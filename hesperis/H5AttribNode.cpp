@@ -39,15 +39,15 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	MString cacheName = data.inputValue( input ).asString();
 	if(cacheName.length() < 2) return stat;
 	
-	std::string substitutedCacheName(cacheName.asChar());
+    std::string substitutedCacheName(cacheName.asChar());
 	EnvVar::replace(substitutedCacheName);
-	
+
 	if(!openH5File(substitutedCacheName) ) {
 		AHelper::Info<std::string >("H5AttribNode cannot open h5 file ", substitutedCacheName );
 		return stat;
 	}
 	
-	double dtime = data.inputValue( aframe ).asDouble();
+    double dtime = data.inputValue( aframe ).asDouble();
 	const int imin = data.inputValue( aminframe ).asInt();
     const int imax = data.inputValue( amaxframe ).asInt();
 	if(dtime < imin) dtime = imin;
@@ -72,7 +72,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	    
 		data.setClean(plug);
 	} 
-	else if( plug.array() == outShort ) {	
+	else if( plug.array() == outShort ) {
 		const std::string attrName = getAttrNameInArray(data, ashortAttrName, idx, &stat);
 		if(!stat) return MS::kFailure;
 		
@@ -96,7 +96,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		
 		data.setClean(plug);
 	}
-	else if( plug.array() == outFloat ) {	
+	else if( plug.array() == outFloat ) {
 		const std::string attrName = getAttrNameInArray(data, afloatAttrName, idx, &stat);
 		if(!stat) return MS::kFailure;
 		
@@ -108,7 +108,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	    
 		data.setClean(plug);
 	}
-	else if( plug.array() == outDouble ) {	
+	else if( plug.array() == outDouble ) {
 		const std::string attrName = getAttrNameInArray(data, adoubleAttrName, idx, &stat);
 		if(!stat) return MS::kFailure;
 		
@@ -120,7 +120,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	    
 		data.setClean(plug);
 	}
-	else if( plug.array() == outBool ) {	
+	else if( plug.array() == outBool ) {
 		const std::string attrName = getAttrNameInArray(data, aboolAttrName, idx, &stat);
 		if(!stat) return MS::kFailure;
 		
@@ -244,7 +244,7 @@ std::string H5AttribNode::getAttrNameInArray(MDataBlock& data, const MObject & a
 		*stat = MS::kFailure;
 		return "";
 	}
-	
+
 	*stat = MS::kSuccess;
 	return std::string(sname.asChar() );
 }

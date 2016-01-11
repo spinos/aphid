@@ -14,15 +14,19 @@
 H5Availability::H5Availability() {}
 H5Availability::~H5Availability() {}
 
-char  H5Availability::openFile(const char* filename, HDocument::OpenMode accessFlag)
+char H5Availability::openFile(const char* filename, HDocument::OpenMode accessFlag)
 {
-	if(fFileStatus.count(filename) < 1) {
+	if(fFileStatus.size() < 1 || fFileStatus.find(filename) == fFileStatus.end() ) {
         HDocument * d = new HDocument;
 		d->open(h5FileName(filename).c_str(), accessFlag);
-        if(d->isOpened())
-            fFileStatus[filename] = d;       
-        else 
+        if(d->isOpened()) {
+            std::cout<<"\n open h5 "<<filename;
+            fFileStatus[filename] = d; 
+        }
+        else {
+            std::cout<<"\n error cannot open h5 "<<filename;
             return 0;
+        }
 	}
 	
 	HObject::FileIO = *fFileStatus[filename];

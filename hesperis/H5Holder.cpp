@@ -24,13 +24,13 @@ void H5Holder::getSampler(SampleFrame & sampler)
         hasSpf = true;
     }
     w.close();
+
+    if(hasSpf || !HObject::FileIO.checkExist("/.spf" )) return;
     
-    if(!hasSpf) {
-        HIntAttribute aspf("/.spf");
-        if(aspf.open()) {
-            aspf.read(& sampler.m_spf);
-            aspf.close();
-        }
+    HIntAttribute aspf("/.spf");
+    if(aspf.open()) {
+        aspf.read(& sampler.m_spf);
+        aspf.close();
     }
 }
 

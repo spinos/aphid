@@ -62,7 +62,7 @@ private:
 	{
 		Td * d = NULL;
 		if(m_mappedAttribDatas.find(attrName) == m_mappedAttribDatas.end() ) {
-			d = grp->openDataStorage<Td>(".bake", stat);
+            d = grp->openDataStorage<Td>(".bake", stat);
 			if(stat) m_mappedAttribDatas[attrName] = d;
 			else AHelper::Info<std::string>("H5AttribNode cannot open data ", attrName);
 		}
@@ -80,7 +80,7 @@ private:
 		bool stat;
 		Td * d = getDataStorage<Td>(&grp, attrName, stat);
 		if(stat) {
-			Tv a, b;
+            Tv a, b;
 			d->readElement((char *)&a, sampler->sampleOfset0() );
 			if(sampler->m_weights[0] > .99f) {
 				result = a;
