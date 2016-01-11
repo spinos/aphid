@@ -49,7 +49,7 @@ public:
 	static int NumBitsPerPnt();
 	static int NumBitsPerCol();
 	
-	char checkDataSpace();
+	int checkDataSpace();
 	
 protected:
 	
@@ -81,7 +81,7 @@ char H2dDataset<DataRank, NRows, CnkSz>::open(hid_t parentId)
 }
 
 template<int DataRank, int NRows, int CnkSz>
-char H2dDataset<DataRank, NRows, CnkSz>::checkDataSpace()
+int H2dDataset<DataRank, NRows, CnkSz>::checkDataSpace()
 {
 	hid_t fileSpace = H5Dget_space(fObjectId);
 	if( H5Sget_simple_extent_ndims(fileSpace ) != 2) {
@@ -97,7 +97,8 @@ char H2dDataset<DataRank, NRows, CnkSz>::checkDataSpace()
 		std::cout<<"\nERROR: data space dims[1] != nrows";
 		return 0;
 	}
-	return 1;
+	// std::cout<<"\n data set dim: "<<dims[0]<<" x "<<dims[1];
+	return dims[0] * dims[1];
 }
 
 template<int DataRank, int NRows, int CnkSz>

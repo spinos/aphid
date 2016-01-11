@@ -6,6 +6,9 @@
 #include <maya/MString.h>
 #include <EnvVar.h>
 #include <H5Holder.h>
+#include <HOocArray.h>
+#include <HBase.h>
+#include <AHelper.h>
 
 class H5AttribNode : public MPxNode, public EnvVar, public H5Holder
 {
@@ -45,6 +48,54 @@ private:
 						const MString & name1L, const MString & name1S, 
 						const MString & name2L, const MString & name2S, 
 						MFnNumericData::Type valueTyp);
+						
+	std::string getAttrNameInArray(MDataBlock& data, const MObject & attr, 
+						unsigned idx, MStatus * stat) const;
+						
+	MDataHandle getHandleInArray(MDataBlock& data, const MObject & attr, 
+						unsigned idx, MStatus * stat) const;
+						
+	std::map<std::string, HObject *> m_mappedAttribDatas;
+	
+	template<typename Td>
+	Td * getDataStorage(HBase * grp, const std::string & attrName, bool & stat)
+	{
+		Td * d = NULL;
+		if(m_mappedAttribDatas.find(attrName) == m_mappedAttribDatas.end() ) {
+			d = grp->openDataStorage<Td>(".bake", stat);
+			if(stat) m_mappedAttribDatas[attrName] = d;
+			else AHelper::Info<std::string>("H5AttribNode cannot open data ", attrName);
+		}
+		else {
+			d = static_cast<Td *>(m_mappedAttribDatas[attrName]);
+			stat = true;
+		}
+		return d;
+	}
+	
+	template<typename Td, typename Tv>
+	bool readData(const std::string & attrName, SampleFrame * sampler, Tv & result)
+	{
+		HBase grp(attrName);
+		bool stat;
+		Td * d = getDataStorage<Td>(&grp, attrName, stat);
+		if(stat) {
+			Tv a, b;
+			d->readElement((char *)&a, sampler->sampleOfset0() );
+			if(sampler->m_weights[0] > .99f) {
+				result = a;
+			}
+			else {
+				d->readElement((char *)&b, sampler->sampleOfset1() );
+				result = a * sampler->m_weights[0] + b * sampler->m_weights[1];
+			}
+		}
+		
+		grp.close();
+		
+		return stat;
+	}
+	
 };
 
 

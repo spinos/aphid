@@ -25,6 +25,7 @@ class HOocArray : public H2dDataset<DataRank, NRows, BufSize > {
 /// total space usage
 	int m_size;
 	hid_t m_parentId;
+	int m_currentBlock;
 	
 public:
 	HOocArray(const std::string & name) : H2dDataset<DataRank, NRows, BufSize>(name)
@@ -51,6 +52,7 @@ public:
 	
 	void read(char * d, int offset, int ncols);
 	void readIncore(int offset, int ncols);
+	void readElement(char * dst, int idx);
 	
 	char * incoreBuf() const;
 	
@@ -60,6 +62,7 @@ protected:
 
 private:
 	void writeCurrentBuf(int ncols);
+	void printIncoreValues(int &it, int ncols, int bpp);
 	void printAValue(char * v);
 };
 
@@ -68,6 +71,7 @@ bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 {
 	if(H2dDataset<DataRank, NRows, BufSize>::create(parentId) ) {
 		m_parentId = parentId;
+		m_currentBlock = -1;
 	}
 	else
 		m_parentId = 0;
@@ -79,6 +83,9 @@ bool HOocArray<DataRank, NRows, BufSize>::openStorage(hid_t parentId)
 {
 	if(H2dDataset<DataRank, NRows, BufSize>::open(parentId) ) {
 		m_parentId = parentId;
+		m_currentBlock = -1;
+		m_size = H2dDataset<DataRank, NRows, BufSize>::checkDataSpace();
+		if(m_size < 1) std::cout<<"\n HOocArray error: zero data space size";
 	}
 	else
 		m_parentId = 0;
@@ -155,12 +162,19 @@ void HOocArray<DataRank, NRows, BufSize>::printValues()
 		if((m_size - i*BufSize) < BufSize) ncols = m_size - i*BufSize;
 		std::cout<<"\n read n col "<<ncols;
 		readIncore(i*BufSize, ncols);
-		for(j=0;j<ncols;++j) {
-			for(k=0;k<NRows;++k) {
-				std::cout<<"\n ["<<it<<"]";
-				printAValue(&m_data[(j*NRows+k) * bpp]);
-				it++;
-			}
+		printIncoreValues(it, ncols, bpp);
+	}
+}
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::printIncoreValues(int &it, int ncols, int bpp)
+{
+	int j, k;
+	for(j=0;j<ncols;++j) {
+		for(k=0;k<NRows;++k) {
+			std::cout<<"\n ["<<it<<"]";
+			printAValue(&m_data[(j*NRows+k) * bpp]);
+			it++;
 		}
 	}
 }
@@ -191,3 +205,23 @@ void HOocArray<DataRank, NRows, BufSize>::printAValue(char * v)
 			break;
 	}
 }
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::readElement(char * dst, int idx)
+{
+	if(idx >= m_size) {
+		std::cout<<"\n HOocArray out-of-range index: "<<idx;
+		return;
+	}
+	
+	const int blk = idx / NRows / BufSize;
+	const int blockOffset = blk * BufSize;
+	const int bpp = H2dDataset<DataRank, NRows, BufSize>::NumBitsPerPnt();
+	if(blk != m_currentBlock) {
+		int ncols = (m_size < blockOffset + BufSize) ? (m_size - blockOffset) : BufSize; 
+		readIncore(blockOffset, ncols);
+		m_currentBlock = blk;
+	}
+	memcpy( dst, &m_data[bpp * (idx - blockOffset)], bpp );
+}
+//:~

@@ -116,5 +116,18 @@ public:
 		d->close();
 		return d;
 	}
+	
+	template<typename T>
+	T * openDataStorage(const std::string & name, bool & stat)
+	{
+		if(!hasNamedData(name.c_str() ) ) {
+			stat = false;
+			return NULL;
+		}
+		T * d = new T(name);
+		stat = d->openStorage(fObjectId);
+		d->close();
+		return d;
+	}
 };
 #endif        //  #ifndef HBASE_H

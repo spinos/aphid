@@ -1,4 +1,3 @@
-#include <AHelper.h>
 #include "H5AttribNode.h"
 #include <SHelper.h>
 #include <BaseUtil.h>
@@ -26,7 +25,12 @@ MObject H5AttribNode::outBool;
 
 H5AttribNode::H5AttribNode() {}
 
-H5AttribNode::~H5AttribNode() {}
+H5AttribNode::~H5AttribNode() 
+{
+	std::map<std::string, HObject *>::iterator it = m_mappedAttribDatas.begin();
+	for(;it!=m_mappedAttribDatas.end();++it) delete it->second;
+	m_mappedAttribDatas.clear();
+}
 
 MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 {
@@ -52,26 +56,79 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	SampleFrame sampler;
 	getSampler(sampler);
 	sampler.calculateWeights(dtime);
+	sampler.m_minFrame = imin;
 
-	if( plug.array() == outByte ) {
-		const unsigned idx = plug.logicalIndex();
-        
-		MArrayDataHandle btNameArray = data.inputArrayValue( abyteAttrName );
-		btNameArray.jumpToElement(idx);
-		const MString btName = btNameArray.inputValue().asString();
-		
-		if(!HObject::FileIO.checkExist(btName.asChar() ) ) {
-			AHelper::Info<MString >("H5AttribNode cannot find grp ", btName );
-			return stat;
-		}
+	const unsigned idx = plug.logicalIndex();
 	
+	if( plug.array() == outByte ) {
+		const std::string attrName = getAttrNameInArray(data, abyteAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
 		
+		char b = 0;
+		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, &sampler, b);
 		
-        MArrayDataHandle btArry = data.outputArrayValue(outByte, &stat);
-		btArry.jumpToElement(idx);
-		MDataHandle hbt = btArry.outputValue();
-
-		hbt.set(0);
+		MDataHandle hbt = getHandleInArray(data, outByte, idx, &stat);
+		hbt.set(b);
+	    
+		data.setClean(plug);
+	} 
+	else if( plug.array() == outShort ) {	
+		const std::string attrName = getAttrNameInArray(data, ashortAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
+		
+        short b = 0;
+		readData<HOocArray<hdata::TShort, 1, 64>, short >(attrName, &sampler, b);
+		
+		MDataHandle hbt = getHandleInArray(data, outShort, idx, &stat);
+		hbt.set(b);
+	    
+		data.setClean(plug);
+	}
+	else if( plug.array() == outInt ) {
+		const std::string attrName = getAttrNameInArray(data, aintAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
+		
+		int b = 0;
+		readData<HOocArray<hdata::TInt, 1, 64>, int >(attrName, &sampler, b);
+		
+		MDataHandle hbt = getHandleInArray(data, outInt, idx, &stat);
+		hbt.set(b);
+		
+		data.setClean(plug);
+	}
+	else if( plug.array() == outFloat ) {	
+		const std::string attrName = getAttrNameInArray(data, afloatAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
+		
+		float b = 0;
+		readData<HOocArray<hdata::TFloat, 1, 64>, float >(attrName, &sampler, b);
+		
+		MDataHandle hbt = getHandleInArray(data, outFloat, idx, &stat);
+		hbt.set(b);
+	    
+		data.setClean(plug);
+	}
+	else if( plug.array() == outDouble ) {	
+		const std::string attrName = getAttrNameInArray(data, adoubleAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
+		
+        double b = 0;
+		readData<HOocArray<hdata::TDouble, 1, 64>, double >(attrName, &sampler, b);
+		
+		MDataHandle hbt = getHandleInArray(data, outDouble, idx, &stat);
+		hbt.set(b);
+	    
+		data.setClean(plug);
+	}
+	else if( plug.array() == outBool ) {	
+		const std::string attrName = getAttrNameInArray(data, aboolAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
+		
+		char b = 0;
+		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, &sampler, b);
+		
+        MDataHandle hbt = getHandleInArray(data, outBool, idx, &stat);
+		hbt.set(b);
 	    
 		data.setClean(plug);
 	} 
@@ -124,7 +181,7 @@ MStatus H5AttribNode::initialize()
 						"intAttribName", "itnm", "outInt", "oit", 
 						MFnNumericData::kInt);
 	
-	createNameValueAttr(adoubleAttrName, outDouble,
+	createNameValueAttr(afloatAttrName, outFloat,
 						"floatAttribName", "ftnm", "outFloat", "oft", 
 						MFnNumericData::kFloat);
 	
@@ -173,5 +230,30 @@ MStatus H5AttribNode::connectionMade(const MPlug &plug, const MPlug &otherPlug, 
     }
 
     return MPxNode::connectionMade( plug, otherPlug, asSrc );
+}
+
+std::string H5AttribNode::getAttrNameInArray(MDataBlock& data, const MObject & attr, 
+												unsigned idx, MStatus * stat) const
+{
+	MArrayDataHandle nameArray = data.inputArrayValue( attr, stat );
+	nameArray.jumpToElement(idx);
+	const MString sname = nameArray.inputValue().asString();
+	
+	if(!HObject::FileIO.checkExist(sname.asChar() ) ) {
+		AHelper::Info<MString >("H5AttribNode cannot find grp ", sname );
+		*stat = MS::kFailure;
+		return "";
+	}
+	
+	*stat = MS::kSuccess;
+	return std::string(sname.asChar() );
+}
+
+MDataHandle H5AttribNode::getHandleInArray(MDataBlock& data, const MObject & attr, 
+						unsigned idx, MStatus * stat) const
+{
+	MArrayDataHandle btArry = data.outputArrayValue(attr, stat);
+	btArry.jumpToElement(idx);
+	return btArry.outputValue();
 }
 //:~
