@@ -22,6 +22,8 @@ MObject H5AttribNode::adoubleAttrName;
 MObject H5AttribNode::outDouble;
 MObject H5AttribNode::aboolAttrName;
 MObject H5AttribNode::outBool;
+MObject H5AttribNode::aenumAttrName;
+MObject H5AttribNode::outEnum;
 
 H5AttribNode::H5AttribNode() {}
 
@@ -53,10 +55,8 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	if(dtime < imin) dtime = imin;
 	if(dtime > imax) dtime = imax;
     
-	SampleFrame sampler;
-	getSampler(sampler);
-	sampler.calculateWeights(dtime);
-	sampler.m_minFrame = imin;
+	sampler()->calculateWeights(dtime);
+	sampler()->m_minFrame = imin;
 
 	const unsigned idx = plug.logicalIndex();
 	
@@ -65,7 +65,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		char b = 0;
-		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, &sampler, b);
+		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outByte, idx, &stat);
 		hbt.set(b);
@@ -77,7 +77,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
         short b = 0;
-		readData<HOocArray<hdata::TShort, 1, 64>, short >(attrName, &sampler, b);
+		readData<HOocArray<hdata::TShort, 1, 64>, short >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outShort, idx, &stat);
 		hbt.set(b);
@@ -89,7 +89,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		int b = 0;
-		readData<HOocArray<hdata::TInt, 1, 64>, int >(attrName, &sampler, b);
+		readData<HOocArray<hdata::TInt, 1, 64>, int >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outInt, idx, &stat);
 		hbt.set(b);
@@ -101,7 +101,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		float b = 0;
-		readData<HOocArray<hdata::TFloat, 1, 64>, float >(attrName, &sampler, b);
+		readData<HOocArray<hdata::TFloat, 1, 64>, float >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outFloat, idx, &stat);
 		hbt.set(b);
@@ -113,7 +113,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
         double b = 0;
-		readData<HOocArray<hdata::TDouble, 1, 64>, double >(attrName, &sampler, b);
+		readData<HOocArray<hdata::TDouble, 1, 64>, double >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outDouble, idx, &stat);
 		hbt.set(b);
@@ -125,9 +125,21 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		char b = 0;
-		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, &sampler, b);
+		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, sampler(), b);
 		
         MDataHandle hbt = getHandleInArray(data, outBool, idx, &stat);
+		hbt.set(b);
+	    
+		data.setClean(plug);
+	}
+	else if( plug.array() == outEnum ) {
+		const std::string attrName = getAttrNameInArray(data, aenumAttrName, idx, &stat);
+		if(!stat) return MS::kFailure;
+		
+		short b = 0;
+		readData<HOocArray<hdata::TShort, 1, 64>, short >(attrName, sampler(), b);
+		
+        MDataHandle hbt = getHandleInArray(data, outEnum, idx, &stat);
 		hbt.set(b);
 	    
 		data.setClean(plug);
@@ -192,6 +204,10 @@ MStatus H5AttribNode::initialize()
 	createNameValueAttr(aboolAttrName, outBool,
 						"boolAttribName", "blnm", "outBool", "obl", 
 						MFnNumericData::kBoolean);
+/// enum value as short					
+	createNameValueAttr(aenumAttrName, outEnum,
+						"enumAttribName", "ennm", "outEnum", "oen", 
+						MFnNumericData::kShort);
 
 	return MS::kSuccess;
 }

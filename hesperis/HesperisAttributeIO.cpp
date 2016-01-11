@@ -408,6 +408,52 @@ bool HesperisAttributeIO::FinishInsertDataValue(HObject * grp, ANumericAttribute
 	return true;
 }
 
+bool HesperisAttributeIO::BeginBakeEnum(const std::string & attrName, AEnumAttribute *data)
+{
+	HBase grp(attrName);
+	bool stat = true;
+	HObject * d = grp.createDataStorage<HOocArray<hdata::TShort, 1, 64> >(".bake", stat);
+	grp.close();
+	if(stat) {
+		AHelper::Info<std::string >("bake enum attr", attrName );
+		MappedBakeData[attrName] = d;
+	}
+	else {
+		AHelper::Info<std::string >("HesperisAttributeIO error cannot bake enum attr", attrName );
+	}
+	return stat;
+}
+
+bool HesperisAttributeIO::EndBakeEnum(const std::string & attrName, AEnumAttribute *data)
+{
+	if(MappedBakeData.find(attrName) == MappedBakeData.end() ) {
+		std::cout<<"\n HesperisAttributeIO error end bake cannot find enum attr "<<attrName;
+		return false;
+	}
+	HBase grp(attrName);
+	
+	FinishInsertValue<HOocArray<hdata::TShort, 1, 64> >(MappedBakeData[attrName]);
+	
+	grp.close();
+	
+	return true;
+}
+
+bool HesperisAttributeIO::BakeEnum(const std::string & attrName, AEnumAttribute *data)
+{
+	if(MappedBakeData.find(attrName) == MappedBakeData.end() ) {
+		std::cout<<"\n HesperisAttributeIO error cannot find enum attr "<<attrName;
+		return false;
+	}
+	HBase grp(attrName);
+	
+	AHelper::Info<short>("enum value ", data->asShort() );
+	InsertValue<HOocArray<hdata::TShort, 1, 64>, short >(MappedBakeData[attrName], data->asShort() );
+			
+	grp.close();
+	return true;
+}
+
 void HesperisAttributeIO::ClearBakeData()
 { MappedBakeData.clear(); }
 
@@ -415,12 +461,13 @@ bool HesperisAttributeIO::ConnectBaked(HBase * parent, AAttribute * data, MObjec
 {
 	if(!parent->hasNamedData(".bake")) return false;
 	
-	if(data->attrType() != AAttribute::aNumeric) return false;
-	
-	ANumericAttribute * numericData = static_cast<ANumericAttribute *>(data);
-	
-	HesperisAttribConnector::Connect(parent->pathToObject(), numericData->numericType(), entity, attr);
-			
+	if(data->attrType() == AAttribute::aNumeric) {
+		ANumericAttribute * numericData = static_cast<ANumericAttribute *>(data);
+		HesperisAttribConnector::ConnectNumeric(parent->pathToObject(), numericData->numericType(), entity, attr);
+	}
+	else if(data->attrType() == AAttribute::aEnum) {
+		HesperisAttribConnector::ConnectEnum(parent->pathToObject(), entity, attr);
+	}		
 	return true;
 }
 //:~

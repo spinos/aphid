@@ -41,13 +41,11 @@ void HesperisAttribConnector::CreateMasterNode()
 void HesperisAttribConnector::ClearMasterNode()
 { MasterAttribNode = MObject::kNullObj; }
 
-void HesperisAttribConnector::Connect(const std::string & name, ANumericAttribute::NumericAttributeType typ,
+void HesperisAttribConnector::ConnectNumeric(const std::string & name, ANumericAttribute::NumericAttributeType typ,
 								MObject & entity, MObject & attr)
 {
-	if(MasterAttribNode.isNull()) CreateMasterNode();
-	
-	MString plgName("");
-	MString srcName("");
+	std::string plgName("");
+	std::string srcName("");
 	switch(typ ) {
 		case ANumericAttribute::TByteNumeric:
 			plgName = "btnm";
@@ -77,13 +75,24 @@ void HesperisAttribConnector::Connect(const std::string & name, ANumericAttribut
 			break;
     }
 	
-	if(plgName.length() < 1) return;
+	if(plgName.size() < 1) return;
+	
+	Connect(name, plgName, srcName, entity, attr);
+}
+
+void HesperisAttribConnector::ConnectEnum(const std::string & name, MObject & entity, MObject & attr)
+{ Connect(name, "ennm", "outEnum", entity, attr); }
+
+void HesperisAttribConnector::Connect(const std::string & name, const std::string & plgName, const std::string & srcName,
+									MObject & entity, MObject & attr)	
+{
+	if(MasterAttribNode.isNull()) CreateMasterNode();
 	
 	MFnDependencyNode fmast(MasterAttribNode);
 	MStatus stat;
-	MPlug namePlugs = fmast.findPlug(plgName, false, &stat );
+	MPlug namePlugs = fmast.findPlug(plgName.c_str(), false, &stat );
 	if(!stat) return;
-	MPlug outValueArrayPlug = fmast.findPlug(srcName, true, &stat );
+	MPlug outValueArrayPlug = fmast.findPlug(srcName.c_str(), true, &stat );
 	if(!stat) return;
     
 	unsigned count = namePlugs.numElements();
@@ -99,3 +108,4 @@ void HesperisAttribConnector::Connect(const std::string & name, ANumericAttribut
 	dgModifier.connect(outValuePlug, dstPlug);
 	dgModifier.doIt();
 }
+//:~

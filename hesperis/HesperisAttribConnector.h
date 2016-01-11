@@ -16,13 +16,15 @@ class HesperisAttribConnector {
 public:
 	static MObject MasterAttribNode;
 	
-	static void Connect(const std::string & name, ANumericAttribute::NumericAttributeType typ,
+	static void ConnectNumeric(const std::string & name, ANumericAttribute::NumericAttributeType typ,
 								MObject & entity, MObject & attr);
+	static void ConnectEnum(const std::string & name, MObject & entity, MObject & attr);
 	static void ClearMasterNode();
 	
 protected:
 
 private:
 	static void CreateMasterNode();
-
+	static void Connect(const std::string & name, const std::string & plgName, const std::string & srcName,
+							MObject & entity, MObject & attr);
 };

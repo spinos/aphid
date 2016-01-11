@@ -24,6 +24,9 @@ public:
 	static bool BeginBakeAttribute(const std::string & attrName, ANumericAttribute *data);
 	static bool EndBakeAttribute(const std::string & attrName, ANumericAttribute *data);
 	static bool BakeAttribute(const std::string & attrName, ANumericAttribute *data);
+	static bool BeginBakeEnum(const std::string & attrName, AEnumAttribute *data);
+	static bool EndBakeEnum(const std::string & attrName, AEnumAttribute *data);
+	static bool BakeEnum(const std::string & attrName, AEnumAttribute *data);
 	static void ClearBakeData();
 	
 protected:

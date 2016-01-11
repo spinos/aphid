@@ -57,6 +57,7 @@ public:
 	char * incoreBuf() const;
 	
 	void printValues();
+	void clear();
 	
 protected:
 
@@ -224,4 +225,8 @@ void HOocArray<DataRank, NRows, BufSize>::readElement(char * dst, int idx)
 	}
 	memcpy( dst, &m_data[bpp * (idx - blockOffset)], bpp );
 }
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::clear()
+{ m_size = 0; }
 //:~

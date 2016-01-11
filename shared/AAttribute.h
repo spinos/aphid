@@ -77,6 +77,8 @@ public:
 	unsigned numFields() const;
 	short value(short & a, short & b) const;
 	std::string fieldName(short ind);
+	short asShort() const;
+	
 protected:
 
 private:

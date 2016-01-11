@@ -40,6 +40,8 @@ public:
 	static  	MObject 	outDouble;
 	static MObject aboolAttrName;
 	static  	MObject 	outBool;
+	static MObject aenumAttrName;
+	static  	MObject 	outEnum;
 	
 	static	MTypeId		id;
 	

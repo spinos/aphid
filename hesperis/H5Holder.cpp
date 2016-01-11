@@ -24,7 +24,7 @@ void H5Holder::getSampler(SampleFrame & sampler)
         hasSpf = true;
     }
     w.close();
-
+	
     if(hasSpf || !HObject::FileIO.checkExist("/.spf" )) return;
     
     HIntAttribute aspf("/.spf");
@@ -35,7 +35,11 @@ void H5Holder::getSampler(SampleFrame & sampler)
 }
 
 bool H5Holder::openH5File(const std::string & fileName)
-{ return H5Files.openFile(fileName.c_str(), HDocument::oReadAndWrite ); }
+{ 
+	if(!H5Files.openFile(fileName.c_str(), HDocument::oReadAndWrite ) ) return false; 
+	getSampler(m_sampler);
+	return true;
+}
 
 void H5Holder::setTime(double x)
 { m_lastTime = x; }
@@ -50,3 +54,6 @@ int H5Holder::getFrame(double x, int tmin, int tmax) const
 	if(r > tmax) r = tmax;
 	return r;
 }
+
+SampleFrame * H5Holder::sampler()
+{ return &m_sampler; }

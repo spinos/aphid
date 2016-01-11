@@ -14,6 +14,7 @@
 
 class H5Holder {
 
+	SampleFrame m_sampler;
 	double m_lastTime;
 	
 public:
@@ -28,6 +29,7 @@ protected:
 	void setTime(double x);
 	bool isTimeChanged(double x) const;
 	int getFrame(double x, int tmin, int tmax) const;
+	SampleFrame * sampler();
 	
 private:
 
