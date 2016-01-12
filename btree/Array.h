@@ -27,10 +27,6 @@ public:
 		return Sequence<KeyType>::currentKey();
 	}
 	
-	void remove(const KeyType & k) {
-		Sequence<KeyType>::remove(k);
-	}
-	
 	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) const
 	{			
 		Pair<Entity *, Entity> g = Sequence<KeyType>::findEntity(k, mf, extraKey);

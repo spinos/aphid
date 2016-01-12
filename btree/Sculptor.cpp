@@ -41,7 +41,7 @@ void Sculptor::beginAddVertices(const float & gridSize)
 	m_tree->setGridSize(gridSize);
 }
 
-void Sculptor::addVertex(VertexP * v)
+void Sculptor::insertVertex(VertexP * v)
 {
 	m_tree->insert((const float *)v->index->t1, v);
 }
@@ -67,7 +67,7 @@ const float Sculptor::selectRadius() const
 void Sculptor::setStrength(const float & x) 
 { m_strength = x; }
 
-void Sculptor::setMeshTopology(MeshTopology * topo) 
+void Sculptor::setTopology(SimpleTopology * topo) 
 { m_topo = topo; }
 
 void Sculptor::selectPoints(const Ray * incident)
@@ -99,7 +99,7 @@ void Sculptor::selectPoints(const Ray * incident)
 		float tmin, tmax;
 		touchedBox.intersect(*incident, &tmin, &tmax);
 		/// std::cout<<" tmin "<<tmin<<" "<<m_active->meanDepth();
-		if((tmin - m_active->meanDepth() ) > selectRadius() ) {
+		if((tmin - m_active->minDepth() ) > selectRadius() ) {
 		    break;
 		}
 		
@@ -139,9 +139,9 @@ bool Sculptor::intersect(Array<int, VertexP> * d, const Ray & ray)
 			float d = p.distanceTo(ray.m_origin);
 			m_active->updateMinDepth(d);
 			
-			if(d - m_active->meanDepth() < 2.f * selectRadius()) {
-			addToStage(vert);
-			addToActive(vert);
+			if(d - m_active->minDepth() < 2.f * selectRadius()) {
+				addToStage(vert);
+				addToActive(vert);
 			}
 		}
 		d->next();
@@ -152,6 +152,7 @@ bool Sculptor::intersect(Array<int, VertexP> * d, const Ray & ray)
 
 void Sculptor::addToActive(VertexP * v)
 {
+	if(m_active->vertices->find(v->key) ) return;
 	VertexP * av = new VertexP;
 	av->key = v->key;
 	av->index = v->index;
@@ -202,9 +203,10 @@ void Sculptor::revertStage(sdb::Array<int, VertexP> * stage, bool isBackward)
 	while(!stage->end()) {
 		VertexP * vert = stage->value();
 		const Vector3F p0 = *(vert->index->t1);
-		if(isBackward)
+		if(isBackward) {
 /// P <- Pref
 			*(vert->index->t1) = *(vert->index->t3);
+		}
 		else
 /// P <- N
 			*(vert->index->t1) = *(vert->index->t2);
@@ -240,27 +242,51 @@ ActiveGroup * Sculptor::activePoints() const
 { return m_active; }
 
 void Sculptor::pullPoints()
-{ movePointsAlong(m_active->meanNormal, 0.02f * selectRadius()); }
+{ movePointsAlong(m_active->meanNormal, 0.04f * selectRadius()); }
 
 void Sculptor::pushPoints()
-{ movePointsAlong(m_active->meanNormal, -0.02f * selectRadius()); }
+{ movePointsAlong(m_active->meanNormal, -0.04f * selectRadius()); }
 
 void Sculptor::pinchPoints()
-{ movePointsToward(m_active->meanPosition, 0.02f); }
+{ movePointsToward(m_active->meanPosition, 0.04f); }
 
 void Sculptor::spreadPoints()
-{ movePointsToward(m_active->meanPosition, -0.02f); }
+{ movePointsToward(m_active->meanPosition, -0.04f); }
 
 /// mean normal + from center
 void Sculptor::inflatePoints()
 { 
 	Vector3F nor = m_active->meanNormal;
-	nor.reverse();
-	movePointsToward(m_active->meanPosition, -0.02f, false, &nor); 
+	Array<int, VertexP> * vs = m_active->vertices;
+	
+	float wei, round;
+	vs->begin();
+	while(!vs->end()) {
+		
+		VertexP * l = vs->value();
+		wei = *l->index->t4;
+		
+		const Vector3F p0(*(l->index->t1));
+		
+		Vector3F pn = *l->index->t2;
+/// blow outwards
+		if(pn.dot(nor) < 0.f) pn.reverse();
+		
+		round = cos(p0.distanceTo(m_active->meanPosition) / selectRadius() * 1.5f );
+		pn *= round;
+		pn += nor * round;
+		
+		*(l->index->t1) += pn * wei * m_strength * 0.1f;
+	
+		m_tree->displace(l, p0);
+
+		vs->next();
+	}
+	smoothPoints();
 }
 
 void Sculptor::smudgePoints(const Vector3F & x)
-{ movePointsAlong(x, 0.08f); }
+{ movePointsAlong(x, 0.5f); }
 
 void Sculptor::smoothPoints()
 {	
@@ -279,7 +305,7 @@ void Sculptor::smoothPoints()
 		
 		m_topo->getDifferentialCoord(l->key, d);
 		
-		*(l->index->t1) -= d * 0.1f * wei * m_strength;
+		*(l->index->t1) -= d * 0.5f * wei * m_strength;
 	
 		m_tree->displace(l, p0);
 
@@ -307,7 +333,6 @@ void Sculptor::movePointsAlong(const Vector3F & d, const float & fac)
 		m_tree->displace(l, p0);
 		vs->next();
 	}
-	//std::cout<<"\n aft move sel "<<vs->size();
 }
 
 void Sculptor::movePointsToward(const Vector3F & d, const float & fac, bool normalize, Vector3F * vmod)
@@ -323,14 +348,14 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac, bool norm
 		VertexP * l = vs->value();
 		wei = *l->index->t4;
 		
-		const VertexP vert = *l;
-		
 		const Vector3F p0(*(l->index->t1));
 		
 		tod = d - *(l->index->t1);
 		if(normalize) tod.normalize();
 		*(l->index->t1) += tod * fac * wei * m_strength;
-		if(vmod) *(l->index->t1) += *vmod * fac * wei;
+		if(vmod) {
+			*(l->index->t1) += *vmod * wei * m_strength;
+		}
 	
 		m_tree->displace(l, p0);
 		vs->next();

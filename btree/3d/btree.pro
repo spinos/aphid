@@ -1,4 +1,4 @@
-INCLUDEPATH += ../../shared ../ ./
+INCLUDEPATH += ../../shared ../ ./ ../../lapl
 LIBS += -L../../lib -laphid		
 CONFIG += release
 HEADERS       = ../Types.h ../Entity.h ../List.h ../Sequence.h ../BNode.h ../C3Tree.h glwidget.h window.h ../../shared/Base3DView.h ../../shared/RayMarch.h \
@@ -6,7 +6,7 @@ HEADERS       = ../Types.h ../Entity.h ../List.h ../Sequence.h ../BNode.h ../C3T
                   ../Dropoff.h \
 				  ../Ordered.h
 SOURCES       = ../Types.cpp ../Entity.cpp ../List.cpp ../Sequence.cpp ../BNode.cpp ../C3Tree.cpp glwidget.cpp window.cpp main.cpp ../../shared/Base3DView.cpp ../../shared/RayMarch.cpp \
-                    ../Sculptor.cpp \
+                    ../../shared/SimpleTopology.cpp ../Sculptor.cpp ../ActiveGroup.cpp \
                     ../Dropoff.cpp \
 					../Ordered.cpp
 QT           += opengl

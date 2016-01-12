@@ -12,7 +12,7 @@
 #include <WorldGrid.h>
 #include <RayMarch.h>
 #include <Dropoff.h>
-#include <MeshTopology.h>
+#include <SimpleTopology.h>
 namespace sdb {
 class Sculptor {
 public:
@@ -20,7 +20,7 @@ public:
 	virtual ~Sculptor();
 	
 	void beginAddVertices(const float & gridSize);
-	void addVertex(VertexP * v);
+	void insertVertex(VertexP * v);
 	void endAddVertices();
 	
 	void setSelectRadius(const float & x);
@@ -28,7 +28,7 @@ public:
 	
 	void setStrength(const float & x);
 	
-	void setMeshTopology(MeshTopology * topo);
+	void setTopology(SimpleTopology * topo);
 	
 	void selectPoints(const Ray * incident);
 	void deselectPoints();
@@ -62,7 +62,7 @@ private:
 	RayMarch m_march;
 	ActiveGroup * m_active;
 	WorldGrid<Array<int, VertexP>, VertexP > * m_tree;
-	MeshTopology * m_topo;
+	SimpleTopology * m_topo;
 	float m_strength;
 /// multiple stages tracking vertex position at selection and de-selection
 	std::deque<Array<int, VertexP> * > m_stages;
