@@ -38,6 +38,48 @@ void printList(List<int> & l)
 	std::cout<<" count "<<i<<"\n";
 }
 
+void printArray(Array<int, float> & arr)
+{
+	std::cout<<"\n display array \n size "<<arr.size()<<"\n";
+	arr.begin();
+	while(!arr.end() ) {
+		std::cout<<" a["<<arr.key()<<"] "<<*arr.value();
+		arr.next();
+	}
+}
+
+void testArrayRemove()
+{
+	std::cout<<"\n test array remove";
+	
+	Array<int, float> arr;
+	
+	int k[15];
+	float v[15];
+	int i = 0;
+	for(i=0;i<15;i++) {
+		k[i] = rand() % 99 - 39;
+		v[i] = ((float)(rand() % 99) )/ 99.f - .5f;
+		
+		arr.insert(k[i], &v[i]);
+	}
+	
+	printArray(arr);
+	
+	v[8] = -99.f;
+	
+	printArray(arr);
+	
+	for(i=0;i<15;i++) {
+		std::cout<<"\n rm "<<k[i];
+		arr.remove(k[i]);
+		printArray(arr);
+		std::cout<<"\n v "<<v[i];
+	}
+	
+	std::cout<<"\n done";
+}
+
 int main()
 {
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
@@ -180,8 +222,6 @@ int main()
 	testFind(arr, 0);
 	testFind(arr, 11);
 	
-	return 1;
-	
 	List<int> ll;
 	for(int i = 0; i < 199; i++)
 		ll.insert(noi.rint1(i) % 999);
@@ -209,6 +249,9 @@ int main()
 	printList(ll);
 	
 	ll.clear();
+	
+	testArrayRemove();
+	
 	std::cout<<"\n all passed\n";
 	return 0;
 }

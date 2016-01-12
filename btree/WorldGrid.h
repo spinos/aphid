@@ -116,11 +116,20 @@ void WorldGrid<ChildType, ValueType>::displace(ValueType * v, const Vector3F & p
 	Coord3 c1 = gridCoord((float *)(v->index)->t1);
 	Coord3 c0 = gridCoord((float *)&pref);
 	if(c0 == c1) return;
-	Pair<Entity *, Entity> p = findEntity(c0);
+	
 	ValueType * nv = new ValueType;
 	nv->key = v->key;
 	nv->index = v->index;
-	static_cast<ChildType *>(p.index)->remove(v->key);
+	
+	Pair<Entity *, Entity> p = findEntity(c0);
+	if(p.index) {
+		ChildType * g = static_cast<ChildType *>(p.index);
+		g->remove(v->key);
+		if(g->isEmpty()) {
+			// std::cout<<"\n remove grid "<<c0;
+			remove(c0);
+		}
+	}
 	insert(c1, nv);
 }
 

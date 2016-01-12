@@ -9,6 +9,7 @@
 
 #pragma once
 #include <AllMath.h>
+#include <Types.h>
 #include <vector>
 #include <boost/scoped_array.hpp>
 class VertexAdjacency;
@@ -18,8 +19,8 @@ class BaseMesh;
 
 class MeshTopology {
 public:
-    MeshTopology(Vector3F * pos, Vector3F * nor, int * tri, const int & numV, const int & numTri);
-	MeshTopology(BaseMesh * mesh);
+	MeshTopology(sdb::PNPrefW * pool, int * tri, const int & numV, const int & numTri);
+    MeshTopology(BaseMesh * mesh);
 	virtual ~MeshTopology();
 	
 	void cleanup();
@@ -44,7 +45,6 @@ private:
 	char parallelEdgeInQuad(unsigned *indices, unsigned v0, unsigned v1, unsigned & a, unsigned & b) const;
 	boost::scoped_array<VertexAdjacency> m_adjacency;
 	std::vector<Facet *> m_faces;
-	BaseMesh * m_mesh;
-	Vector3F * m_pos;
-	Vector3F * m_nor;
+	//BaseMesh * m_mesh;
+	sdb::PNPrefW * m_pool;
 };

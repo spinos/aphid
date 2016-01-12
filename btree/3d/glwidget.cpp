@@ -42,7 +42,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 		p[i].index = &m_pool[i];
         
 /// add vertex as P, N, Pref
-        m_sculptor->addVertex(&p[i]);
+        m_sculptor->insertVertex(&p[i]);
     }
 	
 	m_sculptor->endAddVertices();
@@ -67,7 +67,6 @@ void GLWidget::clientDraw()
 	
 	dr->setColor(0.f, 1.f, .3f);
 	drawPoints(*m_sculptor->activePoints());
-    qDebug()<<".";
 }
 
 void GLWidget::drawPoints(WorldGrid<Array<int, VertexP>, VertexP > * tree)
@@ -106,6 +105,7 @@ void GLWidget::drawPoints(const ActiveGroup & grp)
 void GLWidget::clientSelect(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
+	m_sculptor->clearCurrentStage();
 	//m_sculptor->selectPoints(getIncidentRay());
 	setUpdatesEnabled(true);
 }
@@ -122,7 +122,7 @@ void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 	setUpdatesEnabled(false);
 	m_sculptor->selectPoints(getIncidentRay());
 	// m_sculptor->pullPoints();
-	const Vector3F dv = strokeVector(m_sculptor->activePoints()->meanDepth());
+	const Vector3F dv = strokeVector(m_sculptor->activePoints()->minDepth());
 	m_sculptor->smudgePoints(dv);
 	setUpdatesEnabled(true);
 }

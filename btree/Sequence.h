@@ -141,6 +141,9 @@ public:
 		return false;
 	}
 	
+	bool isEmpty() const
+	{ return m_root->numKeys() < 1; }
+	
 	void verbose() {
 		std::cout<<"\n sequence root node "<<*m_root;
 	}

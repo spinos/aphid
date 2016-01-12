@@ -47,6 +47,8 @@ public:
 	void undo();
 	void redo();
     Array<int, VertexP> * lastStage();
+	void clearCurrentStage();
+	void clearAllStages();
 	
 private:
 	bool intersect(Array<int, VertexP> * ps, const Ray & ray);
@@ -58,6 +60,7 @@ private:
 	void revertStage(sdb::Array<int, VertexP> * stage, bool isBackward = true);
 	void movePointsAlong(const Vector3F & d, const float & fac);
 	void movePointsToward(const Vector3F & d, const float & fac, bool normalize =false, Vector3F * vmod = NULL);
+	
 private:
 	RayMarch m_march;
 	ActiveGroup * m_active;

@@ -17,6 +17,7 @@ Sculptor::Sculptor()
 
 	m_tree = new WorldGrid<Array<int, VertexP>, VertexP >;
 	m_active = new ActiveGroup;
+	m_active->reset();
 	m_strength = 0.5f;
 	m_topo = NULL;
 	m_activeStageId = 0;
@@ -119,7 +120,6 @@ void Sculptor::deselectPoints()
 	finishStage();
 	m_tree->calculateBBox();
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());
-	m_active->reset(); 
 }
 
 bool Sculptor::intersect(Array<int, VertexP> * d, const Ray & ray)
@@ -177,12 +177,11 @@ void Sculptor::appendStage()
 { m_stages.push_back(new sdb::Array<int, VertexP>() ); }
 
 sdb::Array<int, VertexP> * Sculptor::currentStage()
-{ return m_stages.back(); }
+{ return m_stages[m_activeStageId]; }
 
 void Sculptor::finishStage() 
 {
-	if(currentStage()->size() > 0) {
-		m_activeStageId = m_stages.size() - 1;
+	if(!currentStage()->isEmpty() ) {
 		sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
 		stg->begin();
 		while(!stg->end()) {
@@ -191,7 +190,21 @@ void Sculptor::finishStage()
 			*(vert->index->t2) = *(vert->index->t1);
 			stg->next();	
 		}
-		appendStage();
+		m_activeStageId++;
+		if(m_activeStageId >= m_stages.size())
+			appendStage();
+		else 
+			m_stages[m_activeStageId]->clear();
+			
+		if(m_stages.size() > 200) {
+/// limit num stages
+			delete m_stages[0];
+			m_stages.erase(m_stages.begin() );
+			m_activeStageId--;
+		}
+		
+		std::cout<<"\n finish stage "<<m_activeStageId-1
+			<<" add "<<m_activeStageId;
 	}
 }
 
@@ -218,21 +231,27 @@ void Sculptor::revertStage(sdb::Array<int, VertexP> * stage, bool isBackward)
 
 void Sculptor::undo()
 {
-	sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
+	if(m_activeStageId<1) return;
+	sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId-1];
 	revertStage(stg);
     m_lastStage = stg;
 	m_activeStageId--;
 	if(m_activeStageId<0) m_activeStageId=0;
+	
+	std::cout<<"\n undo stage "<<m_activeStageId<<" current "<<m_activeStageId;
 }
 
 void Sculptor::redo()
 {
-	unsigned i = m_activeStageId+1;
-	if(i>=m_stages.size() ) return;
-	sdb::Array<int, VertexP> * stg = m_stages[i];
+	if(currentStage()->isEmpty() ) return;
+	sdb::Array<int, VertexP> * stg = m_stages[m_activeStageId];
 	revertStage(stg, false);
     m_lastStage = stg;
 	m_activeStageId++;
+	if(m_activeStageId>=m_stages.size() )
+		appendStage();
+		
+	std::cout<<"\n redo stage "<<m_activeStageId-1<<" current "<<m_activeStageId;
 }
 
 WorldGrid<Array<int, VertexP>, VertexP > * Sculptor::allPoints() const 
@@ -364,5 +383,15 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac, bool norm
 
 Array<int, VertexP> * Sculptor::lastStage()
 { return m_lastStage; }
+
+void Sculptor::clearCurrentStage()
+{ m_stages[m_activeStageId]->clear(); }
+
+void Sculptor::clearAllStages()
+{
+	int i=0;
+	for(;i<m_stages.size();++i) m_stages[i]->clear();
+	m_activeStageId = 0;
+}
 
 } // end namespace sdb
