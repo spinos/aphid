@@ -8,49 +8,19 @@
  */
 
 #pragma once
-#include <Array.h>
-#include <C3Tree.h>
+#include <ActiveGroup.h>
+#include <WorldGrid.h>
 #include <RayMarch.h>
 #include <Dropoff.h>
 #include <MeshTopology.h>
 namespace sdb {
 class Sculptor {
 public:
-	class ActiveGroup {
-	public:
-		ActiveGroup();
-		~ActiveGroup();
-		void reset();
-		int numSelected();
-		float depthRange();
-		void updateDepthRange(const float & d);
-		void finish();
-		void average(List<VertexP> * d);
-		const float weight(const int & i) const;
-		void setDropoffFunction(Dropoff::DistanceFunction x);
-		const Dropoff::DistanceFunction dropoffFunction() const;
-		const int numActivePoints() const;
-		const int numActiveBlocks() const;
-		const float meanDepth() const;
-		
-		Ordered<int, VertexP> * vertices;
-		float depthMin, depthMax, gridSize, threshold;
-		Vector3F meanPosition, meanNormal;
-		Ray incidentRay;
-	private:
-	    void calculateWeight();
-	    void calculateWeight(List<VertexP> * d);
-	    std::deque<float> m_weights;
-	    Dropoff::DistanceFunction m_dropoffType;
-	    Dropoff *m_drop;
-		int m_numActivePoints, m_numActiveBlocks;
-	};
-	
 	Sculptor();
 	virtual ~Sculptor();
 	
 	void beginAddVertices(const float & gridSize);
-	void addVertex(const VertexP & v);
+	void addVertex(VertexP * v);
 	void endAddVertices();
 	
 	void setSelectRadius(const float & x);
@@ -63,7 +33,7 @@ public:
 	void selectPoints(const Ray * incident);
 	void deselectPoints();
 	
-	C3Tree * allPoints() const;
+	WorldGrid<Array<int, VertexP>, VertexP > * allPoints() const;
 	ActiveGroup * activePoints() const;
 	
 	void pullPoints();
@@ -79,8 +49,8 @@ public:
     Array<int, VertexP> * lastStage();
 	
 private:
-	bool intersect(List<VertexP> * ps, const Ray & ray);
-	void addToActive(int k, VertexP * v);
+	bool intersect(Array<int, VertexP> * ps, const Ray & ray);
+	void addToActive(VertexP * v);
 	void addToStage(VertexP * v);
 	Array<int, VertexP> * currentStage();
     void finishStage();
@@ -91,7 +61,7 @@ private:
 private:
 	RayMarch m_march;
 	ActiveGroup * m_active;
-	C3Tree * m_tree;
+	WorldGrid<Array<int, VertexP>, VertexP > * m_tree;
 	MeshTopology * m_topo;
 	float m_strength;
 /// multiple stages tracking vertex position at selection and de-selection

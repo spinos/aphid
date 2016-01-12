@@ -25,16 +25,13 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	
 private:
-	void drawPoints(C3Tree * tree);
-	void drawPoints(List<VertexP> * ps);
-	void drawPoints(const Sculptor::ActiveGroup & grp);
+	void drawPoints(WorldGrid<Array<int, VertexP>, VertexP > * tree);
+	void drawPoints(Array<int, VertexP> * ps);
+	void drawPoints(const ActiveGroup & grp);
 
 private:
 	Sculptor * m_sculptor;
-    Vector3F * m_pos;
-	Vector3F * m_nor;
-	Vector3F * m_ref;
-	PNPref * m_pool;
+    PNPrefW * m_pool;
 	
 private slots:
     

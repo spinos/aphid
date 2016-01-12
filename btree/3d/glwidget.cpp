@@ -15,51 +15,44 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
     int i;
 	float w = 29.3f, h = 3.f, d = 13.f;
-    m_pos = new Vector3F[NUMVERTEX];
-	m_nor = new Vector3F[NUMVERTEX];
-	m_ref = new Vector3F[NUMVERTEX];
-    for(i = 0; i < NUMVERTEX; i++) {
-        Vector3F & t = m_pos[i];
+    m_pool = new PNPrefW[NUMVERTEX];
+	for(i = 0; i < NUMVERTEX; i++) {
+        Vector3F t;
 		if(i > NUMVERTEX/2) {
 			w = 5.f;
-			h = 16.3f;
+			h = 24.3f;
 			d = 3.f;
 		}
         t.x = (float(rand()%694) / 694.f - 0.5f) * w;
         t.y = (float(rand()%594) / 594.f - 0.5f) * h;
         t.z = (float(rand()%794) / 794.f - 0.5f) * d;
 		
-		m_nor[i] = m_pos[i]; m_nor[i].normalize();
-		m_ref[i] = m_pos[i];
+		*m_pool[i].t1 = t;
+		*m_pool[i].t2 = t.normal();
+		*m_pool[i].t3 = t;;
     }
 	
-	m_pool = new PNPref[NUMVERTEX];
 	
 	m_sculptor = new Sculptor;
 	m_sculptor->beginAddVertices(2.f);
     
-    VertexP p;
+    VertexP * p = new VertexP[NUMVERTEX];
     for(i = 0; i < NUMVERTEX; i++) {
-        p.key = i;
-		p.index = &m_pool[i];
-        (p.index)->t1 = &m_pos[i];
-		(p.index)->t2 = &m_nor[i];
-		(p.index)->t3 = &m_ref[i];
+        p[i].key = i;
+		p[i].index = &m_pool[i];
+        
 /// add vertex as P, N, Pref
-        m_sculptor->addVertex(p);
+        m_sculptor->addVertex(&p[i]);
     }
 	
 	m_sculptor->endAddVertices();
-	m_sculptor->setSelectRadius(2.f);
+	m_sculptor->setSelectRadius(2.5f);
 }
 
 GLWidget::~GLWidget()
 {
 	delete m_sculptor;
     delete[] m_pool;
-	delete[] m_pos;
-	delete[] m_nor;
-	delete[] m_ref;
 }
 
 void GLWidget::clientDraw()
@@ -77,18 +70,18 @@ void GLWidget::clientDraw()
     qDebug()<<".";
 }
 
-void GLWidget::drawPoints(C3Tree * tree)
+void GLWidget::drawPoints(WorldGrid<Array<int, VertexP>, VertexP > * tree)
 {
-    KdTreeDrawer * dr = getDrawer();
+    // KdTreeDrawer * dr = getDrawer();
 	tree->begin();
 	while(!tree->end()) {
         // dr->setColor(0.1 * (rand() & 7), 0.1 * (rand() & 7), 0.1 * (rand() & 7));
-		drawPoints(tree->verticesInGrid());
+		drawPoints(tree->value());
 		tree->next();
 	}
 }
 
-void GLWidget::drawPoints(List<VertexP> * d) 
+void GLWidget::drawPoints(Array<int, VertexP> * d) 
 {
 	if(!d) return;
 	KdTreeDrawer * dr = getDrawer();
@@ -96,27 +89,18 @@ void GLWidget::drawPoints(List<VertexP> * d)
 	
 	d->begin();
 	while(!d->end()) {
-		Vector3F * p = d->value().index->t1;
+		Vector3F * p = d->value()->index->t1;
 		dr->vertex(*p);
 		d->next();
 	}
 	dr->end();
 }
 
-void GLWidget::drawPoints(const Sculptor::ActiveGroup & grp)
+void GLWidget::drawPoints(const ActiveGroup & grp)
 {
-	Ordered<int, VertexP> * ps = grp.vertices;
+	Array<int, VertexP> * ps = grp.vertices;
 	if(ps->size() < 1) return;
-	const int maxNumBlk = grp.numActiveBlocks();
-	int blk = 0;
-	ps->begin();
-	while(!ps->end()) {
-		List<VertexP> * vs = ps->value();
-		drawPoints(vs);
-		blk++;
-		if(blk == maxNumBlk) return;
-		ps->next();
-	}
+	drawPoints(ps);
 }
 
 void GLWidget::clientSelect(QMouseEvent */*event*/)

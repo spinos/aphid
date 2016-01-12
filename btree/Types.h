@@ -83,6 +83,12 @@ class Couple
 public:
 	T1 * t1;
 	T2 * t2;
+	
+	Couple() 
+	{
+		t1 = new T1;
+		t2 = new T2;
+	}
 };
 
 template<typename T1, typename T2, typename T3>
@@ -92,6 +98,13 @@ public:
 	T1 * t1;
 	T2 * t2;
 	T3 * t3;
+	
+	Triple()
+	{
+		t1 = new T1;
+		t2 = new T2;
+		t3 = new T3;
+	}
 };
 
 template<typename T1, typename T2, typename T3, typename T4>
@@ -102,12 +115,21 @@ public:
 	T2 * t2;
 	T3 * t3;
 	T4 * t4;
+	
+	Quadruple()
+	{
+		t1 = new T1;
+		t2 = new T2;
+		t3 = new T3;
+		t4 = new T4;
+	}
 };
 
-typedef Triple<Vector3F, Vector3F, Vector3F > PNPref;
-class VertexP : public Pair<int, PNPref>
+typedef Quadruple<Vector3F, Vector3F, Vector3F, float > PNPrefW;
+class VertexP : public Pair<int, PNPrefW>
 {
 public:
+	
 	const bool operator==(const VertexP & another) const {
 		return index == another.index;
 	}

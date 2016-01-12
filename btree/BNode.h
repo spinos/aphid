@@ -817,7 +817,7 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
     
 /// remove leaf connection
 	if(m_data[found].index) {
-	    delete m_data[found].index;
+		delete m_data[found].index;
 		m_data[found].index = NULL;
 	}
 
