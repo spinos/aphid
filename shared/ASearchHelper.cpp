@@ -272,17 +272,14 @@ char ASearchHelper::findFirstTypedChild(MDagPath &parent, MObject &result, MFn::
     return 0;
 }
 
-char ASearchHelper::findTypedNodeInHistory(MObject &root, const char *nodename, MObject &res)
+char ASearchHelper::findTypedNodeInHistory(MObject &root, const char *nodename, MObject &res, bool downstream)
 {
-	if(root == MObject::kNullObj)
-		return 0;
-		
+	if(root == MObject::kNullObj) return 0;
+	MItDependencyGraph::Direction dir = downstream ? MItDependencyGraph::kDownstream : MItDependencyGraph::kUpstream;
 	MStatus stat;
-	MItDependencyGraph itdep(root, MFn::kInvalid, MItDependencyGraph::kUpstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
-	for(; !itdep.isDone(); itdep.next())
-	{
-		if(MFnDependencyNode(itdep.currentItem()).typeName() == nodename)
-		{
+	MItDependencyGraph itdep(root, MFn::kInvalid, dir, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
+	for(; !itdep.isDone(); itdep.next()) {
+		if(MFnDependencyNode(itdep.currentItem()).typeName() == nodename) {
 			res = itdep.currentItem();
 			return 1;
 		}

@@ -42,7 +42,7 @@ public:
 	void pinchPoints();
 	void spreadPoints();
 	void smudgePoints(const Vector3F & x);
-	void smoothPoints();
+	void smoothPoints(float frac = .5f);
 	void inflatePoints();
 	void erasePoints();
 	

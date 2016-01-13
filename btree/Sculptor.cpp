@@ -309,13 +309,13 @@ void Sculptor::inflatePoints()
 
 		vs->next();
 	}
-	smoothPoints();
+	smoothPoints(0.4f);
 }
 
 void Sculptor::smudgePoints(const Vector3F & x)
 { movePointsAlong(x, 0.5f); }
 
-void Sculptor::smoothPoints()
+void Sculptor::smoothPoints(float frac)
 {	
 	if(m_active->numSelected() < 1) return;
 	Array<int, VertexP> * vs = m_active->vertices;
@@ -332,7 +332,7 @@ void Sculptor::smoothPoints()
 		
 		m_topo->getDifferentialCoord(l->key, d);
 		
-		*(l->index->t1) -= d * 0.5f * wei * m_strength;
+		*(l->index->t1) -= d * frac * wei * m_strength;
 	
 		m_tree->displace(l, p0);
 

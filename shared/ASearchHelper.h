@@ -35,7 +35,7 @@ public:
 	char fuzzyGetObjByFullName(std::string &toReplace,const char* name,MObject& res,MObject& root = MObject::kNullObj);
 	char getDescendedByFullNameIgnoreNamespace(MObject& root, const char* name, MObject& res);
 	char fuzzyGetDescendedByTerminalName(MObject& root, const char* name, MObject& res);
-	char findTypedNodeInHistory(MObject &root, const char *nodename, MObject &res);
+	char findTypedNodeInHistory(MObject &root, const char *nodename, MObject &res, bool downstream=false);
 	char findNamedPlugInHistory(MObject &root, MFn::Type type, MString &name1, MPlug &plug1);
 	char isObjInDownstream(MObject &root, MObject &obj);
 	char getWorldTMByFullName(const char* name, MMatrix& res);

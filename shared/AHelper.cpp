@@ -1064,4 +1064,10 @@ void AHelper::SimpleAnimation(const MPlug & dst, int a, int b)
 	animCv.setInTangentType(1, MFnAnimCurve::kTangentLinear );
 	animCv.setOutTangentType(1, MFnAnimCurve::kTangentLinear );
 }
+
+bool AHelper::IsReferenced(const MObject & node)
+{
+    MFnDependencyNode fnode(node );
+    return fnode.isFromReferencedFile();
+}
 //:~

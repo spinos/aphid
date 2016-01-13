@@ -182,5 +182,7 @@ public:
 			return 0;
 		}
 	}
+    
+    static bool IsReferenced(const MObject & node);
 };
 #endif
