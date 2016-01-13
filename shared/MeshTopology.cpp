@@ -13,17 +13,18 @@
 #include <Edge.h>
 #include <VertexAdjacency.h>
 
-MeshTopology::MeshTopology(sdb::PNPrefW * pool, int * tri, const int & numV, const int & numTri)
+MeshTopology::MeshTopology(Vector3F * pos, Vector3F * nor, int * tri, const int & numV, const int & numTri)
 {
-    m_pool = pool;
-    //m_mesh = NULL;
+    m_pos = pos;
+    m_nor = nor;
+    m_mesh = NULL;
     const unsigned nv = numV;
     m_adjacency.reset(new VertexAdjacency[nv]);
     
     for(unsigned i = 0; i < nv; i++) {
 		VertexAdjacency & v = m_adjacency[i];
 		v.setIndex(i);
-		v.m_v = m_pool[i].t1;
+		v.m_v = &pos[i];
 	}
 	
 	unsigned a, b, c;
@@ -138,7 +139,7 @@ void MeshTopology::calculateVertexNormal(const int & i)
     std::vector<unsigned>::iterator it = faceid.begin();
     for(; it != faceid.end(); ++it) m_faces[(*it)]->update();
     
-    *m_pool[i].t2 = m_adjacency[i].computeNormal();
+    m_nor[i] = m_adjacency[i].computeNormal();
 }
 
 VertexAdjacency * MeshTopology::getTopology() const
@@ -281,7 +282,7 @@ void MeshTopology::update(const int & nv)
 	
 	for(int i = 0; i < nv; i++) {
 		m_adjacency[i].computeWeights();
-		*m_pool[i].t2 = m_adjacency[i].computeNormal();
+		m_nor[i] = m_adjacency[i].computeNormal();
 	}
 }
 
