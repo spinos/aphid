@@ -15,12 +15,14 @@
 #include <maya/MFnCompoundAttribute.h>
 #include <AHelper.h>
 #include <SHelper.h>
+#include <ASearchHelper.h>
 #include <HesperisAttributeIO.h>
 #include <HesperisAttribConnector.h>
 #include <H5IO.h>
 #include <AAttributeHelper.h>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
+#include <sceneIO.h>
 
 AttribNameMap AttribUtil::UserDefinedAttribFilter;
 
@@ -499,22 +501,23 @@ void AttribUtil::saveH5(const MObject & node, AAttribute * data)
 void AttribUtil::load3(const char * filename, MObject & target)
 {
 	if(!OpenH5(filename, HDocument::oReadAndWrite)) {
-		AHelper::Info<const char *>(" uda cannot open h5 file ", filename);
+		AHelper::Info<const char *>("AttribUtil error cannot open h5 file ", filename);
         return;
 	}
 	
 	if(!useH5Bake()) {
-        AHelper::Info<const char *>("h5 file is not opened", filename);
+        AHelper::Info<const char *>("AttribUtil error h5 file is not opened", filename);
         return;   
     }
 	
-	AHelper::Info<const char *>(" read uda from ", filename);
+	AHelper::Info<const char *>(" read attrib from ", filename);
 	HBase w("/");
 	HesperisAttributeIO::ReadAttributes(&w, target);
 	w.close();
 	
 	HesperisAttribConnector::ClearMasterNode();
 	CloseH5();
+	AHelper::Info<const char *>(" done loading attrib ", filename);
 }
 
 void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int flag)
@@ -585,4 +588,140 @@ void AttribUtil::bakeEnum(const MObject & entity, AEnumAttribute * data, int fla
 std::string AttribUtil::fullAttrName(const std::string & nodeName, AAttribute * data) const
 { return boost::str(boost::format("%1%|%2%") % nodeName % data->shortName() ); }
 
+void AttribUtil::load(const char* filename, MObject &target)
+{
+	AnimUtil au;
+	SceneIO doc;
+	if(doc.load(filename) != 1) {
+		AHelper::Info<const char *>("not a cache file", filename);
+		return;
+	}
+	loadFormatVersion(doc);
+	const char* then = doc.getAttribByName("time");
+	doc.free();
+	AHelper::Info<const char *>("cache generated at ", then );
+	MGlobal::executeCommand("select -clear");
+	load3(filename, target);
+}
+
+void AttribUtil::dump(const char *filename, MDagPathArray &active_list)
+{
+	if(IsFilterEmpty()) {
+		MGlobal::displayInfo("AttribUtil abort no -uda flag set for attribute names");
+        return;
+	}
+	
+    if(active_list.length() < 1) {
+        MGlobal::displayInfo("AttribUtil abort insufficient selection! select group(s) to push opium curve cache.");
+        return;
+    }
+	
+	AHelper::Info<std::string>("opium v3 write ", "attribute");
+    AHelper::Info<int>("bundle count ", active_list.length());
+	
+	if(AFrameRange::isValid())
+        MGlobal::executeCommand(MString("currentTime ")+BaseUtil::FirstFrame);
+	
+	MDagPathArray tms;
+	getActiveTransforms(tms, active_list);
+	
+	SceneIO doc;
+	doc.create(filename);
+	doc.recordTime();
+	if(AFrameRange::isValid()) {
+		doc.addFraneRange(FirstFrame, LastFrame);
+		doc.addSPF(SamplesPerFrame);
+	}
+    saveFormatVersion(doc, 3.f);
+	AnimUtil::ResolveFPS(HesperisAnimIO::SecondsPerFrame);
+    saveUDA(doc);
+	
+	if(H5IO::BeheadName.size() > 0) saveBehead( doc, H5IO::BeheadName );
+	doc.recordDataSize();
+	doc.save(filename);
+	doc.free();
+    	
+	bakeAttrib(filename, tms);
+	tms.clear();
+}
+
+void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
+{
+    if(!AFrameRange::isValid()) {
+		return;
+	}
+    
+    BaseUtil::CloseH5();
+	
+    if(!BaseUtil::OpenH5(filename, HDocument::oReadAndWrite)) {
+		AHelper::Info<const char *>("AttribUtil error cannot open h5 file ", filename);
+        return;
+	}
+    
+    if(!useH5Bake()) {
+        AHelper::Info<const char *>("AttribUtil error h5 file is not opened", filename);
+        return;   
+    }
+    
+    HFrameRange fr("/.fr");
+    fr.save(this);
+    fr.close();
+
+    HBase w("/");
+    if(!w.hasNamedAttr(".spf")) w.addIntAttr(".spf");
+    w.writeIntAttr(".spf", &SamplesPerFrame);
+	w.close();
+
+    MTime::Unit timeunit = MTime::kFilm;
+	double secondsPerFrame = 1.0 / 24.0;
+	
+	timeunit = AnimUtil::ResolveFPS(secondsPerFrame);
+    
+    MGlobal::executeCommand(MString("currentTime ")+FirstFrame);
+    
+    std::map<std::string, MDagPath > orderedDag;
+	MDagPathArray down;
+	unsigned i=0;
+	for(;i<active_list.length();++i) {
+/// support geom types
+		ASearchHelper::LsAllTypedPaths(down, active_list[i], MFn::kMesh );
+		ASearchHelper::LsAllTypedPaths(down, active_list[i], MFn::kNurbsCurve );
+	}
+	
+	ASearchHelper::LsAllTransformsTo(orderedDag, down);
+	ASearchHelper::LsAll(orderedDag, down);
+
+    MGlobal::displayInfo(MString(" baking begin ")+FirstFrame
+                         +" end "+LastFrame
+                         +" samples/frame "+SamplesPerFrame
+                         +" seconds/frame "+secondsPerFrame);
+
+	BaseUtil::ISample = 0;
+	bakeH5(orderedDag, 0);
+	
+    double realFrame;
+    int kt, sampFrame;
+	int sampIter = 0;
+    for(kt = BaseUtil::FirstFrame; kt <= BaseUtil::LastFrame; kt++) {
+        BaseUtil::CurrentFrame = kt;
+        
+        for(sampFrame = 0; sampFrame < SamplesPerFrame; sampFrame++) {
+		    BaseUtil::SubFrame = sampFrame;
+			BaseUtil::ISample = sampIter;
+            realFrame = (double)(kt + BaseUtil::DeltaSubFrame * sampFrame);
+
+            MGlobal::executeCommand(MString("currentTime ")+realFrame);
+            useH5Bake();
+            AHelper::Info<double>("frame", realFrame);
+                        
+			bakeH5(orderedDag, 1);
+			sampIter++;
+        }
+    }
+	bakeH5(orderedDag, 2);
+    AHelper::Info<int>("n samples", sampIter);
+	saveH5(orderedDag);
+    BaseUtil::CloseH5();
+    AHelper::Info<const char *>(" done baking attrib ", filename);
+}
 //:~

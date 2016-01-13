@@ -12,10 +12,10 @@
 
 H5Availability H5Holder::H5Files;
 
-H5Holder::H5Holder() : m_lastTime(1e28) {}
+H5Holder::H5Holder() : m_lastTime(1e28), m_hasSampler(false) {}
 H5Holder::~H5Holder() {}
 
-void H5Holder::getSampler(SampleFrame & sampler)
+void H5Holder::readSampler(SampleFrame & sampler)
 {
 	bool hasSpf = false;
     HBase w("/");
@@ -25,7 +25,12 @@ void H5Holder::getSampler(SampleFrame & sampler)
     }
     w.close();
 	
-    if(hasSpf || !HObject::FileIO.checkExist("/.spf" )) return;
+    if(hasSpf) {
+		std::cout<<"\n spf "<<sampler.m_spf;
+		return;
+	}
+	
+	if(!HObject::FileIO.checkExist("/.spf" )) return;
     
     HIntAttribute aspf("/.spf");
     if(aspf.open()) {
@@ -37,7 +42,10 @@ void H5Holder::getSampler(SampleFrame & sampler)
 bool H5Holder::openH5File(const std::string & fileName)
 { 
 	if(!H5Files.openFile(fileName.c_str(), HDocument::oReadAndWrite ) ) return false; 
-	getSampler(m_sampler);
+	if(!m_hasSampler) {
+		readSampler(m_sampler);
+		m_hasSampler = true;
+	}
 	return true;
 }
 

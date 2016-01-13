@@ -447,7 +447,7 @@ bool HesperisAttributeIO::BakeEnum(const std::string & attrName, AEnumAttribute 
 	}
 	HBase grp(attrName);
 	
-	AHelper::Info<short>("enum value ", data->asShort() );
+	// AHelper::Info<short>("enum value ", data->asShort() );
 	InsertValue<HOocArray<hdata::TShort, 1, 64>, short >(MappedBakeData[attrName], data->asShort() );
 			
 	grp.close();

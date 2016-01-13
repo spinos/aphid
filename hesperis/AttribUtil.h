@@ -27,6 +27,9 @@ public:
 	static AttribNameMap ListUserDefinedAttribs(const MString & nodeName, bool filtered = true);
 	static bool IsFilterEmpty();
 	
+	virtual void dump(const char* filename, MDagPathArray &active_list);
+	virtual void load(const char* filename, MObject &target = MObject::kNullObj);
+	
 protected:
     static AttribNameMap UserDefinedAttribFilter;
 	
@@ -50,7 +53,8 @@ private:
 	void bakeNumeric(const MObject & entity, ANumericAttribute * data, int flag);
 	void bakeEnum(const MObject & entity, AEnumAttribute * data, int flag);
 	std::string fullAttrName(const std::string & nodeName, AAttribute * data) const;
-	
+	void bakeAttrib(const char *filename, MDagPathArray &active_list);
+
 private:
 	MPlugArray m_dirtyPlugs;
 };

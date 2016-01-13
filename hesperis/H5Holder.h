@@ -16,6 +16,7 @@ class H5Holder {
 
 	SampleFrame m_sampler;
 	double m_lastTime;
+	bool m_hasSampler;
 	
 public:
 	H5Holder();
@@ -24,7 +25,7 @@ public:
 	static H5Availability H5Files;
 	
 protected:
-	void getSampler(SampleFrame & sampler);
+	void readSampler(SampleFrame & sampler);
 	bool openH5File(const std::string & fileName);
 	void setTime(double x);
 	bool isTimeChanged(double x) const;
