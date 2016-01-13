@@ -22,6 +22,7 @@ Sculptor::Sculptor()
 	m_topo = NULL;
 	m_activeStageId = 0;
 	appendStage();
+	m_refP = new Array<int, Vector3F >;
 }
 
 Sculptor::~Sculptor()
@@ -34,17 +35,24 @@ Sculptor::~Sculptor()
 		delete *it;
 	}
 	m_stages.clear();
+	delete m_refP;
 }
 
 void Sculptor::beginAddVertices(const float & gridSize)
 {
 	m_tree->clear();
 	m_tree->setGridSize(gridSize);
+	m_refP->clear();
 }
 
 void Sculptor::insertVertex(VertexP * v)
-{
-	m_tree->insert((const float *)v->index->t1, v);
+{ m_tree->insert((const float *)v->index->t1, v); }
+
+void Sculptor::insertRefP(VertexP * v)
+{ 
+	Vector3F * p = new Vector3F;
+	*p = *v->index->t1;
+	m_refP->insert(v->key, p);
 }
 
 void Sculptor::endAddVertices()
@@ -392,6 +400,35 @@ void Sculptor::clearAllStages()
 	int i=0;
 	for(;i<m_stages.size();++i) m_stages[i]->clear();
 	m_activeStageId = 0;
+}
+
+void Sculptor::erasePoints()
+{
+	Array<int, VertexP> * vs = m_active->vertices;
+	
+	Vector3F tod;
+	float wei;
+	vs->begin();
+	while(!vs->end()) {
+		
+		VertexP * l = vs->value();
+		wei = *l->index->t4;
+		
+		Vector3F * pr = m_refP->find(vs->key() );
+		if(pr) {
+			const Vector3F p0(*(l->index->t1));
+		
+			tod = *pr - *(l->index->t1);
+			*(l->index->t1) += tod * wei * m_strength * .5f;
+			
+			m_tree->displace(l, p0);
+		}
+		else {
+			std::cout<<"\n sculpter error cannot find pref "<<vs->key();
+		}
+		
+		vs->next();
+	}
 }
 
 } // end namespace sdb

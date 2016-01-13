@@ -126,4 +126,7 @@ const Dropoff::DistanceFunction ActiveGroup::dropoffFunction() const
 void ActiveGroup::setSelectVolume(VolumeType t )
 { m_volumeType = t; }
 
+bool ActiveGroup::isEmpty() const
+{ return vertices->isEmpty(); }
+
 }

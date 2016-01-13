@@ -40,6 +40,7 @@ public:
 	float minDepth() const;
 	
 	void setSelectVolume(VolumeType t );
+	bool isEmpty() const;
 	
 private:
 	void calculateWeight(Array<int, VertexP> * d);

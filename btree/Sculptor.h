@@ -21,6 +21,7 @@ public:
 	
 	void beginAddVertices(const float & gridSize);
 	void insertVertex(VertexP * v);
+	void insertRefP(VertexP * v);
 	void endAddVertices();
 	
 	void setSelectRadius(const float & x);
@@ -43,6 +44,7 @@ public:
 	void smudgePoints(const Vector3F & x);
 	void smoothPoints();
 	void inflatePoints();
+	void erasePoints();
 	
 	void undo();
 	void redo();
@@ -70,6 +72,7 @@ private:
 /// multiple stages tracking vertex position at selection and de-selection
 	std::deque<Array<int, VertexP> * > m_stages;
     Array<int, VertexP> * m_lastStage;
+	Array<int, Vector3F > * m_refP;
 	int m_activeStageId;
 };
 } // end namespace sdb
