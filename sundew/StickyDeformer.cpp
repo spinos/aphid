@@ -35,6 +35,7 @@ MObject StickyDeformer::ainVecY;
 MObject StickyDeformer::ainVecZ;
 MObject StickyDeformer::ainVec;
 MObject StickyDeformer::avertexSpace;
+MObject StickyDeformer::adropoff;
 
 StickyDeformer::StickyDeformer()
 {}
@@ -58,9 +59,15 @@ MStatus StickyDeformer::initialize()
 										 MFnNumericData::kDouble, 0.0, &stat);
 	numericFn.setStorable(false);
 	numericFn.setWritable(true);
-	numericFn.setKeyable(true);
 	addAttribute(aradius);
     attributeAffects(aradius, outputGeom);
+	
+	adropoff = numericFn.create("dropoff", "dpo", 
+										 MFnNumericData::kDouble, 1.0, &stat);
+	numericFn.setStorable(false);
+	numericFn.setWritable(true);
+	addAttribute(adropoff);
+    attributeAffects(adropoff, outputGeom);
 	
 	ainVecX = numericFn.create("vecX", "vcx", 
 										 MFnNumericData::kDouble, 0.0, &stat);
@@ -75,7 +82,6 @@ MStatus StickyDeformer::initialize()
 										
 	numericFn.setStorable(false);
 	numericFn.setWritable(true);
-	numericFn.setKeyable(true);
 	addAttribute(ainVec);
     attributeAffects(ainVec, outputGeom);
 	
@@ -119,6 +125,9 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 	if(radius < 1e-3) return status;
 	// AHelper::Info<double>("def input radius", radius);
 	
+	MDataHandle dropoffData = block.inputValue(adropoff,&status);
+	double dropoff = dropoffData.asDouble();
+	
 	MDataHandle rotData = block.inputValue(avertexSpace,&status);
 	
 	MMatrix rot = rotData.asMatrix();
@@ -135,6 +144,7 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 		l = topt.length();
 		if(l < radius) {
 			wei = 1.0 - l / radius;
+			wei = pow(wei, dropoff);
 			if(wei > 0.93) wei = 0.93;
 			pt += worldDisplaceVec * (env * wei);
 			iter.setPosition(pt);

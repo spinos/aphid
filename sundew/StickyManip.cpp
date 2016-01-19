@@ -83,6 +83,13 @@ MStatus StickyLocatorManip::createChildren()
 	MFnFreePointTriadManip directionManipFn(fDirectionManip);
 	MPoint ori(0.0, 0.0, 1.0);
 	directionManipFn.setPoint(ori);
+	
+	fDropoffManip = addDistanceManip("dropoffManip",
+									  "dropoffDistance");
+									  
+	MFnDistanceManip dropoffManipFn(fDropoffManip);
+	dropoffManipFn.setStartPoint(MPoint(1.0, 0.0, 0.0));
+	dropoffManipFn.setDirection(MVector(1.0, 0.0, 0.0));
 	return stat;
 }
 
@@ -104,7 +111,6 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	MFnDependencyNode nodeFn(node);
 	
 	MFnFreePointTriadManip directionManipFn(fDirectionManip);
-	//directionManipFn.setTranslation(mean, MSpace::kObject);
 	directionManipFn.set(tm);
 	MPlug directionPlug = nodeFn.findPlug("displaceVec", &stat);
     if (MStatus::kFailure != stat) {
@@ -112,7 +118,6 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	}
 	
     MFnDistanceManip distanceManipFn(fDistanceManip);
-	//distanceManipFn.setTranslation(mean, MSpace::kObject);    
 	distanceManipFn.set(tm);
 	MPlug sizePlug = nodeFn.findPlug("size", &stat);
     if (MStatus::kFailure != stat) {
@@ -123,6 +128,17 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 										 &StickyLocatorManip::startPointCallback);
 	}
 
+	MFnDistanceManip dropoffManipFn(fDropoffManip);
+	dropoffManipFn.set(tm);
+	MPlug dropoffPlug = nodeFn.findPlug("dropoff", &stat);
+    if (MStatus::kFailure != stat) {
+	    dropoffManipFn.connectToDistancePlug(dropoffPlug);
+		unsigned startPointIndex = dropoffManipFn.startPointIndex();
+	    addPlugToManipConversionCallback(startPointIndex, 
+										 (plugToManipConversionCallback) 
+										 &StickyLocatorManip::startPointCallback);
+	}
+	
 	finishAddingManips();
 	return MPxManipContainer::connectToDependNode(node);
 }

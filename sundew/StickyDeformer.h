@@ -35,6 +35,7 @@ public:
 	static MObject ainVecZ;
 	static MObject ainVec;
 	static MObject avertexSpace;
+	static MObject adropoff;
 	
 	static MTypeId		id;
 

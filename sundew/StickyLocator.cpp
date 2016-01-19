@@ -26,6 +26,7 @@ MObject StickyLocator::avertexId;
 MObject StickyLocator::ainrefi;
 MObject StickyLocator::ainrefd;
 MObject StickyLocator::avertexSpace;
+MObject StickyLocator::adropoff;
 
 StickyLocator::StickyLocator() 
 {
@@ -261,6 +262,8 @@ MStatus StickyLocator::initialize()
 										aMoveVY,
 										aMoveVZ, &stat);
 	numericFn.setDefault(0.0, 0.0, 1.0);
+	numericFn.setKeyable(true);
+	
 	stat = addAttribute(aMoveV);
 	if (!stat) {
 		stat.perror("addAttribute");
@@ -271,8 +274,21 @@ MStatus StickyLocator::initialize()
 	numericFn.setDefault(1.0);
 	numericFn.setStorable(true);
 	numericFn.setWritable(true);
+	numericFn.setKeyable(true);
 	
 	stat = addAttribute(size);
+	if (!stat) {
+		stat.perror("addAttribute");
+		return stat;
+	}
+	
+	adropoff = numericFn.create("dropoff", "dpo", MFnNumericData::kDouble);
+	numericFn.setDefault(1.0);
+	numericFn.setStorable(true);
+	numericFn.setWritable(true);
+	numericFn.setKeyable(true);
+	
+	stat = addAttribute(adropoff);
 	if (!stat) {
 		stat.perror("addAttribute");
 		return stat;

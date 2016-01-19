@@ -206,6 +206,7 @@ void StickyCmd::connectDeformer(const MObject & viz, const MObject & deformer, i
 	MDGModifier mod;
 	mod.connect(fviz.findPlug("size"), fdeformer.findPlug("radius"));
 	mod.connect(fviz.findPlug("displaceVec"), fdeformer.findPlug("inVec"));
+	mod.connect(fviz.findPlug("dropoff"), fdeformer.findPlug("dropoff"));
 	mod.connect(fviz.findPlug("vertexMatrix"), fdeformer.findPlug("vertexMatrix"));
 	MStatus stat = mod.doIt();
 	

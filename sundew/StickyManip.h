@@ -31,6 +31,7 @@ public:
 
     MDagPath fDistanceManip;
 	MDagPath fDirectionManip;
+	MDagPath fDropoffManip;
 	MDagPath fNodePath;
 
 public:

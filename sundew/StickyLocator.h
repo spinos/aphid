@@ -59,6 +59,7 @@ public:
 	static  	MObject 	ainrefi;
 	static  	MObject 	ainrefd;
 	static MObject avertexSpace;
+	static MObject adropoff;
 	
 public: 
 	static	MTypeId		id;
