@@ -71,6 +71,8 @@ public:
 	static MObject aoutMeanY;
 	static MObject aoutMeanZ;
 	static MObject aoutMean;
+	static  	MObject 	ainrefi;
+	static  	MObject 	ainrefd;
 	
 public: 
 	static	MTypeId		id;

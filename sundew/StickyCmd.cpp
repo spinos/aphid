@@ -90,6 +90,8 @@ MStatus StickyCmd::doIt(const MArgList &args)
 	MObject viz = connectViz(closestVert);
 	if(viz.isNull() ) return status;
 	
+	storeRef(viz, closestMesh, closestVert);
+	
 	connectDeformer(viz, deformer, meshId);
 	return status;
 }
@@ -222,5 +224,42 @@ void StickyCmd::connectDeformer(const MObject & viz, const MObject & deformer, i
 		AHelper::Info<MString>("sticky error cannot connect viz ", srcs[0].name() );
 		return;
 	}
+}
+
+void StickyCmd::storeRef(const MObject & viz, const MDagPath & mesh, unsigned & ivert)
+{
+	MItMeshVertex itmv(mesh);
+	int prevIndex;
+	itmv.setIndex (ivert , prevIndex);
+	MIntArray vertexList;
+	itmv.getConnectedVertices ( vertexList );
+	AHelper::Info<MIntArray>("neighbors", vertexList);
+	
+	MFnDependencyNode fviz(viz);
+	
+	MFnIntArrayData indexD;
+	MObject oindex = indexD.create(vertexList);
+	
+	MPlug indexPlug = fviz.findPlug("refInds");
+	indexPlug.setValue(oindex);
+	
+	MFnMesh fmesh(mesh);
+	MPoint cen, pt;
+	fmesh.getPoint(ivert, cen);
+	const unsigned nv = vertexList.length();
+	MVectorArray dvs;
+	unsigned i=0;
+	for(;i<nv;++i) {
+		fmesh.getPoint(vertexList[i], pt);
+		dvs.append(pt - cen);
+	}
+	
+	AHelper::Info<MVectorArray>("dv", dvs);
+	
+	MFnVectorArrayData displaceD;
+	MObject odisplace = displaceD.create(dvs);
+	
+	MPlug displacePlug = fviz.findPlug("refDisplace");
+	displacePlug.setValue(odisplace);
 }
 //:~

@@ -13,6 +13,7 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnMeshData.h>
+#include <maya/MFnIntArrayData.h>
 #include <CircleCurve.h>
 #include <AHelper.h>
 
@@ -82,7 +83,8 @@ MStatus StickyLocatorManip::createChildren()
 	fDirectionManip = addFreePointTriadManip("freePointTriadManip",
 										"point");
 	MFnFreePointTriadManip directionManipFn(fDirectionManip);
-	directionManipFn.setPoint(startPoint);
+	MPoint ori(0.0, 0.0, 1.0);
+	directionManipFn.setPoint(ori);
 	return stat;
 }
 
@@ -102,9 +104,17 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	meanYPlug.getValue(mean.y);
 	meanZPlug.getValue(mean.z);
 	
+	MFnDependencyNode nodeFn(node);
+	
+	MFnFreePointTriadManip directionManipFn(fDirectionManip);
+	directionManipFn.setTranslation(mean, MSpace::kObject);
+	MPlug directionPlug = nodeFn.findPlug("displaceVec", &stat);
+    if (MStatus::kFailure != stat) {
+	    directionManipFn.connectToPointPlug(directionPlug);
+	}
+	
     MFnDistanceManip distanceManipFn(fDistanceManip);
-	distanceManipFn.setTranslation(mean, MSpace::kObject);
-    MFnDependencyNode nodeFn(node);    
+	distanceManipFn.setTranslation(mean, MSpace::kObject);    
 
 	MPlug sizePlug = nodeFn.findPlug("size", &stat);
     if (MStatus::kFailure != stat) {
@@ -113,13 +123,6 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	    addPlugToManipConversionCallback(startPointIndex, 
 										 (plugToManipConversionCallback) 
 										 &StickyLocatorManip::startPointCallback);
-	}
-	
-	MFnFreePointTriadManip directionManipFn(fDirectionManip);
-	directionManipFn.setTranslation(mean, MSpace::kObject);
-	MPlug directionPlug = nodeFn.findPlug("displaceVec", &stat);
-    if (MStatus::kFailure != stat) {
-	    directionManipFn.connectToPointPlug(directionPlug);
 	}
 
 	finishAddingManips();
@@ -158,6 +161,8 @@ MObject StickyLocator::aoutMeanX;
 MObject StickyLocator::aoutMeanY;
 MObject StickyLocator::aoutMeanZ;
 MObject StickyLocator::aoutMean;
+MObject StickyLocator::ainrefi;
+MObject StickyLocator::ainrefd;
 
 StickyLocator::StickyLocator() 
 {
@@ -332,16 +337,16 @@ MStatus StickyLocator::initialize()
 	MStatus			 stat;
 	
 	aMoveVX = numericFn.create("displaceX", "dspx", 
-										 MFnNumericData::kDouble, 0.0, &stat);
+										 MFnNumericData::kDouble);
 	aMoveVY = numericFn.create("displaceY", "dspy",
-										 MFnNumericData::kDouble, 0.0, &stat);
+										 MFnNumericData::kDouble);
 	aMoveVZ = numericFn.create("displaceZ", "dspz",
-										 MFnNumericData::kDouble, 1.0, &stat);
+										 MFnNumericData::kDouble);
 	aMoveV = numericFn.create("displaceVec", "dspv",
 										aMoveVX,
 										aMoveVY,
 										aMoveVZ, &stat);
-	
+	numericFn.setDefault(0.0, 0.0, 1.0);
 	stat = addAttribute(aMoveV);
 	if (!stat) {
 		stat.perror("addAttribute");
@@ -387,6 +392,30 @@ MStatus StickyLocator::initialize()
 	addAttribute(aoutMean);
 	
 	attributeAffects(ainmesh, aoutMean);
+	
+	MIntArray defaultIntArray;
+	MFnIntArrayData intArrayDataFn;
+	intArrayDataFn.create( defaultIntArray );
+	
+	ainrefi = typedAttr.create("refInds", "rids",
+											MFnData::kIntArray,
+											intArrayDataFn.object(),
+											&stat );
+												
+	if(!stat) MGlobal::displayWarning("failed create ref id attr");
+	typedAttr.setStorable(true);
+	addAttribute(ainrefi);
+	
+	MVectorArray defaultVectArray;
+	MFnVectorArrayData vectArrayDataFn;
+	vectArrayDataFn.create( defaultVectArray );
+	
+	ainrefd = typedAttr.create("refDisplace", "rdp", MFnData::kVectorArray,
+											vectArrayDataFn.object(),
+											&stat );
+	if(!stat) MGlobal::displayWarning("failed create ref dp attr");
+	typedAttr.setStorable(true);
+	addAttribute(ainrefd);
 	
 	MPxManipContainer::addToManipConnectTable(id);
 
