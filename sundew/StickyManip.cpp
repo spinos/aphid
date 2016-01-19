@@ -82,24 +82,28 @@ MStatus StickyLocatorManip::createChildren()
 	fDirectionManip = addFreePointTriadManip("freePointTriadManip",
 										"point");
 	MFnFreePointTriadManip directionManipFn(fDirectionManip);
-	
-    return stat;
+	directionManipFn.setPoint(startPoint);
+	return stat;
 }
-
 
 MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 {
     MStatus stat;
 
-	// Get the DAG path
-	//
 	MFnDagNode dagNodeFn(node);
 	dagNodeFn.getPath(fNodePath);
 
-    // Connect the plugs
-    //    
-
+/// get mean position
+	MPlug meanXPlug = dagNodeFn.findPlug("meanX");
+	MPlug meanYPlug = dagNodeFn.findPlug("meanY");
+	MPlug meanZPlug = dagNodeFn.findPlug("meanZ");
+	MVector mean;
+	meanXPlug.getValue(mean.x);
+	meanYPlug.getValue(mean.y);
+	meanZPlug.getValue(mean.z);
+	
     MFnDistanceManip distanceManipFn(fDistanceManip);
+	distanceManipFn.setTranslation(mean, MSpace::kObject);
     MFnDependencyNode nodeFn(node);    
 
 	MPlug sizePlug = nodeFn.findPlug("size", &stat);
@@ -109,18 +113,17 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	    addPlugToManipConversionCallback(startPointIndex, 
 										 (plugToManipConversionCallback) 
 										 &StickyLocatorManip::startPointCallback);
-		finishAddingManips();
-	    MPxManipContainer::connectToDependNode(node);
 	}
 	
-	MFnFreePointTriadManip directionManipFn;
-    directionManipFn.setObject(fDirectionManip);
+	MFnFreePointTriadManip directionManipFn(fDirectionManip);
+	directionManipFn.setTranslation(mean, MSpace::kObject);
 	MPlug directionPlug = nodeFn.findPlug("displaceVec", &stat);
     if (MStatus::kFailure != stat) {
 	    directionManipFn.connectToPointPlug(directionPlug);
 	}
 
-    return stat;
+	finishAddingManips();
+	return MPxManipContainer::connectToDependNode(node);
 }
 
 
@@ -130,6 +133,7 @@ void StickyLocatorManip::draw(M3dView & view,
 								 M3dView::DisplayStatus status)
 { 
     MPxManipContainer::draw(view, path, style, status);
+	return;
     view.beginGL(); 
 
     MPoint textPos = nodeTranslation();
@@ -171,7 +175,7 @@ StickyLocator::~StickyLocator()
 MStatus StickyLocator::compute(const MPlug &plug, MDataBlock &data)
 {
 	MStatus stat;
-	if( plug == aoutMeanX ) {
+	if( plug == aoutMean ) {
 		MDataHandle hmesh = data.inputValue(ainmesh);
 		MObject mesh = hmesh.asMesh();
 		if(mesh.isNull()) {
@@ -195,19 +199,11 @@ MStatus StickyLocator::compute(const MPlug &plug, MDataBlock &data)
 		
 		fmesh.getPoint(vid, m_origin);
 		
-		MDataHandle outputHandle = data.outputValue( aoutMeanX );
-		outputHandle.set( m_origin.x );
+		MDataHandle outputHandle = data.outputValue( aoutMean );
 		
-		data.setClean(plug);
-	}
-	else if( plug == aoutMeanY ) {
-		MDataHandle outputHandle = data.outputValue( aoutMeanY );
-		outputHandle.set( m_origin.y );
-		data.setClean(plug);
-	}
-	else if( plug == aoutMeanZ ) {
-		MDataHandle outputHandle = data.outputValue( aoutMeanZ );
-		outputHandle.set( m_origin.z );
+		MVector ov(m_origin.x, m_origin.y, m_origin.z);
+		outputHandle.setMVector( ov );
+		
 		data.setClean(plug);
 	}
 	else return MS::kUnknownParameter;
@@ -260,9 +256,27 @@ void StickyLocator::draw(M3dView &view, const MDagPath &path,
 	drawCircle();
 	glPopMatrix();
 	
+	glPushMatrix();
+	const float m2[16] = {0,0,-sizeVal,0,
+					0,sizeVal,0,0,
+					sizeVal,0,0,0,
+					m_origin.x, m_origin.y, m_origin.z, 1};
+	glMultMatrixf(m2);
+	drawCircle();
+	glPopMatrix();
+	
+	glPushMatrix();
+	const float m3[16] = {sizeVal,0,0,0,
+					0,0,-sizeVal,0,
+					0,sizeVal,0,0,
+					m_origin.x, m_origin.y, m_origin.z, 1};
+	glMultMatrixf(m3);
+	drawCircle();
+	glPopMatrix();
+	
 	glBegin(GL_LINES);
-	glVertex3f(0.f, 0.f, 0.f);
-	glVertex3f(vx, vy, vz);
+	glVertex3f(m_origin.x, m_origin.y, m_origin.z);
+	glVertex3f(m_origin.x + vx, m_origin.y + vy, m_origin.z + vz);
 	glEnd();
 	
 	glEnable(GL_DEPTH_TEST);
@@ -299,8 +313,8 @@ MBoundingBox StickyLocator::boundingBox() const
 	MPoint corner1(-1.0, -1.0, -1.0);
 	MPoint corner2(1.0, 1.0, 1.0);
 
-	corner1 = corner1 * multiplier;
-	corner2 = corner2 * multiplier;
+	corner1 = m_origin + corner1 * multiplier;
+	corner2 = m_origin + corner2 * multiplier;
 
 	return MBoundingBox(corner1, corner2);
 }

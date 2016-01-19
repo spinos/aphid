@@ -67,17 +67,30 @@ MStatus StickyCmd::doIt(const MArgList &args)
 		getVertClosestToMean(&minD, closestMesh, closestVert, item, component, mean);
     }
 	
+	int meshId = 0;
+	iter.reset();
+	int i=0;
+	for ( ; !iter.isDone(); iter.next() ) {								
+        MDagPath item;			
+        MObject component;		
+        iter.getDagPath( item, component );
+		if(closestMesh == item) {
+			meshId = i;
+		}
+		i++;
+    }
 	AHelper::Info<MString>("choose mesh", closestMesh.fullPathName() );
+	AHelper::Info<int>("mesh id", meshId);
 	AHelper::Info<unsigned>("choose vert", closestVert );
 	
 	MGlobal::setActiveSelectionList(sels);
 	MObject deformer = createDeformer();
 	if(deformer.isNull() ) return status;
 	
-	MObject viz = connectViz(closestMesh, closestVert);
+	MObject viz = connectViz(closestVert);
 	if(viz.isNull() ) return status;
 	
-	connectDeformer(viz, deformer);
+	connectDeformer(viz, deformer, meshId);
 	return status;
 }
 
@@ -125,35 +138,16 @@ void StickyCmd::getVertClosestToMean(float *minD, MDagPath & closestMesh, unsign
 	}
 }
 
-MObject StickyCmd::connectViz(const MDagPath & mesh, unsigned vert)
-{
-	MObject omesh = mesh.node();
-	MObject odef;
-	ASearchHelper searcher;
-	if(searcher.findTypedNodeInHistory(omesh, "stickyDeformer", odef) ) {
-		MObject root = mesh.node();
-		searcher.findIntermediateMeshInHistory(root, omesh);
-	}
-	
-	MStatus stat;
-	MFnDependencyNode fmesh(omesh, &stat);
-	if(!stat) {
-		AHelper::Info<MString>("sticky error not a mesh ", mesh.fullPathName() );
-		return MObject::kNullObj;
-	}
-	
+MObject StickyCmd::connectViz(unsigned vert)
+{	
 	MDagModifier mod;
 	MObject tm = mod.createNode("transform");
-	stat = mod.doIt();
+	MStatus stat = mod.doIt();
 	MObject viz = mod.createNode("stickyLocator", tm);
 	stat = mod.doIt();
-	if(!stat) {
-		AHelper::Info<MString>("sticky error cannot create viz ", mesh.fullPathName() );
-		return MObject::kNullObj;
-	}
 
 	if(viz.isNull() ) {
-		AHelper::Info<MString>("sticky error null viz ", mesh.fullPathName() );
+		AHelper::Info<MString>("sticky error null viz ", "" );
 		return MObject::kNullObj;
 	}
 	
@@ -164,13 +158,6 @@ MObject StickyCmd::connectViz(const MDagPath & mesh, unsigned vert)
 		return MObject::kNullObj;
 	}
 	vidPlug.setValue((int)vert);
-	
-	mod.connect(fmesh.findPlug("outMesh"), fviz.findPlug("inMesh"));
-	stat = mod.doIt();
-	if(!stat) {
-		AHelper::Info<MString>("sticky error cannot connect viz ", mesh.fullPathName() );
-		return MObject::kNullObj;
-	}
 	
 	AHelper::Info<MString>("stick create viz", fviz.name() );
 	return viz;
@@ -205,13 +192,35 @@ MObject StickyCmd::createDeformer()
 	return node;
 }
 
-void StickyCmd::connectDeformer(const MObject & viz, const MObject & deformer)
+void StickyCmd::connectDeformer(const MObject & viz, const MObject & deformer, int meshId)
 {
 	MFnDependencyNode fviz(viz);
 	MFnDependencyNode fdeformer(deformer);
 	MDGModifier mod;
 	mod.connect(fviz.findPlug("outMean"), fdeformer.findPlug("inMean"));
 	mod.connect(fviz.findPlug("size"), fdeformer.findPlug("radius"));
-	mod.doIt();
+	mod.connect(fviz.findPlug("displaceVec"), fdeformer.findPlug("inVec"));
+	MStatus stat = mod.doIt();
+	
+/// find  input[meshId].inputGeometry
+	MPlug inputPlug = fdeformer.findPlug("input");
+	MPlug ainputPlug = inputPlug.elementByLogicalIndex(meshId);
+
+/// child(0) is inputGeometry
+	MPlug geoPlug = ainputPlug.child(0);
+	MPlugArray srcs;
+	if(!geoPlug.connectedTo (srcs, true, false)) {
+		AHelper::Info<MString>("sticky error no connection ", geoPlug.name() );
+		return;
+	}
+	
+	AHelper::Info<MString>("sticky deformer input geometry", srcs[0].name() );
+
+	mod.connect(srcs[0], fviz.findPlug("inMesh"));
+	stat = mod.doIt();
+	if(!stat) {
+		AHelper::Info<MString>("sticky error cannot connect viz ", srcs[0].name() );
+		return;
+	}
 }
 //:~

@@ -34,6 +34,10 @@ public:
 	static MObject ainMeanZ;
 	static MObject ainMean;
 	static MObject aradius;
+	static MObject ainVecX;
+	static MObject ainVecY;
+	static MObject ainVecZ;
+	static MObject ainVec;
 	
 	static MTypeId		id;
 

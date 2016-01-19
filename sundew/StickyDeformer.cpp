@@ -35,6 +35,10 @@ MObject StickyDeformer::ainMeanY;
 MObject StickyDeformer::ainMeanZ;
 MObject StickyDeformer::ainMean;
 MObject StickyDeformer::aradius;
+MObject StickyDeformer::ainVecX;
+MObject StickyDeformer::ainVecY;
+MObject StickyDeformer::ainVecZ;
+MObject StickyDeformer::ainVec;
 
 StickyDeformer::StickyDeformer()
 {}
@@ -77,6 +81,22 @@ MStatus StickyDeformer::initialize()
 	addAttribute(ainMean);
     attributeAffects(ainMean, outputGeom);
 	
+	ainVecX = numericFn.create("vecX", "vcx", 
+										 MFnNumericData::kDouble, 0.0, &stat);
+	ainVecY = numericFn.create("vecY", "vcy",
+										 MFnNumericData::kDouble, 0.0, &stat);
+	ainVecZ = numericFn.create("vecZ", "vcz",
+										 MFnNumericData::kDouble, 0.0, &stat);
+	ainVec = numericFn.create("inVec", "ivc",
+										ainVecX,
+										ainVecY,
+										ainVecZ, &stat);
+										
+	numericFn.setStorable(false);
+	numericFn.setWritable(true);
+	addAttribute(ainVec);
+    attributeAffects(ainVec, outputGeom);
+	
 	return MS::kSuccess;
 }
 
@@ -117,13 +137,38 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 //
 {
 	MStatus status;
-
-	// determine the envelope (this is a global scale factor)
-	//
 	MDataHandle envData = block.inputValue(envelope,&status);
 	const float env = envData.asFloat();
-	if(env < 0.001) return status;
+	if(env < 1e-3f) return status;
 	
+	MDataHandle vecData = block.inputValue(ainVec,&status);
+	MVector displaceVec = vecData.asVector();
+	if(displaceVec.length() < 1e-3) return status;
+	// AHelper::Info<MVector>("def input displace", displaceVec);
+	
+	MDataHandle radiusData = block.inputValue(aradius,&status);
+	double radius = radiusData.asDouble();
+	if(radius < 1e-3) return status;
+	// AHelper::Info<double>("def input radius", radius);
+	
+	MDataHandle meanData = block.inputValue(ainMean,&status);
+	MVector mean = meanData.asVector();
+	// AHelper::Info<MVector>("def input mean", mean);
+	
+	MPoint pt;
+	MVector topt;
+	double l, wei;
+	for (; !iter.isDone(); iter.next()) {
+		pt = iter.position();
+		topt = pt - mean;
+		l = topt.length();
+		if(l < radius) {
+			wei = 1.0 - l / radius;
+			if(wei > 0.9) wei = 0.9;
+			pt += displaceVec * (env * wei);
+			iter.setPosition(pt);
+		}
+	}
 	return status;
 }
 //:~

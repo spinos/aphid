@@ -27,7 +27,8 @@ private:
 	void addPosition(MPoint * sum, float * mass, const MDagPath & mesh, MObject & vert);
 	void getVertClosestToMean(float *minD, MDagPath & closestMesh, unsigned & closestVert, 
 								const MDagPath & mesh, MObject & vert, const MPoint & mean);
-	MObject connectViz(const MDagPath & mesh, unsigned vert);
+	MObject connectViz(unsigned vert);
 	MObject createDeformer();
-	void connectDeformer(const MObject & viz, const MObject & deformer);
+	void connectDeformer(const MObject & viz, const MObject & deformer, int meshId);
+	
 };
