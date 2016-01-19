@@ -29,15 +29,12 @@ public:
 	virtual MStatus connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
 	virtual MStatus connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
 	
-	static MObject ainMeanX;
-	static MObject ainMeanY;
-	static MObject ainMeanZ;
-	static MObject ainMean;
 	static MObject aradius;
 	static MObject ainVecX;
 	static MObject ainVecY;
 	static MObject ainVecZ;
 	static MObject ainVec;
+	static MObject avertexSpace;
 	
 	static MTypeId		id;
 

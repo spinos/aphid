@@ -1,3 +1,8 @@
+/*
+ * select mesh(s) or mesh vertex(ices)
+ * run command: sticky
+*/
+
 #include "StickyCmd.h"
 #include <maya/MArgDatabase.h>
 #include <maya/MArgList.h>
@@ -8,8 +13,8 @@
 #include <maya/MDagModifier.h>
 #include <maya/MDGModifier.h>
 #include <maya/MFnIntArrayData.h>
+#include <maya/MItMeshVertex.h>
 #include <ASearchHelper.h>
-#include "DifferentialRecord.h"
 
 StickyCmd::StickyCmd()
 {
@@ -199,9 +204,9 @@ void StickyCmd::connectDeformer(const MObject & viz, const MObject & deformer, i
 	MFnDependencyNode fviz(viz);
 	MFnDependencyNode fdeformer(deformer);
 	MDGModifier mod;
-	mod.connect(fviz.findPlug("outMean"), fdeformer.findPlug("inMean"));
 	mod.connect(fviz.findPlug("size"), fdeformer.findPlug("radius"));
 	mod.connect(fviz.findPlug("displaceVec"), fdeformer.findPlug("inVec"));
+	mod.connect(fviz.findPlug("vertexMatrix"), fdeformer.findPlug("vertexMatrix"));
 	MStatus stat = mod.doIt();
 	
 /// find  input[meshId].inputGeometry

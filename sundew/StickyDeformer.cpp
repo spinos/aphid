@@ -29,16 +29,12 @@
 #include <AHelper.h>
 
 MTypeId     StickyDeformer::id( 0xd76a847 );
-
-MObject     StickyDeformer::ainMeanX;
-MObject StickyDeformer::ainMeanY;
-MObject StickyDeformer::ainMeanZ;
-MObject StickyDeformer::ainMean;
 MObject StickyDeformer::aradius;
 MObject StickyDeformer::ainVecX;
 MObject StickyDeformer::ainVecY;
 MObject StickyDeformer::ainVecZ;
 MObject StickyDeformer::ainVec;
+MObject StickyDeformer::avertexSpace;
 
 StickyDeformer::StickyDeformer()
 {}
@@ -62,24 +58,9 @@ MStatus StickyDeformer::initialize()
 										 MFnNumericData::kDouble, 0.0, &stat);
 	numericFn.setStorable(false);
 	numericFn.setWritable(true);
+	numericFn.setKeyable(true);
 	addAttribute(aradius);
     attributeAffects(aradius, outputGeom);
-	
-	ainMeanX = numericFn.create("meanX", "mnx", 
-										 MFnNumericData::kDouble, 0.0, &stat);
-	ainMeanY = numericFn.create("meanY", "mny",
-										 MFnNumericData::kDouble, 0.0, &stat);
-	ainMeanZ = numericFn.create("meanZ", "mnz",
-										 MFnNumericData::kDouble, 0.0, &stat);
-	ainMean = numericFn.create("inMean", "imn",
-										ainMeanX,
-										ainMeanY,
-										ainMeanZ, &stat);
-										
-	numericFn.setStorable(false);
-	numericFn.setWritable(true);
-	addAttribute(ainMean);
-    attributeAffects(ainMean, outputGeom);
 	
 	ainVecX = numericFn.create("vecX", "vcx", 
 										 MFnNumericData::kDouble, 0.0, &stat);
@@ -94,28 +75,27 @@ MStatus StickyDeformer::initialize()
 										
 	numericFn.setStorable(false);
 	numericFn.setWritable(true);
+	numericFn.setKeyable(true);
 	addAttribute(ainVec);
     attributeAffects(ainVec, outputGeom);
 	
+	MFnMatrixAttribute matAttr;
+	avertexSpace = matAttr.create( "vertexMatrix", "vtm", MFnMatrixAttribute::kDouble );
+ 	matAttr.setStorable(false);
+	matAttr.setWritable(true);
+	matAttr.setConnectable(true);
+	addAttribute(avertexSpace);
+	attributeAffects(avertexSpace, outputGeom);
 	return MS::kSuccess;
 }
 
 MStatus StickyDeformer::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	MStatus result;
-	if(plug == ainMean) {
-		
-	}
 	return MPxDeformerNode::connectionMade (plug, otherPlug, asSrc );
 }
 
 MStatus StickyDeformer::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	MStatus result;
-	if(plug == ainMean) {
-		
-	}
-	
 	return MPxDeformerNode::connectionBroken ( plug, otherPlug, asSrc );
 }
 
@@ -123,18 +103,6 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 				MItGeometry& iter,
 				const MMatrix& m,
 				unsigned int multiIndex)
-//
-// Method: deform
-//
-// Description:   Deform the point with a StickyDeformer algorithm
-//
-// Arguments:
-//   block		: the datablock of the node
-//	 iter		: an iterator for the geometry to be deformed
-//   m    		: matrix to transform the point into world space
-//	 multiIndex : the index of the geometry that we are deforming
-//
-//
 {
 	MStatus status;
 	MDataHandle envData = block.inputValue(envelope,&status);
@@ -151,9 +119,12 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 	if(radius < 1e-3) return status;
 	// AHelper::Info<double>("def input radius", radius);
 	
-	MDataHandle meanData = block.inputValue(ainMean,&status);
-	MVector mean = meanData.asVector();
-	// AHelper::Info<MVector>("def input mean", mean);
+	MDataHandle rotData = block.inputValue(avertexSpace,&status);
+	
+	MMatrix rot = rotData.asMatrix();
+	MVector mean(rot[3][0], rot[3][1], rot[3][2]);
+	
+	MVector worldDisplaceVec = MPoint(displaceVec) * rot - mean;
 	
 	MPoint pt;
 	MVector topt;
@@ -164,8 +135,8 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 		l = topt.length();
 		if(l < radius) {
 			wei = 1.0 - l / radius;
-			if(wei > 0.9) wei = 0.9;
-			pt += displaceVec * (env * wei);
+			if(wei > 0.93) wei = 0.93;
+			pt += worldDisplaceVec * (env * wei);
 			iter.setPosition(pt);
 		}
 	}

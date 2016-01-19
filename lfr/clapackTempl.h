@@ -89,39 +89,39 @@ template <typename T> int clapack_sytrf(char *uplo, integer n, T *a, integer lda
 template <typename T> int clapack_sytri(char *uplo, integer n, T *a, integer lda, 
 	integer *ipiv, T *work, integer *info);
 
-template <> double clapack_dot<double>(integer n, double *dx, integer incx, double *dy, integer incy)
+template <> inline double clapack_dot<double>(integer n, double *dx, integer incx, double *dy, integer incy)
 {
 	return ddot_(&n, dx, &incx, dy, &incy);
 }
 
-template <> float clapack_dot<float>(integer n, float *dx, integer incx, float *dy, integer incy)
+template <> inline float clapack_dot<float>(integer n, float *dx, integer incx, float *dy, integer incy)
 {
 	return sdot_(&n, dx, &incx, dy, &incy);
 }
 
-template <> int clapack_scal<double>(integer n, double da, double *dx, integer incx)
+template <> inline int clapack_scal<double>(integer n, double da, double *dx, integer incx)
 {
 	return dscal_(&n, &da, dx, &incx);
 }
 
-template <> int clapack_scal<float>(integer n, float da, float *dx, integer incx)
+template <> inline int clapack_scal<float>(integer n, float da, float *dx, integer incx)
 {
 	return sscal_(&n, &da, dx, &incx);
 }
 
-template <> void clapack_axpy<double>(integer N,
+template <> inline void clapack_axpy<double>(integer N,
        double alpha,  double* X,  integer incX,
        double* Y,  integer incY) {
 	 daxpy_(&N, &alpha, X, &incX, Y, &incY);
 }
 
-template <> void clapack_axpy<float>(integer N,
+template <> inline void clapack_axpy<float>(integer N,
        float alpha,  float* X,  integer incX,
        float* Y,  integer incY) {
 	 saxpy_(&N, &alpha, X, &incX, Y, &incY);
 }
 
-template <> void clapack_gemv<double>(char * trans, integer M,  integer N,
+template <> inline void clapack_gemv<double>(char * trans, integer M,  integer N,
        double alpha,  double *A,  integer lda,
        double *X,  integer incX,
 	   double beta, double * Y, integer incY)
@@ -132,7 +132,7 @@ template <> void clapack_gemv<double>(char * trans, integer M,  integer N,
            &beta, Y, &incY);
 }
 
-template <> void clapack_gemv<float>(char * trans, integer M,  integer N,
+template <> inline void clapack_gemv<float>(char * trans, integer M,  integer N,
        float alpha,  float *A,  integer lda,
        float *X,  integer incX,
 	   float beta, float * Y, integer incY)
@@ -143,21 +143,21 @@ template <> void clapack_gemv<float>(char * trans, integer M,  integer N,
            &beta, Y, &incY);
 }
 
-template <> int clapack_symv<double>(char *uplo, integer n, double alpha, 
+template <> inline int clapack_symv<double>(char *uplo, integer n, double alpha, 
 	double *a, integer lda, double *x, integer incx, double beta, double *y, integer incy)
 {
 	return dsymv_(uplo, &n, &alpha, 
 		a, &lda, x, &incx, &beta, y, &incy);
 }
 
-template <> int clapack_symv<float>(char *uplo, integer n, float alpha, 
+template <> inline int clapack_symv<float>(char *uplo, integer n, float alpha, 
 	float *a, integer lda, float *x, integer incx, float beta, float *y, integer incy)
 {
 	return ssymv_(uplo, &n, &alpha, 
 		a, &lda, x, &incx, &beta, y, &incy);
 }
 
-template <> int clapack_gesvd<float>(char *jobu, char *jobvt, integer m, integer n, 
+template <> inline int clapack_gesvd<float>(char *jobu, char *jobvt, integer m, integer n, 
 	float *a, integer lda, float *s, float *u, integer ldu, float *vt, 
 	integer ldvt, float *work, integer *lwork, integer *info)
 {
@@ -166,14 +166,14 @@ template <> int clapack_gesvd<float>(char *jobu, char *jobvt, integer m, integer
 		&ldvt,	work,	lwork,	info);
 }
 
-template <> int clapack_gesvd<double>(char *jobu, char *jobvt, integer m, integer n, 
+template <> inline int clapack_gesvd<double>(char *jobu, char *jobvt, integer m, integer n, 
 	double *a, integer lda, double *s, double *u, integer ldu, double *vt, 
 	integer ldvt, double *work, integer *lwork, integer *info)
 { return dgesvd_(jobu, jobvt, &m, &n, 
 		a,	&lda,	s,	u,	&ldu,	vt, 
 		&ldvt,	work,	lwork,	info); }
 		
-template <> int clapack_syevr<double>(char *jobz, char *range, char *uplo, integer n, 
+template <> inline int clapack_syevr<double>(char *jobz, char *range, char *uplo, integer n, 
 	double *a, integer lda,
 	double *vl, double *vu, integer il, integer iu,
 	double abstol, integer *m,
@@ -187,7 +187,7 @@ template <> int clapack_syevr<double>(char *jobz, char *range, char *uplo, integ
 	lwork, iwork, liwork, info);
 }
 
-template <> int clapack_syevr<float>(char *jobz, char *range, char *uplo, integer n, 
+template <> inline int clapack_syevr<float>(char *jobz, char *range, char *uplo, integer n, 
 	float *a, integer lda, 
 	float *vl, float *vu, integer il, integer iu, 
 	float abstol, integer *m, 
@@ -201,7 +201,7 @@ template <> int clapack_syevr<float>(char *jobz, char *range, char *uplo, intege
 	lwork, iwork, liwork, info);
 }
 
-template <> int clapack_gemm<double>(char *transa, char *transb, integer m, integer n, 
+template <> inline int clapack_gemm<double>(char *transa, char *transb, integer m, integer n, 
 	integer k, double alpha, double *a, integer lda, 
 	double *b, integer ldb, double beta, double *c__, integer ldc)
 {
@@ -210,7 +210,7 @@ template <> int clapack_gemm<double>(char *transa, char *transb, integer m, inte
 	b, &ldb, &beta, c__, &ldc);
 }
 
-template <> int clapack_gemm<float>(char *transa, char *transb, integer m, integer n, 
+template <> inline int clapack_gemm<float>(char *transa, char *transb, integer m, integer n, 
 	integer k, float alpha, float *a, integer lda, 
 	float *b, integer ldb, float beta, float *c__, integer ldc)
 {
@@ -219,19 +219,19 @@ template <> int clapack_gemm<float>(char *transa, char *transb, integer m, integ
 	b, &ldb,&beta, c__, &ldc);
 }
 
-template <> int clapack_syr<double>(char *uplo, integer n, double alpha, 
+template <> inline int clapack_syr<double>(char *uplo, integer n, double alpha, 
 	double *x, integer incx, double *a, integer lda)
 {
 	return dsyr_(uplo, &n, &alpha, x, &incx, a, &lda);
 }
 
-template <> int clapack_syr<float>(char *uplo, integer n, float alpha, 
+template <> inline int clapack_syr<float>(char *uplo, integer n, float alpha, 
 	float *x, integer incx, float *a, integer lda)
 {
 	return ssyr_(uplo, &n, &alpha, x, &incx, a, &lda);
 }
 
-template <> int clapack_syrk<double>(char *uplo, char *trans, integer n, integer k, 
+template <> inline int clapack_syrk<double>(char *uplo, char *trans, integer n, integer k, 
 	double alpha, double *a, integer lda, double beta, 
 	double *c__, integer ldc)
 { 
@@ -240,7 +240,7 @@ template <> int clapack_syrk<double>(char *uplo, char *trans, integer n, integer
 	c__, &ldc);
 }
 
-template <> int clapack_syrk<float>(char *uplo, char *trans, integer n, integer k, 
+template <> inline int clapack_syrk<float>(char *uplo, char *trans, integer n, integer k, 
 	float alpha, float *a, integer lda, float beta, 
 	float *c__, integer ldc)
 { 
@@ -249,27 +249,27 @@ template <> int clapack_syrk<float>(char *uplo, char *trans, integer n, integer 
 	c__, &ldc);
 }
 
-template <> int clapack_sytrf<double>(char *uplo, integer n, double *a, integer lda, 
+template <> inline int clapack_sytrf<double>(char *uplo, integer n, double *a, integer lda, 
 	integer *ipiv, double *work, integer *lwork, integer *info)
 {
 	return dsytrf_(uplo,  &n, a, &lda, 
 		ipiv, work, lwork, info);
 }
 
-template <> int clapack_sytrf<float>(char *uplo, integer n, float *a, integer lda, 
+template <> inline int clapack_sytrf<float>(char *uplo, integer n, float *a, integer lda, 
 	integer *ipiv, float *work, integer *lwork, integer *info)
 {
 	return ssytrf_(uplo,  &n, a, &lda, 
 		ipiv, work, lwork, info);
 }
 
-template <> int clapack_sytri<double>(char *uplo, integer n, double *a, integer lda, 
+template <> inline int clapack_sytri<double>(char *uplo, integer n, double *a, integer lda, 
 	integer *ipiv, double *work, integer *info)
 {
 	return dsytri_(uplo, &n, a, &lda, ipiv, work, info);
 }
 
-template <> int clapack_sytri<float>(char *uplo, integer n, float *a, integer lda, 
+template <> inline int clapack_sytri<float>(char *uplo, integer n, float *a, integer lda, 
 	integer *ipiv, float *work, integer *info)
 {
 	return ssytri_(uplo, &n, a, &lda, ipiv, work, info);
