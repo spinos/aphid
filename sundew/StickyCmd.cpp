@@ -96,6 +96,7 @@ MStatus StickyCmd::doIt(const MArgList &args)
 	if(viz.isNull() ) return status;
 	
 	storeRef(viz, closestMesh, closestVert);
+	storeNormal(viz, closestMesh, closestVert);
 	
 	connectDeformer(viz, deformer, meshId);
 	return status;
@@ -267,5 +268,23 @@ void StickyCmd::storeRef(const MObject & viz, const MDagPath & mesh, unsigned & 
 	
 	MPlug displacePlug = fviz.findPlug("refDisplace");
 	displacePlug.setValue(odisplace);
+}
+
+void StickyCmd::storeNormal(const MObject & viz, const MDagPath & mesh, unsigned & ivert)
+{
+	MItMeshVertex itmv(mesh);
+	int prevIndex;
+	itmv.setIndex (ivert , prevIndex);
+	MVector vn;
+	itmv.getNormal ( vn );
+	AHelper::Info<MVector>("vertex normal", vn);
+	
+	MFnDependencyNode fviz(viz);
+	MPlug vxPlug = fviz.findPlug("displaceX");
+	vxPlug.setDouble(vn.x);
+	MPlug vyPlug = fviz.findPlug("displaceY");
+	vyPlug.setDouble(vn.y);
+	MPlug vzPlug = fviz.findPlug("displaceZ");
+	vzPlug.setDouble(vn.z);
 }
 //:~

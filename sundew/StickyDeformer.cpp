@@ -92,6 +92,7 @@ MStatus StickyDeformer::initialize()
 	matAttr.setConnectable(true);
 	addAttribute(avertexSpace);
 	attributeAffects(avertexSpace, outputGeom);
+	MGlobal::executeCommand( "makePaintable -attrType multiFloat -sm deformer stickyDeformer weights" );
 	return MS::kSuccess;
 }
 
@@ -146,7 +147,7 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 			wei = 1.0 - l / radius;
 			wei = pow(wei, dropoff);
 			if(wei > 0.93) wei = 0.93;
-			pt += worldDisplaceVec * (env * wei);
+			pt += worldDisplaceVec * (env * wei * weightValue(block, multiIndex, iter.index() ) );
 			iter.setPosition(pt);
 		}
 	}

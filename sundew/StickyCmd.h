@@ -31,5 +31,6 @@ private:
 	MObject createDeformer();
 	void connectDeformer(const MObject & viz, const MObject & deformer, int meshId);
 	void storeRef(const MObject & viz, const MDagPath & mesh, unsigned & ivert);
+	void storeNormal(const MObject & viz, const MDagPath & mesh, unsigned & ivert);
 	
 };
