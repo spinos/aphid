@@ -59,7 +59,8 @@ MStatus StickyCmd::doIt(const MArgList &args)
 	
 	AHelper::Info<float>("total mass", mass);
 	mean = mean * (1.f/mass);
-	AHelper::Info<MPoint>("mean pos", mean);
+    Vector3F vmean(mean.x, mean.y, mean.z);
+	AHelper::Info<Vector3F>("mean pos", vmean);
 	
 	MDagPath closestMesh;
 	unsigned closestVert;
@@ -71,6 +72,8 @@ MStatus StickyCmd::doIt(const MArgList &args)
         iter.getDagPath( item, component );
 		getVertClosestToMean(&minD, closestMesh, closestVert, item, component, mean);
     }
+	AHelper::Info<MString>("choose mesh", closestMesh.fullPathName() );
+	AHelper::Info<unsigned>("choose vert", closestVert );
 	
 	int meshId = 0;
 	iter.reset();
@@ -84,9 +87,7 @@ MStatus StickyCmd::doIt(const MArgList &args)
 		}
 		i++;
     }
-	AHelper::Info<MString>("choose mesh", closestMesh.fullPathName() );
 	AHelper::Info<int>("mesh id", meshId);
-	AHelper::Info<unsigned>("choose vert", closestVert );
 	
 	MGlobal::setActiveSelectionList(sels);
 	MObject deformer = createDeformer();
@@ -240,7 +241,7 @@ void StickyCmd::storeRef(const MObject & viz, const MDagPath & mesh, unsigned & 
 	itmv.setIndex (ivert , prevIndex);
 	MIntArray vertexList;
 	itmv.getConnectedVertices ( vertexList );
-	AHelper::Info<MIntArray>("neighbors", vertexList);
+	//AHelper::Info<MIntArray>("neighbors", vertexList);
 	
 	MFnDependencyNode fviz(viz);
 	
@@ -261,7 +262,7 @@ void StickyCmd::storeRef(const MObject & viz, const MDagPath & mesh, unsigned & 
 		dvs.append(pt - cen);
 	}
 	
-	AHelper::Info<MVectorArray>("dv", dvs);
+	//AHelper::Info<MVectorArray>("dv", dvs);
 	
 	MFnVectorArrayData displaceD;
 	MObject odisplace = displaceD.create(dvs);
@@ -277,7 +278,7 @@ void StickyCmd::storeNormal(const MObject & viz, const MDagPath & mesh, unsigned
 	itmv.setIndex (ivert , prevIndex);
 	MVector vn;
 	itmv.getNormal ( vn );
-	AHelper::Info<MVector>("vertex normal", vn);
+	//AHelper::Info<MVector>("vertex normal", vn);
 	
 	MFnDependencyNode fviz(viz);
 	MPlug vxPlug = fviz.findPlug("displaceX");

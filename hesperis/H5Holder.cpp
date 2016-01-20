@@ -41,7 +41,7 @@ void H5Holder::readSampler(SampleFrame & sampler)
 
 bool H5Holder::openH5File(const std::string & fileName)
 { 
-	if(!H5Files.openFile(fileName.c_str(), HDocument::oReadAndWrite ) ) return false; 
+	if(!H5Files.openFile(fileName.c_str(), HDocument::oReadOnly ) ) return false; 
 	if(!m_hasSampler) {
 		readSampler(m_sampler);
 		m_hasSampler = true;

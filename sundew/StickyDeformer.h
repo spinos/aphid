@@ -11,7 +11,6 @@
 #include <maya/MTypeId.h> 
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
-#include "DifferentialData.h"
 
 class StickyDeformer : public MPxDeformerNode
 {
