@@ -67,28 +67,18 @@ MStatus StickyLocatorManip::createChildren()
 {
     MStatus stat = MStatus::kSuccess;
 
-    MString manipName("distanceManip");
-    MString distanceName("distance");
-
-    MPoint startPoint(0.0, 0.0, 0.0);
-    MVector direction(0.0, 1.0, 0.0);
-    fDistanceManip = addDistanceManip(manipName,
-									  distanceName);
+    fDistanceManip = addDistanceManip("distanceManip",
+									  "distance");
 	MFnDistanceManip distanceManipFn(fDistanceManip);
-	distanceManipFn.setStartPoint(startPoint);
-	distanceManipFn.setDirection(direction);
+	distanceManipFn.setDirection(MVector(0.0, 1.0, 0.0));
 	
 	fDirectionManip = addFreePointTriadManip("freePointTriadManip",
 										"point");
 	MFnFreePointTriadManip directionManipFn(fDirectionManip);
-	MPoint ori(0.0, 0.0, 1.0);
-	directionManipFn.setPoint(ori);
 	
 	fDropoffManip = addDistanceManip("dropoffManip",
-									  "dropoffDistance");
-									  
+									  "distance1");
 	MFnDistanceManip dropoffManipFn(fDropoffManip);
-	dropoffManipFn.setStartPoint(MPoint(1.0, 0.0, 0.0));
 	dropoffManipFn.setDirection(MVector(1.0, 0.0, 0.0));
 	return stat;
 }
