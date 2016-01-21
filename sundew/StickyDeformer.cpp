@@ -133,6 +133,8 @@ MStatus StickyDeformer::deform( MDataBlock& block,
 	
 	MMatrix rot = rotData.asMatrix();
 	MVector mean(rot[3][0], rot[3][1], rot[3][2]);
+	double scaling = MVector(rot[0][0], rot[0][1], rot[0][2]).length();
+	radius *= scaling;
 	
 	MVector worldDisplaceVec = MPoint(displaceVec) * rot - mean;
 	

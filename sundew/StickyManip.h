@@ -13,6 +13,9 @@
 
 class StickyLocatorManip : public MPxManipContainer
 {
+	MVector m_startPOffset;
+	float m_scalingF;
+	
 public:
     StickyLocatorManip();
     virtual ~StickyLocatorManip();

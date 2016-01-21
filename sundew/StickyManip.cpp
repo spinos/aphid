@@ -20,8 +20,8 @@ MManipData StickyLocatorManip::startPointCallback(unsigned index) const
 {
 	MFnNumericData numData;
 	MObject numDataObj = numData.create(MFnNumericData::k3Double);
-	MVector vec = nodeTranslation();
-	numData.setData(vec.x, vec.y, vec.z);
+/// use vertex matrix translate
+	numData.setData(m_startPOffset.x, m_startPOffset.y, m_startPOffset.z);
 	return MManipData(numDataObj);
 }
 
@@ -97,6 +97,9 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	MMatrix m = fm.matrix();
 	// AHelper::Info<MMatrix>("manip m", m);
 	MTransformationMatrix tm(m);
+	m_startPOffset = MVector(m[3][0], m[3][1], m[3][2]);
+	// AHelper::Info<MVector>("start at", m_startPOffset);
+	m_scalingF = MVector(m[0][0], m[0][1], m[0][2]).length();
 	
 	MFnDependencyNode nodeFn(node);
 	
@@ -107,19 +110,25 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	    directionManipFn.connectToPointPlug(directionPlug);
 	}
 	
-    MFnDistanceManip distanceManipFn(fDistanceManip);
-	distanceManipFn.set(tm);
+    MFnDistanceManip sizeManipFn(fDistanceManip);
+	sizeManipFn.setScalingFactor(m_scalingF);
+	
 	MPlug sizePlug = nodeFn.findPlug("size", &stat);
     if (MStatus::kFailure != stat) {
-	    distanceManipFn.connectToDistancePlug(sizePlug);
-		unsigned startPointIndex = distanceManipFn.startPointIndex();
+	    sizeManipFn.connectToDistancePlug(sizePlug);
+		unsigned startPointIndex = sizeManipFn.startPointIndex();
 	    addPlugToManipConversionCallback(startPointIndex, 
 										 (plugToManipConversionCallback) 
 										 &StickyLocatorManip::startPointCallback);
+		
 	}
+	
+	double currentSize = 1.0;
+	sizePlug.getValue(currentSize);
 
 	MFnDistanceManip dropoffManipFn(fDropoffManip);
-	dropoffManipFn.set(tm);
+	dropoffManipFn.setScalingFactor(m_scalingF * currentSize);
+	
 	MPlug dropoffPlug = nodeFn.findPlug("dropoff", &stat);
     if (MStatus::kFailure != stat) {
 	    dropoffManipFn.connectToDistancePlug(dropoffPlug);

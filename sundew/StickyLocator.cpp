@@ -229,12 +229,13 @@ MBoundingBox StickyLocator::boundingBox() const
 	MPlug plug(thisNode, size);
 
 	double multiplier = plug.asDouble();
+	float sca = m_scad->column(0)[0];
  
 	MPoint corner1(-1.0, -1.0, -1.0);
 	MPoint corner2(1.0, 1.0, 1.0);
 
-	corner1 = m_origin + corner1 * multiplier;
-	corner2 = m_origin + corner2 * multiplier;
+	corner1 = m_origin + corner1 * multiplier * sca;
+	corner2 = m_origin + corner2 * multiplier * sca;
 
 	return MBoundingBox(corner1, corner2);
 }
