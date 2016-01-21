@@ -8,22 +8,13 @@
 #include <maya/MDistance.h>
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnDistanceManip.h> 
-#include <maya/MFnFreePointTriadManip.h>
+#include <maya/MFnDirectionManip.h>
 #include <maya/MFnNumericData.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MFnIntArrayData.h>
 #include <AHelper.h>
-
-MManipData StickyLocatorManip::startPointCallback(unsigned index) const
-{
-	MFnNumericData numData;
-	MObject numDataObj = numData.create(MFnNumericData::k3Double);
-/// use vertex matrix translate
-	numData.setData(m_startPOffset.x, m_startPOffset.y, m_startPOffset.z);
-	return MManipData(numDataObj);
-}
 
 MVector StickyLocatorManip::nodeTranslation() const
 {
@@ -36,7 +27,6 @@ MVector StickyLocatorManip::nodeTranslation() const
 }
 
 MTypeId StickyLocatorManip::id( 0x38575951 );
-
 
 StickyLocatorManip::StickyLocatorManip() 
 { 
@@ -72,9 +62,8 @@ MStatus StickyLocatorManip::createChildren()
 	MFnDistanceManip distanceManipFn(fDistanceManip);
 	distanceManipFn.setDirection(MVector(0.0, 1.0, 0.0));
 	
-	fDirectionManip = addFreePointTriadManip("freePointTriadManip",
-										"point");
-	MFnFreePointTriadManip directionManipFn(fDirectionManip);
+	fDirectionManip = addDirectionManip("dispaceVecManip",
+										"direction");
 	
 	fDropoffManip = addDistanceManip("dropoffManip",
 									  "distance1");
@@ -94,21 +83,11 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 	MObject om;
 	spacePlug.getValue(om);
 	MFnMatrixData fm(om);
-	MMatrix m = fm.matrix();
-	// AHelper::Info<MMatrix>("manip m", m);
-	MTransformationMatrix tm(m);
-	m_startPOffset = MVector(m[3][0], m[3][1], m[3][2]);
-	// AHelper::Info<MVector>("start at", m_startPOffset);
-	m_scalingF = MVector(m[0][0], m[0][1], m[0][2]).length();
+	m_rotateM = fm.matrix();
+	m_startPOffset = MVector(m_rotateM[3][0], m_rotateM[3][1], m_rotateM[3][2]);
+	m_scalingF = MVector(m_rotateM[0][0], m_rotateM[0][1], m_rotateM[0][2]).length();
 	
 	MFnDependencyNode nodeFn(node);
-	
-	MFnFreePointTriadManip directionManipFn(fDirectionManip);
-	directionManipFn.set(tm);
-	MPlug directionPlug = nodeFn.findPlug("displaceVec", &stat);
-    if (MStatus::kFailure != stat) {
-	    directionManipFn.connectToPointPlug(directionPlug);
-	}
 	
     MFnDistanceManip sizeManipFn(fDistanceManip);
 	sizeManipFn.setScalingFactor(m_scalingF);
@@ -138,6 +117,36 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 										 &StickyLocatorManip::startPointCallback);
 	}
 	
+	MFnDirectionManip directionManipFn(fDirectionManip);
+	directionManipFn.setNormalizeDirection(false);
+	
+	MPlug directionPlug = nodeFn.findPlug("displaceVec", &stat);
+	m_localVPlug = directionPlug;
+    if (MStatus::kFailure != stat) {
+/// initial direction
+		MObject ov;
+		directionPlug.getValue(ov);
+		MFnNumericData flocalV(ov);
+		flocalV.getData(m_localV.x, m_localV.y, m_localV.z);
+		MVector v = m_localV * m_rotateM;
+		directionManipFn.setDirection(v);
+
+/// use callbacks, no connection
+		unsigned startPointIndex = directionManipFn.startPointIndex();
+	    addPlugToManipConversionCallback(startPointIndex, 
+										 (plugToManipConversionCallback) 
+										 &StickyLocatorManip::startPointCallback);
+		
+		unsigned endPointIndex = directionManipFn.endPointIndex();
+	    addPlugToManipConversionCallback(endPointIndex, 
+										 (plugToManipConversionCallback) 
+										 &StickyLocatorManip::endPointCallback);
+					
+		m_dirPlugIndex = addManipToPlugConversionCallback(directionPlug, 
+										 (manipToPlugConversionCallback) 
+										 &StickyLocatorManip::endPointCallbackTo);
+	}
+	
 	finishAddingManips();
 	return MPxManipContainer::connectToDependNode(node);
 }
@@ -159,4 +168,53 @@ void StickyLocatorManip::draw(M3dView & view,
     view.drawText(distanceText, textPos, M3dView::kLeft);
 	
     view.endGL();
+}
+
+MManipData StickyLocatorManip::startPointCallback(unsigned index) const
+{
+	MFnNumericData numData;
+	MObject numDataObj = numData.create(MFnNumericData::k3Double);
+/// use vertex matrix translate
+	numData.setData(m_startPOffset.x, m_startPOffset.y, m_startPOffset.z);
+	return MManipData(numDataObj);
+}
+
+MManipData StickyLocatorManip::endPointCallback(unsigned index)
+{
+	MFnNumericData numData;
+	MObject numDataObj = numData.create(MFnNumericData::k3Double);
+	
+	MObject ov;
+	m_localVPlug.getValue(ov);
+	MFnNumericData flocalV(ov);
+	flocalV.getData(m_localV.x, m_localV.y, m_localV.z);
+/// to world space
+	MVector v = m_localV * m_rotateM + m_startPOffset;
+
+	numData.setData(v.x, v.y, v.z);
+	return MManipData(numDataObj);
+}
+
+MManipData StickyLocatorManip::endPointCallbackTo(unsigned index)
+{
+	MFnNumericData numData;
+	MObject numDataObj = numData.create(MFnNumericData::k3Double);
+	
+	if(index != m_dirPlugIndex) {
+		numData.setData(0.0, 0.0, 0.0);
+		return MManipData(numDataObj);
+	}
+	
+	MFnDirectionManip directionManipFn(fDirectionManip);
+	
+	MVector endP;
+	getConverterManipValue (directionManipFn.directionIndex(), endP);
+/// to local space	
+	MVector v = endP * m_rotateM.inverse();
+	m_localV = v;
+
+	numData.setData(v.x, v.y, v.z);
+	
+	MObject ov = numData.object();
+	return MManipData(numDataObj);
 }

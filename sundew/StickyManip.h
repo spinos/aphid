@@ -10,11 +10,16 @@
 
 #include <maya/MPxManipContainer.h> 
 #include <maya/MManipData.h>
+#include <maya/MMatrix.h>
 
 class StickyLocatorManip : public MPxManipContainer
 {
+	MMatrix m_rotateM;
 	MVector m_startPOffset;
+	MVector m_localV;
 	float m_scalingF;
+	unsigned m_dirPlugIndex;
+	MPlug m_localVPlug;
 	
 public:
     StickyLocatorManip();
@@ -30,6 +35,8 @@ public:
 					  M3dView::DisplayStyle style,
 					  M3dView::DisplayStatus status);
 	MManipData startPointCallback(unsigned index) const;
+	MManipData endPointCallback(unsigned index);
+	MManipData endPointCallbackTo(unsigned index);
 	MVector nodeTranslation() const;
 
     MDagPath fDistanceManip;
