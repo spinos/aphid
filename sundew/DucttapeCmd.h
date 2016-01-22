@@ -46,4 +46,5 @@ private:
 					const MDagPath & item, MObject & components);
 	MObject createMergeDeformer();
 	void connectBranch(const MObject & branch, const MObject & merge);
+	void connectMerge(const MObject & mesh, const MObject & merge);
 };

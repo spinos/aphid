@@ -13,12 +13,13 @@
 #include <AHelper.h>
 
 MTypeId     DucttapeMergeDeformer::id( 0x8e71f55 );
+MObject DucttapeMergeDeformer::ainmesh;
 
 DucttapeMergeDeformer::DucttapeMergeDeformer()
-{}
+{ m_inputGeomIter = NULL; }
 
 DucttapeMergeDeformer::~DucttapeMergeDeformer()
-{}
+{ if(m_inputGeomIter) delete m_inputGeomIter; }
 
 void* DucttapeMergeDeformer::creator()
 {
@@ -30,7 +31,15 @@ MStatus DucttapeMergeDeformer::initialize()
 	MStatus stat;
 
 	MFnNumericAttribute numericFn;
-	MFnTypedAttribute typedAttr;
+	MFnTypedAttribute typedAttrFn;
+	
+	ainmesh = typedAttrFn.create("inMesh", "inm", MFnData::kMesh);
+	typedAttrFn.setStorable(false);
+	typedAttrFn.setWritable(true);
+	typedAttrFn.setConnectable(true);
+	addAttribute( ainmesh );
+	
+	attributeAffects(ainmesh, outputGeom);
 	
 	return MS::kSuccess;
 }
@@ -55,9 +64,32 @@ MStatus DucttapeMergeDeformer::deform( MDataBlock& block,
 	const float env = envData.asFloat();
 	if(env < 1e-3f) return status;
 	
+	if(multiIndex == 0) {
+		if(m_inputGeomIter) {
+			delete m_inputGeomIter;
+			m_inputGeomIter = NULL;
+		}
+		
+		MDataHandle hmesh = block.inputValue(ainmesh);
+		
+		MItGeometry * aiter = new MItGeometry( hmesh, true, &status );
+		if(!status) {
+			AHelper::Info<int>("DucttapeMergeDeformer error no geom it", 0);
+			return status;
+		}
+		
+		m_inputGeomIter = aiter;
+	}
+	
+	if(!m_inputGeomIter) return status;
+	
 	for (; !iter.isDone(); iter.next()) {
-		//pt = iter.position();
-		//iter.setPosition(pt);
+		if(m_inputGeomIter->isDone() ) return status;
+		
+		MPoint pt = m_inputGeomIter->position();
+		iter.setPosition(pt);
+		
+		m_inputGeomIter->next();
 	}
 	return status;
 }

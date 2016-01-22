@@ -30,7 +30,8 @@ public:
 	virtual MStatus connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
 	
 	static MTypeId		id;
+	static MObject ainmesh;
 
 private:
-	
+	MItGeometry * m_inputGeomIter;
 };

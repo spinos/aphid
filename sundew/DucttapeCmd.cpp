@@ -92,7 +92,7 @@ MStatus DucttapeCmd::doIt(const MArgList &args)
 	}
 	
 	connectBranch(branchDeformer, mergeDeformer);
-	
+	connectMerge(tapeMesh.node(), mergeDeformer);
 	return status;
 }
 
@@ -236,5 +236,17 @@ void DucttapeCmd::connectBranch(const MObject & branch, const MObject & merge)
 		else
 			MGlobal::displayInfo(MString("cannot find connect to ")+elementPlug.name());
 	}
-	//connectAttr -f ducttapeMergeDeformer1GroupParts.outputGeometry ducttapeBranchDeformer1.inMesh[0];
+}
+
+void DucttapeCmd::connectMerge(const MObject & mesh, const MObject & merge)
+{
+	MStatus stat;
+	MFnDependencyNode fmesh(mesh);
+	MPlug srcPlug = fmesh.findPlug("outMesh");
+	MFnDependencyNode fmerge(merge);
+	MPlug dstPlug = fmerge.findPlug("inMesh");
+	MDGModifier mod;
+	MGlobal::displayInfo(MString("connect ")+srcPlug.name()+" to "+dstPlug.name() );
+	mod.connect(srcPlug, dstPlug);
+	mod.doIt();
 }
