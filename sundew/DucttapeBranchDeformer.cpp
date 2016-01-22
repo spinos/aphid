@@ -11,6 +11,7 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MItGeometry.h>
 #include <AHelper.h>
+#include <vector>
 
 MTypeId     DucttapeBranchDeformer::id( 0xd07badb );
 MObject DucttapeBranchDeformer::ainmesh;
@@ -86,6 +87,8 @@ MStatus DucttapeBranchDeformer::deform( MDataBlock& block,
 		return status;
 	}
 	
+	std::vector<MItGeometry *> geomIters;
+	
 	for(int i=0; i < numSlots; i++) {
 		int grpId = grpIdArray.inputValue().asInt();
 	
@@ -94,24 +97,43 @@ MStatus DucttapeBranchDeformer::deform( MDataBlock& block,
 		
 		if(fgeom.hasObjectGroup(grpId)) {
 			
-			MItGeometry inputIter(hgeom, grpId, true, &status);
+			MItGeometry * pit = new MItGeometry(hgeom, grpId, true, &status );
 			if(!status) {
 				AHelper::Info<int>("DucttapeBranchDeformer inmesh failed", i);
 			}
 			
-			AHelper::Info<int>("DucttapeBranchDeformer inmesh nv", inputIter.count() );
+			// AHelper::Info<int>("DucttapeBranchDeformer inmesh nv", pit->count() );
+			
+			geomIters.push_back(pit);
 		}
 		else {
 			AHelper::Info<int>("DucttapeBranchDeformer input has no group", grpId);
+			return status;
 		}
 		
 		geomArray.next();
 		grpIdArray.next();
 	}
 	
+	unsigned ngeoms = geomIters.size();
+	if(ngeoms < 1) return status;
+	
+	unsigned igeom = 1;
+	MItGeometry * currentGeomIter = geomIters[0];
 	for (; !iter.isDone(); iter.next()) {
-		//pt = iter.position();
-		//iter.setPosition(pt);
+		if(currentGeomIter->isDone() ) {
+			if(igeom == ngeoms) return status;
+			
+			currentGeomIter = geomIters[igeom];
+			igeom++;
+		}
+		MPoint pt = currentGeomIter->position();
+		iter.setPosition(pt);
+		currentGeomIter->next();
 	}
+	
+	std::vector<MItGeometry *>::iterator itd = geomIters.begin();
+	for(;itd!=geomIters.end();++itd) delete *itd;
+	geomIters.clear();
 	return status;
 }
