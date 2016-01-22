@@ -1070,4 +1070,26 @@ bool AHelper::IsReferenced(const MObject & node)
     MFnDependencyNode fnode(node );
     return fnode.isFromReferencedFile();
 }
+
+MObject AHelper::CreateDeformer(const MString & name)
+{
+	MString cmd = MString("deformer -type ") + name;
+	MStringArray result;
+	MGlobal::executeCommand ( cmd, result);
+	if(result.length() < 1) {
+		AHelper::Info<MString>("AHelper error cannot create deformer", name);
+		return MObject::kNullObj;
+	}
+	
+	AHelper::Info<MString>("AHelper create deformer", result[0]);
+	
+	MGlobal::selectByName (result[0], MGlobal::kReplaceList );
+	MSelectionList sels;
+	MGlobal::getActiveSelectionList ( sels );
+	
+	MItSelectionList iter( sels );
+	MObject node;
+	iter.getDependNode(node);
+	return node;
+}
 //:~

@@ -184,5 +184,6 @@ public:
 	}
     
     static bool IsReferenced(const MObject & node);
+	static MObject CreateDeformer(const MString & name);
 };
 #endif

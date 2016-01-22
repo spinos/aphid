@@ -6,9 +6,6 @@
 #include "StickyCmd.h"
 #include <maya/MArgDatabase.h>
 #include <maya/MArgList.h>
-#include <maya/MFnCamera.h>
-#include <maya/MItCurveCV.h>
-#include <maya/MFnNurbsCurve.h>
 #include <maya/MPointArray.h>
 #include <maya/MDagModifier.h>
 #include <maya/MDGModifier.h>
