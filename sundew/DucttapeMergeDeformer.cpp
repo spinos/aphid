@@ -40,7 +40,7 @@ MStatus DucttapeMergeDeformer::initialize()
 	addAttribute( ainmesh );
 	
 	attributeAffects(ainmesh, outputGeom);
-	
+	MGlobal::executeCommand( "makePaintable -attrType multiFloat -sm deformer ducttapeMergeDeformer weights" );
 	return MS::kSuccess;
 }
 
@@ -83,11 +83,18 @@ MStatus DucttapeMergeDeformer::deform( MDataBlock& block,
 	
 	if(!m_inputGeomIter) return status;
 	
+	MPoint pd;
+	MVector dv;
 	for (; !iter.isDone(); iter.next()) {
 		if(m_inputGeomIter->isDone() ) return status;
 		
-		MPoint pt = m_inputGeomIter->position();
-		iter.setPosition(pt);
+		float wei = env * weightValue(block, multiIndex, iter.index() );
+		if(wei > 1e-3f) {
+			pd = iter.position();
+			dv = m_inputGeomIter->position() - pd;
+			pd = pd + dv * wei;
+			iter.setPosition(pd);
+		}
 		
 		m_inputGeomIter->next();
 	}

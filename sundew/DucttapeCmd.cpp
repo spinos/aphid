@@ -50,12 +50,16 @@ MStatus DucttapeCmd::doIt(const MArgList &args)
 	std::vector<int> counts;
 	std::vector<int> connections;
 	std::map<int, IndexPoint > vertices;
+	std::vector<float> ucoords;
+	std::vector<float> vcoords;
 	int i = 0;
 	for ( ; !faceIter.isDone(); faceIter.next() ) {								
         MDagPath item;			
         MObject component;		
         faceIter.getDagPath( item, component );
-		addFaces(counts, connections, vertices, i<<22, item, component);
+		addFaces(counts, connections, vertices, i<<22, 
+					ucoords, vcoords,
+					item, component);
 		i++;
     }
 	
@@ -67,7 +71,7 @@ MStatus DucttapeCmd::doIt(const MArgList &args)
 	AHelper::Info<int>("DucttapeCmd extracts n faces", counts.size() );
 	
 	packVertices(vertices);
-	MDagPath tapeMesh = buildMesh(counts, connections, vertices, &status);
+	MDagPath tapeMesh = buildMesh(counts, connections, vertices, ucoords, vcoords, &status);
 	if(!status) return status;
 	MGlobal::select (tapeMesh, MObject::kNullObj, MGlobal::kReplaceList );
 	MObject branchDeformer = AHelper::CreateDeformer("ducttapeBranchDeformer");
@@ -108,6 +112,8 @@ void DucttapeCmd::addFaces(std::vector<int> & counts,
 					std::vector<int> & connections,
 					std::map<int, IndexPoint > & vertices,
 					int vertexIndOffset,
+					std::vector<float> & ucoords,
+					std::vector<float> & vcoords,
 					const MDagPath & mesh, MObject & faces)
 {
 	MStatus stat;
@@ -130,6 +136,13 @@ void DucttapeCmd::addFaces(std::vector<int> & counts,
 			indp._pnt = pointArray[i];
 			vertices[indices[i]+vertexIndOffset ] = indp;
 		}
+		
+		MFloatArray uArray, vArray;
+		iter.getUVs ( uArray, vArray);
+		for(unsigned i=0; i< uArray.length(); ++i) {
+			ucoords.push_back(uArray[i]);
+			vcoords.push_back(vArray[i]);
+		}
     }
 }
 
@@ -146,6 +159,8 @@ void DucttapeCmd::packVertices(std::map<int, IndexPoint > & vertices)
 MDagPath DucttapeCmd::buildMesh(const std::vector<int> & counts, 
 					const std::vector<int> & connections,
 					std::map<int, IndexPoint > & vertices,
+					const std::vector<float> & ucoords,
+					const std::vector<float> & vcoords,
 					MStatus * stat)
 {
 	int numVertices = vertices.size();
@@ -171,11 +186,31 @@ MDagPath DucttapeCmd::buildMesh(const std::vector<int> & counts,
 	
 	MFnMesh fmesh;
 	MObject omesh = fmesh.create (numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, MObject::kNullObj, stat );
+	
 	MFnDagNode ft(omesh);
 	MDagPath pm;
 	ft.getPath(pm);
 	pm.extendToShape();
 	AHelper::Info<MString>("DucttapeCmd create mesh", pm.fullPathName() );
+	
+	MObject oshape = pm.node();
+	MFnMesh fuv(oshape, stat);
+	if(!stat) return pm;
+	
+	MFloatArray uArray, vArray;
+	MIntArray uvIds;
+	
+	const unsigned ncoords = ucoords.size();
+	unsigned i=0;
+	for(;i<ncoords;++i) {
+		uArray.append(ucoords[i]);
+		vArray.append(vcoords[i]);
+		uvIds.append(i);
+	}
+	
+	*stat = fuv.setUVs(uArray, vArray);
+	*stat = fuv.assignUVs( polygonCounts, uvIds );
+	
 	return pm;
 }
 
@@ -218,7 +253,7 @@ void DucttapeCmd::connectBranch(const MObject & branch, const MObject & merge)
 		MPlugArray srcPlug;
 		elementPlug.connectedTo(srcPlug, true, false, & stat);
 		if(stat) {
-			MGlobal::displayInfo(MString("connect ")+srcPlug[0].name()+" to "+dstPlug.elementByLogicalIndex(i).name() );
+			MGlobal::displayInfo(MString("connect ")+srcPlug[0].name()+" -> "+dstPlug.elementByLogicalIndex(i).name() );
 			mod.connect(srcPlug[0], dstPlug.elementByLogicalIndex(i));
 			mod.doIt();
 		}
@@ -229,7 +264,7 @@ void DucttapeCmd::connectBranch(const MObject & branch, const MObject & merge)
 		elementPlug = inputPlug[i].child(1);
 		elementPlug.connectedTo(srcPlug, true, false, & stat);
 		if(stat) {
-			MGlobal::displayInfo(MString("connect ")+srcPlug[0].name()+" to "+groupIdPlug.elementByLogicalIndex(i).name() );
+			MGlobal::displayInfo(MString("connect ")+srcPlug[0].name()+" -> "+groupIdPlug.elementByLogicalIndex(i).name() );
 			mod.connect(srcPlug[0], groupIdPlug.elementByLogicalIndex(i));
 			mod.doIt();
 		}
@@ -246,7 +281,7 @@ void DucttapeCmd::connectMerge(const MObject & mesh, const MObject & merge)
 	MFnDependencyNode fmerge(merge);
 	MPlug dstPlug = fmerge.findPlug("inMesh");
 	MDGModifier mod;
-	MGlobal::displayInfo(MString("connect ")+srcPlug.name()+" to "+dstPlug.name() );
+	MGlobal::displayInfo(MString("connect ")+srcPlug.name()+" -> "+dstPlug.name() );
 	mod.connect(srcPlug, dstPlug);
 	mod.doIt();
 }

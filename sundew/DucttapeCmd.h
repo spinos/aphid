@@ -32,15 +32,20 @@ private:
 		MPoint _pnt;
 		int _ind;
 	};
+
 	void addFaces(std::vector<int> & counts, 
 					std::vector<int> & connections,
 					std::map<int, IndexPoint > & vertices,
 					int vertexIndOffset,
+					std::vector<float> & ucoords,
+					std::vector<float> & vcoords,
 					const MDagPath & mesh, MObject & faces);
 	void packVertices(std::map<int, IndexPoint > & vertices);
 	MDagPath buildMesh(const std::vector<int> & counts, 
 					const std::vector<int> & connections,
 					std::map<int, IndexPoint > & vertices,
+					const std::vector<float> & ucoords,
+					const std::vector<float> & vcoords,
 					MStatus * stat);
 	void convertToVert(MSelectionList & selVerts, 
 					const MDagPath & item, MObject & components);
