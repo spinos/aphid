@@ -537,7 +537,9 @@ void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int f
 
 void AttribUtil::bakeH5(const MPlug & attrib, int flag)
 {
-	if(IsPlugAnimated (attrib ) ) return;
+	if(IsPlugTUAnimated (attrib ) )
+		return;
+
 	MPlugArray conns;
 	if(!attrib.connectedTo (conns, true, false )) return;
 /// has connection but not key-framed	
