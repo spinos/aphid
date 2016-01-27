@@ -467,6 +467,7 @@ void AttribUtil::saveH5(const std::map<std::string, MDagPath > & entities)
 
 void AttribUtil::saveH5(const MPlug & attrib)
 {
+	bool supported = true;
 	const MObject entity = attrib.node();
 	AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
 	switch(t) {
@@ -483,10 +484,11 @@ void AttribUtil::saveH5(const MPlug & attrib)
 			saveH5(entity, AAttributeHelper::AsEnumData(attrib) );
 			break;
 		default:
-			AHelper::Info<std::string >(" attr type not supported ", attrib.name().asChar() );
+			AHelper::Info<std::string >(" AttribUtil error attr type not supported ", attrib.name().asChar() );
+			supported = false;
 			break;
     }
-	AnimUtil::saveH5(attrib);
+	if(supported) AnimUtil::saveH5(attrib);
 }
 
 void AttribUtil::saveH5(const MObject & node, AAttribute * data)
@@ -494,7 +496,7 @@ void AttribUtil::saveH5(const MObject & node, AAttribute * data)
 	const std::string nodeName = HesperisIO::H5PathNameTo(node);
 	if(nodeName.size() < 1) return;
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % data->shortName() );
-	AHelper::Info<std::string>(" w attr ", attrName);
+	AHelper::Info<std::string>(" w attr", attrName);
 	H5IO::SaveData<HAttributeGroup, AAttribute>(attrName, data);
 }
 
@@ -537,8 +539,7 @@ void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int f
 
 void AttribUtil::bakeH5(const MPlug & attrib, int flag)
 {
-	if(IsPlugTUAnimated (attrib ) )
-		return;
+	if(AAttributeHelper::IsDirectAnimated (attrib ) ) return;
 
 	MPlugArray conns;
 	if(!attrib.connectedTo (conns, true, false )) return;
@@ -551,7 +552,7 @@ void AttribUtil::bakeH5(const MPlug & attrib, int flag)
 		bakeEnum(attrib.node(), AAttributeHelper::AsEnumData(attrib), flag);
 	}
 	else {
-		AHelper::Info<MString >(" attr not bakable ", attrib.name() );
+		AHelper::Info<MString >(" attr not bakable", attrib.name() );
 	}
 }
 

@@ -68,5 +68,5 @@ public:
 							const std::string & nameLong, 
 							const std::string & nameShort,
 							MFnNumericData::Type t);
-							
+	static bool IsDirectAnimated(const MPlug & attrib);
 };

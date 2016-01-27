@@ -22,6 +22,7 @@ public:
 	static int TangentTypeAsInt(MFnAnimCurve::TangentType type);
 	static MFnAnimCurve::TangentType IntAsTangentType(int x);
 	
-public:
+	static AAnimationCurve::CurveType GetAAnimCurveType(MFnAnimCurve::AnimCurveType typ);
+	static MFnAnimCurve::AnimCurveType GetMAnimCurveType(AAnimationCurve::CurveType typ);
 	static bool RemoveAnimationCurve(MPlug & dst);
 };

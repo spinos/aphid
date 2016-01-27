@@ -18,6 +18,7 @@ double HesperisAnimIO::SecondsPerFrame = 0.0416667;
 
 bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj)
 {
+	if(!AAttributeHelper::IsDirectAnimated(attrib)) return false;
 	MObject entity = attrib.node();
 	const std::string nodeName = H5PathNameTo(entity);
 	const std::string shortName(attrib.partialName().asChar());
@@ -32,19 +33,19 @@ bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCu
 		return false;
 	}
 	
-	MFnAnimCurve::AnimCurveType type = animCurve.animCurveType();
+	AAnimationCurve::CurveType type = GetAAnimCurveType(animCurve.animCurveType() );
 
-	if(type != MFnAnimCurve::kAnimCurveTU ) {
-		AHelper::Info<std::string>(" not a TU anim ", attrName );
+	if(type == AAnimationCurve::TUnknown ) {
+		AHelper::Info<std::string>(" not a TA, TL, or TU anim ", attrName );
 		return false;
 	}
 // only weighted for now
 	animCurve.setIsWeighted(true);
 	
-	AHelper::Info<std::string >(" w anim ", attrName );
+	AHelper::Info<std::string >(" w anim", attrName );
 	
 	AAnimationCurve dataCurve;
-	dataCurve.setCurveType(AAnimationCurve::TTU);
+	dataCurve.setCurveType(type);
 		
 	const unsigned numKeys = animCurve.numKeyframes();
 	for (unsigned i = 0; i < numKeys; i++) {
@@ -104,12 +105,16 @@ bool HesperisAnimIO::ProcessAnimationCurve(const AAnimationCurve & data, MPlug &
 	
 	RemoveAnimationCurve(dst);
 	
+	MFnAnimCurve::AnimCurveType typ = GetMAnimCurveType(data.curveType() );
+	
+	if(typ == MFnAnimCurve::kAnimCurveUnknown) return false;
+	
 	MFnAnimCurve * animCv;
 	if( MAnimUtil::isAnimated( dst, false ) ) {
 		animCv = new MFnAnimCurve(dst);
 	} else {
 		animCv = new MFnAnimCurve;
-		animCv->create( dst );
+		animCv->create( dst, typ );
 	}
 	
 	animCv->setIsWeighted(true);
@@ -237,5 +242,21 @@ MFnAnimCurve::TangentType HesperisAnimIO::IntAsTangentType(int x)
 			break;
 	}
 	return y;
+}
+
+AAnimationCurve::CurveType HesperisAnimIO::GetAAnimCurveType(MFnAnimCurve::AnimCurveType typ)
+{
+	if(typ == MFnAnimCurve::kAnimCurveTU) return AAnimationCurve::TTU;
+	if(typ == MFnAnimCurve::kAnimCurveTA) return AAnimationCurve::TTA;
+	if(typ == MFnAnimCurve::kAnimCurveTL) return AAnimationCurve::TTL;
+	return AAnimationCurve::TUnknown;
+}
+
+MFnAnimCurve::AnimCurveType HesperisAnimIO::GetMAnimCurveType(AAnimationCurve::CurveType typ)
+{
+	if(typ == AAnimationCurve::TTU) return MFnAnimCurve::kAnimCurveTU;
+	if(typ == AAnimationCurve::TTA) return MFnAnimCurve::kAnimCurveTA;
+	if(typ == AAnimationCurve::TTL) return MFnAnimCurve::kAnimCurveTL;
+	return MFnAnimCurve::kAnimCurveUnknown;
 }
 //:~

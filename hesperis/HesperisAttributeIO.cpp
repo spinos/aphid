@@ -56,7 +56,7 @@ bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file
 			file->addAttribute(attrName, AAttributeHelper::AsEnumData(attrib));
 			break;
 		default:
-			AHelper::Info<std::string>("attr type not supported ", attrName);
+			AHelper::Info<std::string>("attr type not supported", attrName);
 			break;
     }
 

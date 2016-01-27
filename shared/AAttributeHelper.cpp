@@ -9,6 +9,7 @@
 
 #include "AAttributeHelper.h"
 #include <maya/MFnEnumAttribute.h>
+#include <maya/MFnAnimCurve.h>
 
 void AAttributeHelper::setCustomStringAttrib(MObject node, const char* nameLong, const char* nameShort, const char* value)
 {
@@ -61,6 +62,9 @@ AAttribute::AttributeType AAttributeHelper::GetAttribType(const MObject & entity
 		}
         return AAttribute::aString;
     }
+	if(entity.hasFn(MFn::kUnitAttribute)) {
+		return AAttribute::aUnit;
+	}
     return AAttribute::aUnknown;
 }
 
@@ -250,5 +254,18 @@ bool AAttributeHelper::AddEnumAttr(MObject & attr, MObject & node,
     MFnDependencyNode fn(node);;
 	MStatus stat = fn.addAttribute( attr, MFnDependencyNode::kLocalDynamicAttr );
 	return stat == MS::kSuccess;
+}
+
+bool AAttributeHelper::IsDirectAnimated(const MPlug & attrib)
+{
+	MPlugArray conns;
+	attrib.connectedTo ( conns, true, false);
+	if(conns.length() < 1) return false;
+
+/// connected to a time-based animation curve node	
+	MObject node = conns[0].node();
+	return (node.hasFn( MFn::kAnimCurveTimeToAngular )  ||
+			node.hasFn( MFn::kAnimCurveTimeToDistance )  ||
+			node.hasFn( MFn::kAnimCurveTimeToUnitless ) );
 }
 //:~

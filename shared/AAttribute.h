@@ -20,7 +20,8 @@ public:
 	    aEnum,
 	    aTyped,
 	    aCompound,
-	    aString
+	    aString,
+		aUnit
 	};
 	
 	AAttribute();
