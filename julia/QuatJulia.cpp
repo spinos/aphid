@@ -38,12 +38,13 @@ QuatJulia::QuatJulia(Parameter * param)
 	m_numIter = 5;
 	m_numGrid = 220;
 	
-	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oReadAndWrite);
-	HWorld gworld;
-	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F >("/world/grid");
-	m_tree->setGridSize(1.f / 9.f);
+	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oCreate);
+	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F >("/grid");
+	m_tree->setGridSize(1.f / 10.f);
 	generate();
+	m_tree->save();
 	m_tree->close();
+	HWorld gworld;
 	gworld.save();
 	gworld.close();
 	HObject::FileIO.close();
@@ -72,8 +73,7 @@ void QuatJulia::generate()
 	}
 	m_tree->finishInsert();
 	std::cout<<"\n n elm "<<m_tree->elementSize()
-	<<"\n n pnt "<<n
-	<<"n grid "<<m_tree->size();
+	<<"\n n pnt "<<n;
 }
 
 float QuatJulia::evalAt(const Vector3F & at) const
