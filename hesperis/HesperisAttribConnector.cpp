@@ -14,6 +14,7 @@
 #include <maya/MGlobal.h>
 #include <HObject.h>
 #include <AnimUtil.h>
+#include <AHelper.h>
 
 MObject HesperisAttribConnector::MasterAttribNode;
 
@@ -35,7 +36,9 @@ void HesperisAttribConnector::CreateMasterNode()
                          BaseUtil::LastFrame, BaseUtil::LastFrame);
     
 	MasterAttribNode = omast;
-	MGlobal::displayInfo(MString("master attrib node ")+fmast.name() );
+	AHelper::Info<MString>("master attrib node ", fmast.name() );
+    AHelper::Info<int>("frame begin ", BaseUtil::FirstFrame );
+    AHelper::Info<int>("frame end ", BaseUtil::LastFrame );
 }
 
 void HesperisAttribConnector::ClearMasterNode()

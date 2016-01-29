@@ -600,6 +600,7 @@ void AttribUtil::load(const char* filename, MObject &target)
 		return;
 	}
 	loadFormatVersion(doc);
+    au.loadFrameRange(FirstFrame, LastFrame, doc);
 	const char* then = doc.getAttribByName("time");
 	doc.free();
 	AHelper::Info<const char *>("cache generated at ", then );
