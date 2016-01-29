@@ -24,10 +24,11 @@
 #include <Matrix44F.h>
 #include <Vector3F.h>
 #include "depthCut.h"
+#include <Forest.h>
 
 class MItMeshPolygon;
 
-class ProxyViz : public MPxLocatorNode
+class ProxyViz : public MPxLocatorNode, public sdb::Forest
 {
 	double m_materializePercentage;
 	
