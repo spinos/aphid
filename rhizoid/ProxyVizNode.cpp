@@ -93,6 +93,7 @@ MObject ProxyViz::aenablecull;
 MObject ProxyViz::ainmesh;
 MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
+MObject ProxyViz::agroundMesh;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0) {
 MMatrix m;
@@ -150,6 +151,8 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			}	
 			_firstLoad = 0;
 		}
+        
+        updateGround(block.inputArrayValue(agroundMesh ) );
 		
 		unsigned num_box = _spaces.length();
 		_details.setLength(num_box);
@@ -656,7 +659,16 @@ MStatus ProxyViz::initialize()
 	numFn.setMax(1.0);
 	numFn.setMin(0.01);
 	addAttribute(aconvertPercentage);
-	
+    
+    agroundMesh = typedAttrFn.create("groundMesh", "grdm", MFnMeshData::kMesh);
+	typedAttrFn.setStorable(false);
+	typedAttrFn.setWritable(true);
+	typedAttrFn.setConnectable(true);
+    typedAttrFn.setArray(true);
+    typedAttrFn.setDisconnectBehavior(MFnAttribute::kDelete);
+	addAttribute( agroundMesh );
+	attributeAffects(agroundMesh, outValue);
+    
 	attributeAffects(acameraspace, outValue);
 	attributeAffects(abboxminx, outValue);
 	attributeAffects(abboxmaxx, outValue);
@@ -672,6 +684,7 @@ MStatus ProxyViz::initialize()
 	attributeAffects(aenablecull, outValue);
 	attributeAffects(ainmesh, outValue);
 	attributeAffects(aconvertPercentage, outValue);
+
 	return MS::kSuccess;
 }
 

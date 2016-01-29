@@ -23,12 +23,12 @@
 #include <maya/MDagPath.h>
 #include <Matrix44F.h>
 #include <Vector3F.h>
-#include "depthCut.h"
-#include <Forest.h>
+#include <depthCut.h>
+#include "MForest.h"
 
 class MItMeshPolygon;
 
-class ProxyViz : public MPxLocatorNode, public sdb::Forest
+class ProxyViz : public MPxLocatorNode, public MForest
 {
 	double m_materializePercentage;
 	
@@ -75,6 +75,7 @@ public:
 	static MObject ainmesh;
 	static MObject aconvertPercentage;
 	static MObject astandinNames;
+    static MObject agroundMesh;
 	static MObject outValue;
 	
 	void addABox(const MMatrix & m);
@@ -106,7 +107,7 @@ public:
 private:
 	char hasDisplayMesh() const;
 	std::string replaceEnvVar(const MString & filename) const;
-	
+    
 	MMatrix _worldSpace, _worldInverseSpace;
 	MMatrixArray _spaces;
 	MFloatArray _details;

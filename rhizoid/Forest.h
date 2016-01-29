@@ -39,6 +39,7 @@ class Forest {
 	WorldGrid<Array<int, Plant>, Plant > * m_grid;
 	std::vector<RotPosTri *> m_pool;
 	std::vector<Plant *> m_plants;
+    std::vector<ATriangleMesh *> m_grounds;
 	KdTree * m_ground;
 	
 public:
@@ -51,14 +52,15 @@ public:
 					const Vector3F & position,
 					const int & triangleId);
 					
-	void resetGround();
-	void addGroundMesh(ATriangleMesh * trimesh);
-	void finishGround();
-	
 protected:
 	const BoundingBox boundingBox() const;
 	unsigned numPlants() const;
-	
+	unsigned numGroundMeshes() const;
+    void clearGroundMeshes();
+    void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
+    ATriangleMesh * getGroundMesh(unsigned idx) const;
+    void buildGround();
+    
 private:
 
 };

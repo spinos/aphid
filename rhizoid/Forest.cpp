@@ -15,7 +15,9 @@ Forest::Forest()
 {
 	TreeNode::MaxNumKeysPerNode = 128;
     TreeNode::MinNumKeysPerNode = 16;
-
+    KdTree::MaxBuildLevel = 20;
+	KdTree::NumPrimitivesInLeafThreashold = 15;
+	
 	m_grid = new WorldGrid<Array<int, Plant>, Plant >;
 	m_ground = NULL;
 }
@@ -23,8 +25,11 @@ Forest::Forest()
 Forest::~Forest() 
 {
 	delete m_grid;
+    
 	std::vector<Plant *>::iterator ita = m_plants.begin();
 	for(;ita!=m_plants.end();++ita) delete *ita;
+    m_plants.clear();
+    
 	std::vector<RotPosTri *>::iterator itb = m_pool.begin();
 	for(;itb!=m_pool.end();++itb) {
 		delete (*itb)->t1;
@@ -32,6 +37,10 @@ Forest::~Forest()
 		delete (*itb)->t3;
 		delete (*itb);
 	}
+    m_pool.clear();
+    
+    clearGroundMeshes();
+    
 	if(m_ground) delete m_ground;
 }
 
@@ -65,22 +74,43 @@ void Forest::addPlant(const Quaternion & orientation,
 	m_grid->insert((const float *)p->index->t2, p );
 }
 
-void Forest::resetGround()
-{
-	if(m_ground) delete m_ground;
-	m_ground = new KdTree;
-}
-
-void Forest::addGroundMesh(ATriangleMesh * trimesh)
-{ m_ground->addGeometry(trimesh); }
-
-void Forest::finishGround()
-{ m_ground->create(); }
-
 const BoundingBox Forest::boundingBox() const
 { return m_grid->boundingBox(); }
 
 unsigned Forest::numPlants() const
 { return m_plants.size(); }
+
+unsigned Forest::numGroundMeshes() const
+{ return m_grounds.size(); }
+
+void Forest::clearGroundMeshes()
+{
+    std::vector<ATriangleMesh *>::iterator itg = m_grounds.begin();
+    for(;itg!=m_grounds.end();++itg) delete *itg;
+    m_grounds.clear();
+}
+
+void Forest::setGroundMesh(ATriangleMesh * trimesh, unsigned idx)
+{ 
+    if(idx >= numGroundMeshes() ) m_grounds.push_back(trimesh); 
+    else m_grounds[idx] = trimesh;
+}
+
+ATriangleMesh * Forest::getGroundMesh(unsigned idx) const
+{
+    if(idx >= numGroundMeshes() ) return NULL;
+    return m_grounds[idx];
+}
+
+void Forest::buildGround()
+{
+    if(m_ground) delete m_ground;
+	m_ground = new KdTree;
+
+    std::vector<ATriangleMesh *>::const_iterator it = m_grounds.begin();
+    for(;it!=m_grounds.end();++it) m_ground->addGeometry(*it);
+
+    m_ground->create();
+}
 
 }
