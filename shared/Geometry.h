@@ -10,8 +10,10 @@
 #pragma once
 #include <TypedEntity.h>
 #include <AVerbose.h>
+#include <Ray.h>
 #include <BoundingBox.h>
 #include <vector>
+
 class Geometry : public TypedEntity, public AVerbose {
 public:
 	struct ClosestToPointTestResult {
@@ -47,7 +49,9 @@ public:
 	virtual bool intersectRay(const Ray * r);
 	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
 	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
-	virtual bool intersectRay(unsigned icomponent, const Ray * r);
+	virtual bool intersectRay(unsigned icomponent, const Ray * r,
+					Vector3F & hitP, Vector3F & hitN, float & hitDistance);
+	virtual bool intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius);
 	virtual void closestToPoint(ClosestToPointTestResult * result);
 	virtual void closestToPointElms(const std::vector<unsigned > & elements, ClosestToPointTestResult * result);
 	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);

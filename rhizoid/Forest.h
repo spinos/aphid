@@ -13,6 +13,8 @@
 #include <Quaternion.h>
 #include <KdTree.h>
 #include <ATriangleMesh.h>
+#include <IntersectionContext.h>
+#include <SelectionContext.h>
 
 /* http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
  * qw= √(1 + m00 + m11 + m22) /2
@@ -41,6 +43,8 @@ class Forest {
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
 	KdTree * m_ground;
+	IntersectionContext m_intersectCtx;
+	SelectionContext m_selectCtx;
 	
 public:
 	Forest();
@@ -51,7 +55,9 @@ public:
 	void addPlant(const Quaternion & orientation, 
 					const Vector3F & position,
 					const int & triangleId);
-					
+		
+	unsigned numActiveGroundFaces();
+	
 protected:
 	const BoundingBox boundingBox() const;
 	unsigned numPlants() const;
@@ -60,7 +66,9 @@ protected:
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     ATriangleMesh * getGroundMesh(unsigned idx) const;
     void buildGround();
-    
+    void selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
+	SelectionContext * activeGround();
+	
 private:
 
 };

@@ -152,7 +152,8 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			_firstLoad = 0;
 		}
         
-        updateGround(block.inputArrayValue(agroundMesh ) );
+		MArrayDataHandle groundArray = block.inputArrayValue(agroundMesh );
+        updateGround(groundArray );
 		
 		unsigned num_box = _spaces.length();
 		_details.setLength(num_box);
@@ -428,6 +429,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		glPopMatrix();
 	}
 	drawSelected(mScale);
+	drawGround();
 	view.endGL();
 }
 

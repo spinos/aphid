@@ -21,6 +21,9 @@ public:
 	virtual const BoundingBox calculateBBox(unsigned icomponent) const;
 	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);
 	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
+	virtual bool intersectRay(unsigned icomponent, const Ray * r,
+					Vector3F & hitP, Vector3F & hitN, float & hitDistance);
+	virtual bool intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius);
 	const unsigned numTriangles() const;
 	
 	void create(unsigned np, unsigned nt);

@@ -23,10 +23,6 @@ public:
 		return s->data();
 	}
 	
-	const KeyType key() const {
-		return Sequence<KeyType>::currentKey();
-	}
-	
 	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) const
 	{			
 		Pair<Entity *, Entity> g = Sequence<KeyType>::findEntity(k, mf, extraKey);

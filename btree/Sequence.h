@@ -112,6 +112,10 @@ public:
 		return leafEnd();
 	}
 	
+	const T key() const {
+		return m_current->key(m_currentData);
+	}
+	
 	void setToEnd() {
 		m_current = NULL;
 	}

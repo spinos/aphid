@@ -52,6 +52,31 @@ private:
     Vector3F m_p[8];
 };
 
+class Sphere {
+
+	Vector3F m_center;
+	float m_radius;
+	
+public:
+    Sphere(const Vector3F & c, const float & r)
+	{
+		m_center = c;
+		m_radius = r;
+	}
+    
+	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const
+	{
+		Vector3F res = m_center + v.normal() * m_radius;
+		if(localP) *localP = res;
+		return res;
+	}
+	
+protected:
+
+private:
+
+};
+
 class Simplex {
 public:
     Simplex();

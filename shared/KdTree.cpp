@@ -250,20 +250,17 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 	PrimitiveArray &prims = m_stream.primitives();
 	indir.setIndex(start);
 	char anyHit = 0;
+	float hitD;
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
 		Primitive * prim = prims.asPrimitive(*iprim);
-		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
+		Geometry * geo = prim->getGeometry();
 		unsigned iface = prim->getComponentIndex();
 		
-		if(mesh->intersect(iface, ctx)) {
-			//ctx->m_primitive = prim;
+		if(geo->intersectRay(iface, &ctx->m_ray, ctx->m_hitP, ctx->m_hitN, ctx->m_minHitDistance) ) {
 			anyHit = 1;
-			//printf("hit %i\n", iface);
 		}
-		//else
-		    //printf("miss %i\n", iface);
 			
 		indir.next();
 	}
@@ -416,10 +413,12 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 		unsigned *iprim = indir.asIndex();
 
 		Primitive * prim = prims.asPrimitive(*iprim);
-		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
-		unsigned iface = prim->getComponentIndex();
+		Geometry * geo = prim->getGeometry();
+		unsigned icomponent = prim->getComponentIndex();
 		
-		mesh->selectFace(iface, ctx);
+		if(geo->intersectSphere(icomponent, ctx->center(), ctx->radius() ) )
+			ctx->select(geo, icomponent);
+			
 		indir.next();
 	}
 	return 1;

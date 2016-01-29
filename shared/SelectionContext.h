@@ -10,8 +10,14 @@
 #pragma once
 #include <AllMath.h>
 #include <BoundingBox.h>
+#include <Geometry.h>
+#include <Sequence.h>
 #include <deque>
+#include <map>
+
 class SelectionContext {
+	std::map<Geometry *, sdb::Sequence<unsigned> * > m_geoComponents;
+	
 public:
 	enum SelectMode {
 		Replace = 0,
@@ -40,6 +46,12 @@ public:
 	char closeTo(const BoundingBox & b) const;
 	char closeTo(const Vector3F & v) const;
 	void addToSelection(const unsigned idx);
+	
+	void select(Geometry * geo, unsigned componentId);
+	void deselect();
+	unsigned countComponents();
+	std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator geometryBegin();
+	std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator geometryEnd();
 	
 	unsigned numSelected() const;
 	const std::deque<unsigned> & selectedQue() const;

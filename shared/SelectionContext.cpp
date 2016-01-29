@@ -22,7 +22,7 @@ void SelectionContext::reset(const Vector3F & center, const float & radius)
 {
 	m_center = center;
 	m_radius = radius;
-	if(m_mode == Replace) m_indices.clear();
+	//if(m_mode == Replace) m_indices.clear();
 	m_enableDirection = 0;
 }
 
@@ -142,6 +142,37 @@ SelectionContext::SelectMode SelectionContext::getSelectMode() const
 {
 	return m_mode;
 }
+
+void SelectionContext::select(Geometry * geo, unsigned componentId)
+{
+	if(m_geoComponents.count(geo) < 1) m_geoComponents[geo] = new sdb::Sequence<unsigned>();
+	if(m_mode == Append) m_geoComponents[geo]->insert(componentId);
+	else if(m_mode == Remove) m_geoComponents[geo]->remove(componentId);
+}
+
+void SelectionContext::deselect()
+{
+	std::map<Geometry *, sdb::Sequence<unsigned> * >::const_iterator it = m_geoComponents.begin();
+	for(;it!=m_geoComponents.end();++it) {
+		it->second->clear();
+	}
+}
+
+unsigned SelectionContext::countComponents()
+{
+	unsigned c = 0;
+	std::map<Geometry *, sdb::Sequence<unsigned> * >::const_iterator it = m_geoComponents.begin();
+	for(;it!=m_geoComponents.end();++it) {
+		c += it->second->size();
+	}
+	return c;
+}
+
+std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator SelectionContext::geometryBegin()
+{ return m_geoComponents.begin(); }
+
+std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator SelectionContext::geometryEnd()
+{ return m_geoComponents.end(); }
 
 void SelectionContext::discard()
 {

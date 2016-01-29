@@ -35,7 +35,8 @@ bool Geometry::intersectBox(unsigned icomponent, const BoundingBox & box)
 bool Geometry::intersectTetrahedron(unsigned icomponent, const Vector3F * tet)
 { return false; }
 
-bool Geometry::intersectRay(unsigned icomponent, const Ray * r)
+bool Geometry::intersectRay(unsigned icomponent, const Ray * r,
+					Vector3F & hitP, Vector3F & hitN, float & hitDistance)
 { return false; }
 
 void Geometry::closestToPoint(ClosestToPointTestResult * result) {}
@@ -53,4 +54,7 @@ const Vector3F Geometry::boundingCenter() const
 	BoundingBox box = calculateBBox();
 	return box.center();
 }
+
+bool Geometry::intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius)
+{ return false; }
 //:~

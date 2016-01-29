@@ -101,4 +101,65 @@ bool ATriangleMesh::intersectTetrahedron(unsigned icomponent, const Vector3F * t
 	unsigned * v = triangleIndices(icomponent);
 	return gjk::IntersectTest::evaluateTriangle(p, v);
 }
+
+bool ATriangleMesh::intersectRay(unsigned icomponent, const Ray * r,
+					Vector3F & hitP, Vector3F & hitN, float & hitDistance )
+{
+	Vector3F * p = points();
+	unsigned * v = triangleIndices(icomponent);
+	Vector3F a = p[v[0]];
+	Vector3F b = p[v[1]];
+	Vector3F c = p[v[2]];
+	Vector3F ab = b - a;
+	Vector3F ac = c - a;
+	Vector3F nor = ab.cross(ac);
+	nor.normalize();
+	
+	float ddotn = r->m_dir.dot(nor);
+	
+	//if(!ctx->twoSided && ddotn > 0.f) return 0;
+	
+	float t = (a.dot(nor) - r->m_origin.dot(nor)) / ddotn;
+	
+	if(t < 0.f || t > hitDistance) return 0;
+	
+	Vector3F onplane = r->m_origin + r->m_dir * t;
+	Vector3F e01 = b - a;
+	Vector3F x0 = onplane - a;
+	if(e01.cross(x0).dot(nor) < 0.f) return 0;
+	
+	//printf("pass a\n");
+
+	Vector3F e12 = c - b;
+	Vector3F x1 = onplane - b;
+	if(e12.cross(x1).dot(nor) < 0.f) return 0;
+	
+	//printf("pass b\n");
+	
+	Vector3F e20 = a - c;
+	Vector3F x2 = onplane - c;
+	if(e20.cross(x2).dot(nor) < 0.f) return 0;
+	
+	//printf("pass c\n");
+	hitP = onplane;
+	hitN = nor;
+	hitDistance = t;
+	
+	return 1;
+}
+
+bool ATriangleMesh::intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius)
+{ 
+	Vector3F * p = points();
+	unsigned * v = triangleIndices(icomponent);
+	gjk::TriangleSet A;
+	A.x()[0] = p[v[0]];
+	A.x()[1] = p[v[1]];
+	A.x()[2] = p[v[2]];
+	gjk::Sphere B(center, radius );
+	if(! gjk::Intersect1<gjk::TriangleSet, gjk::Sphere>::Evaluate(A, B) )
+		return false;
+	
+	return true;
+}
 //:~

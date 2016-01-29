@@ -113,4 +113,35 @@ void Forest::buildGround()
     m_ground->create();
 }
 
+void Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode)
+{
+	if(m_ground->isEmpty() ) return;
+	
+	m_intersectCtx.reset(ray);
+	m_ground->intersect(&m_intersectCtx);
+	
+	if(!m_intersectCtx.m_success) {
+/// empty previous selection if hit nothing
+		if(mode == SelectionContext::Replace)
+			m_selectCtx.deselect();
+		return;
+	}
+	
+	m_selectCtx.setSelectMode(mode);
+	m_selectCtx.reset(m_intersectCtx.m_hitP, 4.f);
+	m_selectCtx.setDirection(m_intersectCtx.m_hitN);
+	
+	//std::cout<<"\n select P "<<m_selectCtx.center();
+	//std::cout<<"\n select r "<<m_selectCtx.radius();
+	
+	m_ground->select(&m_selectCtx);
+	//m_selectCtx.finish();
+}
+
+unsigned Forest::numActiveGroundFaces()
+{ return m_selectCtx.countComponents(); }
+
+SelectionContext * Forest::activeGround()
+{ return &m_selectCtx; }
+
 }
