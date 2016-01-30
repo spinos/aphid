@@ -217,6 +217,19 @@ void DrawForest::drawGrid()
 	}
 }
 
+void DrawForest::drawActivePlants()
+{
+	if(numActivePlants() < 1) return;
+	glDepthFunc(GL_LEQUAL);
+	glColor3f(.1f, 8.f, .3f);
+	sdb::Array<int, sdb::Plant> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		drawWiredPlant(arr->value()->index );
+		arr->next();
+	}
+}
+
 void DrawForest::drawBounding(const BoundingBox & b) const
 {
 	Vector3F minb = b.getMin();

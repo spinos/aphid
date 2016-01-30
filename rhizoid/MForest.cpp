@@ -78,6 +78,22 @@ void MForest::updateGroundMesh(MObject & mesh, unsigned idx)
     }
 }
 
+void MForest::selectPlant(const MPoint & origin, const MPoint & dest, 
+					MGlobal::ListAdjustment adj)
+{
+	Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	
+	SelectionContext::SelectMode m = SelectionContext::Replace;
+	if(adj == MGlobal::kAddToList) m = SelectionContext::Append;
+	else if(adj == MGlobal::kRemoveFromList) m = SelectionContext::Remove;
+	
+	bool stat = selectPlants(r, m);
+	if(!stat)
+		AHelper::Info<int>("empty selection", m);
+}
+
 void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::ListAdjustment adj)
 {
 	Vector3F a(origin.x, origin.y, origin.z);

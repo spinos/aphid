@@ -30,6 +30,7 @@ protected:
 	void drawWiredPlants();
 	void drawGridBounding();
 	void drawGrid();
+	void drawActivePlants();
 	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);

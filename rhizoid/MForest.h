@@ -10,6 +10,8 @@ public:
     MForest();
     virtual ~MForest();
     
+	void selectPlant(const MPoint & origin, const MPoint & dest, 
+					MGlobal::ListAdjustment adj);
 	void selectGround(const MPoint & origin, const MPoint & dest, 
 					MGlobal::ListAdjustment adj);
 	void flood(GrowOption & option);

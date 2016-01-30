@@ -376,7 +376,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		drawWiredPlants();
 	}
 
-	drawSelected(mScale);
+	drawActivePlants();
 	drawGround();
 	view.endGL();
 }

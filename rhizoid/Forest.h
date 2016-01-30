@@ -8,14 +8,12 @@
  */
 
 #pragma once
-#include <WorldGrid.h>
-#include <Array.h>
+#include "PlantSelection.h"
 #include <Quaternion.h>
 #include <Matrix44F.h>
 #include <KdTree.h>
 #include <ATriangleMesh.h>
 #include <IntersectionContext.h>
-#include <SelectionContext.h>
 #include <PseudoNoise.h>
 
 /* http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
@@ -28,17 +26,6 @@
 class TriangleRaster;
 
 namespace sdb {
-/// (plant id, (transformation, plant type id, triangle bind id) )
-typedef Triple<Matrix44F, int, int > PlantData;
-class Plant : public Pair<int, PlantData>
-{
-public:
-	
-	const bool operator==(const Plant & another) const {
-		return index == another.index;
-	}
-	
-};
 
 /*
  *  plant and ground data
@@ -52,6 +39,7 @@ class Forest {
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
 	KdTree * m_ground;
+	PlantSelection * m_activePlants;
 	IntersectionContext m_intersectCtx;
 	SelectionContext m_selectCtx;
 	PseudoNoise m_pnoise;
@@ -72,6 +60,7 @@ public:
 	virtual ~Forest();
 	
 	unsigned numActiveGroundFaces();
+	const unsigned & numActivePlants() const;
 	
 protected:
 	void resetGrid(float gridSize);
@@ -88,13 +77,15 @@ protected:
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     ATriangleMesh * getGroundMesh(unsigned idx) const;
     void buildGround();
-    bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
+    bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
+	bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
 	SelectionContext * activeGround();
 	void growOnGround(GrowOption & option);
 	
 	virtual float plantSize(int idx) const;
 	
 	WorldGrid<Array<int, Plant>, Plant > * grid();
+	Array<int, Plant> * activePlants();
 	
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 

@@ -23,11 +23,13 @@ Forest::Forest()
 	m_ground = NULL;
 	m_seed = rand() % 999999;
 	m_numPlants = 0;
+	m_activePlants = new PlantSelection(m_grid);
 }
 
 Forest::~Forest() 
 {
 	delete m_grid;
+	delete m_activePlants;
     
 	std::vector<Plant *>::iterator ita = m_plants.begin();
 	for(;ita!=m_plants.end();++ita) delete *ita;
@@ -129,6 +131,27 @@ void Forest::buildGround()
     for(;it!=m_grounds.end();++it) m_ground->addGeometry(*it);
 
     m_ground->create();
+}
+
+bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
+{
+	if(m_ground->isEmpty() ) return false;
+	if(numPlants() < 1) return false;
+	
+	m_intersectCtx.reset(ray);
+	m_ground->intersect(&m_intersectCtx);
+	
+	if(!m_intersectCtx.m_success) {
+/// empty previous selection if hit nothing
+		if(mode == SelectionContext::Replace)
+			m_activePlants->deselect();
+		return false;
+	}
+	
+	m_activePlants->set(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN, 4.f);
+	m_activePlants->select(mode);
+	
+	return true;
 }
 
 bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode)
@@ -285,5 +308,11 @@ Matrix44F Forest::randomSpaceAt(const Vector3F & pos, const GrowOption & option)
 
 WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
 { return m_grid; }
+
+const unsigned & Forest::numActivePlants() const
+{ return m_activePlants->count(); }
+
+Array<int, Plant> * Forest::activePlants()
+{ return m_activePlants->data(); }
 
 }

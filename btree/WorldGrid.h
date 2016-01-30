@@ -52,6 +52,7 @@ public:
 	void displace(ValueType * v, const Vector3F & pref);
 	
 	ChildType * findCell(const Vector3F & pref);
+	ChildType * findCell(const Coord3 & c);
 	
 protected:
 	
@@ -139,7 +140,13 @@ template<typename ChildType, typename ValueType>
 ChildType * WorldGrid<ChildType, ValueType>::findCell(const Vector3F & pref)
 {
 	Coord3 c0 = gridCoord((float *)&pref);
-	Pair<Entity *, Entity> p = findEntity(c0);
+	return findCell(c0);
+}
+
+template<typename ChildType, typename ValueType>
+ChildType * WorldGrid<ChildType, ValueType>::findCell(const Coord3 & c)
+{
+	Pair<Entity *, Entity> p = findEntity(c);
 	if(p.index) {
 		ChildType * g = static_cast<ChildType *>(p.index);
 		return g;
