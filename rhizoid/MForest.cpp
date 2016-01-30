@@ -98,5 +98,8 @@ void MForest::flood(GrowOption & option)
 	option.m_plantId = activePlantId();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
 	growOnGround(option);
+	updateNumPlants();
 	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
+	updateGrid();
+	AHelper::Info<BoundingBox>("ProxyViz grid bounding", gridBoundingBox() );
 }

@@ -364,103 +364,35 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		//fCuller->showFrameBuffer();
 	}
 	
-	char displayMeshIsValid = hasDisplayMesh();
-	MItMeshPolygon displayMeshIt(fDisplayMesh);
-	
-	const GLfloat grayDiffuseMaterial[] = {0.47, 0.46, 0.45};
-	const GLfloat greenDiffuseMaterial[] = {0.33, 0.53, 0.37}; 
-	
-	unsigned num_box = _spaces.length();
-	
-	if ( ( style == M3dView::kFlatShaded ) || 
-		    ( style == M3dView::kGouraudShaded ) ) {
-		glPushAttrib(GL_LIGHTING_BIT);
-		glEnable(GL_LIGHTING);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grayDiffuseMaterial);
-		for(unsigned i =0; i < num_box; i++) {
-            glPushMatrix();
-    
-            const MMatrix space = _spaces[i];
-            matrix_as_array(space, mm);
-            
-            glMultMatrixd(mm);
-			glMultMatrixf(mScale);
-			if(fVisibleTag) {
-                if(!fVisibleTag[i])
-                    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, greenDiffuseMaterial);
-                else
-                    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grayDiffuseMaterial);
-            }
-			
-            if(displayMeshIsValid)
-				drawSolidMesh(displayMeshIt);
-			else
-				draw_solid_box();
-				
-            glPopMatrix();
-        }
-		glDisable(GL_LIGHTING);
-		glPopAttrib();
-	}
-	glDepthFunc(GL_LEQUAL);         
-	for(unsigned i =0; i < num_box; i++) {
-		glPushMatrix();
+	draw_a_box();
+	drawGridBounding();
+	drawGrid();
 
-		const MMatrix space = _spaces[i];
-		matrix_as_array(space, mm);
-		
-		glMultMatrixd(mm);
-		glMultMatrixf(mScale);
-		
-		if(displayMeshIsValid)
-			drawWireMesh(displayMeshIt);
-		else
-			draw_a_box();
-			
-		glPopMatrix();
+	if ( ( style == M3dView::kFlatShaded ) || 
+		    ( style == M3dView::kGouraudShaded ) ) {		
+		drawPlants();
 	}
+	else {
+		drawWiredPlants();
+	}
+
 	drawSelected(mScale);
 	drawGround();
 	view.endGL();
 }
 
 bool ProxyViz::isBounded() const
-{ 
-	return true;
-}
+{ return true; }
 
 MBoundingBox ProxyViz::boundingBox() const
 {   
-	Vector3F vmin = defBox().getMin();
-	Vector3F vmax = defBox().getMax();
+	BoundingBox bbox = defBox();
+	if(numPlants() > 0) bbox.expandBy(gridBoundingBox() );
+	
+	Vector3F vmin = bbox.getMin();
+	Vector3F vmax = bbox.getMax();
 	MPoint corner1(vmin.x, vmin.y, vmin.z);
 	MPoint corner2(vmax.x, vmax.y, vmax.z);
-
-	unsigned num_box = _spaces.length();
-	
-	if(num_box < 2)
-		return MBoundingBox( corner1, corner2 );
-		
-	corner1 = MPoint(10e8, 10e8, 10e8);
-	corner2 = MPoint(-10e8, -10e8, -10e8);
-	
-	for(unsigned i =1; i < num_box; i++) {
-
-		double mm[3];
-		const MMatrix space = _spaces[i];
-
-		mm[0] = space(3,0);
-		mm[1] = space(3,1);
-		mm[2] = space(3,2);
-		
-		if(corner1.x > mm[0]) corner1.x = mm[0];
-		if(corner2.x < mm[0]) corner2.x = mm[0];
-		if(corner1.y > mm[1]) corner1.y = mm[1];
-		if(corner2.y < mm[1]) corner2.y = mm[1];
-		if(corner1.z > mm[2]) corner1.z = mm[2];
-		if(corner2.z < mm[2]) corner2.z = mm[2];
-
-	}
 
 	return MBoundingBox( corner1, corner2 );
 }

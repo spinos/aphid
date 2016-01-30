@@ -56,6 +56,7 @@ class Forest {
 	SelectionContext m_selectCtx;
 	PseudoNoise m_pnoise;
 	int m_seed;
+	unsigned m_numPlants;
 	
 public:
 	struct GrowOption {
@@ -74,12 +75,14 @@ public:
 	
 protected:
 	void resetGrid(float gridSize);
-	void finishGrid();
+	void updateGrid();
 	void addPlant(const Matrix44F & tm,
 					const int & plantTypeId,
 					const int & triangleId);
-	const BoundingBox boundingBox() const;
+	const BoundingBox & gridBoundingBox() const;
 	unsigned numPlants() const;
+	void updateNumPlants();
+	unsigned numCells();
 	unsigned numGroundMeshes() const;
     void clearGroundMeshes();
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
@@ -90,6 +93,8 @@ protected:
 	void growOnGround(GrowOption & option);
 	
 	virtual float plantSize(int idx) const;
+	
+	WorldGrid<Array<int, Plant>, Plant > * grid();
 	
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 

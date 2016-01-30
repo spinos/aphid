@@ -26,8 +26,17 @@ protected:
 	void draw_coordsys() const;
 	int activePlantId() const;
 	virtual float plantSize(int idx) const;
+	void drawPlants();
+	void drawWiredPlants();
+	void drawGridBounding();
+	void drawGrid();
 	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
+	void drawPlants(sdb::Array<int, sdb::Plant> * cell);
+	void drawPlant(sdb::PlantData * data);
+	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
+	void drawWiredPlant(sdb::PlantData * data);
+	void drawBounding(const BoundingBox & b) const;
 	
 };

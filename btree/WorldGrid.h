@@ -45,7 +45,7 @@ public:
 
 	void calculateBBox();
 	const BoundingBox coordToGridBBox(const Coord3 & c) const;
-	const BoundingBox boundingBox() const;
+	const BoundingBox & boundingBox() const;
 
 	float gridSize() const;
 	
@@ -105,7 +105,7 @@ const BoundingBox WorldGrid<ChildType, ValueType>::coordToGridBBox(const Coord3 
 }
 
 template<typename ChildType, typename ValueType>
-const BoundingBox WorldGrid<ChildType, ValueType>::boundingBox() const
+const BoundingBox & WorldGrid<ChildType, ValueType>::boundingBox() const
 { return m_bbox; }
 
 template<typename ChildType, typename ValueType>

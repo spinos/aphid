@@ -22,6 +22,7 @@ Forest::Forest()
 	m_grid = new WorldGrid<Array<int, Plant>, Plant >;
 	m_ground = NULL;
 	m_seed = rand() % 999999;
+	m_numPlants = 0;
 }
 
 Forest::~Forest() 
@@ -52,7 +53,7 @@ void Forest::resetGrid(float gridSize)
 	m_grid->setGridSize(gridSize);
 }
 
-void Forest::finishGrid()
+void Forest::updateGrid()
 {
 	m_grid->calculateBBox();
 	std::cout<<"\n Forest grid bbox "<<m_grid->boundingBox();
@@ -77,11 +78,25 @@ void Forest::addPlant(const Matrix44F & tm,
 	m_grid->insert((const float *)&at, p );
 }
 
-const BoundingBox Forest::boundingBox() const
+const BoundingBox & Forest::gridBoundingBox() const
 { return m_grid->boundingBox(); }
 
 unsigned Forest::numPlants() const
-{ return m_plants.size(); }
+{ return m_numPlants; }
+
+void Forest::updateNumPlants()
+{
+	m_numPlants = 0;
+	m_grid->begin();
+	while(!m_grid->end() ) {
+		Array<int, Plant> * cell = m_grid->value();
+		m_numPlants += cell->size();
+		m_grid->next();
+	}
+}
+
+unsigned Forest::numCells()
+{ return m_grid->size(); }
 
 unsigned Forest::numGroundMeshes() const
 { return m_grounds.size(); }
@@ -192,8 +207,6 @@ void Forest::growOnTriangle(TriangleRaster * tri, GrowOption & option)
 		Vector3F & pos = samples[s];
 		if(closeToOccupiedPosition(pos, delta)) continue;
 			
-		std::cout<<" add a plant at "<<pos;
-		
 		Matrix44F tm = randomSpaceAt(pos, option);
 		
 		addPlant(tm, option.m_plantId,
@@ -269,5 +282,8 @@ Matrix44F Forest::randomSpaceAt(const Vector3F & pos, const GrowOption & option)
 
 	return space;
 }
+
+WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
+{ return m_grid; }
 
 }
