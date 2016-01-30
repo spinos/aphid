@@ -441,6 +441,7 @@ void KdTree::closestToPoint(ClosestToPointTestResult * result)
 
 void KdTree::recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result)
 {
+	if(result->_distance<1e-3f) return;
 	if(!result->closeTo(box)) return;
 	if(node->isLeaf())
 		return leafClosestToPoint(node, box, result);

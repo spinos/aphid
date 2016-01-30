@@ -26,13 +26,27 @@ public:
 	
 };
 
+class PlantInstance
+{
+public:
+	~PlantInstance()
+	{
+		delete m_backup;
+	}
+	
+	PlantData * m_reference;
+	PlantData * m_backup;
+	float m_weight;
+	
+};
+
 class PlantSelection {
 	
 	Vector3F m_center, m_direction;
 	float m_radius;
 	unsigned m_numSelected;
 	WorldGrid<Array<int, Plant>, Plant > * m_grid;
-	Array<int, Plant> * m_plants;
+	Array<int, PlantInstance> * m_plants;
 	
 public:
 	PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid);
@@ -43,7 +57,8 @@ public:
 	void select(SelectionContext::SelectMode mode);
 	void deselect();
 	const unsigned & count() const;
-	Array<int, Plant> * data();
+	Array<int, PlantInstance> * data();
+	void calculateWeight();
 	
 protected:
 

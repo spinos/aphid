@@ -14,7 +14,7 @@ namespace sdb {
 PlantSelection::PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid)
 { 
 	m_grid = grid; 
-	m_plants = new Array<int, Plant>();
+	m_plants = new Array<int, PlantInstance>();
 	m_numSelected = 0;
 }
 
@@ -70,15 +70,15 @@ void PlantSelection::select(const Coord3 & c, SelectionContext::SelectMode mode)
 
 void PlantSelection::select(Plant * p)
 { 
-	PlantData * d = new PlantData;
-	*d->t1 = *p->index->t1;
-	*d->t2 = *p->index->t2;
-	*d->t3 = *p->index->t3;
+	PlantData * backup = new PlantData;
+	*backup->t1 = *p->index->t1;
+	*backup->t2 = *p->index->t2;
+	*backup->t3 = *p->index->t3;
 	
-	Plant * ap = new Plant;
-	ap->key = p->key;
-	ap->index = d;
-	m_plants->insert(p->key, ap);
+	PlantInstance * inst = new PlantInstance;
+	inst->m_backup = backup;
+	inst->m_reference = p->index;
+	m_plants->insert(p->key, inst);
 }
 
 void PlantSelection::deselect()
@@ -90,7 +90,23 @@ void PlantSelection::deselect()
 const unsigned & PlantSelection::count() const
 { return m_numSelected; }
 	
-Array<int, Plant> * PlantSelection::data()
+Array<int, PlantInstance> * PlantSelection::data()
 { return m_plants; }
+
+void PlantSelection::calculateWeight()
+{
+	m_plants->begin();
+	while(!m_plants->end() ) {
+		const Vector3F pr = m_plants->value()->m_reference->t1->getTranslation();
+		const float dist = m_center.distanceTo(pr);
+		if(dist < m_radius) {
+			m_plants->value()->m_weight = 1.f - dist / m_radius;
+		}
+		else {
+			m_plants->value()->m_weight = 0.f;
+		}
+		m_plants->next();
+	}
+}
 
 }

@@ -312,7 +312,43 @@ WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
 const unsigned & Forest::numActivePlants() const
 { return m_activePlants->count(); }
 
-Array<int, Plant> * Forest::activePlants()
+Array<int, PlantInstance> * Forest::activePlants()
 { return m_activePlants->data(); }
+
+void Forest::movePlant(const Ray & ray,
+						const Vector3F & displaceNear, const Vector3F & displaceFar,
+						const float & clipNear, const float & clipFar)
+{
+	if(numActivePlants() < 1 ) return;
+	if(m_ground->isEmpty() ) return;
+	
+	m_intersectCtx.reset(ray);
+	m_ground->intersect(&m_intersectCtx);
+	
+	if(!m_intersectCtx.m_success) return;
+	
+	const float depth = m_intersectCtx.m_hitP.distanceTo(ray.m_origin);
+	const Vector3F disp = displaceNear 
+					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
+	
+	m_activePlants->set(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN, 4.f);
+	m_activePlants->calculateWeight();
+	
+	Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-4f) { 
+			Vector3F pos = arr->value()->m_reference->t1->getTranslation()
+						 + disp * wei;
+						 
+			m_closestPointTest.reset(pos, 1e8f);
+			m_ground->closestToPoint(&m_closestPointTest);
+			if(m_closestPointTest._hasResult);
+				arr->value()->m_reference->t1->setTranslation(m_closestPointTest._hitPoint );
+		}
+		arr->next();
+	}
+}
 
 }

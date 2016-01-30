@@ -815,7 +815,7 @@ void ProxyViz::adjustSize(short x, short y, float magnitude)
 	}
 }
 
-void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, MFnMesh & mesh)
+void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat)
 {
     useActiveView();
 	MPoint toNear, toFar;
@@ -827,42 +827,14 @@ void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short 
 	MVector dispNear = toNear - fromNear;
 	MVector dispFar = toFar - fromFar;
 	
-	Vector3F pp;
-	Vector2F cursor(start_x, start_y);
-	MVector disp;
-	unsigned num_active = _activeIndices.length();
-	for(unsigned i =0; i < num_active; i++) {
-		MMatrix space = worldizeSpace(_spaces[_activeIndices[i]]);
-		MPoint pos(space(3, 0), space(3, 1), space(3, 2));
-		short viewx, viewy;
-		_viewport.worldToView (pos, viewx, viewy);
-		Vector2F pscrn(viewx, viewy);
-		float weight = pscrn.distantTo(cursor);
-		weight = 1.f - weight/128.f;
-			
-		if(weight>0)
-		{
-			pp = Vector3F(space(3,0), space(3,1), space(3,2));
-			pp = mat.transform(pp);
-			
-			if(pp.z > clipNear) {
-				
-				disp = dispNear + (dispFar - dispNear)*(pp.z-clipNear)/(clipFar-clipNear);
-				
-				MPoint movedp = MPoint(space(3,0), space(3,1), space(3,2)) + MVector(disp.x, disp.y, disp.z) * weight;
-				
-				MPoint closestP;
-				MVector closestN;
-				mesh.getClosestPointAndNormal (movedp, closestP, closestN, MSpace::kWorld);
+	Vector3F a(toNear.x, toNear.y, toNear.z);
+	Vector3F b(toFar.x, toFar.y, toFar.z);
+	Ray r(a, b);
 	
-				space(3, 0) =  closestP.x;
-				space(3, 1) =  closestP.y;
-				space(3, 2) =  closestP.z;
-
-				_spaces[_activeIndices[i]] = localizeSpace(space);
-			}
-		}	
-	}
+	Vector3F v0(dispNear.x, dispNear.y, dispNear.z);
+	Vector3F v1(dispFar.x, dispFar.y, dispFar.z);
+	
+	movePlant(r, v0, v1, clipNear, clipFar);
 }
 
 void ProxyViz::smoothPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, MFnMesh & mesh)

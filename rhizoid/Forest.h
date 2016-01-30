@@ -41,6 +41,7 @@ class Forest {
 	KdTree * m_ground;
 	PlantSelection * m_activePlants;
 	IntersectionContext m_intersectCtx;
+	Geometry::ClosestToPointTestResult m_closestPointTest;
 	SelectionContext m_selectCtx;
 	PseudoNoise m_pnoise;
 	int m_seed;
@@ -85,8 +86,12 @@ protected:
 	virtual float plantSize(int idx) const;
 	
 	WorldGrid<Array<int, Plant>, Plant > * grid();
-	Array<int, Plant> * activePlants();
+	Array<int, PlantInstance> * activePlants();
 	
+	void movePlant(const Ray & ray,
+					const Vector3F & displaceNear, const Vector3F & displaceFar,
+					const float & clipNear, const float & clipFar);
+						
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
 					GrowOption & option);

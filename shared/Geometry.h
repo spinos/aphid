@@ -25,6 +25,7 @@ public:
 		unsigned _icomponent;
 		bool _hasResult;
 		bool _isInside;
+		Geometry * _geom;
 		void reset(const Vector3F & p, float d) {
 			_toPoint = p;
 			_distance = d;
