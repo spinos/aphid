@@ -3,6 +3,7 @@
 #include <maya/MGlobal.h>
 #include <maya/MArrayDataHandle.h>
 
+/// maya interface
 class MForest : public DrawForest {
 
 public:
@@ -10,7 +11,8 @@ public:
     virtual ~MForest();
     
 	void selectGround(const MPoint & origin, const MPoint & dest, 
-					MGlobal::ListAdjustment adj = MGlobal::kReplaceList);
+					MGlobal::ListAdjustment adj);
+	void flood(GrowOption & option);
 	
 protected:
     void updateGround(MArrayDataHandle & data);

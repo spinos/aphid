@@ -51,6 +51,8 @@ public:
 	
 	void displace(ValueType * v, const Vector3F & pref);
 	
+	ChildType * findCell(const Vector3F & pref);
+	
 protected:
 	
 private:
@@ -131,6 +133,18 @@ void WorldGrid<ChildType, ValueType>::displace(ValueType * v, const Vector3F & p
 		}
 	}
 	insert(c1, nv);
+}
+
+template<typename ChildType, typename ValueType>
+ChildType * WorldGrid<ChildType, ValueType>::findCell(const Vector3F & pref)
+{
+	Coord3 c0 = gridCoord((float *)&pref);
+	Pair<Entity *, Entity> p = findEntity(c0);
+	if(p.index) {
+		ChildType * g = static_cast<ChildType *>(p.index);
+		return g;
+	}
+	return NULL;
 }
 
 } //end namespace sdb

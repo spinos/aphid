@@ -30,7 +30,9 @@ class MItMeshPolygon;
 
 class ProxyViz : public MPxLocatorNode, public MForest
 {
+	M3dView _viewport;
 	double m_materializePercentage;
+	bool m_toSetGrid;
 	
 public:
 	ProxyViz();
@@ -77,6 +79,7 @@ public:
 	static MObject astandinNames;
     static MObject agroundMesh;
 	static MObject outValue;
+	static	MTypeId		id;
 	
 	void addABox(const MMatrix & m);
 	char isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax);
@@ -101,8 +104,6 @@ public:
 	const MMatrixArray & spaces() const;
 	const MMatrixArray spaces(int groupCount, int groupId, MIntArray & ppNums) const;
 	const MMatrix & worldSpace() const;
-public: 
-	static	MTypeId		id;
 	
 private:
 	char hasDisplayMesh() const;
@@ -113,16 +114,12 @@ private:
 	MFloatArray _details;
 	MIntArray _randNums;
 	MIntArray _activeIndices;
-	M3dView _viewport;
-	Vector3F _bbmin, _bbmax;
+	
 	char *fVisibleTag;
 	char _firstLoad, fHasView;
 	void drawSelected(float mScale[16]);
 	void drawSolidMesh(MItMeshPolygon & iter);
 	void drawWireMesh(MItMeshPolygon & iter);
-	void draw_solid_box() const;
-	void draw_a_box() const;
-	void draw_coordsys() const;
 	void drawViewFrustum(const MMatrix & cameraSpace, const float & h_fov, const float & aspectRatio);
 	void loadCache(const char* filename);
 	void saveCache(const char* filename);

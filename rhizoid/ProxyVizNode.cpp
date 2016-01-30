@@ -1,8 +1,5 @@
 #include <Vector2F.h>
 #include "proxyVizNode.h"
-#include <maya/MString.h> 
-#include <maya/MGlobal.h>
-
 #include <maya/MVector.h>
 #include <maya/MFnMatrixAttribute.h>
 #include <maya/MDataHandle.h>
@@ -21,6 +18,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <PseudoNoise.h>
 #include <EnvVar.h>
+#include <AHelper.h>
 #include <fstream> 
 
 static int indexByValue(const MIntArray &arr, int value) 
@@ -95,12 +93,13 @@ MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
 MObject ProxyViz::agroundMesh;
 
-ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0) {
-MMatrix m;
-addABox(m);
-_bbmin.x = _bbmin.y = _bbmin.z = -1.f;
-_bbmax.x = _bbmax.y = _bbmax.z = 1.f;
+ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0),
+m_toSetGrid(true)
+{
+	MMatrix m;
+	addABox(m);
 }
+
 ProxyViz::~ProxyViz() 
 {
     if(fVisibleTag)
@@ -123,12 +122,18 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		fDisplayMesh = block.inputValue( ainmesh ).asMesh();
 
-		_bbmin.x = block.inputValue(abboxminx).asFloat();
-		_bbmin.y = block.inputValue(abboxminy).asFloat();
-		_bbmin.z = block.inputValue(abboxminz).asFloat();
-		_bbmax.x = block.inputValue(abboxmaxx).asFloat();
-		_bbmax.y = block.inputValue(abboxmaxy).asFloat();
-		_bbmax.z = block.inputValue(abboxmaxz).asFloat();
+		BoundingBox * defb = defBoxP();
+		defb->setMin(block.inputValue(abboxminx).asFloat(), 0);
+		defb->setMin(block.inputValue(abboxminy).asFloat(), 1);
+		defb->setMin(block.inputValue(abboxminz).asFloat(), 2);
+		defb->setMax(block.inputValue(abboxmaxx).asFloat(), 0);
+		defb->setMax(block.inputValue(abboxmaxy).asFloat(), 1);
+		defb->setMax(block.inputValue(abboxmaxz).asFloat(), 2);
+		
+		if(m_toSetGrid) {
+			m_toSetGrid = false;
+			resetGrid(defb->distance(0) * 20.f);
+		}
 		
 		double h_apeture = block.inputValue(ahapeture).asDouble();
 		double v_apeture = block.inputValue(avapeture).asDouble();
@@ -174,7 +179,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			_activeIndices.clear();
 		}
 
-		const Vector3F vdetail = _bbmax - _bbmin;
+		const Vector3F vdetail = defb->getMax() - defb->getMin();
 		const float detail = vdetail.length();
 		float aspectRatio = v_apeture / h_apeture;
 		calculateLOD(cameraInv, h_fov, aspectRatio, detail, frustumCull);
@@ -308,20 +313,6 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	float mScale[16];
 	scale_matrix(multiplier, mScale);
 	
-	MPlug bbminxplug(thisNode, abboxminx);
-	_bbmin.x = bbminxplug.asFloat();
-	MPlug bbminyplug(thisNode, abboxminy);
-	_bbmin.y = bbminyplug.asFloat();
-	MPlug bbminzplug(thisNode, abboxminz);
-	_bbmin.z = bbminzplug.asFloat();
-	
-	MPlug bbmaxxplug(thisNode, abboxmaxx);
-	_bbmax.x = bbmaxxplug.asFloat();
-	MPlug bbmaxyplug(thisNode, abboxmaxy);
-	_bbmax.y = bbmaxyplug.asFloat();
-	MPlug bbmaxzplug(thisNode, abboxmaxz);
-	_bbmax.z = bbmaxzplug.asFloat();
-	
 	MPlug matplg(thisNode, acameraspace);
 	MObject matobj;
 	matplg.getValue(matobj);
@@ -440,9 +431,10 @@ bool ProxyViz::isBounded() const
 
 MBoundingBox ProxyViz::boundingBox() const
 {   
-	
-	MPoint corner1(_bbmin.x, _bbmin.y, _bbmin.z);
-	MPoint corner2(_bbmax.x, _bbmax.y, _bbmax.z);
+	Vector3F vmin = defBox().getMin();
+	Vector3F vmax = defBox().getMax();
+	MPoint corner1(vmin.x, vmin.y, vmin.z);
+	MPoint corner2(vmax.x, vmax.y, vmax.z);
 
 	unsigned num_box = _spaces.length();
 	
@@ -690,95 +682,6 @@ MStatus ProxyViz::initialize()
 	return MS::kSuccess;
 }
 
-void ProxyViz::draw_solid_box() const
-{
-    glBegin(GL_QUADS);
-	glNormal3f(0.f, 0.f, -1.f);
-	glVertex3f(_bbmin.x, _bbmin.y, _bbmin.z);
-	glVertex3f(_bbmin.x, _bbmax.y, _bbmin.z);
-	glVertex3f(_bbmax.x, _bbmax.y, _bbmin.z);
-	glVertex3f(_bbmax.x, _bbmin.y, _bbmin.z);
-	
-	glNormal3f(0.f, 0.f, 1.f);
-	glVertex3f(_bbmin.x, _bbmin.y, _bbmax.z);
-	glVertex3f(_bbmax.x, _bbmin.y, _bbmax.z);
-	glVertex3f(_bbmax.x, _bbmax.y, _bbmax.z);
-	glVertex3f(_bbmin.x, _bbmax.y, _bbmax.z);
-	
-	glNormal3f(-1.f, 0.f, 0.f);
-	glVertex3f(_bbmin.x, _bbmin.y, _bbmin.z);
-	glVertex3f(_bbmin.x, _bbmin.y, _bbmax.z);
-	glVertex3f(_bbmin.x, _bbmax.y, _bbmax.z);
-	glVertex3f(_bbmin.x, _bbmax.y, _bbmin.z);
-	
-	glNormal3f(1.f, 0.f, 0.f);
-	glVertex3f(_bbmax.x, _bbmin.y, _bbmin.z);
-	glVertex3f(_bbmax.x, _bbmax.y, _bbmin.z);
-	glVertex3f(_bbmax.x, _bbmax.y, _bbmax.z);
-	glVertex3f(_bbmax.x, _bbmin.y, _bbmax.z);
-	
-	glNormal3f(0.f, -1.f, 0.f);
-	glVertex3f(_bbmin.x, _bbmin.y, _bbmin.z);
-	glVertex3f(_bbmax.x, _bbmin.y, _bbmin.z);
-	glVertex3f(_bbmax.x, _bbmin.y, _bbmax.z);
-	glVertex3f(_bbmin.x, _bbmin.y, _bbmax.z);
-	
-	glNormal3f(0.f, 1.f, 0.f);
-	glVertex3f(_bbmin.x, _bbmax.y, _bbmin.z);
-	glVertex3f(_bbmin.x, _bbmax.y, _bbmax.z);
-	glVertex3f(_bbmax.x, _bbmax.y, _bbmax.z);
-	glVertex3f(_bbmax.x, _bbmax.y, _bbmin.z);
-	glEnd();
-}
-
-void ProxyViz::draw_a_box() const
-{
-	glBegin( GL_LINES );
-	    glVertex3f(_bbmin.x, _bbmin.y, _bbmin.z);
-		glVertex3f(_bbmax.x, _bbmin.y, _bbmin.z);
-		glVertex3f(_bbmin.x, _bbmax.y, _bbmin.z);
-		glVertex3f(_bbmax.x, _bbmax.y, _bbmin.z);
-		glVertex3f(_bbmin.x, _bbmin.y, _bbmax.z);
-		glVertex3f(_bbmax.x, _bbmin.y, _bbmax.z);
-		glVertex3f(_bbmin.x, _bbmax.y, _bbmax.z);
-		glVertex3f(_bbmax.x, _bbmax.y, _bbmax.z);
-		
-		glVertex3f(_bbmin.x, _bbmin.y, _bbmin.z);
-		glVertex3f(_bbmin.x, _bbmax.y, _bbmin.z);
-		glVertex3f(_bbmax.x, _bbmin.y, _bbmin.z);
-		glVertex3f(_bbmax.x, _bbmax.y, _bbmin.z);
-		glVertex3f(_bbmin.x, _bbmin.y, _bbmax.z);
-		glVertex3f(_bbmin.x, _bbmax.y, _bbmax.z);
-		glVertex3f(_bbmax.x, _bbmin.y, _bbmax.z);
-		glVertex3f(_bbmax.x, _bbmax.y, _bbmax.z);
-		
-		glVertex3f(_bbmin.x, _bbmin.y, _bbmin.z);
-		glVertex3f(_bbmin.x, _bbmin.y, _bbmax.z);
-		glVertex3f(_bbmax.x, _bbmin.y, _bbmin.z);
-		glVertex3f(_bbmax.x, _bbmin.y, _bbmax.z);
-		glVertex3f(_bbmin.x, _bbmax.y, _bbmin.z);
-		glVertex3f(_bbmin.x, _bbmax.y, _bbmax.z);
-		glVertex3f(_bbmax.x, _bbmax.y, _bbmin.z);
-		glVertex3f(_bbmax.x, _bbmax.y, _bbmax.z);
-		
-	glEnd();
-}
-
-void ProxyViz::draw_coordsys() const
-{
-	glBegin( GL_LINES );
-	glColor3f(1.f, 0.f, 0.f);
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(_bbmax.x, 0.f, 0.f); 
-	glColor3f(0.f, 1.f, 0.f);					
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, _bbmax.y, 0.f); 
-	glColor3f(0.f, 0.f, 1.f);					
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, 0.f, _bbmax.z);		
-	glEnd();
-}
-
 void ProxyViz::drawSelected(float mScale[16])
 {
 	double mm[16];
@@ -886,7 +789,7 @@ float longestDimension(const Vector3F & bbmax, const Vector3F & bbmin)
 void ProxyViz::selectBoxesInView(short xmin, short ymin, short xmax, short ymax, MGlobal::ListAdjustment selectionMode)
 {	
     useActiveView();
-	float longest = longestDimension(_bbmax, _bbmin);
+	float longest = defBox().getLongestDistance();
 
 	if(selectionMode == MGlobal::kReplaceList)
 		_activeIndices.clear();
@@ -927,7 +830,7 @@ void ProxyViz::selectBoxesInView(short xmin, short ymin, short xmax, short ymax,
 void ProxyViz::removeBoxesInView(short xmin, short ymin, short xmax, short ymax, const float & threshold)
 {
     useActiveView();
-	float longest = longestDimension(_bbmax, _bbmin);
+	float longest = defBox().getLongestDistance();
 
 	_activeIndices.clear();
 	unsigned num_box = _spaces.length();
@@ -1331,7 +1234,7 @@ void ProxyViz::pressToLoad()
 
 void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling)
 {	
-    float longest = longestDimension(_bbmax, _bbmin);
+    float longest = defBox().getLongestDistance();
 	int portW, portH;
 
 	if(fHasView) {

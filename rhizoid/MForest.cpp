@@ -88,5 +88,15 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 	if(adj == MGlobal::kAddToList) m = SelectionContext::Append;
 	else if(adj == MGlobal::kRemoveFromList) m = SelectionContext::Remove;
 	
-	selectGroundFaces(r, m);
+	bool stat = selectGroundFaces(r, m);
+	if(!stat)
+		AHelper::Info<int>("empty selection", m);
+}
+
+void MForest::flood(GrowOption & option)
+{
+	option.m_plantId = activePlantId();
+	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
+	growOnGround(option);
+	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
 }

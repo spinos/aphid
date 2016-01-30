@@ -29,6 +29,7 @@ public:
 	void create(unsigned np, unsigned nt);
 	unsigned * triangleIndices(unsigned idx) const;
 	const Vector3F triangleCenter(unsigned idx) const;
+	const Vector3F triangleNormal(unsigned idx) const;
 	virtual std::string verbosestr() const;
 protected:
 	

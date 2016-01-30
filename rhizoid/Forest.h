@@ -11,10 +11,12 @@
 #include <WorldGrid.h>
 #include <Array.h>
 #include <Quaternion.h>
+#include <Matrix44F.h>
 #include <KdTree.h>
 #include <ATriangleMesh.h>
 #include <IntersectionContext.h>
 #include <SelectionContext.h>
+#include <PseudoNoise.h>
 
 /* http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
  * qw= √(1 + m00 + m11 + m22) /2
@@ -22,11 +24,13 @@
  * qy = (m02 - m20)/( 4 *qw)
  * qz = (m10 - m01)/( 4 *qw)
  */
+ 
+class TriangleRaster;
 
 namespace sdb {
-/// (plant id, (world orientation, world position, triangle bind id) )
-typedef Triple<Quaternion, Vector3F, int > RotPosTri;
-class Plant : public Pair<int, RotPosTri>
+/// (plant id, (transformation, plant type id, triangle bind id) )
+typedef Triple<Matrix44F, int, int > PlantData;
+class Plant : public Pair<int, PlantData>
 {
 public:
 	
@@ -36,29 +40,44 @@ public:
 	
 };
 
+/*
+ *  plant and ground data
+ *
+ */
+
 class Forest {
 
 	WorldGrid<Array<int, Plant>, Plant > * m_grid;
-	std::vector<RotPosTri *> m_pool;
+	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
 	KdTree * m_ground;
 	IntersectionContext m_intersectCtx;
 	SelectionContext m_selectCtx;
+	PseudoNoise m_pnoise;
+	int m_seed;
 	
 public:
+	struct GrowOption {
+		Vector3F m_upDirection;
+		int m_plantId;
+		float m_minScale, m_maxScale;
+		float m_marginSize;
+		float m_rotateNoise;
+		bool m_alongNormal;
+	};
+	
 	Forest();
 	virtual ~Forest();
 	
-	void resetGrid(float gridSize);
-	void finishGrid();
-	void addPlant(const Quaternion & orientation, 
-					const Vector3F & position,
-					const int & triangleId);
-		
 	unsigned numActiveGroundFaces();
 	
 protected:
+	void resetGrid(float gridSize);
+	void finishGrid();
+	void addPlant(const Matrix44F & tm,
+					const int & plantTypeId,
+					const int & triangleId);
 	const BoundingBox boundingBox() const;
 	unsigned numPlants() const;
 	unsigned numGroundMeshes() const;
@@ -66,11 +85,20 @@ protected:
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     ATriangleMesh * getGroundMesh(unsigned idx) const;
     void buildGround();
-    void selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
+    bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
 	SelectionContext * activeGround();
+	void growOnGround(GrowOption & option);
+	
+	virtual float plantSize(int idx) const;
 	
 private:
-
+	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
+					GrowOption & option);
+	void growOnTriangle(TriangleRaster * tri, GrowOption & option);
+	bool closeToOccupiedPosition(const Vector3F & pos, 
+					const float & minDistance);
+	Matrix44F randomSpaceAt(const Vector3F & pos, const GrowOption & option);
+	
 };
 
 }

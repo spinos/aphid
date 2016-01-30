@@ -86,6 +86,20 @@ const Vector3F ATriangleMesh::triangleCenter(unsigned idx) const
 	return (p[v[0]] + p[v[1]] + p[v[2]]) / 3.f;
 }
 
+const Vector3F ATriangleMesh::triangleNormal(unsigned idx) const
+{
+	unsigned * v = triangleIndices(idx);
+	Vector3F * p = points();
+	Vector3F a = p[v[0]];
+	Vector3F b = p[v[1]];
+	Vector3F c = p[v[2]];
+	Vector3F ab = b - a;
+	Vector3F ac = c - a;
+	Vector3F nor = ab.cross(ac);
+	nor.normalize();
+	return nor;
+}
+
 std::string ATriangleMesh::verbosestr() const
 {
 	std::stringstream sst;
