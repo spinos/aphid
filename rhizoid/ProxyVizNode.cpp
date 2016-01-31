@@ -7,7 +7,9 @@
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MEulerRotation.h>
 #include <maya/MFnMatrixData.h>
+#include <maya/MFnPointArrayData.h>
 #include <maya/MFnDoubleArrayData.h>
+#include <maya/MFnIntArrayData.h>
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
@@ -46,15 +48,21 @@ MObject ProxyViz::ainmesh;
 MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
 MObject ProxyViz::agroundMesh;
+MObject ProxyViz::aplantTransformCache;
+MObject ProxyViz::aplantIdCache;
+MObject ProxyViz::aplantTriangleIdCache;
+MObject ProxyViz::aplantTriangleCoordCache;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0),
 m_toSetGrid(true), m_hasCamera(false)
-{}
+{
+	attachSceneCallbacks();
+}
 
 ProxyViz::~ProxyViz() 
 {
-    if(fVisibleTag)
-        delete[] fVisibleTag;
+    if(fVisibleTag) delete[] fVisibleTag;
+	detachSceneCallbacks();
 }
 
 MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
@@ -523,7 +531,45 @@ MStatus ProxyViz::initialize()
     typedAttrFn.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( agroundMesh );
 	attributeAffects(agroundMesh, outValue);
-    
+	
+	MPointArray defaultPntArray;
+	MFnPointArrayData pntArrayDataFn;
+	pntArrayDataFn.create( defaultPntArray );
+	aplantTransformCache = typedAttrFn.create( "transformCachePlant",
+											"tmcpl",
+											MFnData::kPointArray,
+											pntArrayDataFn.object(),
+											&stat );
+    typedAttrFn.setStorable(true);
+	addAttribute(aplantTransformCache);
+	
+	MIntArray defaultIntArray;
+	MFnIntArrayData intArrayDataFn;
+	intArrayDataFn.create( defaultIntArray );
+	aplantIdCache = typedAttrFn.create( "idCachePlant",
+											"idcpl",
+											MFnData::kIntArray,
+											intArrayDataFn.object(),
+											&stat );
+    typedAttrFn.setStorable(true);
+	addAttribute(aplantIdCache);
+	
+	aplantTriangleIdCache = typedAttrFn.create( "triCachePlant",
+											"trcpl",
+											MFnData::kIntArray,
+											intArrayDataFn.object(),
+											&stat );
+    typedAttrFn.setStorable(true);
+	addAttribute(aplantTriangleIdCache);
+	
+	aplantTriangleCoordCache = typedAttrFn.create( "coordCachePlant",
+											"crcpl",
+											MFnData::kVectorArray,
+											vectArrayDataFn.object(),
+											&stat );
+    typedAttrFn.setStorable(true);
+	addAttribute(aplantTriangleCoordCache);
+	
 	// attributeAffects(acameraspace, outValue);
 	attributeAffects(abboxminx, outValue);
 	attributeAffects(abboxmaxx, outValue);
@@ -541,6 +587,62 @@ MStatus ProxyViz::initialize()
 	attributeAffects(aconvertPercentage, outValue);
 
 	return MS::kSuccess;
+}
+
+void ProxyViz::attachSceneCallbacks()
+{
+	fBeforeSaveCB  = MSceneMessage::addCallback(MSceneMessage::kBeforeSave,  releaseCallback, this);
+}
+
+void ProxyViz::detachSceneCallbacks()
+{
+	if (fBeforeSaveCB)
+		MMessage::removeCallback(fBeforeSaveCB);
+
+	fBeforeSaveCB = 0;
+}
+
+void ProxyViz::releaseCallback(void* clientData)
+{
+	ProxyViz *pThis = (ProxyViz*) clientData;
+	pThis->saveInternal();
+}
+
+void ProxyViz::saveInternal()
+{
+	AHelper::Info<MString>("prxnode save internal", MFnDependencyNode(thisMObject()).name() );
+	updateNumPlants();
+	const unsigned n = numPlants();
+	AHelper::Info<unsigned>("num plants", n );
+	if(n<1) return;
+	
+	MPointArray plantTms;
+	MIntArray plantIds;
+	MIntArray plantTris;
+	MVectorArray plantCoords;
+	
+/// fill the data
+	
+	MFnPointArrayData tmFn;
+	MObject otm = tmFn.create(plantTms);
+	MPlug tmPlug(thisMObject(), aplantTransformCache);
+	tmPlug.setValue(otm);
+	
+	
+	MFnIntArrayData idFn;
+	MObject oid = idFn.create(plantIds);
+	MPlug idPlug(thisMObject(), aplantIdCache);
+	idPlug.setValue(oid);
+	
+	MFnIntArrayData triFn;
+	MObject otri = idFn.create(plantTris);
+	MPlug triPlug(thisMObject(), aplantTriangleIdCache);
+	triPlug.setValue(otri);
+	
+	MFnVectorArrayData crdFn;
+	MObject ocrd = crdFn.create(plantCoords);
+	MPlug crdPlug(thisMObject(), aplantTriangleCoordCache);
+	crdPlug.setValue(ocrd);
 }
 
 char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax)
@@ -619,9 +721,6 @@ void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short 
 	
 	movePlant(r, v0, v1, clipNear, clipFar);
 }
-
-void ProxyViz::smoothPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, MFnMesh & mesh)
-{}
 
 void ProxyViz::adjustRotation(short x, short y, float magnitude, short axis, float noise)
 {	
@@ -1066,6 +1165,13 @@ MStatus ProxyViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, 
 {
 	if(plug == acameraspace) m_hasCamera = true;
 	//AHelper::Info<MString>("connect", plug.name());
+	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
+}
+
+MStatus ProxyViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
+{
+	if(plug == acameraspace) m_hasCamera = false;
+	//AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 

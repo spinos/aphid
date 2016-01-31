@@ -18,9 +18,9 @@
 #include <maya/MMatrixArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MFloatArray.h>
-#include <maya/MFnMesh.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
+#include <maya/MSceneMessage.h>
 #include <Matrix44F.h>
 #include <Vector3F.h>
 #include <depthCut.h>
@@ -48,6 +48,7 @@ public:
 	virtual bool            isBounded() const;
 	virtual MBoundingBox    boundingBox() const; 
 	virtual MStatus connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
+	virtual MStatus connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
 	
 	static  void *          creator();
 	static  MStatus         initialize();
@@ -80,13 +81,16 @@ public:
 	static MObject aconvertPercentage;
 	static MObject astandinNames;
     static MObject agroundMesh;
+	static MObject aplantTransformCache;
+	static MObject aplantIdCache;
+	static MObject aplantTriangleIdCache;
+	static MObject aplantTriangleCoordCache;
 	static MObject outValue;
 	static	MTypeId		id;
 	
 	char isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax);
 	void adjustSize(short x, short y, float magnitude);
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
-	void smoothPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat, MFnMesh &mesh);
 	void adjustRotation(short x, short y, float magnitude, short axis, float noise = 0.f);
 	void adjustLocation(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, short axis, float noise = 0.f);
 	void pressToSave();
@@ -126,6 +130,13 @@ private:
 	void vizViewFrustum(MObject & node);
 	DepthCut * fCuller;
 	MObject fDisplayMesh;
+	
+	void attachSceneCallbacks();
+	void detachSceneCallbacks();
+	static void releaseCallback(void* clientData);
+
+	MCallbackId fBeforeSaveCB;
+	void saveInternal();
 	
 };
 #endif        //  #ifndef PROXYVIZNODE_H

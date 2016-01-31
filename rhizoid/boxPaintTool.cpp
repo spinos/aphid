@@ -681,15 +681,7 @@ void proxyPaintContext::startSelectGround()
 }
 
 void proxyPaintContext::smoothSelected()
-{
-	if(!m_pViz)
-		return;
-
-	if(!goCollide)
-		return;
-
-	m_pViz->smoothPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar, mat, fcollide);
-}
+{}
 
 void proxyPaintContext::grow()
 {
