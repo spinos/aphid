@@ -56,6 +56,7 @@ public:
 		float m_marginSize;
 		float m_rotateNoise;
 		bool m_alongNormal;
+		bool m_multiGrow;
 	};
 	
 	Forest();
@@ -93,7 +94,9 @@ protected:
 	void movePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,
 					const float & clipNear, const float & clipFar);
-						
+	
+	void growAt(const Ray & ray, GrowOption & option);
+	
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
 					int geoId,
@@ -104,7 +107,12 @@ private:
 					GrowOption & option);
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);
-	Matrix44F randomSpaceAt(const Vector3F & pos, const GrowOption & option);
+	bool testNeighborsInCell(const Vector3F & pos, 
+					const float & minDistance,
+					Array<int, Plant> * cell);
+	void randomSpaceAt(const Vector3F & pos, 
+							const GrowOption & option,
+							Matrix44F & space, float & scale);
 	int geomertyId(Geometry * geo) const;
 	
 };

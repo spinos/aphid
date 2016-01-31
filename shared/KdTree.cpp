@@ -256,10 +256,12 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 
 		Primitive * prim = prims.asPrimitive(*iprim);
 		Geometry * geo = prim->getGeometry();
-		unsigned iface = prim->getComponentIndex();
+		unsigned icomp = prim->getComponentIndex();
 		
-		if(geo->intersectRay(iface, &ctx->m_ray, ctx->m_hitP, ctx->m_hitN, ctx->m_minHitDistance) ) {
+		if(geo->intersectRay(icomp, &ctx->m_ray, ctx->m_hitP, ctx->m_hitN, ctx->m_minHitDistance) ) {
 			anyHit = 1;
+			ctx->m_geometry = geo;
+			ctx->m_componentIdx = icomp;
 		}
 			
 		indir.next();

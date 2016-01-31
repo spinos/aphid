@@ -308,16 +308,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	draw_a_box();
 	drawGridBounding();
-	drawGrid();
+	// drawGrid();
 
 	if ( ( style == M3dView::kFlatShaded ) || 
 		    ( style == M3dView::kGouraudShaded ) ) {		
 		drawPlants();
 	}
-	else {
-		drawWiredPlants();
-	}
-
+	
+	drawWiredPlants();
 	drawActivePlants();
 	drawGround();
 	view.endGL();
@@ -535,7 +533,7 @@ MStatus ProxyViz::initialize()
 	addAttribute( agroundMesh );
 	attributeAffects(agroundMesh, outValue);
     
-	attributeAffects(acameraspace, outValue);
+	// attributeAffects(acameraspace, outValue);
 	attributeAffects(abboxminx, outValue);
 	attributeAffects(abboxmaxx, outValue);
 	attributeAffects(abboxminy, outValue);

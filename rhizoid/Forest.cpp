@@ -225,30 +225,29 @@ void Forest::growOnTriangle(TriangleRaster * tri,
 							GroundBind & bind,
 							GrowOption & option)
 {
-	float delta = option.m_marginSize + plantSize(option.m_plantId);
+	float sampleSize = plantSize(option.m_plantId) * .7f;
 	int grid_x, grid_y;
-	tri->gridSize(delta, grid_x, grid_y);
+	tri->gridSize(sampleSize, grid_x, grid_y);
 	int numSamples = grid_x * grid_y;
 	
 	Vector3F *samples = new Vector3F[numSamples];
 	char *hits = new char[numSamples];
-	tri->genSamples(delta, grid_x, grid_y, samples, hits);
+	tri->genSamples(sampleSize, grid_x, grid_y, samples, hits);
+	float scale;
+	Matrix44F tm;
 	for(int s = 0; s < numSamples; s++) {
 		if(!hits[s]) continue;	
 	
 		Vector3F & pos = samples[s];
-		if(closeToOccupiedPosition(pos, delta)) continue;
 			
-		Matrix44F tm = randomSpaceAt(pos, option);
+		randomSpaceAt(pos, option, tm, scale);
+		float delta = option.m_marginSize + sampleSize * 1.4f * scale;
+		if(closeToOccupiedPosition(pos, delta)) continue;
 		
 		bar->project(pos);
 		bar->compute();
 		if(!bar->insideTriangle()) continue;
 		
-		//std::cout<<" bar"<<bar->getV(0)<<","<<bar->getV(1)<<","<<bar->getV(2);
-		//int a, b;
-		//bind.getGeomComp(a, b);
-		//std::cout<<" bind "<<a<<","<<b;
 		bind.m_w0 = bar->getV(0);
 		bind.m_w1 = bar->getV(1);
 		bind.m_w2 = bar->getV(2);
@@ -262,13 +261,59 @@ void Forest::growOnTriangle(TriangleRaster * tri,
 bool Forest::closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance)
 {
-	Array<int, Plant> * cell = m_grid->findCell(pos);
+	Coord3 c0 = m_grid->gridCoord((const float *)&pos);
+	Array<int, Plant> * cell = m_grid->findCell(c0);
+	if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	
+	BoundingBox b = m_grid->coordToGridBBox(c0);
+	
+	Coord3 c1 = c0;
+	if(pos.x - minDistance < b.getMin(0) ) {
+		 c1.x = c0.x - 1;
+		 cell = m_grid->findCell(c1);
+		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	}
+	if(pos.x + minDistance > b.getMax(0) ) {
+		 c1.x = c0.x + 1;
+		 cell = m_grid->findCell(c1);
+		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	}
+	c1.x = c0.x;
+	if(pos.y - minDistance < b.getMin(1) ) {
+		 c1.y = c0.y - 1;
+		 cell = m_grid->findCell(c1);
+		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	}
+	if(pos.y + minDistance > b.getMax(1) ) {
+		 c1.y = c0.y + 1;
+		 cell = m_grid->findCell(c1);
+		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	}
+	c1.y = c0.y;
+	if(pos.z - minDistance < b.getMin(2) ) {
+		 c1.z = c0.z - 1;
+		 cell = m_grid->findCell(c1);
+		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	}
+	if(pos.z + minDistance > b.getMax(2) ) {
+		 c1.z = c0.z + 1;
+		 cell = m_grid->findCell(c1);
+		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	}
+	return false;
+}
+
+bool Forest::testNeighborsInCell(const Vector3F & pos, 
+					const float & minDistance,
+					Array<int, Plant> * cell)
+{
 	if(!cell) return false;
 	if(cell->isEmpty() ) return false;
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
-		if(pos.distanceTo(d->t1->getTranslation() ) < minDistance) return true;
+		float scale = d->t1->getSide().length();
+		if(pos.distanceTo(d->t1->getTranslation() ) - plantSize(*d->t3) * scale < minDistance) return true;
 		  
 		cell->next();
 	}
@@ -278,15 +323,14 @@ bool Forest::closeToOccupiedPosition(const Vector3F & pos,
 float Forest::plantSize(int idx) const
 { return 1.f; }
 
-Matrix44F Forest::randomSpaceAt(const Vector3F & pos, const GrowOption & option)
+void Forest::randomSpaceAt(const Vector3F & pos, const GrowOption & option,
+							Matrix44F & space, float & scale)
 {
-	Matrix44F space;
 	*space.m(3, 0) =  pos.x;
 	*space.m(3, 1) =  pos.y;
 	*space.m(3, 2) =  pos.z;
 	
 	Vector3F up = option.m_upDirection;
-	//up.normalize();
 	
 	Vector3F side(1.f, 0.f, 0.f);
 	if(up.x > 0.9f || up.x < -0.9f)
@@ -298,7 +342,7 @@ Matrix44F Forest::randomSpaceAt(const Vector3F & pos, const GrowOption & option)
 	side = up.cross(front);
 	side.normalize();
 	
-	float sz = (m_pnoise.rfloat(m_seed)) * (option.m_maxScale - option.m_minScale)
+	scale = (m_pnoise.rfloat(m_seed)) * (option.m_maxScale - option.m_minScale)
 				+ option.m_minScale;
 	m_seed++;
 	
@@ -313,17 +357,15 @@ Matrix44F Forest::randomSpaceAt(const Vector3F & pos, const GrowOption & option)
 	front = side.cross(up);
 	front.normalize();
 
-	*space.m(0, 0) = side.x * sz;
-	*space.m(0, 1) = side.y * sz;
-	*space.m(0, 2) = side.z * sz;
-	*space.m(1, 0) = up.x * sz;
-	*space.m(1, 1) = up.y * sz;
-	*space.m(1, 2) = up.z * sz;
-	*space.m(2, 0) = front.x * sz;
-	*space.m(2, 1) = front.y * sz;
-	*space.m(2, 2) = front.z * sz;
-
-	return space;
+	*space.m(0, 0) = side.x * scale;
+	*space.m(0, 1) = side.y * scale;
+	*space.m(0, 2) = side.z * scale;
+	*space.m(1, 0) = up.x * scale;
+	*space.m(1, 1) = up.y * scale;
+	*space.m(1, 2) = up.z * scale;
+	*space.m(2, 0) = front.x * scale;
+	*space.m(2, 1) = front.y * scale;
+	*space.m(2, 2) = front.z * scale;
 }
 
 WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
@@ -395,6 +437,50 @@ void Forest::removeAllPlants()
 	m_activePlants->deselect();
 	m_grid->clear();
 	m_numPlants = 0;
+}
+
+void Forest::growAt(const Ray & ray, GrowOption & option)
+{
+	if(m_ground->isEmpty() ) return;
+	
+	m_intersectCtx.reset(ray);
+	m_ground->intersect(&m_intersectCtx);
+	
+	if(!m_intersectCtx.m_success) return;
+	
+	ATriangleMesh * mesh = static_cast<ATriangleMesh *>(m_intersectCtx.m_geometry);
+	unsigned component = m_intersectCtx.m_componentIdx;
+	if(option.m_alongNormal)
+		option.m_upDirection = mesh->triangleNormal(component );
+		
+	Vector3F * p = mesh->points();
+	unsigned * tri = mesh->triangleIndices(component );
+	TriangleRaster trir;
+	BarycentricCoordinate bar;
+	if(!trir.create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) return;
+	
+	bar.create(p[tri[0]], p[tri[1]], p[tri[2]] );
+	
+	GroundBind bind;
+	bind.setGeomComp(geomertyId(mesh), component );
+	
+	if(option.m_multiGrow) growOnTriangle(&trir, &bar, bind, option);
+	else {
+		Matrix44F tm;
+		float scale;
+		randomSpaceAt(m_intersectCtx.m_hitP, option, tm, scale);
+		float delta = option.m_marginSize + plantSize(option.m_plantId) * scale;
+		if(closeToOccupiedPosition(m_intersectCtx.m_hitP, delta)) return;
+		
+		bar.project(m_intersectCtx.m_hitP);
+		bar.compute();
+		
+		bind.m_w0 = bar.getV(0);
+		bind.m_w1 = bar.getV(1);
+		bind.m_w2 = bar.getV(2);
+		
+		addPlant(tm, bind, option.m_plantId);
+	}
 }
 
 }

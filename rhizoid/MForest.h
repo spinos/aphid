@@ -17,6 +17,9 @@ public:
 	void selectGround(const MPoint & origin, const MPoint & dest, 
 					MGlobal::ListAdjustment adj);
 	void flood(GrowOption & option);
+	void grow(const MPoint & origin, const MPoint & dest, 
+					GrowOption & option);
+	void finishGrow();
 	
 protected:
     void updateGround(MArrayDataHandle & data);

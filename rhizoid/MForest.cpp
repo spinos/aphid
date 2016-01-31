@@ -118,7 +118,16 @@ void MForest::flood(GrowOption & option)
 	updateNumPlants();
 	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
 	updateGrid();
-	AHelper::Info<BoundingBox>("ProxyViz grid bounding", gridBoundingBox() );
+}
+
+void MForest::grow(const MPoint & origin, const MPoint & dest, 
+					GrowOption & option)
+{
+	option.m_plantId = activePlantId();
+	Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	growAt(r, option);
 }
 
 void MForest::drawSolidMesh(MItMeshPolygon & iter)
@@ -175,4 +184,9 @@ void MForest::matrix_as_array(const MMatrix &space, double *mm)
 	mm[15] = space(3,3);
 }
 
+void MForest::finishGrow()
+{
+	updateGrid();
+	updateNumPlants();
+}
 //:~
