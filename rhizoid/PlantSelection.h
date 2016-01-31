@@ -73,12 +73,13 @@ public:
 	const unsigned & count() const;
 	Array<int, PlantInstance> * data();
 	void calculateWeight();
+	void select(Plant * p);
 	
 protected:
 
 private:
 	void select(const Coord3 & c, SelectionContext::SelectMode mode);
-	void select(Plant * p);
+	
 };
 
 }

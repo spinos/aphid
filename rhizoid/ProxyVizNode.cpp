@@ -16,16 +16,6 @@
 #include <AHelper.h>
 #include <fstream> 
 
-static int indexByValue(const MIntArray &arr, int value) 
-{
-	unsigned numElement = arr.length();
-	for(unsigned i = 0; i < numElement; i++) {
-		if(arr[i] == value)
-			return i;
-	}
-	return -1;
-}
-
 MTypeId ProxyViz::id( 0x95a19e );
 MObject ProxyViz::abboxminx;
 MObject ProxyViz::abboxminy;
@@ -120,13 +110,14 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
         
 		MArrayDataHandle groundArray = block.inputArrayValue(agroundMesh );
         updateGround(groundArray );
+		moveWithGround();
 		
+/// particle output
 		unsigned num_box = _spaces.length();
 		_details.setLength(num_box);
 		_randNums.setLength(num_box);
 		
-		if(fVisibleTag)
-		    delete[] fVisibleTag;
+		if(fVisibleTag) delete[] fVisibleTag;
 		fVisibleTag = new char[num_box];
 		
 		if(start_time == 1.f) {
@@ -630,16 +621,7 @@ void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short 
 }
 
 void ProxyViz::smoothPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, MFnMesh & mesh)
-{
-	unsigned num_active = _activeIndices.length();
-	if(num_active < 2) return;
-	MVectorArray wp;
-	wp.setLength(num_active);
-	for(unsigned i =0; i < num_active; i++) {
-		MMatrix space = worldizeSpace(_spaces[_activeIndices[i]]);
-		wp[i] = MVector(space(3,0), space(3,1), space(3,2));
-	}
-}
+{}
 
 void ProxyViz::adjustRotation(short x, short y, float magnitude, short axis, float noise)
 {	
@@ -763,46 +745,6 @@ void ProxyViz::adjustLocation(short start_x, short start_y, short last_x, short 
 				_spaces[_activeIndices[i]] = localizeSpace(space);
 			}
 		}	
-	}
-}
-
-void ProxyViz::snapByIntersection(MFnMesh &mesh)
-{
-    MStatus stat;
-    unsigned num_active = _activeIndices.length();
-	for(unsigned i =0; i < num_active; i++) {
-	    MMatrix space = worldizeSpace(_spaces[_activeIndices[i]]);
-		MPoint pos(space(3, 0), space(3, 1), space(3, 2));
-		const MVector dir(space(1, 0), space(1, 1), space(1, 2));
-		const MVector invdir = dir * -1.0;
-	    
-		MPointArray Aphit;
-        MIntArray Aihit;
-        MPoint hit;
-        MVector nor;
-        char validHit = 0;
-        if(mesh.intersect (pos, dir, Aphit, 0, MSpace::kWorld, &Aihit, &stat)) {
-            hit = Aphit[0];
-            mesh.getPolygonNormal (Aihit[0], nor,  MSpace::kWorld );
-            if(nor * dir > 0.0)
-                validHit = 1;   
-        }
-        
-        if(!validHit) {
-            if(mesh.intersect (pos, invdir, Aphit, 0, MSpace::kWorld, &Aihit, &stat)) {
-                hit = Aphit[0];
-                mesh.getPolygonNormal (Aihit[0], nor,  MSpace::kWorld );
-                if(nor * dir > 0.0)
-                    validHit = 1;  
-            }
-        }
-        
-        if(validHit) {
-            space(3, 0) = hit.x;
-			space(3, 1) = hit.y;
-			space(3, 2) = hit.z;
-			_spaces[_activeIndices[i]] = localizeSpace(space);
-        }
 	}
 }
 

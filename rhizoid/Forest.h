@@ -14,7 +14,6 @@
 #include <KdTree.h>
 #include <ATriangleMesh.h>
 #include <IntersectionContext.h>
-#include <PseudoNoise.h>
 
 /* http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
  * qw= √(1 + m00 + m11 + m22) /2
@@ -22,9 +21,6 @@
  * qy = (m02 - m20)/( 4 *qw)
  * qz = (m10 - m01)/( 4 *qw)
  */
- 
-class TriangleRaster;
-class BarycentricCoordinate;
 
 namespace sdb {
 
@@ -44,8 +40,6 @@ class Forest {
 	IntersectionContext m_intersectCtx;
 	Geometry::ClosestToPointTestResult m_closestPointTest;
 	SelectionContext m_selectCtx;
-	PseudoNoise m_pnoise;
-	int m_seed;
 	unsigned m_numPlants;
 	
 public:
@@ -69,52 +63,41 @@ public:
 protected:
 	void resetGrid(float gridSize);
 	void updateGrid();
-	void addPlant(const Matrix44F & tm,
-					const GroundBind & bind,
-					const int & plantTypeId);
-	const BoundingBox & gridBoundingBox() const;
-	unsigned numPlants() const;
 	void updateNumPlants();
-	unsigned numCells();
-	unsigned numGroundMeshes() const;
-    void clearGroundMeshes();
+	void clearGroundMeshes();
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
-    ATriangleMesh * getGroundMesh(unsigned idx) const;
     void buildGround();
     bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
 	bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
-	SelectionContext * activeGround();
-	void growOnGround(GrowOption & option);
 	
-	virtual float plantSize(int idx) const;
-	
+	unsigned numCells();
+	unsigned numGroundMeshes() const;
+    unsigned numPlants() const;
+	const BoundingBox & gridBoundingBox() const;
 	WorldGrid<Array<int, Plant>, Plant > * grid();
 	Array<int, PlantInstance> * activePlants();
+	PlantSelection * selection();
+	KdTree * ground();
+	IntersectionContext * intersection();
+	SelectionContext * activeGround();
+	ATriangleMesh * getGroundMesh(unsigned idx) const;
+    virtual float plantSize(int idx) const;
 	
-	void movePlant(const Ray & ray,
-					const Vector3F & displaceNear, const Vector3F & displaceFar,
-					const float & clipNear, const float & clipFar);
+	void displacePlantInGrid(PlantInstance * inst );
+	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
+	bool getBindPoint(Vector3F & pos, GroundBind * bind);
 	
-	void growAt(const Ray & ray, GrowOption & option);
-	void clearAt(const Ray & ray, float weight);
-	
-private:
-	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
-					int geoId,
-					GrowOption & option);
-	void growOnTriangle(TriangleRaster * tri, 
-					BarycentricCoordinate * bar,
-					GroundBind & bind,
-					GrowOption & option);
+	int geomertyId(Geometry * geo) const;
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);
+	bool intersectGround(const Ray & ray);
+	void addPlant(const Matrix44F & tm,
+					const GroundBind & bind,
+					const int & plantTypeId);
+private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
 					Array<int, Plant> * cell);
-	void randomSpaceAt(const Vector3F & pos, 
-							const GrowOption & option,
-							Matrix44F & space, float & scale);
-	int geomertyId(Geometry * geo) const;
 	
 };
 

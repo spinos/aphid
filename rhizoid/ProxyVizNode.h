@@ -92,7 +92,6 @@ public:
 	void pressToSave();
 	void pressToLoad();
 	void setCullMesh(MDagPath mesh);
-	void snapByIntersection(MFnMesh &mesh);
 	
 	unsigned getNumActiveBoxes() const;
 	MMatrix getActiveBox(unsigned idx) const;

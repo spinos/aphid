@@ -7,9 +7,9 @@
  *
  */
 #pragma once
-#include "Forest.h"
+#include "ModifyForest.h"
 
-class DrawForest : public sdb::Forest {
+class DrawForest : public sdb::ModifyForest {
 	
 	BoundingBox m_defBox;
 	
