@@ -577,31 +577,6 @@ char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short
 	return 0;
 }
 
-void ProxyViz::removeBoxesInView(short xmin, short ymin, short xmax, short ymax, const float & threshold)
-{
-    useActiveView();
-	float longest = defBox().getLongestDistance();
-
-	_activeIndices.clear();
-	unsigned num_box = _spaces.length();
-	for(unsigned i =1; i < num_box; i++) {
-		const MMatrix space = worldizeSpace(_spaces[i]);
-
-		const MPoint pos(space(3,0), space(3,1), space(3,2));
-		const MVector side(space(0,0), space(0,1), space(0,2)); 
-		
-				
-		if(isBoxInView(pos, longest * side.length(), xmin, ymin, xmax, ymax)) {
-			float noi = float(random()%191)/191.f;
-			if(noi < threshold) {
-				_spaces.remove(i);
-				i--;
-				num_box--;
-			}
-		}
-	}
-}
-
 void ProxyViz::adjustSize(short x, short y, float magnitude)
 {
     useActiveView();
@@ -616,8 +591,7 @@ void ProxyViz::adjustSize(short x, short y, float magnitude)
 		float weight = pscrn.distantTo(cursor);
 		weight = 1.f - weight/128.f;
 			
-		if(weight>0)
-		{
+		if(weight>0) {
 			float disp = 1.f + magnitude * weight;
 			space(0, 0) *= disp;
 			space(0, 1) *= disp;

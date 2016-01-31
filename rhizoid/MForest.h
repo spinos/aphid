@@ -20,6 +20,9 @@ public:
 	void grow(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option);
 	void finishGrow();
+	void erase(const MPoint & origin, const MPoint & dest,
+					float weight);
+	void finishErase();
 	
 protected:
     void updateGround(MArrayDataHandle & data);

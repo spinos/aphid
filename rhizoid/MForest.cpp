@@ -189,4 +189,20 @@ void MForest::finishGrow()
 	updateGrid();
 	updateNumPlants();
 }
+
+void MForest::erase(const MPoint & origin, const MPoint & dest,
+					float weight)
+{
+	Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	
+	clearAt(r, weight);
+}
+
+void MForest::finishErase()
+{
+	updateGrid();
+	updateNumPlants();
+}
 //:~

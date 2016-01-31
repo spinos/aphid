@@ -120,7 +120,11 @@ int DrawForest::activePlantId() const
 { return 0; }
 
 float DrawForest::plantSize(int idx) const
-{ return (m_defBox.distance(0) + m_defBox.distance(2)) * .5f; }
+{ 
+	float a = m_defBox.distance(0) * .7f;
+	float b = m_defBox.distance(2) * .7f;
+	return a > b ? a : b ; 
+}
 
 void DrawForest::drawWiredPlants()
 {

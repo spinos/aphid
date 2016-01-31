@@ -483,4 +483,46 @@ void Forest::growAt(const Ray & ray, GrowOption & option)
 	}
 }
 
+void Forest::clearAt(const Ray & ray, float weight)
+{
+	if(numActivePlants() < 1 ) return;
+	if(m_ground->isEmpty() ) return;
+	
+	m_intersectCtx.reset(ray);
+	m_ground->intersect(&m_intersectCtx);
+	
+	if(!m_intersectCtx.m_success) return;
+	
+	m_activePlants->set(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN, 4.f);
+	m_activePlants->calculateWeight();
+	
+	std::vector<int> idToClear;
+	Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-4f) { 
+			if(m_pnoise.rfloat(m_seed) < weight) {
+				idToClear.push_back(arr->key() );
+				Plant * pl = arr->value()->m_reference;
+				Vector3F pos = pl->index->t1->getTranslation();
+				Coord3 c0 = m_grid->gridCoord((const float *)&pos);
+				Array<int, Plant> * cell = m_grid->findCell(c0 );
+				if(cell) {
+					cell->remove(arr->key() );
+					if(cell->isEmpty() )
+						m_grid->remove(c0);
+				}
+			}
+			m_seed++;
+		}
+		arr->next();
+	}
+	
+	std::vector<int>::const_iterator it = idToClear.begin();
+	for(;it!=idToClear.end();++it) {
+		arr->remove(*it);
+	}
+}
+
 }

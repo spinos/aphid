@@ -96,6 +96,7 @@ protected:
 					const float & clipNear, const float & clipFar);
 	
 	void growAt(const Ray & ray, GrowOption & option);
+	void clearAt(const Ray & ray, float weight);
 	
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
