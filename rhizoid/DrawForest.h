@@ -31,6 +31,9 @@ protected:
 	void drawGridBounding();
 	void drawGrid();
 	void drawActivePlants();
+	void drawViewFrustum(const Matrix44F & cameraSpace,
+						const Matrix44F & worldInverseSpace,
+						const float & h_fov, const float & aspectRatio);
 	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);

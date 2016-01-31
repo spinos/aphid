@@ -9,6 +9,7 @@
 
 #include "Forest.h"
 #include <TriangleRaster.h>
+#include <BarycentricCoordinate.h>
 
 namespace sdb {
 
@@ -62,13 +63,13 @@ void Forest::updateGrid()
 }
 
 void Forest::addPlant(const Matrix44F & tm,
-					const int & plantTypeId,
-					const int & triangleId)
+					const GroundBind & bind,
+					const int & plantTypeId)
 {
 	PlantData * d = new PlantData;
 	*d->t1 = tm;
-	*d->t2 = plantTypeId;
-	*d->t3 = triangleId;
+	*d->t2 = bind;
+	*d->t3 = plantTypeId;
 	m_pool.push_back(d);
 	
 	Plant * p = new Plant;
@@ -190,15 +191,17 @@ void Forest::growOnGround(GrowOption & option)
 	if(numActiveGroundFaces() < 1) return;
 	std::map<Geometry *, Sequence<unsigned> * >::iterator it = m_selectCtx.geometryBegin();
 	for(; it != m_selectCtx.geometryEnd(); ++it) {
-		growOnFaces(it->first, it->second, option);
+		growOnFaces(it->first, it->second, geomertyId(it->first), option);
 	}
 }
 
 void Forest::growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
+						int geoId,
 						GrowOption & option)
 {
+	GroundBind bind;
 	ATriangleMesh * mesh = static_cast<ATriangleMesh *>(geo);
-	Vector3F *p = mesh->points();
+	Vector3F * p = mesh->points();
 	components->begin();
 	while(!components->end()) {
 		if(option.m_alongNormal)
@@ -206,15 +209,21 @@ void Forest::growOnFaces(Geometry * geo, Sequence<unsigned> * components,
 		
 		unsigned * tri = mesh->triangleIndices(components->key() );
 		TriangleRaster trir;
-
-		if(trir.create(p[tri[0]], p[tri[1]], p[tri[2]]))
-			growOnTriangle(&trir, option);
-		
+		BarycentricCoordinate bar;
+		if(trir.create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) {
+			bar.create(p[tri[0]], p[tri[1]], p[tri[2]] );
+			
+			bind.setGeomComp(geoId, components->key() );
+			growOnTriangle(&trir, &bar, bind, option);
+		}
 		components->next();
 	}
 }
 
-void Forest::growOnTriangle(TriangleRaster * tri, GrowOption & option)
+void Forest::growOnTriangle(TriangleRaster * tri, 
+							BarycentricCoordinate * bar,
+							GroundBind & bind,
+							GrowOption & option)
 {
 	float delta = option.m_marginSize + plantSize(option.m_plantId);
 	int grid_x, grid_y;
@@ -232,8 +241,19 @@ void Forest::growOnTriangle(TriangleRaster * tri, GrowOption & option)
 			
 		Matrix44F tm = randomSpaceAt(pos, option);
 		
-		addPlant(tm, option.m_plantId,
-					0);
+		bar->project(pos);
+		bar->compute();
+		if(!bar->insideTriangle()) continue;
+		
+		//std::cout<<" bar"<<bar->getV(0)<<","<<bar->getV(1)<<","<<bar->getV(2);
+		//int a, b;
+		//bind.getGeomComp(a, b);
+		//std::cout<<" bind "<<a<<","<<b;
+		bind.m_w0 = bar->getV(0);
+		bind.m_w1 = bar->getV(1);
+		bind.m_w2 = bar->getV(2);
+		
+		addPlant(tm, bind, option.m_plantId);
 	}
 	delete[] samples;
 	delete[] hits;
@@ -339,16 +359,42 @@ void Forest::movePlant(const Ray & ray,
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
-			Vector3F pos = arr->value()->m_reference->t1->getTranslation()
+			PlantData * plantd = arr->value()->m_reference->index;
+			Vector3F pos = plantd->t1->getTranslation()
 						 + disp * wei;
 						 
 			m_closestPointTest.reset(pos, 1e8f);
 			m_ground->closestToPoint(&m_closestPointTest);
-			if(m_closestPointTest._hasResult);
-				arr->value()->m_reference->t1->setTranslation(m_closestPointTest._hitPoint );
+			if(m_closestPointTest._hasResult) {
+				plantd->t1->setTranslation(m_closestPointTest._hitPoint );
+				PlantData * back = arr->value()->m_backup->index;
+			
+				Plant * moved = m_grid->displace(arr->value()->m_reference,
+								m_closestPointTest._hitPoint, 
+								back->t1->getTranslation() );
+				if(moved) arr->value()->m_reference = moved;
+			}
 		}
 		arr->next();
 	}
+}
+
+int Forest::geomertyId(Geometry * geo) const
+{
+	int i = 0;
+	std::vector<ATriangleMesh *>::const_iterator it = m_grounds.begin();
+	for(;it!=m_grounds.end(); ++it) {
+		if(*it == geo) return i;
+		i++;
+	}
+	return -1;
+}
+
+void Forest::removeAllPlants()
+{
+	m_activePlants->deselect();
+	m_grid->clear();
+	m_numPlants = 0;
 }
 
 }

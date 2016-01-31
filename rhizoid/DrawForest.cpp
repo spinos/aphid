@@ -225,7 +225,7 @@ void DrawForest::drawActivePlants()
 	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
-		drawWiredPlant(arr->value()->m_reference );
+		drawWiredPlant(arr->value()->m_reference->index );
 		arr->next();
 	}
 }
@@ -265,5 +265,54 @@ void DrawForest::drawBounding(const BoundingBox & b) const
 		glVertex3f(maxb.x, maxb.y, maxb.z);
 		
 	glEnd();
+}
+
+void DrawForest::drawViewFrustum(const Matrix44F & cameraSpace, 
+								const Matrix44F & worldInverseSpace,
+								const float & h_fov, const float & aspectRatio)
+{
+	float fnear = -1.f;
+	float ffar = -250000.f;
+	float nearRight = fnear * h_fov;
+	float nearLeft = -nearRight;
+	float nearUp = nearRight * aspectRatio;
+	float nearBottom = -nearUp;
+	float farRight = ffar * h_fov;
+	float farLeft = -farRight;
+	float farUp = farRight * aspectRatio;
+	float farBottom = -farUp;
+	Vector3F clipNear[4];
+	Vector3F clipFar[4];
+	
+	clipNear[0].set(nearLeft, nearBottom, fnear);
+	clipNear[1].set(nearRight, nearBottom, fnear);
+	clipNear[2].set(nearRight, nearUp, fnear);
+	clipNear[3].set(nearLeft, nearUp, fnear);
+	
+	clipFar[0].set(farLeft, farBottom, ffar);
+	clipFar[1].set(farRight, farBottom, ffar);
+	clipFar[2].set(farRight, farUp, ffar);
+	clipFar[3].set(farLeft, farUp, ffar);
+	
+	glPushMatrix();
+    
+	float m[16];
+	cameraSpace.glMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
+	
+	glPushMatrix();
+    worldInverseSpace.glMatrix(m);
+	glMultMatrixf((const GLfloat*)m);
+	
+	glBegin(GL_LINES);
+	for(int i=0; i < 4; i++) {
+		glVertex3fv((const GLfloat*)&clipNear[i]);
+		glVertex3fv((const GLfloat*)&clipFar[i]);
+	}
+	glEnd();
+		
+	glPopMatrix();
+	glPopMatrix();
+
 }
 //:~

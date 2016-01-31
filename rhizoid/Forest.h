@@ -24,6 +24,7 @@
  */
  
 class TriangleRaster;
+class BarycentricCoordinate;
 
 namespace sdb {
 
@@ -62,13 +63,14 @@ public:
 	
 	unsigned numActiveGroundFaces();
 	const unsigned & numActivePlants() const;
+	void removeAllPlants();
 	
 protected:
 	void resetGrid(float gridSize);
 	void updateGrid();
 	void addPlant(const Matrix44F & tm,
-					const int & plantTypeId,
-					const int & triangleId);
+					const GroundBind & bind,
+					const int & plantTypeId);
 	const BoundingBox & gridBoundingBox() const;
 	unsigned numPlants() const;
 	void updateNumPlants();
@@ -94,11 +96,16 @@ protected:
 						
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
+					int geoId,
 					GrowOption & option);
-	void growOnTriangle(TriangleRaster * tri, GrowOption & option);
+	void growOnTriangle(TriangleRaster * tri, 
+					BarycentricCoordinate * bar,
+					GroundBind & bind,
+					GrowOption & option);
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);
 	Matrix44F randomSpaceAt(const Vector3F & pos, const GrowOption & option);
+	int geomertyId(Geometry * geo) const;
 	
 };
 

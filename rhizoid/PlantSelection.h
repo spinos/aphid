@@ -14,8 +14,22 @@
 
 namespace sdb {
 
-/// (plant id, (transformation, plant type id, triangle bind id) )
-typedef Triple<Matrix44F, int, int > PlantData;
+struct GroundBind {
+	float m_w0, m_w1, m_w2;
+	int m_geomComp;
+	void setGeomComp(int geom, int comp)
+	{
+		m_geomComp = ((geom<<22) | comp);
+	}
+	void getGeomComp(int & geom, int & comp)
+	{
+		geom = m_geomComp>>22;
+		comp = (m_geomComp << 10)>>10;
+	}
+};
+
+/// (plant id, (transformation, triangle bind, plant type id) )
+typedef Triple<Matrix44F, GroundBind, int > PlantData;
 class Plant : public Pair<int, PlantData>
 {
 public:
@@ -34,8 +48,8 @@ public:
 		delete m_backup;
 	}
 	
-	PlantData * m_reference;
-	PlantData * m_backup;
+	Plant * m_reference;
+	Plant * m_backup;
 	float m_weight;
 	
 };

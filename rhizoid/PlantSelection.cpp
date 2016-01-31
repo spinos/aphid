@@ -75,9 +75,13 @@ void PlantSelection::select(Plant * p)
 	*backup->t2 = *p->index->t2;
 	*backup->t3 = *p->index->t3;
 	
+	Plant * b = new Plant;
+	b->key = p->key;
+	b->index = backup;
+	
 	PlantInstance * inst = new PlantInstance;
-	inst->m_backup = backup;
-	inst->m_reference = p->index;
+	inst->m_backup = b;
+	inst->m_reference = p;
 	m_plants->insert(p->key, inst);
 }
 
@@ -97,7 +101,7 @@ void PlantSelection::calculateWeight()
 {
 	m_plants->begin();
 	while(!m_plants->end() ) {
-		const Vector3F pr = m_plants->value()->m_reference->t1->getTranslation();
+		const Vector3F pr = m_plants->value()->m_reference->index->t1->getTranslation();
 		const float dist = m_center.distanceTo(pr);
 		if(dist < m_radius) {
 			m_plants->value()->m_weight = 1.f - dist / m_radius;

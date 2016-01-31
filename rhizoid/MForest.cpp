@@ -1,5 +1,6 @@
 #include "MForest.h"
 #include <maya/MFnMesh.h>
+#include <gl_heads.h>
 #include <AHelper.h>
 
 MForest::MForest()
@@ -119,4 +120,59 @@ void MForest::flood(GrowOption & option)
 	updateGrid();
 	AHelper::Info<BoundingBox>("ProxyViz grid bounding", gridBoundingBox() );
 }
+
+void MForest::drawSolidMesh(MItMeshPolygon & iter)
+{
+	iter.reset();
+	for(; !iter.isDone(); iter.next()) {
+		int vertexCount = iter.polygonVertexCount();
+		glBegin(GL_POLYGON);
+		for(int i=0; i < vertexCount; i++) {
+			MPoint p = iter.point (i);
+			MVector n;
+			iter.getNormal(i, n);
+			glNormal3f(n.x, n.y, n.z);
+			glVertex3f(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+}
+
+void MForest::drawWireMesh(MItMeshPolygon & iter)
+{
+	iter.reset();
+	glBegin(GL_LINES);
+	for(; !iter.isDone(); iter.next()) {
+		int vertexCount = iter.polygonVertexCount();
+		
+		for(int i=0; i < vertexCount-1; i++) {
+			MPoint p = iter.point (i);
+			glVertex3f(p.x, p.y, p.z);
+			p = iter.point (i+1);
+			glVertex3f(p.x, p.y, p.z);
+		}		
+	}
+	glEnd();
+}
+
+void MForest::matrix_as_array(const MMatrix &space, double *mm)
+{
+	mm[0] = space(0,0);
+	mm[1] = space(0,1);
+	mm[2] = space(0,2);
+	mm[3] = space(0,3);
+	mm[4] = space(1,0);
+	mm[5] = space(1,1);
+	mm[6] = space(1,2);
+	mm[7] = space(1,3);
+	mm[8] = space(2,0);
+	mm[9] = space(2,1);
+	mm[10] = space(2,2);
+	mm[11] = space(2,3);
+	mm[12] = space(3,0);
+	mm[13] = space(3,1);
+	mm[14] = space(3,2);
+	mm[15] = space(3,3);
+}
+
 //:~

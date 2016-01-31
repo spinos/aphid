@@ -33,6 +33,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	M3dView _viewport;
 	double m_materializePercentage;
 	bool m_toSetGrid;
+	bool m_hasCamera;
 	
 public:
 	ProxyViz();
@@ -46,7 +47,8 @@ public:
 
 	virtual bool            isBounded() const;
 	virtual MBoundingBox    boundingBox() const; 
-
+	virtual MStatus connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
+	
 	static  void *          creator();
 	static  MStatus         initialize();
 
@@ -81,9 +83,7 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	void addABox(const MMatrix & m);
 	char isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax);
-	void selectBoxesInView(short xmin, short ymin, short xmax, short ymax, MGlobal::ListAdjustment selectionMode);
 	void removeBoxesInView(short xmin, short ymin, short xmax, short ymax, const float & threshold);
 	void adjustSize(short x, short y, float magnitude);
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
@@ -92,7 +92,6 @@ public:
 	void adjustLocation(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, short axis, float noise = 0.f);
 	void pressToSave();
 	void pressToLoad();
-	void removeAllBoxes();
 	void setCullMesh(MDagPath mesh);
 	void snapByIntersection(MFnMesh &mesh);
 	
@@ -117,10 +116,7 @@ private:
 	
 	char *fVisibleTag;
 	char _firstLoad, fHasView;
-	void drawSelected(float mScale[16]);
-	void drawSolidMesh(MItMeshPolygon & iter);
-	void drawWireMesh(MItMeshPolygon & iter);
-	void drawViewFrustum(const MMatrix & cameraSpace, const float & h_fov, const float & aspectRatio);
+	
 	void loadCache(const char* filename);
 	void saveCache(const char* filename);
 	void bakePass(const char* filename, const MVectorArray & position, const MVectorArray & scale, const MVectorArray & rotation);
@@ -129,6 +125,7 @@ private:
 	MMatrix localizeSpace(const MMatrix & s) const;
 	MMatrix worldizeSpace(const MMatrix & s) const;
 	void useActiveView();
+	void vizViewFrustum(MObject & node);
 	DepthCut * fCuller;
 	MObject fDisplayMesh;
 	

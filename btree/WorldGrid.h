@@ -48,8 +48,9 @@ public:
 	const BoundingBox & boundingBox() const;
 
 	float gridSize() const;
-	
-	void displace(ValueType * v, const Vector3F & pref);
+
+/// relocate value into different cell	
+	ValueType * displace(ValueType * v, const Vector3F & pcur, const Vector3F & pref);
 	
 	ChildType * findCell(const Vector3F & pref);
 	ChildType * findCell(const Coord3 & c);
@@ -114,11 +115,11 @@ float WorldGrid<ChildType, ValueType>::gridSize() const
 { return m_gridSize; }
 
 template<typename ChildType, typename ValueType>
-void WorldGrid<ChildType, ValueType>::displace(ValueType * v, const Vector3F & pref)
+ValueType * WorldGrid<ChildType, ValueType>::displace(ValueType * v, const Vector3F & pcur, const Vector3F & pref)
 {
-	Coord3 c1 = gridCoord((float *)(v->index)->t1);
+	Coord3 c1 = gridCoord((float *)&pcur);
 	Coord3 c0 = gridCoord((float *)&pref);
-	if(c0 == c1) return;
+	if(c0 == c1) return NULL;
 	
 	ValueType * nv = new ValueType;
 	nv->key = v->key;
@@ -134,6 +135,7 @@ void WorldGrid<ChildType, ValueType>::displace(ValueType * v, const Vector3F & p
 		}
 	}
 	insert(c1, nv);
+	return nv;
 }
 
 template<typename ChildType, typename ValueType>

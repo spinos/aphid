@@ -1,10 +1,6 @@
 #include <Vector2F.h>
 #include "proxyVizNode.h"
-#include <maya/MVector.h>
 #include <maya/MFnMatrixAttribute.h>
-#include <maya/MDataHandle.h>
-#include <maya/MColor.h>
-#include <maya/MDistance.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MVectorArray.h>
@@ -15,7 +11,6 @@
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
-#include <maya/MItMeshPolygon.h>
 #include <PseudoNoise.h>
 #include <EnvVar.h>
 #include <AHelper.h>
@@ -29,37 +24,6 @@ static int indexByValue(const MIntArray &arr, int value)
 			return i;
 	}
 	return -1;
-}
-
-static void matrix_as_array(const MMatrix &space, double *mm)
-{
-	mm[0] = space(0,0);
-	mm[1] = space(0,1);
-	mm[2] = space(0,2);
-	mm[3] = space(0,3);
-	mm[4] = space(1,0);
-	mm[5] = space(1,1);
-	mm[6] = space(1,2);
-	mm[7] = space(1,3);
-	mm[8] = space(2,0);
-	mm[9] = space(2,1);
-	mm[10] = space(2,2);
-	mm[11] = space(2,3);
-	mm[12] = space(3,0);
-	mm[13] = space(3,1);
-	mm[14] = space(3,2);
-	mm[15] = space(3,3);
-
-}
-
-static void scale_matrix(const Vector3F &scale, float *mm)
-{
-	mm[0] = scale.x;
-	mm[5] = scale.y;
-	mm[10] = scale.z;
-	mm[15] = 1.f;
-	mm[1] = mm[2] = mm[3] = mm[4] = mm[6] = mm[7] = mm[8] = mm[9] = mm[11] = mm[12] = mm[13] = mm[14] = 0.f;
-	
 }
 
 MTypeId ProxyViz::id( 0x95a19e );
@@ -94,11 +58,8 @@ MObject ProxyViz::aconvertPercentage;
 MObject ProxyViz::agroundMesh;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0),
-m_toSetGrid(true)
-{
-	MMatrix m;
-	addABox(m);
-}
+m_toSetGrid(true), m_hasCamera(false)
+{}
 
 ProxyViz::~ProxyViz() 
 {
@@ -310,32 +271,13 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	MPlug mutzplug( thisNode, azmultiplier);
 	multiplier.z = mutzplug.asFloat();	
 	
-	float mScale[16];
-	scale_matrix(multiplier, mScale);
-	
-	MPlug matplg(thisNode, acameraspace);
-	MObject matobj;
-	matplg.getValue(matobj);
-	MFnMatrixData matdata(matobj);
-    MMatrix cameramat = matdata.matrix(); 
-	cameramat = cameramat.inverse();
-	
-	MPlug hfaplg(thisNode, ahapeture);
-	float hfa = hfaplg.asFloat();
-	MPlug vfaplg(thisNode, ahapeture);
-	float vfa = vfaplg.asFloat();
-	MPlug flplg(thisNode, afocallength);
-	float fl = flplg.asFloat();
-	float hfov = hfa * 0.5 / ( fl * 0.03937 );
-	float aspectRatio = vfa / hfa;
-	
 	_viewport = view;
 	fHasView = 1;
 
 	view.beginGL();
 	
-	drawViewFrustum(cameramat, hfov, aspectRatio);
-
+	if(m_hasCamera) vizViewFrustum(thisNode);
+	
 	if(!fCuller)
 		fCuller = new DepthCut;
 	
@@ -389,10 +331,8 @@ MBoundingBox ProxyViz::boundingBox() const
 	BoundingBox bbox = defBox();
 	if(numPlants() > 0) bbox.expandBy(gridBoundingBox() );
 	
-	Vector3F vmin = bbox.getMin();
-	Vector3F vmax = bbox.getMax();
-	MPoint corner1(vmin.x, vmin.y, vmin.z);
-	MPoint corner2(vmax.x, vmax.y, vmax.z);
+	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);
+	MPoint corner2(bbox.m_data[3], bbox.m_data[4], bbox.m_data[5]);
 
 	return MBoundingBox( corner1, corner2 );
 }
@@ -614,76 +554,6 @@ MStatus ProxyViz::initialize()
 	return MS::kSuccess;
 }
 
-void ProxyViz::drawSelected(float mScale[16])
-{
-	double mm[16];
-	glDisable(GL_DEPTH_TEST);
-	unsigned num_active = getNumActiveBoxes();
-	for(unsigned i =0; i < num_active; i++) {
-		glPushMatrix();
-
-		const MMatrix space = _spaces[_activeIndices[i]];
-		matrix_as_array(space, mm);
-		
-		glMultMatrixd(mm);
-		glMultMatrixf(mScale);
-		draw_coordsys();
-		glPopMatrix();
-	}		
-	glEnable(GL_DEPTH_TEST);
-}
-
-void ProxyViz::drawViewFrustum(const MMatrix & cameraSpace, const float & h_fov, const float & aspectRatio)
-{
-	float fnear = -1.f;
-	float ffar = -250000.f;
-	float nearRight = fnear * h_fov;
-	float nearLeft = -nearRight;
-	float nearUp = nearRight * aspectRatio;
-	float nearBottom = -nearUp;
-	float farRight = ffar * h_fov;
-	float farLeft = -farRight;
-	float farUp = farRight * aspectRatio;
-	float farBottom = -farUp;
-	MPoint clipNear[4];
-	MPoint clipFar[4];
-	
-	clipNear[0] = MPoint(nearLeft, nearBottom, fnear);
-	clipNear[1] = MPoint(nearRight, nearBottom, fnear);
-	clipNear[2] = MPoint(nearRight, nearUp, fnear);
-	clipNear[3] = MPoint(nearLeft, nearUp, fnear);
-	
-	clipFar[0] = MPoint(farLeft, farBottom, ffar);
-	clipFar[1] = MPoint(farRight, farBottom, ffar);
-	clipFar[2] = MPoint(farRight, farUp, ffar);
-	clipFar[3] = MPoint(farLeft, farUp, ffar);
-	
-	for(int i=0; i < 4; i++) {
-		clipNear[i] *= cameraSpace;
-		clipNear[i] *= _worldInverseSpace;
-		clipFar[i] *= cameraSpace;
-		clipFar[i] *= _worldInverseSpace;
-	}
-	
-	MPoint p;
-	glBegin(GL_LINES);
-	for(int i=0; i < 4; i++) {
-		p = clipNear[i];
-		glVertex3f(p.x, p.y, p.z);
-		p = clipFar[i];
-		glVertex3f(p.x, p.y, p.z);
-	}
-	glEnd();
-	
-}
-
-void ProxyViz::addABox(const MMatrix & m)
-{
-	const MMatrix localm = localizeSpace(m);
-	_spaces.append(localm);
-	_activeIndices.append(_spaces.length() - 1);
-}
-
 char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax)
 {
 	int portW = _viewport.portWidth();
@@ -707,56 +577,6 @@ char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short
 		return 1;
 	}
 	return 0;
-}
-
-float longestDimension(const Vector3F & bbmax, const Vector3F & bbmin)
-{
-	Vector3F bb = bbmax - bbmin;
-	float longest = bb.x;
-	if(bb.y > longest) longest = bb.y;
-	if(bb.z > longest) longest = bb.z;
-	return longest;
-}
-
-void ProxyViz::selectBoxesInView(short xmin, short ymin, short xmax, short ymax, MGlobal::ListAdjustment selectionMode)
-{	
-    useActiveView();
-	float longest = defBox().getLongestDistance();
-
-	if(selectionMode == MGlobal::kReplaceList)
-		_activeIndices.clear();
-		
-	unsigned num_box = _spaces.length();
-	for(unsigned i =1; i < num_box; i++) {
-		const MMatrix space = worldizeSpace(_spaces[i]);
-
-		const MPoint pos(space(3,0), space(3,1), space(3,2));
-		const MVector side(space(0,0), space(0,1), space(0,2)); 
-					
-		if(isBoxInView(pos, longest * side.length(), xmin, ymin, xmax, ymax)) {
-			if(selectionMode == MGlobal::kReplaceList) {
-				_activeIndices.append(i);
-			}
-			else {
-				int found = indexByValue(_activeIndices, i);
-                                if(selectionMode == MGlobal::kXORWithList) {
-                                    if(found < 0)
-                                        _activeIndices.append(i);
-                                    else
-                                        _activeIndices.remove(found);
-                                }
-                                else if(selectionMode == MGlobal::kRemoveFromList) {
-                                    if(found > -1)
-                                        _activeIndices.remove(found);
-                                }
-                                else if(selectionMode == MGlobal::kAddToList) {
-                                    if(found < 0)
-                                        _activeIndices.append(i);
-                                }
-                        }
-
-		}
-	}
 }
 
 void ProxyViz::removeBoxesInView(short xmin, short ymin, short xmax, short ymax, const float & threshold)
@@ -1206,14 +1026,6 @@ void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, cons
 	}
 }
 
-void ProxyViz::removeAllBoxes()
-{
-	_activeIndices.clear();
-	_spaces.clear();
-	MMatrix m;
-	addABox(m);
-}
-
 void ProxyViz::setCullMesh(MDagPath mesh)
 {
 	MGlobal::displayInfo(MString("proxy viz uses blocker: ") + mesh.fullPathName());
@@ -1261,7 +1073,6 @@ void ProxyViz::updateWorldSpace()
 	MDagPath::getAPathTo(thisNode, thisPath);
 	_worldSpace = thisPath.inclusiveMatrix();
 	_worldInverseSpace = thisPath.inclusiveMatrixInverse();
-	//MGlobal::displayInfo(MString("ws p ")+_worldSpace(3,0)+" "+_worldSpace(3,1)+" "+_worldSpace(3,2));	
 }
 
 MMatrix ProxyViz::localizeSpace(const MMatrix & s) const
@@ -1293,40 +1104,6 @@ char ProxyViz::hasDisplayMesh() const
 		return 0;
 
 	return 1;
-}
-
-void ProxyViz::drawSolidMesh(MItMeshPolygon & iter)
-{
-	iter.reset();
-	for(; !iter.isDone(); iter.next()) {
-		int vertexCount = iter.polygonVertexCount();
-		glBegin(GL_POLYGON);
-		for(int i=0; i < vertexCount; i++) {
-			MPoint p = iter.point (i);
-			MVector n;
-			iter.getNormal(i, n);
-			glNormal3f(n.x, n.y, n.z);
-			glVertex3f(p.x, p.y, p.z);
-		}
-		glEnd();
-	}
-}
-
-void ProxyViz::drawWireMesh(MItMeshPolygon & iter)
-{
-	iter.reset();
-	glBegin(GL_LINES);
-	for(; !iter.isDone(); iter.next()) {
-		int vertexCount = iter.polygonVertexCount();
-		
-		for(int i=0; i < vertexCount-1; i++) {
-			MPoint p = iter.point (i);
-			glVertex3f(p.x, p.y, p.z);
-			p = iter.point (i+1);
-			glVertex3f(p.x, p.y, p.z);
-		}		
-	}
-	glEnd();
 }
 
 const MMatrixArray & ProxyViz::spaces() const
@@ -1369,5 +1146,36 @@ std::string ProxyViz::replaceEnvVar(const MString & filename) const
 	if(var.replace(sfilename))
 	    MGlobal::displayInfo(MString("substitute file path "+filename+" to ")+sfilename.c_str());
 	return sfilename;
+}
+
+MStatus ProxyViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
+{
+	if(plug == acameraspace) m_hasCamera = true;
+	//AHelper::Info<MString>("connect", plug.name());
+	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
+}
+
+void ProxyViz::vizViewFrustum(MObject & thisNode)
+{
+	MPlug hfaplg(thisNode, ahapeture);
+	float hfa = hfaplg.asFloat();
+	MPlug vfaplg(thisNode, ahapeture);
+	float vfa = vfaplg.asFloat();
+	MPlug flplg(thisNode, afocallength);
+	float fl = flplg.asFloat();
+	float hfov = hfa * 0.5 / ( fl * 0.03937 );
+	float aspectRatio = vfa / hfa;
+	
+	MPlug matplg(thisNode, acameraspace);
+	MObject matobj;
+	matplg.getValue(matobj);
+	MFnMatrixData matdata(matobj);
+    MMatrix cameramat = matdata.matrix(); 
+	
+	Matrix44F cameraSpace;
+	AHelper::ConvertToMatrix44F(cameraSpace, cameramat);
+	Matrix44F worldInvSpace;
+	AHelper::ConvertToMatrix44F(worldInvSpace, _worldInverseSpace);
+	drawViewFrustum(cameraSpace, worldInvSpace, hfov, aspectRatio);
 }
 //:~
