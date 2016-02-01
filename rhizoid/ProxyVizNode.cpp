@@ -269,12 +269,12 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	MPlug mutzplug( thisNode, azmultiplier);
 	setScaleMuliplier(mutzplug.asFloat(), 2);	
 	
+	if(m_hasCamera) updateViewFrustum(thisNode);
+	
 	_viewport = view;
 	fHasView = 1;
 
 	view.beginGL();
-	
-	if(m_hasCamera) vizViewFrustum(thisNode);
 	
 	if(!fCuller)
 		fCuller = new DepthCut;
@@ -307,6 +307,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	glPushMatrix();
 	glMultMatrixd(mm);	
+	
 	draw_a_box();
 	drawGridBounding();
 	// drawGrid();
@@ -316,7 +317,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		drawPlants();
 	}
 	
-    drawBrush();
+    if(m_hasCamera) drawViewFrustum();
+	drawBrush();
 	drawWiredPlants();
 	drawActivePlants();
 	drawGround();
@@ -892,27 +894,23 @@ MStatus ProxyViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
-void ProxyViz::vizViewFrustum(MObject & thisNode)
+void ProxyViz::updateViewFrustum(MObject & thisNode)
 {
-	MPlug hfaplg(thisNode, ahapeture);
-	float hfa = hfaplg.asFloat();
-	MPlug vfaplg(thisNode, ahapeture);
-	float vfa = vfaplg.asFloat();
-	MPlug flplg(thisNode, afocallength);
-	float fl = flplg.asFloat();
-	float hfov = hfa * 0.5 / ( fl * 0.03937 );
-	float aspectRatio = vfa / hfa;
-	
 	MPlug matplg(thisNode, acameraspace);
 	MObject matobj;
 	matplg.getValue(matobj);
 	MFnMatrixData matdata(matobj);
     MMatrix cameramat = matdata.matrix(); 
 	
-	Matrix44F cameraSpace;
-	AHelper::ConvertToMatrix44F(cameraSpace, cameramat);
-	Matrix44F worldInvSpace;
-	AHelper::ConvertToMatrix44F(worldInvSpace, _worldInverseSpace);
-	drawViewFrustum(cameraSpace, worldInvSpace, hfov, aspectRatio);
+	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
+	
+	MPlug hfaplg(thisNode, ahapeture);
+	float hfa = hfaplg.asFloat();
+	MPlug vfaplg(thisNode, avapeture);
+	float vfa = vfaplg.asFloat();
+	MPlug flplg(thisNode, afocallength);
+	float fl = flplg.asFloat();
+	
+	setFrustum(hfa, vfa, fl, -1.f, -250000.f);
 }
 //:~

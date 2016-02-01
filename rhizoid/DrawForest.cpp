@@ -27,7 +27,7 @@ void DrawForest::setScaleMuliplier(float x, int idx)
 
 void DrawForest::drawGround() 
 {
-	glPushAttrib(GL_LIGHTING_BIT);
+	glPushAttrib(GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
 	glColor3f(.57f, .37f, 0.f);
 	
@@ -280,53 +280,15 @@ void DrawForest::drawBounding(const BoundingBox & b) const
 	glEnd();
 }
 
-void DrawForest::drawViewFrustum(const Matrix44F & cameraSpace, 
-								const Matrix44F & worldInverseSpace,
-								const float & h_fov, const float & aspectRatio)
+void DrawForest::drawViewFrustum()
 {
-	float fnear = -1.f;
-	float ffar = -250000.f;
-	float nearRight = fnear * h_fov;
-	float nearLeft = -nearRight;
-	float nearUp = nearRight * aspectRatio;
-	float nearBottom = -nearUp;
-	float farRight = ffar * h_fov;
-	float farLeft = -farRight;
-	float farUp = farRight * aspectRatio;
-	float farBottom = -farUp;
-	Vector3F clipNear[4];
-	Vector3F clipFar[4];
-	
-	clipNear[0].set(nearLeft, nearBottom, fnear);
-	clipNear[1].set(nearRight, nearBottom, fnear);
-	clipNear[2].set(nearRight, nearUp, fnear);
-	clipNear[3].set(nearLeft, nearUp, fnear);
-	
-	clipFar[0].set(farLeft, farBottom, ffar);
-	clipFar[1].set(farRight, farBottom, ffar);
-	clipFar[2].set(farRight, farUp, ffar);
-	clipFar[3].set(farLeft, farUp, ffar);
-	
-	glPushMatrix();
-    
-	float m[16];
-	cameraSpace.glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
-	
-	glPushMatrix();
-    worldInverseSpace.glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
-	
+	const AFrustum & fr = frustum();
 	glBegin(GL_LINES);
 	for(int i=0; i < 4; i++) {
-		glVertex3fv((const GLfloat*)&clipNear[i]);
-		glVertex3fv((const GLfloat*)&clipFar[i]);
+		glVertex3fv((const GLfloat*)fr.v(i) );
+		glVertex3fv((const GLfloat*)fr.v(i+4) );
 	}
 	glEnd();
-		
-	glPopMatrix();
-	glPopMatrix();
-
 }
 
 void DrawForest::drawBrush()

@@ -114,7 +114,8 @@ private:
 	MMatrix localizeSpace(const MMatrix & s) const;
 	MMatrix worldizeSpace(const MMatrix & s) const;
 	void useActiveView();
-	void vizViewFrustum(MObject & node);
+	void updateViewFrustum(MObject & node);
+	
 	DepthCut * fCuller;
 	MObject fDisplayMesh;
 	

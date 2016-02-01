@@ -8,15 +8,16 @@
  */
 #pragma once
 #include "ModifyForest.h"
+#include <ViewCull.h>
 class CircleCurve;
 
-class DrawForest : public sdb::ModifyForest {
+class DrawForest : public sdb::ModifyForest, public ViewCull {
 	
     Matrix44F m_useMat;
     BoundingBox m_defBox;
 	float m_transbuf[16];
 	float m_scalbuf[3];
-	 CircleCurve * m_circle;
+	CircleCurve * m_circle;
 	
 public:
     DrawForest();
@@ -37,9 +38,7 @@ protected:
 	void drawGridBounding();
 	void drawGrid();
 	void drawActivePlants();
-	void drawViewFrustum(const Matrix44F & cameraSpace,
-						const Matrix44F & worldInverseSpace,
-						const float & h_fov, const float & aspectRatio);
+	void drawViewFrustum();
 	void drawBrush();
     
 private:
