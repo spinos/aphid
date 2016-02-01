@@ -23,6 +23,10 @@ public:
 	void erase(const MPoint & origin, const MPoint & dest,
 					float weight);
 	void finishErase();
+	void adjustSize(const MPoint & origin, const MPoint & dest, 
+                     float magnitude);
+	void adjustRotation(const MPoint & origin, const MPoint & dest, 
+                        float magnitude, short axis);
 	
 protected:
     void updateGround(MArrayDataHandle & data);

@@ -21,20 +21,24 @@ class ModifyForest : public Forest {
 	BarycentricCoordinate * m_bary;
 	PseudoNoise m_pnoise;
 	int m_seed;
-	
+	float m_noiseWeight;
+    
 public:
 	ModifyForest();
 	virtual ~ModifyForest();
 	
+    void setNoiseWeight(float x);
+    
 protected:
 	bool growOnGround(GrowOption & option);
 	
 	bool growAt(const Ray & ray, GrowOption & option);
 	void clearAt(const Ray & ray, float weight);
+	void scaleAt(const Ray & ray, float magnitude);
+    void rotateAt(const Ray & ray, float magnitude, int axis);
 	void movePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,
 					const float & clipNear, const float & clipFar);
-	
 	void moveWithGround();
 	
 private:
@@ -50,7 +54,9 @@ private:
 							const GrowOption & option,
 							Matrix44F & space, float & scale);
 	void movePlantsWithGround(Array<int, Plant> * arr);
-	
+	bool calculateSelecedWeight(const Ray & ray);
+    float getNoise() const;
+    
 };
 
 }

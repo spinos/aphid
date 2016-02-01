@@ -172,8 +172,8 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 void DrawForest::drawPlants()
 {
 	glDepthFunc(GL_LEQUAL);
-	const GLfloat grayDiffuseMaterial[] = {0.47, 0.46, 0.45};
-	// const GLfloat greenDiffuseMaterial[] = {0.33, 0.53, 0.37};
+	const GLfloat grayDiffuseMaterial[] = {0.47f, 0.46f, 0.45f};
+	// const GLfloat greenDiffuseMaterial[] = {0.33f, 0.53f, 0.37f};
 	glPushAttrib(GL_LIGHTING_BIT);
 	glEnable(GL_LIGHTING);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grayDiffuseMaterial);

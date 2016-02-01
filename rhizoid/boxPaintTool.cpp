@@ -381,7 +381,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 			rotateAroundAxis(0);
 			break;
 		case 8 :
-			moveAlongAxis(1);
+			//moveAlongAxis(1);
 			break;
 		case 9 :
 			selectGround();
@@ -437,20 +437,17 @@ void proxyPaintContext::setOperation(unsigned val)
 		return;
 	}
 	
-	if(val == 102) 
-	{
+	if(val == 102) {
 		extractSelected();
 		return;
 	}
 	
-	if(val == 103) 
-	{
+	if(val == 103) {
 		erectSelected();
 		return;
 	}
 	
-	if(mOpt == 9 && val != 9)
-	{
+	if(mOpt == 9 && val != 9) {
 		MGlobal::setSelectionMode(MGlobal::kSelectObjectMode);
 		MSelectionList empty;
 		MGlobal::selectCommand(empty);
@@ -631,11 +628,13 @@ unsigned proxyPaintContext::getInstanceGroupCount() const
 void proxyPaintContext::resize()
 {
 	if(!m_pViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 		
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	
-	m_pViz->adjustSize(start_x, start_y, mag);
+	m_pViz->adjustSize(fromNear, fromFar, mag);
 }
 
 void proxyPaintContext::move()
@@ -648,18 +647,20 @@ void proxyPaintContext::move()
 void proxyPaintContext::rotateAroundAxis(short axis)
 {
 	if(!m_pViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 		
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	
-	m_pViz->adjustRotation(start_x, start_y, mag, axis, m_rotation_noise);
+    m_pViz->setNoiseWeight(m_rotation_noise);
+	m_pViz->adjustRotation(fromNear, fromFar, mag, axis);
 }
 
 void proxyPaintContext::moveAlongAxis(short axis)
 {
-	if(!m_pViz) return;
-	
-	m_pViz->adjustLocation(start_x, start_y, last_x, last_y,  clipNear, clipFar, mat, axis, m_rotation_noise);
+	//if(!m_pViz) return;
+	//m_pViz->adjustLocation(start_x, start_y, last_x, last_y,  clipNear, clipFar, mat, axis);
 }
 
 void proxyPaintContext::selectGround()

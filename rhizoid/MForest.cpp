@@ -206,6 +206,26 @@ void MForest::finishErase()
 	updateNumPlants();
 }
 
+void MForest::adjustSize(const MPoint & origin, const MPoint & dest, 
+                         float magnitude)
+{
+    Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	
+    scaleAt(r, magnitude);
+}
+
+void MForest::adjustRotation(const MPoint & origin, const MPoint & dest,
+                             float magnitude, short axis)
+{	
+    Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	
+    rotateAt(r, magnitude, axis);
+}
+
 void MForest::savePlants(MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,

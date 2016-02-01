@@ -89,10 +89,7 @@ public:
 	static	MTypeId		id;
 	
 	char isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax);
-	void adjustSize(short x, short y, float magnitude);
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
-	void adjustRotation(short x, short y, float magnitude, short axis, float noise = 0.f);
-	void adjustLocation(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat, short axis, float noise = 0.f);
 	void pressToSave();
 	void pressToLoad();
 	void setCullMesh(MDagPath mesh);

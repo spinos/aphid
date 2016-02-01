@@ -18,6 +18,7 @@ ModifyForest::ModifyForest()
 	m_raster = new TriangleRaster;
 	m_bary = new BarycentricCoordinate;
 	m_seed = rand() % 999999; 
+    m_noiseWeight = 0.f;
 }
 
 ModifyForest::~ModifyForest() 
@@ -25,6 +26,9 @@ ModifyForest::~ModifyForest()
 	delete m_raster;
 	delete m_bary;
 }
+
+void ModifyForest::setNoiseWeight(float x)
+{ m_noiseWeight = x; } 
 
 bool ModifyForest::growOnGround(GrowOption & option)
 {
@@ -140,13 +144,9 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 
 void ModifyForest::clearAt(const Ray & ray, float weight)
 {
-	if(numActivePlants() < 1 ) return;
-	if(!intersectGround(ray) ) return;
+	if(!calculateSelecedWeight(ray)) return;
 	
 	IntersectionContext * ctx = intersection();
-	
-	selection()->set(ctx->m_hitP, ctx->m_hitN, 4.f);
-	selection()->calculateWeight();
 	
 	std::vector<int> idToClear;
 	Array<int, PlantInstance> * arr = activePlants();
@@ -178,21 +178,91 @@ void ModifyForest::clearAt(const Ray & ray, float weight)
 	idToClear.clear();
 }
 
+void ModifyForest::scaleAt(const Ray & ray, float magnitude)
+{
+    if(!calculateSelecedWeight(ray)) return;
+	
+	IntersectionContext * ctx = intersection();
+    
+    Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-4f) { 
+			PlantData * plantd = arr->value()->m_reference->index;
+			Matrix44F * mat = plantd->t1;
+            mat->scaleBy(1.f + magnitude * wei);
+		}
+		arr->next();
+	}
+}
+
+void ModifyForest::rotateAt(const Ray & ray, float magnitude, int axis)
+{
+    if(!calculateSelecedWeight(ray)) return;
+    Vector3F first, second, third;
+    float scaling;
+    Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-4f) { 
+			PlantData * plantd = arr->value()->m_reference->index;
+			Matrix44F * tm = plantd->t1;
+            
+            first.set(tm->M(0,0), tm->M(0,1), tm->M(0,2));
+			second.set(tm->M(1,0), tm->M(1,1), tm->M(1,2));
+			third.set(tm->M(2,0), tm->M(2,1), tm->M(2,2));
+            
+			scaling = first.length();
+			first.normalize();
+			second.normalize();
+			third.normalize();
+			if(axis == 0) {
+				second.rotateAroundAxis(first, magnitude * wei * (1.f + getNoise() ) );
+				third = first.cross(second);				
+			}
+			else if(axis == 1) {
+				first.rotateAroundAxis(second, magnitude * wei * (1.f + getNoise() ) );
+				third = first.cross(second);
+			}
+			else {
+				first.rotateAroundAxis(third, magnitude * wei * (1.f + getNoise() ) );
+				second = third.cross(first);				
+			}
+			
+			first.normalize();
+			second.normalize();
+			third.normalize();
+			first *= scaling;
+			second *= scaling;
+			third *= scaling;
+			
+			*tm->m(0, 0) = first.x;
+			*tm->m(0, 1) = first.y;
+			*tm->m(0, 2) = first.z;
+			*tm->m(1, 0) = second.x;
+			*tm->m(1, 1) = second.y;
+			*tm->m(1, 2) = second.z;
+			*tm->m(2, 0) = third.x;
+			*tm->m(2, 1) = third.y;
+			*tm->m(2, 2) = third.z;
+		}
+		arr->next();
+	}
+}
+
 void ModifyForest::movePlant(const Ray & ray,
 						const Vector3F & displaceNear, const Vector3F & displaceFar,
 						const float & clipNear, const float & clipFar)
 {
-	if(numActivePlants() < 1 ) return;
-	if(!intersectGround(ray) ) return;
+	if(!calculateSelecedWeight(ray)) return;
 	
 	IntersectionContext * ctx = intersection();
 	
 	const float depth = ctx->m_hitP.distanceTo(ray.m_origin);
 	const Vector3F disp = displaceNear 
 					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
-	
-	selection()->set(ctx->m_hitP, ctx->m_hitN, 4.f);
-	selection()->calculateWeight();
 	
 	Vector3F pos, bindPos;
 	Array<int, PlantInstance> * arr = activePlants();
@@ -304,5 +374,20 @@ void ModifyForest::randomSpaceAt(const Vector3F & pos, const GrowOption & option
 	*space.m(2, 1) = front.y * scale;
 	*space.m(2, 2) = front.z * scale;
 }
+
+bool ModifyForest::calculateSelecedWeight(const Ray & ray)
+{
+    if(numActivePlants() < 1 ) return false;
+	if(!intersectGround(ray) ) return false;
+	
+	IntersectionContext * ctx = intersection();
+	
+	selection()->set(ctx->m_hitP, ctx->m_hitN, 4.f);
+	selection()->calculateWeight();
+    return true;
+}
+
+float ModifyForest::getNoise() const
+{ return m_noiseWeight * (float(rand()%991) / 991.f - .5f); }
 
 }
