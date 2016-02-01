@@ -55,9 +55,7 @@ MObject ProxyViz::aplantTriangleCoordCache;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0),
 m_toSetGrid(true), m_hasCamera(false)
-{
-	attachSceneCallbacks();
-}
+{ attachSceneCallbacks(); }
 
 ProxyViz::~ProxyViz() 
 {
@@ -73,14 +71,6 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MStatus status;
 
-		MMatrix cameraInv;
-		MDataHandle cameradata = block.inputValue(acameraspace, &status);
-        if(status) {
-			cameraInv = cameradata.asMatrix();
-		}
-		
-		fDisplayMesh = block.inputValue( ainmesh ).asMesh();
-
 		BoundingBox * defb = defBoxP();
 		defb->setMin(block.inputValue(abboxminx).asFloat(), 0);
 		defb->setMin(block.inputValue(abboxminy).asFloat(), 1);
@@ -94,6 +84,27 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			resetGrid(defb->distance(0) * 20.f);
 		}
 		
+		if(_firstLoad) {
+/// internal cache has the priority
+			if(!loadInternal(block) ) {
+				MString filename =  block.inputValue( acachename ).asString();
+				if(filename != "") {
+					loadExternal(replaceEnvVar(filename).c_str());
+				}
+			}
+			_firstLoad = 0;
+		}
+        
+		MArrayDataHandle groundArray = block.inputArrayValue(agroundMesh );
+        updateGround(groundArray );
+		moveWithGround();
+		
+		MMatrix cameraInv;
+		MDataHandle cameradata = block.inputValue(acameraspace, &status);
+        if(status) cameraInv = cameradata.asMatrix();
+		
+		fDisplayMesh = block.inputValue( ainmesh ).asMesh();
+		
 		double h_apeture = block.inputValue(ahapeture).asDouble();
 		double v_apeture = block.inputValue(avapeture).asDouble();
 		double fl = block.inputValue(afocallength).asDouble();
@@ -104,21 +115,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		int groupCount = block.inputValue(agroupcount).asInt();
 		int groupId = block.inputValue(ainstanceId).asInt();
 		int frustumCull = block.inputValue(aenablecull).asInt();
-		MString bakename =  block.inputValue( adumpname ).asString();
-		MString filename =  block.inputValue( acachename ).asString();	
 		const double percentage = block.inputValue(aconvertPercentage).asDouble();
 		m_materializePercentage = percentage;
-
-		if(_firstLoad) {
-			if(filename != "") {
-			    loadCache(replaceEnvVar(filename).c_str());
-			}	
-			_firstLoad = 0;
-		}
-        
-		MArrayDataHandle groundArray = block.inputArrayValue(agroundMesh );
-        updateGround(groundArray );
-		moveWithGround();
+		MString bakename =  block.inputValue( adumpname ).asString();
 		
 /// particle output
 		unsigned num_box = _spaces.length();
@@ -260,15 +259,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	updateWorldSpace();
 	MObject thisNode = thisMObject();
 	
-	Vector3F multiplier;
 	MPlug mutxplug( thisNode, axmultiplier);
-	multiplier.x = mutxplug.asFloat();
+	setScaleMuliplier(mutxplug.asFloat(), 0);
 	
 	MPlug mutyplug( thisNode, aymultiplier);
-	multiplier.y = mutyplug.asFloat();
+	setScaleMuliplier(mutyplug.asFloat(), 1);
 	
 	MPlug mutzplug( thisNode, azmultiplier);
-	multiplier.z = mutzplug.asFloat();	
+	setScaleMuliplier(mutzplug.asFloat(), 2);	
 	
 	_viewport = view;
 	fHasView = 1;
@@ -309,8 +307,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawGridBounding();
 	// drawGrid();
 
-	if ( ( style == M3dView::kFlatShaded ) || 
-		    ( style == M3dView::kGouraudShaded ) ) {		
+	if ( style == M3dView::kFlatShaded || 
+		    style == M3dView::kGouraudShaded ) {		
 		drawPlants();
 	}
 	
@@ -326,7 +324,7 @@ bool ProxyViz::isBounded() const
 MBoundingBox ProxyViz::boundingBox() const
 {   
 	BoundingBox bbox = defBox();
-	if(numPlants() > 0) bbox.expandBy(gridBoundingBox() );
+	if(numPlants() > 0) bbox = gridBoundingBox();
 	
 	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);
 	MPoint corner2(bbox.m_data[3], bbox.m_data[4], bbox.m_data[5]);
@@ -621,13 +619,12 @@ void ProxyViz::saveInternal()
 	MIntArray plantTris;
 	MVectorArray plantCoords;
 	
-/// fill the data
+	savePlants(plantTms, plantIds, plantTris, plantCoords);
 	
 	MFnPointArrayData tmFn;
 	MObject otm = tmFn.create(plantTms);
 	MPlug tmPlug(thisMObject(), aplantTransformCache);
 	tmPlug.setValue(otm);
-	
 	
 	MFnIntArrayData idFn;
 	MObject oid = idFn.create(plantIds);
@@ -643,6 +640,31 @@ void ProxyViz::saveInternal()
 	MObject ocrd = crdFn.create(plantCoords);
 	MPlug crdPlug(thisMObject(), aplantTriangleCoordCache);
 	crdPlug.setValue(ocrd);
+}
+
+bool ProxyViz::loadInternal(MDataBlock& block)
+{
+	MDataHandle tmH = block.inputValue(aplantTransformCache);
+	MFnPointArrayData tmFn(tmH.data());
+	MPointArray plantTms = tmFn.array();
+	if(plantTms.length() < 1) return false;
+	
+	MDataHandle idH = block.inputValue(aplantIdCache);
+	MFnIntArrayData idFn(idH.data());
+	MIntArray plantIds = idFn.array();
+	if(plantIds.length() < 1) return false;
+	
+	MDataHandle triH = block.inputValue(aplantTriangleIdCache);
+	MFnIntArrayData triFn(triH.data());
+	MIntArray plantTris = triFn.array();
+	if(plantTris.length() < 1) return false;
+	
+	MDataHandle crdH = block.inputValue(aplantTriangleCoordCache);
+	MFnVectorArrayData crdFn(crdH.data());
+	MVectorArray plantCoords = crdFn.array();
+	if(plantCoords.length() < 1) return false;
+		
+	return loadPlants(plantTms, plantIds, plantTris, plantCoords);
 }
 
 char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax)
@@ -848,116 +870,26 @@ void ProxyViz::adjustLocation(short start_x, short start_y, short last_x, short 
 }
 
 MMatrix ProxyViz::getActiveBox(unsigned idx) const
-{
-	return worldizeSpace(_spaces[_activeIndices[idx]]);
-}
+{ return worldizeSpace(_spaces[_activeIndices[idx]]); }
 
 int ProxyViz::getActiveIndex(unsigned idx) const
-{
-	return _activeIndices[idx];
-}
+{ return _activeIndices[idx]; }
 
 void ProxyViz::setActiveBox(unsigned idx, const MMatrix & mat)
-{
-	_spaces[_activeIndices[idx]] = localizeSpace(mat);
-}
+{ _spaces[_activeIndices[idx]] = localizeSpace(mat); }
 
 unsigned ProxyViz::getNumActiveBoxes() const
-{
-	return _activeIndices.length();
-}
-
-void ProxyViz::loadCache(const char* filename)
-{
-    MGlobal::displayInfo("proxy viz loading...");
-	std::ifstream chFile;
-	chFile.open(filename, std::ios_base::in | std::ios_base::binary);
-	if(!chFile.is_open()) {
-		MGlobal::displayWarning(MString("proxy viz cannot open file: ") + filename);
-		return;
-	}
-	
-	chFile.seekg (0, ios::end);
-
-	if(chFile.tellg() < 4 + 4 * 16) {
-		MGlobal::displayWarning(MString("proxy viz skipped empty file: ") + filename);
-		chFile.close();
-		return;
-	}
-	
-	chFile.seekg (0, ios::beg);
-	int numRec;
-	chFile.read((char*)&numRec, sizeof(int));
-	MGlobal::displayInfo(MString("proxy viz read recond count ") + numRec);
-	float *data = new float[numRec * 16];
-	chFile.read((char*)data, sizeof(float) * numRec * 16);
-	chFile.close();
-	
-	_spaces.setLength(numRec);
-	for(int i=0; i < numRec; i++) {
-		MMatrix space;
-		const int ii = i * 16;
-		space(0, 0) = data[ii];
-		space(0, 1) = data[ii+1];
-		space(0, 2) = data[ii+2];
-		space(1, 0) = data[ii+4];
-		space(1, 1) = data[ii+5];
-		space(1, 2) = data[ii+6];
-		space(2, 0) = data[ii+8];
-		space(2, 1) = data[ii+9];
-		space(2, 2) = data[ii+10];
-		space(3, 0) = data[ii+12];
-		space(3, 1) = data[ii+13];
-		space(3, 2) = data[ii+14];
-		
-		_spaces[i] = space;
-	}
-	MGlobal::displayInfo(MString("proxy viz read cache from ") + filename);
-	delete[] data;
-}
-
-void ProxyViz::saveCache(const char* filename)
-{
-	std::ofstream chFile;
-	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
-	if(!chFile.is_open()) {
-		MGlobal::displayWarning(MString("proxy viz cannot open file: ") + filename);
-		return;
-	}
-	int numRec = _spaces.length();
-	MGlobal::displayInfo(MString("proxy viz write recond count ") + numRec);
-	chFile.write((char*)&numRec, sizeof(int));
-	float *data = new float[numRec * 16];
-	for(int i=0; i < numRec; i++) {
-		const MMatrix space = _spaces[i];
-		const int ii = i * 16;
-		data[ii] = space(0, 0);
-		data[ii+1] = space(0, 1);
-		data[ii+2] = space(0, 2);
-		data[ii+4] = space(1, 0);
-		data[ii+5] = space(1, 1);
-		data[ii+6] = space(1, 2);
-		data[ii+8] = space(2, 0);
-		data[ii+9] = space(2, 1);
-		data[ii+10] = space(2, 2);
-		data[ii+12] = space(3, 0);
-		data[ii+13] = space(3, 1);
-		data[ii+14] = space(3, 2);
-	}
-	chFile.write((char*)data, sizeof(float) * numRec * 16);
-	chFile.close();
-	MGlobal::displayInfo(MString("Well done! Proxy saved to ") + filename);
-	delete[] data;
-}
+{ return _activeIndices.length(); }
 
 void ProxyViz::pressToSave()
 {
 	MObject thisNode = thisMObject();
 	MPlug plugc( thisNode, acachename );
 	const MString filename = plugc.asString();
-	if(filename != "") {
-	    saveCache(replaceEnvVar(filename).c_str());
-	}
+	if(filename != "")
+	    saveExternal(replaceEnvVar(filename).c_str());
+	else 
+		AHelper::Info<int>("ProxyViz error empty external cache filename", 0);
 }
 
 void ProxyViz::pressToLoad()
@@ -966,7 +898,9 @@ void ProxyViz::pressToLoad()
 	MPlug plugc( thisNode, acachename );
 	const MString filename = plugc.asString();
 	if(filename != "")
-		loadCache(replaceEnvVar(filename).c_str());
+		loadExternal(replaceEnvVar(filename).c_str());
+	else 
+		AHelper::Info<int>("ProxyViz error empty external cache filename", 0);
 }
 
 void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling)
@@ -1046,39 +980,6 @@ void ProxyViz::setCullMesh(MDagPath mesh)
 		fCuller->setMesh(mesh);
 }
 
-void ProxyViz::bakePass(const char* filename, const MVectorArray & position, const MVectorArray & scale, const MVectorArray & rotation)
-{
-	std::ofstream chFile;
-	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
-	if(!chFile.is_open()) {
-		MGlobal::displayWarning(MString("proxy viz cannot open file: ") + filename);
-		return;
-	}
-	int numRec = position.length();
-	MGlobal::displayInfo(MString("proxy viz write bake recond count ") + numRec);
-	chFile.write((char*)&numRec, sizeof(int));
-	float *data = new float[numRec * 9];
-	for(int i=0; i < numRec; i++) {
-		const int ii = i * 9;
-		const MVector pos = position[i];
-		const MVector scl = scale[i];
-		const MVector rot = rotation[i];
-		data[ii] = pos.x;
-		data[ii+1] = pos.y;
-		data[ii+2] = pos.z;
-		data[ii+3] = scl.x;
-		data[ii+4] = scl.y;
-		data[ii+5] = scl.z;
-		data[ii+6] = rot.x;
-		data[ii+7] = rot.y;
-		data[ii+8] = rot.z;
-	}
-	chFile.write((char*)data, sizeof(float) * numRec * 9);
-	chFile.close();
-	MGlobal::displayInfo(MString("Well done! Proxy pass saved to ") + filename);
-	delete[] data;
-}
-
 void ProxyViz::updateWorldSpace()
 {
 	MObject thisNode = thisMObject();
@@ -1103,9 +1004,7 @@ MMatrix ProxyViz::worldizeSpace(const MMatrix & s) const
 }
 
 void ProxyViz::useActiveView()
-{
-     _viewport = M3dView::active3dView();
-}
+{ _viewport = M3dView::active3dView(); }
 
 char ProxyViz::hasDisplayMesh() const
 {
@@ -1119,38 +1018,8 @@ char ProxyViz::hasDisplayMesh() const
 	return 1;
 }
 
-const MMatrixArray & ProxyViz::spaces() const
-{
-    return _spaces; 
-}
-
-const MMatrixArray ProxyViz::spaces(int groupCount, int groupId, MIntArray & ppNums) const
-{
-    MMatrixArray res;
-    const unsigned num_box = _spaces.length();
-    for(unsigned i =1; i < num_box; i++) {	
-        if(groupCount > 1) {
-            int grp = _randNums[i] % groupCount;
-            if(grp != groupId)
-                continue;
-        }
-			
-        if(m_materializePercentage < 1.0) {
-            double dart = ((double)(rand()%497))/497.0;
-            if(dart > m_materializePercentage) continue;
-        }
-			   
-        const MMatrix space = _spaces[i];
-        res.append(space);
-        ppNums.append(_randNums[i]);
-    }
-    return res;
-}
-
 const MMatrix & ProxyViz::worldSpace() const
-{
-    return _worldSpace;
-}
+{ return _worldSpace; }
 
 std::string ProxyViz::replaceEnvVar(const MString & filename) const
 {

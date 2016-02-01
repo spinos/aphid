@@ -29,7 +29,26 @@ protected:
 	void drawSolidMesh(MItMeshPolygon & iter);
 	void drawWireMesh(MItMeshPolygon & iter);
 	static void matrix_as_array(const MMatrix &space, double *mm);
+	void savePlants(MPointArray & plantTms, 
+					MIntArray & plantIds,
+					MIntArray & plantTris,
+					MVectorArray & plantCoords);
+	bool loadPlants(const MPointArray & plantTms, 
+					const MIntArray & plantIds,
+					const MIntArray & plantTris,
+					const MVectorArray & plantCoords);
+	void loadExternal(const char* filename);
+	void saveExternal(const char* filename);
+	void bakePass(const char* filename, 
+					const MVectorArray & position, 
+					const MVectorArray & scale, 
+					const MVectorArray & rotation);
+	
 private:
     void updateGroundMesh(MObject & mesh, unsigned idx);
-    
+    void saveCell(sdb::Array<int, sdb::Plant> *cell,
+					MPointArray & plantTms, 
+					MIntArray & plantIds,
+					MIntArray & plantTris,
+					MVectorArray & plantCoords);
 };

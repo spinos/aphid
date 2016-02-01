@@ -11,9 +11,17 @@
 #include <gl_heads.h>
 
 DrawForest::DrawForest() 
-{ m_defBox = BoundingBox(-1.f, -1.f, -1.f, 1.f, 1.f, 1.f); }
+{ 
+	m_defBox = BoundingBox(-1.f, -1.f, -1.f, 1.f, 1.f, 1.f);
+	m_scalbuf[0] = 1.f; 
+	m_scalbuf[1] = 1.f; 
+	m_scalbuf[2] = 1.f; 
+}
 
 DrawForest::~DrawForest() {}
+
+void DrawForest::setScaleMuliplier(float x, int idx)
+{ m_scalbuf[idx] = x; }
 
 void DrawForest::drawGround() 
 {
@@ -195,10 +203,9 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 {
 	glPushMatrix();
     
-	float m[16];
-	data->t1->glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
-	//glMultMatrixf(mScale);
+	data->t1->glMatrix(m_transbuf);
+	glMultMatrixf(m_transbuf);
+	glScalef(m_scalbuf[0], m_scalbuf[1], m_scalbuf[2]);
 	draw_solid_box();
 		
 	glPopMatrix();

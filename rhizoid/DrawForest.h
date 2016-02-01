@@ -12,12 +12,15 @@
 class DrawForest : public sdb::ModifyForest {
 	
 	BoundingBox m_defBox;
+	float m_transbuf[16];
+	float m_scalbuf[3];
 	
 public:
     DrawForest();
     virtual ~DrawForest();
     
 protected:
+	void setScaleMuliplier(float x, int idx);
     void drawGround();
 	BoundingBox * defBoxP();
 	const BoundingBox & defBox() const;

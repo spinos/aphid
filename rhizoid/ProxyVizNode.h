@@ -102,8 +102,6 @@ public:
 	int getActiveIndex(unsigned idx) const;
 	void setActiveBox(unsigned idx, const MMatrix & mat);
 	
-	const MMatrixArray & spaces() const;
-	const MMatrixArray spaces(int groupCount, int groupId, MIntArray & ppNums) const;
 	const MMatrix & worldSpace() const;
 	
 private:
@@ -119,9 +117,6 @@ private:
 	char *fVisibleTag;
 	char _firstLoad, fHasView;
 	
-	void loadCache(const char* filename);
-	void saveCache(const char* filename);
-	void bakePass(const char* filename, const MVectorArray & position, const MVectorArray & scale, const MVectorArray & rotation);
 	void calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling);
 	void updateWorldSpace();
 	MMatrix localizeSpace(const MMatrix & s) const;
@@ -137,6 +132,7 @@ private:
 
 	MCallbackId fBeforeSaveCB;
 	void saveInternal();
+	bool loadInternal(MDataBlock& block);
 	
 };
 #endif        //  #ifndef PROXYVIZNODE_H
