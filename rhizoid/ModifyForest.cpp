@@ -26,13 +26,14 @@ ModifyForest::~ModifyForest()
 	delete m_bary;
 }
 
-void ModifyForest::growOnGround(GrowOption & option)
+bool ModifyForest::growOnGround(GrowOption & option)
 {
-	if(numActiveGroundFaces() < 1) return;
+	if(numActiveGroundFaces() < 1) return false;
 	std::map<Geometry *, Sequence<unsigned> * >::iterator it = activeGround()->geometryBegin();
 	for(; it != activeGround()->geometryEnd(); ++it) {
 		growOnFaces(it->first, it->second, geomertyId(it->first), option);
 	}
+    return true;
 }
 
 void ModifyForest::growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
@@ -97,9 +98,9 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 	delete[] hits;
 }
 
-void ModifyForest::growAt(const Ray & ray, GrowOption & option)
+bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 {
-	if(!intersectGround(ray) ) return;
+	if(!intersectGround(ray) ) return false;
 	
 	IntersectionContext * ctx = intersection();
 	
@@ -110,7 +111,7 @@ void ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		
 	Vector3F * p = mesh->points();
 	unsigned * tri = mesh->triangleIndices(component );
-	if(!m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) return;
+	if(!m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) return false;
 	
 	m_bary->create(p[tri[0]], p[tri[1]], p[tri[2]] );
 	
@@ -123,7 +124,7 @@ void ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		float scale;
 		randomSpaceAt(ctx->m_hitP, option, tm, scale);
 		float delta = option.m_marginSize + plantSize(option.m_plantId) * scale;
-		if(closeToOccupiedPosition(ctx->m_hitP, delta)) return;
+		if(closeToOccupiedPosition(ctx->m_hitP, delta)) return false;
 		
 		m_bary->project(ctx->m_hitP);
 		m_bary->compute();
@@ -134,6 +135,7 @@ void ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		
 		addPlant(tm, bind, option.m_plantId);
 	}
+    return true;
 }
 
 void ModifyForest::clearAt(const Ray & ray, float weight)

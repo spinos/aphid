@@ -92,8 +92,7 @@ void MForest::selectPlant(const MPoint & origin, const MPoint & dest,
 	else if(adj == MGlobal::kRemoveFromList) m = SelectionContext::Remove;
 	
 	bool stat = selectPlants(r, m);
-	if(!stat)
-		AHelper::Info<int>("empty selection", m);
+	if(!stat) AHelper::Info<int>("MForest error empty selection", 0);
 }
 
 void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::ListAdjustment adj)
@@ -107,15 +106,15 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 	else if(adj == MGlobal::kRemoveFromList) m = SelectionContext::Remove;
 	
 	bool stat = selectGroundFaces(r, m);
-	if(!stat)
-		AHelper::Info<int>("empty selection", m);
+	if(!stat) AHelper::Info<int>("MForest error empty ground", 0);
 }
 
 void MForest::flood(GrowOption & option)
 {
 	option.m_plantId = activePlantId();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
-	growOnGround(option);
+	if(!growOnGround(option))
+        AHelper::Info<int>("MForest error empty ground", 0 );
 	updateNumPlants();
 	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
 	updateGrid();

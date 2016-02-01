@@ -27,9 +27,9 @@ public:
 	virtual ~ModifyForest();
 	
 protected:
-	void growOnGround(GrowOption & option);
+	bool growOnGround(GrowOption & option);
 	
-	void growAt(const Ray & ray, GrowOption & option);
+	bool growAt(const Ray & ray, GrowOption & option);
 	void clearAt(const Ray & ray, float weight);
 	void movePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,

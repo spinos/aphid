@@ -131,8 +131,6 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 
 bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode)
 {
-	if(m_ground->isEmpty() ) return false;
-	
 	if(!intersectGround(ray) ) {
 /// empty previous selection if hit nothing
 		if(mode == SelectionContext::Replace)
@@ -302,12 +300,13 @@ void Forest::bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F 
 
 bool Forest::intersectGround(const Ray & ray)
 {
-	if(ground()->isEmpty() ) return false;
+    if(!m_ground) return false;
+	if(m_ground->isEmpty() ) return false;
 	
-	intersection()->reset(ray);
-	ground()->intersect(intersection() );
+	m_intersectCtx.reset(ray);
+	m_ground->intersect(&m_intersectCtx );
 	
-	return intersection()->m_success;
+	return m_intersectCtx.m_success;
 }
 
 void Forest::addPlant(const Matrix44F & tm,

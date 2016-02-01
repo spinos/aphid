@@ -404,7 +404,7 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	if(!m_pViz) return MS::kSuccess;
 	if(mOpt==0) m_pViz->finishGrow();
 	if(mOpt==1) m_pViz->finishErase();
-	if(mOpt==2) AHelper::Info<unsigned>("n active faces", m_pViz->numActivePlants() );
+	if(mOpt==2) AHelper::Info<unsigned>("n active plants", m_pViz->numActivePlants() );
 	if(mOpt==9) AHelper::Info<unsigned>("n active faces", m_pViz->numActiveGroundFaces() );
 	
 	return MS::kSuccess;		
