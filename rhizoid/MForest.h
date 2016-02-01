@@ -7,7 +7,9 @@
 
 /// maya interface
 class MForest : public DrawForest {
-
+	
+	int * m_randGroup;
+	
 public:
     MForest();
     virtual ~MForest();
@@ -28,7 +30,7 @@ public:
 	void adjustRotation(const MPoint & origin, const MPoint & dest, 
                         float magnitude, short axis);
 	void extractActive(int numGroups);
-
+	
 protected:
     void updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
 	void drawSolidMesh(MItMeshPolygon & iter);
@@ -48,7 +50,11 @@ protected:
 					const MVectorArray & position, 
 					const MVectorArray & scale, 
 					const MVectorArray & rotation);
-	
+	void initRandGroup();
+	void pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
+					int totalGroups, int currentGroup, 
+					double percentage);
+					
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
     void saveCell(sdb::Array<int, sdb::Plant> *cell,
@@ -56,4 +62,8 @@ private:
 					MIntArray & plantIds,
 					MIntArray & plantTris,
 					MVectorArray & plantCoords);
+	void pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
+					bool hasCamera, float lodLowGate, float lodHighGate, 
+					int totalGroups, int currentGroup, 
+					double percentage, int & it);
 };

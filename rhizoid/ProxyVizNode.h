@@ -93,6 +93,9 @@ public:
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
 	void pressToSave();
 	void pressToLoad();
+	void beginPickInView();
+	void processPickInView();
+	void endPickInView();
 	
 	const MMatrix & worldSpace() const;
 	
@@ -102,8 +105,6 @@ private:
     
 	MMatrixArray _spaces;
 	MFloatArray _details;
-	MIntArray _randNums;
-	
 	char _firstLoad, fHasView;
 	
 	void calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling);

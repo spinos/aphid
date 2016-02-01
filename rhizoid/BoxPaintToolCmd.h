@@ -39,7 +39,7 @@
 #endif
 
 #include <Matrix44F.h>
-#include "proxyVizNode.h"
+#include "ProxyVizNode.h"
 #include <PseudoNoise.h>
 #include <IntersectionGroup.h>
 
@@ -87,6 +87,15 @@ public:
 	MStatus			finalize();
 
 private:
+	enum Operation {
+		opUnknown = 0,
+		opBeginPick = 1,
+		opDoPick = 2,
+		opEndPick = 3
+	};
+	
+	Operation m_operation;
+	
 	unsigned opt, nseg;
 	float lseg;
 	MString fBlockerName, fVizName;

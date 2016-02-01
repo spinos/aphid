@@ -5,11 +5,12 @@
 #include <AHelper.h>
 #include <fstream> 
 
-MForest::MForest()
+MForest::MForest() :
+m_randGroup(NULL)
 {}
 
 MForest::~MForest()
-{}
+{ if(m_randGroup) delete[] m_randGroup; }
 
 void MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray)
 {
@@ -479,5 +480,77 @@ void MForest::extractActive(int numGroups)
 	}
 	
 	MGlobal::displayInfo(MString("proxy paint extracted ") + numActivePlants() + " transforms in " + numGroups + " groups");
+}
+
+void MForest::initRandGroup()
+{
+	const unsigned n = numPlants();
+	if(n < 1) {
+		MGlobal::displayInfo("MForest no plant to pick");
+		return;
+	}
+	
+	if(m_randGroup) delete[] m_randGroup;
+	m_randGroup = new int[n];
+	
+	PseudoNoise pnoise;
+	unsigned i = 0;
+	for(;i<n;++i) m_randGroup[i] = pnoise.rint1(i + 2397 * i, n * 5);
+}
+
+void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
+					int totalGroups, int currentGroup, 
+					double percentage)
+{
+	int i = 0;
+	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	g->begin();
+	while(!g->end() ) {
+		pickupVisiblePlantsInCell(g->value(), hasCamera, lodLowGate, lodHighGate, 
+					totalGroups, currentGroup, 
+					percentage, i);
+		g->next();
+	}
+}
+
+void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
+					bool hasCamera, float lodLowGate, float lodHighGate, 
+					int totalGroups, int currentGroup, 
+					double percentage, int & it)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		
+		bool survived = true;
+		
+		if(activePlants()->find(cell->value()->key) ) 
+			survived = false;
+		
+		if(survived) {
+			if(totalGroups > 1) {
+				if((m_randGroup[it] % totalGroups) != currentGroup)
+					survived = false;
+			}
+		}
+		
+		if(survived) {
+			if(percentage < 1.0) {
+			    double dart = ((double)(m_randGroup[it]%997))/997.0;
+			    if(dart > percentage) 
+					survived = false;
+			}
+		}
+			
+		if(survived) {
+			if(hasCamera) {
+/// todo check visibility
+			}
+		}
+		
+		if(survived) selection()->select(cell->value() );
+		
+		it++;
+		cell->next();
+	}
 }
 //:~

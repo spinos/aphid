@@ -10,6 +10,13 @@
 #include "BoxPaintToolCmd.h"
 #include <ASearchHelper.h>
 
+#define kBeginPickFlag "-bpk" 
+#define kBeginPickFlagLong "-beginPick"
+#define kDoPickFlag "-dpk" 
+#define kDoPickFlagLong "-doPick"
+#define kEndPickFlag "-epk" 
+#define kEndPickFlagLong "-endPick"
+
 proxyPaintTool::~proxyPaintTool() {}
 
 proxyPaintTool::proxyPaintTool()
@@ -39,8 +46,9 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kCullSelectionFlag, kCullSelectionFlagLong, MSyntax::kUnsigned);
 	syntax.addFlag(kMultiCreateFlag, kMultiCreateFlagLong, MSyntax::kUnsigned);
 	syntax.addFlag(kInstanceGroupCountFlag, kInstanceGroupCountFlagLong, MSyntax::kUnsigned);
-	syntax.addFlag(kBlockFlag, kBlockFlagLong, MSyntax::kString);
-	syntax.addFlag(kVizFlag, kVizFlagLong, MSyntax::kString);
+	syntax.addFlag(kBeginPickFlag, kBeginPickFlagLong, MSyntax::kString);
+	syntax.addFlag(kDoPickFlag, kDoPickFlagLong, MSyntax::kString);
+	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	
 	return syntax;
 }
@@ -55,6 +63,8 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	MStatus status;
 
 	status = parseArgs(args);
+	
+	if(m_operation == opUnknown) return status;
 	
 	ASearchHelper finder;
 
@@ -71,12 +81,27 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 		MGlobal::displayWarning(MString("cannot recognize viz: ") + fVizName);
 		return MS::kSuccess;
 	}
+	
+	switch(m_operation) {
+		case opBeginPick:
+			pViz->beginPickInView();
+			break;
+		case opDoPick:
+			pViz->processPickInView();
+			break;
+		case opEndPick:
+			pViz->endPickInView();
+			break;
+		default:
+			;
+	}
 
 	return MS::kSuccess;
 }
 
 MStatus proxyPaintTool::parseArgs(const MArgList &args)
 {
+	m_operation = opUnknown;
 	MStatus status;
 	MArgDatabase argData(syntax(), args);
 	
@@ -202,23 +227,32 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 		}
 	}
 	
-	if (argData.isFlagSet(kBlockFlag)) {
-		status = argData.getFlagArgument(kBlockFlag, 0, fBlockerName);
-		if (!status) {
-			status.perror("block flag parsing failed");
-			return status;
-		}
-	}
-	
-	if (argData.isFlagSet(kVizFlag)) {
-		status = argData.getFlagArgument(kVizFlag, 0, fVizName);
+	if (argData.isFlagSet(kBeginPickFlag)) {
+		status = argData.getFlagArgument(kBeginPickFlag, 0, fVizName);
 		if (!status) {
 			status.perror("viz flag parsing failed");
 			return status;
 		}
+		m_operation = opBeginPick;
 	}
 	
-	MGlobal::displayInfo(MString("culled by ") + fBlockerName + " " + fVizName);
+	if (argData.isFlagSet(kDoPickFlag)) {
+		status = argData.getFlagArgument(kDoPickFlag, 0, fVizName);
+		if (!status) {
+			status.perror("viz flag parsing failed");
+			return status;
+		}
+		m_operation = opDoPick;
+	}
+	
+	if (argData.isFlagSet(kEndPickFlag)) {
+		status = argData.getFlagArgument(kEndPickFlag, 0, fVizName);
+		if (!status) {
+			status.perror("viz flag parsing failed");
+			return status;
+		}
+		m_operation = opEndPick;
+	}
 	
 	return MS::kSuccess;
 }

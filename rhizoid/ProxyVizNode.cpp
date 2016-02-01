@@ -135,14 +135,14 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 /// particle output
 		unsigned num_box = _spaces.length();
 		_details.setLength(num_box);
-		_randNums.setLength(num_box);
+		//_randNums.setLength(num_box);
 		
 		if(start_time == 1.f) {
 			MGlobal::displayInfo(MString("proxy viz initialize lod keys"));
 			PseudoNoise pnoise;
 			for(unsigned i =1; i < num_box; i++) {
 				_details[i] = -1.f;
-				_randNums[i] = pnoise.rint1(i + 2397 * i, num_box * 4);
+				//_randNums[i] = pnoise.rint1(i + 2397 * i, num_box * 4);
 			}
 		}
 
@@ -202,9 +202,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			}
 				
 			if(groupCount > 1) {
-				int grp = _randNums[i] % groupCount;
-				if(grp != groupId)
-					continue;
+				//int grp = _randNums[i] % groupCount;
+				//if(grp != groupId)
+				//	continue;
 			}
 			
 			if(percentage < 1.0) {
@@ -572,7 +572,6 @@ MStatus ProxyViz::initialize()
     typedAttrFn.setStorable(true);
 	addAttribute(aplantTriangleCoordCache);
 	
-	// attributeAffects(acameraspace, outValue);
 	attributeAffects(abboxminx, outValue);
 	attributeAffects(abboxmaxx, outValue);
 	attributeAffects(abboxminy, outValue);
@@ -898,4 +897,38 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	
 	setFrustum(hfa, vfa, fl, -1.f, -250000.f);
 }
+
+
+void ProxyViz::beginPickInView()
+{
+	MGlobal::displayInfo("MForest begin pick in view");
+	initRandGroup();
+	selection()->deselect();
+}
+
+void ProxyViz::processPickInView()
+{
+	useActiveView();
+	_viewport.refresh();
+	
+	MObject node = thisMObject();
+	MPlug gateHighPlg(node, alodgatehigh);
+	float gateHigh = gateHighPlg.asFloat();
+	
+	MPlug gateLowPlg(node, alodgatelow);
+	float gateLow = gateLowPlg.asFloat();
+	
+	MPlug gcPlg(node, agroupcount);
+	int groupCount = gcPlg.asInt();
+	
+	MPlug giPlg(node, ainstanceId);
+	int groupId = giPlg.asInt();
+	
+	MPlug perPlg(node, aconvertPercentage);
+	double percentage = perPlg.asDouble();
+	pickVisiblePlants(m_hasCamera, gateLow, gateHigh, groupCount, groupId, percentage);
+}
+
+void ProxyViz::endPickInView()
+{}
 //:~
