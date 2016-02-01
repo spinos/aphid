@@ -82,6 +82,8 @@ protected:
 	IntersectionContext * intersection();
 	SelectionContext * activeGround();
 	ATriangleMesh * getGroundMesh(unsigned idx) const;
+	const std::vector<ATriangleMesh *> & groundMeshes() const;
+	
     virtual float plantSize(int idx) const;
 	
 	void displacePlantInGrid(PlantInstance * inst );

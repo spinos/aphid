@@ -108,6 +108,9 @@ ATriangleMesh * Forest::getGroundMesh(unsigned idx) const
     return m_grounds[idx];
 }
 
+const std::vector<ATriangleMesh *> & Forest::groundMeshes() const
+{ return m_grounds; }
+
 void Forest::buildGround()
 {
     if(m_ground) delete m_ground;

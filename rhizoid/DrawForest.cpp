@@ -10,6 +10,7 @@
 #include "DrawForest.h"
 #include <gl_heads.h>
 #include <CircleCurve.h>
+#include <DepthCull.h>
 
 DrawForest::DrawForest() 
 { 
@@ -331,5 +332,15 @@ void DrawForest::drawCircle() const
 		glVertex3f(p.x, p.y, p.z);
 	}
 	glEnd();
+}
+
+void DrawForest::drawDepthCull(double * localTm)
+{
+	DepthCull * culler = depthCuller();
+	culler->setLocalSpace(localTm);
+	culler->frameBufferBegin();
+	culler->drawFrameBuffer(groundMeshes() );
+	culler->frameBufferEnd();
+	//culler->showFrameBuffer();
 }
 //:~

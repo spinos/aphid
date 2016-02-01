@@ -317,7 +317,6 @@ void proxyPaintContext::setCullSelection(unsigned val)
 	else
 		MGlobal::displayInfo("proxyPaint disable cull selection");
 	m_cullSelection = val;
-	sendCullSurface();
 	MToolsInfo::setDirtyFlag(*this);
 }
 
@@ -453,19 +452,6 @@ void proxyPaintContext::erectSelected()
 {
 	if(!m_pViz) return;
 	m_pViz->erectActive();
-}
-
-void proxyPaintContext::sendCullSurface()
-{
-	if(!validateSelection()) return;
-			
-	if(goCollide && m_cullSelection == 1) {
-		m_pViz->setCullMesh(fcollide.dagPath());
-	}
-	else {
-		MDagPath nouse;
-		m_pViz->setCullMesh(nouse);
-	}
 }
 
 void proxyPaintContext::snap()

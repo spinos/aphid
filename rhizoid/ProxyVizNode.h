@@ -23,7 +23,6 @@
 #include <maya/MSceneMessage.h>
 #include <Matrix44F.h>
 #include <Vector3F.h>
-#include <depthCut.h>
 #include "MForest.h"
 
 class MItMeshPolygon;
@@ -94,7 +93,6 @@ public:
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
 	void pressToSave();
 	void pressToLoad();
-	void setCullMesh(MDagPath mesh);
 	
 	const MMatrix & worldSpace() const;
 	
@@ -116,7 +114,6 @@ private:
 	void useActiveView();
 	void updateViewFrustum(MObject & node);
 	
-	DepthCut * fCuller;
 	MObject fDisplayMesh;
 	
 	void attachSceneCallbacks();

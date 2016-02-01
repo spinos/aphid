@@ -84,7 +84,6 @@ private:
 	char validateViz(const MSelectionList &sels);
 	char validateCollide(const MSelectionList &sels);
 	char validateSelection();
-	void sendCullSurface();
 	void smoothSelected();
 	void selectGround();
 	void startSelectGround();

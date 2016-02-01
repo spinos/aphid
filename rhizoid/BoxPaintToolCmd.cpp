@@ -71,16 +71,6 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 		MGlobal::displayWarning(MString("cannot recognize viz: ") + fVizName);
 		return MS::kSuccess;
 	}
-	
-	MDagPath pMesh;
-	if(finder.dagByFullName(fBlockerName.asChar(), pMesh)) {
-		MGlobal::displayInfo(MString("found blocker mesh: ") + fBlockerName);
-		pViz->setCullMesh(pMesh);
-	}
-	else {
-		MDagPath nouse;
-		pViz->setCullMesh(nouse);
-	}
 
 	return MS::kSuccess;
 }

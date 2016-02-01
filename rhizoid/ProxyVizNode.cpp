@@ -54,7 +54,7 @@ MObject ProxyViz::aplantIdCache;
 MObject ProxyViz::aplantTriangleIdCache;
 MObject ProxyViz::aplantTriangleCoordCache;
 
-ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0), fCuller(0),
+ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0),
 m_toSetGrid(true), m_hasCamera(false)
 { attachSceneCallbacks(); }
 
@@ -276,33 +276,22 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 
 	view.beginGL();
 	
-	if(!fCuller)
-		fCuller = new DepthCut;
+	initDepthCull();
 	
-	if(!fCuller->isDiagnosed()) {
+	if(!isDepthCullDiagnosed() ) {
 #ifdef WIN32
         MGlobal::displayInfo("init glext on win32");
 		gExtensionInit();
-#endif		
-		std::string log;
-		fCuller->diagnose(log);
-		MGlobal::displayInfo(MString("glsl diagnose log: ") + log.c_str());
+#endif	
+		diagnoseDepthCull();
 	}
 	
 	double mm[16];
 	matrix_as_array(_worldInverseSpace, mm);
 		
-	if(fCuller->isDiagnosed()) {
-		if(!fCuller->hasFBO()) {
-			std::string log;
-			fCuller->initializeFBO(log);
-			MGlobal::displayInfo(log.c_str());
-		}
-		fCuller->setLocalSpace(mm);
-		fCuller->frameBufferBegin();
-		fCuller->drawFrameBuffer();
-		fCuller->frameBufferEnd();
-		//fCuller->showFrameBuffer();
+	if(isDepthCullDiagnosed() ) {
+		initDepthCullFBO();
+		if(m_hasCamera) drawDepthCull(mm);
 	}
 	
 	glPushMatrix();
@@ -693,7 +682,7 @@ char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short
 	const MPoint pcam = pos * modelViewMatrix;
 	short x, y;
 	_viewport.worldToView (pos, x, y);
-		
+		/*
 	if(x > xmin && x < xmax && y > ymin && y < ymax) {
 		if(!fCuller)
 			return 1;
@@ -705,7 +694,7 @@ char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short
 				return 0;
 		}
 		return 1;
-	}
+	}*/
 	return 0;
 }
 
@@ -821,13 +810,6 @@ void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, cons
 		if(realdetail > _details[i])
 			_details[i] = realdetail;
 	}
-}
-
-void ProxyViz::setCullMesh(MDagPath mesh)
-{
-	MGlobal::displayInfo(MString("proxy viz uses blocker: ") + mesh.fullPathName());
-	if(fCuller)
-		fCuller->setMesh(mesh);
 }
 
 void ProxyViz::updateWorldSpace()
