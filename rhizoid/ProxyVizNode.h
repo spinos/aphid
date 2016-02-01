@@ -33,7 +33,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	MMatrix _worldSpace, _worldInverseSpace;
 	double m_materializePercentage;
 	bool m_toSetGrid;
-	bool m_hasCamera;
+	bool m_hasCamera, m_hasParticle;
 	
 public:
 	ProxyViz();
@@ -104,7 +104,6 @@ private:
 	MFloatArray _details;
 	MIntArray _randNums;
 	
-	char *fVisibleTag;
 	char _firstLoad, fHasView;
 	
 	void calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling);

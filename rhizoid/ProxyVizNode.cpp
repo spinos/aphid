@@ -54,13 +54,14 @@ MObject ProxyViz::aplantIdCache;
 MObject ProxyViz::aplantTriangleIdCache;
 MObject ProxyViz::aplantTriangleCoordCache;
 
-ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0), fVisibleTag(0),
-m_toSetGrid(true), m_hasCamera(false)
+ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
+m_toSetGrid(true), 
+m_hasCamera(false), 
+m_hasParticle(false)
 { attachSceneCallbacks(); }
 
 ProxyViz::~ProxyViz() 
 {
-    if(fVisibleTag) delete[] fVisibleTag;
 	detachSceneCallbacks();
 }
 
@@ -101,8 +102,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
         updateGround(groundMeshArray, groundSpaceArray );
 		moveWithGround();
 		
+		/*
 		MPlug plgParticlePos(thisMObject(), outPositionPP);
 		if(!plgParticlePos.isConnected()) {
+		*/
+		if(!m_hasParticle) {
+			AHelper::Info<int>(" no particle ", 0);
 			block.setClean(plug);
             return MS::kSuccess;
 		}
@@ -111,7 +116,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		MDataHandle cameradata = block.inputValue(acameraspace, &status);
         if(status) cameraInv = cameradata.asMatrix();
 		
-		fDisplayMesh = block.inputValue( ainmesh ).asMesh();
+		//fDisplayMesh = block.inputValue( ainmesh ).asMesh();
 		
 		double h_apeture = block.inputValue(ahapeture).asDouble();
 		double v_apeture = block.inputValue(avapeture).asDouble();
@@ -132,16 +137,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		_details.setLength(num_box);
 		_randNums.setLength(num_box);
 		
-		if(fVisibleTag) delete[] fVisibleTag;
-		fVisibleTag = new char[num_box];
-		
 		if(start_time == 1.f) {
 			MGlobal::displayInfo(MString("proxy viz initialize lod keys"));
 			PseudoNoise pnoise;
 			for(unsigned i =1; i < num_box; i++) {
 				_details[i] = -1.f;
 				_randNums[i] = pnoise.rint1(i + 2397 * i, num_box * 4);
-				fVisibleTag[i] = 1;
 			}
 		}
 
@@ -210,8 +211,6 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			    double dart = ((double)(rand()%497))/497.0;
 			    if(dart > percentage) continue;
 			}
-			
-			fVisibleTag[i] = 0;
                 
             const MMatrix space = worldizeSpace(_spaces[i]);
             const MVector pos(space(3,0), space(3,1), space(3,2));
@@ -220,7 +219,6 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			 
             outPosArray.append(pos);
                 
-            
             const MVector scale(sz, sz, sz);
             outScaleArray.append(scale);
 			
@@ -291,7 +289,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		
 	if(isDepthCullDiagnosed() ) {
 		initDepthCullFBO();
-		if(m_hasCamera) drawDepthCull(mm);
+		if(m_hasCamera && m_hasParticle) drawDepthCull(mm);
 	}
 	
 	glPushMatrix();
@@ -675,14 +673,14 @@ bool ProxyViz::loadInternal(MDataBlock& block)
 
 char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax)
 {
-	int portW = _viewport.portWidth();
+	/*int portW = _viewport.portWidth();
 	int portH = _viewport.portHeight();
 	MMatrix modelViewMatrix;
 	_viewport.modelViewMatrix ( modelViewMatrix );
 	const MPoint pcam = pos * modelViewMatrix;
 	short x, y;
 	_viewport.worldToView (pos, x, y);
-		/*
+		
 	if(x > xmin && x < xmax && y > ymin && y < ymax) {
 		if(!fCuller)
 			return 1;
@@ -695,7 +693,7 @@ char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short
 		}
 		return 1;
 	}*/
-	return 0;
+	return 1;
 }
 
 void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat)
@@ -744,8 +742,7 @@ void ProxyViz::pressToLoad()
 
 void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling)
 {	
-    float longest = defBox().getLongestDistance();
-	int portW, portH;
+    int portW, portH;
 
 	if(fHasView) {
 		MString srenderer;
@@ -757,6 +754,8 @@ void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, cons
 		MGlobal::displayInfo("proxy viz has no renderer");
 		return;
 	}
+	
+	float longest = defBox().getLongestDistance();
 				
 	unsigned num_box = _details.length();
 	
@@ -865,6 +864,7 @@ std::string ProxyViz::replaceEnvVar(const MString & filename) const
 MStatus ProxyViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == acameraspace) m_hasCamera = true;
+	else if(plug == outPositionPP) m_hasParticle = true;
 	//AHelper::Info<MString>("connect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
@@ -872,6 +872,7 @@ MStatus ProxyViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, 
 MStatus ProxyViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == acameraspace) m_hasCamera = false;
+	else if(plug == outPositionPP) m_hasParticle = false;
 	//AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
@@ -882,7 +883,9 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MObject matobj;
 	matplg.getValue(matobj);
 	MFnMatrixData matdata(matobj);
+/// input is inversed
     MMatrix cameramat = matdata.matrix(); 
+	cameramat.inverse();
 	
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
 	
