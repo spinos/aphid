@@ -28,7 +28,8 @@ public:
 	virtual ~ModifyForest();
 	
     void setNoiseWeight(float x);
-    
+    void erectActive();
+	
 protected:
 	bool growOnGround(GrowOption & option);
 	

@@ -31,6 +31,7 @@ class MItMeshPolygon;
 class ProxyViz : public MPxLocatorNode, public MForest
 {
 	M3dView _viewport;
+	MMatrix _worldSpace, _worldInverseSpace;
 	double m_materializePercentage;
 	bool m_toSetGrid;
 	bool m_hasCamera;
@@ -94,22 +95,15 @@ public:
 	void pressToLoad();
 	void setCullMesh(MDagPath mesh);
 	
-	unsigned getNumActiveBoxes() const;
-	MMatrix getActiveBox(unsigned idx) const;
-	int getActiveIndex(unsigned idx) const;
-	void setActiveBox(unsigned idx, const MMatrix & mat);
-	
 	const MMatrix & worldSpace() const;
 	
 private:
 	char hasDisplayMesh() const;
 	std::string replaceEnvVar(const MString & filename) const;
     
-	MMatrix _worldSpace, _worldInverseSpace;
 	MMatrixArray _spaces;
 	MFloatArray _details;
 	MIntArray _randNums;
-	MIntArray _activeIndices;
 	
 	char *fVisibleTag;
 	char _firstLoad, fHasView;

@@ -27,7 +27,8 @@ public:
                      float magnitude);
 	void adjustRotation(const MPoint & origin, const MPoint & dest, 
                         float magnitude, short axis);
-	
+	void extractActive(int numGroups);
+
 protected:
     void updateGround(MArrayDataHandle & data);
 	void drawSolidMesh(MItMeshPolygon & iter);

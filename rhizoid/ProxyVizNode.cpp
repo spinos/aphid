@@ -99,6 +99,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
         updateGround(groundArray );
 		moveWithGround();
 		
+		MPlug plgParticlePos(thisMObject(), outPositionPP);
+		if(!plgParticlePos.isConnected()) {
+			block.setClean(plug);
+            return MS::kSuccess;
+		}
+		
 		MMatrix cameraInv;
 		MDataHandle cameradata = block.inputValue(acameraspace, &status);
         if(status) cameraInv = cameradata.asMatrix();
@@ -135,19 +141,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 				_randNums[i] = pnoise.rint1(i + 2397 * i, num_box * 4);
 				fVisibleTag[i] = 1;
 			}
-			_activeIndices.clear();
 		}
 
 		const Vector3F vdetail = defb->getMax() - defb->getMin();
 		const float detail = vdetail.length();
 		float aspectRatio = v_apeture / h_apeture;
 		calculateLOD(cameraInv, h_fov, aspectRatio, detail, frustumCull);
-		
-		MPlug plgParticlePos(thisMObject(), outPositionPP);
-		if(!plgParticlePos.isConnected()) {
-			block.setClean(plug);
-            return MS::kSuccess;
-		}
 		
 		MDataHandle hdata = block.inputValue(outPositionPP, &status);
         MFnVectorArrayData farray(hdata.data(), &status);
@@ -289,13 +288,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	}
 	
 	double mm[16];
+	matrix_as_array(_worldInverseSpace, mm);
+		
 	if(fCuller->isDiagnosed()) {
 		if(!fCuller->hasFBO()) {
 			std::string log;
 			fCuller->initializeFBO(log);
 			MGlobal::displayInfo(log.c_str());
 		}
-		matrix_as_array(_worldInverseSpace, mm);
 		fCuller->setLocalSpace(mm);
 		fCuller->frameBufferBegin();
 		fCuller->drawFrameBuffer();
@@ -303,6 +303,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		//fCuller->showFrameBuffer();
 	}
 	
+	glPushMatrix();
+	glMultMatrixd(mm);	
 	draw_a_box();
 	drawGridBounding();
 	// drawGrid();
@@ -316,6 +318,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawWiredPlants();
 	drawActivePlants();
 	drawGround();
+	glPopMatrix();
 	view.endGL();
 }
 
@@ -714,18 +717,6 @@ void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short 
 	
 	movePlant(r, v0, v1, clipNear, clipFar);
 }
-
-MMatrix ProxyViz::getActiveBox(unsigned idx) const
-{ return worldizeSpace(_spaces[_activeIndices[idx]]); }
-
-int ProxyViz::getActiveIndex(unsigned idx) const
-{ return _activeIndices[idx]; }
-
-void ProxyViz::setActiveBox(unsigned idx, const MMatrix & mat)
-{ _spaces[_activeIndices[idx]] = localizeSpace(mat); }
-
-unsigned ProxyViz::getNumActiveBoxes() const
-{ return _activeIndices.length(); }
 
 void ProxyViz::pressToSave()
 {

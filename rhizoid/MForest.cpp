@@ -1,5 +1,6 @@
 #include "MForest.h"
 #include <maya/MFnMesh.h>
+#include <maya/MDagModifier.h>
 #include <gl_heads.h>
 #include <AHelper.h>
 #include <fstream> 
@@ -367,6 +368,7 @@ void MForest::loadExternal(const char* filename)
 
 void MForest::saveExternal(const char* filename)
 {
+	return;
 	std::ofstream chFile;
 	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
 	if(!chFile.is_open()) {
@@ -430,5 +432,47 @@ void MForest::bakePass(const char* filename, const MVectorArray & position, cons
 	chFile.close();
 	MGlobal::displayInfo(MString("Well done! Proxy pass saved to ") + filename);
 	delete[] data;
+}
+
+void MForest::extractActive(int numGroups)
+{
+	if(numActivePlants() < 1) {
+		AHelper::Info<int>(" empty selection, cannot extract", 0);
+		return;
+	}
+	
+	MDagModifier mod;
+	MStatus stat;
+	MObjectArray instanceGroups;
+	
+	for(int g = 0; g < numGroups; g++) {
+		MObject grp = mod.createNode("transform", MObject::kNullObj , &stat);
+		mod.doIt();
+		instanceGroups.append(grp);
+		MFnDagNode fgrp(grp);
+		fgrp.setName(MString("instanceGroup")+g);
+	}
+
+	MMatrix mm;
+	PseudoNoise pnoise;	
+	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+	
+		Matrix44F * mat = arr->value()->m_reference->index->t1;
+		AHelper::ConvertToMMatrix(mm, *mat);
+		const int idx =  arr->value()->m_reference->key;
+		const int groupId = pnoise.rint1(idx + 2397 * idx, numGroups * 4) % numGroups;
+		MObject tra = mod.createNode("transform", instanceGroups[groupId], &stat);
+		mod.doIt();
+		MFnTransform ftra(tra);
+		ftra.set(MTransformationMatrix(mm));
+		ftra.setName(MString("transform") + idx);
+		MObject loc = mod.createNode("locator", tra, &stat);
+		mod.doIt();
+		arr->next();
+	}
+	
+	MGlobal::displayInfo(MString("proxy paint extracted ") + numActivePlants() + " transforms in " + numGroups + " groups");
 }
 //:~
