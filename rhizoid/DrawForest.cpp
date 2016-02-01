@@ -9,6 +9,7 @@
 
 #include "DrawForest.h"
 #include <gl_heads.h>
+#include <CircleCurve.h>
 
 DrawForest::DrawForest() 
 { 
@@ -16,6 +17,7 @@ DrawForest::DrawForest()
 	m_scalbuf[0] = 1.f; 
 	m_scalbuf[1] = 1.f; 
 	m_scalbuf[2] = 1.f; 
+    m_circle = new CircleCurve;
 }
 
 DrawForest::~DrawForest() {}
@@ -325,5 +327,47 @@ void DrawForest::drawViewFrustum(const Matrix44F & cameraSpace,
 	glPopMatrix();
 	glPopMatrix();
 
+}
+
+void DrawForest::drawBrush()
+{
+    const float & radius = selectionRadius();
+    const Vector3F & position = selectionCenter();
+    const Vector3F & direction = selectionNormal();
+    const float offset = radius * 0.05f;
+    const float part = radius * 0.33f;
+    glPushMatrix();
+    glTranslatef(position.x, position.y, position.z);
+    glTranslatef(direction.x * offset, direction.y * offset, direction.z * offset);
+    
+    glBegin(GL_LINES);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(direction.x * part, direction.y * part, direction.z * part);
+    glEnd();
+    
+    glPushMatrix();
+    glScalef(radius, radius, radius);
+    glPushMatrix();
+    
+    m_useMat.setFrontOrientation(direction);
+    m_useMat.glMatrix(m_transbuf);
+    glMultMatrixf(m_transbuf);
+	
+    drawCircle();
+    glPopMatrix();
+    glPopMatrix();
+    glPopMatrix();
+    
+}
+
+void DrawForest::drawCircle() const
+{
+	Vector3F p;
+	glBegin(GL_LINE_STRIP);
+	for(unsigned i = 0; i < m_circle->numVertices(); i++) {
+		p = m_circle->getCv(i);
+		glVertex3f(p.x, p.y, p.z);
+	}
+	glEnd();
 }
 //:~

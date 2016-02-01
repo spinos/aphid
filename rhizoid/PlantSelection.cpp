@@ -16,17 +16,19 @@ PlantSelection::PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid)
 	m_grid = grid; 
 	m_plants = new Array<int, PlantInstance>();
 	m_numSelected = 0;
+    m_radius = 8.f;
 }
 
 PlantSelection::~PlantSelection()
 { delete m_plants; }
 	
-void PlantSelection::set(const Vector3F & center, const Vector3F & direction,
-		const float & radius)
+void PlantSelection::setRadius(float x)
+{ m_radius = x; }
+
+void PlantSelection::setCenter(const Vector3F & center, const Vector3F & direction)
 {
 	m_center = center;
 	m_direction = direction;
-	m_radius = radius;
 }
 
 void PlantSelection::select(SelectionContext::SelectMode mode)
@@ -112,5 +114,8 @@ void PlantSelection::calculateWeight()
 		m_plants->next();
 	}
 }
+
+const float & PlantSelection::radius() const
+{ return m_radius; }
 
 }

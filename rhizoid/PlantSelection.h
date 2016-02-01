@@ -66,8 +66,8 @@ public:
 	PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid);
 	virtual ~PlantSelection();
 	
-	void set(const Vector3F & center, const Vector3F & direction,
-			const float & radius);
+    void setRadius(float x);
+	void setCenter(const Vector3F & center, const Vector3F & direction);
 	void select(SelectionContext::SelectMode mode);
 	void deselect();
 	const unsigned & count() const;
@@ -75,6 +75,8 @@ public:
 	void calculateWeight();
 	void select(Plant * p);
 	
+    const float & radius() const;
+    
 protected:
 
 private:

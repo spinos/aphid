@@ -8,12 +8,15 @@
  */
 #pragma once
 #include "ModifyForest.h"
+class CircleCurve;
 
 class DrawForest : public sdb::ModifyForest {
 	
-	BoundingBox m_defBox;
+    Matrix44F m_useMat;
+    BoundingBox m_defBox;
 	float m_transbuf[16];
 	float m_scalbuf[3];
+	 CircleCurve * m_circle;
 	
 public:
     DrawForest();
@@ -37,7 +40,8 @@ protected:
 	void drawViewFrustum(const Matrix44F & cameraSpace,
 						const Matrix44F & worldInverseSpace,
 						const float & h_fov, const float & aspectRatio);
-	
+	void drawBrush();
+    
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, sdb::Plant> * cell);
@@ -45,5 +49,6 @@ private:
 	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
 	void drawWiredPlant(sdb::PlantData * data);
 	void drawBounding(const BoundingBox & b) const;
-	
+	void drawCircle() const;
+    
 };

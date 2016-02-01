@@ -277,7 +277,7 @@ MStatus proxyPaintTool::finalize()
 	return MPxToolCommand::doFinalize( command );
 }
 
-proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(4.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),m_pViz(0),
+proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),m_pViz(0),
 m_growAlongNormal(0),
 m_cullSelection(0), 
 m_multiCreate(0),
@@ -700,15 +700,10 @@ char proxyPaintContext::validateSelection()
  	MGlobal::getActiveSelectionList( slist );
 	if(!validateViz(slist))
 	    MGlobal::displayWarning("No proxyViz selected");
-		
-	if(!validateCollide(slist))
-		MGlobal::displayWarning("No mesh selected");
-		
-    if(!m_pViz)
-		return 0;
-	if(!goCollide)
-		return 0;
-		
+			
+    if(!m_pViz) return 0;
+
+	m_pViz->setSelectionRadius(getBrushRadius() );
 	return 1;
 }
 

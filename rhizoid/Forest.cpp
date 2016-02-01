@@ -22,6 +22,7 @@ Forest::Forest()
 	m_ground = NULL;
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
+    m_selectCtx.setRadius(8.f);
 }
 
 Forest::~Forest() 
@@ -45,6 +46,12 @@ Forest::~Forest()
     clearGroundMeshes();
     
 	if(m_ground) delete m_ground;
+}
+
+void Forest::setSelectionRadius(float x)
+{ 
+    m_selectCtx.setRadius(x); 
+    m_activePlants->setRadius(x);
 }
 
 void Forest::resetGrid(float gridSize)
@@ -123,7 +130,7 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 		return false;
 	}
 	
-	m_activePlants->set(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN, 4.f);
+	m_activePlants->setCenter(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN);
 	m_activePlants->select(mode);
 	
 	return true;
@@ -139,7 +146,7 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 	}
 	
 	m_selectCtx.setSelectMode(mode);
-	m_selectCtx.reset(m_intersectCtx.m_hitP, 4.f);
+	m_selectCtx.setCenter(m_intersectCtx.m_hitP);
 	m_selectCtx.setDirection(m_intersectCtx.m_hitN);
 
 	m_ground->select(&m_selectCtx);
@@ -326,6 +333,16 @@ void Forest::addPlant(const Matrix44F & tm,
 	
 	const Vector3F at = tm.getTranslation();
 	m_grid->insert((const float *)&at, p );
+    m_activePlants->select(p);
 }
+
+const float & Forest::selectionRadius() const
+{ return m_activePlants->radius(); }
+
+const Vector3F & Forest::selectionCenter() const
+{ return m_intersectCtx.m_hitP; }
+
+const Vector3F & Forest::selectionNormal() const
+{ return m_intersectCtx.m_hitN; }
 
 }

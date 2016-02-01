@@ -312,6 +312,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		drawPlants();
 	}
 	
+    drawBrush();
 	drawWiredPlants();
 	drawActivePlants();
 	drawGround();

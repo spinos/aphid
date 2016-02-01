@@ -382,7 +382,7 @@ bool ModifyForest::calculateSelecedWeight(const Ray & ray)
 	
 	IntersectionContext * ctx = intersection();
 	
-	selection()->set(ctx->m_hitP, ctx->m_hitN, 4.f);
+	selection()->setCenter(ctx->m_hitP, ctx->m_hitN);
 	selection()->calculateWeight();
     return true;
 }

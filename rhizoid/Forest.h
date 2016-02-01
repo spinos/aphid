@@ -56,6 +56,7 @@ public:
 	Forest();
 	virtual ~Forest();
 	
+    void setSelectionRadius(float x);
 	unsigned numActiveGroundFaces();
 	const unsigned & numActivePlants() const;
 	void removeAllPlants();
@@ -94,6 +95,10 @@ protected:
 	void addPlant(const Matrix44F & tm,
 					const GroundBind & bind,
 					const int & plantTypeId);
+    const float & selectionRadius() const;
+    const Vector3F & selectionCenter() const;
+    const Vector3F & selectionNormal() const;
+    
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
