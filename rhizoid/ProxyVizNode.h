@@ -82,6 +82,7 @@ public:
 	static MObject aconvertPercentage;
 	static MObject astandinNames;
     static MObject agroundMesh;
+	static MObject agroundSpace;
 	static MObject aplantTransformCache;
 	static MObject aplantIdCache;
 	static MObject aplantTriangleIdCache;

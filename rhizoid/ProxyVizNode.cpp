@@ -48,6 +48,7 @@ MObject ProxyViz::ainmesh;
 MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
 MObject ProxyViz::agroundMesh;
+MObject ProxyViz::agroundSpace;
 MObject ProxyViz::aplantTransformCache;
 MObject ProxyViz::aplantIdCache;
 MObject ProxyViz::aplantTriangleIdCache;
@@ -95,8 +96,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			_firstLoad = 0;
 		}
         
-		MArrayDataHandle groundArray = block.inputArrayValue(agroundMesh );
-        updateGround(groundArray );
+		MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
+        MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
+        updateGround(groundMeshArray, groundSpaceArray );
 		moveWithGround();
 		
 		MPlug plgParticlePos(thisMObject(), outPositionPP);
@@ -533,6 +535,15 @@ MStatus ProxyViz::initialize()
     typedAttrFn.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( agroundMesh );
 	attributeAffects(agroundMesh, outValue);
+	
+	agroundSpace = matAttr.create("groundSpace", "grdsp", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setWritable(true);
+	matAttr.setConnectable(true);
+    matAttr.setArray(true);
+    matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
+	addAttribute( agroundSpace );
+	attributeAffects(agroundSpace, outValue);
 	
 	MPointArray defaultPntArray;
 	MFnPointArrayData pntArrayDataFn;

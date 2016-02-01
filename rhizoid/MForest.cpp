@@ -11,23 +11,28 @@ MForest::MForest()
 MForest::~MForest()
 {}
 
-void MForest::updateGround(MArrayDataHandle & data)
+void MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray)
 {
-    unsigned nslots = data.elementCount();
+    const unsigned nslots = meshDataArray.elementCount();
     if(numGroundMeshes() > 0 && numGroundMeshes() != nslots)
         clearGroundMeshes();
     
+	MStatus hasSpace;
+	MMatrix space = MMatrix::identity;
     for(unsigned i=0;i<nslots;++i) {
-        MDataHandle meshData = data.inputValue();
+        MDataHandle spaceData = spaceDataArray.inputValue(&hasSpace);
+		if(hasSpace) space = spaceData.asMatrix();
+		MDataHandle meshData = meshDataArray.inputValue();
         MObject mesh = meshData.asMesh();
         if(mesh.isNull()) {
 			AHelper::Info<unsigned>("MForest error no input ground mesh", i );
 		}
         else {
-            updateGroundMesh(mesh, i);
+            updateGroundMesh(mesh, space, i);
         }
         
-        data.next();
+        meshDataArray.next();
+		if(hasSpace) spaceDataArray.next();
     }
     
     if(numGroundMeshes() < 1) {
@@ -38,7 +43,7 @@ void MForest::updateGround(MArrayDataHandle & data)
     buildGround();
 }
 
-void MForest::updateGroundMesh(MObject & mesh, unsigned idx)
+void MForest::updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx)
 {
     MFnMesh fmesh(mesh);
 	
@@ -47,7 +52,7 @@ void MForest::updateGroundMesh(MObject & mesh, unsigned idx)
 	
 	const unsigned nv = ps.length();
 	unsigned i = 0;
-	//for(;i<nv;i++) ps[i] *= wm;
+	if(worldTm != MMatrix::identity) for(;i<nv;i++) ps[i] *= worldTm;
 	
 	MIntArray triangleCounts, triangleVertices;
 	fmesh.getTriangles(triangleCounts, triangleVertices);

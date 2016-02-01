@@ -30,7 +30,7 @@ public:
 	void extractActive(int numGroups);
 
 protected:
-    void updateGround(MArrayDataHandle & data);
+    void updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
 	void drawSolidMesh(MItMeshPolygon & iter);
 	void drawWireMesh(MItMeshPolygon & iter);
 	static void matrix_as_array(const MMatrix &space, double *mm);
@@ -50,7 +50,7 @@ protected:
 					const MVectorArray & rotation);
 	
 private:
-    void updateGroundMesh(MObject & mesh, unsigned idx);
+    void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
     void saveCell(sdb::Array<int, sdb::Plant> *cell,
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
