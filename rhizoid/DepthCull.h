@@ -18,7 +18,7 @@ public:
 	
 	virtual const char* vertexProgramSource() const;
 	virtual const char* fragmentProgramSource() const;
-	virtual void drawFrameBuffer(const std::vector<ATriangleMesh *> & meshes);
+	void drawFrameBuffer(const std::vector<ATriangleMesh *> & meshes);
 	
 	void setLocalSpace(double* m);
 	

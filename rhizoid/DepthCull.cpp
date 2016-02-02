@@ -75,12 +75,13 @@ char DepthCull::isCulled(float depth, int x, int y, int w, int h, float offset)
 		
 	const int coordx = (float)x/(float)w * (frameBufferWidth());
 	const int coordy = (float)y/(float)h * (frameBufferHeight());
-	const float buffed = fPixels[(coordy * frameBufferWidth() + coordx) * 4];
+	//const float buffed = fPixels[(coordy * frameBufferWidth() + coordx) * 4];
 	
-	if(buffed < 0.1f) return 0;
+	//if(buffed < 0.1f) return 0;
 
 	//MGlobal::displayInfo(MString("d:")+depth+" "+buffed+" "+offset);
 
-	return depth > (buffed + offset);
+	//return depth > (buffed + offset);
+	return 0;
 }
 

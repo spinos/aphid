@@ -40,3 +40,25 @@ void AFrustum::set(const float & horizontalApeture,
 
 const Vector3F * AFrustum::v(int idx) const
 { return &m_v[idx]; }
+
+Vector3F AFrustum::X(int idx) const
+{ m_v[idx]; }
+
+Vector3F AFrustum::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	float maxdotv = -1e8f;
+    float dotv;
+	
+    Vector3F res, q;
+    for(int i=0; i < 8; i++) {
+        q = m_v[i];
+        dotv = q.dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            res = q;
+            if(localP) *localP = q;
+        }
+    }
+    
+    return res;
+}

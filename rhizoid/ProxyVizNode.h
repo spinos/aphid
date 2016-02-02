@@ -31,8 +31,8 @@ class ProxyViz : public MPxLocatorNode, public MForest
 {
 	M3dView _viewport;
 	MMatrix _worldSpace, _worldInverseSpace;
-	double m_materializePercentage;
 	bool m_toSetGrid;
+	bool m_toCheckVisibility;
 	bool m_hasCamera, m_hasParticle;
 	
 public:
@@ -63,7 +63,6 @@ public:
 	static MObject outScalePP;
 	static MObject outRotationPP;
 	static MObject acachename;
-	static MObject adumpname;
 	static MObject acameraspace;
 	static MObject alodgatehigh;
 	static MObject alodgatelow;
@@ -74,9 +73,7 @@ public:
 	static MObject aymultiplier;
 	static MObject azmultiplier;
 	static MObject agroupcount;
-	static MObject astarttime;
 	static MObject ainstanceId;
-	static MObject aenablecull;
 	static MObject ainmesh;
 	static MObject aconvertPercentage;
 	static MObject astandinNames;
@@ -104,7 +101,6 @@ private:
 	std::string replaceEnvVar(const MString & filename) const;
     
 	MMatrixArray _spaces;
-	MFloatArray _details;
 	char _firstLoad, fHasView;
 	
 	void calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling);

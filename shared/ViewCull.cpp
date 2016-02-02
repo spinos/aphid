@@ -8,6 +8,7 @@
  */
 
 #include "ViewCull.h"
+#include <GjkIntersection.h>
 
 ViewCull::ViewCull() : m_enabled(false) {}
 ViewCull::~ViewCull() {}
@@ -35,8 +36,20 @@ void ViewCull::setFrustum(const float & horizontalApeture,
 Matrix44F *	ViewCull::cameraSpaceP()
 { return &m_space; }
 
+Matrix44F * ViewCull::cameraInvSpaceP()
+{ return &m_invSpace; }
+
 const Matrix44F & ViewCull::cameraSpace() const
 { return m_space; }
 
 const AFrustum & ViewCull::frustum() const
 { return m_frustum; }
+
+bool ViewCull::cullByFrustum(const Vector3F & center, const float & radius) const
+{
+	gjk::Sphere B(center, radius );
+	if( gjk::Intersect1<AFrustum, gjk::Sphere>::Evaluate(m_frustum, B) )
+		return false;
+	return true;
+}
+//:~

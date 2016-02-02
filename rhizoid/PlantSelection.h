@@ -70,11 +70,11 @@ public:
 	void setCenter(const Vector3F & center, const Vector3F & direction);
 	void select(SelectionContext::SelectMode mode);
 	void deselect();
-	const unsigned & count() const;
+	const unsigned & numSelected() const;
 	Array<int, PlantInstance> * data();
 	void calculateWeight();
 	void select(Plant * p);
-	
+	void updateNumSelected();
     const float & radius() const;
     
 protected:

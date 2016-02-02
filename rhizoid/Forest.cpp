@@ -231,7 +231,7 @@ WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
 { return m_grid; }
 
 const unsigned & Forest::numActivePlants() const
-{ return m_activePlants->count(); }
+{ return m_activePlants->numSelected(); }
 
 Array<int, PlantInstance> * Forest::activePlants()
 { return m_activePlants->data(); }

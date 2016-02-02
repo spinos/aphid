@@ -30,7 +30,6 @@ MObject ProxyViz::outScalePP;
 MObject ProxyViz::outRotationPP;
 MObject ProxyViz::outValue;
 MObject ProxyViz::acachename;
-MObject ProxyViz::adumpname;
 MObject ProxyViz::acameraspace;
 MObject ProxyViz::ahapeture;
 MObject ProxyViz::avapeture;
@@ -41,9 +40,7 @@ MObject ProxyViz::axmultiplier;
 MObject ProxyViz::aymultiplier;
 MObject ProxyViz::azmultiplier;
 MObject ProxyViz::agroupcount;
-MObject ProxyViz::astarttime;
 MObject ProxyViz::ainstanceId;
-MObject ProxyViz::aenablecull;
 MObject ProxyViz::ainmesh;
 MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
@@ -57,6 +54,7 @@ MObject ProxyViz::aplantTriangleCoordCache;
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
 m_toSetGrid(true), 
 m_hasCamera(false), 
+m_toCheckVisibility(false),
 m_hasParticle(false)
 { attachSceneCallbacks(); }
 
@@ -80,6 +78,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		defb->setMax(block.inputValue(abboxmaxx).asFloat(), 0);
 		defb->setMax(block.inputValue(abboxmaxy).asFloat(), 1);
 		defb->setMax(block.inputValue(abboxmaxz).asFloat(), 2);
+		calculateDefExtent();
 		
 		if(m_toSetGrid) {
 			m_toSetGrid = false;
@@ -112,7 +111,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
             return MS::kSuccess;
 		}
 		
-		MMatrix cameraInv;
+		/*MMatrix cameraInv;
 		MDataHandle cameradata = block.inputValue(acameraspace, &status);
         if(status) cameraInv = cameradata.asMatrix();
 		
@@ -124,32 +123,20 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		double h_fov = h_apeture * 0.5 / ( fl * 0.03937 );
 		float gate_high = block.inputValue(alodgatehigh).asFloat();
 		float gate_low = block.inputValue(alodgatelow).asFloat();
-		float start_time = block.inputValue(astarttime).asFloat();
 		int groupCount = block.inputValue(agroupcount).asInt();
 		int groupId = block.inputValue(ainstanceId).asInt();
 		int frustumCull = block.inputValue(aenablecull).asInt();
 		const double percentage = block.inputValue(aconvertPercentage).asDouble();
-		m_materializePercentage = percentage;
-		MString bakename =  block.inputValue( adumpname ).asString();
+		m_materializePercentage = percentage;*/
+		//MString bakename =  block.inputValue( adumpname ).asString();
 		
 /// particle output
-		unsigned num_box = _spaces.length();
-		_details.setLength(num_box);
-		//_randNums.setLength(num_box);
-		
-		if(start_time == 1.f) {
-			MGlobal::displayInfo(MString("proxy viz initialize lod keys"));
-			PseudoNoise pnoise;
-			for(unsigned i =1; i < num_box; i++) {
-				_details[i] = -1.f;
-				//_randNums[i] = pnoise.rint1(i + 2397 * i, num_box * 4);
-			}
-		}
+		//unsigned num_box = _spaces.length();
 
-		const Vector3F vdetail = defb->getMax() - defb->getMin();
-		const float detail = vdetail.length();
-		float aspectRatio = v_apeture / h_apeture;
-		calculateLOD(cameraInv, h_fov, aspectRatio, detail, frustumCull);
+		//const Vector3F vdetail = defb->getMax() - defb->getMin();
+		//const float detail = vdetail.length();
+		//float aspectRatio = v_apeture / h_apeture;
+		//calculateLOD(cameraInv, h_fov, aspectRatio, detail, frustumCull);
 		
 		MDataHandle hdata = block.inputValue(outPositionPP, &status);
         MFnVectorArrayData farray(hdata.data(), &status);
@@ -190,6 +177,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
         outScaleArray.clear();
 		outRotateArray.clear();
 		
+		/*
 		MGlobal::displayInfo(MString("proxy viz boxes count: ") + num_box);
 		
 		if(gate_high >= 1.f)
@@ -227,19 +215,19 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			outRotateArray.append(eula.asVector());
 
         }
-		
+		*/
 		if(outPosArray.length() < 1) {
 			outPosArray.append(MVector(0,0,0));
 			outScaleArray.append(MVector(1,1,1));
 			outRotateArray.append(MVector(0,0,0));
 		}
 		
-		MGlobal::displayInfo(MString("proxy viz gen ") + outPosArray.length() + " instances for group " + groupId);
+		//MGlobal::displayInfo(MString("proxy viz gen ") + outPosArray.length() + " instances for group " + groupId);
 		
-		if(bakename != "") {
-		    MGlobal::displayInfo(MString("proxy viz bake result to ") + bakename);
-			bakePass(replaceEnvVar(bakename).c_str(), outPosArray, outScaleArray, outRotateArray);
-		}
+		//if(bakename != "") {
+		  //  MGlobal::displayInfo(MString("proxy viz bake result to ") + bakename);
+			//bakePass(replaceEnvVar(bakename).c_str(), outPosArray, outScaleArray, outRotateArray);
+		//}
 
         float result = outPosArray.length();
 
@@ -289,7 +277,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		
 	if(isDepthCullDiagnosed() ) {
 		initDepthCullFBO();
-		if(m_hasCamera && m_hasParticle) drawDepthCull(mm);
+		if(m_hasCamera && m_toCheckVisibility) drawDepthCull(mm);
 	}
 	
 	glPushMatrix();
@@ -404,23 +392,11 @@ MStatus ProxyViz::initialize()
 	numFn.setMin(1);
 	addAttribute(agroupcount);
 	
-	astarttime = numFn.create( "startTime", "stt", MFnNumericData::kFloat, 1.f);
-	numFn.setKeyable(false);
-	numFn.setStorable(true);
-	addAttribute(astarttime);
-	
 	ainstanceId = numFn.create( "instanceId", "iis", MFnNumericData::kInt, 0);
 	numFn.setKeyable(false);
 	numFn.setStorable(true);
 	numFn.setMin(0);
 	addAttribute(ainstanceId);
-	
-	aenablecull = numFn.create( "enableCull", "ecl", MFnNumericData::kInt, 1);
-	numFn.setKeyable(false);
-	numFn.setStorable(true);
-	numFn.setMin(0);
-	numFn.setMax(1);
-	addAttribute(aenablecull);
 
 	MFnTypedAttribute typedAttrFn;
 	MVectorArray defaultVectArray;
@@ -470,10 +446,6 @@ MStatus ProxyViz::initialize()
 	acachename = stringAttr.create( "cachePath", "cp", MFnData::kString );
  	stringAttr.setStorable(true);
 	addAttribute( acachename );
-	
-	adumpname = stringAttr.create( "bakePath", "bkp", MFnData::kString );
- 	stringAttr.setStorable(true);
- 	addAttribute(adumpname);
 	
 	astandinNames = stringAttr.create( "standinNames", "sdn", MFnData::kString );
  	stringAttr.setStorable(true);
@@ -581,9 +553,7 @@ MStatus ProxyViz::initialize()
 	attributeAffects(outPositionPP, outValue);
 	attributeAffects(alodgatehigh, outValue);
 	attributeAffects(alodgatelow, outValue);
-	attributeAffects(astarttime, outValue);
 	attributeAffects(ainstanceId, outValue);
-	attributeAffects(aenablecull, outValue);
 	attributeAffects(ainmesh, outValue);
 	attributeAffects(aconvertPercentage, outValue);
 
@@ -740,7 +710,7 @@ void ProxyViz::pressToLoad()
 }
 
 void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling)
-{	
+{	/*
     int portW, portH;
 
 	if(fHasView) {
@@ -807,7 +777,7 @@ void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, cons
 		
 		if(realdetail > _details[i])
 			_details[i] = realdetail;
-	}
+	}*/
 }
 
 void ProxyViz::updateWorldSpace()
@@ -882,11 +852,11 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MObject matobj;
 	matplg.getValue(matobj);
 	MFnMatrixData matdata(matobj);
-/// input is inversed
     MMatrix cameramat = matdata.matrix(); 
-	cameramat.inverse();
-	
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
+	
+	cameramat.inverse();
+	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat);
 	
 	MPlug hfaplg(thisNode, ahapeture);
 	float hfa = hfaplg.asFloat();
@@ -895,7 +865,7 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MPlug flplg(thisNode, afocallength);
 	float fl = flplg.asFloat();
 	
-	setFrustum(hfa, vfa, fl, -1.f, -250000.f);
+	setFrustum(hfa, vfa, fl, -10.f, -50000.f);
 }
 
 
@@ -904,6 +874,7 @@ void ProxyViz::beginPickInView()
 	MGlobal::displayInfo("MForest begin pick in view");
 	initRandGroup();
 	selection()->deselect();
+	m_toCheckVisibility = true;
 }
 
 void ProxyViz::processPickInView()
@@ -912,6 +883,7 @@ void ProxyViz::processPickInView()
 	_viewport.refresh();
 	
 	MObject node = thisMObject();
+	
 	MPlug gateHighPlg(node, alodgatehigh);
 	float gateHigh = gateHighPlg.asFloat();
 	
@@ -930,5 +902,5 @@ void ProxyViz::processPickInView()
 }
 
 void ProxyViz::endPickInView()
-{}
+{ m_toCheckVisibility = false; }
 //:~

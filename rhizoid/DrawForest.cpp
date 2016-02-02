@@ -137,6 +137,15 @@ float DrawForest::plantSize(int idx) const
 	return a > b ? a : b ; 
 }
 
+Vector3F DrawForest::plantCenter(int idx) const
+{ return m_defBox.center(); }
+
+void DrawForest::calculateDefExtent()
+{ m_boxExtent = m_defBox.radius(); }
+
+float DrawForest::plantExtent(int idx) const
+{ return m_boxExtent; }
+
 void DrawForest::drawWiredPlants()
 {
 	glDepthFunc(GL_LEQUAL);
@@ -342,5 +351,18 @@ void DrawForest::drawDepthCull(double * localTm)
 	culler->drawFrameBuffer(groundMeshes() );
 	culler->frameBufferEnd();
 	//culler->showFrameBuffer();
+}
+
+bool DrawForest::isVisibleInView(sdb::Plant * pl)
+{
+	sdb::PlantData * d = pl->index;
+	int typ = *d->t3;
+	Vector3F localP = plantCenter(typ);
+	Vector3F worldP = d->t1->transform(localP);
+	float r = plantSize(typ) * d->t1->getSide().length() * plantExtent(typ);
+	if(cullByFrustum(worldP, r) ) return false;
+	
+	
+	return true;
 }
 //:~

@@ -496,12 +496,20 @@ void MForest::initRandGroup()
 	PseudoNoise pnoise;
 	unsigned i = 0;
 	for(;i<n;++i) m_randGroup[i] = pnoise.rint1(i + 2397 * i, n * 5);
+	AHelper::Info<int>(" total n plants", n );
 }
 
 void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage)
 {
+	AHelper::Info<int>("pick n g", totalGroups);
+	AHelper::Info<int>("pick u g", currentGroup);
+	AHelper::Info<bool>("has cam", hasCamera);
+	AHelper::Info<float>("gate l", lodLowGate);
+	AHelper::Info<float>("gate h", lodHighGate);
+	AHelper::Info<double>("per", percentage);
+	
 	int i = 0;
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	g->begin();
@@ -511,6 +519,8 @@ void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighG
 					percentage, i);
 		g->next();
 	}
+	selection()->updateNumSelected();
+	AHelper::Info<int>(" n visible plants", numActivePlants() );
 }
 
 void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
@@ -520,10 +530,10 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 {
 	cell->begin();
 	while(!cell->end() ) {
+		sdb::Plant * pl = cell->value();
 		
 		bool survived = true;
-		
-		if(activePlants()->find(cell->value()->key) ) 
+		if(activePlants()->find(pl->key) ) 
 			survived = false;
 		
 		if(survived) {
@@ -535,7 +545,7 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 		
 		if(survived) {
 			if(percentage < 1.0) {
-			    double dart = ((double)(m_randGroup[it]%997))/997.0;
+			    double dart = ((double)(m_randGroup[it]&1023))/1024.0;
 			    if(dart > percentage) 
 					survived = false;
 			}
@@ -543,11 +553,11 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 			
 		if(survived) {
 			if(hasCamera) {
-/// todo check visibility
+				survived = isVisibleInView(pl );
 			}
 		}
 		
-		if(survived) selection()->select(cell->value() );
+		if(survived) selection()->select(pl );
 		
 		it++;
 		cell->next();

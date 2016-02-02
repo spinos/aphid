@@ -13,7 +13,7 @@
 class ViewCull {
 	
 	AFrustum m_frustum;
-	Matrix44F m_space;
+	Matrix44F m_space, m_invSpace;
 	bool m_enabled;
 	
 public:
@@ -31,8 +31,11 @@ public:
 			const float & clipFar);
 			
 	Matrix44F *	cameraSpaceP();
+	Matrix44F * cameraInvSpaceP();
 	const Matrix44F & cameraSpace() const;
 	const AFrustum & frustum() const;
+	
+	bool cullByFrustum(const Vector3F & center, const float & radius) const;
 	
 protected:
 	

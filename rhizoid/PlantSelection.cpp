@@ -93,7 +93,10 @@ void PlantSelection::deselect()
 	m_numSelected = 0;
 }
 
-const unsigned & PlantSelection::count() const
+void PlantSelection::updateNumSelected()
+{ m_numSelected = m_plants->size(); }
+
+const unsigned & PlantSelection::numSelected() const
 { return m_numSelected; }
 	
 Array<int, PlantInstance> * PlantSelection::data()

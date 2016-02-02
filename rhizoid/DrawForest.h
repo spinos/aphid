@@ -16,6 +16,7 @@ class DrawForest : public sdb::ModifyForest, public ViewDepthCull
 	
     Matrix44F m_useMat;
     BoundingBox m_defBox;
+	float m_boxExtent;
 	float m_transbuf[16];
 	float m_scalbuf[3];
 	CircleCurve * m_circle;
@@ -34,6 +35,8 @@ protected:
 	void draw_coordsys() const;
 	int activePlantId() const;
 	virtual float plantSize(int idx) const;
+	Vector3F plantCenter(int idx) const;
+	float plantExtent(int idx) const;
 	void drawPlants();
 	void drawWiredPlants();
 	void drawGridBounding();
@@ -42,7 +45,9 @@ protected:
 	void drawViewFrustum();
 	void drawBrush();
 	void drawDepthCull(double * localTm);
-    
+	bool isVisibleInView(sdb::Plant * pl);
+    void calculateDefExtent();
+	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, sdb::Plant> * cell);
