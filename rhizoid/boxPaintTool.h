@@ -11,7 +11,7 @@
 class proxyPaintContext : public MPxContext
 {
 	float m_brushRadius, m_brushWeight;
-	float m_min_scale, m_max_scale, m_rotation_noise;
+	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
 	unsigned m_growAlongNormal;
 	
 public:
@@ -50,6 +50,8 @@ public:
 	void setReadCache(MString filename);
 	void cleanup();
 	char getSelectedViz();
+	void setCreateMargin(float x);
+	float getCreateMargin();
 
 private:
 	short					start_x, start_y;

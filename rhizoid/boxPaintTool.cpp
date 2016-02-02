@@ -7,6 +7,7 @@
 
 proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),m_pViz(0),
 m_growAlongNormal(0),
+m_createMargin(0.1f),
 m_cullSelection(0), 
 m_multiCreate(0),
 m_groupCount(1)
@@ -537,6 +538,7 @@ void proxyPaintContext::setGrowOption(ProxyViz::GrowOption & opt)
 	opt.m_marginSize = 1.f;
 	opt.m_plantId = 0;
 	opt.m_multiGrow = m_multiCreate;
+	opt.m_marginSize = m_createMargin;
 }
 
 void proxyPaintContext::setWriteCache(MString filename)
@@ -579,4 +581,11 @@ char proxyPaintContext::getSelectedViz()
 	}
 	return 1;
 }
+
+void proxyPaintContext::setCreateMargin(float x)
+{ m_createMargin = x; }
+
+float proxyPaintContext::getCreateMargin()
+{ return m_createMargin; }
+
 //:~

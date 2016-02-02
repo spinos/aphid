@@ -69,7 +69,7 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 							GroundBind & bind,
 							GrowOption & option)
 {
-	float sampleSize = plantSize(option.m_plantId) * .7f;
+	float sampleSize = plantSize(option.m_plantId) * .67f;
 	int grid_x, grid_y;
 	tri->gridSize(sampleSize, grid_x, grid_y);
 	int numSamples = grid_x * grid_y;
@@ -85,7 +85,11 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 		Vector3F & pos = samples[s];
 			
 		randomSpaceAt(pos, option, tm, scale);
-		float delta = option.m_marginSize + sampleSize * 1.4f * scale;
+		float scaledSize = sampleSize * 1.5f * scale;
+		float limitedMargin = option.m_marginSize;
+/// limit low margin
+		if(limitedMargin < -.99f * scaledSize) limitedMargin = -.99f * scaledSize;
+		float delta = limitedMargin + scaledSize;
 		if(closeToOccupiedPosition(pos, delta)) continue;
 		
 		bar->project(pos);
@@ -127,7 +131,11 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		Matrix44F tm;
 		float scale;
 		randomSpaceAt(ctx->m_hitP, option, tm, scale);
-		float delta = option.m_marginSize + plantSize(option.m_plantId) * scale;
+		float scaledSize = plantSize(option.m_plantId) * scale;
+		float limitedMargin = option.m_marginSize;
+/// limit low margin
+		if(limitedMargin < -.99f * scaledSize) limitedMargin = -.99f * scaledSize;
+		float delta = limitedMargin + scaledSize;
 		if(closeToOccupiedPosition(ctx->m_hitP, delta)) return false;
 		
 		m_bary->project(ctx->m_hitP);
@@ -145,8 +153,6 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 void ModifyForest::clearAt(const Ray & ray, float weight)
 {
 	if(!calculateSelecedWeight(ray)) return;
-	
-	IntersectionContext * ctx = intersection();
 	
 	std::vector<int> idToClear;
 	Array<int, PlantInstance> * arr = activePlants();
@@ -181,8 +187,6 @@ void ModifyForest::clearAt(const Ray & ray, float weight)
 void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 {
     if(!calculateSelecedWeight(ray)) return;
-	
-	IntersectionContext * ctx = intersection();
     
     Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();

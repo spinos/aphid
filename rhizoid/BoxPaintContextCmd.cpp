@@ -8,6 +8,8 @@
  */
 
 #include "BoxPaintContextCmd.h"
+#define kCreateMarginFlag "-mgn"
+#define kCreateMarginFlagLong "-marginSize"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -167,6 +169,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		}
 		fContext->setInstanceGroupCount(igc);
 	}
+	
+	if (argData.isFlagSet(kCreateMarginFlag)) {
+		double margin = 1.0;
+		if (argData.getFlagArgument(kCreateMarginFlag, 0, margin) )
+			fContext->setCreateMargin(margin);
+	}
 
 	return MS::kSuccess;
 }
@@ -218,6 +226,9 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	if (argData.isFlagSet(kInstanceGroupCountFlag)) {
 		setResult((int)fContext->getInstanceGroupCount());
 	}
+	
+	if (argData.isFlagSet(kCreateMarginFlag))
+		setResult((float)fContext->getCreateMargin() );
 	
 	return MS::kSuccess;
 }
@@ -315,5 +326,11 @@ MStatus proxyPaintContextCmd::appendSyntax()
 		return MS::kFailure;
 	}
 	
-	return MS::kSuccess;
+	stat = mySyntax.addFlag(kCreateMarginFlag, kCreateMarginFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add marginSize arg");
+		return MS::kFailure;
+	}
+	
+	return stat;
 }
