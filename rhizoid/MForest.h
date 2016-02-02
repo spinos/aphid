@@ -65,6 +65,8 @@ private:
 					MIntArray & plantIds,
 					MIntArray & plantTris,
 					MVectorArray & plantCoords);
+	void getDataInCell(sdb::Array<int, sdb::Plant> *cell, 
+					float * data, unsigned & it);
 	void pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 					bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 

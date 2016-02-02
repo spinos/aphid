@@ -375,37 +375,55 @@ void MForest::loadExternal(const char* filename)
 
 void MForest::saveExternal(const char* filename)
 {
-	return;
 	std::ofstream chFile;
 	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
 	if(!chFile.is_open()) {
-		MGlobal::displayWarning(MString("proxy viz cannot open file: ") + filename);
+		AHelper::Info<const char *>("MForest cannot open file: ", filename);
 		return;
 	}
-	int numRec = 1;//_spaces.length();
-	MGlobal::displayInfo(MString("proxy viz write recond count ") + numRec);
+	
+	unsigned numRec = numPlants();
+	AHelper::Info<unsigned>("MForest write n plants ", numRec);
 	chFile.write((char*)&numRec, sizeof(int));
+	
 	float *data = new float[numRec * 16];
-	for(int i=0; i < numRec; i++) {
-		const MMatrix space;// = _spaces[i];
-		const int ii = i * 16;
-		data[ii] = space(0, 0);
-		data[ii+1] = space(0, 1);
-		data[ii+2] = space(0, 2);
-		data[ii+4] = space(1, 0);
-		data[ii+5] = space(1, 1);
-		data[ii+6] = space(1, 2);
-		data[ii+8] = space(2, 0);
-		data[ii+9] = space(2, 1);
-		data[ii+10] = space(2, 2);
-		data[ii+12] = space(3, 0);
-		data[ii+13] = space(3, 1);
-		data[ii+14] = space(3, 2);
+	unsigned it = 0;
+	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	g->begin();
+	while(!g->end() ) {
+		getDataInCell(g->value(), data, it);
+		g->next();
 	}
+	
 	chFile.write((char*)data, sizeof(float) * numRec * 16);
 	chFile.close();
-	MGlobal::displayInfo(MString("Well done! Proxy saved to ") + filename);
+	AHelper::Info<const char *>(" Proxy saved to file: ", filename);
 	delete[] data;
+}
+
+void MForest::getDataInCell(sdb::Array<int, sdb::Plant> *cell, 
+							float * data, unsigned & it)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		sdb::PlantData * d = cell->value()->index;
+		Matrix44F * mat = d->t1;
+		const int ii = it * 16;
+		data[ii] = mat->M(0, 0);
+		data[ii+1] = mat->M(0, 1);
+		data[ii+2] = mat->M(0, 2);
+		data[ii+4] = mat->M(1, 0);
+		data[ii+5] = mat->M(1, 1);
+		data[ii+6] = mat->M(1, 2);
+		data[ii+8] = mat->M(2, 0);
+		data[ii+9] = mat->M(2, 1);
+		data[ii+10] = mat->M(2, 2);
+		data[ii+12] = mat->M(3, 0);
+		data[ii+13] = mat->M(3, 1);
+		data[ii+14] = mat->M(3, 2);
+		it++;
+		cell->next();
+	}
 }
 
 void MForest::bakePass(const char* filename, const MVectorArray & position, const MVectorArray & scale, const MVectorArray & rotation)

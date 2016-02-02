@@ -244,7 +244,7 @@ void DrawForest::drawActivePlants()
 {
 	if(numActivePlants() < 1) return;
 	glDepthFunc(GL_LEQUAL);
-	glColor3f(.1f, 8.f, .3f);
+	glColor3f(.1f, .9f, .43f);
 	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
