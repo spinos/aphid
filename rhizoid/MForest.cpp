@@ -553,7 +553,7 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 			
 		if(survived) {
 			if(hasCamera) {
-				survived = isVisibleInView(pl );
+				survived = isVisibleInView(pl, lodLowGate, lodHighGate );
 			}
 		}
 		

@@ -27,7 +27,8 @@ protected:
 	void initDepthCullFBO();
 	DepthCull * depthCuller();
 	
-	bool cullByDepth(const Vector3F & pnt, const float & threshold) const;
+	bool cullByDepth(const Vector3F & pnt, const float & threshold,
+					float & camZ) const;
 	
 private:
 

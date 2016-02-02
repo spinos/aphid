@@ -353,7 +353,8 @@ void DrawForest::drawDepthCull(double * localTm)
 	//culler->showFrameBuffer();
 }
 
-bool DrawForest::isVisibleInView(sdb::Plant * pl)
+bool DrawForest::isVisibleInView(sdb::Plant * pl,
+					const float lowLod, const float highLod)
 {
 	sdb::PlantData * d = pl->index;
 	int typ = *d->t3;
@@ -361,8 +362,11 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl)
 	Vector3F worldP = d->t1->transform(localP);
 	float r = plantSize(typ) * d->t1->getSide().length() * plantExtent(typ);
 	if(cullByFrustum(worldP, r) ) return false;
-	if(cullByDepth(worldP, r) ) return false;
-	
+	float camZ;
+	if(cullByDepth(worldP, r, camZ) ) return false;
+	if(lowLod > 0.f || highLod < 1.f) {
+		if(cullByLod(camZ, r, lowLod, highLod ) ) return false;
+	}
 	return true;
 }
 //:~

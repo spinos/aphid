@@ -14,7 +14,7 @@ class ViewCull {
 	
 	AFrustum m_frustum;
 	Matrix44F m_space, m_invSpace;
-	float m_hfov, m_aspectRatio;
+	float m_hfov, m_aspectRatio, m_farClip, m_detailWidth;
 	bool m_enabled;
 	
 public:
@@ -38,7 +38,9 @@ public:
 	const AFrustum & frustum() const;
 	
 	bool cullByFrustum(const Vector3F & center, const float & radius) const;
-	
+	bool cullByLod(const float & localZ, const float & radius,
+					const float & lowLod, const float & highLod) const;
+					
 protected:
 	void ndc(const Vector3F & cameraP, float & coordx, float & coordy) const;
 	

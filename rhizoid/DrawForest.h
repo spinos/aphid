@@ -45,7 +45,8 @@ protected:
 	void drawViewFrustum();
 	void drawBrush();
 	void drawDepthCull(double * localTm);
-	bool isVisibleInView(sdb::Plant * pl);
+	bool isVisibleInView(sdb::Plant * pl, 
+					const float lowLod, const float highLod);
     void calculateDefExtent();
 	
 private:

@@ -27,6 +27,9 @@ void ViewCull::setFrustum(const float & horizontalApeture,
 {
 	m_hfov = horizontalApeture * 0.5f / ( focalLength * 0.03937f );
 	m_aspectRatio = verticalApeture / horizontalApeture;
+	m_farClip = clipFar;
+/// 1 / 20 of port width
+	m_detailWidth = -clipFar * m_hfov * .05f;
 	m_frustum.set(m_hfov, 
 				m_aspectRatio,
 				clipNear,
@@ -71,5 +74,14 @@ void ViewCull::ndc(const Vector3F & cameraP, float & coordx, float & coordy) con
 	if(coordx > .997f) coordx = .997f;
 	if(coordy < 0.f) coordy = 0.f;
 	if(coordy > .997f) coordy = .997f;
+}
+
+bool ViewCull::cullByLod(const float & localZ, const float & radius,
+					const float & lowLod, const float & highLod) const
+{
+	float details = radius / (m_detailWidth * localZ / m_farClip);
+	if(details > .999f) details = .999f;
+	if(details < lowLod || details >= highLod) return true;
+	return false;
 }
 //:~
