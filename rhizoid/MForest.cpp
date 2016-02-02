@@ -1,6 +1,7 @@
 #include "MForest.h"
 #include <maya/MFnMesh.h>
 #include <maya/MDagModifier.h>
+#include <maya/MEulerRotation.h>
 #include <gl_heads.h>
 #include <AHelper.h>
 #include <fstream> 
@@ -562,5 +563,43 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 		it++;
 		cell->next();
 	}
+}
+
+void MForest::saveParticles(MVectorArray & positions,
+						MVectorArray & rotations,
+						MVectorArray & scales)
+{
+	positions.clear();
+	rotations.clear();
+	scales.clear();
+	
+	if(numActivePlants() < 1) {
+		positions.append(MVector(0,0,0));
+		rotations.append(MVector(0,0,0));
+		scales.append(MVector(1,1,1));
+		return;
+	}
+	
+	MMatrix mm;
+	MEulerRotation eula;
+	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+	
+		Matrix44F * mat = arr->value()->m_reference->index->t1;
+		AHelper::ConvertToMMatrix(mm, *mat);
+		
+		positions.append(MVector(mm(3,0), mm(3,1), mm(3,2) ) );
+		
+		eula = mm;
+		rotations.append(eula.asVector());
+		
+		double sz = MVector(mm(0,0), mm(0,1), mm(0,2)).length();
+		scales.append(MVector(sz, sz, sz) );
+			
+		arr->next();
+	}
+	
+	AHelper::Info<unsigned>(" save n particles", numActivePlants() );
 }
 //:~

@@ -34,6 +34,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;
 	bool m_hasCamera, m_hasParticle;
+	char _firstLoad, fHasView;
 	
 public:
 	ProxyViz();
@@ -86,7 +87,6 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	char isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax);
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
 	void pressToSave();
 	void pressToLoad();
@@ -100,10 +100,6 @@ private:
 	char hasDisplayMesh() const;
 	std::string replaceEnvVar(const MString & filename) const;
     
-	MMatrixArray _spaces;
-	char _firstLoad, fHasView;
-	
-	void calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling);
 	void updateWorldSpace();
 	MMatrix localizeSpace(const MMatrix & s) const;
 	MMatrix worldizeSpace(const MMatrix & s) const;

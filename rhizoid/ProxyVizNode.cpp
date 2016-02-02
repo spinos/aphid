@@ -5,7 +5,6 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MVectorArray.h>
 #include <maya/MFnVectorArrayData.h>
-#include <maya/MEulerRotation.h>
 #include <maya/MFnMatrixData.h>
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFnDoubleArrayData.h>
@@ -101,42 +100,10 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
         updateGround(groundMeshArray, groundSpaceArray );
 		moveWithGround();
 		
-		/*
-		MPlug plgParticlePos(thisMObject(), outPositionPP);
-		if(!plgParticlePos.isConnected()) {
-		*/
 		if(!m_hasParticle) {
-			AHelper::Info<int>(" no particle ", 0);
 			block.setClean(plug);
             return MS::kSuccess;
 		}
-		
-		/*MMatrix cameraInv;
-		MDataHandle cameradata = block.inputValue(acameraspace, &status);
-        if(status) cameraInv = cameradata.asMatrix();
-		
-		//fDisplayMesh = block.inputValue( ainmesh ).asMesh();
-		
-		double h_apeture = block.inputValue(ahapeture).asDouble();
-		double v_apeture = block.inputValue(avapeture).asDouble();
-		double fl = block.inputValue(afocallength).asDouble();
-		double h_fov = h_apeture * 0.5 / ( fl * 0.03937 );
-		float gate_high = block.inputValue(alodgatehigh).asFloat();
-		float gate_low = block.inputValue(alodgatelow).asFloat();
-		int groupCount = block.inputValue(agroupcount).asInt();
-		int groupId = block.inputValue(ainstanceId).asInt();
-		int frustumCull = block.inputValue(aenablecull).asInt();
-		const double percentage = block.inputValue(aconvertPercentage).asDouble();
-		m_materializePercentage = percentage;*/
-		//MString bakename =  block.inputValue( adumpname ).asString();
-		
-/// particle output
-		//unsigned num_box = _spaces.length();
-
-		//const Vector3F vdetail = defb->getMax() - defb->getMin();
-		//const float detail = vdetail.length();
-		//float aspectRatio = v_apeture / h_apeture;
-		//calculateLOD(cameraInv, h_fov, aspectRatio, detail, frustumCull);
 		
 		MDataHandle hdata = block.inputValue(outPositionPP, &status);
         MFnVectorArrayData farray(hdata.data(), &status);
@@ -173,61 +140,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MGlobal::displayInfo(MString("proxy viz computes particle attributes"));
         
-        outPosArray.clear();
-        outScaleArray.clear();
-		outRotateArray.clear();
-		
-		/*
-		MGlobal::displayInfo(MString("proxy viz boxes count: ") + num_box);
-		
-		if(gate_high >= 1.f)
-			gate_high = 10e8;
-
-        for(unsigned i =1; i < num_box; i++) {
-			if(frustumCull > 0) {
-				if(_details[i] >= gate_high || _details[i] < gate_low) 
-					continue;
-			}
-				
-			if(groupCount > 1) {
-				//int grp = _randNums[i] % groupCount;
-				//if(grp != groupId)
-				//	continue;
-			}
-			
-			if(percentage < 1.0) {
-			    double dart = ((double)(rand()%497))/497.0;
-			    if(dart > percentage) continue;
-			}
-                
-            const MMatrix space = worldizeSpace(_spaces[i]);
-            const MVector pos(space(3,0), space(3,1), space(3,2));
-			const MVector vx(space(0,0), space(0,1), space(0,2));
-            const double sz = vx.length();
-			 
-            outPosArray.append(pos);
-                
-            const MVector scale(sz, sz, sz);
-            outScaleArray.append(scale);
-			
-			MEulerRotation eula;
-			eula = space; 
-			outRotateArray.append(eula.asVector());
-
-        }
-		*/
-		if(outPosArray.length() < 1) {
-			outPosArray.append(MVector(0,0,0));
-			outScaleArray.append(MVector(1,1,1));
-			outRotateArray.append(MVector(0,0,0));
-		}
-		
-		//MGlobal::displayInfo(MString("proxy viz gen ") + outPosArray.length() + " instances for group " + groupId);
-		
-		//if(bakename != "") {
-		  //  MGlobal::displayInfo(MString("proxy viz bake result to ") + bakename);
-			//bakePass(replaceEnvVar(bakename).c_str(), outPosArray, outScaleArray, outRotateArray);
-		//}
+		saveParticles(outPosArray, outRotateArray, outScaleArray);
 
         float result = outPosArray.length();
 
@@ -550,12 +463,12 @@ MStatus ProxyViz::initialize()
 	attributeAffects(abboxmaxy, outValue);
 	attributeAffects(abboxminz, outValue);
 	attributeAffects(abboxmaxz, outValue);
-	attributeAffects(outPositionPP, outValue);
-	attributeAffects(alodgatehigh, outValue);
-	attributeAffects(alodgatelow, outValue);
-	attributeAffects(ainstanceId, outValue);
 	attributeAffects(ainmesh, outValue);
-	attributeAffects(aconvertPercentage, outValue);
+	attributeAffects(outPositionPP, outValue);
+	//attributeAffects(alodgatehigh, outValue);
+	//attributeAffects(alodgatelow, outValue);
+	//attributeAffects(ainstanceId, outValue);
+	//attributeAffects(aconvertPercentage, outValue);
 
 	return MS::kSuccess;
 }
@@ -640,31 +553,6 @@ bool ProxyViz::loadInternal(MDataBlock& block)
 	return loadPlants(plantTms, plantIds, plantTris, plantCoords);
 }
 
-char ProxyViz::isBoxInView(const MPoint &pos, float threshold, short xmin, short ymin, short xmax, short ymax)
-{
-	/*int portW = _viewport.portWidth();
-	int portH = _viewport.portHeight();
-	MMatrix modelViewMatrix;
-	_viewport.modelViewMatrix ( modelViewMatrix );
-	const MPoint pcam = pos * modelViewMatrix;
-	short x, y;
-	_viewport.worldToView (pos, x, y);
-		
-	if(x > xmin && x < xmax && y > ymin && y < ymax) {
-		if(!fCuller)
-			return 1;
-
-		if(fCuller->isDiagnosed()) {
-			
-			const float depth = -pcam.z;
-			if(fCuller->isCulled(depth, x, y, portW, portH, threshold))
-				return 0;
-		}
-		return 1;
-	}*/
-	return 1;
-}
-
 void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat)
 {
     useActiveView();
@@ -707,77 +595,6 @@ void ProxyViz::pressToLoad()
 		loadExternal(replaceEnvVar(filename).c_str());
 	else 
 		AHelper::Info<int>("ProxyViz error empty external cache filename", 0);
-}
-
-void ProxyViz::calculateLOD(const MMatrix & cameraInv, const float & h_fov, const float & aspectRatio, const float & detail, const int & enableViewFrustumCulling)
-{	/*
-    int portW, portH;
-
-	if(fHasView) {
-		MString srenderer;
-		_viewport.getRendererString (srenderer);
-		portW = _viewport.portWidth();
-		portH = _viewport.portHeight();
-	}
-	else {
-		MGlobal::displayInfo("proxy viz has no renderer");
-		return;
-	}
-	
-	float longest = defBox().getLongestDistance();
-				
-	unsigned num_box = _details.length();
-	
-	if(enableViewFrustumCulling == 0) {
-		for(unsigned i =1; i < num_box; i++) {
-			_details[i] = 1.f;
-		}
-		return;
-	}
-	for(unsigned i =1; i < num_box; i++) {
-			
-		const MMatrix space = worldizeSpace(_spaces[i]);
-		const MVector pos(space(3,0), space(3,1), space(3,2)); 
-			
-		const MVector vx(space(0,0), space(0,1), space(0,2));
-		const double sz = vx.length();
-		
-		const MPoint pcam = MPoint(pos) * cameraInv;
-		
-		const double depth = -pcam.z;
-		double h_max = depth * h_fov;
-		double h_min = -h_max;
-		double v_max = h_max * aspectRatio;
-		double v_min = -v_max;
-		
-		float realdetail = -1.f;
-		
-		if(depth < 0.0) {
-			if(pcam.distanceTo(MPoint(0,0,0)) < (longest * sz * 2))
-				realdetail = 10;
-		}
-		else {
-			if(pcam.x + longest * sz < h_min || pcam.x - longest * sz > h_max || pcam.y + longest * sz < v_min || pcam.y - longest * sz > v_max) {
-				if(pcam.distanceTo(MPoint(0,0,0)) < (longest * sz * 2))
-					realdetail = 10;
-			}
-			else {
-				realdetail = detail * sz / (h_max + 10e-6);
-				if(fHasView) {
-					if(pcam.x > h_min && pcam.x < h_max && pcam.y > v_min && pcam.y < v_max) {
-						if(!isBoxInView(pos, longest * sz, 0, 0, portW, portH)) 
-							realdetail = -1.f;
-					}
-				}
-			}
-		}
-
-		if(realdetail > 10e7)
-			realdetail = 10e7;
-		
-		if(realdetail > _details[i])
-			_details[i] = realdetail;
-	}*/
 }
 
 void ProxyViz::updateWorldSpace()
@@ -866,7 +683,6 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	
 	setFrustum(hfa, vfa, fl, -10.f, -250000.f);
 }
-
 
 void ProxyViz::beginPickInView()
 {

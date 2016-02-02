@@ -54,6 +54,9 @@ protected:
 	void pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage);
+	void saveParticles(MVectorArray & positions,
+						MVectorArray & rotations,
+						MVectorArray & scales);
 					
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
