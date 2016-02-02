@@ -504,13 +504,6 @@ void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighG
 					int totalGroups, int currentGroup, 
 					double percentage)
 {
-	AHelper::Info<int>("pick n g", totalGroups);
-	AHelper::Info<int>("pick u g", currentGroup);
-	AHelper::Info<bool>("has cam", hasCamera);
-	AHelper::Info<float>("gate l", lodLowGate);
-	AHelper::Info<float>("gate h", lodHighGate);
-	AHelper::Info<double>("per", percentage);
-	
 	int i = 0;
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	g->begin();
@@ -574,9 +567,10 @@ void MForest::saveParticles(MVectorArray & positions,
 	scales.clear();
 	
 	if(numActivePlants() < 1) {
-		positions.append(MVector(0,0,0));
-		rotations.append(MVector(0,0,0));
-		scales.append(MVector(1,1,1));
+		//positions.append(MVector(0,0,0));
+		//rotations.append(MVector(0,0,0));
+		//scales.append(MVector(1,1,1));
+		AHelper::Info<int>(" no active plants to save", 0);
 		return;
 	}
 	

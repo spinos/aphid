@@ -91,7 +91,8 @@ private:
 		opUnknown = 0,
 		opBeginPick = 1,
 		opDoPick = 2,
-		opEndPick = 3
+		opEndPick = 3,
+		opGetPick = 4
 	};
 	
 	Operation m_operation;

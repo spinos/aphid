@@ -95,10 +95,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			_firstLoad = 0;
 		}
         
-		MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
-        MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
-        updateGround(groundMeshArray, groundSpaceArray );
-		moveWithGround();
+		if(!m_toCheckVisibility) {
+			MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
+			MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
+			updateGround(groundMeshArray, groundSpaceArray );
+			moveWithGround();
+		}
 		
 		if(!m_hasParticle) {
 			block.setClean(plug);

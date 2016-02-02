@@ -16,6 +16,8 @@
 #define kDoPickFlagLong "-doPick"
 #define kEndPickFlag "-epk" 
 #define kEndPickFlagLong "-endPick"
+#define kGetPickFlag "-gpk" 
+#define kGetPickFlagLong "-getPick"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -44,11 +46,12 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kWriteCacheFlag, kWriteCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kReadCacheFlag, kReadCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kCullSelectionFlag, kCullSelectionFlagLong, MSyntax::kUnsigned);
-	syntax.addFlag(kMultiCreateFlag, kMultiCreateFlagLong, MSyntax::kUnsigned);
 	syntax.addFlag(kInstanceGroupCountFlag, kInstanceGroupCountFlagLong, MSyntax::kUnsigned);
 	syntax.addFlag(kBeginPickFlag, kBeginPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kDoPickFlag, kDoPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
+	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
+	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
 	
 	return syntax;
 }
@@ -91,6 +94,9 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 			break;
 		case opEndPick:
 			pViz->endPickInView();
+			break;
+		case opGetPick:
+			setResult((int)pViz->numActivePlants() );
 			break;
 		default:
 			;
@@ -209,15 +215,6 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 		}
 	}
 	
-	if (argData.isFlagSet(kMultiCreateFlag)) {
-		unsigned mcr;
-		status = argData.getFlagArgument(kMultiCreateFlag, 0, mcr);
-		if (!status) {
-			status.perror("multi create flag parsing failed");
-			return status;
-		}
-	}
-	
 	if (argData.isFlagSet(kInstanceGroupCountFlag)) {
 		unsigned igc;
 		status = argData.getFlagArgument(kInstanceGroupCountFlag, 0, igc);
@@ -252,6 +249,15 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		m_operation = opEndPick;
+	}
+	
+	if (argData.isFlagSet(kGetPickFlag)) {
+		status = argData.getFlagArgument(kGetPickFlag, 0, fVizName);
+		if (!status) {
+			status.perror("viz flag parsing failed");
+			return status;
+		}
+		m_operation = opGetPick;
 	}
 	
 	return MS::kSuccess;
