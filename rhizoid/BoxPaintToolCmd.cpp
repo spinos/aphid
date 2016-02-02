@@ -18,6 +18,8 @@
 #define kEndPickFlagLong "-endPick"
 #define kGetPickFlag "-gpk" 
 #define kGetPickFlagLong "-getPick"
+#define kConnectGroundFlag "-cgnd" 
+#define kConnectGroundFlagLong "-connectGround"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -52,6 +54,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
+	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong, MSyntax::kNoArg);
 	
 	return syntax;
 }

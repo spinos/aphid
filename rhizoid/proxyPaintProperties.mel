@@ -1,0 +1,273 @@
+proc string proxyPaint_getCurrentViz()
+{
+    pickWalk -d down;
+    string $sel[] = `ls -sl -type proxyViz`;
+    if(size($sel) < 1)
+        return "";
+    
+    return $sel[0];
+}
+
+proc string proxyPaint_getCurrentCache()
+{
+    string $node = proxyPaint_getCurrentViz();
+    if($node == "")
+        return "";
+    
+    string $ch = `getAttr ($node + ".cachePath")`;
+    return $ch;
+}
+
+global proc proxyPaintProperties ()
+{
+	setUITemplate -pushTemplate DefaultTemplate;
+
+	string $parent = `toolPropertyWindow -q -location`;
+    setParent $parent;
+	string $curctx = `currentCtx`;
+
+	columnLayout proxyPaint;
+		tabLayout -childResizable true proxyPaintTabs;
+			columnLayout proxyPaintTab;
+				frameLayout -cll true -cl false -l "proxyPaint Options" proxyPaintFrame;
+					columnLayout  -adjustableColumn true proxyPaintOptions;
+						separator -style "none";
+						
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_face.xpm" -label "Select Faces To Flood" -c "proxyPaintSetOpt(9)";
+
+	rowColumnLayout -numberOfColumns 3
+        -columnWidth 1 120
+		-columnWidth 2 120
+		-columnWidth 3 120;
+	        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_flood.xpm" -label "Flood" -c "proxyPaintDoFlood(`floatSliderGrp -q -value proxyPaintSlider_BRad`)";
+            iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_snap.xpm" -label "Snap Along Y" -c "proxyPaintDoSnap";
+            iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_erect.xpm" -label "Align to World Up" -c "proxyPaintSetOpt(103)";  
+            iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_clear.xpm" -label "Clear(Reset)" -c "proxyPaintReset";
+        setParent ..;
+        
+checkBox -label "Along Face Normal" -cc "proxyPaintSetALN(`checkBox -q -value proxyPaintSlider_ALN`)" proxyPaintSlider_ALN;
+
+floatSliderGrp -label "Brush Radius" -field true
+    -minValue 0.01 -maxValue 1000.0
+    -fieldMinValue 0.01 -fieldMaxValue 500000.0
+    -value 10.0
+	-cw 1 130
+	-cc "proxyPaintSetBRadius(`floatSliderGrp -q -value proxyPaintSlider_BRad`)" proxyPaintSlider_BRad;
+
+floatSliderGrp -label "Create Margin" -field true
+    -minValue -10.0 -maxValue 10.0
+    -fieldMinValue -1000.0 -fieldMaxValue 1000.0
+    -value 0.1
+	-cw 1 130
+	-cc "proxyPaintSetCreateMargin(`floatSliderGrp -q -value proxyPaintSlider_createMargin`)" proxyPaintSlider_createMargin;
+
+floatSliderGrp -label "Erase Weight" -field true
+    -minValue 0.01 -maxValue 1.0
+    -fieldMinValue 0.01 -fieldMaxValue 1.0
+    -value 0.8
+	-cw 1 130
+	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
+
+floatSliderGrp -label "Scale Min" -field true
+    -minValue 0.1 -maxValue 2.0
+    -fieldMinValue 0.01 -fieldMaxValue 20.0
+    -value 1.0
+	-cw 1 130
+	-cc "proxyPaintSetScaleMin(`floatSliderGrp -q -value proxyPaintSlider_ScaleMin`)" proxyPaintSlider_ScaleMin;
+	
+floatSliderGrp -label "Scale Max" -field true
+    -minValue 0.1 -maxValue 2.0
+    -fieldMinValue 0.01 -fieldMaxValue 20.0
+    -value 1.0
+	-cw 1 130
+	-cc "proxyPaintSetScaleMax(`floatSliderGrp -q -value proxyPaintSlider_ScaleMax`)" proxyPaintSlider_ScaleMax;
+	
+floatSliderGrp -label "Rotate Noise" -field true
+    -minValue 0.0 -maxValue 1.0
+    -fieldMinValue 0.0 -fieldMaxValue 1.0
+    -value 0.1
+	-cw 1 130
+	-cc "proxyPaintSetRotateNoise(`floatSliderGrp -q -value proxyPaintSlider_rotateNoise`)" proxyPaintSlider_rotateNoise;
+
+intSliderGrp -label "Multiple Create" -field true
+    -minValue 0 -maxValue 6
+    -fieldMinValue 0 -fieldMaxValue 6
+    -value 0
+	-cw 1 130
+	-cc "proxyPaintSetMultiCreate(`intSliderGrp -q -value proxyPaintSlider_multiCreate`)" proxyPaintSlider_multiCreate;
+	
+	rowLayout -numberOfColumns 3
+	        -columnWidth3 110 110 110;	
+iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_create.xpm" -label "Create" -c "proxyPaintSetOpt(0)";
+iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_erase.xpm" -label "Erase" -c "proxyPaintSetOpt(1)";
+iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm" -label "Select" -c "proxyPaintSetOpt(2)";
+
+        setParent ..;
+checkBox -label "Cull Select/Erase" -cc "proxyPaintSetCull(`checkBox -q -value proxyPaintSlider_cullCheck`)" proxyPaintSlider_cullCheck;
+     
+	rowColumnLayout -numberOfColumns 3
+        -columnWidth 1 120
+		-columnWidth 2 120
+		-columnWidth 3 120;
+		
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_scale.xpm" -label "Scale" -c "proxyPaintSetOpt(3)";
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_move.xpm" -label "Move" -c "proxyPaintSetOpt(4)";
+	text -l "";
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateY.xpm" -label "RotateY" -c "proxyPaintSetOpt(5)";
+        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateZ.xpm" -label "RotateZ" -c "proxyPaintSetOpt(6)";
+        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateX.xpm" -label "RotateX" -c "proxyPaintSetOpt(7)";
+        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_translateAlongY.xpm" -label "TranslateY" -c "proxyPaintSetOpt(8)";
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_smoothSelected.xpm" -label "Smooth" -c "proxyPaintSetOpt(10)";
+        
+	setParent ..;
+	separator;
+	
+	intSliderGrp -label "Num Instance Groups" -field true
+    -minValue 1 -maxValue 8
+    -fieldMinValue 1 -fieldMaxValue 100
+    -value 1
+	-cw 1 130
+	-cc "proxyPaintSetInstanceGroupCount(`intSliderGrp -q -value proxyPaintSlider_instanceGroupCount`)" proxyPaintSlider_instanceGroupCount;
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_extract.xpm" -label "Extract Selected" -c "proxyPaintSetOpt(102)";  
+	separator;
+	
+	string $cache = proxyPaint_getCurrentCache();
+	textFieldButtonGrp -columnWidth 1 80 -columnWidth 2 280 -label "Cache File" -text $cache -buttonLabel "Browse" -bc "proxyPaintChooseCache" -cc "proxyPaintSetCache" proxyPaintSlider_cacheField;
+	rowLayout -numberOfColumns 2
+	        -columnWidth2 110 110;
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_save.xpm" -label "Save" -c "proxyPaintWriteCache";
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_load.xpm" -label "Load(Revert)" -c "proxyPaintReadCache";
+	setParent ..;
+	
+	                                setParent ..; // proxyPaintOptions
+				setParent ..; // proxyPaintFrame
+			setParent ..; // proxyPaintTab
+		setParent ..; // proxyPaintTabs
+	setParent ..; // proxyPaint
+
+	// Name the tabs; -tl does not allow tab labelling upon creation
+	tabLayout -e -tl proxyPaintTab "Tool Defaults" proxyPaintTabs;
+
+	setUITemplate -popTemplate;
+
+	//proxyPaintSetCallbacks($parent);
+}
+
+global proc proxyPaintSetOpt(int $val)
+{
+	proxyPaintToolContext -e -opt $val `currentCtx`;
+}
+
+global proc proxyPaintSetMultiCreate(int $val)
+{
+	proxyPaintToolContext -e -mct $val `currentCtx`;
+}
+
+global proc proxyPaintSetInstanceGroupCount(int $val)
+{
+    proxyPaintToolContext -e -igc $val `currentCtx`;
+}
+
+global proc proxyPaintSetBRadius(float $val)
+{
+	proxyPaintToolContext -e -brd $val `currentCtx`;
+}
+
+global proc proxyPaintSetCreateMargin(float $val)
+{
+	proxyPaintToolContext -e -marginSize $val `currentCtx`;
+}
+
+global proc proxyPaintSetBWeight(float $val)
+{
+	proxyPaintToolContext -e -bwt $val `currentCtx`;
+}
+
+global proc proxyPaintSetScaleMin(float $val)
+{
+	proxyPaintToolContext -e -smn $val `currentCtx`;
+}
+
+global proc proxyPaintSetScaleMax(float $val)
+{
+	proxyPaintToolContext -e -smx $val `currentCtx`;
+}
+
+global proc proxyPaintSetRotateNoise(float $val)
+{
+	proxyPaintToolContext -e -rno $val `currentCtx`;
+}
+
+global proc proxyPaintSetALN(int $val)
+{
+    proxyPaintToolContext -e -anl $val `currentCtx`;
+}
+
+global proc proxyPaintSetCull(int $val)
+{
+    proxyPaintToolContext -e -cus $val `currentCtx`;
+}
+
+global proc proxyPaintChooseCache()
+{
+    string $cache[] = `fileDialog2 -fileFilter "*.sct;;*.*"`;
+    textFieldGrp -e -text $cache[0] proxyPaintSlider_cacheField;
+    
+    proxyPaintSetCache();
+}
+
+global proc proxyPaintSetCache()
+{
+    string $node = proxyPaint_getCurrentViz();
+    if($node == "")
+        return;
+    
+    setAttr -type "string" ($node + ".cachePath") `textFieldGrp -q -text proxyPaintSlider_cacheField`;
+}
+
+global proc proxyPaintWriteCache()
+{
+    string $filename = `textFieldGrp -q -text proxyPaintSlider_cacheField`;
+    if($filename == "")
+        return;
+    if(`confirmDialog -title "Override Confirmation" -message ("Are you sure you want to write current proxy to file \n" + $filename + " ?")
+    -button "Yes" -button "No" -defaultButton "No"
+    -cancelButton "No" -dismissString "No"` == "No")
+        return;
+    proxyPaintToolContext -e -wch $filename `currentCtx`;
+}
+
+global proc proxyPaintReadCache()
+{
+    string $filename = `textFieldGrp -q -text proxyPaintSlider_cacheField`;
+    if($filename == "")
+        return;
+    
+    proxyPaintToolContext -e -rch $filename `currentCtx`;
+}
+
+global proc proxyPaintReset()
+{
+    if(`confirmDialog -title "Reset Confirmation" -message "Are you sure you want to reset current Viz and discard all unsaved changes?"
+    -button "Yes" -button "No" -defaultButton "No"
+    -cancelButton "No" -dismissString "No"` == "No")
+        return;
+    proxyPaintToolContext -e -opt 99 `currentCtx`;
+}
+
+global proc proxyPaintDoSnap()
+{
+    proxyPaintToolContext -e -opt 101 `currentCtx`;
+}
+
+global proc proxyPaintDoFlood(float $radius)
+{
+    if($radius < 1.0) {
+        if(`confirmDialog -title "Flood Confirmation" -message "Flood by very small distance could spawn too many boxes. Are you sure you want to flood with current brush radius?"
+            -button "Yes" -button "No" -defaultButton "No"
+            -cancelButton "No" -dismissString "No"` == "No")
+                return;
+    }
+    proxyPaintToolContext -e -opt 100 `currentCtx`;
+}
+
