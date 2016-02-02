@@ -51,6 +51,7 @@ protected:
 	virtual void updateShaderParameters() const;
 	virtual void defaultShaderParameters();
 
+	const float * pixels() const;
 	GLhandleARB vertex_shader, fragment_shader, program_object;
 };
 #endif        //  #ifndef GLSLBASE_H

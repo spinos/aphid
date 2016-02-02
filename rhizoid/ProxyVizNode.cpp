@@ -855,8 +855,7 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
     MMatrix cameramat = matdata.matrix(); 
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
 	
-	cameramat.inverse();
-	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat);
+	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat.inverse() );
 	
 	MPlug hfaplg(thisNode, ahapeture);
 	float hfa = hfaplg.asFloat();
@@ -865,7 +864,7 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MPlug flplg(thisNode, afocallength);
 	float fl = flplg.asFloat();
 	
-	setFrustum(hfa, vfa, fl, -10.f, -50000.f);
+	setFrustum(hfa, vfa, fl, -10.f, -250000.f);
 }
 
 

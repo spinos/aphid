@@ -9,16 +9,12 @@
 
 #include "AFrustum.h"
 #include <iostream>
-void AFrustum::set(const float & horizontalApeture,
-			const float & verticalApeture,
-			const float & focalLength,
+void AFrustum::set(const float & hfov,
+			const float & aspectRatio,
 			const float & clipNear,
 			const float & clipFar,
 			const Matrix44F & mat)
 {
-	float hfov = horizontalApeture * 0.5f / ( focalLength * 0.03937f );
-	float aspectRatio = verticalApeture / horizontalApeture;
-	
 	float nearRight = clipNear * hfov;
 	float nearLeft = -nearRight;
 	float nearUp = nearRight * aspectRatio;

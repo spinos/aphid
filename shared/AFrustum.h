@@ -14,9 +14,8 @@ class AFrustum {
 	Vector3F m_v[8];
 	
 public:
-	void set(const float & horizontalApeture,
-			const float & verticalApeture,
-			const float & focalLength,
+	void set(const float & hfov,
+			const float & aspectRatio,
 			const float & clipNear,
 			const float & clipFar,
 			const Matrix44F & mat);

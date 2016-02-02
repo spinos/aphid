@@ -66,22 +66,15 @@ const char* DepthCull::fragmentProgramSource() const
 "}";
 }
 
-char DepthCull::isCulled(float depth, int x, int y, int w, int h, float offset)
-{		
-	if(!hasFBO()) return 0;
-
-	if(x < 0 || y < 0 || x >= w || y >=h)
-		return 0;
+float DepthCull::getBufferDepth(float s, float t) const
+{
+	if(!hasFBO()) return -1.f;
 		
-	const int coordx = (float)x/(float)w * (frameBufferWidth());
-	const int coordy = (float)y/(float)h * (frameBufferHeight());
-	//const float buffed = fPixels[(coordy * frameBufferWidth() + coordx) * 4];
+	const int coordx = s * frameBufferWidth();
+	const int coordy = t * frameBufferHeight();
+	return pixels()[(coordy * frameBufferWidth() + coordx) * 4];
 	
 	//if(buffed < 0.1f) return 0;
-
-	//MGlobal::displayInfo(MString("d:")+depth+" "+buffed+" "+offset);
-
 	//return depth > (buffed + offset);
-	return 0;
 }
 

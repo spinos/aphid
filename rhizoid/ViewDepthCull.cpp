@@ -45,4 +45,16 @@ void ViewDepthCull::initDepthCullFBO()
 DepthCull * ViewDepthCull::depthCuller()
 { return m_depthCuller; }
 
+bool ViewDepthCull::cullByDepth(const Vector3F & pnt, const float & threshold) const
+{
+	Vector3F camP = cameraInvSpace().transform(pnt);
+	
+	if(camP.z > -1.f) return false;
+	float s, t;
+	ndc(camP, s, t);
+	
+	float b = m_depthCuller->getBufferDepth(s, t);
+	if(b<1.f) return false;
+	return (-camP.z - threshold) > b;
+}
 //:~

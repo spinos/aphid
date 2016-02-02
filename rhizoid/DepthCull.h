@@ -22,7 +22,7 @@ public:
 	
 	void setLocalSpace(double* m);
 	
-	char isCulled(float depth, int x, int y, int w, int h, float offset);
+	float getBufferDepth(float s, float t) const;
 	
 private:
 	double *fLocalSpace;

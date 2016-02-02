@@ -361,7 +361,7 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl)
 	Vector3F worldP = d->t1->transform(localP);
 	float r = plantSize(typ) * d->t1->getSide().length() * plantExtent(typ);
 	if(cullByFrustum(worldP, r) ) return false;
-	
+	if(cullByDepth(worldP, r) ) return false;
 	
 	return true;
 }
