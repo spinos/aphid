@@ -54,6 +54,7 @@ ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
 m_toSetGrid(true), 
 m_hasCamera(false), 
 m_toCheckVisibility(false),
+m_enableCompute(true),
 m_hasParticle(false)
 { attachSceneCallbacks(); }
 
@@ -64,6 +65,7 @@ ProxyViz::~ProxyViz()
 
 MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 {
+	if(!m_enableCompute) return MS::kSuccess;
 	if( plug == outValue ) {
 		
 		updateWorldSpace();
@@ -98,8 +100,11 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		if(!m_toCheckVisibility) {
 			MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
 			MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
+			std::cout<<"\n udate ground ";
 			updateGround(groundMeshArray, groundSpaceArray );
+			std::cout<<"\n move on ground";
 			moveWithGround();
+			std::cout<<"\n done";
 		}
 		
 		if(!m_hasParticle) {
@@ -158,6 +163,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 { 	
+	if(!m_enableCompute) return;
 	updateWorldSpace();
 	MObject thisNode = thisMObject();
 	
@@ -720,4 +726,8 @@ void ProxyViz::processPickInView()
 
 void ProxyViz::endPickInView()
 { m_toCheckVisibility = false; }
+
+void ProxyViz::setEnableCompute(bool x)
+{ m_enableCompute = x; }
+	
 //:~

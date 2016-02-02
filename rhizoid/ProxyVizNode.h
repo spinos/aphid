@@ -33,7 +33,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	MMatrix _worldSpace, _worldInverseSpace;
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;
-	bool m_hasCamera, m_hasParticle;
+	bool m_hasCamera, m_hasParticle, m_enableCompute;
 	char _firstLoad, fHasView;
 	
 public:
@@ -95,6 +95,7 @@ public:
 	void endPickInView();
 	
 	const MMatrix & worldSpace() const;
+	void setEnableCompute(bool x);
 	
 private:
 	char hasDisplayMesh() const;

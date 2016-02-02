@@ -87,12 +87,18 @@ public:
 	MStatus			finalize();
 
 private:
+	MStatus connectSelected();
+	bool connectMeshToViz(MObject & meshObj, MObject & vizObj, unsigned & slot);
+	void connectTransform(MObject & transObj, MObject & vizObj, const unsigned & slot);
+
+private:
 	enum Operation {
 		opUnknown = 0,
 		opBeginPick = 1,
 		opDoPick = 2,
 		opEndPick = 3,
-		opGetPick = 4
+		opGetPick = 4,
+		opConnectGround = 5
 	};
 	
 	Operation m_operation;

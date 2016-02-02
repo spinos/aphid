@@ -289,6 +289,7 @@ void ModifyForest::movePlant(const Ray & ray,
 
 void ModifyForest::moveWithGround()
 {
+	activeGround()->deselect();
 	selection()->deselect();
 	if(numPlants() < 1) return;
 	if(ground()->isEmpty() ) return;

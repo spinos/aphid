@@ -8,6 +8,7 @@
  */
 
 #include "BoxPaintToolCmd.h"
+#include "ProxyVizNode.h"
 #include <ASearchHelper.h>
 
 #define kBeginPickFlag "-bpk" 
@@ -18,8 +19,8 @@
 #define kEndPickFlagLong "-endPick"
 #define kGetPickFlag "-gpk" 
 #define kGetPickFlagLong "-getPick"
-#define kConnectGroundFlag "-cgnd" 
-#define kConnectGroundFlagLong "-connectGround"
+#define kConnectGroundFlag "-cgm" 
+#define kConnectGroundFlagLong "-connectGMesh"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -54,7 +55,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
-	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong, MSyntax::kNoArg);
+	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
 	
 	return syntax;
 }
@@ -71,6 +72,8 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	status = parseArgs(args);
 	
 	if(m_operation == opUnknown) return status;
+	
+	if(m_operation == opConnectGround) return connectSelected();
 	
 	ASearchHelper finder;
 
@@ -263,6 +266,9 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 		m_operation = opGetPick;
 	}
 	
+	if (argData.isFlagSet(kConnectGroundFlag))
+		m_operation = opConnectGround;
+		
 	return MS::kSuccess;
 }
 
@@ -282,4 +288,109 @@ MStatus proxyPaintTool::finalize()
 	//command.addArg(MString(kLSegFlag));
 	//command.addArg((float)lseg);
 	return MPxToolCommand::doFinalize( command );
+}
+
+MStatus proxyPaintTool::connectSelected()
+{
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 2) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) and a viz to connect");
+		return MS::kFailure;
+	}
+	
+	MStatus stat;
+	MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
+    MObject vizobj;
+    iter.getDependNode(vizobj);
+	MFnDependencyNode fviz(vizobj, &stat);
+    if(stat) {
+        MFnDependencyNode fviz(vizobj);
+		if(fviz.typeName() != "proxyViz") stat = MS::kFailure;
+	}
+	
+	if(!stat ) {
+		AHelper::Info<int>("proxyPaintTool error no viz node selected", 0);
+		return stat;
+	}
+	
+	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+		
+	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	pViz->setEnableCompute(false);
+	
+	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		return MS::kFailure;
+	}
+	
+	for(;!meshIter.isDone(); meshIter.next() ) {
+		MObject mesh;
+		meshIter.getDependNode(mesh);
+		
+		MFnDependencyNode fmesh(mesh, &stat);
+		if(!stat) continue;
+			
+		AHelper::Info<MString>("proxyPaintTool found mesh", fmesh.name() );
+		unsigned islot;
+		if(connectMeshToViz(mesh, vizobj, islot)) {
+			MDagPath meshPath;
+			meshIter.getDagPath ( meshPath );
+			meshPath.pop();
+			AHelper::Info<MString>("proxyPaintTool connect transform", meshPath.fullPathName() );
+			MObject trans = meshPath.node();
+			connectTransform(trans, vizobj, islot);
+		}
+	}
+	
+	pViz->setEnableCompute(true);
+	
+	return stat;
+}
+
+bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsigned & slot)
+{
+	MFnDependencyNode fmesh(meshObj);
+	MPlug srcMesh = fmesh.findPlug("outMesh");
+	AHelper::Info<MString>("check", srcMesh.name() );
+	
+	MStatus stat;
+	MPlugArray connected;
+	srcMesh.connectedTo ( connected , false, true, &stat );
+	unsigned i = 0;
+	for(;i<connected.length();++i) {
+		if(connected[i].node() == vizObj) {
+			AHelper::Info<MString>("already connected to", connected[i].name() );
+			return false;
+		}
+	}
+	
+	MFnDependencyNode fviz(vizObj);
+	MPlug dstGround = fviz.findPlug("groundMesh");
+	slot = dstGround.numElements();
+	MPlug dst = dstGround.elementByLogicalIndex(slot);
+	AHelper::Info<MString>("connect to", dst.name() );
+	
+	MDGModifier modif;
+	modif.connect(srcMesh, dst );
+	modif.doIt();
+	return true;
+}
+
+void proxyPaintTool::connectTransform(MObject & transObj, MObject & vizObj, const unsigned & slot)
+{
+	MFnDependencyNode ftrans(transObj);
+	MPlug srcSpace = ftrans.findPlug("worldMatrix").elementByLogicalIndex(0);
+	AHelper::Info<MString>("check mesh", srcSpace.name() );
+
+	MFnDependencyNode fviz(vizObj);
+	MPlug dstGround = fviz.findPlug("groundSpace");
+	MPlug dst = dstGround.elementByLogicalIndex(slot);
+	AHelper::Info<MString>("connect to", dst.name() );
+	
+	MDGModifier modif;
+	modif.connect(srcSpace, dst );
+	modif.doIt();
 }
