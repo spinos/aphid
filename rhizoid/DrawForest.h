@@ -9,9 +9,11 @@
 #pragma once
 #include "ModifyForest.h"
 #include <ViewDepthCull.h>
+#include <DrawBox.h>
+
 class CircleCurve;
 
-class DrawForest : public sdb::ModifyForest, public ViewDepthCull
+class DrawForest : public sdb::ModifyForest, public ViewDepthCull, public DrawBox
 {
 	
     Matrix44F m_useMat;
@@ -20,8 +22,8 @@ class DrawForest : public sdb::ModifyForest, public ViewDepthCull
 	float m_transbuf[16];
 	float m_scalbuf[3];
 	CircleCurve * m_circle;
-	float m_boxBoundBuf[72];
-	float m_boxFaceBuf[72];
+	float m_defBoxCenter[3];
+	float m_defBoxScale[3];
 	
 public:
     DrawForest();
@@ -62,11 +64,7 @@ private:
 	void drawPlant(sdb::PlantData * data);
 	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
 	void drawWiredPlant(sdb::PlantData * data);
-	void drawBounding(const BoundingBox & b) const;
 	void drawCircle() const;
     void calculateDefExtent();
-	void buildDefBoundBuf();
-	void drawDefBoundBuf() const;
-	void buildDefFaceBuf();
-	void drawDefFaceBuf() const;
+	
 };

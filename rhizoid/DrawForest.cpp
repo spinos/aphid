@@ -63,10 +63,10 @@ const BoundingBox & DrawForest::defBox() const
 { return m_defBox; }
 
 void DrawForest::draw_solid_box() const
-{ drawDefFaceBuf(); }
+{ drawSolidBox(m_defBoxCenter, m_defBoxScale); }
 
 void DrawForest::draw_a_box() const
-{ drawDefBoundBuf(); }
+{ drawWireBox(m_defBoxCenter, m_defBoxScale); }
 
 void DrawForest::draw_coordsys() const
 {
@@ -185,7 +185,7 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 void DrawForest::drawGridBounding()
 {
 	if(numPlants() < 1) return;
-	drawBounding(gridBoundingBox() );
+	drawBoundingBox(&gridBoundingBox() );
 }
 
 void DrawForest::drawGrid()
@@ -194,7 +194,7 @@ void DrawForest::drawGrid()
 	if(g->isEmpty() ) return;
 	g->begin();
 	while(!g->end() ) {
-		drawBounding(g->coordToGridBBox(g->key() ) );
+		drawBoundingBox(&g->coordToGridBBox(g->key() ) );
 		g->next();
 	}
 }
@@ -210,43 +210,6 @@ void DrawForest::drawActivePlants()
 		drawWiredPlant(arr->value()->m_reference->index );
 		arr->next();
 	}
-}
-
-void DrawForest::drawBounding(const BoundingBox & b) const
-{
-	Vector3F minb = b.getMin();
-	Vector3F maxb = b.getMax();
-	
-	glBegin( GL_LINES );
-	
-	    glVertex3f(minb.x, minb.y, minb.z);
-		glVertex3f(maxb.x, minb.y, minb.z);
-		glVertex3f(minb.x, maxb.y, minb.z);
-		glVertex3f(maxb.x, maxb.y, minb.z);
-		glVertex3f(minb.x, minb.y, maxb.z);
-		glVertex3f(maxb.x, minb.y, maxb.z);
-		glVertex3f(minb.x, maxb.y, maxb.z);
-		glVertex3f(maxb.x, maxb.y, maxb.z);
-		
-		glVertex3f(minb.x, minb.y, minb.z);
-		glVertex3f(minb.x, maxb.y, minb.z);
-		glVertex3f(maxb.x, minb.y, minb.z);
-		glVertex3f(maxb.x, maxb.y, minb.z);
-		glVertex3f(minb.x, minb.y, maxb.z);
-		glVertex3f(minb.x, maxb.y, maxb.z);
-		glVertex3f(maxb.x, minb.y, maxb.z);
-		glVertex3f(maxb.x, maxb.y, maxb.z);
-		
-		glVertex3f(minb.x, minb.y, minb.z);
-		glVertex3f(minb.x, minb.y, maxb.z);
-		glVertex3f(maxb.x, minb.y, minb.z);
-		glVertex3f(maxb.x, minb.y, maxb.z);
-		glVertex3f(minb.x, maxb.y, minb.z);
-		glVertex3f(minb.x, maxb.y, maxb.z);
-		glVertex3f(maxb.x, maxb.y, minb.z);
-		glVertex3f(maxb.x, maxb.y, maxb.z);
-		
-	glEnd();
 }
 
 void DrawForest::drawViewFrustum()
@@ -343,235 +306,11 @@ void DrawForest::setDefBox(const float & a,
 	m_defBox.m_data[4] = e;
 	m_defBox.m_data[5] = f;
 	calculateDefExtent();
-	buildDefBoundBuf();
-	buildDefFaceBuf();
-}
-
-void DrawForest::buildDefBoundBuf()
-{
-	Vector3F minb = m_defBox.getMin();
-	Vector3F maxb = m_defBox.getMax();
-	
-	m_boxBoundBuf[0] = minb.x;
-	m_boxBoundBuf[1] = minb.y;
-	m_boxBoundBuf[2] = minb.z;
-	m_boxBoundBuf[3] = maxb.x;
-	m_boxBoundBuf[4] = minb.y;
-	m_boxBoundBuf[5] = minb.z;
-	m_boxBoundBuf[6] = minb.x;
-	m_boxBoundBuf[7] = maxb.y;
-	m_boxBoundBuf[8] = minb.z;
-	m_boxBoundBuf[9] = maxb.x;
-	m_boxBoundBuf[10] = maxb.y;
-	m_boxBoundBuf[11] = minb.z;
-	m_boxBoundBuf[12] = minb.x;
-	m_boxBoundBuf[13] = minb.y;
-	m_boxBoundBuf[14] = maxb.z;
-	m_boxBoundBuf[15] = maxb.x;
-	m_boxBoundBuf[16] = minb.y;
-	m_boxBoundBuf[17] = maxb.z;
-	m_boxBoundBuf[18] = minb.x;
-	m_boxBoundBuf[19] = maxb.y;
-	m_boxBoundBuf[20] = maxb.z;
-	m_boxBoundBuf[21] = maxb.x;
-	m_boxBoundBuf[22] = maxb.y;
-	m_boxBoundBuf[23] = maxb.z;
-		
-	m_boxBoundBuf[24] = minb.x;
-	m_boxBoundBuf[25] = minb.y;
-	m_boxBoundBuf[26] = minb.z;
-	m_boxBoundBuf[27] = minb.x;
-	m_boxBoundBuf[28] = maxb.y;
-	m_boxBoundBuf[29] = minb.z;
-	m_boxBoundBuf[30] = maxb.x;
-	m_boxBoundBuf[31] = minb.y;
-	m_boxBoundBuf[32] = minb.z;
-	m_boxBoundBuf[33] = maxb.x;
-	m_boxBoundBuf[34] = maxb.y;
-	m_boxBoundBuf[35] = minb.z;
-	m_boxBoundBuf[36] = minb.x;
-	m_boxBoundBuf[37] = minb.y;
-	m_boxBoundBuf[38] = maxb.z;
-	m_boxBoundBuf[39] = minb.x;
-	m_boxBoundBuf[40] = maxb.y;
-	m_boxBoundBuf[41] = maxb.z;
-	m_boxBoundBuf[42] = maxb.x;
-	m_boxBoundBuf[43] = minb.y;
-	m_boxBoundBuf[44] = maxb.z;
-	m_boxBoundBuf[45] = maxb.x;
-	m_boxBoundBuf[46] = maxb.y;
-	m_boxBoundBuf[47] = maxb.z;
-		
-	m_boxBoundBuf[48] = minb.x;
-	m_boxBoundBuf[49] = minb.y;
-	m_boxBoundBuf[50] = minb.z;
-	m_boxBoundBuf[51] = minb.x;
-	m_boxBoundBuf[52] = minb.y;
-	m_boxBoundBuf[53] = maxb.z;
-	m_boxBoundBuf[54] = maxb.x;
-	m_boxBoundBuf[55] = minb.y;
-	m_boxBoundBuf[56] = minb.z;
-	m_boxBoundBuf[57] = maxb.x;
-	m_boxBoundBuf[58] = minb.y;
-	m_boxBoundBuf[59] = maxb.z;
-	m_boxBoundBuf[60] = minb.x;
-	m_boxBoundBuf[61] = maxb.y;
-	m_boxBoundBuf[62] = minb.z;
-	m_boxBoundBuf[63] = minb.x;
-	m_boxBoundBuf[64] = maxb.y;
-	m_boxBoundBuf[65] = maxb.z;
-	m_boxBoundBuf[66] = maxb.x;
-	m_boxBoundBuf[67] = maxb.y;
-	m_boxBoundBuf[68] = minb.z;
-	m_boxBoundBuf[69] = maxb.x;
-	m_boxBoundBuf[70] = maxb.y;
-	m_boxBoundBuf[71] = maxb.z;
-		
-}
-
-void DrawForest::buildDefFaceBuf()
-{
-	Vector3F minb = m_defBox.getMin();
-	Vector3F maxb = m_defBox.getMax();
-	
-	m_boxFaceBuf[0] = minb.x;
-	m_boxFaceBuf[1] = minb.y;
-	m_boxFaceBuf[2] = minb.z;
-	m_boxFaceBuf[3] = minb.x;
-	m_boxFaceBuf[4] = maxb.y;
-	m_boxFaceBuf[5] = minb.z;
-	m_boxFaceBuf[6] = maxb.x;
-	m_boxFaceBuf[7] = maxb.y;
-	m_boxFaceBuf[8] = minb.z;
-	m_boxFaceBuf[9] = maxb.x;
-	m_boxFaceBuf[10] = minb.y;
-	m_boxFaceBuf[11] = minb.z;
-	
-	m_boxFaceBuf[12] = minb.x;
-	m_boxFaceBuf[13] = minb.y;
-	m_boxFaceBuf[14] = maxb.z;
-	m_boxFaceBuf[15] = maxb.x;
-	m_boxFaceBuf[16] = minb.y;
-	m_boxFaceBuf[17] = maxb.z;
-	m_boxFaceBuf[18] = maxb.x;
-	m_boxFaceBuf[19] = maxb.y;
-	m_boxFaceBuf[20] = maxb.z;
-	m_boxFaceBuf[21] = minb.x;
-	m_boxFaceBuf[22] = maxb.y;
-	m_boxFaceBuf[23] = maxb.z;
-	
-	m_boxFaceBuf[24] = minb.x;
-	m_boxFaceBuf[25] = minb.y;
-	m_boxFaceBuf[26] = minb.z;
-	m_boxFaceBuf[27] = minb.x;
-	m_boxFaceBuf[28] = minb.y;
-	m_boxFaceBuf[29] = maxb.z;
-	m_boxFaceBuf[30] = minb.x;
-	m_boxFaceBuf[31] = maxb.y;
-	m_boxFaceBuf[32] = maxb.z;
-	m_boxFaceBuf[33] = minb.x;
-	m_boxFaceBuf[34] = maxb.y;
-	m_boxFaceBuf[35] = minb.z;
-	
-	m_boxFaceBuf[36] = maxb.x;
-	m_boxFaceBuf[37] = minb.y;
-	m_boxFaceBuf[38] = minb.z;
-	m_boxFaceBuf[39] = maxb.x;
-	m_boxFaceBuf[40] = maxb.y;
-	m_boxFaceBuf[41] = minb.z;
-	m_boxFaceBuf[42] = maxb.x;
-	m_boxFaceBuf[43] = maxb.y;
-	m_boxFaceBuf[44] = maxb.z;
-	m_boxFaceBuf[45] = maxb.x;
-	m_boxFaceBuf[46] = minb.y;
-	m_boxFaceBuf[47] = maxb.z;
-	
-	m_boxFaceBuf[48] = minb.x;
-	m_boxFaceBuf[49] = minb.y;
-	m_boxFaceBuf[50] = minb.z;
-	m_boxFaceBuf[51] = maxb.x;
-	m_boxFaceBuf[52] = minb.y;
-	m_boxFaceBuf[53] = minb.z;
-	m_boxFaceBuf[54] = maxb.x;
-	m_boxFaceBuf[55] = minb.y;
-	m_boxFaceBuf[56] = maxb.z;
-	m_boxFaceBuf[57] = minb.x;
-	m_boxFaceBuf[58] = minb.y;
-	m_boxFaceBuf[59] = maxb.z;
-	
-	m_boxFaceBuf[60] = minb.x;
-	m_boxFaceBuf[61] = maxb.y;
-	m_boxFaceBuf[62] = minb.z;
-	m_boxFaceBuf[63] = minb.x;
-	m_boxFaceBuf[64] = maxb.y;
-	m_boxFaceBuf[65] = maxb.z;
-	m_boxFaceBuf[66] = maxb.x;
-	m_boxFaceBuf[67] = maxb.y;
-	m_boxFaceBuf[68] = maxb.z;
-	m_boxFaceBuf[69] = maxb.x;
-	m_boxFaceBuf[70] = maxb.y;
-	m_boxFaceBuf[71] = minb.z;
-}
-
-void DrawForest::drawDefBoundBuf() const
-{
-	glBegin( GL_LINES );
-	int i=0;
-	for(;i<24;++i) glVertex3fv(&m_boxBoundBuf[i*3]);
-	glEnd();
-}
-
-void DrawForest::drawDefFaceBuf() const
-{
-	glBegin(GL_TRIANGLES);
-	glNormal3f(0.f, 0.f, -1.f);
-	glVertex3fv(&m_boxFaceBuf[0]);
-	glVertex3fv(&m_boxFaceBuf[3]);
-	glVertex3fv(&m_boxFaceBuf[6]);
-	glVertex3fv(&m_boxFaceBuf[6]);
-	glVertex3fv(&m_boxFaceBuf[9]);
-	glVertex3fv(&m_boxFaceBuf[0]);
-	
-	glNormal3f(0.f, 0.f, 1.f);
-	glVertex3fv(&m_boxFaceBuf[12]);
-	glVertex3fv(&m_boxFaceBuf[15]);
-	glVertex3fv(&m_boxFaceBuf[18]);
-	glVertex3fv(&m_boxFaceBuf[18]);
-	glVertex3fv(&m_boxFaceBuf[21]);
-	glVertex3fv(&m_boxFaceBuf[12]);
-	
-	glNormal3f(-1.f, 0.f, 0.f);
-	glVertex3fv(&m_boxFaceBuf[24]);
-	glVertex3fv(&m_boxFaceBuf[27]);
-	glVertex3fv(&m_boxFaceBuf[30]);
-	glVertex3fv(&m_boxFaceBuf[30]);
-	glVertex3fv(&m_boxFaceBuf[33]);
-	glVertex3fv(&m_boxFaceBuf[24]);
-	
-	glNormal3f(1.f, 0.f, 0.f);
-	glVertex3fv(&m_boxFaceBuf[36]);
-	glVertex3fv(&m_boxFaceBuf[39]);
-	glVertex3fv(&m_boxFaceBuf[42]);
-	glVertex3fv(&m_boxFaceBuf[42]);
-	glVertex3fv(&m_boxFaceBuf[45]);
-	glVertex3fv(&m_boxFaceBuf[36]);
-	
-	glNormal3f(0.f, -1.f, 0.f);
-	glVertex3fv(&m_boxFaceBuf[48]);
-	glVertex3fv(&m_boxFaceBuf[51]);
-	glVertex3fv(&m_boxFaceBuf[54]);
-	glVertex3fv(&m_boxFaceBuf[54]);
-	glVertex3fv(&m_boxFaceBuf[57]);
-	glVertex3fv(&m_boxFaceBuf[48]);
-	
-	glNormal3f(0.f, 1.f, 0.f);
-	glVertex3fv(&m_boxFaceBuf[60]);
-	glVertex3fv(&m_boxFaceBuf[63]);
-	glVertex3fv(&m_boxFaceBuf[66]);
-	glVertex3fv(&m_boxFaceBuf[66]);
-	glVertex3fv(&m_boxFaceBuf[69]);
-	glVertex3fv(&m_boxFaceBuf[60]);
-	
-	glEnd();
+	m_defBoxCenter[0] = (a + d) * .5f;
+	m_defBoxCenter[1] = (b + e) * .5f;
+	m_defBoxCenter[2] = (c + f) * .5f;
+	m_defBoxScale[0] = (d - a);
+	m_defBoxScale[1] = (e - b);
+	m_defBoxScale[2] = (f - c);
 }
 //:~
