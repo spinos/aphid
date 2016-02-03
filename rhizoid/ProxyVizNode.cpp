@@ -100,11 +100,8 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		if(!m_toCheckVisibility) {
 			MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
 			MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
-			std::cout<<"\n udate ground ";
 			updateGround(groundMeshArray, groundSpaceArray );
-			std::cout<<"\n move on ground";
 			moveWithGround();
-			std::cout<<"\n done";
 		}
 		
 		if(!m_hasParticle) {

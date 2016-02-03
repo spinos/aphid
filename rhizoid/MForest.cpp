@@ -370,6 +370,7 @@ void MForest::loadExternal(const char* filename)
 	}
 	delete[] data;
 	finishGrow();
+	moveWithGround();
 	AHelper::Info<const char *>("MForest read cache from ", filename);
 }
 

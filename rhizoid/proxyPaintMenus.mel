@@ -10,6 +10,8 @@ proc proxyPaint_appendMenuItems(string $master)
     menuItem -l "Create Proxy Viz On Selected Mesh" -c "proxyPaint_cviz";
     menuItem -l "Connect Ground To Viz" -c "proxyPaintTool -cgm";
     menuItem -l "Paint Tool" -c "proxyPaint_comb";
+    menuItem -l "Save Cache" -c "proxyPaintTool -scf `fileDialog -m 1`";
+    menuItem -l "Load Cache" -c "proxyPaintTool -lcf `fileDialog -m 0`";
     menuItem -l "Convert Selected Viz To Instancer" -c "proxyPaint_instance";
     menuItem -l "Convert Locators To Objects" -c "proxyPaint_realize";
     menuItem -l "Display Select As" -subMenu true;

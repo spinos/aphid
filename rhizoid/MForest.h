@@ -31,6 +31,9 @@ public:
                         float magnitude, short axis);
 	void extractActive(int numGroups);
 	
+	void loadExternal(const char* filename);
+	void saveExternal(const char* filename);
+	
 protected:
     void updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
 	void drawSolidMesh(MItMeshPolygon & iter);
@@ -44,8 +47,6 @@ protected:
 					const MIntArray & plantIds,
 					const MIntArray & plantTris,
 					const MVectorArray & plantCoords);
-	void loadExternal(const char* filename);
-	void saveExternal(const char* filename);
 	void bakePass(const char* filename, 
 					const MVectorArray & position, 
 					const MVectorArray & scale, 

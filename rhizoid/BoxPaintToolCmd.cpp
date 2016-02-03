@@ -21,6 +21,10 @@
 #define kGetPickFlagLong "-getPick"
 #define kConnectGroundFlag "-cgm" 
 #define kConnectGroundFlagLong "-connectGMesh"
+#define kSaveCacheFlag "-scf" 
+#define kSaveCacheFlagLong "-saveCacheFile"
+#define kLoadCacheFlag "-lcf" 
+#define kLoadCacheFlagLong "-loadCacheFile"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -55,7 +59,8 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
-	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
+	syntax.addFlag(kSaveCacheFlag, kSaveCacheFlagLong, MSyntax::kString);
+	syntax.addFlag(kLoadCacheFlag, kLoadCacheFlagLong, MSyntax::kString);
 	
 	return syntax;
 }
@@ -75,6 +80,10 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	
 	if(m_operation == opConnectGround) return connectSelected();
 	
+	if(m_operation == opSaveCache) return saveCacheSelected();
+			
+	if(m_operation == opLoadCache) return loadCacheSelected();
+		
 	ASearchHelper finder;
 
 	MObject oViz;
@@ -268,7 +277,25 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 	
 	if (argData.isFlagSet(kConnectGroundFlag))
 		m_operation = opConnectGround;
-		
+	
+	if (argData.isFlagSet(kSaveCacheFlag)) {
+		status = argData.getFlagArgument(kSaveCacheFlag, 0, m_cacheName);
+		if (!status) {
+			status.perror("save cache flag parsing failed");
+			return status;
+		}
+		m_operation = opSaveCache;
+	}
+	
+	if (argData.isFlagSet(kLoadCacheFlag)) {
+		status = argData.getFlagArgument(kLoadCacheFlag, 0, m_cacheName);
+		if (!status) {
+			status.perror("save cache flag parsing failed");
+			return status;
+		}
+		m_operation = opLoadCache;
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -301,20 +328,10 @@ MStatus proxyPaintTool::connectSelected()
 	}
 	
 	MStatus stat;
-	MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
-    MObject vizobj;
-    iter.getDependNode(vizobj);
+	MObject vizobj = getSelectedViz(sels, stat);
+	if(!stat) return stat;
+	
 	MFnDependencyNode fviz(vizobj, &stat);
-    if(stat) {
-        MFnDependencyNode fviz(vizobj);
-		if(fviz.typeName() != "proxyViz") stat = MS::kFailure;
-	}
-	
-	if(!stat ) {
-		AHelper::Info<int>("proxyPaintTool error no viz node selected", 0);
-		return stat;
-	}
-	
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 		
 	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
@@ -394,3 +411,67 @@ void proxyPaintTool::connectTransform(MObject & transObj, MObject & vizObj, cons
 	modif.connect(srcSpace, dst );
 	modif.doIt();
 }
+
+MStatus proxyPaintTool::saveCacheSelected()
+{
+	MStatus stat;
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select a viz to save cache");
+		return MS::kFailure;
+	}
+	
+	MObject vizobj = getSelectedViz(sels, stat);
+	if(!stat) return stat;
+	
+	MFnDependencyNode fviz(vizobj, &stat);
+	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+		
+	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	pViz->saveExternal(m_cacheName.asChar() );
+	
+	return stat;
+}
+	
+MStatus proxyPaintTool::loadCacheSelected()
+{
+	MStatus stat;
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select a viz to load cache");
+		return MS::kFailure;
+	}
+	
+	MObject vizobj = getSelectedViz(sels, stat);
+	if(!stat) return stat;
+	
+	MFnDependencyNode fviz(vizobj, &stat);
+	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+		
+	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	pViz->loadExternal(m_cacheName.asChar() );
+	
+	return stat;
+}
+
+MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels, MStatus & stat)
+{
+	MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
+    MObject vizobj;
+    iter.getDependNode(vizobj);
+	MFnDependencyNode fviz(vizobj, &stat);
+    if(stat) {
+        MFnDependencyNode fviz(vizobj);
+		if(fviz.typeName() != "proxyViz") stat = MS::kFailure;
+	}
+	
+	if(!stat )
+		AHelper::Info<int>("proxyPaintTool error no viz node selected", 0);
+		
+	return vizobj;
+}	
+//:~

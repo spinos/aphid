@@ -90,7 +90,10 @@ private:
 	MStatus connectSelected();
 	bool connectMeshToViz(MObject & meshObj, MObject & vizObj, unsigned & slot);
 	void connectTransform(MObject & transObj, MObject & vizObj, const unsigned & slot);
-
+	MStatus saveCacheSelected();
+	MStatus loadCacheSelected();
+	MObject getSelectedViz(const MSelectionList & sels, MStatus & stat);
+	
 private:
 	enum Operation {
 		opUnknown = 0,
@@ -98,14 +101,16 @@ private:
 		opDoPick = 2,
 		opEndPick = 3,
 		opGetPick = 4,
-		opConnectGround = 5
+		opConnectGround = 5,
+		opSaveCache = 6,
+		opLoadCache = 7
 	};
 	
 	Operation m_operation;
 	
 	unsigned opt, nseg;
 	float lseg;
-	MString fBlockerName, fVizName;
+	MString fBlockerName, fVizName, m_cacheName;
 };
 
 const char helpString[] =
