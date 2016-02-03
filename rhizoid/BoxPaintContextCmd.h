@@ -6,7 +6,8 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#include "boxPaintTool.h"
+#include <maya/MPxContextCommand.h>
+class proxyPaintContext;
 
 class proxyPaintContextCmd : public MPxContextCommand
 {

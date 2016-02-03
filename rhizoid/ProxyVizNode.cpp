@@ -558,7 +558,7 @@ bool ProxyViz::loadInternal(MDataBlock& block)
 	return loadPlants(plantTms, plantIds, plantTris, plantCoords);
 }
 
-void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat)
+void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar)
 {
     useActiveView();
 	MPoint toNear, toFar;
