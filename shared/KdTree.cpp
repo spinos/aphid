@@ -50,7 +50,7 @@ void KdTree::create()
 	m_root = new KdTreeNode;
 	
 	BoundingBox b = getBBox();
-    std::cout<<" kdtree level 0 box "<<b.str();
+    // std::cout<<" kdtree level 0 box "<<b.str();
 	boost::timer bTimer;
 	bTimer.restart();
 	
@@ -64,7 +64,7 @@ void KdTree::create()
 	ctx->verbose();
 	delete ctx;
 	
-	m_stream.verbose();
+	// m_stream.verbose();
 	std::cout << "Kd tree constructed in " << bTimer.elapsed() 
 	<< " secs\n max leaf level: "<<m_maxLeafLevel<<"\n"
 	<< " num no-empty leaves "<<m_numNoEmptyLeaf<<"\n";
