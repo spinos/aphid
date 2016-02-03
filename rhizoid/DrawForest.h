@@ -20,6 +20,8 @@ class DrawForest : public sdb::ModifyForest, public ViewDepthCull
 	float m_transbuf[16];
 	float m_scalbuf[3];
 	CircleCurve * m_circle;
+	float m_boxBoundBuf[72];
+	float m_boxFaceBuf[72];
 	
 public:
     DrawForest();
@@ -47,7 +49,12 @@ protected:
 	void drawDepthCull(double * localTm);
 	bool isVisibleInView(sdb::Plant * pl, 
 					const float lowLod, const float highLod);
-    void calculateDefExtent();
+    void setDefBox(const float & a, 
+					const float & b,
+					const float & c,
+					const float & d,
+					const float & e,
+					const float & f);
 	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
@@ -57,5 +64,9 @@ private:
 	void drawWiredPlant(sdb::PlantData * data);
 	void drawBounding(const BoundingBox & b) const;
 	void drawCircle() const;
-    
+    void calculateDefExtent();
+	void buildDefBoundBuf();
+	void drawDefBoundBuf() const;
+	void buildDefFaceBuf();
+	void drawDefFaceBuf() const;
 };

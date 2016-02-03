@@ -72,18 +72,16 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MStatus status;
 
-		BoundingBox * defb = defBoxP();
-		defb->setMin(block.inputValue(abboxminx).asFloat(), 0);
-		defb->setMin(block.inputValue(abboxminy).asFloat(), 1);
-		defb->setMin(block.inputValue(abboxminz).asFloat(), 2);
-		defb->setMax(block.inputValue(abboxmaxx).asFloat(), 0);
-		defb->setMax(block.inputValue(abboxmaxy).asFloat(), 1);
-		defb->setMax(block.inputValue(abboxmaxz).asFloat(), 2);
-		calculateDefExtent();
+		setDefBox(block.inputValue(abboxminx).asFloat(),
+			block.inputValue(abboxminy).asFloat(), 
+			block.inputValue(abboxminz).asFloat(), 
+			block.inputValue(abboxmaxx).asFloat(), 
+			block.inputValue(abboxmaxy).asFloat(), 
+			block.inputValue(abboxmaxz).asFloat());
 		
 		if(m_toSetGrid) {
 			m_toSetGrid = false;
-			resetGrid(defb->distance(0) * 20.f);
+			resetGrid(defBoxP()->distance(0) * 20.f);
 		}
 		
 		if(_firstLoad) {
