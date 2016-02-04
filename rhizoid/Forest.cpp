@@ -15,7 +15,7 @@ Forest::Forest()
 {
 	TreeNode::MaxNumKeysPerNode = 128;
     TreeNode::MinNumKeysPerNode = 16;
-    KdTree::MaxBuildLevel = 20;
+    KdTree::MaxBuildLevel = 25;
 	KdTree::NumPrimitivesInLeafThreashold = 16;
 	
 	m_grid = new WorldGrid<Array<int, Plant>, Plant >;

@@ -9,13 +9,25 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
-#include "BoxPaintToolCmd.h"
+#include <maya/MPxContext.h>
+#include <maya/M3dView.h>
+#include "ProxyVizNode.h"
+
 
 class proxyPaintContext : public MPxContext
 {
+	M3dView					view;
+	double clipNear, clipFar;
 	float m_brushRadius, m_brushWeight;
 	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
-	unsigned m_growAlongNormal;
+	
+	unsigned mOpt, m_numSeg, m_growAlongNormal;
+	unsigned m_cullSelection, m_multiCreate;
+	int m_groupCount;
+	short					start_x, start_y;
+	short					last_x, last_y;
+
+	MGlobal::ListAdjustment	m_listAdjustment;
 	
 public:
 					proxyPaintContext();
@@ -57,23 +69,6 @@ public:
 	float getCreateMargin();
 
 private:
-	short					start_x, start_y;
-	short					last_x, last_y;
-
-	MGlobal::ListAdjustment	m_listAdjustment;
-	M3dView					view;
-	
-	MDagPath m_activeMeshPath;
-	MFnMesh fcollide;
-	char goCollide;
-	MDoubleArray curveLen;
-	Matrix44F mat;
-	MPoint _worldEye;
-	double clipNear, clipFar;
-	unsigned mOpt, m_numSeg;
-	unsigned m_cullSelection, m_multiCreate;
-	int m_groupCount;
-	
 	void resize();
 	void grow();
 	void flood();
@@ -87,7 +82,6 @@ private:
 	void startProcessSelect();
 	void processSelect();
 	char validateViz(const MSelectionList &sels);
-	char validateCollide(const MSelectionList &sels);
 	char validateSelection();
 	void smoothSelected();
 	void selectGround();
@@ -96,11 +90,7 @@ private:
 	void finishGrow();
 	
 	ProxyViz *m_pViz;
-	IntersectionGroup m_intersectionGrp;
-	PseudoNoise pnoise;
-	MPoint _lastHit;
 	
-	int _seed;
 };
 #endif        //  #ifndef BOXPAINTTOOL_H
 

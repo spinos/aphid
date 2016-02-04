@@ -34,6 +34,24 @@ void AFrustum::set(const float & hfov,
 	m_v[7] = mat.transform(Vector3F(farLeft, farUp, clipFar));
 }
 
+void AFrustum::setOrtho(const float & hwith,
+			const float & aspectRatio,
+			const float & clipNear,
+			const float & clipFar,
+			const Matrix44F & mat)
+{
+	float hUp = hwith * aspectRatio;
+	
+	m_v[0] = mat.transform(Vector3F(-hwith, -hUp, clipNear));
+	m_v[1] = mat.transform(Vector3F(hwith, -hUp, clipNear));
+	m_v[2] = mat.transform(Vector3F(hwith, hUp, clipNear));
+	m_v[3] = mat.transform(Vector3F(-hwith, hUp, clipNear));
+	m_v[4] = mat.transform(Vector3F(-hwith, -hUp, clipFar));
+	m_v[5] = mat.transform(Vector3F(hwith, -hUp, clipFar));
+	m_v[6] = mat.transform(Vector3F(hwith, hUp, clipFar));
+	m_v[7] = mat.transform(Vector3F(-hwith, hUp, clipFar));
+}
+
 const Vector3F * AFrustum::v(int idx) const
 { return &m_v[idx]; }
 

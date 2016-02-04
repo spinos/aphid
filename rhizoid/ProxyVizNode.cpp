@@ -76,18 +76,16 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MStatus status;
 
-		BoundingBox * defb = defBoxP();
-		defb->setMin(block.inputValue(abboxminx).asFloat(), 0);
-		defb->setMin(block.inputValue(abboxminy).asFloat(), 1);
-		defb->setMin(block.inputValue(abboxminz).asFloat(), 2);
-		defb->setMax(block.inputValue(abboxmaxx).asFloat(), 0);
-		defb->setMax(block.inputValue(abboxmaxy).asFloat(), 1);
-		defb->setMax(block.inputValue(abboxmaxz).asFloat(), 2);
-		calculateDefExtent();
+		setDefBox(block.inputValue(abboxminx).asFloat(),
+			block.inputValue(abboxminy).asFloat(), 
+			block.inputValue(abboxminz).asFloat(), 
+			block.inputValue(abboxmaxx).asFloat(), 
+			block.inputValue(abboxmaxy).asFloat(), 
+			block.inputValue(abboxmaxz).asFloat());
 		
 		if(m_toSetGrid) {
 			m_toSetGrid = false;
-			resetGrid(defb->distance(0) * 20.f);
+			resetGrid(defBoxP()->distance(0) * 20.f);
 		}
 		
 		if(_firstLoad) {
@@ -178,11 +176,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	MPlug mutzplug( thisNode, azmultiplier);
 	setScaleMuliplier(mutzplug.asFloat(), 2);	
 	
+	MDagPath cameraPath;
+	view.getCamera(cameraPath);
 	if(m_hasCamera) updateViewFrustum(thisNode);
-	
+	else updateViewFrustum(cameraPath);
+
 	_viewport = view;
 	fHasView = 1;
-
+	
 	view.beginGL();
 	
 	initDepthCull();
@@ -563,7 +564,7 @@ bool ProxyViz::loadInternal(MDataBlock& block)
 	return loadPlants(plantTms, plantIds, plantTris, plantCoords);
 }
 
-void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar, Matrix44F & mat)
+void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar)
 {
     useActiveView();
 	MPoint toNear, toFar;
@@ -681,7 +682,6 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MFnMatrixData matdata(matobj);
     MMatrix cameramat = matdata.matrix(); 
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
-	
 	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat.inverse() );
 	
 	MPlug hfaplg(thisNode, ahapeture);
@@ -692,6 +692,28 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	float fl = flplg.asFloat();
 	
 	setFrustum(hfa, vfa, fl, -10.f, -250000.f);
+}
+
+void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
+{
+	MMatrix cameraMat = cameraPath.inclusiveMatrix();
+	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameraMat);
+	MMatrix cameraInvMat = cameraPath.inclusiveMatrixInverse();
+	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameraInvMat);
+	
+	MFnCamera fcam(cameraPath.node() );
+	if(fcam.isOrtho() ) {
+		float orthoW = fcam.orthoWidth();
+		float asp = fcam.aspectRatio();
+		setOrthoFrustum(orthoW, asp, -10.f, -250000.f);
+		
+	} else {
+		float hfa = fcam.horizontalFilmAperture();
+		float vfa = fcam.verticalFilmAperture();
+		float fl = fcam.focalLength();
+	
+		setFrustum(hfa, vfa, fl, -10.f, -250000.f);
+	}
 }
 
 void ProxyViz::beginPickInView()

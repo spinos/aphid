@@ -248,6 +248,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/HAttributeGroup.cpp
 ../shared/AFrustum.cpp
 ../shared/ViewCull.cpp
+../shared/DrawBox.cpp
 ../hesperis/HAdaptiveField.cpp
 ../hesperis/H5FieldIn.cpp
 ../hesperis/H5FieldOut.cpp

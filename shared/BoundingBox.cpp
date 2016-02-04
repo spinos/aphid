@@ -446,4 +446,7 @@ const std::string BoundingBox::str() const
     sst<<"(("<<m_data[0]<<","<<m_data[1]<<","<<m_data[2]<<"),("<<m_data[3]<<","<<m_data[4]<<","<<m_data[5]<<"))";
 	return sst.str();
 }
+
+const float * BoundingBox::data() const
+{ return m_data; }
 //:~

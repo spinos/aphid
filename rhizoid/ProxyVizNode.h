@@ -87,7 +87,7 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar, Matrix44F &mat);
+	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar);
 	void pressToSave();
 	void pressToLoad();
 	void beginPickInView();
@@ -106,6 +106,7 @@ private:
 	MMatrix worldizeSpace(const MMatrix & s) const;
 	void useActiveView();
 	void updateViewFrustum(MObject & node);
+	void updateViewFrustum(const MDagPath & cameraPath);
 	
 	MObject fDisplayMesh;
 	

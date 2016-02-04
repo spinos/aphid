@@ -63,51 +63,10 @@ const BoundingBox & DrawForest::defBox() const
 { return m_defBox; }
 
 void DrawForest::draw_solid_box() const
-{
-	Vector3F minb = m_defBox.getMin();
-	Vector3F maxb = m_defBox.getMax();
-	
-    glBegin(GL_QUADS);
-	glNormal3f(0.f, 0.f, -1.f);
-	glVertex3f(minb.x, minb.y, minb.z);
-	glVertex3f(minb.x, maxb.y, minb.z);
-	glVertex3f(maxb.x, maxb.y, minb.z);
-	glVertex3f(maxb.x, minb.y, minb.z);
-	
-	glNormal3f(0.f, 0.f, 1.f);
-	glVertex3f(minb.x, minb.y, maxb.z);
-	glVertex3f(maxb.x, minb.y, maxb.z);
-	glVertex3f(maxb.x, maxb.y, maxb.z);
-	glVertex3f(minb.x, maxb.y, maxb.z);
-	
-	glNormal3f(-1.f, 0.f, 0.f);
-	glVertex3f(minb.x, minb.y, minb.z);
-	glVertex3f(minb.x, minb.y, maxb.z);
-	glVertex3f(minb.x, maxb.y, maxb.z);
-	glVertex3f(minb.x, maxb.y, minb.z);
-	
-	glNormal3f(1.f, 0.f, 0.f);
-	glVertex3f(maxb.x, minb.y, minb.z);
-	glVertex3f(maxb.x, maxb.y, minb.z);
-	glVertex3f(maxb.x, maxb.y, maxb.z);
-	glVertex3f(maxb.x, minb.y, maxb.z);
-	
-	glNormal3f(0.f, -1.f, 0.f);
-	glVertex3f(minb.x, minb.y, minb.z);
-	glVertex3f(maxb.x, minb.y, minb.z);
-	glVertex3f(maxb.x, minb.y, maxb.z);
-	glVertex3f(minb.x, minb.y, maxb.z);
-	
-	glNormal3f(0.f, 1.f, 0.f);
-	glVertex3f(minb.x, maxb.y, minb.z);
-	glVertex3f(minb.x, maxb.y, maxb.z);
-	glVertex3f(maxb.x, maxb.y, maxb.z);
-	glVertex3f(maxb.x, maxb.y, minb.z);
-	glEnd();
-}
+{ drawSolidBox(m_defBoxCenter, m_defBoxScale); }
 
 void DrawForest::draw_a_box() const
-{ drawBounding(m_defBox); }
+{ drawWireBox(m_defBoxCenter, m_defBoxScale); }
 
 void DrawForest::draw_coordsys() const
 {
@@ -226,7 +185,7 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 void DrawForest::drawGridBounding()
 {
 	if(numPlants() < 1) return;
-	drawBounding(gridBoundingBox() );
+	drawBoundingBox(&gridBoundingBox() );
 }
 
 void DrawForest::drawGrid()
@@ -235,7 +194,7 @@ void DrawForest::drawGrid()
 	if(g->isEmpty() ) return;
 	g->begin();
 	while(!g->end() ) {
-		drawBounding(g->coordToGridBBox(g->key() ) );
+		drawBoundingBox(&g->coordToGridBBox(g->key() ) );
 		g->next();
 	}
 }
@@ -251,43 +210,6 @@ void DrawForest::drawActivePlants()
 		drawWiredPlant(arr->value()->m_reference->index );
 		arr->next();
 	}
-}
-
-void DrawForest::drawBounding(const BoundingBox & b) const
-{
-	Vector3F minb = b.getMin();
-	Vector3F maxb = b.getMax();
-	
-	glBegin( GL_LINES );
-	
-	    glVertex3f(minb.x, minb.y, minb.z);
-		glVertex3f(maxb.x, minb.y, minb.z);
-		glVertex3f(minb.x, maxb.y, minb.z);
-		glVertex3f(maxb.x, maxb.y, minb.z);
-		glVertex3f(minb.x, minb.y, maxb.z);
-		glVertex3f(maxb.x, minb.y, maxb.z);
-		glVertex3f(minb.x, maxb.y, maxb.z);
-		glVertex3f(maxb.x, maxb.y, maxb.z);
-		
-		glVertex3f(minb.x, minb.y, minb.z);
-		glVertex3f(minb.x, maxb.y, minb.z);
-		glVertex3f(maxb.x, minb.y, minb.z);
-		glVertex3f(maxb.x, maxb.y, minb.z);
-		glVertex3f(minb.x, minb.y, maxb.z);
-		glVertex3f(minb.x, maxb.y, maxb.z);
-		glVertex3f(maxb.x, minb.y, maxb.z);
-		glVertex3f(maxb.x, maxb.y, maxb.z);
-		
-		glVertex3f(minb.x, minb.y, minb.z);
-		glVertex3f(minb.x, minb.y, maxb.z);
-		glVertex3f(maxb.x, minb.y, minb.z);
-		glVertex3f(maxb.x, minb.y, maxb.z);
-		glVertex3f(minb.x, maxb.y, minb.z);
-		glVertex3f(minb.x, maxb.y, maxb.z);
-		glVertex3f(maxb.x, maxb.y, minb.z);
-		glVertex3f(maxb.x, maxb.y, maxb.z);
-		
-	glEnd();
 }
 
 void DrawForest::drawViewFrustum()
@@ -368,5 +290,27 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 		if(cullByLod(camZ, r, lowLod, highLod ) ) return false;
 	}
 	return true;
+}
+
+void DrawForest::setDefBox(const float & a, 
+					const float & b,
+					const float & c,
+					const float & d,
+					const float & e,
+					const float & f)
+{
+	m_defBox.m_data[0] = a;
+	m_defBox.m_data[1] = b;
+	m_defBox.m_data[2] = c;
+	m_defBox.m_data[3] = d;
+	m_defBox.m_data[4] = e;
+	m_defBox.m_data[5] = f;
+	calculateDefExtent();
+	m_defBoxCenter[0] = (a + d) * .5f;
+	m_defBoxCenter[1] = (b + e) * .5f;
+	m_defBoxCenter[2] = (c + f) * .5f;
+	m_defBoxScale[0] = (d - a);
+	m_defBoxScale[1] = (e - b);
+	m_defBoxScale[2] = (f - c);
 }
 //:~

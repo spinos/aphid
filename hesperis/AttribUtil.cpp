@@ -39,7 +39,7 @@ void AttribUtil::save3(const MDagPathArray & entities)
 }
 
 void AttribUtil::scan(const MDagPath &entity)
-{		
+{
 	MFnDagNode pf(entity);
     AttribNameMap attribs = ListUserDefinedAttribs(pf.fullPathName(), true);
     if(attribs.size() < 1) return;
@@ -512,14 +512,14 @@ void AttribUtil::load3(const char * filename, MObject & target)
         return;   
     }
 	
-	AHelper::Info<const char *>(" read attrib from ", filename);
+	AHelper::Info<const char *>(" AttribUtil read attrib from ", filename);
 	HBase w("/");
 	HesperisAttributeIO::ReadAttributes(&w, target);
 	w.close();
 	
 	HesperisAttribConnector::ClearMasterNode();
 	CloseH5();
-	AHelper::Info<const char *>(" done loading attrib ", filename);
+	AHelper::Info<const char *>(" AttribUtil done loading attrib ", filename);
 }
 
 void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int flag)
@@ -728,4 +728,7 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
     BaseUtil::CloseH5();
     AHelper::Info<const char *>(" done baking attrib ", filename);
 }
+
+void AttribUtil::setCompressHierarchy(int x)
+{ HesperisAttributeIO::CompressHierarchy = x; }
 //:~

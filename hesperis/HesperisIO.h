@@ -52,6 +52,7 @@ public:
 	static std::string H5PathNameTo(const MDagPath & path);
 	static std::string H5PathNameTo(const MObject & node);
 	static std::string CurrentHObjectPath;
+    static int CompressHierarchy;
     
 protected:
     template<typename Th, typename Td, typename Tc>
@@ -95,4 +96,6 @@ protected:
         }
         return true;
     }
+    
+    static void CompressPath(std::string & dest, const MDagPath & node);
 };

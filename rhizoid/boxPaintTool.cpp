@@ -2,8 +2,13 @@
 #include <maya/MFnCamera.h>
 #include <maya/MPointArray.h>
 #include <maya/MDagModifier.h>
+#include <maya/MToolsInfo.h>
+
 #include "../core/TriangleRaster.h"
 #include <ASearchHelper.h>
+
+const char helpString[] =
+			"Select a proxy viz and a ground plane to paint on.";
 
 proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),m_pViz(0),
 m_growAlongNormal(0),
@@ -35,40 +40,16 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 	
 	view = M3dView::active3dView();
 
-/// get camera matrix
 	MDagPath camera;
 	view.getCamera( camera );
 	
 	MFnCamera fnCamera( camera );
-	MVector upDir = fnCamera.upDirection( MSpace::kWorld );
-	MVector rightDir = fnCamera.rightDirection( MSpace::kWorld );
-	MVector viewDir = fnCamera.viewDirection( MSpace::kWorld );
-	MPoint eyePos = fnCamera.eyePoint ( MSpace::kWorld );
-	_worldEye = eyePos;
 	
 	clipNear = fnCamera.nearClippingPlane();
 	clipFar = fnCamera.farClippingPlane();
-	
-	mat.setIdentity ();
-	*mat.m(0, 0) = -rightDir.x;
-	*mat.m(0, 1) = -rightDir.y;
-	*mat.m(0, 2) = -rightDir.z;
-	*mat.m(1, 0) = upDir.x;
-	*mat.m(1, 1) = upDir.y;
-	*mat.m(1, 2) = upDir.z;
-	*mat.m(2, 0) = viewDir.x;
-	*mat.m(2, 1) = viewDir.y;
-	*mat.m(2, 2) = viewDir.z;
-	*mat.m(3, 0) = eyePos.x;
-	*mat.m(3, 1) = eyePos.y;
-	*mat.m(3, 2) = eyePos.z;
-	
-	mat.inverse();
 
 	validateSelection();
 
-	_seed = rand() % 999999;
-	
 	if(mOpt == 2) startProcessSelect();
 	if(mOpt == 9) startSelectGround();
 	
@@ -369,7 +350,7 @@ void proxyPaintContext::move()
 {
 	if(!m_pViz) return;
 		
-	m_pViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar, mat);
+	m_pViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar);
 }
 
 void proxyPaintContext::rotateAroundAxis(short axis)
@@ -386,10 +367,7 @@ void proxyPaintContext::rotateAroundAxis(short axis)
 }
 
 void proxyPaintContext::moveAlongAxis(short axis)
-{
-	//if(!m_pViz) return;
-	//m_pViz->adjustLocation(start_x, start_y, last_x, last_y,  clipNear, clipFar, mat, axis);
-}
+{}
 
 void proxyPaintContext::selectGround()
 {
@@ -502,30 +480,6 @@ char proxyPaintContext::validateViz(const MSelectionList &sels)
         return 0;
     
     return 1;
-}
-
-char proxyPaintContext::validateCollide(const MSelectionList &sels)
-{
-	goCollide = 0;
-	
-    if(fcollide.setObject(m_activeMeshPath) == MS::kSuccess)
-	{
-		goCollide = 1;    
-		return 1;
-	}
-		
-	MStatus stat;
-	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
-		
-	MDagPath mo;
-	meshIter.getDagPath( mo );
-	if(fcollide.setObject(mo) == MS::kSuccess) 
-	{
-		goCollide = 1;    
-		return 1;
-	}
-	
-    return 0;
 }
 
 void proxyPaintContext::setGrowOption(ProxyViz::GrowOption & opt)

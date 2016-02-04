@@ -32,14 +32,15 @@ bool HesperisAttributeIO::WriteAttributes(const MPlugArray & attribs, HesperisFi
     bool fstat = file->save();
 	if(!fstat) MGlobal::displayWarning(MString(" cannot save attrib to file ")+ file->fileName().c_str());
 	file->close();
+    AHelper::Info<unsigned>(" HesperisAttributeIO write n plugs", attribs.length() );
 	return true;
 }
 
 bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file)
 {
-	const std::string nodeName = H5PathNameTo(attrib.node());
+    const std::string nodeName = H5PathNameTo(attrib.node());
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % attrib.partialName().asChar());
-	AHelper::Info<std::string>("att ", attrName);
+	AHelper::Info<std::string>("HesperisAttributeIO add attrib ", attrName);
 	
 	AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
 	switch(t) {
@@ -79,15 +80,19 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
 	parent->lsTypedChild<HBase>(allGrps);
 	std::vector<std::string>::const_iterator it = allGrps.begin();
 	for(;it!=allGrps.end();++it) {
+			
 		HBase child(*it);
 		if(child.hasNamedAttr(".attr_typ")) {
-			allAttrs.push_back(*it);
+            allAttrs.push_back(*it);
 		}
 		else {
 			MObject otm;
 			if( FindNamedChild(otm, child.lastName(), target) )
 				ReadAttributes(&child, otm);
-		}	
+            else {
+                AHelper::Info<std::string>("HesperisAttributeIO cannot find child by name", child.fObjectPath );
+            }
+		}
 		child.close();
 	}
 	
