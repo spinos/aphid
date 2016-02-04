@@ -23,11 +23,17 @@ public:
 	
 	void enable();
 	void disable();
+	bool isPerspective() const;
 	
 /// cliping is negative in camera space
 	void setFrustum(const float & horizontalApeture,
 			const float & verticalApeture,
 			const float & focalLength,
+			const float & clipNear,
+			const float & clipFar);
+			
+	void setOrthoFrustum(const float & orthoWidth,
+			const float & aspectRatio,
 			const float & clipNear,
 			const float & clipFar);
 			

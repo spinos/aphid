@@ -36,6 +36,22 @@ void ViewCull::setFrustum(const float & horizontalApeture,
 				clipFar,
 				m_space);
 }
+
+void ViewCull::setOrthoFrustum(const float & orthoWidth,
+			const float & aspectRatio,
+			const float & clipNear,
+			const float & clipFar)
+{
+	m_hfov = -1.f;
+	m_aspectRatio = aspectRatio;
+	m_farClip = clipFar;
+	m_detailWidth = orthoWidth * .05f;
+	m_frustum.setOrtho(orthoWidth * .5f, 
+				m_aspectRatio,
+				clipNear,
+				clipFar,
+				m_space);	
+}
 	
 Matrix44F *	ViewCull::cameraSpaceP()
 { return &m_space; }
@@ -84,4 +100,7 @@ bool ViewCull::cullByLod(const float & localZ, const float & radius,
 	if(details < lowLod || details >= highLod) return true;
 	return false;
 }
+
+bool ViewCull::isPerspective() const
+{ return m_hfov > 0.f; }
 //:~

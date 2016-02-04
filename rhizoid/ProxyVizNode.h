@@ -106,6 +106,7 @@ private:
 	MMatrix worldizeSpace(const MMatrix & s) const;
 	void useActiveView();
 	void updateViewFrustum(MObject & node);
+	void updateViewFrustum(const MDagPath & cameraPath);
 	
 	MObject fDisplayMesh;
 	

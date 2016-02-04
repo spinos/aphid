@@ -171,11 +171,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	MPlug mutzplug( thisNode, azmultiplier);
 	setScaleMuliplier(mutzplug.asFloat(), 2);	
 	
+	MDagPath cameraPath;
+	view.getCamera(cameraPath);
 	if(m_hasCamera) updateViewFrustum(thisNode);
-	
+	else updateViewFrustum(cameraPath);
+
 	_viewport = view;
 	fHasView = 1;
-
+	
 	view.beginGL();
 	
 	initDepthCull();
@@ -674,7 +677,6 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MFnMatrixData matdata(matobj);
     MMatrix cameramat = matdata.matrix(); 
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
-	
 	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat.inverse() );
 	
 	MPlug hfaplg(thisNode, ahapeture);
@@ -685,6 +687,28 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	float fl = flplg.asFloat();
 	
 	setFrustum(hfa, vfa, fl, -10.f, -250000.f);
+}
+
+void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
+{
+	MMatrix cameraMat = cameraPath.inclusiveMatrix();
+	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameraMat);
+	MMatrix cameraInvMat = cameraPath.inclusiveMatrixInverse();
+	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameraInvMat);
+	
+	MFnCamera fcam(cameraPath.node() );
+	if(fcam.isOrtho() ) {
+		float orthoW = fcam.orthoWidth();
+		float asp = fcam.aspectRatio();
+		setOrthoFrustum(orthoW, asp, -10.f, -250000.f);
+		
+	} else {
+		float hfa = fcam.horizontalFilmAperture();
+		float vfa = fcam.verticalFilmAperture();
+		float fl = fcam.focalLength();
+	
+		setFrustum(hfa, vfa, fl, -10.f, -250000.f);
+	}
 }
 
 void ProxyViz::beginPickInView()
