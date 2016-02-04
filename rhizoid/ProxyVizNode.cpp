@@ -17,6 +17,10 @@
 #include <AHelper.h>
 #include <fstream> 
 
+#ifdef WIN32
+#include <gExtension.h>
+#endif	
+
 MTypeId ProxyViz::id( 0x95a19e );
 MObject ProxyViz::abboxminx;
 MObject ProxyViz::abboxminy;
@@ -100,8 +104,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		if(!m_toCheckVisibility) {
 			MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
 			MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
-			updateGround(groundMeshArray, groundSpaceArray );
-			moveWithGround();
+/// in case no ground is connected
+            if(updateGround(groundMeshArray, groundSpaceArray ))
+                moveWithGround();
 		}
 		
 		if(!m_hasParticle) {

@@ -292,7 +292,7 @@ void ModifyForest::moveWithGround()
 	activeGround()->deselect();
 	selection()->deselect();
 	if(numPlants() < 1) return;
-	if(ground()->isEmpty() ) return;
+	if(isGroundEmpty() ) return;
 	
 	grid()->begin();
 	while(!grid()->end() ) {

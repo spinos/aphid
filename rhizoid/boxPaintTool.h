@@ -1,3 +1,6 @@
+#ifndef BOXPAINTTOOL_H
+#define BOXPAINTTOOL_H
+
 /*
  *  proxyPaintTool.h
  *  hair
@@ -99,3 +102,5 @@ private:
 	
 	int _seed;
 };
+#endif        //  #ifndef BOXPAINTTOOL_H
+

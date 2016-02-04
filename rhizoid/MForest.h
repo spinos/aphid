@@ -35,7 +35,7 @@ public:
 	void saveExternal(const char* filename);
 	
 protected:
-    void updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
+    bool updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
 	void drawSolidMesh(MItMeshPolygon & iter);
 	void drawWireMesh(MItMeshPolygon & iter);
 	static void matrix_as_array(const MMatrix &space, double *mm);

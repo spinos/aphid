@@ -38,7 +38,7 @@ const Vector3F * AFrustum::v(int idx) const
 { return &m_v[idx]; }
 
 Vector3F AFrustum::X(int idx) const
-{ m_v[idx]; }
+{ return m_v[idx]; }
 
 Vector3F AFrustum::supportPoint(const Vector3F & v, Vector3F * localP) const
 {

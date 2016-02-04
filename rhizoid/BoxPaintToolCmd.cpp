@@ -61,6 +61,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kSaveCacheFlag, kSaveCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kLoadCacheFlag, kLoadCacheFlagLong, MSyntax::kString);
+	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
 	
 	return syntax;
 }

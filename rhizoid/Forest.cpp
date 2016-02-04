@@ -348,4 +348,10 @@ const Vector3F & Forest::selectionCenter() const
 const Vector3F & Forest::selectionNormal() const
 { return m_intersectCtx.m_hitN; }
 
+bool Forest::isGroundEmpty() const
+{
+    if(!m_ground) return true;
+    return m_ground->isEmpty();
+}
+
 }

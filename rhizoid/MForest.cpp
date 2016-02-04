@@ -13,9 +13,13 @@ m_randGroup(NULL)
 MForest::~MForest()
 { if(m_randGroup) delete[] m_randGroup; }
 
-void MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray)
+bool MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray)
 {
     const unsigned nslots = meshDataArray.elementCount();
+    if(nslots<1) {
+        AHelper::Info<int>("MForest error no ground connected", 0);
+        return false;
+    }
     if(numGroundMeshes() > 0 && numGroundMeshes() != nslots)
         clearGroundMeshes();
     
@@ -38,11 +42,12 @@ void MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & 
     }
     
     if(numGroundMeshes() < 1) {
-        AHelper::Info<int>("MForest no ground", 0);
-        return;
+        AHelper::Info<int>("MForest error no ground", 0);
+        return false;
     }
     
     buildGround();
+    return true;
 }
 
 void MForest::updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx)

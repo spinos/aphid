@@ -1,3 +1,6 @@
+#ifndef BOXPAINTCONTEXTCMD_H
+#define BOXPAINTCONTEXTCMD_H
+
 /*
  *  BoxPaintContextCmd.h
  *  proxyPaint
@@ -21,3 +24,4 @@ public:
 protected:
     proxyPaintContext*		fContext;
 };
+#endif        //  #ifndef BOXPAINTCONTEXTCMD_H

@@ -1,3 +1,6 @@
+#ifndef BOXPAINTTOOLCMD_H
+#define BOXPAINTTOOLCMD_H
+
 /*
  *  BoxPaintToolCmd.h
  *  proxyPaint
@@ -115,3 +118,5 @@ private:
 
 const char helpString[] =
 			"Select a proxy viz and a ground plane to paint on.";
+#endif        //  #ifndef BOXPAINTTOOLCMD_H
+

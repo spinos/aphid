@@ -101,6 +101,8 @@ protected:
     const Vector3F & selectionCenter() const;
     const Vector3F & selectionNormal() const;
     
+    bool isGroundEmpty() const;
+    
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
