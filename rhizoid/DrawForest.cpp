@@ -142,7 +142,7 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 
 void DrawForest::drawPlants()
 {
-	glDepthFunc(GL_LEQUAL);
+    glDepthFunc(GL_LEQUAL);
 	const GLfloat grayDiffuseMaterial[] = {0.47f, 0.46f, 0.45f};
 	// const GLfloat greenDiffuseMaterial[] = {0.33f, 0.53f, 0.37f};
 	glPushAttrib(GL_LIGHTING_BIT);
@@ -151,9 +151,13 @@ void DrawForest::drawPlants()
 		
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
+	const float margin = g->gridSize() * .1f;
 	g->begin();
 	while(!g->end() ) {
-		drawPlants(g->value() );
+        BoundingBox cellBox = g->coordToGridBBox(g->key() );
+        cellBox.expand(margin);
+        if(!cullByFrustum(cellBox ) )
+            drawPlants(g->value() );
 		g->next();
 	}
 	

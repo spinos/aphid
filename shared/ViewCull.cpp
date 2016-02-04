@@ -76,6 +76,13 @@ bool ViewCull::cullByFrustum(const Vector3F & center, const float & radius) cons
 	return true;
 }
 
+bool ViewCull::cullByFrustum(const BoundingBox & box) const
+{
+    if( gjk::Intersect1<AFrustum, BoundingBox>::Evaluate(m_frustum, box) )
+		return false;
+    return true; 
+}
+
 void ViewCull::ndc(const Vector3F & cameraP, float & coordx, float & coordy) const
 {
 	float d = -cameraP.z;

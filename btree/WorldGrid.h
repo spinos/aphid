@@ -47,7 +47,7 @@ public:
 	const BoundingBox coordToGridBBox(const Coord3 & c) const;
 	const BoundingBox & boundingBox() const;
 
-	float gridSize() const;
+	const float & gridSize() const;
 
 /// relocate value into different cell	
 	ValueType * displace(ValueType * v, const Vector3F & pcur, const Vector3F & pref);
@@ -111,7 +111,7 @@ const BoundingBox & WorldGrid<ChildType, ValueType>::boundingBox() const
 { return m_bbox; }
 
 template<typename ChildType, typename ValueType>
-float WorldGrid<ChildType, ValueType>::gridSize() const
+const float & WorldGrid<ChildType, ValueType>::gridSize() const
 { return m_gridSize; }
 
 template<typename ChildType, typename ValueType>

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <AFrustum.h>
+#include <BoundingBox.h>
 
 class ViewCull {
 	
@@ -44,6 +45,7 @@ public:
 	const AFrustum & frustum() const;
 	
 	bool cullByFrustum(const Vector3F & center, const float & radius) const;
+	bool cullByFrustum(const BoundingBox & box) const;
 	bool cullByLod(const float & localZ, const float & radius,
 					const float & lowLod, const float & highLod) const;
 					
