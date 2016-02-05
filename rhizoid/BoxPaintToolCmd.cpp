@@ -31,6 +31,8 @@
 #define kLoadCacheFlagLong "-loadCacheFile"
 #define kVoxFlag "-vxl" 
 #define kVoxFlagLong "-voxelize"
+#define kConnectVoxFlag "-cvx" 
+#define kConnectVoxFlagLong "-connectVoxel"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -57,6 +59,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kLoadCacheFlag, kLoadCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
 	syntax.addFlag(kVoxFlag, kVoxFlagLong);
+	syntax.addFlag(kConnectVoxFlag, kConnectVoxFlagLong);
 	
 	return syntax;
 }
@@ -69,13 +72,15 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	
 	if(m_operation == opUnknown) return status;
 	
-	if(m_operation == opConnectGround) return connectSelected();
+	if(m_operation == opConnectGround) return connectGroundSelected();
 	
 	if(m_operation == opSaveCache) return saveCacheSelected();
 			
 	if(m_operation == opLoadCache) return loadCacheSelected();
 	
 	if(m_operation == opVoxelize) return voxelizeSelected();
+	
+	if(m_operation == opConnectVoxel) return connectVoxelSelected();
 		
 	ASearchHelper finder;
 
@@ -160,6 +165,9 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 	
 	if (argData.isFlagSet(kVoxFlag))
 		m_operation = opVoxelize;
+		
+	if (argData.isFlagSet(kConnectVoxFlag))
+		m_operation = opConnectVoxel;
 	
 	if (argData.isFlagSet(kSaveCacheFlag)) {
 		status = argData.getFlagArgument(kSaveCacheFlag, 0, m_cacheName);
@@ -183,24 +191,13 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 }
 
 MStatus proxyPaintTool::finalize()
-//
-// Description
-//     Command is finished, construct a string for the command
-//     for journalling.
-//
 {
 	MArgList command;
 	command.addArg(commandString());
-	//command.addArg(MString(kOptFlag));
-	//command.addArg((int)opt);
-	//command.addArg(MString(kNSegFlag));
-	//command.addArg((int)nseg);
-	//command.addArg(MString(kLSegFlag));
-	//command.addArg((float)lseg);
 	return MPxToolCommand::doFinalize( command );
 }
 
-MStatus proxyPaintTool::connectSelected()
+MStatus proxyPaintTool::connectGroundSelected()
 {
 	MSelectionList sels;
  	MGlobal::getActiveSelectionList( sels );
@@ -250,6 +247,48 @@ MStatus proxyPaintTool::connectSelected()
 	return stat;
 }
 
+MStatus proxyPaintTool::connectVoxelSelected()
+{
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 2) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select proxyExample(s) and a viz to connect");
+		return MS::kFailure;
+	}
+	
+	MStatus stat;
+	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
+	if(!stat) return stat;
+	
+	MFnDependencyNode fviz(vizobj, &stat);
+	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+	
+	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	pViz->setEnableCompute(false);
+	
+	MItSelectionList voxIter(sels, MFn::kPluginLocatorNode, &stat);
+	
+	for(;!voxIter.isDone(); voxIter.next() ) {
+		MObject vox;
+		voxIter.getDependNode(vox);
+		
+		MFnDependencyNode fvox(vox, &stat);
+		if(!stat) continue;
+		
+		if(fviz.typeName() != "proxyExample") continue;
+			
+		AHelper::Info<MString>("proxyPaintTool found proxyExample", fvox.name() );
+		unsigned islot;
+		if(connectVoxToViz(vox, vizobj, islot) )
+			checkOutputConnection(vizobj, "ov1");
+	}
+	
+	pViz->setEnableCompute(true);
+	
+	return stat;
+}
+
 bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsigned & slot)
 {
 	MFnDependencyNode fmesh(meshObj);
@@ -275,6 +314,35 @@ bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsig
 	
 	MDGModifier modif;
 	modif.connect(srcMesh, dst );
+	modif.doIt();
+	return true;
+}
+
+bool proxyPaintTool::connectVoxToViz(MObject & voxObj, MObject & vizObj, unsigned & slot)
+{
+	MFnDependencyNode fvox(voxObj);
+	MPlug srcPlug = fvox.findPlug("ov");
+	AHelper::Info<MString>("check", srcPlug.name() );
+	
+	MStatus stat;
+	MPlugArray connected;
+	srcPlug.connectedTo ( connected , false, true, &stat );
+	unsigned i = 0;
+	for(;i<connected.length();++i) {
+		if(connected[i].node() == vizObj) {
+			AHelper::Info<MString>("already connected to", connected[i].name() );
+			return false;
+		}
+	}
+	
+	MFnDependencyNode fviz(vizObj);
+	MPlug inExample = fviz.findPlug("ixmp");
+	slot = inExample.numElements();
+	MPlug dstPlug = inExample.elementByLogicalIndex(slot);
+	AHelper::Info<MString>("connect to", dstPlug.name() );
+	
+	MDGModifier modif;
+	modif.connect(srcPlug, dstPlug );
 	modif.doIt();
 	return true;
 }
@@ -466,5 +534,9 @@ MObject proxyPaintTool::createViz(const MString & typName,
 	modif.renameNode(viz, vizName);
 	modif.doIt();
 	return viz;
+}
+
+void proxyPaintTool::checkOutputConnection(MObject & node, const MString & outName)
+{
 }
 //:~

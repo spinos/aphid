@@ -36,8 +36,10 @@ public:
 	MStatus			finalize();
 
 private:
-	MStatus connectSelected();
+	MStatus connectGroundSelected();
+	MStatus connectVoxelSelected();
 	bool connectMeshToViz(MObject & meshObj, MObject & vizObj, unsigned & slot);
+	bool connectVoxToViz(MObject & voxObj, MObject & vizObj, unsigned & slot);
 	void connectTransform(MObject & transObj, MObject & vizObj, const unsigned & slot);
 	MStatus saveCacheSelected();
 	MStatus loadCacheSelected();
@@ -46,6 +48,7 @@ private:
 							MStatus & stat);
 	MStatus voxelizeSelected();
 	MObject createViz(const MString & typName, const MString & transName);
+	void checkOutputConnection(MObject & node, const MString & outName);
 	
 private:
 	enum Operation {
@@ -57,7 +60,8 @@ private:
 		opConnectGround = 5,
 		opSaveCache = 6,
 		opLoadCache = 7,
-		opVoxelize = 8
+		opVoxelize = 8,
+		opConnectVoxel = 9
 	};
 	
 	Operation m_operation;
