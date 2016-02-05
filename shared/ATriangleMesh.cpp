@@ -172,9 +172,17 @@ bool ATriangleMesh::intersectSphere(unsigned icomponent, const Vector3F & center
 	A.x()[1] = p[v[1]];
 	A.x()[2] = p[v[2]];
 	gjk::Sphere B(center, radius );
-	if(! gjk::Intersect1<gjk::TriangleSet, gjk::Sphere>::Evaluate(A, B) )
-		return false;
-	
-	return true;
+	return gjk::Intersect1<gjk::TriangleSet, gjk::Sphere>::Evaluate(A, B);
+}
+
+bool ATriangleMesh::intersectBox(unsigned icomponent, const BoundingBox & box)
+{
+	Vector3F * p = points();
+	unsigned * v = triangleIndices(icomponent);
+	gjk::TriangleSet A;
+	A.x()[0] = p[v[0]];
+	A.x()[1] = p[v[1]];
+	A.x()[2] = p[v[2]];
+	return gjk::Intersect1<gjk::TriangleSet, BoundingBox>::Evaluate(A, box);
 }
 //:~

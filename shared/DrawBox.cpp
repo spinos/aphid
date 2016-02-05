@@ -134,6 +134,33 @@ const float DrawBox::UnitBoxTriangle[36][3] = {
 DrawBox::DrawBox() {}
 DrawBox::~DrawBox() {}
 
+void DrawBox::drawWireBox(const float * center, const float & scale) const
+{
+	glPushMatrix();
+	glTranslatef(center[0], center[1], center[2]);
+	glScalef(scale, scale, scale);
+	glBegin(GL_LINES);
+	for(int i=0;i<24;i++) {
+        glVertex3fv(&UnitBoxLine[i][0]);
+    }
+	glEnd();
+	glPopMatrix();
+}
+
+void DrawBox::drawSolidBox(const float * center, const float & scale) const
+{
+	glPushMatrix();
+	glTranslatef(center[0], center[1], center[2]);
+	glScalef(scale, scale, scale);
+	glBegin(GL_TRIANGLES);
+	for(int i=0;i<36;i++) {
+		glNormal3fv(&UnitBoxNormal[i][0]);
+        glVertex3fv(&UnitBoxTriangle[i][0]);
+    }
+	glEnd();
+	glPopMatrix();
+}
+
 void DrawBox::drawWireBox(const float * center, const float * scale) const 
 {
 	glPushMatrix();

@@ -24,6 +24,7 @@ public:
 	virtual bool intersectRay(unsigned icomponent, const Ray * r,
 					Vector3F & hitP, Vector3F & hitN, float & hitDistance);
 	virtual bool intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius);
+	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
 	const unsigned numTriangles() const;
 	
 	void create(unsigned np, unsigned nt);

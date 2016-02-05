@@ -19,6 +19,8 @@ public:
 	
 protected:
 
+	void drawWireBox(const float * center, const float & scale) const;
+	void drawSolidBox(const float * center, const float & scale) const;
 	void drawWireBox(const float * center, const float * scale) const;
 	void drawSolidBox(const float * center, const float * scale) const;
 	void drawBoundingBox(const BoundingBox * box) const;

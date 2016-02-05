@@ -6,8 +6,8 @@
 
 CartesianGrid::CartesianGrid()
 {
-    sdb::TreeNode::MaxNumKeysPerNode = 512;
-	sdb::TreeNode::MinNumKeysPerNode = 32;
+    sdb::TreeNode::MaxNumKeysPerNode = 128;
+	sdb::TreeNode::MinNumKeysPerNode = 16;
 	m_cellHash = new sdb::CellHash;
 }
 

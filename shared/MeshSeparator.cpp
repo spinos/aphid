@@ -13,8 +13,8 @@
 
 MeshSeparator::MeshSeparator() 
 {
-	sdb::TreeNode::MaxNumKeysPerNode = 256;
-	sdb::TreeNode::MinNumKeysPerNode = 32;
+	sdb::TreeNode::MaxNumKeysPerNode = 128;
+	sdb::TreeNode::MinNumKeysPerNode = 16;
 }
 
 MeshSeparator::~MeshSeparator() {}
