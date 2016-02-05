@@ -41,7 +41,11 @@ private:
 	void connectTransform(MObject & transObj, MObject & vizObj, const unsigned & slot);
 	MStatus saveCacheSelected();
 	MStatus loadCacheSelected();
-	MObject getSelectedViz(const MSelectionList & sels, MStatus & stat);
+	MObject getSelectedViz(const MSelectionList & sels, 
+							const MString & typName,
+							MStatus & stat);
+	MStatus voxelizeSelected();
+	MObject createViz(const MString & typName, const MString & transName);
 	
 private:
 	enum Operation {
@@ -52,7 +56,8 @@ private:
 		opGetPick = 4,
 		opConnectGround = 5,
 		opSaveCache = 6,
-		opLoadCache = 7
+		opLoadCache = 7,
+		opVoxelize = 8
 	};
 	
 	Operation m_operation;

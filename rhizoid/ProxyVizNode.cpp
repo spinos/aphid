@@ -15,7 +15,6 @@
 #include <PseudoNoise.h>
 #include <EnvVar.h>
 #include <AHelper.h>
-#include <fstream> 
 
 #ifdef WIN32
 #include <gExtension.h>
@@ -476,11 +475,7 @@ MStatus ProxyViz::initialize()
 	attributeAffects(abboxmaxz, outValue);
 	attributeAffects(ainmesh, outValue);
 	attributeAffects(outPositionPP, outValue);
-	//attributeAffects(alodgatehigh, outValue);
-	//attributeAffects(alodgatelow, outValue);
-	//attributeAffects(ainstanceId, outValue);
-	//attributeAffects(aconvertPercentage, outValue);
-
+	
 	return MS::kSuccess;
 }
 

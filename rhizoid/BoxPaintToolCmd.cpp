@@ -8,8 +8,12 @@
  */
 
 #include "BoxPaintToolCmd.h"
+#include <maya/MDagModifier.h>
 #include "ProxyVizNode.h"
+#include "ExampVizNode.h"
 #include <ASearchHelper.h>
+#include <ATriangleMesh.h>
+#include <KdIntersection.h>
 
 #define kBeginPickFlag "-bpk" 
 #define kBeginPickFlagLong "-beginPick"
@@ -25,6 +29,8 @@
 #define kSaveCacheFlagLong "-saveCacheFile"
 #define kLoadCacheFlag "-lcf" 
 #define kLoadCacheFlagLong "-loadCacheFile"
+#define kVoxFlag "-vxl" 
+#define kVoxFlagLong "-voxelize"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -50,6 +56,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kSaveCacheFlag, kSaveCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kLoadCacheFlag, kLoadCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
+	syntax.addFlag(kVoxFlag, kVoxFlagLong);
 	
 	return syntax;
 }
@@ -67,6 +74,8 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	if(m_operation == opSaveCache) return saveCacheSelected();
 			
 	if(m_operation == opLoadCache) return loadCacheSelected();
+	
+	if(m_operation == opVoxelize) return voxelizeSelected();
 		
 	ASearchHelper finder;
 
@@ -149,6 +158,9 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 	if (argData.isFlagSet(kConnectGroundFlag))
 		m_operation = opConnectGround;
 	
+	if (argData.isFlagSet(kVoxFlag))
+		m_operation = opVoxelize;
+	
 	if (argData.isFlagSet(kSaveCacheFlag)) {
 		status = argData.getFlagArgument(kSaveCacheFlag, 0, m_cacheName);
 		if (!status) {
@@ -199,7 +211,7 @@ MStatus proxyPaintTool::connectSelected()
 	}
 	
 	MStatus stat;
-	MObject vizobj = getSelectedViz(sels, stat);
+	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
@@ -294,7 +306,7 @@ MStatus proxyPaintTool::saveCacheSelected()
 		return MS::kFailure;
 	}
 	
-	MObject vizobj = getSelectedViz(sels, stat);
+	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
@@ -317,7 +329,7 @@ MStatus proxyPaintTool::loadCacheSelected()
 		return MS::kFailure;
 	}
 	
-	MObject vizobj = getSelectedViz(sels, stat);
+	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
@@ -329,7 +341,10 @@ MStatus proxyPaintTool::loadCacheSelected()
 	return stat;
 }
 
-MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels, MStatus & stat)
+// "proxyViz" or "proxyExample"
+MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels, 
+									const MString & typName,
+									MStatus & stat)
 {
 	MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
     MObject vizobj;
@@ -337,12 +352,119 @@ MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels, MStatus & st
 	MFnDependencyNode fviz(vizobj, &stat);
     if(stat) {
         MFnDependencyNode fviz(vizobj);
-		if(fviz.typeName() != "proxyViz") stat = MS::kFailure;
+		if(fviz.typeName() != typName) stat = MS::kFailure;
 	}
 	
 	if(!stat )
 		AHelper::Info<int>("proxyPaintTool error no viz node selected", 0);
 		
 	return vizobj;
-}	
+}
+
+MStatus proxyPaintTool::voxelizeSelected()
+{
+	MStatus stat;
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) to voxelize");
+		return MS::kFailure;
+	}
+	
+	MObject vizobj = getSelectedViz(sels, "proxyExample", stat);
+	if(!stat) {
+		vizobj = createViz("proxyExample", "proxyExample");
+		if(vizobj.isNull()) {
+			MGlobal::displayWarning("proxyPaintTool cannot create example viz");
+			return MS::kFailure;
+		}
+	}
+	
+	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		return MS::kFailure;
+	}
+	
+	std::vector<ATriangleMesh * > meshes;
+	for(;!meshIter.isDone(); meshIter.next() ) {
+		MObject mesh;
+		meshIter.getDependNode(mesh);
+		
+		MFnMesh fmesh(mesh, &stat);
+		if(!stat) continue;
+			
+		AHelper::Info<MString>("proxyPaintTool voxelize add mesh", fmesh.name() );
+	
+		MDagPath meshPath;
+		meshIter.getDagPath(meshPath);
+		
+		MMatrix wm = AHelper::GetWorldTransformMatrix(meshPath);
+		
+		MPointArray ps;
+		fmesh.getPoints(ps);
+		
+		const unsigned nv = ps.length();
+		unsigned i = 0;
+		for(;i<nv;i++) ps[i] *= wm;
+		
+		MIntArray triangleCounts, triangleVertices;
+		fmesh.getTriangles(triangleCounts, triangleVertices);
+		
+		ATriangleMesh * trimesh = new ATriangleMesh;
+		trimesh->create(nv, triangleVertices.length()/3);
+		
+		Vector3F * cvs = trimesh->points();
+		unsigned * ind = trimesh->indices();
+		for(i=0;i<nv;i++) cvs[i].set(ps[i].x, ps[i].y, ps[i].z);
+		for(i=0;i<triangleVertices.length();i++) ind[i] = triangleVertices[i];
+		
+		meshes.push_back(trimesh);
+	}
+	
+	if(meshes.size() < 1) {
+		MGlobal::displayWarning("proxyPaintTool no mesh added");
+		return MS::kFailure;
+	}
+	
+	AHelper::Info<unsigned>("proxyPaintTool voxelize n mesh", meshes.size() );
+	
+	KdTree::MaxBuildLevel = 24;
+	KdTree::NumPrimitivesInLeafThreashold = 24;
+	
+	KdIntersection tree;
+	std::vector<ATriangleMesh * >::iterator it = meshes.begin();
+	for(;it!= meshes.end();++it)
+		tree.addGeometry(*it);
+		
+	tree.create();
+	
+	AHelper::Info<BoundingBox>("proxyPaintTool bounding", tree.getBBox());
+	
+	MFnDependencyNode fviz(vizobj, &stat);
+	AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
+		
+	ExampViz* pViz = (ExampViz*)fviz.userNode();
+	pViz->voxelize(&tree );
+	
+	it = meshes.begin();
+	for(;it!= meshes.end();++it) delete *it;
+	meshes.clear();
+	return stat;
+}
+
+MObject proxyPaintTool::createViz(const MString & typName,
+									const MString & transName)
+{
+	MDagModifier modif;
+	MObject trans = modif.createNode("transform");
+	modif.renameNode (trans, transName);
+	MObject viz = modif.createNode(typName, trans);
+	modif.doIt();
+	MString vizName = MFnDependencyNode(trans).name() + "Shape";
+	modif.renameNode(viz, vizName);
+	modif.doIt();
+	return viz;
+}
 //:~
