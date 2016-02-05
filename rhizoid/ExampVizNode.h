@@ -12,6 +12,7 @@
 #include <maya/MPlug.h>
 #include <maya/MDataBlock.h>
 #include <maya/M3dView.h>
+#include <maya/MPointArray.h>
 
 class ExampViz : public MPxLocatorNode, public ExampVox
 {
@@ -38,6 +39,9 @@ public:
 	static  MObject         abboxmaxv;
 	static  MObject         ancells;
 	static  MObject         acellBuf;
+	static MObject adrawColorR;
+	static MObject adrawColorG;
+	static MObject adrawColorB;
 	static MObject adrawColor;
 	static MObject outValue;
 	static	MTypeId		id;
@@ -46,5 +50,7 @@ public:
 	
 private:
 	void loadBoxes(MObject & node);
+	void loadBoxes(MDataBlock & data);
+	void setBoxes(const MPointArray & src, const unsigned & num);
 	
 };

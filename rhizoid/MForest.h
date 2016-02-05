@@ -58,7 +58,8 @@ protected:
 	void saveParticles(MVectorArray & positions,
 						MVectorArray & rotations,
 						MVectorArray & scales);
-					
+	void updateExamples(MArrayDataHandle & dataArray);	
+				
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
     void saveCell(sdb::Array<int, sdb::Plant> *cell,

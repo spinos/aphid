@@ -84,6 +84,8 @@ public:
 	static MObject aplantIdCache;
 	static MObject aplantTriangleIdCache;
 	static MObject aplantTriangleCoordCache;
+	static MObject ainexamp;
+	static MObject outValue1;
 	static MObject outValue;
 	static	MTypeId		id;
 	

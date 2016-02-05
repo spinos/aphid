@@ -30,8 +30,8 @@ protected:
 	void drawWireGrid();
 	float * diffuseMaterialColV();
 	float * boxCenterSizeF4();
+	bool setNumBoxes(unsigned n);
 	const unsigned & numBoxes() const;
-	void setNumBoxes(unsigned n);
 	
 private:
 

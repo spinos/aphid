@@ -52,6 +52,8 @@ MObject ProxyViz::aplantTransformCache;
 MObject ProxyViz::aplantIdCache;
 MObject ProxyViz::aplantTriangleIdCache;
 MObject ProxyViz::aplantTriangleCoordCache;
+MObject ProxyViz::ainexamp;
+MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
 m_toSetGrid(true), 
@@ -154,6 +156,17 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		outputHandle.set( result );
 		block.setClean(plug);
     }
+	if(plug == outValue1) {
+		
+		MArrayDataHandle hArray = block.inputArrayValue(ainexamp);
+		updateExamples(hArray);
+
+		float result = 91.f;
+
+		MDataHandle outputHandle = block.outputValue( outValue1 );
+		outputHandle.set( result );
+		block.setClean(plug);
+	}
 
 	return MS::kSuccess;
 }
@@ -365,6 +378,11 @@ MStatus ProxyViz::initialize()
 	numFn.setWritable(false);
 	addAttribute(outValue);
 	
+	outValue1 = numFn.create( "outValue1", "ov1", MFnNumericData::kFloat );
+	numFn.setStorable(false);
+	numFn.setWritable(false);
+	addAttribute(outValue1);
+	
 	MFnTypedAttribute   stringAttr;
 	acachename = stringAttr.create( "cachePath", "cp", MFnData::kString );
  	stringAttr.setStorable(true);
@@ -466,6 +484,13 @@ MStatus ProxyViz::initialize()
 											&stat );
     typedAttrFn.setStorable(true);
 	addAttribute(aplantTriangleCoordCache);
+	
+	ainexamp = typedAttrFn.create("inExample", "ixmp", MFnData::kPlugin);
+	typedAttrFn.setStorable(false);
+	typedAttrFn.setConnectable(true);
+	typedAttrFn.setArray(true);
+	addAttribute(ainexamp);
+	attributeAffects(ainexamp, outValue1);
 	
 	attributeAffects(abboxminx, outValue);
 	attributeAffects(abboxmaxx, outValue);

@@ -77,9 +77,15 @@ const unsigned & ExampVox::numBoxes() const
 float * ExampVox::boxCenterSizeF4()
 { return m_boxCenterSizeF4; }
 
-void ExampVox::setNumBoxes(unsigned n)
+bool ExampVox::setNumBoxes(unsigned n)
 {
+	if(n<1) return false;
+	if(n<=m_numBoxes) {
+		m_numBoxes = n;
+		return false;
+	}
 	m_numBoxes = n;
 	if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4;
 	m_boxCenterSizeF4 = new float[n * 4];
+	return true;
 }

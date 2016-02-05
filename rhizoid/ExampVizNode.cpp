@@ -11,8 +11,10 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnPointArrayData.h>
+#include <maya/MFloatVector.h>
 #include <BoundingBox.h>
 #include <AHelper.h>
+#include <ExampData.h>
 
 #ifdef WIN32
 #include <gExtension.h>
@@ -24,6 +26,9 @@ MObject ExampViz::abboxmaxv;
 MObject ExampViz::ancells;
 MObject ExampViz::acellBuf;
 MObject ExampViz::adrawColor;
+MObject ExampViz::adrawColorR;
+MObject ExampViz::adrawColorG;
+MObject ExampViz::adrawColorB;
 MObject ExampViz::outValue;
 
 ExampViz::ExampViz()
@@ -36,10 +41,18 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == outValue ) {
 	
-		float result = 1.f;
+		loadBoxes(block);
+		
+		MFnPluginData fnPluginData;
+		MStatus status;
+		MObject newDataObject = fnPluginData.create(ExampData::id, &status);
+		
+		ExampData * pData = (ExampData *) fnPluginData.data(&status);
+		
+		if(pData) pData->setDesc(this);
 
 		MDataHandle outputHandle = block.outputValue( outValue );
-		outputHandle.set( result );
+		outputHandle.set( pData );
 		block.setClean(plug);
     }
 
@@ -52,12 +65,14 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 {
 	const BoundingBox & bbox = geomBox();
 	MObject selfNode = thisMObject();
-	MPlug colPlug(selfNode, adrawColor);
-	MObject col;
-	colPlug.getValue(col);
-	MFnNumericData colFn(col);
+	MPlug rPlug(selfNode, adrawColorR);
+	MPlug gPlug(selfNode, adrawColorG);
+	MPlug bPlug(selfNode, adrawColorB);
+	
 	float * diffCol = diffuseMaterialColV();
-	colFn.getData(diffCol[0], diffCol[1], diffCol[2]);
+	diffCol[0] = rPlug.asFloat();
+	diffCol[1] = gPlug.asFloat();
+	diffCol[2] = bPlug.asFloat();
 	
 	if(numBoxes() < 1) loadBoxes(selfNode);
 		
@@ -107,7 +122,25 @@ MStatus ExampViz::initialize()
 	
 	MStatus			 stat;
 	
-	adrawColor = numFn.createColor( "dspColor", "dspc" );
+	adrawColorR = numFn.create( "dspColorR", "dspr", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.47f);
+	addAttribute(adrawColorR);
+	
+	adrawColorG = numFn.create( "dspColorG", "dspg", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.46f);
+	addAttribute(adrawColorG);
+	
+	adrawColorB = numFn.create( "dspColorB", "dspb", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.45f);
+	addAttribute(adrawColorB);
+	
+	adrawColor = numFn.create( "dspColor", "dspc", adrawColorR, adrawColorG, adrawColorB );
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setUsedAsColor(true);
@@ -128,9 +161,9 @@ MStatus ExampViz::initialize()
 	numFn.setDefault(1.f, 1.f, 1.f);
 	addAttribute(abboxmaxv);
 	
-	outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
-	numFn.setStorable(false);
-	numFn.setWritable(false);
+	outValue = typedFn.create( "outValue", "ov", MFnData::kPlugin );
+	typedFn.setStorable(false);
+	typedFn.setWritable(false);
 	addAttribute(outValue);
 	
 	MPointArray defaultPntArray;
@@ -143,6 +176,11 @@ MStatus ExampViz::initialize()
     typedFn.setStorable(true);
 	addAttribute(acellBuf);
 	
+	attributeAffects(ancells, outValue);
+	attributeAffects(acellBuf, outValue);
+	attributeAffects(adrawColorR, outValue);
+	attributeAffects(adrawColorG, outValue);
+	attributeAffects(adrawColorB, outValue);
 	attributeAffects(adrawColor, outValue);
 	return MS::kSuccess;
 }
@@ -213,21 +251,14 @@ void ExampViz::loadBoxes(MObject & node)
 	MFnPointArrayData pntFn(cellObj);
 	MPointArray pnts = pntFn.array();
 	
-	const unsigned n = pnts.length();
-	if(n != numBoxes() ) {
+	unsigned n = pnts.length();
+	if(n < numBoxes() ) {
 		AHelper::Info<unsigned>(" ExampViz error wrong cell data length", n );
 		return;
 	}
 	
-	float * dst = boxCenterSizeF4();
-	unsigned i=0;
-	for(;i<n;++i) {
-		const MPoint & p = pnts[i];
-		dst[i*4] = p.x;
-		dst[i*4+1] = p.y;
-		dst[i*4+2] = p.z;
-		dst[i*4+3] = p.w;
-	}
+	n = numBoxes();
+	setBoxes(pnts, n);
 	
 	BoundingBox bb;
 	
@@ -244,4 +275,63 @@ void ExampViz::loadBoxes(MObject & node)
 	bbmxFn.getData3Float(bb.m_data[3], bb.m_data[4], bb.m_data[5]);
 	
 	setGeomBox(bb);
+	
+	AHelper::Info<unsigned>(" ExampViz load n cells", n );
+}
+
+void ExampViz::loadBoxes(MDataBlock & data)
+{
+	unsigned nc = data.inputValue(ancells).asInt();
+	if(nc < 1) {
+		AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
+		return;
+	}
+	if(setNumBoxes(nc) ) {
+	
+		MDataHandle pntH = data.inputValue(acellBuf);
+		MFnPointArrayData pntFn(pntH.data());
+		MPointArray pnts = pntFn.array();
+	
+		unsigned n = pnts.length();
+	
+		if(n >= nc) {
+			n = numBoxes();
+			setBoxes(pnts, n);
+		}
+		else {
+			AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
+		}
+	}
+	
+	BoundingBox bb;
+	
+	MDataHandle bbminH = data.inputValue(abboxminv);
+	MFloatVector& vmin = bbminH.asFloatVector();
+	bb.setMin(vmin.x, vmin.y, vmin.z);
+	
+	MDataHandle bbmaxH = data.inputValue(abboxmaxv);
+	MFloatVector& vmax = bbmaxH.asFloatVector();
+	bb.setMax(vmax.x, vmax.y, vmax.z);
+
+	setGeomBox(bb);
+	
+	float * diffCol = diffuseMaterialColV();
+	
+	MFloatVector& c = data.inputValue(adrawColor).asFloatVector();
+	diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
+	
+	AHelper::Info<unsigned>(" ExampViz update n cells", numBoxes() );
+}
+
+void ExampViz::setBoxes(const MPointArray & src, const unsigned & num)
+{
+	float * dst = boxCenterSizeF4();
+	unsigned i=0;
+	for(;i<num;++i) {
+		const MPoint & p = src[i];
+		dst[i*4] = p.x;
+		dst[i*4+1] = p.y;
+		dst[i*4+2] = p.z;
+		dst[i*4+3] = p.w;
+	}
 }

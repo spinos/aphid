@@ -4,6 +4,8 @@
 #include <maya/MEulerRotation.h>
 #include <gl_heads.h>
 #include <AHelper.h>
+#include <ExampData.h>
+#include <ExampVox.h>
 #include <fstream> 
 
 MForest::MForest() :
@@ -619,5 +621,24 @@ void MForest::saveParticles(MVectorArray & positions,
 	}
 	
 	AHelper::Info<unsigned>(" save n particles", numActivePlants() );
+}
+
+void MForest::updateExamples(MArrayDataHandle & dataArray)
+{
+	int numSlots = dataArray.elementCount();
+	if(numSlots < 1) return;
+	
+	for(int i=0; i < numSlots; i++) {
+		MObject oslot = dataArray.inputValue().data();
+		MFnPluginData fslot(oslot);
+		ExampData * dslot = (ExampData *)fslot.data();
+		if(dslot) {
+			ExampVox * desc = dslot->getDesc();
+			if(desc) {
+/// todo add example
+			}
+		}
+		dataArray.next();
+	}
 }
 //:~
