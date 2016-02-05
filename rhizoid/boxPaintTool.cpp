@@ -8,14 +8,14 @@
 #include <ASearchHelper.h>
 
 const char helpString[] =
-			"Select a proxy viz and a ground plane to paint on.";
+			"Select a proxy viz to paint on.";
 
 proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),m_pViz(0),
 m_growAlongNormal(0),
-m_createMargin(0.1f),
-m_cullSelection(0), 
+m_createMargin(0.1f), 
 m_multiCreate(0),
-m_groupCount(1)
+m_extractGroupCount(1),
+m_plantType(0)
 {
 	setTitleString ( "proxyPaint Tool" );
 
@@ -196,9 +196,6 @@ void proxyPaintContext::setOperation(unsigned val)
 		case 9:
 			MGlobal::displayInfo("proxyPaint set to select ground faces");
 			break;
-		case 10:
-			MGlobal::displayInfo("proxyPaint set to smooth selected");
-			break;
 		default:
 			;
 	}
@@ -292,21 +289,6 @@ unsigned proxyPaintContext::getGrowAlongNormal() const
 	return m_growAlongNormal;
 }
 
-void proxyPaintContext::setCullSelection(unsigned val)
-{
-	if(val == 1) 
-		MGlobal::displayInfo("proxyPaint enable cull selection");
-	else
-		MGlobal::displayInfo("proxyPaint disable cull selection");
-	m_cullSelection = val;
-	MToolsInfo::setDirtyFlag(*this);
-}
-
-unsigned proxyPaintContext::getCullSelection() const
-{
-	return m_cullSelection;
-}
-
 void proxyPaintContext::setMultiCreate(unsigned val)
 {
 	if(val == 1) 
@@ -325,13 +307,13 @@ unsigned proxyPaintContext::getMultiCreate() const
 void proxyPaintContext::setInstanceGroupCount(unsigned val)
 {
 	MGlobal::displayInfo(MString("proxyPaint will extract transforms into ") + val + " groups");
-	m_groupCount = val;
+	m_extractGroupCount = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 unsigned proxyPaintContext::getInstanceGroupCount() const
 {
-	return m_groupCount;
+	return m_extractGroupCount;
 }
 
 void proxyPaintContext::resize()
@@ -424,7 +406,7 @@ void proxyPaintContext::flood()
 void proxyPaintContext::extractSelected()
 {
 	if(!m_pViz) return;
-	m_pViz->extractActive(m_groupCount);
+	m_pViz->extractActive(m_extractGroupCount);
 }
 
 void proxyPaintContext::erectSelected()
@@ -539,7 +521,12 @@ char proxyPaintContext::getSelectedViz()
 void proxyPaintContext::setCreateMargin(float x)
 { m_createMargin = x; }
 
-float proxyPaintContext::getCreateMargin()
+const float & proxyPaintContext::createMargin()
 { return m_createMargin; }
 
+void proxyPaintContext::setPlantType(int x)
+{ m_plantType = x; }
+
+const int & proxyPaintContext::plantType() const
+{ return m_plantType; }
 //:~

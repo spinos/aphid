@@ -21,9 +21,8 @@ class proxyPaintContext : public MPxContext
 	float m_brushRadius, m_brushWeight;
 	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
 	
-	unsigned mOpt, m_numSeg, m_growAlongNormal;
-	unsigned m_cullSelection, m_multiCreate;
-	int m_groupCount;
+	unsigned mOpt, m_numSeg, m_growAlongNormal, m_multiCreate;
+	int m_extractGroupCount, m_plantType;
 	short					start_x, start_y;
 	short					last_x, last_y;
 
@@ -55,8 +54,6 @@ public:
 	float getBrushWeight() const;
 	void setGrowAlongNormal(unsigned val);
 	unsigned getGrowAlongNormal() const;
-	void setCullSelection(unsigned val);
-	unsigned getCullSelection() const;
 	void setMultiCreate(unsigned val);
 	unsigned getMultiCreate() const;
 	void setInstanceGroupCount(unsigned val);
@@ -66,8 +63,10 @@ public:
 	void cleanup();
 	char getSelectedViz();
 	void setCreateMargin(float x);
-	float getCreateMargin();
-
+	const float & createMargin();
+	void setPlantType(int x);
+	const int & plantType() const;
+	
 private:
 	void resize();
 	void grow();

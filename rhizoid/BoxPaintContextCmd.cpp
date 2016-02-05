@@ -31,12 +31,12 @@
 #define kWriteCacheFlagLong "-writeCache"
 #define kReadCacheFlag "-rch" 
 #define kReadCacheFlagLong "-readCache"
-#define kCullSelectionFlag "-cus" 
-#define kCullSelectionFlagLong "-cullSelection"
 #define kMultiCreateFlag "-mct" 
 #define kMultiCreateFlagLong "-multiCreate"
 #define kInstanceGroupCountFlag "-igc" 
 #define kInstanceGroupCountFlagLong "-instanceGroupCount"
+#define kPlantTypeFlag "-pty"
+#define kPlantTypeFlagLong "-plantType"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -167,16 +167,6 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		fContext->setReadCache(ch);
 	}
 	
-	if (argData.isFlagSet(kCullSelectionFlag)) {
-		unsigned cus;
-		status = argData.getFlagArgument(kCullSelectionFlag, 0, cus);
-		if (!status) {
-			status.perror("cull selection flag parsing failed.");
-			return status;
-		}
-		fContext->setCullSelection(cus);
-	}
-	
 	if (argData.isFlagSet(kMultiCreateFlag)) {
 		unsigned mcr;
 		status = argData.getFlagArgument(kMultiCreateFlag, 0, mcr);
@@ -201,6 +191,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		double margin = 1.0;
 		if (argData.getFlagArgument(kCreateMarginFlag, 0, margin) )
 			fContext->setCreateMargin(margin);
+	}
+	
+	if (argData.isFlagSet(kPlantTypeFlag)) {
+		int pty = 0;
+		if (argData.getFlagArgument(kPlantTypeFlag, 0, pty) )
+			fContext->setPlantType(pty);
 	}
 
 	return MS::kSuccess;
@@ -242,10 +238,6 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		setResult((int)fContext->getGrowAlongNormal());
 	}
 	
-	if (argData.isFlagSet(kCullSelectionFlag)) {
-		setResult((int)fContext->getCullSelection());
-	}
-	
 	if (argData.isFlagSet(kMultiCreateFlag)) {
 		setResult((int)fContext->getMultiCreate());
 	}
@@ -255,7 +247,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	}
 	
 	if (argData.isFlagSet(kCreateMarginFlag))
-		setResult((float)fContext->getCreateMargin() );
+		setResult((float)fContext->createMargin() );
+	
+	if (argData.isFlagSet(kPlantTypeFlag))
+		setResult(fContext->plantType() );
 	
 	return MS::kSuccess;
 }
@@ -335,12 +330,6 @@ MStatus proxyPaintContextCmd::appendSyntax()
 		return MS::kFailure;
 	}
 	
-	stat = mySyntax.addFlag(kCullSelectionFlag, kCullSelectionFlagLong, MSyntax::kUnsigned);
-	if(!stat) {
-		MGlobal::displayInfo("failed to add cull selection arg");
-		return MS::kFailure;
-	}
-	
 	stat = mySyntax.addFlag(kMultiCreateFlag, kMultiCreateFlagLong, MSyntax::kUnsigned);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add multi create arg");
@@ -356,6 +345,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kCreateMarginFlag, kCreateMarginFlagLong, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add marginSize arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kPlantTypeFlag, kPlantTypeFlagLong, MSyntax::kLong);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add plantType arg");
 		return MS::kFailure;
 	}
 	
