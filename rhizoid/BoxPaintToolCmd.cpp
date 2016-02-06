@@ -230,15 +230,15 @@ MStatus proxyPaintTool::connectGroundSelected()
 		MFnDependencyNode fmesh(mesh, &stat);
 		if(!stat) continue;
 			
-		AHelper::Info<MString>("proxyPaintTool found mesh", fmesh.name() );
 		unsigned islot;
 		if(connectMeshToViz(mesh, vizobj, islot)) {
 			MDagPath meshPath;
 			meshIter.getDagPath ( meshPath );
 			meshPath.pop();
-			AHelper::Info<MString>("proxyPaintTool connect transform", meshPath.fullPathName() );
+			AHelper::Info<MString>("proxyPaintTool connect ground", meshPath.fullPathName() );
 			MObject trans = meshPath.node();
 			connectTransform(trans, vizobj, islot);
+			checkOutputConnection(vizobj, "ov");
 		}
 	}
 	
@@ -276,12 +276,13 @@ MStatus proxyPaintTool::connectVoxelSelected()
 		MFnDependencyNode fvox(vox, &stat);
 		if(!stat) continue;
 		
-		if(fviz.typeName() != "proxyExample") continue;
+		if(fvox.typeName() != "proxyExample") continue;
 			
-		AHelper::Info<MString>("proxyPaintTool found proxyExample", fvox.name() );
 		unsigned islot;
-		if(connectVoxToViz(vox, vizobj, islot) )
+		if(connectVoxToViz(vox, vizobj, islot) ) {
+			AHelper::Info<MString>("proxyPaintTool connect example", fvox.name() );
 			checkOutputConnection(vizobj, "ov1");
+		}
 	}
 	
 	pViz->setEnableCompute(true);
@@ -409,22 +410,27 @@ MStatus proxyPaintTool::loadCacheSelected()
 	return stat;
 }
 
-// "proxyViz" or "proxyExample"
 MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels, 
 									const MString & typName,
 									MStatus & stat)
 {
 	MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
-    MObject vizobj;
-    iter.getDependNode(vizobj);
-	MFnDependencyNode fviz(vizobj, &stat);
-    if(stat) {
-        MFnDependencyNode fviz(vizobj);
-		if(fviz.typeName() != typName) stat = MS::kFailure;
+	stat = MS::kFailure;
+	MObject vizobj;
+	for(;!iter.isDone();iter.next() ) {
+		iter.getDependNode(vizobj);
+		MFnDependencyNode fviz(vizobj, &stat);
+		if(stat) {
+			MFnDependencyNode fviz(vizobj);
+			if(fviz.typeName() == typName) {
+				stat = MS::kSuccess;
+				break;
+			}
+		}
 	}
 	
 	if(!stat )
-		AHelper::Info<int>("proxyPaintTool error no viz node selected", 0);
+		AHelper::Info<MString>("proxyPaintTool select no node by type", typName);
 		
 	return vizobj;
 }
@@ -538,5 +544,30 @@ MObject proxyPaintTool::createViz(const MString & typName,
 
 void proxyPaintTool::checkOutputConnection(MObject & node, const MString & outName)
 {
+	MFnDependencyNode fnode(node);
+	MStatus stat;
+	MPlug outPlug = fnode.findPlug(outName, &stat);
+	if(!stat) {
+		AHelper::Info<MString>(" proxyPaintTool error not named plug", outName);
+		return;
+	}
+	
+	if(outPlug.isConnected() ) return;
+	
+	MDagModifier modif;
+	MObject trans = modif.createNode("transform");
+	modif.renameNode (trans, fnode.name() + "_" + outName);
+	modif.doIt();
+	
+	modif.connect(outPlug, MFnDependencyNode(trans).findPlug("tx") );
+	modif.doIt();
+	
+	MFnDagNode fdag(node);
+	MDagPath parentPath;
+	fdag.getPath(parentPath);
+	parentPath.pop();
+	
+	modif.reparentNode(trans, parentPath.node() );
+	modif.doIt();
 }
 //:~
