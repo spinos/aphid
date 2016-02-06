@@ -8,6 +8,7 @@
  */
 
 #include "Forest.h"
+#include "ExampVox.h"
 
 namespace sdb {
 
@@ -23,6 +24,9 @@ Forest::Forest()
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
     m_selectCtx.setRadius(8.f);
+	
+	ExampVox * defE = new ExampVox;
+	addPlantExample(defE);
 }
 
 Forest::~Forest() 
@@ -224,8 +228,8 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 	return false;
 }
 
-float Forest::plantSize(int idx) const
-{ return 1.f; }
+const float & Forest::plantSize(int idx) const
+{ return m_examples[idx]->geomSize(); }
 
 WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
 { return m_grid; }
@@ -353,5 +357,21 @@ bool Forest::isGroundEmpty() const
     if(!m_ground) return true;
     return m_ground->isEmpty();
 }
+
+void Forest::addPlantExample(ExampVox * x)
+{
+	if(m_exampleIndices.find(x) != m_exampleIndices.end() ) return;
+	m_exampleIndices[x] = m_examples.size();
+	m_examples.push_back(x);
+}
+
+ExampVox * Forest::plantExample(unsigned idx)
+{ return m_examples[idx]; }
+
+const ExampVox * Forest::plantExample(unsigned idx) const
+{ return m_examples[idx]; }
+
+//int Forest::activePlantId() const
+//{ return 0; }
 
 }

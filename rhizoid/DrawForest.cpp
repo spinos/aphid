@@ -11,10 +11,10 @@
 #include <gl_heads.h>
 #include <CircleCurve.h>
 #include <DepthCull.h>
+#include <ExampVox.h>
 
 DrawForest::DrawForest() 
-{ 
-	m_defBox = BoundingBox(-1.f, -1.f, -1.f, 1.f, 1.f, 1.f);
+{
 	m_scalbuf[0] = 1.f; 
 	m_scalbuf[1] = 1.f; 
 	m_scalbuf[2] = 1.f; 
@@ -56,55 +56,6 @@ void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 	}
 }
 
-BoundingBox * DrawForest::defBoxP()
-{ return &m_defBox; }
-
-const BoundingBox & DrawForest::defBox() const
-{ return m_defBox; }
-
-void DrawForest::draw_solid_box() const
-{ drawSolidBox(m_defBoxCenter, m_defBoxScale); }
-
-void DrawForest::draw_a_box() const
-{ drawWireBox(m_defBoxCenter, m_defBoxScale); }
-
-void DrawForest::draw_coordsys() const
-{
-	Vector3F minb = m_defBox.getMin();
-	Vector3F maxb = m_defBox.getMax();
-	
-	glBegin( GL_LINES );
-	glColor3f(1.f, 0.f, 0.f);
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(maxb.x, 0.f, 0.f); 
-	glColor3f(0.f, 1.f, 0.f);					
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, maxb.y, 0.f); 
-	glColor3f(0.f, 0.f, 1.f);					
-			glVertex3f( 0.f, 0.f, 0.f );
-			glVertex3f(0.f, 0.f, maxb.z);		
-	glEnd();
-}
-
-int DrawForest::activePlantId() const
-{ return 0; }
-
-float DrawForest::plantSize(int idx) const
-{ 
-	float a = m_defBox.distance(0) * .7f;
-	float b = m_defBox.distance(2) * .7f;
-	return a > b ? a : b ; 
-}
-
-Vector3F DrawForest::plantCenter(int idx) const
-{ return m_defBox.center(); }
-
-void DrawForest::calculateDefExtent()
-{ m_boxExtent = m_defBox.radius(); }
-
-float DrawForest::plantExtent(int idx) const
-{ return m_boxExtent; }
-
 void DrawForest::drawWiredPlants()
 {
 	glDepthFunc(GL_LEQUAL);
@@ -134,8 +85,8 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 	float m[16];
 	data->t1->glMatrix(m);
 	glMultMatrixf((const GLfloat*)m);
-	//glMultMatrixf(mScale);
-	draw_a_box();
+	const ExampVox * v = plantExample(*data->t3);
+	drawWireBox(v->geomCenterV(), v->geomScale() );
 		
 	glPopMatrix();
 }
@@ -143,11 +94,8 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 void DrawForest::drawPlants()
 {
     glDepthFunc(GL_LEQUAL);
-	const GLfloat grayDiffuseMaterial[] = {0.47f, 0.46f, 0.45f};
-	// const GLfloat greenDiffuseMaterial[] = {0.33f, 0.53f, 0.37f};
 	glPushAttrib(GL_LIGHTING_BIT);
 	glEnable(GL_LIGHTING);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grayDiffuseMaterial);
 		
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
@@ -181,7 +129,9 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf(m_transbuf);
 	glScalef(m_scalbuf[0], m_scalbuf[1], m_scalbuf[2]);
-	draw_solid_box();
+	const ExampVox * v = plantExample(*data->t3);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, v->diffuseMaterialColor() );
+	drawSolidBox(v->geomCenterV(), v->geomScale() );
 		
 	glPopMatrix();
 }
@@ -284,9 +234,10 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 {
 	sdb::PlantData * d = pl->index;
 	int typ = *d->t3;
-	Vector3F localP = plantCenter(typ);
+	ExampVox * v = plantExample(typ);
+	const Vector3F & localP = v->geomCenter();
 	Vector3F worldP = d->t1->transform(localP);
-	float r = plantSize(typ) * d->t1->getSide().length() * plantExtent(typ);
+	float r = v->geomExtent() * d->t1->getSide().length();
 	if(cullByFrustum(worldP, r) ) return false;
 	float camZ;
 	if(cullByDepth(worldP, r, camZ) ) return false;
@@ -294,27 +245,5 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 		if(cullByLod(camZ, r, lowLod, highLod ) ) return false;
 	}
 	return true;
-}
-
-void DrawForest::setDefBox(const float & a, 
-					const float & b,
-					const float & c,
-					const float & d,
-					const float & e,
-					const float & f)
-{
-	m_defBox.m_data[0] = a;
-	m_defBox.m_data[1] = b;
-	m_defBox.m_data[2] = c;
-	m_defBox.m_data[3] = d;
-	m_defBox.m_data[4] = e;
-	m_defBox.m_data[5] = f;
-	calculateDefExtent();
-	m_defBoxCenter[0] = (a + d) * .5f;
-	m_defBoxCenter[1] = (b + e) * .5f;
-	m_defBoxCenter[2] = (c + f) * .5f;
-	m_defBoxScale[0] = (d - a);
-	m_defBoxScale[1] = (e - b);
-	m_defBoxScale[2] = (f - c);
 }
 //:~

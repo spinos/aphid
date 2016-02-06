@@ -472,7 +472,7 @@ void proxyPaintContext::setGrowOption(ProxyViz::GrowOption & opt)
 	opt.m_maxScale = m_max_scale;
 	opt.m_rotateNoise = m_rotation_noise;
 	opt.m_marginSize = 1.f;
-	opt.m_plantId = 0;
+	opt.m_plantId = m_plantType;
 	opt.m_multiGrow = m_multiCreate;
 	opt.m_marginSize = m_createMargin;
 }
@@ -525,7 +525,10 @@ const float & proxyPaintContext::createMargin()
 { return m_createMargin; }
 
 void proxyPaintContext::setPlantType(int x)
-{ m_plantType = x; }
+{ 
+	AHelper::Info<int>(" proxyPaintContext select plant", x);
+	m_plantType = x; 
+}
 
 const int & proxyPaintContext::plantType() const
 { return m_plantType; }

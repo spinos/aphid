@@ -398,6 +398,13 @@ float BoundingBox::radius() const
     return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
+float BoundingBox::radiusXZ() const
+{
+	float dx = distance(0) * .5f;
+    float dz = distance(2) * .5f;
+    return sqrt(dx*dx + dz*dz);
+}
+
 int BoundingBox::numPoints() const
 { return 8; }
 

@@ -130,7 +130,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	else {
 		Matrix44F tm;
 		float scale;
-		randomSpaceAt(ctx->m_hitP, option, tm, scale);
+		randomSpaceAt(ctx->m_hitP, option, tm, scale); 
 		float scaledSize = plantSize(option.m_plantId) * scale;
 		float limitedMargin = option.m_marginSize;
 /// limit low margin

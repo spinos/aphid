@@ -126,7 +126,6 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 
 void MForest::flood(GrowOption & option)
 {
-	option.m_plantId = activePlantId();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
 	if(!growOnGround(option))
         AHelper::Info<int>("MForest error empty ground", 0 );
@@ -138,7 +137,6 @@ void MForest::flood(GrowOption & option)
 void MForest::grow(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option)
 {
-	option.m_plantId = activePlantId();
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
@@ -635,7 +633,7 @@ void MForest::updateExamples(MArrayDataHandle & dataArray)
 		if(dslot) {
 			ExampVox * desc = dslot->getDesc();
 			if(desc) {
-/// todo add example
+				addPlantExample(desc);
 			}
 		}
 		dataArray.next();

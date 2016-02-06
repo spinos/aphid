@@ -274,7 +274,8 @@ void ExampViz::loadBoxes(MObject & node)
 	MFnNumericData bbmxFn(bbmx);
 	bbmxFn.getData3Float(bb.m_data[3], bb.m_data[4], bb.m_data[5]);
 	
-	setGeomBox(bb);
+	setGeomBox(bb.m_data[0], bb.m_data[1], bb.m_data[2],
+				bb.m_data[3], bb.m_data[4], bb.m_data[5]);
 	
 	AHelper::Info<unsigned>(" ExampViz load n cells", n );
 }
@@ -313,7 +314,8 @@ void ExampViz::loadBoxes(MDataBlock & data)
 	MFloatVector& vmax = bbmaxH.asFloatVector();
 	bb.setMax(vmax.x, vmax.y, vmax.z);
 
-	setGeomBox(bb);
+	setGeomBox(vmin.x, vmin.y, vmin.z,
+				vmax.x, vmax.y, vmax.z);
 	
 	float * diffCol = diffuseMaterialColV();
 	

@@ -49,6 +49,7 @@ public:
 	
 	float distanceTo(const Vector3F & pnt) const;
     float radius() const;
+	float radiusXZ() const;
 	
 	char intersect(const BoundingBox & another) const;
 	bool intersect(const BoundingBox & another, BoundingBox * tightBox) const;

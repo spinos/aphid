@@ -15,6 +15,7 @@
 #include <PseudoNoise.h>
 #include <EnvVar.h>
 #include <AHelper.h>
+#include <ExampVox.h>
 
 #ifdef WIN32
 #include <gExtension.h>
@@ -77,7 +78,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MStatus status;
 
-		setDefBox(block.inputValue(abboxminx).asFloat(),
+		ExampVox * defBox = plantExample(0);
+		
+		defBox->setGeomBox(block.inputValue(abboxminx).asFloat(),
 			block.inputValue(abboxminy).asFloat(), 
 			block.inputValue(abboxminz).asFloat(), 
 			block.inputValue(abboxmaxx).asFloat(), 
@@ -86,7 +89,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		if(m_toSetGrid) {
 			m_toSetGrid = false;
-			resetGrid(defBoxP()->distance(0) * 20.f);
+			resetGrid(defBox->geomExtent() * 20.f);
 		}
 		
 		if(_firstLoad) {
@@ -219,7 +222,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	glPushMatrix();
 	glMultMatrixd(mm);	
 	
-	draw_a_box();
+	ExampVox * defBox = plantExample(0);
+	drawWireBox(defBox->geomCenterV(), defBox->geomScale() );
+	
 	drawGridBounding();
 	// drawGrid();
 
@@ -242,7 +247,7 @@ bool ProxyViz::isBounded() const
 
 MBoundingBox ProxyViz::boundingBox() const
 {   
-	BoundingBox bbox = defBox();
+	BoundingBox bbox = plantExample(0)->geomBox();
 	if(numPlants() > 0) bbox = gridBoundingBox();
 	
 	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);

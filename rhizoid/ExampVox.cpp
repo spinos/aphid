@@ -14,7 +14,12 @@
 ExampVox::ExampVox() : 
 m_boxCenterSizeF4(NULL),
 m_numBoxes(0)
-{ m_geomBox.setOne(); }
+{ 
+	m_diffuseMaterialColV[0] = 0.47f;
+	m_diffuseMaterialColV[1] = 0.46f;
+	m_diffuseMaterialColV[2] = 0.45f;
+	m_geomBox.setOne(); 
+}
 
 ExampVox::~ExampVox() 
 { if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4; }
@@ -51,8 +56,20 @@ void ExampVox::voxelize(KdIntersection * tree)
 const BoundingBox & ExampVox::geomBox() const
 { return m_geomBox; }
 
-void ExampVox::setGeomBox(const BoundingBox & x)
-{ m_geomBox = x; }
+const float & ExampVox::geomExtent() const
+{ return m_geomExtent; }
+
+const float & ExampVox::geomSize() const
+{ return m_geomSize; }
+
+const float * ExampVox::geomCenterV() const
+{ return (const float *)&m_geomCenter; }
+
+const Vector3F & ExampVox::geomCenter() const
+{ return m_geomCenter; }
+
+const float * ExampVox::geomScale() const
+{ return m_geomScale; }
 
 void ExampVox::drawGrid()
 {
@@ -89,3 +106,29 @@ bool ExampVox::setNumBoxes(unsigned n)
 	m_boxCenterSizeF4 = new float[n * 4];
 	return true;
 }
+
+void ExampVox::setGeomBox(const float & a, 
+					const float & b,
+					const float & c,
+					const float & d,
+					const float & e,
+					const float & f)
+{
+	m_geomBox.m_data[0] = a;
+	m_geomBox.m_data[1] = b;
+	m_geomBox.m_data[2] = c;
+	m_geomBox.m_data[3] = d;
+	m_geomBox.m_data[4] = e;
+	m_geomBox.m_data[5] = f;
+	m_geomExtent = m_geomBox.radius();
+	m_geomSize = m_geomBox.radiusXZ(); 
+	m_geomCenter.x = (a + d) * .5f;
+	m_geomCenter.y = (b + e) * .5f;
+	m_geomCenter.z = (c + f) * .5f;
+	m_geomScale[0] = (d - a);
+	m_geomScale[1] = (e - b);
+	m_geomScale[2] = (f - c);
+}
+
+const float * ExampVox::diffuseMaterialColor() const
+{ return m_diffuseMaterialColV; }

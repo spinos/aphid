@@ -21,6 +21,7 @@
  * qy = (m02 - m20)/( 4 *qw)
  * qz = (m10 - m01)/( 4 *qw)
  */
+class ExampVox;
 
 namespace sdb {
 
@@ -35,6 +36,8 @@ class Forest {
 	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
+	std::vector<ExampVox *> m_examples;
+	std::map<ExampVox *, unsigned> m_exampleIndices;
 	KdTree * m_ground;
 	PlantSelection * m_activePlants;
 	IntersectionContext m_intersectCtx;
@@ -84,7 +87,7 @@ protected:
 	ATriangleMesh * getGroundMesh(unsigned idx) const;
 	const std::vector<ATriangleMesh *> & groundMeshes() const;
 	
-    virtual float plantSize(int idx) const;
+	const float & plantSize(int idx) const;
 	
 	void displacePlantInGrid(PlantInstance * inst );
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
@@ -102,7 +105,11 @@ protected:
     const Vector3F & selectionNormal() const;
     
     bool isGroundEmpty() const;
-    
+    void addPlantExample(ExampVox * x);
+	ExampVox * plantExample(unsigned idx);
+	const ExampVox * plantExample(unsigned idx) const;
+	//int activePlantId() const;
+	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
