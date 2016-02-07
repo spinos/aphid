@@ -19,8 +19,10 @@ class ExampVox : public DrawBox {
 	float m_geomScale[3];
 /// radius of bbox
 	float m_geomExtent;
-/// radius of x-z axis of bbox
+/// radius exclusion
 	float m_geomSize;
+/// scaling radius of exclusion
+	float m_sizeMult;
 	unsigned m_numBoxes;
 	
 public:
@@ -29,6 +31,8 @@ public:
 	
 	virtual void voxelize(KdIntersection * tree);
 	
+/// set b4 geom box
+	void setGeomSizeMult(const float & x);
 	void setGeomBox(const float & a, 
 					const float & b,
 					const float & c,

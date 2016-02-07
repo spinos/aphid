@@ -17,8 +17,7 @@ DrawForest::DrawForest()
 {
 	m_scalbuf[0] = 1.f; 
 	m_scalbuf[1] = 1.f; 
-	m_scalbuf[2] = 1.f; 
-    m_circle = new CircleCurve;
+	m_scalbuf[2] = 1.f;
 }
 
 DrawForest::~DrawForest() {}
@@ -193,30 +192,13 @@ void DrawForest::drawBrush()
     glVertex3f(direction.x * part, direction.y * part, direction.z * part);
     glEnd();
     
-    glPushMatrix();
-    glScalef(radius, radius, radius);
-    glPushMatrix();
-    
     m_useMat.setFrontOrientation(direction);
+	m_useMat.scaleBy(radius);
     m_useMat.glMatrix(m_transbuf);
-    glMultMatrixf(m_transbuf);
-	
-    drawCircle();
-    glPopMatrix();
-    glPopMatrix();
+    
+    drawCircle(m_transbuf);
     glPopMatrix();
     
-}
-
-void DrawForest::drawCircle() const
-{
-	Vector3F p;
-	glBegin(GL_LINE_STRIP);
-	for(unsigned i = 0; i < m_circle->numVertices(); i++) {
-		p = m_circle->getCv(i);
-		glVertex3f(p.x, p.y, p.z);
-	}
-	glEnd();
 }
 
 void DrawForest::drawDepthCull(double * localTm)

@@ -31,6 +31,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 {
 	M3dView _viewport;
 	MMatrix _worldSpace, _worldInverseSpace;
+	float m_transBuf[16];
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;
 	bool m_hasCamera, m_hasParticle, m_enableCompute;
@@ -60,6 +61,7 @@ public:
 	static  MObject         abboxmaxx;
 	static  MObject         abboxmaxy;
 	static  MObject         abboxmaxz;
+	static MObject aradiusMult;
 	static MObject outPositionPP;
 	static MObject outScalePP;
 	static MObject outRotationPP;
@@ -119,6 +121,7 @@ private:
 	MCallbackId fBeforeSaveCB;
 	void saveInternal();
 	bool loadInternal(MDataBlock& block);
+	void updateGeomBox(ExampVox * dst, MObject & node);
 	
 };
 #endif        //  #ifndef PROXYVIZNODE_H

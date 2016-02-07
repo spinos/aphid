@@ -13,7 +13,8 @@
 
 ExampVox::ExampVox() : 
 m_boxCenterSizeF4(NULL),
-m_numBoxes(0)
+m_numBoxes(0),
+m_sizeMult(1.f)
 { 
 	m_diffuseMaterialColV[0] = 0.47f;
 	m_diffuseMaterialColV[1] = 0.46f;
@@ -107,6 +108,9 @@ bool ExampVox::setNumBoxes(unsigned n)
 	return true;
 }
 
+void ExampVox::setGeomSizeMult(const float & x)
+{ m_sizeMult = x; }
+
 void ExampVox::setGeomBox(const float & a, 
 					const float & b,
 					const float & c,
@@ -121,7 +125,7 @@ void ExampVox::setGeomBox(const float & a,
 	m_geomBox.m_data[4] = e;
 	m_geomBox.m_data[5] = f;
 	m_geomExtent = m_geomBox.radius();
-	m_geomSize = m_geomBox.radiusXZ(); 
+	m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); 
 	m_geomCenter.x = (a + d) * .5f;
 	m_geomCenter.y = (b + e) * .5f;
 	m_geomCenter.z = (c + f) * .5f;

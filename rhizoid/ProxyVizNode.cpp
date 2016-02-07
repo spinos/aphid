@@ -28,6 +28,7 @@ MObject ProxyViz::abboxminz;
 MObject ProxyViz::abboxmaxx;
 MObject ProxyViz::abboxmaxy;
 MObject ProxyViz::abboxmaxz;
+MObject ProxyViz::aradiusMult;
 MObject ProxyViz::outPositionPP;
 MObject ProxyViz::outScalePP;
 MObject ProxyViz::outRotationPP;
@@ -79,6 +80,8 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		MStatus status;
 
 		ExampVox * defBox = plantExample(0);
+		
+		defBox->setGeomSizeMult(block.inputValue(aradiusMult).asFloat() );
 		
 		defBox->setGeomBox(block.inputValue(abboxminx).asFloat(),
 			block.inputValue(abboxminy).asFloat(), 
@@ -223,7 +226,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	glMultMatrixd(mm);	
 	
 	ExampVox * defBox = plantExample(0);
+	updateGeomBox(defBox, thisNode);
 	drawWireBox(defBox->geomCenterV(), defBox->geomScale() );
+	Matrix44F mat;
+	mat.setFrontOrientation(Vector3F::YAxis);
+	mat.scaleBy(defBox->geomSize() );
+    mat.glMatrix(m_transBuf);
+	
+	drawCircle(m_transBuf);
 	
 	drawGridBounding();
 	// drawGrid();
@@ -309,6 +319,13 @@ MStatus ProxyViz::initialize()
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
 	addAttribute(abboxmaxz);
+	
+	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(1.f);
+	numFn.setMin(.05f);
+	addAttribute(aradiusMult);
 	
 	axmultiplier = numFn.create( "visualMultiplierX", "vmx", MFnNumericData::kFloat, 1.f);
 	numFn.setKeyable(true);
@@ -496,7 +513,7 @@ MStatus ProxyViz::initialize()
 	typedAttrFn.setArray(true);
 	addAttribute(ainexamp);
 	attributeAffects(ainexamp, outValue1);
-	
+	attributeAffects(aradiusMult, outValue1);
 	attributeAffects(abboxminx, outValue);
 	attributeAffects(abboxmaxx, outValue);
 	attributeAffects(abboxminy, outValue);
@@ -779,4 +796,14 @@ void ProxyViz::endPickInView()
 void ProxyViz::setEnableCompute(bool x)
 { m_enableCompute = x; }
 	
+void ProxyViz::updateGeomBox(ExampVox * dst, MObject & node)
+{
+	dst->setGeomSizeMult(MPlug(node, aradiusMult).asFloat() );
+	dst->setGeomBox(MPlug(node, abboxminx).asFloat(),
+			MPlug(node, abboxminy).asFloat(), 
+			MPlug(node, abboxminz).asFloat(), 
+			MPlug(node, abboxmaxx).asFloat(), 
+			MPlug(node, abboxmaxy).asFloat(), 
+			MPlug(node, abboxmaxz).asFloat());
+}
 //:~

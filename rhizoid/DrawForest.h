@@ -10,16 +10,16 @@
 #include "ModifyForest.h"
 #include <ViewDepthCull.h>
 #include <DrawBox.h>
+#include <DrawCircle.h>
 
 class CircleCurve;
 
-class DrawForest : public sdb::ModifyForest, public ViewDepthCull, public DrawBox
+class DrawForest : public sdb::ModifyForest, public ViewDepthCull, public DrawBox, public DrawCircle
 {
 	
     Matrix44F m_useMat;
 	float m_transbuf[16];
 	float m_scalbuf[3];
-	CircleCurve * m_circle;
 	
 public:
     DrawForest();
@@ -46,6 +46,5 @@ private:
 	void drawPlant(sdb::PlantData * data);
 	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
 	void drawWiredPlant(sdb::PlantData * data);
-	void drawCircle() const;
-    
+	
 };

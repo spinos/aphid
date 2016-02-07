@@ -7,6 +7,7 @@
  *
  */
 #include "ExampVox.h"
+#include <DrawCircle.h>
 #include <maya/MPxLocatorNode.h> 
 #include <maya/MTypeId.h> 
 #include <maya/MPlug.h>
@@ -14,8 +15,9 @@
 #include <maya/M3dView.h>
 #include <maya/MPointArray.h>
 
-class ExampViz : public MPxLocatorNode, public ExampVox
+class ExampViz : public MPxLocatorNode, public ExampVox, public DrawCircle
 {
+	float m_transBuf[16];
 	
 public:
 	ExampViz();
@@ -43,6 +45,7 @@ public:
 	static MObject adrawColorG;
 	static MObject adrawColorB;
 	static MObject adrawColor;
+	static MObject aradiusMult;
 	static MObject outValue;
 	static	MTypeId		id;
 	
@@ -50,6 +53,7 @@ public:
 	
 private:
 	void loadBoxes(MObject & node);
+	void updateGeomBox(MObject & node);
 	void loadBoxes(MDataBlock & data);
 	void setBoxes(const MPointArray & src, const unsigned & num);
 	

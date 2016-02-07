@@ -29,6 +29,7 @@ MObject ExampViz::adrawColor;
 MObject ExampViz::adrawColorR;
 MObject ExampViz::adrawColorG;
 MObject ExampViz::adrawColorB;
+MObject ExampViz::aradiusMult;
 MObject ExampViz::outValue;
 
 ExampViz::ExampViz()
@@ -75,6 +76,8 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	diffCol[2] = bPlug.asFloat();
 	
 	if(numBoxes() < 1) loadBoxes(selfNode);
+	
+	updateGeomBox(selfNode);
 		
 	view.beginGL();
 	drawBoundingBox(&bbox);
@@ -94,6 +97,13 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	} 
 	else
 		drawWireGrid();
+	
+	Matrix44F mat;
+	mat.setFrontOrientation(Vector3F::YAxis);
+	mat.scaleBy(geomSize() );
+    mat.glMatrix(m_transBuf);
+	
+	drawCircle(m_transBuf);
 	view.endGL();
 }
 
@@ -147,6 +157,13 @@ MStatus ExampViz::initialize()
 	numFn.setDefault(0.47f, 0.46f, 0.45f);
 	addAttribute(adrawColor);
 	
+	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(1.f);
+	numFn.setMin(.05f);
+	addAttribute(aradiusMult);
+	
 	ancells = numFn.create( "numCells", "ncl", MFnNumericData::kInt, 0 );
 	numFn.setStorable(true);
 	addAttribute(ancells);
@@ -176,6 +193,7 @@ MStatus ExampViz::initialize()
     typedFn.setStorable(true);
 	addAttribute(acellBuf);
 	
+	attributeAffects(aradiusMult, outValue);
 	attributeAffects(ancells, outValue);
 	attributeAffects(acellBuf, outValue);
 	attributeAffects(adrawColorR, outValue);
@@ -237,6 +255,31 @@ void ExampViz::voxelize(KdIntersection * tree)
 	AHelper::Info<unsigned>(" ExampViz generate n cells" ,n);
 }
 
+void ExampViz::updateGeomBox(MObject & node)
+{
+	MPlug radiusMultPlug(node, aradiusMult);
+	float radiusScal = radiusMultPlug.asFloat();
+	setGeomSizeMult(radiusScal);
+	
+	BoundingBox bb;
+	
+	MObject bbmn;
+	MPlug bbmnPlug(node, abboxminv);
+	bbmnPlug.getValue(bbmn);
+	MFnNumericData bbmnFn(bbmn);
+	bbmnFn.getData3Float(bb.m_data[0], bb.m_data[1], bb.m_data[2]);
+	
+	MObject bbmx;
+	MPlug bbmxPlug(node, abboxmaxv);
+	bbmxPlug.getValue(bbmx);
+	MFnNumericData bbmxFn(bbmx);
+	bbmxFn.getData3Float(bb.m_data[3], bb.m_data[4], bb.m_data[5]);
+	
+	setGeomBox(bb.m_data[0], bb.m_data[1], bb.m_data[2],
+				bb.m_data[3], bb.m_data[4], bb.m_data[5]);
+				
+}
+
 void ExampViz::loadBoxes(MObject & node)
 {	
 	MPlug ncellsPlug(node, ancells);
@@ -259,23 +302,6 @@ void ExampViz::loadBoxes(MObject & node)
 	
 	n = numBoxes();
 	setBoxes(pnts, n);
-	
-	BoundingBox bb;
-	
-	MObject bbmn;
-	MPlug bbmnPlug(node, abboxminv);
-	bbmnPlug.getValue(bbmn);
-	MFnNumericData bbmnFn(bbmn);
-	bbmnFn.getData3Float(bb.m_data[0], bb.m_data[1], bb.m_data[2]);
-	
-	MObject bbmx;
-	MPlug bbmxPlug(node, abboxmaxv);
-	bbmxPlug.getValue(bbmx);
-	MFnNumericData bbmxFn(bbmx);
-	bbmxFn.getData3Float(bb.m_data[3], bb.m_data[4], bb.m_data[5]);
-	
-	setGeomBox(bb.m_data[0], bb.m_data[1], bb.m_data[2],
-				bb.m_data[3], bb.m_data[4], bb.m_data[5]);
 	
 	AHelper::Info<unsigned>(" ExampViz load n cells", n );
 }
@@ -303,6 +329,10 @@ void ExampViz::loadBoxes(MDataBlock & data)
 			AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
 		}
 	}
+	
+	MDataHandle radiusMultH = data.inputValue(aradiusMult);
+	float radiusScal = radiusMultH.asFloat();
+	setGeomSizeMult(radiusScal);
 	
 	BoundingBox bb;
 	
