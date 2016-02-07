@@ -47,5 +47,6 @@ private:
 	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
 	void drawWiredPlant(sdb::PlantData * data);
 	void drawPlantBox(sdb::PlantData * data);
+	void drawPlant(const ExampVox * v, sdb::PlantData * data);
 	
 };

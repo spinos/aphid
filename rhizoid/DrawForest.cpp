@@ -136,12 +136,31 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 	glScalef(m_scalbuf[0], m_scalbuf[1], m_scalbuf[2]);
 	const ExampVox * v = plantExample(*data->t3);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, v->diffuseMaterialColor() );
-	if(v->numBoxes() < 1) 
-		drawSolidBox(v->geomCenterV(), v->geomScale() );
-	else 
-		drawSolidBoxArray(v->boxCenterSizeF4(), v->numBoxes() );
-		
+	drawPlant(v , data);
 	glPopMatrix();
+}
+
+void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
+{
+	if(v->numBoxes() < 1) {
+		drawSolidBox(v->geomCenterV(), v->geomScale() );
+		return;
+	}
+	
+	const Vector3F & localP = v->geomCenter();
+	Vector3F worldP = data->t1->transform(localP);
+	float r = v->geomExtent() * data->t1->getSide().length();
+	if(cullByFrustum(worldP, r) ) {
+		return;
+	}
+	
+	float camZ = cameraDepth(worldP);
+	if(cullByLod(camZ, r, .8f, 1.9f) ) {
+		drawSolidBox(v->geomCenterV(), v->geomScale() );
+		return;
+	}
+	
+	drawSolidBoxArray(v->boxCenterSizeF4(), v->numBoxes() );
 }
 
 void DrawForest::drawGridBounding()

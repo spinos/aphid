@@ -48,7 +48,9 @@ public:
 	bool cullByFrustum(const BoundingBox & box) const;
 	bool cullByLod(const float & localZ, const float & radius,
 					const float & lowLod, const float & highLod) const;
-					
+	
+	float cameraDepth(const Vector3F & p) const;
+	
 protected:
 	void ndc(const Vector3F & cameraP, float & coordx, float & coordy) const;
 	

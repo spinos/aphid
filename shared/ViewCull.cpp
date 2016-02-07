@@ -110,4 +110,7 @@ bool ViewCull::cullByLod(const float & localZ, const float & radius,
 
 bool ViewCull::isPerspective() const
 { return m_hfov > 0.f; }
+
+float ViewCull::cameraDepth(const Vector3F & p) const
+{ return cameraInvSpace().transform(p).z; }
 //:~
