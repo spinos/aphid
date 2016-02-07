@@ -24,7 +24,12 @@ protected:
 	void drawWireBox(const float * center, const float * scale) const;
 	void drawSolidBox(const float * center, const float * scale) const;
 	void drawBoundingBox(const BoundingBox * box) const;
-	
+	void drawSolidBoxArray(const float * data,
+						const unsigned & count,
+						const unsigned & stride = 1) const;
+	void drawWireBoxArray(const float * data,
+						const unsigned & count,
+						const unsigned & stride = 1) const;
 private:
 	static const float UnitBoxLine[24][3];
 	static const float UnitBoxTriangle[36][3];

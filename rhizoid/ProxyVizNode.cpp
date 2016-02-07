@@ -92,7 +92,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		if(m_toSetGrid) {
 			m_toSetGrid = false;
-			resetGrid(defBox->geomExtent() * 20.f);
+			resetGrid(defBox->geomExtent() * 16.f);
 		}
 		
 		if(_firstLoad) {

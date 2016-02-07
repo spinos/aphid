@@ -46,5 +46,6 @@ private:
 	void drawPlant(sdb::PlantData * data);
 	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
 	void drawWiredPlant(sdb::PlantData * data);
+	void drawPlantBox(sdb::PlantData * data);
 	
 };

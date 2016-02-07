@@ -57,15 +57,23 @@ void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 
 void DrawForest::drawWiredPlants()
 {
-	glDepthFunc(GL_LEQUAL);
-	
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
+	const float margin = g->gridSize() * .1f;
+	glDepthFunc(GL_LEQUAL);
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+	glColor3f(.1f, .1f, .1f);
 	g->begin();
 	while(!g->end() ) {
-		drawWiredPlants(g->value() );
+		BoundingBox cellBox = g->coordToGridBBox(g->key() );
+        cellBox.expand(margin);
+        if(!cullByFrustum(cellBox ) )
+			drawWiredPlants(g->value() );
 		g->next();
 	}
+	
+	glPopAttrib();
 }
 
 void DrawForest::drawWiredPlants(sdb::Array<int, sdb::Plant> * cell)
@@ -81,24 +89,23 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 {
 	glPushMatrix();
     
-	float m[16];
-	data->t1->glMatrix(m);
-	glMultMatrixf((const GLfloat*)m);
+	data->t1->glMatrix(m_transbuf);
+	glMultMatrixf((const GLfloat*)m_transbuf);
 	const ExampVox * v = plantExample(*data->t3);
-	drawWireBox(v->geomCenterV(), v->geomScale() );
+	if(v->numBoxes() < 1)
+		drawWireBox(v->geomCenterV(), v->geomScale() );
 		
 	glPopMatrix();
 }
 
 void DrawForest::drawPlants()
 {
-    glDepthFunc(GL_LEQUAL);
-	glPushAttrib(GL_LIGHTING_BIT);
-	glEnable(GL_LIGHTING);
-		
-	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+    sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	const float margin = g->gridSize() * .1f;
+	glDepthFunc(GL_LEQUAL);
+	glPushAttrib(GL_LIGHTING_BIT);
+	glEnable(GL_LIGHTING);
 	g->begin();
 	while(!g->end() ) {
         BoundingBox cellBox = g->coordToGridBBox(g->key() );
@@ -108,7 +115,6 @@ void DrawForest::drawPlants()
 		g->next();
 	}
 	
-	glDisable(GL_LIGHTING);
 	glPopAttrib();
 }
 
@@ -130,7 +136,10 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 	glScalef(m_scalbuf[0], m_scalbuf[1], m_scalbuf[2]);
 	const ExampVox * v = plantExample(*data->t3);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, v->diffuseMaterialColor() );
-	drawSolidBox(v->geomCenterV(), v->geomScale() );
+	if(v->numBoxes() < 1) 
+		drawSolidBox(v->geomCenterV(), v->geomScale() );
+	else 
+		drawSolidBoxArray(v->boxCenterSizeF4(), v->numBoxes() );
 		
 	glPopMatrix();
 }
@@ -152,6 +161,18 @@ void DrawForest::drawGrid()
 	}
 }
 
+void DrawForest::drawPlantBox(sdb::PlantData * data)
+{
+	glPushMatrix();
+    
+	data->t1->glMatrix(m_transbuf);
+	glMultMatrixf((const GLfloat*)m_transbuf);
+	const ExampVox * v = plantExample(*data->t3);
+	drawWireBox(v->geomCenterV(), v->geomScale() );
+		
+	glPopMatrix();
+}
+
 void DrawForest::drawActivePlants()
 {
 	if(numActivePlants() < 1) return;
@@ -160,7 +181,7 @@ void DrawForest::drawActivePlants()
 	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
-		drawWiredPlant(arr->value()->m_reference->index );
+		drawPlantBox(arr->value()->m_reference->index );
 		arr->next();
 	}
 }

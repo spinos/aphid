@@ -200,3 +200,21 @@ void DrawBox::drawBoundingBox(const BoundingBox * box) const
 	s[2] = box->m_data[5] - box->m_data[2];
 	drawWireBox(t, s);
 }
+
+void DrawBox::drawSolidBoxArray(const float * data,
+						const unsigned & count,
+						const unsigned & stride) const
+{
+	unsigned i=0;
+	for(;i<count;i+=stride)
+	    drawSolidBox((const float *)&data[i*4], data[i*4+3] );
+}
+
+void DrawBox::drawWireBoxArray(const float * data,
+						const unsigned & count,
+						const unsigned & stride) const
+{
+	unsigned i=0;
+	for(;i<count;i+=stride)
+	    drawWireBox((const float *)&data[i*4], data[i*4+3] );
+}

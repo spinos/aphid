@@ -47,6 +47,8 @@ public:
 	const Vector3F & geomCenter() const;
 	const float * geomScale() const;
 	const float * diffuseMaterialColor() const;
+	const float * boxCenterSizeF4() const;
+	const unsigned & numBoxes() const;
 	
 protected:
 	void drawGrid();
@@ -54,7 +56,6 @@ protected:
 	float * diffuseMaterialColV();
 	float * boxCenterSizeF4();
 	bool setNumBoxes(unsigned n);
-	const unsigned & numBoxes() const;
 	
 private:
 

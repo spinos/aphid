@@ -73,18 +73,10 @@ const float * ExampVox::geomScale() const
 { return m_geomScale; }
 
 void ExampVox::drawGrid()
-{
-	unsigned i=0;
-	for(;i<m_numBoxes;++i)
-	    drawSolidBox((const float *)&m_boxCenterSizeF4[i*4], m_boxCenterSizeF4[i*4+3] );
-}
+{ drawSolidBoxArray(m_boxCenterSizeF4, m_numBoxes); }
 
 void ExampVox::drawWireGrid()
-{
-	unsigned i=0;
-	for(;i<m_numBoxes;++i)
-	    drawWireBox((const float *)&m_boxCenterSizeF4[i*4], m_boxCenterSizeF4[i*4+3] );
-}
+{ drawWireBoxArray(m_boxCenterSizeF4, m_numBoxes); }
 
 float * ExampVox::diffuseMaterialColV()
 { return m_diffuseMaterialColV; }
@@ -136,3 +128,6 @@ void ExampVox::setGeomBox(const float & a,
 
 const float * ExampVox::diffuseMaterialColor() const
 { return m_diffuseMaterialColV; }
+
+const float * ExampVox::boxCenterSizeF4() const
+{ return m_boxCenterSizeF4; }
