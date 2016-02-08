@@ -731,7 +731,10 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MPlug flplg(thisNode, afocallength);
 	float fl = flplg.asFloat();
 	
-	setFrustum(hfa, vfa, fl, -10.f, -250000.f);
+    float farClip = -20.f;
+    if(numPlants() > 0) getFarClipDepth(farClip, gridBoundingBox() );
+    
+    setFrustum(hfa, vfa, fl, -10.f, farClip );
 }
 
 void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
@@ -741,18 +744,21 @@ void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 	MMatrix cameraInvMat = cameraPath.inclusiveMatrixInverse();
 	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameraInvMat);
 	
+    float farClip = -20.f;
+    if(numPlants() > 0) getFarClipDepth(farClip, gridBoundingBox() );
+    
 	MFnCamera fcam(cameraPath.node() );
 	if(fcam.isOrtho() ) {
 		float orthoW = fcam.orthoWidth();
 		float asp = fcam.aspectRatio();
-		setOrthoFrustum(orthoW, asp, -10.f, -250000.f);
+		setOrthoFrustum(orthoW, asp, -10.f, farClip );
 		
 	} else {
 		float hfa = fcam.horizontalFilmAperture();
 		float vfa = fcam.verticalFilmAperture();
 		float fl = fcam.focalLength();
 	
-		setFrustum(hfa, vfa, fl, -10.f, -250000.f);
+		setFrustum(hfa, vfa, fl, -10.f, farClip );
 	}
 }
 

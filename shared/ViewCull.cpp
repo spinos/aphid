@@ -114,4 +114,13 @@ bool ViewCull::isPerspective() const
 
 float ViewCull::cameraDepth(const Vector3F & p) const
 { return cameraInvSpace().transform(p).z; }
+
+void ViewCull::getFarClipDepth(float & clip, const BoundingBox & b) const
+{
+    int i = 0;
+    for(;i<8;++i) {
+        float d = cameraDepth(b.X(i) );
+        if(clip > d) clip = d;
+    }
+}
 //:~

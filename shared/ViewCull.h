@@ -51,7 +51,8 @@ public:
 					float & details) const;
 	
 	float cameraDepth(const Vector3F & p) const;
-	
+	void getFarClipDepth(float & clip, const BoundingBox & b) const;
+    
 protected:
 	void ndc(const Vector3F & cameraP, float & coordx, float & coordy) const;
 	
