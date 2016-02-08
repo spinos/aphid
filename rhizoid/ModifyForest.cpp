@@ -150,7 +150,26 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
     return true;
 }
 
-void ModifyForest::clearAt(const Ray & ray, float weight)
+void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
+{
+	if(!calculateSelecedWeight(ray)) return;
+	
+	Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-4f) { 
+			if(m_pnoise.rfloat(m_seed) < option.m_strength) {
+				Plant * pl = arr->value()->m_reference;
+				*pl->index->t3 = option.m_plantId;
+			}
+			m_seed++;
+		}
+		arr->next();
+	}
+}
+
+void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 {
 	if(!calculateSelecedWeight(ray)) return;
 	
@@ -160,7 +179,7 @@ void ModifyForest::clearAt(const Ray & ray, float weight)
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
-			if(m_pnoise.rfloat(m_seed) < weight) {
+			if(m_pnoise.rfloat(m_seed) < option.m_strength) {
 				idToClear.push_back(arr->key() );
 				Plant * pl = arr->value()->m_reference;
 				Vector3F pos = pl->index->t1->getTranslation();

@@ -12,11 +12,13 @@
 #include <maya/MPxContext.h>
 #include <maya/M3dView.h>
 #include "ProxyVizNode.h"
-
+#include <maya/MSceneMessage.h>
 
 class proxyPaintContext : public MPxContext
 {
 	M3dView					view;
+	static ProxyViz * PtrViz;
+	
 	double clipNear, clipFar;
 	float m_brushRadius, m_brushWeight;
 	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
@@ -27,9 +29,12 @@ class proxyPaintContext : public MPxContext
 	short					last_x, last_y;
 
 	MGlobal::ListAdjustment	m_listAdjustment;
+	MCallbackId fBeforeNewCB;
+	MCallbackId fBeforeOpenCB;
 	
 public:
 					proxyPaintContext();
+	virtual ~proxyPaintContext();
 	virtual void	toolOnSetup( MEvent & event );
 	virtual MStatus	doPress( MEvent & event );
 	virtual MStatus	doDrag( MEvent & event );
@@ -87,8 +92,10 @@ private:
 	void startSelectGround();
 	void setGrowOption(ProxyViz::GrowOption & opt);
 	void finishGrow();
-	
-	ProxyViz *m_pViz;
+	void replace();
+	void attachSceneCallbacks();
+	void detachSceneCallbacks();
+	static void releaseCallback(void* clientData);
 	
 };
 #endif        //  #ifndef BOXPAINTTOOL_H

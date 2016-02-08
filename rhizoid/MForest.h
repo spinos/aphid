@@ -21,9 +21,11 @@ public:
 	void flood(GrowOption & option);
 	void grow(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option);
+	void replacePlant(const MPoint & origin, const MPoint & dest, 
+					GrowOption & option);
 	void finishGrow();
 	void erase(const MPoint & origin, const MPoint & dest,
-					float weight);
+					GrowOption & option);
 	void finishErase();
 	void adjustSize(const MPoint & origin, const MPoint & dest, 
                      float magnitude);

@@ -10,7 +10,9 @@
 const char helpString[] =
 			"Select a proxy viz to paint on.";
 
-proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),m_pViz(0),
+ProxyViz * proxyPaintContext::PtrViz = NULL;
+
+proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
 m_growAlongNormal(0),
 m_createMargin(0.1f), 
 m_multiCreate(0),
@@ -23,7 +25,11 @@ m_plantType(0)
 	// be a candidate for the 6th position on the mini-bar.
 	setImage("proxyPaintTool.xpm", MPxContext::kImage1 );
 	setOperation(2);
+	attachSceneCallbacks();
 }
+
+proxyPaintContext::~proxyPaintContext()
+{ detachSceneCallbacks(); }
 
 void proxyPaintContext::toolOnSetup ( MEvent & )
 {
@@ -90,11 +96,11 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 		case 7 :
 			rotateAroundAxis(0);
 			break;
-		case 8 :
-			//moveAlongAxis(1);
-			break;
 		case 9 :
 			selectGround();
+			break;
+		case 10 :
+			replace();
 			break;
 		default:
 			;
@@ -111,11 +117,11 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 {	
 	event.getPosition( last_x, last_y );
 	
-	if(!m_pViz) return MS::kSuccess;
-	if(mOpt==0) m_pViz->finishGrow();
-	if(mOpt==1) m_pViz->finishErase();
-	if(mOpt==2) AHelper::Info<unsigned>("n active plants", m_pViz->numActivePlants() );
-	if(mOpt==9) AHelper::Info<unsigned>("n active faces", m_pViz->numActiveGroundFaces() );
+	if(!PtrViz) return MS::kSuccess;
+	if(mOpt==0) PtrViz->finishGrow();
+	if(mOpt==1) PtrViz->finishErase();
+	if(mOpt==2) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
+	if(mOpt==9) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
 	
 	return MS::kSuccess;		
 }
@@ -157,12 +163,6 @@ void proxyPaintContext::setOperation(unsigned val)
 		return;
 	}
 	
-	if(mOpt == 9 && val != 9) {
-		MGlobal::setSelectionMode(MGlobal::kSelectObjectMode);
-		MSelectionList empty;
-		MGlobal::selectCommand(empty);
-	}
-	
 	mOpt = val;
 	switch (mOpt)
 	{
@@ -195,6 +195,9 @@ void proxyPaintContext::setOperation(unsigned val)
 			break;
 		case 9:
 			MGlobal::displayInfo("proxyPaint set to select ground faces");
+			break;
+		case 10:
+			MGlobal::displayInfo("proxyPaint set to replace");
 			break;
 		default:
 			;
@@ -318,34 +321,34 @@ unsigned proxyPaintContext::getInstanceGroupCount() const
 
 void proxyPaintContext::resize()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 		
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	
-	m_pViz->adjustSize(fromNear, fromFar, mag);
+	PtrViz->adjustSize(fromNear, fromFar, mag);
 }
 
 void proxyPaintContext::move()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 		
-	m_pViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar);
+	PtrViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar);
 }
 
 void proxyPaintContext::rotateAroundAxis(short axis)
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 		
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	
-    m_pViz->setNoiseWeight(m_rotation_noise);
-	m_pViz->adjustRotation(fromNear, fromFar, mag, axis);
+    PtrViz->setNoiseWeight(m_rotation_noise);
+	PtrViz->adjustRotation(fromNear, fromFar, mag, axis);
 }
 
 void proxyPaintContext::moveAlongAxis(short axis)
@@ -353,20 +356,20 @@ void proxyPaintContext::moveAlongAxis(short axis)
 
 void proxyPaintContext::selectGround()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
-	m_pViz->selectGround(fromNear, fromFar, m_listAdjustment);
+	PtrViz->selectGround(fromNear, fromFar, m_listAdjustment);
 }
 
 void proxyPaintContext::startSelectGround()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld (start_x, start_y, fromNear, fromFar );
 	
-	m_pViz->selectGround(fromNear, fromFar, MGlobal::kReplaceList);
+	PtrViz->selectGround(fromNear, fromFar, MGlobal::kReplaceList);
 }
 
 void proxyPaintContext::smoothSelected()
@@ -374,12 +377,12 @@ void proxyPaintContext::smoothSelected()
 
 void proxyPaintContext::grow()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	ProxyViz::GrowOption opt;
 	setGrowOption(opt);
-	m_pViz->grow(fromNear, fromFar, opt);
+	PtrViz->grow(fromNear, fromFar, opt);
 }
 
 char proxyPaintContext::validateSelection()
@@ -389,30 +392,30 @@ char proxyPaintContext::validateSelection()
 	if(!validateViz(slist))
 	    MGlobal::displayWarning("No proxyViz selected");
 			
-    if(!m_pViz) return 0;
+    if(!PtrViz) return 0;
 
-	m_pViz->setSelectionRadius(getBrushRadius() );
+	PtrViz->setSelectionRadius(getBrushRadius() );
 	return 1;
 }
 
 void proxyPaintContext::flood()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	ProxyViz::GrowOption opt;
 	setGrowOption(opt);
-	m_pViz->flood(opt);
+	PtrViz->flood(opt);
 }
 
 void proxyPaintContext::extractSelected()
 {
-	if(!m_pViz) return;
-	m_pViz->extractActive(m_extractGroupCount);
+	if(!PtrViz) return;
+	PtrViz->extractActive(m_extractGroupCount);
 }
 
 void proxyPaintContext::erectSelected()
 {
-	if(!m_pViz) return;
-	m_pViz->erectActive();
+	if(!PtrViz) return;
+	PtrViz->erectActive();
 }
 
 void proxyPaintContext::snap()
@@ -420,30 +423,31 @@ void proxyPaintContext::snap()
 
 void proxyPaintContext::erase()
 {
-    if(!m_pViz) return;
+    if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
-	
-	m_pViz->erase(fromNear, fromFar, m_brushWeight);
+	ProxyViz::GrowOption opt;
+	setGrowOption(opt);
+	PtrViz->erase(fromNear, fromFar, opt);
 	view.refresh( true );	
 }
 
 void proxyPaintContext::startProcessSelect()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld (start_x, start_y, fromNear, fromFar );
 	
-	m_pViz->selectPlant(fromNear, fromFar, MGlobal::kReplaceList);
+	PtrViz->selectPlant(fromNear, fromFar, MGlobal::kReplaceList);
 }
 
 void proxyPaintContext::processSelect()
 {
-	if(!m_pViz) return;
+	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
-	m_pViz->selectPlant(fromNear, fromFar, m_listAdjustment);
+	PtrViz->selectPlant(fromNear, fromFar, m_listAdjustment);
 }
 
 char proxyPaintContext::validateViz(const MSelectionList &sels)
@@ -455,10 +459,10 @@ char proxyPaintContext::validateViz(const MSelectionList &sels)
     if(vizobj != MObject::kNullObj)
 	{
         MFnDependencyNode fviz(vizobj);
-		m_pViz = (ProxyViz*)fviz.userNode();
+		PtrViz = (ProxyViz*)fviz.userNode();
 	}
     
-    if(!m_pViz)
+    if(!PtrViz)
         return 0;
     
     return 1;
@@ -475,6 +479,7 @@ void proxyPaintContext::setGrowOption(ProxyViz::GrowOption & opt)
 	opt.m_plantId = m_plantType;
 	opt.m_multiGrow = m_multiCreate;
 	opt.m_marginSize = m_createMargin;
+	opt.m_strength = m_brushWeight;
 }
 
 void proxyPaintContext::setWriteCache(MString filename)
@@ -482,7 +487,7 @@ void proxyPaintContext::setWriteCache(MString filename)
 	MGlobal::displayInfo(MString("proxyPaint tries to write to cache ") + filename);
 	if(!getSelectedViz())
 		return;
-	m_pViz->pressToSave();
+	PtrViz->pressToSave();
 }
 
 void proxyPaintContext::setReadCache(MString filename)
@@ -490,7 +495,7 @@ void proxyPaintContext::setReadCache(MString filename)
 	MGlobal::displayInfo(MString("proxyPaint tries to read from cache ") + filename);
 	if(!getSelectedViz())
 		return;
-	m_pViz->pressToLoad();
+	PtrViz->pressToLoad();
 }
 
 void proxyPaintContext::cleanup()
@@ -498,13 +503,23 @@ void proxyPaintContext::cleanup()
 	MGlobal::displayInfo("proxyPaint set to reset");
 	if(!getSelectedViz())
 		return;
-	m_pViz->removeAllPlants();	
+	PtrViz->removeAllPlants();	
 }
 
 void proxyPaintContext::finishGrow()
 {
-	if(!m_pViz) return;
-	m_pViz->finishGrow();
+	if(!PtrViz) return;
+	PtrViz->finishGrow();
+}
+
+void proxyPaintContext::replace()
+{
+	if(!PtrViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+	ProxyViz::GrowOption opt;
+	setGrowOption(opt);
+	PtrViz->replacePlant(fromNear, fromFar, opt);
 }
 
 char proxyPaintContext::getSelectedViz()
@@ -532,4 +547,26 @@ void proxyPaintContext::setPlantType(int x)
 
 const int & proxyPaintContext::plantType() const
 { return m_plantType; }
+
+void proxyPaintContext::attachSceneCallbacks()
+{
+	fBeforeNewCB  = MSceneMessage::addCallback(MSceneMessage::kBeforeNew,  releaseCallback, this);
+	fBeforeOpenCB  = MSceneMessage::addCallback(MSceneMessage::kBeforeOpen,  releaseCallback, this);
+}
+
+void proxyPaintContext::detachSceneCallbacks()
+{
+	if (fBeforeNewCB)
+		MMessage::removeCallback(fBeforeNewCB);
+	if (fBeforeOpenCB)
+		MMessage::removeCallback(fBeforeOpenCB);
+	fBeforeNewCB = 0;
+	fBeforeOpenCB = 0;
+}
+
+void proxyPaintContext::releaseCallback(void* clientData)
+{
+	PtrViz = NULL;
+}
+	
 //:~

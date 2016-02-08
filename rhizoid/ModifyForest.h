@@ -34,7 +34,8 @@ protected:
 	bool growOnGround(GrowOption & option);
 	
 	bool growAt(const Ray & ray, GrowOption & option);
-	void clearAt(const Ray & ray, float weight);
+	void replaceAt(const Ray & ray, GrowOption & option);
+	void clearAt(const Ray & ray, GrowOption & option);
 	void scaleAt(const Ray & ray, float magnitude);
     void rotateAt(const Ray & ray, float magnitude, int axis);
 	void movePlant(const Ray & ray,

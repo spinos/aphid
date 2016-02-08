@@ -52,6 +52,7 @@ public:
 		float m_minScale, m_maxScale;
 		float m_marginSize;
 		float m_rotateNoise;
+		float m_strength;
 		bool m_alongNormal;
 		bool m_multiGrow;
 	};

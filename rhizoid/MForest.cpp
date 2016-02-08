@@ -143,6 +143,15 @@ void MForest::grow(const MPoint & origin, const MPoint & dest,
 	growAt(r, option);
 }
 
+void MForest::replacePlant(const MPoint & origin, const MPoint & dest, 
+					GrowOption & option)
+{
+	Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	replaceAt(r, option);
+}
+
 void MForest::drawSolidMesh(MItMeshPolygon & iter)
 {
 	iter.reset();
@@ -205,13 +214,13 @@ void MForest::finishGrow()
 }
 
 void MForest::erase(const MPoint & origin, const MPoint & dest,
-					float weight)
+					GrowOption & option)
 {
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	
-	clearAt(r, weight);
+	clearAt(r, option);
 }
 
 void MForest::finishErase()

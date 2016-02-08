@@ -66,9 +66,7 @@ m_hasParticle(false)
 { attachSceneCallbacks(); }
 
 ProxyViz::~ProxyViz() 
-{
-	detachSceneCallbacks();
-}
+{ detachSceneCallbacks(); }
 
 MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 {
