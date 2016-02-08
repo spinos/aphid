@@ -764,7 +764,7 @@ void ProxyViz::beginPickInView()
 	m_toCheckVisibility = true;
 }
 
-void ProxyViz::processPickInView()
+void ProxyViz::processPickInView(const int & plantTyp)
 {
 	useActiveView();
 	_viewport.refresh();
@@ -785,7 +785,7 @@ void ProxyViz::processPickInView()
 	
 	MPlug perPlg(node, aconvertPercentage);
 	double percentage = perPlg.asDouble();
-	pickVisiblePlants(m_hasCamera, gateLow, gateHigh, groupCount, groupId, percentage);
+	pickVisiblePlants(m_hasCamera, gateLow, gateHigh, groupCount, groupId, percentage, plantTyp);
 }
 
 void ProxyViz::endPickInView()

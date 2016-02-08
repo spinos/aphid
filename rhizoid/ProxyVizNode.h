@@ -95,7 +95,7 @@ public:
 	void pressToSave();
 	void pressToLoad();
 	void beginPickInView();
-	void processPickInView();
+	void processPickInView(const int & plantTyp);
 	void endPickInView();
 	
 	const MMatrix & worldSpace() const;

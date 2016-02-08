@@ -33,6 +33,8 @@
 #define kVoxFlagLong "-voxelize"
 #define kConnectVoxFlag "-cvx" 
 #define kConnectVoxFlagLong "-connectVoxel"
+#define kSelectVoxFlag "-svx" 
+#define kSelectVoxFlagLong "-selectVox"
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -60,6 +62,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
 	syntax.addFlag(kVoxFlag, kVoxFlagLong);
 	syntax.addFlag(kConnectVoxFlag, kConnectVoxFlagLong);
+	syntax.addFlag(kSelectVoxFlag, kSelectVoxFlagLong, MSyntax::kLong);
 	
 	return syntax;
 }
@@ -103,7 +106,7 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 			pViz->beginPickInView();
 			break;
 		case opDoPick:
-			pViz->processPickInView();
+			pViz->processPickInView(m_currentVoxInd);
 			break;
 		case opEndPick:
 			pViz->endPickInView();
@@ -121,6 +124,7 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 MStatus proxyPaintTool::parseArgs(const MArgList &args)
 {
 	m_operation = opUnknown;
+    m_currentVoxInd = 0;
 	MStatus status;
 	MArgDatabase argData(syntax(), args);
 
@@ -131,6 +135,15 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		m_operation = opBeginPick;
+	}
+    
+    if (argData.isFlagSet(kSelectVoxFlag)) {
+		status = argData.getFlagArgument(kSelectVoxFlag, 0, m_currentVoxInd);
+		if (!status) {
+			status.perror("-selectVox flag parsing failed");
+			return status;
+		}
+		AHelper::Info<int>(" proxyPaintTool select example", m_currentVoxInd);
 	}
 	
 	if (argData.isFlagSet(kDoPickFlag)) {

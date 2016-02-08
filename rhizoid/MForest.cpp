@@ -537,7 +537,8 @@ void MForest::initRandGroup()
 
 void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
-					double percentage)
+					double percentage,
+                    int plantTyp)
 {
 	int i = 0;
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
@@ -545,7 +546,7 @@ void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighG
 	while(!g->end() ) {
 		pickupVisiblePlantsInCell(g->value(), hasCamera, lodLowGate, lodHighGate, 
 					totalGroups, currentGroup, 
-					percentage, i);
+					percentage, plantTyp, i);
 		g->next();
 	}
 	selection()->updateNumSelected();
@@ -555,15 +556,18 @@ void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighG
 void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 					bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
-					double percentage, int & it)
+					double percentage, int plantTyp,
+                    int & it)
 {
 	cell->begin();
 	while(!cell->end() ) {
 		sdb::Plant * pl = cell->value();
 		
-		bool survived = true;
-		if(activePlants()->find(pl->key) ) 
-			survived = false;
+		bool survived = (*pl->index->t3 == plantTyp);
+		if(survived) {
+            if(activePlants()->find(pl->key) ) 
+                survived = false;
+        }
 		
 		if(survived) {
 			if(totalGroups > 1) {

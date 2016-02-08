@@ -56,7 +56,8 @@ protected:
 	void initRandGroup();
 	void pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
-					double percentage);
+					double percentage,
+                    int plantTyp);
 	void saveParticles(MVectorArray & positions,
 						MVectorArray & rotations,
 						MVectorArray & scales);
@@ -74,5 +75,6 @@ private:
 	void pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 					bool hasCamera, float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
-					double percentage, int & it);
+					double percentage, int plantTyp, 
+                    int & it);
 };

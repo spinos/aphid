@@ -25,6 +25,8 @@
 
 class proxyPaintTool : public MPxToolCommand
 {
+    int m_currentVoxInd;
+    
 public:
 					proxyPaintTool(); 
 	virtual			~proxyPaintTool(); 

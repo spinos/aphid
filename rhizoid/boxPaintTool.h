@@ -62,7 +62,7 @@ public:
 	void setMultiCreate(unsigned val);
 	unsigned getMultiCreate() const;
 	void setInstanceGroupCount(unsigned val);
-	unsigned getInstanceGroupCount() const;
+    unsigned getInstanceGroupCount() const;
 	void setWriteCache(MString filename);
 	void setReadCache(MString filename);
 	void cleanup();
