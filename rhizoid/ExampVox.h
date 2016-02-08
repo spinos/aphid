@@ -14,6 +14,8 @@ class ExampVox : public DrawBox {
 
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;
+	Vector3F * m_boxNormalBuf;
+	Vector3F * m_boxPositionBuf;
 	float * m_boxCenterSizeF4;
 	float m_diffuseMaterialColV[3];
 	float m_geomScale[3];
@@ -49,6 +51,8 @@ public:
 	const float * diffuseMaterialColor() const;
 	const float * boxCenterSizeF4() const;
 	const unsigned & numBoxes() const;
+	const float * boxNormalBuf() const;
+	const float * boxPositionBuf() const;
 	
 protected:
 	void drawGrid();
@@ -56,6 +60,7 @@ protected:
 	float * diffuseMaterialColV();
 	float * boxCenterSizeF4();
 	bool setNumBoxes(unsigned n);
+	void buildBoxDrawBuf();
 	
 private:
 

@@ -100,9 +100,10 @@ void ViewCull::ndc(const Vector3F & cameraP, float & coordx, float & coordy) con
 }
 
 bool ViewCull::cullByLod(const float & localZ, const float & radius,
-					const float & lowLod, const float & highLod) const
+					const float & lowLod, const float & highLod,
+					float & details) const
 {
-	float details = radius / (m_detailWidth * localZ / m_farClip);
+	details = radius / (m_detailWidth * localZ / m_farClip);
 	if(details > .999f) details = .999f;
 	if(details < lowLod || details >= highLod) return true;
 	return false;

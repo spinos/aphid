@@ -366,4 +366,5 @@ void ExampViz::setBoxes(const MPointArray & src, const unsigned & num)
 		dst[i*4+2] = p.z;
 		dst[i*4+3] = p.w;
 	}
+	buildBoxDrawBuf();
 }

@@ -155,12 +155,14 @@ void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
 	}
 	
 	float camZ = cameraDepth(worldP);
-	if(cullByLod(camZ, r, .8f, 1.9f) ) {
+	float lod;
+	if(cullByLod(camZ, r, .8f, 1.9f, lod) ) {
 		drawSolidBox(v->geomCenterV(), v->geomScale() );
 		return;
 	}
 	
-	drawSolidBoxArray(v->boxCenterSizeF4(), v->numBoxes() );
+	drawSolidBoxArray(v->boxPositionBuf(), v->boxNormalBuf(), 
+						v->numBoxes() * 36 );
 }
 
 void DrawForest::drawGridBounding()
@@ -264,7 +266,8 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 	float camZ;
 	if(cullByDepth(worldP, r, camZ) ) return false;
 	if(lowLod > 0.f || highLod < 1.f) {
-		if(cullByLod(camZ, r, lowLod, highLod ) ) return false;
+		float lod;
+		if(cullByLod(camZ, r, lowLod, highLod, lod ) ) return false;
 	}
 	return true;
 }

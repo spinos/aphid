@@ -218,3 +218,32 @@ void DrawBox::drawWireBoxArray(const float * data,
 	for(;i<count;i+=stride)
 	    drawWireBox((const float *)&data[i*4], data[i*4+3] );
 }
+
+void DrawBox::setSolidBoxDrawBuffer(const float * center, const float & scale,
+						Vector3F * position, Vector3F * normal) const 
+{
+	for(int i=0;i<36;i++) {
+		normal[i].set(UnitBoxNormal[i][0], 
+						UnitBoxNormal[i][1], 
+						UnitBoxNormal[i][2]);
+        position[i].set(UnitBoxTriangle[i][0] * scale + center[0],
+						UnitBoxTriangle[i][1] * scale + center[1],
+						UnitBoxTriangle[i][2] * scale + center[2]);
+    }
+	
+}
+
+void DrawBox::drawSolidBoxArray(const float * ps,
+						const float * ns,
+						const unsigned & count) const
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)ns);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
+
+	glDrawArrays(GL_TRIANGLES, 0, count);
+	
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}

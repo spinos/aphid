@@ -13,6 +13,8 @@
 
 ExampVox::ExampVox() : 
 m_boxCenterSizeF4(NULL),
+m_boxPositionBuf(NULL),
+m_boxNormalBuf(NULL),
 m_numBoxes(0),
 m_sizeMult(1.f)
 { 
@@ -23,7 +25,11 @@ m_sizeMult(1.f)
 }
 
 ExampVox::~ExampVox() 
-{ if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4; }
+{ 
+	if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4; 
+	if(m_boxPositionBuf) delete[] m_boxPositionBuf;
+	if(m_boxNormalBuf) delete[] m_boxNormalBuf;
+}
 
 void ExampVox::voxelize(KdIntersection * tree)
 { 
@@ -37,9 +43,6 @@ void ExampVox::voxelize(KdIntersection * tree)
 	
 	setNumBoxes(n);
 	
-	if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4;
-	m_boxCenterSizeF4 = new float[m_numBoxes * 4];
-	
 	unsigned i=0;
 	sdb::CellHash * c = grd.cells();
 	c->begin();
@@ -51,6 +54,17 @@ void ExampVox::voxelize(KdIntersection * tree)
 		m_boxCenterSizeF4[i*4+3] = grd.cellSizeAtLevel(c->value()->level);
 	    i++;
 		c->next();   
+	}
+	
+	buildBoxDrawBuf();
+}
+
+void ExampVox::buildBoxDrawBuf() 
+{
+	for (unsigned i=0; i<m_numBoxes;++i) {
+		setSolidBoxDrawBuffer(&m_boxCenterSizeF4[i*4], m_boxCenterSizeF4[i*4+3],
+							&m_boxPositionBuf[i*36],
+							&m_boxNormalBuf[i*36]);
 	}
 }
 
@@ -73,7 +87,7 @@ const float * ExampVox::geomScale() const
 { return m_geomScale; }
 
 void ExampVox::drawGrid()
-{ drawSolidBoxArray(m_boxCenterSizeF4, m_numBoxes); }
+{ drawSolidBoxArray((const float *)m_boxPositionBuf, (const float *)m_boxNormalBuf, m_numBoxes * 36); }
 
 void ExampVox::drawWireGrid()
 { drawWireBoxArray(m_boxCenterSizeF4, m_numBoxes); }
@@ -97,6 +111,13 @@ bool ExampVox::setNumBoxes(unsigned n)
 	m_numBoxes = n;
 	if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4;
 	m_boxCenterSizeF4 = new float[n * 4];
+	
+	if(m_boxNormalBuf) delete[] m_boxNormalBuf;
+	m_boxNormalBuf = new Vector3F[m_numBoxes * 36];
+	
+	if(m_boxPositionBuf) delete[] m_boxPositionBuf;
+	m_boxPositionBuf = new Vector3F[m_numBoxes * 36];
+	
 	return true;
 }
 
@@ -131,3 +152,9 @@ const float * ExampVox::diffuseMaterialColor() const
 
 const float * ExampVox::boxCenterSizeF4() const
 { return m_boxCenterSizeF4; }
+
+const float * ExampVox::boxNormalBuf() const
+{ return (const float *)m_boxNormalBuf; }
+
+const float * ExampVox::boxPositionBuf() const
+{ return (const float *)m_boxPositionBuf; }

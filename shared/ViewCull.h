@@ -47,7 +47,8 @@ public:
 	bool cullByFrustum(const Vector3F & center, const float & radius) const;
 	bool cullByFrustum(const BoundingBox & box) const;
 	bool cullByLod(const float & localZ, const float & radius,
-					const float & lowLod, const float & highLod) const;
+					const float & lowLod, const float & highLod,
+					float & details) const;
 	
 	float cameraDepth(const Vector3F & p) const;
 	

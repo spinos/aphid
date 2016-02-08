@@ -9,7 +9,7 @@
 
 #pragma once
 class BoundingBox;
-
+class Vector3F;
 class DrawBox {
 
 public:
@@ -27,9 +27,15 @@ protected:
 	void drawSolidBoxArray(const float * data,
 						const unsigned & count,
 						const unsigned & stride = 1) const;
+	void drawSolidBoxArray(const float * ps,
+						const float * ns,
+						const unsigned & count) const;
 	void drawWireBoxArray(const float * data,
 						const unsigned & count,
 						const unsigned & stride = 1) const;
+	void setSolidBoxDrawBuffer(const float * center, const float & scale,
+						Vector3F * position, Vector3F * normal) const;
+	
 private:
 	static const float UnitBoxLine[24][3];
 	static const float UnitBoxTriangle[36][3];
