@@ -201,6 +201,7 @@ void MForest::finishGrow()
 {
 	updateGrid();
 	updateNumPlants();
+	selection()->updateNumSelected();
 }
 
 void MForest::erase(const MPoint & origin, const MPoint & dest,
@@ -217,6 +218,7 @@ void MForest::finishErase()
 {
 	updateGrid();
 	updateNumPlants();
+	selection()->updateNumSelected();
 }
 
 void MForest::adjustSize(const MPoint & origin, const MPoint & dest, 

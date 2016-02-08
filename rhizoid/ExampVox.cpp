@@ -16,6 +16,7 @@ m_boxCenterSizeF4(NULL),
 m_boxPositionBuf(NULL),
 m_boxNormalBuf(NULL),
 m_numBoxes(0),
+m_boxBufLength(0),
 m_sizeMult(1.f)
 { 
 	m_diffuseMaterialColV[0] = 0.47f;
@@ -106,9 +107,11 @@ bool ExampVox::setNumBoxes(unsigned n)
 	if(n<1) return false;
 	if(n<=m_numBoxes) {
 		m_numBoxes = n;
+		m_boxBufLength = n * 36;
 		return false;
 	}
 	m_numBoxes = n;
+	m_boxBufLength = n * 36;
 	if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4;
 	m_boxCenterSizeF4 = new float[n * 4];
 	
@@ -158,3 +161,6 @@ const float * ExampVox::boxNormalBuf() const
 
 const float * ExampVox::boxPositionBuf() const
 { return (const float *)m_boxPositionBuf; }
+
+const unsigned & ExampVox::boxBufLength() const
+{ return m_boxBufLength; }

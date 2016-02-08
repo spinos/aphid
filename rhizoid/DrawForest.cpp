@@ -22,8 +22,8 @@ DrawForest::DrawForest()
 
 DrawForest::~DrawForest() {}
 
-void DrawForest::setScaleMuliplier(float x, int idx)
-{ m_scalbuf[idx] = x; }
+void DrawForest::setScaleMuliplier(float x, float y, float z)
+{ m_scalbuf[0] = x; m_scalbuf[1] = y; m_scalbuf[2] = z; }
 
 void DrawForest::drawGround() 
 {
@@ -92,8 +92,7 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf((const GLfloat*)m_transbuf);
 	const ExampVox * v = plantExample(*data->t3);
-	if(v->numBoxes() < 1)
-		drawWireBox(v->geomCenterV(), v->geomScale() );
+	drawWireBox(v->geomCenterV(), v->geomScale() );
 		
 	glPopMatrix();
 }
@@ -102,7 +101,7 @@ void DrawForest::drawPlants()
 {
     sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
-	const float margin = g->gridSize() * .1f;
+	const float margin = g->gridSize() * .13f;
 	glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT);
 	glEnable(GL_LIGHTING);
@@ -162,7 +161,7 @@ void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
 	}
 	
 	drawSolidBoxArray(v->boxPositionBuf(), v->boxNormalBuf(), 
-						v->numBoxes() * 36 );
+						v->boxBufLength() );
 }
 
 void DrawForest::drawGridBounding()

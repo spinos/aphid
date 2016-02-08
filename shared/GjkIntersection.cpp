@@ -16,7 +16,7 @@ Vector3F * PointSet::x()
     
 Vector3F PointSet::supportPoint(const Vector3F & v, Vector3F * localP) const
 { 
-    float maxdotv = -1e8f;
+    float maxdotv = -1e28f;
     float dotv;
 	
     Vector3F res, q;

@@ -26,7 +26,7 @@ public:
     virtual ~DrawForest();
     
 protected:
-	void setScaleMuliplier(float x, int idx);
+	void setScaleMuliplier(float x, float y, float z);
     void drawGround();
 	float plantExtent(int idx) const;
 	void drawPlants();

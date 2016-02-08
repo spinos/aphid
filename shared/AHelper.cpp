@@ -1,7 +1,6 @@
 #include "AHelper.h"
 #include <AllMath.h>
 #include <maya/MFnAnimCurve.h>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
 class MString;

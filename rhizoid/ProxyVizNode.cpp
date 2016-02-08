@@ -186,13 +186,11 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	MObject thisNode = thisMObject();
 	
 	MPlug mutxplug( thisNode, axmultiplier);
-	setScaleMuliplier(mutxplug.asFloat(), 0);
-	
 	MPlug mutyplug( thisNode, aymultiplier);
-	setScaleMuliplier(mutyplug.asFloat(), 1);
-	
 	MPlug mutzplug( thisNode, azmultiplier);
-	setScaleMuliplier(mutzplug.asFloat(), 2);	
+	setScaleMuliplier(mutxplug.asFloat(), 
+						mutyplug.asFloat(),
+						mutzplug.asFloat() );	
 	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
@@ -242,10 +240,12 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		    style == M3dView::kGouraudShaded ) {		
 		drawPlants();
 	}
+	else 
+		drawWiredPlants();
 	
     if(m_hasCamera) drawViewFrustum();
 	drawBrush();
-	drawWiredPlants();
+	
 	drawActivePlants();
 	drawGround();
 	glPopMatrix();

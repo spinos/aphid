@@ -26,6 +26,7 @@ class ExampVox : public DrawBox {
 /// scaling radius of exclusion
 	float m_sizeMult;
 	unsigned m_numBoxes;
+	unsigned m_boxBufLength;
 	
 public:
 	ExampVox();
@@ -53,6 +54,7 @@ public:
 	const unsigned & numBoxes() const;
 	const float * boxNormalBuf() const;
 	const float * boxPositionBuf() const;
+	const unsigned & boxBufLength() const;
 	
 protected:
 	void drawGrid();
