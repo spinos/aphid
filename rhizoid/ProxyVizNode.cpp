@@ -55,6 +55,7 @@ MObject ProxyViz::aplantIdCache;
 MObject ProxyViz::aplantTriangleIdCache;
 MObject ProxyViz::aplantTriangleCoordCache;
 MObject ProxyViz::ainexamp;
+MObject ProxyViz::adisplayVox;
 MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
@@ -189,6 +190,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	setScaleMuliplier(mutxplug.asFloat(), 
 						mutyplug.asFloat(),
 						mutzplug.asFloat() );	
+                        
+    MPlug svtPlug(thisNode, adisplayVox);
+    setShowVoxLodThresold(svtPlug.asFloat() );
 	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
@@ -510,6 +514,15 @@ MStatus ProxyViz::initialize()
 	typedAttrFn.setConnectable(true);
 	typedAttrFn.setArray(true);
 	addAttribute(ainexamp);
+    
+    adisplayVox = numFn.create( "showVoxelThreshold", "svt", MFnNumericData::kFloat );
+	numFn.setDefault(1.0);
+    numFn.setMin(.7);
+    numFn.setMax(1.0);
+    numFn.setStorable(true);
+	numFn.setKeyable(true);
+    addAttribute(adisplayVox);
+    
 	attributeAffects(ainexamp, outValue1);
 	attributeAffects(aradiusMult, outValue1);
 	attributeAffects(abboxminx, outValue);

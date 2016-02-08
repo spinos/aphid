@@ -28,8 +28,8 @@ void ViewCull::setFrustum(const float & horizontalApeture,
 	m_hfov = horizontalApeture * 0.5f / ( focalLength * 0.03937f );
 	m_aspectRatio = verticalApeture / horizontalApeture;
 	m_farClip = clipFar;
-/// 1 / 20 of port width
-	m_detailWidth = -clipFar * m_hfov * .05f;
+/// 1 / 30 of port width
+	m_detailWidth = -clipFar * m_hfov * .066f;
 	m_frustum.set(m_hfov, 
 				m_aspectRatio,
 				clipNear,

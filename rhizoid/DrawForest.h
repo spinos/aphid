@@ -20,6 +20,7 @@ class DrawForest : public sdb::ModifyForest, public ViewDepthCull, public DrawBo
     Matrix44F m_useMat;
 	float m_transbuf[16];
 	float m_scalbuf[3];
+    float m_showVoxLodThresold;
 	
 public:
     DrawForest();
@@ -39,7 +40,8 @@ protected:
 	void drawDepthCull(double * localTm);
 	bool isVisibleInView(sdb::Plant * pl, 
 					const float lowLod, const float highLod);
-	
+	void setShowVoxLodThresold(const float & x);
+    
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, sdb::Plant> * cell);

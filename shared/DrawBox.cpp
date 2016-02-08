@@ -139,11 +139,20 @@ void DrawBox::drawWireBox(const float * center, const float & scale) const
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale, scale, scale);
+#if 0
 	glBegin(GL_LINES);
 	for(int i=0;i<24;i++) {
         glVertex3fv(&UnitBoxLine[i][0]);
     }
 	glEnd();
+#else
+    glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxLine);
+
+	glDrawArrays(GL_LINES, 0, 24);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 	glPopMatrix();
 }
 
@@ -152,12 +161,24 @@ void DrawBox::drawSolidBox(const float * center, const float & scale) const
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale, scale, scale);
+#if 0
 	glBegin(GL_TRIANGLES);
 	for(int i=0;i<36;i++) {
 		glNormal3fv(&UnitBoxNormal[i][0]);
         glVertex3fv(&UnitBoxTriangle[i][0]);
     }
 	glEnd();
+#else
+    glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)UnitBoxNormal);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxTriangle);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 	glPopMatrix();
 }
 
@@ -166,11 +187,20 @@ void DrawBox::drawWireBox(const float * center, const float * scale) const
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale[0], scale[1], scale[2]);
+#if 0
 	glBegin(GL_LINES);
 	for(int i=0;i<24;i++) {
         glVertex3fv(&UnitBoxLine[i][0]);
     }
 	glEnd();
+#else
+    glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxLine);
+
+	glDrawArrays(GL_LINES, 0, 24);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 	glPopMatrix();
 }
 
@@ -179,12 +209,24 @@ void DrawBox::drawSolidBox(const float * center, const float * scale) const
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale[0], scale[1], scale[2]);
+#if 0
 	glBegin(GL_TRIANGLES);
 	for(int i=0;i<36;i++) {
 		glNormal3fv(&UnitBoxNormal[i][0]);
         glVertex3fv(&UnitBoxTriangle[i][0]);
     }
 	glEnd();
+#else
+    glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)UnitBoxNormal);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxTriangle);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 	glPopMatrix();
 }
 	
@@ -244,6 +286,6 @@ void DrawBox::drawSolidBoxArray(const float * ps,
 
 	glDrawArrays(GL_TRIANGLES, 0, count);
 	
-	glEnableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }

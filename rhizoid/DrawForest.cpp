@@ -13,7 +13,7 @@
 #include <DepthCull.h>
 #include <ExampVox.h>
 
-DrawForest::DrawForest() 
+DrawForest::DrawForest() : m_showVoxLodThresold(1.f)
 {
 	m_scalbuf[0] = 1.f; 
 	m_scalbuf[1] = 1.f; 
@@ -59,11 +59,11 @@ void DrawForest::drawWiredPlants()
 {
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
-	const float margin = g->gridSize() * .1f;
+	const float margin = g->gridSize() * .13f;
 	glDepthFunc(GL_LEQUAL);
-	glPushAttrib(GL_LIGHTING_BIT);
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
-	glColor3f(.1f, .1f, .1f);
+	glColor3f(.13f, .13f, .13f);
 	g->begin();
 	while(!g->end() ) {
 		BoundingBox cellBox = g->coordToGridBBox(g->key() );
@@ -152,10 +152,15 @@ void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
 	if(cullByFrustum(worldP, r) ) {
 		return;
 	}
+    
+    if(m_showVoxLodThresold >.9999f) {
+        drawSolidBox(v->geomCenterV(), v->geomScale() );
+		return;
+    }
 	
 	float camZ = cameraDepth(worldP);
 	float lod;
-	if(cullByLod(camZ, r, .8f, 1.9f, lod) ) {
+	if(cullByLod(camZ, r, m_showVoxLodThresold, 1.9f, lod) ) {
 		drawSolidBox(v->geomCenterV(), v->geomScale() );
 		return;
 	}
@@ -270,4 +275,8 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 	}
 	return true;
 }
+
+void DrawForest::setShowVoxLodThresold(const float & x)
+{ m_showVoxLodThresold = x; }
+
 //:~
