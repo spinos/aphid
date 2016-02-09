@@ -459,6 +459,10 @@ char proxyPaintContext::validateViz(const MSelectionList &sels)
     if(vizobj != MObject::kNullObj)
 	{
         MFnDependencyNode fviz(vizobj);
+		if(fviz.typeName() != "proxyViz") {
+			PtrViz = NULL;
+			return 0;
+		}
 		PtrViz = (ProxyViz*)fviz.userNode();
 	}
     
