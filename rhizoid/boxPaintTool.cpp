@@ -11,7 +11,7 @@ const char helpString[] =
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
 proxyPaintContext::proxyPaintContext():mOpt(opSelect),
-m_numSeg(5),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
+m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
 m_growAlongNormal(0),
 m_createMargin(0.1f), 
 m_multiCreate(0),
@@ -209,20 +209,7 @@ void proxyPaintContext::setOperation(short val)
 }
 
 unsigned proxyPaintContext::getOperation() const
-{
-	return mOpt;
-}
-
-void proxyPaintContext::setNSegment(unsigned val)
-{
-	m_numSeg = val;
-	MToolsInfo::setDirtyFlag(*this);
-}
-
-unsigned proxyPaintContext::getNSegment() const
-{
-	return m_numSeg;
-}
+{ return mOpt; }
 
 void proxyPaintContext::setBrushRadius(float val)
 {
@@ -341,6 +328,8 @@ void proxyPaintContext::resize()
 		
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
+	
+    PtrViz->setNoiseWeight(m_rotation_noise);
 	PtrViz->adjustSize(fromNear, fromFar, mag);
 }
 
@@ -348,6 +337,7 @@ void proxyPaintContext::move()
 {
 	if(!PtrViz) return;
 		
+	PtrViz->setNoiseWeight(m_rotation_noise);
 	PtrViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar);
 }
 
@@ -373,6 +363,7 @@ void proxyPaintContext::selectGround()
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
+	PtrViz->setNoiseWeight(m_rotation_noise);
 	PtrViz->selectGround(fromNear, fromFar, m_listAdjustment);
 }
 

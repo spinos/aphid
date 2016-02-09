@@ -44,7 +44,7 @@ class proxyPaintContext : public MPxContext
     
     Operation m_currentOpt, mOpt;
     
-	unsigned m_numSeg, m_growAlongNormal, m_multiCreate;
+	unsigned m_growAlongNormal, m_multiCreate;
 	int m_extractGroupCount, m_plantType;
 	short					start_x, start_y;
 	short					last_x, last_y;
@@ -66,8 +66,6 @@ public:
 	
 	void setOperation(short val);
 	unsigned getOperation() const;
-	void setNSegment(unsigned val);
-	unsigned getNSegment() const;
 	void setBrushRadius(float val);
 	float getBrushRadius() const;
 	void setScaleMin(float val);

@@ -13,8 +13,6 @@
 #define kCreateMarginFlagLong "-marginSize"
 #define kOptFlag "-opt" 
 #define kOptFlagLong "-option"
-#define kNsegFlag "-nsg" 
-#define kNsegFlagLong "-numSegment"
 #define kLsegFlag "-brd" 
 #define kLsegFlagLong "-brushRadius"
 #define kMinFlag "-smn" 
@@ -66,17 +64,6 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			return status;
 		}
 		fContext->setOperation(mode);
-	}
-	
-	if (argData.isFlagSet(kNsegFlag)) 
-	{
-		unsigned nseg;
-		status = argData.getFlagArgument(kNsegFlag, 0, nseg);
-		if (!status) {
-			status.perror("nseg flag parsing failed.");
-			return status;
-		}
-		fContext->setNSegment(nseg);
 	}
 	
 	if (argData.isFlagSet(kLsegFlag)) 
@@ -210,10 +197,6 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		setResult((int)fContext->getOperation());
 	}
 	
-	if (argData.isFlagSet(kNsegFlag)) {
-		setResult((int)fContext->getNSegment());
-	}
-	
 	if (argData.isFlagSet(kLsegFlag)) {
 		setResult((float)fContext->getBrushRadius());
 	}
@@ -264,13 +247,6 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	if(!stat)
 	{
 		MGlobal::displayInfo("failed to add option arg");
-		return MS::kFailure;
-	}
-	
-	stat = mySyntax.addFlag(kNsegFlag, kNsegFlagLong, MSyntax::kUnsigned);
-	if(!stat)
-	{
-		MGlobal::displayInfo("failed to add numseg arg");
 		return MS::kFailure;
 	}
 	

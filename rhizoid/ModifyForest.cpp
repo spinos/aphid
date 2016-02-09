@@ -227,7 +227,7 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 		if(wei > 1e-4f) { 
 			PlantData * plantd = arr->value()->m_reference->index;
 			Matrix44F * mat = plantd->t1;
-            mat->scaleBy(1.f + magnitude * wei);
+            mat->scaleBy(1.f + magnitude * wei * (1.f + getNoise() ) );
 		}
 		arr->next();
 	}
@@ -307,7 +307,7 @@ void ModifyForest::movePlant(const Ray & ray,
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
 			PlantData * plantd = arr->value()->m_reference->index;
-			pos = plantd->t1->getTranslation() + disp * wei;
+			pos = plantd->t1->getTranslation() + disp * wei * (1.f + getNoise() );
 			
 			bindToGround(plantd, pos, bindPos);
 			
