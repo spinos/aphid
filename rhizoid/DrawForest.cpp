@@ -228,21 +228,16 @@ void DrawForest::drawBrush()
     const Vector3F & position = selectionCenter();
     const Vector3F & direction = selectionNormal();
     const float offset = radius * 0.05f;
-    const float part = radius * 0.33f;
-    glPushMatrix();
+    
+	glPushMatrix();
     glTranslatef(position.x, position.y, position.z);
     glTranslatef(direction.x * offset, direction.y * offset, direction.z * offset);
-    
-    glBegin(GL_LINES);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(direction.x * part, direction.y * part, direction.z * part);
-    glEnd();
     
     m_useMat.setFrontOrientation(direction);
 	m_useMat.scaleBy(radius);
     m_useMat.glMatrix(m_transbuf);
     
-    drawCircle(m_transbuf);
+    draw3Circles(m_transbuf);
     glPopMatrix();
     
 }

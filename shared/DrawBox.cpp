@@ -147,7 +147,7 @@ void DrawBox::drawWireBox(const float * center, const float & scale) const
 	glEnd();
 #else
     glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxLine);
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)UnitBoxLine);
 
 	glDrawArrays(GL_LINES, 0, 24);
 	
@@ -171,8 +171,8 @@ void DrawBox::drawSolidBox(const float * center, const float & scale) const
 #else
     glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glNormalPointer(GL_FLOAT, 0, (GLfloat*)UnitBoxNormal);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxTriangle);
+	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)UnitBoxNormal);
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)UnitBoxTriangle);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	
@@ -195,7 +195,7 @@ void DrawBox::drawWireBox(const float * center, const float * scale) const
 	glEnd();
 #else
     glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)UnitBoxLine);
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)UnitBoxLine);
 
 	glDrawArrays(GL_LINES, 0, 24);
 	

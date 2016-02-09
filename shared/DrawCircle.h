@@ -18,6 +18,8 @@ public:
 	
 protected:
 	void drawCircle(const float * mat) const;
+	void draw3Circles(const float * mat) const;
+	void drawCircle() const;
 	
 private:
 

@@ -43,7 +43,7 @@ void BaseCurve::createVertices(unsigned num)
 	m_knots = new float[m_numVertices];
 }
 
-const unsigned BaseCurve::numVertices() const
+const unsigned & BaseCurve::numVertices() const
 {
 	return m_numVertices;
 }
@@ -83,12 +83,12 @@ void BaseCurve::computeKnots()
 	}
 }
 
-Vector3F BaseCurve::getCv(unsigned idx) const
+const Vector3F & BaseCurve::getCv(unsigned idx) const
 {
 	return m_cvs[idx];
 }
 
-float BaseCurve::getKnot(unsigned idx) const
+const float & BaseCurve::getKnot(unsigned idx) const
 {
 	return m_knots[idx];
 }
@@ -171,3 +171,6 @@ bool BaseCurve::intersectRay(unsigned icomponent, const Ray * r)
 	Vector3F P2 = r->m_origin + r->m_dir * r->m_tmax;
 	return (distanceBetweenLines(P1, P2, m_cvs[icomponent], m_cvs[icomponent + 1]) < RayIntersectionTolerance);
 }
+
+const float * BaseCurve::cvV() const
+{ return (const float *)m_cvs; }

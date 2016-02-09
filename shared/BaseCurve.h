@@ -25,15 +25,15 @@ public:
 	
 	void createVertices(unsigned num);
 	
-	const unsigned numVertices() const;
+	const unsigned & numVertices() const;
 	const unsigned numSegments() const;
 	void computeKnots();
 	
 	unsigned segmentByParameter(float param) const;
 	unsigned segmentByLength(float param) const;
 	
-	Vector3F getCv(unsigned idx) const;
-	float getKnot(unsigned idx) const;
+	const Vector3F & getCv(unsigned idx) const;
+	const float & getKnot(unsigned idx) const;
 	
 	void fitInto(BaseCurve & another);
 	
@@ -44,6 +44,8 @@ public:
 	Vector3F calculateStraightPoint(float t, unsigned k0, unsigned k1, Vector3F * data) const;
 	
 	void findNeighborKnots(float param, unsigned & nei0, unsigned & nei1) const;
+	
+	const float * cvV() const;
 	
 	Vector3F * m_cvs;
 	float * m_knots;
