@@ -16,6 +16,7 @@
 
 class proxyPaintContext : public MPxContext
 {
+    
 	M3dView					view;
 	static ProxyViz * PtrViz;
 	
@@ -23,6 +24,24 @@ class proxyPaintContext : public MPxContext
 	float m_brushRadius, m_brushWeight;
 	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
 	
+    enum Operation {
+        opUnknown = 0,
+        opErase = 1,
+        opSelect = 2,
+        opResize = 3,
+        opMove = 4,
+        opRotateY = 5,
+        opRotateZ = 6,
+        opRotateX = 7,
+        opResizeBrush = 8,
+        opSelectGround = 9,
+        opReplace = 10,
+        opCreate = 11,
+        opClean = 99,
+        opFlood = 100,
+        opExtract = 102
+    };
+    
 	unsigned mOpt, m_numSeg, m_growAlongNormal, m_multiCreate;
 	int m_extractGroupCount, m_plantType;
 	short					start_x, start_y;

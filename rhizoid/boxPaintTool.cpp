@@ -3,8 +3,6 @@
 #include <maya/MPointArray.h>
 #include <maya/MDagModifier.h>
 #include <maya/MToolsInfo.h>
-
-#include "../core/TriangleRaster.h"
 #include <ASearchHelper.h>
 
 const char helpString[] =
@@ -12,7 +10,8 @@ const char helpString[] =
 
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
-proxyPaintContext::proxyPaintContext():mOpt(999),m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
+proxyPaintContext::proxyPaintContext():mOpt(opSelect),
+m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
 m_growAlongNormal(0),
 m_createMargin(0.1f), 
 m_multiCreate(0),
@@ -24,7 +23,6 @@ m_plantType(0)
 	// Tell the context which XPM to use so the tool can properly
 	// be a candidate for the 6th position on the mini-bar.
 	setImage("proxyPaintTool.xpm", MPxContext::kImage1 );
-	setOperation(2);
 	attachSceneCallbacks();
 }
 
@@ -56,50 +54,47 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 
 	validateSelection();
 
-	if(mOpt == 2) startProcessSelect();
-	if(mOpt == 9) startSelectGround();
+	if(mOpt == opSelect) startProcessSelect();
+	if(mOpt == opSelectGround) startSelectGround();
 	
 	return MS::kSuccess;		
 }
 
 
 MStatus proxyPaintContext::doDrag( MEvent & event )
-//
-// Drag out the proxyPaint (using OpenGL)
-//
 {
 	event.getPosition( last_x, last_y );
 
 	switch (mOpt)
 	{
-		case 0 :
+		case opCreate :
 			grow();
 			break;
-		case 1 :
+		case opErase :
 			erase();
 			break;
-		case 2 : 
+		case opSelect : 
 			processSelect();
 			break;
-		case 3 :
+		case opResize :
 			resize();
 			break;
-		case 4 :
+		case opMove :
 			move();
 			break;
-		case 5 :
+		case opRotateY :
 			rotateAroundAxis(1);
 			break;
-		case 6 :
+		case opRotateZ :
 			rotateAroundAxis(2);
 			break;
-		case 7 :
+		case opRotateX :
 			rotateAroundAxis(0);
 			break;
-		case 9 :
+		case opSelectGround :
 			selectGround();
 			break;
-		case 10 :
+		case opReplace :
 			replace();
 			break;
 		default:
@@ -118,10 +113,9 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	event.getPosition( last_x, last_y );
 	
 	if(!PtrViz) return MS::kSuccess;
-	if(mOpt==0) PtrViz->finishGrow();
-	if(mOpt==1) PtrViz->finishErase();
-	if(mOpt==2) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
-	if(mOpt==9) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
+	if(mOpt==opErase) PtrViz->finishErase();
+	if(mOpt==opSelect) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
+	if(mOpt==opSelectGround) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
 	
 	return MS::kSuccess;		
 }
@@ -138,71 +132,62 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(unsigned val)
 {
-	if(val == 99) {
+	if(val == opClean) {
 		cleanup();
 		return;
 	}
 	
-	if(val==100) {
+	if(val==opFlood) {
 		flood();
 		return;
 	}
 	
-	if(val==101) {
-		//snap();
-		return;
-	}
-	
-	if(val == 102) {
+	if(val ==opExtract) {
 		extractSelected();
 		return;
 	}
 	
-	if(val == 103) {
-		//erectSelected();
-		return;
-	}
-	
+    std::string opstr("unknown");
 	mOpt = val;
 	switch (mOpt)
 	{
-		case 0:
-			MGlobal::displayInfo("proxyPaint set to create");
+		case opCreate:
+			opstr="create";
 			break;
-		case 1: 
-			MGlobal::displayInfo("proxyPaint set to erase");
+		case opErase: 
+			opstr="erase";
 			break;
-		case 2: 
-			MGlobal::displayInfo("proxyPaint set to select");
+		case opSelect: 
+			opstr="select";
 			break;
-		case 3:
-			MGlobal::displayInfo("proxyPaint set to scale");
+		case opResize:
+			opstr="scale";
 			break;
-		case 4:
-			MGlobal::displayInfo("proxyPaint set to move");
+		case opMove:
+			opstr="move";
 			break;
-		case 5:
-			MGlobal::displayInfo("proxyPaint set to rotate y");
+		case opRotateY:
+			opstr="rotate y";
 			break;
-		case 6:
-			MGlobal::displayInfo("proxyPaint set to rotate z");
+		case opRotateZ:
+			opstr="rotate z";
 			break;
-		case 7:
-			MGlobal::displayInfo("proxyPaint set to rotate x");
+		case opRotateX:
+			opstr="rotate x";
 			break;
-		case 8:
-			MGlobal::displayInfo("proxyPaint set to translate along y axis");
+		case opResizeBrush:
+			opstr="resize brush";
 			break;
-		case 9:
-			MGlobal::displayInfo("proxyPaint set to select ground faces");
+		case opSelectGround:
+			opstr="ground faces";
 			break;
-		case 10:
-			MGlobal::displayInfo("proxyPaint set to replace");
+		case opReplace:
+			opstr="replace";
 			break;
 		default:
 			;
 	}
-	
+	AHelper::Info<std::string>("proxyPaintTool set operation mode", opstr);
 	MToolsInfo::setDirtyFlag(*this);
 }
 
@@ -569,8 +554,6 @@ void proxyPaintContext::detachSceneCallbacks()
 }
 
 void proxyPaintContext::releaseCallback(void* clientData)
-{
-	PtrViz = NULL;
-}
+{ PtrViz = NULL; }
 	
 //:~
