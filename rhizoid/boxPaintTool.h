@@ -21,7 +21,7 @@ class proxyPaintContext : public MPxContext
 	static ProxyViz * PtrViz;
 	
 	double clipNear, clipFar;
-	float m_brushRadius, m_brushWeight;
+	float m_brushWeight;
 	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
 	
     enum Operation {
@@ -42,7 +42,9 @@ class proxyPaintContext : public MPxContext
         opExtract = 102
     };
     
-	unsigned mOpt, m_numSeg, m_growAlongNormal, m_multiCreate;
+    Operation m_currentOpt, mOpt;
+    
+	unsigned m_numSeg, m_growAlongNormal, m_multiCreate;
 	int m_extractGroupCount, m_plantType;
 	short					start_x, start_y;
 	short					last_x, last_y;
@@ -62,7 +64,7 @@ public:
 	
 	virtual	void	getClassName(MString & name) const;
 	
-	void setOperation(unsigned val);
+	void setOperation(short val);
 	unsigned getOperation() const;
 	void setNSegment(unsigned val);
 	unsigned getNSegment() const;
@@ -112,6 +114,7 @@ private:
 	void setGrowOption(ProxyViz::GrowOption & opt);
 	void finishGrow();
 	void replace();
+    void scaleBrush();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

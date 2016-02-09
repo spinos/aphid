@@ -6,12 +6,12 @@
 #include <ASearchHelper.h>
 
 const char helpString[] =
-			"Select a proxy viz to paint on.";
+			"Select a proxy viz to paint on";
 
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
 proxyPaintContext::proxyPaintContext():mOpt(opSelect),
-m_numSeg(5),m_brushRadius(8.f),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
+m_numSeg(5),m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
 m_growAlongNormal(0),
 m_createMargin(0.1f), 
 m_multiCreate(0),
@@ -53,9 +53,12 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 	clipFar = fnCamera.farClippingPlane();
 
 	validateSelection();
+    
+    if(event.isModifierShift()) m_currentOpt = opResizeBrush;
+    else m_currentOpt = mOpt;
 
-	if(mOpt == opSelect) startProcessSelect();
-	if(mOpt == opSelectGround) startSelectGround();
+	if(m_currentOpt == opSelect) startProcessSelect();
+	if(m_currentOpt == opSelectGround) startSelectGround();
 	
 	return MS::kSuccess;		
 }
@@ -65,7 +68,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 {
 	event.getPosition( last_x, last_y );
 
-	switch (mOpt)
+	switch (m_currentOpt)
 	{
 		case opCreate :
 			grow();
@@ -97,13 +100,16 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 		case opReplace :
 			replace();
 			break;
+        case opResizeBrush :
+            scaleBrush();
+            break;
 		default:
 			;
 	}
 
 	start_x = last_x;
-	start_y = last_y;
-	
+    start_y = last_y;
+    
 	view.refresh( true );
 	return MS::kSuccess;		
 }
@@ -113,9 +119,9 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	event.getPosition( last_x, last_y );
 	
 	if(!PtrViz) return MS::kSuccess;
-	if(mOpt==opErase) PtrViz->finishErase();
-	if(mOpt==opSelect) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
-	if(mOpt==opSelectGround) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
+	if(m_currentOpt==opErase) PtrViz->finishErase();
+	if(m_currentOpt==opSelect) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
+	if(m_currentOpt==opSelectGround) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
 	
 	return MS::kSuccess;		
 }
@@ -130,7 +136,7 @@ void proxyPaintContext::getClassName( MString & name ) const
 	name.set("proxyPaint");
 }
 
-void proxyPaintContext::setOperation(unsigned val)
+void proxyPaintContext::setOperation(short val)
 {
 	if(val == opClean) {
 		cleanup();
@@ -148,47 +154,58 @@ void proxyPaintContext::setOperation(unsigned val)
 	}
 	
     std::string opstr("unknown");
-	mOpt = val;
-	switch (mOpt)
+	mOpt = opUnknown;
+	switch (val)
 	{
 		case opCreate:
 			opstr="create";
+            mOpt = opCreate;
 			break;
 		case opErase: 
 			opstr="erase";
+            mOpt = opErase;
 			break;
 		case opSelect: 
 			opstr="select";
+            mOpt =opSelect;
 			break;
 		case opResize:
 			opstr="scale";
+            mOpt = opResize;
 			break;
 		case opMove:
 			opstr="move";
+            mOpt = opMove;
 			break;
 		case opRotateY:
 			opstr="rotate y";
+            mOpt = opRotateY;
 			break;
 		case opRotateZ:
 			opstr="rotate z";
+            mOpt = opRotateZ;
 			break;
 		case opRotateX:
 			opstr="rotate x";
+            mOpt = opRotateX;
 			break;
 		case opResizeBrush:
 			opstr="resize brush";
+            mOpt = opResizeBrush;
 			break;
 		case opSelectGround:
 			opstr="ground faces";
+            mOpt = opSelectGround;
 			break;
 		case opReplace:
 			opstr="replace";
+            mOpt = opReplace;
 			break;
 		default:
 			;
 	}
 	AHelper::Info<std::string>("proxyPaintTool set operation mode", opstr);
-	MToolsInfo::setDirtyFlag(*this);
+    MToolsInfo::setDirtyFlag(*this);
 }
 
 unsigned proxyPaintContext::getOperation() const
@@ -209,13 +226,18 @@ unsigned proxyPaintContext::getNSegment() const
 
 void proxyPaintContext::setBrushRadius(float val)
 {
-	m_brushRadius = val;
+    if(PtrViz)
+        PtrViz->setSelectionRadius(val);
+        
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getBrushRadius() const
 {
-	return m_brushRadius;
+    if(PtrViz)
+        return PtrViz->selectionRadius();
+        
+	return 8.f;
 }
 
 void proxyPaintContext::setScaleMin(float val)
@@ -288,9 +310,7 @@ void proxyPaintContext::setMultiCreate(unsigned val)
 }
 
 unsigned proxyPaintContext::getMultiCreate() const
-{
-	return m_multiCreate;
-}
+{ return m_multiCreate; }
 
 void proxyPaintContext::setInstanceGroupCount(unsigned val)
 {
@@ -300,8 +320,17 @@ void proxyPaintContext::setInstanceGroupCount(unsigned val)
 }
 
 unsigned proxyPaintContext::getInstanceGroupCount() const
+{ return m_extractGroupCount; }
+
+void proxyPaintContext::scaleBrush()
 {
-	return m_extractGroupCount;
+    if(!PtrViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+		
+	float mag = last_x - start_x - last_y + start_y;
+	mag /= 48;
+	PtrViz->adjustBrushSize(fromNear, fromFar, mag);
 }
 
 void proxyPaintContext::resize()
@@ -312,7 +341,6 @@ void proxyPaintContext::resize()
 		
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
-	
 	PtrViz->adjustSize(fromNear, fromFar, mag);
 }
 

@@ -42,7 +42,8 @@ protected:
 					const Vector3F & displaceNear, const Vector3F & displaceFar,
 					const float & clipNear, const float & clipFar);
 	void moveWithGround();
-	
+	void scaleBrushAt(const Ray & ray, float magnitude);
+    
 private:
 	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
 					int geoId,

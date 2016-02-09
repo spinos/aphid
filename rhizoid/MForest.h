@@ -27,6 +27,8 @@ public:
 	void erase(const MPoint & origin, const MPoint & dest,
 					GrowOption & option);
 	void finishErase();
+    void adjustBrushSize(const MPoint & origin, const MPoint & dest, 
+                    float magnitude);
 	void adjustSize(const MPoint & origin, const MPoint & dest, 
                      float magnitude);
 	void adjustRotation(const MPoint & origin, const MPoint & dest, 

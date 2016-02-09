@@ -229,13 +229,25 @@ void MForest::finishErase()
 	selection()->updateNumSelected();
 }
 
+void MForest::adjustBrushSize(const MPoint & origin, const MPoint & dest, 
+                         float magnitude)
+{
+    Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	if(magnitude > .5f) magnitude = .5f;
+    if(magnitude < -.5f) magnitude = -.5f;
+    scaleBrushAt(r, magnitude);
+}
+
 void MForest::adjustSize(const MPoint & origin, const MPoint & dest, 
                          float magnitude)
 {
     Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
-	
+	if(magnitude > .5f) magnitude = .5f;
+    if(magnitude < -.5f) magnitude = -.5f;
     scaleAt(r, magnitude);
 }
 

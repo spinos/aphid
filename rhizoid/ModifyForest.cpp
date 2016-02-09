@@ -203,6 +203,19 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 	idToClear.clear();
 }
 
+void ModifyForest::scaleBrushAt(const Ray & ray, float magnitude)
+{
+    if(!intersectGround(ray) ) return;
+	
+	IntersectionContext * ctx = intersection();
+	
+	selection()->setCenter(ctx->m_hitP, ctx->m_hitN);
+	
+    float r = selection()->radius();
+    r *= 1.f + magnitude;
+    selection()->setRadius(r);
+}
+
 void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 {
     if(!calculateSelecedWeight(ray)) return;

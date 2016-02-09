@@ -103,6 +103,9 @@ public:
 	void setEnableCompute(bool x);
 	
 private:
+    void drawBrush(M3dView & view);
+	
+private:
 	char hasDisplayMesh() const;
 	std::string replaceEnvVar(const MString & filename) const;
     

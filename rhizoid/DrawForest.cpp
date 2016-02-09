@@ -227,11 +227,10 @@ void DrawForest::drawBrush()
     const float & radius = selectionRadius();
     const Vector3F & position = selectionCenter();
     const Vector3F & direction = selectionNormal();
-    const float offset = radius * 0.05f;
     
 	glPushMatrix();
     glTranslatef(position.x, position.y, position.z);
-    glTranslatef(direction.x * offset, direction.y * offset, direction.z * offset);
+    glTranslatef(direction.x, direction.y, direction.z);
     
     m_useMat.setFrontOrientation(direction);
 	m_useMat.scaleBy(radius);

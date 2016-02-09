@@ -36,12 +36,12 @@ protected:
 	void drawGrid();
 	void drawActivePlants();
 	void drawViewFrustum();
-	void drawBrush();
 	void drawDepthCull(double * localTm);
 	bool isVisibleInView(sdb::Plant * pl, 
 					const float lowLod, const float highLod);
 	void setShowVoxLodThresold(const float & x);
-    
+    void drawBrush();
+	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, sdb::Plant> * cell);

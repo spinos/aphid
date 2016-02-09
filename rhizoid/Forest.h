@@ -64,7 +64,8 @@ public:
 	unsigned numActiveGroundFaces();
 	const unsigned & numActivePlants() const;
 	void removeAllPlants();
-	
+	const float & selectionRadius() const;
+    
 protected:
 	void resetGrid(float gridSize);
 	void updateGrid();
@@ -101,7 +102,6 @@ protected:
 	void addPlant(const Matrix44F & tm,
 					const GroundBind & bind,
 					const int & plantTypeId);
-    const float & selectionRadius() const;
     const Vector3F & selectionCenter() const;
     const Vector3F & selectionNormal() const;
     

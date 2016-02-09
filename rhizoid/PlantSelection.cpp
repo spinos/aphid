@@ -23,7 +23,10 @@ PlantSelection::~PlantSelection()
 { delete m_plants; }
 	
 void PlantSelection::setRadius(float x)
-{ m_radius = x; }
+{ 
+    m_radius = x; 
+    if(m_radius < .1f) m_radius = .1f;
+}
 
 void PlantSelection::setCenter(const Vector3F & center, const Vector3F & direction)
 {

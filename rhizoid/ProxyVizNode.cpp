@@ -246,8 +246,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		drawWiredPlants();
 	
     if(m_hasCamera) drawViewFrustum();
-	drawBrush();
-	
+    
+	drawBrush(view);
 	drawActivePlants();
 	drawGround();
 	glPopMatrix();
@@ -822,5 +822,16 @@ void ProxyViz::updateGeomBox(ExampVox * dst, MObject & node)
 			MPlug(node, abboxmaxx).asFloat(), 
 			MPlug(node, abboxmaxy).asFloat(), 
 			MPlug(node, abboxmaxz).asFloat());
+}
+
+void ProxyViz::drawBrush(M3dView & view)
+{
+    const float & radius = selectionRadius();
+    MString radstr("radius: ");
+    radstr += radius;
+    const Vector3F & position = selectionCenter();
+    view.drawText(radstr, MPoint(position.x, position.y, position.z) );
+	
+    DrawForest::drawBrush();
 }
 //:~
