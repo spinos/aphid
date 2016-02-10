@@ -234,8 +234,6 @@ add_library(aphid STATIC ../shared/line_math.h
 ../btree/BNode.cpp
 ../btree/BTree.cpp
 ../btree/Entity.cpp
-../btree/Sequence.cpp
-../btree/Array.cpp
 ../btree/MortonHash.cpp
 ../shared/BaseSampler.cpp
 ../shared/AField.cpp
