@@ -1,0 +1,6 @@
+set (CMAKE_BUILD_TYPE  Release )
+set_target_properties(proxyPaint PROPERTIES SUFFIX .mll)
+add_library(target MODULE ${SOURCES})
+add_definitions (-D_BOOL -DREQUIRE_IOSTREAM -DNDEBUG)
+set(CMAKE_MODULE_LINKER_FLAGS "/export:initializePlugin /export:uninitializePlugin")
+
