@@ -17,7 +17,9 @@ set (_HAS_CPP0X 0)
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 ELSE ()
-include_directories(../../Library/boost_1_55_0 ../../Library/hdf5/include)
+set (AttributeNoninline "__attribute__ ((noinline))")
+add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+include_directories(../../Library/boost_1_43_0 ../../Library/hdf5/include)
 ENDIF()
 add_library(aphid STATIC ../shared/line_math.h
 		../shared/tetrahedron_math.h
