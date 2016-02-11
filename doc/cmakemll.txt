@@ -1,0 +1,9 @@
+set (CMAKE_BUILD_TYPE  Release )
+add_definitions (-D_BOOL -DREQUIRE_IOSTREAM -DNDEBUG)
+set(CMAKE_MODULE_LINKER_FLAGS "/export:initializePlugin /export:uninitializePlugin")
+
+add_library(target MODULE ${SOURCES})
+set_target_properties(target PROPERTIES SUFFIX .mll)
+#foreach target include relevant maya include
+target_include_directories (target PRIVATE ${MAYA_INCLUDE_PATH_2010})
+
