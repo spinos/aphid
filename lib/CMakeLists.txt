@@ -23,25 +23,20 @@ ENDIF()
 
 
 if (WIN32)
-	IF (EXISTS "D:/usr/hdf5/include")
-		SET (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
-	ENDIF ()
-
-elseif (APPLE)
-	IF (EXISTS "/users/jianzhang/Library/hdf5/include")
-		SET (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
-	ENDIF ()
-	
+	IF (EXISTS "D:/usr/hdf5")
+		SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
+		SET (HDF5_LIBRARIES "D:/usr/hdf5/lib")
+		SET (HDF5_DIR "D:/usr/hdf5")
+	ENDIF ()	
 endif ()
-
+		
 FIND_PACKAGE (HDF5 REQUIRED)
 	
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
-MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIR} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
-include_directories (${HDF5_INCLUDE_DIR})
-include_directories (${HDF5_INCLUDE_DIR}/boost/tr1/tr1)
+include_directories (${HDF5_INCLUDE_DIRS})
 
 if(WIN32)
 	IF (EXISTS "D:/usr/boost_1_51_0")
@@ -70,6 +65,7 @@ MESSAGE (" boost regex is " ${Boost_REGEX_LIBRARY})
 MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 
 include_directories (${Boost_INCLUDE_DIR})
+include_directories (${Boost_INCLUDE_DIR}/boost/tr1/tr1)
 
 add_library(aphid STATIC ../shared/line_math.h
 		../shared/tetrahedron_math.h

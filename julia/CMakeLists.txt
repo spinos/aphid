@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (julia)
- 
+SET (CMAKE_BUILD_TYPE Release)
 include_directories ("." "../shared" "../btree")
 
 set (HEADER_FILES ../btree/HWorldGrid.h
@@ -15,30 +15,29 @@ add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
 
 if (WIN32)
 	IF (EXISTS "D:/usr/hdf5/include")
-		SET (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
+		SET (HDF5_ROOT "D:/usr/hdf5")
 	ENDIF ()
-
-elseif (APPLE)
-	IF (EXISTS "/users/jianzhang/Library/hdf5/include")
-		SET (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
-	ENDIF ()
-	
 endif ()
 
 FIND_PACKAGE (HDF5 REQUIRED)
 	
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
-MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIR} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
 if(WIN32)
 set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
-target_link_libraries (julia "D:/usr/hdf5/lib/zlib.lib")
+# target_link_libraries (julia "D:/usr/hdf5/lib/zlib.lib")
 endif()
-
 
 include_directories (${HDF5_INCLUDE_DIR})
 target_link_libraries (julia ${HDF5_LIBRARIES})
+
+FIND_PACKAGE (ZLIB REQUIRED)
+MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARIES})
+
+target_link_libraries (julia ${ZLIB_LIBRARIES})
 
 if(WIN32)
 	IF (EXISTS "D:/usr/boost_1_51_0")
