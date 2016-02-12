@@ -6,9 +6,7 @@ include_directories(../mallard ../shared ../lapl ../catmullclark ../easymodel ..
 ../kdtree
 ../hesperis)
 IF (WIN32)
-include_directories(D:/usr/boost_1_51_0 
-D:/usr/libxml2/include D:/usr/HDF5/include
-D:/usr/boost_1_51_0/boost/tr1/tr1)
+include_directories(D:/usr/libxml2/include D:/usr/HDF5/include)
 ADD_DEFINITIONS( -DNDEBUG -D_WIN32_WINDOWS 
 ## http://www.boost.org/doc/libs/1_49_0/libs/config/doc/html/boost_config/boost_macro_reference.html
 -DBOOST_HAS_TR1)
@@ -16,11 +14,63 @@ ADD_DEFINITIONS( -DNDEBUG -D_WIN32_WINDOWS
 set (_HAS_CPP0X 0)
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+
 ELSE ()
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
-include_directories(../../Library/boost_1_43_0 ../../Library/hdf5/include)
+
 ENDIF()
+
+
+if (WIN32)
+	IF (EXISTS "D:/usr/hdf5/include")
+		SET (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
+	ENDIF ()
+
+elseif (APPLE)
+	IF (EXISTS "/users/jianzhang/Library/hdf5/include")
+		SET (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
+	ENDIF ()
+	
+endif ()
+
+FIND_PACKAGE (HDF5 REQUIRED)
+	
+MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIR} )
+MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
+
+include_directories (${HDF5_INCLUDE_DIR})
+include_directories (${HDF5_INCLUDE_DIR}/boost/tr1/tr1)
+
+if(WIN32)
+	IF (EXISTS "D:/usr/boost_1_51_0")
+		SET (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
+	
+	ENDIF ()
+	set (Boost_USE_STATIC_LIBS ON)
+	set (Boost_USE_MULTITHREADED ON)
+	
+ELSEIF (APPLE)
+	IF (EXISTS "/users/jianzhang/Library/boost_1_55_0")
+		SET (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
+	ELSEIF (EXISTS "/users/jollyroger/Library/boost_1_43_0")
+		SET (Boost_INCLUDE_DIR "/users/jollyroger/Library/boost_1_43_0")
+	ENDIF ()
+	
+endif()
+
+FIND_PACKAGE (Boost REQUIRED COMPONENTS system filesystem date_time regex)	
+	
+MESSAGE (" boost version is " ${Boost_VERSION})
+MESSAGE (" boost include is " ${Boost_INCLUDE_DIR} )
+MESSAGE (" boost system is " ${Boost_SYSTEM_LIBRARY})
+MESSAGE (" boost date_time is " ${Boost_DATE_TIME_LIBRARY})
+MESSAGE (" boost regex is " ${Boost_REGEX_LIBRARY})
+MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
+
+include_directories (${Boost_INCLUDE_DIR})
+
 add_library(aphid STATIC ../shared/line_math.h
 		../shared/tetrahedron_math.h
                 ../shared/Vector3F.cpp 

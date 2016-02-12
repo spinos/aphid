@@ -1,5 +1,5 @@
 #include "Parameter.h"
-
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

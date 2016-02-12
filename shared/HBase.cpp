@@ -294,23 +294,7 @@ char HBase::readCharData(const char * dataName, unsigned count, char *dst, HData
 }
 
 char HBase::hasNamedAttr(const char * attrName)
-{
-    const int n = numAttrs();
-    if(n<1) return 0;
-	//std::cout<<"\n "<<fObjectPath<<" has "<<nattr<<" attrs\n";
-	int i;
-	for(i = 0; i < n; i++) {
-		hid_t aid = H5Aopen_idx(fObjectId, i);
-		//std::cout<<getAttrName(aid)<<"\n";
-		if(getAttrName(aid) == attrName) {
-			//std::cout<<"found "<<attrName;
-			H5Aclose(aid);
-			return 1;
-		}
-		H5Aclose(aid);
-	}
-	return 0;
-}
+{ return H5Aexists(fObjectId, attrName) > 0; }
 
 std::string HBase::getAttrName(hid_t attrId)
 {
@@ -395,8 +379,9 @@ int HBase::numChildren()
 
 int HBase::numAttrs()
 {
-	hsize_t nattr = H5Aget_num_attrs(fObjectId);
-	return (int)nattr;
+    H5O_info_t oinfo;
+    H5Oget_info(fObjectId, &oinfo);
+    return oinfo.num_attrs;
 }
 
 int HBase::numDatas()
