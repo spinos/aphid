@@ -46,17 +46,6 @@ class Forest {
 	unsigned m_numPlants;
 	
 public:
-	struct GrowOption {
-		Vector3F m_upDirection;
-		int m_plantId;
-		float m_minScale, m_maxScale;
-		float m_marginSize;
-		float m_rotateNoise;
-		float m_strength;
-		bool m_alongNormal;
-		bool m_multiGrow;
-	};
-	
 	Forest();
 	virtual ~Forest();
 	

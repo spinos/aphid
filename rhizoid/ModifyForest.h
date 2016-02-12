@@ -24,6 +24,17 @@ class ModifyForest : public Forest {
 	float m_noiseWeight;
     
 public:
+    struct GrowOption {
+		Vector3F m_upDirection;
+		int m_plantId;
+		float m_minScale, m_maxScale;
+		float m_minMarginSize, m_maxMarginSize;
+		float m_rotateNoise;
+		float m_strength;
+		bool m_alongNormal;
+		bool m_multiGrow;
+	};
+    
 	ModifyForest();
 	virtual ~ModifyForest();
 	
@@ -59,6 +70,7 @@ private:
 	void movePlantsWithGround(Array<int, Plant> * arr);
 	bool calculateSelecedWeight(const Ray & ray);
     float getNoise() const;
+    float getNoise2(const float & a, const float & b) const;
     
 };
 

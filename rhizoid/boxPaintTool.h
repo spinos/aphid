@@ -21,8 +21,6 @@ class proxyPaintContext : public MPxContext
 	static ProxyViz * PtrViz;
 	
 	double clipNear, clipFar;
-	float m_brushWeight;
-	float m_min_scale, m_max_scale, m_rotation_noise, m_createMargin;
 	
     enum Operation {
         opUnknown = 0,
@@ -44,8 +42,9 @@ class proxyPaintContext : public MPxContext
     
     Operation m_currentOpt, mOpt;
     
-	unsigned m_growAlongNormal, m_multiCreate;
-	int m_extractGroupCount, m_plantType;
+    ProxyViz::GrowOption m_growOpt;
+    
+	int m_extractGroupCount;
 	short					start_x, start_y;
 	short					last_x, last_y;
 
@@ -86,8 +85,10 @@ public:
 	void setReadCache(MString filename);
 	void cleanup();
 	char getSelectedViz();
-	void setCreateMargin(float x);
-	const float & createMargin();
+	void setMinCreateMargin(float x);
+	const float & minCreateMargin();
+    void setMaxCreateMargin(float x);
+	const float & maxCreateMargin();
 	void setPlantType(int x);
 	const int & plantType() const;
 	
@@ -109,7 +110,6 @@ private:
 	void smoothSelected();
 	void selectGround();
 	void startSelectGround();
-	void setGrowOption(ProxyViz::GrowOption & opt);
 	void finishGrow();
 	void replace();
     void scaleBrush();

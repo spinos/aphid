@@ -10,13 +10,8 @@ const char helpString[] =
 
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
-proxyPaintContext::proxyPaintContext():mOpt(opSelect),
-m_brushWeight(.66f),m_min_scale(1.f),m_max_scale(1.f),m_rotation_noise(0.f),
-m_growAlongNormal(0),
-m_createMargin(0.1f), 
-m_multiCreate(0),
-m_extractGroupCount(1),
-m_plantType(0)
+proxyPaintContext::proxyPaintContext() : mOpt(opSelect),
+m_extractGroupCount(1)
 {
 	setTitleString ( "proxyPaint Tool" );
 
@@ -24,6 +19,18 @@ m_plantType(0)
 	// be a candidate for the 6th position on the mini-bar.
 	setImage("proxyPaintTool.xpm", MPxContext::kImage1 );
 	attachSceneCallbacks();
+    
+    ProxyViz::GrowOption & gop = m_growOpt;
+    gop.m_upDirection = Vector3F::YAxis;
+	gop.m_alongNormal = 0;
+	gop.m_minScale = 1.f;
+	gop.m_maxScale = 1.f;
+	gop.m_rotateNoise = 0.f;
+	gop.m_plantId = 0;
+	gop.m_multiGrow = 0;
+	gop.m_minMarginSize = .1f;
+	gop.m_maxMarginSize = .1f;
+	gop.m_strength = .67f;
 }
 
 proxyPaintContext::~proxyPaintContext()
@@ -229,46 +236,46 @@ float proxyPaintContext::getBrushRadius() const
 
 void proxyPaintContext::setScaleMin(float val)
 {
-	m_min_scale = val;
+	m_growOpt.m_minScale = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getScaleMin() const
 {
-	return m_min_scale;
+	return m_growOpt.m_minScale;
 }
 
 void proxyPaintContext::setScaleMax(float val)
 {
-	m_max_scale = val;
+	m_growOpt.m_maxScale = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getScaleMax() const
 {
-	return m_max_scale;
+	return m_growOpt.m_maxScale;
 }
 
 void proxyPaintContext::setRotationNoise(float val)
 {
-	m_rotation_noise = val;
+	m_growOpt.m_rotateNoise = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getRotationNoise() const
 {
-	return m_rotation_noise;
+	return m_growOpt.m_rotateNoise;
 }
 
 void proxyPaintContext::setBrushWeight(float val)
 {
-	m_brushWeight = val;
+	m_growOpt.m_strength = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getBrushWeight() const
 {
-	return m_brushWeight;
+	return m_growOpt.m_strength;
 }
 
 void proxyPaintContext::setGrowAlongNormal(unsigned val)
@@ -277,13 +284,13 @@ void proxyPaintContext::setGrowAlongNormal(unsigned val)
 		MGlobal::displayInfo("proxyPaint enable grow along face normal");
 	else
 		MGlobal::displayInfo("proxyPaint disable grow along face normal");
-	m_growAlongNormal = val;
+	m_growOpt.m_alongNormal = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 unsigned proxyPaintContext::getGrowAlongNormal() const
 {
-	return m_growAlongNormal;
+	return m_growOpt.m_alongNormal;
 }
 
 void proxyPaintContext::setMultiCreate(unsigned val)
@@ -292,12 +299,12 @@ void proxyPaintContext::setMultiCreate(unsigned val)
 		MGlobal::displayInfo("proxyPaint enable multiple create");
 	else
 		MGlobal::displayInfo("proxyPaint disable multiple create");
-	m_multiCreate = val;
+	m_growOpt.m_multiGrow = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 unsigned proxyPaintContext::getMultiCreate() const
-{ return m_multiCreate; }
+{ return m_growOpt.m_multiGrow; }
 
 void proxyPaintContext::setInstanceGroupCount(unsigned val)
 {
@@ -329,7 +336,7 @@ void proxyPaintContext::resize()
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	
-    PtrViz->setNoiseWeight(m_rotation_noise);
+    PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
 	PtrViz->adjustSize(fromNear, fromFar, mag);
 }
 
@@ -337,7 +344,7 @@ void proxyPaintContext::move()
 {
 	if(!PtrViz) return;
 		
-	PtrViz->setNoiseWeight(m_rotation_noise);
+	PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
 	PtrViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar);
 }
 
@@ -350,7 +357,7 @@ void proxyPaintContext::rotateAroundAxis(short axis)
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	
-    PtrViz->setNoiseWeight(m_rotation_noise);
+    PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
 	PtrViz->adjustRotation(fromNear, fromFar, mag, axis);
 }
 
@@ -363,7 +370,7 @@ void proxyPaintContext::selectGround()
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
-	PtrViz->setNoiseWeight(m_rotation_noise);
+	PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
 	PtrViz->selectGround(fromNear, fromFar, m_listAdjustment);
 }
 
@@ -384,9 +391,7 @@ void proxyPaintContext::grow()
 	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
-	ProxyViz::GrowOption opt;
-	setGrowOption(opt);
-	PtrViz->grow(fromNear, fromFar, opt);
+	PtrViz->grow(fromNear, fromFar, m_growOpt);
 }
 
 char proxyPaintContext::validateSelection()
@@ -405,9 +410,7 @@ char proxyPaintContext::validateSelection()
 void proxyPaintContext::flood()
 {
 	if(!PtrViz) return;
-	ProxyViz::GrowOption opt;
-	setGrowOption(opt);
-	PtrViz->flood(opt);
+	PtrViz->flood(m_growOpt);
 }
 
 void proxyPaintContext::extractSelected()
@@ -430,9 +433,7 @@ void proxyPaintContext::erase()
     if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
-	ProxyViz::GrowOption opt;
-	setGrowOption(opt);
-	PtrViz->erase(fromNear, fromFar, opt);
+	PtrViz->erase(fromNear, fromFar, m_growOpt);
 	view.refresh( true );	
 }
 
@@ -476,20 +477,6 @@ char proxyPaintContext::validateViz(const MSelectionList &sels)
     return 1;
 }
 
-void proxyPaintContext::setGrowOption(ProxyViz::GrowOption & opt)
-{
-	opt.m_upDirection = Vector3F::YAxis;
-	opt.m_alongNormal = m_growAlongNormal > 0;
-	opt.m_minScale = m_min_scale;
-	opt.m_maxScale = m_max_scale;
-	opt.m_rotateNoise = m_rotation_noise;
-	opt.m_marginSize = 1.f;
-	opt.m_plantId = m_plantType;
-	opt.m_multiGrow = m_multiCreate;
-	opt.m_marginSize = m_createMargin;
-	opt.m_strength = m_brushWeight;
-}
-
 void proxyPaintContext::setWriteCache(MString filename)
 {
 	MGlobal::displayInfo(MString("proxyPaint tries to write to cache ") + filename);
@@ -525,9 +512,7 @@ void proxyPaintContext::replace()
 	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
-	ProxyViz::GrowOption opt;
-	setGrowOption(opt);
-	PtrViz->replacePlant(fromNear, fromFar, opt);
+	PtrViz->replacePlant(fromNear, fromFar, m_growOpt);
 }
 
 char proxyPaintContext::getSelectedViz()
@@ -541,20 +526,26 @@ char proxyPaintContext::getSelectedViz()
 	return 1;
 }
 
-void proxyPaintContext::setCreateMargin(float x)
-{ m_createMargin = x; }
+void proxyPaintContext::setMinCreateMargin(float x)
+{ m_growOpt.m_minMarginSize = x; }
 
-const float & proxyPaintContext::createMargin()
-{ return m_createMargin; }
+const float & proxyPaintContext::minCreateMargin()
+{ return m_growOpt.m_minMarginSize; }
+
+void proxyPaintContext::setMaxCreateMargin(float x)
+{ m_growOpt.m_maxMarginSize = x; }
+
+const float & proxyPaintContext::maxCreateMargin()
+{ return m_growOpt.m_maxMarginSize; }
 
 void proxyPaintContext::setPlantType(int x)
 { 
 	AHelper::Info<int>(" proxyPaintContext select plant", x);
-	m_plantType = x; 
+	m_growOpt.m_plantId = x; 
 }
 
 const int & proxyPaintContext::plantType() const
-{ return m_plantType; }
+{ return m_growOpt.m_plantId; }
 
 void proxyPaintContext::attachSceneCallbacks()
 {

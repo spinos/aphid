@@ -86,7 +86,7 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 			
 		randomSpaceAt(pos, option, tm, scale);
 		float scaledSize = sampleSize * 1.5f * scale;
-		float limitedMargin = option.m_marginSize;
+		float limitedMargin = getNoise2(option.m_minMarginSize, option.m_maxMarginSize);
 /// limit low margin
 		if(limitedMargin < -.99f * scaledSize) limitedMargin = -.99f * scaledSize;
 		float delta = limitedMargin + scaledSize;
@@ -132,7 +132,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		float scale;
 		randomSpaceAt(ctx->m_hitP, option, tm, scale); 
 		float scaledSize = plantSize(option.m_plantId) * scale;
-		float limitedMargin = option.m_marginSize;
+		float limitedMargin = getNoise2(option.m_minMarginSize, option.m_maxMarginSize);
 /// limit low margin
 		if(limitedMargin < -.99f * scaledSize) limitedMargin = -.99f * scaledSize;
 		float delta = limitedMargin + scaledSize;
@@ -426,6 +426,9 @@ bool ModifyForest::calculateSelecedWeight(const Ray & ray)
 
 float ModifyForest::getNoise() const
 { return m_noiseWeight * (float(rand()%991) / 991.f - .5f); }
+
+float ModifyForest::getNoise2(const float & a, const float & b) const
+{ return a + (b - a) * (float(rand()%991) ) / 991.f; }
 
 void ModifyForest::erectActive()
 {

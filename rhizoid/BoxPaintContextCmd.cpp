@@ -9,8 +9,10 @@
 
 #include "BoxPaintContextCmd.h"
 #include "boxPaintTool.h"
-#define kCreateMarginFlag "-mgn"
-#define kCreateMarginFlagLong "-marginSize"
+#define kMinMarginFlag "-mng"
+#define kMinMarginFlagLong "-minMargin"
+#define kMaxMarginFlag "-mxg"
+#define kMaxMarginFlagLong "-maxMargin"
 #define kOptFlag "-opt" 
 #define kOptFlagLong "-option"
 #define kLsegFlag "-brd" 
@@ -174,10 +176,16 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		fContext->setInstanceGroupCount(igc);
 	}
 	
-	if (argData.isFlagSet(kCreateMarginFlag)) {
+	if (argData.isFlagSet(kMinMarginFlag)) {
 		double margin = 1.0;
-		if (argData.getFlagArgument(kCreateMarginFlag, 0, margin) )
-			fContext->setCreateMargin(margin);
+		if (argData.getFlagArgument(kMinMarginFlag, 0, margin) )
+			fContext->setMinCreateMargin(margin);
+	}
+    
+    if (argData.isFlagSet(kMaxMarginFlag)) {
+		double margin = 1.0;
+		if (argData.getFlagArgument(kMaxMarginFlag, 0, margin) )
+			fContext->setMaxCreateMargin(margin);
 	}
 	
 	if (argData.isFlagSet(kPlantTypeFlag)) {
@@ -229,8 +237,11 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		setResult((int)fContext->getInstanceGroupCount());
 	}
 	
-	if (argData.isFlagSet(kCreateMarginFlag))
-		setResult((float)fContext->createMargin() );
+	if (argData.isFlagSet(kMinMarginFlag))
+		setResult((float)fContext->minCreateMargin() );
+        
+    if (argData.isFlagSet(kMaxMarginFlag))
+		setResult((float)fContext->maxCreateMargin() );
 	
 	if (argData.isFlagSet(kPlantTypeFlag))
 		setResult(fContext->plantType() );
@@ -318,9 +329,15 @@ MStatus proxyPaintContextCmd::appendSyntax()
 		return MS::kFailure;
 	}
 	
-	stat = mySyntax.addFlag(kCreateMarginFlag, kCreateMarginFlagLong, MSyntax::kDouble);
+	stat = mySyntax.addFlag(kMinMarginFlag, kMinMarginFlagLong, MSyntax::kDouble);
 	if(!stat) {
-		MGlobal::displayInfo("failed to add marginSize arg");
+		MGlobal::displayInfo("failed to add min margin arg");
+		return MS::kFailure;
+	}
+    
+    stat = mySyntax.addFlag(kMaxMarginFlag, kMaxMarginFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add max margin arg");
 		return MS::kFailure;
 	}
 	
