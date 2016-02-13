@@ -35,6 +35,7 @@ class proxyPaintContext : public MPxContext
         opSelectGround = 9,
         opReplace = 10,
         opCreate = 11,
+        opSelectByType= 12,
         opClean = 99,
         opFlood = 100,
         opExtract = 102
@@ -105,6 +106,7 @@ private:
 	void moveAlongAxis(short axis);
 	void startProcessSelect();
 	void processSelect();
+    void processSelectByType();
 	char validateViz(const MSelectionList &sels);
 	char validateSelection();
 	void smoothSelected();

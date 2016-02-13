@@ -62,6 +62,7 @@ protected:
 	void clearGroundMeshes();
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     void buildGround();
+    void setSelectTypeFilter(int flt);
     bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
 	bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
 	

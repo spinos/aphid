@@ -371,7 +371,7 @@ ExampVox * Forest::plantExample(unsigned idx)
 const ExampVox * Forest::plantExample(unsigned idx) const
 { return m_examples[idx]; }
 
-//int Forest::activePlantId() const
-//{ return 0; }
+void Forest::setSelectTypeFilter(int flt)
+{ m_activePlants->setTypeFilter(flt); }
 
 }

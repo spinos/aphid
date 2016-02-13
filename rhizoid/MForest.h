@@ -14,7 +14,7 @@ public:
     MForest();
     virtual ~MForest();
     
-	void selectPlant(const MPoint & origin, const MPoint & dest, 
+	void selectPlantByType(const MPoint & origin, const MPoint & dest,  int typ,
 					MGlobal::ListAdjustment adj);
 	void selectGround(const MPoint & origin, const MPoint & dest, 
 					MGlobal::ListAdjustment adj);

@@ -17,6 +17,7 @@ PlantSelection::PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid)
 	m_plants = new Array<int, PlantInstance>();
 	m_numSelected = 0;
     m_radius = 8.f;
+    m_typeFilter = -1;
 }
 
 PlantSelection::~PlantSelection()
@@ -65,6 +66,9 @@ void PlantSelection::select(const Coord3 & c, SelectionContext::SelectMode mode)
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
 		if(m_center.distanceTo(d->t1->getTranslation() ) < m_radius) {
+            if(m_typeFilter > -1 ) {
+                if(m_typeFilter != *d->t3) mode = SelectionContext::Unknown;
+            }
 			if(mode == SelectionContext::Append) select(cell->value() );
 			else if(mode == SelectionContext::Remove) m_plants->remove(cell->key() );
 		}
@@ -123,5 +127,8 @@ void PlantSelection::calculateWeight()
 
 const float & PlantSelection::radius() const
 { return m_radius; }
+
+void PlantSelection::setTypeFilter(int x)
+{ m_typeFilter = x; }
 
 }

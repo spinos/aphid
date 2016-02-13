@@ -95,10 +95,10 @@ void MForest::updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned
     }
 }
 
-void MForest::selectPlant(const MPoint & origin, const MPoint & dest, 
+void MForest::selectPlantByType(const MPoint & origin, const MPoint & dest,  int typ,
 					MGlobal::ListAdjustment adj)
 {
-	Vector3F a(origin.x, origin.y, origin.z);
+    Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	
@@ -106,6 +106,7 @@ void MForest::selectPlant(const MPoint & origin, const MPoint & dest,
 	if(adj == MGlobal::kAddToList) m = SelectionContext::Append;
 	else if(adj == MGlobal::kRemoveFromList) m = SelectionContext::Remove;
 	
+	setSelectTypeFilter(typ);
 	bool stat = selectPlants(r, m);
 	if(!stat) AHelper::Info<int>("MForest error empty selection", 0);
 }

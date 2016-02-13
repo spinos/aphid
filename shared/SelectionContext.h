@@ -20,9 +20,10 @@ class SelectionContext {
 	
 public:
 	enum SelectMode {
-		Replace = 0,
-		Append = 1,
-		Remove = 2
+        Unknown = 0,
+		Replace = 1,
+		Append = 2,
+		Remove = 3
 	};
 	
 	SelectionContext();

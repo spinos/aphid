@@ -64,7 +64,7 @@ MStatus proxyPaintContext::doPress( MEvent & event )
     if(event.isModifierShift()) m_currentOpt = opResizeBrush;
     else m_currentOpt = mOpt;
 
-	if(m_currentOpt == opSelect) startProcessSelect();
+	if(m_currentOpt == opSelect || m_currentOpt == opSelectByType) startProcessSelect();
 	if(m_currentOpt == opSelectGround) startSelectGround();
 	
 	return MS::kSuccess;		
@@ -85,6 +85,9 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 			break;
 		case opSelect : 
 			processSelect();
+			break;
+        case opSelectByType : 
+			processSelectByType();
 			break;
 		case opResize :
 			resize();
@@ -127,7 +130,7 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	
 	if(!PtrViz) return MS::kSuccess;
 	if(m_currentOpt==opErase) PtrViz->finishErase();
-	if(m_currentOpt==opSelect) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
+	if(m_currentOpt==opSelect || m_currentOpt==opSelectByType) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
 	if(m_currentOpt==opSelectGround) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
 	
 	return MS::kSuccess;		
@@ -207,6 +210,10 @@ void proxyPaintContext::setOperation(short val)
 		case opReplace:
 			opstr="replace";
             mOpt = opReplace;
+			break;
+        case opSelectByType:
+			opstr="select by type";
+            mOpt = opSelectByType;
 			break;
 		default:
 			;
@@ -443,7 +450,7 @@ void proxyPaintContext::startProcessSelect()
 	MPoint fromNear, fromFar;
 	view.viewToWorld (start_x, start_y, fromNear, fromFar );
 	
-	PtrViz->selectPlant(fromNear, fromFar, MGlobal::kReplaceList);
+	PtrViz->selectPlantByType(fromNear, fromFar, -1, MGlobal::kReplaceList);
 }
 
 void proxyPaintContext::processSelect()
@@ -452,7 +459,16 @@ void proxyPaintContext::processSelect()
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
-	PtrViz->selectPlant(fromNear, fromFar, m_listAdjustment);
+	PtrViz->selectPlantByType(fromNear, fromFar, -1, m_listAdjustment);
+}
+
+void proxyPaintContext::processSelectByType()
+{
+    if(!PtrViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+	
+	PtrViz->selectPlantByType(fromNear, fromFar, m_growOpt.m_plantId, m_listAdjustment);
 }
 
 char proxyPaintContext::validateViz(const MSelectionList &sels)

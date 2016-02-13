@@ -59,6 +59,7 @@ class PlantSelection {
 	Vector3F m_center, m_direction;
 	float m_radius;
 	unsigned m_numSelected;
+    int m_typeFilter;
 	WorldGrid<Array<int, Plant>, Plant > * m_grid;
 	Array<int, PlantInstance> * m_plants;
 	
@@ -69,13 +70,15 @@ public:
     void setRadius(float x);
 	void setCenter(const Vector3F & center, const Vector3F & direction);
 	void select(SelectionContext::SelectMode mode);
-	void deselect();
+    void deselect();
 	const unsigned & numSelected() const;
 	Array<int, PlantInstance> * data();
 	void calculateWeight();
 	void select(Plant * p);
 	void updateNumSelected();
     const float & radius() const;
+    
+    void setTypeFilter(int x);
     
 protected:
 
