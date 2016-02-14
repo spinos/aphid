@@ -14,30 +14,45 @@ main.cpp)
 add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
 
 if (WIN32)
-	IF (EXISTS "D:/usr/hdf5/include")
-		SET (HDF5_ROOT "D:/usr/hdf5")
+	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+# location of configure file FindHDF5.cmake
+		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
 	ENDIF ()
 endif ()
 
 FIND_PACKAGE (HDF5 REQUIRED)
-	
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
 MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
-if(WIN32)
-set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
-# target_link_libraries (julia "D:/usr/hdf5/lib/zlib.lib")
-endif()
-
-include_directories (${HDF5_INCLUDE_DIR})
+include_directories (${HDF5_INCLUDE_DIRS})
 target_link_libraries (julia ${HDF5_LIBRARIES})
 
+if(WIN32)
+SET (ZLIB_DIR "C:/Program Files/ZLIB/cmake/ZLIB")
+SET (ZLIB_INCLUDE_DIR "C:/Program Files/ZLIB/include")
+SET (ZLIB_LIBRARY "C:/Program Files/ZLIB/lib/libzlib.lib")
+endif()
+
 FIND_PACKAGE (ZLIB REQUIRED)
+MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
+MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
 MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
-MESSAGE (" zlib library is " ${ZLIB_LIBRARIES})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
 
 target_link_libraries (julia ${ZLIB_LIBRARIES})
+
+set (SZIP_DIR "C:/Program Files/SZIP/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
+set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
+FIND_PACKAGE (SZIP REQUIRED)
+MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
+MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
+MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
+MESSAGE (" szip library is " ${SZIP_LIBRARY})
+
+target_link_libraries (julia ${SZIP_LIBRARY})
 
 if(WIN32)
 	IF (EXISTS "D:/usr/boost_1_51_0")

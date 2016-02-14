@@ -21,17 +21,15 @@ add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 ENDIF()
 
-
 if (WIN32)
-	IF (EXISTS "D:/usr/hdf5")
-		SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
-		SET (HDF5_LIBRARIES "D:/usr/hdf5/lib")
-		SET (HDF5_DIR "D:/usr/hdf5")
+	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+# location of configure file FindHDF5.cmake
+		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
 	ENDIF ()	
 endif ()
 		
 FIND_PACKAGE (HDF5 REQUIRED)
-	
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
 MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
