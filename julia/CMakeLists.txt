@@ -21,7 +21,11 @@ if (WIN32)
 endif ()
 
 FIND_PACKAGE (HDF5 REQUIRED)
+
+IF (WIN32)
 SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")
+ENDIF ()
+
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
 MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
@@ -43,9 +47,18 @@ MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
 
 target_link_libraries (julia ${ZLIB_LIBRARIES})
 
+IF (WIN32)
 set (SZIP_DIR "C:/Program Files/SZIP/cmake/SZIP")
 set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
 set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
+
+ELSEIF (APPLE)
+set (SZIP_DIR "/usr/local/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "/usr/local/include")
+set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
+
+ENDIF ()
+
 FIND_PACKAGE (SZIP REQUIRED)
 MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
 MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})

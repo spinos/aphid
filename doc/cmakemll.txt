@@ -32,6 +32,9 @@ MESSAGE (" szip library is " ${SZIP_LIBRARY})
 
 target_link_libraries (target ${SZIP_LIBRARY})
 
+# edit szip-config.cmake
+# add PATH to GET_FILENAME_COMPONENT()
+
 # for hdf5
 # edit CMakeFilters.cmake
 # setup zlib and szip
@@ -39,3 +42,7 @@ target_link_libraries (target ${SZIP_LIBRARY})
 SET (HDF5_ENABLE_Z_LIB_SUPPORT ON)
 SET (HDF5_ENABLE_SZIP_SUPPORT ON)
 
+# for some reason windows hdf5 points to dll instead of lib
+IF (WIN32)
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")
+ENDIF ()
