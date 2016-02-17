@@ -233,10 +233,10 @@ char GLSLBase::initializeFBO(std::string& log)
 }
 
 int GLSLBase::frameBufferWidth() const
-{ return 256; }
+{ return 512; }
 
 int GLSLBase::frameBufferHeight() const
-{ return 256; }
+{ return 512; }
 
 void GLSLBase::frameBufferBegin() const
 {

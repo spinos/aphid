@@ -248,7 +248,7 @@ void DrawForest::drawDepthCull(double * localTm)
 	culler->frameBufferBegin();
 	culler->drawFrameBuffer(groundMeshes() );
 	culler->frameBufferEnd();
-	//culler->showFrameBuffer();
+	// culler->showFrameBuffer();
 }
 
 bool DrawForest::isVisibleInView(sdb::Plant * pl,
@@ -261,8 +261,9 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 	Vector3F worldP = d->t1->transform(localP);
 	float r = v->geomExtent() * d->t1->getSide().length();
 	if(cullByFrustum(worldP, r) ) return false;
+    
 	float camZ;
-	if(cullByDepth(worldP, r, camZ) ) return false;
+	if(cullByDepth(worldP, r, camZ) ) {} //return false;
 	if(lowLod > 0.f || highLod < 1.f) {
 		float lod;
 		if(cullByLod(camZ, r, lowLod, highLod, lod ) ) return false;

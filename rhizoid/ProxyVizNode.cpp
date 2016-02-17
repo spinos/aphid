@@ -219,7 +219,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		
 	if(isDepthCullDiagnosed() ) {
 		initDepthCullFBO();
-		if(m_hasCamera && m_toCheckVisibility) drawDepthCull(mm);
+		if(m_hasCamera
+          && m_toCheckVisibility) 
+       drawDepthCull(mm);
 	}
 	
 	glPushMatrix();
