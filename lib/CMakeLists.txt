@@ -29,7 +29,10 @@ if (WIN32)
 endif ()
 		
 FIND_PACKAGE (HDF5 REQUIRED)
+IF (WIN32)
 SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
+ENDIF ()
+
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
 MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )

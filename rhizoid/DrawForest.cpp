@@ -101,7 +101,7 @@ void DrawForest::drawPlants()
 {
     sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	if(g->isEmpty() ) return;
-	const float margin = g->gridSize() * .13f;
+	const float margin = g->gridSize() * .1f;
 	glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT);
 	glEnable(GL_LIGHTING);
@@ -140,7 +140,12 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 }
 
 void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
-{
+{	
+	if(m_showVoxLodThresold >.9999f) {
+        drawSolidBox(v->geomCenterV(), v->geomScale() );
+		return;
+    }
+	
 	if(v->numBoxes() < 1) {
 		drawSolidBox(v->geomCenterV(), v->geomScale() );
 		return;
@@ -152,11 +157,6 @@ void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
 	if(cullByFrustum(worldP, r) ) {
 		return;
 	}
-    
-    if(m_showVoxLodThresold >.9999f) {
-        drawSolidBox(v->geomCenterV(), v->geomScale() );
-		return;
-    }
 	
 	float camZ = cameraDepth(worldP);
 	float lod;
