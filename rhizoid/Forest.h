@@ -74,6 +74,7 @@ protected:
 	Array<int, PlantInstance> * activePlants();
 	PlantSelection * selection();
 	KdTree * ground();
+	const KdTree * ground() const;
 	IntersectionContext * intersection();
 	SelectionContext * activeGround();
 	ATriangleMesh * getGroundMesh(unsigned idx) const;

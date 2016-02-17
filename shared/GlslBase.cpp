@@ -141,12 +141,13 @@ char GLSLBase::initializeShaders(std::string& log)
 		if (vertex_shader) {
 			glDeleteObjectARB(vertex_shader);
 			vertex_shader   = NULL;
+			log += "\n Glsl error vertex shader not compiled \n";
 		}
 		if (fragment_shader) {
 			glDeleteObjectARB(fragment_shader);
 			fragment_shader = NULL;
+			log += "\n Glsl error fragment shader not compiled \n";
 		}
-		log += "\nshaders not compiled";
 		return 0;
 	}
 	
@@ -167,7 +168,7 @@ char GLSLBase::initializeShaders(std::string& log)
 	if (!linked) {
 		glDeleteObjectARB(program_object);
 		program_object = NULL;
-		log += "shaders not linked";
+		log += "\n Glsl error shaders not linked";
 		return 0;
 	}
 

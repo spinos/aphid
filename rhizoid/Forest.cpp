@@ -243,6 +243,9 @@ Array<int, PlantInstance> * Forest::activePlants()
 KdTree * Forest::ground()
 { return m_ground; }
 
+const KdTree * Forest::ground() const
+{ return m_ground; }
+
 IntersectionContext * Forest::intersection()
 { return &m_intersectCtx; }
 

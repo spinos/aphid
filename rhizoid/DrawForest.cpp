@@ -224,6 +224,8 @@ void DrawForest::drawViewFrustum()
 
 void DrawForest::drawBrush()
 {
+	glPushAttrib(GL_CURRENT_BIT);
+	
     const float & radius = selectionRadius();
     const Vector3F & position = selectionCenter();
     const Vector3F & direction = selectionNormal();
@@ -238,7 +240,8 @@ void DrawForest::drawBrush()
     
     draw3Circles(m_transbuf);
     glPopMatrix();
-    
+	
+    glPopAttrib();
 }
 
 void DrawForest::drawDepthCull(double * localTm)
@@ -248,7 +251,13 @@ void DrawForest::drawDepthCull(double * localTm)
 	culler->frameBufferBegin();
 	culler->drawFrameBuffer(groundMeshes() );
 	culler->frameBufferEnd();
-	// culler->showFrameBuffer();
+}
+
+void DrawForest::drawDepthBuffer()
+{
+	const Vector3F c = frustum().center();
+	glRasterPos3f(c.x, c.y, c.z);
+	depthCuller()->showFrameBuffer();
 }
 
 bool DrawForest::isVisibleInView(sdb::Plant * pl,
@@ -263,10 +272,10 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 	if(cullByFrustum(worldP, r) ) return false;
     
 	float camZ;
-	if(cullByDepth(worldP, r, camZ) ) {} //return false;
+	if(cullByDepth(worldP, r, camZ) ) return false;
 	if(lowLod > 0.f || highLod < 1.f) {
 		float lod;
-		if(cullByLod(camZ, r, lowLod, highLod, lod ) ) return false;
+		if(cullByLod(camZ, r, lowLod, highLod, lod ) ) {}//return false;
 	}
 	return true;
 }

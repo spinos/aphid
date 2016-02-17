@@ -59,6 +59,6 @@ bool ViewDepthCull::cullByDepth(const Vector3F & pnt, const float & threshold,
 	
 	float b = m_depthCuller->getBufferDepth(s, t);
 	if(b<1.f) return false;
-	return (-camZ - threshold) > b;
+	return (-camZ - threshold * 4.f) > b;
 }
 //:~

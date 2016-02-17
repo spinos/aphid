@@ -547,7 +547,7 @@ void MForest::initRandGroup()
 	AHelper::Info<int>(" total n plants", n );
 }
 
-void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
+void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage,
                     int plantTyp)
@@ -556,7 +556,7 @@ void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighG
 	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
-		pickupVisiblePlantsInCell(g->value(), hasCamera, lodLowGate, lodHighGate, 
+		pickupVisiblePlantsInCell(g->value(), lodLowGate, lodHighGate, 
 					totalGroups, currentGroup, 
 					percentage, plantTyp, i);
 		g->next();
@@ -566,7 +566,7 @@ void MForest::pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighG
 }
 
 void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
-					bool hasCamera, float lodLowGate, float lodHighGate, 
+					float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage, int plantTyp,
                     int & it)
@@ -597,7 +597,7 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 		}
 			
 		if(survived) {
-			if(hasCamera) {
+			if(hasView() ) {
 				survived = isVisibleInView(pl, lodLowGate, lodHighGate );
 			}
 		}

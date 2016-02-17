@@ -56,7 +56,7 @@ protected:
 					const MVectorArray & scale, 
 					const MVectorArray & rotation);
 	void initRandGroup();
-	void pickVisiblePlants(bool hasCamera, float lodLowGate, float lodHighGate, 
+	void pickVisiblePlants(float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage,
                     int plantTyp);
@@ -75,7 +75,7 @@ private:
 	void getDataInCell(sdb::Array<int, sdb::Plant> *cell, 
 					float * data, unsigned & it);
 	void pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
-					bool hasCamera, float lodLowGate, float lodHighGate, 
+					float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage, int plantTyp, 
                     int & it);

@@ -15,15 +15,16 @@ class ViewCull {
 	
 	AFrustum m_frustum;
 	Matrix44F m_space, m_invSpace;
-	float m_hfov, m_aspectRatio, m_farClip, m_detailWidth;
+	float m_hfov, m_aspectRatio, m_farClip, m_detailWidth, m_overscan, m_portAspectRatio;
 	bool m_enabled;
 	
 public:
 	ViewCull();
 	virtual ~ViewCull();
 	
-	void enable();
-	void disable();
+	void enableView();
+	void disableView();
+	const bool & hasView() const;
 	bool isPerspective() const;
 	
 /// cliping is negative in camera space
@@ -52,9 +53,17 @@ public:
 	
 	float cameraDepth(const Vector3F & p) const;
 	void getFarClipDepth(float & clip, const BoundingBox & b) const;
-    
+    void setViewPortSize(int w, int h);
+	const float nearClipPlane() const;
+	const float & farClipPlane() const;
+	
 protected:
+	const float & hfov() const;
 	void ndc(const Vector3F & cameraP, float & coordx, float & coordy) const;
+	void setViewport(const double & overscan,
+					const int & portWidth,
+					const int & portHeight);
+	const float & overscan() const;
 	
 private:
 

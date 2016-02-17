@@ -41,7 +41,8 @@ protected:
 					const float lowLod, const float highLod);
 	void setShowVoxLodThresold(const float & x);
     void drawBrush();
-	
+	void drawDepthBuffer();
+
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, sdb::Plant> * cell);

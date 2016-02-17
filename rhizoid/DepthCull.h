@@ -1,5 +1,5 @@
 /*
- *  depthCut.h
+ *  depthCull.h
  *  proxyPaint
  *
  *  Created by jian zhang on 5/18/12.

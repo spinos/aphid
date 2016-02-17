@@ -1,5 +1,5 @@
 /*
- *  depthCut.cpp
+ *  depthCull.cpp
  *  proxyPaint
  *
  *  Created by jian zhang on 5/18/12.
@@ -15,11 +15,14 @@ DepthCull::~DepthCull() {}
 
 void DepthCull::drawFrameBuffer(const std::vector<ATriangleMesh *> & meshes)
 {		
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	
 	programBegin();
 	
 	glPushMatrix();
 	glMultMatrixd(fLocalSpace);
-	
+	glColor3f(1,1,1);
 	glBegin(GL_TRIANGLES);
 	
 	std::vector<ATriangleMesh *>::const_iterator it = meshes.begin();
@@ -62,7 +65,7 @@ const char* DepthCull::fragmentProgramSource() const
 "void main()"
 "{"
 "	float d = -PCAM.z; "
-"		gl_FragColor = vec4 (d, d, d, 1.0);"
+"		gl_FragColor = vec4 (d, d/10000.0, d/10000.0, 1.0);"
 "}";
 }
 

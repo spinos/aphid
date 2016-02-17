@@ -76,3 +76,13 @@ Vector3F AFrustum::supportPoint(const Vector3F & v, Vector3F * localP) const
     
     return res;
 }
+
+Vector3F AFrustum::center() const
+{ return (m_v[0] * .125f +
+			m_v[1] * .125f +
+			m_v[2] * .125f +
+			m_v[3] * .125f +
+			m_v[4] * .125f +
+			m_v[5] * .125f +
+			m_v[6] * .125f +
+			m_v[7] * .125f); }

@@ -13,10 +13,10 @@
 ViewCull::ViewCull() : m_enabled(false) {}
 ViewCull::~ViewCull() {}
 	
-void ViewCull::enable()
+void ViewCull::enableView()
 { m_enabled = true; }
 
-void ViewCull::disable()
+void ViewCull::disableView()
 { m_enabled = false; }
 
 void ViewCull::setFrustum(const float & horizontalApeture,
@@ -83,20 +83,22 @@ bool ViewCull::cullByFrustum(const BoundingBox & box) const
     return true; 
 }
 
+/// in viewport
 void ViewCull::ndc(const Vector3F & cameraP, float & coordx, float & coordy) const
 {
 	float d = -cameraP.z;
-	if(d<1.f) d= 1.f;
+	if(d<1.f) d= 1.f; 
 	float h_max = d * m_hfov;
 	float h_min = -h_max;
 	float v_max = h_max * m_aspectRatio;
 	float v_min = -v_max;
-	coordx = (cameraP.x - h_min) / (h_max - h_min);
-	coordy = (cameraP.y - v_min) / (v_max - v_min);
+	coordx = (cameraP.x/m_overscan - h_min) / (h_max - h_min);
+	coordy = (cameraP.y/m_overscan/(m_portAspectRatio / m_aspectRatio) - v_min) / (v_max - v_min);
+	
 	if(coordx < 0.f) coordx = 0.f;
-	if(coordx > .997f) coordx = .997f;
+	if(coordx > .999f) coordx = .999f;
 	if(coordy < 0.f) coordy = 0.f;
-	if(coordy > .997f) coordy = .997f;
+	if(coordy > .999f) coordy = .999f;
 }
 
 bool ViewCull::cullByLod(const float & localZ, const float & radius,
@@ -123,4 +125,27 @@ void ViewCull::getFarClipDepth(float & clip, const BoundingBox & b) const
         if(clip > d) clip = d;
     }
 }
+
+const bool & ViewCull::hasView() const
+{ return m_enabled; }
+
+const float ViewCull::nearClipPlane() const
+{ return 1.f; }
+
+const float & ViewCull::farClipPlane() const
+{ return m_farClip; }
+
+const float & ViewCull::hfov() const
+{ return m_hfov; }
+	
+void ViewCull::setViewport(const double & overscan,
+					const int & portWidth,
+					const int & portHeight)
+{
+	m_overscan = overscan;
+	m_portAspectRatio = (float)portHeight/(float)portWidth;
+}
+
+const float & ViewCull::overscan() const
+{ return m_overscan; }
 //:~

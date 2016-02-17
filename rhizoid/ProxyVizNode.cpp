@@ -56,11 +56,11 @@ MObject ProxyViz::aplantTriangleIdCache;
 MObject ProxyViz::aplantTriangleCoordCache;
 MObject ProxyViz::ainexamp;
 MObject ProxyViz::adisplayVox;
+MObject ProxyViz::acheckDepth;
 MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
-m_toSetGrid(true), 
-m_hasCamera(false), 
+m_toSetGrid(true),
 m_toCheckVisibility(false),
 m_enableCompute(true),
 m_hasParticle(false)
@@ -196,8 +196,14 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
-	if(m_hasCamera) updateViewFrustum(thisNode);
+	if(hasView() ) updateViewFrustum(thisNode);
 	else updateViewFrustum(cameraPath);
+	
+	const double ovs = MFnCamera(cameraPath).overscan();
+	setViewport(ovs, view.portWidth(), view.portHeight() );
+	
+	MPlug cdp(thisNode, acheckDepth);
+	const bool shoDepth = cdp.asBool();
 
 	_viewport = view;
 	fHasView = 1;
@@ -219,9 +225,12 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		
 	if(isDepthCullDiagnosed() ) {
 		initDepthCullFBO();
-		if(m_hasCamera
-          && m_toCheckVisibility) 
-       drawDepthCull(mm);
+		if(shoDepth) {
+			drawDepthCull(mm);
+			drawDepthBuffer();
+		}
+		else if(hasView() && m_toCheckVisibility) 
+			drawDepthCull(mm);
 	}
 	
 	glPushMatrix();
@@ -247,7 +256,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	else 
 		drawWiredPlants();
 	
-    if(m_hasCamera) drawViewFrustum();
+    if(hasView() ) drawViewFrustum();
     
 	drawBrush(view);
 	drawActivePlants();
@@ -263,6 +272,7 @@ MBoundingBox ProxyViz::boundingBox() const
 {   
 	BoundingBox bbox = plantExample(0)->geomBox();
 	if(numPlants() > 0) bbox = gridBoundingBox();
+	else if(!isGroundEmpty() ) bbox = ground()->getBBox();
 	
 	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);
 	MPoint corner2(bbox.m_data[3], bbox.m_data[4], bbox.m_data[5]);
@@ -524,6 +534,11 @@ MStatus ProxyViz::initialize()
     numFn.setStorable(true);
 	numFn.setKeyable(true);
     addAttribute(adisplayVox);
+	
+	acheckDepth = numFn.create( "checkDepth", "cdp", MFnNumericData::kBoolean );
+	numFn.setDefault(0);
+	numFn.setStorable(false);
+	addAttribute(acheckDepth);
     
 	attributeAffects(ainexamp, outValue1);
 	attributeAffects(aradiusMult, outValue1);
@@ -715,7 +730,7 @@ std::string ProxyViz::replaceEnvVar(const MString & filename) const
 
 MStatus ProxyViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	if(plug == acameraspace) m_hasCamera = true;
+	if(plug == acameraspace) enableView();
 	else if(plug == outPositionPP) m_hasParticle = true;
 	//AHelper::Info<MString>("connect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
@@ -723,7 +738,7 @@ MStatus ProxyViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, 
 
 MStatus ProxyViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	if(plug == acameraspace) m_hasCamera = false;
+	if(plug == acameraspace) disableView();
 	else if(plug == outPositionPP) m_hasParticle = false;
 	//AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
@@ -806,7 +821,7 @@ void ProxyViz::processPickInView(const int & plantTyp)
 	
 	MPlug perPlg(node, aconvertPercentage);
 	double percentage = perPlg.asDouble();
-	pickVisiblePlants(m_hasCamera, gateLow, gateHigh, groupCount, groupId, percentage, plantTyp);
+	pickVisiblePlants(gateLow, gateHigh, groupCount, groupId, percentage, plantTyp);
 }
 
 void ProxyViz::endPickInView()

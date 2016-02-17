@@ -34,7 +34,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	float m_transBuf[16];
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;
-	bool m_hasCamera, m_hasParticle, m_enableCompute;
+	bool m_hasParticle, m_enableCompute;
 	char _firstLoad, fHasView;
 	
 public:
@@ -88,6 +88,7 @@ public:
 	static MObject aplantTriangleCoordCache;
 	static MObject ainexamp;
     static MObject adisplayVox;
+	static MObject acheckDepth;
 	static MObject outValue1;
 	static MObject outValue;
 	static	MTypeId		id;

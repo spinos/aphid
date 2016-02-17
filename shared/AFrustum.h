@@ -27,6 +27,7 @@ public:
 	const Vector3F * v(int idx) const;
 	Vector3F X(int idx) const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
+	Vector3F center() const;
 	
 private:
 	
