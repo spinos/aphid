@@ -27,7 +27,6 @@
 #include <boost/format.hpp>
 
 std::string HesperisIO::CurrentHObjectPath;
-int HesperisIO::CompressHierarchy = 0;
 
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file )
 {
@@ -314,7 +313,6 @@ Matrix33F::RotateOrder HesperisIO::GetRotationOrder(MTransformationMatrix::Rotat
 std::string HesperisIO::H5PathNameTo(const MDagPath & path)
 {
 	std::string r(path.fullPathName().asChar());
-    CompressPath(r, path);
 	H5PathName(r);
     return r;
 }
@@ -328,7 +326,6 @@ std::string HesperisIO::H5PathNameTo(const MObject & node)
         r = pf.fullPathName().asChar();
         MDagPath nodePath;
         pf.getPath(nodePath);
-        CompressPath(r, nodePath);
     }
 	else r = MFnDependencyNode(node).name().asChar();
 	
@@ -352,14 +349,4 @@ MObject HesperisTransformCreator::create(BaseTransform * data, MObject & parentO
     return otm;
 }
 
-void HesperisIO::CompressPath(std::string & dest, const MDagPath & node)
-{
-    if(CompressHierarchy <= 0) return;
-    
-    MDagPath parent = node;
-    parent.pop(CompressHierarchy+1);
-    dest = boost::str(boost::format("%1%|%2%") 
-                     % parent.fullPathName().asChar() 
-                     % MFnDagNode(node).name().asChar());
-}
 //:~

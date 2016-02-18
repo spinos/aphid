@@ -728,7 +728,4 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
     BaseUtil::CloseH5();
     AHelper::Info<const char *>(" done baking attrib ", filename);
 }
-
-void AttribUtil::setCompressHierarchy(int x)
-{ HesperisAttributeIO::CompressHierarchy = x; }
 //:~

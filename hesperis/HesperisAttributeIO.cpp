@@ -89,9 +89,9 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
 			MObject otm;
 			if( FindNamedChild(otm, child.lastName(), target) )
 				ReadAttributes(&child, otm);
-            else {
-                AHelper::Info<std::string>("HesperisAttributeIO cannot find child by name", child.fObjectPath );
-            }
+            //else {
+            //    AHelper::Info<std::string>("HesperisAttributeIO cannot find child by name", child.fObjectPath );
+            //}
 		}
 		child.close();
 	}

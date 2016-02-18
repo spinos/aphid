@@ -14,6 +14,8 @@
 #include <map>
 
 class HFile : public BaseFile {
+    HDocument::OpenMode m_openMode;
+    
 public:
 	HFile();
 	HFile(const char * name);
@@ -28,6 +30,8 @@ public:
 	bool find(const std::string & pathName);
     bool isGroupOpened(const std::string & pathName) const;
     bool openGroup(const std::string & pathName);
+    
+    void setOpenMode(HDocument::OpenMode accessFlag);
     
 protected:
 	void useDocument();

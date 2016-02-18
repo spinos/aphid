@@ -30,9 +30,6 @@ public:
 	virtual void dump(const char* filename, MDagPathArray &active_list);
 	virtual void load(const char* filename, MObject &target = MObject::kNullObj);
 
-/// |a|b|c to |a|c
-    void setCompressHierarchy(int x);
-    
 protected:
     static AttribNameMap UserDefinedAttribFilter;
 	

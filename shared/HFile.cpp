@@ -10,8 +10,12 @@
 #include "HFile.h"
 #include <HObject.h>
 #include <iostream>
-HFile::HFile() : BaseFile() {}
-HFile::HFile(const char * name) : BaseFile(name) {}
+HFile::HFile() : BaseFile() 
+{ m_openMode = HDocument::oReadAndWrite; }
+
+HFile::HFile(const char * name) : BaseFile(name) 
+{ m_openMode = HDocument::oReadAndWrite; }
+
 HFile::~HFile() {}
 
 bool HFile::doCreate(const std::string & fileName)
@@ -28,7 +32,7 @@ bool HFile::doCreate(const std::string & fileName)
 
 bool HFile::doRead(const std::string & fileName)
 {
-	if(!HObject::FileIO.open(fileName.c_str(), HDocument::oReadAndWrite)) {
+	if(!HObject::FileIO.open(fileName.c_str(), m_openMode )) {
 		setLatestError(BaseFile::FileNotReadable);
 		return false;
 	}
@@ -100,4 +104,7 @@ void HFile::closeOpenedGroups()
     }
     m_openedGroups.clear();
 }
+
+void HFile::setOpenMode(HDocument::OpenMode accessFlag)
+{ m_openMode = accessFlag; }
 //:~
