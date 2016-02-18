@@ -10,7 +10,7 @@
 #include "ViewCull.h"
 #include <GjkIntersection.h>
 
-ViewCull::ViewCull() : m_enabled(false) {}
+ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}
 	
 void ViewCull::enableView()
@@ -129,21 +129,16 @@ void ViewCull::getFarClipDepth(float & clip, const BoundingBox & b) const
 const bool & ViewCull::hasView() const
 { return m_enabled; }
 
-const float ViewCull::nearClipPlane() const
-{ return 1.f; }
-
 const float & ViewCull::farClipPlane() const
 { return m_farClip; }
-
-const float & ViewCull::hfov() const
-{ return m_hfov; }
 	
-void ViewCull::setViewport(const double & overscan,
-					const int & portWidth,
+void ViewCull::setOverscan(const double & x)
+{ m_overscan = x; }
+
+void ViewCull::setViewportAspect(const int & portWidth,
 					const int & portHeight)
 {
-	m_overscan = overscan;
-	m_portAspectRatio = (float)portHeight/(float)portWidth;
+	if(portWidth>0) m_portAspectRatio = (float)portHeight/(float)portWidth;
 }
 
 const float & ViewCull::overscan() const

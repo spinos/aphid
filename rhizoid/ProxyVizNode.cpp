@@ -57,6 +57,7 @@ MObject ProxyViz::aplantTriangleCoordCache;
 MObject ProxyViz::ainexamp;
 MObject ProxyViz::adisplayVox;
 MObject ProxyViz::acheckDepth;
+MObject ProxyViz::ainoverscan;
 MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
@@ -199,8 +200,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	if(hasView() ) updateViewFrustum(thisNode);
 	else updateViewFrustum(cameraPath);
 	
-	const double ovs = MFnCamera(cameraPath).overscan();
-	setViewport(ovs, view.portWidth(), view.portHeight() );
+	setViewportAspect(view.portWidth(), view.portHeight() );
 	
 	MPlug cdp(thisNode, acheckDepth);
 	const bool shoDepth = cdp.asBool();
@@ -539,6 +539,11 @@ MStatus ProxyViz::initialize()
 	numFn.setDefault(0);
 	numFn.setStorable(false);
 	addAttribute(acheckDepth);
+	
+	ainoverscan = numFn.create( "cameraOverscan", "cos", MFnNumericData::kDouble );
+	numFn.setDefault(1.33);
+	numFn.setStorable(false);
+	addAttribute(ainoverscan);
     
 	attributeAffects(ainexamp, outValue1);
 	attributeAffects(aradiusMult, outValue1);
@@ -765,6 +770,9 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
     if(numPlants() > 0) getFarClipDepth(farClip, gridBoundingBox() );
     
     setFrustum(hfa, vfa, fl, -10.f, farClip );
+	
+	MPlug overscanPlug(thisNode, ainoverscan);
+	setOverscan(overscanPlug.asDouble() );
 }
 
 void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
@@ -790,6 +798,7 @@ void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 	
 		setFrustum(hfa, vfa, fl, -10.f, farClip );
 	}
+	setOverscan(fcam.overscan() );
 }
 
 void ProxyViz::beginPickInView()

@@ -53,15 +53,12 @@ public:
 	
 	float cameraDepth(const Vector3F & p) const;
 	void getFarClipDepth(float & clip, const BoundingBox & b) const;
-    void setViewPortSize(int w, int h);
-	const float nearClipPlane() const;
-	const float & farClipPlane() const;
+    const float & farClipPlane() const;
 	
 protected:
-	const float & hfov() const;
 	void ndc(const Vector3F & cameraP, float & coordx, float & coordy) const;
-	void setViewport(const double & overscan,
-					const int & portWidth,
+	void setOverscan(const double & x);
+	void setViewportAspect(const int & portWidth,
 					const int & portHeight);
 	const float & overscan() const;
 	

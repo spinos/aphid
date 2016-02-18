@@ -89,6 +89,7 @@ public:
 	static MObject ainexamp;
     static MObject adisplayVox;
 	static MObject acheckDepth;
+	static MObject ainoverscan;
 	static MObject outValue1;
 	static MObject outValue;
 	static	MTypeId		id;
