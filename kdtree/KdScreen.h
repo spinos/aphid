@@ -67,16 +67,16 @@ void KdScreen<T>::create(int w, int h)
     m_z = new float[w * h];
     m_base.setRect(0, 0, w-1, h-1);
 	
-	createTiles()
+	createTiles();
 }
 
 template<typename T>
 void KdScreen<T>::createTiles()
 {
-	int ns = m_base.rect().width() / 32;
-	if(w & 31) ns++;
-	int nt = m_base.rect().height() / 32;
-	if(h & 31) nt++;
+	int ns = m_base.rect().width() >> 5;
+	if(ns & 31) ns++;
+	int nt = m_base.rect().height() >> 5;
+	if(nt & 31) nt++;
 	
 	const int n = (ns * nt);
 	m_tiles = new RectangleI[n];
