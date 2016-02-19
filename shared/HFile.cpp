@@ -11,10 +11,10 @@
 #include <HObject.h>
 #include <iostream>
 HFile::HFile() : BaseFile() 
-{ m_openMode = HDocument::oReadAndWrite; }
+{ m_openMode = HDocument::oReadOnly; }
 
 HFile::HFile(const char * name) : BaseFile(name) 
-{ m_openMode = HDocument::oReadAndWrite; }
+{ m_openMode = HDocument::oReadOnly; }
 
 HFile::~HFile() {}
 

@@ -322,11 +322,8 @@ std::string HesperisIO::H5PathNameTo(const MObject & node)
 	MStatus stat;
 	MFnDagNode pf(node, &stat);
     std::string r;
-	if(stat) {
+	if(stat)
         r = pf.fullPathName().asChar();
-        MDagPath nodePath;
-        pf.getPath(nodePath);
-    }
 	else r = MFnDependencyNode(node).name().asChar();
 	
 	H5PathName(r);
