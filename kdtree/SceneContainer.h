@@ -11,7 +11,9 @@ class RandomMesh;
 class KdTreeDrawer;
 class BezierCurve;
 class KdCluster;
+class KdTree;
 class GeometryArray;
+#define NUM_MESHES 90
 class SceneContainer {
 public:
 	SceneContainer(KdTreeDrawer * drawer);
@@ -28,8 +30,9 @@ private:
 
 private:
 	KdTreeDrawer * m_drawer;
-	RandomMesh * m_mesh[4];
+	RandomMesh * m_mesh[NUM_MESHES];
 	GeometryArray * m_curves;
 	KdCluster * m_cluster;
+	KdTree * m_tree;
 	int m_level;
 };

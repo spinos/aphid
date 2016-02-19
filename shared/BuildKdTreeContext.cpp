@@ -30,7 +30,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 		unsigned compIdx = p->getComponentIndex();
 		
 		primBoxes[i] = geo->calculateBBox(compIdx);
-		primBoxes[i].expand(10e-6);
+		primBoxes[i].expand(1e-6f);
 		primitives.next();
 	}
 }
@@ -51,12 +51,12 @@ void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
 	m_bbox = bbox;
 }
 
-BoundingBox BuildKdTreeContext::getBBox() const
+const BoundingBox & BuildKdTreeContext::getBBox() const
 {
 	return m_bbox;
 }
 
-const unsigned BuildKdTreeContext::getNumPrimitives() const
+const unsigned & BuildKdTreeContext::getNumPrimitives() const
 {
 	return m_numPrimitive;
 }

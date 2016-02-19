@@ -18,6 +18,7 @@ public:
 	typedef Primitive* PrimitivePtr;
 	SplitEvent();
 	
+	void setEmpty();
 	void setPos(float val);
 	void setAxis(int val);
 	/// split box into left and right box
@@ -28,7 +29,7 @@ public:
 	
 	void setLeftRightNumPrim(const unsigned &leftNumPrim, const unsigned &rightNumPrim);
 	
-	const float getCost() const;
+	const float & getCost() const;
 	
 	int leftCount() const;
 	int rightCount() const;

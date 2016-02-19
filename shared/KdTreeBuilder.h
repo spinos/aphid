@@ -18,14 +18,13 @@ class KdTreeBuilder {
 public:
 	typedef Primitive* PrimitivePtr;
 
-	KdTreeBuilder(BuildKdTreeContext &ctx);
+	KdTreeBuilder();
 	virtual ~KdTreeBuilder();
 	
+	void setContext(BuildKdTreeContext &ctx);
 	void calculateSides();
 	void updateEventBBoxAlong(const int &axis);
 	
-	void partitionLeft(BuildKdTreeContext &ctx);
-	void partitionRight(BuildKdTreeContext &ctx);
 	void partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
 	
 	const SplitEvent *bestSplit();

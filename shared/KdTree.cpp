@@ -92,7 +92,9 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 		return;
 	}
 	
-	KdTreeBuilder builder(ctx);
+	KdTreeBuilder builder;
+	
+	builder.setContext(ctx);
 
 	const SplitEvent *plane = builder.bestSplit();
 	

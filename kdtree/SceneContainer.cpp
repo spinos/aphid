@@ -17,16 +17,21 @@
 #include <GeometryArray.h>
 #include <RandomCurve.h>
 #include <bezierPatch.h>
-#define TEST_CURVE 1
-#define TEST_MESH 0
+#define TEST_CURVE 0
+#define TEST_MESH 1
 #define NUM_CURVESU 20
 #define NUM_CURVESV 20
 #define NUM_CURVES 400
+
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
 {
-	m_level = 6;
+	m_level = 30;
 	m_drawer = drawer;
 	m_cluster = new KdCluster;
+	m_tree = new KdTree;
+	
+	KdTree::MaxBuildLevel = m_level;
+	KdTree::NumPrimitivesInLeafThreashold = 32;
 	
 #if TEST_MESH
 	testMesh();
@@ -35,25 +40,24 @@ SceneContainer::SceneContainer(KdTreeDrawer * drawer)
 #if TEST_CURVE
 	testCurve();
 #endif
-	
-	KdTree::MaxBuildLevel = m_level;
-	KdTree::NumPrimitivesInLeafThreashold = 13;
-	
-	m_cluster->create();
 }
 
 SceneContainer::~SceneContainer() {}
 
 void SceneContainer::testMesh()
 {
+	unsigned count = 0;
 	unsigned i=0;
-	for(;i<4;i++) {
-		Vector3F c(-10.f + 32.f * RandomF01(), 
-					1.f + 32.f * RandomF01(), 
-					-12.f + 32.f * RandomF01());
-		m_mesh[i] = new RandomMesh(25000 + 5000 * RandomF01(), c, 4.f + 2.f * RandomF01(), i&1);
-		m_cluster->addGeometry(m_mesh[i]);
+	for(;i<NUM_MESHES;++i) {
+		Vector3F c(-10.f + 80.f * RandomF01(), 
+					1.f + 60.f * RandomF01(), 
+					-12.f + 50.f * RandomF01());
+		m_mesh[i] = new RandomMesh(10000 + 10000 * RandomF01(), c, 4.f + 2.f * RandomF01(), i&1);
+		m_tree->addGeometry(m_mesh[i]);
+		count += m_mesh[i]->numTriangles();
 	}
+	std::cout<<"\n total n tri "<<count;
+	m_tree->create();
 }
 
 void SceneContainer::testCurve()
@@ -96,6 +100,7 @@ void SceneContainer::testCurve()
 				.9f);
 
 	m_cluster->addGeometry(m_curves);
+	m_cluster->create();
 }
 
 void SceneContainer::renderWorld()
@@ -105,7 +110,7 @@ void SceneContainer::renderWorld()
 	int i=0;
 	
 #if TEST_MESH
-	for(;i<4;i++) 
+	for(;i<NUM_MESHES;i++) 
 		m_drawer->triangleMesh(m_mesh[i]);
 #endif	
 	glColor3f(0.1f, .2f, .3f);
@@ -122,15 +127,26 @@ void SceneContainer::renderWorld()
 		
 	m_drawer->setWired(1);
 	m_drawer->setColor(0.15f, 1.f, 0.5f);
+#if TEST_MESH
+	m_drawer->drawKdTree(m_tree);
+#endif
+
+#if TEST_CURVE
 	m_drawer->drawKdTree(m_cluster);
+#endif
 }
 
 void SceneContainer::upLevel()
 {
 	m_level++;
-	if(m_level > 24) m_level = 24;
+	if(m_level > 30) m_level = 30;
 	KdTree::MaxBuildLevel = m_level;
+#if TEST_MESH
+	m_tree->rebuild();
+#endif
+#if TEST_CURVE
 	m_cluster->rebuild();
+#endif
 }
 
 void SceneContainer::downLevel()
@@ -138,5 +154,10 @@ void SceneContainer::downLevel()
 	m_level--;
 	if(m_level<2) m_level = 2;
 	KdTree::MaxBuildLevel = m_level;
+#if TEST_MESH
+	m_tree->rebuild();
+#endif
+#if TEST_CURVE
 	m_cluster->rebuild();
+#endif
 }

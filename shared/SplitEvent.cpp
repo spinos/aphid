@@ -16,8 +16,11 @@ int SplitEvent::NumEventPerDimension = 32;
 //BoundingBox SplitEvent::ParentBox;
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
-	m_cost = 10e28;
+	m_cost = 1e28f;
 }
+
+void SplitEvent::setEmpty()
+{ m_isEmpty = 1; }
 
 void SplitEvent::setPos(float val)
 {
@@ -54,7 +57,7 @@ void SplitEvent::setLeftRightNumPrim(const unsigned &leftNumPrim, const unsigned
 	m_rightNumPrim = rightNumPrim;
 }
 
-const float SplitEvent::getCost() const
+const float & SplitEvent::getCost() const
 {
 	return m_cost;
 }

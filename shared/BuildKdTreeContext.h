@@ -26,7 +26,7 @@ public:
 	
 	void create(const unsigned &count);
 
-	const unsigned getNumPrimitives() const;
+	const unsigned & getNumPrimitives() const;
 
 	unsigned *indices();
 	BoundingBox *boxes();
@@ -34,7 +34,7 @@ public:
 	void verbose() const;
 
 	void setBBox(const BoundingBox &bbox);
-	BoundingBox getBBox() const;
+	const BoundingBox & getBBox() const;
 	float visitCost() const;
 private:
 	BoundingBox m_bbox;

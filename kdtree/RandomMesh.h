@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include <TriangleMesh.h>
+#include <ATriangleMesh.h>
 
-class RandomMesh : public TriangleMesh {
+class RandomMesh : public ATriangleMesh {
 public:
 	RandomMesh(unsigned numFaces, const Vector3F & center, const float & size, int type);
 	virtual ~RandomMesh();

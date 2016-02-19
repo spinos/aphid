@@ -25,7 +25,7 @@ void MinMaxBins::create(const unsigned &num, const float &min, const float &max)
 	m_maxBin = new unsigned[num];
 	
 	for(unsigned i = 0; i < m_binSize; i++) {
-		m_minBin[i] = m_maxBin[m_binSize - 1 - i] = 0;
+		m_minBin[i] = m_maxBin[i] = 0;
 	}
 }
 
