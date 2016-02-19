@@ -13,7 +13,9 @@ BuildKdTreeContext::BuildKdTreeContext() {}
 
 BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 {
-	create(data.getNumPrimitives());
+	createIndirection(data.getNumPrimitives());
+/// copy bbox of all prims
+	m_primitiveBoxes.create(m_numPrimitive+1);
 	
 	BoundingBox *primBoxes = m_primitiveBoxes.ptr();
 	unsigned *primIndex = m_indices.ptr();
@@ -39,11 +41,10 @@ BuildKdTreeContext::~BuildKdTreeContext()
 {
 }
 
-void BuildKdTreeContext::create(const unsigned &count)
+void BuildKdTreeContext::createIndirection(const unsigned &count)
 {
 	m_numPrimitive = count;
 	m_indices.create(m_numPrimitive+1);
-	m_primitiveBoxes.create(m_numPrimitive+1);
 }
 
 void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
@@ -66,7 +67,7 @@ unsigned *BuildKdTreeContext::indices()
 	return m_indices.ptr();
 }
 
-BoundingBox *BuildKdTreeContext::boxes()
+BoundingBox *BuildKdTreeContext::primitiveBoxes()
 {
 	return m_primitiveBoxes.ptr();
 }

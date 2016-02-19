@@ -10,6 +10,8 @@
 #include "KdTreeBuilder.h"
 #include <boost/thread.hpp>  
 
+BuildKdTreeContext * KdTreeBuilder::GlobalContext = NULL;
+
 KdTreeBuilder::KdTreeBuilder()
 {
 	m_bins = new MinMaxBins[SplitEvent::Dimension];
@@ -34,7 +36,8 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 
 void KdTreeBuilder::calculateBins()
 {
-	BoundingBox *primBoxes = m_context->boxes();
+	BoundingBox *primBoxes = GlobalContext->primitiveBoxes();
+	unsigned *indices = m_context->indices();
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(m_bbox.distance(axis) < 1e-3f) {
 		    m_bins[axis].setFlat();
@@ -43,7 +46,7 @@ void KdTreeBuilder::calculateBins()
 		m_bins[axis].create(SplitEvent::NumBinPerDimension, m_bbox.getMin(axis), m_bbox.getMax(axis));
 	
 		for(unsigned i = 0; i < m_numPrimitive; i++) {
-			const BoundingBox * primBox = &primBoxes[i];
+			const BoundingBox * primBox = &primBoxes[indices[i]];
 			m_bins[axis].add(primBox->getMin(axis), primBox->getMax(axis));
 		}
 		
@@ -70,6 +73,7 @@ void KdTreeBuilder::calculateSplitEvents()
 			event.setLeftRightNumPrim(leftNumPrim, rightNumPrim);
 		}
 	}
+	
 #if 0
 	boost::thread boxThread[3];
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
@@ -103,9 +107,11 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 	const float min = m_bbox.getMin(axis);
 	const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
 	int g, minGrid, maxGrid;
-	BoundingBox *primBoxes = m_context->boxes();
+	BoundingBox *primBoxes = GlobalContext->primitiveBoxes();
+	unsigned *indices = m_context->indices();
+	
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		const BoundingBox * primBox = &primBoxes[i];
+		const BoundingBox * primBox = &primBoxes[indices[i] ];
 		
 		minGrid = (primBox->getMin(axis) - min) / delta;
 		
@@ -210,9 +216,9 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 	
 	SplitEvent &e = m_event[m_bestEventIdx];
 	if(e.leftCount() > 0)
-		leftCtx.create(e.leftCount());
+		leftCtx.createIndirection(e.leftCount());
 	if(e.rightCount() > 0)
-		rightCtx.create(e.rightCount());
+		rightCtx.createIndirection(e.rightCount());
 	
 	BoundingBox leftBox, rightBox;
 
@@ -220,44 +226,35 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 	leftCtx.setBBox(leftBox);
 	rightCtx.setBBox(rightBox);
 	
+	BoundingBox *boxSrc = GlobalContext->primitiveBoxes();
 	unsigned *indices = m_context->indices();
-	BoundingBox *boxSrc = m_context->boxes();
-	BoundingBox *leftBoxDst = leftCtx.boxes();
-	BoundingBox *rightBoxDst = rightCtx.boxes();
+	
 	unsigned *leftIdxDst = leftCtx.indices();
 	unsigned *rightIdxDst = rightCtx.indices();
 	
-	int leftCount = 0;
-	int rightCount = 0;
 	int side;
+	unsigned ind;
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		const BoundingBox * primBox = &boxSrc[i];
+		ind = *indices;
+		const BoundingBox * primBox = &boxSrc[ind];
 		
-		//if(primBox.getMax(e.getAxis()) < m_bbox.getMin(e.getAxis())) continue;
-		//if(primBox.getMin(e.getAxis()) > m_bbox.getMax(e.getAxis())) continue;
-		//if(*indices == 2202) printf("2202 xbound %f %f", primBox.getMin(0), primBox.getMax(0));
 		side = e.side(*primBox);
 		
-		//side = m_primitiveClassification[i];
 		if(side < 2) {
 			if(primBox->touch(leftBox)) {
-		
-			leftIdxDst[leftCount] = *indices;
-			leftBoxDst[leftCount] = *primBox;
-			leftCount++;
+			*leftIdxDst = ind;
+			leftIdxDst++;
 			
 			}
 		}
 		if(side > 0) {
 			if(primBox->touch(rightBox)) {
-			rightIdxDst[rightCount] = *indices;
-			rightBoxDst[rightCount] = *primBox;
-			rightCount++;
+			*rightIdxDst = ind;
+			rightIdxDst++;
 			}
 		}
 		indices++;
 	}
-	//printf("partition %i | %i\n", leftCount, rightCount);
 }
 
 void KdTreeBuilder::verbose() const

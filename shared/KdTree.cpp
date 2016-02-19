@@ -57,15 +57,20 @@ void KdTree::create()
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream);
 	ctx->setBBox(b);
 	
+	std::cout << "\n Kd tree ctx in " << bTimer.elapsed();
+	bTimer.restart();
+	
 	m_maxLeafLevel = 0;
 	m_numNoEmptyLeaf = 0;
+	
+	KdTreeBuilder::GlobalContext = ctx;
 	
 	subdivide(m_root, *ctx, 0);
 	ctx->verbose();
 	delete ctx;
 	
 	// m_stream.verbose();
-	std::cout << "Kd tree constructed in " << bTimer.elapsed() 
+	std::cout << "\n Kd tree built in " << bTimer.elapsed() 
 	<< " secs\n max leaf level: "<<m_maxLeafLevel<<"\n"
 	<< " num no-empty leaves "<<m_numNoEmptyLeaf<<"\n";
 }

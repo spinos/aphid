@@ -24,12 +24,12 @@ public:
 	BuildKdTreeContext(BuildKdTreeStream &data);
 	~BuildKdTreeContext();
 	
-	void create(const unsigned &count);
+	void createIndirection(const unsigned &count);
 
 	const unsigned & getNumPrimitives() const;
 
 	unsigned *indices();
-	BoundingBox *boxes();
+	BoundingBox * primitiveBoxes();
 	
 	void verbose() const;
 
