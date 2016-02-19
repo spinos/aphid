@@ -12,6 +12,7 @@
 #include <KdTreeNode.h>
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
+#include <VectorArray.h>
 
 class IntersectionContext;
 class SelectionContext;
@@ -42,7 +43,8 @@ protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
 	IndexArray & indirection();
-	PrimitiveArray & primitives();
+	sdb::VectorArray<Primitive> & primitives();
+	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);
 	void createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx);

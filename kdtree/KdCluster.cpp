@@ -98,14 +98,14 @@ void KdCluster::leafWriteGroup(KdTreeNode *node, const BoundingBox & box)
 	
 	unsigned start = node->getPrimStart();
 	IndexArray &indir = indirection();
-	PrimitiveArray &prims = primitives();
+	sdb::VectorArray<Primitive> &prims = primitives();
 	indir.setIndex(start);
 
 	unsigned igroup = 0;
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		if(geo->type() == TGeometryArray) {

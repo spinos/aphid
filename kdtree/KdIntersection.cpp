@@ -50,13 +50,13 @@ bool KdIntersection::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 	
 	unsigned start = node->getPrimStart();
 	IndexArray &indir = indirection();
-	PrimitiveArray &prims = primitives();
+	sdb::VectorArray<Primitive> &prims = primitives();
 	indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
@@ -118,13 +118,13 @@ bool KdIntersection::leafIntersectTetrahedron(KdTreeNode *node, const BoundingBo
 	
 	unsigned start = node->getPrimStart();
 	IndexArray &indir = indirection();
-	PrimitiveArray &prims = primitives();
+	sdb::VectorArray<Primitive> &prims = primitives();
 	indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
@@ -174,13 +174,13 @@ void KdIntersection::leafCountElementIntersectBox(std::vector<unsigned> & result
 	
 	unsigned start = node->getPrimStart();
 	IndexArray &indir = indirection();
-	PrimitiveArray &prims = primitives();
+	sdb::VectorArray<Primitive> &prims = primitives();
 	indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		

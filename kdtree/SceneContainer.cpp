@@ -25,7 +25,7 @@
 
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
 {
-	m_level = 30;
+	m_level = 10;
 	m_drawer = drawer;
 	m_cluster = new KdCluster;
 	m_tree = new KdTree;

@@ -26,7 +26,7 @@ void Primitive::setComponentIndex(const unsigned &idx)
 	m_componentIndex = idx;
 }
 
-const unsigned Primitive::getComponentIndex() const
+const unsigned & Primitive::getComponentIndex() const
 {
 	return m_componentIndex;
 }

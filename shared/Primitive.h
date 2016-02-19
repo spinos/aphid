@@ -17,7 +17,7 @@ public:
 	Geometry *getGeometry() const;
 	
 	void setComponentIndex(const unsigned &idx);
-	const unsigned getComponentIndex() const;
+	const unsigned & getComponentIndex() const;
 	
 private:
 	Geometry *m_geometry;

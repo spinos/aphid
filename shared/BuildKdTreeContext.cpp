@@ -9,6 +9,8 @@
 
 #include "BuildKdTreeContext.h"
 #include "Geometry.h"
+#include <VectorArray.h>
+
 BuildKdTreeContext::BuildKdTreeContext() {}
 
 BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
@@ -20,12 +22,13 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 	BoundingBox *primBoxes = m_primitiveBoxes.ptr();
 	unsigned *primIndex = m_indices.ptr();
 	
-	PrimitiveArray &primitives = data.primitives();
-	primitives.begin();
+	sdb::VectorArray<Primitive> &primitives = data.primitives();
+	
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		primIndex[i] = i;
+		*primIndex = i;
+		primIndex++;
 		
-		Primitive *p = primitives.asPrimitive();
+		Primitive *p = primitives.get(i);
 
 		Geometry *geo = p->getGeometry();
 		
@@ -33,7 +36,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 		
 		primBoxes[i] = geo->calculateBBox(compIdx);
 		primBoxes[i].expand(1e-6f);
-		primitives.next();
+		
 	}
 }
 

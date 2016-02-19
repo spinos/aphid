@@ -15,7 +15,7 @@
 #include <boost/timer.hpp>
 
 int KdTree::MaxBuildLevel = 32;
-unsigned KdTree::NumPrimitivesInLeafThreashold = 8;
+unsigned KdTree::NumPrimitivesInLeafThreashold = 32;
 
 KdTree::KdTree() 
 {
@@ -254,14 +254,14 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 	//printf("prim start %i ", start);
 	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
 	IndexArray &indir = m_stream.indirection();
-	PrimitiveArray &prims = m_stream.primitives();
+	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
 	indir.setIndex(start);
 	char anyHit = 0;
 	float hitD;
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomp = prim->getComponentIndex();
 		
@@ -283,10 +283,10 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 Primitive * KdTree::getPrim(unsigned idx)
 {
     IndexArray &indir = m_stream.indirection();
-	PrimitiveArray &prims = m_stream.primitives();
+	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
 	indir.setIndex(idx);
 	unsigned *iprim = indir.asIndex();
-	return  prims.asPrimitive(*iprim);
+	return  prims.get(*iprim);
 }
 
 char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
@@ -351,13 +351,13 @@ char KdTree::leafClosestPoint(KdTreeNode *node, const Vector3F &origin, Intersec
 	unsigned num = node->getNumPrims();
 	
 	IndexArray &indir = m_stream.indirection();
-	PrimitiveArray &prims = m_stream.primitives();
+	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
 	indir.setIndex(start);
 	char anyHit = 0;
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
 		unsigned iface = prim->getComponentIndex();
 		
@@ -415,13 +415,13 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	if(num < 1) return 0;
 	unsigned start = node->getPrimStart();
 	IndexArray &indir = m_stream.indirection();
-	PrimitiveArray &prims = m_stream.primitives();
+	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
 	indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
@@ -442,7 +442,7 @@ const TypedEntity::Type KdTree::type() const
 IndexArray & KdTree::indirection()
 { return m_stream.indirection(); }
 
-PrimitiveArray & KdTree::primitives()
+sdb::VectorArray<Primitive> & KdTree::primitives()
 { return m_stream.primitives(); }
 
 void KdTree::closestToPoint(ClosestToPointTestResult * result)
@@ -471,13 +471,13 @@ void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, Closes
 	
 	unsigned start = node->getPrimStart();
 	IndexArray &indir = indirection();
-	PrimitiveArray &prims = primitives();
+	sdb::VectorArray<Primitive> &prims = primitives();
 	indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
 		unsigned *iprim = indir.asIndex();
 
-		Primitive * prim = prims.asPrimitive(*iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		

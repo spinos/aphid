@@ -5,15 +5,13 @@ cmake_minimum_required (VERSION 2.8)
 project (testkdtree)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_BUILD_TYPE RELEASE)
-include_directories ("../shared" "../catmullclark")
+set (CMAKE_BUILD_TYPE Release)
+include_directories ("../shared" "../catmullclark" "../btree")
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"
 "glwidget.h"
 "SceneContainer.h"
-"KdCluster.h"
-"KdIntersection.h"
 "RandomCurve.h"
 "RandomMesh.h")
 
@@ -22,8 +20,6 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 "glWidget.cpp"
 "window.cpp"
 "SceneContainer.cpp"
-"KdCluster.cpp"
-"KdIntersection.cpp"
 "RandomCurve.cpp"
 "RandomMesh.cpp")
 

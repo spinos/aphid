@@ -9,7 +9,7 @@
 
 #pragma once
 #include <BoundingBox.h>
-#include <PrimitiveArray.h>
+#include <VectorArray.h>
 #include <IndexArray.h>
 #include <KdTreeNodeArray.h>
 #include <BaseMesh.h>
@@ -23,11 +23,9 @@ public:
 	void appendGeometry(Geometry * geo);
 	
 	const unsigned getNumPrimitives() const;
-	const PrimitiveArray &getPrimitives() const;
-	const IndexArray &getIndices() const;
-	
-	PrimitiveArray &primitives();
-	IndexArray &indices();
+	const sdb::VectorArray<Primitive> &getPrimitives() const;
+
+	sdb::VectorArray<Primitive> &primitives();
 	IndexArray &indirection();
 	
 	KdTreeNode *createTreeBranch();
@@ -36,8 +34,7 @@ public:
 	void verbose() const;
 	
 private:
-	PrimitiveArray m_primitives;
-	IndexArray m_indices;
+	sdb::VectorArray<Primitive> m_primitives;
 	IndexArray m_indirection;
 	KdTreeNodeArray m_nodes;
 };

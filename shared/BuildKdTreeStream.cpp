@@ -17,14 +17,12 @@ BuildKdTreeStream::~BuildKdTreeStream()
 
 void BuildKdTreeStream::initialize()
 {
-	m_indices.initialize();
 	m_nodes.initialize();
 	m_indirection.initialize();
 }
 
 void BuildKdTreeStream::cleanup()
 {
-	m_indices.clear();
 	m_nodes.clear();
 	m_indirection.clear();
 }
@@ -33,43 +31,31 @@ void BuildKdTreeStream::appendGeometry(Geometry * geo)
 {
 // std::cout<<" geo type "<<geo->type()<<" ";
 	const unsigned n = geo->numComponents();
-	m_primitives.expandBy(n);
-	m_indices.expandBy(n);
 	for(unsigned i = 0; i < n; i++) {
-		Primitive *p = m_primitives.asPrimitive();
-		p->setGeometry(geo);
-		p->setComponentIndex(i);
-		
-		unsigned *dest = m_indices.asIndex();
-		*dest = m_primitives.index();
-		m_primitives.next();
-		m_indices.next();
+		//Primitive *p = m_primitives.asPrimitive();
+		//p->setGeometry(geo);
+		//p->setComponentIndex(i);
+		//m_primitives.next();
+		Primitive p;
+		p.setGeometry(geo);
+		p.setComponentIndex(i);
+		m_primitives.insert(p);
 	}
 }
 
 const unsigned BuildKdTreeStream::getNumPrimitives() const
 {
-	return m_primitives.index();
+	return m_primitives.size();
 }
 
-const PrimitiveArray &BuildKdTreeStream::getPrimitives() const
+const sdb::VectorArray<Primitive> &BuildKdTreeStream::getPrimitives() const
 {
 	return m_primitives;
 }
 
-const IndexArray &BuildKdTreeStream::getIndices() const
-{
-	return m_indices;
-}
-
-PrimitiveArray &BuildKdTreeStream::primitives()
+sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
 {
 	return m_primitives;
-}
-	
-IndexArray &BuildKdTreeStream::indices()
-{
-	return m_indices;
 }
 
 IndexArray &BuildKdTreeStream::indirection()
