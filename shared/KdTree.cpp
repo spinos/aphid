@@ -143,6 +143,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 
 void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 {
+	if(!ctx.grid() ) {
 	if(ctx.getNumPrimitives() > 0) {
 		IndexArray &indir = m_stream.indirection();
 		unsigned numDir = ctx.getNumPrimitives();
@@ -157,6 +158,7 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 			indir.next();
 		}
 		m_numNoEmptyLeaf++;
+	}
 	}
 	
 	node->setLeaf(true);

@@ -27,7 +27,8 @@ public:
 	}
 	
 	virtual ~Sequence() {
-		delete m_root;
+/// todo external data 
+		//delete m_root;
 	}
 	
 	Pair<T, Entity> * insert(const T & x) { 

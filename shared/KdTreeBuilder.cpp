@@ -30,8 +30,102 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 	m_numPrimitive = ctx.getNumPrimitives();
 	m_bbox = ctx.getBBox();
 	
-	calculateBins();
-	calculateSplitEvents();
+	if(m_context->isCompressed() ) {
+		calculateCompressBins();
+		calculateCompressSplitEvents();
+	}
+	else {
+		calculateBins();
+		calculateSplitEvents();
+	}
+	
+	const unsigned numEvent = SplitEvent::NumEventPerDimension * SplitEvent::Dimension;
+	for(unsigned i = 0; i < numEvent; i++)
+		m_event[i].calculateCost(m_bbox.area());
+}
+
+void KdTreeBuilder::calculateCompressBins()
+{
+	sdb::WorldGrid<GroupCell, unsigned > * grd = m_context->grid();
+	
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bbox.distance(axis) < 1e-3f) {
+		    m_bins[axis].setFlat();
+			continue;
+		}
+		m_bins[axis].create(SplitEvent::NumBinPerDimension, m_bbox.getMin(axis), m_bbox.getMax(axis));
+	
+		grd->begin();
+		while (!grd->end() ) {
+			const BoundingBox & primBox = grd->value()->m_box;
+			if(primBox.touch(m_bbox) ) 
+				m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
+				
+			grd->next();
+		}
+		
+		m_bins[axis].scan();
+	}
+}
+
+void KdTreeBuilder::calculateCompressSplitEvents()
+{
+	int dimOffset;
+	unsigned leftNumPrim, rightNumPrim;
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+			
+		dimOffset = SplitEvent::NumEventPerDimension * axis;	
+		const float min = m_bbox.getMin(axis);
+		const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
+		for(int i = 0; i < SplitEvent::NumEventPerDimension; i++) {
+			SplitEvent &event = m_event[dimOffset + i];
+			event.setAxis(axis);
+			event.setPos(min + delta * (i + 1));
+			m_bins[axis].get(i, leftNumPrim, rightNumPrim);
+			event.setLeftRightNumPrim(leftNumPrim, rightNumPrim);
+		}
+	}
+	
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+			
+		updateCompressEventBBoxAlong(axis);
+	}
+}
+
+void KdTreeBuilder::updateCompressEventBBoxAlong(const int &axis)
+{
+	SplitEvent * eventOffset = &m_event[axis * SplitEvent::NumEventPerDimension];
+	
+	const float min = m_bbox.getMin(axis);
+	const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
+	int g, minGrid, maxGrid;
+	
+	sdb::WorldGrid<GroupCell, unsigned > * grd = m_context->grid();
+	
+	grd->begin();
+	while (!grd->end() ) {
+		const BoundingBox & primBox = grd->value()->m_box;
+		if(primBox.touch(m_bbox) ) {	
+			minGrid = (primBox.getMin(axis) - min) / delta;
+		
+			if(minGrid < 0) minGrid = 0;
+		
+			for(g = minGrid; g < SplitEvent::NumEventPerDimension; g++)
+				eventOffset[g].updateLeftBox(primBox);
+		
+			maxGrid = (primBox.getMax(axis) - min) / delta;
+		
+			if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
+
+			for(g = maxGrid; g > 0; g--)
+				eventOffset[g - 1].updateRightBox(primBox);
+		}
+		grd->next();
+	}
 }
 
 void KdTreeBuilder::calculateBins()
@@ -56,12 +150,12 @@ void KdTreeBuilder::calculateBins()
 
 void KdTreeBuilder::calculateSplitEvents()
 {
-	const unsigned numEvent = SplitEvent::NumEventPerDimension * SplitEvent::Dimension;
 	int dimOffset;
 	unsigned leftNumPrim, rightNumPrim;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(m_bins[axis].isFlat())
 			continue;
+			
 		dimOffset = SplitEvent::NumEventPerDimension * axis;	
 		const float min = m_bbox.getMin(axis);
 		const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
@@ -91,13 +185,11 @@ void KdTreeBuilder::calculateSplitEvents()
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(m_bins[axis].isFlat())
 			continue;
+			
 		updateEventBBoxAlong(axis);
 	}
 #endif
 	
-	for(unsigned i = 0; i < numEvent; i++) {
-		m_event[i].calculateCost(m_bbox.area());
-	}
 }
 
 void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
@@ -216,16 +308,63 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 {
 	
 	SplitEvent &e = m_event[m_bestEventIdx];
+	
+	BoundingBox leftBox, rightBox;
+	m_bbox.split(e.getAxis(), e.getPos(), leftBox, rightBox);
+	leftCtx.setBBox(leftBox);
+	rightCtx.setBBox(rightBox);
+	
+	if(m_context->isCompressed() )
+		partitionCompress(e, leftBox, rightBox, leftCtx, rightCtx);
+	else 
+		partitionPrims(e, leftBox, rightBox, leftCtx, rightCtx);
+	
+}
+
+void KdTreeBuilder::partitionCompress(const SplitEvent & e,
+					const BoundingBox & leftBox, const BoundingBox & rightBox,
+						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
+{
+	sdb::WorldGrid<GroupCell, unsigned > * grd = m_context->grid();
+	
+	if(e.leftCount() > 0)
+		leftCtx.createGrid(grd->gridSize() );
+	if(e.rightCount() > 0)
+		rightCtx.createGrid(grd->gridSize() );
+	
+	int side;
+	grd->begin();
+	while (!grd->end() ) {
+		const BoundingBox & primBox = grd->value()->m_box;
+		if(primBox.touch(m_bbox) ) {	
+			side = e.side(primBox);
+			if(side < 2) {
+				if(primBox.touch(leftBox))
+					leftCtx.addCell(grd->key(), grd->value() );
+			}
+			if(side > 0) {
+				if(primBox.touch(rightBox))
+					rightCtx.addCell(grd->key(), grd->value() );
+			}
+		}
+		grd->next();
+	}
+	
+	leftCtx.countPrimsInGrid();
+	rightCtx.countPrimsInGrid();
+	
+	std::cout<<"\n part "<<leftCtx.getNumPrimitives()<<"/"<<rightCtx.getNumPrimitives()
+	<<" cell "<<leftCtx.numCells()<<"/"<<rightCtx.numCells();
+}
+
+void KdTreeBuilder::partitionPrims(const SplitEvent & e,
+					const BoundingBox & leftBox, const BoundingBox & rightBox,
+						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
+{
 	if(e.leftCount() > 0)
 		leftCtx.createIndirection(e.leftCount());
 	if(e.rightCount() > 0)
 		rightCtx.createIndirection(e.rightCount());
-	
-	BoundingBox leftBox, rightBox;
-
-	m_bbox.split(e.getAxis(), e.getPos(), leftBox, rightBox);
-	leftCtx.setBBox(leftBox);
-	rightCtx.setBBox(rightBox);
 	
 	BoundingBox *boxSrc = GlobalContext->primitiveBoxes();
 	unsigned *indices = m_context->indices();
@@ -245,7 +384,6 @@ void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &r
 			if(primBox->touch(leftBox)) {
 			*leftIdxDst = ind;
 			leftIdxDst++;
-			
 			}
 		}
 		if(side > 0) {

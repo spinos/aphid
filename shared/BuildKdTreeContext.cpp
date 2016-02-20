@@ -11,7 +11,8 @@
 #include "Geometry.h"
 #include <VectorArray.h>
 
-BuildKdTreeContext::BuildKdTreeContext() : m_grid(NULL) {}
+BuildKdTreeContext::BuildKdTreeContext() : m_grid(NULL),
+m_numPrimitive(0) {}
 
 BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBox & b)
 {
@@ -64,6 +65,12 @@ void BuildKdTreeContext::createIndirection(const unsigned &count)
 	m_indices.create(m_numPrimitive+1);
 }
 
+void BuildKdTreeContext::createGrid(const float & x)
+{
+	m_grid = new sdb::WorldGrid<GroupCell, unsigned >();
+	m_grid->setGridSize(x);
+}
+
 void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
 {
 	m_bbox = bbox;
@@ -98,4 +105,33 @@ void BuildKdTreeContext::verbose() const
 {
 	//printf("indices state:\n");
 	//m_indices.verbose();
+}
+
+bool BuildKdTreeContext::isCompressed()
+{ 
+	if(!m_grid) return false;
+	return m_grid->size() < (m_numPrimitive>>2); 
+}
+
+sdb::WorldGrid<GroupCell, unsigned > * BuildKdTreeContext::grid()
+{ return m_grid; }
+
+void BuildKdTreeContext::addCell(const sdb::Coord3 & x, GroupCell * c)
+{ m_grid->insertChildValue(x, c); }
+
+void BuildKdTreeContext::countPrimsInGrid()
+{
+	m_numPrimitive = 0;
+	if(!m_grid) return;
+	m_grid->begin();
+	while(!m_grid->end() ) {
+		m_numPrimitive += m_grid->value()->size();
+		m_grid->next();
+	}
+}
+
+int BuildKdTreeContext::numCells()
+{
+	if(!m_grid) return 0;
+	return m_grid->size();
 }

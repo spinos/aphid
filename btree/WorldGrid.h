@@ -39,6 +39,8 @@ public:
 	ChildType * insertChild(const float * at);
 	ChildType * insertChild(const Coord3 & x);
 	
+	void insertChildValue(const Coord3 & x , ChildType * v);
+	
 /// put v into grid
 	void insert(const float * at, ValueType * v);
 	void insert(const Coord3 & x , ValueType * v);
@@ -89,6 +91,13 @@ ChildType * WorldGrid<ChildType, ValueType>::insertChild(const Coord3 & x)
 		p->index = new ChildType(this);
 
 	return static_cast<ChildType *>(p->index);
+}
+
+template<typename ChildType, typename ValueType>
+void WorldGrid<ChildType, ValueType>::insertChildValue(const Coord3 & x , ChildType * v)
+{
+	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
+	p->index = v;
 }
 
 template<typename ChildType, typename ValueType>

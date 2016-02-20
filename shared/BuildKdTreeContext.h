@@ -33,7 +33,8 @@ public:
 	~BuildKdTreeContext();
 	
 	void createIndirection(const unsigned &count);
-
+	void createGrid(const float & x);
+	
 	const unsigned & getNumPrimitives() const;
 
 	unsigned *indices();
@@ -44,6 +45,12 @@ public:
 	void setBBox(const BoundingBox &bbox);
 	const BoundingBox & getBBox() const;
 	float visitCost() const;
+	bool isCompressed();
+	sdb::WorldGrid<GroupCell, unsigned > * grid();
+	void addCell(const sdb::Coord3 & x, GroupCell * c);
+	void countPrimsInGrid();
+	int numCells();
+	
 private:
 	BoundingBox m_bbox;
 	IndexList m_indices;
