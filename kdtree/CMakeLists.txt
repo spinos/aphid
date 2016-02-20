@@ -13,9 +13,13 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "glwidget.h"
 "SceneContainer.h"
 "RandomCurve.h"
-"RandomMesh.h")
+"RandomMesh.h"
+../btree/BNode.h)
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
+../btree/Types.cpp
+../btree/Entity.cpp
+../btree/BNode.cpp
 ../shared/KdTreeNode.cpp 
 ../shared/BuildKdTreeContext.cpp 
 ../shared/KdTreeNodeArray.cpp 

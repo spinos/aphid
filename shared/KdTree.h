@@ -18,6 +18,8 @@ class IntersectionContext;
 class SelectionContext;
 class KdTree : public Geometry, public Boundary
 {
+	int m_minNumLeafPrims, m_maxNumLeafPrims, m_totalNumLeafPrims;
+	
 public:
 	KdTree();
 	virtual ~KdTree();

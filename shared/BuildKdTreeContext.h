@@ -50,6 +50,11 @@ public:
 	void addCell(const sdb::Coord3 & x, GroupCell * c);
 	void countPrimsInGrid();
 	int numCells();
+	bool decompress(bool forced = false);
+	void addIndex(const unsigned & x);
+	
+private:
+	void addIndices(GroupCell * c, unsigned & ind);
 	
 private:
 	BoundingBox m_bbox;

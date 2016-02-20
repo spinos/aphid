@@ -50,19 +50,22 @@ void KdTree::create()
 	m_root = new KdTreeNode;
 	
 	const BoundingBox & b = getBBox();
-    /// std::cout<<" kdtree level 0 box "<<b.str();
+    std::cout<<"\n Kd tree level 0 box "<<b.str();
 	boost::timer bTimer;
 	bTimer.restart();
 	
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream, b);
 	
-	std::cout << "\n Kd tree ctx in " << bTimer.elapsed();
+	std::cout << "\n Kd tree prepare in " << bTimer.elapsed();
 	bTimer.restart();
 	
 	m_maxLeafLevel = 0;
 	m_numNoEmptyLeaf = 0;
 	
 	KdTreeBuilder::GlobalContext = ctx;
+	m_minNumLeafPrims = 1e28;
+	m_maxNumLeafPrims = 0;
+	m_totalNumLeafPrims = 0;
 	
 	subdivide(m_root, *ctx, 0);
 	ctx->verbose();
@@ -70,8 +73,10 @@ void KdTree::create()
 	
 	// m_stream.verbose();
 	std::cout << "\n Kd tree built in " << bTimer.elapsed() 
-	<< " secs\n max leaf level: "<<m_maxLeafLevel<<"\n"
-	<< " num no-empty leaves "<<m_numNoEmptyLeaf<<"\n";
+	<< " secs\n max leaf level: "<<m_maxLeafLevel
+	<< "\n num no-empty leaves "<<m_numNoEmptyLeaf
+	<<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
+	<<"\n average "<<(float)m_totalNumLeafPrims/(float)m_numNoEmptyLeaf;
 }
 
 void KdTree::rebuild()
@@ -143,10 +148,18 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 
 void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 {
+	ctx.decompress(true);
 	if(!ctx.grid() ) {
 	if(ctx.getNumPrimitives() > 0) {
+		const unsigned numDir = ctx.getNumPrimitives();
+		
+		if(m_minNumLeafPrims > numDir )
+			m_minNumLeafPrims = numDir;
+		if(m_maxNumLeafPrims < numDir )
+			m_maxNumLeafPrims = numDir;
+		m_totalNumLeafPrims += numDir;
+		
 		IndexArray &indir = m_stream.indirection();
-		unsigned numDir = ctx.getNumPrimitives();
 		node->setPrimStart(indir.index());
 		node->setNumPrims(numDir);
 		

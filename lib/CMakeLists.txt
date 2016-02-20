@@ -285,11 +285,10 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/DynamicBody.cpp
 ../shared/ConvexShape.cpp
 ../shared/ViewFrame.cpp
-../btree/Types.cpp
-../btree/Entity.cpp
-../btree/BNode.cpp
+#../btree/Types.cpp
+#../btree/Entity.cpp
+#../btree/BNode.cpp
 ../btree/BTree.cpp
-../btree/Entity.cpp
 ../btree/MortonHash.cpp
 ../shared/BaseSampler.cpp
 ../shared/AField.cpp

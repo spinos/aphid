@@ -18,10 +18,14 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 {
 	setBBox(b);
 	m_grid = new sdb::WorldGrid<GroupCell, unsigned >();
-	m_grid->setGridSize(b.getLongestDistance() / 60.f);
+	m_grid->setGridSize(b.getLongestDistance() / 64.f);
 	std::cout<<"\n ctx grid size "<<m_grid->gridSize();
 	
-	createIndirection(data.getNumPrimitives());
+	m_numPrimitive = data.getNumPrimitives();
+	std::cout<<"\n n prims "<<m_numPrimitive;
+	
+	createIndirection(m_numPrimitive);
+	
 /// copy bbox of all prims
 	m_primitiveBoxes.create(m_numPrimitive+1);
 	
@@ -39,7 +43,8 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		unsigned compIdx = p->getComponentIndex();
 		
 		primBoxes[i] = geo->calculateBBox(compIdx);
-		primBoxes[i].expand(1e-6f);	
+		
+		// primBoxes[i].expand(1e-6f);	
 		
 		const Vector3F center = primBoxes[i].center();
 		
@@ -47,6 +52,12 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		primIndex++;
 		
 		GroupCell * c = m_grid->insertChild((const float *)&center);
+		
+		if(!c) {
+			std::cout<<"\n error cast to GroupCell";
+			return;
+		}
+		
 		c->insert(i);
 		c->m_box.expandBy(primBoxes[i]);
 	}
@@ -59,11 +70,9 @@ BuildKdTreeContext::~BuildKdTreeContext()
 	if(m_grid) delete m_grid;
 }
 
+/// allocate by max count
 void BuildKdTreeContext::createIndirection(const unsigned &count)
-{
-	m_numPrimitive = count;
-	m_indices.create(m_numPrimitive+1);
-}
+{ m_indices.create(count+1); }
 
 void BuildKdTreeContext::createGrid(const float & x)
 {
@@ -108,10 +117,7 @@ void BuildKdTreeContext::verbose() const
 }
 
 bool BuildKdTreeContext::isCompressed()
-{ 
-	if(!m_grid) return false;
-	return m_grid->size() < (m_numPrimitive>>2); 
-}
+{ return m_grid !=NULL; }
 
 sdb::WorldGrid<GroupCell, unsigned > * BuildKdTreeContext::grid()
 { return m_grid; }
@@ -134,4 +140,40 @@ int BuildKdTreeContext::numCells()
 {
 	if(!m_grid) return 0;
 	return m_grid->size();
+}
+
+bool BuildKdTreeContext::decompress(bool forced)
+{
+	if(!m_grid) return false;
+	if(m_numPrimitive < 1024 
+		|| numCells() < 64
+		|| forced) {
+		m_indices.create(m_numPrimitive+1);
+		unsigned ind = 0;
+		m_grid->begin();
+		while(!m_grid->end() ) {
+			addIndices(m_grid->value(), ind );
+			m_grid->next();
+		}
+		delete m_grid;
+		m_grid = NULL;
+		return true;
+	}
+	return false;
+}
+
+void BuildKdTreeContext::addIndices(GroupCell * c, unsigned &ind)
+{
+	c->begin();
+	while(!c->end() ) {
+		m_indices.ptr()[ind] = c->key();
+		ind++;
+		c->next();
+	}
+}
+
+void BuildKdTreeContext::addIndex(const unsigned & x)
+{
+	m_indices.ptr()[m_numPrimitive] = x;
+	m_numPrimitive++;
 }

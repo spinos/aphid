@@ -57,15 +57,33 @@ const bool Coord3::operator==(const Coord3 & another) const {
 }
 
 const bool Coord3::operator<(const Coord3 & another) const {
-	return (z< another.z &&	y< another.y && x< another.x);
+	if(z < another.z) return true;
+	if(z > another.z) return false;
+/// z equals
+	if(y < another.y) return true;
+	if(y > another.y) return false;
+/// y equals
+	return x < another.x;
 }
 
 const bool Coord3::operator>=(const Coord3 & another) const {
-	return (z>= another.z && y>= another.y && x>= another.x);
+	if(z > another.z) return true;
+	if(z < another.z) return false;
+/// z equals
+	if(y > another.y) return true;
+	if(y < another.y) return false;
+/// y equals
+	return x >= another.x;
 }
 
 const bool Coord3::operator>(const Coord3 & another) const {
-	return (z> another.z &&	y> another.y && x> another.x);
+	if(z > another.z) return true;
+	if(z < another.z) return false;
+/// z equals
+	if(y > another.y) return true;
+	if(y < another.y) return false;
+/// y equals
+	return x > another.x;
 }
 
 const std::string Coord3::str() const 

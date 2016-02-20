@@ -19,6 +19,7 @@ public:
 	void get(const unsigned &idx, unsigned &left, unsigned &right) const;
 	char isFlat() const;
 	void setFlat();
+	const float & delta() const;
 	
 private:
 	void validateIdx(int &idx) const;

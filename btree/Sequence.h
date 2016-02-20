@@ -32,7 +32,14 @@ public:
 	}
 	
 	Pair<T, Entity> * insert(const T & x) { 
+#if 0
+		std::cout<<"\n seq insert"<<x;
+		Pair<T, Entity> * e = m_root->insert(x);
+		std::cout<<"\n res"<<e->index;
+		return e;
+#else
 		return m_root->insert(x);
+#endif
 	}
 	
 	void remove(const T & x) {

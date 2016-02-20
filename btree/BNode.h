@@ -53,7 +53,7 @@ protected:
 		
 		Entity * _p;
 	};
-	static NodeIndirection SeparatedNodes;
+	// static NodeIndirection SeparatedNodes;
 private:
 	
 };
@@ -123,7 +123,7 @@ private:
 	Pair<KeyType, Entity> * insertLeaf(const KeyType & x);
 	Pair<KeyType, Entity> * insertInterior(const KeyType & x);
 	
-	void splitRoot();
+	void splitRootToLeaves();
 	BNode *splitLeaf(const KeyType & x);
 	
 	void insertKey(KeyType x);
@@ -199,9 +199,9 @@ private:
 };
 
 template <typename KeyType>  
-BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent)
+BNode<KeyType>::BNode(Entity * parent) : TreeNode(parent),
+m_numKeys(0)
 {
-	m_numKeys = 0;
 	m_data = new Pair<KeyType, Entity>[MaxNumKeysPerNode];
 	for(int i=0;i< MaxNumKeysPerNode;++i)
         m_data[i].index = NULL;
@@ -219,15 +219,20 @@ BNode<KeyType>::~BNode()
 template <typename KeyType>  
 BNode<KeyType> * BNode<KeyType>::nextIndex(KeyType x) const
 {
-	if(firstKey() > x) return static_cast<BNode *>(firstIndex());
+	//std::cout<<"\n find "<<x<<" in "<<*this;
+	
+	if(firstKey() > x) {
+		if(!firstIndex()) std::cout<<"\n error first index";
+		return static_cast<BNode *>(firstIndex());
+	}
 	int ii;
 	SearchResult s = findKey(x);
 	ii = s.low;
 	if(s.found > -1) ii = s.found;
 	else if(key(s.high) < x) ii = s.high;
 	
-	//std::cout<<"find "<<x<<" in "<<*this<<" i "<<ii<<"\n";
-	return (static_cast<BNode *>(m_data[ii].index));
+	//std::cout<<"found "<<ii<<"\n";
+	return static_cast<BNode *>(m_data[ii].index);
 }
 
 template <typename KeyType> 
@@ -251,8 +256,6 @@ Pair<KeyType, Entity> * BNode<KeyType>::insert(const KeyType & x)
 {
 	if(isRoot()) 
 		return insertRoot(x);
-	else if(isLeaf())
-		return insertLeaf(x);
 	
 	return insertInterior(x);
 }
@@ -262,7 +265,6 @@ void BNode<KeyType>::remove(const KeyType & x)
 {
 	if(isRoot()) {
     
-		SeparatedNodes.reset();
 		removeRoot(x);
 	}
 	else if(isLeaf()) {
@@ -295,16 +297,23 @@ Pair<KeyType, Entity> * BNode<KeyType>::insertRoot(const KeyType & x)
 {
 	if(hasChildren()) {
 		BNode * n = nextIndex(x);
-		return n->insert(x);
+		if(n->isLeaf() ) {
+			return n->insertLeaf(x);
+		}
+		return n->insertInterior(x);
 	}
-	
+
+/// a single node
 	if(isFull()) {	
-		splitRoot();
+		splitRootToLeaves();
 		BNode * n = nextIndex(x);
-		return n->insert(x);
+		return n->insertLeaf(x);
 	}
 	
-	if(!hasKey(x)) insertKey(x);
+	if(!hasKey(x)) {
+		insertKey(x);
+		// std::cout<<"\n bnode insert root "<<x<<" into "<<*this;
+	}
 	
 	return dataP(findKey(x).found);
 }
@@ -312,11 +321,15 @@ Pair<KeyType, Entity> * BNode<KeyType>::insertRoot(const KeyType & x)
 template <typename KeyType> 
 Pair<KeyType, Entity> * BNode<KeyType>::insertLeaf(const KeyType & x)
 {
-	if(!hasKey(x)) insertKey(x);
+	if(!hasKey(x)) {
+		insertKey(x);
+		/// std::cout<<"\n bnode insert leaf"<<x<<" into "<<*this;
+	}
 	
 	BNode * dst = this;
 	if(isFull())
 		dst = splitLeaf(x);
+	
 	
 	return dst->dataP(dst->findKey(x).found);
 }
@@ -324,8 +337,13 @@ Pair<KeyType, Entity> * BNode<KeyType>::insertLeaf(const KeyType & x)
 template <typename KeyType> 
 Pair<KeyType, Entity> * BNode<KeyType>::insertInterior(const KeyType & x)
 {
+	//std::cout<<"\n insert inner"<<x<<" into "<<*this;
 	BNode * n = nextIndex(x);
-	return n->insert(x);
+	if(n->isLeaf() ) {
+		//std::cout<<"\n child is leaf"<<n<<" nk "<<n->numKeys();
+		return n->insertLeaf(x);
+	}
+	return n->insertInterior(x);
 }
 
 template <typename KeyType> 
@@ -363,8 +381,9 @@ void BNode<KeyType>::insertKey(KeyType x)
 }
 
 template <typename KeyType> 
-void BNode<KeyType>::splitRoot()
+void BNode<KeyType>::splitRootToLeaves()
 {
+	// std::cout<<"\n split root";
 	BNode * one = new BNode(this);
 	one->setLeaf();
 	BNode * two = new BNode(this); 
@@ -378,13 +397,19 @@ void BNode<KeyType>::splitRoot()
 			dst = two;
 		
 		dst->insertData(m_data[i]);
+		m_data[i].index = NULL;
 	}
+	
+	/// std::cout<<"\n into "<<*one<<"\n"<<*two;
 	
 	setFirstIndex(one);
 	setNumKeys(1);
 	
 	m_data[0].key = two->firstKey();
 	m_data[0].index = two;
+	
+	/// std::cout<<"\n aft "<<*this;
+	
 	one->connectSibling(two);
 }
 
@@ -396,11 +421,13 @@ BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 	BNode * two = new BNode(parent()); 
 	two->setLeaf();
 
-	for(int i=MaxNumKeysPerNode>>1; i < MaxNumKeysPerNode; ++i)
+	for(int i=MaxNumKeysPerNode / 2; i < MaxNumKeysPerNode; ++i) {
 		two->insertData(m_data[i]);
+		m_data[i].index = NULL;
+	}
 		
-	setNumKeys(MaxNumKeysPerNode>>1);
-
+	setNumKeys(MaxNumKeysPerNode / 2);
+	
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
 	
@@ -483,12 +510,12 @@ void BNode<KeyType>::connectToChildren()
 template <typename KeyType> 
 void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
 {
-	//std::cout<<"part root "<<*this;
+	/// std::cout<<"\n part root ";
 	BNode * one = new BNode(this);
 	BNode * two = new BNode(this);
 	
 	BNode * dst = one;
-	const int midI = MaxNumKeysPerNode >> 1;
+	const int midI = MaxNumKeysPerNode / 2;
 	int i=0;
 	for(; i < MaxNumKeysPerNode; ++i) {
 		if(i == midI)	
@@ -496,7 +523,8 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
 		else 
 			dst->insertData(m_data[i]);
 	}
-	//std::cout<<"into "<<*one<<*two;
+	
+	/// std::cout<<"\n into "<<*one<<"\n"<<*two;
 	
 	one->setFirstIndex(firstIndex());
 	two->setFirstIndex(m_data[midI].index);
@@ -506,6 +534,7 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
 	m_data[0].index = two;
 
 	setNumKeys(1);
+	/// std::cout<<"\n after "<<*this;
 	
 	one->connectToChildren();
 	two->connectToChildren();
@@ -923,7 +952,7 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 		else 
 			setFirstIndex(lft->firstIndex());
 			
-		SeparatedNodes.take(lft);
+		//SeparatedNodes.take(lft);
 		
 		connectToChildren();
 	}
@@ -987,7 +1016,7 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
     
 	rgt->sendDataLeft(rgt->numKeys(), this);
     
-	SeparatedNodes.take(rgt);
+	//SeparatedNodes.take(rgt);
 	
 	// deepPrint();
 	

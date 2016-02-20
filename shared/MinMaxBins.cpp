@@ -75,3 +75,6 @@ void MinMaxBins::setFlat()
 {
 	m_isFlat = 1;
 }
+
+const float & MinMaxBins::delta() const
+{ return m_delta; }
