@@ -16,10 +16,14 @@ BuildKdTreeStream::~BuildKdTreeStream()
 }
 
 void BuildKdTreeStream::initialize()
-{}
+{
+	cleanup();
+}
 
 void BuildKdTreeStream::cleanup()
 {
+	std::vector<KdTreeNode *>::iterator it = m_nodes.begin();
+	for(;it != m_nodes.end(); ++it) delete *it;
 	m_nodes.clear();
 	m_indirection.clear();
 }

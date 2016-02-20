@@ -21,14 +21,18 @@ public:
 	
 template<typename T>
 class Sequence : public Entity {
+
+	bool m_isDataExternal;
+	
 public:
-	Sequence(Entity * parent = NULL) : Entity(parent) {
+	Sequence(Entity * parent = NULL) : Entity(parent),
+	m_isDataExternal(false)
+	{
 		m_root = new BNode<T>();
 	}
 	
 	virtual ~Sequence() {
-/// todo external data 
-		//delete m_root;
+		if(!m_isDataExternal) delete m_root;
 	}
 	
 	Pair<T, Entity> * insert(const T & x) { 
@@ -161,6 +165,10 @@ public:
 	}
 
     virtual void display();
+	
+	void setDataExternal()
+	{ m_isDataExternal = true; }
+
 protected:	
 	void beginLeaf() {
 		m_current = m_root->firstLeaf();
@@ -197,7 +205,7 @@ protected:
 		}
 		return r;
 	}
-
+	
 private:
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 

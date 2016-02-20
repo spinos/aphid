@@ -78,6 +78,7 @@ void BuildKdTreeContext::createGrid(const float & x)
 {
 	m_grid = new sdb::WorldGrid<GroupCell, unsigned >();
 	m_grid->setGridSize(x);
+	m_grid->setDataExternal();
 }
 
 void BuildKdTreeContext::setBBox(const BoundingBox &bbox)
