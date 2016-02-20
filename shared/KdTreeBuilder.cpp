@@ -143,9 +143,9 @@ const SplitEvent *KdTreeBuilder::bestSplit()
 	return &m_event[m_bestEventIdx];
 }
 
-SplitEvent KdTreeBuilder::splitAt(int axis, int idx) const
+SplitEvent * KdTreeBuilder::splitAt(int axis, int idx)
 {
-	return m_event[axis * SplitEvent::NumEventPerDimension + idx];
+	return &m_event[axis * SplitEvent::NumEventPerDimension + idx];
 }
 
 void KdTreeBuilder::byLowestCost(unsigned & dst)
@@ -154,9 +154,9 @@ void KdTreeBuilder::byLowestCost(unsigned & dst)
 	
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		for(int i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
-			SplitEvent e = splitAt(axis, i);
-			if(e.getCost() < lowest && e.hasBothSides()) {
-				lowest = e.getCost();
+			SplitEvent * e = splitAt(axis, i);
+			if(e->getCost() < lowest && e->hasBothSides()) {
+				lowest = e->getCost();
 				dst = i + SplitEvent::NumEventPerDimension * axis;
 			}
 		}
@@ -167,19 +167,20 @@ char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 {
 	int res = -1;
 	float vol, emptyVolume = -1.f;
+	const int minHead = 5;
+	const int maxTail = SplitEvent::NumEventPerDimension - 6;
 	int i, head, tail;
-	SplitEvent cand;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		head = 0;
-		cand = splitAt(axis, 0);
-		if(cand.leftCount() == 0) {
+		SplitEvent * cand = splitAt(axis, 0);
+		if(cand->leftCount() == 0) {
 			for(i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
 				cand = splitAt(axis, i);
-				if(cand.leftCount() == 0)
+				if(cand->leftCount() == 0)
 					head = i;
 			}
 			
-			if(head > 2) {
+			if(head > minHead) {
 				vol = head;
 				if(vol > emptyVolume) {
 					emptyVolume = vol;
@@ -189,13 +190,13 @@ char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 		}
 		tail = SplitEvent::NumEventPerDimension - 1;
 		cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1);
-		if(cand.rightCount() == 0) {
+		if(cand->rightCount() == 0) {
 			for(i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
 				cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1 - i);
-				if(cand.rightCount() == 0)
+				if(cand->rightCount() == 0)
 					tail = SplitEvent::NumEventPerDimension - 1 - i;
 			}
-			if(tail < SplitEvent::NumEventPerDimension - 3) {
+			if(tail < maxTail) {
 				vol = SplitEvent::NumEventPerDimension - tail;
 				if(vol > emptyVolume) {
 					emptyVolume = vol;

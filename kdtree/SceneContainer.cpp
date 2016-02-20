@@ -25,12 +25,14 @@
 
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
 {
-	m_level = 10;
+	m_level = 1;
 	m_drawer = drawer;
 	m_cluster = new KdCluster;
 	m_tree = new KdTree;
 	
-	KdTree::MaxBuildLevel = m_level;
+	sdb::TreeNode::MaxNumKeysPerNode = 128;
+    sdb::TreeNode::MinNumKeysPerNode = 16;
+    KdTree::MaxBuildLevel = m_level;
 	KdTree::NumPrimitivesInLeafThreashold = 32;
 	
 #if TEST_MESH
@@ -49,10 +51,10 @@ void SceneContainer::testMesh()
 	unsigned count = 0;
 	unsigned i=0;
 	for(;i<NUM_MESHES;++i) {
-		Vector3F c(-10.f + 80.f * RandomF01(), 
-					1.f + 60.f * RandomF01(), 
-					-12.f + 50.f * RandomF01());
-		m_mesh[i] = new RandomMesh(10000 + 10000 * RandomF01(), c, 4.f + 2.f * RandomF01(), i&1);
+		Vector3F c(-10.f + 50.f * RandomF01(), 
+					1.f * i + 20.f * RandomF01(), 
+					-1.f * i + -30.f + 50.f * RandomF01());
+		m_mesh[i] = new RandomMesh(10000 + 10000 * RandomF01(), c, 7.f + 2.f * RandomF01(), i&1);
 		m_tree->addGeometry(m_mesh[i]);
 		count += m_mesh[i]->numTriangles();
 	}

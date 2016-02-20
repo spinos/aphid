@@ -9,19 +9,27 @@
 
 #pragma once
 #include <BoundingBox.h>
-#include <PrimitiveArray.h>
-#include <IndexArray.h>
 #include <KdTreeNodeArray.h>
-#include <ClassificationStorage.h>
 #include <BoundingBoxList.h>
 #include <IndexList.h>
 #include <SplitEvent.h>
 #include <BuildKdTreeStream.h>
+#include <WorldGrid.h>
+#include <Array.h>
+
+class GroupCell : public sdb::Sequence<unsigned>
+{
+public:
+	GroupCell(sdb::Entity * parent = NULL) : sdb::Sequence<unsigned>(parent) {}
+	BoundingBox m_box;
+};
 
 class BuildKdTreeContext {
+	sdb::WorldGrid<GroupCell, unsigned > * m_grid;
+	
 public:
 	BuildKdTreeContext();
-	BuildKdTreeContext(BuildKdTreeStream &data);
+	BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBox & b);
 	~BuildKdTreeContext();
 	
 	void createIndirection(const unsigned &count);

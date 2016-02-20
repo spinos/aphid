@@ -45,7 +45,7 @@ private:
 	void calculateSplitEvents();
 	char byCutoffEmptySpace(unsigned & dst);
 	void byLowestCost(unsigned & dst);
-	SplitEvent splitAt(int axis, int idx) const;
+	SplitEvent * splitAt(int axis, int idx);
 	
 	BoundingBox m_bbox;
 	BuildKdTreeContext *m_context;

@@ -36,6 +36,9 @@ public:
 	const Coord3 key() const 
 	{ return Sequence<Coord3>::currentKey(); }
 	
+	ChildType * insertChild(const float * at);
+	ChildType * insertChild(const Coord3 & x);
+	
 /// put v into grid
 	void insert(const float * at, ValueType * v);
 	void insert(const Coord3 & x , ValueType * v);
@@ -69,6 +72,23 @@ const Coord3 WorldGrid<ChildType, ValueType>::gridCoord(const float * p) const
 	r.y = p[1] / m_gridSize; if(p[1] < 0.f) r.y--;
 	r.z = p[2] / m_gridSize; if(p[2] < 0.f) r.z--;
 	return r;
+}
+
+template<typename ChildType, typename ValueType>
+ChildType * WorldGrid<ChildType, ValueType>::insertChild(const float * at)
+{
+	const Coord3 x = gridCoord(at);
+	return insertChild(x);
+}
+
+template<typename ChildType, typename ValueType>
+ChildType * WorldGrid<ChildType, ValueType>::insertChild(const Coord3 & x)
+{
+	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
+	if(!p->index)
+		p->index = new ChildType(this);
+
+	return static_cast<ChildType *>(p->index);
 }
 
 template<typename ChildType, typename ValueType>

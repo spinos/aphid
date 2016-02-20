@@ -11,10 +11,15 @@
 #include "Geometry.h"
 #include <VectorArray.h>
 
-BuildKdTreeContext::BuildKdTreeContext() {}
+BuildKdTreeContext::BuildKdTreeContext() : m_grid(NULL) {}
 
-BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
+BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBox & b)
 {
+	setBBox(b);
+	m_grid = new sdb::WorldGrid<GroupCell, unsigned >();
+	m_grid->setGridSize(b.getLongestDistance() / 60.f);
+	std::cout<<"\n ctx grid size "<<m_grid->gridSize();
+	
 	createIndirection(data.getNumPrimitives());
 /// copy bbox of all prims
 	m_primitiveBoxes.create(m_numPrimitive+1);
@@ -25,9 +30,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 	sdb::VectorArray<Primitive> &primitives = data.primitives();
 	
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
-		*primIndex = i;
-		primIndex++;
-		
+				
 		Primitive *p = primitives.get(i);
 
 		Geometry *geo = p->getGeometry();
@@ -35,13 +38,24 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data)
 		unsigned compIdx = p->getComponentIndex();
 		
 		primBoxes[i] = geo->calculateBBox(compIdx);
-		primBoxes[i].expand(1e-6f);
+		primBoxes[i].expand(1e-6f);	
 		
+		const Vector3F center = primBoxes[i].center();
+		
+		*primIndex = i;
+		primIndex++;
+		
+		GroupCell * c = m_grid->insertChild((const float *)&center);
+		c->insert(i);
+		c->m_box.expandBy(primBoxes[i]);
 	}
+	
+	std::cout<<"\n ctx grid n cell "<<m_grid->size();
 }
 
 BuildKdTreeContext::~BuildKdTreeContext() 
 {
+	if(m_grid) delete m_grid;
 }
 
 void BuildKdTreeContext::createIndirection(const unsigned &count)

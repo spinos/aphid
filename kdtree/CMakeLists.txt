@@ -16,6 +16,17 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "RandomMesh.h")
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
+../shared/KdTreeNode.cpp 
+../shared/BuildKdTreeContext.cpp 
+../shared/KdTreeNodeArray.cpp 
+../shared/KdTree.cpp 
+../shared/KdTreeBuilder.cpp 
+../shared/SplitEvent.cpp 
+../shared/MinMaxBins.cpp 
+../shared/BuildKdTreeStream.cpp 
+                #../shared/BaseServer.cpp
+../kdtree/KdCluster.cpp
+../kdtree/KdIntersection.cpp
 "main.cpp"
 "glWidget.cpp"
 "window.cpp"

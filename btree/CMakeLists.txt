@@ -3,7 +3,7 @@ project (btree)
  
 include_directories ("." "../shared")
 
-add_executable(btree Types.cpp Entity.cpp List.cpp BNode.cpp BTree.cpp Array.cpp 
+add_executable(btree Types.cpp Entity.cpp List.cpp BNode.cpp BTree.cpp 
 ../shared/PseudoNoise.cpp
 main.cpp)
 

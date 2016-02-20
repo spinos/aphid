@@ -104,20 +104,12 @@ add_library(aphid STATIC ../shared/line_math.h
                 ../shared/BaseField.cpp 
                 ../shared/BaseDeformer.cpp 
     ../shared/SkeletonSubspaceDeformer.cpp 
-                ../shared/KdTreeNode.cpp 
                 ../shared/Primitive.cpp 
                 ../shared/PrimitiveFilter.cpp 
-                ../shared/BuildKdTreeContext.cpp 
-                ../shared/KdTreeNodeArray.cpp 
-                ../shared/KdTree.cpp 
                 ../shared/PrimitiveArray.cpp 
                 ../shared/IndexArray.cpp 
                 ../shared/BaseArray.cpp 
                 ../shared/ClassificationStorage.cpp 
-                ../shared/KdTreeBuilder.cpp 
-                ../shared/SplitEvent.cpp 
-                ../shared/MinMaxBins.cpp 
-                ../shared/BuildKdTreeStream.cpp 
                 ../shared/IndexList.cpp 
                 ../shared/BoundingBoxList.cpp 
                 ../shared/SelectionArray.cpp 
@@ -197,8 +189,7 @@ add_library(aphid STATIC ../shared/line_math.h
 	../shared/BezierPatchHirarchy.cpp 
 	../shared/KMeansClustering.cpp 
 	../shared/BaseSphere.cpp 
-	../shared/PseudoNoise.cpp 
-## ../shared/BaseServer.cpp 
+	../shared/PseudoNoise.cpp  
     ../shared/BaseClient.cpp 
 	../shared/RenderEngine.cpp 
 	../shared/AdaptableStripeBuffer.cpp 
@@ -272,8 +263,17 @@ add_library(aphid STATIC ../shared/line_math.h
                 ../catmullclark/BezierDrawer.cpp 
 				../powell/PowellMethod.cpp 
 				../powell/BaseFunction.cpp
-../kdtree/KdCluster.cpp
-../kdtree/KdIntersection.cpp
+##../shared/KdTreeNode.cpp 
+                ##../shared/BuildKdTreeContext.cpp 
+                ##../shared/KdTreeNodeArray.cpp 
+                ##../shared/KdTree.cpp 
+                ##../shared/KdTreeBuilder.cpp 
+                ##../shared/SplitEvent.cpp 
+                ##../shared/MinMaxBins.cpp 
+                ##../shared/BuildKdTreeStream.cpp 
+                ## ../shared/BaseServer.cpp
+##../kdtree/KdCluster.cpp
+##../kdtree/KdIntersection.cpp
 ../shared/APointCloud.cpp
 ../shared/ATriangleMesh.cpp
 ../shared/ATetrahedronMesh.cpp

@@ -49,13 +49,12 @@ void KdTree::create()
 {	
 	m_root = new KdTreeNode;
 	
-	BoundingBox b = getBBox();
-    // std::cout<<" kdtree level 0 box "<<b.str();
+	const BoundingBox & b = getBBox();
+    /// std::cout<<" kdtree level 0 box "<<b.str();
 	boost::timer bTimer;
 	bTimer.restart();
 	
-	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream);
-	ctx->setBBox(b);
+	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream, b);
 	
 	std::cout << "\n Kd tree ctx in " << bTimer.elapsed();
 	bTimer.restart();
