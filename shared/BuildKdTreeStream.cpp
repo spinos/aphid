@@ -16,10 +16,7 @@ BuildKdTreeStream::~BuildKdTreeStream()
 }
 
 void BuildKdTreeStream::initialize()
-{
-	m_nodes.initialize();
-	m_indirection.initialize();
-}
+{}
 
 void BuildKdTreeStream::cleanup()
 {
@@ -58,33 +55,32 @@ sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
 	return m_primitives;
 }
 
-IndexArray &BuildKdTreeStream::indirection()
+std::vector<unsigned> &BuildKdTreeStream::indirection()
 {
 	return m_indirection;
 }
 
 KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
-	m_nodes.expandBy(2);
-	KdTreeNode *p = m_nodes.current();
+	m_nodes.push_back(new KdTreeNode);
+	KdTreeNode *p = m_nodes.back();
 	unsigned long * tmp = (unsigned long*)p;
 	tmp[1] = tmp[3] = 6;
-	m_nodes.next();
-	tmp = (unsigned long*)m_nodes.current();
+	
+	m_nodes.push_back(new KdTreeNode);
+	KdTreeNode *q = m_nodes.back();
+	tmp = (unsigned long*)q;
 	tmp[1] = tmp[3] = 6;
-	m_nodes.next();
+	
 	return p;
 }
 
 KdTreeNode *BuildKdTreeStream::firstTreeBranch()
 {
-	return m_nodes.asKdTreeNode(0);
+	return m_nodes[0];
 }
 
 void BuildKdTreeStream::verbose() const
 {
 	printf("kd-tree data stream input primitive count: %i\nnodes state:\n", getNumPrimitives());	
-	m_nodes.verbose();
-	printf("indirection state:\n");
-	m_indirection.verbose();
 }

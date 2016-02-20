@@ -10,10 +10,10 @@
 #pragma once
 #include <BoundingBox.h>
 #include <VectorArray.h>
-#include <IndexArray.h>
-#include <KdTreeNodeArray.h>
 #include <BaseMesh.h>
-#include <PatchMesh.h>
+#include <KdTreeNode.h>
+#include <vector>
+
 class BuildKdTreeStream {
 public:
 	BuildKdTreeStream();
@@ -26,7 +26,7 @@ public:
 	const sdb::VectorArray<Primitive> &getPrimitives() const;
 
 	sdb::VectorArray<Primitive> &primitives();
-	IndexArray &indirection();
+	std::vector<unsigned> &indirection();
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
@@ -35,6 +35,6 @@ public:
 	
 private:
 	sdb::VectorArray<Primitive> m_primitives;
-	IndexArray m_indirection;
-	KdTreeNodeArray m_nodes;
+	std::vector<unsigned> m_indirection;
+	std::vector<KdTreeNode *> m_nodes;
 };

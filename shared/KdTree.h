@@ -44,7 +44,7 @@ public:
 protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
-	IndexArray & indirection();
+	std::vector<unsigned> & indirection();
 	sdb::VectorArray<Primitive> & primitives();
 	
 private:

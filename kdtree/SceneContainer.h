@@ -13,7 +13,7 @@ class BezierCurve;
 class KdCluster;
 class KdTree;
 class GeometryArray;
-#define NUM_MESHES 400
+#define NUM_MESHES 200
 class SceneContainer {
 public:
 	SceneContainer(KdTreeDrawer * drawer);

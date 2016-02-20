@@ -31,7 +31,7 @@ RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float &
 		else {
 			phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
 			theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
-			r = ((float)(rand() % 24091)) / 24091.f * .2f + 0.8f;
+			r = ((float)(rand() % 24091)) / 24091.f * .1f + 0.9f;
 			rx = sin(theta) * cos(phi);
 			ry = sin(theta) * sin(phi);
 			rz = cos(theta);

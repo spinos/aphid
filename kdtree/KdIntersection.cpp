@@ -49,14 +49,14 @@ bool KdIntersection::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 	if(num < 1) return false;
 	
 	unsigned start = node->getPrimStart();
-	IndexArray &indir = indirection();
+	std::vector<unsigned> &indir = indirection();
 	sdb::VectorArray<Primitive> &prims = primitives();
-	indir.setIndex(start);
+	//indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
-		unsigned *iprim = indir.asIndex();
-
-		Primitive * prim = prims.get(*iprim);
+		//unsigned *iprim = indir.asIndex();
+		unsigned iprim = indir[start + i];
+		Primitive * prim = prims.get(iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
@@ -64,7 +64,7 @@ bool KdIntersection::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 			m_intersectElement = icomponent;
 			return true;
 		}
-		indir.next();
+		//indir.next();
 	}
 	return false;
 }
@@ -117,14 +117,14 @@ bool KdIntersection::leafIntersectTetrahedron(KdTreeNode *node, const BoundingBo
 	if(!box.intersect(m_testBox)) return false;
 	
 	unsigned start = node->getPrimStart();
-	IndexArray &indir = indirection();
+	std::vector<unsigned> &indir = indirection();
 	sdb::VectorArray<Primitive> &prims = primitives();
-	indir.setIndex(start);
+	//indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
-		unsigned *iprim = indir.asIndex();
-
-		Primitive * prim = prims.get(*iprim);
+		//unsigned *iprim = indir.asIndex();
+		unsigned iprim = indir[start + i];
+		Primitive * prim = prims.get(iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
@@ -132,7 +132,7 @@ bool KdIntersection::leafIntersectTetrahedron(KdTreeNode *node, const BoundingBo
 			m_intersectElement = icomponent;
 			return true;
 		}
-		indir.next();
+		//indir.next();
 	}
 	return false;
 }
@@ -173,19 +173,19 @@ void KdIntersection::leafCountElementIntersectBox(std::vector<unsigned> & result
 	if(num < 1) return;
 	
 	unsigned start = node->getPrimStart();
-	IndexArray &indir = indirection();
+	std::vector<unsigned> &indir = indirection();
 	sdb::VectorArray<Primitive> &prims = primitives();
-	indir.setIndex(start);
+	//indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
-		unsigned *iprim = indir.asIndex();
-
-		Primitive * prim = prims.get(*iprim);
+		//unsigned *iprim = indir.asIndex();
+		unsigned iprim = indir[start + i];
+		Primitive * prim = prims.get(iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
 		if(geo->intersectBox(icomponent, m_testBox)) result.push_back(icomponent);
-		indir.next();
+		//indir.next();
 	}
 }
 

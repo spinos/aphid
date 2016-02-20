@@ -25,7 +25,7 @@
 
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
 {
-	m_level = 1;
+	m_level = 10;
 	m_drawer = drawer;
 	m_cluster = new KdCluster;
 	m_tree = new KdTree;
@@ -59,7 +59,7 @@ void SceneContainer::testMesh()
 		Vector3F c(-10.f + i * .1f + 25.f * RandomF01(), 
 					yb + up * i + 17.f * RandomF01(), 
 					-1.f * i + -30.f + 15.f * RandomF01());
-		m_mesh[i] = new RandomMesh(1000 + 1000 * RandomF01(), c, 9.f + 4.f * RandomF01(), i&1);
+		m_mesh[i] = new RandomMesh(3000 - 2300 * RandomF01(), c, 5.f - 4.f * RandomF01(), i&1);
 		m_tree->addGeometry(m_mesh[i]);
 		count += m_mesh[i]->numTriangles();
 	}
