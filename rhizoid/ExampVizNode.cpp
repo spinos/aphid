@@ -15,6 +15,7 @@
 #include <BoundingBox.h>
 #include <AHelper.h>
 #include <ExampData.h>
+#include <KdTree.h>
 
 #ifdef WIN32
 #include <gExtension.h>
@@ -217,7 +218,7 @@ MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
-void ExampViz::voxelize(KdIntersection * tree)
+void ExampViz::voxelize(KdTree * tree)
 {
 	ExampVox::voxelize(tree);
 	

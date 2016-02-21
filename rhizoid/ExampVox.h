@@ -8,8 +8,8 @@
  */
 #include <DrawBox.h>
 #include <BoundingBox.h>
+class KdTree;
 
-class KdIntersection;
 class ExampVox : public DrawBox {
 
 	BoundingBox m_geomBox;
@@ -32,7 +32,7 @@ public:
 	ExampVox();
 	virtual ~ExampVox();
 	
-	virtual void voxelize(KdIntersection * tree);
+	virtual void voxelize(KdTree * tree);
 	
 /// set b4 geom box
 	void setGeomSizeMult(const float & x);

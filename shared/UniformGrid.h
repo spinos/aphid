@@ -8,7 +8,7 @@
  */
 
 #include <CartesianGrid.h>
-class KdIntersection;
+class KdTree;
 
 class UniformGrid : public CartesianGrid
 {
@@ -19,12 +19,12 @@ public:
     UniformGrid();
 	virtual ~UniformGrid();
     
-    virtual void create(KdIntersection * tree, int maxLevel);
+    virtual void create(KdTree * tree, int maxLevel);
     const int & maxLevel() const;
 	
 protected:
-    virtual bool tagCellsToRefine(KdIntersection * tree);
-	void refine(KdIntersection * tree);
+    virtual bool tagCellsToRefine(KdTree * tree);
+	void refine(KdTree * tree);
 	
 private:
     void setCellToRefine(unsigned k, const sdb::CellValue * v,

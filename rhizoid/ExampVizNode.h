@@ -49,7 +49,7 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	virtual void voxelize(KdIntersection * tree);
+	virtual void voxelize(KdTree * tree);
 	
 private:
 	void loadBoxes(MObject & node);

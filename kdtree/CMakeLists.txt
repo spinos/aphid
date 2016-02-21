@@ -35,7 +35,6 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 ../shared/BuildKdTreeStream.cpp 
                 #../shared/BaseServer.cpp
 ../kdtree/KdCluster.cpp
-../kdtree/KdIntersection.cpp
 "main.cpp"
 "glWidget.cpp"
 "window.cpp"

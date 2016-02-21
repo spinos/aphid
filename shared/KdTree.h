@@ -19,6 +19,8 @@ class SelectionContext;
 class KdTree : public Geometry, public Boundary
 {
 	int m_minNumLeafPrims, m_maxNumLeafPrims, m_totalNumLeafPrims;
+	BoundingBox m_testBox;
+	unsigned m_intersectElement;
 	
 public:
 	KdTree();
@@ -39,6 +41,7 @@ public:
 	static int MaxBuildLevel;
 	static unsigned NumPrimitivesInLeafThreashold;
 // override geomery
+	virtual bool intersectBox(const BoundingBox & box);
 	virtual void closestToPoint(ClosestToPointTestResult * result);
 	
 protected:
@@ -56,6 +59,8 @@ private:
 	char leafSelect(KdTreeNode *node, SelectionContext * ctx);
 	void recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result);
 	void leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result);
+	bool recursiveIntersectBox(KdTreeNode *node, const BoundingBox & box);
+	bool leafIntersectBox(KdTreeNode *node, const BoundingBox & box);
 	
 	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;

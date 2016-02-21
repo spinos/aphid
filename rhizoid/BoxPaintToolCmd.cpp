@@ -13,7 +13,7 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <ATriangleMesh.h>
-#include <KdIntersection.h>
+#include <KdTree.h>
 
 #define kBeginPickFlag "-bpk" 
 #define kBeginPickFlagLong "-beginPick"
@@ -520,7 +520,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 	KdTree::MaxBuildLevel = 24;
 	KdTree::NumPrimitivesInLeafThreashold = 24;
 	
-	KdIntersection tree;
+	KdTree tree;
 	std::vector<ATriangleMesh * >::iterator it = meshes.begin();
 	for(;it!= meshes.end();++it)
 		tree.addGeometry(*it);

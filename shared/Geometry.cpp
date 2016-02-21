@@ -16,18 +16,18 @@ void Geometry::ClosestToPointTestResult::reset()
 
 void Geometry::ClosestToPointTestResult::reset(const Vector3F & p, float initialDistance) 
 {
-/// reuse last geom
 	if(_hasResult) {
 /// same point
 		if(p.distance2To(_toPoint) < 1e-6f) {
 			_distance = 0.f;
 			return;
 		}
-		_distance = p.distanceTo(_hitPoint);
-		_geom->closestToPoint(_icomponent, this);
+/// reuse last geom 
+		_toPoint = p;
+		_hasResult = false;
+		_distance = initialDistance;
 /// lower the distance
-		if(_distance > initialDistance)
-			_distance = initialDistance;
+		_geom->closestToPoint(_icomponent, this);
 	}
 	else
 		_distance = initialDistance;

@@ -8,7 +8,7 @@
  */
 
 #include "UniformGrid.h"
-#include <KdIntersection.h>
+#include <KdTree.h>
 #include <GjkIntersection.h>
 #include <Morton3D.h>
 
@@ -22,7 +22,7 @@ UniformGrid::~UniformGrid()
     delete m_cellsToRefine;
 }
 
-void UniformGrid::create(KdIntersection * tree, int maxLevel)
+void UniformGrid::create(KdTree * tree, int maxLevel)
 {
 	m_maxLevel = maxLevel;
 	std::cout<<"\n UniformGrid create max level "<<maxLevel;
@@ -59,7 +59,7 @@ void UniformGrid::create(KdIntersection * tree, int maxLevel)
     std::cout<<"\n level"<<level<<" n cell "<<numCells();
 }
 
-bool UniformGrid::tagCellsToRefine(KdIntersection * tree)
+bool UniformGrid::tagCellsToRefine(KdTree * tree)
 {
 	m_cellsToRefine->clear();
 	
@@ -92,7 +92,7 @@ static const float Cell8ChildOffset[8][3] = {
 {1.f, 1.f, -1.f},
 {1.f, 1.f, 1.f}};
 
-void UniformGrid::refine(KdIntersection * tree)
+void UniformGrid::refine(KdTree * tree)
 {    
 	int level1;
 	float hh;

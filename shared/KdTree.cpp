@@ -50,7 +50,7 @@ void KdTree::create()
 	m_root = new KdTreeNode;
 	
 	const BoundingBox & b = getBBox();
-    std::cout<<"\n Kd tree level 0 box "<<b.str();
+    /// std::cout<<"\n Kd tree level 0 box "<<b.str();
 	boost::timer bTimer;
 	bTimer.restart();
 	
@@ -63,13 +63,13 @@ void KdTree::create()
 	m_numNoEmptyLeaf = 0;
 	
 	KdTreeBuilder::GlobalContext = ctx;
-	m_minNumLeafPrims = 1e28;
+	m_minNumLeafPrims = 1<<28;
 	m_maxNumLeafPrims = 0;
 	m_totalNumLeafPrims = 0;
 	
 	subdivide(m_root, *ctx, 0);
-	ctx->verbose();
-	delete ctx;
+	//ctx->verbose();
+	//delete ctx;
 	
 	// m_stream.verbose();
 	std::cout << "\n Kd tree built in " << bTimer.elapsed() << " secs"
@@ -77,7 +77,7 @@ void KdTree::create()
 	<<"\n max leaf level: "<<m_maxLeafLevel
 	<<"\n num no-empty leaves "<<m_numNoEmptyLeaf
 	<<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
-	<<"\n average "<<(float)m_totalNumLeafPrims/(float)m_numNoEmptyLeaf;
+	<<"   average "<<(float)m_totalNumLeafPrims/(float)m_numNoEmptyLeaf;
 }
 
 void KdTree::rebuild()
@@ -425,5 +425,61 @@ void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, Closes
 		
 		geo->closestToPoint(icomponent, result);
 	}
+}
+
+bool KdTree::intersectBox(const BoundingBox & box)
+{
+	KdTreeNode * root = getRoot();
+	if(!root) return false;
+	
+	BoundingBox b = getBBox();
+	
+	m_testBox = box;
+	
+	return recursiveIntersectBox(root, b);
+}
+
+bool KdTree::recursiveIntersectBox(KdTreeNode *node, const BoundingBox & box)
+{
+	if(!box.intersect(m_testBox)) return false;
+	
+	if(node->isLeaf())
+		return leafIntersectBox(node, box);
+		
+	const int axis = node->getAxis();
+	const float splitPos = node->getSplitPos();
+	
+	BoundingBox leftBox, rightBox;
+	box.split(axis, splitPos, leftBox, rightBox);
+	
+	if(recursiveIntersectBox(node->getLeft(), leftBox)) return true;
+	
+	return recursiveIntersectBox(node->getRight(), rightBox);
+}
+
+bool KdTree::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
+{
+	const unsigned num = node->getNumPrims();
+	if(num < 1) return false;
+	
+	unsigned start = node->getPrimStart();
+	std::vector<unsigned> &indir = indirection();
+	sdb::VectorArray<Primitive> &prims = primitives();
+	//indir.setIndex(start);
+
+	for(unsigned i = 0; i < num; i++) {
+		//unsigned *iprim = indir.asIndex();
+		unsigned iprim = indir[start + i];
+		Primitive * prim = prims.get(iprim);
+		Geometry * geo = prim->getGeometry();
+		unsigned icomponent = prim->getComponentIndex();
+		
+		if(geo->intersectBox(icomponent, m_testBox)) {
+			m_intersectElement = icomponent;
+			return true;
+		}
+		//indir.next();
+	}
+	return false;
 }
 //:~

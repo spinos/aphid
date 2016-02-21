@@ -9,16 +9,12 @@
 
 #include "BuildKdTreeStream.h"
 
-BuildKdTreeStream::BuildKdTreeStream() {}
+BuildKdTreeStream::BuildKdTreeStream() : m_numNodes(0) {}
 BuildKdTreeStream::~BuildKdTreeStream() 
-{
-	cleanup();
-}
+{ cleanup(); }
 
 void BuildKdTreeStream::initialize()
-{
-	cleanup();
-}
+{ cleanup(); }
 
 void BuildKdTreeStream::cleanup()
 {

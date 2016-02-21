@@ -9,7 +9,7 @@
 
 #include "ExampVox.h"
 #include <UniformGrid.h>
-#include <KdIntersection.h>
+#include <KdTree.h>
 
 ExampVox::ExampVox() : 
 m_boxCenterSizeF4(NULL),
@@ -32,7 +32,7 @@ ExampVox::~ExampVox()
 	if(m_boxNormalBuf) delete[] m_boxNormalBuf;
 }
 
-void ExampVox::voxelize(KdIntersection * tree)
+void ExampVox::voxelize(KdTree * tree)
 { 
 	m_geomBox = tree->getBBox();
 	m_geomBox.expand(0.01f);
