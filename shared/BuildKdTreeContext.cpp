@@ -147,7 +147,7 @@ bool BuildKdTreeContext::decompress(bool forced)
 {
 	if(!m_grid) return false;
 	if(m_numPrimitive < 1024 
-		|| numCells() < 64
+		|| numCells() < 32
 		|| forced) {
 		m_indices.create(m_numPrimitive+1);
 		unsigned ind = 0;

@@ -72,9 +72,10 @@ void KdTree::create()
 	delete ctx;
 	
 	// m_stream.verbose();
-	std::cout << "\n Kd tree built in " << bTimer.elapsed() 
-	<< " secs\n max leaf level: "<<m_maxLeafLevel
-	<< "\n num no-empty leaves "<<m_numNoEmptyLeaf
+	std::cout << "\n Kd tree built in " << bTimer.elapsed() << " secs"
+	<<"\n total num nodes "<<m_stream.numNodes()
+	<<"\n max leaf level: "<<m_maxLeafLevel
+	<<"\n num no-empty leaves "<<m_numNoEmptyLeaf
 	<<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
 	<<"\n average "<<(float)m_totalNumLeafPrims/(float)m_numNoEmptyLeaf;
 }

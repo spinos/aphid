@@ -10,8 +10,8 @@
 #include <BaseMesh.h>
 #include <BuildKdTreeContext.h>
 int SplitEvent::Dimension = 3;
-int SplitEvent::NumBinPerDimension = 33;
-int SplitEvent::NumEventPerDimension = 32;
+int SplitEvent::NumBinPerDimension = 17;
+int SplitEvent::NumEventPerDimension = 16;
 //float SplitEvent::ParentBoxArea = 1.f;
 //BoundingBox SplitEvent::ParentBox;
 SplitEvent::SplitEvent() : m_isEmpty(1)

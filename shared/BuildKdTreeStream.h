@@ -15,6 +15,10 @@
 #include <vector>
 
 class BuildKdTreeStream {
+
+	unsigned m_numNodes;
+	KdTreeNode * m_nodeBuf;
+	
 public:
 	BuildKdTreeStream();
 	~BuildKdTreeStream();
@@ -30,6 +34,8 @@ public:
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
+	
+	const unsigned & numNodes() const;
 	
 	void verbose() const;
 	
