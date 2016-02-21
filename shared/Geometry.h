@@ -29,15 +29,13 @@ public:
 		bool _hasResult;
 		bool _isInside;
 		Geometry * _geom;
-		void reset(const Vector3F & p, float d) {
-			_toPoint = p;
-			_distance = d;
-			_hasResult = false;
-			_isInside = false;
-		}
-		bool closeTo(const BoundingBox & box) {
-			return box.distanceTo(_toPoint) < _distance;
-		}
+		
+		ClosestToPointTestResult();
+		
+		void reset();
+		void reset(const Vector3F & p, float initialDistance);
+		bool closeTo(const BoundingBox & box);
+		bool closeEnough();
 	};
 	
 	Geometry();

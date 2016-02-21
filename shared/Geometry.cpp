@@ -8,6 +8,40 @@
  */
 
 #include "Geometry.h"
+
+Geometry::ClosestToPointTestResult::ClosestToPointTestResult() : _hasResult(false) {}
+
+void Geometry::ClosestToPointTestResult::reset()
+{ _hasResult = false; }
+
+void Geometry::ClosestToPointTestResult::reset(const Vector3F & p, float initialDistance) 
+{
+/// reuse last geom
+	if(_hasResult) {
+/// same point
+		if(p.distance2To(_toPoint) < 1e-6f) {
+			_distance = 0.f;
+			return;
+		}
+		_distance = p.distanceTo(_hitPoint);
+		_geom->closestToPoint(_icomponent, this);
+/// lower the distance
+		if(_distance > initialDistance)
+			_distance = initialDistance;
+	}
+	else
+		_distance = initialDistance;
+	_toPoint = p;
+	_hasResult = false;
+	_isInside = false;
+}
+
+bool Geometry::ClosestToPointTestResult::closeTo(const BoundingBox & box)
+{ return box.distanceTo(_toPoint) < _distance; }
+
+bool Geometry::ClosestToPointTestResult::closeEnough()
+{ return _distance < 1e-3f; }
+
 Geometry::Geometry() {}
 Geometry::~Geometry() {}
 

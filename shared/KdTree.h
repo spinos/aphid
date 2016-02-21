@@ -32,7 +32,6 @@ public:
 	virtual void rebuild();
 	
 	char intersect(IntersectionContext * ctx);
-	char closestPoint(const Vector3F & origin, IntersectionContext * ctx);
 	void select(SelectionContext * ctx);
 
 	Primitive * getPrim(unsigned idx);
@@ -41,6 +40,7 @@ public:
 	static unsigned NumPrimitivesInLeafThreashold;
 // override geomery
 	virtual void closestToPoint(ClosestToPointTestResult * result);
+	
 protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
@@ -52,8 +52,6 @@ private:
 	void createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx);
 	char recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx);
 	char leafIntersect(KdTreeNode *node, IntersectionContext * ctx);
-	char recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
-	char leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx);
 	char recursiveSelect(KdTreeNode *node, SelectionContext * ctx);
 	char leafSelect(KdTreeNode *node, SelectionContext * ctx);
 	void recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result);

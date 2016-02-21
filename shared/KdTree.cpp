@@ -300,95 +300,8 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 Primitive * KdTree::getPrim(unsigned idx)
 {
     std::vector<unsigned> &indir = m_stream.indirection();
-	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
-	//indir.setIndex(idx);
-	//unsigned *iprim = indir.asIndex();
-	unsigned iprim = indir[idx];
-		
-	return  prims.get(iprim);
-}
-
-char KdTree::closestPoint(const Vector3F & origin, IntersectionContext * ctx)
-{
-	if(!getRoot()) return 0;
-	KdTreeNode * root = getRoot();
-	ctx->setBBox(getBBox());
-	return recusiveClosestPoint(root, origin, ctx);
-}
-
-char KdTree::recusiveClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
-{
-	//printf("%i ", ctx->m_level);
-	int level = ctx->m_level;
-	level++;
-	if(node->isLeaf()) {
-		return leafClosestPoint(node, origin, ctx);
-	}
-	const int axis = node->getAxis();
-	const float splitPos = node->getSplitPos();
-	const float ori = origin.comp(axis);
-	char belowPlane = ori < splitPos;
-	
-	BoundingBox leftBox, rightBox;
-	BoundingBox bigBox = ctx->getBBox();
-	bigBox.split(axis, splitPos, leftBox, rightBox);
-	KdTreeNode *nearNode, *farNode;
-	BoundingBox nearBox, farBox;
-	if(belowPlane) {
-		nearNode = node->getLeft();
-		farNode = node->getRight();
-		nearBox = leftBox;
-		farBox = rightBox;
-	}
-	else {
-		farNode = node->getLeft();
-		nearNode = node->getRight();
-		farBox = leftBox;
-		nearBox = rightBox;
-	}
-	
-	char hit = 0;
-	if(nearBox.isPointAround(origin, ctx->m_minHitDistance)) {
-		ctx->setBBox(nearBox);
-		ctx->m_level = level;
-		hit = recusiveClosestPoint(nearNode, origin, ctx);
-	}
-
-	if(farBox.isPointAround(origin, ctx->m_minHitDistance)) {
-		ctx->setBBox(farBox);
-		ctx->m_level = level;
-		hit = recusiveClosestPoint(farNode, origin, ctx);
-		
-	}
-
-	return hit;
-}
-
-char KdTree::leafClosestPoint(KdTreeNode *node, const Vector3F &origin, IntersectionContext * ctx)
-{
-	unsigned start = node->getPrimStart();
-	unsigned num = node->getNumPrims();
-	
-	std::vector<unsigned> &indir = m_stream.indirection();
-	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
-	//indir.setIndex(start);
-	char anyHit = 0;
-	for(unsigned i = 0; i < num; i++) {
-		//unsigned *iprim = indir.asIndex();
-		unsigned iprim = indir[start + i];
-		
-		Primitive * prim = prims.get(iprim);
-		BaseMesh *mesh = (BaseMesh *)prim->getGeometry();
-		unsigned iface = prim->getComponentIndex();
-		
-		if(mesh->closestPoint(iface, origin, ctx)) {
-			anyHit = 1;
-		}
-			
-		//indir.next();
-	}
-	if(anyHit) {ctx->m_success = 1; ctx->m_cell = (char *)node;}
-	return anyHit;
+	sdb::VectorArray<Primitive> &prims = m_stream.primitives();	
+	return  prims.get(indir[idx]);
 }
 
 void KdTree::select(SelectionContext * ctx)
@@ -436,10 +349,8 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	unsigned start = node->getPrimStart();
 	std::vector<unsigned> &indir = m_stream.indirection();
 	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
-	//indir.setIndex(start);
 
 	for(unsigned i = 0; i < num; i++) {
-		//unsigned *iprim = indir.asIndex();
 		unsigned iprim = indir[start + i];
 		
 		Primitive * prim = prims.get(iprim);
@@ -448,8 +359,6 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 		
 		if(geo->intersectSphere(icomponent, ctx->sphere() ) )
 			ctx->select(geo, icomponent);
-			
-		//indir.next();
 	}
 	return 1;
 }
@@ -467,11 +376,13 @@ sdb::VectorArray<Primitive> & KdTree::primitives()
 { return m_stream.primitives(); }
 
 void KdTree::closestToPoint(ClosestToPointTestResult * result)
-{ recusiveClosestToPoint(getRoot(), getBBox(), result); }
+{ 
+	if(result->closeEnough() ) return;
+	recusiveClosestToPoint(getRoot(), getBBox(), result); 
+}
 
 void KdTree::recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result)
 {
-	if(result->_distance<1e-3f) return;
 	if(!result->closeTo(box)) return;
 	if(node->isLeaf())
 		return leafClosestToPoint(node, box, result);
@@ -481,8 +392,20 @@ void KdTree::recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, Cl
 	BoundingBox leftBox, rightBox;
 	box.split(axis, splitPos, leftBox, rightBox);
 	
-	recusiveClosestToPoint(node->getLeft(), leftBox, result);
-	recusiveClosestToPoint(node->getRight(), rightBox, result);
+	const float cp = result->_toPoint.comp(axis) - splitPos;
+	if(cp < 0.f) {
+		recusiveClosestToPoint(node->getLeft(), leftBox, result);
+		if(result->closeEnough() ) return;
+		if( -cp < result->_distance) 
+			recusiveClosestToPoint(node->getRight(), rightBox, result);
+	}
+	else {
+		recusiveClosestToPoint(node->getRight(), rightBox, result);
+		if(result->closeEnough() ) return;
+		if(cp < result->_distance)
+			recusiveClosestToPoint(node->getLeft(), leftBox, result);
+	}
+	
 }
 
 void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result)
@@ -490,20 +413,17 @@ void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, Closes
 	const unsigned num = node->getNumPrims();
 	if(num < 1) return;
 	
-	unsigned start = node->getPrimStart();
+	const unsigned start = node->getPrimStart();
 	std::vector<unsigned> &indir = indirection();
 	sdb::VectorArray<Primitive> &prims = primitives();
-	//indir.setIndex(start);
-
+	
 	for(unsigned i = 0; i < num; i++) {
-		//unsigned *iprim = indir.asIndex();
 		unsigned iprim = indir[start + i];
 		Primitive * prim = prims.get(iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
 		geo->closestToPoint(icomponent, result);
-		//indir.next();
 	}
 }
 //:~
