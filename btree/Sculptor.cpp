@@ -231,7 +231,7 @@ void Sculptor::revertStage(sdb::Array<int, VertexP> * stage, bool isBackward)
 		else
 /// P <- N
 			*(vert->index->t1) = *(vert->index->t2);
-		m_tree->displace(vert, p0);
+		m_tree->displace(vert, *(vert->index->t1), p0);
 		stage->next();	
 	}
 	m_tree->calculateBBox();
@@ -305,7 +305,7 @@ void Sculptor::inflatePoints()
 		
 		*(l->index->t1) += pn * wei * m_strength * 0.1f;
 	
-		m_tree->displace(l, p0);
+		m_tree->displace(l, *(l->index->t1), p0);
 
 		vs->next();
 	}
@@ -334,7 +334,7 @@ void Sculptor::smoothPoints(float frac)
 		
 		*(l->index->t1) -= d * frac * wei * m_strength;
 	
-		m_tree->displace(l, p0);
+		m_tree->displace(l, *(l->index->t1), p0);
 
 		vs->next();
 	}
@@ -357,7 +357,7 @@ void Sculptor::movePointsAlong(const Vector3F & d, const float & fac)
 		
 		*(l->index->t1) += d * fac * wei * m_strength;
 	
-		m_tree->displace(l, p0);
+		m_tree->displace(l, *(l->index->t1), p0);
 		vs->next();
 	}
 }
@@ -384,7 +384,7 @@ void Sculptor::movePointsToward(const Vector3F & d, const float & fac, bool norm
 			*(l->index->t1) += *vmod * wei * m_strength;
 		}
 	
-		m_tree->displace(l, p0);
+		m_tree->displace(l, *(l->index->t1), p0);
 		vs->next();
 	}
 }
@@ -421,7 +421,7 @@ void Sculptor::erasePoints()
 			tod = *pr - *(l->index->t1);
 			*(l->index->t1) += tod * wei * m_strength * .5f;
 			
-			m_tree->displace(l, p0);
+			m_tree->displace(l, *(l->index->t1), p0);
 		}
 		else {
 			std::cout<<"\n sculpter error cannot find pref "<<vs->key();

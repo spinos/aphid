@@ -6,6 +6,9 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#include <IntersectionContext.h>
+#include <SelectionContext.h>
+#include <Geometry.h>
 
 class RandomMesh;
 class KdTreeDrawer;
@@ -13,8 +16,13 @@ class BezierCurve;
 class KdCluster;
 class KdTree;
 class GeometryArray;
-#define NUM_MESHES 200
+class Ray;
+#define NUM_MESHES 201
 class SceneContainer {
+	IntersectionContext m_intersectCtx;
+	SelectionContext m_selectCtx;
+	Geometry::ClosestToPointTestResult m_closestPointTest;
+	
 public:
 	SceneContainer(KdTreeDrawer * drawer);
 	virtual ~SceneContainer();
@@ -22,12 +30,16 @@ public:
 	void renderWorld();
 	void upLevel();
 	void downLevel();
+	void intersect(const Ray * incident);
+	
 protected:
 
 private:
 	void testMesh();
 	void testCurve();
-
+	void drawIntersection();
+	void drawClosest();
+	
 private:
 	KdTreeDrawer * m_drawer;
 	RandomMesh * m_mesh[NUM_MESHES];

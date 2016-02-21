@@ -12,6 +12,9 @@
 #include "AGenericMesh.h"
 
 class ATriangleMesh : public AGenericMesh {
+	
+	gjk::TriangleSet m_componentTriangle;
+	
 public:
 	ATriangleMesh();
 	virtual ~ATriangleMesh();
@@ -23,7 +26,7 @@ public:
 	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 	virtual bool intersectRay(unsigned icomponent, const Ray * r,
 					Vector3F & hitP, Vector3F & hitN, float & hitDistance);
-	virtual bool intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius);
+	virtual bool intersectSphere(unsigned icomponent, const gjk::Sphere & B);
 	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
 	const unsigned numTriangles() const;
 	

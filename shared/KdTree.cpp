@@ -446,7 +446,7 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		
-		if(geo->intersectSphere(icomponent, ctx->center(), ctx->radius() ) )
+		if(geo->intersectSphere(icomponent, ctx->sphere() ) )
 			ctx->select(geo, icomponent);
 			
 		//indir.next();

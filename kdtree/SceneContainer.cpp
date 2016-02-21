@@ -17,6 +17,8 @@
 #include <GeometryArray.h>
 #include <RandomCurve.h>
 #include <bezierPatch.h>
+#include <Ray.h>
+
 #define TEST_CURVE 0
 #define TEST_MESH 1
 #define NUM_CURVESU 20
@@ -25,6 +27,8 @@
 
 SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
 {
+	m_intersectCtx.m_success = 0;
+	
 	m_level = 10;
 	m_drawer = drawer;
 	m_cluster = new KdCluster;
@@ -57,7 +61,7 @@ void SceneContainer::testMesh()
 			yb = NUM_MESHES * .2f;
 		}
 		Vector3F c(-10.f + i * .1f + 25.f * RandomF01(), 
-					yb + up * i + 17.f * RandomF01(), 
+					yb + up * i + 27.f * RandomF01(), 
 					-1.f * i + -30.f + 15.f * RandomF01());
 		m_mesh[i] = new RandomMesh(3000 - 2300 * RandomF01(), c, 5.f - 4.f * RandomF01(), i&1);
 		m_tree->addGeometry(m_mesh[i]);
@@ -119,6 +123,9 @@ void SceneContainer::renderWorld()
 #if TEST_MESH
 	for(;i<NUM_MESHES;i++) 
 		m_drawer->triangleMesh(m_mesh[i]);
+		
+	drawIntersection();
+	drawClosest();
 #endif	
 	glColor3f(0.1f, .2f, .3f);
 	
@@ -166,5 +173,70 @@ void SceneContainer::downLevel()
 #endif
 #if TEST_CURVE
 	m_cluster->rebuild();
+#endif
+}
+
+void SceneContainer::intersect(const Ray * incident)
+{
+	m_intersectCtx.reset(*incident);
+#if TEST_MESH
+	m_tree->intersect(&m_intersectCtx );
+	if(m_intersectCtx.m_success) {
+		m_selectCtx.setRadius(4.f);
+		m_selectCtx.setSelectMode(SelectionContext::Append);
+		m_selectCtx.setCenter(m_intersectCtx.m_hitP);
+		m_selectCtx.setDirection(m_intersectCtx.m_hitN);
+
+		m_tree->select(&m_selectCtx);
+	
+	}
+#endif
+}
+
+void SceneContainer::drawIntersection()
+{
+#if TEST_MESH
+	glColor3f(0,1,0);
+	glBegin(GL_TRIANGLES);
+	std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator it = m_selectCtx.geometryBegin();
+	for(;it!=m_selectCtx.geometryEnd();++it) {
+		ATriangleMesh * mesh = static_cast<ATriangleMesh *>(it->first);
+		const Vector3F * p = mesh->points();
+		
+		sdb::Sequence<unsigned> * cell = it->second;
+		cell->begin();
+		while(!cell->end() ) {
+			unsigned component = cell->key();
+			unsigned * tri = mesh->triangleIndices(component);
+			glVertex3fv((const GLfloat * )&p[tri[0] ]);
+			glVertex3fv((const GLfloat * )&p[tri[1] ]);
+			glVertex3fv((const GLfloat * )&p[tri[2] ]);
+			cell->next();
+		}
+	}
+	glEnd();
+#endif
+}
+
+void SceneContainer::drawClosest()
+{
+#if TEST_MESH
+	if(!m_intersectCtx.m_success) return;
+	
+	Vector3F orig = m_intersectCtx.m_hitP;
+	orig.x += 20.f;
+	orig.y -= 20.f;
+	
+	m_closestPointTest.reset(orig, orig.distanceTo( m_intersectCtx.m_hitP));
+	m_tree->closestToPoint(&m_closestPointTest);
+	
+	if(m_closestPointTest._hasResult) {
+		glColor3f(1,0,0);
+		glBegin(GL_LINES);
+			glVertex3fv((const GLfloat * )&orig);
+			glVertex3fv((const GLfloat * )&m_closestPointTest._hitPoint);
+		glEnd();
+	}
+	
 #endif
 }

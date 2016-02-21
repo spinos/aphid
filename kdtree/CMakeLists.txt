@@ -6,7 +6,8 @@ project (testkdtree)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE Release)
-include_directories ("../shared" "../catmullclark" "../btree")
+include_directories ("../shared" "../catmullclark" "../btree"
+../lapl)
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"
@@ -17,6 +18,10 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../btree/BNode.h)
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
+../shared/GeoDrawer.cpp
+../shared/LightDrawer.cpp
+../shared/KdTreeDrawer.cpp
+../shared/CartesianGrid.cpp
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp

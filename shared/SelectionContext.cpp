@@ -35,6 +35,7 @@ void SelectionContext::setDirection(const Vector3F & d)
 void SelectionContext::setCenter(const Vector3F & center)
 {
 	m_center = center;
+	m_sphere.setCenter(center);
 }
 
 const Vector3F & SelectionContext::center() const
@@ -45,6 +46,7 @@ const Vector3F & SelectionContext::center() const
 void SelectionContext::setRadius(const float & radius)
 {
 	m_radius = radius;
+	m_sphere.setRadius(radius);
 }
 
 float SelectionContext::radius() const
@@ -179,6 +181,9 @@ void SelectionContext::discard()
 	m_mode = Replace;
 	m_indices.clear();
 }
+
+const gjk::Sphere & SelectionContext::sphere() const
+{ return m_sphere; }
 
 void SelectionContext::verbose() const
 {

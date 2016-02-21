@@ -10,7 +10,6 @@
 #include "ATriangleMesh.h"
 #include "BaseBuffer.h"
 #include "BarycentricCoordinate.h"
-#include <GjkIntersection.h>
 #include <iostream>
 
 ATriangleMesh::ATriangleMesh() 
@@ -58,7 +57,8 @@ void ATriangleMesh::closestToPoint(unsigned icomponent, ClosestToPointTestResult
 {
 	Vector3F * p = points();
 	unsigned * v = triangleIndices(icomponent);
-	BarycentricCoordinate bar;
+	
+	BarycentricCoordinate & bar = result->_bar;
 	bar.create(p[v[0]], p[v[1]], p[v[2]]);
 	float d = bar.project(result->_toPoint);
 	if(d>=result->_distance) return;
@@ -163,26 +163,25 @@ bool ATriangleMesh::intersectRay(unsigned icomponent, const Ray * r,
 	return 1;
 }
 
-bool ATriangleMesh::intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius)
+bool ATriangleMesh::intersectSphere(unsigned icomponent, const gjk::Sphere & B)
 { 
 	Vector3F * p = points();
 	unsigned * v = triangleIndices(icomponent);
-	gjk::TriangleSet A;
-	A.x()[0] = p[v[0]];
-	A.x()[1] = p[v[1]];
-	A.x()[2] = p[v[2]];
-	gjk::Sphere B(center, radius );
-	return gjk::Intersect1<gjk::TriangleSet, gjk::Sphere>::Evaluate(A, B);
+	m_componentTriangle.x()[0] = p[v[0]];
+	m_componentTriangle.x()[1] = p[v[1]];
+	m_componentTriangle.x()[2] = p[v[2]];
+	
+	return gjk::Intersect1<gjk::TriangleSet, gjk::Sphere>::Evaluate(m_componentTriangle, B);
 }
 
 bool ATriangleMesh::intersectBox(unsigned icomponent, const BoundingBox & box)
 {
 	Vector3F * p = points();
 	unsigned * v = triangleIndices(icomponent);
-	gjk::TriangleSet A;
-	A.x()[0] = p[v[0]];
-	A.x()[1] = p[v[1]];
-	A.x()[2] = p[v[2]];
-	return gjk::Intersect1<gjk::TriangleSet, BoundingBox>::Evaluate(A, box);
+	m_componentTriangle.x()[0] = p[v[0]];
+	m_componentTriangle.x()[1] = p[v[1]];
+	m_componentTriangle.x()[2] = p[v[2]];
+	
+	return gjk::Intersect1<gjk::TriangleSet, BoundingBox>::Evaluate(m_componentTriangle, box);
 }
 //:~

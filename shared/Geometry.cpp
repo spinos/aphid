@@ -55,6 +55,6 @@ const Vector3F Geometry::boundingCenter() const
 	return box.center();
 }
 
-bool Geometry::intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius)
+bool Geometry::intersectSphere(unsigned icomponent, const gjk::Sphere & B)
 { return false; }
 //:~

@@ -13,10 +13,13 @@
 #include <Ray.h>
 #include <BoundingBox.h>
 #include <vector>
+#include <GjkIntersection.h>
+#include "BarycentricCoordinate.h"
 
 class Geometry : public TypedEntity, public AVerbose {
 public:
 	struct ClosestToPointTestResult {
+		BarycentricCoordinate _bar;
 		Vector3F _toPoint;
 		Vector3F _hitPoint;
 		Vector3F _hitNormal;
@@ -52,7 +55,7 @@ public:
 	virtual bool intersectTetrahedron(unsigned icomponent, const Vector3F * tet);
 	virtual bool intersectRay(unsigned icomponent, const Ray * r,
 					Vector3F & hitP, Vector3F & hitN, float & hitDistance);
-	virtual bool intersectSphere(unsigned icomponent, const Vector3F & center, const float & radius);
+	virtual bool intersectSphere(unsigned icomponent, const gjk::Sphere & B);
 	virtual void closestToPoint(ClosestToPointTestResult * result);
 	virtual void closestToPointElms(const std::vector<unsigned > & elements, ClosestToPointTestResult * result);
 	virtual void closestToPoint(unsigned icomponent, ClosestToPointTestResult * result);

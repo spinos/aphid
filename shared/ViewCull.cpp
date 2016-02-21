@@ -70,7 +70,8 @@ const AFrustum & ViewCull::frustum() const
 
 bool ViewCull::cullByFrustum(const Vector3F & center, const float & radius) const
 {
-	gjk::Sphere B(center, radius );
+	gjk::Sphere B;
+	B.set(center, radius );
 	if( gjk::Intersect1<AFrustum, gjk::Sphere>::Evaluate(m_frustum, B) )
 		return false;
 	return true;

@@ -14,6 +14,7 @@
 #include <Sequence.h>
 #include <deque>
 #include <map>
+#include <GjkIntersection.h>
 
 class SelectionContext {
 	std::map<Geometry *, sdb::Sequence<unsigned> * > m_geoComponents;
@@ -61,6 +62,8 @@ public:
 	SelectMode getSelectMode() const;
 	void discard();
 	
+	const gjk::Sphere & sphere() const;
+	
 	void verbose() const;
 private:
 	void finishAdd();
@@ -70,6 +73,7 @@ private:
 	std::deque<unsigned> m_indices;
 	std::deque<unsigned> m_removeIndices;
 	BoundingBox m_bbox;
+	gjk::Sphere m_sphere;
 	Vector3F m_center, m_normal;
 	float m_radius;
 	SelectMode m_mode;

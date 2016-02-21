@@ -41,7 +41,7 @@ void GLWidget::clientDeselect(QMouseEvent */*event*/)
 void GLWidget::clientMouseInput(QMouseEvent */*event*/)
 {
 	setUpdatesEnabled(false);
-	
+	m_scene->intersect(getIncidentRay());
 	setUpdatesEnabled(true);
 }
 

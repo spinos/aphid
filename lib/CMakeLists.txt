@@ -88,7 +88,7 @@ add_library(aphid STATIC ../shared/line_math.h
                 ../shared/BaseCamera.cpp 
                 ../shared/PerspectiveCamera.cpp 
                 ../shared/BaseDrawer.cpp 
-                ../shared/KdTreeDrawer.cpp 
+#../shared/KdTreeDrawer.cpp 
                 ../shared/SpaceHandle.cpp 
                 ../shared/TypedEntity.cpp 
 				../shared/NamedEntity.cpp 
@@ -204,8 +204,8 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/LightGroup.cpp 
 ../shared/LineDrawer.cpp 
 ../shared/MeshDrawer.cpp 
-../shared/GeoDrawer.cpp 
-../shared/LightDrawer.cpp 
+#../shared/GeoDrawer.cpp 
+#../shared/LightDrawer.cpp 
 ../shared/RenderOptions.cpp 
 ../shared/SelectionContext.cpp 
 ../shared/BaseTexture.cpp 
@@ -288,11 +288,11 @@ add_library(aphid STATIC ../shared/line_math.h
 #../btree/Types.cpp
 #../btree/Entity.cpp
 #../btree/BNode.cpp
-../btree/BTree.cpp
+#../btree/BTree.cpp
 ../btree/MortonHash.cpp
 ../shared/BaseSampler.cpp
 ../shared/AField.cpp
-../shared/CartesianGrid.cpp
+#../shared/CartesianGrid.cpp
 ../shared/HField.cpp
 ../shared/TetrahedronMeshBuilder.cpp
 ../shared/AAnimationCurve.cpp
@@ -303,7 +303,7 @@ add_library(aphid STATIC ../shared/line_math.h
 ../shared/ViewCull.cpp
 ../shared/DrawBox.cpp
 ../shared/DrawCircle.cpp
-../shared/UniformGrid.cpp
+#../shared/UniformGrid.cpp
 ../hesperis/HAdaptiveField.cpp
 ../hesperis/H5FieldIn.cpp
 ../hesperis/H5FieldOut.cpp

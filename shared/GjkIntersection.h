@@ -1,3 +1,4 @@
+#pragma once
 #include <AllMath.h>
 #include <BoundingBox.h>
 namespace gjk {
@@ -58,11 +59,19 @@ class Sphere {
 	float m_radius;
 	
 public:
-    Sphere(const Vector3F & c, const float & r)
+	Sphere() {}
+	
+	void set(const Vector3F & c, const float & r)
 	{
 		m_center = c;
 		m_radius = r;
 	}
+	
+	void setCenter(const Vector3F & c)
+	{ m_center = c; }
+	
+	void setRadius(const float & r)
+	{ m_radius = r; }
     
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const
 	{
