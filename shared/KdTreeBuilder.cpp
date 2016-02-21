@@ -270,13 +270,14 @@ char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 		head = 0;
 		SplitEvent * cand = splitAt(axis, 0);
 		if(cand->leftCount() == 0) {
-			for(i = 1; i < SplitEvent::NumEventPerDimension - 2; i++) {
+			for(i = minHead; i < SplitEvent::NumEventPerDimension - 2; i++) {
 				cand = splitAt(axis, i);
 				if(cand->leftCount() == 0)
 					head = i;
 			}
 			
-			if(head > minHead) {
+			if(head > minHead) 
+			{
 				vol = head * m_bins[axis].delta() * m_bbox.crossSectionArea(axis);
 				
 				if(vol > emptyVolume) {
@@ -288,7 +289,7 @@ char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 		tail = SplitEvent::NumEventPerDimension - 1;
 		cand = splitAt(axis, SplitEvent::NumEventPerDimension - 1);
 		if(cand->rightCount() == 0) {
-			for(i = SplitEvent::NumEventPerDimension - 2; i > 1 ; i--) {
+			for(i = maxTail; i > 1 ; i--) {
 				cand = splitAt(axis, i);
 				if(cand->rightCount() == 0)
 					tail = i;

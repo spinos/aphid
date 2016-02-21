@@ -10,10 +10,9 @@
 #include <BaseMesh.h>
 #include <BuildKdTreeContext.h>
 int SplitEvent::Dimension = 3;
-int SplitEvent::NumBinPerDimension = 17;
-int SplitEvent::NumEventPerDimension = 16;
-//float SplitEvent::ParentBoxArea = 1.f;
-//BoundingBox SplitEvent::ParentBox;
+int SplitEvent::NumBinPerDimension = 12;
+int SplitEvent::NumEventPerDimension = 11;
+
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
 	m_cost = 1e28f;
@@ -119,7 +118,7 @@ void SplitEvent::calculateCost(float x)
 	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
 	*/
 	if(m_isEmpty) return;
-	m_cost = 2.f;
+	m_cost = 2.5f;
 	if(m_leftBox.isValid()) m_cost += 2.f * (m_leftBox.area() * m_leftNumPrim) / x;
 	if(m_rightBox.isValid()) m_cost += 2.f * (m_rightBox.area() * m_rightNumPrim) / x;
 }

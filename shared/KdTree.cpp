@@ -96,7 +96,9 @@ void KdTree::clear()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < NumPrimitivesInLeafThreashold || level == KdTree::MaxBuildLevel) {
+	if(ctx.getNumPrimitives() < NumPrimitivesInLeafThreashold 
+		|| level == KdTree::MaxBuildLevel) {
+		/// if(ctx.isCompressed()) std::cout<<"\n still compressed "<<level;
 		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
 		createLeaf(node, ctx);
 		return;
@@ -108,14 +110,11 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 
 	const SplitEvent *plane = builder.bestSplit();
 	
-	//builder.verbose();
-	
-	if(!ctx.isCompressed()) {
 	if(plane->getCost() > ctx.visitCost()) {
+		/// if(ctx.isCompressed()) std::cout<<"\n still compressed "<<level;
 		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
 		createLeaf(node, ctx);
 		return;
-	}
 	}
 	
 	node->setAxis(plane->getAxis());
