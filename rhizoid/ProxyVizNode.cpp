@@ -212,28 +212,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	view.beginGL();
 	
-	initDepthCull();
-	
-	if(!isDepthCullDiagnosed() ) {
-#ifdef WIN32
-        MGlobal::displayInfo("init glext on win32");
-		gExtensionInit();
-#endif	
-		diagnoseDepthCull();
-	}
-	
 	double mm[16];
 	matrix_as_array(_worldInverseSpace, mm);
-		
-	if(isDepthCullDiagnosed() ) {
-		initDepthCullFBO();
-		if(shoDepth) {
-			drawDepthCull(mm);
-			drawDepthBuffer();
-		}
-		else if(hasView() && m_toCheckVisibility) 
-			drawDepthCull(mm);
-	}
 	
 	glPushMatrix();
 	glMultMatrixd(mm);	
@@ -760,6 +740,11 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
     MMatrix cameramat = matdata.matrix(); 
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
 	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat.inverse() );
+	float peye[3];
+	peye[0] = cameramat.matrix[3][0];
+	peye[1] = cameramat.matrix[3][1];
+	peye[2] = cameramat.matrix[3][2];
+	setEyePosition(peye);
 	
 	MPlug hfaplg(thisNode, ahapeture);
 	float hfa = hfaplg.asFloat();
@@ -783,6 +768,11 @@ void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameraMat);
 	MMatrix cameraInvMat = cameraPath.inclusiveMatrixInverse();
 	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameraInvMat);
+	float peye[3];
+	peye[0] = cameraMat.matrix[3][0];
+	peye[1] = cameraMat.matrix[3][1];
+	peye[2] = cameraMat.matrix[3][2];
+	setEyePosition(peye);
 	
     float farClip = -20.f;
     if(numPlants() > 0) getFarClipDepth(farClip, gridBoundingBox() );

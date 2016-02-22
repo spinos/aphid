@@ -15,6 +15,7 @@ class ViewCull {
 	
 	AFrustum m_frustum;
 	Matrix44F m_space, m_invSpace;
+	Vector3F m_eyePosition;
 	float m_hfov, m_aspectRatio, m_farClip, m_detailWidth, m_overscan, m_portAspectRatio;
 	bool m_enabled;
 	
@@ -54,6 +55,7 @@ public:
 	float cameraDepth(const Vector3F & p) const;
 	void getFarClipDepth(float & clip, const BoundingBox & b) const;
     const float & farClipPlane() const;
+	const Vector3F & eyePosition() const;
 	
 protected:
 	void ndc(const Vector3F & cameraP, float & coordx, float & coordy) const;
@@ -61,6 +63,7 @@ protected:
 	void setViewportAspect(const int & portWidth,
 					const int & portHeight);
 	const float & overscan() const;
+	void setEyePosition(float * p);
 	
 private:
 

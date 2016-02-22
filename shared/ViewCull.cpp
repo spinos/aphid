@@ -144,4 +144,10 @@ void ViewCull::setViewportAspect(const int & portWidth,
 
 const float & ViewCull::overscan() const
 { return m_overscan; }
+
+const Vector3F & ViewCull::eyePosition() const
+{ return m_eyePosition; }
+
+void ViewCull::setEyePosition(float * p)
+{ m_eyePosition.set(p[0], p[1], p[2]); }
 //:~

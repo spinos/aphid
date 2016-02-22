@@ -244,22 +244,6 @@ void DrawForest::drawBrush()
     glPopAttrib();
 }
 
-void DrawForest::drawDepthCull(double * localTm)
-{
-	DepthCull * culler = depthCuller();
-	culler->setLocalSpace(localTm);
-	culler->frameBufferBegin();
-	culler->drawFrameBuffer(groundMeshes() );
-	culler->frameBufferEnd();
-}
-
-void DrawForest::drawDepthBuffer()
-{
-	const Vector3F c = frustum().center();
-	glRasterPos3f(c.x, c.y, c.z);
-	depthCuller()->showFrameBuffer();
-}
-
 bool DrawForest::isVisibleInView(sdb::Plant * pl,
 					const float lowLod, const float highLod)
 {
@@ -268,14 +252,17 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 	ExampVox * v = plantExample(typ);
 	const Vector3F & localP = v->geomCenter();
 	Vector3F worldP = d->t1->transform(localP);
-	float r = v->geomExtent() * d->t1->getSide().length();
+	const float r = v->geomExtent() * d->t1->getSide().length();
 	if(cullByFrustum(worldP, r) ) return false;
     
 	float camZ;
-	if(cullByDepth(worldP, r, camZ) ) return false;
+	if(cullByDepth(worldP, r * 2.f, camZ, ground() ) ) return false;
+	
 	if(lowLod > 0.f || highLod < 1.f) {
+/// local z is negative
+		camZ = -camZ;
 		float lod;
-		if(cullByLod(camZ, r, lowLod, highLod, lod ) ) {}//return false;
+		if(cullByLod(camZ, r, lowLod, highLod, lod ) ) return false;
 	}
 	return true;
 }

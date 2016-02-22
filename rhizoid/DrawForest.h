@@ -8,13 +8,13 @@
  */
 #pragma once
 #include "ModifyForest.h"
-#include <ViewDepthCull.h>
+#include <ViewObscureCull.h>
 #include <DrawBox.h>
 #include <DrawCircle.h>
 
 class CircleCurve;
 
-class DrawForest : public sdb::ModifyForest, public ViewDepthCull, public DrawBox, public DrawCircle
+class DrawForest : public sdb::ModifyForest, public ViewObscureCull, public DrawBox, public DrawCircle
 {
 	
     Matrix44F m_useMat;
@@ -36,13 +36,11 @@ protected:
 	void drawGrid();
 	void drawActivePlants();
 	void drawViewFrustum();
-	void drawDepthCull(double * localTm);
 	bool isVisibleInView(sdb::Plant * pl, 
 					const float lowLod, const float highLod);
 	void setShowVoxLodThresold(const float & x);
     void drawBrush();
-	void drawDepthBuffer();
-
+	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, sdb::Plant> * cell);
