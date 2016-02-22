@@ -44,7 +44,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		
 		primBoxes[i] = geo->calculateBBox(compIdx);
 		
-		// primBoxes[i].expand(1e-6f);	
+		primBoxes[i].expand(1e-6f);	
 		
 		const Vector3F center = primBoxes[i].center();
 		

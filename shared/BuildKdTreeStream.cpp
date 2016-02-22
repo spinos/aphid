@@ -19,21 +19,16 @@ void BuildKdTreeStream::initialize()
 void BuildKdTreeStream::cleanup()
 {
 	m_numNodes = 0;
-	std::vector<KdTreeNode *>::iterator it = m_nodes.begin();
-	for(;it != m_nodes.end(); ++it) free( *it);
-	m_nodes.clear();
+	std::vector<KdTreeNode *>::iterator it = m_nodeBlks.begin();
+	for(;it != m_nodeBlks.end(); ++it) free( *it);
+	m_nodeBlks.clear();
 	m_indirection.clear();
 }
 
 void BuildKdTreeStream::appendGeometry(Geometry * geo)
 {
-// std::cout<<" geo type "<<geo->type()<<" ";
 	const unsigned n = geo->numComponents();
 	for(unsigned i = 0; i < n; i++) {
-		//Primitive *p = m_primitives.asPrimitive();
-		//p->setGeometry(geo);
-		//p->setComponentIndex(i);
-		//m_primitives.next();
 		Primitive p;
 		p.setGeometry(geo);
 		p.setComponentIndex(i);
@@ -65,7 +60,7 @@ KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
 	if((m_numNodes & 2047) == 0) {
 		m_nodeBuf = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2049);
-		m_nodes.push_back(m_nodeBuf);
+		m_nodeBlks.push_back(m_nodeBuf);
 	}
 	
 	KdTreeNode * b = &m_nodeBuf[m_numNodes & 2047];	
@@ -83,7 +78,7 @@ KdTreeNode *BuildKdTreeStream::createTreeBranch()
 
 KdTreeNode *BuildKdTreeStream::firstTreeBranch()
 {
-	return m_nodes[0];
+	return m_nodeBlks[0];
 }
 
 const unsigned & BuildKdTreeStream::numNodes() const
@@ -91,5 +86,7 @@ const unsigned & BuildKdTreeStream::numNodes() const
 
 void BuildKdTreeStream::verbose() const
 {
-	printf("kd-tree data stream input primitive count: %i\nnodes state:\n", getNumPrimitives());	
+    std::cout<<"\n kd-tree data stream input primitive count: " <<getNumPrimitives()
+    <<"\n n node "<<m_numNodes
+    <<"\n n blocks "<<m_nodeBlks.size();
 }

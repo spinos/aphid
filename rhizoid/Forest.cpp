@@ -16,7 +16,7 @@ Forest::Forest()
 {
 	TreeNode::MaxNumKeysPerNode = 128;
     TreeNode::MinNumKeysPerNode = 16;
-    KdTree::MaxBuildLevel = 32;
+    KdTree::MaxBuildLevel = 28;
 	KdTree::NumPrimitivesInLeafThreashold = 128;
 	
 	m_grid = new WorldGrid<Array<int, Plant>, Plant >;
@@ -376,5 +376,11 @@ const ExampVox * Forest::plantExample(unsigned idx) const
 
 void Forest::setSelectTypeFilter(int flt)
 { m_activePlants->setTypeFilter(flt); }
+
+std::string Forest::groundBuildLog() const
+{ 
+    if(!m_ground) return " error ground Kdtree not built"; 
+    return m_ground->buildLog();
+}
 
 }

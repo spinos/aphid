@@ -17,7 +17,7 @@ class KdCluster;
 class KdTree;
 class GeometryArray;
 class Ray;
-#define NUM_MESHES 122
+#define NUM_MESHES 199
 class SceneContainer {
 	IntersectionContext m_intersectCtx;
 	SelectionContext m_selectCtx;

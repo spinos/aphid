@@ -110,8 +110,10 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			MArrayDataHandle groundMeshArray = block.inputArrayValue(agroundMesh );
 			MArrayDataHandle groundSpaceArray = block.inputArrayValue(agroundSpace );
 /// in case no ground is connected
-            if(updateGround(groundMeshArray, groundSpaceArray ))
+            if(updateGround(groundMeshArray, groundSpaceArray )) {
                 moveWithGround();
+                AHelper::Info<std::string>(" ProxyViz ground ", groundBuildLog() );
+            }
 		}
 		
 		if(!m_hasParticle) {

@@ -21,7 +21,8 @@ class KdTree : public Geometry, public Boundary
 	int m_minNumLeafPrims, m_maxNumLeafPrims, m_totalNumLeafPrims;
 	BoundingBox m_testBox;
 	unsigned m_intersectElement;
-	
+	std::string m_buildLogStr;
+    
 public:
 	KdTree();
 	virtual ~KdTree();
@@ -43,7 +44,8 @@ public:
 // override geomery
 	virtual bool intersectBox(const BoundingBox & box);
 	virtual void closestToPoint(ClosestToPointTestResult * result);
-	
+	std::string buildLog() const;
+    
 protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;

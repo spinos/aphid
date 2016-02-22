@@ -13,6 +13,7 @@
 #include <IntersectionContext.h>
 #include "SelectionContext.h"
 #include <boost/timer.hpp>
+#include <sstream>
 
 int KdTree::MaxBuildLevel = 32;
 unsigned KdTree::NumPrimitivesInLeafThreashold = 32;
@@ -56,7 +57,9 @@ void KdTree::create()
 	
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream, b);
 	
-	std::cout << "\n Kd tree prepare in " << bTimer.elapsed();
+	std::stringstream sst;
+	sst << "\n Kd tree pre-built in " << bTimer.elapsed();
+    std::cout<<"\n Kd tree building...";
 	bTimer.restart();
 	
 	m_maxLeafLevel = 0;
@@ -72,12 +75,14 @@ void KdTree::create()
 	//delete ctx;
 	
 	// m_stream.verbose();
-	std::cout << "\n Kd tree built in " << bTimer.elapsed() << " secs"
+    sst << "\n Kd tree built in " << bTimer.elapsed() << " secs"
 	<<"\n total num nodes "<<m_stream.numNodes()
 	<<"\n max leaf level: "<<m_maxLeafLevel
 	<<"\n num no-empty leaves "<<m_numNoEmptyLeaf
 	<<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
 	<<"   average "<<(float)m_totalNumLeafPrims/(float)m_numNoEmptyLeaf;
+    m_buildLogStr = sst.str();
+    std::cout<<m_buildLogStr;
 }
 
 void KdTree::rebuild()
@@ -482,4 +487,7 @@ bool KdTree::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 	}
 	return false;
 }
+
+std::string KdTree::buildLog() const
+{ return m_buildLogStr; }
 //:~

@@ -42,5 +42,5 @@ public:
 private:
 	sdb::VectorArray<Primitive> m_primitives;
 	std::vector<unsigned> m_indirection;
-	std::vector<KdTreeNode *> m_nodes;
+	std::vector<KdTreeNode *> m_nodeBlks;
 };

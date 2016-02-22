@@ -100,7 +100,7 @@ protected:
     void addPlantExample(ExampVox * x);
 	ExampVox * plantExample(unsigned idx);
 	const ExampVox * plantExample(unsigned idx) const;
-	//int activePlantId() const;
+	std::string groundBuildLog() const;
 	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
