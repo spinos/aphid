@@ -10,6 +10,8 @@
 #include "ViewObscureCull.h"
 #include <KdTree.h>
 
+namespace aphid {
+
 ViewObscureCull::ViewObscureCull() {}
 ViewObscureCull::~ViewObscureCull() {}
 
@@ -25,5 +27,7 @@ bool ViewObscureCull::cullByDepth(const Vector3F & pnt, const float & threshold,
 	
 	if(!m_intersectCtx.m_success) return false;
 	return ( cameraZ - eyePosition().distanceTo(m_intersectCtx.m_hitP) ) > threshold;
+}
+
 }
 //:~

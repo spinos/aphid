@@ -8,6 +8,7 @@
  */
 
 #include <CartesianGrid.h>
+namespace aphid {
 class KdTree;
 
 class UniformGrid : public CartesianGrid
@@ -33,3 +34,5 @@ private:
 private:
     
 };
+
+}

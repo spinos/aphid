@@ -21,9 +21,9 @@
  * qy = (m02 - m20)/( 4 *qw)
  * qz = (m10 - m01)/( 4 *qw)
  */
-class ExampVox;
+namespace aphid {
 
-namespace sdb {
+class ExampVox;
 
 /*
  *  plant and ground data
@@ -32,7 +32,7 @@ namespace sdb {
 
 class Forest {
 
-	WorldGrid<Array<int, Plant>, Plant > * m_grid;
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * m_grid;
 	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
@@ -70,8 +70,8 @@ protected:
 	unsigned numGroundMeshes() const;
     unsigned numPlants() const;
 	const BoundingBox & gridBoundingBox() const;
-	WorldGrid<Array<int, Plant>, Plant > * grid();
-	Array<int, PlantInstance> * activePlants();
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid();
+	sdb::Array<int, PlantInstance> * activePlants();
 	PlantSelection * selection();
 	KdTree * ground();
 	const KdTree * ground() const;
@@ -105,7 +105,7 @@ protected:
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
-					Array<int, Plant> * cell);
+					sdb::Array<int, Plant> * cell);
 	
 };
 

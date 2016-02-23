@@ -1,5 +1,5 @@
 #include "MortonHash.h"
-
+namespace aphid {
 namespace sdb {
 CellHash::CellHash() {}
 CellHash::~CellHash() {}
@@ -47,3 +47,4 @@ void EdgeHash::connectedTo(unsigned & a, unsigned & b)
 }
 
 } // end namespace sdb
+}

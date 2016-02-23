@@ -10,16 +10,16 @@
 #include "Forest.h"
 #include "ExampVox.h"
 
-namespace sdb {
+namespace aphid {
 
 Forest::Forest() 
 {
-	TreeNode::MaxNumKeysPerNode = 128;
-    TreeNode::MinNumKeysPerNode = 16;
+	sdb::TreeNode::MaxNumKeysPerNode = 128;
+    sdb::TreeNode::MinNumKeysPerNode = 16;
     KdTree::MaxBuildLevel = 28;
 	KdTree::NumPrimitivesInLeafThreashold = 128;
 	
-	m_grid = new WorldGrid<Array<int, Plant>, Plant >;
+	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >;
 	m_ground = NULL;
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
@@ -81,7 +81,7 @@ void Forest::updateNumPlants()
 	m_numPlants = 0;
 	m_grid->begin();
 	while(!m_grid->end() ) {
-		Array<int, Plant> * cell = m_grid->value();
+		sdb::Array<int, Plant> * cell = m_grid->value();
 		m_numPlants += cell->size();
 		m_grid->next();
 	}
@@ -169,13 +169,13 @@ SelectionContext * Forest::activeGround()
 bool Forest::closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance)
 {
-	Coord3 c0 = m_grid->gridCoord((const float *)&pos);
-	Array<int, Plant> * cell = m_grid->findCell(c0);
+	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&pos);
+	sdb::Array<int, Plant> * cell = m_grid->findCell(c0);
 	if(testNeighborsInCell(pos, minDistance, cell) ) return true;
 	
 	BoundingBox b = m_grid->coordToGridBBox(c0);
 	
-	Coord3 c1 = c0;
+	sdb::Coord3 c1 = c0;
 	if(pos.x - minDistance < b.getMin(0) ) {
 		 c1.x = c0.x - 1;
 		 cell = m_grid->findCell(c1);
@@ -213,7 +213,7 @@ bool Forest::closeToOccupiedPosition(const Vector3F & pos,
 
 bool Forest::testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
-					Array<int, Plant> * cell)
+					sdb::Array<int, Plant> * cell)
 {
 	if(!cell) return false;
 	if(cell->isEmpty() ) return false;
@@ -231,13 +231,13 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 const float & Forest::plantSize(int idx) const
 { return m_examples[idx]->geomSize(); }
 
-WorldGrid<Array<int, Plant>, Plant > * Forest::grid()
+sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * Forest::grid()
 { return m_grid; }
 
 const unsigned & Forest::numActivePlants() const
 { return m_activePlants->numSelected(); }
 
-Array<int, PlantInstance> * Forest::activePlants()
+sdb::Array<int, PlantInstance> * Forest::activePlants()
 { return m_activePlants->data(); }
 
 KdTree * Forest::ground()

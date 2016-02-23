@@ -4,6 +4,8 @@
 #include <BNode.h>
 #include <BaseBuffer.h>
 
+namespace aphid {
+
 CartesianGrid::CartesianGrid()
 {
     sdb::TreeNode::MaxNumKeysPerNode = 128;
@@ -267,5 +269,7 @@ void CartesianGrid::printGrids(BaseBuffer * dst)
         c->next();  
         xyz += 3;
     }
+}
+
 }
 //:~

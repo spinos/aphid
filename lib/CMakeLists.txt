@@ -90,6 +90,8 @@ ADD_LIBRARY (aphidMath STATIC
 ../shared/MersenneTwister.cpp
 ../shared/PseudoNoise.cpp
 ../shared/QuickSort.cpp
+../shared/Plane.cpp
+../shared/AFrustum.cpp
 )
 
 ADD_LIBRARY (aphidGeom STATIC 
@@ -197,7 +199,6 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/VertexPath.cpp
 ../lapl/VertexAdjacency.cpp
 ../shared/MeshTopology.cpp 
-../shared/Plane.cpp
 ../shared/VertexDataGroup.cpp
 ../shared/BaseField.cpp
 ../shared/BaseState.cpp
@@ -312,7 +313,6 @@ add_library(aphid STATIC
 ##../shared/HField.cpp
 ##../shared/CartesianGrid.cpp
 ##../shared/TetrahedronMeshBuilder.cpp
-##../shared/AFrustum.cpp
 ##../shared/ViewCull.cpp
 ##../shared/DrawBox.cpp
 ##../shared/DrawCircle.cpp

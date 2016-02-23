@@ -10,7 +10,7 @@
 #include "DrawCircle.h"
 #include <gl_heads.h>
 
-CircleCurve DrawCircle::UnitCircleCurve;
+aphid::CircleCurve DrawCircle::UnitCircleCurve;
 
 DrawCircle::DrawCircle() {}
 DrawCircle::~DrawCircle() {}

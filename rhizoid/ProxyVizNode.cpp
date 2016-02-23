@@ -21,6 +21,8 @@
 #include <gExtension.h>
 #endif	
 
+namespace aphid {
+
 MTypeId ProxyViz::id( 0x95a19e );
 MObject ProxyViz::abboxminx;
 MObject ProxyViz::abboxminy;
@@ -851,5 +853,7 @@ void ProxyViz::drawBrush(M3dView & view)
     view.drawText(radstr, MPoint(position.x, position.y, position.z) );
 	
     DrawForest::drawBrush();
+}
+
 }
 //:~

@@ -9,6 +9,8 @@ class MString;
 using namespace std;
 #include <sstream>
 
+namespace aphid {
+
 AHelper::AHelper(void)
 {
 }
@@ -1090,5 +1092,7 @@ MObject AHelper::CreateDeformer(const MString & name)
 	MObject node;
 	iter.getDependNode(node);
 	return node;
+}
+
 }
 //:~

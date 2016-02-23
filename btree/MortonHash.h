@@ -3,6 +3,8 @@
 
 #include <Array.h>
 
+namespace aphid {
+
 namespace sdb {
     
 typedef unsigned uint;
@@ -46,5 +48,7 @@ private:
 };
 
 } // end namespace sdb
+
+}
 #endif        //  #ifndef MORTONHASH_H
 

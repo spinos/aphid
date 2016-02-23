@@ -8,9 +8,11 @@
  */
 
 #pragma once
-#include "CircleCurve.h"
+
+#include <CircleCurve.h>
+
 class DrawCircle {
-	static CircleCurve UnitCircleCurve;
+	static aphid::CircleCurve UnitCircleCurve;
 	
 public:
 	DrawCircle();

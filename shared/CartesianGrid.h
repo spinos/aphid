@@ -3,6 +3,9 @@
 
 #include <BoundingBox.h>
 #include <MortonHash.h>
+
+namespace aphid {
+
 class BaseBuffer;
 class CartesianGrid 
 {
@@ -75,5 +78,6 @@ private:
     sdb::CellHash * m_cellHash;
 };
 
+}
 #endif        //  #ifndef CARTESIANGRID_H
 

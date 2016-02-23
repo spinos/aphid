@@ -12,7 +12,7 @@
 #include <Array.h>
 #include <SelectionContext.h>
 
-namespace sdb {
+namespace aphid {
 
 struct GroundBind {
 	float m_w0, m_w1, m_w2;
@@ -29,8 +29,8 @@ struct GroundBind {
 };
 
 /// (plant id, (transformation, triangle bind, plant type id) )
-typedef Triple<Matrix44F, GroundBind, int > PlantData;
-class Plant : public Pair<int, PlantData>
+typedef sdb::Triple<Matrix44F, GroundBind, int > PlantData;
+class Plant : public sdb::Pair<int, PlantData>
 {
 public:
 	
@@ -60,11 +60,11 @@ class PlantSelection {
 	float m_radius;
 	unsigned m_numSelected;
     int m_typeFilter;
-	WorldGrid<Array<int, Plant>, Plant > * m_grid;
-	Array<int, PlantInstance> * m_plants;
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * m_grid;
+	sdb::Array<int, PlantInstance> * m_plants;
 	
 public:
-	PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid);
+	PlantSelection(sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid);
 	virtual ~PlantSelection();
 	
     void setRadius(float x);
@@ -72,7 +72,7 @@ public:
 	void select(SelectionContext::SelectMode mode);
     void deselect();
 	const unsigned & numSelected() const;
-	Array<int, PlantInstance> * data();
+	sdb::Array<int, PlantInstance> * data();
 	void calculateWeight();
 	void select(Plant * p);
 	void updateNumSelected();
@@ -83,7 +83,7 @@ public:
 protected:
 
 private:
-	void select(const Coord3 & c, SelectionContext::SelectMode mode);
+	void select(const sdb::Coord3 & c, SelectionContext::SelectMode mode);
 	
 };
 

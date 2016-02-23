@@ -11,6 +11,8 @@
 #include <ViewCull.h>
 #include <IntersectionContext.h>
 
+namespace aphid {
+
 class KdTree;
 class ViewObscureCull : public ViewCull {
 
@@ -29,3 +31,5 @@ protected:
 private:
 
 };
+
+}

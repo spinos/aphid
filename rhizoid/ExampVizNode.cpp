@@ -47,9 +47,9 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
-		MObject newDataObject = fnPluginData.create(ExampData::id, &status);
+		MObject newDataObject = fnPluginData.create(aphid::ExampData::id, &status);
 		
-		ExampData * pData = (ExampData *) fnPluginData.data(&status);
+		aphid::ExampData * pData = (aphid::ExampData *) fnPluginData.data(&status);
 		
 		if(pData) pData->setDesc(this);
 
@@ -65,7 +65,7 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
-	const BoundingBox & bbox = geomBox();
+	const aphid::BoundingBox & bbox = geomBox();
 	MObject selfNode = thisMObject();
 	MPlug rPlug(selfNode, adrawColorR);
 	MPlug gPlug(selfNode, adrawColorG);
@@ -99,8 +99,8 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	else
 		drawWireGrid();
 	
-	Matrix44F mat;
-	mat.setFrontOrientation(Vector3F::YAxis);
+	aphid::Matrix44F mat;
+	mat.setFrontOrientation(aphid::Vector3F::YAxis);
 	mat.scaleBy(geomSize() );
     mat.glMatrix(m_transBuf);
 	
@@ -113,7 +113,7 @@ bool ExampViz::isBounded() const
 
 MBoundingBox ExampViz::boundingBox() const
 {   
-	const BoundingBox & bbox = geomBox();
+	const aphid::BoundingBox & bbox = geomBox();
 	
 	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);
 	MPoint corner2(bbox.m_data[3], bbox.m_data[4], bbox.m_data[5]);
@@ -207,22 +207,22 @@ MStatus ExampViz::initialize()
 MStatus ExampViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == outValue)
-		AHelper::Info<MString>("connect", plug.name());
+		aphid::AHelper::Info<MString>("connect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
 MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == outValue)
-		AHelper::Info<MString>("disconnect", plug.name());
+		aphid::AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
-void ExampViz::voxelize(KdTree * tree)
+void ExampViz::voxelize(aphid::KdTree * tree)
 {
 	ExampVox::voxelize(tree);
 	
-	const BoundingBox bb = geomBox();
+	const aphid::BoundingBox bb = geomBox();
 	
 	MFnNumericData bbFn;
 	MObject bbData = bbFn.create(MFnNumericData::k3Float);
@@ -253,7 +253,7 @@ void ExampViz::voxelize(KdTree * tree)
 	MPlug cellPlug(thisMObject(), acellBuf);
 	cellPlug.setValue(opnt);
 	
-	AHelper::Info<unsigned>(" ExampViz generate n cells" ,n);
+	aphid::AHelper::Info<unsigned>(" ExampViz generate n cells" ,n);
 }
 
 void ExampViz::updateGeomBox(MObject & node)
@@ -262,7 +262,7 @@ void ExampViz::updateGeomBox(MObject & node)
 	float radiusScal = radiusMultPlug.asFloat();
 	setGeomSizeMult(radiusScal);
 	
-	BoundingBox bb;
+	aphid::BoundingBox bb;
 	
 	MObject bbmn;
 	MPlug bbmnPlug(node, abboxminv);
@@ -297,21 +297,21 @@ void ExampViz::loadBoxes(MObject & node)
 	
 	unsigned n = pnts.length();
 	if(n < numBoxes() ) {
-		AHelper::Info<unsigned>(" ExampViz error wrong cell data length", n );
+		aphid::AHelper::Info<unsigned>(" ExampViz error wrong cell data length", n );
 		return;
 	}
 	
 	n = numBoxes();
 	setBoxes(pnts, n);
 	
-	AHelper::Info<unsigned>(" ExampViz load n cells", n );
+	aphid::AHelper::Info<unsigned>(" ExampViz load n cells", n );
 }
 
 void ExampViz::loadBoxes(MDataBlock & data)
 {
 	unsigned nc = data.inputValue(ancells).asInt();
 	if(nc < 1) {
-		AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
+		aphid::AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
 		return;
 	}
 	if(setNumBoxes(nc) ) {
@@ -327,7 +327,7 @@ void ExampViz::loadBoxes(MDataBlock & data)
 			setBoxes(pnts, n);
 		}
 		else {
-			AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
+			aphid::AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
 		}
 	}
 	
@@ -335,7 +335,7 @@ void ExampViz::loadBoxes(MDataBlock & data)
 	float radiusScal = radiusMultH.asFloat();
 	setGeomSizeMult(radiusScal);
 	
-	BoundingBox bb;
+	aphid::BoundingBox bb;
 	
 	MDataHandle bbminH = data.inputValue(abboxminv);
 	MFloatVector& vmin = bbminH.asFloatVector();
@@ -353,7 +353,7 @@ void ExampViz::loadBoxes(MDataBlock & data)
 	MFloatVector& c = data.inputValue(adrawColor).asFloatVector();
 	diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
 	
-	AHelper::Info<unsigned>(" ExampViz update n cells", numBoxes() );
+	aphid::AHelper::Info<unsigned>(" ExampViz update n cells", numBoxes() );
 }
 
 void ExampViz::setBoxes(const MPointArray & src, const unsigned & num)

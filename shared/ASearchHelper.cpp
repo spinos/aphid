@@ -32,6 +32,8 @@
 #include <vector>
 using namespace std;
 
+namespace aphid {
+
 std::string ASearchHelper::getPullPathName(MObject &node)
 {
     MFnDagNode pf(node);
@@ -972,5 +974,7 @@ void ASearchHelper::LsAll(std::map<std::string, MDagPath> & dst, const MDagPathA
 	unsigned i = 0;
 	for(;i<n;i++)
 		dst[tails[i].fullPathName().asChar()] = tails[i];
+}
+
 }
 //~:

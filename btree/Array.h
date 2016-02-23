@@ -2,6 +2,7 @@
 
 #include "Entity.h"
 #include "Sequence.h"
+namespace aphid {
 namespace sdb {
 template<typename KeyType, typename ValueType>
 class Array : public Sequence<KeyType>
@@ -50,3 +51,4 @@ private:
 	
 };
 } //end namespace sdb
+}

@@ -11,6 +11,8 @@
 #include <AFrustum.h>
 #include <BoundingBox.h>
 
+namespace aphid {
+
 class ViewCull {
 	
 	AFrustum m_frustum;
@@ -68,3 +70,5 @@ protected:
 private:
 
 };
+
+}

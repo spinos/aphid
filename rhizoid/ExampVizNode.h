@@ -15,7 +15,7 @@
 #include <maya/M3dView.h>
 #include <maya/MPointArray.h>
 
-class ExampViz : public MPxLocatorNode, public ExampVox, public DrawCircle
+class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public DrawCircle
 {
 	float m_transBuf[16];
 	
@@ -49,7 +49,7 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	virtual void voxelize(KdTree * tree);
+	virtual void voxelize(aphid::KdTree * tree);
 	
 private:
 	void loadBoxes(MObject & node);

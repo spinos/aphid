@@ -13,6 +13,8 @@
 #include <DepthCull.h>
 #include <ExampVox.h>
 
+namespace aphid {
+
 DrawForest::DrawForest() : m_showVoxLodThresold(1.f)
 {
 	m_scalbuf[0] = 1.f; 
@@ -57,7 +59,7 @@ void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 
 void DrawForest::drawWiredPlants()
 {
-	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	const float margin = g->gridSize() * .13f;
 	glDepthFunc(GL_LEQUAL);
@@ -76,7 +78,7 @@ void DrawForest::drawWiredPlants()
 	glPopAttrib();
 }
 
-void DrawForest::drawWiredPlants(sdb::Array<int, sdb::Plant> * cell)
+void DrawForest::drawWiredPlants(sdb::Array<int, Plant> * cell)
 {
 	cell->begin();
 	while(!cell->end() ) {
@@ -85,7 +87,7 @@ void DrawForest::drawWiredPlants(sdb::Array<int, sdb::Plant> * cell)
 	}
 }
 
-void DrawForest::drawWiredPlant(sdb::PlantData * data)
+void DrawForest::drawWiredPlant(PlantData * data)
 {
 	glPushMatrix();
     
@@ -99,7 +101,7 @@ void DrawForest::drawWiredPlant(sdb::PlantData * data)
 
 void DrawForest::drawPlants()
 {
-    sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+    sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	const float margin = g->gridSize() * .1f;
 	glDepthFunc(GL_LEQUAL);
@@ -117,7 +119,7 @@ void DrawForest::drawPlants()
 	glPopAttrib();
 }
 
-void DrawForest::drawPlants(sdb::Array<int, sdb::Plant> * cell)
+void DrawForest::drawPlants(sdb::Array<int, Plant> * cell)
 {
 	cell->begin();
 	while(!cell->end() ) {
@@ -126,7 +128,7 @@ void DrawForest::drawPlants(sdb::Array<int, sdb::Plant> * cell)
 	}
 }
 
-void DrawForest::drawPlant(sdb::PlantData * data)
+void DrawForest::drawPlant(PlantData * data)
 {
 	glPushMatrix();
     
@@ -139,7 +141,7 @@ void DrawForest::drawPlant(sdb::PlantData * data)
 	glPopMatrix();
 }
 
-void DrawForest::drawPlant(const ExampVox * v, sdb::PlantData * data)
+void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 {	
 	if(m_showVoxLodThresold >.9999f) {
         drawSolidBox(v->geomCenterV(), v->geomScale() );
@@ -177,7 +179,7 @@ void DrawForest::drawGridBounding()
 
 void DrawForest::drawGrid()
 {
-	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	g->begin();
 	while(!g->end() ) {
@@ -186,7 +188,7 @@ void DrawForest::drawGrid()
 	}
 }
 
-void DrawForest::drawPlantBox(sdb::PlantData * data)
+void DrawForest::drawPlantBox(PlantData * data)
 {
 	glPushMatrix();
     
@@ -203,7 +205,7 @@ void DrawForest::drawActivePlants()
 	if(numActivePlants() < 1) return;
 	glDepthFunc(GL_LEQUAL);
 	glColor3f(.1f, .9f, .43f);
-	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		drawPlantBox(arr->value()->m_reference->index );
@@ -244,10 +246,10 @@ void DrawForest::drawBrush()
     glPopAttrib();
 }
 
-bool DrawForest::isVisibleInView(sdb::Plant * pl,
+bool DrawForest::isVisibleInView(Plant * pl,
 					const float lowLod, const float highLod)
 {
-	sdb::PlantData * d = pl->index;
+	PlantData * d = pl->index;
 	int typ = *d->t3;
 	ExampVox * v = plantExample(typ);
 	const Vector3F & localP = v->geomCenter();
@@ -270,4 +272,5 @@ bool DrawForest::isVisibleInView(sdb::Plant * pl,
 void DrawForest::setShowVoxLodThresold(const float & x)
 { m_showVoxLodThresold = x; }
 
+}
 //:~

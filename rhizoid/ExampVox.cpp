@@ -11,6 +11,8 @@
 #include <UniformGrid.h>
 #include <KdTree.h>
 
+namespace aphid {
+
 ExampVox::ExampVox() : 
 m_boxCenterSizeF4(NULL),
 m_boxPositionBuf(NULL),
@@ -164,3 +166,5 @@ const float * ExampVox::boxPositionBuf() const
 
 const unsigned & ExampVox::boxBufLength() const
 { return m_boxBufLength; }
+
+}

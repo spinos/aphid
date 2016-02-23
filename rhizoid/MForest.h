@@ -5,6 +5,8 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MMatrix.h>
 
+namespace aphid {
+
 /// maya interface
 class MForest : public DrawForest {
 	
@@ -67,16 +69,18 @@ protected:
 				
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
-    void saveCell(sdb::Array<int, sdb::Plant> *cell,
+    void saveCell(sdb::Array<int, Plant> *cell,
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
 					MVectorArray & plantCoords);
-	void getDataInCell(sdb::Array<int, sdb::Plant> *cell, 
+	void getDataInCell(sdb::Array<int, Plant> *cell, 
 					float * data, unsigned & it);
-	void pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
+	void pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
 					float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage, int plantTyp, 
                     int & it);
 };
+
+}

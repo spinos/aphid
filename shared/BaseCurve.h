@@ -10,8 +10,8 @@
 #pragma once
 
 #include <AllMath.h>
-#include <vector>
 #include <Geometry.h>
+#include <vector>
 
 namespace aphid {
 

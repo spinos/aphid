@@ -11,7 +11,7 @@
 #include <TriangleRaster.h>
 #include <BarycentricCoordinate.h>
 
-namespace sdb {
+namespace aphid {
 
 ModifyForest::ModifyForest() 
 { 
@@ -33,14 +33,14 @@ void ModifyForest::setNoiseWeight(float x)
 bool ModifyForest::growOnGround(GrowOption & option)
 {
 	if(numActiveGroundFaces() < 1) return false;
-	std::map<Geometry *, Sequence<unsigned> * >::iterator it = activeGround()->geometryBegin();
+	std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator it = activeGround()->geometryBegin();
 	for(; it != activeGround()->geometryEnd(); ++it) {
 		growOnFaces(it->first, it->second, geomertyId(it->first), option);
 	}
     return true;
 }
 
-void ModifyForest::growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
+void ModifyForest::growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
 						int geoId,
 						GrowOption & option)
 {
@@ -154,7 +154,7 @@ void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
 {
 	if(!calculateSelecedWeight(ray)) return;
 	
-	Array<int, PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -174,7 +174,7 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 	if(!calculateSelecedWeight(ray)) return;
 	
 	std::vector<int> idToClear;
-	Array<int, PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -183,8 +183,8 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 				idToClear.push_back(arr->key() );
 				Plant * pl = arr->value()->m_reference;
 				Vector3F pos = pl->index->t1->getTranslation();
-				Coord3 c0 = grid()->gridCoord((const float *)&pos);
-				Array<int, Plant> * cell = grid()->findCell(c0 );
+				sdb::Coord3 c0 = grid()->gridCoord((const float *)&pos);
+				sdb::Array<int, Plant> * cell = grid()->findCell(c0 );
 				if(cell) {
 					cell->remove(arr->key() );
 					if(cell->isEmpty() )
@@ -220,7 +220,7 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 {
     if(!calculateSelecedWeight(ray)) return;
     
-    Array<int, PlantInstance> * arr = activePlants();
+    sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -238,7 +238,7 @@ void ModifyForest::rotateAt(const Ray & ray, float magnitude, int axis)
     if(!calculateSelecedWeight(ray)) return;
     Vector3F first, second, third;
     float scaling;
-    Array<int, PlantInstance> * arr = activePlants();
+    sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -301,7 +301,7 @@ void ModifyForest::movePlant(const Ray & ray,
 					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
 	
 	Vector3F pos, bindPos;
-	Array<int, PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -332,7 +332,7 @@ void ModifyForest::moveWithGround()
 		grid()->next();
 	}
 	
-	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	if(arr->size() < 1) return;
 	
 	arr->begin();
@@ -344,7 +344,7 @@ void ModifyForest::moveWithGround()
 	updateGrid();
 }
 
-void ModifyForest::movePlantsWithGround(Array<int, Plant> * arr)
+void ModifyForest::movePlantsWithGround(sdb::Array<int, Plant> * arr)
 {
 	Vector3F bindP, curP;
 	arr->begin();
@@ -435,7 +435,7 @@ void ModifyForest::erectActive()
 	if(numActivePlants() < 1) return;
 	
 	Vector3F worldUp(0.f, 1.f, 0.f);	
-	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		Matrix44F * mat = arr->value()->m_reference->index->t1;

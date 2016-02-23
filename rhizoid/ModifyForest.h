@@ -10,10 +10,10 @@
 #include "Forest.h"
 #include <PseudoNoise.h>
 
+namespace aphid {
+
 class TriangleRaster;
 class BarycentricCoordinate;
-
-namespace sdb {
 
 class ModifyForest : public Forest {
 	
@@ -56,7 +56,7 @@ protected:
 	void scaleBrushAt(const Ray & ray, float magnitude);
     
 private:
-	void growOnFaces(Geometry * geo, Sequence<unsigned> * components, 
+	void growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
 					int geoId,
 					GrowOption & option);
 	
@@ -67,7 +67,7 @@ private:
 	void randomSpaceAt(const Vector3F & pos, 
 							const GrowOption & option,
 							Matrix44F & space, float & scale);
-	void movePlantsWithGround(Array<int, Plant> * arr);
+	void movePlantsWithGround(sdb::Array<int, Plant> * arr);
 	bool calculateSelecedWeight(const Ray & ray);
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;

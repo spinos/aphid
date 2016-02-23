@@ -14,6 +14,8 @@
 #include "ProxyVizNode.h"
 #include <maya/MSceneMessage.h>
 
+using namespace aphid;
+
 class proxyPaintContext : public MPxContext
 {
     

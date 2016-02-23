@@ -22,6 +22,9 @@ class MDagPathArray;
 #include <map>
 #include <sstream>
 #include <AHelper.h>
+
+namespace aphid {
+
 class ASearchHelper : public AHelper {
 public:
 	ASearchHelper() {}
@@ -77,4 +80,6 @@ public:
 	static void LsAll(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails);
 
 };
+
+}
 #endif

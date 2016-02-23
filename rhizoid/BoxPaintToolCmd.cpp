@@ -85,7 +85,7 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	
 	if(m_operation == opConnectVoxel) return connectVoxelSelected();
 		
-	ASearchHelper finder;
+	aphid::ASearchHelper finder;
 
 	MObject oViz;
 	if(!finder.getObjByFullName(fVizName.asChar(), oViz)) {
@@ -94,7 +94,7 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	}
 	
 	MFnDependencyNode fviz(oViz);
-    ProxyViz *pViz = (ProxyViz*)fviz.userNode();
+    aphid::ProxyViz *pViz = (aphid::ProxyViz*)fviz.userNode();
     
     if(!pViz) {
 		MGlobal::displayWarning(MString("cannot recognize viz: ") + fVizName);
@@ -143,7 +143,7 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			status.perror("-selectVox flag parsing failed");
 			return status;
 		}
-		AHelper::Info<int>(" proxyPaintTool select example", m_currentVoxInd);
+		aphid::AHelper::Info<int>(" proxyPaintTool select example", m_currentVoxInd);
 	}
 	
 	if (argData.isFlagSet(kDoPickFlag)) {
@@ -225,9 +225,9 @@ MStatus proxyPaintTool::connectGroundSelected()
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
-	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+	aphid::AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 		
-	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	aphid::ProxyViz* pViz = (aphid::ProxyViz*)fviz.userNode();
 	pViz->setEnableCompute(false);
 	
 	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
@@ -248,7 +248,7 @@ MStatus proxyPaintTool::connectGroundSelected()
 			MDagPath meshPath;
 			meshIter.getDagPath ( meshPath );
 			meshPath.pop();
-			AHelper::Info<MString>("proxyPaintTool connect ground", meshPath.fullPathName() );
+			aphid::AHelper::Info<MString>("proxyPaintTool connect ground", meshPath.fullPathName() );
 			MObject trans = meshPath.node();
 			connectTransform(trans, vizobj, islot);
 			checkOutputConnection(vizobj, "ov");
@@ -275,9 +275,9 @@ MStatus proxyPaintTool::connectVoxelSelected()
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
-	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+	aphid::AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 	
-	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	aphid::ProxyViz* pViz = (aphid::ProxyViz*)fviz.userNode();
 	pViz->setEnableCompute(false);
 	
 	MItSelectionList voxIter(sels, MFn::kPluginLocatorNode, &stat);
@@ -293,7 +293,7 @@ MStatus proxyPaintTool::connectVoxelSelected()
 			
 		unsigned islot;
 		if(connectVoxToViz(vox, vizobj, islot) ) {
-			AHelper::Info<MString>("proxyPaintTool connect example", fvox.name() );
+			aphid::AHelper::Info<MString>("proxyPaintTool connect example", fvox.name() );
 			checkOutputConnection(vizobj, "ov1");
 		}
 	}
@@ -307,7 +307,7 @@ bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsig
 {
 	MFnDependencyNode fmesh(meshObj);
 	MPlug srcMesh = fmesh.findPlug("outMesh");
-	AHelper::Info<MString>("check", srcMesh.name() );
+	aphid::AHelper::Info<MString>("check", srcMesh.name() );
 	
 	MStatus stat;
 	MPlugArray connected;
@@ -315,7 +315,7 @@ bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsig
 	unsigned i = 0;
 	for(;i<connected.length();++i) {
 		if(connected[i].node() == vizObj) {
-			AHelper::Info<MString>("already connected to", connected[i].name() );
+			aphid::AHelper::Info<MString>("already connected to", connected[i].name() );
 			return false;
 		}
 	}
@@ -324,7 +324,7 @@ bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsig
 	MPlug dstGround = fviz.findPlug("groundMesh");
 	slot = dstGround.numElements();
 	MPlug dst = dstGround.elementByLogicalIndex(slot);
-	AHelper::Info<MString>("connect to", dst.name() );
+	aphid::AHelper::Info<MString>("connect to", dst.name() );
 	
 	MDGModifier modif;
 	modif.connect(srcMesh, dst );
@@ -336,7 +336,7 @@ bool proxyPaintTool::connectVoxToViz(MObject & voxObj, MObject & vizObj, unsigne
 {
 	MFnDependencyNode fvox(voxObj);
 	MPlug srcPlug = fvox.findPlug("ov");
-	AHelper::Info<MString>("check", srcPlug.name() );
+	aphid::AHelper::Info<MString>("check", srcPlug.name() );
 	
 	MStatus stat;
 	MPlugArray connected;
@@ -344,7 +344,7 @@ bool proxyPaintTool::connectVoxToViz(MObject & voxObj, MObject & vizObj, unsigne
 	unsigned i = 0;
 	for(;i<connected.length();++i) {
 		if(connected[i].node() == vizObj) {
-			AHelper::Info<MString>("already connected to", connected[i].name() );
+			aphid::AHelper::Info<MString>("already connected to", connected[i].name() );
 			return false;
 		}
 	}
@@ -353,7 +353,7 @@ bool proxyPaintTool::connectVoxToViz(MObject & voxObj, MObject & vizObj, unsigne
 	MPlug inExample = fviz.findPlug("ixmp");
 	slot = inExample.numElements();
 	MPlug dstPlug = inExample.elementByLogicalIndex(slot);
-	AHelper::Info<MString>("connect to", dstPlug.name() );
+	aphid::AHelper::Info<MString>("connect to", dstPlug.name() );
 	
 	MDGModifier modif;
 	modif.connect(srcPlug, dstPlug );
@@ -365,12 +365,12 @@ void proxyPaintTool::connectTransform(MObject & transObj, MObject & vizObj, cons
 {
 	MFnDependencyNode ftrans(transObj);
 	MPlug srcSpace = ftrans.findPlug("worldMatrix").elementByLogicalIndex(0);
-	AHelper::Info<MString>("check mesh", srcSpace.name() );
+	aphid::AHelper::Info<MString>("check mesh", srcSpace.name() );
 
 	MFnDependencyNode fviz(vizObj);
 	MPlug dstGround = fviz.findPlug("groundSpace");
 	MPlug dst = dstGround.elementByLogicalIndex(slot);
-	AHelper::Info<MString>("connect to", dst.name() );
+	aphid::AHelper::Info<MString>("connect to", dst.name() );
 	
 	MDGModifier modif;
 	modif.connect(srcSpace, dst );
@@ -392,9 +392,9 @@ MStatus proxyPaintTool::saveCacheSelected()
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
-	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+	aphid::AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 		
-	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	aphid::ProxyViz* pViz = (aphid::ProxyViz*)fviz.userNode();
 	pViz->saveExternal(m_cacheName.asChar() );
 	
 	return stat;
@@ -415,9 +415,9 @@ MStatus proxyPaintTool::loadCacheSelected()
 	if(!stat) return stat;
 	
 	MFnDependencyNode fviz(vizobj, &stat);
-	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+	aphid::AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 		
-	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	aphid::ProxyViz* pViz = (aphid::ProxyViz*)fviz.userNode();
 	pViz->loadExternal(m_cacheName.asChar() );
 	
 	return stat;
@@ -443,7 +443,7 @@ MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels,
 	}
 	
 	if(!stat )
-		AHelper::Info<MString>("proxyPaintTool select no node by type", typName);
+		aphid::AHelper::Info<MString>("proxyPaintTool select no node by type", typName);
 		
 	return vizobj;
 }
@@ -474,7 +474,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 		return MS::kFailure;
 	}
 	
-	std::vector<ATriangleMesh * > meshes;
+	std::vector<aphid::ATriangleMesh * > meshes;
 	for(;!meshIter.isDone(); meshIter.next() ) {
 		MObject mesh;
 		meshIter.getDependNode(mesh);
@@ -482,12 +482,12 @@ MStatus proxyPaintTool::voxelizeSelected()
 		MFnMesh fmesh(mesh, &stat);
 		if(!stat) continue;
 			
-		AHelper::Info<MString>("proxyPaintTool voxelize add mesh", fmesh.name() );
+		aphid::AHelper::Info<MString>("proxyPaintTool voxelize add mesh", fmesh.name() );
 	
 		MDagPath meshPath;
 		meshIter.getDagPath(meshPath);
 		
-		MMatrix wm = AHelper::GetWorldTransformMatrix(meshPath);
+		MMatrix wm = aphid::AHelper::GetWorldTransformMatrix(meshPath);
 		
 		MPointArray ps;
 		fmesh.getPoints(ps);
@@ -499,10 +499,10 @@ MStatus proxyPaintTool::voxelizeSelected()
 		MIntArray triangleCounts, triangleVertices;
 		fmesh.getTriangles(triangleCounts, triangleVertices);
 		
-		ATriangleMesh * trimesh = new ATriangleMesh;
+		aphid::ATriangleMesh * trimesh = new aphid::ATriangleMesh;
 		trimesh->create(nv, triangleVertices.length()/3);
 		
-		Vector3F * cvs = trimesh->points();
+		aphid::Vector3F * cvs = trimesh->points();
 		unsigned * ind = trimesh->indices();
 		for(i=0;i<nv;i++) cvs[i].set(ps[i].x, ps[i].y, ps[i].z);
 		for(i=0;i<triangleVertices.length();i++) ind[i] = triangleVertices[i];
@@ -515,22 +515,22 @@ MStatus proxyPaintTool::voxelizeSelected()
 		return MS::kFailure;
 	}
 	
-	AHelper::Info<unsigned>("proxyPaintTool voxelize n mesh", meshes.size() );
+	aphid::AHelper::Info<unsigned>("proxyPaintTool voxelize n mesh", meshes.size() );
 	
-	KdTree::MaxBuildLevel = 24;
-	KdTree::NumPrimitivesInLeafThreashold = 24;
+	aphid::KdTree::MaxBuildLevel = 24;
+	aphid::KdTree::NumPrimitivesInLeafThreashold = 24;
 	
-	KdTree tree;
-	std::vector<ATriangleMesh * >::iterator it = meshes.begin();
+	aphid::KdTree tree;
+	std::vector<aphid::ATriangleMesh * >::iterator it = meshes.begin();
 	for(;it!= meshes.end();++it)
 		tree.addGeometry(*it);
 		
 	tree.create();
 	
-	AHelper::Info<BoundingBox>("proxyPaintTool bounding", tree.getBBox());
+	aphid::AHelper::Info<aphid::BoundingBox>("proxyPaintTool bounding", tree.getBBox());
 	
 	MFnDependencyNode fviz(vizobj, &stat);
-	AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
+	aphid::AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
 		
 	ExampViz* pViz = (ExampViz*)fviz.userNode();
 	pViz->voxelize(&tree );
@@ -561,7 +561,7 @@ void proxyPaintTool::checkOutputConnection(MObject & node, const MString & outNa
 	MStatus stat;
 	MPlug outPlug = fnode.findPlug(outName, &stat);
 	if(!stat) {
-		AHelper::Info<MString>(" proxyPaintTool error not named plug", outName);
+		aphid::AHelper::Info<MString>(" proxyPaintTool error not named plug", outName);
 		return;
 	}
 	

@@ -9,12 +9,12 @@
 
 #include "PlantSelection.h"
 
-namespace sdb {
+namespace aphid {
 
-PlantSelection::PlantSelection(WorldGrid<Array<int, Plant>, Plant > * grid)
+PlantSelection::PlantSelection(sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid)
 { 
 	m_grid = grid; 
-	m_plants = new Array<int, PlantInstance>();
+	m_plants = new sdb::Array<int, PlantInstance>();
 	m_numSelected = 0;
     m_radius = 8.f;
     m_typeFilter = -1;
@@ -39,8 +39,8 @@ void PlantSelection::select(SelectionContext::SelectMode mode)
 {
 	int ng = 1 + m_radius / m_grid->gridSize();
 	
-	const Coord3 c0 = m_grid->gridCoord((const float *)&m_center);
-	Coord3 c1;
+	const sdb::Coord3 c0 = m_grid->gridCoord((const float *)&m_center);
+	sdb::Coord3 c1;
 	int i, j, k;
 	for(k=-ng; k<=ng; ++k) {
 		c1.z = c0.z + k;
@@ -55,11 +55,11 @@ void PlantSelection::select(SelectionContext::SelectMode mode)
 	m_numSelected = m_plants->size();
 }
 
-void PlantSelection::select(const Coord3 & c, SelectionContext::SelectMode mode)
+void PlantSelection::select(const sdb::Coord3 & c, SelectionContext::SelectMode mode)
 {
 	BoundingBox b = m_grid->coordToGridBBox(c);
 	if(!b.isPointAround(m_center, m_radius) ) return;
-	Array<int, Plant> * cell = m_grid->findCell(c);
+	sdb::Array<int, Plant> * cell = m_grid->findCell(c);
 	if(!cell) return;
 	if(cell->isEmpty() ) return;
 	cell->begin();
@@ -106,7 +106,7 @@ void PlantSelection::updateNumSelected()
 const unsigned & PlantSelection::numSelected() const
 { return m_numSelected; }
 	
-Array<int, PlantInstance> * PlantSelection::data()
+sdb::Array<int, PlantInstance> * PlantSelection::data()
 { return m_plants; }
 
 void PlantSelection::calculateWeight()

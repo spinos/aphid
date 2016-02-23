@@ -41,6 +41,8 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
+namespace aphid {
+
 class AHelper
 {
 public:
@@ -186,4 +188,6 @@ public:
     static bool IsReferenced(const MObject & node);
 	static MObject CreateDeformer(const MString & name);
 };
+
+}
 #endif

@@ -12,9 +12,11 @@
 #include <DrawBox.h>
 #include <DrawCircle.h>
 
+namespace aphid {
+
 class CircleCurve;
 
-class DrawForest : public sdb::ModifyForest, public ViewObscureCull, public DrawBox, public DrawCircle
+class DrawForest : public ModifyForest, public ViewObscureCull, public DrawBox, public DrawCircle
 {
 	
     Matrix44F m_useMat;
@@ -36,18 +38,20 @@ protected:
 	void drawGrid();
 	void drawActivePlants();
 	void drawViewFrustum();
-	bool isVisibleInView(sdb::Plant * pl, 
+	bool isVisibleInView(Plant * pl, 
 					const float lowLod, const float highLod);
 	void setShowVoxLodThresold(const float & x);
     void drawBrush();
 	
 private:
     void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
-	void drawPlants(sdb::Array<int, sdb::Plant> * cell);
-	void drawPlant(sdb::PlantData * data);
-	void drawWiredPlants(sdb::Array<int, sdb::Plant> * cell);
-	void drawWiredPlant(sdb::PlantData * data);
-	void drawPlantBox(sdb::PlantData * data);
-	void drawPlant(const ExampVox * v, sdb::PlantData * data);
+	void drawPlants(sdb::Array<int, Plant> * cell);
+	void drawPlant(PlantData * data);
+	void drawWiredPlants(sdb::Array<int, Plant> * cell);
+	void drawWiredPlant(PlantData * data);
+	void drawPlantBox(PlantData * data);
+	void drawPlant(const ExampVox * v, PlantData * data);
 	
 };
+
+}

@@ -27,6 +27,8 @@
 
 class MItMeshPolygon;
 
+namespace aphid {
+
 class ProxyViz : public MPxLocatorNode, public MForest
 {
 	M3dView _viewport;
@@ -130,4 +132,6 @@ private:
 	void updateGeomBox(ExampVox * dst, MObject & node);
 	
 };
+
+}
 #endif        //  #ifndef PROXYVIZNODE_H

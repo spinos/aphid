@@ -12,6 +12,8 @@
 #include <GjkIntersection.h>
 #include <Morton3D.h>
 
+namespace aphid {
+
 UniformGrid::UniformGrid()
 {
     m_cellsToRefine = new sdb::CellHash;
@@ -128,3 +130,5 @@ void UniformGrid::refine(KdTree * tree)
 
 const int & UniformGrid::maxLevel() const
 { return m_maxLevel; }
+
+}

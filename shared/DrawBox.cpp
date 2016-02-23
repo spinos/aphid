@@ -11,6 +11,8 @@
 #include <gl_heads.h>
 #include "BoundingBox.h"
 
+namespace aphid {
+
 const float DrawBox::UnitBoxLine[24][3] = {
 {-.5f, -.5f, -.5f},
 { .5f, -.5f, -.5f},
@@ -288,4 +290,6 @@ void DrawBox::drawSolidBoxArray(const float * ps,
 	
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 }

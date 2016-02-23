@@ -8,6 +8,9 @@
  */
 
 #pragma once
+
+namespace aphid {
+
 class BoundingBox;
 class Vector3F;
 class DrawBox {
@@ -42,3 +45,5 @@ private:
 	static const float UnitBoxNormal[36][3];
 	
 };
+
+}

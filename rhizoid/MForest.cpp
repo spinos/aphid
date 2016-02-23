@@ -8,6 +8,8 @@
 #include <ExampVox.h>
 #include <fstream> 
 
+namespace aphid {
+
 MForest::MForest() :
 m_randGroup(NULL)
 {}
@@ -267,7 +269,7 @@ void MForest::savePlants(MPointArray & plantTms,
 					MIntArray & plantTris,
 					MVectorArray & plantCoords)
 {
-	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		saveCell(g->value(), plantTms, plantIds,
@@ -277,7 +279,7 @@ void MForest::savePlants(MPointArray & plantTms,
 	AHelper::Info<unsigned>(" MForest saved num plants", plantIds.length() );
 }
 
-void MForest::saveCell(sdb::Array<int, sdb::Plant> *cell,
+void MForest::saveCell(sdb::Array<int, Plant> *cell,
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
@@ -285,14 +287,14 @@ void MForest::saveCell(sdb::Array<int, sdb::Plant> *cell,
 {
 	cell->begin();
 	while(!cell->end() ) {
-		sdb::PlantData * d = cell->value()->index;
+		PlantData * d = cell->value()->index;
 		Matrix44F * mat = d->t1;
 		plantTms.append(MPoint(mat->M(0,0), mat->M(0,1), mat->M(0,2) ) );
 		plantTms.append(MPoint(mat->M(1,0), mat->M(1,1), mat->M(1,2) ) );
 		plantTms.append(MPoint(mat->M(2,0), mat->M(2,1), mat->M(2,2) ) );
 		plantTms.append(MPoint(mat->M(3,0), mat->M(3,1), mat->M(3,2) ) );
 		
-		sdb::GroundBind * bind = d->t2;
+		GroundBind * bind = d->t2;
 		plantTris.append(bind->m_geomComp);
 		plantCoords.append(MVector(bind->m_w0, bind->m_w1, bind->m_w2) );
 		
@@ -316,7 +318,7 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 	if(ntm != npl * 4) return false;
 	
 	Matrix44F tms;
-	sdb::GroundBind bind;
+	GroundBind bind;
 	int typId;
 	unsigned i =0;
 	for(;i<npl;++i) {
@@ -376,7 +378,7 @@ void MForest::loadExternal(const char* filename)
 	chFile.close();
 	
 	Matrix44F space;
-	sdb::GroundBind bind;
+	GroundBind bind;
 	bind.m_geomComp = -1;
 	int typId = 0;	
 	for(int i=0; i < numRec; i++) {
@@ -417,7 +419,7 @@ void MForest::saveExternal(const char* filename)
 	
 	float *data = new float[numRec * 16];
 	unsigned it = 0;
-	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		getDataInCell(g->value(), data, it);
@@ -430,12 +432,12 @@ void MForest::saveExternal(const char* filename)
 	delete[] data;
 }
 
-void MForest::getDataInCell(sdb::Array<int, sdb::Plant> *cell, 
+void MForest::getDataInCell(sdb::Array<int, Plant> *cell, 
 							float * data, unsigned & it)
 {
 	cell->begin();
 	while(!cell->end() ) {
-		sdb::PlantData * d = cell->value()->index;
+		PlantData * d = cell->value()->index;
 		Matrix44F * mat = d->t1;
 		const int ii = it * 16;
 		data[ii] = mat->M(0, 0);
@@ -509,7 +511,7 @@ void MForest::extractActive(int numGroups)
 
 	MMatrix mm;
 	PseudoNoise pnoise;	
-	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 	
@@ -553,7 +555,7 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
                     int plantTyp)
 {
 	int i = 0;
-	sdb::WorldGrid<sdb::Array<int, sdb::Plant>, sdb::Plant > * g = grid();
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		pickupVisiblePlantsInCell(g->value(), lodLowGate, lodHighGate, 
@@ -565,7 +567,7 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
 	AHelper::Info<int>(" n visible plants", numActivePlants() );
 }
 
-void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
+void MForest::pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
 					float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 
 					double percentage, int plantTyp,
@@ -573,7 +575,7 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, sdb::Plant> *cell,
 {
 	cell->begin();
 	while(!cell->end() ) {
-		sdb::Plant * pl = cell->value();
+		Plant * pl = cell->value();
 		
 		bool survived = (*pl->index->t3 == plantTyp);
 		if(survived) {
@@ -627,7 +629,7 @@ void MForest::saveParticles(MVectorArray & positions,
 	
 	MMatrix mm;
 	MEulerRotation eula;
-	sdb::Array<int, sdb::PlantInstance> * arr = activePlants();
+	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 	
@@ -665,5 +667,7 @@ void MForest::updateExamples(MArrayDataHandle & dataArray)
 		}
 		dataArray.next();
 	}
+}
+
 }
 //:~

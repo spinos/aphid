@@ -10,6 +10,8 @@
 #include "ViewCull.h"
 #include <GjkIntersection.h>
 
+namespace aphid {
+
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}
 	
@@ -150,4 +152,6 @@ const Vector3F & ViewCull::eyePosition() const
 
 void ViewCull::setEyePosition(float * p)
 { m_eyePosition.set(p[0], p[1], p[2]); }
+
+}
 //:~

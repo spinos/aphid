@@ -8,6 +8,9 @@
  */
 #include <DrawBox.h>
 #include <BoundingBox.h>
+
+namespace aphid {
+
 class KdTree;
 
 class ExampVox : public DrawBox {
@@ -67,3 +70,5 @@ protected:
 private:
 
 };
+
+}
