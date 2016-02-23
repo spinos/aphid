@@ -10,6 +10,8 @@
 #include "Edge.h"
 #include <Facet.h>
 
+namespace aphid {
+
 Edge::Edge() : identicalTwin(0) {}
 Edge::~Edge() {}
 
@@ -127,4 +129,6 @@ char Edge::connectedToVertex(unsigned idx) const
 	if(vb->getIndex() == idx)
 		return 1;
 	return 0;
+}
+
 }

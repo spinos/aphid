@@ -9,6 +9,7 @@
 #include <iostream>
 #include "GeodesicHemisphereMesh.h"
 #include <cmath>
+namespace aphid {
 
 GeodesicHemisphereMesh::GeodesicHemisphereMesh(unsigned level)
 {
@@ -85,4 +86,6 @@ void GeodesicHemisphereMesh::subdivide(unsigned level, unsigned & currentVertex,
             currentIndex++;
         }
     }
+}
+
 }

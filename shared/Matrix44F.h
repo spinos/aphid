@@ -11,6 +11,8 @@
  */
 #include <Vector3F.h>
 #include <Matrix33F.h>
+namespace aphid {
+
  class Matrix44F
  {
  public:
@@ -73,6 +75,6 @@
 	float v[16];
  };
  
-
+}
 #endif        //  #ifndef MATRIX44F_H
 

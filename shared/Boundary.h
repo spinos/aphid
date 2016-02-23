@@ -8,7 +8,11 @@
  */
 #pragma once
 #include <BoundingBox.h>
+namespace aphid {
+
 class Boundary {
+	BoundingBox m_bbox;
+	
 public:
 	Boundary();
 	
@@ -19,5 +23,7 @@ protected:
 	void updateBBox(const BoundingBox & box);
 	BoundingBox * bbox();
 private:
-	BoundingBox m_bbox;
+	
 };
+
+}

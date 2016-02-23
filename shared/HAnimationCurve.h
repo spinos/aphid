@@ -10,6 +10,9 @@
  *
  */
 #include <HBase.h>
+
+namespace aphid {
+
 class AAnimationKey;
 class AAnimationCurve;
 class HAnimationCurve : public HBase {
@@ -26,4 +29,6 @@ private:
 	void saveKey(unsigned i, const AAnimationKey & key);
 	AAnimationKey loadKey(int i);
 };
+
+}
 #endif        //  #ifndef HANIMATIONCURVE_H

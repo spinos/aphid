@@ -1,6 +1,7 @@
 #pragma once
 #include "HFile.h"
 #include "APlayback.h"
+namespace aphid {
 
 class APlaybackFile : public HFile, public APlayback {
 public:
@@ -17,3 +18,5 @@ protected:
 private:
 
 };
+
+}

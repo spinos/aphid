@@ -9,6 +9,8 @@
 
 #pragma once
 #include <HBase.h>
+namespace aphid {
+
 class BaseMesh;
 class HMesh : public HBase {
 public:
@@ -24,3 +26,5 @@ public:
 private:
 	
 };
+
+}

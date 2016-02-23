@@ -11,10 +11,9 @@
 
 #include <BoundingBox.h>
 #include <BoundingRectangle.h>
-#include <ConvexShape.h>
 #include <GProfile.h>
 
-// class ZEXRImage;
+using namespace aphid;
 
 class BaseDrawer {
 public:

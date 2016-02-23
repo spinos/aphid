@@ -6,9 +6,11 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <TypedEntity.h>
 #include "Primitive.h"
 #include "Geometry.h"
+
+namespace {
+
 Primitive::Primitive() {}
 
 void Primitive::setGeometry(Geometry * data)
@@ -29,4 +31,6 @@ void Primitive::setComponentIndex(const unsigned &idx)
 const unsigned & Primitive::getComponentIndex() const
 {
 	return m_componentIndex;
+}
+
 }

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <HFile.h>
+namespace aphid {
 
 class HRFile : public HFile {
 public:
@@ -22,3 +23,5 @@ protected:
 private:
 
 };
+
+}

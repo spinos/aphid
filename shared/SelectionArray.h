@@ -11,6 +11,8 @@
 #include <PrimitiveFilter.h>
 #include <AllGeometry.h>
 
+namespace aphid {
+
 class Vector3F;
 class Primitive;
 class Geometry;
@@ -69,3 +71,5 @@ private:
 	
 	bool m_needVertexPath;
 };
+
+}

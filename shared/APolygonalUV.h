@@ -1,6 +1,9 @@
 #ifndef APOLYGONALUV_H
 #define APOLYGONALUV_H
 #include <AVerbose.h>
+
+namespace aphid {
+
 class BaseBuffer;
 class APolygonalUV : public AVerbose {
 public:
@@ -24,5 +27,7 @@ private:
     BaseBuffer * m_indices;
     unsigned m_numCoords, m_numIndices;
 };
+
+}
 #endif        //  #ifndef APOLYGONALUV_H
 

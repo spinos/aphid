@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AllMath.h>
+namespace aphid {
 
 class LineBuffer {
 public:
@@ -19,3 +20,5 @@ private:
 	Vector3F * m_vertices;
     unsigned m_numVertices;
 };
+
+}

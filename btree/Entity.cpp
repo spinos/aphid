@@ -8,6 +8,8 @@
  */
 
 #include "Entity.h"
+namespace aphid {
+
 namespace sdb {
 
 Entity::Entity(Entity * parent)
@@ -33,3 +35,5 @@ bool Entity::shareSameParent(Entity * another) const
 void Entity::display() const {}
 
 } // end of namespace sdb
+
+}

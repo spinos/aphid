@@ -9,6 +9,9 @@
 #pragma once
 #include <string>
 #include <map>
+
+namespace aphid {
+
 class APlaybackFile;
 class MultiPlaybackFile {
 public:
@@ -25,3 +28,5 @@ protected:
 private:
 	std::map<std::string, APlaybackFile *> fFileStatus;
 };
+
+}

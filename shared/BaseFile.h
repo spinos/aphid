@@ -9,6 +9,7 @@
 
 #pragma once
 #include <string>
+namespace aphid {
 
 class BaseFile {
 public:
@@ -78,3 +79,5 @@ private:
 	bool _opened;
 	bool m_dirty;
 };
+
+}

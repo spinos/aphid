@@ -2,6 +2,9 @@
 #define APOLYGONALMESH_H
 #include <map>
 #include "AGenericMesh.h"
+
+namespace aphid {
+
 class APolygonalUV;
 class APolygonalMesh : public AGenericMesh {
 public:
@@ -33,5 +36,7 @@ private:
     BaseBuffer * m_faceDrifts;
     unsigned m_numPolygons;
 };
+
+}
 #endif        //  #ifndef APOLYGONALMESH_H
 

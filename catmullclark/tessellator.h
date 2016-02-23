@@ -8,7 +8,8 @@
  */
 #include <Vector3F.h>
 #include "bezierPatch.h"
-//#include <zEXRImage.h>
+namespace aphid {
+
 class Tessellator {
 public:
 	Tessellator();
@@ -36,3 +37,5 @@ public:
 	int* _vertices;
 	//ZEXRImage* _displacementMap;
 };
+
+}

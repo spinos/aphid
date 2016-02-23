@@ -6,13 +6,12 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <iostream>
-#include <APhid.h>
 #include "KdTree.h"
 #include <Ray.h>
 #include <IntersectionContext.h>
 #include "SelectionContext.h"
 #include <boost/timer.hpp>
+#include <iostream>
 #include <sstream>
 
 int KdTree::MaxBuildLevel = 32;
@@ -72,7 +71,7 @@ void KdTree::create()
 	
 	subdivide(m_root, *ctx, 0);
 	//ctx->verbose();
-	//delete ctx;
+	delete ctx;
 	
 	// m_stream.verbose();
     sst << "\n Kd tree built in " << bTimer.elapsed() << " secs"

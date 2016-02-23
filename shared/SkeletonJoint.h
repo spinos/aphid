@@ -10,6 +10,7 @@
 #pragma once
 
 #include <BaseTransform.h>
+namespace aphid {
 
 class SkeletonJoint : public BaseTransform {
 public:
@@ -31,3 +32,5 @@ protected:
 private:
 	Vector3F m_jointOrientAngles;
 };
+
+}

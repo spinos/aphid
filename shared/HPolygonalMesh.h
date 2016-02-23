@@ -2,6 +2,9 @@
 #define HPOLYGONALMESH_H
 
 #include <HBase.h>
+
+namespace aphid {
+
 class APolygonalMesh;
 
 class HPolygonalMesh : public HBase {
@@ -18,5 +21,7 @@ protected:
 private:
 	
 };
+
+}
 #endif        //  #ifndef HPOLYGONALMESH_H
 

@@ -12,6 +12,7 @@
 #include <VertexAdjacency.h>
 #include "Edge.h"
 #include <PatchNeighborRec.h>
+namespace aphid {
 
 AccStencil::AccStencil() {}
 AccStencil::~AccStencil() {}
@@ -200,3 +201,4 @@ void AccStencil::verbose() const
 {
 }
 
+}

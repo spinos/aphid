@@ -8,6 +8,7 @@
  */
 #include <iostream>
 #include "IntersectionContext.h"
+namespace aphid {
 
 IntersectionContext::IntersectionContext() {}
 
@@ -48,4 +49,6 @@ void IntersectionContext::setNormalReference(const Vector3F & nor)
 void IntersectionContext::verbose() const
 {
 	std::cout<<" bbox "<<m_bbox.getMin(0)<<" "<<m_bbox.getMin(1)<<" "<<m_bbox.getMin(2)<<" - "<<m_bbox.getMax(0)<<" "<<m_bbox.getMax(1)<<" "<<m_bbox.getMax(2)<<"\n";
+}
+
 }

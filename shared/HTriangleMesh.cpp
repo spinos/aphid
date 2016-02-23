@@ -16,6 +16,8 @@
 #include <BaseBuffer.h>
 #include <ATriangleMesh.h>
 
+namespace aphid {
+
 HTriangleMesh::HTriangleMesh(const std::string & path) : HBase(path) 
 {
 }
@@ -87,5 +89,7 @@ char HTriangleMesh::readAftCreation(ATriangleMesh * tri)
 	readIntData(".v", tri->numTriangles() * 3, (unsigned *)tri->indices());
 	
 	return 1;
+}
+
 }
 //:~

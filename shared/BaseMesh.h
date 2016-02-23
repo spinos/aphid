@@ -15,6 +15,8 @@
 #include <Ray.h>
 #include <VertexDataGroup.h>
 
+namespace aphid {
+
 class SelectionContext;
 
 class BaseMesh : public Geometry, public Boundary {
@@ -118,3 +120,5 @@ private:
 	unsigned * m_uvIds;
 	unsigned _numVertices;
 };
+
+}

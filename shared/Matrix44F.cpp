@@ -8,6 +8,7 @@
  */
 #include <cmath>
 #include "Matrix44F.h"
+namespace aphid {
 
 Matrix44F Matrix44F::Identitiy;
 
@@ -472,5 +473,7 @@ const std::string Matrix44F::str() const
     sst<<"["<<v[8]<<", "<<v[9]<<", "<<v[10]<<", "<<v[11]<<"]\n";
     sst<<"["<<v[12]<<", "<<v[13]<<", "<<v[14]<<", "<<v[15]<<"]\n";
 	return sst.str();
+}
+
 }
 //:~

@@ -8,6 +8,7 @@
  */
 
 #include "SpaceHandle.h"
+namespace aphid {
 
 SpaceHandle::SpaceHandle() 
 {
@@ -47,4 +48,6 @@ void SpaceHandle::setSize(float val)
 float SpaceHandle::getSize() const
 {
 	return m_size;
+}
+
 }

@@ -2,6 +2,9 @@
 #define VECTOR3F_H
 #include <ATypes.h>
 #include <Vector2F.h>
+
+namespace aphid {
+
 class Vector3F{
 public:
 	Vector3F();
@@ -80,5 +83,7 @@ public:
 	
 	float x,y,z;
 };
+
+}
 #endif        //  #ifndef VECTOR3F_H
 

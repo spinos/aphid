@@ -10,6 +10,7 @@
 #include "PlaneMesh.h"
 #include <Patch.h>
 #include <BaseCurve.h>
+namespace aphid {
 
 PlaneMesh::PlaneMesh(const Vector3F & bottomLeft, const Vector3F & bottomRight, const Vector3F & topRight, const Vector3F & topLeft, unsigned gu, unsigned gv) : PatchMesh() 
 {
@@ -64,4 +65,6 @@ void PlaneMesh::setFaceConnection(unsigned gu, unsigned gv)
 		polygonIndices()[face * 4 + 3] = (j + 1) * (gu + 1) + i;
 		face++;
 	}
+}
+
 }

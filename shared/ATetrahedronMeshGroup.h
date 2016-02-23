@@ -3,6 +3,7 @@
 
 #include "ATetrahedronMesh.h"
 #include "AStripedModel.h"
+namespace aphid {
 
 class ATetrahedronMeshGroup : public ATetrahedronMesh, public AStripedModel {
 public:
@@ -15,5 +16,7 @@ public:
 private:
 
 };
+
+}
 #endif        //  #ifndef ATETRAHEDRONMESHGROUP_H
 

@@ -9,6 +9,9 @@
 #include "BaseBuffer.h"
 #include <Vector3F.h>
 #include <iostream>
+
+namespace aphid {
+
 BaseBuffer::BaseBuffer() : m_bufferSize(0), m_native(0)
 {}
 
@@ -104,4 +107,6 @@ void TypedBuffer::minusFlt(const BaseBuffer * other)
 
 void TypedBuffer::minusVec3(const BaseBuffer * other)
 { minus<Vector3F>(other, numElements()); }
+
+}
 //:~

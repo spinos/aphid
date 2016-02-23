@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <AllMath.h>
+namespace aphid {
 
 class Segment {
 public:
@@ -20,3 +21,5 @@ private:
 	Vector3F m_dir;
 	float m_length;
 };
+
+}

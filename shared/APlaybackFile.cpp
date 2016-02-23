@@ -1,6 +1,7 @@
 #include "APlaybackFile.h"
 #include <HFrameRange.h>
 #include <boost/format.hpp>
+namespace aphid {
 
 APlaybackFile::APlaybackFile() : HFile() 
 {}
@@ -41,5 +42,7 @@ void APlaybackFile::verbose() const
     std::cout<<"\n playback range: ("<<this->FirstFrame
     <<","<<this->LastFrame
     <<")";
+}
+
 }
 //:~

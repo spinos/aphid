@@ -13,6 +13,9 @@
 #include <Ray.h>
 #include <ToolContext.h>
 #include <Plane.h>
+
+namespace aphid {
+
 class TransformManipulator : public BaseTransform {
 public:
 	TransformManipulator();
@@ -59,3 +62,5 @@ private:
 	ToolContext::InteractMode m_mode;
 	bool m_started;
 };
+
+}

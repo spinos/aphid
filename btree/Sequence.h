@@ -9,6 +9,9 @@
 #pragma once
 #include <BNode.h>
 #include <deque>
+
+namespace aphid {
+
 namespace sdb {
 
 class MatchFunction {
@@ -239,3 +242,5 @@ void Sequence<T>::displayLevel(const int & level, const std::vector<Entity *> & 
 }
 
 } //end namespace sdb
+
+}

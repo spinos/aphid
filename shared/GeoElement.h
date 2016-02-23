@@ -7,6 +7,8 @@
  *
  */
 #pragma once
+namespace aphid {
+
 class GeoElement {
 public:
 	GeoElement();
@@ -35,3 +37,5 @@ public:
 	char visibility;
 	char marked;
 };
+
+}

@@ -9,6 +9,9 @@
 
 #include "BaseBrush.h"
 #include <Plane.h>
+
+namespace aphid {
+
 BaseBrush::BaseBrush() : m_radius(1.f), m_pitch(0.01f), m_maxToeFactor(2.f), m_numDarts(99)
 {
 	m_strength = 1.f;
@@ -184,4 +187,6 @@ const float & BaseBrush::dropoff() const { return m_dropoff; }
 
 void BaseBrush::setPinpoint(bool b) { m_pinpoint = b; }
 bool BaseBrush::pinpoint() const { return m_pinpoint; }
+
+}
 //:~

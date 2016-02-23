@@ -9,6 +9,8 @@
 
 #include "AAnimationCurve.h"
 
+namespace aphid {
+
 AAnimationCurve::AAnimationCurve() 
 { m_curveType = TUnknown; }
 
@@ -29,4 +31,6 @@ unsigned AAnimationCurve::numKeys() const
 
 AAnimationKey AAnimationCurve::key(unsigned i) const
 { return m_keys[i]; }
+
+}
 //:~

@@ -9,6 +9,8 @@
 #include <iostream>
 #include "AccCorner.h"
 
+namespace aphid {
+
 AccCorner::AccCorner() {}
 AccCorner::~AccCorner() { reset(); }
 
@@ -172,4 +174,6 @@ void AccCorner::verbose() const
 	std::cout<<"\ncorner nei idx: ";
 	for(unsigned i=0; i < _cornerIndices.size(); i++) std::cout<<" "<<_cornerIndices[i];
     printf("\n");
+}
+
 }

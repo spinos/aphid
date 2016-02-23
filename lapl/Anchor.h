@@ -11,6 +11,9 @@
 #include <map>
 #include <SpaceHandle.h>
 #include <SelectionArray.h>
+
+namespace aphid {
+
 class Ray;
 class Anchor : public SpaceHandle {
 public:
@@ -48,3 +51,5 @@ private:
 	std::map<unsigned, AnchorPoint *>::iterator m_anchorPointIt;
 	std::vector<unsigned> m_pointIndex;
 };
+
+}

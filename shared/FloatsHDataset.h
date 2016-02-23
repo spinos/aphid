@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <HDataset.h>
+namespace aphid {
 
 class FloatsHDataset : public HDataset {
 public:
@@ -17,3 +18,5 @@ public:
 	void setNumFloats(int num);
 	int numFloats() const;
 };
+
+}

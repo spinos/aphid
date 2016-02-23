@@ -8,6 +8,8 @@
  */
 #pragma once
 #include <Vector3F.h>
+namespace aphid {
+
 class Ray;
 class Plane;
 class BoundingBox {
@@ -74,3 +76,4 @@ public:
 	float m_data[6];
 	int m_padding0, m_padding1;
 };
+}

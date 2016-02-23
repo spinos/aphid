@@ -9,6 +9,9 @@
 #include <AccCorner.h>
 #include <AccEdge.h>
 #include <AccInterior.h>
+
+namespace aphid {
+
 class Vector3F;
 class VertexAdjacency;
 class PatchNeighborRec;
@@ -46,3 +49,4 @@ private:
 	char findSharedNeighbor(int a, int b, int c, int & dst);
 };
 
+}

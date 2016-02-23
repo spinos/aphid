@@ -1,6 +1,9 @@
 #include "SkeletonSystem.h"
 #include <SkeletonJoint.h>
 #include <SkeletonPose.h>
+
+namespace aphid {
+
 SkeletonSystem::SkeletonSystem() 
 {
 }
@@ -186,4 +189,6 @@ void SkeletonSystem::initIdWeight(unsigned n, VectorN<unsigned> & ids, VectorN<f
 void SkeletonSystem::recoverPose(const SkeletonPose * pose)
 {
     pose->recoverValues(m_joints);
+}
+
 }

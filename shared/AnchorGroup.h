@@ -10,6 +10,7 @@
 #include <Anchor.h>
 #include <vector>
 #include <AllMath.h>
+namespace aphid {
 
 class AnchorGroup {
 public:
@@ -53,3 +54,5 @@ private:
 	unsigned m_activeAnchorIdx;
 	float m_hitTolerance;
 };
+
+}

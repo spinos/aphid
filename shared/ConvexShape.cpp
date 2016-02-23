@@ -9,6 +9,7 @@
 
 #include "ConvexShape.h"
 #include <cmath>
+namespace aphid {
 
 Frustum::Frustum() {}
 
@@ -104,5 +105,7 @@ void Frustum::split(Frustum & child0, Frustum & child1, float alpha, bool alongX
 		lft[7] = p3;
 		rgt[5] = p3;
 	}
+}
+
 }
 //;~

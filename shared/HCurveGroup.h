@@ -8,6 +8,8 @@
  */
 #pragma once
 #include <HBase.h>
+namespace aphid {
+
 class CurveGroup;
 class HCurveGroup : public HBase {
 public:
@@ -21,3 +23,5 @@ public:
 private:
 	
 };
+
+}

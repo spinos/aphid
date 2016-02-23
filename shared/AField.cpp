@@ -9,6 +9,8 @@
 
 #include "AField.h"
 
+namespace aphid {
+
 AField::AField() {}
 AField::~AField() 
 {
@@ -109,5 +111,7 @@ void AField::verbose() const
     std::map<std::string, TypedBuffer * >::const_iterator it = m_channels.begin();
 	for(;it!=m_channels.end();++it)
          std::cout<<"\n channel[\""<<it->first<<"\"]";
+}
+
 }
 //:~

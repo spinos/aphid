@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AllMath.h>
+namespace aphid {
 
 class BaseSphere {
 public:
@@ -19,3 +20,5 @@ private:
     Vector3F m_center;
     float m_radius;
 };
+
+}

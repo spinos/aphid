@@ -11,6 +11,7 @@
 #include "BaseBuffer.h"
 #include "tetrahedron_math.h"
 #include <GjkIntersection.h>
+namespace aphid {
 
 ATetrahedronMesh::ATetrahedronMesh() 
 {
@@ -179,5 +180,7 @@ std::string ATetrahedronMesh::verbosestr() const
 		<<"\n volume "<<volume()
 		<<"\n";
 	return sst.str();
+}
+
 }
 //:~

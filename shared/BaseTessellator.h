@@ -9,6 +9,8 @@
 
 #pragma once
 #include <AllMath.h>
+namespace aphid {
+
 class BaseTessellator {
 public:
 	BaseTessellator();
@@ -34,3 +36,5 @@ private:
 	unsigned * m_indices;
 	unsigned m_numVertices, m_numIndices;
 };
+
+}

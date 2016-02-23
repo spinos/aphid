@@ -14,6 +14,8 @@
 #include <Types.h>
 #include <sstream>
 
+namespace aphid {
+
 namespace sdb {
 
 class TreeNode : public Entity
@@ -1283,3 +1285,5 @@ bool BNode<KeyType>::checkDupKey(KeyType & duk) const
 }
 
 } // end of namespace sdb
+
+}

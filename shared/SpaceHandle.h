@@ -10,6 +10,7 @@
 #pragma once
 
 #include <AllMath.h>
+namespace aphid {
 
 class SpaceHandle {
 public:
@@ -28,3 +29,5 @@ public:
 private:
 	float m_size;
 };
+
+}

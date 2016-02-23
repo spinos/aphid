@@ -10,6 +10,9 @@
 #pragma once
 #include <AllGeometry.h>
 #include <vector>
+
+namespace aphid {
+
 class MeshTopology;
 
 class ComponentConversion {
@@ -30,3 +33,5 @@ private:
 	char appendUnique(unsigned idx, std::vector<unsigned> & dst) const;
 	MeshTopology * m_topology;
 };
+
+}

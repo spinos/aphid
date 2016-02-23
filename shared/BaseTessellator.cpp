@@ -8,6 +8,7 @@
  */
 
 #include "BaseTessellator.h"
+namespace aphid {
 
 BaseTessellator::BaseTessellator() : m_cvs(0), m_indices(0), m_normals(0), m_uvs(0) 
 {
@@ -80,4 +81,6 @@ unsigned BaseTessellator::numVertices() const
 unsigned BaseTessellator::numIndices() const
 {
 	return m_numIndices;
+}
+
 }

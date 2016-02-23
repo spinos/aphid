@@ -12,6 +12,8 @@
 #include <vector>
 #include <map>
 
+namespace aphid {
+
 class AAttribute : public TypedEntity {
 public:
 	enum AttributeType {
@@ -235,4 +237,6 @@ protected:
 private:
 	bool m_value;
 };
+
+}
 //:~

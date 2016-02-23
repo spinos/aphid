@@ -1,5 +1,6 @@
 #include "Quaternion.h"
 #include <cmath>
+namespace aphid {
 
 Quaternion::Quaternion()
 { set(1.f, 0.f, 0.f, 0.f) ;}
@@ -59,3 +60,4 @@ Quaternion Quaternion::progress(const Vector3F & angularVelocity, const float & 
 	return q * *this;
 }
 
+}

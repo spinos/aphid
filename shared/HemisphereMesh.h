@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BaseMesh.h>
+namespace aphid {
 
 class HemisphereMesh : public BaseMesh {
 public:
@@ -20,3 +21,5 @@ public:
 private:
 	unsigned _gridTheta, _gridPhi;
 };
+
+}

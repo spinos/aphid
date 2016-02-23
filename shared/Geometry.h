@@ -15,6 +15,7 @@
 #include <vector>
 #include <GjkIntersection.h>
 #include "BarycentricCoordinate.h"
+namespace aphid {
 
 class Geometry : public TypedEntity, public AVerbose {
 public:
@@ -61,3 +62,5 @@ protected:
     
 private:
 };
+
+}

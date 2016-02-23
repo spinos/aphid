@@ -9,6 +9,9 @@
 
 #pragma once
 #include <iostream>
+
+namespace aphid {
+
 namespace sdb {
 
 class Entity
@@ -47,3 +50,5 @@ private:
 };
 
 } // end of namespace sdb
+
+}

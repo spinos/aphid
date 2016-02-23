@@ -9,6 +9,9 @@
 #pragma once
 #include <Vector3F.h>
 #include <GeoElement.h>
+
+namespace aphid {
+
 class Vertex : public GeoElement {
 public:
 	Vertex();
@@ -16,3 +19,5 @@ public:
 	
 	Vector3F *m_v;
 };
+
+}

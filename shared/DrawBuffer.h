@@ -2,6 +2,8 @@
 
 #include <AllMath.h>
 #include <boost/scoped_array.hpp>
+namespace aphid {
+
 class BaseTexture;
 class DrawBuffer {
 public:
@@ -27,3 +29,5 @@ private:
     boost::scoped_array<Float2> m_texcoords;
     unsigned m_numVertices, m_numIndices;
 };
+
+}

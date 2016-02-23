@@ -9,6 +9,7 @@
 
 #include "HDataset.h"
 #include <iostream>
+namespace aphid {
 
 HDataset::HDataset(const std::string & path) : HObject(path)
 {}
@@ -202,4 +203,6 @@ hid_t HDataset::createSpace(hsize_t * block) const
 	int ndim = 1;
 		
 	return H5Screate_simple(ndim, dims, NULL);
+}
+
 }

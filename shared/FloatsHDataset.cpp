@@ -8,6 +8,7 @@
  */
 
 #include "FloatsHDataset.h"
+namespace aphid {
 
 FloatsHDataset::FloatsHDataset(const std::string & path) : HDataset(path)
 {
@@ -25,4 +26,6 @@ void FloatsHDataset::setNumFloats(int num)
 int FloatsHDataset::numFloats() const
 {
 	return fDimension[0];
+}
+
 }

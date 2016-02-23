@@ -11,6 +11,9 @@
 #include <AllMath.h>
 #include <TypedEntity.h>
 #include <NamedEntity.h>
+
+namespace aphid {
+
 class BaseTexture : public TypedEntity, public NamedEntity {
 public:
 	enum TexelFormat {
@@ -48,3 +51,5 @@ private:
 	TexelDepth m_depth;
 	bool m_allWhite;
 };
+
+}

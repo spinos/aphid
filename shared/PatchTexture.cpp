@@ -9,6 +9,7 @@
 
 #include "PatchTexture.h"
 #include "PatchMesh.h"
+namespace aphid {
 
 PatchTexture::PatchTexture() 
 { 
@@ -98,4 +99,6 @@ void PatchTexture::toFloat(unsigned char * src, Float3 & dst) const
 	dst.x = ((float)((int)src[0])) / 255.f;
 	dst.y = ((float)((int)src[1])) / 255.f;
 	dst.z = ((float)((int)src[2])) / 255.f;
+}
+
 }

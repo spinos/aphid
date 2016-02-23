@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Matrix44F.h>
+namespace aphid {
 
 class AFrustum {
 	Vector3F m_v[8];
@@ -32,3 +33,5 @@ public:
 private:
 	
 };
+
+}

@@ -2,6 +2,8 @@
 #include <BaseBuffer.h>
 #include <sstream>
 
+namespace aphid {
+
 APolygonalUV::APolygonalUV()
 {
     m_numCoords = 0;
@@ -49,5 +51,7 @@ std::string APolygonalUV::verbosestr() const
     <<"\n nfacev "<<numIndices()
     <<"\n";
     return sst.str();
+}
+
 }
 //:~

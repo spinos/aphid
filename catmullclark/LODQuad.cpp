@@ -10,6 +10,8 @@
 #include <Vector2F.h>
 #include "LODQuad.h"
 
+namespace aphid {
+
 LODQuad::LODQuad() {}
 
 LODQuad::~LODQuad() {}
@@ -58,4 +60,6 @@ float LODQuad::getMaxEdgeLength() const
 	float lcd = cd.length();
 	if(lab > lcd) return lab;
 	return lcd;
+}
+
 }

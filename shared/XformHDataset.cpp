@@ -8,6 +8,7 @@
  */
 
 #include "XformHDataset.h"
+namespace aphid {
 
 XformHDataset::XformHDataset(const std::string & path) : HDataset(path)
 {
@@ -24,5 +25,7 @@ char XformHDataset::read(float *data)
 	if(status < 0)
 		return 0;
 	return 1;
+}
+
 }
 

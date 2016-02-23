@@ -10,6 +10,8 @@
 #include "Types.h"
 
 #include <boost/format.hpp>
+namespace aphid {
+
 namespace sdb {
 
 Coord2::Coord2() {x = y = 0;}
@@ -97,3 +99,5 @@ const std::string V3::str() const
 }
 
 } // end namespace sdb
+
+}

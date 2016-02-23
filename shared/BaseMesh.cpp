@@ -11,6 +11,9 @@
 #include "BaseMesh.h"
 #include <SelectionContext.h>
 #include <map>
+
+namespace aphid {
+
 BaseMesh::BaseMesh()
 {
 	_vertices = 0;
@@ -602,4 +605,6 @@ void BaseMesh::verbose() const
 
 const TypedEntity::Type BaseMesh::type() const
 { return TTriangleMesh;}
+
+}
 //:~

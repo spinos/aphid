@@ -9,6 +9,7 @@
 
 #pragma once
 #include <string>
+namespace aphid {
 
 class NamedEntity {
 public:
@@ -26,3 +27,5 @@ private:
 	std::string m_name;
 	unsigned m_index;
 };
+
+}

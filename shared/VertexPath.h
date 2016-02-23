@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
 #include <AllGeometry.h>
+
+namespace aphid {
+
 class MeshTopology;
 
 class VertexPath {
@@ -20,4 +23,6 @@ private:
     std::vector<unsigned> m_vertices;
     MeshTopology * m_topology;
 };
+
+}
 

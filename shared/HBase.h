@@ -14,6 +14,9 @@
 #include <string>
 #include <iostream>
 #include <vector>
+
+namespace aphid {
+
 class Vector3F;
 class Matrix33F;
 class Matrix44F;
@@ -131,4 +134,6 @@ public:
 		return d;
 	}
 };
+
+}
 #endif        //  #ifndef HBASE_H

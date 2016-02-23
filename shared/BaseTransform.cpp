@@ -9,6 +9,9 @@
 
 #include "BaseTransform.h"
 #include <Plane.h>
+
+namespace aphid {
+
 BaseTransform::BaseTransform(BaseTransform * parent)
 {
     m_translation.setZero();
@@ -237,4 +240,6 @@ Vector3F BaseTransform::scalePivot() const
 
 Vector3F BaseTransform::scalePivotTranslate() const
 { return m_scalePivotTranslate; }
+
+}
 //:~

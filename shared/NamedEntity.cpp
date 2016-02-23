@@ -9,6 +9,9 @@
 
 #include "NamedEntity.h"
 #include <sstream>
+
+namespace aphid {
+
 NamedEntity::NamedEntity() { m_name = "unknown"; }
 NamedEntity::~NamedEntity() {}
 	
@@ -41,4 +44,6 @@ std::string NamedEntity::particalName() const
 	if(found > 0)
 		s.erase(0, found + 1);
 	return s;
+}
+
 }

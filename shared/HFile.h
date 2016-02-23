@@ -12,6 +12,7 @@
 #include "BaseFile.h"
 #include "HBase.h"
 #include <map>
+namespace aphid {
 
 class HFile : public BaseFile {
     HDocument::OpenMode m_openMode;
@@ -66,3 +67,5 @@ private:
     std::map<std::string, HBase *> m_openedGroups;
 	HDocument m_doc;
 };
+
+}

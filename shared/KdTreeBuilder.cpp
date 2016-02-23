@@ -129,7 +129,7 @@ void KdTreeBuilder::updateCompressEventBBoxAlong(const int &axis)
 
 void KdTreeBuilder::calculateBins()
 {
-	BoundingBox *primBoxes = GlobalContext->primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & primBoxes = GlobalContext->primitiveBoxes();
 	unsigned *indices = m_context->indices();
 	const unsigned nprim = m_context->getNumPrimitives();
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
@@ -140,7 +140,7 @@ void KdTreeBuilder::calculateBins()
 		m_bins[axis].create(SplitEvent::NumBinPerDimension, m_bbox.getMin(axis), m_bbox.getMax(axis));
 		for(unsigned i = 0; i < nprim; i++) {
 			//std::cout<<" "<<indices[i];
-			const BoundingBox * primBox = &primBoxes[indices[i]];
+			const BoundingBox * primBox = primBoxes[indices[i]];
 			m_bins[axis].add(primBox->getMin(axis), primBox->getMax(axis));
 		}
 		
@@ -199,12 +199,12 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 	const float min = m_bbox.getMin(axis);
 	const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
 	int g, minGrid, maxGrid;
-	BoundingBox *primBoxes = GlobalContext->primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & primBoxes = GlobalContext->primitiveBoxes();
 	unsigned *indices = m_context->indices();
 	const unsigned nprim = m_context->getNumPrimitives();
 	
 	for(unsigned i = 0; i < nprim; i++) {
-		const BoundingBox * primBox = &primBoxes[indices[i] ];
+		const BoundingBox * primBox = primBoxes[indices[i] ];
 		
 		minGrid = (primBox->getMin(axis) - min) / delta;
 		
@@ -389,14 +389,14 @@ void KdTreeBuilder::partitionPrims(const SplitEvent & e,
 	if(e.rightCount() > 0)
 		rightCtx.createIndirection(e.rightCount());
 	
-	BoundingBox *boxSrc = GlobalContext->primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
 	unsigned *indices = m_context->indices();
 	
 	int side;
 	const unsigned nprim = m_context->getNumPrimitives();
 	for(unsigned i = 0; i < nprim; i++) {
 		
-		const BoundingBox * primBox = &boxSrc[indices[i]];
+		const BoundingBox * primBox = boxSrc[indices[i]];
 		
 		side = e.side(*primBox);
 		

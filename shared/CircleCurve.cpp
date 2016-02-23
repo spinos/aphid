@@ -8,7 +8,8 @@
  */
 
 #include "CircleCurve.h"
-#include <AllMath.h>
+namespace aphid {
+
 CircleCurve::CircleCurve() : m_radius(1.f), m_eccentricity(0.f)
 {   
 	create();
@@ -39,4 +40,6 @@ void CircleCurve::setRadius(float x)
 		m_cvs[i].set(sin(delta * i) * r, cos(delta * i) * r, 0.f);
 	}
 	computeKnots();
+}
+
 }

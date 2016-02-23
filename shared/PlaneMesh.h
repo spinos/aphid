@@ -10,6 +10,9 @@
 #pragma once
 
 #include <PatchMesh.h>
+
+namespace aphid {
+
 class BaseCurve;
 class PlaneMesh : public PatchMesh {
 public:
@@ -19,3 +22,5 @@ public:
 private:
 	void setFaceConnection(unsigned gu, unsigned gv);
 };
+
+}

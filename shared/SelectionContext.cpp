@@ -9,6 +9,7 @@
 
 #include "SelectionContext.h"
 #include "QuickSort.h"
+namespace aphid {
 
 SelectionContext::SelectionContext() { m_mode = Replace; }
 SelectionContext::~SelectionContext() { m_indices.clear(); }
@@ -192,4 +193,6 @@ void SelectionContext::verbose() const
 	for(; it != m_indices.end(); ++it) {
 		std::clog<<" "<<*it;
 	}
+}
+
 }

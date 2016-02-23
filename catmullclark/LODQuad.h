@@ -9,6 +9,7 @@
 #pragma once
 
 #include "BaseQuad.h"
+namespace aphid {
 
 class LODQuad : public BaseQuad {
 public:
@@ -25,3 +26,5 @@ public:
 	
 	float _details[4];
 };
+
+}

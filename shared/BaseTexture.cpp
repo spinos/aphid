@@ -8,6 +8,7 @@
  */
 
 #include "BaseTexture.h"
+namespace aphid {
 
 BaseTexture::BaseTexture() { setAllWhite(true); }
 
@@ -37,3 +38,5 @@ unsigned BaseTexture::dataSize() const { return numTexels() * m_format * m_depth
 
 const TypedEntity::Type BaseTexture::type() const
 { return TTexture; }
+
+}

@@ -12,6 +12,8 @@
 #include "MultiPlaybackFile.h"
 #include "APlaybackFile.h"
 
+namespace aphid {
+
 MultiPlaybackFile::MultiPlaybackFile() {}
 MultiPlaybackFile::~MultiPlaybackFile() {}
 
@@ -52,5 +54,7 @@ APlaybackFile * MultiPlaybackFile::namedFile(const std::string & fileName) const
 	std::map<std::string, APlaybackFile *>::const_iterator it = fFileStatus.find(fileName);
 	if(it == fFileStatus.end()) return 0;
 	return it->second;
+}
+
 }
 //~:

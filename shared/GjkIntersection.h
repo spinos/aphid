@@ -1,6 +1,9 @@
 #pragma once
 #include <AllMath.h>
 #include <BoundingBox.h>
+
+namespace aphid {
+
 namespace gjk {
 
 class PointSet {
@@ -153,5 +156,7 @@ public:
         return false;
     }
 };
+
+}
 
 }

@@ -2,6 +2,9 @@
 
 #include <Vector3F.h>
 #include <map>
+
+namespace aphid {
+
 class BaseMesh;
 class BaseField
 {
@@ -28,3 +31,5 @@ private:
     Vector3F * m_color;
 	std::map<unsigned, float *> m_values;
 };
+
+}

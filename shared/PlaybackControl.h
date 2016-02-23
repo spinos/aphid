@@ -9,6 +9,9 @@
 
 #pragma once
 #include <BaseState.h>
+
+namespace aphid {
+
 class PlaybackControl : public BaseState {
 public:
 	PlaybackControl();
@@ -29,3 +32,5 @@ public:
 private:
 	int m_rangeMin, m_rangeMax, m_currentFrame;
 };
+
+}

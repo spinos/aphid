@@ -8,6 +8,7 @@
  */
 
 #pragma once
+namespace aphid {
 
 class TypedEntity {
 public:
@@ -39,3 +40,5 @@ public:
 	
 private:
 };
+
+}

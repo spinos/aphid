@@ -1,4 +1,7 @@
 #include <HBase.h>
+
+namespace aphid {
+
 class APolygonalUV;
 
 class HPolygonalUV : public HBase {
@@ -15,3 +18,5 @@ protected:
 private:
 	
 };
+
+}

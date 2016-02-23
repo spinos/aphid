@@ -11,6 +11,9 @@
 
 #include <AllMath.h>
 #include <NamedEntity.h>
+
+namespace aphid {
+
 class SkeletonJoint;
 class SkeletonPose : public NamedEntity {
 public:
@@ -30,3 +33,5 @@ private:
 	float * m_angles;
 	unsigned m_numJoints, m_dof;
 };
+
+}

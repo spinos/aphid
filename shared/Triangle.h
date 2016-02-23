@@ -11,6 +11,8 @@
 #include <Vector3F.h>
 #include <BoundingBox.h>
 
+namespace aphid {
+
 class Triangle {
 public:
     Triangle(const Vector3F& a, const Vector3F& b, const Vector3F& c);
@@ -35,3 +37,5 @@ public:
 	const Vector3F corner(const int & i) const;
 	Vector3F p0, p1, p2, nor;
 };
+
+}

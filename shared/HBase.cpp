@@ -11,6 +11,9 @@
 
 #include <sstream>
 #include <iostream>
+
+namespace aphid {
+
 HBase::HBase(const std::string & path) : HGroup(path) 
 {
 	if(fObjectPath == "/") {
@@ -421,4 +424,6 @@ char HBase::load()
 
 char HBase::verifyType()
 { return 1; }
+
+}
 //:~

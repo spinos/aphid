@@ -9,6 +9,7 @@
 
 #include "ATriangleMesh.h"
 #include "AStripedModel.h"
+namespace aphid {
 
 class ATriangleMeshGroup : public ATriangleMesh, public AStripedModel {
 public:
@@ -20,3 +21,5 @@ public:
 private:
 
 };
+
+}

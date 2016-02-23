@@ -9,6 +9,10 @@
 
 #include "Vertex.h"
 
+namespace aphid {
+
 Vertex::Vertex() {}
 Vertex::~Vertex() {}
+
+}
 

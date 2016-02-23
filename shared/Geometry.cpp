@@ -8,6 +8,7 @@
  */
 
 #include "Geometry.h"
+namespace aphid {
 
 Geometry::ClosestToPointTestResult::ClosestToPointTestResult() : _hasResult(false) {}
 
@@ -91,4 +92,6 @@ const Vector3F Geometry::boundingCenter() const
 
 bool Geometry::intersectSphere(unsigned icomponent, const gjk::Sphere & B)
 { return false; }
+
+}
 //:~

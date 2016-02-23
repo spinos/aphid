@@ -8,6 +8,7 @@
  */
 
 #include "Ray.h"
+namespace aphid {
 
 Ray::Ray() {}
 
@@ -38,4 +39,5 @@ const Vector3F Ray::closetPointOnRay(const Vector3F & p, float * t) const
 	float tt = m_origin.dot(m_dir) - p.dot(m_dir);
 	if(t) *t = tt;
 	return m_origin - m_dir * tt;
+}
 }

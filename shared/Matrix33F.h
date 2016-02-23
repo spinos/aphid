@@ -8,6 +8,7 @@
  */
 #include "Vector3F.h"
 #include "Quaternion.h"
+namespace aphid {
 
  class Matrix33F
  {
@@ -79,3 +80,4 @@
 	float v[9];
  };
 
+}

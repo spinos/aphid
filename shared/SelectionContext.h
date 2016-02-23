@@ -15,6 +15,7 @@
 #include <deque>
 #include <map>
 #include <GjkIntersection.h>
+namespace aphid {
 
 class SelectionContext {
 	std::map<Geometry *, sdb::Sequence<unsigned> * > m_geoComponents;
@@ -79,3 +80,5 @@ private:
 	SelectMode m_mode;
 	char m_enableDirection;
 };
+
+}

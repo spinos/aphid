@@ -1,6 +1,9 @@
 #pragma once
 
 #include <AllMath.h>
+
+namespace aphid {
+
 class Ray;
 class BaseMesh;
 class IntersectionContext;
@@ -28,3 +31,5 @@ private:
     char m_started;
 	int m_mode;
 };
+
+}

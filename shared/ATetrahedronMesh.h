@@ -11,6 +11,7 @@
  */
 #include "AGenericMesh.h"
 #include "BaseSampler.h"
+namespace aphid {
 
 class ATetrahedronMesh : public AGenericMesh {
 public:
@@ -41,4 +42,6 @@ private:
     TetrahedronSampler m_sampler;
 	float m_volume;
 };
+
+}
 #endif        //  #ifndef ATETRAHEDRONMESH_H

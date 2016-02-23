@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BaseDeformer.h>
+namespace aphid {
 
 class SkeletonSystem;
 
@@ -40,3 +41,5 @@ private:
 	SkeletonSystem * m_skeleton;
 	unsigned m_numRestP;
 };
+
+}

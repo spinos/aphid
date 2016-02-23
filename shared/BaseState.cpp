@@ -1,4 +1,5 @@
 #include "BaseState.h"
+namespace aphid {
 
 BaseState::BaseState() 
 {
@@ -20,4 +21,6 @@ void BaseState::disable()
 bool BaseState::isEnabled() const
 {
 	return m_enabled;
+}
+
 }

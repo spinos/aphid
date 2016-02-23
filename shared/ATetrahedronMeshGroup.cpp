@@ -1,4 +1,5 @@
 #include "ATetrahedronMeshGroup.h"
+namespace aphid {
 
 ATetrahedronMeshGroup::ATetrahedronMeshGroup() {}
 ATetrahedronMeshGroup::~ATetrahedronMeshGroup() {}
@@ -16,5 +17,7 @@ std::string ATetrahedronMeshGroup::verbosestr() const
     <<" nstripe "<<numStripes()
     <<"\n";
 	return sst.str();
+}
+
 }
 

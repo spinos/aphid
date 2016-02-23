@@ -15,6 +15,7 @@
 #include <Geometry.h>
 #include <Ray.h>
 #include <Vector2F.h>
+namespace aphid {
 
 class IntersectionContext : public PrimitiveFilter {
 public:
@@ -45,3 +46,5 @@ public:
 	float m_coord[3];
 private:
 };
+
+}

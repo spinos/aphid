@@ -8,6 +8,7 @@
  */
 
 #include "QuadraticCurve.h"
+namespace aphid {
 
 QuadraticCurve::QuadraticCurve() {}
 QuadraticCurve::~QuadraticCurve() {}
@@ -23,4 +24,6 @@ Vector3F QuadraticCurve::interpolate(float param) const
 	findNeighborKnots(param, k0, k1);
 	
 	return interpolateStraight(param - m_knots[k0], k0, k1);
+}
+
 }

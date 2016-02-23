@@ -10,6 +10,8 @@
 #include "HTriangleMeshGroup.h"
 #include "ATriangleMeshGroup.h"
 
+namespace aphid {
+
 HTriangleMeshGroup::HTriangleMeshGroup(const std::string & path) : HTriangleMesh(path) {}
 HTriangleMeshGroup::~HTriangleMeshGroup() {}
 
@@ -59,4 +61,6 @@ char HTriangleMeshGroup::load(ATriangleMeshGroup * tri)
 	readIntData(".inddrift", npart, (unsigned *)tri->indexDrifts());
 	
 	return HTriangleMesh::readAftCreation(tri);
+}
+
 }

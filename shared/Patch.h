@@ -15,6 +15,8 @@
 #include <Geometry.h>
 #include <Boundary.h>
 
+namespace aphid {
+
 class Patch : public Plane, public Boundary, public Geometry {
 public:
 	struct PushPlaneContext {
@@ -60,3 +62,5 @@ public:
 private:
 	Segment m_segs[4];
 };
+
+}

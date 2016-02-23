@@ -8,6 +8,7 @@
  */
 
 #include <HDataset.h>
+namespace aphid {
 
 class IndicesHDataset : public HDataset {
 public:
@@ -19,3 +20,5 @@ public:
 	
 	virtual hid_t dataType();
 };
+
+}

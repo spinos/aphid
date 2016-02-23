@@ -8,6 +8,7 @@
  */
 
 #include "BoundingRectangle.h"
+namespace aphid {
 
 BoundingRectangle::BoundingRectangle() 
 {
@@ -16,8 +17,8 @@ BoundingRectangle::BoundingRectangle()
 
 void BoundingRectangle::reset()
 {
-	m_data[0] = m_data[1] = 10e8;
-	m_data[2] = m_data[3] = -10e8;
+	m_data[0] = m_data[1] = 1e8f;
+	m_data[2] = m_data[3] = -1e8f;
 }
 
 void BoundingRectangle::set(float minx, float miny, float maxx, float maxy)
@@ -74,4 +75,6 @@ bool BoundingRectangle::isPointInside(const Vector2F & p) const
 	if(p.x < getMin(0) || p.x > getMax(0)) return false;
 	if(p.y < getMin(1) || p.y > getMax(1)) return false;
 	return true;
+}
+
 }

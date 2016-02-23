@@ -9,6 +9,8 @@
 
 #include "HIntAttribute.h"
 
+namespace aphid {
+
 HIntAttribute::HIntAttribute(const std::string & path) : HAttribute(path)
 {
 }
@@ -27,4 +29,6 @@ char HIntAttribute::read(int *data)
 	if(status < 0)
 		return 0;
 	return 1;
+}
+
 }

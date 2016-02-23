@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <HDataset.h>
+namespace aphid {
 
 class VerticesHDataset : public HDataset {
 public:
@@ -17,3 +18,5 @@ public:
 	void setNumVertices(int num);
 	int numVertices() const;
 };
+
+}

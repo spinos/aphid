@@ -11,6 +11,8 @@
 
 #include <HAttribute.h>
 
+namespace aphid {
+
 class HIntAttribute : public HAttribute
 {
 public:
@@ -20,3 +22,5 @@ public:
 	virtual char write(int *data);
 	virtual char read(int *data);
 };
+
+}

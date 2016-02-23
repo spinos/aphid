@@ -8,6 +8,8 @@
  */
 #pragma once
 #include <Vector2F.h>
+namespace aphid {
+
 class BoundingRectangle {
 public:
 	BoundingRectangle();
@@ -28,4 +30,6 @@ public:
 private:
 	float m_data[4];
 };
+
+}
 

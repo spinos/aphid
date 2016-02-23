@@ -8,7 +8,10 @@
  */
 
 #include "TypedEntity.h"
+namespace aphid {
 
 const TypedEntity::Type TypedEntity::type() const
 { return TUnknown; }
+
+}
 //:~

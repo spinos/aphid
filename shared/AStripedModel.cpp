@@ -9,6 +9,7 @@
 
 #include "AStripedModel.h"
 #include <BaseBuffer.h>
+namespace aphid {
 
 AStripedModel::AStripedModel() 
 {
@@ -51,5 +52,7 @@ void AStripedModel::copyIndexDrift(unsigned * src, unsigned n, unsigned start, u
     unsigned * dst = &indexDrifts()[start];
     unsigned i = 0;
     for(;i<n;i++) dst[i] = src[i] + offset;
+}
+
 }
 //:~

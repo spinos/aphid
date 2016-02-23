@@ -9,6 +9,7 @@
 
 #pragma once
 #include <HBase.h>
+namespace aphid {
 
 class HWorld : public HBase {
 public:
@@ -21,3 +22,5 @@ public:
 private:
 	int m_modifiedTime;
 };
+
+}

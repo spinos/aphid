@@ -10,6 +10,9 @@
 #pragma once
 #include <AllMath.h>
 #include <LineBuffer.h>
+
+namespace aphid {
+
 class ActiveRegion : public LineBuffer {
 public:
 	ActiveRegion();
@@ -26,3 +29,5 @@ public:
 private:
 	std::vector<unsigned> m_regionFaces;
 };
+
+}

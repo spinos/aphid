@@ -10,6 +10,9 @@
 #include "SkeletonSubspaceDeformer.h"
 #include <SkeletonSystem.h>
 #include <SkeletonJoint.h>
+
+namespace aphid {
+
 SkeletonSubspaceDeformer::SkeletonSubspaceDeformer() 
 {
 	m_skeleton = 0;
@@ -163,4 +166,6 @@ Vector3F SkeletonSubspaceDeformer::combine(unsigned idx)
 SkeletonSystem * SkeletonSubspaceDeformer::skeleton() const
 {
 	return m_skeleton;
+}
+
 }

@@ -9,6 +9,9 @@
 
 #include "SkeletonPose.h"
 #include <SkeletonJoint.h>
+
+namespace aphid {
+
 SkeletonPose::SkeletonPose() 
 {
 	m_jointStart = 0;
@@ -102,4 +105,6 @@ void SkeletonPose::cleanup()
 unsigned SkeletonPose::degreeOfFreedom() const
 {
 	return m_dof;
+}
+
 }

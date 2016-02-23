@@ -10,6 +10,8 @@
 #include "BezierCurve.h"
 #include <tetrahedron_math.h>
 
+namespace aphid {
+
 BezierCurve::BezierCurve() {}
 BezierCurve::~BezierCurve() {}
 
@@ -375,4 +377,5 @@ float BezierCurve::length() const
 	return sum;
 }
 
+}
 //:~

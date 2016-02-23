@@ -9,6 +9,8 @@
 
 #include "AOrientedBox.h"
 
+namespace aphid {
+
 AOrientedBox::AOrientedBox() {}
 AOrientedBox::~AOrientedBox() {}
 
@@ -79,5 +81,7 @@ const BoundingBox AOrientedBox::calculateBBox() const
 		box.updateMax(p[i]);
 	}
 	return box;
+}
+
 }
 //:~

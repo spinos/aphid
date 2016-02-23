@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Vector3F.h>
+namespace aphid {
 
 class Ray
 {
@@ -21,3 +22,5 @@ public:
 	Vector3F m_origin, m_dir;
 	float m_tmin, m_tmax;
 };
+
+}

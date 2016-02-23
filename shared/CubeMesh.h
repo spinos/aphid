@@ -9,9 +9,12 @@
 
 #pragma once
 #include <BaseMesh.h>
+namespace aphid {
 
 class CubeMesh : public BaseMesh {
 public:
 	CubeMesh();
 	virtual ~CubeMesh();
 };
+
+}

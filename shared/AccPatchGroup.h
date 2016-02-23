@@ -9,6 +9,9 @@
 #pragma once
 
 #include <AllMath.h>
+
+namespace aphid {
+
 class AccPatch;
 class BezierPatchHirarchy;
 class IntersectionContext;
@@ -30,3 +33,5 @@ private:
 	BezierPatchHirarchy * m_activeHirarchy;
 	unsigned m_numHirarchy;
 };
+
+}

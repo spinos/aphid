@@ -10,6 +10,8 @@
 #pragma once
 #include <AllMath.h>
 #include <Ray.h>
+namespace aphid {
+
 class BaseBrush {
 public:
 	BaseBrush();
@@ -59,3 +61,5 @@ private:
 	unsigned m_numDarts;
 	bool m_twoSided, m_filterByColor, m_pinpoint;
 };
+
+}

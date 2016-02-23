@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <AllMath.h>
+using namespace aphid;
 
 class BaseCamera {
 public:

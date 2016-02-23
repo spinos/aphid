@@ -8,6 +8,7 @@
  */
 
 #include "VerticesHDataset.h"
+namespace aphid {
 
 VerticesHDataset::VerticesHDataset(const std::string & path) : HDataset(path)
 {
@@ -25,4 +26,6 @@ void VerticesHDataset::setNumVertices(int num)
 int VerticesHDataset::numVertices() const
 {
 	return fDimension[0] / 3;
+}
+
 }

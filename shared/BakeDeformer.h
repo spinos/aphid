@@ -12,6 +12,9 @@
 #include <BaseDeformer.h>
 #include <AllMath.h>
 #include <map>
+
+namespace aphid {
+
 class HBase;
 class BakeDeformer : public HRFile, public BaseDeformer {
 public:
@@ -41,3 +44,5 @@ private:
 	std::map<int, Vector3F> m_frameCenters;
 	int m_minFrame, m_maxFrame, m_currentFrame;
 };
+
+}

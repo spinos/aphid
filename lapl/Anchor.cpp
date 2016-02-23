@@ -10,6 +10,7 @@
 #include "Anchor.h"
 #include <Vertex.h>
 #include <Ray.h>
+namespace aphid {
 
 Anchor::Anchor() {}
 
@@ -157,5 +158,7 @@ void Anchor::clear()
 	}
 	m_anchorPoints.clear();
 	m_pointIndex.clear();
+}
+
 }
 //:~

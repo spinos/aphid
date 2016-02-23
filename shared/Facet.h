@@ -11,6 +11,9 @@
 #include <Vertex.h>
 #include <Edge.h>
 #include <GeoElement.h>
+
+namespace aphid {
+
 class Facet : public GeoElement {
 public:
 	Facet();
@@ -51,3 +54,5 @@ private:
 	Edge *m_edges[3];
 	unsigned m_polyIndex;
 };
+
+}

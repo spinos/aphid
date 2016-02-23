@@ -11,6 +11,9 @@
  */
 
 #include "HObject.h"
+
+namespace aphid {
+
 class HDataset : public HObject {
 public:
 	struct SelectPart {
@@ -52,4 +55,6 @@ private:
 	hid_t createFileSpace() const;
 	hid_t createSpace(hsize_t * block) const;
 };
+
+}
 #endif        //  #ifndef HDATASET_H

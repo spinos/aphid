@@ -1,5 +1,6 @@
 #pragma once
 #include <AllMath.h>
+namespace aphid {
 
 class BaseQuad {
 public:
@@ -14,3 +15,5 @@ public:
     Vector3F * _corners;
 private:
 };
+
+}

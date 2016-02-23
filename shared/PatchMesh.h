@@ -11,6 +11,9 @@
 
 #include <BaseMesh.h>
 #include <boost/scoped_array.hpp>
+
+namespace aphid {
+
 class PointInsidePolygonTest;
 class PatchMesh : public BaseMesh {
 public:
@@ -43,3 +46,5 @@ private:
 	boost::scoped_array<unsigned> m_quadUVIds;
 	unsigned m_numQuads;
 };
+
+}

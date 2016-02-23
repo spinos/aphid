@@ -8,6 +8,7 @@
  */
 
 #include "PlaybackControl.h"
+namespace aphid {
 
 PlaybackControl::PlaybackControl() 
 {
@@ -63,4 +64,6 @@ void PlaybackControl::enable()
 void PlaybackControl::disable()
 {
 	BaseState::disable();
+}
+
 }

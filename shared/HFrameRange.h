@@ -11,6 +11,9 @@
  */
 
 #include <HBase.h>
+
+namespace aphid {
+
 class AFrameRange;
 class HFrameRange : public HBase {
 public:
@@ -24,5 +27,7 @@ public:
 private:
 	
 };
+
+}
 #endif        //  #ifndef HFRAMERANGE_H
 

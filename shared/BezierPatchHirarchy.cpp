@@ -3,6 +3,9 @@
 #include <PointInsidePolygonTest.h>
 #include <InverseBilinearInterpolate.h>
 #include <BiLinearInterpolate.h>
+
+namespace aphid {
+
 int BezierPatchHirarchy::MaxBezierPatchHirarchyLevel = 3;
 BezierPatchHirarchy::BezierPatchHirarchy()
 {
@@ -98,4 +101,6 @@ Vector2F BezierPatchHirarchy::restoreUV(unsigned idx, const Vector3F & p) const
 void BezierPatchHirarchy::setRebuild()
 {
 	cleanup();
+}
+
 }

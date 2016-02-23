@@ -9,6 +9,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
+namespace aphid {
 
 class BaseBuffer {
 public:	
@@ -77,4 +78,6 @@ protected:
 private:
 	ValueType m_type;
 };
+
+}
 #endif        //  #ifndef BASEBUFFER_H

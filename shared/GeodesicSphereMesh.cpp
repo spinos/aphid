@@ -9,6 +9,7 @@
 #include <iostream>
 #include "GeodesicSphereMesh.h"
 #include <cmath>
+namespace aphid {
 
 GeodesicSphereMesh::GeodesicSphereMesh(unsigned level)
 {
@@ -97,4 +98,6 @@ void GeodesicSphereMesh::subdivide(unsigned level, unsigned & currentVertex, uns
             currentIndex++;
         }
     }
+}
+
 }

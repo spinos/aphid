@@ -8,6 +8,7 @@
  */
 
 #include "DiscMesh.h"
+namespace aphid {
 
 DiscMesh::DiscMesh()
 {
@@ -39,5 +40,7 @@ DiscMesh::DiscMesh()
 
 DiscMesh::~DiscMesh()
 {
+
+}
 
 }

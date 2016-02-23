@@ -9,6 +9,9 @@
 
 #include "BarycentricCoordinate.h"
 #include <iostream>
+
+namespace aphid {
+
 inline float barycentric_coord(float ax, float ay, float bx, float by, float x, float y)
 {
 	return (ay - by)*x + (bx - ax)*y +ax*by - bx*ay;
@@ -179,5 +182,7 @@ Vector3F BarycentricCoordinate::getOnPlane() const
 Vector3F BarycentricCoordinate::getNormal() const
 {
 	return m_n;
+}
+
 }
 //:~

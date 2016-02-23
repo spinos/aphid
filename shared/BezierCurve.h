@@ -10,6 +10,8 @@
 #include <BoundingBox.h>
 #include <BaseCurve.h>
 #include <Primitive.h>
+namespace aphid {
+
 struct BezierSpline {
     void deCasteljauSplit(BezierSpline & a, BezierSpline & b)
     {
@@ -88,3 +90,5 @@ private:
 	void calculateCage(unsigned seg, Vector3F *p) const;
 	Vector3F calculateBezierPoint(float t, Vector3F * data) const;
 };
+
+}

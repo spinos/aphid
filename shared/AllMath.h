@@ -19,6 +19,8 @@
 #include <Matrix44F.h>
 #include <Vector2F.h>
 
+namespace aphid {
+
 inline bool IsNan(float a) { return a != a; }
 
 inline bool IsInf(float a) { return (a > 1e38 || a < -1e38); }
@@ -117,5 +119,6 @@ inline char IsNearZero(T const & a)
 	return 1;
 }
 
+}
 #endif        //  #ifndef ALLMATH_H
 

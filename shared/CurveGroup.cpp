@@ -8,6 +8,7 @@
  */
 
 #include "CurveGroup.h"
+namespace aphid {
 
 CurveGroup::CurveGroup() 
 {
@@ -55,5 +56,7 @@ void CurveGroup::verbose() const
 {
 	std::cout<<" curve group n curves: "<<m_numCurves;
 	std::cout<<" n cvs: "<<m_numPoints<<"\n";
+}
+
 }
 //:~

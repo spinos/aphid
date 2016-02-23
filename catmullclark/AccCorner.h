@@ -9,6 +9,9 @@
 #pragma once
 #include <Vector3F.h>
 #include <vector>
+
+namespace aphid {
+
 class AccCorner {
 public:
 	AccCorner();
@@ -41,3 +44,5 @@ private:
 	std::vector<char> _tagCornerIndices;
 	int _centerIndex;
 };
+
+}

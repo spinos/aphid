@@ -13,6 +13,8 @@
 *   0 
 */
 
+namespace aphid {
+
 static const int TetrahedronToTriangleVertex[12] = {
 0, 1, 2, 
 1, 0, 3,
@@ -354,6 +356,8 @@ inline Float4 getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v)
     coord.w = 0.f;
     
     return coord;
+}
+
 }
 #endif        //  #ifndef TETRAHEDRON_MATH_H
 

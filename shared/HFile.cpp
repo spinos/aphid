@@ -10,6 +10,9 @@
 #include "HFile.h"
 #include <HObject.h>
 #include <iostream>
+
+namespace aphid {
+
 HFile::HFile() : BaseFile() 
 { m_openMode = HDocument::oReadOnly; }
 
@@ -107,4 +110,6 @@ void HFile::closeOpenedGroups()
 
 void HFile::setOpenMode(HDocument::OpenMode accessFlag)
 { m_openMode = accessFlag; }
+
+}
 //:~

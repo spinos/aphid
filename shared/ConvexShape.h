@@ -9,6 +9,7 @@
 
 #pragma once
 #include "Matrix44F.h"
+namespace aphid {
 
 class Frustum {
 
@@ -68,3 +69,5 @@ protected:
 private:
 
 };
+
+}

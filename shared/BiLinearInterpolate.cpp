@@ -21,6 +21,8 @@
 
 #include "BiLinearInterpolate.h"
 
+namespace aphid {
+
 BiLinearInterpolate::BiLinearInterpolate() {}
 
 float BiLinearInterpolate::interpolate(float u, float v, const float * src) const
@@ -42,4 +44,6 @@ void BiLinearInterpolate::interpolate3(float u, float v, const Vector3F * src, V
 	Vector3F lo = src[0] * (1.f - u) + src[1] * u;
     Vector3F hi = src[3] * (1.f - u) + src[2] * u;
     *dst = lo * (1.f - v) + hi * v;
+}
+
 }

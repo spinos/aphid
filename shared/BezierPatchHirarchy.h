@@ -1,5 +1,8 @@
 #pragma once
 #include <AllMath.h>
+
+namespace aphid {
+
 class BezierPatch;
 class PointInsidePolygonTest;
 class InverseBilinearInterpolate;
@@ -23,3 +26,5 @@ private:
 	InverseBilinearInterpolate * m_invbil;
     unsigned * m_childIdx;
 };
+
+}

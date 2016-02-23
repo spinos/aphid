@@ -13,6 +13,9 @@
 #include <AccPatchMesh.h>
 #include <PatchTexture.h>
 #include <BaseSphere.h>
+
+namespace aphid {
+
 CollisionRegion::CollisionRegion() : m_regionElementStart(UINT_MAX) 
 {
 	m_ctx = new IntersectionContext;
@@ -436,4 +439,6 @@ void CollisionRegion::interpolateVertexVector(Vector3F * dst)
 void CollisionRegion::interpolateVertexVector(unsigned faceIdx, float u, float v, Vector3F * dst)
 {
 	m_body->interpolateVectorOnPatch(faceIdx, u, v, m_perVertexVector, dst);
+}
+
 }

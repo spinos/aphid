@@ -2,6 +2,8 @@
 #include <MeshTopology.h>
 #include <VertexAdjacency.h>
 
+namespace aphid {
+
 VertexPath::VertexPath() {}
 VertexPath::~VertexPath() {}
 
@@ -74,3 +76,4 @@ unsigned VertexPath::vertex(unsigned idx) const
 	return m_vertices[idx];
 }
 
+}

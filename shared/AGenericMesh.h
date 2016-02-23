@@ -13,6 +13,9 @@
 #include "Geometry.h"
 #include <Matrix44F.h>
 #include <map>
+
+namespace aphid {
+
 class BaseBuffer;
 class AGenericMesh : public Geometry {
 public:
@@ -46,4 +49,6 @@ private:
 	BaseBuffer * m_anchors;
 	unsigned m_numPoints, m_numIndices;
 };
+
+}
 #endif        //  #ifndef AGENERICMESH_H

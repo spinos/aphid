@@ -12,6 +12,8 @@
 
 #include <Geometry.h>
 
+namespace aphid {
+
 class GeometryArray : public Geometry {
 public:
 	GeometryArray();
@@ -37,4 +39,6 @@ private:
 	Geometry ** m_geos;
 	unsigned m_numGeometies;
 };
+
+}
 #endif        //  #ifndef GEOMETRYARRAY_H

@@ -10,6 +10,9 @@
 #pragma once
 #include <vector>
 #include <boost/scoped_array.hpp>
+
+namespace aphid {
+
 class PatchNeighborRec {
 public:
 	PatchNeighborRec();
@@ -29,3 +32,5 @@ private:
 	boost::scoped_array<char> m_tagCorners;
 	unsigned m_numEdges, m_numCorners;
 };
+
+}

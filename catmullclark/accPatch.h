@@ -9,6 +9,9 @@
 #pragma once
 #include <bezierPatch.h>
 #include <PatchNeighborRec.h>
+
+namespace aphid {
+
 class AccStencil;
 class AccPatch : public BezierPatch {
 public:
@@ -26,3 +29,5 @@ public:
 private:
 	PatchNeighborRec m_corners[4];
 };
+
+}

@@ -8,6 +8,7 @@
  */
 
 #include "ATriangleMeshGroup.h"
+namespace aphid {
 
 ATriangleMeshGroup::ATriangleMeshGroup() {}
 ATriangleMeshGroup::~ATriangleMeshGroup() {}
@@ -16,5 +17,7 @@ void ATriangleMeshGroup::create(unsigned np, unsigned nt, unsigned ns)
 {
 	ATriangleMesh::create(np, nt);
 	AStripedModel::create(ns);
+}
+
 }
 	

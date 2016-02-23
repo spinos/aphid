@@ -11,6 +11,9 @@
 #include <AllMath.h>
 #include <BaseTexture.h>
 #include <boost/scoped_array.hpp>
+
+namespace aphid {
+
 class PatchMesh;
 class PatchTexture : public BaseTexture {
 public:
@@ -36,3 +39,5 @@ private:
 	boost::scoped_array<Float3> m_colors;
 	unsigned m_numColors;
 };
+
+}

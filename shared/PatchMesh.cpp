@@ -13,6 +13,8 @@
 #include <BiLinearInterpolate.h>
 #include <SelectionContext.h>
 
+namespace aphid {
+
 PatchMesh::PatchMesh() 
 {
 	m_numQuads = 0;
@@ -240,5 +242,7 @@ char PatchMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
 	ctx->addToSelection(idx);
 	
 	return 1;
+}
+
 }
 //:~

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BaseMesh.h>
+namespace aphid {
 
 class GeodesicSphereMesh : public BaseMesh {
 public:
@@ -18,3 +19,5 @@ public:
 private:	
 	void subdivide(unsigned level, unsigned & currentVertex, unsigned & currentIndex, Vector3F * p, unsigned * idx, Vector3F a, Vector3F b, Vector3F c, Vector3F d);
 };
+
+}

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <HDataset.h>
+namespace aphid {
 
 class HCharData : public HDataset {
 public:
@@ -22,3 +23,5 @@ public:
 	virtual hid_t dataType();
 private:
 };
+
+}

@@ -1,6 +1,8 @@
 #include "HTetrahedronMeshGroup.h"
 #include "ATetrahedronMeshGroup.h"
 
+namespace aphid {
+
 HTetrahedronMeshGroup::HTetrahedronMeshGroup(const std::string & path)
     : HTetrahedronMesh(path) 
 {}
@@ -53,4 +55,6 @@ char HTetrahedronMeshGroup::load(ATetrahedronMeshGroup * tetra)
 	readIntData(".inddrift", npart, (unsigned *)tetra->indexDrifts());
 	
 	return HTetrahedronMesh::readAftCreation(tetra);
+}
+
 }

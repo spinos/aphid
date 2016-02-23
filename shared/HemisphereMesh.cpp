@@ -9,6 +9,7 @@
 #include <iostream>
 #include "HemisphereMesh.h"
 #include <cmath>
+namespace aphid {
 
 HemisphereMesh::HemisphereMesh(unsigned grid_theta, unsigned grid_phi)
 {	
@@ -64,4 +65,6 @@ unsigned HemisphereMesh::getGridTheta() const
 unsigned HemisphereMesh::getGridPhi() const
 {
 	return _gridPhi;
+}
+
 }

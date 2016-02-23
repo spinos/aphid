@@ -7,6 +7,9 @@
  *
  */
 #include <Vector3F.h>
+
+namespace aphid {
+
 class AccEdge {
 public:
 	AccEdge() {}
@@ -24,3 +27,5 @@ public:
 private:
 
 };
+
+}

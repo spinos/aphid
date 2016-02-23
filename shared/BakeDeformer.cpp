@@ -11,6 +11,9 @@
 #include <AllHdf.h>
 #include <HBase.h>
 #include <sstream>
+
+namespace aphid {
+
 BakeDeformer::BakeDeformer()
 {}
 
@@ -198,4 +201,6 @@ void BakeDeformer::verbose() const
 	std::cout<<"Bake Cache Deformer: "<<fileName()<<"\n num vertices "<<numVertices();
 	std::cout<<" frame range "<<m_minFrame<<" to "<<m_maxFrame<<"\n";
 	std::cout<<" bake path "<<m_bakePath<<"\n";
+}
+
 }

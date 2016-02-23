@@ -4,6 +4,8 @@
 #include <AField.h>
 #include <BaseBuffer.h>
 
+namespace aphid {
+
 HField::HField(const std::string & path) : HBase(path) {}
 HField::~HField() {}
 	
@@ -213,5 +215,7 @@ bool HField::loadAChannelFrame(const std::string & frame,
     gbake.close();
     grp.close();
 	return true;
+}
+
 }
 //:~

@@ -1,4 +1,5 @@
 #include "BaseSphere.h"
+namespace aphid {
 
 BaseSphere::BaseSphere() 
 {
@@ -39,4 +40,6 @@ char BaseSphere::expand(const BaseSphere & another)
     if(another.inside(*this, d)) return 0;
     m_radius += d;
     return 1;
+}
+
 }

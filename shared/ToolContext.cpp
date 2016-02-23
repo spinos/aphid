@@ -1,4 +1,5 @@
 #include <ToolContext.h>
+namespace aphid {
 
 ToolContext::ToolContext()
 {
@@ -24,4 +25,6 @@ void ToolContext::setPreviousContext(InteractMode val)
 ToolContext::InteractMode ToolContext::previousContext() const
 {
 	return m_preCtx;
+}
+
 }

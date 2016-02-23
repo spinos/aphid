@@ -13,6 +13,8 @@
 #include <Edge.h>
 #include <VertexAdjacency.h>
 
+namespace aphid {
+
 MeshTopology::MeshTopology(Vector3F * pos, Vector3F * nor, int * tri, const int & numV, const int & numTri)
 {
     m_pos = pos;
@@ -291,5 +293,7 @@ void MeshTopology::getDifferentialCoord(const int & vertexId, Vector3F & dst)
 	VertexAdjacency & adj = m_adjacency[vertexId];
 	adj.computeDifferentialCoordinate();
 	dst = adj.getDifferentialCoordinate();
+}
+
 }
 //:~

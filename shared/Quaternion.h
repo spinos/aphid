@@ -2,6 +2,7 @@
 #define QUATERNION_H
 
 #include <Vector3F.h>
+namespace aphid {
 
 class Quaternion {
 public:
@@ -18,5 +19,7 @@ public:
 	
 	float w, x, y, z;
 };
+
+}
 #endif        //  #ifndef QUATERNION_H
 

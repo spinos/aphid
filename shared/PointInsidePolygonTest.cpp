@@ -9,6 +9,8 @@
 
 #include "PointInsidePolygonTest.h"
 
+namespace aphid {
+
 PointInsidePolygonTest::PointInsidePolygonTest() {}
 
 PointInsidePolygonTest::PointInsidePolygonTest(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3) : Patch (p0, p1, p2, p3) {}
@@ -104,5 +106,7 @@ bool PointInsidePolygonTest::intersect(Ray & ray, Vector3F & closestP)
 	if(!isPointInside(closestP)) return false;
 	
 	return true;
+}
+
 }
 //:~

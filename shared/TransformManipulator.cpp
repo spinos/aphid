@@ -9,6 +9,9 @@
 
 #include "TransformManipulator.h"
 #include <Plane.h>
+
+namespace aphid {
+
 TransformManipulator::TransformManipulator() 
 {
 	m_subject = 0;
@@ -203,4 +206,6 @@ bool TransformManipulator::started() const
 BaseTransform * TransformManipulator::subject() const
 {
 	return m_subject;
+}
+
 }

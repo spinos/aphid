@@ -10,6 +10,9 @@
 #pragma once
 #include <Vector3F.h>
 #include <Matrix44F.h>
+
+namespace aphid {
+
 class BarycentricCoordinate {
 public:
 	BarycentricCoordinate();
@@ -35,3 +38,5 @@ private:
 	float m_area;
 	float m_v[3];
 };
+
+}

@@ -1,6 +1,8 @@
 #include "HFrameRange.h"
 #include "AFrameRange.h"
 
+namespace aphid {
+
 HFrameRange::HFrameRange(const std::string & path) : HBase(path) 
 {}
 
@@ -49,4 +51,6 @@ char HFrameRange::load(AFrameRange * tm)
 	readIntAttr(".spf", &tm->SamplesPerFrame);
     readFloatAttr(".fps", &tm->FramesPerSecond);
     return 1;
+}
+
 }

@@ -8,6 +8,7 @@
  */
 
 #include "ActiveRegion.h"
+namespace aphid {
 
 ActiveRegion::ActiveRegion() {}
 ActiveRegion::~ActiveRegion() 
@@ -41,3 +42,5 @@ void ActiveRegion::addActiveRegionFace(unsigned idx)
 }
 
 void ActiveRegion::resetActiveRegion() {}
+
+}

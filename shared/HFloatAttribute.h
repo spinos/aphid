@@ -11,6 +11,8 @@
 
 #include <HAttribute.h>
 
+namespace aphid {
+
 class HFloatAttribute : public HAttribute
 {
 public:
@@ -20,3 +22,5 @@ public:
 	virtual char write(float *data);
 	virtual char read(float *data);
 };
+
+}

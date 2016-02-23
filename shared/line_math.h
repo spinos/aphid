@@ -2,6 +2,7 @@
 #define LINE_MATH_H
 
 #include <AllMath.h>
+namespace aphid {
 
 // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
 inline float distancePointLine(const Vector3F & P0, 
@@ -56,5 +57,6 @@ inline float distanceBetweenLines(const Vector3F & P1, const Vector3F & P2,
     return distanceBetweenSkewLines(P1, P2, P3, P4);
 }
 
+}
 #endif        //  #ifndef LINE_MATH_H
 

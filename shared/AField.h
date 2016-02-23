@@ -12,6 +12,9 @@
 #include <string>
 #include "BaseBuffer.h"
 #include "BaseSampler.h"
+
+namespace aphid {
+
 class AField {
 public:	
 	enum FieldType {
@@ -55,3 +58,5 @@ private:
 	std::map<std::string, TypedBuffer * > m_channels;
 	TypedBuffer * m_currentChannel;
 };
+
+}

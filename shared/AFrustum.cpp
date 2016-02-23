@@ -9,6 +9,9 @@
 
 #include "AFrustum.h"
 #include <iostream>
+
+namespace aphid {
+
 void AFrustum::set(const float & hfov,
 			const float & aspectRatio,
 			const float & clipNear,
@@ -86,3 +89,5 @@ Vector3F AFrustum::center() const
 			m_v[5] * .125f +
 			m_v[6] * .125f +
 			m_v[7] * .125f); }
+
+}

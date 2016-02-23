@@ -9,6 +9,7 @@
 
 #include <BaseFile.h>
 #include <map>
+namespace aphid {
 
 class BaseFileGroup {
 public:
@@ -22,3 +23,5 @@ protected:
 private:
 	std::map<std::string, BaseFile *> m_files;
 };
+
+}

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BaseFile.h>
+namespace aphid {
 
 class BaseScene : public BaseFile {
 public:
@@ -18,3 +19,5 @@ public:
 private:
 
 };
+
+}

@@ -13,6 +13,7 @@
 #include <Boundary.h>
 #include <NamedEntity.h>
 #include <Ray.h>
+namespace aphid {
 
 class BaseTransform : public Geometry, public Boundary, public NamedEntity {
 public:
@@ -82,3 +83,5 @@ private:
 	Float3 m_rotateDOF;
 	Matrix33F::RotateOrder m_rotationOrder;
 };
+
+}

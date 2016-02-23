@@ -9,6 +9,8 @@
 
 #include "HFloatAttribute.h"
 
+namespace aphid {
+
 HFloatAttribute::HFloatAttribute(const std::string & path) : HAttribute(path)
 {
 }
@@ -32,4 +34,6 @@ char HFloatAttribute::read(float *data)
 	if(status < 0)
 		return 0;
 	return 1;
+}
+
 }

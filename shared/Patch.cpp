@@ -21,6 +21,8 @@
 
 #include "Patch.h"
 
+namespace aphid {
+
 Patch::Patch() {}
 
 Patch::Patch(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3) : Plane (p0, p1, p2, p3) 
@@ -192,4 +194,6 @@ float Patch::segmentLength(int idx) const
 float Patch::size() const
 {
 	return .25f * (segmentLength(0) + segmentLength(1) + segmentLength(2) + segmentLength(3));
+}
+
 }

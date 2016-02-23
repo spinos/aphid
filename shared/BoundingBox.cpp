@@ -10,6 +10,8 @@
 #include "BoundingBox.h"
 #include <Ray.h>
 #include <Plane.h>
+namespace aphid {
+
 BoundingBox::BoundingBox()
 {
 	reset();
@@ -456,4 +458,6 @@ const std::string BoundingBox::str() const
 
 const float * BoundingBox::data() const
 { return m_data; }
+
+}
 //:~

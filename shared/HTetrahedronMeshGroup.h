@@ -1,4 +1,7 @@
 #include "HTetrahedronMesh.h"
+
+namespace aphid {
+
 class ATetrahedronMeshGroup;
 class HTetrahedronMeshGroup : public HTetrahedronMesh {
 public:
@@ -9,3 +12,5 @@ public:
 	virtual char save(ATetrahedronMeshGroup * tetra);
 	virtual char load(ATetrahedronMeshGroup * tetra);
 };
+
+}

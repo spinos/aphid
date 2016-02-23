@@ -14,6 +14,8 @@
 #include <ComponentConversion.h>
 #include <MeshTopology.h>
 
+namespace aphid {
+
 SelectionArray::SelectionArray() 
 {
 	m_vertexPath = new VertexPath;
@@ -227,5 +229,7 @@ void SelectionArray::asPolygons(std::vector<unsigned> & polyIds, std::vector<uns
 	else if(getComponentFilterType() == PrimitiveFilter::TVertex) {
 		m_compconvert->vertexToPolygon(m_vertexIds, polyIds, vppIds);
 	}
+}
+
 }
 //:~

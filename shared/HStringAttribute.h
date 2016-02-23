@@ -9,6 +9,8 @@
 #pragma once
 #include <HAttribute.h>
 
+namespace aphid {
+
 class HStringAttribute : public HAttribute
 {
 public:
@@ -19,3 +21,5 @@ public:
 	virtual char write(const std::string & str);
 	virtual char read(std::string & str);
 };
+
+}

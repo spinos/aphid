@@ -8,6 +8,7 @@
  */
 
 #include "GeoElement.h"
+namespace aphid {
 
 GeoElement::GeoElement() : next(0)
 {
@@ -70,4 +71,6 @@ void GeoElement::setNext(GeoElement * another)
 GeoElement* GeoElement::getNext() const
 {
 	return next;
+}
+
 }

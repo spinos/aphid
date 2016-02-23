@@ -8,6 +8,8 @@
  */
 #pragma once
 #include <HBase.h>
+namespace aphid {
+
 class BaseTransform;
 class HTransform : public HBase {
 public:
@@ -22,3 +24,5 @@ public:
 private:
 	
 };
+
+}

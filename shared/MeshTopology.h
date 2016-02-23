@@ -11,6 +11,9 @@
 #include <AllMath.h>
 #include <vector>
 #include <boost/scoped_array.hpp>
+
+namespace aphid {
+
 class VertexAdjacency;
 class Facet;
 class Edge;
@@ -48,3 +51,5 @@ private:
 	Vector3F * m_pos;
 	Vector3F * m_nor;
 };
+
+}

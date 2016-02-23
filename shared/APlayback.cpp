@@ -1,5 +1,8 @@
 #include "APlayback.h"
 #include <boost/format.hpp>
+
+namespace aphid {
+
 APlayback::APlayback() 
 { m_numFramesPlayed = 0; }
 
@@ -69,4 +72,6 @@ std::string APlayback::currentFrameStr() const
 
 void APlayback::setCurrentFrame(int x)
 { m_currentFrame = x; }
+
+}
 //:~

@@ -8,6 +8,9 @@
  */
 
 #pragma once
+
+namespace {
+
 class Geometry;
 class Primitive {
 public:
@@ -23,3 +26,5 @@ private:
 	Geometry *m_geometry;
 	unsigned m_componentIndex;
 };
+
+}

@@ -9,7 +9,8 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-
+namespace aphid {
+	
 class Vector2F{
 public:
 	Vector2F();
@@ -44,4 +45,6 @@ public:
 	void verbose(const char * pref) const;
 	float x,y;
 };
+
+}
 #endif        //  #ifndef VECTOR2F_H

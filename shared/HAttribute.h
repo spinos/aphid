@@ -8,6 +8,9 @@
  */
 #pragma once
 #include "HObject.h"
+
+namespace aphid {
+
 class HAttribute : public HObject {
 public:
 	HAttribute(const std::string & path);
@@ -22,3 +25,5 @@ public:
 	
 	int dataSpaceDimension() const;
 };
+
+}

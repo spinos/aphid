@@ -8,6 +8,7 @@
  */
 
 #include "BaseFileGroup.h"
+namespace aphid {
 
 BaseFileGroup::BaseFileGroup() {}
 BaseFileGroup::~BaseFileGroup() 
@@ -22,4 +23,6 @@ bool BaseFileGroup::getFile(const std::string & name, BaseFile * dst)
 	if(m_files.find(name) == m_files.end()) return false;
 	dst = m_files[name];
 	return true;
+}
+
 }

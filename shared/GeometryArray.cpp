@@ -8,7 +8,9 @@
  */
 
 #include "GeometryArray.h"
-#include <BezierCurve.h>
+
+namespace aphid {
+
 GeometryArray::GeometryArray() 
 {
 	m_geos = 0;
@@ -77,4 +79,6 @@ bool GeometryArray::intersectRay(const Ray * r)
 bool GeometryArray::intersectRay(unsigned icomponent, const Ray * r)
 {
 	return geometry(icomponent)->intersectRay(r);
+}
+
 }

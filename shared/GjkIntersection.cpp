@@ -1,5 +1,8 @@
 #include "GjkIntersection.h"
 #include "tetrahedron_math.h"
+
+namespace aphid {
+
 namespace gjk {
 
 PointSet::PointSet() {}
@@ -257,6 +260,8 @@ bool IntersectTest::evaluateTriangle(Vector3F * p, unsigned * v)
     pt[1] = p[v[1]];
     pt[2] = p[v[2]];
     return evaluate(&B);
+}
+
 }
 
 }

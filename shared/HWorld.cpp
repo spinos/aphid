@@ -12,6 +12,9 @@
 #include "boost/date_time/local_time_adjustor.hpp"
 #include "boost/date_time/c_local_time_adjustor.hpp"
 using namespace boost::posix_time;
+
+namespace aphid {
+
 HWorld::HWorld() : HBase("/world"), m_modifiedTime(0) 
 {
 }
@@ -44,4 +47,6 @@ std::string HWorld::modifiedTimeStr() const
 	time_duration td = seconds(m_modifiedTime);
 	ptime rec = ptime(from_iso_string("20120131T235959")) + td;
 	return to_iso_extended_string(rec);
+}
+
 }

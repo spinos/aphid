@@ -12,6 +12,9 @@
 #include <AllMath.h>
 #include <vector>
 #include <Geometry.h>
+
+namespace aphid {
+
 class BoundingBox;
 class BaseCurve : public Geometry {
 public:
@@ -62,3 +65,5 @@ public:
 	static float RayIntersectionTolerance;
 private:
 };
+
+}

@@ -8,6 +8,9 @@
  */
 #pragma once
 #include <HBase.h>
+
+namespace aphid {
+
 class ATriangleMesh;
 
 class HTriangleMesh : public HBase {
@@ -25,3 +28,5 @@ protected:
 private:
 	
 };
+
+}

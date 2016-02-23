@@ -10,6 +10,9 @@
 #include "HAnimationCurve.h"
 #include "AAnimationCurve.h"
 #include <sstream>
+
+namespace aphid {
+
 HAnimationCurve::HAnimationCurve(const std::string & path) : HBase(path) 
 {}
 
@@ -157,5 +160,7 @@ AAnimationKey HAnimationCurve::loadKey(int i)
 	
 	keyGrp.close();
 	return key;
+}
+
 }
 //:~

@@ -1,6 +1,7 @@
 #include "CacheFile.h"
 #include <AllHdf.h>
 #include <HBase.h>
+namespace aphid {
 
 CacheFile::CacheFile() : HFile() {}
 CacheFile::CacheFile(const char * name) : HFile(name) {}
@@ -329,4 +330,6 @@ void CacheFile::getTranslation(const std::string & name, Vector3F & at)
 	if(b.hasNamedAttr(name.c_str()))
 		b.readFloatAttr(name.c_str(), (float *)&at);
 	b.close();
+}
+
 }

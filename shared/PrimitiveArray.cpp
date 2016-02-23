@@ -8,6 +8,7 @@
  */
 
 #include "PrimitiveArray.h"
+namespace aphid {
 
 PrimitiveArray::PrimitiveArray() 
 {
@@ -34,3 +35,5 @@ Primitive *PrimitiveArray::asPrimitive()
 
 unsigned PrimitiveArray::elementSize() const
 { return sizeof(Primitive); }
+
+}

@@ -2,6 +2,8 @@
 #include <BaseState.h>
 #include <BaseMesh.h>
 
+namespace aphid {
+
 class BaseDeformer : public BaseState
 {
 public:
@@ -30,3 +32,5 @@ private:
 	Vector3F * m_restV;
 	BaseMesh * m_mesh;
 };
+
+}

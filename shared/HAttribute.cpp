@@ -9,6 +9,8 @@
 
 #include "HAttribute.h"
 
+namespace aphid {
+
 HAttribute::HAttribute(const std::string & path) : HObject(path)
 {
 }
@@ -59,5 +61,7 @@ int HAttribute::dataSpaceDimension() const
 	hsize_t     dims_out[3];
 	H5Sget_simple_extent_dims(fDataSpace, dims_out, NULL);
 	return dims_out[0];
+}
+
 }
 //:~

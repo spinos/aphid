@@ -10,6 +10,7 @@
 #pragma once
 #include <BaseArray.h>
 #include <Primitive.h>
+namespace aphid {
 
 class PrimitiveArray : public BaseArray<Primitive> {
 public:
@@ -22,3 +23,5 @@ public:
 protected:
 	virtual unsigned elementSize() const;
 };
+
+}

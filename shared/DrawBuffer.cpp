@@ -5,6 +5,9 @@
 #include <gl_heads.h>
 #endif
 #include <BaseTexture.h>
+
+namespace aphid {
+
 DrawBuffer::DrawBuffer() 
 {
     m_numIndices = 0;
@@ -88,4 +91,6 @@ unsigned * DrawBuffer::indices()
 const unsigned & DrawBuffer::numPoints() const
 {
 	return m_numVertices;
+}
+
 }

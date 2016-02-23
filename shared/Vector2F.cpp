@@ -10,6 +10,7 @@
 #include "Vector2F.h"
 #include <iostream>
 #include <cmath>
+namespace aphid {
 
 Vector2F::Vector2F() 
 {
@@ -140,5 +141,7 @@ float Vector2F::cross(const Vector2F & b) const
 void Vector2F::verbose(const char * pref) const
 {
 	std::cout<<pref<<" ("<<x<<","<<y<<")\n";
+}
+
 }
 //:~

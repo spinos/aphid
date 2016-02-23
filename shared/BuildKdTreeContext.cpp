@@ -26,10 +26,6 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 	
 	createIndirection(m_numPrimitive);
 	
-/// copy bbox of all prims
-	m_primitiveBoxes.create(m_numPrimitive+1);
-	
-	BoundingBox *primBoxes = m_primitiveBoxes.ptr();
 	unsigned *primIndex = m_indices.ptr();
 	
 	sdb::VectorArray<Primitive> &primitives = data.primitives();
@@ -42,11 +38,13 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		
 		unsigned compIdx = p->getComponentIndex();
 		
-		primBoxes[i] = geo->calculateBBox(compIdx);
+		BoundingBox ab = geo->calculateBBox(compIdx);
 		
-		primBoxes[i].expand(1e-6f);	
+		ab.expand(1e-6f);
 		
-		const Vector3F center = primBoxes[i].center();
+		m_primitiveBoxes.insert(ab);
+		
+		const Vector3F center = ab.center();
 		
 		*primIndex = i;
 		primIndex++;
@@ -59,7 +57,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		}
 		
 		c->insert(i);
-		c->m_box.expandBy(primBoxes[i]);
+		c->m_box.expandBy(ab);
 	}
 	
 	std::cout<<"\n ctx grid n cell "<<m_grid->size();
@@ -101,9 +99,9 @@ unsigned *BuildKdTreeContext::indices()
 	return m_indices.ptr();
 }
 
-BoundingBox *BuildKdTreeContext::primitiveBoxes()
+const sdb::VectorArray<BoundingBox> & BuildKdTreeContext::primitiveBoxes() const
 {
-	return m_primitiveBoxes.ptr();
+	return m_primitiveBoxes;
 }
 
 float BuildKdTreeContext::visitCost() const

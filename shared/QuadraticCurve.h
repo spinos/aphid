@@ -9,6 +9,7 @@
 #pragma once
 
 #include <BaseCurve.h>
+namespace aphid {
 
 class QuadraticCurve : public BaseCurve {
 public:
@@ -18,3 +19,5 @@ public:
 	virtual Vector3F interpolate(float param) const;
 private:
 };
+
+}

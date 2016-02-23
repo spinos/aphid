@@ -9,6 +9,9 @@
 
 #include "AnchorGroup.h"
 #include <Ray.h>
+
+namespace aphid {
+
 AnchorGroup::AnchorGroup() {m_activeAnchor = 0;}
 AnchorGroup::~AnchorGroup() {}
 
@@ -182,5 +185,7 @@ void AnchorGroup::setLastReleventIndex(unsigned val)
 unsigned AnchorGroup::getReleventIndex(unsigned idx) const
 {
     return m_relevantIndex[idx];
+}
+
 }
 //:~

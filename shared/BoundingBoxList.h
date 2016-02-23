@@ -9,6 +9,8 @@
 
 #pragma once
 #include <BoundingBox.h>
+namespace aphid {
+
 class BoundingBoxList {
 public:
 	BoundingBoxList();
@@ -20,3 +22,5 @@ private:
 	char *m_raw;
 	BoundingBox *m_aligned;
 };
+
+}

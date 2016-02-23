@@ -11,6 +11,9 @@
 #include <AllMath.h>
 #include <Patch.h>
 #include <Ray.h>
+
+namespace aphid {
+
 class PointInsidePolygonTest : public Patch {
 public:
 	PointInsidePolygonTest();
@@ -20,3 +23,5 @@ public:
 	static bool isPointInside(const Vector3F & px, const Vector3F & nor, Vector3F *vertices, const int nv);
 	bool intersect(Ray & ray, Vector3F & closestP);
 };
+
+}

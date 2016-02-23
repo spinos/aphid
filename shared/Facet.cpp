@@ -9,6 +9,8 @@
 #include <cmath>
 #include "Facet.h"
 
+namespace aphid {
+
 Facet::Facet() {}
 
 Facet::Facet(Vertex *a, Vertex *b, Vertex *c)
@@ -247,4 +249,6 @@ float Facet::cumputeArea(Vector3F *a, Vector3F *b, Vector3F *c)
 	l[2] = d[2].length();
 	
 	return (0.5*sqrt(l[0]*l[0]*l[2]*l[2] - (d[0].dot(d[2]))*(d[0].dot(d[2]))));
+}
+
 }

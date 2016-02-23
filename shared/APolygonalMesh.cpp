@@ -2,6 +2,9 @@
 #include "BaseBuffer.h"
 #include "APolygonalUV.h"
 #include "SHelper.h"
+
+namespace aphid {
+
 APolygonalMesh::APolygonalMesh() 
 {
     m_faceCounts = new BaseBuffer;
@@ -122,5 +125,7 @@ std::string APolygonalMesh::verbosestr() const
     
     sst<<"\n";
     return sst.str();
+}
+
 }
 //:~

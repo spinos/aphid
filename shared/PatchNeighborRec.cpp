@@ -9,6 +9,8 @@
 
 #include "PatchNeighborRec.h"
 
+namespace aphid {
+
 PatchNeighborRec::PatchNeighborRec() {}
 PatchNeighborRec::~PatchNeighborRec() {}
 
@@ -42,3 +44,5 @@ const unsigned & PatchNeighborRec::numCorners() const { return m_numCorners; }
 const int * PatchNeighborRec::edges() const { return m_edges.get(); }
 const int * PatchNeighborRec::corners() const { return m_corners.get(); }
 const char * PatchNeighborRec::tagCorners() const { return m_tagCorners.get(); }
+
+}

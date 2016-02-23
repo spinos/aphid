@@ -11,7 +11,9 @@
  */
 
 #include <HBase.h>
-class BaseBuffer;
+
+namespace aphid {
+
 class ATetrahedronMesh;
 
 class HTetrahedronMesh : public HBase {
@@ -28,4 +30,6 @@ protected:
 private:
 	
 };
+
+}
 #endif        //  #ifndef HTETRAHEDRONMESH_H

@@ -13,6 +13,9 @@
 #include "Matrix44F.h"
 
 #include <cmath>
+
+namespace aphid {
+
 VertexAdjacency::VertexAdjacency() {}
 VertexAdjacency::~VertexAdjacency() 
 {
@@ -495,4 +498,6 @@ void VertexAdjacency::verbose() const
 	for(it = m_neighbors.begin(); it < m_neighbors.end(); it++) {
 		printf(" %i ", (*it)->v->getIndex());
 	}
+}
+
 }

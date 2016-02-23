@@ -8,6 +8,7 @@
  */
 
 #include "CubeMesh.h"
+namespace aphid {
 
 CubeMesh::CubeMesh()
 {
@@ -76,3 +77,5 @@ CubeMesh::CubeMesh()
 }
 
 CubeMesh::~CubeMesh() {}
+
+}

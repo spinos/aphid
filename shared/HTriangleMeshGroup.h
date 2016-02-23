@@ -8,6 +8,9 @@
  */
 #pragma once
 #include "HTriangleMesh.h"
+
+namespace aphid {
+
 class ATriangleMeshGroup;
 class HTriangleMeshGroup : public HTriangleMesh {
 public:
@@ -18,3 +21,5 @@ public:
 	virtual char save(ATriangleMeshGroup * tri);
 	virtual char load(ATriangleMeshGroup * tri);
 };
+
+}

@@ -1,5 +1,5 @@
-#include <Vector3F.h>
 #include "BaseQuad.h"
+namespace aphid {
 
 BaseQuad::BaseQuad()
 {
@@ -31,4 +31,6 @@ Vector3F BaseQuad::interpolate(float u, float v) const
     Vector3F lo = _corners[0] * (1.f - u) + _corners[1] * u;
     Vector3F hi = _corners[3] * (1.f - u) + _corners[2] * u;
     return lo * (1.f - v) + hi * v;
+}
+
 }

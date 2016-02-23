@@ -28,9 +28,9 @@
  *  0 - 1
  *
  */
-#include <AllMath.h>
-#include <BoundingBox.h>
 #include "bezierPatch.h"
+
+namespace aphid {
 
 BezierPatch::BezierPatch() {}
 
@@ -423,5 +423,7 @@ void BezierPatch::tangentFrame(float u, float v, Matrix33F & frm) const
 	du.normalize();
 	
     frm.fill(side, up, du);
+}
+
 }
 //:~

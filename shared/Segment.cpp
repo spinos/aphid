@@ -8,7 +8,8 @@
  */
 
 #include "Segment.h"
-#include <AllMath.h>
+namespace aphid {
+
 Segment::Segment() 
 {
 	m_length = 0.f;
@@ -57,4 +58,6 @@ float Segment::distanceTo(const Vector3F & po, Vector3F & closestP) const
 const float & Segment::length() const
 {
 	return m_length;
+}
+
 }

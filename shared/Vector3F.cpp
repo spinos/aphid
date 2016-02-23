@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+namespace aphid {
 
 Vector3F Vector3F::XAxis(1.f, 0.f, 0.f);
 Vector3F Vector3F::YAxis(0.f, 1.f, 0.f);
@@ -335,4 +336,6 @@ const std::string Vector3F::str() const
 	sst.str("");
     sst<<"("<<x<<","<<y<<","<<z<<")";
 	return sst.str();
+}
+
 }

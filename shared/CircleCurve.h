@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BaseCurve.h>
+namespace aphid {
 
 class CircleCurve : public BaseCurve {
 public:
@@ -21,3 +22,5 @@ public:
 private:
 	float m_radius, m_eccentricity;
 };
+
+}

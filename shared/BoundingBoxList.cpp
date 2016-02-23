@@ -10,6 +10,8 @@
 #include "BoundingBoxList.h"
 #include <iostream>
 
+namespace aphid {
+
 BoundingBoxList::BoundingBoxList() {m_raw = 0;}
 BoundingBoxList::~BoundingBoxList() 
 {
@@ -25,4 +27,6 @@ void BoundingBoxList::create(const unsigned &num)
 BoundingBox *BoundingBoxList::ptr()
 {
 	return m_aligned;
+}
+
 }

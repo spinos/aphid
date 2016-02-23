@@ -9,6 +9,8 @@
 
 #include "IndicesHDataset.h"
 #include <iostream>
+namespace aphid {
+
 IndicesHDataset::IndicesHDataset(const std::string & path) : HDataset(path)
 {
 }
@@ -30,5 +32,7 @@ int IndicesHDataset::numIndices() const
 hid_t IndicesHDataset::dataType()
 {
 	return H5T_NATIVE_INT;
+}
+
 }
 

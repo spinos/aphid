@@ -9,7 +9,7 @@
 #include <iostream>
 #include "Triangle.h"
 #include <Plane.h>
-//#include <maya/MGlobal.h>
+namespace aphid {
 
 void project_point_on_line(const Vector3F & p, const Vector3F & lineDir, const Vector3F & onLine, float & l)
 {
@@ -394,3 +394,4 @@ const Vector3F Triangle::corner(const int & i) const
     return p2;
 }
 
+}

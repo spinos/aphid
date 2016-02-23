@@ -8,6 +8,7 @@
  */
 
 #include "AFrameRange.h"
+namespace aphid {
 
 int AFrameRange::FirstFrame = 0;
 int AFrameRange::LastFrame = 0;
@@ -28,4 +29,6 @@ bool AFrameRange::isValid() const
 
 int AFrameRange::numFramesInRange() const
 { return LastFrame - FirstFrame + 1; }
+
+}
 

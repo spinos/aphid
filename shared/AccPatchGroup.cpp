@@ -16,6 +16,8 @@
 #include <BiLinearInterpolate.h>
 #include <InverseBilinearInterpolate.h>
 
+namespace aphid {
+
 AccPatchGroup::AccPatchGroup() : m_bezier(0), m_hirarchy(0)
 {
 	m_numHirarchy = 0;
@@ -114,4 +116,6 @@ void AccPatchGroup::setActiveHirarchy(unsigned idx)
 void AccPatchGroup::setRebuildPatchHirarchy()
 {
 	for(unsigned i = 0; i < m_numHirarchy; i++) m_hirarchy[i].setRebuild();
+}
+
 }

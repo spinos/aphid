@@ -1,6 +1,8 @@
 #include "HPolygonalUV.h"
 #include <APolygonalUV.h>
 
+namespace aphid {
+
 HPolygonalUV::HPolygonalUV(const std::string & path) : HBase(path) 
 {}
 
@@ -67,4 +69,6 @@ char HPolygonalUV::load(APolygonalUV * poly)
 	readIntData(".uvid", poly->numIndices(), poly->indices());
 	
 	return 1;
+}
+
 }

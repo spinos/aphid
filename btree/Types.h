@@ -10,6 +10,8 @@
 #pragma once
 #include <string>
 #include <Vector3F.h>
+namespace aphid {
+
 namespace sdb {
 
 class Coord2
@@ -136,3 +138,5 @@ public:
 };
 
 } // end namespace sdb
+
+}

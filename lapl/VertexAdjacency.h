@@ -9,7 +9,9 @@
 #pragma once
 #include <AllMath.h>
 #include <map>
-#include "Vertex.h"
+#include <Vertex.h>
+
+namespace aphid {
 
 class Edge;
 class Facet;
@@ -81,3 +83,5 @@ private:
 	std::vector<VertexNeighbor *>::iterator m_neighborIt;
 	std::map<int,int>::iterator m_orderedNeighborIt;
 };
+
+}

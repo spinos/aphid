@@ -15,6 +15,9 @@
 #include <BiLinearInterpolate.h>
 #include <InverseBilinearInterpolate.h>
 #include <BezierPatchHirarchy.h>
+
+namespace aphid {
+
 AccPatchMesh::AccPatchMesh() 
 {
 	
@@ -266,5 +269,7 @@ void AccPatchMesh::getPatchHir(unsigned idx, std::vector<Vector3F> & dst)
 {
 	setActiveHirarchy(idx);
 	recursiveBezierPatch(1, 0, dst);
+}
+
 }
 //:~

@@ -1,4 +1,5 @@
 #pragma once
+namespace aphid {
 
 class BaseState {
 public:
@@ -11,3 +12,5 @@ public:
 private:
     bool m_enabled;
 };
+
+}

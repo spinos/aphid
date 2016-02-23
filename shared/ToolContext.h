@@ -1,4 +1,5 @@
 #pragma once
+namespace aphid {
 
 class ToolContext {
 public:
@@ -63,3 +64,5 @@ public:
 private:
     InteractMode m_ctx, m_preCtx;
 };
+
+}

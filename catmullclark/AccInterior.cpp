@@ -8,6 +8,7 @@
  */
 
 #include "AccInterior.h"
+namespace aphid {
 
 Vector3F AccInterior::computePosition() const
 {
@@ -27,4 +28,6 @@ Vector3F AccInterior::computeNormal() const
 	return res / (_valence + 5.f);
 	res.normalize();
 	return res;
+}
+
 }

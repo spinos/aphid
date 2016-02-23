@@ -13,6 +13,9 @@
 #include <map>
 #include <AllMath.h>
 #include <BoundingBox.h>
+
+namespace aphid {
+
 class HBase;
 class HDataset;
 class CacheFile : public HFile, public BaseState {
@@ -61,3 +64,4 @@ private:
 	std::map<std::string, unsigned> m_cachedSlices;
 };
 
+}

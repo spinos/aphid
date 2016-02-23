@@ -4,6 +4,8 @@
 #include <APolygonalUV.h>
 #include <HPolygonalUV.h>
 
+namespace aphid {
+
 HPolygonalMesh::HPolygonalMesh(const std::string & path): HBase(path)
 {}
 
@@ -107,4 +109,6 @@ char HPolygonalMesh::load(APolygonalMesh * poly)
 		poly->addUV(*it, auv);
 	}
     return 1;
+}
+
 }

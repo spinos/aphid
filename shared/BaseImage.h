@@ -8,6 +8,8 @@
  */
 #pragma once
 #include <BaseFile.h>
+namespace aphid {
+
 class BaseImage : public BaseFile {
     	int m_imageWidth, m_imageHeight;
 public:
@@ -48,3 +50,5 @@ private:
     ChannelRank m_channelRank;
 	
 };
+
+}

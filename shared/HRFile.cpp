@@ -9,6 +9,9 @@
 
 #include "HRFile.h"
 #include <HObject.h>
+
+namespace aphid {
+
 HRFile::HRFile() : HFile() {}
 HRFile::HRFile(const char * name) : HFile(name) {}
 
@@ -22,4 +25,6 @@ bool HRFile::doRead(const std::string & fileName)
 	setDocument(HObject::FileIO);
 
 	return true;
+}
+
 }

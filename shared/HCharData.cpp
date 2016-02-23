@@ -8,6 +8,7 @@
  */
 
 #include "HCharData.h"
+namespace aphid {
 
 HCharData::HCharData(const std::string & path)  : HDataset(path) {}
 HCharData::~HCharData() {}
@@ -27,4 +28,6 @@ int HCharData::numChars() const
 hid_t HCharData::dataType()
 {
 	return H5T_NATIVE_CHAR;
+}
+
 }

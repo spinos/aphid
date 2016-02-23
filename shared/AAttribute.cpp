@@ -9,6 +9,8 @@
 
 #include "AAttribute.h"
 
+namespace aphid {
+
 AAttribute::AAttribute() 
 {
 	m_longName = "unknown";
@@ -260,4 +262,6 @@ bool ABooleanNumericAttribute::value() const
 
 char ABooleanNumericAttribute::asChar() const
 { return (char)value(); }
+
+}
 //:~

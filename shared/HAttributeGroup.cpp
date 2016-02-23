@@ -10,6 +10,8 @@
 #include "HAttributeGroup.h"
 #include <sstream>
 
+namespace aphid {
+
 HAttributeGroup::HAttributeGroup(const std::string & path) : HBase(path) {}
 HAttributeGroup::~HAttributeGroup() {}
 
@@ -360,4 +362,6 @@ ANumericAttribute * AAttributeWrap::createNumeric(int numericType)
 
 AAttribute * AAttributeWrap::attrib()
 { return m_attrib; }
+
+}
 //:~

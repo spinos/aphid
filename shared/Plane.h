@@ -10,6 +10,8 @@
 #pragma once
 #include <AllMath.h>
 #include <Ray.h>
+namespace aphid {
+
 class Plane {
 public:
 	Plane();
@@ -29,3 +31,5 @@ public:
 private:
 	float m_a, m_b, m_c, m_d;
 };
+
+}

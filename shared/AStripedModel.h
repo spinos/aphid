@@ -9,6 +9,9 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+ 
+namespace aphid {
+
 class BaseBuffer;
 
 class AStripedModel {
@@ -30,4 +33,5 @@ private:
 	BaseBuffer * m_iDrift;
 };
 
+}
 #endif // ASTRIPEDMODEL_H

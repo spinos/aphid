@@ -12,6 +12,8 @@
 #include <Ray.h>
 #include <line_math.h>
 
+namespace aphid {
+
 float BaseCurve::RayIntersectionTolerance = 1.f;
 
 BaseCurve::BaseCurve() 
@@ -174,3 +176,5 @@ bool BaseCurve::intersectRay(unsigned icomponent, const Ray * r)
 
 const float * BaseCurve::cvV() const
 { return (const float *)m_cvs; }
+
+}

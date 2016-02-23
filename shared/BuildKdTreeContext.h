@@ -9,13 +9,11 @@
 
 #pragma once
 #include <BoundingBox.h>
-#include <KdTreeNodeArray.h>
-#include <BoundingBoxList.h>
 #include <IndexList.h>
 #include <SplitEvent.h>
 #include <BuildKdTreeStream.h>
 #include <WorldGrid.h>
-#include <Array.h>
+#include <VectorArray.h>
 
 class GroupCell : public sdb::Sequence<unsigned>
 {
@@ -38,7 +36,7 @@ public:
 	const unsigned & getNumPrimitives() const;
 
 	unsigned *indices();
-	BoundingBox * primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & primitiveBoxes() const;
 	
 	void verbose() const;
 
@@ -59,6 +57,6 @@ private:
 private:
 	BoundingBox m_bbox;
 	IndexList m_indices;
-	BoundingBoxList m_primitiveBoxes;
+	sdb::VectorArray<BoundingBox> m_primitiveBoxes;
 	unsigned m_numPrimitive;
 };

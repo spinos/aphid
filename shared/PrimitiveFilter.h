@@ -1,5 +1,7 @@
 #pragma once
 
+namespace aphid {
+
 class PrimitiveFilter {
 public:
     enum ComponentType {
@@ -16,4 +18,6 @@ public:
 private:
     ComponentType m_componentType;
 };
+
+}
 

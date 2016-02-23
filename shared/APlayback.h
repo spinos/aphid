@@ -4,6 +4,8 @@
 #include "AFrameRange.h"
 #include <string>
 
+namespace aphid {
+
 class APlayback : public AFrameRange {
 public:
     APlayback();
@@ -37,5 +39,6 @@ private:
     int m_numFramesPlayed;
 };
 
+}
 #endif        //  #ifndef APLAYBACK_H
 

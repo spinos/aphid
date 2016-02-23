@@ -3,6 +3,8 @@
 
 #include <HBase.h>
 
+namespace aphid {
+
 class AField;
 class TypedBuffer;
 class HField : public HBase {
@@ -26,5 +28,7 @@ protected:
 private:
 	
 };
+
+}
 #endif        //  #ifndef HFIELD_H
 

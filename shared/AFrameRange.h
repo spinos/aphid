@@ -9,6 +9,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+namespace aphid {
 
 class AFrameRange {
 public:
@@ -22,4 +23,6 @@ public:
 	static int LastFrame;
 	static int SamplesPerFrame;
 };
+
+}
 #endif        //  #ifndef AFRAMERANGE_H

@@ -12,6 +12,8 @@
 #include <VertexAdjacency.h>
 #include <AllGeometry.h>
 
+namespace aphid {
+
 ComponentConversion::ComponentConversion() {}
 
 void ComponentConversion::setTopology(MeshTopology * topo)
@@ -156,5 +158,7 @@ Vector3F ComponentConversion::vertexPosition(unsigned idx) const
 {
 	VertexAdjacency & adj = m_topology->getAdjacency(idx);
 	return *adj.m_v;
+}
+
 }
 

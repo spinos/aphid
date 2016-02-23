@@ -1,6 +1,9 @@
 #include "HTransform.h"
 #include "BaseTransform.h"
 #include "Matrix44F.h"
+
+namespace aphid {
+
 HTransform::HTransform(const std::string & path) : HBase(path) 
 {}
 
@@ -84,5 +87,7 @@ char HTransform::load(BaseTransform * tm)
 		tm->setScale(t3);
 
     return 1;
+}
+
 }
 //:~

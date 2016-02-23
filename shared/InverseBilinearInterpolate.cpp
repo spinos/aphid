@@ -14,6 +14,8 @@
 
 #include "InverseBilinearInterpolate.h"
 
+namespace aphid {
+
 InverseBilinearInterpolate::InverseBilinearInterpolate() {}
 InverseBilinearInterpolate::~InverseBilinearInterpolate() {}
 
@@ -64,4 +66,6 @@ Vector2F InverseBilinearInterpolate::solve(Vector2F M1, Vector2F M2, Vector2F b,
 	float det = M1.cross(M2);
 	if(safeInvert || det != 0.f) det = 1.f/det;
 	return Vector2F(b.cross(M2), -b.cross(M1)) * det;
+}
+
 }

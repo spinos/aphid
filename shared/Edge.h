@@ -10,6 +10,9 @@
 #pragma once
 #include <Vertex.h>
 #include <GeoElement.h>
+
+namespace aphid {
+
 class Edge: public GeoElement {
 public:
 	Edge();
@@ -46,3 +49,5 @@ private:
 	char *face;
 	Edge *identicalTwin;
 };
+
+}

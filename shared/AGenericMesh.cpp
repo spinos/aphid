@@ -10,6 +10,8 @@
 #include "AGenericMesh.h"
 #include "BaseBuffer.h"
 
+namespace aphid {
+
 AGenericMesh::AGenericMesh() 
 {
 	m_points = new BaseBuffer;
@@ -134,4 +136,6 @@ void AGenericMesh::moveIntoSpace(const Matrix44F & m)
 
 BaseBuffer * AGenericMesh::pointsBuf() const
 { return m_points; }
+
+}
 //:~

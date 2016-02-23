@@ -10,6 +10,8 @@
 #include "HAttributeEntry.h"
 #include <AllHdf.h>
 
+namespace aphid {
+
 HAttributeEntry::HAttributeEntry(const std::string & path) : HBase(path) {}
 HAttributeEntry::~HAttributeEntry() {}
 
@@ -107,5 +109,7 @@ char HFlt3AttributeEntry::load(Vector3F * dst)
 {
     readFloatAttr(".def_val", (float *)dst);
     return 1;
+}
+
 }
 //:~

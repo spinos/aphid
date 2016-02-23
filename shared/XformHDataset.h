@@ -7,9 +7,13 @@
  *
  */
 #include <HDataset.h>
+namespace aphid {
+
 class XformHDataset : public HDataset {
 public:
 	XformHDataset(const std::string & path);
 	virtual ~XformHDataset();
 	virtual char read(float *data);
 };
+
+}

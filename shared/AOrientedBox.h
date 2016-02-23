@@ -9,6 +9,9 @@
 #pragma once
 #include <AllMath.h>
 #include <Geometry.h>
+
+namespace aphid {
+
 class AOrientedBox : public Geometry {
 public:
 	AOrientedBox();
@@ -36,3 +39,5 @@ private:
 	Vector3F m_center;
 	Vector3F m_extent;
 };
+
+}

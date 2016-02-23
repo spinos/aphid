@@ -9,6 +9,7 @@
 #pragma once
 #include <AllMath.h>
 #include <Geometry.h>
+namespace aphid {
 
 struct PatchSplitContext {
 	Vector2F patchUV[4];
@@ -52,3 +53,5 @@ public:
 	Vector3F _binormals[12];
 	Vector2F _texcoords[4];
 };
+
+}

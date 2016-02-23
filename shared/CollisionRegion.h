@@ -12,6 +12,8 @@
 #include <Patch.h>
 #include <ActiveRegion.h>
 #include <deque>
+namespace aphid {
+
 class IntersectionContext;
 class MeshTopology;
 class AccPatchMesh;
@@ -82,3 +84,5 @@ private:
 	float * m_perVertexFloat;
 	Vector3F * m_perVertexVector;
 };
+
+}

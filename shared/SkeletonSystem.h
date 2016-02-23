@@ -2,6 +2,9 @@
 
 #include <AllMath.h>
 #include <Ray.h>
+
+namespace aphid {
+
 class SkeletonJoint;
 class BaseTransform;
 class SkeletonPose;
@@ -37,4 +40,5 @@ private:
     std::vector<SkeletonJoint *> m_joints;
 };
 
+}
 

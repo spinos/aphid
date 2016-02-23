@@ -13,6 +13,9 @@
 #include <sstream>
 #include <iostream>
 #include <CurveGroup.h>
+
+namespace aphid {
+
 HCurveGroup::HCurveGroup(const std::string & path) : HBase(path) 
 {
 }
@@ -78,5 +81,7 @@ char HCurveGroup::load(CurveGroup * curve)
 	curve->verbose();
 	
 	return 1;
+}
+
 }
 //:~

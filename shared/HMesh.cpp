@@ -13,6 +13,9 @@
 #include <sstream>
 #include <iostream>
 #include <BaseMesh.h>
+
+namespace aphid {
+
 HMesh::HMesh(const std::string & path) : HBase(path) 
 {
 }
@@ -165,5 +168,7 @@ char HMesh::loadFaceTag(BaseMesh * mesh, const std::string & tagName, const std:
 		for(unsigned i =0; i < mesh->getNumFaces(); i++) g[i] = 1;
 	}
 	return 1;
+}
+
 }
 //:~

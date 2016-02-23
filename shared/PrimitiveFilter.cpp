@@ -1,5 +1,7 @@
 #include "PrimitiveFilter.h"
 
+namespace aphid {
+
 PrimitiveFilter::PrimitiveFilter() {m_componentType = TFace;}
 
 void PrimitiveFilter::setComponentFilterType(ComponentType ft)
@@ -10,4 +12,6 @@ void PrimitiveFilter::setComponentFilterType(ComponentType ft)
 PrimitiveFilter::ComponentType PrimitiveFilter::getComponentFilterType() const
 {
     return m_componentType;
+}
+
 }

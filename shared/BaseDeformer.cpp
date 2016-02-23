@@ -1,5 +1,7 @@
 #include "BaseDeformer.h"
 
+namespace aphid {
+
 BaseDeformer::BaseDeformer() : m_deformedV(0), m_restV(0) 
 {
 	m_numVertices = 0;
@@ -65,4 +67,6 @@ BoundingBox BaseDeformer::calculateBBox() const
 		b.updateMax(m_deformedV[i]);
 	}
     return b;
+}
+
 }

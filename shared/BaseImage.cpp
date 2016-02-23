@@ -9,6 +9,8 @@
 
 #include "BaseImage.h"
 #include <iostream>
+namespace aphid {
+
 BaseImage::BaseImage()
 {
 }
@@ -112,4 +114,6 @@ void BaseImage::verbose() const
 	
 	if(isOpened())
 		std::cout<<" image is verified\n";
+}
+
 }

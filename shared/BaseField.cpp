@@ -1,5 +1,8 @@
 #include "BaseField.h"
 #include "BaseMesh.h"
+
+namespace aphid {
+
 BaseField::BaseField() : m_color(0) 
 {
 	m_activeValue = 0;
@@ -59,4 +62,6 @@ void BaseField::plotColor(unsigned idx)
 		m_color[i].z = 1.f - v[i];
 		m_color[i].y = .3f;
 	}
+}
+
 }

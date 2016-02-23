@@ -9,8 +9,12 @@
 
 #pragma once
 #include <AllMath.h>
+namespace aphid {
+
 class LinearInterpolate {
 public:
 	LinearInterpolate();
 	float interpolate(float u, float * src) const;
 };
+
+}

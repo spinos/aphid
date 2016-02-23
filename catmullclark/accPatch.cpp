@@ -10,6 +10,8 @@
 #include "accPatch.h"
 #include "accStencil.h"
 
+namespace aphid {
+
 AccPatch::AccPatch() {}
 AccPatch::~AccPatch() {}
 
@@ -71,4 +73,6 @@ void AccPatch::processInteriorControlPoints(int i)
 	AccInterior &topo = stencil->m_interiors[i];
 	_contorlPoints[j] = topo.computePosition();
 	_normals[j] = topo.computeNormal();
+}
+
 }

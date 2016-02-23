@@ -8,6 +8,7 @@
  */
 
 #include "SkeletonJoint.h"
+namespace aphid {
 
 SkeletonJoint::SkeletonJoint(BaseTransform * parent) : BaseTransform(parent) 
 {}
@@ -65,4 +66,6 @@ float SkeletonJoint::length() const
 	
 	Vector3F cp = child(0)->translation();
 	return cp.x;
+}
+
 }

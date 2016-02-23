@@ -13,8 +13,9 @@
 #include <sstream>
 #include <iostream>
 #include <CurveGroup.h>
-#include <BaseBuffer.h>
 #include <ATetrahedronMesh.h>
+
+namespace aphid {
 
 HTetrahedronMesh::HTetrahedronMesh(const std::string & path) : HBase(path) 
 {
@@ -101,5 +102,7 @@ char HTetrahedronMesh::readAftCreation(ATetrahedronMesh * tetra)
     tetra->setVolume(vlm);
     
     return 1;
+}
+
 }
 //:~

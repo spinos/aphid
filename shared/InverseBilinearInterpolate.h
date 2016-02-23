@@ -8,6 +8,7 @@
  */
 
 #include <AllMath.h>
+namespace aphid {
 
 class InverseBilinearInterpolate {
 public:
@@ -22,3 +23,5 @@ private:
 	Matrix44F m_space;
 	Vector2F m_E, m_F, m_G;
 };
+
+}

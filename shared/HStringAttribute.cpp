@@ -9,6 +9,8 @@
 
 #include "HStringAttribute.h"
 
+namespace aphid {
+
 HStringAttribute::HStringAttribute(const std::string & path) : HAttribute(path) {}
 HStringAttribute::~HStringAttribute() {}
 	
@@ -36,4 +38,6 @@ char HStringAttribute::read(std::string & str)
 	str = std::string(t);
 	delete[] t;
 	return 1;
+}
+
 }

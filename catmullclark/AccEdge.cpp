@@ -9,6 +9,8 @@
 
 #include "AccEdge.h"
 
+namespace aphid {
+
 void AccEdge::reset()
 {
 	_isZeroLength = 0;
@@ -83,4 +85,6 @@ Vector3F AccEdge::computeNormal(int side) const
 
 	res.normalize();
 	return res;
+}
+
 }

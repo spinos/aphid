@@ -8,6 +8,7 @@
  */
 
 #include "PyramidMesh.h"
+namespace aphid {
 
 PyramidMesh::PyramidMesh()
 {
@@ -34,5 +35,7 @@ PyramidMesh::PyramidMesh()
 
 PyramidMesh::~PyramidMesh()
 {
+
+}
 
 }

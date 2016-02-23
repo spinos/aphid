@@ -12,6 +12,8 @@
 #include "BarycentricCoordinate.h"
 #include <iostream>
 
+namespace aphid {
+
 ATriangleMesh::ATriangleMesh() 
 {
 }
@@ -183,5 +185,7 @@ bool ATriangleMesh::intersectBox(unsigned icomponent, const BoundingBox & box)
 	m_componentTriangle.x()[2] = p[v[2]];
 	
 	return gjk::Intersect1<gjk::TriangleSet, BoundingBox>::Evaluate(m_componentTriangle, box);
+}
+
 }
 //:~

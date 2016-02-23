@@ -7,6 +7,8 @@
  *
  */
 #include "BNode.h"
+namespace aphid {
+
 namespace sdb {
     
 int TreeNode::MaxNumKeysPerNode = 8;
@@ -51,4 +53,6 @@ void TreeNode::setFirstIndex(Entity * another)
 { m_first = another; }
 
 } // end of namespace sdb
+
+}
 //~:

@@ -8,6 +8,7 @@
 #include <cmath>
 #include "Matrix33F.h"
 #include <iostream>
+namespace aphid {
 
 Matrix33F Matrix33F::IdentityMatrix;
 
@@ -575,5 +576,7 @@ Vector3F Matrix33F::SolveAxb(const Matrix33F & A, const Vector3F & b)
 	sol.y = ( m[1][3]                   - sol.z * m[1][2] ) / m[1][1];
 	sol.x = ( m[0][3] - sol.y * m[0][1] - sol.z * m[0][2] ) / m[0][0];
 	return sol;
+}
+
 }
 //:~

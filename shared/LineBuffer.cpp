@@ -1,4 +1,5 @@
 #include "LineBuffer.h"
+namespace aphid {
 
 LineBuffer::LineBuffer() 
 {
@@ -35,4 +36,6 @@ Vector3F * LineBuffer::vertices()
 unsigned LineBuffer::numVertices() const
 {
     return m_numVertices;
+}
+
 }

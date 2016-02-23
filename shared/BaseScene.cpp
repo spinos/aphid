@@ -8,8 +8,11 @@
  */
 
 #include "BaseScene.h"
+namespace aphid {
 
 BaseScene::BaseScene() : BaseFile("untitled") {}
 
 BaseScene::~BaseScene() {}
+
+}
 

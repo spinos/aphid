@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BaseMesh.h>
+namespace aphid {
 
 class DiscMesh : public BaseMesh {
 public:
@@ -16,3 +17,5 @@ public:
 	virtual ~DiscMesh();
 private:	
 };
+
+}

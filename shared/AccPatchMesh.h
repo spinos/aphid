@@ -11,6 +11,9 @@
 #include <PatchMesh.h>
 #include <Patch.h>
 #include <AccPatchGroup.h>
+
+namespace aphid {
+
 class BezierPatch;
 class AccPatch;
 class MeshTopology;
@@ -41,3 +44,5 @@ private:
 	void recursiveBezierClosestPoint(const Vector3F & origin, BezierPatch* patch, IntersectionContext * ctx, const PatchSplitContext split, int level) const;
 	void recursiveBezierPushPlane(BezierPatch* patch, Patch::PushPlaneContext * ctx, int level) const;
 };
+
+}

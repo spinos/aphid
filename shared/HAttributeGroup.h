@@ -11,6 +11,8 @@
 #include "HBase.h"
 #include "AAttribute.h"
 
+namespace aphid {
+
 class AAttributeWrap {
 public:
 	AAttributeWrap();
@@ -52,3 +54,5 @@ protected:
 	
 private:
 };
+
+}

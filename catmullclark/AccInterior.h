@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Vector3F.h>
+namespace aphid {
 
 class AccInterior {
 public:
@@ -23,3 +24,5 @@ public:
 private:
 
 };
+
+}

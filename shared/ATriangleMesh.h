@@ -11,6 +11,8 @@
  */
 #include "AGenericMesh.h"
 
+namespace aphid {
+
 class ATriangleMesh : public AGenericMesh {
 	
 	gjk::TriangleSet m_componentTriangle;
@@ -40,4 +42,6 @@ protected:
 private:
 	
 };
+
+}
 #endif        //  #ifndef ATRIANGLEMESH_H

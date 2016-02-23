@@ -11,6 +11,8 @@
  */
 #include <deque>
 
+namespace aphid {
+
 class AAnimationKey {
 public:
 	float _key;
@@ -48,4 +50,6 @@ private:
 	std::deque<AAnimationKey> m_keys;
 	CurveType m_curveType;
 };
+
+}
 #endif        //  #ifndef AANIMATIONCURVE_H

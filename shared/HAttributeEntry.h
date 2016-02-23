@@ -10,6 +10,7 @@
 #pragma once
 #include <HBase.h>
 #include <Vector3F.h>
+namespace aphid {
 
 class HAttributeEntry : public HBase {
 public:
@@ -79,3 +80,4 @@ protected:
 private:
 };
 
+}

@@ -5,6 +5,9 @@
 #include <Plane.h>
 #include <MeshTopology.h>
 #include <VertexAdjacency.h>
+
+namespace aphid {
+
 MeshManipulator::MeshManipulator() 
 {
     m_intersect = new IntersectionContext;
@@ -108,4 +111,6 @@ void MeshManipulator::smoothSurface(const Ray * r)
 			m_intersect->m_componentIdx = neighbor->v->getIndex();
 		}
     }
+}
+
 }

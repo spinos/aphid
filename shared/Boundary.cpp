@@ -8,6 +8,7 @@
  */
 
 #include "Boundary.h"
+namespace aphid {
 
 Boundary::Boundary() {}
 
@@ -22,3 +23,5 @@ BoundingBox * Boundary::bbox()
 
 void Boundary::updateBBox(const BoundingBox & box)
 { m_bbox.expandBy(box); }
+
+}
