@@ -9,6 +9,8 @@
 
 #include "ViewFrame.h"
 
+namespace aphid {
+
 void RectangleI::set(int x0, int y0, int x1, int y1)
 {
 	m_v[0] = x0; m_v[1] = y0;
@@ -90,4 +92,6 @@ void ViewFrame::split(ViewFrame & childLft, ViewFrame & childRgt) const
 
 int ViewFrame::numPixels() const
 { return m_rect.area(); }
+
+}
 //:~

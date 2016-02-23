@@ -10,6 +10,7 @@
 #pragma once
 
 #include <AllMath.h>
+namespace aphid {
 
 class AdaptableStripeBuffer {
 public:
@@ -51,3 +52,5 @@ private:
 	Vector3F * m_curCol;
 	float * m_curWidth;
 };
+
+}

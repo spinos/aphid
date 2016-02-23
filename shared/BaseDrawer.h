@@ -13,7 +13,7 @@
 #include <BoundingRectangle.h>
 #include <GProfile.h>
 
-using namespace aphid;
+namespace aphid {
 
 class BaseDrawer {
 public:
@@ -83,3 +83,5 @@ private:
     char m_wired;
 	Vector3F m_activeColor, m_inertColor;
 };
+
+}

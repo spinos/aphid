@@ -8,7 +8,8 @@
  */
 #pragma once
 #include <AllMath.h>
-using namespace aphid;
+
+namespace aphid {
 
 class BaseCamera {
 public:
@@ -57,3 +58,5 @@ public:
 	float fHorizontalAperture;
 	float m_nearClipPlane, m_farClipPlane;
 };
+
+}

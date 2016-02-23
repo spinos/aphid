@@ -15,6 +15,8 @@
 #include <WorldGrid.h>
 #include <VectorArray.h>
 
+namespace aphid {
+
 class GroupCell : public sdb::Sequence<unsigned>
 {
 public:
@@ -60,3 +62,5 @@ private:
 	sdb::VectorArray<BoundingBox> m_primitiveBoxes;
 	unsigned m_numPrimitive;
 };
+
+}

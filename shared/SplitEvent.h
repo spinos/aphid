@@ -8,14 +8,13 @@
  */
 #pragma once
 #include <BoundingBox.h>
-#include <IndexArray.h>
-#include <PrimitiveArray.h>
+
+namespace aphid {
 
 class BuildKdTreeContext;
 
 class SplitEvent {
 public:
-	typedef Primitive* PrimitivePtr;
 	SplitEvent();
 	
 	void setEmpty();
@@ -57,3 +56,5 @@ private:
 	unsigned m_leftNumPrim, m_rightNumPrim;
 	char m_isEmpty;
 };
+
+}

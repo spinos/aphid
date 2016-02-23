@@ -11,6 +11,9 @@
  */
 #include <KdTree.h>
 #include <map>
+
+namespace aphid {
+
 class GeometryArray;
 class KdCluster : public KdTree {
 public:
@@ -43,4 +46,6 @@ private:
 	std::map<KdTreeNode *, unsigned > m_nodeGroupInd;
 	unsigned m_currentGroup;
 };
+
+}
 #endif        //  #ifndef KDCLUSTER_H

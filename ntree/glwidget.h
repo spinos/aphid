@@ -6,7 +6,7 @@
 #include <KdEngine.h>
 #include <KdScreen.h>
 
-class TestBox : public BoundingBox
+class TestBox : public aphid::BoundingBox
 {
 public:
     TestBox() {}
@@ -17,7 +17,9 @@ public:
     { return * this; }
 };
 
-class GLWidget : public Base3DView
+using namespace aphid;
+
+class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
 
@@ -50,7 +52,7 @@ private slots:
     
 private:
 	KdEngine<TestBox> m_engine;
-	VectorArray<TestBox> * m_source;
+	sdb::VectorArray<TestBox> * m_source;
 	KdNTree<TestBox, KdNode4 > * m_tree;
 	Frustum m_frustum;
 	int m_treeletColI;

@@ -1,6 +1,8 @@
 #pragma once
 #include <KdTreeNode.h>
 
+namespace aphid {
+
 /// http://www.highperformancegraphics.org/previous/www_2012/media/Papers/HPG2012_Papers_Heitz.pdf
 
 template <int NumLevels>
@@ -75,3 +77,5 @@ int KdNNode<NumLevels>::BranchingFactor = NumLevels;
 
 typedef KdNNode<3> KdNode3;
 typedef KdNNode<4> KdNode4;
+
+}

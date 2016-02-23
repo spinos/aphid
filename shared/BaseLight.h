@@ -9,6 +9,9 @@
 
 #pragma once
 #include "BaseTransform.h"
+
+namespace aphid {
+
 class BaseLight : public BaseTransform {
 public:
 	BaseLight();
@@ -34,3 +37,5 @@ private:
 	int m_samples;
 	bool m_castShadow;
 };
+
+}

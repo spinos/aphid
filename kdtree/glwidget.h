@@ -2,7 +2,7 @@
 #define GLWIDGET_H
 
 #include <Base3DView.h>
-class SceneContainer;
+#include "SceneContainer.h"
 
 class GLWidget : public Base3DView
 {

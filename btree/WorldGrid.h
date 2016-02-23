@@ -11,6 +11,9 @@
 #pragma once
 #include <Sequence.h>
 #include <BoundingBox.h>
+
+namespace aphid {
+
 namespace sdb {
 
 template<typename ChildType, typename ValueType>
@@ -186,3 +189,5 @@ ChildType * WorldGrid<ChildType, ValueType>::findCell(const Coord3 & c)
 }
 
 } //end namespace sdb
+
+}

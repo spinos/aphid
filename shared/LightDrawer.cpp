@@ -8,6 +8,9 @@
  */
 
 #include "LightDrawer.h"
+
+namespace aphid {
+
 LightDrawer::LightDrawer() {}
 LightDrawer::~LightDrawer() {}
 
@@ -64,4 +67,6 @@ void LightDrawer::drawSquareLight(SquareLight * l) const
 	useSpace(l->space());
 	drawSquare(l->square());
 	glPopMatrix();
+}
+
 }

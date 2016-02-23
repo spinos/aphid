@@ -14,6 +14,8 @@
 #include <iostream>
 #include <sstream>
 
+namespace aphid {
+
 int KdTree::MaxBuildLevel = 32;
 unsigned KdTree::NumPrimitivesInLeafThreashold = 32;
 
@@ -489,4 +491,6 @@ bool KdTree::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 
 std::string KdTree::buildLog() const
 { return m_buildLogStr; }
+
+}
 //:~

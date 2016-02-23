@@ -8,25 +8,27 @@
  */
 
 #include "GeoDrawer.h"
-#include <BaseTransform.h>
-#include <TransformManipulator.h>
-#include <SkeletonJoint.h>
-#include <SelectionArray.h>
-#include <Anchor.h>
 #include <GeodesicSphereMesh.h>
 #include <PyramidMesh.h>
 #include <CubeMesh.h>
 #include <CircleCurve.h>
 #include <DiscMesh.h>
-#include <CurveBuilder.h>
 #include <Geometry.h>
 #include <GeometryArray.h>
 #include <ATriangleMesh.h>
 #include <ATetrahedronMesh.h>
-#include <APointCloud.h>
-#include <tetrahedron_math.h>
-#include <CartesianGrid.h>
 #include <AOrientedBox.h>
+#include <tetrahedron_math.h>
+//#include <BaseTransform.h>
+//#include <TransformManipulator.h>
+//#include <SkeletonJoint.h>
+//#include <SelectionArray.h>
+//#include <Anchor.h>
+//#include <CurveBuilder.h>
+//#include <APointCloud.h>
+//#include <CartesianGrid.h>
+
+namespace aphid {
 
 GeoDrawer::GeoDrawer() 
 {
@@ -344,7 +346,7 @@ void GeoDrawer::coordsys(const Matrix33F & orient, const Vector3F & p, const Vec
 	
 	glPopMatrix();
 }
-
+/*
 void GeoDrawer::manipulator(TransformManipulator * m)
 {
 	if(m->isDetached()) return;
@@ -615,7 +617,7 @@ void GeoDrawer::components(SelectionArray * arr)
 		}
     }
 }
-
+*/
 void GeoDrawer::primitive(Primitive * prim)
 {
 /*
@@ -738,6 +740,7 @@ void GeoDrawer::geometryArray(GeometryArray * arr) const
 void GeoDrawer::setAlignDir(const Vector3F & v)
 { m_alignDir = v; }
 
+/*
 void GeoDrawer::pointCloud(APointCloud * cloud) const
 {
 	const unsigned n = cloud->numPoints();
@@ -746,7 +749,7 @@ void GeoDrawer::pointCloud(APointCloud * cloud) const
 	unsigned i = 0;
 	for(; i<n;i++) alignedCircle(p[i], r[i]);
 }
-
+*/
 void GeoDrawer::tetrahedronMesh(ATetrahedronMesh * mesh) const
 {
     const unsigned nt = mesh->numTetrahedrons();
@@ -765,7 +768,7 @@ void GeoDrawer::tetrahedronMesh(ATetrahedronMesh * mesh) const
     }
     glEnd();
 }
-
+/*
 void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 {
     glBegin(GL_LINES);
@@ -782,7 +785,7 @@ void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
 	}
     glEnd();
 }
-
+*/
 const int IndexBoxLine[24] = {
 0, 1, 2, 3,
 4, 5, 6, 7,
@@ -797,5 +800,7 @@ void GeoDrawer::orientedBox(const AOrientedBox * ob) const
 	ob->getBoxVertices(m_boxVBuf);
 	int i = 0;
 	for(;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
+}
+
 }
 //:~

@@ -9,6 +9,9 @@
 #pragma once
 #include "GeoDrawer.h"
 #include "AllLight.h"
+
+namespace aphid {
+
 class LightDrawer : public GeoDrawer {
 public:
 	LightDrawer();
@@ -21,3 +24,5 @@ public:
 private:
 
 };
+
+}

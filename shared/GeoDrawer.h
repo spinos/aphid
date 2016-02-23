@@ -11,24 +11,27 @@
  */
 
 #include "MeshDrawer.h"
-class BaseTransform;
-class TransformManipulator;
-class SkeletonJoint;
-class Anchor;
-class SpaceHandle;
+
+namespace aphid {
+
 class GeodesicSphereMesh;
 class PyramidMesh;
 class CubeMesh;
 class CircleCurve;
-class SelectionArray;
 class Primitive;
 class DiscMesh;
 class Geometry;
 class GeometryArray;
-class APointCloud;
 class ATetrahedronMesh;
-class CartesianGrid;
 class AOrientedBox;
+//class CartesianGrid;
+//class APointCloud;
+//class SelectionArray;
+//class BaseTransform;
+//class TransformManipulator;
+//class SkeletonJoint;
+//class Anchor;
+//class SpaceHandle;
 
 class GeoDrawer : public MeshDrawer {
 public:
@@ -55,18 +58,18 @@ public:
 	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0);
 	void coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & size);
 	
-	void manipulator(TransformManipulator * m);
-	void spaceHandle(SpaceHandle * hand);
-	void anchor(Anchor *a, char active = 0);
+	//void manipulator(TransformManipulator * m);
+	//void spaceHandle(SpaceHandle * hand);
+	//void anchor(Anchor *a, char active = 0);
 	
-	void transform(BaseTransform * t) const;
+	//void transform(BaseTransform * t) const;
 	
-	void skeletonJoint(SkeletonJoint * joint);
-	void moveHandle(int axis, bool active) const;
-	void spinHandle(TransformManipulator * m, bool active) const;
-	void spinPlanes(BaseTransform * t) const;
+	//void skeletonJoint(SkeletonJoint * joint);
+	//void moveHandle(int axis, bool active) const;
+	//void spinHandle(TransformManipulator * m, bool active) const;
+	//void spinPlanes(BaseTransform * t) const;
 	
-	void components(SelectionArray * arr);
+	//void components(SelectionArray * arr);
 	
 	void primitive(Primitive * prim);
 	
@@ -82,9 +85,9 @@ public:
 	void alignedDisc(const Vector3F & pos, float radius) const;
 	void alignedCircle(const Vector3F & pos, float radius) const;
 	
-	void pointCloud(APointCloud * cloud) const;
+	//void pointCloud(APointCloud * cloud) const;
 	void tetrahedronMesh(ATetrahedronMesh * mesh) const;
-	void cartesianGrid(CartesianGrid * grid) const;
+	//void cartesianGrid(CartesianGrid * grid) const;
 	
 	void orientedBox(const AOrientedBox * ob) const;
 private:
@@ -97,4 +100,6 @@ private:
 	Vector3F * m_boxVBuf;
 	float m_spaceBuf[16];
 };
+
+}
 #endif        //  #ifndef GEODRAWER_H

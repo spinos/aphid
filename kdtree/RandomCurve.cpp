@@ -12,6 +12,8 @@
 #include <CurveBuilder.h>
 #include <GeometryArray.h>
 #include <BezierPatch.h>
+namespace aphid {
+
 RandomCurve::RandomCurve() {}
 
 void RandomCurve::create(GeometryArray * result, 
@@ -59,4 +61,6 @@ void RandomCurve::create(GeometryArray * result,
 		result->setGeometry(c, j * nu + i);
 	}
 	}
+}
+
 }

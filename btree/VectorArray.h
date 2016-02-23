@@ -10,6 +10,9 @@
 #pragma once
 #include <vector>
 #include "Entity.h"
+
+namespace aphid {
+
 namespace sdb {
 
 template <typename T>
@@ -74,5 +77,7 @@ public:
 	const T * operator[] (int idx) const
 	{ return m_data[idx]; }
 };
+
+}
 
 }

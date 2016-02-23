@@ -4,6 +4,8 @@
 #include <GjkIntersection.h>
 #include <KdTreeNode.h>
 
+namespace aphid {
+
 template<typename T>
 class KdScreen {
 	ViewFrame m_base;
@@ -273,4 +275,6 @@ unsigned KdScreen<T>::numBoxes() const
 template<typename T>
 unsigned KdScreen<T>::box(unsigned idx) const
 { return m_boxes[idx]; }
+
+}
 //:~

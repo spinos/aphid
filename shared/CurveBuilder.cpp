@@ -8,6 +8,8 @@
  */
 
 #include "CurveBuilder.h"
+namespace aphid {
+
 std::vector<Vector3F> CurveBuilder::BuilderVertices;
 CurveBuilder::CurveBuilder() {}
 
@@ -27,4 +29,6 @@ void CurveBuilder::finishBuild(BaseCurve * c)
 	c->computeKnots();
 	
 	BuilderVertices.clear();
+}
+
 }

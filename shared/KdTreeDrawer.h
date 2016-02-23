@@ -7,15 +7,19 @@
  *
  */
 #pragma once
-#include <LightDrawer.h>
+#include <GeoDrawer.h>
+
+namespace aphid {
+
 class KdTree;
 class BoundingBox;
 class KdTreeNode;
-class KdTreeDrawer : public LightDrawer {
+
+class KdTreeDrawer {
 public:
 	KdTreeDrawer();
-	virtual ~KdTreeDrawer();
 	void drawKdTree(KdTree * tree);
 	void drawKdTreeNode(KdTreeNode * tree, const BoundingBox & bbox, int level);
-	void drawPrimitivesInNode(KdTree *tree, KdTreeNode * node);
 };
+
+}

@@ -9,7 +9,7 @@
 
 #pragma once
 
-namespace {
+namespace aphid {
 
 class Geometry;
 class Primitive {

@@ -8,6 +8,9 @@
  */
 #pragma once
 #include <BaseCamera.h>
+
+namespace aphid {
+
 class PerspectiveCamera : public BaseCamera {
 public:
 	PerspectiveCamera();
@@ -24,3 +27,5 @@ public:
 private:
 	float m_fov;
 };
+
+}

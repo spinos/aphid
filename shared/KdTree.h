@@ -14,6 +14,8 @@
 #include <KdTreeBuilder.h>
 #include <VectorArray.h>
 
+namespace aphid {
+
 class IntersectionContext;
 class SelectionContext;
 class KdTree : public Geometry, public Boundary
@@ -69,3 +71,5 @@ private:
 	int m_maxLeafLevel;
 	unsigned m_numNoEmptyLeaf;
 };
+
+}

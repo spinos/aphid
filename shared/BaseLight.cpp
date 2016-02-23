@@ -9,6 +9,8 @@
 
 #include "BaseLight.h"
 
+namespace aphid {
+
 BaseLight::BaseLight() 
 {
 	m_lightColor = Float3(1.f, 1.f, 1.f);
@@ -66,4 +68,6 @@ void BaseLight::setCastShadow(bool x)
 bool BaseLight::castShadow() const
 {
 	return m_castShadow;
+}
+
 }

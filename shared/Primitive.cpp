@@ -9,7 +9,7 @@
 #include "Primitive.h"
 #include "Geometry.h"
 
-namespace {
+namespace aphid {
 
 Primitive::Primitive() {}
 

@@ -1,5 +1,8 @@
 #include "GLHUD.h"
 #include <BaseCamera.h>
+
+namespace aphid {
+
 GLuint GLHUD::m_texture = 0;
 
 GLHUD::GLHUD() {}
@@ -863,3 +866,4 @@ void GLHUD::drawString(const std::string & str, const int & row) const
 	glPopMatrix();
 }
 
+}

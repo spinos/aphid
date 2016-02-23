@@ -7,8 +7,10 @@
  *
  */
 #include "SplitEvent.h"
-#include <BaseMesh.h>
 #include <BuildKdTreeContext.h>
+
+namespace aphid {
+
 int SplitEvent::Dimension = 3;
 int SplitEvent::NumBinPerDimension = 12;
 int SplitEvent::NumEventPerDimension = 11;
@@ -149,5 +151,7 @@ void SplitEvent::verbose() const
 	<<"\n left box "<<m_leftBox
 	<<"\n right box "<<m_rightBox;
 	//printf("cost %f left %i %f right %i %f\n", m_cost, m_leftNumPrim, m_leftBox.area(), m_rightNumPrim, m_rightBox.area());
+}
+
 }
 //:~

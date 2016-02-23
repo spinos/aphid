@@ -10,6 +10,8 @@
 #include "KdTreeBuilder.h"
 #include <boost/thread.hpp>  
 
+namespace aphid {
+
 BuildKdTreeContext * KdTreeBuilder::GlobalContext = NULL;
 
 KdTreeBuilder::KdTreeBuilder()
@@ -422,4 +424,6 @@ void KdTreeBuilder::verbose() const
 	printf("unsplit cost %f = 2 * %i box %f\n", 2.f * nprim, nprim, m_bbox.area());
 	m_event[m_bestEventIdx].verbose();
 	printf("chose split %i: %i\n", m_bestEventIdx/SplitEvent::NumEventPerDimension,  m_bestEventIdx%SplitEvent::NumEventPerDimension);
+}
+
 }

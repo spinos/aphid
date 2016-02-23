@@ -10,6 +10,8 @@
 
 #include <ConvexShape.h>
 
+namespace aphid {
+
 class RectangleI {
 
 	int m_v[4];
@@ -56,3 +58,5 @@ public:
     }
 	
 };
+
+}

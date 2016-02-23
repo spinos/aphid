@@ -13,6 +13,9 @@
 #include <GL/glext.h>
 #endif
 #include <string>
+
+namespace aphid {
+
 class BaseCamera;
 class GLHUD {
 public:
@@ -25,3 +28,5 @@ private:
     static GLuint m_texture;
     BaseCamera * m_camera;
 };
+
+}

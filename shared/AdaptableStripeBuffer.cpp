@@ -9,6 +9,8 @@
 
 #include "AdaptableStripeBuffer.h"
 
+namespace aphid {
+
 AdaptableStripeBuffer::AdaptableStripeBuffer()
 {
 	m_numCvs  = 0;
@@ -150,4 +152,6 @@ Vector3F * AdaptableStripeBuffer::currentCol()
 float * AdaptableStripeBuffer::currentWidth()
 {
 	return m_curWidth;
+}
+
 }

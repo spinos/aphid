@@ -10,13 +10,19 @@
 #include <SelectionContext.h>
 #include <Geometry.h>
 
+namespace aphid {
 class RandomMesh;
+class GeoDrawer;
 class KdTreeDrawer;
 class BezierCurve;
 class KdCluster;
 class KdTree;
 class GeometryArray;
 class Ray;
+}
+
+using namespace aphid;
+
 #define NUM_MESHES 199
 class SceneContainer {
 	IntersectionContext m_intersectCtx;
@@ -24,7 +30,7 @@ class SceneContainer {
 	Geometry::ClosestToPointTestResult m_closestPointTest;
 	
 public:
-	SceneContainer(KdTreeDrawer * drawer);
+	SceneContainer(GeoDrawer * dr);
 	virtual ~SceneContainer();
 	
 	void renderWorld();
@@ -41,6 +47,7 @@ private:
 	void drawClosest();
 	
 private:
+	GeoDrawer * m_geoDrawer;
 	KdTreeDrawer * m_drawer;
 	RandomMesh * m_mesh[NUM_MESHES];
 	GeometryArray * m_curves;

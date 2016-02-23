@@ -14,6 +14,8 @@
 #include <KdTreeNode.h>
 #include <vector>
 
+namespace aphid {
+
 class BuildKdTreeStream {
 
 	unsigned m_numNodes;
@@ -44,3 +46,5 @@ private:
 	std::vector<unsigned> m_indirection;
 	std::vector<KdTreeNode *> m_nodeBlks;
 };
+
+}

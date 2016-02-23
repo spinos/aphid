@@ -9,6 +9,8 @@
 
 #pragma once
 
+namespace aphid {
+
 template<int NumLevels>
 class Treelet {
 	///			[0      1]parent		  level 0
@@ -75,3 +77,5 @@ int Treelet<NumLevels>::index() const
 { return m_index; }
 
 typedef Treelet<4> Treelet4;
+
+}

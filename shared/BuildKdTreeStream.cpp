@@ -9,6 +9,8 @@
 
 #include "BuildKdTreeStream.h"
 
+namespace aphid {
+
 BuildKdTreeStream::BuildKdTreeStream() : m_numNodes(0) {}
 BuildKdTreeStream::~BuildKdTreeStream() 
 { cleanup(); }
@@ -89,4 +91,6 @@ void BuildKdTreeStream::verbose() const
     std::cout<<"\n kd-tree data stream input primitive count: " <<getNumPrimitives()
     <<"\n n node "<<m_numNodes
     <<"\n n blocks "<<m_nodeBlks.size();
+}
+
 }

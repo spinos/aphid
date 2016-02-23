@@ -19,21 +19,19 @@ set (HEADER_FILES "../shared/Base3DView.h"
 
 set (SOURCE_FILES "../shared/Base3DView.cpp"
 ../shared/GeoDrawer.cpp
-../shared/LightDrawer.cpp
 ../shared/KdTreeDrawer.cpp
-../shared/CartesianGrid.cpp
+##../shared/CartesianGrid.cpp
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp
+../shared/MinMaxBins.cpp
+../shared/SplitEvent.cpp 
 ../shared/KdTreeNode.cpp 
 ../shared/BuildKdTreeContext.cpp 
-../shared/KdTreeNodeArray.cpp 
+##../shared/KdTreeNodeArray.cpp 
 ../shared/KdTree.cpp 
-../shared/KdTreeBuilder.cpp 
-../shared/SplitEvent.cpp 
-../shared/MinMaxBins.cpp 
+../shared/KdTreeBuilder.cpp  
 ../shared/BuildKdTreeStream.cpp 
-                #../shared/BaseServer.cpp
 ../kdtree/KdCluster.cpp
 "main.cpp"
 "glWidget.cpp"
@@ -72,9 +70,13 @@ target_link_libraries (testkdtree ${OPENGL_LIBRARIES})
 
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+set (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidGeom.lib
+D:/aphid/lib/aphidUI.lib)
 else ()
-set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
+/users/jianzhang/aphid/lib/libaphidGeom.a
+/users/jianzhang/aphid/lib/libaphidUI.a)
 endif ()
 
 target_link_libraries (testkdtree ${Aphid_Library})

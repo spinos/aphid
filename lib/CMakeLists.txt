@@ -122,7 +122,16 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/IntersectionContext.cpp 
 ../shared/SelectionContext.cpp
 ../shared/BaseTransform.cpp
-../shared/Segment.cpp  
+../shared/Segment.cpp
+../shared/CurveBuilder.cpp 
+../shared/BaseMesh.cpp
+../shared/GeodesicSphereMesh.cpp 
+../shared/PyramidMesh.cpp 
+../shared/CubeMesh.cpp 
+../shared/DiscMesh.cpp
+../shared/PlaneMesh.cpp
+../shared/ConvexShape.cpp
+../catmullclark/bezierPatch.cpp 
 )
 
 ADD_LIBRARY (aphidH5 STATIC
@@ -161,80 +170,84 @@ ADD_LIBRARY (aphidH5 STATIC
 ../shared/HAttributeGroup.cpp
 )
 
-add_library(aphid STATIC  
-##                ../shared/BaseCamera.cpp 
-##                ../shared/PerspectiveCamera.cpp 
-##                ../shared/BaseDrawer.cpp 
-##../shared/KdTreeDrawer.cpp 
-##../shared/BaseDeformer.cpp
-##../shared/SpaceHandle.cpp                  
-                ../shared/BaseMesh.cpp 
-		../shared/PlaneMesh.cpp 
-                ../shared/GeoElement.cpp 
-                ../shared/Vertex.cpp 
-                ../shared/Edge.cpp 
-                ../shared/Facet.cpp 
-                ../shared/BaseField.cpp  
-    ../shared/SkeletonSubspaceDeformer.cpp                 
-                ../shared/PrimitiveFilter.cpp 
+ADD_LIBRARY (aphidUI STATIC
+../shared/BaseCamera.cpp
+../shared/PerspectiveCamera.cpp 
+../shared/BaseDrawer.cpp 
+../shared/DrawBuffer.cpp
+../shared/LineDrawer.cpp 
+../shared/MeshDrawer.cpp 
+../shared/GeoDrawer.cpp 
+##../shared/LightDrawer.cpp 
+../shared/LineBuffer.cpp
+../shared/AdaptableStripeBuffer.cpp
+../shared/GLHUD.cpp
+../shared/GLight.cpp 
+../shared/GMaterial.cpp 
+../shared/GProfile.cpp
+../shared/BaseBrush.cpp
+../shared/ToolContext.cpp
+../shared/SelectionArray.cpp
+../shared/PrimitiveFilter.cpp
+../shared/ComponentConversion.cpp
+../shared/GeoElement.cpp 
+../shared/Vertex.cpp 
+../shared/Edge.cpp 
+../shared/Facet.cpp 
+../shared/VertexPath.cpp
+../lapl/VertexAdjacency.cpp
+../shared/MeshTopology.cpp 
+../shared/Plane.cpp
+../shared/VertexDataGroup.cpp
+../shared/BaseField.cpp
+../shared/BaseState.cpp
+../shared/BaseDeformer.cpp  
+)
+
+add_library(aphid STATIC                 
+##../shared/SpaceHandle.cpp                
+    ../shared/SkeletonSubspaceDeformer.cpp                                  
                 ../shared/PrimitiveArray.cpp                 
                 ../shared/ClassificationStorage.cpp 
 		../shared/IndexArray.cpp 
-                ##../shared/BoundingBoxList.cpp 
-                ../shared/SelectionArray.cpp 
-                ../shared/ComponentConversion.cpp 
+                ##../shared/BoundingBoxList.cpp  
                 ##../shared/EasemodelUtil.cpp 
-                ../shared/GeodesicSphereMesh.cpp 
-                ../shared/PyramidMesh.cpp 
-                ../shared/CubeMesh.cpp 
-		../shared/DiscMesh.cpp 
-                ../shared/AnchorGroup.cpp 
-                ../shared/VertexPath.cpp 
-                ../shared/MeshTopology.cpp 
-                ../shared/PatchMesh.cpp  
-                                ../shared/ToolContext.cpp 
+                ../shared/AnchorGroup.cpp                 
+                ../shared/PatchMesh.cpp   
                                 ../shared/BiLinearInterpolate.cpp 
-                                ../shared/LinearInterpolate.cpp 
-                ../shared/Plane.cpp 
+                                ../shared/LinearInterpolate.cpp  
                 ../shared/PointInsidePolygonTest.cpp 
                                 ../shared/AccPatchMesh.cpp 
 				../shared/PatchNeighborRec.cpp 
 				../shared/PatchTexture.cpp 
                                 ../shared/InverseBilinearInterpolate.cpp 
-                                ../shared/Patch.cpp 
-                                ../shared/BaseBrush.cpp 
-                                ../shared/GLight.cpp 
-                                ../shared/GMaterial.cpp 
-                                ../shared/GProfile.cpp 
+                                ../shared/Patch.cpp   
                                 ##../shared/BaseTessellator.cpp 
                                 ##../shared/CollisionRegion.cpp 
-                                ##../shared/DrawBuffer.cpp 
+                                ## 
                                 ##../shared/BlockDrawBuffer.cpp 
                 ##../shared/BaseScene.cpp  
     ##../shared/BaseImage.cpp 
     ##../shared/BaseFileGroup.cpp
     ##../shared/BakeDeformer.cpp 
     ##../shared/PlaybackControl.cpp 
-    ##../shared/CacheFile.cpp 
-    ##../shared/BaseState.cpp 
+    ##../shared/CacheFile.cpp  
     ##../shared/HRFile.cpp 
     ##../shared/TransformManipulator.cpp 
     ##../shared/MeshManipulator.cpp 
 	##../shared/SkeletonJoint.cpp 
 	##../shared/SkeletonSystem.cpp 
-	##../shared/SkeletonPose.cpp 
-	##../shared/LineBuffer.cpp 
+	##../shared/SkeletonPose.cpp  
 	##../shared/SelectCondition.cpp 
     ##../shared/FloodCondition.cpp 
 	##../shared/ActiveRegion.cpp 
-	##../shared/AccPatchGroup.cpp 
-	##../shared/VertexDataGroup.cpp 
+	##../shared/AccPatchGroup.cpp  
 	##../shared/BezierPatchHirarchy.cpp 
 	##../shared/KMeansClustering.cpp 
 	##../shared/BaseSphere.cpp   
     ##../shared/BaseClient.cpp 
 	##../shared/RenderEngine.cpp 
-	##../shared/AdaptableStripeBuffer.cpp 
+	## 
 	##../shared/BlockStripeBuffer.cpp 
 	##../shared/LODFn.cpp 
 	##../shared/NoisePlot.cpp 
@@ -244,10 +257,6 @@ add_library(aphid STATIC
 	##../shared/PointLight.cpp 
 	##../shared/SquareLight.cpp 
 ##../shared/LightGroup.cpp 
-##../shared/LineDrawer.cpp 
-##../shared/MeshDrawer.cpp 
-##../shared/GeoDrawer.cpp 
-##../shared/LightDrawer.cpp 
 ##../shared/RenderOptions.cpp  
 ##../shared/BaseTexture.cpp 
 ##../shared/TextureGroup.cpp 
@@ -256,24 +265,20 @@ add_library(aphid STATIC
 ##../shared/BaseShader.cpp 
 ##../shared/ShaderGroup.cpp 
 ##../shared/RayMarch.cpp 
-##../shared/GLHUD.cpp
 ##../shared/BaseLog.cpp
 ##../shared/APlayback.cpp
 ##../shared/APlaybackFile.cpp
 ##../shared/MultiPlaybackFile.cpp
-##../shared/CurveBuilder.cpp
 ##../shared/ModelDifference.cpp
 ##../shared/TriangleDifference.cpp
 ##../shared/ADeformer.cpp
 ##../shared/TriangleAnchorDeformer.cpp
 ##../shared/SplineMap1D.cpp
-##../lapl/VertexAdjacency.cpp 
 ##../lapl/Anchor.cpp 
 ##../catmullclark/BaseQuad.cpp 
 ##../catmullclark/LODQuad.cpp 
 ##../catmullclark/accPatch.cpp 
-##../catmullclark/accStencil.cpp 
-##../catmullclark/bezierPatch.cpp 
+##../catmullclark/accStencil.cpp  
 ##../catmullclark/tessellator.cpp 
 ##../catmullclark/AccCorner.cpp 
 ##../catmullclark/AccEdge.cpp 
@@ -296,7 +301,6 @@ add_library(aphid STATIC
 ##../shared/MeshSeparator.cpp
 ##../shared/PrincipalComponents.cpp
 ##../shared/DynamicBody.cpp
-##../shared/ConvexShape.cpp
 ##../shared/ViewFrame.cpp
 ##../btree/Types.cpp
 ##../btree/Entity.cpp

@@ -14,6 +14,8 @@
 #include <BuildKdTreeContext.h>
 #include <MinMaxBins.h>
 
+namespace aphid {
+
 class KdTreeBuilder {
 public:
 	typedef Primitive* PrimitivePtr;
@@ -62,3 +64,5 @@ private:
 	SplitEvent *m_event;
 	unsigned m_bestEventIdx;
 };
+
+}

@@ -14,8 +14,9 @@
 #include "KdTreeDrawer.h"
 #include <KdTree.h>
 
+namespace aphid {
+
 KdTreeDrawer::KdTreeDrawer() {}
-KdTreeDrawer::~KdTreeDrawer() {}
 
 void KdTreeDrawer::drawKdTree(KdTree * tree)
 {
@@ -23,9 +24,7 @@ void KdTreeDrawer::drawKdTree(KdTree * tree)
 	BoundingBox bbox = tree->getBBox();
 	KdTreeNode * root = tree->getRoot();
 	
-	setWired(1);
-	setColor(0.f, 0.3f, 0.1f);
-	boundingBox(bbox);
+	glColor3f(0.f, 0.3f, 0.1f);
 	
 	int level = 0;
 	drawKdTreeNode(root, bbox, level);
@@ -71,12 +70,4 @@ void KdTreeDrawer::drawKdTreeNode(KdTreeNode * tree, const BoundingBox & bbox, i
 	drawKdTreeNode(tree->getRight(), rightBox, level);	
 }
 
-void KdTreeDrawer::drawPrimitivesInNode(KdTree * tree, KdTreeNode * node)
-{
-	unsigned num = node->getNumPrims();	
-	unsigned start = node->getPrimStart();
-	for(unsigned i = 0; i < num; i++) {
-	    Primitive * prim = tree->getPrim(start + i);
-	    primitive(prim);
-	}
 }

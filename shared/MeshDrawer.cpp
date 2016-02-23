@@ -12,6 +12,9 @@
 #include <BaseDeformer.h>
 #include <BaseField.h>
 #include <ATriangleMesh.h>
+
+namespace aphid {
+
 MeshDrawer::MeshDrawer() {}
 MeshDrawer::~MeshDrawer() {}
 
@@ -273,4 +276,6 @@ void MeshDrawer::field(const BaseField * f)
 // deactivate vertex arrays after drawing
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 }

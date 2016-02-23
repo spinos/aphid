@@ -11,6 +11,8 @@
 #include "Geometry.h"
 #include <VectorArray.h>
 
+namespace aphid {
+
 BuildKdTreeContext::BuildKdTreeContext() : m_grid(NULL),
 m_numPrimitive(0) {}
 
@@ -175,4 +177,6 @@ void BuildKdTreeContext::addIndex(const unsigned & x)
 {
 	m_indices.ptr()[m_numPrimitive] = x;
 	m_numPrimitive++;
+}
+
 }

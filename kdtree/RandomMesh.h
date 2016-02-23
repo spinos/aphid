@@ -10,8 +10,12 @@
 #pragma once
 #include <ATriangleMesh.h>
 
+namespace aphid {
+
 class RandomMesh : public ATriangleMesh {
 public:
 	RandomMesh(unsigned numFaces, const Vector3F & center, const float & size, int type);
 	virtual ~RandomMesh();
 };
+
+}

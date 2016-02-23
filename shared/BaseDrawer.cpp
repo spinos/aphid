@@ -15,7 +15,8 @@
 #include "BaseDrawer.h"
 #include "Matrix33F.h"
 #include <cmath>
-// #include <zEXRImage.h>
+
+namespace aphid {
 
 static const int sModLightColors = 15;
 static const float sLightColors[16][3] = {
@@ -322,4 +323,6 @@ const float * BaseDrawer::lightColor(int i) const
 
 void BaseDrawer::setGroupColorLight(int i) const
 { glColor3fv(lightColor(i)); }
+
+}
 //:~

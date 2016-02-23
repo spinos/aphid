@@ -13,6 +13,8 @@
 #include "KdBuilder.h"
 #include "KdScreen.h"
 
+namespace aphid {
+
 template<typename T>
 class KdEngine {
 
@@ -23,7 +25,7 @@ public:
 	KdEngine();
 	virtual ~KdEngine();
 	
-	void initGeometry(VectorArray<T> * source, const BoundingBox & box);
+	void initGeometry(sdb::VectorArray<T> * source, const BoundingBox & box);
 	void initScreen(int w, int h);
 	void render(const Frustum & f);
 	KdNTree<T, KdNode4 > * tree();
@@ -53,7 +55,7 @@ KdEngine<T>::~KdEngine()
 }
 
 template<typename T>
-void KdEngine<T>::initGeometry(VectorArray<T> * source, const BoundingBox & box)
+void KdEngine<T>::initGeometry(sdb::VectorArray<T> * source, const BoundingBox & box)
 {
 	m_tree->init(source, box);
     KdNBuilder<4, T, KdNode4 > bud;
@@ -84,4 +86,6 @@ void KdEngine<T>::render(const Frustum & f)
 template<typename T>
 KdScreen<KdNTree<T, KdNode4 > > * KdEngine<T>::screen()
 { return m_screen; }
+
+}
 //:~

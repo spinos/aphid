@@ -7,6 +7,7 @@
  *
  */
 #pragma once
+namespace aphid {
 
 class KdTreeNode
 {
@@ -71,3 +72,4 @@ public:
 private:
 
 };
+}

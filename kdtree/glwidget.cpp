@@ -4,11 +4,10 @@
 #include <math.h>
 #include "glwidget.h"
 #include <KdTreeDrawer.h>
-#include "SceneContainer.h"
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
-    m_scene = new SceneContainer(getDrawer());
+    m_scene = new SceneContainer(getDrawer() );
 }
 GLWidget::~GLWidget()
 { 

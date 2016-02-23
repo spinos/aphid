@@ -7,8 +7,8 @@
  *
  */
 #include <iostream>
-#include <APhid.h>
 #include "KdTreeNode.h"
+namespace aphid {
 
 KdTreeNode::KdTreeNode() {};
 
@@ -83,4 +83,6 @@ void KdTreeNode::setOffset(int x)
 
 int KdTreeNode::getOffset() const
 { return (inner.combined & ~EIndirectionMask)>>3; }
+
+}
 //:~

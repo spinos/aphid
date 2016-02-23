@@ -9,13 +9,15 @@
 #include <BaseBrush.h>
 #include <BaseCamera.h>
 #include <PerspectiveCamera.h>
-#include <KdTreeDrawer.h>
+#include <GeoDrawer.h>
 #include <IntersectionContext.h>
 #include <GLHUD.h>
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+namespace aphid {
 
 const boost::posix_time::ptime time_t_epoch(boost::gregorian::date(2010,1,1));
 
@@ -26,7 +28,7 @@ Base3DView::Base3DView(QWidget *parent)
 	m_orthoCamera = new BaseCamera;
 	m_perspCamera = new PerspectiveCamera;
 	fCamera = m_orthoCamera;
-	m_drawer = new KdTreeDrawer;
+	m_drawer = new GeoDrawer;
 	m_activeComponent = new SelectionArray;
 	m_activeComponent->setComponentFilterType(PrimitiveFilter::TVertex);
 	m_intersectCtx = new IntersectionContext;
@@ -86,7 +88,7 @@ BaseCamera * Base3DView::orthoCamera()
 	return m_orthoCamera;
 }
 	
-KdTreeDrawer * Base3DView::getDrawer() const
+GeoDrawer * Base3DView::getDrawer() const
 {
 	return m_drawer;
 }
@@ -320,7 +322,7 @@ void Base3DView::resetView()
 void Base3DView::drawSelection()
 {
 	m_drawer->setColor(0.f, .8f, .2f);
-	m_drawer->components(m_activeComponent);
+	//m_drawer->components(m_activeComponent);
 }
 
 void Base3DView::clearSelection()
@@ -559,5 +561,7 @@ void Base3DView::drawFrontImagePlane()
 
     glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
+}
+
 }
 //:~

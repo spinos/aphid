@@ -6,8 +6,9 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-#include <AllMath.h>
 #include "PerspectiveCamera.h"
+
+namespace aphid {
 
 PerspectiveCamera::PerspectiveCamera()
 {
@@ -71,4 +72,6 @@ void PerspectiveCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3
 	if(alpha < 0.f) alpha = 0.f;
 	else if(alpha > 1.f) alpha = 1.f;
 	worldVec = vecFar * alpha + vecNear * (1.f - alpha);
+}
+
 }

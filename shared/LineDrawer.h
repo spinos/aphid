@@ -10,6 +10,9 @@
 
 #include "BaseDrawer.h"
 #include "ConvexShape.h"
+
+namespace aphid {
+
 class LineBuffer;
 class AdaptableStripeBuffer;
 class BaseCurve;
@@ -29,3 +32,5 @@ public:
 	void smoothCurve(const BezierSpline & sp, short deg) const;
 	void frustum(const Frustum * f);
 };
+
+}

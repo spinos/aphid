@@ -12,6 +12,9 @@
 #include <AdaptableStripeBuffer.h>
 #include <BaseCurve.h>
 #include <BezierCurve.h>
+
+namespace aphid {
+
 LineDrawer::LineDrawer() {}
 LineDrawer::~LineDrawer() {}
 
@@ -205,5 +208,7 @@ void LineDrawer::frustum(const Frustum * f)
 	p = f->X(3);
 	glVertex3fv((float *)&p);
 	glEnd();
+}
+
 }
 //:~

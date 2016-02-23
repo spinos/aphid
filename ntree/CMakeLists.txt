@@ -10,14 +10,30 @@ include_directories (../shared
 ../bcc2d
 ../hesperis
 ../kdtree
-../btree)
+../btree
+../lapl)
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"
 "glwidget.h"
-"../shared/Morton3D.h")
+"../shared/Morton3D.h"
+../btree/BNode.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
+../btree/Entity.cpp
+../btree/Types.cpp
+../btree/BNode.cpp
+../shared/KdTreeNode.cpp
+../shared/KdTree.cpp
+../shared/KdTreeBuilder.cpp
+../shared/BuildKdTreeContext.cpp 
+../shared/BuildKdTreeStream.cpp 
+../shared/MinMaxBins.cpp 
+../shared/SplitEvent.cpp
+../shared/GeoDrawer.cpp
+../shared/KdTreeDrawer.cpp
+##../shared/CartesianGrid.cpp
+../shared/ViewFrame.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
@@ -32,10 +48,15 @@ find_package (OpenGL REQUIRED)
 target_link_libraries (testntree ${OPENGL_LIBRARIES})
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+set (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidGeom.lib
+D:/aphid/lib/aphidUI.lib)
 else ()
-set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
+/users/jianzhang/aphid/lib/libaphidGeom.a
+/users/jianzhang/aphid/lib/libaphidUI.a)
 endif ()
+
 target_link_libraries (testntree ${Aphid_Library})
 
 if (WIN32)

@@ -10,6 +10,9 @@
 #include "RandomMesh.h"
 #include <iostream>
 #include <cmath>
+
+namespace aphid {
+
 RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float & size, int type) 
 {
 	createBuffer(numFaces * 4, numFaces * 4);
@@ -57,3 +60,4 @@ RandomMesh::RandomMesh(unsigned numFaces, const Vector3F & center, const float &
 
 RandomMesh::~RandomMesh() {}
 
+}

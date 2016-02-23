@@ -10,6 +10,9 @@
 #pragma once
 #include "LineDrawer.h"
 #include <deque>
+
+namespace aphid {
+
 class BaseMesh;
 class BaseDeformer;
 class BaseField;
@@ -34,3 +37,5 @@ public:
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
 	void field(const BaseField * f);
 };
+
+}

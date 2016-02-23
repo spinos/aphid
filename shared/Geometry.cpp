@@ -8,6 +8,7 @@
  */
 
 #include "Geometry.h"
+
 namespace aphid {
 
 Geometry::ClosestToPointTestResult::ClosestToPointTestResult() : _hasResult(false) {}

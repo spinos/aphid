@@ -8,6 +8,9 @@
  */
 #include "BaseCurve.h"
 #include <vector>
+
+namespace aphid {
+
 class CurveBuilder {
 public:
 	CurveBuilder();
@@ -18,3 +21,5 @@ private:
 	static std::vector<Vector3F> BuilderVertices;
 	
 };
+
+}

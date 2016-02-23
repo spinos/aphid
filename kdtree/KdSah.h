@@ -3,38 +3,14 @@
 #include <MinMaxBins.h>
 #include <Boundary.h>
 #include <boost/thread.hpp>
-#include <vector>
+#include <VectorArray.h>
 
-template <typename T>
-class VectorArray {
-	
-	std::vector<T *> m_data;
-	
-public:
-	VectorArray() {}
-	virtual ~VectorArray() 
-	{
-		const int n = m_data.size();
-		int i = 0;
-		for(; i<n; i++) delete m_data[i];
-			
-		m_data.clear();
-	}
-	
-	void add(T * a) 
-	{ m_data.push_back(a); }
-	
-	int size() const
-	{ return m_data.size(); }
-	
-	T * get(int idx) const
-	{ return m_data[idx]; }
-};
+namespace aphid {
 
 template <typename T>
 class SahSplit : public Boundary {
     
-	VectorArray<T> * m_source;
+	sdb::VectorArray<T> * m_source;
     int * m_indices;
     MinMaxBins * m_bins;
 	SplitEvent * m_event;
@@ -42,7 +18,7 @@ class SahSplit : public Boundary {
 	int m_numPrims;
     
 public:
-    SahSplit(int n, VectorArray<T> * source);
+    SahSplit(int n, sdb::VectorArray<T> * source);
     virtual ~SahSplit();
 	
 	void initIndices();
@@ -62,7 +38,7 @@ public:
 	bool isEmpty() const
 	{ return m_numPrims < 1; }
 	
-	VectorArray<T> * source()
+	sdb::VectorArray<T> * source()
 	{ return m_source; }
 	
 	void verbose() const;
@@ -81,7 +57,7 @@ private:
 };
 
 template <typename T>
-SahSplit<T>::SahSplit(int n, VectorArray<T> * source) : m_indices(NULL)
+SahSplit<T>::SahSplit(int n, sdb::VectorArray<T> * source) : m_indices(NULL)
 {
 	m_source = source;
     m_bins = new MinMaxBins[SplitEvent::Dimension];
@@ -123,6 +99,7 @@ void SahSplit<T>::calculateBins(const BoundingBox & b)
 		    m_bins[axis].setFlat();		
 	}
 	
+#if 0
 	boost::thread boxThread[3];
 	
 	
@@ -137,6 +114,13 @@ void SahSplit<T>::calculateBins(const BoundingBox & b)
 			continue;
 		boxThread[axis].join();
 	}
+#else
+	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+		binningAlong(b, axis);
+	}
+#endif
 }
 
 template <typename T>
@@ -382,5 +366,7 @@ void SahSplit<T>::verbose() const
 			<<" n prims "<<numPrims()
 			<<" visit cost "<<visitCost()
 			<<"\n";
+}
+
 }
 //:~

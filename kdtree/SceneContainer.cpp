@@ -25,12 +25,13 @@
 #define NUM_CURVESV 20
 #define NUM_CURVES 400
 
-SceneContainer::SceneContainer(KdTreeDrawer * drawer) 
+SceneContainer::SceneContainer(GeoDrawer * dr) 
 {
+	m_geoDrawer = dr;
 	m_intersectCtx.m_success = 0;
 	
 	m_level = 28;
-	m_drawer = drawer;
+	m_drawer = new KdTreeDrawer;
 	m_cluster = new KdCluster;
 	m_tree = new KdTree;
 	
@@ -48,7 +49,8 @@ SceneContainer::SceneContainer(KdTreeDrawer * drawer)
 #endif
 }
 
-SceneContainer::~SceneContainer() {}
+SceneContainer::~SceneContainer() 
+{ delete m_drawer; }
 
 void SceneContainer::testMesh()
 {
@@ -116,13 +118,13 @@ void SceneContainer::testCurve()
 
 void SceneContainer::renderWorld()
 {
-	m_drawer->setGrey(.3f);
-	m_drawer->setWired(0);
+	m_geoDrawer->setGrey(.3f);
+	m_geoDrawer->setWired(0);
 	int i=0;
 	
 #if TEST_MESH
 	for(;i<NUM_MESHES;i++) 
-		m_drawer->triangleMesh(m_mesh[i]);
+		m_geoDrawer->triangleMesh(m_mesh[i]);
 		
 	drawIntersection();
 	drawClosest();
@@ -134,14 +136,15 @@ void SceneContainer::renderWorld()
 		// m_drawer->smoothCurve(*(BezierCurve *)m_curves->geometry(i), 4);
 	// glColor3f(.354f,.8333f,.12f);
 	for(i=0; i<m_cluster->numGroups(); i++) {
-		m_drawer->setGroupColorLight(i);
-		m_drawer->geometry(m_cluster->group(i));
+		m_geoDrawer->setGroupColorLight(i);
+		m_geoDrawer->geometry(m_cluster->group(i));
 	}
 #endif
 		
-	m_drawer->setWired(1);
-	m_drawer->setColor(0.15f, 1.f, 0.5f);
+	m_geoDrawer->setWired(1);
+	m_geoDrawer->setColor(.15f, .6f, .5f);
 #if TEST_MESH
+	m_geoDrawer->boundingBox(m_tree->getBBox() );
 	m_drawer->drawKdTree(m_tree);
 #endif
 

@@ -10,6 +10,8 @@
  *
  */
 #include <AllMath.h>
+namespace aphid {
+
 class GeometryArray;
 class BezierPatch;
 class RandomCurve {
@@ -22,4 +24,6 @@ public:
 				int sn, int sm,
 				float fr);
 };
+
+}
 #endif        //  #ifndef RANDOMCURVE_H

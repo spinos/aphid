@@ -9,6 +9,9 @@
 
 #include "KdCluster.h"
 #include <GeometryArray.h>
+
+namespace aphid {
+
 KdCluster::KdCluster() : m_groupGeometries(0) {}
 KdCluster::~KdCluster() {}
 
@@ -201,4 +204,6 @@ void KdCluster::setCurrentGroup(unsigned x)
 
 bool KdCluster::isGroupIdValid(unsigned x) const
 { return x < numGroups(); }
+
+}
 //:~

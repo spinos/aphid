@@ -11,6 +11,8 @@
 #include "Treelet.h"
 #include "KdNTree.h"
 
+namespace aphid {
+
 template<int NumLevels, typename T, typename Tn>
 class KdRope : public Treelet<NumLevels > {
 	
@@ -67,7 +69,7 @@ KdNeighbors KdRope<NumLevels, T, Tn>::neighbor(int idx) const
 template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const KdNeighbors & ns)
 {
-	Tn * root = &m_tree->nodes()[parentTreelet];
+	Tn * root = m_tree->nodes()[parentTreelet];
 	KdTreeNode * rootNode = root->node(parentNodeIdx);
 	visitRoot(rootNode, box, ns);
 	int level = 1;
@@ -99,7 +101,7 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 	bool needNextLevel = false;
 	const int levelBegin = Treelet<NumLevels>::OffsetByLevel(level);
 	const int iTreelet = Treelet<NumLevels>::index();
-	Tn * treelet = &m_tree->nodes()[iTreelet];
+	Tn * treelet = m_tree->nodes()[iTreelet];
 	const int nAtLevel = 1<<level;
 	BoundingBox lftBox, rgtBox;
 	int i;
@@ -186,7 +188,7 @@ template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::pushLeaves()
 {
 	const int iTreelet = Treelet<NumLevels>::index();
-	Tn * treelet = &m_tree->nodes()[iTreelet];
+	Tn * treelet = m_tree->nodes()[iTreelet];
 	const int n = Treelet<NumLevels>::numNodes();
 	int i = 0;
 	for(;i<n;i++) {
@@ -249,5 +251,7 @@ void KdRope<NumLevels, T, Tn>::endMap()
 			}
 		}
 	}
+}
+
 }
 //:~

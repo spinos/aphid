@@ -12,23 +12,23 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<" test kdtree\n";
-	const int n = 5000;
-    m_source = new VectorArray<TestBox>();
+	const int n = 10000;
+    m_source = new sdb::VectorArray<TestBox>();
 	
 	BoundingBox rootBox;
     int i;
     for(i=0; i<n; i++) {
-        TestBox *a = new TestBox;
+        TestBox a;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 200.f * r * cos(th);
         float y = -40.f + 100.f * r * sin(th) + 36.f * sin(x/12.f);
         float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 9.f * sin(y/23.f);
-        a->setMin(-1 + x, -1 + y, -1 + z);
-        a->setMax( 1 + x,  1 + y,  1 + z);
+        a.setMin(-1 + x, -1 + y, -1 + z);
+        a.setMax( 1 + x,  1 + y,  1 + z);
         
-		m_source->add(a);
-		rootBox.expandBy(a->calculateBBox());
+		m_source->insert(a);
+		rootBox.expandBy(a.calculateBBox());
     }
 	
 	m_engine.initGeometry(m_source, rootBox);
@@ -85,7 +85,7 @@ void GLWidget::drawTree()
 	m_treeletColI = 0;
 	getDrawer()->setColor(.15f, .25f, .35f);
 	getDrawer()->boundingBox(m_tree->getBBox() );
-    drawANode(&m_tree->nodes()[0], 0, m_tree->getBBox(), 0, true );
+    drawANode(m_tree->root(), 0, m_tree->getBBox(), 0, true );
 }
 
 void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)

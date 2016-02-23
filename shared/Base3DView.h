@@ -5,13 +5,16 @@
 #include <AllMath.h>
 #include <Ray.h>
 
+class QTimer;
+
+namespace aphid {
+
 class BaseCamera;
 class PerspectiveCamera;
-class KdTreeDrawer;
+class GeoDrawer;
 class IntersectionContext;
 class ToolContext;
 class SelectionArray;
-class QTimer;
 class BaseBrush;
 class BaseTransform;
 class GLHUD;
@@ -32,7 +35,7 @@ public:
 	BaseCamera * getCamera() const;
 	BaseCamera * perspCamera();
 	BaseCamera * orthoCamera();
-	KdTreeDrawer * getDrawer() const;
+	GeoDrawer * getDrawer() const;
 	SelectionArray * getActiveComponent() const;
 	IntersectionContext * getIntersectionContext() const;
 	const Ray * getIncidentRay() const;
@@ -105,7 +108,7 @@ private:
 	BaseCamera* fCamera;
 	BaseCamera* m_orthoCamera;
 	PerspectiveCamera* m_perspCamera;
-	KdTreeDrawer * m_drawer;
+	GeoDrawer * m_drawer;
 	SelectionArray * m_activeComponent;
 	IntersectionContext * m_intersectCtx;
 	BaseBrush * m_brush;
@@ -116,5 +119,7 @@ private:
 	GLHUD * m_hud;
 	long m_startTime, m_lastTime;
 };
+
+}
 #endif        //  #ifndef BASE3DVIEW_H
 

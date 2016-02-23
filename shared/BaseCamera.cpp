@@ -9,6 +9,9 @@
 
 #include "BaseCamera.h"
 #include <iostream>
+
+namespace aphid {
+
 BaseCamera::BaseCamera() 
 {
     m_nearClipPlane = 2.f;
@@ -270,5 +273,7 @@ void BaseCamera::setFarClipPlane(float x)
 	m_farClipPlane = x;
 }
 
- void BaseCamera::setFieldOfView(float) {}
+void BaseCamera::setFieldOfView(float) {}
+ 
+}
 //:~
