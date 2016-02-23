@@ -9,6 +9,9 @@
 
 #include "MinMaxBins.h"
 #include <iostream>
+
+namespace aphid {
+
 MinMaxBins::MinMaxBins() : m_isFlat(0), m_minBin(NULL), m_maxBin(NULL) {}
 MinMaxBins::~MinMaxBins() 
 {
@@ -78,3 +81,5 @@ void MinMaxBins::setFlat()
 
 const float & MinMaxBins::delta() const
 { return m_delta; }
+
+}

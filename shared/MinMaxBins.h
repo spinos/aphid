@@ -8,6 +8,8 @@
  */
 #pragma once
 
+namespace aphid {
+
 class MinMaxBins {
 public:
 	MinMaxBins();
@@ -29,3 +31,5 @@ private:
 	float m_boundLeft, m_delta;
 	char m_isFlat;
 };
+
+}
