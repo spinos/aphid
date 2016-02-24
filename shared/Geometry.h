@@ -10,15 +10,15 @@
 #pragma once
 #include <TypedEntity.h>
 #include <AVerbose.h>
-#include <Ray.h>
+#include <NamedEntity.h>
 #include <BoundingBox.h>
-#include <vector>
 #include <GjkIntersection.h>
 #include "BarycentricCoordinate.h"
+#include <Ray.h>
 
 namespace aphid {
 
-class Geometry : public TypedEntity, public AVerbose {
+class Geometry : public TypedEntity, public NamedEntity, public AVerbose {
 public:
 	struct ClosestToPointTestResult {
 		BarycentricCoordinate _bar;

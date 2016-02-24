@@ -15,7 +15,7 @@
 #include <Ray.h>
 namespace aphid {
 
-class BaseTransform : public Geometry, public Boundary, public NamedEntity {
+class BaseTransform : public Geometry, public Boundary {
 public:
 	enum RotateAxis {
 		AX,

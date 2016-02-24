@@ -25,14 +25,15 @@ void NamedEntity::setName(const std::string & name, int i)
 	m_name = sst.str();
 }
 
-std::string NamedEntity::name() const { return m_name; }
+const std::string & NamedEntity::name() const 
+{ return m_name; }
 
 void NamedEntity::setIndex(unsigned idx)
 {
     m_index = idx;
 }
 
-unsigned NamedEntity::index() const
+const unsigned & NamedEntity::index() const
 {
     return m_index;
 }

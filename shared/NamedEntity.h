@@ -18,11 +18,11 @@ public:
 	
 	void setName(const std::string & name);
 	void setName(const std::string & name, int i);
-	std::string name() const;
+	const std::string & name() const;
 	std::string particalName() const;
 	
 	void setIndex(unsigned idx);
-	unsigned index() const;
+	const unsigned & index() const;
 private:
 	std::string m_name;
 	unsigned m_index;
