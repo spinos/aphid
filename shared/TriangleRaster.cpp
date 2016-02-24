@@ -9,6 +9,8 @@
 #include <math.h>
 #include "TriangleRaster.h"
 
+namespace aphid {
+
 TriangleRaster::TriangleRaster() {}
 TriangleRaster::~TriangleRaster() {}
 
@@ -25,15 +27,15 @@ char TriangleRaster::create(const Vector3F & a, const Vector3F & b, const Vector
 	
 	Vector3F v = b - a;
 	
-	if(v.length() < 10e-3)
+	if(v.length() < 1e-3f)
 		return 0;
 		
 	v = c - b;
-	if(v.length() < 10e-3)
+	if(v.length() < 1e-3f)
 		return 0;
 		
 	v = a - c;
-	if(v.length() < 10e-3)
+	if(v.length() < 1e-3f)
 		return 0;
 		
 	Vector3F side = b - a; side.normalize();
@@ -59,10 +61,10 @@ char TriangleRaster::create(const Vector3F & a, const Vector3F & b, const Vector
 	n[1] = up;
 	n[2] = front;
 	
-	bboxMax.x = -10e6;
-	bboxMax.y = -10e6;
-	bboxMin.x = 10e6;
-	bboxMin.y = 10e6;
+	bboxMax.x = -1e6f;
+	bboxMax.y = -1e6f;
+	bboxMin.x = 1e6f;
+	bboxMin.y = 1e6f;
 	for(int i=0; i<3; i++) {
 		if(q[i].x > bboxMax.x) bboxMax.x = q[i].x;
 		if(q[i].y > bboxMax.y) bboxMax.y = q[i].y;
@@ -207,4 +209,6 @@ char TriangleRaster::isPointWithin(const Vector3F &test, float &alpha, float & b
 		return 1;
 			
 	return 0;
+}
+
 }

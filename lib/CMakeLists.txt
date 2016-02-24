@@ -134,6 +134,7 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/ConvexShape.cpp
 ../catmullclark/bezierPatch.cpp 
 ../shared/AFrustum.cpp
+../shared/TriangleRaster.cpp
 )
 
 ADD_LIBRARY (aphidH5 STATIC

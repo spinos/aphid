@@ -12,6 +12,9 @@
 #include "boost/filesystem/path.hpp"
 #include "hdf5.h"
 using namespace boost::filesystem;
+
+namespace aphid {
+
 char HDocument::open(const char * filename, OpenMode mode)
 {
 	char fileExists = 0;
@@ -100,3 +103,4 @@ std::string HDocument::fileName() const
     return fFileName;
 }
 
+}

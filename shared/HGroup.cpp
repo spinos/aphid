@@ -9,6 +9,8 @@
 
 #include "HGroup.h"
 
+namespace aphid {
+
 HGroup::HGroup(const std::string & path) : HObject(path)
 {
 }
@@ -47,4 +49,6 @@ int HGroup::objectType() const
 
 bool HGroup::isOpened() const
 { return fObjectId > -1; }
+
+}
 //:~

@@ -13,6 +13,8 @@
 #include "hdf5.h"
 #include <sstream>
 
+namespace aphid {
+
 HDocument HObject::FileIO;
 
 HObject::HObject(const std::string & path)
@@ -96,5 +98,7 @@ std::string HObject::lastName() const
 		result = result.erase(0, found);
 
 	return result;
+}
+
 }
 //:~

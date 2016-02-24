@@ -12,6 +12,9 @@
 #include "hdf5.h"
 
 #include <string>
+
+namespace aphid {
+
 class HDocument {
 public:
 	enum OpenMode {
@@ -47,4 +50,6 @@ public:
 	hid_t fFileId;
 	ErrorMessage fCurrentError;
 };
+
+}
 #endif        //  #ifndef HDOCUMENT_H

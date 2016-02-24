@@ -13,8 +13,10 @@
 #include <Vector2F.h>
 #include <Vector3F.h>
 #include <Matrix44F.h>
-#include <stdlib.h>
 #include <PseudoNoise.h>
+
+namespace aphid {
+
 class TriangleRaster {
 public:
 	TriangleRaster();
@@ -27,6 +29,7 @@ public:
 	void genSamples(const float delta, const int & num_grid_x, const int & num_grid_y, Vector3F *res, char *hits);
 
 	char isPointWithin(const Vector3F &test, float &alpha, float & beta, float & gamma);
+	
 private:
 	Matrix44F mat;
 	Vector3F p[3];
@@ -40,4 +43,6 @@ private:
 	char dice(int i, int j, float delta_x, float delta_y, float &alpha, float & beta, float & gamma );
 	void eliminateSampleTooClose(float distance, int i, int j, int i1, int j1, int grid_x, int grid_y, Vector3F *res, char *hits);
 };
+
+}
 #endif        //  #ifndef TRIANGLERASTER_H

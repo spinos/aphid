@@ -11,6 +11,9 @@
  */
 
 #include "HObject.h"
+
+namespace aphid {
+
 class HGroup : public HObject {
 public:
 	HGroup(const std::string & path);
@@ -22,4 +25,6 @@ public:
 	virtual void close();
 	virtual int objectType() const;
 };
+
+}
 #endif        //  #ifndef HGROUP_H

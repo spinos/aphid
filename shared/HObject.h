@@ -12,6 +12,8 @@
 #include "HDocument.h"
 #include <string>
 
+namespace aphid {
+
 class HObject {
 public:
 	HObject(const std::string & path);
@@ -37,5 +39,7 @@ public:
 	hid_t fObjectId;
 	std::string fObjectPath;
 };
+
+}
 #endif        //  #ifndef HOBJECT_H
 
