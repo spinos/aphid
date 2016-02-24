@@ -11,20 +11,18 @@
 
 namespace aphid {
 
-class Geometry;
 class Primitive {
+
+	int m_geomComp;
+	
 public:
 	Primitive();
 
-	void setGeometry(Geometry * data);
-	Geometry *getGeometry() const;
-	
-	void setComponentIndex(const unsigned &idx);
-	const unsigned & getComponentIndex() const;
+	void setGeometryComponent(const int & geom, const int & comp);
+	void getGeometryComponent(int & geom, int & comp);
 	
 private:
-	Geometry *m_geometry;
-	unsigned m_componentIndex;
+	
 };
 
 }

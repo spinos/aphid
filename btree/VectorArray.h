@@ -42,24 +42,24 @@ public:
 	
 	void insert()
 	{
-		if((m_numData & 4095)==0) {
-			m_buf = new T[4097];
+		if((m_numData & 1023)==0) {
+			m_buf = new T[1025];
 			m_blocks.push_back(m_buf);
 		}
 		
-		T * d = &m_buf[m_numData & 4095];
+		T * d = &m_buf[m_numData & 1023];
 		m_data.push_back(d);
 		m_numData++;
 	}
 	
 	void insert(const T & a) 
 	{
-		if((m_numData & 4095)==0) {
-			m_buf = new T[4097];
+		if((m_numData & 1023)==0) {
+			m_buf = new T[1025];
 			m_blocks.push_back(m_buf);
 		}
 		
-		T * d = &m_buf[m_numData & 4095];
+		T * d = &m_buf[m_numData & 1023];
 		*d = a;
 		m_data.push_back(d);
 		m_numData++;

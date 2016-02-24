@@ -20,7 +20,7 @@ class IntersectionContext;
 class SelectionContext;
 class KdTree : public Geometry, public Boundary
 {
-	int m_minNumLeafPrims, m_maxNumLeafPrims, m_totalNumLeafPrims;
+	int m_minNumLeafPrims, m_maxNumLeafPrims;
 	BoundingBox m_testBox;
 	unsigned m_intersectElement;
 	std::string m_buildLogStr;
@@ -49,9 +49,12 @@ public:
 	std::string buildLog() const;
     
 protected:
+	BuildKdTreeStream m_stream;
+	
+protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
-	sdb::VectorArray<unsigned> & indirection();
+	sdb::VectorArray<Primitive> & indirection();
 	sdb::VectorArray<Primitive> & primitives();
 	
 private:
@@ -66,7 +69,6 @@ private:
 	bool recursiveIntersectBox(KdTreeNode *node, const BoundingBox & box);
 	bool leafIntersectBox(KdTreeNode *node, const BoundingBox & box);
 	
-	BuildKdTreeStream m_stream;
 	KdTreeNode *m_root;
 	int m_maxLeafLevel;
 	unsigned m_numNoEmptyLeaf;

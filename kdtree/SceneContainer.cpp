@@ -65,7 +65,7 @@ void SceneContainer::testMesh()
 		Vector3F c(-10.f + i * .1f + 75.f * RandomF01(), 
 					yb + up * i + 42.f * RandomF01(), 
 					-1.f * i + -30.f + 45.f * RandomF01());
-		m_mesh[i] = new RandomMesh(12500 - 1200 * RandomF01(), c, 11.f - 3.f * RandomF01(), i&1);
+		m_mesh[i] = new RandomMesh(12500 - 1200 * RandomF01(), c, 10.f - 3.f * RandomF01(), i&1);
 		m_tree->addGeometry(m_mesh[i]);
 		count += m_mesh[i]->numTriangles();
 	}

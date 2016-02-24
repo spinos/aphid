@@ -69,7 +69,6 @@ void KdTree::create()
 	KdTreeBuilder::GlobalContext = ctx;
 	m_minNumLeafPrims = 1<<28;
 	m_maxNumLeafPrims = 0;
-	m_totalNumLeafPrims = 0;
 	
 	subdivide(m_root, *ctx, 0);
 	//ctx->verbose();
@@ -80,8 +79,11 @@ void KdTree::create()
 	<<"\n total num nodes "<<m_stream.numNodes()
 	<<"\n max leaf level: "<<m_maxLeafLevel
 	<<"\n num no-empty leaves "<<m_numNoEmptyLeaf
-	<<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
-	<<"   average "<<(float)m_totalNumLeafPrims/(float)m_numNoEmptyLeaf;
+	<<"\n num prim indirections "<<m_stream.numIndirections();
+	if( m_stream.numIndirections() > 0) {
+		sst <<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
+		<<"   average "<<(float)m_stream.numIndirections()/(float)m_numNoEmptyLeaf;
+	}
     m_buildLogStr = sst.str();
     std::cout<<m_buildLogStr;
 }
@@ -165,19 +167,18 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 			m_minNumLeafPrims = numDir;
 		if(m_maxNumLeafPrims < numDir )
 			m_maxNumLeafPrims = numDir;
-		m_totalNumLeafPrims += numDir;
 		
-		sdb::VectorArray<unsigned> &indir = m_stream.indirection();
+		sdb::VectorArray<Primitive> &prim = m_stream.primitives();
+		sdb::VectorArray<Primitive> &indir = m_stream.indirection();
 		node->setPrimStart(indir.size());
 		node->setNumPrims(numDir);
 		
-		//indir.expandBy(numDir);
         const sdb::VectorArray<unsigned> & src = ctx.indices();
 		for(unsigned i = 0; i < numDir; i++) {
 			//unsigned *idx = indir.asIndex();
 			//*idx = src[i];
 			//indir.next();
-			indir.insert(*src[i]);
+			indir.insert(*prim[*src[i]]);
 		}
 		m_numNoEmptyLeaf++;
 	}
@@ -276,22 +277,23 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 	unsigned start = node->getPrimStart();
 	//printf("prim start %i ", start);
 	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
-	sdb::VectorArray<unsigned> &indir = m_stream.indirection();
-	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
-	//indir.setIndex(start);
+	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
+	//sdb::VectorArray<Primitive> &prims = m_stream.primitives();
+	int igeom, icomponent;
 	char anyHit = 0;
 	float hitD;
 	for(unsigned i = 0; i < num; i++) {
 		//unsigned *iprim = indir.asIndex();
-		unsigned * iprim = indir[start + i];
-		Primitive * prim = prims.get(*iprim);
-		Geometry * geo = prim->getGeometry();
-		unsigned icomp = prim->getComponentIndex();
+		//unsigned * iprim = indir[start + i];
+		//Primitive * prim = prims.get(*iprim);
+		Primitive * prim = indir[start + i];
+		prim->getGeometryComponent(igeom, icomponent);
+		Geometry * geo = m_stream.geometry(igeom);
 		
-		if(geo->intersectRay(icomp, &ctx->m_ray, ctx->m_hitP, ctx->m_hitN, ctx->m_minHitDistance) ) {
+		if(geo->intersectRay(icomponent, &ctx->m_ray, ctx->m_hitP, ctx->m_hitN, ctx->m_minHitDistance) ) {
 			anyHit = 1;
 			ctx->m_geometry = geo;
-			ctx->m_componentIdx = icomp;
+			ctx->m_componentIdx = icomponent;
 		}
 			
 		//indir.next();
@@ -305,9 +307,10 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 
 Primitive * KdTree::getPrim(unsigned idx)
 {
-    sdb::VectorArray<unsigned> &indir = m_stream.indirection();
-	sdb::VectorArray<Primitive> &prims = m_stream.primitives();	
-	return  prims.get(*indir[idx]);
+    sdb::VectorArray<Primitive> &indir = m_stream.indirection();
+	return indir[idx];
+	//sdb::VectorArray<Primitive> &prims = m_stream.primitives();	
+	//return  prims.get(*indir[idx]);
 }
 
 void KdTree::select(SelectionContext * ctx)
@@ -353,15 +356,15 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	const unsigned num = node->getNumPrims();
 	if(num < 1) return 0;
 	unsigned start = node->getPrimStart();
-	sdb::VectorArray<unsigned> &indir = m_stream.indirection();
-	sdb::VectorArray<Primitive> &prims = m_stream.primitives();
-
+	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
+	//sdb::VectorArray<Primitive> &prims = m_stream.primitives();
+	int igeom, icomponent;
 	for(unsigned i = 0; i < num; i++) {
-		unsigned * iprim = indir[start + i];
-		
-		Primitive * prim = prims.get(*iprim);
-		Geometry * geo = prim->getGeometry();
-		unsigned icomponent = prim->getComponentIndex();
+		//unsigned * iprim = indir[start + i];
+		//Primitive * prim = prims.get(*iprim);
+		Primitive * prim = indir[start + i];
+		prim->getGeometryComponent(igeom, icomponent);
+		Geometry * geo = m_stream.geometry(igeom);
 		
 		if(geo->intersectSphere(icomponent, ctx->sphere() ) )
 			ctx->select(geo, icomponent);
@@ -375,7 +378,7 @@ const unsigned KdTree::numNoEmptyLeaves() const
 const TypedEntity::Type KdTree::type() const
 { return TypedEntity::TKdTree; }
 
-sdb::VectorArray<unsigned> & KdTree::indirection()
+sdb::VectorArray<Primitive> & KdTree::indirection()
 { return m_stream.indirection(); }
 
 sdb::VectorArray<Primitive> & KdTree::primitives()
@@ -420,14 +423,15 @@ void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, Closes
 	if(num < 1) return;
 	
 	const unsigned start = node->getPrimStart();
-	sdb::VectorArray<unsigned> &indir = indirection();
-	sdb::VectorArray<Primitive> &prims = primitives();
-	
+	sdb::VectorArray<Primitive> &indir = indirection();
+	///sdb::VectorArray<Primitive> &prims = primitives();
+	int igeom, icomponent;
 	for(unsigned i = 0; i < num; i++) {
-		unsigned *iprim = indir[start + i];
-		Primitive * prim = prims.get(*iprim);
-		Geometry * geo = prim->getGeometry();
-		unsigned icomponent = prim->getComponentIndex();
+		//unsigned *iprim = indir[start + i];
+		//Primitive * prim = prims.get(*iprim);
+		Primitive * prim = indir[start + i];
+		prim->getGeometryComponent(igeom, icomponent);
+		Geometry * geo = m_stream.geometry(igeom);
 		
 		geo->closestToPoint(icomponent, result);
 	}
@@ -469,16 +473,15 @@ bool KdTree::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 	if(num < 1) return false;
 	
 	unsigned start = node->getPrimStart();
-	sdb::VectorArray<unsigned> &indir = indirection();
-	sdb::VectorArray<Primitive> &prims = primitives();
-	//indir.setIndex(start);
-
+	sdb::VectorArray<Primitive> &indir = indirection();
+	//sdb::VectorArray<Primitive> &prims = primitives();
+	int igeom, icomponent;
 	for(unsigned i = 0; i < num; i++) {
-		//unsigned *iprim = indir.asIndex();
-		unsigned *iprim = indir[start + i];
-		Primitive * prim = prims.get(*iprim);
-		Geometry * geo = prim->getGeometry();
-		unsigned icomponent = prim->getComponentIndex();
+		//unsigned *iprim = indir[start + i];
+		//Primitive * prim = prims.get(*iprim);
+		Primitive * prim = indir[start + i];
+		prim->getGeometryComponent(igeom, icomponent);
+		Geometry * geo = m_stream.geometry(igeom);
 		
 		if(geo->intersectBox(icomponent, m_testBox)) {
 			m_intersectElement = icomponent;

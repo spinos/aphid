@@ -32,7 +32,7 @@ public:
 	const sdb::VectorArray<Primitive> &getPrimitives() const;
 
 	sdb::VectorArray<Primitive> &primitives();
-	sdb::VectorArray<unsigned> &indirection();
+	sdb::VectorArray<Primitive> &indirection();
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
@@ -40,11 +40,16 @@ public:
 	const unsigned & numNodes() const;
 	
 	void verbose() const;
+	BoundingBox calculateComponentBox(const int & igeom, const int & icomp);
+	Geometry * geometry(const int & igeom);
+	unsigned numGeometries() const;
+	unsigned numIndirections() const;
 	
 private:
 	sdb::VectorArray<Primitive> m_primitives;
-	sdb::VectorArray<unsigned> m_indirection;
+	sdb::VectorArray<Primitive> m_indirection;
 	sdb::VectorArray<KdTreeNode> m_nodeBlks;
+	std::vector<Geometry *> m_geoms;
 };
 
 }

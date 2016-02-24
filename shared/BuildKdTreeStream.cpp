@@ -25,35 +25,43 @@ void BuildKdTreeStream::cleanup()
 	//for(;it != m_nodeBlks.end(); ++it) free( *it);
 	m_nodeBlks.clear();
 	m_indirection.clear();
+	m_geoms.clear();
 }
 
 void BuildKdTreeStream::appendGeometry(Geometry * geo)
 {
-	const unsigned n = geo->numComponents();
-	for(unsigned i = 0; i < n; i++) {
+	const int igeom = m_geoms.size();
+	if(igeom == (1<<10) - 1) {
+		std::cout<<"\n Kd tree warning exceeded geometry count limit "<<igeom;
+		return;
+	}
+	
+	geo->setIndex(igeom);
+	m_geoms.push_back(geo);
+	int n = geo->numComponents();
+	if(n>= (1<<22) - 1) {
+		std::cout<<"\n Kd tree warning exceeded geometry component limit "<<n;
+		n = (1<<22) - 1;
+	}
+	for(int i = 0; i < n; i++) {
 		Primitive p;
-		p.setGeometry(geo);
-		p.setComponentIndex(i);
+		p.setGeometryComponent(igeom, i);
 		m_primitives.insert(p);
 	}
 }
 
 const unsigned BuildKdTreeStream::getNumPrimitives() const
-{
-	return m_primitives.size();
-}
+{ return m_primitives.size(); }
 
 const sdb::VectorArray<Primitive> &BuildKdTreeStream::getPrimitives() const
-{
-	return m_primitives;
-}
+{ return m_primitives; }
 
 sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
 {
 	return m_primitives;
 }
 
-sdb::VectorArray<unsigned> &BuildKdTreeStream::indirection()
+sdb::VectorArray<Primitive> &BuildKdTreeStream::indirection()
 {
 	return m_indirection;
 }
@@ -96,5 +104,17 @@ void BuildKdTreeStream::verbose() const
     <<"\n n node "<<m_numNodes
     <<"\n n blocks "<<m_nodeBlks.size();
 }
+
+BoundingBox BuildKdTreeStream::calculateComponentBox(const int & igeom, const int & icomp)
+{ return m_geoms[igeom]->calculateBBox(icomp); }
+
+Geometry * BuildKdTreeStream::geometry(const int & igeom)
+{ return m_geoms[igeom]; }
+
+unsigned BuildKdTreeStream::numGeometries() const
+{ return m_geoms.size(); }
+
+unsigned BuildKdTreeStream::numIndirections() const
+{ return m_indirection.size(); }
 
 }

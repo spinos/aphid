@@ -26,19 +26,21 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 	m_numPrimitive = data.getNumPrimitives();
 	std::cout<<"\n n prims "<<m_numPrimitive;
 	
-	createIndirection(m_numPrimitive);
-	
+	// createIndirection(m_numPrimitive);
+	int igeom, icomp;
 	sdb::VectorArray<Primitive> &primitives = data.primitives();
 	
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
 				
 		Primitive *p = primitives.get(i);
+		
+		p->getGeometryComponent(igeom, icomp);
 
-		Geometry *geo = p->getGeometry();
+		//Geometry *geo = p->getGeometry();
 		
-		unsigned compIdx = p->getComponentIndex();
+		//unsigned compIdx = p->getComponentIndex();
 		
-		BoundingBox ab = geo->calculateBBox(compIdx);
+		BoundingBox ab = data.calculateComponentBox(igeom, icomp); //geo->calculateBBox(compIdx);
 		
 		ab.expand(1e-6f);
 		
