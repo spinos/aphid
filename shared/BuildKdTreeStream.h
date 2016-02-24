@@ -29,7 +29,6 @@ public:
 	void appendGeometry(Geometry * geo);
 	
 	const unsigned getNumPrimitives() const;
-	const sdb::VectorArray<Primitive> &getPrimitives() const;
 
 	sdb::VectorArray<Primitive> &primitives();
 	sdb::VectorArray<Primitive> &indirection();
@@ -44,6 +43,7 @@ public:
 	Geometry * geometry(const int & igeom);
 	unsigned numGeometries() const;
 	unsigned numIndirections() const;
+	void removeInput();
 	
 private:
 	sdb::VectorArray<Primitive> m_primitives;

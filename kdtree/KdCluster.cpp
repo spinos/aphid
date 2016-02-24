@@ -54,11 +54,6 @@ void KdCluster::create()
 	<<" min/max geometry count in group "<<minN<<"/"<<maxN<<"\n";
 }
 
-void KdCluster::rebuild()
-{
-	KdTree::rebuild();
-}
-
 void KdCluster::clear()
 {
 	clearGroups();

@@ -74,7 +74,7 @@ void KdTree::create()
 	//ctx->verbose();
 	delete ctx;
 	
-	// m_stream.verbose();
+	m_stream.removeInput();
     sst << "\n Kd tree built in " << bTimer.elapsed() << " secs"
 	<<"\n total num nodes "<<m_stream.numNodes()
 	<<"\n max leaf level: "<<m_maxLeafLevel
@@ -86,13 +86,6 @@ void KdTree::create()
 	}
     m_buildLogStr = sst.str();
     std::cout<<m_buildLogStr;
-}
-
-void KdTree::rebuild()
-{
-	clear();
-	m_stream.initialize();
-	create();
 }
 
 void KdTree::clear()

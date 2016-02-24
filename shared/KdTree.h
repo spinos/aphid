@@ -34,7 +34,6 @@ public:
 	void addGeometry(Geometry * geo);
 	
 	virtual void create();
-	virtual void rebuild();
 	
 	char intersect(IntersectionContext * ctx);
 	void select(SelectionContext * ctx);

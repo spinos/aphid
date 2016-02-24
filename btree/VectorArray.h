@@ -33,9 +33,11 @@ public:
 	void clear()
 	{
 		m_numData = 0;
-		const int n = m_blocks.size();
-		int i = 0;
-		for(; i<n; i++) delete[] m_blocks[i];
+		typename std::vector<T *>::iterator it = m_blocks.begin();
+		for(;it!=m_blocks.end();++it) delete[] *it;
+		//const int n = m_blocks.size();
+		//int i = 0;
+		//for(; i<n; i++) delete[] m_blocks[i];
 		m_blocks.clear();
 		m_data.clear();
 	}

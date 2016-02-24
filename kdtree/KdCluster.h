@@ -26,7 +26,6 @@ public:
     void setGroupGeometry(unsigned idx, GeometryArray * geos);
 	
 	virtual void create();
-	virtual void rebuild();
 	
 	virtual bool intersectRay(const Ray * eyeRay);
 	void setCurrentGroup(unsigned x);

@@ -53,18 +53,11 @@ void BuildKdTreeStream::appendGeometry(Geometry * geo)
 const unsigned BuildKdTreeStream::getNumPrimitives() const
 { return m_primitives.size(); }
 
-const sdb::VectorArray<Primitive> &BuildKdTreeStream::getPrimitives() const
+sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
 { return m_primitives; }
 
-sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
-{
-	return m_primitives;
-}
-
 sdb::VectorArray<Primitive> &BuildKdTreeStream::indirection()
-{
-	return m_indirection;
-}
+{ return m_indirection; }
 
 KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
@@ -116,5 +109,8 @@ unsigned BuildKdTreeStream::numGeometries() const
 
 unsigned BuildKdTreeStream::numIndirections() const
 { return m_indirection.size(); }
+
+void BuildKdTreeStream::removeInput()
+{ m_primitives.clear(); }
 
 }

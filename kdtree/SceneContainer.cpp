@@ -33,7 +33,6 @@ SceneContainer::SceneContainer(GeoDrawer * dr)
 	m_level = 28;
 	m_drawer = new KdTreeDrawer;
 	m_cluster = new KdCluster;
-	m_tree = new KdTree;
 	
 	sdb::TreeNode::MaxNumKeysPerNode = 128;
     sdb::TreeNode::MinNumKeysPerNode = 16;
@@ -41,6 +40,18 @@ SceneContainer::SceneContainer(GeoDrawer * dr)
 	KdTree::NumPrimitivesInLeafThreashold = 128;
 	
 #if TEST_MESH
+	unsigned i=0;
+	float up = .2f, yb = 0.f;
+	for(;i<NUM_MESHES;++i) {
+		if(i==NUM_MESHES/2) {
+			up = -.4f;
+			yb = NUM_MESHES * .2f;
+		}
+		Vector3F c(-10.f + i * .1f + 75.f * RandomF01(), 
+					yb + up * i + 42.f * RandomF01(), 
+					-1.f * i + -30.f + 45.f * RandomF01());
+		m_mesh[i] = new RandomMesh(12500 - 1200 * RandomF01(), c, 10.f - 3.f * RandomF01(), i&1);
+	}
 	testMesh();
 #endif
 
@@ -54,21 +65,10 @@ SceneContainer::~SceneContainer()
 
 void SceneContainer::testMesh()
 {
-	unsigned count = 0;
+	m_tree = new KdTree;
 	unsigned i=0;
-	float up = .2f, yb = 0.f;
-	for(;i<NUM_MESHES;++i) {
-		if(i==NUM_MESHES/2) {
-			up = -.4f;
-			yb = NUM_MESHES * .2f;
-		}
-		Vector3F c(-10.f + i * .1f + 75.f * RandomF01(), 
-					yb + up * i + 42.f * RandomF01(), 
-					-1.f * i + -30.f + 45.f * RandomF01());
-		m_mesh[i] = new RandomMesh(12500 - 1200 * RandomF01(), c, 10.f - 3.f * RandomF01(), i&1);
+	for(;i<NUM_MESHES;++i)
 		m_tree->addGeometry(m_mesh[i]);
-		count += m_mesh[i]->numTriangles();
-	}
 	
 	m_tree->create();
 }
@@ -159,7 +159,9 @@ void SceneContainer::upLevel()
 	if(m_level > 30) m_level = 30;
 	KdTree::MaxBuildLevel = m_level;
 #if TEST_MESH
-	m_tree->rebuild();
+	//m_tree->rebuild();
+	delete m_tree;
+	testMesh();
 #endif
 #if TEST_CURVE
 	m_cluster->rebuild();
@@ -172,7 +174,9 @@ void SceneContainer::downLevel()
 	if(m_level<2) m_level = 2;
 	KdTree::MaxBuildLevel = m_level;
 #if TEST_MESH
-	m_tree->rebuild();
+	//m_tree->rebuild();
+	delete m_tree;
+	testMesh();
 #endif
 #if TEST_CURVE
 	m_cluster->rebuild();
