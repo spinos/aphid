@@ -100,16 +100,16 @@ void KdCluster::leafWriteGroup(KdTreeNode *node, const BoundingBox & box)
 	curGrp->create(num);
 	
 	unsigned start = node->getPrimStart();
-	std::vector<unsigned> &indir = indirection();
+	sdb::VectorArray<unsigned> &indir = indirection();
 	sdb::VectorArray<Primitive> &prims = primitives();
 	//indir.setIndex(start);
 
 	unsigned igroup = 0;
 	for(unsigned i = 0; i < num; i++) {
 		//unsigned *iprim = indir.asIndex();
-		unsigned iprim = indir[start + i];
+		unsigned *iprim = indir[start + i];
 		
-		Primitive * prim = prims.get(iprim);
+		Primitive * prim = prims.get(*iprim);
 		Geometry * geo = prim->getGeometry();
 		unsigned icomponent = prim->getComponentIndex();
 		if(geo->type() == TGeometryArray) {

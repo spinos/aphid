@@ -13,6 +13,8 @@
 class MString;
 class MObject;
 
+namespace aphid {
+
 class AAttributeHelper : public AHelper {
 public:
 	AAttributeHelper() {}
@@ -70,3 +72,5 @@ public:
 							MFnNumericData::Type t);
 	static bool IsDirectAnimated(const MPlug & attrib);
 };
+
+}

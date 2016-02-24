@@ -32,7 +32,7 @@ public:
 	const sdb::VectorArray<Primitive> &getPrimitives() const;
 
 	sdb::VectorArray<Primitive> &primitives();
-	std::vector<unsigned> &indirection();
+	sdb::VectorArray<unsigned> &indirection();
 	
 	KdTreeNode *createTreeBranch();
 	KdTreeNode *firstTreeBranch();
@@ -43,8 +43,8 @@ public:
 	
 private:
 	sdb::VectorArray<Primitive> m_primitives;
-	std::vector<unsigned> m_indirection;
-	std::vector<KdTreeNode *> m_nodeBlks;
+	sdb::VectorArray<unsigned> m_indirection;
+	sdb::VectorArray<KdTreeNode> m_nodeBlks;
 };
 
 }

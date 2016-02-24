@@ -21,8 +21,8 @@ void BuildKdTreeStream::initialize()
 void BuildKdTreeStream::cleanup()
 {
 	m_numNodes = 0;
-	std::vector<KdTreeNode *>::iterator it = m_nodeBlks.begin();
-	for(;it != m_nodeBlks.end(); ++it) free( *it);
+	//std::vector<KdTreeNode *>::iterator it = m_nodeBlks.begin();
+	//for(;it != m_nodeBlks.end(); ++it) free( *it);
 	m_nodeBlks.clear();
 	m_indirection.clear();
 }
@@ -53,20 +53,24 @@ sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
 	return m_primitives;
 }
 
-std::vector<unsigned> &BuildKdTreeStream::indirection()
+sdb::VectorArray<unsigned> &BuildKdTreeStream::indirection()
 {
 	return m_indirection;
 }
 
 KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
+    m_nodeBlks.insert();
+    m_nodeBlks.insert();
+    KdTreeNode * b = m_nodeBlks[m_numNodes];
+/*	
 	if((m_numNodes & 2047) == 0) {
-		m_nodeBuf = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2049);
+		m_nodeBuf = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2050);
 		m_nodeBlks.push_back(m_nodeBuf);
 	}
 	
 	KdTreeNode * b = &m_nodeBuf[m_numNodes & 2047];	
-	
+*/	
 	unsigned long * tmp = (unsigned long*)&b[0];
 	tmp[1] = tmp[3] = 6;
 	

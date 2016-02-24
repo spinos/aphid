@@ -28,8 +28,6 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 	
 	createIndirection(m_numPrimitive);
 	
-	unsigned *primIndex = m_indices.ptr();
-	
 	sdb::VectorArray<Primitive> &primitives = data.primitives();
 	
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
@@ -48,8 +46,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		
 		const Vector3F center = ab.center();
 		
-		*primIndex = i;
-		primIndex++;
+        m_indices.insert(i);
 		
 		GroupCell * c = m_grid->insertChild((const float *)&center);
 		
@@ -72,7 +69,7 @@ BuildKdTreeContext::~BuildKdTreeContext()
 
 /// allocate by max count
 void BuildKdTreeContext::createIndirection(const unsigned &count)
-{ m_indices.create(count+1); }
+{}
 
 void BuildKdTreeContext::createGrid(const float & x)
 {
@@ -96,9 +93,9 @@ const unsigned & BuildKdTreeContext::getNumPrimitives() const
 	return m_numPrimitive;
 }
 
-unsigned *BuildKdTreeContext::indices()
+const sdb::VectorArray<unsigned> & BuildKdTreeContext::indices() const
 {
-	return m_indices.ptr();
+	return m_indices;
 }
 
 const sdb::VectorArray<BoundingBox> & BuildKdTreeContext::primitiveBoxes() const
@@ -149,11 +146,12 @@ bool BuildKdTreeContext::decompress(bool forced)
 	if(m_numPrimitive < 1024 
 		|| numCells() < 32
 		|| forced) {
-		m_indices.create(m_numPrimitive+1);
-		unsigned ind = 0;
+/// reset
+        m_numPrimitive = 0;
 		m_grid->begin();
+        m_indices.clear();
 		while(!m_grid->end() ) {
-			addIndices(m_grid->value(), ind );
+			addIndices(m_grid->value() );
 			m_grid->next();
 		}
 		delete m_grid;
@@ -163,19 +161,18 @@ bool BuildKdTreeContext::decompress(bool forced)
 	return false;
 }
 
-void BuildKdTreeContext::addIndices(GroupCell * c, unsigned &ind)
+void BuildKdTreeContext::addIndices(GroupCell * c)
 {
 	c->begin();
 	while(!c->end() ) {
-		m_indices.ptr()[ind] = c->key();
-		ind++;
+		addIndex(c->key() );
 		c->next();
 	}
 }
 
 void BuildKdTreeContext::addIndex(const unsigned & x)
 {
-	m_indices.ptr()[m_numPrimitive] = x;
+	m_indices.insert( x);
 	m_numPrimitive++;
 }
 

@@ -135,6 +135,7 @@ ADD_LIBRARY (aphidGeom STATIC
 ../catmullclark/bezierPatch.cpp 
 ../shared/AFrustum.cpp
 ../shared/TriangleRaster.cpp
+../shared/PrimitiveFilter.cpp
 )
 
 ADD_LIBRARY (aphidH5 STATIC
@@ -191,7 +192,6 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/BaseBrush.cpp
 ../shared/ToolContext.cpp
 ../shared/SelectionArray.cpp
-../shared/PrimitiveFilter.cpp
 ../shared/ComponentConversion.cpp
 ../shared/GeoElement.cpp 
 ../shared/Vertex.cpp 

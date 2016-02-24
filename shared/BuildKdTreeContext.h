@@ -37,7 +37,7 @@ public:
 	
 	const unsigned & getNumPrimitives() const;
 
-	unsigned *indices();
+	const sdb::VectorArray<unsigned> & indices() const;
 	const sdb::VectorArray<BoundingBox> & primitiveBoxes() const;
 	
 	void verbose() const;
@@ -54,11 +54,11 @@ public:
 	void addIndex(const unsigned & x);
 	
 private:
-	void addIndices(GroupCell * c, unsigned & ind);
+	void addIndices(GroupCell * c);
 	
 private:
 	BoundingBox m_bbox;
-	IndexList m_indices;
+	sdb::VectorArray<unsigned> m_indices;
 	sdb::VectorArray<BoundingBox> m_primitiveBoxes;
 	unsigned m_numPrimitive;
 };

@@ -51,7 +51,7 @@ public:
 protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
-	std::vector<unsigned> & indirection();
+	sdb::VectorArray<unsigned> & indirection();
 	sdb::VectorArray<Primitive> & primitives();
 	
 private:

@@ -11,6 +11,8 @@
 #include <maya/MFnEnumAttribute.h>
 #include <maya/MFnAnimCurve.h>
 
+namespace aphid {
+
 void AAttributeHelper::setCustomStringAttrib(MObject node, const char* nameLong, const char* nameShort, const char* value)
 {
 	MFnDependencyNode fdep(node);
@@ -267,5 +269,7 @@ bool AAttributeHelper::IsDirectAnimated(const MPlug & attrib)
 	return (node.hasFn( MFn::kAnimCurveTimeToAngular )  ||
 			node.hasFn( MFn::kAnimCurveTimeToDistance )  ||
 			node.hasFn( MFn::kAnimCurveTimeToUnitless ) );
+}
+
 }
 //:~
