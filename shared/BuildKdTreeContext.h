@@ -32,7 +32,6 @@ public:
 	BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBox & b);
 	~BuildKdTreeContext();
 	
-	void createIndirection(const unsigned &count);
 	void createGrid(const float & x);
 	
 	const unsigned & getNumPrimitives() const;

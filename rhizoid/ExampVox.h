@@ -8,10 +8,11 @@
  */
 #include <DrawBox.h>
 #include <BoundingBox.h>
+#include <Geometry.h>
+#include <vector>
+#include <BuildKdTreeContext.h>
 
 namespace aphid {
-
-class KdTree;
 
 class ExampVox : public DrawBox {
 
@@ -35,7 +36,7 @@ public:
 	ExampVox();
 	virtual ~ExampVox();
 	
-	virtual void voxelize(KdTree * tree);
+	virtual void voxelize(const std::vector<Geometry *> & geoms);
 	
 /// set b4 geom box
 	void setGeomSizeMult(const float & x);
@@ -68,7 +69,8 @@ protected:
 	void buildBoxDrawBuf();
 	
 private:
-
+	void fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
+				Geometry * geo);
 };
 
 }

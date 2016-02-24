@@ -8,8 +8,6 @@
  */
 
 #include "ExampVox.h"
-#include <UniformGrid.h>
-#include <KdTree.h>
 
 namespace aphid {
 
@@ -34,32 +32,61 @@ ExampVox::~ExampVox()
 	if(m_boxNormalBuf) delete[] m_boxNormalBuf;
 }
 
-void ExampVox::voxelize(KdTree * tree)
-{ 
-	m_geomBox = tree->getBBox();
-	m_geomBox.expand(0.01f);
-	UniformGrid grd;
-	grd.setBounding(m_geomBox);
-	grd.create(tree, 4);
-	unsigned n = grd.numCells();
+void ExampVox::voxelize(const std::vector<Geometry *> & geoms)
+{
+	m_geomBox.reset();
+	unsigned n = 0;
+	std::vector<Geometry *>::const_iterator it = geoms.begin();
+	for(;it!=geoms.end();++it) {
+		n += (*it)->numComponents();
+		m_geomBox.expandBy((*it)->calculateBBox() );
+	}
+	
 	if(n < 1) return;
 	
-	setNumBoxes(n);
+	m_geomBox.expand(0.01f);
+	sdb::WorldGrid<GroupCell, unsigned > grid;
+	grid.setGridSize(m_geomBox.getLongestDistance() / 15.f);
+	
+	it = geoms.begin();
+	for(;it!=geoms.end();++it) {
+		fillGrid(&grid, *it);
+	}
+	
+	setNumBoxes(grid.size() );
 	
 	unsigned i=0;
-	sdb::CellHash * c = grd.cells();
-	c->begin();
-	while(!c->end()) {
-		Vector3F center = grd.cellCenter(c->key() );
+	grid.begin();
+	while(!grid.end()) {
+		Vector3F center = grid.value()->m_box.center();
 		m_boxCenterSizeF4[i*4] = center.x;
 		m_boxCenterSizeF4[i*4+1] = center.y;
 		m_boxCenterSizeF4[i*4+2] = center.z;
-		m_boxCenterSizeF4[i*4+3] = grd.cellSizeAtLevel(c->value()->level);
+		m_boxCenterSizeF4[i*4+3] = grid.value()->m_box.getLongestDistance() * .67f;
 	    i++;
-		c->next();   
+		grid.next();   
 	}
 	
 	buildBoxDrawBuf();
+}
+
+void ExampVox::fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
+				Geometry * geo)
+{
+	const int n = geo->numComponents();
+	for(int i = 0; i < n; i++) {
+		BoundingBox ab = geo->calculateBBox(i);
+		const Vector3F center = ab.center();
+		GroupCell * c = grid->insertChild((const float *)&center);
+		
+		if(!c) {
+			std::cout<<"\n error cast to GroupCell";
+			return;
+		}
+		
+		c->insert(i);
+		c->m_box.expandBy(ab);
+	}
 }
 
 void ExampVox::buildBoxDrawBuf() 

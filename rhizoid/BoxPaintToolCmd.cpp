@@ -474,7 +474,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 		return MS::kFailure;
 	}
 	
-	std::vector<aphid::ATriangleMesh * > meshes;
+	std::vector<aphid::Geometry * > meshes;
 	for(;!meshIter.isDone(); meshIter.next() ) {
 		MObject mesh;
 		meshIter.getDependNode(mesh);
@@ -516,26 +516,14 @@ MStatus proxyPaintTool::voxelizeSelected()
 	}
 	
 	aphid::AHelper::Info<unsigned>("proxyPaintTool voxelize n mesh", meshes.size() );
-	
-	aphid::KdTree::MaxBuildLevel = 24;
-	aphid::KdTree::NumPrimitivesInLeafThreashold = 24;
-	
-	aphid::KdTree tree;
-	std::vector<aphid::ATriangleMesh * >::iterator it = meshes.begin();
-	for(;it!= meshes.end();++it)
-		tree.addGeometry(*it);
-		
-	tree.create();
-	
-	aphid::AHelper::Info<aphid::BoundingBox>("proxyPaintTool bounding", tree.getBBox());
-	
+
 	MFnDependencyNode fviz(vizobj, &stat);
 	aphid::AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
 		
 	ExampViz* pViz = (ExampViz*)fviz.userNode();
-	pViz->voxelize(&tree );
+	pViz->voxelize(meshes);
 	
-	it = meshes.begin();
+	std::vector<aphid::Geometry * >::iterator it = meshes.begin();
 	for(;it!= meshes.end();++it) delete *it;
 	meshes.clear();
 	return stat;

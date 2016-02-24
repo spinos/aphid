@@ -218,10 +218,9 @@ MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
-void ExampViz::voxelize(aphid::KdTree * tree)
+void ExampViz::voxelize(const std::vector<aphid::Geometry *> & geoms)
 {
-	ExampVox::voxelize(tree);
-	
+	ExampVox::voxelize(geoms);
 	const aphid::BoundingBox bb = geomBox();
 	
 	MFnNumericData bbFn;
@@ -253,7 +252,8 @@ void ExampViz::voxelize(aphid::KdTree * tree)
 	MPlug cellPlug(thisMObject(), acellBuf);
 	cellPlug.setValue(opnt);
 	
-	aphid::AHelper::Info<unsigned>(" ExampViz generate n cells" ,n);
+	aphid::AHelper::Info<aphid::BoundingBox>(" ExampViz bounding", bb );	
+	aphid::AHelper::Info<unsigned>(" ExampViz generate n cells" , n);
 }
 
 void ExampViz::updateGeomBox(MObject & node)

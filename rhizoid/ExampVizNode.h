@@ -49,7 +49,7 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	virtual void voxelize(aphid::KdTree * tree);
+	virtual void voxelize(const std::vector<aphid::Geometry *> & geoms);
 	
 private:
 	void loadBoxes(MObject & node);

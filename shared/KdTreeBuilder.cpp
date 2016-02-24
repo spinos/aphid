@@ -386,11 +386,6 @@ void KdTreeBuilder::partitionPrims(const SplitEvent & e,
 					const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
 {
-	if(e.leftCount() > 0)
-		leftCtx.createIndirection(e.leftCount());
-	if(e.rightCount() > 0)
-		rightCtx.createIndirection(e.rightCount());
-	
 	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
 	const sdb::VectorArray<unsigned> & indices = m_context->indices();
 	

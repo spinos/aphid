@@ -26,7 +26,6 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 	m_numPrimitive = data.getNumPrimitives();
 	std::cout<<"\n n prims "<<m_numPrimitive;
 	
-	// createIndirection(m_numPrimitive);
 	int igeom, icomp;
 	sdb::VectorArray<Primitive> &primitives = data.primitives();
 	
@@ -36,11 +35,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		
 		p->getGeometryComponent(igeom, icomp);
 
-		//Geometry *geo = p->getGeometry();
-		
-		//unsigned compIdx = p->getComponentIndex();
-		
-		BoundingBox ab = data.calculateComponentBox(igeom, icomp); //geo->calculateBBox(compIdx);
+		BoundingBox ab = data.calculateComponentBox(igeom, icomp);
 		
 		ab.expand(1e-6f);
 		
@@ -68,10 +63,6 @@ BuildKdTreeContext::~BuildKdTreeContext()
 {
 	if(m_grid) delete m_grid;
 }
-
-/// allocate by max count
-void BuildKdTreeContext::createIndirection(const unsigned &count)
-{}
 
 void BuildKdTreeContext::createGrid(const float & x)
 {
