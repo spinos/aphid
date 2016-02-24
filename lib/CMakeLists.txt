@@ -91,7 +91,6 @@ ADD_LIBRARY (aphidMath STATIC
 ../shared/PseudoNoise.cpp
 ../shared/QuickSort.cpp
 ../shared/Plane.cpp
-../shared/AFrustum.cpp
 )
 
 ADD_LIBRARY (aphidGeom STATIC 
@@ -134,6 +133,7 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/PlaneMesh.cpp
 ../shared/ConvexShape.cpp
 ../catmullclark/bezierPatch.cpp 
+../shared/AFrustum.cpp
 )
 
 ADD_LIBRARY (aphidH5 STATIC
