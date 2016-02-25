@@ -10,7 +10,7 @@
 
 #include <BNode.h>
 #include <List.h>
-
+namespace aphid {
 namespace sdb {
 
 class BTree
@@ -29,3 +29,4 @@ private:
 	BNode<int> * m_root;
 };
 } // end namespace sdb
+}

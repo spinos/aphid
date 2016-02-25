@@ -12,6 +12,8 @@
 #include <HWorldGrid.h>
 namespace jul {
 
+using namespace aphid;
+
 class QuatJulia {
 
 	Float4 m_c;

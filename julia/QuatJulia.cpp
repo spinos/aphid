@@ -40,7 +40,7 @@ QuatJulia::QuatJulia(Parameter * param)
 	
 	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oCreate);
 	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F >("/grid");
-	m_tree->setGridSize(1.f / 10.f);
+	m_tree->setGridSize(1.f / 9.f);
 	generate();
 	m_tree->save();
 	m_tree->close();

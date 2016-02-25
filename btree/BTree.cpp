@@ -9,6 +9,7 @@
 
 #include "BTree.h"
 
+namespace aphid {
 namespace sdb {
 
 BTree::BTree()
@@ -98,3 +99,4 @@ void BTree::displayLeaves()
 }
 
 } // end namespace sdb
+}

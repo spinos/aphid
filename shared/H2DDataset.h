@@ -10,6 +10,7 @@
 #pragma once
 #include "HObject.h"
 
+namespace aphid {
 namespace hdata {
 
 enum Rank {
@@ -290,4 +291,6 @@ int H2dDataset<DataRank, NRows, CnkSz>::numColumns()
 	H5Sget_simple_extent_dims(fileSpace, current_dims, max_dims);
 
 	return current_dims[0];
+}
+
 }

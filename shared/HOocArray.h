@@ -11,6 +11,8 @@
 #pragma once
 #include "H2dDataset.h"
 
+namespace aphid {
+    
 /// BufSize is max num columns in-core
 
 template <int DataRank, int NRows, int BufSize>
@@ -229,4 +231,6 @@ void HOocArray<DataRank, NRows, BufSize>::readElement(char * dst, int idx)
 template <int DataRank, int NRows, int BufSize>
 void HOocArray<DataRank, NRows, BufSize>::clear()
 { m_size = 0; }
+
+}
 //:~

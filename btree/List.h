@@ -9,6 +9,8 @@
 #pragma once
 #include <Entity.h>
 #include <vector>
+
+namespace aphid {
 namespace sdb {
 
 template<typename T>
@@ -161,3 +163,4 @@ private:
 	int m_numOccupied;
 };
 } //end namespace sdb
+}

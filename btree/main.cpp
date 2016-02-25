@@ -11,7 +11,7 @@
 #include <Types.h>
 #include <Array.h>
 #include "../shared/PseudoNoise.h"
-using namespace sdb;
+using namespace aphid::sdb;
 
 void testFind(Array<int, int> & arr, int k)
 {

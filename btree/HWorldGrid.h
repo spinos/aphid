@@ -14,6 +14,7 @@
 #include <HBase.h>
 #include <boost/format.hpp>
 
+namespace aphid {
 namespace sdb {
 
 template<typename ChildType, typename ValueType>
@@ -124,4 +125,5 @@ char HWorldGrid<ChildType, ValueType>::load()
 	return 1;
 }
 
+}
 }

@@ -7,7 +7,8 @@ set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
 )
 
-set (SOURCE_FILES Parameter.cpp 
+set (SOURCE_FILES 
+Parameter.cpp 
 QuatJulia.cpp
 main.cpp)
 
@@ -104,7 +105,9 @@ if (WIN32)
 set (Aphid_Library "D:/aphid/lib/aphid.lib")
 else ()
 	IF (EXISTS "/users/jianzhang/aphid/lib/libaphid.a")
-		set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+		set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
+					/users/jianzhang/aphid/lib/libaphidSdb.a
+					/users/jianzhang/aphid/lib/libaphidH5.a)
 	ELSEIF (EXISTS "/users/jollyroger/aphid/lib/libaphid.a")
 		set (Aphid_Library "/users/jollyroger/aphid/lib/libaphid.a")
 	ENDIF ()

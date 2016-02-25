@@ -206,6 +206,12 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/BaseDeformer.cpp  
 )
 
+ADD_LIBRARY (aphidSdb STATIC
+../btree/Types.cpp
+../btree/Entity.cpp
+../btree/BNode.cpp
+)
+
 add_library(aphid STATIC                 
 ##../shared/SpaceHandle.cpp                
     ../shared/SkeletonSubspaceDeformer.cpp                                  
@@ -304,9 +310,6 @@ add_library(aphid STATIC
 ##../shared/PrincipalComponents.cpp
 ##../shared/DynamicBody.cpp
 ##../shared/ViewFrame.cpp
-##../btree/Types.cpp
-##../btree/Entity.cpp
-##../btree/BNode.cpp
 ##../btree/BTree.cpp
 ##../btree/MortonHash.cpp
 ##../shared/BaseSampler.cpp
