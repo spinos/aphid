@@ -346,12 +346,12 @@ void KdTreeBuilder::partitionCompress(const SplitEvent & e,
 		if(primBox.touch(m_bbox) ) {	
 			side = e.side(primBox);
 			if(side < 2) {
-				if(primBox.touch(leftBox))
-					leftCtx.addCell(grd->key(), grd->value() );
+				//if(primBox.touch(leftBox))
+				leftCtx.addCell(grd->key(), grd->value() );
 			}
 			if(side > 0) {
-				if(primBox.touch(rightBox))
-					rightCtx.addCell(grd->key(), grd->value() );
+				//if(primBox.touch(rightBox))
+				rightCtx.addCell(grd->key(), grd->value() );
 			}
 		}
 		grd->next();
