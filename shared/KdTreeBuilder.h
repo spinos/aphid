@@ -32,7 +32,6 @@ public:
 	const SplitEvent *bestSplit();
 	void verbose() const;
 	
-	static BuildKdTreeContext * GlobalContext;
 private:
 	struct IndexLimit {
 		IndexLimit() {low = 1; high = -1;}

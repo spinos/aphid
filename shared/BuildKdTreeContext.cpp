@@ -13,6 +13,8 @@
 
 namespace aphid {
 
+BuildKdTreeContext * BuildKdTreeContext::GlobalContext = NULL;
+
 BuildKdTreeContext::BuildKdTreeContext() : m_grid(NULL),
 m_numPrimitive(0) {}
 
@@ -122,6 +124,7 @@ void BuildKdTreeContext::countPrimsInGrid()
 	if(!m_grid) return;
 	m_grid->begin();
 	while(!m_grid->end() ) {
+		//countPrimsIn(m_grid->value() );
 		m_numPrimitive += m_grid->value()->size();
 		m_grid->next();
 	}
@@ -140,25 +143,45 @@ bool BuildKdTreeContext::decompress(bool forced)
 		|| numCells() < 32
 		|| forced) {
 /// reset
-        m_numPrimitive = 0;
-		m_grid->begin();
         m_indices.clear();
+		m_numPrimitive = 0;
+		
+		m_grid->begin();
 		while(!m_grid->end() ) {
-			addIndices(m_grid->value() );
+			addIndicesIn(m_grid->value() );
 			m_grid->next();
 		}
+		
 		delete m_grid;
 		m_grid = NULL;
+		
 		return true;
 	}
 	return false;
 }
 
-void BuildKdTreeContext::addIndices(GroupCell * c)
+void BuildKdTreeContext::addIndicesIn(GroupCell * c)
 {
+	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
+		
 	c->begin();
 	while(!c->end() ) {
-		addIndex(c->key() );
+		const BoundingBox * primB = boxSrc[c->key() ];
+		if(primB->touch(m_bbox) )
+			addIndex(c->key() );
+		c->next();
+	}
+}
+
+void BuildKdTreeContext::countPrimsIn(GroupCell * c)
+{
+	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
+		
+	c->begin();
+	while(!c->end() ) {
+		const BoundingBox * primB = boxSrc[c->key() ];
+		if(primB->touch(m_bbox) )
+			m_numPrimitive++;
 		c->next();
 	}
 }

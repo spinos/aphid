@@ -52,8 +52,11 @@ public:
 	bool decompress(bool forced = false);
 	void addIndex(const unsigned & x);
 	
+	static BuildKdTreeContext * GlobalContext;
+	
 private:
-	void addIndices(GroupCell * c);
+	void addIndicesIn(GroupCell * c);
+	void countPrimsIn(GroupCell * c);
 	
 private:
 	BoundingBox m_bbox;

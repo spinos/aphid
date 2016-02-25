@@ -12,8 +12,6 @@
 
 namespace aphid {
 
-BuildKdTreeContext * KdTreeBuilder::GlobalContext = NULL;
-
 KdTreeBuilder::KdTreeBuilder()
 {
 	m_bins = new MinMaxBins[SplitEvent::Dimension];
@@ -131,7 +129,7 @@ void KdTreeBuilder::updateCompressEventBBoxAlong(const int &axis)
 
 void KdTreeBuilder::calculateBins()
 {
-	const sdb::VectorArray<BoundingBox> & primBoxes = GlobalContext->primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & primBoxes = BuildKdTreeContext::GlobalContext->primitiveBoxes();
 	const sdb::VectorArray<unsigned> & indices = m_context->indices();
 	const unsigned nprim = m_context->getNumPrimitives();
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
@@ -201,7 +199,7 @@ void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
 	const float min = m_bbox.getMin(axis);
 	const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
 	int g, minGrid, maxGrid;
-	const sdb::VectorArray<BoundingBox> & primBoxes = GlobalContext->primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & primBoxes = BuildKdTreeContext::GlobalContext->primitiveBoxes();
 	const sdb::VectorArray<unsigned> & indices = m_context->indices();
 	const unsigned nprim = m_context->getNumPrimitives();
 	
@@ -386,7 +384,7 @@ void KdTreeBuilder::partitionPrims(const SplitEvent & e,
 					const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
 {
-	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
+	const sdb::VectorArray<BoundingBox> & boxSrc = BuildKdTreeContext::GlobalContext->primitiveBoxes();
 	const sdb::VectorArray<unsigned> & indices = m_context->indices();
 	
 	int side;
@@ -398,14 +396,12 @@ void KdTreeBuilder::partitionPrims(const SplitEvent & e,
 		side = e.side(*primBox);
 		
 		if(side < 2) {
-			if(primBox->touch(leftBox)) {
+			//if(primBox->touch(leftBox))
 			leftCtx.addIndex(*indices[i]);
-			}
 		}
 		if(side > 0) {
-			if(primBox->touch(rightBox)) {
+			//if(primBox->touch(rightBox))
 			rightCtx.addIndex(*indices[i]);
-			}
 		}		
 	}
 	

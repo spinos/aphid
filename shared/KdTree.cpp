@@ -66,7 +66,7 @@ void KdTree::create()
 	m_maxLeafLevel = 0;
 	m_numNoEmptyLeaf = 0;
 	
-	KdTreeBuilder::GlobalContext = ctx;
+	BuildKdTreeContext::GlobalContext = ctx;
 	m_minNumLeafPrims = 1<<28;
 	m_maxNumLeafPrims = 0;
 	
@@ -158,26 +158,19 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 	
 	const sdb::VectorArray<Primitive> &prim = m_stream.primitives();
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
-	const sdb::VectorArray<BoundingBox> & primB = KdTreeBuilder::GlobalContext->primitiveBoxes();
 	
 	node->setPrimStart(indir.size());
 	
-	const BoundingBox & cb = ctx.getBBox();
-	unsigned numTouched = 0;
 	const sdb::VectorArray<unsigned> & src = ctx.indices();
-	for(unsigned i = 0; i < numDir; i++) {
-		if(primB[*src[i]]->touch(cb ) ) {
-			indir.insert(*prim[*src[i]]);
-			numTouched++;
-		}
-	}
+	for(unsigned i = 0; i < numDir; i++)
+		indir.insert(*prim[*src[i]]);
 		
-	if(m_minNumLeafPrims > numTouched )
-		m_minNumLeafPrims = numTouched;
-	if(m_maxNumLeafPrims < numTouched )
-		m_maxNumLeafPrims = numTouched;
+	if(m_minNumLeafPrims > numDir )
+		m_minNumLeafPrims = numDir;
+	if(m_maxNumLeafPrims < numDir )
+		m_maxNumLeafPrims = numDir;
 	
-	node->setNumPrims(numTouched);
+	node->setNumPrims(numDir);
 	m_numNoEmptyLeaf++;
 }
 
