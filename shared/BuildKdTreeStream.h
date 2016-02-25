@@ -30,7 +30,7 @@ public:
 	
 	const unsigned getNumPrimitives() const;
 
-	sdb::VectorArray<Primitive> &primitives();
+	const sdb::VectorArray<Primitive> &primitives();
 	sdb::VectorArray<Primitive> &indirection();
 	
 	KdTreeNode *createTreeBranch();

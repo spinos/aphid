@@ -152,32 +152,33 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 {
 	ctx.decompress(true);
-	if(!ctx.grid() ) {
-	if(ctx.getNumPrimitives() > 0) {
-		const unsigned numDir = ctx.getNumPrimitives();
-		
-		if(m_minNumLeafPrims > numDir )
-			m_minNumLeafPrims = numDir;
-		if(m_maxNumLeafPrims < numDir )
-			m_maxNumLeafPrims = numDir;
-		
-		sdb::VectorArray<Primitive> &prim = m_stream.primitives();
-		sdb::VectorArray<Primitive> &indir = m_stream.indirection();
-		node->setPrimStart(indir.size());
-		node->setNumPrims(numDir);
-		
-        const sdb::VectorArray<unsigned> & src = ctx.indices();
-		for(unsigned i = 0; i < numDir; i++) {
-			//unsigned *idx = indir.asIndex();
-			//*idx = src[i];
-			//indir.next();
-			indir.insert(*prim[*src[i]]);
-		}
-		m_numNoEmptyLeaf++;
-	}
-	}
-	
 	node->setLeaf(true);
+	if(ctx.getNumPrimitives() < 1) return;
+	const unsigned numDir = ctx.getNumPrimitives();
+	
+	const sdb::VectorArray<Primitive> &prim = m_stream.primitives();
+	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
+	const sdb::VectorArray<BoundingBox> & primB = KdTreeBuilder::GlobalContext->primitiveBoxes();
+	
+	node->setPrimStart(indir.size());
+	
+	const BoundingBox & cb = ctx.getBBox();
+	unsigned numTouched = 0;
+	const sdb::VectorArray<unsigned> & src = ctx.indices();
+	for(unsigned i = 0; i < numDir; i++) {
+		if(primB[*src[i]]->touch(cb ) ) {
+			indir.insert(*prim[*src[i]]);
+			numTouched++;
+		}
+	}
+		
+	if(m_minNumLeafPrims > numTouched )
+		m_minNumLeafPrims = numTouched;
+	if(m_maxNumLeafPrims < numTouched )
+		m_maxNumLeafPrims = numTouched;
+	
+	node->setNumPrims(numTouched);
+	m_numNoEmptyLeaf++;
 }
 
 char KdTree::intersect(IntersectionContext * ctx)
@@ -268,10 +269,8 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 	const unsigned num = node->getNumPrims();
 	if(num < 1) return 0;
 	unsigned start = node->getPrimStart();
-	//printf("prim start %i ", start);
-	//printf("prims count in leaf %i start at %i\n", node->getNumPrims(), node->getPrimStart());
+	
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
-	//sdb::VectorArray<Primitive> &prims = m_stream.primitives();
 	int igeom, icomponent;
 	char anyHit = 0;
 	float hitD;
@@ -302,8 +301,6 @@ Primitive * KdTree::getPrim(unsigned idx)
 {
     sdb::VectorArray<Primitive> &indir = m_stream.indirection();
 	return indir[idx];
-	//sdb::VectorArray<Primitive> &prims = m_stream.primitives();	
-	//return  prims.get(*indir[idx]);
 }
 
 void KdTree::select(SelectionContext * ctx)
@@ -350,11 +347,8 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	if(num < 1) return 0;
 	unsigned start = node->getPrimStart();
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
-	//sdb::VectorArray<Primitive> &prims = m_stream.primitives();
 	int igeom, icomponent;
 	for(unsigned i = 0; i < num; i++) {
-		//unsigned * iprim = indir[start + i];
-		//Primitive * prim = prims.get(*iprim);
 		Primitive * prim = indir[start + i];
 		prim->getGeometryComponent(igeom, icomponent);
 		Geometry * geo = m_stream.geometry(igeom);
@@ -373,9 +367,6 @@ const TypedEntity::Type KdTree::type() const
 
 sdb::VectorArray<Primitive> & KdTree::indirection()
 { return m_stream.indirection(); }
-
-sdb::VectorArray<Primitive> & KdTree::primitives()
-{ return m_stream.primitives(); }
 
 void KdTree::closestToPoint(ClosestToPointTestResult * result)
 { 

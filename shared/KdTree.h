@@ -54,7 +54,6 @@ protected:
 	virtual void clear();
 	const unsigned numNoEmptyLeaves() const;
 	sdb::VectorArray<Primitive> & indirection();
-	sdb::VectorArray<Primitive> & primitives();
 	
 private:
 	void subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level);

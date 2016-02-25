@@ -189,7 +189,7 @@ void SceneContainer::intersect(const Ray * incident)
 #if TEST_MESH
 	m_tree->intersect(&m_intersectCtx );
 	if(m_intersectCtx.m_success) {
-		m_selectCtx.setRadius(4.f);
+		m_selectCtx.setRadius(1.f);
 		m_selectCtx.setSelectMode(SelectionContext::Append);
 		m_selectCtx.setCenter(m_intersectCtx.m_hitP);
 		m_selectCtx.setDirection(m_intersectCtx.m_hitN);

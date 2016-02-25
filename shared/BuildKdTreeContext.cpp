@@ -27,7 +27,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 	std::cout<<"\n n prims "<<m_numPrimitive;
 	
 	int igeom, icomp;
-	sdb::VectorArray<Primitive> &primitives = data.primitives();
+	const sdb::VectorArray<Primitive> &primitives = data.primitives();
 	
 	for(unsigned i = 0; i < m_numPrimitive; i++) {
 				

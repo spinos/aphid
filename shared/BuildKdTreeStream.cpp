@@ -53,7 +53,7 @@ void BuildKdTreeStream::appendGeometry(Geometry * geo)
 const unsigned BuildKdTreeStream::getNumPrimitives() const
 { return m_primitives.size(); }
 
-sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
+const sdb::VectorArray<Primitive> &BuildKdTreeStream::primitives()
 { return m_primitives; }
 
 sdb::VectorArray<Primitive> &BuildKdTreeStream::indirection()
