@@ -4,8 +4,8 @@
 RegexUi::RegexUi(QWidget *parent)
     : QWidget(parent)
 {
-    contentLine = new QTextEdit("-100/0/4;300/456/2;99/199/5;");
-	expressionLine = new QLineEdit("(?<0>-*[[:digit:]]+)/(?<1>-*[[:digit:]]+)/(?<2>-*[[:digit:]]+);");
+    contentLine = new QTextEdit("-100/0/4;300/456/2;99/199/5");
+	expressionLine = new QLineEdit("(?<1>-*[[:digit:]]+)/(?<2>-*[[:digit:]]+)/(?<3>-*[[:digit:]]+)");
 	replaceLine = new QLineEdit("b");
 	resultLine = new QTextEdit;
 	resultLine->setReadOnly(true);
