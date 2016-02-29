@@ -22,6 +22,8 @@
 #include "HesperisFile.h"
 #include "H5IO.h"
 
+namespace aphid {
+    
 class CurveGroup;
 class ATriangleMeshGroup;
 
@@ -97,3 +99,5 @@ protected:
     }
     
 };
+
+}

@@ -3,10 +3,13 @@
 #include <string>
 class MFnMesh;
 class MIntArray;
-class APolygonalMesh;
-class APolygonalUV;
 class MDagPath;
 class MDGModifier;
+
+namespace aphid {
+    
+class APolygonalMesh;
+class APolygonalUV;
 
 class HesperisPolygonalMeshCreator {
 public:
@@ -35,3 +38,5 @@ public:
     static bool ReadMeshes(MObject &target = MObject::kNullObj);
     static bool ConnectUv(MObject &target = MObject::kNullObj);
 };
+
+}

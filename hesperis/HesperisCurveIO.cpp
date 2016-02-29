@@ -16,7 +16,8 @@
 #include <CurveGroup.h>
 #include <ASearchHelper.h>
 #include <boost/format.hpp>
-
+namespace aphid {
+    
 MObject HesperisCurveCreator::create(CurveGroup * data, MObject & parentObj,
                        const std::string & nodeName)
 {
@@ -196,5 +197,7 @@ bool HesperisCurveIO::ReadCurves(MObject &target)
     ReadTransformAnd<HCurveGroup, CurveGroup, HesperisCurveCreator>(&grpWorld, target);
     grpWorld.close();
     return true;
+}
+
 }
 //:~

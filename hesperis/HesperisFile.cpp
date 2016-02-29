@@ -20,6 +20,8 @@
 #include <sstream>
 #include <boost/format.hpp>
 
+namespace aphid {
+
 AFrameRange HesperisFile::Frames;
 bool HesperisFile::DoStripNamespace = true;
 
@@ -436,5 +438,7 @@ std::string HesperisFile::modifiedTime()
 	grpWorld.load();
 	grpWorld.close();
 	return grpWorld.modifiedTimeStr();
+}
+
 }
 //:~

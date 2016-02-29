@@ -9,6 +9,8 @@
 #include <HDocument.h>
 #include <string>
 #include <map>
+namespace aphid {
+    
 class H5Availability {
 public:
 	H5Availability();
@@ -22,3 +24,5 @@ public:
 private:
 	std::map<std::string, HDocument * > fFileStatus;
 };
+
+}

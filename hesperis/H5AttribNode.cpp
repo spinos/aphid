@@ -29,7 +29,7 @@ H5AttribNode::H5AttribNode() {}
 
 H5AttribNode::~H5AttribNode() 
 {
-	std::map<std::string, HObject *>::iterator it = m_mappedAttribDatas.begin();
+	std::map<std::string, aphid::HObject *>::iterator it = m_mappedAttribDatas.begin();
 	for(;it!=m_mappedAttribDatas.end();++it) delete it->second;
 	m_mappedAttribDatas.clear();
 }
@@ -45,7 +45,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	EnvVar::replace(substitutedCacheName);
 
 	if(!openH5File(substitutedCacheName) ) {
-		AHelper::Info<std::string >("H5AttribNode cannot open h5 file ", substitutedCacheName );
+		aphid::AHelper::Info<std::string >("H5AttribNode cannot open h5 file ", substitutedCacheName );
 		return stat;
 	}
 	
@@ -65,7 +65,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		char b = 0;
-		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TChar, 1, 64>, char >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outByte, idx, &stat);
 		hbt.set(b);
@@ -77,7 +77,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
         short b = 0;
-		readData<HOocArray<hdata::TShort, 1, 64>, short >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TShort, 1, 64>, short >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outShort, idx, &stat);
 		hbt.set(b);
@@ -89,7 +89,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		int b = 0;
-		readData<HOocArray<hdata::TInt, 1, 64>, int >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TInt, 1, 64>, int >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outInt, idx, &stat);
 		hbt.set(b);
@@ -101,7 +101,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		float b = 0;
-		readData<HOocArray<hdata::TFloat, 1, 64>, float >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TFloat, 1, 64>, float >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outFloat, idx, &stat);
 		hbt.set(b);
@@ -113,7 +113,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
         double b = 0;
-		readData<HOocArray<hdata::TDouble, 1, 64>, double >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TDouble, 1, 64>, double >(attrName, sampler(), b);
 		
 		MDataHandle hbt = getHandleInArray(data, outDouble, idx, &stat);
 		hbt.set(b);
@@ -125,7 +125,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		char b = 0;
-		readData<HOocArray<hdata::TChar, 1, 64>, char >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TChar, 1, 64>, char >(attrName, sampler(), b);
 		
         MDataHandle hbt = getHandleInArray(data, outBool, idx, &stat);
 		hbt.set(b);
@@ -137,7 +137,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		if(!stat) return MS::kFailure;
 		
 		short b = 0;
-		readData<HOocArray<hdata::TShort, 1, 64>, short >(attrName, sampler(), b);
+		readData<aphid::HOocArray<aphid::hdata::TShort, 1, 64>, short >(attrName, sampler(), b);
 		
         MDataHandle hbt = getHandleInArray(data, outEnum, idx, &stat);
 		hbt.set(b);
@@ -255,8 +255,8 @@ std::string H5AttribNode::getAttrNameInArray(MDataBlock& data, const MObject & a
 	nameArray.jumpToElement(idx);
 	const MString sname = nameArray.inputValue().asString();
 	
-	if(!HObject::FileIO.checkExist(sname.asChar() ) ) {
-		AHelper::Info<MString >("H5AttribNode cannot find grp ", sname );
+	if(!aphid::HObject::FileIO.checkExist(sname.asChar() ) ) {
+		aphid::AHelper::Info<MString >("H5AttribNode cannot find grp ", sname );
 		*stat = MS::kFailure;
 		return "";
 	}

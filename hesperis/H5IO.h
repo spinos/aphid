@@ -9,6 +9,8 @@
 
 #pragma once
 #include <HBase.h>
+namespace aphid {
+
 class H5IO {
 public:
 	static void CreateGroup(const std::string & name);
@@ -35,3 +37,5 @@ protected:
 	
 private:
 };
+
+}

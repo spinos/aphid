@@ -15,6 +15,8 @@
 #include <boost/format.hpp>
 #include "HesperisAttribConnector.h"
 
+namespace aphid {
+    
 std::map<std::string, HObject * > HesperisAttributeIO::MappedBakeData;
 
 HesperisAttributeIO::HesperisAttributeIO() {}
@@ -474,5 +476,7 @@ bool HesperisAttributeIO::ConnectBaked(HBase * parent, AAttribute * data, MObjec
 		HesperisAttribConnector::ConnectEnum(parent->pathToObject(), entity, attr);
 	}		
 	return true;
+}
+
 }
 //:~

@@ -14,6 +14,8 @@
 #include <AHelper.h>
 #include <BaseUtil.h>
 
+namespace aphid {
+    
 bool HesperisPolygonalMeshIO::WritePolygonalMeshes(const MDagPathArray & paths, HesperisFile * file)
 {
     file->clearPolygonalMeshes();
@@ -419,5 +421,7 @@ MPlug HesperisMeshUvConnector::createUVSets(APolygonalMesh * data, MPlug & origi
 	}
 	
 	return outMeshPlug;
+}
+
 }
 //:~

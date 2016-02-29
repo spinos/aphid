@@ -11,6 +11,8 @@
 #include <maya/MObject.h>
 #include <AAttribute.h>
 
+namespace aphid {
+    
 class HesperisAttribConnector {
 
 public:
@@ -28,3 +30,5 @@ private:
 	static void Connect(const std::string & name, const std::string & plgName, const std::string & srcName,
 							MObject & entity, MObject & attr);
 };
+
+}

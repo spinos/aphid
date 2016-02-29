@@ -10,6 +10,8 @@
 #include "H5Holder.h"
 #include <HBase.h>
 
+namespace aphid {
+    
 H5Availability H5Holder::H5Files;
 
 H5Holder::H5Holder() : m_lastTime(1e28), m_hasSampler(false) {}
@@ -65,3 +67,5 @@ int H5Holder::getFrame(double x, int tmin, int tmax) const
 
 SampleFrame * H5Holder::sampler()
 { return &m_sampler; }
+
+}

@@ -8,7 +8,8 @@
  */
 
 #include "HesperisIO.h"
-
+namespace aphid {
+    
 class HesperisCurveCreator {
 public:
 	static MObject create(CurveGroup * data, MObject & parentObj,
@@ -27,3 +28,5 @@ public:
 							const std::string & parentName = "");
 	static bool ReadCurves(MObject &target = MObject::kNullObj);
 };
+
+}

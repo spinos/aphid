@@ -10,7 +10,7 @@
 #include <HBase.h>
 #include <AHelper.h>
 
-class H5AttribNode : public MPxNode, public EnvVar, public H5Holder
+class H5AttribNode : public MPxNode, public EnvVar, public aphid::H5Holder
 {
 public:
 						H5AttribNode();
@@ -57,16 +57,16 @@ private:
 	MDataHandle getHandleInArray(MDataBlock& data, const MObject & attr, 
 						unsigned idx, MStatus * stat) const;
 						
-	std::map<std::string, HObject *> m_mappedAttribDatas;
+	std::map<std::string, aphid::HObject *> m_mappedAttribDatas;
 	
 	template<typename Td>
-	Td * getDataStorage(HBase * grp, const std::string & attrName, bool & stat)
+	Td * getDataStorage(aphid::HBase * grp, const std::string & attrName, bool & stat)
 	{
 		Td * d = NULL;
 		if(m_mappedAttribDatas.find(attrName) == m_mappedAttribDatas.end() ) {
             d = grp->openDataStorage<Td>(".bake", stat);
 			if(stat) m_mappedAttribDatas[attrName] = d;
-			else AHelper::Info<std::string>("H5AttribNode cannot open data ", attrName);
+			else aphid::AHelper::Info<std::string>("H5AttribNode cannot open data ", attrName);
 		}
 		else {
 			d = static_cast<Td *>(m_mappedAttribDatas[attrName]);
@@ -78,7 +78,7 @@ private:
 	template<typename Td, typename Tv>
 	bool readData(const std::string & attrName, SampleFrame * sampler, Tv & result)
 	{
-		HBase grp(attrName);
+		aphid::HBase grp(attrName);
 		bool stat;
 		Td * d = getDataStorage<Td>(&grp, attrName, stat);
 		if(stat) {

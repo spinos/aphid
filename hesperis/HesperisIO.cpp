@@ -26,6 +26,8 @@
 #include <sstream>
 #include <boost/format.hpp>
 
+namespace aphid {
+    
 std::string HesperisIO::CurrentHObjectPath;
 
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file )
@@ -346,4 +348,5 @@ MObject HesperisTransformCreator::create(BaseTransform * data, MObject & parentO
     return otm;
 }
 
+}
 //:~

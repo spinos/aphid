@@ -9,6 +9,7 @@
 #pragma once
 #include <Vector2F.h>
 #include <iostream>
+#include <string>
 
 namespace aphid {
    

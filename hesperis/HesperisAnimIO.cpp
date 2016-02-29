@@ -14,6 +14,8 @@
 #include <maya/MAnimUtil.h>
 #include <boost/format.hpp>
 
+namespace aphid {
+    
 double HesperisAnimIO::SecondsPerFrame = 0.0416667;
 
 bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj)
@@ -258,5 +260,7 @@ MFnAnimCurve::AnimCurveType HesperisAnimIO::GetMAnimCurveType(AAnimationCurve::C
 	if(typ == AAnimationCurve::TTA) return MFnAnimCurve::kAnimCurveTA;
 	if(typ == AAnimationCurve::TTL) return MFnAnimCurve::kAnimCurveTL;
 	return MFnAnimCurve::kAnimCurveUnknown;
+}
+
 }
 //:~

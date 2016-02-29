@@ -9,7 +9,11 @@
 
 #include "animUtil.h"
 #include <maya/MPlugArray.h>
+
+namespace aphid {
 class AAttribute;
+}
+
 class AttribUtil : public AnimUtil {
 public:
 	AttribUtil();
@@ -35,7 +39,7 @@ protected:
 	
 private:
 	void scan(const MDagPath & entity);
-	void saveAttrib(AAttribute::AttributeType t, AnimIO & doc, const MObject & entity, const MObject & attrib);
+	void saveAttrib(aphid::AAttribute::AttributeType t, AnimIO & doc, const MObject & entity, const MObject & attrib);
     void saveStringAttrib(AnimIO & doc, const MObject & node, const MObject & attrib);
     void saveNumericAttrib(AnimIO & doc, const MObject & node, const MObject & attrib, xmlNodePtr * parent = 0);
     void saveCompoundAttrib(AnimIO & doc, const MObject & node, const MObject & attrib);
@@ -48,11 +52,11 @@ private:
     void setNumericAttrib(MFnDependencyNode & fdep, AnimIO & doc);
     MObject createNumericAttrib(AnimIO & doc);
 	virtual void saveH5(const MPlug & attrib);
-	void saveH5(const MObject & node, AAttribute * data);
+	void saveH5(const MObject & node, aphid::AAttribute * data);
     void bakeH5(const MPlug & attrib, int flag);
-	void bakeNumeric(const MObject & entity, ANumericAttribute * data, int flag);
-	void bakeEnum(const MObject & entity, AEnumAttribute * data, int flag);
-	std::string fullAttrName(const std::string & nodeName, AAttribute * data) const;
+	void bakeNumeric(const MObject & entity, aphid::ANumericAttribute * data, int flag);
+	void bakeEnum(const MObject & entity, aphid::AEnumAttribute * data, int flag);
+	std::string fullAttrName(const std::string & nodeName, aphid::AAttribute * data) const;
 	void bakeAttrib(const char *filename, MDagPathArray &active_list);
 
 private:

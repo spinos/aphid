@@ -16,6 +16,8 @@
 #include <AnimUtil.h>
 #include <AHelper.h>
 
+namespace aphid {
+    
 MObject HesperisAttribConnector::MasterAttribNode;
 
 void HesperisAttribConnector::CreateMasterNode()
@@ -110,5 +112,7 @@ void HesperisAttribConnector::Connect(const std::string & name, const std::strin
     
 	dgModifier.connect(outValuePlug, dstPlug);
 	dgModifier.doIt();
+}
+
 }
 //:~

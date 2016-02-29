@@ -10,6 +10,8 @@
 #pragma once
 #include "HesperisAnimIO.h"
 
+namespace aphid {
+    
 class HesperisAttributeIO : public HesperisAnimIO {
 public:
 	HesperisAttributeIO();
@@ -62,3 +64,5 @@ private:
 	static bool ConnectBaked(HBase * parent, AAttribute * data, MObject & entity, MObject & attr);
 	
 };
+
+}

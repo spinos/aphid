@@ -11,6 +11,8 @@
 #include <AAnimationCurve.h>
 #include <maya/MFnAnimCurve.h>
 
+namespace aphid {
+    
 class HesperisAnimIO : public HesperisIO {
 public:
 	static bool WriteAnimation(const MPlug & attrib, const MObject & animCurveObj);
@@ -26,3 +28,5 @@ public:
 	static MFnAnimCurve::AnimCurveType GetMAnimCurveType(AAnimationCurve::CurveType typ);
 	static bool RemoveAnimationCurve(MPlug & dst);
 };
+
+}

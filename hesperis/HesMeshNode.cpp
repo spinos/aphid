@@ -17,6 +17,7 @@
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
+using namespace aphid;
 using namespace boost::filesystem;
 using namespace std;
 namespace io = boost::iostreams;

@@ -10,7 +10,8 @@
 #include <HBase.h>
 #include <SHelper.h>
 #include <sstream>
-
+namespace aphid {
+    
 H5Availability::H5Availability() {}
 H5Availability::~H5Availability() {}
 
@@ -64,5 +65,7 @@ std::string H5Availability::closeAll()
 	}
     fFileStatus.clear();
 	return sst.str();
+}
+
 }
 //~:

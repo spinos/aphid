@@ -25,6 +25,8 @@
 #include <vector>
 #include <AFrameRange.h>
 
+namespace aphid {
+    
 class BaseTransform;
 class CurveGroup;
 class BaseBuffer;
@@ -142,4 +144,6 @@ private:
     ReadComponent m_readComp;
 	WriteComponent m_writeComp;
 };
+
+}
 #endif        //  #ifndef HESPERISFILE_H

@@ -8,7 +8,6 @@
 #include <maya/MIntArray.h>
 #include <vector>
 #include <EnvVar.h>
-using namespace std;
  
 class HesUVNode : public MPxNode, public EnvVar
 {

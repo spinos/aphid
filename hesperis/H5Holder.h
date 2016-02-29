@@ -12,6 +12,8 @@
 #include <H5Availability.h>
 #include <SampleFrame.h>
 
+namespace aphid {
+    
 class H5Holder {
 
 	SampleFrame m_sampler;
@@ -35,3 +37,5 @@ protected:
 private:
 
 };
+
+}

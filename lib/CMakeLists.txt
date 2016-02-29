@@ -172,6 +172,9 @@ ADD_LIBRARY (aphidH5 STATIC
 ../shared/HAnimationCurve.cpp
 ../shared/AAttribute.cpp
 ../shared/HAttributeGroup.cpp
+../hesperis/H5IO.cpp
+../hesperis/H5Availability.cpp
+../hesperis/HesperisFile.cpp
 )
 
 ADD_LIBRARY (aphidUI STATIC
@@ -326,7 +329,5 @@ add_library(aphid STATIC
 ##../hesperis/H5FieldOut.cpp
 ##../hesperis/AdaptiveGrid.cpp
 ##../hesperis/AdaptiveField.cpp
-##../hesperis/H5IO.cpp
-##../hesperis/H5Availability.cpp
 )
 
