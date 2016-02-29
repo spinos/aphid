@@ -8,6 +8,8 @@
  */
 
 #include "Sculptor.h"
+
+namespace aphid {
 namespace sdb {
 
 Sculptor::Sculptor() 
@@ -432,3 +434,4 @@ void Sculptor::erasePoints()
 }
 
 } // end namespace sdb
+}

@@ -13,6 +13,8 @@
 #include <maya/MItMeshVertex.h>
 #include <ASearchHelper.h>
 
+using namespace aphid;
+
 StickyCmd::StickyCmd()
 {
 	setCommandString("StickyCmd");

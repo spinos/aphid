@@ -11,6 +11,9 @@
 #include <deque>
 #include <Ray.h>
 #include <BoundingBox.h>
+
+namespace aphid {
+
 class RayMarch
 {
 public:
@@ -29,3 +32,5 @@ private:
 	BoundingBox m_limit, m_current;
 	float m_gridSize;
 };
+
+}

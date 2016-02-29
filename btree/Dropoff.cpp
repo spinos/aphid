@@ -1,5 +1,7 @@
 #include "Dropoff.h"
 #include <cmath>
+
+namespace aphid {
 namespace sdb {
 float Dropoff::linear(const float & x, const float & scaling)
 {
@@ -32,5 +34,6 @@ float Dropoff::cosineCurve(const float & x, const float & scaling)
 float Dropoff::exponentialCurve(const float & x, const float & scaling)
 {
     return exp(x/scaling * -6.);
+}
 }
 }

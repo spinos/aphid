@@ -12,6 +12,8 @@
 #include <Edge.h>
 #include <VertexAdjacency.h>
 
+namespace aphid {
+
 SimpleTopology::SimpleTopology(sdb::PNPrefW * pool, int * tri, const int & numV, const int & numTri)
 {
     m_pool = pool;
@@ -140,5 +142,7 @@ void SimpleTopology::getDifferentialCoord(const int & vertexId, Vector3F & dst)
 	VertexAdjacency & adj = m_adjacency[vertexId];
 	adj.computeDifferentialCoordinate();
 	dst = adj.getDifferentialCoordinate();
+}
+
 }
 //:~

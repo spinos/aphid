@@ -12,6 +12,8 @@
 #include <maya/MItGeometry.h>
 #include <AHelper.h>
 
+using namespace aphid;
+
 MTypeId     DucttapeMergeDeformer::id( 0x8e71f55 );
 MObject DucttapeMergeDeformer::ainmesh;
 

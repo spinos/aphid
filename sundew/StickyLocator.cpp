@@ -8,7 +8,6 @@
  */
 
 #include "StickyLocator.h"
-#include <CircleCurve.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MPxManipContainer.h>

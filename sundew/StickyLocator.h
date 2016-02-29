@@ -11,6 +11,7 @@
 
 #include <maya/MFnMesh.h>
 #include <maya/MPxLocatorNode.h> 
+#include <CircleCurve.h>
 
 namespace lfr {
 template <typename T> class DenseMatrix;
@@ -18,7 +19,7 @@ template <typename T> class DenseVector;
 template <typename T> class SvdSolver;
 }
 
-class CircleCurve;
+using namespace aphid;
 
 class StickyLocator : public MPxLocatorNode
 {

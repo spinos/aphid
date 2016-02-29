@@ -13,6 +13,8 @@
 #include <AHelper.h>
 #include <vector>
 
+using namespace aphid;
+
 MTypeId     DucttapeBranchDeformer::id( 0xd07badb );
 MObject DucttapeBranchDeformer::ainmesh;
 MObject DucttapeBranchDeformer::aingroupId;

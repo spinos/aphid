@@ -12,6 +12,9 @@
 #include <Types.h>
 #include <vector>
 #include <boost/scoped_array.hpp>
+
+namespace aphid {
+
 class VertexAdjacency;
 class Facet;
 class Edge;
@@ -41,3 +44,5 @@ private:
 	std::vector<Facet *> m_faces;
 	sdb::PNPrefW * m_pool;
 };
+
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+namespace aphid {
 namespace sdb {
 
 class Dropoff {
@@ -68,4 +69,5 @@ public:
     }
 };
 
+}
 }

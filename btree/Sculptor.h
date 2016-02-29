@@ -13,6 +13,8 @@
 #include <RayMarch.h>
 #include <Dropoff.h>
 #include <SimpleTopology.h>
+
+namespace aphid {
 namespace sdb {
 class Sculptor {
 public:
@@ -76,3 +78,4 @@ private:
 	int m_activeStageId;
 };
 } // end namespace sdb
+}

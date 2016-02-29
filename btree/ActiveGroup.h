@@ -12,6 +12,7 @@
 #include <Array.h>
 #include <Dropoff.h>
 
+namespace aphid {
 namespace sdb {
 
 class ActiveGroup {
@@ -49,4 +50,5 @@ private:
 	VolumeType m_volumeType;
 };
 	
+}
 }

@@ -9,6 +9,7 @@
 
 #include "ActiveGroup.h"
 
+namespace aphid {
 namespace sdb {
 
 ActiveGroup::ActiveGroup() 
@@ -129,4 +130,5 @@ void ActiveGroup::setSelectVolume(VolumeType t )
 bool ActiveGroup::isEmpty() const
 { return vertices->isEmpty(); }
 
+}
 }

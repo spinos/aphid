@@ -20,6 +20,8 @@
 #include <maya/MDGModifier.h>
 #include <ASearchHelper.h>
 
+using namespace aphid;
+
 DucttapeCmd::DucttapeCmd()
 {
 	setCommandString("DucttapeCmd");

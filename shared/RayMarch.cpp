@@ -9,6 +9,9 @@
 
 #include "RayMarch.h"
 #include <iostream>
+
+namespace aphid {
+
 RayMarch::RayMarch() {}
 
 void RayMarch::initialize(const BoundingBox & bb, const float & gridSize) 
@@ -108,4 +111,6 @@ const BoundingBox RayMarch::computeBBox(const Vector3F & p) const
 	b.setMin(m_gridSize * cx, m_gridSize * cy, m_gridSize * cz);
 	b.setMax(m_gridSize * (cx + 1), m_gridSize * (cy + 1), m_gridSize * (cz + 1));
 	return b;
+}
+
 }
