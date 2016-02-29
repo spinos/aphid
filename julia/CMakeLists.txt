@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 2.8)
 project (julia)
+SET (CMAKE_AUTOMOC ON)
+SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 SET (CMAKE_BUILD_TYPE Release)
-include_directories ("." "../shared" "../btree")
+include_directories ("../shared" "../btree")
 
 set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
@@ -102,7 +104,9 @@ target_link_libraries (julia ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (julia ${Boost_REGEX_LIBRARY})
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+SET (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidSdb.lib
+D:/aphid/lib/aphidH5.lib)
 else ()
 	IF (EXISTS "/users/jianzhang/aphid/lib/libaphid.a")
 		set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
@@ -114,4 +118,37 @@ else ()
 endif ()
 
 target_link_libraries (julia ${Aphid_Library})
+
+SET (VIEWERSOURCE viewerMain.cpp
+renderthread.cpp
+whitenoisewidget.cpp
+)
+
+SET (CUSOURCES "")
+
+find_package (CUDA QUIET REQUIRED)
+
+message ("cuda found ? " ${CUDA_FOUND})
+message ("cuda version " ${CUDA_VERSION})
+message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
+message ("cuda librarie " ${CUDA_CUDA_LIBRARY})
+message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
+message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
+message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
+
+IF (WIN32)
+	SET (CUDA_NVCC_FLAGS "--disable-warnings --ptxas-options=-v -arch sm_21")
+ELSE ()
+	SET (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
+ENDIF ()
+
+CUDA_ADD_EXECUTABLE (viewJulia ${VIEWERSOURCE} ${CUSOURCES})
+
+find_package (Qt4 REQUIRED)
+message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
+SET (QT_USE_QTOPENGL ON)
+
+target_link_libraries (viewJulia Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries(viewJulia ${Boost_LIBRARIES})
+target_link_libraries(viewJulia ${Aphid_Library})
 

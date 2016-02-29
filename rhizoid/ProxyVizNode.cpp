@@ -207,7 +207,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	setViewportAspect(view.portWidth(), view.portHeight() );
 	
 	MPlug cdp(thisNode, acheckDepth);
-	const bool shoDepth = cdp.asBool();
+	// const bool shoDepth = cdp.asBool();
 
 	_viewport = view;
 	fHasView = 1;
@@ -782,8 +782,8 @@ void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 	MFnCamera fcam(cameraPath.node() );
 	if(fcam.isOrtho() ) {
 		float orthoW = fcam.orthoWidth();
-		float asp = fcam.aspectRatio();
-		setOrthoFrustum(orthoW, asp, -10.f, farClip );
+		float orthoH = orthoW * fcam.aspectRatio();
+		setOrthoFrustum(orthoW, orthoH, -10.f, farClip );
 		
 	} else {
 		float hfa = fcam.horizontalFilmAperture();
