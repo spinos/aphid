@@ -16,17 +16,23 @@ main.cpp)
 
 add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
 
+SET (INSTALLED_HDF5 OFF)
 if (WIN32)
 	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
 # location of configure file FindHDF5.cmake
 		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
+        SET (INSTALLED_HDF5 ON)
+    ELSE (EXISTS "D:/usr/hdf5")
+        SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
+        SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
 	ENDIF ()
 endif ()
 
+IF (INSTALLED_HDF5)
 FIND_PACKAGE (HDF5 REQUIRED)
-
 IF (WIN32)
-SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
+ENDIF ()
 ENDIF ()
 
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
@@ -37,9 +43,12 @@ include_directories (${HDF5_INCLUDE_DIRS})
 target_link_libraries (julia ${HDF5_LIBRARIES})
 
 if(WIN32)
-SET (ZLIB_DIR "C:/Program Files/ZLIB/cmake/ZLIB")
-SET (ZLIB_INCLUDE_DIR "C:/Program Files/ZLIB/include")
-SET (ZLIB_LIBRARY "C:/Program Files/ZLIB/lib/libzlib.lib")
+##SET (ZLIB_DIR "C:/Program Files/ZLIB/cmake/ZLIB")
+##SET (ZLIB_INCLUDE_DIR "C:/Program Files/ZLIB/include")
+##SET (ZLIB_LIBRARY "C:/Program Files/ZLIB/lib/libzlib.lib")
+SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
 endif()
 
 FIND_PACKAGE (ZLIB REQUIRED)
@@ -51,7 +60,7 @@ MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
 target_link_libraries (julia ${ZLIB_LIBRARIES})
 
 IF (WIN32)
-set (SZIP_DIR "C:/Program Files/SZIP/cmake/SZIP")
+set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
 set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
 set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
 
@@ -143,6 +152,11 @@ ELSE ()
 ENDIF ()
 
 CUDA_ADD_EXECUTABLE (viewJulia ${VIEWERSOURCE} ${CUSOURCES})
+
+if(WIN32)
+## set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
+endif()
 
 find_package (Qt4 REQUIRED)
 message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
