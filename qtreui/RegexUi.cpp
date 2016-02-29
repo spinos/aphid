@@ -4,8 +4,8 @@
 RegexUi::RegexUi(QWidget *parent)
     : QWidget(parent)
 {
-    contentLine = new QTextEdit("abc");
-	expressionLine = new QLineEdit("a.*");
+    contentLine = new QTextEdit("-100/0/4;300/456/2;99/199/5;");
+	expressionLine = new QLineEdit("(?<0>-*[[:digit:]]+)/(?<1>-*[[:digit:]]+)/(?<2>-*[[:digit:]]+);");
 	replaceLine = new QLineEdit("b");
 	resultLine = new QTextEdit;
 	resultLine->setReadOnly(true);
@@ -129,7 +129,7 @@ QStringList RegexUi::search(QString& content, QString& expression)
 	QStringList res;
 	char found = 0;
 	const boost::regex re1(expression.toUtf8().data());
-	
+	int j=0;
 	std::string tomatch(content.toUtf8().data());
 	std::string::const_iterator start, end;
     start = tomatch.begin();
@@ -137,8 +137,9 @@ QStringList RegexUi::search(QString& content, QString& expression)
 	boost::match_results<std::string::const_iterator> what;
 	while(regex_search(start, end, what, re1, boost::match_default) )
 	{
+        res <<str( boost::format(" occurance[%1%] ") % (j++) ).c_str();
 		found = 1;
-		for(unsigned i = 0; i <what.size(); i++)
+		for(unsigned i = 0; i <what.size(); ++i)
 		{
 			std::string numblk = str(boost::format(" %1% : %2% ") % i % what[i]);
 			res << numblk.c_str();
