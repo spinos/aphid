@@ -26,6 +26,8 @@ if (WIN32)
         SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
         SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
 	ENDIF ()
+ELSE ()
+	SET (INSTALLED_HDF5 ON)
 endif ()
 
 IF (INSTALLED_HDF5)
@@ -117,23 +119,37 @@ SET (Aphid_Library D:/aphid/lib/aphidMath.lib
 D:/aphid/lib/aphidSdb.lib
 D:/aphid/lib/aphidH5.lib)
 else ()
-	IF (EXISTS "/users/jianzhang/aphid/lib/libaphid.a")
-		set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
-					/users/jianzhang/aphid/lib/libaphidSdb.a
-					/users/jianzhang/aphid/lib/libaphidH5.a)
-	ELSEIF (EXISTS "/users/jollyroger/aphid/lib/libaphid.a")
+	IF (EXISTS "/users/jianzhang/aphid/lib/libaphidMath.a")
+		SET (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a) 
+		SET (Aphid_Sdb_Library /users/jianzhang/aphid/lib/libaphidSdb.a) 
+		SET (Aphid_H5_Library /users/jianzhang/aphid/lib/libaphidH5.a )
+		SET (Aphid_Geom_Library /users/jianzhang/aphid/lib/libaphidGeom.a )
+		SET (Aphid_Cu_Library /users/jianzhang/aphid/lib/libaphidCu.a )
+	ELSEIF (EXISTS "/users/jollyroger/aphid/lib/libaphidMath.a")
 		set (Aphid_Library "/users/jollyroger/aphid/lib/libaphid.a")
 	ENDIF ()
 endif ()
 
-target_link_libraries (julia ${Aphid_Library})
+MESSAGE (" aphid math library is " ${Aphid_Math_Library})
+MESSAGE (" aphid sdb library is " ${Aphid_Sdb_Library})
+MESSAGE (" aphid h5 library is " ${Aphid_H5_Library})
+MESSAGE (" aphid geom library is " ${Aphid_Geom_Library})
+MESSAGE (" aphid cu library is " ${Aphid_Cu_Library})
+
+target_link_libraries (julia ${Aphid_Math_Library})
+target_link_libraries (julia ${Aphid_Sdb_Library})
+target_link_libraries (julia ${Aphid_H5_Library})
 
 SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
 whitenoisewidget.cpp
+CubeRender.cpp
 )
 
-SET (CUSOURCES "")
+SET (CUSOURCES 
+../shared/cu/ImageBase.cu
+cu/CubeRender.cu
+)
 
 find_package (CUDA QUIET REQUIRED)
 
@@ -153,6 +169,13 @@ ENDIF ()
 
 CUDA_ADD_EXECUTABLE (viewJulia ${VIEWERSOURCE} ${CUSOURCES})
 
+target_link_libraries(viewJulia ${Boost_LIBRARIES})
+target_link_libraries (viewJulia ${Aphid_Math_Library})
+target_link_libraries (viewJulia ${Aphid_Sdb_Library})
+target_link_libraries (viewJulia ${Aphid_H5_Library})
+target_link_libraries (viewJulia ${Aphid_Geom_Library})
+target_link_libraries (viewJulia ${Aphid_Cu_Library})
+
 if(WIN32)
 ## set (QT_QMAKE_EXECUTABLE "D:/usr/Qtx64/4.7.1/bin/qmake.exe")
 set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
@@ -163,6 +186,4 @@ message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 SET (QT_USE_QTOPENGL ON)
 
 target_link_libraries (viewJulia Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries(viewJulia ${Boost_LIBRARIES})
-target_link_libraries(viewJulia ${Aphid_Library})
 

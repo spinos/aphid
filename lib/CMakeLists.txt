@@ -91,6 +91,7 @@ ADD_LIBRARY (aphidMath STATIC
 ../shared/PseudoNoise.cpp
 ../shared/QuickSort.cpp
 ../shared/Plane.cpp
+../shared/ViewCull.cpp
 )
 
 ADD_LIBRARY (aphidGeom STATIC 
@@ -320,7 +321,6 @@ add_library(aphid STATIC
 ##../shared/HField.cpp
 ##../shared/CartesianGrid.cpp
 ##../shared/TetrahedronMeshBuilder.cpp
-##../shared/ViewCull.cpp
 ##../shared/DrawBox.cpp
 ##../shared/DrawCircle.cpp
 ##../shared/UniformGrid.cpp
@@ -331,3 +331,25 @@ add_library(aphid STATIC
 ##../hesperis/AdaptiveField.cpp
 )
 
+find_package (CUDA QUIET)
+
+IF (${CUDA_FOUND})
+
+message ("cuda found ? " ${CUDA_FOUND})
+message ("cuda version " ${CUDA_VERSION})
+message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
+message ("cuda librarie " ${CUDA_CUDA_LIBRARY})
+message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
+message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
+message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
+
+CUDA_ADD_LIBRARY (aphidCu STATIC
+../shared/CudaBase.cpp
+../shared/CudaGLBase.cpp
+../shared/CUDABuffer.cpp
+../shared/CudaRender.cpp
+)
+
+ELSE ()
+	MESSAGE (" cuda not found ")
+ENDIF ()

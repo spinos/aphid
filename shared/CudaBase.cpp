@@ -1,9 +1,9 @@
 #include <iostream>
 #include <sstream>
-#include <gl_heads.h>
 #include "CudaBase.h"
 #include <cuda_runtime.h>
-#include <cuda_gl_interop.h>
+
+namespace aphid {
 
 int CudaBase::MaxThreadPerBlock = 512;
 int CudaBase::MaxRegisterPerBlock = 8192;
@@ -15,14 +15,10 @@ int CudaBase::MemoryUsed = 0;
 std::string CudaBase::BreakInfo("unknown");
 
 CudaBase::CudaBase()
-{
-    
-}
+{}
 
 CudaBase::~CudaBase()
-{
-    
-}
+{}
 
 char CudaBase::CheckCUDevice()
 {
@@ -67,14 +63,6 @@ char CudaBase::CheckCUDevice()
     return 0;
 }
 
-void CudaBase::SetGLDevice()
-{
-    if(!CheckCUDevice()) return;
-	std::cout<<" cuda set GL device\n";
-	cudaGLSetGLDevice(0);
-	HasDevice = 1;
-}
-
 void CudaBase::SetDevice()
 {
     if(!CheckCUDevice()) return;
@@ -114,4 +102,6 @@ void CudaBase::CheckCudaError(const char * info)
 
 cudaError_t CudaBase::Synchronize()
 { return cudaDeviceSynchronize(); }
+
+}
 //:~

@@ -24,6 +24,7 @@ public:
 	bool isLandscape() const;
 	int width() const;
 	int height() const;
+	
 	void split(RectangleI & r0, RectangleI & r1, float & alpha, bool alongX) const;
 	
 	friend std::ostream& operator<<(std::ostream &output, const RectangleI & p) {

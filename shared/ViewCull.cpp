@@ -45,6 +45,16 @@ void BaseView::setOrthoFrustum(const float & orthoWidth,
 				clipFar,
 				m_space);	
 }
+
+void BaseView::updateAspectRatio(const int & w, const int & h)
+{
+	m_aspectRatio = (float)h / (float)w;
+	m_frustum.set(m_hfov, 
+				m_aspectRatio,
+				-1.f,
+				m_farClip,
+				m_space);
+}
 	
 Matrix44F *	BaseView::cameraSpaceP()
 { return &m_space; }
@@ -80,9 +90,12 @@ const float & BaseView::hfov() const
 { return m_hfov; }
 
 void BaseView::setRect(const int & x, const int & y)
-{ m_rect.set(x, y); }
+{ 
+	m_rect.set(x, y); 
+	updateAspectRatio(x, y);
+}
 
-const RectangleI & BaseView::Rect() const
+const RectangleI & BaseView::rect() const
 { return m_rect; }
 
 void BaseView::setSubRect(const int & x0, const int & y0, const int & x1, const int & y1)
@@ -90,6 +103,9 @@ void BaseView::setSubRect(const int & x0, const int & y0, const int & x1, const 
 
 const RectangleI & BaseView::subRect() const
 { return m_subRect; }
+
+const int BaseView::numPixels() const
+{ return m_rect.area(); }
 
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}

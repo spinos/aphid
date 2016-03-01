@@ -18,8 +18,7 @@ protected:
 
 private slots:
     void updatePixmap(const QImage &image);
-	void simulate(); 
-
+	
 private:
     RenderThread thread;
     QPixmap pixmap;

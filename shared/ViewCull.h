@@ -35,8 +35,9 @@ public:
 	const float & farClipPlane() const;
 	const Vector3F & eyePosition() const;
 	const float & aspectRatio() const;
-	const RectangleI & Rect() const;
+	const RectangleI & rect() const;
 	const RectangleI & subRect() const;
+	const int numPixels() const;
 	
 protected:
 	void setRect(const int & x, const int & y);
@@ -58,6 +59,9 @@ protected:
 			const float & orthoHeight,
 			const float & clipNear,
 			const float & clipFar);
+			
+	void updateAspectRatio(const int & w, const int & h);
+	
 private:
     
 };

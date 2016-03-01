@@ -10,6 +10,8 @@
 #include <iostream>
 #include "CudaBase.h"
 
+namespace aphid {
+
 CUDABuffer::CUDABuffer() : _device_vbo_buffer(0), m_reseveSize(0),
 m_bufferSize(0)
 {} 
@@ -113,3 +115,4 @@ const unsigned CUDABuffer::minimalMemSize(unsigned size) const
 	return (rds < 4096) ? 4096 : rds;
 }
 
+}

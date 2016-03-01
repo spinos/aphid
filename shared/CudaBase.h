@@ -2,6 +2,9 @@
 #define CUDABASE_H
 #include <cuda_runtime_api.h>
 #include <string>
+
+namespace aphid {
+
 class CudaBase
 {
 public:
@@ -10,7 +13,6 @@ public:
     
     static char CheckCUDevice();
     static void SetDevice();
-    static void SetGLDevice();
     
     static int MaxThreadPerBlock;
     static int MaxRegisterPerBlock;
@@ -27,5 +29,6 @@ public:
 private:
 };
 
-#endif        //  #ifndef CUDAWORKS_H
+}
+#endif        //  #ifndef CUDABASE_H
 

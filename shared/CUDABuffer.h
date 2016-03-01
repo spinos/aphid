@@ -9,6 +9,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
+namespace aphid {
 
 class CUDABuffer {
 public:
@@ -37,5 +38,6 @@ private:
 	unsigned m_bufferSize, m_reseveSize;
 };
 
+}
 #endif        //  #ifndef CUDABUFFER_H
 

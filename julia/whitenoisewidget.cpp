@@ -16,9 +16,9 @@ MandelbrotWidget::MandelbrotWidget(QWidget *parent)
 
     resize(540, 480);
 	
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	timer->start(40);
+	//QTimer *timer = new QTimer(this);
+	//connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
+	//timer->start(40);
 }
 
 void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
@@ -46,10 +46,4 @@ void MandelbrotWidget::updatePixmap(const QImage &image)
 
     pixmap = QPixmap::fromImage(image);
     update();
-}
-
-void MandelbrotWidget::simulate()
-{
-    update();
-    thread.render(size());
 }

@@ -25,10 +25,10 @@ void RectangleI::set(int x0, int y0, int x1, int y1)
 }
 
 int RectangleI::width() const
-{ return m_v[2] - m_v[0] + 1; }
+{ return m_v[2] - m_v[0]; }
 
 int RectangleI::height() const
-{ return m_v[3] - m_v[1] + 1; }
+{ return m_v[3] - m_v[1]; }
 
 int RectangleI::area() const
 { return width() * height(); }

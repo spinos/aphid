@@ -3,13 +3,14 @@
 #include <math.h>
 
 #include "renderthread.h"
+#include <CudaBase.h>
 
 RenderThread::RenderThread(QObject *parent)
     : QThread(parent)
 {
     restart = false;
     abort = false;
-
+	aphid::CudaBase::SetDevice();
 }
 
 RenderThread::~RenderThread()
@@ -29,14 +30,7 @@ void RenderThread::render(QSize resultSize)
     int w = resultSize.width();
     int h = resultSize.height();
 
-/// round to 16
-    int tw = w >> 4;
-    if((w & 15) > 0) tw++;
-    w = tw << 4;
-    
-    int th = h >> 4;
-    if((h & 15) > 0) th++;
-    h = th << 4;
+	aphid::CudaRender::GetRoundedSize(w, h);
   
 	this->resultSize = QSize(w, h);
 
@@ -56,11 +50,19 @@ void RenderThread::run()
         QSize resultSize = this->resultSize;
 
         mutex.unlock();
-
-        QImage image(resultSize, QImage::Format_RGB32);
+		
+		if (restart)
+			break;
+		if (abort)
+			return;
 			
-        const int tw = resultSize.width() >> 4;
-        const int th = resultSize.height() >> 4;
+		m_render.setSize(resultSize.width(), resultSize.height() );
+		m_render.render();
+		
+		QImage image(resultSize, QImage::Format_RGB32);
+			
+        const int tw = m_render.tileX();
+        const int th = m_render.tileY();
         
         int i, j, k, l;
         for(j=0; j<th; ++j) {
@@ -70,20 +72,21 @@ void RenderThread::run()
                 if (abort)
                     return;
                 
-                int r = rand()%256;
+				uint * tile = (uint *)m_render.tileHostColor(i, j);
+                
+				/*
+				int r = rand()%256;
                 int g = rand()%256;
                 int b = rand()%256;
-                uint tile[256];
                 for(k=0; k<16; ++k) {
                     for(l=0; l<16; ++l) {
                         tile[k * 16 +l] = qRgb(r, g, b);
                     }
                 }
+				*/
                 
-                for(k=0; k<16; ++k) {
-                    uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * 16 + k));
-                    memcpy ( &scanLine[i*16], &tile[k*16], 64 );
-                }
+				uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * 16) );
+				m_render.sendTileColor(&scanLine[i*16], resultSize.width(), i, j);
             }
         }
         

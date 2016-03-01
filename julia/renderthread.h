@@ -5,6 +5,7 @@
 #include <QSize>
 #include <QThread>
 #include <QWaitCondition>
+#include <CubeRender.h>
 
 QT_BEGIN_NAMESPACE
 class QImage;
@@ -34,6 +35,7 @@ private:
     bool restart;
     bool abort;
 
+	CubeRender m_render;
 };
 
 #endif
