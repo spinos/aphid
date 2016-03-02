@@ -22,4 +22,17 @@ public:
 	virtual char read(std::string & str);
 };
 
+/// variable length string attrib based on
+/// http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/attrvstr.c
+class HVLStringAttribute : public HAttribute
+{
+public:
+	HVLStringAttribute(const std::string & path);
+	~HVLStringAttribute();
+	
+	virtual hid_t dataType();
+	virtual char write(const std::string & str);
+	virtual char read(std::string & str);
+};
+
 }

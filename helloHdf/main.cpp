@@ -1,12 +1,13 @@
 #include <iostream>
 
 #include <HBase.h>
-#include "hdf5_hl.h"
 #define MAX_NAME 1024
 
 #include "Holder.h"
 #include <HOocArray.h>
-
+#include <HFrameRange.h>
+#include <AFrameRange.h>
+using namespace aphid;
 void
 do_dtype(hid_t tid) {
 
@@ -535,8 +536,8 @@ void test2dData(const char * filename)
 	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
 	
 	HBase C3("/C3");
-	H2dDataset<hdata::TInt, 3> ds(".d");
-	ds.create(C3.fObjectId);
+	H2dDataset<hdata::TInt, 3, 32> ds(".d");
+	if(!ds.open(C3.fObjectId) ) ds.create(C3.fObjectId);
 
 #define N 128
 	int b[N][3];
@@ -612,8 +613,8 @@ void testOoc(const char * filename)
 	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
 	
 	HBase C4("/C4");
-	HOocArray<hdata::TInt, 3, 32> ds(".d");
-	ds.createStorage(C4.fObjectId);
+	HOocArray<hdata::TInt, 3, 128> ds(".d");
+	if(!ds.openStorage(C4.fObjectId)) ds.createStorage(C4.fObjectId);
 	
 	int a[3];
 	for(int i=0;i<299;++i) {
@@ -624,7 +625,7 @@ void testOoc(const char * filename)
 	}
 	ds.finishInsert();
 	
-	ds.open(C4.fObjectId);
+	ds.openStorage(C4.fObjectId);
 	std::cout<<"\n d n cols "<<ds.numColumns();
 	
 	ds.readIncore(127, 32);
@@ -634,11 +635,27 @@ void testOoc(const char * filename)
 		std::cout<<"\n b["<<i<<"] "<<b[i*3]<<" "<<b[i*3+1]<<" "<<b[i*3+2];
 	}
 	
-	ds.close();
 	std::cout<<"\n d size "<<ds.size();
 	
 	HObject::FileIO.close();
 	std::cout<<"\n end test ooc data";
+}
+
+void testFrameRange(const char * filename)
+{
+	std::cout<<"\n begin test fr";
+	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
+	
+	AFrameRange fr;
+	HFrameRange hfr(".fr");
+	hfr.load(&fr);
+	hfr.close();
+	
+	HObject::FileIO.close();
+	
+	std::cout<<"\n fr begin/end "<<fr.FirstFrame<<"/"<<fr.LastFrame;
+	std::cout<<"\n fr seg"<<fr.segmentExpr();
+	std::cout<<"\n end test fr";
 }
 
 int main (int argc, char * const argv[]) {
@@ -656,6 +673,16 @@ int main (int argc, char * const argv[]) {
 	else {
 		printf("\n not opened");
 	}
+	
+	AFrameRange fr;
+	fr.FirstFrame = 1;
+	fr.LastFrame = 240;
+	fr.SamplesPerFrame = 2;
+	fr.segmentExprRef() = "10/20/4;40/50/8;";//99/109/6;";//199/210/4";
+	std::cout<<"\n seg expr len "<<fr.segmentExpr().size();
+	HFrameRange hfr(".fr");
+	hfr.save(&fr);
+	hfr.close();
 	
 	HBase w("/");
 	if(!w.hasNamedAttr(".range")) w.addIntAttr(".range", 4);
@@ -691,6 +718,8 @@ int main (int argc, char * const argv[]) {
 	
 	if(!HObject::FileIO.close()) std::cout<<"\n warning: file not closed!\n";
 	
+	testFrameRange("dset.h5");
+	return 0;
 	printf("\n closed aft write");
 	
 	changeTime("dset.h5");

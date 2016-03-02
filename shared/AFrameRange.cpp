@@ -20,7 +20,7 @@ int AFrameRange::LastFrame = 0;
 int AFrameRange::SamplesPerFrame = 1;
 float AFrameRange::FramesPerSecond = 25.f;
 
-AFrameRange::AFrameRange() { reset(); }
+AFrameRange::AFrameRange() {}
 AFrameRange::~AFrameRange() {}
 void AFrameRange::reset()
 {

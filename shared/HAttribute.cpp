@@ -18,10 +18,11 @@ HAttribute::HAttribute(const std::string & path) : HObject(path)
 char HAttribute::create(int dim, hid_t parentId)
 {
 	hsize_t dims = dim;
-	
 	hid_t dataSpace = H5Screate_simple(1, &dims, NULL);
 	
-	fObjectId = H5Acreate(parentId, fObjectPath.c_str(), dataType(), dataSpace, 
+	hid_t type = dataType();
+	//H5Tset_size (type, H5T_VARIABLE);
+	fObjectId = H5Acreate(parentId, fObjectPath.c_str(), type, dataSpace, 
                           H5P_DEFAULT, H5P_DEFAULT);
 						  
 	H5Sclose(dataSpace);

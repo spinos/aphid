@@ -8,80 +8,89 @@ set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 set (HEADER_FILES "../shared/Morton3D.h")
 include_directories ("../shared")
+
 add_executable (hdata ${HEADER_FILES} Holder.cpp main.cpp)
 
-if (WIN32)
-set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
-set (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
-else ()
-set (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
-set (HDF5_LIBRARIES "/users/jianzhang/Library/hdf5/lib/libhdf5.dylib")
-endif ()
+FIND_PACKAGE (HDF5 REQUIRED)
+MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
+MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
-if(WIN32)
-set (ZLIB_ROOT "D:/usr/zlib-1.2.5")
-target_link_libraries (helloh5 "D:/usr/hdf5/lib/zlib.lib")
-endif()
-
-
-if (WIN32)
-set (SZIP_INCLUDE_DIR "D:/usr/szip-2.1/src")
-set (SZIP_LIBRARIES "D:/usr/szip-2.1/szip.lib")
-include_directories (${SZIP_INCLUDE_DIR})
-target_link_libraries (hdata ${SZIP_LIBRARIES})
-endif ()
-
-
-
-include_directories (${HDF5_INCLUDE_DIR})
+include_directories (${HDF5_INCLUDE_DIRS})
 target_link_libraries (hdata ${HDF5_LIBRARIES})
 
-if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
-else ()
-set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
-endif ()
+FIND_PACKAGE (ZLIB REQUIRED)
+MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
+MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
+MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
 
-target_link_libraries (hdata ${Aphid_Library})
+target_link_libraries (hdata ${ZLIB_LIBRARIES})
+
+FIND_PACKAGE (SZIP REQUIRED)
+MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
+MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
+MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
+MESSAGE (" szip library is " ${SZIP_LIBRARY})
+
+target_link_libraries (hdata ${SZIP_LIBRARY})
 
 if(WIN32)
-	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
-	set (Boost_LIBRARY_DIR "D:/usr/boost_1_51_0/stage/lib")
-	set (Boost_USE_STATIC_LIBS ON)
-	set (Boost_USE_MULTITHREADED ON)
-	include_directories ("D:/usr/boost_1_51_0")
-	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex)
-else()
-
-if(APPLE)
-	set (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
-	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
-	include_directories ("/users/jianzhang/Library/boost_1_55_0")
-	find_package(Boost 1.55 COMPONENTS system filesystem date_time regex)
-	include_directories ("/usr/local/include")
-
-else()
-	set (Boost_INCLUDE_DIR "/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	set (Boost_USE_STATIC_LIBS ON)
-	set (Boost_USE_MULTITHREADED ON)
-	include_directories ("/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex)
+	IF (EXISTS "D:/usr/boost_1_51_0")
+		SET (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
 	
-endif()
+	ENDIF ()
+	set (Boost_USE_STATIC_LIBS ON)
+	set (Boost_USE_MULTITHREADED ON)
+	
+ELSEIF (APPLE)
+	IF (EXISTS "/users/jianzhang/Library/boost_1_55_0")
+		SET (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
+	ELSEIF (EXISTS "/users/jollyroger/Library/boost_1_43_0")
+		SET (Boost_INCLUDE_DIR "/users/jollyroger/Library/boost_1_43_0")
+	ENDIF ()
 	
 endif()
 
-message ("boost system is" ${Boost_SYSTEM_LIBRARY})
-message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
-message ("boost regex is" ${Boost_REGEX_LIBRARY})
-message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
+FIND_PACKAGE (Boost REQUIRED COMPONENTS system filesystem date_time regex)	
+	
+MESSAGE (" boost version is " ${Boost_VERSION})
+MESSAGE (" boost include is " ${Boost_INCLUDE_DIR} )
+MESSAGE (" boost system is " ${Boost_SYSTEM_LIBRARY})
+MESSAGE (" boost date_time is " ${Boost_DATE_TIME_LIBRARY})
+MESSAGE (" boost regex is " ${Boost_REGEX_LIBRARY})
+MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 
-set (AttributeNoninline "__attribute__ ((noinline))")
-add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
-
+include_directories (${Boost_INCLUDE_DIR})
+	
 target_link_libraries (hdata ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (hdata ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (hdata ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (hdata ${Boost_REGEX_LIBRARY})
 
+if (WIN32)
+SET (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidSdb.lib
+D:/aphid/lib/aphidH5.lib)
+else ()
+	IF (EXISTS "/users/jianzhang/aphid/lib/libaphidMath.a")
+		SET (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a) 
+		SET (Aphid_Sdb_Library /users/jianzhang/aphid/lib/libaphidSdb.a) 
+		SET (Aphid_H5_Library /users/jianzhang/aphid/lib/libaphidH5.a )
+		SET (Aphid_Geom_Library /users/jianzhang/aphid/lib/libaphidGeom.a )
+		SET (Aphid_Cu_Library /users/jianzhang/aphid/lib/libaphidCu.a )
+	ELSEIF (EXISTS "/users/jollyroger/aphid/lib/libaphidMath.a")
+		set (Aphid_Library "/users/jollyroger/aphid/lib/libaphid.a")
+	ENDIF ()
+endif ()
+
+MESSAGE (" aphid math library is " ${Aphid_Math_Library})
+MESSAGE (" aphid sdb library is " ${Aphid_Sdb_Library})
+MESSAGE (" aphid h5 library is " ${Aphid_H5_Library})
+MESSAGE (" aphid geom library is " ${Aphid_Geom_Library})
+MESSAGE (" aphid cu library is " ${Aphid_Cu_Library})
+
+target_link_libraries (hdata ${Aphid_Math_Library})
+target_link_libraries (hdata ${Aphid_Sdb_Library})
+target_link_libraries (hdata ${Aphid_H5_Library})
 

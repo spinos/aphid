@@ -42,7 +42,7 @@ char HFrameRange::save(AFrameRange * tm)
     
     writeFloatAttr(".fps", &tm->FramesPerSecond);
     
-    if(tm->segmentExpr().size() >= 3) {
+    if(tm->segmentExpr().size() > 3) {
         if(!hasNamedAttr(".sgxr"))
             addStringAttr(".sgxr", tm->segmentExpr().size() );
         

@@ -33,6 +33,7 @@ public:
 	void addFloatData(const char * dataName, unsigned count);
 	void addVector3Data(const char * dataName, unsigned count);
 	void addCharData(const char * dataName, unsigned count);
+	void addVLStringAttr(const char * attrName, int dim);
 	
 	void writeIntAttr(const char * attrName, int *value);
 	void writeFloatAttr(const char * attrName, float *value);
@@ -43,6 +44,7 @@ public:
 	void writeMatrix33Data(const char * dataName, unsigned count, Matrix33F *value, HDataset::SelectPart * part = 0);
 	void writeMatrix44Data(const char * dataName, unsigned count, Matrix44F *value, HDataset::SelectPart * part = 0);
 	void writeCharData(const char * dataName, unsigned count, char *value, HDataset::SelectPart * part = 0);
+	void writeVLStringAttr(const char * attrName, const std::string & value);
 	
 	char readIntAttr(const char * attrName, int *value);
 	char readFloatAttr(const char * attrName, float *value);
@@ -52,6 +54,7 @@ public:
 	char readVector3Data(const char * dataname, unsigned count, Vector3F *dst, HDataset::SelectPart * part = 0);
 	char readMatrix33Data(const char * dataname, unsigned count, Matrix33F *dst, HDataset::SelectPart * part = 0);
 	char readCharData(const char * dataName, unsigned count, char *dst, HDataset::SelectPart * part = 0);
+	char readVLStringAttr(const char * attrName, std::string & value);
 	
 	char hasNamedAttr(const char * attrName);
 	std::string getAttrName(hid_t attrId);

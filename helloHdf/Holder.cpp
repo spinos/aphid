@@ -11,6 +11,8 @@
 #include <HBase.h>
 #include <boost/timer.hpp>
 #include <iostream>
+using namespace aphid;
+
 Holder::Holder() {}
 Holder::~Holder() {}
 
