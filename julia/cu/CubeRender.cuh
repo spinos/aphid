@@ -1,4 +1,8 @@
 #include "cu/ImageBase.cuh"
+#include "cu/VectorMath.cuh"
+#include "cu/RayIntersection.cuh"
+
+__constant__ float3 c_frustumVec[6];
 
 __global__ void showTile_kernel(uint * pix, 
                                 float * depth)
@@ -13,3 +17,4 @@ __global__ void showTile_kernel(uint * pix,
 	pix[ind] = encodeRGB(r, g, 0); 
 	depth[ind] = 1e20f;
 }
+

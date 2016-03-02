@@ -41,6 +41,18 @@ void CudaRender::setSize(const int & w, const int & h)
 	m_deviceDepth.create( npix * 4 );
 }
 
+void CudaRender::setImageSize(const int & w, const int & h)
+{ 
+    m_imageDim[0] = w;
+    m_imageDim[1] = h;
+}
+
+const int & CudaRender::imageWidth() const
+{ return m_imageDim[0]; }
+
+const int & CudaRender::imageHeight() const
+{ return m_imageDim[1]; }
+
 const int & CudaRender::tileX() const
 { return m_tileDim[0]; }
 
@@ -49,6 +61,9 @@ const int & CudaRender::tileY() const
 
 int * CudaRender::tileDim()
 { return m_tileDim; }
+
+int * CudaRender::imageDim()
+{ return m_imageDim; }
 
 unsigned * CudaRender::hostColor() const
 { return (unsigned *)m_hostColor.data(); }
@@ -88,5 +103,11 @@ void CudaRender::GetRoundedSize(int & w, int & h)
 
 void CudaRender::colorToHost()
 { m_deviceColor.deviceToHost(m_hostColor.data(), numPixels() * 4); }
+
+void CudaRender::updateRayFrameVec()
+{ frustum().toRayFrame(m_rayFrameVec); }
+
+Vector3F * CudaRender::rayFrameVec()
+{ return m_rayFrameVec; }
 
 }

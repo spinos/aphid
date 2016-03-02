@@ -5,6 +5,8 @@
 
 namespace cuber {
     
+void setFrustum(float * src);
+    
 void render(uint * color,
                 float * depth,
                 int blockx,

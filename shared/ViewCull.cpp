@@ -106,6 +106,7 @@ const RectangleI & BaseView::subRect() const
 
 const int BaseView::numPixels() const
 { return m_rect.area(); }
+	
 
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}

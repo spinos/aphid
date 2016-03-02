@@ -5,6 +5,11 @@
  *  Created by jian zhang on 2/2/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
+ *
+ *  3 - 2 near  7 - 6 far
+ *  |   |       |   |
+ *  0 - 1       4 - 5
+ *
  */
 
 #include "AFrustum.h"
@@ -89,5 +94,16 @@ Vector3F AFrustum::center() const
 			m_v[5] * .125f +
 			m_v[6] * .125f +
 			m_v[7] * .125f); }
+
+void AFrustum::toRayFrame(Vector3F * dst) const
+{
+    dst[0] = m_v[3];
+    dst[1] = m_v[2] - m_v[3];
+    dst[2] = m_v[0] - m_v[3];
+    
+    dst[3] = m_v[7];
+    dst[4] = m_v[6] - m_v[7];
+    dst[5] = m_v[4] - m_v[7];
+}
 
 }

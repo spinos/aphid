@@ -29,6 +29,8 @@ void CubeRender::setSize(const int & w, const int & h)
 
 void CubeRender::render()
 {
+    updateRayFrameVec();
+    cuber::setFrustum((float *)rayFrameVec());
 	cuber::render((uint *) colorBuffer(),
                 (float *) depthBuffer(),
 				16,

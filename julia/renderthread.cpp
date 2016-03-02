@@ -27,12 +27,14 @@ void RenderThread::render(QSize resultSize)
 {
     QMutexLocker locker(&mutex);
 
+    this->m_portSize = resultSize;
+    
     int w = resultSize.width();
     int h = resultSize.height();
 
 	aphid::CudaRender::GetRoundedSize(w, h);
   
-	this->resultSize = QSize(w, h);
+	this->m_resultSize = QSize(w, h);
 
     if (!isRunning()) {
         start(LowPriority);
@@ -47,7 +49,7 @@ void RenderThread::run()
     forever {
         mutex.lock();
 
-        QSize resultSize = this->resultSize;
+        QSize renderSize = this->m_resultSize;
 
         mutex.unlock();
 		
@@ -55,11 +57,12 @@ void RenderThread::run()
 			break;
 		if (abort)
 			return;
-			
-		m_render.setSize(resultSize.width(), resultSize.height() );
+		
+		m_render.setImageSize(m_portSize.width(), m_portSize.height() );
+		m_render.setSize(renderSize.width(), renderSize.height() );
 		m_render.render();
 		
-		QImage image(resultSize, QImage::Format_RGB32);
+		QImage image(renderSize, QImage::Format_RGB32);
 			
         const int tw = m_render.tileX();
         const int th = m_render.tileY();
@@ -86,7 +89,7 @@ void RenderThread::run()
 				*/
                 
 				uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * 16) );
-				m_render.sendTileColor(&scanLine[i*16], resultSize.width(), i, j);
+				m_render.sendTileColor(&scanLine[i*16], renderSize.width(), i, j);
             }
         }
         

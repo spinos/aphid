@@ -2,6 +2,9 @@
 
 namespace cuber {
 
+void setFrustum(float * src)
+{ cudaMemcpyToSymbol(c_frustumVec, src, 72); }
+
 void render(uint * pix,
             float * depth,
             int blockx,

@@ -31,10 +31,10 @@ private:
     QMutex mutex;
     QWaitCondition condition;
 
-    QSize resultSize;
+    QSize m_resultSize, m_portSize;
     bool restart;
     bool abort;
-
+    
 	CubeRender m_render;
 };
 
