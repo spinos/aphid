@@ -19,15 +19,15 @@ int AFrameRange::FirstFrame = 0;
 int AFrameRange::LastFrame = 0;
 int AFrameRange::SamplesPerFrame = 1;
 float AFrameRange::FramesPerSecond = 25.f;
-std::string AFrameRange::SegmentExpr;
 
-AFrameRange::AFrameRange() {}
+AFrameRange::AFrameRange() { reset(); }
 AFrameRange::~AFrameRange() {}
 void AFrameRange::reset()
 {
 	FirstFrame = 0;
 	LastFrame = 0;
 	SamplesPerFrame = 1;
+	m_segmentExpr = "";
 }
 
 bool AFrameRange::isValid() const
@@ -36,6 +36,11 @@ bool AFrameRange::isValid() const
 int AFrameRange::numFramesInRange() const
 { return LastFrame - FirstFrame + 1; }
 
+const std::string & AFrameRange::segmentExpr() const
+{ return m_segmentExpr; }
+
+std::string & AFrameRange::segmentExprRef()
+{ return m_segmentExpr; }
 
 AFrameRangeSegment::AFrameRangeSegment() {}
 

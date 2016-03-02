@@ -42,11 +42,11 @@ char HFrameRange::save(AFrameRange * tm)
     
     writeFloatAttr(".fps", &tm->FramesPerSecond);
     
-    if(tm->SegmentExpr.size() >= 3) {
+    if(tm->segmentExpr().size() >= 3) {
         if(!hasNamedAttr(".sgxr"))
-            addStringAttr(".sgxr", tm->SegmentExpr.size() );
+            addStringAttr(".sgxr", tm->segmentExpr().size() );
         
-        writeStringAttr(".sgxr", tm->SegmentExpr);
+        writeStringAttr(".sgxr", tm->segmentExpr() );
     }
     return 1;
 }
@@ -58,7 +58,7 @@ char HFrameRange::load(AFrameRange * tm)
 	readIntAttr(".spf", &tm->SamplesPerFrame);
     readFloatAttr(".fps", &tm->FramesPerSecond);
     if(hasNamedAttr(".sgxr"))
-        readStringAttr(".sgxr", tm->SegmentExpr);
+        readStringAttr(".sgxr", tm->segmentExprRef() );
     return 1;
 }
 

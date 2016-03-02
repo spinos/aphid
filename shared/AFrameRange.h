@@ -15,17 +15,22 @@
 namespace aphid {
 
 class AFrameRange {
+
+	std::string m_segmentExpr;
+	
 public:
 	AFrameRange();
 	virtual ~AFrameRange();
 	void reset();
 	bool isValid() const;
 	int numFramesInRange() const;
+	const std::string & segmentExpr() const;
+	std::string & segmentExprRef();
+	
     static float FramesPerSecond;
 	static int FirstFrame;
 	static int LastFrame;
 	static int SamplesPerFrame;
-	static std::string SegmentExpr;
 };
 
 class AFrameRangeSegment {
