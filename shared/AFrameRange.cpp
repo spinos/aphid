@@ -69,19 +69,6 @@ bool AFrameRangeSegment::create(const std::string & src)
     return m_data.size() > 0;
 }
 
-bool AFrameRangeSegment::getSamples(int & dst, const int & frame) const
-{
-    std::vector<RangeSegment>::const_iterator it = m_data.begin();
-    for(;it!=m_data.end();++it) {
-        if(it->m_begin <= frame
-            && it->m_end > frame) {
-                dst = it->m_samples;
-                return true;
-            }
-    }
-    return false;
-}
-
 const std::string AFrameRangeSegment::str() const
 {
     std::stringstream sst;

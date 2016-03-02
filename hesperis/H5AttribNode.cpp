@@ -55,7 +55,7 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	if(dtime < imin) dtime = imin;
 	if(dtime > imax) dtime = imax;
     
-	sampler()->calculateWeights(dtime);
+	sampler()->calculateWeights(dtime, sampler()->m_spf);
 	sampler()->m_minFrame = imin;
 
 	const unsigned idx = plug.logicalIndex();

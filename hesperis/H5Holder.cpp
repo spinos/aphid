@@ -9,12 +9,13 @@
 
 #include "H5Holder.h"
 #include <HBase.h>
+#include <HFrameRange.h>
 
 namespace aphid {
     
 H5Availability H5Holder::H5Files;
 
-H5Holder::H5Holder() : m_lastTime(1e28), m_hasSampler(false) {}
+H5Holder::H5Holder() : m_lastTime(1e28), m_hasSampler(false), m_hasSpfSegment(false) {}
 H5Holder::~H5Holder() {}
 
 void H5Holder::readSampler(SampleFrame & sampler)
@@ -48,6 +49,9 @@ bool H5Holder::openH5File(const std::string & fileName)
 		readSampler(m_sampler);
 		m_hasSampler = true;
 	}
+    
+    m_hasSpfSegment = readSpfSegment();
+    
 	return true;
 }
 
@@ -67,5 +71,26 @@ int H5Holder::getFrame(double x, int tmin, int tmax) const
 
 SampleFrame * H5Holder::sampler()
 { return &m_sampler; }
+
+bool H5Holder::readSpfSegment()
+{
+    AFrameRange afr;
+    HFrameRange fr(".fr");
+    fr.load(&afr);
+    fr.close();
+    
+    if(AFrameRange::SegmentExpr.size() < 3) return false;
+    
+    if( m_spfSegment.create(AFrameRange::SegmentExpr) )
+        return true;
+    
+    return false;
+}
+
+const AFrameRangeSegment & H5Holder::spfSegment() const
+{ return m_spfSegment; }
+
+const bool & H5Holder::hasSpfSegment() const
+{ return m_hasSpfSegment; }
 
 }

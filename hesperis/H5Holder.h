@@ -11,14 +11,17 @@
 
 #include <H5Availability.h>
 #include <SampleFrame.h>
+#include <AFrameRange.h>
 
 namespace aphid {
     
 class H5Holder {
 
+    AFrameRangeSegment m_spfSegment;
 	SampleFrame m_sampler;
 	double m_lastTime;
 	bool m_hasSampler;
+    bool m_hasSpfSegment;
 	
 public:
 	H5Holder();
@@ -33,7 +36,11 @@ protected:
 	bool isTimeChanged(double x) const;
 	int getFrame(double x, int tmin, int tmax) const;
 	SampleFrame * sampler();
-	
+	bool readSpfSegment();
+    
+    const AFrameRangeSegment & spfSegment() const;
+    const bool & hasSpfSegment() const;
+    
 private:
 
 };

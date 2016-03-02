@@ -51,6 +51,19 @@ public:
     
     const std::string str() const;
 	
+    template<typename T>
+    bool getSamples(int & dst, const T & frame) const
+    {
+        std::vector<RangeSegment>::const_iterator it = m_data.begin();
+        for(;it!=m_data.end();++it) {
+            if(it->m_begin <= frame
+                && it->m_end > frame) {
+                    if(it->m_samples > 0) dst = it->m_samples;
+                    return true;
+                }
+        }
+        return false;
+    }
 };
 
 }

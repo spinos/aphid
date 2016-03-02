@@ -511,7 +511,13 @@ void AttribUtil::load3(const char * filename, MObject & target)
         AHelper::Info<const char *>("AttribUtil error h5 file is not opened", filename);
         return;   
     }
-	
+    
+    AFrameRange afr;
+    HFrameRange fr(".fr");
+    fr.load(&afr);
+    fr.close();
+    AnimUtil::UpdateFrameRange(&afr);
+
 	AHelper::Info<const char *>(" AttribUtil read attrib from ", filename);
 	HBase w("/");
 	HesperisAttributeIO::ReadAttributes(&w, target);
@@ -700,7 +706,7 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
                          +" samples/frame "+SamplesPerFrame
                          +" seconds/frame "+secondsPerFrame);
 
-	BaseUtil::ISample = 0;
+	//BaseUtil::ISample = 0;
 	bakeH5(orderedDag, 0);
 	
     double realFrame;
@@ -711,7 +717,7 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
         
         for(sampFrame = 0; sampFrame < SamplesPerFrame; sampFrame++) {
 		    BaseUtil::SubFrame = sampFrame;
-			BaseUtil::ISample = sampIter;
+			//BaseUtil::ISample = sampIter;
             realFrame = (double)(kt + BaseUtil::DeltaSubFrame * sampFrame);
 
             MGlobal::executeCommand(MString("currentTime ")+realFrame);
