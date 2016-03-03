@@ -50,10 +50,10 @@ void HBase::addStringAttr(const char * attrName, int dim)
 	attr.close();
 }
 
-void HBase::addVLStringAttr(const char * attrName, int dim)
+void HBase::addVLStringAttr(const char * attrName)
 {
 	HVLStringAttribute attr(attrName);
-	attr.create(dim, fObjectId);
+	attr.create(1, fObjectId);
 	attr.close();
 }
 

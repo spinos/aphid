@@ -44,9 +44,9 @@ char HFrameRange::save(AFrameRange * tm)
     
     if(tm->segmentExpr().size() > 3) {
         if(!hasNamedAttr(".sgxr"))
-            addStringAttr(".sgxr", tm->segmentExpr().size() );
+            addVLStringAttr(".sgxr");
         
-        writeStringAttr(".sgxr", tm->segmentExpr() );
+        writeVLStringAttr(".sgxr", tm->segmentExpr() );
     }
     return 1;
 }
@@ -58,7 +58,7 @@ char HFrameRange::load(AFrameRange * tm)
 	readIntAttr(".spf", &tm->SamplesPerFrame);
     readFloatAttr(".fps", &tm->FramesPerSecond);
     if(hasNamedAttr(".sgxr"))
-        readStringAttr(".sgxr", tm->segmentExprRef() );
+        readVLStringAttr(".sgxr", tm->segmentExprRef() );
     return 1;
 }
 

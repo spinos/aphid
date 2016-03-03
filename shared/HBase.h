@@ -33,7 +33,7 @@ public:
 	void addFloatData(const char * dataName, unsigned count);
 	void addVector3Data(const char * dataName, unsigned count);
 	void addCharData(const char * dataName, unsigned count);
-	void addVLStringAttr(const char * attrName, int dim);
+	void addVLStringAttr(const char * attrName);
 	
 	void writeIntAttr(const char * attrName, int *value);
 	void writeFloatAttr(const char * attrName, float *value);

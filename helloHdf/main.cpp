@@ -658,6 +658,23 @@ void testFrameRange(const char * filename)
 	std::cout<<"\n end test fr";
 }
 
+void testVls(const char * filename)
+{
+	std::cout<<"\n begin test vlstr";
+	HObject::FileIO.open(filename, HDocument::oReadAndWrite);
+	
+	HBase w("/");
+	
+	std::string rs;
+	w.readVLStringAttr(".vls", rs);
+	w.close();
+	
+	HObject::FileIO.close();
+	
+	std::cout<<"\n read vl str "<<rs;
+	std::cout<<"\n end test vlstr";
+}
+
 int main (int argc, char * const argv[]) {
     if(argc > 1) {
 		changeTime(argv[1], true);
@@ -678,13 +695,16 @@ int main (int argc, char * const argv[]) {
 	fr.FirstFrame = 1;
 	fr.LastFrame = 240;
 	fr.SamplesPerFrame = 2;
-	fr.segmentExprRef() = "10/20/4;40/50/8;";//99/109/6;";//199/210/4";
-	std::cout<<"\n seg expr len "<<fr.segmentExpr().size();
+	fr.segmentExprRef() = "10/20/4;";//40/50/8;99/109/6;199/210/4";
+	
 	HFrameRange hfr(".fr");
 	hfr.save(&fr);
 	hfr.close();
 	
 	HBase w("/");
+	if(!w.hasNamedAttr(".vls") ) w.addVLStringAttr(".vls");
+	w.writeVLStringAttr(".vls", "_ _0fCDEFgh /87");
+	
 	if(!w.hasNamedAttr(".range")) w.addIntAttr(".range", 4);
 		
 	int vrange[4];
@@ -719,6 +739,7 @@ int main (int argc, char * const argv[]) {
 	if(!HObject::FileIO.close()) std::cout<<"\n warning: file not closed!\n";
 	
 	testFrameRange("dset.h5");
+	//testVls("dset.h5");
 	return 0;
 	printf("\n closed aft write");
 	

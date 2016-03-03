@@ -24,7 +24,7 @@ public:
 
 /// variable length string attrib based on
 /// http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/attrvstr.c
-class HVLStringAttribute : public HAttribute
+class HVLStringAttribute : public HStringAttribute
 {
 public:
 	HVLStringAttribute(const std::string & path);
