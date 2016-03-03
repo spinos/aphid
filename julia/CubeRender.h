@@ -15,7 +15,7 @@ public:
 	CubeRender();
 	virtual ~CubeRender();
 	
-	virtual void setSize(const int & w, const int & h);
+	virtual void setBufferSize(const int & w, const int & h);
 	void render();
 	
 };

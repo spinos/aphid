@@ -5,6 +5,7 @@
 
 namespace cuber {
     
+void setRenderRect(int * src);
 void setFrustum(float * src);
     
 void render(uint * color,
@@ -12,6 +13,9 @@ void render(uint * color,
                 int blockx,
                 int gridx, int gridy);
 
+void setBoxFaces();
+
 }
+
 #endif        //  #ifndef CUBERENDERINTERFACE_H
 

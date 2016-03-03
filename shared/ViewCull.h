@@ -19,6 +19,7 @@ class BaseView {
 	AFrustum m_frustum;
 	Matrix44F m_space, m_invSpace;
 	RectangleI m_rect, m_subRect;
+	Vector3F m_rayFrameVec[6];
 	Vector3F m_eyePosition;
 	float m_hfov, m_aspectRatio, m_farClip; 
 	
@@ -61,6 +62,9 @@ protected:
 			const float & clipFar);
 			
 	void updateAspectRatio(const int & w, const int & h);
+	
+	void updateRayFrameVec();
+	Vector3F * rayFrameVec();
 	
 private:
     

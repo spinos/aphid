@@ -58,8 +58,10 @@ void RenderThread::run()
 		if (abort)
 			return;
 		
-		m_render.setImageSize(m_portSize.width(), m_portSize.height() );
-		m_render.setSize(renderSize.width(), renderSize.height() );
+		// qDebug()<<" port"<<m_portSize<<" buffer"<<renderSize;;
+		
+		m_render.setPortSize(m_portSize.width(), m_portSize.height() );
+		m_render.setBufferSize(renderSize.width(), renderSize.height() );
 		m_render.render();
 		
 		QImage image(renderSize, QImage::Format_RGB32);

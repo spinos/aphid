@@ -106,7 +106,12 @@ const RectangleI & BaseView::subRect() const
 
 const int BaseView::numPixels() const
 { return m_rect.area(); }
-	
+
+void BaseView::updateRayFrameVec()
+{ frustum().toRayFrame(m_rayFrameVec, rect().width(), rect().height() ); }
+
+Vector3F * BaseView::rayFrameVec()
+{ return m_rayFrameVec; }
 
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}

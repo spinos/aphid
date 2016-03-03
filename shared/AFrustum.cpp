@@ -5,6 +5,7 @@
  *  Created by jian zhang on 2/2/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
+ *	origin at lower-left corner
  *
  *  3 - 2 near  7 - 6 far
  *  |   |       |   |
@@ -17,17 +18,18 @@
 
 namespace aphid {
 
+/// clip is negative in camera space
 void AFrustum::set(const float & hfov,
 			const float & aspectRatio,
 			const float & clipNear,
 			const float & clipFar,
 			const Matrix44F & mat)
 {
-	float nearRight = clipNear * hfov;
+	float nearRight = -clipNear * hfov;
 	float nearLeft = -nearRight;
 	float nearUp = nearRight * aspectRatio;
 	float nearBottom = -nearUp;
-	float farRight = clipFar * hfov;
+	float farRight = -clipFar * hfov;
 	float farLeft = -farRight;
 	float farUp = farRight * aspectRatio;
 	float farBottom = -farUp;
@@ -95,15 +97,26 @@ Vector3F AFrustum::center() const
 			m_v[6] * .125f +
 			m_v[7] * .125f); }
 
-void AFrustum::toRayFrame(Vector3F * dst) const
+// origin at left-up corner, center position, right and down deviation of first pixel, 
+// at near and far clip
+// 
+//   - 1 near   - 4 far
+// | 0        | 3
+// 2          5
+//
+void AFrustum::toRayFrame(Vector3F * dst, const int & gridX, const int & gridY) const
 {
-    dst[0] = m_v[3];
     dst[1] = m_v[2] - m_v[3];
+	dst[1] /= gridX;
     dst[2] = m_v[0] - m_v[3];
+	dst[2] /= gridY;
+	dst[0] = m_v[3] + dst[1] * .5f + dst[2] * .5f;
     
-    dst[3] = m_v[7];
     dst[4] = m_v[6] - m_v[7];
+	dst[4] /= gridX;
     dst[5] = m_v[4] - m_v[7];
+	dst[5] /= gridY;
+	dst[3] = m_v[7] + dst[4] * .5f + dst[5] * .5f;
 }
 
 }

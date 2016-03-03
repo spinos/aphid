@@ -21,18 +21,15 @@ class CudaRender : public BaseView {
 	BaseBuffer m_hostColor;
 	CUDABuffer m_deviceColor;
 	CUDABuffer m_deviceDepth;
-	Vector3F m_rayFrameVec[6];
 	int m_tileDim[2];
-	int m_imageDim[2];
+	int m_bufferLength;
 	
 public :
 	CudaRender();
 	virtual ~CudaRender();
 	
-	virtual void setSize(const int & w, const int & h);
-	void setImageSize(const int & w, const int & h);
-	const int & imageWidth() const;
-	const int & imageHeight() const;
+	virtual void setBufferSize(const int & w, const int & h);
+	void setPortSize(const int & w, const int & h);
 	const int & tileX() const;
 	const int & tileY() const;
 	unsigned * hostColor() const;
@@ -46,10 +43,8 @@ protected :
 	void * depthBuffer();
 	void * colorBuffer();
 	int * tileDim();
-	int * imageDim();
 	void colorToHost();
-	void updateRayFrameVec();
-	Vector3F * rayFrameVec();
+	const int & bufferLength() const;
 	
 private:
 

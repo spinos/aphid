@@ -17,19 +17,21 @@ using namespace aphid;
 CubeRender::CubeRender() {}
 CubeRender::~CubeRender() {}
 
-void CubeRender::setSize(const int & w, const int & h)
+void CubeRender::setBufferSize(const int & w, const int & h)
 {
-	aphid::CudaRender::setSize(w, h);
+	aphid::CudaRender::setBufferSize(w, h);
 	imagebase::resetImage((uint *) colorBuffer(),
                 (float *) depthBuffer(),
                 512,
-                numPixels() );
+                w * h );
 	CudaBase::CheckCudaError(" reset image");
 }
 
 void CubeRender::render()
 {
     updateRayFrameVec();
+	cuber::setBoxFaces();
+	cuber::setRenderRect((int *)&rect() );
     cuber::setFrustum((float *)rayFrameVec());
 	cuber::render((uint *) colorBuffer(),
                 (float *) depthBuffer(),

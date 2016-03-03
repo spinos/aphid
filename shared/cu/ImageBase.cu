@@ -9,7 +9,7 @@ __global__ void resetImage_kernel(uint * pix,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	pix[ind] = 0; 
-	depth[ind] = 1e20f;
+	depth[ind] = 0.f;
 }
 
 void resetImage(uint * pix,

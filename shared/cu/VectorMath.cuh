@@ -87,7 +87,7 @@ inline __device__ void float3_scale_inplace(float3 & v1, float s)
     v1.z *= s; 
 }
 
-inline __device__ void float3_divide_inplace(float3 & v1, float s)
+inline __device__ void float3_divide_inplace(float3 & v1, const float & s)
 { 
     v1.x /= s;
     v1.y /= s;
@@ -162,6 +162,71 @@ inline __device__ float4 select4(const float4 & a, const float4 & b, const int3 
 
 inline __device__ float3 float4_difference(const float4 & v1, const float4 & v2)
 { return make_float3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z); }
+
+template<typename T1, typename T2>
+inline __device__ void v3_convert(T1 & a, const T2 & b)
+{
+    a.x = b.x;
+    a.y = b.y;
+    a.z = b.z;
+}
+
+template<typename T1, typename T2, typename T3>
+inline __device__ void v3_add_mult(T1 & a, const T2 & b, const T3 & c)
+{
+    a.x += b.x * c;
+    a.y += b.y * c;
+    a.z += b.z * c;
+}
+
+template<typename T1, typename T2>
+inline __device__ void v3_add(T1 & a, const T2 & b)
+{
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+}
+
+template<typename T1, typename T2, typename T3>
+inline __device__ void v3_minus_mult(T1 & a, const T2 & b, const T3 & c)
+{
+    a.x -= b.x * c;
+    a.y -= b.y * c;
+    a.z -= b.z * c;
+}
+
+template<typename T1, typename T2>
+inline __device__ void v3_minus(T1 & a, const T2 & b)
+{
+    a.x -= b.x;
+    a.y -= b.y;
+    a.z -= b.z;
+}
+
+template<typename T>
+inline __device__ void v3_normalize_inplace(T & v)
+{
+	float l = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
+	v.x /= l;
+	v.y /= l;
+	v.z /= l;
+}
+
+template<typename T1, typename T2>
+inline __device__ void v3_divide_inplace(T1 & v1, const T2 & v2)
+{ 
+    v1.x /= v2.x;
+    v1.y /= v2.y;
+    v1.z /= v2.z; 
+}
+
+template<typename T1, typename T2>
+__device__ float3 v3_cross(const T1 & v1, const T2 & v2)
+{ return make_float3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x); }
+
+template<typename T1, typename T2>
+__device__ float v3_dot(const T1 & v1, const T2 & v2)
+{ return (v1.x * v2.x + v1.y * v2.y + v1.z * v2.z); }
 
 #endif        //  #ifndef VECTOR_MATH_CUH
 

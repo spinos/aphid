@@ -5,6 +5,8 @@
  *  Created by jian zhang on 10/3/13.
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
+ *  quadruple of
+ *  (xmin, ymin, xmax, ymax)
  */
 
 #include "BoundingRectangle.h"
