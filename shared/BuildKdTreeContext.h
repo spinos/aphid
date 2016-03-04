@@ -8,24 +8,15 @@
  */
 
 #pragma once
-#include <BoundingBox.h>
-#include <IndexList.h>
 #include <SplitEvent.h>
 #include <BuildKdTreeStream.h>
-#include <WorldGrid.h>
-#include <VectorArray.h>
+#include <GridClustering.h>
 
 namespace aphid {
 
-class GroupCell : public sdb::Sequence<unsigned>
-{
-public:
-	GroupCell(sdb::Entity * parent = NULL) : sdb::Sequence<unsigned>(parent) {}
-	BoundingBox m_box;
-};
-
 class BuildKdTreeContext {
-	sdb::WorldGrid<GroupCell, unsigned > * m_grid;
+
+	GridClustering * m_grid;
 	
 public:
 	BuildKdTreeContext();
@@ -55,8 +46,6 @@ public:
 	static BuildKdTreeContext * GlobalContext;
 	
 private:
-	void addIndicesIn(GroupCell * c);
-	void countPrimsIn(GroupCell * c);
 	
 private:
 	BoundingBox m_bbox;

@@ -76,7 +76,8 @@ D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
-/users/jianzhang/aphid/lib/libaphidUI.a)
+/users/jianzhang/aphid/lib/libaphidUI.a
+/users/jianzhang/aphid/lib/libaphidSdb.a)
 endif ()
 
 target_link_libraries (testkdtree ${Aphid_Library})

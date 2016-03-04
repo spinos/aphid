@@ -46,7 +46,7 @@ void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree,
 {
 	tree->init(source, box);
     KdNBuilder<4, T, KdNode4 > bud;
-	bud.SetNumPrimsInLeaf(10);
+	bud.SetNumPrimsInLeaf(8);
 	
 	SahSplit<T> splt(source->size(), source);
 	splt.initIndices();

@@ -214,6 +214,7 @@ ADD_LIBRARY (aphidSdb STATIC
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp
+../btree/GridClustering.cpp
 )
 
 add_library(aphid STATIC                 

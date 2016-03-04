@@ -21,7 +21,7 @@ m_numPrimitive(0) {}
 BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBox & b)
 {
 	setBBox(b);
-	m_grid = new sdb::WorldGrid<GroupCell, unsigned >();
+	m_grid = new GridClustering();
 	m_grid->setGridSize(b.getLongestDistance() / 64.f);
 	std::cout<<"\n ctx grid size "<<m_grid->gridSize();
 	
@@ -43,19 +43,10 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 		
 		m_primitiveBoxes.insert(ab);
 		
-		const Vector3F center = ab.center();
-		
         m_indices.insert(i);
 		
-		GroupCell * c = m_grid->insertChild((const float *)&center);
+		m_grid->insertToGroup(ab, i);
 		
-		if(!c) {
-			std::cout<<"\n error cast to GroupCell";
-			return;
-		}
-		
-		c->insert(i);
-		c->m_box.expandBy(ab);
 	}
 	
 	std::cout<<"\n ctx grid n cell "<<m_grid->size();
@@ -68,7 +59,7 @@ BuildKdTreeContext::~BuildKdTreeContext()
 
 void BuildKdTreeContext::createGrid(const float & x)
 {
-	m_grid = new sdb::WorldGrid<GroupCell, unsigned >();
+	m_grid = new GridClustering();
 	m_grid->setGridSize(x);
 	m_grid->setDataExternal();
 }
@@ -122,12 +113,7 @@ void BuildKdTreeContext::countPrimsInGrid()
 {
 	m_numPrimitive = 0;
 	if(!m_grid) return;
-	m_grid->begin();
-	while(!m_grid->end() ) {
-		//countPrimsIn(m_grid->value() );
-		m_numPrimitive += m_grid->value()->size();
-		m_grid->next();
-	}
+	m_numPrimitive = m_grid->numElements();
 }
 
 int BuildKdTreeContext::numCells()
@@ -146,11 +132,10 @@ bool BuildKdTreeContext::decompress(bool forced)
         m_indices.clear();
 		m_numPrimitive = 0;
 		
-		m_grid->begin();
-		while(!m_grid->end() ) {
-			addIndicesIn(m_grid->value() );
-			m_grid->next();
-		}
+		const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
+		m_grid->extractInside(m_indices, boxSrc, m_bbox );
+		
+		m_numPrimitive = m_indices.size();
 		
 		delete m_grid;
 		m_grid = NULL;
@@ -158,32 +143,6 @@ bool BuildKdTreeContext::decompress(bool forced)
 		return true;
 	}
 	return false;
-}
-
-void BuildKdTreeContext::addIndicesIn(GroupCell * c)
-{
-	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
-		
-	c->begin();
-	while(!c->end() ) {
-		const BoundingBox * primB = boxSrc[c->key() ];
-		if(primB->touch(m_bbox) )
-			addIndex(c->key() );
-		c->next();
-	}
-}
-
-void BuildKdTreeContext::countPrimsIn(GroupCell * c)
-{
-	const sdb::VectorArray<BoundingBox> & boxSrc = GlobalContext->primitiveBoxes();
-		
-	c->begin();
-	while(!c->end() ) {
-		const BoundingBox * primB = boxSrc[c->key() ];
-		if(primB->touch(m_bbox) )
-			m_numPrimitive++;
-		c->next();
-	}
 }
 
 void BuildKdTreeContext::addIndex(const unsigned & x)

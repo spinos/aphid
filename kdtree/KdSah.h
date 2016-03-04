@@ -93,7 +93,7 @@ template <typename T>
 void SahSplit<T>::calculateBins(const BoundingBox & b)
 {
 	int axis;
-	const float thre = b.getLongestDistance() * .19f;
+	const float thre = b.getLongestDistance() * .1f;
 	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(b.distance(axis) < thre) 
 		    m_bins[axis].setFlat();		

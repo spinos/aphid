@@ -12,8 +12,8 @@
 namespace aphid {
 
 int SplitEvent::Dimension = 3;
-int SplitEvent::NumBinPerDimension = 12;
-int SplitEvent::NumEventPerDimension = 11;
+int SplitEvent::NumBinPerDimension = 16;
+int SplitEvent::NumEventPerDimension = 15;
 
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
