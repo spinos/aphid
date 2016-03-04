@@ -103,7 +103,7 @@ void BuildKdTreeContext::verbose() const
 bool BuildKdTreeContext::isCompressed()
 { return m_grid !=NULL; }
 
-sdb::WorldGrid<GroupCell, unsigned > * BuildKdTreeContext::grid()
+GridClustering * BuildKdTreeContext::grid()
 { return m_grid; }
 
 void BuildKdTreeContext::addCell(const sdb::Coord3 & x, GroupCell * c)

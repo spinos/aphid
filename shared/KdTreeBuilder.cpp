@@ -12,11 +12,9 @@
 
 namespace aphid {
 
-KdTreeBuilder::KdTreeBuilder()
-{}
+KdTreeBuilder::KdTreeBuilder() {}
 
-KdTreeBuilder::~KdTreeBuilder() 
-{}
+KdTreeBuilder::~KdTreeBuilder() {}
 
 void KdTreeBuilder::setContext(BuildKdTreeContext &ctx) 
 {
@@ -26,9 +24,9 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 	initBins(m_bbox);
 	
 	if(m_context->isCompressed() ) {
-		calculateCompressBins();
+		calculateCompressBins(m_context->grid(), m_bbox);
 		initEvents(m_bbox);
-		calculateCompressSplitEvents();
+		calculateCompressSplitEvents(m_context->grid(), m_bbox);
 	}
 	else {
 		calculateBins(m_context->getNumPrimitives(),
@@ -42,69 +40,6 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 	}
 	
 	calculateCosts(m_bbox);
-}
-
-void KdTreeBuilder::calculateCompressBins()
-{
-	sdb::WorldGrid<GroupCell, unsigned > * grd = m_context->grid();
-	
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat() )
-			continue;
-		
-		grd->begin();
-		while (!grd->end() ) {
-			const BoundingBox & primBox = grd->value()->m_box;
-			if(primBox.touch(m_bbox) ) 
-				m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
-				
-			grd->next();
-		}
-		
-		m_bins[axis].scan();
-	}
-}
-
-void KdTreeBuilder::calculateCompressSplitEvents()
-{	
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-			
-		updateCompressEventBBoxAlong(axis);
-	}
-}
-
-void KdTreeBuilder::updateCompressEventBBoxAlong(const int &axis)
-{
-	SplitEvent * eventOffset = &m_event[axis * SplitEvent::NumEventPerDimension];
-	
-	const float min = m_bbox.getMin(axis);
-	const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
-	int g, minGrid, maxGrid;
-	
-	sdb::WorldGrid<GroupCell, unsigned > * grd = m_context->grid();
-	
-	grd->begin();
-	while (!grd->end() ) {
-		const BoundingBox & primBox = grd->value()->m_box;
-		if(primBox.touch(m_bbox) ) {	
-			minGrid = (primBox.getMin(axis) - min) / delta;
-		
-			if(minGrid < 0) minGrid = 0;
-		
-			for(g = minGrid; g < SplitEvent::NumEventPerDimension; g++)
-				eventOffset[g].updateLeftBox(primBox);
-		
-			maxGrid = (primBox.getMax(axis) - min) / delta;
-		
-			if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
-
-			for(g = maxGrid; g > 0; g--)
-				eventOffset[g - 1].updateRightBox(primBox);
-		}
-		grd->next();
-	}
 }
 
 const SplitEvent *KdTreeBuilder::bestSplit()

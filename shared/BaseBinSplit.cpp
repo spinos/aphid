@@ -219,4 +219,64 @@ void BaseBinSplit::calculateCosts(const BoundingBox & box)
 		m_event[i].calculateCost(ba);
 }
 
+void BaseBinSplit::calculateCompressBins(GridClustering * grd, const BoundingBox & box)
+{
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat() )
+			continue;
+		
+		grd->begin();
+		while (!grd->end() ) {
+			const BoundingBox & primBox = grd->value()->m_box;
+			if(primBox.touch(box) ) 
+				m_bins[axis].add(primBox.getMin(axis), primBox.getMax(axis));
+				
+			grd->next();
+		}
+		
+		m_bins[axis].scan();
+	}
+}
+
+void BaseBinSplit::calculateCompressSplitEvents(GridClustering * grd, const BoundingBox & box)
+{	
+	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+		if(m_bins[axis].isFlat())
+			continue;
+			
+		updateCompressEventBBoxAlong(axis, grd, box);
+	}
+}
+
+void BaseBinSplit::updateCompressEventBBoxAlong(const int &axis,
+				GridClustering * grd, const BoundingBox & box)
+{
+	SplitEvent * eventOffset = &m_event[axis * SplitEvent::NumEventPerDimension];
+	
+	const float min = box.getMin(axis);
+	const float delta = box.distance(axis) / SplitEvent::NumBinPerDimension;
+	int g, minGrid, maxGrid;
+	
+	grd->begin();
+	while (!grd->end() ) {
+		const BoundingBox & primBox = grd->value()->m_box;
+		if(primBox.touch(box) ) {	
+			minGrid = (primBox.getMin(axis) - min) / delta;
+		
+			if(minGrid < 0) minGrid = 0;
+		
+			for(g = minGrid; g < SplitEvent::NumEventPerDimension; g++)
+				eventOffset[g].updateLeftBox(primBox);
+		
+			maxGrid = (primBox.getMax(axis) - min) / delta;
+		
+			if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
+
+			for(g = maxGrid; g > 0; g--)
+				eventOffset[g - 1].updateRightBox(primBox);
+		}
+		grd->next();
+	}
+}
+
 }

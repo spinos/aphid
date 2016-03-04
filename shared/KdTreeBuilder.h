@@ -40,9 +40,6 @@ private:
 	};
 	typedef std::vector<IndexLimit> EmptySpace;
 	
-	void calculateCompressBins();
-	void calculateCompressSplitEvents();
-	void updateCompressEventBBoxAlong(const int &axis);
 	void partitionCompress(const SplitEvent & e,
 						const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);

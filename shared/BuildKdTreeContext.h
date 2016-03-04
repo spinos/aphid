@@ -36,7 +36,7 @@ public:
 	const BoundingBox & getBBox() const;
 	float visitCost() const;
 	bool isCompressed();
-	sdb::WorldGrid<GroupCell, unsigned > * grid();
+	GridClustering * grid();
 	void addCell(const sdb::Coord3 & x, GroupCell * c);
 	void countPrimsInGrid();
 	int numCells();
