@@ -10,13 +10,12 @@
 #pragma once
 
 #include <PrimitiveArray.h>
-#include <SplitEvent.h>
+#include <BaseBinSplit.h>
 #include <BuildKdTreeContext.h>
-#include <MinMaxBins.h>
 
 namespace aphid {
 
-class KdTreeBuilder {
+class KdTreeBuilder : public BaseBinSplit {
 public:
 	typedef Primitive* PrimitivePtr;
 
@@ -47,9 +46,6 @@ private:
 	void updateCompressEventBBoxAlong(const int &axis);
 	void calculateBins();
 	void calculateSplitEvents();
-	char byCutoffEmptySpace(unsigned & dst);
-	void byLowestCost(unsigned & dst);
-	SplitEvent * splitAt(int axis, int idx);
 	void partitionCompress(const SplitEvent & e,
 						const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
@@ -59,8 +55,6 @@ private:
 	
 	BoundingBox m_bbox;
 	BuildKdTreeContext *m_context;
-	MinMaxBins *m_bins;
-	SplitEvent *m_event;
 	unsigned m_bestEventIdx;
 };
 
