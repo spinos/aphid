@@ -24,7 +24,7 @@ public:
 	void compressPrimitives();
     
 	void setIndexAt(int idx, int val);
-	int indexAt(int idx) const;
+	const int & indexAt(int idx) const;
     
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
@@ -104,7 +104,7 @@ void SahSplit<T>::setIndexAt(int idx, int val)
 { m_indices[idx] = val; }
 
 template <typename T>
-int SahSplit<T>::indexAt(int idx) const
+const int & SahSplit<T>::indexAt(int idx) const
 { return m_indices[idx]; }
 
 template <typename T>

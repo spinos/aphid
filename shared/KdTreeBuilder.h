@@ -24,7 +24,6 @@ public:
 	
 	void setContext(BuildKdTreeContext &ctx);
 	void calculateSides();
-	void updateEventBBoxAlong(const int &axis);
 	
 	void partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
 	
@@ -44,8 +43,6 @@ private:
 	void calculateCompressBins();
 	void calculateCompressSplitEvents();
 	void updateCompressEventBBoxAlong(const int &axis);
-	void calculateBins();
-	void calculateSplitEvents();
 	void partitionCompress(const SplitEvent & e,
 						const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);

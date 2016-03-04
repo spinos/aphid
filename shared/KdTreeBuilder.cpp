@@ -31,9 +31,14 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 		calculateCompressSplitEvents();
 	}
 	else {
-		calculateBins();
+		calculateBins(m_context->getNumPrimitives(),
+				m_context->indices(),
+				BuildKdTreeContext::GlobalContext->primitiveBoxes() );
 		initEvents(m_bbox);
-		calculateSplitEvents();
+		calculateSplitEvents(m_bbox,
+				m_context->getNumPrimitives(),
+				m_context->indices(),
+				BuildKdTreeContext::GlobalContext->primitiveBoxes() );
 	}
 	
 	const unsigned numEvent = SplitEvent::NumEventPerDimension * SplitEvent::Dimension;
@@ -101,81 +106,6 @@ void KdTreeBuilder::updateCompressEventBBoxAlong(const int &axis)
 				eventOffset[g - 1].updateRightBox(primBox);
 		}
 		grd->next();
-	}
-}
-
-void KdTreeBuilder::calculateBins()
-{
-	const sdb::VectorArray<BoundingBox> & primBoxes = BuildKdTreeContext::GlobalContext->primitiveBoxes();
-	const sdb::VectorArray<unsigned> & indices = m_context->indices();
-	const unsigned nprim = m_context->getNumPrimitives();
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if( m_bins[axis].isFlat()) {
-			continue;
-		}
-		
-		for(unsigned i = 0; i < nprim; i++) {
-			const BoundingBox * primBox = primBoxes[*indices[i]];
-			m_bins[axis].add(primBox->getMin(axis), primBox->getMax(axis));
-		}
-		
-		m_bins[axis].scan();
-	}
-}
-
-void KdTreeBuilder::calculateSplitEvents()
-{	
-#if 0
-	boost::thread boxThread[3];
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		boxThread[axis] = boost::thread(boost::bind(&KdTreeBuilder::updateEventBBoxAlong, this, axis));
-	}
-	
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		boxThread[axis].join();
-	}
-#else
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-			
-		updateEventBBoxAlong(axis);
-	}
-#endif
-	
-}
-
-void KdTreeBuilder::updateEventBBoxAlong(const int &axis)
-{
-	SplitEvent * eventOffset = &m_event[axis * SplitEvent::NumEventPerDimension];
-	
-	const float min = m_bbox.getMin(axis);
-	const float delta = m_bbox.distance(axis) / SplitEvent::NumBinPerDimension;
-	int g, minGrid, maxGrid;
-	const sdb::VectorArray<BoundingBox> & primBoxes = BuildKdTreeContext::GlobalContext->primitiveBoxes();
-	const sdb::VectorArray<unsigned> & indices = m_context->indices();
-	const unsigned nprim = m_context->getNumPrimitives();
-	
-	for(unsigned i = 0; i < nprim; i++) {
-		const BoundingBox * primBox = primBoxes[*indices[i] ];
-		
-		minGrid = (primBox->getMin(axis) - min) / delta;
-		
-		if(minGrid < 0) minGrid = 0;
-		
-		for(g = minGrid; g < SplitEvent::NumEventPerDimension; g++)
-			eventOffset[g].updateLeftBox(*primBox);
-		
-		maxGrid = (primBox->getMax(axis) - min) / delta;
-		
-		if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
-
-		for(g = maxGrid; g > 0; g--)
-			eventOffset[g - 1].updateRightBox(*primBox);
 	}
 }
 
