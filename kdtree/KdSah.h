@@ -12,24 +12,20 @@ class SahSplit : public BaseBinSplit, public Boundary {
 	sdb::VectorArray<T> * m_source;
 	GridClustering * m_grid;
 	sdb::VectorArray<BoundingBox> m_primitiveBoxes;
-    int * m_indices;
-    int m_bestEventIdx;
-	int m_numPrims;
+    sdb::VectorArray<unsigned> m_indices;
+    unsigned m_numPrims;
     
 public:
-    SahSplit(int n, sdb::VectorArray<T> * source);
+    SahSplit(sdb::VectorArray<T> * source);
     virtual ~SahSplit();
 	
-	void initIndicesAndBoxes();
+	void initIndicesAndBoxes(const unsigned & num);
 	void compressPrimitives();
-    
-	void setIndexAt(int idx, int val);
-	const int & indexAt(int idx) const;
     
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
 	
-	const int & numPrims() const 
+	const unsigned & numPrims() const 
 	{ return m_numPrims; }
 	
 	float visitCost() const
@@ -41,6 +37,8 @@ public:
 	sdb::VectorArray<T> * source()
 	{ return m_source; }
 	
+	const unsigned & indexAt(const unsigned & idx) const;
+	
 	void verbose() const;
 	
 	static SahSplit * GlobalSplitContext;
@@ -48,40 +46,36 @@ public:
 protected:
 	const sdb::VectorArray<BoundingBox> & primitiveBoxes() const;
 	GridClustering * grid();
+	void addPrimitive(const unsigned & idx);
 	
 private:
-    void calculateBins(const BoundingBox & b);
-	void calculateSplitEvents(const BoundingBox & b);
-	void binningAlong(const BoundingBox & b, int axis);
-	void updateEventsAlong(const BoundingBox & b, const int &axis);
-    
+
 };
 
 template <typename T>
 SahSplit<T> * SahSplit<T>::GlobalSplitContext = NULL;
 
 template <typename T>
-SahSplit<T>::SahSplit(int n, sdb::VectorArray<T> * source) : m_indices(NULL),
+SahSplit<T>::SahSplit(sdb::VectorArray<T> * source) : m_indices(NULL),
 m_grid(NULL)
 {
 	m_source = source;
-    if(n>0) m_indices = new int[n];
-	m_numPrims = n;
+    m_numPrims = 0;
 }
 
 template <typename T>
 SahSplit<T>::~SahSplit()
 {
-    if(m_indices) delete[] m_indices;
-	if(m_grid) delete m_grid;
+    if(m_grid) delete m_grid;
 }
 
 template <typename T>
-void SahSplit<T>::initIndicesAndBoxes() 
+void SahSplit<T>::initIndicesAndBoxes(const unsigned & num) 
 {
-	int i = 0;
+	m_numPrims = num;
+	unsigned i = 0;
 	for(;i<m_numPrims; i++) {
-		m_indices[i] = i;
+		m_indices.insert(i);
 		m_primitiveBoxes.insert(m_source->get(i)->calculateBBox() );
 	}
 }
@@ -100,139 +94,23 @@ void SahSplit<T>::compressPrimitives()
 }
 
 template <typename T>
-void SahSplit<T>::setIndexAt(int idx, int val)
-{ m_indices[idx] = val; }
-
-template <typename T>
-const int & SahSplit<T>::indexAt(int idx) const
-{ return m_indices[idx]; }
-
-template <typename T>
-void SahSplit<T>::calculateBins(const BoundingBox & b)
-{
-	int axis;
-#if 0
-	boost::thread boxThread[3];
-	
-	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		boxThread[axis] = boost::thread(boost::bind(&SahSplit::binningAlong, this, b, axis));
-	}
-	
-	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		boxThread[axis].join();
-	}
-#else
-	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		binningAlong(b, axis);
-	}
-#endif
-}
-
-template <typename T>
-void SahSplit<T>::binningAlong(const BoundingBox & b, int axis)
-{	
-	const sdb::VectorArray<BoundingBox> & primBoxes = SahSplit<T>::GlobalSplitContext->primitiveBoxes();
-	
-	for(int i = 0; i < m_numPrims; i++) {
-		const BoundingBox * primBox = primBoxes[indexAt(i)];
-		m_bins[axis].add(primBox->getMin(axis), primBox->getMax(axis));
-	}
-	
-	m_bins[axis].scan();
-}
-
-template <typename T>
-void SahSplit<T>::calculateSplitEvents(const BoundingBox & b)
-{    
-#if 0
-    boost::thread boxThread[3];
-	
-	int axis;	
-	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		boxThread[axis] = boost::thread(boost::bind(&SahSplit::updateEventsAlong, this, b, axis));
-	}
-	
-	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-		boxThread[axis].join();
-	}
-#else
-	int axis;	
-	for(axis = 0; axis < SplitEvent::Dimension; axis++) {
-		if(m_bins[axis].isFlat())
-			continue;
-			
-		updateEventsAlong(b, axis);
-	}
-#endif
-}
-
-template <typename T>
-void SahSplit<T>::updateEventsAlong(const BoundingBox & b, const int &axis)
-{
-	SplitEvent * eventOffset = &m_event[axis * SplitEvent::NumEventPerDimension];
-	
-    const float min = b.getMin(axis);
-	const float delta = b.distance(axis) / SplitEvent::NumBinPerDimension;
-	int g, minGrid, maxGrid;
-	const sdb::VectorArray<BoundingBox> & primBoxes = SahSplit<T>::GlobalSplitContext->primitiveBoxes();
-	int i;	
-    for(i = 0; i < m_numPrims; i++) {
-		const int iprim = indexAt(i);
-		const BoundingBox * primBox = primBoxes[iprim];
-
-		minGrid = (primBox->getMin(axis) - min) / delta;
-		if(minGrid < 0) minGrid = 0;
-		
-		for(g = minGrid; g < SplitEvent::NumEventPerDimension; g++)
-			eventOffset[g].updateLeftBox(*primBox);
-
-		maxGrid = (primBox->getMax(axis) - min) / delta;
-		
-		if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
-
-		for(g = maxGrid; g > 0; g--)
-			eventOffset[g - 1].updateRightBox(*primBox);
-		
-	}
-	
-	for(i = 0; i < SplitEvent::NumEventPerDimension; i++)
-		eventOffset[i].calculateCost(b.area());
-}
-
-template <typename T>
 SplitEvent * SahSplit<T>::bestSplit()
 {
 	const BoundingBox bb = getBBox();
 	
 	initBins(bb);
-	calculateBins(bb);
+	const unsigned n = numPrims();
+	calculateBins(n,
+				m_indices,
+				SahSplit<T>::GlobalSplitContext->primitiveBoxes() );
 	initEvents(bb);
-	calculateSplitEvents(bb);
+	calculateSplitEvents(bb,
+				n,
+				m_indices,
+				SahSplit<T>::GlobalSplitContext->primitiveBoxes() );
 	
-	m_bestEventIdx = splitAtLowestCost();
-#if 1
-	int lc = 0;
-	if(byCutoffEmptySpace(lc, bb)) {
-		if(m_event[lc].getCost() < m_event[m_bestEventIdx].getCost() * 2.f)
-			m_bestEventIdx = lc;
-#if 0
-			std::cout<<" cutoff at "
-				<<lc/SplitEvent::NumEventPerDimension
-				<<":"
-				<<lc%SplitEvent::NumEventPerDimension;
-#endif
-	}
-#endif
+	calculateCosts(bb);
+	splitAtLowestCost(bb);
 	return &m_event[m_bestEventIdx];
 }
 
@@ -251,20 +129,20 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 	int rightCount = 0;
 	int side;
 	for(unsigned i = 0; i < m_numPrims; i++) {
-		const int iprim = indexAt(i);
+		const unsigned iprim = *m_indices[i];
 		T * geo = m_source->get(iprim);
 		const BoundingBox & primBox = geo->bbox();
 		
 		side = e.side(primBox);
 		if(side < 2) {
 			if(primBox.touch(leftBox)) {
-				leftSplit->setIndexAt(leftCount, iprim);
+				leftSplit->addPrimitive(iprim);
 				leftCount++;
 			}
 		}
 		if(side > 0) {
 			if(primBox.touch(rightBox)) {
-				rightSplit->setIndexAt(rightCount, iprim);
+				rightSplit->addPrimitive(iprim);
 				rightCount++;
 			}
 		}
@@ -274,7 +152,6 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 	// std::cout<<"\n partition "<<m_numPrims
 	//		<<" -> "<<leftCount
 	//		<<"|"<<rightCount;
-
 }
 
 template <typename T>
@@ -284,6 +161,17 @@ const sdb::VectorArray<BoundingBox> & SahSplit<T>::primitiveBoxes() const
 template <typename T>
 GridClustering * SahSplit<T>::grid()
 { return m_grid; }
+
+template <typename T>
+void SahSplit<T>::addPrimitive(const unsigned & idx)
+{ 
+	m_indices.insert(idx); 
+	m_numPrims++;
+}
+
+template <typename T>
+const unsigned & SahSplit<T>::indexAt(const unsigned & idx) const
+{ return *m_indices[idx]; }
 
 template <typename T>
 void SahSplit<T>::verbose() const

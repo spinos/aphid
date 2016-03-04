@@ -52,7 +52,6 @@ private:
 	
 	BoundingBox m_bbox;
 	BuildKdTreeContext *m_context;
-	unsigned m_bestEventIdx;
 };
 
 }

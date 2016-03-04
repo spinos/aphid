@@ -53,8 +53,8 @@ void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree,
 	bud.MaxTreeletLevel = maxLevel;
 	
 /// first split
-	SahSplit<T> splt(source->size(), source);
-	splt.initIndicesAndBoxes();
+	SahSplit<T> splt(source);
+	splt.initIndicesAndBoxes(source->size() );
     splt.setBBox(box);
 	if(splt.numPrims() > 1024) splt.compressPrimitives();
 	

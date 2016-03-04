@@ -121,20 +121,32 @@ bool BaseBinSplit::byCutoffEmptySpace(int & dst, const BoundingBox & bb)
 SplitEvent * BaseBinSplit::splitAt(int axis, int idx) const
 { return &m_event[axis * SplitEvent::NumEventPerDimension + idx]; }
 
-int BaseBinSplit::splitAtLowestCost()
+void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 {
 	float lowest = 10e28f;
-	int result = 0;
+	m_bestEventIdx = 0;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		for(int i = 1; i < SplitEvent::NumEventPerDimension - 1; i++) {
 			const SplitEvent * e = splitAt(axis, i);
 			if(e->getCost() < lowest && e->hasBothSides()) {
 				lowest = e->getCost();
-				result = i + SplitEvent::NumEventPerDimension * axis;
+				m_bestEventIdx = i + SplitEvent::NumEventPerDimension * axis;
 			}
 		}
 	}
-    return result;
+#if 1
+	int lc = 0;
+	if(byCutoffEmptySpace(lc, b)) {
+		if(m_event[lc].getCost() < m_event[m_bestEventIdx].getCost() * 2.f)
+			m_bestEventIdx = lc;
+#if 0
+			std::cout<<" cutoff at "
+				<<lc/SplitEvent::NumEventPerDimension
+				<<":"
+				<<lc%SplitEvent::NumEventPerDimension;
+#endif
+	}
+#endif
 }
 
 void BaseBinSplit::calculateBins(const unsigned nprim, 
@@ -165,7 +177,7 @@ void BaseBinSplit::calculateSplitEvents(const BoundingBox & box,
 			continue;
 			
 		updateEventBBoxAlong(box, axis, nprim, indices, primBoxes);
-	}	
+	}
 }
 
 void BaseBinSplit::updateEventBBoxAlong(const BoundingBox & box,
@@ -179,7 +191,8 @@ void BaseBinSplit::updateEventBBoxAlong(const BoundingBox & box,
 	const float min = box.getMin(axis);
 	const float delta = box.distance(axis) / SplitEvent::NumBinPerDimension;
 	int g, minGrid, maxGrid;
-	for(unsigned i = 0; i < nprim; i++) {
+	unsigned i;
+	for(i = 0; i < nprim; i++) {
 		const BoundingBox * primBox = primBoxes[*indices[i] ];
 		
 		minGrid = (primBox->getMin(axis) - min) / delta;
@@ -196,6 +209,14 @@ void BaseBinSplit::updateEventBBoxAlong(const BoundingBox & box,
 		for(g = maxGrid; g > 0; g--)
 			eventOffset[g - 1].updateRightBox(*primBox);
 	}
+}
+
+void BaseBinSplit::calculateCosts(const BoundingBox & box)
+{
+	const float ba = box.area();
+	const unsigned numEvent = SplitEvent::NumEventPerDimension * SplitEvent::Dimension;
+	for(unsigned i = 0; i < numEvent; i++)
+		m_event[i].calculateCost(ba);
 }
 
 }

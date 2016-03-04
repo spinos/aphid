@@ -41,9 +41,7 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 				BuildKdTreeContext::GlobalContext->primitiveBoxes() );
 	}
 	
-	const unsigned numEvent = SplitEvent::NumEventPerDimension * SplitEvent::Dimension;
-	for(unsigned i = 0; i < numEvent; i++)
-		m_event[i].calculateCost(m_bbox.area());
+	calculateCosts(m_bbox);
 }
 
 void KdTreeBuilder::calculateCompressBins()
@@ -111,14 +109,7 @@ void KdTreeBuilder::updateCompressEventBBoxAlong(const int &axis)
 
 const SplitEvent *KdTreeBuilder::bestSplit()
 {
-	m_bestEventIdx = splitAtLowestCost();
-	
-	int lc = 0;
-	if(byCutoffEmptySpace(lc, m_bbox)) {
-		if(m_event[lc].getCost() < m_event[m_bestEventIdx].getCost() * 2.f)
-			m_bestEventIdx = lc;
-	}
-		
+	splitAtLowestCost(m_bbox);
 	return &m_event[m_bestEventIdx];
 }
 

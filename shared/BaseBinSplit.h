@@ -24,13 +24,14 @@ public:
 protected:
 	MinMaxBins * m_bins;
 	SplitEvent * m_event;
-    
+    int m_bestEventIdx;
+	
 protected:
 	void initBins(const BoundingBox & b);
 	void initEvents(const BoundingBox & b);
 	bool byCutoffEmptySpace(int & dst, const BoundingBox & bb);
 	SplitEvent * splitAt(int axis, int idx) const;
-	int splitAtLowestCost();
+	void splitAtLowestCost(const BoundingBox & b);
 	void calculateBins(const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
@@ -38,6 +39,7 @@ protected:
 			const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
+	void calculateCosts(const BoundingBox & box);
 			
 private:
 	void initEventsAlong(const BoundingBox & b, const int &axis);
