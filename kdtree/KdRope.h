@@ -224,7 +224,6 @@ void KdRope<NumLevels, T, Tn>::mapNeighbors(KdNeighbors & ns)
 template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::endMap()
 {
-	std::cout<<"\n n ropes "<<BoxMap.size();
 	unsigned i = 0;
 	std::map<unsigned, BoundingBox >::iterator it = BoxMap.begin();
 	for(;it!=BoxMap.end(); ++it) {

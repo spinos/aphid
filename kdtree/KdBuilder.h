@@ -68,9 +68,11 @@ KdTreeletBuilder<NumLevels, T, Tn>::~KdTreeletBuilder()
 template<int NumLevels, typename T, typename Tn>
 void KdTreeletBuilder<NumLevels, T, Tn>::build(int parentIdx, SahSplit<T> * parent, Tn * node, Tn * root, int iRoot)
 {
-	if(!subdivideRoot(parentIdx, parent, root, iRoot)) return;
+	node->init();
+    if(!subdivideRoot(parentIdx, parent, root, iRoot))
+		return;
 	
-    int level = 1;
+	int level = 1;
     for(;level <= NumLevels; level++) {
         if(!subdivideInterial(node, level)) break;
 	}
@@ -80,6 +82,7 @@ template<int NumLevels, typename T, typename Tn>
 bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T> * parent, Tn * root, int iRoot)
 {
 	if(parent->numPrims() <= NumPrimsInLeaf) {
+		// std::cout<<"\n root count low";
 		setNodeLeaf(parent, root, iRoot);
 		return false;
 	}
@@ -87,6 +90,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T
 	SplitEvent * plane = parent->bestSplit();
 	
 	if(plane->getCost() > parent->visitCost()) {
+		// std::cout<<"\n root split";
 		costNotice(parent, plane);
 		setNodeLeaf(parent, root, iRoot);
 		return false;
@@ -134,6 +138,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
         SplitEvent * plane = parent->bestSplit();
 		
 		if(plane->getCost() > parent->visitCost()) {
+			// std::cout<<"\n internal split";
 			costNotice(parent, plane);
 			setNodeLeaf(parent, interial, iNode);
 			clearSplit(iNode);
@@ -188,7 +193,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * 
 		for(;i<parent->numPrims();i++)
 			m_tree->addDataIndex( parent->indexAt(i) );
 	}
-	/// std::cout<<" leaf["<<iLeaf<<"] ("<<primStart<<","<<primStart+primLen-1<<")";
+	// std::cout<<"\n leaf["<<iLeaf<<"] ("<<primStart<<","<<primLen<<")";
 	node->setLeaf(idx, iLeaf, primLen);
 	m_tree->addLeafNode(primStart);
 }
@@ -240,7 +245,7 @@ template<int NumLevels, typename T, typename Tn>
 void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, KdNTree<T, Tn> * tree)
 {
 	/// node[1]
-	tree->addNode();
+	tree->addBranch();
 	KdTreeletBuilder<NumLevels, T, Tn> treelet(1, tree);
 	Tn * root = tree->root();
 	sdb::VectorArray<Tn> & nodes = tree->nodes();
@@ -270,7 +275,7 @@ void KdNBuilder<NumLevels, T, Tn>::subdivide(KdTreeletBuilder<NumLevels, T, Tn> 
 		SahSplit<T> * parent = treelet->split(i);
 		if(!parent) continue;
 		
-		const int branchIdx = tree->addNode();
+		const int branchIdx = tree->addBranch();
 
         KdTreeletBuilder<NumLevels, T, Tn> subTreelet(branchIdx, tree);
         subTreelet.build(parentIdx, parent, nodes[branchIdx], parentNode, i);

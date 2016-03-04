@@ -12,8 +12,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<" test kdtree\n";
-	const int n = 10000;
+	const int n = 29985;
     m_source = new sdb::VectorArray<TestBox>();
+	m_tree = new KdNTree<TestBox, KdNode4 >();
 	
 	BoundingBox rootBox;
     int i;
@@ -31,9 +32,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 		rootBox.expandBy(a.calculateBBox());
     }
 	
-	m_engine.initGeometry(m_source, rootBox);
-    m_tree = m_engine.tree();
-	
+	m_engine.buildTree(m_tree, m_source, rootBox);
+	m_engine.printTree(m_tree);
 	
 	const double nearClip = 1.001f;
     const double farClip = 999.999f;
@@ -54,6 +54,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 //! [1]
 GLWidget::~GLWidget()
 {
+	delete m_source;
+	delete m_tree;
 }
 
 void GLWidget::clientInit()
@@ -63,11 +65,9 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	getDrawer()->frustum(&m_frustum);
+	// getDrawer()->frustum(&m_frustum);
     // drawBoxes();
     drawTree();
-    m_engine.render(m_frustum);
-    drawScreen();
 }
 
 void GLWidget::drawBoxes() const
@@ -84,8 +84,8 @@ void GLWidget::drawTree()
 {
 	m_treeletColI = 0;
 	getDrawer()->setColor(.15f, .25f, .35f);
-	getDrawer()->boundingBox(m_tree->getBBox() );
-    drawANode(m_tree->root(), 0, m_tree->getBBox(), 0, true );
+	getDrawer()->boundingBox(tree()->getBBox() );
+    drawANode(tree()->root(), 0, tree()->getBBox(), 0, true );
 }
 
 void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
@@ -95,7 +95,9 @@ void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, in
 	
 	KdTreeNode * nn = treelet->node(idx);
 	if(nn->isLeaf()) {
-		drawALeaf(m_tree->leafPrimStart(nn->getPrimStart() ), nn->getNumPrims(), box);
+		std::cout<<"\n i "<<idx
+			<<" leaf start "<<nn->getPrimStart()<<" n "<<nn->getNumPrims();
+		drawALeaf(tree()->leafPrimStart(nn->getPrimStart() ), nn->getNumPrims(), box);
 		return;
 	}
 	
@@ -116,15 +118,17 @@ void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, in
 		if(isRoot) drawATreelet(treelet + offset, lft, rgt, level);
 	}
 	else {
+		if(offset> 0) {
 		drawANode(treelet, idx + offset, lft, level);
 		drawANode(treelet, idx + offset + 1, rgt, level);
+		}
 	}
 }
 
 void GLWidget::drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level)
 {
 	KdTreeNode * nn = treelet->node(idx);
-	if(nn->isLeaf()) return;
+	if(nn->isLeaf() ) return;
 	
 	const int axis = nn->getAxis();
 	const float pos = nn->getSplitPos();
@@ -137,8 +141,10 @@ void GLWidget::drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBo
 		drawATreelet(treelet + offset, lft, rgt, level);
 	}
 	else {
+		if(offset> 0) {
 		drawConnectedTreelet(treelet, idx + offset, lft, level);
 		drawConnectedTreelet(treelet, idx + offset + 1, rgt, level);
+		}
 	}
 }
 
@@ -171,22 +177,13 @@ void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 	else {
 		int i = 0;
 		for(;i<n;i++) {
-			getDrawer()->boundingBox(* m_tree->dataAt(start + i) );
+			getDrawer()->boundingBox(* tree()->dataAt(start + i) );
 		}
 	}
 }
 
-void GLWidget::drawScreen()
-{
-    getDrawer()->setColor(0.f, .6f, 0.f);
-    KdEngine<TestBox>::ScreenType * scrn = m_engine.screen();
-    const unsigned n = scrn->m_views.size();
-	// qDebug()<<" nv "<<n;
-    unsigned i = 0;
-    for(;i<n;i++) {
-		getDrawer()->frustum(&scrn->m_views[i].view());
-	}
-}
+KdNTree<TestBox, KdNode4 > * GLWidget::tree()
+{ return m_tree; }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
@@ -233,7 +230,6 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::resizeEvent(QResizeEvent * event)
 {
     QSize renderAreaSize = size();
-    qDebug()<<"render size "<<renderAreaSize.width()<<" "<<renderAreaSize.height();
-    m_engine.initScreen(renderAreaSize.width(), renderAreaSize.height());
+    // qDebug()<<"render size "<<renderAreaSize.width()<<" "<<renderAreaSize.height();
     Base3DView::resizeEvent(event);
 }

@@ -11,81 +11,81 @@
 
 #include "KdNTree.h"
 #include "KdBuilder.h"
-#include "KdScreen.h"
 
 namespace aphid {
 
 template<typename T>
 class KdEngine {
 
-	KdNTree<T, KdNode4 > * m_tree;
-	KdScreen<KdNTree<T, KdNode4 > > * m_screen;
-    
 public:
 	KdEngine();
 	virtual ~KdEngine();
 	
-	void initGeometry(sdb::VectorArray<T> * source, const BoundingBox & box);
-	void initScreen(int w, int h);
-	void render(const Frustum & f);
-	KdNTree<T, KdNode4 > * tree();
+	void buildTree(KdNTree<T, KdNode4 > * tree, 
+					sdb::VectorArray<T> * source, const BoundingBox & box);
 	
-    KdScreen<KdNTree<T, KdNode4 > > * screen();
-    typedef KdNTree<T, KdNode4 > TreeType;
-    typedef KdScreen<KdNTree<T, KdNode4 > > ScreenType;
+	void printTree(KdNTree<T, KdNode4 > * tree);
+	// typedef KdNTree<T, KdNode4 > TreeType;
     
 protected:
 
 private:
-
+	void printBranch(KdNTree<T, KdNode4 > * tree, int idx);
+	
 };
 
 template<typename T>
-KdEngine<T>::KdEngine()
-{
-	m_tree = new KdNTree<T, KdNode4 >();
-    m_screen = new KdScreen<KdNTree<T, KdNode4 > >();
-}
+KdEngine<T>::KdEngine() {}
 
 template<typename T>
-KdEngine<T>::~KdEngine()
-{
-	delete m_tree;
-    delete m_screen;
-}
+KdEngine<T>::~KdEngine() {}
 
 template<typename T>
-void KdEngine<T>::initGeometry(sdb::VectorArray<T> * source, const BoundingBox & box)
+void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree, 
+							sdb::VectorArray<T> * source, const BoundingBox & box)
 {
-	m_tree->init(source, box);
+	tree->init(source, box);
     KdNBuilder<4, T, KdNode4 > bud;
-	bud.SetNumPrimsInLeaf(8);
+	bud.SetNumPrimsInLeaf(10);
 	
 	SahSplit<T> splt(source->size(), source);
 	splt.initIndices();
     splt.setBBox(box);
-	bud.build(&splt, m_tree);
-	m_tree->verbose();
+	bud.build(&splt, tree);
+	tree->verbose();
 }
 
 template<typename T>
-void KdEngine<T>::initScreen(int w, int h)
-{ m_screen->create(w, h); }
-
-template<typename T>
-KdNTree<T, KdNode4 > * KdEngine<T>::tree()
-{ return m_tree; }
-
-template<typename T>
-void KdEngine<T>::render(const Frustum & f)
+void KdEngine<T>::printTree(KdNTree<T, KdNode4 > * tree)
 {
-    m_screen->setView(f);
-    m_screen->getVisibleFrames(m_tree);
+	KdNode4 * tn = tree->root();
+	std::cout<<"\n root";
+	tn->verbose();
+	int i=0;
+	for(;i<KdNode4::NumNodes;++i) {
+		KdTreeNode * child = tn->node(i);
+		if(child->isLeaf() ) {}
+		else {
+			printBranch(tree, tn->internalOffset(i) );
+		}
+	}
 }
 
 template<typename T>
-KdScreen<KdNTree<T, KdNode4 > > * KdEngine<T>::screen()
-{ return m_screen; }
+void KdEngine<T>::printBranch(KdNTree<T, KdNode4 > * tree, int idx)
+{
+	KdNode4 * tn = tree->nodes()[idx];
+	std::cout<<"\n branch["<<idx<<"]";
+	tn->verbose();
+	int i=14;
+	for(;i<KdNode4::NumNodes;++i) {
+		KdTreeNode * child = tn->node(i);
+		if(child->isLeaf() ) {}
+		else {
+			printBranch(tree, idx + tn->internalOffset(i) );
+		}
+	}
+}
 
 }
 //:~

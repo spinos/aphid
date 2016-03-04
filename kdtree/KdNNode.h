@@ -13,11 +13,18 @@ class KdNNode {
 public:
 	KdNNode();
 	
-    KdTreeNode * node(int idx)
+	void init();
+	
+    const KdTreeNode * node(int idx) const
+    { return & m_nodes[idx]; }
+	
+	KdTreeNode * node(int idx)
     { return & m_nodes[idx]; }
     
 	void setInternal(int idx, int axis, float pos, int offset);
 	void setLeaf(int idx, unsigned start, unsigned num);
+	
+	int internalOffset(int idx) const;
 	
 	void verbose();
 	
@@ -31,6 +38,13 @@ public:
 
 template <int NumLevels>
 KdNNode<NumLevels>::KdNNode() {}
+
+template <int NumLevels>
+void KdNNode<NumLevels>::init()
+{
+	for(int i=0; i<NumNodes; ++i)
+		setLeaf(i, 0, 0);
+}
 
 template <int NumLevels>
 void KdNNode<NumLevels>::setInternal(int idx, int axis, float pos, int offset)
@@ -52,22 +66,31 @@ void KdNNode<NumLevels>::setLeaf(int idx, unsigned start, unsigned num)
 template <int NumLevels>
 void KdNNode<NumLevels>::verbose()
 {
-	std::cout<<"\n treelet level "<<NumLevels
-			<<" n node "<<NumNodes;
+	std::cout<<"\n treelet";
+	//		<<" level "<<NumLevels
+	//		<<" n node "<<NumNodes;
 	int i = 0;
 	for(;i<NumNodes;i++) {
-		std::cout<<"\n node "<<i;
-		if(m_nodes[i].isLeaf()) {
-			std::cout<<" leaf";
+		KdTreeNode & child = m_nodes[i];
+		if(child.isLeaf()) {
+			if(child.getNumPrims() > 0) {
+				std::cout<<"\n ["<<i<<"] leaf"
+						<<" "<<child.getPrimStart()
+						<<" count "<<child.getNumPrims();
+			}
 		}
 		else {
-			std::cout<<" internal"
-					<<" split axis "<<m_nodes[i].getAxis()
-					<<" pos "<<m_nodes[i].getSplitPos()
-					<<" offset "<<(m_nodes[i].getOffset() & ~TreeletOffsetMask);
+			std::cout<<"\n ["<<i<<"]"
+					<<" internal split axis "<<child.getAxis()
+					<<" pos "<<child.getSplitPos()
+					<<" offset "<<(child.getOffset() & ~TreeletOffsetMask);
 		}
 	}
 }
+
+template <int NumLevels>
+int KdNNode<NumLevels>::internalOffset(int idx) const
+{ return (node(idx)->getOffset() & ~TreeletOffsetMask); }
 
 template <int NumLevels>
 int KdNNode<NumLevels>::NumNodes = (1<<NumLevels+1) - 2;

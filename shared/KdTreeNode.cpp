@@ -34,7 +34,7 @@ int KdTreeNode::getAxis() const
 
 void KdTreeNode::setLeaf( bool a_Leaf ) 
 { 
-	leaf.combined = (a_Leaf) ? (leaf.combined | ~ETypeMask):(leaf.combined & ETypeMask); 
+	leaf.combined = (a_Leaf) ? (leaf.combined | ~ETypeMask) : (leaf.combined & ETypeMask); 
 }
 
 void KdTreeNode::setPrimStart(unsigned long offset)

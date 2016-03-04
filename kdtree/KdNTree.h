@@ -117,7 +117,7 @@ public:
     int maxNumData() const;
 	
 	int numNodes() const;
-	int addNode();
+	int addBranch();
 	
 	void addDataIndex(int x);
 	int numData() const;
@@ -165,7 +165,9 @@ void KdNTree<T, Tn>::init(sdb::VectorArray<T> * source, const BoundingBox & box)
 	m_source = source;
 	m_numRopes = 0;
 	m_nodePool.clear();
+/// node[0]
 	m_nodePool.insert();
+	root()->init();
 	m_leafNodes.clear();
 }
 
@@ -206,7 +208,7 @@ void KdNTree<T, Tn>::addDataIndex(int x)
 { m_leafDataIndices.push_back(x); }
 
 template <typename T, typename Tn>
-int KdNTree<T, Tn>::addNode()
+int KdNTree<T, Tn>::addBranch()
 { 
 	m_nodePool.insert(); 
 	return m_nodePool.size() - 1;
@@ -285,7 +287,7 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	sst<<"\n KdNTree: "
 	<<"\n treelet level "<<Tn::BranchingFactor
 	<<"\n n input "<<m_source->size()
-	<<"\n n node "<<numNodes()
+	<<"\n n treelet "<<numNodes()
 	<<"\n n leaf "<<numLeafNodes()
 	<<"\n n data "<<numData()
 	<<"\n n rope "<<m_numRopes

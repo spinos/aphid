@@ -17,7 +17,12 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "window.h"
 "glwidget.h"
 "../shared/Morton3D.h"
-../btree/BNode.h)
+../kdtree/KdBuilder.h
+../kdtree/KdEngine.h
+../kdtree/KdRope.h
+../kdtree/KdNTree.h
+../kdtree/KdNNode.h
+../kdtree/KdSah.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../btree/Entity.cpp
