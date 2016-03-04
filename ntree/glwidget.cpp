@@ -13,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<" test kdtree\n";
-	const int n = 19998;
+	const int n = 29998;
     m_source = new sdb::VectorArray<TestBox>();
 	m_tree = new KdNTree<TestBox, KdNode4 >();
 	
@@ -24,7 +24,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 100.f * r * cos(th);
-        float y = -40.f + 50.f * r * sin(th) + 36.f * sin(x/12.f);
+        float y = -40.f + 70.f * r * sin(th) + 36.f * sin(x/12.f);
         float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 33.f * sin(y/23.f);
         a.setMin(-.21 + x, -.21 + y, -.21 + z);
         a.setMax( .21 + x,  .21 + y,  .21 + z);

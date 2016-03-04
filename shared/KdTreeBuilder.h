@@ -9,16 +9,17 @@
 
 #pragma once
 
-#include <PrimitiveArray.h>
 #include <BaseBinSplit.h>
 #include <BuildKdTreeContext.h>
 
 namespace aphid {
 
 class KdTreeBuilder : public BaseBinSplit {
+	
+	BoundingBox m_bbox;
+	BuildKdTreeContext *m_context;
+	
 public:
-	typedef Primitive* PrimitivePtr;
-
 	KdTreeBuilder();
 	virtual ~KdTreeBuilder();
 	
@@ -31,24 +32,13 @@ public:
 	void verbose() const;
 	
 private:
-	struct IndexLimit {
-		IndexLimit() {low = 1; high = -1;}
-		char isValid() {return low < high;}
-		int bound() {return high - low;}
-		int low, high;
-		float area;
-	};
-	typedef std::vector<IndexLimit> EmptySpace;
-	
 	void partitionCompress(const SplitEvent & e,
 						const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
 	void partitionPrims(const SplitEvent & e,
 						const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
-	
-	BoundingBox m_bbox;
-	BuildKdTreeContext *m_context;
+						
 };
 
 }

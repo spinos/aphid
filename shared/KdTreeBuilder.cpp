@@ -13,7 +13,6 @@
 namespace aphid {
 
 KdTreeBuilder::KdTreeBuilder() {}
-
 KdTreeBuilder::~KdTreeBuilder() {}
 
 void KdTreeBuilder::setContext(BuildKdTreeContext &ctx) 

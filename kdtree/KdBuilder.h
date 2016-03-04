@@ -191,6 +191,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeInternal(Tn * node, int idx, int
 template<int NumLevels, typename T, typename Tn>
 void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * node, int idx)
 {
+	parent->decompressGrid(true);
 	unsigned iLeaf = m_tree->numLeafNodes();
 	unsigned primStart = 0, primLen = 0;
 	if(!parent->isEmpty()) {
