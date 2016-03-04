@@ -22,7 +22,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/KdRope.h
 ../kdtree/KdNTree.h
 ../kdtree/KdNNode.h
-../kdtree/KdSah.h)
+../kdtree/KdSah.h
+NTreeDrawer.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../btree/Entity.cpp
@@ -39,6 +40,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/KdTreeDrawer.cpp
 ##../shared/CartesianGrid.cpp
 ../shared/ViewFrame.cpp
+../shared/DrawBox.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

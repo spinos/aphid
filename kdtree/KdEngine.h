@@ -62,12 +62,10 @@ void KdEngine<T>::printTree(KdNTree<T, KdNode4 > * tree)
 	std::cout<<"\n root";
 	tn->verbose();
 	int i=0;
-	for(;i<KdNode4::NumNodes;++i) {
-		KdTreeNode * child = tn->node(i);
-		if(child->isLeaf() ) {}
-		else {
-			printBranch(tree, tn->internalOffset(i) );
-		}
+	KdTreeNode * child = tn->node(0);
+	if(child->isLeaf() ) {}
+	else {
+		printBranch(tree, tn->internalOffset(0) );
 	}
 }
 

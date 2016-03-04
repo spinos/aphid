@@ -2,7 +2,8 @@
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include "glwidget.h"
-#include <KdTreeDrawer.h>
+#include <GeoDrawer.h>
+#include <NTreeDrawer.h>
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -12,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<" test kdtree\n";
-	const int n = 29985;
+	const int n = 21198;
     m_source = new sdb::VectorArray<TestBox>();
 	m_tree = new KdNTree<TestBox, KdNode4 >();
 	
@@ -22,9 +23,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         TestBox a;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = -60.f + 200.f * r * cos(th);
-        float y = -40.f + 100.f * r * sin(th) + 36.f * sin(x/12.f);
-        float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 9.f * sin(y/23.f);
+        float x = -60.f + 100.f * r * cos(th);
+        float y = -40.f + 50.f * r * sin(th) + 36.f * sin(x/12.f);
+        float z = -40.f + 40.f * float( rand() % 999 ) / 999.f + 9.f * sin(y/23.f);
         a.setMin(-1 + x, -1 + y, -1 + z);
         a.setMax( 1 + x,  1 + y,  1 + z);
         
@@ -33,7 +34,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     }
 	
 	m_engine.buildTree(m_tree, m_source, rootBox);
-	m_engine.printTree(m_tree);
+	// m_engine.printTree(m_tree);
 	
 	const double nearClip = 1.001f;
     const double farClip = 999.999f;
@@ -85,7 +86,9 @@ void GLWidget::drawTree()
 	m_treeletColI = 0;
 	getDrawer()->setColor(.15f, .25f, .35f);
 	getDrawer()->boundingBox(tree()->getBBox() );
-    drawANode(tree()->root(), 0, tree()->getBBox(), 0, true );
+	
+	NTreeDrawer dr;
+	dr.drawTree<TestBox>(m_tree);
 }
 
 void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
