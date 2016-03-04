@@ -28,7 +28,7 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 ../shared/SplitEvent.cpp 
 ../shared/KdTreeNode.cpp 
 ../shared/BuildKdTreeContext.cpp 
-##../shared/KdTreeNodeArray.cpp 
+../shared/BaseBinSplit.cpp 
 ../shared/KdTree.cpp 
 ../shared/KdTreeBuilder.cpp  
 ../shared/BuildKdTreeStream.cpp 

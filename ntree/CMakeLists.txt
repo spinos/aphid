@@ -33,6 +33,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/BuildKdTreeStream.cpp 
 ../shared/MinMaxBins.cpp 
 ../shared/SplitEvent.cpp
+../shared/BaseBinSplit.cpp 
 ../shared/GeoDrawer.cpp
 ../shared/KdTreeDrawer.cpp
 ##../shared/CartesianGrid.cpp
