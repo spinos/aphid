@@ -22,7 +22,9 @@ public:
 	virtual ~KdEngine();
 	
 	void buildTree(KdNTree<T, KdNode4 > * tree, 
-					sdb::VectorArray<T> * source, const BoundingBox & box);
+					sdb::VectorArray<T> * source, const BoundingBox & box,
+					int maxLeafPrim = 8,
+					int maxLevel = 8);
 	
 	void printTree(KdNTree<T, KdNode4 > * tree);
 	// typedef KdNTree<T, KdNode4 > TreeType;
@@ -42,16 +44,22 @@ KdEngine<T>::~KdEngine() {}
 
 template<typename T>
 void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree, 
-							sdb::VectorArray<T> * source, const BoundingBox & box)
+							sdb::VectorArray<T> * source, const BoundingBox & box,
+							int maxLeafPrim, int maxLevel)
 {
 	tree->init(source, box);
     KdNBuilder<4, T, KdNode4 > bud;
-	bud.SetNumPrimsInLeaf(8);
-	bud.MaxTreeletLevel = 5;
+	bud.SetNumPrimsInLeaf(maxLeafPrim);
+	bud.MaxTreeletLevel = maxLevel;
 	
+/// first split
 	SahSplit<T> splt(source->size(), source);
-	splt.initIndices();
+	splt.initIndicesAndBoxes();
     splt.setBBox(box);
+	if(splt.numPrims() > 1024) splt.compressPrimitives();
+	
+	SahSplit<T>::GlobalSplitContext = &splt;
+	
 	bud.build(&splt, tree);
 	tree->verbose();
 }

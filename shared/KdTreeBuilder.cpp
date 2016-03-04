@@ -260,13 +260,15 @@ void KdTreeBuilder::byLowestCost(unsigned & dst)
 char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 {
 	int res = -1;
-	float vol, emptyVolume = -1.f;
+	float vol, area, emptyVolume = -1.f;
 	const int minHead = 2;
 	const int maxTail = SplitEvent::NumEventPerDimension - 3;
 	const int midSect = SplitEvent::NumEventPerDimension / 2;
 	int i, head, tail;
 	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
 		if(m_bins[axis].isFlat() ) continue;
+		
+		area = m_bbox.crossSectionArea(axis);
 		
 		head = 0;
 		SplitEvent * cand = splitAt(axis, 0);
@@ -278,7 +280,7 @@ char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 			}
 			
 			if(head > minHead) {
-				vol = head * m_bins[axis].delta() * m_bbox.crossSectionArea(axis);
+				vol = head * m_bins[axis].delta() * area;
 				
 				if(vol > emptyVolume) {
 					emptyVolume = vol;
@@ -295,7 +297,7 @@ char KdTreeBuilder::byCutoffEmptySpace(unsigned &dst)
 					tail = i;
 			}
 			if(tail < maxTail) {
-				vol = (SplitEvent::NumEventPerDimension - tail) * m_bins[axis].delta() * m_bbox.crossSectionArea(axis);
+				vol = (SplitEvent::NumEventPerDimension - tail) * m_bins[axis].delta() * area;
 				
 				if(vol > emptyVolume) {
 					emptyVolume = vol;
