@@ -26,9 +26,6 @@ set (HEADER_FILES "../shared/Base3DView.h"
 NTreeDrawer.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
-../btree/Entity.cpp
-../btree/Types.cpp
-../btree/BNode.cpp
 ../shared/KdTreeNode.cpp
 ../shared/KdTree.cpp
 ../shared/KdTreeBuilder.cpp
@@ -61,7 +58,8 @@ D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
-/users/jianzhang/aphid/lib/libaphidUI.a)
+/users/jianzhang/aphid/lib/libaphidUI.a
+/users/jianzhang/aphid/lib/libaphidSdb.a)
 endif ()
 
 target_link_libraries (testntree ${Aphid_Library})

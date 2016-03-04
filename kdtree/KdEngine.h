@@ -47,6 +47,7 @@ void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree,
 	tree->init(source, box);
     KdNBuilder<4, T, KdNode4 > bud;
 	bud.SetNumPrimsInLeaf(8);
+	bud.MaxTreeletLevel = 5;
 	
 	SahSplit<T> splt(source->size(), source);
 	splt.initIndices();

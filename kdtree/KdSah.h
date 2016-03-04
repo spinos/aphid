@@ -29,7 +29,7 @@ public:
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
 	
-	int numPrims() const 
+	const int & numPrims() const 
 	{ return m_numPrims; }
 	
 	float visitCost() const
