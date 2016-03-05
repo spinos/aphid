@@ -2,6 +2,8 @@
 #include <HInnerGrid.h>
 #include <HWorldGrid.h>
 #include <ConvexShape.h>
+#include <KdEngine.h>
+#include <VectorArray.h>
 
 using namespace aphid;
 
@@ -52,8 +54,23 @@ void JuliaTree::buildSphere(const std::string & name)
 {
     sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > grd(name);
     grd.load();
-    
     grd.close();
+    
+    const float h = grd.gridSize();
+    const float e = h *.49999f;
+    sdb::VectorArray<cvx::Cube> cs;
+    cvx::Cube c;
+    grd.begin();
+    while(!grd.end() ) {
+        c.set(grd.coordToCellCenter(grd.key() ), e);
+        cs.insert(c);
+        grd.next();   
+    }
+    
+    KdNTree<cvx::Cube, KdNode4 > tree;
+    KdEngine<cvx::Cube> engine;
+    engine.buildTree(&tree, &cs, grd.boundingBox(), 4);
+    engine.printTree(&tree);
 }
 
 }

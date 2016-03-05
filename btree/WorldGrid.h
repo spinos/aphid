@@ -63,6 +63,8 @@ public:
 	ChildType * findCell(const Vector3F & pref);
 	ChildType * findCell(const Coord3 & c);
 	
+	Vector3F coordToCellCenter(const Coord3 & c) const;
+	
 protected:
 	float * gridSizeR();
     BoundingBox * boundingBoxR();
@@ -138,6 +140,14 @@ const BoundingBox WorldGrid<ChildType, ValueType>::coordToGridBBox(const Coord3 
 	bb.setMin(m_gridSize * c.x, m_gridSize * c.y, m_gridSize * c.z);
 	bb.setMax(m_gridSize * (c.x + 1), m_gridSize * (c.y + 1), m_gridSize * (c.z + 1));
 	return bb;
+}
+
+template<typename ChildType, typename ValueType>
+Vector3F WorldGrid<ChildType, ValueType>::coordToCellCenter(const Coord3 & c) const
+{
+	return Vector3F(m_gridSize * (.5f + c.x), 
+	                m_gridSize * (.5f + c.y), 
+	                m_gridSize * (.5f + c.z) );
 }
 
 template<typename ChildType, typename ValueType>

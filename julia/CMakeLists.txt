@@ -3,7 +3,8 @@ project (julia)
 SET (CMAKE_AUTOMOC ON)
 SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 SET (CMAKE_BUILD_TYPE Release)
-include_directories ("../shared" "../btree")
+include_directories ("../shared" "../btree"
+../kdtree)
 
 set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
@@ -13,6 +14,10 @@ Parameter.h
 )
 
 set (SOURCE_FILES 
+../shared/KdTreeNode.cpp
+../shared/MinMaxBins.cpp 
+../shared/SplitEvent.cpp
+../shared/BaseBinSplit.cpp 
 Parameter.cpp 
 QuatJulia.cpp
 JuliaTree.cpp
