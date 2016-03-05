@@ -64,7 +64,9 @@ public:
 	ChildType * findCell(const Coord3 & c);
 	
 protected:
-	
+	float * gridSizeR();
+    BoundingBox * boundingBoxR();
+    
 private:
 	
 };
@@ -187,6 +189,14 @@ ChildType * WorldGrid<ChildType, ValueType>::findCell(const Coord3 & c)
 	}
 	return NULL;
 }
+
+template<typename ChildType, typename ValueType>
+float * WorldGrid<ChildType, ValueType>::gridSizeR()
+{ return &m_gridSize; }
+
+template<typename ChildType, typename ValueType>
+BoundingBox * WorldGrid<ChildType, ValueType>::boundingBoxR()
+{ return &m_bbox; }
 
 } //end namespace sdb
 

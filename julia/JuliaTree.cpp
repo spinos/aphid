@@ -50,7 +50,10 @@ void JuliaTree::buildTree(const std::string & name)
 
 void JuliaTree::buildSphere(const std::string & name)
 {
+    sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > grd(name);
+    grd.load();
     
+    grd.close();
 }
 
 }

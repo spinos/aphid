@@ -116,6 +116,8 @@ char HWorldGrid<ChildType, ValueType>::save()
 	}
 	
 	cellCoords->finishInsert();
+	// cellCoords->printValues();
+	delete cellCoords;
 	
 	WorldGrid<ChildType, ValueType>::calculateBBox();
 	
@@ -153,7 +155,29 @@ char HWorldGrid<ChildType, ValueType>::save()
 template<typename ChildType, typename ValueType>
 char HWorldGrid<ChildType, ValueType>::load()
 {
-	return 1;
+	readFloatAttr(".bbx", (float *)WorldGrid<ChildType, ValueType>::boundingBoxR() );
+	readFloatAttr(".gsz", WorldGrid<ChildType, ValueType>::gridSizeR() );
+	
+	HOocArray<hdata::TInt, 3, 256> cellCoords(".cells");
+	cellCoords.openStorage(fObjectId);
+	// cellCoords.printValues();
+	const int & ncoord = cellCoords.numCols();
+	Coord3 c;
+	for(int i=0; i<ncoord; ++i) {
+	    cellCoords.readColumn((char *)&c, i);
+	    Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(c);
+        if(!p->index) {
+            p->index = new ChildType(coord3Str(c), this);
+            static_cast<ChildType *>(p->index)->openStorage(fObjectId);
+            static_cast<ChildType *>(p->index)->close();
+        }
+	}
+		
+	std::cout<<"\n n cell "<<WorldGrid<ChildType, ValueType>::size()
+	    <<"\n grid size "<<WorldGrid<ChildType, ValueType>::gridSize()
+       <<"\n grid bbox "<<WorldGrid<ChildType, ValueType>::boundingBox()
+       <<"\n n element "<<elementSize();
+    return 1;
 }
 
 }
