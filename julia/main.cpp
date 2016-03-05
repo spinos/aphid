@@ -9,6 +9,7 @@
 #include <iostream>
 #include "Parameter.h"
 #include "QuatJulia.h"
+#include "JuliaTree.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,11 @@ int main(int argc, char *argv[])
 	if(param.operation() == jul::Parameter::kGenerate ) {
 		std::cout<<"\n generate julia set ";
 		jul::QuatJulia julia(&param);
+	}
+	
+	if(param.operation() == jul::Parameter::kBuildTree ) {
+		std::cout<<"\n build kdntree ";
+		jul::JuliaTree t(&param);
 	}
 	return 0;
 }

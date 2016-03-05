@@ -9,6 +9,7 @@
 
 #pragma once
 #include "HObject.h"
+#include <iostream>
 
 namespace aphid {
 namespace hdata {

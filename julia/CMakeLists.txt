@@ -7,11 +7,15 @@ include_directories ("../shared" "../btree")
 
 set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
+QuatJulia.h
+JuliaTree.h
+Parameter.h
 )
 
 set (SOURCE_FILES 
 Parameter.cpp 
 QuatJulia.cpp
+JuliaTree.cpp
 main.cpp)
 
 add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
@@ -139,6 +143,7 @@ MESSAGE (" aphid cu library is " ${Aphid_Cu_Library})
 target_link_libraries (julia ${Aphid_Math_Library})
 target_link_libraries (julia ${Aphid_Sdb_Library})
 target_link_libraries (julia ${Aphid_H5_Library})
+target_link_libraries (julia ${Aphid_Geom_Library})
 
 SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp

@@ -124,7 +124,7 @@ void WorldGrid<ChildType, ValueType>::calculateBBox()
 	m_bbox.reset();
 	begin();
 	while(!end()) {
-		m_bbox.expandBy(coordToGridBBox(currentKey() ));
+		m_bbox.expandBy(coordToGridBBox( key() ));
 		next();
 	}
 }

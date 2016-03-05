@@ -13,7 +13,8 @@ public:
 	enum OperationFlag {
 		kUnknown = 0,
 		kHelp = 1,
-		kGenerate = 2
+		kGenerate = 2,
+		kBuildTree = 3
 	};
 	
 	Parameter(int argc, char *argv[]);

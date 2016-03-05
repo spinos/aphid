@@ -158,6 +158,7 @@ void LineDrawer::smoothCurve(const BezierSpline & sp, short deg) const
 	glEnd();
 }
 
+/*
 void LineDrawer::frustum(const Frustum * f)
 {	
 	glBegin(GL_LINES);
@@ -208,7 +209,7 @@ void LineDrawer::frustum(const Frustum * f)
 	p = f->X(3);
 	glVertex3fv((float *)&p);
 	glEnd();
-}
+}*/
 
 }
 //:~

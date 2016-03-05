@@ -1,3 +1,6 @@
+#ifndef HWORLDGRID_H
+#define HWORLDGRID_H
+
 /*
  *  HWorldGrid.h
  *  julia
@@ -8,15 +11,14 @@
  *  out-of-core grid
  */
 
-#pragma once
-
 #include "WorldGrid.h"
 #include <HBase.h>
 #include <boost/format.hpp>
 
 namespace aphid {
+    
 namespace sdb {
-
+    
 template<typename ChildType, typename ValueType>
 class HWorldGrid : public HBase, public WorldGrid<ChildType, ValueType> {
 
@@ -115,7 +117,36 @@ char HWorldGrid<ChildType, ValueType>::save()
 	
 	cellCoords->finishInsert();
 	
-	std::cout<<"\n HWorldGrid save n grid "<<n;
+	WorldGrid<ChildType, ValueType>::calculateBBox();
+	
+	if(!hasNamedAttr(".bbx") )
+	    addFloatAttr(".bbx", 6);
+	writeFloatAttr(".bbx", (float *)&WorldGrid<ChildType, ValueType>::boundingBox() );
+	
+	float gz = WorldGrid<ChildType, ValueType>::gridSize();
+	if(!hasNamedAttr(".gsz") )
+	    addFloatAttr(".gsz", 1);
+	writeFloatAttr(".gsz", &gz );
+	
+	if(!hasNamedAttr(".ncel") )
+	    addIntAttr(".ncel", 1);
+	writeIntAttr(".ncel", &n);
+	
+	int nelm = elementSize();
+	if(!hasNamedAttr(".nelm") )
+	    addIntAttr(".nelm", 1);
+	writeIntAttr(".nelm", &nelm);
+	
+	if(!hasNamedAttr(".vlt") )
+	    addIntAttr(".vlt", 1);
+	writeIntAttr(".vlt", (int *)&ValueType::ShapeTypeId );
+	
+	std::cout<<"\n HWorldGrid save n value "<<nelm
+	    <<"\n n cell "<<n
+	    <<"\n grid size "<<gz
+	    <<"\n bounding box "<<WorldGrid<ChildType, ValueType>::boundingBox()
+	    <<"\n value type "<<ValueType::ShapeTypeId;
+	
 	return 1;
 }
 
@@ -127,3 +158,5 @@ char HWorldGrid<ChildType, ValueType>::load()
 
 }
 }
+#endif        //  #ifndef HWORLDGRID_H
+

@@ -1,3 +1,6 @@
+#ifndef QUATJULIA_H
+#define QUATJULIA_H
+
 /*
  *  QuatJulia.h
  *  
@@ -10,6 +13,8 @@
 #include "Parameter.h"
 #include <HInnerGrid.h>
 #include <HWorldGrid.h>
+#include <ConvexShape.h>
+
 namespace jul {
 
 using namespace aphid;
@@ -19,8 +24,9 @@ class QuatJulia {
 	Float4 m_c;
 	int m_numIter;
 	int m_numGrid;
+	float m_scaling;
 /// un-organized grid
-	sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F > * m_tree;
+	sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 256 >, cvx::Sphere > * m_tree;
 public:
 	QuatJulia(Parameter * param);
 	virtual ~QuatJulia();
@@ -33,3 +39,4 @@ private:
 };
 
 }
+#endif        //  #ifndef QUATJULIA_H

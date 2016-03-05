@@ -9,6 +9,7 @@
 
 #include "QuatJulia.h"
 #include <HWorld.h>
+
 namespace jul {
 
 Float4 quatProd(const Float4 & a, const Float4 & b)
@@ -36,11 +37,12 @@ QuatJulia::QuatJulia(Parameter * param)
 
 	m_c = Float4(0.f, 0.f, 0.f, 0.f);
 	m_numIter = 5;
-	m_numGrid = 220;
+	m_numGrid = 232;
+	m_scaling = 16.f;
 	
 	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oCreate);
-	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 3, 256 >, Vector3F >("/grid");
-	m_tree->setGridSize(1.f / 9.f);
+	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 256 >, cvx::Sphere >("/grid");
+	m_tree->setGridSize(m_scaling / 10.f);
 	generate();
 	m_tree->save();
 	m_tree->close();
@@ -66,14 +68,15 @@ void QuatJulia::generate()
 				Vector3F sample = origin + Vector3F(grid * i, grid * j, grid * k);
 				if( evalAt( sample ) > 0.f ) {
 					n++;
-					m_tree->insert((const float *)&sample, sample);
+					cvx::Sphere sp;
+					sample *= m_scaling;
+					sp.set(sample, .001f);
+					m_tree->insert((const float *)&sample, sp);
 				}
 			}
 		}
 	}
 	m_tree->finishInsert();
-	std::cout<<"\n n elm "<<m_tree->elementSize()
-	<<"\n n pnt "<<n;
 }
 
 float QuatJulia::evalAt(const Vector3F & at) const

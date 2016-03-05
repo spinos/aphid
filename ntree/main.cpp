@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     Window window;
     //window.showMaximized();
-    window.resize(640, 640);
+    window.resize(720, 540);
     window.show();
     return app.exec();
 }

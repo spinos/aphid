@@ -89,7 +89,7 @@ void KdEngine<T>::printBranch(KdNTree<T, KdNode4 > * tree, int idx)
 		KdTreeNode * child = tn->node(i);
 		if(child->isLeaf() ) {}
 		else {
-			printBranch(tree, idx + tn->internalOffset(i) );
+			if(tn->internalOffset(i) > 0) printBranch(tree, idx + tn->internalOffset(i) );
 		}
 	}
 }

@@ -30,7 +30,7 @@ public:
 	void linearCurve(const BaseCurve & curve) const;
 	void smoothCurve(const BezierCurve & curve, short deg) const;
 	void smoothCurve(const BezierSpline & sp, short deg) const;
-	void frustum(const Frustum * f);
+	// void frustum(const Frustum * f);
 };
 
 }

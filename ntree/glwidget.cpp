@@ -12,22 +12,24 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
     
-    std::cout<<" test kdtree\n";
-	const int n = 29998;
-    m_source = new sdb::VectorArray<TestBox>();
-	m_tree = new KdNTree<TestBox, KdNode4 >();
+    std::cout<<"\n test kdtree";
+	const int n = 25512;
+    m_source = new sdb::VectorArray<cvx::Sphere>();
+	m_tree = new KdNTree<cvx::Sphere, KdNode4 >();
 	
+	std::cout<<"\n size of sphere "<<sizeof(cvx::Sphere);
+	std::cout<<"\n size of capsule "<<sizeof(cvx::Capsule);
+	std::cout<<"\n size of tree4 "<<sizeof(KdNode4);
 	BoundingBox rootBox;
     int i;
     for(i=0; i<n; i++) {
-        TestBox a;
+        cvx::Sphere a;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 100.f * r * cos(th);
         float y = -40.f + 70.f * r * sin(th) + 36.f * sin(x/12.f);
         float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 33.f * sin(y/23.f);
-        a.setMin(-.21 + x, -.21 + y, -.21 + z);
-        a.setMax( .21 + x,  .21 + y,  .21 + z);
+        a.set(Vector3F(x, y, z), .2f);
         
 		m_source->insert(a);
 		rootBox.expandBy(a.calculateBBox());
@@ -45,8 +47,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	camspace.rotateX( .05f);
 	camspace.rotateY(-.14f);
 	camspace.setTranslation(10.f, 10.f, 170.f);
-	m_frustum.set(nearClip, farClip, hAperture, vAperture, aov, camspace);
-    
+	
 	m_maxDrawTreeLevel = 1;
     // std::cout<<"\n size of node "<<sizeof(KdNode4);
 }
@@ -77,7 +78,7 @@ void GLWidget::drawBoxes() const
     const int n = m_source->size();
     int i = 0;
     for(;i<n;i++) {
-        getDrawer()->boundingBox(*m_source->get(i));
+        getDrawer()->boundingBox(m_source->get(i)->calculateBBox() );
     }
 }
 
@@ -88,7 +89,7 @@ void GLWidget::drawTree()
 	getDrawer()->boundingBox(tree()->getBBox() );
 	
 	NTreeDrawer dr;
-	dr.drawTree<TestBox>(m_tree);
+	dr.drawTree<cvx::Sphere>(m_tree);
 }
 
 void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
@@ -180,12 +181,12 @@ void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 	else {
 		int i = 0;
 		for(;i<n;i++) {
-			getDrawer()->boundingBox(* tree()->dataAt(start + i) );
+			getDrawer()->boundingBox(tree()->dataAt(start + i)->calculateBBox() );
 		}
 	}
 }
 
-KdNTree<TestBox, KdNode4 > * GLWidget::tree()
+KdNTree<cvx::Sphere, KdNode4 > * GLWidget::tree()
 { return m_tree; }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

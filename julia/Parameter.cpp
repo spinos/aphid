@@ -34,6 +34,15 @@ Parameter::Parameter(int argc, char *argv[])
 				m_outFileName = argv[i+1];
 				m_opt = kGenerate;
 			}
+			
+			if(strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--tree") == 0) {
+				if(i==argc-1) {
+					std::cout<<"\n --tree value is not set";
+					break;
+				}
+				m_outFileName = argv[i+1];
+				m_opt = kBuildTree;
+			}
 		}
 	}
 }
@@ -52,6 +61,7 @@ void Parameter::PrintHelp()
 	<<"\nUsage:\n julia [option]"
 	<<"\nDescription:\n large data set test."
 	<<"\nOptions:\n -g or --generate    string    filename of output file storing the data"
+	<<"\n -t or --tree    string    filename of output file storing the data to build ntree"
 	<<"\n -h or --help    print this information"
 	<<"\n";
 }

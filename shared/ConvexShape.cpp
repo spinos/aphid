@@ -10,6 +10,8 @@
 #include "ConvexShape.h"
 #include <cmath>
 namespace aphid {
+    
+namespace cvx {
 
 Frustum::Frustum() {}
 
@@ -105,6 +107,49 @@ void Frustum::split(Frustum & child0, Frustum & child1, float alpha, bool alongX
 		lft[7] = p3;
 		rgt[5] = p3;
 	}
+}
+
+Sphere::Sphere() {}
+
+void Sphere::set(const Vector3F & x, const float & r)
+{ m_p = x; m_r = r; }
+
+BoundingBox Sphere::calculateBBox() const
+{ return BoundingBox(m_p.x - m_r, m_p.y - m_r, m_p.z - m_r,
+                    m_p.x + m_r, m_p.y + m_r, m_p.z + m_r); }
+
+ShapeType Sphere::ShapeTypeId = TSphere;
+
+Cube::Cube() {}
+
+void Cube::set(const Vector3F & x, const float & r)
+{ m_p = x; m_r = r; }
+ 
+BoundingBox Cube::calculateBBox() const
+{ return BoundingBox(m_p.x - m_r, m_p.y - m_r, m_p.z - m_r,
+                    m_p.x + m_r, m_p.y + m_r, m_p.z + m_r); }
+
+ShapeType Cube::ShapeTypeId = TCube;
+
+Capsule::Capsule() {}
+
+void Capsule::set(const Vector3F & x0, const float & r0,
+            const Vector3F & x1, const float & r1)
+{
+    m_p0 = x0; m_r0 = r0;
+    m_p1 = x1; m_r1 = r1;
+}
+    
+BoundingBox Capsule::calculateBBox() const
+{
+    BoundingBox b;
+    b.expandBy(m_p0, m_r0);
+    b.expandBy(m_p1, m_r1);
+    return b;
+}
+    
+ShapeType Capsule::ShapeTypeId = TCapsule;
+
 }
 
 }

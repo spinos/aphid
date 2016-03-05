@@ -16,7 +16,7 @@ namespace aphid {
 class ViewFrame {
 
 	RectangleI m_rect;
-	Frustum m_frustum;
+	cvx::Frustum m_frustum;
 	
 public:
 	ViewFrame();
@@ -24,9 +24,9 @@ public:
 
     void setRect(int x0, int y0, int x1, int y1);
     void setRect(const RectangleI & r);
-    void setView(const Frustum & f);
+    void setView(const cvx::Frustum & f);
     
-    Frustum view() const;
+    cvx::Frustum view() const;
 	RectangleI rect() const;
 	
 	void split(ViewFrame & childLft, ViewFrame & childRgt) const;

@@ -167,7 +167,6 @@ void KdNTree<T, Tn>::init(sdb::VectorArray<T> * source, const BoundingBox & box)
 	m_nodePool.clear();
 /// node[0]
 	m_nodePool.insert();
-	root()->init();
 	m_leafNodes.clear();
 }
 

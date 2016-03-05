@@ -88,7 +88,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::build(int parentIdx, SahSplit<T> * pare
 template<int NumLevels, typename T, typename Tn>
 bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T> * parent, Tn * root, int iRoot)
 {
-	if(parent->numPrims() <= MaxNumPrimsInLeaf) {
+	if(parent->numPrims() < MaxNumPrimsInLeaf) {
 		// std::cout<<"\n root count low";
 		setNodeLeaf(parent, root, iRoot);
 		return false;
@@ -98,7 +98,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T
 	
 	if(plane->getCost() > parent->visitCost()) {
 		// std::cout<<"\n root split";
-		costNotice(parent, plane);
+		// costNotice(parent, plane);
 		setNodeLeaf(parent, root, iRoot);
 		return false;
 	}
@@ -136,7 +136,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
 			continue;
 		}
         
-		if(parent->numPrims() <= MaxNumPrimsInLeaf) {
+		if(parent->numPrims() < MaxNumPrimsInLeaf) {
 			setNodeLeaf(parent, interial, iNode);
 			clearSplit(iNode);
 			continue;
@@ -146,7 +146,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
 		
 		if(plane->getCost() > parent->visitCost()) {
 			// std::cout<<"\n internal split";
-			costNotice(parent, plane);
+			// costNotice(parent, plane);
 			setNodeLeaf(parent, interial, iNode);
 			clearSplit(iNode);
 			continue;

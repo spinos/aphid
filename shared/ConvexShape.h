@@ -9,7 +9,18 @@
 
 #pragma once
 #include "Matrix44F.h"
+#include "BoundingBox.h"
+
 namespace aphid {
+    
+namespace cvx {
+    
+    enum ShapeType {
+        TUnknown = 0,
+        TSphere = 1,
+        TCube = 2,
+        TCapsule = 3
+    };
 
 class Frustum {
 
@@ -69,5 +80,52 @@ protected:
 private:
 
 };
+
+class Sphere {
+  
+    Vector3F m_p;
+    float m_r;
+    
+public:
+    Sphere();
+    void set(const Vector3F & x, const float & r);
+    
+    BoundingBox calculateBBox() const;
+    
+    static ShapeType ShapeTypeId;
+};
+
+class Cube {
+    
+    Vector3F m_p;
+    float m_r;
+    
+public:
+    Cube();
+    void set(const Vector3F & x, const float & r);
+    
+    BoundingBox calculateBBox() const;
+    
+    static ShapeType ShapeTypeId;
+};
+
+class Capsule {
+    
+    Vector3F m_p0;
+    float m_r0;
+    Vector3F m_p1;
+    float m_r1;
+    
+public:
+    Capsule();
+    void set(const Vector3F & x0, const float & r0,
+            const Vector3F & x1, const float & r1);
+    
+    BoundingBox calculateBBox() const;
+    
+    static ShapeType ShapeTypeId;
+};
+
+}
 
 }

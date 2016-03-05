@@ -20,10 +20,10 @@ void ViewFrame::setRect(int x0, int y0, int x1, int y1)
 void ViewFrame::setRect(const RectangleI & r)
 { m_rect = r; }
 
-void ViewFrame::setView(const Frustum & f)
+void ViewFrame::setView(const cvx::Frustum & f)
 { m_frustum = f; }
 
-Frustum ViewFrame::view() const
+cvx::Frustum ViewFrame::view() const
 { return m_frustum; }
 
 RectangleI ViewFrame::rect() const
@@ -35,7 +35,7 @@ void ViewFrame::split(ViewFrame & childLft, ViewFrame & childRgt) const
 	const bool alongX = rect().isLandscape();
 	float alpha;
 	rect().split(r0, r1, alpha, alongX);
-	Frustum f0, f1;
+	cvx::Frustum f0, f1;
 	m_frustum.split(f0, f1, alpha, alongX);
 	childLft.setRect(r0);
 	childRgt.setRect(r1);

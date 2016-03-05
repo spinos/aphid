@@ -27,16 +27,10 @@ NTreeDrawer.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/KdTreeNode.cpp
-../shared/KdTree.cpp
-../shared/KdTreeBuilder.cpp
-../shared/BuildKdTreeContext.cpp 
-../shared/BuildKdTreeStream.cpp 
 ../shared/MinMaxBins.cpp 
 ../shared/SplitEvent.cpp
 ../shared/BaseBinSplit.cpp 
 ../shared/GeoDrawer.cpp
-../shared/KdTreeDrawer.cpp
-##../shared/CartesianGrid.cpp
 ../shared/ViewFrame.cpp
 ../shared/DrawBox.cpp
 glwidget.cpp
@@ -64,20 +58,6 @@ set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 endif ()
 
 target_link_libraries (testntree ${Aphid_Library})
-
-if (WIN32)
-set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
-"D:/usr/openEXR/lib/Iex.lib"
-"D:/usr/openEXR/lib/IlmImf.lib"
-"D:/usr/openEXR/lib/IlmThread.lib")  
-else()
-set (OpenEXR_Library "/usr/local/lib/libHalf.a"
-"/usr/local/lib/libIex.a"
-"/usr/local/lib/libIlmImf.a"
-"/usr/local/lib/libIlmThread.a")
-endif()
-
-target_link_libraries (testntree ${OpenEXR_Library})
 
 find_package (zlib REQUIRED)
 target_link_libraries (testntree ${ZLIB_LIBRARIES})

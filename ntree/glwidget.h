@@ -4,18 +4,7 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 #include <KdEngine.h>
-#include <KdScreen.h>
-
-class TestBox : public aphid::BoundingBox
-{
-public:
-    TestBox() {}
-    virtual ~TestBox() {}
-    BoundingBox calculateBBox() const
-    { return * this; }
-    BoundingBox bbox() const
-    { return * this; }
-};
+#include <ConvexShape.h>
 
 using namespace aphid;
 
@@ -45,16 +34,15 @@ private:
 	void drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot = false);
     void drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level);
 	void drawALeaf(unsigned start, unsigned n, const BoundingBox & box);
-	KdNTree<TestBox, KdNode4 > * tree();
+	KdNTree<cvx::Sphere, KdNode4 > * tree();
 	
 private slots:
     void simulate();
     
 private:
-	KdEngine<TestBox> m_engine;
-	sdb::VectorArray<TestBox> * m_source;
-	KdNTree<TestBox, KdNode4 > * m_tree;
-	Frustum m_frustum;
+	KdEngine<cvx::Sphere> m_engine;
+	sdb::VectorArray<cvx::Sphere> * m_source;
+	KdNTree<cvx::Sphere, KdNode4 > * m_tree;
 	int m_treeletColI;
 	int m_maxDrawTreeLevel;
 };

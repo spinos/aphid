@@ -4,16 +4,21 @@
 namespace aphid {
 
 /// http://www.highperformancegraphics.org/previous/www_2012/media/Papers/HPG2012_Papers_Heitz.pdf
-
+/// n levels
+/// 2^(n+1) - 2 nodes
+///    
+/// parent (last level node of another treelet)
+///      /       \
+///    0          1
+///  2   3     4     5
+/// 6 7 8 9  10 11 12 13
 template <int NumLevels>
 class KdNNode {
-    /// n levels
-    /// 2^n - 2 nodes
+    
     KdTreeNode m_nodes[(1<<NumLevels+1) - 2];
+    
 public:
 	KdNNode();
-	
-	void init();
 	
     const KdTreeNode * node(int idx) const
     { return & m_nodes[idx]; }
@@ -34,13 +39,18 @@ public:
 	enum EMask {
 		TreeletOffsetMask = 1<<20,
 	};
+
+private:
+    void setAllLeaf();
+	
 };
 
 template <int NumLevels>
-KdNNode<NumLevels>::KdNNode() {}
+KdNNode<NumLevels>::KdNNode() 
+{ setAllLeaf(); }
 
 template <int NumLevels>
-void KdNNode<NumLevels>::init()
+void KdNNode<NumLevels>::setAllLeaf()
 {
 	for(int i=0; i<NumNodes; ++i)
 		setLeaf(i, 0, 0);
@@ -80,10 +90,12 @@ void KdNNode<NumLevels>::verbose()
 			}
 		}
 		else {
+		    if(child.getOffset() > 0) {
 			std::cout<<"\n ["<<i<<"]"
-					<<" internal split axis "<<child.getAxis()
-					<<" pos "<<child.getSplitPos()
-					<<" offset "<<(child.getOffset() & ~TreeletOffsetMask);
+			        <<" offset "<<(child.getOffset() & ~TreeletOffsetMask)
+					<<" internal axis "<<child.getAxis()
+					<<" split "<<child.getSplitPos();
+			}
 		}
 	}
 }

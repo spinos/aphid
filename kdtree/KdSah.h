@@ -92,7 +92,7 @@ template <typename T>
 void SahSplit<T>::compressPrimitives()
 {
 	m_grid = new GridClustering();
-	m_grid->setGridSize(getBBox().getLongestDistance() / 32.f);
+	m_grid->setGridSize(getBBox().getLongestDistance() / 48.f);
 	
 	int i = 0;
 	for(;i<m_numPrims; i++)
