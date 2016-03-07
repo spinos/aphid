@@ -151,6 +151,11 @@ float MinMaxBins::leftEmptyDistance(int & idx, const int & head) const
 
 float MinMaxBins::rightEmptyDistance(int & idx, const int & tail) const
 {
+	if(m_maxBin[m_numSplits-1] > 1) return -1.f;
+	if(m_maxBin[m_numSplits-2]==0) {
+		idx = m_numSplits-2;
+		return m_pos[m_numSplits-1] - m_pos[m_numSplits-2];
+	}
 	return -1.f;
 }
 
