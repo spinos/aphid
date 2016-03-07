@@ -27,7 +27,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 100.f * r * cos(th*1.1f);
-        float y = 0.f + 70.f * r * sin(th/1.63f) + 39.f * sin(x/13.f);
+        float y = 0.f + 70.f * r * sin(th/.73f) + 39.f * sin(x/13.f);
         float z = 0.f + 50.f * float( rand() % 999 ) / 999.f + 23.f * sin(y/23.f);
         a.set(Vector3F(x, y, z), .2f);
         
@@ -35,7 +35,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 		rootBox.expandBy(a.calculateBBox());
     }
 	
-	m_engine.buildTree(m_tree, m_source, rootBox, 8, 3);
+	m_engine.buildTree(m_tree, m_source, rootBox, 4);
 	// m_engine.printTree(m_tree);
 	
 	const double nearClip = 1.001f;

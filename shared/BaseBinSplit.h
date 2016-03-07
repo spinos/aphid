@@ -55,7 +55,7 @@ private:
 			const int &axis, const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
-	void updateCompressEventBBoxAlong(const int &axis,
+	void updateEventBBoxAlong(const int &axis,
 			GridClustering * grd, const BoundingBox & box);
 	void splitSoftBinAlong(const int & axis,
 			GridClustering * grd, const BoundingBox & box);
