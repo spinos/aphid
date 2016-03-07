@@ -1,6 +1,7 @@
 #pragma once
 #include <Geometry.h>
 #include <Boundary.h>
+#include <TreeProperty.h>
 #include "KdNNode.h"
 #include "KdSah.h"
 #include <sstream>
@@ -85,7 +86,7 @@ public:
 };
 
 template <typename T, typename Tn>
-class KdNTree : public AVerbose, public Boundary
+class KdNTree : public AVerbose, public Boundary, public TreeProperty
 {
 	/// i --> tree_leaf[i] --> prim_start
 	///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
@@ -168,6 +169,8 @@ void KdNTree<T, Tn>::init(sdb::VectorArray<T> * source, const BoundingBox & box)
 /// node[0]
 	m_nodePool.insert();
 	m_leafNodes.clear();
+	resetPropery();
+	setTotalVolume(box.volume() );
 }
 
 template <typename T, typename Tn>
@@ -291,6 +294,7 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	<<"\n n data "<<numData()
 	<<"\n n rope "<<m_numRopes
 	<<"\n";
+	sst<<logProperty();
 	return sst.str();
 }
 

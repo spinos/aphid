@@ -18,6 +18,7 @@ set (SOURCE_FILES
 ../shared/MinMaxBins.cpp 
 ../shared/SplitEvent.cpp
 ../shared/BaseBinSplit.cpp 
+../kdtree/TreeProperty.cpp
 Parameter.cpp 
 QuatJulia.cpp
 JuliaTree.cpp

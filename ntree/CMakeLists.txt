@@ -23,6 +23,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/KdNTree.h
 ../kdtree/KdNNode.h
 ../kdtree/KdSah.h
+../kdtree/TreeProperty.h
 NTreeDrawer.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -33,6 +34,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/GeoDrawer.cpp
 ../shared/ViewFrame.cpp
 ../shared/DrawBox.cpp
+../kdtree/TreeProperty.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

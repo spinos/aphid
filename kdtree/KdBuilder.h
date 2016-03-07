@@ -189,7 +189,10 @@ void KdTreeletBuilder<NumLevels, T, Tn>::clearSplit(int idx)
 
 template<int NumLevels, typename T, typename Tn>
 void KdTreeletBuilder<NumLevels, T, Tn>::setNodeInternal(Tn * node, int idx, int axis, float pos, int offset)
-{ node->setInternal(idx, axis, pos, offset); }
+{ 
+	m_tree->addNInternal();
+	node->setInternal(idx, axis, pos, offset); 
+}
 
 template<int NumLevels, typename T, typename Tn>
 void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * node, int idx)
@@ -197,12 +200,18 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * 
 	parent->decompressGrid(true);
 	unsigned iLeaf = m_tree->numLeafNodes();
 	unsigned primStart = 0, primLen = 0;
-	if(!parent->isEmpty()) {
+	if(parent->isEmpty()) {
+		m_tree->addEmptyVolume(parent->getBBox().volume() );
+	}
+	else {
 		primStart = m_tree->numData();
 		primLen = parent->numPrims();
 		int i = 0;
 		for(;i<parent->numPrims();i++)
 			m_tree->addDataIndex( parent->indexAt(i) );
+			
+		m_tree->addNLeaf();
+		m_tree->updateNPrim(primLen);
 	}
 	// std::cout<<"\n leaf["<<iLeaf<<"] ("<<primStart<<","<<primLen<<")";
 	node->setLeaf(idx, iLeaf, primLen);
@@ -281,6 +290,7 @@ void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, KdNTree<T, Tn> * 
 template<int NumLevels, typename T, typename Tn>
 void KdNBuilder<NumLevels, T, Tn>::subdivide(KdTreeletBuilder<NumLevels, T, Tn> * treelet, KdNTree<T, Tn> * tree, int level)
 {	
+	tree->addMaxLevel(level);
     const int parentIdx = treelet->index();
 	sdb::VectorArray<Tn> & nodes = tree->nodes();
     Tn * parentNode = nodes[parentIdx];
