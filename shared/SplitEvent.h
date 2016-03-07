@@ -18,8 +18,6 @@ public:
 	SplitEvent();
 	
 	void setEmpty();
-	void setPos(float val);
-	void setAxis(int val);
 	/// split box into left and right box
 	void setBAP(const BoundingBox & b, int a, float p);
 	
@@ -30,8 +28,8 @@ public:
 	
 	const float & getCost() const;
 	
-	int leftCount() const;
-	int rightCount() const;
+	const int & leftCount() const;
+	const int & rightCount() const;
 	
 	void calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftBBox, BoundingBox &rightBBox);
 	void calculateCost(float x);
@@ -44,17 +42,13 @@ public:
 	float hasBothSides() const;
 	void limitBox(const BoundingBox & b);
 	void verbose() const;
-
-	static int Dimension;
-	//static int NumBinPerDimension;
-	//static int NumEventPerDimension;
 	
 private:
 	BoundingBox m_leftBox, m_rightBox, m_lftBound, m_rgtBound;
 	float m_pos;
 	int m_axis;
 	float m_cost;
-	unsigned m_leftNumPrim, m_rightNumPrim;
+	int m_leftNumPrim, m_rightNumPrim;
 	char m_isEmpty;
 };
 

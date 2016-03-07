@@ -18,20 +18,22 @@ namespace aphid {
 
 class BaseBinSplit {
 
+	MinMaxBins m_bins[3];
+	SplitEvent m_event[MMBINNSPLITLIMIT * 3];
+    
 public:
 	BaseBinSplit();
 	virtual ~BaseBinSplit();
 	
 protected:
-	MinMaxBins m_bins[3];
-	SplitEvent m_event[MMBINNSPLITLIMIT * 3];
-    int m_bestEventIdx;
+	int m_bestEventIdx;
 	
 protected:
 	void initEvents(const BoundingBox & b);
 	SplitEvent * splitAt(int axis, int idx);
+	SplitEvent * split(int idx);
 	void splitAtLowestCost(const BoundingBox & b);
-	void calculateBins(const unsigned nprim, 
+	void calcEvenBin(const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes,
 			const BoundingBox & b);
@@ -40,10 +42,10 @@ protected:
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
 	void calculateCosts(const BoundingBox & box);
-	void calculateCompressBins(GridClustering * grd, const BoundingBox & box);
+	void calcEvenBin(GridClustering * grd, const BoundingBox & box);
 	void calculateCompressSplitEvents(GridClustering * grd, const BoundingBox & box);
 	
-	void calcCompressedSoftBin(GridClustering * grd, const BoundingBox & box);
+	void calcSoftBin(GridClustering * grd, const BoundingBox & box);
 	void calcSoftBin(const unsigned & nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes,
@@ -57,7 +59,8 @@ private:
 			const sdb::VectorArray<BoundingBox> & primBoxes);
 	void updateEventBBoxAlong(const int &axis,
 			GridClustering * grd, const BoundingBox & box);
-	void splitSoftBinAlong(const int & axis,
+	void splitSoftBinAlong(MinMaxBins * dst,
+			const int & axis,
 			GridClustering * grd, const BoundingBox & box);
 	void splitSoftBinAlong(MinMaxBins * dst, 
 			const int & axis,

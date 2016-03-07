@@ -11,13 +11,15 @@
 
 namespace aphid {
 
+#define MMBINISFLATRATIO .2f
 BaseBinSplit::BaseBinSplit() 
 {}
 
 BaseBinSplit::~BaseBinSplit() 
 {}
 
-void BaseBinSplit::splitSoftBinAlong(const int & axis,
+void BaseBinSplit::splitSoftBinAlong(MinMaxBins * dst,
+			const int & axis,
 			GridClustering * grd, const BoundingBox & box)
 {
 	float geoRight, rightMost = box.getMin(axis);
@@ -25,26 +27,26 @@ void BaseBinSplit::splitSoftBinAlong(const int & axis,
 	while (!grd->end() ) {
 		const BoundingBox & primBox = grd->value()->m_box;
 		
-		m_bins[axis].insertSplitPos(primBox.getMin(axis) );
+		dst->insertSplitPos(primBox.getMin(axis) );
 		
-		if(m_bins[axis].isFull() ) return;
+		if(dst->isFull() ) return;
 		
 		geoRight = primBox.getMax(axis);
 		if(rightMost < geoRight) rightMost = geoRight;
 		
 		grd->next();
 	}
-	m_bins[axis].insertSplitPos(rightMost + m_bins[axis].delta() );
-	if(m_bins[axis].numSplits() < 4) {
-		std::cout<<"\n\n waringing low splits\n\n";
-		m_bins[axis].printSplitPos();
-	}
+	dst->insertSplitPos(rightMost + m_bins[axis].delta() );
+	//if(m_bins[axis].numSplits() < 4) {
+	//	std::cout<<"\n\n waringing low splits\n\n";
+	//	m_bins[axis].printSplitPos();
+	//}
 }
 
 void BaseBinSplit::initEvents(const BoundingBox & b)
 {
 	int axis;
-    for(axis = 0; axis < SplitEvent::Dimension; axis++) {
+    for(axis = 0; axis < 3; axis++) {
 		if(m_bins[axis].isFlat())
 			continue;
 	
@@ -83,8 +85,7 @@ bool BaseBinSplit::cutoffEmptySpace(int & dst, const BoundingBox & bb, const flo
 	int res = -1;
 	float mxd = -1.f, dist;
 	int isplit=-1;
-	//int axis = bb.getLongestAxis();
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	for(int axis = 0; axis < 3; axis++) {
 		if(m_bins[axis].isFlat() ) continue;
 		
 		dist = m_bins[axis].leftEmptyDistance(isplit);
@@ -121,7 +122,7 @@ void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 {
 	float lowest = 1e28f;
 	m_bestEventIdx = 0;
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	for(int axis = 0; axis < 3; axis++) {
 		for(int i = 0; i < MMBINNSPLITLIMIT; i++) {
 			const SplitEvent * e = splitAt(axis, i);
 			if(e->getCost() < lowest 
@@ -156,13 +157,13 @@ void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 	}
 }
 
-void BaseBinSplit::calculateBins(const unsigned nprim, 
+void BaseBinSplit::calcEvenBin(const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes,
 			const BoundingBox & b)
 {
-	const float thre = b.getLongestDistance() * .1f;
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	const float thre = b.getLongestDistance() * MMBINISFLATRATIO;
+	for(int axis = 0; axis < 3; axis++) {
 		if(b.distance(axis) < thre) {
 		    m_bins[axis].setFlat();	
 			continue;
@@ -184,7 +185,7 @@ void BaseBinSplit::calculateSplitEvents(const BoundingBox & box,
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes)
 {	
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	for(int axis = 0; axis < 3; axis++) {
 		if(m_bins[axis].isFlat())
 			continue;
 		if(m_bins[axis].isEmpty())
@@ -221,10 +222,10 @@ void BaseBinSplit::splitSoftBinAlong(MinMaxBins * dst,
 		if(rightMost < geoRight) rightMost = geoRight;
 	}
 	dst->insertSplitPos(rightMost + dst->delta() );
-	if(dst->numSplits() < 4) {
-		std::cout<<"\n\n waringing low splits\n\n";
-		dst->printSplitPos();
-	}
+	//if(dst->numSplits() < 4) {
+	//	std::cout<<"\n\n waringing low splits\n\n";
+	//	dst->printSplitPos();
+	//}
 }
 
 void BaseBinSplit::calcSoftBin(const unsigned & nprim, 
@@ -232,8 +233,8 @@ void BaseBinSplit::calcSoftBin(const unsigned & nprim,
 			const sdb::VectorArray<BoundingBox> & primBoxes,
 			const BoundingBox & box)
 {
-	const float thre = box.getLongestDistance() * .1f;
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	const float thre = box.getLongestDistance() * MMBINISFLATRATIO;
+	for(int axis = 0; axis < 3; axis++) {
 		if(box.distance(axis) < thre) {
 		    m_bins[axis].setFlat();	
 			continue;
@@ -243,8 +244,6 @@ void BaseBinSplit::calcSoftBin(const unsigned & nprim,
 		
 		splitSoftBinAlong(&m_bins[axis], axis, box, nprim, indices, primBoxes);
 		
-		//std::cout<<"\n n prim"<<nprim;
-		//m_bins[axis].printSplitPos();
 		for(unsigned i = 0; i < nprim; i++) {
 			const BoundingBox * primBox = primBoxes[*indices[i]];
 			m_bins[axis].add(primBox->getMin(axis), primBox->getMax(axis));
@@ -255,10 +254,10 @@ void BaseBinSplit::calcSoftBin(const unsigned & nprim,
 	}
 }
 
-void BaseBinSplit::calcCompressedSoftBin(GridClustering * grd, const BoundingBox & box)
+void BaseBinSplit::calcSoftBin(GridClustering * grd, const BoundingBox & box)
 {
-	const float thre = box.getLongestDistance() * .1f;
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	const float thre = box.getLongestDistance() * MMBINISFLATRATIO;
+	for(int axis = 0; axis < 3; axis++) {
 		if(box.distance(axis) < thre) {
 		    m_bins[axis].setFlat();	
 			continue;
@@ -266,9 +265,7 @@ void BaseBinSplit::calcCompressedSoftBin(GridClustering * grd, const BoundingBox
 		
 		m_bins[axis].reset(box.getMin(axis), box.getMax(axis) );
 		
-		splitSoftBinAlong(axis, grd, box);
-		
-		// m_bins[axis].printSplitPos();
+		splitSoftBinAlong(&m_bins[axis], axis, grd, box);
 		
 		grd->begin();
 		while (!grd->end() ) {
@@ -279,17 +276,15 @@ void BaseBinSplit::calcCompressedSoftBin(GridClustering * grd, const BoundingBox
 			grd->next();
 		}
 		
-		//if(axis ==0) std::cout<<"\n\n axis "<<axis;
 		m_bins[axis].scan();
 		//m_bins[axis].verbose();
-		//std::cout<<"\n bb"<<box;
 	}
 }
 
-void BaseBinSplit::calculateCompressBins(GridClustering * grd, const BoundingBox & b)
+void BaseBinSplit::calcEvenBin(GridClustering * grd, const BoundingBox & b)
 {
-	const float thre = b.getLongestDistance() * .1f;
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	const float thre = b.getLongestDistance() * MMBINISFLATRATIO;
+	for(int axis = 0; axis < 3; axis++) {
 		if(b.distance(axis) < thre) {
 		    m_bins[axis].setFlat();	
 			continue;
@@ -307,14 +302,13 @@ void BaseBinSplit::calculateCompressBins(GridClustering * grd, const BoundingBox
 		}
 		
 		m_bins[axis].scan();
-		//m_bins[axis].printSplitPos();
 		//m_bins[axis].verbose();
 	}
 }
 
 void BaseBinSplit::calculateCompressSplitEvents(GridClustering * grd, const BoundingBox & box)
 {	
-	for(int axis = 0; axis < SplitEvent::Dimension; axis++) {
+	for(int axis = 0; axis < 3; axis++) {
 		if(m_bins[axis].isFlat())
 			continue;
 		if(m_bins[axis].isEmpty())
@@ -328,36 +322,21 @@ void BaseBinSplit::updateEventBBoxAlong(const int &axis,
 {
 	SplitEvent * eventOffset = &m_event[axis * MMBINNSPLITLIMIT];
 	
-	//const float min = box.getMin(axis);
-	//const float delta = box.distance(axis) / SplitEvent::NumBinPerDimension;
 	int g, minGrid, maxGrid;
 	int n = m_bins[axis].numSplits();
-	
-	// m_bins[axis].printSplitPos();
 	
 	grd->begin();
 	while (!grd->end() ) {
 		const BoundingBox & primBox = grd->value()->m_box;
-		//if(primBox.touch(box) ) {	
-			//minGrid = (primBox.getMin(axis) - min) / delta;
-		
-			//if(minGrid < 0) minGrid = 0;
-			//std::cout<<"\n t"<<primBox.getMin(axis);
-		
+			
 			minGrid = m_bins[axis].firstSplitToRight(primBox.getMin(axis) );
 			for(g = minGrid; g < n; g++)
 				eventOffset[g].updateLeftBox(primBox);
 		
-			//maxGrid = (primBox.getMax(axis) - min) / delta;
-		
-			//if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
 			maxGrid = m_bins[axis].lastSplitToLeft(primBox.getMax(axis) );
-			if(maxGrid>0) maxGrid--;
 			for(g = maxGrid; g >= 0; g--)
 				eventOffset[g].updateRightBox(primBox);
 				
-			//std::cout<<" grid "<<minGrid<<"/"<<maxGrid;
-		//}
 		grd->next();
 	}
 }
@@ -370,26 +349,18 @@ void BaseBinSplit::updateEventBBoxAlong(const BoundingBox & box,
 {
 	SplitEvent * eventOffset = &m_event[axis * MMBINNSPLITLIMIT];
 	
-	//const float min = box.getMin(axis);
-	//const float delta = box.distance(axis) / SplitEvent::NumBinPerDimension;
 	int n = m_bins[axis].numSplits();
 	int g, minGrid, maxGrid;
 	unsigned i;
 	for(i = 0; i < nprim; i++) {
 		const BoundingBox * primBox = primBoxes[*indices[i] ];
 		
-		//minGrid = (primBox->getMin(axis) - min) / delta;
-		
-		//if(minGrid < 0) minGrid = 0;
 		minGrid = m_bins[axis].firstSplitToRight(primBox->getMin(axis) );
 			
 		for(g = minGrid; g < n; g++)
 			eventOffset[g].updateLeftBox(*primBox);
 		
-		//maxGrid = (primBox->getMax(axis) - min) / delta;
-		//if(maxGrid > SplitEvent::NumEventPerDimension) maxGrid = SplitEvent::NumEventPerDimension;
 		maxGrid = m_bins[axis].lastSplitToLeft(primBox->getMax(axis) );
-		if(maxGrid>0) maxGrid--;
 		for(g = maxGrid; g >= 0; g--)
 			eventOffset[g].updateRightBox(*primBox);
 	}
@@ -397,5 +368,8 @@ void BaseBinSplit::updateEventBBoxAlong(const BoundingBox & box,
 
 SplitEvent * BaseBinSplit::splitAt(int axis, int idx)
 { return &m_event[axis * MMBINNSPLITLIMIT + idx]; }
+
+SplitEvent * BaseBinSplit::split(int idx)
+{ return &m_event[idx]; }
 
 }

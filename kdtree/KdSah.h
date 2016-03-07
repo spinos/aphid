@@ -54,7 +54,7 @@ protected:
 	void addPrimitive(const unsigned & idx);
 	
 private:
-	void partitionCompress(const SplitEvent & e,
+	void partitionCompress(const SplitEvent * e,
 					const BoundingBox & leftBox, const BoundingBox & rightBox,
 						SahSplit * leftCtx, SahSplit * rightCtx);
 
@@ -107,10 +107,10 @@ SplitEvent * SahSplit<T>::bestSplit()
 	const BoundingBox & bb = getBBox();
 	
 	if(grid()) 
-		//calculateCompressBins(grid(), bb);
-		calcCompressedSoftBin(grid(), bb);
+		//calcEvenBin(grid(), bb);
+		calcSoftBin(grid(), bb);
 	else 
-		//calculateBins(numPrims(),
+		//calcEvenBin(numPrims(),
 		calcSoftBin(numPrims(),
 				m_indices,
 				SahSplit<T>::GlobalSplitContext->primitiveBoxes(),
@@ -126,16 +126,16 @@ SplitEvent * SahSplit<T>::bestSplit()
 	
 	calculateCosts(bb);
 	splitAtLowestCost(bb);
-	return &m_event[m_bestEventIdx];
+	return split(m_bestEventIdx);
 }
 
 template <typename T>
 void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 {	
-	SplitEvent & e = m_event[m_bestEventIdx];
+	const SplitEvent * e = split(m_bestEventIdx);
 	
-	BoundingBox leftBox = e.leftBound();
-	BoundingBox rightBox = e.rightBound();
+	BoundingBox leftBox = e->leftBound();
+	BoundingBox rightBox = e->rightBound();
 
 	leftSplit->setBBox(leftBox);
 	rightSplit->setBBox(rightBox);
@@ -151,7 +151,7 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 		const unsigned iprim = *m_indices[i];
 		const BoundingBox & primBox = *primBoxes[iprim];
 		
-		side = e.side(primBox);
+		side = e->side(primBox);
 		if(side < 2) {
 			if(primBox.touch(leftBox)) {
 				leftSplit->addPrimitive(iprim);
@@ -172,16 +172,16 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 }
 
 template <typename T>
-void SahSplit<T>::partitionCompress(const SplitEvent & e,
+void SahSplit<T>::partitionCompress(const SplitEvent * e,
 					const BoundingBox & leftBox, const BoundingBox & rightBox,
 						SahSplit * leftCtx, SahSplit * rightCtx)
 {
 	GridClustering * grd = grid();
 	const BoundingBox & bb = getBBox();
 	
-	if(e.leftCount() > 0)
+	if(e->leftCount() > 0)
 		leftCtx->createGrid(grd->gridSize() );
-	if(e.rightCount() > 0)
+	if(e->rightCount() > 0)
 		rightCtx->createGrid(grd->gridSize() );
 		
 	int side;
@@ -189,24 +189,24 @@ void SahSplit<T>::partitionCompress(const SplitEvent & e,
 	while (!grd->end() ) {
 		const BoundingBox & primBox = grd->value()->m_box;
 		if(primBox.touch(bb) ) {	
-			side = e.side(primBox);
+			side = e->side(primBox);
 			if(side < 2) {
-				if(e.leftCount()<1) std::cout<<"\n\n warning left should be empty! \n\n";
+				if(e->leftCount()<1) std::cout<<"\n\n warning left should be empty! \n\n";
 				else leftCtx->addCell(grd->key(), grd->value() );
 			}
 			if(side > 0) {
-				if(e.rightCount()<1) std::cout<<"\n\n warning right should be empty! \n\n";
+				if(e->rightCount()<1) std::cout<<"\n\n warning right should be empty! \n\n";
 				else rightCtx->addCell(grd->key(), grd->value() );
 			}
 		}
 		grd->next();
 	}
 	
-	if(e.leftCount() > 0) {
+	if(e->leftCount() > 0) {
 		leftCtx->countPrimsInGrid();
 		leftCtx->decompressGrid();
 	}
-	if(e.rightCount() > 0) {
+	if(e->rightCount() > 0) {
 		rightCtx->countPrimsInGrid();
 		rightCtx->decompressGrid();
 	}

@@ -11,10 +11,6 @@
 
 namespace aphid {
 
-int SplitEvent::Dimension = 3;
-//int SplitEvent::NumBinPerDimension = 16;
-//int SplitEvent::NumEventPerDimension = 15;
-
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
 	m_cost = 1e28f;
@@ -22,17 +18,6 @@ SplitEvent::SplitEvent() : m_isEmpty(1)
 
 void SplitEvent::setEmpty()
 { m_isEmpty = 1; }
-
-void SplitEvent::setPos(float val)
-{
-	m_pos = val;
-}
-
-void SplitEvent::setAxis(int val)
-{
-	m_isEmpty = 0;
-	m_axis = val;
-}
 
 void SplitEvent::setBAP(const BoundingBox & b, int a, float p)
 {
@@ -65,15 +50,11 @@ const float & SplitEvent::getCost() const
 	return m_cost;
 }
 
-int SplitEvent::leftCount() const
-{
-	return m_leftNumPrim;
-}
+const int & SplitEvent::leftCount() const
+{ return m_leftNumPrim; }
 
-int SplitEvent::rightCount() const
-{
-	return m_rightNumPrim;
-}
+const int & SplitEvent::rightCount() const
+{ return m_rightNumPrim; }
 
 int SplitEvent::side(const BoundingBox &box) const
 {

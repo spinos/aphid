@@ -98,7 +98,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T
 	
 	if(plane->getCost() > parent->visitCost()) {
 		// std::cout<<"\n root split";
-		// costNotice(parent, plane);
+		costNotice(parent, plane);
 		setNodeLeaf(parent, root, iRoot);
 		return false;
 	}
@@ -148,7 +148,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
 		
 		if(plane->getCost() > parent->visitCost()) {
 			// std::cout<<"\n internal split";
-			// costNotice(parent, plane);
+			costNotice(parent, plane);
 			setNodeLeaf(parent, interial, iNode);
 			clearSplit(iNode);
 			continue;
@@ -168,7 +168,7 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
 			
 			setNodeInternal(interial, iNode, plane->getAxis(), plane->getPos(), Treelet<NumLevels>::ChildOffset(iNode) );
 			
-			//clearSplit(iNode);
+			clearSplit(iNode);
 		}
 		else {
 			// std::cout<<"\n end of treelet "<<parent->numPrims();
