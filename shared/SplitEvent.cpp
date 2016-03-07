@@ -59,7 +59,7 @@ const int & SplitEvent::rightCount() const
 int SplitEvent::side(const BoundingBox &box) const
 {
 	int side = 1;
-	if(box.getMax(m_axis) < m_pos)
+	if(box.getMax(m_axis) <= m_pos)
 		side = 0;
 	else if(box.getMin(m_axis) >= m_pos)
 		side = 2;
@@ -110,7 +110,7 @@ void SplitEvent::calculateCost(float x)
 	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
 	*/
 	if(m_isEmpty) return;
-	m_cost = 2.5f;
+	m_cost = 1.5f;
 	if(m_leftBox.isValid()) m_cost += 2.f * (m_leftBox.area() * m_leftNumPrim) / x;
 	if(m_rightBox.isValid()) m_cost += 2.f * (m_rightBox.area() * m_rightNumPrim) / x;
 }
@@ -120,7 +120,7 @@ float SplitEvent::area() const
 	return m_leftBox.area() + m_rightBox.area();
 }
 
-float SplitEvent::hasBothSides() const
+bool SplitEvent::hasBothSides() const
 {
 	return (m_leftNumPrim > 0 && m_rightNumPrim > 0);
 }
@@ -138,7 +138,8 @@ void SplitEvent::verbose() const
 		std::cout<<" is empty";
 		return;
 	}
-	std::cout<<" at "<<m_pos<<" cost "<<m_cost
+	std::cout<<" along "<<m_axis
+	<<" at "<<m_pos<<" cost "<<m_cost
 	<<"\n prim count "<<m_leftNumPrim<<"/"<<m_rightNumPrim
 	<<"\n bound "<<m_lftBound
 	<<"/"<<m_rgtBound

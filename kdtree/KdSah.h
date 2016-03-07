@@ -40,7 +40,7 @@ public:
 	const unsigned & indexAt(const unsigned & idx) const;
 	
 	bool decompressGrid(bool forced = false);
-	
+	bool isCompressed() const;
 	void verbose() const;
 	
 	static SahSplit * GlobalSplitContext;
@@ -92,7 +92,7 @@ template <typename T>
 void SahSplit<T>::compressPrimitives()
 {
 	m_grid = new GridClustering();
-	m_grid->setGridSize(getBBox().getLongestDistance() / 48.f);
+	m_grid->setGridSize(getBBox().getLongestDistance() / 32.f);
 	
 	int i = 0;
 	for(;i<m_numPrims; i++)
@@ -284,6 +284,10 @@ void SahSplit<T>::verbose() const
 			<<" visit cost "<<visitCost()
 			<<"\n";
 }
+
+template <typename T>
+bool SahSplit<T>::isCompressed() const
+{ return m_grid != NULL; }
 
 }
 //:~

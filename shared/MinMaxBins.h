@@ -13,7 +13,7 @@ namespace aphid {
 #define MMBINNSPLITLIMIT 33
 #define MMBINNSPLITLIMITP1 34
 #define MMBINNSPLITLIMITM1 32
-#define MMBINNSPLITLIMITM1F 31.999f
+#define MMBINNSPLITLIMITM1F 31.9999f
 
 class MinMaxBins {
 /// n-1+2 splits first and last is bound

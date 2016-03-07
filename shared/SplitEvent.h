@@ -39,7 +39,7 @@ public:
 	void updateRightBox(const BoundingBox &box);
 	BoundingBox leftBound() const;
 	BoundingBox rightBound() const;
-	float hasBothSides() const;
+	bool hasBothSides() const;
 	void limitBox(const BoundingBox & b);
 	void verbose() const;
 	

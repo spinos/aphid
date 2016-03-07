@@ -96,7 +96,9 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideRoot(int parentIdx, SahSplit<T
 
 	SplitEvent * plane = parent->bestSplit();
 	
-	if(plane->getCost() > parent->visitCost()) {
+	if(plane->getCost() > parent->visitCost()
+	    && !parent->isCompressed()
+	    && plane->hasBothSides() ) {
 		// std::cout<<"\n root split";
 		costNotice(parent, plane);
 		setNodeLeaf(parent, root, iRoot);
@@ -146,7 +148,9 @@ bool KdTreeletBuilder<NumLevels, T, Tn>::subdivideInterial(Tn * interial, int le
 		
 		//plane->verbose();
 		
-		if(plane->getCost() > parent->visitCost()) {
+		if(plane->getCost() > parent->visitCost()
+		    && !parent->isCompressed() 
+		    && plane->hasBothSides() ) {
 			// std::cout<<"\n internal split";
 			costNotice(parent, plane);
 			setNodeLeaf(parent, interial, iNode);
@@ -230,6 +234,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::costNotice(SahSplit<T> * parent, SplitE
 			<<" < split cost "
 			<<plane->getCost()
 			<<" stop subdivide";
+	plane->verbose();
 }
 
 template<int NumLevels, typename T, typename Tn>

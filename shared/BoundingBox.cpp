@@ -217,9 +217,9 @@ Vector3F BoundingBox::center() const
 
 char BoundingBox::touch(const BoundingBox & b) const
 {
-	if(m_data[0] > b.m_data[3] || m_data[3] < b.m_data[0]) return 0;
-	if(m_data[1] > b.m_data[4] || m_data[4] < b.m_data[1]) return 0;
-	if(m_data[2] > b.m_data[5] || m_data[5] < b.m_data[2]) return 0;
+	if(m_data[0] >= b.m_data[3] || m_data[3] <= b.m_data[0]) return 0;
+	if(m_data[1] >= b.m_data[4] || m_data[4] <= b.m_data[1]) return 0;
+	if(m_data[2] >= b.m_data[5] || m_data[5] <= b.m_data[2]) return 0;
 	return 1;
 }
 

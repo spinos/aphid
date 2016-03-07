@@ -57,7 +57,7 @@ void JuliaTree::buildSphere(const std::string & name)
     grd.close();
     
     const float h = grd.gridSize();
-    const float e = h * .5f;//.49999f;
+    const float e = h * .4999f;
     sdb::VectorArray<cvx::Cube> cs;
     cvx::Cube c;
     grd.begin();
@@ -70,7 +70,7 @@ void JuliaTree::buildSphere(const std::string & name)
     KdNTree<cvx::Cube, KdNode4 > tree;
     KdEngine<cvx::Cube> engine;
     engine.buildTree(&tree, &cs, grd.boundingBox(), 4);
-    engine.printTree(&tree);
+    // engine.printTree(&tree);
 }
 
 }
