@@ -7,13 +7,13 @@
  *
  */
 #include "SplitEvent.h"
-#include <BuildKdTreeContext.h>
+#include <iostream>
 
 namespace aphid {
 
 int SplitEvent::Dimension = 3;
-int SplitEvent::NumBinPerDimension = 16;
-int SplitEvent::NumEventPerDimension = 15;
+//int SplitEvent::NumBinPerDimension = 16;
+//int SplitEvent::NumEventPerDimension = 15;
 
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
@@ -40,14 +40,16 @@ void SplitEvent::setBAP(const BoundingBox & b, int a, float p)
 	m_axis = a;
 	m_pos = p;
 	m_isEmpty = 0;
+	//m_leftBox.reset();
+	//m_rightBox.reset();
 }
 	
-float SplitEvent::getPos() const
+const float & SplitEvent::getPos() const
 {
 	return m_pos;
 }
 
-int SplitEvent::getAxis() const
+const int & SplitEvent::getAxis() const
 {
 	return m_axis;
 }
@@ -108,6 +110,13 @@ void SplitEvent::updateRightBox(const BoundingBox &box)
 	m_rightBox.expandBy(box);	
 }
 
+void SplitEvent::limitBox(const BoundingBox & b)
+{
+    if(m_isEmpty) return;
+    if(m_leftBox.isValid()) m_leftBox.shrinkBy(b);
+    if(m_rightBox.isValid()) m_rightBox.shrinkBy(b);
+}
+
 void SplitEvent::calculateCost(float x)
 {/*
 	BoundingBox leftBBox, rightBBox;
@@ -143,13 +152,17 @@ BoundingBox SplitEvent::rightBound() const
 
 void SplitEvent::verbose() const
 {
-	std::cout<<" split event\n"
-	<<" cost "<<m_cost
-	<<" prim count "<<m_leftNumPrim<<"/"<<m_rightNumPrim
-	<<"\n left bound "<<m_lftBound
-	<<"\n right bound "<<m_rgtBound
-	<<"\n left box "<<m_leftBox
-	<<"\n right box "<<m_rightBox;
+	std::cout<<"\n split event";
+	if(m_isEmpty) {
+		std::cout<<" is empty";
+		return;
+	}
+	std::cout<<" at "<<m_pos<<" cost "<<m_cost
+	<<"\n prim count "<<m_leftNumPrim<<"/"<<m_rightNumPrim
+	<<"\n bound "<<m_lftBound
+	<<"/"<<m_rgtBound
+	<<"\n box "<<m_leftBox
+	<<"/"<<m_rightBox;
 	//printf("cost %f left %i %f right %i %f\n", m_cost, m_leftNumPrim, m_leftBox.area(), m_rightNumPrim, m_rightBox.area());
 }
 

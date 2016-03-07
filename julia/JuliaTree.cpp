@@ -57,7 +57,7 @@ void JuliaTree::buildSphere(const std::string & name)
     grd.close();
     
     const float h = grd.gridSize();
-    const float e = h *.49999f;
+    const float e = h * .5f;//.49999f;
     sdb::VectorArray<cvx::Cube> cs;
     cvx::Cube c;
     grd.begin();

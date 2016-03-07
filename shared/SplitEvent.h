@@ -23,8 +23,8 @@ public:
 	/// split box into left and right box
 	void setBAP(const BoundingBox & b, int a, float p);
 	
-	float getPos() const;
-	int getAxis() const;
+	const float & getPos() const;
+	const int & getAxis() const;
 	
 	void setLeftRightNumPrim(const unsigned &leftNumPrim, const unsigned &rightNumPrim);
 	
@@ -42,11 +42,12 @@ public:
 	BoundingBox leftBound() const;
 	BoundingBox rightBound() const;
 	float hasBothSides() const;
+	void limitBox(const BoundingBox & b);
 	void verbose() const;
 
 	static int Dimension;
-	static int NumBinPerDimension;
-	static int NumEventPerDimension;
+	//static int NumBinPerDimension;
+	//static int NumEventPerDimension;
 	
 private:
 	BoundingBox m_leftBox, m_rightBox, m_lftBound, m_rgtBound;

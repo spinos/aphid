@@ -13,7 +13,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
     
     std::cout<<"\n test kdtree";
-	const int n = 25512;
+	const int n = 16512;
     m_source = new sdb::VectorArray<cvx::Sphere>();
 	m_tree = new KdNTree<cvx::Sphere, KdNode4 >();
 	
@@ -26,16 +26,16 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
         cvx::Sphere a;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = -60.f + 100.f * r * cos(th);
-        float y = -40.f + 70.f * r * sin(th) + 36.f * sin(x/12.f);
-        float z = -40.f + 50.f * float( rand() % 999 ) / 999.f + 33.f * sin(y/23.f);
+        float x = -60.f + 100.f * r * cos(th*1.1f);
+        float y = 0.f + 70.f * r * sin(th/1.33f) + 39.f * sin(x/13.f);
+        float z = 0.f + 50.f * float( rand() % 999 ) / 999.f + 23.f * sin(y/23.f);
         a.set(Vector3F(x, y, z), .2f);
         
 		m_source->insert(a);
 		rootBox.expandBy(a.calculateBBox());
     }
 	
-	m_engine.buildTree(m_tree, m_source, rootBox, 8);
+	m_engine.buildTree(m_tree, m_source, rootBox, 8, 1);
 	// m_engine.printTree(m_tree);
 	
 	const double nearClip = 1.001f;
@@ -68,7 +68,7 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
 	// getDrawer()->frustum(&m_frustum);
-    // drawBoxes();
+    drawBoxes();
     drawTree();
 }
 

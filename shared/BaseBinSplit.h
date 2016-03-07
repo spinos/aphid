@@ -23,19 +23,18 @@ public:
 	virtual ~BaseBinSplit();
 	
 protected:
-	MinMaxBins * m_bins;
-	SplitEvent * m_event;
+	MinMaxBins m_bins[3];
+	SplitEvent m_event[MMBINNSPLITLIMIT * 3];
     int m_bestEventIdx;
 	
 protected:
-	void initBins(const BoundingBox & b);
 	void initEvents(const BoundingBox & b);
-	bool byCutoffEmptySpace(int & dst, const BoundingBox & bb);
-	SplitEvent * splitAt(int axis, int idx) const;
+	SplitEvent * splitAt(int axis, int idx);
 	void splitAtLowestCost(const BoundingBox & b);
 	void calculateBins(const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
-			const sdb::VectorArray<BoundingBox> & primBoxes);
+			const sdb::VectorArray<BoundingBox> & primBoxes,
+			const BoundingBox & b);
 	void calculateSplitEvents(const BoundingBox & box,
 			const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
@@ -43,6 +42,12 @@ protected:
 	void calculateCosts(const BoundingBox & box);
 	void calculateCompressBins(GridClustering * grd, const BoundingBox & box);
 	void calculateCompressSplitEvents(GridClustering * grd, const BoundingBox & box);
+	
+	void calcCompressedSoftBin(GridClustering * grd, const BoundingBox & box);
+	void calcSoftBin(const unsigned & nprim, 
+			const sdb::VectorArray<unsigned> & indices,
+			const sdb::VectorArray<BoundingBox> & primBoxes,
+			const BoundingBox & box);
 	
 private:
 	void initEventsAlong(const BoundingBox & b, const int &axis);
@@ -52,7 +57,15 @@ private:
 			const sdb::VectorArray<BoundingBox> & primBoxes);
 	void updateCompressEventBBoxAlong(const int &axis,
 			GridClustering * grd, const BoundingBox & box);
-			
+	void testCompressedSoftBinAlong(const int & axis,
+			GridClustering * grd, const BoundingBox & box);
+	void createSoftBin(MinMaxBins * dst, 
+			const int & axis,
+			const unsigned & nprim, 
+			const sdb::VectorArray<unsigned> & indices,
+			const sdb::VectorArray<BoundingBox> & primBoxes);
+	bool cutoffEmptySpace(int & dst, const BoundingBox & bb, const float & minVol);
+	
 };
 
 }

@@ -35,6 +35,7 @@ public:
 	const Vector3F getMin() const;
 	const Vector3F getMax() const;
 	const float area() const;
+	const float volume() const;
 	const float crossSectionArea(const int &axis) const;
 	const float distance(const int &axis) const;
 	const Vector3F normal(const int & i) const;

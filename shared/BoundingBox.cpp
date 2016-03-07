@@ -459,5 +459,8 @@ const std::string BoundingBox::str() const
 const float * BoundingBox::data() const
 { return m_data; }
 
+const float BoundingBox::volume() const
+{ return distance(0) * distance(1) * distance(2); }
+
 }
 //:~
