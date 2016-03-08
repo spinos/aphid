@@ -4,6 +4,7 @@
 #include <ConvexShape.h>
 #include <KdEngine.h>
 #include <VectorArray.h>
+#include <HNTree.h>
 
 using namespace aphid;
 
@@ -54,7 +55,6 @@ void JuliaTree::buildSphere(const std::string & name)
 {
     sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > grd(name);
     grd.load();
-    grd.close();
     
     const float h = grd.gridSize();
     const float e = h * .4999f;
@@ -67,14 +67,18 @@ void JuliaTree::buildSphere(const std::string & name)
         grd.next();   
     }
     
-    KdNTree<cvx::Cube, KdNode4 > tree;
+    HNTree<cvx::Cube, KdNode4 > tree( boost::str(boost::format("%1%/tree") % name ) );
     KdEngine<cvx::Cube> engine;
     TreeProperty::BuildProfile bf;
     bf._maxLeafPrims = 5;
     bf._unquantized = false;
     
     engine.buildTree(&tree, &cs, grd.boundingBox(), &bf);
-    // engine.printTree(&tree);
+	
+	tree.save();
+	tree.close();
+	grd.close();
+    
 }
 
 }

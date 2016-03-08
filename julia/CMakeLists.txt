@@ -8,6 +8,8 @@ include_directories ("../shared" "../btree"
 
 set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
+../kdtree/HNTree.h
+../kdtree/KdEngine.h
 QuatJulia.h
 JuliaTree.h
 Parameter.h

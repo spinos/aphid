@@ -8,6 +8,17 @@
 
 namespace aphid {
 
+namespace knt {
+/// i --> tree_leaf[i] --> prim_start
+///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
+///
+struct TreeLeaf {
+	unsigned _ropeInd[6];
+	unsigned _primStart;
+	unsigned _nouse;
+};
+}
+
 class KdNeighbors {
 	/// 0 left 1 right 2 bottom 3 top 4 back 5 front
 public:
@@ -88,21 +99,12 @@ public:
 template <typename T, typename Tn>
 class KdNTree : public AVerbose, public Boundary, public TreeProperty
 {
-	/// i --> tree_leaf[i] --> prim_start
-	///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
-	///
-	struct TreeLeaf {
-		unsigned _ropeInd[6];
-		unsigned _primStart;
-		unsigned _nouse;
-	};
-	
 	sdb::VectorArray<T> * m_source;
     sdb::VectorArray<Tn> m_nodePool;
-	sdb::VectorArray<TreeLeaf> m_leafNodes;
-	std::vector<int> m_leafDataIndices;
+	sdb::VectorArray<knt::TreeLeaf> m_leafNodes;
+	sdb::VectorArray<int> m_leafDataIndices;
 	BoundingBox * m_ropes;
-    unsigned m_numRopes;
+    int m_numRopes;
 
 public:
     KdNTree();
@@ -113,16 +115,16 @@ public:
 
     Tn * root();
     
-	sdb::VectorArray<Tn> & nodes();
-	
-    int maxNumData() const;
-	
 	int numNodes() const;
 	int addBranch();
 	
 	void addDataIndex(int x);
 	int numData() const;
 	T * dataAt(unsigned idx) const;
+	const sdb::VectorArray<Tn> & nodes() const;
+	sdb::VectorArray<Tn> & nodes();
+
+	const sdb::VectorArray<knt::TreeLeaf> & leafNodes() const;
 	
 	int numLeafNodes() const;
 	void addLeafNode(unsigned primStart);
@@ -133,6 +135,7 @@ public:
 	
 	void createRopes(unsigned n);
 	void setRope(unsigned idx, const BoundingBox & v );
+	const int & numRopes() const;
 	
 	unsigned leafRopeInd(unsigned idx, int ri) const;
 	void setLeafRopeInd(unsigned x, unsigned idx, int ri);
@@ -142,8 +145,12 @@ public:
 	virtual std::string verbosestr() const;
     
     typedef Tn TreeletType;
+	
 protected:
-
+	const BoundingBox * ropes() const;
+	const sdb::VectorArray<int> & leafIndirection() const;
+	int numLeafIndirection() const;
+	
 private:
 	void clear();
 };
@@ -198,6 +205,10 @@ sdb::VectorArray<Tn> & KdNTree<T, Tn>::nodes()
 { return m_nodePool; }
 
 template <typename T, typename Tn>
+const sdb::VectorArray<Tn> & KdNTree<T, Tn>::nodes() const
+{ return m_nodePool; }
+
+template <typename T, typename Tn>
 int KdNTree<T, Tn>::numNodes() const
 { return m_nodePool.size(); }
 
@@ -207,7 +218,7 @@ int KdNTree<T, Tn>::numData() const
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::addDataIndex(int x)
-{ m_leafDataIndices.push_back(x); }
+{ m_leafDataIndices.insert(x); }
 
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::addBranch()
@@ -227,7 +238,7 @@ int KdNTree<T, Tn>::numLeafNodes() const
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::addLeafNode(unsigned primStart)
 { 
-	TreeLeaf l;
+	knt::TreeLeaf l;
 	l._primStart = primStart;
 	m_leafNodes.insert(l);
 }
@@ -283,6 +294,26 @@ void KdNTree<T, Tn>::setLeafRopeInd(unsigned x, unsigned idx, int ri)
 }
 
 template <typename T, typename Tn>
+const sdb::VectorArray<knt::TreeLeaf> & KdNTree<T, Tn>::leafNodes() const
+{ return m_leafNodes; }
+
+template <typename T, typename Tn>
+const int & KdNTree<T, Tn>::numRopes() const
+{ return m_numRopes; }
+
+template <typename T, typename Tn>
+const BoundingBox * KdNTree<T, Tn>::ropes() const
+{ return m_ropes; }
+
+template <typename T, typename Tn>
+const sdb::VectorArray<int> & KdNTree<T, Tn>::leafIndirection() const
+{ return m_leafDataIndices; }
+
+template <typename T, typename Tn>
+int KdNTree<T, Tn>::numLeafIndirection() const
+{ return m_leafDataIndices.size(); }
+
+template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const
 { 
 	std::stringstream sst;
@@ -292,7 +323,7 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	<<"\n n treelet "<<numNodes()
 	<<"\n n leaf "<<numLeafNodes()
 	<<"\n n data "<<numData()
-	<<"\n n rope "<<m_numRopes
+	<<"\n n rope "<<numRopes()
 	<<"\n";
 	sst<<logProperty();
 	return sst.str();

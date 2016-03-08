@@ -14,9 +14,11 @@ namespace aphid {
     
 bool MinMaxBins::UnqunatizedPosition = true;
 
-MinMaxBins::MinMaxBins() : m_isFlat(0),
+MinMaxBins::MinMaxBins() : 
+
+m_numSplits(0),
 m_isEven(false),
-m_numSplits(0) 
+m_isFlat(0)
 {}
 
 MinMaxBins::~MinMaxBins() 
