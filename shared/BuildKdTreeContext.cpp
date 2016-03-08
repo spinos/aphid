@@ -28,6 +28,7 @@ BuildKdTreeContext::BuildKdTreeContext(BuildKdTreeStream &data, const BoundingBo
 	const sdb::VectorArray<Primitive> &primitives = data.primitives();
 	
 	const unsigned n = data.getNumPrimitives();
+	std::cout<<"\n ctx n input "<<n;
 	for(unsigned i=0;i<n; i++) {
 		addPrimitive(i);
 		

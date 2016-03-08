@@ -66,7 +66,7 @@ public:
 private:
 	const float & firstSplitPos() const;
 	const float & lastSplitPos() const;
-	
+	void getGrid(const float & x, int & lft, int & rgt) const;
 };
 
 }

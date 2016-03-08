@@ -46,7 +46,8 @@ void KdTree::create(BuildProfile * prof)
 {	
 	KdTreeBuilder::MaxLeafPrimThreashold = prof->_maxLeafPrims;
 	KdTreeBuilder::MaxBuildLevel = prof->_maxLevel;
-
+	MinMaxBins::UnqunatizedPosition = prof->_unquantized;
+	
 	m_root = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2);
 	
 	const BoundingBox & b = getBBox();
@@ -56,9 +57,10 @@ void KdTree::create(BuildProfile * prof)
 	
 	BuildKdTreeContext *ctx = new BuildKdTreeContext(m_stream, b);
 	
+	std::cout<<"\n Kd tree building...";
 	std::stringstream sst;
 	sst << "\n Kd tree pre-built in " << bTimer.elapsed();
-    std::cout<<"\n Kd tree building...";
+    
 	bTimer.restart();
 	
 	resetPropery();

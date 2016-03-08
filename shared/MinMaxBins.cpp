@@ -47,7 +47,8 @@ bool MinMaxBins::insertSplitPos(const float & x)
 /// out of bound
 	if(x < m_pos[0] + m_delta) return false;
 	if(x > m_pos[MMBINNSPLITLIMIT] - m_delta) return false;
-	
+
+#if 0	
 	int i, j;
 	for(i=1;i<m_numSplits;++i) {
 /// move forward
@@ -72,7 +73,33 @@ bool MinMaxBins::insertSplitPos(const float & x)
 			return true;
 		}
 	}
+#else
+	int lft, rgt;
+	getGrid(x, lft, rgt);
+	if(UnqunatizedPosition) {
+/// move right forward		
+		if(rgt < m_numSplits-1) {
+			if(x > m_pos[rgt] - m_delta 
+				&& x>m_pos[lft] + m_delta * 2.f) {
+				m_pos[rgt] = x - m_delta;
+				return true;
+			}
+		}
+	}
 	
+	if(x > (m_pos[lft] + m_delta) 
+			&& x < (m_pos[rgt] - m_delta) ) {
+/// push following
+		for(int j=m_numSplits; j>rgt;--j ) {
+			m_pos[j] = m_pos[j-1];
+		}
+/// insert at
+		m_pos[rgt] = x;
+		m_numSplits++;
+		m_pos[m_numSplits-1] = m_pos[MMBINNSPLITLIMIT];
+		return true;
+	}
+#endif
 	return false;
 }
 	
@@ -171,6 +198,7 @@ int MinMaxBins::firstSplitToRight(const float & x) const
 	if(x< firstSplitPos() ) return 0;
 	if(x>= lastSplitPos() ) return m_numSplits-1;
 	
+#if 0
 	//if(m_isEven) return (x - m_pos[0]) / m_delta + 1;
 	int i;
 	for(i=1;i<m_numSplits;++i) {
@@ -179,6 +207,11 @@ int MinMaxBins::firstSplitToRight(const float & x) const
 		}
 	}
 	return m_numSplits-1;
+#else
+	int lft, rgt;
+	getGrid(x, lft, rgt);
+	return rgt;
+#endif
 }
 
 ///   ----> x 
@@ -188,7 +221,8 @@ int MinMaxBins::lastSplitToLeft(const float & x) const
 {
 	if(x< firstSplitPos() ) return 0;
 	if(x>= lastSplitPos() ) return m_numSplits-1;
-	
+
+#if 0	
 	//if(m_isEven) return (x - m_pos[0]) / m_delta + 1;
 	int i;
 	for(i=0;i<m_numSplits-1;++i) {
@@ -197,6 +231,30 @@ int MinMaxBins::lastSplitToLeft(const float & x) const
 		}
 	}
 	return m_numSplits-1;
+#else
+	int lft, rgt;
+	getGrid(x, lft, rgt);
+	return lft;
+#endif
+}
+
+void MinMaxBins::getGrid(const float & x, int & lft, int & rgt) const
+{
+	lft = 0;
+	rgt = m_numSplits - 1;
+	int mid = (lft + rgt)/2;
+	float fm;
+	while(rgt > lft+1) {
+		fm = m_pos[mid];
+		if(fm==x) {
+			lft = mid;
+			rgt = mid+1;
+			return;
+		}
+		if(fm>x) rgt = mid;
+		if(fm<x) lft = mid;
+		mid = (lft + rgt)/2;
+	}
 }
 
 void MinMaxBins::verbose() const
