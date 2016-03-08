@@ -170,7 +170,7 @@ void BaseBinSplit::calcEvenBin(const unsigned nprim,
 	}
 }
 
-void BaseBinSplit::calculateSplitEvents(const BoundingBox & box,
+void BaseBinSplit::calcEvent(const BoundingBox & box,
 			const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes)
@@ -296,7 +296,7 @@ void BaseBinSplit::calcEvenBin(GridClustering * grd, const BoundingBox & b)
 	}
 }
 
-void BaseBinSplit::calculateCompressSplitEvents(GridClustering * grd, const BoundingBox & box)
+void BaseBinSplit::calcEvent(GridClustering * grd, const BoundingBox & box)
 {	
 	for(int axis = 0; axis < 3; axis++) {
 		if(isEmptyAlong(axis))

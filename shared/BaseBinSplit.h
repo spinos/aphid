@@ -38,13 +38,14 @@ protected:
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes,
 			const BoundingBox & b);
-	void calculateSplitEvents(const BoundingBox & box,
+	void calcEvent(const BoundingBox & box,
 			const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
+	void calcEvent(GridClustering * grd, 
+	        const BoundingBox & box);
 	void calculateCosts(const BoundingBox & box);
 	void calcEvenBin(GridClustering * grd, const BoundingBox & box);
-	void calculateCompressSplitEvents(GridClustering * grd, const BoundingBox & box);
 	
 	void calcSoftBin(GridClustering * grd, const BoundingBox & box);
 	void calcSoftBin(const unsigned & nprim, 

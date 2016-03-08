@@ -1,57 +1,31 @@
 #pragma once
 #include <BaseBinSplit.h>
-#include <Boundary.h>
+#include <PrimBoundary.h>
 #include <boost/thread.hpp>
-#include <GridClustering.h>
 
 namespace aphid {
 
 template <typename T>
-class SahSplit : public BaseBinSplit, public Boundary {
+class SahSplit : public BaseBinSplit, public PrimBoundary {
     
 	sdb::VectorArray<T> * m_source;
-	GridClustering * m_grid;
-	sdb::VectorArray<BoundingBox> m_primitiveBoxes;
-    sdb::VectorArray<unsigned> m_indices;
-    unsigned m_numPrims;
-    
+	
 public:
     SahSplit(sdb::VectorArray<T> * source);
     virtual ~SahSplit();
 	
 	void initIndicesAndBoxes(const unsigned & num);
-	void compressPrimitives();
-    
+	
     SplitEvent * bestSplit();
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
 	
-	const unsigned & numPrims() const 
-	{ return m_numPrims; }
-	
-	float visitCost() const
-	{ return 2.f * m_numPrims; }
-	
-	bool isEmpty() const
-	{ return m_numPrims < 1; }
-	
-	sdb::VectorArray<T> * source()
-	{ return m_source; }
-	
-	const unsigned & indexAt(const unsigned & idx) const;
+	sdb::VectorArray<T> * source();
 	
 	bool decompressGrid(bool forced = false);
-	bool isCompressed() const;
-	void verbose() const;
 	
 	static SahSplit * GlobalSplitContext;
 	
 protected:
-	const sdb::VectorArray<BoundingBox> & primitiveBoxes() const;
-	GridClustering * grid();
-	void createGrid(const float & x);
-	void addCell(const sdb::Coord3 & x, GroupCell * c);
-	void countPrimsInGrid();
-	void addPrimitive(const unsigned & idx);
 	
 private:
 	void partitionCompress(const SplitEvent * e,
@@ -64,41 +38,22 @@ template <typename T>
 SahSplit<T> * SahSplit<T>::GlobalSplitContext = NULL;
 
 template <typename T>
-SahSplit<T>::SahSplit(sdb::VectorArray<T> * source) : m_indices(NULL),
-m_grid(NULL)
-{
-	m_source = source;
-    m_numPrims = 0;
-}
+SahSplit<T>::SahSplit(sdb::VectorArray<T> * source) 
+{ m_source = source; }
 
 template <typename T>
 SahSplit<T>::~SahSplit()
-{
-    if(m_grid) delete m_grid;
-}
+{}
 
 template <typename T>
 void SahSplit<T>::initIndicesAndBoxes(const unsigned & num) 
 {
-	m_numPrims = num;
-	unsigned i = 0;
-	for(;i<m_numPrims; i++) {
-		m_indices.insert(i);
-		m_primitiveBoxes.insert(m_source->get(i)->calculateBBox() );
+	clearPrimitive();
+	
+	for(unsigned i=0;i<num; i++) {
+		addPrimitive(i);
+		addPrimitiveBox(m_source->get(i)->calculateBBox() );
 	}
-}
-
-template <typename T>
-void SahSplit<T>::compressPrimitives()
-{
-	m_grid = new GridClustering();
-	m_grid->setGridSize(getBBox().getLongestDistance() / 32.f);
-	
-	int i = 0;
-	for(;i<m_numPrims; i++)
-		m_grid->insertToGroup(*m_primitiveBoxes[i], i);
-	
-	std::cout<<"\n ctx grid n cell "<<m_grid->size();
 }
 
 template <typename T>
@@ -112,16 +67,18 @@ SplitEvent * SahSplit<T>::bestSplit()
 	else 
 		//calcEvenBin(numPrims(),
 		calcSoftBin(numPrims(),
-				m_indices,
+				indices(),
 				SahSplit<T>::GlobalSplitContext->primitiveBoxes(),
 				bb );
 	
 	initEvents(bb);
 	
-	if(grid()) calculateCompressSplitEvents(grid(), bb);
-	else calculateSplitEvents(bb,
+	if(grid()) 
+	    calcEvent(grid(), bb);
+	else 
+	    calcEvent(bb,
 				numPrims(),
-				m_indices,
+				indices(),
 				SahSplit<T>::GlobalSplitContext->primitiveBoxes() );
 	
 	calculateCosts(bb);
@@ -144,11 +101,11 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 		return partitionCompress(e, leftBox, rightBox, leftSplit, rightSplit);
 		
 	const sdb::VectorArray<BoundingBox> & primBoxes = GlobalSplitContext->primitiveBoxes();
-	// int leftCount = 0;
-	// int rightCount = 0;
+	
+	const unsigned n = numPrims();
 	int side;
-	for(unsigned i = 0; i < m_numPrims; i++) {
-		const unsigned iprim = *m_indices[i];
+	for(unsigned i = 0; i < n; i++) {
+		const unsigned iprim = indexAt(i);
 		const BoundingBox & primBox = *primBoxes[iprim];
 		
 		side = e->side(primBox);
@@ -213,81 +170,23 @@ void SahSplit<T>::partitionCompress(const SplitEvent * e,
 }
 
 template <typename T>
-const sdb::VectorArray<BoundingBox> & SahSplit<T>::primitiveBoxes() const
-{ return m_primitiveBoxes; }
-
-template <typename T>
-GridClustering * SahSplit<T>::grid()
-{ return m_grid; }
-
-template <typename T>
-void SahSplit<T>::createGrid(const float & x)
-{
-	m_grid = new GridClustering();
-	m_grid->setGridSize(x);
-	m_grid->setDataExternal();
-}
-
-template <typename T>
-void SahSplit<T>::addCell(const sdb::Coord3 & x, GroupCell * c)
-{ m_grid->insertChildValue(x, c); }
-
-template <typename T>
-void SahSplit<T>::countPrimsInGrid()
-{
-	m_numPrims = 0;
-	if(!m_grid) return;
-	m_numPrims = m_grid->numElements();
-}
-
-template <typename T>
 bool SahSplit<T>::decompressGrid(bool forced)
 {
-	if(!m_grid) return false;
-	if(m_numPrims < 1024 
-		|| m_grid->size() < 32
+	if(!grid()) return false;
+	if(numPrims() < 1024 
+		|| grid()->size() < 32
 		|| forced) {
-/// reset
-        m_indices.clear();
-		m_numPrims = 0;
-		
-		const sdb::VectorArray<BoundingBox> & boxSrc = GlobalSplitContext->primitiveBoxes();
-		m_grid->extractInside(m_indices, boxSrc, getBBox() );
-		
-		m_numPrims = m_indices.size();
-		
-		delete m_grid;
-		m_grid = NULL;
-		
+
+		uncompressGrid(GlobalSplitContext->primitiveBoxes());
+				
 		return true;
 	}
 	return false;
 }
 
 template <typename T>
-void SahSplit<T>::addPrimitive(const unsigned & idx)
-{ 
-	m_indices.insert(idx); 
-	m_numPrims++;
-}
-
-template <typename T>
-const unsigned & SahSplit<T>::indexAt(const unsigned & idx) const
-{ return *m_indices[idx]; }
-
-template <typename T>
-void SahSplit<T>::verbose() const
-{
-	std::cout<<"\n split source "
-			<<getBBox()
-			<<" n prims "<<numPrims()
-			<<" visit cost "<<visitCost()
-			<<"\n";
-}
-
-template <typename T>
-bool SahSplit<T>::isCompressed() const
-{ return m_grid != NULL; }
-
+sdb::VectorArray<T> * SahSplit<T>::source()
+{ return m_source; }
+	
 }
 //:~

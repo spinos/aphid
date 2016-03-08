@@ -19,6 +19,7 @@ set (SOURCE_FILES
 ../shared/SplitEvent.cpp
 ../shared/BaseBinSplit.cpp 
 ../kdtree/TreeProperty.cpp
+../kdtree/PrimBoundary.cpp
 Parameter.cpp 
 QuatJulia.cpp
 JuliaTree.cpp

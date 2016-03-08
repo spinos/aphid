@@ -35,6 +35,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/ViewFrame.cpp
 ../shared/DrawBox.cpp
 ../kdtree/TreeProperty.cpp
+../kdtree/PrimBoundary.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
