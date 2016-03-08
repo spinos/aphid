@@ -150,6 +150,7 @@ protected:
 	const BoundingBox * ropes() const;
 	const sdb::VectorArray<int> & leafIndirection() const;
 	int numLeafIndirection() const;
+	void clear(const BoundingBox & b);
 	
 private:
 	void clear();
@@ -168,16 +169,10 @@ KdNTree<T, Tn>::~KdNTree()
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::init(sdb::VectorArray<T> * source, const BoundingBox & box) 
 {
-	clear();
-	Boundary::setBBox(box);
-	m_source = source;
-	m_numRopes = 0;
-	m_nodePool.clear();
+	clear(box);
 /// node[0]
 	m_nodePool.insert();
-	m_leafNodes.clear();
-	resetPropery();
-	setTotalVolume(box.volume() );
+	m_source = source;
 }
 
 template <typename T, typename Tn>
@@ -188,8 +183,20 @@ template <typename T, typename Tn>
 void KdNTree<T, Tn>::clear()
 {
 	if(isNull()) return;
+	m_nodePool.clear();
+	m_leafNodes.clear();
 	m_leafDataIndices.clear();
 	if(m_ropes) delete[] m_ropes;
+	m_numRopes = 0;
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::clear(const BoundingBox & b)
+{
+	clear();
+	Boundary::setBBox(b);
+	resetPropery();
+	setTotalVolume(b.volume() );
 }
 
 template <typename T, typename Tn>
@@ -229,7 +236,7 @@ int KdNTree<T, Tn>::addBranch()
 
 template <typename T, typename Tn>
 T * KdNTree<T, Tn>::dataAt(unsigned idx) const
-{ return m_source->get(m_leafDataIndices[idx]); }
+{ return m_source->get(*m_leafDataIndices[idx]); }
 
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::numLeafNodes() const

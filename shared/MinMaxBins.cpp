@@ -57,8 +57,8 @@ bool MinMaxBins::insertSplitPos(const float & x)
 /// no need for integer coord
     if(UnqunatizedPosition) {
 		if(x < m_pos[i] + m_delta && i < m_numSplits - 1) {
-			if(x>m_pos[i-1] + m_delta * 2.f)
-				m_pos[i] = x - m_delta;
+			if(x>m_pos[i-1] + m_delta)
+				m_pos[i] = x;
 				return true;
 		}
 	}		
@@ -82,8 +82,8 @@ bool MinMaxBins::insertSplitPos(const float & x)
 /// move right forward		
 		if(rgt < m_numSplits-1) {
 			if(x > m_pos[rgt] - m_delta 
-				&& x>m_pos[lft] + m_delta * 2.f) {
-				m_pos[rgt] = x - m_delta;
+				&& x>m_pos[lft] + m_delta) {
+				m_pos[rgt] = x;
 				return true;
 			}
 		}

@@ -22,14 +22,16 @@ public:
 	virtual ~HNTree();
 	
 	virtual char save();
-	//virtual char load();
-    //virtual char verifyType();
+	virtual char load();
+    virtual char verifyType();
 
 protected:
 	void save240Node();
 	void saveLeaf();
 	void saveInd();
 	void saveRope();
+	
+	void read240Node();
 	
 private:
 
@@ -174,6 +176,52 @@ void HNTree<T, Tn>::saveRope()
 	    addIntAttr(".nrope", 1);
 	writeIntAttr(".nrope", &n);
 	std::cout<<"\n save "<<n<<" rope";
+}
+
+template <typename T, typename Tn>
+char HNTree<T, Tn>::verifyType()
+{
+	if(!hasNamedAttr(".nrope") ) return 0;
+	if(!hasNamedData(".rope") ) return 0;
+	if(!hasNamedAttr(".nind") ) return 0;
+	if(!hasNamedData(".ind") ) return 0;
+	if(!hasNamedAttr(".nleaf") ) return 0;
+	if(!hasNamedData(".leaf") ) return 0;
+	if(!hasNamedAttr(".nnode") ) return 0;
+	if(!hasNamedData(".node") ) return 0;
+	if(!hasNamedAttr(".bbx") ) return 0;
+	return 1;
+}
+
+template <typename T, typename Tn>
+char HNTree<T, Tn>::load()
+{
+	BoundingBox b;
+	readFloatAttr(".bbx", (float *)&b );
+	KdNTree<T, Tn>::clear(b);
+	
+	if(sizeof(Tn) == 240) 
+		read240Node();
+		
+	return 1;
+}
+
+template <typename T, typename Tn>
+void HNTree<T, Tn>::read240Node()
+{
+	int n =0;
+	readIntAttr(".nnode", &n);
+	
+	HOocArray<hdata::TChar, 240, 256> treeletD(".node");
+	if(!treeletD.openStorage(fObjectId)) 
+		return;
+	
+	Tn atreelet;
+	int i=0;
+	for(;i<n;++i) {
+		treeletD.readColumn((char *)&atreelet, i);
+	}
+	std::cout<<"\n load "<<n<<" node240";
 }
 
 }
