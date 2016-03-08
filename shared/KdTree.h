@@ -13,14 +13,14 @@
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
 #include <VectorArray.h>
+#include <TreeProperty.h>
 
 namespace aphid {
 
 class IntersectionContext;
 class SelectionContext;
-class KdTree : public Geometry, public Boundary
+class KdTree : public Geometry, public Boundary, public TreeProperty
 {
-	int m_minNumLeafPrims, m_maxNumLeafPrims;
 	BoundingBox m_testBox;
 	unsigned m_intersectElement;
 	std::string m_buildLogStr;
@@ -33,15 +33,14 @@ public:
 	KdTreeNode* getRoot() const;
 	void addGeometry(Geometry * geo);
 	
-	virtual void create();
+	virtual void create(BuildProfile * prof);
 	
 	char intersect(IntersectionContext * ctx);
 	void select(SelectionContext * ctx);
 
 	Primitive * getPrim(unsigned idx);
 	virtual const Type type() const;
-	static int MaxBuildLevel;
-	static unsigned NumPrimitivesInLeafThreashold;
+	
 // override geomery
 	virtual bool intersectBox(const BoundingBox & box);
 	virtual void closestToPoint(ClosestToPointTestResult * result);
@@ -52,7 +51,6 @@ protected:
 	
 protected:
 	virtual void clear();
-	const unsigned numNoEmptyLeaves() const;
 	sdb::VectorArray<Primitive> & indirection();
 	
 private:
@@ -68,8 +66,7 @@ private:
 	bool leafIntersectBox(KdTreeNode *node, const BoundingBox & box);
 	
 	KdTreeNode *m_root;
-	int m_maxLeafLevel;
-	unsigned m_numNoEmptyLeaf;
+	
 };
 
 }

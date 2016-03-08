@@ -36,8 +36,6 @@ SceneContainer::SceneContainer(GeoDrawer * dr)
 	
 	sdb::TreeNode::MaxNumKeysPerNode = 128;
     sdb::TreeNode::MinNumKeysPerNode = 16;
-    KdTree::MaxBuildLevel = m_level;
-	KdTree::NumPrimitivesInLeafThreashold = 128;
 	
 #if TEST_MESH
 	unsigned i=0;
@@ -70,7 +68,10 @@ void SceneContainer::testMesh()
 	for(;i<NUM_MESHES;++i)
 		m_tree->addGeometry(m_mesh[i]);
 	
-	m_tree->create();
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 128;
+	bf._maxLevel = m_level;
+	m_tree->create(&bf);
 }
 
 void SceneContainer::testCurve()
@@ -157,7 +158,6 @@ void SceneContainer::upLevel()
 {
 	m_level++;
 	if(m_level > 30) m_level = 30;
-	KdTree::MaxBuildLevel = m_level;
 #if TEST_MESH
 	//m_tree->rebuild();
 	delete m_tree;
@@ -172,7 +172,6 @@ void SceneContainer::downLevel()
 {
 	m_level--;
 	if(m_level<2) m_level = 2;
-	KdTree::MaxBuildLevel = m_level;
 #if TEST_MESH
 	//m_tree->rebuild();
 	delete m_tree;

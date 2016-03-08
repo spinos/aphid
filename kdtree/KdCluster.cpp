@@ -26,7 +26,10 @@ void KdCluster::setGroupGeometry(unsigned idx, GeometryArray * geos)
 
 void KdCluster::create()
 {
-	KdTree::create();
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 128;
+	bf._maxLevel = 8;
+	KdTree::create(&bf);
 	KdTreeNode * root = getRoot();
 	if(!root) return;
 	

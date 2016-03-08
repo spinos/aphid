@@ -12,6 +12,9 @@
 
 namespace aphid {
 
+int KdTreeBuilder::MaxLeafPrimThreashold = 64;
+int KdTreeBuilder::MaxBuildLevel = 32;
+	
 KdTreeBuilder::KdTreeBuilder() {}
 KdTreeBuilder::~KdTreeBuilder() {}
 
@@ -20,23 +23,24 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 	m_context = &ctx;
 	m_bbox = ctx.getBBox();
 	
-	initBins(m_bbox);
+	if(m_context->isCompressed() )
+		calcSoftBin(m_context->grid(), m_bbox);
+	else
+		calcSoftBin(m_context->numPrims(),
+				m_context->indices(),
+				BuildKdTreeContext::GlobalContext->primitiveBoxes(),
+				m_bbox );
+				
+	initEvents(m_bbox);
+
+	if(m_context->isCompressed() )
+		calcEvent(m_context->grid(), m_bbox);
+	else
+		calcEvent(m_bbox,
+				m_context->numPrims(),
+				m_context->indices(),
+				BuildKdTreeContext::GlobalContext->primitiveBoxes() );
 	
-	if(m_context->isCompressed() ) {
-		calculateCompressBins(m_context->grid(), m_bbox);
-		initEvents(m_bbox);
-		calculateCompressSplitEvents(m_context->grid(), m_bbox);
-	}
-	else {
-		calculateBins(m_context->getNumPrimitives(),
-				m_context->indices(),
-				BuildKdTreeContext::GlobalContext->primitiveBoxes() );
-		initEvents(m_bbox);
-		calculateSplitEvents(m_bbox,
-				m_context->getNumPrimitives(),
-				m_context->indices(),
-				BuildKdTreeContext::GlobalContext->primitiveBoxes() );
-	}
 	
 	calculateCosts(m_bbox);
 }
@@ -44,23 +48,23 @@ void KdTreeBuilder::setContext(BuildKdTreeContext &ctx)
 const SplitEvent *KdTreeBuilder::bestSplit()
 {
 	splitAtLowestCost(m_bbox);
-	return &m_event[m_bestEventIdx];
+	return split(m_bestEventIdx);
 }
 
 void KdTreeBuilder::partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
 {
 	
-	SplitEvent &e = m_event[m_bestEventIdx];
+	const SplitEvent *e = split(m_bestEventIdx);
 	
 	BoundingBox leftBox, rightBox;
-	m_bbox.split(e.getAxis(), e.getPos(), leftBox, rightBox);
+	m_bbox.split(e->getAxis(), e->getPos(), leftBox, rightBox);
 	leftCtx.setBBox(leftBox);
 	rightCtx.setBBox(rightBox);
 	
 	if(m_context->isCompressed() )
-		partitionCompress(e, leftBox, rightBox, leftCtx, rightCtx);
+		partitionCompress(*e, leftBox, rightBox, leftCtx, rightCtx);
 	else 
-		partitionPrims(e, leftBox, rightBox, leftCtx, rightCtx);
+		partitionPrims(*e, leftBox, rightBox, leftCtx, rightCtx);
 	
 }
 
@@ -93,26 +97,11 @@ void KdTreeBuilder::partitionCompress(const SplitEvent & e,
 		grd->next();
 	}
 	 
-	if(e.leftCount() > 0) {
-		leftCtx.countPrimsInGrid();
-#if 0
-		const int ncl = leftCtx.numCells();
-		if(leftCtx.decompress())
-			std::cout<<"\n decomp lft cell "<<ncl<<" n prim "<<leftCtx.getNumPrimitives();
-#else
-		leftCtx.decompress();
-#endif
-	}
-	if(e.rightCount() > 0) {
-		rightCtx.countPrimsInGrid();
-#if 0
-		const int ncr = rightCtx.numCells();
-		if(rightCtx.decompress())
-			std::cout<<"\n decomp rgt cell "<<ncr<<" n prim "<<rightCtx.getNumPrimitives();
-#else
-		rightCtx.decompress();
-#endif
-	}
+	if(e.leftCount() > 0)
+		leftCtx.decompressPrimitives();
+	
+	if(e.rightCount() > 0)
+		rightCtx.decompressPrimitives();
 	
 }
 
@@ -124,8 +113,8 @@ void KdTreeBuilder::partitionPrims(const SplitEvent & e,
 	const sdb::VectorArray<unsigned> & indices = m_context->indices();
 	
 	int side;
-	const unsigned nprim = m_context->getNumPrimitives();
-	for(unsigned i = 0; i < nprim; i++) {
+	const int nprim = m_context->numPrims();
+	for(int i = 0; i < nprim; i++) {
 		
 		const BoundingBox * primBox = boxSrc[*indices[i]];
 		
@@ -133,24 +122,15 @@ void KdTreeBuilder::partitionPrims(const SplitEvent & e,
 		
 		if(side < 2) {
 			//if(primBox->touch(leftBox))
-			leftCtx.addIndex(*indices[i]);
+			leftCtx.addPrimitive(*indices[i]);
 		}
 		if(side > 0) {
 			//if(primBox->touch(rightBox))
-			rightCtx.addIndex(*indices[i]);
+			rightCtx.addPrimitive(*indices[i]);
 		}		
 	}
 	
 	/// std::cout<<"\n part prim "<<leftCtx.getNumPrimitives()<<"/"<<rightCtx.getNumPrimitives();
-}
-
-void KdTreeBuilder::verbose() const
-{
-	const unsigned nprim = m_context->getNumPrimitives();
-	
-	printf("unsplit cost %f = 2 * %i box %f\n", 2.f * nprim, nprim, m_bbox.area());
-	m_event[m_bestEventIdx].verbose();
-	printf("chose split %i: %i\n", m_bestEventIdx/SplitEvent::NumEventPerDimension,  m_bestEventIdx%SplitEvent::NumEventPerDimension);
 }
 
 }

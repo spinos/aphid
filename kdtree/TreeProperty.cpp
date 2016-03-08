@@ -56,6 +56,9 @@ void TreeProperty::updateNPrim(int x)
 	m_totalNPrim += x;
 }
 
+int TreeProperty::numNoEmptyLeaves() const
+{ return m_numLeafNodes; }
+
 std::string TreeProperty::logProperty() const
 {
 	std::stringstream sst;

@@ -16,14 +16,9 @@
 
 namespace aphid {
 
-int KdTree::MaxBuildLevel = 32;
-unsigned KdTree::NumPrimitivesInLeafThreashold = 32;
-
 KdTree::KdTree() 
 {
 	m_root = 0;
-	m_maxLeafLevel = 0;
-	m_numNoEmptyLeaf = 0;
 }
 
 KdTree::~KdTree() 
@@ -47,8 +42,11 @@ void KdTree::addGeometry(Geometry * geo)
 	updateBBox(geo->calculateBBox());
 }
 
-void KdTree::create()
+void KdTree::create(BuildProfile * prof)
 {	
+	KdTreeBuilder::MaxLeafPrimThreashold = prof->_maxLeafPrims;
+	KdTreeBuilder::MaxBuildLevel = prof->_maxLevel;
+
 	m_root = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2);
 	
 	const BoundingBox & b = getBBox();
@@ -63,12 +61,10 @@ void KdTree::create()
     std::cout<<"\n Kd tree building...";
 	bTimer.restart();
 	
-	m_maxLeafLevel = 0;
-	m_numNoEmptyLeaf = 0;
+	resetPropery();
+	setTotalVolume(b.volume() );
 	
 	BuildKdTreeContext::GlobalContext = ctx;
-	m_minNumLeafPrims = 1<<28;
-	m_maxNumLeafPrims = 0;
 	
 	subdivide(m_root, *ctx, 0);
 	//ctx->verbose();
@@ -77,13 +73,8 @@ void KdTree::create()
 	m_stream.removeInput();
     sst << "\n Kd tree built in " << bTimer.elapsed() << " secs"
 	<<"\n total num nodes "<<m_stream.numNodes()
-	<<"\n max leaf level: "<<m_maxLeafLevel
-	<<"\n num no-empty leaves "<<m_numNoEmptyLeaf
-	<<"\n num prim indirections "<<m_stream.numIndirections();
-	if( m_stream.numIndirections() > 0) {
-		sst <<"\n min/max leaf prims "<<m_minNumLeafPrims<<"/"<<m_maxNumLeafPrims
-		<<"   average "<<(float)m_stream.numIndirections()/(float)m_numNoEmptyLeaf;
-	}
+	<<"\n num prim indirections "<<m_stream.numIndirections()
+	<<logProperty();
     m_buildLogStr = sst.str();
     std::cout<<m_buildLogStr;
 }
@@ -97,10 +88,9 @@ void KdTree::clear()
 
 void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 {
-	if(ctx.getNumPrimitives() < NumPrimitivesInLeafThreashold 
-		|| level == KdTree::MaxBuildLevel) {
-		/// if(ctx.isCompressed()) std::cout<<"\n still compressed "<<level;
-		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
+	addMaxLevel(level);
+	if(ctx.numPrims() < KdTreeBuilder::MaxLeafPrimThreashold 
+		|| level == KdTreeBuilder::MaxBuildLevel) {
 		createLeaf(node, ctx);
 		return;
 	}
@@ -112,8 +102,6 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	const SplitEvent *plane = builder.bestSplit();
 	
 	if(plane->getCost() > ctx.visitCost()) {
-		/// if(ctx.isCompressed()) std::cout<<"\n still compressed "<<level;
-		if(level > m_maxLeafLevel) m_maxLeafLevel = level;
 		createLeaf(node, ctx);
 		return;
 	}
@@ -124,6 +112,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	
 	node->setLeft(branch);
 	node->setLeaf(false);
+	addNInternal();
 
 	BuildKdTreeContext *leftCtx = new BuildKdTreeContext();
 	BuildKdTreeContext *rightCtx = new BuildKdTreeContext();
@@ -135,6 +124,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	else {
 		branch->leaf.combined = 6;
 		branch->setNumPrims(0);
+		addEmptyVolume(leftCtx->getBBox().volume() );
 	}
 		
 	delete leftCtx;
@@ -144,6 +134,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	else {
 		(branch+1)->leaf.combined = 6;
 		(branch+1)->setNumPrims(0);
+		addEmptyVolume(rightCtx->getBBox().volume() );
 	}
 		
 	delete rightCtx;
@@ -151,10 +142,13 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 
 void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 {
-	ctx.decompress(true);
+	ctx.decompressPrimitives(true);
 	node->setLeaf(true);
-	if(ctx.getNumPrimitives() < 1) return;
-	const unsigned numDir = ctx.getNumPrimitives();
+	if(ctx.numPrims() < 1) {
+		addEmptyVolume(ctx.getBBox().volume() );
+		return;
+	}
+	const int numDir = ctx.numPrims();
 	
 	const sdb::VectorArray<Primitive> &prim = m_stream.primitives();
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
@@ -162,16 +156,13 @@ void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 	node->setPrimStart(indir.size());
 	
 	const sdb::VectorArray<unsigned> & src = ctx.indices();
-	for(unsigned i = 0; i < numDir; i++)
+	for(int i = 0; i < numDir; i++)
 		indir.insert(*prim[*src[i]]);
-		
-	if(m_minNumLeafPrims > numDir )
-		m_minNumLeafPrims = numDir;
-	if(m_maxNumLeafPrims < numDir )
-		m_maxNumLeafPrims = numDir;
+	
+	addNLeaf();
+	updateNPrim(numDir);
 	
 	node->setNumPrims(numDir);
-	m_numNoEmptyLeaf++;
 }
 
 char KdTree::intersect(IntersectionContext * ctx)
@@ -351,9 +342,6 @@ char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 	}
 	return 1;
 }
-
-const unsigned KdTree::numNoEmptyLeaves() const
-{ return m_numNoEmptyLeaf; }
 
 const TypedEntity::Type KdTree::type() const
 { return TypedEntity::TKdTree; }

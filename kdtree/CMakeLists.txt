@@ -33,6 +33,8 @@ set (SOURCE_FILES "../shared/Base3DView.cpp"
 ../shared/KdTreeBuilder.cpp  
 ../shared/BuildKdTreeStream.cpp 
 ../kdtree/KdCluster.cpp
+../kdtree/PrimBoundary.cpp
+../kdtree/TreeProperty.cpp
 "main.cpp"
 "glWidget.cpp"
 "window.cpp"

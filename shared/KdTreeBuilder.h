@@ -29,7 +29,9 @@ public:
 	void partition(BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx);
 	
 	const SplitEvent *bestSplit();
-	void verbose() const;
+	
+	static int MaxLeafPrimThreashold;
+	static int MaxBuildLevel;
 	
 private:
 	void partitionCompress(const SplitEvent & e,

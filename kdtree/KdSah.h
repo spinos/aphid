@@ -20,8 +20,7 @@ public:
     void partition(SahSplit * leftSplit, SahSplit * rightSplit);
 	
 	sdb::VectorArray<T> * source();
-	
-	bool decompressGrid(bool forced = false);
+	bool decompressPrimitives(bool force=false);
 	
 	static SahSplit * GlobalSplitContext;
 	
@@ -54,6 +53,8 @@ void SahSplit<T>::initIndicesAndBoxes(const unsigned & num)
 		addPrimitive(i);
 		addPrimitiveBox(m_source->get(i)->calculateBBox() );
 	}
+	
+	if(numPrims() > 1024) compressPrimitives();
 }
 
 template <typename T>
@@ -112,20 +113,14 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 		if(side < 2) {
 			if(primBox.touch(leftBox)) {
 				leftSplit->addPrimitive(iprim);
-				// leftCount++;
 			}
 		}
 		if(side > 0) {
 			if(primBox.touch(rightBox)) {
 				rightSplit->addPrimitive(iprim);
-				// rightCount++;
 			}
 		}
 	}
-
-	// std::cout<<"\n partition "<<m_numPrims
-	//		<<" -> "<<leftCount
-	//		<<"|"<<rightCount;
 }
 
 template <typename T>
@@ -159,34 +154,24 @@ void SahSplit<T>::partitionCompress(const SplitEvent * e,
 		grd->next();
 	}
 	
-	if(e->leftCount() > 0) {
-		leftCtx->countPrimsInGrid();
-		leftCtx->decompressGrid();
-	}
-	if(e->rightCount() > 0) {
-		rightCtx->countPrimsInGrid();
-		rightCtx->decompressGrid();
-	}
-}
-
-template <typename T>
-bool SahSplit<T>::decompressGrid(bool forced)
-{
-	if(!grid()) return false;
-	if(numPrims() < 1024 
-		|| grid()->size() < 32
-		|| forced) {
-
-		uncompressGrid(GlobalSplitContext->primitiveBoxes());
-				
-		return true;
-	}
-	return false;
+	if(e->leftCount() > 0)
+		leftCtx->decompressPrimitives();
+		
+	if(e->rightCount() > 0)
+		rightCtx->decompressPrimitives();
+		
 }
 
 template <typename T>
 sdb::VectorArray<T> * SahSplit<T>::source()
 { return m_source; }
 	
+template <typename T>
+bool SahSplit<T>::decompressPrimitives(bool force)
+{ 
+	if(!force) countPrimsInGrid();
+	return decompress(GlobalSplitContext->primitiveBoxes(), force);
+}
+
 }
 //:~

@@ -54,10 +54,9 @@ void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree,
 	
 /// first split
 	SahSplit<T> splt(source);
+	splt.setBBox(box);
 	splt.initIndicesAndBoxes(source->size() );
-    splt.setBBox(box);
-	if(splt.numPrims() > 1024) splt.compressPrimitives();
-	
+    
 	SahSplit<T>::GlobalSplitContext = &splt;
 	
 	bud.build(&splt, tree);

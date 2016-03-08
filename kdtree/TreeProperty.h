@@ -43,6 +43,7 @@ public:
 	void addNInternal();
 	void addNLeaf();
 	void updateNPrim(int x);
+	int numNoEmptyLeaves() const;
 	
 protected:
 	void resetPropery();

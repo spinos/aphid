@@ -2,8 +2,9 @@
 
 namespace aphid {
 
-PrimBoundary::PrimBoundary() : m_numPrims(0),
-m_grid(NULL)
+PrimBoundary::PrimBoundary() : 
+m_grid(NULL),
+m_numPrims(0)
 {}
 
 PrimBoundary::~PrimBoundary() 
@@ -12,7 +13,7 @@ PrimBoundary::~PrimBoundary()
 float PrimBoundary::visitCost() const
 { return 2.f * m_numPrims; }
 	
-const unsigned & PrimBoundary::numPrims() const 
+const int & PrimBoundary::numPrims() const 
 { return m_numPrims; }
 
 bool PrimBoundary::isEmpty() const
@@ -30,7 +31,7 @@ void PrimBoundary::addPrimitiveBox(const BoundingBox & b)
 void PrimBoundary::compressPrimitives()
 {
 	m_grid = new GridClustering();
-	m_grid->setGridSize(getBBox().getLongestDistance() / 32.f);
+	m_grid->setGridSize(getBBox().getLongestDistance() / 64.f);
 	
 	int i = 0;
 	for(;i<m_numPrims; i++)
@@ -67,6 +68,21 @@ void PrimBoundary::uncompressGrid(const sdb::VectorArray<BoundingBox> & boxSrc)
 		
 	delete m_grid;
 	m_grid = NULL;
+}
+
+bool PrimBoundary::decompress(const sdb::VectorArray<BoundingBox> & boxSrc, 
+		bool forced)
+{
+	if(!grid()) return false;
+	if(numPrims() < 1024 
+		|| grid()->size() < 32
+		|| forced) {
+
+		uncompressGrid(boxSrc);
+		
+		return true;
+	}
+	return false;
 }
 
 void PrimBoundary::createGrid(const float & x)
