@@ -42,9 +42,6 @@ void PrimBoundary::compressPrimitives()
 const sdb::VectorArray<unsigned> & PrimBoundary::indices() const
 { return m_indices; }
 
-const unsigned & PrimBoundary::indexAt(const unsigned & idx) const
-{ return *m_indices[idx]; }
-
 GridClustering * PrimBoundary::grid()
 { return m_grid; }
 

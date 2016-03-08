@@ -105,7 +105,7 @@ void SahSplit<T>::partition(SahSplit * leftSplit, SahSplit * rightSplit)
 	const unsigned n = numPrims();
 	int side;
 	for(unsigned i = 0; i < n; i++) {
-		const unsigned iprim = indexAt(i);
+		const unsigned iprim = *indices()[i];
 		const BoundingBox & primBox = *primBoxes[iprim];
 		
 		side = e->side(primBox);

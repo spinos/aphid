@@ -208,7 +208,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * 
 		primLen = parent->numPrims();
 		int i = 0;
 		for(;i<parent->numPrims();i++)
-			m_tree->addDataIndex( parent->indexAt(i) );
+			m_tree->addDataIndex( *parent->indices()[i] );
 			
 		m_tree->addNLeaf();
 		m_tree->updateNPrim(primLen);

@@ -22,7 +22,6 @@ public:
 	void compressPrimitives();
     
 	const sdb::VectorArray<unsigned> & indices() const;
-	const unsigned & indexAt(const unsigned & idx) const;
 	
 	bool isCompressed() const;
 	void verbose() const;
