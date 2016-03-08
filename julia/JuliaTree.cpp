@@ -69,7 +69,11 @@ void JuliaTree::buildSphere(const std::string & name)
     
     KdNTree<cvx::Cube, KdNode4 > tree;
     KdEngine<cvx::Cube> engine;
-    engine.buildTree(&tree, &cs, grd.boundingBox(), 4);
+    TreeProperty::BuildProfile bf;
+    bf._maxLeafPrims = 5;
+    bf._unquantized = false;
+    
+    engine.buildTree(&tree, &cs, grd.boundingBox(), &bf);
     // engine.printTree(&tree);
 }
 

@@ -11,6 +11,8 @@
 #include <iostream>
 
 namespace aphid {
+    
+bool MinMaxBins::UnqunatizedPosition = true;
 
 MinMaxBins::MinMaxBins() : m_isFlat(0),
 m_isEven(false),
@@ -50,13 +52,13 @@ bool MinMaxBins::insertSplitPos(const float & x)
 	for(i=1;i<m_numSplits;++i) {
 /// move forward
 /// no need for integer coord
-#if 0
+    if(UnqunatizedPosition) {
 		if(x < m_pos[i] + m_delta && i < m_numSplits - 1) {
 			if(x>m_pos[i-1] + m_delta * 2.f)
 				m_pos[i] = x - m_delta;
 				return true;
 		}
-#endif		
+	}		
 		if(x > (m_pos[i-1] + m_delta) 
 			&& x < (m_pos[i] - m_delta) ) {
 /// push following

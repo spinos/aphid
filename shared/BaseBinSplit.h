@@ -32,6 +32,7 @@ protected:
 	void initEvents(const BoundingBox & b);
 	SplitEvent * splitAt(int axis, int idx);
 	SplitEvent * split(int idx);
+	SplitEvent * firstEventAlong(const int & axis);
 	void splitAtLowestCost(const BoundingBox & b);
 	void calcEvenBin(const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
@@ -52,7 +53,8 @@ protected:
 			const BoundingBox & box);
 	
 private:
-	void initEventsAlong(const BoundingBox & b, const int &axis);
+	void initEventsAlong(SplitEvent * e,
+	        const BoundingBox & b, const int &axis);
 	void updateEventBBoxAlong(const BoundingBox & box,
 			const int &axis, const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
@@ -69,6 +71,7 @@ private:
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
 	bool cutoffEmptySpace(int & dst, const BoundingBox & bb, const float & minVol);
+	bool isEmptyAlong(const int & axis) const;
 	
 };
 

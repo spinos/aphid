@@ -61,6 +61,8 @@ public:
 	int maxNumSplits() const;
 	void verbose() const;
 	
+	static bool UnqunatizedPosition;
+	
 private:
 	const float & firstSplitPos() const;
 	const float & lastSplitPos() const;

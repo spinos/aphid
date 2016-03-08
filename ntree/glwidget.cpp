@@ -35,7 +35,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 		rootBox.expandBy(a.calculateBBox());
     }
 	
-	m_engine.buildTree(m_tree, m_source, rootBox, 7);
+    TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 8;
+    m_engine.buildTree(m_tree, m_source, rootBox, &bf);
 	// m_engine.printTree(m_tree);
 	
 	const double nearClip = 1.001f;

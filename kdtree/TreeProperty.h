@@ -23,6 +23,18 @@ class TreeProperty {
 	float m_totalVolume;
 	
 public:
+    struct BuildProfile {
+        int _maxLeafPrims;
+        int _maxLevel;
+        bool _unquantized;
+        
+        BuildProfile() {
+            _maxLeafPrims = 8;
+            _maxLevel = 8;
+            _unquantized = true;
+        }
+    };
+    
 	TreeProperty();
 	virtual ~TreeProperty();
 	void addMaxLevel(int x);

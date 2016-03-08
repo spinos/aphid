@@ -23,8 +23,7 @@ public:
 	
 	void buildTree(KdNTree<T, KdNode4 > * tree, 
 					sdb::VectorArray<T> * source, const BoundingBox & box,
-					int maxLeafPrim = 8,
-					int maxLevel = 8);
+					const TreeProperty::BuildProfile * prof);
 	
 	void printTree(KdNTree<T, KdNode4 > * tree);
 	// typedef KdNTree<T, KdNode4 > TreeType;
@@ -45,12 +44,13 @@ KdEngine<T>::~KdEngine() {}
 template<typename T>
 void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree, 
 							sdb::VectorArray<T> * source, const BoundingBox & box,
-							int maxLeafPrim, int maxLevel)
+							const TreeProperty::BuildProfile * prof)
 {
 	tree->init(source, box);
     KdNBuilder<4, T, KdNode4 > bud;
-	bud.SetNumPrimsInLeaf(maxLeafPrim);
-	bud.MaxTreeletLevel = maxLevel;
+	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);
+	bud.MaxTreeletLevel = prof->_maxLevel;
+	MinMaxBins::UnqunatizedPosition = prof->_unquantized;
 	
 /// first split
 	SahSplit<T> splt(source);
