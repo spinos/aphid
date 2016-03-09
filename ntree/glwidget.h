@@ -14,7 +14,7 @@ class GLWidget : public aphid::Base3DView
 
 public:
     
-    GLWidget(QWidget *parent = 0);
+    GLWidget(const std::string & filename, QWidget *parent = 0);
     ~GLWidget();
 	
 protected:    
@@ -38,7 +38,8 @@ private:
 	
 private slots:
     void simulate();
-    
+    bool readTree(const std::string & filename);
+	
 private:
 	KdEngine<cvx::Sphere> m_engine;
 	sdb::VectorArray<cvx::Sphere> * m_source;

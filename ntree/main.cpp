@@ -5,9 +5,10 @@
 
 int main(int argc, char *argv[])
 {
-    qDebug()<<"main";
+	std::string tgt;
+    if(argc>1) tgt = argv[1];
     QApplication app(argc, argv);
-    Window window;
+    Window window(tgt);
     //window.showMaximized();
     window.resize(720, 540);
     window.show();

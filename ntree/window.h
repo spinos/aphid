@@ -14,7 +14,7 @@ class Window : public QMainWindow
     Q_OBJECT
 
 public:
-    Window();
+    Window(const std::string & filename);
 
 protected:
     void keyPressEvent(QKeyEvent *event);

@@ -14,8 +14,19 @@
 
 namespace aphid {
 
+class HBaseNTree : public HBase {
+
+public:
+	HBaseNTree(const std::string & name);
+	virtual ~HBaseNTree();
+	
+	virtual char verifyType();
+
+protected:
+};
+
 template <typename T, typename Tn>
-class HNTree : public KdNTree<T, Tn>, public HBase {
+class HNTree : public KdNTree<T, Tn>, public HBaseNTree {
 	
 public:
 	HNTree(const std::string & name);
@@ -23,15 +34,17 @@ public:
 	
 	virtual char save();
 	virtual char load();
-    virtual char verifyType();
-
+    
 protected:
 	void save240Node();
 	void saveLeaf();
 	void saveInd();
 	void saveRope();
 	
-	void read240Node();
+	void load240Node();
+	void loadLeaf();
+	void loadInd();
+	void loadRope();
 	
 private:
 
@@ -39,7 +52,7 @@ private:
 
 template <typename T, typename Tn>
 HNTree<T, Tn>::HNTree(const std::string & name) :
-HBase(name)
+HBaseNTree(name)
 {}
 
 template <typename T, typename Tn>
@@ -179,35 +192,25 @@ void HNTree<T, Tn>::saveRope()
 }
 
 template <typename T, typename Tn>
-char HNTree<T, Tn>::verifyType()
-{
-	if(!hasNamedAttr(".nrope") ) return 0;
-	if(!hasNamedData(".rope") ) return 0;
-	if(!hasNamedAttr(".nind") ) return 0;
-	if(!hasNamedData(".ind") ) return 0;
-	if(!hasNamedAttr(".nleaf") ) return 0;
-	if(!hasNamedData(".leaf") ) return 0;
-	if(!hasNamedAttr(".nnode") ) return 0;
-	if(!hasNamedData(".node") ) return 0;
-	if(!hasNamedAttr(".bbx") ) return 0;
-	return 1;
-}
-
-template <typename T, typename Tn>
 char HNTree<T, Tn>::load()
 {
 	BoundingBox b;
 	readFloatAttr(".bbx", (float *)&b );
 	KdNTree<T, Tn>::clear(b);
+	std::cout<<"\n bbox "<<b;
 	
 	if(sizeof(Tn) == 240) 
-		read240Node();
+		load240Node();
 		
+	loadLeaf();
+	loadInd();
+	loadRope();
+	
 	return 1;
 }
 
 template <typename T, typename Tn>
-void HNTree<T, Tn>::read240Node()
+void HNTree<T, Tn>::load240Node()
 {
 	int n =0;
 	readIntAttr(".nnode", &n);
@@ -216,12 +219,72 @@ void HNTree<T, Tn>::read240Node()
 	if(!treeletD.openStorage(fObjectId)) 
 		return;
 	
-	Tn atreelet;
 	int i=0;
 	for(;i<n;++i) {
-		treeletD.readColumn((char *)&atreelet, i);
+		treeletD.readColumn((char *)KdNTree<T, Tn>::addTreelet(), i);
 	}
+	
 	std::cout<<"\n load "<<n<<" node240";
+}
+
+template <typename T, typename Tn>
+void HNTree<T, Tn>::loadLeaf()
+{
+	int n =0;
+	readIntAttr(".nleaf", &n);
+	
+	HOocArray<hdata::TInt, 8, 256> leafD(".leaf");
+	if(!leafD.openStorage(fObjectId))
+		return;
+	
+	int i=0;
+	for(;i<n;++i) {
+		leafD.readColumn((char *)KdNTree<T, Tn>::addLeaf(), i);
+	}
+	
+	std::cout<<"\n load "<<n<<" leaf";
+}
+
+template <typename T, typename Tn>
+void HNTree<T, Tn>::loadInd()
+{
+	int n =0;
+	readIntAttr(".nind", &n);
+	
+	HOocArray<hdata::TInt, 64, 64> indD(".ind");
+	if(!indD.openStorage(fObjectId))
+		return;
+	
+	int b[64];
+	int i=0, j=0;
+	for(;i<n;++i) {
+		if((i & 63) == 0) {
+			indD.readColumn((char *)b, j);
+			j++;
+		}
+		*KdNTree<T, Tn>::addIndirection() = b[i & 63];
+	}
+	
+	std::cout<<"\n load "<<n<<" indirection";
+}
+	
+template <typename T, typename Tn>
+void HNTree<T, Tn>::loadRope()
+{
+	int n =0;
+	readIntAttr(".nrope", &n);
+	
+	HOocArray<hdata::TFloat, 8, 256> ropeD(".rope");
+	if(!ropeD.openStorage(fObjectId))
+		return;
+	
+	KdNTree<T, Tn>::createRopes(n);
+	int i=0;
+	for(;i<n;++i) {
+		ropeD.readColumn((char *)KdNTree<T, Tn>::ropesR(i), i);
+	}
+	
+	std::cout<<"\n save "<<n<<" rope";
 }
 
 }

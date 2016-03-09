@@ -24,6 +24,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/KdNNode.h
 ../kdtree/KdSah.h
 ../kdtree/TreeProperty.h
+../kdtree/HNTree.h
+NTreeIO.h
 NTreeDrawer.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -36,6 +38,8 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/DrawBox.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
+../kdtree/HNTree.cpp
+NTreeIO.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
@@ -45,6 +49,71 @@ set (SOURCE_FILES ${SOURCE_FILES} "../shared/gExtension.cpp")
 endif ()
 
 add_executable (testntree ${HEADER_FILES} ${SOURCE_FILES})
+
+SET (INSTALLED_HDF5 OFF)
+if (WIN32)
+	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+# location of configure file FindHDF5.cmake
+		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
+        SET (INSTALLED_HDF5 ON)
+    ELSE (EXISTS "D:/usr/hdf5")
+        SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
+        SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+	ENDIF ()
+ELSE ()
+	SET (INSTALLED_HDF5 ON)
+endif ()
+
+IF (INSTALLED_HDF5)
+FIND_PACKAGE (HDF5 REQUIRED)
+IF (WIN32)
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
+ENDIF ()
+ENDIF ()
+
+MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
+MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
+
+include_directories (${HDF5_INCLUDE_DIRS})
+target_link_libraries (testntree ${HDF5_LIBRARIES})
+
+if(WIN32)
+##SET (ZLIB_DIR "C:/Program Files/ZLIB/cmake/ZLIB")
+##SET (ZLIB_INCLUDE_DIR "C:/Program Files/ZLIB/include")
+##SET (ZLIB_LIBRARY "C:/Program Files/ZLIB/lib/libzlib.lib")
+SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
+endif()
+
+FIND_PACKAGE (ZLIB REQUIRED)
+MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
+MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
+MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
+
+target_link_libraries (testntree ${ZLIB_LIBRARIES})
+
+IF (WIN32)
+set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
+set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
+
+ELSEIF (APPLE)
+set (SZIP_DIR "/usr/local/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "/usr/local/include")
+set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
+
+ENDIF ()
+
+FIND_PACKAGE (SZIP REQUIRED)
+MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
+MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
+MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
+MESSAGE (" szip library is " ${SZIP_LIBRARY})
+
+target_link_libraries (testntree ${SZIP_LIBRARY})
 
 find_package (OpenGL REQUIRED)
 target_link_libraries (testntree ${OPENGL_LIBRARIES})
@@ -57,13 +126,11 @@ else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
 /users/jianzhang/aphid/lib/libaphidUI.a
+/users/jianzhang/aphid/lib/libaphidH5.a
 /users/jianzhang/aphid/lib/libaphidSdb.a)
 endif ()
 
 target_link_libraries (testntree ${Aphid_Library})
-
-find_package (zlib REQUIRED)
-target_link_libraries (testntree ${ZLIB_LIBRARIES})
 
 if(WIN32)
 set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")

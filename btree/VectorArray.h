@@ -78,6 +78,9 @@ public:
 	
 	const T * operator[] (int idx) const
 	{ return m_data[idx]; }
+	
+	T * last ()
+	{ return m_data[m_numData-1]; }
 };
 
 }

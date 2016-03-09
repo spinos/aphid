@@ -148,16 +148,22 @@ public:
 	
 protected:
 	const BoundingBox * ropes() const;
+	BoundingBox * ropesR(const int & idx);
 	const sdb::VectorArray<int> & leafIndirection() const;
 	int numLeafIndirection() const;
 	void clear(const BoundingBox & b);
-	
+	Tn * addTreelet();
+	knt::TreeLeaf * addLeaf();
+	int * addIndirection();
+
 private:
 	void clear();
 };
 
 template <typename T, typename Tn>
-KdNTree<T, Tn>::KdNTree() 
+KdNTree<T, Tn>::KdNTree() :
+m_ropes(NULL),
+m_numRopes(0)
 {}
 
 template <typename T, typename Tn>
@@ -235,6 +241,13 @@ int KdNTree<T, Tn>::addBranch()
 }
 
 template <typename T, typename Tn>
+Tn * KdNTree<T, Tn>::addTreelet()
+{ 
+	m_nodePool.insert(); 
+	return m_nodePool.last();
+}
+
+template <typename T, typename Tn>
 T * KdNTree<T, Tn>::dataAt(unsigned idx) const
 { return m_source->get(*m_leafDataIndices[idx]); }
 
@@ -248,6 +261,20 @@ void KdNTree<T, Tn>::addLeafNode(unsigned primStart)
 	knt::TreeLeaf l;
 	l._primStart = primStart;
 	m_leafNodes.insert(l);
+}
+
+template <typename T, typename Tn>
+knt::TreeLeaf * KdNTree<T, Tn>::addLeaf()
+{ 
+	m_leafNodes.insert();
+	return m_leafNodes.last();
+}
+
+template <typename T, typename Tn>
+int * KdNTree<T, Tn>::addIndirection()
+{
+	m_leafDataIndices.insert();
+	return m_leafDataIndices.last();
 }
 
 template <typename T, typename Tn>
@@ -311,6 +338,10 @@ const int & KdNTree<T, Tn>::numRopes() const
 template <typename T, typename Tn>
 const BoundingBox * KdNTree<T, Tn>::ropes() const
 { return m_ropes; }
+
+template <typename T, typename Tn>
+BoundingBox * KdNTree<T, Tn>::ropesR(const int & idx)
+{ return &m_ropes[idx]; }
 
 template <typename T, typename Tn>
 const sdb::VectorArray<int> & KdNTree<T, Tn>::leafIndirection() const

@@ -4,13 +4,13 @@
 #include "window.h"
 
 //! [0]
-Window::Window()
+Window::Window(const std::string & filename)
 {
-    qDebug()<<"window";
-    glWidget = new GLWidget;
+    glWidget = new GLWidget(filename);
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("KdNTree"));
+    if(filename.size() < 1) setWindowTitle(tr("KdNTree"));
+	else setWindowTitle(tr(filename.c_str()));
 }
 //! [1]
 

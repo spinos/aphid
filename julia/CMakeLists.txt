@@ -4,12 +4,14 @@ SET (CMAKE_AUTOMOC ON)
 SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 SET (CMAKE_BUILD_TYPE Release)
 include_directories ("../shared" "../btree"
+../ntree
 ../kdtree)
 
 set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
 ../kdtree/HNTree.h
 ../kdtree/KdEngine.h
+../ntree/NTreeIO.h
 QuatJulia.h
 JuliaTree.h
 Parameter.h
@@ -22,6 +24,8 @@ set (SOURCE_FILES
 ../shared/BaseBinSplit.cpp 
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
+../kdtree/HNTree.cpp
+../ntree/NTreeIO.cpp
 Parameter.cpp 
 QuatJulia.cpp
 JuliaTree.cpp

@@ -4,8 +4,9 @@
 #include "glwidget.h"
 #include <GeoDrawer.h>
 #include <NTreeDrawer.h>
+#include <NTreeIO.h>
 
-GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
+GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
@@ -17,9 +18,6 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_source = new sdb::VectorArray<cvx::Sphere>();
 	m_tree = new KdNTree<cvx::Sphere, KdNode4 >();
 	
-	std::cout<<"\n size of sphere "<<sizeof(cvx::Sphere);
-	std::cout<<"\n size of capsule "<<sizeof(cvx::Capsule);
-	std::cout<<"\n size of tree4 "<<sizeof(KdNode4);
 	BoundingBox rootBox;
     int i;
     for(i=0; i<n; i++) {
@@ -40,18 +38,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
     m_engine.buildTree(m_tree, m_source, rootBox, &bf);
 	// m_engine.printTree(m_tree);
 	
-	const double nearClip = 1.001f;
-    const double farClip = 999.999f;
-    const double hAperture = 1.f;
-    const double vAperture = .75f;
-    const double aov = 55.f;
-	Matrix44F camspace;
-	camspace.rotateX( .05f);
-	camspace.rotateY(-.14f);
-	camspace.setTranslation(10.f, 10.f, 170.f);
-	
 	m_maxDrawTreeLevel = 1;
-    // std::cout<<"\n size of node "<<sizeof(KdNode4);
+	
+	if(filename.size() > 1) readTree(filename);
 }
 //! [0]
 
@@ -238,4 +227,24 @@ void GLWidget::resizeEvent(QResizeEvent * event)
     QSize renderAreaSize = size();
     // qDebug()<<"render size "<<renderAreaSize.width()<<" "<<renderAreaSize.height();
     Base3DView::resizeEvent(event);
+}
+
+bool GLWidget::readTree(const std::string & filename)
+{
+	bool stat = false;
+	NTreeIO hio;
+	if(!hio.begin(filename) ) return false;
+	
+	std::string gridName;
+	stat = hio.findGrid(gridName);
+	if(stat) std::cout<<"\n grid "<<gridName;
+	
+	cvx::ShapeType vt = hio.gridValueType(gridName);
+    
+	std::string treeName;
+	stat = hio.findTree(treeName, gridName);
+	if(stat && vt == cvx::TSphere) hio.loadSphereTree(treeName);
+	
+	hio.end();
+	return true;
 }

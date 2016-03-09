@@ -24,12 +24,16 @@ class TreeProperty {
 	
 public:
     struct BuildProfile {
+		int _minBNodeNumKeys;
+        int _maxBNodeNumKeys;
         int _maxLeafPrims;
         int _maxLevel;
         bool _unquantized;
         
         BuildProfile() {
-            _maxLeafPrims = 8;
+			_minBNodeNumKeys = 16;
+            _maxBNodeNumKeys = 128;
+			_maxLeafPrims = 8;
             _maxLevel = 8;
             _unquantized = true;
         }

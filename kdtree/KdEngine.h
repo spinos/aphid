@@ -50,6 +50,8 @@ void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree,
     KdNBuilder<4, T, KdNode4 > bud;
 	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);
 	bud.MaxTreeletLevel = prof->_maxLevel;
+	sdb::TreeNode::MaxNumKeysPerNode = prof->_maxBNodeNumKeys;
+	sdb::TreeNode::MinNumKeysPerNode = prof->_minBNodeNumKeys;
 	
 /// first split
 	SahSplit<T> splt(source);
