@@ -11,8 +11,6 @@
 #include <iostream>
 
 namespace aphid {
-    
-bool MinMaxBins::UnqunatizedPosition = true;
 
 MinMaxBins::MinMaxBins() : 
 
@@ -78,16 +76,13 @@ bool MinMaxBins::insertSplitPos(const float & x)
 #else
 	int lft, rgt;
 	getGrid(x, lft, rgt);
-	if(UnqunatizedPosition) {
 /// move right forward		
 		if(rgt < m_numSplits-1) {
-			if(x > m_pos[rgt] - m_delta 
-				&& x>m_pos[lft] + m_delta) {
+			if(x>m_pos[lft] + m_delta) {
 				m_pos[rgt] = x;
 				return true;
 			}
 		}
-	}
 	
 	if(x > (m_pos[lft] + m_delta) 
 			&& x < (m_pos[rgt] - m_delta) ) {

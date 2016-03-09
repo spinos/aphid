@@ -75,7 +75,7 @@ bool PrimBoundary::decompress(const sdb::VectorArray<BoundingBox> & boxSrc,
 {
 	if(!grid()) return false;
 	if(numPrims() < 1024 
-		|| grid()->size() < 32
+		|| grid()->size() < 8
 		|| forced) {
 
 		uncompressGrid(boxSrc);

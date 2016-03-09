@@ -50,7 +50,6 @@ void KdEngine<T>::buildTree(KdNTree<T, KdNode4 > * tree,
     KdNBuilder<4, T, KdNode4 > bud;
 	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);
 	bud.MaxTreeletLevel = prof->_maxLevel;
-	MinMaxBins::UnqunatizedPosition = prof->_unquantized;
 	
 /// first split
 	SahSplit<T> splt(source);

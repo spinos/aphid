@@ -46,7 +46,6 @@ void KdTree::create(BuildProfile * prof)
 {	
 	KdTreeBuilder::MaxLeafPrimThreashold = prof->_maxLeafPrims;
 	KdTreeBuilder::MaxBuildLevel = prof->_maxLevel;
-	MinMaxBins::UnqunatizedPosition = prof->_unquantized;
 	
 	m_root = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2);
 	
