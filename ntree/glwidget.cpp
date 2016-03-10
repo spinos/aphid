@@ -13,15 +13,34 @@ GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(p
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
     
-    std::cout<<"\n test kdtree";
+	m_maxDrawTreeLevel = 1;
+	
+	m_source = NULL;
+	m_tree = NULL;
+	
+	if(filename.size() > 1) readTree(filename);
+	else testTree();
+}
+//! [0]
+
+//! [1]
+GLWidget::~GLWidget()
+{
+	delete m_source;
+	delete m_tree;
+}
+
+void GLWidget::testTree()
+{
+	std::cout<<"\n test kdtree";
 	const int n = 16512;
-    m_source = new sdb::VectorArray<cvx::Sphere>();
-	m_tree = new KdNTree<cvx::Sphere, KdNode4 >();
+    m_source = new sdb::VectorArray<cvx::Cube>();
+	m_tree = new KdNTree<cvx::Cube, KdNode4 >();
 	
 	BoundingBox rootBox;
     int i;
     for(i=0; i<n; i++) {
-        cvx::Sphere a;
+        cvx::Cube a;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
         float x = -60.f + 100.f * r * cos(th*1.1f);
@@ -37,18 +56,6 @@ GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(p
 	bf._maxLeafPrims = 8;
     m_engine.buildTree(m_tree, m_source, rootBox, &bf);
 	// m_engine.printTree(m_tree);
-	
-	m_maxDrawTreeLevel = 1;
-	
-	if(filename.size() > 1) readTree(filename);
-}
-//! [0]
-
-//! [1]
-GLWidget::~GLWidget()
-{
-	delete m_source;
-	delete m_tree;
 }
 
 void GLWidget::clientInit()
@@ -59,12 +66,13 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
 	// getDrawer()->frustum(&m_frustum);
-    drawBoxes();
+	drawBoxes();
     drawTree();
 }
 
 void GLWidget::drawBoxes() const
 {
+	if(!m_source) return;
     getDrawer()->setColor(.065f, .165f, .065f);
     const int n = m_source->size();
     int i = 0;
@@ -75,12 +83,13 @@ void GLWidget::drawBoxes() const
 
 void GLWidget::drawTree()
 {
+	if(!m_tree) return; 
 	m_treeletColI = 0;
 	getDrawer()->setColor(.15f, .25f, .35f);
 	getDrawer()->boundingBox(tree()->getBBox() );
 	
 	NTreeDrawer dr;
-	dr.drawTree<cvx::Sphere>(m_tree);
+	dr.drawTree<cvx::Cube>(m_tree);
 }
 
 void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
@@ -177,7 +186,7 @@ void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 	}
 }
 
-KdNTree<cvx::Sphere, KdNode4 > * GLWidget::tree()
+KdNTree<cvx::Cube, KdNode4 > * GLWidget::tree()
 { return m_tree; }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
@@ -191,11 +200,6 @@ void GLWidget::clientDeselect()
 
 //! [10]
 void GLWidget::clientMouseInput(Vector3F & stir)
-{
-}
-//! [10]
-
-void GLWidget::simulate()
 {
 }
 
@@ -243,7 +247,7 @@ bool GLWidget::readTree(const std::string & filename)
     
 	std::string treeName;
 	stat = hio.findTree(treeName, gridName);
-	if(stat && vt == cvx::TSphere) hio.loadSphereTree(treeName);
+	if(stat) m_tree= hio.loadCube4Tree(treeName);
 	
 	hio.end();
 	return true;

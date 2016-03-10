@@ -10,6 +10,7 @@
 #pragma once
 #include <HDocument.h>
 #include <ConvexShape.h>
+#include <HNTree.h>
 
 namespace aphid {
 
@@ -30,7 +31,7 @@ public:
 	
 	cvx::ShapeType gridValueType(const std::string & name);
 	
-	bool loadSphereTree(const std::string & name);
+	HNTree<cvx::Cube, KdNode4 > * loadCube4Tree(const std::string & name);
 	
 protected:
 

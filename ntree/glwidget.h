@@ -34,16 +34,16 @@ private:
 	void drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot = false);
     void drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level);
 	void drawALeaf(unsigned start, unsigned n, const BoundingBox & box);
-	KdNTree<cvx::Sphere, KdNode4 > * tree();
+	KdNTree<cvx::Cube, KdNode4 > * tree();
 	
 private slots:
-    void simulate();
     bool readTree(const std::string & filename);
+	void testTree();
 	
 private:
-	KdEngine<cvx::Sphere> m_engine;
-	sdb::VectorArray<cvx::Sphere> * m_source;
-	KdNTree<cvx::Sphere, KdNode4 > * m_tree;
+	KdEngine<cvx::Cube> m_engine;
+	sdb::VectorArray<cvx::Cube> * m_source;
+	KdNTree<cvx::Cube, KdNode4 > * m_tree;
 	int m_treeletColI;
 	int m_maxDrawTreeLevel;
 };

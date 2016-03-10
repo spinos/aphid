@@ -26,7 +26,7 @@ public:
 	HWorldGrid(const std::string & name, Entity * parent = NULL);
 	virtual ~HWorldGrid();
 	
-	void insert(const float * at, const ValueType & v);
+	bool insert(const float * at, const ValueType & v);
 	void finishInsert();
 	int elementSize();
 /// override HBase
@@ -50,7 +50,7 @@ HWorldGrid<ChildType, ValueType>::~HWorldGrid()
 {}
 
 template<typename ChildType, typename ValueType>
-void HWorldGrid<ChildType, ValueType>::insert(const float * at, const ValueType & v) 
+bool HWorldGrid<ChildType, ValueType>::insert(const float * at, const ValueType & v) 
 {
 	const Coord3 x = WorldGrid<ChildType, ValueType>::gridCoord(at);
 	
@@ -61,6 +61,7 @@ void HWorldGrid<ChildType, ValueType>::insert(const float * at, const ValueType 
 		static_cast<ChildType *>(p->index)->close();
 	}
 	static_cast<ChildType *>(p->index)->insert((char *)&v);
+	return true;
 }
 
 template<typename ChildType, typename ValueType>
@@ -91,7 +92,7 @@ int HWorldGrid<ChildType, ValueType>::elementSize()
 
 template<typename ChildType, typename ValueType>
 std::string HWorldGrid<ChildType, ValueType>::coord3Str(const Coord3 & c) const
-{ return boost::str(boost::format("%1%_%2%_%3%") % c.x % c.y % c.z ); }
+{ return boost::str(boost::format("%1%,%2%,%3%") % c.x % c.y % c.z ); }
 
 template<typename ChildType, typename ValueType>
 char HWorldGrid<ChildType, ValueType>::save()

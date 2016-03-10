@@ -8,7 +8,6 @@
  */
 
 #include "NTreeIO.h"
-#include <HNTree.h>
 
 namespace aphid {
 
@@ -77,13 +76,13 @@ cvx::ShapeType NTreeIO::gridValueType(const std::string & name)
 	return vt;
 }
 
-bool NTreeIO::loadSphereTree(const std::string & name)
+HNTree<cvx::Cube, KdNode4 > * NTreeIO::loadCube4Tree(const std::string & name)
 {
-	std::cout<<"\n sphere tree "<<name;
-	HNTree<cvx::Cube, KdNode4 > tree( name );
-    tree.load();
-	tree.close();
-	
+	std::cout<<"\n cube4 tree "<<name;
+	HNTree<cvx::Cube, KdNode4 > *tree = new HNTree<cvx::Cube, KdNode4 >( name );
+    tree->load();
+	tree->close();
+	return tree;
 }
 
 }

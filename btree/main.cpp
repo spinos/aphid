@@ -10,6 +10,7 @@
 #include <BTree.h>
 #include <Types.h>
 #include <Array.h>
+#include "Sequence.h"
 #include "../shared/PseudoNoise.h"
 using namespace aphid::sdb;
 
@@ -252,6 +253,9 @@ int main()
 	
 	testArrayRemove();
 	
+	Sequence<Coord3> c3t;
+	Pair<Coord3, Entity> * p0 = c3t.insert(Coord3(0,0,0));
+	std::cout<<"\n p"<<p0->index;
 	std::cout<<"\n all passed\n";
 	return 0;
 }

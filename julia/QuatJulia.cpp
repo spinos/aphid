@@ -5,6 +5,8 @@
  *  Created by jian zhang on 1/1/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
+ *  http://paulbourke.net/fractals/quatjulia/
+ *  http://www.chaospro.de/documentation/html/fractaltypes/quaternions/theory.htm
  */
 
 #include "QuatJulia.h"
@@ -21,6 +23,11 @@ Float4 quatProd(const Float4 & a, const Float4 & b)
 			a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x);
 }
 
+Float4 quatCongujate(const Float4 & a)
+{
+	return Float4(a.x, -a.y, -a.z, -a.w);
+}
+
 Float4 quatSq(const Float4 & a)
 {
 	return Float4(
@@ -32,17 +39,17 @@ Float4 quatSq(const Float4 & a)
 
 QuatJulia::QuatJulia(Parameter * param) 
 {
-	sdb::TreeNode::MaxNumKeysPerNode = 128;
+	sdb::TreeNode::MaxNumKeysPerNode = 256;
 	sdb::TreeNode::MinNumKeysPerNode = 16;
 
-	m_c = Float4(0.f, 0.f, 0.f, 0.f);
-	m_numIter = 5;
-	m_numGrid = 232;
-	m_scaling = 16.f;
+	m_c = Float4(-0.02,-0.0156,-0.563,-0.4);
+	m_numIter = 10;
+	m_numGrid = 300;
+	m_scaling = 48.f;
 	
 	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oCreate);
 	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 256 >, cvx::Sphere >("/grid");
-	m_tree->setGridSize(m_scaling / 16.f);
+	m_tree->setGridSize(m_scaling / 32.f);
 	generate();
 	m_tree->save();
 	m_tree->close();
@@ -60,13 +67,15 @@ void QuatJulia::generate()
 /// eval at uniform grid
 	int i, j, k;
 	const float grid = 1.f / (float)m_numGrid;
-	const Vector3F origin(grid * .5f, grid * .5f, grid * .5f);
+	const Vector3F origin(-.5f-grid * .5f, 
+							-.5f-grid * .5f, 
+							-.5f-grid * .5f);
 	int n = 0;
 	for(k=0; k<m_numGrid; ++k ) {
 		for(j=0; j<m_numGrid; ++j ) {
 			for(i=0; i<m_numGrid; ++i ) {
 				Vector3F sample = origin + Vector3F(grid * i, grid * j, grid * k);
-				if( evalAt( sample ) > 0.f ) {
+				if( evalAt( sample*3.f ) > 0.f ) {
 					n++;
 					cvx::Sphere sp;
 					sample *= m_scaling;
@@ -82,7 +91,7 @@ void QuatJulia::generate()
 float QuatJulia::evalAt(const Vector3F & at) const
 {
 /// Quaternion Julia Fractals
-	Float4 z(at.x, at.y, at.z, 0.f);
+	Float4 z(at.x, at.y, at.z, 0.1f);
 	Float4 z2(1.f, 0.f, 0.f, 0.f);
 
 	float n = 0.0;
@@ -91,16 +100,15 @@ float QuatJulia::evalAt(const Vector3F & at) const
 	while (n < m_numIter)
 	{
 		z2 = quatProd(z, z2) * 2.f;
-		z  = quatSq(z) + m_c;
-
+		z = quatSq(z) + m_c;
 		sqr_abs_z = z.dot(z);
-		if (sqr_abs_z >= 4.f)
+		if (sqr_abs_z >= 1.f)
 			break;
 
 		n++;
 	}
 
-	return sqr_abs_z - 4.f;
+	return 1.f - sqr_abs_z;
 }
 
 }
