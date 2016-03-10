@@ -7,6 +7,7 @@
  *
  */
 #include <iostream>
+#include <stdint.h>
 #include "KdTreeNode.h"
 namespace aphid {
 
@@ -24,7 +25,7 @@ float KdTreeNode::getSplitPos() const
 
 void KdTreeNode::setAxis( int a_Axis ) 
 { 
-	inner.combined = a_Axis + (inner.combined & EInnerAxisMask); 
+	inner.combined = a_Axis | (inner.combined & EInnerAxisMask); 
 }
 
 int KdTreeNode::getAxis() const
@@ -32,10 +33,11 @@ int KdTreeNode::getAxis() const
 	return inner.combined & (~EInnerAxisMask); 
 }
 
-void KdTreeNode::setLeaf( bool a_Leaf ) 
-{ 
-	leaf.combined = (a_Leaf) ? (leaf.combined | ~ETypeMask) : (leaf.combined & ETypeMask); 
-}
+void KdTreeNode::setLeaf() 
+{ leaf.combined = ETypeMaskTau; }
+
+void KdTreeNode::setInternal()
+{ leaf.combined = leaf.combined & ETypeMask; }
 
 void KdTreeNode::setPrimStart(unsigned long offset)
 {
@@ -47,30 +49,32 @@ void KdTreeNode::setNumPrims(unsigned long numPrims)
 	leaf.end = numPrims;
 }
 
-unsigned long KdTreeNode::getPrimStart() const 
+int KdTreeNode::getPrimStart() const 
 {
-	return (leaf.combined & ~ELeafOffsetMask) >> 3;
+	return (leaf.combined & (~ELeafOffsetMask) ) >> 3;
 }
 
-unsigned long KdTreeNode::getNumPrims() const 
+int KdTreeNode::getNumPrims() const 
 {
 	return leaf.end;
 }
 
 bool KdTreeNode::isLeaf() const
 {
-	return ((leaf.combined & ~ETypeMask) > 0); 
+	return ((leaf.combined & (~ETypeMask) ) > 0); 
 }
 
 void KdTreeNode::setLeft( KdTreeNode* a_Left )
 { 
+    uintptr_t rawR = reinterpret_cast<uintptr_t>(this);
 	uintptr_t rawInt = reinterpret_cast<uintptr_t>(a_Left);
-	inner.combined = rawInt + (inner.combined & EIndirectionMask); 
+	inner.combined = (rawInt - rawR) | (inner.combined & EIndirectionMask); 
 }
 
 KdTreeNode* KdTreeNode::getLeft() const
 { 
-	return (KdTreeNode*)(inner.combined & ~EIndirectionMask); 
+    uintptr_t rawR = reinterpret_cast<uintptr_t>(this);
+	return (KdTreeNode*)(rawR + (inner.combined & ~EIndirectionMask) ); 
 }
 
 KdTreeNode* KdTreeNode::getRight() const 

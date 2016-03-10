@@ -112,7 +112,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 	KdTreeNode* branch = m_stream.createTreeBranch();
 	
 	node->setLeft(branch);
-	node->setLeaf(false);
+	node->setInternal();
 	addNInternal();
 
 	BuildKdTreeContext *leftCtx = new BuildKdTreeContext();
@@ -144,7 +144,7 @@ void KdTree::subdivide(KdTreeNode * node, BuildKdTreeContext & ctx, int level)
 void KdTree::createLeaf(KdTreeNode * node, BuildKdTreeContext & ctx)
 {
 	ctx.decompressPrimitives(true);
-	node->setLeaf(true);
+	node->setLeaf();
 	if(ctx.numPrims() < 1) {
 		addEmptyVolume(ctx.getBBox().volume() );
 		return;
@@ -251,9 +251,10 @@ char KdTree::recusiveIntersect(KdTreeNode *node, IntersectionContext * ctx)
 
 char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 {
-	const unsigned num = node->getNumPrims();
+	const int num = node->getNumPrims();
 	if(num < 1) return 0;
-	unsigned start = node->getPrimStart();
+	const int start = node->getPrimStart();
+    // std::cout<<"\n leaf intersect"<<start<<" "<<num;
 	
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
 	int igeom, icomponent;
@@ -328,12 +329,12 @@ char KdTree::recursiveSelect(KdTreeNode *node, SelectionContext * ctx)
 
 char KdTree::leafSelect(KdTreeNode *node, SelectionContext * ctx)
 {
-	const unsigned num = node->getNumPrims();
+	const int num = node->getNumPrims();
 	if(num < 1) return 0;
-	unsigned start = node->getPrimStart();
+	const int start = node->getPrimStart();
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
 	int igeom, icomponent;
-	for(unsigned i = 0; i < num; i++) {
+	for(int i = 0; i < num; i++) {
 		Primitive * prim = indir[start + i];
 		prim->getGeometryComponent(igeom, icomponent);
 		Geometry * geo = m_stream.geometry(igeom);
@@ -385,14 +386,13 @@ void KdTree::recusiveClosestToPoint(KdTreeNode *node, const BoundingBox &box, Cl
 
 void KdTree::leafClosestToPoint(KdTreeNode *node, const BoundingBox &box, ClosestToPointTestResult * result)
 {
-	const unsigned num = node->getNumPrims();
+	const int num = node->getNumPrims();
 	if(num < 1) return;
-	
-	const unsigned start = node->getPrimStart();
+	const int start = node->getPrimStart();
 	sdb::VectorArray<Primitive> &indir = indirection();
 	///sdb::VectorArray<Primitive> &prims = primitives();
 	int igeom, icomponent;
-	for(unsigned i = 0; i < num; i++) {
+	for(int i = 0; i < num; i++) {
 		//unsigned *iprim = indir[start + i];
 		//Primitive * prim = prims.get(*iprim);
 		Primitive * prim = indir[start + i];
@@ -435,14 +435,14 @@ bool KdTree::recursiveIntersectBox(KdTreeNode *node, const BoundingBox & box)
 
 bool KdTree::leafIntersectBox(KdTreeNode *node, const BoundingBox & box)
 {
-	const unsigned num = node->getNumPrims();
+	const int num = node->getNumPrims();
 	if(num < 1) return false;
 	
-	unsigned start = node->getPrimStart();
+	const int start = node->getPrimStart();
 	sdb::VectorArray<Primitive> &indir = indirection();
 	//sdb::VectorArray<Primitive> &prims = primitives();
 	int igeom, icomponent;
-	for(unsigned i = 0; i < num; i++) {
+	for(int i = 0; i < num; i++) {
 		//unsigned *iprim = indir[start + i];
 		//Primitive * prim = prims.get(*iprim);
 		Primitive * prim = indir[start + i];

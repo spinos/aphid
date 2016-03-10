@@ -22,7 +22,7 @@ public:
 				          or indirection table entry
 				   2-0  : Split axis
 				*/
-				unsigned long combined;
+				int combined;
 
 				/// Split plane coordinate
 				float split;
@@ -34,10 +34,10 @@ public:
 				   31   : True (leaf node)
 				   30-0 : Offset to the node's primitive list
 				*/
-				unsigned long combined;
+				int combined;
 
 				/// End offset of the primitive list
-				unsigned long end;
+				int end;
 			} leaf;
 		};
 		
@@ -47,9 +47,10 @@ public:
 	float getSplitPos() const;
 	void setAxis( int a_Axis );
 	int getAxis() const;
-	void setLeaf( bool a_Leaf );
-	unsigned long getPrimStart() const;
-	unsigned long getNumPrims() const;
+	void setLeaf();
+    void setInternal();
+	int getPrimStart() const;
+	int getNumPrims() const;
 	bool isLeaf() const;
 	void setLeft( KdTreeNode* a_Left );
 	void setPrimStart(unsigned long offset);
@@ -62,6 +63,7 @@ public:
 	enum EMask {
 		EInnerAxisMask = ~0x3,
 		ETypeMask = ~0x4,
+        ETypeMaskTau = 0x4,
 		ELeafOffsetMask = ~ETypeMask,
 		EIndirectionMask = 0x7,
 		

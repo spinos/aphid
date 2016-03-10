@@ -16,9 +16,7 @@ Forest::Forest()
 {
 	sdb::TreeNode::MaxNumKeysPerNode = 128;
     sdb::TreeNode::MinNumKeysPerNode = 16;
-    KdTree::MaxBuildLevel = 28;
-	KdTree::NumPrimitivesInLeafThreashold = 128;
-	
+    
 	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >;
 	m_ground = NULL;
 	m_numPlants = 0;
@@ -123,7 +121,10 @@ void Forest::buildGround()
     std::vector<ATriangleMesh *>::const_iterator it = m_grounds.begin();
     for(;it!=m_grounds.end();++it) m_ground->addGeometry(*it);
 
-    m_ground->create();
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 128;
+	bf._maxLevel = 28;
+    m_ground->create(&bf);
 }
 
 bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)

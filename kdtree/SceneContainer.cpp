@@ -186,6 +186,7 @@ void SceneContainer::intersect(const Ray * incident)
 {
 	m_intersectCtx.reset(*incident);
 #if TEST_MESH
+std::cout<<"\n intersect begin";
 	m_tree->intersect(&m_intersectCtx );
 	if(m_intersectCtx.m_success) {
 		m_selectCtx.setRadius(1.f);
@@ -194,8 +195,8 @@ void SceneContainer::intersect(const Ray * incident)
 		m_selectCtx.setDirection(m_intersectCtx.m_hitN);
 
 		m_tree->select(&m_selectCtx);
-	
 	}
+std::cout<<"\n intersect end";
 #endif
 }
 
