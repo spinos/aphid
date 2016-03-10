@@ -141,6 +141,7 @@ public:
 	void setLeafRopeInd(unsigned x, unsigned idx, int ri);
 
 	sdb::VectorArray<T> * source();
+	void setSource(sdb::VectorArray<T> * src);
 	
 	virtual std::string verbosestr() const;
     
@@ -350,6 +351,10 @@ const sdb::VectorArray<int> & KdNTree<T, Tn>::leafIndirection() const
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::numLeafIndirection() const
 { return m_leafDataIndices.size(); }
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::setSource(sdb::VectorArray<T> * src)
+{ m_source = src; }
 
 template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const

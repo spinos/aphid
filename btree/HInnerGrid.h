@@ -30,6 +30,7 @@ public:
 	void finishInsert();
 	int numElements();
 	void beginInsert();
+	bool beginRead();
 	
 protected:
 
@@ -77,6 +78,16 @@ void HInnerGrid<DataRank, NRows, BufSize>::beginInsert()
 		m_data->openStorage(fObjectId, true);
 	else 
 		m_data->createStorage(fObjectId);
+}
+
+template <int DataRank, int NRows, int BufSize>
+bool HInnerGrid<DataRank, NRows, BufSize>::beginRead()
+{
+	if(!hasNamedData(".data") ) return false;
+	if(!m_data)
+		m_data = new HOocArray<DataRank, NRows, BufSize>(".data");
+	m_data->openStorage(fObjectId);
+	return true;
 }
 
 }

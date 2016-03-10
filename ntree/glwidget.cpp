@@ -241,14 +241,20 @@ bool GLWidget::readTree(const std::string & filename)
 	
 	std::string gridName;
 	stat = hio.findGrid(gridName);
-	if(stat) std::cout<<"\n grid "<<gridName;
+	if(stat) {
+		std::cout<<"\n grid "<<gridName;
+		m_source = new sdb::VectorArray<cvx::Cube>();
+		hio.loadSphereGridCoord(m_source, gridName);
+	}
 	
 	cvx::ShapeType vt = hio.gridValueType(gridName);
     
 	std::string treeName;
-	//stat = hio.findTree(treeName, gridName);
-	//if(stat) m_tree= hio.loadCube4Tree(treeName);
-	m_tree= hio.loadCube4Tree("/grid/tree");
+	stat = hio.findTree(treeName, gridName);
+	if(stat) {
+		m_tree= hio.loadCube4Tree(treeName);
+		m_tree->setSource(m_source);
+	}
 	
 	hio.end();
 	return true;

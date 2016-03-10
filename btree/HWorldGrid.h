@@ -172,14 +172,14 @@ char HWorldGrid<ChildType, ValueType>::load()
 	
 	HOocArray<hdata::TInt, 3, 256> cellCoords(".cells");
 	cellCoords.openStorage(fObjectId);
-	// cellCoords.printValues();
 	const int & ncoord = cellCoords.numCols();
 	Coord3 c;
 	for(int i=0; i<ncoord; ++i) {
 	    cellCoords.readColumn((char *)&c, i);
 	    Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(c);
         if(!p->index) {
-            p->index = new ChildType(coord3Str(c), this);
+            p->index = new ChildType(childPath(coord3Str(c) ), this);
+			static_cast<ChildType *>(p->index)->beginRead();
         }
 	}
 		
