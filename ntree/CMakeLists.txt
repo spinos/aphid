@@ -38,6 +38,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/DrawBox.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
+../btree/HWorldGrid.cpp
 ../kdtree/HNTree.cpp
 NTreeIO.cpp
 glwidget.cpp

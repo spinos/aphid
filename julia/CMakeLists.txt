@@ -26,6 +26,7 @@ set (SOURCE_FILES
 ../kdtree/PrimBoundary.cpp
 ../kdtree/HNTree.cpp
 ../ntree/NTreeIO.cpp
+../btree/HWorldGrid.cpp
 Parameter.cpp 
 QuatJulia.cpp
 JuliaTree.cpp

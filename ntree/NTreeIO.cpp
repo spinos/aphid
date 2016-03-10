@@ -8,6 +8,7 @@
  */
 
 #include "NTreeIO.h"
+#include <HWorldGrid.h>
 
 namespace aphid {
 
@@ -28,7 +29,7 @@ bool NTreeIO::findGrid(std::string & name, const std::string & grpName)
 {
 	std::vector<std::string > gridNames;
 	HBase r(grpName);
-	r.lsTypedChild<HVarGrid>(gridNames);
+	r.lsTypedChild<sdb::HVarGrid>(gridNames);
 	r.close();
 	
 	if(gridNames.size() <1) {
@@ -59,7 +60,7 @@ cvx::ShapeType NTreeIO::gridValueType(const std::string & name)
 {
 	cvx::ShapeType vt = cvx::TUnknown;
     
-    HVarGrid vg(name);
+    sdb::HVarGrid vg(name);
     vg.load();
     std::cout<<"\n value type ";
     switch(vg.valueType() ) {

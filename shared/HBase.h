@@ -138,23 +138,5 @@ public:
 	}
 };
 
-class HVarGrid : public HBase {
-    
-    float m_bbx[6];
-    int m_vtyp;
-    float m_gsize;
-    
-public:
-    HVarGrid(const std::string & name);
-	virtual ~HVarGrid();
-	
-	virtual char verifyType();
-	virtual char load();
-	
-	const int & valueType() const;
-	const float & gridSize() const;
-	const float * bbox() const;
-};
-
 }
 #endif        //  #ifndef HBASE_H

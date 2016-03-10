@@ -246,8 +246,9 @@ bool GLWidget::readTree(const std::string & filename)
 	cvx::ShapeType vt = hio.gridValueType(gridName);
     
 	std::string treeName;
-	stat = hio.findTree(treeName, gridName);
-	if(stat) m_tree= hio.loadCube4Tree(treeName);
+	//stat = hio.findTree(treeName, gridName);
+	//if(stat) m_tree= hio.loadCube4Tree(treeName);
+	m_tree= hio.loadCube4Tree("/grid/tree");
 	
 	hio.end();
 	return true;

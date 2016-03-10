@@ -44,12 +44,12 @@ QuatJulia::QuatJulia(Parameter * param)
 
 	m_c = Float4(-0.02,-0.0156,-0.563,-0.4);
 	m_numIter = 10;
-	m_numGrid = 300;
+	m_numGrid = 320;
 	m_scaling = 48.f;
 	
 	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oCreate);
 	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 256 >, cvx::Sphere >("/grid");
-	m_tree->setGridSize(m_scaling / 32.f);
+	m_tree->setGridSize(m_scaling / 64.f);
 	generate();
 	m_tree->save();
 	m_tree->close();
@@ -67,15 +67,15 @@ void QuatJulia::generate()
 /// eval at uniform grid
 	int i, j, k;
 	const float grid = 1.f / (float)m_numGrid;
-	const Vector3F origin(-.5f-grid * .5f, 
-							-.5f-grid * .5f, 
-							-.5f-grid * .5f);
+	const Vector3F origin(-.5f+grid * .5f, 
+							-.5f+grid * .5f, 
+							-.5f+grid * .5f);
 	int n = 0;
 	for(k=0; k<m_numGrid; ++k ) {
 		for(j=0; j<m_numGrid; ++j ) {
 			for(i=0; i<m_numGrid; ++i ) {
 				Vector3F sample = origin + Vector3F(grid * i, grid * j, grid * k);
-				if( evalAt( sample*3.f ) > 0.f ) {
+				if( evalAt( sample*3.2f ) > 0.f ) {
 					n++;
 					cvx::Sphere sp;
 					sample *= m_scaling;
