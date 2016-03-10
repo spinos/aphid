@@ -15,7 +15,7 @@ namespace aphid {
 template <int NumLevels>
 class KdNNode {
     
-    KdTreeNode m_nodes[(1<<NumLevels+1) - 2];
+    KdTreeNode m_nodes[(1<<(NumLevels+1)) - 2];
     
 public:
 	KdNNode();

@@ -116,7 +116,7 @@ ELSEIF (APPLE)
 	
 endif()
 
-FIND_PACKAGE (Boost REQUIRED COMPONENTS system filesystem date_time regex)	
+FIND_PACKAGE (Boost REQUIRED COMPONENTS system filesystem date_time regex thread chrono)	
 	
 MESSAGE (" boost version is " ${Boost_VERSION})
 MESSAGE (" boost include is " ${Boost_INCLUDE_DIR} )
@@ -124,6 +124,8 @@ MESSAGE (" boost system is " ${Boost_SYSTEM_LIBRARY})
 MESSAGE (" boost date_time is " ${Boost_DATE_TIME_LIBRARY})
 MESSAGE (" boost regex is " ${Boost_REGEX_LIBRARY})
 MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
+MESSAGE (" boost threaed is " ${Boost_THREAD_LIBRARY})
+MESSAGE (" boost threaed is " ${Boost_CHRONO_LIBRARY})
 
 include_directories (${Boost_INCLUDE_DIR})
 	
@@ -131,11 +133,15 @@ target_link_libraries (julia ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (julia ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (julia ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (julia ${Boost_REGEX_LIBRARY})
+target_link_libraries (julia ${Boost_THREAD_LIBRARY})
+target_link_libraries (julia ${Boost_CHRONO_LIBRARY})
 
 if (WIN32)
-SET (Aphid_Library D:/aphid/lib/aphidMath.lib
-D:/aphid/lib/aphidSdb.lib
-D:/aphid/lib/aphidH5.lib)
+SET (Aphid_Math_Library D:/aphid/lib/aphidMath.lib)
+SET (Aphid_Sdb_Library D:/aphid/lib/aphidSdb.lib)
+SET (Aphid_H5_Library D:/aphid/lib/aphidH5.lib)
+SET (Aphid_Geom_Library D:/aphid/lib/aphidGeom.lib)
+SET (Aphid_Cu_Library D:/aphid/lib/aphidCu.lib)
 else ()
 	IF (EXISTS "/users/jianzhang/aphid/lib/libaphidMath.a")
 		SET (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a) 

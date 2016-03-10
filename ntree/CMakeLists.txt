@@ -122,6 +122,8 @@ target_link_libraries (testntree ${OPENGL_LIBRARIES})
 if (WIN32)
 set (Aphid_Library D:/aphid/lib/aphidMath.lib
 D:/aphid/lib/aphidGeom.lib
+D:/aphid/lib/aphidH5.lib
+D:/aphid/lib/aphidSdb.lib
 D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a

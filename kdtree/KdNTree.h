@@ -81,8 +81,8 @@ public:
 	
 	void decodeTreeletNodeHash(int i, int s, unsigned & itreelet, unsigned & inode) const
 	{
-		itreelet = _n[i].m_padding1 >> s+1;
-		inode = _n[i].m_padding1 & ~(1<<s+1);
+		itreelet = _n[i].m_padding1 >> (s+1);
+		inode = _n[i].m_padding1 & ~(1<<(s+1) );
 	}
 	
 	void verbose() const

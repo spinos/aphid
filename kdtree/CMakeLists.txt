@@ -74,7 +74,8 @@ target_link_libraries (testkdtree ${OPENGL_LIBRARIES})
 if (WIN32)
 set (Aphid_Library D:/aphid/lib/aphidMath.lib
 D:/aphid/lib/aphidGeom.lib
-D:/aphid/lib/aphidUI.lib)
+D:/aphid/lib/aphidUI.lib
+D:/aphid/lib/aphidSdb.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a

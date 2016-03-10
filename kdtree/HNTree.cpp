@@ -11,8 +11,6 @@
 
 namespace aphid {
 
-namespace sdb {
-
 HBaseNTree::HBaseNTree(const std::string & name) :
 HBase(name) {}
 
@@ -30,8 +28,6 @@ char HBaseNTree::verifyType()
 	if(!hasNamedData(".node") ) return 0;
 	if(!hasNamedAttr(".bbx") ) return 0;
 	return 1;
-}
-
 }
 
 }
