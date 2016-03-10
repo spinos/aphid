@@ -79,13 +79,10 @@ template <typename T, typename Tn>
 void HNTree<T, Tn>::save240Node()
 {
 	HOocArray<hdata::TChar, 240, 256> treeletD(".node");
-	if(hasNamedData(".node") ) {
-		treeletD.openStorage(fObjectId);
-		treeletD.clear();
-	}
-	else {
+	if(hasNamedData(".node") )
+		treeletD.openStorage(fObjectId, true);
+	else
 		treeletD.createStorage(fObjectId);
-	}
 	
 	const sdb::VectorArray<Tn> & src = KdNTree<T, Tn>::nodes();
 	int n = KdNTree<T, Tn>::numNodes();
@@ -106,13 +103,10 @@ template <typename T, typename Tn>
 void HNTree<T, Tn>::saveLeaf()
 {
 	HOocArray<hdata::TInt, 8, 256> leafD(".leaf");
-	if(hasNamedData(".leaf") ) {
-		leafD.openStorage(fObjectId);
-		leafD.clear();
-	}
-	else {
+	if(hasNamedData(".leaf") )
+		leafD.openStorage(fObjectId, true);
+	else
 		leafD.createStorage(fObjectId);
-	}
 	
 	const sdb::VectorArray<knt::TreeLeaf> & src = KdNTree<T, Tn>::leafNodes();
 	int n = KdNTree<T, Tn>::numLeafNodes();
@@ -133,13 +127,10 @@ template <typename T, typename Tn>
 void HNTree<T, Tn>::saveInd()
 {
 	HOocArray<hdata::TInt, 64, 64> indD(".ind");
-	if(hasNamedData(".ind") ) {
-		indD.openStorage(fObjectId);
-		indD.clear();
-	}
-	else {
+	if(hasNamedData(".ind") )
+		indD.openStorage(fObjectId, true);
+	else
 		indD.createStorage(fObjectId);
-	}
 	
 	const sdb::VectorArray<int> & src = KdNTree<T, Tn>::leafIndirection();
 	int n = KdNTree<T, Tn>::numLeafIndirection();
@@ -168,13 +159,10 @@ template <typename T, typename Tn>
 void HNTree<T, Tn>::saveRope()
 {
 	HOocArray<hdata::TFloat, 8, 256> ropeD(".rope");
-	if(hasNamedData(".rope") ) {
-		ropeD.openStorage(fObjectId);
-		ropeD.clear();
-	}
-	else {
+	if(hasNamedData(".rope") )
+		ropeD.openStorage(fObjectId, true);
+	else
 		ropeD.createStorage(fObjectId);
-	}
 	
 	const BoundingBox * src = KdNTree<T, Tn>::ropes();
 	int n = KdNTree<T, Tn>::numRopes();
@@ -284,7 +272,7 @@ void HNTree<T, Tn>::loadRope()
 		ropeD.readColumn((char *)KdNTree<T, Tn>::ropesR(i), i);
 	}
 	
-	std::cout<<"\n save "<<n<<" rope";
+	std::cout<<"\n load "<<n<<" rope";
 }
 
 }

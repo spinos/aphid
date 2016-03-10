@@ -45,7 +45,6 @@ public:
 	char write(char *data, hdata::Select2DPart * part);
 	char read(char *data, hdata::Select2DPart * part);
 
-	int numColumns();
 	virtual int objectType() const;
 	
 	static int NumBitsPerPnt();
@@ -61,6 +60,8 @@ private:
 	
 	hid_t createFileSpace() const;
 	hid_t dataType();
+	hsize_t getMemspaceWidth();
+	
 };
 
 template<int DataRank, int NRows, int CnkSz>
@@ -283,7 +284,7 @@ char H2dDataset<DataRank, NRows, CnkSz>::read(char *data, hdata::Select2DPart * 
 }
 
 template<int DataRank, int NRows, int CnkSz>
-int H2dDataset<DataRank, NRows, CnkSz>::numColumns()
+hsize_t H2dDataset<DataRank, NRows, CnkSz>::getMemspaceWidth()
 {
 	hid_t fileSpace = H5Dget_space(fObjectId);
 	

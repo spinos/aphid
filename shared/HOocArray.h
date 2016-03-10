@@ -32,7 +32,7 @@ public:
 	virtual ~HOocArray();
 	
 	bool createStorage(hid_t parentId);
-	bool openStorage(hid_t parentId);
+	bool openStorage(hid_t parentId, bool doClear=false);
 	
 	void insert(char * d);
 	void finishInsert();
@@ -48,7 +48,8 @@ public:
 	char * incoreBuf() const;
 	
 	void printValues();
-	void clear();
+/// set to beginning or somewhere
+	void reset(const int & idx = 0);
 	
 protected:
 
@@ -78,6 +79,7 @@ bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 	if(H2dDataset<DataRank, NRows, BufSize>::create(parentId) ) {
 		m_parentId = parentId;
 		m_currentBlock = -1;
+		H2dDataset<DataRank, NRows, BufSize>::close();
 	}
 	else
 		m_parentId = 0;
@@ -85,13 +87,15 @@ bool HOocArray<DataRank, NRows, BufSize>::createStorage(hid_t parentId)
 }
 
 template <int DataRank, int NRows, int BufSize>
-bool HOocArray<DataRank, NRows, BufSize>::openStorage(hid_t parentId)
+bool HOocArray<DataRank, NRows, BufSize>::openStorage(hid_t parentId, bool doClear)
 {
 	if(H2dDataset<DataRank, NRows, BufSize>::open(parentId) ) {
 		m_parentId = parentId;
 		m_currentBlock = -1;
 		m_pnts = H2dDataset<DataRank, NRows, BufSize>::checkDataSpace();
 		if(m_pnts < 1) std::cout<<"\n HOocArray error: zero data space size";
+		if(doClear) reset();
+		H2dDataset<DataRank, NRows, BufSize>::close();
 	}
 	else
 		m_parentId = 0;
@@ -254,8 +258,8 @@ void HOocArray<DataRank, NRows, BufSize>::readColumn(char * dst, int idx)
 }
 
 template <int DataRank, int NRows, int BufSize>
-void HOocArray<DataRank, NRows, BufSize>::clear()
-{ m_pnts = 0; }
+void HOocArray<DataRank, NRows, BufSize>::reset(const int & idx)
+{ m_pnts = idx; }
 
 template <int DataRank, int NRows, int BufSize>
 int HOocArray<DataRank, NRows, BufSize>::numCols() const

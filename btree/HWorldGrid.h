@@ -51,7 +51,8 @@ public:
 /// override HBase
 	virtual char save();
 	virtual char load();
-
+/// close all children
+	virtual void close();
 protected:
 	std::string coord3Str(const Coord3 & c) const;
 	
@@ -75,11 +76,10 @@ bool HWorldGrid<ChildType, ValueType>::insert(const float * at, const ValueType 
 	
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
 	if(!p->index) {
-		p->index = new ChildType(coord3Str(x), this);
-		static_cast<ChildType *>(p->index)->createStorage(fObjectId);
-		static_cast<ChildType *>(p->index)->close();
+		p->index = new ChildType(childPath(coord3Str(x) ), this);
+		static_cast<ChildType *>(p->index)->beginInsert();
 	}
-	static_cast<ChildType *>(p->index)->insert((char *)&v);
+	static_cast<ChildType *>(p->index)->insert(at, (char *)&v);
 	return true;
 }
 
@@ -100,9 +100,7 @@ int HWorldGrid<ChildType, ValueType>::elementSize()
 	WorldGrid<ChildType, ValueType>::begin();
 	while(!WorldGrid<ChildType, ValueType>::end() ) {
 		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
-		cell->open(fObjectId);
-		sum += cell->numColumns();
-		cell->close();
+		sum += cell->numElements();
 		
 		WorldGrid<ChildType, ValueType>::next();
 	}
@@ -116,28 +114,22 @@ std::string HWorldGrid<ChildType, ValueType>::coord3Str(const Coord3 & c) const
 template<typename ChildType, typename ValueType>
 char HWorldGrid<ChildType, ValueType>::save()
 {
-	HOocArray<hdata::TInt, 3, 256> * cellCoords = new HOocArray<hdata::TInt, 3, 256>(".cells");
+	HOocArray<hdata::TInt, 3, 256> cellCoords(".cells");
 
-	if(hasNamedData(".cells") ) {
-		cellCoords->openStorage(fObjectId);
-		cellCoords->clear();
-	}
-	else {
-		cellCoords->createStorage(fObjectId);
-	}
-	
-	int n=0;
+	if(hasNamedData(".cells") )
+		cellCoords.openStorage(fObjectId, true);
+	else
+		cellCoords.createStorage(fObjectId);
+
 	WorldGrid<ChildType, ValueType>::begin();
 	while(!WorldGrid<ChildType, ValueType>::end() ) {
 		Coord3 c = WorldGrid<ChildType, ValueType>::key();
-		cellCoords->insert((char *)&c );
+		cellCoords.insert((char *)&c );
 		WorldGrid<ChildType, ValueType>::next();
-		n++;
 	}
 	
-	cellCoords->finishInsert();
-	// cellCoords->printValues();
-	delete cellCoords;
+	cellCoords.finishInsert();
+	int n=cellCoords.numCols();
 	
 	WorldGrid<ChildType, ValueType>::calculateBBox();
 	
@@ -188,8 +180,6 @@ char HWorldGrid<ChildType, ValueType>::load()
 	    Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(c);
         if(!p->index) {
             p->index = new ChildType(coord3Str(c), this);
-            static_cast<ChildType *>(p->index)->openStorage(fObjectId);
-            static_cast<ChildType *>(p->index)->close();
         }
 	}
 		
@@ -198,6 +188,17 @@ char HWorldGrid<ChildType, ValueType>::load()
        <<"\n grid bbox "<<WorldGrid<ChildType, ValueType>::boundingBox()
        <<"\n n element "<<elementSize();
     return 1;
+}
+
+template<typename ChildType, typename ValueType>
+void HWorldGrid<ChildType, ValueType>::close()
+{
+	WorldGrid<ChildType, ValueType>::begin();
+	while(!WorldGrid<ChildType, ValueType>::end() ) {
+		WorldGrid<ChildType, ValueType>::value()->close();
+		WorldGrid<ChildType, ValueType>::next();
+	}
+	HBase::close();
 }
 
 }

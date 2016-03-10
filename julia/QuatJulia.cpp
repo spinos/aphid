@@ -44,12 +44,12 @@ QuatJulia::QuatJulia(Parameter * param)
 
 	m_c = Float4(-0.02,-0.0156,-0.563,-0.4);
 	m_numIter = 10;
-	m_numGrid = 320;
+	m_numGrid = 360;
 	m_scaling = 48.f;
 	
 	HObject::FileIO.open(param->outFileName().c_str(), HDocument::oCreate);
 	m_tree = new sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 256 >, cvx::Sphere >("/grid");
-	m_tree->setGridSize(m_scaling / 64.f);
+	m_tree->setGridSize(m_scaling / 32.f);
 	generate();
 	m_tree->save();
 	m_tree->close();
