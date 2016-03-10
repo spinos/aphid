@@ -83,12 +83,12 @@ private:
 		Td * d = getDataStorage<Td>(&grp, attrName, stat);
 		if(stat) {
             Tv a, b;
-			d->readElement((char *)&a, sampler->sampleOfset0() );
+			d->readPoint((char *)&a, sampler->sampleOfset0() );
 			if(sampler->m_weights[0] > .99f) {
 				result = a;
 			}
 			else {
-				d->readElement((char *)&b, sampler->sampleOfset1() );
+				d->readPoint((char *)&b, sampler->sampleOfset1() );
 				result = a * sampler->m_weights[0] + b * sampler->m_weights[1];
 			}
 		}

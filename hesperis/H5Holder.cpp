@@ -74,14 +74,24 @@ SampleFrame * H5Holder::sampler()
 
 bool H5Holder::readSpfSegment()
 {
+    int oldFirst = AFrameRange::FirstFrame;
+    int oldLast = AFrameRange::LastFrame;
+    int oldSpf = AFrameRange::SamplesPerFrame;
+    float oldFps = AFrameRange::FramesPerSecond;
+    
     AFrameRange afr;
     HFrameRange fr(".fr");
     fr.load(&afr);
     fr.close();
     
-    if(AFrameRange::SegmentExpr.size() < 3) return false;
+    AFrameRange::FirstFrame = oldFirst;
+    AFrameRange::LastFrame = oldLast;
+    AFrameRange::SamplesPerFrame = oldSpf;
+    AFrameRange::FramesPerSecond = oldFps;
     
-    if( m_spfSegment.create(AFrameRange::SegmentExpr) )
+    if(afr.segmentExpr().size() < 3) return false;
+    
+    if( m_spfSegment.create(afr.segmentExpr() ) )
         return true;
     
     return false;

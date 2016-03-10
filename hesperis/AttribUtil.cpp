@@ -511,12 +511,6 @@ void AttribUtil::load3(const char * filename, MObject & target)
         AHelper::Info<const char *>("AttribUtil error h5 file is not opened", filename);
         return;   
     }
-    
-    AFrameRange afr;
-    HFrameRange fr(".fr");
-    fr.load(&afr);
-    fr.close();
-    AnimUtil::UpdateFrameRange(&afr);
 
 	AHelper::Info<const char *>(" AttribUtil read attrib from ", filename);
 	HBase w("/");
