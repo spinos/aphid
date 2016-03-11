@@ -281,7 +281,7 @@ void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, KdNTree<T, Tn> * 
 	
 	KdRope<NumLevels, T, Tn> rope(1, tree);
 	rope.beginMap();
-	KdNeighbors ns;
+	BoxNeighbors ns;
 	ns.reset();
 	rope.build(0, 0, parent->getBBox(), ns);
 	process(&rope, tree);

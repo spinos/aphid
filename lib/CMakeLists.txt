@@ -137,6 +137,7 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/AFrustum.cpp
 ../shared/TriangleRaster.cpp
 ../shared/PrimitiveFilter.cpp
+../shared/BoxNeighbors.cpp
 )
 
 ADD_LIBRARY (aphidH5 STATIC

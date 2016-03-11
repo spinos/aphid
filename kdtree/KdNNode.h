@@ -61,6 +61,7 @@ void KdNNode<NumLevels>::setAllLeaf()
 template <int NumLevels>
 void KdNNode<NumLevels>::setInternal(int idx, int axis, float pos, int offset)
 {
+/// set internal last
 	m_nodes[idx].setAxis(axis);
 	m_nodes[idx].setSplitPos(pos);
 	m_nodes[idx].setOffset(offset);
@@ -69,10 +70,11 @@ void KdNNode<NumLevels>::setInternal(int idx, int axis, float pos, int offset)
 
 template <int NumLevels>
 void KdNNode<NumLevels>::setLeaf(int idx, unsigned start, unsigned num)
-{ 
+{
+/// set leaf first
+	m_nodes[idx].setLeaf();
 	m_nodes[idx].setPrimStart( start); 
 	m_nodes[idx].setNumPrims( num); 
-	m_nodes[idx].setLeaf(); 
 }
 
 template <int NumLevels>

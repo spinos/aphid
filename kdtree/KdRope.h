@@ -19,7 +19,7 @@ class KdRope : public Treelet<NumLevels > {
 	BoundingBox m_boxes[(1<<NumLevels+1) - 2];
 	int m_splitAxis[(1<<NumLevels+1) - 2];
 	float m_splitPos[(1<<NumLevels+1) - 2];
-	KdNeighbors m_ns[(1<<NumLevels+1) - 2];
+	BoxNeighbors m_ns[(1<<NumLevels+1) - 2];
 	KdNTree<T, Tn> * m_tree;
 	static std::map<unsigned, BoundingBox > BoxMap;
 	
@@ -27,21 +27,21 @@ public:
 	KdRope(int index, KdNTree<T, Tn> * tree);
 	virtual ~KdRope() {}
 	
-	void build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const KdNeighbors & ns);
+	void build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const BoxNeighbors & ns);
 	
-	BoundingBox box(int idx) const;
-	KdNeighbors neighbor(int idx) const;
+	const BoundingBox & box(int idx) const;
+	const BoxNeighbors & neighbor(int idx) const;
 	
 	void beginMap();
 	void endMap();
 	
 protected:
-	void visitRoot(KdTreeNode * parent, const BoundingBox & box, const KdNeighbors & ns);
+	void visitRoot(KdTreeNode * parent, const BoundingBox & box, const BoxNeighbors & ns);
 	bool visitInterial(int level);
 	void visitCousins(int iNode, int level);
 	bool chooseCousinAsNeighbor(int iNeighbor, int iNode, int iParent, int & updated);
 	void pushLeaves();
-	void mapNeighbors(KdNeighbors & ns);
+	void mapNeighbors(BoxNeighbors & ns);
 private:
 	
 };
@@ -59,15 +59,15 @@ KdRope<NumLevels, T, Tn>::KdRope(int index, KdNTree<T, Tn> * tree) : Treelet<Num
 }
 
 template<int NumLevels, typename T, typename Tn>
-BoundingBox KdRope<NumLevels, T, Tn>::box(int idx) const
+const BoundingBox & KdRope<NumLevels, T, Tn>::box(int idx) const
 { return m_boxes[idx]; }
 
 template<int NumLevels, typename T, typename Tn>
-KdNeighbors KdRope<NumLevels, T, Tn>::neighbor(int idx) const
+const BoxNeighbors & KdRope<NumLevels, T, Tn>::neighbor(int idx) const
 { return m_ns[idx]; }
 
 template<int NumLevels, typename T, typename Tn>
-void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const KdNeighbors & ns)
+void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const BoxNeighbors & ns)
 {
 	Tn * root = m_tree->nodes()[parentTreelet];
 	KdTreeNode * rootNode = root->node(parentNodeIdx);
@@ -80,7 +80,7 @@ void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const
 }
 
 template<int NumLevels, typename T, typename Tn>
-void KdRope<NumLevels, T, Tn>::visitRoot(KdTreeNode * parent, const BoundingBox & box, const KdNeighbors & ns)
+void KdRope<NumLevels, T, Tn>::visitRoot(KdTreeNode * parent, const BoundingBox & box, const BoxNeighbors & ns)
 {
 	const float pos = parent->getSplitPos();
 	const int axis = parent->getAxis();
@@ -91,8 +91,8 @@ void KdRope<NumLevels, T, Tn>::visitRoot(KdTreeNode * parent, const BoundingBox 
 	m_ns[0] = ns;
 	m_ns[1] = ns;
 	/// opposite sides of the split become neighbors along split axis
-	m_ns[0].set(rgtBox, axis, true, Treelet<NumLevels>::index(), 1);
-	m_ns[1].set(lftBox, axis, false, Treelet<NumLevels>::index(), 0);
+	m_ns[0].setOpposite(rgtBox, axis, true, Treelet<NumLevels>::index(), 1);
+	m_ns[1].setOpposite(lftBox, axis, false, Treelet<NumLevels>::index(), 0);
 }
 
 template<int NumLevels, typename T, typename Tn>
@@ -132,12 +132,12 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 			m_boxes[iLftChild] = lftBox;
 			m_boxes[iLftChild + 1] = rgtBox;
 			
-			const KdNeighbors nodeNs = m_ns[iNode];
+			const BoxNeighbors nodeNs = m_ns[iNode];
 			m_ns[iLftChild] = nodeNs;
 			m_ns[iLftChild + 1] = nodeNs;
 			
-			m_ns[iLftChild].set(rgtBox, axis, true, iTreelet, iLftChild + 1);
-			m_ns[iLftChild + 1].set(lftBox, axis, false, iTreelet, iLftChild);
+			m_ns[iLftChild].setOpposite(rgtBox, axis, true, iTreelet, iLftChild + 1);
+			m_ns[iLftChild + 1].setOpposite(lftBox, axis, false, iTreelet, iLftChild);
 			
 			needNextLevel = true;
 		}
@@ -150,7 +150,7 @@ template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::visitCousins(int iNode, int level)
 {
 	const int hi = Treelet<NumLevels>::OffsetByLevel(level);
-	KdNeighbors & nodeNs = m_ns[iNode];
+	BoxNeighbors & nodeNs = m_ns[iNode];
 	int i = 0;
 	for(;i<6;i++) {
 		BoundingBox & ni = nodeNs._n[i];
@@ -159,7 +159,7 @@ void KdRope<NumLevels, T, Tn>::visitCousins(int iNode, int level)
 				int updated;
 				if(chooseCousinAsNeighbor(i, iNode, ni.m_padding0, updated)) {
 					// std::cout<<"\n ud nei "<<iNode<<" "<<ni.m_padding0<<" -> "<<updated;
-					m_ns[iNode].set(m_boxes[updated], i, Treelet<NumLevels>::index(), updated);
+					m_ns[iNode].setNeighbor(m_boxes[updated], i, Treelet<NumLevels>::index(), updated);
 				}
 			}
 		}
@@ -172,12 +172,12 @@ bool KdRope<NumLevels, T, Tn>::chooseCousinAsNeighbor(int iNeighbor, int iNode, 
 	const BoundingBox a = m_boxes[iNode];
 	const int iLftCousin = iParent + Treelet<NumLevels>::ChildOffset(iParent);
 	BoundingBox b = m_boxes[iLftCousin];
-	if(KdNeighbors::IsNeighborOf(iNeighbor, a, b)) {
+	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b)) {
 		updated = iLftCousin;
 		return true;
 	}
 	b = m_boxes[iLftCousin + 1];
-	if(KdNeighbors::IsNeighborOf(iNeighbor, a, b)) {
+	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b)) {
 		updated = iLftCousin + 1;
 		return true;
 	}
@@ -192,7 +192,7 @@ void KdRope<NumLevels, T, Tn>::pushLeaves()
 	const int n = Treelet<NumLevels>::numNodes();
 	int i = 0;
 	for(;i<n;i++) {
-		KdNeighbors nodeNs = m_ns[i];
+		BoxNeighbors nodeNs = m_ns[i];
 		if(nodeNs.isEmpty()) continue;
 		
 		KdTreeNode * node = treelet->node(i);
@@ -209,7 +209,7 @@ void KdRope<NumLevels, T, Tn>::beginMap()
 { BoxMap.clear(); }
 
 template<int NumLevels, typename T, typename Tn>
-void KdRope<NumLevels, T, Tn>::mapNeighbors(KdNeighbors & ns)
+void KdRope<NumLevels, T, Tn>::mapNeighbors(BoxNeighbors & ns)
 {
 	int i = 0;
 	for(;i<6;i++) {

@@ -5,6 +5,7 @@
 #include <IntersectionContext.h>
 #include "KdNNode.h"
 #include "KdSah.h"
+#include "BoxNeighbors.h"
 #include <sstream>
 
 namespace aphid {
@@ -14,88 +15,12 @@ namespace knt {
 ///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
 ///
 struct TreeLeaf {
-	unsigned _ropeInd[6];
-	unsigned _primStart;
-	unsigned _nouse;
+/// -x +x -y +y -z +z
+	int _ropeInd[6];
+	int _primStart;
+	int _nouse;
 };
 }
-
-class KdNeighbors {
-	/// 0 left 1 right 2 bottom 3 top 4 back 5 front
-public:
-	BoundingBox _n[6];
-	void reset() 
-	{
-		int i = 0;
-		for(;i<6;i++) {
-			_n[i].m_padding0 = 0; // node
-			_n[i].m_padding1 = 0; // treelet, zero is null
-		}
-	}
-	
-	void set(const BoundingBox & box, int axis, bool isHigh, int treeletIdx, int nodeIdx)
-	{
-		int idx = axis<<1;
-		if(isHigh) idx++;
-		set(box, idx, treeletIdx, nodeIdx);
-	}
-	
-	void set(const BoundingBox & box, int idx, int treeletIdx, int nodeIdx)
-	{
-		_n[idx] = box;
-		_n[idx].m_padding0 = nodeIdx;
-		_n[idx].m_padding1 = treeletIdx;
-	}
-	
-	bool isEmpty() const
-	{
-		int i = 0;
-		for(;i<6;i++) {
-			if(_n[i].m_padding1 != 0) return false;
-		}
-		return true;
-	}
-	
-	static bool IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b)
-	{
-		const int splitAxis = dir / 2;
-		int i = 0;
-		for(;i<3;i++) {
-			if(i==splitAxis) {
-				if(dir & 1) {
-					if(b.getMin(splitAxis) != a.getMax(splitAxis) ) return false;
-				}
-				else {
-					if(b.getMax(splitAxis) != a.getMin(splitAxis) ) return false;
-				}
-			}
-			else {
-				if(b.getMin(i) > a.getMin(i)) return false;
-				if(b.getMax(i) < a.getMax(i)) return false;
-			}
-		}
-		return true;
-	}
-	
-	unsigned encodeTreeletNodeHash(int i, int s) const
-	{ return (_n[i].m_padding1 << (s + 1)) + _n[i].m_padding0; }
-	
-	void decodeTreeletNodeHash(int i, int s, unsigned & itreelet, unsigned & inode) const
-	{
-		itreelet = _n[i].m_padding1 >> (s+1);
-		inode = _n[i].m_padding1 & ~(1<<(s+1) );
-	}
-	
-	void verbose() const
-	{
-		int i = 0;
-		for(;i<6;i++) {
-			if(_n[i].m_padding1 != 0) std::cout<<"\n ["<<i<<"] "<<_n[i].m_padding1
-				<<" "<<_n[i].m_padding0
-				<<" "<<_n[i];
-		}
-	}
-};
 
 template <typename T, typename Tn>
 class KdNTree : public AVerbose, public Boundary, public TreeProperty
@@ -129,16 +54,16 @@ public:
 	
 	int numLeafNodes() const;
 	void addLeafNode(unsigned primStart);
-	const unsigned & leafPrimStart(unsigned idx) const;
+	const int & leafPrimStart(unsigned idx) const;
 	void getLeafBox(BoundingBox & dst, unsigned idx, unsigned count) const;
 	
-	void setLeafRope(unsigned idx, const KdNeighbors & ns);
+	void setLeafRope(unsigned idx, const BoxNeighbors & ns);
 	
 	void createRopes(unsigned n);
 	void setRope(unsigned idx, const BoundingBox & v );
 	const int & numRopes() const;
 	
-	unsigned leafRopeInd(unsigned idx, int ri) const;
+	const int & leafRopeInd(unsigned idx, int ri) const;
 	void setLeafRopeInd(unsigned x, unsigned idx, int ri);
 
 	sdb::VectorArray<T> * source();
@@ -164,10 +89,15 @@ private:
 	void clear();
 	int firstVisit(IntersectionContext * ctx,
 							const KdTreeNode * n) const;
-	char visitLeaf(IntersectionContext * ctx, 
+/// -1: non-leaf
+///  0: empty leaf
+///  1: non-empty leaf
+	int visitLeaf(IntersectionContext * ctx, 
 							int & branchIdx,
 							int & nodeIdx);
-	
+	bool climbRope(IntersectionContext * ctx, 
+							int & branchIdx,
+							int & nodeIdx);
 };
 
 template <typename T, typename Tn>
@@ -288,15 +218,15 @@ int * KdNTree<T, Tn>::addIndirection()
 }
 
 template <typename T, typename Tn>
-const unsigned & KdNTree<T, Tn>::leafPrimStart(unsigned idx) const
+const int & KdNTree<T, Tn>::leafPrimStart(unsigned idx) const
 { return m_leafNodes[idx]->_primStart; }
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::getLeafBox(BoundingBox & dst, unsigned idx, unsigned count) const
 {
 	dst.reset();
-	const unsigned s = leafPrimStart(idx);
-    unsigned i = 0;
+	const int s = leafPrimStart(idx);
+    int i = 0;
     for(;i< count; i++) dst.expandBy( dataAt(s + i)->bbox() );
 }
 
@@ -312,8 +242,9 @@ void KdNTree<T, Tn>::setRope(unsigned idx, const BoundingBox & v )
 { m_ropes[idx] = v; }
 
 template <typename T, typename Tn>
-void KdNTree<T, Tn>::setLeafRope(unsigned idx, const KdNeighbors & ns)
+void KdNTree<T, Tn>::setLeafRope(unsigned idx, const BoxNeighbors & ns)
 {
+	// ns.verbose();
 	int i = 0;
 	for(;i<6;i++) {
 		if(ns._n[i].m_padding1 != 0) {
@@ -323,11 +254,10 @@ void KdNTree<T, Tn>::setLeafRope(unsigned idx, const KdNeighbors & ns)
 			m_leafNodes[idx]->_ropeInd[i] = 0;
 		}
 	}
-	// ns.verbose();
 }
 
 template <typename T, typename Tn>
-unsigned KdNTree<T, Tn>::leafRopeInd(unsigned idx, int ri) const
+const int & KdNTree<T, Tn>::leafRopeInd(unsigned idx, int ri) const
 { return m_leafNodes[idx]->_ropeInd[ri]; }
 
 template <typename T, typename Tn>
@@ -444,30 +374,32 @@ char KdNTree<T, Tn>::intersect(IntersectionContext * ctx)
 	ctx->setBBox(b);
 	int branchIdx = root()->internalOffset(0);
 	int nodeIdx = firstVisit(ctx, r);
+	int stat;
 	bool hasNext = true;
 	while (hasNext) {
-		
-		if(visitLeaf(ctx, branchIdx, nodeIdx) ) {
+		stat = visitLeaf(ctx, branchIdx, nodeIdx);
+		if(stat > 0 ) {
 			hasNext = false;
+		}
+		else if(stat==0) {
+			hasNext = climbRope(ctx, branchIdx, nodeIdx);
 		}
 	}
 	return 0;
 }
 
 template <typename T, typename Tn>
-char KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx, 
+int KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx, 
 									int & branchIdx,
 									int & nodeIdx)
 {
-	std::cout<<"\n visit branch "<<branchIdx
-				<<" node "<<nodeIdx;
+	std::cout<<"\n node "<<nodeIdx;
 				
 	const Tn * branch = nodes()[branchIdx];
 	const KdTreeNode * r = branch->node(nodeIdx);
 	if(r->isLeaf() ) {
-		std::cout<<"\n hit leaf "<<branchIdx<<" "<<nodeIdx;
-		branch->printChild(nodeIdx);
-		return 1;
+		std::cout<<"\n hit leaf ";
+		return r->getNumPrims() > 0;
 	}
 	
 	const int offset = branch->internalOffset(nodeIdx);
@@ -476,12 +408,46 @@ char KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx,
 		nodeIdx += offset + firstVisit(ctx, r);
 	}
 	else {
-		// std::cout<<"\n branch offset "<<offset;
 		branchIdx += offset;
+		std::cout<<"\n branch "<<branchIdx;
 		nodeIdx = firstVisit(ctx, r);
 	}
 	
-	return 0;
+	return -1;
+}
+
+template <typename T, typename Tn>
+bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx, 
+									int & branchIdx,
+									int & nodeIdx)
+{
+	const BoundingBox & b = ctx->getBBox();
+	float t0, t1;
+	b.intersect(ctx->m_ray, &t0, &t1);
+	const Vector3F hit1 = ctx->m_ray.m_origin + ctx->m_ray.m_dir * t1;
+	int side = b.pointOnSide(hit1);
+	// std::cout<<"\n rope side "<<side;
+	
+	const Tn * branch = nodes()[branchIdx];
+	const KdTreeNode * r = branch->node(nodeIdx);
+/// leaf ind actually 
+	int iLeaf = r->getPrimStart();
+	std::cout<<"\n leaf["<<iLeaf<<"] ";
+	
+	int iRope = leafRopeInd(iLeaf, side);
+	
+	if(iRope < 1) {
+		std::cout<<" no rope";
+		return false;
+	}
+	
+	std::cout<<" rope["<<iRope<<"]";
+	const BoundingBox & rp = m_ropes[ iRope ];
+	BoxNeighbors::DecodeTreeletNodeHash(rp.m_padding1, Tn::BranchingFactor, 
+					branchIdx, nodeIdx);
+	std::cout<<"\n branch "<<branchIdx;
+	ctx->setBBox(rp);
+	return true;
 }
 
 template <typename T, typename Tn>

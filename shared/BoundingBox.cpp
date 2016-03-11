@@ -407,6 +407,16 @@ float BoundingBox::radiusXZ() const
     return sqrt(dx*dx + dz*dz);
 }
 
+int BoundingBox::pointOnSide(const Vector3F & v) const
+{
+	if(Absolute<float>(v.x - m_data[0]) < 1e-4f) return 0;
+	if(Absolute<float>(v.x - m_data[3]) < 1e-4f) return 1;
+	if(Absolute<float>(v.y - m_data[1]) < 1e-4f) return 2;
+	if(Absolute<float>(v.y - m_data[4]) < 1e-4f) return 3;
+	if(Absolute<float>(v.z - m_data[2]) < 1e-4f) return 4;
+	return 5;
+}
+
 int BoundingBox::numPoints() const
 { return 8; }
 
