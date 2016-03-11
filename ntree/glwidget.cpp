@@ -19,6 +19,7 @@ GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(p
 	m_source = NULL;
 	m_tree = NULL;
 	
+	std::cout<<"\n sizeof 4node "<<sizeof(KdNode4);
 	if(filename.size() > 1) readTree(filename);
 	else testTree();
 }

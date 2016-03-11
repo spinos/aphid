@@ -36,12 +36,12 @@ public:
 	virtual char load();
     
 protected:
-	void save240Node();
+	void save256Node();
 	void saveLeaf();
 	void saveInd();
 	void saveRope();
 	
-	void load240Node();
+	void load256Node();
 	void loadLeaf();
 	void loadInd();
 	void loadRope();
@@ -61,8 +61,8 @@ HNTree<T, Tn>::~HNTree() {}
 template <typename T, typename Tn>
 char HNTree<T, Tn>::save()
 {
-	if(sizeof(Tn) == 240) 
-		save240Node();
+	if(sizeof(Tn) == 256) 
+		save256Node();
 	
 	saveLeaf();
 	saveInd();
@@ -76,9 +76,9 @@ char HNTree<T, Tn>::save()
 }
 
 template <typename T, typename Tn>
-void HNTree<T, Tn>::save240Node()
+void HNTree<T, Tn>::save256Node()
 {
-	HOocArray<hdata::TChar, 240, 256> treeletD(".node");
+	HOocArray<hdata::TChar, 256, 256> treeletD(".node");
 	if(hasNamedData(".node") )
 		treeletD.openStorage(fObjectId, true);
 	else
@@ -96,7 +96,7 @@ void HNTree<T, Tn>::save240Node()
 	if(!hasNamedAttr(".nnode") )
 	    addIntAttr(".nnode", 1);
 	writeIntAttr(".nnode", &n);
-	std::cout<<"\n save "<<n<<" node240";
+	std::cout<<"\n save "<<n<<" node256";
 }
 	
 template <typename T, typename Tn>
@@ -187,8 +187,8 @@ char HNTree<T, Tn>::load()
 	KdNTree<T, Tn>::clear(b);
 	std::cout<<"\n bbox "<<b;
 	
-	if(sizeof(Tn) == 240) 
-		load240Node();
+	if(sizeof(Tn) == 256) 
+		load256Node();
 		
 	loadLeaf();
 	loadInd();
@@ -198,12 +198,12 @@ char HNTree<T, Tn>::load()
 }
 
 template <typename T, typename Tn>
-void HNTree<T, Tn>::load240Node()
+void HNTree<T, Tn>::load256Node()
 {
 	int n =0;
 	readIntAttr(".nnode", &n);
 	
-	HOocArray<hdata::TChar, 240, 256> treeletD(".node");
+	HOocArray<hdata::TChar, 256, 256> treeletD(".node");
 	if(!treeletD.openStorage(fObjectId)) 
 		return;
 	
@@ -212,7 +212,7 @@ void HNTree<T, Tn>::load240Node()
 		treeletD.readColumn((char *)KdNTree<T, Tn>::addTreelet(), i);
 	}
 	
-	std::cout<<"\n load "<<n<<" node240";
+	std::cout<<"\n load "<<n<<" node256";
 }
 
 template <typename T, typename Tn>
