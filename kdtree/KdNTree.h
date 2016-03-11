@@ -2,6 +2,7 @@
 #include <Geometry.h>
 #include <Boundary.h>
 #include <TreeProperty.h>
+#include <IntersectionContext.h>
 #include "KdNNode.h"
 #include "KdSah.h"
 #include <sstream>
@@ -111,7 +112,7 @@ public:
 	virtual ~KdNTree();
 	
 	void init(sdb::VectorArray<T> * source, const BoundingBox & box);
-	bool isNull() const;
+	bool isEmpty() const;
 
     Tn * root();
     
@@ -143,6 +144,8 @@ public:
 	sdb::VectorArray<T> * source();
 	void setSource(sdb::VectorArray<T> * src);
 	
+	char intersect(IntersectionContext * ctx);
+	
 	virtual std::string verbosestr() const;
     
     typedef Tn TreeletType;
@@ -159,6 +162,12 @@ protected:
 
 private:
 	void clear();
+	int firstVisit(IntersectionContext * ctx,
+							const KdTreeNode * n) const;
+	char visitLeaf(IntersectionContext * ctx, 
+							int & branchIdx,
+							int & nodeIdx);
+	
 };
 
 template <typename T, typename Tn>
@@ -183,13 +192,13 @@ void KdNTree<T, Tn>::init(sdb::VectorArray<T> * source, const BoundingBox & box)
 }
 
 template <typename T, typename Tn>
-bool KdNTree<T, Tn>::isNull() const
+bool KdNTree<T, Tn>::isEmpty() const
 { return m_nodePool.size() < 1; }
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::clear()
 {
-	if(isNull()) return;
+	if(isEmpty()) return;
 	m_nodePool.clear();
 	m_leafNodes.clear();
 	m_leafDataIndices.clear();
@@ -355,6 +364,125 @@ int KdNTree<T, Tn>::numLeafIndirection() const
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::setSource(sdb::VectorArray<T> * src)
 { m_source = src; }
+
+template <typename T, typename Tn>
+int KdNTree<T, Tn>::firstVisit(IntersectionContext * ctx, 
+								const KdTreeNode * n) const
+{
+	const int axis = n->getAxis();
+	const float splitPos = n->getSplitPos();
+	
+	const Ray & ray = ctx->m_ray;
+	
+	const float o = ray.m_origin.comp(axis);
+	const float d = ray.m_dir.comp(axis);
+	
+	const BoundingBox & b = ctx->getBBox();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	// std::cout<<"\n split "<<axis<<" "<<splitPos;
+	
+	bool above = o >= splitPos;
+/// parallel to split
+	if(Absolute<float>(d) < 1e-5f) {
+		if(above) ctx->setBBox(rgtBox);
+		else ctx->setBBox(lftBox);
+		
+		return above;
+	}
+	
+/// inside
+	if(lftBox.isPointInside(ray.m_origin) ) {
+		ctx->setBBox(lftBox);
+		return 0;
+	}
+	
+	if(rgtBox.isPointInside(ray.m_origin) ) {
+		ctx->setBBox(rgtBox);
+		return 1;
+	}
+	
+/// one side
+	float t = (splitPos - o) / d;
+	if(t< 0.f) {
+		if(above) ctx->setBBox(rgtBox);
+		else ctx->setBBox(lftBox);
+		return above;
+	}
+	
+/// near one
+	Vector3F hitP = ray.m_origin + ray.m_dir * t;
+	if(b.isPointInside(hitP) ) {
+		if(above) ctx->setBBox(rgtBox);
+		else ctx->setBBox(lftBox);
+		return above;
+	}
+	
+	BoundingBox p2h;
+	p2h.expandBy(ray.m_origin);
+	p2h.expandBy(hitP);
+/// swap side
+	if(!p2h.touch(b) ) above = !above;
+	
+	if(above) ctx->setBBox(rgtBox);
+	else ctx->setBBox(lftBox);
+		
+	return above;
+}
+
+template <typename T, typename Tn>
+char KdNTree<T, Tn>::intersect(IntersectionContext * ctx)
+{
+	if(isEmpty()) return 0;
+	
+	const BoundingBox & b = getBBox();
+	if(!b.intersect(ctx->m_ray)) return 0;
+	
+	KdTreeNode * r = root()->node(0);
+	if(r->isLeaf() ) return 1;
+	
+	ctx->setBBox(b);
+	int branchIdx = root()->internalOffset(0);
+	int nodeIdx = firstVisit(ctx, r);
+	bool hasNext = true;
+	while (hasNext) {
+		
+		if(visitLeaf(ctx, branchIdx, nodeIdx) ) {
+			hasNext = false;
+		}
+	}
+	return 0;
+}
+
+template <typename T, typename Tn>
+char KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx, 
+									int & branchIdx,
+									int & nodeIdx)
+{
+	std::cout<<"\n visit branch "<<branchIdx
+				<<" node "<<nodeIdx;
+				
+	const Tn * branch = nodes()[branchIdx];
+	const KdTreeNode * r = branch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		std::cout<<"\n hit leaf "<<branchIdx<<" "<<nodeIdx;
+		branch->printChild(nodeIdx);
+		return 1;
+	}
+	
+	const int offset = branch->internalOffset(nodeIdx);
+	if(r->getOffset() < Tn::TreeletOffsetMask) {
+		// std::cout<<"\n inner offset "<<offset;
+		nodeIdx += offset + firstVisit(ctx, r);
+	}
+	else {
+		// std::cout<<"\n branch offset "<<offset;
+		branchIdx += offset;
+		nodeIdx = firstVisit(ctx, r);
+	}
+	
+	return 0;
+}
 
 template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const

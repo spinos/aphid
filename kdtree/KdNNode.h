@@ -31,7 +31,7 @@ public:
 	
 	int internalOffset(int idx) const;
 	
-	void verbose();
+	void verbose() const;
 	
 	static int NumNodes;
 	static int BranchingFactor;
@@ -39,6 +39,8 @@ public:
 	enum EMask {
 		TreeletOffsetMask = 1<<20,
 	};
+	
+	void printChild(const int & idx) const;
 
 private:
     void setAllLeaf();
@@ -74,29 +76,37 @@ void KdNNode<NumLevels>::setLeaf(int idx, unsigned start, unsigned num)
 }
 
 template <int NumLevels>
-void KdNNode<NumLevels>::verbose()
+void KdNNode<NumLevels>::verbose() const
 {
 	std::cout<<"\n treelet";
 	//		<<" level "<<NumLevels
 	//		<<" n node "<<NumNodes;
 	int i = 0;
 	for(;i<NumNodes;i++) {
-		KdTreeNode & child = m_nodes[i];
+		const KdTreeNode & child = m_nodes[i];
 		if(child.isLeaf()) {
-			if(child.getNumPrims() > 0) {
-				std::cout<<"\n ["<<i<<"] leaf"
-						<<" "<<child.getPrimStart()
-						<<" count "<<child.getNumPrims();
-			}
+			if(child.getNumPrims() > 0) printChild(i);
 		}
 		else {
-		    if(child.getOffset() > 0) {
-			std::cout<<"\n ["<<i<<"]"
-			        <<" offset "<<(child.getOffset() & ~TreeletOffsetMask)
-					<<" internal axis "<<child.getAxis()
-					<<" split "<<child.getSplitPos();
-			}
+			if(child.getOffset() > 0) printChild(i);
 		}
+	}
+}
+
+template <int NumLevels>
+void KdNNode<NumLevels>::printChild(const int & idx) const
+{
+	const KdTreeNode & child = m_nodes[idx];
+	if(child.isLeaf()) {
+		std::cout<<"\n ["<<idx<<"] leaf"
+					<<" "<<child.getPrimStart()
+					<<" count "<<child.getNumPrims();
+	}
+	else {
+		std::cout<<"\n ["<<idx<<"] internal"
+				<<" offset "<<(child.getOffset() & ~TreeletOffsetMask)
+				<<" axis "<<child.getAxis()
+				<<" split "<<child.getSplitPos();
 	}
 }
 

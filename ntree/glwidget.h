@@ -5,6 +5,7 @@
 #include <Base3DView.h>
 #include <KdEngine.h>
 #include <ConvexShape.h>
+#include <IntersectionContext.h>
 
 using namespace aphid;
 
@@ -20,9 +21,9 @@ public:
 protected:    
     virtual void clientInit();
     virtual void clientDraw();
-    virtual void clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit);
-    virtual void clientDeselect();
-    virtual void clientMouseInput(Vector3F & stir);
+    virtual void clientSelect(QMouseEvent *event);
+    virtual void clientDeselect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
     virtual void resizeEvent(QResizeEvent * event);
@@ -34,13 +35,16 @@ private:
 	void drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot = false);
     void drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level);
 	void drawALeaf(unsigned start, unsigned n, const BoundingBox & box);
+	void drawIntersect();
 	KdNTree<cvx::Cube, KdNode4 > * tree();
 	
 private slots:
     bool readTree(const std::string & filename);
 	void testTree();
+	void testIntersect(const Ray * incident);
 	
 private:
+	IntersectionContext m_intersectCtx;
 	KdEngine<cvx::Cube> m_engine;
 	sdb::VectorArray<cvx::Cube> * m_source;
 	KdNTree<cvx::Cube, KdNode4 > * m_tree;

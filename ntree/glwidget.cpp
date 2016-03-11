@@ -68,6 +68,7 @@ void GLWidget::clientDraw()
 	// getDrawer()->frustum(&m_frustum);
 	drawBoxes();
     drawTree();
+	drawIntersect();
 }
 
 void GLWidget::drawBoxes() const
@@ -189,18 +190,21 @@ void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
 KdNTree<cvx::Cube, KdNode4 > * GLWidget::tree()
 { return m_tree; }
 
-void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
+void GLWidget::clientSelect(QMouseEvent *event)
 {
-}
-//! [9]
-
-void GLWidget::clientDeselect()
-{
+	setUpdatesEnabled(false);
+	testIntersect(getIncidentRay());
+	setUpdatesEnabled(true);
 }
 
-//! [10]
-void GLWidget::clientMouseInput(Vector3F & stir)
+void GLWidget::clientDeselect(QMouseEvent *event)
+{}
+
+void GLWidget::clientMouseInput(QMouseEvent *event)
 {
+	setUpdatesEnabled(false);
+	testIntersect(getIncidentRay());
+	setUpdatesEnabled(true);
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
@@ -259,3 +263,30 @@ bool GLWidget::readTree(const std::string & filename)
 	hio.end();
 	return true;
 }
+
+void GLWidget::testIntersect(const Ray * incident)
+{
+	m_intersectCtx.reset(*incident);
+	if(!m_tree) return;
+	std::stringstream sst; sst<<incident->m_dir;
+	qDebug()<<"interset begin "<<sst.str().c_str();
+	m_tree->intersect(&m_intersectCtx);
+	qDebug()<<"interset end";
+}
+
+void GLWidget::drawIntersect()
+{
+	Vector3F dst = m_intersectCtx.m_ray.m_origin
+					+ m_intersectCtx.m_ray.m_dir * m_intersectCtx.m_ray.m_tmax;
+					
+	glColor3f(1,0,0);
+	glBegin(GL_LINES);
+		glVertex3fv((const GLfloat * )&m_intersectCtx.m_ray.m_origin);
+		glVertex3fv((const GLfloat * )&dst);
+	glEnd();
+	
+	BoundingBox b = m_intersectCtx.getBBox();
+	b.expand(0.03f);
+	getDrawer()->boundingBox(b );
+}
+//:~

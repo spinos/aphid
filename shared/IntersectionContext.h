@@ -44,6 +44,8 @@ public:
 	char twoSided;
 	char * m_cell;
 	float m_coord[3];
+	float m_tmin, m_tmax;
+	
 private:
 };
 
