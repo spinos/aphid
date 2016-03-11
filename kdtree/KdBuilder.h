@@ -198,13 +198,13 @@ template<int NumLevels, typename T, typename Tn>
 void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * node, int idx)
 {
 	parent->decompressPrimitives(true);
-	unsigned iLeaf = m_tree->numLeafNodes();
-	unsigned primStart = 0, primLen = 0;
+	int iLeaf = m_tree->numLeafNodes();
+	int primStart = 0, primLen = 0;
 	if(parent->isEmpty()) {
 		m_tree->addEmptyVolume(parent->getBBox().volume() );
 	}
 	else {
-		primStart = m_tree->numData();
+		primStart = m_tree->numPrimIndirection();
 		primLen = parent->numPrims();
 		int i = 0;
 		for(;i<parent->numPrims();i++)
@@ -215,7 +215,7 @@ void KdTreeletBuilder<NumLevels, T, Tn>::setNodeLeaf(SahSplit<T> * parent, Tn * 
 	}
 	// std::cout<<"\n leaf["<<iLeaf<<"] ("<<primStart<<","<<primLen<<")";
 	node->setLeaf(idx, iLeaf, primLen);
-	m_tree->addLeafNode(primStart);
+	m_tree->addLeafNode(primStart, primLen);
 }
 
 template<int NumLevels, typename T, typename Tn>

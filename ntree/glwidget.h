@@ -37,11 +37,12 @@ private:
 	void drawALeaf(unsigned start, unsigned n, const BoundingBox & box);
 	void drawIntersect();
 	KdNTree<cvx::Cube, KdNode4 > * tree();
-	
-private slots:
-    bool readTree(const std::string & filename);
+	bool readTree(const std::string & filename);
 	void testTree();
 	void testIntersect(const Ray * incident);
+	void drawActiveSource(const unsigned & iLeaf);
+	
+private slots:
 	
 private:
 	IntersectionContext m_intersectCtx;

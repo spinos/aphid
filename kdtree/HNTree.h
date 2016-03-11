@@ -85,7 +85,7 @@ void HNTree<T, Tn>::save240Node()
 		treeletD.createStorage(fObjectId);
 	
 	const sdb::VectorArray<Tn> & src = KdNTree<T, Tn>::nodes();
-	int n = KdNTree<T, Tn>::numNodes();
+	int n = KdNTree<T, Tn>::numBranches();
 	int i=0;
 	for(;i<n;++i) {
 		treeletD.insert((char *)src[i] );
@@ -132,8 +132,8 @@ void HNTree<T, Tn>::saveInd()
 	else
 		indD.createStorage(fObjectId);
 	
-	const sdb::VectorArray<int> & src = KdNTree<T, Tn>::leafIndirection();
-	int n = KdNTree<T, Tn>::numLeafIndirection();
+	const sdb::VectorArray<int> & src = KdNTree<T, Tn>::primIndirection();
+	int n = KdNTree<T, Tn>::numPrimIndirection();
 	
 	int b[64];
 	int i=0, j=0;

@@ -12,7 +12,8 @@ GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(p
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
-    
+    m_intersectCtx.m_success = 0;
+	
 	m_maxDrawTreeLevel = 1;
 	
 	m_source = NULL;
@@ -276,10 +277,16 @@ void GLWidget::testIntersect(const Ray * incident)
 
 void GLWidget::drawIntersect()
 {
-	Vector3F dst = m_intersectCtx.m_ray.m_origin
-					+ m_intersectCtx.m_ray.m_dir * m_intersectCtx.m_ray.m_tmax;
-					
-	glColor3f(1,0,0);
+	Vector3F dst;
+	if(m_intersectCtx.m_success) {
+		glColor3f(0,1,0);
+		dst = m_intersectCtx.m_ray.travel(m_intersectCtx.m_tmax);
+	}
+	else {
+		glColor3f(1,0,0);
+		dst = m_intersectCtx.m_ray.destination();
+	}
+	
 	glBegin(GL_LINES);
 		glVertex3fv((const GLfloat * )&m_intersectCtx.m_ray.m_origin);
 		glVertex3fv((const GLfloat * )&dst);
@@ -288,5 +295,21 @@ void GLWidget::drawIntersect()
 	BoundingBox b = m_intersectCtx.getBBox();
 	b.expand(0.03f);
 	getDrawer()->boundingBox(b );
+	
+	if(m_intersectCtx.m_success) drawActiveSource(m_intersectCtx.m_componentIdx);
+}
+
+void GLWidget::drawActiveSource(const unsigned & iLeaf)
+{
+	if(!m_tree) return;
+	if(!m_source) return;
+	
+	int start, len;
+	m_tree->leafPrimStartLength(start, len, iLeaf);
+	int i=0;
+	for(;i<len;++i) {
+		const cvx::Cube * c = m_source->get( m_tree->primIndirectionAt(start + i) );
+		getDrawer()->boundingBox(c->calculateBBox() );
+	}
 }
 //:~

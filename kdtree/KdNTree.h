@@ -12,13 +12,14 @@ namespace aphid {
 
 namespace knt {
 /// i --> tree_leaf[i] --> prim_start
-///                    \-> rope_ind   --> leaf_neighbors[rope_ind]
+///					   --> prim_len
+///                    --> rope_ind   --> leaf_neighbors[rope_ind]
 ///
 struct TreeLeaf {
 /// -x +x -y +y -z +z
 	int _ropeInd[6];
 	int _primStart;
-	int _nouse;
+	int _primLength;
 };
 }
 
@@ -28,7 +29,7 @@ class KdNTree : public AVerbose, public Boundary, public TreeProperty
 	sdb::VectorArray<T> * m_source;
     sdb::VectorArray<Tn> m_nodePool;
 	sdb::VectorArray<knt::TreeLeaf> m_leafNodes;
-	sdb::VectorArray<int> m_leafDataIndices;
+	sdb::VectorArray<int> m_primIndices;
 	BoundingBox * m_ropes;
     int m_numRopes;
 
@@ -41,11 +42,12 @@ public:
 
     Tn * root();
     
-	int numNodes() const;
+	int numPrimIndirection() const;
+	const int & primIndirectionAt(const int & idx) const;
+	int numBranches() const;
 	int addBranch();
 	
 	void addDataIndex(int x);
-	int numData() const;
 	T * dataAt(unsigned idx) const;
 	const sdb::VectorArray<Tn> & nodes() const;
 	sdb::VectorArray<Tn> & nodes();
@@ -53,9 +55,10 @@ public:
 	const sdb::VectorArray<knt::TreeLeaf> & leafNodes() const;
 	
 	int numLeafNodes() const;
-	void addLeafNode(unsigned primStart);
+	void addLeafNode(const int & primStart, const int & primLen);
 	const int & leafPrimStart(unsigned idx) const;
-	void getLeafBox(BoundingBox & dst, unsigned idx, unsigned count) const;
+	void leafPrimStartLength(int & start, int & len, 
+									unsigned idx) const;
 	
 	void setLeafRope(unsigned idx, const BoxNeighbors & ns);
 	
@@ -78,8 +81,7 @@ public:
 protected:
 	const BoundingBox * ropes() const;
 	BoundingBox * ropesR(const int & idx);
-	const sdb::VectorArray<int> & leafIndirection() const;
-	int numLeafIndirection() const;
+	const sdb::VectorArray<int> & primIndirection() const;
 	void clear(const BoundingBox & b);
 	Tn * addTreelet();
 	knt::TreeLeaf * addLeaf();
@@ -131,7 +133,7 @@ void KdNTree<T, Tn>::clear()
 	if(isEmpty()) return;
 	m_nodePool.clear();
 	m_leafNodes.clear();
-	m_leafDataIndices.clear();
+	m_primIndices.clear();
 	if(m_ropes) delete[] m_ropes;
 	m_numRopes = 0;
 }
@@ -162,16 +164,12 @@ const sdb::VectorArray<Tn> & KdNTree<T, Tn>::nodes() const
 { return m_nodePool; }
 
 template <typename T, typename Tn>
-int KdNTree<T, Tn>::numNodes() const
+int KdNTree<T, Tn>::numBranches() const
 { return m_nodePool.size(); }
 
 template <typename T, typename Tn>
-int KdNTree<T, Tn>::numData() const
-{ return m_leafDataIndices.size(); }
-
-template <typename T, typename Tn>
 void KdNTree<T, Tn>::addDataIndex(int x)
-{ m_leafDataIndices.insert(x); }
+{ m_primIndices.insert(x); }
 
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::addBranch()
@@ -189,17 +187,18 @@ Tn * KdNTree<T, Tn>::addTreelet()
 
 template <typename T, typename Tn>
 T * KdNTree<T, Tn>::dataAt(unsigned idx) const
-{ return m_source->get(*m_leafDataIndices[idx]); }
+{ return m_source->get(*m_primIndices[idx]); }
 
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::numLeafNodes() const
 { return m_leafNodes.size(); }
 
 template <typename T, typename Tn>
-void KdNTree<T, Tn>::addLeafNode(unsigned primStart)
+void KdNTree<T, Tn>::addLeafNode(const int & primStart, const int & primLen)
 { 
 	knt::TreeLeaf l;
 	l._primStart = primStart;
+	l._primLength = primLen;
 	m_leafNodes.insert(l);
 }
 
@@ -213,8 +212,8 @@ knt::TreeLeaf * KdNTree<T, Tn>::addLeaf()
 template <typename T, typename Tn>
 int * KdNTree<T, Tn>::addIndirection()
 {
-	m_leafDataIndices.insert();
-	return m_leafDataIndices.last();
+	m_primIndices.insert();
+	return m_primIndices.last();
 }
 
 template <typename T, typename Tn>
@@ -222,12 +221,11 @@ const int & KdNTree<T, Tn>::leafPrimStart(unsigned idx) const
 { return m_leafNodes[idx]->_primStart; }
 
 template <typename T, typename Tn>
-void KdNTree<T, Tn>::getLeafBox(BoundingBox & dst, unsigned idx, unsigned count) const
-{
-	dst.reset();
-	const int s = leafPrimStart(idx);
-    int i = 0;
-    for(;i< count; i++) dst.expandBy( dataAt(s + i)->bbox() );
+void KdNTree<T, Tn>::leafPrimStartLength(int & start, int & len, 
+									unsigned idx) const
+{ 
+	start = m_leafNodes[idx]->_primStart; 
+	len = m_leafNodes[idx]->_primLength;
 }
 
 template <typename T, typename Tn>
@@ -284,12 +282,16 @@ BoundingBox * KdNTree<T, Tn>::ropesR(const int & idx)
 { return &m_ropes[idx]; }
 
 template <typename T, typename Tn>
-const sdb::VectorArray<int> & KdNTree<T, Tn>::leafIndirection() const
-{ return m_leafDataIndices; }
+const sdb::VectorArray<int> & KdNTree<T, Tn>::primIndirection() const
+{ return m_primIndices; }
 
 template <typename T, typename Tn>
-int KdNTree<T, Tn>::numLeafIndirection() const
-{ return m_leafDataIndices.size(); }
+int KdNTree<T, Tn>::numPrimIndirection() const
+{ return m_primIndices.size(); }
+
+template <typename T, typename Tn>
+const int & KdNTree<T, Tn>::primIndirectionAt(const int & idx) const
+{ return *m_primIndices[idx]; }
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::setSource(sdb::VectorArray<T> * src)
@@ -341,7 +343,7 @@ int KdNTree<T, Tn>::firstVisit(IntersectionContext * ctx,
 	}
 	
 /// near one
-	Vector3F hitP = ray.m_origin + ray.m_dir * t;
+	Vector3F hitP = ray.travel(t);
 	if(b.isPointInside(hitP) ) {
 		if(above) ctx->setBBox(rgtBox);
 		else ctx->setBBox(lftBox);
@@ -385,7 +387,7 @@ char KdNTree<T, Tn>::intersect(IntersectionContext * ctx)
 			hasNext = climbRope(ctx, branchIdx, nodeIdx);
 		}
 	}
-	return 0;
+	return ctx->m_success;
 }
 
 template <typename T, typename Tn>
@@ -398,8 +400,17 @@ int KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx,
 	const Tn * branch = nodes()[branchIdx];
 	const KdTreeNode * r = branch->node(nodeIdx);
 	if(r->isLeaf() ) {
-		std::cout<<"\n hit leaf ";
-		return r->getNumPrims() > 0;
+		std::cout<<"\n hit leaf "<<r->getPrimStart();
+		if(r->getNumPrims() < 1) {
+			return 0;
+		}
+		std::cout<<" n prim "<<r->getNumPrims();
+		ctx->getBBox().intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax);
+		ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
+/// leaf ind actually
+		ctx->m_componentIdx = r->getPrimStart();
+		ctx->m_success = 1;
+		return 1;
 	}
 	
 	const int offset = branch->internalOffset(nodeIdx);
@@ -424,7 +435,7 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	const BoundingBox & b = ctx->getBBox();
 	float t0, t1;
 	b.intersect(ctx->m_ray, &t0, &t1);
-	const Vector3F hit1 = ctx->m_ray.m_origin + ctx->m_ray.m_dir * t1;
+	const Vector3F hit1 = ctx->m_ray.travel(t1);
 	int side = b.pointOnSide(hit1);
 	// std::cout<<"\n rope side "<<side;
 	
@@ -457,9 +468,9 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	sst<<"\n KdNTree: "
 	<<"\n treelet level "<<Tn::BranchingFactor
 	<<"\n n input "<<m_source->size()
-	<<"\n n treelet "<<numNodes()
+	<<"\n n treelet "<<numBranches()
 	<<"\n n leaf "<<numLeafNodes()
-	<<"\n n data "<<numData()
+	<<"\n n data "<<numPrimIndirection()
 	<<"\n n rope "<<numRopes()
 	<<"\n";
 	sst<<logProperty();
