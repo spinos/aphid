@@ -67,18 +67,17 @@ void BoxNeighbors::verbose() const
 	}
 }
 
-bool BoxNeighbors::IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b,
-								const float & tolerance)
+bool BoxNeighbors::AreNeighbors(int dir, const BoundingBox & a, const BoundingBox & b)
 {
-	const int splitAxis = dir / 2;
+	const int splitAxis = dir >> 1;
 	int i = 0;
 	for(;i<3;i++) {
 		if(i==splitAxis) {
 			if(dir & 1) {
-				if(Absolute<float>(b.getMin(splitAxis) - a.getMax(splitAxis) ) > tolerance ) return false;
+				if(b.getMin(splitAxis) != a.getMax(splitAxis)) return false;
 			}
 			else {
-				if(Absolute<float>(b.getMax(splitAxis) - a.getMin(splitAxis) ) > tolerance ) return false;
+				if(b.getMax(splitAxis) != a.getMin(splitAxis)) return false;
 			}
 		}
 		else {

@@ -172,13 +172,12 @@ bool KdRope<NumLevels, T, Tn>::chooseCousinAsNeighbor(int iNeighbor, int iNode, 
 	const BoundingBox & a = m_boxes[iNode];
 	const int iLftCousin = iParent + Treelet<NumLevels>::ChildOffset(iParent);
 	BoundingBox b = m_boxes[iLftCousin];
-	const float tol = b.getLongestAxis() * 1e-3f;
-	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b, tol)) {
+	if(BoxNeighbors::AreNeighbors(iNeighbor, a, b)) {
 		updated = iLftCousin;
 		return true;
 	}
 	b = m_boxes[iLftCousin + 1];
-	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b, tol)) {
+	if(BoxNeighbors::AreNeighbors(iNeighbor, a, b)) {
 		updated = iLftCousin + 1;
 		return true;
 	}
