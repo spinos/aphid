@@ -35,9 +35,6 @@ public:
 		m_numData = 0;
 		typename std::vector<T *>::iterator it = m_blocks.begin();
 		for(;it!=m_blocks.end();++it) delete[] *it;
-		//const int n = m_blocks.size();
-		//int i = 0;
-		//for(; i<n; i++) delete[] m_blocks[i];
 		m_blocks.clear();
 		m_data.clear();
 	}
@@ -67,9 +64,6 @@ public:
 		m_numData++;
 	}
 	
-	const int & size() const
-	{ return m_numData; }
-	
 	T * get(int idx) const
 	{ return m_data[idx]; }
 	
@@ -81,7 +75,24 @@ public:
 	
 	T * last ()
 	{ return m_data[m_numData-1]; }
+	
+	const int & size() const;
+	int numBlocks() const;
+	T * block(const int & idx) const;
+	
 };
+
+template <typename T>
+const int & VectorArray<T>::size() const
+{ return m_numData; }
+
+template <typename T>
+int VectorArray<T>::numBlocks() const
+{ return m_blocks.size(); }
+
+template <typename T>
+T * VectorArray<T>::block(const int & idx) const
+{ return m_blocks[idx]; }
 
 }
 

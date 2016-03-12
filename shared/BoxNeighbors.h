@@ -28,7 +28,8 @@ public:
 	
 	void verbose() const;
 	
-	static bool IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b);
+	static bool IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b,
+							const float & tolerance);
 	static void DecodeTreeletNodeHash(const int & src, int rank, int & itreelet, int & inode);
 	
 /// 0 left 1 right 2 bottom 3 top 4 back 5 front

@@ -443,7 +443,7 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	const KdTreeNode * r = branch->node(nodeIdx);
 /// leaf ind actually 
 	int iLeaf = r->getPrimStart();
-	std::cout<<"\n leaf["<<iLeaf<<"] ";
+	std::cout<<"\n side "<<side;
 	
 	int iRope = leafRopeInd(iLeaf, side);
 	

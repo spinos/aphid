@@ -32,8 +32,23 @@ public:
 	
 	cvx::ShapeType gridValueType(const std::string & name);
 	
-	HNTree<cvx::Cube, KdNode4 > * loadCube4Tree(const std::string & name);
-	void loadSphereGridCoord(sdb::VectorArray<cvx::Cube> * dst, const std::string & name);
+	template<typename T>
+	void loadGridCoord(sdb::VectorArray<cvx::Cube> * dst, const std::string & name)
+	{
+		T grd(name);
+		grd.load();
+		const float h = grd.gridSize();
+/// shrink a little
+		const float e = h * .5f;
+		cvx::Cube c;
+		grd.begin();
+		while(!grd.end() ) {
+			c.set(grd.coordToCellCenter(grd.key() ), e);
+			dst->insert(c);
+			grd.next();
+		}
+		grd.close();
+	}
 	
 protected:
 

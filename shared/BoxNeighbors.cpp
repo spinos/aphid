@@ -9,6 +9,7 @@
 
 #include "BoxNeighbors.h"
 #include <iostream>
+#include <AllMath.h>
 
 namespace aphid {
 
@@ -66,22 +67,23 @@ void BoxNeighbors::verbose() const
 	}
 }
 
-bool BoxNeighbors::IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b)
+bool BoxNeighbors::IsNeighborOf(int dir, const BoundingBox & a, const BoundingBox & b,
+								const float & tolerance)
 {
 	const int splitAxis = dir / 2;
 	int i = 0;
 	for(;i<3;i++) {
 		if(i==splitAxis) {
 			if(dir & 1) {
-				if(b.getMin(splitAxis) != a.getMax(splitAxis) ) return false;
+				if(Absolute<float>(b.getMin(splitAxis) - a.getMax(splitAxis) ) > tolerance ) return false;
 			}
 			else {
-				if(b.getMax(splitAxis) != a.getMin(splitAxis) ) return false;
+				if(Absolute<float>(b.getMax(splitAxis) - a.getMin(splitAxis) ) > tolerance ) return false;
 			}
 		}
 		else {
-			if(b.getMin(i) > a.getMin(i)) return false;
-			if(b.getMax(i) < a.getMax(i)) return false;
+			if(b.getMin(i) > a.getMin(i) + tolerance) return false;
+			if(b.getMax(i) < a.getMax(i) - tolerance) return false;
 		}
 	}
 	return true;

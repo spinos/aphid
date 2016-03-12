@@ -169,6 +169,7 @@ SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
 whitenoisewidget.cpp
 CubeRender.cpp
+../kdtree/CudaNTree.cpp
 )
 
 SET (CUSOURCES 

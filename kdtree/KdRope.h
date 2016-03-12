@@ -169,15 +169,16 @@ void KdRope<NumLevels, T, Tn>::visitCousins(int iNode, int level)
 template<int NumLevels, typename T, typename Tn>
 bool KdRope<NumLevels, T, Tn>::chooseCousinAsNeighbor(int iNeighbor, int iNode, int iParent, int & updated)
 {
-	const BoundingBox a = m_boxes[iNode];
+	const BoundingBox & a = m_boxes[iNode];
 	const int iLftCousin = iParent + Treelet<NumLevels>::ChildOffset(iParent);
 	BoundingBox b = m_boxes[iLftCousin];
-	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b)) {
+	const float tol = b.getLongestAxis() * 1e-3f;
+	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b, tol)) {
 		updated = iLftCousin;
 		return true;
 	}
 	b = m_boxes[iLftCousin + 1];
-	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b)) {
+	if(BoxNeighbors::IsNeighborOf(iNeighbor, a, b, tol)) {
 		updated = iLftCousin + 1;
 		return true;
 	}

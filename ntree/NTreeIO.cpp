@@ -78,29 +78,4 @@ cvx::ShapeType NTreeIO::gridValueType(const std::string & name)
 	return vt;
 }
 
-HNTree<cvx::Cube, KdNode4 > * NTreeIO::loadCube4Tree(const std::string & name)
-{
-	std::cout<<"\n cube4 tree "<<name;
-	HNTree<cvx::Cube, KdNode4 > *tree = new HNTree<cvx::Cube, KdNode4 >( name );
-    tree->load();
-	tree->close();
-	return tree;
-}
-
-void NTreeIO::loadSphereGridCoord(sdb::VectorArray<cvx::Cube> * dst, const std::string & name)
-{
-	sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > grd(name);
-    grd.load();
-    const float h = grd.gridSize();
-    const float e = h * .4999f;
-   cvx::Cube c;
-    grd.begin();
-    while(!grd.end() ) {
-        c.set(grd.coordToCellCenter(grd.key() ), e);
-        dst->insert(c);
-        grd.next(); 
-    }
-	grd.close();
-}
-
 }

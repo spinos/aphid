@@ -5,6 +5,8 @@
 #include <GeoDrawer.h>
 #include <NTreeDrawer.h>
 #include <NTreeIO.h>
+#include <HWorldGrid.h>
+#include <HInnerGrid.h>
 
 GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(parent)
 {
@@ -250,16 +252,19 @@ bool GLWidget::readTree(const std::string & filename)
 	if(stat) {
 		std::cout<<"\n grid "<<gridName;
 		m_source = new sdb::VectorArray<cvx::Cube>();
-		hio.loadSphereGridCoord(m_source, gridName);
+		hio.loadGridCoord<sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > >(m_source, gridName);
 	}
 	
-	cvx::ShapeType vt = hio.gridValueType(gridName);
+	// cvx::ShapeType vt = hio.gridValueType(gridName);
     
 	std::string treeName;
 	stat = hio.findTree(treeName, gridName);
 	if(stat) {
-		m_tree= hio.loadCube4Tree(treeName);
-		m_tree->setSource(m_source);
+		HNTree<cvx::Cube, KdNode4 > * htree = new HNTree<cvx::Cube, KdNode4 >(treeName);
+		htree->load();
+		htree->close();
+		htree->setSource(m_source);
+		m_tree = htree;
 	}
 	
 	hio.end();
@@ -305,6 +310,7 @@ void GLWidget::drawActiveSource(const unsigned & iLeaf)
 	if(!m_tree) return;
 	if(!m_source) return;
 	
+	glColor3f(0,.6,.4);
 	int start, len;
 	m_tree->leafPrimStartLength(start, len, iLeaf);
 	int i=0;
