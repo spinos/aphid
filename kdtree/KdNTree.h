@@ -17,6 +17,7 @@ namespace knt {
 ///
 struct TreeLeaf {
 /// -x +x -y +y -z +z
+/// start by 0, -1 is null
 	int _ropeInd[6];
 	int _primStart;
 	int _primLength;
@@ -245,11 +246,11 @@ void KdNTree<T, Tn>::setLeafRope(unsigned idx, const BoxNeighbors & ns)
 	// ns.verbose();
 	int i = 0;
 	for(;i<6;i++) {
-		if(ns._n[i].m_padding1 != 0) {
+		if(ns._n[i].m_padding1 > 0) {
 			m_leafNodes[idx]->_ropeInd[i] = ns.encodeTreeletNodeHash(i, Tn::BranchingFactor);
 		}
 		else {
-			m_leafNodes[idx]->_ropeInd[i] = 0;
+			m_leafNodes[idx]->_ropeInd[i] = -1;
 		}
 	}
 }
@@ -261,7 +262,7 @@ const int & KdNTree<T, Tn>::leafRopeInd(unsigned idx, int ri) const
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::setLeafRopeInd(unsigned x, unsigned idx, int ri)
 { 
-	// std::cout<<"\n map "<<m_leafNodes[idx]._ropeInd[ri]<<" to "<<x;
+	// if(x<1) std::cout<<"\n warning map leaf "<<idx<<" rope "<<ri<<" to "<<x;
 	m_leafNodes[idx]->_ropeInd[ri] = x; 
 }
 
@@ -447,7 +448,7 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	
 	int iRope = leafRopeInd(iLeaf, side);
 	
-	if(iRope < 1) {
+	if(iRope < 0) {
 		std::cout<<" no rope";
 		return false;
 	}

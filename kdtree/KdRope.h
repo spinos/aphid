@@ -132,7 +132,7 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 			m_boxes[iLftChild] = lftBox;
 			m_boxes[iLftChild + 1] = rgtBox;
 			
-			const BoxNeighbors nodeNs = m_ns[iNode];
+			const BoxNeighbors & nodeNs = m_ns[iNode];
 			m_ns[iLftChild] = nodeNs;
 			m_ns[iLftChild + 1] = nodeNs;
 			
@@ -197,8 +197,8 @@ void KdRope<NumLevels, T, Tn>::pushLeaves()
 		if(nodeNs.isEmpty()) continue;
 		
 		KdTreeNode * node = treelet->node(i);
-		if(node->isLeaf()) {
-			// std::cout<<" rope treelet["<<iTreelet<<"] leaf["<<i<<"]";
+		if(node->isLeaf() ) {
+			//std::cout<<"\n rope treelet["<<iTreelet<<"] node["<<i<<"] leaf["<<node->getPrimStart()<<"] ";
 			m_tree->setLeafRope(node->getPrimStart(), nodeNs);
 			mapNeighbors(nodeNs);
 		}
@@ -214,8 +214,9 @@ void KdRope<NumLevels, T, Tn>::mapNeighbors(BoxNeighbors & ns)
 {
 	int i = 0;
 	for(;i<6;i++) {
-		if(ns._n[i].m_padding1 != 0) {
-			unsigned k = ns.encodeTreeletNodeHash(i, Tn::BranchingFactor);
+		if(ns._n[i].m_padding1 > 0) {
+/// combine node and treelet to pad1
+			int k = ns.encodeTreeletNodeHash(i, Tn::BranchingFactor);
 			ns._n[i].m_padding1 = k;
 			BoxMap[k] = ns._n[i];
 		}
@@ -245,8 +246,8 @@ void KdRope<NumLevels, T, Tn>::endMap()
 	i = 0;
 	for(;i<n;i++) {
 		for(j=0;j<6;j++) {
-			unsigned k = m_tree->leafRopeInd(i, j);
-			if(k != 0) {
+			int k = m_tree->leafRopeInd(i, j);
+			if(k > 0) {
 				m_tree->setLeafRopeInd(BoxMap[k].m_padding0, i, j);
 			}
 		}

@@ -42,7 +42,7 @@ bool BoxNeighbors::isEmpty() const
 {
 	int i = 0;
 	for(;i<6;i++) {
-		if(_n[i].m_padding1 != 0) return false;
+		if(_n[i].m_padding1 > 0) return false;
 	}
 	return true;
 }
@@ -82,8 +82,8 @@ bool BoxNeighbors::IsNeighborOf(int dir, const BoundingBox & a, const BoundingBo
 			}
 		}
 		else {
-			if(b.getMin(i) > a.getMin(i) + tolerance) return false;
-			if(b.getMax(i) < a.getMax(i) - tolerance) return false;
+			if(b.getMin(i) > a.getMin(i) ) return false;
+			if(b.getMax(i) < a.getMax(i) ) return false;
 		}
 	}
 	return true;
