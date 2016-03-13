@@ -2,8 +2,6 @@
 #include <HInnerGrid.h>
 #include <HWorldGrid.h>
 #include <KdEngine.h>
-#include <VectorArray.h>
-#include <HNTree.h>
 #include <NTreeIO.h>
 
 using namespace aphid;

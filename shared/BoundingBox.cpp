@@ -409,11 +409,15 @@ float BoundingBox::radiusXZ() const
 
 int BoundingBox::pointOnSide(const Vector3F & v) const
 {
-	if(Absolute<float>(v.x - m_data[0]) < 1e-4f) return 0;
-	if(Absolute<float>(v.x - m_data[3]) < 1e-4f) return 1;
-	if(Absolute<float>(v.y - m_data[1]) < 1e-4f) return 2;
-	if(Absolute<float>(v.y - m_data[4]) < 1e-4f) return 3;
-	if(Absolute<float>(v.z - m_data[2]) < 1e-4f) return 4;
+	const Vector3F c = center();
+	Vector3F s(v.x, c.y, c.z);
+	if(Absolute<float>(s.x - m_data[0]) < 1e-5f) return 0;
+	if(Absolute<float>(s.x - m_data[3]) < 1e-5f) return 1;
+	s.set(c.x, v.y, c.z);
+	if(Absolute<float>(s.y - m_data[1]) < 1e-5f) return 2;
+	if(Absolute<float>(s.y - m_data[4]) < 1e-5f) return 3;
+	s.set(c.x, c.y, v.z);
+	if(Absolute<float>(s.z - m_data[2]) < 1e-5f) return 4;
 	return 5;
 }
 

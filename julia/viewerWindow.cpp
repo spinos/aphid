@@ -2,21 +2,27 @@
 
 #include "viewerWindow.h"
 #include "whitenoisewidget.h"
+#include "CubeRender.h"
+#include "WorldRender.h"
 
 namespace jul {
 
 Window::Window(const Parameter * param)
 {
-	CubeRender * r = new CubeRender;
+	aphid::CudaRender * r;
 	
+	if(param->operation() == Parameter::kView) {
+		r = new aphid::WorldRender(param->outFileName() );
+		setWindowTitle(tr(param->outFileName().c_str()));
+	}
+	else {
+		r = new aphid::CubeRender;
+		setWindowTitle(tr("ray-cast test"));
+	}
+		
     m_widget = new MandelbrotWidget(r, this);
 	
 	setCentralWidget(m_widget);
-    
-	if(param->operation() == Parameter::kView) 
-		setWindowTitle(tr(param->outFileName().c_str()));
-	else 
-		setWindowTitle(tr("ray cast test"));
 }
 //! [1]
 

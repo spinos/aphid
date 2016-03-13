@@ -1,10 +1,8 @@
 #include <QtGui>
 
-#include <math.h>
-
 #include "whitenoisewidget.h"
 
-MandelbrotWidget::MandelbrotWidget(CubeRender * r, 
+MandelbrotWidget::MandelbrotWidget(aphid::CudaRender * r, 
 									QWidget *parent)
     : QWidget(parent)
 {

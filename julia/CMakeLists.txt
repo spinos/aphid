@@ -173,8 +173,12 @@ renderthread.cpp
 whitenoisewidget.cpp
 CubeRender.cpp
 ../kdtree/CudaNTree.cpp
+../kdtree/HNTree.cpp
+../ntree/NTreeIO.cpp
+../btree/HWorldGrid.cpp
 Parameter.cpp
 viewerWindow.cpp
+WorldRender.cpp
 )
 
 SET (CUSOURCES 
@@ -217,4 +221,6 @@ message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 SET (QT_USE_QTOPENGL ON)
 
 target_link_libraries (viewJulia Qt4::QtGui Qt4::QtOpenGL)
-
+target_link_libraries (viewJulia ${HDF5_LIBRARIES})
+target_link_libraries (viewJulia ${ZLIB_LIBRARIES})
+target_link_libraries (viewJulia ${SZIP_LIBRARY})

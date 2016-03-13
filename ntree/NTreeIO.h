@@ -38,7 +38,6 @@ public:
 		T grd(name);
 		grd.load();
 		const float h = grd.gridSize();
-/// shrink a little
 		const float e = h * .5f;
 		cvx::Cube c;
 		grd.begin();

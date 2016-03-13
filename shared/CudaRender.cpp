@@ -43,6 +43,9 @@ void CudaRender::setBufferSize(const int & w, const int & h)
 	m_deviceDepth.create( m_bufferLength * 4 );
 }
 
+void CudaRender::render()
+{}
+
 void CudaRender::setPortSize(const int & w, const int & h)
 { setRect(w, h); }
 

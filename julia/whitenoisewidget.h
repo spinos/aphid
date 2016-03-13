@@ -10,7 +10,7 @@ class MandelbrotWidget : public QWidget
     Q_OBJECT
 
 public:
-    MandelbrotWidget(CubeRender * r, 
+    MandelbrotWidget(aphid::CudaRender * r, 
 					QWidget *parent = 0);
 
 protected:

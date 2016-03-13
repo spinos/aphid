@@ -29,6 +29,8 @@ public :
 	virtual ~CudaRender();
 	
 	virtual void setBufferSize(const int & w, const int & h);
+	virtual void render();
+	
 	void setPortSize(const int & w, const int & h);
 	const int & tileX() const;
 	const int & tileY() const;

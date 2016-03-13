@@ -22,7 +22,7 @@ RenderThread::~RenderThread()
     wait();
 }
 
-void RenderThread::setR(CubeRender * r)
+void RenderThread::setR(aphid::CudaRender * r)
 { m_r = r; }
 
 void RenderThread::render(QSize resultSize)

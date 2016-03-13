@@ -5,7 +5,7 @@
 #include <QSize>
 #include <QThread>
 #include <QWaitCondition>
-#include <CubeRender.h>
+#include <CudaRender.h>
 
 QT_BEGIN_NAMESPACE
 class QImage;
@@ -19,7 +19,7 @@ public:
     RenderThread(QObject *parent = 0);
     ~RenderThread();
 
-	void setR(CubeRender * r);
+	void setR(aphid::CudaRender * r);
     void render(QSize resultSize);
 
 signals:
@@ -36,7 +36,7 @@ private:
     bool restart;
     bool abort;
     
-	CubeRender * m_r;
+	aphid::CudaRender * m_r;
 };
 
 #endif

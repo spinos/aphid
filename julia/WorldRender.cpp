@@ -1,24 +1,39 @@
 /*
- *  CubeRender.cpp
- *  
+ *  WorldRender.cpp
+ *  julia
  *
- *  Created by jian zhang on 3/2/16.
+ *  Created by jian zhang on 3/14/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#include "CubeRender.h"
+
+#include "WorldRender.h"
+#include <CudaNTree.h>
+#include <NTreeIO.h>
 #include <CudaBase.h>
 #include <cu/ImageBaseInterface.h>
 #include "CubeRenderInterface.h"
 
 namespace aphid {
 
-CubeRender::CubeRender() {}
-CubeRender::~CubeRender() {}
-
-void CubeRender::setBufferSize(const int & w, const int & h)
+WorldRender::WorldRender(const std::string & filename) 
 {
-	CudaRender::setBufferSize(w, h);
+	CudaNTree x;
+	NTreeIO hio;
+	hio.begin(filename, HDocument::oReadOnly );
+	
+	std::string gridName;
+	if(hio.findGrid(gridName))
+		std::cout<<"\n found grid "<<gridName;
+		
+	hio.end();
+}
+
+WorldRender::~WorldRender() {}
+
+void WorldRender::setBufferSize(const int & w, const int & h)
+{
+	aphid::CudaRender::setBufferSize(w, h);
 	imagebase::resetImage((uint *) colorBuffer(),
                 (float *) depthBuffer(),
                 512,
@@ -26,7 +41,7 @@ void CubeRender::setBufferSize(const int & w, const int & h)
 	CudaBase::CheckCudaError(" reset image");
 }
 
-void CubeRender::render()
+void WorldRender::render()
 {
     updateRayFrameVec();
 	cuber::setBoxFaces();

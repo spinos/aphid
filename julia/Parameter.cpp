@@ -11,7 +11,7 @@ namespace jul {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	std::cout<<"\n lfr (Julia Set) version 20160101";
+	std::cout<<"\n Julia Set version 20160314";
 
 	m_opt = kUnknown;
 	
