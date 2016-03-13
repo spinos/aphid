@@ -14,7 +14,8 @@ public:
 		kUnknown = 0,
 		kHelp = 1,
 		kGenerate = 2,
-		kBuildTree = 3
+		kBuildTree = 3,
+		kView = 4
 	};
 	
 	Parameter(int argc, char *argv[]);
@@ -25,7 +26,7 @@ public:
 	
 	OperationFlag operation() const;
 	
-	std::string outFileName() const;
+	const std::string & outFileName() const;
 protected:
 
 private:

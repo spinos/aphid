@@ -10,7 +10,8 @@ class MandelbrotWidget : public QWidget
     Q_OBJECT
 
 public:
-    MandelbrotWidget(QWidget *parent = 0);
+    MandelbrotWidget(CubeRender * r, 
+					QWidget *parent = 0);
 
 protected:
     void paintEvent(QPaintEvent *event);

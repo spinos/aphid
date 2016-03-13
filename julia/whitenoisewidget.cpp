@@ -4,18 +4,16 @@
 
 #include "whitenoisewidget.h"
 
-MandelbrotWidget::MandelbrotWidget(QWidget *parent)
+MandelbrotWidget::MandelbrotWidget(CubeRender * r, 
+									QWidget *parent)
     : QWidget(parent)
 {
-
-    qRegisterMetaType<QImage>("QImage");
+	thread.setR(r);
+	
+	qRegisterMetaType<QImage>("QImage");
     connect(&thread, SIGNAL(renderedImage(QImage)),
             this, SLOT(updatePixmap(QImage)));
 
-    setWindowTitle(tr("White Noise"));
-
-    resize(540, 480);
-	
 	//QTimer *timer = new QTimer(this);
 	//connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
 	//timer->start(40);

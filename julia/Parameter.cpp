@@ -43,6 +43,15 @@ Parameter::Parameter(int argc, char *argv[])
 				m_outFileName = argv[i+1];
 				m_opt = kBuildTree;
 			}
+			
+			if(strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--view") == 0) {
+				if(i==argc-1) {
+					std::cout<<"\n --view value is not set";
+					break;
+				}
+				m_outFileName = argv[i+1];
+				m_opt = kView;
+			}
 		}
 	}
 }
@@ -62,11 +71,12 @@ void Parameter::PrintHelp()
 	<<"\nDescription:\n large data set test."
 	<<"\nOptions:\n -g or --generate    string    filename of output file storing the data"
 	<<"\n -t or --tree    string    filename of output file storing the data to build ntree"
+	<<"\n -v or --view    string    filename of input file storing the data to view ntree"
 	<<"\n -h or --help    print this information"
 	<<"\n";
 }
 
-std::string Parameter::outFileName() const
+const std::string & Parameter::outFileName() const
 { return m_outFileName; }
 
 }

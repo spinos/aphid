@@ -40,15 +40,21 @@
 ****************************************************************************/
 
 #include <QApplication>
+#include "Parameter.h"
+#include "viewerWindow.h"
 
-#include "whitenoisewidget.h"
-
-//! [0]
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
-    MandelbrotWidget widget;
-    widget.show();
-    return app.exec();
+    jul::Parameter param(argc, argv);
+	if(param.operation() == jul::Parameter::kHelp ) {
+		jul::Parameter::PrintHelp();
+		return 1;
+	}
+	
+	QApplication app(argc, argv);
+	jul::Window window(&param);
+    //window.showMaximized();
+    window.resize(720, 540);
+    window.show();
+	return app.exec();
 }
-//! [0]

@@ -165,11 +165,16 @@ target_link_libraries (julia ${Aphid_Sdb_Library})
 target_link_libraries (julia ${Aphid_H5_Library})
 target_link_libraries (julia ${Aphid_Geom_Library})
 
+SET (VIEWERHEADER Parameter.h
+viewerWindow.h)
+
 SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
 whitenoisewidget.cpp
 CubeRender.cpp
 ../kdtree/CudaNTree.cpp
+Parameter.cpp
+viewerWindow.cpp
 )
 
 SET (CUSOURCES 
@@ -193,7 +198,7 @@ ELSE ()
 	SET (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 ENDIF ()
 
-CUDA_ADD_EXECUTABLE (viewJulia ${VIEWERSOURCE} ${CUSOURCES})
+CUDA_ADD_EXECUTABLE (viewJulia ${VIEWERHEADER} ${VIEWERSOURCE} ${CUSOURCES})
 
 target_link_libraries(viewJulia ${Boost_LIBRARIES})
 target_link_libraries (viewJulia ${Aphid_Math_Library})

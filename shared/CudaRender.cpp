@@ -8,11 +8,14 @@
  */
 
 #include "CudaRender.h"
+#include "CudaBase.h"
 #include <iostream>
 namespace aphid {
 
 CudaRender::CudaRender() 
 {
+	CudaBase::SetDevice();
+	
 	const Vector3F eye(0.f, 0.f, 30.f);
 	setEyePosition((float *)&eye);
 	

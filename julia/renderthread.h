@@ -19,6 +19,7 @@ public:
     RenderThread(QObject *parent = 0);
     ~RenderThread();
 
+	void setR(CubeRender * r);
     void render(QSize resultSize);
 
 signals:
@@ -35,7 +36,7 @@ private:
     bool restart;
     bool abort;
     
-	CubeRender m_render;
+	CubeRender * m_r;
 };
 
 #endif
