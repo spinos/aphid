@@ -626,7 +626,7 @@ void testOoc(const char * filename)
 	ds.finishInsert();
 	
 	ds.openStorage(C4.fObjectId);
-	std::cout<<"\n d n cols "<<ds.numColumns();
+	std::cout<<"\n d n cols "<<ds.numCols();
 	
 	ds.readIncore(127, 32);
 	
@@ -635,7 +635,7 @@ void testOoc(const char * filename)
 		std::cout<<"\n b["<<i<<"] "<<b[i*3]<<" "<<b[i*3+1]<<" "<<b[i*3+2];
 	}
 	
-	std::cout<<"\n d size "<<ds.size();
+	std::cout<<"\n d size "<<ds.numPoints();
 	
 	HObject::FileIO.close();
 	std::cout<<"\n end test ooc data";

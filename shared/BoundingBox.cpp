@@ -282,13 +282,13 @@ char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 		const Vector3F o = ray.m_origin;
 		if(IsValueNearZero(diri)) {
 			if(i == 0) {
-				if(o.x < m_data[0] || o.x > m_data[3]) return 0;
+				if(o.x < m_data[0] || o.x >= m_data[3]) return 0;
 			}
 			else if(i == 1) {
-				if(o.y < m_data[1] || o.y > m_data[4]) return 0;
+				if(o.y < m_data[1] || o.y >= m_data[4]) return 0;
 			}
 			else {
-				if(o.z < m_data[2] || o.z > m_data[5]) return 0;
+				if(o.z < m_data[2] || o.z >= m_data[5]) return 0;
 			}
 			continue;
 		}
@@ -407,17 +407,15 @@ float BoundingBox::radiusXZ() const
     return sqrt(dx*dx + dz*dz);
 }
 
-int BoundingBox::pointOnSide(const Vector3F & v) const
+int BoundingBox::pointOnSide(const Vector3F & v, const Vector3F & d) const
 {
-	const Vector3F c = center();
-	Vector3F s(v.x, c.y, c.z);
-	if(Absolute<float>(s.x - m_data[0]) < 1e-5f) return 0;
-	if(Absolute<float>(s.x - m_data[3]) < 1e-5f) return 1;
-	s.set(c.x, v.y, c.z);
-	if(Absolute<float>(s.y - m_data[1]) < 1e-5f) return 2;
-	if(Absolute<float>(s.y - m_data[4]) < 1e-5f) return 3;
-	s.set(c.x, c.y, v.z);
-	if(Absolute<float>(s.z - m_data[2]) < 1e-5f) return 4;
+/// over-shoot by a large distance
+    const Vector3F c = v + d;
+	if(m_data[0] - c.x > 1e-5f) return 0;
+	if(c.x - m_data[3] > 1e-5f) return 1;
+	if(m_data[1] - c.y > 1e-5f) return 2;
+	if(c.y - m_data[4] > 1e-5f) return 3;
+	if(m_data[2] - c.z > 1e-5f) return 4;
 	return 5;
 }
 

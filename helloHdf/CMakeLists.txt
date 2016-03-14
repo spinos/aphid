@@ -11,13 +11,39 @@ include_directories ("../shared")
 
 add_executable (hdata ${HEADER_FILES} Holder.cpp main.cpp)
 
+SET (INSTALLED_HDF5 OFF)
+if (WIN32)
+	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+# location of configure file FindHDF5.cmake
+		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
+        SET (INSTALLED_HDF5 ON)
+    ELSE (EXISTS "D:/usr/hdf5")
+        SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
+        SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+	ENDIF ()
+ELSE ()
+	SET (INSTALLED_HDF5 ON)
+endif ()
+
+IF (INSTALLED_HDF5)
 FIND_PACKAGE (HDF5 REQUIRED)
+IF (WIN32)
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
+ENDIF ()
+ENDIF ()
+
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
 MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
 MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
 include_directories (${HDF5_INCLUDE_DIRS})
 target_link_libraries (hdata ${HDF5_LIBRARIES})
+
+if(WIN32)
+SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
+endif()
 
 FIND_PACKAGE (ZLIB REQUIRED)
 MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
@@ -26,6 +52,18 @@ MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
 MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
 
 target_link_libraries (hdata ${ZLIB_LIBRARIES})
+
+IF (WIN32)
+set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
+set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
+
+ELSEIF (APPLE)
+set (SZIP_DIR "/usr/local/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "/usr/local/include")
+set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
+
+ENDIF ()
 
 FIND_PACKAGE (SZIP REQUIRED)
 MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
@@ -69,9 +107,9 @@ target_link_libraries (hdata ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (hdata ${Boost_REGEX_LIBRARY})
 
 if (WIN32)
-SET (Aphid_Library D:/aphid/lib/aphidMath.lib
-D:/aphid/lib/aphidSdb.lib
-D:/aphid/lib/aphidH5.lib)
+SET (Aphid_Math_Library D:/aphid/lib/aphidMath.lib)
+SET (Aphid_Sdb_Library D:/aphid/lib/aphidSdb.lib)
+SET (Aphid_H5_Library D:/aphid/lib/aphidH5.lib)
 else ()
 	IF (EXISTS "/users/jianzhang/aphid/lib/libaphidMath.a")
 		SET (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a) 
@@ -94,3 +132,11 @@ target_link_libraries (hdata ${Aphid_Math_Library})
 target_link_libraries (hdata ${Aphid_Sdb_Library})
 target_link_libraries (hdata ${Aphid_H5_Library})
 
+add_executable (checkIntegrity checkIntegrityMain.cpp)
+
+target_link_libraries (checkIntegrity ${HDF5_LIBRARIES})
+target_link_libraries (checkIntegrity ${ZLIB_LIBRARIES})
+target_link_libraries (checkIntegrity ${SZIP_LIBRARY})
+target_link_libraries (checkIntegrity ${Aphid_H5_Library})
+target_link_libraries (checkIntegrity ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (checkIntegrity ${Boost_SYSTEM_LIBRARY})

@@ -16,10 +16,10 @@ namespace aphid {
 template<int NumLevels, typename T, typename Tn>
 class KdRope : public Treelet<NumLevels > {
 	
-	BoundingBox m_boxes[(1<<NumLevels+1) - 2];
-	int m_splitAxis[(1<<NumLevels+1) - 2];
-	float m_splitPos[(1<<NumLevels+1) - 2];
-	BoxNeighbors m_ns[(1<<NumLevels+1) - 2];
+	BoundingBox m_boxes[(1<<(NumLevels+1) ) - 2];
+	int m_splitAxis[(1<<(NumLevels+1) ) - 2];
+	float m_splitPos[(1<<(NumLevels+1) ) - 2];
+	BoxNeighbors m_ns[(1<<(NumLevels+1) ) - 2];
 	KdNTree<T, Tn> * m_tree;
 	static std::map<unsigned, BoundingBox > BoxMap;
 	
