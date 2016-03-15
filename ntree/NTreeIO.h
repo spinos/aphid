@@ -37,16 +37,22 @@ public:
 	{
 		T grd(name);
 		grd.load();
-		const float h = grd.gridSize();
+		loadGridCoord<T>(dst, &grd);
+		grd.close();
+	}
+	
+	template<typename T>
+	void loadGridCoord(sdb::VectorArray<cvx::Cube> * dst, T * grd)
+	{
+		const float h = grd->gridSize();
 		const float e = h * .5f;
 		cvx::Cube c;
-		grd.begin();
-		while(!grd.end() ) {
-			c.set(grd.coordToCellCenter(grd.key() ), e);
+		grd->begin();
+		while(!grd->end() ) {
+			c.set(grd->coordToCellCenter(grd->key() ), e);
 			dst->insert(c);
-			grd.next();
+			grd->next();
 		}
-		grd.close();
 	}
 	
 protected:

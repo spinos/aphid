@@ -9,27 +9,51 @@
 
 #include "WorldRender.h"
 #include <CudaNTree.h>
-#include <NTreeIO.h>
 #include <CudaBase.h>
 #include <cu/ImageBaseInterface.h>
 #include "CubeRenderInterface.h"
 
 namespace aphid {
 
-WorldRender::WorldRender(const std::string & filename) 
+WorldRender::WorldRender(const std::string & filename) :
+m_worldGrid(NULL)
 {
-	CudaNTree x;
-	NTreeIO hio;
-	hio.begin(filename, HDocument::oReadOnly );
+	//CudaNTree x;
+	bool stat = m_io.begin(filename, HDocument::oReadOnly );
+	if(!stat)
+		return;
 	
 	std::string gridName;
-	if(hio.findGrid(gridName))
-		std::cout<<"\n found grid "<<gridName;
+	stat = m_io.findGrid(gridName);
+	if(!stat)
+		return;
+	
+	std::cout<<"\n found grid "<<gridName;
+	
+	m_worldGrid = new WorldGridT(gridName);
+	m_worldGrid->load();
+	m_io.loadGridCoord<WorldGridT >(&m_worldCoord, m_worldGrid);
+
+	std::string treeName;
+	stat = m_io.findTree(treeName, gridName);
+	if(!stat)
+		return;
 		
-	hio.end();
+	std::cout<<"\n found tree "<<treeName;
+
+	m_worldTree = new WorldTreeT(treeName);
+	m_worldTree->load();
+	m_worldTree->close();
+	m_worldTree->setSource(&m_worldCoord);
+	
+	
 }
 
-WorldRender::~WorldRender() {}
+WorldRender::~WorldRender() 
+{ 
+	if(m_worldGrid) m_worldGrid->close();
+	m_io.end(); 
+}
 
 void WorldRender::setBufferSize(const int & w, const int & h)
 {

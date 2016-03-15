@@ -172,6 +172,8 @@ SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
 whitenoisewidget.cpp
 CubeRender.cpp
+../shared/KdTreeNode.cpp
+../kdtree/TreeProperty.cpp
 ../kdtree/CudaNTree.cpp
 ../kdtree/HNTree.cpp
 ../ntree/NTreeIO.cpp
