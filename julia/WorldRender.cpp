@@ -18,7 +18,6 @@ namespace aphid {
 WorldRender::WorldRender(const std::string & filename) :
 m_worldGrid(NULL)
 {
-	//CudaNTree x;
 	bool stat = m_io.begin(filename, HDocument::oReadOnly );
 	if(!stat)
 		return;
@@ -45,7 +44,6 @@ m_worldGrid(NULL)
 	m_worldTree->load();
 	m_worldTree->close();
 	m_worldTree->setSource(&m_worldCoord);
-	
 	
 }
 

@@ -164,11 +164,11 @@ void HNTree<T, Tn>::saveRope()
 	else
 		ropeD.createStorage(fObjectId);
 	
-	const BoundingBox * src = KdNTree<T, Tn>::ropes();
+	const sdb::VectorArray<BoundingBox> & src = KdNTree<T, Tn>::ropes();
 	int n = KdNTree<T, Tn>::numRopes();
 	int i=0;
 	for(;i<n;++i) {
-		ropeD.insert((char *)&src[i] );
+		ropeD.insert((char *)src[i] );
 	}
 	
 	ropeD.finishInsert();
@@ -266,10 +266,9 @@ void HNTree<T, Tn>::loadRope()
 	if(!ropeD.openStorage(fObjectId))
 		return;
 	
-	KdNTree<T, Tn>::createRopes(n);
-	int i=0;
+	int i=1;
 	for(;i<n;++i) {
-		ropeD.readColumn((char *)KdNTree<T, Tn>::ropesR(i), i);
+		ropeD.readColumn((char *)KdNTree<T, Tn>::addRope(), i);
 	}
 	
 	std::cout<<"\n load "<<n<<" rope";

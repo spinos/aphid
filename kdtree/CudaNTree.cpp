@@ -12,7 +12,16 @@
 
 namespace aphid {
 
-CudaNTree::CudaNTree() {}
-CudaNTree::~CudaNTree() {}
+CudaNTree::CudaNTree(const std::string & name) :
+HNTree<cvx::Cube, KdNode4 >(name) 
+{
+	m_branchPool.reset(new CUDABuffer);
+	m_leafPool.reset(new CUDABuffer);
+	m_primIndirecion.reset(new CUDABuffer);
+	m_ropes.reset(new CUDABuffer);
+}
+
+CudaNTree::~CudaNTree() 
+{}
 	
 }

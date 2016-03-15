@@ -7,24 +7,23 @@
  *
  */
 #pragma once
+#include <boost/scoped_ptr.hpp>
+#include <HNTree.h>
+#include <ConvexShape.h>
 
 namespace aphid {
 
 class CUDABuffer;
 
-class CudaNTree {
+class CudaNTree : public HNTree<cvx::Cube, KdNode4 > {
 
-	CUDABuffer * m_branchPool;
-	CUDABuffer * m_leafPool;
-	CUDABuffer * m_primIndirecion;
-	CUDABuffer * m_ropes;
-	int m_numBranches;
-	int m_numLeaves;
-	int m_numPrimIndices;
-	int m_numRopes;
+	boost::scoped_ptr<CUDABuffer> m_branchPool;
+	boost::scoped_ptr<CUDABuffer> m_leafPool;
+	boost::scoped_ptr<CUDABuffer> m_primIndirecion;
+	boost::scoped_ptr<CUDABuffer> m_ropes;
 	
 public:
-	CudaNTree();
+	CudaNTree(const std::string & name);
 	virtual ~CudaNTree();
 	
 protected:

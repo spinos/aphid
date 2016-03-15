@@ -225,18 +225,18 @@ void KdRope<NumLevels, T, Tn>::mapNeighbors(BoxNeighbors & ns)
 template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::endMap()
 {
-	unsigned i = 0;
+/// first rope is bound
+	unsigned i = 1;
 	std::map<unsigned, BoundingBox >::iterator it = BoxMap.begin();
 	for(;it!=BoxMap.end(); ++it) {
 		it->second.m_padding0 = i;
 		i++;
 	}
 	
-	m_tree->createRopes(BoxMap.size());
 	i = 0;
 	it = BoxMap.begin();
 	for(;it!=BoxMap.end(); ++it) {
-		m_tree->setRope(i, it->second);
+		*m_tree->addRope() = it->second;
 		i++;
 	}
 	

@@ -31,21 +31,22 @@ class KdNTree : public AVerbose, public Boundary, public TreeProperty
     sdb::VectorArray<Tn> m_nodePool;
 	sdb::VectorArray<knt::TreeLeaf> m_leafNodes;
 	sdb::VectorArray<int> m_primIndices;
-	BoundingBox * m_ropes;
-    int m_numRopes;
-
+	sdb::VectorArray<BoundingBox> m_ropes;
+    
 public:
     KdNTree();
 	virtual ~KdNTree();
 	
 	void init(sdb::VectorArray<T> * source, const BoundingBox & box);
 	bool isEmpty() const;
-
+	int numBranches() const;
+	int numLeafNodes() const;
+	int numPrimIndirection() const;
+	int numRopes() const;
+	
     Tn * root();
     
-	int numPrimIndirection() const;
 	const int & primIndirectionAt(const int & idx) const;
-	int numBranches() const;
 	int addBranch();
 	
 	void addDataIndex(int x);
@@ -55,17 +56,13 @@ public:
 
 	const sdb::VectorArray<knt::TreeLeaf> & leafNodes() const;
 	
-	int numLeafNodes() const;
 	void addLeafNode(const int & primStart, const int & primLen);
 	const int & leafPrimStart(unsigned idx) const;
 	void leafPrimStartLength(int & start, int & len, 
 									unsigned idx) const;
-	
 	void setLeafRope(unsigned idx, const BoxNeighbors & ns);
 	
-	void createRopes(unsigned n);
-	void setRope(unsigned idx, const BoundingBox & v );
-	const int & numRopes() const;
+	BoundingBox * addRope();
 	
 	const int & leafRopeInd(unsigned idx, int ri) const;
 	void setLeafRopeInd(unsigned x, unsigned idx, int ri);
@@ -80,8 +77,7 @@ public:
     typedef Tn TreeletType;
 	
 protected:
-	const BoundingBox * ropes() const;
-	BoundingBox * ropesR(const int & idx);
+	const sdb::VectorArray<BoundingBox> & ropes() const;
 	const sdb::VectorArray<int> & primIndirection() const;
 	void clear(const BoundingBox & b);
 	Tn * addTreelet();
@@ -104,9 +100,7 @@ private:
 };
 
 template <typename T, typename Tn>
-KdNTree<T, Tn>::KdNTree() :
-m_ropes(NULL),
-m_numRopes(0)
+KdNTree<T, Tn>::KdNTree()
 {}
 
 template <typename T, typename Tn>
@@ -135,8 +129,7 @@ void KdNTree<T, Tn>::clear()
 	m_nodePool.clear();
 	m_leafNodes.clear();
 	m_primIndices.clear();
-	if(m_ropes) delete[] m_ropes;
-	m_numRopes = 0;
+	m_ropes.clear();
 }
 
 template <typename T, typename Tn>
@@ -144,6 +137,8 @@ void KdNTree<T, Tn>::clear(const BoundingBox & b)
 {
 	clear();
 	Boundary::setBBox(b);
+/// first rope is bound
+	*addRope() = b;
 	resetPropery();
 	setTotalVolume(b.volume() );
 }
@@ -218,6 +213,13 @@ int * KdNTree<T, Tn>::addIndirection()
 }
 
 template <typename T, typename Tn>
+BoundingBox * KdNTree<T, Tn>::addRope()
+{
+	m_ropes.insert();
+	return m_ropes.last();
+}
+
+template <typename T, typename Tn>
 const int & KdNTree<T, Tn>::leafPrimStart(unsigned idx) const
 { return m_leafNodes[idx]->_primStart; }
 
@@ -228,17 +230,6 @@ void KdNTree<T, Tn>::leafPrimStartLength(int & start, int & len,
 	start = m_leafNodes[idx]->_primStart; 
 	len = m_leafNodes[idx]->_primLength;
 }
-
-template <typename T, typename Tn>
-void KdNTree<T, Tn>::createRopes(unsigned n)
-{ 
-	m_numRopes = n;
-	m_ropes = new BoundingBox[n]; 
-}
-
-template <typename T, typename Tn>
-void KdNTree<T, Tn>::setRope(unsigned idx, const BoundingBox & v )
-{ m_ropes[idx] = v; }
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::setLeafRope(unsigned idx, const BoxNeighbors & ns)
@@ -271,16 +262,12 @@ const sdb::VectorArray<knt::TreeLeaf> & KdNTree<T, Tn>::leafNodes() const
 { return m_leafNodes; }
 
 template <typename T, typename Tn>
-const int & KdNTree<T, Tn>::numRopes() const
-{ return m_numRopes; }
+int KdNTree<T, Tn>::numRopes() const
+{ return m_ropes.size(); }
 
 template <typename T, typename Tn>
-const BoundingBox * KdNTree<T, Tn>::ropes() const
+const sdb::VectorArray<BoundingBox> & KdNTree<T, Tn>::ropes() const
 { return m_ropes; }
-
-template <typename T, typename Tn>
-BoundingBox * KdNTree<T, Tn>::ropesR(const int & idx)
-{ return &m_ropes[idx]; }
 
 template <typename T, typename Tn>
 const sdb::VectorArray<int> & KdNTree<T, Tn>::primIndirection() const
@@ -454,11 +441,11 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	}
 	
 	std::cout<<" rope["<<iRope<<"]";
-	const BoundingBox & rp = m_ropes[ iRope ];
-	BoxNeighbors::DecodeTreeletNodeHash(rp.m_padding1, Tn::BranchingFactor, 
+	const BoundingBox * rp = m_ropes[ iRope ];
+	BoxNeighbors::DecodeTreeletNodeHash(rp->m_padding1, Tn::BranchingFactor, 
 					branchIdx, nodeIdx);
 	std::cout<<"\n branch "<<branchIdx;
-	ctx->setBBox(rp);
+	ctx->setBBox(*rp);
 	return true;
 }
 
