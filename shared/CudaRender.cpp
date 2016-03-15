@@ -21,9 +21,9 @@ CudaRender::CudaRender()
 	
 	Matrix44F m;
 	m.setTranslation(eye);
-	*cameraSpaceP() = m;
+	*cameraSpaceR() = m;
 	m.inverse();
-	*cameraInvSpaceP() = m;
+	*cameraInvSpaceR() = m;
 	
 	setFrustum(1.33f, 1.f, 5.2f, -1.f, -1000.f);
 }

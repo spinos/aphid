@@ -44,8 +44,8 @@ protected:
 	void setRect(const int & x, const int & y);
     void setSubRect(const int & x0, const int & y0, const int & x1, const int & y1);
     void setEyePosition(float * p);
-	Matrix44F *	cameraSpaceP();
-	Matrix44F * cameraInvSpaceP();
+	Matrix44F *	cameraSpaceR();
+	Matrix44F * cameraInvSpaceR();
 	
 	const float & hfov() const;
 	
@@ -65,6 +65,8 @@ protected:
 	
 	void updateRayFrameVec();
 	Vector3F * rayFrameVec();
+	
+	void frameAll(const BoundingBox & b);
 	
 private:
     

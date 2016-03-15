@@ -45,6 +45,7 @@ m_worldGrid(NULL)
 	m_worldTree->close();
 	m_worldTree->setSource(&m_worldCoord);
 	
+	frameAll(m_worldTree->getBBox() );
 }
 
 WorldRender::~WorldRender() 

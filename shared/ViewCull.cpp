@@ -56,10 +56,10 @@ void BaseView::updateAspectRatio(const int & w, const int & h)
 				m_space);
 }
 	
-Matrix44F *	BaseView::cameraSpaceP()
+Matrix44F *	BaseView::cameraSpaceR()
 { return &m_space; }
 
-Matrix44F * BaseView::cameraInvSpaceP()
+Matrix44F * BaseView::cameraInvSpaceR()
 { return &m_invSpace; }
 
 const Matrix44F & BaseView::cameraSpace() const
@@ -112,6 +112,19 @@ void BaseView::updateRayFrameVec()
 
 Vector3F * BaseView::rayFrameVec()
 { return m_rayFrameVec; }
+
+void BaseView::frameAll(const BoundingBox & b)
+{
+	Vector3F eye = b.center();
+	eye.z = b.getMax(2) + b.distance(0) / hfov() * .7f;
+	setEyePosition((float *)&eye);
+	
+	Matrix44F m;
+	m.setTranslation(eye);
+	*cameraSpaceR() = m;
+	m.inverse();
+	*cameraInvSpaceR() = m;
+}
 
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}

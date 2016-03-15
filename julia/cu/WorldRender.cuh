@@ -29,12 +29,12 @@ __global__ void twoCube_kernel(uint * pix,
     v3_normalize_inplace<float4>(incident.d);
     
     Aabb4 box;
-    box.low.x = -5.f;
-    box.low.y = 8.f;
-    box.low.z = -5.f;
-    box.high.x = 5.f;
-    box.high.y = 18.f;
-    box.high.z = 5.f;
+    box.low.x = -13.5f;
+    box.low.y = -13.5f;
+    box.low.z = -15.f;
+    box.high.x = 16.5f;
+    box.high.y = 13.5f;
+    box.high.z = 15.f;
     
     uint ind = getTiledPixelIdx();
     
