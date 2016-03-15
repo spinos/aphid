@@ -29,7 +29,7 @@ private:
 					
 	template<typename T>
 	void drawANode(KdNTree<T, KdNode4 > * tree, int branchIdx, 
-					KdNode4 * treelet, int idx, 
+					const KdNode4 * treelet, int idx, 
 					const BoundingBox & box);
 };
 
@@ -54,7 +54,7 @@ void NTreeDrawer::drawBranch(KdNTree<T, KdNode4 > * tree, int branchIdx,
 							const BoundingBox & lftBox,
 							const BoundingBox & rgtBox)
 {
-	KdNode4 * tn = tree->nodes()[branchIdx];
+	const KdNode4 * tn = tree->branches()[branchIdx];
 /// first two
 	drawANode<T>(tree, branchIdx, tn, 0, lftBox );
 	drawANode<T>(tree, branchIdx, tn, 1, rgtBox );
@@ -62,11 +62,11 @@ void NTreeDrawer::drawBranch(KdNTree<T, KdNode4 > * tree, int branchIdx,
 
 template<typename T>
 void NTreeDrawer::drawANode(KdNTree<T, KdNode4 > * tree, int branchIdx, 
-					KdNode4 * treelet, int idx, 
+					const KdNode4 * treelet, int idx, 
 					const BoundingBox & box)
 {
 	drawBoundingBox(&box);
-	KdTreeNode * node = treelet->node(idx);
+	const KdTreeNode * node = treelet->node(idx);
 	if(node->isLeaf() ) { return; }
 	const int axis = node->getAxis();
 	const float pos = node->getSplitPos();

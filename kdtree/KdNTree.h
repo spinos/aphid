@@ -45,16 +45,17 @@ public:
 	int numRopes() const;
 	
     Tn * root();
-    
+    const sdb::VectorArray<Tn> & branches() const;
+	sdb::VectorArray<Tn> & branches();
+	const sdb::VectorArray<knt::TreeLeaf> & leafNodes() const;
+	const sdb::VectorArray<BoundingBox> & ropes() const;
+	const sdb::VectorArray<int> & primIndirection() const;
+	
 	const int & primIndirectionAt(const int & idx) const;
 	int addBranch();
 	
 	void addDataIndex(int x);
 	T * dataAt(unsigned idx) const;
-	const sdb::VectorArray<Tn> & nodes() const;
-	sdb::VectorArray<Tn> & nodes();
-
-	const sdb::VectorArray<knt::TreeLeaf> & leafNodes() const;
 	
 	void addLeafNode(const int & primStart, const int & primLen);
 	const int & leafPrimStart(unsigned idx) const;
@@ -77,8 +78,6 @@ public:
     typedef Tn TreeletType;
 	
 protected:
-	const sdb::VectorArray<BoundingBox> & ropes() const;
-	const sdb::VectorArray<int> & primIndirection() const;
 	void clear(const BoundingBox & b);
 	Tn * addTreelet();
 	knt::TreeLeaf * addLeaf();
@@ -150,14 +149,6 @@ sdb::VectorArray<T> * KdNTree<T, Tn>::source()
 template <typename T, typename Tn>
 Tn * KdNTree<T, Tn>::root()
 { return m_nodePool[0]; }
-
-template <typename T, typename Tn>
-sdb::VectorArray<Tn> & KdNTree<T, Tn>::nodes()
-{ return m_nodePool; }
-
-template <typename T, typename Tn>
-const sdb::VectorArray<Tn> & KdNTree<T, Tn>::nodes() const
-{ return m_nodePool; }
 
 template <typename T, typename Tn>
 int KdNTree<T, Tn>::numBranches() const
@@ -385,7 +376,7 @@ int KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx,
 {
 	std::cout<<"\n node "<<nodeIdx;
 				
-	const Tn * branch = nodes()[branchIdx];
+	const Tn * branch = branches()[branchIdx];
 	const KdTreeNode * r = branch->node(nodeIdx);
 	if(r->isLeaf() ) {
 		std::cout<<"\n hit leaf "<<r->getPrimStart();
@@ -427,7 +418,7 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	int side = b.pointOnSide(hit1, ctx->m_ray.m_dir);
 	// std::cout<<"\n rope side "<<side;
 	
-	const Tn * branch = nodes()[branchIdx];
+	const Tn * branch = branches()[branchIdx];
 	const KdTreeNode * r = branch->node(nodeIdx);
 /// leaf ind actually 
 	int iLeaf = r->getPrimStart();
@@ -448,6 +439,14 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	ctx->setBBox(*rp);
 	return true;
 }
+
+template <typename T, typename Tn>
+const sdb::VectorArray<Tn> & KdNTree<T, Tn>::branches() const
+{ return m_nodePool; }
+
+template <typename T, typename Tn>
+sdb::VectorArray<Tn> & KdNTree<T, Tn>::branches()
+{ return m_nodePool; }
 
 template <typename T, typename Tn>
 std::string KdNTree<T, Tn>::verbosestr() const

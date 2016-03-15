@@ -17,14 +17,21 @@ class CUDABuffer;
 
 class CudaNTree : public HNTree<cvx::Cube, KdNode4 > {
 
-	boost::scoped_ptr<CUDABuffer> m_branchPool;
-	boost::scoped_ptr<CUDABuffer> m_leafPool;
-	boost::scoped_ptr<CUDABuffer> m_primIndirecion;
-	boost::scoped_ptr<CUDABuffer> m_ropes;
+	boost::scoped_ptr<CUDABuffer> m_deviceBranch;
+	boost::scoped_ptr<CUDABuffer> m_deviceLeaf;
+	boost::scoped_ptr<CUDABuffer> m_deviceIndirection;
+	boost::scoped_ptr<CUDABuffer> m_deviceRope;
 	
 public:
 	CudaNTree(const std::string & name);
 	virtual ~CudaNTree();
+	
+	virtual char load();
+    
+	void * deviceBranch() const;
+	void * deviceLeaf() const;
+	void * deviceIndirection() const;
+	void * deviceRope() const;
 	
 protected:
 

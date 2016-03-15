@@ -57,7 +57,8 @@ void WorldRender::setBufferSize(const int & w, const int & h)
 {
 	aphid::CudaRender::setBufferSize(w, h);
 	imagebase::resetImage((uint *) colorBuffer(),
-                (float *) depthBuffer(),
+                (float *) nearDepthBuffer(),
+				(float *) farDepthBuffer(),
                 512,
                 w * h );
 	CudaBase::CheckCudaError(" reset image");
@@ -70,7 +71,7 @@ void WorldRender::render()
 	cuber::setRenderRect((int *)&rect() );
     cuber::setFrustum((float *)rayFrameVec());
 	cuber::render((uint *) colorBuffer(),
-                (float *) depthBuffer(),
+                (float *) nearDepthBuffer(),
 				16,
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");

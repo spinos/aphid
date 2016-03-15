@@ -42,7 +42,7 @@ public:
 	void insert()
 	{
 		if((m_numData & 1023)==0) {
-			m_buf = new T[1025];
+			m_buf = new T[1024];
 			m_blocks.push_back(m_buf);
 		}
 		
@@ -54,7 +54,7 @@ public:
 	void insert(const T & a) 
 	{
 		if((m_numData & 1023)==0) {
-			m_buf = new T[1025];
+			m_buf = new T[1024];
 			m_blocks.push_back(m_buf);
 		}
 		
@@ -80,6 +80,10 @@ public:
 	int numBlocks() const;
 	T * block(const int & idx) const;
 	
+	int sizeInBytes() const;
+	int numElementsInBlock(const int & idx) const;
+	int elementBytes() const;
+	
 };
 
 template <typename T>
@@ -93,6 +97,21 @@ int VectorArray<T>::numBlocks() const
 template <typename T>
 T * VectorArray<T>::block(const int & idx) const
 { return m_blocks[idx]; }
+
+template <typename T>
+int VectorArray<T>::sizeInBytes() const
+{ return sizeof(T) * m_numData; }
+
+template <typename T>
+int VectorArray<T>::numElementsInBlock(const int & idx) const
+{
+	if(idx < numBlocks() - 1) return 1024;
+	return m_numData & 1023;
+}
+
+template <typename T>
+int VectorArray<T>::elementBytes() const
+{ return sizeof(T); }
 
 }
 

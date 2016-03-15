@@ -42,7 +42,8 @@ public :
 	static void GetRoundedSize(int & w, int & h);
 	
 protected :
-	void * depthBuffer();
+	void * nearDepthBuffer();
+	void * farDepthBuffer();
 	void * colorBuffer();
 	int * tileDim();
 	void colorToHost();

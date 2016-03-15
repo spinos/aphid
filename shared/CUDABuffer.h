@@ -30,6 +30,23 @@ public:
 	void deviceToHost(void * dst, unsigned loc, unsigned size);
 	
 	const unsigned bufferSize() const;
+	
+	template<typename T>
+	void copyFrom(const T & harr)
+	{
+		create(harr.sizeInBytes() );
+		const int se = harr.elementBytes();
+		const int n = harr.numBlocks();
+		int loc = 0;
+		int bs;
+		int i=0;
+		for(;i<n;++i) {
+			bs = harr.numElementsInBlock(i) * se;
+			hostToDevice(harr.block(i), loc, bs );
+			loc += bs;
+		}
+	}
+	
 private:
     const unsigned minimalMemSize(unsigned size) const;
 	

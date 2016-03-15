@@ -39,8 +39,8 @@ void CudaRender::setBufferSize(const int & w, const int & h)
 /// uint in rgba
 	m_hostColor.create( m_bufferLength * 4 );
 	m_deviceColor.create( m_bufferLength * 4 );
-/// float
-	m_deviceDepth.create( m_bufferLength * 4 );
+/// float for near and far
+	m_deviceDepth.create( m_bufferLength * 8 );
 }
 
 void CudaRender::render()
@@ -74,9 +74,6 @@ void CudaRender::sendTileColor(unsigned * dst, const int & stride,
 		memcpy ( &dst[i*stride], &src[i*16], 64 );
 }
 
-void * CudaRender::depthBuffer()
-{ return m_deviceDepth.bufferOnDevice(); }
-
 void * CudaRender::colorBuffer()
 { return m_deviceColor.bufferOnDevice(); }
 
@@ -99,5 +96,11 @@ void CudaRender::colorToHost()
 
 const int & CudaRender::bufferLength() const
 { return m_bufferLength; }
+
+void * CudaRender::nearDepthBuffer()
+{ return m_deviceDepth.bufferOnDevice(); }
+
+void * CudaRender::farDepthBuffer()
+{ return m_deviceDepth.bufferOnDeviceAt( m_bufferLength * 4 ); }
 
 }

@@ -273,7 +273,7 @@ void KdNBuilder<NumLevels, T, Tn>::build(SahSplit<T> * parent, KdNTree<T, Tn> * 
 	tree->addBranch();
 	KdTreeletBuilder<NumLevels, T, Tn> treelet(1, tree);
 	Tn * root = tree->root();
-	sdb::VectorArray<Tn> & nodes = tree->nodes();
+	sdb::VectorArray<Tn> & nodes = tree->branches();
 	/// only first node in first treelet is useful
 	/// spawn into second treelet
 	treelet.build(0, parent, nodes[1], root, 0);
@@ -293,8 +293,8 @@ void KdNBuilder<NumLevels, T, Tn>::subdivide(KdTreeletBuilder<NumLevels, T, Tn> 
 {	
 	tree->addMaxLevel(level);
     const int parentIdx = treelet->index();
-	sdb::VectorArray<Tn> & nodes = tree->nodes();
-    Tn * parentNode = nodes[parentIdx];
+	sdb::VectorArray<Tn> & nodes = tree->branches();
+	Tn * parentNode = nodes[parentIdx];
 	const int n = treelet->numNodes();
 	int i = treelet->LastLevelOffset();
 	for(;i<n;i++) {
@@ -318,8 +318,8 @@ template<int NumLevels, typename T, typename Tn>
 void KdNBuilder<NumLevels, T, Tn>::process(const KdRope<NumLevels, T, Tn> * treelet, KdNTree<T, Tn> * tree)
 {
 	const int parentIdx = treelet->index();
-	sdb::VectorArray<Tn> & nodes = tree->nodes();
-    Tn * parentNode = nodes[parentIdx];
+	sdb::VectorArray<Tn> & nodes = tree->branches();
+	Tn * parentNode = nodes[parentIdx];
 	const int n = treelet->numNodes();
 	int i = treelet->LastLevelOffset();
 	for(;i<n;i++) {

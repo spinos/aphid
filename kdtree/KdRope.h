@@ -69,7 +69,7 @@ const BoxNeighbors & KdRope<NumLevels, T, Tn>::neighbor(int idx) const
 template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::build(int parentTreelet, int parentNodeIdx, const BoundingBox & box, const BoxNeighbors & ns)
 {
-	Tn * root = m_tree->nodes()[parentTreelet];
+	Tn * root = m_tree->branches()[parentTreelet];
 	KdTreeNode * rootNode = root->node(parentNodeIdx);
 	visitRoot(rootNode, box, ns);
 	int level = 1;
@@ -101,14 +101,14 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 	bool needNextLevel = false;
 	const int levelBegin = Treelet<NumLevels>::OffsetByLevel(level);
 	const int iTreelet = Treelet<NumLevels>::index();
-	Tn * treelet = m_tree->nodes()[iTreelet];
+	const Tn * treelet = m_tree->branches()[iTreelet];
 	const int nAtLevel = 1<<level;
 	BoundingBox lftBox, rgtBox;
 	int i;
 	if(level > 1) {
 		for(i=0; i<nAtLevel; i++) {
 			const int iNode = levelBegin + i;
-			KdTreeNode * node = treelet->node(iNode);
+			const KdTreeNode * node = treelet->node(iNode);
 			visitCousins(iNode, level);
 		}
 	}
@@ -116,7 +116,7 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 	if(level < NumLevels) {
 		for(i=0; i<nAtLevel; i++) {
 			const int iNode = levelBegin + i;
-			KdTreeNode * node = treelet->node(iNode);
+			const KdTreeNode * node = treelet->node(iNode);
 			if(node->isLeaf()) continue;
 
 			const BoundingBox nodeBox = m_boxes[iNode];
@@ -188,14 +188,14 @@ template<int NumLevels, typename T, typename Tn>
 void KdRope<NumLevels, T, Tn>::pushLeaves()
 {
 	const int iTreelet = Treelet<NumLevels>::index();
-	Tn * treelet = m_tree->nodes()[iTreelet];
+	const Tn * treelet = m_tree->branches()[iTreelet];
 	const int n = Treelet<NumLevels>::numNodes();
 	int i = 0;
 	for(;i<n;i++) {
 		BoxNeighbors nodeNs = m_ns[i];
 		if(nodeNs.isEmpty()) continue;
 		
-		KdTreeNode * node = treelet->node(i);
+		const KdTreeNode * node = treelet->node(i);
 		if(node->isLeaf() ) {
 			//std::cout<<"\n rope treelet["<<iTreelet<<"] node["<<i<<"] leaf["<<node->getPrimStart()<<"] ";
 			m_tree->setLeafRope(node->getPrimStart(), nodeNs);

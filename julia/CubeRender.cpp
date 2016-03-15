@@ -20,7 +20,7 @@ void CubeRender::setBufferSize(const int & w, const int & h)
 {
 	CudaRender::setBufferSize(w, h);
 	imagebase::resetImage((uint *) colorBuffer(),
-                (float *) depthBuffer(),
+                (float *) nearDepthBuffer(),
                 512,
                 w * h );
 	CudaBase::CheckCudaError(" reset image");
@@ -33,7 +33,7 @@ void CubeRender::render()
 	cuber::setRenderRect((int *)&rect() );
     cuber::setFrustum((float *)rayFrameVec());
 	cuber::render((uint *) colorBuffer(),
-                (float *) depthBuffer(),
+                (float *) nearDepthBuffer(),
 				16,
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");

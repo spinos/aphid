@@ -84,7 +84,7 @@ void HNTree<T, Tn>::save256Node()
 	else
 		treeletD.createStorage(fObjectId);
 	
-	const sdb::VectorArray<Tn> & src = KdNTree<T, Tn>::nodes();
+	const sdb::VectorArray<Tn> & src = KdNTree<T, Tn>::branches();
 	int n = KdNTree<T, Tn>::numBranches();
 	int i=0;
 	for(;i<n;++i) {
