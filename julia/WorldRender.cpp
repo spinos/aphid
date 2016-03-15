@@ -11,7 +11,7 @@
 #include <CudaNTree.h>
 #include <CudaBase.h>
 #include <cu/ImageBaseInterface.h>
-#include "CubeRenderInterface.h"
+#include "WorldRenderInterface.h"
 
 namespace aphid {
 
@@ -67,11 +67,12 @@ void WorldRender::setBufferSize(const int & w, const int & h)
 void WorldRender::render()
 {
     updateRayFrameVec();
-	cuber::setBoxFaces();
-	cuber::setRenderRect((int *)&rect() );
-    cuber::setFrustum((float *)rayFrameVec());
-	cuber::render((uint *) colorBuffer(),
+	wldr::setBoxFaces();
+	wldr::setRenderRect((int *)&rect() );
+    wldr::setFrustum((float *)rayFrameVec());
+	wldr::render((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
+				(float *) farDepthBuffer(),
 				16,
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");

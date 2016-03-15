@@ -166,7 +166,9 @@ target_link_libraries (julia ${Aphid_H5_Library})
 target_link_libraries (julia ${Aphid_Geom_Library})
 
 SET (VIEWERHEADER Parameter.h
-viewerWindow.h)
+viewerWindow.h
+CubeRenderInterface.h
+WorldRenderInterface.h)
 
 SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
@@ -186,6 +188,7 @@ WorldRender.cpp
 SET (CUSOURCES 
 ../shared/cu/ImageBase.cu
 cu/CubeRender.cu
+cu/WorldRender.cu
 )
 
 find_package (CUDA QUIET REQUIRED)
