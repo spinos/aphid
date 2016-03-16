@@ -22,10 +22,11 @@ class CudaRender : public BaseView {
 	CUDABuffer m_deviceColor;
 	CUDABuffer m_deviceDepth;
 	int m_tileDim[2];
+	int m_tileSize;
 	int m_bufferLength;
 	
 public :
-	CudaRender();
+	CudaRender(int m_tileSize = 16);
 	virtual ~CudaRender();
 	
 	virtual void setBufferSize(const int & w, const int & h);
@@ -39,7 +40,8 @@ public :
 	void sendTileColor(unsigned * dst, const int & stride,
 					const int & x, const int & y) const;
 	
-	static void GetRoundedSize(int & w, int & h);
+	void getRoundedSize(int & w, int & h) const;
+	const int & tileSize() const;
 	
 protected :
 	void * nearDepthBuffer();

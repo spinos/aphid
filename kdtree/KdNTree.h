@@ -426,7 +426,7 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	
 	int iRope = leafRopeInd(iLeaf, side);
 	
-	if(iRope < 0) {
+	if(iRope < 1) {
 		std::cout<<" no rope";
 		return false;
 	}

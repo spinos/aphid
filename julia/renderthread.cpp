@@ -34,7 +34,7 @@ void RenderThread::render(QSize resultSize)
     int w = resultSize.width();
     int h = resultSize.height();
 
-	aphid::CudaRender::GetRoundedSize(w, h);
+	m_r->getRoundedSize(w, h);
   
 	this->m_resultSize = QSize(w, h);
 
@@ -48,7 +48,7 @@ void RenderThread::render(QSize resultSize)
 
 void RenderThread::run()
 {
-    forever {
+    for(;;) {
         mutex.lock();
 
         QSize renderSize = this->m_resultSize;
@@ -60,16 +60,17 @@ void RenderThread::run()
 		if (abort)
 			return;
 		
-		// qDebug()<<" port"<<m_portSize<<" buffer"<<renderSize;;
-		
 		m_r->setPortSize(m_portSize.width(), m_portSize.height() );
 		m_r->setBufferSize(renderSize.width(), renderSize.height() );
 		m_r->render();
 		
 		QImage image(renderSize, QImage::Format_RGB32);
 			
-        const int tw = m_r->tileX();
-        const int th = m_r->tileY();
+        const int & tw = m_r->tileX();
+        const int & th = m_r->tileY();
+		const int & ts = m_r->tileSize();
+		
+		// qDebug()<<" tile "<<tw<<"x"<<th<<" size"<<ts;
         
         int i, j, k, l;
         for(j=0; j<th; ++j) {
@@ -81,8 +82,8 @@ void RenderThread::run()
                 
 				uint * tile = (uint *)m_r->tileHostColor(i, j);
                 
-				uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * 16) );
-				m_r->sendTileColor(&scanLine[i*16], renderSize.width(), i, j);
+				uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * ts) );
+				m_r->sendTileColor(&scanLine[i*ts], renderSize.width(), i, j);
             }
         }
         

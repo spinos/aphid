@@ -20,8 +20,8 @@ __global__ void resetImage2_kernel(uint * pix,
     unsigned ind = blockIdx.x*blockDim.x + threadIdx.x;
 	if(ind >= maxInd) return;
 	pix[ind] = 0; 
-	nearDepth[ind] = 0.f;
-	farDepth[ind] = 1e28f;
+	nearDepth[ind] = 1.f;
+	farDepth[ind] = 1000.f;
 }
 
 void resetImage(uint * pix,

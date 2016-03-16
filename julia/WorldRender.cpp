@@ -16,6 +16,7 @@
 namespace aphid {
 
 WorldRender::WorldRender(const std::string & filename) :
+CudaRender(8),
 m_worldGrid(NULL)
 {
 	bool stat = m_io.begin(filename, HDocument::oReadOnly );
@@ -45,7 +46,7 @@ m_worldGrid(NULL)
 	m_worldTree->close();
 	m_worldTree->setSource(&m_worldCoord);
 	
-	frameAll(m_worldTree->getBBox() );
+	//frameAll(m_worldTree->getBBox() );
 }
 
 WorldRender::~WorldRender() 
@@ -77,7 +78,7 @@ void WorldRender::render()
 				m_worldTree->deviceBranch(),
 				m_worldTree->deviceLeaf(),
 				m_worldTree->deviceRope(),
-				16,
+				tileSize(),
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");
 	colorToHost();

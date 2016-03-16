@@ -116,7 +116,7 @@ Vector3F * BaseView::rayFrameVec()
 void BaseView::frameAll(const BoundingBox & b)
 {
 	Vector3F eye = b.center();
-	eye.z = b.getMax(2) + b.distance(0) / hfov() * .7f;
+	eye.z = b.getMax(2) + b.distance(0) / hfov() * .55f + 120.f;
 	setEyePosition((float *)&eye);
 	
 	Matrix44F m;
@@ -124,6 +124,7 @@ void BaseView::frameAll(const BoundingBox & b)
 	*cameraSpaceR() = m;
 	m.inverse();
 	*cameraInvSpaceR() = m;
+	setFrustum(1.33f, 1.f, 26.2f, -1.f, -1000.f);
 }
 
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}

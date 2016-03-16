@@ -34,7 +34,7 @@ void CubeRender::render()
     cuber::setFrustum((float *)rayFrameVec());
 	cuber::render((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
-				16,
+				tileSize(),
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");
 	colorToHost();

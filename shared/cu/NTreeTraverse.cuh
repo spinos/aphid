@@ -124,7 +124,10 @@ inline __device__ int first_visit(const KdNode * node,
 	aabb4_expand<float4>(p2h, incident.o);
 	aabb4_expand<float3>(p2h, hitP);
 	
-	if( aabb4_touch(p2h, box) == 0) above = !above;
+	if( aabb4_touch(p2h, box) == 0) {
+	    if(above) above = 0;
+	    else above = 1;
+	}
 	
 	if(above) box = rgtBox;
 	else box = lftBox;
@@ -134,12 +137,15 @@ inline __device__ int first_visit(const KdNode * node,
 
 inline __device__ int visit_leaf(Aabb4 & box, 
                                 const Ray4 & incident, 
-                                const NTreeBranch4 & branch,
+                                NTreeBranch4 * branches,
                                 int & branchIdx, 
                                 int & nodeIdx)
 {
-    const KdNode * r = get_branch_node(branch, nodeIdx);
+    const KdNode * r = get_branch_node(branches[branchIdx], nodeIdx);
     if(is_leaf(r) ) {
+        if(get_prim_length(r) < 1)
+            return 0;
+        
         return 1;
     }
     
@@ -148,7 +154,7 @@ inline __device__ int visit_leaf(Aabb4 & box,
 		nodeIdx += offset + first_visit(r, incident, box);
 	}
 	else {
-		branchIdx += offset & ~(1<<20);
+		branchIdx += offset & (~(1<<20));
 		nodeIdx = first_visit(r, incident, box);
 	}
     return -1;
@@ -157,9 +163,34 @@ inline __device__ int visit_leaf(Aabb4 & box,
 inline __device__ void decode_rope(const int & src, int & itreelet, int & inode)
 {
 	itreelet = src >> 5;
-	inode = src & ((1<<5)-1 );
+	inode = src & 31;
 }
 
+inline __device__ int climb_rope(Aabb4 & box, 
+                            const Ray4 & incident, 
+                            NTreeLeaf * leaves,
+                            Rope * ropes, 
+		                    const NTreeBranch4 & branch,
+                            int & branchIdx, 
+                            int & nodeIdx)
+{
+    float tmin, tmax;
+    ray_box(incident, box, tmin, tmax);
+    
+    float3 hitP;
+    ray_progress(hitP, incident, tmax + 1e-3f);
+    int side = side_on_aabb4(box, hitP);
+    
+    const KdNode * r = get_branch_node(branch, nodeIdx);
+    int iLeaf = get_prim_offset(r);
+    int iRope = leaves[iLeaf]._ropeInd[side];
+    if(iRope < 1) return 0;
+    
+    const Rope & rp = ropes[iRope];
+    decode_rope(rp.treeletNode, branchIdx, nodeIdx);
+    aabb4_convert<Rope>(box, rp); 
+    return 1;   
+}
 
 #endif        //  #ifndef NTREETRAVERSE_CUH
 

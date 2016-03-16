@@ -37,11 +37,19 @@ __global__ void twoCube_kernel(uint * pix,
     
     uint ind = getTiledPixelIdx();
     
+    
+    int r1 = 0;//127 + 128 * incident.d.x;
+    int g1 = 0;//127 + 128 * incident.d.y;
+    int b1 = 127 + 128 * incident.d.z;
+    
+	pix[ind] = encodeRGB(r1, g1, b1);
+	return;
+    
     incident.o.w = nearDepth[ind];
     incident.d.w = farDepth[ind];
     
-    float3 hitP, hitN;
-    if(!ray_box(incident, hitP, hitN, box) ) 
+    float tmin, tmax;
+    if(!ray_box(incident, box, tmin, tmax) ) 
         return;
     
     const NTreeBranch4 & root = branches[0];
@@ -49,19 +57,33 @@ __global__ void twoCube_kernel(uint * pix,
     
     if(is_leaf(kn) ) return;
     
-    int branchIdx = get_branch_internal_offset(root, 0);
+    int branchIdx = get_inner_offset(kn) & ~(1<<20);
     int nodeIdx = first_visit(kn, incident, box);
+    
     int hasNext = 1;
     int stat;
     while (hasNext) {
-		stat = visit_leaf(box, incident, branches[branchIdx], 
+		stat = visit_leaf(box, incident, branches, 
 		                    branchIdx, nodeIdx);
 		if(stat > 0 ) {
-			hasNext = false;
+			hasNext = 0;
+		}
+		else if(stat == 0) {
+		    hasNext = climb_rope(box, incident, 
+		                    leaves,
+		                    ropes, 
+		                    branches[branchIdx], 
+		                    branchIdx, nodeIdx);
 		}
 	}
-    
-	ray_box(incident, hitP, hitN, box);
+	
+	if(stat < 1) {
+	    pix[ind] = encodeRGB(244, 244, 1);
+	    return;
+	}
+	float3 hitP;
+    ray_progress(hitP, incident, tmin - 1e-3f);
+    float3 hitN = c_ray_box_face[side_on_aabb4(box, hitP)];
 	
     int r = 128 + 127 * hitN.x;
     int g = 128 + 127 * hitN.y;

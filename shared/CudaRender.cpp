@@ -12,7 +12,7 @@
 #include <iostream>
 namespace aphid {
 
-CudaRender::CudaRender() 
+CudaRender::CudaRender(int tileSize) 
 {
 	CudaBase::SetDevice();
 	
@@ -25,15 +25,16 @@ CudaRender::CudaRender()
 	m.inverse();
 	*cameraInvSpaceR() = m;
 	
-	setFrustum(1.33f, 1.f, 5.2f, -1.f, -1000.f);
+	setFrustum(1.33f, 1.f, 7.2f, -1.f, -1000.f);
+	m_tileSize = tileSize;
 }
 
 CudaRender::~CudaRender() {}
 
 void CudaRender::setBufferSize(const int & w, const int & h)
 {
-	m_tileDim[0] = w>>4;
-	m_tileDim[1] = h>>4;
+	m_tileDim[0] = w / m_tileSize;
+	m_tileDim[1] = h / m_tileSize;
 	m_bufferLength = w * h;
 	
 /// uint in rgba
@@ -62,7 +63,7 @@ unsigned * CudaRender::hostColor() const
 { return (unsigned *)m_hostColor.data(); }
 
 unsigned * CudaRender::tileHostColor(const int & x, const int & y) const
-{ return &hostColor()[(y * tileX() + x)<<8]; }
+{ return &hostColor()[(y * tileX() + x) * m_tileSize * m_tileSize]; }
 
 /// copy in scanline
 void CudaRender::sendTileColor(unsigned * dst, const int & stride,
@@ -70,25 +71,25 @@ void CudaRender::sendTileColor(unsigned * dst, const int & stride,
 {
 	unsigned * src = tileHostColor(x, y);
 	
-	for(int i=0; i<16; ++i)
-		memcpy ( &dst[i*stride], &src[i*16], 64 );
+	for(int i=0; i<m_tileSize; ++i)
+		memcpy ( &dst[i*stride], &src[i*m_tileSize], m_tileSize * 4 );
 }
 
 void * CudaRender::colorBuffer()
 { return m_deviceColor.bufferOnDevice(); }
 
-void CudaRender::GetRoundedSize(int & w, int & h)
+void CudaRender::getRoundedSize(int & w, int & h) const
 {
-	if(w<16) w = 16;
-	if(h<16) h = 16;
-/// round to 16
-    int tw = w >> 4;
-    if((w & 15) > 0) tw++;
-    w = tw << 4;
+	if(w<m_tileSize) w = m_tileSize;
+	if(h<m_tileSize) h = m_tileSize;
+	
+    int tw = w / m_tileSize;
+    if((w & (m_tileSize - 1)) > 0) tw++;
+    w = tw * m_tileSize;
     
-    int th = h >> 4;
-    if((h & 15) > 0) th++;
-    h = th << 4;
+    int th = h / m_tileSize;
+    if((h & (m_tileSize - 1)) > 0) th++;
+    h = th * m_tileSize;
 }
 
 void CudaRender::colorToHost()
@@ -102,5 +103,8 @@ void * CudaRender::nearDepthBuffer()
 
 void * CudaRender::farDepthBuffer()
 { return m_deviceDepth.bufferOnDeviceAt( m_bufferLength * 4 ); }
+
+const int & CudaRender::tileSize() const
+{ return m_tileSize; }
 
 }
