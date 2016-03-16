@@ -11,6 +11,7 @@ void setFrustum(float * src)
 void render(uint * pix,
             float * nearDepth,
 			float * farDepth,
+			void * ropes,
             int blockx,
             int gridx, int gridy)
 {
@@ -19,7 +20,8 @@ void render(uint * pix,
     
     twoCube_kernel<<< grid, block >>>(pix, 
         nearDepth,
-		farDepth);
+		farDepth,
+		(Rope *)ropes);
 }
 
 const float cubefaces[] = {

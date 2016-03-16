@@ -1,13 +1,15 @@
 #include "cu/ImageBase.cuh"
 #include "cu/VectorMath.cuh"
 #include "cu/RayIntersection.cuh"
+#include "cu/NTreeTraverse.cuh"
 
 __constant__ float3 c_frustumVec[6];
 __constant__ int4 c_renderRect;
 
 __global__ void twoCube_kernel(uint * pix, 
                                 float * nearDepth,
-                                float * farDepth)
+                                float * farDepth,
+                                Rope * ropes)
 {
     uint px = getPixelCoordx();
     uint py = getPixelCoordy();
@@ -29,12 +31,7 @@ __global__ void twoCube_kernel(uint * pix,
     v3_normalize_inplace<float4>(incident.d);
     
     Aabb4 box;
-    box.low.x = -13.5f;
-    box.low.y = -13.5f;
-    box.low.z = -15.f;
-    box.high.x = 16.5f;
-    box.high.y = 13.5f;
-    box.high.z = 15.f;
+    aabb4_convert<Rope>(box, ropes[0]);
     
     uint ind = getTiledPixelIdx();
     

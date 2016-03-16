@@ -20,6 +20,13 @@ struct __align__(16) Aabb4 {
 
 __constant__ float3 c_ray_box_face[6];
 
+template<typename T>
+inline __device__ void aabb4_convert(Aabb4 & v, const T & src)
+{ 
+    v3_convert<float4, float3>(v.low, src.low); 
+    v3_convert<float4, float3>(v.high, src.high); 
+}
+
 inline __device__ int is_approximate(const float & a, const float & b)
 { return absoluteValueF(a-b) < 1e-5f; }
 

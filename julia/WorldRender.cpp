@@ -74,6 +74,7 @@ void WorldRender::render()
 	wldr::render((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
 				(float *) farDepthBuffer(),
+				m_worldTree->deviceRope(),
 				16,
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");

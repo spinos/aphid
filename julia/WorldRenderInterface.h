@@ -20,6 +20,7 @@ void setFrustum(float * src);
 void render(uint * color,
                 float * nearDepth,
                 float * farDepth,
+				void * ropes,
                 int blockx,
                 int gridx, int gridy);
 
