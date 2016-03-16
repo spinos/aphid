@@ -74,6 +74,8 @@ void WorldRender::render()
 	wldr::render((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
 				(float *) farDepthBuffer(),
+				m_worldTree->deviceBranch(),
+				m_worldTree->deviceLeaf(),
 				m_worldTree->deviceRope(),
 				16,
 				tileX(), tileY() );

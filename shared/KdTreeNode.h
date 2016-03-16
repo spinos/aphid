@@ -13,30 +13,25 @@ class KdTreeNode
 {
 public:
 	union {
-			/* Inner node */
 			struct {
-				/* Bit layout:
-				   31   : False (inner node)
-				   30   : Indirection node flag
-				   29-3 : Offset to the left child 
-				          or indirection table entry
-				   2-0  : Split axis
-				*/
+/// Bit layout:
+///  -4  : offset to child
+///   3  : false (inner node)
+/// 2-0  : Split axis
 				int combined;
 
-				/// Split plane coordinate
+/// split plane coordinate
 				float split;
 			} inner;
 
-			/* Leaf node */
 			struct {
-				/* Bit layout:
-				   31   : True (leaf node)
-				   30-0 : Offset to the node's primitive list
-				*/
+/// Bit layout:
+///  -4 : offset to first primitive
+///   3 : true (leaf node)
+/// 2-0 : no use
 				int combined;
 
-				/// End offset of the primitive list
+/// number of the primitives
 				int end;
 			} leaf;
 		};
@@ -61,14 +56,10 @@ public:
 	int getOffset() const;
 
 	enum EMask {
-		EInnerAxisMask = ~0x3,
-		ETypeMask = ~0x4,
-        ETypeMaskTau = 0x4,
-		ELeafOffsetMask = ~ETypeMask,
-		EIndirectionMask = 0x7,
-		
-		//EInnerOffsetMask = ~(EInnerAxisMask + EIndirectionMask),
-		//ERelOffsetLimit = (1<<28) - 1
+		EInnerAxisMask = ~0x3,  // ...1100 
+		ETypeMask = ~0x4,		// ...1011
+        ETypeMaskTau = 0x4,		// ...0100
+		EIndirectionMask = 0x7	// ....111 first 3 bits
 	};
 	
 private:

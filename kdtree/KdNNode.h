@@ -39,6 +39,7 @@ public:
 	
 	enum EMask {
 		TreeletOffsetMask = 1<<20,
+		TreeletOffsetMaskTau = ~TreeletOffsetMask
 	};
 	
 	void printChild(const int & idx) const;

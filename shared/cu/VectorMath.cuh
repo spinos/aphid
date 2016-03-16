@@ -228,5 +228,13 @@ template<typename T1, typename T2>
 __device__ float v3_dot(const T1 & v1, const T2 & v2)
 { return (v1.x * v2.x + v1.y * v2.y + v1.z * v2.z); }
 
+template<typename T>
+inline __device__ float v3_component(const T & v, int d)
+{ 
+    if(d < 1) return v.x;
+    if(d<2) return v.y;
+    return v.z;    
+}
+
 #endif        //  #ifndef VECTOR_MATH_CUH
 

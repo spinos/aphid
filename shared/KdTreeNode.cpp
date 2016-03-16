@@ -41,7 +41,7 @@ void KdTreeNode::setInternal()
 
 void KdTreeNode::setPrimStart(unsigned long offset)
 {
-	leaf.combined = (offset<<3) | ELeafOffsetMask;
+	leaf.combined = (offset<<3) | ETypeMaskTau;
 }
 
 void KdTreeNode::setNumPrims(unsigned long numPrims)
@@ -51,7 +51,7 @@ void KdTreeNode::setNumPrims(unsigned long numPrims)
 
 int KdTreeNode::getPrimStart() const 
 {
-	return (leaf.combined & (~ELeafOffsetMask) ) >> 3;
+	return leaf.combined >> 3;
 }
 
 int KdTreeNode::getNumPrims() const 
@@ -61,7 +61,7 @@ int KdTreeNode::getNumPrims() const
 
 bool KdTreeNode::isLeaf() const
 {
-	return ((leaf.combined & (~ETypeMask) ) > 0); 
+	return ((leaf.combined & ETypeMaskTau ) > 0); 
 }
 
 void KdTreeNode::setLeft( KdTreeNode* a_Left )
@@ -83,10 +83,10 @@ KdTreeNode* KdTreeNode::getRight() const
 }
 
 void KdTreeNode::setOffset(int x)
-{ inner.combined = (x<<3) + (inner.combined & EIndirectionMask); }
+{ inner.combined = (x<<3) | (inner.combined & EIndirectionMask); }
 
 int KdTreeNode::getOffset() const
-{ return (inner.combined & ~EIndirectionMask)>>3; }
+{ return inner.combined >>3; }
 
 }
 //:~

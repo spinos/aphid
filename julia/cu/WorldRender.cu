@@ -11,6 +11,8 @@ void setFrustum(float * src)
 void render(uint * pix,
             float * nearDepth,
 			float * farDepth,
+			void * branches,
+			void * leaves,
 			void * ropes,
             int blockx,
             int gridx, int gridy)
@@ -21,6 +23,8 @@ void render(uint * pix,
     twoCube_kernel<<< grid, block >>>(pix, 
         nearDepth,
 		farDepth,
+		(NTreeBranch4 *)branches,
+		(NTreeLeaf *)leaves,
 		(Rope *)ropes);
 }
 

@@ -9,6 +9,8 @@ __constant__ int4 c_renderRect;
 __global__ void twoCube_kernel(uint * pix, 
                                 float * nearDepth,
                                 float * farDepth,
+                                NTreeBranch4 * branches,
+                                NTreeLeaf * leaves,
                                 Rope * ropes)
 {
     uint px = getPixelCoordx();
@@ -39,13 +41,33 @@ __global__ void twoCube_kernel(uint * pix,
     incident.d.w = farDepth[ind];
     
     float3 hitP, hitN;
-    if(ray_box(incident, hitP, hitN, box) ) {
+    if(!ray_box(incident, hitP, hitN, box) ) 
+        return;
     
+    const NTreeBranch4 & root = branches[0];
+    const KdNode * kn = get_branch_node(root, 0);
+    
+    if(is_leaf(kn) ) return;
+    
+    int branchIdx = get_branch_internal_offset(root, 0);
+    int nodeIdx = first_visit(kn, incident, box);
+    int hasNext = 1;
+    int stat;
+    while (hasNext) {
+		stat = visit_leaf(box, incident, branches[branchIdx], 
+		                    branchIdx, nodeIdx);
+		if(stat > 0 ) {
+			hasNext = false;
+		}
+	}
+    
+	ray_box(incident, hitP, hitN, box);
+	
     int r = 128 + 127 * hitN.x;
     int g = 128 + 127 * hitN.y;
     int b = 128 + 127 * hitN.z;
     
 	pix[ind] = encodeRGB(r, g, b);
-	}
+	
 }
 

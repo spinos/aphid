@@ -392,13 +392,13 @@ int KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx,
 		return 1;
 	}
 	
-	const int offset = branch->internalOffset(nodeIdx);
-	if(r->getOffset() < Tn::TreeletOffsetMask) {
+	const int offset = r->getOffset();
+	if(offset < Tn::TreeletOffsetMask) {
 		// std::cout<<"\n inner offset "<<offset;
 		nodeIdx += offset + firstVisit(ctx, r);
 	}
 	else {
-		branchIdx += offset;
+		branchIdx += offset & Tn::TreeletOffsetMaskTau;
 		std::cout<<"\n branch "<<branchIdx;
 		nodeIdx = firstVisit(ctx, r);
 	}

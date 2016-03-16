@@ -27,6 +27,64 @@ inline __device__ void aabb4_convert(Aabb4 & v, const T & src)
     v3_convert<float4, float3>(v.high, src.high); 
 }
 
+inline __device__ void aabb4_reset(Aabb4 & b)
+{
+    b.low.x = b.low.y = b.low.z = 1e20f;
+    b.high.x = b.high.y = b.high.z = -1e20f;
+}
+
+template<typename T>
+inline __device__ void aabb4_expand(Aabb4 & b, 
+                                    const T & pnt)
+{
+    if(b.low.x > pnt.x) b.low.x = pnt.x;
+    if(b.low.y > pnt.y) b.low.y = pnt.y;
+    if(b.low.z > pnt.z) b.low.z = pnt.z;
+    if(b.high.x < pnt.x) b.high.x = pnt.x;
+    if(b.high.y < pnt.y) b.high.y = pnt.y;
+    if(b.high.z < pnt.z) b.high.z = pnt.z;
+}
+
+inline __device__ void aabb4_split(Aabb4 & lftBox, Aabb4 & rgtBox, 
+                                const Aabb4 & box, 
+                                const int & axis, 
+                                const float & splitPos)
+{
+    lftBox = box;
+    rgtBox = box;
+    if(axis == 0) {
+        lftBox.high.x = splitPos;
+        rgtBox.low.x = splitPos;
+    }
+    else if(axis == 1) {
+        lftBox.high.y = splitPos;
+        rgtBox.low.y = splitPos;
+    }
+    else {
+        lftBox.high.z = splitPos;
+        rgtBox.low.z = splitPos;
+    }
+}
+
+inline __device__ int aabb4_touch(const Aabb4 & a,
+                                const Aabb4 & b)
+{
+    if(a.low.x >= b.high.x || a.high.x <= b.low.x) return 0;
+	if(a.low.y >= b.high.y || a.high.y <= b.low.y) return 0;
+	if(a.low.z >= b.high.z || a.high.z <= b.low.z) return 0;
+	return 1;
+}
+
+template<typename Tbox, typename Tpnt>
+inline __device__ int is_v3_inside(const Tbox & box, 
+                                    const Tpnt & p)
+{
+    if(p.x < box.low.x || p.x > box.high.x) return 0;
+	if(p.y < box.low.y || p.y > box.high.y) return 0;
+	if(p.z < box.low.z || p.z > box.high.z) return 0;
+	return 1;
+}
+
 inline __device__ int is_approximate(const float & a, const float & b)
 { return absoluteValueF(a-b) < 1e-5f; }
 
