@@ -418,15 +418,24 @@ int BoundingBox::pointOnEdge(const Vector3F & v) const
 	r.normalize();
 	int jr = r.longestAxis();
 	if(jr == 0) {
-		if(r.x == r.y || r.x == r.z) return 1;
-		return 0;
+		if(r.x == r.y || r.x == r.z) {
+			if(r.x < 0.f) return 0;
+			return 1;
+		}
+		return -1;
 	}
 	if(jr == 1) {
-		if(r.y == r.x || r.y == r.z) return 1;
-		return 0;
+		if(r.y == r.x || r.y == r.z) {
+			if(r.y < 0.f) return 2;
+			return 3;
+		}
+		return -1;
 	}
-	if(r.z == r.x || r.z == r.y) return 1;
-	return 0;
+	if(r.z == r.x || r.z == r.y) {
+		if(r.z < 0.f) return 4;
+		return 5;
+	}
+	return -1;
 }
 
 /// should not on edge/corner

@@ -351,4 +351,15 @@ int Vector3F::orientation() const
 	return 5;
 }
 
+Vector3F Vector3F::inOrientation(const float & l) const
+{
+	int j = orientation();
+	if(j==0) return Vector3F(-l, 0.f, 0.f);
+	if(j==1) return Vector3F( l, 0.f, 0.f);
+	if(j==2) return Vector3F(0.f, -l, 0.f);
+	if(j==3) return Vector3F(0.f,  l, 0.f);
+	if(j==4) return Vector3F(0.f, 0.f, -l);
+	return Vector3F(0.f, 0.f, l);
+}
+
 }

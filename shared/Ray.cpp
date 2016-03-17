@@ -29,7 +29,7 @@ Ray::Ray(const Vector3F& pfrom, const Vector3F& pto)
 	m_dir.normalize();
 }
 
-Vector3F Ray::travel(float & t) const
+Vector3F Ray::travel(const float & t) const
 { return m_origin + m_dir * t; }
 
 Vector3F Ray::destination() const

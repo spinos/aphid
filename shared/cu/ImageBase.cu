@@ -21,7 +21,7 @@ __global__ void resetImage2_kernel(uint * pix,
 	if(ind >= maxInd) return;
 	pix[ind] = 0; 
 	nearDepth[ind] = 1.f;
-	farDepth[ind] = 1000.f;
+	farDepth[ind] = 1e28f;
 }
 
 void resetImage(uint * pix,

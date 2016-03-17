@@ -70,15 +70,14 @@ __global__ void twoCube_kernel(uint * pix,
 		                    branchIdx, nodeIdx);
 		}
 	}
-	
+
+/// empty
 	if(stat < 1) 
 	    return;
 
+	ray_box(incident, box, tmin, tmax);
 	float3 hitP;
-    ray_progress(hitP, incident, tmin);
-    if(on_edge_aabb4(box, hitP) ) {
-        v3_add_mult<float3, float4, float>(hitP, incident.d, -1e-4f);
-    }
+    ray_progress(hitP, incident, tmin - 1e-5f);
     float3 hitN = c_ray_box_face[side1_on_aabb4<float4>(box, hitP)];
 	
     int r = 128 + 127 * hitN.x;
