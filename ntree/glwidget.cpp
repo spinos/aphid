@@ -82,7 +82,9 @@ void GLWidget::drawBoxes() const
     const int n = m_source->size();
     int i = 0;
     for(;i<n;i++) {
-        getDrawer()->boundingBox(m_source->get(i)->calculateBBox() );
+		BoundingBox b = m_source->get(i)->calculateBBox();
+		b.expand(-0.03f);
+        getDrawer()->boundingBox(b );
     }
 }
 
@@ -316,7 +318,9 @@ void GLWidget::drawActiveSource(const unsigned & iLeaf)
 	int i=0;
 	for(;i<len;++i) {
 		const cvx::Cube * c = m_source->get( m_tree->primIndirectionAt(start + i) );
-		getDrawer()->boundingBox(c->calculateBBox() );
+		BoundingBox b = c->calculateBBox();
+		b.expand(-0.03f);
+		getDrawer()->boundingBox(b );
 	}
 }
 //:~
