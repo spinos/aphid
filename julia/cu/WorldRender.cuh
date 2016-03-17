@@ -11,7 +11,9 @@ __global__ void twoCube_kernel(uint * pix,
                                 float * farDepth,
                                 NTreeBranch4 * branches,
                                 NTreeLeaf * leaves,
-                                Rope * ropes)
+                                Rope * ropes,
+                                int * indirections,
+                                Cube * primitives)
 {
     uint px = getPixelCoordx();
     uint py = getPixelCoordy();
@@ -64,7 +66,7 @@ __global__ void twoCube_kernel(uint * pix,
 		    hasNext = climb_rope(box, incident, 
 		                    leaves,
 		                    ropes, 
-		                    branches[branchIdx], 
+		                    get_branch_node(branches[branchIdx], nodeIdx),
 		                    branchIdx, nodeIdx);
 		}
 	}

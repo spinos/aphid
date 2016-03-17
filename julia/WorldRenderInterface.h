@@ -23,6 +23,8 @@ void render(uint * color,
 				void * branches,
 				void * leaves,
 				void * ropes,
+				int * indirections,
+				void * primitives,
                 int blockx,
                 int gridx, int gridy);
 

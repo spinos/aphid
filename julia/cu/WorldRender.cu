@@ -14,6 +14,8 @@ void render(uint * pix,
 			void * branches,
 			void * leaves,
 			void * ropes,
+			int * indirections,
+			void * primitives,
             int blockx,
             int gridx, int gridy)
 {
@@ -25,7 +27,9 @@ void render(uint * pix,
 		farDepth,
 		(NTreeBranch4 *)branches,
 		(NTreeLeaf *)leaves,
-		(Rope *)ropes);
+		(Rope *)ropes,
+		indirections,
+		(Cube *)primitives);
 }
 
 const float cubefaces[] = {

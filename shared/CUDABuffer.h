@@ -34,7 +34,7 @@ public:
 	template<typename T>
 	void copyFrom(const T & harr)
 	{
-		create(harr.sizeInBytes() );
+		create(harr.sizeInBytes() ); 
 		const int se = harr.elementBytes();
 		const int n = harr.numBlocks();
 		int loc = 0;
@@ -42,7 +42,7 @@ public:
 		int i=0;
 		for(;i<n;++i) {
 			bs = harr.numElementsInBlock(i) * se;
-			hostToDevice(harr.block(i), loc, bs );
+			hostToDevice(harr.block(i), loc, bs ); 
 			loc += bs;
 		}
 	}

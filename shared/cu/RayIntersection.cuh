@@ -18,7 +18,20 @@ struct __align__(16) Aabb4 {
     float4 high;
 };
 
+/// center and extent
+typedef float4 Cube;
+
 __constant__ float3 c_ray_box_face[6];
+
+inline __device__ void aabb4_from_cube(Aabb4 & v, const Cube & src)
+{ 
+    v.low.x = src.x - src.w; 
+    v.low.y = src.y - src.w; 
+    v.low.z = src.z - src.w; 
+    v.high.x = src.x + src.w; 
+    v.high.y = src.y + src.w; 
+    v.high.z = src.z + src.w;
+}
 
 template<typename T>
 inline __device__ void aabb4_convert(Aabb4 & v, const T & src)

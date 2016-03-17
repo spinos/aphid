@@ -168,7 +168,8 @@ target_link_libraries (julia ${Aphid_Geom_Library})
 SET (VIEWERHEADER Parameter.h
 viewerWindow.h
 CubeRenderInterface.h
-WorldRenderInterface.h)
+WorldRenderInterface.h
+../kdtree/CudaNTree.h)
 
 SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
@@ -176,7 +177,6 @@ whitenoisewidget.cpp
 CubeRender.cpp
 ../shared/KdTreeNode.cpp
 ../kdtree/TreeProperty.cpp
-../kdtree/CudaNTree.cpp
 ../kdtree/HNTree.cpp
 ../ntree/NTreeIO.cpp
 ../btree/HWorldGrid.cpp

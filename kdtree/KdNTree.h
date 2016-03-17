@@ -68,8 +68,8 @@ public:
 	const int & leafRopeInd(unsigned idx, int ri) const;
 	void setLeafRopeInd(unsigned x, unsigned idx, int ri);
 
-	sdb::VectorArray<T> * source();
-	void setSource(sdb::VectorArray<T> * src);
+	const sdb::VectorArray<T> * source() const;
+	virtual void setSource(sdb::VectorArray<T> * src);
 	
 	char intersect(IntersectionContext * ctx);
 	
@@ -146,7 +146,7 @@ void KdNTree<T, Tn>::clear(const BoundingBox & b)
 }
 
 template <typename T, typename Tn>
-sdb::VectorArray<T> * KdNTree<T, Tn>::source()
+const sdb::VectorArray<T> * KdNTree<T, Tn>::source() const
 { return m_source; }
 
 template <typename T, typename Tn>
@@ -364,9 +364,9 @@ char KdNTree<T, Tn>::intersect(IntersectionContext * ctx)
 		stat = visitLeaf(ctx, branchIdx, nodeIdx);
 		if(stat > 0 ) {
 			if(hitPrimitive(ctx, branchIdx, nodeIdx) ) hasNext = false;
-			else hasNext = climbRope(ctx, branchIdx, nodeIdx);
+			else stat = 0;
 		}
-		else if(stat==0) {
+		if(stat==0) {
 			hasNext = climbRope(ctx, branchIdx, nodeIdx);
 		}
 	}

@@ -12,15 +12,14 @@
 #include <NTreeIO.h>
 #include <HWorldGrid.h>
 #include <HInnerGrid.h>
+#include <CudaNTree.h>
 
 namespace aphid {
-
-class CudaNTree;
 
 class WorldRender : public CudaRender {
 
 typedef sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > WorldGridT;
-typedef CudaNTree WorldTreeT;
+typedef CudaNTree<cvx::Cube, KdNode4> WorldTreeT;
 
 	NTreeIO m_io;
 	sdb::VectorArray<cvx::Cube> m_worldCoord;

@@ -170,7 +170,7 @@ inline __device__ int climb_rope(Aabb4 & box,
                             const Ray4 & incident, 
                             NTreeLeaf * leaves,
                             Rope * ropes, 
-		                    const NTreeBranch4 & branch,
+		                    const KdNode * r,
                             int & branchIdx, 
                             int & nodeIdx)
 {
@@ -180,11 +180,10 @@ inline __device__ int climb_rope(Aabb4 & box,
     float3 hitP;
     ray_progress(hitP, incident, tmax);
     if(on_edge_aabb4(box, hitP) ) {
-       v3_add_mult<float3, float4, float>(hitP, incident.d, 1e-4f);
+       v3_add_mult<float3, float4, float>(hitP, incident.d, 1e-3f);
     }
     int side = side1_on_aabb4<float4>(box, hitP);
     
-    const KdNode * r = get_branch_node(branch, nodeIdx);
     int iLeaf = get_prim_offset(r);
     int iRope = leaves[iLeaf]._ropeInd[side];
     if(iRope < 1) return 0;

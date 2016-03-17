@@ -8,7 +8,6 @@
  */
 
 #include "WorldRender.h"
-#include <CudaNTree.h>
 #include <CudaBase.h>
 #include <cu/ImageBaseInterface.h>
 #include "WorldRenderInterface.h"
@@ -33,7 +32,7 @@ m_worldGrid(NULL)
 	m_worldGrid = new WorldGridT(gridName);
 	m_worldGrid->load();
 	m_io.loadGridCoord<WorldGridT >(&m_worldCoord, m_worldGrid);
-
+	
 	std::string treeName;
 	stat = m_io.findTree(treeName, gridName);
 	if(!stat)
@@ -76,6 +75,8 @@ void WorldRender::render()
 				m_worldTree->deviceBranch(),
 				m_worldTree->deviceLeaf(),
 				m_worldTree->deviceRope(),
+				(int *)m_worldTree->deviceIndirection(),
+				m_worldTree->devicePrim(),
 				tileSize(),
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" render image");
