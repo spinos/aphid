@@ -62,7 +62,8 @@ public:
 	char isPointAround(const Vector3F & p, float threshold) const;
 	char isBoxAround(const BoundingBox & b, float threshold) const;
 	char inside(const BoundingBox & b) const;
-	int pointOnSide(const Vector3F & v, const Vector3F & d) const;
+	int pointOnSide(const Vector3F & v) const;
+	int pointOnEdge(const Vector3F & v) const;
 	char isValid() const;
 	void verbose() const;
 	void verbose(const char * pref) const;

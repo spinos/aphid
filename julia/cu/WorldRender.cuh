@@ -69,13 +69,15 @@ __global__ void twoCube_kernel(uint * pix,
 		}
 	}
 	
-	if(stat < 1) {
-	    //pix[ind] = encodeRGB(244, 244, 1);
+	if(stat < 1) 
 	    return;
-	}
+
 	float3 hitP;
-    ray_progress(hitP, incident, tmin - 1e-3f);
-    float3 hitN = c_ray_box_face[side_on_aabb4(box, hitP)];
+    ray_progress(hitP, incident, tmin);
+    if(on_edge_aabb4(box, hitP) ) {
+        v3_add_mult<float3, float4, float>(hitP, incident.d, -1e-4f);
+    }
+    float3 hitN = c_ray_box_face[side1_on_aabb4<float4>(box, hitP)];
 	
     int r = 128 + 127 * hitN.x;
     int g = 128 + 127 * hitN.y;

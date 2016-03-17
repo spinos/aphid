@@ -212,7 +212,9 @@ void BoundingBox::expand(float val)
 
 Vector3F BoundingBox::center() const
 {
-	return Vector3F(m_data[0] * 0.5f + m_data[3] * 0.5f, m_data[1] * 0.5f + m_data[4] * 0.5f, m_data[2] * 0.5f + m_data[5] * 0.5f);
+	return Vector3F((m_data[0] + m_data[3]) * 0.5f, 
+					(m_data[1] + m_data[4]) * 0.5f, 
+					(m_data[2] + m_data[5]) * 0.5f);
 }
 
 char BoundingBox::touch(const BoundingBox & b) const
@@ -407,15 +409,44 @@ float BoundingBox::radiusXZ() const
     return sqrt(dx*dx + dz*dz);
 }
 
-int BoundingBox::pointOnSide(const Vector3F & v, const Vector3F & d) const
+int BoundingBox::pointOnEdge(const Vector3F & v) const
 {
-/// over-shoot by a large distance
-    const Vector3F c = v + d;
-	if(m_data[0] - c.x > 1e-5f) return 0;
-	if(c.x - m_data[3] > 1e-5f) return 1;
-	if(m_data[1] - c.y > 1e-5f) return 2;
-	if(c.y - m_data[4] > 1e-5f) return 3;
-	if(m_data[2] - c.z > 1e-5f) return 4;
+	Vector3F r = v - center();
+	r.x /= distance(0);
+	r.y /= distance(1);
+	r.z /= distance(2);
+	r.normalize();
+	int jr = r.longestAxis();
+	if(jr == 0) {
+		if(r.x == r.y || r.x == r.z) return 1;
+		return 0;
+	}
+	if(jr == 1) {
+		if(r.y == r.x || r.y == r.z) return 1;
+		return 0;
+	}
+	if(r.z == r.x || r.z == r.y) return 1;
+	return 0;
+}
+
+/// should not on edge/corner
+int BoundingBox::pointOnSide(const Vector3F & v) const
+{
+	Vector3F r = v - center();
+	r.x /= distance(0);
+	r.y /= distance(1);
+	r.z /= distance(2);
+	r.normalize();
+	int jr = r.longestAxis();
+	if(jr == 0) {
+		if(r.x < 0.f) return 0;
+		return 1;
+	}
+	if(jr == 1) {
+		if(r.y < 0.f) return 2;
+		return 3;
+	}
+	if(r.z < 0.f) return 4;
 	return 5;
 }
 

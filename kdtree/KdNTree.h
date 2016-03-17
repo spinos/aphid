@@ -414,8 +414,12 @@ bool KdNTree<T, Tn>::climbRope(IntersectionContext * ctx,
 	const BoundingBox & b = ctx->getBBox();
 	float t0, t1;
 	b.intersect(ctx->m_ray, &t0, &t1);
-	const Vector3F hit1 = ctx->m_ray.travel(t1);
-	int side = b.pointOnSide(hit1, ctx->m_ray.m_dir);
+	Vector3F hit1 = ctx->m_ray.travel(t1);
+	if(b.pointOnEdge(hit1) ) {
+		std::cout<<"\n on edge "<<hit1;
+		hit1 += ctx->m_ray.m_dir * 1e-4f;
+	}
+	int side = b.pointOnSide(hit1);
 	// std::cout<<"\n rope side "<<side;
 	
 	const Tn * branch = branches()[branchIdx];

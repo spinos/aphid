@@ -236,5 +236,40 @@ inline __device__ float v3_component(const T & v, int d)
     return v.z;    
 }
 
+template<typename T>
+inline __device__ void v3_reverse_inplace(T & v)
+{ 
+    v.x *= -1.f;
+    v.y *= -1.f;
+    v.z *= -1.f;
+}
+
+template<typename T>
+inline __device__ int v3_major_axis(const T & v)
+{ 
+    float a = (v.x >= 0) ? v.x : -v.x;
+	float b = (v.y >= 0) ? v.y : -v.y;
+	float c = (v.z >= 0) ? v.z : -v.z;
+	if(a >= b && a >= c) return 0;
+	if(b >= c && b >= a) return 1;
+	return 2;    
+}
+
+template<typename T>
+inline __device__ int v3_orientation(const T & v)
+{ 
+    int j = v3_major_axis<T>(v);
+    if(j==0) {
+		if(v.x<0.f) return 0;
+		return 1;
+	}
+	if(j==1) {
+		if(v.y<0.f) return 2;
+		return 3;
+	}
+	if(v.z<0.f) return 4;
+	return 5;
+}
+
 #endif        //  #ifndef VECTOR_MATH_CUH
 

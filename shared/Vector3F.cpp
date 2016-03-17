@@ -247,14 +247,12 @@ float Vector3F::comp(int dim) const
 
 int Vector3F::longestAxis() const
 {
-	float a = x;
-	if(a < 0) a = -a;
-	float b = y;
-	if(b < 0) b = -b;
-	float c = z;
-	if(c < 0) c = -c;
-	if(a > b && a > c) return 0;
-	if(b > c && b > a) return 1;
+/// find the higest absolute 
+	float a = (x >= 0) ? x : -x;
+	float b = (y >= 0) ? y : -y;
+	float c = (z >= 0) ? z : -z;
+	if(a >= b && a >= c) return 0;
+	if(b >= c && b >= a) return 1;
 	return 2;
 }
 
@@ -336,6 +334,21 @@ const std::string Vector3F::str() const
 	sst.str("");
     sst<<"("<<x<<","<<y<<","<<z<<")";
 	return sst.str();
+}
+
+int Vector3F::orientation() const
+{ 
+	int j = longestAxis();
+	if(j==0) {
+		if(x<0.f) return 0;
+		return 1;
+	}
+	if(j==1) {
+		if(y<0.f) return 2;
+		return 3;
+	}
+	if(z<0.f) return 4;
+	return 5;
 }
 
 }

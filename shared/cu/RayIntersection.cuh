@@ -99,6 +99,57 @@ inline __device__ int side_on_aabb4(const Aabb4 & b,
     return 5;    
 }
 
+inline __device__ int on_edge_aabb4(const Aabb4 & b,
+                                    const float3 & pnt)
+{
+    float3 r;
+    r.x = pnt.x - (b.low.x + b.high.x) * .5f;
+    r.y = pnt.y - (b.low.y + b.high.y) * .5f;
+    r.z = pnt.z - (b.low.z + b.high.z) * .5f;
+    r.x /= b.high.x - b.low.x;
+    r.y /= b.high.y - b.low.y;
+    r.z /= b.high.z - b.low.z;
+    v3_normalize_inplace<float3>(r);
+    
+    int jr = v3_major_axis<float3>(r);
+	if(jr == 0) {
+		if(r.x == r.y || r.x == r.z) return 1;
+		return 0;
+	}
+	if(jr == 1) {
+		if(r.y == r.x || r.y == r.z) return 1;
+		return 0;
+	}
+	if(r.z == r.x || r.z == r.y) return 1;
+	return 0;   
+}
+
+template<typename Td>
+inline __device__ int side1_on_aabb4(const Aabb4 & b,
+                                    const float3 & pnt)
+{
+    float3 r;
+    r.x = pnt.x - (b.low.x + b.high.x) * .5f;
+    r.y = pnt.y - (b.low.y + b.high.y) * .5f;
+    r.z = pnt.z - (b.low.z + b.high.z) * .5f;
+    r.x /= b.high.x - b.low.x;
+    r.y /= b.high.y - b.low.y;
+    r.z /= b.high.z - b.low.z;
+    v3_normalize_inplace<float3>(r);
+    
+    int jr = v3_major_axis<float3>(r);
+	if(jr == 0) {
+	    if(r.x < 0.f) return 0;
+		return 1;
+	}
+	if(jr == 1) {
+		if(r.y < 0.f) return 2;
+		return 3;
+	}
+	if(r.z < 0.f) return 4;
+	return 5;   
+}
+
 inline __device__ void ray_progress(float3 & p, const Ray4 & r, float h)
 { 
   p.x = r.o.x + r.d.x * h;
