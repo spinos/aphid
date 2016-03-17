@@ -69,12 +69,12 @@ __global__ void oneCube_kernel(uint * pix,
     v3_normalize_inplace<float4>(incident.d);
     
     Aabb4 box;
-    box.low.x = -5.3f;
-    box.low.y = 8.f;
+    box.low.x = 11.f;
+    box.low.y = 11.f;
     box.low.z = -5.f;
-    box.high.x = 5.f;
-    box.high.y = 18.f;
-    box.high.z = 5.2f;
+    box.high.x = 21.f;
+    box.high.y = 21.f;
+    box.high.z = 5.f;
     
     uint ind = getTiledPixelIdx();
     
@@ -84,7 +84,7 @@ __global__ void oneCube_kernel(uint * pix,
     float tmin, tmax;
     if(ray_box(incident, box, tmin, tmax) ) {
         float3 hitP;
-        ray_progress(hitP, incident, tmin - 1e-4f);
+        ray_progress(hitP, incident, tmin - 1e-3f);
         float3 hitN = c_ray_box_face[side_on_aabb4(box, hitP)];
 	
     int r = 128 + 127 * hitN.x;

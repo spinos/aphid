@@ -10,13 +10,14 @@
 #include "CudaRender.h"
 #include "CudaBase.h"
 #include <iostream>
+#include <cmath>
 namespace aphid {
 
 CudaRender::CudaRender(int tileSize) 
 {
 	CudaBase::SetDevice();
 	
-	const Vector3F eye(0.f, 0.f, 30.f);
+	const Vector3F eye(0.f, 0.f, 100.f);
 	setEyePosition((float *)&eye);
 	
 	Matrix44F m;
@@ -24,8 +25,10 @@ CudaRender::CudaRender(int tileSize)
 	*cameraSpaceR() = m;
 	m.inverse();
 	*cameraInvSpaceR() = m;
-	
-	setFrustum(1.33f, 1.f, 7.2f, -1.f, -1000.f);
+
+/// 35mm Academy
+	std::cout<<"\n angle of view "<<180.f/3.14f*2.f * atan(21.9456f/2.f/35.f)<<" degree";
+	setFrustum(.864f, .63f, 35.f, -1.f, -1000.f);
 	m_tileSize = tileSize;
 }
 

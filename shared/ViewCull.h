@@ -50,8 +50,10 @@ protected:
 	const float & hfov() const;
 	
 /// cliping is negative in camera space
-	virtual void setFrustum(const float & horizontalApeture,
-			const float & verticalApeture,
+/// camera apertures are in inches
+/// focal length is in millimeters
+	virtual void setFrustum(const float & horizontalAperture,
+			const float & verticalAperture,
 			const float & focalLength,
 			const float & clipNear,
 			const float & clipFar);

@@ -4,7 +4,7 @@
  *
  *  Created by jian zhang on 2/2/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
- *
+ *  reference http://paulbourke.net/miscellaneous/lens/
  */
 
 #include "ViewCull.h"
@@ -15,14 +15,15 @@ namespace aphid {
 BaseView::BaseView() {}
 BaseView::~BaseView() {}
 
-void BaseView::setFrustum(const float & horizontalApeture,
-			const float & verticalApeture,
+void BaseView::setFrustum(const float & horizontalAperture,
+			const float & verticalAperture,
 			const float & focalLength,
 			const float & clipNear,
 			const float & clipFar)
 {
-	m_hfov = horizontalApeture * 0.5f / ( focalLength * 0.03937f );
-	m_aspectRatio = verticalApeture / horizontalApeture;
+/// 0.03937f is millimeter to inch conversion
+	m_hfov = horizontalAperture * 0.5f / ( focalLength * 0.03937f );
+	m_aspectRatio = verticalAperture / horizontalAperture;
 	m_farClip = clipFar;
 	m_frustum.set(m_hfov, 
 				m_aspectRatio,

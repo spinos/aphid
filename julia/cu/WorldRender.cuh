@@ -37,14 +37,6 @@ __global__ void twoCube_kernel(uint * pix,
     
     uint ind = getTiledPixelIdx();
     
-    
-    int r1 = 0;//127 + 128 * incident.d.x;
-    int g1 = 0;//127 + 128 * incident.d.y;
-    int b1 = 127 + 128 * incident.d.z;
-    
-	pix[ind] = encodeRGB(r1, g1, b1);
-	return;
-    
     incident.o.w = nearDepth[ind];
     incident.d.w = farDepth[ind];
     
@@ -78,7 +70,7 @@ __global__ void twoCube_kernel(uint * pix,
 	}
 	
 	if(stat < 1) {
-	    pix[ind] = encodeRGB(244, 244, 1);
+	    //pix[ind] = encodeRGB(244, 244, 1);
 	    return;
 	}
 	float3 hitP;

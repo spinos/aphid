@@ -106,17 +106,23 @@ Vector3F AFrustum::center() const
 //
 void AFrustum::toRayFrame(Vector3F * dst, const int & gridX, const int & gridY) const
 {
-    dst[1] = m_v[2] - m_v[3];
-	dst[1] /= gridX;
-    dst[2] = m_v[0] - m_v[3];
-	dst[2] /= gridY;
+    dst[1] = (m_v[2] - m_v[3]) / gridX;
+    dst[2] = (m_v[0] - m_v[3]) / gridY;
 	dst[0] = m_v[3] + dst[1] * .5f + dst[2] * .5f;
     
-    dst[4] = m_v[6] - m_v[7];
-	dst[4] /= gridX;
-    dst[5] = m_v[4] - m_v[7];
-	dst[5] /= gridY;
+    dst[4] = (m_v[6] - m_v[7]) / gridX;
+    dst[5] = (m_v[4] - m_v[7]) / gridY;
 	dst[3] = m_v[7] + dst[4] * .5f + dst[5] * .5f;
+	/*std::cout<<"\n grd "<<gridX<<"x"<<gridY
+		<<"\n corner[0] "<<dst[0]
+		<<"\n corner[1] "<<dst[0] + dst[1] * gridX
+		<<"\n corner[2] "<<dst[0] + dst[2] * gridY
+		<<"\n corner[3] "<<dst[0] + dst[1] * gridX + dst[2] * gridY
+		<<"\n corner[4] "<<dst[3]
+		<<"\n corner[5] "<<dst[3] + dst[4] * gridX
+		<<"\n corner[6] "<<dst[3] + dst[5] * gridY
+		<<"\n corner[7] "<<dst[3] + dst[4] * gridX + dst[5] * gridY
+		<<"\n ray[0] "<<(dst[3] - dst[0]).normal();*/
 }
 
 }
