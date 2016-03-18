@@ -45,7 +45,7 @@ void UniformGrid::create(KdTree * tree, int maxLevel)
                 sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
                 box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
                 box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-				if(tree->intersectBox(box))
+				if(tree->intersectBox(&box))
 					addCell(sample, level);
             }
         }

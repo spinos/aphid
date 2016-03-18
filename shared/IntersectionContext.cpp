@@ -51,4 +51,19 @@ void IntersectionContext::verbose() const
 	std::cout<<" bbox "<<m_bbox.getMin(0)<<" "<<m_bbox.getMin(1)<<" "<<m_bbox.getMin(2)<<" - "<<m_bbox.getMax(0)<<" "<<m_bbox.getMax(1)<<" "<<m_bbox.getMax(2)<<"\n";
 }
 
+BoxIntersectContext::BoxIntersectContext()
+{}
+
+BoxIntersectContext::~BoxIntersectContext()
+{}
+
+void BoxIntersectContext::reset()
+{ m_prims.clear(); }
+
+void BoxIntersectContext::addPrim(const int & i)
+{ m_prims.push_back(i); }
+
+int BoxIntersectContext::numIntersect() const
+{ return m_prims.size(); }
+
 }

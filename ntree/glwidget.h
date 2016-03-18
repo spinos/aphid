@@ -6,6 +6,7 @@
 #include <KdEngine.h>
 #include <ConvexShape.h>
 #include <IntersectionContext.h>
+#include <VoxelGrid.h>
 
 using namespace aphid;
 
@@ -39,6 +40,7 @@ private:
 	KdNTree<cvx::Cube, KdNode4 > * tree();
 	bool readTree(const std::string & filename);
 	void testTree();
+	void testGrid();
 	void testIntersect(const Ray * incident);
 	void drawActiveSource(const unsigned & iLeaf);
 	
@@ -49,6 +51,7 @@ private:
 	KdEngine<cvx::Cube> m_engine;
 	sdb::VectorArray<cvx::Cube> * m_source;
 	KdNTree<cvx::Cube, KdNode4 > * m_tree;
+	VoxelGrid<KdNTree<cvx::Cube, KdNode4 >, cvx::Cube > * m_grid;
 	int m_treeletColI;
 	int m_maxDrawTreeLevel;
 };

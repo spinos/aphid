@@ -51,4 +51,18 @@ public:
 private:
 };
 
+class BoxIntersectContext : public BoundingBox {
+	
+	std::vector<int> m_prims;
+	
+public:
+	BoxIntersectContext();
+	virtual ~BoxIntersectContext();
+	
+	void reset();
+	void addPrim(const int & i);
+	int numIntersect() const;
+	
+};
+
 }

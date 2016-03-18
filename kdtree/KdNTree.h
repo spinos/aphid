@@ -72,6 +72,7 @@ public:
 	virtual void setSource(sdb::VectorArray<T> * src);
 	
 	char intersect(IntersectionContext * ctx);
+	char intersectBox(BoxIntersectContext * ctx);
 	
 	virtual std::string verbosestr() const;
     
@@ -100,6 +101,13 @@ private:
 							int & branchIdx,
 							int & nodeIdx,
 							const KdTreeNode * r);
+							
+	void leafIntersectBox(BoxIntersectContext * ctx,
+							KdTreeNode * r);
+	void innerIntersectBox(BoxIntersectContext * ctx,
+							int branchIdx,
+							int nodeIdx,
+							const BoundingBox & b);
 };
 
 template <typename T, typename Tn>
@@ -501,6 +509,93 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	<<"\n";
 	sst<<logProperty();
 	return sst.str();
+}
+
+template <typename T, typename Tn>
+char KdNTree<T, Tn>::intersectBox(BoxIntersectContext * ctx)
+{
+	if(isEmpty()) return 0;
+	
+	const BoundingBox & b = getBBox();
+	if(!b.intersect(*ctx)) return 0;
+	
+	KdTreeNode * r = root()->node(0);
+	if(r->isLeaf() ) {
+		leafIntersectBox(ctx, r);
+	}
+	else {
+		const int axis = r->getAxis();
+		const float splitPos = r->getSplitPos();
+		BoundingBox lftBox, rgtBox;
+		b.split(axis, splitPos, lftBox, rgtBox);
+		
+		int branchIdx = root()->internalOffset(0);
+		innerIntersectBox(ctx, branchIdx, 0, lftBox);
+		innerIntersectBox(ctx, branchIdx, 1, rgtBox);
+	} 
+	
+	return ctx->numIntersect() > 0;
+}
+
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::leafIntersectBox(BoxIntersectContext * ctx,
+							KdTreeNode * r)
+{
+	if(r->getNumPrims() < 1) return;
+	int start, len;
+	leafPrimStartLength(start, len, r->getPrimStart() );
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = m_source->get(primIndirectionAt(start + i) );
+		if(c->calculateBBox().intersect(*ctx) ) {
+			ctx->addPrim(primIndirectionAt(start + i) );
+		}
+	}
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
+							int branchIdx,
+							int nodeIdx,
+							const BoundingBox & b)
+{
+	if(!b.intersect(*ctx) ) return;
+	
+	Tn * currentBranch = branches()[branchIdx];
+	KdTreeNode * r = currentBranch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		leafIntersectBox(ctx, r);
+		return;
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	
+	const int offset = r->getOffset();
+	if(offset < Tn::TreeletOffsetMask) {
+		innerIntersectBox(ctx, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+		innerIntersectBox(ctx, 
+							branchIdx,
+							nodeIdx + offset + 1,
+							rgtBox);
+	}
+	else {
+		innerIntersectBox(ctx, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+		innerIntersectBox(ctx, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+	}
+		
 }
 
 }

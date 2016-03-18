@@ -30,7 +30,7 @@ public:
 	virtual ~Treelet();
 	
 	int numNodes() const;
-	int index() const;
+	const int & index() const;
 	static int LastLevelOffset();
 	static int OffsetByLevel(int level);
 	static int ChildOffset(int x);
@@ -73,7 +73,7 @@ int Treelet<NumLevels>::ChildOffset(int x)
 { return x + 2; }
 
 template<int NumLevels>
-int Treelet<NumLevels>::index() const
+const int & Treelet<NumLevels>::index() const
 { return m_index; }
 
 typedef Treelet<4> Treelet4;

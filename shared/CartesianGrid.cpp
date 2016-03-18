@@ -141,12 +141,12 @@ void CartesianGrid::addCell(unsigned code, int level, int visited, unsigned inde
 	m_cellHash->insert(code, ind);
 }
 
-unsigned CartesianGrid::addCell(const Vector3F & p, int level)
+unsigned CartesianGrid::addCell(const Vector3F & p, int level, int visited)
 {
     unsigned code = mortonEncodeLevel(p, level);
 	sdb::CellValue * ind = new sdb::CellValue;
 	ind->level = level;
-	ind->visited = 0;
+	ind->visited = visited;
 	m_cellHash->insert(code, ind);
 	
     return code;
@@ -270,6 +270,16 @@ void CartesianGrid::printGrids(BaseBuffer * dst)
         xyz += 3;
     }
 }
+
+const float CartesianGrid::Cell8ChildOffset[8][3] = {
+{-1.f, -1.f, -1.f},
+{-1.f, -1.f, 1.f},
+{-1.f, 1.f, -1.f},
+{-1.f, 1.f, 1.f},
+{1.f, -1.f, -1.f},
+{1.f, -1.f, 1.f},
+{1.f, 1.f, -1.f},
+{1.f, 1.f, 1.f}};
 
 }
 //:~

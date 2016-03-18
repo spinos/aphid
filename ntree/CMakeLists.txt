@@ -25,6 +25,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/KdSah.h
 ../kdtree/TreeProperty.h
 ../kdtree/HNTree.h
+../kdtree/VoxelGrid.h
 NTreeIO.h
 NTreeDrawer.h)
 
@@ -36,6 +37,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/GeoDrawer.cpp
 ../shared/ViewFrame.cpp
 ../shared/DrawBox.cpp
+../shared/CartesianGrid.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
 ../btree/HWorldGrid.cpp

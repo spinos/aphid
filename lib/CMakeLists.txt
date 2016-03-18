@@ -216,6 +216,7 @@ ADD_LIBRARY (aphidSdb STATIC
 ../btree/Entity.cpp
 ../btree/BNode.cpp
 ../btree/GridClustering.cpp
+../btree/MortonHash.cpp
 )
 
 add_library(aphid STATIC                 

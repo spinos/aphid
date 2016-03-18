@@ -7,14 +7,19 @@
 namespace aphid {
 
 class BaseBuffer;
+
 class CartesianGrid 
 {
+/// left-bottom-back corner
+	Vector3F m_origin;
+/// same for each dimensions
+    float m_span, m_gridH;
+/// 30-bit morton code limited to level 10 
+    sdb::CellHash * m_cellHash;
+	
 public:
     CartesianGrid();
 	virtual ~CartesianGrid();
-    
-    void setBounding(float * originSpan);
-	void setBounding(const BoundingBox & bound);
     
     const unsigned numCells() const;
     void getBounding(BoundingBox & bound) const;
@@ -27,7 +32,7 @@ public:
 	BoundingBox cellBox(unsigned code, int level) const;
 	
 	void addCell(unsigned code, int level, int visited, unsigned index);
-	unsigned addCell(const Vector3F & p, int level);
+	unsigned addCell(const Vector3F & p, int level, int visited);
 	
     unsigned mortonEncodeLevel(const Vector3F & p, int level) const;
 	void printGrids(BaseBuffer * dst);
@@ -38,6 +43,9 @@ public:
 	sdb::CellValue * findCell(unsigned code) const;
 	
 protected:
+	void setBounding(float * originSpan);
+	void setBounding(const BoundingBox & bound);
+    
 	const float gridSize() const;
 	
 	void gridOfP(const Vector3F & p, unsigned & x,
@@ -72,10 +80,11 @@ protected:
 									int level,
 									int dx, int dy, int dz,
 									int cx, int cy, int cz);
+									
+	static const float Cell8ChildOffset[8][3];
+	
 private:
-    Vector3F m_origin;
-    float m_span, m_gridH; // same for each dimensions
-    sdb::CellHash * m_cellHash;
+    
 };
 
 }
