@@ -59,9 +59,17 @@ __global__ void twoCube_kernel(uint * pix,
 		stat = visit_leaf(box, incident, get_branch_node(branches[branchIdx], nodeIdx), 
 		                    branchIdx, nodeIdx);
 		if(stat > 0 ) {
-			hasNext = 0;
+            if(hit_primitive(box, 
+                                incident, 
+                                get_branch_node(branches[branchIdx], nodeIdx),
+                                leaves,
+                                indirections,
+                                primitives) )
+			    hasNext = 0;
+            else
+                stat = 0;
 		}
-		else if(stat == 0) {
+        if(stat == 0) {
 		    hasNext = climb_rope(box, incident, 
 		                    leaves,
 		                    ropes, 

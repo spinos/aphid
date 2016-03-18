@@ -190,5 +190,30 @@ inline __device__ int climb_rope(Aabb4 & box,
     return 1;   
 }
 
+inline __device__ int hit_primitive(Aabb4 & box,
+                            Ray4 & incident, 
+                            const KdNode * r,
+                            NTreeLeaf * leaves,
+                            int * indirections,
+                            Cube * primitives)
+{
+    int iLeaf = get_prim_offset(r);
+    const NTreeLeaf & lea = leaves[iLeaf];
+    int i = lea._primStart;
+    const int end = i + lea._primLength;
+    float tmin, tmax;
+    Aabb4 b;
+    int nhit = 0;
+    for(;i<end;++i) {
+        aabb4_from_cube(b, primitives[indirections[i] ]);
+        if(ray_box(incident, b, tmin, tmax) ) {
+            box = b;
+            incident.d.w = tmax;
+            nhit++;
+        }
+    }
+    return nhit;
+}
+
 #endif        //  #ifndef NTREETRAVERSE_CUH
 
