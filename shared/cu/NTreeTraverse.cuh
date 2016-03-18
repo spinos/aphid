@@ -137,11 +137,10 @@ inline __device__ int first_visit(const KdNode * node,
 
 inline __device__ int visit_leaf(Aabb4 & box, 
                                 const Ray4 & incident, 
-                                NTreeBranch4 * branches,
-                                int & branchIdx, 
+                                 const KdNode * r,
+								 int & branchIdx, 
                                 int & nodeIdx)
 {
-    const KdNode * r = get_branch_node(branches[branchIdx], nodeIdx);
     if(is_leaf(r) ) {
         if(get_prim_length(r) < 1)
             return 0;
@@ -178,7 +177,7 @@ inline __device__ int climb_rope(Aabb4 & box,
     ray_box(incident, box, tmin, tmax);
     
     float3 hitP;
-    ray_progress(hitP, incident, tmax + 1e-3f);
+    ray_progress(hitP, incident, tmax + 1e-4f);
     int side = side1_on_aabb4<float4>(box, hitP);
     
     int iLeaf = get_prim_offset(r);

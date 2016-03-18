@@ -46,18 +46,17 @@ __global__ void twoCube_kernel(uint * pix,
     if(!ray_box(incident, box, tmin, tmax) ) 
         return;
     
-    const NTreeBranch4 & root = branches[0];
-    const KdNode * kn = get_branch_node(root, 0);
+    const KdNode * kn = get_branch_node(branches[0], 0);
     
     if(is_leaf(kn) ) return;
     
     int branchIdx = get_inner_offset(kn) & ~(1<<20);
-    int nodeIdx = first_visit(kn, incident, box);
+	int nodeIdx = first_visit(kn, incident, box);
     
     int hasNext = 1;
     int stat;
     while (hasNext) {
-		stat = visit_leaf(box, incident, branches, 
+		stat = visit_leaf(box, incident, get_branch_node(branches[branchIdx], nodeIdx), 
 		                    branchIdx, nodeIdx);
 		if(stat > 0 ) {
 			hasNext = 0;

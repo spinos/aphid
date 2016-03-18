@@ -445,7 +445,7 @@ int BoundingBox::pointOnSide(const Vector3F & v) const
 	r.x /= distance(0);
 	r.y /= distance(1);
 	r.z /= distance(2);
-	r.normalize();
+	//r.normalize();
 	int jr = r.longestAxis();
 	if(jr == 0) {
 		if(r.x < 0.f) return 0;

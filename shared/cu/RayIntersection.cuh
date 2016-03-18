@@ -148,8 +148,6 @@ inline __device__ int side1_on_aabb4(const Aabb4 & b,
     r.x /= b.high.x - b.low.x;
     r.y /= b.high.y - b.low.y;
     r.z /= b.high.z - b.low.z;
-    v3_normalize_inplace<float3>(r);
-    
     int jr = v3_major_axis<float3>(r);
 	if(jr == 0) {
 	    if(r.x < 0.f) return 0;
