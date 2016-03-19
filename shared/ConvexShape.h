@@ -105,6 +105,11 @@ public:
     void set(const Vector3F & x, const float & r);
     
     BoundingBox calculateBBox() const;
+	
+	template<typename T>
+	bool accurateIntersect(const T & b) const{
+		return true;
+	}
     
     static ShapeType ShapeTypeId;
 };
@@ -124,6 +129,22 @@ public:
     BoundingBox calculateBBox() const;
     
     static ShapeType ShapeTypeId;
+};
+
+class Triangle {
+
+	Vector3F m_p0; int m_nc0;
+	Vector3F m_p1; int m_nc1;
+	Vector3F m_p2; int m_nc2;
+	
+public:
+	Triangle();
+	void setP(const Vector3F & p, const int & idx);
+	void setN(const Vector3F & n, const int & idx);
+	void setC(const Vector3F & c, const int & idx);
+
+private:
+	
 };
 
 }

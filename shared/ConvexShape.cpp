@@ -8,6 +8,7 @@
  */
 
 #include "ConvexShape.h"
+#include <Quantization.h>
 #include <cmath>
 namespace aphid {
     
@@ -149,6 +150,30 @@ BoundingBox Capsule::calculateBBox() const
 }
     
 ShapeType Capsule::ShapeTypeId = TCapsule;
+
+Triangle::Triangle()
+{}
+
+void Triangle::setP(const Vector3F & p, const int & idx)
+{ 
+	if(idx == 0) m_p0 = p;
+	else if(idx == 1) m_p1 = p;
+	else m_p2 = p;
+}
+
+void Triangle::setN(const Vector3F & n, const int & idx)
+{
+	if(idx == 0) colnor30::encodeN(m_nc0, n);
+	else if(idx == 1) colnor30::encodeN(m_nc1, n);
+	else  colnor30::encodeN(m_nc2, n);
+}
+
+void Triangle::setC(const Vector3F & c, const int & idx)
+{
+	if(idx == 0) colnor30::encodeC(m_nc0, c);
+	else if(idx == 1) colnor30::encodeC(m_nc1, c);
+	else  colnor30::encodeC(m_nc2, c);
+}
 
 }
 

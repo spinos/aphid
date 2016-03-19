@@ -19,6 +19,9 @@
 #include <IndexArray.h>
 #include <SHelper.h>
 #include <ConvexShape.h>
+#include <Quantization.h>
+
+using namespace aphid;
 
 #ifdef __APPLE__
 typedef unsigned long long uint64;
@@ -316,7 +319,7 @@ void testOBox()
 }
 
 void testTimedArray(unsigned n, unsigned nrep)
-{
+{/*
     unsigned i,j, b;
     boost::timer bTimer;
     
@@ -344,7 +347,7 @@ void testTimedArray(unsigned n, unsigned nrep)
     std::cout << "\n access "<<n<< " array took " << bTimer.elapsed() <<" secs";
 	std::cout<<"\n sum "<<b;
     unsigned access = *arrs.asIndex(9235);
-	std::cout<<" test access [9235] "<<(access);
+	std::cout<<" test access [9235] "<<(access);*/
 }
 
 void testTimedVec(unsigned n, unsigned nrep)
@@ -421,6 +424,66 @@ void testRgba()
     unsigned rb = (a & mblue)>>8;
     unsigned ra = (a & ma);
     std::cout<<boost::format("recovered rgba: %1% %2% %3% %4%\n") % rr % rg % rb % ra;
+}
+
+void testQuantize()
+{
+	std::cout<<"\n test quant";
+	Vector3F c0, c1, n0, n1;
+	int code;
+	int i = 0;
+	for(;i<36;++i) {
+		std::cout<<"\n it"<<i;
+		c0.x = (float) (rand() & 255) / 255.f;
+		c0.y = (float) (rand() & 255) / 255.f;
+		c0.z = (float) (rand() & 255) / 255.f;
+		
+		if(i/6 == 0 ) {
+			n0.x = -1.f;
+			n0.y = (float) (rand() & 511) / 255.f - 1.f;
+			n0.z = (float) (rand() & 511) / 255.f - 1.f;
+		}
+		else if(i/6 == 1 ) {
+			n0.x = 1.f;
+			n0.y = (float) (rand() & 511) / 255.f - 1.f;
+			n0.z = (float) (rand() & 511) / 255.f - 1.f;
+		}
+		else if(i/6 == 2 ) {
+			n0.y = -1.f;
+			n0.x = (float) (rand() & 511) / 255.f - 1.f;
+			n0.z = (float) (rand() & 511) / 255.f - 1.f;
+		}
+		else if(i/6 == 3 ) {
+			n0.y = 1.f;
+			n0.x = (float) (rand() & 511) / 255.f - 1.f;
+			n0.z = (float) (rand() & 511) / 255.f - 1.f;
+		}
+		else if(i/6 == 4 ) {
+			n0.z = -1.f;
+			n0.x = (float) (rand() & 511) / 255.f - 1.f;
+			n0.y = (float) (rand() & 511) / 255.f - 1.f;
+		}
+		else {
+			n0.z = 1.f;
+			n0.x = (float) (rand() & 511) / 255.f - 1.f;
+			n0.y = (float) (rand() & 511) / 255.f - 1.f;
+		}
+		n0.normalize();
+		
+		code = 0;
+		colnor30::encodeC(code, c0);
+		colnor30::encodeN(code, n0);
+		
+		std::cout<<"\n col in "<<c0;
+		colnor30::decodeC(c1, code);
+		std::cout<<"\n col out "<<c1
+		<<"\n col error "<<c1-c0<<"\n";
+		
+		std::cout<<"\n nor in "<<n0;
+		colnor30::decodeN(n1, code);
+		std::cout<<"\n n out "<<n1
+		<<"\n nor error "<<n1-n0<<"\n";
+	}
 }
 
 int main(int argc, char * const argv[])
@@ -521,8 +584,7 @@ int main(int argc, char * const argv[])
 	// testMersenne();
     
     // testOBox();
-	// testRgba();
-    std::cout<<"\n size of frustum "<<sizeof(Frustum);
+	testQuantize();
     
 	std::cout<<" end of test\n";
 	return 0;

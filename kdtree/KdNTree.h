@@ -549,7 +549,9 @@ void KdNTree<T, Tn>::leafIntersectBox(BoxIntersectContext * ctx,
 	for(;i<len;++i) {
 		const T * c = m_source->get(primIndirectionAt(start + i) );
 		if(c->calculateBBox().intersect(*ctx) ) {
-			ctx->addPrim(primIndirectionAt(start + i) );
+			if(c-> template accurateIntersect<BoxIntersectContext >(*ctx) ) {
+				ctx->addPrim(primIndirectionAt(start + i) );
+			}
 		}
 	}
 }
