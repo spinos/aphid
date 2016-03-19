@@ -74,11 +74,10 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	// getDrawer()->frustum(&m_frustum);
 	drawBoxes();
-   // drawTree();
+	drawTree();
 	drawIntersect();
-	drawGrid();
+	// drawGrid();
 }
 
 void GLWidget::drawBoxes() const
@@ -333,7 +332,19 @@ void GLWidget::drawActiveSource(const unsigned & iLeaf)
 void GLWidget::testGrid()
 {
 	m_grid = new VoxelGrid<KdNTree<cvx::Cube, KdNode4 >, cvx::Cube >();
-	m_grid->create(m_tree, m_tree->getBBox(), 9);
+	BoundingBox b = m_tree->getBBox();
+	b.expand(b.getLongestDistance() * .005f);
+	m_grid->create(m_tree, b, 9);
+	
+	m_source->clear();
+	m_grid->extractCellBoxes(m_source);
+	
+	BoundingBox rootBox;
+	m_grid->getBounding(rootBox);
+	
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 8;
+    m_engine.buildTree(m_tree, m_source, rootBox, &bf);
 }
 
 void GLWidget::drawGrid()

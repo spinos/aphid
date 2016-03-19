@@ -31,7 +31,7 @@ protected:
 private:
 	bool tagCellsToRefine(sdb::CellHash & cellsToRefine);
 	void refine(Ttree * tree, sdb::CellHash & cellsToRefine);
-
+	
 };
 
 template<typename Ttree, typename Tvalue>
@@ -89,7 +89,7 @@ bool VoxelGrid<Ttree, Tvalue>::tagCellsToRefine(sdb::CellHash & cellsToRefine)
 	sdb::CellHash * c = cells();
     c->begin();
     while(!c->end()) {
-        if(c->value()->visited > 0) {
+        if(c->value()->visited > 4) {
 			sdb::CellValue * ind = new sdb::CellValue;
 			ind->level = c->value()->level;
 			ind->visited = 1;
@@ -97,7 +97,13 @@ bool VoxelGrid<Ttree, Tvalue>::tagCellsToRefine(sdb::CellHash & cellsToRefine)
 		}
         c->next();
 	}
-	return cellsToRefine.size() > 0;
+	if(cellsToRefine.size() < 1 ) return false;
+	
+	tagCellsToRefineByNeighbours(cellsToRefine);
+	tagCellsToRefineByNeighbours(cellsToRefine);
+	tagCellsToRefineByNeighbours(cellsToRefine);
+	
+	return true;
 }
 
 template<typename Ttree, typename Tvalue>

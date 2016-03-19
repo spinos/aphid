@@ -11,7 +11,7 @@
 
 namespace aphid {
 
-#define MMBINISFLATRATIO .2f
+#define MMBINISFLATRATIO .19f
 BaseBinSplit::BaseBinSplit() 
 {}
 

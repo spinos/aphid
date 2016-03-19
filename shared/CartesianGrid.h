@@ -3,6 +3,8 @@
 
 #include <BoundingBox.h>
 #include <MortonHash.h>
+#include <VectorArray.h>
+#include <ConvexShape.h>
 
 namespace aphid {
 
@@ -41,6 +43,8 @@ public:
 	void putPInsideBound(Vector3F & p) const;
 	
 	sdb::CellValue * findCell(unsigned code) const;
+	void extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
+						const float & shrinkFactor = .49995f);
 	
 protected:
 	void setBounding(float * originSpan);
@@ -80,8 +84,15 @@ protected:
 									int level,
 									int dx, int dy, int dz,
 									int cx, int cy, int cz);
+		
+	bool check24NeighboursToRefine(unsigned k, const sdb::CellValue * v,
+									sdb::CellHash & cellsToRefine);
+	
+	void tagCellsToRefineByNeighbours(sdb::CellHash & cellsToRefine);
 									
 	static const float Cell8ChildOffset[8][3];
+	static const int Cell6NeighborOffsetI[6][3];
+	static const int Cell24FinerNeighborOffsetI[24][3];
 	
 private:
     

@@ -281,5 +281,98 @@ const float CartesianGrid::Cell8ChildOffset[8][3] = {
 {1.f, 1.f, -1.f},
 {1.f, 1.f, 1.f}};
 
+const int CartesianGrid::Cell6NeighborOffsetI[6][3] = {
+{-1, 0, 0},
+{ 1, 0, 0},
+{ 0,-1, 0},
+{ 0, 1, 0},
+{ 0, 0,-1},
+{ 0, 0, 1},
+};
+ 
+const int CartesianGrid::Cell24FinerNeighborOffsetI[24][3] = {
+{ 1,-1,-1}, // left
+{ 1, 1,-1},
+{ 1,-1, 1},
+{ 1, 1, 1},
+{-1,-1,-1}, // right
+{-1, 1,-1},
+{-1,-1, 1},
+{-1, 1, 1},
+{-1, 1,-1}, // bottom
+{ 1, 1,-1},
+{-1, 1, 1},
+{ 1, 1, 1},
+{-1,-1,-1}, // top
+{ 1,-1,-1},
+{-1,-1, 1},
+{ 1,-1, 1},
+{-1,-1, 1}, // back
+{ 1,-1, 1},
+{-1, 1, 1},
+{ 1, 1, 1},
+{-1,-1,-1}, // front
+{ 1,-1,-1},
+{-1, 1,-1},
+{ 1, 1,-1}
+};
+
+void CartesianGrid::tagCellsToRefineByNeighbours(sdb::CellHash & cellsToRefine)
+{
+	sdb::CellHash * c = cells();
+	c->begin();
+    while(!c->end()) {
+        if(!cellsToRefine.find(c->key() ) ) {
+            if(check24NeighboursToRefine(c->key(), c->value(), cellsToRefine) ) {
+				sdb::CellValue * ind = new sdb::CellValue;
+				ind->level = c->value()->level;
+				ind->visited = 1;
+				cellsToRefine.insert(c->key(), ind);
+			}
+        }
+        c->next();
+    }
+}
+
+bool CartesianGrid::check24NeighboursToRefine(unsigned k, const sdb::CellValue * v,
+											sdb::CellHash & cellsToRefine)
+{ 
+    int i, j;
+    for(i=0;i<6;i++) {
+		for(j=0;j<4;j++) {
+			unsigned code = encodeFinerNeighborCell(k,
+												v->level,
+									Cell6NeighborOffsetI[i][0], 
+									Cell6NeighborOffsetI[i][1],
+									Cell6NeighborOffsetI[i][2],
+									Cell24FinerNeighborOffsetI[i * 4 + j][0],
+									Cell24FinerNeighborOffsetI[i * 4 + j][1],
+									Cell24FinerNeighborOffsetI[i * 4 + j][2]);
+			if(cellsToRefine.find(code)) return true;
+		}
+    }
+    return false; 
+}
+
+void CartesianGrid::extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
+									const float & shrinkFactor)
+{
+	cvx::Cube b;
+	float hh;
+    Vector3F sample;
+	sdb::CellHash * c = cells();
+    c->begin();
+    while(!c->end()) {
+        
+		sample = cellCenter(c->key() );
+		hh = cellSizeAtLevel(c->value()->level ) * shrinkFactor;
+			
+		b.set(sample, hh);
+		dst->insert(b);
+		
+        c->next();
+	}
+}
+
 }
 //:~
