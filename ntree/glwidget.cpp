@@ -3,10 +3,11 @@
 #include <BaseCamera.h>
 #include "glwidget.h"
 #include <GeoDrawer.h>
-#include <NTreeDrawer.h>
+#include "NTreeDrawer.h"
 #include <NTreeIO.h>
 #include <HWorldGrid.h>
 #include <HInnerGrid.h>
+#include "GridDrawer.h"
 
 GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(parent)
 {
@@ -75,8 +76,9 @@ void GLWidget::clientDraw()
 {
 	// getDrawer()->frustum(&m_frustum);
 	drawBoxes();
-    drawTree();
+   // drawTree();
 	drawIntersect();
+	drawGrid();
 }
 
 void GLWidget::drawBoxes() const
@@ -334,4 +336,12 @@ void GLWidget::testGrid()
 	m_grid->create(m_tree, m_tree->getBBox(), 9);
 }
 
+void GLWidget::drawGrid()
+{
+	if(!m_grid) return;
+	
+	glColor3f(0,.3,.4);
+	GridDrawer dr;
+	dr.drawGrid<CartesianGrid>(m_grid);
+}
 //:~

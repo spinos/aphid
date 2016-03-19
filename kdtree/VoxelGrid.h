@@ -73,11 +73,11 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 	
 	sdb::CellHash cellsToRefine;
 	bool needRefine = tagCellsToRefine(cellsToRefine);
-    while(needRefine && level < maxLevel) {
+    while(needRefine && level < m_maxLevel) {
         std::cout<<"\n level"<<level<<" n cell "<<numCells();
 		refine(tree, cellsToRefine);
 		level++;
-		if(level < maxLevel) needRefine = tagCellsToRefine(cellsToRefine);
+		if(level < m_maxLevel) needRefine = tagCellsToRefine(cellsToRefine);
     }
 	std::cout<<"\n level"<<level<<" n cell "<<numCells();
 }
@@ -89,7 +89,7 @@ bool VoxelGrid<Ttree, Tvalue>::tagCellsToRefine(sdb::CellHash & cellsToRefine)
 	sdb::CellHash * c = cells();
     c->begin();
     while(!c->end()) {
-        if(c->value()->visited > 1) {
+        if(c->value()->visited > 0) {
 			sdb::CellValue * ind = new sdb::CellValue;
 			ind->level = c->value()->level;
 			ind->visited = 1;
@@ -112,24 +112,22 @@ void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefin
 	cellsToRefine.begin();
 	while (!cellsToRefine.end()) {
 		sdb::CellValue * parentCell = cellsToRefine.value();
-		if(parentCell->visited > 0) {
-        
-			k = cellsToRefine.key();
-			
-			level1 = parentCell->level + 1;
-			hh = cellSizeAtLevel(level1) * .5f;
-			sample = cellCenter(k);
-			removeCell(k);
-			for(u = 0; u < 8; u++) {
-				subs = sample + Vector3F(hh * Cell8ChildOffset[u][0], 
-				hh * Cell8ChildOffset[u][1], 
-				hh * Cell8ChildOffset[u][2]);
-				box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
-                box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
-				box.reset();
-				if(tree->intersectBox(&box)) 
-					addCell(subs, level1, box.numIntersect());
-			}
+
+		k = cellsToRefine.key();
+		
+		level1 = parentCell->level + 1;
+		hh = cellSizeAtLevel(level1) * .5f;
+		sample = cellCenter(k);
+		removeCell(k);
+		for(u = 0; u < 8; u++) {
+			subs = sample + Vector3F(hh * Cell8ChildOffset[u][0], 
+			hh * Cell8ChildOffset[u][1], 
+			hh * Cell8ChildOffset[u][2]);
+			box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
+			box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
+			box.reset();
+			if(tree->intersectBox(&box)) 
+				addCell(subs, level1, box.numIntersect());
 		}
 		
 		cellsToRefine.next();

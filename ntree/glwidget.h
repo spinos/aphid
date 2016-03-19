@@ -43,6 +43,7 @@ private:
 	void testGrid();
 	void testIntersect(const Ray * incident);
 	void drawActiveSource(const unsigned & iLeaf);
+	void drawGrid();
 	
 private slots:
 	
