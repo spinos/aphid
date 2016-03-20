@@ -107,7 +107,7 @@ public:
     BoundingBox calculateBBox() const;
 	
 	template<typename T>
-	bool accurateIntersect(const T & b) const{
+	bool exactIntersect(const T & b) const{
 		return true;
 	}
     
@@ -136,7 +136,7 @@ class Triangle {
 	Vector3F m_p0; int m_nc0;
 	Vector3F m_p1; int m_nc1;
 	Vector3F m_p2; int m_nc2;
-	
+
 public:
 	Triangle();
 	void setP(const Vector3F & p, const int & idx);

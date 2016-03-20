@@ -81,6 +81,38 @@ void testArrayRemove()
 	std::cout<<"\n done";
 }
 
+void testLargeSequence()
+{
+	TreeNode::MaxNumKeysPerNode = 128;
+	TreeNode::MinNumKeysPerNode = 2;
+	int n = 1<<23;
+	std::cout<<"\n test large sequence "<<n;
+	Array<int, int> sq;
+	int i = 0, j = 2, nr = 0;
+	for(;i<n;++i) {
+		
+		int k = rand() & ((n<<4)-1);
+		if(!sq.find(k)) {
+			int * v = new int[1];
+			*v = k;
+			sq.insert(k , v);
+		}
+		else {
+			if((i & 63) == 0) {
+				sq.remove(k);
+				nr++;
+			}
+		}
+		
+		if((i & (j-1)) == 0) {
+			std::cout<<"\n i"<<i;
+			j<<=3;
+		}
+	}
+	std::cout<<"\n sequence size "<<sq.size()
+	<<"\n n removed "<<nr;
+}
+
 int main()
 {
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
@@ -256,6 +288,7 @@ int main()
 	Sequence<Coord3> c3t;
 	Pair<Coord3, Entity> * p0 = c3t.insert(Coord3(0,0,0));
 	std::cout<<"\n p"<<p0->index;
+	testLargeSequence();
 	std::cout<<"\n all passed\n";
 	return 0;
 }

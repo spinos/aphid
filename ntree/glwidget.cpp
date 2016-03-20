@@ -42,7 +42,7 @@ GLWidget::~GLWidget()
 void GLWidget::testTree()
 {
 	std::cout<<"\n test kdtree";
-	const int n = 16512;
+	const int n = 17913;
     m_source = new sdb::VectorArray<cvx::Cube>();
 	m_tree = new KdNTree<cvx::Cube, KdNode4 >();
 	
@@ -52,9 +52,9 @@ void GLWidget::testTree()
         cvx::Cube a;
         float r = sqrt(float( rand() % 999 ) / 999.f);
         float th = float( rand() % 999 ) / 999.f * 1.5f;
-        float x = -60.f + 100.f * r * cos(th*1.1f);
-        float y = 0.f + 70.f * r * sin(th/.93f) + 39.f * sin(x/13.f);
-        float z = 0.f + 50.f * float( rand() % 999 ) / 999.f + 23.f * sin(y/23.f);
+        float x = -60.f + 150.f * r * cos(th*1.1f);
+        float y = 0.f + 80.f * r * sin(th/.93f) + 39.f * sin(x/13.f);
+        float z = 0.f + 60.f * float( rand() % 999 ) / 999.f + 24.f * sin(y/23.f);
         a.set(Vector3F(x, y, z), .2f);
         
 		m_source->insert(a);
@@ -334,7 +334,7 @@ void GLWidget::testGrid()
 	m_grid = new VoxelGrid<KdNTree<cvx::Cube, KdNode4 >, cvx::Cube >();
 	BoundingBox b = m_tree->getBBox();
 	b.expand(b.getLongestDistance() * .005f);
-	m_grid->create(m_tree, b, 9);
+	m_grid->create(m_tree, b, 9, 6);
 	
 	m_source->clear();
 	m_grid->extractCellBoxes(m_source);
