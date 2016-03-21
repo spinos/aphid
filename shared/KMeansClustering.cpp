@@ -9,6 +9,8 @@
 
 #include "KMeansClustering.h"
 
+namespace aphid {
+
 KMeansClustering::KMeansClustering() : m_centroid(0), m_group(0), m_sum(0), m_countPerGroup(0), m_valid(0) 
 {
 	m_k = 4;
@@ -159,4 +161,6 @@ const Vector3F KMeansClustering::centroid(unsigned igroup) const
 
 void KMeansClustering::setCentroid(unsigned idx, const Vector3F & pos)
 { m_centroid[idx] = pos;}
+
+}
 //:~

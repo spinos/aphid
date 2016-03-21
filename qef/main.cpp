@@ -1,7 +1,5 @@
 #include <iostream>
-#include <cmath>
-#include <MersenneTwister.h>
-#include <Vector3F.h>
+#include <KMeansClustering.h>
 #include <QuadraticErrorFunction.h>
 
 /// reference https://inst.eecs.berkeley.edu/~ee127a/book/login/def_pseudo_inv.html
@@ -90,11 +88,11 @@ void testQE()
 	qf.create(5);
 	
 	aphid::Vector3F Ns[5];
-	Ns[0].set(-.454f, 0.001f, .454f);
-	Ns[1].set(-.454f, 0.001f, .454f);
-	Ns[2].set( .454f, -0.015f, .454f);
-	Ns[3].set( .454f, -0.0f, .454f);
-	Ns[4].set( .0f, 0.0f, .54f);
+	Ns[0].set(-.59f, -0.001f, .49f);
+	Ns[1].set(-.59f, 0.001f, .49f);
+	Ns[2].set( .59f, -0.001f, .49f);
+	Ns[3].set( .59f, 0.001f, .49f);
+	Ns[4].set( .59f, 0.001f, .49f);
 	
 	Ns[0].normalize();
 	Ns[1].normalize();
@@ -103,11 +101,11 @@ void testQE()
 	Ns[4].normalize();
 	
 	aphid::Vector3F Ps[4];
-	Ps[0].set(0.f, 0.f, 0.f);
+	Ps[0].set(0.f, .1f, 0.f);
 	Ps[1].set(0.f, 1.f, 0.f);
-	Ps[2].set(1.f, 0.f, 0.f);
+	Ps[2].set(1.f, .1f, 0.f);
 	Ps[3].set(1.f, 1.f, 0.f);
-	Ps[4].set(.5f, 0.f, .5f);
+	Ps[4].set(1.f, .25f, 0.f);
 	
 	float ndp;
 	int i=0;
@@ -125,9 +123,70 @@ void testQE()
 	std::cout<<"\n end test qe";
 }
 
+void testKMean()
+{
+	std::cout<<"\n begin test kmean";
+	aphid::kmean::Cluster<aphid::Vector3F> clus;
+	
+	aphid::sdb::VectorArray<aphid::Vector3F> & src = clus.object();
+	
+#if 0
+	clus.setN(299);
+	
+	float a, b;
+	int axis;
+	aphid::Vector3F t;
+	int i;
+	for(i=0; i< 299; ++i) {
+		a = (float) (rand() & 1023) / 511 - 1.f;  a *= 0.59f;
+		b = (float) (rand() & 1023) / 511 - 1.f;  b *= 0.59f;
+		axis = rand() % 6;
+		if(axis < 1)
+			t = aphid::Vector3F(.99f, a, b);
+		else if(axis < 2)
+			t = aphid::Vector3F(a, .99f, b);	
+		else if(axis < 3) 
+			t = aphid::Vector3F(a, b, .99f);
+		else if(axis < 4) 
+			t = aphid::Vector3F(a, b, -.99f);
+		else if(axis < 5) 
+			t = aphid::Vector3F(a, -.99f, b);
+		else 
+			t = aphid::Vector3F(-.99f, a, b);
+		t.normalize();
+		// std::cout<<"\n t["<<i<<"] "<<t;
+		
+		*src[i] = t;
+	}
+	
+	clus.setK(6);
+	clus.setToNormalize(true);
+	
+#else
+	clus.setN(7);
+	
+	*src[0] = aphid::Vector3F(-.59f, 0.001f, .49f);
+	*src[1] = aphid::Vector3F( 2.59f, 1.001f, .49f);
+	*src[2] = aphid::Vector3F( .59f, 1.001f, -1.49f);
+	*src[3] = aphid::Vector3F( .59f, 1.001f, -1.49f);
+	*src[4] = aphid::Vector3F( 2.59f,-1.001f, .49f);
+	*src[5] = aphid::Vector3F(-.59f, 0.001f, .49f);
+	*src[6] = aphid::Vector3F(-.59f, 0.001f, .49f);
+	clus.setK(3);
+	clus.setToNormalize(false);
+	
+#endif
+
+	clus.compute();
+	clus.printResult();
+	
+	std::cout<<"\n end test kmean";
+}
+
 int main()
 { 
     testSVD3();
 	testQE();
+	testKMean();
 	return 1;
 }

@@ -83,10 +83,10 @@ bool QuadraticErrorFunction<T, Dim>::compute()
 	m_svd.compute(m_A);
 	
 /// last singular value
-	if(m_svd.S().v()[Dim-1] < 1e-3) {
-		std::cout<<"\n s"<<m_svd.S();
-		std::cout<<"\n A is near singular, no solution";
-		return false;
+	if(m_svd.S().v()[Dim-1] < 0.01) {
+		std::cout<<"\n A is near singular, truncate to 0.01";
+		m_svd.SR()->v()[Dim-1] = 0.01;
+		//return false;
 	}
 	
 	std::cout<<"\n s"<<m_svd.S();

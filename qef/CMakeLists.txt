@@ -9,8 +9,9 @@ set (CMAKE_BUILD_TYPE RELEASE)
 set (HEADER_FILES
 ../lfr/clapackTempl.h
 ../lfr/linearMath.h
+../shared/KMeansClustering.h
 ../shared/QuadraticErrorFunction.h)
-include_directories ( ../shared ../lfr)
+include_directories ( ../shared ../lfr ../btree)
 add_executable (testqef ${HEADER_FILES} main.cpp)
 
 if(WIN32)
@@ -38,7 +39,8 @@ target_link_libraries (testqef ${LAPACK_LIBRARY})
 if (WIN32)
 set (Aphid_Library "D:/aphid/lib/aphid.lib")
 else ()
-set (Aphid_Library "/users/jianzhang/aphid/lib/libaphidMath.a")
+set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
+/users/jianzhang/aphid/lib/libaphidSdb.a)
 endif ()
 
 target_link_libraries (testqef ${Aphid_Library})

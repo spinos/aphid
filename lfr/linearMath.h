@@ -927,6 +927,8 @@ public:
 	const DenseVector<T> & S() const;
 	const DenseMatrix<T> & Vt() const;
 	
+	DenseVector<T> * SR();
+	
 protected:
 
 private:
@@ -992,6 +994,10 @@ const DenseVector<T> & SvdSolver<T>::S() const
 template<typename T>
 const DenseMatrix<T> & SvdSolver<T>::Vt() const
 { return m_v; }	
+
+template<typename T>
+DenseVector<T> * SvdSolver<T>::SR()
+{ return &m_s; }
 	
 } /// end of namespace lfr
 
