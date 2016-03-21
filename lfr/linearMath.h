@@ -389,6 +389,9 @@ public:
 	void multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
 /// b = alpha A * x + beta b
+	void mult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
+/// b = alpha A * x + beta b
 	void mult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
 /// b = alpha AT * x + beta b
@@ -609,7 +612,25 @@ template <typename T>
 void DenseMatrix<T>::multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
             const T alpha, const T beta) const
 {
-	clapack_gemm<T>("N", "T", m_numRows, m_numRows, m_numColumns, 
+	clapack_gemm<T>("N", "T", m_numRows, 
+							x.numRows(), 
+							m_numColumns, 
+							alpha, m_v, m_numRows, 
+							x.column(0), x.numRows(), beta, b.raw(), m_numRows);
+}
+
+/// reference http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
+/// b = alpha A * x + beta b
+/// M A.m
+/// N x.n
+/// K A.n
+template <typename T>
+void DenseMatrix<T>::mult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
+            const T alpha, const T beta) const
+{
+	clapack_gemm<T>("N", "N", m_numRows, 
+							x.numColumns(), 
+							m_numColumns, 
 							alpha, m_v, m_numRows, 
 							x.column(0), x.numRows(), beta, b.raw(), m_numRows);
 }
@@ -789,7 +810,7 @@ const std::string DenseMatrix<T>::str() const
 	for (int i = 0; i<m_numRows; ++i) {
       sst<<"\n|";
 	  for (int j = 0; j<m_numColumns; ++j) {
-         sst<<" "<<static_cast<double>(m_v[j*m_numRows+i]);
+         sst<<" "<<m_v[j*m_numRows+i];
       }
       sst<<" |";
    }
@@ -902,9 +923,10 @@ public:
 	
 	bool compute(const DenseMatrix<T> & M);
 	
-	DenseMatrix<T> * U();
-	DenseVector<T> * S();
-	DenseMatrix<T> * V();
+	const DenseMatrix<T> & U() const;
+	const DenseVector<T> & S() const;
+	const DenseMatrix<T> & Vt() const;
+	
 protected:
 
 private:
@@ -922,13 +944,16 @@ template<typename T>
 SvdSolver<T>::~SvdSolver() 
 { if(m_work) free(m_work); }
 
+/// A mxn = U mxm S mxn V^T nxn
+/// M is changed
+/// V is V^T actually
 template<typename T>
 bool SvdSolver<T>::compute(const DenseMatrix<T> & M)
 {
 	const int m = M.numRows();
 	const int n = M.numColumns();
 	
-	m_s.resize(n );
+	m_s.resize(m );
 	m_u.resize(m, m );
 	m_v.resize(n, n );
 	
@@ -957,17 +982,17 @@ bool SvdSolver<T>::compute(const DenseMatrix<T> & M)
 }
 
 template<typename T>
-DenseMatrix<T> * SvdSolver<T>::U()
-{ return &m_u; }
+const DenseMatrix<T> & SvdSolver<T>::U() const
+{ return m_u; }
 
 template<typename T>
-DenseVector<T> * SvdSolver<T>::S()
-{ return &m_s; }
+const DenseVector<T> & SvdSolver<T>::S() const
+{ return m_s; }
 
 template<typename T>
-DenseMatrix<T> * SvdSolver<T>::V()
-{ return &m_v; }
-
+const DenseMatrix<T> & SvdSolver<T>::Vt() const
+{ return m_v; }	
+	
 } /// end of namespace lfr
 
 #endif        //  #ifndef LINEARMATH_H
