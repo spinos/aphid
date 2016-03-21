@@ -64,6 +64,7 @@ protected:
 	unsigned addGrid(const Vector3F & p);
     const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
+	int encodeCellOrigin(const unsigned & code, const int & level) const;
 	void removeCell(unsigned code);
     void printHash();
 	

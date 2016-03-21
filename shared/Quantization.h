@@ -6,14 +6,44 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include "Vector3F.h"
 #include <cmath>
 namespace aphid {
 
+namespace col32 {
+
+inline void encodeC(int & dst, const float &r, const float &g,
+					const float &b, const float &a)
+{
+	int red = r<1.f ? 256 * r : 255;
+	int green = g<1.f ? 256 * r : 255;
+	int blue = b<1.f ? 256 * r : 255;
+	int alpha = a<1.f ? 256 * r : 255;
+	dst = (alpha<<24 | red<<16 | green<<8 | blue);
+}
+
+inline void decodeC(float &r, float &g,
+					float &b, float &a,
+					const int & src)
+{
+	int red = (src>>16) & 255;
+	int green = (src>>8) & 255;
+	int blue = src & 255;
+	int alpha = src>>24;
+	
+	r = (float)red * 0.00390625f;
+	g = (float)green * 0.00390625f;
+	b = (float)blue * 0.00390625f;
+	a = (float)alpha * 0.00390625f;
+}
+
+}
+
 namespace colnor30 {
 
-/// normal-color packed into int bit layout
+/// normal-color packed into int 
+/// bit layout
 /// 0-4 color red		5bit
 /// 5-9 color green		5bit
 /// 10-14 color blue	5bit
@@ -22,7 +52,7 @@ namespace colnor30 {
 /// 18-23 normal u		6bit
 /// 24-29 normal v		6bit
 
-void encodeN(int & dst, const Vector3F & n)
+inline void encodeN(int & dst, const Vector3F & n)
 {
 /// 0 - 5
 	int o = n.orientation();
@@ -51,7 +81,7 @@ void encodeN(int & dst, const Vector3F & n)
 	dst = dst | (d<<15 | axis<<16 | u<<18 | v<<24);
 }
 
-void encodeC(int & dst, const Vector3F & c)
+inline void encodeC(int & dst, const Vector3F & c)
 {
 	int r = c.x < 1.f ? 32 * c.x : 31;
 	int g = c.y < 1.f ? 32 * c.y : 31;
@@ -60,7 +90,7 @@ void encodeC(int & dst, const Vector3F & c)
 	dst = dst | (r | g<<5 | b<<10);
 }
 
-void decodeN(Vector3F & n, const int & src)
+inline void decodeN(Vector3F & n, const int & src)
 {
 	int d = src & (1<<15);
 	int axis = (src>>16) & 3;
@@ -87,7 +117,7 @@ void decodeN(Vector3F & n, const int & src)
 	n.normalize();
 }
 
-void decodeC(Vector3F & c, const int & src)
+inline void decodeC(Vector3F & c, const int & src)
 {
 	int r = src & 31;
 	int g = (src>>5) & 31;

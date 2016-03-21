@@ -10,12 +10,72 @@
 
 #include <CartesianGrid.h>
 #include <IntersectionContext.h>
+#include <Quantization.h>
+#include <VectorArray.h>
 
 namespace aphid {
+
+struct Voxel {
+/// color in rgba 32bit
+	int m_color;
+/// morton code in bound
+	int m_pos;
+/// level-ncontour-indexcontour packed into int
+/// bit layout
+/// 0-3 level			4bit 0-15
+/// 4-5 n contour		2bit 0-3
+/// 6-   offset to first contour
+	int m_contour;
+	
+	void setColor(const float &r, const float &g,
+					const float &b, const float &a)
+	{ col32::encodeC(m_color, r, g, b, a); }
+	
+	void setPos(const int & morton, const int & level)
+	{ 
+		m_pos = morton; 
+		m_contour = m_contour | level;
+	}
+	
+	void setContour(const int & count, const int & offset)
+	{ m_contour = m_contour | (count<<4 | offset<<6); }
+	
+	void getColor(float &r, float &g,
+					float &b, float &a)
+	{ col32::decodeC(r, g, b, a, m_color); }
+	
+};
+
+struct Contour {
+/// point-normal packed into int
+/// bit layout
+/// 0-4		gridx		5bit
+/// 5-9		girdy		5bit
+/// 10-14	girdz		5bit
+/// 15 normal sign		1bit
+/// 16-17 normal axis	2bit
+/// 18-23 normal u		6bit
+/// 24-29 normal v		6bit
+	int m_data;
+	
+	void setNormal(const Vector3F & n)
+	{ colnor30::encodeN(m_data, n); }
+	
+	void setPoint(const Vector3F & p,
+					const Vector3F & o,
+					const float & d)
+	{
+		Vector3F c((p.x - o.x)/d, (p.y - o.y)/d, (p.z - o.z)/d);
+		colnor30::encodeC(m_data, c);
+	}
+	
+};
 
 template<typename Ttree, typename Tvalue>
 class VoxelGrid : public CartesianGrid {
 
+	sdb::VectorArray<Voxel> m_voxels;
+	sdb::VectorArray<Contour> m_contours;
 	int m_maxLevel;
 	
 public:
@@ -26,6 +86,9 @@ public:
 				const BoundingBox & b,
 				int maxLevel = 9,
 				int minLevel = 5);
+	
+	int numVoxels() const;
+	int numContours() const;
 	
 protected:
 
@@ -49,6 +112,9 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 										int maxLevel,
 										int minLevel)
 {
+	m_voxels.clear();
+	m_contours.clear();
+	
 	setBounding(b);
 	m_maxLevel = maxLevel;
 	
@@ -209,11 +275,26 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
 		nCells++;
 		totalPrims += nPrims;
 		
+		Voxel v;
+		v.setColor(.99f, .99f, .99f, .99f);
+		v.setPos(encodeCellOrigin(c->key(), c->value()->level ), c->value()->level );
+		v.setContour(0, 0);
+		m_voxels.insert(v);
+		
         c->next();
 	}
 	
 	std::cout<<"\n n prims per cell min/max/average "<<minPrims
-	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)nCells;
+	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)nCells
+	<<"\n n voxel "<<numVoxels();
 }
+
+template<typename Ttree, typename Tvalue>
+int VoxelGrid<Ttree, Tvalue>::numVoxels() const
+{ return m_voxels.size(); }
+
+template<typename Ttree, typename Tvalue>
+int VoxelGrid<Ttree, Tvalue>::numContours() const
+{ return m_contours.size(); }
 
 }

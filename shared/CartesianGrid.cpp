@@ -374,5 +374,11 @@ void CartesianGrid::extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
 	}
 }
 
+int CartesianGrid::encodeCellOrigin(const unsigned & code, const int & level) const
+{
+	float h = cellSizeAtLevel(level) * 0.5f;
+    return mortonEncode(cellCenter(code) - Vector3F(h, h, h));
+}
+
 }
 //:~
