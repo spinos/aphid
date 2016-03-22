@@ -11,9 +11,14 @@
 #include <maya/MPxCommand.h> 
 #include <maya/MArgDatabase.h>
 #include <maya/MDagPath.h>
+#include <NTreeIO.h>
+
+using namespace aphid;
 
 class QefCmd : public MPxCommand 
 {
+	NTreeIO m_io;
+	
 public:
 	QefCmd();
 	virtual ~QefCmd();
@@ -26,7 +31,9 @@ protected:
 	virtual MStatus			parseArgs(const MArgList &argList);
 	MStatus printHelp();
 	MStatus writeSelected();
-    void writeMesh(const MDagPath & path);
+	void updateMeshBBox(BoundingBox & bbox, const MDagPath & path);
+    void writeMesh(HTriangleAsset & asset, 
+					const Vector3F & ref, const MDagPath & path);
     
 private:
 	enum WorkMode {
@@ -34,5 +41,5 @@ private:
 		WCreate = 1
 	};
 	WorkMode m_mode;
-	
+	std::string m_filename;
 };

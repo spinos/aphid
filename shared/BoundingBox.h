@@ -65,6 +65,7 @@ public:
 	int pointOnSide(const Vector3F & v) const;
 	int pointOnEdge(const Vector3F & v) const;
 	char isValid() const;
+	void round();
 	void verbose() const;
 	void verbose(const char * pref) const;
 	const std::string str() const;

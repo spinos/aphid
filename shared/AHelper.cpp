@@ -1094,5 +1094,16 @@ MObject AHelper::CreateDeformer(const MString & name)
 	return node;
 }
 
+double AHelper::AreaOfTriangle(const MPoint & a, const MPoint & b, const MPoint & c)
+{
+	MVector ab = b - a;
+	double l0 = ab.length();
+	MVector ca = a - c;
+	double l2 = ca.length();
+	double dd = ab  * ca ;
+	
+	return 0.5 * sqrt(l0 * l0 * l2 *l2 - dd * dd ) ;
+}
+
 }
 //:~

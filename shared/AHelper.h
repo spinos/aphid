@@ -132,6 +132,8 @@ public:
 	
 	static MMatrix GetWorldTransformMatrix(const MDagPath & path);
 	static MMatrix GetWorldParentTransformMatrix(const MDagPath & path);
+	static double AreaOfTriangle(const MPoint & a, const MPoint & b, const MPoint & c);
+	
 	template<typename T>
 	static void Info(const std::string & note, const T & v)
 	{

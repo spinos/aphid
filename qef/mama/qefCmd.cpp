@@ -10,8 +10,8 @@
 #include "QefCmd.h"
 #include <maya/MGlobal.h>
 #include <ASearchHelper.h>
-
-using namespace aphid;
+#include <maya/MIntArray.h>
+#include <maya/MItMeshVertex.h>
 
 QefCmd::QefCmd() {}
 QefCmd::~QefCmd() {}
@@ -26,6 +26,7 @@ MSyntax QefCmd::newSyntax()
 	MSyntax syntax;
 
 	syntax.addFlag("-h", "-help", MSyntax::kNoArg);
+	syntax.addFlag("-w", "-write", MSyntax::kString);
 	syntax.enableQuery(false);
 	syntax.enableEdit(false);
 
@@ -34,15 +35,25 @@ MSyntax QefCmd::newSyntax()
 
 MStatus QefCmd::parseArgs(const MArgList &args)
 {
-	MStatus			ReturnStatus;
-	MArgDatabase	argData(syntax(), args, &ReturnStatus);
+	MStatus			stat;
+	MArgDatabase	argData(syntax(), args, &stat);
 
-	if ( ReturnStatus.error() )
+	if ( stat.error() )
 		return MS::kFailure;
 
-	m_mode = WCreate;
+	m_mode = WHelp;
 	
-	if(argData.isFlagSet("-h")) m_mode = WHelp;
+	if(argData.isFlagSet("-w") ) {
+		MString ch;
+		stat = argData.getFlagArgument("-w", 0, ch);
+		if (!stat) {
+			stat.perror("-w flag parsing failed.");
+			return stat;
+		}
+		m_filename = ch.asChar();
+		m_mode = WCreate;
+	}
+	if(argData.isFlagSet("-h") ) m_mode = WHelp;
 	
 	return MS::kSuccess;
 }
@@ -52,7 +63,7 @@ MStatus QefCmd::doIt(const MArgList &argList)
 	MStatus status;
 	status = parseArgs(argList);
 	if (!status)
-		return status;
+		return printHelp();
 	
 	if(m_mode == WCreate) return writeSelected();
     return printHelp();
@@ -70,6 +81,13 @@ MStatus QefCmd::printHelp()
 
 MStatus QefCmd::writeSelected()
 {
+	if(!m_io.begin(m_filename, HDocument::oCreate ) ) {
+		AHelper::Info<std::string >(" NTree IO cannot crate file", m_filename );
+		return MS::kFailure;
+	}
+	
+	HTriangleAsset triass("/triangles");
+	
     MSelectionList sels;
  	MGlobal::getActiveSelectionList( sels );
 	
@@ -101,37 +119,87 @@ MStatus QefCmd::writeSelected()
     }
     
     std::map<std::string, MDagPath>::const_iterator meshIt = orderedMeshes.begin();
+	
+	BoundingBox bbox;
+	for(;meshIt != orderedMeshes.end(); ++meshIt) {
+        updateMeshBBox(bbox, meshIt->second);
+    }
+
+	bbox.round();
+	AHelper::Info<BoundingBox>(" bbox ", bbox);
+	
+	meshIt = orderedMeshes.begin();
     for(;meshIt != orderedMeshes.end(); ++meshIt) {
-        writeMesh(meshIt->second);
+        writeMesh(triass, bbox.getMin(), meshIt->second);
     }
     
+	triass.save();
+	triass.close();
+	m_io.end();
+	
+	AHelper::Info<std::string >(" NTree IO finished writing file", m_filename );
     return MS::kSuccess;
 }
 
-void QefCmd::writeMesh(const MDagPath & path)
+void QefCmd::updateMeshBBox(BoundingBox & bbox, const MDagPath & path)
+{
+	MItMeshVertex vertIt(path);
+	for(; !vertIt.isDone(); vertIt.next() ) {
+		const MPoint pnt = vertIt.position ( MSpace::kWorld );
+		Vector3F v(pnt.x, pnt.y, pnt.z);
+		bbox.expandBy(v);
+	}
+}
+
+void QefCmd::writeMesh(HTriangleAsset & asset, 
+						const Vector3F & ref, const MDagPath & path)
 {
     AHelper::Info<MString>("w mesh", path.fullPathName() );
     MStatus stat;
+	
     MIntArray vertices;
-    int ntris, i, totalNTri = 0, nv;
-    int triV[3];
+    int i, j, totalNTri = 0, nv;
+	MPoint dp[3];
+	MVector dn[3];
+	Vector3F fp[3], fn[3], col[3];
+	col[0].set(1.f, 1.f, 1.f);
+	col[1].set(1.f, 1.f, 1.f);
+	col[2].set(1.f, 1.f, 1.f);
     MItMeshPolygon faceIt(path);
-    for(i=0; !faceIt.isDone(); faceIt.next(), i++) {
-        faceIt.numTriangles(ntris);
-        totalNTri += ntris;
-        
+    for(; !faceIt.isDone(); faceIt.next() ) {
+
         faceIt.getVertices(vertices);
-        nv = vertices.lenght();
+        nv = vertices.length();
         
         for(i=1; i<nv-1; ++i ) {
-            triV[0] = vertices[0];
-            triV[1] = vertices[i];
-            triV[2] = vertices[i+1];
+			dp[0] = faceIt.point(0, MSpace::kWorld );
+			dp[1] = faceIt.point(i, MSpace::kWorld );
+			dp[2] = faceIt.point(i+1, MSpace::kWorld );
+			
+			if(AHelper::AreaOfTriangle(dp[0], dp[1], dp[2]) < 1e-5f ) {
+				AHelper::Info<int>(" low triangle area ", faceIt.index() );
+				continue;
+			}
+			
+			faceIt.getNormal(0 , dn[0], MSpace::kWorld );
+			faceIt.getNormal(i , dn[1], MSpace::kWorld );
+			faceIt.getNormal(i+1 , dn[2], MSpace::kWorld );
+			
+			cvx::Triangle tri;
+			for(j=0; j<3; ++j) {
+				fp[j].set(dp[j].x - ref.x, dp[j].y - ref.y, dp[j].z - ref.z);
+				tri.setP(fp[j], j);
+				
+				fn[j].set(dn[j].x, dn[j].y, dn[j].z);
+				tri.setN(fn[j], j);
+				
+				tri.setC(col[j], j);
+			}
+			
+			asset.insert(tri);
+			
+			totalNTri++;
         }
-        
-        AHelper::Info<int>(" tri ", triV[0]);
-        AHelper::Info<int>(" tri ", triV[1]);
-        AHelper::Info<int>(" tri ", triV[2]);
     }
     
     AHelper::Info<int>(" total n tri ", totalNTri);

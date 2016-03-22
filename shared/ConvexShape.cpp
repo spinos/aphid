@@ -175,6 +175,11 @@ void Triangle::setC(const Vector3F & c, const int & idx)
 	else  colnor30::encodeC(m_nc2, c);
 }
 
+ShapeType Triangle::ShapeTypeId = TTriangle;
+
+std::string Triangle::GetTypeStr()
+{ return "triangle"; }
+
 }
 
 }

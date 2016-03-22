@@ -31,7 +31,7 @@ namespace aphid {
 	void setIdentity();
 	void setZero();
 	float* m(int i, int j);
-	float M(int i, int j) const;
+	const float & M(int i, int j) const;
 	
 	float determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i ) const;
 	void inverse();

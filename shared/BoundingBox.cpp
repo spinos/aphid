@@ -514,5 +514,26 @@ const float * BoundingBox::data() const
 const float BoundingBox::volume() const
 { return distance(0) * distance(1) * distance(2); }
 
+void BoundingBox::round()
+{
+	if(m_data[0] < 0.f) m_data[0] = -(int(-m_data[0]) - 1);
+	else m_data[0] = int(m_data[0]);
+	
+	if(m_data[1] < 0.f) m_data[1] = -(int(-m_data[1]) - 1);
+	else m_data[1] = int(m_data[1]);
+	
+	if(m_data[2] < 0.f) m_data[2] = -(int(-m_data[2]) - 1);
+	else m_data[2] = int(m_data[2]);
+	
+	if(m_data[3] < 0.f) m_data[3] = -(int(-m_data[3]) );
+	else m_data[3] = int(m_data[3]) + 1;
+	
+	if(m_data[4] < 0.f) m_data[4] = -(int(-m_data[4]) );
+	else m_data[4] = int(m_data[4]) + 1;
+	
+	if(m_data[5] < 0.f) m_data[5] = -(int(-m_data[5]) );
+	else m_data[5] = int(m_data[5]) + 1;
+}
+
 }
 //:~

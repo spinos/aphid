@@ -9,9 +9,9 @@
 
 #pragma once
 #include <HDocument.h>
-#include <ConvexShape.h>
 #include <HNTree.h>
 #include <VectorArray.h>
+#include <HElemAsset.h>
 
 namespace aphid {
 

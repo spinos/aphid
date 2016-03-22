@@ -19,7 +19,8 @@ namespace cvx {
         TUnknown = 0,
         TSphere = 1,
         TCube = 2,
-        TCapsule = 3
+        TCapsule = 3,
+		TTriangle = 4
     };
 
 class Frustum {
@@ -143,6 +144,9 @@ public:
 	void setN(const Vector3F & n, const int & idx);
 	void setC(const Vector3F & c, const int & idx);
 
+	static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
+	
 private:
 	
 };

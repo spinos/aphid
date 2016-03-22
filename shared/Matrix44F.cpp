@@ -113,7 +113,7 @@ float* Matrix44F::m(int i, int j)
 	return &v[i * 4 + j];
 }
 
-float Matrix44F::M(int i, int j) const
+const float & Matrix44F::M(int i, int j) const
 {
 	return v[i * 4 + j];
 }
