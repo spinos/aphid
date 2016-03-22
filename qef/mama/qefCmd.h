@@ -10,6 +10,7 @@
 #include <maya/MSyntax.h>
 #include <maya/MPxCommand.h> 
 #include <maya/MArgDatabase.h>
+#include <maya/MDagPath.h>
 
 class QefCmd : public MPxCommand 
 {
@@ -24,7 +25,9 @@ public:
 protected:
 	virtual MStatus			parseArgs(const MArgList &argList);
 	MStatus printHelp();
-	
+	MStatus writeSelected();
+    void writeMesh(const MDagPath & path);
+    
 private:
 	enum WorkMode {
 		WHelp = 0,

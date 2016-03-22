@@ -85,8 +85,9 @@ void testQE()
 {
 	std::cout<<"\n begin test qe";
 	aphid::QuadraticErrorFunction<float, 3> qf;
+    
 	qf.create(5);
-	
+    
 	aphid::Vector3F Ns[5];
 	Ns[0].set(-.59f, -0.001f, .49f);
 	Ns[1].set(-.59f, 0.001f, .49f);
@@ -100,13 +101,13 @@ void testQE()
 	Ns[3].normalize();
 	Ns[4].normalize();
 	
-	aphid::Vector3F Ps[4];
+	aphid::Vector3F Ps[5];
 	Ps[0].set(0.f, .1f, 0.f);
 	Ps[1].set(0.f, 1.f, 0.f);
 	Ps[2].set(1.f, .1f, 0.f);
 	Ps[3].set(1.f, 1.f, 0.f);
 	Ps[4].set(1.f, .25f, 0.f);
-	
+
 	float ndp;
 	int i=0;
 	for(;i<5;++i) {
@@ -115,7 +116,7 @@ void testQE()
 		std::cout<<"\n b["<<i<<"] "<<ndp;
 		qf.copyB(i, &ndp );
 	}
-	
+		
 	qf.compute();
 	
 	std::cout<<"\n x "<< qf.x();

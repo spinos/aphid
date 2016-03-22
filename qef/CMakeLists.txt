@@ -19,7 +19,6 @@ if(WIN32)
     set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
 	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
     set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
-    
 endif()
 
 if(APPLE)
@@ -37,12 +36,12 @@ target_link_libraries (testqef ${BLAS_LIBRARY})
 target_link_libraries (testqef ${LAPACK_LIBRARY})
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+set (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidSdb.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidSdb.a)
 endif ()
 
 target_link_libraries (testqef ${Aphid_Library})
-
 

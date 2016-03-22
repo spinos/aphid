@@ -51,7 +51,8 @@ target_link_libraries (testbit ${Boost_THREAD_LIBRARY})
 target_link_libraries (testbit ${Boost_CHRONO_LIBRARY})
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+set (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidGeom.lib)
 else ()
 ## set (Aphid_Library "/users/jollyroger/aphid/lib/libaphid.a")
 SET (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a

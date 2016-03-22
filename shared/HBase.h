@@ -109,7 +109,7 @@ public:
 		if(hasNamedData(name.c_str() ) ) {
 			stat = d->openStorage(fObjectId);
 			if(stat) stat = d->checkDataSpace();
-			if(stat) d->clear();
+			if(stat) d->reset();
 		}
 		else {
 			if(d->createStorage(fObjectId)) {
