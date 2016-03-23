@@ -295,7 +295,7 @@ bool HesperisAttributeIO::BeginBakeAttribute(const std::string & attrName, ANume
 		MappedBakeData[attrName] = d;
 	}
 	else {
-		AHelper::Info<std::string >("HesperisAttributeIO error cannot bake attr", attrName );
+		AHelper::Info<std::string >("HesperisAttributeIO error cannot open group to bake attr", attrName );
 	}
 	return stat;
 }
@@ -304,26 +304,28 @@ HObject * HesperisAttributeIO::CreateBake(HBase * grp, ANumericAttribute::Numeri
 										const std::string & attrName, const std::string & dataName,
 										bool &stat)
 {
+    std::cout<<"\n HesperisAttributeIO create bake "<<grp->pathToObject()<<dataName
+        <<" in file "<<HObject::FileIO.fileName();
 	HObject * d = NULL;
 	stat = false;
 	switch(typ) {
 		case ANumericAttribute::TByteNumeric:
-			d = grp->createDataStorage<HOocArray<hdata::TChar, 1, 64> >(dataName, stat);
+			d = grp->createDataStorage<HOocArray<hdata::TChar, 1, 64> >(dataName, true, stat);
 			break;
 		case ANumericAttribute::TShortNumeric:
-			d = grp->createDataStorage<HOocArray<hdata::TShort, 1, 64> >(dataName, stat);
+			d = grp->createDataStorage<HOocArray<hdata::TShort, 1, 64> >(dataName, true, stat);
 			break;
 		case ANumericAttribute::TIntNumeric:
-			d = grp->createDataStorage<HOocArray<hdata::TInt, 1, 64> >(dataName, stat);
+			d = grp->createDataStorage<HOocArray<hdata::TInt, 1, 64> >(dataName, true, stat);
 			break;
 		case ANumericAttribute::TBooleanNumeric:
-			d = grp->createDataStorage<HOocArray<hdata::TChar, 1, 64> >(dataName, stat);
+			d = grp->createDataStorage<HOocArray<hdata::TChar, 1, 64> >(dataName, true, stat);
 			break;
 		case ANumericAttribute::TFloatNumeric:
-			d = grp->createDataStorage<HOocArray<hdata::TFloat, 1, 64> >(dataName, stat);
+			d = grp->createDataStorage<HOocArray<hdata::TFloat, 1, 64> >(dataName, true, stat);
 			break;
 		case ANumericAttribute::TDoubleNumeric:
-			d = grp->createDataStorage<HOocArray<hdata::TDouble, 1, 64> >(dataName, stat);
+			d = grp->createDataStorage<HOocArray<hdata::TDouble, 1, 64> >(dataName, true, stat);
 			break;
 		default:
 			break;
@@ -335,7 +337,8 @@ HObject * HesperisAttributeIO::CreateBake(HBase * grp, ANumericAttribute::Numeri
 bool HesperisAttributeIO::EndBakeAttribute(const std::string & attrName, ANumericAttribute *data)
 {
 	if(MappedBakeData.find(attrName) == MappedBakeData.end() ) {
-		std::cout<<"\n HesperisAttributeIO error end bake cannot find attr "<<attrName;
+		std::cout<<"\n HesperisAttributeIO error end bake cannot find attr "<<attrName
+        <<" in file "<<HObject::FileIO.fileName();
 		return false;
 	}
 	HBase grp(attrName);
@@ -350,7 +353,8 @@ bool HesperisAttributeIO::EndBakeAttribute(const std::string & attrName, ANumeri
 bool HesperisAttributeIO::BakeAttribute(const std::string & attrName, ANumericAttribute *data)
 {
 	if(MappedBakeData.find(attrName) == MappedBakeData.end() ) {
-		std::cout<<"\n HesperisAttributeIO error cannot find attr "<<attrName;
+		std::cout<<"\n HesperisAttributeIO error cannot find attr "<<attrName
+        <<" in file "<<HObject::FileIO.fileName();
 		return false;
 	}
 	HBase grp(attrName);
@@ -419,7 +423,7 @@ bool HesperisAttributeIO::BeginBakeEnum(const std::string & attrName, AEnumAttri
 {
 	HBase grp(attrName);
 	bool stat = true;
-	HObject * d = grp.createDataStorage<HOocArray<hdata::TShort, 1, 64> >(".bake", stat);
+	HObject * d = grp.createDataStorage<HOocArray<hdata::TShort, 1, 64> >(".bake", true, stat);
 	grp.close();
 	if(stat) {
 		AHelper::Info<std::string >("bake enum attr", attrName );

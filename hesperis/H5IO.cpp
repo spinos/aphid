@@ -16,6 +16,8 @@ std::string H5IO::BeheadName("");
 
 void H5IO::CreateGroup(const std::string & name)
 {
+    std::cout<<"\n h5 io create group "<<name
+    <<" in file "<<HObject::FileIO.fileName();
 /// hierarchy to name
 	std::vector<std::string> allNames; 
     SHelper::listAllNames(name, allNames);

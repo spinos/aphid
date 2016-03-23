@@ -87,20 +87,22 @@ template<int DataRank, int NRows, int CnkSz>
 int H2dDataset<DataRank, NRows, CnkSz>::checkDataSpace()
 {
 	hid_t fileSpace = H5Dget_space(fObjectId);
-	if( H5Sget_simple_extent_ndims(fileSpace ) != 2) {
-		std::cout<<"\nERROR: data space dimension != 2";
+	
+    if( H5Sget_simple_extent_ndims(fileSpace ) != 2) {
+		std::cout<<"\nERROR: data space dimension != 2 "<<pathToObject();
 		return 0;
 	}
-	
+    
 	hsize_t dims[2];
 	hsize_t maxdims[2];
 	H5Sget_simple_extent_dims(fileSpace, dims,  maxdims );
-	
+    
 	if(dims[1] != NRows) {
-		std::cout<<"\nERROR: data space dims[1] != nrows";
+		std::cout<<"\nERROR: data space dims[1] "<<dims[1]<<" != nrows "<<NRows
+        <<" "<<pathToObject();
 		return 0;
 	}
-	// std::cout<<"\n data set dim: "<<dims[0]<<" x "<<dims[1];
+	
 	return dims[0] * dims[1];
 }
 

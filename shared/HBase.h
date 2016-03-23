@@ -124,13 +124,12 @@ public:
     }
 	
 	template<typename T>
-	T * createDataStorage(const std::string & name, bool & stat)
+	T * createDataStorage(const std::string & name, bool toClear, bool & stat)
 	{
 		T * d = new T(name);
 		if(hasNamedData(name.c_str() ) ) {
-			stat = d->openStorage(fObjectId);
+			stat = d->openStorage(fObjectId, false);
 			if(stat) stat = d->checkDataSpace();
-			if(stat) d->reset();
 		}
 		else {
 			if(d->createStorage(fObjectId)) {

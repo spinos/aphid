@@ -227,6 +227,10 @@ triWidget.cpp
 triWindow.cpp
 triMain.cpp)
 
+if (WIN32)
+set (SHOTRI_SOURCE_FILES ${SOURCE_FILES} "../shared/gExtension.cpp")
+endif ()
+
 add_executable (shotriangle ${SHOTRI_HEADER_FILES} ${SHOTRI_SOURCE_FILES})
 target_link_libraries (shotriangle ${HDF5_LIBRARIES})
 target_link_libraries (shotriangle ${ZLIB_LIBRARIES})

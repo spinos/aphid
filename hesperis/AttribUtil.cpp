@@ -493,6 +493,9 @@ void AttribUtil::saveH5(const MPlug & attrib)
 
 void AttribUtil::saveH5(const MObject & node, AAttribute * data)
 {
+/// read attrib may trigger read in another h5 file
+/// switch back to write file afterwards
+    useH5Bake();
 	const std::string nodeName = HesperisIO::H5PathNameTo(node);
 	if(nodeName.size() < 1) return;
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % data->shortName() );
@@ -558,6 +561,7 @@ void AttribUtil::bakeH5(const MPlug & attrib, int flag)
 
 void AttribUtil::bakeNumeric(const MObject & entity, ANumericAttribute * data, int flag)
 { 
+    useH5Bake();
 	const std::string nodeName = HesperisIO::H5PathNameTo(entity);
 	const std::string attrName = fullAttrName(nodeName, data);
 	if(flag == 0) {
@@ -574,6 +578,7 @@ void AttribUtil::bakeNumeric(const MObject & entity, ANumericAttribute * data, i
 
 void AttribUtil::bakeEnum(const MObject & entity, AEnumAttribute * data, int flag)
 {
+    useH5Bake();
 	const std::string nodeName = HesperisIO::H5PathNameTo(entity);
 	const std::string attrName = fullAttrName(nodeName, data);
 	if(flag == 0) {
@@ -657,7 +662,7 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
     
     BaseUtil::CloseH5();
 	
-    if(!BaseUtil::OpenH5(filename, HDocument::oReadAndWrite)) {
+    if(!BaseUtil::OpenH5(filename, HDocument::oCreate)) {
 		AHelper::Info<const char *>("AttribUtil error cannot open h5 file ", filename);
         return;
 	}
@@ -682,6 +687,7 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
 	timeunit = AnimUtil::ResolveFPS(secondsPerFrame);
     
     MGlobal::executeCommand(MString("currentTime ")+FirstFrame);
+    useH5Bake();
     
     std::map<std::string, MDagPath > orderedDag;
 	MDagPathArray down;
@@ -700,9 +706,8 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
                          +" samples/frame "+SamplesPerFrame
                          +" seconds/frame "+secondsPerFrame);
 
-	//BaseUtil::ISample = 0;
-	bakeH5(orderedDag, 0);
-	
+    bakeH5(orderedDag, 0);
+    
     double realFrame;
     int kt, sampFrame;
 	int sampIter = 0;
@@ -711,21 +716,25 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
         
         for(sampFrame = 0; sampFrame < SamplesPerFrame; sampFrame++) {
 		    BaseUtil::SubFrame = sampFrame;
-			//BaseUtil::ISample = sampIter;
+            
             realFrame = (double)(kt + BaseUtil::DeltaSubFrame * sampFrame);
 
             MGlobal::executeCommand(MString("currentTime ")+realFrame);
-            useH5Bake();
+            
             AHelper::Info<double>("frame", realFrame);
                         
 			bakeH5(orderedDag, 1);
+            
 			sampIter++;
         }
     }
 	bakeH5(orderedDag, 2);
+    
     AHelper::Info<int>("n samples", sampIter);
-	saveH5(orderedDag);
-    BaseUtil::CloseH5();
+    
+    saveH5(orderedDag);
+    useH5Bake();
+	BaseUtil::CloseH5();
     AHelper::Info<const char *>(" done baking attrib ", filename);
 }
 //:~
