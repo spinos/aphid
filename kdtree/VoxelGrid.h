@@ -7,6 +7,8 @@
  *
  *  subdivide if intersected until max level
  */
+#ifndef VOXELGRID_H
+#define VOXELGRID_H
 
 #include <CartesianGrid.h>
 #include <IntersectionContext.h>
@@ -298,3 +300,4 @@ int VoxelGrid<Ttree, Tvalue>::numContours() const
 { return m_contours.size(); }
 
 }
+#endif        //  #ifndef VOXELGRID_H

@@ -22,18 +22,78 @@ set (APHID_DIR "D:/aphid")
 message (" aphid is  " ${APHID_DIR} )
 
 include_directories (${APHID_DIR}/shared
-    ${APHID_DIR}/rhizoid
     ${APHID_DIR}/btree
     ${APHID_DIR}/kdtree
-    ${APHID_DIR}/hesperis
-    ${APHID_DIR}/lapl)
+    ${APHID_DIR}/ntree
+    ${APHID_DIR}/hesperis)
 
 set (SOURCES  main.cpp
 qefCmd.cpp
+${APHID_DIR}/btree/HWorldGrid.cpp
+${APHID_DIR}/ntree/NTreeIO.cpp
+${APHID_DIR}/kdtree/HNTree.cpp
+${APHID_DIR}/shared/HElemAsset.cpp
 ${APHID_DIR}/shared/AHelper.cpp
 ${APHID_DIR}/shared/ASearchHelper.cpp
 ${APHID_DIR}/shared/SHelper.cpp
 )
+
+SET (INSTALLED_HDF5 OFF)
+if (WIN32)
+	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+# location of configure file FindHDF5.cmake
+		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
+        SET (INSTALLED_HDF5 ON)
+    ELSE (EXISTS "D:/usr/hdf5")
+        SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
+        SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+	ENDIF ()
+ELSE ()
+	SET (INSTALLED_HDF5 ON)
+endif ()
+
+IF (INSTALLED_HDF5)
+FIND_PACKAGE (HDF5 REQUIRED)
+IF (WIN32)
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
+ENDIF ()
+ENDIF ()
+
+MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
+MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
+
+include_directories (${HDF5_INCLUDE_DIRS})
+
+if(WIN32)
+SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
+endif()
+
+FIND_PACKAGE (ZLIB REQUIRED)
+MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
+MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
+MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
+
+IF (WIN32)
+set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
+set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
+
+ELSEIF (APPLE)
+set (SZIP_DIR "/usr/local/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "/usr/local/include")
+set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
+
+ENDIF ()
+
+FIND_PACKAGE (SZIP REQUIRED)
+MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
+MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
+MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
+MESSAGE (" szip library is " ${SZIP_LIBRARY})
 
 if(WIN32)
 set (Boost_INCLUDE_DIR d:/usr/boost_1_51_0)
@@ -84,14 +144,24 @@ SET (MAYA_INCLUDE_PATH_2016 ${MAYA_LOCATION_2016}/include)
 SET (MAYA_LIB_PATH_2016 ${MAYA_LOCATION_2016}/lib) 
 
 ADD_LIBRARY (qef2014 MODULE ${SOURCES})
+
+target_link_libraries (qef2014 ${HDF5_LIBRARIES})
+target_link_libraries (qef2014 ${ZLIB_LIBRARIES})
+target_link_libraries (qef2014 ${SZIP_LIBRARY})
+
 if(WIN32)
 set_target_properties(qef2014 PROPERTIES SUFFIX .mll)
 set(CMAKE_MODULE_LINKER_FLAGS "/export:initializePlugin /export:uninitializePlugin")
 endif()
 target_include_directories (qef2014 PRIVATE ${MAYA_INCLUDE_PATH_2014})
 
+SET (APHID_LIBRARIES ${APHID_DIR}/lib/aphidMath.lib
+${APHID_DIR}/lib/aphidGeom.lib
+${APHID_DIR}/lib/aphidSdb.lib
+${APHID_DIR}/lib/aphidH5.lib)
+
 if(WIN32)
-target_link_libraries (qef2014 ${APHID_DIR}/lib/aphidMath.lib)
+target_link_libraries (qef2014 ${APHID_LIBRARIES})
 else()
 endif()
 
@@ -114,11 +184,6 @@ ${MAYA_LIB_PATH_2014}/libOpenMayaUI.so
 ${MAYA_LIB_PATH_2014}/libOpenMayaAnim.so)
 endif()
 
-if(WIN32)
-target_link_libraries (qef2014 ${APHID_DIR}/lib/aphidMath.lib)
-else()
-endif()
-
 ADD_LIBRARY (qef2015 MODULE ${SOURCES})
 if(WIN32)
 set_target_properties(qef2015 PROPERTIES SUFFIX .mll)
@@ -127,7 +192,7 @@ endif()
 target_include_directories (qef2015 PRIVATE ${MAYA_INCLUDE_PATH_2015})
 
 if(WIN32)
-target_link_libraries (qef2015 ${APHID_DIR}/lib/aphidMath.lib)
+target_link_libraries (qef2015 ${APHID_LIBRARIES})
 else()
 endif()
 
@@ -150,10 +215,9 @@ ${MAYA_LIB_PATH_2015}/libOpenMayaUI.so
 ${MAYA_LIB_PATH_2015}/libOpenMayaAnim.so)
 endif()
 
-if(WIN32)
-target_link_libraries (qef2015 ${APHID_DIR}/lib/aphidMath.lib)
-else()
-endif()
+target_link_libraries (qef2015 ${HDF5_LIBRARIES})
+target_link_libraries (qef2015 ${ZLIB_LIBRARIES})
+target_link_libraries (qef2015 ${SZIP_LIBRARY})
 
 ADD_LIBRARY (qef2016 MODULE ${SOURCES})
 if(WIN32)
@@ -163,7 +227,7 @@ endif()
 target_include_directories (qef2016 PRIVATE ${MAYA_INCLUDE_PATH_2016})
 
 if(WIN32)
-target_link_libraries (qef2016 ${APHID_DIR}/lib/aphidMath.lib)
+target_link_libraries (qef2016 ${APHID_LIBRARIES})
 else()
 endif()
 
@@ -186,8 +250,7 @@ ${MAYA_LIB_PATH_2016}/libOpenMayaUI.so
 ${MAYA_LIB_PATH_2016}/libOpenMayaAnim.so)
 endif()
 
-if(WIN32)
-target_link_libraries (qef2016 ${APHID_DIR}/lib/aphidMath.lib)
-else()
-endif()
+target_link_libraries (qef2016 ${HDF5_LIBRARIES})
+target_link_libraries (qef2016 ${ZLIB_LIBRARIES})
+target_link_libraries (qef2016 ${SZIP_LIBRARY})
 

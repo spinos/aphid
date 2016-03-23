@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef TRIWINDOW_H
+#define TRIWINDOW_H
 
 #include <QMainWindow>
 
