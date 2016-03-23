@@ -37,6 +37,7 @@ GLWidget::~GLWidget()
 {
 	delete m_source;
 	delete m_tree;
+	if(m_grid) delete m_grid;
 }
 
 void GLWidget::testTree()
@@ -102,100 +103,6 @@ void GLWidget::drawTree()
 	
 	NTreeDrawer dr;
 	dr.drawTree<cvx::Cube>(m_tree);
-}
-
-void GLWidget::drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot)
-{
-	if(level == m_maxDrawTreeLevel-1) getDrawer()->setGroupColorLight(m_treeletColI);
-	else getDrawer()->setColor(.1f, .15f, .12f);
-	
-	KdTreeNode * nn = treelet->node(idx);
-	if(nn->isLeaf()) {
-		std::cout<<"\n i "<<idx
-			<<" leaf start "<<nn->getPrimStart()<<" n "<<nn->getNumPrims();
-		drawALeaf(tree()->leafPrimStart(nn->getPrimStart() ), nn->getNumPrims(), box);
-		return;
-	}
-	
-	BoundingBox flat(box);
-	const int axis = nn->getAxis();
-	const float pos = nn->getSplitPos();
-	flat.setMin(pos, axis);
-	flat.setMax(pos, axis);
-	
-	if(idx < Treelet4::LastLevelOffset() ) getDrawer()->boundingBox(flat);
-	
-	BoundingBox lft, rgt;
-	box.split(axis, pos, lft, rgt);
-	
-	int offset = nn->getOffset();
-	if(offset > KdNode4::TreeletOffsetMask ) {
-		offset &= ~KdNode4::TreeletOffsetMask;
-		if(isRoot) drawATreelet(treelet + offset, lft, rgt, level);
-	}
-	else {
-		if(offset> 0) {
-		drawANode(treelet, idx + offset, lft, level);
-		drawANode(treelet, idx + offset + 1, rgt, level);
-		}
-	}
-}
-
-void GLWidget::drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level)
-{
-	KdTreeNode * nn = treelet->node(idx);
-	if(nn->isLeaf() ) return;
-	
-	const int axis = nn->getAxis();
-	const float pos = nn->getSplitPos();
-	BoundingBox lft, rgt;
-	box.split(axis, pos, lft, rgt);
-	
-	int offset = nn->getOffset();
-	if(offset > KdNode4::TreeletOffsetMask ) {
-		offset &= ~KdNode4::TreeletOffsetMask;
-		drawATreelet(treelet + offset, lft, rgt, level);
-	}
-	else {
-		if(offset> 0) {
-		drawConnectedTreelet(treelet, idx + offset, lft, level);
-		drawConnectedTreelet(treelet, idx + offset + 1, rgt, level);
-		}
-	}
-}
-
-void GLWidget::drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const BoundingBox & rgtBox, int level)
-{	
-	if(level >= m_maxDrawTreeLevel) return;
-	
-	if(level == m_maxDrawTreeLevel-1) {
-		m_treeletColI++;
-		getDrawer()->setGroupColorLight(m_treeletColI);
-	}
-	else getDrawer()->setColor(.1f, .15f, .12f);
-	
-	getDrawer()->boundingBox(lftBox);
-    getDrawer()->boundingBox(rgtBox);
-    
-	drawANode(treelet, 0, lftBox, level);
-	drawANode(treelet, 1, rgtBox, level);
-	
-	drawConnectedTreelet(treelet, 0, lftBox, level+1);
-	drawConnectedTreelet(treelet, 1, rgtBox, level+1);
-}
-
-void GLWidget::drawALeaf(unsigned start, unsigned n, const BoundingBox & box)
-{
-	if(n<1) {
-		// getDrawer()->setColor(0.f, 0.f, 0.f);
-		// getDrawer()->boundingBox(box);
-	}
-	else {
-		int i = 0;
-		for(;i<n;i++) {
-			getDrawer()->boundingBox(tree()->dataAt(start + i)->calculateBBox() );
-		}
-	}
 }
 
 KdNTree<cvx::Cube, KdNode4 > * GLWidget::tree()

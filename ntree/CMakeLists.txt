@@ -17,6 +17,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "window.h"
 "glwidget.h"
 "../shared/Morton3D.h"
+../shared/HElemAsset.h
 ../kdtree/KdBuilder.h
 ../kdtree/KdEngine.h
 ../kdtree/KdRope.h
@@ -188,5 +189,55 @@ target_link_libraries (testntree ${Boost_CHRONO_LIBRARY})
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
-message (${Boost_LIBRARIES})
-target_link_libraries(testntree ${Boost_LIBRARIES})
+set (SHOTRI_HEADER_FILES "../shared/Base3DView.h" 
+triWindow.h
+"../shared/Morton3D.h"
+../shared/HElemAsset.h
+../kdtree/KdBuilder.h
+../kdtree/KdEngine.h
+../kdtree/KdRope.h
+../kdtree/KdNTree.h
+../kdtree/KdNNode.h
+../kdtree/KdSah.h
+../kdtree/TreeProperty.h
+../kdtree/HNTree.h
+../kdtree/VoxelGrid.h
+NTreeIO.h
+NTreeDrawer.h
+Container.h
+triWidget.h)
+
+set (SHOTRI_SOURCE_FILES ../shared/Base3DView.cpp
+../shared/KdTreeNode.cpp
+../shared/MinMaxBins.cpp 
+../shared/SplitEvent.cpp
+../shared/BaseBinSplit.cpp 
+../shared/GeoDrawer.cpp
+../shared/ViewFrame.cpp
+../shared/DrawBox.cpp
+../shared/CartesianGrid.cpp
+../kdtree/TreeProperty.cpp
+../kdtree/PrimBoundary.cpp
+../btree/HWorldGrid.cpp
+../kdtree/HNTree.cpp
+NTreeIO.cpp
+triWidget.cpp
+triWindow.cpp
+triMain.cpp)
+
+add_executable (shotriangle ${SHOTRI_HEADER_FILES} ${SHOTRI_SOURCE_FILES})
+target_link_libraries (shotriangle ${HDF5_LIBRARIES})
+target_link_libraries (shotriangle ${ZLIB_LIBRARIES})
+target_link_libraries (shotriangle ${SZIP_LIBRARY})
+target_link_libraries (shotriangle ${Aphid_Library})
+target_link_libraries (shotriangle ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (shotriangle ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (shotriangle ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (shotriangle ${Boost_REGEX_LIBRARY})
+target_link_libraries (shotriangle ${Boost_THREAD_LIBRARY})
+target_link_libraries (shotriangle ${Boost_CHRONO_LIBRARY})
+target_link_libraries (shotriangle Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (shotriangle ${OPENGL_LIBRARIES})
+
+
+

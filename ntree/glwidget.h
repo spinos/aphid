@@ -32,11 +32,7 @@ protected:
 private:
     void drawBoxes() const;
     void drawTree();
-    void drawATreelet(KdNode4 * treelet, const BoundingBox & lftBox, const BoundingBox & rgtBox, int level);
-	void drawANode(KdNode4 * treelet, int idx, const BoundingBox & box, int level, bool isRoot = false);
-    void drawConnectedTreelet(KdNode4 * treelet, int idx, const BoundingBox & box, int level);
-	void drawALeaf(unsigned start, unsigned n, const BoundingBox & box);
-	void drawIntersect();
+    void drawIntersect();
 	KdNTree<cvx::Cube, KdNode4 > * tree();
 	bool readTree(const std::string & filename);
 	void testTree();
