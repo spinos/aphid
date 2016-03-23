@@ -13,12 +13,17 @@
 
 namespace aphid {
 
-NTreeIO::NTreeIO() {}
+NTreeIO::NTreeIO() 
+{}
 
 bool NTreeIO::begin(const std::string & filename,
 					HDocument::OpenMode om)
 {
-	return HObject::FileIO.open(filename.c_str(), om);
+	if(!HObject::FileIO.open(filename.c_str(), om) ) {
+		std::cout<<"\n NTree IO cannot open file "<<filename;
+		return false;
+	}
+	return true;
 }
 
 void NTreeIO::end()

@@ -70,7 +70,7 @@ public:
 			return false;
 		}
 		name = assetNames[0];
-		return false;
+		return true;
 	}
 	
 protected:

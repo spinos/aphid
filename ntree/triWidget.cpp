@@ -33,10 +33,45 @@ void TriWidget::clientInit()
 
 void TriWidget::clientDraw()
 {
-	//drawBoxes();
-	drawTree();
+	drawTriangle();
+	// drawTree();
 	// drawIntersect();
 	// drawGrid();
+}
+
+void TriWidget::drawTriangle()
+{
+	if(!m_container.source() ) return;
+	
+	//getDrawer()->m_wireProfile.apply();
+	getDrawer()->m_surfaceProfile.apply();
+	getDrawer()->setColor(.8f, .8f, .8f);
+	
+/*
+	float diff[4] = {0.8, 0.8, 0.8, 1.0};
+	glEnable(GL_LIGHTING);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diff );
+*/
+		
+	const sdb::VectorArray<cvx::Triangle> * src = m_container.source();
+	const int n = src->size();
+	glBegin(GL_TRIANGLES);
+	int i=0;
+	for(;i<n;++i) {
+		const cvx::Triangle * t = src->get(i);
+		
+		glNormal3fv((GLfloat *)&t->N(0) );
+		glVertex3fv((GLfloat *)t->p(0) );
+		
+		glNormal3fv((GLfloat *)&t->N(1) );
+		glVertex3fv((GLfloat *)t->p(1) );
+		
+		glNormal3fv((GLfloat *)&t->N(2) );
+		glVertex3fv((GLfloat *)t->p(2) );
+	}
+	glEnd();
 }
 
 void TriWidget::drawTree()

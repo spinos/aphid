@@ -42,4 +42,5 @@ private:
 	};
 	WorkMode m_mode;
 	std::string m_filename;
+	std::string m_assetName;
 };

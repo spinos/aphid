@@ -141,8 +141,13 @@ class Triangle {
 public:
 	Triangle();
 	void setP(const Vector3F & p, const int & idx);
+	void resetNC();
 	void setN(const Vector3F & n, const int & idx);
 	void setC(const Vector3F & c, const int & idx);
+	
+	const Vector3F * p(int idx) const;
+	const Vector3F & P(int idx) const;
+	Vector3F N(int idx) const;
 
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();

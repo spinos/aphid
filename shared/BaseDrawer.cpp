@@ -51,7 +51,7 @@ BaseDrawer::~BaseDrawer ()
 void BaseDrawer::initializeProfile()
 {
 	m_markerProfile = GProfile(false, true, false, false, false);
-	m_surfaceProfile = GProfile(true, true, false, false, true);
+	m_surfaceProfile = GProfile(true, true, false, false, false);
 	surfaceMat = new GMaterial(Color4(0.05, 0.05, 0.05, 1.0),Color4(0.8, 0.8, 0.8, 1.0),Color4(0.23, 0.23, 0.19, 1.0),Color4(0.0, 0.0, 0.0, 1.0), 100.f);
 	m_surfaceProfile.m_material = surfaceMat;
 	m_wireProfile = GProfile(false, true, true, false, false);

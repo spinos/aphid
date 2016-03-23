@@ -43,5 +43,7 @@ void GProfile::apply() const
 	if(m_textured) glEnable(GL_TEXTURE_2D);
 	else glDisable(GL_TEXTURE_2D);
 	
-	if(m_material) m_material->apply();
+	if(m_material) {
+		m_material->apply();
+	}
 }

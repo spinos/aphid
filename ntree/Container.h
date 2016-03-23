@@ -29,10 +29,12 @@ public:
 	
 	bool readTree(const std::string & filename);
 	KdNTree<T, KdNode4 > * tree();
+	const sdb::VectorArray<T> * source() const;
 	
 protected:
 
 private:
+	void loadTriangles(const std::string & name);
 	
 };
 
@@ -59,10 +61,14 @@ bool Container<T>::readTree(const std::string & filename)
 	std::string elmName;
 	stat = hio.findElemAsset<T>(elmName);
 	if(stat) {
-		std::cout<<"\n asset "<<elmName;
-		m_source = new sdb::VectorArray<T>();
+		std::cout<<"\n found "<<T::GetTypeStr()<<" type asset "<<elmName;
+		
+		if(T::ShapeTypeId == cvx::TTriangle ) 
+			loadTriangles(elmName);
 		
 	}
+	else 
+		std::cout<<"\n found no "<<T::GetTypeStr()<<" type asset";
 	
 	hio.end();
 	return true;
@@ -71,3 +77,21 @@ bool Container<T>::readTree(const std::string & filename)
 template<typename T>
 KdNTree<T, KdNode4 > * Container<T>::tree()
 { return m_tree; }
+
+template<typename T>
+const sdb::VectorArray<T> * Container<T>::source() const
+{ return m_source; }
+
+template<typename T>
+void Container<T>::loadTriangles(const std::string & name)
+{
+	HTriangleAsset ass(name);
+	ass.load();
+	std::cout<<"\n bbox "<<ass.getBBox();
+	if(ass.numElems() > 0) {
+		m_source = new sdb::VectorArray<T>();
+		ass.extract(m_source);
+		std::cout<<"\n n tri "<<m_source->size();
+	}
+	ass.close();
+}

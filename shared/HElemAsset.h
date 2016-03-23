@@ -14,6 +14,7 @@
 #include <HOocArray.h>
 #include <Boundary.h>
 #include <ConvexShape.h>
+#include <VectorArray.h>
 
 namespace aphid {
 
@@ -31,6 +32,7 @@ template<typename T, int NRow>
 class HElemAsset : public HElemBase, public Boundary {
 
 	HOocArray<hdata::TChar, NRow, 1024> * m_data;
+	int m_numElem;
 	
 public:
 	HElemAsset(const std::string & name);
@@ -40,13 +42,17 @@ public:
 	virtual char load();
     
 	void insert(const T & x);
+	void extract(sdb::VectorArray<T> * dst);
+	
+	const int & numElems() const;
 	
 };
 
 template<typename T, int NRow>
 HElemAsset<T, NRow>::HElemAsset(const std::string & name) :
 HElemBase(name),
-m_data(NULL)
+m_data(NULL),
+m_numElem(0)
 {}
 
 template<typename T, int NRow>
@@ -76,10 +82,10 @@ char HElemAsset<T, NRow>::save()
 	if(!hasNamedAttr(".nelem") )
 	    addIntAttr(".nelem", 1);
 	
-	int ne = m_data->numCols();
-	writeIntAttr(".nelem", (int *)&ne );
+	m_numElem = m_data->numCols();
+	writeIntAttr(".nelem", (int *)&m_numElem );
 	
-	std::cout<<"\n HElemAsset saved "<<ne<<" "<<T::GetTypeStr();
+	std::cout<<"\n HElemAsset saved "<<m_numElem<<" "<<T::GetTypeStr();
 	
 	return 1;
 }
@@ -106,6 +112,8 @@ char HElemAsset<T, NRow>::load()
 	readFloatAttr(".bbx", (float *)&b );
 	setBBox(b);
 	
+	readIntAttr(".nelem", &m_numElem );
+	
 	m_data = new HOocArray<hdata::TChar, NRow, 1024>(".data");
 	if(!m_data->openStorage(fObjectId)) {
 		std::cout<<"\n HElemAsset cannot open data storage";
@@ -113,6 +121,24 @@ char HElemAsset<T, NRow>::load()
 	}
 	
 	return 1;
+}
+
+template<typename T, int NRow>
+const int & HElemAsset<T, NRow>::numElems() const
+{ return m_numElem; }
+
+template<typename T, int NRow>
+void HElemAsset<T, NRow>::extract(sdb::VectorArray<T> * dst)
+{
+	if(!m_data) return;
+	
+	T s;
+	int i=0;
+	for(;i<m_numElem;++i) {
+		m_data->readColumn((char *)&s, i);
+		dst->insert(s);
+	}
+	
 }
 
 typedef HElemAsset<cvx::Triangle, 48> HTriangleAsset;

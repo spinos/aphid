@@ -161,6 +161,9 @@ void Triangle::setP(const Vector3F & p, const int & idx)
 	else m_p2 = p;
 }
 
+void Triangle::resetNC()
+{ m_nc0 = m_nc1 = m_nc2 = 0; }
+
 void Triangle::setN(const Vector3F & n, const int & idx)
 {
 	if(idx == 0) colnor30::encodeN(m_nc0, n);
@@ -173,6 +176,29 @@ void Triangle::setC(const Vector3F & c, const int & idx)
 	if(idx == 0) colnor30::encodeC(m_nc0, c);
 	else if(idx == 1) colnor30::encodeC(m_nc1, c);
 	else  colnor30::encodeC(m_nc2, c);
+}
+
+const Vector3F * Triangle::p(int idx) const
+{ 
+	if(idx == 0) return &m_p0;
+	else if(idx == 1) return &m_p1;
+	return &m_p2;
+}
+
+const Vector3F & Triangle::P(int idx) const
+{ 
+	if(idx == 0) return m_p0;
+	else if(idx == 1) return m_p1;
+	return m_p2;
+}
+
+Vector3F Triangle::N(int idx) const
+{
+	Vector3F r;
+	if(idx == 0) colnor30::decodeN(r, m_nc0);
+	else if(idx == 1) colnor30::decodeN(r, m_nc1);
+	else colnor30::decodeN(r, m_nc2);
+	return r;
 }
 
 ShapeType Triangle::ShapeTypeId = TTriangle;

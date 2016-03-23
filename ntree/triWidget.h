@@ -33,7 +33,7 @@ protected:
 	
 	
 private:
-    // void drawBoxes() const;
+    void drawTriangle();
     void drawTree();
 	// void drawIntersect();
 	// void testGrid();
