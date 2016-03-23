@@ -39,6 +39,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/ViewFrame.cpp
 ../shared/DrawBox.cpp
 ../shared/CartesianGrid.cpp
+../shared/HElemAsset.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
 ../btree/HWorldGrid.cpp
@@ -216,6 +217,7 @@ set (SHOTRI_SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/ViewFrame.cpp
 ../shared/DrawBox.cpp
 ../shared/CartesianGrid.cpp
+../shared/HElemAsset.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
 ../btree/HWorldGrid.cpp

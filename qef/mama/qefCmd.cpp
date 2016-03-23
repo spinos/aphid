@@ -128,9 +128,10 @@ MStatus QefCmd::writeSelected()
 	bbox.round();
 	AHelper::Info<BoundingBox>(" bbox ", bbox);
 	
+	int nt = 0;
 	meshIt = orderedMeshes.begin();
     for(;meshIt != orderedMeshes.end(); ++meshIt) {
-        writeMesh(triass, bbox.getMin(), meshIt->second);
+        nt += writeMesh(triass, bbox.getMin(), meshIt->second);
     }
     
 	triass.save();
@@ -138,6 +139,7 @@ MStatus QefCmd::writeSelected()
 	m_io.end();
 	
 	AHelper::Info<std::string >(" NTree IO finished writing file", m_filename );
+    AHelper::Info<int >(" n triangle", nt );
     return MS::kSuccess;
 }
 
@@ -151,7 +153,7 @@ void QefCmd::updateMeshBBox(BoundingBox & bbox, const MDagPath & path)
 	}
 }
 
-void QefCmd::writeMesh(HTriangleAsset & asset, 
+int QefCmd::writeMesh(HTriangleAsset & asset, 
 						const Vector3F & ref, const MDagPath & path)
 {
     AHelper::Info<MString>("w mesh", path.fullPathName() );
@@ -203,4 +205,5 @@ void QefCmd::writeMesh(HTriangleAsset & asset,
     }
     
     AHelper::Info<int>(" total n tri ", totalNTri);
+	return totalNTri;
 }

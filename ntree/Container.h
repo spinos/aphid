@@ -57,7 +57,7 @@ bool Container<T>::readTree(const std::string & filename)
 	if(!hio.begin(filename) ) return false;
 	
 	std::string elmName;
-	//stat = hio.findElemAsset(elmName);
+	stat = hio.findElemAsset<T>(elmName);
 	if(stat) {
 		std::cout<<"\n asset "<<elmName;
 		m_source = new sdb::VectorArray<T>();

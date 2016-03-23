@@ -449,6 +449,15 @@ std::string HBase::childPath(int i)
 	return sst.str();
 }
 
+bool HBase::hasNamedAttrIntVal(const std::string & attrName,
+								int attrVal)
+{
+	if(!hasNamedAttr(attrName.c_str() ) ) return false;
+	int v = -1;
+	if(!readIntAttr(attrName.c_str(), &v) ) return false;
+	return (v == attrVal);
+}
+
 char HBase::save()
 { return 1; }
 

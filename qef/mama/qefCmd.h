@@ -32,7 +32,7 @@ protected:
 	MStatus printHelp();
 	MStatus writeSelected();
 	void updateMeshBBox(BoundingBox & bbox, const MDagPath & path);
-    void writeMesh(HTriangleAsset & asset, 
+    int writeMesh(HTriangleAsset & asset, 
 					const Vector3F & ref, const MDagPath & path);
     
 private:

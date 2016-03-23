@@ -17,8 +17,18 @@
 
 namespace aphid {
 
+class HElemBase : public HBase {
+
+public:
+	HElemBase(const std::string & name);
+	virtual ~HElemBase();
+	
+	virtual char verifyType();
+
+};
+
 template<typename T, int NRow>
-class HElemAsset : public HBase, public Boundary {
+class HElemAsset : public HElemBase, public Boundary {
 
 	HOocArray<hdata::TChar, NRow, 1024> * m_data;
 	
@@ -26,7 +36,6 @@ public:
 	HElemAsset(const std::string & name);
 	virtual ~HElemAsset();
 	
-	virtual char verifyType();
 	virtual char save();
 	virtual char load();
     
@@ -36,23 +45,13 @@ public:
 
 template<typename T, int NRow>
 HElemAsset<T, NRow>::HElemAsset(const std::string & name) :
-HBase(name),
+HElemBase(name),
 m_data(NULL)
 {}
 
 template<typename T, int NRow>
 HElemAsset<T, NRow>::~HElemAsset()
 { if(m_data) delete m_data; }
-
-template<typename T, int NRow>
-char HElemAsset<T, NRow>::verifyType()
-{
-	if(!hasNamedAttr(".bbx") ) return 0;
-	if(!hasNamedAttr(".elemtyp") ) return 0;
-	if(!hasNamedAttr(".nelem") ) return 0;
-	if(!hasNamedData(".data") ) return 0;
-	return 1;
-}
 
 template<typename T, int NRow>
 char HElemAsset<T, NRow>::save()

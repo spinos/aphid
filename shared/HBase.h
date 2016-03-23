@@ -67,6 +67,9 @@ public:
 	char hasNamedData(const char * dataName);
 	char discardNamedAttr(const char * path);
 	
+	bool hasNamedAttrIntVal(const std::string & attrName,
+							int attrVal);
+	
 	int numChildren();
 	int numAttrs();
 	int numDatas();
@@ -87,6 +90,24 @@ public:
 			if(isChildGroup(i)) {
 				T gc(childPath(i));
 				if(gc.verifyType()) names.push_back(childPath(i));
+				gc.close();
+			}
+		}
+	}
+	
+	template<typename T>
+	void lsTypedChildWithIntAttrVal(std::vector<std::string> & names,
+									const std::string & attrName,
+									int attrVal ) {
+		int nc = numChildren();
+		int i = 0;
+		for(;i<nc;i++) {
+			if(isChildGroup(i)) {
+				T gc(childPath(i));
+				if(gc.verifyType()) {
+					if(gc.hasNamedAttrIntVal(attrName, attrVal ) )
+						names.push_back(childPath(i));
+				}
 				gc.close();
 			}
 		}

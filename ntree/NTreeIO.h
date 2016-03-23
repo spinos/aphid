@@ -29,7 +29,7 @@ public:
 	
 	bool findTree(std::string & name,
 				const std::string & grpName="/");
-	
+				
 	cvx::ShapeType gridValueType(const std::string & name);
 	
 	template<typename T>
@@ -53,6 +53,24 @@ public:
 			dst->insert(c);
 			grd->next();
 		}
+	}
+	
+	template<typename T>
+	bool findElemAsset(std::string & name,
+				const std::string & grpName="/")
+	{
+		std::vector<std::string > assetNames;
+		HBase r(grpName);
+		r.lsTypedChildWithIntAttrVal<HElemBase>(assetNames,
+											".elemtyp", T::ShapeTypeId );
+		r.close();
+		
+		if(assetNames.size() <1) {
+			std::cout<<"\n found no elem";
+			return false;
+		}
+		name = assetNames[0];
+		return false;
 	}
 	
 protected:
