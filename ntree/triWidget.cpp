@@ -43,7 +43,6 @@ void TriWidget::drawTriangle()
 {
 	if(!m_container.source() ) return;
 	
-	//getDrawer()->m_wireProfile.apply();
 	getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->setColor(.8f, .8f, .8f);
 	
@@ -78,6 +77,7 @@ void TriWidget::drawTree()
 {
 	if(!m_container.tree() ) return; 
 	
+	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.15f, .25f, .35f);
 	getDrawer()->boundingBox(m_container.tree()->getBBox() );
 	

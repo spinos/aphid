@@ -19,7 +19,7 @@ template<typename T>
 class Container {
 
 	KdEngine<T> m_engine;
-	BoundingBox m_rootBox;
+	BoundingBox m_worldBox;
 	sdb::VectorArray<T> * m_source;
 	KdNTree<T, KdNode4 > * m_tree;
 	VoxelGrid<KdNTree<T, KdNode4 >, T > * m_grid;
@@ -83,11 +83,19 @@ bool Container<T>::buildTree()
 	if(!m_source) return false;
 	if(m_source->size() < 1) return false;
 	
+	float d0 = m_worldBox.distance(0);
+	float d1 = m_worldBox.distance(1);
+	float d2 = m_worldBox.distance(2);
+	BoundingBox rootBox;
+	rootBox.setMin(0.f, 0.f, 0.f);
+	rootBox.setMax(d0, d1, d2);
+	std::cout<<"\n root bbox "<<rootBox;
+	
 	m_tree = new KdNTree<T, KdNode4 >();
 	
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 16;
-    m_engine.buildTree(m_tree, m_source, m_rootBox, &bf);
+	bf._maxLeafPrims = 64;
+    m_engine.buildTree(m_tree, m_source, rootBox, &bf);
 	
 	return true;
 }
@@ -105,15 +113,8 @@ void Container<T>::loadTriangles(const std::string & name)
 {
 	HTriangleAsset ass(name);
 	ass.load();
-	m_rootBox = ass.getBBox();
-	std::cout<<"\n world bbox "<<m_rootBox;
-	float d0 = m_rootBox.distance(0);
-	float d1 = m_rootBox.distance(1);
-	float d2 = m_rootBox.distance(2);
-	m_rootBox.setMin(0.f, 0.f, 0.f);
-	m_rootBox.setMax(d0, d1, d2);
-	std::cout<<"\n local bbox "<<m_rootBox;
-	
+	m_worldBox = ass.getBBox();
+	std::cout<<"\n world bbox "<<m_worldBox;
 	if(ass.numElems() > 0) {
 		m_source = new sdb::VectorArray<T>();
 		ass.extract(m_source);

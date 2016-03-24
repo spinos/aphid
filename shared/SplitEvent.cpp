@@ -13,7 +13,7 @@ namespace aphid {
 
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
-	m_cost = 1e28f;
+	m_cost = 1e38f;
 }
 
 void SplitEvent::setEmpty()
@@ -58,9 +58,12 @@ const int & SplitEvent::rightCount() const
 
 int SplitEvent::side(const BoundingBox &box) const
 {
+/// both
 	int side = 1;
+/// left only
 	if(box.getMax(m_axis) <= m_pos)
 		side = 0;
+/// right only
 	else if(box.getMin(m_axis) >= m_pos)
 		side = 2;
 	return side;
@@ -98,7 +101,7 @@ void SplitEvent::limitBox(const BoundingBox & b)
     if(m_rightBox.isValid()) m_rightBox.shrinkBy(b);
 }
 
-void SplitEvent::calculateCost(float x)
+void SplitEvent::calculateCost(const float & a)
 {/*
 	BoundingBox leftBBox, rightBBox;
 	for(unsigned i = 0; i < NumPrimitive; i++) {
@@ -111,8 +114,14 @@ void SplitEvent::calculateCost(float x)
 	*/
 	if(m_isEmpty) return;
 	m_cost = 1.5f;
-	if(m_leftBox.isValid()) m_cost += 2.f * (m_leftBox.area() * m_leftNumPrim) / x;
-	if(m_rightBox.isValid()) m_cost += 2.f * (m_rightBox.area() * m_rightNumPrim) / x;
+	if(m_leftBox.isValid()) {
+		//m_leftBox.shrinkBy(b);
+		m_cost += 2.f * (m_leftBox.area() * m_leftNumPrim) / a;
+	}
+	if(m_rightBox.isValid()) {
+		//m_rightBox.shrinkBy(b);
+		m_cost += 2.f * (m_rightBox.area() * m_rightNumPrim) / a;
+	}
 }
 
 float SplitEvent::area() const
@@ -125,22 +134,21 @@ bool SplitEvent::hasBothSides() const
 	return (m_leftNumPrim > 0 && m_rightNumPrim > 0);
 }
 
-BoundingBox SplitEvent::leftBound() const
+const BoundingBox & SplitEvent::leftBound() const
 { return m_lftBound; }
 
-BoundingBox SplitEvent::rightBound() const
+const BoundingBox & SplitEvent::rightBound() const
 { return m_rgtBound; }
 
 void SplitEvent::verbose() const
 {
-	std::cout<<"\n split event";
+	std::cout<<"\n split event along "<<m_axis
+	<<" at "<<m_pos<<" cost "<<m_cost;
 	if(m_isEmpty) {
 		std::cout<<" is empty";
 		return;
 	}
-	std::cout<<" along "<<m_axis
-	<<" at "<<m_pos<<" cost "<<m_cost
-	<<"\n prim count "<<m_leftNumPrim<<"/"<<m_rightNumPrim
+	std::cout<<"\n prim count "<<m_leftNumPrim<<"/"<<m_rightNumPrim
 	<<"\n bound "<<m_lftBound
 	<<"/"<<m_rgtBound
 	<<"\n box "<<m_leftBox
@@ -148,5 +156,7 @@ void SplitEvent::verbose() const
 	//printf("cost %f left %i %f right %i %f\n", m_cost, m_leftNumPrim, m_leftBox.area(), m_rightNumPrim, m_rightBox.area());
 }
 
+const char & SplitEvent::isEmpty() const
+{ return m_isEmpty; }
 }
 //:~

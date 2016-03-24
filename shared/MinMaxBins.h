@@ -32,7 +32,7 @@ class MinMaxBins {
 	int m_numSplits;
 	float m_delta;
 	bool m_isEven;
-	char m_isFlat;
+	bool m_isFlat;
 
 public:
 	MinMaxBins();
@@ -43,7 +43,7 @@ public:
 	void add(const float &min, const float &max);
 	void scan();
 	void getCounts(const unsigned &idx, unsigned &left, unsigned &right) const;
-	char isFlat() const;
+	bool isFlat() const;
 	void setFlat();
 	const float & delta() const;
 	bool insertSplitPos(const float & x);

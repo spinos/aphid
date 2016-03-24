@@ -25,8 +25,7 @@ public:
 	
 	bool isCompressed() const;
 	void verbose() const;
-	bool canEndSubdivide(const float & costOfDivivde, 
-							const bool & twoSided = false ) const;
+	bool canEndSubdivide(const float & costOfDivivde) const;
 	GridClustering * grid();
 	void createGrid(const float & x);
 	void addCell(const sdb::Coord3 & x, GroupCell * c);
