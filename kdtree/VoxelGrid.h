@@ -86,8 +86,7 @@ public:
 	
 	void create(Ttree * tree, 
 				const BoundingBox & b,
-				int maxLevel = 9,
-				int minLevel = 5);
+				int maxLevel = 8);
 	
 	int numVoxels() const;
 	int numContours() const;
@@ -111,8 +110,7 @@ VoxelGrid<Ttree, Tvalue>::~VoxelGrid() {}
 template<typename Ttree, typename Tvalue>
 void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree, 
 										const BoundingBox & b,
-										int maxLevel,
-										int minLevel)
+										int maxLevel)
 {
 	m_voxels.clear();
 	m_contours.clear();
@@ -136,7 +134,7 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
                 sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
                 box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
                 box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-				box.reset();
+				box.reset(1);
 				tree->intersectBox(&box);
 				if(box.numIntersect() > 0 )
 					addCell(sample, level, box.numIntersect() );
@@ -150,21 +148,12 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
         refine(tree, cellsToRefine);
 		level++;
 		if(level < m_maxLevel) needRefine = tagCellsToRefine(cellsToRefine);
-		std::cout<<"\n refine level"<<level<<" n cell "<<numCells();
+		std::cout<<"\n level"<<level<<" n cell "<<numCells();
     }
 	
-	std::cout<<"\n reach level "<<level;
-	
-	level = 3;
-	while(level < minLevel) {
-		if(tagLevelCellsToRefine(cellsToRefine, level) ) {
-			refine(tree, cellsToRefine);
-			std::cout<<"\n refine level "<<level<<" n cell "<<numCells();
-		}
-		level++;
-	}
+	std::cout<<"\n end refine "<<level;
 		
-	createVoxels(tree);
+	//createVoxels(tree);
 }
 
 template<typename Ttree, typename Tvalue>
@@ -174,20 +163,14 @@ bool VoxelGrid<Ttree, Tvalue>::tagCellsToRefine(sdb::CellHash & cellsToRefine)
 	sdb::CellHash * c = cells();
     c->begin();
     while(!c->end()) {
-        if(c->value()->visited > 3) {
-			sdb::CellValue * ind = new sdb::CellValue;
-			ind->level = c->value()->level;
-			ind->visited = 1;
-			cellsToRefine.insert(c->key(), ind);
-		}
+        
+		sdb::CellValue * ind = new sdb::CellValue;
+		ind->level = c->value()->level;
+		ind->visited = 1;
+		cellsToRefine.insert(c->key(), ind);
+		
         c->next();
 	}
-	if(cellsToRefine.size() < 1 ) return false;
-	
-	tagCellsToRefineByNeighbours(cellsToRefine);
-	tagCellsToRefineByNeighbours(cellsToRefine);
-	tagCellsToRefineByNeighbours(cellsToRefine);
-	tagCellsToRefineByNeighbours(cellsToRefine);
 	
 	return true;
 }
@@ -236,7 +219,7 @@ void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefin
 			hh * Cell8ChildOffset[u][2]);
 			box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
 			box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
-			box.reset();
+			box.reset(1);
 			tree->intersectBox(&box);
 			if(box.numIntersect() > 0) 
 				addCell(subs, level1, box.numIntersect());

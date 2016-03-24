@@ -30,16 +30,13 @@ protected:
     virtual void clientMouseInput(QMouseEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 	
-	
-	
 private:
     void drawTriangle();
     void drawTree();
 	void testIntersect(const Ray * incident);
 	void drawIntersect();
 	void drawActiveSource(const unsigned & iLeaf);
-	// void testGrid();
-	// void drawGrid();
+	void drawGrid();
 	
 private slots:
 	

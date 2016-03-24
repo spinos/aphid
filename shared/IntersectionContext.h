@@ -54,14 +54,18 @@ private:
 class BoxIntersectContext : public BoundingBox {
 	
 	std::vector<int> m_prims;
+	int m_cap;
+	bool m_exact;
 	
 public:
 	BoxIntersectContext();
 	virtual ~BoxIntersectContext();
 	
-	void reset();
+	void reset(int maxNumPrim = 1, bool beExact = false);
 	void addPrim(const int & i);
 	int numIntersect() const;
+	bool isExact() const;
+	bool isFull() const;
 	
 };
 

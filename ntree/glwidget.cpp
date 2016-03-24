@@ -241,7 +241,7 @@ void GLWidget::testGrid()
 	m_grid = new VoxelGrid<KdNTree<cvx::Cube, KdNode4 >, cvx::Cube >();
 	BoundingBox b = m_tree->getBBox();
 	b.expand(b.getLongestDistance() * .005f);
-	m_grid->create(m_tree, b, 9, 6);
+	m_grid->create(m_tree, b);
 	
 	m_source->clear();
 	m_grid->extractCellBoxes(m_source);

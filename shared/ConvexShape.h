@@ -11,6 +11,7 @@
 #include "Matrix44F.h"
 #include "BoundingBox.h"
 #include "Ray.h"
+#include "GjkIntersection.h"
 
 namespace aphid {
     
@@ -110,7 +111,7 @@ public:
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	
 	template<typename T>
-	bool exactIntersect(const T & b) const{
+	bool exactIntersect(const T & b) const {
 		return true;
 	}
     
@@ -153,6 +154,15 @@ public:
 
 	BoundingBox calculateBBox() const;
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
+	
+	template<typename T>
+	bool exactIntersect(const T & b) const {
+	
+		return gjk::Intersect1<Triangle, T>::Evaluate(*this, b);
+	}
+	
+	const Vector3F & X(int idx) const;
+	const Vector3F & supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();

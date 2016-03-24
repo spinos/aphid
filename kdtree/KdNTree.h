@@ -549,9 +549,14 @@ void KdNTree<T, Tn>::leafIntersectBox(BoxIntersectContext * ctx,
 	for(;i<len;++i) {
 		const T * c = m_source->get(primIndirectionAt(start + i) );
 		if(c->calculateBBox().intersect(*ctx) ) {
-			if(c-> template exactIntersect<BoxIntersectContext >(*ctx) ) {
-				ctx->addPrim(primIndirectionAt(start + i) );
+			if(ctx->isExact() ) {
+				if(c-> template exactIntersect<BoxIntersectContext >(*ctx) )
+					ctx->addPrim(primIndirectionAt(start + i) );
 			}
+			else
+				ctx->addPrim(primIndirectionAt(start + i) );
+				
+			if(ctx->isFull() ) return;
 		}
 	}
 }
@@ -562,8 +567,6 @@ void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
 							int nodeIdx,
 							const BoundingBox & b)
 {
-	if(!b.intersect(*ctx) ) return;
-	
 	Tn * currentBranch = branches()[branchIdx];
 	KdTreeNode * r = currentBranch->node(nodeIdx);
 	if(r->isLeaf() ) {
@@ -578,26 +581,39 @@ void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
 	
 	const int offset = r->getOffset();
 	if(offset < Tn::TreeletOffsetMask) {
-		innerIntersectBox(ctx, 
+		if(ctx->getMin(axis) < splitPos ) {
+			innerIntersectBox(ctx, 
 							branchIdx,
 							nodeIdx + offset,
 							lftBox);
-		innerIntersectBox(ctx, 
+			if(ctx->isFull() ) return;
+		}
+		
+		if(ctx->getMax(axis) > splitPos ) {
+			innerIntersectBox(ctx, 
 							branchIdx,
 							nodeIdx + offset + 1,
 							rgtBox);
+			if(ctx->isFull() ) return;
+		}
 	}
 	else {
-		innerIntersectBox(ctx, 
+		if(ctx->getMin(axis) < splitPos ) {
+			innerIntersectBox(ctx, 
 							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							0,
 							lftBox);
-		innerIntersectBox(ctx, 
+			if(ctx->isFull() ) return;
+		}
+		
+		if(ctx->getMax(axis) > splitPos ) {
+			innerIntersectBox(ctx, 
 							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							1,
 							rgtBox);
+			if(ctx->isFull() ) return;
+		}
 	}
-		
 }
 
 }

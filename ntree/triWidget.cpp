@@ -12,6 +12,7 @@
 #include <BaseCamera.h>
 #include <GeoDrawer.h>
 #include <NTreeDrawer.h>
+#include "GridDrawer.h"
 
 TriWidget::TriWidget(const std::string & filename, QWidget *parent) : 
 Base3DView(parent)
@@ -36,7 +37,7 @@ void TriWidget::clientDraw()
 	drawTriangle();
 	drawTree();
 	drawIntersect();
-	// drawGrid();
+	drawGrid();
 }
 
 void TriWidget::drawTriangle()
@@ -157,3 +158,13 @@ void TriWidget::drawActiveSource(const unsigned & iLeaf)
 	}
 	glEnd();
 }
+
+void TriWidget::drawGrid()
+{
+	if(!m_container.grid() ) return;
+	
+	glColor3f(0,.3,.4);
+	GridDrawer dr;
+	dr.drawGrid<CartesianGrid>(m_container.grid() );
+}
+//:~

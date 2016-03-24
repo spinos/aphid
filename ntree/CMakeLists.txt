@@ -17,6 +17,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "window.h"
 "glwidget.h"
 "../shared/Morton3D.h"
+../shared/ConvexShape.h
 ../shared/HElemAsset.h
 ../kdtree/KdBuilder.h
 ../kdtree/KdEngine.h
@@ -193,6 +194,7 @@ add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 set (SHOTRI_HEADER_FILES "../shared/Base3DView.h" 
 triWindow.h
 "../shared/Morton3D.h"
+../shared/ConvexShape.h
 ../shared/HElemAsset.h
 ../kdtree/KdBuilder.h
 ../kdtree/KdEngine.h

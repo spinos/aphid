@@ -30,6 +30,7 @@ public:
 	
 	bool readTree(const std::string & filename);
 	KdNTree<T, KdNode4 > * tree();
+	VoxelGrid<KdNTree<T, KdNode4 >, T > * grid();
 	const sdb::VectorArray<T> * source() const;
 	const BoundingBox & worldBox() const;
 	
@@ -38,6 +39,7 @@ protected:
 private:
 	void loadTriangles(const std::string & name);
 	bool buildTree();
+	bool buildGrid();
 	
 };
 
@@ -75,7 +77,8 @@ bool Container<T>::readTree(const std::string & filename)
 	
 	hio.end();
 	
-	return buildTree();
+	buildTree();
+	return buildGrid();
 }
 
 template<typename T>
@@ -102,12 +105,35 @@ bool Container<T>::buildTree()
 }
 
 template<typename T>
+bool Container<T>::buildGrid()
+{
+	m_grid = new VoxelGrid<KdNTree<T, KdNode4 >, T >();
+	BoundingBox b = m_tree->getBBox();
+	b.expand(b.getLongestDistance() * .005f);
+	m_grid->create(m_tree, b);
+	
+	/*m_source->clear();
+	m_grid->extractCellBoxes(m_source);
+	
+	BoundingBox rootBox;
+	m_grid->getBounding(rootBox);
+	
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 8;
+    m_engine.buildTree(m_tree, m_source, rootBox, &bf);*/
+}
+
+template<typename T>
 KdNTree<T, KdNode4 > * Container<T>::tree()
 { return m_tree; }
 
 template<typename T>
 const sdb::VectorArray<T> * Container<T>::source() const
 { return m_source; }
+
+template<typename T>
+VoxelGrid<KdNTree<T, KdNode4 >, T > * Container<T>::grid()
+{ return m_grid; }
 
 template<typename T>
 const BoundingBox & Container<T>::worldBox() const

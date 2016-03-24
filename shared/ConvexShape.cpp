@@ -251,6 +251,26 @@ bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
     return true;
 }
 
+const Vector3F & Triangle::X(int idx) const
+{ return P(idx); }
+
+const Vector3F & Triangle::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	float maxdotv = -1e18f;
+    float dotv;
+	int ir = 0;
+	
+    for(int i=0; i < 3; ++i) {
+        dotv = P(i).dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            ir = i;
+        }
+    }
+    if(localP) *localP = P(ir);
+    return P(ir);
+}
+
 ShapeType Triangle::ShapeTypeId = TTriangle;
 
 std::string Triangle::GetTypeStr()
