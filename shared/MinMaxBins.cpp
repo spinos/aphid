@@ -16,7 +16,7 @@ MinMaxBins::MinMaxBins() :
 
 m_numSplits(0),
 m_isEven(false),
-m_isFlat(0)
+m_isFlat(false)
 {}
 
 MinMaxBins::~MinMaxBins() 
@@ -137,11 +137,11 @@ void MinMaxBins::getCounts(const unsigned &idx, unsigned &left, unsigned &right)
 	right =	m_maxBin[idx];
 }
 
-char MinMaxBins::isFlat() const
+bool MinMaxBins::isFlat() const
 { return m_isFlat; }
 
 void MinMaxBins::setFlat()
-{ m_isFlat = 1; }
+{ m_isFlat = true; }
 
 const float & MinMaxBins::delta() const
 { return m_delta; }

@@ -102,12 +102,10 @@ void PrimBoundary::countPrimsInGrid()
 	m_numPrims = m_grid->numElements();
 }
 
-bool PrimBoundary::canEndSubdivide(const float & costOfDivivde,
-									const bool & twoSided) const
+bool PrimBoundary::canEndSubdivide(const float & costOfDivivde) const
 {
 	if(isCompressed() ) return false;
-    if(twoSided) return (costOfDivivde > visitCost() );
-	return costOfDivivde * .67f > visitCost();
+    return (costOfDivivde > visitCost() );
 }
 
 void PrimBoundary::verbose() const

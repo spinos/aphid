@@ -32,15 +32,16 @@ public:
 	const int & rightCount() const;
 	
 	void calculateTightBBoxes(const BoundingBox &box, BoundingBox &leftBBox, BoundingBox &rightBBox);
-	void calculateCost(float x);
+	void calculateCost(const float & a);
 	float area() const;
 	int side(const BoundingBox &box) const;
 	void updateLeftBox(const BoundingBox &box);
 	void updateRightBox(const BoundingBox &box);
-	BoundingBox leftBound() const;
-	BoundingBox rightBound() const;
+	const BoundingBox & leftBound() const;
+	const BoundingBox & rightBound() const;
 	bool hasBothSides() const;
 	void limitBox(const BoundingBox & b);
+	const char & isEmpty() const;
 	void verbose() const;
 	
 private:

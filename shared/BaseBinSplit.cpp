@@ -11,7 +11,9 @@
 
 namespace aphid {
 
-#define MMBINISFLATRATIO .19f
+#define MMBINISFLATRATIO .1f
+#define MMBINCUTOFFRATIO .2f
+
 BaseBinSplit::BaseBinSplit() 
 {}
 
@@ -107,27 +109,32 @@ bool BaseBinSplit::cutoffEmptySpace(int & dst, const BoundingBox & bb, const flo
 
 void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 {
-	float lowest = 1e28f;
 	m_bestEventIdx = 0;
+	if(isEmptyAlong(0)
+		&& isEmptyAlong(1)
+		&& isEmptyAlong(2) ) {
+/// no split, the best one will be empty
+				return;
+			}
+			
+	float lowest = 1e39f;
 	for(int axis = 0; axis < 3; axis++) {
 	    if(isEmptyAlong(axis))
 			continue;
 		
-		for(int i = 1; i < m_bins[axis].numSplits()-1; i++) {
+		for(int i = 1; i < m_bins[axis].numSplits()-1; ++i) {
 			const SplitEvent * e = splitAt(axis, i);
-			if(e->getCost() < lowest 
-				&& e->hasBothSides()
-				) {
+			if(e->getCost() < lowest) {
 				lowest = e->getCost();
 				m_bestEventIdx = i + MMBINNSPLITLIMIT * axis;
 			}
 		}
 	}
-	//std::cout<<"\n lowest cost "<<lowest;
-	//m_event[m_bestEventIdx].verbose();
+
 #if 1
+	if(m_event[m_bestEventIdx].hasBothSides() ) {
 	int lc = 0;
-	if(cutoffEmptySpace(lc, b, b.volume() * .34f)) {
+	if(cutoffEmptySpace(lc, b, b.volume() * MMBINCUTOFFRATIO)) {
 		// if(m_event[lc].getCost() < lowest * 2.f )
 		    m_bestEventIdx = lc;
 #if 0
@@ -136,15 +143,35 @@ void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 				<<":"
 				<<lc%SplitEvent::NumEventPerDimension;
 #endif
+		}
 	}
 #endif
-	//if(!m_event[m_bestEventIdx].hasBothSides()) {
-	//if(m_bins[m_bestEventIdx/MMBINNSPLITLIMIT].numSplits() < 4) {
-	if(0) {
-		std::cout<<"\n\n best split "<<m_bestEventIdx;
+	
+#if 0
+	std::cout<<"\n\n best split "<<m_bestEventIdx;
+	m_event[m_bestEventIdx].verbose();
+	m_bins[m_bestEventIdx/MMBINNSPLITLIMIT].verbose();
+
+	if(m_event[m_bestEventIdx].isEmpty() ) {
+		std::cout<<"\n warning empty split event "<<m_bestEventIdx;
 		m_event[m_bestEventIdx].verbose();
-		m_bins[m_bestEventIdx/MMBINNSPLITLIMIT].verbose();
+		std::cout<<"\n show all splits";
+		for(int axis = 0; axis < 3; axis++) {
+			if(isEmptyAlong(axis)) {
+				std::cout<<"\n axis "<<axis<<" is empty";
+				continue;
+			}
+			
+			std::cout<<"\n axis "<<axis<<" n split "<<m_bins[axis].numSplits();
+				
+			for(int i = 1; i < m_bins[axis].numSplits()-1; ++i) {
+				std::cout<<"\n split "<<i;
+				const SplitEvent * e = splitAt(axis, i);
+				e->verbose();
+			}
+		}
 	}
+#endif
 }
 
 void BaseBinSplit::calcEvenBin(const unsigned nprim, 
@@ -153,7 +180,7 @@ void BaseBinSplit::calcEvenBin(const unsigned nprim,
 			const BoundingBox & b)
 {
 	const float thre = b.getLongestDistance() * MMBINISFLATRATIO;
-	for(int axis = 0; axis < 3; axis++) {
+	for(int axis = 0; axis < 3; ++axis) {
 		if(b.distance(axis) < thre) {
 		    m_bins[axis].setFlat();	
 			continue;
@@ -249,7 +276,7 @@ void BaseBinSplit::calcSoftBin(GridClustering * grd, const BoundingBox & box)
 	const float thre = box.getLongestDistance() * MMBINISFLATRATIO;
 	for(int axis = 0; axis < 3; axis++) {
 		if(box.distance(axis) < thre) {
-		    m_bins[axis].setFlat();	
+		    m_bins[axis].setFlat();
 			continue;
 		}
 		
@@ -366,7 +393,7 @@ SplitEvent * BaseBinSplit::firstEventAlong(const int & axis)
 bool BaseBinSplit::isEmptyAlong(const int & axis) const
 { 
     return m_bins[axis].isFlat() 
-            || m_bins[axis].isEmpty(); 
+		|| m_bins[axis].isEmpty(); 
 }
 
 }

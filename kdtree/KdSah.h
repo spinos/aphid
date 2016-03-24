@@ -143,11 +143,19 @@ void SahSplit<T>::partitionCompress(const SplitEvent * e,
 		if(primBox.touch(bb) ) {	
 			side = e->side(primBox);
 			if(side < 2) {
-				if(e->leftCount()<1) std::cout<<"\n\n warning left should be empty! \n\n";
+				if(e->leftCount()<1) {
+					std::cout<<"\n warning left should be empty!"
+					<<"\n "<<primBox;
+					e->verbose();
+				}
 				else leftCtx->addCell(grd->key(), grd->value() );
 			}
 			if(side > 0) {
-				if(e->rightCount()<1) std::cout<<"\n\n warning right should be empty! \n\n";
+				if(e->rightCount()<1) {
+					std::cout<<"\n warning right should be empty!"
+					<<" \n"<<primBox;
+					e->verbose();
+				}
 				else rightCtx->addCell(grd->key(), grd->value() );
 			}
 		}
