@@ -149,6 +149,8 @@ public:
 	const Vector3F & P(int idx) const;
 	Vector3F N(int idx) const;
 
+	BoundingBox calculateBBox() const;
+	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();
 	

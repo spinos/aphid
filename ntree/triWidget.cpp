@@ -34,7 +34,7 @@ void TriWidget::clientInit()
 void TriWidget::clientDraw()
 {
 	drawTriangle();
-	// drawTree();
+	drawTree();
 	// drawIntersect();
 	// drawGrid();
 }

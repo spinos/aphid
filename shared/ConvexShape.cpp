@@ -201,6 +201,15 @@ Vector3F Triangle::N(int idx) const
 	return r;
 }
 
+BoundingBox Triangle::calculateBBox() const
+{
+	BoundingBox b;
+    b.expandBy(m_p0);
+    b.expandBy(m_p1);
+	b.expandBy(m_p2);
+    return b;
+}
+
 ShapeType Triangle::ShapeTypeId = TTriangle;
 
 std::string Triangle::GetTypeStr()
