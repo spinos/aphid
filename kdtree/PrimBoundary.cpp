@@ -1,4 +1,5 @@
 #include <PrimBoundary.h>
+#include <SplitEvent.h>
 
 namespace aphid {
 
@@ -11,7 +12,7 @@ PrimBoundary::~PrimBoundary()
 { if(m_grid) delete m_grid; }
     
 float PrimBoundary::visitCost() const
-{ return 2.f * m_numPrims; }
+{ return .2f * m_numPrims; }
 	
 const int & PrimBoundary::numPrims() const 
 { return m_numPrims; }
@@ -102,10 +103,11 @@ void PrimBoundary::countPrimsInGrid()
 	m_numPrims = m_grid->numElements();
 }
 
-bool PrimBoundary::canEndSubdivide(const float & costOfDivivde) const
+bool PrimBoundary::canEndSubdivide(const SplitEvent * split) const
 {
+	if(split->isEmpty() ) return true;
 	if(isCompressed() ) return false;
-    return (costOfDivivde > visitCost() );
+    return (split->getCost() > visitCost() );
 }
 
 void PrimBoundary::verbose() const

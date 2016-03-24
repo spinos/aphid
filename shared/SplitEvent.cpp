@@ -94,34 +94,37 @@ void SplitEvent::updateRightBox(const BoundingBox &box)
 	m_rightBox.expandBy(box);	
 }
 
-void SplitEvent::limitBox(const BoundingBox & b)
+void SplitEvent::calculateCost(const float & a, const float & vol)
 {
-    if(m_isEmpty) return;
-    if(m_leftBox.isValid()) m_leftBox.shrinkBy(b);
-    if(m_rightBox.isValid()) m_rightBox.shrinkBy(b);
-}
-
-void SplitEvent::calculateCost(const float & a)
-{/*
-	BoundingBox leftBBox, rightBBox;
-	for(unsigned i = 0; i < NumPrimitive; i++) {
-		//unsigned &primIdx = PrimitiveIndices[i];
-		BoundingBox &primBox = PrimitiveBoxes[i];
-		calculateTightBBoxes(primBox, leftBBox, rightBBox);
+	if(m_isEmpty) return;
+	
+	m_cost = 0.f;
+#define CUTOFFGAPRATIO .33f	
+/// reduce cost when large part of the box is empty
+/// more split to empty leaves
+	float cutoff = 1.f;
+	float gap;
+	if(m_leftBox.isValid()) {
+		m_cost += .2f * (m_leftBox.area() * m_leftNumPrim) / a;
+	}
+	else {
+		gap = m_lftBound.volume() / vol;
+		if(gap > CUTOFFGAPRATIO)
+			cutoff -= gap;
 	}
 	
-	m_cost = 15.f + 20.f * (leftBBox.area() * m_leftNumPrim + rightBBox.area() * m_rightNumPrim) / ParentBoxArea;
-	*/
-	if(m_isEmpty) return;
-	m_cost = 1.5f;
-	if(m_leftBox.isValid()) {
-		//m_leftBox.shrinkBy(b);
-		m_cost += 2.f * (m_leftBox.area() * m_leftNumPrim) / a;
-	}
 	if(m_rightBox.isValid()) {
-		//m_rightBox.shrinkBy(b);
-		m_cost += 2.f * (m_rightBox.area() * m_rightNumPrim) / a;
+		m_cost += .2f * (m_rightBox.area() * m_rightNumPrim) / a;
 	}
+	else {
+		gap = m_rgtBound.volume() / vol;
+		if(gap > CUTOFFGAPRATIO)
+			cutoff -= gap;
+	}
+	
+	m_cost *= cutoff;
+/// cost to traverse
+	m_cost += .25f;
 }
 
 float SplitEvent::area() const

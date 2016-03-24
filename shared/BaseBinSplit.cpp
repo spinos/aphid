@@ -131,11 +131,9 @@ void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 		}
 	}
 
-#if 1
 	if(m_event[m_bestEventIdx].hasBothSides() ) {
 	int lc = 0;
 	if(cutoffEmptySpace(lc, b, b.volume() * MMBINCUTOFFRATIO)) {
-		// if(m_event[lc].getCost() < lowest * 2.f )
 		    m_bestEventIdx = lc;
 #if 0
 			std::cout<<" cutoff at "
@@ -145,7 +143,7 @@ void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 #endif
 		}
 	}
-#endif
+
 	
 #if 0
 	std::cout<<"\n\n best split "<<m_bestEventIdx;
@@ -212,12 +210,15 @@ void BaseBinSplit::calcEvent(const BoundingBox & box,
 void BaseBinSplit::calculateCosts(const BoundingBox & box)
 {
 	const float ba = box.area();
+	const float bv = box.volume();
 	for(int axis=0; axis<3; ++axis) {
 	    if(isEmptyAlong(axis))
 			continue;
+			
+		int lastOne = m_bins[axis].numSplits()-2;
 /// skip ones on bound
 		for(int i = 1; i < m_bins[axis].numSplits()-1; ++i) {
-			firstEventAlong(axis)[i].calculateCost(ba);
+			firstEventAlong(axis)[i].calculateCost(ba, bv );
 		}
 	}
 }

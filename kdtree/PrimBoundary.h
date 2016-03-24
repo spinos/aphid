@@ -4,6 +4,8 @@
 #include <GridClustering.h>
 
 namespace aphid {
+
+class SplitEvent;
     
 class PrimBoundary : public Boundary {
 
@@ -25,7 +27,7 @@ public:
 	
 	bool isCompressed() const;
 	void verbose() const;
-	bool canEndSubdivide(const float & costOfDivivde) const;
+	bool canEndSubdivide(const SplitEvent * split) const;
 	GridClustering * grid();
 	void createGrid(const float & x);
 	void addCell(const sdb::Coord3 & x, GroupCell * c);
