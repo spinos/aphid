@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <AllMath.h>
+#include <BoundingBox.h>
 
 namespace aphid {
 
@@ -51,6 +52,7 @@ public:
 	virtual void setFieldOfView(float x);
 	
 	void traverse(const Vector3F & v);
+	void frameAll(const BoundingBox & b);
 	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

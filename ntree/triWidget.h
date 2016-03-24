@@ -26,19 +26,19 @@ public:
 protected:    
     virtual void clientInit();
     virtual void clientDraw();
-    // virtual void clientSelect(QMouseEvent *event);
-    // virtual void clientMouseInput(QMouseEvent *event);
-	// virtual void keyPressEvent(QKeyEvent *event);
+    virtual void clientSelect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
+	virtual void keyPressEvent(QKeyEvent *event);
 	
 	
 	
 private:
     void drawTriangle();
     void drawTree();
-	// void drawIntersect();
+	void testIntersect(const Ray * incident);
+	void drawIntersect();
+	void drawActiveSource(const unsigned & iLeaf);
 	// void testGrid();
-	// void testIntersect(const Ray * incident);
-	// void drawActiveSource(const unsigned & iLeaf);
 	// void drawGrid();
 	
 private slots:

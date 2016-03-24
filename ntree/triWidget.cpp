@@ -35,7 +35,7 @@ void TriWidget::clientDraw()
 {
 	drawTriangle();
 	drawTree();
-	// drawIntersect();
+	drawIntersect();
 	// drawGrid();
 }
 
@@ -45,14 +45,6 @@ void TriWidget::drawTriangle()
 	
 	getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->setColor(.8f, .8f, .8f);
-	
-/*
-	float diff[4] = {0.8, 0.8, 0.8, 1.0};
-	glEnable(GL_LIGHTING);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
-	glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diff );
-*/
 		
 	const sdb::VectorArray<cvx::Triangle> * src = m_container.source();
 	const int n = src->size();
@@ -83,4 +75,85 @@ void TriWidget::drawTree()
 	
 	NTreeDrawer dr;
 	dr.drawTree<cvx::Triangle>(m_container.tree() );
+}
+
+void TriWidget::keyPressEvent(QKeyEvent *event)
+{
+	switch (event->key()) {
+		case Qt::Key_F:
+			qDebug()<<"frame all ";
+			camera()->frameAll(m_container.worldBox() );
+		    break;
+		default:
+			break;
+	}
+	
+	Base3DView::keyPressEvent(event);
+}
+
+void TriWidget::clientSelect(QMouseEvent *event)
+{
+	setUpdatesEnabled(false);
+	testIntersect(getIncidentRay());
+	setUpdatesEnabled(true);
+}
+
+void TriWidget::clientMouseInput(QMouseEvent *event)
+{
+	setUpdatesEnabled(false);
+	testIntersect(getIncidentRay());
+	setUpdatesEnabled(true);
+}
+
+void TriWidget::testIntersect(const Ray * incident)
+{
+	m_intersectCtx.reset(*incident);
+	if(!m_container.tree() ) return; 
+	std::stringstream sst; sst<<incident->m_dir;
+	qDebug()<<"interset begin "<<sst.str().c_str();
+	m_container.tree()->intersect(&m_intersectCtx);
+	qDebug()<<"interset end";
+}
+
+void TriWidget::drawIntersect()
+{
+	Vector3F dst;
+	if(m_intersectCtx.m_success) {
+		glColor3f(0,1,0);
+		dst = m_intersectCtx.m_ray.travel(m_intersectCtx.m_tmax);
+	}
+	else {
+		glColor3f(1,0,0);
+		dst = m_intersectCtx.m_ray.destination();
+	}
+	
+	glBegin(GL_LINES);
+		glVertex3fv((const GLfloat * )&m_intersectCtx.m_ray.m_origin);
+		glVertex3fv((const GLfloat * )&dst);
+	glEnd();
+	
+	BoundingBox b = m_intersectCtx.getBBox();
+	b.expand(0.03f);
+	getDrawer()->boundingBox(b );
+	
+	if(m_intersectCtx.m_success) drawActiveSource(m_intersectCtx.m_componentIdx);
+}
+
+void TriWidget::drawActiveSource(const unsigned & iLeaf)
+{
+	if(!m_container.tree() ) return;
+	if(!m_container.source() ) return;
+	
+	glColor3f(0,.6,.4);
+	int start, len;
+	m_container.tree()->leafPrimStartLength(start, len, iLeaf);
+	glBegin(GL_TRIANGLES);
+	int i=0;
+	for(;i<len;++i) {
+		const cvx::Triangle * c = m_container.source()->get( m_container.tree()->primIndirectionAt(start + i) );
+		glVertex3fv((const GLfloat * )c->p(0));
+		glVertex3fv((const GLfloat * )c->p(1));
+		glVertex3fv((const GLfloat * )c->p(2));
+	}
+	glEnd();
 }

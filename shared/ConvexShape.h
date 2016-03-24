@@ -10,6 +10,7 @@
 #pragma once
 #include "Matrix44F.h"
 #include "BoundingBox.h"
+#include "Ray.h"
 
 namespace aphid {
     
@@ -106,6 +107,7 @@ public:
     void set(const Vector3F & x, const float & r);
     
     BoundingBox calculateBBox() const;
+	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	
 	template<typename T>
 	bool exactIntersect(const T & b) const{
@@ -150,6 +152,7 @@ public:
 	Vector3F N(int idx) const;
 
 	BoundingBox calculateBBox() const;
+	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
 	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();

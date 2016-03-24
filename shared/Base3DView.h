@@ -98,6 +98,8 @@ protected:
 	float frameRate();
 	
 	void drawFrontImagePlane();
+	BaseCamera * camera();
+	
 private:
 	void computeIncidentRay(int x, int y);
 	

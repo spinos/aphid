@@ -413,7 +413,7 @@ int KdNTree<T, Tn>::hitPrimitive(IntersectionContext * ctx,
 	int i = 0;
 	for(;i<len;++i) {
 		const T * c = m_source->get(primIndirectionAt(start + i));
-		if(c->calculateBBox().intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) ) {
+		if(c->intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) ) {
 			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;

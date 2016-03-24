@@ -31,6 +31,7 @@ public:
 	bool readTree(const std::string & filename);
 	KdNTree<T, KdNode4 > * tree();
 	const sdb::VectorArray<T> * source() const;
+	const BoundingBox & worldBox() const;
 	
 protected:
 
@@ -46,7 +47,7 @@ Container<T>::Container()
 	m_source = NULL;
 	m_tree = NULL;
 	m_grid = NULL;
-	
+	m_worldBox.reset();
 }
 
 template<typename T>
@@ -107,6 +108,10 @@ KdNTree<T, KdNode4 > * Container<T>::tree()
 template<typename T>
 const sdb::VectorArray<T> * Container<T>::source() const
 { return m_source; }
+
+template<typename T>
+const BoundingBox & Container<T>::worldBox() const
+{ return m_worldBox; }
 
 template<typename T>
 void Container<T>::loadTriangles(const std::string & name)

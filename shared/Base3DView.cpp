@@ -563,5 +563,8 @@ void Base3DView::drawFrontImagePlane()
 	glPopMatrix();
 }
 
+BaseCamera * Base3DView::camera()
+{ return fCamera; }
+
 }
 //:~

@@ -130,6 +130,9 @@ BoundingBox Cube::calculateBBox() const
 { return BoundingBox(m_p.x - m_r, m_p.y - m_r, m_p.z - m_r,
                     m_p.x + m_r, m_p.y + m_r, m_p.z + m_r); }
 
+bool Cube::intersect(const Ray &ray, float *hitt0, float *hitt1) const
+{ return calculateBBox().intersect(ray, hitt0, hitt1); }
+
 ShapeType Cube::ShapeTypeId = TCube;
 
 Capsule::Capsule() {}
@@ -208,6 +211,44 @@ BoundingBox Triangle::calculateBBox() const
     b.expandBy(m_p1);
 	b.expandBy(m_p2);
     return b;
+}
+
+bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
+{
+	Vector3F ab = m_p1 - m_p0;
+	Vector3F ac = m_p2 - m_p0;
+	Vector3F nor = ab.cross(ac);
+	nor.normalize();
+	
+	float ddotn = ray.m_dir.dot(nor);
+	
+	//if(!ctx->twoSided && ddotn > 0.f) return 0;
+	
+	float t = (m_p0.dot(nor) - ray.m_origin.dot(nor)) / ddotn;
+	
+	if(t < 0.f || t > ray.m_tmax) return 0;
+	
+	Vector3F onplane = ray.m_origin + ray.m_dir * t;
+	Vector3F e01 = m_p1 - m_p0;
+	Vector3F x0 = onplane - m_p0;
+	if(e01.cross(x0).dot(nor) < 0.f) return 0;
+	
+	//printf("pass a\n");
+
+	Vector3F e12 = m_p2 - m_p1;
+	Vector3F x1 = onplane - m_p1;
+	if(e12.cross(x1).dot(nor) < 0.f) return 0;
+	
+	//printf("pass b\n");
+	
+	Vector3F e20 = m_p0 - m_p2;
+	Vector3F x2 = onplane - m_p2;
+	if(e20.cross(x2).dot(nor) < 0.f) return 0;
+	
+	//printf("pass c\n");
+	*hitt0 = t;
+	
+    return true;
 }
 
 ShapeType Triangle::ShapeTypeId = TTriangle;
