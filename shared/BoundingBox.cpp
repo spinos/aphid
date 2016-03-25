@@ -535,5 +535,25 @@ void BoundingBox::round()
 	else m_data[5] = int(m_data[5]) + 1;
 }
 
+void BoundingBox::translate(const Vector3F & ta)
+{
+	m_data[0] += ta.x;
+	m_data[3] += ta.x;
+	m_data[1] += ta.y;
+	m_data[4] += ta.y;
+	m_data[2] += ta.z;
+	m_data[5] += ta.z;
+}
+
+void BoundingBox::scale(const float & sc)
+{
+	m_data[0] *= sc;
+	m_data[1] *= sc;
+	m_data[2] *= sc;
+	m_data[3] *= sc;
+	m_data[4] *= sc;
+	m_data[5] *= sc;
+}
+
 }
 //:~

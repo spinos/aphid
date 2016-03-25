@@ -34,10 +34,15 @@ private:
     void drawTriangle();
     void drawTree();
 	void testIntersect(const Ray * incident);
+	void testTriangleIntersection(const Ray * incident);
+	void testVoxelIntersection(const Ray * incident);
 	void drawIntersect();
+	void drawVoxelIntersect();
 	void drawActiveSource(const unsigned & iLeaf);
+	void drawActiveVoxel(const unsigned & iLeaf);
 	void drawVoxel();
 	void drawVoxelTree();
+	BoundingBox getFrameBox();
 	
 private slots:
 	

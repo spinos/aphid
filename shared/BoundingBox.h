@@ -77,6 +77,10 @@ public:
     Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
     Vector3F X(int idx) const;
 	const float * data() const;
+	
+	void translate(const Vector3F & ta);
+	void scale(const float & sc);
+	
 	float m_data[6];
 	int m_padding0, m_padding1;
 };

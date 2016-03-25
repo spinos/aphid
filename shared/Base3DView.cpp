@@ -219,6 +219,7 @@ void Base3DView::processCamera(QMouseEvent *event)
 		else
 			updatePerspProjection();
     }
+	update();
 }
 
 void Base3DView::processSelection(QMouseEvent *event)
@@ -395,7 +396,7 @@ void Base3DView::keyPressEvent(QKeyEvent *e)
 		default:
 			break;
 	}
-	
+	update();
 	QWidget::keyPressEvent(e);
 }
 

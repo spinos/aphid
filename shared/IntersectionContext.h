@@ -27,6 +27,9 @@ public:
 	
 	void reset();
 	void reset(const Ray & ray);
+	void reset(const Ray & ray, 
+				const Vector3F & ref, 
+				const float & scaling);
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
 	

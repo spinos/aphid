@@ -30,6 +30,18 @@ void IntersectionContext::reset(const Ray & ray)
 	reset();
 }
 
+void IntersectionContext::reset(const Ray & ray, 
+								const Vector3F & ref, 
+								const float & scaling)
+{
+	m_ray = ray;
+	m_ray.m_origin -= ref;
+	m_ray.m_origin *= scaling;
+	m_ray.m_tmin *= scaling;
+	m_ray.m_tmax *= scaling;
+	reset();
+}
+
 void IntersectionContext::setBBox(const BoundingBox & bbox)
 {
 	m_bbox = bbox;

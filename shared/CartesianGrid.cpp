@@ -49,6 +49,9 @@ const Vector3F & CartesianGrid::origin() const
 const float & CartesianGrid::span() const
 { return m_span; }
 
+float CartesianGrid::spanTo1024() const
+{ return m_span / 1024.f; }
+
 sdb::CellHash * CartesianGrid::cells()
 { return m_cellHash; }
 

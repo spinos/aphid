@@ -32,15 +32,20 @@ TriWidget::~TriWidget()
 {}
 
 void TriWidget::clientInit()
-{ connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update())); }
+{ //connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update())); 
+}
 
 void TriWidget::clientDraw()
 {
 	drawTriangle();
-	if(m_pickTree == tTriangle) drawTree();
-	else drawVoxelTree();
-	
-	drawIntersect();
+	if(m_pickTree == tTriangle) {
+		drawTree();
+		drawIntersect();
+	}
+	else {
+		drawVoxelTree();
+		drawVoxelIntersect();
+	}
 }
 
 void TriWidget::drawTriangle()
@@ -83,13 +88,9 @@ void TriWidget::drawTree()
 
 void TriWidget::keyPressEvent(QKeyEvent *event)
 {
-	BoundingBox frb = m_container.worldBox();
-	if(m_intersectCtx.m_success)
-		frb = m_intersectCtx.getBBox();
-	
 	switch (event->key()) {
 		case Qt::Key_F:
-			camera()->frameAll(frb );
+			camera()->frameAll(getFrameBox() );
 		    break;
 		case Qt::Key_T:
 			if(m_pickTree == tTriangle) m_pickTree = tVoxel;
@@ -107,6 +108,7 @@ void TriWidget::clientSelect(QMouseEvent *event)
 	setUpdatesEnabled(false);
 	testIntersect(getIncidentRay());
 	setUpdatesEnabled(true);
+	update();
 }
 
 void TriWidget::clientMouseInput(QMouseEvent *event)
@@ -114,15 +116,34 @@ void TriWidget::clientMouseInput(QMouseEvent *event)
 	setUpdatesEnabled(false);
 	testIntersect(getIncidentRay());
 	setUpdatesEnabled(true);
+	update();
 }
 
 void TriWidget::testIntersect(const Ray * incident)
 {
+	if(m_pickTree == tTriangle ) testTriangleIntersection(incident);
+	else testVoxelIntersection(incident);
+}	
+
+void TriWidget::testTriangleIntersection(const Ray * incident)
+{
 	m_intersectCtx.reset(*incident);
 	if(!m_container.tree() ) return; 
-	std::stringstream sst; sst<<incident->m_dir;
+	std::stringstream sst; 
+	sst<<m_intersectCtx.m_ray.m_origin<<" "<<incident->m_dir;
 	qDebug()<<"interset begin "<<sst.str().c_str();
 	m_container.tree()->intersect(&m_intersectCtx);
+	qDebug()<<"interset end";
+}
+
+void TriWidget::testVoxelIntersection(const Ray * incident)
+{
+	if(!m_container.voxelTree() ) return; 
+	m_intersectCtx.reset(*incident, m_container.grid()->origin(), 1.f / m_container.grid()->spanTo1024() );
+	std::stringstream sst; 
+	sst<<m_intersectCtx.m_ray.m_origin<<" "<<incident->m_dir;
+	qDebug()<<"interset begin "<<sst.str().c_str();
+	m_container.voxelTree()->intersect(&m_intersectCtx);
 	qDebug()<<"interset end";
 }
 
@@ -147,7 +168,42 @@ void TriWidget::drawIntersect()
 	b.expand(0.03f);
 	getDrawer()->boundingBox(b );
 	
-	if(m_intersectCtx.m_success) drawActiveSource(m_intersectCtx.m_componentIdx);
+	if(m_intersectCtx.m_success) 
+		drawActiveSource(m_intersectCtx.m_componentIdx);
+}
+
+void TriWidget::drawVoxelIntersect()
+{
+	Vector3F ref = m_container.grid()->origin();
+	float scaling = m_container.grid()->spanTo1024();
+	
+	glPushMatrix();
+	glTranslatef(ref.x, ref.y, ref.z);
+	glScalef(scaling, scaling, scaling);
+	
+	Vector3F ori = m_intersectCtx.m_ray.m_origin;
+	Vector3F dst;
+	if(m_intersectCtx.m_success) {
+		glColor3f(0,1,0);
+		dst = m_intersectCtx.m_ray.travel(m_intersectCtx.m_tmax);
+	}
+	else {
+		glColor3f(1,0,0);
+		dst = m_intersectCtx.m_ray.destination();
+	}
+	
+	glBegin(GL_LINES);
+		glVertex3fv((const GLfloat * )&ori);
+		glVertex3fv((const GLfloat * )&dst);
+	glEnd();
+	
+	BoundingBox b = m_intersectCtx.getBBox();
+	b.expand(0.03f);
+	getDrawer()->boundingBox(b );
+	
+	if(m_intersectCtx.m_success) 
+		drawActiveVoxel(m_intersectCtx.m_componentIdx);
+	glPopMatrix();
 }
 
 void TriWidget::drawActiveSource(const unsigned & iLeaf)
@@ -169,15 +225,31 @@ void TriWidget::drawActiveSource(const unsigned & iLeaf)
 	glEnd();
 }
 
+void TriWidget::drawActiveVoxel(const unsigned & iLeaf)
+{
+	if(!m_container.voxelTree() ) return;
+	if(!m_container.grid() ) return;
+	const sdb::VectorArray<Voxel> & src = m_container.grid()->voxels();
+	glColor3f(0,.6,.4);
+	int start, len;
+	m_container.voxelTree()->leafPrimStartLength(start, len, iLeaf);
+	int i=0;
+	for(;i<len;++i) {
+		const Voxel * c = src.get( m_container.voxelTree()->primIndirectionAt(start + i) );
+		getDrawer()->boundingBox(c->calculateBBox() );
+	}
+	
+}
+
 void TriWidget::drawVoxel()
 {
 	if(!m_container.grid() ) return;
 	
 	glColor3f(0,.3,.4);
-	const float scaling = m_container.grid()->span() / 1024.f;
 	GridDrawer dr;
 	dr.drawArray<aphid::Voxel >(m_container.grid()->voxels(), 
-								m_container.grid()->origin(), scaling);
+								m_container.grid()->origin(), 
+								m_container.grid()->spanTo1024() );
 }
 
 void TriWidget::drawVoxelTree()
@@ -187,8 +259,21 @@ void TriWidget::drawVoxelTree()
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.15f, .25f, .35f);
 	
-	float scaling = m_container.grid()->span() / 1024.f;
 	NTreeDrawer dr;
-	dr.drawTree<Voxel >(m_container.voxelTree(), m_container.grid()->origin(), scaling);
+	dr.drawTree<Voxel >(m_container.voxelTree(), m_container.grid()->origin(), 
+							m_container.grid()->spanTo1024() );
+}
+
+BoundingBox TriWidget::getFrameBox()
+{
+	BoundingBox frb = m_container.worldBox();
+	if(m_intersectCtx.m_success) {
+		frb = m_intersectCtx.getBBox();
+		if(m_pickTree == tVoxel) {
+			frb.translate(m_container.grid()->origin() );
+			frb.scale(m_container.grid()->spanTo1024() );
+		}
+	}
+	return frb;
 }
 //:~

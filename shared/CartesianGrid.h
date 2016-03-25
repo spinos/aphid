@@ -27,6 +27,7 @@ public:
     void getBounding(BoundingBox & bound) const;
     const Vector3F & origin() const;
 	const float & span() const;
+	float spanTo1024() const;
     
 	sdb::CellHash * cells();
     const Vector3F cellCenter(unsigned code) const;

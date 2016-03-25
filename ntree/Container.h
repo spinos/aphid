@@ -113,7 +113,7 @@ bool Container<T>::buildGrid()
 {
 	m_grid = new VoxelGrid<KdNTree<T, KdNode4 >, T >();
 	BoundingBox b = m_tree->getBBox();
-	m_grid->create(m_tree, b, 7);
+	m_grid->create(m_tree, b, 8);
 	
 	Vector3F o = m_grid->origin();
 	float sp = 1024.f;
@@ -123,7 +123,7 @@ bool Container<T>::buildGrid()
 						
 	m_voxelTree = new KdNTree<Voxel, KdNode4 >();
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 8;
+	bf._maxLeafPrims = 32;
     
 	KdEngine<Voxel> engine;
 	engine.buildTree(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);

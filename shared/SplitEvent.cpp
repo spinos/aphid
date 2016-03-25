@@ -99,7 +99,7 @@ void SplitEvent::calculateCost(const float & a, const float & vol)
 	if(m_isEmpty) return;
 	
 	m_cost = 0.f;
-#define CUTOFFGAPRATIO .33f	
+#define CUTOFFGAPRATIO .4f	
 /// reduce cost when large part of the box is empty
 /// more split to empty leaves
 	float cutoff = 1.f;
