@@ -18,11 +18,11 @@ using namespace aphid;
 template<typename T>
 class Container {
 
-	KdEngine<T> m_engine;
 	BoundingBox m_worldBox;
 	sdb::VectorArray<T> * m_source;
 	KdNTree<T, KdNode4 > * m_tree;
 	VoxelGrid<KdNTree<T, KdNode4 >, T > * m_grid;
+	KdNTree<Voxel, KdNode4 > * m_voxelTree;
 	
 public:
 	Container();
@@ -30,6 +30,7 @@ public:
 	
 	bool readTree(const std::string & filename);
 	KdNTree<T, KdNode4 > * tree();
+	KdNTree<Voxel, KdNode4 > * voxelTree();
 	VoxelGrid<KdNTree<T, KdNode4 >, T > * grid();
 	const sdb::VectorArray<T> * source() const;
 	const BoundingBox & worldBox() const;
@@ -48,6 +49,7 @@ Container<T>::Container()
 {
 	m_source = NULL;
 	m_tree = NULL;
+	m_voxelTree = NULL;
 	m_grid = NULL;
 	m_worldBox.reset();
 }
@@ -99,7 +101,9 @@ bool Container<T>::buildTree()
 	
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 50;
-    m_engine.buildTree(m_tree, m_source, rootBox, &bf);
+	
+	KdEngine<T> engine;
+	engine.buildTree(m_tree, m_source, rootBox, &bf);
 	
 	return true;
 }
@@ -109,23 +113,29 @@ bool Container<T>::buildGrid()
 {
 	m_grid = new VoxelGrid<KdNTree<T, KdNode4 >, T >();
 	BoundingBox b = m_tree->getBBox();
-	b.expand(b.getLongestDistance() * .005f);
-	m_grid->create(m_tree, b);
+	m_grid->create(m_tree, b, 7);
 	
-	/*m_source->clear();
-	m_grid->extractCellBoxes(m_source);
-	
-	BoundingBox rootBox;
-	m_grid->getBounding(rootBox);
-	
+	Vector3F o = m_grid->origin();
+	float sp = 1024.f;
+	BoundingBox gridBox(o.x, o.y, o.z,
+						o.x+sp, o.y+sp, o.z+sp);
+	std::cout<<"\n grid box "<<gridBox;
+						
+	m_voxelTree = new KdNTree<Voxel, KdNode4 >();
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 8;
-    m_engine.buildTree(m_tree, m_source, rootBox, &bf);*/
+    
+	KdEngine<Voxel> engine;
+	engine.buildTree(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);
 }
 
 template<typename T>
 KdNTree<T, KdNode4 > * Container<T>::tree()
 { return m_tree; }
+
+template<typename T>
+KdNTree<Voxel, KdNode4 > * Container<T>::voxelTree()
+{ return m_voxelTree; }
 
 template<typename T>
 const sdb::VectorArray<T> * Container<T>::source() const

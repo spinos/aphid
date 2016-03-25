@@ -13,6 +13,7 @@
 #include <GeoDrawer.h>
 #include <NTreeDrawer.h>
 #include "GridDrawer.h"
+#include <VoxelGrid.h>
 
 TriWidget::TriWidget(const std::string & filename, QWidget *parent) : 
 Base3DView(parent)
@@ -21,8 +22,9 @@ Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
+	usePerspCamera();
     m_intersectCtx.m_success = 0;
-	
+	m_pickTree = tTriangle;
 	if(filename.size() > 1) m_container.readTree(filename);
 }
 
@@ -35,9 +37,10 @@ void TriWidget::clientInit()
 void TriWidget::clientDraw()
 {
 	drawTriangle();
-	drawTree();
+	if(m_pickTree == tTriangle) drawTree();
+	else drawVoxelTree();
+	
 	drawIntersect();
-	drawGrid();
 }
 
 void TriWidget::drawTriangle()
@@ -80,10 +83,17 @@ void TriWidget::drawTree()
 
 void TriWidget::keyPressEvent(QKeyEvent *event)
 {
+	BoundingBox frb = m_container.worldBox();
+	if(m_intersectCtx.m_success)
+		frb = m_intersectCtx.getBBox();
+	
 	switch (event->key()) {
 		case Qt::Key_F:
-			qDebug()<<"frame all ";
-			camera()->frameAll(m_container.worldBox() );
+			camera()->frameAll(frb );
+		    break;
+		case Qt::Key_T:
+			if(m_pickTree == tTriangle) m_pickTree = tVoxel;
+			else m_pickTree = tTriangle;
 		    break;
 		default:
 			break;
@@ -159,12 +169,26 @@ void TriWidget::drawActiveSource(const unsigned & iLeaf)
 	glEnd();
 }
 
-void TriWidget::drawGrid()
+void TriWidget::drawVoxel()
 {
 	if(!m_container.grid() ) return;
 	
 	glColor3f(0,.3,.4);
+	const float scaling = m_container.grid()->span() / 1024.f;
 	GridDrawer dr;
-	dr.drawGrid<CartesianGrid>(m_container.grid() );
+	dr.drawArray<aphid::Voxel >(m_container.grid()->voxels(), 
+								m_container.grid()->origin(), scaling);
+}
+
+void TriWidget::drawVoxelTree()
+{
+	if(!m_container.voxelTree() ) return; 
+	
+	getDrawer()->m_wireProfile.apply();
+	getDrawer()->setColor(.15f, .25f, .35f);
+	
+	float scaling = m_container.grid()->span() / 1024.f;
+	NTreeDrawer dr;
+	dr.drawTree<Voxel >(m_container.voxelTree(), m_container.grid()->origin(), scaling);
 }
 //:~

@@ -25,8 +25,8 @@ public:
     
     const unsigned numCells() const;
     void getBounding(BoundingBox & bound) const;
-    const Vector3F origin() const;
-	const float span() const;
+    const Vector3F & origin() const;
+	const float & span() const;
     
 	sdb::CellHash * cells();
     const Vector3F cellCenter(unsigned code) const;
@@ -64,7 +64,6 @@ protected:
 	unsigned addGrid(const Vector3F & p);
     const Vector3F gridOrigin(unsigned code) const;
 	const Vector3F cellOrigin(unsigned code, int level) const;
-	int encodeCellOrigin(const unsigned & code, const int & level) const;
 	void removeCell(unsigned code);
     void printHash();
 	

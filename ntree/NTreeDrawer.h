@@ -19,7 +19,9 @@ public:
 	virtual ~NTreeDrawer() {}
 	
 	template<typename T>
-	void drawTree(KdNTree<T, KdNode4 > * tree);
+	void drawTree(KdNTree<T, KdNode4 > * tree,
+					const Vector3F & origin = Vector3F(0.f, 0.f, 0.f),
+					const float & scaling = 1.f);
 	
 private:
 	template<typename T>
@@ -34,9 +36,17 @@ private:
 };
 
 template<typename T>
-void NTreeDrawer::drawTree(KdNTree<T, KdNode4 > * tree)
+void NTreeDrawer::drawTree(KdNTree<T, KdNode4 > * tree,
+							const Vector3F & origin,
+							const float & scaling)
 {
+	glPushMatrix();
+	glTranslatef(origin.x, origin.y, origin.z);
+	glScalef(scaling, scaling, scaling);
+	
 	const BoundingBox & box = tree->getBBox();
+	drawBoundingBox(&box);
+	
 	KdNode4 * tn = tree->root();
 	KdTreeNode * child = tn->node(0);
 	if(child->isLeaf() ) {}
@@ -47,6 +57,8 @@ void NTreeDrawer::drawTree(KdNTree<T, KdNode4 > * tree)
 		box.split(axis, pos, lft, rgt);
 		drawBranch<T>(tree, tn->internalOffset(0), lft, rgt );
 	}
+	
+	glPopMatrix();
 }
 
 template<typename T>

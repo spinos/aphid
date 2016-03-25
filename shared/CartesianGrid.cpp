@@ -30,7 +30,7 @@ void CartesianGrid::setBounding(const BoundingBox & bound)
 {
 	m_origin = bound.getMin();
     m_span = bound.getLongestDistance();
-    m_gridH = m_span / 1024.0;
+    m_gridH = m_span / 1024.f;
     m_cellHash->clear();
 }
 
@@ -43,10 +43,10 @@ void CartesianGrid::getBounding(BoundingBox & bound) const
     bound.setMax(m_origin.x + m_span, m_origin.y + m_span, m_origin.z + m_span);
 }
 
-const Vector3F CartesianGrid::origin() const
+const Vector3F & CartesianGrid::origin() const
 { return m_origin; }
 
-const float CartesianGrid::span() const
+const float & CartesianGrid::span() const
 { return m_span; }
 
 sdb::CellHash * CartesianGrid::cells()
@@ -372,12 +372,6 @@ void CartesianGrid::extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
 		
         c->next();
 	}
-}
-
-int CartesianGrid::encodeCellOrigin(const unsigned & code, const int & level) const
-{
-	float h = cellSizeAtLevel(level) * 0.5f;
-    return mortonEncode(cellCenter(code) - Vector3F(h, h, h));
 }
 
 }

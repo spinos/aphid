@@ -278,10 +278,12 @@ void BaseCamera::setFieldOfView(float) {}
 void BaseCamera::frameAll(const BoundingBox & b)
 {
 	if(!b.isValid() ) return;
+	
+	std::cout<<"\n camera frame all "<<b;
+			
 	const float d = b.distance(0);
 	const Vector3F c = b.center();
-	fHorizontalAperture = d;
-	
+
 	fSpace.setIdentity();
 	fSpace.setTranslation(c + Vector3F(0.f, 0.f, d*2.f));
 	fCenterOfInterest = c;

@@ -36,14 +36,20 @@ private:
 	void testIntersect(const Ray * incident);
 	void drawIntersect();
 	void drawActiveSource(const unsigned & iLeaf);
-	void drawGrid();
+	void drawVoxel();
+	void drawVoxelTree();
 	
 private slots:
 	
 private:
 	IntersectionContext m_intersectCtx;
 	Container<cvx::Triangle > m_container;
+	enum PickTreeType {
+		tTriangle = 0,
+		tVoxel = 1
+	};
 	
+	PickTreeType m_pickTree;
 };
 
 #endif

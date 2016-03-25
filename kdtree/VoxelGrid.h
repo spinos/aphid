@@ -14,13 +14,14 @@
 #include <IntersectionContext.h>
 #include <Quantization.h>
 #include <VectorArray.h>
+#include <Morton3D.h>
 
 namespace aphid {
 
 struct Voxel {
 /// color in rgba 32bit
 	int m_color;
-/// morton code in bound
+/// morton code of cell center in bound
 	int m_pos;
 /// level-ncontour-indexcontour packed into int
 /// bit layout
@@ -33,18 +34,32 @@ struct Voxel {
 					const float &b, const float &a)
 	{ col32::encodeC(m_color, r, g, b, a); }
 	
+/// set pos first
 	void setPos(const int & morton, const int & level)
 	{ 
 		m_pos = morton; 
-		m_contour = m_contour | level;
+		m_contour = level;
 	}
 	
 	void setContour(const int & count, const int & offset)
-	{ m_contour = m_contour | (count<<4 | offset<<6); }
+	{ m_contour = m_contour | (offset<<6 | count<<4); }
 	
 	void getColor(float &r, float &g,
 					float &b, float &a)
 	{ col32::decodeC(r, g, b, a, m_color); }
+	
+	BoundingBox calculateBBox() const
+	{
+		BoundingBox b;
+		
+		unsigned x, y, z;
+		decodeMorton3D(m_pos, x, y, z);
+		int h = 1<<(9 - (m_contour & 15) );
+		
+		return BoundingBox((float)x-h, (float)y-h, (float)z-h,
+				(float)x+h, (float)y+h, (float)z+h);
+				
+	}
 	
 };
 
@@ -90,6 +105,9 @@ public:
 	
 	int numVoxels() const;
 	int numContours() const;
+	
+	const sdb::VectorArray<Voxel> & voxels() const;
+	sdb::VectorArray<Voxel> * voxelsR();
 	
 protected:
 
@@ -153,7 +171,7 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 	
 	std::cout<<"\n end refine "<<level;
 		
-	//createVoxels(tree);
+	createVoxels(tree);
 }
 
 template<typename Ttree, typename Tvalue>
@@ -232,11 +250,14 @@ void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefin
 template<typename Ttree, typename Tvalue>
 void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
 {
+	std::cout<<"\n 0 %";
+		
 	int minPrims = 1<<20;
 	int maxPrims = 0;
 	int totalPrims = 0;
-	int nCells = 0;
 	int nPrims;
+	const int ncpc = numCells() / 100;
+	int ic = 0, ipc = 0;
 	float hh;
     Vector3F sample;
 	BoxIntersectContext box;
@@ -249,28 +270,39 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
 		
 		box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
 		box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-		box.reset();
+		box.reset(1<<20, true);
         
 		tree->intersectBox(&box);
 		
 		nPrims = box.numIntersect();
-		if(nPrims < 1) std::cout<<"\n warning no intersect";
+		if(nPrims > 0) {
+		
 		if(minPrims > nPrims ) minPrims = nPrims;
 		if(maxPrims < nPrims ) maxPrims = nPrims;
-		nCells++;
 		totalPrims += nPrims;
 		
 		Voxel v;
 		v.setColor(.99f, .99f, .99f, .99f);
-		v.setPos(encodeCellOrigin(c->key(), c->value()->level ), c->value()->level );
+		v.setPos(c->key(), c->value()->level );
+/// todo contours
 		v.setContour(0, 0);
 		m_voxels.insert(v);
 		
+		}
+		
+		ic++;
+		if(ic==ncpc) {
+			ipc++;
+			if(!(ipc % 5)) {
+				std::cout<<"\n "<<ipc<<" % ";
+			}
+			ic = 0;
+		}
         c->next();
 	}
 	
 	std::cout<<"\n n prims per cell min/max/average "<<minPrims
-	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)nCells
+	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)numVoxels()
 	<<"\n n voxel "<<numVoxels();
 }
 
@@ -281,6 +313,14 @@ int VoxelGrid<Ttree, Tvalue>::numVoxels() const
 template<typename Ttree, typename Tvalue>
 int VoxelGrid<Ttree, Tvalue>::numContours() const
 { return m_contours.size(); }
+
+template<typename Ttree, typename Tvalue>
+const sdb::VectorArray<Voxel> & VoxelGrid<Ttree, Tvalue>::voxels() const
+{ return m_voxels; }
+
+template<typename Ttree, typename Tvalue>
+sdb::VectorArray<Voxel> * VoxelGrid<Ttree, Tvalue>::voxelsR()
+{ return &m_voxels; }
 
 }
 #endif        //  #ifndef VOXELGRID_H
