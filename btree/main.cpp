@@ -83,16 +83,16 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-	TreeNode::MaxNumKeysPerNode = 128;
-	TreeNode::MinNumKeysPerNode = 4;
-	int n = 1<<20;
+	TreeNode::MaxNumKeysPerNode = 8;
+	TreeNode::MinNumKeysPerNode = 2;
+	int n = 100;
 	std::cout<<"\n test large sequence "<<n;
 	Sequence<int> sq;
 	int i = 0, j = 2, nr = 0;
 	for(;i<n;++i) {
 		
 		int k = i+1; 
-		k = rand() & ((1<<24)-1);
+		k = rand() & ((1<<22)-1);
 		
 		if(!sq.findKey(k) ) {
 			// std::cout<<"\n insert "<<i<<" "<<k;
@@ -116,25 +116,6 @@ void testSequenceRemove()
 				
 			//}
 		}
-		/*
-		int ik=0;
-		int prek;
-		sq.begin();
-		while(!sq.end() ) {
-			k = sq.key();
-		
-			if(ik>1) {
-			if(k <= prek) {
-				std::cout<<" wrong key "<<k<<" <= "<< prek;
-				sq.display();
-				return;
-			}
-			prek = k;
-			ik++;
-		}
-		
-		sq.next();
-	}*/
 		
 		if((i & (j-1)) == 0) {
 			std::cout<<"\n i"<<i<<" size "<<sq.size();
@@ -145,7 +126,7 @@ void testSequenceRemove()
 	int nb4rm = sq.size();
 	std::cout<<"\n sequence size "<<nb4rm;
 	
-	std::cout<<"\n get keys";
+	std::cout<<"\n test key order ";
 	std::deque<int > keystorm;
 	sq.begin();
 	while(!sq.end() ) {
@@ -155,7 +136,6 @@ void testSequenceRemove()
 		if(ik>1) {
 			if(k <= keystorm[ik-1]) {
 				std::cout<<" wrong key "<<k<<" <= "<< keystorm[ik-1];
-				// sq.display();
 				return;
 			}
 		}
@@ -167,9 +147,8 @@ void testSequenceRemove()
 	
 	int nrm = keystorm.size();
 	
-	// sq.display();
-	std::cout<<"\n n to rm "<<nrm
-	<<"\n test find keys ";
+	sq.display();
+	std::cout<<"\n passed\n test find n key "<<nrm;
 	for(j=0;j<nrm;++j) {
 			if(!sq.findKey(keystorm[j]) ) {
 				std::cout<<"\n\n error cannot find "<<keystorm[j]
@@ -179,12 +158,15 @@ void testSequenceRemove()
 				return;
 			}
 		}
-	std::cout<<"\n passed\n test remove";
+	std::cout<<"\n passed\n test remove keys";
 	
 	int anrm = 0;
 	for(i=0; i< nrm; ++i) {
-		//std::cout<<"\n remove "<<i<<" "<<keystorm[i];
-		//if(i<nrm-1) std::cout<<" next "<<keystorm[i+1];
+		std::cout<<"\n remove "<<i<<" "<<keystorm[i];
+		char c;
+		std::cout << "Enter: ";
+		std::cin >> c;
+		
 		int presz = sq.numLeaf();
 		if(sq.findKey(keystorm[i])) sq.remove(keystorm[i]);
 		else {
@@ -192,9 +174,21 @@ void testSequenceRemove()
 			sq.dbgFind(keystorm[i]);
 			std::cout<<"\n n leaf "<<sq.numLeaf()
 			<<"\n n removed "<<anrm;
+			sq.display();
+			std::cout<<"\n abort after remove "<<anrm;
+			
+			return;
+		}
+		
+		if(!sq.dbgCheck() ) {
+			sq.display();
+			std::cout<<"\n abort after remove "<<anrm;
 			return;
 		}
 		anrm++;
+		
+		sq.display();
+		//
 		/*
 		for(j=i+1;j<nrm;++j) {
 			if(!sq.find(keystorm[j]) ) {

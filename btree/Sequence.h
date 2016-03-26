@@ -205,6 +205,8 @@ public:
 		return r;
 	}
 	
+	bool dbgCheck();
+	
 protected:	
 	void beginLeaf() {
 		m_current = m_root->firstLeaf();
@@ -248,6 +250,8 @@ void Sequence<T>::display()
     std::cout<<"\n sequence display "
     <<"\n root "<<*m_root;
 	
+    m_root->dbgLinks(false);
+    
 	std::map<int, std::vector<Entity *> > nodes;
 	m_root->getChildren(nodes, 1);
 	
@@ -262,7 +266,7 @@ void Sequence<T>::displayLevel(const int & level, const std::vector<Entity *> & 
 	std::cout<<"\n level: "<<level<<" n "<<nodes.size()<<" ";
 	std::vector<Entity *>::const_iterator it = nodes.begin();
 	for(; it != nodes.end(); ++it)
-		std::cout<<*(static_cast<BNode<T> *>(*it));
+		std::cout<<"\n"<<*(static_cast<BNode<T> *>(*it));
 }
 
 template<typename T>
@@ -270,6 +274,10 @@ void Sequence<T>::dbgFind(const T & x)
 {
 	m_root->dbgFind(x);
 }
+
+template<typename T>
+bool Sequence<T>::dbgCheck()
+{ return m_root->dbgLinks(); }
 
 } //end namespace sdb
 
