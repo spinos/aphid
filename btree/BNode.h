@@ -18,6 +18,8 @@ namespace aphid {
 
 namespace sdb {
 
+#define DBG_SPLIT 1
+
 class TreeNode : public Entity
 {
 	Entity *m_first;
@@ -55,7 +57,7 @@ protected:
 		
 		Entity * _p;
 	};
-	// static NodeIndirection SeparatedNodes;
+	
 private:
 	
 };
@@ -69,7 +71,7 @@ public:
 template <typename KeyType>
 class BNode : public TreeNode
 {
-	 Pair<KeyType, Entity> * m_data;
+	Pair<KeyType, Entity> * m_data;
 	int m_numKeys;
 	
 public:
@@ -87,7 +89,7 @@ public:
 	Pair<Entity *, Entity> findInNode(const KeyType & x, SearchResult * result);
 	
 	const int numKeys() const  { return m_numKeys; }
-	const KeyType key(const int & i) const { return m_data[i].key; }
+	const KeyType & key(const int & i) const { return m_data[i].key; }
 	Entity * index(const int & i) const { return m_data[i].index; }
 	
 	friend std::ostream& operator<<(std::ostream &output, const BNode & p) {
@@ -181,7 +183,7 @@ private:
 	void balanceInteriorLeft();
 	
 	bool isFull() const { return m_numKeys == MaxNumKeysPerNode; }
-	bool underflow() const { return m_numKeys < MinNumKeysPerNode; }
+	bool underflow() const { return m_numKeys == MinNumKeysPerNode; }
 	void reduceNumKeys() { m_numKeys--; }
 	void increaseNumKeys() { m_numKeys++; }
 	void setNumKeys(int x) { m_numKeys = x; }
@@ -376,9 +378,9 @@ void BNode<KeyType>::insertKey(KeyType x)
 		
 	m_data[i+1].key = x;
 	m_data[i+1].index = NULL;
-	//std::cout<<"insert key "<<x.key<<" at "<<i+1<<"\n";
-    increaseNumKeys();
-
+	
+	increaseNumKeys();
+	
 #if 0
 	KeyType duk;
 	if(!checkDupKey(duk)) {
@@ -425,6 +427,9 @@ void BNode<KeyType>::splitRootToLeaves()
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 {
+#if DBG_SPLIT
+	//std::cout<<"\n split "<<str();
+#endif
 	Entity * oldRgt = sibling();
 	BNode * two = new BNode(parent()); 
 	two->setLeaf();
@@ -438,7 +443,9 @@ BNode<KeyType> * BNode<KeyType>::splitLeaf(const KeyType & x)
 	
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
-	
+#if DBG_SPLIT	
+	//std::cout<<"\n into "<<str()<<" and "<<two->str();
+#endif	
 	Pair<KeyType, Entity> b;
 	b.key = two->firstKey();
 	b.index = two;
@@ -516,9 +523,16 @@ void BNode<KeyType>::connectToChildren()
 
 /// part into 2 interials
 template <typename KeyType> 
-void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
+void BNode<KeyType>::partRoot(Pair<KeyType, Entity> b)
 {
-	/// std::cout<<"\n part root ";
+#if DBG_SPLIT
+	//std::cout<<"\n part root "<<str()<<"\n add index "<<static_cast<BNode *>(b.index)->firstKey();
+#endif
+
+#if DBG_SPLIT
+	//std::cout<<"\n right to "<<static_cast<BNode *>(m_data[numKeys() - 1].index)->firstKey();
+#endif	
+
 	BNode * one = new BNode(this);
 	BNode * two = new BNode(this);
 	
@@ -532,27 +546,55 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> x)
 			dst->insertData(m_data[i]);
 	}
 	
-	/// std::cout<<"\n into "<<*one<<"\n"<<*two;
 	
 	one->setFirstIndex(firstIndex());
-	two->setFirstIndex(m_data[midI].index);
+	
+	if(b.key > m_data[midI].key) {
+		std::cout<<"\n b.k "<<b.key<<" > 1st.k "<<m_data[midI].key;
+		two->insertData(b);
+		two->setFirstIndex(m_data[midI].index);
+	}
+	else {
+		std::cout<<"\n b.k "<<b.key<<" < 1st.k "<<m_data[midI].key;
+		one->insertData(b);
+		two->setFirstIndex(m_data[midI].index);
+		//two->setFirstIndex(b.index);
+		//one->setFirstIndex(m_data[midI].index);
+	}
+
+#if DBG_SPLIT
+	//std::cout<<"\n into "<<*one<<" and "<<*two;
+#endif
+
+#if DBG_SPLIT
+	std::cout<<"\n two n k "<<two->numKeys();
+	std::cout<<" <- "<<static_cast<BNode *>(two->firstIndex() )->firstKey();
+	for(int i=0;i<two->numKeys(); ++i) {
+		std::cout<<" -> "<<static_cast<BNode *>(two->index(i) )->firstKey();
+	}
+#endif	
 	
 	setFirstIndex(one);
 	m_data[0].key = m_data[midI].key;
 	m_data[0].index = two;
 
 	setNumKeys(1);
-	/// std::cout<<"\n after "<<*this;
-	
+#if DBG_SPLIT
+	//std::cout<<"\n after "<<*this;
+#endif
 	one->connectToChildren();
+#if DBG_SPLIT	
+	//std::cout<<"\n connect right child";
+#endif
 	two->connectToChildren();
 }
 
 template <typename KeyType> 
 void BNode<KeyType>::partInterior(Pair<KeyType, Entity> x)
 {
+#if DBG_SPLIT
 	//std::cout<<"part interior "<<*this;
-	
+#endif
 	BNode * rgt = new BNode(parent());
 	
 	Pair<KeyType, Entity> * old = new Pair<KeyType, Entity>[MaxNumKeysPerNode];
@@ -564,11 +606,13 @@ void BNode<KeyType>::partInterior(Pair<KeyType, Entity> x)
 	
 	delete[] old;
 	
-	//std::cout<<"into "<<*this<<*rgt;
-	
+#if DBG_SPLIT
+	//std::cout<<" into "<<*this<<" and "<<*rgt;
+#endif	
 	connectToChildren();
 	
 	rgt->setFirstIndex(p.index);
+
 	rgt->connectToChildren();
 	
 	Pair<KeyType, Entity> b;
@@ -1158,6 +1202,7 @@ const std::string BNode<KeyType>::str() const
     sst<<lastKey()<<"] ";
     }
     if(!sibling()) sst<<"~";
+	if(isLeaf() ) sst<<" is leaf ";
 	return sst.str();
 }
 
@@ -1177,9 +1222,9 @@ const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
     r.low = 0; 
 	r.high = 0;
 
-	if(key(0) == x) r.found = 0;
-	
 	if(numKeys() < 1) return r;
+	
+	if(key(0) == x) r.found = 0;
 	
 	r.high = numKeys() - 1;
 	if(key(r.high) == x) r.found = r.high;
@@ -1189,9 +1234,9 @@ const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
         mid = (r.low + r.high) / 2;
         
 		if(key(mid) == x) r.found = mid;
-        if(key(r.low) == x) r.found = r.low;
-		if(key(r.high) == x) r.found = r.high;
-        
+        else if(key(r.low) == x) r.found = r.low;
+		else if(key(r.high) == x) r.found = r.high;
+		
         if(r.found > -1) break;
 		
         if(x < key(mid)) r.high = mid;
@@ -1229,15 +1274,12 @@ Pair<Entity *, Entity> BNode<KeyType>::findLeaf(const KeyType & x)
 	r.key = this;
 	r.index = NULL;
 	if(!isKeyInRange(x) ) {
-		BNode * bro = siblingNode();
-		if(bro) return bro->findLeaf(x);
 		return r;
 	}
-	int found = findKey(x).found;
+	int f = findKey(x).found;
+	if(f < 0) return r;
 	
-	if(found < 0) return r;
-	
-	r.index = dataP(found)->index;
+	r.index = dataP(f)->index;
 	
 	return r;
 }
@@ -1328,9 +1370,6 @@ void BNode<KeyType>::dbgFindInLeaf(const KeyType & x)
 	std::cout<<"\n dbg leaf "<<str();
 	if(!isKeyInRange(x) ) {
 		std::cout<<"\n out of range";
-		BNode * bro = siblingNode();
-		if(bro) return bro->dbgFindInRoot(x);
-		else std::cout<<"\n end of leaf ";
 		return;
 	}
 	int found = findKey(x).found;

@@ -81,65 +81,136 @@ void testArrayRemove()
 	std::cout<<"\n done";
 }
 
-void testLargeSequence()
+void testSequenceRemove()
 {
-	TreeNode::MaxNumKeysPerNode = 32;
-	TreeNode::MinNumKeysPerNode = 2;
-	int n = 1<<15;
+	TreeNode::MaxNumKeysPerNode = 128;
+	TreeNode::MinNumKeysPerNode = 4;
+	int n = 1<<20;
 	std::cout<<"\n test large sequence "<<n;
-	Array<int, int> * sq = new Array<int, int>;
+	Sequence<int> sq;
 	int i = 0, j = 2, nr = 0;
 	for(;i<n;++i) {
 		
-		int k = rand() & ((1<<30)-1);
-		if(!sq->find(k)) {
-			int * v = new int[1];
-			*v = k;
-			sq->insert(k , v);
+		int k = i+1; 
+		k = rand() & ((1<<24)-1);
+		
+		if(!sq.findKey(k) ) {
+			// std::cout<<"\n insert "<<i<<" "<<k;
+			//int prenl = sq.numLeaf();
 			
-			if(!sq->find(k) ) {
-				int ek;
-				sq->find(k, MatchFunction::mLequal, &ek);
-				if(ek != k) {
-					std::cout<<"\n error cannot find "<<k<<" size "<<sq->size()
-					<<"\n found "<<ek;
-					std::cout<<"\n n leaf "<<sq->numLeaf();
-					sq->dbgFind(k);
-				}
+			sq.insert(k);
+			
+			//sq.display();
+/*
+			if(!sq.findKey(k) ) {
+				std::cout<<"\n\n error lost "<<k
+				<<"\n size "<<sq.size()<<" n leaf "<<sq.numLeaf();
+				sq.dbgFind(k);
+				
+				return;
+			}*/
+			
+			//int posnl = sq.numLeaf();
+			//if(posnl != prenl) {
+				//std::cout<<"\n n leaf changed after insert "<<k;
+				
+			//}
+		}
+		/*
+		int ik=0;
+		int prek;
+		sq.begin();
+		while(!sq.end() ) {
+			k = sq.key();
+		
+			if(ik>1) {
+			if(k <= prek) {
+				std::cout<<" wrong key "<<k<<" <= "<< prek;
+				sq.display();
+				return;
 			}
+			prek = k;
+			ik++;
 		}
 		
+		sq.next();
+	}*/
+		
 		if((i & (j-1)) == 0) {
-			std::cout<<"\n i"<<i<<" size "<<sq->size();
-			j<<=3;
+			std::cout<<"\n i"<<i<<" size "<<sq.size();
+			j<<=1;
 		}
 	}
 	
-	int nb4rm = sq->size();
+	int nb4rm = sq.size();
 	std::cout<<"\n sequence size "<<nb4rm;
 	
-	std::vector<int > keystorm;
-	sq->begin();
-	while(!sq->end() ) {
-		if(rand() & 7) keystorm.push_back(sq->key() );
-		sq->next();
+	std::cout<<"\n get keys";
+	std::deque<int > keystorm;
+	sq.begin();
+	while(!sq.end() ) {
+		int k = sq.key();
+		
+		int ik = keystorm.size();
+		if(ik>1) {
+			if(k <= keystorm[ik-1]) {
+				std::cout<<" wrong key "<<k<<" <= "<< keystorm[ik-1];
+				// sq.display();
+				return;
+			}
+		}
+		//if(rand() & 1) 
+			keystorm.push_back(k);
+		
+		sq.next();
 	}
 	
 	int nrm = keystorm.size();
-	std::cout<<"\n n to rm "<<nrm;
+	
+	// sq.display();
+	std::cout<<"\n n to rm "<<nrm
+	<<"\n test find keys ";
+	for(j=0;j<nrm;++j) {
+			if(!sq.findKey(keystorm[j]) ) {
+				std::cout<<"\n\n error cannot find "<<keystorm[j]
+				<<"\n "<<" at "<<j;
+				//sq.dbgFind(keystorm[j]);
+				std::cout<<"\n n leaf "<<sq.numLeaf();
+				return;
+			}
+		}
+	std::cout<<"\n passed\n test remove";
+	
 	int anrm = 0;
 	for(i=0; i< nrm; ++i) {
-		if(sq->find(keystorm[i])) sq->remove(keystorm[i]);
+		//std::cout<<"\n remove "<<i<<" "<<keystorm[i];
+		//if(i<nrm-1) std::cout<<" next "<<keystorm[i+1];
+		int presz = sq.numLeaf();
+		if(sq.findKey(keystorm[i])) sq.remove(keystorm[i]);
 		else {
-			std::cout<<"\n cannot find "<<keystorm[i];
-			sq->dbgFind(keystorm[i]);
-			std::cout<<"\n n leaf "<<sq->numLeaf()
+			std::cout<<"\n error cannot find to remove "<<keystorm[i];
+			sq.dbgFind(keystorm[i]);
+			std::cout<<"\n n leaf "<<sq.numLeaf()
 			<<"\n n removed "<<anrm;
 			return;
 		}
 		anrm++;
+		/*
+		for(j=i+1;j<nrm;++j) {
+			if(!sq.find(keystorm[j]) ) {
+				std::cout<<"\n error cannot find "<<keystorm[j]
+				<<"\n "<<i<<" "<<j;
+				return;
+			}
+		}
+		
+		int possz = sq->numLeaf();
+		if(possz == presz - 1 ) {
+			std::cout<<"\n leaf size "<<possz<<" "<<presz<<" "<<i;
+			
+		}*/
 	}
-	std::cout<<"\n aft rm "<<sq->size()<<" "<<nb4rm - nrm;
+	std::cout<<"\n aft rm "<<sq.size()<<" "<<nb4rm - nrm;
 }
 
 int main()
@@ -312,14 +383,14 @@ int main()
 	printList(ll);
 	
 	ll.clear();
-	*/
+	
 	testArrayRemove();
-	/*
+	
 	Sequence<Coord3> c3t;
 	Pair<Coord3, Entity> * p0 = c3t.insert(Coord3(0,0,0));
 	std::cout<<"\n p"<<p0->index;
 	*/
-	testLargeSequence();
+	testSequenceRemove();
 	std::cout<<"\n all passed\n";
 	return 0;
 }
