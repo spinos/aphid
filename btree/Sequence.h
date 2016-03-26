@@ -171,7 +171,19 @@ public:
 	
 	void setDataExternal()
 	{ m_isDataExternal = true; }
+	
+	int numLeaf() {
+		int nn = 0;
+		beginLeaf();
+		while(!leafEnd()) {
+			nn++;
+			nextLeaf();
+		}
+		return nn;
+	}
 
+	void dbgFind(const T & x);
+	
 protected:	
 	void beginLeaf() {
 		m_current = m_root->firstLeaf();
@@ -239,6 +251,12 @@ void Sequence<T>::displayLevel(const int & level, const std::vector<Entity *> & 
 	std::vector<Entity *>::const_iterator it = nodes.begin();
 	for(; it != nodes.end(); ++it)
 		std::cout<<*(static_cast<BNode<T> *>(*it));
+}
+
+template<typename T>
+void Sequence<T>::dbgFind(const T & x)
+{
+	m_root->dbgFind(x);
 }
 
 } //end namespace sdb

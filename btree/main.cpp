@@ -83,38 +83,68 @@ void testArrayRemove()
 
 void testLargeSequence()
 {
-	TreeNode::MaxNumKeysPerNode = 128;
+	TreeNode::MaxNumKeysPerNode = 32;
 	TreeNode::MinNumKeysPerNode = 2;
-	int n = 1<<23;
+	int n = 1<<15;
 	std::cout<<"\n test large sequence "<<n;
-	Array<int, int> sq;
+	Array<int, int> * sq = new Array<int, int>;
 	int i = 0, j = 2, nr = 0;
 	for(;i<n;++i) {
 		
-		int k = rand() & ((n<<4)-1);
-		if(!sq.find(k)) {
+		int k = rand() & ((1<<30)-1);
+		if(!sq->find(k)) {
 			int * v = new int[1];
 			*v = k;
-			sq.insert(k , v);
-		}
-		else {
-			if((i & 63) == 0) {
-				sq.remove(k);
-				nr++;
+			sq->insert(k , v);
+			
+			if(!sq->find(k) ) {
+				int ek;
+				sq->find(k, MatchFunction::mLequal, &ek);
+				if(ek != k) {
+					std::cout<<"\n error cannot find "<<k<<" size "<<sq->size()
+					<<"\n found "<<ek;
+					std::cout<<"\n n leaf "<<sq->numLeaf();
+					sq->dbgFind(k);
+				}
 			}
 		}
 		
 		if((i & (j-1)) == 0) {
-			std::cout<<"\n i"<<i;
+			std::cout<<"\n i"<<i<<" size "<<sq->size();
 			j<<=3;
 		}
 	}
-	std::cout<<"\n sequence size "<<sq.size()
-	<<"\n n removed "<<nr;
+	
+	int nb4rm = sq->size();
+	std::cout<<"\n sequence size "<<nb4rm;
+	
+	std::vector<int > keystorm;
+	sq->begin();
+	while(!sq->end() ) {
+		if(rand() & 7) keystorm.push_back(sq->key() );
+		sq->next();
+	}
+	
+	int nrm = keystorm.size();
+	std::cout<<"\n n to rm "<<nrm;
+	int anrm = 0;
+	for(i=0; i< nrm; ++i) {
+		if(sq->find(keystorm[i])) sq->remove(keystorm[i]);
+		else {
+			std::cout<<"\n cannot find "<<keystorm[i];
+			sq->dbgFind(keystorm[i]);
+			std::cout<<"\n n leaf "<<sq->numLeaf()
+			<<"\n n removed "<<anrm;
+			return;
+		}
+		anrm++;
+	}
+	std::cout<<"\n aft rm "<<sq->size()<<" "<<nb4rm - nrm;
 }
 
 int main()
 {
+	/*
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
 	BTree tree;
 	tree.find(99);
@@ -282,12 +312,13 @@ int main()
 	printList(ll);
 	
 	ll.clear();
-	
+	*/
 	testArrayRemove();
-	
+	/*
 	Sequence<Coord3> c3t;
 	Pair<Coord3, Entity> * p0 = c3t.insert(Coord3(0,0,0));
 	std::cout<<"\n p"<<p0->index;
+	*/
 	testLargeSequence();
 	std::cout<<"\n all passed\n";
 	return 0;

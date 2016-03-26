@@ -151,7 +151,14 @@ unsigned CartesianGrid::addCell(const Vector3F & p, int level, int visited)
 	ind->level = level;
 	ind->visited = visited;
 	m_cellHash->insert(code, ind);
-	
+#if 0
+	if(!m_cellHash->find(code) ) {
+		std::cout<<"\n error add cell "<<code;
+		unsigned x, y, z;
+			decodeMorton3D(code, x, y, z);
+			std::cout<<"\n coord "<<x<<","<<y<<","<<z;
+	}
+#endif
     return code;
 }
 

@@ -95,6 +95,8 @@ public:
         return output;
     }
 	
+	void dbgFind(const KeyType & x);
+	
 private:	
 	const KeyType firstKey() const;
 	const KeyType lastKey() const;
@@ -192,6 +194,10 @@ private:
 	Pair<Entity *, Entity> findRoot(const KeyType & x);
 	Pair<Entity *, Entity> findLeaf(const KeyType & x);
 	Pair<Entity *, Entity> findInterior(const KeyType & x);
+	
+	void dbgFindInRoot(const KeyType & x);
+	void dbgFindInLeaf(const KeyType & x);
+	void dbgFindInInterior(const KeyType & x);
 		
 	const std::string str() const;
 	void deepPrint() const;
@@ -788,7 +794,13 @@ void BNode<KeyType>::replaceIndex(int n, Pair<KeyType, Entity> x)
 template <typename KeyType> 
 void BNode<KeyType>::removeLeaf(const KeyType & x)
 {
-	if(!removeDataLeaf(x)) return;
+	if(!removeDataLeaf(x)) {
+		if(x > lastKey() ) {
+			BNode * bro = siblingNode();
+			if(bro) return bro->removeLeaf(x);
+		}
+		return;
+	}
 	if(!underflow()) return;
 
 	if(!mergeLeaf())
@@ -1216,7 +1228,11 @@ Pair<Entity *, Entity> BNode<KeyType>::findLeaf(const KeyType & x)
 	Pair<Entity *, Entity> r;
 	r.key = this;
 	r.index = NULL;
-	if(!isKeyInRange(x) ) return r;
+	if(!isKeyInRange(x) ) {
+		BNode * bro = siblingNode();
+		if(bro) return bro->findLeaf(x);
+		return r;
+	}
 	int found = findKey(x).found;
 	
 	if(found < 0) return r;
@@ -1282,6 +1298,57 @@ bool BNode<KeyType>::checkDupKey(KeyType & duk) const
 		}
 	}
 	return true;
+}
+
+template <typename KeyType>
+void BNode<KeyType>::dbgFind(const KeyType & x)
+{
+	if(isRoot()) 
+		return dbgFindInRoot(x);
+	else if(isLeaf())
+		return dbgFindInLeaf(x);
+	
+	return dbgFindInInterior(x);
+}
+
+template <typename KeyType>
+void BNode<KeyType>::dbgFindInRoot(const KeyType & x)
+{
+	std::cout<<"\n dbg root "<<str();
+	if(hasChildren()) {
+		BNode * n = nextIndex(x);
+		return n->dbgFind(x);
+	}
+	return dbgFindInLeaf(x);
+}
+
+template <typename KeyType>
+void BNode<KeyType>::dbgFindInLeaf(const KeyType & x)
+{
+	std::cout<<"\n dbg leaf "<<str();
+	if(!isKeyInRange(x) ) {
+		std::cout<<"\n out of range";
+		BNode * bro = siblingNode();
+		if(bro) return bro->dbgFindInRoot(x);
+		else std::cout<<"\n end of leaf ";
+		return;
+	}
+	int found = findKey(x).found;
+	
+	if(found < 0) {
+		std::cout<<"\n not found";
+		return;
+	}
+	
+	std::cout<<"\n found "<<x;
+}
+
+template <typename KeyType>
+void BNode<KeyType>::dbgFindInInterior(const KeyType & x)
+{
+	std::cout<<"\n dbg inner "<<str();
+	BNode * n = nextIndex(x);
+	return n->dbgFind(x);
 }
 
 } // end of namespace sdb

@@ -116,10 +116,10 @@ public:
 protected:
 
 private:
-	bool tagCellsToRefine(sdb::CellHash & cellsToRefine);
-	bool tagLevelCellsToRefine(sdb::CellHash & cellsToRefine, const int & level);
-	void refine(Ttree * tree, sdb::CellHash & cellsToRefine);
-	void createVoxels(Ttree * tree);
+	bool tagCellsToRefine(sdb::CellHash & cellsToRefine, int level);
+	void refine(Ttree * tree, sdb::CellHash & cellsToRefine,
+				int level);
+	void createVoxels(Ttree * tree, int level);
 	
 };
 
@@ -159,82 +159,71 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 				box.reset(1);
 				tree->intersectBox(&box);
 				if(box.numIntersect() > 0 )
-					addCell(sample, level, box.numIntersect() );
+					addCell(sample, level, 1);
             }
         }
     }
 	
-	sdb::CellHash cellsToRefine;
-	bool needRefine = tagCellsToRefine(cellsToRefine);
-    while(needRefine && level < m_maxLevel) {
-        refine(tree, cellsToRefine);
-		level++;
-		if(level < m_maxLevel) needRefine = tagCellsToRefine(cellsToRefine);
+    while(level < m_maxLevel) {
 		std::cout<<"\n level"<<level<<" n cell "<<numCells();
-    }
+		sdb::CellHash * cellsToRefine = new sdb::CellHash;
+		tagCellsToRefine(*cellsToRefine, level);
 	
-	std::cout<<"\n end refine "<<level;
+        refine(tree, *cellsToRefine, level);
 		
-	createVoxels(tree);
+		delete cellsToRefine;
+		level++;
+	}
+	
+	std::cout<<"\n level "<<level<<" n cell "<<numCells();
+		
+	createVoxels(tree, maxLevel);
 }
 
 template<typename Ttree, typename Tvalue>
-bool VoxelGrid<Ttree, Tvalue>::tagCellsToRefine(sdb::CellHash & cellsToRefine)
+bool VoxelGrid<Ttree, Tvalue>::tagCellsToRefine(sdb::CellHash & cellsToRefine,
+												int level)
 {
-	cellsToRefine.clear();
 	sdb::CellHash * c = cells();
     c->begin();
     while(!c->end()) {
         
+		if(c->value()->level == level) {
 		sdb::CellValue * ind = new sdb::CellValue;
 		ind->level = c->value()->level;
 		ind->visited = 1;
-		cellsToRefine.insert(c->key(), ind);
+		cellsToRefine.insert(c->key(), ind );
 		
+		}
         c->next();
 	}
-	
 	return true;
 }
 
 template<typename Ttree, typename Tvalue>
-bool VoxelGrid<Ttree, Tvalue>::tagLevelCellsToRefine(sdb::CellHash & cellsToRefine,
-														const int & level)
-{
-	cellsToRefine.clear();
-	sdb::CellHash * c = cells();
-    c->begin();
-    while(!c->end()) {
-        if(c->value()->level == level) {
-			sdb::CellValue * ind = new sdb::CellValue;
-			ind->level = c->value()->level;
-			ind->visited = 1;
-			cellsToRefine.insert(c->key(), ind);
-		}
-        c->next();
-	}
-	return cellsToRefine.size() > 0;
-}
-
-template<typename Ttree, typename Tvalue>
-void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefine)
-{    
+void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefine,
+										int level)
+{	
 	int level1;
 	float hh;
     Vector3F sample, subs;
 	int u;
 	unsigned k;
 	BoxIntersectContext box;
+	
 	cellsToRefine.begin();
 	while (!cellsToRefine.end()) {
-		sdb::CellValue * parentCell = cellsToRefine.value();
-
 		k = cellsToRefine.key();
+		sdb::CellValue * parentCell = cellsToRefine.value();
 		
+		//sdb::CellValue * old =  findCell(k);
+		//if(!old) std::cout<<"\n no old cell "<<k;
+		//else if(old->level != level) std::cout<<"\n waringing wrong old level "<<old->level<<" "<<level;
+
 		level1 = parentCell->level + 1;
-		hh = cellSizeAtLevel(level1) * .5f;
+		hh = cellSizeAtLevel(level1) * .5;
 		sample = cellCenter(k);
-		removeCell(k);
+		
 		for(u = 0; u < 8; u++) {
 			subs = sample + Vector3F(hh * Cell8ChildOffset[u][0], 
 			hh * Cell8ChildOffset[u][1], 
@@ -244,15 +233,17 @@ void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefin
 			box.reset(1);
 			tree->intersectBox(&box);
 			if(box.numIntersect() > 0) 
-				addCell(subs, level1, box.numIntersect());
+				addCell(subs, level1, 1);
 		}
+		
+		removeCell(k);
 		
 		cellsToRefine.next();
     }
 }
 
 template<typename Ttree, typename Tvalue>
-void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
+void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree, int level)
 {
 	std::cout<<"\n 0 %";
 		
@@ -269,6 +260,8 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
     c->begin();
     while(!c->end()) {
 	
+		if(c->value()->level == level) {
+			
 		sample = cellCenter(c->key() );
 		hh = cellSizeAtLevel(c->value()->level ) * 0.5f;
 		
@@ -293,7 +286,10 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
 		m_voxels.insert(v);
 		
 		}
-		
+		}
+		else 
+			 std::cout<<"\n waringing wrong level "<<c->value()->level<<" "<<c->key();
+
 		ic++;
 		if(ic==ncpc) {
 			ipc++;
@@ -302,6 +298,7 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree)
 			}
 			ic = 0;
 		}
+		
         c->next();
 	}
 	
