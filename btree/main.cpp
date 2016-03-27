@@ -83,14 +83,19 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-	TreeNode::MaxNumKeysPerNode = 9;
-	TreeNode::MinNumKeysPerNode = 3;
-	
 #define INTERACTOVE 0
+#define DOSHUFFLE 1
+
 #if INTERACTOVE
+	TreeNode::MaxNumKeysPerNode = 12;
+	TreeNode::MinNumKeysPerNode = 4;
+	
 	int n = 1<<7;
 #else
-	int n = 1<<10;
+	TreeNode::MaxNumKeysPerNode = 128;
+	TreeNode::MinNumKeysPerNode = 16;
+	
+	int n = 1<<12;
 #endif
 	std::cout<<"\n test large sequence "<<n;
 	Sequence<int> sq;
@@ -156,7 +161,7 @@ void testSequenceRemove()
 	}
 	
 	int nrm = keystorm.size();
-#if 1
+#if DOSHUFFLE
 	for(i=0;i<n;++i) {
 		for(j=0; j<33;++j) {
 			int rj = rand() % n;

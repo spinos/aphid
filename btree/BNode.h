@@ -217,7 +217,10 @@ private:
 	void validateKeys();
 	void behead();
 	KeyType getHighestKey() const;
-	void threeWayMerge();
+	void takeover();
+	void leafTakeover();
+	void innerTakeover();
+	void compressSingular();
 	void leaf3WayMerge();
 	void inner3WayMerge();
 	
@@ -291,6 +294,7 @@ void BNode<KeyType>::remove(const KeyType & x)
 	if(isRoot()) {
     
 		removeRoot(x);
+		compressSingular();
 	}
 	else if(isLeaf()) {
     
@@ -676,7 +680,7 @@ template <typename KeyType>
 bool BNode<KeyType>::leafBalance()
 {
 	if(leafBalanceRight()) return true;
-	return	false;//leafBalanceLeft();
+	return leafBalanceLeft();
 }
 
 template <typename KeyType> 
@@ -706,7 +710,7 @@ bool BNode<KeyType>::leafBalanceRight()
 
 template <typename KeyType> 
 bool BNode<KeyType>::leafBalanceLeft()
-{
+{return false;
 	const Pair<KeyType, Entity> s = firstData();
 	
 	bool found = false;
@@ -1029,7 +1033,7 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 #endif	
 	if(isSingular() ) {
 	    if(hasChildren() )
-	        threeWayMerge();
+	        takeover();
 	    else 
 	        removeKey(x.key);
 	}
@@ -1110,9 +1114,11 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 	insertData(k);
     
 	rgt->sendDataLeft(rgt->numKeys(), this);
-    
-	std::cout<<"\n aft "<<str();
 	
+#if 0    
+	std::cout<<"\n aft "<<str();
+#endif	
+
 	connectToChildren();
 	
 	k.key = rgt->firstKey();
@@ -1536,7 +1542,7 @@ bool BNode<KeyType>::shouldMerge(BNode<KeyType> * lft, BNode<KeyType> * rgt) con
 
 template <typename KeyType>
 bool BNode<KeyType>::isFull() const 
-{ return m_numKeys >= MaxNumKeysPerNode; }
+{ return m_numKeys == MaxNumKeysPerNode; }
 	
 template <typename KeyType>
 bool BNode<KeyType>::underflow() const 
@@ -1588,16 +1594,16 @@ KeyType BNode<KeyType>::getHighestKey() const
 }
 
 template <typename KeyType>
-void BNode<KeyType>::threeWayMerge()
+void BNode<KeyType>::takeover()
 {    
     if(leftChildNode()->isLeaf() )
-        leaf3WayMerge();
+        leafTakeover();
     else
-        inner3WayMerge();
+        innerTakeover();
 }
 	
 template <typename KeyType>
-void BNode<KeyType>::leaf3WayMerge()
+void BNode<KeyType>::leafTakeover()
 {
     BNode * lft = leftChildNode();
     int i, j=0;
@@ -1608,7 +1614,7 @@ void BNode<KeyType>::leaf3WayMerge()
 }
 
 template <typename KeyType>
-void BNode<KeyType>::inner3WayMerge()
+void BNode<KeyType>::innerTakeover()
 {
     BNode * lft = leftChildNode();
     BNode * lftLnk = lft->leftChildNode();
@@ -1633,7 +1639,63 @@ const KeyType & BNode<KeyType>::key(const int & i) const
 template <typename KeyType>
 Entity * BNode<KeyType>::index(const int & i) const 
 { return m_data[i].index; }
+
+template <typename KeyType>
+void BNode<KeyType>::compressSingular()
+{
+    if(!isSingular() ) return;
 	
+    if(!leftChildNode() ) return;
+	if(leftChildNode()->numKeys() 
+		+ linkedNode(0)->numKeys() > MaxNumKeysPerNode - 1) return;
+		
+	if(leftChildNode()->isLeaf() )
+        leaf3WayMerge();
+    else
+        inner3WayMerge();
+	
+}
+	
+template <typename KeyType>
+void BNode<KeyType>::leaf3WayMerge()
+{
+    BNode * lft = leftChildNode();
+    BNode * rgt = linkedNode(0);
+    int i, j=0;
+    for(i = 0; i< lft->numKeys(); ++i) 
+        m_data[j++] = lft->data(i);
+    for(i = 0; i< rgt->numKeys(); ++i) 
+        m_data[j++] = rgt->data(i);
+    setNumKeys(j);
+    connectSibling(NULL);
+}
+
+template <typename KeyType>
+void BNode<KeyType>::inner3WayMerge()
+{
+    BNode * lft = leftChildNode();
+    BNode * lftLnk = lft->leftChildNode();
+    BNode * rgt = linkedNode(0);
+    BNode * rgtLnk = rgt->leftChildNode();
+    
+    Pair<KeyType, Entity> k;
+    k.key = rgtLnk->firstKey();
+    k.index = rgtLnk;
+    
+    int i, j=0;
+    for(i = 0; i< lft->numKeys(); ++i) 
+        m_data[j++] = lft->data(i);
+    
+    m_data[j++] = k;
+    
+    for(i = 0; i< rgt->numKeys(); ++i) 
+        m_data[j++] = rgt->data(i);
+    
+    setNumKeys(j);
+    connectSibling(lftLnk);
+	connectToChildren();
+}
+
 } // end of namespace sdb
 
 }
