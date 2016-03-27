@@ -83,16 +83,16 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-	TreeNode::MaxNumKeysPerNode = 7;
-	TreeNode::MinNumKeysPerNode = 2;
-	int n = 100;
+	TreeNode::MaxNumKeysPerNode = 128;
+	TreeNode::MinNumKeysPerNode = 16;
+	int n = 1<<10;
 	std::cout<<"\n test large sequence "<<n;
 	Sequence<int> sq;
 	int i = 0, j = 2, nr = 0;
 	for(;i<n;++i) {
 		
 		int k = i+1; 
-		k = rand() & ((1<<22)-1);
+		k = rand() & ((1<<30)-1);
 		
 		if(!sq.findKey(k) ) {
 			// std::cout<<"\n insert "<<i<<" "<<k;
@@ -168,8 +168,8 @@ void testSequenceRemove()
 	for(i=0; i< nrm; ++i) {
 		std::cout<<"\n remove "<<i<<" "<<keystorm[i];
 		char c;
-		std::cout << "Enter: ";
-		std::cin >> c;
+		//std::cout << "Enter: ";
+		//std::cin >> c;
 		
 		int presz = sq.numLeaf();
 		if(sq.findKey(keystorm[i])) sq.remove(keystorm[i]);
@@ -208,7 +208,7 @@ void testSequenceRemove()
 			
 		}*/
 	}
-	std::cout<<"\n aft rm "<<sq.size()<<" "<<nb4rm - nrm;
+	std::cout<<"\n all "<<nrm<<" keys removed";
 }
 
 int main()

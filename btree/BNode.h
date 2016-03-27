@@ -18,7 +18,7 @@ namespace aphid {
 
 namespace sdb {
 
-#define DBG_SPLIT 1
+#define DBG_SPLIT 0
 
 class TreeNode : public Entity
 {
@@ -104,6 +104,7 @@ public:
 	void dbgFind(const KeyType & x);
 	bool dbgLinks(bool silient=true);
 	void dbgDown() const;
+	bool isSingular() const;
 	
 private:	
 	const KeyType firstKey() const;
@@ -183,14 +184,9 @@ private:
 	void mergeData(BNode * another, int start = 0);
 	void replaceIndex(int n, Pair<KeyType, Entity> x);
 	
-	bool interiorBalance();
-	
 	bool mergeInterior(const KeyType x);
 	bool mergeInteriorRight(const KeyType x);
 	bool mergeInteriorLeft(const KeyType x);
-	
-	bool interiorBalanceRight();
-	bool interiorBalanceLeft();
 	
 	bool isFull() const;
 	bool underflow() const;
@@ -220,6 +216,10 @@ private:
 	int countBalance(int a, int b);
 	void validateKeys();
 	void behead();
+	KeyType getHighestKey() const;
+	void threeWayMerge();
+	void leaf3WayMerge();
+	void inner3WayMerge();
 	
 };
 
@@ -580,7 +580,6 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> b)
 	two->connectLeftChild(m_data[midI].index);
 
 #if DBG_SPLIT
-	//std::cout<<"\n into "<<*one<<" and "<<*two;
 	std::cout<<"\n two n k "<<two->numKeys();
 	std::cout<<" <- "<<static_cast<BNode *>(two->leftChild() )->firstKey();
 	for(int i=0;i<two->numKeys(); ++i) {
@@ -646,7 +645,7 @@ Pair<KeyType, Entity> BNode<KeyType>::partData(Pair<KeyType, Entity> x, Pair<Key
 	int i = MaxNumKeysPerNode - 1;
 
 	for(;i >= 0; i--) {
-		if(x.key > old[i].key && !inserted) { //std::cout<<" k"<<i<<" "<<old[i].key;
+		if(x.key > old[i].key && !inserted) {
 			q = x;
 			i++;
 			inserted = true;
@@ -933,8 +932,6 @@ bool BNode<KeyType>::mergeLeafRight()
 	
 	up->pop(k);
 	
-	dbgRightUp(siblingNode() );
-    
 	return true;
 }
 
@@ -1063,31 +1060,16 @@ void BNode<KeyType>::pop(const Pair<KeyType, Entity> & x)
 template <typename KeyType> 
 void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 {
-	std::cout<<"\n pop in "<<str()<<" by "<<x.key;
-	removeKey(x.key);
+	std::cout<<"\n pop "<<str()<<" by "<<x.key;
 	
-	if(!underflow() ) return;
-	
-	if(hasChildren() ) {
-	    
-		BNode * lft = leftChildNode();
-        setNumKeys(0);
-		mergeData(lft);
-		
-		std::cout<<"\n merge 1st "<<str();
-		
-		if(lft->isLeaf() )
-			connectLeftChild(NULL);
-		else 
-			connectLeftChild(lft->leftChild());
-
-		connectToChildren();
-		
-		std::cout<<"\n done";
+	if(isSingular() ) {
+	    if(hasChildren() )
+	        threeWayMerge();
+	    else 
+	        removeKey(x.key);
 	}
-	else {
-	    connectLeftChild(NULL);
-	}
+	else 
+	    removeKey(x.key);
 	
 	std::cout<<"\n aft pop "<<str();
 	dbgLinks();
@@ -1096,23 +1078,18 @@ void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 template <typename KeyType> 
 void BNode<KeyType>::popInterior(const Pair<KeyType, Entity> & x)
 {
-	std::cout<<"\n pop by "<<x.key;
-	dbgUp();
+	std::cout<<"\n pop "<<str()<<" by "<<x.key;
 	
 	if(x.key == firstKey() ) {
-	    std::cout<<"\n first key";
 	    removeFirstData1();
 	}
 	else removeKey(x.key);
 	
-	// validateKeys();
 	std::cout<<"\n aft ";
-	dbgUp();
 	dbgLinks(false);
 	
 	if(!underflow()) return;
 	
-	//if(!interiorBalance())
 	mergeInterior(x.key);
 	
 }
@@ -1141,13 +1118,6 @@ bool BNode<KeyType>::mergeInterior(const KeyType x)
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::interiorBalance()
-{
-    bool stat = interiorBalanceRight();
-	return stat;//interiorBalanceLeft();
-}
-
-template <typename KeyType> 
 bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 {
     int kr;
@@ -1155,21 +1125,18 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 	
     if(!rgt) return false;
     
-	std::cout<<"\n  merge "<<str()<<" by "<<x;
-	dbgRightUp(rgt);
-	parentNode()->dbgLinks(false);
+	std::cout<<"\n  merge "<<str()
+		<<" by "<<x;
 	
 	if(!shouldInteriorMerge(this, rgt)) {
-	    std::cout<<"\n  inner cannot merge";
+	    std::cout<<"\n  inner cannot merge "
+				<<rgt->str();
 	    return false;
 	}
 	
-				
-	std::cout<<"\n bring down k["<<kr<<"] "<<parentNode()->key(kr);
 	Pair<KeyType, Entity> k;
 	k.key = parentNode()->key(kr);
 	k.index = rgt->leftChild();
-	std::cout<<" <- right node "<<rgt->str();
 	
 	insertData(k);
     
@@ -1179,16 +1146,10 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 	
 	connectToChildren();
 	
-	std::cout<<"\n parent key right to last "<<kr<<" k "<<k.key;
 	k.key = rgt->firstKey();
 	k.index = this;
 	parentNode()->setData(kr, k);
-	
-	std::cout<<"\n parent aft set k "<< parentNode()->str();
-	
 	parentNode()->pop(k);
-	
-	std::cout<<"\n parent aft pop k "<< parentNode()->str();
 	
 	return true;
 }
@@ -1208,7 +1169,6 @@ BNode<KeyType> * BNode<KeyType>::rightInteriorNeighbor(int & indParent) const
     if(parentNode()->lastKey() < firstKey() ) return NULL;
     if(parentNode()->firstKey() >= lastKey() ) {
         indParent = 0;
-        std::cout<<"\n right inner nei kr "<<indParent;
         return parentNode()->linkedNode(0);
     }
     
@@ -1297,61 +1257,6 @@ void BNode<KeyType>::dbgRightUp(BNode<KeyType> * rgt)
 	    <<"\n k "<<kr
 	    <<"\n  "<<str()
 	    <<" <- "<<rgt->str();
-}
-
-template <typename KeyType> 
-bool BNode<KeyType>::interiorBalanceRight()
-{ 
-    int kr;
-    BNode * rgt = rightInteriorNeighbor(kr);
-	if(!rgt) return false;
-	
-	std::cout<<"\n\n balance "<<str()
-	<<"->"<<rgt->str();
-	
-	int n = countBalance(numKeys(), rgt->numKeys() );
-	if(n<1) return false;
-
-	Pair<KeyType, Entity> k;
-	
-	for(int i = 0; i<n; ++i) {
-		k.key = rgt->firstKey();
-		k.index = rgt->leftChild();
-	    
-	    insertData(k);
-	    
-	    rgt->behead();
-	
-	    std::cout<<"\n aft "<<rgt->leftChildNode()->str();
-	}
-	
-	k.key = rgt->leftChildNode()->firstKey();
-	k.index = rgt;
-	parentNode()->setData(kr, k);
-	
-	validateKeys();
-	rgt->validateKeys();
-	
-	std::cout<<"\n aft "<<str()
-	<<"->"<<rgt->str();
-	
-	return true;
-}
-
-template <typename KeyType> 
-bool BNode<KeyType>::interiorBalanceLeft()
-{
-	BNode * lft = leftInteriorNeighbor();
-	if(!lft) return false;
-	Pair<KeyType, Entity> k;
-	parentNode()->rightTo(lft->lastData().key, k);
-	k.index = leftChild();
-	insertData(k);
-	Pair<KeyType, Entity> l = lft->lastData();
-	connectLeftChild(l.index);
-	parentNode()->replaceKey(k.key, l.key);
-	lft->removeLastData();
-	return true;
 }
 
 template <typename KeyType>
@@ -1689,14 +1594,12 @@ void BNode<KeyType>::setNumKeys(int x)
 { m_numKeys = x; }
 
 template <typename KeyType>
+bool BNode<KeyType>::isSingular() const
+{ return m_numKeys < 2; }
+
+template <typename KeyType>
 void BNode<KeyType>::validateKeys()
-{
-    /*for(int i=0;i<numKeys(); ++i) {
-		if(linkedNode(i)->firstKey() < key(i)) {
-			m_data[i].key = linkedNode(i)->firstKey();
-		}
-	}*/
-	
+{	
 	for(int i=0; i< numKeys()-1; ++i) {
 	    if(index(i) == index(i+1)) {
 	        
@@ -1706,6 +1609,50 @@ void BNode<KeyType>::validateKeys()
 	        m_numKeys--;
 	    }
 	}
+}
+
+template <typename KeyType>
+KeyType BNode<KeyType>::getHighestKey() const
+{
+	if(isLeaf() ) return lastKey();
+	return linkedNode(numKeys() - 1)->getHighestKey();
+}
+
+template <typename KeyType>
+void BNode<KeyType>::threeWayMerge()
+{
+	std::cout<<"\n 3 way merg "<<leftChildNode()->str();
+        
+    if(leftChildNode()->isLeaf() )
+        leaf3WayMerge();
+    else
+        inner3WayMerge();
+}
+	
+template <typename KeyType>
+void BNode<KeyType>::leaf3WayMerge()
+{
+    BNode * lft = leftChildNode();
+    int i, j=0;
+    for(i = 0; i< lft->numKeys(); ++i) 
+        m_data[j++] = lft->data(i);
+    setNumKeys(j);
+    connectSibling(NULL);
+}
+
+template <typename KeyType>
+void BNode<KeyType>::inner3WayMerge()
+{
+    BNode * lft = leftChildNode();
+    BNode * lftLnk = lft->leftChildNode();
+    
+    int i, j=0;
+    for(i = 0; i< lft->numKeys(); ++i) 
+        m_data[j++] = lft->data(i);
+    
+    setNumKeys(j);
+    connectSibling(lftLnk);
+	connectToChildren();
 }
 	
 } // end of namespace sdb
