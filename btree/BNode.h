@@ -22,7 +22,9 @@ namespace sdb {
 
 class TreeNode : public Entity
 {
-	Entity *m_first;
+/// to left child or
+/// to right sibling for leaf
+	Entity * m_link;
 	bool m_isLeaf;
 	
 public:
@@ -34,13 +36,15 @@ public:
 	bool isLeaf() const;
 	
 	Entity * sibling() const;
-	Entity * firstIndex() const;
+	Entity * leftChild() const;
 	
 	void setLeaf();
 	void connectSibling(Entity * another);
-	void setFirstIndex(Entity * another);
+	void connectLeftChild(Entity * another);
+	
 	static int MaxNumKeysPerNode;
 	static int MinNumKeysPerNode;
+	
 protected:
 	struct NodeIndirection {
 		void reset() {
@@ -99,6 +103,7 @@ public:
 	
 	void dbgFind(const KeyType & x);
 	bool dbgLinks(bool silient=true);
+	void dbgDown() const;
 	
 private:	
 	const KeyType firstKey() const;
@@ -127,7 +132,7 @@ private:
 	BNode * leftInteriorNeighbor() const;
 	BNode * rightInteriorNeighbor(int & indParent) const;
 	BNode * linkedNode(int idx) const;
-	BNode * firstLinkedNode() const; 
+	BNode * leftChildNode() const; 
 	
 	Pair<KeyType, Entity> * insertRoot(const KeyType & x);
 	Pair<KeyType, Entity> * insertLeaf(const KeyType & x);
@@ -151,9 +156,9 @@ private:
 /// insert data, split if needed
 	void bounce(const Pair<KeyType, Entity> b);
 
-	bool balanceLeaf();
-	bool balanceLeafRight();
-	bool balanceLeafLeft();
+	bool leafBalance();
+	bool leafBalanceRight();
+	bool leafBalanceLeft();
 	void sendDataRight(int num, BNode * rgt);
 	void sendDataLeft(int num, BNode * lft);
 	
@@ -178,14 +183,14 @@ private:
 	void mergeData(BNode * another, int start = 0);
 	void replaceIndex(int n, Pair<KeyType, Entity> x);
 	
-	bool balanceInterior();
+	bool interiorBalance();
 	
 	bool mergeInterior(const KeyType x);
 	bool mergeInteriorRight(const KeyType x);
 	bool mergeInteriorLeft(const KeyType x);
 	
-	bool balanceInteriorRight();
-	bool balanceInteriorLeft();
+	bool interiorBalanceRight();
+	bool interiorBalanceLeft();
 	
 	bool isFull() const;
 	bool underflow() const;
@@ -214,6 +219,7 @@ private:
 	void dbgRightUp(BNode<KeyType> * rgt);
 	int countBalance(int a, int b);
 	void validateKeys();
+	void behead();
 	
 };
 
@@ -241,8 +247,8 @@ BNode<KeyType> * BNode<KeyType>::nextIndex(KeyType x) const
 	//std::cout<<"\n find "<<x<<" in "<<*this;
 	
 	if(firstKey() > x) {
-		if(!firstIndex()) std::cout<<"\n error first index";
-		return static_cast<BNode *>(firstIndex());
+		if(!leftChild()) std::cout<<"\n error first index";
+		return static_cast<BNode *>(leftChild());
 	}
 	int ii;
 	SearchResult s = findKey(x);
@@ -307,7 +313,7 @@ void BNode<KeyType>::removeRoot(const KeyType & x)
 	else {
 		removeKeyAndData(x);
 		
-		setFirstIndex(NULL);
+		connectLeftChild(NULL);
 	}
 }
 
@@ -421,7 +427,7 @@ void BNode<KeyType>::splitRootToLeaves()
 	
 	/// std::cout<<"\n into "<<*one<<"\n"<<*two;
 	
-	setFirstIndex(one);
+	connectLeftChild(one);
 	setNumKeys(1);
 	
 	m_data[0].key = two->firstKey();
@@ -482,14 +488,14 @@ void BNode<KeyType>::getChildren(std::map<int, std::vector<Entity *> > & dst, in
 {
 	if(isLeaf()) return;
 	if(!hasChildren()) return;
-	dst[level].push_back(firstIndex());
+	dst[level].push_back(leftChild());
 	for(int i = 0;i < numKeys(); i++) {
 		dst[level].push_back(index(i));
     }
 		
 	level++;
 		
-	BNode * n = static_cast<BNode *>(firstIndex());
+	BNode * n = static_cast<BNode *>(leftChild());
 	n->getChildren(dst, level);
 	for(int i = 0;i < numKeys(); i++) {
 		n = static_cast<BNode *>(index(i));
@@ -502,7 +508,7 @@ BNode<KeyType> * BNode<KeyType>::firstLeaf()
 {
 	if(isRoot()) { 
 		if(hasChildren())
-			return static_cast<BNode *>(firstIndex())->firstLeaf();
+			return static_cast<BNode *>(leftChild())->firstLeaf();
 		else 
 			return this;
 			
@@ -511,7 +517,7 @@ BNode<KeyType> * BNode<KeyType>::firstLeaf()
 	if(isLeaf())
 		return this;
 	
-	return static_cast<BNode *>(firstIndex())->firstLeaf();
+	return static_cast<BNode *>(leftChild())->firstLeaf();
 }
 
 template <typename KeyType>
@@ -522,7 +528,7 @@ template <typename KeyType>
 void BNode<KeyType>::connectToChildren()
 {
 	if(!hasChildren()) return;
-	Entity * n = firstIndex();
+	Entity * n = leftChild();
 	n->setParent(this);
 	for(int i = 0;i < numKeys(); i++) {
 		n = index(i);
@@ -555,8 +561,7 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> b)
 			dst->insertData(m_data[i]);
 	}
 	
-	
-	one->setFirstIndex(firstIndex());
+	one->connectLeftChild(leftChild());
 	
 	if(b.key > m_data[midI].key) {
 #if DBG_SPLIT
@@ -572,18 +577,18 @@ void BNode<KeyType>::partRoot(Pair<KeyType, Entity> b)
 		one->insertData(b);
 	}
 	
-	two->setFirstIndex(m_data[midI].index);
+	two->connectLeftChild(m_data[midI].index);
 
 #if DBG_SPLIT
 	//std::cout<<"\n into "<<*one<<" and "<<*two;
 	std::cout<<"\n two n k "<<two->numKeys();
-	std::cout<<" <- "<<static_cast<BNode *>(two->firstIndex() )->firstKey();
+	std::cout<<" <- "<<static_cast<BNode *>(two->leftChild() )->firstKey();
 	for(int i=0;i<two->numKeys(); ++i) {
 		std::cout<<" -> "<<static_cast<BNode *>(two->index(i) )->firstKey();
 	}
 #endif	
 	
-	setFirstIndex(one);
+	connectLeftChild(one);
 	m_data[0].key = m_data[midI].key;
 	m_data[0].index = two;
 
@@ -620,7 +625,7 @@ void BNode<KeyType>::partInterior(Pair<KeyType, Entity> x)
 #endif	
 	connectToChildren();
 	
-	rgt->setFirstIndex(p.index);
+	rgt->connectLeftChild(p.index);
 
 	rgt->connectToChildren();
 	
@@ -669,14 +674,14 @@ Pair<KeyType, Entity> BNode<KeyType>::partData(Pair<KeyType, Entity> x, Pair<Key
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::balanceLeaf()
+bool BNode<KeyType>::leafBalance()
 {
-	if(balanceLeafRight()) return true;
-	return	balanceLeafLeft();
+	if(leafBalanceRight()) return true;
+	return	false;//leafBalanceLeft();
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::balanceLeafRight()
+bool BNode<KeyType>::leafBalanceRight()
 {
     BNode * rgt = siblingNode();
 	if(!rgt) return false;
@@ -706,7 +711,7 @@ bool BNode<KeyType>::balanceLeafRight()
 	    
 	   rgt->removeKey(rgt->firstData().key);
 	
-	    //std::cout<<"\n aft "<<rgt->firstLinkedNode()->str();
+	    //std::cout<<"\n aft "<<rgt->leftChildNode()->str();
 	}
 	crossed->replaceKey(kpop, rgt->firstData().key);
 #else
@@ -727,7 +732,7 @@ bool BNode<KeyType>::balanceLeafRight()
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::balanceLeafLeft()
+bool BNode<KeyType>::leafBalanceLeft()
 {
 	const Pair<KeyType, Entity> s = firstData();
 	
@@ -776,9 +781,9 @@ bool BNode<KeyType>::hasKey(const KeyType & x) const
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::leftTo(const KeyType & x) const
 {
-	if(numKeys()==1) return static_cast<BNode *>(firstIndex());
+	if(numKeys()==1) return static_cast<BNode *>(leftChild());
 	int i = keyLeft(x);
-	if(i < 0) return static_cast<BNode *>(firstIndex());
+	if(i < 0) return static_cast<BNode *>(leftChild());
 	return static_cast<BNode *>(index(i));
 }
 
@@ -880,7 +885,7 @@ void BNode<KeyType>::removeLeaf(const KeyType & x)
 	}
 	if(!underflow()) return;
 
-	if(!balanceLeaf())
+	if(!leafBalance())
 	    mergeLeaf();
 }
 
@@ -900,7 +905,7 @@ bool BNode<KeyType>::mergeLeafRight()
 	
 	BNode * up = siblingNode()->parentNode();
 /// must share parent
-	if(parent() != up) return false;
+	if(parentNode() != up) return false;
 	
 	if(!shouldMerge(this, siblingNode() )) return false;
 	
@@ -977,6 +982,15 @@ bool BNode<KeyType>::removeDataLeaf(const KeyType & x)
 }
 
 template <typename KeyType> 
+void BNode<KeyType>::behead()
+{
+	connectSibling(index(0) );
+	for(int i= 0; i < numKeys() - 1; i++)
+		m_data[i] = m_data[i+1];
+	reduceNumKeys();
+}
+
+template <typename KeyType> 
 void BNode<KeyType>::removeFirstData1()
 {
     for(int i= 0; i < numKeys() - 1; i++)
@@ -994,7 +1008,7 @@ bool BNode<KeyType>::removeKey(const KeyType & x)
 	int found = s.found;
 	
 	if(found == 0) {
-	    setFirstIndex(m_data[found].index);
+	    connectLeftChild(m_data[found].index);
 	}
 	else {
 		m_data[found - 1].index = m_data[found].index;
@@ -1049,25 +1063,30 @@ void BNode<KeyType>::pop(const Pair<KeyType, Entity> & x)
 template <typename KeyType> 
 void BNode<KeyType>::popRoot(const Pair<KeyType, Entity> & x)
 {
-	std::cout<<"\n\n pop in "<<str()<<" by "<<x.key;
+	std::cout<<"\n pop in "<<str()<<" by "<<x.key;
+	removeKey(x.key);
 	
-	if(numKeys() > 1) {
-	    const bool hc = hasChildren();
-	    removeKey(x.key);
-	    if(!hc) setFirstIndex(NULL);
-	}
-	else {
+	if(!underflow() ) return;
+	
+	if(hasChildren() ) {
 	    
-		BNode * lft = static_cast<BNode *>(firstIndex());
+		BNode * lft = leftChildNode();
         setNumKeys(0);
 		mergeData(lft);
+		
 		std::cout<<"\n merge 1st "<<str();
-		if(lft->isLeaf())
-			setFirstIndex(NULL);
+		
+		if(lft->isLeaf() )
+			connectLeftChild(NULL);
 		else 
-			setFirstIndex(lft->firstIndex());
-			
+			connectLeftChild(lft->leftChild());
+
 		connectToChildren();
+		
+		std::cout<<"\n done";
+	}
+	else {
+	    connectLeftChild(NULL);
 	}
 	
 	std::cout<<"\n aft pop "<<str();
@@ -1093,8 +1112,8 @@ void BNode<KeyType>::popInterior(const Pair<KeyType, Entity> & x)
 	
 	if(!underflow()) return;
 	
-	if(!balanceInterior())
-	    mergeInterior(x.key);
+	//if(!interiorBalance())
+	mergeInterior(x.key);
 	
 }
 
@@ -1122,10 +1141,10 @@ bool BNode<KeyType>::mergeInterior(const KeyType x)
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::balanceInterior()
+bool BNode<KeyType>::interiorBalance()
 {
-    bool stat = balanceInteriorRight();
-	return stat;//balanceInteriorLeft();
+    bool stat = interiorBalanceRight();
+	return stat;//interiorBalanceLeft();
 }
 
 template <typename KeyType> 
@@ -1149,7 +1168,7 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 	std::cout<<"\n bring down k["<<kr<<"] "<<parentNode()->key(kr);
 	Pair<KeyType, Entity> k;
 	k.key = parentNode()->key(kr);
-	k.index = rgt->firstIndex();
+	k.index = rgt->leftChild();
 	std::cout<<" <- right node "<<rgt->str();
 	
 	insertData(k);
@@ -1169,7 +1188,6 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 	
 	parentNode()->pop(k);
 	
-	
 	std::cout<<"\n parent aft pop k "<< parentNode()->str();
 	
 	return true;
@@ -1188,13 +1206,18 @@ template <typename KeyType>
 BNode<KeyType> * BNode<KeyType>::rightInteriorNeighbor(int & indParent) const
 {
     if(parentNode()->lastKey() < firstKey() ) return NULL;
-    if(parentNode()->firstKey() > lastKey() ) {
+    if(parentNode()->firstKey() >= lastKey() ) {
         indParent = 0;
+        std::cout<<"\n right inner nei kr "<<indParent;
         return parentNode()->linkedNode(0);
     }
     
-	indParent = parentNode()->keyRight(firstKey() );
-	if(indParent < 0) return NULL;
+    SearchResult s = parentNode()->findKey(firstKey() );
+	if(s.found > -1) indParent = s.found;
+	else indParent = s.low;
+	
+	std::cout<<"\n right inner nei kr "<<indParent;
+	
 	return parentNode()->linkedNode(indParent);
 }
 
@@ -1205,7 +1228,7 @@ template <typename KeyType>
 BNode<KeyType> * BNode<KeyType>::leftInteriorNeighbor() const
 {
     if(parentNode()->firstKey() > lastKey() ) return NULL;
-    if(parentNode()->index(0) == this) return parentNode()->firstLinkedNode();
+    if(parentNode()->index(0) == this) return parentNode()->leftChildNode();
     
 	Pair<KeyType, Entity> k, j;
 	if(!parentNode()->dataLeftTo(firstKey(), k)) return NULL;
@@ -1251,7 +1274,7 @@ bool BNode<KeyType>::dataLeftTo(const KeyType & x, Pair<KeyType, Entity> & dst) 
 		dst = m_data[i];
 		return true;
 	}
-	dst.index = firstIndex();
+	dst.index = leftChild();
 	return false;
 }
 
@@ -1277,14 +1300,14 @@ void BNode<KeyType>::dbgRightUp(BNode<KeyType> * rgt)
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::balanceInteriorRight()
+bool BNode<KeyType>::interiorBalanceRight()
 { 
     int kr;
     BNode * rgt = rightInteriorNeighbor(kr);
 	if(!rgt) return false;
 	
-	std::cout<<"\n\n balance ";
-	dbgRightUp(rgt);
+	std::cout<<"\n\n balance "<<str()
+	<<"->"<<rgt->str();
 	
 	int n = countBalance(numKeys(), rgt->numKeys() );
 	if(n<1) return false;
@@ -1292,39 +1315,40 @@ bool BNode<KeyType>::balanceInteriorRight()
 	Pair<KeyType, Entity> k;
 	
 	for(int i = 0; i<n; ++i) {
-	    k.key = rgt->firstKey();
-	    k.index = rgt->firstIndex();
-	
+		k.key = rgt->firstKey();
+		k.index = rgt->leftChild();
+	    
 	    insertData(k);
 	    
-	    rgt->removeKey(rgt->firstData().key);
+	    rgt->behead();
 	
-	    std::cout<<"\n aft "<<rgt->firstLinkedNode()->str();
+	    std::cout<<"\n aft "<<rgt->leftChildNode()->str();
 	}
 	
-	k.key = rgt->firstLinkedNode()->firstKey();
+	k.key = rgt->leftChildNode()->firstKey();
 	k.index = rgt;
 	parentNode()->setData(kr, k);
 	
+	validateKeys();
+	rgt->validateKeys();
 	
-	std::cout<<"\n aft ";
-	dbgRightUp(rgt);
-	parentNode()->dbgLinks(false);
+	std::cout<<"\n aft "<<str()
+	<<"->"<<rgt->str();
 	
 	return true;
 }
 
 template <typename KeyType> 
-bool BNode<KeyType>::balanceInteriorLeft()
+bool BNode<KeyType>::interiorBalanceLeft()
 {
 	BNode * lft = leftInteriorNeighbor();
 	if(!lft) return false;
 	Pair<KeyType, Entity> k;
 	parentNode()->rightTo(lft->lastData().key, k);
-	k.index = firstIndex();
+	k.index = leftChild();
 	insertData(k);
 	Pair<KeyType, Entity> l = lft->lastData();
-	setFirstIndex(l.index);
+	connectLeftChild(l.index);
 	parentNode()->replaceKey(k.key, l.key);
 	lft->removeLastData();
 	return true;
@@ -1335,8 +1359,8 @@ BNode<KeyType> * BNode<KeyType>::linkedNode(int idx) const
 { return static_cast<BNode *>(index(idx) ); }
 
 template <typename KeyType>
-BNode<KeyType> * BNode<KeyType>::firstLinkedNode() const
-{ return static_cast<BNode *>(firstIndex() ); }
+BNode<KeyType> * BNode<KeyType>::leftChildNode() const
+{ return static_cast<BNode *>(leftChild() ); }
 
 template <typename KeyType> 
 BNode<KeyType> * BNode<KeyType>::parentNode() const
@@ -1354,16 +1378,33 @@ const std::string BNode<KeyType>::str() const
 	else if(isLeaf() ) sst<<" leaf  ";
 	else sst<<" inner ";
 	
+	int i = 0;
 	sst<<" n "<<numKeys()<<" [";
     if(numKeys() ==0) {
         sst<<"] ";
     } else {
-    int i = 0;
+    
     for(;i<numKeys()-1;++i) sst<<key(i)<<",";
     sst<<lastKey()<<"] ";
     }
-    if(!sibling()) sst<<"~";
+	
+	if(!siblingNode() ) sst<<"~";
 	return sst.str();
+}
+
+template <typename KeyType> 
+void BNode<KeyType>::dbgDown() const 
+{
+	int i;
+	if(isLeaf() ) {
+		if(siblingNode() ) std::cout<<" | "<<siblingNode()->firstKey();
+		else std::cout<<"~";
+	}
+	else {
+		if(leftChildNode() ) std::cout << "\n   " << leftChildNode()->firstKey() << " < ";
+		for(i=0;i<numKeys();++i)
+		std::cout << " > " << linkedNode(i)->firstKey();
+	}
 }
 
 template <typename KeyType>
@@ -1553,22 +1594,26 @@ void BNode<KeyType>::dbgFindInInterior(const KeyType & x)
 template <typename KeyType>
 bool BNode<KeyType>::dbgLinks(bool silient)
 {	
+    if(!hasChildren()) return true;
 	bool stat = true;
 	if(!silient) std::cout<<"\n n k "<<numKeys();
-	KeyType pre = firstLinkedNode()->firstKey();
-	if(!silient) std::cout<<" "<<pre<<"<-";
+	KeyType pre = leftChildNode()->firstKey();
+	if(!silient) std::cout<<" "<<pre<<" | ";
+	
 	for(int i=0;i<numKeys(); ++i) {
+	
 		KeyType cur = linkedNode(i)->firstKey();
-		if(!silient) std::cout<<" -> "<<cur;
+		if(!silient) std::cout<<"  "<<cur;
 		if(cur <= pre) {
-			std::cout<<"\n\n****    error wrong link";
+			std::cout<<"\n\n****    error wrong link "
+			        <<pre<<" >= "<<cur;
 			stat = false;
 		}
 		pre = cur;
 	}
 	
 	for(int i=0;i<numKeys(); ++i) {
-		if(linkedNode(i)->firstKey() < key(i)) {
+		if(key(i) > linkedNode(i)->firstKey() ) {
 			if(!silient) std::cout<<"\n\n****    error wrong k["<<i<<"]"
 						<<key(i)
 						<<" > "
@@ -1576,6 +1621,33 @@ bool BNode<KeyType>::dbgLinks(bool silient)
 						;
 			stat = false;
 		}
+	}
+	
+	if(isLeaf() ) {
+		if(siblingNode() ) {
+			if(lastKey() >= siblingNode()->firstKey() ) {
+				if(!silient) std::cout<<"\n\n****    error order to sibling "
+							<<lastKey()
+							<<" > "
+							<<siblingNode()->firstKey()
+							;
+				stat = false;
+			}
+		}
+	}
+	else if(leftChild() ) {
+		if(firstKey() < leftChildNode()->lastKey() ) {
+				if(!silient) std::cout<<"\n\n****    error order to left child "
+							<<firstKey()
+							<<" < ["<<leftChildNode()->firstKey()
+							<<", "<<leftChildNode()->lastKey()<<"] "
+							;
+				stat = false;
+			}
+	}
+	if(!stat) {
+	    std::cout<<"\n failed link check\n"<<str();
+	    dbgDown();
 	}
 	return stat;
 }
@@ -1594,7 +1666,7 @@ bool BNode<KeyType>::isFull() const
 	
 template <typename KeyType>
 bool BNode<KeyType>::underflow() const 
-{ return m_numKeys == MinNumKeysPerNode; }
+{ return m_numKeys <= MinNumKeysPerNode; }
 
 template <typename KeyType>
 bool BNode<KeyType>::shouldInteriorMerge(BNode<KeyType> * lft, BNode<KeyType> * rgt) const 
@@ -1619,11 +1691,11 @@ void BNode<KeyType>::setNumKeys(int x)
 template <typename KeyType>
 void BNode<KeyType>::validateKeys()
 {
-    for(int i=0;i<numKeys(); ++i) {
+    /*for(int i=0;i<numKeys(); ++i) {
 		if(linkedNode(i)->firstKey() < key(i)) {
 			m_data[i].key = linkedNode(i)->firstKey();
 		}
-	}
+	}*/
 	
 	for(int i=0; i< numKeys()-1; ++i) {
 	    if(index(i) == index(i+1)) {

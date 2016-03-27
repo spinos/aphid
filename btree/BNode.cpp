@@ -16,13 +16,13 @@ int TreeNode::MinNumKeysPerNode = 2;
 
 TreeNode::TreeNode(Entity * parent) : Entity(parent)
 {
-	m_first = NULL;
+	m_link = NULL;
 	m_isLeaf = false;
 }
 
 TreeNode::~TreeNode() 
 {
-	if(m_first && !isLeaf()) delete m_first;
+	if(m_link && !isLeaf()) delete m_link;
 }
 
 bool TreeNode::isRoot() const 
@@ -31,26 +31,26 @@ bool TreeNode::isRoot() const
 bool TreeNode::hasChildren() const 
 { 
 	if(isLeaf()) return false; 
-	return m_first != NULL;
+	return m_link != NULL;
 }
 
 bool TreeNode::isLeaf() const 
 { return m_isLeaf; }
 
 Entity * TreeNode::sibling() const
-{ return m_first; }
+{ return m_link; }
 
-Entity * TreeNode::firstIndex() const 
-{ return m_first; }
+Entity * TreeNode::leftChild() const 
+{ return m_link; }
 
 void TreeNode::setLeaf() 
 { m_isLeaf = true; }
 
 void TreeNode::connectSibling(Entity * another)
-{ m_first = another; }
+{ m_link = another; }
 
-void TreeNode::setFirstIndex(Entity * another)
-{ m_first = another; }
+void TreeNode::connectLeftChild(Entity * another)
+{ m_link = another; }
 
 } // end of namespace sdb
 

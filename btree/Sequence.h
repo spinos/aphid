@@ -237,6 +237,7 @@ protected:
 	
 private:
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
+	bool dbgCheckLayer(const int & level, const std::vector<Entity *> & nodes);
 
 private:
 	BNode<T> * m_root;
@@ -248,9 +249,10 @@ template<typename T>
 void Sequence<T>::display()
 {
     std::cout<<"\n sequence display "
-    <<"\n root "<<*m_root;
+    <<"\n  "<<*m_root;
 	
-    m_root->dbgLinks(false);
+    if(!m_root->hasChildren() ) return;
+    m_root->dbgDown();
     
 	std::map<int, std::vector<Entity *> > nodes;
 	m_root->getChildren(nodes, 1);
@@ -265,8 +267,11 @@ void Sequence<T>::displayLevel(const int & level, const std::vector<Entity *> & 
 {
 	std::cout<<"\n level: "<<level<<" n "<<nodes.size()<<" ";
 	std::vector<Entity *>::const_iterator it = nodes.begin();
-	for(; it != nodes.end(); ++it)
-		std::cout<<"\n"<<*(static_cast<BNode<T> *>(*it));
+	for(; it != nodes.end(); ++it) {
+	    BNode<T> * n = static_cast<BNode<T> *>(*it);
+		std::cout<<"\n"<<*n;
+		n->dbgDown();
+	}
 }
 
 template<typename T>
@@ -277,7 +282,43 @@ void Sequence<T>::dbgFind(const T & x)
 
 template<typename T>
 bool Sequence<T>::dbgCheck()
-{ return m_root->dbgLinks(); }
+{ 
+	if( !m_root->dbgLinks(false) ) return false;
+	
+	std::map<int, std::vector<Entity *> > nodes;
+	m_root->getChildren(nodes, 1);
+	
+	std::map<int, std::vector<Entity *> >::const_iterator it = nodes.begin();
+	for(; it != nodes.end(); ++it) {
+		if(!dbgCheckLayer((*it).first, (*it).second)) return false;
+	}
+		
+	return true;
+}
+
+template<typename T>
+bool Sequence<T>::dbgCheckLayer(const int & level, const std::vector<Entity *> & nodes)
+{
+    int nl = 0;
+    std::vector<Entity *>::const_iterator it = nodes.begin();
+	for(; it != nodes.end(); ++it) {
+		BNode<T> * n = static_cast<BNode<T> *>(*it);
+		if(n->isLeaf() ) {
+		    nl += n->numKeys();
+		    continue;
+		}
+		if(!n->dbgLinks(false) ) return false;
+	}
+	
+	if(nl > 0) {
+	    if(nl != size()) {
+	        std::cout<<"\n wrong size "<<nl
+	            <<" != "<<size();
+	            return false;
+	    }
+	}
+	return true;
+}
 
 } //end namespace sdb
 

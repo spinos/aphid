@@ -83,7 +83,7 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-	TreeNode::MaxNumKeysPerNode = 8;
+	TreeNode::MaxNumKeysPerNode = 7;
 	TreeNode::MinNumKeysPerNode = 2;
 	int n = 100;
 	std::cout<<"\n test large sequence "<<n;
@@ -99,8 +99,6 @@ void testSequenceRemove()
 			//int prenl = sq.numLeaf();
 			
 			sq.insert(k);
-			
-			//sq.display();
 /*
 			if(!sq.findKey(k) ) {
 				std::cout<<"\n\n error lost "<<k
@@ -125,6 +123,12 @@ void testSequenceRemove()
 	
 	int nb4rm = sq.size();
 	std::cout<<"\n sequence size "<<nb4rm;
+	
+	if(!sq.dbgCheck() ) {
+		sq.display();
+		std::cout<<"\n failed check, abort";
+		return;
+	}
 	
 	std::cout<<"\n test key order ";
 	std::deque<int > keystorm;
@@ -158,7 +162,7 @@ void testSequenceRemove()
 				return;
 			}
 		}
-	std::cout<<"\n passed\n test remove keys";
+	std::cout<<"\n passed\n test remove keys "<<nrm;
 	
 	int anrm = 0;
 	for(i=0; i< nrm; ++i) {
@@ -182,7 +186,7 @@ void testSequenceRemove()
 		
 		if(!sq.dbgCheck() ) {
 			sq.display();
-			std::cout<<"\n abort after remove "<<anrm;
+			std::cout<<"\n failed check, abort after remove "<<anrm;
 			return;
 		}
 		anrm++;
