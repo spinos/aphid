@@ -31,7 +31,7 @@ public:
         bool _unquantized;
         
         BuildProfile() {
-			_minBNodeNumKeys = 2;
+			_minBNodeNumKeys = 16;
             _maxBNodeNumKeys = 128;
 			_maxLeafPrims = 8;
             _maxLevel = 8;

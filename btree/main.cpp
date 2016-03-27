@@ -83,9 +83,15 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-	TreeNode::MaxNumKeysPerNode = 128;
-	TreeNode::MinNumKeysPerNode = 16;
+	TreeNode::MaxNumKeysPerNode = 9;
+	TreeNode::MinNumKeysPerNode = 3;
+	
+#define INTERACTOVE 0
+#if INTERACTOVE
+	int n = 1<<7;
+#else
 	int n = 1<<10;
+#endif
 	std::cout<<"\n test large sequence "<<n;
 	Sequence<int> sq;
 	int i = 0, j = 2, nr = 0;
@@ -131,7 +137,7 @@ void testSequenceRemove()
 	}
 	
 	std::cout<<"\n test key order ";
-	std::deque<int > keystorm;
+	std::vector<int > keystorm;
 	sq.begin();
 	while(!sq.end() ) {
 		int k = sq.key();
@@ -150,6 +156,18 @@ void testSequenceRemove()
 	}
 	
 	int nrm = keystorm.size();
+#if 1
+	for(i=0;i<n;++i) {
+		for(j=0; j<33;++j) {
+			int rj = rand() % n;
+			if(rj+9 < n) {
+				int tk = keystorm[rj];
+				keystorm[rj] = keystorm[rj+9];
+				keystorm[rj+9] = tk;
+			}
+		}
+	}
+#endif
 	
 	sq.display();
 	std::cout<<"\n passed\n test find n key "<<nrm;
@@ -167,9 +185,12 @@ void testSequenceRemove()
 	int anrm = 0;
 	for(i=0; i< nrm; ++i) {
 		std::cout<<"\n remove "<<i<<" "<<keystorm[i];
+		
+#if INTERACTOVE
 		char c;
-		//std::cout << "Enter: ";
-		//std::cin >> c;
+		std::cout << "Enter: ";
+		std::cin >> c;
+#endif
 		
 		int presz = sq.numLeaf();
 		if(sq.findKey(keystorm[i])) sq.remove(keystorm[i]);
