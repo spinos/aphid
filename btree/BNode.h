@@ -142,7 +142,7 @@ private:
 	void splitRootToLeaves();
 	BNode *splitLeaf(const KeyType & x);
 	
-	void insertKey(KeyType x);
+	int insertKey(const KeyType & x);
 	void removeFirstData1();
 	bool removeKey(const KeyType & x);
 	bool removeKeyAndData(const KeyType & x);
@@ -166,7 +166,7 @@ private:
 	void removeLastData();
 	void removeFirstData();
 
-	void replaceKey(KeyType x, KeyType y);
+	void replaceKey(const KeyType & x, const KeyType & y);
 	bool hasKey(const KeyType & x) const;
 	
 	void removeRoot(const KeyType & x);
@@ -338,28 +338,31 @@ Pair<KeyType, Entity> * BNode<KeyType>::insertRoot(const KeyType & x)
 		return n->insertLeaf(x);
 	}
 	
-	if(!hasKey(x)) {
-		insertKey(x);
+	SearchResult sr = findKey(x);
+	if(sr.found < 0) {
+		sr.found = insertKey(x);
 		// std::cout<<"\n bnode insert root "<<x<<" into "<<*this;
 	}
 	
-	return dataP(findKey(x).found);
+	return dataP(sr.found);
 }
 
 template <typename KeyType> 
 Pair<KeyType, Entity> * BNode<KeyType>::insertLeaf(const KeyType & x)
 {
-	if(!hasKey(x)) {
-		insertKey(x);
+	SearchResult sr = findKey(x);
+	if(sr.found < 0) {
+		sr.found = insertKey(x);
 		/// std::cout<<"\n bnode insert leaf"<<x<<" into "<<*this;
 	}
 	
 	BNode * dst = this;
-	if(isFull())
+	if(isFull()) {
 		dst = splitLeaf(x);
+		sr = dst->findKey(x);
+	}
 	
-	
-	return dst->dataP(dst->findKey(x).found);
+	return dst->dataP(sr.found);
 }
 
 template <typename KeyType> 
@@ -387,8 +390,15 @@ void BNode<KeyType>::insertData(Pair<KeyType, Entity> x)
 }
 
 template <typename KeyType> 
-void BNode<KeyType>::insertKey(KeyType x)
+int BNode<KeyType>::insertKey(const KeyType & x)
 {  
+	if(m_numKeys < 1) {
+		m_data[0].key = x;
+		m_data[0].index = NULL;
+		m_numKeys = 1;
+		return 0;
+	}
+	
 	int i;
     for(i= numKeys() - 1;i >= 0 && m_data[i].key > x; --i) {
 		m_data[i+1] = m_data[i];
@@ -406,6 +416,7 @@ void BNode<KeyType>::insertKey(KeyType x)
 		if(duk == x) std::cout<<"\n dupleaf "<<*this;
 	}
 #endif
+	return i+1;
 }
 
 template <typename KeyType> 
@@ -749,7 +760,7 @@ BNode<KeyType> * BNode<KeyType>::ancestor(const KeyType & x, bool & found) const
 template <typename KeyType> 
 bool BNode<KeyType>::hasKey(const KeyType & x) const
 {
-	if(numKeys() < 1) false;
+	if(numKeys() < 1) return false;
     if(x > lastKey() || x < firstKey() ) return false;
 	return (findKey(x).found > -1);
 }
@@ -839,7 +850,7 @@ void BNode<KeyType>::removeFirstData()
 }
 
 template <typename KeyType> 
-void BNode<KeyType>::replaceKey(KeyType x, KeyType y)
+void BNode<KeyType>::replaceKey(const KeyType & x, const KeyType & y)
 {
 	SearchResult s = findKey(x);
 	if(s.found > -1) m_data[s.found].key = y;
