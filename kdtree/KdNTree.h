@@ -74,6 +74,8 @@ public:
 	char intersect(IntersectionContext * ctx);
 	char intersectBox(BoxIntersectContext * ctx);
 	
+	const T * getSource(const int x) const;
+	
 	virtual std::string verbosestr() const;
     
     typedef Tn TreeletType;
@@ -362,7 +364,7 @@ char KdNTree<T, Tn>::intersect(IntersectionContext * ctx)
 	if(!b.intersect(ctx->m_ray)) return 0;
 	
 	KdTreeNode * r = root()->node(0);
-	if(r->isLeaf() ) return 1;
+	if(r->isLeaf() ) return 0;
 	
 	ctx->setBBox(b);
 	int branchIdx = root()->internalOffset(0);
@@ -615,6 +617,10 @@ void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
 		}
 	}
 }
+
+template <typename T, typename Tn>
+const T * KdNTree<T, Tn>::getSource(const int x) const
+{ return m_source->get(primIndirectionAt(x) ); }
 
 }
 //:~

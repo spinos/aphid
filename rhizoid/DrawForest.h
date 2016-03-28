@@ -44,7 +44,8 @@ protected:
     void drawBrush();
 	
 private:
-    void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
+    void drawFace(const int & geoId, const int & triId);
+	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlants(sdb::Array<int, Plant> * cell);
 	void drawPlant(PlantData * data);
 	void drawWiredPlants(sdb::Array<int, Plant> * cell);

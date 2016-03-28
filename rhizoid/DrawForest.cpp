@@ -29,18 +29,38 @@ void DrawForest::setScaleMuliplier(float x, float y, float z)
 
 void DrawForest::drawGround() 
 {
+	if(numActiveGroundFaces() < 1) return;
+	sdb::Sequence<int> * prims = activeGround()->primIndices();
+	const sdb::VectorArray<cvx::Triangle> & tris = triangles();
+	
 	glPushAttrib(GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
 	glColor3f(.57f, .37f, 0.f);
 	
 	glBegin(GL_TRIANGLES);
-	SelectionContext * active = activeGround();
-	std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator it = active->geometryBegin();
-	for(; it != active->geometryEnd(); ++it) {
-		drawFaces(it->first, it->second);
+	
+	prims->begin();
+	while(!prims->end() ) {
+	
+		const cvx::Triangle * t = tris[prims->key() ];
+		drawFace(t->ind0(), t->ind1() );
+		
+		prims->next();
 	}
+	
 	glEnd();
 	glPopAttrib();
+}
+
+void DrawForest::drawFace(const int & geoId, const int & triId)
+{
+	const ATriangleMesh * mesh = groundMeshes()[geoId];
+	Vector3F * p = mesh->points();
+	unsigned * tri = mesh->triangleIndices(triId );
+	glVertex3fv((GLfloat *)&p[tri[0]]);
+	glVertex3fv((GLfloat *)&p[tri[1]]);
+	glVertex3fv((GLfloat *)&p[tri[2]]);
+		
 }
 
 void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
@@ -258,7 +278,7 @@ bool DrawForest::isVisibleInView(Plant * pl,
 	if(cullByFrustum(worldP, r) ) return false;
     
 	float camZ;
-	if(cullByDepth(worldP, r * 2.f, camZ, ground() ) ) return false;
+	if(cullByDepth<KdNTree<cvx::Triangle, KdNode4 > >(worldP, r * 2.f, camZ, ground() ) ) return false;
 	
 	if(lowLod > 0.f || highLod < 1.f) {
 /// local z is negative

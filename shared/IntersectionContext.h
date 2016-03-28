@@ -15,6 +15,7 @@
 #include <Geometry.h>
 #include <Ray.h>
 #include <Vector2F.h>
+
 namespace aphid {
 
 class IntersectionContext : public PrimitiveFilter {
@@ -60,7 +61,7 @@ class BoxIntersectContext : public BoundingBox {
 	int m_cap;
 	bool m_exact;
 	
-public:
+public:	
 	BoxIntersectContext();
 	virtual ~BoxIntersectContext();
 	

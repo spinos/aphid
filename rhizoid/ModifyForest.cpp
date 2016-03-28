@@ -33,11 +33,38 @@ void ModifyForest::setNoiseWeight(float x)
 bool ModifyForest::growOnGround(GrowOption & option)
 {
 	if(numActiveGroundFaces() < 1) return false;
-	std::map<Geometry *, sdb::Sequence<unsigned> * >::iterator it = activeGround()->geometryBegin();
-	for(; it != activeGround()->geometryEnd(); ++it) {
-		growOnFaces(it->first, it->second, geomertyId(it->first), option);
+	sdb::Sequence<int> * prims = activeGround()->primIndices();
+	const sdb::VectorArray<cvx::Triangle> & tris = triangles();
+	
+	prims->begin();
+	while(!prims->end() ) {
+	
+		const cvx::Triangle * t = tris[prims->key() ];
+		growOnFace(t->ind0(), t->ind1(), option);
+		
+		prims->next();
 	}
+	
     return true;
+}
+
+void ModifyForest::growOnFace(const int & geoId, const int & triId,
+					GrowOption & option)
+{
+	GroundBind bind;
+	const ATriangleMesh * mesh = groundMeshes()[geoId];
+	Vector3F * p = mesh->points();
+	if(option.m_alongNormal)
+		option.m_upDirection = mesh->triangleNormal(triId );
+		
+	unsigned * tri = mesh->triangleIndices(triId );
+	
+	if(m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) {
+		m_bary->create(p[tri[0]], p[tri[1]], p[tri[2]] );
+		
+		bind.setGeomComp(geoId, triId );
+		growOnTriangle(m_raster, m_bary, bind, option);
+	}
 }
 
 void ModifyForest::growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
@@ -110,24 +137,37 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 {
 	if(!intersectGround(ray) ) return false;
 	
+	if(option.m_multiGrow) {
+		activeGround()->deselect();
+		selectGroundFaces(ray, SelectionContext::Append);
+		growOnGround(option);
+		return true;
+	}
+	
 	IntersectionContext * ctx = intersection();
 	
-	ATriangleMesh * mesh = static_cast<ATriangleMesh *>(ctx->m_geometry);
-	unsigned component = ctx->m_componentIdx;
+/// ind to source
+	if(ctx->m_componentIdx >= ground()->primIndirection().size() ) {
+		std::cout<<"\n oor "<<ctx->m_componentIdx
+			<<" >= "<<ground()->primIndirection().size();
+		return false;
+	}
+	const cvx::Triangle * t = ground()->getSource(ctx->m_componentIdx);
+	
+	ATriangleMesh * mesh = groundMeshes()[t->ind0()];
+	
 	if(option.m_alongNormal)
-		option.m_upDirection = mesh->triangleNormal(component );
+		option.m_upDirection = mesh->triangleNormal(t->ind1() );
 		
 	Vector3F * p = mesh->points();
-	unsigned * tri = mesh->triangleIndices(component );
+	unsigned * tri = mesh->triangleIndices(t->ind1() );
 	if(!m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) return false;
 	
 	m_bary->create(p[tri[0]], p[tri[1]], p[tri[2]] );
 	
 	GroundBind bind;
-	bind.setGeomComp(geomertyId(mesh), component );
+	bind.setGeomComp(geomertyId(mesh), t->ind1() );
 	
-	if(option.m_multiGrow) growOnTriangle(m_raster, m_bary, bind, option);
-	else {
 		Matrix44F tm;
 		float scale;
 		randomSpaceAt(ctx->m_hitP, option, tm, scale); 
@@ -146,7 +186,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		bind.m_w2 = m_bary->getV(2);
 		
 		addPlant(tm, bind, option.m_plantId);
-	}
+	
     return true;
 }
 

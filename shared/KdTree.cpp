@@ -259,7 +259,6 @@ char KdTree::leafIntersect(KdTreeNode *node, IntersectionContext * ctx)
 	sdb::VectorArray<Primitive> &indir = m_stream.indirection();
 	int igeom, icomponent;
 	char anyHit = 0;
-	float hitD;
 	for(unsigned i = 0; i < num; i++) {
 		//unsigned *iprim = indir.asIndex();
 		//unsigned * iprim = indir[start + i];

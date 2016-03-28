@@ -18,13 +18,14 @@ Forest::Forest()
     sdb::TreeNode::MinNumKeysPerNode = 16;
     
 	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >;
-	m_ground = NULL;
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
-    m_selectCtx.setRadius(8.f);
-	
+	m_selectCtx = new SphereSelectionContext;
+    
 	ExampVox * defE = new ExampVox;
 	addPlantExample(defE);
+	
+	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
 }
 
 Forest::~Forest() 
@@ -47,14 +48,11 @@ Forest::~Forest()
     
     clearGroundMeshes();
     
-	if(m_ground) delete m_ground;
+	delete m_ground;
 }
 
 void Forest::setSelectionRadius(float x)
-{ 
-    m_selectCtx.setRadius(x); 
-    m_activePlants->setRadius(x);
-}
+{ m_activePlants->setRadius(x); }
 
 void Forest::resetGrid(float gridSize)
 {
@@ -115,16 +113,18 @@ const std::vector<ATriangleMesh *> & Forest::groundMeshes() const
 
 void Forest::buildGround()
 {
-    if(m_ground) delete m_ground;
-	m_ground = new KdTree;
-
-    std::vector<ATriangleMesh *>::const_iterator it = m_grounds.begin();
-    for(;it!=m_grounds.end();++it) m_ground->addGeometry(*it);
+	m_triangles.clear();
+	BoundingBox gridBox;
+	
+	KdEngine engine;
+	engine.buildSource<cvx::Triangle, ATriangleMesh >(&m_triangles, 
+													gridBox,
+													m_grounds);
 
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 128;
-	bf._maxLevel = 28;
-    m_ground->create(&bf);
+	bf._maxLeafPrims = 64;
+	
+	engine.buildTree<cvx::Triangle>(m_ground, &m_triangles, gridBox, &bf);
 }
 
 bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
@@ -149,23 +149,23 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 	if(!intersectGround(ray) ) {
 /// empty previous selection if hit nothing
 		if(mode == SelectionContext::Replace)
-			m_selectCtx.deselect();
+			m_selectCtx->deselect();
 		return false;
 	}
 	
-	m_selectCtx.setSelectMode(mode);
-	m_selectCtx.setCenter(m_intersectCtx.m_hitP);
-	m_selectCtx.setDirection(m_intersectCtx.m_hitN);
+	m_selectCtx->reset(m_intersectCtx.m_hitP, m_activePlants->radius(),
+		mode);
 
-	m_ground->select(&m_selectCtx);
+	KdEngine engine;
+	engine.select<cvx::Triangle>(m_ground, m_selectCtx);
 	return true;
 }
 
 unsigned Forest::numActiveGroundFaces()
-{ return m_selectCtx.countComponents(); }
+{ return m_selectCtx->numSelected(); }
 
-SelectionContext * Forest::activeGround()
-{ return &m_selectCtx; }
+SphereSelectionContext * Forest::activeGround()
+{ return m_selectCtx; }
 
 bool Forest::closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance)
@@ -241,10 +241,10 @@ const unsigned & Forest::numActivePlants() const
 sdb::Array<int, PlantInstance> * Forest::activePlants()
 { return m_activePlants->data(); }
 
-KdTree * Forest::ground()
+KdNTree<cvx::Triangle, KdNode4 > * Forest::ground()
 { return m_ground; }
 
-const KdTree * Forest::ground() const
+const KdNTree<cvx::Triangle, KdNode4 > * Forest::ground() const
 { return m_ground; }
 
 IntersectionContext * Forest::intersection()
@@ -300,7 +300,9 @@ void Forest::displacePlantInGrid(PlantInstance * inst )
 void Forest::bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest)
 {
 	m_closestPointTest.reset(origin, 1e8f);
-	m_ground->closestToPoint(&m_closestPointTest);
+	
+	KdEngine engine;
+	engine.closestToPoint<cvx::Triangle>(m_ground, &m_closestPointTest);
 	if(m_closestPointTest._hasResult) {
 	
 		GroundBind * bind = plantd->t2;
@@ -322,7 +324,8 @@ bool Forest::intersectGround(const Ray & ray)
 	if(m_ground->isEmpty() ) return false;
 	
 	m_intersectCtx.reset(ray);
-	m_ground->intersect(&m_intersectCtx );
+	KdEngine engine;
+	engine.intersect<cvx::Triangle>(m_ground, &m_intersectCtx );
 	
 	return m_intersectCtx.m_success;
 }
@@ -381,7 +384,10 @@ void Forest::setSelectTypeFilter(int flt)
 std::string Forest::groundBuildLog() const
 { 
     if(!m_ground) return " error ground Kdtree not built"; 
-    return m_ground->buildLog();
+    return "";//m_ground->buildLog();
 }
+
+const sdb::VectorArray<cvx::Triangle> & Forest::triangles() const
+{ return m_triangles; }
 
 }

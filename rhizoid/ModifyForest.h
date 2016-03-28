@@ -59,6 +59,9 @@ private:
 	void growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
 					int geoId,
 					GrowOption & option);
+					
+	void growOnFace(const int & geoId, const int & triId,
+					GrowOption & option);
 	
 	void growOnTriangle(TriangleRaster * tri, 
 					BarycentricCoordinate * bar,

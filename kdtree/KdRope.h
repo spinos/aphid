@@ -108,7 +108,6 @@ bool KdRope<NumLevels, T, Tn>::visitInterial(int level)
 	if(level > 1) {
 		for(i=0; i<nAtLevel; i++) {
 			const int iNode = levelBegin + i;
-			const KdTreeNode * node = treelet->node(iNode);
 			visitCousins(iNode, level);
 		}
 	}

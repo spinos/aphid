@@ -143,6 +143,7 @@ void MForest::grow(const MPoint & origin, const MPoint & dest,
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	growAt(r, option);
+	finishGrow();
 }
 
 void MForest::replacePlant(const MPoint & origin, const MPoint & dest, 

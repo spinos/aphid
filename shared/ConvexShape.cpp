@@ -181,6 +181,13 @@ void Triangle::setC(const Vector3F & c, const int & idx)
 	else  colnor30::encodeC(m_nc2, c);
 }
 
+void Triangle::setInd(const int & x, const int & idx)
+{ 
+	if(idx == 0) m_nc0 = x;
+	else if(idx == 1) m_nc1 = x;
+	m_nc2 = x;
+}
+
 const Vector3F * Triangle::p(int idx) const
 { 
 	if(idx == 0) return &m_p0;
@@ -203,6 +210,12 @@ Vector3F Triangle::N(int idx) const
 	else colnor30::decodeN(r, m_nc2);
 	return r;
 }
+
+const int & Triangle::ind0() const
+{ return m_nc0; }
+
+const int & Triangle::ind1() const
+{ return m_nc1; }
 
 BoundingBox Triangle::calculateBBox() const
 {

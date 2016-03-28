@@ -81,4 +81,30 @@ private:
 	char m_enableDirection;
 };
 
+
+class SphereSelectionContext : public BoundingBox {
+	
+	sdb::Sequence<int> m_prims;
+	gjk::Sphere m_sphere;
+	bool m_exact;
+	SelectionContext::SelectMode m_mode;
+	
+public:	
+	SphereSelectionContext();
+	virtual ~SphereSelectionContext();
+	
+	void deselect();
+	void reset(const Vector3F & p, const float & r,
+				SelectionContext::SelectMode mode = SelectionContext::Replace,
+				bool beExact = true);
+	void addPrim(const int & i);
+	int numSelected();
+	bool isExact() const;
+	
+	sdb::Sequence<int> * primIndices();
+	
+	const gjk::Sphere & sphere() const;
+	
+};
+
 }

@@ -102,8 +102,8 @@ bool Container<T>::buildTree()
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 50;
 	
-	KdEngine<T> engine;
-	engine.buildTree(m_tree, m_source, rootBox, &bf);
+	KdEngine engine;
+	engine.buildTree<T>(m_tree, m_source, rootBox, &bf);
 	
 	return true;
 }
@@ -125,8 +125,8 @@ bool Container<T>::buildGrid()
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 32;
     
-	KdEngine<Voxel> engine;
-	engine.buildTree(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);
+	KdEngine engine;
+	engine.buildTree<Voxel>(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);
 }
 
 template<typename T>

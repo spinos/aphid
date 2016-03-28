@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef TriWidget_H
-#define TriWidget_H
+#ifndef TRIWidget_H
+#define TRIWidget_H
 
 #include <Base3DView.h>
 #include <IntersectionContext.h>

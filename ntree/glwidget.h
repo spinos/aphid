@@ -45,7 +45,6 @@ private slots:
 	
 private:
 	IntersectionContext m_intersectCtx;
-	KdEngine<cvx::Cube> m_engine;
 	sdb::VectorArray<cvx::Cube> * m_source;
 	KdNTree<cvx::Cube, KdNode4 > * m_tree;
 	VoxelGrid<KdNTree<cvx::Cube, KdNode4 >, cvx::Cube > * m_grid;

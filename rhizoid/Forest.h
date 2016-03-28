@@ -11,7 +11,8 @@
 #include "PlantSelection.h"
 #include <Quaternion.h>
 #include <Matrix44F.h>
-#include <KdTree.h>
+#include <KdEngine.h>
+#include <ConvexShape.h>
 #include <ATriangleMesh.h>
 #include <IntersectionContext.h>
 
@@ -38,11 +39,12 @@ class Forest {
     std::vector<ATriangleMesh *> m_grounds;
 	std::vector<ExampVox *> m_examples;
 	std::map<ExampVox *, unsigned> m_exampleIndices;
-	KdTree * m_ground;
+	KdNTree<cvx::Triangle, KdNode4 > * m_ground;
+	sdb::VectorArray<cvx::Triangle> m_triangles;
 	PlantSelection * m_activePlants;
 	IntersectionContext m_intersectCtx;
 	Geometry::ClosestToPointTestResult m_closestPointTest;
-	SelectionContext m_selectCtx;
+	SphereSelectionContext * m_selectCtx;
 	unsigned m_numPlants;
 	
 public:
@@ -73,10 +75,10 @@ protected:
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid();
 	sdb::Array<int, PlantInstance> * activePlants();
 	PlantSelection * selection();
-	KdTree * ground();
-	const KdTree * ground() const;
+	KdNTree<cvx::Triangle, KdNode4 > * ground();
+	const KdNTree<cvx::Triangle, KdNode4 > * ground() const;
 	IntersectionContext * intersection();
-	SelectionContext * activeGround();
+	SphereSelectionContext * activeGround();
 	ATriangleMesh * getGroundMesh(unsigned idx) const;
 	const std::vector<ATriangleMesh *> & groundMeshes() const;
 	
@@ -101,6 +103,8 @@ protected:
 	ExampVox * plantExample(unsigned idx);
 	const ExampVox * plantExample(unsigned idx) const;
 	std::string groundBuildLog() const;
+	
+	const sdb::VectorArray<cvx::Triangle> & triangles() const;
 	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 

@@ -147,10 +147,13 @@ public:
 	void resetNC();
 	void setN(const Vector3F & n, const int & idx);
 	void setC(const Vector3F & c, const int & idx);
+	void setInd(const int & x, const int & idx);
 	
 	const Vector3F * p(int idx) const;
 	const Vector3F & P(int idx) const;
 	Vector3F N(int idx) const;
+	const int & ind0() const;
+	const int & ind1() const;
 
 	BoundingBox calculateBBox() const;
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;

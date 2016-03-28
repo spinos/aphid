@@ -195,4 +195,46 @@ void SelectionContext::verbose() const
 	}
 }
 
+
+SphereSelectionContext::SphereSelectionContext() :
+m_exact(false),
+m_mode(SelectionContext::Replace)
+{}
+
+SphereSelectionContext::~SphereSelectionContext()
+{}
+
+void SphereSelectionContext::deselect()
+{ m_prims.clear(); }
+
+void SphereSelectionContext::reset(const Vector3F & p,
+									const float & r,
+									SelectionContext::SelectMode mode,
+									bool beExact)
+{ 
+	setMin(p.x - r, p.y - r, p.z - r);
+	setMax(p.x + r, p.y + r, p.z + r);
+	m_sphere.set(p, r);
+	m_mode = mode;
+	m_exact = beExact;
+}
+
+void SphereSelectionContext::addPrim(const int & i)
+{ 
+	if(m_mode == SelectionContext::Append) m_prims.insert(i);
+	else m_prims.remove(i);
+}
+
+int SphereSelectionContext::numSelected()
+{ return m_prims.size(); }
+
+bool SphereSelectionContext::isExact() const
+{ return m_exact; }
+
+const gjk::Sphere & SphereSelectionContext::sphere() const
+{ return m_sphere; }
+
+sdb::Sequence<int> * SphereSelectionContext::primIndices()
+{ return &m_prims; }
+
 }
