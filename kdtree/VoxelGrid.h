@@ -175,7 +175,7 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 		level++;
 	}
 	
-	std::cout<<"\n level "<<level<<" n cell "<<numCells();
+	std::cout<<"\n level"<<level<<" n cell "<<numCells();
 		
 	createVoxels(tree, maxLevel);
 }
@@ -216,9 +216,11 @@ void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefin
 		k = cellsToRefine.key();
 		sdb::CellValue * parentCell = cellsToRefine.value();
 		
-		//sdb::CellValue * old =  findCell(k);
-		//if(!old) std::cout<<"\n no old cell "<<k;
-		//else if(old->level != level) std::cout<<"\n waringing wrong old level "<<old->level<<" "<<level;
+#if 0
+		sdb::CellValue * old =  findCell(k);
+		if(!old) std::cout<<"\n no old cell "<<k;
+		else if(old->level != level) std::cout<<"\n waringing wrong old level "<<old->level<<" "<<level;
+#endif
 
 		level1 = parentCell->level + 1;
 		hh = cellSizeAtLevel(level1) * .5;

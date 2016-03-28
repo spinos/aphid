@@ -83,7 +83,7 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-#define INTERACTOVE 0
+#define INTERACTOVE 1
 #define DOSHUFFLE 1
 
 #if INTERACTOVE
@@ -95,41 +95,35 @@ void testSequenceRemove()
 	TreeNode::MaxNumKeysPerNode = 128;
 	TreeNode::MinNumKeysPerNode = 16;
 	
-	int n = 1<<12;
+	int n = 1<<16;
 #endif
-	std::cout<<"\n test large sequence "<<n;
+	std::cout<<"\n test sequence n "<<n;
 	Sequence<int> sq;
+	sq.insert(0);
+	std::cout<<"\n size aft 0 "<<sq.size();
+	sq.insert(-1);
+	std::cout<<"\n size aft -1 "<<sq.size();
+		
 	int i = 0, j = 2, nr = 0;
 	for(;i<n;++i) {
 		
-		int k = i+1; 
+		int k = i; 
 		k = rand() & ((1<<30)-1);
+		k++;
 		
-		if(!sq.findKey(k) ) {
-			// std::cout<<"\n insert "<<i<<" "<<k;
-			//int prenl = sq.numLeaf();
-			
+		if(!sq.findKey(k) )
 			sq.insert(k);
-/*
-			if(!sq.findKey(k) ) {
-				std::cout<<"\n\n error lost "<<k
-				<<"\n size "<<sq.size()<<" n leaf "<<sq.numLeaf();
-				sq.dbgFind(k);
-				
-				return;
-			}*/
-			
-			//int posnl = sq.numLeaf();
-			//if(posnl != prenl) {
-				//std::cout<<"\n n leaf changed after insert "<<k;
-				
-			//}
-		}
 		
 		if((i & (j-1)) == 0) {
 			std::cout<<"\n i"<<i<<" size "<<sq.size();
 			j<<=1;
 		}
+	}
+	
+	if(!sq.findKey(0) ) {
+		sq.display();
+		std::cout<<"\n failed to find zero, abort";
+		return;
 	}
 	
 	int nb4rm = sq.size();
@@ -174,14 +168,16 @@ void testSequenceRemove()
 	}
 #endif
 	
+#if INTERACTOVE
 	sq.display();
+#endif
+
 	std::cout<<"\n passed\n test find n key "<<nrm;
 	for(j=0;j<nrm;++j) {
 			if(!sq.findKey(keystorm[j]) ) {
 				std::cout<<"\n\n error cannot find "<<keystorm[j]
 				<<"\n "<<" at "<<j;
-				//sq.dbgFind(keystorm[j]);
-				std::cout<<"\n n leaf "<<sq.numLeaf();
+				sq.dbgFind(keystorm[j]);
 				return;
 			}
 		}
@@ -189,9 +185,9 @@ void testSequenceRemove()
 	
 	int anrm = 0;
 	for(i=0; i< nrm; ++i) {
-		std::cout<<"\n remove "<<i<<" "<<keystorm[i];
-		
+	
 #if INTERACTOVE
+		std::cout<<"\n remove "<<i<<" "<<keystorm[i];
 		char c;
 		std::cout << "Enter: ";
 		std::cin >> c;
@@ -216,25 +212,11 @@ void testSequenceRemove()
 			return;
 		}
 		anrm++;
-		
+#if INTERACTOVE
 		sq.display();
-		//
-		/*
-		for(j=i+1;j<nrm;++j) {
-			if(!sq.find(keystorm[j]) ) {
-				std::cout<<"\n error cannot find "<<keystorm[j]
-				<<"\n "<<i<<" "<<j;
-				return;
-			}
-		}
-		
-		int possz = sq->numLeaf();
-		if(possz == presz - 1 ) {
-			std::cout<<"\n leaf size "<<possz<<" "<<presz<<" "<<i;
-			
-		}*/
+#endif
 	}
-	std::cout<<"\n all "<<nrm<<" keys removed";
+	std::cout<<"\n passded!\n all "<<nrm<<" keys removed";
 }
 
 int main()
@@ -415,6 +397,6 @@ int main()
 	std::cout<<"\n p"<<p0->index;
 	*/
 	testSequenceRemove();
-	std::cout<<"\n all passed\n";
+	std::cout<<"\n end of test\n";
 	return 0;
 }

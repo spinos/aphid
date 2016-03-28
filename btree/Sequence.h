@@ -283,7 +283,7 @@ void Sequence<T>::dbgFind(const T & x)
 template<typename T>
 bool Sequence<T>::dbgCheck()
 { 
-	if( !m_root->dbgLinks(false) ) return false;
+	if( !m_root->dbgLinks() ) return false;
 	
 	std::map<int, std::vector<Entity *> > nodes;
 	m_root->getChildren(nodes, 1);
@@ -307,7 +307,7 @@ bool Sequence<T>::dbgCheckLayer(const int & level, const std::vector<Entity *> &
 		    nl += n->numKeys();
 		    continue;
 		}
-		if(!n->dbgLinks(false) ) return false;
+		if(!n->dbgLinks(true) ) return false;
 	}
 	
 	if(nl > 0) {

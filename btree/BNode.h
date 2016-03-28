@@ -22,8 +22,8 @@ namespace sdb {
 
 class TreeNode : public Entity
 {
-/// to left child or
-/// to right sibling for leaf
+/// to left child 
+/// or to sibling for leaf
 	Entity * m_link;
 	bool m_isLeaf;
 	
@@ -208,8 +208,7 @@ private:
 	void dbgFindInInterior(const KeyType & x);
 		
 	const std::string str() const;
-	void deepPrint() const;
-   
+	
 	bool checkDupKey(KeyType & duk) const;
 	void dbgUp();
 	void dbgRightUp(BNode<KeyType> * rgt);
@@ -750,7 +749,7 @@ BNode<KeyType> * BNode<KeyType>::ancestor(const KeyType & x, bool & found) const
 template <typename KeyType> 
 bool BNode<KeyType>::hasKey(const KeyType & x) const
 {
-	if(numKeys() < 1) return firstKey() == x;
+	if(numKeys() < 1) false;
     if(x > lastKey() || x < firstKey() ) return false;
 	return (findKey(x).found > -1);
 }
@@ -1102,7 +1101,7 @@ bool BNode<KeyType>::mergeInteriorRight(const KeyType x)
 #endif
 
 	if(!shouldInteriorMerge(this, rgt)) {
-	    std::cout<<"\n  inner cannot merge "
+	    std::cout<<"\n  cannot merge "
 				<<rgt->str();
 	    return false;
 	}
@@ -1394,16 +1393,6 @@ Pair<Entity *, Entity> BNode<KeyType>::findInNode(const KeyType & x, SearchResul
 	r.index = dataP(result->found)->index;
 	
 	return r; 
-}
-
-template <typename KeyType>
-void BNode<KeyType>::deepPrint() const
-{
-	std::cout<<"\n "<<*this<<":";
-	std::cout<<" "<<*leftTo(key(0));
-	int i=0;
-	Pair<KeyType, Entity> k;
-	for(;i<numKeys();++i) std::cout<<" "<<key(i)<<":"<<*rightTo(key(i), k);
 }
 
 template <typename KeyType>
