@@ -83,7 +83,7 @@ void testArrayRemove()
 
 void testSequenceRemove()
 {
-#define INTERACTOVE 1
+#define INTERACTOVE 0
 #define DOSHUFFLE 1
 
 #if INTERACTOVE
@@ -136,33 +136,33 @@ void testSequenceRemove()
 	}
 	
 	std::cout<<"\n test key order ";
-	std::vector<int > keystorm;
+    int ksize = 0;
+	int * keystorm = new int[nb4rm + 1];
 	sq.begin();
 	while(!sq.end() ) {
 		int k = sq.key();
 		
-		int ik = keystorm.size();
-		if(ik>1) {
-			if(k <= keystorm[ik-1]) {
-				std::cout<<" wrong key "<<k<<" <= "<< keystorm[ik-1];
+		if(ksize>1) {
+			if(k <= keystorm[ksize-1] ) {
+				std::cout<<" wrong key "<<k<<" <= "<< keystorm[ksize-1];
 				return;
 			}
 		}
-		//if(rand() & 1) 
-			keystorm.push_back(k);
-		
+            keystorm[ksize++] = k;
+        
 		sq.next();
 	}
-	
-	int nrm = keystorm.size();
+    std::cout<<"\n ksize "<<ksize;
+
+	int nrm = sq.size();
 #if DOSHUFFLE
-	for(i=0;i<n;++i) {
+	for(i=0;i<nrm;++i) {
 		for(j=0; j<33;++j) {
-			int rj = rand() % n;
-			if(rj+9 < n) {
+			int rj = rand() % nrm;
+			if(rj > 9) {
 				int tk = keystorm[rj];
-				keystorm[rj] = keystorm[rj+9];
-				keystorm[rj+9] = tk;
+				keystorm[rj] = keystorm[rj-9];
+				keystorm[rj-9] = tk;
 			}
 		}
 	}
@@ -217,6 +217,7 @@ void testSequenceRemove()
 #endif
 	}
 	std::cout<<"\n passded!\n all "<<nrm<<" keys removed";
+    delete[] keystorm;
 }
 
 int main()
