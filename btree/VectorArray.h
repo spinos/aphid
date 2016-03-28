@@ -42,7 +42,7 @@ public:
 	void insert()
 	{
 		if((m_numData & 1023)==0) {
-			m_buf = new T[1024];
+			m_buf = (T *)malloc(sizeof(T) * 1024);//new T[1024];
 			m_blocks.push_back(m_buf);
 		}
 		
@@ -54,7 +54,7 @@ public:
 	void insert(const T & a) 
 	{
 		if((m_numData & 1023)==0) {
-			m_buf = new T[1024];
+			m_buf = (T *)malloc(sizeof(T) * 1024);//new T[1024];
 			m_blocks.push_back(m_buf);
 		}
 		

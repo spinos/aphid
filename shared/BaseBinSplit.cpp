@@ -117,7 +117,7 @@ void BaseBinSplit::splitAtLowestCost(const BoundingBox & b)
 				return;
 			}
 			
-	float lowest = 1e39f;
+	float lowest = 1e29f;
 	for(int axis = 0; axis < 3; axis++) {
 	    if(isEmptyAlong(axis))
 			continue;

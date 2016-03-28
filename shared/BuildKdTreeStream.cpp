@@ -63,7 +63,7 @@ KdTreeNode *BuildKdTreeStream::createTreeBranch()
 {
     m_nodeBlks.insert();
     m_nodeBlks.insert();
-    KdTreeNode * b = m_nodeBlks[m_numNodes];
+    KdTreeNode * b = m_nodeBlks.get(m_numNodes);
 /*	
 	if((m_numNodes & 2047) == 0) {
 		m_nodeBuf = (KdTreeNode *)malloc(sizeof(KdTreeNode) * 2050);
@@ -72,10 +72,10 @@ KdTreeNode *BuildKdTreeStream::createTreeBranch()
 	
 	KdTreeNode * b = &m_nodeBuf[m_numNodes & 2047];	
 */	
-	unsigned long * tmp = (unsigned long*)&b[0];
+	int * tmp = (int*)&b[0];
 	tmp[1] = tmp[3] = 6;
 	
-	tmp = (unsigned long*)&b[1];
+	tmp = (int*)&b[1];
 	tmp[1] = tmp[3] = 6;
 	
 	m_numNodes += 2;

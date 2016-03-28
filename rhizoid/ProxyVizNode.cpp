@@ -740,8 +740,8 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	matplg.getValue(matobj);
 	MFnMatrixData matdata(matobj);
     MMatrix cameramat = matdata.matrix(); 
-	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameramat);
-	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameramat.inverse() );
+	AHelper::ConvertToMatrix44F(*cameraSpaceR(), cameramat);
+	AHelper::ConvertToMatrix44F(*cameraInvSpaceR(), cameramat.inverse() );
 	float peye[3];
 	peye[0] = cameramat.matrix[3][0];
 	peye[1] = cameramat.matrix[3][1];
@@ -767,9 +767,9 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 {
 	MMatrix cameraMat = cameraPath.inclusiveMatrix();
-	AHelper::ConvertToMatrix44F(*cameraSpaceP(), cameraMat);
+	AHelper::ConvertToMatrix44F(*cameraSpaceR(), cameraMat);
 	MMatrix cameraInvMat = cameraPath.inclusiveMatrixInverse();
-	AHelper::ConvertToMatrix44F(*cameraInvSpaceP(), cameraInvMat);
+	AHelper::ConvertToMatrix44F(*cameraInvSpaceR(), cameraInvMat);
 	float peye[3];
 	peye[0] = cameraMat.matrix[3][0];
 	peye[1] = cameraMat.matrix[3][1];

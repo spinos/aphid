@@ -12,7 +12,7 @@
 
 namespace aphid {
 
-int KdTreeBuilder::MaxLeafPrimThreashold = 64;
+int KdTreeBuilder::MaxLeafPrimThreashold = 256;
 int KdTreeBuilder::MaxBuildLevel = 32;
 	
 KdTreeBuilder::KdTreeBuilder() {}

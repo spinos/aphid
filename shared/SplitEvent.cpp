@@ -13,7 +13,7 @@ namespace aphid {
 
 SplitEvent::SplitEvent() : m_isEmpty(1)
 {
-	m_cost = 1e38f;
+	m_cost = 1e28f;
 }
 
 void SplitEvent::setEmpty()

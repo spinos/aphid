@@ -66,15 +66,14 @@ bool KdTreeNode::isLeaf() const
 
 void KdTreeNode::setLeft( KdTreeNode* a_Left )
 { 
-    uintptr_t rawR = reinterpret_cast<uintptr_t>(this);
-	uintptr_t rawInt = reinterpret_cast<uintptr_t>(a_Left);
-	inner.combined = (rawInt - rawR) | (inner.combined & EIndirectionMask); 
+    uintptr_t rawInt = reinterpret_cast<uintptr_t>(a_Left);
+    if(rawInt > (1<<31) ) std::cout<<" warning huge offset "<<rawInt;
+	inner.combined = rawInt | (inner.combined & EIndirectionMask);
 }
 
 KdTreeNode* KdTreeNode::getLeft() const
 { 
-    uintptr_t rawR = reinterpret_cast<uintptr_t>(this);
-	return (KdTreeNode*)(rawR + (inner.combined & ~EIndirectionMask) ); 
+    return (KdTreeNode*)(inner.combined & ~EIndirectionMask);
 }
 
 KdTreeNode* KdTreeNode::getRight() const 

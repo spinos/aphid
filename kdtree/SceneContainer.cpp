@@ -69,7 +69,7 @@ void SceneContainer::testMesh()
 		m_tree->addGeometry(m_mesh[i]);
 	
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 128;
+	bf._maxLeafPrims = 1024;
 	bf._maxLevel = m_level;
 	m_tree->create(&bf);
 }
