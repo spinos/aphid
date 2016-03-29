@@ -28,6 +28,7 @@ public:
 		float _contributes[4];
 		float _distance;
 		unsigned _icomponent;
+		unsigned _igeometry;
 		bool _hasResult;
 		bool _isInside;
 		Geometry * _geom;

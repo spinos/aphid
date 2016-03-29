@@ -85,6 +85,19 @@ private:
 									int & branchIdx,
 									int & nodeIdx,
 									const KdTreeNode * r);
+									
+	template<typename T>
+	void leafClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+								Geometry::ClosestToPointTestResult * result,
+								KdTreeNode *node, const BoundingBox &box);
+								
+	template<typename T>
+	void innerClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+				Geometry::ClosestToPointTestResult * ctx,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & b);
+								
 };
 
 template<typename T, typename Ts>
@@ -332,6 +345,7 @@ int KdEngine::hitPrimitive(KdNTree<T, KdNode4 > * tree,
 		const T * c = tree->getSource(start + i);
 		if(c->intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) ) {
 			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
+			ctx->m_hitN = c->calculateNormal();
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;
 /// ind tp source
@@ -480,7 +494,131 @@ template<typename T>
 void KdEngine::closestToPoint(KdNTree<T, KdNode4 > * tree, 
 				Geometry::ClosestToPointTestResult * ctx)
 {
+	if(ctx->closeEnough() ) return;
+	if(tree->isEmpty() ) return;
+	const BoundingBox b = tree->getBBox();
+	KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() ) {
+		leafClosestToPoint(tree, ctx, r, b);
+		return;
+	}
+	int branchIdx = tree->root()->internalOffset(0);
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox leftBox, rightBox;
+	b.split(axis, splitPos, leftBox, rightBox);
+	
+	const float cp = ctx->_toPoint.comp(axis) - splitPos;
+	if(cp < 0.f) {
+		innerClosestToPoint(tree, ctx, branchIdx, 0, leftBox);
+		if(ctx->closeEnough() ) return;
+		if( -cp < ctx->_distance) 
+			innerClosestToPoint(tree, ctx, branchIdx, 1, rightBox);
+	}
+	else {
+		innerClosestToPoint(tree, ctx, branchIdx, 1, rightBox);
+		if(ctx->closeEnough() ) return;
+		if(cp < ctx->_distance)
+			innerClosestToPoint(tree, ctx, branchIdx, 0, leftBox);
+	}
+	
+}
+	
+template<typename T>
+void KdEngine::innerClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+				Geometry::ClosestToPointTestResult * ctx,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & b)
+{
+	KdNode4 * currentBranch = tree->branches()[branchIdx];
+	KdTreeNode * r = currentBranch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		leafClosestToPoint(tree, ctx, r, b);
+		return;
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	const float cp = ctx->_toPoint.comp(axis) - splitPos;
+	
+	const int offset = r->getOffset();
+	if(offset < KdNode4::TreeletOffsetMask) {
+		if(cp < 0.f ) {
+			innerClosestToPoint(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+			
+			if(ctx->closeEnough() ) return;
+			
+			if( -cp < ctx->_distance) 
+				innerClosestToPoint(tree, ctx, 
+							branchIdx, 
+							nodeIdx + offset + 1, 
+							rgtBox);
+		}
+		else {
+			innerClosestToPoint(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset + 1,
+							rgtBox);
+							
+			if(ctx->closeEnough() ) return;
+			
+			innerClosestToPoint(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+		}
+	}
+	else {
+		if(cp < 0.f ) {
+			innerClosestToPoint(tree, ctx, 
+							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+							
+			if(ctx->closeEnough() ) return;
+			
+			innerClosestToPoint(tree, ctx, 
+							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+		}
+		else {
+			innerClosestToPoint(tree, ctx, 
+							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+							
+			if(ctx->closeEnough() ) return;
+			
+			innerClosestToPoint(tree, ctx, 
+							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+		}
+	}
+}
 
+template<typename T>
+void KdEngine::leafClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+								Geometry::ClosestToPointTestResult * result,
+								KdTreeNode *node, const BoundingBox &box)
+{
+	if(node->getNumPrims() < 1) return;
+	int start, len;
+	tree->leafPrimStartLength(start, len, node->getPrimStart() );
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = tree->getSource(start + i );
+		c-> template closestToPoint<Geometry::ClosestToPointTestResult>(result);
+	}
+	
 }
 
 }

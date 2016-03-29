@@ -65,6 +65,9 @@ struct Voxel {
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const
 	{ return calculateBBox().intersect(ray, hitt0, hitt1); }
 	
+	Vector3F calculateNormal() const
+	{ return Vector3F(0.f, 1.f, 0.f); }
+	
 };
 
 struct Contour {

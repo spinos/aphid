@@ -12,6 +12,7 @@
 #include "BoundingBox.h"
 #include "Ray.h"
 #include "GjkIntersection.h"
+#include "BarycentricCoordinate.h"
 
 namespace aphid {
     
@@ -154,6 +155,7 @@ public:
 	Vector3F N(int idx) const;
 	const int & ind0() const;
 	const int & ind1() const;
+	Vector3F calculateNormal() const;
 
 	BoundingBox calculateBBox() const;
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
@@ -164,6 +166,9 @@ public:
 		return gjk::Intersect1<Triangle, T>::Evaluate(*this, b);
 	}
 	
+	template<typename T>
+	void closestToPoint(T * result) const;
+	
 	const Vector3F & X(int idx) const;
 	const Vector3F & supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 	
@@ -173,6 +178,31 @@ public:
 private:
 	
 };
+
+template<typename T>
+void Triangle::closestToPoint(T * result) const
+{
+	BarycentricCoordinate & bar = result->_bar;
+	bar.create(m_p0, m_p1, m_p2);
+	float d = bar.project(result->_toPoint);
+	if(d>=result->_distance) return;
+	bar.compute();
+	if(!bar.insideTriangle()) bar.computeClosest();
+	
+	Vector3F clampledP = bar.getClosest();
+	d = (clampledP - result->_toPoint).length();
+	if(d>=result->_distance) return;
+	
+	result->_distance = d;
+	result->_hasResult = true;
+	result->_hitPoint = clampledP;
+	result->_contributes[0] = bar.getV(0);
+	result->_contributes[1] = bar.getV(1);
+	result->_contributes[2] = bar.getV(2);
+	result->_hitNormal = bar.getNormal();
+	result->_igeometry = ind0();
+	result->_icomponent = ind1();
+}
 
 }
 

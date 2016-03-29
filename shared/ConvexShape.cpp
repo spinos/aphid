@@ -226,12 +226,18 @@ BoundingBox Triangle::calculateBBox() const
     return b;
 }
 
-bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
+Vector3F Triangle::calculateNormal() const
 {
 	Vector3F ab = m_p1 - m_p0;
 	Vector3F ac = m_p2 - m_p0;
 	Vector3F nor = ab.cross(ac);
 	nor.normalize();
+	return nor;
+}
+
+bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
+{
+	const Vector3F nor = calculateNormal();
 	
 	float ddotn = ray.m_dir.dot(nor);
 	
