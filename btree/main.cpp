@@ -87,15 +87,11 @@ void testSequenceRemove()
 #define DOSHUFFLE 1
 
 #if INTERACTOVE
-	TreeNode::MaxNumKeysPerNode = 12;
-	TreeNode::MinNumKeysPerNode = 4;
 	
-	int n = 1<<7;
+	int n = 300;
 #else
-	TreeNode::MaxNumKeysPerNode = 128;
-	TreeNode::MinNumKeysPerNode = 16;
-	
-	int n = 1<<16;
+
+	int n = 1<<15;
 #endif
 	std::cout<<"\n test sequence n "<<n;
 	Sequence<int> sq;
@@ -104,7 +100,7 @@ void testSequenceRemove()
 	sq.insert(-1);
 	std::cout<<"\n size aft -1 "<<sq.size();
 		
-	int i = 0, j = 2, nr = 0;
+	int i = 0, j = 2;
 	for(;i<n;++i) {
 		
 		int k = i; 
@@ -159,10 +155,10 @@ void testSequenceRemove()
 	for(i=0;i<nrm;++i) {
 		for(j=0; j<33;++j) {
 			int rj = rand() % nrm;
-			if(rj > 9) {
+			if(rj > 19) {
 				int tk = keystorm[rj];
-				keystorm[rj] = keystorm[rj-9];
-				keystorm[rj-9] = tk;
+				keystorm[rj] = keystorm[rj-19];
+				keystorm[rj-19] = tk;
 			}
 		}
 	}
