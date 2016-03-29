@@ -63,7 +63,7 @@ void GLWidget::testTree()
     }
 	
     TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 8;
+	bf._maxLeafPrims = 32;
 	
 	KdEngine engine;
     engine.buildTree<cvx::Cube>(m_tree, m_source, rootBox, &bf);
@@ -252,7 +252,7 @@ void GLWidget::testGrid()
 	m_grid->getBounding(rootBox);
 	
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 8;
+	bf._maxLeafPrims = 16;
     
 	KdEngine engine;
     engine.buildTree<cvx::Cube>(m_tree, m_source, rootBox, &bf);

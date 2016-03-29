@@ -43,6 +43,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/HElemAsset.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
+../btree/GridClustering.cpp
 ../btree/HWorldGrid.cpp
 ../kdtree/HNTree.cpp
 NTreeIO.cpp
@@ -222,6 +223,7 @@ set (SHOTRI_SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/HElemAsset.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
+../btree/GridClustering.cpp
 ../btree/HWorldGrid.cpp
 ../kdtree/HNTree.cpp
 NTreeIO.cpp

@@ -34,7 +34,7 @@ public:
 	{
 		m_numData = 0;
 		typename std::vector<T *>::iterator it = m_blocks.begin();
-		for(;it!=m_blocks.end();++it) delete[] *it;
+		for(;it!=m_blocks.end();++it) delete[] (*it);
 		m_blocks.clear();
 		m_data.clear();
 	}
@@ -42,7 +42,7 @@ public:
 	void insert()
 	{
 		if((m_numData & 1023)==0) {
-			m_buf = (T *)malloc(sizeof(T) * 1024);//new T[1024];
+			m_buf = new T[1024];
 			m_blocks.push_back(m_buf);
 		}
 		
@@ -54,7 +54,7 @@ public:
 	void insert(const T & a) 
 	{
 		if((m_numData & 1023)==0) {
-			m_buf = (T *)malloc(sizeof(T) * 1024);//new T[1024];
+			m_buf = new T[1024];
 			m_blocks.push_back(m_buf);
 		}
 		

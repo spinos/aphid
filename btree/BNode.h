@@ -866,8 +866,8 @@ template <typename KeyType>
 void BNode<KeyType>::removeLeaf(const KeyType & x)
 {
 	if(!removeDataLeaf(x)) {
-		std::cout<<"\n error bnode cannot remove data "<<x
-			<<" in "<<str();
+		//std::cout<<"\n error bnode cannot remove data "<<x
+		//	<<" in "<<str();
 		return;
 	}
 	if(!underflow()) return;
@@ -1325,8 +1325,8 @@ const SearchResult BNode<KeyType>::findKey(const KeyType & x) const
         mid = (r.low + r.high) / 2;
         
 		if(key(mid) == x) r.found = mid;
-        else if(key(r.low) == x) r.found = r.low;
-		else if(key(r.high) == x) r.found = r.high;
+        if(key(r.low) == x) r.found = r.low;
+		if(key(r.high) == x) r.found = r.high;
 		
         if(r.found > -1) break;
 		

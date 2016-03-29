@@ -11,8 +11,8 @@ namespace aphid {
 
 namespace sdb {
     
-int TreeNode::MaxNumKeysPerNode = 8;
-int TreeNode::MinNumKeysPerNode = 2;
+int TreeNode::MaxNumKeysPerNode = 128;
+int TreeNode::MinNumKeysPerNode = 16;
 
 TreeNode::TreeNode(Entity * parent) : Entity(parent)
 {
