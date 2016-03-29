@@ -101,6 +101,7 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 	tri->gridSize(sampleSize, grid_x, grid_y);
 	int numSamples = grid_x * grid_y;
 	
+	const bool limitRadius = option.m_radius > 1e-3f;
 	Vector3F *samples = new Vector3F[numSamples];
 	char *hits = new char[numSamples];
 	tri->genSamples(sampleSize, grid_x, grid_y, samples, hits);
@@ -110,6 +111,11 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 		if(!hits[s]) continue;	
 	
 		Vector3F & pos = samples[s];
+		
+		if(limitRadius) {
+			if(pos.distanceTo(option.m_centerPoint) >  option.m_radius)
+				continue;
+		}
 			
 		randomSpaceAt(pos, option, tm, scale);
 		float scaledSize = sampleSize * 1.5f * scale;
@@ -137,36 +143,44 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 {
 	if(!intersectGround(ray) ) return false;
 	
+	IntersectionContext * ctx = intersection();
+	
 	if(option.m_multiGrow) {
 		activeGround()->deselect();
 		selectGroundFaces(ray, SelectionContext::Append);
+/// limit radius
+		option.m_centerPoint = ctx->m_hitP;
+		option.m_radius = selection()->radius();
 		growOnGround(option);
 		return true;
 	}
 	
-	IntersectionContext * ctx = intersection();
-	
 /// ind to source
 	if(ctx->m_componentIdx >= ground()->primIndirection().size() ) {
-		std::cout<<"\n oor "<<ctx->m_componentIdx
+		std::cout<<"\n oor component idx "<<ctx->m_componentIdx
 			<<" >= "<<ground()->primIndirection().size();
 		return false;
 	}
+	
 	const cvx::Triangle * t = ground()->getSource(ctx->m_componentIdx);
 	
-	ATriangleMesh * mesh = groundMeshes()[t->ind0()];
+/// ind to geom
+	
+	if(t->ind0() >= groundMeshes().size() ) {
+		std::cout<<"\n oor mesh idx "<<t->ind0()
+			<<" >= "<<groundMeshes().size();
+		return false;
+	}
 	
 	if(option.m_alongNormal)
-		option.m_upDirection = mesh->triangleNormal(t->ind1() );
+		option.m_upDirection = t->calculateNormal();
 		
-	Vector3F * p = mesh->points();
-	unsigned * tri = mesh->triangleIndices(t->ind1() );
-	if(!m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) return false;
+	if(!m_raster->create(t->P(0), t->P(1), t->P(2) ) ) return false;
 	
-	m_bary->create(p[tri[0]], p[tri[1]], p[tri[2]] );
+	m_bary->create(t->P(0), t->P(1), t->P(2) );
 	
 	GroundBind bind;
-	bind.setGeomComp(geomertyId(mesh), t->ind1() );
+	bind.setGeomComp(t->ind0(), t->ind1() );
 	
 		Matrix44F tm;
 		float scale;

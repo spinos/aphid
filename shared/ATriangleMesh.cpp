@@ -79,7 +79,6 @@ void ATriangleMesh::closestToPoint(unsigned icomponent, ClosestToPointTestResult
 	result->_contributes[2] = bar.getV(2);
 	result->_hitNormal = bar.getNormal();
 	result->_icomponent = icomponent;
-	result->_geom = this;
 }
 
 const Vector3F ATriangleMesh::triangleCenter(unsigned idx) const

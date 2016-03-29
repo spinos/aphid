@@ -31,7 +31,6 @@ public:
 		unsigned _igeometry;
 		bool _hasResult;
 		bool _isInside;
-		Geometry * _geom;
 		
 		ClosestToPointTestResult();
 		

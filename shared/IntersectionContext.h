@@ -43,6 +43,7 @@ public:
 	Vector2F m_patchUV;
 	float m_minHitDistance, m_elementHitDistance;
 	int m_level;
+	int m_leafIdx;
 	Geometry * m_geometry;
 	unsigned m_componentIdx, m_curComponentIdx;
 	char m_success;

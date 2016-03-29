@@ -253,17 +253,6 @@ IntersectionContext * Forest::intersection()
 PlantSelection * Forest::selection()
 { return m_activePlants; }
 
-int Forest::geomertyId(Geometry * geo) const
-{
-	int i = 0;
-	std::vector<ATriangleMesh *>::const_iterator it = m_grounds.begin();
-	for(;it!=m_grounds.end(); ++it) {
-		if(*it == geo) return i;
-		i++;
-	}
-	return -1;
-}
-
 void Forest::removeAllPlants()
 {
 	m_activePlants->deselect();
@@ -300,13 +289,15 @@ void Forest::displacePlantInGrid(PlantInstance * inst )
 void Forest::bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest)
 {
 	m_closestPointTest.reset(origin, 1e8f);
-	
+	// std::cout<<"\n closestto"<<origin;
 	KdEngine engine;
 	engine.closestToPoint<cvx::Triangle>(m_ground, &m_closestPointTest);
 	if(m_closestPointTest._hasResult) {
-	
+	//std::cout<<"\n geocomp "<<m_closestPointTest._igeometry
+	//						<<" "<<m_closestPointTest._icomponent
+	//						<<" "<<m_closestPointTest._hitPoint;
 		GroundBind * bind = plantd->t2;
-		bind->setGeomComp(geomertyId(m_closestPointTest._geom), 
+		bind->setGeomComp(m_closestPointTest._igeometry, 
 								m_closestPointTest._icomponent );
 		bind->m_w0 = m_closestPointTest._contributes[0];
 		bind->m_w1 = m_closestPointTest._contributes[1];

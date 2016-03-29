@@ -9,7 +9,7 @@
 
 #pragma once
 #include <ViewCull.h>
-#include <IntersectionContext.h>
+#include <KdEngine.h>
 
 namespace aphid {
 
@@ -28,24 +28,26 @@ protected:
 					float & cameraZ,
 					KdTree * obscurer);
 	
-	template <typename T>
+	template <typename T, typename Tr>
 	bool cullByDepth(const Vector3F & pnt, const float & threshold,
 					float & cameraZ,
-					T * obscurer);
+					Tr * obscurer);
 private:
 
 };
 
-template <typename T>
+template <typename T, typename Tr>
 bool ViewObscureCull::cullByDepth(const Vector3F & pnt, const float & threshold,
 					float & cameraZ,
-					T * obscurer)
+					Tr * obscurer)
 {
 	cameraZ = eyePosition().distanceTo(pnt);
 	if(!obscurer) return false;
 	Ray incident(eyePosition(), pnt );
 	m_intersectCtx.reset(incident);
-	obscurer->intersect(&m_intersectCtx );
+	
+	KdEngine engine;
+	engine.intersect<T>(obscurer, &m_intersectCtx );
 	
 	if(!m_intersectCtx.m_success) return false;
 	return ( cameraZ - eyePosition().distanceTo(m_intersectCtx.m_hitP) ) > threshold;

@@ -26,11 +26,13 @@ class ModifyForest : public Forest {
 public:
     struct GrowOption {
 		Vector3F m_upDirection;
+		Vector3F m_centerPoint;
 		int m_plantId;
 		float m_minScale, m_maxScale;
 		float m_minMarginSize, m_maxMarginSize;
 		float m_rotateNoise;
 		float m_strength;
+		float m_radius;
 		bool m_alongNormal;
 		bool m_multiGrow;
 	};

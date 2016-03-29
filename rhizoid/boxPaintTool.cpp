@@ -417,6 +417,8 @@ char proxyPaintContext::validateSelection()
 void proxyPaintContext::flood()
 {
 	if(!PtrViz) return;
+/// no radius limit
+	m_growOpt.m_radius = -1.f;
 	PtrViz->flood(m_growOpt);
 }
 

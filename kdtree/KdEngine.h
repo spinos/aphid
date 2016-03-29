@@ -311,6 +311,7 @@ int KdEngine::visitLeaf(IntersectionContext * ctx,
 				
 	if(r->isLeaf() ) {
 //		std::cout<<"\n hit leaf "<<r->getPrimStart();
+		ctx->m_leafIdx = r->getPrimStart();
 		if(r->getNumPrims() < 1) {
 			return 0;
 		}
@@ -348,7 +349,7 @@ int KdEngine::hitPrimitive(KdNTree<T, KdNode4 > * tree,
 			ctx->m_hitN = c->calculateNormal();
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;
-/// ind tp source
+/// ind to source
 			ctx->m_componentIdx = start + i;
 			nhit++;
 		}
@@ -367,7 +368,11 @@ bool KdEngine::climbRope(KdNTree<T, KdNode4 > * tree,
 	const BoundingBox & b = ctx->getBBox();
 	float t0, t1;
 	b.intersect(ctx->m_ray, &t0, &t1);
-	Vector3F hit1 = ctx->m_ray.travel(t1 + 1e-4f);
+	Vector3F hit1 = ctx->m_ray.travel(t1 + 1e-3f);
+/// end inside 
+	if(b.isPointInside(hit1) )
+		return false;
+		
 	int side = b.pointOnSide(hit1);
 ///	std::cout<<"\n rope side "<<side;
 	

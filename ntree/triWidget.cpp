@@ -171,7 +171,7 @@ void TriWidget::drawIntersect()
 	getDrawer()->boundingBox(b );
 	
 	if(m_intersectCtx.m_success) 
-		drawActiveSource(m_intersectCtx.m_componentIdx);
+		drawActiveSource(m_intersectCtx.m_leafIdx);
 }
 
 void TriWidget::drawVoxelIntersect()
@@ -204,7 +204,7 @@ void TriWidget::drawVoxelIntersect()
 	getDrawer()->boundingBox(b );
 	
 	if(m_intersectCtx.m_success) 
-		drawActiveVoxel(m_intersectCtx.m_componentIdx);
+		drawActiveVoxel(m_intersectCtx.m_leafIdx);
 	glPopMatrix();
 }
 

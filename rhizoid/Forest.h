@@ -88,7 +88,6 @@ protected:
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
 	bool getBindPoint(Vector3F & pos, GroundBind * bind);
 	
-	int geomertyId(Geometry * geo) const;
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);
 	bool intersectGround(const Ray & ray);

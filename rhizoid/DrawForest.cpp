@@ -278,7 +278,7 @@ bool DrawForest::isVisibleInView(Plant * pl,
 	if(cullByFrustum(worldP, r) ) return false;
     
 	float camZ;
-	if(cullByDepth<KdNTree<cvx::Triangle, KdNode4 > >(worldP, r * 2.f, camZ, ground() ) ) return false;
+	if(cullByDepth<cvx::Triangle, KdNTree<cvx::Triangle, KdNode4 > >(worldP, r * 2.f, camZ, ground() ) ) return false;
 	
 	if(lowLod > 0.f || highLod < 1.f) {
 /// local z is negative
