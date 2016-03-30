@@ -138,13 +138,10 @@ void KdEngine::buildTree(KdNTree<T, KdNode4 > * tree,
 							sdb::VectorArray<T> * source, const BoundingBox & box,
 							const TreeProperty::BuildProfile * prof)
 {
-    sdb::TreeNode::MaxNumKeysPerNode = prof->_maxBNodeNumKeys;
-	sdb::TreeNode::MinNumKeysPerNode = prof->_minBNodeNumKeys;
-    
 	tree->init(source, box);
     
     std::cout<<"\n max level "<<prof->_maxLevel
-    <<"\n max n leaf per leaf "<<prof->_maxLeafPrims;
+    <<"\n max n prims per leaf "<<prof->_maxLeafPrims;
     
     KdNBuilder<4, T, KdNode4 > bud;
 	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);

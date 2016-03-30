@@ -100,7 +100,7 @@ bool Container<T>::buildTree()
 	m_tree = new KdNTree<T, KdNode4 >();
 	
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 50;
+	bf._maxLeafPrims = 128;
 	
 	KdEngine engine;
 	engine.buildTree<T>(m_tree, m_source, rootBox, &bf);

@@ -95,6 +95,7 @@ void TriWidget::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_T:
 			if(m_pickTree == tTriangle) m_pickTree = tVoxel;
 			else m_pickTree = tTriangle;
+			m_intersectCtx.reset();
 		    break;
 		default:
 			break;

@@ -8,8 +8,6 @@ namespace aphid {
 
 CartesianGrid::CartesianGrid()
 {
-	sdb::TreeNode::MaxNumKeysPerNode = 128;
-	sdb::TreeNode::MinNumKeysPerNode = 16;
 	m_cellHash = new sdb::CellHash;
 }
 

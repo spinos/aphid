@@ -112,15 +112,17 @@ private:
 	
 	bool removeKey(const KeyType & x);
 	
-	void partRoot(Pair<KeyType, Entity> x);
-	Pair<KeyType, Entity> partData(Pair<KeyType, Entity> x, Pair<KeyType, Entity> old[], BNode * lft, BNode * rgt, bool doSplitLeaf = false);
+	void partRoot(const Pair<KeyType, Entity> & x);
+	Pair<KeyType, Entity> partData(const Pair<KeyType, Entity> & x, 
+								Pair<KeyType, Entity> old[], 
+								BNode * lft, BNode * rgt, bool doSplitLeaf = false);
 	
-	void partInterior(Pair<KeyType, Entity> x);
+	void partInterior(const Pair<KeyType, Entity> & x);
 	
 /// for each child, set parent
 	void connectToChildren();
 /// insert data, split if needed
-	void bounce(const Pair<KeyType, Entity> b);
+	void bounce(const Pair<KeyType, Entity> & b);
 
 	bool leafBalance();
 	bool leafBalanceRight();
@@ -379,7 +381,7 @@ BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::splitLeaf(const KeyType & x)
 }
 
 template <typename KeyType, int MaxNKey> 
-void BNode<KeyType, MaxNKey>::bounce(const Pair<KeyType, Entity> b)
+void BNode<KeyType, MaxNKey>::bounce(const Pair<KeyType, Entity> & b)
 {	
 	if(KeyNData<KeyType, MaxNKey>::isFull()) {
 		if(isRoot()) 
@@ -446,7 +448,7 @@ void BNode<KeyType, MaxNKey>::connectToChildren()
 
 /// part into 2 interials
 template <typename KeyType, int MaxNKey> 
-void BNode<KeyType, MaxNKey>::partRoot(Pair<KeyType, Entity> b)
+void BNode<KeyType, MaxNKey>::partRoot(const Pair<KeyType, Entity> & b)
 {
 #if DBG_SPLIT
 	//std::cout<<"\n part root "<<str()<<"\n add index "<<static_cast<BNode *>(b.index)->firstKey();
@@ -496,10 +498,13 @@ void BNode<KeyType, MaxNKey>::partRoot(Pair<KeyType, Entity> b)
 #endif	
 	
 	connectLeftChild(one);
-	KeyNData<KeyType, MaxNKey>::dataR(0)->key = KeyNData<KeyType, MaxNKey>::data(midI).key;
-	KeyNData<KeyType, MaxNKey>::dataR(0)->index = two;
-
+	
+	Pair<KeyType, Entity> c;
+	c.key = KeyNData<KeyType, MaxNKey>::data(midI).key;
+	c.index = two;
+	KeyNData<KeyType, MaxNKey>::setData(0, c);
 	KeyNData<KeyType, MaxNKey>::setNumKeys(1);
+	
 #if DBG_SPLIT
 	//std::cout<<"\n after "<<*this;
 #endif
@@ -511,21 +516,19 @@ void BNode<KeyType, MaxNKey>::partRoot(Pair<KeyType, Entity> b)
 }
 
 template <typename KeyType, int MaxNKey> 
-void BNode<KeyType, MaxNKey>::partInterior(Pair<KeyType, Entity> x)
+void BNode<KeyType, MaxNKey>::partInterior(const Pair<KeyType, Entity> & x)
 {
 #if DBG_SPLIT
 	//std::cout<<"part interior "<<*this;
 #endif
 	BNode * rgt = new BNode(parent());
 	
-	Pair<KeyType, Entity> * old = new Pair<KeyType, Entity>[MaxNKey];
+	Pair<KeyType, Entity> old[MaxNKey];
 	for(int i=0; i < MaxNKey; i++)
 		old[i] = KeyNData<KeyType, MaxNKey>::data(i);
 	
 	KeyNData<KeyType, MaxNKey>::setNumKeys(0);
 	Pair<KeyType, Entity> p = partData(x, old, this, rgt);
-	
-	delete[] old;
 	
 #if DBG_SPLIT
 	//std::cout<<" into "<<*this<<" and "<<*rgt;
@@ -543,7 +546,9 @@ void BNode<KeyType, MaxNKey>::partInterior(Pair<KeyType, Entity> x)
 }
 
 template <typename KeyType, int MaxNKey> 
-Pair<KeyType, Entity> BNode<KeyType, MaxNKey>::partData(Pair<KeyType, Entity> x, Pair<KeyType, Entity> old[], BNode * lft, BNode * rgt, bool doSplitLeaf)
+Pair<KeyType, Entity> BNode<KeyType, MaxNKey>::partData(const Pair<KeyType, Entity> & x, 
+											Pair<KeyType, Entity> old[], 
+											BNode * lft, BNode * rgt, bool doSplitLeaf)
 {
 	Pair<KeyType, Entity> res, q;
 	BNode * dst = rgt;
@@ -1190,7 +1195,7 @@ void BNode<KeyType, MaxNKey>::dbgFindInLeaf(const KeyType & x)
 		return;
 	}
 	
-	std::cout<<"\n found "<<x;
+	std::cout<<"\n found "<<x<<" key["<<found<<"]";
 }
 
 template <typename KeyType, int MaxNKey>

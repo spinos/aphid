@@ -192,9 +192,8 @@ target_link_libraries (testntree ${Boost_CHRONO_LIBRARY})
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
-set (SHOTRI_HEADER_FILES "../shared/Base3DView.h" 
-triWindow.h
-"../shared/Morton3D.h"
+set (SHOTRI_HEADER_FILES ../shared/Base3DView.h
+../shared/Morton3D.h
 ../shared/ConvexShape.h
 ../shared/HElemAsset.h
 ../kdtree/KdBuilder.h
