@@ -97,6 +97,8 @@ public:
     BoundingBox calculateBBox() const;
     
     static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
+	
 };
 
 class Cube {

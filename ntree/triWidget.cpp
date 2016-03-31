@@ -134,7 +134,7 @@ void TriWidget::testTriangleIntersection(const Ray * incident)
 	sst<<m_intersectCtx.m_ray.m_origin<<" "<<incident->m_dir;
 	qDebug()<<"interset begin "<<sst.str().c_str();
 	KdEngine eng;
-	eng.intersect<cvx::Triangle>(m_container.tree(), &m_intersectCtx);
+	eng.intersect<cvx::Triangle, KdNode4>(m_container.tree(), &m_intersectCtx);
 	qDebug()<<"interset end";
 }
 
@@ -146,7 +146,7 @@ void TriWidget::testVoxelIntersection(const Ray * incident)
 	sst<<m_intersectCtx.m_ray.m_origin<<" "<<incident->m_dir;
 	qDebug()<<"interset begin "<<sst.str().c_str();
 	KdEngine eng;
-	eng.intersect<Voxel>(m_container.voxelTree(), &m_intersectCtx);
+	eng.intersect<Voxel, KdNode4>(m_container.voxelTree(), &m_intersectCtx);
 	qDebug()<<"interset end";
 }
 

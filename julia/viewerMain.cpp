@@ -40,19 +40,12 @@
 ****************************************************************************/
 
 #include <QApplication>
-#include "Parameter.h"
 #include "viewerWindow.h"
 
 int main(int argc, char *argv[])
-{
-    jul::Parameter param(argc, argv);
-	if(param.operation() == jul::Parameter::kHelp ) {
-		jul::Parameter::PrintHelp();
-		return 1;
-	}
-	
+{	
 	QApplication app(argc, argv);
-	jul::Window window(&param);
+	jul::Window window(argc, argv);
     //window.showMaximized();
     window.resize(720, 540);
     window.show();

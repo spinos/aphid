@@ -140,3 +140,13 @@ target_link_libraries (checkIntegrity ${SZIP_LIBRARY})
 target_link_libraries (checkIntegrity ${Aphid_H5_Library})
 target_link_libraries (checkIntegrity ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (checkIntegrity ${Boost_SYSTEM_LIBRARY})
+
+add_executable (diagnose diagnoseMain.cpp)
+
+target_link_libraries (diagnose ${HDF5_LIBRARIES})
+target_link_libraries (diagnose ${ZLIB_LIBRARIES})
+target_link_libraries (diagnose ${SZIP_LIBRARY})
+target_link_libraries (diagnose ${Aphid_H5_Library})
+target_link_libraries (diagnose ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (diagnose ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (diagnose ${Boost_REGEX_LIBRARY})

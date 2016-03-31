@@ -39,9 +39,6 @@ Float4 quatSq(const Float4 & a)
 
 QuatJulia::QuatJulia(Parameter * param) 
 {
-	sdb::TreeNode::MaxNumKeysPerNode = 256;
-	sdb::TreeNode::MinNumKeysPerNode = 16;
-
 	m_c = Float4(-0.02,-0.0156,-0.563,-0.4);
 	m_numIter = 10;
 	m_numGrid = 360;

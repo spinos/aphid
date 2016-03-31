@@ -66,8 +66,8 @@ void GLWidget::testTree()
 	bf._maxLeafPrims = 32;
 	
 	KdEngine engine;
-    engine.buildTree<cvx::Cube>(m_tree, m_source, rootBox, &bf);
-	// engine.printTree(m_tree);
+    engine.buildTree<cvx::Cube, KdNode4, 4>(m_tree, m_source, rootBox, &bf);
+	// engine.printTree<cvx::Cube, KdNode4>(m_tree);
 }
 
 void GLWidget::clientInit()
@@ -255,7 +255,7 @@ void GLWidget::testGrid()
 	bf._maxLeafPrims = 16;
     
 	KdEngine engine;
-    engine.buildTree<cvx::Cube>(m_tree, m_source, rootBox, &bf);
+    engine.buildTree<cvx::Cube, KdNode4, 4>(m_tree, m_source, rootBox, &bf);
 }
 
 void GLWidget::drawGrid()

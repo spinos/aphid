@@ -31,6 +31,7 @@ public:
 	int numElements();
 	void beginInsert();
 	bool beginRead();
+	void flush();
 	
 protected:
 
@@ -89,6 +90,10 @@ bool HInnerGrid<DataRank, NRows, BufSize>::beginRead()
 	m_data->openStorage(fObjectId);
 	return true;
 }
+
+template <int DataRank, int NRows, int BufSize>
+void HInnerGrid<DataRank, NRows, BufSize>::flush()
+{}
 
 }
 }

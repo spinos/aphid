@@ -20,6 +20,7 @@ template<typename ChildType, typename ValueType>
 class WorldGrid : public Sequence<Coord3>
 {
 	BoundingBox m_bbox;
+/// size of cell
 	float m_gridSize;
 	
 public:

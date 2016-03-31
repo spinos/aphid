@@ -7,13 +7,13 @@
 
 namespace jul {
 
-Window::Window(const Parameter * param)
+Window::Window(int argc, char *argv[])
 {
 	aphid::CudaRender * r;
 	
-	if(param->operation() == Parameter::kView) {
-		r = new aphid::WorldRender(param->outFileName() );
-		setWindowTitle(tr(param->outFileName().c_str()));
+	if(argc == 2) {
+		r = new aphid::WorldRender(argv[1] );
+		setWindowTitle(tr(argv[1]));
 	}
 	else {
 		r = new aphid::CubeRender;

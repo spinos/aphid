@@ -9,6 +9,7 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  *  out-of-core grid
+ *  child must be ooc 
  */
 
 #include "WorldGrid.h"
@@ -41,10 +42,18 @@ public:
 template<typename ChildType, typename ValueType>
 class HWorldGrid : public HBase, public WorldGrid<ChildType, ValueType> {
 
+	std::string m_dirtyName;
+	Sequence<Coord3> m_dirtyCell;
+	
 public:
 	HWorldGrid(const std::string & name, Entity * parent = NULL);
 	virtual ~HWorldGrid();
 	
+	bool insert(const std::string & name, const BoundingBox & box);
+	bool insert(const std::string & name, const Coord3 & x);
+/// insert with offset
+	bool insert(const ValueType * v, const Vector3F & rel);
+	bool insert(const ValueType * v, const Coord3 & x);
 	bool insert(const float * at, const ValueType & v);
 	void finishInsert();
 	int elementSize();
@@ -68,6 +77,73 @@ HBase(name), WorldGrid<ChildType, ValueType>(parent)
 template<typename ChildType, typename ValueType>
 HWorldGrid<ChildType, ValueType>::~HWorldGrid()
 {}
+
+template<typename ChildType, typename ValueType>
+bool HWorldGrid<ChildType, ValueType>::insert(const std::string & name, const BoundingBox & box)
+{
+	std::cout<<"\n wg insert "<<name<<" "<<box;
+	m_dirtyName = name;
+	m_dirtyCell.clear();
+/// find intesected grid
+	const Coord3 lo = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMin());
+	const Coord3 hi = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMax());
+	int i, j, k;
+	for(k=lo.z; k<= hi.z; ++k) {
+		for(j=lo.y; j<= hi.y; ++j) {
+			for(i=lo.x; i<= hi.x; ++i) {
+				insert(name, Coord3(i,j,k) );
+				m_dirtyCell.insert(Coord3(i,j,k) );
+			}
+		}
+	}
+	std::cout<<"\n affect "<<m_dirtyCell.size()<<" cells ";
+	return true;
+}
+
+template<typename ChildType, typename ValueType>
+bool HWorldGrid<ChildType, ValueType>::insert(const std::string & name, const Coord3 & x)
+{
+	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
+	if(!p->index) {
+		p->index = new ChildType(childPath(coord3Str(x) ), this);
+	}
+	static_cast<ChildType *>(p->index)->insert(name);
+	return true;
+}
+
+template<typename ChildType, typename ValueType>
+bool HWorldGrid<ChildType, ValueType>::insert(const ValueType * v, 
+												const Vector3F & rel) 
+{
+	BoundingBox box = v->calculateBBox();
+	box.translate(rel);
+/// find intesected grid
+	const Coord3 lo = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMin());
+	const Coord3 hi = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMax());
+	int i, j, k;
+	for(k=lo.z; k<= hi.z; ++k) {
+		for(j=lo.y; j<= hi.y; ++j) {
+			for(i=lo.x; i<= hi.x; ++i) {
+				insert(v, Coord3(i,j,k));
+			}
+		}
+	}
+	return true;
+}
+
+template<typename ChildType, typename ValueType>
+bool HWorldGrid<ChildType, ValueType>::insert(const ValueType * v, const Coord3 & x)
+{
+	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
+	if(!p->index) {
+		//p->index = new ChildType(childPath(coord3Str(x) ), this);
+		//static_cast<ChildType *>(p->index)->beginInsert();
+		std::cout<<"\n error world grid has no cell "<<x;
+		return false;
+	}
+	static_cast<ChildType *>(p->index)->insert(v);
+	return true;
+}
 
 template<typename ChildType, typename ValueType>
 bool HWorldGrid<ChildType, ValueType>::insert(const float * at, const ValueType & v) 
@@ -100,7 +176,10 @@ int HWorldGrid<ChildType, ValueType>::elementSize()
 	WorldGrid<ChildType, ValueType>::begin();
 	while(!WorldGrid<ChildType, ValueType>::end() ) {
 		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
-		sum += cell->numElements();
+		if(cell)
+			sum += cell->numElements();
+		else 
+			std::cout<<"\n warning world grid has no cell "<<WorldGrid<ChildType, ValueType>::key();
 		
 		WorldGrid<ChildType, ValueType>::next();
 	}
@@ -114,6 +193,19 @@ std::string HWorldGrid<ChildType, ValueType>::coord3Str(const Coord3 & c) const
 template<typename ChildType, typename ValueType>
 char HWorldGrid<ChildType, ValueType>::save()
 {
+/// any dirty cells
+	m_dirtyCell.begin();
+	while(!m_dirtyCell.end() ) {
+		Pair<Entity *, Entity> p = Sequence<Coord3>::findEntity(m_dirtyCell.key() );
+		if(p.index) {
+			static_cast<ChildType *>(p.index)->flush();
+		}
+		else 
+			std::cout<<"\n error world grid has no cell "<<m_dirtyCell.key();
+		
+		m_dirtyCell.next();
+	}
+	
 	HOocArray<hdata::TInt, 3, 256> cellCoords(".cells");
 
 	if(hasNamedData(".cells") )
@@ -159,7 +251,7 @@ char HWorldGrid<ChildType, ValueType>::save()
 	    <<"\n n cell "<<n
 	    <<"\n grid size "<<gz
 	    <<"\n bounding box "<<WorldGrid<ChildType, ValueType>::boundingBox()
-	    <<"\n value type "<<ValueType::ShapeTypeId;
+	    <<"\n value type "<<ValueType::GetTypeStr();
 	
 	return 1;
 }

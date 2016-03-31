@@ -76,6 +76,4 @@ template<int NumLevels>
 const int & Treelet<NumLevels>::index() const
 { return m_index; }
 
-typedef Treelet<4> Treelet4;
-
 }

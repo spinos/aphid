@@ -121,6 +121,9 @@ BoundingBox Sphere::calculateBBox() const
 
 ShapeType Sphere::ShapeTypeId = TSphere;
 
+std::string Sphere::GetTypeStr()
+{ return "sphere"; }
+
 Cube::Cube() {}
 
 void Cube::set(const Vector3F & x, const float & r)

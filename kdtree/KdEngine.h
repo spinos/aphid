@@ -25,39 +25,39 @@ public:
 					BoundingBox & box,
 					const std::vector<Ts *> & src);
 	
-	template<typename T>
-	void buildTree(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn, int NLevel>
+	void buildTree(KdNTree<T, Tn > * tree, 
 					sdb::VectorArray<T> * source, const BoundingBox & box,
 					const TreeProperty::BuildProfile * prof);
 	
-	template<typename T>
-	void printTree(KdNTree<T, KdNode4 > * tree);
+	template<typename T, typename Tn>
+	void printTree(KdNTree<T, Tn > * tree);
 	
-	template<typename T>
-	bool intersect(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	bool intersect(KdNTree<T, Tn > * tree, 
 				IntersectionContext * ctx);
 	
-	template<typename T>
-	void select(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	void select(KdNTree<T, Tn > * tree, 
 				SphereSelectionContext * ctx);
 				
-	template<typename T>
-	void closestToPoint(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	void closestToPoint(KdNTree<T, Tn > * tree, 
 				Geometry::ClosestToPointTestResult * ctx);
 
 protected:
 
 private:
-	template<typename T>
-	void printBranch(KdNTree<T, KdNode4 > * tree, int idx);
+	template<typename T, typename Tn>
+	void printBranch(KdNTree<T, Tn > * tree, int idx);
 	
-	template<typename T>
-	void leafSelect(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	void leafSelect(KdNTree<T, Tn > * tree, 
 					SphereSelectionContext * ctx,
 					KdTreeNode * r);
 	
-	template<typename T>
-	void innerSelect(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	void innerSelect(KdNTree<T, Tn > * tree, 
 					SphereSelectionContext * ctx,
 					int branchIdx,
 					int nodeIdx,
@@ -68,31 +68,31 @@ private:
 	int firstVisit(IntersectionContext * ctx, 
 					const KdTreeNode * n);
 	
-	template <typename T>
+	template <typename T, typename Tn>
 	int visitLeaf(IntersectionContext * ctx, 
 					int & branchIdx,
 					int & nodeIdx,
 					const KdTreeNode * r);
 					
-	template <typename T>
-	int hitPrimitive(KdNTree<T, KdNode4 > * tree, 
+	template <typename T, typename Tn>
+	int hitPrimitive(KdNTree<T, Tn > * tree, 
 							IntersectionContext * ctx, 
 							const KdTreeNode * r);
 	
-	template <typename T>
-	bool climbRope(KdNTree<T, KdNode4 > * tree, 
+	template <typename T, typename Tn>
+	bool climbRope(KdNTree<T, Tn > * tree, 
 							IntersectionContext * ctx, 
 									int & branchIdx,
 									int & nodeIdx,
 									const KdTreeNode * r);
 									
-	template<typename T>
-	void leafClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	void leafClosestToPoint(KdNTree<T, Tn > * tree, 
 								Geometry::ClosestToPointTestResult * result,
 								KdTreeNode *node, const BoundingBox &box);
 								
-	template<typename T>
-	void innerClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+	template<typename T, typename Tn>
+	void innerClosestToPoint(KdNTree<T, Tn > * tree, 
 				Geometry::ClosestToPointTestResult * ctx,
 				int branchIdx,
 				int nodeIdx,
@@ -133,8 +133,8 @@ void KdEngine::buildSource(sdb::VectorArray<T> * dst,
 	}
 }
 
-template<typename T>
-void KdEngine::buildTree(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn, int NLevel>
+void KdEngine::buildTree(KdNTree<T, Tn > * tree, 
 							sdb::VectorArray<T> * source, const BoundingBox & box,
 							const TreeProperty::BuildProfile * prof)
 {
@@ -143,7 +143,7 @@ void KdEngine::buildTree(KdNTree<T, KdNode4 > * tree,
     std::cout<<"\n max level "<<prof->_maxLevel
     <<"\n max n prims per leaf "<<prof->_maxLeafPrims;
     
-    KdNBuilder<4, T, KdNode4 > bud;
+    KdNBuilder<NLevel, T, Tn > bud;
 	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);
 	bud.MaxTreeletLevel = prof->_maxLevel;
 	
@@ -158,28 +158,28 @@ void KdEngine::buildTree(KdNTree<T, KdNode4 > * tree,
 	tree->verbose();
 }
 
-template<typename T>
-void KdEngine::printTree(KdNTree<T, KdNode4 > * tree)
+template<typename T, typename Tn>
+void KdEngine::printTree(KdNTree<T, Tn > * tree)
 {
-	KdNode4 * tn = tree->root();
+	Tn * tn = tree->root();
 	std::cout<<"\n root";
 	tn->verbose();
 	int i=0;
 	KdTreeNode * child = tn->node(0);
 	if(child->isLeaf() ) {}
 	else {
-		printBranch<T>(tree, tn->internalOffset(0) );
+		printBranch<T, Tn>(tree, tn->internalOffset(0) );
 	}
 }
 
-template<typename T>
-void KdEngine::printBranch(KdNTree<T, KdNode4 > * tree, int idx)
+template<typename T, typename Tn>
+void KdEngine::printBranch(KdNTree<T, Tn > * tree, int idx)
 {
-	KdNode4 * tn = tree->nodes()[idx];
+	Tn * tn = tree->branches()[idx];
 	std::cout<<"\n branch["<<idx<<"]";
 	tn->verbose();
 	int i=14;
-	for(;i<KdNode4::NumNodes;++i) {
+	for(;i<Tn::NumNodes;++i) {
 		KdTreeNode * child = tn->node(i);
 		if(child->isLeaf() ) {}
 		else {
@@ -188,8 +188,8 @@ void KdEngine::printBranch(KdNTree<T, KdNode4 > * tree, int idx)
 	}
 }
 
-template<typename T>
-bool KdEngine::intersect(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+bool KdEngine::intersect(KdNTree<T, Tn > * tree, 
 				IntersectionContext * ctx)
 {
 	if(tree->isEmpty()) return 0;
@@ -203,13 +203,13 @@ bool KdEngine::intersect(KdNTree<T, KdNode4 > * tree,
 	ctx->setBBox(b);
 	int branchIdx = tree->root()->internalOffset(0);
 	int preBranchIdx = branchIdx;
-	KdNode4 * currentBranch = tree->branches()[branchIdx];
+	Tn * currentBranch = tree->branches()[branchIdx];
 	int nodeIdx = firstVisit<T>(ctx, r);
 	KdTreeNode * kn = currentBranch->node(nodeIdx);
 	int stat;
 	bool hasNext = true;
 	while (hasNext) {
-		stat = visitLeaf<T>(ctx, branchIdx, nodeIdx, 
+		stat = visitLeaf<T, Tn>(ctx, branchIdx, nodeIdx, 
 							kn);
 							
 		if(preBranchIdx != branchIdx) {
@@ -303,7 +303,7 @@ int KdEngine::firstVisit(IntersectionContext * ctx,
 	return above;
 }
 
-template <typename T>
+template <typename T, typename Tn>
 int KdEngine::visitLeaf(IntersectionContext * ctx, 
 									int & branchIdx,
 									int & nodeIdx,
@@ -321,12 +321,12 @@ int KdEngine::visitLeaf(IntersectionContext * ctx,
 	}
 	
 	const int offset = r->getOffset();
-	if(offset < KdNode4::TreeletOffsetMask) {
+	if(offset < Tn::TreeletOffsetMask) {
 		// std::cout<<"\n inner offset "<<offset;
 		nodeIdx += offset + firstVisit<T>(ctx, r);
 	}
 	else {
-		branchIdx += offset & KdNode4::TreeletOffsetMaskTau;
+		branchIdx += offset & Tn::TreeletOffsetMaskTau;
 //		std::cout<<"\n branch "<<branchIdx;
 		nodeIdx = firstVisit<T>(ctx, r);
 	}
@@ -334,8 +334,8 @@ int KdEngine::visitLeaf(IntersectionContext * ctx,
 	return -1;
 }
 
-template <typename T>
-int KdEngine::hitPrimitive(KdNTree<T, KdNode4 > * tree, 
+template <typename T, typename Tn>
+int KdEngine::hitPrimitive(KdNTree<T, Tn > * tree, 
 							IntersectionContext * ctx, 
 							const KdTreeNode * r)
 {
@@ -360,8 +360,8 @@ int KdEngine::hitPrimitive(KdNTree<T, KdNode4 > * tree,
 	return nhit;
 }
 
-template <typename T>
-bool KdEngine::climbRope(KdNTree<T, KdNode4 > * tree, 
+template <typename T, typename Tn>
+bool KdEngine::climbRope(KdNTree<T, Tn > * tree, 
 							IntersectionContext * ctx, 
 									int & branchIdx,
 									int & nodeIdx,
@@ -396,8 +396,8 @@ bool KdEngine::climbRope(KdNTree<T, KdNode4 > * tree,
 	return true;
 }
 
-template<typename T>
-void KdEngine::select(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+void KdEngine::select(KdNTree<T, Tn > * tree, 
 						SphereSelectionContext * ctx)
 {
 	if(tree->isEmpty() ) return;
@@ -422,8 +422,8 @@ void KdEngine::select(KdNTree<T, KdNode4 > * tree,
 	
 }
 
-template<typename T>
-void KdEngine::leafSelect(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+void KdEngine::leafSelect(KdNTree<T, Tn > * tree, 
 				SphereSelectionContext * ctx,
 				KdTreeNode * r)
 {
@@ -445,14 +445,14 @@ void KdEngine::leafSelect(KdNTree<T, KdNode4 > * tree,
 	}
 }
 
-template<typename T>
-void KdEngine::innerSelect(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+void KdEngine::innerSelect(KdNTree<T, Tn > * tree, 
 				SphereSelectionContext * ctx,
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & b)
 {
-	KdNode4 * currentBranch = tree->branches()[branchIdx];
+	Tn * currentBranch = tree->branches()[branchIdx];
 	KdTreeNode * r = currentBranch->node(nodeIdx);
 	if(r->isLeaf() ) {
 		leafSelect(tree, ctx, r);
@@ -465,7 +465,7 @@ void KdEngine::innerSelect(KdNTree<T, KdNode4 > * tree,
 	b.split(axis, splitPos, lftBox, rgtBox);
 	
 	const int offset = r->getOffset();
-	if(offset < KdNode4::TreeletOffsetMask) {
+	if(offset < Tn::TreeletOffsetMask) {
 		if(ctx->getMin(axis) < splitPos ) {
 			innerSelect(tree, ctx, 
 							branchIdx,
@@ -483,22 +483,22 @@ void KdEngine::innerSelect(KdNTree<T, KdNode4 > * tree,
 	else {
 		if(ctx->getMin(axis) < splitPos ) {
 			innerSelect(tree, ctx, 
-							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							0,
 							lftBox);
 		}
 		
 		if(ctx->getMax(axis) > splitPos ) {
 			innerSelect(tree, ctx, 
-							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							1,
 							rgtBox);
 		}
 	}
 }
 
-template<typename T>
-void KdEngine::closestToPoint(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+void KdEngine::closestToPoint(KdNTree<T, Tn > * tree, 
 				Geometry::ClosestToPointTestResult * ctx)
 {
 	if(ctx->closeEnough() ) return;
@@ -532,14 +532,14 @@ void KdEngine::closestToPoint(KdNTree<T, KdNode4 > * tree,
 	
 }
 	
-template<typename T>
-void KdEngine::innerClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree, 
 				Geometry::ClosestToPointTestResult * ctx,
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & b)
 {
-	KdNode4 * currentBranch = tree->branches()[branchIdx];
+	Tn * currentBranch = tree->branches()[branchIdx];
 	KdTreeNode * r = currentBranch->node(nodeIdx);
 	if(r->isLeaf() ) {
 		leafClosestToPoint(tree, ctx, r, b);
@@ -553,7 +553,7 @@ void KdEngine::innerClosestToPoint(KdNTree<T, KdNode4 > * tree,
 	const float cp = ctx->_toPoint.comp(axis) - splitPos;
 	
 	const int offset = r->getOffset();
-	if(offset < KdNode4::TreeletOffsetMask) {
+	if(offset < Tn::TreeletOffsetMask) {
 		if(cp < 0.f ) {
 			innerClosestToPoint(tree, ctx, 
 							branchIdx,
@@ -585,35 +585,35 @@ void KdEngine::innerClosestToPoint(KdNTree<T, KdNode4 > * tree,
 	else {
 		if(cp < 0.f ) {
 			innerClosestToPoint(tree, ctx, 
-							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							0,
 							lftBox);
 							
 			if(ctx->closeEnough() ) return;
 			
 			innerClosestToPoint(tree, ctx, 
-							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							1,
 							rgtBox);
 		}
 		else {
 			innerClosestToPoint(tree, ctx, 
-							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							1,
 							rgtBox);
 							
 			if(ctx->closeEnough() ) return;
 			
 			innerClosestToPoint(tree, ctx, 
-							branchIdx + offset & KdNode4::TreeletOffsetMaskTau,
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							0,
 							lftBox);
 		}
 	}
 }
 
-template<typename T>
-void KdEngine::leafClosestToPoint(KdNTree<T, KdNode4 > * tree, 
+template<typename T, typename Tn>
+void KdEngine::leafClosestToPoint(KdNTree<T, Tn > * tree, 
 								Geometry::ClosestToPointTestResult * result,
 								KdTreeNode *node, const BoundingBox &box)
 {

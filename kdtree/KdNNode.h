@@ -21,12 +21,9 @@ class KdNNode {
 public:
 	KdNNode();
 	
-    const KdTreeNode * node(int idx) const
-    { return & m_nodes[idx]; }
+    const KdTreeNode * node(int idx) const;
+	KdTreeNode * node(int idx);
 	
-	KdTreeNode * node(int idx)
-    { return & m_nodes[idx]; }
-    
 	void setInternal(int idx, int axis, float pos, int offset);
 	void setLeaf(int idx, unsigned start, unsigned num);
 	
@@ -56,8 +53,9 @@ KdNNode<NumLevels>::KdNNode()
 template <int NumLevels>
 void KdNNode<NumLevels>::setAllLeaf()
 {
-	for(int i=0; i<NumNodes; ++i)
-		setLeaf(i, 0, 0);
+	//for(int i=0; i<NumNodes; ++i)
+	//	setLeaf(i, 0, 0);
+	memset (m_nodes, 0, (NumNodes + 2) << 3);
 }
 
 template <int NumLevels>
@@ -124,7 +122,16 @@ int KdNNode<NumLevels>::NumNodes = (1<<NumLevels+1) - 2;
 template <int NumLevels>
 int KdNNode<NumLevels>::BranchingFactor = NumLevels;
 
+template <int NumLevels>
+const KdTreeNode * KdNNode<NumLevels>::node(int idx) const
+{ return & m_nodes[idx]; }
+
+template <int NumLevels>
+KdTreeNode * KdNNode<NumLevels>::node(int idx)
+{ return & m_nodes[idx]; }
+
 typedef KdNNode<3> KdNode3;
 typedef KdNNode<4> KdNode4;
+typedef KdNNode<5> KdNode5;
 
 }

@@ -12,11 +12,14 @@
 #include <HNTree.h>
 #include <VectorArray.h>
 #include <HElemAsset.h>
+#include <HAssetGrid.h>
 
 namespace aphid {
 
 class NTreeIO {
 
+	HDocument m_doc;
+	
 public:
 	NTreeIO();
 	
@@ -70,13 +73,39 @@ public:
 			return false;
 		}
 		name = assetNames[0];
+/// no path
+		int islash = name.rfind('/', name.size() );
+		if(islash >=0)
+			name.erase(0, ++islash);
 		return true;
 	}
+	
+	template<typename Ta, typename Tv>
+	bool extractAsset(const std::string & name, 
+							sdb::VectorArray<Tv> * dst,
+							BoundingBox & box);
 	
 protected:
 
 private:
 
 };
+
+template<typename Ta, typename Tv>
+bool NTreeIO::extractAsset(const std::string & name, 
+							sdb::VectorArray<Tv> * dst,
+							BoundingBox & box)
+{
+	Ta ass(name);
+	ass.load();
+	box = ass.getBBox();
+	std::cout<<"\n asset bbox "<<box;
+	if(ass.numElems() > 0) {
+		ass.extract(dst);
+		std::cout<<"\n extract n "<<Tv::GetTypeStr()<<" "<<dst->size();
+	}
+	ass.close();
+	return dst->size() > 0;
+}
 
 }

@@ -15,6 +15,7 @@ set (HEADER_FILES ../btree/HWorldGrid.h
 QuatJulia.h
 JuliaTree.h
 Parameter.h
+JuliaWorld.h
 )
 
 set (SOURCE_FILES 
@@ -22,6 +23,8 @@ set (SOURCE_FILES
 ../shared/MinMaxBins.cpp 
 ../shared/SplitEvent.cpp
 ../shared/BaseBinSplit.cpp 
+../shared/HElemAsset.cpp
+../btree/GridClustering.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
 ../kdtree/HNTree.cpp
@@ -30,6 +33,7 @@ set (SOURCE_FILES
 Parameter.cpp 
 QuatJulia.cpp
 JuliaTree.cpp
+JuliaWorld.cpp
 main.cpp)
 
 add_executable(julia ${HEADER_FILES} ${SOURCE_FILES})
@@ -180,7 +184,6 @@ CubeRender.cpp
 ../kdtree/HNTree.cpp
 ../ntree/NTreeIO.cpp
 ../btree/HWorldGrid.cpp
-Parameter.cpp
 viewerWindow.cpp
 WorldRender.cpp
 )

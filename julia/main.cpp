@@ -8,12 +8,12 @@
  */
 #include <iostream>
 #include "Parameter.h"
+#include "JuliaWorld.h"
 #include "QuatJulia.h"
 #include "JuliaTree.h"
 
 int main(int argc, char *argv[])
 {
-	std::cout<<"\n julia set \n";
 	jul::Parameter param(argc, argv);
 	if(!param.isValid() || param.operation() == jul::Parameter::kHelp ) {
 		jul::Parameter::PrintHelp();
@@ -28,6 +28,15 @@ int main(int argc, char *argv[])
 	if(param.operation() == jul::Parameter::kBuildTree ) {
 		std::cout<<"\n build kdntree ";
 		jul::JuliaTree t(&param);
+	}
+	
+	jul::JuliaWorld wd;
+	if(param.operation() == jul::Parameter::kInitialize ) {
+		wd.create(param);
+	}
+	
+	if(param.operation() == jul::Parameter::kInsert ) {
+		wd.insert(param);
 	}
 	return 0;
 }

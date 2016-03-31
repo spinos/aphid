@@ -20,15 +20,24 @@ bool NTreeIO::begin(const std::string & filename,
 					HDocument::OpenMode om)
 {
 	if(!HObject::FileIO.open(filename.c_str(), om) ) {
-		std::cout<<"\n NTree IO cannot open file "<<filename;
+		if(om == HDocument::oCreate) 
+			std::cout<<"\n NTree IO cannot create file "<<filename;
+		else if(om == HDocument::oReadAndWrite) 
+			std::cout<<"\n NTree IO cannot read/write file "<<filename;
+		else 
+			std::cout<<"\n NTree IO cannot read file "<<filename;
 		return false;
 	}
+	m_doc = HObject::FileIO;
+	std::cout<<"\n ntree io open file "<<m_doc.fileName();
 	return true;
 }
 
 void NTreeIO::end()
 {
-	HObject::FileIO.close();
+	std::cout<<"\n ntree io close file "<<m_doc.fileName();
+	m_doc.close();
+	//HObject::FileIO.close();
 }
 
 bool NTreeIO::findGrid(std::string & name, const std::string & grpName)

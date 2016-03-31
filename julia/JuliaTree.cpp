@@ -47,11 +47,11 @@ void JuliaTree::buildSphere(const std::string & name)
     }
     
     HNTree<cvx::Cube, KdNode4 > tree( boost::str(boost::format("%1%/tree") % name ) );
-    KdEngine<cvx::Cube> engine;
+    KdEngine engine;
     TreeProperty::BuildProfile bf;
-    bf._maxLeafPrims = 5;
+    bf._maxLeafPrims = 8;
     
-    engine.buildTree(&tree, &cs, grd.boundingBox(), &bf);
+    engine.buildTree<cvx::Cube, KdNode4, 4>(&tree, &cs, grd.boundingBox(), &bf);
 	
 	tree.save();
 	tree.close();

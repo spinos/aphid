@@ -8,14 +8,18 @@ namespace jul {
 
 class Parameter {
 
+	std::string m_inFileName;
 	std::string m_outFileName;
+	int m_cellSize;
+	
 public:
 	enum OperationFlag {
 		kUnknown = 0,
 		kHelp = 1,
 		kGenerate = 2,
 		kBuildTree = 3,
-		kView = 4
+		kInitialize = 4,
+		kInsert = 5
 	};
 	
 	Parameter(int argc, char *argv[]);
@@ -26,7 +30,10 @@ public:
 	
 	OperationFlag operation() const;
 	
+	const std::string & inFileName() const;
 	const std::string & outFileName() const;
+	const int & cellSize() const;
+	
 protected:
 
 private:

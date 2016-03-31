@@ -103,7 +103,7 @@ bool Container<T>::buildTree()
 	bf._maxLeafPrims = 128;
 	
 	KdEngine engine;
-	engine.buildTree<T>(m_tree, m_source, rootBox, &bf);
+	engine.buildTree<T, KdNode4, 4>(m_tree, m_source, rootBox, &bf);
 	
 	return true;
 }
@@ -126,7 +126,7 @@ bool Container<T>::buildGrid()
 	bf._maxLeafPrims = 32;
     
 	KdEngine engine;
-	engine.buildTree<Voxel>(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);
+	engine.buildTree<Voxel, KdNode4, 4>(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);
 }
 
 template<typename T>

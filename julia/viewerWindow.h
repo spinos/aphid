@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include <QMainWindow>
-#include <Parameter.h>
+
 QT_BEGIN_NAMESPACE
 class QWidget;
 QT_END_NAMESPACE
@@ -14,7 +14,7 @@ class Window : public QMainWindow
     Q_OBJECT
 
 public:
-    Window(const Parameter * param);
+    Window(int argc, char *argv[]);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
