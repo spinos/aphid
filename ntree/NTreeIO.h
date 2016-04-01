@@ -85,6 +85,10 @@ public:
 							sdb::VectorArray<Tv> * dst,
 							BoundingBox & box);
 	
+	template<typename T>
+	bool hasNamedAsset(const std::string & grpName,
+						const std::string & name);
+	
 protected:
 
 private:
@@ -106,6 +110,22 @@ bool NTreeIO::extractAsset(const std::string & name,
 	}
 	ass.close();
 	return dst->size() > 0;
+}
+
+template<typename T>
+bool NTreeIO::hasNamedAsset(const std::string & grpName,
+						const std::string & name)
+{
+	HBase g(grpName);
+	bool stat = g.hasNamedChild(name.c_str() );
+	if(stat) {
+		HBase a(g.childPath(name) );
+		stat = a.hasNamedAttrIntVal(".elemtyp", T::ShapeTypeId)
+				&& a.hasNamedAttrIntVal(".act", 1);
+		a.close();
+	}
+	g.close();
+	return stat;
 }
 
 }

@@ -48,7 +48,8 @@ class HWorldGrid : public HBase, public WorldGrid<ChildType, ValueType> {
 public:
 	HWorldGrid(const std::string & name, Entity * parent = NULL);
 	virtual ~HWorldGrid();
-	
+
+/// inset named elem	
 	bool insert(const std::string & name, const BoundingBox & box);
 	bool insert(const std::string & name, const Coord3 & x);
 /// insert with offset
@@ -62,6 +63,12 @@ public:
 	virtual char load();
 /// close all children
 	virtual void close();
+/// clean dirty cells
+	void setClean();
+/// remove named elem
+	void remove(const std::string & name, const BoundingBox & box);
+	void remove(const std::string & name, const Coord3 & x);
+	
 protected:
 	std::string coord3Str(const Coord3 & c) const;
 	
@@ -81,9 +88,7 @@ HWorldGrid<ChildType, ValueType>::~HWorldGrid()
 template<typename ChildType, typename ValueType>
 bool HWorldGrid<ChildType, ValueType>::insert(const std::string & name, const BoundingBox & box)
 {
-	std::cout<<"\n wg insert "<<name<<" "<<box;
 	m_dirtyName = name;
-	m_dirtyCell.clear();
 /// find intesected grid
 	const Coord3 lo = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMin());
 	const Coord3 hi = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMax());
@@ -96,7 +101,7 @@ bool HWorldGrid<ChildType, ValueType>::insert(const std::string & name, const Bo
 			}
 		}
 	}
-	std::cout<<"\n affect "<<m_dirtyCell.size()<<" cells ";
+	std::cout<<"\n affect "<<m_dirtyCell.size()<<" cells in world grid";
 	return true;
 }
 
@@ -136,8 +141,6 @@ bool HWorldGrid<ChildType, ValueType>::insert(const ValueType * v, const Coord3 
 {
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
 	if(!p->index) {
-		//p->index = new ChildType(childPath(coord3Str(x) ), this);
-		//static_cast<ChildType *>(p->index)->beginInsert();
 		std::cout<<"\n error world grid has no cell "<<x;
 		return false;
 	}
@@ -213,17 +216,21 @@ char HWorldGrid<ChildType, ValueType>::save()
 	else
 		cellCoords.createStorage(fObjectId);
 
+	BoundingBox * gb = WorldGrid<ChildType, ValueType>::boundingBoxR();
+	gb->reset();
 	WorldGrid<ChildType, ValueType>::begin();
 	while(!WorldGrid<ChildType, ValueType>::end() ) {
 		Coord3 c = WorldGrid<ChildType, ValueType>::key();
-		cellCoords.insert((char *)&c );
+		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
+		if(cell->numElements() > 0) {
+			cellCoords.insert((char *)&c );
+			gb->expandBy(WorldGrid<ChildType, ValueType>::keyToGridBBox() );
+		}
 		WorldGrid<ChildType, ValueType>::next();
 	}
 	
 	cellCoords.finishInsert();
 	int n=cellCoords.numCols();
-	
-	WorldGrid<ChildType, ValueType>::calculateBBox();
 	
 	if(!hasNamedAttr(".bbx") )
 	    addFloatAttr(".bbx", 6);
@@ -291,6 +298,41 @@ void HWorldGrid<ChildType, ValueType>::close()
 		WorldGrid<ChildType, ValueType>::next();
 	}
 	HBase::close();
+}
+
+template<typename ChildType, typename ValueType>
+void HWorldGrid<ChildType, ValueType>::setClean()
+{ m_dirtyCell.clear(); }
+
+template<typename ChildType, typename ValueType>
+void HWorldGrid<ChildType, ValueType>::remove(const std::string & name, 
+												const BoundingBox & box)
+{
+	m_dirtyName = name;
+/// find intesected grid
+	const Coord3 lo = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMin());
+	const Coord3 hi = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMax());
+	int i, j, k;
+	for(k=lo.z; k<= hi.z; ++k) {
+		for(j=lo.y; j<= hi.y; ++j) {
+			for(i=lo.x; i<= hi.x; ++i) {
+				remove(name, Coord3(i,j,k) );
+				m_dirtyCell.insert(Coord3(i,j,k) );
+			}
+		}
+	}
+	std::cout<<"\n affect "<<m_dirtyCell.size()<<" cells in world grid";
+}
+	
+template<typename ChildType, typename ValueType>
+void HWorldGrid<ChildType, ValueType>::remove(const std::string & name, 
+												const Coord3 & x)
+{
+	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
+	if(!p->index) {
+		p->index = new ChildType(childPath(coord3Str(x) ), this);
+	}
+	static_cast<ChildType *>(p->index)->remove(name);
 }
 
 }

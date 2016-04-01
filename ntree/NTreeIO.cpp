@@ -29,13 +29,13 @@ bool NTreeIO::begin(const std::string & filename,
 		return false;
 	}
 	m_doc = HObject::FileIO;
-	std::cout<<"\n ntree io open file "<<m_doc.fileName();
+	std::cout<<"\n ntree io open file "<<m_doc.fileName()<<"\n";
 	return true;
 }
 
 void NTreeIO::end()
 {
-	std::cout<<"\n ntree io close file "<<m_doc.fileName();
+	std::cout<<"\n ntree io close file "<<m_doc.fileName()<<"\n";
 	m_doc.close();
 	//HObject::FileIO.close();
 }

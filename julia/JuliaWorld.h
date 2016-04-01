@@ -19,11 +19,13 @@ public:
     JuliaWorld();
     virtual ~JuliaWorld();
     
-	void create(const Parameter & param);
-	void insert(const Parameter & param);
+	void process(const Parameter & param);
 	
 private:
-
+	void create(const Parameter & param);
+	void insert(const Parameter & param);
+	void remove(const Parameter & param);
+	
 };
 
 }

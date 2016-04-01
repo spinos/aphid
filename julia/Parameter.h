@@ -19,7 +19,8 @@ public:
 		kGenerate = 2,
 		kBuildTree = 3,
 		kInitialize = 4,
-		kInsert = 5
+		kInsert = 5,
+		kRemove = 6
 	};
 	
 	Parameter(int argc, char *argv[]);

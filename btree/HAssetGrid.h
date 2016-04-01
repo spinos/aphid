@@ -6,7 +6,7 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  *  grid contains a number of element asset
- *  withing boundary
+ *  within boundary
  */
 
 #include <HBase.h>
@@ -32,6 +32,7 @@ public:
 	int numElements();
 	//void beginInsert();
 	bool beginRead();
+	void remove(const std::string & name);
 	
 protected:
 
@@ -41,7 +42,8 @@ private:
 
 template <typename T, typename Tv>
 HAssetGrid<T, Tv>::HAssetGrid(const std::string & name, Entity * parent) :
-HBase(name), Entity(parent)
+HBase(name), Entity(parent),
+m_activeAsset(NULL)
 {}
 
 template <typename T, typename Tv>
@@ -93,10 +95,22 @@ bool HAssetGrid<T, Tv>::insert(const Tv * v)
 template <typename T, typename Tv>
 bool HAssetGrid<T, Tv>::flush()
 {
+	if(!m_activeAsset) return false;
 	m_activeAsset->save();
 	m_activeAsset->close();
 	delete m_activeAsset;
 	return true;
+}
+
+template <typename T, typename Tv>
+void HAssetGrid<T, Tv>::remove(const std::string & name)
+{
+	if(hasTypedChildWithIntAttrVal<T>(name, ".elemtyp", Tv::ShapeTypeId ) ) {
+		std::cout<<"\n hasset remove "<<(childPath(name) );
+		T c(childPath(name) );
+		c.clear();
+		c.close();
+	}
 }
 
 }

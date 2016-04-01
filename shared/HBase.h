@@ -112,6 +112,23 @@ public:
 			}
 		}
 	}
+	
+	template<typename T>
+	bool hasTypedChildWithIntAttrVal(const std::string & name,
+									const std::string & attrName,
+									int attrVal ) 
+	{
+		bool stat = false;
+		if(hasNamedChild(name.c_str() ) ) {
+			T gc(childPath(name ) );
+			if(gc.verifyType() ) {
+				if(gc.hasNamedAttrIntVal(attrName, attrVal ) )
+					stat = true;
+			}
+			gc.close();
+		}
+		return stat;
+	}
     
     void lsData(std::vector<std::string> & names) {
         int nc = numChildren();

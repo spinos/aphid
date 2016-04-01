@@ -48,6 +48,17 @@ Parameter::Parameter(int argc, char *argv[])
 			m_opt = kInsert;
 		}
 		
+		if(strcmp(argv[i], "-rm") == 0 || strcmp(argv[i], "--remove") == 0) {
+			if(i==argc-2) {
+				std::cout<<"\n --remove value is not set";
+				m_opt = kUnknown;
+				break;
+			}
+			m_inFileName = argv[i+1];
+			m_outFileName = argv[i+2];
+			m_opt = kRemove;
+		}
+		
 		if(strcmp(argv[i], "-cz") == 0 || strcmp(argv[i], "--cellSize") == 0) {
 			if(i==argc-1) {
 				std::cout<<"\n --cellSize value is not set";
@@ -109,6 +120,7 @@ void Parameter::PrintHelp()
 	<<"\n -cz or --cellSize    int    size of world grid cell, default 128"
 	<<"\n                             must >= 8, only works with -init"
 	<<"\n -i or --insert    string1    string2    insert assect from file1 into file2"
+	<<"\n -rm or --remove    string1    string2    insert assect of name1 into file2"
 	//<<"\n -g or --generate    string    filename of output file storing the data"
 	//<<"\n -t or --tree    string    filename of output file storing the data to build ntree"
 	<<"\n -h or --help    print this information"

@@ -69,7 +69,8 @@ public:
 protected:
 	float * gridSizeR();
     BoundingBox * boundingBoxR();
-    
+    const BoundingBox keyToGridBBox() const;
+	
 private:
 	
 };
@@ -208,6 +209,10 @@ float * WorldGrid<ChildType, ValueType>::gridSizeR()
 template<typename ChildType, typename ValueType>
 BoundingBox * WorldGrid<ChildType, ValueType>::boundingBoxR()
 { return &m_bbox; }
+
+template<typename ChildType, typename ValueType>
+const BoundingBox WorldGrid<ChildType, ValueType>::keyToGridBBox() const
+{ return coordToGridBBox(key() ); }
 
 } //end namespace sdb
 

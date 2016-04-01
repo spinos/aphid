@@ -43,6 +43,7 @@ public:
     
 	void insert(const T & x);
 	void extract(sdb::VectorArray<T> * dst);
+	void clear();
 	
 	const int & numElems() const;
 	
@@ -108,6 +109,11 @@ void HElemAsset<T, NRow>::insert(const T & x)
 template<typename T, int NRow>
 char HElemAsset<T, NRow>::load()
 {
+	if(!hasNamedAttr(".nelem") ) {
+		std::cout<<"\n helemasset has not nelem attr";
+		return 0;
+	}
+	
 	BoundingBox b;
 	readFloatAttr(".bbx", (float *)&b );
 	setBBox(b);
@@ -139,6 +145,15 @@ void HElemAsset<T, NRow>::extract(sdb::VectorArray<T> * dst)
 		dst->insert(s);
 	}
 	
+}
+
+template<typename T, int NRow>
+void HElemAsset<T, NRow>::clear()
+{
+	if(load() ) {
+		m_data->reset();
+		save();
+	}
 }
 
 typedef HElemAsset<cvx::Triangle, 48> HTriangleAsset;

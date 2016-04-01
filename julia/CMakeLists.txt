@@ -12,6 +12,8 @@ set (HEADER_FILES ../btree/HWorldGrid.h
 ../kdtree/HNTree.h
 ../kdtree/KdEngine.h
 ../ntree/NTreeIO.h
+../shared/HAsset.h
+../btree/HAssetGrid.h
 QuatJulia.h
 JuliaTree.h
 Parameter.h
