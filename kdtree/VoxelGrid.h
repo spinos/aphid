@@ -68,6 +68,9 @@ struct Voxel {
 	Vector3F calculateNormal() const
 	{ return Vector3F(0.f, 1.f, 0.f); }
 	
+	static std::string GetTypeStr()
+	{ return "voxel"; }
+	
 };
 
 struct Contour {

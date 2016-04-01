@@ -151,6 +151,13 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	
 	if(vgd.numVoxels() < 1) return;
 	
+	KdNTree<Voxel, KdNode4 > vtree;
+	bf._maxLeafPrims = 32;
+    
+	BoundingBox vxBox(0.f, 0.f, 0.f,
+						1024.f, 1024.f, 1024.f);
+						
+	engine.buildTree<Voxel, KdNode4, 4>(&vtree, vgd.voxelsR(), vxBox, &bf);
 }
 
 }
