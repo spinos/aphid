@@ -14,9 +14,6 @@ namespace sdb {
 
 Sculptor::Sculptor() 
 {
-    TreeNode::MaxNumKeysPerNode = 128;
-    TreeNode::MinNumKeysPerNode = 16;
-
 	m_tree = new WorldGrid<Array<int, VertexP>, VertexP >;
 	m_active = new ActiveGroup;
 	m_active->reset();
@@ -59,9 +56,7 @@ void Sculptor::insertRefP(VertexP * v)
 
 void Sculptor::endAddVertices()
 {
-    std::cout<<"\n grid count "<<m_tree->size()
-    <<" max "<<TreeNode::MaxNumKeysPerNode
-    <<" min "<<TreeNode::MinNumKeysPerNode;
+    std::cout<<"\n grid count "<<m_tree->size();
     
 	m_tree->calculateBBox();
 	m_march.initialize(m_tree->boundingBox(), m_tree->gridSize());

@@ -366,7 +366,7 @@ void StickyLocator::buildRefScale(const MVectorArray & diffs)
 	
 	m_svdSolver->compute(*m_S);
 	
-	m_refScale = m_svdSolver->S()->v()[0];
+	m_refScale = m_svdSolver->S().v()[0];
 	
 	AHelper::Info<float>("refscale", m_refScale);
 }
@@ -397,11 +397,11 @@ void StickyLocator::updateRotation(const MFnMesh & fmesh,
 	
 	m_svdSolver->compute(*m_S);
 	
-	const float d = m_svdSolver->S()->v()[0] / m_refScale;
+	const float d = m_svdSolver->S().v()[0] / m_refScale;
 	m_scad->column(0)[0] = d;
 	m_scad->column(1)[1] = d;
 	m_scad->column(2)[2] = d;
 	
-	m_svdSolver->V()->transMult(*m_Vd, * m_scad);
-	m_Vd->multTrans(*m_Ri, *m_svdSolver->U());
+	m_svdSolver->Vt().transMult(*m_Vd, * m_scad);
+	m_Vd->multTrans(*m_Ri, m_svdSolver->U());
 }
