@@ -138,6 +138,9 @@ bool Cube::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 
 ShapeType Cube::ShapeTypeId = TCube;
 
+std::string Cube::GetTypeStr()
+{ return "cube"; }
+
 Capsule::Capsule() {}
 
 void Capsule::set(const Vector3F & x0, const float & r0,
@@ -236,6 +239,13 @@ Vector3F Triangle::calculateNormal() const
 	Vector3F nor = ab.cross(ac);
 	nor.normalize();
 	return nor;
+}
+
+void Triangle::translate(const Vector3F & v)
+{
+	m_p0 += v;
+	m_p1 += v;
+	m_p2 += v;
 }
 
 bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const

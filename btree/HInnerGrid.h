@@ -12,6 +12,7 @@
 
 #include <HBase.h>
 #include <HOocArray.h>
+#include <BoundingBox.h>
 #include "Entity.h"
 
 namespace aphid {
@@ -32,6 +33,7 @@ public:
 	void beginInsert();
 	bool beginRead();
 	void flush();
+	void buildTree(const BoundingBox & rootBox);
 	
 protected:
 
@@ -93,6 +95,10 @@ bool HInnerGrid<DataRank, NRows, BufSize>::beginRead()
 
 template <int DataRank, int NRows, int BufSize>
 void HInnerGrid<DataRank, NRows, BufSize>::flush()
+{}
+
+template <int DataRank, int NRows, int BufSize>
+void HInnerGrid<DataRank, NRows, BufSize>::buildTree(const BoundingBox & rootBox)
 {}
 
 }

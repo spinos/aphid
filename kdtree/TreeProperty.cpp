@@ -68,7 +68,8 @@ std::string TreeProperty::logProperty() const
 	<<"\n n prim min/max/average "<<m_minPrims<<"/"<<m_maxPrims
 	<<"/"<<((float)m_totalNPrim/(float)m_numLeafNodes)
 	<<"\n total volume "<<m_totalVolume
-	<<"\n empty ratio  "<<m_emptyVolume/m_totalVolume;
+	<<"\n empty ratio  "<<m_emptyVolume/m_totalVolume
+	<<"\n ";
 	return sst.str();
 }
 

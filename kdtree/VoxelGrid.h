@@ -137,6 +137,7 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 										const BoundingBox & b,
 										int maxLevel)
 {
+	std::cout<<"\n creating voxel grid\n max level "<<maxLevel<<"\n";
 	m_voxels.clear();
 	m_contours.clear();
 	
@@ -168,7 +169,8 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
     }
 	
     while(level < m_maxLevel) {
-		std::cout<<"\n level"<<level<<" n cell "<<numCells();
+		std::cout<<"\r level"<<level<<" n cell "<<numCells();
+		std::cout.flush();
 		sdb::CellHash * cellsToRefine = new sdb::CellHash;
 		tagCellsToRefine(*cellsToRefine, level);
 	
@@ -178,7 +180,7 @@ void VoxelGrid<Ttree, Tvalue>::create(Ttree * tree,
 		level++;
 	}
 	
-	std::cout<<"\n level"<<level<<" n cell "<<numCells();
+	std::cout<<"\r level"<<level<<" n cell "<<numCells();
 		
 	createVoxels(tree, maxLevel);
 }
@@ -250,7 +252,7 @@ void VoxelGrid<Ttree, Tvalue>::refine(Ttree * tree, sdb::CellHash & cellsToRefin
 template<typename Ttree, typename Tvalue>
 void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree, int level)
 {
-	std::cout<<"\n 0 %";
+	std::cout<<"\n voxelize 0 %";
 		
 	int minPrims = 1<<20;
 	int maxPrims = 0;
@@ -293,13 +295,14 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree, int level)
 		}
 		}
 		else 
-			 std::cout<<"\n waringing wrong level "<<c->value()->level<<" "<<c->key();
+			 std::cout<<"\n waringing wrong level "<<c->value()->level<<" "<<c->key()<<std::endl;
 
 		ic++;
 		if(ic==ncpc) {
 			ipc++;
-			if(!(ipc % 5)) {
-				std::cout<<"\n "<<ipc<<" % ";
+			if(!(ipc & 3)) {
+				std::cout<<"\r voxelize "<<ipc<<" % ";
+				std::cout.flush();
 			}
 			ic = 0;
 		}
@@ -307,9 +310,9 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree, int level)
         c->next();
 	}
 	
-	std::cout<<"\n n prims per cell min/max/average "<<minPrims
-	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)numVoxels()
-	<<"\n n voxel "<<numVoxels();
+	std::cout<<"\n n voxel "<<numVoxels()
+		<<"\n n prims per cell min/max/average "<<minPrims
+	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)numVoxels();
 }
 
 template<typename Ttree, typename Tvalue>

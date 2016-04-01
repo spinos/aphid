@@ -11,6 +11,8 @@
 
 #include <HBase.h>
 #include <HElemAsset.h>
+#include <KdEngine.h>
+#include <VoxelGrid.h>
 
 namespace aphid {
 namespace sdb {
@@ -27,12 +29,10 @@ public:
 	bool insert(const Tv * v);
 	bool insert(const std::string & name);
 	bool flush();
-	//bool insert(const float * at, char * v);
-	//void finishInsert();
 	int numElements();
-	//void beginInsert();
 	bool beginRead();
 	void remove(const std::string & name);
+	void buildTree(const BoundingBox & worldBox);
 	
 protected:
 
@@ -111,6 +111,46 @@ void HAssetGrid<T, Tv>::remove(const std::string & name)
 		c.clear();
 		c.close();
 	}
+}
+
+template <typename T, typename Tv>
+void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
+{
+	sdb::VectorArray<Tv> src;
+	std::vector<std::string > assetNames;
+	lsTypedChildWithIntAttrVal<HElemBase>(assetNames,
+											".elemtyp", Tv::ShapeTypeId );
+	std::vector<std::string >::const_iterator it = assetNames.begin();
+	for(;it != assetNames.end();++it) {
+		T ass(*it);
+		if(ass.load() ) {
+			ass.extract(&src);
+		}
+		ass.close();
+	}
+	
+	if(src.size() < 1) return;
+	
+	std::cout<<"\n hassetgrid extract "<<src.size()<<" "<<Tv::GetTypeStr()
+			<<" in world bbox "<<worldBox;
+	BoundingBox rootBox(0.f, 0.f, 0.f,
+						worldBox.distance(0), 
+						worldBox.distance(1), 
+						worldBox.distance(2));
+	
+	KdNTree<Tv, KdNode4 > ptree;
+	
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 64;
+	
+	KdEngine engine;
+	engine.buildTree<Tv, KdNode4, 4>(&ptree, &src, rootBox, &bf);
+	
+	VoxelGrid<KdNTree<Tv, KdNode4 >, Tv > vgd;
+	vgd.create(&ptree, rootBox, 8);
+	
+	if(vgd.numVoxels() < 1) return;
+	
 }
 
 }

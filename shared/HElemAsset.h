@@ -64,7 +64,7 @@ template<typename T, int NRow>
 char HElemAsset<T, NRow>::save()
 {
 	if(!m_data) {
-		std::cout<<"\n HElemAsset has no data";
+		std::cout<<"\n helemasset has no data";
 		return 0;
 	}
 	
@@ -86,7 +86,7 @@ char HElemAsset<T, NRow>::save()
 	m_numElem = m_data->numCols();
 	writeIntAttr(".nelem", (int *)&m_numElem );
 	
-	std::cout<<"\n HElemAsset saved "<<m_numElem<<" "<<T::GetTypeStr();
+	std::cout<<"\n helemasset saved "<<m_numElem<<" "<<T::GetTypeStr();
 	
 	return 1;
 }
@@ -122,7 +122,7 @@ char HElemAsset<T, NRow>::load()
 	
 	m_data = new HOocArray<hdata::TChar, NRow, 1024>(".data");
 	if(!m_data->openStorage(fObjectId)) {
-		std::cout<<"\n HElemAsset cannot open data storage";
+		std::cout<<"\n helemasset cannot open data storage";
 		return 0;
 	}
 	

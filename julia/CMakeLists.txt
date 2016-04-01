@@ -26,6 +26,7 @@ set (SOURCE_FILES
 ../shared/SplitEvent.cpp
 ../shared/BaseBinSplit.cpp 
 ../shared/HElemAsset.cpp
+../shared/CartesianGrid.cpp
 ../btree/GridClustering.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp

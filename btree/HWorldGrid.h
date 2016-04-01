@@ -121,6 +121,7 @@ bool HWorldGrid<ChildType, ValueType>::insert(const ValueType * v,
 												const Vector3F & rel) 
 {
 	BoundingBox box = v->calculateBBox();
+/// to world
 	box.translate(rel);
 /// find intesected grid
 	const Coord3 lo = WorldGrid<ChildType, ValueType>::gridCoord((const float *)&box.getMin());
@@ -129,7 +130,14 @@ bool HWorldGrid<ChildType, ValueType>::insert(const ValueType * v,
 	for(k=lo.z; k<= hi.z; ++k) {
 		for(j=lo.y; j<= hi.y; ++j) {
 			for(i=lo.x; i<= hi.x; ++i) {
-				insert(v, Coord3(i,j,k));
+				ValueType localV = *v;
+/// to world
+				localV.translate(rel);
+				Vector3F cellOri = WorldGrid<ChildType, ValueType>::coordToGridBBox(Coord3(i,j,k) ).getMin();
+				cellOri.reverse();
+/// to cell
+				localV.translate(cellOri);
+				insert(&localV, Coord3(i,j,k) );
 			}
 		}
 	}
@@ -202,6 +210,7 @@ char HWorldGrid<ChildType, ValueType>::save()
 		Pair<Entity *, Entity> p = Sequence<Coord3>::findEntity(m_dirtyCell.key() );
 		if(p.index) {
 			static_cast<ChildType *>(p.index)->flush();
+			static_cast<ChildType *>(p.index)->buildTree(WorldGrid<ChildType, ValueType>::coordToGridBBox(m_dirtyCell.key() ) );
 		}
 		else 
 			std::cout<<"\n error world grid has no cell "<<m_dirtyCell.key();

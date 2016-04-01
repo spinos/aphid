@@ -140,8 +140,9 @@ void KdEngine::buildTree(KdNTree<T, Tn > * tree,
 {
 	tree->init(source, box);
     
-    std::cout<<"\n max level "<<prof->_maxLevel
-    <<"\n max n prims per leaf "<<prof->_maxLeafPrims;
+    std::cout<<"\n kdengine begin building "<<T::GetTypeStr()<<" tree "
+			<<"\n max n prims per leaf "<<prof->_maxLeafPrims
+			<<"\n max build level "<<prof->_maxLevel;
     
     KdNBuilder<NLevel, T, Tn > bud;
 	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);
