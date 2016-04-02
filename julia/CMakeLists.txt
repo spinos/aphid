@@ -183,7 +183,12 @@ renderthread.cpp
 whitenoisewidget.cpp
 CubeRender.cpp
 ../shared/KdTreeNode.cpp
+../shared/MinMaxBins.cpp 
+../shared/SplitEvent.cpp
+../shared/BaseBinSplit.cpp 
+../btree/GridClustering.cpp
 ../kdtree/TreeProperty.cpp
+../kdtree/PrimBoundary.cpp
 ../kdtree/HNTree.cpp
 ../ntree/NTreeIO.cpp
 ../btree/HWorldGrid.cpp

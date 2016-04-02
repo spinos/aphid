@@ -6,13 +6,20 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  *  grid contains a number of element asset
- *  within boundary
+ *  bounded by a cube
+ *  /asset_1
+ *  /asset_2
+ *  ...
+ *  /.tree
  */
 
 #include <HBase.h>
 #include <HElemAsset.h>
 #include <KdEngine.h>
 #include <VoxelGrid.h>
+#include <HNTree.h>
+#include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace aphid {
 namespace sdb {
@@ -20,7 +27,7 @@ namespace sdb {
 template <typename T, typename Tv>
 class HAssetGrid : public HBase, public Entity {
 	
-	T * m_activeAsset;
+	boost::scoped_ptr<T> m_activeAsset;
 	
 public:
 	HAssetGrid(const std::string & name, Entity * parent);
@@ -42,8 +49,7 @@ private:
 
 template <typename T, typename Tv>
 HAssetGrid<T, Tv>::HAssetGrid(const std::string & name, Entity * parent) :
-HBase(name), Entity(parent),
-m_activeAsset(NULL)
+HBase(name), Entity(parent)
 {}
 
 template <typename T, typename Tv>
@@ -81,7 +87,7 @@ bool HAssetGrid<T, Tv>::insert(const std::string & name)
 {
 /// open named asset
 	std::cout<<"\n hasset insert "<<(childPath(name) );
-	m_activeAsset = new T(childPath(name) );
+	m_activeAsset.reset(new T(childPath(name) ) );
 	return true;
 }
 
@@ -95,10 +101,10 @@ bool HAssetGrid<T, Tv>::insert(const Tv * v)
 template <typename T, typename Tv>
 bool HAssetGrid<T, Tv>::flush()
 {
-	if(!m_activeAsset) return false;
-	m_activeAsset->save();
-	m_activeAsset->close();
-	delete m_activeAsset;
+	if(m_activeAsset) {
+		m_activeAsset->save();
+		m_activeAsset->close();
+	}
 	return true;
 }
 
@@ -151,13 +157,15 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	
 	if(vgd.numVoxels() < 1) return;
 	
-	KdNTree<Voxel, KdNode4 > vtree;
+	HNTree<Voxel, KdNode4 > vtree(boost::str(boost::format("%1%/.tree") % pathToObject() ) );
 	bf._maxLeafPrims = 32;
     
 	BoundingBox vxBox(0.f, 0.f, 0.f,
 						1024.f, 1024.f, 1024.f);
 						
 	engine.buildTree<Voxel, KdNode4, 4>(&vtree, vgd.voxelsR(), vxBox, &bf);
+	vtree.save();
+	vtree.close();
 }
 
 }

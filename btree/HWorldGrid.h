@@ -9,12 +9,18 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  *  out-of-core grid
- *  child must be ooc 
+ *  /coord1
+ *  /coord2
+ *  ...
+ *  /.tree 
  */
 
 #include "WorldGrid.h"
 #include <HBase.h>
 #include <HOocArray.h>
+#include <KdEngine.h>
+#include <HNTree.h>
+#include <ConvexShape.h>
 #include <boost/format.hpp>
 
 namespace aphid {
@@ -73,7 +79,8 @@ protected:
 	std::string coord3Str(const Coord3 & c) const;
 	
 private:
-
+	void buildTree(const BoundingBox & worldBox);
+	
 };
 
 template<typename ChildType, typename ValueType>
@@ -238,6 +245,8 @@ char HWorldGrid<ChildType, ValueType>::save()
 		WorldGrid<ChildType, ValueType>::next();
 	}
 	
+	if(gb->isValid() ) buildTree(*gb );
+	
 	cellCoords.finishInsert();
 	int n=cellCoords.numCols();
 	
@@ -342,6 +351,39 @@ void HWorldGrid<ChildType, ValueType>::remove(const std::string & name,
 		p->index = new ChildType(childPath(coord3Str(x) ), this);
 	}
 	static_cast<ChildType *>(p->index)->remove(name);
+}
+
+template<typename ChildType, typename ValueType>
+void HWorldGrid<ChildType, ValueType>::buildTree(const BoundingBox & worldBox)
+{
+	const float h = WorldGrid<ChildType, ValueType>::gridSize();
+    const float e = h * .49995f;
+	
+	sdb::VectorArray<cvx::Cube> cbs;
+	cvx::Cube cb;
+	
+	WorldGrid<ChildType, ValueType>::begin();
+	while(!WorldGrid<ChildType, ValueType>::end() ) {
+		Coord3 c = WorldGrid<ChildType, ValueType>::key();
+		
+		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
+		if(cell->numElements() > 0) {
+			cb.set(WorldGrid<ChildType, ValueType>::coordToCellCenter(WorldGrid<ChildType, ValueType>::key() ), e);
+			cbs.insert(cb);
+		}
+		
+		WorldGrid<ChildType, ValueType>::next();
+	}
+	
+	HNTree<cvx::Cube, KdNode4 > cbtree( boost::str(boost::format("%1%/.tree") % pathToObject() ) );
+    KdEngine engine;
+    TreeProperty::BuildProfile bf;
+    bf._maxLeafPrims = 8;
+    
+    engine.buildTree<cvx::Cube, KdNode4, 4>(&cbtree, &cbs, worldBox, &bf);
+	
+	cbtree.save();
+	cbtree.close();
 }
 
 }

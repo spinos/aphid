@@ -103,7 +103,7 @@ bool NTreeIO::extractAsset(const std::string & name,
 	Ta ass(name);
 	ass.load();
 	box = ass.getBBox();
-	std::cout<<"\n asset bbox "<<box;
+	std::cout<<"\n  bbox "<<box;
 	if(ass.numElems() > 0) {
 		ass.extract(dst);
 		std::cout<<"\n extract n "<<Tv::GetTypeStr()<<" "<<dst->size();

@@ -6,10 +6,14 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  *  /grid
- *       /coord(x,y,z)
- *                    /asset_name
+ *       /coord(x1,y1,z1)
+ *       /coord(x2,y2,z2)
+ *       ...
+ *       /.tree
  *  /asset
- *        /asset_name
+ *        /asset1
+ *        /asset2
+ *        ...
  */
 
 #include "JuliaWorld.h"
@@ -122,8 +126,9 @@ void JuliaWorld::insert(const Parameter & param)
 		ani.close();
 		
 		oldBox = ani.getBBox();
+		
 		std::cout<<"\n asset "<<elmName<<" already exists in "<<param.outFileName()
-		<<"\n bbox "<<oldBox
+		<<"\n  bbox "<<oldBox
 		<<"\n are you sure to override it? ";
 		
 		char b[256];
@@ -187,7 +192,7 @@ void JuliaWorld::remove(const Parameter & param)
 		
 		oldBox = ani.getBBox();
 		std::cout<<"\n asset "<<elmName<<" exists in "<<param.outFileName()
-		<<"\n bbox "<<oldBox
+		<<"\n  bbox "<<oldBox
 		<<"\n are you sure to remove it? ";
 		
 		char b[256];

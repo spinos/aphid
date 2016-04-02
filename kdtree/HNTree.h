@@ -61,6 +61,7 @@ HNTree<T, Tn>::~HNTree() {}
 template <typename T, typename Tn>
 char HNTree<T, Tn>::save()
 {
+	std::cout<<"\n hntree begin save";
 	if(sizeof(Tn) == 256) 
 		save256Node();
 	
@@ -71,7 +72,7 @@ char HNTree<T, Tn>::save()
 	if(!hasNamedAttr(".bbx") )
 	    addFloatAttr(".bbx", 6);
 	writeFloatAttr(".bbx", (float *)&KdNTree<T, Tn>::getBBox() );
-	
+	std::cout<<"\n hntree end save";
 	return 1;
 }
 

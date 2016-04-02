@@ -303,7 +303,7 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree, int level)
 		ic++;
 		if(ic==ncpc) {
 			ipc++;
-			if(!(ipc & 3)) {
+			if((ipc & 3) == 3) {
 				std::cout<<"\r voxelize "<<ipc<<" % ";
 				std::cout.flush();
 			}
@@ -313,7 +313,7 @@ void VoxelGrid<Ttree, Tvalue>::createVoxels(Ttree * tree, int level)
         c->next();
 	}
 	
-	std::cout<<"\n n voxel "<<numVoxels()
+	std::cout<<"\r n voxel "<<numVoxels()
 		<<"\n n prims per cell min/max/average "<<minPrims
 	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)numVoxels();
 }
