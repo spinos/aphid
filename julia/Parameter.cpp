@@ -13,7 +13,7 @@ Parameter::Parameter(int argc, char *argv[])
 {
 	m_opt = kUnknown;
 	bool foundImages = false;
-	m_cellSize = 128;
+	m_cellSize = 256;
 	
 	if(argc < 2) {
 		std::cout<<"\n too few arguments "<<argc;
@@ -67,8 +67,8 @@ Parameter::Parameter(int argc, char *argv[])
 			}
 			try {
 				int cz = boost::lexical_cast<int>(argv[i+1]);
-				if(cz < 8) {
-					std::cout<<"\n bad --cellSize value (< 8)";
+				if(cz < 32) {
+					std::cout<<"\n bad --cellSize value (< 32)";
 					m_opt = kUnknown;
 					break;
 				}
@@ -113,12 +113,12 @@ Parameter::OperationFlag Parameter::operation() const
 
 void Parameter::PrintHelp()
 {
-	std::cout<<"\n julia (Voxel Render Research) version 20160331"
+	std::cout<<"\n julia (Voxel Render Research) version 20160402"
 	<<"\nDescription:\n large data set test."
 	<<"\nUsage:\n julia [option]\nOptions:"
 	<<"\n -init or --initialize    string    filename of output file storing the wrold"
-	<<"\n -cz or --cellSize    int    size of world grid cell, default 128"
-	<<"\n                             must >= 8, only works with -init"
+	<<"\n -cz or --cellSize    int    size of world grid cell, default 256"
+	<<"\n                             must >= 32, only works with -init"
 	<<"\n -i or --insert    string1    string2    insert assect from file1 into file2"
 	<<"\n -rm or --remove    string1    string2    insert assect of name1 into file2"
 	//<<"\n -g or --generate    string    filename of output file storing the data"

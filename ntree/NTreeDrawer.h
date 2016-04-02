@@ -33,6 +33,12 @@ private:
 	void drawANode(KdNTree<T, KdNode4 > * tree, int branchIdx, 
 					const KdNode4 * treelet, int idx, 
 					const BoundingBox & box);
+					
+	template<typename T>
+	void drawALeaf(KdNTree<T, KdNode4 > * tree, 
+					const KdTreeNode * node,
+					const BoundingBox & box);
+					
 };
 
 template<typename T>
@@ -48,8 +54,10 @@ void NTreeDrawer::drawTree(KdNTree<T, KdNode4 > * tree,
 	drawBoundingBox(&box);
 	
 	KdNode4 * tn = tree->root();
-	KdTreeNode * child = tn->node(0);
-	if(child->isLeaf() ) {}
+	const KdTreeNode * child = tn->node(0);
+	if(child->isLeaf() ) {
+		// drawALeaf<T>(tree, child, box);
+	}
 	else {
 		const int axis = child->getAxis();
 		const float pos = child->getSplitPos();
@@ -79,7 +87,10 @@ void NTreeDrawer::drawANode(KdNTree<T, KdNode4 > * tree, int branchIdx,
 {
 	drawBoundingBox(&box);
 	const KdTreeNode * node = treelet->node(idx);
-	if(node->isLeaf() ) { return; }
+	if(node->isLeaf() ) { 
+		// drawALeaf<T>(tree, node, box);
+		return;
+	}
 	const int axis = node->getAxis();
 	const float pos = node->getSplitPos();
 	BoundingBox lft, rgt;
@@ -94,6 +105,20 @@ void NTreeDrawer::drawANode(KdNTree<T, KdNode4 > * tree, int branchIdx,
 	}
 	else {
 		drawBranch<T>(tree, branchIdx + offset, lft, rgt );
+	}
+}
+
+template<typename T>
+void NTreeDrawer::drawALeaf(KdNTree<T, KdNode4 > * tree, 
+					const KdTreeNode * node,
+					const BoundingBox & box)
+{
+	int start, len;
+	tree->leafPrimStartLength(start, len, node->getPrimStart() );
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = tree->getSource(start + i);
+		drawBoundingBox(&c->calculateBBox() );
 	}
 }
 

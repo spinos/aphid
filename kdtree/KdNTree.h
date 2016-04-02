@@ -363,10 +363,15 @@ char KdNTree<T, Tn>::intersect(IntersectionContext * ctx)
 	const BoundingBox & b = getBBox();
 	if(!b.intersect(ctx->m_ray)) return 0;
 	
-	KdTreeNode * r = root()->node(0);
-	if(r->isLeaf() ) return 0;
-	
 	ctx->setBBox(b);
+	
+	KdTreeNode * r = root()->node(0);
+	if(r->isLeaf() ) {
+		ctx->m_leafIdx = r->getPrimStart();
+		hitPrimitive(ctx, r);
+		return ctx->m_success;
+	}
+	
 	int branchIdx = root()->internalOffset(0);
 	int preBranchIdx = branchIdx;
 	Tn * currentBranch = branches()[branchIdx];
@@ -419,10 +424,13 @@ int KdNTree<T, Tn>::hitPrimitive(IntersectionContext * ctx,
 			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;
+/// ind to source
+			ctx->m_componentIdx = start + i;
 			nhit++;
 		}
 	}
-	if(nhit<1) std::cout<<" no hit ";
+	std::cout<<"\n hit "<<nhit<<"\n";
+	std::cout.flush();
 	return nhit;
 }
 
@@ -436,6 +444,7 @@ int KdNTree<T, Tn>::visitLeaf(IntersectionContext * ctx,
 				
 	if(r->isLeaf() ) {
 		std::cout<<"\n hit leaf "<<r->getPrimStart();
+		ctx->m_leafIdx = r->getPrimStart();
 		if(r->getNumPrims() < 1) {
 			return 0;
 		}

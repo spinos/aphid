@@ -77,7 +77,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	drawBoxes();
+	//drawBoxes();
 	drawTree();
 	drawIntersect();
 	// drawGrid();
@@ -130,14 +130,9 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
-		case Qt::Key_K:
-			m_maxDrawTreeLevel--;
-			// qDebug()<<"down level "<<m_maxDrawTreeLevel;
+		case Qt::Key_F:
+			camera()->frameAll(getFrameBox() );
 		    break;
-		case Qt::Key_L:
-			m_maxDrawTreeLevel++;
-		    // qDebug()<<"up level "<<m_maxDrawTreeLevel;
-			break;
 		default:
 			break;
 	}
@@ -169,19 +164,22 @@ bool GLWidget::readTree(const std::string & filename)
 		std::cout<<"\n grid "<<gridName;
 		m_source = new sdb::VectorArray<cvx::Cube>();
 		hio.loadGridCoord<sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > >(m_source, gridName);
-	}
+	} else
+		std::cout<<"\n found no grid ";
 	
 	// cvx::ShapeType vt = hio.gridValueType(gridName);
     
 	std::string treeName;
 	stat = hio.findTree(treeName, gridName);
 	if(stat) {
+		std::cout<<"\n tree "<<treeName;
 		HNTree<cvx::Cube, KdNode4 > * htree = new HNTree<cvx::Cube, KdNode4 >(treeName);
 		htree->load();
 		htree->close();
 		htree->setSource(m_source);
 		m_tree = htree;
-	}
+	} else
+		std::cout<<"\n found no tree ";
 	
 	hio.end();
 	return true;
@@ -218,7 +216,7 @@ void GLWidget::drawIntersect()
 	b.expand(0.03f);
 	getDrawer()->boundingBox(b );
 	
-	if(m_intersectCtx.m_success) drawActiveSource(m_intersectCtx.m_componentIdx);
+	if(m_intersectCtx.m_success) drawActiveSource(m_intersectCtx.m_leafIdx);
 }
 
 void GLWidget::drawActiveSource(const unsigned & iLeaf)
@@ -265,5 +263,12 @@ void GLWidget::drawGrid()
 	glColor3f(0,.3,.4);
 	GridDrawer dr;
 	dr.drawGrid<CartesianGrid>(m_grid);
+}
+
+BoundingBox GLWidget::getFrameBox()
+{
+	BoundingBox b;
+	if(m_tree) b = m_tree->getBBox();
+	return b;
 }
 //:~

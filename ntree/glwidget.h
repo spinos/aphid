@@ -40,6 +40,7 @@ private:
 	void testIntersect(const Ray * incident);
 	void drawActiveSource(const unsigned & iLeaf);
 	void drawGrid();
+	BoundingBox getFrameBox();
 	
 private slots:
 	

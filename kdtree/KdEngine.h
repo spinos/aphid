@@ -198,10 +198,15 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 	const BoundingBox & b = tree->getBBox();
 	if(!b.intersect(ctx->m_ray)) return 0;
 	
-	const KdTreeNode * r = tree->root()->node(0);
-	if(r->isLeaf() ) return 0;
-	
 	ctx->setBBox(b);
+	
+	const KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() ) {
+		ctx->m_leafIdx = r->getPrimStart();
+		hitPrimitive(tree, ctx, r);
+		return ctx->m_success;
+	}
+	
 	int branchIdx = tree->root()->internalOffset(0);
 	int preBranchIdx = branchIdx;
 	Tn * currentBranch = tree->branches()[branchIdx];
