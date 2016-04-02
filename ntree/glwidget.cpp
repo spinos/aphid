@@ -27,7 +27,7 @@ GLWidget::GLWidget(const std::string & filename, QWidget *parent) : Base3DView(p
 	if(filename.size() > 1) readTree(filename);
 	else {
 		testTree();
-		testGrid();
+		// testGrid();
 	}
 }
 //! [0]
@@ -43,7 +43,7 @@ GLWidget::~GLWidget()
 void GLWidget::testTree()
 {
 	std::cout<<"\n test kdtree";
-	const int n = 17913;
+	const int n = 27913;
     m_source = new sdb::VectorArray<cvx::Cube>();
 	m_tree = new KdNTree<cvx::Cube, KdNode4 >();
 	
@@ -62,6 +62,10 @@ void GLWidget::testTree()
 		rootBox.expandBy(a.calculateBBox());
     }
 	
+	std::cout<<"\n bbox "<<rootBox;
+	rootBox.round();
+	std::cout<<"\n rounded to "<<rootBox;
+	
     TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 32;
 	
@@ -77,7 +81,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	//drawBoxes();
+	drawBoxes();
 	drawTree();
 	drawIntersect();
 	// drawGrid();
@@ -87,6 +91,7 @@ void GLWidget::drawBoxes() const
 {
 	if(!m_source) return;
     getDrawer()->setColor(.065f, .165f, .065f);
+#if 0
     const int n = m_source->size();
     int i = 0;
     for(;i<n;i++) {
@@ -94,6 +99,10 @@ void GLWidget::drawBoxes() const
 		b.expand(-0.03f);
         getDrawer()->boundingBox(b );
     }
+#else
+	NTreeDrawer dr;
+	dr.drawSource<cvx::Cube>(m_tree);
+#endif
 }
 
 void GLWidget::drawTree()

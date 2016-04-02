@@ -138,6 +138,7 @@ DrawBox::~DrawBox() {}
 
 void DrawBox::drawWireBox(const float * center, const float & scale) const
 {
+#if 0
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale, scale, scale);
@@ -156,10 +157,21 @@ void DrawBox::drawWireBox(const float * center, const float & scale) const
 	glDisableClientState(GL_VERTEX_ARRAY);
 #endif
 	glPopMatrix();
+#endif
+
+	glBegin(GL_LINES);
+	for(int i=0;i<24;i++) {
+        glVertex3f(center[0] + scale * UnitBoxLine[i][0],
+					center[1] + scale * UnitBoxLine[i][1],
+					center[2] + scale * UnitBoxLine[i][2]);
+    }
+	glEnd();
+	
 }
 
 void DrawBox::drawSolidBox(const float * center, const float & scale) const
 {
+#if 0
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale, scale, scale);
@@ -182,10 +194,22 @@ void DrawBox::drawSolidBox(const float * center, const float & scale) const
 	glDisableClientState(GL_VERTEX_ARRAY);
 #endif
 	glPopMatrix();
+#endif
+
+	glBegin(GL_TRIANGLES);
+	for(int i=0;i<36;i++) {
+		glNormal3fv(&UnitBoxNormal[i][0]);
+        glVertex3f(center[0] + scale * UnitBoxTriangle[i][0],
+					center[1] + scale * UnitBoxTriangle[i][1],
+					center[2] + scale * UnitBoxTriangle[i][2]);
+    }
+	glEnd();
+	
 }
 
 void DrawBox::drawWireBox(const float * center, const float * scale) const 
 {
+#if 0
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale[0], scale[1], scale[2]);
@@ -204,10 +228,20 @@ void DrawBox::drawWireBox(const float * center, const float * scale) const
 	glDisableClientState(GL_VERTEX_ARRAY);
 #endif
 	glPopMatrix();
+#endif
+
+	glBegin(GL_LINES);
+	for(int i=0;i<24;i++) {
+        glVertex3f(center[0] + scale[0] * UnitBoxLine[i][0],
+					center[1] + scale[1] * UnitBoxLine[i][1],
+					center[2] + scale[2] * UnitBoxLine[i][2]);
+    }
+	glEnd();
 }
 
 void DrawBox::drawSolidBox(const float * center, const float * scale) const 
 {
+#if 0
 	glPushMatrix();
 	glTranslatef(center[0], center[1], center[2]);
 	glScalef(scale[0], scale[1], scale[2]);
@@ -230,20 +264,21 @@ void DrawBox::drawSolidBox(const float * center, const float * scale) const
 	glDisableClientState(GL_VERTEX_ARRAY);
 #endif
 	glPopMatrix();
+#endif
+
+	glBegin(GL_TRIANGLES);
+	for(int i=0;i<36;i++) {
+		glNormal3fv(&UnitBoxNormal[i][0]);
+        glVertex3f(center[0] + scale[0] * UnitBoxTriangle[i][0],
+					center[1] + scale[1] * UnitBoxTriangle[i][1],
+					center[2] + scale[2] * UnitBoxTriangle[i][2]);
+    }
+	glEnd();
+	
 }
 	
 void DrawBox::drawBoundingBox(const BoundingBox * box) const
-{
-	float t[3];
-	t[0] = (box->m_data[3] + box->m_data[0]) * .5f;
-	t[1] = (box->m_data[4] + box->m_data[1]) * .5f;
-	t[2] = (box->m_data[5] + box->m_data[2]) * .5f;
-	float s[3];
-	s[0] = box->m_data[3] - box->m_data[0];
-	s[1] = box->m_data[4] - box->m_data[1];
-	s[2] = box->m_data[5] - box->m_data[2];
-	drawWireBox(t, s);
-}
+{ drawHLWireBox(&box->m_data[0]); }
 
 void DrawBox::drawSolidBoxArray(const float * data,
 						const unsigned & count,
@@ -290,6 +325,49 @@ void DrawBox::drawSolidBoxArray(const float * ps,
 	
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+const int DrawBox::HLBoxLine[24][3] = {
+{0, 1, 2},
+{3, 1, 2},
+{0, 4, 2},
+{3, 4, 2},
+	
+{0, 1, 5},
+{3, 1, 5},
+{0, 4, 5},
+{3, 4, 5},
+	
+{0, 1, 2},
+{0, 4, 2},
+{3, 1, 2},
+{3, 4, 2},
+	
+{0, 1, 5},
+{0, 4, 5},
+{3, 1, 5},
+{3, 4, 5},
+	
+{0, 1, 2},
+{0, 1, 5},
+{3, 1, 2},
+{3, 1, 5},
+	
+{0, 4, 2},
+{0, 4, 5},
+{3, 4, 2},
+{3, 4, 5}
+};
+
+void DrawBox::drawHLWireBox(const float * v) const
+{
+	glBegin(GL_LINES);
+	for(int i=0;i<24;i++) {
+        glVertex3f(v[HLBoxLine[i][0]], 
+					v[HLBoxLine[i][1]], 
+					v[HLBoxLine[i][2]]);
+    }
+	glEnd();
 }
 
 }

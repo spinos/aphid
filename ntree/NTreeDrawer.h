@@ -19,6 +19,11 @@ public:
 	virtual ~NTreeDrawer() {}
 	
 	template<typename T>
+	void drawSource(KdNTree<T, KdNode4 > * tree,
+					const Vector3F & origin = Vector3F(0.f, 0.f, 0.f),
+					const float & scaling = 1.f);
+	
+	template<typename T>
 	void drawTree(KdNTree<T, KdNode4 > * tree,
 					const Vector3F & origin = Vector3F(0.f, 0.f, 0.f),
 					const float & scaling = 1.f);
@@ -120,6 +125,27 @@ void NTreeDrawer::drawALeaf(KdNTree<T, KdNode4 > * tree,
 		const T * c = tree->getSource(start + i);
 		drawBoundingBox(&c->calculateBBox() );
 	}
+}
+
+template<typename T>
+void NTreeDrawer::drawSource(KdNTree<T, KdNode4 > * tree,
+					const Vector3F & origin,
+					const float & scaling)
+{
+	glPushMatrix();
+	glTranslatef(origin.x, origin.y, origin.z);
+	glScalef(scaling, scaling, scaling);
+	
+	const sdb::VectorArray<T> * src = tree->source();
+	const int n = src->size();
+	int i = 0;
+    for(;i<n;i++) {
+		BoundingBox b = src->get(i)->calculateBBox();
+		b.expand(-0.03f);
+        drawBoundingBox(&b );
+    }
+		
+	glPopMatrix();
 }
 
 }

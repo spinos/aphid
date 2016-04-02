@@ -38,12 +38,14 @@ protected:
 						const unsigned & stride = 1) const;
 	void setSolidBoxDrawBuffer(const float * center, const float & scale,
 						Vector3F * position, Vector3F * normal) const;
+						
+	void drawHLWireBox(const float * v) const;
 	
 private:
 	static const float UnitBoxLine[24][3];
 	static const float UnitBoxTriangle[36][3];
 	static const float UnitBoxNormal[36][3];
-	
+	static const int HLBoxLine[24][3];
 };
 
 }

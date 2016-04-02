@@ -279,6 +279,7 @@ bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 	
 	//printf("pass c\n");
 	*hitt0 = t;
+	*hitt1 = t;
 	
     return true;
 }
