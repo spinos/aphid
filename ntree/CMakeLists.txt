@@ -28,6 +28,9 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/TreeProperty.h
 ../kdtree/HNTree.h
 ../kdtree/VoxelGrid.h
+Container.h
+wldWidget.h
+triWidget.h
 NTreeIO.h
 NTreeDrawer.h)
 
@@ -46,6 +49,8 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../btree/GridClustering.cpp
 ../btree/HWorldGrid.cpp
 ../kdtree/HNTree.cpp
+wldWidget.cpp
+triWidget.cpp
 NTreeIO.cpp
 glwidget.cpp
 window.cpp
@@ -191,62 +196,3 @@ target_link_libraries (testntree ${Boost_CHRONO_LIBRARY})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
-
-set (SHOTRI_HEADER_FILES ../shared/Base3DView.h
-../shared/Morton3D.h
-../shared/ConvexShape.h
-../shared/HElemAsset.h
-../kdtree/KdBuilder.h
-../kdtree/KdEngine.h
-../kdtree/KdRope.h
-../kdtree/KdNTree.h
-../kdtree/KdNNode.h
-../kdtree/KdSah.h
-../kdtree/TreeProperty.h
-../kdtree/HNTree.h
-../kdtree/VoxelGrid.h
-NTreeIO.h
-NTreeDrawer.h
-Container.h
-triWidget.h)
-
-set (SHOTRI_SOURCE_FILES ../shared/Base3DView.cpp
-../shared/KdTreeNode.cpp
-../shared/MinMaxBins.cpp 
-../shared/SplitEvent.cpp
-../shared/BaseBinSplit.cpp 
-../shared/GeoDrawer.cpp
-../shared/ViewFrame.cpp
-../shared/DrawBox.cpp
-../shared/CartesianGrid.cpp
-../shared/HElemAsset.cpp
-../kdtree/TreeProperty.cpp
-../kdtree/PrimBoundary.cpp
-../btree/GridClustering.cpp
-../btree/HWorldGrid.cpp
-../kdtree/HNTree.cpp
-NTreeIO.cpp
-triWidget.cpp
-triWindow.cpp
-triMain.cpp)
-
-if (WIN32)
-set (SHOTRI_SOURCE_FILES ${SOURCE_FILES} "../shared/gExtension.cpp")
-endif ()
-
-add_executable (vass ${SHOTRI_HEADER_FILES} ${SHOTRI_SOURCE_FILES})
-target_link_libraries (vass ${HDF5_LIBRARIES})
-target_link_libraries (vass ${ZLIB_LIBRARIES})
-target_link_libraries (vass ${SZIP_LIBRARY})
-target_link_libraries (vass ${Aphid_Library})
-target_link_libraries (vass ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (vass ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (vass ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (vass ${Boost_REGEX_LIBRARY})
-target_link_libraries (vass ${Boost_THREAD_LIBRARY})
-target_link_libraries (vass ${Boost_CHRONO_LIBRARY})
-target_link_libraries (vass Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (vass ${OPENGL_LIBRARIES})
-
-
-

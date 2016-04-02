@@ -2,25 +2,24 @@
 #define WINDOW_H
 
 #include <QMainWindow>
+#include <Base3DView.h>
 
 QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
-//! [0]
-class GLWidget;
 
 class Window : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    Window(const std::string & filename);
+    Window(int argc, char *argv[]);
 
 protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    GLWidget *glWidget;
+    aphid::Base3DView *glWidget;
 };
 //! [0]
 

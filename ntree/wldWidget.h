@@ -1,5 +1,5 @@
-#ifndef GLWIDGET_H
-#define GLWIDGET_H
+#ifndef WldWidget_H
+#define WldWidget_H
 
 #include <QGLWidget>
 #include <Base3DView.h>
@@ -8,14 +8,14 @@
 #include <IntersectionContext.h>
 #include <VoxelGrid.h>
 
-class GLWidget : public aphid::Base3DView
+class WldWidget : public aphid::Base3DView
 {
     Q_OBJECT
 
 public:
     
-    GLWidget(const std::string & filename, QWidget *parent = 0);
-    ~GLWidget();
+    WldWidget(const std::string & filename, QWidget *parent = 0);
+    ~WldWidget();
 	
 protected:    
     virtual void clientInit();
@@ -34,10 +34,8 @@ private:
 	aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 > * tree();
 	bool readTree(const std::string & filename);
 	void testTree();
-	void testGrid();
 	void testIntersect(const aphid::Ray * incident);
 	void drawActiveSource(const unsigned & iLeaf);
-	void drawGrid();
 	aphid::BoundingBox getFrameBox();
 	
 private slots:
@@ -46,9 +44,6 @@ private:
 	aphid::IntersectionContext m_intersectCtx;
 	aphid::sdb::VectorArray<aphid::cvx::Cube> * m_source;
 	aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 > * m_tree;
-	aphid::VoxelGrid<aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 >, aphid::cvx::Cube > * m_grid;
-	int m_treeletColI;
-	int m_maxDrawTreeLevel;
 };
 //! [3]
 

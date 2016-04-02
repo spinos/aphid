@@ -1,16 +1,26 @@
 #include <QtGui>
 
-#include "glwidget.h"
 #include "window.h"
+#include "glwidget.h"
+#include "wldWidget.h"
+#include "triWidget.h"
 
-//! [0]
-Window::Window(const std::string & filename)
+Window::Window(int argc, char *argv[])
 {
-    glWidget = new GLWidget(filename);
+	if(argc < 3) {
+		glWidget = new GLWidget("");
+		setWindowTitle(tr("KdNTree"));
+	}
+	else {
+		std::string filename(argv[argc - 1]);
+		if(strcmp(argv[1], "-a") == 0)
+			glWidget = new TriWidget(filename);
+		else
+			glWidget = new WldWidget(filename);
+		setWindowTitle(tr(filename.c_str()));
+	}
 	
 	setCentralWidget(glWidget);
-    if(filename.size() < 1) setWindowTitle(tr("KdNTree"));
-	else setWindowTitle(tr(filename.c_str()));
 }
 //! [1]
 
