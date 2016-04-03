@@ -263,8 +263,8 @@ void TriWidget::drawVoxelTree()
 	getDrawer()->setColor(.15f, .25f, .35f);
 	
 	NTreeDrawer dr;
-	dr.drawTree<Voxel >(m_container.voxelTree(), m_container.grid()->origin(), 
-							m_container.grid()->spanTo1024() );
+	dr.drawTree<Voxel >(m_container.voxelTree());//, m_container.grid()->origin(), 
+							//m_container.grid()->spanTo1024() );
 }
 
 BoundingBox TriWidget::getFrameBox()

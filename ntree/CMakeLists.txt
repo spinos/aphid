@@ -28,6 +28,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/TreeProperty.h
 ../kdtree/HNTree.h
 ../kdtree/VoxelGrid.h
+../btree/HAssetGrid.h
 Container.h
 wldWidget.h
 triWidget.h

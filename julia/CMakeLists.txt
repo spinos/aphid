@@ -5,7 +5,8 @@ SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 SET (CMAKE_BUILD_TYPE Release)
 include_directories ("../shared" "../btree"
 ../ntree
-../kdtree)
+../kdtree
+../hesperis)
 
 set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h

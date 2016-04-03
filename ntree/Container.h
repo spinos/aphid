@@ -104,6 +104,7 @@ bool Container<T>::buildTree()
 	
 	KdEngine engine;
 	engine.buildTree<T, KdNode4, 4>(m_tree, m_source, rootBox, &bf);
+	m_tree->setRelativeTransform(rootBox);
 	
 	return true;
 }
@@ -127,6 +128,9 @@ bool Container<T>::buildGrid()
     
 	KdEngine engine;
 	engine.buildTree<Voxel, KdNode4, 4>(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);
+	BoundingBox brel;
+	m_grid->getBounding(brel);
+	m_voxelTree->setRelativeTransform(brel);
 }
 
 template<typename T>

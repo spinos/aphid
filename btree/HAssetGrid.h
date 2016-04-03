@@ -31,6 +31,8 @@ template <typename T, typename Tv>
 class HAssetGrid : public HBase, public Entity {
 	
 	boost::scoped_ptr<T> m_activeAsset;
+	boost::scoped_ptr<HNTree<Voxel, KdNode4 > > m_tree;
+	int m_numVoxels;
 	
 public:
 	HAssetGrid(const std::string & name, Entity * parent);
@@ -43,6 +45,8 @@ public:
 	bool beginRead();
 	void remove(const std::string & name);
 	void buildTree(const BoundingBox & worldBox);
+	bool isEmpty() const;
+	HNTree<Voxel, KdNode4 > * loadTree();
 	
 protected:
 
@@ -52,7 +56,10 @@ private:
 
 template <typename T, typename Tv>
 HAssetGrid<T, Tv>::HAssetGrid(const std::string & name, Entity * parent) :
-HBase(name), Entity(parent)
+HBase(name), Entity(parent),
+m_activeAsset(0),
+m_tree(0),
+m_numVoxels(0)
 {}
 
 template <typename T, typename Tv>
@@ -125,6 +132,8 @@ void HAssetGrid<T, Tv>::remove(const std::string & name)
 template <typename T, typename Tv>
 void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 {
+	m_numVoxels = 0;
+	
 	sdb::VectorArray<Tv> src;
 	std::vector<std::string > assetNames;
 	lsTypedChildWithIntAttrVal<HElemBase>(assetNames,
@@ -139,7 +148,7 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	}
 	
 	if(src.size() < 1) return;
-	
+			
 	std::cout<<"\n hassetgrid extract "<<src.size()<<" "<<Tv::GetTypeStr()
 			<<" in world bbox "<<worldBox;
 	BoundingBox rootBox(0.f, 0.f, 0.f,
@@ -158,7 +167,12 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	VoxelGrid<KdNTree<Tv, KdNode4 >, Tv > vgd;
 	vgd.create(&ptree, rootBox, 8);
 	
-	if(vgd.numVoxels() < 1) return;
+	m_numVoxels = vgd.numVoxels();
+	
+	if(m_numVoxels < 1) {
+		std::cout<<"\n  warning hassetgrid "<<worldBox<<" is empty";
+		return;
+	}
 	
 	HNTree<Voxel, KdNode4 > vtree(boost::str(boost::format("%1%/.tree") % pathToObject() ) );
 	bf._maxLeafPrims = 32;
@@ -167,8 +181,24 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 						1024.f, 1024.f, 1024.f);
 						
 	engine.buildTree<Voxel, KdNode4, 4>(&vtree, vgd.voxelsR(), vxBox, &bf);
+	vtree.setRelativeTransform(worldBox);
 	vtree.save();
 	vtree.close();
+}
+
+template <typename T, typename Tv>
+bool HAssetGrid<T, Tv>::isEmpty() const
+{ return m_numVoxels < 1; }
+
+template <typename T, typename Tv>
+HNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::loadTree()
+{
+	if(!m_tree.get() ) {
+		m_tree.reset(new HNTree<Voxel, KdNode4 >(boost::str(boost::format("%1%/.tree") % pathToObject() ) ) );
+		m_tree->load();
+		m_tree->close();
+	}
+	return m_tree.get();
 }
 
 }

@@ -44,7 +44,12 @@ public:
 	int numPrimIndirection() const;
 	int numRopes() const;
 	
+	void setRelativeTransform(const BoundingBox & rel);
+/// translate and scale
+	void getRelativeTransform(float * dst) const;
+	
     Tn * root();
+	const Tn * root() const;
     const sdb::VectorArray<Tn> & branches() const;
 	sdb::VectorArray<Tn> & branches();
 	const sdb::VectorArray<knt::TreeLeaf> & leafNodes() const;
@@ -162,6 +167,10 @@ const sdb::VectorArray<T> * KdNTree<T, Tn>::source() const
 
 template <typename T, typename Tn>
 Tn * KdNTree<T, Tn>::root()
+{ return m_nodePool[0]; }
+
+template <typename T, typename Tn>
+const Tn * KdNTree<T, Tn>::root() const
 { return m_nodePool[0]; }
 
 template <typename T, typename Tn>
@@ -639,6 +648,26 @@ void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
 template <typename T, typename Tn>
 const T * KdNTree<T, Tn>::getSource(const int x) const
 { return m_source->get(primIndirectionAt(x) ); }
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::setRelativeTransform(const BoundingBox & rel)
+{
+/// use enpty node of root branch to store translate and scale
+	float * ts = (float *)root()->node(1);
+	ts[0] = rel.getMin(0);
+	ts[1] = rel.getMin(1);
+	ts[2] = rel.getMin(2);
+	ts[3] = rel.distance(0) / getBBox().distance(0);
+	ts[4] = rel.distance(1) / getBBox().distance(1);
+	ts[5] = rel.distance(2) / getBBox().distance(2);
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::getRelativeTransform(float * dst) const
+{
+	float * ts = (float *)root()->node(1);
+	memcpy(dst, ts, 24);
+}
 
 }
 //:~

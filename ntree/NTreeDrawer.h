@@ -24,9 +24,7 @@ public:
 					const float & scaling = 1.f);
 	
 	template<typename T>
-	void drawTree(KdNTree<T, KdNode4 > * tree,
-					const Vector3F & origin = Vector3F(0.f, 0.f, 0.f),
-					const float & scaling = 1.f);
+	void drawTree(KdNTree<T, KdNode4 > * tree);
 	
 private:
 	template<typename T>
@@ -47,13 +45,14 @@ private:
 };
 
 template<typename T>
-void NTreeDrawer::drawTree(KdNTree<T, KdNode4 > * tree,
-							const Vector3F & origin,
-							const float & scaling)
+void NTreeDrawer::drawTree(KdNTree<T, KdNode4 > * tree)
 {
+	float ts[6];
+	tree->getRelativeTransform(ts);
+	
 	glPushMatrix();
-	glTranslatef(origin.x, origin.y, origin.z);
-	glScalef(scaling, scaling, scaling);
+	glTranslatef(ts[0], ts[1], ts[2]);
+	glScalef(ts[3], ts[4], ts[5]);
 	
 	const BoundingBox & box = tree->getBBox();
 	drawBoundingBox(&box);

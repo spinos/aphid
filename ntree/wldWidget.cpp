@@ -16,8 +16,10 @@ WldWidget::WldWidget(const std::string & filename, QWidget *parent) : Base3DView
 	orthoCamera()->setNearClipPlane(1.f);
     m_intersectCtx.m_success = 0;
 	
+	m_grid = NULL;
 	m_source = NULL;
 	m_tree = NULL;
+	m_voxel = NULL;
 	
 	if(filename.size() > 1) readTree(filename);
 }
@@ -26,8 +28,9 @@ WldWidget::WldWidget(const std::string & filename, QWidget *parent) : Base3DView
 //! [1]
 WldWidget::~WldWidget()
 {
-	delete m_source;
-	delete m_tree;
+	if(m_grid) delete m_grid;
+	if(m_source) delete m_source;
+	if(m_tree) delete m_tree;
 }
 
 void WldWidget::clientInit()
@@ -40,6 +43,7 @@ void WldWidget::clientDraw()
 	drawBoxes();
 	drawTree();
 	drawIntersect();
+	drawVoxel();
 }
 
 void WldWidget::drawBoxes() const
@@ -109,16 +113,16 @@ void WldWidget::resizeEvent(QResizeEvent * event)
 bool WldWidget::readTree(const std::string & filename)
 {
 	bool stat = false;
-	NTreeIO hio;
-	if(!hio.begin(filename) ) return false;
 	
-	stat = hio.objectExists("/grid/.tree");
+	if(!m_hio.begin(filename) ) return false;
+	
+	stat = m_hio.objectExists("/grid/.tree");
 	
 	if(stat) {
 		m_grid = new WorldGridT("/grid");
 		m_grid->load();
 		m_source = new sdb::VectorArray<cvx::Cube>;
-		hio.loadGridCoord<WorldGridT >(m_source, m_grid);
+		m_hio.loadGridCoord<WorldGridT >(m_source, m_grid);
 		m_tree = new HNTree<cvx::Cube, KdNode4 >("/grid/.tree");
 		m_tree->load();
 		m_tree->close();
@@ -140,6 +144,10 @@ void WldWidget::testIntersect(const Ray * incident)
 	KdEngine eng;
 	eng.intersect<cvx::Cube, KdNode4>(m_tree, &m_intersectCtx);
 	qDebug()<<"interset end";
+	if(m_intersectCtx.m_success) {
+		qDebug()<<" hit component "<<m_intersectCtx.m_componentIdx;
+		m_voxel = m_grid->cell(m_intersectCtx.m_componentIdx)->loadTree();
+	}
 }
 
 void WldWidget::drawIntersect()
@@ -181,6 +189,14 @@ void WldWidget::drawActiveSource(const unsigned & iLeaf)
 		b.expand(-0.03f);
 		getDrawer()->boundingBox(b );
 	}
+}
+
+void WldWidget::drawVoxel()
+{
+	if(!m_voxel) return;
+	glColor3f(.5f,.55f,.45f);
+	NTreeDrawer dr;
+	dr.drawTree<Voxel>(m_voxel);
 }
 
 BoundingBox WldWidget::getFrameBox()

@@ -34,6 +34,7 @@ public:
 	bool beginRead();
 	void flush();
 	void buildTree(const BoundingBox & rootBox);
+	bool isEmpty();
 	
 protected:
 
@@ -100,6 +101,10 @@ void HInnerGrid<DataRank, NRows, BufSize>::flush()
 template <int DataRank, int NRows, int BufSize>
 void HInnerGrid<DataRank, NRows, BufSize>::buildTree(const BoundingBox & rootBox)
 {}
+
+template <int DataRank, int NRows, int BufSize>
+bool HInnerGrid<DataRank, NRows, BufSize>::isEmpty()
+{ return numElements() < 1; }
 
 }
 }
