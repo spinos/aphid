@@ -354,7 +354,7 @@ int KdEngine::hitPrimitive(KdNTree<T, Tn > * tree,
 		const T * c = tree->getSource(start + i);
 		if(c->intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) ) {
 			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
-			ctx->m_hitN = c->calculateNormal();
+			// ctx->m_hitN = c->calculateNormal();
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;
 /// ind to source

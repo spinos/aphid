@@ -8,11 +8,22 @@
  */
 
 #pragma once
+#include <HDocument.h>
 #include <HBase.h>
 namespace aphid {
 
 class H5IO {
+	
+	HDocument m_doc;
+	
 public:
+
+	bool begin(const std::string & filename, 
+				HDocument::OpenMode om = HDocument::oReadOnly);
+	void end();
+	
+	bool objectExists(const std::string & fullPath);
+	
 	static void CreateGroup(const std::string & name);
 	template<typename T1, typename T2>
 	static void SaveData(const std::string & name, T2 * data)

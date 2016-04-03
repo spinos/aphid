@@ -14,6 +14,64 @@ namespace aphid {
 
 std::string H5IO::BeheadName("");
 
+bool H5IO::begin(const std::string & filename,
+					HDocument::OpenMode om)
+{
+	if(!HObject::FileIO.open(filename.c_str(), om) ) {
+		if(om == HDocument::oCreate) 
+			std::cout<<"\n  h5io cannot create file "<<filename;
+		else if(om == HDocument::oReadAndWrite) 
+			std::cout<<"\n  h5io cannot read/write file "<<filename;
+		else 
+			std::cout<<"\n  h5io cannot read file "<<filename;
+		return false;
+	}
+	m_doc = HObject::FileIO;
+	std::cout<<"\n h5io open file "<<m_doc.fileName()<<"\n";
+	return true;
+}
+
+void H5IO::end()
+{
+	std::cout<<"\n h5io close file "<<m_doc.fileName()<<"\n";
+	m_doc.close();
+	//HObject::FileIO.close();
+}
+
+bool H5IO::objectExists(const std::string & fullPath)
+{
+	std::vector<std::string> allNames; 
+    SHelper::Split(fullPath, allNames);
+	bool stat = true;
+	HBase rt("/");
+	std::vector<HBase *> openedGrps;
+    openedGrps.push_back(&rt);
+	
+    std::vector<std::string>::const_iterator it = allNames.begin();
+    for(;it!=allNames.end();++it) {
+		stat = openedGrps.back()->hasNamedChild((*it).c_str() );
+		
+		if(stat ) {
+			openedGrps.push_back(new HBase(openedGrps.back()->childPath(*it ) ) );
+			
+		}
+		else {
+			std::cout<<"\n  h5io cannot find "<<openedGrps.back()->childPath(*it )
+					<<" in file "<<m_doc.fileName();
+			std::cout.flush();
+			stat = false;
+			break;
+		}
+    }
+	
+	std::vector<HBase *>::iterator cit = openedGrps.begin();
+    for(;cit!=openedGrps.end();++cit) {
+		(*cit)->close();
+	}
+	
+	return stat;
+}
+
 void H5IO::CreateGroup(const std::string & name)
 {
     std::cout<<"\n h5 io create group "<<name

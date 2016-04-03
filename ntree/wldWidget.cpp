@@ -4,9 +4,6 @@
 #include "wldWidget.h"
 #include <GeoDrawer.h>
 #include "NTreeDrawer.h"
-#include <NTreeIO.h>
-#include <HWorldGrid.h>
-#include <HInnerGrid.h>
 #include "GridDrawer.h"
 
 using namespace aphid;
@@ -115,30 +112,22 @@ bool WldWidget::readTree(const std::string & filename)
 	NTreeIO hio;
 	if(!hio.begin(filename) ) return false;
 	
-	std::string gridName;
-	stat = hio.findGrid(gridName);
-	if(stat) {
-		std::cout<<"\n grid "<<gridName;
-		m_source = new sdb::VectorArray<cvx::Cube>();
-		hio.loadGridCoord<sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > >(m_source, gridName);
-	} else
-		std::cout<<"\n found no grid ";
+	stat = hio.objectExists("/grid/.tree");
 	
-	// cvx::ShapeType vt = hio.gridValueType(gridName);
-    
-	std::string treeName;
-	stat = hio.findTree(treeName, gridName);
 	if(stat) {
-		std::cout<<"\n tree "<<treeName;
-		HNTree<cvx::Cube, KdNode4 > * htree = new HNTree<cvx::Cube, KdNode4 >(treeName);
-		htree->load();
-		htree->close();
-		htree->setSource(m_source);
-		m_tree = htree;
-	} else
-		std::cout<<"\n found no tree ";
+		m_grid = new WorldGridT("/grid");
+		m_grid->load();
+		m_source = new sdb::VectorArray<cvx::Cube>;
+		hio.loadGridCoord<WorldGridT >(m_source, m_grid);
+		m_tree = new HNTree<cvx::Cube, KdNode4 >("/grid/.tree");
+		m_tree->load();
+		m_tree->close();
+		m_tree->setSource(m_source);
+		
+	} else {
+		std::cout<<"\n  found no grid ";
+	}
 	
-	hio.end();
 	return true;
 }
 
@@ -148,7 +137,8 @@ void WldWidget::testIntersect(const Ray * incident)
 	if(!m_tree) return;
 	std::stringstream sst; sst<<incident->m_dir;
 	qDebug()<<"interset begin "<<sst.str().c_str();
-	m_tree->intersect(&m_intersectCtx);
+	KdEngine eng;
+	eng.intersect<cvx::Cube, KdNode4>(m_tree, &m_intersectCtx);
 	qDebug()<<"interset end";
 }
 

@@ -1,3 +1,6 @@
+#ifndef HASSETGRID_H
+#define HASSETGRID_H
+
 /*
  *  HAssetGrid.h
  *  julia
@@ -170,3 +173,4 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 
 }
 }
+#endif        //  #ifndef HASSETGRID_H

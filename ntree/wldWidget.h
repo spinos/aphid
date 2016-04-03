@@ -6,7 +6,9 @@
 #include <KdEngine.h>
 #include <ConvexShape.h>
 #include <IntersectionContext.h>
-#include <VoxelGrid.h>
+#include <HWorldGrid.h>
+#include <HAssetGrid.h>
+#include <NTreeIO.h>
 
 class WldWidget : public aphid::Base3DView
 {
@@ -41,9 +43,12 @@ private:
 private slots:
 	
 private:
+typedef aphid::sdb::HAssetGrid<aphid::HTriangleAsset, aphid::cvx::Triangle > InnerGridT;
+typedef aphid::sdb::HWorldGrid<InnerGridT, aphid::cvx::Triangle > WorldGridT;
 	aphid::IntersectionContext m_intersectCtx;
 	aphid::sdb::VectorArray<aphid::cvx::Cube> * m_source;
-	aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 > * m_tree;
+	WorldGridT * m_grid;
+	aphid::HNTree<aphid::cvx::Cube, aphid::KdNode4 > * m_tree;
 };
 //! [3]
 

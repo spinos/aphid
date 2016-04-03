@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <HDocument.h>
+#include <H5IO.h>
 #include <HNTree.h>
 #include <VectorArray.h>
 #include <HElemAsset.h>
@@ -16,16 +16,10 @@
 
 namespace aphid {
 
-class NTreeIO {
+class NTreeIO : public H5IO {
 
-	HDocument m_doc;
-	
 public:
 	NTreeIO();
-	
-	bool begin(const std::string & filename, 
-				HDocument::OpenMode om = HDocument::oReadOnly);
-	void end();
 	
 	bool findGrid(std::string & name,
 				const std::string & grpName="/");

@@ -16,30 +16,6 @@ namespace aphid {
 NTreeIO::NTreeIO() 
 {}
 
-bool NTreeIO::begin(const std::string & filename,
-					HDocument::OpenMode om)
-{
-	if(!HObject::FileIO.open(filename.c_str(), om) ) {
-		if(om == HDocument::oCreate) 
-			std::cout<<"\n NTree IO cannot create file "<<filename;
-		else if(om == HDocument::oReadAndWrite) 
-			std::cout<<"\n NTree IO cannot read/write file "<<filename;
-		else 
-			std::cout<<"\n NTree IO cannot read file "<<filename;
-		return false;
-	}
-	m_doc = HObject::FileIO;
-	std::cout<<"\n ntree io open file "<<m_doc.fileName()<<"\n";
-	return true;
-}
-
-void NTreeIO::end()
-{
-	std::cout<<"\n ntree io close file "<<m_doc.fileName()<<"\n";
-	m_doc.close();
-	//HObject::FileIO.close();
-}
-
 bool NTreeIO::findGrid(std::string & name, const std::string & grpName)
 {
 	std::vector<std::string > gridNames;
