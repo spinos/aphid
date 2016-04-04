@@ -160,6 +160,7 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 64;
+	bf._doTightBox = false;
 	
 	KdEngine engine;
 	engine.buildTree<Tv, KdNode4, 4>(&ptree, &src, rootBox, &bf);
@@ -176,6 +177,7 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	
 	HNTree<Voxel, KdNode4 > vtree(boost::str(boost::format("%1%/.tree") % pathToObject() ) );
 	bf._maxLeafPrims = 32;
+	bf._doTightBox = true;
     
 	BoundingBox vxBox(0.f, 0.f, 0.f,
 						1024.f, 1024.f, 1024.f);
@@ -184,6 +186,13 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	vtree.setRelativeTransform(worldBox);
 	vtree.save();
 	vtree.close();
+	
+	BoundingBox tb;
+	vtree.getWorldTightBox(&tb);
+	if(!hasNamedAttr(".bbx") )
+	    addFloatAttr(".bbx", 6);
+	writeFloatAttr(".bbx", (float *)&tb );
+	std::cout<<"\n hassetgrid world tight bbox "<<tb;
 }
 
 template <typename T, typename Tv>

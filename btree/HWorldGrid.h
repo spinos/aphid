@@ -362,6 +362,7 @@ void HWorldGrid<ChildType, ValueType>::buildTree(const BoundingBox & worldBox)
 	const float h = WorldGrid<ChildType, ValueType>::gridSize();
     const float e = h * .49995f;
 	
+/// todo use tight box instead of cube
 	sdb::VectorArray<cvx::Cube> cbs;
 	cvx::Cube cb;
 	
@@ -382,6 +383,7 @@ void HWorldGrid<ChildType, ValueType>::buildTree(const BoundingBox & worldBox)
     KdEngine engine;
     TreeProperty::BuildProfile bf;
     bf._maxLeafPrims = 8;
+	bf._doTightBox = false;
     
     engine.buildTree<cvx::Cube, KdNode4, 4>(&cbtree, &cbs, worldBox, &bf);
 	cbtree.setRelativeTransform(worldBox);

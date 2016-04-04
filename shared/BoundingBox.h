@@ -79,7 +79,9 @@ public:
 	const float * data() const;
 	
 	void translate(const Vector3F & ta);
+	void translate(const float * t);
 	void scale(const float & sc);
+	void scale(const float * sc);
 	
 	float m_data[6];
 	int m_padding0, m_padding1;

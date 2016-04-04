@@ -27,6 +27,7 @@ protected:
 	void drawWireBox(const float * center, const float * scale) const;
 	void drawSolidBox(const float * center, const float * scale) const;
 	void drawBoundingBox(const BoundingBox * box) const;
+	void drawSolidBoundingBox(const BoundingBox * box) const;
 	void drawSolidBoxArray(const float * data,
 						const unsigned & count,
 						const unsigned & stride = 1) const;
@@ -40,12 +41,14 @@ protected:
 						Vector3F * position, Vector3F * normal) const;
 						
 	void drawHLWireBox(const float * v) const;
+	void drawHLSolidBox(const float * v) const;
 	
 private:
 	static const float UnitBoxLine[24][3];
 	static const float UnitBoxTriangle[36][3];
 	static const float UnitBoxNormal[36][3];
 	static const int HLBoxLine[24][3];
+	static const int HLBoxTriangle[36][3];
 };
 
 }

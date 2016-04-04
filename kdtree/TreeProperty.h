@@ -29,6 +29,7 @@ public:
         int _maxLeafPrims;
         int _maxLevel;
         bool _unquantized;
+		bool _doTightBox;
         
         BuildProfile() {
 			_maxBNodeNumKeys = 128;
@@ -36,6 +37,7 @@ public:
             _maxLeafPrims = 32;
             _maxLevel = 8;
             _unquantized = true;
+			_doTightBox = false;
         }
     };
     

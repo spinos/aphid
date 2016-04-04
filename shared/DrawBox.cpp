@@ -280,6 +280,9 @@ void DrawBox::drawSolidBox(const float * center, const float * scale) const
 void DrawBox::drawBoundingBox(const BoundingBox * box) const
 { drawHLWireBox(&box->m_data[0]); }
 
+void DrawBox::drawSolidBoundingBox(const BoundingBox * box) const
+{ drawHLSolidBox(&box->m_data[0]); }
+
 void DrawBox::drawSolidBoxArray(const float * data,
 						const unsigned & count,
 						const unsigned & stride) const
@@ -366,6 +369,64 @@ void DrawBox::drawHLWireBox(const float * v) const
         glVertex3f(v[HLBoxLine[i][0]], 
 					v[HLBoxLine[i][1]], 
 					v[HLBoxLine[i][2]]);
+    }
+	glEnd();
+}
+
+const int DrawBox::HLBoxTriangle[36][3] = {
+{0, 1, 2}, // back
+{3, 4, 2},
+{3, 1, 2},
+{0, 1, 2},
+{0, 4, 2},
+{3, 4, 2},
+	
+{0, 1, 5}, // front
+{3, 1, 5},
+{3, 4, 5},
+{3, 4, 5},
+{0, 4, 5},
+{0, 1, 5},
+	
+{0, 1, 2}, // left
+{0, 1, 5},
+{0, 4, 2},
+{0, 4, 2},
+{0, 1, 5},
+{0, 4, 5},
+	
+{3, 1, 2}, // right
+{3, 4, 2},
+{3, 1, 5},
+{3, 1, 5},
+{3, 4, 2},
+{3, 4, 5},
+	
+{0, 1, 2}, // bottom
+{3, 1, 2},
+{3, 1, 5},
+{3, 1, 5},
+{0, 1, 5},
+{0, 1, 2},
+	
+{0, 4, 2}, // top
+{0, 4, 5},
+{3, 4, 2},
+{3, 4, 2},
+{0, 4, 5},
+{3, 4, 5}
+};
+
+void DrawBox::drawHLSolidBox(const float * v) const
+{
+	glBegin(GL_TRIANGLES);
+	for(int i=0;i<36;i++) {
+		glNormal3f(UnitBoxNormal[i][0], 
+						UnitBoxNormal[i][1], 
+						UnitBoxNormal[i][2]);
+        glVertex3f(v[HLBoxTriangle[i][0]], 
+						v[HLBoxTriangle[i][1]], 
+						v[HLBoxTriangle[i][2]]);
     }
 	glEnd();
 }

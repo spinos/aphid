@@ -545,6 +545,16 @@ void BoundingBox::translate(const Vector3F & ta)
 	m_data[5] += ta.z;
 }
 
+void BoundingBox::translate(const float * ta)
+{
+	m_data[0] += ta[0];
+	m_data[3] += ta[0];
+	m_data[1] += ta[1];
+	m_data[4] += ta[1];
+	m_data[2] += ta[2];
+	m_data[5] += ta[2];
+}
+
 void BoundingBox::scale(const float & sc)
 {
 	m_data[0] *= sc;
@@ -553,6 +563,16 @@ void BoundingBox::scale(const float & sc)
 	m_data[3] *= sc;
 	m_data[4] *= sc;
 	m_data[5] *= sc;
+}
+
+void BoundingBox::scale(const float * sc)
+{
+	m_data[0] *= sc[0];
+	m_data[1] *= sc[1];
+	m_data[2] *= sc[2];
+	m_data[3] *= sc[0];
+	m_data[4] *= sc[1];
+	m_data[5] *= sc[2];
 }
 
 }

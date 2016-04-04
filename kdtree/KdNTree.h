@@ -47,6 +47,11 @@ public:
 	void setRelativeTransform(const BoundingBox & rel);
 /// translate and scale
 	void getRelativeTransform(float * dst) const;
+	void storeBBox(const BoundingBox & b);
+	void storeTightBox();
+/// access stored b
+	void getTightBox(BoundingBox * b) const;
+	void getWorldTightBox(BoundingBox * b) const;
 	
     Tn * root();
 	const Tn * root() const;
@@ -90,6 +95,7 @@ protected:
 	Tn * addTreelet();
 	knt::TreeLeaf * addLeaf();
 	int * addIndirection();
+	BoundingBox getTightBox() const;
 
 private:
 	void clear();
@@ -134,6 +140,7 @@ void KdNTree<T, Tn>::init(sdb::VectorArray<T> * source, const BoundingBox & box)
 /// node[0]
 	m_nodePool.insert();
 	m_source = source;
+	storeBBox(box);
 }
 
 template <typename T, typename Tn>
@@ -653,13 +660,14 @@ template <typename T, typename Tn>
 void KdNTree<T, Tn>::setRelativeTransform(const BoundingBox & rel)
 {
 /// use enpty node of root branch to store translate and scale
+	const BoundingBox & b = getBBox();
 	float * ts = (float *)root()->node(1);
-	ts[0] = rel.getMin(0);
-	ts[1] = rel.getMin(1);
-	ts[2] = rel.getMin(2);
-	ts[3] = rel.distance(0) / getBBox().distance(0);
-	ts[4] = rel.distance(1) / getBBox().distance(1);
-	ts[5] = rel.distance(2) / getBBox().distance(2);
+	ts[0] = rel.getMin(0) - b.getMin(0);
+	ts[1] = rel.getMin(1) - b.getMin(1);
+	ts[2] = rel.getMin(2) - b.getMin(2);
+	ts[3] = rel.distance(0) / b.distance(0);
+	ts[4] = rel.distance(1) / b.distance(1);
+	ts[5] = rel.distance(2) / b.distance(2);
 }
 
 template <typename T, typename Tn>
@@ -667,6 +675,54 @@ void KdNTree<T, Tn>::getRelativeTransform(float * dst) const
 {
 	float * ts = (float *)root()->node(1);
 	memcpy(dst, ts, 24);
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::storeBBox(const BoundingBox & b)
+{
+/// use enpty node of root branch to store bounding
+	float * dst = (float *)root()->node(4);
+	memcpy(dst, (char *)&b, 32);
+}
+
+template <typename T, typename Tn>
+BoundingBox KdNTree<T, Tn>::getTightBox() const
+{
+	BoundingBox b;
+	const int n = m_source->size();
+	int i=0;
+	for(;i<n;++i) {
+		const T * c = m_source->get(i);
+		b.expandBy(c->calculateBBox() );
+	}
+	return b;
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::storeTightBox()
+{
+	BoundingBox b = getTightBox();
+	float * dst = (float *)root()->node(8);
+	memcpy(dst, (char *)&b, 32);
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::getTightBox(BoundingBox * b) const
+{
+	float * src = (float *)root()->node(8);
+	memcpy((char *)b, src, 32);
+}
+
+template <typename T, typename Tn>
+void KdNTree<T, Tn>::getWorldTightBox(BoundingBox * b) const
+{
+	getTightBox(b);
+	
+	float relts[6];
+	getRelativeTransform(relts);
+	
+	b->scale(&relts[3]);
+	b->translate(relts);
 }
 
 }

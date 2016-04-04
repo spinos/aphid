@@ -26,6 +26,12 @@ public:
 	template<typename T>
 	void drawTree(KdNTree<T, KdNode4 > * tree);
 	
+	template<typename T>
+	void drawTightBox(KdNTree<T, KdNode4 > * tree);
+	
+	template<typename T>
+	void draw8Boxes(KdNTree<T, KdNode4 > * tree);
+	
 private:
 	template<typename T>
 	void drawBranch(KdNTree<T, KdNode4 > * tree, int branchIdx, 
@@ -40,6 +46,16 @@ private:
 	template<typename T>
 	void drawALeaf(KdNTree<T, KdNode4 > * tree, 
 					const KdTreeNode * node,
+					const BoundingBox & box);
+		
+	template<typename T>
+	void draw8BoxesBranch(KdNTree<T, KdNode4 > * tree, int branchIdx, 
+							const BoundingBox & lftBox,
+							const BoundingBox & rgtBox);
+							
+	template<typename T>
+	void draw8BoxesNode(KdNTree<T, KdNode4 > * tree, int branchIdx, 
+					const KdNode4 * treelet, int idx, 
 					const BoundingBox & box);
 					
 };
@@ -145,6 +161,91 @@ void NTreeDrawer::drawSource(KdNTree<T, KdNode4 > * tree,
     }
 		
 	glPopMatrix();
+}
+
+template<typename T>
+void NTreeDrawer::drawTightBox(KdNTree<T, KdNode4 > * tree)
+{
+	float ts[6];
+	tree->getRelativeTransform(ts);
+	
+	glPushMatrix();
+	glTranslatef(ts[0], ts[1], ts[2]);
+	glScalef(ts[3], ts[4], ts[5]);
+	
+	BoundingBox box;
+	tree->getTightBox(&box);
+	drawBoundingBox(&box);
+	
+	glPopMatrix();
+}	
+
+template<typename T>
+void NTreeDrawer::draw8Boxes(KdNTree<T, KdNode4 > * tree)
+{
+	float ts[6];
+	tree->getRelativeTransform(ts);
+	
+	glPushMatrix();
+	glTranslatef(ts[0], ts[1], ts[2]);
+	glScalef(ts[3], ts[4], ts[5]);
+	
+	const BoundingBox & box = tree->getBBox();
+	
+	KdNode4 * tn = tree->root();
+	const KdTreeNode * child = tn->node(0);
+	if(child->isLeaf() ) {
+		drawSolidBoundingBox(&tree->getTightBox() );
+	}
+	else {
+		const int axis = child->getAxis();
+		const float pos = child->getSplitPos();
+		BoundingBox lft, rgt;
+		box.split(axis, pos, lft, rgt);
+		draw8BoxesBranch<T>(tree, tn->internalOffset(0), lft, rgt );
+	}
+	
+	glPopMatrix();
+}
+
+template<typename T>
+void NTreeDrawer::draw8BoxesBranch(KdNTree<T, KdNode4 > * tree, int branchIdx, 
+							const BoundingBox & lftBox,
+							const BoundingBox & rgtBox)
+{
+	const KdNode4 * tn = tree->branches()[branchIdx];
+/// first two
+	draw8BoxesNode<T>(tree, branchIdx, tn, 0, lftBox );
+	draw8BoxesNode<T>(tree, branchIdx, tn, 1, rgtBox );
+}
+
+template<typename T>
+void NTreeDrawer::draw8BoxesNode(KdNTree<T, KdNode4 > * tree, int branchIdx, 
+					const KdNode4 * treelet, int idx, 
+					const BoundingBox & box)
+{
+	drawBoundingBox(&box);
+	const KdTreeNode * node = treelet->node(idx);
+	if(node->isLeaf() ) { 
+		if(node->getNumPrims() > 0) 
+		drawSolidBoundingBox(&box);
+		return;
+	}
+	const int axis = node->getAxis();
+	const float pos = node->getSplitPos();
+	BoundingBox lft, rgt;
+	box.split(axis, pos, lft, rgt);
+	
+	int offset = treelet->internalOffset(idx);
+
+/// within treelet
+	if(node->getOffset() < KdNode4::TreeletOffsetMask ) {
+		draw8BoxesNode<T>(tree, branchIdx, treelet, idx + offset, lft );
+		draw8BoxesNode<T>(tree, branchIdx, treelet, idx + offset + 1, rgt );
+	}
+	else {
+		drawSolidBoundingBox(&box);
+	}
 }
 
 }

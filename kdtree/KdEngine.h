@@ -156,6 +156,7 @@ void KdEngine::buildTree(KdNTree<T, Tn > * tree,
 	SahSplit<T>::GlobalSplitContext = &splt;
 	
 	bud.build(&splt, tree);
+	if(prof->_doTightBox) tree->storeTightBox();
 	tree->verbose();
 }
 

@@ -58,8 +58,8 @@ void WldWidget::drawTree()
 {
 	if(!m_tree) return; 
 	
-	getDrawer()->setColor(.15f, .25f, .35f);
-	getDrawer()->boundingBox(tree()->getBBox() );
+	//getDrawer()->setColor(.15f, .25f, .35f);
+	//getDrawer()->boundingBox(tree()->getBBox() );
 	
 	NTreeDrawer dr;
 	dr.drawTree<cvx::Cube>(m_tree);
@@ -194,9 +194,11 @@ void WldWidget::drawActiveSource(const unsigned & iLeaf)
 void WldWidget::drawVoxel()
 {
 	if(!m_voxel) return;
-	glColor3f(.5f,.55f,.45f);
+	glColor3f(.0f,.65f,.45f);
 	NTreeDrawer dr;
 	dr.drawTree<Voxel>(m_voxel);
+	getDrawer()->setColor(0.f, .15f, .35f);
+	dr.drawTightBox<Voxel>(m_voxel);
 }
 
 BoundingBox WldWidget::getFrameBox()
