@@ -40,7 +40,9 @@ class proxyPaintContext : public MPxContext
         opSelectByType= 12,
         opClean = 99,
         opFlood = 100,
-        opExtract = 102
+        opExtract = 102,
+        opDiscardFaceSelection = 103,
+        opDiscardPlantSelection = 104
     };
     
     Operation m_currentOpt, mOpt;
@@ -117,6 +119,8 @@ private:
 	void finishGrow();
 	void replace();
     void scaleBrush();
+    void discardFaceSelection();
+    void discardPlantSelection();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

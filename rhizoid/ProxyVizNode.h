@@ -92,6 +92,7 @@ public:
     static MObject adisplayVox;
 	static MObject acheckDepth;
 	static MObject ainoverscan;
+    static MObject aactivated;
 	static MObject outValue1;
 	static MObject outValue;
 	static	MTypeId		id;
@@ -106,6 +107,9 @@ public:
 	const MMatrix & worldSpace() const;
 	void setEnableCompute(bool x);
 	
+    void deselectFaces();
+    void deselectPlants();
+    
 private:
     void drawBrush(M3dView & view);
 	

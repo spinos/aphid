@@ -60,6 +60,7 @@ MObject ProxyViz::ainexamp;
 MObject ProxyViz::adisplayVox;
 MObject ProxyViz::acheckDepth;
 MObject ProxyViz::ainoverscan;
+MObject ProxyViz::aactivated;
 MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
@@ -206,8 +207,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	setViewportAspect(view.portWidth(), view.portHeight() );
 	
-	MPlug cdp(thisNode, acheckDepth);
-	// const bool shoDepth = cdp.asBool();
+	MPlug actp(thisNode, aactivated);
+	if(actp.asBool()) setWireColor(.125f, .1925f, .1725f);
+    else setWireColor(.0675f, .0675f, .0675f);
 
 	_viewport = view;
 	fHasView = 1;
@@ -528,6 +530,11 @@ MStatus ProxyViz::initialize()
 	numFn.setDefault(1.33);
 	numFn.setStorable(false);
 	addAttribute(ainoverscan);
+    
+    aactivated = numFn.create( "activated", "act", MFnNumericData::kBoolean );
+	numFn.setDefault(0);
+	numFn.setStorable(false);
+	addAttribute(aactivated);
     
 	attributeAffects(ainexamp, outValue1);
 	attributeAffects(aradiusMult, outValue1);
@@ -853,6 +860,20 @@ void ProxyViz::drawBrush(M3dView & view)
     view.drawText(radstr, MPoint(position.x, position.y, position.z) );
 	
     DrawForest::drawBrush();
+}
+
+void ProxyViz::deselectFaces()
+{
+    activeGround()->deselect();
+    MGlobal::displayInfo(" discard selected faces");
+    if(hasView() ) _viewport.refresh();
+}
+
+void ProxyViz::deselectPlants()
+{
+    selection()->deselect();
+    MGlobal::displayInfo(" discard selected plants");
+    if(hasView() ) _viewport.refresh();
 }
 
 }

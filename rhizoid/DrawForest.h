@@ -20,6 +20,7 @@ class DrawForest : public ModifyForest, public ViewObscureCull, public DrawBox, 
 {
 	
     Matrix44F m_useMat;
+    float m_wireColor[3];
 	float m_transbuf[16];
 	float m_scalbuf[3];
     float m_showVoxLodThresold;
@@ -42,7 +43,8 @@ protected:
 					const float lowLod, const float highLod);
 	void setShowVoxLodThresold(const float & x);
     void drawBrush();
-	
+	void setWireColor(const float & r, const float & g, const float & b);
+    
 private:
     void drawFace(const int & geoId, const int & triId);
 	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);

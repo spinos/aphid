@@ -148,6 +148,16 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(short val)
 {
+    if(val == opDiscardFaceSelection) {
+		discardFaceSelection();
+		return;
+	}
+    
+    if(val == opDiscardPlantSelection) {
+		discardPlantSelection();
+		return;
+	}
+    
 	if(val == opClean) {
 		cleanup();
 		return;
@@ -564,6 +574,18 @@ void proxyPaintContext::setPlantType(int x)
 
 const int & proxyPaintContext::plantType() const
 { return m_growOpt.m_plantId; }
+
+void proxyPaintContext::discardFaceSelection()
+{
+    if(!PtrViz) return;
+    PtrViz->deselectFaces();
+}
+
+void proxyPaintContext::discardPlantSelection()
+{
+    if(!PtrViz) return;
+    PtrViz->deselectPlants();
+}
 
 void proxyPaintContext::attachSceneCallbacks()
 {

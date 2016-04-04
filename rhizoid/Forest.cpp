@@ -13,10 +13,7 @@
 namespace aphid {
 
 Forest::Forest() 
-{
-	sdb::TreeNode::MaxNumKeysPerNode = 128;
-    sdb::TreeNode::MinNumKeysPerNode = 16;
-    
+{    
 	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >;
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
@@ -124,7 +121,7 @@ void Forest::buildGround()
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 64;
 	
-	engine.buildTree<cvx::Triangle>(m_ground, &m_triangles, gridBox, &bf);
+	engine.buildTree<cvx::Triangle, KdNode4, 4>(m_ground, &m_triangles, gridBox, &bf);
 }
 
 bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
@@ -133,8 +130,8 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 	
 	if(!intersectGround(ray) ) {
 /// empty previous selection if hit nothing
-		if(mode == SelectionContext::Replace)
-			m_activePlants->deselect();
+		//if(mode == SelectionContext::Replace)
+		//	m_activePlants->deselect();
 		return false;
 	}
 	
@@ -148,8 +145,8 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 {
 	if(!intersectGround(ray) ) {
 /// empty previous selection if hit nothing
-		if(mode == SelectionContext::Replace)
-			m_selectCtx->deselect();
+		//if(mode == SelectionContext::Replace)
+		//	m_selectCtx->deselect();
 		return false;
 	}
 	

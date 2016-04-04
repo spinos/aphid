@@ -20,6 +20,7 @@ DrawForest::DrawForest() : m_showVoxLodThresold(1.f)
 	m_scalbuf[0] = 1.f; 
 	m_scalbuf[1] = 1.f; 
 	m_scalbuf[2] = 1.f;
+    m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
 }
 
 DrawForest::~DrawForest() {}
@@ -85,7 +86,7 @@ void DrawForest::drawWiredPlants()
 	glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
-	glColor3f(.13f, .13f, .13f);
+	glColor3fv(m_wireColor);
 	g->begin();
 	while(!g->end() ) {
 		BoundingBox cellBox = g->coordToGridBBox(g->key() );
@@ -291,6 +292,13 @@ bool DrawForest::isVisibleInView(Plant * pl,
 
 void DrawForest::setShowVoxLodThresold(const float & x)
 { m_showVoxLodThresold = x; }
+
+void DrawForest::setWireColor(const float & r, const float & g, const float & b)
+{
+    m_wireColor[0] = r;
+    m_wireColor[1] = g;
+    m_wireColor[2] = b;
+}
 
 }
 //:~
