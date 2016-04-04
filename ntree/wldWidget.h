@@ -34,7 +34,7 @@ private:
     void drawTree();
     void drawIntersect();
 	void drawVoxel();
-	aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 > * tree();
+	aphid::KdNTree<aphid::cvx::Box, aphid::KdNode4 > * tree();
 	bool readTree(const std::string & filename);
 	void testTree();
 	void testIntersect(const aphid::Ray * incident);
@@ -47,9 +47,9 @@ private:
 typedef aphid::sdb::HAssetGrid<aphid::HTriangleAsset, aphid::cvx::Triangle > InnerGridT;
 typedef aphid::sdb::HWorldGrid<InnerGridT, aphid::cvx::Triangle > WorldGridT;
 	aphid::IntersectionContext m_intersectCtx;
-	aphid::sdb::VectorArray<aphid::cvx::Cube> * m_source;
+	aphid::sdb::VectorArray<aphid::cvx::Box> * m_source;
 	WorldGridT * m_grid;
-	aphid::HNTree<aphid::cvx::Cube, aphid::KdNode4 > * m_tree;
+	aphid::HNTree<aphid::cvx::Box, aphid::KdNode4 > * m_tree;
 	aphid::KdNTree<aphid::Voxel, aphid::KdNode4 > * m_voxel;
 	aphid::NTreeIO m_hio;
 };

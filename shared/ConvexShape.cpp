@@ -136,10 +136,45 @@ BoundingBox Cube::calculateBBox() const
 bool Cube::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 { return calculateBBox().intersect(ray, hitt0, hitt1); }
 
+Vector3F Cube::calculateNormal() const
+{ return Vector3F::XAxis; }
+
 ShapeType Cube::ShapeTypeId = TCube;
 
 std::string Cube::GetTypeStr()
 { return "cube"; }
+
+Box::Box() {}
+
+void Box::set(const Vector3F & lo, const Vector3F & hi)
+{ m_low = lo; m_high = hi; }
+
+void Box::set(const float * m)
+{
+	m_low.set(m[0], m[1], m[2]);
+	m_high.set(m[3], m[4], m[5]);
+}
+
+void Box::expand(const float & d)
+{
+	m_low.x -= d; m_low.y -= d; m_low.z -= d;
+	m_high.x += d; m_high.y += d; m_high.z += d;
+}
+
+BoundingBox Box::calculateBBox() const
+{ return BoundingBox(m_low.x, m_low.y, m_low.z,
+                    m_high.x, m_high.y, m_high.z); }
+					
+bool Box::intersect(const Ray &ray, float *hitt0, float *hitt1) const
+{ return calculateBBox().intersect(ray, hitt0, hitt1); }
+
+Vector3F Box::calculateNormal() const
+{ return Vector3F::XAxis; }
+
+ShapeType Box::ShapeTypeId = TBox;
+
+std::string Box::GetTypeStr()
+{ return "box"; }
 
 Capsule::Capsule() {}
 

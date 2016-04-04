@@ -34,8 +34,7 @@ WldWidget::~WldWidget()
 }
 
 void WldWidget::clientInit()
-{
-	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+{// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update())); 
 }
 
 void WldWidget::clientDraw()
@@ -49,9 +48,9 @@ void WldWidget::clientDraw()
 void WldWidget::drawBoxes() const
 {
 	if(!m_source) return;
-    getDrawer()->setColor(.065f, .165f, .065f);
+    getDrawer()->setColor(.0f, .065f, .165f);
 	NTreeDrawer dr;
-	dr.drawSource<cvx::Cube>(m_tree);
+	dr.drawSource<cvx::Box>(m_tree);
 }
 
 void WldWidget::drawTree()
@@ -62,10 +61,10 @@ void WldWidget::drawTree()
 	//getDrawer()->boundingBox(tree()->getBBox() );
 	
 	NTreeDrawer dr;
-	dr.drawTree<cvx::Cube>(m_tree);
+	dr.drawTree<cvx::Box>(m_tree);
 }
 
-KdNTree<cvx::Cube, KdNode4 > * WldWidget::tree()
+KdNTree<cvx::Box, KdNode4 > * WldWidget::tree()
 { return m_tree; }
 
 void WldWidget::clientSelect(QMouseEvent *event)
@@ -73,6 +72,7 @@ void WldWidget::clientSelect(QMouseEvent *event)
 	setUpdatesEnabled(false);
 	testIntersect(getIncidentRay());
 	setUpdatesEnabled(true);
+	update();
 }
 
 void WldWidget::clientDeselect(QMouseEvent *event)
@@ -83,6 +83,7 @@ void WldWidget::clientMouseInput(QMouseEvent *event)
 	setUpdatesEnabled(false);
 	testIntersect(getIncidentRay());
 	setUpdatesEnabled(true);
+	update();
 }
 
 void WldWidget::keyPressEvent(QKeyEvent *event)
@@ -121,9 +122,9 @@ bool WldWidget::readTree(const std::string & filename)
 	if(stat) {
 		m_grid = new WorldGridT("/grid");
 		m_grid->load();
-		m_source = new sdb::VectorArray<cvx::Cube>;
-		m_hio.loadGridCoord<WorldGridT >(m_source, m_grid);
-		m_tree = new HNTree<cvx::Cube, KdNode4 >("/grid/.tree");
+		m_source = new sdb::VectorArray<cvx::Box>;
+		if(m_hio.loadBox(m_source, m_grid) < 1) std::cout<<"\n error no box";
+		m_tree = new HNTree<cvx::Box, KdNode4 >("/grid/.tree");
 		m_tree->load();
 		m_tree->close();
 		m_tree->setSource(m_source);
@@ -142,7 +143,7 @@ void WldWidget::testIntersect(const Ray * incident)
 	std::stringstream sst; sst<<incident->m_dir;
 	qDebug()<<"interset begin "<<sst.str().c_str();
 	KdEngine eng;
-	eng.intersect<cvx::Cube, KdNode4>(m_tree, &m_intersectCtx);
+	eng.intersect<cvx::Box, KdNode4>(m_tree, &m_intersectCtx);
 	qDebug()<<"interset end";
 	if(m_intersectCtx.m_success) {
 		qDebug()<<" hit component "<<m_intersectCtx.m_componentIdx;
@@ -184,7 +185,7 @@ void WldWidget::drawActiveSource(const unsigned & iLeaf)
 	m_tree->leafPrimStartLength(start, len, iLeaf);
 	int i=0;
 	for(;i<len;++i) {
-		const cvx::Cube * c = m_source->get( m_tree->primIndirectionAt(start + i) );
+		const cvx::Box * c = m_source->get( m_tree->primIndirectionAt(start + i) );
 		BoundingBox b = c->calculateBBox();
 		b.expand(-0.03f);
 		getDrawer()->boundingBox(b );

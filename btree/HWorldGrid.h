@@ -362,33 +362,48 @@ void HWorldGrid<ChildType, ValueType>::buildTree(const BoundingBox & worldBox)
 	const float h = WorldGrid<ChildType, ValueType>::gridSize();
     const float e = h * .49995f;
 	
-/// todo use tight box instead of cube
-	sdb::VectorArray<cvx::Cube> cbs;
-	cvx::Cube cb;
+	sdb::VectorArray<cvx::Box> cbs;
+	cvx::Box cb;
+	BoundingBox cellBox;
 	
 	WorldGrid<ChildType, ValueType>::begin();
 	while(!WorldGrid<ChildType, ValueType>::end() ) {
 		Coord3 c = WorldGrid<ChildType, ValueType>::key();
 		
 		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
-		if(cell->numElements() > 0) {
-			cb.set(WorldGrid<ChildType, ValueType>::coordToCellCenter(WorldGrid<ChildType, ValueType>::key() ), e);
+		if(!cell->isEmpty() ) {
+			cell->getBBox(&cellBox);
+			cb.set((const float *)&cellBox);
 			cbs.insert(cb);
 		}
 		
 		WorldGrid<ChildType, ValueType>::next();
 	}
 	
-	HNTree<cvx::Cube, KdNode4 > cbtree( boost::str(boost::format("%1%/.tree") % pathToObject() ) );
+	HNTree<cvx::Box, KdNode4 > cbtree(boost::str(boost::format("%1%/.tree") % pathToObject() ) );
     KdEngine engine;
     TreeProperty::BuildProfile bf;
     bf._maxLeafPrims = 8;
 	bf._doTightBox = false;
     
-    engine.buildTree<cvx::Cube, KdNode4, 4>(&cbtree, &cbs, worldBox, &bf);
+    engine.buildTree<cvx::Box, KdNode4, 4>(&cbtree, &cbs, worldBox, &bf);
 	cbtree.setRelativeTransform(worldBox);
 	cbtree.save();
 	cbtree.close();
+	
+	HOocArray<hdata::TChar, 32, 1024> cbd(boost::str(boost::format("%1%/.box") % pathToObject() ) );
+	if(hasNamedData(".box") ) 
+		cbd.openStorage(fObjectId, true);
+	else
+		cbd.createStorage(fObjectId);
+	
+	const int nb = cbs.size();
+	int i=0;
+	for(;i<nb;++i)
+		cbd.insert((char *)cbs[i]);
+	
+	cbd.finishInsert();
+	std::cout<<"\n hworldgrid "<<pathToObject()<<" saved "<<cbd.numCols()<<" box"<<std::endl;
 }
 
 template<typename ChildType, typename ValueType>

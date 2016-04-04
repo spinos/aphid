@@ -32,7 +32,6 @@ class HAssetGrid : public HBase, public Entity {
 	
 	boost::scoped_ptr<T> m_activeAsset;
 	boost::scoped_ptr<HNTree<Voxel, KdNode4 > > m_tree;
-	int m_numVoxels;
 	
 public:
 	HAssetGrid(const std::string & name, Entity * parent);
@@ -42,11 +41,11 @@ public:
 	bool insert(const std::string & name);
 	bool flush();
 	int numElements();
-	bool beginRead();
 	void remove(const std::string & name);
 	void buildTree(const BoundingBox & worldBox);
-	bool isEmpty() const;
+	bool isEmpty();
 	HNTree<Voxel, KdNode4 > * loadTree();
+	void getBBox(BoundingBox * dst);
 	
 protected:
 
@@ -58,19 +57,12 @@ template <typename T, typename Tv>
 HAssetGrid<T, Tv>::HAssetGrid(const std::string & name, Entity * parent) :
 HBase(name), Entity(parent),
 m_activeAsset(0),
-m_tree(0),
-m_numVoxels(0)
+m_tree(0)
 {}
 
 template <typename T, typename Tv>
 HAssetGrid<T, Tv>::~HAssetGrid()
 {}
-
-template <typename T, typename Tv>
-bool HAssetGrid<T, Tv>::beginRead()
-{
-	return true;
-}
 
 template <typename T, typename Tv>
 int HAssetGrid<T, Tv>::numElements()
@@ -132,7 +124,10 @@ void HAssetGrid<T, Tv>::remove(const std::string & name)
 template <typename T, typename Tv>
 void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 {
-	m_numVoxels = 0;
+	int numVoxels = 0;
+	if(!hasNamedAttr(".nvx") )
+	    addIntAttr(".nvx", 1);
+	writeIntAttr(".nvx", &numVoxels );
 	
 	sdb::VectorArray<Tv> src;
 	std::vector<std::string > assetNames;
@@ -168,12 +163,14 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	VoxelGrid<KdNTree<Tv, KdNode4 >, Tv > vgd;
 	vgd.create(&ptree, rootBox, 8);
 	
-	m_numVoxels = vgd.numVoxels();
+	numVoxels = vgd.numVoxels();
 	
-	if(m_numVoxels < 1) {
+	if(numVoxels < 1) {
 		std::cout<<"\n  warning hassetgrid "<<worldBox<<" is empty";
 		return;
 	}
+	
+	writeIntAttr(".nvx", &numVoxels );
 	
 	HNTree<Voxel, KdNode4 > vtree(boost::str(boost::format("%1%/.tree") % pathToObject() ) );
 	bf._maxLeafPrims = 32;
@@ -193,11 +190,16 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	    addFloatAttr(".bbx", 6);
 	writeFloatAttr(".bbx", (float *)&tb );
 	std::cout<<"\n hassetgrid world tight bbox "<<tb;
+	// H5Fflush(HObject::FileIO.fFileId, H5F_SCOPE_LOCAL);
 }
 
 template <typename T, typename Tv>
-bool HAssetGrid<T, Tv>::isEmpty() const
-{ return m_numVoxels < 1; }
+bool HAssetGrid<T, Tv>::isEmpty()
+{
+	int nv = 0;
+	readIntAttr(".nvx", &nv );
+	return nv < 1; 
+}
 
 template <typename T, typename Tv>
 HNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::loadTree()
@@ -209,6 +211,10 @@ HNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::loadTree()
 	}
 	return m_tree.get();
 }
+
+template <typename T, typename Tv>
+void HAssetGrid<T, Tv>::getBBox(BoundingBox * dst)
+{ readFloatAttr(".bbx", (float *)dst ); }
 
 }
 }

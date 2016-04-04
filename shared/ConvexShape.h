@@ -23,7 +23,8 @@ namespace cvx {
         TSphere = 1,
         TCube = 2,
         TCapsule = 3,
-		TTriangle = 4
+		TTriangle = 4,
+		TBox = 5
     };
 
 class Frustum {
@@ -112,6 +113,31 @@ public:
     
     BoundingBox calculateBBox() const;
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
+	Vector3F calculateNormal() const;
+	
+	template<typename T>
+	bool exactIntersect(const T & b) const {
+		return true;
+	}
+    
+    static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
+};
+
+class Box {
+    
+    Vector3F m_low; int m_pad0;
+	Vector3F m_high; int m_pad1;
+    
+public:
+    Box();
+    void set(const Vector3F & lo, const Vector3F & hi);
+	void set(const float * m);
+	void expand(const float & d);
+    
+    BoundingBox calculateBBox() const;
+	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
+	Vector3F calculateNormal() const;
 	
 	template<typename T>
 	bool exactIntersect(const T & b) const {

@@ -64,7 +64,7 @@ template<typename T, int NRow>
 char HElemAsset<T, NRow>::save()
 {
 	if(!m_data) {
-		std::cout<<"\n helemasset has no data";
+		std::cout<<"\n helemasset "<<pathToObject()<<" has no data";
 		return 0;
 	}
 	
@@ -86,7 +86,7 @@ char HElemAsset<T, NRow>::save()
 	m_numElem = m_data->numCols();
 	writeIntAttr(".nelem", (int *)&m_numElem );
 	
-	std::cout<<"\n helemasset saved "<<m_numElem<<" "<<T::GetTypeStr();
+	std::cout<<"\n helemasset "<<pathToObject()<<" saved "<<m_numElem<<" "<<T::GetTypeStr()<<std::endl;
 	
 	return 1;
 }
@@ -157,5 +157,6 @@ void HElemAsset<T, NRow>::clear()
 }
 
 typedef HElemAsset<cvx::Triangle, 48> HTriangleAsset;
+typedef HElemAsset<cvx::Box, 32> HBoxAsset;
 
 }

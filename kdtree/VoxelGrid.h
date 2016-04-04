@@ -50,16 +50,14 @@ struct Voxel {
 	
 	BoundingBox calculateBBox() const
 	{
-		BoundingBox b;
-		
 		unsigned x, y, z;
 		decodeMorton3D(m_pos, x, y, z);
 		float h = 1<< (9 - (m_contour & 15) );
-		h *= .9999f;
 		
-		return BoundingBox((float)x-h, (float)y-h, (float)z-h,
+		BoundingBox b((float)x-h, (float)y-h, (float)z-h,
 				(float)x+h, (float)y+h, (float)z+h);
-				
+		b.expand(-.00003f);
+		return b;
 	}
 	
 	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const
