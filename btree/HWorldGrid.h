@@ -236,15 +236,19 @@ char HWorldGrid<ChildType, ValueType>::save()
 	else
 		cellCoords.createStorage(fObjectId);
 
+	int nvx, totalNVx = 0;
 	BoundingBox * gb = WorldGrid<ChildType, ValueType>::boundingBoxR();
 	gb->reset();
 	WorldGrid<ChildType, ValueType>::begin();
 	while(!WorldGrid<ChildType, ValueType>::end() ) {
 		Coord3 c = WorldGrid<ChildType, ValueType>::key();
 		ChildType * cell = WorldGrid<ChildType, ValueType>::value();
-		if(!cell->isEmpty() ) {
+		nvx = 0;
+		cell->getNumVoxel(&nvx);
+		if(nvx > 0 ) {
 			cellCoords.insert((char *)&c );
 			gb->expandBy(WorldGrid<ChildType, ValueType>::keyToGridBBox() );
+			totalNVx += nvx;
 		}
 		WorldGrid<ChildType, ValueType>::next();
 	}
@@ -276,12 +280,13 @@ char HWorldGrid<ChildType, ValueType>::save()
 	    addIntAttr(".vlt", 1);
 	writeIntAttr(".vlt", (int *)&ValueType::ShapeTypeId );
 	
-	std::cout<<"\n HWorldGrid save n value "<<nelm
+	std::cout<<"\n HWorldGrid saved in "<<HObject::FileIO.fileName()
+		<<"\n n "<<ValueType::GetTypeStr()<<" "<<nelm
+		<<"\n n voxel "<<totalNVx
 	    <<"\n n cell "<<n
 	    <<"\n grid size "<<gz
-	    <<"\n bounding box "<<WorldGrid<ChildType, ValueType>::boundingBox()
-	    <<"\n value type "<<ValueType::GetTypeStr();
-	
+	    <<"\n bounding box "<<WorldGrid<ChildType, ValueType>::boundingBox();
+	std::cout.flush();
 	return 1;
 }
 

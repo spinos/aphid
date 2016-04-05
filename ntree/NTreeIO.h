@@ -85,6 +85,8 @@ public:
 						
 	int loadBox(sdb::VectorArray<cvx::Box> * dst, HBase * grp);
 	
+	int loadVoxel(sdb::VectorArray<Voxel> * dst, HBase * grp);
+	
 protected:
 
 private:

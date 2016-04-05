@@ -50,7 +50,8 @@ typedef aphid::sdb::HWorldGrid<InnerGridT, aphid::cvx::Triangle > WorldGridT;
 	aphid::sdb::VectorArray<aphid::cvx::Box> * m_source;
 	WorldGridT * m_grid;
 	aphid::HNTree<aphid::cvx::Box, aphid::KdNode4 > * m_tree;
-	aphid::KdNTree<aphid::Voxel, aphid::KdNode4 > * m_voxel;
+	aphid::KdNTree<aphid::Voxel, aphid::KdNode4 > * m_voxelTree;
+	aphid::sdb::VectorArray<aphid::Voxel> * m_voxelSource;
 	aphid::NTreeIO m_hio;
 };
 //! [3]

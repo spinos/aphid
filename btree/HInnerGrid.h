@@ -36,7 +36,8 @@ public:
 	void buildTree(const BoundingBox & rootBox);
 	bool isEmpty();
 	void getBBox(BoundingBox * dst);
-	
+	void getNumVoxel(int * dst);
+
 protected:
 
 private:
@@ -109,6 +110,10 @@ bool HInnerGrid<DataRank, NRows, BufSize>::isEmpty()
 
 template <int DataRank, int NRows, int BufSize>
 void HInnerGrid<DataRank, NRows, BufSize>::getBBox(BoundingBox * dst)
+{}
+
+template <int DataRank, int NRows, int BufSize>
+void HInnerGrid<DataRank, NRows, BufSize>::getNumVoxel(int * dst)
 {}
 
 }

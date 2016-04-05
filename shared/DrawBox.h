@@ -27,6 +27,7 @@ protected:
 	void drawWireBox(const float * center, const float * scale) const;
 	void drawSolidBox(const float * center, const float * scale) const;
 	void drawBoundingBox(const BoundingBox * box) const;
+	void drawWiredBoundingBox(const BoundingBox * box) const;
 	void drawSolidBoundingBox(const BoundingBox * box) const;
 	void drawSolidBoxArray(const float * data,
 						const unsigned & count,
@@ -42,6 +43,7 @@ protected:
 						
 	void drawHLWireBox(const float * v) const;
 	void drawHLSolidBox(const float * v) const;
+	void drawHLBox(const float * v) const;
 	
 private:
 	static const float UnitBoxLine[24][3];

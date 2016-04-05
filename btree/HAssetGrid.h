@@ -46,7 +46,8 @@ public:
 	bool isEmpty();
 	HNTree<Voxel, KdNode4 > * loadTree();
 	void getBBox(BoundingBox * dst);
-	
+	void getNumVoxel(int * dst);
+
 protected:
 
 private:
@@ -190,7 +191,18 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	    addFloatAttr(".bbx", 6);
 	writeFloatAttr(".bbx", (float *)&tb );
 	std::cout<<"\n hassetgrid world tight bbox "<<tb;
-	// H5Fflush(HObject::FileIO.fFileId, H5F_SCOPE_LOCAL);
+	
+	HOocArray<hdata::TChar, 12, 1024> vxd(boost::str(boost::format("%1%/.vox") % pathToObject() ) );
+	if(hasNamedData(".vox") ) 
+		vxd.openStorage(fObjectId, true);
+	else
+		vxd.createStorage(fObjectId);
+		
+	int i=0;
+	for(;i<numVoxels;++i)
+		vxd.insert((char *)vgd.voxels()[i]);
+	
+	vxd.finishInsert();
 }
 
 template <typename T, typename Tv>
@@ -215,6 +227,10 @@ HNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::loadTree()
 template <typename T, typename Tv>
 void HAssetGrid<T, Tv>::getBBox(BoundingBox * dst)
 { readFloatAttr(".bbx", (float *)dst ); }
+
+template <typename T, typename Tv>
+void HAssetGrid<T, Tv>::getNumVoxel(int * dst)
+{ readIntAttr(".nvx", dst ); }
 
 }
 }

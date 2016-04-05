@@ -19,7 +19,8 @@ WldWidget::WldWidget(const std::string & filename, QWidget *parent) : Base3DView
 	m_grid = NULL;
 	m_source = NULL;
 	m_tree = NULL;
-	m_voxel = NULL;
+	m_voxelTree = NULL;
+	m_voxelSource = NULL;
 	
 	if(filename.size() > 1) readTree(filename);
 }
@@ -147,7 +148,11 @@ void WldWidget::testIntersect(const Ray * incident)
 	qDebug()<<"interset end";
 	if(m_intersectCtx.m_success) {
 		qDebug()<<" hit component "<<m_intersectCtx.m_componentIdx;
-		m_voxel = m_grid->cell(m_intersectCtx.m_componentIdx)->loadTree();
+		m_voxelTree = m_grid->cell(m_intersectCtx.m_componentIdx)->loadTree();
+/// todo only load once
+		m_voxelSource = new sdb::VectorArray<aphid::Voxel>;
+		m_hio.loadVoxel(m_voxelSource, m_grid->cell(m_intersectCtx.m_componentIdx) );
+		m_voxelTree->setSource(m_voxelSource);
 	}
 }
 
@@ -194,12 +199,13 @@ void WldWidget::drawActiveSource(const unsigned & iLeaf)
 
 void WldWidget::drawVoxel()
 {
-	if(!m_voxel) return;
+	if(!m_voxelTree) return;
 	glColor3f(.0f,.65f,.45f);
 	NTreeDrawer dr;
-	dr.drawTree<Voxel>(m_voxel);
+	dr.drawTree<Voxel>(m_voxelTree);
 	getDrawer()->setColor(0.f, .15f, .35f);
-	dr.drawTightBox<Voxel>(m_voxel);
+	dr.drawTightBox<Voxel>(m_voxelTree);
+	dr.drawSource<Voxel>(m_voxelTree);
 }
 
 BoundingBox WldWidget::getFrameBox()

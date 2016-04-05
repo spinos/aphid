@@ -280,6 +280,9 @@ void DrawBox::drawSolidBox(const float * center, const float * scale) const
 void DrawBox::drawBoundingBox(const BoundingBox * box) const
 { drawHLWireBox(&box->m_data[0]); }
 
+void DrawBox::drawWiredBoundingBox(const BoundingBox * box) const
+{ drawHLBox(&box->m_data[0]); }
+
 void DrawBox::drawSolidBoundingBox(const BoundingBox * box) const
 { drawHLSolidBox(&box->m_data[0]); }
 
@@ -416,6 +419,14 @@ const int DrawBox::HLBoxTriangle[36][3] = {
 {0, 4, 5},
 {3, 4, 5}
 };
+
+void DrawBox::drawHLBox(const float * v) const
+{
+	for(int i=0;i<36;i++)
+		glVertex3f(v[HLBoxTriangle[i][0]], 
+						v[HLBoxTriangle[i][1]], 
+						v[HLBoxTriangle[i][2]]);
+}
 
 void DrawBox::drawHLSolidBox(const float * v) const
 {
