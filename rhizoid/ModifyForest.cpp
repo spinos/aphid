@@ -164,8 +164,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	
 	const cvx::Triangle * t = ground()->getSource(ctx->m_componentIdx);
 	
-/// ind to geom
-	
+/// ind to geom	
 	if(t->ind0() >= groundMeshes().size() ) {
 		std::cout<<"\n oor mesh idx "<<t->ind0()
 			<<" >= "<<groundMeshes().size();
@@ -202,6 +201,57 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		addPlant(tm, bind, option.m_plantId);
 	
     return true;
+}
+
+bool ModifyForest::growAt(const Matrix44F & trans, GrowOption & option)
+{
+	Ray incident( trans.getTranslation() + Vector3F(0.f, 10.f, 0.f),
+                 Vector3F(0.f, -1.f, 0.f),
+                 0.f, 1e8f);
+				 
+	if(!intersectGround(incident) )
+		return false;
+        
+	IntersectionContext * ctx = intersection();
+/// ind to source
+	if(ctx->m_componentIdx >= ground()->primIndirection().size() ) {
+		std::cout<<"\n oor component idx "<<ctx->m_componentIdx
+			<<" >= "<<ground()->primIndirection().size();
+		return false;
+	}
+        
+	const cvx::Triangle * t = ground()->getSource(ctx->m_componentIdx);
+/// ind to geom
+	if(t->ind0() >= groundMeshes().size() ) {
+		std::cout<<"\n oor mesh idx "<<t->ind0()
+			<<" >= "<<groundMeshes().size();
+		return false;
+	}
+	
+/// x size
+	float scale = trans.getSide().length();
+	float scaledSize = plantSize(option.m_plantId) * scale;
+	if(closeToOccupiedPosition(ctx->m_hitP, scaledSize)) 
+		return false;
+	
+    m_bary->create(t->P(0), t->P(1), t->P(2) );
+        
+	GroundBind bind;
+	bind.setGeomComp(t->ind0(), t->ind1() );
+        
+	m_bary->project(ctx->m_hitP);
+	m_bary->compute();
+        
+	bind.m_w0 = m_bary->getV(0);
+	bind.m_w1 = m_bary->getV(1);
+	bind.m_w2 = m_bary->getV(2);
+        
+	Matrix44F tm = trans;
+/// snap to ground
+	tm.setTranslation(ctx->m_hitP);
+	addPlant(tm, bind, option.m_plantId);
+	
+	return true;
 }
 
 void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)

@@ -878,50 +878,13 @@ void ProxyViz::deselectPlants()
 
 void ProxyViz::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option)
 {
-    BarycentricCoordinate bary;
     std::vector<Matrix44F>::const_iterator it = ms.begin();
     for(;it!=ms.end();++it) {
-        Ray incident( (*it).getTranslation() + Vector3F(0.f, 10.f, 0.f),
-                 Vector3F(0.f, -1.f, 0.f),
-                 0.f, 1e8f);
-        
-        if(!intersectGround(incident) ) {
-            AHelper::Info<Vector3F>("no intersection at ", (*it).getTranslation());
-            continue;
-        }
-        
-        IntersectionContext * ctx = intersection();
-/// ind to source
-        if(ctx->m_componentIdx >= ground()->primIndirection().size() ) {
-            std::cout<<"\n oor component idx "<<ctx->m_componentIdx
-                <<" >= "<<ground()->primIndirection().size();
-            continue;
-        }
-        
-        const cvx::Triangle * t = ground()->getSource(ctx->m_componentIdx);
-/// ind to geom
-        if(t->ind0() >= groundMeshes().size() ) {
-            std::cout<<"\n oor mesh idx "<<t->ind0()
-                <<" >= "<<groundMeshes().size();
-            continue;
-        }
-	
-        bary.create(t->P(0), t->P(1), t->P(2) );
-        
-        GroundBind bind;
-        bind.setGeomComp(t->ind0(), t->ind1() );
-        
-        bary.project(ctx->m_hitP);
-		bary.compute();
-        
-        bind.m_w0 = bary.getV(0);
-		bind.m_w1 = bary.getV(1);
-		bind.m_w2 = bary.getV(2);
-        
-        Matrix44F tm = *it;
-        tm.setTranslation(ctx->m_hitP);
-        addPlant(tm, bind, option.m_plantId);
-    }
+		if(!growAt(*it, option) )
+			AHelper::Info<Vector3F>("no grow at ", (*it).getTranslation());		
+	}
+		
+	finishGrow();
 }
 
 }

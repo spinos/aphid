@@ -47,6 +47,7 @@ protected:
 	bool growOnGround(GrowOption & option);
 	
 	bool growAt(const Ray & ray, GrowOption & option);
+	bool growAt(const Matrix44F & trans, GrowOption & option);
 	void replaceAt(const Ray & ray, GrowOption & option);
 	void clearAt(const Ray & ray, GrowOption & option);
 	void scaleAt(const Ray & ray, float magnitude);

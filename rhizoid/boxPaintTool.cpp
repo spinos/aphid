@@ -646,6 +646,5 @@ void proxyPaintContext::injectSelectedTransform()
     
     AHelper::Info<int>("proxyPaintContext inject n transform", ms.size() );
     PtrViz->injectPlants(ms, m_growOpt);
-    PtrViz->finishErase();
 }
 //:~
