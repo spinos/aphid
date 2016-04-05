@@ -82,10 +82,6 @@ public:
 	template<typename T>
 	bool hasNamedAsset(const std::string & grpName,
 						const std::string & name);
-						
-	int loadBox(sdb::VectorArray<cvx::Box> * dst, HBase * grp);
-	
-	int loadVoxel(sdb::VectorArray<Voxel> * dst, HBase * grp);
 	
 protected:
 

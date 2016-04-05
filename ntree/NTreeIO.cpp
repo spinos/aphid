@@ -68,36 +68,4 @@ cvx::ShapeType NTreeIO::gridValueType(const std::string & name)
 	return vt;
 }
 
-int NTreeIO::loadBox(sdb::VectorArray<cvx::Box> * dst, HBase * grp)
-{
-	if(!grp->hasNamedData(".box") ) return 0;
-	HOocArray<hdata::TChar, 32, 1024> cbd(boost::str(boost::format("%1%/.box") % grp->pathToObject() ) );
-	if(!cbd.openStorage(grp->fObjectId) ) return 0;
-	const int nc = cbd.numCols();
-	std::cout<<"\n ntreeio read "<<nc<<" box from "<<grp->pathToObject();
-	cvx::Box b;
-	int i=0;
-	for(;i<nc;++i) {
-		cbd.readColumn((char *)&b, i);
-		dst->insert(b);
-	}
-	return dst->size();
-}
-
-int NTreeIO::loadVoxel(sdb::VectorArray<Voxel> * dst, HBase * grp)
-{
-	if(!grp->hasNamedData(".vox") ) return 0;
-	HOocArray<hdata::TChar, 12, 1024> cbd(boost::str(boost::format("%1%/.vox") % grp->pathToObject() ) );
-	if(!cbd.openStorage(grp->fObjectId) ) return 0;
-	const int nc = cbd.numCols();
-	std::cout<<"\n ntreeio read "<<nc<<" voxel from "<<grp->pathToObject();
-	Voxel b;
-	int i=0;
-	for(;i<nc;++i) {
-		cbd.readColumn((char *)&b, i);
-		dst->insert(b);
-	}
-	return dst->size();
-}
-
 }

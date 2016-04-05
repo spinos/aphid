@@ -3,7 +3,7 @@
 #include <Boundary.h>
 #include <TreeProperty.h>
 #include <IntersectionContext.h>
-#include "KdNNode.h"
+#include <KdNNode.h>
 #include "KdSah.h"
 #include "BoxNeighbors.h"
 #include <sstream>

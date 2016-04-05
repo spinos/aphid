@@ -19,8 +19,8 @@
 #include <HBase.h>
 #include <HElemAsset.h>
 #include <KdEngine.h>
-#include <VoxelGrid.h>
 #include <HNTree.h>
+#include <VoxelGrid.h>
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -31,6 +31,8 @@ template <typename T, typename Tv>
 class HAssetGrid : public HBase, public Entity {
 	
 	boost::scoped_ptr<T> m_activeAsset;
+	boost::scoped_ptr<sdb::VectorArray<Voxel> > m_voxels;
+/// tree to voxels
 	boost::scoped_ptr<HNTree<Voxel, KdNode4 > > m_tree;
 	
 public:
@@ -44,10 +46,11 @@ public:
 	void remove(const std::string & name);
 	void buildTree(const BoundingBox & worldBox);
 	bool isEmpty();
-	HNTree<Voxel, KdNode4 > * loadTree();
 	void getBBox(BoundingBox * dst);
 	void getNumVoxel(int * dst);
-
+	KdNTree<Voxel, KdNode4 > * loadTree();
+	KdNTree<Voxel, KdNode4 > * tree();
+	
 protected:
 
 private:
@@ -58,6 +61,7 @@ template <typename T, typename Tv>
 HAssetGrid<T, Tv>::HAssetGrid(const std::string & name, Entity * parent) :
 HBase(name), Entity(parent),
 m_activeAsset(0),
+m_voxels(0),
 m_tree(0)
 {}
 
@@ -214,15 +218,33 @@ bool HAssetGrid<T, Tv>::isEmpty()
 }
 
 template <typename T, typename Tv>
-HNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::loadTree()
+KdNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::loadTree()
 {
-	if(!m_tree.get() ) {
-		m_tree.reset(new HNTree<Voxel, KdNode4 >(boost::str(boost::format("%1%/.tree") % pathToObject() ) ) );
-		m_tree->load();
-		m_tree->close();
+	if(m_tree.get() ) return m_tree.get();
+	
+	m_voxels.reset(new sdb::VectorArray<Voxel>);
+	HOocArray<hdata::TChar, 12, 1024> cbd(boost::str(boost::format("%1%/.vox") % pathToObject() ) );
+	cbd.openStorage(fObjectId);
+	const int nc = cbd.numCols();
+	std::cout<<"\n hassetgrid "<<pathToObject()<<" read "<<nc<<" voxel";
+	Voxel b;
+	int i=0;
+	for(;i<nc;++i) {
+		cbd.readColumn((char *)&b, i);
+		m_voxels->insert(b);
 	}
+	
+	m_tree.reset(new HNTree<Voxel, KdNode4 >(boost::str(boost::format("%1%/.tree") % pathToObject() ) ) );
+	m_tree->load();
+	m_tree->close();
+	m_tree->setSource(m_voxels.get() );
+	
 	return m_tree.get();
 }
+
+template <typename T, typename Tv>
+KdNTree<Voxel, KdNode4 > * HAssetGrid<T, Tv>::tree()
+{ return m_tree.get(); }
 
 template <typename T, typename Tv>
 void HAssetGrid<T, Tv>::getBBox(BoundingBox * dst)

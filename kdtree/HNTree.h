@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include "KdNTree.h"
+#include <KdNTree.h>
 #include <HBase.h>
 #include <HOocArray.h>
 

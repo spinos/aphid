@@ -22,6 +22,7 @@
 #include <HNTree.h>
 #include <ConvexShape.h>
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace aphid {
     
@@ -52,6 +53,10 @@ class HWorldGrid : public HBase, public WorldGrid<ChildType, ValueType> {
 	Sequence<Coord3> m_dirtyCell;
 /// access cells by idx
 	std::vector<ChildType *> m_cellArr;
+/// box to all cells
+	boost::scoped_ptr<sdb::VectorArray<cvx::Box> > m_boxes;
+/// tree to boxes
+	boost::scoped_ptr<HNTree<cvx::Box, KdNode4 > > m_tree;
 	
 public:
 	HWorldGrid(const std::string & name, Entity * parent = NULL);
@@ -80,6 +85,9 @@ public:
 	ChildType * cell(const int & i);
 	const ChildType * cell(const int & i) const;
 	
+	KdNTree<cvx::Box, KdNode4 > * loadTree();
+	KdNTree<cvx::Box, KdNode4 > * tree();
+	
 protected:
 	std::string coord3Str(const Coord3 & c) const;
 	
@@ -90,7 +98,9 @@ private:
 
 template<typename ChildType, typename ValueType>
 HWorldGrid<ChildType, ValueType>::HWorldGrid(const std::string & name, Entity * parent) :
-HBase(name), WorldGrid<ChildType, ValueType>(parent)
+HBase(name), WorldGrid<ChildType, ValueType>(parent),
+m_boxes(0),
+m_tree(0)
 {}
 
 template<typename ChildType, typename ValueType>
@@ -308,7 +318,9 @@ char HWorldGrid<ChildType, ValueType>::load()
 			m_cellArr.push_back(static_cast<ChildType *>(p->index) );
         }
 	}
-		
+	
+	loadTree();
+	
 	std::cout<<"\n n cell "<<WorldGrid<ChildType, ValueType>::size()
 	    <<"\n grid size "<<WorldGrid<ChildType, ValueType>::gridSize()
        <<"\n grid bbox "<<WorldGrid<ChildType, ValueType>::boundingBox()
@@ -418,6 +430,34 @@ ChildType * HWorldGrid<ChildType, ValueType>::cell(const int & i)
 template<typename ChildType, typename ValueType>
 const ChildType * HWorldGrid<ChildType, ValueType>::cell(const int & i) const
 { return m_cellArr[i]; }
+
+template<typename ChildType, typename ValueType>
+KdNTree<cvx::Box, KdNode4 > * HWorldGrid<ChildType, ValueType>::loadTree()
+{
+	if(m_tree.get() ) return m_tree.get();
+	
+	m_boxes.reset(new sdb::VectorArray<cvx::Box>);
+	
+	HOocArray<hdata::TChar, 32, 1024> cbd(childPath((".box") ) );
+	cbd.openStorage(fObjectId);
+	const int nc = cbd.numCols();
+	std::cout<<"\n hworldgrid "<<pathToObject()<<" read "<<nc<<" box";
+	cvx::Box b;
+	for(int i=0;i<nc;++i) {
+		cbd.readColumn((char *)&b, i);
+		m_boxes->insert(b);
+	}
+		
+	m_tree.reset(new HNTree<cvx::Box, KdNode4 >(childPath(".tree") ) );
+	m_tree->load();
+	m_tree->close();
+	m_tree->setSource(m_boxes.get() );
+	return m_tree.get();
+}
+
+template<typename ChildType, typename ValueType>
+KdNTree<cvx::Box, KdNode4 > * HWorldGrid<ChildType, ValueType>::tree()
+{ return m_tree.get(); }
 
 }
 }
