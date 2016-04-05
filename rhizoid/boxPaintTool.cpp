@@ -148,6 +148,11 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(short val)
 {
+    if(val == opInjectTransform) {
+		injectSelectedTransform();
+		return;
+	}
+    
     if(val == opDiscardFaceSelection) {
 		discardFaceSelection();
 		return;
@@ -605,5 +610,42 @@ void proxyPaintContext::detachSceneCallbacks()
 
 void proxyPaintContext::releaseCallback(void* clientData)
 { PtrViz = NULL; }
+
+void proxyPaintContext::injectSelectedTransform()
+{
+    if(!PtrViz) {
+        MGlobal::displayWarning("proxyPaintContext has no active viz");
+		return;
+    }
+    
+    MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
 	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintContext wrong selection, select transform(s) to inject");
+		return;
+	}
+    
+    MStatus stat;
+    MItSelectionList transIter(sels, MFn::kTransform, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintContext no transform selected, nothing to inject");
+		return;
+	}
+    
+    std::vector<Matrix44F> ms;
+    Matrix44F wmf;
+    MMatrix wmd;
+    for(;!transIter.isDone(); transIter.next() ) {
+		MDagPath transPath;
+		transIter.getDagPath(transPath);
+        wmd = aphid::AHelper::GetWorldTransformMatrix(transPath);
+        AHelper::ConvertToMatrix44F(wmf, wmd);
+        ms.push_back(wmf);
+	}
+    
+    AHelper::Info<int>("proxyPaintContext inject n transform", ms.size() );
+    PtrViz->injectPlants(ms, m_growOpt);
+    PtrViz->finishErase();
+}
 //:~
