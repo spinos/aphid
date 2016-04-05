@@ -914,6 +914,10 @@ void ProxyViz::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & opti
         bary.project(ctx->m_hitP);
 		bary.compute();
         
+        bind.m_w0 = bary.getV(0);
+		bind.m_w1 = bary.getV(1);
+		bind.m_w2 = bary.getV(2);
+        
         Matrix44F tm = *it;
         tm.setTranslation(ctx->m_hitP);
         addPlant(tm, bind, option.m_plantId);
