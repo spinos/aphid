@@ -9,23 +9,20 @@
 #pragma once
 
 #include <CudaRender.h>
-#include <NTreeIO.h>
+#include <ConvexShape.h>
 #include <HWorldGrid.h>
-#include <HInnerGrid.h>
-#include <CudaNTree.h>
+#include <HAssetGrid.h>
+#include <WorldManager.h>
 
 namespace aphid {
 
 class WorldRender : public CudaRender {
 
-typedef sdb::HWorldGrid<sdb::HInnerGrid<hdata::TFloat, 4, 1024 >, cvx::Sphere > WorldGridT;
-typedef CudaNTree<cvx::Cube, KdNode4> WorldTreeT;
-
-	NTreeIO m_io;
-	sdb::VectorArray<cvx::Cube> m_worldCoord;
-	WorldGridT * m_worldGrid;
-	WorldTreeT * m_worldTree;
-	
+typedef aphid::sdb::HAssetGrid<aphid::HTriangleAsset, aphid::cvx::Triangle > InnerGridT;
+typedef aphid::sdb::HWorldGrid<InnerGridT, aphid::cvx::Triangle > WorldGridT;
+typedef aphid::KdNTree<aphid::Voxel, aphid::KdNode4 > TreeT;
+	jul::WorldManager<WorldGridT, InnerGridT, TreeT> m_io;
+		
 public:
 	WorldRender(const std::string & filename);
 	virtual ~WorldRender();

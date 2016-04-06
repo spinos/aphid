@@ -8,15 +8,15 @@
  */
 #pragma once
 #include <boost/scoped_ptr.hpp>
-#include <HNTree.h>
 #include <ConvexShape.h>
+#include <KdNTree.h>
 #include <CUDABuffer.h>
 #include <CudaBase.h>
 
 namespace aphid {
 
 template <typename T, typename Tn>
-class CudaNTree : public HNTree<T, Tn > {
+class CudaNTree {
 
 	boost::scoped_ptr<CUDABuffer> m_deviceBranch;
 	boost::scoped_ptr<CUDABuffer> m_deviceLeaf;
@@ -25,12 +25,11 @@ class CudaNTree : public HNTree<T, Tn > {
 	boost::scoped_ptr<CUDABuffer> m_devicePrim;
 	
 public:
-	CudaNTree(const std::string & name);
+	CudaNTree();
 	virtual ~CudaNTree();
 	
-	virtual char load();
-    virtual void setSource(sdb::VectorArray<T> * src);
-	
+	bool transfer(KdNTree<T, Tn> * src);
+
 	void * deviceBranch() const;
 	void * deviceLeaf() const;
 	void * deviceIndirection() const;
@@ -43,8 +42,7 @@ private:
 };
 
 template <typename T, typename Tn>
-CudaNTree<T, Tn>::CudaNTree(const std::string & name) :
-HNTree<T, Tn>(name) 
+CudaNTree<T, Tn>::CudaNTree()
 {
 	m_deviceBranch.reset(new CUDABuffer);
 	m_deviceLeaf.reset(new CUDABuffer);
@@ -58,21 +56,20 @@ CudaNTree<T, Tn>::~CudaNTree()
 {}
 
 template <typename T, typename Tn>
-char CudaNTree<T, Tn>::load()
-{
-	if(!HNTree<T, Tn>::load() ) 
-		return 0;
-	
-	m_deviceBranch->copyFrom<sdb::VectorArray<KdNode4> >(HNTree<T, Tn>::branches() );
-	m_deviceLeaf->copyFrom<sdb::VectorArray<knt::TreeLeaf> >(HNTree<T, Tn>::leafNodes() );
-	m_deviceIndirection->copyFrom<sdb::VectorArray<int> >(HNTree<T, Tn>::primIndirection() );
-	m_deviceRope->copyFrom<sdb::VectorArray<BoundingBox> >(HNTree<T, Tn>::ropes() );
+bool CudaNTree<T, Tn>::transfer(KdNTree<T, Tn> * src)
+{	
+	m_deviceBranch->copyFrom<sdb::VectorArray<KdNode4> >(src->branches() );
+	m_deviceLeaf->copyFrom<sdb::VectorArray<knt::TreeLeaf> >(src->leafNodes() );
+	m_deviceIndirection->copyFrom<sdb::VectorArray<int> >(src->primIndirection() );
+	m_deviceRope->copyFrom<sdb::VectorArray<BoundingBox> >(src->ropes() );
+	m_devicePrim->copyFrom<sdb::VectorArray<T> >( *src->source() );
 #if 0
 	std::cout<<"\n branch buf size "<<m_deviceBranch->bufferSize()
 		<<"\n leaf buf size "<<m_deviceLeaf->bufferSize()
 		<<"\n prim buf size "<<m_deviceIndirection->bufferSize()
 		<<"\n rope buf size "<<m_deviceRope->bufferSize()
-		<<"\n cu mem "<<CudaBase::MemoryUsed;
+		<<"\n prim buf size "<<m_devicePrim->bufferSize()
+		<<"\n cu mem "<<CudaBase::MemoryUsed<<" bytes";
 #endif
 	return 1;
 }
@@ -96,15 +93,5 @@ void * CudaNTree<T, Tn>::deviceRope() const
 template <typename T, typename Tn>
 void * CudaNTree<T, Tn>::devicePrim() const
 { return m_devicePrim->bufferOnDevice(); }
-
-template <typename T, typename Tn>
-void CudaNTree<T, Tn>::setSource(sdb::VectorArray<T> * src)
-{
-	HNTree<T, Tn>::setSource(src);
-	m_devicePrim->copyFrom<sdb::VectorArray<T> >( *HNTree<T, Tn>::source() );
-#if 0
-	std::cout<<"\n prim buf size "<<m_devicePrim->bufferSize();	
-#endif
-}
 
 }

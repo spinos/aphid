@@ -271,5 +271,45 @@ inline __device__ int v3_orientation(const T & v)
 	return 5;
 }
 
+template<typename T>
+inline __device__ void v3_addr(T & a, const float * b)
+{
+    a.x += b[0];
+    a.y += b[1];
+    a.z += b[2];
+}
+
+template<typename T>
+inline __device__ void v3_minusr(T & a, const float * b)
+{
+    a.x -= b[0];
+    a.y -= b[1];
+    a.z -= b[2];
+}
+
+template<typename T>
+inline __device__ void v3_multr(T & a, const float * b)
+{
+    a.x *= b[0];
+    a.y *= b[1];
+    a.z *= b[2];
+}
+
+template<typename T>
+inline __device__ void v3_divider(T & a, const float * b)
+{
+    a.x /= b[0];
+    a.y /= b[1];
+    a.z /= b[2];
+}
+
+template<typename T>
+inline __device__ void v3_r(T & a, const float * b)
+{
+    a.x = b[0];
+    a.y = b[1];
+    a.z = b[2];
+}
+
 #endif        //  #ifndef VECTOR_MATH_CUH
 

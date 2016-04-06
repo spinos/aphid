@@ -29,7 +29,7 @@ public:
 	Manager();
 	virtual ~Manager();
 	
-	bool openWorld(const std::string & filename);
+	virtual bool openWorld(const std::string & filename);
 	TreeT * loadCell(const int & idx);
 	WorldT * grid() const;
 	const int & usedMemory() const;

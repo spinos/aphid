@@ -177,6 +177,9 @@ SET (VIEWERHEADER Parameter.h
 viewerWindow.h
 CubeRenderInterface.h
 WorldRenderInterface.h
+Manager.h
+WorldManager.h
+WorldRender.h
 ../kdtree/CudaNTree.h)
 
 SET (VIEWERSOURCE viewerMain.cpp
@@ -186,7 +189,9 @@ CubeRender.cpp
 ../shared/KdTreeNode.cpp
 ../shared/MinMaxBins.cpp 
 ../shared/SplitEvent.cpp
-../shared/BaseBinSplit.cpp 
+../shared/BaseBinSplit.cpp
+../shared/HElemAsset.cpp
+../shared/CartesianGrid.cpp
 ../btree/GridClustering.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp

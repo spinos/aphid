@@ -22,14 +22,14 @@ void render(uint * pix,
     dim3 block(blockx, blockx, 1);
     dim3 grid(gridx, gridy, 1);
     
-    twoCube_kernel<<< grid, block >>>(pix, 
+    worldBox_kernel<<< grid, block, 1024 >>>(pix, 
         nearDepth,
 		farDepth,
 		(NTreeBranch4 *)branches,
 		(NTreeLeaf *)leaves,
 		(Rope *)ropes,
 		indirections,
-		(Cube *)primitives);
+		(Aabb4 *)primitives);
 }
 
 const float cubefaces[] = {

@@ -2,19 +2,58 @@
 #include "cu/VectorMath.cuh"
 #include "cu/RayIntersection.cuh"
 #include "cu/NTreeTraverse.cuh"
+#include "cuSMem.cuh"
 
 __constant__ float3 c_frustumVec[6];
 __constant__ int4 c_renderRect;
 
-__global__ void twoCube_kernel(uint * pix, 
+__global__ void worldBox_kernel(uint * pix, 
                                 float * nearDepth,
                                 float * farDepth,
                                 NTreeBranch4 * branches,
                                 NTreeLeaf * leaves,
                                 Rope * ropes,
                                 int * indirections,
-                                Cube * primitives)
+                                Aabb4 * primitives)
 {
+    float *sdata = SharedMemory<float>();
+/// smem layout in floats
+/// 0  -> 7     grid translation and scaling
+/// 8  -> 15    grid tight box
+/// 16 -> 23    grid box
+
+    if(threadIdx.x ==0 && threadIdx.y ==0) {
+        const NTreeBranch4 & rootBranch = branches[0];
+/// get relative transform
+/// stored in branch[0] node[1]
+///        const float * rt = (const float *)get_branch_node(rootBranch, 1);
+///        sdata[0] = rt[0];
+///        sdata[1] = rt[1];
+///        sdata[2] = rt[2];
+///        sdata[3] = rt[3];
+///        sdata[4] = rt[4];
+///        sdata[5] = rt[5];
+/// get tight box
+/// stored in branch[0] node[8]
+        const float * tb = (const float *)get_branch_node(rootBranch, 8);
+        sdata[8] = tb[0];
+        sdata[9] = tb[1];
+        sdata[10] = tb[2];
+        sdata[11] = tb[3];
+        sdata[12] = tb[4];
+        sdata[13] = tb[5];
+/// get grid box
+/// stored in branch[0] node[4]
+        const float * gb = (const float *)get_branch_node(rootBranch, 4);
+        sdata[16] = gb[0];
+        sdata[17] = gb[1];
+        sdata[18] = gb[2];
+        sdata[19] = gb[3];
+        sdata[20] = gb[4];
+        sdata[21] = gb[5];
+    }
+    __syncthreads();
+    
     uint px = getPixelCoordx();
     uint py = getPixelCoordy();
     
@@ -30,12 +69,20 @@ __global__ void twoCube_kernel(uint * pix,
     v3_convert<float4, float3>(incident.d, c_frustumVec[3]);
     v3_add_mult<float4, float3, uint>(incident.d, c_frustumVec[4], px);
     v3_add_mult<float4, float3, uint>(incident.d, c_frustumVec[5], py);
+
+/// transform into grid space
+/// not necessary for world
+///    v3_minusr<float4>(incident.o, &sdata[0]);
+///    v3_minusr<float4>(incident.d, &sdata[0]);
+///    v3_divider<float4>(incident.o, &sdata[3]);
+///    v3_divider<float4>(incident.d, &sdata[3]);
     
     v3_minus<float4, float4>(incident.d, incident.o);
     v3_normalize_inplace<float4>(incident.d);
     
     Aabb4 box;
-    aabb4_convert<Rope>(box, ropes[0]);
+/// test tight box
+    aabb4_r(box, &sdata[8]);
     
     uint ind = getTiledPixelIdx();
     
@@ -46,6 +93,9 @@ __global__ void twoCube_kernel(uint * pix,
     if(!ray_box(incident, box, tmin, tmax) ) 
         return;
     
+/// start with grid box
+    aabb4_r(box, &sdata[16]);
+
     const KdNode * kn = get_branch_node(branches[0], 0);
     
     if(is_leaf(kn) ) return;

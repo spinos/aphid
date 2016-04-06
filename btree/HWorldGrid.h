@@ -401,7 +401,7 @@ void HWorldGrid<ChildType, ValueType>::buildTree(const BoundingBox & worldBox)
     KdEngine engine;
     TreeProperty::BuildProfile bf;
     bf._maxLeafPrims = 8;
-	bf._doTightBox = false;
+	bf._doTightBox = true;
     
     engine.buildTree<cvx::Box, KdNode4, 4>(&cbtree, &cbs, worldBox, &bf);
 	cbtree.setRelativeTransform(worldBox);
@@ -420,7 +420,13 @@ void HWorldGrid<ChildType, ValueType>::buildTree(const BoundingBox & worldBox)
 		cbd.insert((char *)cbs[i]);
 	
 	cbd.finishInsert();
-	std::cout<<"\n hworldgrid "<<pathToObject()<<" saved "<<cbd.numCols()<<" box"<<std::endl;
+	
+	BoundingBox tb;
+	cbtree.getWorldTightBox(&tb);
+	
+	std::cout<<"\n hworldgrid "<<pathToObject()<<" saved "<<cbd.numCols()<<" box"
+			<<"\n world tight box "<<tb;
+	std::cout.flush();
 }
 
 template<typename ChildType, typename ValueType>

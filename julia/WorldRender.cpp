@@ -15,42 +15,14 @@
 namespace aphid {
 
 WorldRender::WorldRender(const std::string & filename) :
-CudaRender(8),
-m_worldGrid(NULL)
+CudaRender(8)
 {
-	bool stat = m_io.begin(filename, HDocument::oReadOnly );
-	if(!stat)
-		return;
-	
-	std::string gridName;
-	stat = m_io.findGrid(gridName);
-	if(!stat)
-		return;
-	
-	std::cout<<"\n found grid "<<gridName;
-	
-	m_worldGrid = new WorldGridT(gridName);
-	m_worldGrid->load();
-	m_io.loadGridCoord<WorldGridT >(&m_worldCoord, m_worldGrid);
-	
-	std::string treeName;
-	stat = m_io.findTree(treeName, gridName);
-	if(!stat)
-		return;
-		
-	std::cout<<"\n found tree "<<treeName;
-
-	m_worldTree = new WorldTreeT(treeName);
-	m_worldTree->load();
-	m_worldTree->close();
-	m_worldTree->setSource(&m_worldCoord);
+	bool stat = m_io.openWorld(filename);
+	if(!stat) {}
 }
 
 WorldRender::~WorldRender() 
-{ 
-	if(m_worldGrid) m_worldGrid->close();
-	m_io.end(); 
-}
+{}
 
 void WorldRender::setBufferSize(const int & w, const int & h)
 {
@@ -60,11 +32,13 @@ void WorldRender::setBufferSize(const int & w, const int & h)
 				(float *) farDepthBuffer(),
                 512,
                 w * h );
-	CudaBase::CheckCudaError(" reset image");
+	CudaBase::CheckCudaError(" world reset image");
 }
 
 void WorldRender::render()
 {
+	CudaNTree<cvx::Box, KdNode4> * tree = m_io.worldTree();
+	
     updateRayFrameVec();
 	wldr::setBoxFaces();
 	wldr::setRenderRect((int *)&rect() );
@@ -72,14 +46,14 @@ void WorldRender::render()
 	wldr::render((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
 				(float *) farDepthBuffer(),
-				m_worldTree->deviceBranch(),
-				m_worldTree->deviceLeaf(),
-				m_worldTree->deviceRope(),
-				(int *)m_worldTree->deviceIndirection(),
-				m_worldTree->devicePrim(),
+				tree->deviceBranch(),
+				tree->deviceLeaf(),
+				tree->deviceRope(),
+				(int *)tree->deviceIndirection(),
+				tree->devicePrim(),
 				tileSize(),
 				tileX(), tileY() );
-	CudaBase::CheckCudaError(" render image");
+	CudaBase::CheckCudaError(" world render image");
 	colorToHost();
 }
 

@@ -40,6 +40,12 @@ inline __device__ void aabb4_convert(Aabb4 & v, const T & src)
     v3_convert<float4, float3>(v.high, src.high); 
 }
 
+inline __device__ void aabb4_r(Aabb4 & v, const float * src)
+{ 
+    v3_r<float4>(v.low, src); 
+    v3_r<float4>(v.high, &src[3]); 
+}
+
 inline __device__ void aabb4_reset(Aabb4 & b)
 {
     b.low.x = b.low.y = b.low.z = 1e20f;
