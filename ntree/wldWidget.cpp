@@ -33,6 +33,8 @@ void WldWidget::clientDraw()
 	drawTree();
 	drawIntersect();
 	drawVoxel();
+	hudText(boost::str(boost::format("mem %1% KB") % m_hio.usedMemory() ), 2);
+		
 }
 
 void WldWidget::drawBoxes() const

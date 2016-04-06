@@ -84,7 +84,7 @@ public:
 	char intersect(IntersectionContext * ctx);
 	char intersectBox(BoxIntersectContext * ctx);
 /// by indirection
-	const T * getSource(const int x) const;
+	const T * getSource(const int & x) const;
 	
 	virtual std::string verbosestr() const;
     
@@ -655,7 +655,7 @@ void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
 }
 
 template <typename T, typename Tn>
-const T * KdNTree<T, Tn>::getSource(const int x) const
+const T * KdNTree<T, Tn>::getSource(const int & x) const
 { return m_source->get(primIndirectionAt(x) ); }
 
 template <typename T, typename Tn>

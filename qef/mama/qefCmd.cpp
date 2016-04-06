@@ -213,10 +213,12 @@ int QefCmd::writeMesh(HTriangleAsset & asset,
 			dp[1] *= worldTm;	
 			dp[2] *= worldTm;
 			
-			if(AHelper::AreaOfTriangle(dp[0], dp[1], dp[2]) < 1e-5f ) {
+#if 0
+			if(AHelper::AreaOfTriangle(dp[0], dp[1], dp[2]) < 1e-6f ) {
 				AHelper::Info<int>(" low triangle area ", faceIt.index() );
 				continue;
 			}
+#endif
 			
 			faceIt.getNormal(0 , dn[0], MSpace::kObject );
 			faceIt.getNormal(i , dn[1], MSpace::kObject );

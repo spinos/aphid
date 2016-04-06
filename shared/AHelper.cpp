@@ -73,7 +73,7 @@ void AHelper::extractMeshParams(const MObject& mesh, unsigned & numVertex, unsig
 	}
 }
 
-MStatus AHelper::createIntAttr(MObject& attr, const char* nameLong, const char* nameShort, int val, int min)
+MStatus AHelper::createIntAttr(MObject& attr, const char* nameLong, const char* nameShort, int val, int vmin)
 {
 	MStatus status;
 	MFnNumericAttribute fAttr;
@@ -82,7 +82,7 @@ MStatus AHelper::createIntAttr(MObject& attr, const char* nameLong, const char* 
 	fAttr.setReadable(true);
 	fAttr.setKeyable(true);
 	fAttr.setConnectable(true);
-	fAttr.setMin(min);
+	fAttr.setMin(vmin);
 	return status;
 }
 

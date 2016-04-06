@@ -37,9 +37,11 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPlugArray.h>
 #include <maya/MFnTransform.h>
-#include <Matrix44F.h>
 #include <sstream>
+#undef min
+#undef max
 #include <boost/lexical_cast.hpp>
+#include <Matrix44F.h>
 
 namespace aphid {
 
@@ -65,7 +67,7 @@ public:
 	static void getDoubleArrayFromPlug(MDoubleArray& array, MPlug& plug);
 	static void extractMeshParams(const MObject& mesh, unsigned & numVertex, unsigned & numPolygons, MPointArray& vertices, MIntArray& pcounts, MIntArray& pconnects);
 	
-	static MStatus createIntAttr(MObject& attr, const char* nameLong, const char* nameShort, int val, int min);
+	static MStatus createIntAttr(MObject& attr, const char* nameLong, const char* nameShort, int val, int vmin);
 	static MStatus createDoubleAttr(MObject& attr, const MString& nameLong, const MString& nameShort, double val);
 	static MStatus createTypedAttr(MObject& attr, const MString& nameLong, const MString& nameShort, MFnData::Type type);
 	static MStatus createTypedArrayAttr(MObject& attr, const MString& nameLong, const MString& nameShort, MFnData::Type type);

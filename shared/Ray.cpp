@@ -12,12 +12,12 @@ namespace aphid {
 
 Ray::Ray() {}
 
-Ray::Ray(const Vector3F& pfrom, const Vector3F& vdir, float min, float max)
+Ray::Ray(const Vector3F& pfrom, const Vector3F& vdir, float tmin, float tmax)
 {
 	m_origin = pfrom;
 	m_dir = vdir;
-	m_tmin = min;
-	m_tmax = max;
+	m_tmin = tmin;
+	m_tmax = tmax;
 }
 
 Ray::Ray(const Vector3F& pfrom, const Vector3F& pto) 

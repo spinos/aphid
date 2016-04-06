@@ -359,8 +359,8 @@ int KdEngine::hitPrimitive(KdNTree<T, Tn > * tree,
 			ctx->m_hitN = c->calculateNormal();
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;
-/// ind to source
-			ctx->m_componentIdx = start + i;
+/// idx of source
+			ctx->m_componentIdx = tree->primIndirectionAt(start + i);
 			nhit++;
 		}
 	}
