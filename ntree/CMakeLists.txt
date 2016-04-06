@@ -11,7 +11,7 @@ include_directories (../shared
 ../hesperis
 ../kdtree
 ../btree
-../lapl)
+../julia)
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"
@@ -29,6 +29,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/HNTree.h
 ../kdtree/VoxelGrid.h
 ../btree/HAssetGrid.h
+../julia/Manager.h
 Container.h
 wldWidget.h
 triWidget.h

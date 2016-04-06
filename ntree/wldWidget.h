@@ -8,7 +8,7 @@
 #include <IntersectionContext.h>
 #include <HWorldGrid.h>
 #include <HAssetGrid.h>
-#include <NTreeIO.h>
+#include <Manager.h>
 
 class WldWidget : public aphid::Base3DView
 {
@@ -34,8 +34,6 @@ private:
     void drawTree();
     void drawIntersect();
 	void drawVoxel();
-	bool readTree(const std::string & filename);
-	void testTree();
 	void testIntersect(const aphid::Ray * incident);
 	void drawActiveSource(const unsigned & iLeaf);
 	aphid::BoundingBox getFrameBox();
@@ -43,12 +41,13 @@ private:
 private slots:
 	
 private:
+	aphid::IntersectionContext m_intersectCtx;
+	
 typedef aphid::sdb::HAssetGrid<aphid::HTriangleAsset, aphid::cvx::Triangle > InnerGridT;
 typedef aphid::sdb::HWorldGrid<InnerGridT, aphid::cvx::Triangle > WorldGridT;
-	aphid::IntersectionContext m_intersectCtx;
-	WorldGridT * m_grid;
-	aphid::KdNTree<aphid::Voxel, aphid::KdNode4 > * m_voxelTree;
-	aphid::NTreeIO m_hio;
+typedef aphid::KdNTree<aphid::Voxel, aphid::KdNode4 > TreeT;
+	TreeT * m_voxelTree;
+	aphid::jul::Manager<WorldGridT, InnerGridT, TreeT> m_hio;
 };
 //! [3]
 

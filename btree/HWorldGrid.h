@@ -462,4 +462,3 @@ KdNTree<cvx::Box, KdNode4 > * HWorldGrid<ChildType, ValueType>::tree()
 }
 }
 #endif        //  #ifndef HWORLDGRID_H
-

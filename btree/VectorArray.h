@@ -83,6 +83,8 @@ public:
 	int sizeInBytes() const;
 	int numElementsInBlock(const int & idx) const;
 	int elementBytes() const;
+/// in kilobyte
+	int usedMemory() const;
 	
 };
 
@@ -112,6 +114,10 @@ int VectorArray<T>::numElementsInBlock(const int & idx) const
 template <typename T>
 int VectorArray<T>::elementBytes() const
 { return sizeof(T); }
+
+template <typename T>
+int VectorArray<T>::usedMemory() const
+{ return numBlocks() * elementBytes(); }
 
 }
 

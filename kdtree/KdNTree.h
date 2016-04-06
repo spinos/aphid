@@ -83,12 +83,14 @@ public:
 	
 	char intersect(IntersectionContext * ctx);
 	char intersectBox(BoxIntersectContext * ctx);
-	
+/// by indirection
 	const T * getSource(const int x) const;
 	
 	virtual std::string verbosestr() const;
     
     typedef Tn TreeletType;
+	
+	int usedMemory() const;
 	
 protected:
 	void clear(const BoundingBox & b);
@@ -723,6 +725,16 @@ void KdNTree<T, Tn>::getWorldTightBox(BoundingBox * b) const
 	
 	b->scale(&relts[3]);
 	b->translate(relts);
+}
+
+template <typename T, typename Tn>
+int KdNTree<T, Tn>::usedMemory() const
+{
+	return (m_source->usedMemory()
+		+ m_nodePool.usedMemory()
+		+ m_leafNodes.usedMemory()
+		+ m_primIndices.usedMemory()
+		+ m_ropes.usedMemory() );
 }
 
 }

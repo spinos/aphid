@@ -16,22 +16,16 @@ WldWidget::WldWidget(const std::string & filename, QWidget *parent) : Base3DView
 	orthoCamera()->setNearClipPlane(1.f);
     m_intersectCtx.m_success = 0;
 	
-	m_grid = NULL;
 	m_voxelTree = NULL;
 	
-	if(filename.size() > 1) readTree(filename);
+	if(filename.size() > 1) m_hio.openWorld(filename);
 }
-//! [0]
 
-//! [1]
 WldWidget::~WldWidget()
-{
-	if(m_grid) delete m_grid;
-}
+{}
 
 void WldWidget::clientInit()
-{// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update())); 
-}
+{}// connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 
 void WldWidget::clientDraw()
 {
@@ -43,21 +37,18 @@ void WldWidget::clientDraw()
 
 void WldWidget::drawBoxes() const
 {
-	if(!m_grid) return;
+	if(!m_hio.grid()) return;
     getDrawer()->setColor(.0f, .065f, .165f);
 	NTreeDrawer dr;
-	dr.drawSource<cvx::Box>(m_grid->tree() );
+	dr.drawSource<cvx::Box>(m_hio.grid()->tree() );
 }
 
 void WldWidget::drawTree()
 {
-	if(!m_grid) return; 
-	
-	//getDrawer()->setColor(.15f, .25f, .35f);
-	//getDrawer()->boundingBox(tree()->getBBox() );
+	if(!m_hio.grid()) return; 
 	
 	NTreeDrawer dr;
-	dr.drawTree<cvx::Box>(m_grid->tree() );
+	dr.drawTree<cvx::Box>(m_hio.grid()->tree() );
 }
 
 void WldWidget::clientSelect(QMouseEvent *event)
@@ -104,37 +95,18 @@ void WldWidget::resizeEvent(QResizeEvent * event)
     Base3DView::resizeEvent(event);
 }
 
-bool WldWidget::readTree(const std::string & filename)
-{
-	bool stat = false;
-	
-	if(!m_hio.begin(filename) ) return false;
-	
-	stat = m_hio.objectExists("/grid/.tree");
-	
-	if(stat) {
-		m_grid = new WorldGridT("/grid");
-		m_grid->load();
-		
-	} else {
-		std::cout<<"\n  found no grid ";
-	}
-	
-	return true;
-}
-
 void WldWidget::testIntersect(const Ray * incident)
 {
 	m_intersectCtx.reset(*incident);
-	if(!m_grid) return;
+	if(!m_hio.grid()) return;
 	std::stringstream sst; sst<<incident->m_dir;
 	qDebug()<<"interset begin "<<sst.str().c_str();
 	KdEngine eng;
-	eng.intersect<cvx::Box, KdNode4>(m_grid->tree(), &m_intersectCtx);
+	eng.intersect<cvx::Box, KdNode4>(m_hio.grid()->tree(), &m_intersectCtx);
 	qDebug()<<"interset end";
 	if(m_intersectCtx.m_success) {
 		qDebug()<<" hit component "<<m_intersectCtx.m_componentIdx;
-		m_voxelTree = m_grid->cell(m_intersectCtx.m_componentIdx)->loadTree();
+		m_voxelTree = m_hio.loadCell(m_intersectCtx.m_componentIdx);
 	}
 }
 
@@ -159,19 +131,20 @@ void WldWidget::drawIntersect()
 	b.expand(0.03f);
 	getDrawer()->boundingBox(b );
 	
-	if(m_intersectCtx.m_success) drawActiveSource(m_intersectCtx.m_leafIdx);
+	if(m_intersectCtx.m_success)
+		drawActiveSource(m_intersectCtx.m_leafIdx);
 }
 
 void WldWidget::drawActiveSource(const unsigned & iLeaf)
 {
-	if(!m_grid) return;
+	if(!m_hio.grid()) return;
 	
 	glColor3f(0,.6,.4);
 	int start, len;
-	m_grid->tree()->leafPrimStartLength(start, len, iLeaf);
+	m_hio.grid()->tree()->leafPrimStartLength(start, len, iLeaf);
 	int i=0;
 	for(;i<len;++i) {
-		const cvx::Box * c = m_grid->tree()->getSource(start + i);
+		const cvx::Box * c = m_hio.grid()->tree()->getSource(start + i);
 		BoundingBox b = c->calculateBBox();
 		b.expand(-0.03f);
 		getDrawer()->boundingBox(b );
@@ -185,14 +158,14 @@ void WldWidget::drawVoxel()
 	NTreeDrawer dr;
 	dr.drawTree<Voxel>(m_voxelTree);
 	getDrawer()->setColor(0.f, .15f, .35f);
-	dr.drawTightBox<Voxel>(m_voxelTree);
+	// dr.drawTightBox<Voxel>(m_voxelTree);
 	dr.drawSource<Voxel>(m_voxelTree);
 }
 
 BoundingBox WldWidget::getFrameBox()
 {
 	BoundingBox b;
-	if(m_grid) b = m_grid->tree()->getBBox();
+	if(m_hio.grid()) b = m_hio.grid()->tree()->getBBox();
 	return b;
 }
 //:~
