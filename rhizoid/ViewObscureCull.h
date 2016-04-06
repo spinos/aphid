@@ -13,7 +13,6 @@
 
 namespace aphid {
 
-class KdTree;
 class ViewObscureCull : public ViewCull {
 
 	IntersectionContext m_intersectCtx;
@@ -23,10 +22,6 @@ public:
 	virtual ~ViewObscureCull();
 	
 protected:
-
-	bool cullByDepth(const Vector3F & pnt, const float & threshold,
-					float & cameraZ,
-					KdTree * obscurer);
 	
 	template <typename T, typename Tr>
 	bool cullByDepth(const Vector3F & pnt, const float & threshold,

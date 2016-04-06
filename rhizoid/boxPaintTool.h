@@ -38,6 +38,7 @@ class proxyPaintContext : public MPxContext
         opReplace = 10,
         opCreate = 11,
         opSelectByType= 12,
+		opRandResize = 13,
         opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
@@ -123,6 +124,7 @@ private:
     void discardFaceSelection();
     void discardPlantSelection();
     void injectSelectedTransform();
+	void resizeSelectedRandomly();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

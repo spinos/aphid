@@ -42,7 +42,8 @@ public:
 	
     void setNoiseWeight(float x);
     void erectActive();
-	
+	void scalePlant(GrowOption & option);
+    
 protected:
 	bool growOnGround(GrowOption & option);
 	
@@ -51,7 +52,7 @@ protected:
 	void replaceAt(const Ray & ray, GrowOption & option);
 	void clearAt(const Ray & ray, GrowOption & option);
 	void scaleAt(const Ray & ray, float magnitude);
-    void rotateAt(const Ray & ray, float magnitude, int axis);
+	void rotateAt(const Ray & ray, float magnitude, int axis);
 	void movePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,
 					const float & clipNear, const float & clipFar);

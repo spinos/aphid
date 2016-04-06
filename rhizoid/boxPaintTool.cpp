@@ -148,6 +148,11 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(short val)
 {
+	if(val == opRandResize) {
+		resizeSelectedRandomly();
+		return;
+	}
+	
     if(val == opInjectTransform) {
 		injectSelectedTransform();
 		return;
@@ -646,5 +651,12 @@ void proxyPaintContext::injectSelectedTransform()
     
     AHelper::Info<int>("proxyPaintContext inject n transform", ms.size() );
     PtrViz->injectPlants(ms, m_growOpt);
+}
+
+void proxyPaintContext::resizeSelectedRandomly()
+{
+	if(!PtrViz) return;
+    
+	PtrViz->scalePlant(m_growOpt);
 }
 //:~

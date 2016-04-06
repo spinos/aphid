@@ -337,6 +337,20 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 	}
 }
 
+void ModifyForest::scalePlant(GrowOption & option)
+{
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		PlantData * plantd = arr->value()->m_reference->index;
+		Matrix44F * mat = plantd->t1;
+		float rat = getNoise2(option.m_minScale, option.m_maxScale) / mat->getSide().length();
+		if(rat < .1f) rat = .1f;
+		mat->scaleBy(rat );
+		arr->next();
+	}
+}
+
 void ModifyForest::rotateAt(const Ray & ray, float magnitude, int axis)
 {
     if(!calculateSelecedWeight(ray)) return;
