@@ -64,7 +64,7 @@ bool HesperisPolygonalMeshIO::CreateMeshData(APolygonalMesh * data, const MDagPa
 	
     unsigned i = 0;
     for(;i<np;i++) {
-        wp  = ps[i] * worldTm;
+        wp  = ps[i] * worldTm - GlobalReferencePoint;
         pnts[i].set((float)wp.x, (float)wp.y, (float)wp.z);
     }
     

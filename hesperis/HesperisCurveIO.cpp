@@ -155,7 +155,7 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
 		inode++;
 		
 		for(j=0; j<nj; j++) {
-			wp = ps[j] * worldTm;
+			wp = ps[j] * worldTm - GlobalReferencePoint;
 			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
 			icv++;
 		}

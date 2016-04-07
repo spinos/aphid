@@ -54,6 +54,7 @@ public:
 	static std::string H5PathNameTo(const MDagPath & path);
 	static std::string H5PathNameTo(const MObject & node);
 	static std::string CurrentHObjectPath;
+    static MPoint GlobalReferencePoint;
     
 protected:
     template<typename Th, typename Td, typename Tc>

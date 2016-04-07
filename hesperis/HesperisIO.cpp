@@ -28,6 +28,7 @@
 
 namespace aphid {
     
+MPoint HesperisIO::GlobalReferencePoint;
 std::string HesperisIO::CurrentHObjectPath;
 
 bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file )
@@ -204,7 +205,7 @@ bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup
 		fmesh.getTriangles(triangleCounts, triangleVertices);
 			
 		for(j=0; j<fmesh.numVertices(); j++) {
-            wp = ps[j] * worldTm;
+            wp = ps[j] * worldTm - GlobalReferencePoint;
 			pnts[pDrift + j].set((float)wp.x, (float)wp.y, (float)wp.z);
         }
 		
