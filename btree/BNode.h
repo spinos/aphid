@@ -718,7 +718,7 @@ void BNode<KeyType, MaxNKey>::removeLeaf(const KeyType & x)
 		return;
 	}
 	
-	if(!isUnderflow()) return;
+	//if(!isUnderflow()) return;
 
 	if(!leafBalance())
 	    mergeLeaf();

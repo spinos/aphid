@@ -21,7 +21,7 @@ class Container {
 	BoundingBox m_worldBox;
 	sdb::VectorArray<T> * m_source;
 	KdNTree<T, KdNode4 > * m_tree;
-	VoxelGrid<KdNTree<T, KdNode4 >, T > * m_grid;
+	VoxelGrid<T, KdNode4 > * m_grid;
 	KdNTree<Voxel, KdNode4 > * m_voxelTree;
 	
 public:
@@ -31,7 +31,7 @@ public:
 	bool readTree(const std::string & filename);
 	KdNTree<T, KdNode4 > * tree();
 	KdNTree<Voxel, KdNode4 > * voxelTree();
-	VoxelGrid<KdNTree<T, KdNode4 >, T > * grid();
+	VoxelGrid<T, KdNode4 > * grid();
 	const sdb::VectorArray<T> * source() const;
 	const BoundingBox & worldBox() const;
 	
@@ -112,7 +112,7 @@ bool Container<T>::buildTree()
 template<typename T>
 bool Container<T>::buildGrid()
 {
-	m_grid = new VoxelGrid<KdNTree<T, KdNode4 >, T >();
+	m_grid = new VoxelGrid<T, KdNode4 >();
 	BoundingBox b = m_tree->getBBox();
 	m_grid->create(m_tree, b, 8);
 	
@@ -146,7 +146,7 @@ const sdb::VectorArray<T> * Container<T>::source() const
 { return m_source; }
 
 template<typename T>
-VoxelGrid<KdNTree<T, KdNode4 >, T > * Container<T>::grid()
+VoxelGrid<T, KdNode4 > * Container<T>::grid()
 { return m_grid; }
 
 template<typename T>

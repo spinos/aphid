@@ -82,7 +82,7 @@ public:
 	virtual void setSource(sdb::VectorArray<T> * src);
 	
 	char intersect(IntersectionContext * ctx);
-	char intersectBox(BoxIntersectContext * ctx);
+	//char intersectBox(BoxIntersectContext * ctx);
 /// by indirection
 	const T * getSource(const int & x) const;
 	
@@ -117,12 +117,12 @@ private:
 							int & nodeIdx,
 							const KdTreeNode * r);
 							
-	void leafIntersectBox(BoxIntersectContext * ctx,
-							KdTreeNode * r);
-	void innerIntersectBox(BoxIntersectContext * ctx,
-							int branchIdx,
-							int nodeIdx,
-							const BoundingBox & b);
+	//void leafIntersectBox(BoxIntersectContext * ctx,
+	//						KdTreeNode * r);
+	//void innerIntersectBox(BoxIntersectContext * ctx,
+	//						int branchIdx,
+	//						int nodeIdx,
+	//						const BoundingBox & b);
 };
 
 template <typename T, typename Tn>
@@ -548,7 +548,7 @@ std::string KdNTree<T, Tn>::verbosestr() const
 	sst<<logProperty();
 	return sst.str();
 }
-
+/*
 template <typename T, typename Tn>
 char KdNTree<T, Tn>::intersectBox(BoxIntersectContext * ctx)
 {
@@ -653,7 +653,7 @@ void KdNTree<T, Tn>::innerIntersectBox(BoxIntersectContext * ctx,
 		}
 	}
 }
-
+*/
 template <typename T, typename Tn>
 const T * KdNTree<T, Tn>::getSource(const int & x) const
 { return m_source->get(primIndirectionAt(x) ); }

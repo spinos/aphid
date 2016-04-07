@@ -44,6 +44,10 @@ public:
 	template<typename T, typename Tn>
 	void closestToPoint(KdNTree<T, Tn > * tree, 
 				Geometry::ClosestToPointTestResult * ctx);
+				
+	template<typename T, typename Tn>
+	void intersectBox(KdNTree<T, Tn > * tree, 
+				BoxIntersectContext * ctx);
 
 protected:
 
@@ -97,7 +101,18 @@ private:
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & b);
-								
+				
+	template<typename T, typename Tn>
+	void leafIntersectBox(KdNTree<T, Tn > * tree,
+				BoxIntersectContext * ctx,
+				KdTreeNode * r);
+		
+	template <typename T, typename Tn>
+	void innerIntersectBox(KdNTree<T, Tn > * tree,
+				BoxIntersectContext * ctx,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & b);
 };
 
 template<typename T, typename Ts>
@@ -634,6 +649,111 @@ void KdEngine::leafClosestToPoint(KdNTree<T, Tn > * tree,
 		c-> template closestToPoint<Geometry::ClosestToPointTestResult>(result);
 	}
 	
+}
+
+
+template<typename T, typename Tn>
+void KdEngine::intersectBox(KdNTree<T, Tn > * tree, 
+				BoxIntersectContext * ctx)
+{
+	if(tree->isEmpty() ) return;
+	KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() ) {
+		leafIntersectBox(tree, ctx, r);
+		return;
+	}
+	const BoundingBox b = tree->getBBox();
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	int branchIdx = tree->root()->internalOffset(0);
+	if(ctx->getMin(axis) < splitPos) 
+		innerIntersectBox(tree, ctx, branchIdx, 0, lftBox);
+	if(ctx->isFull() ) return;
+	
+	if(ctx->getMax(axis) > splitPos) 
+		innerIntersectBox(tree, ctx, branchIdx, 1, rgtBox);
+}
+
+template <typename T, typename Tn>
+void KdEngine::leafIntersectBox(KdNTree<T, Tn > * tree,
+							BoxIntersectContext * ctx,
+							KdTreeNode * r)
+{
+	if(r->getNumPrims() < 1) return;
+	int start, len;
+	tree->leafPrimStartLength(start, len, r->getPrimStart() );
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = tree->getSource(start + i );
+		if(c->calculateBBox().intersect(*ctx) ) {
+			if(ctx->isExact() ) {
+				if(c-> template exactIntersect<BoxIntersectContext >(*ctx) )
+					ctx->addPrim(tree->primIndirectionAt(start + i) );
+			}
+			else
+				ctx->addPrim(tree->primIndirectionAt(start + i) );
+				
+			if(ctx->isFull() ) return;
+		}
+	}
+}
+
+template <typename T, typename Tn>
+void KdEngine::innerIntersectBox(KdNTree<T, Tn > * tree,
+							BoxIntersectContext * ctx,
+							int branchIdx,
+							int nodeIdx,
+							const BoundingBox & b)
+{
+	Tn * currentBranch = tree->branches()[branchIdx];
+	KdTreeNode * r = currentBranch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		leafIntersectBox(tree, ctx, r);
+		return;
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	
+	const int offset = r->getOffset();
+	if(offset < Tn::TreeletOffsetMask) {
+		if(ctx->getMin(axis) < splitPos ) {
+			innerIntersectBox(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+			if(ctx->isFull() ) return;
+		}
+		
+		if(ctx->getMax(axis) > splitPos ) {
+			innerIntersectBox(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset + 1,
+							rgtBox);
+			if(ctx->isFull() ) return;
+		}
+	}
+	else {
+		if(ctx->getMin(axis) < splitPos ) {
+			innerIntersectBox(tree, ctx, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+			if(ctx->isFull() ) return;
+		}
+		
+		if(ctx->getMax(axis) > splitPos ) {
+			innerIntersectBox(tree, ctx, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+			if(ctx->isFull() ) return;
+		}
+	}
 }
 
 }

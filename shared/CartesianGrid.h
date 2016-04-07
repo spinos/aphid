@@ -47,10 +47,15 @@ public:
 	void extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
 						const float & shrinkFactor = .49995f);
 	
-protected:
-	void setBounding(float * originSpan);
+	static const float Cell8ChildOffset[8][3];
+	static const int Cell6NeighborOffsetI[6][3];
+	static const int Cell24FinerNeighborOffsetI[24][3];
+	
 	void setBounding(const BoundingBox & bound);
     
+protected:
+	void setBounding(float * originSpan);
+	
 	const float gridSize() const;
 	
 	void gridOfP(const Vector3F & p, unsigned & x,
@@ -90,10 +95,6 @@ protected:
 									sdb::CellHash & cellsToRefine);
 	
 	void tagCellsToRefineByNeighbours(sdb::CellHash & cellsToRefine);
-									
-	static const float Cell8ChildOffset[8][3];
-	static const int Cell6NeighborOffsetI[6][3];
-	static const int Cell24FinerNeighborOffsetI[24][3];
 	
 private:
     

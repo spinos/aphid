@@ -303,7 +303,7 @@ int KeyNData<KeyType, MaxNKey>::keyLeft(const KeyType & x) const
 
 template <typename KeyType, int MaxNKey>
 bool KeyNData<KeyType, MaxNKey>::isKeyInRange(const KeyType & x) const
-{ 
+{
 	if( x < firstKey() ) return false;
 	if( x > lastKey() ) return false; 
 	return true;
@@ -319,10 +319,17 @@ const SearchResult KeyNData<KeyType, MaxNKey>::findKey(const KeyType & x) const
 
 	if(numKeys() < 1) return r;
 	
-	if(key(0) == x) r.found = 0;
-	
 	r.high = numKeys() - 1;
-	if(key(r.high) == x) r.found = r.high;
+	
+	if(key(0) == x) {
+		r.found = 0;
+		return r;
+	}
+	
+	if(key(r.high) == x) {
+		r.found = r.high;
+		return r;
+	}
 	
     int mid;
     while(r.low < r.high - 1) {

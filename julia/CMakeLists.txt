@@ -12,6 +12,8 @@ set (HEADER_FILES ../btree/HWorldGrid.h
 ../btree/HInnerGrid.h
 ../kdtree/HNTree.h
 ../kdtree/KdEngine.h
+../kdtree/GridBuilder.h
+../kdtree/VoxelGrid.h
 ../ntree/NTreeIO.h
 ../shared/HAsset.h
 ../btree/HAssetGrid.h

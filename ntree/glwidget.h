@@ -46,7 +46,7 @@ private:
 	aphid::IntersectionContext m_intersectCtx;
 	aphid::sdb::VectorArray<aphid::cvx::Cube> * m_source;
 	aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 > * m_tree;
-	aphid::VoxelGrid<aphid::KdNTree<aphid::cvx::Cube, aphid::KdNode4 >, aphid::cvx::Cube > * m_grid;
+	aphid::VoxelGrid<aphid::cvx::Cube, aphid::KdNode4 > * m_grid;
 	int m_treeletColI;
 	int m_maxDrawTreeLevel;
 };

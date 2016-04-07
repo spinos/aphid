@@ -249,7 +249,7 @@ void GLWidget::drawActiveSource(const unsigned & iLeaf)
 
 void GLWidget::testGrid()
 {
-	m_grid = new VoxelGrid<KdNTree<cvx::Cube, KdNode4 >, cvx::Cube >();
+	m_grid = new VoxelGrid<cvx::Cube, KdNode4 >();
 	BoundingBox b = m_tree->getBBox();
 	b.expand(b.getLongestDistance() * .005f);
 	m_grid->create(m_tree, b);

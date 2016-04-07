@@ -192,7 +192,7 @@ public:
 	
 	template<typename T>
 	bool exactIntersect(const T & b) const {
-	
+		if(calculateBBox().inside(b) ) return true;
 		return gjk::Intersect1<Triangle, T>::Evaluate(*this, b);
 	}
 	

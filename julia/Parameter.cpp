@@ -12,8 +12,15 @@ namespace jul {
 Parameter::Parameter(int argc, char *argv[])
 {
 	m_opt = kUnknown;
-	bool foundImages = false;
 	m_cellSize = 256;
+	
+#if 0
+/// test
+	m_inFileName = "/users/jianzhang/palm.h5";
+	m_outFileName = "/users/jianzhang/aphid/julia/xyz";
+	m_opt = kInsert;
+	return;
+#endif
 	
 	if(argc < 2) {
 		std::cout<<"\n too few arguments "<<argc;
@@ -100,7 +107,6 @@ Parameter::Parameter(int argc, char *argv[])
 				m_opt = kBuildTree;
 			}
 	}
-	
 }
 
 Parameter::~Parameter() {}
