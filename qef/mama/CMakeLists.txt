@@ -36,6 +36,7 @@ ${APHID_DIR}/shared/HElemAsset.cpp
 ${APHID_DIR}/shared/AHelper.cpp
 ${APHID_DIR}/shared/ASearchHelper.cpp
 ${APHID_DIR}/shared/SHelper.cpp
+${APHID_DIR}/hesperis/HesperisIO.cpp
 )
 
 SET (INSTALLED_HDF5 OFF)
