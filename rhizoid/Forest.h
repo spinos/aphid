@@ -85,6 +85,7 @@ protected:
 	const float & plantSize(int idx) const;
 	
 	void displacePlantInGrid(PlantInstance * inst );
+	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
 	bool getBindPoint(Vector3F & pos, GroundBind * bind);
 	
