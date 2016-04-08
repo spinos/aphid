@@ -31,6 +31,10 @@ public:
 template<typename T>
 void GridDrawer::drawGrid(T * g)
 {
+	BoundingBox gb;
+	g->getBounding(gb);
+	drawBoundingBox(&gb);
+	
 	sdb::CellHash * c = g->cells();
 	Vector3F l;
     float h;

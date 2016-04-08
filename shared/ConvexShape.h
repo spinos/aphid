@@ -182,6 +182,7 @@ public:
 	const Vector3F * p(int idx) const;
 	const Vector3F & P(int idx) const;
 	Vector3F N(int idx) const;
+	Vector3F C(int idx) const;
 	const int & ind0() const;
 	const int & ind1() const;
 	Vector3F calculateNormal() const;

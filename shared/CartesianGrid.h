@@ -52,6 +52,8 @@ public:
 	static const int Cell24FinerNeighborOffsetI[24][3];
 	
 	void setBounding(const BoundingBox & bound);
+/// tight bbox
+	BoundingBox calculateBBox();
     
 protected:
 	void setBounding(float * originSpan);

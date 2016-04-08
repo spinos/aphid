@@ -382,5 +382,19 @@ void CartesianGrid::extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
 	}
 }
 
+BoundingBox CartesianGrid::calculateBBox()
+{
+	BoundingBox r;
+	sdb::CellHash * c = cells();
+    c->begin();
+    while(!c->end()) {
+        
+		r.expandBy(cellBox(c->key(), c->value()->level) );
+		
+        c->next();
+	}
+	return r;
+}
+
 }
 //:~

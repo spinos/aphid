@@ -63,7 +63,7 @@ void GridBuilder<T, Tn>::build(KdNTree<T, Tn > * tree,
     int i, j, k;
 
     const float h = g4.cellSizeAtLevel(level);
-    const float hh = h * .5f;
+    const float hh = h * .49995f;
 	
 	const Vector3F ori = g4.origin() + Vector3F(hh, hh, hh);
     Vector3F sample;
@@ -111,7 +111,7 @@ bool GridBuilder<T, Tn>::refine(KdNTree<T, Tn > * tree,
     while(!c->end()) {
         
 		int level1 = c->value()->level + 1;
-		float hh = gd.cellSizeAtLevel(level1) * .5f;
+		float hh = gd.cellSizeAtLevel(level1) * .49995f;
 		Vector3F sample = gd.cellCenter(c->key() );
 		
 		for(int u = 0; u < 8; u++) {

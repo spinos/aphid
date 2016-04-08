@@ -20,6 +20,9 @@ protected:
 
 private:
     aphid::Base3DView *glWidget;
+	
+	void printHelp();
+	
 };
 //! [0]
 

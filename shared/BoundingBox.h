@@ -54,7 +54,7 @@ public:
     float radius() const;
 	float radiusXZ() const;
 	
-	char intersect(const BoundingBox & another) const;
+	bool intersect(const BoundingBox & another) const;
 	bool intersect(const BoundingBox & another, BoundingBox * tightBox) const;
 	char intersect(const Ray &ray, float *hitt0=NULL, float *hitt1=NULL) const;
 	bool intersect(const Plane & p, float & tmin, float & tmax) const;

@@ -247,12 +247,14 @@ float BoundingBox::distanceTo(const Vector3F & pnt) const
     return sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-char BoundingBox::intersect(const BoundingBox & another) const
+bool BoundingBox::intersect(const BoundingBox & another) const
 {
-    for(int i=0; i < 3; i++) {
-        if(getMin(i) > another.getMax(i)) return 0;
-        if(getMax(i) < another.getMin(i)) return 0;    
-    }
+    if(getMin(0) >= another.getMax(0)) return 0;
+	if(getMax(0) <= another.getMin(0)) return 0;
+	if(getMin(1) >= another.getMax(1)) return 0;
+	if(getMax(1) <= another.getMin(1)) return 0; 
+	if(getMin(2) >= another.getMax(2)) return 0;
+	if(getMax(2) <= another.getMin(2)) return 0;    
     return 1;
 }
 

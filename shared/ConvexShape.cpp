@@ -252,6 +252,15 @@ Vector3F Triangle::N(int idx) const
 	return r;
 }
 
+Vector3F Triangle::C(int idx) const
+{
+	Vector3F r;
+	if(idx == 0) colnor30::decodeC(r, m_nc0);
+	else if(idx == 1) colnor30::decodeC(r, m_nc1);
+	else colnor30::decodeC(r, m_nc2);
+	return r;
+}
+
 const int & Triangle::ind0() const
 { return m_nc0; }
 

@@ -19,6 +19,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../shared/Morton3D.h"
 ../shared/ConvexShape.h
 ../shared/HElemAsset.h
+../shared/VoxelEngine.h
 ../kdtree/KdBuilder.h
 ../kdtree/KdEngine.h
 ../kdtree/KdRope.h
@@ -33,6 +34,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 Container.h
 wldWidget.h
 triWidget.h
+voxWidget.h
 NTreeIO.h
 NTreeDrawer.h)
 
@@ -53,6 +55,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../kdtree/HNTree.cpp
 wldWidget.cpp
 triWidget.cpp
+voxWidget.cpp
 NTreeIO.cpp
 glwidget.cpp
 window.cpp

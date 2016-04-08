@@ -178,7 +178,7 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level)
 		if(c->value()->level == level) {
 			
 		sample = cellCenter(c->key() );
-		hh = cellSizeAtLevel(c->value()->level ) * 0.5f;
+		hh = cellSizeAtLevel(c->value()->level ) * 0.49995f;
 		
 		box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
 		box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
