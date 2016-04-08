@@ -131,6 +131,7 @@ bool Container<T>::buildGrid()
 	BoundingBox brel;
 	m_grid->getBounding(brel);
 	m_voxelTree->setRelativeTransform(brel);
+    return true;
 }
 
 template<typename T>

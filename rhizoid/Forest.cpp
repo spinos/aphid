@@ -154,7 +154,7 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 		mode);
 
 	KdEngine engine;
-	engine.select<cvx::Triangle>(m_ground, m_selectCtx);
+	engine.select<cvx::Triangle, KdNode4>(m_ground, m_selectCtx);
 	return true;
 }
 
@@ -312,7 +312,7 @@ bool Forest::intersectGround(const Ray & ray)
 	
 	m_intersectCtx.reset(ray);
 	KdEngine engine;
-	engine.intersect<cvx::Triangle>(m_ground, &m_intersectCtx );
+	engine.intersect<cvx::Triangle, KdNode4>(m_ground, &m_intersectCtx );
 	
 	return m_intersectCtx.m_success;
 }

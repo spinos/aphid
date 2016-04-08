@@ -687,14 +687,16 @@ void KdEngine::leafIntersectBox(KdNTree<T, Tn > * tree,
 	int i = 0;
 	for(;i<len;++i) {
 		const T * c = tree->getSource(start + i );
-		if(c->calculateBBox().intersect(*ctx) ) {
+        bool hit = c->calculateBBox().intersect(*ctx)
+		if(hit) {
 			if(ctx->isExact() ) {
-				if(c-> template exactIntersect<BoxIntersectContext >(*ctx) )
-					ctx->addPrim(tree->primIndirectionAt(start + i) );
-			}
-			else
-				ctx->addPrim(tree->primIndirectionAt(start + i) );
-				
+                if(!c->calculateBBox().inside(*ctx) )
+                    hit = c-> template exactIntersect<BoxIntersectContext >(*ctx);
+            }
+		}
+        
+		if(hit) {
+			ctx->addPrim(tree->primIndirectionAt(start + i) );
 			if(ctx->isFull() ) return;
 		}
 	}
