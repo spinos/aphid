@@ -43,6 +43,7 @@ public:
 	bool isPInsideBound(const Vector3F & p) const;
 	void putPInsideBound(Vector3F & p) const;
 	
+	sdb::CellValue * findCell(const Vector3F & p, int level) const;
 	sdb::CellValue * findCell(unsigned code) const;
 	void extractCellBoxes(sdb::VectorArray<cvx::Cube> * dst,
 						const float & shrinkFactor = .49995f);

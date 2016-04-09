@@ -32,6 +32,7 @@ private:
 	void buildTests();
 	void drawGrids();
 	void drawTriangles();
+	void drawFronts();
 	
 private:
 	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine;

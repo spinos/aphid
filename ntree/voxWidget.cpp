@@ -37,6 +37,7 @@ void VoxWidget::clientDraw()
 {
 	drawGrids();
 	drawTriangles();
+	drawFronts();
 }
 
 void VoxWidget::clientMouseInput(QMouseEvent *event)
@@ -84,6 +85,45 @@ void VoxWidget::drawTriangles()
 	glEnd();
 }
 
+void VoxWidget::drawFronts()
+{
+	GeoDrawer * dr = getDrawer();
+	Vector3F d, c;
+	int i =0;
+	for(;i<6;++i) {
+		if(i==0) {
+			d.set(-1.f, 0.f, 0.f);
+			c.set(.5f, 0.f, 0.f);
+		}
+		else if(i==1) {
+			d.set(1.f, 0.f, 0.f);
+			c.set(1.f, 0.f, 0.f);
+		}
+		else if(i==2) {
+			d.set(0.f, -1.f, 0.f);
+			c.set(0.f, .5f, 0.f);
+		}
+		else if(i==3) {
+			d.set(0.f, 1.f, 0.f);
+			c.set(0.f, 1.f, 0.f);
+		}
+		else if(i==4) {
+			d.set(0.f, 0.f, -1.f);
+			c.set(0.f, 0.f, .5f);
+		}
+		else {
+			d.set(0.f, 0.f, 1.f);
+			c.set(0.f, 0.f, 1.f);
+		}
+		const std::vector<Vector3F> & fr = m_engine.fronts(i);
+		std::vector<Vector3F>::const_iterator it = fr.begin();
+		for(;it!= fr.end();++it) {
+			glColor3f(c.x, c.y, c.z);
+			dr->cube(*it, 0.1f);
+		}
+	}
+}
+
 void VoxWidget::buildTests()
 {
 	BoundingBox b(0.f, 0.f, 0.f,
@@ -92,8 +132,8 @@ void VoxWidget::buildTests()
 	
 	Vector3F vp[3];
 	vp[0].set(-1.1f, .1f, -.9f);
-	vp[1].set(2.f, 1.1f, 6.9f);
-	vp[2].set(9.9f, 3.1f, 3.f);
+	vp[1].set(2.f, 5.1f, 3.9f);
+	vp[2].set(7.9f, 3.1f, 5.f);
 	
 	cvx::Triangle tri;
 	tri.resetNC();

@@ -115,6 +115,9 @@ unsigned CartesianGrid::mortonEncodeLevel(const Vector3F & p, int level) const
 sdb::CellValue * CartesianGrid::findGrid(unsigned code) const
 { return m_cellHash->find(code); }
 
+sdb::CellValue * CartesianGrid::findCell(const Vector3F & p, int level) const
+{ return findCell(mortonEncodeLevel(p, level) ); }
+
 sdb::CellValue * CartesianGrid::findCell(unsigned code) const
 {
     if(code < 1) return 0;
