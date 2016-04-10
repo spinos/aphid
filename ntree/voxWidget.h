@@ -33,9 +33,18 @@ private:
 	void drawGrids();
 	void drawTriangles();
 	void drawFronts();
+	aphid::cvx::Triangle createTriangle(const aphid::Vector3F & p0,
+								const aphid::Vector3F & p1,
+								const aphid::Vector3F & p2,
+								const aphid::Vector3F & c0,
+								const aphid::Vector3F & c1,
+								const aphid::Vector3F & c2);
 	
 private:
 	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine;
-	
+	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine1;
+	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine2;
+	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine3;
+	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine4;
 };
 #endif

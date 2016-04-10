@@ -66,6 +66,12 @@ void VoxWidget::drawGrids()
 	glColor3f(0,.6,.4);
 	GridDrawer dr;
 	dr.drawGrid<CartesianGrid>(&m_engine);
+	//glTranslatef(8,0,0);
+	dr.drawGrid<CartesianGrid>(&m_engine1);
+	dr.drawGrid<CartesianGrid>(&m_engine2);
+	dr.drawGrid<CartesianGrid>(&m_engine3);
+	dr.drawGrid<CartesianGrid>(&m_engine4);
+	//glTranslatef(-8,0,0);
 }
 
 void VoxWidget::drawTriangles()
@@ -88,6 +94,7 @@ void VoxWidget::drawTriangles()
 void VoxWidget::drawFronts()
 {
 	GeoDrawer * dr = getDrawer();
+	/*
 	Vector3F d, c;
 	int i =0;
 	for(;i<6;++i) {
@@ -121,7 +128,40 @@ void VoxWidget::drawFronts()
 			glColor3f(c.x, c.y, c.z);
 			dr->cube(*it, 0.1f);
 		}
+		if(fr.size() > 3) 
+			dr->orientedBox(&m_engine.cut(i) );
 	}
+	*/
+	dr->setColor(0.f, 0.f, 1.f);
+	dr->orientedBox(&m_engine.orientedBBox() );
+	//glTranslatef(8,0,0);
+	dr->orientedBox(&m_engine1.orientedBBox() );
+	dr->orientedBox(&m_engine2.orientedBBox() );
+	dr->orientedBox(&m_engine3.orientedBBox() );
+	dr->orientedBox(&m_engine4.orientedBBox() );
+	//glTranslatef(-8,0,0);
+}
+
+cvx::Triangle VoxWidget::createTriangle(const Vector3F & p0,
+								const Vector3F & p1,
+								const Vector3F & p2,
+								const Vector3F & c0,
+								const Vector3F & c1,
+								const Vector3F & c2)
+{
+	cvx::Triangle tri;
+	tri.resetNC();
+	tri.setP(p0,0);
+	tri.setP(p1,1);
+	tri.setP(p2,2);
+	Vector3F nor = tri.calculateNormal();
+	tri.setN(nor, 0);
+	tri.setN(nor, 1);
+	tri.setN(nor, 2);
+	tri.setC(c0, 0);
+	tri.setC(c1, 1);
+	tri.setC(c2, 2);
+	return tri;
 }
 
 void VoxWidget::buildTests()
@@ -130,38 +170,69 @@ void VoxWidget::buildTests()
 					8.f, 8.f, 8.f);
 	m_engine.setBounding(b);
 	
-	Vector3F vp[3];
-	vp[0].set(-1.1f, .1f, -.9f);
-	vp[1].set(2.f, 5.1f, 3.9f);
-	vp[2].set(7.9f, 3.1f, 5.f);
+	Vector3F vp[4];
+	vp[0].set(1.1f, 1.1f, 1.3f);
+	vp[1].set(5.7f, 4.1f, 6.1f);
+	vp[2].set(7.9f, 7.1f, 4.9f);
+	vp[3].set(4.9f, .2f, .2f);
 	
-	cvx::Triangle tri;
-	tri.resetNC();
-	tri.setP(vp[0],0);
-	tri.setP(vp[1],1);
-	tri.setP(vp[2],2);
-	
-	Vector3F nor = tri.calculateNormal();
-	Vector3F vn[3];
-	vn[0] = nor + Vector3F(-.05f, 0.f, 0.f);
-	vn[1] = nor + Vector3F(-.05f, 0.f, 0.f);
-	vn[2] = nor + Vector3F( .05f, 0.f, 0.f);
-	
-	tri.setN(vn[0], 0);
-	tri.setN(vn[1], 1);
-	tri.setN(vn[2], 2);
-	
-	Vector3F vc[3];
+	Vector3F vc[4];
 	vc[0].set(1.f, 0.f, 0.f);
 	vc[1].set(0.5f, 0.1f, 0.f);
 	vc[2].set(0.1f, 0.f, .5f);
-	tri.setC(vc[0], 0);
-	tri.setC(vc[1], 1);
-	tri.setC(vc[2], 2);
+	vc[3].set(0.1f, .5f, 0.f);
 	
-	m_engine.add(tri);
+	m_engine.add(createTriangle(vp[0], vp[1], vp[2],
+								vc[0], vc[1], vc[2]) );
+								
+	m_engine.add(createTriangle(vp[0], vp[2], vp[3],
+								vc[0], vc[2], vc[3]) );
 	
 	m_engine.build();
 	std::cout<<"\n grid n cell "<<m_engine.numCells();
 	std::cout.flush();
+	
+	b.setMax(4.f, 4.f, 4.f);
+	m_engine1.setBounding(b);
+	m_engine1.add(createTriangle(vp[0], vp[1], vp[2],
+								vc[0], vc[1], vc[2]) );
+								
+	m_engine1.add(createTriangle(vp[0], vp[2], vp[3],
+								vc[0], vc[2], vc[3]) );
+	
+	m_engine1.build();
+	
+	b.setMin(4.f, 4.f, 4.f);
+	b.setMax(8.f, 8.f, 8.f);
+	m_engine2.setBounding(b);
+	m_engine2.add(createTriangle(vp[0], vp[1], vp[2],
+								vc[0], vc[1], vc[2]) );
+								
+	m_engine2.add(createTriangle(vp[0], vp[2], vp[3],
+								vc[0], vc[2], vc[3]) );
+	
+	m_engine2.build();
+	
+	b.setMin(4.f, 4.f, 0.f);
+	b.setMax(8.f, 8.f, 4.f);
+	m_engine3.setBounding(b);
+	m_engine3.add(createTriangle(vp[0], vp[1], vp[2],
+								vc[0], vc[1], vc[2]) );
+								
+	m_engine3.add(createTriangle(vp[0], vp[2], vp[3],
+								vc[0], vc[2], vc[3]) );
+	
+	m_engine3.build();
+	
+	b.setMin(4.f, 0.f, 0.f);
+	b.setMax(8.f, 4.f, 4.f);
+	m_engine4.setBounding(b);
+	m_engine4.add(createTriangle(vp[0], vp[1], vp[2],
+								vc[0], vc[1], vc[2]) );
+								
+	m_engine4.add(createTriangle(vp[0], vp[2], vp[3],
+								vc[0], vc[2], vc[3]) );
+	
+	m_engine4.build();
+	
 }

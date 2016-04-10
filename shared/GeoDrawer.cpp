@@ -346,6 +346,7 @@ void GeoDrawer::coordsys(const Matrix33F & orient, const Vector3F & p, const Vec
 	
 	glPopMatrix();
 }
+
 /*
 void GeoDrawer::manipulator(TransformManipulator * m)
 {
@@ -795,11 +796,20 @@ const int IndexBoxLine[24] = {
 2, 6, 3, 7
 };
 
-void GeoDrawer::orientedBox(const AOrientedBox * ob) const
+void GeoDrawer::orientedBox(const AOrientedBox * ob)
 {
-	ob->getBoxVertices(m_boxVBuf);
 	int i = 0;
+	glBegin(GL_LINES);
+	ob->getBoxVertices(m_boxVBuf);
+	setColor(0.f, .1f, .5f);
 	for(;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
+	
+	setColor(.5f, .5f, 0.f);
+	ob->get8DOPVertices(m_boxVBuf);
+	for(i=0;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
+	
+	glEnd();
+	coordsys(ob->orientation(), ob->center() );
 }
 
 }

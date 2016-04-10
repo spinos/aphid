@@ -353,6 +353,18 @@ ShapeType Triangle::ShapeTypeId = TTriangle;
 std::string Triangle::GetTypeStr()
 { return "triangle"; }
 
+bool Triangle::sampleP(Vector3F & dst, const BoundingBox &  box) const
+{
+	for(int i=0; i<100; ++i) {
+		float a = ((float)(rand() & 1023)) / 1023.f;
+		float b = (1.f - a ) * ((float)(rand() & 1023)) / 1023.f;
+		float c = 1.f - a - b;
+		dst = m_p0 * a + m_p1 * b + m_p2 * c;
+		if(box.isPointInside(dst) ) return true;
+	}
+	return false;
+}
+
 }
 
 }

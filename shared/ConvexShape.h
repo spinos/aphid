@@ -199,6 +199,8 @@ public:
 	template<typename T>
 	void closestToPoint(T * result) const;
 	
+	bool sampleP(Vector3F & dst, const BoundingBox &  b) const;
+	
 	const Vector3F & X(int idx) const;
 	const Vector3F & supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 	

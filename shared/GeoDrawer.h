@@ -56,7 +56,8 @@ public:
 	void coordsys(float scale = 1.f) const;
 	void coordsys(const Vector3F & scale) const;
 	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0);
-	void coordsys(const Matrix33F & orient, const Vector3F & p, const Vector3F & size);
+	void coordsys(const Matrix33F & orient, const Vector3F & p, 
+					const Vector3F & size = Vector3F(1.f, 1.f, 1.f) );
 	
 	//void manipulator(TransformManipulator * m);
 	//void spaceHandle(SpaceHandle * hand);
@@ -89,7 +90,8 @@ public:
 	void tetrahedronMesh(ATetrahedronMesh * mesh) const;
 	//void cartesianGrid(CartesianGrid * grid) const;
 	
-	void orientedBox(const AOrientedBox * ob) const;
+	void orientedBox(const AOrientedBox * ob);
+	
 private:
 	Vector3F m_alignDir;
 	GeodesicSphereMesh * m_sphere;

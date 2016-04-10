@@ -9,16 +9,20 @@
 #ifndef APHID_VOXEL_ENGINE_H
 #define APHID_VOXEL_ENGINE_H
 #include <CartesianGrid.h>
+#include <PrincipalComponents.h>
 #include <vector>
 
 namespace aphid {
 
-template<typename T, int NLevel = 4>
+template<typename T, int NLevel = 3>
 class VoxelEngine : public CartesianGrid {
 
 /// container of primitives
 	std::vector<T> m_prims;
 	std::vector<Vector3F> m_fronts[6];
+	PrincipalComponents<std::vector<Vector3F> > m_pcas[6];
+	AOrientedBox m_cuts[6];
+	AOrientedBox m_obox;
 	
 public:
 	VoxelEngine();
@@ -30,6 +34,8 @@ public:
 /// access to primitives
 	const std::vector<T> & prims() const;
 	const std::vector<Vector3F> & fronts(int x) const;
+	const AOrientedBox & cut(int x) const;
+	const AOrientedBox & orientedBBox() const;
 	
 protected:
 	int intersect(const BoundingBox * b);
@@ -38,6 +44,7 @@ protected:
 						const BoundingBox & b,
 						const Vector3F & ro,
 						const Vector3F & d) const;
+	void calculateOBox();
 						
 private:
 
@@ -79,9 +86,14 @@ void VoxelEngine<T, NLevel>::build()
     }
 	
 	const BoundingBox tight = calculateBBox();
-	for(i=0; i < 6; i++)
+	for(i=0; i < 6; i++) {
 		findFrontFaces(i, &tight);
+		if(m_fronts[i].size() > 3) 
+			m_cuts[i] = m_pcas[i].analyze(m_fronts[i], m_fronts[i].size() );
+		std::cout<<"\n front["<<i<<"] "<< m_fronts[i].size();
+	}
 	
+	calculateOBox();
 }
 
 template<typename T, int NLevel>
@@ -202,12 +214,76 @@ bool VoxelEngine<T, NLevel>::findNearestHit(Vector3F & dst,
 }
 
 template<typename T, int NLevel>
+void VoxelEngine<T, NLevel>::calculateOBox()
+{
+	std::vector<Vector3F> pnts;
+#if 0
+	const float hh = cellSizeAtLevel(NLevel + 2);
+	Vector3F cnt;
+	sdb::CellHash * c = cells();
+    c->begin();
+    while(!c->end()) {
+        
+		cnt = cellCenter(c->key() );
+		for(int i=0; i< 8; ++i)
+			pnts.push_back(cnt + Vector3F(Cell8ChildOffset[i][0],
+											Cell8ChildOffset[i][1],
+											Cell8ChildOffset[i][2]) * hh );
+			
+        c->next();
+	}
+#else	
+	BoundingBox b;
+	getBounding(b);
+	Vector3F p;
+	
+	typename std::vector<T>::const_iterator it = m_prims.begin();
+	it = m_prims.begin();
+	for(;it!= m_prims.end(); ++it) {
+		p = (*it).P(0);
+		if(b.isPointInside(p) )
+			pnts.push_back(p);
+			
+		p = (*it).P(1);
+		if(b.isPointInside(p ) )
+			pnts.push_back(p);
+			
+		p = (*it).P(2);
+		if(b.isPointInside(p ) )
+			pnts.push_back(p);
+	}
+	
+	for(int i=0; i< 100; ++i) {
+		it = m_prims.begin();
+		for(;it!= m_prims.end(); ++it) {
+			const BoundingBox & cb = (*it).calculateBBox();
+			if(cb.intersect(b) ) {
+				if((*it).sampleP(p, b) )
+					pnts.push_back(p);
+			}
+		}
+	}
+#endif
+	std::cout<<"\n n pnt "<<pnts.size();
+	PrincipalComponents<std::vector<Vector3F> > obpca;
+	m_obox = obpca.analyze(pnts, pnts.size() );
+}
+
+template<typename T, int NLevel>
 const std::vector<T> & VoxelEngine<T, NLevel>::prims() const
 { return m_prims; }
 
 template<typename T, int NLevel>
 const std::vector<Vector3F> & VoxelEngine<T, NLevel>::fronts(int x) const
 { return m_fronts[x]; }
+
+template<typename T, int NLevel>
+const AOrientedBox & VoxelEngine<T, NLevel>::cut(int x) const
+{ return m_cuts[x]; }
+
+template<typename T, int NLevel>
+const AOrientedBox & VoxelEngine<T, NLevel>::orientedBBox() const
+{ return m_obox; }
 
 }
 
