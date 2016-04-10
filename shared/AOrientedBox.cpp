@@ -118,5 +118,172 @@ void AOrientedBox::get8DOPVertices(Vector3F * dst) const
 	dst[7] = m_center + rx * m_8DOPExtent[1] + ry * m_8DOPExtent[3] + rz * ez;
 }
 
+void AOrientedBox::get8DOPMesh(Vector3F * vert,
+						int * tri,
+						int & nvert,
+						int & ntri) const
+{
+/// top side
+	nvert = 4;
+	vert[0].set(-m_extent.x, -m_extent.y, m_extent.z);
+	vert[1].set( m_extent.x, -m_extent.y, m_extent.z);
+	vert[2].set( m_extent.x,  m_extent.y, m_extent.z);
+	vert[3].set(-m_extent.x,  m_extent.y, m_extent.z);
+	ntri = 2;
+	tri[0] = 0; tri[1] = 1; tri[2] = 2;
+	tri[3] = 0; tri[4] = 2; tri[5] = 3;
+/// rotate 45 deg
+	Vector3F rgt(1.f, 1.f, 0.f);
+	Vector3F up(-1.f, 1.f, 0.f);
+	rgt.normalize();
+	up.normalize();
+	
+/// max 8 edges
+	int edgei[16];
+	int edgec = 4;
+	edgei[0] = 0; edgei[1] = 1;
+	edgei[2] = 1; edgei[3] = 2;
+	edgei[4] = 2; edgei[5] = 3;
+	edgei[6] = 3; edgei[7] = 0;
+	
+	BoundingBox box(-m_extent.x, -m_extent.y, -m_extent.z,
+					 m_extent.x,  m_extent.y,  m_extent.z);
+	
+	Vector3F o = rgt * m_8DOPExtent[0] + up * m_8DOPExtent[3];
+	Vector3F d = rgt * m_8DOPExtent[0] + up * m_8DOPExtent[2];
+	Vector3F phit;
+	Ray incident(o, d);
+	float tmin, tmax;
+	if(box.intersect(incident, &tmin, &tmax) ) {
+		if(tmax - tmin > .2f) {
+			phit = incident.travel(tmax);
+			vert[0].x = phit.x;
+			vert[0].y = phit.y;
+			
+			phit = incident.travel(tmin);
+			vert[nvert].x = phit.x;
+			vert[nvert].y = phit.y;
+			vert[nvert].z = m_extent.z;
+			tri[ntri*3] = 0; tri[ntri*3+1] = nvert-1; tri[ntri*3+2] = nvert;
+			edgei[7] = nvert;
+			edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = 0;
+			edgec++;
+			nvert++;
+			ntri++;
+		}
+	}
+	
+	o = rgt * m_8DOPExtent[0] + up * m_8DOPExtent[2];
+	d = rgt * m_8DOPExtent[1] + up * m_8DOPExtent[2];
+	incident = Ray(o, d);
+	if(box.intersect(incident, &tmin, &tmax) ) {
+		if(tmax - tmin > .2f) {
+			phit = incident.travel(tmax);
+			vert[1].x = phit.x;
+			vert[1].y = phit.y;
+			
+			phit = incident.travel(tmin);
+			vert[nvert].x = phit.x;
+			vert[nvert].y = phit.y;
+			vert[nvert].z = m_extent.z;
+			tri[ntri*3] = 0; tri[ntri*3+1] = nvert; tri[ntri*3+2] = 1;
+			edgei[1] = nvert;
+			edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = 1;
+			edgec++;
+			nvert++;
+			ntri++;
+		}
+	}
+	
+	o = rgt * m_8DOPExtent[1] + up * m_8DOPExtent[2];
+	d = rgt * m_8DOPExtent[1] + up * m_8DOPExtent[3];
+	incident = Ray(o, d);
+	if(box.intersect(incident, &tmin, &tmax) ) {
+		if(tmax - tmin > .2f) {
+			phit = incident.travel(tmax);
+			vert[2].x = phit.x;
+			vert[2].y = phit.y;
+			
+			phit = incident.travel(tmin);
+			vert[nvert].x = phit.x;
+			vert[nvert].y = phit.y;
+			vert[nvert].z = m_extent.z;
+			tri[ntri*3] = 1; tri[ntri*3+1] = nvert; tri[ntri*3+2] = 2;
+			edgei[3] = nvert;
+			edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = 2;
+			edgec++;
+			nvert++;
+			ntri++;
+		}
+	}
+	
+	o = rgt * m_8DOPExtent[1] + up * m_8DOPExtent[3];
+	d = rgt * m_8DOPExtent[0] + up * m_8DOPExtent[3];
+	incident = Ray(o, d);
+	if(box.intersect(incident, &tmin, &tmax) ) {
+		if(tmax - tmin > .2f) {
+			phit = incident.travel(tmax);
+			vert[3].x = phit.x;
+			vert[3].y = phit.y;
+			
+			phit = incident.travel(tmin);
+			vert[nvert].x = phit.x;
+			vert[nvert].y = phit.y;
+			vert[nvert].z = m_extent.z;
+			tri[ntri*3] = 2; tri[ntri*3+1] = nvert; tri[ntri*3+2] = 3;
+			edgei[5] = nvert;
+			edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = 3;
+			edgec++;
+			nvert++;
+			ntri++;
+		}
+	}
+
+/// copy to bottom side
+	for(int i=0; i<nvert; ++i) {
+		vert[i+nvert] = vert[i];
+		vert[i+nvert].z = -m_extent.z;
+	}
+	
+	nvert += nvert;
+	for(int i=0; i<nvert; ++i) {
+		vert[i] = m_orientation.transform(vert[i]) + m_center;
+	}
+	
+	for(int i=0; i<ntri; ++i) {
+		tri[(i+ ntri)*3] = tri[i*3] + edgec;
+		tri[(i+ ntri)*3+1] = tri[i*3+2] + edgec;
+		tri[(i+ ntri)*3+2] = tri[i*3+1] + edgec;
+	}
+	ntri += ntri;
+	
+/// connect top and bottom
+	for(int i=0; i<edgec; ++i) {
+		int i1 = i+1;
+		if(i1 == edgec) i1 = 0;
+		
+		tri[ntri*3] = edgei[i];
+		tri[ntri*3+1] = edgei[i] + edgec;
+		tri[ntri*3+2] = edgei[i1];
+		ntri++;
+		tri[ntri*3] = edgei[i] + edgec;
+		tri[ntri*3+1] = edgei[i1] + edgec;
+		tri[ntri*3+2] = edgei[i1];
+		ntri++;
+	}
+	
+	///std::cout<<"\n n edge "<<edgec
+		///		<<"\n v "<<nvert
+			///	<<"\n t "<<ntri;
+	
+}
+
+void AOrientedBox::limitMinThickness(const float & x)
+{ if(m_extent.z < x) m_extent.z = x; }
+
 }
 //:~

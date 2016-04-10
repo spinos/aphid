@@ -46,5 +46,6 @@ private:
 	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine2;
 	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine3;
 	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine4;
+	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine5;
 };
 #endif

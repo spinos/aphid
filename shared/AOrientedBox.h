@@ -32,9 +32,16 @@ public:
 	Vector3F minorVector(bool low) const;
 	void getBoxVertices(Vector3F * dst) const;
 	void get8DOPVertices(Vector3F * dst) const;
+/// limit 16 vert 18 tri
+	void get8DOPMesh(Vector3F * vert,
+						int * tri,
+						int & nvert,
+						int & ntri) const;
 	
 	virtual const Type type() const;
 	virtual const BoundingBox calculateBBox() const;
+	void limitMinThickness(const float & x);
+	
 protected:
 
 private:

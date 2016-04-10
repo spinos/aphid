@@ -798,17 +798,32 @@ const int IndexBoxLine[24] = {
 
 void GeoDrawer::orientedBox(const AOrientedBox * ob)
 {
-	int i = 0;
-	glBegin(GL_LINES);
-	ob->getBoxVertices(m_boxVBuf);
-	setColor(0.f, .1f, .5f);
-	for(;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
+	//int i = 0;
+	//glBegin(GL_LINES);
+	//ob->getBoxVertices(m_boxVBuf);
+	//for(;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
 	
-	setColor(.5f, .5f, 0.f);
-	ob->get8DOPVertices(m_boxVBuf);
-	for(i=0;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
+	//setColor(.5f, .5f, 0.f);
+	//ob->get8DOPVertices(m_boxVBuf);
+	//for(i=0;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
 	
-	glEnd();
+	//glEnd();
+	
+	//setColor(0.f, .15f, .2f);
+	Vector3F ps[16];
+	int tris[84];
+	int nv, ntri;
+	ob->get8DOPMesh(ps, tris, nv, ntri);
+	
+	setWired(true);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
+	
+	glDrawElements(GL_TRIANGLES, ntri*3, GL_UNSIGNED_INT, tris);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
 	coordsys(ob->orientation(), ob->center() );
 }
 

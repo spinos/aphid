@@ -35,7 +35,7 @@ void VoxWidget::clientInit()
 
 void VoxWidget::clientDraw()
 {
-	drawGrids();
+	//drawGrids();
 	drawTriangles();
 	drawFronts();
 }
@@ -66,12 +66,11 @@ void VoxWidget::drawGrids()
 	glColor3f(0,.6,.4);
 	GridDrawer dr;
 	dr.drawGrid<CartesianGrid>(&m_engine);
-	//glTranslatef(8,0,0);
 	dr.drawGrid<CartesianGrid>(&m_engine1);
 	dr.drawGrid<CartesianGrid>(&m_engine2);
 	dr.drawGrid<CartesianGrid>(&m_engine3);
 	dr.drawGrid<CartesianGrid>(&m_engine4);
-	//glTranslatef(-8,0,0);
+	dr.drawGrid<CartesianGrid>(&m_engine5);
 }
 
 void VoxWidget::drawTriangles()
@@ -94,52 +93,18 @@ void VoxWidget::drawTriangles()
 void VoxWidget::drawFronts()
 {
 	GeoDrawer * dr = getDrawer();
-	/*
-	Vector3F d, c;
-	int i =0;
-	for(;i<6;++i) {
-		if(i==0) {
-			d.set(-1.f, 0.f, 0.f);
-			c.set(.5f, 0.f, 0.f);
-		}
-		else if(i==1) {
-			d.set(1.f, 0.f, 0.f);
-			c.set(1.f, 0.f, 0.f);
-		}
-		else if(i==2) {
-			d.set(0.f, -1.f, 0.f);
-			c.set(0.f, .5f, 0.f);
-		}
-		else if(i==3) {
-			d.set(0.f, 1.f, 0.f);
-			c.set(0.f, 1.f, 0.f);
-		}
-		else if(i==4) {
-			d.set(0.f, 0.f, -1.f);
-			c.set(0.f, 0.f, .5f);
-		}
-		else {
-			d.set(0.f, 0.f, 1.f);
-			c.set(0.f, 0.f, 1.f);
-		}
-		const std::vector<Vector3F> & fr = m_engine.fronts(i);
-		std::vector<Vector3F>::const_iterator it = fr.begin();
-		for(;it!= fr.end();++it) {
-			glColor3f(c.x, c.y, c.z);
-			dr->cube(*it, 0.1f);
-		}
-		if(fr.size() > 3) 
-			dr->orientedBox(&m_engine.cut(i) );
-	}
-	*/
-	dr->setColor(0.f, 0.f, 1.f);
+	dr->setColor(.1f, .1f, .1f);
 	dr->orientedBox(&m_engine.orientedBBox() );
-	//glTranslatef(8,0,0);
+	dr->setColor(0.f, .1f, .5f);
 	dr->orientedBox(&m_engine1.orientedBBox() );
+	dr->setColor(.9f, .1f, .1f);
 	dr->orientedBox(&m_engine2.orientedBBox() );
+	dr->setColor(.9f, .9f, .1f);
 	dr->orientedBox(&m_engine3.orientedBBox() );
+	dr->setColor(0.f, .3f, .5f);
 	dr->orientedBox(&m_engine4.orientedBBox() );
-	//glTranslatef(-8,0,0);
+	dr->setColor(0.1f, .3f, 0.f);
+	dr->orientedBox(&m_engine5.orientedBBox() );
 }
 
 cvx::Triangle VoxWidget::createTriangle(const Vector3F & p0,
@@ -171,9 +136,9 @@ void VoxWidget::buildTests()
 	m_engine.setBounding(b);
 	
 	Vector3F vp[4];
-	vp[0].set(1.1f, 1.1f, 1.3f);
-	vp[1].set(5.7f, 4.1f, 6.1f);
-	vp[2].set(7.9f, 7.1f, 4.9f);
+	vp[0].set(1.1f, .91f, 1.3f);
+	vp[1].set(5.27f, 3.1f, 6.1f);
+	vp[2].set(7.49f, 6.721f, 4.9f);
 	vp[3].set(4.9f, .2f, .2f);
 	
 	Vector3F vc[4];
@@ -235,4 +200,14 @@ void VoxWidget::buildTests()
 	
 	m_engine4.build();
 	
+	b.setMin(4.f, 0.f, 4.f);
+	b.setMax(8.f, 4.f, 8.f);
+	m_engine5.setBounding(b);
+	m_engine5.add(createTriangle(vp[0], vp[1], vp[2],
+								vc[0], vc[1], vc[2]) );
+								
+	m_engine5.add(createTriangle(vp[0], vp[2], vp[3],
+								vc[0], vc[2], vc[3]) );
+	
+	m_engine5.build();
 }

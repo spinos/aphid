@@ -29,7 +29,7 @@ public:
 	virtual ~VoxelEngine();
 	
 	void add(const T & x);
-	void build();
+	bool build();
 	
 /// access to primitives
 	const std::vector<T> & prims() const;
@@ -45,7 +45,9 @@ protected:
 						const Vector3F & ro,
 						const Vector3F & d) const;
 	void calculateOBox();
-						
+	void sampleCells(std::vector<Vector3F> & dst);
+	void samplePrims(std::vector<Vector3F> & dst);
+
 private:
 
 };
@@ -63,7 +65,7 @@ void VoxelEngine<T, NLevel>::add(const T & x)
 { m_prims.push_back(x); }
 
 template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::build()
+bool VoxelEngine<T, NLevel>::build()
 {
 	const float h = cellSizeAtLevel(NLevel);
     const float hh = h * .49995f;
@@ -85,15 +87,11 @@ void VoxelEngine<T, NLevel>::build()
         }
     }
 	
-	const BoundingBox tight = calculateBBox();
-	for(i=0; i < 6; i++) {
-		findFrontFaces(i, &tight);
-		if(m_fronts[i].size() > 3) 
-			m_cuts[i] = m_pcas[i].analyze(m_fronts[i], m_fronts[i].size() );
-		std::cout<<"\n front["<<i<<"] "<< m_fronts[i].size();
-	}
+	if(numCells() < 1) return false;
 	
 	calculateOBox();
+	
+	return true;
 }
 
 template<typename T, int NLevel>
@@ -214,25 +212,26 @@ bool VoxelEngine<T, NLevel>::findNearestHit(Vector3F & dst,
 }
 
 template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::calculateOBox()
+void VoxelEngine<T, NLevel>::sampleCells(std::vector<Vector3F> & dst)
 {
-	std::vector<Vector3F> pnts;
-#if 0
 	const float hh = cellSizeAtLevel(NLevel + 2);
-	Vector3F cnt;
 	sdb::CellHash * c = cells();
     c->begin();
     while(!c->end()) {
         
-		cnt = cellCenter(c->key() );
+		Vector3F cnt = cellCenter(c->key() );
 		for(int i=0; i< 8; ++i)
-			pnts.push_back(cnt + Vector3F(Cell8ChildOffset[i][0],
+			dst.push_back(cnt + Vector3F(Cell8ChildOffset[i][0],
 											Cell8ChildOffset[i][1],
 											Cell8ChildOffset[i][2]) * hh );
 			
         c->next();
 	}
-#else	
+}
+
+template<typename T, int NLevel>
+void VoxelEngine<T, NLevel>::samplePrims(std::vector<Vector3F> & dst)
+{
 	BoundingBox b;
 	getBounding(b);
 	Vector3F p;
@@ -242,31 +241,45 @@ void VoxelEngine<T, NLevel>::calculateOBox()
 	for(;it!= m_prims.end(); ++it) {
 		p = (*it).P(0);
 		if(b.isPointInside(p) )
-			pnts.push_back(p);
+			dst.push_back(p);
 			
 		p = (*it).P(1);
 		if(b.isPointInside(p ) )
-			pnts.push_back(p);
+			dst.push_back(p);
 			
 		p = (*it).P(2);
 		if(b.isPointInside(p ) )
-			pnts.push_back(p);
+			dst.push_back(p);
 	}
 	
-	for(int i=0; i< 100; ++i) {
+	for(int i=0; i< 200; ++i) {
 		it = m_prims.begin();
 		for(;it!= m_prims.end(); ++it) {
 			const BoundingBox & cb = (*it).calculateBBox();
 			if(cb.intersect(b) ) {
 				if((*it).sampleP(p, b) )
-					pnts.push_back(p);
+					dst.push_back(p);
 			}
 		}
+		if(dst.size() > 500) return;
 	}
-#endif
-	std::cout<<"\n n pnt "<<pnts.size();
+}
+
+template<typename T, int NLevel>
+void VoxelEngine<T, NLevel>::calculateOBox()
+{
+	std::vector<Vector3F> pnts;
+	
+	if(m_prims.size() > 128) sampleCells(pnts);
+	else {
+		samplePrims(pnts);
+		if(pnts.size() < 32) sampleCells(pnts);
+	}
+	
+	// std::cout<<"\n n pnt "<<pnts.size();
 	PrincipalComponents<std::vector<Vector3F> > obpca;
 	m_obox = obpca.analyze(pnts, pnts.size() );
+	m_obox.limitMinThickness(cellSizeAtLevel(NLevel + 2) );
 }
 
 template<typename T, int NLevel>
