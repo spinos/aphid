@@ -75,6 +75,7 @@ void VoxWidget::drawGrids()
 
 void VoxWidget::drawTriangles()
 {
+	getDrawer()->m_markerProfile.apply();
 	glColor3f(0,.2,.6);
 	glBegin(GL_TRIANGLES);
 	const std::vector<cvx::Triangle> & tris = m_engine.prims();
@@ -93,8 +94,9 @@ void VoxWidget::drawTriangles()
 void VoxWidget::drawFronts()
 {
 	GeoDrawer * dr = getDrawer();
+	dr->m_surfaceProfile.apply();
 	dr->setColor(.1f, .1f, .1f);
-	dr->orientedBox(&m_engine.orientedBBox() );
+	//dr->orientedBox(&m_engine.orientedBBox() );
 	dr->setColor(0.f, .1f, .5f);
 	dr->orientedBox(&m_engine1.orientedBBox() );
 	dr->setColor(.9f, .1f, .1f);

@@ -9,19 +9,96 @@
 #ifndef APHID_VOXEL_ENGINE_H
 #define APHID_VOXEL_ENGINE_H
 #include <CartesianGrid.h>
+#include <Morton3D.h>
 #include <PrincipalComponents.h>
+#include <Quantization.h>
 #include <vector>
 
 namespace aphid {
+
+struct Voxel {
+/// color in rgba 32bit
+	int m_color;
+/// morton code of cell center in bound
+	int m_pos;
+/// level-ncontour-indexcontour packed into int
+/// bit layout
+/// 0-3 level			4bit 0-15
+/// 4-5 n contour		2bit 0-3
+/// 6-   offset to first contour
+	int m_contour;
+	
+	void setColor(const float &r, const float &g,
+					const float &b, const float &a)
+	{ col32::encodeC(m_color, r, g, b, a); }
+	
+/// set pos first
+	void setPos(const int & morton, const int & level)
+	{ 
+		m_pos = morton; 
+		m_contour = level;
+	}
+	
+	void setContour(const int & count, const int & offset)
+	{ m_contour = m_contour | (offset<<6 | count<<4); }
+	
+	void getColor(float &r, float &g,
+					float &b, float &a)
+	{ col32::decodeC(r, g, b, a, m_color); }
+	
+	BoundingBox calculateBBox() const
+	{
+		unsigned x, y, z;
+		decodeMorton3D(m_pos, x, y, z);
+		float h = 1<< (9 - (m_contour & 15) );
+		
+		BoundingBox b((float)x-h, (float)y-h, (float)z-h,
+				(float)x+h, (float)y+h, (float)z+h);
+		b.expand(-.00003f);
+		return b;
+	}
+	
+	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const
+	{ return calculateBBox().intersect(ray, hitt0, hitt1); }
+	
+	Vector3F calculateNormal() const
+	{ return Vector3F(0.f, 1.f, 0.f); }
+	
+	static std::string GetTypeStr()
+	{ return "voxel"; }
+	
+};
+
+struct Contour {
+/// point-normal packed into int
+/// bit layout
+/// 0-4		gridx		5bit
+/// 5-9		girdy		5bit
+/// 10-14	girdz		5bit
+/// 15 normal sign		1bit
+/// 16-17 normal axis	2bit
+/// 18-23 normal u		6bit
+/// 24-29 normal v		6bit
+	int m_data;
+	
+	void setNormal(const Vector3F & n)
+	{ colnor30::encodeN(m_data, n); }
+	
+	void setPoint(const Vector3F & p,
+					const Vector3F & o,
+					const float & d)
+	{
+		Vector3F c((p.x - o.x)/d, (p.y - o.y)/d, (p.z - o.z)/d);
+		colnor30::encodeC(m_data, c);
+	}
+	
+};
 
 template<typename T, int NLevel = 3>
 class VoxelEngine : public CartesianGrid {
 
 /// container of primitives
 	std::vector<T> m_prims;
-	std::vector<Vector3F> m_fronts[6];
-	PrincipalComponents<std::vector<Vector3F> > m_pcas[6];
-	AOrientedBox m_cuts[6];
 	AOrientedBox m_obox;
 	
 public:
@@ -31,19 +108,14 @@ public:
 	void add(const T & x);
 	bool build();
 	
+	void extractContours(Voxel & dst) const;
+	
 /// access to primitives
 	const std::vector<T> & prims() const;
-	const std::vector<Vector3F> & fronts(int x) const;
-	const AOrientedBox & cut(int x) const;
 	const AOrientedBox & orientedBBox() const;
 	
 protected:
 	int intersect(const BoundingBox * b);
-	void findFrontFaces(int facing, const BoundingBox * b);
-	bool findNearestHit(Vector3F & dst,
-						const BoundingBox & b,
-						const Vector3F & ro,
-						const Vector3F & d) const;
 	void calculateOBox();
 	void sampleCells(std::vector<Vector3F> & dst);
 	void samplePrims(std::vector<Vector3F> & dst);
@@ -115,100 +187,6 @@ int VoxelEngine<T, NLevel>::intersect(const BoundingBox * b)
 		}
 	}
 	return nsect;
-}
-
-const float RightDirTable[6][3] = {
-{ 0.f, 0.f, 1.f},
-{ 0.f, 0.f,-1.f},
-{-1.f, 0.f, 0.f},
-{-1.f, 0.f, 0.f},
-{ 1.f, 0.f, 0.f},
-{-1.f, 0.f, 0.f}
-};
-
-const float UpDirTable[6][3] = {
-{ 0.f, 1.f, 0.f},
-{ 0.f, 1.f, 0.f},
-{ 0.f, 0.f, 1.f},
-{ 0.f, 0.f, -1.f},
-{ 0.f, 1.f, 0.f},
-{ 0.f, 1.f, 0.f}
-};
-
-const float DepthDirTable[6][3] = {
-{ 1.f, 0.f, 0.f},
-{-1.f, 0.f, 0.f},
-{ 0.f, 1.f, 0.f},
-{ 0.f,-1.f, 0.f},
-{ 0.f, 0.f, 1.f},
-{ 0.f, 0.f,-1.f}
-};
-
-template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::findFrontFaces(int facing, const BoundingBox * b)
-{
-	const Vector3F bo = origin();
-	const float & d = span();
-	Vector3F right, up, depth, ori;
-	right.set(RightDirTable[facing][0], RightDirTable[facing][1], RightDirTable[facing][2]);
-	up.set(UpDirTable[facing][0], UpDirTable[facing][1], UpDirTable[facing][2]);
-	depth.set(DepthDirTable[facing][0], DepthDirTable[facing][1], DepthDirTable[facing][2]);
-		   
-	if(facing == 0) {
-		ori = bo;
-	}
-	else if(facing == 1) {
-		ori.set(bo.x + d, bo.y, bo.z + d);
-	}
-	else if(facing == 2) {
-		ori.set(bo.x + d, bo.y, bo.z);
-	}
-	else if(facing == 3) {
-		ori.set(bo.x + d, bo.y + d, bo.z + d);
-	}
-	else if(facing == 4) {
-		ori = bo;
-	}
-	else {
-		ori.set(bo.x + d, bo.y, bo.z + d);
-	}
-	
-	const float h = cellSizeAtLevel(NLevel);
-	const float hh = h * .5f;
-	ori += right * hh;
-	ori += up * hh;
-	ori += depth * hh;
-	
-	const int dim = 1<<NLevel;
-	int i, j, k;
-	for(k=0; k<dim; ++k) {
-		for(j=0; j<dim; ++j) {
-			Vector3F ro = ori + right * h * k + up * h * j;
-			Vector3F rd;
-			if(findNearestHit(rd, *b, ro, depth) ) {
-				m_fronts[facing].push_back(rd - depth * hh);
-			}
-		}
-	}
-}
-
-template<typename T, int NLevel>
-bool VoxelEngine<T, NLevel>::findNearestHit(Vector3F & dst,
-									const BoundingBox & b,
-									const Vector3F & ro,
-									const Vector3F & d) const
-{
-	if(findCell(ro, NLevel) ) return false;
-	const float h = cellSizeAtLevel(NLevel);
-	const int dim = 1<<NLevel;
-	for(int i=1; i<dim; ++i) {
-		dst = ro + d * i * h;
-		if(!b.isPointInside(dst) ) continue;
-		if(findCell(dst, NLevel) ) {
-			return true;
-		}
-	}
-	return false;		
 }
 
 template<typename T, int NLevel>
@@ -287,16 +265,13 @@ const std::vector<T> & VoxelEngine<T, NLevel>::prims() const
 { return m_prims; }
 
 template<typename T, int NLevel>
-const std::vector<Vector3F> & VoxelEngine<T, NLevel>::fronts(int x) const
-{ return m_fronts[x]; }
-
-template<typename T, int NLevel>
-const AOrientedBox & VoxelEngine<T, NLevel>::cut(int x) const
-{ return m_cuts[x]; }
-
-template<typename T, int NLevel>
 const AOrientedBox & VoxelEngine<T, NLevel>::orientedBBox() const
 { return m_obox; }
+
+template<typename T, int NLevel>
+void VoxelEngine<T, NLevel>::extractContours(Voxel & dst) const
+{
+}
 
 }
 

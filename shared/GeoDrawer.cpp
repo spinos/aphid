@@ -769,24 +769,7 @@ void GeoDrawer::tetrahedronMesh(ATetrahedronMesh * mesh) const
     }
     glEnd();
 }
-/*
-void GeoDrawer::cartesianGrid(CartesianGrid * grid) const
-{
-    glBegin(GL_LINES);
-	sdb::CellHash * c = grid->cells();
-	Vector3F l;
-    float h;
-	c->begin();
-	while(!c->end()) {
-		l = grid->cellCenter(c->key());
-		h = grid->cellSizeAtLevel(c->value()->level);
-        unitBoxAt(l, h);
-		
-	    c->next();   
-	}
-    glEnd();
-}
-*/
+
 const int IndexBoxLine[24] = {
 0, 1, 2, 3,
 4, 5, 6, 7,
@@ -798,30 +781,18 @@ const int IndexBoxLine[24] = {
 
 void GeoDrawer::orientedBox(const AOrientedBox * ob)
 {
-	//int i = 0;
-	//glBegin(GL_LINES);
-	//ob->getBoxVertices(m_boxVBuf);
-	//for(;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
-	
-	//setColor(.5f, .5f, 0.f);
-	//ob->get8DOPVertices(m_boxVBuf);
-	//for(i=0;i<24;i++) glVertex3fv((float *)&m_boxVBuf[IndexBoxLine[i]]);
-	
-	//glEnd();
-	
-	//setColor(0.f, .15f, .2f);
-	Vector3F ps[16];
-	int tris[84];
-	int nv, ntri;
-	ob->get8DOPMesh(ps, tris, nv, ntri);
-	
-	setWired(true);
+	DOP8Builder dop;
+	dop.build(*ob);
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
+	glEnableClientState(GL_NORMAL_ARRAY);
 	
-	glDrawElements(GL_TRIANGLES, ntri*3, GL_UNSIGNED_INT, tris);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)dop.normal());
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)dop.vertex());
 
+	glDrawArrays(GL_TRIANGLES, 0, dop.numTriangles() * 3);
+
+	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	coordsys(ob->orientation(), ob->center() );

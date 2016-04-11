@@ -9,90 +9,11 @@
  */
 #ifndef VOXELGRID_H
 #define VOXELGRID_H
-
-#include <Quantization.h>
+#include <VoxelEngine.h>
 #include <VectorArray.h>
 #include <GridBuilder.h>
 
 namespace aphid {
-
-struct Voxel {
-/// color in rgba 32bit
-	int m_color;
-/// morton code of cell center in bound
-	int m_pos;
-/// level-ncontour-indexcontour packed into int
-/// bit layout
-/// 0-3 level			4bit 0-15
-/// 4-5 n contour		2bit 0-3
-/// 6-   offset to first contour
-	int m_contour;
-	
-	void setColor(const float &r, const float &g,
-					const float &b, const float &a)
-	{ col32::encodeC(m_color, r, g, b, a); }
-	
-/// set pos first
-	void setPos(const int & morton, const int & level)
-	{ 
-		m_pos = morton; 
-		m_contour = level;
-	}
-	
-	void setContour(const int & count, const int & offset)
-	{ m_contour = m_contour | (offset<<6 | count<<4); }
-	
-	void getColor(float &r, float &g,
-					float &b, float &a)
-	{ col32::decodeC(r, g, b, a, m_color); }
-	
-	BoundingBox calculateBBox() const
-	{
-		unsigned x, y, z;
-		decodeMorton3D(m_pos, x, y, z);
-		float h = 1<< (9 - (m_contour & 15) );
-		
-		BoundingBox b((float)x-h, (float)y-h, (float)z-h,
-				(float)x+h, (float)y+h, (float)z+h);
-		b.expand(-.00003f);
-		return b;
-	}
-	
-	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const
-	{ return calculateBBox().intersect(ray, hitt0, hitt1); }
-	
-	Vector3F calculateNormal() const
-	{ return Vector3F(0.f, 1.f, 0.f); }
-	
-	static std::string GetTypeStr()
-	{ return "voxel"; }
-	
-};
-
-struct Contour {
-/// point-normal packed into int
-/// bit layout
-/// 0-4		gridx		5bit
-/// 5-9		girdy		5bit
-/// 10-14	girdz		5bit
-/// 15 normal sign		1bit
-/// 16-17 normal axis	2bit
-/// 18-23 normal u		6bit
-/// 24-29 normal v		6bit
-	int m_data;
-	
-	void setNormal(const Vector3F & n)
-	{ colnor30::encodeN(m_data, n); }
-	
-	void setPoint(const Vector3F & p,
-					const Vector3F & o,
-					const float & d)
-	{
-		Vector3F c((p.x - o.x)/d, (p.y - o.y)/d, (p.z - o.z)/d);
-		colnor30::encodeC(m_data, c);
-	}
-	
-};
 
 template<typename T, typename Tn>
 class VoxelGrid : public CartesianGrid {

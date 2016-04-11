@@ -26,17 +26,12 @@ public:
 	const Vector3F & center() const;
 	const Matrix33F & orientation() const;
 	const Vector3F & extent() const;
+	const float * dopExtent() const;
 	Vector3F majorPoint(bool low) const;
 	Vector3F majorVector(bool low) const;
     Vector3F minorPoint(bool low) const;
 	Vector3F minorVector(bool low) const;
 	void getBoxVertices(Vector3F * dst) const;
-	void get8DOPVertices(Vector3F * dst) const;
-/// limit 16 vert 18 tri
-	void get8DOPMesh(Vector3F * vert,
-						int * tri,
-						int & nvert,
-						int & ntri) const;
 	
 	virtual const Type type() const;
 	virtual const BoundingBox calculateBBox() const;
@@ -50,6 +45,24 @@ private:
 	Vector3F m_extent;
 /// in xy
 	float m_8DOPExtent[4];
+};
+
+class DOP8Builder {
+
+	Vector3F m_vert[18];
+/// lateral 8 top and bottom
+	Vector3F m_nor[10];
+	Vector3F m_facevert[84];
+	Vector3F m_facenor[84];
+	int m_tri[84];
+	int m_ntri;
+	
+public:
+	DOP8Builder();
+	void build(const AOrientedBox & ob);
+	const int & numTriangles() const;
+	const Vector3F * vertex() const;
+	const Vector3F * normal() const;
 };
 
 }
