@@ -90,4 +90,7 @@ bool BoxIntersectContext::isExact() const
 bool BoxIntersectContext::isFull() const
 { return m_prims.size() >= m_cap; }
 
+const std::vector<int> & BoxIntersectContext::primIndices() const
+{ return m_prims; }
+
 }

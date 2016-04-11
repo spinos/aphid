@@ -69,6 +69,7 @@ public:
 	void reset(int maxNumPrim = 1, bool beExact = false);
 	void addPrim(const int & i);
 	int numIntersect() const;
+	const std::vector<int> & primIndices() const;
 	bool isExact() const;
 	bool isFull() const;
 	

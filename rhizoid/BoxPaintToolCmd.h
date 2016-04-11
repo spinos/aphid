@@ -12,16 +12,15 @@
 #include <maya/MString.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
- 
 #include <maya/MItSelectionList.h>
 #include <maya/MSelectionList.h>
-
 #include <maya/MPxToolCommand.h> 
-
 #include <maya/MSyntax.h>
 #include <maya/MArgParser.h>
 #include <maya/MArgDatabase.h>
 #include <maya/MArgList.h>
+#include <VectorArray.h>
+#include <ConvexShape.h>
 
 class proxyPaintTool : public MPxToolCommand
 {
@@ -51,6 +50,9 @@ private:
 	MStatus voxelizeSelected();
 	MObject createViz(const MString & typName, const MString & transName);
 	void checkOutputConnection(MObject & node, const MString & outName);
+	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
+					aphid::BoundingBox & bbox,
+					const MDagPath & meshPath);
 	
 private:
 	enum Operation {

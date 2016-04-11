@@ -17,8 +17,8 @@ namespace aphid {
 template<typename T, typename Tn>
 class GridBuilder {
 	
-/// level 4 - 8
-	CartesianGrid m_levelGrid[5];
+/// level 3 - 8
+	CartesianGrid m_levelGrid[6];
 	int m_finalLevel;
 	
 public:
@@ -27,7 +27,8 @@ public:
 	
 	void build(KdNTree<T, Tn > * tree, 
 					const BoundingBox & b,
-					const int & maxLevel);
+					const int & maxLevel,
+					const int & minNPrims);
 	
 	const int & finalLevel() const;
 	int numFinalLevelCells();
@@ -36,7 +37,8 @@ public:
 protected:
 	bool refine(KdNTree<T, Tn > * tree,
 				const BoundingBox & b,
-				const int & level);
+				const int & level,
+				const int & minNPrims);
 	
 private:
 	
@@ -53,19 +55,20 @@ GridBuilder<T, Tn>::~GridBuilder()
 template<typename T, typename Tn>	
 void GridBuilder<T, Tn>::build(KdNTree<T, Tn > * tree, 
 					const BoundingBox & b,
-					const int & maxLevel)
+					const int & maxLevel,
+					const int & minNPrims)
 {
-	int level = 4;
+	int level = 3;
 	
-	CartesianGrid & g4 = m_levelGrid[level - 4];
-	g4.setBounding(b);
+	CartesianGrid & g3 = m_levelGrid[level - 3];
+	g3.setBounding(b);
 	const int dim = 1<<level;
     int i, j, k;
 
-    const float h = g4.cellSizeAtLevel(level);
+    const float h = g3.cellSizeAtLevel(level);
     const float hh = h * .49995f;
 	
-	const Vector3F ori = g4.origin() + Vector3F(hh, hh, hh);
+	const Vector3F ori = g3.origin() + Vector3F(hh, hh, hh);
     Vector3F sample;
     BoxIntersectContext box;
 	KdEngine eng;
@@ -75,23 +78,23 @@ void GridBuilder<T, Tn>::build(KdNTree<T, Tn > * tree,
                 sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
                 box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
                 box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-				box.reset(1, true);
+				box.reset(minNPrims, true);
 				eng.intersectBox<T, Tn>(tree, &box);
-				if(box.numIntersect() > 0 )
-					g4.addCell(sample, level, 1);
+				if(box.numIntersect() > minNPrims-1 )
+					g3.addCell(sample, level, 1);
             }
         }
     }
 	
 	m_finalLevel = level;
 	
-	if(g4.numCells() < 1) return;
+	if(g3.numCells() < 1) return;
 	
 	while(level < maxLevel) {
-		std::cout<<"\r level"<<level<<" n cell "<<m_levelGrid[level - 4].numCells();
+		std::cout<<"\r level"<<level<<" n cell "<<m_levelGrid[level - 3].numCells();
 		std::cout.flush();
 		
-		refine(tree, b, level);
+		refine(tree, b, level, minNPrims);
 		level++;
 	}
 	m_finalLevel = level;
@@ -100,10 +103,11 @@ void GridBuilder<T, Tn>::build(KdNTree<T, Tn > * tree,
 template<typename T, typename Tn>	
 bool GridBuilder<T, Tn>::refine(KdNTree<T, Tn > * tree,
 				const BoundingBox & b,
-				const int & level)
+				const int & level,
+				const int & minNPrims)
 {
-	sdb::CellHash * c = m_levelGrid[level - 4].cells();
-	CartesianGrid & gd = m_levelGrid[level + 1 - 4];
+	sdb::CellHash * c = m_levelGrid[level - 3].cells();
+	CartesianGrid & gd = m_levelGrid[level + 1 - 3];
 	gd.setBounding(b);
 	BoxIntersectContext box;
 	KdEngine eng;
@@ -120,9 +124,9 @@ bool GridBuilder<T, Tn>::refine(KdNTree<T, Tn > * tree,
 												hh * gd.Cell8ChildOffset[u][2]);
 			box.setMin(subs.x - hh, subs.y - hh, subs.z - hh);
 			box.setMax(subs.x + hh, subs.y + hh, subs.z + hh);
-			box.reset(1, true);
+			box.reset(minNPrims, true);
 			eng.intersectBox<T, Tn>(tree, &box);
-			if(box.numIntersect() > 0) 
+			if(box.numIntersect() > minNPrims-1) 
 				gd.addCell(subs, level1, 1);
 		}
 		
@@ -138,10 +142,10 @@ const int & GridBuilder<T, Tn>::finalLevel() const
 
 template<typename T, typename Tn>
 int GridBuilder<T, Tn>::numFinalLevelCells()
-{ return m_levelGrid[m_finalLevel - 4].numCells(); }
+{ return m_levelGrid[m_finalLevel - 3].numCells(); }
 
 template<typename T, typename Tn>	
 sdb::CellHash * GridBuilder<T, Tn>::finalLevelCells()
-{ return m_levelGrid[m_finalLevel - 4].cells(); }
+{ return m_levelGrid[m_finalLevel - 3].cells(); }
 
 }

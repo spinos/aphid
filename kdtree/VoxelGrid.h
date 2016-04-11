@@ -20,15 +20,32 @@ class VoxelGrid : public CartesianGrid {
 
 	sdb::VectorArray<Voxel> m_voxels;
 	sdb::VectorArray<Contour> m_contours;
+	sdb::VectorArray<AOrientedBox> m_oboxes;
 	int m_maxLevel;
 	
 public:
+	struct BuildProfile {
+		int _minNPrimsPerCell;
+		int _maxLevel;
+		bool _extractDOP;
+		bool _xyDOP;
+		bool _shellOnly;
+		
+		BuildProfile() {
+			_minNPrimsPerCell = 3;
+			_maxLevel = 6;
+			_extractDOP = false;
+			_xyDOP = false;
+			_shellOnly = false;
+		}
+	};
+	
 	VoxelGrid();
 	virtual ~VoxelGrid();
 	
 	void create(KdNTree<T, Tn > * tree, 
 				const BoundingBox & b,
-				int maxLevel = 8);
+				BuildProfile * profile);
 	
 	int numVoxels() const;
 	int numContours() const;
@@ -36,10 +53,12 @@ public:
 	const sdb::VectorArray<Voxel> & voxels() const;
 	sdb::VectorArray<Voxel> * voxelsR();
 	
+	const sdb::VectorArray<AOrientedBox> & dops() const;
+	
 protected:
 
 private:
-	void createVoxels(KdNTree<T, Tn > * tree, int level);
+	void createVoxels(KdNTree<T, Tn > * tree, int level, BuildProfile * profile);
 	
 };
 
@@ -52,16 +71,17 @@ VoxelGrid<T, Tn>::~VoxelGrid() {}
 template<typename T, typename Tn>
 void VoxelGrid<T, Tn>::create(KdNTree<T, Tn > * tree, 
 										const BoundingBox & b,
-										int maxLevel)
+										BuildProfile * profile)
 {
-	std::cout<<"\n creating voxel grid\n max level "<<maxLevel<<"\n";
+	std::cout<<"\n creating voxel grid\n max level "<<profile->_maxLevel<<"\n";
 	m_voxels.clear();
 	m_contours.clear();
+	m_oboxes.clear();
 	
 	setBounding(b);
 	
 	GridBuilder<T, Tn> builder;
-	builder.build(tree, b, maxLevel);
+	builder.build(tree, b, profile->_maxLevel, profile->_minNPrimsPerCell);
 	
 	if(builder.numFinalLevelCells() < 1) return;
 	
@@ -74,11 +94,11 @@ void VoxelGrid<T, Tn>::create(KdNTree<T, Tn > * tree,
 	
 	std::cout<<"\n level"<<builder.finalLevel()<<" n cell "<<numCells();
 	
-	createVoxels(tree, builder.finalLevel() );
+	createVoxels(tree, builder.finalLevel(), profile );
 }
 
 template<typename T, typename Tn>
-void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level)
+void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level, BuildProfile * profile)
 {
 	std::cout<<"\n voxelize 0 %";
 		
@@ -86,11 +106,17 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level)
 	int maxPrims = 0;
 	int totalPrims = 0;
 	int nPrims;
-	const int ncpc = numCells() / 100;
+	int ncpc = numCells() / 100;
+	if(ncpc<1) ncpc = 1;
 	int ic = 0, ipc = 0;
 	float hh;
-    Vector3F sample;
+	
+	Vector3F sample;
 	BoxIntersectContext box;
+	VoxelEngine<cvx::Triangle, KdNode4 >::Profile vepf;
+	vepf._tree = tree;
+	// vepf._approxCell = true;
+	if(profile->_xyDOP) vepf._orientAtXY = true;
 	KdEngine eng;
 	sdb::CellHash * c = cells();
     c->begin();
@@ -103,16 +129,27 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level)
 		
 		box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
 		box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-		box.reset(1<<20, true);
+		box.reset(profile->_minNPrimsPerCell, true);
         
 		eng.intersectBox<T, Tn>(tree, &box);
 		
 		nPrims = box.numIntersect();
-		if(nPrims > 0) {
+		bool toBuild = nPrims > profile->_minNPrimsPerCell - 1;
+		if(profile->_shellOnly)
+			toBuild = !cellHas6Neighbors(c->key(), c->value()->level );
+			
+		if(toBuild) {
 		
 		if(minPrims > nPrims ) minPrims = nPrims;
 		if(maxPrims < nPrims ) maxPrims = nPrims;
 		totalPrims += nPrims;
+		
+			VoxelEngine<cvx::Triangle, KdNode4 > veng;
+			veng.setBounding(box);
+				
+			veng.build(&vepf);
+			
+			if(profile->_extractDOP) m_oboxes.insert(veng.orientedBBox() );
 		
 		Voxel v;
 		v.setColor(.99f, .99f, .99f, .99f);
@@ -139,9 +176,10 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level)
         c->next();
 	}
 	
-	std::cout<<"\n n voxel "<<numVoxels()
+	std::cout<<"\n voxel grid end\n n voxel "<<numVoxels()
 		<<"\n n prims per cell min/max/average "<<minPrims
 	<<" / "<<maxPrims<<" / "<<(float)totalPrims/(float)numVoxels();
+	std::cout.flush();
 }
 
 template<typename T, typename Tn>
@@ -159,6 +197,10 @@ const sdb::VectorArray<Voxel> & VoxelGrid<T, Tn>::voxels() const
 template<typename T, typename Tn>
 sdb::VectorArray<Voxel> * VoxelGrid<T, Tn>::voxelsR()
 { return &m_voxels; }
+
+template<typename T, typename Tn>
+const sdb::VectorArray<AOrientedBox> & VoxelGrid<T, Tn>::dops() const
+{ return m_oboxes; }
 
 }
 #endif        //  #ifndef VOXELGRID_H

@@ -91,13 +91,14 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		glEnable(GL_LIGHTING);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffCol );
 			
-		drawGrid();
+		//drawGrid();
+		drawDop();
 		
 		glDisable(GL_LIGHTING);
 		glPopAttrib();
 	} 
-	else
-		drawWireGrid();
+	//else
+		//drawWireGrid();
 	
 	aphid::Matrix44F mat;
 	mat.setFrontOrientation(aphid::Vector3F::YAxis);
@@ -216,6 +217,24 @@ MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	if(plug == outValue)
 		aphid::AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
+}
+
+void ExampViz::voxelize1(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
+							const aphid::BoundingBox & bbox)
+{
+	aphid::ExampVox::voxelize1(tri, bbox);
+	aphid::AHelper::Info<int>("dop draw buf len ", dopBufLength() );
+	
+	MFnNumericData bbFn;
+	MObject bbData = bbFn.create(MFnNumericData::k3Float);
+	
+	bbFn.setData(bbox.data()[0], bbox.data()[1], bbox.data()[2]);
+	MPlug bbmnPlug(thisMObject(), abboxminv);
+	bbmnPlug.setValue(bbData);
+	
+	bbFn.setData(bbox.data()[3], bbox.data()[4], bbox.data()[5]);
+	MPlug bbmxPlug(thisMObject(), abboxmaxv);
+	bbmxPlug.setValue(bbData);
 }
 
 void ExampViz::voxelize(const std::vector<aphid::Geometry *> & geoms)

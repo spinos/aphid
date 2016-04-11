@@ -136,13 +136,15 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	BoundingBox box(-et.x, -et.y, -et.z,
 					 et.x,  et.y,  et.z);
 	
+	float cutThre = et.y < et.x ? et.y : et.x; 
+	cutThre *= .19f;
 	Vector3F o = rgt * dopEt[0] + up * dopEt[3];
 	Vector3F d = rgt * dopEt[0] + up * dopEt[2];
 	Vector3F phit;
 	Ray incident(o, d);
 	float tmin, tmax;
 	if(box.intersect(incident, &tmin, &tmax) ) {
-		if(tmax - tmin > .2f) {
+		if(tmax - tmin > cutThre) {
 			phit = incident.travel(tmax);
 			m_vert[0].x = phit.x;
 			m_vert[0].y = phit.y;
@@ -176,7 +178,7 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	d = rgt * dopEt[1] + up * dopEt[2];
 	incident = Ray(o, d);
 	if(box.intersect(incident, &tmin, &tmax) ) {
-		if(tmax - tmin > .2f) {
+		if(tmax - tmin > cutThre) {
 			phit = incident.travel(tmax);
 			m_vert[1].x = phit.x;
 			m_vert[1].y = phit.y;
@@ -209,7 +211,7 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	d = rgt * dopEt[1] + up * dopEt[3];
 	incident = Ray(o, d);
 	if(box.intersect(incident, &tmin, &tmax) ) {
-		if(tmax - tmin > .2f) {
+		if(tmax - tmin > cutThre) {
 			phit = incident.travel(tmax);
 			m_vert[2].x = phit.x;
 			m_vert[2].y = phit.y;
@@ -243,7 +245,7 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	d = rgt * dopEt[0] + up * dopEt[3];
 	incident = Ray(o, d);
 	if(box.intersect(incident, &tmin, &tmax) ) {
-		if(tmax - tmin > .2f) {
+		if(tmax - tmin > cutThre) {
 			phit = incident.travel(tmax);
 			m_vert[3].x = phit.x;
 			m_vert[3].y = phit.y;

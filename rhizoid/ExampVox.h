@@ -10,7 +10,11 @@
 #include <BoundingBox.h>
 #include <Geometry.h>
 #include <vector>
-#include <BuildKdTreeContext.h>
+#include <VectorArray.h>
+#include <ConvexShape.h>
+#include <GridClustering.h>
+#include <AOrientedBox.h>
+#include <boost/scoped_ptr.hpp>
 
 namespace aphid {
 
@@ -20,6 +24,8 @@ class ExampVox : public DrawBox {
 	Vector3F m_geomCenter;
 	Vector3F * m_boxNormalBuf;
 	Vector3F * m_boxPositionBuf;
+	boost::scoped_ptr<Vector3F> m_dopNormalBuf;
+	boost::scoped_ptr<Vector3F> m_dopPositionBuf;
 	float * m_boxCenterSizeF4;
 	float m_diffuseMaterialColV[3];
 	float m_geomScale[3];
@@ -31,12 +37,15 @@ class ExampVox : public DrawBox {
 	float m_sizeMult;
 	unsigned m_numBoxes;
 	unsigned m_boxBufLength;
+	int m_dopBufLength;
 	
 public:
 	ExampVox();
 	virtual ~ExampVox();
 	
 	virtual void voxelize(const std::vector<Geometry *> & geoms);
+	virtual void voxelize1(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox);
 	
 /// set b4 geom box
 	void setGeomSizeMult(const float & x);
@@ -59,14 +68,17 @@ public:
 	const float * boxNormalBuf() const;
 	const float * boxPositionBuf() const;
 	const unsigned & boxBufLength() const;
+	const int & dopBufLength() const;
 	
 protected:
+	void drawDop();
 	void drawGrid();
 	void drawWireGrid();
 	float * diffuseMaterialColV();
 	float * boxCenterSizeF4();
 	bool setNumBoxes(unsigned n);
 	void buildBoxDrawBuf();
+	void buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops);
 	
 private:
 	void fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,

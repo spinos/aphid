@@ -16,11 +16,13 @@ template<typename T>
 class PrincipalComponents {
 	
 	Vector3F * m_pos;
+	int m_constrain;
 	
 public:
 	PrincipalComponents();
 	virtual ~PrincipalComponents();
 	
+	void setOrientConstrain(int x);
 	AOrientedBox analyze(const T & pos, int n);
 	
 protected:
@@ -30,6 +32,7 @@ protected:
 	float covarianceYY(int n) const;
 	float covarianceYZ(int n) const;
 	float covarianceZZ(int n) const;
+	Matrix33F getOrientation(int n);
 	
 private:
 	
@@ -37,7 +40,8 @@ private:
 
 template<typename T>
 PrincipalComponents<T>::PrincipalComponents() :
-m_pos(NULL)
+m_pos(NULL),
+m_constrain(0)
 {}
 
 template<typename T>
@@ -47,15 +51,17 @@ PrincipalComponents<T>::~PrincipalComponents()
 }
 
 template<typename T>
-AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n)
+void PrincipalComponents<T>::setOrientConstrain(int x)
+{ m_constrain = x; }
+
+template<typename T>
+Matrix33F PrincipalComponents<T>::getOrientation(int n)
 {
-	Vector3F bar = Vector3F::Zero;
-	int i=0;
-	for(;i<n;i++) bar += pos.at(i);
-	bar *= 1.f/(float)n;
-	
-	m_pos = new Vector3F[n];
-	for(i=0;i<n;i++) m_pos[i] = pos.at(i) - bar;
+	if(m_constrain>0) {
+		return Matrix33F(Vector3F(1.f, 0.f, 0.f), 
+						Vector3F(0.f, 0.f, -1.f),
+						Vector3F(0.f, 1.f, 0.f));
+	}
 	
 // is symmetric
 	Matrix33F covarianceMatrix;
@@ -74,9 +80,22 @@ AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n)
 	//<<"\n dominant eigen vec "<<covarianceMatrix.eigenVector(domegv);
 	//std::cout<<"\n dominent eigen val "<<domegv;
 	//std::cout<<"\n eigen vals "<<covarianceMatrix.eigenValues();
-	
 	Vector3F egv;
-	Matrix33F egs = covarianceMatrix.eigenSystem(egv);
+	return covarianceMatrix.eigenSystem(egv);
+}
+
+template<typename T>
+AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n)
+{
+	Vector3F bar = Vector3F::Zero;
+	int i=0;
+	for(;i<n;i++) bar += pos.at(i);
+	bar *= 1.f/(float)n;
+	
+	m_pos = new Vector3F[n];
+	for(i=0;i<n;i++) m_pos[i] = pos.at(i) - bar;
+	
+	Matrix33F egs = getOrientation(n);
 	AOrientedBox r;
 	r.setOrientation(egs);
 	

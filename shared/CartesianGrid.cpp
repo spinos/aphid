@@ -399,5 +399,16 @@ BoundingBox CartesianGrid::calculateBBox()
 	return r;
 }
 
+bool CartesianGrid::cellHas6Neighbors(unsigned code, int level)
+{
+	if(!findNeighborCell(code, level, -1, 0, 0) ) return false;
+	if(!findNeighborCell(code, level,  1, 0, 0) ) return false;
+	if(!findNeighborCell(code, level, 0, -1, 0) ) return false;
+	if(!findNeighborCell(code, level, 0, 1, 0) ) return false;
+	if(!findNeighborCell(code, level, 0, 0, -1) ) return false;
+	if(!findNeighborCell(code, level, 0, 0, 1) ) return false;
+	return true;
+}
+
 }
 //:~

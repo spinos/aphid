@@ -13,7 +13,7 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <ATriangleMesh.h>
-#include <KdTree.h>
+#include <HesperisIO.h>
 
 #define kBeginPickFlag "-bpk" 
 #define kBeginPickFlagLong "-beginPick"
@@ -474,59 +474,72 @@ MStatus proxyPaintTool::voxelizeSelected()
 		return MS::kFailure;
 	}
 	
-	std::vector<aphid::Geometry * > meshes;
-	for(;!meshIter.isDone(); meshIter.next() ) {
-		MObject mesh;
-		meshIter.getDependNode(mesh);
-		
-		MFnMesh fmesh(mesh, &stat);
-		if(!stat) continue;
-			
-		aphid::AHelper::Info<MString>("proxyPaintTool voxelize add mesh", fmesh.name() );
+	aphid::sdb::VectorArray<aphid::cvx::Triangle> tris;
+	aphid::BoundingBox bbox;
 	
+	for(;!meshIter.isDone(); meshIter.next() ) {
+		
 		MDagPath meshPath;
 		meshIter.getDagPath(meshPath);
-		
-		MMatrix wm = aphid::AHelper::GetWorldTransformMatrix(meshPath);
-		
-		MPointArray ps;
-		fmesh.getPoints(ps);
-		
-		const unsigned nv = ps.length();
-		unsigned i = 0;
-		for(;i<nv;i++) ps[i] *= wm;
-		
-		MIntArray triangleCounts, triangleVertices;
-		fmesh.getTriangles(triangleCounts, triangleVertices);
-		
-		aphid::ATriangleMesh * trimesh = new aphid::ATriangleMesh;
-		trimesh->create(nv, triangleVertices.length()/3);
-		
-		aphid::Vector3F * cvs = trimesh->points();
-		unsigned * ind = trimesh->indices();
-		for(i=0;i<nv;i++) cvs[i].set(ps[i].x, ps[i].y, ps[i].z);
-		for(i=0;i<triangleVertices.length();i++) ind[i] = triangleVertices[i];
-		
-		meshes.push_back(trimesh);
+		getMeshTris(tris, bbox, meshPath);
 	}
 	
-	if(meshes.size() < 1) {
-		MGlobal::displayWarning("proxyPaintTool no mesh added");
+	if(tris.size() < 1) {
+		MGlobal::displayWarning("proxyPaintTool no triangle added");
 		return MS::kFailure;
 	}
 	
-	aphid::AHelper::Info<unsigned>("proxyPaintTool voxelize n mesh", meshes.size() );
+	bbox.round();
+	aphid::AHelper::Info<unsigned>("proxyPaintTool voxelize n triangle", tris.size() );
 
 	MFnDependencyNode fviz(vizobj, &stat);
 	aphid::AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
 		
 	ExampViz* pViz = (ExampViz*)fviz.userNode();
-	pViz->voxelize(meshes);
+	pViz->voxelize1(&tris, bbox);
 	
-	std::vector<aphid::Geometry * >::iterator it = meshes.begin();
-	for(;it!= meshes.end();++it) delete *it;
-	meshes.clear();
 	return stat;
+}
+
+void proxyPaintTool::getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
+								aphid::BoundingBox & bbox,
+								const MDagPath & meshPath)
+{
+	aphid::AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
+	
+	MMatrix worldTm = aphid::HesperisIO::GetWorldTransform(meshPath);
+	
+    MStatus stat;
+	
+    MIntArray vertices;
+    int i, j, nv;
+	MPoint dp[3];
+	aphid::Vector3F fp[3];
+	MItMeshPolygon faceIt(meshPath);
+    for(; !faceIt.isDone(); faceIt.next() ) {
+
+		faceIt.getVertices(vertices);
+        nv = vertices.length();
+        
+        for(i=1; i<nv-1; ++i ) {
+			dp[0] = faceIt.point(0, MSpace::kObject );
+			dp[1] = faceIt.point(i, MSpace::kObject );
+			dp[2] = faceIt.point(i+1, MSpace::kObject );
+			
+			dp[0] *= worldTm;
+			dp[1] *= worldTm;	
+			dp[2] *= worldTm;
+			
+			aphid::cvx::Triangle tri;
+			for(j=0; j<3; ++j) {
+				fp[j].set(dp[j].x, dp[j].y, dp[j].z);
+				tri.setP(fp[j], j);
+				bbox.expandBy(fp[j], 1e-4f);
+			}
+			
+			tris.insert(tri);
+        }
+    }
 }
 
 MObject proxyPaintTool::createViz(const MString & typName,

@@ -8,6 +8,8 @@
  */
 
 #include "ExampVox.h"
+#include <KdEngine.h>
+#include <VoxelGrid.h>
 
 namespace aphid {
 
@@ -17,6 +19,7 @@ m_boxPositionBuf(NULL),
 m_boxNormalBuf(NULL),
 m_numBoxes(0),
 m_boxBufLength(0),
+m_dopBufLength(0),
 m_sizeMult(1.f)
 { 
 	m_diffuseMaterialColV[0] = 0.47f;
@@ -30,6 +33,26 @@ ExampVox::~ExampVox()
 	if(m_boxCenterSizeF4) delete[] m_boxCenterSizeF4; 
 	if(m_boxPositionBuf) delete[] m_boxPositionBuf;
 	if(m_boxNormalBuf) delete[] m_boxNormalBuf;
+}
+
+void ExampVox::voxelize1(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox)
+{
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 64;
+	KdEngine engine;
+	KdNTree<cvx::Triangle, KdNode4 > gtr;
+	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, tri, bbox, &bf);
+	
+	VoxelGrid<cvx::Triangle, KdNode4>::BuildProfile vf;
+	vf._maxLevel = 3;
+	vf._extractDOP = true;
+	vf._shellOnly = true;
+	
+	VoxelGrid<cvx::Triangle, KdNode4> ggd;
+	ggd.create(&gtr, bbox, &vf);
+	
+	buildDOPDrawBuf(ggd.dops() );
 }
 
 void ExampVox::voxelize(const std::vector<Geometry *> & geoms)
@@ -193,5 +216,38 @@ const float * ExampVox::boxPositionBuf() const
 
 const unsigned & ExampVox::boxBufLength() const
 { return m_boxBufLength; }
+
+void ExampVox::buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops)
+{
+	const int ndop = dops.size();
+	m_dopNormalBuf.reset(new Vector3F[ndop * 84]);
+	m_dopPositionBuf.reset(new Vector3F[ndop * 84]);
+	
+	int bufLen = 0;
+	DOP8Builder bud;
+	int i=0, j;
+	for(;i<ndop;++i) {
+		bud.build(*dops.get(i) );
+	
+		for(j=0; j<bud.numTriangles() * 3; ++j) {
+			m_dopNormalBuf.get()[bufLen + j] = bud.normal()[j];
+			m_dopPositionBuf.get()[bufLen + j] = bud.vertex()[j];
+		}
+		
+		bufLen += bud.numTriangles() * 3;
+	}
+	m_dopBufLength = bufLen;
+}
+
+const int & ExampVox::dopBufLength() const
+{ return m_dopBufLength; }
+
+void ExampVox::drawDop()
+{
+	if(m_dopBufLength < 1) return;
+	drawSolidBoxArray((const float *)m_dopPositionBuf.get(),
+						(const float *)m_dopNormalBuf.get(),
+						m_dopBufLength);
+}
 
 }

@@ -355,7 +355,7 @@ std::string Triangle::GetTypeStr()
 
 bool Triangle::sampleP(Vector3F & dst, const BoundingBox &  box) const
 {
-	for(int i=0; i<100; ++i) {
+	for(int i=0; i<10; ++i) {
 		float a = ((float)(rand() & 1023)) / 1023.f;
 		float b = (1.f - a ) * ((float)(rand() & 1023)) / 1023.f;
 		float c = 1.f - a - b;

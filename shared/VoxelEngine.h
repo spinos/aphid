@@ -54,7 +54,7 @@ struct Voxel {
 		
 		BoundingBox b((float)x-h, (float)y-h, (float)z-h,
 				(float)x+h, (float)y+h, (float)z+h);
-		b.expand(-.00003f);
+		b.expand(-.000023f);
 		return b;
 	}
 	
@@ -94,19 +94,27 @@ struct Contour {
 	
 };
 
-template<typename T, int NLevel = 3>
+template<typename T, typename Tn, int NLevel = 3>
 class VoxelEngine : public CartesianGrid {
 
-/// container of primitives
-	std::vector<T> m_prims;
 	AOrientedBox m_obox;
 	
 public:
+	struct Profile {
+		KdNTree<T, Tn > * _tree;
+		bool _approxCell;
+		bool _orientAtXY;
+		Profile() {
+			_tree = NULL;
+			_approxCell = false;
+			_orientAtXY = false;
+		}
+	};
+
 	VoxelEngine();
 	virtual ~VoxelEngine();
 	
-	void add(const T & x);
-	bool build();
+	bool build(Profile * prof);
 	
 	void extractContours(Voxel & dst) const;
 	
@@ -115,36 +123,32 @@ public:
 	const AOrientedBox & orientedBBox() const;
 	
 protected:
-	int intersect(const BoundingBox * b);
-	void calculateOBox();
+	void calculateOBox(Profile * prof);
 	void sampleCells(std::vector<Vector3F> & dst);
-	void samplePrims(std::vector<Vector3F> & dst);
+	void samplePrims(std::vector<Vector3F> & dst, Profile * prof);
 
 private:
 
 };
 
-template<typename T, int NLevel>
-VoxelEngine<T, NLevel>::VoxelEngine()
+template<typename T, typename Tn, int NLevel>
+VoxelEngine<T, Tn, NLevel>::VoxelEngine()
 {}
 
-template<typename T, int NLevel>
-VoxelEngine<T, NLevel>::~VoxelEngine()
+template<typename T, typename Tn, int NLevel>
+VoxelEngine<T, Tn, NLevel>::~VoxelEngine()
 {}
 
-template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::add(const T & x)
-{ m_prims.push_back(x); }
-
-template<typename T, int NLevel>
-bool VoxelEngine<T, NLevel>::build()
+template<typename T, typename Tn, int NLevel>
+bool VoxelEngine<T, Tn, NLevel>::build(Profile * prof)
 {
 	const float h = cellSizeAtLevel(NLevel);
     const float hh = h * .49995f;
 	const int dim = 1<<NLevel;
 	const Vector3F ori = origin() + Vector3F(hh, hh, hh);
     Vector3F sample;
-	BoundingBox box;
+	KdEngine eng;
+	BoxIntersectContext box;
 	int i, j, k;
 	for(k=0; k < dim; k++) {
         for(j=0; j < dim; j++) {
@@ -152,8 +156,10 @@ bool VoxelEngine<T, NLevel>::build()
                 sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
                 box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
                 box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
+				box.reset(1, true);
 				
-				if(intersect(&box) > 0 )
+				eng.intersectBox<T, Tn>(prof->_tree, &box);
+				if(box.numIntersect() > 0 )
 					addCell(sample, NLevel, 1);
             }
         }
@@ -161,36 +167,13 @@ bool VoxelEngine<T, NLevel>::build()
 	
 	if(numCells() < 1) return false;
 	
-	calculateOBox();
+	calculateOBox(prof);
 	
 	return true;
 }
 
-template<typename T, int NLevel>
-int VoxelEngine<T, NLevel>::intersect(const BoundingBox * b)
-{
-	int nsect = 0;
-	typename std::vector<T>::const_iterator it = m_prims.begin();
-	for(;it!= m_prims.end(); ++it) {
-		const BoundingBox & cb = (*it).calculateBBox();
-		if(cb.intersect(*b) ) {
-			bool isect = false;
-			if(cb.inside(*b) ) {
-				isect = true;
-			}
-			else {
-				isect = it-> template exactIntersect<BoundingBox >(*b);
-			}
-			
-			if(isect)
-				nsect++;
-		}
-	}
-	return nsect;
-}
-
-template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::sampleCells(std::vector<Vector3F> & dst)
+template<typename T, typename Tn, int NLevel>
+void VoxelEngine<T, Tn, NLevel>::sampleCells(std::vector<Vector3F> & dst)
 {
 	const float hh = cellSizeAtLevel(NLevel + 2);
 	sdb::CellHash * c = cells();
@@ -207,69 +190,55 @@ void VoxelEngine<T, NLevel>::sampleCells(std::vector<Vector3F> & dst)
 	}
 }
 
-template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::samplePrims(std::vector<Vector3F> & dst)
+template<typename T, typename Tn, int NLevel>
+void VoxelEngine<T, Tn, NLevel>::samplePrims(std::vector<Vector3F> & dst, Profile * prof)
 {
-	BoundingBox b;
-	getBounding(b);
+	BoxIntersectContext box;
+	getBounding(box);
+	box.reset(1<<16, true);
+	KdEngine eng;
+	eng.intersectBox<T, Tn>(prof->_tree, &box);
+	
+	const std::vector<int> & inds = box.primIndices();
+	const sdb::VectorArray<T> * prims = prof->_tree->source();
+    
 	Vector3F p;
 	
-	typename std::vector<T>::const_iterator it = m_prims.begin();
-	it = m_prims.begin();
-	for(;it!= m_prims.end(); ++it) {
-		p = (*it).P(0);
-		if(b.isPointInside(p) )
-			dst.push_back(p);
-			
-		p = (*it).P(1);
-		if(b.isPointInside(p ) )
-			dst.push_back(p);
-			
-		p = (*it).P(2);
-		if(b.isPointInside(p ) )
-			dst.push_back(p);
-	}
-	
+	typename std::vector<int>::const_iterator it;
 	for(int i=0; i< 200; ++i) {
-		it = m_prims.begin();
-		for(;it!= m_prims.end(); ++it) {
-			const BoundingBox & cb = (*it).calculateBBox();
-			if(cb.intersect(b) ) {
-				if((*it).sampleP(p, b) )
+		it = inds.begin();
+		for(;it!= inds.end(); ++it) {
+			const T * aprim = prims->get(*it); 
+			if(aprim->sampleP(p, box) )
 					dst.push_back(p);
-			}
 		}
 		if(dst.size() > 500) return;
 	}
 }
 
-template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::calculateOBox()
+template<typename T, typename Tn, int NLevel>
+void VoxelEngine<T, Tn, NLevel>::calculateOBox(Profile * prof)
 {
 	std::vector<Vector3F> pnts;
 	
-	if(m_prims.size() > 128) sampleCells(pnts);
+	if(prof->_approxCell) sampleCells(pnts);
 	else {
-		samplePrims(pnts);
+		samplePrims(pnts, prof);
 		if(pnts.size() < 32) sampleCells(pnts);
 	}
 	
-	// std::cout<<"\n n pnt "<<pnts.size();
 	PrincipalComponents<std::vector<Vector3F> > obpca;
+	if(prof->_orientAtXY) obpca.setOrientConstrain(1);
 	m_obox = obpca.analyze(pnts, pnts.size() );
 	m_obox.limitMinThickness(cellSizeAtLevel(NLevel + 2) );
 }
 
-template<typename T, int NLevel>
-const std::vector<T> & VoxelEngine<T, NLevel>::prims() const
-{ return m_prims; }
-
-template<typename T, int NLevel>
-const AOrientedBox & VoxelEngine<T, NLevel>::orientedBBox() const
+template<typename T, typename Tn, int NLevel>
+const AOrientedBox & VoxelEngine<T, Tn, NLevel>::orientedBBox() const
 { return m_obox; }
 
-template<typename T, int NLevel>
-void VoxelEngine<T, NLevel>::extractContours(Voxel & dst) const
+template<typename T, typename Tn, int NLevel>
+void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 {
 }
 

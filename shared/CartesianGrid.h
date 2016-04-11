@@ -99,6 +99,8 @@ protected:
 	
 	void tagCellsToRefineByNeighbours(sdb::CellHash & cellsToRefine);
 	
+	bool cellHas6Neighbors(unsigned code, int level);
+	
 private:
     
 };
