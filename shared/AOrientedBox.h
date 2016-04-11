@@ -50,8 +50,6 @@ private:
 class DOP8Builder {
 
 	Vector3F m_vert[18];
-/// lateral 8 top and bottom
-	Vector3F m_nor[10];
 	Vector3F m_facevert[84];
 	Vector3F m_facenor[84];
 	int m_tri[84];

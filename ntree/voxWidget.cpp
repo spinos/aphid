@@ -35,7 +35,7 @@ void VoxWidget::clientInit()
 
 void VoxWidget::clientDraw()
 {
-	//drawGrids();
+	drawGrids();
 	drawTriangles();
 	drawFronts();
 }
@@ -94,9 +94,10 @@ void VoxWidget::drawTriangles()
 void VoxWidget::drawFronts()
 {
 	GeoDrawer * dr = getDrawer();
-	dr->m_surfaceProfile.apply();
+	//dr->m_surfaceProfile.apply();
+    dr->m_wireProfile.apply();
 	dr->setColor(.1f, .1f, .1f);
-	//dr->orientedBox(&m_engine.orientedBBox() );
+	dr->orientedBox(&m_engine.orientedBBox() );
 	dr->setColor(0.f, .1f, .5f);
 	dr->orientedBox(&m_engine1.orientedBBox() );
 	dr->setColor(.9f, .1f, .1f);

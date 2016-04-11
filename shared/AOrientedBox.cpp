@@ -121,17 +121,18 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	up.normalize();
 	
 /// max 8 edges
+    Vector3F edgeNor[8];
 	int edgei[16];
 	int edgec = 4;
 	edgei[0] = 0; edgei[1] = 1;
 	edgei[2] = 1; edgei[3] = 2;
 	edgei[4] = 2; edgei[5] = 3;
 	edgei[6] = 3; edgei[7] = 0;
-	m_nor[0].set(0.f,-1.f, 0.f);
-	m_nor[1].set(1.f, 0.f, 0.f);
-	m_nor[2].set(0.f, 1.f, 0.f);
-	m_nor[3].set(-1.f, 0.f, 0.f);
-	
+	edgeNor[0].set(0.f,-1.f, 0.f);
+	edgeNor[1].set(1.f, 0.f, 0.f);
+	edgeNor[2].set(0.f, 1.f, 0.f);
+	edgeNor[3].set(-1.f, 0.f, 0.f);
+	int splitEdge = 3;
 	BoundingBox box(-et.x, -et.y, -et.z,
 					 et.x,  et.y,  et.z);
 	
@@ -151,16 +152,26 @@ void DOP8Builder::build(const AOrientedBox & ob)
 			m_vert[nvert].y = phit.y;
 			m_vert[nvert].z = et.z;
 			m_tri[m_ntri*3] = 0; m_tri[m_ntri*3+1] = nvert-1; m_tri[m_ntri*3+2] = nvert;
-			edgei[7] = nvert;
-			edgei[edgec*2] = nvert;
-			edgei[edgec*2+1] = 0;
-			m_nor[edgec].set(-.7071f, -.7071f, 0.f);
+			
+            //std::cout<<"\n split e"<<splitEdge<<" "
+            //        <<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1];
+            
+            edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = edgei[splitEdge*2+1];
+			edgei[splitEdge*2+1] = nvert;
+            
+            //std::cout<<" into "<<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1]
+            //    <<" and "<<edgei[edgec*2]<<" - "<<edgei[edgec*2+1];
+                    
+			edgeNor[edgec].set(-.7071f, -.7071f, 0.f);
 			edgec++;
 			nvert++;
 			m_ntri++;
 		}
 	}
 	
+    splitEdge = 0;
+    
 	o = rgt * dopEt[0] + up * dopEt[2];
 	d = rgt * dopEt[1] + up * dopEt[2];
 	incident = Ray(o, d);
@@ -175,16 +186,25 @@ void DOP8Builder::build(const AOrientedBox & ob)
 			m_vert[nvert].y = phit.y;
 			m_vert[nvert].z = et.z;
 			m_tri[m_ntri*3] = 0; m_tri[m_ntri*3+1] = nvert; m_tri[m_ntri*3+2] = 1;
-			edgei[1] = nvert;
-			edgei[edgec*2] = nvert;
-			edgei[edgec*2+1] = 1;
-			m_nor[edgec].set(.7071f, -.7071f, 0.f);
+			
+            //std::cout<<"\n split e"<<splitEdge<<" "
+            //        <<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1];
+            
+            edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = edgei[splitEdge*2+1];
+            edgei[splitEdge*2 + 1] = nvert;
+			
+            //std::cout<<" into "<<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1]
+            //    <<" and "<<edgei[edgec*2]<<" - "<<edgei[edgec*2+1];
+            
+			edgeNor[edgec].set(.7071f, -.7071f, 0.f);
 			edgec++;
 			nvert++;
 			m_ntri++;
 		}
 	}
 	
+    splitEdge = 1;
 	o = rgt * dopEt[1] + up * dopEt[2];
 	d = rgt * dopEt[1] + up * dopEt[3];
 	incident = Ray(o, d);
@@ -199,16 +219,26 @@ void DOP8Builder::build(const AOrientedBox & ob)
 			m_vert[nvert].y = phit.y;
 			m_vert[nvert].z = et.z;
 			m_tri[m_ntri*3] = 1; m_tri[m_ntri*3+1] = nvert; m_tri[m_ntri*3+2] = 2;
-			edgei[3] = nvert;
-			edgei[edgec*2] = nvert;
-			edgei[edgec*2+1] = 2;
-			m_nor[edgec].set(.7071f, .7071f, 0.f);
+			
+            //std::cout<<"\n split e"<<splitEdge<<" "
+            //        <<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1];
+            
+            edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = edgei[splitEdge*2+1];
+            edgei[splitEdge*2 + 1] = nvert;
+			
+            //std::cout<<" into "<<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1]
+            //    <<" and "<<edgei[edgec*2]<<" - "<<edgei[edgec*2+1];
+            
+                
+			edgeNor[edgec].set(.7071f, .7071f, 0.f);
 			edgec++;
 			nvert++;
 			m_ntri++;
 		}
 	}
 	
+    splitEdge = 2;
 	o = rgt * dopEt[1] + up * dopEt[3];
 	d = rgt * dopEt[0] + up * dopEt[3];
 	incident = Ray(o, d);
@@ -223,10 +253,18 @@ void DOP8Builder::build(const AOrientedBox & ob)
 			m_vert[nvert].y = phit.y;
 			m_vert[nvert].z = et.z;
 			m_tri[m_ntri*3] = 2; m_tri[m_ntri*3+1] = nvert; m_tri[m_ntri*3+2] = 3;
-			edgei[5] = nvert;
-			edgei[edgec*2] = nvert;
-			edgei[edgec*2+1] = 3;
-			m_nor[edgec].set(-.7071f, .7071f, 0.f);
+			
+            //std::cout<<"\n split e"<<splitEdge<<" "
+            //        <<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1];
+            
+            edgei[edgec*2] = nvert;
+			edgei[edgec*2+1] = edgei[splitEdge*2+1];
+            edgei[splitEdge*2 + 1] = nvert;
+			
+            //std::cout<<" into "<<edgei[splitEdge*2]<<" - "<<edgei[splitEdge*2+1]
+             //   <<" and "<<edgei[edgec*2]<<" - "<<edgei[edgec*2+1];
+            
+			edgeNor[edgec].set(-.7071f, .7071f, 0.f);
 			edgec++;
 			nvert++;
 			m_ntri++;
@@ -246,50 +284,29 @@ void DOP8Builder::build(const AOrientedBox & ob)
 		m_vert[i] = space.transform(m_vert[i]) + cnt;
 	}
 	
-	m_nor[edgec+1].set(0.f, 0.f, 1.f);
-	m_nor[edgec+2].set(0.f, 0.f, -1.f);
-	
-	for(int i=0; i<edgec+2; ++i) {
-		m_nor[i] = space.transform(m_nor[i]);
-	}
-	
-	for(int i=0; i<m_ntri; ++i) {
-		m_tri[(i+ m_ntri)*3] = m_tri[i*3] + edgec;
-		m_tri[(i+ m_ntri)*3+1] = m_tri[i*3+2] + edgec;
-		m_tri[(i+ m_ntri)*3+2] = m_tri[i*3+1] + edgec;
-	}
-	m_ntri += m_ntri;
-	
-/// connect top and bottom
+	Vector3F topNor(0.f, 0.f, 1.f);
+    topNor = space.transform(topNor);
+	Vector3F bottomNor(0.f, 0.f, -1.f);
+	bottomNor = space.transform(bottomNor);
+    
 	for(int i=0; i<edgec; ++i) {
-		int i1 = i+1;
-		if(i1 == edgec) i1 = 0;
-		
-		m_tri[m_ntri*3] = edgei[i];
-		m_tri[m_ntri*3+1] = edgei[i] + edgec;
-		m_tri[m_ntri*3+2] = edgei[i1];
-		m_ntri++;
-		m_tri[m_ntri*3] = edgei[i] + edgec;
-		m_tri[m_ntri*3+1] = edgei[i1] + edgec;
-		m_tri[m_ntri*3+2] = edgei[i1];
-		m_ntri++;
+		edgeNor[i] = space.transform(edgeNor[i]);
 	}
 	
-/// vert to face vert
-	for(int i=0; i<m_ntri*3; ++i) {
-		m_facevert[i] = m_vert[m_tri[i]];
-	}
+    //for(int i=0; i<edgec; ++i) {
+    //    std::cout<<"\n e"<<i<<" "<<edgei[i*2]<<" - "<<edgei[i*2+1];
+    //}
 	
 /// nor to face nor
-	for(int i=0; i<edgec*3; ++i) {
-		m_facenor[i] = m_nor[edgec+1];
+	for(int i=0; i<m_ntri*3; ++i) {
+        m_facenor[i] = topNor;
 	}
-	for(int i=edgec*3; i<edgec*6; ++i) {
-		m_facenor[i] = m_nor[edgec+2];
+	for(int i=m_ntri*3; i<m_ntri*6; ++i) {
+		m_facenor[i] = bottomNor;
 	}
-	int lateralOffset = edgec * 6;
+	int lateralOffset = m_ntri * 6;
 	for(int i=0; i<edgec; ++i) {
-		const Vector3F & lateralNor = m_nor[i];
+		const Vector3F lateralNor = edgeNor[i];
 		m_facenor[lateralOffset + i*6] = lateralNor;
 		m_facenor[lateralOffset + i*6+1] = lateralNor;
 		m_facenor[lateralOffset + i*6+2] = lateralNor;
@@ -297,6 +314,35 @@ void DOP8Builder::build(const AOrientedBox & ob)
 		m_facenor[lateralOffset + i*6+4] = lateralNor;
 		m_facenor[lateralOffset + i*6+5] = lateralNor;
 	}
+
+/// bottom side
+    for(int i=0; i<m_ntri; ++i) {
+		m_tri[(i+ m_ntri)*3] = m_tri[i*3] + edgec;
+		m_tri[(i+ m_ntri)*3+1] = m_tri[i*3+2] + edgec;
+		m_tri[(i+ m_ntri)*3+2] = m_tri[i*3+1] + edgec;
+	}
+	m_ntri += m_ntri;
+    
+/// connect top and bottom
+	for(int i=0; i<edgec; ++i) {
+		m_tri[m_ntri*3] = edgei[i*2];
+		m_tri[m_ntri*3+1] = edgei[i*2] + edgec;
+		m_tri[m_ntri*3+2] = edgei[i*2+1];
+		m_ntri++;
+		m_tri[m_ntri*3] = edgei[i*2] + edgec;
+		m_tri[m_ntri*3+1] = edgei[i*2+1] + edgec;
+		m_tri[m_ntri*3+2] = edgei[i*2+1];
+		m_ntri++;
+	}
+	
+/// vert to face vert
+	for(int i=0; i<m_ntri*3; ++i) {
+		m_facevert[i] = m_vert[m_tri[i]];
+	}
+    
+    //for(int i=0; i<m_ntri*3; ++i) {
+    //   std::cout<<"\n nor "<<i<<m_facenor[i];
+	//}
 }
 
 const int & DOP8Builder::numTriangles() const

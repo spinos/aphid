@@ -795,7 +795,7 @@ void GeoDrawer::orientedBox(const AOrientedBox * ob)
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
-	coordsys(ob->orientation(), ob->center() );
+	//coordsys(ob->orientation(), ob->center() );
 }
 
 }
