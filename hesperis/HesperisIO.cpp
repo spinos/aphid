@@ -96,38 +96,6 @@ bool HesperisIO::WriteMeshes(const MDagPathArray & paths,
 	return true;
 }
 
-MMatrix HesperisIO::GetParentTransform(const MDagPath & path)
-{
-    MMatrix m;
-    MDagPath parentPath = path;
-    parentPath.pop();
-    MStatus stat;
-    MFnTransform ft(parentPath, &stat);
-    if(!stat) {
-        MGlobal::displayWarning(MString("hesperis io cannot create transform func by paht ")+path.fullPathName());
-        return m;   
-    }
-    m = ft.transformation().asMatrix();
-    return m;
-}
-
-MMatrix HesperisIO::GetWorldTransform(const MDagPath & path)
-{
-    MMatrix m;
-    MDagPath parentPath = path;
-    MStatus stat;
-    for(;;) {
-        stat = parentPath.pop();
-        if(!stat) break;
-        MFnTransform ft(parentPath, &stat);
-        if(!stat) {
-            return m;   
-        }
-        m *= ft.transformation().asMatrix();
-    }
-    return m;
-}
-
 bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject & oparent)
 {
     if(oparent == MObject::kNullObj) {

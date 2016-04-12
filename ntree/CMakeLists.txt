@@ -15,7 +15,6 @@ include_directories (../shared
 
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"
-"glwidget.h"
 "../shared/Morton3D.h"
 ../shared/ConvexShape.h
 ../shared/HElemAsset.h
@@ -56,7 +55,6 @@ wldWidget.cpp
 triWidget.cpp
 voxWidget.cpp
 NTreeIO.cpp
-glwidget.cpp
 window.cpp
 main.cpp)
 

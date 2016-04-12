@@ -165,8 +165,11 @@ void HAssetGrid<T, Tv>::buildTree(const BoundingBox & worldBox)
 	KdEngine engine;
 	engine.buildTree<Tv, KdNode4, 4>(&ptree, &src, rootBox, &bf);
 	
-	VoxelGrid<Tv, KdNode4 > vgd;
-	vgd.create(&ptree, rootBox, 8);
+	typename VoxelGrid<Tv, KdNode4>::BuildProfile vf;
+	vf._minNPrimsPerCell = 1;
+	
+	VoxelGrid<Tv, KdNode4> vgd;
+	vgd.create(&ptree, rootBox, &vf);
 	
 	numVoxels = vgd.numVoxels();
 	

@@ -10,6 +10,7 @@
 #define VOX_Widget_H
 
 #include <Base3DView.h>
+#include <KdEngine.h>
 #include <VoxelEngine.h>
 #include <ConvexShape.h>
 
@@ -41,11 +42,13 @@ private:
 								const aphid::Vector3F & c2);
 	
 private:
-	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine;
-	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine1;
-	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine2;
-	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine3;
-	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine4;
-	aphid::VoxelEngine<aphid::cvx::Triangle > m_engine5;
+	aphid::sdb::VectorArray<aphid::cvx::Triangle> m_tris;
+	
+	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine;
+	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine1;
+	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine2;
+	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine3;
+	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine4;
+	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine5;
 };
 #endif

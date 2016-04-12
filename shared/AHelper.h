@@ -132,8 +132,10 @@ public:
 	static char containsGeom(const MDagPath & root);
     static std::string FullPathNameToObj(const MObject & obj);
 	
-	static MMatrix GetWorldTransformMatrix(const MDagPath & path);
 	static MMatrix GetWorldParentTransformMatrix(const MDagPath & path);
+	static MMatrix GetParentTransform(const MDagPath & path);
+/// include itself
+	static MMatrix GetWorldTransformMatrix(const MDagPath & path);
 	static double AreaOfTriangle(const MPoint & a, const MPoint & b, const MPoint & c);
 	
 	template<typename T>

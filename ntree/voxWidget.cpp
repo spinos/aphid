@@ -78,15 +78,16 @@ void VoxWidget::drawTriangles()
 	getDrawer()->m_markerProfile.apply();
 	glColor3f(0,.2,.6);
 	glBegin(GL_TRIANGLES);
-	const std::vector<cvx::Triangle> & tris = m_engine.prims();
-	std::vector<cvx::Triangle>::const_iterator it = tris.begin();
-	for(;it!=tris.end();++it) {
-		glColor3fv((GLfloat *)&it->C(0) );
-		glVertex3fv((GLfloat *)it->p(0) );
-		glColor3fv((GLfloat *)&it->C(1) );
-		glVertex3fv((GLfloat *)it->p(1) );
-		glColor3fv((GLfloat *)&it->C(2) );
-		glVertex3fv((GLfloat *)it->p(2) );
+	const int n = m_tris.size();
+	int i = 0;
+	for(;i<n;++i) {
+		const cvx::Triangle * t = m_tris[i];
+		glColor3fv((GLfloat *)&t->C(0) );
+		glVertex3fv((GLfloat *)t->p(0) );
+		glColor3fv((GLfloat *)&t->C(1) );
+		glVertex3fv((GLfloat *)t->p(1) );
+		glColor3fv((GLfloat *)&t->C(2) );
+		glVertex3fv((GLfloat *)t->p(2) );
 	}
 	glEnd();
 }
@@ -136,7 +137,6 @@ void VoxWidget::buildTests()
 {
 	BoundingBox b(0.f, 0.f, 0.f,
 					8.f, 8.f, 8.f);
-	m_engine.setBounding(b);
 	
 	Vector3F vp[4];
 	vp[0].set(1.1f, .91f, 1.3f);
@@ -150,67 +150,47 @@ void VoxWidget::buildTests()
 	vc[2].set(0.1f, 0.f, .5f);
 	vc[3].set(0.1f, .5f, 0.f);
 	
-	m_engine.add(createTriangle(vp[0], vp[1], vp[2],
+	m_tris.insert(createTriangle(vp[0], vp[1], vp[2],
 								vc[0], vc[1], vc[2]) );
 								
-	m_engine.add(createTriangle(vp[0], vp[2], vp[3],
+	m_tris.insert(createTriangle(vp[0], vp[2], vp[3],
 								vc[0], vc[2], vc[3]) );
 	
-	m_engine.build();
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 64;
+	KdEngine eng;
+	KdNTree<cvx::Triangle, KdNode4 > gtr;
+	eng.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, &m_tris, b, &bf);
+	
+	VoxelEngine<cvx::Triangle, KdNode4 >::Profile vf;
+	vf._tree = &gtr;
+	
+	m_engine.setBounding(b);
+	m_engine.build(&vf);
 	std::cout<<"\n grid n cell "<<m_engine.numCells();
 	std::cout.flush();
 	
 	b.setMax(4.f, 4.f, 4.f);
 	m_engine1.setBounding(b);
-	m_engine1.add(createTriangle(vp[0], vp[1], vp[2],
-								vc[0], vc[1], vc[2]) );
-								
-	m_engine1.add(createTriangle(vp[0], vp[2], vp[3],
-								vc[0], vc[2], vc[3]) );
-	
-	m_engine1.build();
+	m_engine1.build(&vf);
 	
 	b.setMin(4.f, 4.f, 4.f);
 	b.setMax(8.f, 8.f, 8.f);
 	m_engine2.setBounding(b);
-	m_engine2.add(createTriangle(vp[0], vp[1], vp[2],
-								vc[0], vc[1], vc[2]) );
-								
-	m_engine2.add(createTriangle(vp[0], vp[2], vp[3],
-								vc[0], vc[2], vc[3]) );
-	
-	m_engine2.build();
+	m_engine2.build(&vf);
 	
 	b.setMin(4.f, 4.f, 0.f);
 	b.setMax(8.f, 8.f, 4.f);
 	m_engine3.setBounding(b);
-	m_engine3.add(createTriangle(vp[0], vp[1], vp[2],
-								vc[0], vc[1], vc[2]) );
-								
-	m_engine3.add(createTriangle(vp[0], vp[2], vp[3],
-								vc[0], vc[2], vc[3]) );
-	
-	m_engine3.build();
+	m_engine3.build(&vf);
 	
 	b.setMin(4.f, 0.f, 0.f);
 	b.setMax(8.f, 4.f, 4.f);
 	m_engine4.setBounding(b);
-	m_engine4.add(createTriangle(vp[0], vp[1], vp[2],
-								vc[0], vc[1], vc[2]) );
-								
-	m_engine4.add(createTriangle(vp[0], vp[2], vp[3],
-								vc[0], vc[2], vc[3]) );
-	
-	m_engine4.build();
+	m_engine4.build(&vf);
 	
 	b.setMin(4.f, 0.f, 4.f);
 	b.setMax(8.f, 4.f, 8.f);
 	m_engine5.setBounding(b);
-	m_engine5.add(createTriangle(vp[0], vp[1], vp[2],
-								vc[0], vc[1], vc[2]) );
-								
-	m_engine5.add(createTriangle(vp[0], vp[2], vp[3],
-								vc[0], vc[2], vc[3]) );
-	
-	m_engine5.build();
+	m_engine5.build(&vf);
 }

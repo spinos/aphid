@@ -13,7 +13,6 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <ATriangleMesh.h>
-#include <HesperisIO.h>
 
 #define kBeginPickFlag "-bpk" 
 #define kBeginPickFlagLong "-beginPick"
@@ -507,7 +506,7 @@ void proxyPaintTool::getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> &
 {
 	aphid::AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
 	
-	MMatrix worldTm = aphid::HesperisIO::GetWorldTransform(meshPath);
+	MMatrix worldTm = aphid::AHelper::GetWorldParentTransformMatrix(meshPath);
 	
     MStatus stat;
 	

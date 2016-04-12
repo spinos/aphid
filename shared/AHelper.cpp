@@ -944,16 +944,6 @@ std::string AHelper::FullPathNameToObj(const MObject & node)
     return std::string(pf.fullPathName().asChar());
 }
 
-MMatrix AHelper::GetWorldTransformMatrix(const MDagPath & path)
-{
-	MMatrix m = MMatrix::identity;
-	if(path.node().hasFn(MFn::kTransform))
-		m = MFnTransform(path).transformation().asMatrix();
-		
-	m *= GetWorldParentTransformMatrix(path);
-	return m;
-}
-
 MMatrix AHelper::GetWorldParentTransformMatrix(const MDagPath & path)
 {
 	MMatrix m;
@@ -968,6 +958,31 @@ MMatrix AHelper::GetWorldParentTransformMatrix(const MDagPath & path)
         m *= ft.transformation().asMatrix();
     }
     return m;
+}
+
+MMatrix AHelper::GetParentTransform(const MDagPath & path)
+{
+    MMatrix m;
+    MDagPath parentPath = path;
+    parentPath.pop();
+    MStatus stat;
+    MFnTransform ft(parentPath, &stat);
+    if(!stat) {
+        MGlobal::displayWarning(MString("hesperis io cannot create transform func by paht ")+path.fullPathName());
+        return m;   
+    }
+    m = ft.transformation().asMatrix();
+    return m;
+}
+
+MMatrix AHelper::GetWorldTransformMatrix(const MDagPath & path)
+{
+	MMatrix m = MMatrix::identity;
+	if(path.node().hasFn(MFn::kTransform))
+		m = MFnTransform(path).transformation().asMatrix();
+		
+	m *= GetWorldParentTransformMatrix(path);
+	return m;
 }
 
 void AHelper::PrintMatrix(const std::string & note, const MMatrix & mat)

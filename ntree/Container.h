@@ -114,7 +114,11 @@ bool Container<T>::buildGrid()
 {
 	m_grid = new VoxelGrid<T, KdNode4 >();
 	BoundingBox b = m_tree->getBBox();
-	m_grid->create(m_tree, b, 8);
+	
+	typename VoxelGrid<T, KdNode4>::BuildProfile vf;
+	vf._minNPrimsPerCell = 1;
+	
+	m_grid->create(m_tree, b, &vf);
 	
 	Vector3F o = m_grid->origin();
 	float sp = 1024.f;

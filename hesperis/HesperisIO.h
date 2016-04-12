@@ -42,8 +42,6 @@ public:
 							const std::string & parentName = "");
     static bool CreateMeshGroup(const MDagPathArray & paths, 
 								ATriangleMeshGroup * dst);
-    static MMatrix GetParentTransform(const MDagPath & path);
-    static MMatrix GetWorldTransform(const MDagPath & path);
     static bool FindNamedChild(MObject & dst, const std::string & name, MObject & oparent = MObject::kNullObj);
     static bool GetTransform(BaseTransform * dst, const MDagPath & path);
     static bool LsCurves(std::vector<std::string > & dst);

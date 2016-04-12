@@ -21,11 +21,10 @@ struct Voxel {
 	int m_color;
 /// morton code of cell center in bound
 	int m_pos;
-/// level-ncontour-indexcontour packed into int
+/// level-ncontour packed into int
 /// bit layout
 /// 0-3 level			4bit 0-15
-/// 4-5 n contour		2bit 0-3
-/// 6-   offset to first contour
+/// 4-6 n contour		3bit 0-7
 	int m_contour;
 	
 	void setColor(const float &r, const float &g,
@@ -39,8 +38,8 @@ struct Voxel {
 		m_contour = level;
 	}
 	
-	void setContour(const int & count, const int & offset)
-	{ m_contour = m_contour | (offset<<6 | count<<4); }
+	void setNContour(const int & count)
+	{ m_contour = m_contour | (count<<4); }
 	
 	void getColor(float &r, float &g,
 					float &b, float &a)
@@ -72,9 +71,10 @@ struct Voxel {
 struct Contour {
 /// point-normal packed into int
 /// bit layout
-/// 0-4		gridx		5bit
-/// 5-9		girdy		5bit
-/// 10-14	girdz		5bit
+/// 0-3		gridx		4bit
+/// 4-7		girdy		4bit
+/// 8-11	girdz		4bit
+/// 12-14   thickness   3bit slab if > 0
 /// 15 normal sign		1bit
 /// 16-17 normal axis	2bit
 /// 18-23 normal u		6bit
@@ -84,12 +84,15 @@ struct Contour {
 	void setNormal(const Vector3F & n)
 	{ colnor30::encodeN(m_data, n); }
 	
+	void setThickness(const int & x)
+	{ m_data = m_data | (x<<12); }
+	
 	void setPoint(const Vector3F & p,
 					const Vector3F & o,
 					const float & d)
 	{
 		Vector3F c((p.x - o.x)/d, (p.y - o.y)/d, (p.z - o.z)/d);
-		colnor30::encodeC(m_data, c);
+		col12::encodeC(m_data, c);
 	}
 	
 };
@@ -118,8 +121,6 @@ public:
 	
 	void extractContours(Voxel & dst) const;
 	
-/// access to primitives
-	const std::vector<T> & prims() const;
 	const AOrientedBox & orientedBBox() const;
 	
 protected:
@@ -230,7 +231,7 @@ void VoxelEngine<T, Tn, NLevel>::calculateOBox(Profile * prof)
 	PrincipalComponents<std::vector<Vector3F> > obpca;
 	if(prof->_orientAtXY) obpca.setOrientConstrain(1);
 	m_obox = obpca.analyze(pnts, pnts.size() );
-	m_obox.limitMinThickness(cellSizeAtLevel(NLevel + 2) );
+	m_obox.limitMinThickness(cellSizeAtLevel(NLevel + 1) );
 }
 
 template<typename T, typename Tn, int NLevel>

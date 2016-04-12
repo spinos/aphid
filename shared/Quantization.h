@@ -11,6 +11,31 @@
 #include <cmath>
 namespace aphid {
 
+namespace col12 {
+
+inline void encodeC(int & dst, const Vector3F & c)
+{
+	int red = c.x<1.f ? 16 * c.x : 15;
+	int green = c.y<1.f ? 16 * c.y : 15;
+	int blue = c.z<1.f ? 16 * c.z : 15;
+	dst = (dst & (~4095)) | (red<<8 | green<<4 | blue);
+}
+
+inline void decodeC(Vector3F & c,
+					const int & src)
+{
+	int masked = src & 4095;
+	int red = (masked>>8) & 15;
+	int green = (masked>>4) & 15;
+	int blue = masked & 15;
+	
+	c.x = (float)red * 0.0625f;
+	c.y = (float)green * 0.0625f;
+	c.z = (float)blue * 0.0625f;
+}
+
+}
+
 namespace col32 {
 
 inline void encodeC(int & dst, const float &r, const float &g,
@@ -92,7 +117,7 @@ inline void encodeC(int & dst, const Vector3F & c)
 
 inline void decodeN(Vector3F & n, const int & src)
 {
-	int d = src & (1<<15);
+	int d = src & 32768;
 	int axis = (src>>16) & 3;
 	int u = (src>>18) & 63;
 	int v = (src>>24) & 63;
@@ -119,13 +144,14 @@ inline void decodeN(Vector3F & n, const int & src)
 
 inline void decodeC(Vector3F & c, const int & src)
 {
-	int r = src & 31;
-	int g = (src>>5) & 31;
-	int b = (src>>10) & 31;
+	int masked = src & 32767;
+	int r = masked & 31;
+	int g = (masked>>5) & 31;
+	int b = (masked>>10) & 31;
 	
-	c.x = (float)r/32.f;
-	c.y = (float)g/32.f;
-	c.z = (float)b/32.f;
+	c.x = (float)r * .03125f;
+	c.y = (float)g * .03125f;
+	c.z = (float)b * .03125f;
 }
 
 }
