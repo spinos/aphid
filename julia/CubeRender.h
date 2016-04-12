@@ -8,11 +8,14 @@
  */
 #pragma once
 #include <CudaRender.h>
+#include <voxTest.h>
 
 namespace aphid {
 
 class CubeRender : public CudaRender {
 
+	VoxTest m_test;
+	
 public:
 	CubeRender();
 	virtual ~CubeRender();

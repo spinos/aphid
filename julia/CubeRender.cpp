@@ -13,7 +13,9 @@
 
 namespace aphid {
 
-CubeRender::CubeRender() {}
+CubeRender::CubeRender() 
+{ m_test.build(); }
+
 CubeRender::~CubeRender() {}
 
 void CubeRender::setBufferSize(const int & w, const int & h)

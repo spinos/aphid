@@ -38,7 +38,9 @@ struct Contour {
 	void setThickness(const float & x,
 						const float & d)
 	{
-		int ng = (x / d) * 8.f;
+		float fg = (x / d) * 8.f;
+		int ng = fg;
+		if(fg - ng > .5f) ng++;
 		if(ng > 7) ng = 7;
 		m_data = m_data | (ng<<12); 
 	}
@@ -272,7 +274,7 @@ void VoxelEngine<T, Tn, NLevel>::calculateOBox(Profile * prof)
 	PrincipalComponents<std::vector<Vector3F> > obpca;
 	if(prof->_orientAtXY) obpca.setOrientConstrain(1);
 	m_obox = obpca.analyze(pnts, pnts.size() );
-	m_obox.limitMinThickness(cellSizeAtLevel(NLevel + 1) );
+	m_obox.limitMinThickness(cellSizeAtLevel(NLevel) );
 }
 
 template<typename T, typename Tn, int NLevel>
@@ -315,8 +317,8 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 	acontour.setThickness(oboxExt.x, hd);
 	acontour.setNormal(rot.row(0) );
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n slab 0 at "<<cnt<<"\n facing "<<rot.row(0)
-							<<"\n thickness "<<oboxExt.x;
+	std::cout<<"\n contour["<<nct<<"] at "<<cnt<<" facing "<<rot.row(0)
+							<<" thickness "<<oboxExt.x;
 #endif
 	
 	dst.m_contour[nct++] = acontour;
@@ -326,8 +328,8 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 	acontour.setThickness(oboxExt.y, hd);
 	acontour.setNormal(rot.row(1) );
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n slab 1 at "<<cnt<<"\n facing "<<rot.row(1)
-							<<"\n thickness "<<oboxExt.y;
+	std::cout<<"\n contour["<<nct<<"] at "<<cnt<<" facing "<<rot.row(1)
+							<<" thickness "<<oboxExt.y;
 #endif	
 	dst.m_contour[nct++] = acontour;
 	
@@ -336,8 +338,8 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 	acontour.setThickness(oboxExt.z, hd);
 	acontour.setNormal(rot.row(2) );
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n slab 2 at "<<cnt<<"\n facing "<<rot.row(2)
-							<<"\n thickness "<<oboxExt.z;
+	std::cout<<"\n contour["<<nct<<"] at "<<cnt<<" facing "<<rot.row(2)
+							<<" thickness "<<oboxExt.z;
 #endif	
 	dst.m_contour[nct++] = acontour;
 	
@@ -359,7 +361,7 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 		acontour.setNormal(cutn);
 		dst.m_contour[nct++] = acontour;
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n cut 0 at "<<cutp<<"\n facing "<<cutn;
+	std::cout<<"\n contour["<<nct<<"] at "<<cutp<<" facing "<<cutn;
 #endif
 	}
 	
@@ -380,7 +382,7 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 		acontour.setNormal(cutn);
 		dst.m_contour[nct++] = acontour;
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n cut 1 at "<<cutp<<"\n facing "<<cutn;
+	std::cout<<"\n contour["<<nct<<"] at "<<cutp<<" facing "<<cutn;
 #endif
 	}
 	
@@ -401,7 +403,7 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 		acontour.setNormal(cutn);
 		dst.m_contour[nct++] = acontour;
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n cut 2 at "<<cutp<<"\n facing "<<cutn;
+	std::cout<<"\n contour["<<nct<<"] at "<<cutp<<" facing "<<cutn;
 #endif
 	}
 	
@@ -422,7 +424,7 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 		acontour.setNormal(cutn);
 		dst.m_contour[nct++] = acontour;
 #if VERBEXTRACTCONTOUR
-	std::cout<<"\n cut 3 at "<<cutp<<"\n facing "<<cutn;
+	std::cout<<"\n contour["<<nct<<"] at "<<cutp<<" facing "<<cutn;
 #endif
 	}
 #if VERBEXTRACTCONTOUR
@@ -460,8 +462,8 @@ void VoxelEngine<T, Tn, NLevel>::printContours(const Voxel & v) const
 	for(;i<nct;++i) {
 		const Contour & c = v.m_contour[i];
 		std::cout<<"\n contour["<<i<<"] at "<<c.getPoint(boxOri, d)
-			<<"\n facing "<<c.getNormal()
-			<<"\n thickness "<<c.getThickness(d * .866f);
+			<<" facing "<<c.getNormal()
+			<<" thickness "<<c.getThickness(d * .866f);
 	}
 	std::cout<<"\n voxel has "<<nct<<" contours";
 	std::cout.flush();

@@ -10,9 +10,7 @@
 #define VOX_Widget_H
 
 #include <Base3DView.h>
-#include <KdEngine.h>
-#include <VoxelEngine.h>
-#include <ConvexShape.h>
+#include <voxTest.h>
 
 class VoxWidget : public aphid::Base3DView 
 {
@@ -30,25 +28,13 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event);
 	
 private:
-	void buildTests();
 	void drawGrids();
 	void drawTriangles();
 	void drawFronts();
-	aphid::cvx::Triangle createTriangle(const aphid::Vector3F & p0,
-								const aphid::Vector3F & p1,
-								const aphid::Vector3F & p2,
-								const aphid::Vector3F & c0,
-								const aphid::Vector3F & c1,
-								const aphid::Vector3F & c2);
+	
 	
 private:
-	aphid::sdb::VectorArray<aphid::cvx::Triangle> m_tris;
+	aphid::VoxTest m_test;
 	
-	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine;
-	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine1;
-	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine2;
-	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine3;
-	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine4;
-	aphid::VoxelEngine<aphid::cvx::Triangle, aphid::KdNode4 > m_engine5;
 };
 #endif

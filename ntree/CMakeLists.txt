@@ -30,6 +30,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../kdtree/VoxelGrid.h
 ../btree/HAssetGrid.h
 ../julia/Manager.h
+../julia/voxTest.h
 Container.h
 wldWidget.h
 triWidget.h
@@ -51,6 +52,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../btree/GridClustering.cpp
 ../btree/HWorldGrid.cpp
 ../kdtree/HNTree.cpp
+../julia/voxTest.cpp
 wldWidget.cpp
 triWidget.cpp
 voxWidget.cpp

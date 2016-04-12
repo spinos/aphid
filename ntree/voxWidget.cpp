@@ -30,7 +30,7 @@ VoxWidget::~VoxWidget()
 
 void VoxWidget::clientInit()
 {
-	buildTests();
+	m_test.build();
 }
 
 void VoxWidget::clientDraw()
@@ -65,12 +65,8 @@ void VoxWidget::drawGrids()
 {
 	glColor3f(0,.6,.4);
 	GridDrawer dr;
-	dr.drawGrid<CartesianGrid>(&m_engine);
-	dr.drawGrid<CartesianGrid>(&m_engine1);
-	dr.drawGrid<CartesianGrid>(&m_engine2);
-	dr.drawGrid<CartesianGrid>(&m_engine3);
-	dr.drawGrid<CartesianGrid>(&m_engine4);
-	dr.drawGrid<CartesianGrid>(&m_engine5);
+	for(int i=0; i< 6; ++i)
+		dr.drawGrid<CartesianGrid>(&m_test.m_engine[i]);
 }
 
 void VoxWidget::drawTriangles()
@@ -78,10 +74,10 @@ void VoxWidget::drawTriangles()
 	getDrawer()->m_markerProfile.apply();
 	glColor3f(0,.2,.6);
 	glBegin(GL_TRIANGLES);
-	const int n = m_tris.size();
+	const int n = m_test.m_tris.size();
 	int i = 0;
 	for(;i<n;++i) {
-		const cvx::Triangle * t = m_tris[i];
+		const cvx::Triangle * t = m_test.m_tris[i];
 		glColor3fv((GLfloat *)&t->C(0) );
 		glVertex3fv((GLfloat *)t->p(0) );
 		glColor3fv((GLfloat *)&t->C(1) );
@@ -97,108 +93,11 @@ void VoxWidget::drawFronts()
 	GeoDrawer * dr = getDrawer();
 	//dr->m_surfaceProfile.apply();
     dr->m_wireProfile.apply();
-	dr->setColor(.1f, .1f, .1f);
-	dr->orientedBox(&m_engine.orientedBBox() );
-	dr->setColor(0.f, .1f, .5f);
-	dr->orientedBox(&m_engine1.orientedBBox() );
-	dr->setColor(.9f, .1f, .1f);
-	dr->orientedBox(&m_engine2.orientedBBox() );
-	dr->setColor(.9f, .9f, .1f);
-	dr->orientedBox(&m_engine3.orientedBBox() );
-	dr->setColor(0.f, .3f, .5f);
-	dr->orientedBox(&m_engine4.orientedBBox() );
-	dr->setColor(0.1f, .3f, 0.f);
-	dr->orientedBox(&m_engine5.orientedBBox() );
+	for(int i=0; i< 6; ++i) {
+		dr->setColor(m_test.TestColor[i][0],
+						m_test.TestColor[i][1],
+						m_test.TestColor[i][2]);
+		dr->orientedBox(&m_test.m_engine[i].orientedBBox() );
+	}
 }
 
-cvx::Triangle VoxWidget::createTriangle(const Vector3F & p0,
-								const Vector3F & p1,
-								const Vector3F & p2,
-								const Vector3F & c0,
-								const Vector3F & c1,
-								const Vector3F & c2)
-{
-	cvx::Triangle tri;
-	tri.resetNC();
-	tri.setP(p0,0);
-	tri.setP(p1,1);
-	tri.setP(p2,2);
-	Vector3F nor = tri.calculateNormal();
-	tri.setN(nor, 0);
-	tri.setN(nor, 1);
-	tri.setN(nor, 2);
-	tri.setC(c0, 0);
-	tri.setC(c1, 1);
-	tri.setC(c2, 2);
-	return tri;
-}
-
-void VoxWidget::buildTests()
-{
-	Vector3F vp[4];
-	vp[0].set(1.1f, .91f, 1.3f);
-	vp[1].set(5.27f, 3.1f, 6.1f);
-	vp[2].set(7.49f, 6.721f, 4.9f);
-	vp[3].set(4.9f, .2f, .2f);
-	
-	Vector3F vc[4];
-	vc[0].set(1.f, 0.f, 0.f);
-	vc[1].set(0.5f, 0.1f, 0.f);
-	vc[2].set(0.1f, 0.f, .5f);
-	vc[3].set(0.1f, .5f, 0.f);
-	
-	m_tris.insert(createTriangle(vp[0], vp[1], vp[2],
-								vc[0], vc[1], vc[2]) );
-								
-	m_tris.insert(createTriangle(vp[0], vp[2], vp[3],
-								vc[0], vc[2], vc[3]) );
-	
-/// big cell
-	BoundingBox b(0.f, 0.f, 0.f,
-					8.f, 8.f, 8.f);
-					
-	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 64;
-	KdEngine eng;
-	KdNTree<cvx::Triangle, KdNode4 > gtr;
-	eng.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, &m_tris, b, &bf);
-	
-	VoxelEngine<cvx::Triangle, KdNode4 >::Profile vf;
-	vf._tree = &gtr;
-	
-	m_engine.setBounding(b);
-	m_engine.build(&vf);
-	std::cout<<"\n grid n cell "<<m_engine.numCells();
-	
-	Voxel v;
-/// 512^3 grid
-	int level = 6;
-	unsigned code = encodeMorton3D(4, 4, 4);
-	v.setPos(code, level);
-	m_engine.extractContours(v);
-	m_engine.printContours(v);
-	
-	b.setMax(4.f, 4.f, 4.f);
-	m_engine1.setBounding(b);
-	m_engine1.build(&vf);
-	
-	b.setMin(4.f, 4.f, 4.f);
-	b.setMax(8.f, 8.f, 8.f);
-	m_engine2.setBounding(b);
-	m_engine2.build(&vf);
-	
-	b.setMin(4.f, 4.f, 0.f);
-	b.setMax(8.f, 8.f, 4.f);
-	m_engine3.setBounding(b);
-	m_engine3.build(&vf);
-	
-	b.setMin(4.f, 0.f, 0.f);
-	b.setMax(8.f, 4.f, 4.f);
-	m_engine4.setBounding(b);
-	m_engine4.build(&vf);
-	
-	b.setMin(4.f, 0.f, 4.f);
-	b.setMax(8.f, 4.f, 8.f);
-	m_engine5.setBounding(b);
-	m_engine5.build(&vf);
-}

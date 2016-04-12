@@ -182,7 +182,8 @@ WorldRenderInterface.h
 Manager.h
 WorldManager.h
 WorldRender.h
-../kdtree/CudaNTree.h)
+../kdtree/CudaNTree.h
+voxTest.h)
 
 SET (VIEWERSOURCE viewerMain.cpp
 renderthread.cpp
@@ -202,6 +203,7 @@ CubeRender.cpp
 ../btree/HWorldGrid.cpp
 viewerWindow.cpp
 WorldRender.cpp
+voxTest.cpp
 )
 
 SET (CUSOURCES 
