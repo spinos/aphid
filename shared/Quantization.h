@@ -29,9 +29,10 @@ inline void decodeC(Vector3F & c,
 	int green = (masked>>4) & 15;
 	int blue = masked & 15;
 	
-	c.x = (float)red * 0.0625f;
-	c.y = (float)green * 0.0625f;
-	c.z = (float)blue * 0.0625f;
+/// to center
+	c.x = (float)red * 0.0625f + 0.03125f;
+	c.y = (float)green * 0.0625f + 0.03125f;
+	c.z = (float)blue * 0.0625f + 0.03125f;
 }
 
 }
@@ -148,10 +149,10 @@ inline void decodeC(Vector3F & c, const int & src)
 	int r = masked & 31;
 	int g = (masked>>5) & 31;
 	int b = (masked>>10) & 31;
-	
-	c.x = (float)r * .03125f;
-	c.y = (float)g * .03125f;
-	c.z = (float)b * .03125f;
+/// to center
+	c.x = (float)r * .03125f + .015625f;
+	c.y = (float)g * .03125f + .015625f;
+	c.z = (float)b * .03125f + .015625f;
 }
 
 }

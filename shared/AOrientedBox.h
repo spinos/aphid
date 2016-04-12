@@ -36,7 +36,10 @@ public:
 	virtual const Type type() const;
 	virtual const BoundingBox calculateBBox() const;
 	void limitMinThickness(const float & x);
-	
+
+	Vector3F get8DOPFaceX() const;
+	Vector3F get8DOPFaceY() const;
+		
 protected:
 
 private:

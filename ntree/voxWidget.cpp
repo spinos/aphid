@@ -135,9 +135,6 @@ cvx::Triangle VoxWidget::createTriangle(const Vector3F & p0,
 
 void VoxWidget::buildTests()
 {
-	BoundingBox b(0.f, 0.f, 0.f,
-					8.f, 8.f, 8.f);
-	
 	Vector3F vp[4];
 	vp[0].set(1.1f, .91f, 1.3f);
 	vp[1].set(5.27f, 3.1f, 6.1f);
@@ -156,6 +153,10 @@ void VoxWidget::buildTests()
 	m_tris.insert(createTriangle(vp[0], vp[2], vp[3],
 								vc[0], vc[2], vc[3]) );
 	
+/// big cell
+	BoundingBox b(0.f, 0.f, 0.f,
+					8.f, 8.f, 8.f);
+					
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 64;
 	KdEngine eng;
@@ -168,7 +169,14 @@ void VoxWidget::buildTests()
 	m_engine.setBounding(b);
 	m_engine.build(&vf);
 	std::cout<<"\n grid n cell "<<m_engine.numCells();
-	std::cout.flush();
+	
+	Voxel v;
+/// 512^3 grid
+	int level = 6;
+	unsigned code = encodeMorton3D(4, 4, 4);
+	v.setPos(code, level);
+	m_engine.extractContours(v);
+	m_engine.printContours(v);
 	
 	b.setMax(4.f, 4.f, 4.f);
 	m_engine1.setBounding(b);

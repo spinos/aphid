@@ -98,6 +98,18 @@ const float * AOrientedBox::dopExtent() const
 void AOrientedBox::limitMinThickness(const float & x)
 { if(m_extent.z < x) m_extent.z = x; }
 
+Vector3F AOrientedBox::get8DOPFaceX() const
+{
+	Vector3F rgt(.7071067f, .7071067f, 0.f);
+	return m_orientation.transform(rgt);
+}
+
+Vector3F AOrientedBox::get8DOPFaceY() const
+{
+	Vector3F up(-.7071067f, .7071067f, 0.f);
+	return m_orientation.transform(up);
+}
+
 DOP8Builder::DOP8Builder()
 {}
 
@@ -115,10 +127,8 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	m_tri[0] = 0; m_tri[1] = 1; m_tri[2] = 2;
 	m_tri[3] = 0; m_tri[4] = 2; m_tri[5] = 3;
 /// rotate 45 deg
-	Vector3F rgt(1.f, 1.f, 0.f);
-	Vector3F up(-1.f, 1.f, 0.f);
-	rgt.normalize();
-	up.normalize();
+	Vector3F rgt(.7071067f, .7071067f, 0.f);
+	Vector3F up(-.7071067f, .7071067f, 0.f);
 	
 /// max 8 edges
     Vector3F edgeNor[8];

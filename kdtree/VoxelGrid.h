@@ -152,10 +152,9 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level, BuildProf
 			if(profile->_extractDOP) m_oboxes.insert(veng.orientedBBox() );
 		
 		Voxel v;
-		v.setColor(.99f, .99f, .99f, .99f);
 		v.setPos(c->key(), c->value()->level );
-/// todo contours
-		v.setNContour(0);
+			veng.extractColor(v);
+			veng.extractContours(v);
 		m_voxels.insert(v);
 		
 		}

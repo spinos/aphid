@@ -24,6 +24,7 @@ public:
 	virtual ~CartesianGrid();
     
     const unsigned numCells() const;
+/// of entire grid
     void getBounding(BoundingBox & bound) const;
     const Vector3F & origin() const;
 	const float & span() const;
