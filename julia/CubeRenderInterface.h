@@ -12,6 +12,13 @@ void render(uint * color,
                 float * depth,
                 int blockx,
                 int gridx, int gridy);
+				
+void drawPyramid(uint * color,
+                float * depth,
+                int blockx,
+                int gridx, int gridy,
+				void * planes,
+				void * bounding);
 
 void setBoxFaces();
 

@@ -35,7 +35,7 @@ void RenderThread::render(QSize resultSize)
     int h = resultSize.height();
 
 	m_r->getRoundedSize(w, h);
-  
+	
 	this->m_resultSize = QSize(w, h);
 
     if (!isRunning()) {
@@ -51,6 +51,7 @@ void RenderThread::tumble(int dx, int dy)
 	QMutexLocker locker(&mutex);
 	int w = this->m_portSize.width();
 	m_r->tumble(dx, dy, w);
+	
 	if (!isRunning()) {
         start(LowPriority);
     } else {
@@ -64,6 +65,7 @@ void RenderThread::track(int dx, int dy)
 	QMutexLocker locker(&mutex);
 	int w = this->m_portSize.width();
 	m_r->track(dx, dy, w);
+	
 	if (!isRunning()) {
         start(LowPriority);
     } else {
@@ -77,6 +79,7 @@ void RenderThread::zoom(int dz)
 	QMutexLocker locker(&mutex);
 	int w = this->m_portSize.width();
 	m_r->zoom(dz, w);
+	
 	if (!isRunning()) {
         start(LowPriority);
     } else {
@@ -87,11 +90,14 @@ void RenderThread::zoom(int dz)
 
 void RenderThread::run()
 {
-    for(;;) {
+   for(;;) {
         mutex.lock();
 
         QSize renderSize = this->m_resultSize;
-
+		m_r->setPortSize(m_portSize.width(), m_portSize.height() );
+		m_r->setBufferSize(renderSize.width(), renderSize.height() );
+		m_r->updateRayFrameVec();
+	
         mutex.unlock();
 		
 		if (restart)
@@ -99,8 +105,6 @@ void RenderThread::run()
 		if (abort)
 			return;
 		
-		m_r->setPortSize(m_portSize.width(), m_portSize.height() );
-		m_r->setBufferSize(renderSize.width(), renderSize.height() );
 		m_r->render();
 		
 		QImage image(renderSize, QImage::Format_RGB32);
@@ -115,7 +119,7 @@ void RenderThread::run()
         for(j=0; j<th; ++j) {
             for(i=0; i<tw; ++i) {
                 if (restart)
-                    break;
+					break;
                 if (abort)
                     return;
                 
@@ -128,7 +132,7 @@ void RenderThread::run()
         
 		if (!restart)
 			emit renderedImage(image);
-
+			
         mutex.lock();
 		
         if (!restart)

@@ -19,7 +19,7 @@ Window::Window(int argc, char *argv[])
 		r = new aphid::CubeRender;
 		setWindowTitle(tr("ray-cast test"));
 	}
-		
+	
     m_widget = new MandelbrotWidget(r, this);
 	
 	setCentralWidget(m_widget);

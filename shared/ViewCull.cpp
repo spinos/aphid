@@ -87,7 +87,8 @@ void BaseView::zoom(int dz, int portWidth)
 	
 	eye += front * dist * -fra;
 	m_eyePosition = eye;
-	m_centerOfInterest += front * dist * -fra * 0.1f;
+	if(fra > 0.f && dist < 10.f)
+		m_centerOfInterest += front * dist * -fra * 0.1f;
 	
 	m_space.setTranslation(eye);
 	m_invSpace = m_space;

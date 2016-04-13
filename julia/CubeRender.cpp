@@ -14,7 +14,16 @@
 namespace aphid {
 
 CubeRender::CubeRender() 
-{ m_test.build(); }
+{ 
+	m_test.build(); 
+	m_devicePyramidPlanes.reset(new CUDABuffer);
+	m_devicePyramidPlanes->create(4000);
+	m_devicePyramidBox.reset(new CUDABuffer);
+	m_devicePyramidBox->create(4000);
+	
+	m_devicePyramidPlanes->hostToDevice((char *)m_test.m_pyramid.plane(0), 80);
+	m_devicePyramidBox->hostToDevice((char *)m_test.m_pyramid.bbox(), 32);
+}
 
 CubeRender::~CubeRender() {}
 
@@ -30,14 +39,15 @@ void CubeRender::setBufferSize(const int & w, const int & h)
 
 void CubeRender::render()
 {
-    updateRayFrameVec();
 	cuber::setBoxFaces();
 	cuber::setRenderRect((int *)&rect() );
     cuber::setFrustum((float *)rayFrameVec());
-	cuber::render((uint *) colorBuffer(),
+	cuber::drawPyramid((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
 				tileSize(),
-				tileX(), tileY() );
+				tileX(), tileY(),
+				m_devicePyramidPlanes->bufferOnDevice(),
+				m_devicePyramidBox->bufferOnDevice() );
 	CudaBase::CheckCudaError(" render image");
 	colorToHost();
 }

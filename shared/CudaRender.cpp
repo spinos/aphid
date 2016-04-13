@@ -17,7 +17,7 @@ CudaRender::CudaRender(int tileSize)
 {
 	CudaBase::SetDevice();
 	
-	const Vector3F eye(0.f, 0.f, 800.f);
+	const Vector3F eye(0.f, 0.f, 100.f);
 	setEyePosition((float *)&eye);
 	
 	Matrix44F m;

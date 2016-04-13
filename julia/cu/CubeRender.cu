@@ -20,6 +20,22 @@ void render(uint * pix,
         depth);
 }
 
+void drawPyramid(uint * color,
+                float * depth,
+                int blockx,
+                int gridx, int gridy,
+				void * planes,
+				void * bounding)
+{
+    dim3 block(blockx, blockx, 1);
+    dim3 grid(gridx, gridy, 1);
+    
+    onePyrmaid_kernel<<< grid, block >>>(color, 
+        depth,
+        (float4 *)planes,
+        (Aabb *)bounding);
+}
+
 const float cubefaces[] = {
 -1, 0, 0,
  1, 0, 0,

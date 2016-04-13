@@ -20,6 +20,9 @@ struct Float4 {
 	: x(a), y(b), z(c), w(d)
 	{}
 	
+	void set(float a, float b, float c, float d)
+	{ x = a; y = b; z = c; w = d; }
+	
 	Float4 operator * ( const float& scale ) const
 	{
 		return Float4(

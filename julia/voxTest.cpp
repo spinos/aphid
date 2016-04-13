@@ -126,6 +126,44 @@ void VoxTest::build()
 	m_voxels[5].setPos(code, level);
 	m_engine[5].extractContours(m_voxels[5]);
 	m_engine[5].printContours(m_voxels[5]);
+	
+	buildPyramid();
+}
+
+void VoxTest::buildPyramid()
+{
+	Vector3F nor(0.f, -1.f, -0.32f);
+	//nor.normalize();
+	Vector3F pnt(-1.55f, -.49f, 0.f);
+	float w = -pnt.dot(nor);
+/// bottom (0, -.5, 0)
+	m_pyramid.plane(0)->set(nor.x, nor.y, nor.z, w);
+	
+	nor.set(-.8f, 1.f, .56f);
+	nor.normalize();
+	pnt.set(-2.21f, -.5f, 0.f);
+	w = -pnt.dot(nor);
+/// -x (-2, -.5, 0)
+	m_pyramid.plane(1)->set(nor.x, nor.y, nor.z, w);
+	
+	nor.set(1.f, 1.f, -0.33f);
+	nor.normalize();
+	pnt.set(-1.f, -.5f, -.3f);
+	w = -pnt.dot(nor);
+/// +x (-1, -.5, 0)
+	m_pyramid.plane(2)->set(nor.x, nor.y, nor.z, w);
+	
+	nor.set(0.f, .695f, -.73f);
+	nor.normalize();
+	pnt.set(-1.5, -.15, -.5);
+	w = -pnt.dot(nor);
+/// -z (-1.5, -.5, -.5)
+	m_pyramid.plane(3)->set(nor.x, nor.y, nor.z, w);
+/// +z (-1.5, -.5, .5)
+	m_pyramid.plane(4)->set(0.f, .7071f, .7071f, 0.f);
+	
+	m_pyramid.bbox()->setMin(-2.f, -.5f, -.5f);
+	m_pyramid.bbox()->setMax(-1.f, 0.f, .5f);
 }
 
 const float VoxTest::TestColor[6][3] = {

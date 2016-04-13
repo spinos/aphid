@@ -224,5 +224,126 @@ inline __device__ int ray_box(const Ray4 & ray,
 	
 	return 1;
 }
+
+inline __device__ int ray_plane(float & t, float & denom,
+                                const Ray4 & ray,
+                                const float3 & n, 
+                                const float & d)
+{
+    denom = v3_dot<float3, float4>(n, ray.d);
+/// parallel
+    if(absoluteValueF(denom) < 1e-8f) return 0;
+    
+    t = -(d + v3_dot<float3, float4>(n, ray.o) ) / denom;
+    
+    return 1;
+}
+
+inline __device__ void update_tnormal(float & t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        const float3 & n,
+                        float t, float denom)
+{
+    if(denom < 0.f) {
+/// last enter
+        if(t > t0) {
+            t0 = t;
+            t0Normal = n;
+        }
+    } else {
+/// first exit
+        if(t < t1) {
+            t1 = t;
+            t1Normal = n;
+        }
+    }
+}
+
+inline __device__ int ray_box_hull(float3 & hitP, float3 & hitN,
+                        Ray4 & ray,
+                        const Aabb4 & box)
+{
+    float t, denom;
+    float3 t0Normal, t1Normal;
+    float3 n;
+    n.x = -1.f; n.y = 0.f; n.z = 0.f;
+    float d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    if(ray_plane(t, denom, ray, n, d))
+        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+    
+    if(ray.o.w > ray.d.w) return 0;
+    
+    n = make_float3(1.f, 0.f, 0.f);
+    d = - n.x * box.high.x - n.y * box.low.y - n.z * box.low.z;
+    if(ray_plane(t, denom, ray, n, d))
+        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+    
+    if(ray.o.w > ray.d.w) return 0;
+    
+    n = make_float3(0.f, -1.f, 0.f);
+    d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    if(ray_plane(t, denom, ray, n, d))
+        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+    
+    if(ray.o.w > ray.d.w) return 0;
+    
+    n = make_float3(0.f, 1.f, 0.f);
+    d = - n.x * box.low.x - n.y * box.high.y - n.z * box.low.z;
+    if(ray_plane(t, denom, ray, n, d))
+        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+    
+    if(ray.o.w > ray.d.w) return 0;
+    
+    n = make_float3(0.f, 0.f, -1.f);
+    d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    if(ray_plane(t, denom, ray, n, d))
+        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+    
+    if(ray.o.w > ray.d.w) return 0;
+    
+    n = make_float3(0.f, 0.f, 1.f);
+    d = - n.x * box.low.x - n.y * box.low.y - n.z * box.high.z;
+    if(ray_plane(t, denom, ray, n, d))
+        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+    
+    if(ray.o.w > ray.d.w) return 0;
+    
+    hitN = t0Normal;
+    ray_progress(hitP, ray, ray.o.w);
+    return 1;
+}
+
+inline __device__ int ray_box_and_hull(float3 & hitP, float3 & hitN,
+                        Ray4 & ray,
+                        const Aabb4 & box,
+                        float4 * planes,
+                        int numPlanes)
+{
+    if(!ray_box_hull(hitP, hitN, ray, box) )
+        return 0;
+        
+    float tEnterBox = ray.o.w;
+    float3 n, t0Normal, t1Normal;
+    float t, denom, d;
+    int i=0;
+    for(;i<numPlanes;++i) {
+        float4 plane = planes[i];
+        v3_convert<float3, float4>(n, plane);
+        d = plane.w;
+        if(ray_plane(t, denom, ray, n, d) )
+            update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        
+        if(ray.o.w > ray.d.w)
+            return 0;
+        
+    }
+    
+    if(ray.o.w > tEnterBox) {
+        ray_progress(hitP, ray, ray.o.w);
+        hitN = t0Normal;
+    }
+        
+    return 1;
+}
 #endif        //  #ifndef RAY_INTERSECTION_CUH
 

@@ -31,6 +31,7 @@ public:
 	void tumble(int dx, int dy, int portWidth);
 	void track(int dx, int dy, int portWidth);
 	void zoom(int dz, int portWidth);
+	void updateRayFrameVec();
 	
 	bool isPerspective() const;
 			
@@ -71,7 +72,6 @@ protected:
 			
 	void updateAspectRatio(const int & w, const int & h);
 	
-	void updateRayFrameVec();
 	Vector3F * rayFrameVec();
 	
 	void frameAll(const BoundingBox & b);

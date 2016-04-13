@@ -34,7 +34,7 @@ void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
 
 void MandelbrotWidget::resizeEvent(QResizeEvent * /* event */)
 {
-    thread.render(size());
+	thread.render(size());
 }
 
 void MandelbrotWidget::mousePressEvent(QMouseEvent *event)

@@ -236,6 +236,51 @@ void Triangle::closestToPoint(T * result) const
 	result->_icomponent = ind1();
 }
 
+template<int N>
+class Hull {
+	
+	BoundingBox m_bbox;
+	Float4 m_plane[N];
+	
+public:
+	Hull();
+	
+	int numPlanes() const;
+	Float4 * plane(int x);
+	const Float4 & Plane(int x) const;
+	
+	BoundingBox * bbox();
+	const BoundingBox & BBox() const;
+	
+};
+
+template<int N>
+Hull<N>::Hull()
+{}
+
+template<int N>
+int Hull<N>::numPlanes() const
+{ return N; }
+
+template<int N>
+Float4 * Hull<N>::plane(int x)
+{ return &m_plane[x]; }
+
+template<int N>
+const Float4 & Hull<N>::Plane(int x) const
+{ return m_plane[x]; }
+
+template<int N>
+BoundingBox * Hull<N>::bbox()
+{ return &m_bbox; }
+
+template<int N>
+const BoundingBox & Hull<N>::BBox() const
+{ return m_bbox; }
+
+typedef Hull<5> PyramidHull;
+typedef Hull<6> FrustumHull;
+
 }
 
 }

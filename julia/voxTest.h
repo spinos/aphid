@@ -29,8 +29,12 @@ public:
 	
 	VoxelEngine<cvx::Triangle, KdNode4 > m_engine[6];	
 	Voxel m_voxels[6];
-	
+	cvx::PyramidHull m_pyramid;
 	static const float TestColor[6][3];
+
+protected:
+	void buildPyramid();
+	
 };
 
 }
