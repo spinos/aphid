@@ -27,7 +27,7 @@ CudaRender::CudaRender(int tileSize)
 	*cameraInvSpaceR() = m;
 
 /// 35mm Academy
-	std::cout<<"\n angle of view "<<180.f/3.14f*2.f * atan(21.9456f/2.f/35.f)<<" degree";
+	std::cout<<"\n angle of view "<<180.f/3.14f*2.f * atan(21.9456f/2.f/35.f)<<" deg";
 	setFrustum(.864f, .63f, 35.f, -1.f, -20000.f);
 	m_tileSize = tileSize;
 }

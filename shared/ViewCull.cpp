@@ -12,8 +12,90 @@
 
 namespace aphid {
 
-BaseView::BaseView() {}
+BaseView::BaseView() 
+{
+	m_centerOfInterest.set(0.f, 0.f, 0.f);
+	m_eyePosition.set(0.f, 0.f, 100.f);
+}
+
 BaseView::~BaseView() {}
+
+void BaseView::tumble(int dx, int dy, int portWidth)
+{
+	Vector3F side  = m_space.getSide();
+	Vector3F up    = m_space.getUp();
+	Vector3F front = m_space.getFront();
+	Vector3F eye = m_space.getTranslation();	
+	Vector3F toEye = eye - m_centerOfInterest;
+	float dist = toEye.length();
+	const float scaleing = dist * 2.f / (float)portWidth;
+	eye -= side * (float)dx * scaleing;
+	eye += up * (float)dy * scaleing;
+	
+	toEye = eye - m_centerOfInterest;
+	toEye.normalize();
+	
+	eye = m_centerOfInterest + toEye * dist;
+	m_space.setTranslation(eye);
+	
+	front = toEye;
+	
+	side = up.cross(front);
+	side.y = 0.f;
+	side.normalize();
+	
+	up = front.cross(side);
+	up.normalize();
+	
+	m_space.setOrientations(side, up, front);
+	
+	m_invSpace = m_space;
+	m_invSpace.inverse();
+}
+
+void BaseView::track(int dx, int dy, int portWidth)
+{
+	Vector3F side  = m_space.getSide();
+	Vector3F up    = m_space.getUp();
+	Vector3F eye = m_space.getTranslation();
+	
+	const float scaling = perspectivity(portWidth);
+	
+	side *= (float)dx * scaling;
+	up *= (float)dy * scaling;
+	eye -= side;
+	eye += up;
+	
+	m_eyePosition = eye;
+	m_centerOfInterest -= side;
+	m_centerOfInterest += up;
+	
+	m_space.setTranslation(eye);
+	
+	m_invSpace = m_space;
+	m_invSpace.inverse();
+}
+
+void BaseView::zoom(int dz, int portWidth)
+{
+	Vector3F front = m_space.getFront();
+	Vector3F eye = m_space.getTranslation();
+	Vector3F toEye = eye - m_centerOfInterest;
+	const float dist = toEye.length();
+	
+	const float fra = (float)dz/(float)portWidth * 7.f;
+	
+	eye += front * dist * -fra;
+	m_eyePosition = eye;
+	m_centerOfInterest += front * dist * -fra * 0.1f;
+	
+	m_space.setTranslation(eye);
+	m_invSpace = m_space;
+	m_invSpace.inverse();
+}
+
+float BaseView::perspectivity(int portWidth) const
+{ return m_hfov * 2.f * m_eyePosition.distanceTo(m_centerOfInterest) / (float)portWidth; }
 
 void BaseView::setFrustum(const float & horizontalAperture,
 			const float & verticalAperture,
@@ -83,6 +165,9 @@ const Vector3F & BaseView::eyePosition() const
 
 void BaseView::setEyePosition(float * p)
 { m_eyePosition.set(p[0], p[1], p[2]); }
+
+void BaseView::setCenterOfInterest(float * p)
+{ m_centerOfInterest.set(p[0], p[1], p[2]); }
 
 const float & BaseView::aspectRatio() const
 { return m_aspectRatio; }

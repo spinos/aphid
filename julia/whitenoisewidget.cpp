@@ -37,9 +37,47 @@ void MandelbrotWidget::resizeEvent(QResizeEvent * /* event */)
     thread.render(size());
 }
 
+void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
+{	
+    m_lastMousePos = event->pos();
+    //if(event->modifiers() == Qt::AltModifier) 
+      //  return;
+    
+    //processSelection(event);
+}
+
+void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if(event->modifiers() == Qt::AltModifier)
+		processCamera(event);
+    //    processCamera(event);
+    else {}
+      //  processMouseInput(event);
+
+    m_lastMousePos = event->pos();
+}
+
+void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event)
+{}
+
 void MandelbrotWidget::updatePixmap(const QImage &image)
 {
 
     pixmap = QPixmap::fromImage(image);
     update();
+}
+
+void MandelbrotWidget::processCamera(QMouseEvent *event)
+{
+    int dx = event->x() - m_lastMousePos.x();
+    int dy = event->y() - m_lastMousePos.y();
+    if (event->buttons() & Qt::LeftButton) {
+        thread.tumble(dx, dy);
+    } 
+	else if (event->buttons() & Qt::MidButton) {
+		thread.track(dx, dy);
+    }
+	else if (event->buttons() & Qt::RightButton) {
+		thread.zoom(-dx / 2 - dy / 2 );
+    }
 }

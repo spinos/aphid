@@ -21,6 +21,9 @@ public:
 
 	void setR(aphid::CudaRender * r);
     void render(QSize resultSize);
+	void tumble(int dx, int dy);
+	void track(int dx, int dy);
+	void zoom(int dz);
 
 signals:
     void renderedImage(const QImage &image);

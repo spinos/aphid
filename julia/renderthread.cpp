@@ -46,6 +46,45 @@ void RenderThread::render(QSize resultSize)
     }
 }
 
+void RenderThread::tumble(int dx, int dy)
+{
+	QMutexLocker locker(&mutex);
+	int w = this->m_portSize.width();
+	m_r->tumble(dx, dy, w);
+	if (!isRunning()) {
+        start(LowPriority);
+    } else {
+        restart = true;
+        condition.wakeOne();
+    }
+}
+
+void RenderThread::track(int dx, int dy)
+{
+	QMutexLocker locker(&mutex);
+	int w = this->m_portSize.width();
+	m_r->track(dx, dy, w);
+	if (!isRunning()) {
+        start(LowPriority);
+    } else {
+        restart = true;
+        condition.wakeOne();
+    }
+}
+
+void RenderThread::zoom(int dz)
+{
+	QMutexLocker locker(&mutex);
+	int w = this->m_portSize.width();
+	m_r->zoom(dz, w);
+	if (!isRunning()) {
+        start(LowPriority);
+    } else {
+        restart = true;
+        condition.wakeOne();
+    }
+}
+
 void RenderThread::run()
 {
     for(;;) {

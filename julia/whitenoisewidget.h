@@ -16,13 +16,19 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
 
 private slots:
     void updatePixmap(const QImage &image);
 	
 private:
+	void processCamera(QMouseEvent *event);
+	
+private:
     RenderThread thread;
     QPixmap pixmap;
-
+	QPoint m_lastMousePos;
 };
 

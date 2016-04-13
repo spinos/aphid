@@ -21,12 +21,17 @@ class BaseView {
 	RectangleI m_rect, m_subRect;
 	Vector3F m_rayFrameVec[6];
 	Vector3F m_eyePosition;
+	Vector3F m_centerOfInterest;
 	float m_hfov, m_aspectRatio, m_farClip; 
 	
 public:
     BaseView();
     virtual ~BaseView();
     
+	void tumble(int dx, int dy, int portWidth);
+	void track(int dx, int dy, int portWidth);
+	void zoom(int dz, int portWidth);
+	
 	bool isPerspective() const;
 			
 	const Matrix44F & cameraSpace() const;
@@ -44,6 +49,7 @@ protected:
 	void setRect(const int & x, const int & y);
     void setSubRect(const int & x0, const int & y0, const int & x1, const int & y1);
     void setEyePosition(float * p);
+	void setCenterOfInterest(float * p);
 	Matrix44F *	cameraSpaceR();
 	Matrix44F * cameraInvSpaceR();
 	
@@ -69,6 +75,7 @@ protected:
 	Vector3F * rayFrameVec();
 	
 	void frameAll(const BoundingBox & b);
+	float perspectivity(int portWidth) const;
 	
 private:
     
