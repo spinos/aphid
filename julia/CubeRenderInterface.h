@@ -20,6 +20,12 @@ void drawPyramid(uint * color,
 				void * planes,
 				void * bounding);
 
+void drawVoxel(uint * color,
+                float * depth,
+                int blockx,
+                int gridx, int gridy,
+				void * voxels);
+
 void setBoxFaces();
 
 }

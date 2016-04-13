@@ -18,6 +18,7 @@ class CubeRender : public CudaRender {
 	VoxTest m_test;
 	boost::scoped_ptr<CUDABuffer> m_devicePyramidPlanes;
 	boost::scoped_ptr<CUDABuffer> m_devicePyramidBox;
+	boost::scoped_ptr<CUDABuffer> m_deviceVoxels;
 	
 public:
 	CubeRender();
