@@ -227,13 +227,10 @@ inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
 
 inline __device__ int ray_voxel_hull1(float &t0, float & t1,
                         float3 & t0Normal, float3 & t1Normal,
-                        Ray4 & ray,
+                        const Ray4 & ray,
                         const Voxel & v,
                         const Aabb4 & box)
-{
-    t0 = -1e20f;
-    t1 = 1e20f;
-    
+{    
     const float voxelSize = box.high.x - box.low.x;
     
     float d, thickness;
@@ -244,7 +241,6 @@ inline __device__ int ray_voxel_hull1(float &t0, float & t1,
         int contour = v.m_contour[i];
         pnt = get_contour_point(contour, box.low, voxelSize);
         nor = get_contour_normal(contour);
-        d = -v3_dot<float3, float3>(nor, pnt);
         thickness = get_contour_thickness(contour, voxelSize * .866f);
         
         if(thickness > 0.f) {
@@ -256,7 +252,7 @@ inline __device__ int ray_voxel_hull1(float &t0, float & t1,
             ray_plane1(t0, t1, t0Normal, t1Normal, ray, nor, d);
             if(t0 >= t1)
             return 0;
-        
+            
             pslab = pnt;
             v3_reverse_inplace<float3>(nor);
             v3_add_mult<float3, float3, float>(pslab, nor, thickness);
@@ -268,16 +264,15 @@ inline __device__ int ray_voxel_hull1(float &t0, float & t1,
             
         }
         else {
-            
+            d = -v3_dot<float3, float3>(nor, pnt);
+        
             ray_plane1(t0, t1, t0Normal, t1Normal, ray, nor, d);
             if(t0 >= t1)
             return 0;
+            
         }
-        
-
     }
     
-    if(t0 > ray.d.w) return 0;
     return 1;
 }
 

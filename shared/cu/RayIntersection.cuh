@@ -257,7 +257,7 @@ inline __device__ int ray_plane1(float & t0, float & t1,
     
     if(denom < 0.f) {
 /// out of range
-        if(t <= ray.o.w) return 0;
+        if(t < ray.o.w) return 0;
 /// last enter
         if(t > t0) {
             t0 = t;
@@ -267,7 +267,7 @@ inline __device__ int ray_plane1(float & t0, float & t1,
         
     } else {
 /// out of range    
-        if(t >= ray.d.w) return 0;
+        if(t > ray.d.w) return 0;
 /// first exit
         if(t < t1) {
             t1 = t;
@@ -287,49 +287,49 @@ inline __device__ int ray_box_hull1(float & t0, float & t1,
     t0 = -1e20f;
     t1 = 1e20f;
     
-    int entered = 0;
+    //int entered = 0;
     float3 n;
     n.x = -1.f; n.y = 0.f; n.z = 0.f;
     float d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
     int stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
-    if (stat == 2) entered = 1;
+    //if (stat == 2) entered = 1;
     
     n = make_float3(1.f, 0.f, 0.f);
     d = - n.x * box.high.x - n.y * box.low.y - n.z * box.low.z;
     stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
-    if (stat == 2) entered = 1;
+    //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, -1.f, 0.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
     stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
-    if (stat == 2) entered = 1;
+    //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 1.f, 0.f);
     d = - n.x * box.low.x - n.y * box.high.y - n.z * box.low.z;
     stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
-    if (stat == 2) entered = 1;
+    //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 0.f, -1.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
     stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
-    if (stat == 2) entered = 1;
+    //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 0.f, 1.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.high.z;
     stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
-    if (stat == 2) entered = 1;
+    //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
-    if(!entered ) return 0;
+    //if(!entered ) return 0;
     
     return 1;
 }

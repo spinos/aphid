@@ -169,8 +169,7 @@ __global__ void oneVoxel_kernel(uint * pix,
     float t0, t1, mint0 = 1e20f;
     float3 t0Normal, t1Normal;
     float3 shadingN = make_float3(0.f, 0.f, 0.f);
-    float3 preShadingN = shadingN;
-    
+    float preMint0 = mint0;
     int i=0;
     for(;i<5;++i) {
         Voxel v = voxels[i];
@@ -178,31 +177,24 @@ __global__ void oneVoxel_kernel(uint * pix,
         if(ray_box_hull1(t0, t1, 
                         t0Normal, t1Normal,
                         incident, box) ) {
-        
-            if(t0 < mint0) {
-                //shadingN = t0Normal;
-                
-                //mint0 = t0;
-                //incident.d.w = t1;
+           
+           if(t0 < mint0) {
+                preMint0 = mint0;
+                mint0 = t0;
                 
                 if(ray_voxel_hull1(t0, t1, 
                         t0Normal, t1Normal, 
                         incident, v, box) ) {
-               
+                                  
                     shadingN = t0Normal;
-                    preShadingN = shadingN;
-                    mint0 = t0;
-                    //incident.d.w = t1;
-                
+
                 }
                 else {
-                    shadingN = preShadingN;
-                    mint0 = 1e20f;
+                    mint0 = preMint0;
                     
                 }
             }
         }
-	
 	}
 /// output	       
     uint ind = getTiledPixelIdx();
