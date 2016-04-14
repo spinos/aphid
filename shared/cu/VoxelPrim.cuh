@@ -228,20 +228,19 @@ inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
 inline __device__ int ray_voxel_hull1(float &t0, float & t1,
                         float3 & t0Normal, float3 & t1Normal,
                         const Ray4 & ray,
-                        const Voxel & v,
+                        const int & nct,
+                        const int * contours,
+                        const float * contourThicknesses,
                         const Aabb4 & box)
-{    
-    const float voxelSize = box.high.x - box.low.x;
-    
+{
     float d, thickness;
     float3 pslab, pnt, nor;
-    int nct = get_n_contours(v);
-    int i=0;
-    for(;i<nct;++i) {
-        int contour = v.m_contour[i];
-        pnt = get_contour_point(contour, box.low, voxelSize);
-        nor = get_contour_normal(contour);
-        thickness = get_contour_thickness(contour, voxelSize * .866f);
+    float voxelSize = box.high.x - box.low.x;
+        
+    for(int i=0;i<nct;++i) {
+        pnt = get_contour_point(contours[i], box.low, voxelSize);
+        nor = get_contour_normal(contours[i]);
+        thickness = contourThicknesses[i];
         
         if(thickness > 0.f) {
 /// slab
@@ -305,6 +304,65 @@ inline __device__ int get_closest_voxel(
         }
     }
     return r;
+}
+
+inline __device__ void extractCurrentVoxelContour(float3 * contourN,
+                                float * contourD,
+                                int * isActive,
+                                const int * contours,
+                                const Aabb4 & box,
+                                int tid)
+{
+    const float voxelSize = box.high.x - box.low.x;
+    const int cv = contours[tid];
+    float3 pnt = get_contour_point(cv, box.low, voxelSize);
+    float3 nor = get_contour_normal(cv);
+    float thickness = get_contour_thickness(cv, voxelSize * .866f);
+    contourN[tid * 2] = nor;
+    isActive[tid * 2] = 1;
+    if(thickness > 0.f) {
+        
+        float3 pslab = pnt;
+        v3_add_mult<float3, float3, float>(pslab, nor, thickness);
+        contourD[tid * 2] = -v3_dot<float3, float3>(nor, pslab);
+            
+        v3_reverse_inplace<float3>(nor);
+        contourN[tid * 2 + 1] = nor;
+        
+        pslab = pnt;
+        v3_add_mult<float3, float3, float>(pslab, nor, thickness);
+        contourD[tid * 2 + 1] = -v3_dot<float3, float3>(nor, pslab);
+            
+        isActive[tid * 2 + 1] = 1;
+    }
+    else {
+        contourD[tid * 2] = -v3_dot<float3, float3>(nor, pnt);
+        isActive[tid * 2 + 1] = 0;
+    }
+    
+}
+
+inline __device__ int ray_voxel_hull2(float &t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        const Ray4 & ray,
+                        const float3 * contourN,
+                        const float * contourD,
+                        const int * isActive,
+                        const int & nct)
+{    
+    for(int i=0;i<nct;++i) {
+        if(!isActive[i]) continue;
+        
+        ray_plane1(t0, t1, t0Normal, t1Normal, 
+            ray, 
+            contourN[i], contourD[i]);
+        
+        if(t0 >= t1)
+            return 0;
+        
+    }
+    
+    return 1;
 }
 
 #endif

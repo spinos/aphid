@@ -114,9 +114,11 @@ void RenderThread::run()
 		const int & ts = m_r->tileSize();
 		
 		// qDebug()<<" tile "<<tw<<"x"<<th<<" size"<<ts;
-        
+#if 1
         int i, j, k, l;
         for(j=0; j<th; ++j) {
+			uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * ts) );
+				
             for(i=0; i<tw; ++i) {
                 if (restart)
 					break;
@@ -125,10 +127,12 @@ void RenderThread::run()
                 
 				uint * tile = (uint *)m_r->tileHostColor(i, j);
                 
-				uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * ts) );
 				m_r->sendTileColor(&scanLine[i*ts], renderSize.width(), i, j);
             }
         }
+#else
+		m_r->sendImageColor(reinterpret_cast<uint *>(image.scanLine(0) ));
+#endif
         
 		if (!restart)
 			emit renderedImage(image);

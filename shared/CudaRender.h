@@ -39,6 +39,7 @@ public :
 	unsigned * tileHostColor(const int & x, const int & y) const;
 	void sendTileColor(unsigned * dst, const int & stride,
 					const int & x, const int & y) const;
+	void sendImageColor(unsigned * dst) const;
 	
 	void getRoundedSize(int & w, int & h) const;
 	const int & tileSize() const;

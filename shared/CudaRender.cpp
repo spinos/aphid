@@ -78,6 +78,9 @@ void CudaRender::sendTileColor(unsigned * dst, const int & stride,
 		memcpy ( &dst[i*stride], &src[i*m_tileSize], m_tileSize * 4 );
 }
 
+void CudaRender::sendImageColor(unsigned * dst) const
+{ memcpy ( dst, hostColor(), m_bufferLength * 4 ); }
+
 void * CudaRender::colorBuffer()
 { return m_deviceColor.bufferOnDevice(); }
 

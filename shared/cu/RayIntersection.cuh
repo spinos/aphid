@@ -279,6 +279,58 @@ inline __device__ int ray_plane1(float & t0, float & t1,
     return 1;
 }
 
+inline __device__ int ray_box_hull2(float & t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        const Ray4 & ray,
+                        const float3 * n,
+                        const float * d)
+{
+    t0 = -1e20f;
+    t1 = 1e20f;
+    
+    for(int i=0; i< 6; ++i) {
+        ray_plane1(t0, t1, t0Normal, t1Normal, ray, n[i], d[i]);
+        if(t0 >= t1) return 0;
+    }
+    return 1;
+}
+
+inline __device__ void extractBoxND(float3 * boxN,
+                                    float * boxD,
+                                    const Aabb4 & box,
+                                    int i)
+{
+    float3 n;
+    float d;
+    if(i==0) {
+        n.x = -1.f; n.y = 0.f; n.z = 0.f;
+        d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    }
+    else if(i==1) {
+        n.x = 1.f; n.y = 0.f; n.z = 0.f;
+        d = - n.x * box.high.x - n.y * box.low.y - n.z * box.low.z;
+    }
+    else if(i==2) {
+        n.x = 0.f; n.y = -1.f; n.z = 0.f;
+        d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    }
+    else if(i==3) {
+        n.x = 0.f; n.y = 1.f; n.z = 0.f;
+        d = - n.x * box.low.x - n.y * box.high.y - n.z * box.low.z;
+    }
+    else if(i==4) {
+        n.x = 0.f; n.y = 0.f; n.z = -1.f;
+        d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    }
+    else {
+        n.x = 0.f; n.y = 0.f; n.z = 1.f;
+        d = - n.x * box.low.x - n.y * box.low.y - n.z * box.high.z;
+    }
+    boxN[i] = n;
+    boxD[i] = d;
+    
+}
+
 inline __device__ int ray_box_hull1(float & t0, float & t1,
                         float3 & t0Normal, float3 & t1Normal,
                         const Ray4 & ray,
@@ -291,40 +343,46 @@ inline __device__ int ray_box_hull1(float & t0, float & t1,
     float3 n;
     n.x = -1.f; n.y = 0.f; n.z = 0.f;
     float d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
-    int stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    //int stat = 
+    ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
     //if (stat == 2) entered = 1;
     
     n = make_float3(1.f, 0.f, 0.f);
     d = - n.x * box.high.x - n.y * box.low.y - n.z * box.low.z;
-    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    //stat = 
+    ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
     //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, -1.f, 0.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
-    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    //stat = 
+    ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
     //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 1.f, 0.f);
     d = - n.x * box.low.x - n.y * box.high.y - n.z * box.low.z;
-    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    //stat = 
+    ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
     //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 0.f, -1.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
-    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    //stat = 
+    ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
     //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 0.f, 1.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.high.z;
-    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    //stat = 
+    ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
     //if (stat == 2) entered = 1;
     
     if(t0 >= t1) return 0;

@@ -45,7 +45,7 @@ void drawVoxel(uint * color,
     dim3 block(blockx, blockx, 1);
     dim3 grid(gridx, gridy, 1);
     
-    oneVoxel_kernel<<< grid, block >>>(color, 
+    oneVoxel_kernel<<< grid, block, 14096 >>>(color, 
         depth,
         (Voxel *)voxels);
 }
