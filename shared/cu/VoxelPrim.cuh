@@ -104,7 +104,7 @@ inline __device__ Aabb4 calculate_bbox(const Voxel & v)
 {
     uint x, y, z;
 	decodeMorton3D(v.m_pos, x, y, z);
-	float h = 1<< (9 - (v.m_level & 15) );
+	float h = 1<< (8 - (v.m_level & 15) );
 	
 	Aabb4 b;
 	b.low.x = x - h;
@@ -117,15 +117,14 @@ inline __device__ Aabb4 calculate_bbox(const Voxel & v)
 	return b;
 }
 
-inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
+inline __device__ int ray_voxel_hull(float &t0, float & t1,
+                        float3 & hitP, float3 & hitN,
                         Ray4 & ray,
-                        const Voxel & v)
+                        const Voxel & v,
+                        const Aabb4 & box)
 {
-    Aabb4 box = calculate_bbox(v);
-    if(!ray_box_hull(hitP, hitN, ray, box) )
-        return 0;
-
-    float tEnterBox = ray.o.w;
+    t0 = -1e20f;
+    t1 = 1e20f;
     
     const float voxelSize = box.high.x - box.low.x;
     
@@ -147,34 +146,85 @@ inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
             d = -v3_dot<float3, float3>(nor, pslab);
             
             if(ray_plane(t, denom, ray, nor, d) )
-                update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, nor, t, denom);
+                update_tnormal(t0, t1, t0Normal, t1Normal, nor, t, denom);
             
-            if(ray.o.w > ray.d.w)
+            if(t0 >= t1)
                 return 0;
-        
+            
             pslab = pnt;
             v3_reverse_inplace<float3>(nor);
             v3_add_mult<float3, float3, float>(pslab, nor, thickness);
             d = -v3_dot<float3, float3>(nor, pslab);
             
             if(ray_plane(t, denom, ray, nor, d) )
-                update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, nor, t, denom);
+                update_tnormal(t0, t1, t0Normal, t1Normal, nor, t, denom);
             
-            if(ray.o.w > ray.d.w)
+            if(t0 >= t1) 
                 return 0;
+            
         }
-        else if(ray_plane(t, denom, ray, nor, d) ) {
-            update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, nor, t, denom);
+        else {
+            
+            if(ray_plane(t, denom, ray, nor, d) )
+                update_tnormal(t0, t1, t0Normal, t1Normal, nor, t, denom);
         
-            if(ray.o.w > ray.d.w)
+            if(t0 >= t1)
                 return 0;
+            
         }
+        if(t0 > ray.d.w) return 0;
     }
     
-    if(ray.o.w > tEnterBox) {
-        ray_progress(hitP, ray, ray.o.w);
-        hitN = t0Normal;
+    hitN = t0Normal;
+    ray_progress(hitP, ray, t0);
+    return 1;
+}
+
+inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
+                        Ray4 & ray,
+                        const Voxel & v)
+{
+    //float3 enterP = hitP;
+    //float3 enterN = hitN;
+    //float enterO = ray.o.w;
+    //float enterD = ray.d.w;
+    Aabb4 box = calculate_bbox(v);
+    
+    float3 boxN, boxP;
+    float boxt0;
+    float boxt1;
+    
+    if(!ray_box_hull(boxt0, boxt1, boxP, boxN, ray, box) )
+        return 0;
+    
+    if(boxt0 >= ray.d.w) return 0;
+    
+    hitP = boxP;
+    hitN = boxN;
+    
+    ray.o.w = boxt0;
+    ray.d.w = boxt1;
+    
+    float3 hullP, hullN;
+    float hullt0, hullt1;
+    
+    if(ray_voxel_hull(hullt0, hullt1, hullP, hullN, ray, v, box) ) {
+            
+        if(hullt0 > boxt0) {
+            hitP = hullP;
+            hitN = hullN;
+            ray.o.w = hullt0;
+        }   
+         
+        if(hullt1 < boxt1)
+            ray.d.w = hullt1;
     }
+    else {
+        ray.d.w = 1e20f;
+        return 0;
+    }
+
+    
     return 1;
 }
 

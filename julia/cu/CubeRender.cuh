@@ -165,18 +165,22 @@ __global__ void oneVoxel_kernel(uint * pix,
     
     uint ind = getTiledPixelIdx();
     
-    incident.o.w = -1e28f;
-    incident.d.w = 1e28f;
+    incident.o.w = 0.f;
+    incident.d.w = 1e20f;
     
     float3 hitP, hitN;
-    if(ray_voxel(hitP, hitN, incident, voxels[1]) ) {
-    int r = 128 + 127 * hitN.x;
-    int g = 128 + 127 * hitN.y;
-    int b = 128 + 127 * hitN.z;
-	pix[ind] = encodeRGB(r, g, b);
+    int r = 0, g= 0, b= 0;
+    int i=0;
+    for(;i<5;++i) {
+    if(ray_voxel(hitP, hitN, incident, voxels[i]) ) {
+          r = 128 + 127 * hitN.x;
+          g = 128 + 127 * hitN.y;
+          b = 128 + 127 * hitN.z;
 	}
-	else {
-	        pix[ind] = encodeRGB(99, 99, 99);
+	
+	
+	pix[ind] = encodeRGB(r, g, b);
+	
 	}
 }
 

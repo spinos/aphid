@@ -26,7 +26,7 @@ CudaRender(8)
 	
 	m_devicePyramidPlanes->hostToDevice((char *)m_test.m_pyramid.plane(0), 80);
 	m_devicePyramidBox->hostToDevice((char *)m_test.m_pyramid.bbox(), 32);
-	m_deviceVoxels->hostToDevice((char *)&m_test.m_voxels[1], 80);
+	m_deviceVoxels->hostToDevice((char *)&m_test.m_voxels[1], 200);
 }
 
 CubeRender::~CubeRender() {}

@@ -259,57 +259,63 @@ inline __device__ void update_tnormal(float & t0, float & t1,
     }
 }
 
-inline __device__ int ray_box_hull(float3 & hitP, float3 & hitN,
+inline __device__ int ray_box_hull(float & t0, float & t1,
+                        float3 & hitP, float3 & hitN,
                         Ray4 & ray,
                         const Aabb4 & box)
 {
+    t0 = -1e20f;
+    t1 = 1e20f;
     float t, denom;
     float3 t0Normal, t1Normal;
     float3 n;
     n.x = -1.f; n.y = 0.f; n.z = 0.f;
     float d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
     if(ray_plane(t, denom, ray, n, d))
-        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        update_tnormal(t0, t1, t0Normal, t1Normal, n, t, denom);
     
-    if(ray.o.w > ray.d.w) return 0;
+    if(t0 >= t1) return 0;
     
     n = make_float3(1.f, 0.f, 0.f);
     d = - n.x * box.high.x - n.y * box.low.y - n.z * box.low.z;
     if(ray_plane(t, denom, ray, n, d))
-        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        update_tnormal(t0, t1, t0Normal, t1Normal, n, t, denom);
     
-    if(ray.o.w > ray.d.w) return 0;
+    if(t0 >= t1) return 0;
     
     n = make_float3(0.f, -1.f, 0.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
     if(ray_plane(t, denom, ray, n, d))
-        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        update_tnormal(t0, t1, t0Normal, t1Normal, n, t, denom);
     
-    if(ray.o.w > ray.d.w) return 0;
+    if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 1.f, 0.f);
     d = - n.x * box.low.x - n.y * box.high.y - n.z * box.low.z;
     if(ray_plane(t, denom, ray, n, d))
-        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        update_tnormal(t0, t1, t0Normal, t1Normal, n, t, denom);
     
-    if(ray.o.w > ray.d.w) return 0;
+    if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 0.f, -1.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
     if(ray_plane(t, denom, ray, n, d))
-        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        update_tnormal(t0, t1, t0Normal, t1Normal, n, t, denom);
     
-    if(ray.o.w > ray.d.w) return 0;
+    if(t0 >= t1) return 0;
     
     n = make_float3(0.f, 0.f, 1.f);
     d = - n.x * box.low.x - n.y * box.low.y - n.z * box.high.z;
     if(ray_plane(t, denom, ray, n, d))
-        update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        update_tnormal(t0, t1, t0Normal, t1Normal, n, t, denom);
     
-    if(ray.o.w > ray.d.w) return 0;
-    
+    if(t0 >= t1) return 0;
+
+    if(t0 >= ray.d.w) return 0;
+
     hitN = t0Normal;
-    ray_progress(hitP, ray, ray.o.w);
+    ray_progress(hitP, ray, t0);
+    
     return 1;
 }
 
@@ -319,7 +325,10 @@ inline __device__ int ray_box_and_hull(float3 & hitP, float3 & hitN,
                         float4 * planes,
                         int numPlanes)
 {
-    if(!ray_box_hull(hitP, hitN, ray, box) )
+    float t0 = -1e10f;
+    float t1 = 1e10f;
+    
+    if(!ray_box_hull(t0, t1, hitP, hitN, ray, box) )
         return 0;
         
     float tEnterBox = ray.o.w;
