@@ -281,4 +281,35 @@ inline __device__ int ray_voxel_hull1(float &t0, float & t1,
     return 1;
 }
 
+inline __device__ int get_closest_voxel(
+                    float & t0,
+                    float & t1,
+                    float3 & t0Normal, 
+                    float3 & t1Normal,
+                    Aabb4 & outBox,
+                    Ray4 & incident,
+                    Voxel * voxels, 
+                    int n)
+{
+    float3 n0, n1;
+    int r = -1;
+    for(int i=0;i<n;++i) {
+        Voxel v = voxels[i];
+        Aabb4 box = calculate_bbox(v);
+        if(ray_box_hull1(t0, t1, 
+            n0, n1,
+            incident, box) ) {
+        
+            
+            t0Normal = n0;
+            t1Normal = n1;
+            incident.d.w = t1;
+            r = i;
+            outBox = box;
+        
+        }
+    }
+    return r;
+}
+
 #endif
