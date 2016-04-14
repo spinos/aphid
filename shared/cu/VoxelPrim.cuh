@@ -184,10 +184,6 @@ inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
                         Ray4 & ray,
                         const Voxel & v)
 {
-    //float3 enterP = hitP;
-    //float3 enterN = hitN;
-    //float enterO = ray.o.w;
-    //float enterD = ray.d.w;
     Aabb4 box = calculate_bbox(v);
     
     float3 boxN, boxP;
@@ -225,6 +221,63 @@ inline __device__ int ray_voxel(float3 & hitP, float3 & hitN,
     }
 
     
+    return 1;
+}
+
+
+inline __device__ int ray_voxel_hull1(float &t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        Ray4 & ray,
+                        const Voxel & v,
+                        const Aabb4 & box)
+{
+    t0 = -1e20f;
+    t1 = 1e20f;
+    
+    const float voxelSize = box.high.x - box.low.x;
+    
+    float d, thickness;
+    float3 pslab, pnt, nor;
+    int nct = get_n_contours(v);
+    int i=0;
+    for(;i<nct;++i) {
+        int contour = v.m_contour[i];
+        pnt = get_contour_point(contour, box.low, voxelSize);
+        nor = get_contour_normal(contour);
+        d = -v3_dot<float3, float3>(nor, pnt);
+        thickness = get_contour_thickness(contour, voxelSize * .866f);
+        
+        if(thickness > 0.f) {
+/// slab
+            pslab = pnt;
+            v3_add_mult<float3, float3, float>(pslab, nor, thickness);
+            d = -v3_dot<float3, float3>(nor, pslab);
+            
+            ray_plane1(t0, t1, t0Normal, t1Normal, ray, nor, d);
+            if(t0 >= t1)
+            return 0;
+        
+            pslab = pnt;
+            v3_reverse_inplace<float3>(nor);
+            v3_add_mult<float3, float3, float>(pslab, nor, thickness);
+            d = -v3_dot<float3, float3>(nor, pslab);
+            
+            ray_plane1(t0, t1, t0Normal, t1Normal, ray, nor, d);
+            if(t0 >= t1)
+            return 0;
+            
+        }
+        else {
+            
+            ray_plane1(t0, t1, t0Normal, t1Normal, ray, nor, d);
+            if(t0 >= t1)
+            return 0;
+        }
+        
+
+    }
+    
+    if(t0 > ray.d.w) return 0;
     return 1;
 }
 

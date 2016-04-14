@@ -239,6 +239,101 @@ inline __device__ int ray_plane(float & t, float & denom,
     return 1;
 }
 
+/// 0: no hit
+/// 1: hit but no normal update
+/// 2: last enter
+/// 3: first exit
+inline __device__ int ray_plane1(float & t0, float & t1,
+                                float3 & t0Normal, float3 & t1Normal,
+                                const Ray4 & ray,
+                                const float3 & n, 
+                                const float & d)
+{
+    float denom = v3_dot<float3, float4>(n, ray.d);
+/// parallel
+    //if(absoluteValueF(denom) < 1e-8f) return 0;
+    
+    float t = -(d + v3_dot<float3, float4>(n, ray.o) ) / denom;
+    
+    if(denom < 0.f) {
+/// out of range
+        if(t <= ray.o.w) return 0;
+/// last enter
+        if(t > t0) {
+            t0 = t;
+            t0Normal = n;
+            return 2;
+        }
+        
+    } else {
+/// out of range    
+        if(t >= ray.d.w) return 0;
+/// first exit
+        if(t < t1) {
+            t1 = t;
+            t1Normal = n;
+            return 3;
+        }
+    }
+    
+    return 1;
+}
+
+inline __device__ int ray_box_hull1(float & t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        const Ray4 & ray,
+                        const Aabb4 & box)
+{
+    t0 = -1e20f;
+    t1 = 1e20f;
+    
+    int entered = 0;
+    float3 n;
+    n.x = -1.f; n.y = 0.f; n.z = 0.f;
+    float d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    int stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    if (stat == 2) entered = 1;
+    
+    n = make_float3(1.f, 0.f, 0.f);
+    d = - n.x * box.high.x - n.y * box.low.y - n.z * box.low.z;
+    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    if (stat == 2) entered = 1;
+    
+    if(t0 >= t1) return 0;
+    
+    n = make_float3(0.f, -1.f, 0.f);
+    d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    if (stat == 2) entered = 1;
+    
+    if(t0 >= t1) return 0;
+    
+    n = make_float3(0.f, 1.f, 0.f);
+    d = - n.x * box.low.x - n.y * box.high.y - n.z * box.low.z;
+    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    if (stat == 2) entered = 1;
+    
+    if(t0 >= t1) return 0;
+    
+    n = make_float3(0.f, 0.f, -1.f);
+    d = - n.x * box.low.x - n.y * box.low.y - n.z * box.low.z;
+    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    if (stat == 2) entered = 1;
+    
+    if(t0 >= t1) return 0;
+    
+    n = make_float3(0.f, 0.f, 1.f);
+    d = - n.x * box.low.x - n.y * box.low.y - n.z * box.high.z;
+    stat = ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
+    if (stat == 2) entered = 1;
+    
+    if(t0 >= t1) return 0;
+    
+    if(!entered ) return 0;
+    
+    return 1;
+}
+
 inline __device__ void update_tnormal(float & t0, float & t1,
                         float3 & t0Normal, float3 & t1Normal,
                         const float3 & n,

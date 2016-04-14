@@ -163,24 +163,52 @@ __global__ void oneVoxel_kernel(uint * pix,
     v3_minus<float4, float4>(incident.d, incident.o);
     v3_normalize_inplace<float4>(incident.d);
     
-    uint ind = getTiledPixelIdx();
-    
-    incident.o.w = 0.f;
+    incident.o.w = -1e20f;
     incident.d.w = 1e20f;
     
-    float3 hitP, hitN;
-    int r = 0, g= 0, b= 0;
+    float t0, t1, mint0 = 1e20f;
+    float3 t0Normal, t1Normal;
+    float3 shadingN = make_float3(0.f, 0.f, 0.f);
+    float3 preShadingN = shadingN;
+    
     int i=0;
     for(;i<5;++i) {
-    if(ray_voxel(hitP, hitN, incident, voxels[i]) ) {
-          r = 128 + 127 * hitN.x;
-          g = 128 + 127 * hitN.y;
-          b = 128 + 127 * hitN.z;
+        Voxel v = voxels[i];
+        Aabb4 box = calculate_bbox(v);
+        if(ray_box_hull1(t0, t1, 
+                        t0Normal, t1Normal,
+                        incident, box) ) {
+        
+            if(t0 < mint0) {
+                //shadingN = t0Normal;
+                
+                //mint0 = t0;
+                //incident.d.w = t1;
+                
+                if(ray_voxel_hull1(t0, t1, 
+                        t0Normal, t1Normal, 
+                        incident, v, box) ) {
+               
+                    shadingN = t0Normal;
+                    preShadingN = shadingN;
+                    mint0 = t0;
+                    //incident.d.w = t1;
+                
+                }
+                else {
+                    shadingN = preShadingN;
+                    mint0 = 1e20f;
+                    
+                }
+            }
+        }
+	
 	}
-	
-	
-	pix[ind] = encodeRGB(r, g, b);
-	
-	}
+/// output	       
+    uint ind = getTiledPixelIdx();
+    
+	pix[ind] = encodeRGB(128 + 127 * shadingN.x, 
+	                    128 + 127 * shadingN.y,
+	                    128 + 127 * shadingN.z);
 }
 
