@@ -311,5 +311,56 @@ inline __device__ void v3_r(T & a, const float * b)
     a.z = b[2];
 }
 
+inline __device__ void keep_max_component(float3 & a,
+                                        const float3 & b)
+{
+    if(b.x > b.y && b.x > b.z) {
+        a.y = a.z = 0.f;
+    }
+    else if(b.y > b.x && b.y > b.z) {
+        a.x = a.z = 0.f;
+    }
+    else {
+        a.x = a.y = 0.f;
+    }
+}
+
+inline __device__ void keep_min_component(float3 & a,
+                                        const float3 & b)
+{
+    if(b.x < b.y && b.x < b.z) {
+        a.y = a.z = 0.f;
+    }
+    else if(b.y < b.x && b.y < b.z) {
+        a.x = a.z = 0.f;
+    }
+    else {
+        a.x = a.y = 0.f;
+    }
+}
+
+inline __device__ void choose_one(float3 & a,
+                               const int3 & b)
+{
+    if(b.x) a.x = 1.f;
+    else a.x = -1.f;
+    if(b.y) a.y = 1.f;
+    else a.y = -1.f;
+    if(b.z) a.z = 1.f;
+    else a.z = -1.f;
+}
+
+
+inline __device__ void choose_negative_one(float3 & a,
+                               const int3 & b)
+{
+    if(b.x) a.x = -1.f;
+    else a.x = 1.f;
+    if(b.y) a.y = -1.f;
+    else a.y = 1.f;
+    if(b.z) a.z = -1.f;
+    else a.z = 1.f;
+}
+
 #endif        //  #ifndef VECTOR_MATH_CUH
 

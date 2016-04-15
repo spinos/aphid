@@ -187,6 +187,34 @@ inline __device__ void weightedSum(float3 & dst,
     dst.z = v1.z * w1 + v2.z * w2 + v3.z * w3;
 }
 
+inline __device__ int ray_box_slab(float & t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        const Ray4 & ray,
+                        const Aabb4 & aabb
+                        )
+{
+/// sides facing ray direction
+    int3 isNegative = make_int3(ray.d.x < 0.f, ray.d.y < 0.f, ray.d.z < 0.f);
+	float3 t_min = float4_difference( select4(aabb.high, aabb.low, isNegative), ray.o );
+	float3 t_max = float4_difference( select4(aabb.low, aabb.high, isNegative), ray.o );
+	v3_divide_inplace<float3, float4>(t_min, ray.d);
+	v3_divide_inplace<float3, float4>(t_max, ray.d);
+
+/// last enter	
+    t0 = fmax( t_min.z, fmax(t_min.y, fmax(t_min.x, ray.o.w)) );
+/// first exit
+	t1 = fmin( t_max.z, fmin(t_max.y, fmin(t_max.x, ray.d.w)) );
+
+    if(t0 >= t1 || t1 <= 0.f) return 0;
+   
+    choose_one(t0Normal, isNegative);
+    choose_negative_one(t1Normal, isNegative);
+    
+    keep_max_component(t0Normal, t_min);
+    keep_min_component(t1Normal, t_max);
+    return 1;
+}
+
 inline __device__ int ray_box(const Ray4 & ray,
                         const Aabb4 & aabb,
                         float & tmin, float & tmax)
@@ -279,6 +307,32 @@ inline __device__ int ray_plane1(float & t0, float & t1,
     return 1;
 }
 
+inline __device__ void ray_plane2(float & t0, float & t1,
+                                float3 & t0Normal, float3 & t1Normal,
+                                const Ray4 & ray,
+                                const float3 & n, 
+                                const float & d)
+{
+    float denom = v3_dot<float3, float4>(n, ray.d);
+
+    float t = -(d + v3_dot<float3, float4>(n, ray.o) ) / denom;
+    
+    if(denom < 0.f) {
+/// last enter
+        if(t > t0) {
+            t0 = t;
+            t0Normal = n;
+        }
+        
+    } else {
+/// first exit
+        if(t < t1) {
+            t1 = t;
+            t1Normal = n;
+        }
+    }
+}
+
 inline __device__ int ray_box_hull2(float & t0, float & t1,
                         float3 & t0Normal, float3 & t1Normal,
                         const Ray4 & ray,
@@ -289,7 +343,7 @@ inline __device__ int ray_box_hull2(float & t0, float & t1,
     t1 = 1e20f;
     
     for(int i=0; i< 6; ++i) {
-        ray_plane1(t0, t1, t0Normal, t1Normal, ray, n[i], d[i]);
+        ray_plane2(t0, t1, t0Normal, t1Normal, ray, n[i], d[i]);
         if(t0 >= t1) return 0;
     }
     return 1;

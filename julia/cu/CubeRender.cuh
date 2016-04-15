@@ -151,11 +151,13 @@ __global__ void oneVoxel_kernel(uint * pix,
 /// not enough shared mem to store all contours for all boxes
     int * sncontours = (int *)&sdata[512]; /// 1 * 64
     int * scontours = (int *)&sdata[576]; /// 1 * 64
+/// cache contours of one box
     float3 * scurrentContourN = (float3 *)&sdata[1152]; /// 16 * 3
     float * scurrentContourD = &sdata[1200]; /// 16 * 1
     int * scurrentActiveContour = (int *)&sdata[1216]; /// 16 * 1
-    float3 * sboxN = (float3 *)&sdata[1232]; /// 3 * 6
-    float * sboxD = &sdata[1250];
+    //float3 * sboxN = (float3 *)&sdata[1232]; /// 3 * 6
+    //float * sboxD = &sdata[1250];
+    float3 * sshadingN = (float3 *)&sdata[1232]; /// 3 * 64
     
     int tidx = threadIdx.x + blockDim.x * threadIdx.y;
     if(tidx < 5) {
@@ -190,7 +192,7 @@ __global__ void oneVoxel_kernel(uint * pix,
 
     float t0, t1, mint0 = 1e20f, preMint0 = 1e20f;
     float3 t0Normal, t1Normal;
-    float3 shadingN = make_float3(0.f, 0.f, 0.f);
+    sshadingN[tidx] = make_float3(0.f, 0.f, 0.f);
      
     for(int i=0;i<5;++i) {
         
@@ -204,24 +206,28 @@ __global__ void oneVoxel_kernel(uint * pix,
             
         }
         
-        int ibox = tidx - sncontours[i];
-        if(ibox >= 0 && ibox < 6) {
-            extractBoxND(sboxN, sboxD,
-                                sboxes[i],
-                                ibox);
+        //int ibox = tidx - sncontours[i];
+        //if(ibox >= 0 && ibox < 6) {
+          //  extractBoxND(sboxN, sboxD,
+            //                    sboxes[i],
+              //                  ibox);
             
-        }
+        //}
         __syncthreads();
         
-        if(ray_box_hull2(t0, t1, 
-                        t0Normal, t1Normal,
-                        incident, 
-                        sboxN, sboxD) ) {
-
+        //if(ray_box_hull2(t0, t1,
+          //              t0Normal, t1Normal,
+            //            incident, 
+              //          sboxN, sboxD) ) {
+        if(ray_box_slab(t0, t1, 
+                         t0Normal, t1Normal,
+                         incident, 
+                         sboxes[i]) ) {
+        
            if(t0 < mint0) {
                 preMint0 = mint0;
                 mint0 = t0;
-                
+               
                 if(ray_voxel_hull2(t0, t1, 
                         t0Normal, t1Normal, 
                         incident,
@@ -229,14 +235,15 @@ __global__ void oneVoxel_kernel(uint * pix,
                         scurrentContourD,
                         scurrentActiveContour,
                         sncontours[i] * 2) ) {
-                                  
-                    shadingN = t0Normal;
-
+                                 
+                    sshadingN[tidx] = t0Normal;
+                    
                 }
                 else {
                     mint0 = preMint0;
                     
                 }
+
             }
         }
         
@@ -246,11 +253,9 @@ __global__ void oneVoxel_kernel(uint * pix,
 	if(px < c_renderRect.x || px >= c_renderRect.z) return;
     if(py < c_renderRect.y || py >= c_renderRect.w) return;
     
-/// output	       
-    uint ind = getTiledPixelIdx();
-    
-	pix[ind] = encodeRGB(128 + 127 * shadingN.x, 
-	                    128 + 127 * shadingN.y,
-	                    128 + 127 * shadingN.z);
+/// output	           
+	pix[getTiledPixelIdx()] = encodeRGB(128 + 127 * sshadingN[tidx].x, 
+	                    128 + 127 * sshadingN[tidx].y,
+	                    128 + 127 * sshadingN[tidx].z);
 }
 

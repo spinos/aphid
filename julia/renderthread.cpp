@@ -53,9 +53,9 @@ void RenderThread::tumble(int dx, int dy)
 	m_r->tumble(dx, dy, w);
 	
 	if (!isRunning()) {
-        start(NormalPriority);
+		start(LowPriority);
     } else {
-        restart = true;
+		restart = true;
         condition.wakeOne();
     }
 }
@@ -67,7 +67,7 @@ void RenderThread::track(int dx, int dy)
 	m_r->track(dx, dy, w);
 	
 	if (!isRunning()) {
-        start(NormalPriority);
+        start(LowPriority);
     } else {
         restart = true;
         condition.wakeOne();
@@ -81,7 +81,7 @@ void RenderThread::zoom(int dz)
 	m_r->zoom(dz, w);
 	
 	if (!isRunning()) {
-        start(NormalPriority);
+        start(LowPriority);
     } else {
         restart = true;
         condition.wakeOne();
@@ -90,6 +90,7 @@ void RenderThread::zoom(int dz)
 
 void RenderThread::run()
 {
+	int nrender = 0;
    for(;;) {
         mutex.lock();
 
@@ -100,14 +101,18 @@ void RenderThread::run()
 	
         mutex.unlock();
 		
-		if (restart)
-			break;
-		if (abort)
+		if (abort) {
+			qDebug()<<"abort render loop"<<++nrender;
 			return;
+		}
 		
+		if (!restart) {	
+		qDebug()<<"render loop"<<++nrender;
 		m_r->render();
-							
+						
 		m_r->colorToHost();
+		
+		//qDebug()<<" imagesize "<<renderSize.width()<<"x"<<renderSize.height();
 		
 		QImage image(renderSize, QImage::Format_RGB32);
 			
@@ -115,7 +120,7 @@ void RenderThread::run()
         const int & th = m_r->tileY();
 		const int & ts = m_r->tileSize();
 		
-		// qDebug()<<" tile "<<tw<<"x"<<th<<" size"<<ts;
+		//qDebug()<<" tile "<<tw<<"x"<<th<<" size"<<ts;
 #if 1
         int i, j, k, l;
         for(j=0; j<th; ++j) {
@@ -128,11 +133,12 @@ void RenderThread::run()
             }
         }
 #else
-		m_r->sendImageColor(reinterpret_cast<uint *>(image.scanLine(0) ));
+		m_r->sendImageColor(reinterpret_cast<uint *>(image.scanLine(0) ), renderSize.width() * renderSize.height() );
 #endif
         
-		if (!restart)
-			emit renderedImage(image);
+		
+		emit renderedImage(image);
+		}
 			
         mutex.lock();
 		
