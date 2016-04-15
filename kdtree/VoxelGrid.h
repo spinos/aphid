@@ -155,7 +155,7 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level, BuildProf
 		v.setPos(c->key(), c->value()->level );
 			veng.extractColor(v);
 			veng.extractContours(v);
-		m_voxels.insert(v);
+			m_voxels.insert(v);
 		
 		}
 		}

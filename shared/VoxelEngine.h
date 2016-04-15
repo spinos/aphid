@@ -13,6 +13,7 @@
 #include <PrincipalComponents.h>
 #include <Quantization.h>
 #include <vector>
+#include <boost/thread.hpp>  
 
 namespace aphid {
 
@@ -135,7 +136,7 @@ struct Voxel {
 	
 };
 
-template<typename T, typename Tn, int NLevel = 3>
+template<typename T, typename Tn, int NLevel = 3, int NThread = 4>
 class VoxelEngine : public CartesianGrid {
 
 	AOrientedBox m_obox;
@@ -172,19 +173,23 @@ private:
 						const Vector3F & dir,
 						const BoundingBox & box,
 						const float & d) const;
-
+	void samplePrimsWork(std::vector<Vector3F> & dst, 
+						const sdb::VectorArray<T> * prims,
+						const BoundingBox & box,
+						const std::vector<int> & inds,
+						int minInd, int maxInd) const;
 };
 
-template<typename T, typename Tn, int NLevel>
-VoxelEngine<T, Tn, NLevel>::VoxelEngine()
+template<typename T, typename Tn, int NLevel, int NThread>
+VoxelEngine<T, Tn, NLevel, NThread>::VoxelEngine()
 {}
 
-template<typename T, typename Tn, int NLevel>
-VoxelEngine<T, Tn, NLevel>::~VoxelEngine()
+template<typename T, typename Tn, int NLevel, int NThread>
+VoxelEngine<T, Tn, NLevel, NThread>::~VoxelEngine()
 {}
 
-template<typename T, typename Tn, int NLevel>
-bool VoxelEngine<T, Tn, NLevel>::build(Profile * prof)
+template<typename T, typename Tn, int NLevel, int NThread>
+bool VoxelEngine<T, Tn, NLevel, NThread>::build(Profile * prof)
 {
 	const float h = cellSizeAtLevel(NLevel);
     const float hh = h * .49995f;
@@ -216,8 +221,8 @@ bool VoxelEngine<T, Tn, NLevel>::build(Profile * prof)
 	return true;
 }
 
-template<typename T, typename Tn, int NLevel>
-void VoxelEngine<T, Tn, NLevel>::sampleCells(std::vector<Vector3F> & dst)
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::sampleCells(std::vector<Vector3F> & dst)
 {
 	const float hh = cellSizeAtLevel(NLevel + 2);
 	sdb::CellHash * c = cells();
@@ -234,8 +239,8 @@ void VoxelEngine<T, Tn, NLevel>::sampleCells(std::vector<Vector3F> & dst)
 	}
 }
 
-template<typename T, typename Tn, int NLevel>
-void VoxelEngine<T, Tn, NLevel>::samplePrims(std::vector<Vector3F> & dst, Profile * prof)
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::samplePrims(std::vector<Vector3F> & dst, Profile * prof)
 {
 	BoxIntersectContext box;
 	getBounding(box);
@@ -246,22 +251,60 @@ void VoxelEngine<T, Tn, NLevel>::samplePrims(std::vector<Vector3F> & dst, Profil
 	const std::vector<int> & inds = box.primIndices();
 	const sdb::VectorArray<T> * prims = prof->_tree->source();
     
-	Vector3F p;
-	
-	typename std::vector<int>::const_iterator it;
-	for(int i=0; i< 200; ++i) {
-		it = inds.begin();
-		for(;it!= inds.end(); ++it) {
-			const T * aprim = prims->get(*it); 
-			if(aprim->sampleP(p, box) )
-					dst.push_back(p);
+	const int nworks = inds.size();
+	if(nworks < NThread) samplePrimsWork(dst, prims, box, inds, 0, nworks );
+	else {
+		std::vector<Vector3F> branchSamples[NThread];
+		boost::thread workTr[NThread];
+		
+		const int wpt = nworks / NThread;
+		int workMin, workMax;
+/// branch
+		for(int i=0; i<NThread; ++i) {
+			workMin = i * wpt;
+			workMax = workMin + wpt;
+			if(workMax > nworks) workMax = nworks; 
+			
+			workTr[i] = boost::thread(boost::bind(&VoxelEngine<T, Tn, NLevel, NThread>::samplePrimsWork, 
+										this, 
+										branchSamples[i], prims, box, inds, workMin, workMax) );
 		}
-		if(dst.size() > 500) return;
+/// join
+		for(int i=0; i<NThread; ++i) {
+			workTr[i].join();
+		}
+/// merge		
+		for(int i=0; i<NThread; ++i) {
+			const std::vector<Vector3F> & branch = branchSamples[i];
+			const int branchSize = branch.size();
+			for(int j=0; j<branchSize; ++j) {
+				dst.push_back(branch[j]);
+			}
+		}
 	}
 }
 
-template<typename T, typename Tn, int NLevel>
-void VoxelEngine<T, Tn, NLevel>::calculateOBox(Profile * prof)
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::samplePrimsWork(std::vector<Vector3F> & dst, 
+											const sdb::VectorArray<T> * prims,
+											const BoundingBox & box,
+											const std::vector<int> & inds,
+											int minInd, int maxInd) const
+{
+	Vector3F p;
+	for(int j=0; j< 200; ++j) {
+		
+		for(int i=minInd; i<maxInd; ++i) {
+			const T * aprim = prims->get(inds[i]); 
+			if(aprim->sampleP(p, box) )
+					dst.push_back(p);
+		}
+		if(dst.size() > 400) return;
+	}
+}
+
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::calculateOBox(Profile * prof)
 {
 	std::vector<Vector3F> pnts;
 	
@@ -277,20 +320,21 @@ void VoxelEngine<T, Tn, NLevel>::calculateOBox(Profile * prof)
 	m_obox.limitMinThickness(cellSizeAtLevel(NLevel) );
 }
 
-template<typename T, typename Tn, int NLevel>
-const AOrientedBox & VoxelEngine<T, Tn, NLevel>::orientedBBox() const
+template<typename T, typename Tn, int NLevel, int NThread>
+const AOrientedBox & VoxelEngine<T, Tn, NLevel, NThread>::orientedBBox() const
 { return m_obox; }
 
-template<typename T, typename Tn, int NLevel>
-void VoxelEngine<T, Tn, NLevel>::extractColor(Voxel & dst) const
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::extractColor(Voxel & dst) const
 {
+/// todo
 	dst.setColor(.99f, .99f, .99f, .99f);
 }
 
-template<typename T, typename Tn, int NLevel>
-void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::extractContours(Voxel & dst) const
 {
-#define VERBEXTRACTCONTOUR 1
+#define VERBEXTRACTCONTOUR 0
 	int nct = 0;
 	BoundingBox box;
 	getBounding(box);
@@ -434,8 +478,8 @@ void VoxelEngine<T, Tn, NLevel>::extractContours(Voxel & dst) const
 	std::cout.flush();
 }
 
-template<typename T, typename Tn, int NLevel>
-bool VoxelEngine<T, Tn, NLevel>::findIntersection(Vector3F & dst,
+template<typename T, typename Tn, int NLevel, int NThread>
+bool VoxelEngine<T, Tn, NLevel, NThread>::findIntersection(Vector3F & dst,
 										const Vector3F & dir,
 										const BoundingBox & box,
 										const float & d) const
@@ -452,8 +496,8 @@ bool VoxelEngine<T, Tn, NLevel>::findIntersection(Vector3F & dst,
 	return stat;
 }
 
-template<typename T, typename Tn, int NLevel>
-void VoxelEngine<T, Tn, NLevel>::printContours(const Voxel & v) const
+template<typename T, typename Tn, int NLevel, int NThread>
+void VoxelEngine<T, Tn, NLevel, NThread>::printContours(const Voxel & v) const
 {
 	const Vector3F & boxOri = origin();
 	const float & d = span(); 
