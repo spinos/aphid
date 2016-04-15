@@ -107,22 +107,16 @@ void RenderThread::run()
 		}
 		
 		if (!restart) {	
-		qDebug()<<"render loop"<<++nrender;
-		m_r->render();
-						
-		m_r->colorToHost();
-		
+		    qDebug()<<"render loop"<<++nrender;
+		    m_r->render();
+
 		//qDebug()<<" imagesize "<<renderSize.width()<<"x"<<renderSize.height();
 		
-		QImage image(renderSize, QImage::Format_RGB32);
-			
-        const int & tw = m_r->tileX();
-        const int & th = m_r->tileY();
-		const int & ts = m_r->tileSize();
+		    QImage image(renderSize, QImage::Format_RGB32);
+		    m_r->colorToHost(reinterpret_cast<uint *>(image.scanLine(0) ), 
+		                    renderSize.width() * renderSize.height() );
 		
-		m_r->sendImageColor(reinterpret_cast<uint *>(image.scanLine(0) ), renderSize.width() * renderSize.height() );
-
-		emit renderedImage(image);
+		    emit renderedImage(image);
 		}
 			
         mutex.lock();

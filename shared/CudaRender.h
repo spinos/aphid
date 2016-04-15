@@ -44,7 +44,7 @@ public :
 	void getRoundedSize(int & w, int & h) const;
 	const int & tileSize() const;
 	
-	void colorToHost();
+	void colorToHost(unsigned * dst, int npix);
 	
 protected :
 	void * nearDepthBuffer();
@@ -52,6 +52,7 @@ protected :
 	void * colorBuffer();
 	int * tileDim();
 	const int & bufferLength() const;
+	void colorToHost();
 	
 private:
 

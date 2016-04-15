@@ -101,6 +101,9 @@ void CudaRender::getRoundedSize(int & w, int & h) const
 void CudaRender::colorToHost()
 { m_deviceColor.deviceToHost(m_hostColor.data(), bufferLength() * 4); }
 
+void CudaRender::colorToHost(unsigned * dst, int npix)
+{ m_deviceColor.deviceToHost(dst, npix * 4); }
+
 const int & CudaRender::bufferLength() const
 { return m_bufferLength; }
 
