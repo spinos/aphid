@@ -53,7 +53,7 @@ void RenderThread::tumble(int dx, int dy)
 	m_r->tumble(dx, dy, w);
 	
 	if (!isRunning()) {
-        start(LowPriority);
+        start(NormalPriority);
     } else {
         restart = true;
         condition.wakeOne();
@@ -67,7 +67,7 @@ void RenderThread::track(int dx, int dy)
 	m_r->track(dx, dy, w);
 	
 	if (!isRunning()) {
-        start(LowPriority);
+        start(NormalPriority);
     } else {
         restart = true;
         condition.wakeOne();
@@ -81,7 +81,7 @@ void RenderThread::zoom(int dz)
 	m_r->zoom(dz, w);
 	
 	if (!isRunning()) {
-        start(LowPriority);
+        start(NormalPriority);
     } else {
         restart = true;
         condition.wakeOne();
@@ -106,6 +106,8 @@ void RenderThread::run()
 			return;
 		
 		m_r->render();
+							
+		m_r->colorToHost();
 		
 		QImage image(renderSize, QImage::Format_RGB32);
 			
@@ -118,15 +120,10 @@ void RenderThread::run()
         int i, j, k, l;
         for(j=0; j<th; ++j) {
 			uint *scanLine = reinterpret_cast<uint *>(image.scanLine(j * ts) );
-				
+			
             for(i=0; i<tw; ++i) {
-                if (restart)
-					break;
-                if (abort)
-                    return;
-                
-				uint * tile = (uint *)m_r->tileHostColor(i, j);
-                
+
+				uint * tile = (uint *)m_r->tileHostColor(i, j);                
 				m_r->sendTileColor(&scanLine[i*ts], renderSize.width(), i, j);
             }
         }

@@ -54,7 +54,6 @@ void WorldRender::render()
 				tileSize(),
 				tileX(), tileY() );
 	CudaBase::CheckCudaError(" world render image");
-	colorToHost();
 }
 
 }

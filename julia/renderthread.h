@@ -40,6 +40,7 @@ private:
     bool abort;
     
 	aphid::CudaRender * m_r;
+	
 };
 
 #endif

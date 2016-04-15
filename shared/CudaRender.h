@@ -44,12 +44,13 @@ public :
 	void getRoundedSize(int & w, int & h) const;
 	const int & tileSize() const;
 	
+	void colorToHost();
+	
 protected :
 	void * nearDepthBuffer();
 	void * farDepthBuffer();
 	void * colorBuffer();
 	int * tileDim();
-	void colorToHost();
 	const int & bufferLength() const;
 	
 private:

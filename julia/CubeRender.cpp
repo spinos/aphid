@@ -61,7 +61,6 @@ void CubeRender::render()
 				m_deviceVoxels->bufferOnDevice() );
 #endif
 	CudaBase::CheckCudaError(" render image");
-	colorToHost();
 }
 
 }
