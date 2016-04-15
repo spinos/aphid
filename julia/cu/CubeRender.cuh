@@ -254,7 +254,7 @@ __global__ void oneVoxel_kernel(uint * pix,
     if(py < c_renderRect.y || py >= c_renderRect.w) return;
     
 /// output	           
-	pix[getTiledPixelIdx()] = encodeRGB(128 + 127 * sshadingN[tidx].x, 
+	pix[getImagePixelIdx(px, py)] = encodeRGB(128 + 127 * sshadingN[tidx].x, 
 	                    128 + 127 * sshadingN[tidx].y,
 	                    128 + 127 * sshadingN[tidx].z);
 }

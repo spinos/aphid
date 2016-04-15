@@ -14,7 +14,7 @@
 namespace aphid {
 
 CubeRender::CubeRender() :
-CudaRender(8)
+CudaRender(16)
 { 
 	m_test.build(); 
 	m_devicePyramidPlanes.reset(new CUDABuffer);

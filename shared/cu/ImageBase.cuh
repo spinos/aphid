@@ -21,5 +21,9 @@ inline __device__ uint getTileIdx()
 inline __device__ uint getTiledPixelIdx()
 { return getTileIdx() * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x; }
 
+inline __device__ uint getImagePixelIdx(uint x, uint y)
+{ return y * blockDim.x * gridDim.x
+        + x; }
+
 #endif        //  #ifndef IMAGEBASE_CUH
 
