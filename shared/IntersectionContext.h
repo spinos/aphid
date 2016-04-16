@@ -64,6 +64,7 @@ class BoxIntersectContext : public BoundingBox {
 	
 public:	
 	BoxIntersectContext();
+	BoxIntersectContext(const BoundingBox & a);
 	virtual ~BoxIntersectContext();
 	
 	void reset(int maxNumPrim = 1, bool beExact = false);

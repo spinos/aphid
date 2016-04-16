@@ -145,9 +145,9 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level, BuildProf
 		totalPrims += nPrims;
 		
 			VoxelEngine<cvx::Triangle, KdNode4 > veng;
-			veng.setBounding(box);
+			vepf._bbox = box;
 				
-			veng.build(&vepf);
+			if(veng.build(&vepf) ) {
 			
 			if(profile->_extractDOP) m_oboxes.insert(veng.orientedBBox() );
 		
@@ -156,7 +156,7 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level, BuildProf
 			veng.extractColor(v);
 			veng.extractContours(v);
 			m_voxels.insert(v);
-		
+			}
 		}
 		}
 		//else 

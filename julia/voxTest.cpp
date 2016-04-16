@@ -65,10 +65,8 @@ void VoxTest::build()
 	
 	VoxelEngine<cvx::Triangle, KdNode4 >::Profile vf;
 	vf._tree = &gtr;
-	
-	m_engine[0].setBounding(b);
+	vf._bbox = b;
 	m_engine[0].build(&vf);
-	std::cout<<"\n grid n cell "<<m_engine[0].numCells();
 	
 /// 512^3 grid
 	int level = 6;
@@ -78,7 +76,7 @@ void VoxTest::build()
 	m_engine[0].printContours(m_voxels[0]);
 	
 	b.setMax(4.f, 4.f, 4.f);
-	m_engine[1].setBounding(b);
+	vf._bbox = b;
 	m_engine[1].build(&vf);
 	
 	level = 7;
@@ -89,7 +87,7 @@ void VoxTest::build()
 	
 	b.setMin(4.f, 4.f, 4.f);
 	b.setMax(8.f, 8.f, 8.f);
-	m_engine[2].setBounding(b);
+	vf._bbox = b;
 	m_engine[2].build(&vf);
 	
 	code = encodeMorton3D(6, 6, 6);
@@ -99,7 +97,7 @@ void VoxTest::build()
 	
 	b.setMin(4.f, 4.f, 0.f);
 	b.setMax(8.f, 8.f, 4.f);
-	m_engine[3].setBounding(b);
+	vf._bbox = b;
 	m_engine[3].build(&vf);
 	
 	code = encodeMorton3D(6, 6, 2);
@@ -109,7 +107,7 @@ void VoxTest::build()
 	
 	b.setMin(4.f, 0.f, 0.f);
 	b.setMax(8.f, 4.f, 4.f);
-	m_engine[4].setBounding(b);
+	vf._bbox = b;
 	m_engine[4].build(&vf);
 	
 	code = encodeMorton3D(6, 2, 2);
@@ -119,7 +117,7 @@ void VoxTest::build()
 	
 	b.setMin(4.f, 0.f, 4.f);
 	b.setMax(8.f, 4.f, 8.f);
-	m_engine[5].setBounding(b);
+	vf._bbox = b;
 	m_engine[5].build(&vf);
 	
 	code = encodeMorton3D(6, 2, 6);

@@ -8,7 +8,7 @@
  */
 #ifndef APHID_VOXEL_ENGINE_H
 #define APHID_VOXEL_ENGINE_H
-#include <CartesianGrid.h>
+#include <Boundary.h>
 #include <Morton3D.h>
 #include <PrincipalComponents.h>
 #include <Quantization.h>
@@ -136,19 +136,55 @@ struct Voxel {
 	
 };
 
-template<typename T, typename Tn, int NLevel = 3, int NThread = 4>
-class VoxelEngine : public CartesianGrid {
+template<typename T>
+class PrimSampler {
+
+public:
+	PrimSampler();
+	
+	void run(std::vector<Vector3F> * dst, 
+						const sdb::VectorArray<T> * prims,
+						const BoundingBox & box,
+						const std::vector<int> & inds,
+						int minInd, int maxInd) const;
+						
+};
+
+template<typename T>
+PrimSampler<T>::PrimSampler()
+{}
+
+template<typename T>
+void PrimSampler<T>::run(std::vector<Vector3F> * dst, 
+						const sdb::VectorArray<T> * prims,
+						const BoundingBox & box,
+						const std::vector<int> & inds,
+						int minInd, int maxInd) const
+{
+	Vector3F p;
+	for(int j=0; j< 400; ++j) {
+		
+		for(int i=minInd; i<maxInd; ++i) {
+			const T * aprim = prims->get(inds[i]); 
+			if(aprim->sampleP(p, box) )
+					dst->push_back(p);
+		}
+		if(dst->size() > 200) return;
+	}
+}
+
+template<typename T, typename Tn, int NThread = 8>
+class VoxelEngine : public Boundary {
 
 	AOrientedBox m_obox;
 	
 public:
 	struct Profile {
+		BoundingBox _bbox;
 		KdNTree<T, Tn > * _tree;
-		bool _approxCell;
 		bool _orientAtXY;
 		Profile() {
 			_tree = NULL;
-			_approxCell = false;
 			_orientAtXY = false;
 		}
 	};
@@ -164,8 +200,6 @@ public:
 	const AOrientedBox & orientedBBox() const;
 	
 protected:
-	void calculateOBox(Profile * prof);
-	void sampleCells(std::vector<Vector3F> & dst);
 	void samplePrims(std::vector<Vector3F> & dst, Profile * prof);
 
 private:
@@ -173,89 +207,62 @@ private:
 						const Vector3F & dir,
 						const BoundingBox & box,
 						const float & d) const;
-	void samplePrimsWork(std::vector<Vector3F> & dst, 
-						const sdb::VectorArray<T> * prims,
-						const BoundingBox & box,
-						const std::vector<int> & inds,
-						int minInd, int maxInd) const;
+	
 };
 
-template<typename T, typename Tn, int NLevel, int NThread>
-VoxelEngine<T, Tn, NLevel, NThread>::VoxelEngine()
+template<typename T, typename Tn, int NThread>
+VoxelEngine<T, Tn, NThread>::VoxelEngine()
 {}
 
-template<typename T, typename Tn, int NLevel, int NThread>
-VoxelEngine<T, Tn, NLevel, NThread>::~VoxelEngine()
+template<typename T, typename Tn, int NThread>
+VoxelEngine<T, Tn, NThread>::~VoxelEngine()
 {}
 
-template<typename T, typename Tn, int NLevel, int NThread>
-bool VoxelEngine<T, Tn, NLevel, NThread>::build(Profile * prof)
+template<typename T, typename Tn, int NThread>
+bool VoxelEngine<T, Tn, NThread>::build(Profile * prof)
 {
-	const float h = cellSizeAtLevel(NLevel);
-    const float hh = h * .49995f;
-	const int dim = 1<<NLevel;
-	const Vector3F ori = origin() + Vector3F(hh, hh, hh);
-    Vector3F sample;
-	KdEngine eng;
-	BoxIntersectContext box;
-	int i, j, k;
-	for(k=0; k < dim; k++) {
-        for(j=0; j < dim; j++) {
-            for(i=0; i < dim; i++) {
-                sample = ori + Vector3F(h* (float)i, h* (float)j, h* (float)k);
-                box.setMin(sample.x - hh, sample.y - hh, sample.z - hh);
-                box.setMax(sample.x + hh, sample.y + hh, sample.z + hh);
-				box.reset(1, true);
-				
-				eng.intersectBox<T, Tn>(prof->_tree, &box);
-				if(box.numIntersect() > 0 )
-					addCell(sample, NLevel, 1);
-            }
-        }
-    }
+	setBBox(prof->_bbox);
+	std::vector<Vector3F> pnts;
 	
-	if(numCells() < 1) return false;
+	samplePrims(pnts, prof);
+	if(pnts.size() < 8) {
+		// std::cout<<"\n low n sample "<<pnts.size();
+		return false;
+	}
 	
-	calculateOBox(prof);
+	PrincipalComponents<std::vector<Vector3F> > obpca;
+	if(prof->_orientAtXY) obpca.setOrientConstrain(1);
+	m_obox = obpca.analyze(pnts, pnts.size() );
+	m_obox.limitMinThickness(prof->_bbox.distance(0) * .125f );
 	
 	return true;
 }
 
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::sampleCells(std::vector<Vector3F> & dst)
+template<typename T, typename Tn, int NThread>
+void VoxelEngine<T, Tn, NThread>::samplePrims(std::vector<Vector3F> & dst, Profile * prof)
 {
-	const float hh = cellSizeAtLevel(NLevel + 2);
-	sdb::CellHash * c = cells();
-    c->begin();
-    while(!c->end()) {
-        
-		Vector3F cnt = cellCenter(c->key() );
-		for(int i=0; i< 8; ++i)
-			dst.push_back(cnt + Vector3F(Cell8ChildOffset[i][0],
-											Cell8ChildOffset[i][1],
-											Cell8ChildOffset[i][2]) * hh );
-			
-        c->next();
-	}
-}
-
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::samplePrims(std::vector<Vector3F> & dst, Profile * prof)
-{
-	BoxIntersectContext box;
-	getBounding(box);
+	BoxIntersectContext box(getBBox() );
+	
 	box.reset(1<<16, true);
 	KdEngine eng;
 	eng.intersectBox<T, Tn>(prof->_tree, &box);
 	
 	const std::vector<int> & inds = box.primIndices();
 	const sdb::VectorArray<T> * prims = prof->_tree->source();
-    
+	
 	const int nworks = inds.size();
-	if(nworks < NThread) samplePrimsWork(dst, prims, box, inds, 0, nworks );
+#if 0 
+	PrimSampler<T> sampler;
+	sampler.run(&dst, prims, box, inds, 0, nworks );
+#else	
+	if(nworks < NThread) {
+		PrimSampler<T> sampler;
+		sampler.run(&dst, prims, box, inds, 0, nworks );
+	}
 	else {
 		std::vector<Vector3F> branchSamples[NThread];
 		boost::thread workTr[NThread];
+		PrimSampler<T> sampler[NThread];
 		
 		const int wpt = nworks / NThread;
 		int workMin, workMax;
@@ -265,9 +272,9 @@ void VoxelEngine<T, Tn, NLevel, NThread>::samplePrims(std::vector<Vector3F> & ds
 			workMax = workMin + wpt;
 			if(workMax > nworks) workMax = nworks; 
 			
-			workTr[i] = boost::thread(boost::bind(&VoxelEngine<T, Tn, NLevel, NThread>::samplePrimsWork, 
-										this, 
-										branchSamples[i], prims, box, inds, workMin, workMax) );
+			workTr[i] = boost::thread(boost::bind(&PrimSampler<T>::run, 
+										&sampler[i], 
+										&branchSamples[i], prims, box, inds, workMin, workMax) );
 		}
 /// join
 		for(int i=0; i<NThread; ++i) {
@@ -275,69 +282,32 @@ void VoxelEngine<T, Tn, NLevel, NThread>::samplePrims(std::vector<Vector3F> & ds
 		}
 /// merge		
 		for(int i=0; i<NThread; ++i) {
-			const std::vector<Vector3F> & branch = branchSamples[i];
-			const int branchSize = branch.size();
+			const int branchSize = branchSamples[i].size();
 			for(int j=0; j<branchSize; ++j) {
-				dst.push_back(branch[j]);
+				dst.push_back(branchSamples[i][j]);
 			}
 		}
 	}
+#endif
 }
 
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::samplePrimsWork(std::vector<Vector3F> & dst, 
-											const sdb::VectorArray<T> * prims,
-											const BoundingBox & box,
-											const std::vector<int> & inds,
-											int minInd, int maxInd) const
-{
-	Vector3F p;
-	for(int j=0; j< 200; ++j) {
-		
-		for(int i=minInd; i<maxInd; ++i) {
-			const T * aprim = prims->get(inds[i]); 
-			if(aprim->sampleP(p, box) )
-					dst.push_back(p);
-		}
-		if(dst.size() > 400) return;
-	}
-}
-
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::calculateOBox(Profile * prof)
-{
-	std::vector<Vector3F> pnts;
-	
-	if(prof->_approxCell) sampleCells(pnts);
-	else {
-		samplePrims(pnts, prof);
-		if(pnts.size() < 32) sampleCells(pnts);
-	}
-	
-	PrincipalComponents<std::vector<Vector3F> > obpca;
-	if(prof->_orientAtXY) obpca.setOrientConstrain(1);
-	m_obox = obpca.analyze(pnts, pnts.size() );
-	m_obox.limitMinThickness(cellSizeAtLevel(NLevel) );
-}
-
-template<typename T, typename Tn, int NLevel, int NThread>
-const AOrientedBox & VoxelEngine<T, Tn, NLevel, NThread>::orientedBBox() const
+template<typename T, typename Tn, int NThread>
+const AOrientedBox & VoxelEngine<T, Tn, NThread>::orientedBBox() const
 { return m_obox; }
 
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::extractColor(Voxel & dst) const
+template<typename T, typename Tn, int NThread>
+void VoxelEngine<T, Tn, NThread>::extractColor(Voxel & dst) const
 {
 /// todo
 	dst.setColor(.99f, .99f, .99f, .99f);
 }
 
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::extractContours(Voxel & dst) const
+template<typename T, typename Tn, int NThread>
+void VoxelEngine<T, Tn, NThread>::extractContours(Voxel & dst) const
 {
 #define VERBEXTRACTCONTOUR 0
 	int nct = 0;
-	BoundingBox box;
-	getBounding(box);
+	const BoundingBox & box = getBBox();
 	const Vector3F & cnt = m_obox.center();
 	const Matrix33F & rot = m_obox.orientation();
 	const Vector3F & oboxExt = m_obox.extent();
@@ -478,8 +448,8 @@ void VoxelEngine<T, Tn, NLevel, NThread>::extractContours(Voxel & dst) const
 	std::cout.flush();
 }
 
-template<typename T, typename Tn, int NLevel, int NThread>
-bool VoxelEngine<T, Tn, NLevel, NThread>::findIntersection(Vector3F & dst,
+template<typename T, typename Tn, int NThread>
+bool VoxelEngine<T, Tn, NThread>::findIntersection(Vector3F & dst,
 										const Vector3F & dir,
 										const BoundingBox & box,
 										const float & d) const
@@ -496,11 +466,11 @@ bool VoxelEngine<T, Tn, NLevel, NThread>::findIntersection(Vector3F & dst,
 	return stat;
 }
 
-template<typename T, typename Tn, int NLevel, int NThread>
-void VoxelEngine<T, Tn, NLevel, NThread>::printContours(const Voxel & v) const
+template<typename T, typename Tn, int NThread>
+void VoxelEngine<T, Tn, NThread>::printContours(const Voxel & v) const
 {
-	const Vector3F & boxOri = origin();
-	const float & d = span(); 
+	const Vector3F & boxOri = getBBox().getMin();
+	const float & d =  getBBox().distance(0); 
 	const int nct = v.getNContour();
 	int i=0;
 	for(;i<nct;++i) {

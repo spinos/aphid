@@ -9,6 +9,7 @@
 
 #include <DrawBox.h>
 #include <VectorArray.h>
+#include <CartesianGrid.h>
 
 namespace aphid {
 

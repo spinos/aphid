@@ -55,6 +55,7 @@ private:
 	};
 	
 	PickTreeType m_pickTree;
+	std::string m_filename;
 };
 
 #endif

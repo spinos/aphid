@@ -25,7 +25,7 @@ Base3DView(parent)
 	usePerspCamera();
     m_intersectCtx.m_success = 0;
 	m_pickTree = tTriangle;
-	if(filename.size() > 1) m_container.readTree(filename);
+	m_filename = filename;
 }
 
 TriWidget::~TriWidget()
@@ -33,6 +33,7 @@ TriWidget::~TriWidget()
 
 void TriWidget::clientInit()
 { //connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update())); 
+	if(m_filename.size() > 1) m_container.readTree(m_filename);
 }
 
 void TriWidget::clientDraw()

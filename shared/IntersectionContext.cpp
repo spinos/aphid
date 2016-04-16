@@ -68,6 +68,12 @@ m_cap(1),
 m_exact(false)
 {}
 
+BoxIntersectContext::BoxIntersectContext(const BoundingBox & a) :
+BoundingBox(a),
+m_cap(1),
+m_exact(false)
+{}
+
 BoxIntersectContext::~BoxIntersectContext()
 {}
 

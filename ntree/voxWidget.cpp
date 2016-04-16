@@ -64,9 +64,9 @@ void VoxWidget::keyPressEvent(QKeyEvent *event)
 void VoxWidget::drawGrids()
 {
 	glColor3f(0,.6,.4);
-	GridDrawer dr;
+	GeoDrawer * dr = getDrawer();
 	for(int i=0; i< 6; ++i)
-		dr.drawGrid<CartesianGrid>(&m_test.m_engine[i]);
+		dr->boundingBox(m_test.m_engine[i].getBBox() );
 }
 
 void VoxWidget::drawTriangles()
