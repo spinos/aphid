@@ -7,22 +7,13 @@
 
 namespace jul {
 
-Window::Window(int argc, char *argv[])
+Window::Window(aphid::CudaRender * r,
+				const std::string & title)
 {
-	aphid::CudaRender * r;
-	
-	if(argc == 2) {
-		r = new aphid::WorldRender(argv[1] );
-		setWindowTitle(tr(argv[1]));
-	}
-	else {
-		r = new aphid::CubeRender;
-		setWindowTitle(tr("ray-cast test"));
-	}
-	
     m_widget = new MandelbrotWidget(r, this);
 	
 	setCentralWidget(m_widget);
+	setWindowTitle(tr(title.c_str() ) );
 }
 //! [1]
 
