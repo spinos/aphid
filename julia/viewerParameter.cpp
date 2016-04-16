@@ -12,6 +12,7 @@ namespace jul {
 ViewerParam::ViewerParam(int argc, char *argv[])
 {
 	m_opt = kUnknown;
+	m_assetGridLevel = 6;
 	
 	if(argc < 2) {
 		std::cout<<"\n too few arguments "<<argc;
@@ -39,6 +40,32 @@ ViewerParam::ViewerParam(int argc, char *argv[])
 			m_inFileName = argv[i+1];
 			m_opt = kTestAsset;
 		}
+		
+		if(strcmp(argv[i], "-agl") == 0 || strcmp(argv[i], "--assetGridLevel") == 0) {
+			if(i==argc-1) {
+				std::cout<<"\n --assetGridLevel value is not set";
+				m_opt = kUnknown;
+				break;
+			}
+			try {
+				int agl = boost::lexical_cast<int>(argv[i+1]);
+				if(agl < 3) {
+					std::cout<<"\n bad --assetGridLevel value (< 3)";
+					m_opt = kUnknown;
+					break;
+				}
+				if(agl > 8) {
+					std::cout<<"\n bad --assetGridLevel value (> 8)";
+					m_opt = kUnknown;
+					break;
+				}
+				m_assetGridLevel = agl;
+			} catch(const boost::bad_lexical_cast &) {
+				std::cout<<"\n bad --assetGridLevel value "<<argv[i+1];
+				m_opt = kUnknown;
+				break;
+			}
+		}
 	}
 	
 }
@@ -59,12 +86,17 @@ void ViewerParam::PrintHelp()
 	<<"\n -tv or --testVoxel    prototype to draw voxel with contours"
 	<<"\n -ta or --testAsset    string1    filename of asset"
 	<<"\n     prototype to draw triangle asset"
+	<<"\n -agl or --assetGridLevel    int    max level of asset grid"
+	<<"\n     only works with -ta, default value 6 (64^3), valid between 3 and 8"
 	<<"\n -h or --help    print this information"
 	<<std::endl;
 }
 
 const std::string & ViewerParam::inFileName() const
 { return m_inFileName; }
+
+const int & ViewerParam::assetGridLevel() const
+{ return m_assetGridLevel; }
 
 std::string ViewerParam::operationTitle() const
 {

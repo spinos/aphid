@@ -28,7 +28,7 @@ public:
 	Container();
 	virtual ~Container();
 	
-	bool readTree(const std::string & filename);
+	bool readTree(const std::string & filename, int gridLevel = 6);
 	KdNTree<T, KdNode4 > * tree();
 	KdNTree<Voxel, KdNode4 > * voxelTree();
 	VoxelGrid<T, KdNode4 > * grid();
@@ -40,7 +40,7 @@ protected:
 private:
 	void loadTriangles(const std::string & name);
 	bool buildTree();
-	bool buildGrid();
+	bool buildGrid(int gridLevel);
 	
 };
 
@@ -59,7 +59,7 @@ Container<T>::~Container()
 {}
 
 template<typename T>
-bool Container<T>::readTree(const std::string & filename)
+bool Container<T>::readTree(const std::string & filename, int gridLevel)
 {
 	bool stat = false;
 	NTreeIO hio;
@@ -80,7 +80,7 @@ bool Container<T>::readTree(const std::string & filename)
 	hio.end();
 	
 	buildTree();
-	return buildGrid();
+	return buildGrid(gridLevel);
 }
 
 template<typename T>
@@ -110,13 +110,14 @@ bool Container<T>::buildTree()
 }
 
 template<typename T>
-bool Container<T>::buildGrid()
+bool Container<T>::buildGrid(int gridLevel)
 {
 	m_grid = new VoxelGrid<T, KdNode4 >();
 	BoundingBox b = m_tree->getBBox();
 	
 	typename VoxelGrid<T, KdNode4>::BuildProfile vf;
 	vf._minNPrimsPerCell = 1;
+	vf._maxLevel = gridLevel;
 	
 	m_grid->create(m_tree, b, &vf);
 	

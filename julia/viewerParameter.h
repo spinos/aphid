@@ -9,6 +9,7 @@ namespace jul {
 class ViewerParam {
 
 	std::string m_inFileName;
+	int m_assetGridLevel;
 	
 public:
 	enum OperationFlag {
@@ -27,6 +28,7 @@ public:
 	OperationFlag operation() const;
 	
 	const std::string & inFileName() const;
+	const int & assetGridLevel() const;
 	std::string operationTitle() const;
 	
 protected:

@@ -39,8 +39,7 @@ void WorldRender::render()
 {
 	CudaNTree<cvx::Box, KdNode4> * tree = m_io.worldTree();
 	
-    //updateRayFrameVec();
-	wldr::setBoxFaces();
+    wldr::setBoxFaces();
 	wldr::setRenderRect((int *)&rect() );
     wldr::setFrustum((float *)rayFrameVec());
 	wldr::render((uint *) colorBuffer(),

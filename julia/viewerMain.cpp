@@ -3,10 +3,10 @@
  */
  
 #include <QApplication>
-#include "viewerParameter.h"
 #include "viewerWindow.h"
 #include "CubeRender.h"
-#include "WorldRender.h"
+#include "AssetRender.h"
+#include "viewerParameter.h"
 
 int main(int argc, char *argv[])
 {	
@@ -25,11 +25,13 @@ int main(int argc, char *argv[])
 	
 	if(param.operation() == jul::ViewerParam::kTestAsset ) {
 		
-		// r = new aphid::WorldRender(param.inFileName() );
+		aphid::AssetRender * ar = new aphid::AssetRender;
+		if( ar->load(param.inFileName(), param.assetGridLevel() ) )
+			r = ar;
 	}
 	
 	if(!r) {
-		std::cout<<"\n no render ";
+		std::cout<<"\n no render attached ";
 		return 0;
 	}
 	

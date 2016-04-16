@@ -526,37 +526,23 @@ inline __device__ int ray_box_hull(float & t0, float & t1,
     return 1;
 }
 
-inline __device__ int ray_box_and_hull(float3 & hitP, float3 & hitN,
+inline __device__ int ray_hull(float & t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
                         Ray4 & ray,
-                        const Aabb4 & box,
                         float4 * planes,
                         int numPlanes)
-{
-    float t0 = -1e10f;
-    float t1 = 1e10f;
-    
-    if(!ray_box_hull(t0, t1, hitP, hitN, ray, box) )
-        return 0;
-        
-    float tEnterBox = ray.o.w;
-    float3 n, t0Normal, t1Normal;
-    float t, denom, d;
-    int i=0;
-    for(;i<numPlanes;++i) {
+{        
+    float3 n;
+    float d;
+    for(int i=0;i<numPlanes;++i) {
         float4 plane = planes[i];
         v3_convert<float3, float4>(n, plane);
         d = plane.w;
-        if(ray_plane(t, denom, ray, n, d) )
-            update_tnormal(ray.o.w, ray.d.w, t0Normal, t1Normal, n, t, denom);
+        ray_plane1(t0, t1, t0Normal, t1Normal, ray, n, d);
         
-        if(ray.o.w > ray.d.w)
+        if(t0 >= t1)
             return 0;
         
-    }
-    
-    if(ray.o.w > tEnterBox) {
-        ray_progress(hitP, ray, ray.o.w);
-        hitN = t0Normal;
     }
         
     return 1;

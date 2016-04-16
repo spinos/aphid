@@ -124,21 +124,30 @@ __global__ void onePyrmaid_kernel(uint * pix,
     Aabb4 box;
     aabb4_convert<Aabb>(box, *bounding);
     
-    uint ind = getTiledPixelIdx();
+    uint ind = getImagePixelIdx(px, py);
     
     incident.o.w = -1e28f;
     incident.d.w = 1e28f;
     
-    float3 hitP, hitN;
-    if(ray_box_and_hull(hitP, hitN, incident, box, planes, 5) ) {
-    int r = 128 + 127 * hitN.x;
-    int g = 128 + 127 * hitN.y;
-    int b = 128 + 127 * hitN.z;
-	pix[ind] = encodeRGB(r, g, b);
+    float t0, t1;
+    float3 t0Normal, t1Normal;
+    float3 shadingNormal = make_float3(0.f, 0.f, 0.f);
+    if(ray_box_slab(t0, t1,
+                    t0Normal, t1Normal, 
+                    incident, box) ) {
+        
+        if(ray_hull(t0, t1, 
+                    t0Normal, t1Normal, 
+                    incident,
+                    planes, 5) ) {
+            shadingNormal = t0Normal;
+        }
 	}
-	else {
-	        pix[ind] = encodeRGB(99, 99, 99);
-	}
+	
+	pix[ind] = encodeRGB(128 + 127 * shadingNormal.x,
+                            128 + 127 * shadingNormal.y,
+                            128 + 127 * shadingNormal.z);
+	
 }
 
 __global__ void oneVoxel_kernel(uint * pix, 

@@ -184,6 +184,7 @@ WorldManager.h
 WorldRender.h
 ../kdtree/CudaNTree.h
 viewerParameter.h
+AssetRender.h
 voxTest.h)
 
 SET (VIEWERSOURCE viewerMain.cpp
@@ -205,6 +206,7 @@ CubeRender.cpp
 viewerWindow.cpp
 WorldRender.cpp
 voxTest.cpp
+AssetRender.cpp
 viewerParameter.cpp)
 
 SET (CUSOURCES 
