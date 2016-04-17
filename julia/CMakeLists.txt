@@ -30,6 +30,7 @@ set (SOURCE_FILES
 ../shared/BaseBinSplit.cpp 
 ../shared/HElemAsset.cpp
 ../shared/CartesianGrid.cpp
+../shared/PrincipalComponents.cpp
 ../btree/GridClustering.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
@@ -198,6 +199,7 @@ CubeRender.cpp
 ../shared/BaseBinSplit.cpp
 ../shared/HElemAsset.cpp
 ../shared/CartesianGrid.cpp
+../shared/PrincipalComponents.cpp
 ../btree/GridClustering.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp

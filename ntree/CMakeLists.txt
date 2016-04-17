@@ -47,6 +47,7 @@ set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/DrawBox.cpp
 ../shared/CartesianGrid.cpp
 ../shared/HElemAsset.cpp
+../shared/PrincipalComponents.cpp
 ../kdtree/TreeProperty.cpp
 ../kdtree/PrimBoundary.cpp
 ../btree/GridClustering.cpp

@@ -10,10 +10,9 @@
 #define APHID_VOXEL_ENGINE_H
 #include <Boundary.h>
 #include <Morton3D.h>
-#include <PrincipalComponents.h>
 #include <Quantization.h>
+#include <PrincipalComponents.h> 
 #include <vector>
-#include <boost/thread.hpp>  
 
 namespace aphid {
 
