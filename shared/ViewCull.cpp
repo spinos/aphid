@@ -104,6 +104,15 @@ void BaseView::zoom(int dz, int portWidth)
 float BaseView::perspectivity(int portWidth) const
 { return m_hfov * 2.f * eyePosition().distanceTo(m_centerOfInterest) / (float)portWidth; }
 
+void BaseView::frameAll()
+{
+    m_centerOfInterest.setZero();
+    m_space.setIdentity();
+	m_space.setTranslation(Vector3F(0.f, 0.f, 100.f) );
+	m_invSpace.setIdentity();
+	m_invSpace.setTranslation(Vector3F(0.f, 0.f, -100.f) );
+}
+
 void BaseView::setFrustum(const float & horizontalAperture,
 			const float & verticalAperture,
 			const float & focalLength,
@@ -173,8 +182,8 @@ Vector3F BaseView::eyePosition() const
 void BaseView::setEyePosition(const Vector3F & p)
 { m_space.setTranslation(p); }
 
-void BaseView::setCenterOfInterest(float * p)
-{ m_centerOfInterest.set(p[0], p[1], p[2]); }
+void BaseView::setCenterOfInterest(const Vector3F & p)
+{ m_centerOfInterest = p; }
 
 const float & BaseView::aspectRatio() const
 { return m_aspectRatio; }
@@ -210,7 +219,7 @@ void BaseView::frameAll(const BoundingBox & b)
 {
 	Vector3F eye = b.center();
 	eye.z = b.getMax(2) + b.distance(0) / hfov() * .55f + 120.f;
-	setEyePosition((float *)&eye);
+	setEyePosition(eye);
 	
 	Matrix44F m;
 	m.setTranslation(eye);
@@ -219,6 +228,25 @@ void BaseView::frameAll(const BoundingBox & b)
 	*cameraInvSpaceR() = m;
 	setFrustum(1.33f, 1.f, 26.2f, -1.f, -1000.f);
 }
+
+Vector3F BaseView::directionToEye() const
+{
+    Vector3F v = eyePosition() - m_centerOfInterest;
+    v.normalize();
+    return v;
+}
+
+void BaseView::setFarClip(const float & x)
+{ m_farClip = x; }
+
+void BaseView::updateInvSpace()
+{
+    m_invSpace = m_space;
+	m_invSpace.inverse();
+}
+
+void BaseView::updateFrustum()
+{ setFrustum(.864f, .63f, 35.f, -1.f, m_farClip); }
 
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}

@@ -24,6 +24,7 @@ public:
 	void tumble(int dx, int dy);
 	void track(int dx, int dy);
 	void zoom(int dz);
+	void frameAll();
 
 signals:
     void renderedImage(const QImage &image);

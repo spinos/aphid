@@ -19,7 +19,10 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
-
+	void keyPressEvent(QKeyEvent *event);
+	void focusInEvent(QFocusEvent * event);
+	void focusOutEvent(QFocusEvent * event);
+	
 private slots:
     void updatePixmap(const QImage &image);
 	

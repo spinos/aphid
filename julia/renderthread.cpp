@@ -88,6 +88,20 @@ void RenderThread::zoom(int dz)
     }
 }
 
+void RenderThread::frameAll()
+{
+    QMutexLocker locker(&mutex);
+	
+    m_r->frameAll();
+	
+	if (!isRunning()) {
+        start(LowPriority);
+    } else {
+        restart = true;
+        condition.wakeOne();
+    }
+}
+
 void RenderThread::run()
 {
 	int nrender = 0;

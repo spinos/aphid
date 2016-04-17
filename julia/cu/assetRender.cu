@@ -8,20 +8,29 @@ void setRenderRect(int * src)
 void setFrustum(float * src)
 { cudaMemcpyToSymbol(c_frustumVec, src, 72); }
 
-void drawPyramid(uint * color,
-                float * depth,
-                int blockx,
+void drawCube(uint * color,
+                float * nearDepth,
+                float * farDepth,
+				int blockx,
                 int gridx, int gridy,
-				void * planes,
-				void * bounding)
+                void * branches,
+				void * leaves,
+				void * ropes,
+				int * indirections,
+				void * primitives
+                )
 {
     dim3 block(blockx, blockx, 1);
     dim3 grid(gridx, gridy, 1);
     
-    assetPyrmaid_kernel<<< grid, block >>>(color, 
-        depth,
-        (float4 *)planes,
-        (Aabb *)bounding);
+    assetBox_kernel<<< grid, block, 14096 >>>(color, 
+        nearDepth,
+		farDepth,
+		(NTreeBranch4 *)branches,
+		(NTreeLeaf *)leaves,
+		(Rope *)ropes,
+		indirections,
+		(Aabb4 *)primitives);
 }
 
 }

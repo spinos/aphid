@@ -9,7 +9,6 @@
 #ifndef JUL_ASSET_RENDER_H
 #define JUL_ASSET_RENDER_H
 #include <CudaRender.h>
-#include <voxTest.h>
 #include <boost/scoped_ptr.hpp>
 #include <Container.h>
 #include <ConvexShape.h>
@@ -19,9 +18,6 @@ namespace aphid {
 
 class AssetRender : public CudaRender {
 
-	VoxTest m_test;
-	boost::scoped_ptr<CUDABuffer> m_devicePyramidPlanes;
-	boost::scoped_ptr<CUDABuffer> m_devicePyramidBox;
 	Container<cvx::Triangle > m_container;
 
 typedef CudaNTree<Voxel, KdNode4> CuTreeT;
@@ -35,6 +31,8 @@ public:
 	
 	virtual void setBufferSize(const int & w, const int & h);
 	virtual void render();
+/// override baseview
+	virtual void frameAll();
 	
 };
 

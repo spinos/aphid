@@ -130,6 +130,7 @@ bool Container<T>::buildGrid(int gridLevel)
 	m_voxelTree = new KdNTree<Voxel, KdNode4 >();
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 32;
+    bf._doTightBox = true;
     
 	KdEngine engine;
 	engine.buildTree<Voxel, KdNode4, 4>(m_voxelTree, m_grid->voxelsR(), gridBox, &bf);

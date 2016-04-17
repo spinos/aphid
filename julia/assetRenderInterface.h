@@ -7,13 +7,17 @@ namespace assr {
     
 void setRenderRect(int * src);
 void setFrustum(float * src);
-
-void drawPyramid(uint * color,
-                float * depth,
-                int blockx,
+void drawCube(uint * color,
+                float * nearDepth,
+                float * farDepth,
+				int blockx,
                 int gridx, int gridy,
-				void * planes,
-				void * bounding);
+                void * branches,
+				void * leaves,
+				void * ropes,
+				int * indirections,
+				void * primitives
+                );
 
 }
 

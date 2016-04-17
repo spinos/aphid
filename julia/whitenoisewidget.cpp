@@ -12,9 +12,7 @@ MandelbrotWidget::MandelbrotWidget(aphid::CudaRender * r,
     connect(&thread, SIGNAL(renderedImage(QImage)),
             this, SLOT(updatePixmap(QImage)));
 
-	//QTimer *timer = new QTimer(this);
-	//connect(timer, SIGNAL(timeout()), this, SLOT(simulate()));
-	//timer->start(40);
+	setFocusPolicy(Qt::ClickFocus);
 }
 
 void MandelbrotWidget::paintEvent(QPaintEvent * /* event */)
@@ -62,7 +60,6 @@ void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void MandelbrotWidget::updatePixmap(const QImage &image)
 {
-
     pixmap = QPixmap::fromImage(image);
     update();
 }
@@ -81,3 +78,26 @@ void MandelbrotWidget::processCamera(QMouseEvent *event)
 		thread.zoom(-dx / 2 - dy / 2 );
     }
 }
+
+void MandelbrotWidget::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+		case Qt::Key_F:
+			thread.frameAll();
+		    break;
+		default:
+			break;
+	}
+	QWidget::keyPressEvent(event);
+}
+
+void MandelbrotWidget::focusInEvent(QFocusEvent * event)
+{
+    QWidget::focusInEvent(event);
+}
+
+void MandelbrotWidget::focusOutEvent(QFocusEvent * event)
+{
+	QWidget::focusOutEvent(event);
+}
+

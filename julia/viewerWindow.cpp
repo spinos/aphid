@@ -12,8 +12,8 @@ Window::Window(aphid::CudaRender * r,
 {
     m_widget = new MandelbrotWidget(r, this);
 	
-	setCentralWidget(m_widget);
 	setWindowTitle(tr(title.c_str() ) );
+	setCentralWidget(m_widget);
 }
 //! [1]
 

@@ -31,6 +31,7 @@ public:
 	void track(int dx, int dy, int portWidth);
 	void zoom(int dz, int portWidth);
 	void updateRayFrameVec();
+	virtual void frameAll();
 	
 	bool isPerspective() const;
 			
@@ -49,7 +50,8 @@ protected:
 	void setRect(const int & x, const int & y);
     void setSubRect(const int & x0, const int & y0, const int & x1, const int & y1);
     void setEyePosition(const Vector3F & p);
-	void setCenterOfInterest(float * p);
+	void setCenterOfInterest(const Vector3F & p);
+	void setFarClip(const float & x);
 	Matrix44F *	cameraSpaceR();
 	Matrix44F * cameraInvSpaceR();
 	
@@ -75,6 +77,9 @@ protected:
 	
 	void frameAll(const BoundingBox & b);
 	float perspectivity(int portWidth) const;
+	Vector3F directionToEye() const;
+	void updateInvSpace();
+	void updateFrustum();
 	
 private:
     

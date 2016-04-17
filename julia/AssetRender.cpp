@@ -15,16 +15,7 @@ namespace aphid {
 
 AssetRender::AssetRender() :
 CudaRender(16)
-{ 
-	m_test.build(); 
-	m_devicePyramidPlanes.reset(new CUDABuffer);
-	m_devicePyramidPlanes->create(4000);
-	m_devicePyramidBox.reset(new CUDABuffer);
-	m_devicePyramidBox->create(4000);
-	
-	m_devicePyramidPlanes->hostToDevice((char *)m_test.m_pyramid.plane(0), 80);
-	m_devicePyramidBox->hostToDevice((char *)m_test.m_pyramid.bbox(), 32);
-}
+{}
 
 AssetRender::~AssetRender() {}
 
@@ -43,12 +34,16 @@ void AssetRender::render()
 	assr::setRenderRect((int *)&rect() );
     assr::setFrustum((float *)rayFrameVec());
 
-	assr::drawPyramid((uint *) colorBuffer(),
+	assr::drawCube((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
+				(float *) farDepthBuffer(),
 				tileSize(),
 				tileX(), tileY(),
-				m_devicePyramidPlanes->bufferOnDevice(),
-				m_devicePyramidBox->bufferOnDevice() );
+				m_cuTree->deviceBranch(),
+				m_cuTree->deviceLeaf(),
+				m_cuTree->deviceRope(),
+				(int *)m_cuTree->deviceIndirection(),
+				m_cuTree->devicePrim() );
 
 	CudaBase::CheckCudaError(" render image");
 }
@@ -59,6 +54,20 @@ bool AssetRender::load(const std::string & filename, const int & level)
 	m_cuTree.reset(new CuTreeT);
 	m_cuTree->transfer(m_container.voxelTree() );
 	return true;
+}
+
+void AssetRender::frameAll()
+{
+    BoundingBox tb;
+    m_container.voxelTree()->getWorldTightBox(&tb);
+    const Vector3F coi = tb.center();
+    const Vector3F recede = directionToEye() 
+                            * (tb.distance(2) + tb.distance(0) );
+    setCenterOfInterest(coi);
+    setEyePosition(coi + recede);
+    updateInvSpace();
+    setFarClip(-tb.distance(0)-tb.distance(1)-tb.distance(2));
+    updateFrustum();
 }
 
 }
