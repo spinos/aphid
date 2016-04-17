@@ -15,7 +15,15 @@ namespace aphid {
 BaseView::BaseView() 
 {
 	m_centerOfInterest.set(0.f, 0.f, 0.f);
-	m_eyePosition.set(0.f, 0.f, 100.f);
+	m_space.setIdentity();
+	m_space.setTranslation(Vector3F(0.f, 0.f, 100.f) );
+	m_invSpace.setIdentity();
+	m_invSpace.setTranslation(Vector3F(0.f, 0.f, -100.f) );
+	
+/// 35mm Academy
+	std::cout<<"\n angle of view "<<180.f/3.14f*2.f * atan(21.9456f/2.f/35.f)<<" deg";
+	setFrustum(.864f, .63f, 35.f, -1.f, -20000.f);
+	
 }
 
 BaseView::~BaseView() {}
@@ -66,7 +74,6 @@ void BaseView::track(int dx, int dy, int portWidth)
 	eye -= side;
 	eye += up;
 	
-	m_eyePosition = eye;
 	m_centerOfInterest -= side;
 	m_centerOfInterest += up;
 	
@@ -86,7 +93,6 @@ void BaseView::zoom(int dz, int portWidth)
 	const float fra = (float)dz/(float)portWidth * 7.f;
 	
 	eye += front * dist * -fra;
-	m_eyePosition = eye;
 	if(fra > 0.f && dist < 10.f)
 		m_centerOfInterest += front * dist * -fra * 0.1f;
 	
@@ -96,7 +102,7 @@ void BaseView::zoom(int dz, int portWidth)
 }
 
 float BaseView::perspectivity(int portWidth) const
-{ return m_hfov * 2.f * m_eyePosition.distanceTo(m_centerOfInterest) / (float)portWidth; }
+{ return m_hfov * 2.f * eyePosition().distanceTo(m_centerOfInterest) / (float)portWidth; }
 
 void BaseView::setFrustum(const float & horizontalAperture,
 			const float & verticalAperture,
@@ -161,11 +167,11 @@ bool BaseView::isPerspective() const
 const float & BaseView::farClipPlane() const
 { return m_farClip; }
 
-const Vector3F & BaseView::eyePosition() const
-{ return m_eyePosition; }
+Vector3F BaseView::eyePosition() const
+{ return m_space.getTranslation(); }
 
-void BaseView::setEyePosition(float * p)
-{ m_eyePosition.set(p[0], p[1], p[2]); }
+void BaseView::setEyePosition(const Vector3F & p)
+{ m_space.setTranslation(p); }
 
 void BaseView::setCenterOfInterest(float * p)
 { m_centerOfInterest.set(p[0], p[1], p[2]); }

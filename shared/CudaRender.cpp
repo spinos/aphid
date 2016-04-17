@@ -13,26 +13,12 @@
 #include <cmath>
 namespace aphid {
 
-CudaRender::CudaRender(int tileSize) 
-{
-	CudaBase::SetDevice();
-	
-	const Vector3F eye(0.f, 0.f, 100.f);
-	setEyePosition((float *)&eye);
-	
-	Matrix44F m;
-	m.setTranslation(eye);
-	*cameraSpaceR() = m;
-	m.inverse();
-	*cameraInvSpaceR() = m;
+CudaRender::CudaRender(int tileSize) :
+m_tileSize(tileSize)
+{ CudaBase::SetDevice(); }
 
-/// 35mm Academy
-	std::cout<<"\n angle of view "<<180.f/3.14f*2.f * atan(21.9456f/2.f/35.f)<<" deg";
-	setFrustum(.864f, .63f, 35.f, -1.f, -20000.f);
-	m_tileSize = tileSize;
-}
-
-CudaRender::~CudaRender() {}
+CudaRender::~CudaRender() 
+{}
 
 void CudaRender::setBufferSize(const int & w, const int & h)
 {

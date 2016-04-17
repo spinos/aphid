@@ -9,7 +9,7 @@
 #include "AssetRender.h"
 #include <CudaBase.h>
 #include <cu/ImageBaseInterface.h>
-#include "CubeRenderInterface.h"
+#include "assetRenderInterface.h"
 
 namespace aphid {
 
@@ -40,11 +40,10 @@ void AssetRender::setBufferSize(const int & w, const int & h)
 
 void AssetRender::render()
 {
-	cuber::setBoxFaces();
-	cuber::setRenderRect((int *)&rect() );
-    cuber::setFrustum((float *)rayFrameVec());
+	assr::setRenderRect((int *)&rect() );
+    assr::setFrustum((float *)rayFrameVec());
 
-	cuber::drawPyramid((uint *) colorBuffer(),
+	assr::drawPyramid((uint *) colorBuffer(),
                 (float *) nearDepthBuffer(),
 				tileSize(),
 				tileX(), tileY(),

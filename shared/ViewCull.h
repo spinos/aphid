@@ -20,7 +20,6 @@ class BaseView {
 	Matrix44F m_space, m_invSpace;
 	RectangleI m_rect, m_subRect;
 	Vector3F m_rayFrameVec[6];
-	Vector3F m_eyePosition;
 	Vector3F m_centerOfInterest;
 	float m_hfov, m_aspectRatio, m_farClip; 
 	
@@ -40,7 +39,7 @@ public:
 	const AFrustum & frustum() const;
 	
 	const float & farClipPlane() const;
-	const Vector3F & eyePosition() const;
+	Vector3F eyePosition() const;
 	const float & aspectRatio() const;
 	const RectangleI & rect() const;
 	const RectangleI & subRect() const;
@@ -49,7 +48,7 @@ public:
 protected:
 	void setRect(const int & x, const int & y);
     void setSubRect(const int & x0, const int & y0, const int & x1, const int & y1);
-    void setEyePosition(float * p);
+    void setEyePosition(const Vector3F & p);
 	void setCenterOfInterest(float * p);
 	Matrix44F *	cameraSpaceR();
 	Matrix44F * cameraInvSpaceR();

@@ -179,6 +179,7 @@ SET (VIEWERHEADER Parameter.h
 viewerWindow.h
 CubeRenderInterface.h
 WorldRenderInterface.h
+assetRenderInterface.h
 Manager.h
 WorldManager.h
 WorldRender.h
@@ -213,6 +214,7 @@ SET (CUSOURCES
 ../shared/cu/ImageBase.cu
 cu/CubeRender.cu
 cu/WorldRender.cu
+cu/assetRender.cu
 )
 
 find_package (CUDA QUIET REQUIRED)
