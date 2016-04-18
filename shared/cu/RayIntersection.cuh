@@ -215,6 +215,28 @@ inline __device__ int ray_box_slab(float & t0, float & t1,
     return 1;
 }
 
+inline __device__ int ray_box_slab1(float & t0, float & t1,
+                        const Ray4 & ray,
+                        const Aabb4 & aabb
+                        )
+{
+/// sides facing ray direction
+    int3 isNegative = make_int3(ray.d.x < 0.f, ray.d.y < 0.f, ray.d.z < 0.f);
+	float3 t_min = float4_difference( select4(aabb.high, aabb.low, isNegative), ray.o );
+	float3 t_max = float4_difference( select4(aabb.low, aabb.high, isNegative), ray.o );
+	v3_divide_inplace<float3, float4>(t_min, ray.d);
+	v3_divide_inplace<float3, float4>(t_max, ray.d);
+
+/// last enter	
+    t0 = fmax( t_min.z, fmax(t_min.y, fmax(t_min.x, ray.o.w)) );
+/// first exit
+	t1 = fmin( t_max.z, fmin(t_max.y, fmin(t_max.x, ray.d.w)) );
+
+    if(t0 >= t1 || t1 <= 0.f) return 0;
+   
+    return 1;
+}
+
 inline __device__ int ray_box(const Ray4 & ray,
                         const Aabb4 & aabb,
                         float & tmin, float & tmax)

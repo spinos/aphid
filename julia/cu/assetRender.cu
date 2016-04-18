@@ -23,14 +23,26 @@ void drawCube(uint * color,
     dim3 block(blockx, blockx, 1);
     dim3 grid(gridx, gridy, 1);
     
-    assetBox_kernel<<< grid, block, 14096 >>>(color, 
-        nearDepth,
-		farDepth,
-		(NTreeBranch4 *)branches,
-		(NTreeLeaf *)leaves,
-		(Rope *)ropes,
-		indirections,
-		(Aabb4 *)primitives);
+    if(blockx == 8) {
+        assetBox_kernel<64> <<< grid, block, 16000 >>>(color, 
+            nearDepth,
+            farDepth,
+            (NTreeBranch4 *)branches,
+            (NTreeLeaf *)leaves,
+            (Rope *)ropes,
+            indirections,
+            (Aabb4 *)primitives);
+	}
+	else if(blockx == 16) {
+	    assetBox_kernel<256> <<< grid, block, 16000 >>>(color, 
+            nearDepth,
+            farDepth,
+            (NTreeBranch4 *)branches,
+            (NTreeLeaf *)leaves,
+            (Rope *)ropes,
+            indirections,
+            (Aabb4 *)primitives);
+	}
 }
 
 }
