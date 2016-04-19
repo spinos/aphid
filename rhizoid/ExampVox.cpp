@@ -160,7 +160,7 @@ bool ExampVox::setNumBoxes(unsigned n)
 	if(n<=m_numBoxes) {
 		m_numBoxes = n;
 		m_boxBufLength = n * 36;
-		return false;
+		return true;
 	}
 	m_numBoxes = n;
 	m_boxBufLength = n * 36;
@@ -248,6 +248,25 @@ void ExampVox::drawDop()
 	drawSolidBoxArray((const float *)m_dopPositionBuf.get(),
 						(const float *)m_dopNormalBuf.get(),
 						m_dopBufLength);
+}
+
+Vector3F * ExampVox::dopNormalR()
+{ return m_dopNormalBuf.get(); }
+	
+Vector3F * ExampVox::dopPositionR()
+{ return m_dopPositionBuf.get(); }
+
+const float * ExampVox::dopNormalBuf() const
+{ return (const float *)m_dopNormalBuf.get(); }
+
+const float * ExampVox::dopPositionBuf() const
+{ return (const float *)m_dopPositionBuf.get(); }
+
+void ExampVox::setDOPDrawBufLen(const int & x)
+{ 
+	m_dopBufLength = x;
+	m_dopNormalBuf.reset(new Vector3F[x]);
+	m_dopPositionBuf.reset(new Vector3F[x]);
 }
 
 }

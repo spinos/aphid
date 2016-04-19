@@ -169,7 +169,8 @@ void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 		return;
     }
 	
-	if(v->numBoxes() < 1) {
+/// no box or dop
+	if(v->numBoxes() < 1 && v->dopBufLength() < 1) {
 		drawSolidBox(v->geomCenterV(), v->geomScale() );
 		return;
 	}
@@ -188,7 +189,12 @@ void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 		return;
 	}
 	
-	drawSolidBoxArray(v->boxPositionBuf(), v->boxNormalBuf(), 
+/// draw dop first, then box
+	if(v->dopBufLength() )
+		drawSolidBoxArray(v->dopPositionBuf(), v->dopNormalBuf(), 
+						v->dopBufLength() );
+	else
+		drawSolidBoxArray(v->boxPositionBuf(), v->boxNormalBuf(), 
 						v->boxBufLength() );
 }
 

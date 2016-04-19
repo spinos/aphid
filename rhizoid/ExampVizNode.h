@@ -41,6 +41,9 @@ public:
 	static  MObject         abboxmaxv;
 	static  MObject         ancells;
 	static  MObject         acellBuf;
+	static  MObject         adoplen;
+	static  MObject         adopPBuf;
+	static  MObject         adopNBuf;
 	static MObject adrawColorR;
 	static MObject adrawColorG;
 	static MObject adrawColorB;
@@ -54,9 +57,11 @@ public:
 							const aphid::BoundingBox & bbox);
 	
 private:
+	bool loadDops(MDataBlock & data);
+	bool loadBoxes(MDataBlock & data);
+	void setBoxes(const MPointArray & src, const unsigned & num);
 	void loadBoxes(MObject & node);
 	void updateGeomBox(MObject & node);
-	void loadBoxes(MDataBlock & data);
-	void setBoxes(const MPointArray & src, const unsigned & num);
+	bool loadDOPs(MObject & node);
 	
 };

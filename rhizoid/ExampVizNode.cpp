@@ -26,6 +26,9 @@ MObject ExampViz::abboxminv;
 MObject ExampViz::abboxmaxv;
 MObject ExampViz::ancells;
 MObject ExampViz::acellBuf;
+MObject ExampViz::adoplen;
+MObject ExampViz::adopPBuf;
+MObject ExampViz::adopNBuf;
 MObject ExampViz::adrawColor;
 MObject ExampViz::adrawColorR;
 MObject ExampViz::adrawColorG;
@@ -42,8 +45,32 @@ ExampViz::~ExampViz()
 MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == outValue ) {
+		
+		MDataHandle radiusMultH = block.inputValue(aradiusMult);
+		float radiusScal = radiusMultH.asFloat();
+		setGeomSizeMult(radiusScal);
+		
+		aphid::BoundingBox bb;
+		
+		MDataHandle bbminH = block.inputValue(abboxminv);
+		MFloatVector& vmin = bbminH.asFloatVector();
+		bb.setMin(vmin.x, vmin.y, vmin.z);
+		
+		MDataHandle bbmaxH = block.inputValue(abboxmaxv);
+		MFloatVector& vmax = bbmaxH.asFloatVector();
+		bb.setMax(vmax.x, vmax.y, vmax.z);
+
+		setGeomBox(vmin.x, vmin.y, vmin.z,
+				vmax.x, vmax.y, vmax.z);
 	
-		loadBoxes(block);
+		float * diffCol = diffuseMaterialColV();
+		
+		MFloatVector& c = block.inputValue(adrawColor).asFloatVector();
+		diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
+		
+/// dop first, then box
+		if(!loadDops(block) )
+			loadBoxes(block);
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
@@ -76,7 +103,10 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	diffCol[1] = gPlug.asFloat();
 	diffCol[2] = bPlug.asFloat();
 	
-	if(numBoxes() < 1) loadBoxes(selfNode);
+/// load dop first, then box
+	bool stat = dopBufLength() > 0;
+	if(!stat) stat = loadDOPs(selfNode);
+	if(!stat) loadBoxes(selfNode);
 	
 	updateGeomBox(selfNode);
 		
@@ -97,8 +127,6 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		glDisable(GL_LIGHTING);
 		glPopAttrib();
 	} 
-	//else
-		//drawWireGrid();
 	
 	aphid::Matrix44F mat;
 	mat.setFrontOrientation(aphid::Vector3F::YAxis);
@@ -195,9 +223,33 @@ MStatus ExampViz::initialize()
     typedFn.setStorable(true);
 	addAttribute(acellBuf);
 	
+	adoplen = numFn.create( "dopLen", "dpl", MFnNumericData::kInt, 0 );
+	numFn.setStorable(true);
+	addAttribute(adoplen);
+	
+	MVectorArray defaultVecArray;
+	MFnVectorArrayData vecArrayDataFn;
+	vecArrayDataFn.create( defaultVecArray );
+	adopPBuf = typedFn.create( "dopPBuf", "dpp",
+											MFnData::kVectorArray,
+											vecArrayDataFn.object(),
+											&stat );
+    typedFn.setStorable(true);
+	addAttribute(adopPBuf);
+	
+	adopNBuf = typedFn.create( "dopNBuf", "dpn",
+											MFnData::kVectorArray,
+											vecArrayDataFn.object(),
+											&stat );
+    typedFn.setStorable(true);
+	addAttribute(adopNBuf);
+	
 	attributeAffects(aradiusMult, outValue);
 	attributeAffects(ancells, outValue);
 	attributeAffects(acellBuf, outValue);
+	attributeAffects(adoplen, outValue);
+	attributeAffects(adopPBuf, outValue);
+	attributeAffects(adopNBuf, outValue);
 	attributeAffects(adrawColorR, outValue);
 	attributeAffects(adrawColorG, outValue);
 	attributeAffects(adrawColorB, outValue);
@@ -223,7 +275,6 @@ void ExampViz::voxelize1(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox)
 {
 	aphid::ExampVox::voxelize1(tri, bbox);
-	aphid::AHelper::Info<int>("dop draw buf len ", dopBufLength() );
 	
 	MFnNumericData bbFn;
 	MObject bbData = bbFn.create(MFnNumericData::k3Float);
@@ -235,6 +286,31 @@ void ExampViz::voxelize1(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 	bbFn.setData(bbox.data()[3], bbox.data()[4], bbox.data()[5]);
 	MPlug bbmxPlug(thisMObject(), abboxmaxv);
 	bbmxPlug.setValue(bbData);
+	
+	const int n = dopBufLength();
+	MPlug dopLenPlug(thisMObject(), adoplen);
+	dopLenPlug.setInt(n);
+	if(n < 1) return;
+	
+	MVectorArray dopp; dopp.setLength(n);
+	MVectorArray dopn; dopn.setLength(n);
+	const aphid::Vector3F * ps = dopPositionR();
+	const aphid::Vector3F * ns = dopNormalR();
+	for(int i=0; i<n; ++i) {
+		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
+		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
+	}
+	
+	MFnVectorArrayData vecFn;
+	MObject opnt = vecFn.create(dopp);
+	MPlug doppPlug(thisMObject(), adopPBuf);
+	doppPlug.setValue(opnt);
+	
+	MObject onor = vecFn.create(dopn);
+	MPlug dopnPlug(thisMObject(), adopNBuf);
+	dopnPlug.setValue(onor);
+	
+	aphid::AHelper::Info<int>("dop draw buf len ", dopBufLength() );
 }
 
 void ExampViz::voxelize(const std::vector<aphid::Geometry *> & geoms)
@@ -323,56 +399,34 @@ void ExampViz::loadBoxes(MObject & node)
 	n = numBoxes();
 	setBoxes(pnts, n);
 	
-	aphid::AHelper::Info<unsigned>(" ExampViz load n cells", n );
+	aphid::AHelper::Info<unsigned>(" ExampViz load n boxes", n );
 }
 
-void ExampViz::loadBoxes(MDataBlock & data)
+bool ExampViz::loadBoxes(MDataBlock & data)
 {
 	unsigned nc = data.inputValue(ancells).asInt();
 	if(nc < 1) {
 		aphid::AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
-		return;
+		return false;
 	}
-	if(setNumBoxes(nc) ) {
-	
-		MDataHandle pntH = data.inputValue(acellBuf);
-		MFnPointArrayData pntFn(pntH.data());
-		MPointArray pnts = pntFn.array();
-	
-		unsigned n = pnts.length();
-	
-		if(n >= nc) {
-			n = numBoxes();
-			setBoxes(pnts, n);
-		}
-		else {
-			aphid::AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
-		}
-	}
-	
-	MDataHandle radiusMultH = data.inputValue(aradiusMult);
-	float radiusScal = radiusMultH.asFloat();
-	setGeomSizeMult(radiusScal);
-	
-	aphid::BoundingBox bb;
-	
-	MDataHandle bbminH = data.inputValue(abboxminv);
-	MFloatVector& vmin = bbminH.asFloatVector();
-	bb.setMin(vmin.x, vmin.y, vmin.z);
-	
-	MDataHandle bbmaxH = data.inputValue(abboxmaxv);
-	MFloatVector& vmax = bbmaxH.asFloatVector();
-	bb.setMax(vmax.x, vmax.y, vmax.z);
 
-	setGeomBox(vmin.x, vmin.y, vmin.z,
-				vmax.x, vmax.y, vmax.z);
+	MDataHandle pntH = data.inputValue(acellBuf);
+	MFnPointArrayData pntFn(pntH.data());
+	MPointArray pnts = pntFn.array();
+
+	unsigned n = pnts.length();
 	
-	float * diffCol = diffuseMaterialColV();
+	if(n < nc) {
+		aphid::AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
+		return false;
+	}
 	
-	MFloatVector& c = data.inputValue(adrawColor).asFloatVector();
-	diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
+	setNumBoxes(nc);
+	n = numBoxes();
+	setBoxes(pnts, n);
 	
-	aphid::AHelper::Info<unsigned>(" ExampViz update n cells", numBoxes() );
+	aphid::AHelper::Info<unsigned>(" ExampViz update n boxes", numBoxes() );
+	return true;
 }
 
 void ExampViz::setBoxes(const MPointArray & src, const unsigned & num)
@@ -388,3 +442,90 @@ void ExampViz::setBoxes(const MPointArray & src, const unsigned & num)
 	}
 	buildBoxDrawBuf();
 }
+
+bool ExampViz::loadDops(MDataBlock & data)
+{
+	int n = data.inputValue(adoplen).asInt();
+	if(n < 1) {
+		aphid::AHelper::Info<int>(" ExampViz error zero n dops", n);
+		return false;
+	}
+	
+	MDataHandle pntH = data.inputValue(adopPBuf);
+	MFnVectorArrayData pntFn(pntH.data());
+	MVectorArray pnts = pntFn.array();
+	
+	if(pnts.length() < n) {
+		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop position length", pnts.length() );
+		return false;
+	}
+	
+	MDataHandle norH = data.inputValue(adopNBuf);
+	MFnVectorArrayData norFn(norH.data());
+	MVectorArray nors = norFn.array();
+	
+	if(nors.length() < n) {
+		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", pnts.length() );
+		return false;
+	}
+	
+	setDOPDrawBufLen(n);
+	
+	aphid::Vector3F * ps = dopPositionR();
+	aphid::Vector3F * ns = dopNormalR();
+	for(int i=0; i<n; ++i) {
+		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
+		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
+	}
+	
+	aphid::AHelper::Info<int>(" ExampViz load dop buf length", dopBufLength() );
+		
+	return true;
+}
+
+bool ExampViz::loadDOPs(MObject & node)
+{
+	MPlug doplenPlug(node, adoplen);
+	int n = doplenPlug.asInt();
+	if(n<1) return false;
+	
+	MPlug doppPlug(node, adopPBuf);
+	MObject doppObj;
+	doppPlug.getValue(doppObj);
+	
+	MFnVectorArrayData pntFn(doppObj);
+	MVectorArray pnts = pntFn.array();
+	
+	unsigned np = pnts.length();
+	if(np < n ) {
+		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop position length", np );
+		return false;
+	}
+	
+	MPlug dopnPlug(node, adopNBuf);
+	MObject dopnObj;
+	dopnPlug.getValue(dopnObj);
+	
+	MFnVectorArrayData norFn(dopnObj);
+	MVectorArray nors = norFn.array();
+	
+	unsigned nn = nors.length();
+	if(nn < n ) {
+		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", nn );
+		return false;
+	}
+
+	setDOPDrawBufLen(n);
+	
+	aphid::Vector3F * ps = dopPositionR();
+	aphid::Vector3F * ns = dopNormalR();
+	for(int i=0; i<n; ++i) {
+		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
+		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
+	}
+	
+	aphid::AHelper::Info<unsigned>(" ExampViz load n dops", n );
+	
+	return true;
+}
+//:~

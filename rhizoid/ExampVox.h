@@ -69,6 +69,8 @@ public:
 	const float * boxPositionBuf() const;
 	const unsigned & boxBufLength() const;
 	const int & dopBufLength() const;
+	const float * dopNormalBuf() const;
+	const float * dopPositionBuf() const;
 	
 protected:
 	void drawDop();
@@ -79,6 +81,9 @@ protected:
 	bool setNumBoxes(unsigned n);
 	void buildBoxDrawBuf();
 	void buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops);
+	Vector3F * dopNormalR();
+	Vector3F * dopPositionR();
+	void setDOPDrawBufLen(const int & x);
 	
 private:
 	void fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
