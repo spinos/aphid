@@ -10,7 +10,6 @@
 #include "ModifyForest.h"
 #include <TriangleRaster.h>
 #include <BarycentricCoordinate.h>
-
 namespace aphid {
 
 ModifyForest::ModifyForest() 
@@ -161,8 +160,8 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 			<<" >= "<<ground()->primIndirection().size();
 		return false;
 	}
-	
-	const cvx::Triangle * t = ground()->getSource(ctx->m_componentIdx);
+/// idx of source
+    const cvx::Triangle * t = ground()->source()->get(ctx->m_componentIdx);
 	
 /// ind to geom	
 	if(t->ind0() >= groundMeshes().size() ) {
@@ -174,13 +173,16 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	if(option.m_alongNormal)
 		option.m_upDirection = t->calculateNormal();
 		
-	if(!m_raster->create(t->P(0), t->P(1), t->P(2) ) ) return false;
+    const ATriangleMesh * mesh = groundMeshes()[t->ind0()];
+    Vector3F * pnt = mesh->points();
+    unsigned * tri = mesh->triangleIndices(t->ind1());
+    
+	if(!m_raster->create(pnt[tri[0]], pnt[tri[1]], pnt[tri[2]] ) ) return false;
 	
-	m_bary->create(t->P(0), t->P(1), t->P(2) );
-	
+	m_bary->create(pnt[tri[0]], pnt[tri[1]], pnt[tri[2]] );
+    
 	GroundBind bind;
 	bind.setGeomComp(t->ind0(), t->ind1() );
-	
 		Matrix44F tm;
 		float scale;
 		randomSpaceAt(ctx->m_hitP, option, tm, scale); 
@@ -193,7 +195,10 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		
 		m_bary->project(ctx->m_hitP);
 		m_bary->compute();
-		
+		if(!m_bary->insideTriangle()) {
+            return false;
+        }
+        
 		bind.m_w0 = m_bary->getV(0);
 		bind.m_w1 = m_bary->getV(1);
 		bind.m_w2 = m_bary->getV(2);
