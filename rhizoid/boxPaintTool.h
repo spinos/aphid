@@ -49,7 +49,7 @@ class proxyPaintContext : public MPxContext
     
     Operation m_currentOpt, mOpt;
     
-    ProxyViz::GrowOption m_growOpt;
+    ModifyForest::GrowOption m_growOpt;
     
 	int m_extractGroupCount;
 	short					start_x, start_y;
@@ -98,6 +98,8 @@ public:
 	const float & maxCreateMargin();
 	void setPlantType(int x);
 	const int & plantType() const;
+	void setStickToGround(bool x);
+	const bool & stickToGround() const;
 	
 private:
 	void resize();

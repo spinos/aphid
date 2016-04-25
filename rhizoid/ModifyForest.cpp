@@ -172,14 +172,10 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	
 	if(option.m_alongNormal)
 		option.m_upDirection = t->calculateNormal();
-		
-    const ATriangleMesh * mesh = groundMeshes()[t->ind0()];
-    Vector3F * pnt = mesh->points();
-    unsigned * tri = mesh->triangleIndices(t->ind1());
     
-	if(!m_raster->create(pnt[tri[0]], pnt[tri[1]], pnt[tri[2]] ) ) return false;
+	if(!m_raster->create(t->P(0), t->P(1), t->P(2) ) ) return false;
 	
-	m_bary->create(pnt[tri[0]], pnt[tri[1]], pnt[tri[2]] );
+	m_bary->create(t->P(0), t->P(1), t->P(2) );
     
 	GroundBind bind;
 	bind.setGeomComp(t->ind0(), t->ind1() );
@@ -196,6 +192,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		m_bary->project(ctx->m_hitP);
 		m_bary->compute();
 		if(!m_bary->insideTriangle()) {
+			std::cout<<"\n out of triangle pnt "<<ctx->m_hitP;
             return false;
         }
         
@@ -211,6 +208,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 bool ModifyForest::growAt(const Matrix44F & trans, GrowOption & option)
 {        
 	GroundBind bind;
+	if(option.m_stickToGround) {
 	Vector3F pog;
 	if(!bindToGround(&bind, trans.getTranslation(), pog) )
 		return false;
@@ -225,6 +223,12 @@ bool ModifyForest::growAt(const Matrix44F & trans, GrowOption & option)
 /// snap to ground
 	tm.setTranslation(pog);
 	addPlant(tm, bind, option.m_plantId);
+	}
+	else {
+/// disable ground binding
+		bind.setGeomComp(1023, 0);
+		addPlant(trans, bind, option.m_plantId);
+	}
 	
 	return true;
 }
@@ -445,7 +449,12 @@ void ModifyForest::movePlantsWithGround(sdb::Array<int, Plant> * arr)
 		Plant * pl = arr->value();
 		curP = pl->index->t1->getTranslation();
 		GroundBind * bind = pl->index->t2;
-		if(!getBindPoint(bindP, bind) ) {
+		const int bindStat = getBindPoint(bindP, bind);
+		if(bindStat < 0) {
+/// disabled, use current position
+			bindP = curP;
+		}
+		else if(bindStat < 1 ) {
 			bindToGround(pl->index, curP, bindP);
 		}
 		

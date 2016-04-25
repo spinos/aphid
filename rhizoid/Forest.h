@@ -87,7 +87,10 @@ protected:
 	void displacePlantInGrid(PlantInstance * inst );
 	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
-	bool getBindPoint(Vector3F & pos, GroundBind * bind);
+/// -1: disable binding
+///  0: failed, rebind
+///  1: success
+	int getBindPoint(Vector3F & pos, GroundBind * bind);
 	
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);

@@ -37,6 +37,8 @@
 #define kInstanceGroupCountFlagLong "-instanceGroupCount"
 #define kPlantTypeFlag "-pty"
 #define kPlantTypeFlagLong "-plantType"
+#define kStickToGroundFlag "-stg"
+#define kStickToGroundFlagLong "-stickToGround"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -193,6 +195,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		if (argData.getFlagArgument(kPlantTypeFlag, 0, pty) )
 			fContext->setPlantType(pty);
 	}
+	
+	if (argData.isFlagSet(kStickToGroundFlag)) {
+		int stg = 1;
+		if (argData.getFlagArgument(kStickToGroundFlag, 0, stg) )
+			fContext->setStickToGround(stg>0);
+	}
 
 	return MS::kSuccess;
 }
@@ -245,6 +253,9 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kPlantTypeFlag))
 		setResult(fContext->plantType() );
+		
+	if (argData.isFlagSet(kStickToGroundFlag))
+		setResult(fContext->stickToGround() );
 	
 	return MS::kSuccess;
 }
@@ -344,6 +355,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kPlantTypeFlag, kPlantTypeFlagLong, MSyntax::kLong);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add plantType arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kStickToGroundFlag, kStickToGroundFlagLong, MSyntax::kLong);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add stickToGround arg");
 		return MS::kFailure;
 	}
 	

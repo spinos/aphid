@@ -257,20 +257,21 @@ void Forest::removeAllPlants()
 	m_numPlants = 0;
 }
 
-bool Forest::getBindPoint(Vector3F & pos, GroundBind * bind)
+int Forest::getBindPoint(Vector3F & pos, GroundBind * bind)
 {
 	int geom, component;
 	bind->getGeomComp(geom, component);
-	if(geom < 0 || geom >= numGroundMeshes() ) return false;
+	if(geom < 0 || geom > 999) return -1;
+	if(geom >= numGroundMeshes() ) return 0;
 	
 	ATriangleMesh * mesh = m_grounds[geom];
-	if(component < 0 || component >= mesh->numTriangles() ) return false;
+	if(component < 0 || component >= mesh->numTriangles() ) return 0;
 	unsigned * tri = mesh->triangleIndices(component);
 	Vector3F * pnt = mesh->points();
 	pos = pnt[tri[0]] * bind->m_w0
 			+ pnt[tri[1]] * bind->m_w1
 			+ pnt[tri[2]] * bind->m_w2;
-	return true;
+	return 1;
 }
 
 void Forest::displacePlantInGrid(PlantInstance * inst )

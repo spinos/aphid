@@ -35,6 +35,21 @@ public:
 		float m_radius;
 		bool m_alongNormal;
 		bool m_multiGrow;
+		bool m_stickToGround;
+		
+		GrowOption() {
+			m_upDirection = Vector3F::YAxis;
+			m_alongNormal = 0;
+			m_minScale = 1.f;
+			m_maxScale = 1.f;
+			m_rotateNoise = 0.f;
+			m_plantId = 0;
+			m_multiGrow = 0;
+			m_minMarginSize = .1f;
+			m_maxMarginSize = .1f;
+			m_strength = .67f;
+			m_stickToGround = true;
+		}
 	};
     
 	ModifyForest();

@@ -19,18 +19,6 @@ m_extractGroupCount(1)
 	// be a candidate for the 6th position on the mini-bar.
 	setImage("proxyPaintTool.xpm", MPxContext::kImage1 );
 	attachSceneCallbacks();
-    
-    ProxyViz::GrowOption & gop = m_growOpt;
-    gop.m_upDirection = Vector3F::YAxis;
-	gop.m_alongNormal = 0;
-	gop.m_minScale = 1.f;
-	gop.m_maxScale = 1.f;
-	gop.m_rotateNoise = 0.f;
-	gop.m_plantId = 0;
-	gop.m_multiGrow = 0;
-	gop.m_minMarginSize = .1f;
-	gop.m_maxMarginSize = .1f;
-	gop.m_strength = .67f;
 }
 
 proxyPaintContext::~proxyPaintContext()
@@ -316,9 +304,7 @@ void proxyPaintContext::setGrowAlongNormal(unsigned val)
 }
 
 unsigned proxyPaintContext::getGrowAlongNormal() const
-{
-	return m_growOpt.m_alongNormal;
-}
+{ return m_growOpt.m_alongNormal; }
 
 void proxyPaintContext::setMultiCreate(unsigned val)
 {
@@ -659,4 +645,13 @@ void proxyPaintContext::resizeSelectedRandomly()
     
 	PtrViz->scalePlant(m_growOpt);
 }
+
+void proxyPaintContext::setStickToGround(bool x)
+{ 
+	AHelper::Info<bool>(" proxyPaintContext set stick to ground", x);
+	m_growOpt.m_stickToGround = x; 
+}
+
+const bool & proxyPaintContext::stickToGround() const
+{ return m_growOpt.m_stickToGround; }
 //:~
