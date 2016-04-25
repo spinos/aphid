@@ -265,6 +265,25 @@ template <typename T>
 int KdEngine::firstVisit(IntersectionContext * ctx, 
 								const KdTreeNode * n)
 {
+#if 1
+    const BoundingBox & b = ctx->getBBox();
+	b.intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax);
+	
+	Vector3F enterP = ctx->m_ray.travel(ctx->m_tmin);
+	const int axis = n->getAxis();
+	const float splitPos = n->getSplitPos();
+	int above = enterP.comp(axis) >= splitPos;
+	BoundingBox childBox;
+	
+	if(above) 
+		b.splitRight(axis, splitPos, childBox);
+	else
+		b.splitLeft(axis, splitPos, childBox);
+		
+	ctx->setBBox(childBox);
+		
+	return above; 
+#else
 	const int axis = n->getAxis();
 	const float splitPos = n->getSplitPos();
 	
@@ -324,6 +343,7 @@ int KdEngine::firstVisit(IntersectionContext * ctx,
 	else ctx->setBBox(lftBox);
 		
 	return above;
+#endif
 }
 
 template <typename T, typename Tn>

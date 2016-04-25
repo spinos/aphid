@@ -167,6 +167,23 @@ inline __device__ int side1_on_aabb4(const Aabb4 & b,
 	return 5;   
 }
 
+template<typename Td>
+inline __device__ int side2_on_aabb4(const Aabb4 & b,
+                                    const float3 & nr)
+{
+    int jr = v3_major_axis<float3>(nr);
+	if(jr == 0) {
+	    if(nr.x < 0.f) return 0;
+		return 1;
+	}
+	if(jr == 1) {
+		if(nr.y < 0.f) return 2;
+		return 3;
+	}
+	if(nr.z < 0.f) return 4;
+	return 5;   
+}
+
 inline __device__ void ray_progress(float3 & p, const Ray4 & r, float h)
 { 
   p.x = r.o.x + r.d.x * h;
@@ -197,8 +214,8 @@ inline __device__ int ray_box_slab(float & t0, float & t1,
     int3 isNegative = make_int3(ray.d.x < 0.f, ray.d.y < 0.f, ray.d.z < 0.f);
 	float3 t_min = float4_difference( select4(aabb.high, aabb.low, isNegative), ray.o );
 	float3 t_max = float4_difference( select4(aabb.low, aabb.high, isNegative), ray.o );
-	v3_divide_inplace<float3, float4>(t_min, ray.d);
-	v3_divide_inplace<float3, float4>(t_max, ray.d);
+	v3_divide<float3, float4>(t_min, ray.d);
+	v3_divide<float3, float4>(t_max, ray.d);
 
 /// last enter	
     t0 = fmax( t_min.z, fmax(t_min.y, fmax(t_min.x, ray.o.w)) );
@@ -224,8 +241,8 @@ inline __device__ int ray_box_slab1(float & t0, float & t1,
     int3 isNegative = make_int3(ray.d.x < 0.f, ray.d.y < 0.f, ray.d.z < 0.f);
 	float3 t_min = float4_difference( select4(aabb.high, aabb.low, isNegative), ray.o );
 	float3 t_max = float4_difference( select4(aabb.low, aabb.high, isNegative), ray.o );
-	v3_divide_inplace<float3, float4>(t_min, ray.d);
-	v3_divide_inplace<float3, float4>(t_max, ray.d);
+	v3_divide<float3, float4>(t_min, ray.d);
+	v3_divide<float3, float4>(t_max, ray.d);
 
 /// last enter	
     t0 = fmax( t_min.z, fmax(t_min.y, fmax(t_min.x, ray.o.w)) );
@@ -261,8 +278,8 @@ inline __device__ int ray_box(const Ray4 & ray,
 	float3 t_min = float4_difference( select4(aabb.high, aabb.low, isNegative), ray.o );
 	float3 t_max = float4_difference( select4(aabb.low, aabb.high, isNegative), ray.o );
 	
-	v3_divide_inplace<float3, float4>(t_min, ray.d);
-	v3_divide_inplace<float3, float4>(t_max, ray.d);
+	v3_divide<float3, float4>(t_min, ray.d);
+	v3_divide<float3, float4>(t_max, ray.d);
 	
 	//Must use fmin()/fmax(); if one of the parameters is NaN, then the parameter that is not NaN is returned. 
 	//Behavior of min()/max() with NaNs is undefined. (See OpenCL Specification 1.2 [6.12.2] and [6.12.4])
@@ -569,5 +586,28 @@ inline __device__ int ray_hull(float & t0, float & t1,
         
     return 1;
 }
+
+inline __device__ void aabb4_split_at(Aabb4 & box, 
+                                const float3 & pnt,
+                                const int & axis, 
+                                const float & splitPos)
+{
+    float c = v3_component<float3>(pnt, axis);
+    if(c < splitPos)
+        v3_set_component<float4>(box.high, axis, splitPos);
+    else
+        v3_set_component<float4>(box.low, axis, splitPos);
+}
+
+inline __device__ void aabb4_split_lft(Aabb4 & box, 
+                                const int & axis, 
+                                const float & splitPos)
+{ v3_set_component<float4>(box.high, axis, splitPos); }
+
+inline __device__ void aabb4_split_rgt(Aabb4 & box, 
+                                const int & axis, 
+                                const float & splitPos)
+{ v3_set_component<float4>(box.low, axis, splitPos); }
+
 #endif        //  #ifndef RAY_INTERSECTION_CUH
 

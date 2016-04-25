@@ -165,6 +165,23 @@ inline __device__ void decode_rope(const int & src, int & itreelet, int & inode)
 	inode = src & 31;
 }
 
+/// find side by t1 normal
+inline __device__ int climb_rope1(Aabb4 & box, 
+                            int & branchIdx, 
+                            int & nodeIdx,
+                            const float3 & t1Normal, 
+                            const NTreeLeaf & leaf,
+                            Rope * ropes)
+{
+    int iRope = leaf._ropeInd[side2_on_aabb4<float4>(box, t1Normal)];
+    if(iRope < 1) return 0;
+    
+    const Rope & rp = ropes[iRope];
+    decode_rope(rp.treeletNode, branchIdx, nodeIdx);
+    aabb4_convert<Rope>(box, rp); 
+    return 1;   
+}
+
 inline __device__ int climb_rope(Aabb4 & box, 
                             const Ray4 & incident, 
                             NTreeLeaf * leaves,

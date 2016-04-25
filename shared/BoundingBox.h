@@ -40,7 +40,9 @@ public:
 	const float distance(const int &axis) const;
 	const Vector3F normal(const int & i) const;
 	
-	void split(int axis, float pos, BoundingBox & left, BoundingBox & right) const;
+	void split(int axis, float pos, BoundingBox & lft, BoundingBox & rgt) const;
+	void splitLeft(int axis, float pos, BoundingBox & lft) const;
+	void splitRight(int axis, float pos, BoundingBox & rgt) const;
 	void expandBy(const BoundingBox &another);
 	void expandBy(const Vector3F & pos);
 	void expandBy(const Vector3F & pos, float r);

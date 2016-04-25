@@ -14,7 +14,7 @@
 namespace aphid {
 
 AssetRender::AssetRender() :
-CudaRender(16)
+CudaRender(8)
 {}
 
 AssetRender::~AssetRender() {}

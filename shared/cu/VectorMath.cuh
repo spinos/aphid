@@ -213,7 +213,7 @@ inline __device__ void v3_normalize_inplace(T & v)
 }
 
 template<typename T1, typename T2>
-inline __device__ void v3_divide_inplace(T1 & v1, const T2 & v2)
+inline __device__ void v3_divide(T1 & v1, const T2 & v2)
 { 
     v1.x /= v2.x;
     v1.y /= v2.y;
@@ -362,5 +362,12 @@ inline __device__ void choose_negative_one(float3 & a,
     else a.z = 1.f;
 }
 
+template<typename T>
+inline __device__ void v3_set_component(T & v, int d, const float & c)
+{ 
+    if(d < 1) v.x = c;
+    else if(d<2) v.y = c;
+    else v.z = c;    
+}
 #endif        //  #ifndef VECTOR_MATH_CUH
 

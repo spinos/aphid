@@ -140,22 +140,24 @@ const float BoundingBox::distance(const int &axis) const
 	return m_data[axis + 3] - m_data[axis];
 }
 
-void BoundingBox::split(int axis, float pos, BoundingBox & left, BoundingBox & right) const
+void BoundingBox::split(int axis, float pos, BoundingBox & lft, BoundingBox & rgt) const
 {
-	left = right = *this;
+	lft = rgt = *this;
 	
-	if(axis == 0) {
-		left.m_data[3] = pos;
-		right.m_data[0] = pos;
-	}
-	else if(axis == 1) {
-		left.m_data[4] = pos;
-		right.m_data[1] = pos;
-	}
-	else {
-		left.m_data[5] = pos;
-		right.m_data[2] = pos;
-	}
+	lft.setMax(pos, axis);
+	rgt.setMin(pos, axis);
+}
+
+void BoundingBox::splitLeft(int axis, float pos, BoundingBox & lft) const
+{
+	lft = *this;
+	lft.setMax(pos, axis);
+}
+
+void BoundingBox::splitRight(int axis, float pos, BoundingBox & rgt) const
+{
+	rgt = *this;
+	rgt.setMin(pos, axis);
 }
 
 void BoundingBox::expandBy(const BoundingBox &another)

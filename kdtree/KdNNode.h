@@ -106,7 +106,7 @@ void KdNNode<NumLevels>::printChild(const int & idx) const
 	}
 	else {
 		std::cout<<"\n ["<<idx<<"] internal"
-				<<" offset "<<(child.getOffset() & ~TreeletOffsetMask)
+				<<" offset "<<(child.getOffset() & TreeletOffsetMaskTau)
 				<<" axis "<<child.getAxis()
 				<<" split "<<child.getSplitPos();
 	}
@@ -114,7 +114,7 @@ void KdNNode<NumLevels>::printChild(const int & idx) const
 
 template <int NumLevels>
 int KdNNode<NumLevels>::internalOffset(int idx) const
-{ return (node(idx)->getOffset() & ~TreeletOffsetMask); }
+{ return (node(idx)->getOffset() & TreeletOffsetMaskTau); }
 
 template <int NumLevels>
 int KdNNode<NumLevels>::NumNodes = (1<<NumLevels+1) - 2;
