@@ -257,3 +257,5 @@ target_link_libraries (viewJulia Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (viewJulia ${HDF5_LIBRARIES})
 target_link_libraries (viewJulia ${ZLIB_LIBRARIES})
 target_link_libraries (viewJulia ${SZIP_LIBRARY})
+
+SET (EXECUTABLE_OUTPUT_PATH ./bin)
