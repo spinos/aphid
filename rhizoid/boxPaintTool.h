@@ -100,6 +100,7 @@ public:
 	const int & plantType() const;
 	void setStickToGround(bool x);
 	const bool & stickToGround() const;
+	void selectViz();
 	
 private:
 	void resize();

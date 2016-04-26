@@ -47,7 +47,7 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 	clipNear = fnCamera.nearClippingPlane();
 	clipFar = fnCamera.farClippingPlane();
 
-	validateSelection();
+	// validateSelection();
     
     if(event.isModifierShift()) m_currentOpt = opResizeBrush;
     else m_currentOpt = mOpt;
@@ -654,4 +654,7 @@ void proxyPaintContext::setStickToGround(bool x)
 
 const bool & proxyPaintContext::stickToGround() const
 { return m_growOpt.m_stickToGround; }
+
+void proxyPaintContext::selectViz()
+{ validateSelection(); }
 //:~
