@@ -166,7 +166,8 @@ inline __device__ void decode_rope(const int & src, int & itreelet, int & inode)
 }
 
 /// find side by t1 normal
-inline __device__ int climb_rope1(Aabb4 & box, 
+inline __device__ void climb_rope_traverse(int & Ncurrent,
+                            Aabb4 & box, 
                             int & branchIdx, 
                             int & nodeIdx,
                             const float3 & t1Normal, 
@@ -174,12 +175,15 @@ inline __device__ int climb_rope1(Aabb4 & box,
                             Rope * ropes)
 {
     int iRope = leaf._ropeInd[side2_on_aabb4<float4>(box, t1Normal)];
-    if(iRope < 1) return 0;
+    if(iRope < 1) {
+        Ncurrent = 0;
+        return;
+    }
     
     const Rope & rp = ropes[iRope];
     decode_rope(rp.treeletNode, branchIdx, nodeIdx);
     aabb4_convert<Rope>(box, rp); 
-    return 1;   
+    Ncurrent = (branchIdx << 9) | nodeIdx;
 }
 
 inline __device__ int climb_rope(Aabb4 & box, 
@@ -231,5 +235,64 @@ inline __device__ int hit_primitive(Aabb4 & box,
     return nhit;
 }
 
+inline __device__ void load_NodeTraverse(int * isNodeLeaf,
+                                        NTreeLeaf * leaf,
+                                        int * innerAxis,
+                                        float * innerSplitPos,
+                                        int * innerOffset,
+                                        const int & iBranch,
+                                        const int & iNode,
+                                        NTreeBranch4 * branches,
+                                        NTreeLeaf * leaves)
+{
+    const KdNode * kn = get_branch_node(branches[iBranch], iNode);
+    *isNodeLeaf = is_leaf(kn);
+    if(*isNodeLeaf) {
+        *leaf = leaves[get_prim_offset(kn)];
+        
+    } else {
+        *innerAxis = get_split_axis(kn);
+        *innerSplitPos = get_split_pos(kn);
+        *innerOffset = get_inner_offset(kn);
+    }
+}
+
+inline __device__ int hit_leaf(const NTreeLeaf * leaf)
+{
+    return leaf->_primLength > 0;
+}
+
+inline __device__ void inner_traverse(int & Ncurrent,
+                                      Aabb4 & box,
+                                 int & iBranch,
+                                 int & iNode,
+                                 const float3 & t0Position,
+                                 const int & splitAxis,
+                                 const float & splitPos,
+                                 const int & innerOffset)
+{
+    if(v3_component<float3>(t0Position, splitAxis) < splitPos) {
+        aabb4_split_lft(box, splitAxis, splitPos);
+        if(innerOffset < 1048576) {
+            iNode += innerOffset;
+        }
+        else {
+            iBranch += innerOffset & 1048575;
+            iNode = 0;
+        }
+    }
+    else {
+        aabb4_split_rgt(box, splitAxis, splitPos);
+        if(innerOffset < 1048576) {
+            iNode += innerOffset + 1;
+        }
+        else {
+            iBranch += innerOffset & 1048575;
+            iNode = 1;
+        }
+    }
+/// update Ncurrent
+    Ncurrent = (iBranch << 9) | iNode;
+}
 #endif        //  #ifndef NTREETRAVERSE_CUH
 

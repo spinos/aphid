@@ -50,7 +50,6 @@ __device__ void reduceMaxInBlock(int tid, T * m)
     
     if(NumThreads > 32) {
         if(tid < 32) m[tid] = max(m[tid], m[tid + 32]);
-        //__syncthreads();
     }
     
     if(tid < 16) m[tid] = max(m[tid], m[tid + 16]);

@@ -121,87 +121,68 @@ __global__ void assetBox_kernel(uint * pix,
     aabb4_r(box, sgb);
 /// branch 0 node 0
 	scurrentNode[tidx] = 0;
-	
+    
     float3 t0Normal, t1Normal, t0Position;
     sshadingNormal[tidx] = make_float3(0.f, 0.f, 0.f);
-    int iBranch, iNode;
+
+    if(ray_box_slab(t0, t1,
+                            t0Normal, t1Normal, 
+                            incident, box) ) 
+        sshadingNormal[tidx] = t0Normal;
     
+    int iBranch, iNode;
+
     for(;;) {
         iBranch = scurrentNode[tidx] >> 9;
         iNode = scurrentNode[tidx] & 511;
-            
+        
         if(tidx < 1) {
-/// load Ntraverse
-            const KdNode * kn = get_branch_node(branches[iBranch], iNode);
-            *sntisLeaf = is_leaf(kn);
-            if(*sntisLeaf) {
-                *snttreeleaf = leaves[get_prim_offset(kn)];
-                
-            } else {
-                *sntaxis = get_split_axis(kn);
-                *sntsplitPos = get_split_pos(kn);
-                *sntinnerOffset = get_inner_offset(kn);
-            }
+            load_NodeTraverse(sntisLeaf,
+                              snttreeleaf,
+                              sntaxis,
+                              sntsplitPos,
+                              sntinnerOffset,
+                              iBranch, iNode,
+                              branches, leaves);
+            
         }
         
         __syncthreads();
         
         if(scurrentNode[tidx] == scurrentNode[0]) { 
 /// update Ncurrent if ray is active       
-            ray_box_slab(t0, t1,
+            if(ray_box_slab(t0, t1,
                             t0Normal, t1Normal, 
-                            incident, box);
+                            incident, box) ) {
             if(*sntisLeaf) {
 /// leaf node          
-                if(snttreeleaf->_primLength > 0) {
+                if(hit_leaf(snttreeleaf) ) {
 /// update shading normal for non-empty leaf box  
                     sshadingNormal[tidx] = t0Normal;
 /// end of ray
                     scurrentNode[tidx] = 0;   
                 }
-                else {
-/// climb rope      
-                    if(climb_rope1(box, 
+                else
+                    climb_rope_traverse(scurrentNode[tidx],
+                            box, 
                             iBranch, 
                             iNode,
                             t1Normal, 
                             *snttreeleaf,
-                            ropes) ) {
-/// update Ncurrent
-                        scurrentNode[tidx] = (iBranch << 9) | iNode;
-                    }
-                    else {
-/// end of ray
-                        scurrentNode[tidx] = 0; 
-                    }
-                }
+                            ropes);
             }
             else {
 /// internal node
                 ray_progress(t0Position, incident, t0);
-/// split box at t0 position
-                if(v3_component<float3>(t0Position, *sntaxis) < *sntsplitPos) {
-                    aabb4_split_lft(box, *sntaxis, *sntsplitPos);
-                    if(*sntinnerOffset < 1048576) {
-                        iNode += *sntinnerOffset;
-                    }
-                    else {
-                        iBranch += *sntinnerOffset & 1048575;
-                        iNode = 0;
-                    }
-                }
-                else {
-                    aabb4_split_rgt(box, *sntaxis, *sntsplitPos);
-                    if(*sntinnerOffset < 1048576) {
-                        iNode += *sntinnerOffset + 1;
-                    }
-                    else {
-                        iBranch += *sntinnerOffset & 1048575;
-                        iNode = 1;
-                    }
-                }
-/// update Ncurrent
-                scurrentNode[tidx] = (iBranch << 9) | iNode;
+                inner_traverse(scurrentNode[tidx], 
+                               box, iBranch, iNode,
+                                   t0Position,
+                                   *sntaxis, *sntsplitPos,
+                                   *sntinnerOffset);
+            }
+            }
+            else {
+                scurrentNode[tidx] = 0;   
             }
         }
         
@@ -216,7 +197,7 @@ __global__ void assetBox_kernel(uint * pix,
 	    if(scurrentNode[0] < 1)
 	        break;
     }
-    
+  
     if(px < c_renderRect.x || px >= c_renderRect.z) return;
     if(py < c_renderRect.y || py >= c_renderRect.w) return;
     
