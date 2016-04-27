@@ -3,10 +3,13 @@
 #include <Types.h>
 #include "glwidget.h"
 #include <cmath>
-#include <KdTreeDrawer.h>
+#include <GeoDrawer.h>
 #include <Sequence.h>
 #include <Ordered.h>
 #define NUMVERTEX 190000
+
+using namespace aphid;
+using namespace aphid::sdb;
 
 struct X {
 	int a, b;
@@ -57,7 +60,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientDraw()
 {
-	KdTreeDrawer * dr = getDrawer();
+	GeoDrawer * dr = getDrawer();
 	BoundingBox bb;
 	
 	drawPoints(m_sculptor->allPoints());
@@ -83,9 +86,10 @@ void GLWidget::drawPoints(WorldGrid<Array<int, VertexP>, VertexP > * tree)
 void GLWidget::drawPoints(Array<int, VertexP> * d) 
 {
 	if(!d) return;
-	KdTreeDrawer * dr = getDrawer();
+	GeoDrawer * dr = getDrawer();
 	dr->beginPoint(2.f);
 	
+	// d->printLeafSize();
 	d->begin();
 	while(!d->end()) {
 		Vector3F * p = d->value()->index->t1;

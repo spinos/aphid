@@ -353,7 +353,7 @@ template <typename KeyType, int MaxNKey>
 BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::splitLeaf(const KeyType & x)
 {
 #if DBG_SPLIT
-	//std::cout<<"\n split "<<str();
+	std::cout<<"\n split "<<str();
 #endif
 	Entity * oldRgt = sibling();
 	BNode * two = new BNode(parent()); 
@@ -369,7 +369,7 @@ BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::splitLeaf(const KeyType & x)
 	connectSibling(two);
 	if(oldRgt) two->connectSibling(oldRgt);
 #if DBG_SPLIT	
-	//std::cout<<"\n into "<<str()<<" and "<<two->str();
+	std::cout<<"\n into "<<str()<<" and "<<two->str();
 #endif	
 	Pair<KeyType, Entity> b;
 	b.key = two->firstKey();
@@ -608,12 +608,15 @@ bool BNode<KeyType, MaxNKey>::leafBalanceRight()
 	int n = shouldBalance(this, rgt);
 	if(n == 0) return false;
 	
+	// std::cout<<"\n balance right "<<n;
+	
 	Pair<KeyType, Entity> old = rgt->firstData();
 	if(n < 0) sendDataRight(-n, rgt);
 	else siblingNode()->sendDataLeft(n, this);
 	
 	crossed->replaceKey(old.key, rgt->firstData().key);
 	
+	// std::cout<<"\nbalanced right "<<*this<<*siblingNode();
 	return true;
 }
 
@@ -640,7 +643,7 @@ bool BNode<KeyType, MaxNKey>::leafBalanceLeft()
 	
 	crossed->replaceKey(old.key, KeyNData<KeyType, MaxNKey>::firstData().key);
 	
-	//std::cout<<"\nbalanced "<<*leftSibling<<*this;
+	// std::cout<<"\nbalanced left "<<*leftSibling<<*this;
 	return true;
 }
 
@@ -718,6 +721,8 @@ void BNode<KeyType, MaxNKey>::removeLeaf(const KeyType & x)
 		return;
 	}
 	
+	//std::cout<<"\n bnode remove in leaf "<<x
+	//	<<" n key "<<KeyNData<KeyType, MaxNKey>::numKeys();
 	//if(!isUnderflow()) return;
 
 	if(!leafBalance())

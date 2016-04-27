@@ -13,6 +13,7 @@
 #include <Ordered.h>
 #include <List.h>
 #include <BoundingBox.h>
+namespace aphid {
 namespace sdb {
 
 class C3Tree : public Ordered<Coord3, VertexP>
@@ -42,3 +43,4 @@ private:
 	float m_gridSize;
 };
 } // end namespace sdb
+}

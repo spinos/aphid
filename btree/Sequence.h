@@ -39,14 +39,7 @@ public:
 	}
 	
 	Pair<T, Entity> * insert(const T & x) { 
-#if 0
-		std::cout<<"\n seq insert"<<x;
-		Pair<T, Entity> * e = m_root->insert(x);
-		std::cout<<"\n res"<<e->index;
-		return e;
-#else
 		return m_root->insert(x);
-#endif
 	}
 	
 	void remove(const T & x) {
@@ -207,6 +200,8 @@ public:
 	
 	bool dbgCheck();
 	
+	void printLeafSize();
+	
 protected:	
 	void beginLeaf() {
 		m_current = m_root->firstLeaf();
@@ -318,6 +313,20 @@ bool Sequence<T>::dbgCheckLayer(const int & level, const std::vector<Entity *> &
 	    }
 	}
 	return true;
+}
+
+template<typename T>
+void Sequence<T>::printLeafSize()
+{
+	std::cout<<"\n";
+	int c = 0, i=0;
+	beginLeaf();
+	while(!leafEnd()) {
+		std::cout<<" leaf["<<i++<<"]"<< leafSize();
+		c+= leafSize();
+		nextLeaf();
+	}
+	std::cout<<" total "<< c;
 }
 
 } //end namespace sdb

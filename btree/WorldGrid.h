@@ -175,12 +175,12 @@ ValueType * WorldGrid<ChildType, ValueType>::displace(ValueType * v, const Vecto
 	if(p.index) {
 		ChildType * g = static_cast<ChildType *>(p.index);
 		g->remove(v->key);
-		if(g->isEmpty()) {
-			// std::cout<<"\n remove grid "<<c0;
+		if(g->isEmpty())
 			remove(c0);
-		}
 	}
+	
 	insert(c1, nv);
+	
 	return nv;
 }
 

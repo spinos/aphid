@@ -6,9 +6,6 @@
 
 Window::Window()
 {
-	TreeNode::MaxNumKeysPerNode = 64;
-	TreeNode::MinNumKeysPerNode = 32;
-
     glWidget = new GLWidget;
 
 	setCentralWidget(glWidget);

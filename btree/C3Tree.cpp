@@ -8,7 +8,7 @@
  */
 
 #include "C3Tree.h"
-
+namespace aphid {
 namespace sdb {
 
 C3Tree::C3Tree(Entity * parent) : Ordered<Coord3, VertexP>(parent),
@@ -102,3 +102,4 @@ void C3Tree::displace(const VertexP & v, const Vector3F & pref)
 }		
 
 } // end namespace sdb
+}

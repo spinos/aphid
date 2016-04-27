@@ -10,6 +10,7 @@
 #pragma once
 #include <Sequence.h>
 #include <List.h>
+namespace aphid {
 namespace sdb {
 
 template<typename KeyType, typename ValueType>
@@ -90,3 +91,4 @@ private:
 	int m_elemI, m_elemSize;
 };
 } //end namespace sdb
+}

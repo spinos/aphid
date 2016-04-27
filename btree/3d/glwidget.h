@@ -4,9 +4,7 @@
 #include <Base3DView.h>
 #include <Sculptor.h>
 
-using namespace sdb;
-
-class GLWidget : public Base3DView
+class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
 
@@ -25,13 +23,13 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	
 private:
-	void drawPoints(WorldGrid<Array<int, VertexP>, VertexP > * tree);
-	void drawPoints(Array<int, VertexP> * ps);
-	void drawPoints(const ActiveGroup & grp);
+	void drawPoints(aphid::sdb::WorldGrid<aphid::sdb::Array<int, aphid::sdb::VertexP>, aphid::sdb::VertexP > * tree);
+	void drawPoints(aphid::sdb::Array<int, aphid::sdb::VertexP> * ps);
+	void drawPoints(const aphid::sdb::ActiveGroup & grp);
 
 private:
-	Sculptor * m_sculptor;
-    PNPrefW * m_pool;
+	aphid::sdb::Sculptor * m_sculptor;
+    aphid::sdb::PNPrefW * m_pool;
 	
 private slots:
     

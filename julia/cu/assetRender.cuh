@@ -121,22 +121,19 @@ __global__ void assetBox_kernel(uint * pix,
     aabb4_r(box, sgb);
 /// branch 0 node 0
 	scurrentNode[tidx] = 0;
+	__syncthreads();
     
     float3 t0Normal, t1Normal, t0Position;
     sshadingNormal[tidx] = make_float3(0.f, 0.f, 0.f);
-
-    if(ray_box_slab(t0, t1,
-                            t0Normal, t1Normal, 
-                            incident, box) ) 
-        sshadingNormal[tidx] = t0Normal;
     
-    int iBranch, iNode;
+    int iBranch = 0, iNode = 0;
 
     for(;;) {
-        iBranch = scurrentNode[tidx] >> 9;
-        iNode = scurrentNode[tidx] & 511;
         
         if(tidx < 1) {
+            iBranch = scurrentNode[tidx] >> 9;
+            iNode = scurrentNode[tidx] & 511;
+        
             load_NodeTraverse(sntisLeaf,
                               snttreeleaf,
                               sntaxis,
@@ -149,7 +146,7 @@ __global__ void assetBox_kernel(uint * pix,
         
         __syncthreads();
         
-        if(scurrentNode[tidx] == scurrentNode[0]) { 
+        if(((iBranch << 9) | iNode) == scurrentNode[0]) { 
 /// update Ncurrent if ray is active       
             if(ray_box_slab(t0, t1,
                             t0Normal, t1Normal, 

@@ -92,7 +92,7 @@ Entity * KeyNData<KeyType, MaxNKey>::index(const int & i) const
 
 template <typename KeyType, int MaxNKey>
 bool KeyNData<KeyType, MaxNKey>::isFull() const
-{ return m_numKeys == MaxNKey; }
+{ return m_numKeys > MaxNKey-1; }
 
 template <typename KeyType, int MaxNKey>
 void KeyNData<KeyType, MaxNKey>::reduceNumKeys() 
