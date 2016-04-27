@@ -131,4 +131,24 @@ const float & PlantSelection::radius() const
 void PlantSelection::setTypeFilter(int x)
 { m_typeFilter = x; }
 
+bool PlantSelection::touchCell(const Ray & incident, const sdb::Coord3 & c, 
+								Vector3F & pnt)
+{
+	sdb::Array<int, Plant> * cell = m_grid->findCell(c);
+	if(!cell) return false;
+	if(cell->isEmpty() ) return false;
+	float tt;
+	cell->begin();
+	while(!cell->end()) {
+		PlantData * d = cell->value()->index;
+		pnt = incident.closetPointOnRay(d->t1->getTranslation(), &tt );
+		if(tt < -1.f 
+			&& pnt.distanceTo(d->t1->getTranslation() ) < m_radius)
+            return true;
+		
+		cell->next();
+	}
+	return false;
+}
+
 }

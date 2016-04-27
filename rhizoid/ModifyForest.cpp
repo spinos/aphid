@@ -288,7 +288,9 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 
 void ModifyForest::scaleBrushAt(const Ray & ray, float magnitude)
 {
-    if(!intersectGround(ray) ) return;
+    if(!intersectGround(ray)) {
+		if(!intersectGrid(ray)) return;
+	}
 	
 	IntersectionContext * ctx = intersection();
 	
@@ -517,7 +519,9 @@ void ModifyForest::randomSpaceAt(const Vector3F & pos, const GrowOption & option
 bool ModifyForest::calculateSelecedWeight(const Ray & ray)
 {
     if(numActivePlants() < 1 ) return false;
-	if(!intersectGround(ray) ) return false;
+	if(!intersectGround(ray) ) {
+		if(!intersectGrid(ray)) return false;
+	}
 	
 	IntersectionContext * ctx = intersection();
 	

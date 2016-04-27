@@ -89,7 +89,6 @@ void GLWidget::drawPoints(Array<int, VertexP> * d)
 	GeoDrawer * dr = getDrawer();
 	dr->beginPoint(2.f);
 	
-	// d->printLeafSize();
 	d->begin();
 	while(!d->end()) {
 		Vector3F * p = d->value()->index->t1;

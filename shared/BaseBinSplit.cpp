@@ -215,7 +215,6 @@ void BaseBinSplit::calculateCosts(const BoundingBox & box)
 	    if(isEmptyAlong(axis))
 			continue;
 			
-		int lastOne = m_bins[axis].numSplits()-2;
 /// skip ones on bound
 		for(int i = 1; i < m_bins[axis].numSplits()-1; ++i) {
 			firstEventAlong(axis)[i].calculateCost(ba, bv );

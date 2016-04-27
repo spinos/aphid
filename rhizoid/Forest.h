@@ -15,6 +15,7 @@
 #include <ConvexShape.h>
 #include <ATriangleMesh.h>
 #include <IntersectionContext.h>
+#include <RayMarch.h>
 
 /* http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
  * qw= √(1 + m00 + m11 + m22) /2
@@ -45,6 +46,7 @@ class Forest {
 	IntersectionContext m_intersectCtx;
 	Geometry::ClosestToPointTestResult m_closestPointTest;
 	SphereSelectionContext * m_selectCtx;
+	RayMarch m_march;
 	unsigned m_numPlants;
 	
 public:
@@ -95,6 +97,7 @@ protected:
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);
 	bool intersectGround(const Ray & ray);
+	bool intersectGrid(const Ray & ray);
 	void addPlant(const Matrix44F & tm,
 					const GroundBind & bind,
 					const int & plantTypeId);

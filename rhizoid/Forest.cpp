@@ -60,7 +60,7 @@ void Forest::resetGrid(float gridSize)
 void Forest::updateGrid()
 {
 	m_grid->calculateBBox();
-	// std::cout<<"\n Forest grid bbox "<<m_grid->boundingBox();
+	m_march.initialize(m_grid->boundingBox(), m_grid->gridSize());
 }
 
 const BoundingBox & Forest::gridBoundingBox() const
@@ -129,10 +129,7 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 	if(numPlants() < 1) return false;
 	
 	if(!intersectGround(ray) ) {
-/// empty previous selection if hit nothing
-		//if(mode == SelectionContext::Replace)
-		//	m_activePlants->deselect();
-		return false;
+		if(!intersectGrid(ray) ) return false;
 	}
 	
 	m_activePlants->setCenter(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN);
@@ -316,6 +313,35 @@ bool Forest::intersectGround(const Ray & ray)
 	engine.intersect<cvx::Triangle, KdNode4>(m_ground, &m_intersectCtx );
 	
 	return m_intersectCtx.m_success;
+}
+
+bool Forest::intersectGrid(const Ray & incident)
+{
+	if(!m_march.begin(incident)) return false;
+	sdb::Sequence<sdb::Coord3> added;
+	BoundingBox touchedBox;
+	Vector3F pnt;
+	while(!m_march.end() ) {
+		const std::deque<Vector3F> coords = m_march.touched(selectionRadius(), touchedBox);
+
+		std::deque<Vector3F>::const_iterator it = coords.begin();
+		for(; it != coords.end(); ++it) {
+			const sdb::Coord3 c = m_grid->gridCoord((const float *)&(*it));
+/// already tested
+			if(added.find(c)) continue;
+            
+			added.insert(c);
+
+			if(m_activePlants->touchCell(incident, c, pnt) ) {
+				m_intersectCtx.m_hitP = pnt;
+				m_intersectCtx.m_hitN = Vector3F::YAxis;
+				return true;
+			}
+		}
+		
+		m_march.step();
+	}
+	return false;
 }
 
 void Forest::addPlant(const Matrix44F & tm,

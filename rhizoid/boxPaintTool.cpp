@@ -117,7 +117,8 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	event.getPosition( last_x, last_y );
 	
 	if(!PtrViz) return MS::kSuccess;
-	if(m_currentOpt==opErase) PtrViz->finishErase();
+	if(m_currentOpt==opErase ||
+		m_currentOpt==opMove ) PtrViz->finishErase();
 	if(m_currentOpt==opSelect || m_currentOpt==opSelectByType) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
 	if(m_currentOpt==opSelectGround) AHelper::Info<unsigned>("n active faces", PtrViz->numActiveGroundFaces() );
 	

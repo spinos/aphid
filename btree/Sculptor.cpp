@@ -67,7 +67,7 @@ void Sculptor::setSelectRadius(const float & x)
 	m_active->threshold = x;
 }
 
-const float Sculptor::selectRadius() const
+const float & Sculptor::selectRadius() const
 { return m_active->threshold; }
 
 void Sculptor::setStrength(const float & x) 

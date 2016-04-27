@@ -32,17 +32,13 @@ bool RayMarch::begin(const Ray & r)
 		m_path.m_tmax -= hitMin;
 	}
 	
-	m_path.m_origin += m_path.m_dir * 10e-4;
+	m_path.m_origin += m_path.m_dir * 1e-4f;
 
 	return true;
 }
 
 bool RayMarch::end() 
-{ 
-	if(m_path.m_tmax < 10e-4) return true;
-	
-	return false; 
-}
+{ return m_path.m_tmax < 1e-4f; }
 
 void RayMarch::step() 
 {

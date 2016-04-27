@@ -349,6 +349,7 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 	}
 	finishGrow();
 	AHelper::Info<unsigned>(" MForest load num plants", numPlants() );
+	selection()->deselect();
 	return true;
 }
 

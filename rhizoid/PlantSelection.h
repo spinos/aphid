@@ -80,6 +80,9 @@ public:
     
     void setTypeFilter(int x);
     
+	bool touchCell(const Ray & incident, const sdb::Coord3 & c, 
+					Vector3F & pnt);
+	
 protected:
 
 private:

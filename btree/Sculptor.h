@@ -27,7 +27,7 @@ public:
 	void endAddVertices();
 	
 	void setSelectRadius(const float & x);
-	const float selectRadius() const;
+	const float & selectRadius() const;
 	
 	void setStrength(const float & x);
 	
