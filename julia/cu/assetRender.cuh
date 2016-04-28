@@ -128,12 +128,10 @@ __global__ void assetBox_kernel(uint * pix,
     
     int iBranch = 0, iNode = 0;
 
-    for(;;) {
-        
+    for(int it=0;it<120;++it) {
+    //for(;;) {
         if(tidx < 1) {
-            iBranch = scurrentNode[tidx] >> 9;
-            iNode = scurrentNode[tidx] & 511;
-        
+            
             load_NodeTraverse(sntisLeaf,
                               snttreeleaf,
                               sntaxis,
@@ -148,39 +146,40 @@ __global__ void assetBox_kernel(uint * pix,
         
         if(((iBranch << 9) | iNode) == scurrentNode[0]) { 
 /// update Ncurrent if ray is active       
-            if(ray_box_slab(t0, t1,
+            ray_box_slab(t0, t1,
                             t0Normal, t1Normal, 
-                            incident, box) ) {
+                            incident, box);
+            
             if(*sntisLeaf) {
 /// leaf node          
                 if(hit_leaf(snttreeleaf) ) {
 /// update shading normal for non-empty leaf box  
                     sshadingNormal[tidx] = t0Normal;
 /// end of ray
-                    scurrentNode[tidx] = 0;   
+                    iBranch = 0;
+                    iNode = 0; 
                 }
-                else
-                    climb_rope_traverse(scurrentNode[tidx],
-                            box, 
+                else {
+                    climb_rope_traverse(box, 
                             iBranch, 
                             iNode,
                             t1Normal, 
                             *snttreeleaf,
                             ropes);
+                    
+                }
             }
             else {
 /// internal node
                 ray_progress(t0Position, incident, t0);
-                inner_traverse(scurrentNode[tidx], 
-                               box, iBranch, iNode,
+                inner_traverse(box, iBranch, iNode,
                                    t0Position,
                                    *sntaxis, *sntsplitPos,
                                    *sntinnerOffset);
+
             }
-            }
-            else {
-                scurrentNode[tidx] = 0;   
-            }
+/// update Ncurrent
+            scurrentNode[tidx] = (iBranch << 9) | iNode;
         }
         
         __syncthreads();
@@ -189,10 +188,13 @@ __global__ void assetBox_kernel(uint * pix,
 	    reduceMaxInBlock<NumThreads, int>(tidx, scurrentNode);
 	
 	    __syncthreads();
-	    
+        
 /// exit if no active rays
 	    if(scurrentNode[0] < 1)
 	        break;
+
+        scurrentNode[tidx] = (iBranch << 9) | iNode;
+        __syncthreads();
     }
   
     if(px < c_renderRect.x || px >= c_renderRect.z) return;

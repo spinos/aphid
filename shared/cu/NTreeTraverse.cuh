@@ -166,8 +166,7 @@ inline __device__ void decode_rope(const int & src, int & itreelet, int & inode)
 }
 
 /// find side by t1 normal
-inline __device__ void climb_rope_traverse(int & Ncurrent,
-                            Aabb4 & box, 
+inline __device__ void climb_rope_traverse(Aabb4 & box, 
                             int & branchIdx, 
                             int & nodeIdx,
                             const float3 & t1Normal, 
@@ -176,14 +175,15 @@ inline __device__ void climb_rope_traverse(int & Ncurrent,
 {
     int iRope = leaf._ropeInd[side2_on_aabb4<float4>(box, t1Normal)];
     if(iRope < 1) {
-        Ncurrent = 0;
+/// end of traverse
+        branchIdx = 0;
+        nodeIdx = 0;
         return;
     }
     
     const Rope & rp = ropes[iRope];
     decode_rope(rp.treeletNode, branchIdx, nodeIdx);
     aabb4_convert<Rope>(box, rp); 
-    Ncurrent = (branchIdx << 9) | nodeIdx;
 }
 
 inline __device__ int climb_rope(Aabb4 & box, 
@@ -262,8 +262,7 @@ inline __device__ int hit_leaf(const NTreeLeaf * leaf)
     return leaf->_primLength > 0;
 }
 
-inline __device__ void inner_traverse(int & Ncurrent,
-                                      Aabb4 & box,
+inline __device__ void inner_traverse(Aabb4 & box,
                                  int & iBranch,
                                  int & iNode,
                                  const float3 & t0Position,
@@ -291,8 +290,7 @@ inline __device__ void inner_traverse(int & Ncurrent,
             iNode = 1;
         }
     }
-/// update Ncurrent
-    Ncurrent = (iBranch << 9) | iNode;
+
 }
 #endif        //  #ifndef NTREETRAVERSE_CUH
 
