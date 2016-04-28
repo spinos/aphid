@@ -35,15 +35,15 @@ __global__ void assetBox_kernel(uint * pix,
     int * sntinnerOffset = (int *)&sdata[15];
 /// 16 -> 21    grid box
     float *sgb = &sdata[16];
-/// 24 -> NumThreads + 23   Ncurrent for each ray 
-///                         as branch | node
-///                         Ncurrent[0] is Ntraverse
+/// 24 -> NumThreads + 23   Ncurrent 
+///             branch | node  for each ray
+///             max reduce to Ncurrent[0] as Ntraverse
     int * scurrentNode = (int *)&sdata[24];
 /// NumThreads + 24 -> NumThreads + 24 + 3 * NumThreads - 1
-///                    shading normal for each ray
+///             shading normal for each ray
     float3 * sshadingNormal = (float3 *)&sdata[NumThreads + 24];
 /// 4 * NumThreads + 24 -> 4 * NumThreads + 24 + 8 - 1
-///                     tree leaf
+///             current tree leaf
     NTreeLeaf * snttreeleaf = (NTreeLeaf *)&sdata[4 * NumThreads + 24];
     
     const int tidx = threadIdx.x + blockDim.x * threadIdx.y;
@@ -120,24 +120,22 @@ __global__ void assetBox_kernel(uint * pix,
 /// start with grid box
     aabb4_r(box, sgb);
 /// branch 0 node 0
+    int iBranch = 0, iNode = 0;
 	scurrentNode[tidx] = 0;
 	__syncthreads();
     
     float3 t0Normal, t1Normal, t0Position;
     sshadingNormal[tidx] = make_float3(0.f, 0.f, 0.f);
     
-    int iBranch = 0, iNode = 0;
-
-    for(int it=0;it<120;++it) {
-    //for(;;) {
+    //for(int it=0;it<120;++it) {
+    for(;;) {
         if(tidx < 1) {
-            
-            load_NodeTraverse(sntisLeaf,
+            load_traverseNode(sntisLeaf,
                               snttreeleaf,
                               sntaxis,
                               sntsplitPos,
                               sntinnerOffset,
-                              iBranch, iNode,
+                              scurrentNode[tidx],
                               branches, leaves);
             
         }
@@ -146,9 +144,9 @@ __global__ void assetBox_kernel(uint * pix,
         
         if(((iBranch << 9) | iNode) == scurrentNode[0]) { 
 /// update Ncurrent if ray is active       
-            ray_box_slab(t0, t1,
+            if(ray_box_slab(t0, t1,
                             t0Normal, t1Normal, 
-                            incident, box);
+                            incident, box)) {
             
             if(*sntisLeaf) {
 /// leaf node          
@@ -160,13 +158,13 @@ __global__ void assetBox_kernel(uint * pix,
                     iNode = 0; 
                 }
                 else {
+                    
                     climb_rope_traverse(box, 
                             iBranch, 
                             iNode,
                             t1Normal, 
                             *snttreeleaf,
-                            ropes);
-                    
+                            ropes);        
                 }
             }
             else {
@@ -178,10 +176,17 @@ __global__ void assetBox_kernel(uint * pix,
                                    *sntinnerOffset);
 
             }
-/// update Ncurrent
-            scurrentNode[tidx] = (iBranch << 9) | iNode;
+            }
+            else {
+/// missed box
+                iBranch = 0;
+                iNode = 0; 
+            }
+
+            
         }
-        
+/// update/restore Ncurrent
+        scurrentNode[tidx] = (iBranch << 9) | iNode;
         __syncthreads();
 	
 /// count active rays, result stored in srayActive[0]
@@ -193,8 +198,6 @@ __global__ void assetBox_kernel(uint * pix,
 	    if(scurrentNode[0] < 1)
 	        break;
 
-        scurrentNode[tidx] = (iBranch << 9) | iNode;
-        __syncthreads();
     }
   
     if(px < c_renderRect.x || px >= c_renderRect.z) return;

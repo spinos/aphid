@@ -235,17 +235,16 @@ inline __device__ int hit_primitive(Aabb4 & box,
     return nhit;
 }
 
-inline __device__ void load_NodeTraverse(int * isNodeLeaf,
+inline __device__ void load_traverseNode(int * isNodeLeaf,
                                         NTreeLeaf * leaf,
                                         int * innerAxis,
                                         float * innerSplitPos,
                                         int * innerOffset,
-                                        const int & iBranch,
-                                        const int & iNode,
+                                        const int & Ncurrent,
                                         NTreeBranch4 * branches,
                                         NTreeLeaf * leaves)
 {
-    const KdNode * kn = get_branch_node(branches[iBranch], iNode);
+    const KdNode * kn = get_branch_node(branches[Ncurrent>>9], Ncurrent & 511);
     *isNodeLeaf = is_leaf(kn);
     if(*isNodeLeaf) {
         *leaf = leaves[get_prim_offset(kn)];
