@@ -2,6 +2,7 @@
 #define NTREETRAVERSE_CUH
 
 #include "RayIntersection.cuh"
+#define MAX_NUM_PRIM_PER_LEAF 64
 
 struct KdNode {
     union {
@@ -248,17 +249,15 @@ inline __device__ void load_traverseNode(int * isNodeLeaf,
     *isNodeLeaf = is_leaf(kn);
     if(*isNodeLeaf) {
         *leaf = leaves[get_prim_offset(kn)];
+/// limit n prim per leaf
+        if(leaf->_primLength > MAX_NUM_PRIM_PER_LEAF) 
+            leaf->_primLength = MAX_NUM_PRIM_PER_LEAF;
         
     } else {
         *innerAxis = get_split_axis(kn);
         *innerSplitPos = get_split_pos(kn);
         *innerOffset = get_inner_offset(kn);
     }
-}
-
-inline __device__ int hit_leaf(const NTreeLeaf * leaf)
-{
-    return leaf->_primLength > 0;
 }
 
 inline __device__ void inner_traverse(Aabb4 & box,
@@ -291,5 +290,17 @@ inline __device__ void inner_traverse(Aabb4 & box,
     }
 
 }
+
+template<typename T>
+inline __device__ void load_leafPrims(T * prims,
+                                const T * src,
+                                int * indirections,
+                                const NTreeLeaf * leaf,
+                                const int & tid)
+{
+    int ind = indirections[leaf->_primStart + tid];
+    prims[tid] = src[ind];
+}
+
 #endif        //  #ifndef NTREETRAVERSE_CUH
 

@@ -19,7 +19,6 @@ template<typename T, typename Tn>
 class VoxelGrid : public CartesianGrid {
 
 	sdb::VectorArray<Voxel> m_voxels;
-	sdb::VectorArray<Contour> m_contours;
 	sdb::VectorArray<AOrientedBox> m_oboxes;
 	int m_maxLevel;
 	
@@ -48,7 +47,6 @@ public:
 				BuildProfile * profile);
 	
 	int numVoxels() const;
-	int numContours() const;
 	
 	const sdb::VectorArray<Voxel> & voxels() const;
 	sdb::VectorArray<Voxel> * voxelsR();
@@ -75,7 +73,6 @@ void VoxelGrid<T, Tn>::create(KdNTree<T, Tn > * tree,
 {
 	std::cout<<"\n creating voxel grid\n max level "<<profile->_maxLevel<<"\n";
 	m_voxels.clear();
-	m_contours.clear();
 	m_oboxes.clear();
 	
 	setBounding(b);
@@ -184,10 +181,6 @@ void VoxelGrid<T, Tn>::createVoxels(KdNTree<T, Tn > * tree, int level, BuildProf
 template<typename T, typename Tn>
 int VoxelGrid<T, Tn>::numVoxels() const
 { return m_voxels.size(); }
-
-template<typename T, typename Tn>
-int VoxelGrid<T, Tn>::numContours() const
-{ return m_contours.size(); }
 
 template<typename T, typename Tn>
 const sdb::VectorArray<Voxel> & VoxelGrid<T, Tn>::voxels() const

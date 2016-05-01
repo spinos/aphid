@@ -104,7 +104,7 @@ inline __device__ Aabb4 calculate_bbox(const Voxel & v)
 {
     uint x, y, z;
 	decodeMorton3D(v.m_pos, x, y, z);
-	float h = 1<< (8 - (v.m_level & 15) );
+	float h = 1<< (9 - (v.m_level & 15) );
 	
 	Aabb4 b;
 	b.low.x = x - h;
@@ -363,6 +363,26 @@ inline __device__ int ray_voxel_hull2(float &t0, float & t1,
     }
     
     return 1;
+}
+
+inline __device__ int hit_leaf(float & t0, float & t1,
+                        float3 & t0Normal, float3 & t1Normal,
+                        const Ray4 & incident,
+                        const Voxel * prims,
+                        const int & numPrims)
+{
+    if(numPrims < 1) return 0;
+    int stat = 0;
+    for(int i=0; i<numPrims; ++i) {
+        Aabb4 box = calculate_bbox(prims[i]);
+        if(ray_box_slab(t0, t1, 
+                         t0Normal, t1Normal,
+                         incident, 
+                         box) ) {
+            stat = 1;
+                         }
+    }
+    return stat;
 }
 
 #endif

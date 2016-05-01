@@ -17,7 +17,7 @@ __global__ void assetBox_kernel(uint * pix,
                                 NTreeLeaf * leaves,
                                 Rope * ropes,
                                 int * indirections,
-                                Aabb4 * primitives)
+                                Voxel * primitives)
 {
     float *sdata = SharedMemory<float>();
 /// 0  -> 5     grid translation and scaling
@@ -35,7 +35,7 @@ __global__ void assetBox_kernel(uint * pix,
     int * sntinnerOffset = (int *)&sdata[15];
 /// 16 -> 21    grid box
     float *sgb = &sdata[16];
-/// 24 -> NumThreads + 23   Ncurrent 
+/// 24 -> NumThreads + 24 - 1   Ncurrent 
 ///             branch | node  for each ray
 ///             max reduce to Ncurrent[0] as Ntraverse
     int * scurrentNode = (int *)&sdata[24];
@@ -45,6 +45,9 @@ __global__ void assetBox_kernel(uint * pix,
 /// 4 * NumThreads + 24 -> 4 * NumThreads + 24 + 8 - 1
 ///             current tree leaf
     NTreeLeaf * snttreeleaf = (NTreeLeaf *)&sdata[4 * NumThreads + 24];
+/// 4 * NumThreads + 32 -> 4 * NumThreads + 32 + 10 * MAX_NUM_PRIM_PER_LEAF - 1
+///             current leaf voxels
+    Voxel * sleafPrims = (Voxel *)&sdata[4 * NumThreads + 32];
     
     const int tidx = threadIdx.x + blockDim.x * threadIdx.y;
     if(tidx < 1) {
@@ -142,6 +145,16 @@ __global__ void assetBox_kernel(uint * pix,
         
         __syncthreads();
         
+        if(*sntisLeaf) {
+            if(tidx < snttreeleaf->_primLength)
+                load_leafPrims<Voxel>(sleafPrims, 
+                            primitives,
+                            indirections, 
+                            snttreeleaf, 
+                            tidx);            
+            __syncthreads();
+        }
+        
         if(((iBranch << 9) | iNode) == scurrentNode[0]) { 
 /// update Ncurrent if ray is active       
             if(ray_box_slab(t0, t1,
@@ -150,7 +163,11 @@ __global__ void assetBox_kernel(uint * pix,
             
             if(*sntisLeaf) {
 /// leaf node          
-                if(hit_leaf(snttreeleaf) ) {
+                if(hit_leaf(t0, t1,
+                    t0Normal, t1Normal, 
+                    incident,
+                    sleafPrims,
+                    snttreeleaf->_primLength) ) {
 /// update shading normal for non-empty leaf box  
                     sshadingNormal[tidx] = t0Normal;
 /// end of ray

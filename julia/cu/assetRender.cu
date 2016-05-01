@@ -31,7 +31,7 @@ void drawCube(uint * color,
             (NTreeLeaf *)leaves,
             (Rope *)ropes,
             indirections,
-            (Aabb4 *)primitives);
+            (Voxel *)primitives);
 	}
 	else if(blockx == 16) {
 	    assetBox_kernel<256> <<< grid, block, 16000 >>>(color, 
@@ -41,7 +41,7 @@ void drawCube(uint * color,
             (NTreeLeaf *)leaves,
             (Rope *)ropes,
             indirections,
-            (Aabb4 *)primitives);
+            (Voxel *)primitives);
 	}
 }
 
