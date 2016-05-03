@@ -222,7 +222,7 @@ inline __device__ int ray_box_slab(float & t0, float & t1,
 /// first exit
 	t1 = fmin( t_max.z, fmin(t_max.y, fmin(t_max.x, ray.d.w)) );
 
-    if(t0 >= t1 || t1 < 0.f) return 0;
+    if(t0 > t1 || t1 < 0.f) return 0;
    
     choose_one(t0Normal, isNegative);
     choose_negative_one(t1Normal, isNegative);

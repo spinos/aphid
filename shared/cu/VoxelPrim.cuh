@@ -367,20 +367,26 @@ inline __device__ int ray_voxel_hull2(float &t0, float & t1,
 
 inline __device__ int hit_leaf(float & t0, float & t1,
                         float3 & t0Normal, float3 & t1Normal,
+                        float3 & outNormal,
                         const Ray4 & incident,
                         const Voxel * prims,
                         const int & numPrims)
 {
     if(numPrims < 1) return 0;
     int stat = 0;
+    float mint0 = 1e20f;
     for(int i=0; i<numPrims; ++i) {
         Aabb4 box = calculate_bbox(prims[i]);
         if(ray_box_slab(t0, t1, 
                          t0Normal, t1Normal,
                          incident, 
                          box) ) {
-            stat = 1;
-                         }
+            if(t0 < mint0) {
+                mint0 = t0;
+                stat = 1;
+                outNormal = t0Normal;
+            }
+        }
     }
     return stat;
 }

@@ -165,17 +165,15 @@ __global__ void assetBox_kernel(uint * pix,
 /// leaf node          
                 if(hit_leaf(t0, t1,
                     t0Normal, t1Normal, 
+                    sshadingNormal[tidx],
                     incident,
                     sleafPrims,
                     snttreeleaf->_primLength) ) {
-/// update shading normal for non-empty leaf box  
-                    sshadingNormal[tidx] = t0Normal;
 /// end of ray
                     iBranch = 0;
                     iNode = 0; 
                 }
                 else {
-                    
                     climb_rope_traverse(box, 
                             iBranch, 
                             iNode,
@@ -202,6 +200,7 @@ __global__ void assetBox_kernel(uint * pix,
 
             
         }
+        __syncthreads();
 /// update/restore Ncurrent
         scurrentNode[tidx] = (iBranch << 9) | iNode;
         __syncthreads();
@@ -225,5 +224,4 @@ __global__ void assetBox_kernel(uint * pix,
                             128 + 127 * sshadingNormal[tidx].z);
 	
 }
-
 
