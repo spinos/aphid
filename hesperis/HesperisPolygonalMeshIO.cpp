@@ -57,9 +57,7 @@ bool HesperisPolygonalMeshIO::CreateMeshData(APolygonalMesh * data, const MDagPa
     
     MPointArray ps;
     MPoint wp;
-	MMatrix worldTm;
-    
-    worldTm = GetWorldTransform(path);
+	MMatrix worldTm = AHelper::GetWorldTransformMatrix(path);
     fmesh.getPoints(ps, MSpace::kObject);
 	
     unsigned i = 0;

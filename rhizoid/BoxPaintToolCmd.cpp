@@ -13,6 +13,7 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <ATriangleMesh.h>
+#include <PrincipalComponents.h> 
 
 #define kBeginPickFlag "-bpk" 
 #define kBeginPickFlagLong "-beginPick"
@@ -34,6 +35,10 @@
 #define kConnectVoxFlagLong "-connectVoxel"
 #define kSelectVoxFlag "-svx" 
 #define kSelectVoxFlagLong "-selectVox"
+#define kPCAFlag "-pca" 
+#define kPCAFlagLong "-principalComponent"
+
+using namespace aphid;
 
 proxyPaintTool::~proxyPaintTool() {}
 
@@ -62,7 +67,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kVoxFlag, kVoxFlagLong);
 	syntax.addFlag(kConnectVoxFlag, kConnectVoxFlagLong);
 	syntax.addFlag(kSelectVoxFlag, kSelectVoxFlagLong, MSyntax::kLong);
-	
+	syntax.addFlag(kPCAFlag, kPCAFlagLong);
 	return syntax;
 }
 
@@ -83,6 +88,8 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	if(m_operation == opVoxelize) return voxelizeSelected();
 	
 	if(m_operation == opConnectVoxel) return connectVoxelSelected();
+	
+    if(m_operation == opPrincipalComponent) return performPCA();
 		
 	aphid::ASearchHelper finder;
 
@@ -197,6 +204,10 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		m_operation = opLoadCache;
+	}
+    
+    if (argData.isFlagSet(kPCAFlag)) {
+		m_operation = opPrincipalComponent;
 	}
 	
 	return MS::kSuccess;
@@ -582,5 +593,87 @@ void proxyPaintTool::checkOutputConnection(MObject & node, const MString & outNa
 	
 	modif.reparentNode(trans, parentPath.node() );
 	modif.doIt();
+}
+
+MStatus proxyPaintTool::performPCA()
+{
+    MStatus stat;
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) to pca");
+		return MS::kFailure;
+	}
+
+	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		return MS::kFailure;
+	}
+	
+	aphid::sdb::VectorArray<aphid::cvx::Triangle> tris;
+	aphid::BoundingBox bbox;
+	
+	for(;!meshIter.isDone(); meshIter.next() ) {
+		
+		MDagPath meshPath;
+		meshIter.getDagPath(meshPath);
+		getMeshTris(tris, bbox, meshPath);
+	}
+	
+	if(tris.size() < 1) {
+		MGlobal::displayWarning("proxyPaintTool no triangle added");
+		return MS::kFailure;
+	}
+	
+	bbox.round();
+    
+    const int nt = tris.size();
+    AHelper::Info<int>("proxyPaintTool pca n triangles", nt );
+    std::vector<Vector3F> pnts;
+    for(int i=0; i< nt; ++i) {
+        const aphid::cvx::Triangle * t = tris[i];
+/// at triangle center
+        pnts.push_back(t->P(0) * .33f 
+                       + t->P(1) * .33f
+                       + t->P(2) * .33f);
+    }
+    
+    PrincipalComponents<std::vector<Vector3F> > obpca;
+    AOrientedBox obox = obpca.analyze(pnts, pnts.size() );
+	
+    AHelper::Info<Vector3F>("obox c", obox.center() );
+    AHelper::Info<Matrix33F>("obox r", obox.orientation() );
+    AHelper::Info<Vector3F>("obox e", obox.extent() );
+    MDoubleArray rd;
+    rd.setLength(16);
+    const Vector3F exob = obox.extent();
+    const Matrix33F rtob = obox.orientation();
+    Vector3F rx = obox.orientation().row(0) * exob.x;
+    
+    rd[0] = rx.x;
+    rd[1] = rx.y;
+    rd[2] = rx.z;
+    rd[3] = 0.f; 
+    
+    Vector3F ry = obox.orientation().row(1) * exob.y;
+    rd[4] = ry.x;
+    rd[5] = ry.y;
+    rd[6] = ry.z;
+    rd[7] = 0.f;
+    
+    Vector3F rz = obox.orientation().row(2) * exob.z;
+    rd[8] = rz.x;
+    rd[9] = rz.y;
+    rd[10] = rz.z;
+    rd[11] = 0.f;
+    
+    rd[12] = obox.center().x;
+    rd[13] = obox.center().y;
+    rd[14] = obox.center().z;
+    rd[15] = 1.f;
+    setResult(rd);
+	return stat;
 }
 //:~
