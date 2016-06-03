@@ -144,7 +144,7 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
 	for(i=0; i<n; i++) {
 		if(!IsCurveValid(paths[i])) continue;
 		
-		worldTm = GetWorldTransform(paths[i]);
+		worldTm = AHelper::GetWorldTransformMatrix(paths[i]);
 		
 		MFnNurbsCurve fcurve(paths[i].node());
 		nj = fcurve.numCVs();

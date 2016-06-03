@@ -167,7 +167,7 @@ bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup
         //MGlobal::displayInfo(MString("p drift ")+pDrift+
         //                     MString("i drift ")+iDrift);
 		
-        worldTm = GetWorldTransform(paths[i]);
+        worldTm = AHelper::GetWorldTransformMatrix(paths[i]);
 		
 		fmesh.getPoints(ps, MSpace::kObject);
 		fmesh.getTriangles(triangleCounts, triangleVertices);

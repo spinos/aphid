@@ -53,7 +53,8 @@ private:
 	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
 					aphid::BoundingBox & bbox,
 					const MDagPath & meshPath);
-	
+	MStatus performPCA();
+    
 private:
 	enum Operation {
 		opUnknown = 0,
@@ -65,7 +66,8 @@ private:
 		opSaveCache = 6,
 		opLoadCache = 7,
 		opVoxelize = 8,
-		opConnectVoxel = 9
+		opConnectVoxel = 9,
+        opPrincipalComponent = 10
 	};
 	
 	Operation m_operation;
