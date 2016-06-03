@@ -15,9 +15,16 @@ include_directories (../shared
 set (HEADER_FILES "../shared/Base3DView.h" 
 "window.h"
 "glwidget.h"
-"../shared/Morton3D.h")
+"../shared/Morton3D.h"
+Parameter.h
+Scene.h
+Delaunay2D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
+../shared/CartesianGrid.cpp
+Parameter.cpp
+Scene.cpp
+Delaunay2D.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
@@ -36,6 +43,7 @@ set (Aphid_Library "D:/aphid/lib/aphid.lib")
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
+/users/jianzhang/aphid/lib/libaphidSdb.a
 /users/jianzhang/aphid/lib/libaphidUI.a)
 endif ()
 target_link_libraries (foo ${Aphid_Library})

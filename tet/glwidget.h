@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include <Base3DView.h>
+#include "Scene.h"
 
 class GLWidget : public aphid::Base3DView
 {
@@ -10,7 +11,7 @@ class GLWidget : public aphid::Base3DView
 
 public:
     
-    GLWidget(QWidget *parent = 0);
+    GLWidget(ttg::Scene * sc, QWidget *parent = 0);
     ~GLWidget();
 	
 protected:    
@@ -26,8 +27,9 @@ protected:
 private:
 
 private slots:
-    void simulate();
 
+private:
+	ttg::Scene * m_scene;
 };
 //! [3]
 

@@ -37,7 +37,7 @@ public:
 	virtual unsigned * getQuadIndices() const;
 	virtual unsigned numQuads() const;
 	virtual Vector3F getFaceNormal(const unsigned & idx) const;
-	virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
+	//virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
 	
 	unsigned * quadUVIds();
 	unsigned * getQuadUVIds() const;

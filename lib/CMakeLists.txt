@@ -122,7 +122,7 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/Triangle.cpp
 ../shared/BarycentricCoordinate.cpp  
 ../shared/IntersectionContext.cpp 
-../shared/SelectionContext.cpp
+##../shared/SelectionContext.cpp
 ../shared/BaseTransform.cpp
 ../shared/Segment.cpp
 ../shared/CurveBuilder.cpp 

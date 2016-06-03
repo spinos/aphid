@@ -2,11 +2,12 @@
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include "glwidget.h"
-#include <KdTreeDrawer.h>
+#include <GeoDrawer.h>
 using namespace aphid;
 
-GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
+GLWidget::GLWidget(ttg::Scene * sc, QWidget *parent) : Base3DView(parent)
 {
+	m_scene = sc;
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
@@ -21,11 +22,13 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
-	connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
+	m_scene->init();
+	//connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void GLWidget::clientDraw()
 {
+	m_scene->draw(getDrawer() );
 }
 //! [7]
 
@@ -41,11 +44,6 @@ void GLWidget::clientDeselect()
 
 //! [10]
 void GLWidget::clientMouseInput(Vector3F & stir)
-{
-}
-//! [10]
-
-void GLWidget::simulate()
 {
 }
 

@@ -229,7 +229,7 @@ Vector3F PatchMesh::getFaceNormal(const unsigned & idx) const
 	PointInsidePolygonTest pa = patchAt(idx);
 	return pa.normal();
 }
-
+/*
 char PatchMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
 {
 	PointInsidePolygonTest pa = patchAt(idx);
@@ -243,6 +243,6 @@ char PatchMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
 	
 	return 1;
 }
-
+*/
 }
 //:~

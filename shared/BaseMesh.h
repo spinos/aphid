@@ -17,7 +17,7 @@
 
 namespace aphid {
 
-class SelectionContext;
+//class SelectionContext;
 
 class BaseMesh : public Geometry, public Boundary {
 public:
@@ -85,7 +85,7 @@ public:
 	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	char selectComponent(IntersectionContext * ctx) const;
 	
-	virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
+	//virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
 	
 	void putIntoObjectSpace();
 	

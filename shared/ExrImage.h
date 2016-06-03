@@ -3,6 +3,7 @@
 
 #include "BaseImage.h"
 
+namespace aphid {
 class ExrImage : public BaseImage
 {
     char *_pixels;
@@ -24,5 +25,6 @@ private:
     void tileCoord(const int ind, const int tileSize, int & x, int & y) const;
 	
 };
+}
 #endif        //  #ifndef EXRIMAGE_H
 
