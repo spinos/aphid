@@ -16,6 +16,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "window.h"
 "glwidget.h"
 "../shared/Morton3D.h"
+triangulation.h
 Parameter.h
 Scene.h
 Delaunay2D.h)
