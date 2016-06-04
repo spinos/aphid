@@ -14,7 +14,7 @@ using namespace aphid;
 namespace ttg {
 
 Delaunay2D::Delaunay2D() :
-m_endTri(25) 
+m_endTri(50) 
 {}
 
 Delaunay2D::~Delaunay2D() 
@@ -49,7 +49,7 @@ void Delaunay2D::generateSamples()
     for(j=0; j < dim; j++) {
 		for(i=0; i < dim; i++) {
 			sample = ori + Vector3F(h* (float)i, h* (float)j, (float)h);
-			if(RandomF01() < .99f )
+			if(RandomF01() < .95f )
 				bgg.addCell(sample, level, 0);
 		}
 	}
@@ -324,29 +324,24 @@ bool Delaunay2D::canEdgeFlip(const Quadrilateral & q) const
 {
 	ITRIANGLE * ta = q.ta;
 	std::cout<<" ta"; printTriangleVertice(ta);
-	std::cout<<" apex "<<q.apex<<"\n";
+	//std::cout<<" apex "<<q.apex<<"\n";
 	
 	ITRIANGLE * tb = q.tb;
 	if(!tb) return false;
 	
 	std::cout<<" tb"; printTriangleVertice(tb);
-	std::cout<<" anti-apex "<<q.aapex<<"\n";
-	std::cout<<" edge ("<<q.e.v[0]<<", "<<q.e.v[1]<<")\n";
+	//std::cout<<" anti-apex "<<q.aapex<<"\n";
+	//std::cout<<" edge ("<<q.e.v[0]<<", "<<q.e.v[1]<<")\n";
 	
 /// belongs to supertriangle
 	if(q.apex < 3 || q.aapex < 3) return false;
 	
-	std::cout<<" check empty principle\n";
+	//std::cout<<" check empty principle\n";
 	TriCircle cir;
 	circumCircle(cir, m_X[tb->p1], m_X[tb->p2], m_X[tb->p3]);
-	if(m_X[q.apex].distanceTo(cir.pc) < cir.r ) {
-		//TriCircle cir1;
-		//circumCircle(cir1, m_X[q.apex], m_X[q.e.v[1]], m_X[q.aapex]);
-		//if(m_X[q.e.v[0]].distanceTo(cir1.pc) <= cir1.r) {
-		//	if(cir1.r >= cir.r) return false;
-		//}
+	if(m_X[q.apex].distanceTo(cir.pc) < cir.r )
 		return true;
-	}
+	
 	//circumCircle(cir, m_X[ta->p1], m_X[ta->p2], m_X[ta->p3]);
 	//if(m_X[q.aapex].distanceTo(cir.pc) <= cir.r )
 	//	return true;
@@ -437,18 +432,19 @@ void Delaunay2D::processEdgeFlip(Quadrilateral & q)
 		printTriangleVertice(q.nei[i]);
 	}
 	q.ta->p1 = q.apex;
-	q.ta->p2 = q.aapex;
-	q.ta->p3 = q.e.v[1];
-	q.tb->p1 = q.aapex;
-	q.tb->p2 = q.apex;
-	q.tb->p3 = q.e.v[0];
+	q.ta->p2 = q.e.v[0];
+	q.ta->p3 = q.aapex;
+	
+	q.tb->p1 = q.apex;
+	q.tb->p2 = q.aapex;
+	q.tb->p3 = q.e.v[1];
 /// update neighbors
 	int ae, be;
 	connectTriangles(q.tb, q.ta, be, ae);
-	connectTriangles(q.nei[2], q.ta, be, ae);
-	connectTriangles(q.nei[3], q.ta, be, ae);
-	connectTriangles(q.nei[0], q.tb, be, ae);
-	connectTriangles(q.nei[1], q.tb, be, ae);
+	connectTriangles(q.nei[0], q.ta, be, ae);
+	connectTriangles(q.nei[1], q.ta, be, ae);
+	connectTriangles(q.nei[2], q.tb, be, ae);
+	connectTriangles(q.nei[3], q.tb, be, ae);
 }
 
 void Delaunay2D::spawnEdges(std::deque<Quadrilateral> & qls)
@@ -456,22 +452,20 @@ void Delaunay2D::spawnEdges(std::deque<Quadrilateral> & qls)
 	Quadrilateral q0 = qls[0];
 	std::cout<<"\n spawn ";printQuadrilateral(&q0);
 	
-	std::cout<<" spawn 0";
 	Quadrilateral q1;
 	q1.ta = q0.ta;
-	q1.tb = q0.nei[2];
+	q1.tb = q0.nei[1];
 	q1.apex = q0.apex;
 	findAntiApex(q1);
-	std::cout<<" spawn quad0"; printQuadrilateral(&q1);
+	std::cout<<" quad0"; printQuadrilateral(&q1);
 	qls.push_back(q1);
 	
-	std::cout<<" spawn 1";
 	Quadrilateral q2;
-	q2.ta = q0.nei[1];
-	q2.tb = q0.tb;
-	q2.apex = oppositeVertex(q0.nei[1], q0.aapex, q0.e.v[0]);
+	q2.ta = q0.tb;
+	q2.tb = q0.nei[2];
+	q2.apex = q0.apex;
 	findAntiApex(q2);
-	std::cout<<" spawn quad1"; printQuadrilateral(&q2);
+	std::cout<<" quad1"; printQuadrilateral(&q2);
 	qls.push_back(q2);
 }
 
