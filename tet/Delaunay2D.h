@@ -69,14 +69,22 @@ private:
 					const aphid::Vector3F & c) const;
 	void flipEdges(std::deque<Quadrilateral> & qls);
 	bool canEdgeFlip(const Quadrilateral & q) const;
-	IEDGE findEdge(const ITRIANGLE * tri, const int & p) const;
+	IEDGE findOppositeEdge(const ITRIANGLE * tri, const int & p) const;
 	bool findAntiApex(Quadrilateral & q) const;
 	int findAntiApex(const ITRIANGLE * tri, const IEDGE & e) const;	
-	int findNeighborEdge(const ITRIANGLE * tri,  ITRIANGLE * tgt) const;
 	void processEdgeFlip(Quadrilateral & q);
 	void findQuadNeighbor(Quadrilateral & q);
-	bool connectTriangleAB(ITRIANGLE * b, ITRIANGLE * a, const int & p);
+	void spawnEdges(std::deque<Quadrilateral> & qls);
 	void printTriangleVertice(const ITRIANGLE * a) const;
+	void printQuadrilateral(const Quadrilateral * q) const;
+	int containtsVertex(const ITRIANGLE * a, const int & p) const;
+	int previousVertex(const ITRIANGLE * a, const int & i) const;
+	int currentVertex(const ITRIANGLE * a, const int & i) const;
+	int nextVertex(const ITRIANGLE * a, const int & i) const;
+	int oppositeVertex(const ITRIANGLE * a, const int & va, const int & vb) const;
+	bool connectTriangles(ITRIANGLE * b, ITRIANGLE * a,
+						int & be, int & ae) const;
+	
 };
 
 }
