@@ -13,7 +13,10 @@
 using namespace aphid;
 namespace ttg {
 
-Delaunay2D::Delaunay2D() {}
+Delaunay2D::Delaunay2D() :
+m_endTri(25) 
+{}
+
 Delaunay2D::~Delaunay2D() 
 {
 	delete[] m_X;
@@ -21,6 +24,12 @@ Delaunay2D::~Delaunay2D()
 }
 
 bool Delaunay2D::init() 
+{
+	generateSamples();
+	triangulate();
+}
+
+void Delaunay2D::generateSamples()
 {
 	std::cout<<" generate samples by 16 X 16 grid\n";
 	BoundingBox bbx(0.f, 0.f, 0.f,
@@ -65,7 +74,10 @@ bool Delaunay2D::init()
 		m_X[i++].set(sample.x + RandomFn11() * 0.4f, sample.y + RandomFn11() * 0.4f, 0.f);
 	    cel->next();
 	}
-	
+}
+
+bool Delaunay2D::triangulate()
+{
 	ITRIANGLE superTri;
 	superTri.p1 = 0;
 	superTri.p2 = 1;
@@ -73,12 +85,11 @@ bool Delaunay2D::init()
 	m_numTri = 0;
 	m_triangles[m_numTri++] = superTri;
 	
-	i = 3;
-#define ENDNV 28
-	for(;i<ENDNV;++i) {
+	int i = 3;
+	for(;i<m_endTri;++i) {
 /// Lawson's find the triangle that contains X[i]
 		std::cout<<"\n insert X["<<i<<"]\n";
-		j = searchTri(m_X[i]);
+		int j = searchTri(m_X[i]);
 		ITRIANGLE t = m_triangles[j];
 
 /// vertices of Tri[j]		
@@ -155,7 +166,22 @@ bool Delaunay2D::init()
 		flipEdges(qls);
 		
 	}
+	std::cout<<" end triangulate X["<<i-1<<"]"<<std::endl;
 	return true;
+}
+
+bool Delaunay2D::progressForward()
+{ 
+	m_endTri++;
+	if(m_endTri>m_N) m_endTri=m_N;
+	return triangulate(); 
+}
+
+bool Delaunay2D::progressBackward()
+{ 
+	m_endTri--;
+	if(m_endTri<5) m_endTri=5;
+	return triangulate(); 
 }
 
 const char * Delaunay2D::titleStr() const
@@ -407,7 +433,7 @@ void Delaunay2D::processEdgeFlip(Quadrilateral & q)
 	findQuadNeighbor(q);
 	int i=0;
 	for(;i<4;++i) {
-		std::cout<<" neighbor triangle["<<i<<"] ";
+		std::cout<<" qudrilateral neighbor["<<i<<"] ";
 		printTriangleVertice(q.nei[i]);
 	}
 	q.ta->p1 = q.apex;
@@ -436,6 +462,7 @@ void Delaunay2D::spawnEdges(std::deque<Quadrilateral> & qls)
 	q1.tb = q0.nei[2];
 	q1.apex = q0.apex;
 	findAntiApex(q1);
+	std::cout<<" spawn quad0"; printQuadrilateral(&q1);
 	qls.push_back(q1);
 	
 	std::cout<<" spawn 1";
@@ -444,6 +471,7 @@ void Delaunay2D::spawnEdges(std::deque<Quadrilateral> & qls)
 	q2.tb = q0.tb;
 	q2.apex = oppositeVertex(q0.nei[1], q0.aapex, q0.e.v[0]);
 	findAntiApex(q2);
+	std::cout<<" spawn quad1"; printQuadrilateral(&q2);
 	qls.push_back(q2);
 }
 

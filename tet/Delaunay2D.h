@@ -42,7 +42,7 @@ struct Quadrilateral {
 
 class Delaunay2D : public Scene {
 
-	int m_N, m_numTri;
+	int m_N, m_numTri, m_endTri;
 	aphid::Vector3F * m_X;
 	ITRIANGLE * m_triangles;
 	std::deque<IEDGE> m_edges;
@@ -54,9 +54,13 @@ public:
 	virtual const char * titleStr() const;
 	
 	virtual bool init();
+	virtual bool progressForward();
+	virtual bool progressBackward();
 	virtual void draw(aphid::GeoDrawer * dr);
 	
 private:
+	void generateSamples();
+	bool triangulate();
 	void circumCircle(TriCircle & circ,
 						const aphid::Vector3F & p1,
 						const aphid::Vector3F & p2,

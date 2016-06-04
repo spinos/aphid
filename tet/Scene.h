@@ -20,6 +20,8 @@ public:
 	virtual const char * titleStr() const;
 	
 	virtual bool init();
+	virtual bool progressForward();
+	virtual bool progressBackward();
 	virtual void draw(aphid::GeoDrawer * dr);
 };
 

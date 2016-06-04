@@ -49,6 +49,16 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
+	switch (e->key()) {
+		case Qt::Key_M:
+			m_scene->progressForward();
+			break;
+		case Qt::Key_N:
+			m_scene->progressBackward();
+			break;
+		default:
+			break;
+	}
 	Base3DView::keyPressEvent(e);
 }
 

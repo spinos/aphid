@@ -17,6 +17,12 @@ Scene::~Scene() {}
 bool Scene::init() 
 { return true; }
 
+bool Scene::progressForward()
+{ return true; }
+
+bool Scene::progressBackward()
+{ return true; }
+
 const char * Scene::titleStr() const
 { return "unknown"; }
 
