@@ -31,7 +31,7 @@ bool Hilbert2D::init()
 
 void Hilbert2D::generateSamples()
 {
-	std::cout<<" generate samples by 16 X 16 grid\n";
+	std::cout<<" generate samples by 32 X 32 grid\n";
 	BoundingBox bbx(0.f, 0.f, 0.f,
 					32.f, 32.f, 32.f);
 	const float x0 = 16.f;

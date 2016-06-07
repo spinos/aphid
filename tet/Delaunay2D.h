@@ -10,6 +10,7 @@
 #define TTG_DELAUNAY_2D_H
 #include "Scene.h"
 #include "triangulation.h"
+#include "QuickSort.h"
 
 namespace ttg {
 
@@ -17,6 +18,7 @@ class Delaunay2D : public Scene {
 
 	int m_N, m_numTri, m_endTri;
 	aphid::Vector3F * m_X;
+	aphid::QuickSortPair<int, int> * m_ind;
 	ITRIANGLE * m_triangles;
 	
 public:
