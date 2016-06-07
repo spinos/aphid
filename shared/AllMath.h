@@ -119,6 +119,10 @@ inline char IsNearZero(T const & a)
 	return 1;
 }
 
+template<typename T>
+inline void SwapAB(T & a, T & b, T & c)
+{ c = a; a = b; b = c; }
+
 }
 #endif        //  #ifndef ALLMATH_H
 

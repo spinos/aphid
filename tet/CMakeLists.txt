@@ -16,15 +16,18 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "window.h"
 "glwidget.h"
 "../shared/Morton3D.h"
+../shared/hilbertCurve.h
 triangulation.h
 Parameter.h
 Scene.h
+Hilbert2D.h
 Delaunay2D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/CartesianGrid.cpp
 Parameter.cpp
 Scene.cpp
+Hilbert2D.cpp
 Delaunay2D.cpp
 glwidget.cpp
 window.cpp

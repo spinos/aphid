@@ -15,7 +15,8 @@ class Parameter {
 public:
 	enum Operation {
 		kHelp = 0,
-		kDelaunay2D = 1
+		kDelaunay2D = 1,
+		kHilbert2D = 2
 	};
 	
 	Parameter(int argc, char *argv[]);

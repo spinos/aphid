@@ -1,10 +1,11 @@
-#ifndef QUICKSORT_H
-#define QUICKSORT_H
-#include <iostream>
+#ifndef APHID_QUICKSORT_H
+#define APHID_QUICKSORT_H
+//#include <iostream>
 #include <stdlib.h>
-#include <BaseArray.h>
+//#include <BaseArray.h>
 #include <deque>
-using namespace std;
+
+namespace aphid {
 
 template <typename KeyType, typename ValueType>
 struct QuickSortPair {
@@ -76,7 +77,9 @@ public:
 	
 	static void Sort(unsigned * kv, int first, int last);
 	// static void Sort(BaseArray &array,int first,int last);
-	static void Sort(vector<unsigned> &array,int first,int last);
-	static void Sort(deque<unsigned> &array,int first,int last);
+	static void Sort(std::vector<unsigned> &array,int first,int last);
+	static void Sort(std::deque<unsigned> &array,int first,int last);
 };
+
+}
 #endif        //  #ifndef QUICKSORT_H

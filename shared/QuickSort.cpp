@@ -1,5 +1,7 @@
 #include "QuickSort.h"
 
+namespace aphid {
+
 void QuickSort::Sort(unsigned * kv, int first, int last)
 {
     if(last < first) return;
@@ -60,7 +62,7 @@ void QuickSort::Sort(BaseArray &array,int first,int last)
 }
 */
 
-void QuickSort::Sort(vector<unsigned> &array,int first,int last)
+void QuickSort::Sort(std::vector<unsigned> &array,int first,int last)
 {
 	if(last < first) return;
 	
@@ -88,7 +90,7 @@ void QuickSort::Sort(vector<unsigned> &array,int first,int last)
 	if(low<last) Sort(array,low,last);
 }
 
-void QuickSort::Sort(deque<unsigned> &array,int first,int last)
+void QuickSort::Sort(std::deque<unsigned> &array,int first,int last)
 {
 	if(last < first) return;
 	
@@ -114,5 +116,7 @@ void QuickSort::Sort(deque<unsigned> &array,int first,int last)
 	
 	if(first<high) Sort(array,first,high);
 	if(low<last) Sort(array,low,last);
+}
+
 }
 //:~
