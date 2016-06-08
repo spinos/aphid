@@ -31,6 +31,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-h2") == 0 || strcmp(argv[i], "--hilbert2d") == 0) {
 				m_operation = kHilbert2D;
 			}
+			if(strcmp(argv[i], "-h3") == 0 || strcmp(argv[i], "--hilbert3d") == 0) {
+				m_operation = kHilbert3D;
+			}
 		}
 	}
 	
@@ -48,6 +51,9 @@ void Parameter::PrintHelp()
 	<<"\nDescription:\n generates tetrahedral mesh for FEM"
 	<<"\nOptions:\n -h or --help    print this information"
 	<<"\n -h2 or --hilbert2d    test 2D hilbert curve"
+	<<"\n -h3 or --hilbert3d    test 3D hilbert curve"
+	<<"\nHot keys:"
+	<<"\n m/n    progress forward/backward"
 	<<"\n";
 }
 

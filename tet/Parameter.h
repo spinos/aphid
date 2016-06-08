@@ -16,7 +16,8 @@ public:
 	enum Operation {
 		kHelp = 0,
 		kDelaunay2D = 1,
-		kHilbert2D = 2
+		kHilbert2D = 2,
+		kHilbert3D = 3
 	};
 	
 	Parameter(int argc, char *argv[]);

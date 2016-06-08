@@ -232,7 +232,7 @@ void Delaunay2D::draw(GeoDrawer * dr)
 		glVertex3fv((const GLfloat *)&a);
 	}
 	glEnd();
-#if 0	
+#if 0
 	dr->setColor(.5f, .5f, .5f);
 	TriCircle cir;
 	Matrix44F rot;

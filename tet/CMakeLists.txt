@@ -21,6 +21,7 @@ triangulation.h
 Parameter.h
 Scene.h
 Hilbert2D.h
+Hilbert3D.h
 Delaunay2D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -29,6 +30,7 @@ Parameter.cpp
 Scene.cpp
 Hilbert2D.cpp
 Delaunay2D.cpp
+Hilbert3D.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
