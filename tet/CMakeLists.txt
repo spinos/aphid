@@ -18,11 +18,13 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "../shared/Morton3D.h"
 ../shared/hilbertCurve.h
 triangulation.h
+tetrahedralization.h
 Parameter.h
 Scene.h
 Hilbert2D.h
 Hilbert3D.h
-Delaunay2D.h)
+Delaunay2D.h
+Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/CartesianGrid.cpp
@@ -30,6 +32,7 @@ Parameter.cpp
 Scene.cpp
 Hilbert2D.cpp
 Delaunay2D.cpp
+Delaunay3D.cpp
 Hilbert3D.cpp
 glwidget.cpp
 window.cpp

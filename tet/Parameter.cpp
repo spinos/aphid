@@ -34,6 +34,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-h3") == 0 || strcmp(argv[i], "--hilbert3d") == 0) {
 				m_operation = kHilbert3D;
 			}
+			if(strcmp(argv[i], "-d3") == 0 || strcmp(argv[i], "--delauney3d") == 0) {
+				m_operation = kDelaunay3D;
+			}
 		}
 	}
 	
@@ -52,6 +55,7 @@ void Parameter::PrintHelp()
 	<<"\nOptions:\n -h or --help    print this information"
 	<<"\n -h2 or --hilbert2d    test 2D hilbert curve"
 	<<"\n -h3 or --hilbert3d    test 3D hilbert curve"
+	<<"\n -d3 or --delauney3d    test 3D delauney"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";
