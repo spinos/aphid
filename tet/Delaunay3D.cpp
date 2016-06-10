@@ -117,10 +117,8 @@ void Delaunay3D::generateSamples()
 bool Delaunay3D::tetrahedralize()
 {
 	ITetrahedron superTet;
-	superTet.iv0 = 0;
-	superTet.iv1 = 1;
-	superTet.iv2 = 2;
-	superTet.iv3 = 3;
+	setTetrahedronVertices(superTet, 0, 1, 2, 3);
+	resetTetrahedronNeighbors(superTet);
 	m_numTet = 0;
 	m_tets[m_numTet++] = superTet;
 	
@@ -133,52 +131,10 @@ bool Delaunay3D::tetrahedralize()
 		int j = searchTet(m_X[ii]);
 		ITetrahedron t = m_tets[j];
 
-/// vertices of Tet[j]		
-		const int p1 = t.iv0;
-		const int p2 = t.iv1;
-		const int p3 = t.iv2;
-		const int p4 = t.iv3;
-		// std::cout<<"\n split tri["<<j<<"]"; printTriangleVertice(&t);
-		
-/// neighbor of Tet[j]
-		ITetrahedron * nei1 = t.nei[0];		
-		ITetrahedron * nei2 = t.nei[1];
-		ITetrahedron * nei3 = t.nei[2];
-		ITetrahedron * nei4 = t.nei[3];		
-/*
-/// remove Tet[j], add three new tetrahedrons
-/// connect X[i] to be p3		
-		m_triangles[j].p3 = ii;
-		// std::cout<<" = "; printTriangleVertice(&m_triangles[j]);
-		
-		t.p1 = p2;
-		t.p2 = p3;
-		t.p3 = ii;
-		m_triangles[m_numTri++] = t;
-		// std::cout<<" + "; printTriangleVertice(&m_triangles[m_numTri-1]);
-
-		t.p1 = p3;
-		t.p2 = p1;
-		t.p3 = ii;
-		m_triangles[m_numTri++] = t;
-		// std::cout<<" + "; printTriangleVertice(&m_triangles[m_numTri-1]);
-		
-/// connect neighbors to new triangles
-		int ae, be;
-		connectTriangles(&m_triangles[j], &m_triangles[m_numTri-2], be, ae);
-		connectTriangles(&m_triangles[j], &m_triangles[m_numTri-1], be, ae);
-		connectTriangles(&m_triangles[m_numTri-1], &m_triangles[m_numTri-2], be, ae);
-
-/// update new triangles to neighbors
-		if(nei1)
-			connectTriangles(nei1, &m_triangles[j], be, ae);
-			
-		if(nei2)
-			connectTriangles(nei2, &m_triangles[m_numTri-2], be, ae);
-		
-		if(nei3)
-			connectTriangles(nei3, &m_triangles[m_numTri-1], be, ae);
-				
+		splitTetrahedron(&m_tets[j], &m_tets[m_numTet], &m_tets[m_numTet+1], &m_tets[m_numTet+2], ii);
+/// add three tetrahedrons
+		m_numTet+=3;		
+/*				
 		std::deque<Quadrilateral> qls;
 		Quadrilateral q1;
 		q1.ta = &m_triangles[j];
@@ -263,6 +219,22 @@ void Delaunay3D::draw(GeoDrawer * dr)
 		glVertex3fv((const GLfloat *)&c);
 	}
 	glEnd();
+	
+#if 1
+	dr->setColor(.5f, .5f, .5f);
+	TetSphere cir;
+	i = 0;
+	for(;i<m_numTet;++i) {
+		const ITetrahedron t = m_tets[i];
+		a = m_X[t.iv0];
+		b = m_X[t.iv1];
+		c = m_X[t.iv2];
+		d = m_X[t.iv3];
+		
+		circumSphere(cir, a, b, c, d);
+		dr->alignedCircle(cir.pc, cir.r);
+	}
+#endif
 }
 
 int Delaunay3D::searchTet(const aphid::Vector3F & p) const

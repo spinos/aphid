@@ -113,53 +113,13 @@ bool Delaunay2D::triangulate()
 /// Lawson's find the triangle that contains X[i]
 		std::cout<<"\n insert X["<<i<<"]\n";
 		int ii = m_ind[i].value;
-		std::cout<<"\n ind "<<ii;
 		int j = searchTri(m_X[ii]);
-		ITRIANGLE t = m_triangles[j];
-
-/// vertices of Tri[j]		
-		const int p1 = t.p1;
-		const int p2 = t.p2;
-		const int p3 = t.p3;
-		// std::cout<<"\n split tri["<<j<<"]"; printTriangleVertice(&t);
+		std::cout<<"\n insie tri["<<j<<"]\n";
 		
-/// neighbor of Tri[j]
-		ITRIANGLE * nei1 = t.nei[0];		
-		ITRIANGLE * nei2 = t.nei[1];
-		ITRIANGLE * nei3 = t.nei[2];		
-
-/// remove Tri[j], add three new triangles
-/// connect X[i] to be p3		
-		m_triangles[j].p3 = ii;
-		// std::cout<<" = "; printTriangleVertice(&m_triangles[j]);
-		
-		t.p1 = p2;
-		t.p2 = p3;
-		t.p3 = ii;
-		m_triangles[m_numTri++] = t;
-		// std::cout<<" + "; printTriangleVertice(&m_triangles[m_numTri-1]);
-
-		t.p1 = p3;
-		t.p2 = p1;
-		t.p3 = ii;
-		m_triangles[m_numTri++] = t;
-		// std::cout<<" + "; printTriangleVertice(&m_triangles[m_numTri-1]);
-		
-/// connect neighbors to new triangles
-		int ae, be;
-		connectTriangles(&m_triangles[j], &m_triangles[m_numTri-2], be, ae);
-		connectTriangles(&m_triangles[j], &m_triangles[m_numTri-1], be, ae);
-		connectTriangles(&m_triangles[m_numTri-1], &m_triangles[m_numTri-2], be, ae);
-
-/// update new triangles to neighbors
-		if(nei1)
-			connectTriangles(nei1, &m_triangles[j], be, ae);
-			
-		if(nei2)
-			connectTriangles(nei2, &m_triangles[m_numTri-2], be, ae);
-		
-		if(nei3)
-			connectTriangles(nei3, &m_triangles[m_numTri-1], be, ae);
+		splitTriangle(&m_triangles[j], &m_triangles[m_numTri], &m_triangles[m_numTri+1],
+				ii);
+/// add two more triangles				
+		m_numTri+=2;
 				
 		std::deque<Quadrilateral> qls;
 		Quadrilateral q1;

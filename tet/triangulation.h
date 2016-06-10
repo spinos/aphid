@@ -34,12 +34,23 @@ typedef struct {
 inline void printTriangleVertice(const ITRIANGLE * a)
 { std::cout<<" triangle ("<<a->p1<<", "<<a->p2<<", "<<a->p3<<")\n"; }
 
+inline void setTriangleVertices(ITRIANGLE * t, int a, int b, int c)
+{ t->p1 = a; t->p2 = b; t->p3 = c; }
+
 inline int containtsVertex(const ITRIANGLE * a, const int & p)
 {
 	if(a->p1 == p) return 0;
 	if(a->p2 == p) return 1;
 	if(a->p3 == p) return 2;
 	return -1;
+}
+
+inline bool matchTriangles(const ITRIANGLE * a, const ITRIANGLE * b)
+{
+	if(containtsVertex(a, b->p1) < 0) return false;
+	if(containtsVertex(a, b->p2) < 0) return false;
+	if(containtsVertex(a, b->p3) < 0) return false;
+	return true;
 }
 
 inline int previousVertex(const ITRIANGLE * a, const int & i)
@@ -179,6 +190,48 @@ inline bool insideTri(const aphid::Vector3F & p,
 	if(e20.cross(x2).dot(nor) < 0.f) return false;
 	
 	return true;
+}
+
+/// split t1 into t1 t2 t3 by v0
+/// with connections
+inline void splitTriangle(ITRIANGLE * t1, ITRIANGLE * t2, ITRIANGLE * t3,
+			int v0)
+{
+/// vertices of Tri[j]		
+	const int v1 = t1->p1;
+	const int v2 = t1->p2;
+	const int v3 = t1->p3;
+	
+/// neighbor of Tri[j]
+	ITRIANGLE * nei1 = t1->nei[0];		
+	ITRIANGLE * nei2 = t1->nei[1];
+	ITRIANGLE * nei3 = t1->nei[2];
+		
+/// x0 be p3
+	t1->p3 = v0;
+	
+	t2->p1 = v2;
+	t2->p2 = v3;
+	t2->p3 = v0;
+	
+	t3->p1 = v3;
+	t3->p2 = v1;
+	t3->p3 = v0;
+	
+	int ae, be;
+	connectTriangles(t1, t2, be, ae);
+	connectTriangles(t1, t3, be, ae);
+	connectTriangles(t3, t2, be, ae);
+
+/// update new triangles to neighbors
+	if(nei1)
+		connectTriangles(nei1, t1, be, ae);
+		
+	if(nei2)
+		connectTriangles(nei2, t2, be, ae);
+	
+	if(nei3)
+		connectTriangles(nei3, t3, be, ae);
 }
 
 struct Quadrilateral {
