@@ -131,35 +131,53 @@ bool Delaunay3D::tetrahedralize()
 		int j = searchTet(m_X[ii]);
 		ITetrahedron t = m_tets[j];
 
-		splitTetrahedron(&m_tets[j], &m_tets[m_numTet], &m_tets[m_numTet+1], &m_tets[m_numTet+2], ii);
+/// neighbor of t
+		ITetrahedron * nei1 = t.nei[0];		
+		ITetrahedron * nei2 = t.nei[1];
+		ITetrahedron * nei3 = t.nei[2];
+		ITetrahedron * nei4 = t.nei[3];
+		
+		ITetrahedron * t1 = &m_tets[j];
+		ITetrahedron * t2 = &m_tets[m_numTet];
+		ITetrahedron * t3 = &m_tets[m_numTet+1];
+		ITetrahedron * t4 = &m_tets[m_numTet+2];
+		
+		splitTetrahedron(t1, t2, t3, t4, ii);
 /// add three tetrahedrons
-		m_numTet+=3;		
-/*				
-		std::deque<Quadrilateral> qls;
-		Quadrilateral q1;
-		q1.ta = &m_triangles[j];
-		q1.tb = m_triangles[j].nei[0];
-		q1.apex = ii;
-		findAntiApex(q1);
-		qls.push_back(q1);
-		flipEdges(qls, m_X);
+		m_numTet+=3;	
 		
-		Quadrilateral q2;
-		q2.ta = &m_triangles[m_numTri-2];
-		q2.tb = m_triangles[m_numTri-2].nei[0];
-		q2.apex = ii;
-		findAntiApex(q2);
-		qls.push_back(q2);
-		flipEdges(qls, m_X);
+		std::deque<Bipyramid> pyras;
 		
-		Quadrilateral q3;
-		q3.ta = &m_triangles[m_numTri-1];
-		q3.tb = m_triangles[m_numTri-1].nei[0];
-		q3.apex = ii;
-		findAntiApex(q3);
-		qls.push_back(q3);
-		flipEdges(qls, m_X);
-		*/
+		Bipyramid pyra1, pyra2, pyra3, pyra4;
+/// update new tetrahedrons to old neighbors
+		if(nei1) {
+			connectTetrahedrons(nei1, t1);
+			createBipyramid(&pyra1, t1, nei1);
+			pyras.push_back(pyra1);
+			flipFaces(pyras, m_X, m_tets, m_numTet);
+		}
+			
+		if(nei2) {
+			connectTetrahedrons(nei2, t2);
+			createBipyramid(&pyra2, t2, nei2);
+			pyras.push_back(pyra2);
+			flipFaces(pyras, m_X, m_tets, m_numTet);
+		}
+		
+		if(nei3) {
+			connectTetrahedrons(nei3, t3);
+			createBipyramid(&pyra3, t3, nei3);
+			pyras.push_back(pyra3);
+			flipFaces(pyras, m_X, m_tets, m_numTet);
+		}
+			
+		if(nei4) {
+			connectTetrahedrons(nei4, t4);
+			createBipyramid(&pyra4, t4, nei4);
+			pyras.push_back(pyra4);
+			flipFaces(pyras, m_X, m_tets, m_numTet);
+		}
+
 	}
 	std::cout<<" end triangulate X["<<i-1<<"]"<<std::endl;
 	return true;
@@ -188,7 +206,7 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	dr->setColor(0.f, 0.f, 0.f);
 	int i = 3;
 	for(;i<m_N+4;++i) {
-		dr->cube(m_X[i], .25f);
+		dr->cube(m_X[i], .125f);
 	}
 	dr->m_wireProfile.apply();
 	dr->setColor(0.2f, 0.2f, 0.4f);
@@ -196,6 +214,7 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	Vector3F a, b, c, d;
 	i = 0;
 	for(;i<m_numTet;++i) {
+		if(i==m_numTet-1) dr->setColor(0.f, .6f, 0.4f);
 		const ITetrahedron t = m_tets[i];
 		a = m_X[t.iv0];
 		b = m_X[t.iv1];
@@ -220,7 +239,7 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	}
 	glEnd();
 	
-#if 1
+#if 0
 	dr->setColor(.5f, .5f, .5f);
 	TetSphere cir;
 	i = 0;
