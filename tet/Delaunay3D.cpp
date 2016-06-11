@@ -16,7 +16,7 @@ using namespace aphid;
 namespace ttg {
 
 Delaunay3D::Delaunay3D() :
-m_endTet(5) 
+m_endTet(8) 
 {}
 
 Delaunay3D::~Delaunay3D() 
@@ -148,34 +148,52 @@ bool Delaunay3D::tetrahedralize()
 		
 		std::deque<Bipyramid> pyras;
 		
-		Bipyramid pyra1, pyra2, pyra3, pyra4;
+		resetBipyramid(&m_pyra1);
+		resetBipyramid(&m_pyra2);
+		resetBipyramid(&m_pyra3);
+		resetBipyramid(&m_pyra4);
+		
+		int oldNt;
+		
 /// update new tetrahedrons to old neighbors
 		if(nei1) {
 			connectTetrahedrons(nei1, t1);
-			createBipyramid(&pyra1, t1, nei1);
-			pyras.push_back(pyra1);
+			createBipyramid(&m_pyra1, t1, nei1);
+			pyras.push_back(m_pyra1);
+			oldNt = m_numTet;
 			flipFaces(pyras, m_X, m_tets, m_numTet);
+			if(oldNt == m_numTet)
+				resetBipyramid(&m_pyra1);
 		}
 			
 		if(nei2) {
 			connectTetrahedrons(nei2, t2);
-			createBipyramid(&pyra2, t2, nei2);
-			pyras.push_back(pyra2);
+			createBipyramid(&m_pyra2, t2, nei2);
+			pyras.push_back(m_pyra2);
+			oldNt = m_numTet;
 			flipFaces(pyras, m_X, m_tets, m_numTet);
+			if(oldNt == m_numTet)
+				resetBipyramid(&m_pyra2);
 		}
 		
 		if(nei3) {
 			connectTetrahedrons(nei3, t3);
-			createBipyramid(&pyra3, t3, nei3);
-			pyras.push_back(pyra3);
+			createBipyramid(&m_pyra3, t3, nei3);
+			pyras.push_back(m_pyra3);
+			oldNt = m_numTet;
 			flipFaces(pyras, m_X, m_tets, m_numTet);
+			if(oldNt == m_numTet)
+				resetBipyramid(&m_pyra3);
 		}
 			
 		if(nei4) {
 			connectTetrahedrons(nei4, t4);
-			createBipyramid(&pyra4, t4, nei4);
-			pyras.push_back(pyra4);
+			createBipyramid(&m_pyra4, t4, nei4);
+			pyras.push_back(m_pyra4);
+			oldNt = m_numTet;
 			flipFaces(pyras, m_X, m_tets, m_numTet);
+			if(oldNt == m_numTet)
+				resetBipyramid(&m_pyra4);
 		}
 
 	}
@@ -214,7 +232,6 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	Vector3F a, b, c, d;
 	i = 0;
 	for(;i<m_numTet;++i) {
-		if(i==m_numTet-1) dr->setColor(0.f, .6f, 0.4f);
 		const ITetrahedron t = m_tets[i];
 		a = m_X[t.iv0];
 		b = m_X[t.iv1];
@@ -238,7 +255,40 @@ void Delaunay3D::draw(GeoDrawer * dr)
 		glVertex3fv((const GLfloat *)&c);
 	}
 	glEnd();
+
+#if 0	
+	glBegin(GL_TRIANGLES);
+	glVertex3fv((const GLfloat *)&b);
+		glVertex3fv((const GLfloat *)&c);
+		glVertex3fv((const GLfloat *)&d);
+		
+		glVertex3fv((const GLfloat *)&a);
+		glVertex3fv((const GLfloat *)&b);
+		glVertex3fv((const GLfloat *)&d);
+		
+		glVertex3fv((const GLfloat *)&a);
+		glVertex3fv((const GLfloat *)&c);
+		glVertex3fv((const GLfloat *)&b);
+		
+		glVertex3fv((const GLfloat *)&a);
+		glVertex3fv((const GLfloat *)&d);
+		glVertex3fv((const GLfloat *)&c);
+	glEnd();
+#endif
+
+	dr->m_markerProfile.apply();
 	
+#if 1
+	glColor3f(0.7f, .5f, 0.f);
+	if(m_pyra1.tb) drawBipyramid(m_pyra1);
+	glColor3f(0.f, .5f, .7f);
+	if(m_pyra2.tb) drawBipyramid(m_pyra2);
+	glColor3f(.5f, 0.f, .7f);
+	if(m_pyra3.tb) drawBipyramid(m_pyra3);
+	glColor3f(.5f, .5f, .5f);
+	if(m_pyra4.tb) drawBipyramid(m_pyra4);
+#endif
+
 #if 0
 	dr->setColor(.5f, .5f, .5f);
 	TetSphere cir;
@@ -254,6 +304,34 @@ void Delaunay3D::draw(GeoDrawer * dr)
 		dr->alignedCircle(cir.pc, cir.r);
 	}
 #endif
+}
+
+void Delaunay3D::drawBipyramid(const Bipyramid & pyra) const
+{
+	Vector3F a, b, c, d, e;
+	glBegin(GL_LINES);
+	a = m_X[pyra.iv0];
+	b = m_X[pyra.iv1];
+	c = m_X[pyra.iv2];
+	d = m_X[pyra.iv3];
+	e = m_X[pyra.iv4];
+	
+	glVertex3fv((const GLfloat *)&a);
+	glVertex3fv((const GLfloat *)&b);
+	glVertex3fv((const GLfloat *)&a);
+	glVertex3fv((const GLfloat *)&c);
+	glVertex3fv((const GLfloat *)&a);
+	glVertex3fv((const GLfloat *)&d);
+	
+	glColor3f(.1f, .1f, .1f);
+	glVertex3fv((const GLfloat *)&b);
+	glVertex3fv((const GLfloat *)&e);
+	glVertex3fv((const GLfloat *)&c);
+	glVertex3fv((const GLfloat *)&e);
+	glVertex3fv((const GLfloat *)&d);
+	glVertex3fv((const GLfloat *)&e);
+	
+	glEnd();
 }
 
 int Delaunay3D::searchTet(const aphid::Vector3F & p) const

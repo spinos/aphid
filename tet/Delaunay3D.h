@@ -20,6 +20,7 @@ class Delaunay3D : public Scene {
 	aphid::Vector3F * m_X;
 	aphid::QuickSortPair<int, int> * m_ind;
 	ITetrahedron * m_tets;
+	Bipyramid m_pyra1, m_pyra2, m_pyra3, m_pyra4;
 	
 public:
 	Delaunay3D();
@@ -35,7 +36,8 @@ private:
 	void generateSamples();
 	bool tetrahedralize();
 	int searchTet(const aphid::Vector3F & p) const;
-		
+	void drawBipyramid(const Bipyramid & pyra) const;
+	
 };
 
 }
