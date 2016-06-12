@@ -16,7 +16,7 @@ using namespace aphid;
 namespace ttg {
 
 Delaunay3D::Delaunay3D() :
-m_endTet(8) 
+m_endTet(12) 
 {}
 
 Delaunay3D::~Delaunay3D() 
@@ -223,8 +223,8 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	dr->m_markerProfile.apply();
 	dr->setColor(0.f, 0.f, 0.f);
 	int i = 3;
-	for(;i<m_N+4;++i) {
-		dr->cube(m_X[i], .125f);
+	for(;i<m_endTet;++i) {
+		dr->cube(m_X[m_ind[i].value], .125f);
 	}
 	dr->m_wireProfile.apply();
 	dr->setColor(0.2f, 0.2f, 0.4f);
@@ -256,7 +256,12 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	}
 	glEnd();
 
-#if 0	
+#if 0
+	dr->setColor(0.92f, 0.2f, 0.f);
+	a = m_X[10];
+		b = m_X[7];
+		c = m_X[0];
+		d = m_X[4]; 
 	glBegin(GL_TRIANGLES);
 	glVertex3fv((const GLfloat *)&b);
 		glVertex3fv((const GLfloat *)&c);

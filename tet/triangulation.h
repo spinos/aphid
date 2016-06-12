@@ -32,7 +32,7 @@ typedef struct {
 } TriCircle;
 
 inline void printTriangleVertice(const ITRIANGLE * a)
-{ std::cout<<" triangle ("<<a->p1<<", "<<a->p2<<", "<<a->p3<<")\n"; }
+{ std::cout<<" triangle ("<<a->p1<<", "<<a->p2<<", "<<a->p3<<") "; }
 
 inline void setTriangleVertices(ITRIANGLE * t, int a, int b, int c)
 { t->p1 = a; t->p2 = b; t->p3 = c; }
