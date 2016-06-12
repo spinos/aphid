@@ -170,6 +170,27 @@ inline void circumCircle(TriCircle & circ,
 	circ.r = circ.pc.distanceTo(p1);
 }
 
+inline bool insideTriangle(const aphid::Vector3F & p,
+					const aphid::Vector3F & nor,
+					const aphid::Vector3F & a,
+					const aphid::Vector3F & b,
+					const aphid::Vector3F & c)
+{
+	aphid::Vector3F e01 = b - a;
+	aphid::Vector3F x0 = p - a;
+	if(e01.cross(x0).dot(nor) < 0.f) return false;
+	
+	aphid::Vector3F e12 = c - b;
+	aphid::Vector3F x1 = p - b;
+	if(e12.cross(x1).dot(nor) < 0.f) return false;
+	
+	aphid::Vector3F e20 = a - c;
+	aphid::Vector3F x2 = p - c;
+	if(e20.cross(x2).dot(nor) < 0.f) return false;
+	
+	return true;
+}
+
 inline bool insideTri(const aphid::Vector3F & p,
 					const aphid::Vector3F & a,
 					const aphid::Vector3F & b,

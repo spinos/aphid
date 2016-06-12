@@ -77,9 +77,9 @@ inline bool connectTetrahedrons(ITetrahedron * a, ITetrahedron * b)
 	if(ia > -1 && jb > -1) {
 		a->nei[ia] = b;
 		b->nei[jb] = a;
-		std::cout<<"\n connect "; printTetrahedronVertices(a);
-		std::cout<<"\n     and "; printTetrahedronVertices(b);
-		std::cout<<std::endl;
+		//std::cout<<"\n connect "; printTetrahedronVertices(a);
+		//std::cout<<"\n     and "; printTetrahedronVertices(b);
+		//std::cout<<std::endl;
 		return true;
 	}
 	
@@ -200,6 +200,11 @@ inline void splitTetrahedron(ITetrahedron * t1, ITetrahedron * t2,
 	connectTetrahedrons(t2, t4);
 	
 	connectTetrahedrons(t3, t4);
+	
+	std::cout<<"\n into "; printTetrahedronVertices(t1);
+	std::cout<<"\n into "; printTetrahedronVertices(t2);
+	std::cout<<"\n into "; printTetrahedronVertices(t3);
+	std::cout<<"\n into "; printTetrahedronVertices(t4);
 }
 
 typedef struct {
@@ -259,6 +264,35 @@ inline bool canFaceFlip(const Bipyramid & pyra,
 /// belongs to supertetrahedron
 	if(pyra.iv0 < 4 || pyra.iv4 < 4) return false;
 	
+	ITetrahedron * nei1 = pyra.nei1;		
+	ITetrahedron * nei2 = pyra.nei2;
+	ITetrahedron * nei3 = pyra.nei3;
+	ITetrahedron * nei4 = pyra.nei4;
+	ITetrahedron * nei5 = pyra.nei5;
+	ITetrahedron * nei6 = pyra.nei6;
+	if(!nei1 || !nei2
+		|| !nei3 || !nei4
+		|| !nei5 || !nei6 )
+		return false;
+		
+/// must be convex
+	aphid::Vector3F a = X[pyra.iv1];
+	aphid::Vector3F b = X[pyra.iv2];
+	aphid::Vector3F c = X[pyra.iv3];
+	aphid::Vector3F ab = a - b;
+	aphid::Vector3F cb = c - b;
+	aphid::Vector3F nor = ab.cross(cb); nor.normalize();
+	aphid::Vector3F origin = X[pyra.iv0];
+	aphid::Vector3F de = X[pyra.iv4] - origin;
+	float le = de.length();
+	de /= le;
+	float ddotn = de.dot(nor);
+	float t = (a.dot(nor) - origin.dot(nor)) / ddotn;
+	aphid::Vector3F onplane = origin + de * t;
+	
+	if(!insideTriangle(onplane, nor, a, c, b) )
+		return false;
+	
 	TetSphere circ;
 	circumSphere(circ, X[pyra.iv0], X[pyra.iv1], X[pyra.iv2], X[pyra.iv3] );
 	if(X[pyra.iv4].distanceTo(circ.pc) < circ.r )
@@ -289,13 +323,6 @@ inline void processFaceFlip(Bipyramid & pyra,
 	ITetrahedron * nei5 = pyra.nei5;
 	ITetrahedron * nei6 = pyra.nei6;
 	
-	std::cout<<"\n bipyramid nei1";printTetrahedronVertices(nei1);
-	std::cout<<"\n bipyramid nei2";printTetrahedronVertices(nei2);
-	std::cout<<"\n bipyramid nei3";printTetrahedronVertices(nei3);
-	std::cout<<"\n bipyramid nei4";printTetrahedronVertices(nei4);
-	std::cout<<"\n bipyramid nei5";printTetrahedronVertices(nei5);
-	std::cout<<"\n bipyramid nei6";printTetrahedronVertices(nei6);
-
 	setTetrahedronVertices(*pyra.ta, v0, v1, v2, v4);
 	setTetrahedronVertices(*pyra.tb, v0, v2, v3, v4);
 
@@ -314,6 +341,35 @@ inline void processFaceFlip(Bipyramid & pyra,
 	if(nei5) connectTetrahedrons(nei5, pyra.tb);
 	if(nei6) connectTetrahedrons(nei6, tc);
 	
+	std::cout<<"\n edge ("<<v0<<", "<<v4<<")";
+	std::cout<<"\n aft "; printTetrahedronVertices(pyra.ta);
+	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tb);
+	std::cout<<"\n   + "; printTetrahedronVertices(tc);
+}
+
+/// once an face is flipped, spawn three more dipyramids for potential face flipping 
+inline void spawnFaces(std::deque<Bipyramid> & pyras,
+						ITetrahedron * tc)
+{
+	Bipyramid p0 = pyras[0];
+	ITetrahedron * nei4 = p0.nei4;
+	ITetrahedron * nei5 = p0.nei5;
+	ITetrahedron * nei6 = p0.nei6;
+	if(nei4) {
+		Bipyramid pa;
+		createBipyramid(&pa, p0.ta, nei4);
+		pyras.push_back(pa);
+	}
+	if(nei5) {
+		Bipyramid pb;
+		createBipyramid(&pb, p0.tb, nei5);
+		pyras.push_back(pb);
+	}
+	if(nei6) {
+		Bipyramid pc;
+		createBipyramid(&pc, tc, nei6);
+		pyras.push_back(pc);
+	}
 }
 
 inline void flipFaces(std::deque<Bipyramid> & pyras, 
@@ -324,15 +380,14 @@ inline void flipFaces(std::deque<Bipyramid> & pyras,
 	int nq = pyras.size();
 	int i=0;
 	while(nq>0) {
-		std::cout<<"\n process bipyramid["<<i++<<"]\n";
-		
 		if(canFaceFlip(pyras[0], X) ) {
 			processFaceFlip(pyras[0], tets, numTets);
-			//spawnEdges(qls);
+			spawnFaces(pyras, &tets[numTets-1] );
 		}
 		pyras.erase(pyras.begin() );
 		nq = pyras.size();
 	}
+	std::cout<<"\n end flip";
 }
 
 }

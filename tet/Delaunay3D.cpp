@@ -175,7 +175,7 @@ bool Delaunay3D::tetrahedralize()
 			if(oldNt == m_numTet)
 				resetBipyramid(&m_pyra2);
 		}
-		
+		//if(i==m_endTet-1) break;
 		if(nei3) {
 			connectTetrahedrons(nei3, t3);
 			createBipyramid(&m_pyra3, t3, nei3);
@@ -278,15 +278,15 @@ void Delaunay3D::draw(GeoDrawer * dr)
 
 	dr->m_markerProfile.apply();
 	
-#if 1
+#if 0
 	glColor3f(0.7f, .5f, 0.f);
 	if(m_pyra1.tb) drawBipyramid(m_pyra1);
 	glColor3f(0.f, .5f, .7f);
-	if(m_pyra2.tb) drawBipyramid(m_pyra2);
+	//if(m_pyra2.tb) drawBipyramid(m_pyra2);
 	glColor3f(.5f, 0.f, .7f);
 	if(m_pyra3.tb) drawBipyramid(m_pyra3);
 	glColor3f(.5f, .5f, .5f);
-	if(m_pyra4.tb) drawBipyramid(m_pyra4);
+	//if(m_pyra4.tb) drawBipyramid(m_pyra4);
 #endif
 
 #if 0
