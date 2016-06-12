@@ -8,6 +8,7 @@
  */
 #ifndef TTG_TETRAHEDRALIZATION_H
 #define TTG_TETRAHEDRALIZATION_H
+#include <triangle_math.h>
 #include <tetrahedron_math.h>
 #include "triangulation.h"
 
@@ -258,7 +259,7 @@ inline void circumSphere(TetSphere & sphere,
 	sphere.r = p1.distanceTo(sphere.pc);
 }
 
-inline bool canFaceFlip(const Bipyramid & pyra, 
+inline bool canSplitFlip(const Bipyramid & pyra, 
 							const aphid::Vector3F * X)
 {
 /// belongs to supertetrahedron
@@ -279,35 +280,81 @@ inline bool canFaceFlip(const Bipyramid & pyra,
 	aphid::Vector3F a = X[pyra.iv1];
 	aphid::Vector3F b = X[pyra.iv2];
 	aphid::Vector3F c = X[pyra.iv3];
-	aphid::Vector3F ab = a - b;
-	aphid::Vector3F cb = c - b;
-	aphid::Vector3F nor = ab.cross(cb); nor.normalize();
-	aphid::Vector3F origin = X[pyra.iv0];
-	aphid::Vector3F de = X[pyra.iv4] - origin;
-	float le = de.length();
-	de /= le;
-	float ddotn = de.dot(nor);
-	float t = (a.dot(nor) - origin.dot(nor)) / ddotn;
-	aphid::Vector3F onplane = origin + de * t;
-	
-	if(!insideTriangle(onplane, nor, a, c, b) )
+	aphid::Vector3F apex = X[pyra.iv0];
+	aphid::Vector3F antipex = X[pyra.iv4];
+	if(!aphid::segmentIntersectTriangle(apex, antipex, a, b, c) ) 
 		return false;
-	
+		
 	TetSphere circ;
-	circumSphere(circ, X[pyra.iv0], X[pyra.iv1], X[pyra.iv2], X[pyra.iv3] );
-	if(X[pyra.iv4].distanceTo(circ.pc) < circ.r )
+	circumSphere(circ, apex, a, b, c );
+	if(antipex.distanceTo(circ.pc) < circ.r )
 		return true;
 		
 	return false;
 }
 
+inline bool canMergeFlip(const Bipyramid & pyra, 
+							const aphid::Vector3F * X)
+{
+	ITetrahedron * nei1 = pyra.nei1;		
+	ITetrahedron * nei2 = pyra.nei2;
+	ITetrahedron * nei3 = pyra.nei3;
+	ITetrahedron * nei4 = pyra.nei4;
+	ITetrahedron * nei5 = pyra.nei5;
+	ITetrahedron * nei6 = pyra.nei6;
+
+	aphid::Vector3F p0 = X[pyra.iv0];
+	aphid::Vector3F p1 = X[pyra.iv1];
+	aphid::Vector3F p2 = X[pyra.iv2];
+	aphid::Vector3F p3 = X[pyra.iv3];
+	aphid::Vector3F p4 = X[pyra.iv4];
+	TetSphere circ;
+	
+/// find shared neighbor pair	
+	if(nei1 && nei1 == nei6) {
+/// be convex
+		if(!aphid::segmentIntersectTriangle(p3, p1, p2, p4, p0) )
+			return false;
+/// empty principle
+		circumSphere(circ, p3, p2, p4, p0 );
+		if(p1.distanceTo(circ.pc) < circ.r )
+			return false;
+			
+		return true;
+	}
+	
+	if(nei1 && nei2 == nei4) {
+		if(!aphid::segmentIntersectTriangle(p1, p2, p3, p4, p0) )
+			return false;
+		
+		circumSphere(circ, p1, p3, p4, p0 );
+		if(p2.distanceTo(circ.pc) < circ.r )
+			return false;
+			
+		return true;
+	}
+	
+	if(nei1 && nei3 == nei5) {
+		if(!aphid::segmentIntersectTriangle(p2, p3, p1, p4, p0) )
+			return false;
+		
+		circumSphere(circ, p2, p1, p4, p0 );
+		if(p3.distanceTo(circ.pc) < circ.r )
+			return false;
+				
+		return true;
+	}
+	
+	return false;
+}
+
 /// split bipyramid into three tetrahedrons
-inline void processFaceFlip(Bipyramid & pyra,
+inline void processSplitFlip(Bipyramid & pyra,
 							ITetrahedron * tets,
 							int & numTets)
 {
-	std::cout<<"\n flip bipyramid"; printTetrahedronVertices(pyra.ta);
-	std::cout<<"\n +"; printTetrahedronVertices(pyra.tb);
+	std::cout<<"\n split flip bipyramid"; printTetrahedronVertices(pyra.ta);
+	std::cout<<"\n                    +"; printTetrahedronVertices(pyra.tb);
 /// vertices of bipyramid		
 	const int v0 = pyra.iv0;
 	const int v1 = pyra.iv1;
@@ -380,9 +427,12 @@ inline void flipFaces(std::deque<Bipyramid> & pyras,
 	int nq = pyras.size();
 	int i=0;
 	while(nq>0) {
-		if(canFaceFlip(pyras[0], X) ) {
-			processFaceFlip(pyras[0], tets, numTets);
+		if(canSplitFlip(pyras[0], X) ) {
+			processSplitFlip(pyras[0], tets, numTets);
 			spawnFaces(pyras, &tets[numTets-1] );
+		}
+		else if(canMergeFlip(pyras[0], X) ) {
+			std::cout<<"\n todo 32 merge";
 		}
 		pyras.erase(pyras.begin() );
 		nq = pyras.size();

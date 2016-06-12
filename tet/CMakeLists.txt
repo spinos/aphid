@@ -17,6 +17,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 "glwidget.h"
 "../shared/Morton3D.h"
 ../shared/hilbertCurve.h
+../shared/triangle_math.h
+../shared/tetrahedron_math.h
 triangulation.h
 tetrahedralization.h
 Parameter.h
