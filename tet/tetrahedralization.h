@@ -16,9 +16,12 @@ namespace ttg {
 
 struct ITetrahedron {
 	
-	ITetrahedron * nei[4];
+	ITetrahedron * nei0;
+	ITetrahedron * nei1;
+	ITetrahedron * nei2;
+	ITetrahedron * nei3;
 	int iv0, iv1, iv2, iv3;
-	
+	int index;
 };
 
 inline void setTetrahedronVertices(ITetrahedron & t, 
@@ -27,10 +30,45 @@ inline void setTetrahedronVertices(ITetrahedron & t,
 { t.iv0 = a; t.iv1 = b; t.iv2 = c; t.iv3 = d; }
 
 inline void resetTetrahedronNeighbors(ITetrahedron & t)
-{ t.nei[0] = t.nei[1] = t.nei[2] = t.nei[3] = NULL; }
+{ t.nei0 = t.nei1 = t.nei2 = t.nei3 = NULL; }
+
+inline void copyTetrahedron(ITetrahedron * a, const ITetrahedron * b)
+{
+	a->nei0 = b->nei0;
+	a->nei1 = b->nei1;
+	a->nei2 = b->nei2;
+	a->nei3 = b->nei3;
+	a->iv0 = b->iv0;
+	a->iv1 = b->iv1;
+	a->iv2 = b->iv2;
+	a->iv3 = b->iv3;
+}
+
+inline bool tetrahedronHas6Neighbors(const ITetrahedron * t)
+{
+    if(!t->nei0) return false;   
+    if(!t->nei1) return false; 
+    if(!t->nei2) return false;
+    if(!t->nei3) return false; 
+    return true;
+}
 
 inline void printTetrahedronVertices(const ITetrahedron * a)
-{ std::cout<<" tetrahedron ("<<a->iv0<<", "<<a->iv1<<", "<<a->iv2<<", "<<a->iv3<<") "; }
+{ std::cout<<" tetrahedron "<<a->index<<" ("<<a->iv0<<", "<<a->iv1<<", "<<a->iv2<<", "<<a->iv3<<") "; }
+
+inline void printTetrahedronNeighbors(const ITetrahedron * t)
+{
+    std::cout<<"\n neighbor of "; printTetrahedronVertices(t);
+    std::cout<<"\n nei0 "; 
+    if(t->nei0) printTetrahedronVertices(t->nei0); 
+    std::cout<<"\n nei1 "; 
+    if(t->nei1) printTetrahedronVertices(t->nei1); 
+    std::cout<<"\n nei2 "; 
+    if(t->nei2) printTetrahedronVertices(t->nei2); 
+    std::cout<<"\n nei3 "; 
+    if(t->nei3) printTetrahedronVertices(t->nei3); 
+    
+}
 
 inline void faceOfTetrahedron(ITRIANGLE * tri, const ITetrahedron * t, int side)
 {
@@ -63,7 +101,10 @@ inline ITetrahedron * neighborOfTetrahedron(const ITetrahedron * t,
 	setTriangleVertices(&trif, a, b, c);
 	int side = findTetrahedronFace(t, &trif);
 	if(side < 0) return NULL;
-	return t->nei[side];
+	if(side ==0) return t->nei0;
+	if(side ==1) return t->nei1;
+	if(side ==2) return t->nei2;
+	return t->nei3;
 }
 
 inline void printTetrahedronHasNoFace(const ITetrahedron * a, const ITRIANGLE * f)
@@ -90,8 +131,17 @@ inline bool findSharedFace(int & ia, int & jb,
 	return false;
 }
 
+inline void setTetrahedronNeighbor(ITetrahedron * a, ITetrahedron * b, int i)
+{
+    if(i==0) a->nei0 = b;
+    else if(i==1) a->nei1 = b;
+    else if(i==2) a->nei2 = b;
+    else a->nei3 = b;
+}
+
 inline bool connectTetrahedrons(ITetrahedron * a, ITetrahedron * b)
 {
+	if(!a) return false;
 	if(!b) return false;
 	
 	int i, j, ia, jb;
@@ -101,19 +151,55 @@ inline bool connectTetrahedrons(ITetrahedron * a, ITetrahedron * b)
 	}
 	
 	if(ia > -1 && jb > -1) {
-		a->nei[ia] = b;
-		b->nei[jb] = a;
+	    setTetrahedronNeighbor(a, b, ia);
+	    setTetrahedronNeighbor(b, a, jb);
+		//a->nei[ia] = b;
+		//b->nei[jb] = a;
 		//std::cout<<"\n connect "; printTetrahedronVertices(a);
 		//std::cout<<"\n     and "; printTetrahedronVertices(b);
 		//std::cout<<std::endl;
 		return true;
 	}
 	
-	std::cout<<"\n\n [WARNING] failed to connect "; printTetrahedronVertices(a);
+	std::cout<<"\n\n [WARNING] cannot connect "; printTetrahedronVertices(a);
 	std::cout<<"\n                        and "; printTetrahedronVertices(b);
 	std::cout<<std::endl;
 		
 	return false;
+}
+
+inline void reconnectTetrahedronNeighbors(ITetrahedron * t)
+{
+    std::cout<<"\n reconnect neighbor of "; printTetrahedronVertices(t);
+    if(t->nei0)
+        connectTetrahedrons(t, t->nei0); 
+    if(t->nei1)
+        connectTetrahedrons(t, t->nei1); 
+    if(t->nei2)
+        connectTetrahedrons(t, t->nei2); 
+    if(t->nei3)
+        connectTetrahedrons(t, t->nei3); 
+}
+
+inline bool checkTetrahedronConnections(ITetrahedron * a)
+{
+	if(a->nei0) {
+		if(!connectTetrahedrons(a, a->nei0) )
+			return false;
+	}
+	if(a->nei1) {
+		if(!connectTetrahedrons(a, a->nei1) )
+			return false;
+	}
+	if(a->nei2) {
+		if(!connectTetrahedrons(a, a->nei2) )
+			return false;
+	}
+	if(a->nei3) {
+		if(!connectTetrahedrons(a, a->nei3) )
+			return false;
+	}
+	return true;
 }
 
 inline int oppositeVertex(const ITetrahedron * t, 
@@ -131,68 +217,53 @@ inline int oppositeVertex(const ITetrahedron * t,
 typedef struct {
 	ITetrahedron * ta;
 	ITetrahedron * tb;
-	ITetrahedron * nei1;
-	ITetrahedron * nei2;
-	ITetrahedron * nei3;
-	ITetrahedron * nei4;
-	ITetrahedron * nei5;
-	ITetrahedron * nei6;
 	int iv0, iv1, iv2, iv3, iv4;
 	
 } Bipyramid;
 
 inline void printBipyramidVertices(const Bipyramid * pyra)
 {
-	std::cout<<"\n bipyramid ("<<pyra->iv0<<", "
+	std::cout<<" bipyramid ("<<pyra->iv0<<", "
 		<<pyra->iv1<<", "<<pyra->iv2<<", "<<pyra->iv3<<", "
 		<<pyra->iv4<<") ";
-}
-
-inline void printBipyramidNeighbors(const Bipyramid * pyra)
-{
-	if(pyra->nei1) {
-	    std::cout<<"\n nei1 "; printTetrahedronVertices(pyra->nei1);
-	}
-	if(pyra->nei2) {
-	    std::cout<<"\n nei2 "; printTetrahedronVertices(pyra->nei2);
-	}
-	if(pyra->nei3) {
-	    std::cout<<"\n nei3 "; printTetrahedronVertices(pyra->nei3);
-	}
-	if(pyra->nei4) {
-	    std::cout<<"\n nei4 "; printTetrahedronVertices(pyra->nei4);
-	}
-	if(pyra->nei5) {
-	    std::cout<<"\n nei5 "; printTetrahedronVertices(pyra->nei5);
-	}
-	if(pyra->nei6) {
-	    std::cout<<"\n nei6 "; printTetrahedronVertices(pyra->nei6);
-	}
 }
 
 inline void resetBipyramid(Bipyramid * pyra)
 { pyra->tb = NULL; }
 
-inline ITetrahedron * neighborOfBipyramid(const Bipyramid * pyra, int i)
-{ 
-	if(i==1) return pyra->nei1;
-	if(i==2) return pyra->nei2;
-	if(i==3) return pyra->nei3;
-	if(i==4) return pyra->nei4;
-	if(i==5) return pyra->nei5;
-	return pyra->nei6;
+inline void getNeighborOfBipyramid(ITetrahedron * nei1,
+                                ITetrahedron * nei2,
+                                ITetrahedron * nei3,
+                                ITetrahedron * nei4,
+                                ITetrahedron * nei5,
+                                ITetrahedron * nei6,
+                                const Bipyramid * pyra)
+{
+    const int v0 = pyra->iv0;
+    const int v1 = pyra->iv1;
+	const int v2 = pyra->iv2;
+	const int v3 = pyra->iv3;
+	const int v4 = pyra->iv4;
+	nei1 = neighborOfTetrahedron(pyra->ta, v0, v1, v3);
+	nei2 = neighborOfTetrahedron(pyra->ta, v0, v2, v1);
+	nei3 = neighborOfTetrahedron(pyra->ta, v0, v3, v2);
+	nei4 = neighborOfTetrahedron(pyra->tb, v4, v1, v2);
+	nei5 = neighborOfTetrahedron(pyra->tb, v4, v2, v3);
+	nei6 = neighborOfTetrahedron(pyra->tb, v4, v3, v1);   
 }
 
 inline bool createBipyramid(Bipyramid * pyra, 
 						ITetrahedron * ta, 
 						ITetrahedron * tb)
 {
-	std::cout<<"\n create bipyramid "; printTetrahedronVertices(ta); printTetrahedronVertices(tb);
+	// printTetrahedronVertices(ta); printTetrahedronVertices(tb);
 	pyra->ta = ta;
 	pyra->tb = tb;
 	int ia, jb;
-	if(!findSharedFace(ia, jb, ta, tb) ) 
+	if(!findSharedFace(ia, jb, ta, tb) ) {
+		std::cout<<"\n [WARNING] not connected ";
 		return false;
+	}
 		
 	ITRIANGLE tria;
 	faceOfTetrahedron(&tria, ta, ia);
@@ -203,51 +274,10 @@ inline bool createBipyramid(Bipyramid * pyra,
 	pyra->iv3 = tria.p3;
 	pyra->iv4 = oppositeVertex(tb, tria.p1, tria.p2, tria.p3);
 	
-	printBipyramidVertices(pyra);
-	
-	ITRIANGLE tri; int side;
-	setTriangleVertices(&tri, pyra->iv0, pyra->iv1, pyra->iv3);
-	side = findTetrahedronFace(ta, &tri);
-	if(side > -1)
-		pyra->nei1 = ta->nei[side];
-	else
-		printTetrahedronHasNoFace(ta, &tri);
-	
-	setTriangleVertices(&tri, pyra->iv0, pyra->iv2, pyra->iv1);
-	side = findTetrahedronFace(ta, &tri);
-	if(side > -1)
-		pyra->nei2 = ta->nei[side];
-	else
-		printTetrahedronHasNoFace(ta, &tri);
-				
-	setTriangleVertices(&tri, pyra->iv0, pyra->iv3, pyra->iv2);
-	side = findTetrahedronFace(ta, &tri);
-	if(side > -1)
-		pyra->nei3 = ta->nei[side];
-	else
-		printTetrahedronHasNoFace(ta, &tri);
-	
-	setTriangleVertices(&tri, pyra->iv4, pyra->iv1, pyra->iv2);
-	side = findTetrahedronFace(tb, &tri);
-	if(side > -1)
-		pyra->nei4 = tb->nei[side];
-	else
-		printTetrahedronHasNoFace(tb, &tri);
-
-	setTriangleVertices(&tri, pyra->iv4, pyra->iv2, pyra->iv3);
-	side = findTetrahedronFace(tb, &tri);
-	if(side > -1)
-		pyra->nei5 = tb->nei[side];
-	else
-		printTetrahedronHasNoFace(tb, &tri);
-	
-	setTriangleVertices(&tri, pyra->iv4, pyra->iv3, pyra->iv1);
-	side = findTetrahedronFace(tb, &tri);
-	if(side > -1)
-		pyra->nei6 = tb->nei[side];
-	else
-		printTetrahedronHasNoFace(tb, &tri);
-		
+	std::cout<<"\n create "; printBipyramidVertices(pyra);
+	if(!checkTetrahedronConnections(ta) ) printTetrahedronNeighbors(ta);
+	if(!checkTetrahedronConnections(tb) ) printTetrahedronNeighbors(tb);
+	std::cout<<"\n success ";
 	return true;
 }
 
@@ -257,12 +287,17 @@ inline void splitTetrahedron(ITetrahedron * t1, ITetrahedron * t2,
 							int vi)
 {
 	std::cout<<"\n split "; printTetrahedronVertices(t1);
-	
+	printTetrahedronNeighbors(t1);
 /// vertices of t1		
 	const int v0 = t1->iv0;
 	const int v1 = t1->iv1;
 	const int v2 = t1->iv2;
 	const int v3 = t1->iv3;
+	
+	ITetrahedron * nei1 = neighborOfTetrahedron(t1, v1, v2, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(t1, v0, v1, v3);
+	ITetrahedron * nei3 = neighborOfTetrahedron(t1, v0, v2, v1);
+	ITetrahedron * nei4 = neighborOfTetrahedron(t1, v0, v3, v2);
 		
 	setTetrahedronVertices(*t1, vi, v1, v2, v3);
 	setTetrahedronVertices(*t2, vi, v0, v1, v3);
@@ -272,12 +307,27 @@ inline void splitTetrahedron(ITetrahedron * t1, ITetrahedron * t2,
 	connectTetrahedrons(t1, t2);
 	connectTetrahedrons(t1, t3);
 	connectTetrahedrons(t1, t4);
+	connectTetrahedrons(t1, nei1);
 	
 	connectTetrahedrons(t2, t3);
 	connectTetrahedrons(t2, t4);
+	connectTetrahedrons(t2, nei2);
 	
 	connectTetrahedrons(t3, t4);
-	std::cout<<"\n end split ";
+	connectTetrahedrons(t3, nei3);
+	
+	connectTetrahedrons(t4, nei4);
+	
+	std::cout<<"\n to "; printTetrahedronVertices(t1);
+	std::cout<<"\n  + "; printTetrahedronVertices(t2);
+	std::cout<<"\n  + "; printTetrahedronVertices(t3);
+	std::cout<<"\n  + "; printTetrahedronVertices(t4);
+	
+	if(!checkTetrahedronConnections(t1) ) printTetrahedronNeighbors(t1);
+	if(!checkTetrahedronConnections(t2) ) printTetrahedronNeighbors(t2);
+	if(!checkTetrahedronConnections(t3) ) printTetrahedronNeighbors(t3);
+	if(!checkTetrahedronConnections(t4) ) printTetrahedronNeighbors(t4);
+	std::cout<<"\n end of split ";
 }
 
 typedef struct {
@@ -337,15 +387,10 @@ inline bool canSplitFlip(const Bipyramid & pyra,
 /// belongs to supertetrahedron
 	if(pyra.iv0 < 4 || pyra.iv4 < 4) return false;
 	
-	ITetrahedron * nei1 = pyra.nei1;		
-	ITetrahedron * nei2 = pyra.nei2;
-	ITetrahedron * nei3 = pyra.nei3;
-	ITetrahedron * nei4 = pyra.nei4;
-	ITetrahedron * nei5 = pyra.nei5;
-	ITetrahedron * nei6 = pyra.nei6;
-	if(!nei1 || !nei2
-		|| !nei3 || !nei4
-		|| !nei5 || !nei6 )
+	if(!tetrahedronHas6Neighbors(pyra.ta) )
+		return false;
+		
+	if(!tetrahedronHas6Neighbors(pyra.tb) )
 		return false;
 		
 /// must be convex
@@ -368,15 +413,10 @@ inline bool canSplitFlip(const Bipyramid & pyra,
 inline bool canMergeFlip(int & i3rd, const Bipyramid & pyra, 
 							const aphid::Vector3F * X)
 {
-	ITetrahedron * nei1 = pyra.nei1;		
-	ITetrahedron * nei2 = pyra.nei2;
-	ITetrahedron * nei3 = pyra.nei3;
-	ITetrahedron * nei4 = pyra.nei4;
-	ITetrahedron * nei5 = pyra.nei5;
-	ITetrahedron * nei6 = pyra.nei6;
-	if(!nei1 || !nei2
-		|| !nei3 || !nei4
-		|| !nei5 || !nei6 )
+	if(!tetrahedronHas6Neighbors(pyra.ta) )
+		return false;
+		
+	if(!tetrahedronHas6Neighbors(pyra.tb) )
 		return false;
 
 	aphid::Vector3F p0 = X[pyra.iv0];
@@ -385,6 +425,19 @@ inline bool canMergeFlip(int & i3rd, const Bipyramid & pyra,
 	aphid::Vector3F p3 = X[pyra.iv3];
 	aphid::Vector3F p4 = X[pyra.iv4];
 	TetSphere circ;
+	
+	int v0 = pyra.iv0;
+	int v1 = pyra.iv1;
+	int v2 = pyra.iv2;
+	int v3 = pyra.iv3;
+	int v4 = pyra.iv4;
+	
+	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
+	ITetrahedron * nei3 = neighborOfTetrahedron(pyra.ta, v0, v3, v2);
+	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
+	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
+	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
 	
 /// find shared neighbor pair	
 	if(nei1 && nei1 == nei6) {
@@ -427,6 +480,41 @@ inline bool canMergeFlip(int & i3rd, const Bipyramid & pyra,
 	return false;
 }
 
+inline int tetrahedronHasVertex(const ITetrahedron * t,
+								const int & x)
+{
+	if(t->iv0 == x) return 0;
+	if(t->iv1 == x) return 1;
+	if(t->iv2 == x) return 2;
+	if(t->iv3 == x) return 3;
+	return -1;
+}
+
+inline bool checkBipyramidConnection(const Bipyramid & pyra)
+{
+	const int v0 = pyra.iv0;
+	const int v1 = pyra.iv1;
+	const int v2 = pyra.iv2;
+	const int v3 = pyra.iv3;
+	const int v4 = pyra.iv4;
+	
+	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
+	ITetrahedron * nei3 = neighborOfTetrahedron(pyra.ta, v0, v3, v2);
+	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
+	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
+	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
+	
+	if(tetrahedronHasVertex(nei1, pyra.iv4) > -1 ) return false;
+	if(tetrahedronHasVertex(nei2, pyra.iv4) > -1 ) return false;
+	if(tetrahedronHasVertex(nei3, pyra.iv4) > -1 ) return false;
+	if(tetrahedronHasVertex(nei4, pyra.iv0) > -1 ) return false;
+	if(tetrahedronHasVertex(nei5, pyra.iv0) > -1 ) return false;
+	if(tetrahedronHasVertex(nei6, pyra.iv0) > -1 ) return false;
+	
+	return true;
+}
+
 /// flip edge by split bipyramid into three tetrahedrons
 inline void processSplitFlip(Bipyramid & pyra,
 							ITetrahedron * tets,
@@ -444,18 +532,26 @@ inline void processSplitFlip(Bipyramid & pyra,
 	const int v4 = pyra.iv4;
 	
 /// neighbor of bipyramid
-	ITetrahedron * nei1 = pyra.nei1;		
-	ITetrahedron * nei2 = pyra.nei2;
-	ITetrahedron * nei3 = pyra.nei3;
-	ITetrahedron * nei4 = pyra.nei4;
-	ITetrahedron * nei5 = pyra.nei5;
-	ITetrahedron * nei6 = pyra.nei6;
+	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
+	ITetrahedron * nei3 = neighborOfTetrahedron(pyra.ta, v0, v3, v2);
+	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
+	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
+	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
+	
+	if(!checkBipyramidConnection(pyra) ) {
+		std::cout<<"\n [ERROR] wrong bipyramid connections";
+	}
+	
+	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
+	if(!checkTetrahedronConnections(pyra.tb) ) printTetrahedronNeighbors(pyra.tb);
 	
 	setTetrahedronVertices(*pyra.ta, v0, v1, v2, v4);
 	setTetrahedronVertices(*pyra.tb, v0, v2, v3, v4);
 
 /// add a new one
-	ITetrahedron * tc = &tets[numTets++];
+	ITetrahedron * tc = &tets[numTets]; tc->index = numTets;
+	numTets++;
 	setTetrahedronVertices(*tc, v0, v1, v4, v3);
 	
 	connectTetrahedrons(pyra.ta, pyra.tb);
@@ -473,34 +569,42 @@ inline void processSplitFlip(Bipyramid & pyra,
 	std::cout<<"\n aft "; printTetrahedronVertices(pyra.ta);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tb);
 	std::cout<<"\n   + "; printTetrahedronVertices(tc);
+	
+	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
+	if(!checkTetrahedronConnections(pyra.tb) ) printTetrahedronNeighbors(pyra.tb);
+	if(!checkTetrahedronConnections(tc) ) printTetrahedronNeighbors(tc);
 }
 
 /// flip edge by merge a bipyramid with a neighbor tetrahedron into two tetrahedrons
-inline void processMergeFlip(Bipyramid & pyra,
+inline void processMergeFlip(Bipyramid * pyra,
 							const int & side,
 							ITetrahedron * tets,
 							int & numTets)
 {
-	std::cout<<"\n merge flip"; printBipyramidVertices(&pyra);
-	ITetrahedron * tc = neighborOfBipyramid(&pyra, side);
+	std::cout<<"\n merge flip"; printBipyramidVertices(pyra);
+	
+	ITetrahedron * ta = pyra->ta;
+	ITetrahedron * tb = pyra->tb;
+	
+	const int v0 = pyra->iv0;
+	const int v1 = pyra->iv1;
+	const int v2 = pyra->iv2;
+	const int v3 = pyra->iv3;
+	const int v4 = pyra->iv4;
+	
+	ITetrahedron * nei1 = neighborOfTetrahedron(pyra->ta, v0, v1, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(pyra->ta, v0, v2, v1);
+	ITetrahedron * nei3 = neighborOfTetrahedron(pyra->ta, v0, v3, v2);
+	ITetrahedron * nei4 = neighborOfTetrahedron(pyra->tb, v4, v1, v2);
+	ITetrahedron * nei5 = neighborOfTetrahedron(pyra->tb, v4, v2, v3);
+	ITetrahedron * nei6 = neighborOfTetrahedron(pyra->tb, v4, v3, v1);
+
+	ITetrahedron * tc;
+	if(side == 1) tc = nei1;
+	else if(side == 2) tc = nei2;
+	else tc = nei3;
 	std::cout<<" and"; printTetrahedronVertices(tc);
 	
-	ITetrahedron * ta = pyra.ta;
-	ITetrahedron * tb = pyra.tb;
-	
-	const int v0 = pyra.iv0;
-	const int v1 = pyra.iv1;
-	const int v2 = pyra.iv2;
-	const int v3 = pyra.iv3;
-	const int v4 = pyra.iv4;
-	
-	ITetrahedron * nei1 = pyra.nei1;		
-	ITetrahedron * nei2 = pyra.nei2;
-	ITetrahedron * nei3 = pyra.nei3;
-	ITetrahedron * nei4 = pyra.nei4;
-	ITetrahedron * nei5 = pyra.nei5;
-	ITetrahedron * nei6 = pyra.nei6;
-
 /// connection to c	
 	ITetrahedron * neica;
 	ITetrahedron * neicc;
@@ -547,15 +651,18 @@ inline void processMergeFlip(Bipyramid & pyra,
 	connectTetrahedrons(tc, neicc);
 	
 /// remove tb
-	if(tb != &tets[numTets-1]) {
-		std::cout<<"\n remove "; printTetrahedronVertices(tb); printTetrahedronVertices(&tets[numTets-1]);
-		*tb = tets[numTets-1]; 
-	}
-/// reduce num tetrahedrons by one
-	numTets--;
+	std::cout<<"\n remove "; printTetrahedronVertices(tb); 
+	pyra->tb->index = -1;
 	
 	std::cout<<"\n aft "; printTetrahedronVertices(ta);
 	std::cout<<"\n   + "; printTetrahedronVertices(tc);
+	
+	if(!checkTetrahedronConnections(tc)) {
+		std::cout<<"\n [ERROR] wrong tetrahedron connections"; printTetrahedronVertices(tc);
+	}
+	
+	if(!checkTetrahedronConnections(pyra->ta) ) printTetrahedronNeighbors(pyra->ta);
+	if(!checkTetrahedronConnections(tc) ) printTetrahedronNeighbors(tc);
 }
 
 /// once an face is flipped, spawn three more dipyramids for potential face flipping 
@@ -565,20 +672,29 @@ inline void spawnFaces(std::deque<Bipyramid> & pyras,
 	Bipyramid p0 = pyras[0];
 	std::cout<<"\n spawn "; printBipyramidVertices(&p0);
 	
-	ITetrahedron * nei4 = p0.nei4;
-	ITetrahedron * nei5 = p0.nei5;
-	ITetrahedron * nei6 = p0.nei6;
-	if(nei4) {std::cout<<"\n side4 "; printTetrahedronVertices(p0.ta);
+	const int v1 = p0.iv1;
+	const int v2 = p0.iv2;
+	const int v3 = p0.iv3;
+	const int v4 = p0.iv4;
+	ITetrahedron * nei4 = neighborOfTetrahedron(p0.ta, v4, v1, v2);
+	
+	if(nei4) {std::cout<<"\n side 4";
 		Bipyramid pa;
 		if(createBipyramid(&pa, p0.ta, nei4) )
 			pyras.push_back(pa);
 	}
-	if(nei5) {std::cout<<"\n side5 ";
+	
+	ITetrahedron * nei5 = neighborOfTetrahedron(p0.tb, v4, v2, v3);
+	
+	if(nei5) {std::cout<<"\n side 5";
 		Bipyramid pb;
 		if(createBipyramid(&pb, p0.tb, nei5) )
 			pyras.push_back(pb);
 	}
-	if(nei6) {std::cout<<"\n side6 ";
+	
+	ITetrahedron * nei6 = neighborOfTetrahedron(tc, v4, v3, v1);
+
+	if(nei6) {std::cout<<"\n side 6";
 		Bipyramid pc;
 		if(createBipyramid(&pc, tc, nei6) )
 			pyras.push_back(pc);
@@ -588,17 +704,18 @@ inline void spawnFaces(std::deque<Bipyramid> & pyras,
 inline void flipFaces(std::deque<Bipyramid> & pyras, 
 							const aphid::Vector3F * X,
 							ITetrahedron * tets,
-							int & numTets)
+							int & numTets,
+							bool recursively = true)
 {
 	int nq = pyras.size();
 	int mergNei, i=0;
 	while(nq>0) {
 		if(canSplitFlip(pyras[0], X) ) {
 			processSplitFlip(pyras[0], tets, numTets);
-			spawnFaces(pyras, &tets[numTets-1] );
+			if(recursively) spawnFaces(pyras, &tets[numTets-1] );
 		}
 		else if(canMergeFlip(mergNei, pyras[0], X) ) {
-			processMergeFlip(pyras[0], mergNei, 
+			processMergeFlip(&pyras[0], mergNei, 
 							tets, numTets);
 		}
 		pyras.erase(pyras.begin() );

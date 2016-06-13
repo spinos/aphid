@@ -37,6 +37,7 @@ private:
 	bool tetrahedralize();
 	int searchTet(const aphid::Vector3F & p) const;
 	void drawBipyramid(const Bipyramid & pyra) const;
+	bool checkConnectivity();
 	
 };
 

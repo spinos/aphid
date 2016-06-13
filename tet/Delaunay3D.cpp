@@ -16,7 +16,7 @@ using namespace aphid;
 namespace ttg {
 
 Delaunay3D::Delaunay3D() :
-m_endTet(12) 
+m_endTet(15) 
 {}
 
 Delaunay3D::~Delaunay3D() 
@@ -118,6 +118,7 @@ bool Delaunay3D::tetrahedralize()
 {
 	ITetrahedron superTet;
 	setTetrahedronVertices(superTet, 0, 1, 2, 3);
+	superTet.index = 0;
 	resetTetrahedronNeighbors(superTet);
 	m_numTet = 0;
 	m_tets[m_numTet++] = superTet;
@@ -129,18 +130,18 @@ bool Delaunay3D::tetrahedralize()
 		const int ii = m_ind[i].value;
 		std::cout<<"\n ind "<<ii;
 		int j = searchTet(m_X[ii]);
-		ITetrahedron t = m_tets[j];
+		ITetrahedron * t = &m_tets[j];
 
 /// neighbor of t
-		ITetrahedron * nei1 = t.nei[0];		
-		ITetrahedron * nei2 = t.nei[1];
-		ITetrahedron * nei3 = t.nei[2];
-		ITetrahedron * nei4 = t.nei[3];
+		ITetrahedron * nei1 = t->nei0;		
+		ITetrahedron * nei2 = t->nei1;
+		ITetrahedron * nei3 = t->nei2;
+		ITetrahedron * nei4 = t->nei3;
 		
 		ITetrahedron * t1 = &m_tets[j];
-		ITetrahedron * t2 = &m_tets[m_numTet];
-		ITetrahedron * t3 = &m_tets[m_numTet+1];
-		ITetrahedron * t4 = &m_tets[m_numTet+2];
+		ITetrahedron * t2 = &m_tets[m_numTet]; t2->index = m_numTet;
+		ITetrahedron * t3 = &m_tets[m_numTet+1]; t3->index = m_numTet+1;
+		ITetrahedron * t4 = &m_tets[m_numTet+2]; t4->index = m_numTet+2;
 		
 		splitTetrahedron(t1, t2, t3, t4, ii);
 /// add three tetrahedrons
@@ -157,47 +158,61 @@ bool Delaunay3D::tetrahedralize()
 		
 /// update new tetrahedrons to old neighbors
 		if(nei1) {
-			connectTetrahedrons(nei1, t1);
-			createBipyramid(&m_pyra1, t1, nei1);
-			pyras.push_back(m_pyra1);
-			oldNt = m_numTet;
-			flipFaces(pyras, m_X, m_tets, m_numTet);
-			if(oldNt == m_numTet)
-				resetBipyramid(&m_pyra1);
+			if(createBipyramid(&m_pyra1, t1, nei1) ) {
+				pyras.push_back(m_pyra1);
+				oldNt = m_numTet;
+				flipFaces(pyras, m_X, m_tets, m_numTet);
+				if(oldNt == m_numTet)
+					resetBipyramid(&m_pyra1);
+			}
 		}
-			
+		
 		if(nei2) {
-			connectTetrahedrons(nei2, t2);
-			createBipyramid(&m_pyra2, t2, nei2);
-			pyras.push_back(m_pyra2);
-			oldNt = m_numTet;
-			flipFaces(pyras, m_X, m_tets, m_numTet);
-			if(oldNt == m_numTet)
-				resetBipyramid(&m_pyra2);
+			if(createBipyramid(&m_pyra2, t2, nei2) ) {
+				pyras.push_back(m_pyra2);
+				oldNt = m_numTet;
+				flipFaces(pyras, m_X, m_tets, m_numTet);
+				if(oldNt == m_numTet)
+					resetBipyramid(&m_pyra2);
+			}
 		}
-		//if(i==m_endTet-1) break;
+		
 		if(nei3) {
-			connectTetrahedrons(nei3, t3);
-			createBipyramid(&m_pyra3, t3, nei3);
-			pyras.push_back(m_pyra3);
-			oldNt = m_numTet;
-			flipFaces(pyras, m_X, m_tets, m_numTet);
-			if(oldNt == m_numTet)
-				resetBipyramid(&m_pyra3);
+			if(createBipyramid(&m_pyra3, t3, nei3) ) {
+				pyras.push_back(m_pyra3);
+				oldNt = m_numTet;
+				flipFaces(pyras, m_X, m_tets, m_numTet);
+				if(oldNt == m_numTet)
+					resetBipyramid(&m_pyra3);
+			}
 		}
 			
 		if(nei4) {
-			connectTetrahedrons(nei4, t4);
-			createBipyramid(&m_pyra4, t4, nei4);
-			pyras.push_back(m_pyra4);
-			oldNt = m_numTet;
-			flipFaces(pyras, m_X, m_tets, m_numTet);
-			if(oldNt == m_numTet)
-				resetBipyramid(&m_pyra4);
+			if(createBipyramid(&m_pyra4, t4, nei4) ) {
+				pyras.push_back(m_pyra4);
+				oldNt = m_numTet;
+				flipFaces(pyras, m_X, m_tets, m_numTet);
+				if(oldNt == m_numTet)
+					resetBipyramid(&m_pyra4);
+			}
 		}
-
+		
 	}
-	std::cout<<" end triangulate X["<<i-1<<"]"<<std::endl;
+	if(!checkConnectivity() )
+		std::cout<<"\n [ERROR] wrong connectivity ";
+	std::cout<<"\n end triangulate X["<<i-1<<"] nt "<<m_numTet;
+	std::cout.flush();
+	return true;
+}
+
+bool Delaunay3D::checkConnectivity()
+{
+	int i = 0;
+	for(;i<m_numTet;++i) {
+		if(m_tets[i].index < 0) continue;
+		if(!checkTetrahedronConnections(&m_tets[i]) )
+			return false;
+	}
 	return true;
 }
 
@@ -233,6 +248,7 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	i = 0;
 	for(;i<m_numTet;++i) {
 		const ITetrahedron t = m_tets[i];
+		if(t.index < 0) continue;
 		a = m_X[t.iv0];
 		b = m_X[t.iv1];
 		c = m_X[t.iv2];
@@ -300,6 +316,7 @@ void Delaunay3D::draw(GeoDrawer * dr)
 	i = 0;
 	for(;i<m_numTet;++i) {
 		const ITetrahedron t = m_tets[i];
+		if(t.index < 0) continue;
 		a = m_X[t.iv0];
 		b = m_X[t.iv1];
 		c = m_X[t.iv2];
@@ -345,6 +362,7 @@ int Delaunay3D::searchTet(const aphid::Vector3F & p) const
 	int i=m_numTet-1;
 	for(; i>=0; --i) {
 		const ITetrahedron t = m_tets[i];
+		if(t.index < 0) continue;
 		v[0] = m_X[t.iv0];
 		v[1] = m_X[t.iv1];
 		v[2] = m_X[t.iv2];
