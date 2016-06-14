@@ -6,6 +6,7 @@
 #include "Delaunay3D.h"
 #include "Hilbert2D.h"
 #include "Hilbert3D.h"
+#include "Bcc3dTest.h"
 
 using namespace ttg;
 
@@ -18,6 +19,8 @@ Window::Window(const Parameter * param)
 		sc = new Hilbert3D;
 	else if(param->operation() == Parameter::kDelaunay3D)
 		sc = new Delaunay3D;
+	else if(param->operation() == Parameter::kBcc3D)
+		sc = new Bcc3dTest;
 	else
 		sc = new Delaunay2D;
 		

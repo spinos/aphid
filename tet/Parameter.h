@@ -18,7 +18,8 @@ public:
 		kDelaunay2D = 1,
 		kHilbert2D = 2,
 		kHilbert3D = 3,
-		kDelaunay3D = 4
+		kDelaunay3D = 4,
+		kBcc3D = 5
 	};
 	
 	Parameter(int argc, char *argv[]);

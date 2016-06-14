@@ -28,6 +28,8 @@ Scene.h
 Hilbert2D.h
 Hilbert3D.h
 Delaunay2D.h
+BccTetraGrid.h
+Bcc3dTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -38,6 +40,8 @@ Hilbert2D.cpp
 Delaunay2D.cpp
 Delaunay3D.cpp
 Hilbert3D.cpp
+BccTetraGrid.cpp
+Bcc3dTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

@@ -16,7 +16,7 @@ namespace ttg {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	m_operation = kDelaunay3D;
+	m_operation = kBcc3D;
 	
 	if(argc < 2) {
 		std::cout<<"\n tet (Tetrahedral Mesh Generation Research) version 20160601"
@@ -40,6 +40,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-d3") == 0 || strcmp(argv[i], "--delauney3d") == 0) {
 				m_operation = kDelaunay3D;
 			}
+			if(strcmp(argv[i], "-b3") == 0 || strcmp(argv[i], "--bcc3d") == 0) {
+				m_operation = kBcc3D;
+			}
 		}
 	}
 	
@@ -60,6 +63,7 @@ void Parameter::PrintHelp()
 	<<"\n -h3 or --hilbert3d    test 3D hilbert curve"
 	<<"\n -d2 or --delauney2d    test 2D delauney"
 	<<"\n -d3 or --delauney3d    test 3D delauney"
+	<<"\n -b3 or --bcc3d    test 3D BCC"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";
