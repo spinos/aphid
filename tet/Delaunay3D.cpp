@@ -16,7 +16,7 @@ using namespace aphid;
 namespace ttg {
 
 Delaunay3D::Delaunay3D() :
-m_endTet(15) 
+m_endTet(243) 
 {}
 
 Delaunay3D::~Delaunay3D() 
@@ -79,7 +79,7 @@ void Delaunay3D::generateSamples()
 /// first four for super tetrahedron
 	m_X = new Vector3F[m_N+4];
 	m_ind = new QuickSortPair<int, int>[m_N+4];
-	m_tets = new ITetrahedron[m_N * 4 + 16];
+	m_tets = new ITetrahedron[m_N * 10 + 16];
 	const float dx = bbx.distance(0) + bbx.distance(1) + bbx.distance(2);
 	const float dx3 = dx * 3.f;
 	m_X[0].set(bbx.getMax(0) + dx, bbx.getMax(1) + dx3, bbx.getMin(2) - dx);
@@ -96,9 +96,9 @@ void Delaunay3D::generateSamples()
 	cel->begin();
 	while(!cel->end()) {
 		sample = bgg.cellCenter(cel->key());
-		sample.x += RandomFn11() * 0.43f * hh;
-		sample.y += RandomFn11() * 0.43f * hh;
-		sample.z += RandomFn11() * 0.43f * hh;
+		sample.x += RandomFn11() * 0.33f * hh;
+		sample.y += RandomFn11() * 0.33f * hh;
+		sample.z += RandomFn11() * 0.33f * hh;
 		
 		m_ind[i].key = hilbert3DCoord(sample.x, sample.y, sample.z,
 									x0, y0, z0,

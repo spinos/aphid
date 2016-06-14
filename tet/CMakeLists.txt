@@ -20,6 +20,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../shared/triangle_math.h
 ../shared/tetrahedron_math.h
 triangulation.h
+tetrahedron_graph.h
+bipyramid_flip.h
 tetrahedralization.h
 Parameter.h
 Scene.h
