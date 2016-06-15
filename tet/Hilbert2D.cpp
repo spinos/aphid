@@ -27,6 +27,7 @@ Hilbert2D::~Hilbert2D()
 bool Hilbert2D::init() 
 {
 	generateSamples();
+    return true;
 }
 
 void Hilbert2D::generateSamples()

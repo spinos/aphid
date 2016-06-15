@@ -30,6 +30,7 @@ Hilbert3D::~Hilbert3D()
 bool Hilbert3D::init() 
 {
 	generateSamples(m_level);
+    return true;
 }
 
 void Hilbert3D::generateSamples(int level)

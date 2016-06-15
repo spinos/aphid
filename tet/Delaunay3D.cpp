@@ -30,6 +30,7 @@ bool Delaunay3D::init()
 {
 	generateSamples();
 	tetrahedralize();
+    return true;
 }
 
 void Delaunay3D::generateSamples()

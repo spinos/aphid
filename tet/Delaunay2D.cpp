@@ -30,6 +30,7 @@ bool Delaunay2D::init()
 {
 	generateSamples();
 	triangulate();
+    return true;
 }
 
 void Delaunay2D::generateSamples()

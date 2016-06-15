@@ -20,7 +20,10 @@ Bcc3dTest::~Bcc3dTest()
 {}
 
 bool Bcc3dTest::init() 
-{ createGrid(); }
+{ 
+    createGrid();
+    return true;
+}
 
 bool Bcc3dTest::progressForward()
 { 

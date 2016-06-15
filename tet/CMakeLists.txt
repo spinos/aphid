@@ -56,7 +56,10 @@ find_package (OpenGL REQUIRED)
 target_link_libraries (foo ${OPENGL_LIBRARIES})
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+set (Aphid_Library D:/aphid/lib/aphidMath.lib
+D:/aphid/lib/aphidGeom.lib
+D:/aphid/lib/aphidSdb.lib
+D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
@@ -135,3 +138,5 @@ add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 message (${Boost_LIBRARIES})
 target_link_libraries(foo ${Boost_LIBRARIES})
+
+SET (EXECUTABLE_OUTPUT_PATH ../bin)
