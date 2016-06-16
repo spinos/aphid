@@ -61,6 +61,40 @@ void Bcc3dTest::draw(GeoDrawer * dr)
 	for(;i<m_N;++i) {
 		dr->cube(m_X[i], .125f);
 	}
+	
+	dr->m_wireProfile.apply();
+	dr->setColor(0.2f, 0.2f, 0.49f);
+	
+	glBegin(GL_TRIANGLES);
+	Vector3F a, b, c, d;
+	
+	std::vector<ITetrahedron *>::const_iterator it = m_tets.begin();
+	for(;it!= m_tets.end();++it) {
+		const ITetrahedron * t = *it;
+		
+		a = m_X[t->iv0];
+		b = m_X[t->iv1];
+		c = m_X[t->iv2];
+		d = m_X[t->iv3];
+		
+		glVertex3fv((const GLfloat *)&b);
+		glVertex3fv((const GLfloat *)&c);
+		glVertex3fv((const GLfloat *)&d);
+		
+		glVertex3fv((const GLfloat *)&a);
+		glVertex3fv((const GLfloat *)&b);
+		glVertex3fv((const GLfloat *)&d);
+		
+		glVertex3fv((const GLfloat *)&a);
+		glVertex3fv((const GLfloat *)&c);
+		glVertex3fv((const GLfloat *)&b);
+		
+		glVertex3fv((const GLfloat *)&a);
+		glVertex3fv((const GLfloat *)&d);
+		glVertex3fv((const GLfloat *)&c);
+	}
+	
+	glEnd();
 }
 
 void Bcc3dTest::createGrid()

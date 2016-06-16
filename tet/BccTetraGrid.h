@@ -17,6 +17,24 @@
 
 namespace ttg {
 
+/// face shared by two tetra
+template<typename T>
+class STriangle {
+
+public:
+	STriangle() :
+	ta(NULL),
+	tb(NULL) 
+	{}
+	
+	aphid::sdb::Coord3 key;
+	T * ta;
+	T * tb;
+	
+};
+
+typedef aphid::sdb::Array<aphid::sdb::Coord3, STriangle<ITetrahedron> > STriangleArray;
+
 class BccNode {
 	
 public:
@@ -41,7 +59,8 @@ public:
 					const aphid::sdb::Coord3 & cellCoord) const;
 	void connectNodes(std::vector<ITetrahedron *> & dest,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
-					const aphid::sdb::Coord3 & cellCoord) const;	
+					const aphid::sdb::Coord3 & cellCoord,
+					STriangleArray * faces) const;	
 	const aphid::Vector3F * centerP() const;
 	
 private:
@@ -58,11 +77,15 @@ private:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord,
-					const int & inode15, 
-					const int & iface) const;
+					BccNode * node15, 
+					const int & iface,
+					STriangleArray * faces) const;
 	BccNode * findCornerNodeInNeighbor(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	void addFace(STriangleArray * faces,
+				int a, int b, int c,
+				ITetrahedron * t) const;
 	
 };
 

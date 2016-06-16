@@ -1,8 +1,8 @@
 #ifndef APHID_QUICKSORT_H
 #define APHID_QUICKSORT_H
-//#include <iostream>
+
 #include <stdlib.h>
-//#include <BaseArray.h>
+#include <vector>
 #include <deque>
 
 namespace aphid {

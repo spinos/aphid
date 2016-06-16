@@ -88,6 +88,22 @@ const bool Coord3::operator>(const Coord3 & another) const {
 	return x > another.x;
 }
 
+Coord3 Coord3::ordered() const
+{
+	int a = x;
+	if(y < a) a = y;
+	if(z < a) a = z;
+	
+	int c = x;
+	if(y > c) c = y;
+	if(z > c) c = z;
+	
+	int b = x;
+	if(y > a && y < c) b = y;
+	if(z > a && z < c) b = z;
+	return Coord3(a, b, c);
+}
+
 const std::string Coord3::str() const 
 {
 	return (boost::format("(%1%,%2%,%3%)") % x % y % z).str();

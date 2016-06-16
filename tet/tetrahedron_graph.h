@@ -143,6 +143,27 @@ inline void setTetrahedronNeighbor(ITetrahedron * a, ITetrahedron * b, int i)
     else a->nei3 = b;
 }
 
+inline bool connectTetrahedrons(ITetrahedron * a, ITetrahedron * b,
+						int v1, int v2, int v3)
+{
+	ITRIANGLE trif;
+	setTriangleVertices(&trif, v1, v2, v3);
+	int ia = findTetrahedronFace(a, &trif);
+	if(ia < 0) {
+		return false;
+	}
+	
+	int jb = findTetrahedronFace(b, &trif);
+	if(jb < 0) {
+		return false;
+	}
+	
+	setTetrahedronNeighbor(a, b, ia);
+	setTetrahedronNeighbor(b, a, jb);
+	
+	return true;
+}
+
 inline bool connectTetrahedrons(ITetrahedron * a, ITetrahedron * b)
 {
 	if(!a) return false;
@@ -201,6 +222,13 @@ inline void printTetrahedronHasNoFace(const ITetrahedron * a, const ITRIANGLE * 
 {
 	std::cout<<"\n\n [WARNING] no face "; printTriangleVertice(f);
 	std::cout<<"\n				in "; printTetrahedronVertices(a);
+}
+
+inline void printTetrahedronCannotConnect(const ITetrahedron * a, 
+						const ITetrahedron * b)
+{
+	std::cout<<"\n\n [ERROR] cannot connect "; printTetrahedronVertices(a);
+	std::cout<<"\n                      and "; printTetrahedronVertices(b);
 }
 
 }

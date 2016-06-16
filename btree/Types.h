@@ -41,6 +41,7 @@ public:
 	const bool operator<(const Coord3 & another) const;
 	const bool operator>=(const Coord3 & another) const;
 	const bool operator>(const Coord3 & another) const;
+	Coord3 ordered() const;
 	const std::string str() const;
 	friend std::ostream& operator<<(std::ostream &output, const Coord3 & p)
     {

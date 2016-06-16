@@ -138,7 +138,8 @@ void BccCell::getNodePositions(Vector3F * dest,
 
 void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
-					const sdb::Coord3 & cellCoord) const
+					const sdb::Coord3 & cellCoord,
+					STriangleArray * faces) const
 {
 	const float gsize = grid->gridSize();
 	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord);
@@ -153,24 +154,28 @@ void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 		return;
 	}
 	
-	const int inode15 = node15->index;
-	
 /// for each face
 	if(!grid->findCell(neighborCoord(cellCoord, 0) ) )
-		connectNodesOnFace(dest, grid, cell, cellCoord, inode15, 0);
+		connectNodesOnFace(dest, grid, cell, cellCoord, node15, 0, faces);
 	if(!grid->findCell(neighborCoord(cellCoord, 2) ) )
-		connectNodesOnFace(dest, grid, cell, cellCoord, inode15, 2);
+		connectNodesOnFace(dest, grid, cell, cellCoord, node15, 2, faces);
 	if(!grid->findCell(neighborCoord(cellCoord, 4) ) )
-		connectNodesOnFace(dest, grid, cell, cellCoord, inode15, 4);
+		connectNodesOnFace(dest, grid, cell, cellCoord, node15, 4, faces);
+		
+	connectNodesOnFace(dest, grid, cell, cellCoord, node15, 1, faces);
+	connectNodesOnFace(dest, grid, cell, cellCoord, node15, 3, faces);
+	connectNodesOnFace(dest, grid, cell, cellCoord, node15, 5, faces);
 }
 
 void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					sdb::Array<int, BccNode> * cell,
 					const sdb::Coord3 & cellCoord,
-					const int & inode15,
-					const int & iface) const
+					BccNode * node15,
+					const int & iface,
+					STriangleArray * faces) const
 {
+	const int inode15 = node15->index;
 	BccNode * nodeA = cell->find(iface);
 	if(!nodeA) {
 		sdb::Array<int, BccNode> * neicell = grid->findCell(neighborCoord(cellCoord, iface) );
@@ -207,7 +212,32 @@ void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 		
 		ITetrahedron * t = new ITetrahedron;
 		setTetrahedronVertices(*t, inode15, a, b, c);
+		t->index = dest.size();
 		dest.push_back(t);
+		
+/// add four faces
+		addFace(faces, a, b, c, t);
+		addFace(faces, inode15, a, b, t);
+		addFace(faces, inode15, b, c, t);
+		addFace(faces, inode15, c, a, t);
+	}
+}
+
+void BccCell::addFace(STriangleArray * faces,
+				int a, int b, int c,
+				ITetrahedron * t) const
+{
+	sdb::Coord3 itri = sdb::Coord3(a, b, c).ordered();
+	STriangle<ITetrahedron> * tri = faces->find(itri );
+	if(!tri) {
+		tri = new STriangle<ITetrahedron>();
+		tri->key = itri;
+		tri->ta = t;
+		
+		faces->insert(itri, tri);
+	}
+	else {
+		tri->tb = t;
 	}
 }
 
@@ -397,13 +427,31 @@ void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)
 		next();
 	}
 	
+	STriangleArray faces;
+	
 	const int n = cells.size();
 	int i=0;
 	for(;i<n;++i) {
 		const BccCell & c = cells[i];
-		c.connectNodes(dest, this, gridCoord((const float *)c.centerP() ) );
+		c.connectNodes(dest, this, gridCoord((const float *)c.centerP() ), &faces );
 	}
 	cells.clear();
+	std::cout<<"\n n face "<<faces.size();
+	std::cout.flush();
+	
+	faces.begin();
+	while(!faces.end() ) {
+		STriangle<ITetrahedron> * f = faces.value();
+		if(f->tb) {
+			bool stat = connectTetrahedrons(f->ta, f->tb,
+								f->key.x, f->key.y, f->key.z);
+			if(!stat) {
+				printTetrahedronCannotConnect(f->ta, f->tb);
+			}
+		}
+		faces.next();
+	}
+	faces.clear();
 }
 
 }
