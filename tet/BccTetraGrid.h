@@ -12,6 +12,8 @@
 
 #include <WorldGrid.h>
 #include <Array.h>
+#include "triangulation.h"
+#include "tetrahedron_graph.h"
 
 namespace ttg {
 
@@ -28,19 +30,40 @@ class BccCell {
 	
 	static float TwentySixNeighborOffset[26][3];
 	static int SevenNeighborOnCorner[8][7];
+	static int SixTetraFace[6][8];
 	
 public:
 	BccCell(const aphid::Vector3F &center );
 	void addNodes(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
-		
+	void getNodePositions(aphid::Vector3F * dest,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	void connectNodes(std::vector<ITetrahedron *> & dest,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;	
 	const aphid::Vector3F * centerP() const;
 	
 private:
-	bool findNeighborCorner(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
+	void neighborOffset(aphid::Vector3F * dest, int i) const;
+	BccNode * findNeighborCorner(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::Vector3F & pos, int icorner) const;
-	int cornerI(const aphid::Vector3F & corner,
+	int keyToCorner(const aphid::Vector3F & corner,
 				const aphid::Vector3F & center) const;
+	void getNodePosition(aphid::Vector3F * dest,
+						const int & nodeI,
+						const float & gridSize) const;
+	void connectNodesOnFace(std::vector<ITetrahedron *> & dest,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const int & inode15, 
+					const int & iface) const;
+	BccNode * findCornerNodeInNeighbor(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	
 };
 
 class BccTetraGrid : public aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > 
@@ -50,8 +73,10 @@ public:
 	BccTetraGrid();
 	virtual ~BccTetraGrid();
 	
-	void buildTetrahedrons();
+	void buildNodes();
 	int numNodes();
+	void getNodePositions(aphid::Vector3F * dest);
+	void buildTetrahedrons(std::vector<ITetrahedron *> & dest);
 	
 protected:
 

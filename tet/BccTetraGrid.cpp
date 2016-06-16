@@ -53,6 +53,15 @@ int BccCell::SevenNeighborOnCorner[8][7] = {
 {1, 3, 5, 13, 17, 21, 25}
 };
 
+int BccCell::SixTetraFace[6][8] = {
+{ 8, 6,12, 8,10,12, 6,10},
+{ 7, 9, 9,13,13,11,11, 7},
+{ 6, 7,10, 6,11,10, 7,11},
+{ 9, 8, 8,12,12,13,13, 9},
+{ 7, 6, 9, 7, 8, 9, 6, 8},
+{10,11,11,13,13,12,12,10}
+};
+
 BccCell::BccCell(const Vector3F &center )
 { m_center = center; }
 
@@ -69,12 +78,7 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 /// face 1 - 6 when on border
 	int j, i = 0;
 	for(;i<6;++i) {
-		offset.set(TwentySixNeighborOffset[i][0],
-					TwentySixNeighborOffset[i][1],
-					TwentySixNeighborOffset[i][2]);
-		samp = m_center + offset * gsize;
-			
-		if(!grid->findCell(samp) ) {
+		if(!grid->findCell(neighborCoord(cellCoord, i) ) ) {
 			BccNode * ni = new BccNode;
 			ni->key = i;
 			
@@ -87,20 +91,15 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 	for(;i<14;++i) {
 		
 		bool toadd = true;
-		
-		offset.set(TwentySixNeighborOffset[i][0],
-					TwentySixNeighborOffset[i][1],
-					TwentySixNeighborOffset[i][2]);
+		neighborOffset(&offset, i);
 		samp = m_center + offset * gsize * .5f;
 		
 		for(j=0;j<7;++j) {
 			int neighborJ = SevenNeighborOnCorner[i-6][j];
-			offset.set(TwentySixNeighborOffset[neighborJ][0],
-					TwentySixNeighborOffset[neighborJ][1],
-					TwentySixNeighborOffset[neighborJ][2]);
+			neighborOffset(&offset, neighborJ);
 			Vector3F neighborCenter = m_center + offset * gsize;
 			if(findNeighborCorner(grid, neighborCenter,
-					cornerI(samp, neighborCenter) ) ) {
+					keyToCorner(samp, neighborCenter) ) ) {
 				toadd = false;
 				break;
 			}
@@ -115,7 +114,146 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 	}
 }
 
-bool BccCell::findNeighborCorner(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+void BccCell::getNodePositions(Vector3F * dest,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	const float gsize = grid->gridSize();
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord);
+	if(!cell) {
+		std::cout<<"\n [ERROR] no cell "<<cellCoord;
+		return;
+	}
+	
+	cell->begin();
+	while(!cell->end() ) {
+		
+		getNodePosition(&dest[cell->value()->index],
+					cell->value()->key,
+					gsize);
+		
+		cell->next();
+	}
+}
+
+void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	const float gsize = grid->gridSize();
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord);
+	if(!cell) {
+		std::cout<<"\n [ERROR] no cell "<<cellCoord;
+		return;
+	}
+	
+	BccNode * node15 = cell->find(15);
+	if(!node15) {
+		std::cout<<"\n [ERROR] no node15 ";
+		return;
+	}
+	
+	const int inode15 = node15->index;
+	
+/// for each face
+	if(!grid->findCell(neighborCoord(cellCoord, 0) ) )
+		connectNodesOnFace(dest, grid, cell, cellCoord, inode15, 0);
+	if(!grid->findCell(neighborCoord(cellCoord, 2) ) )
+		connectNodesOnFace(dest, grid, cell, cellCoord, inode15, 2);
+	if(!grid->findCell(neighborCoord(cellCoord, 4) ) )
+		connectNodesOnFace(dest, grid, cell, cellCoord, inode15, 4);
+}
+
+void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					sdb::Array<int, BccNode> * cell,
+					const sdb::Coord3 & cellCoord,
+					const int & inode15,
+					const int & iface) const
+{
+	BccNode * nodeA = cell->find(iface);
+	if(!nodeA) {
+		sdb::Array<int, BccNode> * neicell = grid->findCell(neighborCoord(cellCoord, iface) );
+		if(!neicell) {
+			std::cout<<"\n [ERROR] no shared node"<<iface<<" in neighbor cell ";
+			return;
+		}
+		nodeA = neicell->find(15);
+	}
+	const int a = nodeA->index;
+/// four tetra
+	int i=0;
+	for(;i<8;i+=2) {
+		BccNode * nodeB = cell->find(SixTetraFace[iface][i]);
+		if(!nodeB) {
+			nodeB = findCornerNodeInNeighbor(SixTetraFace[iface][i],
+								grid,
+								cellCoord);
+		}
+		if(!nodeB)
+			return;
+		
+		BccNode * nodeC = cell->find(SixTetraFace[iface][i+1]);
+		if(!nodeC) {
+			nodeC = findCornerNodeInNeighbor(SixTetraFace[iface][i+1],
+								grid,
+								cellCoord);
+		}
+		if(!nodeC)
+			return;
+		
+		int b = nodeB->index;
+		int c = nodeC->index;
+		
+		ITetrahedron * t = new ITetrahedron;
+		setTetrahedronVertices(*t, inode15, a, b, c);
+		dest.push_back(t);
+	}
+}
+
+BccNode * BccCell::findCornerNodeInNeighbor(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	const float gsize = grid->gridSize();
+	
+	Vector3F offset;
+	neighborOffset(&offset, i);
+	Vector3F cornerP = m_center + offset * gsize * .5f;
+	
+	int j;
+	for(j=0;j<7;++j) {
+		int neighborJ = SevenNeighborOnCorner[i-6][j];
+		neighborOffset(&offset, neighborJ);
+		Vector3F neighborCenter = m_center + offset * gsize;
+		
+		BccNode * node = findNeighborCorner(grid, neighborCenter,
+				keyToCorner(cornerP, neighborCenter) );
+		if(node) {
+			return node;
+		}
+	}
+	std::cout<<"\n [ERROR] no node"<<i<<" in cell"<<cellCoord;
+	return NULL;
+}
+
+sdb::Coord3 BccCell::neighborCoord(const sdb::Coord3 & cellCoord, int i) const
+{
+	sdb::Coord3 r = cellCoord;
+	r.x += (int)TwentySixNeighborOffset[i][0];
+	r.y += (int)TwentySixNeighborOffset[i][1];
+	r.z += (int)TwentySixNeighborOffset[i][2];
+	return r;
+}
+
+void BccCell::neighborOffset(aphid::Vector3F * dest, int i) const
+{
+	dest->set(TwentySixNeighborOffset[i][0],
+					TwentySixNeighborOffset[i][1],
+					TwentySixNeighborOffset[i][2]);
+}
+
+BccNode * BccCell::findNeighborCorner(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					const Vector3F & pos, int icorner) const
 {
 	sdb::Array<int, BccNode> * neicell = grid->findCell(pos);
@@ -125,7 +263,7 @@ bool BccCell::findNeighborCorner(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNod
 	return neicell->find(icorner );
 }
 
-int BccCell::cornerI(const Vector3F & corner,
+int BccCell::keyToCorner(const Vector3F & corner,
 				const Vector3F & center) const
 {
 	float dx = corner.x - center.x;
@@ -162,10 +300,26 @@ int BccCell::cornerI(const Vector3F & corner,
 	return 13;
 }
 
-BccTetraGrid::BccTetraGrid() {}
-BccTetraGrid::~BccTetraGrid() {}
+void BccCell::getNodePosition(aphid::Vector3F * dest,
+						const int & nodeI,
+						const float & gridSize) const
+{
+	Vector3F offset;
+	neighborOffset(&offset, nodeI);
+	offset *= gridSize * .5f;
+	if(nodeI == 15)
+		offset.set(0.f, 0.f, 0.f);
+		
+	*dest = m_center + offset;
+}
 
-void BccTetraGrid::buildTetrahedrons()
+BccTetraGrid::BccTetraGrid() 
+{}
+
+BccTetraGrid::~BccTetraGrid() 
+{}
+
+void BccTetraGrid::buildNodes()
 {
 	std::vector<BccCell> cells;
 	begin();
@@ -182,6 +336,7 @@ void BccTetraGrid::buildTetrahedrons()
 	}
 	cells.clear();
 	countNodes();
+	
 }
 
 void BccTetraGrid::countNodes()
@@ -213,6 +368,42 @@ int BccTetraGrid::numNodes()
 		next();
 	}
 	return c;
+}
+
+void BccTetraGrid::getNodePositions(Vector3F * dest)
+{
+	std::vector<BccCell> cells;
+	begin();
+	while(!end() ) {
+		cells.push_back(BccCell(coordToCellCenter(key() ) ) );
+		next();
+	}
+	
+	const int n = cells.size();
+	int i=0;
+	for(;i<n;++i) {
+		const BccCell & c = cells[i];
+		c.getNodePositions(dest, this, gridCoord((const float *)c.centerP() ) );
+	}
+	cells.clear();
+}
+
+void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)
+{
+	std::vector<BccCell> cells;
+	begin();
+	while(!end() ) {
+		cells.push_back(BccCell(coordToCellCenter(key() ) ) );
+		next();
+	}
+	
+	const int n = cells.size();
+	int i=0;
+	for(;i<n;++i) {
+		const BccCell & c = cells[i];
+		c.connectNodes(dest, this, gridCoord((const float *)c.centerP() ) );
+	}
+	cells.clear();
 }
 
 }

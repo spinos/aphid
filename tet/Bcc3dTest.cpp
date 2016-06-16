@@ -13,11 +13,19 @@
 using namespace aphid;
 namespace ttg {
 
-Bcc3dTest::Bcc3dTest()
+Bcc3dTest::Bcc3dTest() :
+m_X(NULL)
 {}
 
 Bcc3dTest::~Bcc3dTest() 
-{}
+{
+	if(m_X) delete[] m_X;
+	std::vector<ITetrahedron *>::iterator it = m_tets.begin();
+	for(;it!=m_tets.end();++it) {
+		delete *it;
+	}
+	m_tets.clear();
+}
 
 bool Bcc3dTest::init() 
 { 
@@ -46,6 +54,13 @@ void Bcc3dTest::draw(GeoDrawer * dr)
 		dr->boundingBox(m_grid.coordToGridBBox(m_grid.key() ) );
 		m_grid.next();
 	}
+	
+	dr->m_markerProfile.apply();
+	dr->setColor(0.f, 0.f, 0.f);
+	int i = 0;
+	for(;i<m_N;++i) {
+		dr->cube(m_X[i], .125f);
+	}
 }
 
 void Bcc3dTest::createGrid()
@@ -73,9 +88,15 @@ void Bcc3dTest::createGrid()
 	}
 	m_grid.calculateBBox();
 	std::cout<<"\n n cell "<<m_grid.size();
-	m_grid.buildTetrahedrons();
-	std::cout<<"\n n node "<<m_grid.numNodes();
+	m_grid.buildNodes();
+	m_N = m_grid.numNodes();
+	m_X = new Vector3F[m_N];
+	std::cout<<"\n n node "<<m_N;
+	m_grid.getNodePositions(m_X);
+	m_grid.buildTetrahedrons(m_tets);
+	std::cout<<"\n n tet "<<m_tets.size();
 	std::cout.flush();
+	
 }
 
 }

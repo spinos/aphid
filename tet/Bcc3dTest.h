@@ -17,6 +17,9 @@ namespace ttg {
 class Bcc3dTest : public Scene {
 
 	BccTetraGrid m_grid;
+	aphid::Vector3F * m_X;
+	int m_N;
+	std::vector<ITetrahedron *> m_tets;
 	
 public:
 	Bcc3dTest();
