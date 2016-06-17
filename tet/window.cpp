@@ -7,6 +7,7 @@
 #include "Hilbert2D.h"
 #include "Hilbert3D.h"
 #include "Bcc3dTest.h"
+#include "SuperformulaTest.h"
 
 using namespace ttg;
 
@@ -21,8 +22,10 @@ Window::Window(const Parameter * param)
 		sc = new Delaunay3D;
 	else if(param->operation() == Parameter::kBcc3D)
 		sc = new Bcc3dTest;
-	else
+	else if(param->operation() == Parameter::kDelaunay2D)
 		sc = new Delaunay2D;
+	else 
+		sc = new SuperformulaTest;
 		
     glWidget = new GLWidget(sc, this);
 	

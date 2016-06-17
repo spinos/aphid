@@ -30,6 +30,7 @@ Hilbert3D.h
 Delaunay2D.h
 BccTetraGrid.h
 Bcc3dTest.h
+SuperformulaTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -42,6 +43,7 @@ Delaunay3D.cpp
 Hilbert3D.cpp
 BccTetraGrid.cpp
 Bcc3dTest.cpp
+SuperformulaTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

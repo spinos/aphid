@@ -19,7 +19,8 @@ public:
 		kHilbert2D = 2,
 		kHilbert3D = 3,
 		kDelaunay3D = 4,
-		kBcc3D = 5
+		kBcc3D = 5,
+		kSuperformula = 6
 	};
 	
 	Parameter(int argc, char *argv[]);
