@@ -5,6 +5,8 @@
 #include <Base3DView.h>
 #include "Scene.h"
 
+namespace ttg {
+
 class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
@@ -23,7 +25,21 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
     
-//! [3]
+public slots:
+	void receiveA1(double x);
+	void receiveB1(double x);
+	void receiveM1(double x);
+	void receiveN1(double x);
+	void receiveN2(double x);
+	void receiveN3(double x);
+
+	void receiveA2(double x);
+	void receiveB2(double x);
+	void receiveM2(double x);
+	void receiveN21(double x);
+	void receiveN22(double x);
+	void receiveN23(double x);
+	
 private:
 
 private slots:
@@ -31,6 +47,6 @@ private slots:
 private:
 	ttg::Scene * m_scene;
 };
-//! [3]
 
+}
 #endif

@@ -4,10 +4,14 @@
 #include <QMainWindow>
 #include "Parameter.h"
 QT_BEGIN_NAMESPACE
-
+class QMenu;
+class QAction;
 QT_END_NAMESPACE
-//! [0]
+
+namespace ttg {
+
 class GLWidget;
+class SuperformulaControl;
 
 class Window : public QMainWindow
 {
@@ -20,8 +24,16 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
+	void createActions(Parameter::Operation opt);
+	void createMenus(Parameter::Operation opt);
+	
+private:
     GLWidget *glWidget;
+	QMenu * windowMenu;
+	SuperformulaControl * m_superformulaControl;
+	QAction * showSFControlAct;
+	
 };
-//! [0]
 
+}
 #endif

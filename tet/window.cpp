@@ -8,8 +8,9 @@
 #include "Hilbert3D.h"
 #include "Bcc3dTest.h"
 #include "SuperformulaTest.h"
+#include "SuperformulaControl.h"
 
-using namespace ttg;
+namespace ttg {
 
 Window::Window(const Parameter * param)
 {
@@ -31,6 +32,10 @@ Window::Window(const Parameter * param)
 	
 	setCentralWidget(glWidget);
     setWindowTitle(tr(sc->titleStr() ) );
+	
+	createActions(param->operation() );
+    createMenus(param->operation() );
+	
 }
 //! [1]
 
@@ -40,4 +45,62 @@ void Window::keyPressEvent(QKeyEvent *e)
         close();
 
 	QWidget::keyPressEvent(e);
+}
+
+void Window::createActions(Parameter::Operation opt)
+{
+	if(opt == Parameter::kSuperformula) {
+		m_superformulaControl = new SuperformulaControl(this);
+	
+		showSFControlAct = new QAction(tr("&Superformula Control"), this);
+		showSFControlAct->setStatusTip(tr("Show Superformula settings"));
+		connect(showSFControlAct, SIGNAL(triggered()), m_superformulaControl, SLOT(show()));
+    
+		connect(m_superformulaControl, SIGNAL(a1Changed(double) ), 
+			glWidget, SLOT(receiveA1(double)));
+			
+		connect(m_superformulaControl, SIGNAL(b1Changed(double) ), 
+			glWidget, SLOT(receiveB1(double)));
+			
+		connect(m_superformulaControl, SIGNAL(m1Changed(double) ), 
+			glWidget, SLOT(receiveM1(double)));
+			
+		connect(m_superformulaControl, SIGNAL(n1Changed(double) ), 
+			glWidget, SLOT(receiveN1(double)));
+			
+		connect(m_superformulaControl, SIGNAL(n2Changed(double) ), 
+			glWidget, SLOT(receiveN2(double)));
+			
+		connect(m_superformulaControl, SIGNAL(n3Changed(double) ), 
+			glWidget, SLOT(receiveN3(double)));
+			
+		connect(m_superformulaControl, SIGNAL(a2Changed(double) ), 
+			glWidget, SLOT(receiveA2(double)));
+			
+		connect(m_superformulaControl, SIGNAL(b2Changed(double) ), 
+			glWidget, SLOT(receiveB2(double)));
+			
+		connect(m_superformulaControl, SIGNAL(m2Changed(double) ), 
+			glWidget, SLOT(receiveM2(double)));
+			
+		connect(m_superformulaControl, SIGNAL(n21Changed(double) ), 
+			glWidget, SLOT(receiveN21(double)));
+			
+		connect(m_superformulaControl, SIGNAL(n22Changed(double) ), 
+			glWidget, SLOT(receiveN22(double)));
+			
+		connect(m_superformulaControl, SIGNAL(n23Changed(double) ), 
+			glWidget, SLOT(receiveN23(double)));
+			
+	}
+}
+	
+void Window::createMenus(Parameter::Operation opt)
+{
+	if(opt == Parameter::kSuperformula) {
+		windowMenu = menuBar()->addMenu(tr("&Window"));
+		windowMenu->addAction(showSFControlAct);
+	}
+}
+
 }

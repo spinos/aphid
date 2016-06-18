@@ -3,7 +3,10 @@
 #include <BaseCamera.h>
 #include "glwidget.h"
 #include <GeoDrawer.h>
+#include "SuperformulaTest.h"
 using namespace aphid;
+
+namespace ttg {
 
 GLWidget::GLWidget(ttg::Scene * sc, QWidget *parent) : Base3DView(parent)
 {
@@ -67,3 +70,76 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 	Base3DView::keyReleaseEvent(event);
 }
 
+void GLWidget::receiveA1(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setA1(x);
+	update();
+}
+
+void GLWidget::receiveB1(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setB1(x);
+	update();
+}
+
+void GLWidget::receiveM1(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setM1(x);
+	update();
+}
+
+void GLWidget::receiveN1(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setN1(x);
+	update();
+}
+
+void GLWidget::receiveN2(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setN2(x);
+	update();
+}
+
+void GLWidget::receiveN3(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setN3(x);
+	update();
+}
+
+void GLWidget::receiveA2(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setA2(x);
+	update();
+}
+
+void GLWidget::receiveB2(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setB2(x);
+	update();
+}
+
+void GLWidget::receiveM2(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setM2(x);
+	update();
+}
+
+void GLWidget::receiveN21(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setN21(x);
+	update();
+}
+
+void GLWidget::receiveN22(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setN22(x);
+	update();
+}
+
+void GLWidget::receiveN23(double x)
+{
+	reinterpret_cast<SuperformulaTest *> (m_scene)->setN23(x);
+	update();
+}
+
+}

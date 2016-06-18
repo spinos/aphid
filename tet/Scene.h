@@ -23,6 +23,7 @@ public:
 	virtual bool progressForward();
 	virtual bool progressBackward();
 	virtual void draw(aphid::GeoDrawer * dr);
+	
 };
 
 }

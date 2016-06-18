@@ -23,6 +23,7 @@ triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h
 tetrahedralization.h
+SuperformulaControl.h
 Parameter.h
 Scene.h
 Hilbert2D.h
@@ -35,6 +36,8 @@ Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/CartesianGrid.cpp
+../shared/QDoubleEditSlider.cpp
+SuperformulaControl.cpp
 Parameter.cpp
 Scene.cpp
 Hilbert2D.cpp
