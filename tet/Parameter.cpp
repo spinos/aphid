@@ -16,7 +16,7 @@ namespace ttg {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	m_operation = kSuperformula;
+	m_operation = kSuperformulaPoissonDisk;
 	
 	if(argc < 2) {
 		std::cout<<"\n tet (Tetrahedral Mesh Generation Research) version 20160601"
@@ -46,6 +46,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-sf") == 0 || strcmp(argv[i], "--superformula") == 0) {
 				m_operation = kSuperformula;
 			}
+			if(strcmp(argv[i], "-sfp") == 0 || strcmp(argv[i], "--superformulaPoissonDisk") == 0) {
+				m_operation = kSuperformulaPoissonDisk;
+			}
 		}
 	}
 	
@@ -68,6 +71,7 @@ void Parameter::PrintHelp()
 	<<"\n -d3 or --delauney3d    test 3D delauney"
 	<<"\n -b3 or --bcc3d    test 3D BCC"
 	<<"\n -sf or --superformula    test 3D superformula"
+	<<"\n -sfp or --superformulaPoissonDisk    test 3D superformula + Poisson Disk Sampling"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

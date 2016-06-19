@@ -8,6 +8,7 @@
 #include "Hilbert3D.h"
 #include "Bcc3dTest.h"
 #include "SuperformulaTest.h"
+#include "SuperformulaPoisson.h"
 #include "SuperformulaControl.h"
 
 namespace ttg {
@@ -25,8 +26,10 @@ Window::Window(const Parameter * param)
 		sc = new Bcc3dTest;
 	else if(param->operation() == Parameter::kDelaunay2D)
 		sc = new Delaunay2D;
-	else 
+	else if(param->operation() == Parameter::kSuperformula)
 		sc = new SuperformulaTest;
+	else
+		sc = new SuperformulaPoisson;
 		
     glWidget = new GLWidget(sc, this);
 	
@@ -49,7 +52,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 
 void Window::createActions(Parameter::Operation opt)
 {
-	if(opt == Parameter::kSuperformula) {
+	if(opt == Parameter::kSuperformula
+		|| opt == Parameter::kSuperformulaPoissonDisk ) {
 		m_superformulaControl = new SuperformulaControl(this);
 	
 		showSFControlAct = new QAction(tr("&Superformula Control"), this);
@@ -97,7 +101,8 @@ void Window::createActions(Parameter::Operation opt)
 	
 void Window::createMenus(Parameter::Operation opt)
 {
-	if(opt == Parameter::kSuperformula) {
+	if(opt == Parameter::kSuperformula
+		|| opt == Parameter::kSuperformulaPoissonDisk ) {
 		windowMenu = menuBar()->addMenu(tr("&Window"));
 		windowMenu->addAction(showSFControlAct);
 	}

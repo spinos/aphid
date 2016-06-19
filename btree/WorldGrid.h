@@ -66,6 +66,8 @@ public:
 	
 	Vector3F coordToCellCenter(const Coord3 & c) const;
 	
+	static int TwentySixNeighborCoord[26][3];
+	
 protected:
 	float * gridSizeR();
     BoundingBox * boundingBoxR();
@@ -213,6 +215,36 @@ BoundingBox * WorldGrid<ChildType, ValueType>::boundingBoxR()
 template<typename ChildType, typename ValueType>
 const BoundingBox WorldGrid<ChildType, ValueType>::keyToGridBBox() const
 { return coordToGridBBox(key() ); }
+
+template<typename ChildType, typename ValueType>
+int WorldGrid<ChildType, ValueType>::TwentySixNeighborCoord[26][3] = {
+{-1, 0, 0}, // face
+{ 1, 0, 0},
+{ 0,-1, 0},
+{ 0, 1, 0},
+{ 0, 0,-1},
+{ 0, 0, 1},
+{-1,-1,-1}, // vertex
+{ 1,-1,-1},
+{-1, 1,-1},
+{ 1, 1,-1},
+{-1,-1, 1},
+{ 1,-1, 1},
+{-1, 1, 1},
+{ 1, 1, 1},
+{-1, 0,-1}, // edge
+{ 1, 0,-1},
+{-1, 0, 1},
+{ 1, 0, 1},
+{ 0,-1,-1},
+{ 0, 1,-1},
+{ 0,-1, 1},
+{ 0, 1, 1},
+{-1,-1, 0},
+{ 1,-1, 0},
+{-1, 1, 0},
+{ 1, 1, 0}
+};
 
 } //end namespace sdb
 

@@ -32,6 +32,8 @@ Delaunay2D.h
 BccTetraGrid.h
 Bcc3dTest.h
 SuperformulaTest.h
+PoissonSequence.h
+SuperformulaPoisson.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -47,6 +49,7 @@ Hilbert3D.cpp
 BccTetraGrid.cpp
 Bcc3dTest.cpp
 SuperformulaTest.cpp
+SuperformulaPoisson.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
