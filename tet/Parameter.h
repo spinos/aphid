@@ -21,7 +21,8 @@ public:
 		kDelaunay3D = 4,
 		kBcc3D = 5,
 		kSuperformula = 6,
-		kSuperformulaPoissonDisk = 7
+		kSuperformulaPoissonDisk = 7,
+		kBccTetrahedralize = 8
 	};
 	
 	Parameter(int argc, char *argv[]);

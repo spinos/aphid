@@ -34,6 +34,7 @@ Bcc3dTest.h
 SuperformulaTest.h
 PoissonSequence.h
 SuperformulaPoisson.h
+BccTetrahedralize.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -50,6 +51,7 @@ BccTetraGrid.cpp
 Bcc3dTest.cpp
 SuperformulaTest.cpp
 SuperformulaPoisson.cpp
+BccTetrahedralize.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

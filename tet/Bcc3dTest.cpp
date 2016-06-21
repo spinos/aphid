@@ -114,9 +114,9 @@ void Bcc3dTest::createGrid()
 			for(i=0; i < dim; i++) {
 				sample = ori + Vector3F(h* (float)i, h* (float)j, h*(float)k);
 /// center of cell				
-				BccNode * nouse = new BccNode;
-				nouse->key = 15;
-				m_grid.insert((const float *)&sample, nouse );
+				BccNode * node15 = new BccNode;
+				node15->key = 15;
+				m_grid.insert((const float *)&sample, node15 );
 			}
 		}
 	}

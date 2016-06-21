@@ -10,6 +10,7 @@
 #include "SuperformulaTest.h"
 #include "SuperformulaPoisson.h"
 #include "SuperformulaControl.h"
+#include "BccTetrahedralize.h"
 
 namespace ttg {
 
@@ -28,8 +29,10 @@ Window::Window(const Parameter * param)
 		sc = new Delaunay2D;
 	else if(param->operation() == Parameter::kSuperformula)
 		sc = new SuperformulaTest;
-	else
+	else if(param->operation() == Parameter::kSuperformulaPoissonDisk)
 		sc = new SuperformulaPoisson;
+	else
+		sc = new BccTetrahedralize;
 		
     glWidget = new GLWidget(sc, this);
 	
@@ -53,7 +56,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 void Window::createActions(Parameter::Operation opt)
 {
 	if(opt == Parameter::kSuperformula
-		|| opt == Parameter::kSuperformulaPoissonDisk ) {
+		|| opt == Parameter::kSuperformulaPoissonDisk
+		|| opt == Parameter::kBccTetrahedralize ) {
 		m_superformulaControl = new SuperformulaControl(this);
 	
 		showSFControlAct = new QAction(tr("&Superformula Control"), this);
@@ -102,7 +106,8 @@ void Window::createActions(Parameter::Operation opt)
 void Window::createMenus(Parameter::Operation opt)
 {
 	if(opt == Parameter::kSuperformula
-		|| opt == Parameter::kSuperformulaPoissonDisk ) {
+		|| opt == Parameter::kSuperformulaPoissonDisk
+		|| opt == Parameter::kBccTetrahedralize ) {
 		windowMenu = menuBar()->addMenu(tr("&Window"));
 		windowMenu->addAction(showSFControlAct);
 	}

@@ -66,6 +66,8 @@ public:
 	
 	Vector3F coordToCellCenter(const Coord3 & c) const;
 	
+	int elementCount();
+	
 	static int TwentySixNeighborCoord[26][3];
 	
 protected:
@@ -215,6 +217,19 @@ BoundingBox * WorldGrid<ChildType, ValueType>::boundingBoxR()
 template<typename ChildType, typename ValueType>
 const BoundingBox WorldGrid<ChildType, ValueType>::keyToGridBBox() const
 { return coordToGridBBox(key() ); }
+
+template<typename ChildType, typename ValueType>
+int WorldGrid<ChildType, ValueType>::elementCount()
+{
+	int c = 0;
+	begin();
+	while(!end() ) {
+	
+		c += value()->size();
+		next();
+	}
+	return c;
+}
 
 template<typename ChildType, typename ValueType>
 int WorldGrid<ChildType, ValueType>::TwentySixNeighborCoord[26][3] = {

@@ -43,6 +43,12 @@ public:
 protected:
 	virtual bool createSamples();
 	
+	PoissonSequence<Disk> * sampleGrid();
+	PoissonSequence<Disk> * supportGrid();
+	
+	void extractSamplePos(aphid::Vector3F * dst);
+	void extractSupportPos(aphid::Vector3F * dst);
+	
 private:
 	void fillBackgroud(PoissonSequence<Disk> * dst,
 						PoissonSequence<Disk> * frontGrid,
@@ -53,6 +59,10 @@ private:
 						int & n);
 	void drawSamplesIn(aphid::GeoDrawer * dr,
 						aphid::sdb::Array<int, Disk > * cell);
+						
+	void extractPos(aphid::Vector3F * dst, PoissonSequence<Disk> * grid);
+	void extractPosIn(aphid::Vector3F * dst, int & count,
+					aphid::sdb::Array<int, Disk > * cell);
 	
 };
 

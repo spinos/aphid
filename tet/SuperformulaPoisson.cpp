@@ -37,6 +37,7 @@ bool SuperformulaPoisson::createSamples()
 
 /// 1 / 32 of size of the boundary
 	float r = box.getLongestDistance() * .03125f;
+	std::cout<<"\n r "<<r;
 /// finest grid size
 	float gridSize = r * 2.f;
 	
@@ -155,7 +156,7 @@ void SuperformulaPoisson::draw(GeoDrawer * dr)
 	m_bkg.begin();
 	while(!m_bkg.end() ) {
 	
-		dr->boundingBox(m_bkg.coordToGridBBox(m_bkg.key() ) );
+		// dr->boundingBox(m_bkg.coordToGridBBox(m_bkg.key() ) );
 		m_bkg.next();
 	}
 	
@@ -163,7 +164,7 @@ void SuperformulaPoisson::draw(GeoDrawer * dr)
 	m_bkg1.begin();
 	while(!m_bkg1.end() ) {
 	
-		dr->boundingBox(m_bkg1.coordToGridBBox(m_bkg1.key() ) );
+		// dr->boundingBox(m_bkg1.coordToGridBBox(m_bkg1.key() ) );
 		
 		drawSamplesIn(dr, m_bkg1.value() );
 		m_bkg1.next();
@@ -180,6 +181,42 @@ void SuperformulaPoisson::drawSamplesIn(GeoDrawer * dr,
 		
 		Disk * v = cell->value();
 		dr->cube(v->pos, .0125f);
+		
+		cell->next();
+	}
+}
+
+PoissonSequence<Disk> * SuperformulaPoisson::sampleGrid()
+{ return &m_bkg; }
+
+PoissonSequence<Disk> * SuperformulaPoisson::supportGrid()
+{ return &m_bkg1; }
+
+void SuperformulaPoisson::extractSamplePos(aphid::Vector3F * dst)
+{ extractPos(dst, &m_bkg); }
+
+void SuperformulaPoisson::extractSupportPos(aphid::Vector3F * dst)
+{ extractPos(dst, &m_bkg1); }
+
+void SuperformulaPoisson::extractPos(aphid::Vector3F * dst, PoissonSequence<Disk> * grid)
+{
+	int c = 0;
+	grid->begin();
+	while(!grid->end() ) {
+		
+		extractPosIn(dst, c, grid->value() );
+		grid->next();
+	}
+}
+
+void SuperformulaPoisson::extractPosIn(aphid::Vector3F * dst, int & count,
+					sdb::Array<int, Disk > * cell)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		
+		Disk * v = cell->value();
+		dst[count++] = v->pos;
 		
 		cell->next();
 	}
