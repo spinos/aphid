@@ -163,13 +163,13 @@ void SuperformulaTest::draw(GeoDrawer * dr)
 	
 	dr->m_markerProfile.apply();
 	dr->setColor(0.f, 0.f, 0.f);
-	glBegin(GL_POINTS);
+	//glBegin(GL_POINTS);
 	int i = 0;
 	for(;i<m_NDraw;++i) {
-		// dr->cube(m_X[i], .025f);
-		glVertex3fv((const float *)&m_X[i] );
+		dr->cube(m_X[i], .0125f);
+		//glVertex3fv((const float *)&m_X[i] );
 	}
-	glEnd();
+	//glEnd();
 	dr->m_wireProfile.apply();
 	dr->setColor(0.2f, 0.2f, 0.49f);
 	

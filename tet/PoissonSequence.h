@@ -24,11 +24,11 @@ public:
 	virtual ~PoissonSequence();
 	
 	bool reject(const T * cand);
+	bool rejectIn(aphid::sdb::Array<int, T > * cell, const T * cand);
 	
 protected:
 
 private:
-	bool rejectIn(aphid::sdb::Array<int, T > * cell, const T * cand);
 	
 };
 

@@ -30,15 +30,29 @@ struct Disk {
 
 class SuperformulaPoisson : public SuperformulaTest {
 
+	PoissonSequence<Disk> m_bkg;
+	PoissonSequence<Disk> m_bkg1;
+	
 public:
 	SuperformulaPoisson();
 	virtual ~SuperformulaPoisson();
 	
 	virtual const char * titleStr() const;
+	virtual void draw(aphid::GeoDrawer * dr);
 	
 protected:
 	virtual bool createSamples();
 	
+private:
+	void fillBackgroud(PoissonSequence<Disk> * dst,
+						PoissonSequence<Disk> * frontGrid,
+						int & n);
+	bool fillBackgroudAt(PoissonSequence<Disk> * dst,
+						PoissonSequence<Disk> * frontGrid,
+						Disk & cand,
+						int & n);
+	void drawSamplesIn(aphid::GeoDrawer * dr,
+						aphid::sdb::Array<int, Disk > * cell);
 	
 };
 
