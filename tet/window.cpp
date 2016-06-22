@@ -31,7 +31,7 @@ Window::Window(const Parameter * param)
 		sc = new SuperformulaTest;
 	else if(param->operation() == Parameter::kSuperformulaPoissonDisk)
 		sc = new SuperformulaPoisson;
-	else
+	else///if(param->operation() == Parameter::kBccTetrahedralize)
 		sc = new BccTetrahedralize;
 		
     glWidget = new GLWidget(sc, this);

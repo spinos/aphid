@@ -131,5 +131,53 @@ inline void flipFaces(std::deque<Bipyramid> & pyras,
 	std::cout<<"\n end flip";
 }
 
+inline void splitTetrahedron4(std::vector<ITetrahedron *> & tets,
+							ITetrahedron * t,
+							const int & vi)
+{
+
+}
+
+inline void splitTetrahedron3(std::vector<ITetrahedron *> & tets,
+							ITetrahedron * t,
+							const int & vi)
+{
+
+}
+
+inline void splitTetrahedron2(std::vector<ITetrahedron *> & tets,
+							ITetrahedron * t,
+							const int & vi)
+{
+
+}
+
+inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,
+							ITetrahedron * t,
+							const int & vi)
+{
+
+}
+
+inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
+							ITetrahedron * t,
+							const int & vi,
+							const Float4 & coord)
+{
+	int stat = aphid::barycentricCoordinateStatus(coord);
+	if(stat == 0) {
+		splitTetrahedron4(tets, t, vi);
+	}
+	else if(stat == 1) {
+		splitTetrahedron3(tets, t, vi);
+	}
+	else if(stat == 2) {
+		splitTetrahedron2(tets, t, vi);
+	}
+	else if(stat == 3) {
+		splitTetrahedron1(tets, t, vi);
+	}
+}
+
 }
 #endif

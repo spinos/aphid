@@ -9,6 +9,7 @@
 
 #include "Bcc3dTest.h"
 #include <iostream>
+#include "tetrahedralization.h"
 
 using namespace aphid;
 namespace ttg {
@@ -99,19 +100,21 @@ void Bcc3dTest::draw(GeoDrawer * dr)
 
 void Bcc3dTest::createGrid()
 {
-	m_grid.setGridSize(4.f);
-	int dim = 1<<2;
-	std::cout<<" generate samples by "<<dim<<" X "<<dim<<" X "<<dim<<" grid\n";
+	const float h = 8.f;
+	m_grid.setGridSize(h);
+    int dimx = 3;
+	int dimy = 1;
+	int dimz = 1;
+	std::cout<<" generate samples by "<<dimx<<" X "<<dimy<<" X "<<dimz<<" grid\n";
 	int i, j, k;
 
-    const float h = 4.f;
-    const float hh = 2.f;
+    const float hh = 4.f;
     
-    const Vector3F ori(-1.5f, -1.5f, -1.5f);
+    const Vector3F ori(1.f, 1.f, 1.f);
     Vector3F sample;
-	for(k=0; k < dim; k++) {
-		for(j=0; j < dim; j++) {
-			for(i=0; i < dim; i++) {
+	for(k=0; k < dimz; k++) {
+		for(j=0; j < dimy; j++) {
+			for(i=0; i < dimx; i++) {
 				sample = ori + Vector3F(h* (float)i, h* (float)j, h*(float)k);
 /// center of cell				
 				BccNode * node15 = new BccNode;
@@ -123,14 +126,47 @@ void Bcc3dTest::createGrid()
 	m_grid.calculateBBox();
 	std::cout<<"\n n cell "<<m_grid.size();
 	m_grid.buildNodes();
-	m_N = m_grid.numNodes();
+	m_N = m_grid.numNodes() + 1;
 	m_X = new Vector3F[m_N];
 	std::cout<<"\n n node "<<m_N;
 	m_grid.getNodePositions(m_X);
 	m_grid.buildTetrahedrons(m_tets);
+	
+/// on edge
+	i = m_N - 1;
+	m_X[i].set(2.f, 2.f, 2.f);
+	
+	addPoint(i);
+	
 	std::cout<<"\n n tet "<<m_tets.size();
 	std::cout.flush();
 	
+}
+
+bool Bcc3dTest::addPoint(const int & vi)
+{
+	Float4 coord;
+	ITetrahedron * t = searchTet(m_X[vi], &coord);
+	if(!t ) return false;
+	splitTetrahedron(m_tets, t, vi, coord);
+	
+	return true;
+}
+
+ITetrahedron * Bcc3dTest::searchTet(const aphid::Vector3F & p, Float4 * coord)
+{
+	Vector3F v[4];
+	std::vector<ITetrahedron *>::iterator it = m_tets.begin();
+	for(;it!= m_tets.end();++it) {
+		ITetrahedron * t = *it;
+		if(t->index < 0) continue;
+		v[0] = m_X[t->iv0];
+		v[1] = m_X[t->iv1];
+		v[2] = m_X[t->iv2];
+		v[3] = m_X[t->iv3];
+		if(pointInsideTetrahedronTest1(p, v, coord) ) return t;
+	}
+	return NULL;
 }
 
 }

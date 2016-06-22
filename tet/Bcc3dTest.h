@@ -12,6 +12,8 @@
 #include "Scene.h"
 #include "BccTetraGrid.h"
 
+struct Float4;
+
 namespace ttg {
 
 class Bcc3dTest : public Scene {
@@ -33,6 +35,8 @@ public:
 	
 private:
 	void createGrid();
+	bool addPoint(const int & vi);
+	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
 	
 };
 

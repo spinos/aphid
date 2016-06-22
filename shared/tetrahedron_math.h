@@ -1,3 +1,4 @@
+/// tetrahedron_math.h
 #ifndef TETRAHEDRON_MATH_H
 #define TETRAHEDRON_MATH_H
 
@@ -14,6 +15,22 @@
 */
 
 namespace aphid {
+
+inline void printBarycentricCoordinate4(const Float4 & coord)
+{ std::cout<<"\n coord "<<coord.x<<", "<<coord.y<<", "<<coord.z<<", "<<coord.w; }
+
+/// 0 inside
+/// 1 on face
+/// 2 on edge
+inline int barycentricCoordinateStatus(const Float4 & coord)
+{ 
+	int c = 0;
+	if(coord.x < .03f) c++;
+	if(coord.y < .03f) c++;
+	if(coord.z < .03f) c++;
+	if(coord.w < .03f) c++;
+	return c;
+}
 
 static const int TetrahedronToTriangleVertex[12] = {
 0, 1, 2, 
@@ -101,6 +118,20 @@ inline bool pointInsideTetrahedronTest(const Vector3F & p, const Vector3F * v)
         return false;
     
     if(coord.x > 1.f || coord.y > 1.f || coord.z > 1.f || coord.w > 1.f)
+        return false;
+    
+    return true;
+}
+
+inline bool pointInsideTetrahedronTest1(const Vector3F & p, const Vector3F * v,
+									Float4 * coord)
+{        
+    *coord = getBarycentricCoordinate4(p, v);
+   
+    if(coord->x < 0.f || coord->y < 0.f || coord->z < 0.f || coord->w < 0.f)
+        return false;
+    
+    if(coord->x > 1.f || coord->y > 1.f || coord->z > 1.f || coord->w > 1.f)
         return false;
     
     return true;
