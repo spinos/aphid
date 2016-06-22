@@ -145,11 +145,25 @@ inline void splitTetrahedron3(std::vector<ITetrahedron *> & tets,
 
 }
 
+/// split on edge, find all connected tetra, split each into two
 inline void splitTetrahedron2(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
-							const int & vi)
+							const int & vi,
+                            const Float4 & coord)
 {
-
+    IEdge e;
+    findTetrahedronEdge(&e, t, coord);
+    
+    std::vector<ITetrahedron *> connectedTet;
+    connectedTet.push_back(t);
+    
+    if(e.nei0) {
+        
+    }
+    
+    if(e.nei1) {
+        
+    }
 }
 
 inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,
@@ -172,7 +186,7 @@ inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
 		splitTetrahedron3(tets, t, vi);
 	}
 	else if(stat == 2) {
-		splitTetrahedron2(tets, t, vi);
+		splitTetrahedron2(tets, t, vi, coord);
 	}
 	else if(stat == 3) {
 		splitTetrahedron1(tets, t, vi);

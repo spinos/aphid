@@ -22,6 +22,12 @@ struct ITetrahedron {
 	int index;
 };
 
+struct IEdge {
+    int iv0, iv1;
+    ITetrahedron * nei0;
+	ITetrahedron * nei1;
+};
+
 inline void setTetrahedronVertices(ITetrahedron & t, 
 									const int & a, const int & b, 
 									const int & c, const int & d)
@@ -218,6 +224,14 @@ inline bool checkTetrahedronConnections(ITetrahedron * a)
 	return true;
 }
 
+inline ITetrahedron * tetrahedronNeighbor(const ITetrahedron * a, const int & i)
+{
+    if(i==0) return a->nei0;
+    if(i==1) return a->nei1;
+    if(i==2) return a->nei2;
+    return a->nei3;
+}
+
 inline void printTetrahedronHasNoFace(const ITetrahedron * a, const ITRIANGLE * f)
 {
 	std::cout<<"\n\n [WARNING] no face "; printTriangleVertice(f);
@@ -229,6 +243,79 @@ inline void printTetrahedronCannotConnect(const ITetrahedron * a,
 {
 	std::cout<<"\n\n [ERROR] cannot connect "; printTetrahedronVertices(a);
 	std::cout<<"\n                      and "; printTetrahedronVertices(b);
+}
+
+inline bool findEdgeNeighborPair(IEdge * e,
+                                 const ITetrahedron * a)
+{
+    bool hasOne = false;
+    bool hasTwo = false;
+    ITRIANGLE trif;
+	int i;
+	for(i=0;i<4;++i) {
+		faceOfTetrahedron(&trif, a, i);
+		if(triangleHasEdge(&trif, e->iv0, e->iv1) ) {
+            if(!hasOne) {
+                e->nei0 = tetrahedronNeighbor(a, i);
+                hasOne = true;
+            }
+            else {
+                e->nei1 = tetrahedronNeighbor(a, i);
+                hasTwo = true;
+            }
+        }
+	}
+    
+    return (hasOne && hasTwo);
+}
+
+inline bool findTetrahedronEdge(IEdge * e,
+                                const ITetrahedron * a,
+                                 const Float4 & coord)
+{
+    bool hasOne = false;
+    bool hasTwo = false;
+    if(coord.x > .03f) {
+        e->iv0 = a->iv0;
+        hasOne = true;
+    }
+    
+    if(coord.y > .03f) {
+        if(!hasOne) {
+            e->iv0 = a->iv1;
+            hasOne = true;
+        }
+        else {
+            e->iv1 = a->iv1;
+            hasTwo = true;
+        }
+    }
+    
+    if(coord.z > .03f) {
+        if(!hasOne) {
+            e->iv0 = a->iv2;
+            hasOne = true;
+        }
+        else {
+            e->iv1 = a->iv2;
+            hasTwo = true;
+        }
+    }
+    
+    if(coord.w > .03f) {
+        if(!hasOne) {
+            e->iv0 = a->iv3;
+            hasOne = true;
+        }
+        else {
+            e->iv1 = a->iv3;
+            hasTwo = true;
+        }
+    }
+    
+    if(!hasOne || !hasTwo) return false;
+    
+    return findEdgeNeighborPair(e, a);
 }
 
 }

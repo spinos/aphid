@@ -45,6 +45,13 @@ inline int containtsVertex(const ITRIANGLE * a, const int & p)
 	return -1;
 }
 
+inline bool triangleHasEdge(const ITRIANGLE * a, const int & v0,
+                          const int & v1)
+{
+	return (containtsVertex(a, v0) > -1
+            && containtsVertex(a, v1) > -1);
+}
+
 inline bool matchTriangles(const ITRIANGLE * a, const ITRIANGLE * b)
 {
 	if(containtsVertex(a, b->p1) < 0) return false;
