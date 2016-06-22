@@ -145,6 +145,80 @@ inline void splitTetrahedron3(std::vector<ITetrahedron *> & tets,
 
 }
 
+inline void expandTetrahedronRegion(std::vector<ITetrahedron *> & tets,
+							std::vector<ITetrahedron *> & source)
+{
+	std::vector<ITetrahedron *>::iterator it = source.begin();
+	for(;it!=source.end();++it) {
+		addTetrahedronTo(tets, *it );
+		addTetrahedronTo(tets, (*it)->nei0);
+		addTetrahedronTo(tets, (*it)->nei1);
+		addTetrahedronTo(tets, (*it)->nei2);
+		addTetrahedronTo(tets, (*it)->nei3);
+	}
+}
+
+inline void addTetrahedronFaces(ITetrahedron * t,
+					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+{
+	ITRIANGLE fa;
+	int i=0;
+	for(;i<4;++i) {
+		faceOfTetrahedron(&fa, t, i);
+		aphid::sdb::Coord3 itri = aphid::sdb::Coord3(fa.p1, fa.p2, fa.p3).ordered();
+		IFace * tri = faces.find(itri );
+		if(!tri) {
+			tri = new IFace;
+			tri->key = itri;
+			tri->ta = t;
+			
+			faces.insert(itri, tri);
+		}
+		else {
+			tri->tb = t;
+		}
+	}
+}
+
+inline void splitTwoWay(ITetrahedron * t,
+						std::vector<ITetrahedron *> & tets,
+						aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces,
+						const int & vx,
+						const int & va, const int & vb)
+{
+	//std::cout<<"\n split "; printTetrahedronVertices(t);
+	
+	ITRIANGLE fa = oppositeFace(t, va);
+	ITRIANGLE fb = oppositeFace(t, vb);
+
+	ITetrahedron * na = neighborOfTetrahedron(t, fa.p1, fa.p2, fa.p3);
+	ITetrahedron * nb = neighborOfTetrahedron(t, fb.p1, fb.p2, fb.p3);
+	
+/// change the existing
+	setTetrahedronVertices(*t, vx, fa.p1, fa.p2, fa.p3);
+
+	if(na) {
+		connectTetrahedrons(t, na, fa.p1, fa.p2, fa.p3);
+	}
+	
+/// add an extra
+	ITetrahedron * tb = new ITetrahedron;
+	setTetrahedronVertices(*tb, vx, fb.p1, fb.p2, fb.p3);
+	tb->index = tets.size();
+	
+	
+	if(nb) {
+		connectTetrahedrons(tb, nb, fb.p1, fb.p2, fb.p3);
+	}
+	
+	connectTetrahedrons(t, tb);
+	
+	tets.push_back(tb);
+	
+	addTetrahedronFaces(t, faces);
+	addTetrahedronFaces(tb, faces);
+}
+
 /// split on edge, find all connected tetra, split each into two
 inline void splitTetrahedron2(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
@@ -154,16 +228,23 @@ inline void splitTetrahedron2(std::vector<ITetrahedron *> & tets,
     IEdge e;
     findTetrahedronEdge(&e, t, coord);
     
-    std::vector<ITetrahedron *> connectedTet;
-    connectedTet.push_back(t);
-    
-    if(e.nei0) {
-        
-    }
-    
-    if(e.nei1) {
-        
-    }
+    std::vector<ITetrahedron *> tetOnEdge;
+	tetOnEdge.push_back(t);
+	
+    findTetrahedronsConnectedToEdge(tetOnEdge, e, t);
+	
+	aphid::sdb::Array<aphid::sdb::Coord3, IFace > faces;
+	
+	std::vector<ITetrahedron *>::iterator it = tetOnEdge.begin();
+	for(;it!=tetOnEdge.end();++it) {
+		splitTwoWay(*it, tets, faces,
+					vi, e.iv0, e.iv1);
+	}
+	
+	connectTetrahedrons(faces);
+	
+	faces.clear();
+	tetOnEdge.clear();
 }
 
 inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,

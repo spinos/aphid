@@ -102,7 +102,7 @@ void Bcc3dTest::createGrid()
 {
 	const float h = 8.f;
 	m_grid.setGridSize(h);
-    int dimx = 3;
+    int dimx = 2;
 	int dimy = 1;
 	int dimz = 1;
 	std::cout<<" generate samples by "<<dimx<<" X "<<dimy<<" X "<<dimz<<" grid\n";
@@ -126,17 +126,37 @@ void Bcc3dTest::createGrid()
 	m_grid.calculateBBox();
 	std::cout<<"\n n cell "<<m_grid.size();
 	m_grid.buildNodes();
-	m_N = m_grid.numNodes() + 1;
+	
+#define ADDON 12
+	m_N = m_grid.numNodes() + ADDON;
 	m_X = new Vector3F[m_N];
 	std::cout<<"\n n node "<<m_N;
 	m_grid.getNodePositions(m_X);
 	m_grid.buildTetrahedrons(m_tets);
 	
 /// on edge
-	i = m_N - 1;
-	m_X[i].set(2.f, 2.f, 2.f);
+	i = m_N - ADDON;
 	
-	addPoint(i);
+	m_X[i].set(2.f, 2.f, 2.f);
+	m_X[i+1].set(2.f, 2.f, 6.f);
+	m_X[i+2].set(2.f, 6.f, 6.f);
+	m_X[i+3].set(2.f, 6.f, 2.f);
+	
+	m_X[i+4].set(6.f, 6.f, 2.f);
+	m_X[i+5].set(6.f, 6.f, 6.f);
+	m_X[i+6].set(10.f, 6.f, 6.f);
+	m_X[i+7].set(10.f, 6.f, 2.f);
+	
+	m_X[i+8].set(6.f, 2.f, 6.f);
+	m_X[i+9].set(6.f, 2.f, 2.f);
+	m_X[i+10].set(10.f, 2.f, 6.f);
+	m_X[i+11].set(14.f, 2.f, 2.f);
+	
+	i = m_N - ADDON;
+	for(;i<m_N;++i) {
+		addPoint(i);
+		checkTetrahedronConnections(m_tets);
+	}
 	
 	std::cout<<"\n n tet "<<m_tets.size();
 	std::cout.flush();

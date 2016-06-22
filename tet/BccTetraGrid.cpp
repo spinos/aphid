@@ -211,6 +211,7 @@ void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 		int c = nodeC->index;
 		
 		ITetrahedron * t = new ITetrahedron;
+		resetTetrahedronNeighbors(*t);
 		setTetrahedronVertices(*t, inode15, a, b, c);
 		t->index = dest.size();
 		dest.push_back(t);

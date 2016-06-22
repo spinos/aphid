@@ -10,9 +10,16 @@
 #ifndef TTG_TETRAHEDRON_GRAPH_H
 #define TTG_TETRAHEDRON_GRAPH_H
 
+#include <Array.h>
+
 namespace ttg {
 
 struct ITetrahedron {
+	
+	ITetrahedron()
+	{
+		nei0 = nei1 = nei2 = nei3 = NULL;
+	}
 	
 	ITetrahedron * nei0;
 	ITetrahedron * nei1;
@@ -23,9 +30,23 @@ struct ITetrahedron {
 };
 
 struct IEdge {
+
     int iv0, iv1;
     ITetrahedron * nei0;
 	ITetrahedron * nei1;
+};
+
+struct IFace {
+	
+	IFace() 
+	{
+		ta = NULL;
+		tb = NULL;
+	}
+	
+	aphid::sdb::Coord3 key;
+	ITetrahedron * ta;
+	ITetrahedron * tb;
 };
 
 inline void setTetrahedronVertices(ITetrahedron & t, 
@@ -66,6 +87,10 @@ inline void printTetrahedronNeighbors(const ITetrahedron * t)
     
 }
 
+/// f0 1 2 3
+/// f1 0 1 3
+/// f2 0 2 1
+/// f3 0 3 2
 inline void faceOfTetrahedron(ITRIANGLE * tri, const ITetrahedron * t, int side)
 {
 	if(side==0)
@@ -224,6 +249,15 @@ inline bool checkTetrahedronConnections(ITetrahedron * a)
 	return true;
 }
 
+inline bool checkTetrahedronConnections(std::vector<ITetrahedron *> & tets)
+{
+	std::vector<ITetrahedron *>::iterator it = tets.begin();
+	for(;it!=tets.end();++it) {
+		checkTetrahedronConnections(*it);
+	}
+	return true;
+}
+
 inline ITetrahedron * tetrahedronNeighbor(const ITetrahedron * a, const int & i)
 {
     if(i==0) return a->nei0;
@@ -318,6 +352,156 @@ inline bool findTetrahedronEdge(IEdge * e,
     return findEdgeNeighborPair(e, a);
 }
 
+inline IEdge oppositeEdge(const ITetrahedron * t,
+							const IEdge * e)
+{
+	IEdge ea;
+	bool hasOne = false;
+    
+	if(t->iv0 != e->iv0
+		&& t->iv0 != e->iv1) {
+		
+		ea.iv0 = t->iv0;
+		hasOne = true;
+	}
+	
+	if(t->iv1 != e->iv0
+		&& t->iv1 != e->iv1) {
+		
+		if(!hasOne) {
+			ea.iv0 = t->iv1;
+			hasOne = true;
+		}
+		else {
+			ea.iv1 = t->iv1;
+		}
+	}
+	
+	if(t->iv2 != e->iv0
+		&& t->iv2 != e->iv1) {
+		
+		if(!hasOne) {
+			ea.iv0 = t->iv2;
+			hasOne = true;
+		}
+		else {
+			ea.iv1 = t->iv2;
+		}
+	}
+	
+	if(t->iv3 != e->iv0
+		&& t->iv3 != e->iv1) {
+		
+		if(!hasOne) {
+			ea.iv0 = t->iv3;
+			hasOne = true;
+		}
+		else {
+			ea.iv1 = t->iv3;
+		}
+	}
+	
+    return ea;
 }
 
+inline ITRIANGLE oppositeFace(const ITetrahedron * t,
+								const int & a)
+{
+	ITRIANGLE trif;
+	int i;
+	for(i=0;i<4;++i) {
+		faceOfTetrahedron(&trif, t, i);
+		if(containtsVertex(&trif, a) < 0) 
+			return trif;
+	}
+	
+	return trif;
+}
+
+inline void connectTetrahedrons(aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+{
+	faces.begin();
+	while(!faces.end() ) {
+		
+		IFace * f = faces.value();
+		
+		if(f->tb) {
+			bool stat = connectTetrahedrons(f->ta, f->tb,
+								f->key.x, f->key.y, f->key.z);
+			if(!stat) {
+				printTetrahedronCannotConnect(f->ta, f->tb);
+			}
+		}
+		
+		faces.next();
+	}
+}
+
+inline void addTetrahedronTo(std::vector<ITetrahedron *> & tets,
+							ITetrahedron * a)
+{
+	if(!a) return;
+	if(a->index < 0) return;
+	std::vector<ITetrahedron *>::iterator it = tets.begin();
+	for(;it!= tets.end();++it) {
+		if(*it == a) return;
+	}
+	tets.push_back(a);
+}
+
+inline void findTetrahedronAlongEdge(std::vector<ITetrahedron *> & tets,
+							const IEdge & e,
+							ITetrahedron * a,
+							ITetrahedron * b)
+{
+/// back to origin of loop
+	if(a == tets[0])
+		return;
+		
+	addTetrahedronTo(tets, a);
+	
+	IEdge ea;
+	ea.iv0 = e.iv0;
+	ea.iv1 = e.iv1;
+    findEdgeNeighborPair(&ea, a);
+	
+	//if(ea.nei0) {
+	//	std::cout<<"\n nei0"; printTetrahedronVertices(ea.nei0);
+	//}
+	//if(ea.nei1) {
+	//	std::cout<<"\n nei1"; printTetrahedronVertices(ea.nei1);
+	//}
+	
+	ITetrahedron * c = ea.nei0;
+		
+/// exclude the parent
+	if(!c)
+		c = ea.nei1;
+		
+	if(c == b)
+		c = ea.nei1;
+		
+	if(c)
+		findTetrahedronAlongEdge(tets, ea, c, a);
+
+}
+
+inline void findTetrahedronsConnectedToEdge(std::vector<ITetrahedron *> & tets,
+							const IEdge & e,
+							ITetrahedron * t)
+{
+	//printTetrahedronVertices(t);
+	//std::cout<<"\n edge("<<e.iv0<<", "<<e.iv1<<") ";
+	std::cout.flush();
+	
+    if(e.nei0) {
+		findTetrahedronAlongEdge(tets, e, e.nei0, t);
+	}
+    
+    if(e.nei1) {
+		findTetrahedronAlongEdge(tets, e, e.nei1, t);
+	}
+}
+
+}
 #endif
