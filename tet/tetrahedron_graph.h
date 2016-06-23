@@ -272,6 +272,7 @@ inline bool checkTetrahedronConnections(std::vector<ITetrahedron *> & tets)
 {
 	std::vector<ITetrahedron *>::iterator it = tets.begin();
 	for(;it!=tets.end();++it) {
+		if((*it)->index < 0) continue;
 		if(!checkTetrahedronConnections(*it) ) {
 			std::cout<<"\n [WARNNING] failed connectivity check";
 			printTetrahedronVertices(*it);

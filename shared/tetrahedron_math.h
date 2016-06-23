@@ -389,6 +389,17 @@ inline Float4 getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v)
     return coord;
 }
 
+inline float tetrahedronVolume1(const Vector3F & p0,
+								const Vector3F & p1,
+								const Vector3F & p2,
+								const Vector3F & p3)
+{
+	Vector3F e1 = p1 - p0;
+	Vector3F e2 = p2 - p0;
+	Vector3F e3 = p3 - p0;
+	return  e1.dot( e2.cross( e3 ) ) / 6.0f;
+}
+
 }
 #endif        //  #ifndef TETRAHEDRON_MATH_H
 

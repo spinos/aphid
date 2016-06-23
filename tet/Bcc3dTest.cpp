@@ -66,6 +66,7 @@ void Bcc3dTest::draw(GeoDrawer * dr)
 	std::vector<ITetrahedron *>::const_iterator it = m_tets.begin();
 	for(;it!= m_tets.end();++it) {
 		const ITetrahedron * t = *it;
+		if(t->index < 0) continue;
 		
 		a = m_X[t->iv0];
 		b = m_X[t->iv1];
@@ -133,12 +134,12 @@ void Bcc3dTest::createGrid()
 	
 	m_X[i].set(3.2f, 3.2f, 3.2f); // edge
 	m_X[i+1].set(2.f, 2.f, 6.f); // edge
-	m_X[i+2].set(2.f, 6.f, 6.f);
-	m_X[i+3].set(2.f, 6.f, 2.f);
+	m_X[i+2].set(2.f, 6.f, 6.f); // edge
+	m_X[i+3].set(3.f, 5.f, 3.f); // edge
 	
-	m_X[i+4].set(5.2f, 5.2f, .8f); // face
+	m_X[i+4].set(5.2f, 5.2f, .9f); // face
+	m_X[i+5].set(6.f, 6.f, 3.3f); // face
 	
-	m_X[i+5].set(6.f, 6.f, 3.3f);
 	m_X[i+6].set(8.91f, 6.2f, 3.3f);
 	m_X[i+7].set(10.f, 6.f, 2.f);
 	
@@ -150,7 +151,7 @@ void Bcc3dTest::createGrid()
 	m_X[i+12].set(14.71f, 4.74f, 5.93f);
 	
 	i = m_N - ADDON + 0;
-	for(;i<m_N - ADDON+1;++i) {
+	for(;i<m_N - ADDON+6;++i) {
 		addPoint(i);
 		checkTetrahedronConnections(m_tets);
 	}

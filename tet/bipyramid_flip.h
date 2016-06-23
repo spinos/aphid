@@ -542,10 +542,23 @@ inline bool canSplitFlip1(const Bipyramid & pyra,
 		
 	TetSphere circ;
 	circumSphere(circ, apex, a, b, c );
-	if(antipex.distanceTo(circ.pc) < circ.r )
-		return true;
+	if(antipex.distanceTo(circ.pc) >= circ.r )
+		return false;
 		
-	return false;
+/// check low volume
+	const float lowVol = (tetrahedronVolume1(apex, a, b, c)
+						+ tetrahedronVolume1(antipex, c, b, a) ) * .01f;
+	
+	if(tetrahedronVolume1(apex, a, b, antipex) < lowVol) 
+		return false;
+		
+	if(tetrahedronVolume1(apex, b, c, antipex) < lowVol) 
+		return false;
+
+	if(tetrahedronVolume1(apex, a, antipex, c) < lowVol) 
+		return false;
+
+	return true;
 }
 
 /// flip edge by split bipyramid into three tetrahedrons
@@ -650,18 +663,18 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra, 
 							const aphid::Vector3F * X)
 {
-	aphid::Vector3F p0 = X[pyra.iv0];
-	aphid::Vector3F p1 = X[pyra.iv1];
-	aphid::Vector3F p2 = X[pyra.iv2];
-	aphid::Vector3F p3 = X[pyra.iv3];
-	aphid::Vector3F p4 = X[pyra.iv4];
-	TetSphere circ;
+	const int v0 = pyra.iv0;
+	const int v1 = pyra.iv1;
+	const int v2 = pyra.iv2;
+	const int v3 = pyra.iv3;
+	const int v4 = pyra.iv4;
 	
-	int v0 = pyra.iv0;
-	int v1 = pyra.iv1;
-	int v2 = pyra.iv2;
-	int v3 = pyra.iv3;
-	int v4 = pyra.iv4;
+	aphid::Vector3F p0 = X[v0];
+	aphid::Vector3F p1 = X[v1];
+	aphid::Vector3F p2 = X[v2];
+	aphid::Vector3F p3 = X[v3];
+	aphid::Vector3F p4 = X[v4];
+	TetSphere circ;
 	
 	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
 	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
@@ -669,7 +682,8 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
 	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
 	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
-	
+
+/*	
 	if(nei1) {
 		std::cout<<"\n nei1 "; printTetrahedronVertices(nei1);
 	}
@@ -688,15 +702,16 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 	if(nei6) {
 		std::cout<<"\n nei6 "; printTetrahedronVertices(nei6);
 	}
+*/
 	
 /// find shared neighbor pair	
-	if(nei1 && nei1 == nei6) {std::cout<<"\n 1=6";
+	if(nei1) {
+		if(tetrahedronHasVertex(nei1, v4) > -1 ) {
+			
 /// be convex
 		if(!aphid::segmentIntersectTriangle(p3, p1, p2, p4, p0) )
 			return false;
 			
-		std::cout<<"\n convex";
-		
 /// empty principle
 		circumSphere(circ, p3, p2, p4, p0 );
 		if(p1.distanceTo(circ.pc) < circ.r )
@@ -704,13 +719,15 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 			
 		i3rd = 1;
 		return true;
+		
+		}
 	}
 	
-	if(nei2 && nei2 == nei4) { std::cout<<"\n 2=4";
+	if(nei2) { 
+		if(tetrahedronHasVertex(nei2, v4) > -1 ) {
+			
 		if(!aphid::segmentIntersectTriangle(p1, p2, p3, p4, p0) )
 			return false;
-		
-		std::cout<<"\n convex";
 		
 		circumSphere(circ, p0, p1, p4, p3 );
 		if(p2.distanceTo(circ.pc) < circ.r )
@@ -718,13 +735,15 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 		
 		i3rd = 2;
 		return true;
+		
+		}
 	}
 	
-	if(nei3 && nei3 == nei5) { std::cout<<"\n 3=5";
+	if(nei3) { 
+		if(tetrahedronHasVertex(nei3, v4) > -1 ) {
+			
 		if(!aphid::segmentIntersectTriangle(p2, p3, p1, p4, p0) )
 			return false;
-		
-		std::cout<<"\n convex";
 		
 		circumSphere(circ, p2, p1, p4, p0 );
 		if(p3.distanceTo(circ.pc) < circ.r )
@@ -732,19 +751,110 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 		
 		i3rd = 3;
 		return true;
+		
+		}
 	}
 	
 	return false;
+}
+
+inline bool processMergeFlip1(Bipyramid & pyra,
+							std::vector<ITetrahedron *> & tets,
+							const int & side)
+{
+	std::cout<<"\n merge flip"; printBipyramidVertices(&pyra);
+	
+	ITetrahedron * ta = pyra.ta;
+	ITetrahedron * tb = pyra.tb;
+	
+	const int v0 = pyra.iv0;
+	const int v1 = pyra.iv1;
+	const int v2 = pyra.iv2;
+	const int v3 = pyra.iv3;
+	const int v4 = pyra.iv4;
+	
+	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
+	ITetrahedron * nei3 = neighborOfTetrahedron(pyra.ta, v0, v3, v2);
+	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
+	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
+	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
+
+	//ITetrahedron * tc;
+	if(side == 1) pyra.tc = nei1;
+	else if(side == 2) pyra.tc = nei2;
+	else pyra.tc = nei3;
+	std::cout<<" and"; printTetrahedronVertices(pyra.tc);
+	
+/// connection to c	
+	ITetrahedron * neica;
+	ITetrahedron * neicc;
+	
+	if(side == 1) {
+		neica = neighborOfTetrahedron(pyra.tc, v0, v1, v4);
+		neicc = neighborOfTetrahedron(pyra.tc, v0, v4, v3);
+		
+		setTetrahedronVertices(*ta, v1, v2, v0, v4);
+		setTetrahedronVertices(*pyra.tc, v3, v4, v0, v2);
+
+		connectTetrahedrons(ta, nei2);
+		connectTetrahedrons(ta, nei4);
+		connectTetrahedrons(pyra.tc, nei3);
+		connectTetrahedrons(pyra.tc, nei5);
+	}
+	else if(side == 2) {
+		neica = neighborOfTetrahedron(pyra.tc, v0, v2, v4);
+		neicc = neighborOfTetrahedron(pyra.tc, v0, v4, v1);
+		
+		setTetrahedronVertices(*ta, v2, v3, v0, v4);
+		setTetrahedronVertices(*pyra.tc, v1, v4, v0, v3);
+		
+		connectTetrahedrons(ta, nei3);
+		connectTetrahedrons(ta, nei5);
+		connectTetrahedrons(pyra.tc, nei1);
+		connectTetrahedrons(pyra.tc, nei6);
+	}
+	else {
+		neica = neighborOfTetrahedron(pyra.tc, v0, v3, v4);
+		neicc = neighborOfTetrahedron(pyra.tc, v0, v4, v2);
+		
+		setTetrahedronVertices(*ta, v3, v1, v0, v4);
+		setTetrahedronVertices(*pyra.tc, v2, v4, v0, v1);
+		
+		connectTetrahedrons(ta, nei1);
+		connectTetrahedrons(ta, nei6);
+		connectTetrahedrons(pyra.tc, nei2);
+		connectTetrahedrons(pyra.tc, nei4);
+	}
+
+	connectTetrahedrons(ta, pyra.tc);
+	connectTetrahedrons(ta, neica);
+	connectTetrahedrons(pyra.tc, neicc);
+	
+/// remove tb
+	// std::cout<<"\n remove "; printTetrahedronVertices(tb); 
+	pyra.tb->index = -1;
+	
+	std::cout<<"\n aft "; printTetrahedronVertices(ta);
+	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
+	
+	if(!checkTetrahedronConnections(pyra.tc)) {
+		std::cout<<"\n [ERROR] wrong tetrahedron connections"; printTetrahedronVertices(pyra.tc);
+		return false;
+	}
+	
+	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
+	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
+	
+	createBipyramid(&pyra, pyra.ta, pyra.tc);
+	
+	return true;
 }
 
 inline void flipAFace(IFace * f,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X)
 {
-	std::cout<<"\n test flip ("<<f->key.x<<", "
-		<<f->key.y<<", "
-		<<f->key.z<<") ";
-		
 	if(!canFaceFlip(f) ) 
 		return;
 		
@@ -760,15 +870,10 @@ inline void flipAFace(IFace * f,
 		processSplitFlip1(pyra, tets);
 	}
 	else if(canMergeFlip1(imerg, pyra, X) ) {
-		std::cout<<"\n can merge";
-	//	std::cout<<"\n merge flip ("<<f->key.x<<", "
-	//	<<f->key.y<<", "
-	//	<<f->key.z<<") ";
-		
-	}
-	else {
-		std::cout<<"cannot split or merge";
-		printBipyramidVertices(&pyra);
+		std::cout<<"\n merge flip ("<<f->key.x<<", "
+		<<f->key.y<<", "
+		<<f->key.z<<") ";
+		processMergeFlip1(pyra, tets, imerg);
 	}
 }
 

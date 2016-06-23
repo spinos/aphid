@@ -259,6 +259,8 @@ inline void splitTetrahedronFace(std::vector<ITetrahedron *> & tets,
 	IFace fs;
 	findTetrahedronFace(&fs, t, coord);
 	
+	std::cout<<"\n split face ("<<fs.key.x<<", "<<fs.key.y<<", "<<fs.key.z<<") ";
+	
 	std::vector<IFace *> boundary;
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > faces;
 	threeWaySplit(fs.ta, tets, faces, boundary,
@@ -271,8 +273,7 @@ inline void splitTetrahedronFace(std::vector<ITetrahedron *> & tets,
 	connectTetrahedrons(faces);
 	faces.clear();
 	
-	flipFaces(boundary, tets, X);
-	
+	flipFaces(boundary, tets, X);	
 }
 
 inline void splitTwoWay(ITetrahedron * t,
