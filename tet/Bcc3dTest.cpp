@@ -151,7 +151,7 @@ void Bcc3dTest::createGrid()
 	m_X[i+12].set(14.71f, 4.74f, 5.93f);
 	
 	i = m_N - ADDON + 0;
-	for(;i<m_N - ADDON+6;++i) {
+	for(;i<m_N - ADDON+1;++i) {
 		addPoint(i);
 		checkTetrahedronConnections(m_tets);
 	}

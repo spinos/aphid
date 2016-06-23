@@ -544,21 +544,45 @@ inline bool canSplitFlip1(const Bipyramid & pyra,
 	circumSphere(circ, apex, a, b, c );
 	if(antipex.distanceTo(circ.pc) >= circ.r )
 		return false;
-		
-/// check low volume
-	const float lowVol = (tetrahedronVolume1(apex, a, b, c)
-						+ tetrahedronVolume1(antipex, c, b, a) ) * .01f;
-	
-	if(tetrahedronVolume1(apex, a, b, antipex) < lowVol) 
-		return false;
-		
-	if(tetrahedronVolume1(apex, b, c, antipex) < lowVol) 
-		return false;
-
-	if(tetrahedronVolume1(apex, a, antipex, c) < lowVol) 
-		return false;
 
 	return true;
+}
+
+/// check low volume
+inline bool checkCoplanar(const Bipyramid & pyra, 
+							const aphid::Vector3F * X)
+{
+	aphid::Vector3F a = X[pyra.iv1];
+	aphid::Vector3F b = X[pyra.iv2];
+	aphid::Vector3F c = X[pyra.iv3];
+	aphid::Vector3F apex = X[pyra.iv0];
+	aphid::Vector3F antipex = X[pyra.iv4];
+	
+	const float lowVol = (tetrahedronVolume1(apex, a, b, c)
+						+ tetrahedronVolume1(antipex, c, b, a) ) * .03f;
+	
+	float vol = tetrahedronVolume1(apex, a, b, antipex);
+	if(vol < lowVol) {
+		std::cout<<"\n low volume "<<vol;
+		printBipyramidVertices(&pyra);
+		return true;
+	}
+	
+	vol	= tetrahedronVolume1(apex, b, c, antipex);
+	if(vol < lowVol) {
+		std::cout<<"\n low volume "<<vol;
+		printBipyramidVertices(&pyra);
+		return true;
+	}
+
+	vol = tetrahedronVolume1(apex, a, antipex, c);
+	if(vol < lowVol) {
+		std::cout<<"\n low volume "<<vol;
+		printBipyramidVertices(&pyra);
+		return true;
+	}
+	
+	return false;
 }
 
 /// flip edge by split bipyramid into three tetrahedrons
@@ -711,11 +735,13 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 /// be convex
 		if(!aphid::segmentIntersectTriangle(p3, p1, p2, p4, p0) )
 			return false;
-			
+
+#if 0			
 /// empty principle
 		circumSphere(circ, p3, p2, p4, p0 );
 		if(p1.distanceTo(circ.pc) < circ.r )
 			return false;
+#endif
 			
 		i3rd = 1;
 		return true;
@@ -728,10 +754,12 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 			
 		if(!aphid::segmentIntersectTriangle(p1, p2, p3, p4, p0) )
 			return false;
-		
+
+#if 0		
 		circumSphere(circ, p0, p1, p4, p3 );
 		if(p2.distanceTo(circ.pc) < circ.r )
 			return false;
+#endif
 		
 		i3rd = 2;
 		return true;
@@ -744,10 +772,12 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 			
 		if(!aphid::segmentIntersectTriangle(p2, p3, p1, p4, p0) )
 			return false;
-		
+
+#if 0		
 		circumSphere(circ, p2, p1, p4, p0 );
 		if(p3.distanceTo(circ.pc) < circ.r )
 			return false;
+#endif
 		
 		i3rd = 3;
 		return true;
@@ -846,7 +876,7 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
 	
-	createBipyramid(&pyra, pyra.ta, pyra.tc);
+	createBipyramid1(pyra, pyra.ta, pyra.tc);
 	
 	return true;
 }
@@ -864,15 +894,12 @@ inline void flipAFace(IFace * f,
 	
 	int imerg;
 	if(canSplitFlip1(pyra, X) ) {
-		std::cout<<"\n split flip ("<<f->key.x<<", "
-		<<f->key.y<<", "
-		<<f->key.z<<") ";
-		processSplitFlip1(pyra, tets);
+		if(checkCoplanar(pyra, X) )
+		{}
+		else
+			processSplitFlip1(pyra, tets);
 	}
 	else if(canMergeFlip1(imerg, pyra, X) ) {
-		std::cout<<"\n merge flip ("<<f->key.x<<", "
-		<<f->key.y<<", "
-		<<f->key.z<<") ";
 		processMergeFlip1(pyra, tets, imerg);
 	}
 }
