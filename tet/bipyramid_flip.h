@@ -568,7 +568,6 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
 	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
 	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);	
-	
 /*
 	printTetrahedronVertices(pyra.ta);
 	printTetrahedronVertices(pyra.tb);
@@ -591,7 +590,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	if(nei6) {
 		std::cout<<"\n nei6 "; printTetrahedronVertices(nei6);
 	}
-*/	
+*/
 	setTetrahedronVertices(*pyra.ta, v0, v1, v2, v4);
 	setTetrahedronVertices(*pyra.tb, v0, v2, v3, v4);
 	
@@ -601,6 +600,10 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	tc->index = tets.size();
 	tets.push_back(tc);
 	pyra.tc = tc;
+	
+	resetTetrahedronNeighbors(*pyra.ta);
+	resetTetrahedronNeighbors(*pyra.tb);
+	resetTetrahedronNeighbors(*tc);
 
 	connectTetrahedrons(pyra.ta, pyra.tb);
 	connectTetrahedrons(pyra.ta, pyra.tc);
@@ -632,17 +635,116 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	}
 	
 	std::cout<<"\n edge ("<<v0<<", "<<v4<<")";
+/*
 	std::cout<<"\n aft "; printTetrahedronVertices(pyra.ta);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tb);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
 	
+	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
+	if(!checkTetrahedronConnections(pyra.tb) ) printTetrahedronNeighbors(pyra.tb);
+	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
+*/	
 	return true;
+}
+
+inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra, 
+							const aphid::Vector3F * X)
+{
+	aphid::Vector3F p0 = X[pyra.iv0];
+	aphid::Vector3F p1 = X[pyra.iv1];
+	aphid::Vector3F p2 = X[pyra.iv2];
+	aphid::Vector3F p3 = X[pyra.iv3];
+	aphid::Vector3F p4 = X[pyra.iv4];
+	TetSphere circ;
+	
+	int v0 = pyra.iv0;
+	int v1 = pyra.iv1;
+	int v2 = pyra.iv2;
+	int v3 = pyra.iv3;
+	int v4 = pyra.iv4;
+	
+	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
+	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
+	ITetrahedron * nei3 = neighborOfTetrahedron(pyra.ta, v0, v3, v2);
+	ITetrahedron * nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
+	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
+	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
+	
+	if(nei1) {
+		std::cout<<"\n nei1 "; printTetrahedronVertices(nei1);
+	}
+	if(nei2) {
+		std::cout<<"\n nei2 "; printTetrahedronVertices(nei2);
+	}
+	if(nei3) {
+		std::cout<<"\n nei3 "; printTetrahedronVertices(nei3);
+	}
+	if(nei4) {
+		std::cout<<"\n nei4 "; printTetrahedronVertices(nei4);
+	}
+	if(nei5) {
+		std::cout<<"\n nei5 "; printTetrahedronVertices(nei5);
+	}
+	if(nei6) {
+		std::cout<<"\n nei6 "; printTetrahedronVertices(nei6);
+	}
+	
+/// find shared neighbor pair	
+	if(nei1 && nei1 == nei6) {std::cout<<"\n 1=6";
+/// be convex
+		if(!aphid::segmentIntersectTriangle(p3, p1, p2, p4, p0) )
+			return false;
+			
+		std::cout<<"\n convex";
+		
+/// empty principle
+		circumSphere(circ, p3, p2, p4, p0 );
+		if(p1.distanceTo(circ.pc) < circ.r )
+			return false;
+			
+		i3rd = 1;
+		return true;
+	}
+	
+	if(nei2 && nei2 == nei4) { std::cout<<"\n 2=4";
+		if(!aphid::segmentIntersectTriangle(p1, p2, p3, p4, p0) )
+			return false;
+		
+		std::cout<<"\n convex";
+		
+		circumSphere(circ, p0, p1, p4, p3 );
+		if(p2.distanceTo(circ.pc) < circ.r )
+			return false;
+		
+		i3rd = 2;
+		return true;
+	}
+	
+	if(nei3 && nei3 == nei5) { std::cout<<"\n 3=5";
+		if(!aphid::segmentIntersectTriangle(p2, p3, p1, p4, p0) )
+			return false;
+		
+		std::cout<<"\n convex";
+		
+		circumSphere(circ, p2, p1, p4, p0 );
+		if(p3.distanceTo(circ.pc) < circ.r )
+			return false;
+		
+		i3rd = 3;
+		return true;
+	}
+	
+	return false;
 }
 
 inline void flipAFace(IFace * f,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X)
 {
+	std::cout<<"\n test flip ("<<f->key.x<<", "
+		<<f->key.y<<", "
+		<<f->key.z<<") ";
+		
 	if(!canFaceFlip(f) ) 
 		return;
 		
@@ -650,11 +752,23 @@ inline void flipAFace(IFace * f,
 	if(!createBipyramid1(pyra, f->ta, f->tb) )
 		return;
 	
+	int imerg;
 	if(canSplitFlip1(pyra, X) ) {
 		std::cout<<"\n split flip ("<<f->key.x<<", "
 		<<f->key.y<<", "
 		<<f->key.z<<") ";
 		processSplitFlip1(pyra, tets);
+	}
+	else if(canMergeFlip1(imerg, pyra, X) ) {
+		std::cout<<"\n can merge";
+	//	std::cout<<"\n merge flip ("<<f->key.x<<", "
+	//	<<f->key.y<<", "
+	//	<<f->key.z<<") ";
+		
+	}
+	else {
+		std::cout<<"cannot split or merge";
+		printBipyramidVertices(&pyra);
 	}
 }
 

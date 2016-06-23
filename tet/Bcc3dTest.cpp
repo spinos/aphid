@@ -48,19 +48,13 @@ const char * Bcc3dTest::titleStr() const
 { return "BCC 3D Test"; }
 
 void Bcc3dTest::draw(GeoDrawer * dr) 
-{
-	dr->setColor(0.3f, 0.3f, 0.39f);
-	m_grid.begin();
-	while(!m_grid.end() ) {
-		dr->boundingBox(m_grid.coordToGridBBox(m_grid.key() ) );
-		m_grid.next();
-	}
-	
+{	
 	dr->m_markerProfile.apply();
 	dr->setColor(0.f, 0.f, 0.f);
 	int i = 0;
 	for(;i<m_N;++i) {
 		dr->cube(m_X[i], .125f);
+		dr->drawNumber(i, m_X[i], .5f);
 	}
 	
 	dr->m_wireProfile.apply();
@@ -155,8 +149,8 @@ void Bcc3dTest::createGrid()
 	
 	m_X[i+12].set(14.71f, 4.74f, 5.93f);
 	
-	i = m_N - ADDON + 1;
-	for(;i<m_N - ADDON+2;++i) {
+	i = m_N - ADDON + 0;
+	for(;i<m_N - ADDON+1;++i) {
 		addPoint(i);
 		checkTetrahedronConnections(m_tets);
 	}

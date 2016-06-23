@@ -15,6 +15,31 @@
 
 namespace aphid {
 
+float LineDrawer::DigitLineP[10][8][2] = {
+{{0.3f, 0.1f}, {0.6f, 0.1f}, {0.63f, 0.13f}, {0.73f, 0.9f}, {0.43f, 0.9f}, {0.4f, 0.87f}, {0.3f, 0.13f}, {0.3f, 0.1f} },
+{{0.3f, 0.1f}, {0.31f, 0.1f}, {0.33f, 0.13f}, {0.43f, 0.9f}, {0.43f, 0.9f}, {0.4f, 0.87f}, {0.3f, 0.13f}, {0.3f, 0.1f} },
+{{0.3f, 0.86f}, {0.33f, 0.9f}, {0.5f, 0.9f}, {0.6f, 0.7f}, {0.55f, 0.66f}, {0.21f, 0.23f}, {0.2f, 0.1f}, {0.6f, 0.1f} },
+{{0.22f, 0.9f}, {0.6f, 0.9f}, {0.62f, 0.88f}, {0.57f, 0.65f}, {0.3f, 0.55f}, {0.55f, 0.5f}, {0.5f, 0.2f}, {0.2f, 0.2f} },
+{{0.23f, 0.9f}, {0.2f, 0.6f}, {0.55f, 0.56f}, {0.6f, 0.9f}, {0.55f, 0.56f}, {0.6f, 0.56f}, {0.55f, 0.56f}, {0.5f, 0.1f} },
+{{0.65f, 0.9f}, {0.3f, 0.9f}, {0.27f, 0.55f}, {0.55f, 0.55f}, {0.6f, 0.5f}, {0.58f, 0.13f}, {0.55f, 0.1f}, {0.2f, 0.1f} },
+{{0.3f, 0.9f}, {0.27f, 0.55f}, {0.55f, 0.55f}, {0.6f, 0.5f}, {0.58f, 0.13f}, {0.55f, 0.1f}, {0.2f, 0.1f}, {0.25f, 0.52f} },
+{{0.2f, 0.9f}, {0.6f, 0.9f}, {0.62f, 0.89f}, {0.3f, 0.1f}, {0.29f, 0.1f}, {0.61f, 0.89f}, {0.59f, 0.88f}, {0.2f, 0.88f} },
+{{0.2f, 0.1f}, {0.23f, 0.9f}, {0.63f, 0.9f}, {0.62f, 0.56f}, {0.22f, 0.56f}, {0.62f, 0.56f}, {0.6f, 0.1f}, {0.2f, 0.1f} },
+{{0.22f, 0.56f}, {0.23f, 0.9f}, {0.63f, 0.9f}, {0.62f, 0.56f}, {0.22f, 0.56f}, {0.62f, 0.56f}, {0.6f, 0.1f}, {0.2f, 0.1f} }	
+};
+
+int LineDrawer::DigitM[9] = {
+10000000,
+1000000,
+100000,
+10000,
+1000,
+100,
+10,
+1,
+0
+};
+
 LineDrawer::LineDrawer() {}
 LineDrawer::~LineDrawer() {}
 
@@ -154,6 +179,42 @@ void LineDrawer::smoothCurve(const BezierSpline & sp, short deg) const
 		p = sp.calculateBezierPoint(delta * j);
 		glVertex3fv((GLfloat *)&p);
 		p0 = p;
+	}
+	glEnd();
+}
+
+void LineDrawer::drawNumber(int x, const Vector3F & p, float scale) const
+{
+	glPushMatrix();
+	glTranslatef(p.x, p.y, p.z);
+	glScalef(scale, scale, scale);
+	
+	if(x == 0) {
+		drawDigit(0);
+		glPopMatrix();
+		return;
+	}
+	int m = x;
+/// limit of n digits
+	int n = 0;
+	while(n<8) {
+		int r = m / DigitM[n];
+		if(x>= DigitM[n]) {
+			drawDigit(r);
+			m -= r * DigitM[n];
+			
+			glTranslatef(.6f, 0.f, 0.f);
+		}
+		n++;
+	}
+	glPopMatrix();
+}
+
+void LineDrawer::drawDigit(int d) const
+{
+	glBegin(GL_LINE_STRIP);
+	for(int i=0; i< 8; ++i) {
+		glVertex3f(DigitLineP[d][i][0], DigitLineP[d][i][1], 0.f);
 	}
 	glEnd();
 }

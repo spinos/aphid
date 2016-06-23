@@ -482,6 +482,28 @@ inline void connectTetrahedrons(aphid::sdb::Array<aphid::sdb::Coord3, IFace > & 
 	}
 }
 
+inline void getBoundary(std::vector<IFace *> & boundary,
+						aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+{
+	faces.begin();
+	while(!faces.end() ) {
+		
+		IFace * f = faces.value();
+		
+		if(f->tb) {
+			
+			IFace * tri = new IFace;
+			tri->key = f->key;
+			tri->ta = f->ta;
+			tri->tb = f->tb;
+			boundary.push_back(tri);
+			
+		}
+		
+		faces.next();
+	}
+}
+
 inline void addTetrahedronTo(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * a)
 {

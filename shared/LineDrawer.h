@@ -30,7 +30,12 @@ public:
 	void linearCurve(const BaseCurve & curve) const;
 	void smoothCurve(const BezierCurve & curve, short deg) const;
 	void smoothCurve(const BezierSpline & sp, short deg) const;
+	void drawNumber(int x, const Vector3F & p, float scale = 1.f) const;
+	void drawDigit(int d) const;
 	// void frustum(const Frustum * f);
+private:
+	static float DigitLineP[10][8][2];
+	static int DigitM[9];
 };
 
 }

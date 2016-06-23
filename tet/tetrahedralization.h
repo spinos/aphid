@@ -318,7 +318,8 @@ inline void splitTwoWay(ITetrahedron * t,
 inline void splitTetrahedronEdge(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
-                            const Float4 & coord)
+                            const Float4 & coord,
+							const aphid::Vector3F * X)
 {
     IEdge e;
     findTetrahedronEdge(&e, t, coord);
@@ -337,6 +338,12 @@ inline void splitTetrahedronEdge(std::vector<ITetrahedron *> & tets,
 	}
 	
 	connectTetrahedrons(faces);
+	
+	std::vector<IFace *> boundary;
+	getBoundary(boundary, faces);
+	std::cout<<"\n n bound "<<boundary.size();
+	
+	flipFaces(boundary, tets, X);
 	
 	faces.clear();
 	tetOnEdge.clear();
@@ -363,7 +370,7 @@ inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
 		splitTetrahedronFace(tets, t, vi, coord, X);
 	}
 	else if(stat == 2) {
-		splitTetrahedronEdge(tets, t, vi, coord);
+		splitTetrahedronEdge(tets, t, vi, coord, X);
 	}
 	else if(stat == 3) {
 		splitTetrahedron1(tets, t, vi);
