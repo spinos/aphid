@@ -137,12 +137,13 @@ void Bcc3dTest::createGrid()
 /// on edge
 	i = m_N - ADDON;
 	
-	m_X[i].set(2.f, 2.f, 2.f);
-	m_X[i+1].set(3.f, 3.f, 5.f);
+	m_X[i].set(3.2f, 3.2f, 3.2f); // edge
+	m_X[i+1].set(2.f, 2.f, 6.f); // edge
 	m_X[i+2].set(2.f, 6.f, 6.f);
 	m_X[i+3].set(2.f, 6.f, 2.f);
 	
-	m_X[i+4].set(6.f, 6.f, 1.f);
+	m_X[i+4].set(5.2f, 5.2f, .8f); // face
+	
 	m_X[i+5].set(6.f, 6.f, 3.3f);
 	m_X[i+6].set(8.91f, 6.2f, 3.3f);
 	m_X[i+7].set(10.f, 6.f, 2.f);
@@ -154,8 +155,8 @@ void Bcc3dTest::createGrid()
 	
 	m_X[i+12].set(14.71f, 4.74f, 5.93f);
 	
-	i = m_N - ADDON+4;
-	for(;i<m_N - ADDON+5;++i) {
+	i = m_N - ADDON + 1;
+	for(;i<m_N - ADDON+2;++i) {
 		addPoint(i);
 		checkTetrahedronConnections(m_tets);
 	}
@@ -170,7 +171,7 @@ bool Bcc3dTest::addPoint(const int & vi)
 	Float4 coord;
 	ITetrahedron * t = searchTet(m_X[vi], &coord);
 	if(!t ) return false;
-	splitTetrahedron(m_tets, t, vi, coord);
+	splitTetrahedron(m_tets, t, vi, coord, m_X);
 	
 	return true;
 }

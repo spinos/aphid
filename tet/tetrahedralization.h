@@ -196,9 +196,11 @@ inline void splitTetrahedronInside(std::vector<ITetrahedron *> & tets,
 	
 }
 
+/// spawn three boundary faces to flip bipyramid
 inline void threeWaySplit(ITetrahedron * t,
 							std::vector<ITetrahedron *> & tets,
 							aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces,
+							std::vector<IFace *> & boundary,
 							const int & vx,
 							const int & vb, const int & vc, const int & vd)
 {
@@ -214,6 +216,7 @@ inline void threeWaySplit(ITetrahedron * t,
 	setTetrahedronVertices(*t, vx, fb.p1, fb.p2, fb.p3);
 	if(nb) {
 		connectTetrahedrons(t, nb, fb.p1, fb.p2, fb.p3);
+		addFace(boundary, t, nb, fb.p1, fb.p2, fb.p3);
 	}
 	
 /// add one
@@ -223,6 +226,7 @@ inline void threeWaySplit(ITetrahedron * t,
 	
 	if(nc) {
 		connectTetrahedrons(tc, nc, fc.p1, fc.p2, fc.p3);
+		addFace(boundary, tc, nc, fc.p1, fc.p2, fc.p3);
 	}
 	
 	tets.push_back(tc);
@@ -234,6 +238,7 @@ inline void threeWaySplit(ITetrahedron * t,
 	
 	if(nd) {
 		connectTetrahedrons(td, nd, fd.p1, fd.p2, fd.p3);
+		addFace(boundary, td, nd, fd.p1, fd.p2, fd.p3);
 	}
 	
 	tets.push_back(td);
@@ -248,21 +253,26 @@ inline void threeWaySplit(ITetrahedron * t,
 inline void splitTetrahedronFace(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vx,
-							const Float4 & coord)
+							const Float4 & coord,
+							const aphid::Vector3F * X)
 {
 	IFace fs;
 	findTetrahedronFace(&fs, t, coord);
 	
+	std::vector<IFace *> boundary;
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > faces;
-	threeWaySplit(fs.ta, tets, faces,
+	threeWaySplit(fs.ta, tets, faces, boundary,
 					vx, fs.key.x, fs.key.y, fs.key.z);
 					
 	if(fs.tb)
-		threeWaySplit(fs.tb, tets, faces,
+		threeWaySplit(fs.tb, tets, faces, boundary,
 					vx, fs.key.x, fs.key.y, fs.key.z);
 					
 	connectTetrahedrons(faces);
 	faces.clear();
+	
+	flipFaces(boundary, tets, X);
+	
 }
 
 inline void splitTwoWay(ITetrahedron * t,
@@ -342,14 +352,15 @@ inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,
 inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
-							const Float4 & coord)
+							const Float4 & coord,
+							aphid::Vector3F * X)
 {
 	int stat = aphid::barycentricCoordinateStatus(coord);
 	if(stat == 0) {
 		splitTetrahedronInside(tets, t, vi);
 	}
 	else if(stat == 1) {
-		splitTetrahedronFace(tets, t, vi, coord);
+		splitTetrahedronFace(tets, t, vi, coord, X);
 	}
 	else if(stat == 2) {
 		splitTetrahedronEdge(tets, t, vi, coord);
