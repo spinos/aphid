@@ -131,53 +131,138 @@ inline void flipFaces(std::deque<Bipyramid> & pyras,
 	std::cout<<"\n end flip";
 }
 
-inline void splitTetrahedron4(std::vector<ITetrahedron *> & tets,
+/// dvide tetra into four
+inline void splitTetrahedronInside(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
-							const int & vi)
+							const int & vx)
 {
+	ITRIANGLE fa = oppositeFace(t, t->iv0);
+	ITRIANGLE fb = oppositeFace(t, t->iv1);
+	ITRIANGLE fc = oppositeFace(t, t->iv2);
+	ITRIANGLE fd = oppositeFace(t, t->iv3);
 
+	ITetrahedron * na = neighborOfTetrahedron(t, fa.p1, fa.p2, fa.p3);
+	ITetrahedron * nb = neighborOfTetrahedron(t, fb.p1, fb.p2, fb.p3);
+	ITetrahedron * nc = neighborOfTetrahedron(t, fc.p1, fc.p2, fc.p3);
+	ITetrahedron * nd = neighborOfTetrahedron(t, fd.p1, fd.p2, fd.p3);
+	
+/// change the existing
+	setTetrahedronVertices(*t, vx, fa.p1, fa.p2, fa.p3);
+	if(na) {
+		connectTetrahedrons(t, na, fa.p1, fa.p2, fa.p3);
+	}
+	
+/// add one
+	ITetrahedron * tb = new ITetrahedron;
+	setTetrahedronVertices(*tb, vx, fb.p1, fb.p2, fb.p3);
+	tb->index = tets.size();
+	
+	if(nc) {
+		connectTetrahedrons(tb, nb, fb.p1, fb.p2, fb.p3);
+	}
+	
+	tets.push_back(tb);
+
+/// add one
+	ITetrahedron * tc = new ITetrahedron;
+	setTetrahedronVertices(*tc, vx, fc.p1, fc.p2, fc.p3);
+	tc->index = tets.size();
+	
+	if(nc) {
+		connectTetrahedrons(tc, nc, fc.p1, fc.p2, fc.p3);
+	}
+	
+	tets.push_back(tc);
+	
+/// add one
+	ITetrahedron * td = new ITetrahedron;
+	setTetrahedronVertices(*td, vx, fd.p1, fd.p2, fd.p3);
+	td->index = tets.size();
+	
+	if(nd) {
+		connectTetrahedrons(td, nd, fd.p1, fd.p2, fd.p3);
+	}
+	
+	tets.push_back(td);
+		
+	connectTetrahedrons(t, tb);
+	connectTetrahedrons(t, tc);
+	connectTetrahedrons(t, td);
+	
+	connectTetrahedrons(tb, tc);
+	connectTetrahedrons(tb, td);
+	
+	connectTetrahedrons(tc, td);
+	
 }
 
-inline void splitTetrahedron3(std::vector<ITetrahedron *> & tets,
+inline void threeWaySplit(ITetrahedron * t,
+							std::vector<ITetrahedron *> & tets,
+							aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces,
+							const int & vx,
+							const int & vb, const int & vc, const int & vd)
+{
+	ITRIANGLE fb = oppositeFace(t, vb);
+	ITRIANGLE fc = oppositeFace(t, vc);
+	ITRIANGLE fd = oppositeFace(t, vd);
+
+	ITetrahedron * nb = neighborOfTetrahedron(t, fb.p1, fb.p2, fb.p3);
+	ITetrahedron * nc = neighborOfTetrahedron(t, fc.p1, fc.p2, fc.p3);
+	ITetrahedron * nd = neighborOfTetrahedron(t, fd.p1, fd.p2, fd.p3);
+	
+/// change the existing
+	setTetrahedronVertices(*t, vx, fb.p1, fb.p2, fb.p3);
+	if(nb) {
+		connectTetrahedrons(t, nb, fb.p1, fb.p2, fb.p3);
+	}
+	
+/// add one
+	ITetrahedron * tc = new ITetrahedron;
+	setTetrahedronVertices(*tc, vx, fc.p1, fc.p2, fc.p3);
+	tc->index = tets.size();
+	
+	if(nc) {
+		connectTetrahedrons(tc, nc, fc.p1, fc.p2, fc.p3);
+	}
+	
+	tets.push_back(tc);
+	
+/// add one
+	ITetrahedron * td = new ITetrahedron;
+	setTetrahedronVertices(*td, vx, fd.p1, fd.p2, fd.p3);
+	td->index = tets.size();
+	
+	if(nd) {
+		connectTetrahedrons(td, nd, fd.p1, fd.p2, fd.p3);
+	}
+	
+	tets.push_back(td);
+	
+	addTetrahedronFaces(t, faces);
+	addTetrahedronFaces(tc, faces);
+	addTetrahedronFaces(td, faces);
+}
+
+/// split on face, find tetra pair sharing that face
+/// divide each in three
+inline void splitTetrahedronFace(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
-							const int & vi)
+							const int & vx,
+							const Float4 & coord)
 {
-
-}
-
-inline void expandTetrahedronRegion(std::vector<ITetrahedron *> & tets,
-							std::vector<ITetrahedron *> & source)
-{
-	std::vector<ITetrahedron *>::iterator it = source.begin();
-	for(;it!=source.end();++it) {
-		addTetrahedronTo(tets, *it );
-		addTetrahedronTo(tets, (*it)->nei0);
-		addTetrahedronTo(tets, (*it)->nei1);
-		addTetrahedronTo(tets, (*it)->nei2);
-		addTetrahedronTo(tets, (*it)->nei3);
-	}
-}
-
-inline void addTetrahedronFaces(ITetrahedron * t,
-					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
-{
-	ITRIANGLE fa;
-	int i=0;
-	for(;i<4;++i) {
-		faceOfTetrahedron(&fa, t, i);
-		aphid::sdb::Coord3 itri = aphid::sdb::Coord3(fa.p1, fa.p2, fa.p3).ordered();
-		IFace * tri = faces.find(itri );
-		if(!tri) {
-			tri = new IFace;
-			tri->key = itri;
-			tri->ta = t;
-			
-			faces.insert(itri, tri);
-		}
-		else {
-			tri->tb = t;
-		}
-	}
+	IFace fs;
+	findTetrahedronFace(&fs, t, coord);
+	
+	aphid::sdb::Array<aphid::sdb::Coord3, IFace > faces;
+	threeWaySplit(fs.ta, tets, faces,
+					vx, fs.key.x, fs.key.y, fs.key.z);
+					
+	if(fs.tb)
+		threeWaySplit(fs.tb, tets, faces,
+					vx, fs.key.x, fs.key.y, fs.key.z);
+					
+	connectTetrahedrons(faces);
+	faces.clear();
 }
 
 inline void splitTwoWay(ITetrahedron * t,
@@ -220,7 +305,7 @@ inline void splitTwoWay(ITetrahedron * t,
 }
 
 /// split on edge, find all connected tetra, split each into two
-inline void splitTetrahedron2(std::vector<ITetrahedron *> & tets,
+inline void splitTetrahedronEdge(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
                             const Float4 & coord)
@@ -261,13 +346,13 @@ inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
 {
 	int stat = aphid::barycentricCoordinateStatus(coord);
 	if(stat == 0) {
-		splitTetrahedron4(tets, t, vi);
+		splitTetrahedronInside(tets, t, vi);
 	}
 	else if(stat == 1) {
-		splitTetrahedron3(tets, t, vi);
+		splitTetrahedronFace(tets, t, vi, coord);
 	}
 	else if(stat == 2) {
-		splitTetrahedron2(tets, t, vi, coord);
+		splitTetrahedronEdge(tets, t, vi, coord);
 	}
 	else if(stat == 3) {
 		splitTetrahedron1(tets, t, vi);

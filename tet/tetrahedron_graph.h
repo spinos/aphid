@@ -418,6 +418,27 @@ inline ITRIANGLE oppositeFace(const ITetrahedron * t,
 	return trif;
 }
 
+inline bool findTetrahedronFace(IFace * f,
+								 ITetrahedron * a,
+                                 const Float4 & coord)
+{
+	int vx = -1;
+	if(coord.x < .03f) vx = a->iv0;
+	if(coord.y < .03f) vx = a->iv1;
+	if(coord.z < .03f) vx = a->iv2;
+	if(coord.w < .03f) vx = a->iv3;
+	if(vx < 0) return false;
+	
+	ITRIANGLE trif = oppositeFace(a, vx);
+	
+	f->key = aphid::sdb::Coord3(trif.p1, trif.p2, trif.p3);
+	f->ta = a;
+	int side = findTetrahedronFace(a, &trif);
+	f->tb = tetrahedronNeighbor(a, side);
+	
+	return true;
+}
+
 inline void connectTetrahedrons(aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
 {
 	faces.begin();
@@ -500,6 +521,41 @@ inline void findTetrahedronsConnectedToEdge(std::vector<ITetrahedron *> & tets,
     
     if(e.nei1) {
 		findTetrahedronAlongEdge(tets, e, e.nei1, t);
+	}
+}
+
+inline void expandTetrahedronRegion(std::vector<ITetrahedron *> & tets,
+							std::vector<ITetrahedron *> & source)
+{
+	std::vector<ITetrahedron *>::iterator it = source.begin();
+	for(;it!=source.end();++it) {
+		addTetrahedronTo(tets, *it );
+		addTetrahedronTo(tets, (*it)->nei0);
+		addTetrahedronTo(tets, (*it)->nei1);
+		addTetrahedronTo(tets, (*it)->nei2);
+		addTetrahedronTo(tets, (*it)->nei3);
+	}
+}
+
+inline void addTetrahedronFaces(ITetrahedron * t,
+					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+{
+	ITRIANGLE fa;
+	int i=0;
+	for(;i<4;++i) {
+		faceOfTetrahedron(&fa, t, i);
+		aphid::sdb::Coord3 itri = aphid::sdb::Coord3(fa.p1, fa.p2, fa.p3).ordered();
+		IFace * tri = faces.find(itri );
+		if(!tri) {
+			tri = new IFace;
+			tri->key = itri;
+			tri->ta = t;
+			
+			faces.insert(itri, tri);
+		}
+		else {
+			tri->tb = t;
+		}
 	}
 }
 
