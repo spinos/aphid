@@ -139,8 +139,8 @@ void Bcc3dTest::createGrid()
 	m_X[i+4].set(5.2f, 5.2f, .9f); // face
 	m_X[i+5].set(6.f, 6.f, 3.3f); // face 6
 	
-	m_X[i+6].set(8.91f, 6.2f, 3.3f); // inside
-	m_X[i+7].set(10.f, 6.f, 2.f);
+	m_X[i+6].set(8.91f, 5.94f, 3.2f); // inside
+	m_X[i+7].set(10.f, 6.f, 2.f); // inside 8
 	
 	m_X[i+8].set(6.f, 2.f, 6.f);
 	m_X[i+9].set(6.f, 2.f, 2.f);
@@ -149,7 +149,7 @@ void Bcc3dTest::createGrid()
 	
 	m_X[i+12].set(14.71f, 4.74f, 5.93f);
 	
-#define ENDN 4
+#define ENDN 6
 	i = m_N - ADDON + 0;
 	for(;i<m_N - ADDON+ENDN;++i) {
 		addPoint(i);

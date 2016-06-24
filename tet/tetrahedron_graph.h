@@ -606,5 +606,15 @@ inline void addTetrahedronFaces(ITetrahedron * t,
 	}
 }
 
+inline void addTetrahedronFace(ITetrahedron * t,
+					const int & va, const int & vb, const int & vc,
+					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+{
+	aphid::sdb::Coord3 itri = aphid::sdb::Coord3(va, vb, vc).ordered();
+	IFace * tri = faces.find(itri );
+	if(tri)
+		tri->tb = t;
+}
+
 }
 #endif

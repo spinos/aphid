@@ -134,7 +134,8 @@ inline void flipFaces(std::deque<Bipyramid> & pyras,
 /// dvide tetra into four
 inline void splitTetrahedronInside(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
-							const int & vx)
+							const int & vx,
+							const aphid::Vector3F * X)
 {
 	ITRIANGLE fa = oppositeFace(t, t->iv0);
 	ITRIANGLE fb = oppositeFace(t, t->iv1);
@@ -194,6 +195,21 @@ inline void splitTetrahedronInside(std::vector<ITetrahedron *> & tets,
 	
 	connectTetrahedrons(tc, td);
 	
+	std::vector<IFace *> boundary;
+/// add four boundary faces
+	if(na) 
+		addFace(boundary, t, na, fa.p1, fa.p2, fa.p3);
+		
+	if(nb) 
+		addFace(boundary, tb, nb, fb.p1, fb.p2, fb.p3);
+		
+	if(nb) 
+		addFace(boundary, tc, nc, fc.p1, fc.p2, fc.p3);
+		
+	if(nd) 
+		addFace(boundary, td, nd, fd.p1, fd.p2, fd.p3);
+		
+	flipFaces(boundary, tets, X);	
 }
 
 /// spawn three boundary faces to flip bipyramid
@@ -259,7 +275,7 @@ inline void splitTetrahedronFace(std::vector<ITetrahedron *> & tets,
 	IFace fs;
 	findTetrahedronFace(&fs, t, coord);
 	
-	std::cout<<"\n split face ("<<fs.key.x<<", "<<fs.key.y<<", "<<fs.key.z<<") ";
+	//std::cout<<"\n split face ("<<fs.key.x<<", "<<fs.key.y<<", "<<fs.key.z<<") ";
 	
 	std::vector<IFace *> boundary;
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > faces;
@@ -313,8 +329,11 @@ inline void splitTwoWay(ITetrahedron * t,
 /// shared face only
 	addTetrahedronFaces(t, faces);
 	addTetrahedronFaces(tb, faces);
-/// todo face with neighbors
-
+/// face on neighbors
+	if(na) 
+		addTetrahedronFace(na, fa.p1, fa.p2, fa.p3, faces);
+	if(nb) 
+		addTetrahedronFace(nb, fb.p1, fb.p2, fb.p3, faces);
 }
 
 /// split on edge, find all connected tetra, split each into two
@@ -366,7 +385,7 @@ inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
 {
 	int stat = aphid::barycentricCoordinateStatus(coord);
 	if(stat == 0) {
-		splitTetrahedronInside(tets, t, vi);
+		splitTetrahedronInside(tets, t, vi, X);
 	}
 	else if(stat == 1) {
 		splitTetrahedronFace(tets, t, vi, coord, X);

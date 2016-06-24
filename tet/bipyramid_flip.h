@@ -823,7 +823,7 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	if(side == 1) pyra.tc = nei1;
 	else if(side == 2) pyra.tc = nei2;
 	else pyra.tc = nei3;
-	std::cout<<" and"; printTetrahedronVertices(pyra.tc);
+	//std::cout<<" and"; printTetrahedronVertices(pyra.tc);
 	
 /// connection to c	
 	ITetrahedron * neica;
@@ -883,8 +883,8 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	// std::cout<<"\n remove "; printTetrahedronVertices(tb); 
 	pyra.tb->index = -1;
 	
-	std::cout<<"\n aft "; printTetrahedronVertices(ta);
-	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
+	//std::cout<<"\n aft "; printTetrahedronVertices(ta);
+	//std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
 	
 	if(!checkTetrahedronConnections(pyra.tc)) {
 		std::cout<<"\n [ERROR] wrong tetrahedron connections"; printTetrahedronVertices(pyra.tc);
@@ -895,7 +895,6 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
 	
 	createBipyramid1(pyra, pyra.ta, pyra.tc);
-
 
 /// spawn six boundary faces
 	v0 = pyra.iv0;
@@ -932,8 +931,8 @@ inline void flipAFace(IFace * f,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X)
 {
-	std::cout<<"\n flip ("
-			<<f->key.x<<", "<<f->key.y<<", "<<f->key.z<<") ";
+	//std::cout<<"\n flip ("
+	//		<<f->key.x<<", "<<f->key.y<<", "<<f->key.z<<") ";
 	
 	if(!canFaceFlip(f) )
 		return;
