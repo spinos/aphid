@@ -923,16 +923,16 @@ inline void flipAFace(IFace * f,
 	if(!createBipyramid1(pyra, f->ta, f->tb) )
 		return;
 	
-	int imerg;
 	if(canSplitFlip1(pyra, X) ) {
-		if(checkCoplanar(pyra, X) ) {
+		if(checkCoplanar(pyra, X) )
 			addToDiamond(diam, &pyra);
-		}
 		else
 			processSplitFlip1(pyra, tets, boundary);
 	}
-	else if(canMergeFlip1(imerg, pyra, X) ) {
-		processMergeFlip1(pyra, tets, imerg, boundary);
+	else {
+		int imerg;
+		if(canMergeFlip1(imerg, pyra, X) )
+			processMergeFlip1(pyra, tets, imerg, boundary);
 	}
 }
 

@@ -122,7 +122,7 @@ void Bcc3dTest::createGrid()
 	std::cout<<"\n n cell "<<m_grid.size();
 	m_grid.buildNodes();
 	
-#define ADDON 13
+#define ADDON 16
 	m_N = m_grid.numNodes() + ADDON;
 	m_X = new Vector3F[m_N];
 	std::cout<<"\n n node "<<m_N;
@@ -140,16 +140,19 @@ void Bcc3dTest::createGrid()
 	m_X[i+5].set(6.f, 6.f, 3.3f); // face 6
 	
 	m_X[i+6].set(5.11f, 5.94f, 6.2f); // inside
-	m_X[i+7].set(8.9f, 6.f, 2.f); // inside 8
+	m_X[i+7].set(7.11f, 6.f, 2.f); // inside 8
 	m_X[i+8].set(10.f, 6.17f, 4.93f);
 	
-	m_X[i+9].set(8.23f, 5.67f, 5.63f);
-	m_X[i+10].set(6.f, 2.f, 6.f);
-	m_X[i+11].set(14.f, 1.f, 2.f);
+	m_X[i+9].set(3.53f, 5.67f, 5.63f);
+	m_X[i+10].set(8.01f, 6.f, 6.f);
+	m_X[i+11].set(9.f, 6.391f, 2.35f);
 	
-	m_X[i+12].set(14.71f, 4.74f, 5.93f);
+	m_X[i+12].set(11.1f, 6.191f, 2.35f);
+	m_X[i+13].set(13.1f, 6.091f, 3.435f);
+	m_X[i+14].set(12.1f, 5.791f, 5.735f);
+	m_X[i+15].set(11.1f, 4.791f, 6.035f);
 	
-#define ENDN 11
+#define ENDN 16
 	i = m_N - ADDON + 0;
 	for(;i<m_N - ADDON+ENDN;++i) {
 		addPoint(i);
