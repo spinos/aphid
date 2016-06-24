@@ -149,8 +149,8 @@ void Bcc3dTest::createGrid()
 	
 	m_X[i+12].set(11.1f, 6.191f, 2.35f);
 	m_X[i+13].set(13.1f, 6.091f, 3.435f);
-	m_X[i+14].set(12.1f, 5.791f, 5.735f);
-	m_X[i+15].set(11.1f, 4.791f, 6.035f);
+	m_X[i+14].set(12.1f, 5.791f, 5.335f);
+	m_X[i+15].set(11.1f, 4.8291f, 6.035f);
 	
 #define ENDN 16
 	i = m_N - ADDON + 0;

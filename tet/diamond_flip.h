@@ -81,14 +81,14 @@ inline void printDiamondNeighbors(const Diamond * d)
 }
 
 inline void resetDiamond(Diamond * d)
-{ d->ta = NULL; d->iv5 = -1; }
+{ d->ta = NULL; d->tb = NULL;  d->tc = NULL; d->td = NULL; d->iv5 = -1; }
 
 inline bool isDiamondComplete(const Diamond * d)
-{ return d->iv5 > -1; }
+{ return d->ta && d->iv5 > -1; }
 
 inline bool matchDiamond(Diamond * diam, 
 						const Bipyramid * pyra)
-{
+{	
 	if(pyra->iv0 != diam->iv0
 		&& pyra->iv0 != diam->iv4)
 			return false;
@@ -110,12 +110,16 @@ inline bool matchDiamond(Diamond * diam,
 	IEDGE e = findOppositeEdge(&tria, diam->iv1);
 	diam->iv2 = e.v[0];
 	diam->iv3 = e.v[1];
+	
 	return true;
 }
 
-inline void addToDiamond(Diamond * diam, 
+inline bool addToDiamond(Diamond * diam, 
 						const Bipyramid * pyra)
 {
+	if(isDiamondComplete(diam) )
+		return false;
+		
 	if(!diam->ta) {
 		diam->ta = pyra->ta;
 		diam->tb = pyra->tb;
@@ -124,11 +128,13 @@ inline void addToDiamond(Diamond * diam,
 		diam->iv2 = pyra->iv2;
 		diam->iv3 = pyra->iv3;
 		diam->iv4 = pyra->iv4;
+		return true;
 	}
-	else {
-		if(!matchDiamond(diam, pyra) ) 
-			return;
-			
+
+		if(!matchDiamond(diam, pyra) ) {
+			return false;
+		}
+					
 		if(tetrahedronHasVertex(pyra->ta, diam->iv0) > -1) {
 			diam->tc = pyra->ta;
 			diam->td = pyra->tb;
@@ -137,7 +143,52 @@ inline void addToDiamond(Diamond * diam,
 			diam->td = pyra->ta;
 			diam->tc = pyra->tb;
 		}
+		
+	return true;
+}
+
+inline void addToDiamonds(std::vector<Diamond *> & diams, 
+						const Bipyramid * pyra)
+{
+	int n = diams.size();
+	bool added = false;
+	for(int i=0;i<n;++i) {
+		if(addToDiamond(diams[i], pyra) ) {
+			added = true;
+			break;
+		}
 	}
+	
+	if(!added) {
+		Diamond * d = new Diamond;
+		resetDiamond(d);
+		addToDiamond(d, pyra);
+		diams.push_back(d);
+		
+	}
+}
+
+inline bool verifyDiamondGraph(const Diamond * diam)
+{
+	int v0 = diam->iv0;
+	int v1 = diam->iv1;
+	int v2 = diam->iv2;
+	int v3 = diam->iv3;
+	int v4 = diam->iv4;
+	int v5 = diam->iv5;
+	if(!canConnectTetrahedrons(diam->ta, diam->tb, v1, v2, v3) )
+		return false;
+		
+	if(!canConnectTetrahedrons(diam->tc, diam->td, v5, v3, v2) )
+		return false;
+		
+	if(!canConnectTetrahedrons(diam->ta, diam->tc, v0, v2, v3) )
+		return false;
+		
+	if(!canConnectTetrahedrons(diam->tb, diam->td, v4, v3, v2) )
+		return false;
+		
+	return true;
 }
 
 ///   b4        aft
@@ -156,6 +207,9 @@ inline void addToDiamond(Diamond * diam,
 /// 8 4 5 3     d   d
 inline void flipDiamond(Diamond * diam)
 {
+	if(!verifyDiamondGraph(diam) )
+		return;
+		
 	std::cout<<"\n [INFO] 4way flip "; printDiamondVertices(diam);
 	
 	int v0 = diam->iv0;
@@ -206,6 +260,26 @@ inline void flipDiamond(Diamond * diam)
 		connectTetrahedrons(nei8, diam->td);
 		
 	std::cout<<"\n edge ("<<v0<<", "<<v4<<") ";
+}
+
+inline void flipAllDiamonds(std::vector<Diamond *> & diams)
+{
+	std::vector<Diamond *>::iterator it = diams.begin();
+	for(;it!=diams.end();++it) {
+		if(isDiamondComplete(*it) ) {
+			flipDiamond(*it);
+			resetDiamond(*it);
+		}		
+	}
+}
+
+inline void clearAllDiamonds(std::vector<Diamond *> & diams)
+{
+	std::vector<Diamond *>::iterator it = diams.begin();
+	for(;it!=diams.end();++it) {
+		delete *it;		
+	}
+	diams.clear();
 }
 
 }

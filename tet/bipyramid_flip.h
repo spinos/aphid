@@ -540,7 +540,7 @@ inline bool checkCoplanar(const Bipyramid & pyra,
 	aphid::Vector3F antipex = X[pyra.iv4];
 	
 	const float lowVol = (tetrahedronVolume1(apex, a, b, c)
-						+ tetrahedronVolume1(antipex, c, b, a) ) * .03f;
+						+ tetrahedronVolume1(antipex, c, b, a) ) * .04f;
 	
 	float vol = tetrahedronVolume1(apex, a, b, antipex);
 	if(vol < lowVol) {
@@ -911,7 +911,7 @@ inline void flipAFace(IFace * f,
 						std::vector<IFace *> & boundary,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X,
-						Diamond * diam)
+						std::vector<Diamond *> & diams)
 {
 	//std::cout<<"\n flip ("
 	//		<<f->key.x<<", "<<f->key.y<<", "<<f->key.z<<") ";
@@ -925,7 +925,7 @@ inline void flipAFace(IFace * f,
 	
 	if(canSplitFlip1(pyra, X) ) {
 		if(checkCoplanar(pyra, X) )
-			addToDiamond(diam, &pyra);
+			addToDiamonds(diams, &pyra);
 		else
 			processSplitFlip1(pyra, tets, boundary);
 	}
@@ -940,21 +940,23 @@ inline void flipFaces(std::vector<IFace *> & faces,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X)
 {
-	Diamond diam;
-	resetDiamond(&diam);
+	std::vector<Diamond *> diams;
+	Diamond * d = new Diamond;
+	resetDiamond(d);
+	diams.push_back(d);
+	
 	
 	while(faces.size() >0) {
 		
-		flipAFace(faces[0], faces, tets, X, &diam);
+		flipAFace(faces[0], faces, tets, X, diams);
 		
 		delete faces[0];
 		faces.erase(faces.begin() );
 		
-		if(isDiamondComplete(&diam) ) {
-			flipDiamond(&diam);
-			resetDiamond(&diam);
-		}
+		flipAllDiamonds(diams);
 	}
+	
+	clearAllDiamonds(diams);
 }
 
 }
