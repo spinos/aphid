@@ -542,7 +542,7 @@ inline bool canSplitFlip1(const Bipyramid & pyra,
 		
 	TetSphere circ;
 	circumSphere(circ, apex, a, b, c );
-	if(antipex.distanceTo(circ.pc) >= circ.r )
+	if(antipex.distanceTo(circ.pc) >= circ.r)
 		return false;
 
 	return true;
@@ -587,7 +587,8 @@ inline bool checkCoplanar(const Bipyramid & pyra,
 
 /// flip edge by split bipyramid into three tetrahedrons
 inline bool processSplitFlip1(Bipyramid & pyra,
-							std::vector<ITetrahedron *> & tets)
+							std::vector<ITetrahedron *> & tets,
+							std::vector<IFace *> & boundary)
 {
 	std::cout<<"\n split flip"; printBipyramidVertices(&pyra);
 	
@@ -646,29 +647,36 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	connectTetrahedrons(pyra.ta, pyra.tc);
 	connectTetrahedrons(pyra.tc, pyra.tb);
 
+/// spawn 6 boundary faces
 	if(nei2) {
 		//std::cout<<"\n connect n2 a"; 
 		connectTetrahedrons(nei2, pyra.ta);
+		addFace(boundary, pyra.ta, nei2, v0, v2, v1);
 	}
 	if(nei4) {
 		//std::cout<<"\n connect n4 a";
 		connectTetrahedrons(nei4, pyra.ta);
+		addFace(boundary, pyra.ta, nei4, v1, v2, v4);
 	}
 	if(nei3) {
 		//std::cout<<"\n connect n3 b";
 		connectTetrahedrons(nei3, pyra.tb);
+		addFace(boundary, pyra.tb, nei3, v0, v3, v2);
 	}
 	if(nei5) {
 		//std::cout<<"\n connect n5 b";
 		connectTetrahedrons(nei5, pyra.tb);
+		addFace(boundary, pyra.tb, nei5, v3, v4, v2);
 	}
 	if(nei1) {
 		//std::cout<<"\n connect n1 c";
 		connectTetrahedrons(nei1, pyra.tc);
+		addFace(boundary, pyra.tc, nei1, v0, v1, v3);
 	}
 	if(nei6) {
 		//std::cout<<"\n connect n6 c";
 		connectTetrahedrons(nei6, pyra.tc);
+		addFace(boundary, pyra.tc, nei6, v1, v4, v3);
 	}
 	
 	std::cout<<"\n edge ("<<v0<<", "<<v4<<")";
@@ -736,8 +744,9 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 		if(!aphid::segmentIntersectTriangle(p3, p1, p2, p4, p0) )
 			return false;
 
-#if 0			
 /// empty principle
+#define CHECK_EMPTY_PRINC 1
+#if CHECK_EMPTY_PRINC
 		circumSphere(circ, p3, p2, p4, p0 );
 		if(p1.distanceTo(circ.pc) < circ.r )
 			return false;
@@ -755,7 +764,7 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 		if(!aphid::segmentIntersectTriangle(p1, p2, p3, p4, p0) )
 			return false;
 
-#if 0		
+#if CHECK_EMPTY_PRINC		
 		circumSphere(circ, p0, p1, p4, p3 );
 		if(p2.distanceTo(circ.pc) < circ.r )
 			return false;
@@ -773,7 +782,7 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 		if(!aphid::segmentIntersectTriangle(p2, p3, p1, p4, p0) )
 			return false;
 
-#if 0		
+#if CHECK_EMPTY_PRINC		
 		circumSphere(circ, p2, p1, p4, p0 );
 		if(p3.distanceTo(circ.pc) < circ.r )
 			return false;
@@ -790,18 +799,19 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 
 inline bool processMergeFlip1(Bipyramid & pyra,
 							std::vector<ITetrahedron *> & tets,
-							const int & side)
+							const int & side,
+							std::vector<IFace *> & boundary)
 {
 	std::cout<<"\n merge flip"; printBipyramidVertices(&pyra);
 	
 	ITetrahedron * ta = pyra.ta;
 	ITetrahedron * tb = pyra.tb;
 	
-	const int v0 = pyra.iv0;
-	const int v1 = pyra.iv1;
-	const int v2 = pyra.iv2;
-	const int v3 = pyra.iv3;
-	const int v4 = pyra.iv4;
+	int v0 = pyra.iv0;
+	int v1 = pyra.iv1;
+	int v2 = pyra.iv2;
+	int v3 = pyra.iv3;
+	int v4 = pyra.iv4;
 	
 	ITetrahedron * nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
 	ITetrahedron * nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
@@ -810,7 +820,6 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	ITetrahedron * nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
 	ITetrahedron * nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
 
-	//ITetrahedron * tc;
 	if(side == 1) pyra.tc = nei1;
 	else if(side == 2) pyra.tc = nei2;
 	else pyra.tc = nei3;
@@ -826,6 +835,9 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 		
 		setTetrahedronVertices(*ta, v1, v2, v0, v4);
 		setTetrahedronVertices(*pyra.tc, v3, v4, v0, v2);
+		
+		resetTetrahedronNeighbors(*ta);
+		resetTetrahedronNeighbors(*pyra.tc);
 
 		connectTetrahedrons(ta, nei2);
 		connectTetrahedrons(ta, nei4);
@@ -839,6 +851,9 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 		setTetrahedronVertices(*ta, v2, v3, v0, v4);
 		setTetrahedronVertices(*pyra.tc, v1, v4, v0, v3);
 		
+		resetTetrahedronNeighbors(*ta);
+		resetTetrahedronNeighbors(*pyra.tc);
+		
 		connectTetrahedrons(ta, nei3);
 		connectTetrahedrons(ta, nei5);
 		connectTetrahedrons(pyra.tc, nei1);
@@ -850,6 +865,9 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 		
 		setTetrahedronVertices(*ta, v3, v1, v0, v4);
 		setTetrahedronVertices(*pyra.tc, v2, v4, v0, v1);
+		
+		resetTetrahedronNeighbors(*ta);
+		resetTetrahedronNeighbors(*pyra.tc);
 		
 		connectTetrahedrons(ta, nei1);
 		connectTetrahedrons(ta, nei6);
@@ -877,17 +895,49 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
 	
 	createBipyramid1(pyra, pyra.ta, pyra.tc);
+
+
+/// spawn six boundary faces
+	v0 = pyra.iv0;
+	v1 = pyra.iv1;
+	v2 = pyra.iv2;
+	v3 = pyra.iv3;
+	v4 = pyra.iv4;
 	
+	nei1 = neighborOfTetrahedron(pyra.ta, v0, v1, v3);
+	nei2 = neighborOfTetrahedron(pyra.ta, v0, v2, v1);
+	nei3 = neighborOfTetrahedron(pyra.ta, v0, v3, v2);
+	nei4 = neighborOfTetrahedron(pyra.tb, v4, v1, v2);
+	nei5 = neighborOfTetrahedron(pyra.tb, v4, v2, v3);
+	nei6 = neighborOfTetrahedron(pyra.tb, v4, v3, v1);
+	
+	if(nei1)
+		addFace(boundary, pyra.ta, nei1, v0, v1, v3);
+	if(nei2)
+		addFace(boundary, pyra.ta, nei2, v0, v2, v1);
+	if(nei3)
+		addFace(boundary, pyra.ta, nei3, v0, v3, v2);
+	if(nei4)
+		addFace(boundary, pyra.tb, nei4, v4, v1, v2);
+	if(nei5)
+		addFace(boundary, pyra.tb, nei5, v4, v2, v3);
+	if(nei6)
+		addFace(boundary, pyra.tb, nei6, v4, v3, v1);
+		
 	return true;
 }
 
 inline void flipAFace(IFace * f,
+						std::vector<IFace *> & boundary,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X)
 {
-	if(!canFaceFlip(f) ) 
+	std::cout<<"\n flip ("
+			<<f->key.x<<", "<<f->key.y<<", "<<f->key.z<<") ";
+	
+	if(!canFaceFlip(f) )
 		return;
-		
+	
 	Bipyramid pyra;
 	if(!createBipyramid1(pyra, f->ta, f->tb) )
 		return;
@@ -897,10 +947,10 @@ inline void flipAFace(IFace * f,
 		if(checkCoplanar(pyra, X) )
 		{}
 		else
-			processSplitFlip1(pyra, tets);
+			processSplitFlip1(pyra, tets, boundary);
 	}
 	else if(canMergeFlip1(imerg, pyra, X) ) {
-		processMergeFlip1(pyra, tets, imerg);
+		processMergeFlip1(pyra, tets, imerg, boundary);
 	}
 }
 
@@ -910,7 +960,7 @@ inline void flipFaces(std::vector<IFace *> & faces,
 {
 	while(faces.size() >0) {
 		
-		flipAFace(faces[0], tets, X);
+		flipAFace(faces[0], faces, tets, X);
 		
 		delete faces[0];
 		faces.erase(faces.begin() );

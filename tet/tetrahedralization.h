@@ -302,7 +302,6 @@ inline void splitTwoWay(ITetrahedron * t,
 	setTetrahedronVertices(*tb, vx, fb.p1, fb.p2, fb.p3);
 	tb->index = tets.size();
 	
-	
 	if(nb) {
 		connectTetrahedrons(tb, nb, fb.p1, fb.p2, fb.p3);
 	}
@@ -311,8 +310,11 @@ inline void splitTwoWay(ITetrahedron * t,
 	
 	tets.push_back(tb);
 	
+/// shared face only
 	addTetrahedronFaces(t, faces);
 	addTetrahedronFaces(tb, faces);
+/// todo face with neighbors
+
 }
 
 /// split on edge, find all connected tetra, split each into two
@@ -342,7 +344,6 @@ inline void splitTetrahedronEdge(std::vector<ITetrahedron *> & tets,
 	
 	std::vector<IFace *> boundary;
 	getBoundary(boundary, faces);
-	std::cout<<"\n n bound "<<boundary.size();
 	
 	flipFaces(boundary, tets, X);
 	

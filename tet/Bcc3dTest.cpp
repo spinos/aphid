@@ -133,14 +133,13 @@ void Bcc3dTest::createGrid()
 	i = m_N - ADDON;
 	
 	m_X[i].set(3.2f, 3.2f, 3.2f); // edge
-	m_X[i+1].set(2.f, 2.f, 6.f); // edge
+	m_X[i+1].set(3.f, 3.f, 5.f); // edge
 	m_X[i+2].set(2.f, 6.f, 6.f); // edge
-	m_X[i+3].set(3.f, 5.f, 3.f); // edge
-	
+	m_X[i+3].set(3.f, 5.f, 3.f); // edge 4
 	m_X[i+4].set(5.2f, 5.2f, .9f); // face
-	m_X[i+5].set(6.f, 6.f, 3.3f); // face
+	m_X[i+5].set(6.f, 6.f, 3.3f); // face 6
 	
-	m_X[i+6].set(8.91f, 6.2f, 3.3f);
+	m_X[i+6].set(8.91f, 6.2f, 3.3f); // inside
 	m_X[i+7].set(10.f, 6.f, 2.f);
 	
 	m_X[i+8].set(6.f, 2.f, 6.f);
@@ -150,8 +149,9 @@ void Bcc3dTest::createGrid()
 	
 	m_X[i+12].set(14.71f, 4.74f, 5.93f);
 	
+#define ENDN 4
 	i = m_N - ADDON + 0;
-	for(;i<m_N - ADDON+1;++i) {
+	for(;i<m_N - ADDON+ENDN;++i) {
 		addPoint(i);
 		checkTetrahedronConnections(m_tets);
 	}
