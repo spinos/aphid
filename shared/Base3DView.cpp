@@ -142,7 +142,7 @@ void Base3DView::paintGL()
 	
 	getDrawer()->m_markerProfile.apply();
 	getDrawer()->coordsys(20.f);
-	getDrawer()->setAlignDir(getCamera()->eyeDirection());
+	getDrawer()->setAlignDir(getCamera()->eyeDirection() );
 	clientDraw();
 	if(m_isFocused) {
 		Vector3F corners[4];

@@ -40,7 +40,9 @@ int LineDrawer::DigitM[9] = {
 0
 };
 
-LineDrawer::LineDrawer() {}
+LineDrawer::LineDrawer() 
+{ m_alignDir = Vector3F::ZAxis; }
+
 LineDrawer::~LineDrawer() {}
 
 void LineDrawer::drawLineBuffer(LineBuffer * line) const
@@ -186,8 +188,12 @@ void LineDrawer::smoothCurve(const BezierSpline & sp, short deg) const
 void LineDrawer::drawNumber(int x, const Vector3F & p, float scale) const
 {
 	glPushMatrix();
-	glTranslatef(p.x, p.y, p.z);
-	glScalef(scale, scale, scale);
+	
+	Matrix44F mat;
+    mat.setTranslation(p);
+    mat.setFrontOrientation(alignDir() );
+	mat.scaleBy(scale);
+	useSpace(mat);
 	
 	if(x == 0) {
 		drawDigit(0);
@@ -219,6 +225,11 @@ void LineDrawer::drawDigit(int d) const
 	glEnd();
 }
 
+void LineDrawer::setAlignDir(const Vector3F & v)
+{ m_alignDir = v; }
+
+const Vector3F & LineDrawer::alignDir() const
+{ return m_alignDir; }
 /*
 void LineDrawer::frustum(const Frustum * f)
 {	

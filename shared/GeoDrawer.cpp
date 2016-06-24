@@ -37,7 +37,6 @@ GeoDrawer::GeoDrawer()
 	m_circle = new CircleCurve;
 	m_cube = new CubeMesh;
 	m_disc = new DiscMesh;
-	m_alignDir = Vector3F::ZAxis;
 	m_boxVBuf = new Vector3F[8];
 }
 
@@ -247,7 +246,7 @@ void GeoDrawer::alignedCircle(const Vector3F & pos, float radius) const
 	glPushMatrix();
     Matrix44F mat;
     mat.setTranslation(pos);
-    mat.setFrontOrientation(m_alignDir);
+    mat.setFrontOrientation(alignDir() );
 	mat.scaleBy(radius);
 	useSpace(mat);
 	linearCurve(*m_circle);
@@ -259,7 +258,7 @@ void GeoDrawer::alignedDisc(const Vector3F & pos, float radius) const
 	glPushMatrix();
     Matrix44F mat;
     mat.setTranslation(pos);
-    mat.setFrontOrientation(m_alignDir);
+    mat.setFrontOrientation(alignDir() );
 	mat.scaleBy(radius);
 	useSpace(mat);
 	drawMesh(m_disc);
@@ -737,9 +736,6 @@ void GeoDrawer::geometryArray(GeometryArray * arr) const
 	for(;i<arr->numGeometries(); i++)
 		geometry(arr->geometry(i));
 }
-
-void GeoDrawer::setAlignDir(const Vector3F & v)
-{ m_alignDir = v; }
 
 /*
 void GeoDrawer::pointCloud(APointCloud * cloud) const

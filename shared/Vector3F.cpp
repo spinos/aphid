@@ -230,9 +230,9 @@ void Vector3F::rotateAroundAxis(const Vector3F& axis, float theta)
 
 Vector3F Vector3F::perpendicular() const
 {
-	Vector3F ref(0,1,0);
+	Vector3F ref(0,-1,0);
 	Vector3F n = normal();
-	if(n.y < -0.9f || n.y > 0.9f) ref = Vector3F(1,0,0);
+	if(n.y < -0.9f || n.y > 0.9f) ref = Vector3F(-1,0,0);
 	Vector3F per = cross(ref);
 	per.normalize();
 	return per;

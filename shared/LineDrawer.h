@@ -19,6 +19,9 @@ class BaseCurve;
 struct BezierSpline;
 class BezierCurve;
 class LineDrawer : public BaseDrawer {
+
+	Vector3F m_alignDir;
+	
 public:
 	LineDrawer();
 	virtual ~LineDrawer();
@@ -32,6 +35,10 @@ public:
 	void smoothCurve(const BezierSpline & sp, short deg) const;
 	void drawNumber(int x, const Vector3F & p, float scale = 1.f) const;
 	void drawDigit(int d) const;
+	void setAlignDir(const Vector3F & v);
+	
+protected:
+	const Vector3F & alignDir() const;
 	// void frustum(const Frustum * f);
 private:
 	static float DigitLineP[10][8][2];

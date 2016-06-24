@@ -82,7 +82,6 @@ public:
 	void geometry(Geometry * geo) const;
 	void geometryArray(GeometryArray * arr) const;
 	
-	void setAlignDir(const Vector3F & v);
 	void alignedDisc(const Vector3F & pos, float radius) const;
 	void alignedCircle(const Vector3F & pos, float radius) const;
 	
@@ -93,7 +92,6 @@ public:
 	void orientedBox(const AOrientedBox * ob);
 	
 private:
-	Vector3F m_alignDir;
 	GeodesicSphereMesh * m_sphere;
 	PyramidMesh * m_pyramid;
 	CubeMesh * m_cube;
