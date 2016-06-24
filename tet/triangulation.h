@@ -60,6 +60,30 @@ inline bool matchTriangles(const ITRIANGLE * a, const ITRIANGLE * b)
 	return true;
 }
 
+inline bool trianglesShareEdge(int & ea, int & eb,
+							const ITRIANGLE * a, const ITRIANGLE * b)
+{
+	ea = a->p1;
+	eb = a->p2;
+	if(containtsVertex(b, ea) > -1 
+		&& containtsVertex(b, eb) > -1 )
+			return true;
+			
+	ea = a->p2;
+	eb = a->p3;
+	if(containtsVertex(b, ea) > -1 
+		&& containtsVertex(b, eb) > -1 )
+			return true;
+			
+	ea = a->p3;
+	eb = a->p1;
+	if(containtsVertex(b, ea) > -1 
+		&& containtsVertex(b, eb) > -1 )
+			return true;
+			
+	return false;
+}
+
 inline int previousVertex(const ITRIANGLE * a, const int & i)
 {
 	if(i==0) return a->p3;

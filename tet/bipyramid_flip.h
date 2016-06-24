@@ -13,6 +13,7 @@
 #include <tetrahedron_math.h>
 #include "triangulation.h"
 #include "tetrahedron_graph.h"
+#include "diamond_flip.h"
 
 namespace ttg {
 								
@@ -20,26 +21,6 @@ typedef struct {
    aphid::Vector3F pc;
    float r;
 } TetSphere;
-								
-/// two or three tetrahedrons sharing same face (1, 2, 3)
-/// and six neighbors
-typedef struct {
-	ITetrahedron * ta;
-	ITetrahedron * tb;
-	ITetrahedron * tc;
-	int iv0, iv1, iv2, iv3, iv4;
-	
-} Bipyramid;
-
-inline void printBipyramidVertices(const Bipyramid * pyra)
-{
-	std::cout<<" bipyramid ("<<pyra->iv0<<", "
-		<<pyra->iv1<<", "<<pyra->iv2<<", "<<pyra->iv3<<", "
-		<<pyra->iv4<<") ";
-}
-
-inline void resetBipyramid(Bipyramid * pyra)
-{ pyra->tb = NULL; }
 
 inline void sideOfBipyramidConnection(int & a, int & b, int & c,
 							const Bipyramid & pyra,
@@ -929,7 +910,8 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 inline void flipAFace(IFace * f,
 						std::vector<IFace *> & boundary,
 						std::vector<ITetrahedron *> & tets,
-						const aphid::Vector3F * X)
+						const aphid::Vector3F * X,
+						Diamond * diam)
 {
 	//std::cout<<"\n flip ("
 	//		<<f->key.x<<", "<<f->key.y<<", "<<f->key.z<<") ";
@@ -943,8 +925,9 @@ inline void flipAFace(IFace * f,
 	
 	int imerg;
 	if(canSplitFlip1(pyra, X) ) {
-		if(checkCoplanar(pyra, X) )
-		{}
+		if(checkCoplanar(pyra, X) ) {
+			addToDiamond(diam, &pyra);
+		}
 		else
 			processSplitFlip1(pyra, tets, boundary);
 	}
@@ -957,12 +940,20 @@ inline void flipFaces(std::vector<IFace *> & faces,
 						std::vector<ITetrahedron *> & tets,
 						const aphid::Vector3F * X)
 {
+	Diamond diam;
+	resetDiamond(&diam);
+	
 	while(faces.size() >0) {
 		
-		flipAFace(faces[0], faces, tets, X);
+		flipAFace(faces[0], faces, tets, X, &diam);
 		
 		delete faces[0];
 		faces.erase(faces.begin() );
+		
+		if(isDiamondComplete(&diam) ) {
+			flipDiamond(&diam);
+			resetDiamond(&diam);
+		}
 	}
 }
 

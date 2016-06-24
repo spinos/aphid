@@ -22,6 +22,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h
+diamond_flip.h
 tetrahedralization.h
 SuperformulaControl.h
 Parameter.h

@@ -616,5 +616,25 @@ inline void addTetrahedronFace(ITetrahedron * t,
 		tri->tb = t;
 }
 
+/// two or three tetrahedrons sharing same face (1, 2, 3)
+/// and six neighbors
+typedef struct {
+	ITetrahedron * ta;
+	ITetrahedron * tb;
+	ITetrahedron * tc;
+	int iv0, iv1, iv2, iv3, iv4;
+	
+} Bipyramid;
+
+inline void resetBipyramid(Bipyramid * pyra)
+{ pyra->tb = NULL; }
+
+inline void printBipyramidVertices(const Bipyramid * pyra)
+{
+	std::cout<<" bipyramid ("<<pyra->iv0<<", "
+		<<pyra->iv1<<", "<<pyra->iv2<<", "<<pyra->iv3<<", "
+		<<pyra->iv4<<") ";
+}
+
 }
 #endif
