@@ -31,7 +31,6 @@ struct Disk {
 class SuperformulaPoisson : public SuperformulaTest {
 
 	PoissonSequence<Disk> m_bkg;
-	PoissonSequence<Disk> m_bkg1;
 	
 public:
 	SuperformulaPoisson();
@@ -44,10 +43,8 @@ protected:
 	virtual bool createSamples();
 	
 	PoissonSequence<Disk> * sampleGrid();
-	PoissonSequence<Disk> * supportGrid();
 	
 	void extractSamplePos(aphid::Vector3F * dst);
-	void extractSupportPos(aphid::Vector3F * dst);
 	
 private:
 	void fillBackgroud(PoissonSequence<Disk> * dst,

@@ -26,6 +26,8 @@ public:
 	bool reject(const T * cand);
 	bool rejectIn(aphid::sdb::Array<int, T > * cell, const T * cand);
 	
+	void getCellBoundingBox(aphid::BoundingBox * dst);
+	
 protected:
 
 private:
@@ -78,6 +80,20 @@ bool PoissonSequence<T>::rejectIn(aphid::sdb::Array<int, T > * cell, const T * c
 		cell->next();
 	}
 	return false;
+}
+
+template<typename T>
+void PoissonSequence<T>::getCellBoundingBox(aphid::BoundingBox * dst)
+{
+	aphid::sdb::Array<int, T > * cell = aphid::sdb::WorldGrid<aphid::sdb::Array<int, T >, T >::value();
+	dst->reset();
+	cell->begin();
+	while(!cell->end() ) {
+		
+		dst->expandBy(cell->value()->pos);
+			
+		cell->next();
+	}
 }
 
 }

@@ -18,7 +18,7 @@ class BccTetrahedralize : public SuperformulaPoisson {
 
 	BccTetraGrid m_grid;
 	std::vector<ITetrahedron *> m_tets;
-	int m_N, m_supportBegin, m_sampleBegin;
+	int m_N, m_sampleBegin;
 	float m_pntSz;
 	aphid::Vector3F * m_X;
 	

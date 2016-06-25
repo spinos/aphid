@@ -39,7 +39,7 @@ bool SuperformulaPoisson::createSamples()
 	float r = box.getLongestDistance() * .03125f;
 	std::cout<<"\n r "<<r;
 /// finest grid size
-	float gridSize = r * 2.f;
+	float gridSize = r * 4.f;
 	
 	m_bkg.clear();
 	m_bkg.setGridSize(gridSize);
@@ -79,14 +79,7 @@ bool SuperformulaPoisson::createSamples()
 	
 	std::cout<<"\n n accept "<<numAccept;
 	
-	std::cout<<"\n n bkg "<<m_bkg.size();
-	
-	m_bkg1.clear();
-	m_bkg1.setGridSize(gridSize * 2.f);
-	
-	fillBackgroud(&m_bkg1, &m_bkg, numAccept);
-	
-	std::cout<<"\n n bkg1 "<<m_bkg1.size();
+	std::cout<<"\n n grid "<<m_bkg.size();
 	
 	std::cout.flush();
 	return true;
@@ -156,18 +149,8 @@ void SuperformulaPoisson::draw(GeoDrawer * dr)
 	m_bkg.begin();
 	while(!m_bkg.end() ) {
 	
-		// dr->boundingBox(m_bkg.coordToGridBBox(m_bkg.key() ) );
+		dr->boundingBox(m_bkg.coordToGridBBox(m_bkg.key() ) );
 		m_bkg.next();
-	}
-	
-	dr->setColor(.125f, .117f, .43f);
-	m_bkg1.begin();
-	while(!m_bkg1.end() ) {
-	
-		// dr->boundingBox(m_bkg1.coordToGridBBox(m_bkg1.key() ) );
-		
-		drawSamplesIn(dr, m_bkg1.value() );
-		m_bkg1.next();
 	}
 	
 	SuperformulaTest::draw(dr);
@@ -189,14 +172,8 @@ void SuperformulaPoisson::drawSamplesIn(GeoDrawer * dr,
 PoissonSequence<Disk> * SuperformulaPoisson::sampleGrid()
 { return &m_bkg; }
 
-PoissonSequence<Disk> * SuperformulaPoisson::supportGrid()
-{ return &m_bkg1; }
-
 void SuperformulaPoisson::extractSamplePos(aphid::Vector3F * dst)
 { extractPos(dst, &m_bkg); }
-
-void SuperformulaPoisson::extractSupportPos(aphid::Vector3F * dst)
-{ extractPos(dst, &m_bkg1); }
 
 void SuperformulaPoisson::extractPos(aphid::Vector3F * dst, PoissonSequence<Disk> * grid)
 {

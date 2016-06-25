@@ -156,7 +156,10 @@ void Bcc3dTest::createGrid()
 	i = m_N - ADDON + 0;
 	for(;i<m_N - ADDON+ENDN;++i) {
 		addPoint(i);
-		checkTetrahedronConnections(m_tets);
+		if(!checkTetrahedronConnections(m_tets) ) {
+			std::cout<<"\n [WARNING] break at v"<<i;
+			break;
+		}
 	}
 	
 	std::cout<<"\n n tet "<<m_tets.size();
