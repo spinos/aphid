@@ -10,18 +10,13 @@
 #ifndef TTG_BCC_3D_H
 #define TTG_BCC_3D_H
 #include "Scene.h"
-#include "BccTetraGrid.h"
-
-struct Float4;
+#include "TetrahedralMesher.h"
 
 namespace ttg {
 
 class Bcc3dTest : public Scene {
 
-	BccTetraGrid m_grid;
-	aphid::Vector3F * m_X;
-	int m_N;
-	std::vector<ITetrahedron *> m_tets;
+	TetrahedralMesher m_mesher;
 	
 public:
 	Bcc3dTest();
@@ -35,8 +30,6 @@ public:
 	
 private:
 	void createGrid();
-	bool addPoint(const int & vi);
-	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
 	
 };
 

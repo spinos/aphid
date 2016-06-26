@@ -10,17 +10,15 @@
 #ifndef TTG_BCC_TETRAHEDRALIZE_H
 #define TTG_BCC_TETRAHEDRALIZE_H
 #include "SuperformulaPoisson.h"
-#include "BccTetraGrid.h"
+#include "TetrahedralMesher.h"
 
 namespace ttg {
 
 class BccTetrahedralize : public SuperformulaPoisson {
 
-	BccTetraGrid m_grid;
-	std::vector<ITetrahedron *> m_tets;
-	int m_N, m_sampleBegin;
+	TetrahedralMesher m_mesher;
+	int m_sampleBegin;
 	float m_pntSz;
-	aphid::Vector3F * m_X;
 	
 public:
 	BccTetrahedralize();

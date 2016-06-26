@@ -32,6 +32,7 @@ Hilbert3D.h
 Delaunay2D.h
 BccTetraGrid.h
 Bcc3dTest.h
+TetrahedralMesher.h
 SuperformulaTest.h
 PoissonSequence.h
 SuperformulaPoisson.h
@@ -49,6 +50,7 @@ Delaunay2D.cpp
 Delaunay3D.cpp
 Hilbert3D.cpp
 BccTetraGrid.cpp
+TetrahedralMesher.cpp
 Bcc3dTest.cpp
 SuperformulaTest.cpp
 SuperformulaPoisson.cpp

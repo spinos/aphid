@@ -622,7 +622,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	
 	resetTetrahedronNeighbors(*pyra.ta);
 	resetTetrahedronNeighbors(*pyra.tb);
-	resetTetrahedronNeighbors(*tc);
+	resetTetrahedronNeighbors(*pyra.tc);
 
 	connectTetrahedrons(pyra.ta, pyra.tb);
 	connectTetrahedrons(pyra.ta, pyra.tc);

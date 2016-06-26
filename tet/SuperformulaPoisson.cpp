@@ -35,10 +35,11 @@ bool SuperformulaPoisson::createSamples()
 		}
 	}
 
-/// 1 / 32 of size of the boundary
-	float r = box.getLongestDistance() * .03125f;
+#define RFACTOR .111111f /// 1 / 9
+//#define RFACTOR .0625f /// 1 / 16
+//#define RFACTOR .03125f /// 1 / 32
+	float r = box.getLongestDistance() * RFACTOR;
 	std::cout<<"\n r "<<r;
-/// finest grid size
 	float gridSize = r * 4.f;
 	
 	m_bkg.clear();
@@ -74,12 +75,15 @@ bool SuperformulaPoisson::createSamples()
 		}
 		if(numAccept >= 4000) break;
 	}
+	m_bkg.calculateBBox();
 	
 	setNDraw(numAccept);
 	
 	std::cout<<"\n n accept "<<numAccept;
 	
-	std::cout<<"\n n grid "<<m_bkg.size();
+	std::cout<<"\n sample grid size "<<m_bkg.gridSize()
+		<<"\n n cell "<<m_bkg.size()
+		<<"\n bbx "<<m_bkg.boundingBox();
 	
 	std::cout.flush();
 	return true;
