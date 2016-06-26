@@ -82,12 +82,16 @@ int TetrahedralMesher::build()
 	return m_tets.size();
 }
 
-bool TetrahedralMesher::addPoint(const int & vi)
+bool TetrahedralMesher::addPoint(const int & vi,
+								bool & topologyChanged)
 {
 	Float4 coord;
 	ITetrahedron * t = searchTet(m_X[vi], &coord);
 	if(!t ) return false;
-	splitTetrahedron(m_tets, t, vi, coord, m_X);
+	
+	const float threshold = m_grid.gridSize() * .249f;
+	
+	topologyChanged = splitTetrahedron(m_tets, t, vi, coord, m_X, threshold);
 	
 	return true;
 }

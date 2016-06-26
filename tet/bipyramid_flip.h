@@ -804,7 +804,7 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	if(side == 1) pyra.tc = nei1;
 	else if(side == 2) pyra.tc = nei2;
 	else pyra.tc = nei3;
-	//std::cout<<" and"; printTetrahedronVertices(pyra.tc);
+	std::cout<<" and"; printTetrahedronVertices(pyra.tc);
 	
 /// connection to c	
 	ITetrahedron * neica;

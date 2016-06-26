@@ -33,7 +33,7 @@ public:
 	int numNodes();
 	void setN(const int & x);
 	int build();
-	bool addPoint(const int & vi);
+	bool addPoint(const int & vi, bool & topologyChanged);
 	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
 	bool checkConnectivity();
 	

@@ -9,6 +9,7 @@
 #ifndef TTG_TETRAHEDRALIZATION_H
 #define TTG_TETRAHEDRALIZATION_H
 
+#include <tetrahedron_math.h>
 #include "bipyramid_flip.h"
 
 namespace ttg {
@@ -377,12 +378,22 @@ inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,
 
 }
 
-inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
+inline bool splitTetrahedron(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
 							const Float4 & coord,
-							aphid::Vector3F * X)
+							aphid::Vector3F * X,
+							const float & snapThreshold)
 {
+#if 1
+	int closestV = tetrahedronVertex(t, aphid::highestCoordVec(coord) );
+	if(X[vi].distanceTo(X[closestV]) < snapThreshold ) {
+		std::cout<<"\n snap v"<<closestV<<" v"<<vi;
+		X[closestV] = X[vi];
+		
+		return false;
+	}
+#endif	
 	int stat = aphid::barycentricCoordinateStatus(coord);
 	if(stat == 0) {
 		splitTetrahedronInside(tets, t, vi, X);
@@ -393,9 +404,7 @@ inline void splitTetrahedron(std::vector<ITetrahedron *> & tets,
 	else if(stat == 2) {
 		splitTetrahedronEdge(tets, t, vi, coord, X);
 	}
-	else if(stat == 3) {
-		splitTetrahedron1(tets, t, vi);
-	}
+	return true;
 }
 
 }

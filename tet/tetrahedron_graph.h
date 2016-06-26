@@ -274,12 +274,11 @@ inline bool checkTetrahedronConnections(std::vector<ITetrahedron *> & tets)
 	for(;it!=tets.end();++it) {
 		if((*it)->index < 0) continue;
 		if(!checkTetrahedronConnections(*it) ) {
-			std::cout<<"\n [WARNNING] failed connectivity check";
+			std::cout<<"\n [WARNING] failed connectivity check";
 			printTetrahedronVertices(*it);
 			return false;
 		}
 	}
-	std::cout<<"\n passed ";
 	return true;
 }
 
@@ -289,6 +288,14 @@ inline ITetrahedron * tetrahedronNeighbor(const ITetrahedron * a, const int & i)
     if(i==1) return a->nei1;
     if(i==2) return a->nei2;
     return a->nei3;
+}
+
+inline int tetrahedronVertex(const ITetrahedron * a, const int & i)
+{
+	if(i==0) return a->iv0;
+    if(i==1) return a->iv1;
+    if(i==2) return a->iv2;
+    return a->iv3;
 }
 
 inline void printTetrahedronHasNoFace(const ITetrahedron * a, const ITRIANGLE * f)

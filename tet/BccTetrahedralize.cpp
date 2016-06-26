@@ -76,15 +76,19 @@ bool BccTetrahedralize::createSamples()
 	
 	std::cout<<"\n n tet b4 delauney "<<m_mesher.build();
 	
+	bool topoChanged;
 	int i = m_sampleBegin;
 	for(; i<Nv;++i) {
-		if(!m_mesher.addPoint(i) ) {
+		if(!m_mesher.addPoint(i, topoChanged) ) {
 			std::cout<<"\n [WARNING] add pnt break at v"<<i;
 			break;
 		}
-		if(!m_mesher.checkConnectivity() ) {
+		if(topoChanged) {
+			if(!m_mesher.checkConnectivity() ) {
 			std::cout<<"\n [WARNING] check conn break at v"<<i;
 			break;
+			}
+			std::cout<<"\n [INFO] passed topology check";
 		}
 	}
 	
@@ -130,14 +134,13 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	
 	dr->setColor(0.f, 0.f, 0.f);
 	float nmbSz = m_pntSz * 2.f;
-	dr->drawNumber(292, X[292], nmbSz);
-	dr->drawNumber(44, X[44], nmbSz);
-	dr->drawNumber(289, X[289], nmbSz);
-	dr->drawNumber(290, X[290], nmbSz);
-	dr->drawNumber(39, X[39], nmbSz);
-	dr->drawNumber(44, X[44], nmbSz);
-	dr->drawNumber(43, X[43], nmbSz);
-	dr->drawNumber(37, X[37], nmbSz);
+	dr->drawNumber(258, X[258], nmbSz);
+	dr->drawNumber(589, X[589], nmbSz);
+	dr->drawNumber(276, X[276], nmbSz);
+	dr->drawNumber(258, X[258], nmbSz);
+	dr->drawNumber(260, X[260], nmbSz);
+	dr->drawNumber(547, X[547], nmbSz);
+	dr->drawNumber(373, X[373], nmbSz);
 	
 	//dr->m_wireProfile.apply(); // slow
 	dr->setColor(0.2f, 0.2f, 0.49f);

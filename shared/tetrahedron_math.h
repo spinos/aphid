@@ -19,6 +19,26 @@ namespace aphid {
 inline void printBarycentricCoordinate4(const Float4 & coord)
 { std::cout<<"\n coord "<<coord.x<<", "<<coord.y<<", "<<coord.z<<", "<<coord.w; }
 
+
+/// highest coord
+inline int highestCoordVec(const Float4 & coord)
+{
+	int r = 0;
+	float mx = coord.x;
+	if(coord.y > mx) {
+		mx = coord.y;
+		r = 1;
+	}
+	if(coord.z > mx) {
+		mx = coord.z;
+		r = 2;
+	}
+	if(coord.w > mx) {
+		r = 3;
+	}
+	return r;
+}
+
 /// 0 inside
 /// 1 on face
 /// 2 on edge

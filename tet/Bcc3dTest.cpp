@@ -146,16 +146,20 @@ void Bcc3dTest::createGrid()
 	X[i+14].set(12.1f, 5.791f, 5.335f);
 	X[i+15].set(11.1f, 4.8291f, 6.035f);
 	
+	bool topoChanged;
 #define ENDN 16
 	i = N - ADDON + 0;
 	for(;i<N - ADDON+ENDN;++i) {
-		if(!m_mesher.addPoint(i) ) {
+		if(!m_mesher.addPoint(i, topoChanged) ) {
 			std::cout<<"\n [WARNING] add pnt break at v"<<i;
 			break;
 		}
-		if(!m_mesher.checkConnectivity() ) {
+		if(topoChanged) {
+			if(!m_mesher.checkConnectivity() ) {
 			std::cout<<"\n [WARNING] check conn break at v"<<i;
 			break;
+			}
+			std::cout<<"\n passed topology check";
 		}
 	}
 	
