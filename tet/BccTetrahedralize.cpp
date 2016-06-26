@@ -128,6 +128,17 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	dr->cube(X[44], m_pntSz);
 	dr->cube(X[37], m_pntSz);
 	
+	dr->setColor(0.f, 0.f, 0.f);
+	float nmbSz = m_pntSz * 2.f;
+	dr->drawNumber(292, X[292], nmbSz);
+	dr->drawNumber(44, X[44], nmbSz);
+	dr->drawNumber(289, X[289], nmbSz);
+	dr->drawNumber(290, X[290], nmbSz);
+	dr->drawNumber(39, X[39], nmbSz);
+	dr->drawNumber(44, X[44], nmbSz);
+	dr->drawNumber(43, X[43], nmbSz);
+	dr->drawNumber(37, X[37], nmbSz);
+	
 	//dr->m_wireProfile.apply(); // slow
 	dr->setColor(0.2f, 0.2f, 0.49f);
 	

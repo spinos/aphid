@@ -130,6 +130,12 @@ inline bool addToDiamond(Diamond * diam,
 		diam->iv4 = pyra->iv4;
 		return true;
 	}
+	
+	if(pyra->ta == diam->ta
+		|| pyra->tb == diam->tb
+		|| pyra->ta == diam->tb
+		|| pyra->tb == diam->ta)
+			return false;
 
 		if(!matchDiamond(diam, pyra) ) {
 			return false;

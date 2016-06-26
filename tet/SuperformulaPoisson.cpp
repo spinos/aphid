@@ -40,7 +40,7 @@ bool SuperformulaPoisson::createSamples()
 //#define RFACTOR .03125f /// 1 / 32
 	float r = box.getLongestDistance() * RFACTOR;
 	std::cout<<"\n r "<<r;
-	float gridSize = r * 4.f;
+	float gridSize = r * 2.83f;
 	
 	m_bkg.clear();
 	m_bkg.setGridSize(gridSize);
