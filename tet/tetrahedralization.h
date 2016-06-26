@@ -378,20 +378,23 @@ inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,
 
 }
 
-inline bool splitTetrahedron(std::vector<ITetrahedron *> & tets,
+inline bool insertToTetrahedralMesh(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
 							const Float4 & coord,
 							aphid::Vector3F * X,
-							const float & snapThreshold)
+							const float & snapThreshold,
+							int * prop)
 {
 #if 1
 	int closestV = tetrahedronVertex(t, aphid::highestCoordVec(coord) );
+	if(prop[closestV] < 0) {
 	if(X[vi].distanceTo(X[closestV]) < snapThreshold ) {
 		std::cout<<"\n snap v"<<closestV<<" v"<<vi;
 		X[closestV] = X[vi];
-		
+		prop[closestV] = 1;
 		return false;
+	}
 	}
 #endif	
 	int stat = aphid::barycentricCoordinateStatus(coord);
@@ -404,6 +407,7 @@ inline bool splitTetrahedron(std::vector<ITetrahedron *> & tets,
 	else if(stat == 2) {
 		splitTetrahedronEdge(tets, t, vi, coord, X);
 	}
+	prop[vi] = 1;
 	return true;
 }
 

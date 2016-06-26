@@ -52,39 +52,40 @@ void Bcc3dTest::draw(GeoDrawer * dr)
 		dr->drawNumber(i, X[i], .5f);
 	}
 	
-	dr->m_wireProfile.apply();
-	dr->setColor(0.2f, 0.2f, 0.49f);
-	
-	glBegin(GL_TRIANGLES);
 	Vector3F a, b, c, d;
 	
+	sdb::Array<sdb::Coord3, IFace > * fronts = m_mesher.frontFaces();
+	dr->setColor(0.f, 0.49f, 0.2f);
+	
+	glBegin(GL_TRIANGLES);
+	fronts->begin();
+	while(!fronts->end() ) {
+		a = X[fronts->key().x];
+		b = X[fronts->key().y];
+		c = X[fronts->key().z];
+		
+		glVertex3fv((const float *)&a);
+		glVertex3fv((const float *)&b);
+		glVertex3fv((const float *)&c);
+		
+		fronts->next();
+	}
+	glEnd();
+	
+	dr->setColor(0.2f, 0.2f, 0.49f);
+	
 	for(i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.tetrahedron(i);
-		if(t->index < 0) continue;
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 2);
+		if(!t) continue;
 		
 		a = X[t->iv0];
 		b = X[t->iv1];
 		c = X[t->iv2];
 		d = X[t->iv3];
 		
-		glVertex3fv((const GLfloat *)&b);
-		glVertex3fv((const GLfloat *)&c);
-		glVertex3fv((const GLfloat *)&d);
-		
-		glVertex3fv((const GLfloat *)&a);
-		glVertex3fv((const GLfloat *)&b);
-		glVertex3fv((const GLfloat *)&d);
-		
-		glVertex3fv((const GLfloat *)&a);
-		glVertex3fv((const GLfloat *)&c);
-		glVertex3fv((const GLfloat *)&b);
-		
-		glVertex3fv((const GLfloat *)&a);
-		glVertex3fv((const GLfloat *)&d);
-		glVertex3fv((const GLfloat *)&c);
+		dr->tetrahedronWire(a, b, c, d);
 	}
 	
-	glEnd();
 }
 
 void Bcc3dTest::createGrid()
@@ -135,7 +136,7 @@ void Bcc3dTest::createGrid()
 	
 	X[i+6].set(5.11f, 5.94f, 6.2f); // inside
 	X[i+7].set(7.11f, 6.f, 2.f); // inside 8
-	X[i+8].set(10.f, 6.17f, 4.93f);
+	X[i+8].set(9.f, 6.17f, 4.33f);
 	
 	X[i+9].set(3.53f, 5.67f, 5.63f);
 	X[i+10].set(8.01f, 6.f, 6.f);
@@ -159,11 +160,12 @@ void Bcc3dTest::createGrid()
 			std::cout<<"\n [WARNING] check conn break at v"<<i;
 			break;
 			}
-			std::cout<<"\n passed topology check";
+			std::cout<<"\n [INFO] passed topology check";
 		}
 	}
 	
-	std::cout<<"\n n tet "<<m_mesher.numTetrahedrons();
+	std::cout<<"\n n tet "<<m_mesher.numTetrahedrons()
+		<<"\n n front face "<<m_mesher.buildFrontFaces();
 	std::cout.flush();
 	
 }

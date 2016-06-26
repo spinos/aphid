@@ -794,5 +794,31 @@ void GeoDrawer::orientedBox(const AOrientedBox * ob)
 	//coordsys(ob->orientation(), ob->center() );
 }
 
+void GeoDrawer::tetrahedronWire(const Vector3F & a,
+							const Vector3F & b,
+							const Vector3F & c,
+							const Vector3F & d) const
+{
+	glBegin(GL_LINES);
+	glVertex3fv((const GLfloat *)&a);
+	glVertex3fv((const GLfloat *)&b);
+	
+	glVertex3fv((const GLfloat *)&a);
+	glVertex3fv((const GLfloat *)&c);
+	
+	glVertex3fv((const GLfloat *)&a);
+	glVertex3fv((const GLfloat *)&d);
+	
+	glVertex3fv((const GLfloat *)&b);
+	glVertex3fv((const GLfloat *)&c);
+	
+	glVertex3fv((const GLfloat *)&c);
+	glVertex3fv((const GLfloat *)&d);
+	
+	glVertex3fv((const GLfloat *)&d);
+	glVertex3fv((const GLfloat *)&b);
+	glEnd();
+}
+
 }
 //:~

@@ -90,6 +90,10 @@ public:
 	//void cartesianGrid(CartesianGrid * grid) const;
 	
 	void orientedBox(const AOrientedBox * ob);
+	void tetrahedronWire(const Vector3F & a,
+							const Vector3F & b,
+							const Vector3F & c,
+							const Vector3F & d) const;
 	
 private:
 	GeodesicSphereMesh * m_sphere;

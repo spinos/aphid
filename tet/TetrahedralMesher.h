@@ -19,8 +19,10 @@ class TetrahedralMesher {
 
 	BccTetraGrid m_grid;
 	aphid::Vector3F * m_X;
+	int * m_prop;
 	int m_N;
 	std::vector<ITetrahedron *> m_tets;
+	aphid::sdb::Array<aphid::sdb::Coord3, IFace > m_frontFaces;
 	
 public:
 	TetrahedralMesher();
@@ -40,13 +42,20 @@ public:
 	const int & N() const;
 	aphid::Vector3F * X();
 	const aphid::Vector3F * X() const;
+	const int * prop() const;
 	const ITetrahedron * tetrahedron(const int & vi) const;
+	const ITetrahedron * frontTetrahedron(const int & vi,
+									int nfront = 1) const;
 	int numTetrahedrons();
+	int buildFrontFaces();
+	aphid::sdb::Array<aphid::sdb::Coord3, IFace > * frontFaces();
 	
 protected:
 
 private:
-
+	int countFrontVetices(const ITetrahedron * t) const;
+	void addFrontFaces(const ITetrahedron * t);
+	
 };
 
 }

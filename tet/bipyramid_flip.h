@@ -540,7 +540,7 @@ inline bool checkCoplanar(const Bipyramid & pyra,
 	aphid::Vector3F antipex = X[pyra.iv4];
 	
 	const float lowVol = (tetrahedronVolume1(apex, a, b, c)
-						+ tetrahedronVolume1(antipex, c, b, a) ) * .04f;
+						+ tetrahedronVolume1(antipex, c, b, a) ) * .03f;
 	
 	float vol = tetrahedronVolume1(apex, a, b, antipex);
 	if(vol < lowVol) {

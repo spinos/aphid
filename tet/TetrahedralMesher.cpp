@@ -9,6 +9,7 @@
 
 #include "TetrahedralMesher.h"
 #include <iostream>
+#include "tetrahedron_graph.h"
 #include "tetrahedralization.h"
 
 using namespace aphid;
@@ -16,7 +17,8 @@ using namespace aphid;
 namespace ttg {
 
 TetrahedralMesher::TetrahedralMesher() :
-m_X(NULL) 
+m_X(NULL),
+m_prop(NULL)
 {}
 
 TetrahedralMesher::~TetrahedralMesher() 
@@ -26,11 +28,13 @@ void TetrahedralMesher::clear()
 {
 	m_grid.clear();
 	if(m_X) delete[] m_X;
+	if(m_prop) delete[] m_prop;
 	std::vector<ITetrahedron *>::iterator it = m_tets.begin();
 	for(;it!=m_tets.end();++it) {
 		delete *it;
 	}
 	m_tets.clear();
+	m_frontFaces.clear();
 }
 
 void TetrahedralMesher::setH(const float & x)
@@ -64,6 +68,9 @@ void TetrahedralMesher::setN(const int & x)
 {
 	m_N = x;
 	m_X = new Vector3F[x];
+	m_prop = new int[x];
+	for(int i=0; i<x; ++i)
+		m_prop[i] = -1;
 }
 
 const int & TetrahedralMesher::N() const
@@ -74,6 +81,9 @@ Vector3F * TetrahedralMesher::X()
 
 const Vector3F * TetrahedralMesher::X() const
 { return m_X; }
+
+const int * TetrahedralMesher::prop() const
+{ return m_prop; }
 
 int TetrahedralMesher::build()
 {
@@ -91,7 +101,8 @@ bool TetrahedralMesher::addPoint(const int & vi,
 	
 	const float threshold = m_grid.gridSize() * .249f;
 	
-	topologyChanged = splitTetrahedron(m_tets, t, vi, coord, m_X, threshold);
+	topologyChanged = insertToTetrahedralMesh(m_tets, t, vi, coord, m_X, threshold,
+						m_prop);
 	
 	return true;
 }
@@ -119,6 +130,68 @@ int TetrahedralMesher::numTetrahedrons()
 { return m_tets.size(); }
 
 const ITetrahedron * TetrahedralMesher::tetrahedron(const int & vi) const
-{ return m_tets[vi]; }
+{
+	const ITetrahedron * t = m_tets[vi];
+	if(t->index < 0) return NULL;
+	return t; 
+}
+
+const ITetrahedron * TetrahedralMesher::frontTetrahedron(const int & vi,
+									int nfront) const
+{
+	const ITetrahedron * t = tetrahedron(vi);
+	if(!t) return t;
+	
+	if(countFrontVetices(t) > nfront )
+		return t;
+		
+	return NULL;
+}
+
+int TetrahedralMesher::countFrontVetices(const ITetrahedron * t) const
+{
+	int r = 0;
+	if(m_prop[t->iv0] > -1) r++;
+	if(m_prop[t->iv1] > -1) r++;
+	if(m_prop[t->iv2] > -1) r++;
+	if(m_prop[t->iv3] > -1) r++;
+	return r;
+}
+
+void TetrahedralMesher::addFrontFaces(const ITetrahedron * t)
+{
+	ITRIANGLE trif;
+	int i=0;
+	for(;i<4;++i) {
+		faceOfTetrahedron(&trif, t, i);
+		if(m_prop[trif.p1] > 0
+			&& m_prop[trif.p2] > 0
+			&& m_prop[trif.p3] > 0) {
+				aphid::sdb::Coord3 itri = aphid::sdb::Coord3(trif.p1, trif.p2, trif.p3).ordered();
+				IFace * tri = m_frontFaces.find(itri );
+				if(!tri) {
+					tri = new IFace;
+					tri->key = itri;
+					
+					m_frontFaces.insert(itri, tri);
+				}
+			}
+	}
+}
+
+int TetrahedralMesher::buildFrontFaces()
+{
+	const int n = numTetrahedrons();
+	int i = 0;
+	for(;i<n;++i) {
+		const ITetrahedron * t = frontTetrahedron(i);
+		if(!t) continue;
+		addFrontFaces(t);
+	}
+	return m_frontFaces.size();
+}
+
+sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
+{ return &m_frontFaces; }
 
 }

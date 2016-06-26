@@ -94,7 +94,8 @@ bool BccTetrahedralize::createSamples()
 	
 	std::cout<<"\n n samples "<<m_sampleBegin
 		<<"\n n total node "<<Nv
-		<<"\n n tet "<<m_mesher.numTetrahedrons();
+		<<"\n n tet "<<m_mesher.numTetrahedrons()
+		<<"\n n front face "<<m_mesher.buildFrontFaces();
 	std::cout.flush();
 	return true;
 }
@@ -119,6 +120,26 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 		dr->cube(X[i], m_pntSz);
 	}
 	
+	Vector3F a, b, c, d;
+	sdb::Array<sdb::Coord3, IFace > * fronts = m_mesher.frontFaces();
+	dr->setColor(0.3f, 0.59f, 0.4f);
+	
+	glBegin(GL_TRIANGLES);
+	fronts->begin();
+	while(!fronts->end() ) {
+		a = X[fronts->key().x];
+		b = X[fronts->key().y];
+		c = X[fronts->key().z];
+		
+		glVertex3fv((const float *)&a);
+		glVertex3fv((const float *)&b);
+		glVertex3fv((const float *)&c);
+		
+		fronts->next();
+	}
+	glEnd();
+	
+#if 0
 	dr->setColor(1.f, 0.f, 0.f);
 	dr->cube(X[292], m_pntSz);
 	dr->setColor(1.f, 1.f, 0.f);
@@ -141,43 +162,23 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	dr->drawNumber(260, X[260], nmbSz);
 	dr->drawNumber(547, X[547], nmbSz);
 	dr->drawNumber(373, X[373], nmbSz);
+#endif
 	
 	//dr->m_wireProfile.apply(); // slow
 	dr->setColor(0.2f, 0.2f, 0.49f);
 	
-	glBegin(GL_LINES);
-	Vector3F a, b, c, d;
-	
 	for(i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.tetrahedron(i);
-		
-		if(t->index < 0) continue;
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i);
+		if(!t) continue;
 		
 		a = X[t->iv0];
 		b = X[t->iv1];
 		c = X[t->iv2];
 		d = X[t->iv3];
 		
-		glVertex3fv((const GLfloat *)&a);
-		glVertex3fv((const GLfloat *)&b);
-		
-		glVertex3fv((const GLfloat *)&a);
-		glVertex3fv((const GLfloat *)&c);
-		
-		glVertex3fv((const GLfloat *)&a);
-		glVertex3fv((const GLfloat *)&d);
-		
-		glVertex3fv((const GLfloat *)&b);
-		glVertex3fv((const GLfloat *)&c);
-		
-		glVertex3fv((const GLfloat *)&c);
-		glVertex3fv((const GLfloat *)&d);
-		
-		glVertex3fv((const GLfloat *)&d);
-		glVertex3fv((const GLfloat *)&b);
+		dr->tetrahedronWire(a, b, c, d);
 	}
 	
-	glEnd();
 }
 
 }
