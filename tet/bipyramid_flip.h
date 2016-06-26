@@ -470,8 +470,22 @@ inline void addFace(std::vector<IFace *> & faces,
 					ITetrahedron * tb,
 					const int & va, const int & vb, const int & vc)
 {
+	aphid::sdb::Coord3 k = aphid::sdb::Coord3(va, vb, vc).ordered();
+	std::vector<IFace *>::iterator it = faces.begin();
+	for(;it!=faces.end();++it) {
+		IFace * t = *it;
+		if(t->key == k) {
+			std::cout<<"\n [INFO] double key"<<k;
+			printTetrahedronVertices(t->ta);
+			printTetrahedronVertices(t->tb);
+			t->ta = ta;
+			t->tb = tb;
+			return;
+		}
+	}
+	
 	IFace * tri = new IFace;
-	tri->key = aphid::sdb::Coord3(va, vb, vc);
+	tri->key = k;
 	tri->ta = ta;
 	tri->tb = tb;
 	faces.push_back(tri);
@@ -628,11 +642,11 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	connectTetrahedrons(pyra.ta, pyra.tc);
 	connectTetrahedrons(pyra.tc, pyra.tb);
 
-/// spawn 6 boundary faces
+/// spawn 3 boundary faces on far side
 	if(nei2) {
 		//std::cout<<"\n connect n2 a"; 
 		connectTetrahedrons(nei2, pyra.ta);
-		addFace(boundary, pyra.ta, nei2, v0, v2, v1);
+		//addFace(boundary, pyra.ta, nei2, v0, v2, v1);
 	}
 	if(nei4) {
 		//std::cout<<"\n connect n4 a";
@@ -642,7 +656,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	if(nei3) {
 		//std::cout<<"\n connect n3 b";
 		connectTetrahedrons(nei3, pyra.tb);
-		addFace(boundary, pyra.tb, nei3, v0, v3, v2);
+		//addFace(boundary, pyra.tb, nei3, v0, v3, v2);
 	}
 	if(nei5) {
 		//std::cout<<"\n connect n5 b";
@@ -652,7 +666,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	if(nei1) {
 		//std::cout<<"\n connect n1 c";
 		connectTetrahedrons(nei1, pyra.tc);
-		addFace(boundary, pyra.tc, nei1, v0, v1, v3);
+		//addFace(boundary, pyra.tc, nei1, v0, v1, v3);
 	}
 	if(nei6) {
 		//std::cout<<"\n connect n6 c";
@@ -661,7 +675,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	}
 	
 	std::cout<<"\n edge ("<<v0<<", "<<v4<<")";
-/*
+
 	std::cout<<"\n aft "; printTetrahedronVertices(pyra.ta);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tb);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
@@ -669,7 +683,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
 	if(!checkTetrahedronConnections(pyra.tb) ) printTetrahedronNeighbors(pyra.tb);
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
-*/	
+	
 	return true;
 }
 
@@ -864,8 +878,8 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	// std::cout<<"\n remove "; printTetrahedronVertices(tb); 
 	pyra.tb->index = -1;
 	
-	//std::cout<<"\n aft "; printTetrahedronVertices(ta);
-	//std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
+	std::cout<<"\n aft "; printTetrahedronVertices(ta);
+	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
 	
 	if(!checkTetrahedronConnections(pyra.tc)) {
 		std::cout<<"\n [ERROR] wrong tetrahedron connections"; printTetrahedronVertices(pyra.tc);
@@ -874,7 +888,7 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	
 	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
-	
+/*	
 	createBipyramid1(pyra, pyra.ta, pyra.tc);
 
 /// spawn six boundary faces
@@ -903,7 +917,7 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 		addFace(boundary, pyra.tb, nei5, v4, v2, v3);
 	if(nei6)
 		addFace(boundary, pyra.tb, nei6, v4, v3, v1);
-		
+*/		
 	return true;
 }
 
