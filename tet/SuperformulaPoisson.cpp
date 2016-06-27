@@ -35,13 +35,14 @@ bool SuperformulaPoisson::createSamples()
 		}
 	}
 
-//#define RFACTOR .1f /// 1 / 10
-#define RFACTOR .0625f /// 1 / 16
+#define GFACTOR 1.99f
+#define RFACTOR .1f /// 1 / 10
+//#define RFACTOR .0625f /// 1 / 16
 //#define RFACTOR .05 /// 1 // 20
 //#define RFACTOR .03125f /// 1 / 32
 	float r = box.getLongestDistance() * RFACTOR;
 	std::cout<<"\n r "<<r;
-	float gridSize = r * 1.99f;
+	float gridSize = r * GFACTOR;
 	
 	m_bkg.clear();
 	m_bkg.setGridSize(gridSize);
@@ -199,6 +200,20 @@ void SuperformulaPoisson::extractPosIn(aphid::Vector3F * dst, int & count,
 		
 		Disk * v = cell->value();
 		dst[count++] = v->pos;
+		
+		cell->next();
+	}
+}
+
+void SuperformulaPoisson::extractSamplePosIn(std::vector<Vector3F> & dst,
+					sdb::Array<int, Disk > * cell)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		
+		Disk * v = cell->value();
+		
+		dst.push_back(v->pos);
 		
 		cell->next();
 	}

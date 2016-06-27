@@ -70,12 +70,26 @@ bool BccTetrahedralize::createSamples()
 	m_mesher.setN(m_sampleBegin + sampleGrid()->elementCount() );
 	
 	const int Nv = m_mesher.N();
-	
-	
+
 	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
 	
 	std::cout<<"\n n tet b4 delauney "<<m_mesher.build();
 	
+/// distort grid 
+	supg->begin();
+	while(!supg->end() ) {
+	
+		std::vector<Vector3F> smps;
+		extractSamplePosIn(smps, supg->value() );
+		
+		Vector3F center = supg->coordToCellCenter(supg->key() );
+		m_mesher.moveNodeInCell(center, smps);
+		
+		smps.clear();
+		
+		supg->next();
+	}
+#if 0		
 	bool topoChanged;
 	int i = m_sampleBegin;
 	for(; i<Nv;++i) {
@@ -91,7 +105,7 @@ bool BccTetrahedralize::createSamples()
 			std::cout<<"\n [INFO] passed topology check";
 		}
 	}
-	
+#endif	
 	std::cout<<"\n n samples "<<m_sampleBegin
 		<<"\n n total node "<<Nv
 		<<"\n n tet "<<m_mesher.numTetrahedrons()
@@ -168,7 +182,8 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	dr->setColor(0.2f, 0.2f, 0.49f);
 	
 	for(i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.frontTetrahedron(i);
+		//const ITetrahedron * t = m_mesher.frontTetrahedron(i);
+		const ITetrahedron * t = m_mesher.tetrahedron(i);
 		if(!t) continue;
 		
 		a = X[t->iv0];

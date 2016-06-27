@@ -344,6 +344,45 @@ void BccCell::getNodePosition(aphid::Vector3F * dest,
 	*dest = m_center + offset;
 }
 
+bool BccCell::moveNode(int & xi,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord,
+					const Vector3F & p,
+					int * moved) const
+{
+	int k = keyToCorner(p, m_center );
+	Vector3F offset;
+	neighborOffset(&offset, k);
+	Vector3F vp = m_center + offset * grid->gridSize() * .5f;
+	
+/// choose center of vertex
+	if(m_center.distanceTo(p) < vp.distanceTo(p) )
+		k = 15;
+	
+	if(moved[k])
+		return false;
+	
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord);
+		
+	if(k==15) {
+		
+		BccNode * node15 = cell->find(15);
+		xi = node15->index;
+	}
+	else {
+		return false;
+		BccNode * nodeK = cell->find(k);
+		if(!nodeK) {
+			nodeK = findCornerNodeInNeighbor(k,
+								grid,
+								cellCoord);
+		}
+		xi = nodeK->index;
+	}
+	moved[k] = 1;
+	return true;
+}
+
 BccTetraGrid::BccTetraGrid() 
 {}
 
@@ -453,6 +492,51 @@ void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)
 		faces.next();
 	}
 	faces.clear();
+}
+
+void BccTetraGrid::moveNodeIn(const aphid::Vector3F & cellCenter,
+					const Vector3F * pos, 
+					const int & n,
+					aphid::Vector3F * X,
+					int * prop)
+{
+/// each node can move once
+	int moved[16];
+	int i = 0;
+	for(;i<16;++i)
+		moved[i] = 0;
+		
+	BccCell cell(cellCenter );
+	
+	Vector3F closestP;
+	float minD = 1e8f;
+	float d;
+	for(i=0;i<n;++i) {
+		d = cellCenter.distanceTo(pos[i]);
+		if(d<minD) {
+			minD = d;
+			closestP = pos[i];
+		}
+	}
+	
+	int xi;
+#if 1
+	if(cell.moveNode(xi, this, gridCoord((const float *)&cellCenter ),
+					closestP,
+					moved) ) {
+		X[xi] = closestP;
+		prop[xi] = 1;
+	}
+#else
+	for(i=0;i<n;++i) {
+		if(cell.moveNode(xi, this, gridCoord((const float *)&cellCenter ),
+					pos[i],
+					moved) ) {
+			X[xi] = pos[i];
+			prop[xi] = 1;
+		}
+	}
+#endif
 }
 
 }

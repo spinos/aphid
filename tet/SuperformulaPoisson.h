@@ -45,6 +45,8 @@ protected:
 	PoissonSequence<Disk> * sampleGrid();
 	
 	void extractSamplePos(aphid::Vector3F * dst);
+	void extractSamplePosIn(std::vector<aphid::Vector3F> & dst,
+					aphid::sdb::Array<int, Disk > * cell);
 	
 private:
 	void fillBackgroud(PoissonSequence<Disk> * dst,

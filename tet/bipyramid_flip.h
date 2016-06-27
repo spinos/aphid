@@ -16,6 +16,8 @@
 #include "diamond_flip.h"
 
 namespace ttg {
+
+#define BIPYRA_DEEP_VERBOSE 0
 								
 typedef struct {
    aphid::Vector3F pc;
@@ -613,7 +615,9 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 							std::vector<ITetrahedron *> & tets,
 							std::vector<IFace *> & boundary)
 {
+#if BIPYRA_DEEP_VERBOSE
 	std::cout<<"\n split flip"; printBipyramidVertices(&pyra);
+#endif
 	
 /// vertices of bipyramid		
 	const int v0 = pyra.iv0;
@@ -701,9 +705,10 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 		connectTetrahedrons(nei6, pyra.tc);
 		addFace(boundary, pyra.tc, nei6, v1, v4, v3);
 	}
-/*	
+#if BIPYRA_DEEP_VERBOSE	
 	std::cout<<"\n edge ("<<v0<<", "<<v4<<")";
-
+#endif
+/*
 	std::cout<<"\n aft "; printTetrahedronVertices(pyra.ta);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tb);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
@@ -825,7 +830,9 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 							const int & side,
 							std::vector<IFace *> & boundary)
 {
+#if BIPYRA_DEEP_VERBOSE
 	std::cout<<"\n merge flip"; printBipyramidVertices(&pyra);
+#endif
 	
 	ITetrahedron * ta = pyra.ta;
 	ITetrahedron * tb = pyra.tb;
@@ -846,7 +853,9 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 	if(side == 1) pyra.tc = nei1;
 	else if(side == 2) pyra.tc = nei2;
 	else pyra.tc = nei3;
+#if BIPYRA_DEEP_VERBOSE
 	std::cout<<" and"; printTetrahedronVertices(pyra.tc);
+#endif
 	
 /// connection to c	
 	ITetrahedron * neica;
@@ -905,9 +914,11 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 /// remove tb
 	// std::cout<<"\n remove "; printTetrahedronVertices(tb); 
 	pyra.tb->index = -1;
-	
+
+#if BIPYRA_DEEP_VERBOSE	
 	std::cout<<"\n aft "; printTetrahedronVertices(ta);
 	std::cout<<"\n   + "; printTetrahedronVertices(pyra.tc);
+#endif
 	
 	if(!checkTetrahedronConnections(pyra.tc)) {
 		std::cout<<"\n [ERROR] wrong tetrahedron connections"; printTetrahedronVertices(pyra.tc);

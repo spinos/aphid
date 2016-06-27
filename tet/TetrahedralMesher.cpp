@@ -194,4 +194,21 @@ int TetrahedralMesher::buildFrontFaces()
 sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
 { return &m_frontFaces; }
 
+void TetrahedralMesher::moveNodeInCell(const Vector3F & c,
+						const std::vector<Vector3F> & pos)
+{
+	const int n = pos.size();
+	if(n < 1) return;
+	sdb::Array<int, BccNode> * cell = m_grid.findCell((const float *)&c );
+	if(!cell) 
+		return;
+		
+	Vector3F * locs = new Vector3F[n];
+	for(int i=0; i<n; ++i) {
+		locs[i] = pos[i];
+	}
+	m_grid.moveNodeIn(c, locs, n, m_X, m_prop);
+	delete[] locs;
+}
+
 }

@@ -61,6 +61,11 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					STriangleArray * faces) const;	
+	bool moveNode(int & xi,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & p,
+					int * moved) const;
 	const aphid::Vector3F * centerP() const;
 	
 private:
@@ -100,6 +105,11 @@ public:
 	int numNodes();
 	void getNodePositions(aphid::Vector3F * dest);
 	void buildTetrahedrons(std::vector<ITetrahedron *> & dest);
+	void moveNodeIn(const aphid::Vector3F & cellCenter,
+					const aphid::Vector3F * pos, 
+					const int & n,
+					aphid::Vector3F * X,
+					int * prop);
 	
 protected:
 
