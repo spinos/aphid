@@ -99,7 +99,7 @@ bool TetrahedralMesher::addPoint(const int & vi,
 	ITetrahedron * t = searchTet(m_X[vi], &coord);
 	if(!t ) return false;
 	
-	const float threshold = m_grid.gridSize() * .249f;
+	const float threshold = m_grid.gridSize() * .47f;
 	
 	topologyChanged = insertToTetrahedralMesh(m_tets, t, vi, coord, m_X, threshold,
 						m_prop);

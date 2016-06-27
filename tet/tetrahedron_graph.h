@@ -148,6 +148,24 @@ inline int oppositeVertex(const ITetrahedron * t,
 	return t->iv3;
 }
 
+inline bool sharedVertexTetrahedron(const ITetrahedron * a,
+									const ITetrahedron * b)
+{
+	if(tetrahedronHasVertex(a, b->iv0) ) 
+		return true;
+		
+	if(tetrahedronHasVertex(a, b->iv1) ) 
+		return true;
+		
+	if(tetrahedronHasVertex(a, b->iv2) ) 
+		return true;
+		
+	if(tetrahedronHasVertex(a, b->iv3) ) 
+		return true;
+		
+	return false;
+}
+
 inline bool findSharedFace(int & ia, int & jb,
 				const ITetrahedron * a, const ITetrahedron * b)
 {

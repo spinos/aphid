@@ -523,6 +523,33 @@ inline bool createBipyramid1(Bipyramid & pyra,
 	return true;
 }
 
+inline bool checkConvex(const Bipyramid & pyra, 
+							const aphid::Vector3F * X)
+{
+	aphid::Vector3F a = X[pyra.iv1];
+	aphid::Vector3F b = X[pyra.iv2];
+	aphid::Vector3F c = X[pyra.iv3];
+	aphid::Vector3F apex = X[pyra.iv0];
+	aphid::Vector3F antipex = X[pyra.iv4];
+	return aphid::segmentIntersectTriangle(apex, antipex, a, b, c);
+}
+
+inline bool checkEmptyPrinciple(const Bipyramid & pyra, 
+							const aphid::Vector3F * X)
+{
+	aphid::Vector3F a = X[pyra.iv1];
+	aphid::Vector3F b = X[pyra.iv2];
+	aphid::Vector3F c = X[pyra.iv3];
+	aphid::Vector3F apex = X[pyra.iv0];
+	aphid::Vector3F antipex = X[pyra.iv4];
+	TetSphere circ;
+	circumSphere(circ, apex, a, b, c );
+	if(antipex.distanceTo(circ.pc) >= circ.r)
+		return false;
+
+	return true;
+}
+
 inline bool canSplitFlip1(const Bipyramid & pyra, 
 							const aphid::Vector3F * X)
 {		
@@ -552,9 +579,10 @@ inline bool checkCoplanar(const Bipyramid & pyra,
 	aphid::Vector3F c = X[pyra.iv3];
 	aphid::Vector3F apex = X[pyra.iv0];
 	aphid::Vector3F antipex = X[pyra.iv4];
-	
+
+#define VOL_FAC .01f	
 	const float lowVol = (tetrahedronVolume1(apex, a, b, c)
-						+ tetrahedronVolume1(antipex, c, b, a) ) * .03f;
+						+ tetrahedronVolume1(antipex, c, b, a) ) * VOL_FAC;
 	
 	float vol = tetrahedronVolume1(apex, a, b, antipex);
 	if(vol < lowVol) {
@@ -673,7 +701,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 		connectTetrahedrons(nei6, pyra.tc);
 		addFace(boundary, pyra.tc, nei6, v1, v4, v3);
 	}
-	
+/*	
 	std::cout<<"\n edge ("<<v0<<", "<<v4<<")";
 
 	std::cout<<"\n aft "; printTetrahedronVertices(pyra.ta);
@@ -683,7 +711,7 @@ inline bool processSplitFlip1(Bipyramid & pyra,
 	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
 	if(!checkTetrahedronConnections(pyra.tb) ) printTetrahedronNeighbors(pyra.tb);
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
-	
+*/	
 	return true;
 }
 
@@ -885,10 +913,10 @@ inline bool processMergeFlip1(Bipyramid & pyra,
 		std::cout<<"\n [ERROR] wrong tetrahedron connections"; printTetrahedronVertices(pyra.tc);
 		return false;
 	}
-	
+/*	
 	if(!checkTetrahedronConnections(pyra.ta) ) printTetrahedronNeighbors(pyra.ta);
 	if(!checkTetrahedronConnections(pyra.tc) ) printTetrahedronNeighbors(pyra.tc);
-/*	
+	
 	createBipyramid1(pyra, pyra.ta, pyra.tc);
 
 /// spawn six boundary faces
@@ -936,7 +964,25 @@ inline void flipAFace(IFace * f,
 	Bipyramid pyra;
 	if(!createBipyramid1(pyra, f->ta, f->tb) )
 		return;
-	
+
+#define USE_CONVEXITY 0
+#if USE_CONVEXITY	
+	if(checkConvex(pyra, X) ) {
+		if(canSplitFlip1(pyra, X) ) {
+			if(checkCoplanar(pyra, X) )
+				addToDiamonds(diams, &pyra);
+			else
+				processSplitFlip1(pyra, tets, boundary);
+		}
+	}
+	else {
+		int imerg;
+		if(canMergeFlip1(imerg, pyra, X) )
+			processMergeFlip1(pyra, tets, imerg, boundary);
+		else 
+			addToDiamonds(diams, &pyra);
+	}
+#else	
 	if(canSplitFlip1(pyra, X) ) {
 		if(checkCoplanar(pyra, X) )
 			addToDiamonds(diams, &pyra);
@@ -947,7 +993,10 @@ inline void flipAFace(IFace * f,
 		int imerg;
 		if(canMergeFlip1(imerg, pyra, X) )
 			processMergeFlip1(pyra, tets, imerg, boundary);
+		//else
+		//	addToDiamonds(diams, &pyra);
 	}
+#endif
 }
 
 inline void flipFaces(std::vector<IFace *> & faces,
@@ -966,8 +1015,10 @@ inline void flipFaces(std::vector<IFace *> & faces,
 		
 		delete faces[0];
 		faces.erase(faces.begin() );
-		
+#define ENABLE_DIAMOND_FLIP 1
+#if ENABLE_DIAMOND_FLIP		
 		flipAllDiamonds(diams);
+#endif
 	}
 	
 	clearAllDiamonds(diams);

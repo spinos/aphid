@@ -153,6 +153,40 @@ inline bool addToDiamond(Diamond * diam,
 	return true;
 }
 
+inline bool sharedVertexDiamond(const Diamond * diam, 
+						const Bipyramid * pyra)
+{
+	if(diam->ta) {
+		if(sharedVertexTetrahedron(diam->ta, pyra->ta) )
+			return true;
+		if(sharedVertexTetrahedron(diam->ta, pyra->tb) )
+			return true;
+	}
+	
+	if(diam->tb) {
+		if(sharedVertexTetrahedron(diam->tb, pyra->ta) )
+			return true;
+		if(sharedVertexTetrahedron(diam->tb, pyra->tb) )
+			return true;
+	}
+	
+	if(diam->tc) {
+		if(sharedVertexTetrahedron(diam->tc, pyra->ta) )
+			return true;
+		if(sharedVertexTetrahedron(diam->tc, pyra->tb) )
+			return true;
+	}
+	
+	if(diam->td) {
+		if(sharedVertexTetrahedron(diam->td, pyra->ta) )
+			return true;
+		if(sharedVertexTetrahedron(diam->td, pyra->tb) )
+			return true;
+	}
+			
+	return false;
+}
+
 inline void addToDiamonds(std::vector<Diamond *> & diams, 
 						const Bipyramid * pyra)
 {
@@ -217,6 +251,10 @@ inline void flipDiamond(Diamond * diam)
 		return;
 		
 	std::cout<<"\n [INFO] 4way flip "; printDiamondVertices(diam);
+	std::cout<<"\n ta "; printTetrahedronVertices(diam->ta);
+	std::cout<<"\n tb "; printTetrahedronVertices(diam->tb);
+	std::cout<<"\n tc "; printTetrahedronVertices(diam->tc);
+	std::cout<<"\n td "; printTetrahedronVertices(diam->td);
 	
 	int v0 = diam->iv0;
 	int v1 = diam->iv1;

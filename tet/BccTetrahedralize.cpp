@@ -28,10 +28,10 @@ bool BccTetrahedralize::createSamples()
 	
 	PoissonSequence<Disk> * supg = sampleGrid();
 	
-	const float supsize = supg->gridSize(); /// 4r
+	const float supsize = supg->gridSize(); /// 2r
 	m_mesher.setH(supsize);
 	
-	const float bsize = supsize * .5f; /// 2r
+	const float bsize = supsize * .51f; /// r
 	m_pntSz = bsize * .0625f;
 	BoundingBox cbx;
 	
