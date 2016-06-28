@@ -50,8 +50,10 @@ public:
 	int buildFrontFaces();
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > * frontFaces();
 	
-	void moveNodeInCell(const aphid::Vector3F & c,
+	void moveRedNodeInCell(const aphid::Vector3F & c,
 						const std::vector<aphid::Vector3F> & pos);
+	
+	void smoothBlueNodeInCell(const aphid::Vector3F & cellCenter);
 	
 protected:
 

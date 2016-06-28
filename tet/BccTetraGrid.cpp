@@ -13,13 +13,13 @@ using namespace aphid;
 namespace ttg {
 
 float BccCell::TwentySixNeighborOffset[26][3] = {
-{-1.f, 0.f, 0.f}, // face
+{-1.f, 0.f, 0.f}, // face 0 - 5
 { 1.f, 0.f, 0.f},
 { 0.f,-1.f, 0.f},
 { 0.f, 1.f, 0.f},
 { 0.f, 0.f,-1.f},
 { 0.f, 0.f, 1.f},
-{-1.f,-1.f,-1.f}, // vertex
+{-1.f,-1.f,-1.f}, // vertex 6 - 13
 { 1.f,-1.f,-1.f},
 {-1.f, 1.f,-1.f},
 { 1.f, 1.f,-1.f},
@@ -27,7 +27,7 @@ float BccCell::TwentySixNeighborOffset[26][3] = {
 { 1.f,-1.f, 1.f},
 {-1.f, 1.f, 1.f},
 { 1.f, 1.f, 1.f},
-{-1.f, 0.f,-1.f}, // edge
+{-1.f, 0.f,-1.f}, // edge 14 - 25
 { 1.f, 0.f,-1.f},
 {-1.f, 0.f, 1.f},
 { 1.f, 0.f, 1.f},
@@ -383,6 +383,63 @@ bool BccCell::moveNode(int & xi,
 	return true;
 }
 
+bool BccCell::moveNode15(int & xi,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord,
+					const Vector3F & p) const
+{
+	int k = keyToCorner(p, m_center );
+	Vector3F offset;
+	neighborOffset(&offset, k);
+	Vector3F vp = m_center + offset * grid->gridSize() * .5f;
+	
+/// choose center of vertex
+	if(m_center.distanceTo(p) > vp.distanceTo(p) )
+		return false;
+	
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord);
+		
+	BccNode * node15 = cell->find(15);
+	xi = node15->index;
+	return true;
+}
+
+bool BccCell::getVertexNodeIndices(int vi, int * xi,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord)
+{
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord);
+	BccNode * nodeK = cell->find(vi);
+	if(!nodeK) {
+		return false;
+	}
+	xi[0] = nodeK->index;
+	
+	BccNode * node15 = cell->find(15);
+	xi[1] = node15->index;
+	
+	const float gsize = grid->gridSize();
+	
+	Vector3F offset;
+	neighborOffset(&offset, vi);
+	
+	int j;
+	for(j=0;j<7;++j) {
+		int neighborJ = SevenNeighborOnCorner[vi-6][j];
+		neighborOffset(&offset, neighborJ);
+		Vector3F neighborCenter = m_center + offset * gsize;
+		
+		sdb::Array<int, BccNode> * nei = grid->findCell((const float *)&neighborCenter);
+		if(!nei) {
+			return false;
+		}
+		
+		BccNode * nei15 = nei->find(15);
+		xi[2+j] = nei15->index;
+	}
+	return true;
+}
+
 BccTetraGrid::BccTetraGrid() 
 {}
 
@@ -537,6 +594,43 @@ void BccTetraGrid::moveNodeIn(const aphid::Vector3F & cellCenter,
 		}
 	}
 #endif
+}
+
+void BccTetraGrid::moveRedNodeIn(const aphid::Vector3F & cellCenter,
+					const Vector3F & pos,
+					aphid::Vector3F * X,
+					int * prop)
+{
+	BccCell cell(cellCenter);
+	int xi;
+	if(cell.moveNode15(xi, this, gridCoord((const float *)&cellCenter ),
+					pos) ) {
+		X[xi] = pos;
+		prop[xi] = 1;
+	}
+}
+
+void BccTetraGrid::smoothBlueNodeIn(const aphid::Vector3F & cellCenter,
+					aphid::Vector3F * X)
+{
+	BccCell cell(cellCenter);
+	int xi[9];
+	Vector3F pos;
+/// for each vertex node
+	int i = 6;
+	for(;i<14;++i) {
+		if(cell.getVertexNodeIndices(i, xi, this, gridCoord((const float *)&cellCenter ) ) ) {
+/// average of eight nodes
+			X[xi[0]] = (X[xi[1]]
+						+ X[xi[2]]
+						+ X[xi[3]]
+						+ X[xi[4]]
+						+ X[xi[5]]
+						+ X[xi[6]]
+						+ X[xi[7]]
+						+ X[xi[8]]) * .125f;
+		}
+	}
 }
 
 }

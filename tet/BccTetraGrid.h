@@ -66,6 +66,13 @@ public:
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & p,
 					int * moved) const;
+	bool moveNode15(int & xi,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & p) const;
+	bool getVertexNodeIndices(int vi, int * xi,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord);
 	const aphid::Vector3F * centerP() const;
 	
 private:
@@ -110,7 +117,13 @@ public:
 					const int & n,
 					aphid::Vector3F * X,
 					int * prop);
-	
+	void moveRedNodeIn(const aphid::Vector3F & cellCenter,
+					const  aphid::Vector3F & pos,
+					aphid::Vector3F * X,
+					int * prop);
+	void smoothBlueNodeIn(const aphid::Vector3F & cellCenter,
+					aphid::Vector3F * X);
+					
 protected:
 
 private:

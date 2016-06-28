@@ -99,7 +99,7 @@ bool TetrahedralMesher::addPoint(const int & vi,
 	ITetrahedron * t = searchTet(m_X[vi], &coord);
 	if(!t ) return false;
 	
-	const float threshold = m_grid.gridSize() * .47f;
+	const float threshold = m_grid.gridSize() * .49f;
 	
 	topologyChanged = insertToTetrahedralMesh(m_tets, t, vi, coord, m_X, threshold,
 						m_prop);
@@ -194,21 +194,30 @@ int TetrahedralMesher::buildFrontFaces()
 sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
 { return &m_frontFaces; }
 
-void TetrahedralMesher::moveNodeInCell(const Vector3F & c,
+void TetrahedralMesher::moveRedNodeInCell(const Vector3F & c,
 						const std::vector<Vector3F> & pos)
 {
 	const int n = pos.size();
 	if(n < 1) return;
-	sdb::Array<int, BccNode> * cell = m_grid.findCell((const float *)&c );
-	if(!cell) 
-		return;
-		
-	Vector3F * locs = new Vector3F[n];
-	for(int i=0; i<n; ++i) {
-		locs[i] = pos[i];
+	
+/// closest to red
+	Vector3F closestP;
+	float minD = 1e8f;
+	float d;
+	for(int i=0;i<n;++i) {
+		d = c.distanceTo(pos[i]);
+		if(d<minD) {
+			minD = d;
+			closestP = pos[i];
+		}
 	}
-	m_grid.moveNodeIn(c, locs, n, m_X, m_prop);
-	delete[] locs;
+		
+	m_grid.moveRedNodeIn(c, closestP, m_X, m_prop);
+}
+
+void TetrahedralMesher::smoothBlueNodeInCell(const aphid::Vector3F & cellCenter)
+{
+	m_grid.smoothBlueNodeIn(cellCenter, m_X);
 }
 
 }

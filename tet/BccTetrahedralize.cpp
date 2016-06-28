@@ -31,7 +31,7 @@ bool BccTetrahedralize::createSamples()
 	const float supsize = supg->gridSize(); /// 2r
 	m_mesher.setH(supsize);
 	
-	const float bsize = supsize * .51f; /// r
+	const float bsize = supsize * .5f; /// r
 	m_pntSz = bsize * .0625f;
 	BoundingBox cbx;
 	
@@ -75,7 +75,7 @@ bool BccTetrahedralize::createSamples()
 	
 	std::cout<<"\n n tet b4 delauney "<<m_mesher.build();
 	
-/// distort grid 
+/// distort grid by red 
 	supg->begin();
 	while(!supg->end() ) {
 	
@@ -83,13 +83,24 @@ bool BccTetrahedralize::createSamples()
 		extractSamplePosIn(smps, supg->value() );
 		
 		Vector3F center = supg->coordToCellCenter(supg->key() );
-		m_mesher.moveNodeInCell(center, smps);
+		m_mesher.moveRedNodeInCell(center, smps);
 		
 		smps.clear();
 		
 		supg->next();
 	}
-#if 0		
+
+/// smooth grid by blue
+	supg->begin();
+	while(!supg->end() ) {
+		
+		Vector3F center = supg->coordToCellCenter(supg->key() );
+		m_mesher.smoothBlueNodeInCell(center);
+		
+		supg->next();
+	}
+	
+#if 1		
 	bool topoChanged;
 	int i = m_sampleBegin;
 	for(; i<Nv;++i) {
@@ -102,7 +113,7 @@ bool BccTetrahedralize::createSamples()
 			std::cout<<"\n [WARNING] check conn break at v"<<i;
 			break;
 			}
-			std::cout<<"\n [INFO] passed topology check";
+			// std::cout<<"\n [INFO] passed topology check";
 		}
 	}
 #endif	

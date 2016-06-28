@@ -588,22 +588,28 @@ inline bool checkCoplanar(const Bipyramid & pyra,
 	
 	float vol = tetrahedronVolume1(apex, a, b, antipex);
 	if(vol < lowVol) {
+#if BIPYRA_DEEP_VERBOSE
 		std::cout<<"\n low volume "<<vol;
 		printBipyramidVertices(&pyra);
+#endif
 		return true;
 	}
 	
 	vol	= tetrahedronVolume1(apex, b, c, antipex);
 	if(vol < lowVol) {
+#if BIPYRA_DEEP_VERBOSE
 		std::cout<<"\n low volume "<<vol;
 		printBipyramidVertices(&pyra);
+#endif
 		return true;
 	}
 
 	vol = tetrahedronVolume1(apex, a, antipex, c);
 	if(vol < lowVol) {
+#if BIPYRA_DEEP_VERBOSE
 		std::cout<<"\n low volume "<<vol;
 		printBipyramidVertices(&pyra);
+#endif
 		return true;
 	}
 	

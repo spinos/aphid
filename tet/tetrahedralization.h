@@ -390,7 +390,9 @@ inline bool insertToTetrahedralMesh(std::vector<ITetrahedron *> & tets,
 	int closestV = tetrahedronVertex(t, aphid::highestCoordVec(coord) );
 	if(prop[closestV] < 0) {
 	if(X[vi].distanceTo(X[closestV]) < snapThreshold ) {
+#if 0
 		std::cout<<"\n snap v"<<closestV<<" v"<<vi;
+#endif
 		X[closestV] = X[vi];
 		prop[closestV] = 1;
 		return false;
