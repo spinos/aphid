@@ -45,10 +45,10 @@ inline int highestCoordVec(const Float4 & coord)
 inline int barycentricCoordinateStatus(const Float4 & coord)
 { 
 	int c = 0;
-	if(coord.x <= .03f) c++;
-	if(coord.y <= .03f) c++;
-	if(coord.z <= .03f) c++;
-	if(coord.w <= .03f) c++;
+	if(coord.x <= .01f) c++;
+	if(coord.y <= .01f) c++;
+	if(coord.z <= .01f) c++;
+	if(coord.w <= .01f) c++;
 	return c;
 }
 

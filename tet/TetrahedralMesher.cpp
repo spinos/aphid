@@ -99,7 +99,8 @@ bool TetrahedralMesher::addPoint(const int & vi,
 	ITetrahedron * t = searchTet(m_X[vi], &coord);
 	if(!t ) return false;
 	
-	const float threshold = m_grid.gridSize() * .49f;
+#define SNAPFACTOR .124f
+	const float threshold = m_grid.gridSize() * SNAPFACTOR;
 	
 	topologyChanged = insertToTetrahedralMesh(m_tets, t, vi, coord, m_X, threshold,
 						m_prop);
@@ -142,7 +143,7 @@ const ITetrahedron * TetrahedralMesher::frontTetrahedron(const int & vi,
 	const ITetrahedron * t = tetrahedron(vi);
 	if(!t) return t;
 	
-	if(countFrontVetices(t) > nfront )
+	if(countFrontVetices(t) == nfront )
 		return t;
 		
 	return NULL;

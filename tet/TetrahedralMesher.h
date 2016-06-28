@@ -45,7 +45,7 @@ public:
 	const int * prop() const;
 	const ITetrahedron * tetrahedron(const int & vi) const;
 	const ITetrahedron * frontTetrahedron(const int & vi,
-									int nfront = 1) const;
+									int nfront = 3) const;
 	int numTetrahedrons();
 	int buildFrontFaces();
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > * frontFaces();

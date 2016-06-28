@@ -779,7 +779,7 @@ inline bool canMergeFlip1(int & i3rd, const Bipyramid & pyra,
 			return false;
 
 /// empty principle
-#define CHECK_EMPTY_PRINC 1
+#define CHECK_EMPTY_PRINC 0
 #if CHECK_EMPTY_PRINC
 		circumSphere(circ, p3, p2, p4, p0 );
 		if(p1.distanceTo(circ.pc) < circ.r )

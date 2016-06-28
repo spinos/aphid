@@ -31,6 +31,7 @@ public:
 protected:
 	
 private:
+	void drawFrontEdges();
 	
 };
 

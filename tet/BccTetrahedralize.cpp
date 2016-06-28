@@ -130,6 +130,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	const int Nv = m_mesher.N();
 	const int Nt = m_mesher.numTetrahedrons();
 	const Vector3F * X = m_mesher.X();
+	const int * prop = m_mesher.prop();
 	
 	dr->m_markerProfile.apply();
 	dr->setColor(0.f, 0.f, 0.f);
@@ -191,10 +192,21 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	
 	//dr->m_wireProfile.apply(); // slow
 	dr->setColor(0.2f, 0.2f, 0.49f);
+	drawFrontEdges();
 	
-	for(i=0; i<Nt; ++i) {
-		//const ITetrahedron * t = m_mesher.frontTetrahedron(i);
-		const ITetrahedron * t = m_mesher.tetrahedron(i);
+}
+
+void BccTetrahedralize::drawFrontEdges()
+{
+	Vector3F a, b, c, d;
+	int ra, rb, rc, rd;
+	const int Nt = m_mesher.numTetrahedrons();
+	const Vector3F * X = m_mesher.X();
+	const int * prop = m_mesher.prop();
+	
+	glBegin(GL_LINES);
+	for(int i=0; i<Nt; ++i) {
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 3);
 		if(!t) continue;
 		
 		a = X[t->iv0];
@@ -202,9 +214,43 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 		c = X[t->iv2];
 		d = X[t->iv3];
 		
-		dr->tetrahedronWire(a, b, c, d);
+		ra = prop[t->iv0];
+		rb = prop[t->iv1];
+		rc = prop[t->iv2];
+		rd = prop[t->iv3];
+		
+		//dr->tetrahedronWire(a, b, c, d);
+		if(ra > -1 && rb > -1) {
+			glVertex3fv((const float *)&a);
+			glVertex3fv((const float *)&b);
+		}
+		
+		if(ra > -1 && rc > -1) {
+			glVertex3fv((const float *)&a);
+			glVertex3fv((const float *)&c);
+		}
+		
+		if(ra > -1 && rd > -1) {
+			glVertex3fv((const float *)&a);
+			glVertex3fv((const float *)&d);
+		}
+		
+		if(rb > -1 && rc > -1) {
+			glVertex3fv((const float *)&b);
+			glVertex3fv((const float *)&c);
+		}
+		
+		if(rc > -1 && rd > -1) {
+			glVertex3fv((const float *)&c);
+			glVertex3fv((const float *)&d);
+		}
+		
+		if(rd > -1 && rb > -1) {
+			glVertex3fv((const float *)&d);
+			glVertex3fv((const float *)&b);
+		}
 	}
-	
+	glEnd();
 }
 
 }
