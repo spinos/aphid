@@ -73,7 +73,7 @@ bool BccTetrahedralize::createSamples()
 
 	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
 	
-	std::cout<<"\n n tet b4 delauney "<<m_mesher.build();
+	std::cout<<"\n n tet b4 delauney "<<m_mesher.buildMesh();
 	
 	supg->begin();
 	while(!supg->end() ) {
@@ -82,7 +82,7 @@ bool BccTetrahedralize::createSamples()
 		extractSamplePosIn(smps, supg->value() );
 		
 		Vector3F center = supg->coordToCellCenter(supg->key() );
-		m_mesher.moveNodesInCell(center, smps);
+		m_mesher.processCell(center, smps);
 		
 		smps.clear();
 		
@@ -212,7 +212,7 @@ void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
 	const int * prop = m_mesher.prop();
 	
 	for(int i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 4);
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 2);
 		if(!t) continue;
 		
 		a = X[t->iv0];

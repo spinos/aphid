@@ -85,7 +85,7 @@ const Vector3F * TetrahedralMesher::X() const
 const int * TetrahedralMesher::prop() const
 { return m_prop; }
 
-int TetrahedralMesher::build()
+int TetrahedralMesher::buildMesh()
 {
 	m_grid.getNodePositions(m_X);
 	m_grid.buildTetrahedrons(m_tets);
@@ -146,7 +146,7 @@ const ITetrahedron * TetrahedralMesher::frontTetrahedron(const int & vi,
 	
 	int c = countFrontVetices(t);
 	if(c < nfront 
-		|| c >= nmaxfront)
+		|| c > nmaxfront)
 		return NULL;
 		
 	return t;
@@ -200,7 +200,8 @@ sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
 
 /// move red to closest sample if close enought
 /// move blue to closest while maintain the minimum angle
-void TetrahedralMesher::moveNodesInCell(const Vector3F & c,
+/// todo find cut points on fourteen edges originate from red
+void TetrahedralMesher::processCell(const Vector3F & c,
 						const std::vector<Vector3F> & pos)
 {
 /// closest to red

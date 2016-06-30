@@ -34,7 +34,7 @@ public:
 	int finishGrid();
 	int numNodes();
 	void setN(const int & x);
-	int build();
+	int buildMesh();
 	bool addPoint(const int & vi, bool & topologyChanged);
 	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
 	bool checkConnectivity();
@@ -46,12 +46,12 @@ public:
 	const ITetrahedron * tetrahedron(const int & vi) const;
 	const ITetrahedron * frontTetrahedron(const int & vi,
 									int nfront = 1,
-									int nmaxfront = 3) const;
+									int nmaxfront = 4) const;
 	int numTetrahedrons();
 	int buildFrontFaces();
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > * frontFaces();
 	
-	void moveNodesInCell(const aphid::Vector3F & c,
+	void processCell(const aphid::Vector3F & c,
 						const std::vector<aphid::Vector3F> & pos);
 	
 	void smoothBlueNodeInCell(const aphid::Vector3F & cellCenter);

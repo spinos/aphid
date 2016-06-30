@@ -14,8 +14,8 @@ using namespace aphid;
 namespace ttg {
 
 SuperformulaBase::SuperformulaBase() :
-m_a1(1.f), m_b1(1.f), m_m1(4.f), m_n1(10.f), m_n2(10.f), m_n3(10.f),
-m_a2(1.f), m_b2(1.f), m_m2(4.f), m_n21(10.f), m_n22(10.f), m_n23(10.f)
+m_a1(4.f), m_b1(4.f), m_m1(4.f), m_n1(10.f), m_n2(10.f), m_n3(10.f),
+m_a2(4.f), m_b2(4.f), m_m2(4.f), m_n21(10.f), m_n22(10.f), m_n23(10.f)
 {}
 
 SuperformulaBase::~SuperformulaBase()

@@ -30,6 +30,7 @@ Scene.h
 Hilbert2D.h
 Hilbert3D.h
 Delaunay2D.h
+BccCell.h
 BccTetraGrid.h
 Bcc3dTest.h
 TetrahedralMesher.h
@@ -49,6 +50,7 @@ Hilbert2D.cpp
 Delaunay2D.cpp
 Delaunay3D.cpp
 Hilbert3D.cpp
+BccCell.cpp
 BccTetraGrid.cpp
 TetrahedralMesher.cpp
 Bcc3dTest.cpp

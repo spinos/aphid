@@ -120,7 +120,7 @@ void Bcc3dTest::createGrid()
 	int N = m_mesher.N();
 	std::cout<<"\n n node "<<N;
 	
-	std::cout<<"\n n grid tetra "<<m_mesher.build();
+	std::cout<<"\n n grid tetra "<<m_mesher.buildMesh();
 	
 /// on edge
 	i = N - ADDON;
