@@ -383,6 +383,36 @@ bool BccCell::moveNode(int & xi,
 	return true;
 }
 
+int BccCell::indexToNode15(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const	
+{
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord );
+		
+	BccNode * node15 = cell->find(15);
+	return node15->index;
+}
+
+/// vertex node
+/// i 0:7
+int BccCell::indexToBlueNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const float & cellSize,
+					aphid::Vector3F & p) const
+{
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord );
+	BccNode * node = cell->find(i+6);
+	if(!node) 
+		node = findCornerNodeInNeighbor(i+6,
+								grid,
+								cellCoord);
+	
+	Vector3F offset;
+	neighborOffset(&offset, i+6);
+	p = m_center + offset * cellSize * .5f;
+	return node->index;
+}
+
 bool BccCell::moveNode15(int & xi,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					const sdb::Coord3 & cellCoord,
@@ -594,6 +624,78 @@ void BccTetraGrid::moveNodeIn(const aphid::Vector3F & cellCenter,
 		}
 	}
 #endif
+}
+
+bool BccTetraGrid::moveRedNodeTo(const Vector3F & cellCenter,
+					const float & d,
+					const Vector3F & pos,
+					Vector3F * X,
+					int * prop)
+{	
+	BccCell cell(cellCenter);
+	int xi = cell.indexToNode15(this, gridCoord((const float *)&cellCenter ) );
+			
+/// limit in which red can move
+	if(d > gridSize() * .25f) {
+		return false;
+	}
+		
+	X[xi] = pos;
+	prop[xi] = 4;
+	
+	return true;
+}
+
+void BccTetraGrid::moveBlueNodes(const Vector3F & cellCenter,
+					const aphid::Vector3F & redP,
+					const std::vector<Vector3F> & samples,
+					aphid::Vector3F * X,
+					int * prop)
+{
+	const float gz = gridSize();
+	const float r = gz * .25f;
+	BccCell cell(cellCenter);
+	const sdb::Coord3 cellCoord = gridCoord((const float *)&cellCenter );
+	int xi;
+	float d;
+	Vector3F blueP, closestP;
+/// for each blue
+	int i=0;
+	for(;i<8;++i) {
+		xi = cell.indexToBlueNode(i, this, cellCoord, gz, blueP);
+/// already moved
+		if(prop[xi] > 0) 
+			continue;
+			
+		GetClosest<Vector3F>(closestP, d, blueP, samples);
+		
+		if(isBlueCloseToRed(closestP, blueP, redP, r) ) {
+			continue;
+		}
+			
+		//std::cout<<"\n move blue"<<xi;
+		X[xi] = closestP;
+		prop[xi] = 3;
+	}
+}
+
+/// limit minimum angles
+bool BccTetraGrid::isBlueCloseToRed(const aphid::Vector3F & p,
+					const aphid::Vector3F & blueP,
+					const aphid::Vector3F & redP,
+					const float & r) const
+{
+/// limit in octan
+	Vector3F dp = p - blueP;
+	if(Absolute<float>(dp.x) > 2.f * r) return true;
+	if(Absolute<float>(dp.y) > 2.f * r) return true;
+	if(Absolute<float>(dp.z) > 2.f * r) return true;
+/// limit to red
+	dp = p - redP;
+	if(Absolute<float>(dp.x) < r) return true;
+	if(Absolute<float>(dp.y) < r) return true;
+	if(Absolute<float>(dp.z) < r) return true;
+	return false;
 }
 
 void BccTetraGrid::moveRedNodeIn(const aphid::Vector3F & cellCenter,

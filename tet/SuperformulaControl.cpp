@@ -20,11 +20,11 @@ SuperformulaControl::SuperformulaControl(QWidget *parent)
     
     m_a1Value = new QDoubleEditSlider(tr("a"), this);
 	m_a1Value->setLimit(0.1, 10);
-	m_a1Value->setValue(1.0);
+	m_a1Value->setValue(4.0);
 	
 	m_b1Value = new QDoubleEditSlider(tr("b"), this);
 	m_b1Value->setLimit(0.1, 10);
-	m_b1Value->setValue(1.0);
+	m_b1Value->setValue(4.0);
 	
 	m_m1Value = new QDoubleEditSlider(tr("m"), this);
 	m_m1Value->setLimit(-30, 30);
@@ -56,11 +56,11 @@ SuperformulaControl::SuperformulaControl(QWidget *parent)
 	
 	m_a2Value = new QDoubleEditSlider(tr("a"), this);
 	m_a2Value->setLimit(0.1, 10);
-	m_a2Value->setValue(1.0);
+	m_a2Value->setValue(4.0);
 	
 	m_b2Value = new QDoubleEditSlider(tr("b"), this);
 	m_b2Value->setLimit(0.1, 10);
-	m_b2Value->setValue(1.0);
+	m_b2Value->setValue(4.0);
 	
 	m_m2Value = new QDoubleEditSlider(tr("m"), this);
 	m_m2Value->setLimit(-30, 30);

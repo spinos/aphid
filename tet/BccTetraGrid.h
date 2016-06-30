@@ -66,6 +66,13 @@ public:
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & p,
 					int * moved) const;
+	int indexToNode15(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	int indexToBlueNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const float & cellSize,
+					aphid::Vector3F & p) const;
 	bool moveNode15(int & xi,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
@@ -117,6 +124,20 @@ public:
 					const int & n,
 					aphid::Vector3F * X,
 					int * prop);
+	bool moveRedNodeTo(const aphid::Vector3F & cellCenter,
+					const float & d,
+					const aphid::Vector3F & pos,
+					aphid::Vector3F * X,
+					int * prop);
+	void moveBlueNodes(const aphid::Vector3F & cellCenter,
+					const aphid::Vector3F & redP,
+					const std::vector<aphid::Vector3F> & samples,
+					aphid::Vector3F * X,
+					int * prop);
+	bool isBlueCloseToRed(const aphid::Vector3F & p,
+					const aphid::Vector3F & blueP,
+					const aphid::Vector3F & redP,
+					const float & r) const;				
 	void moveRedNodeIn(const aphid::Vector3F & cellCenter,
 					const  aphid::Vector3F & pos,
 					aphid::Vector3F * X,

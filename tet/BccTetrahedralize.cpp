@@ -75,7 +75,6 @@ bool BccTetrahedralize::createSamples()
 	
 	std::cout<<"\n n tet b4 delauney "<<m_mesher.build();
 	
-/// distort grid by red 
 	supg->begin();
 	while(!supg->end() ) {
 	
@@ -83,13 +82,14 @@ bool BccTetrahedralize::createSamples()
 		extractSamplePosIn(smps, supg->value() );
 		
 		Vector3F center = supg->coordToCellCenter(supg->key() );
-		m_mesher.moveRedNodeInCell(center, smps);
+		m_mesher.moveNodesInCell(center, smps);
 		
 		smps.clear();
 		
 		supg->next();
 	}
-
+	
+#if 0
 /// smooth grid by blue
 	supg->begin();
 	while(!supg->end() ) {
@@ -100,7 +100,7 @@ bool BccTetrahedralize::createSamples()
 		supg->next();
 	}
 	
-#if 1		
+		
 	bool topoChanged;
 	int i = m_sampleBegin;
 	for(; i<Nv;++i) {
@@ -141,11 +141,16 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 		dr->cube(X[i], m_pntSz);
 	}
 #endif
-	dr->setColor(0.f, .5f, 0.f);
+
+#define SHO_SAMPLES 1
+#if SHO_SAMPLES
+	dr->setColor(0.f, .3f, 0.1f);
 	for(i=m_sampleBegin;i<Nv;++i) {
 		dr->cube(X[i], m_pntSz);
 	}
-	
+#endif
+
+#if 0	
 	Vector3F a, b, c, d;
 	sdb::Array<sdb::Coord3, IFace > * fronts = m_mesher.frontFaces();
 	dr->setColor(0.3f, 0.59f, 0.4f);
@@ -164,6 +169,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 		fronts->next();
 	}
 	glEnd();
+#endif
 	
 #if 0
 	dr->setColor(1.f, 0.f, 0.f);
@@ -192,11 +198,12 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	
 	//dr->m_wireProfile.apply(); // slow
 	dr->setColor(0.2f, 0.2f, 0.49f);
-	drawFrontEdges();
-	
+	// drawFrontEdges();
+	drawFrontTets(dr);
+	drawRedBlue(dr);
 }
 
-void BccTetrahedralize::drawFrontEdges()
+void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
 {
 	Vector3F a, b, c, d;
 	int ra, rb, rc, rd;
@@ -204,9 +211,8 @@ void BccTetrahedralize::drawFrontEdges()
 	const Vector3F * X = m_mesher.X();
 	const int * prop = m_mesher.prop();
 	
-	glBegin(GL_LINES);
 	for(int i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 3);
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 4);
 		if(!t) continue;
 		
 		a = X[t->iv0];
@@ -219,7 +225,33 @@ void BccTetrahedralize::drawFrontEdges()
 		rc = prop[t->iv2];
 		rd = prop[t->iv3];
 		
-		//dr->tetrahedronWire(a, b, c, d);
+		dr->tetrahedronWire(a, b, c, d);
+	}
+}
+
+void BccTetrahedralize::drawFrontEdges()
+{
+	Vector3F a, b, c, d;
+	int ra, rb, rc, rd;
+	const int Nt = m_mesher.numTetrahedrons();
+	const Vector3F * X = m_mesher.X();
+	const int * prop = m_mesher.prop();
+	
+	glBegin(GL_LINES);
+	for(int i=0; i<Nt; ++i) {
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 0, 4);
+		if(!t) continue;
+		
+		a = X[t->iv0];
+		b = X[t->iv1];
+		c = X[t->iv2];
+		d = X[t->iv3];
+		
+		ra = prop[t->iv0];
+		rb = prop[t->iv1];
+		rc = prop[t->iv2];
+		rd = prop[t->iv3];
+		
 		if(ra > -1 && rb > -1) {
 			glVertex3fv((const float *)&a);
 			glVertex3fv((const float *)&b);
@@ -251,6 +283,27 @@ void BccTetrahedralize::drawFrontEdges()
 		}
 	}
 	glEnd();
+}
+
+void BccTetrahedralize::drawRedBlue(aphid::GeoDrawer * dr)
+{
+	const int Nv = m_mesher.N();
+	const Vector3F * X = m_mesher.X();
+	const int * prop = m_mesher.prop();
+	
+	dr->m_markerProfile.apply();
+	dr->setColor(0.f, 0.f, 0.f);
+	int i;
+	for(i=0;i<m_sampleBegin;++i) {
+		if(prop[i] < 0 )
+			continue;
+			
+		if(prop[i] == 3 )
+			dr->setColor(0.f, 0.f, 1.f);
+		else if(prop[i] == 4 )
+			dr->setColor(1.f, 0.f, 0.f);
+		dr->cube(X[i], m_pntSz);
+	}
 }
 
 }

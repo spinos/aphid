@@ -138,15 +138,18 @@ const ITetrahedron * TetrahedralMesher::tetrahedron(const int & vi) const
 }
 
 const ITetrahedron * TetrahedralMesher::frontTetrahedron(const int & vi,
-									int nfront) const
+									int nfront,
+									int nmaxfront) const
 {
 	const ITetrahedron * t = tetrahedron(vi);
 	if(!t) return t;
 	
-	if(countFrontVetices(t) == nfront )
-		return t;
+	int c = countFrontVetices(t);
+	if(c < nfront 
+		|| c >= nmaxfront)
+		return NULL;
 		
-	return NULL;
+	return t;
 }
 
 int TetrahedralMesher::countFrontVetices(const ITetrahedron * t) const
@@ -195,25 +198,21 @@ int TetrahedralMesher::buildFrontFaces()
 sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
 { return &m_frontFaces; }
 
-void TetrahedralMesher::moveRedNodeInCell(const Vector3F & c,
+/// move red to closest sample if close enought
+/// move blue to closest while maintain the minimum angle
+void TetrahedralMesher::moveNodesInCell(const Vector3F & c,
 						const std::vector<Vector3F> & pos)
 {
-	const int n = pos.size();
-	if(n < 1) return;
-	
 /// closest to red
-	Vector3F closestP;
-	float minD = 1e8f;
+	Vector3F redP;
 	float d;
-	for(int i=0;i<n;++i) {
-		d = c.distanceTo(pos[i]);
-		if(d<minD) {
-			minD = d;
-			closestP = pos[i];
-		}
-	}
+	if(GetClosest<Vector3F>(redP, d, c, pos) < 0)
+		return;
 		
-	m_grid.moveRedNodeIn(c, closestP, m_X, m_prop);
+	if(!m_grid.moveRedNodeTo(c, d, redP, m_X, m_prop) )
+		redP = c;
+		
+	m_grid.moveBlueNodes(c, redP, pos, m_X, m_prop);
 }
 
 void TetrahedralMesher::smoothBlueNodeInCell(const aphid::Vector3F & cellCenter)

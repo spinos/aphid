@@ -35,11 +35,13 @@ bool SuperformulaPoisson::createSamples()
 		}
 	}
 
-#define GFACTOR 1.99f
+#define GFACTOR 10.f
 //#define RFACTOR .0909f /// 1 / 11
-#define RFACTOR .0625f /// 1 / 16
-//#define RFACTOR .05 /// 1 // 20
+//#define RFACTOR .0625f /// 1 / 16
 //#define RFACTOR .03125f /// 1 / 32
+#define RFACTOR .01 /// 1 / 100
+#define NFACTOR 20000
+#define LFACTOR 400000
 	float r = box.getLongestDistance() * RFACTOR;
 	std::cout<<"\n r "<<r;
 	float gridSize = r * GFACTOR;
@@ -47,14 +49,13 @@ bool SuperformulaPoisson::createSamples()
 	m_bkg.clear();
 	m_bkg.setGridSize(gridSize);
 	
-/// limit of n
-	setN(4000);
+	setN(NFACTOR);
 	
 	int numAccept = 0, preN = 0;
 	Disk cand;
 	cand.r = r * .5f;
-/// 20 times of n
-	for(i=0; i<80000; ++i) {
+
+	for(i=0; i<LFACTOR; ++i) {
 	
 		cand.pos = randomPnt(RandomFn11() * 3.14159269f, 
 								RandomFn11() * 3.14159269f * .5f);
@@ -75,7 +76,7 @@ bool SuperformulaPoisson::createSamples()
 			if(numAccept == preN) break;
 			preN = numAccept;
 		}
-		if(numAccept >= 4000) break;
+		if(numAccept >= NFACTOR) break;
 	}
 	m_bkg.calculateBBox();
 	

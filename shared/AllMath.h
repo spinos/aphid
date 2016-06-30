@@ -123,6 +123,27 @@ template<typename T>
 inline void SwapAB(T & a, T & b, T & c)
 { c = a; a = b; b = c; }
 
+template<typename T>
+inline int GetClosest(T & c, float & d, const T & a, 
+						const std::vector<T> & b)
+{
+	const int n = b.size();
+	if(n<1) return -1;
+	
+	int r;
+	float minD = 1e8f;
+	for(int i=0;i<n;++i) {
+		d = a.distanceTo(b[i]);
+		if(d<minD) {
+			minD = d;
+			c = b[i];
+			r = i;
+		}
+	}
+	d = minD;
+	return r;
+}
+
 }
 #endif        //  #ifndef ALLMATH_H
 
