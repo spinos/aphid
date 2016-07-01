@@ -35,6 +35,7 @@ typedef aphid::sdb::Array<aphid::sdb::Coord3, STriangle<ITetrahedron> > STriangl
 class BccNode {
 	
 public:
+	aphid::Vector3F pos;
 	int key;
 	int index;
 };

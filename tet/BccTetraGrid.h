@@ -23,7 +23,7 @@ public:
 	
 	void buildNodes();
 	int numNodes();
-	void getNodePositions(aphid::Vector3F * dest);
+	void extractNodePositions(aphid::Vector3F * dest);
 	void buildTetrahedrons(std::vector<ITetrahedron *> & dest);
 	void moveNodeIn(const aphid::Vector3F & cellCenter,
 					const aphid::Vector3F * pos, 
@@ -56,6 +56,8 @@ protected:
 private:
 	void countNodes();
 	void countNodesIn(aphid::sdb::Array<int, BccNode> * cell, int & c);
+	void extractNodePositionsIn(aphid::Vector3F * dest,
+						aphid::sdb::Array<int, BccNode> * cell);
 	
 };
 

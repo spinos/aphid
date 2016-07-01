@@ -68,12 +68,10 @@ bool BccTetrahedralize::createSamples()
 	m_sampleBegin = m_mesher.finishGrid();
 	
 	m_mesher.setN(m_sampleBegin + sampleGrid()->elementCount() );
-	
 	const int Nv = m_mesher.N();
 
+	m_mesher.extractGridPos();
 	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
-	
-	std::cout<<"\n n tet b4 delauney "<<m_mesher.buildMesh();
 	
 	supg->begin();
 	while(!supg->end() ) {
@@ -88,6 +86,8 @@ bool BccTetrahedralize::createSamples()
 		
 		supg->next();
 	}
+	
+	std::cout<<"\n n tet b4 delauney "<<m_mesher.buildMesh();
 	
 #if 0
 /// smooth grid by blue
@@ -150,7 +150,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#if 0	
+#if 1
 	Vector3F a, b, c, d;
 	sdb::Array<sdb::Coord3, IFace > * fronts = m_mesher.frontFaces();
 	dr->setColor(0.3f, 0.59f, 0.4f);
@@ -198,7 +198,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	
 	//dr->m_wireProfile.apply(); // slow
 	dr->setColor(0.2f, 0.2f, 0.49f);
-	// drawFrontEdges();
+	//drawFrontEdges();
 	drawFrontTets(dr);
 	drawRedBlue(dr);
 }

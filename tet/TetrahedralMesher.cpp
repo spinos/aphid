@@ -45,10 +45,12 @@ void TetrahedralMesher::setH(const float & x)
 
 void TetrahedralMesher::addCell(const Vector3F & p)
 {
-	if(!m_grid.findCell((const float *)&p ) ) {
+	const sdb::Coord3 c = m_grid.gridCoord((const float *)&p );
+	if(!m_grid.findCell(c) ) {
 		BccNode * node15 = new BccNode;
+		node15->pos = m_grid.coordToCellCenter(c);
 		node15->key = 15;
-		m_grid.insert((const float *)&p, node15 );
+		m_grid.insert(c, node15 );
 	}
 }
 
@@ -73,6 +75,9 @@ void TetrahedralMesher::setN(const int & x)
 		m_prop[i] = -1;
 }
 
+void TetrahedralMesher::extractGridPos()
+{ m_grid.extractNodePositions(m_X); }
+
 const int & TetrahedralMesher::N() const
 { return m_N; }
 
@@ -87,7 +92,6 @@ const int * TetrahedralMesher::prop() const
 
 int TetrahedralMesher::buildMesh()
 {
-	m_grid.getNodePositions(m_X);
 	m_grid.buildTetrahedrons(m_tets);
 	return m_tets.size();
 }

@@ -34,6 +34,7 @@ public:
 	int finishGrid();
 	int numNodes();
 	void setN(const int & x);
+	void extractGridPos();
 	int buildMesh();
 	bool addPoint(const int & vi, bool & topologyChanged);
 	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);

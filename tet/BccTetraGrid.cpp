@@ -69,22 +69,25 @@ int BccTetraGrid::numNodes()
 	return c;
 }
 
-void BccTetraGrid::getNodePositions(Vector3F * dest)
+void BccTetraGrid::extractNodePositions(Vector3F * dest)
 {
-	std::vector<BccCell> cells;
 	begin();
 	while(!end() ) {
-		cells.push_back(BccCell(coordToCellCenter(key() ) ) );
+		
+		extractNodePositionsIn(dest, value() );
 		next();
 	}
-	
-	const int n = cells.size();
-	int i=0;
-	for(;i<n;++i) {
-		const BccCell & c = cells[i];
-		c.getNodePositions(dest, this, gridCoord((const float *)c.centerP() ) );
+}
+
+void BccTetraGrid::extractNodePositionsIn(Vector3F * dest,
+									sdb::Array<int, BccNode> * cell)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		dest[cell->value()->index] = cell->value()->pos;
+		
+		cell->next();
 	}
-	cells.clear();
 }
 
 void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)

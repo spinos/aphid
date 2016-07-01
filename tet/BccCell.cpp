@@ -82,7 +82,7 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 		if(!grid->findCell(neighborCoord(cellCoord, i) ) ) {
 			BccNode * ni = new BccNode;
 			ni->key = i;
-			
+			getNodePosition(&ni->pos, i, gsize);
 			grid->insert(cellCoord, ni);
 		}
 	}
@@ -109,7 +109,7 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 		if(toadd) {
 			BccNode * ni = new BccNode;
 			ni->key = i;
-				
+			getNodePosition(&ni->pos, i, gsize);
 			grid->insert(cellCoord, ni);
 		}
 	}
@@ -336,11 +336,14 @@ void BccCell::getNodePosition(aphid::Vector3F * dest,
 						const int & nodeI,
 						const float & gridSize) const
 {
+	if(nodeI == 15) {
+		*dest = m_center;
+		return;
+	}
+	
 	Vector3F offset;
 	neighborOffset(&offset, nodeI);
 	offset *= gridSize * .5f;
-	if(nodeI == 15)
-		offset.set(0.f, 0.f, 0.f);
 		
 	*dest = m_center + offset;
 }
@@ -408,9 +411,7 @@ int BccCell::indexToBlueNode(const int & i,
 								grid,
 								cellCoord);
 	
-	Vector3F offset;
-	neighborOffset(&offset, i+6);
-	p = m_center + offset * cellSize * .5f;
+	p = node->pos;
 	return node->index;
 }
 
