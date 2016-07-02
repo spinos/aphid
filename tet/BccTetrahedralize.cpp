@@ -37,9 +37,14 @@ bool BccTetrahedralize::createSamples()
 	
 	supg->begin();
 	while(!supg->end() ) {
+	
+		std::vector<Vector3F> smps;
+		extractSamplePosIn(smps, supg->value() );
 		
 		Vector3F center = supg->coordToCellCenter(supg->key() );
-		m_mesher.addCell(center);
+		m_mesher.addFrontCell(center, smps);
+		
+		smps.clear();
 		
 		supg->getCellBoundingBox(&cbx);
 		
@@ -66,7 +71,8 @@ bool BccTetrahedralize::createSamples()
 	}
 	
 	m_mesher.buildGrid();
-	
+
+/*
 	supg->begin();
 	while(!supg->end() ) {
 	
@@ -80,7 +86,7 @@ bool BccTetrahedralize::createSamples()
 		
 		supg->next();
 	}
-	
+*/
 	m_mesher.buildMesh();
 	m_sampleBegin = m_mesher.numNodes();
 	
@@ -113,7 +119,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#define SHO_SAMPLES 0
+#define SHO_SAMPLES 1
 #if SHO_SAMPLES
 	dr->setColor(0.f, .3f, 0.1f);
 	for(i=m_sampleBegin;i<Nv;++i) {
@@ -183,7 +189,7 @@ void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
 	const int * prop = m_mesher.prop();
 	
 	for(int i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 3);
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 0, 3);
 		if(!t) continue;
 		
 		a = X[t->iv0];

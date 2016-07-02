@@ -13,6 +13,42 @@ using namespace aphid;
 
 namespace ttg {
 
+ClosestSampleTest::ClosestSampleTest(const std::vector<Vector3F> & src)
+{
+	m_smps = NULL;
+	m_N = src.size();
+	if(m_N>0) {
+		m_smps = new Vector3F[m_N];
+		int i=0;
+		for(;i<m_N;++i)
+			m_smps[i] = src[i];
+	}
+}
+
+ClosestSampleTest::~ClosestSampleTest()
+{
+	if(m_smps) delete[] m_smps;
+}
+
+int ClosestSampleTest::getClosest(Vector3F & dst, float & d, 
+				const Vector3F & toPnt) const
+{
+	if(m_N < 1) return -1;
+	int i=0;
+	int r;
+	float minD = 1e8f;
+	for(int i=0;i<m_N;++i) {
+		d = toPnt.distanceTo(m_smps[i]);
+		if(d<minD) {
+			minD = d;
+			dst = m_smps[i];
+			r = i;
+		}
+	}
+	d = minD;
+	return r;
+}
+
 float BccCell::TwentySixNeighborOffset[26][3] = {
 {-1.f, 0.f, 0.f}, // face 0 - 5
 { 1.f, 0.f, 0.f},
@@ -444,7 +480,6 @@ BccNode * BccCell::blueNode(const int & i,
 					sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					const float & cellSize,
 					aphid::Vector3F & p) const
 {
 	BccNode * node = cell->find(i+6);
@@ -526,6 +561,17 @@ BccNode * BccCell::addFaceNode(const int & i,
 	ni->key = 15000 + i;
 	grid->insert(cellCoord, ni);
 	return ni;
+}
+
+bool BccCell::moveBlueTo(const Vector3F & p,
+					const Vector3F & q,
+					const float & r)
+{
+	Vector3F dp = p - q;
+	if(Absolute<float>(dp.x) >= r) return false;
+	if(Absolute<float>(dp.y) >= r) return false;
+	if(Absolute<float>(dp.z) >= r) return false;
+	return true;
 }
 
 bool BccCell::moveFaceTo(const int & i,

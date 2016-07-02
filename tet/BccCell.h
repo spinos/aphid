@@ -14,6 +14,19 @@
 
 namespace ttg {
 
+class ClosestSampleTest {
+
+	aphid::Vector3F * m_smps;
+	int m_N;
+	
+public:
+	ClosestSampleTest(const std::vector<aphid::Vector3F> & src);
+	virtual ~ClosestSampleTest();
+	
+	int getClosest(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & toPnt) const;
+};
+
 /// face shared by two tetra
 template<typename T>
 class STriangle {
@@ -74,7 +87,6 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					const float & cellSize,
 					aphid::Vector3F & p) const;
 	BccNode * redRedNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
@@ -87,6 +99,9 @@ public:
 	BccNode * addFaceNode(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
+	bool moveBlueTo(const aphid::Vector3F & p,
+					const aphid::Vector3F & q,
+					const float & r);
 	bool moveFaceTo(const int & i,
 					const aphid::Vector3F & p,
 					const aphid::Vector3F & q,

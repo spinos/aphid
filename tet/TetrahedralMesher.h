@@ -23,6 +23,7 @@ class TetrahedralMesher {
 	int m_N;
 	std::vector<ITetrahedron *> m_tets;
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > m_frontFaces;
+	aphid::sdb::Array<aphid::sdb::Coord3, ClosestSampleTest> m_frontCellCoords;
 	
 public:
 	TetrahedralMesher();
@@ -31,6 +32,8 @@ public:
 	void clear();
 	void setH(const float & x);
 	void addCell(const aphid::Vector3F & p);
+	void addFrontCell(const aphid::Vector3F & p,
+				const std::vector<aphid::Vector3F> & samples);
 	void buildGrid();
 	int finishGrid();
 	int numNodes();
@@ -61,7 +64,16 @@ protected:
 private:
 	int countFrontVetices(const ITetrahedron * t) const;
 	void addFrontFaces(const ITetrahedron * t);
-	
+	void processCells();
+	void moveBlue(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples);
+	void moveRed(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples);
+	void cutFace(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples);
 };
 
 }

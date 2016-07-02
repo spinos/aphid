@@ -35,17 +35,23 @@ public:
 					int * prop);
 	bool moveRedNodeTo(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
-					const float & d,
 					const aphid::Vector3F & pos);
 	void moveBlueNodes(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & redP,
 					const std::vector<aphid::Vector3F> & samples);
+	void moveBlueNodes(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples);
+	aphid::Vector3F moveRedToCellCenter(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord);
 	void cutRedRedEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & redP,
 					const std::vector<aphid::Vector3F> & samples);
-				
+	void cutRedRedEdges(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples);			
 	void moveRedNodeIn(const aphid::Vector3F & cellCenter,
 					const  aphid::Vector3F & pos,
 					aphid::Vector3F * X,

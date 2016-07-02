@@ -35,6 +35,7 @@ void TetrahedralMesher::clear()
 	}
 	m_tets.clear();
 	m_frontFaces.clear();
+	m_frontCellCoords.clear();
 }
 
 void TetrahedralMesher::setH(const float & x)
@@ -46,14 +47,27 @@ void TetrahedralMesher::setH(const float & x)
 void TetrahedralMesher::addCell(const Vector3F & p)
 {
 	const sdb::Coord3 c = m_grid.gridCoord((const float *)&p );
-	if(!m_grid.findCell(c) ) {
+	if(m_grid.findCell(c) ) 
+		return;		
 /// red only
 		BccNode * node15 = new BccNode;
 		node15->pos = m_grid.coordToCellCenter(c);
 		node15->prop = -1;
 		node15->key = 15;
 		m_grid.insert(c, node15 );
-	}
+}
+
+void TetrahedralMesher::addFrontCell(const Vector3F & p,
+						const std::vector<Vector3F> & samples)
+{
+	addCell(p);
+	
+	const sdb::Coord3 c = m_grid.gridCoord((const float *)&p );
+	if(m_frontCellCoords.find(c) )
+		return;
+		
+	ClosestSampleTest * test = new ClosestSampleTest(samples);
+	m_frontCellCoords.insert(c, test);
 }
 
 void TetrahedralMesher::buildGrid()
@@ -104,6 +118,7 @@ const int * TetrahedralMesher::prop() const
 
 int TetrahedralMesher::buildMesh()
 {
+	processCells();
 	m_grid.buildTetrahedrons(m_tets);
 	return m_tets.size();
 }
@@ -229,7 +244,7 @@ void TetrahedralMesher::processCell(const Vector3F & c,
 	if(GetClosest<Vector3F>(redP, d, pc, pos) < 0)
 		return;
 	
-	bool isRedFront = m_grid.moveRedNodeTo(pc, gc, d, redP);
+	bool isRedFront = m_grid.moveRedNodeTo(pc, gc, redP);
 	if(!isRedFront )
 		redP = pc;
 		
@@ -238,5 +253,56 @@ void TetrahedralMesher::processCell(const Vector3F & c,
 	//if(isRedFront) 
 		m_grid.cutRedRedEdges(pc, gc, redP, pos);
 }
+
+void TetrahedralMesher::processCells()
+{
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		moveBlue(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
+	
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		moveRed(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
+	
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		cutFace(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
+}
+
+void TetrahedralMesher::moveBlue(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples)
+{ m_grid.moveBlueNodes(cellCenter, cellCoord, samples); }
+
+void TetrahedralMesher::moveRed(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples)
+{
+	Vector3F redP = m_grid.moveRedToCellCenter(cellCenter, cellCoord);
+/// closest to red
+	Vector3F closestP;
+	float d;
+	if(samples->getClosest(closestP, d, redP) < 0)
+		return;
+
+	m_grid.moveRedNodeTo(cellCenter, cellCoord, closestP);
+}
+
+void TetrahedralMesher::cutFace(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples)
+{ m_grid.cutRedRedEdges(cellCenter, cellCoord, samples); }
 
 }
