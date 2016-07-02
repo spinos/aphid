@@ -34,15 +34,18 @@ public:
 					aphid::Vector3F * X,
 					int * prop);
 	bool moveRedNodeTo(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
 					const float & d,
 					const aphid::Vector3F & pos);
 	void moveBlueNodes(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & redP,
 					const std::vector<aphid::Vector3F> & samples);
-	bool isBlueCloseToRed(const aphid::Vector3F & p,
-					const aphid::Vector3F & blueP,
+	void cutRedRedEdges(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & redP,
-					const float & r) const;				
+					const std::vector<aphid::Vector3F> & samples);
+				
 	void moveRedNodeIn(const aphid::Vector3F & cellCenter,
 					const  aphid::Vector3F & pos,
 					aphid::Vector3F * X,
@@ -57,6 +60,11 @@ private:
 	void extractNodePosPropIn(aphid::Vector3F * destPos,
 					int * destProp,
 					aphid::sdb::Array<int, BccNode> * cell);
+					
+	bool isBlueCloseToRed(const aphid::Vector3F & p,
+					const aphid::Vector3F & blueP,
+					const aphid::Vector3F & redP,
+					const float & r) const;
 	
 };
 

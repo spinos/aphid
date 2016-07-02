@@ -56,8 +56,6 @@ public:
 	void processCell(const aphid::Vector3F & c,
 						const std::vector<aphid::Vector3F> & pos);
 	
-	void smoothBlueNodeInCell(const aphid::Vector3F & cellCenter);
-	
 protected:
 
 private:

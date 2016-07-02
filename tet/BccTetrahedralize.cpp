@@ -121,7 +121,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#if 1
+#if 0
 	Vector3F a, b, c, d;
 	sdb::Array<sdb::Coord3, IFace > * fronts = m_mesher.frontFaces();
 	dr->setColor(0.3f, 0.59f, 0.4f);

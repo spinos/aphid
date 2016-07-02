@@ -48,6 +48,7 @@ class BccCell {
 	static float TwentySixNeighborOffset[26][3];
 	static int SevenNeighborOnCorner[8][7];
 	static int SixTetraFace[6][8];
+	static int SixNeighborOnFace[6][4];
 	
 public:
 	BccCell(const aphid::Vector3F &center );
@@ -70,10 +71,26 @@ public:
 	BccNode * redNode(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * blueNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					const float & cellSize,
 					aphid::Vector3F & p) const;
+	BccNode * redRedNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * faceNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * addFaceNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord);
+	bool moveFaceTo(const int & i,
+					const aphid::Vector3F & p,
+					const aphid::Vector3F & redP,
+					const float & r);
 	int indexToBlueNode(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
@@ -87,6 +104,7 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
 	const aphid::Vector3F * centerP() const;
+	const aphid::Vector3F facePosition(const int & i, const float & gz) const;
 	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
@@ -106,6 +124,9 @@ private:
 					const int & iface,
 					STriangleArray * faces) const;
 	BccNode * findCornerNodeInNeighbor(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * findRedRedNodeInNeighbor(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	void addFace(STriangleArray * faces,

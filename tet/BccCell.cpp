@@ -63,6 +63,15 @@ int BccCell::SixTetraFace[6][8] = {
 {10,11,11,13,13,12,12,10}
 };
 
+int BccCell::SixNeighborOnFace[6][4] = {
+{-1, 0, 0, 1},
+{ 1, 0, 0, 0},
+{ 0,-1, 0, 3},
+{ 0, 1, 0, 2},
+{ 0, 0,-1, 5},
+{ 0, 0, 1, 4}
+};
+
 BccCell::BccCell(const Vector3F &center )
 { m_center = center; }
 
@@ -410,12 +419,12 @@ BccNode * BccCell::redNode(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>
 /// vertex node
 /// i 0:7
 BccNode * BccCell::blueNode(const int & i,
+					sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					const float & cellSize,
 					aphid::Vector3F & p) const
 {
-	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord );
 	BccNode * node = cell->find(i+6);
 	if(!node) 
 		node = findCornerNodeInNeighbor(i+6,
@@ -423,6 +432,93 @@ BccNode * BccCell::blueNode(const int & i,
 								cellCoord);
 	p = node->pos;
 	return node;
+}
+
+/// red-red cut
+/// i 0:5
+BccNode * BccCell::redRedNode(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * node = cell->find(15000 + i);
+	if(!node)
+		node = findRedRedNodeInNeighbor(i, 
+								grid,
+								cellCoord);
+		
+	return node;
+}
+
+/// i 0:5
+BccNode * BccCell::findRedRedNodeInNeighbor(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	sdb::Coord3 neiC(cellCoord.x + SixNeighborOnFace[i][0],
+					cellCoord.y + SixNeighborOnFace[i][1],
+					cellCoord.z + SixNeighborOnFace[i][2]);
+	
+	sdb::Array<int, BccNode> * cell = grid->findCell(neiC);
+	if(!cell) 
+		return NULL;
+	
+	return cell->find(15000 + SixNeighborOnFace[i][3]);
+}
+
+/// i 0:5
+BccNode * BccCell::faceNode(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * node = cell->find(i);
+	if(!node) {
+		sdb::Coord3 neiC(cellCoord.x + SixNeighborOnFace[i][0],
+					cellCoord.y + SixNeighborOnFace[i][1],
+					cellCoord.z + SixNeighborOnFace[i][2]);
+		sdb::Array<int, BccNode> * nei = grid->findCell(neiC);
+		if(!nei) {
+			std::cout<<"\n [ERROR] no neighbor"<<i<<" in cell"<<cellCoord;
+			return NULL;
+		}
+		node = nei->find(15);
+	}
+
+	return node;
+}
+
+/// i 0:5
+const Vector3F BccCell::facePosition(const int & i, const float & gz) const
+{
+	Vector3F offset;
+	neighborOffset(&offset, i);
+	return m_center + offset * gz * .5f;
+}
+
+BccNode * BccCell::addFaceNode(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord)
+{
+	BccNode * ni = new BccNode;
+	ni->key = 15000 + i;
+	grid->insert(cellCoord, ni);
+	return ni;
+}
+
+bool BccCell::moveFaceTo(const int & i,
+					const Vector3F & p,
+					const Vector3F & redP,
+					const float & r)
+{
+	Vector3F vp = p - m_center;
+	
+	vp.normalize();
+	Vector3F offset;
+	neighborOffset(&offset, i);
+	if(vp.dot(offset) < .707f ) return false;
+	
+	return (p - redP).length() > r;
 }
 
 /// vertex node

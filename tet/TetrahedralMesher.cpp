@@ -104,7 +104,6 @@ const int * TetrahedralMesher::prop() const
 
 int TetrahedralMesher::buildMesh()
 {
-	m_grid.countNodes();
 	m_grid.buildTetrahedrons(m_tets);
 	return m_tets.size();
 }
@@ -221,22 +220,22 @@ sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
 void TetrahedralMesher::processCell(const Vector3F & c,
 						const std::vector<Vector3F> & pos)
 {
+	sdb::Coord3 gc = m_grid.gridCoord((const float *)&c );
+	Vector3F pc = m_grid.coordToCellCenter(gc );
+	
 /// closest to red
 	Vector3F redP;
 	float d;
-	if(GetClosest<Vector3F>(redP, d, c, pos) < 0)
+	if(GetClosest<Vector3F>(redP, d, pc, pos) < 0)
 		return;
 	
-	bool isRedFront = m_grid.moveRedNodeTo(c, d, redP);
+	bool isRedFront = m_grid.moveRedNodeTo(pc, gc, d, redP);
 	if(!isRedFront )
-		redP = c;
+		redP = pc;
 		
-	m_grid.moveBlueNodes(c, redP, pos);
-}
-
-void TetrahedralMesher::smoothBlueNodeInCell(const aphid::Vector3F & cellCenter)
-{
-	m_grid.smoothBlueNodeIn(cellCenter, m_X);
+	m_grid.moveBlueNodes(pc, gc, redP, pos);
+	
+	if(isRedFront) m_grid.cutRedRedEdges(pc, gc, redP, pos);
 }
 
 }
