@@ -21,9 +21,12 @@ public:
 	BccTetraGrid();
 	virtual ~BccTetraGrid();
 	
+	void addBlueNodes(const aphid::Vector3F & cellCenter);
+	void countNodes();
 	void buildNodes();
 	int numNodes();
-	void extractNodePositions(aphid::Vector3F * dest);
+	void extractNodePosProp(aphid::Vector3F * destPos,
+					int * destProp);
 	void buildTetrahedrons(std::vector<ITetrahedron *> & dest);
 	void moveNodeIn(const aphid::Vector3F & cellCenter,
 					const aphid::Vector3F * pos, 
@@ -32,14 +35,10 @@ public:
 					int * prop);
 	bool moveRedNodeTo(const aphid::Vector3F & cellCenter,
 					const float & d,
-					const aphid::Vector3F & pos,
-					aphid::Vector3F * X,
-					int * prop);
+					const aphid::Vector3F & pos);
 	void moveBlueNodes(const aphid::Vector3F & cellCenter,
 					const aphid::Vector3F & redP,
-					const std::vector<aphid::Vector3F> & samples,
-					aphid::Vector3F * X,
-					int * prop);
+					const std::vector<aphid::Vector3F> & samples);
 	bool isBlueCloseToRed(const aphid::Vector3F & p,
 					const aphid::Vector3F & blueP,
 					const aphid::Vector3F & redP,
@@ -54,10 +53,10 @@ public:
 protected:
 
 private:
-	void countNodes();
 	void countNodesIn(aphid::sdb::Array<int, BccNode> * cell, int & c);
-	void extractNodePositionsIn(aphid::Vector3F * dest,
-						aphid::sdb::Array<int, BccNode> * cell);
+	void extractNodePosPropIn(aphid::Vector3F * destPos,
+					int * destProp,
+					aphid::sdb::Array<int, BccNode> * cell);
 	
 };
 

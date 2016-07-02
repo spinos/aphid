@@ -11,6 +11,40 @@ inline float distancePointLine(const Vector3F & P0,
     return sqrt(((P0 - P1).cross(P0 - P2)).length2() / (P2 - P1).length2()); 
 }
 
+inline bool distancePointLineSegment(float & d,
+						const Vector3F & P0, 
+                        const Vector3F & P1, const Vector3F & P2)
+{
+	Vector3F v12 = P2 - P1
+	Vector3F v10 = P0 - P1;
+
+	if(v10.dot(v12) <= 0.f ) {
+		d = v10.length();
+		return false;
+	}
+		
+	Vector3F v20 = P0 - P2;
+	
+	if(v20.dot(v12) >= 0.f ) {
+		d = v20.length();
+		return false;
+	}
+	
+    d = sqrt((v10.cross(v20)).length2() / v12.length2() );
+	return true;
+}
+
+inline void projectPointLineSegment(Vector3F & q,
+						const float & d,
+						const Vector3F & P0, 
+                        const Vector3F & P1, const Vector3F & P2)
+{
+	Vector3F v10 = P0 - P1;
+	float lq1 = sqrt(v10.length2() - d * d);
+	Vector3F v12 = P2 - P1;
+	q = P1 + v12.normal() * lq1;
+}
+
 // http://mathworld.wolfram.com/SkewLines.html
 inline bool areIntersectedOrParallelLines(const Vector3F & P1, const Vector3F & P2,
                         const Vector3F & P3, const Vector3F & P4)

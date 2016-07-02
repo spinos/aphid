@@ -31,10 +31,11 @@ public:
 	void clear();
 	void setH(const float & x);
 	void addCell(const aphid::Vector3F & p);
+	void buildGrid();
 	int finishGrid();
 	int numNodes();
 	void setN(const int & x);
-	void extractGridPos();
+	void extractGridPosProp();
 	int buildMesh();
 	bool addPoint(const int & vi, bool & topologyChanged);
 	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);

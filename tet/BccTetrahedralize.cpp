@@ -28,10 +28,10 @@ bool BccTetrahedralize::createSamples()
 	
 	PoissonSequence<Disk> * supg = sampleGrid();
 	
-	const float supsize = supg->gridSize(); /// 2r
+	const float supsize = supg->gridSize();
 	m_mesher.setH(supsize);
 	
-	const float bsize = supsize * .5f; /// r
+	const float bsize = supsize * .5f;
 	m_pntSz = bsize * .0625f;
 	BoundingBox cbx;
 	
@@ -47,7 +47,7 @@ bool BccTetrahedralize::createSamples()
 		float bdx = cbx.distance(0) *.5f;
 		float bdy = cbx.distance(1) *.5f;
 		float bdz = cbx.distance(2) *.5f;
-		
+/// force boundary		
 		for(int i=0; i<26; ++i) {
 			Vector3F voffset(PoissonSequence<Disk>::TwentySixNeighborCoord[i][0],
 							PoissonSequence<Disk>::TwentySixNeighborCoord[i][1],
@@ -65,13 +65,7 @@ bool BccTetrahedralize::createSamples()
 		supg->next();
 	}
 	
-	m_sampleBegin = m_mesher.finishGrid();
-	
-	m_mesher.setN(m_sampleBegin + sampleGrid()->elementCount() );
-	const int Nv = m_mesher.N();
-
-	m_mesher.extractGridPos();
-	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
+	m_mesher.buildGrid();
 	
 	supg->begin();
 	while(!supg->end() ) {
@@ -87,38 +81,15 @@ bool BccTetrahedralize::createSamples()
 		supg->next();
 	}
 	
-	std::cout<<"\n n tet b4 delauney "<<m_mesher.buildMesh();
+	m_mesher.buildMesh();
+	m_sampleBegin = m_mesher.numNodes();
 	
-#if 0
-/// smooth grid by blue
-	supg->begin();
-	while(!supg->end() ) {
+	m_mesher.setN(m_sampleBegin + sampleGrid()->elementCount() );
+
+	m_mesher.extractGridPosProp();
+	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
 		
-		Vector3F center = supg->coordToCellCenter(supg->key() );
-		m_mesher.smoothBlueNodeInCell(center);
-		
-		supg->next();
-	}
-	
-		
-	bool topoChanged;
-	int i = m_sampleBegin;
-	for(; i<Nv;++i) {
-		if(!m_mesher.addPoint(i, topoChanged) ) {
-			std::cout<<"\n [WARNING] add pnt break at v"<<i;
-			break;
-		}
-		if(topoChanged) {
-			if(!m_mesher.checkConnectivity() ) {
-			std::cout<<"\n [WARNING] check conn break at v"<<i;
-			break;
-			}
-			// std::cout<<"\n [INFO] passed topology check";
-		}
-	}
-#endif	
-	std::cout<<"\n n samples "<<m_sampleBegin
-		<<"\n n total node "<<Nv
+	std::cout<<"\n n node "<<m_sampleBegin
 		<<"\n n tet "<<m_mesher.numTetrahedrons()
 		<<"\n n front face "<<m_mesher.buildFrontFaces();
 	std::cout.flush();
@@ -200,7 +171,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	dr->setColor(0.2f, 0.2f, 0.49f);
 	//drawFrontEdges();
 	drawFrontTets(dr);
-	drawRedBlue(dr);
+	drawRedBlueGreen(dr);
 }
 
 void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
@@ -212,7 +183,7 @@ void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
 	const int * prop = m_mesher.prop();
 	
 	for(int i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 2);
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 3);
 		if(!t) continue;
 		
 		a = X[t->iv0];
@@ -285,7 +256,7 @@ void BccTetrahedralize::drawFrontEdges()
 	glEnd();
 }
 
-void BccTetrahedralize::drawRedBlue(aphid::GeoDrawer * dr)
+void BccTetrahedralize::drawRedBlueGreen(aphid::GeoDrawer * dr)
 {
 	const int Nv = m_mesher.N();
 	const Vector3F * X = m_mesher.X();
@@ -302,6 +273,9 @@ void BccTetrahedralize::drawRedBlue(aphid::GeoDrawer * dr)
 			dr->setColor(0.f, 0.f, 1.f);
 		else if(prop[i] == 4 )
 			dr->setColor(1.f, 0.f, 0.f);
+		else
+			dr->setColor(0.f, 1.f, 0.f);
+			
 		dr->cube(X[i], m_pntSz);
 	}
 }

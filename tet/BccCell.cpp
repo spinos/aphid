@@ -69,7 +69,7 @@ BccCell::BccCell(const Vector3F &center )
 const Vector3F * BccCell::centerP() const
 { return &m_center; }
 
-void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+void BccCell::addRedBlueNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 						const sdb::Coord3 & cellCoord ) const
 {
 	const float gsize = grid->gridSize();
@@ -82,6 +82,7 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 		if(!grid->findCell(neighborCoord(cellCoord, i) ) ) {
 			BccNode * ni = new BccNode;
 			ni->key = i;
+			ni->prop = -1;
 			getNodePosition(&ni->pos, i, gsize);
 			grid->insert(cellCoord, ni);
 		}
@@ -109,6 +110,7 @@ void BccCell::addNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid
 		if(toadd) {
 			BccNode * ni = new BccNode;
 			ni->key = i;
+			ni->prop = -1;
 			getNodePosition(&ni->pos, i, gsize);
 			grid->insert(cellCoord, ni);
 		}
@@ -394,6 +396,33 @@ int BccCell::indexToNode15(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>
 		
 	BccNode * node15 = cell->find(15);
 	return node15->index;
+}
+
+/// center node
+BccNode * BccCell::redNode(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const	
+{
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord );
+		
+	return cell->find(15);
+}
+
+/// vertex node
+/// i 0:7
+BccNode * BccCell::blueNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const float & cellSize,
+					aphid::Vector3F & p) const
+{
+	sdb::Array<int, BccNode> * cell = grid->findCell(cellCoord );
+	BccNode * node = cell->find(i+6);
+	if(!node) 
+		node = findCornerNodeInNeighbor(i+6,
+								grid,
+								cellCoord);
+	p = node->pos;
+	return node;
 }
 
 /// vertex node

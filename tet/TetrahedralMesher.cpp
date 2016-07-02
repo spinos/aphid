@@ -47,19 +47,31 @@ void TetrahedralMesher::addCell(const Vector3F & p)
 {
 	const sdb::Coord3 c = m_grid.gridCoord((const float *)&p );
 	if(!m_grid.findCell(c) ) {
+/// red only
 		BccNode * node15 = new BccNode;
 		node15->pos = m_grid.coordToCellCenter(c);
+		node15->prop = -1;
 		node15->key = 15;
 		m_grid.insert(c, node15 );
 	}
 }
 
-int TetrahedralMesher::finishGrid()
+void TetrahedralMesher::buildGrid()
 {
 	m_grid.calculateBBox();
 	std::cout<<"\n mesher grid n cell "<<m_grid.size()
 			<<"\n bbx "<<m_grid.boundingBox();
-	m_grid.buildNodes();
+	
+	m_grid.begin();
+	while(!m_grid.end() ) {
+		m_grid.addBlueNodes(m_grid.coordToCellCenter(m_grid.key() ) );
+		m_grid.next();
+	}
+}
+
+int TetrahedralMesher::finishGrid()
+{
+	
 	return m_grid.numNodes();
 }
 
@@ -75,8 +87,8 @@ void TetrahedralMesher::setN(const int & x)
 		m_prop[i] = -1;
 }
 
-void TetrahedralMesher::extractGridPos()
-{ m_grid.extractNodePositions(m_X); }
+void TetrahedralMesher::extractGridPosProp()
+{ m_grid.extractNodePosProp(m_X, m_prop); }
 
 const int & TetrahedralMesher::N() const
 { return m_N; }
@@ -92,6 +104,7 @@ const int * TetrahedralMesher::prop() const
 
 int TetrahedralMesher::buildMesh()
 {
+	m_grid.countNodes();
 	m_grid.buildTetrahedrons(m_tets);
 	return m_tets.size();
 }
@@ -213,11 +226,12 @@ void TetrahedralMesher::processCell(const Vector3F & c,
 	float d;
 	if(GetClosest<Vector3F>(redP, d, c, pos) < 0)
 		return;
-		
-	if(!m_grid.moveRedNodeTo(c, d, redP, m_X, m_prop) )
+	
+	bool isRedFront = m_grid.moveRedNodeTo(c, d, redP);
+	if(!isRedFront )
 		redP = c;
 		
-	m_grid.moveBlueNodes(c, redP, pos, m_X, m_prop);
+	m_grid.moveBlueNodes(c, redP, pos);
 }
 
 void TetrahedralMesher::smoothBlueNodeInCell(const aphid::Vector3F & cellCenter)

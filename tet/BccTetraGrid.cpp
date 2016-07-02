@@ -18,6 +18,12 @@ BccTetraGrid::BccTetraGrid()
 BccTetraGrid::~BccTetraGrid() 
 {}
 
+void BccTetraGrid::addBlueNodes(const Vector3F & cellCenter)
+{
+	BccCell c(cellCenter);
+	c.addRedBlueNodes(this, gridCoord((const float *)c.centerP() ) );
+}
+
 void BccTetraGrid::buildNodes()
 {
 	std::vector<BccCell> cells;
@@ -31,7 +37,7 @@ void BccTetraGrid::buildNodes()
 	int i=0;
 	for(;i<n;++i) {
 		const BccCell & c = cells[i];
-		c.addNodes(this, gridCoord((const float *)c.centerP() ) );
+		c.addRedBlueNodes(this, gridCoord((const float *)c.centerP() ) );
 	}
 	cells.clear();
 	countNodes();
@@ -69,22 +75,26 @@ int BccTetraGrid::numNodes()
 	return c;
 }
 
-void BccTetraGrid::extractNodePositions(Vector3F * dest)
+void BccTetraGrid::extractNodePosProp(Vector3F * destPos,
+					int * destProp)
 {
 	begin();
 	while(!end() ) {
 		
-		extractNodePositionsIn(dest, value() );
+		extractNodePosPropIn(destPos, destProp, value() );
 		next();
 	}
 }
 
-void BccTetraGrid::extractNodePositionsIn(Vector3F * dest,
-									sdb::Array<int, BccNode> * cell)
+void BccTetraGrid::extractNodePosPropIn(Vector3F * destPos,
+					int * destProp,
+					sdb::Array<int, BccNode> * cell)
 {
 	cell->begin();
 	while(!cell->end() ) {
-		dest[cell->value()->index] = cell->value()->pos;
+		int i = cell->value()->index;
+		destPos[i] = cell->value()->pos;
+		destProp[i] = cell->value()->prop;
 		
 		cell->next();
 	}
@@ -173,29 +183,26 @@ void BccTetraGrid::moveNodeIn(const aphid::Vector3F & cellCenter,
 
 bool BccTetraGrid::moveRedNodeTo(const Vector3F & cellCenter,
 					const float & d,
-					const Vector3F & pos,
-					Vector3F * X,
-					int * prop)
+					const Vector3F & pos)
 {	
-	BccCell cell(cellCenter);
-	int xi = cell.indexToNode15(this, gridCoord((const float *)&cellCenter ) );
-			
 /// limit in which red can move
 	if(d > gridSize() * .25f) {
 		return false;
 	}
 		
-	X[xi] = pos;
-	prop[xi] = 4;
+	BccCell cell(cellCenter);
+	BccNode * node = cell.redNode(this, gridCoord((const float *)&cellCenter ) );
+	
+	// std::cout<<"\n move red";
+	node->pos = pos;
+	node->prop = 4;
 	
 	return true;
 }
 
 void BccTetraGrid::moveBlueNodes(const Vector3F & cellCenter,
 					const aphid::Vector3F & redP,
-					const std::vector<Vector3F> & samples,
-					aphid::Vector3F * X,
-					int * prop)
+					const std::vector<Vector3F> & samples)
 {
 	const float gz = gridSize();
 	const float r = gz * .25f;
@@ -207,9 +214,9 @@ void BccTetraGrid::moveBlueNodes(const Vector3F & cellCenter,
 /// for each blue
 	int i=0;
 	for(;i<8;++i) {
-		xi = cell.indexToBlueNode(i, this, cellCoord, gz, blueP);
+		BccNode * xi = cell.blueNode(i, this, cellCoord, gz, blueP);
 /// already moved
-		if(prop[xi] > 0) 
+		if(xi->prop > 0) 
 			continue;
 			
 		GetClosest<Vector3F>(closestP, d, blueP, samples);
@@ -218,9 +225,9 @@ void BccTetraGrid::moveBlueNodes(const Vector3F & cellCenter,
 			continue;
 		}
 			
-		//std::cout<<"\n move blue"<<xi;
-		X[xi] = closestP;
-		prop[xi] = 3;
+		// std::cout<<"\n move blue";
+		xi->pos = closestP;
+		xi->prop = 3;
 	}
 }
 

@@ -33,7 +33,7 @@ protected:
 private:
 	void drawFrontEdges();
 	void drawFrontTets(aphid::GeoDrawer * dr);
-	void drawRedBlue(aphid::GeoDrawer * dr);
+	void drawRedBlueGreen(aphid::GeoDrawer * dr);
 };
 
 }
