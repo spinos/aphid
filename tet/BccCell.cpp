@@ -166,38 +166,60 @@ void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 		return;
 	}
 	
-/// for each face
-	if(!grid->findCell(neighborCoord(cellCoord, 0) ) )
-		connectNodesOnFace(dest, grid, cell, cellCoord, node15, 0, faces);
-	if(!grid->findCell(neighborCoord(cellCoord, 2) ) )
-		connectNodesOnFace(dest, grid, cell, cellCoord, node15, 2, faces);
-	if(!grid->findCell(neighborCoord(cellCoord, 4) ) )
-		connectNodesOnFace(dest, grid, cell, cellCoord, node15, 4, faces);
+	int ired = node15->index;
+
+/// for each face	
+	int i=0;
+	for(;i<6;++i) {
 		
-	connectNodesOnFace(dest, grid, cell, cellCoord, node15, 1, faces);
-	connectNodesOnFace(dest, grid, cell, cellCoord, node15, 3, faces);
-	connectNodesOnFace(dest, grid, cell, cellCoord, node15, 5, faces);
+		BccNode * nodeA = redRedNode(i, cell, grid, cellCoord);
+		if(!nodeA) {
+			if((i & 1)==0) {
+				if(grid->findCell(neighborCoord(cellCoord, i) ) )
+					continue;
+			}
+			nodeA = faceNode(i, cell, grid, cellCoord);
+		}
+		connectNodesOnFace(dest, grid, cell, cellCoord, 
+							ired, nodeA->index, i, faces);
+
+	}
+	
+	
+/*
+	if(!grid->findCell(neighborCoord(cellCoord, 0) ) ) {
+		nodeA = faceNode(0, cell, grid, cellCoord);
+		connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 0, faces);
+	}
+	if(!grid->findCell(neighborCoord(cellCoord, 2) ) ) {
+		nodeA = faceNode(2, cell, grid, cellCoord);
+		connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 2, faces);
+	}
+	if(!grid->findCell(neighborCoord(cellCoord, 4) ) ) {
+		nodeA = faceNode(4, cell, grid, cellCoord);
+		connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 4, faces);
+	}
+		
+	nodeA = faceNode(1, cell, grid, cellCoord);
+	connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 1, faces);
+	
+	nodeA = faceNode(3, cell, grid, cellCoord);
+	connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 3, faces);
+	
+	nodeA = faceNode(5, cell, grid, cellCoord);
+	connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 5, faces);
+	*/
 }
 
 void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					sdb::Array<int, BccNode> * cell,
 					const sdb::Coord3 & cellCoord,
-					BccNode * node15,
+					int inode15,
+					int a,
 					const int & iface,
 					STriangleArray * faces) const
 {
-	const int inode15 = node15->index;
-	BccNode * nodeA = cell->find(iface);
-	if(!nodeA) {
-		sdb::Array<int, BccNode> * neicell = grid->findCell(neighborCoord(cellCoord, iface) );
-		if(!neicell) {
-			std::cout<<"\n [ERROR] no shared node"<<iface<<" in neighbor cell ";
-			return;
-		}
-		nodeA = neicell->find(15);
-	}
-	const int a = nodeA->index;
 /// four tetra
 	int i=0;
 	for(;i<8;i+=2) {
@@ -508,15 +530,13 @@ BccNode * BccCell::addFaceNode(const int & i,
 
 bool BccCell::moveFaceTo(const int & i,
 					const Vector3F & p,
+					const Vector3F & q,
 					const Vector3F & redP,
 					const float & r)
 {
-	Vector3F vp = p - m_center;
-	
-	vp.normalize();
-	Vector3F offset;
-	neighborOffset(&offset, i);
-	if(vp.dot(offset) < .707f ) return false;
+	Vector3F vp = p - q;
+	float d = vp.length();
+	if(d < .1f * r || d > r) return false;
 	
 	return (p - redP).length() > r;
 }

@@ -260,11 +260,15 @@ void BccTetraGrid::cutRedRedEdges(const Vector3F & cellCenter,
 		if(fCell.redRedNode(i, cell, this, cellCoord) )
 			continue;
 			
-		q = fCell.facePosition(i, gz);
+		BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
+		if(nend->key == i)
+			q = nend->pos;
+		else
+			q = (nend->pos + redP) * .5f;
 		
 		GetClosest<Vector3F>(closestP, d, q, samples);
 		
-		if(!fCell.moveFaceTo(i, closestP, redP, r) )
+		if(!fCell.moveFaceTo(i, closestP, q, redP, r) )
 			continue;
 			
 		BccNode * node = fCell.addFaceNode(i, this, cellCoord);

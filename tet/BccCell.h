@@ -89,6 +89,7 @@ public:
 					const aphid::sdb::Coord3 & cellCoord);
 	bool moveFaceTo(const int & i,
 					const aphid::Vector3F & p,
+					const aphid::Vector3F & q,
 					const aphid::Vector3F & redP,
 					const float & r);
 	int indexToBlueNode(const int & i,
@@ -120,7 +121,8 @@ private:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord,
-					BccNode * node15, 
+					int inode15, 
+					int a,
 					const int & iface,
 					STriangleArray * faces) const;
 	BccNode * findCornerNodeInNeighbor(const int & i,

@@ -235,7 +235,8 @@ void TetrahedralMesher::processCell(const Vector3F & c,
 		
 	m_grid.moveBlueNodes(pc, gc, redP, pos);
 	
-	if(isRedFront) m_grid.cutRedRedEdges(pc, gc, redP, pos);
+	//if(isRedFront) 
+		m_grid.cutRedRedEdges(pc, gc, redP, pos);
 }
 
 }

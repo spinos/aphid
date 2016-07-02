@@ -113,7 +113,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#define SHO_SAMPLES 1
+#define SHO_SAMPLES 0
 #if SHO_SAMPLES
 	dr->setColor(0.f, .3f, 0.1f);
 	for(i=m_sampleBegin;i<Nv;++i) {
@@ -121,7 +121,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#if 0
+#if 1
 	Vector3F a, b, c, d;
 	sdb::Array<sdb::Coord3, IFace > * fronts = m_mesher.frontFaces();
 	dr->setColor(0.3f, 0.59f, 0.4f);
