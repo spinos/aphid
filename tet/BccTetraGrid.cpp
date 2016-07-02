@@ -372,7 +372,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 /// must intersect
 			if(samples->getIntersect(closestP, d, redP, nend->pos) < 0)
 				continue;
-			if(d > .5f * r)
+			if(closestP.distanceTo(q) > r || d > 2.f * r)
 				continue;
 		}
 			

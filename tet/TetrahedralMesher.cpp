@@ -279,6 +279,14 @@ void TetrahedralMesher::processCells()
 		cutFace(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
+	
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		cutBlueBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
 }
 
 void TetrahedralMesher::moveBlue(const Vector3F & cellCenter,
@@ -304,5 +312,12 @@ void TetrahedralMesher::cutFace(const Vector3F & cellCenter,
 					const sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples)
 { m_grid.cutRedRedEdges(cellCenter, cellCoord, samples); }
+
+void TetrahedralMesher::cutBlueBlueEdges(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples)
+{  
+
+}
 
 }

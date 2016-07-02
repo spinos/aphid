@@ -55,22 +55,36 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 				const aphid::Vector3F & seg2) const
 {
 	if(m_N < 1) return -1;
+	Vector3F pos;
+	Vector3F sum(0.f, 0.f, 0.f);
 	int i=0;
 	int r = -1;
-	float minD = 1e8f;
+	float iDot, minD = 1e8f, minDot = 1e8f;
 	for(int i=0;i<m_N;++i) {
 	
 		if(distancePointLineSegment(d, m_smps[i], seg1, seg2) ) {
+			projectPointLineSegment(pos, d, m_smps[i], seg1, seg2);
+			pos = m_smps[i] - pos;
+			sum += pos;
+			iDot = pos.dot(sum);
+			if(minDot > iDot) {
+				minDot = iDot;
+			}
+			
 		if(d<minD) {
 			minD = d;
 			r = i;
 		}
 		}
 	}
-	d = minD;
 	
-	if(r > -1) 
+	if(minDot > -.01f)
+		return -1;
+	
+	if(r > -1) {
+		d = minD;
 		projectPointLineSegment(dst, d, m_smps[r], seg1, seg2);
+	}
 	
 	return r;
 }
