@@ -25,6 +25,10 @@ public:
 	
 	int getClosest(aphid::Vector3F & dst, float & d, 
 				const aphid::Vector3F & toPnt) const;
+				
+	int getIntersect(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & seg1,
+				const aphid::Vector3F & seg2) const;
 };
 
 /// face shared by two tetra

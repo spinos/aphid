@@ -15,7 +15,7 @@ inline bool distancePointLineSegment(float & d,
 						const Vector3F & P0, 
                         const Vector3F & P1, const Vector3F & P2)
 {
-	Vector3F v12 = P2 - P1
+	Vector3F v12 = P2 - P1;
 	Vector3F v10 = P0 - P1;
 
 	if(v10.dot(v12) <= 0.f ) {

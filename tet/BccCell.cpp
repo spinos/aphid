@@ -8,6 +8,7 @@
  */
 
 #include "BccCell.h"
+#include <line_math.h>
 
 using namespace aphid;
 
@@ -46,6 +47,31 @@ int ClosestSampleTest::getClosest(Vector3F & dst, float & d,
 		}
 	}
 	d = minD;
+	return r;
+}
+
+int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & seg1,
+				const aphid::Vector3F & seg2) const
+{
+	if(m_N < 1) return -1;
+	int i=0;
+	int r = -1;
+	float minD = 1e8f;
+	for(int i=0;i<m_N;++i) {
+	
+		if(distancePointLineSegment(d, m_smps[i], seg1, seg2) ) {
+		if(d<minD) {
+			minD = d;
+			r = i;
+		}
+		}
+	}
+	d = minD;
+	
+	if(r > -1) 
+		projectPointLineSegment(dst, d, m_smps[r], seg1, seg2);
+	
 	return r;
 }
 
