@@ -51,6 +51,7 @@ class BccCell {
 	static int SixNeighborOnFace[6][4];
 	static int TwelveBlueBlueEdges[12][3];
 	static int ThreeNeighborOnEdge[36][4];
+	static int TwentyFourFVBlueBlueEdge[24][3];
 	
 public:
 	BccCell(const aphid::Vector3F &center );
@@ -77,6 +78,10 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					aphid::Vector3F & p) const;
+	BccNode * blueNode6(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * redRedNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -157,6 +162,9 @@ private:
 	BccNode * findBlueBlueNodeInNeighbor(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	void addTetrahedron(std::vector<ITetrahedron *> & dest,
+					STriangleArray * faces,
+					int v0, int a, int b, int c) const;
 	void addFace(STriangleArray * faces,
 				int a, int b, int c,
 				ITetrahedron * t) const;

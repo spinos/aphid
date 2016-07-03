@@ -119,7 +119,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#define SHO_SAMPLES 1
+#define SHO_SAMPLES 0
 #if SHO_SAMPLES
 	dr->setColor(0.f, .3f, 0.1f);
 	for(i=m_sampleBegin;i<Nv;++i) {
@@ -189,7 +189,7 @@ void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
 	const int * prop = m_mesher.prop();
 	
 	for(int i=0; i<Nt; ++i) {
-		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 0, 3);
+		const ITetrahedron * t = m_mesher.frontTetrahedron(i, 1, 3);
 		if(!t) continue;
 		
 		a = X[t->iv0];
@@ -275,14 +275,14 @@ void BccTetrahedralize::drawRedBlueGreen(aphid::GeoDrawer * dr)
 		if(prop[i] < 0 )
 			continue;
 			
-		if(prop[i] == 3 )
+		if(prop[i] == 3 ) /// blue
 			dr->setColor(0.f, 0.f, 1.f);
-		else if(prop[i] == 4 )
+		else if(prop[i] == 4 ) /// red
 			dr->setColor(1.f, 0.f, 0.f);
-		else if(prop[i] == 5 )
-			dr->setColor(0.f, 1.f, 0.f);
-		else// if(prop[i] == 8 )
-			dr->setColor(0.f, .5f, .8f);
+		else if(prop[i] == 5 ) /// red-red
+			dr->setColor(1.f, .5f, 0.f);
+		else// if(prop[i] == 6 ) /// blue-blue
+			dr->setColor(0.f, .58f, .88f);
 			
 		dr->cube(X[i], m_pntSz);
 	}

@@ -54,6 +54,17 @@ int BccCell::SevenNeighborOnCorner[8][7] = {
 {1, 3, 5, 13, 17, 21, 25}
 };
 
+/// six face, four edge per face
+/// edge ind
+int BccCell::TwentyFourFVBlueBlueEdge[24][3] = {
+{ 8, 6, 4 }, {12, 8, 10 }, {10,12, 6 }, { 6,10, 8 }, /// -x
+{ 7, 9, 5 }, { 9,13, 11 }, {13,11, 7 }, {11, 7, 9 }, /// +x
+{ 6, 7, 0 }, {10, 6, 8  }, {11,10, 2 }, { 7,11, 9 }, /// -y
+{ 9, 8, 1 }, { 8,12, 10 }, {12,13, 3 }, {13, 9, 11}, /// +y
+{ 7, 6, 0 }, { 9, 7, 5  }, { 8, 9, 1 }, { 6, 8, 4 }, /// -z
+{10,11, 2 }, {11,13, 7  }, {13,12, 3 }, {12,10, 6 }  /// +z
+};
+
 int BccCell::SixTetraFace[6][8] = {
 { 8, 6,12, 8,10,12, 6,10},
 { 7, 9, 9,13,13,11,11, 7},
@@ -73,15 +84,15 @@ int BccCell::SixNeighborOnFace[6][4] = {
 };
 
 int BccCell::TwelveBlueBlueEdges[12][3] = {
-{ 6, 7, 67},
+{ 6, 7, 67}, /// x
 { 8, 9, 89},
 {10,11, 1011},
 {12,13, 1213},
-{ 6, 8, 68},
+{ 6, 8, 68}, /// y
 { 7, 9, 79},
 {10,12, 1012},
 {11,13, 1113},
-{ 6,10, 610},
+{ 6,10, 610}, /// z
 { 7,11, 711},
 { 8,12, 812},
 { 9,13, 913},
@@ -216,6 +227,7 @@ void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 	}
 }
 
+/// iface 0:5
 void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					sdb::Array<int, BccNode> * cell,
@@ -225,42 +237,51 @@ void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 					const int & iface,
 					STriangleArray * faces) const
 {
-/// four tetra
+/// four edges
 	int i=0;
-	for(;i<8;i+=2) {
-		BccNode * nodeB = cell->find(SixTetraFace[iface][i]);
-		if(!nodeB) {
-			nodeB = findCornerNodeInNeighbor(SixTetraFace[iface][i],
-								grid,
-								cellCoord);
-		}
+	for(;i<4;++i) {
+		const int edgei = iface * 4 + i;
+		BccNode * nodeB = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
+									cell, grid, cellCoord);
 		if(!nodeB)
 			return;
 		
-		BccNode * nodeC = cell->find(SixTetraFace[iface][i+1]);
-		if(!nodeC) {
-			nodeC = findCornerNodeInNeighbor(SixTetraFace[iface][i+1],
-								grid,
-								cellCoord);
-		}
+		BccNode * nodeC = blueNode6(TwentyFourFVBlueBlueEdge[edgei][1],
+									cell, grid, cellCoord);
 		if(!nodeC)
 			return;
 		
 		int b = nodeB->index;
 		int c = nodeC->index;
 		
-		ITetrahedron * t = new ITetrahedron;
-		resetTetrahedronNeighbors(*t);
-		setTetrahedronVertices(*t, inode15, a, b, c);
-		t->index = dest.size();
-		dest.push_back(t);
-		
-/// add four faces
-		addFace(faces, a, b, c, t);
-		addFace(faces, inode15, a, b, t);
-		addFace(faces, inode15, b, c, t);
-		addFace(faces, inode15, c, a, t);
+		BccNode * nodeD = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
+									cell, grid, cellCoord);
+									
+		if(nodeD) {
+/// split into two
+			addTetrahedron(dest, faces, inode15, a, b, nodeD->index);
+			addTetrahedron(dest, faces, inode15, a, nodeD->index, c);
+		}
+		else
+			addTetrahedron(dest, faces, inode15, a, b, c);
 	}
+}
+
+void BccCell::addTetrahedron(std::vector<ITetrahedron *> & dest,
+						STriangleArray * faces,
+						int v0, int a, int b, int c) const
+{
+	ITetrahedron * t = new ITetrahedron;
+	resetTetrahedronNeighbors(*t);
+	setTetrahedronVertices(*t, v0, a, b, c);
+	t->index = dest.size();
+	dest.push_back(t);
+	
+/// add four faces
+	addFace(faces, a, b, c, t);
+	addFace(faces, v0, a, b, t);
+	addFace(faces, v0, b, c, t);
+	addFace(faces, v0, c, a, t);
 }
 
 void BccCell::addFace(STriangleArray * faces,
@@ -460,6 +481,23 @@ BccNode * BccCell::blueNode(const int & i,
 	return node;
 }
 
+/// i 6:13
+BccNode * BccCell::blueNode6(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	BccNode * node = cell->find(i);
+	if(!node) 
+		node = findCornerNodeInNeighbor(i,
+								grid,
+								cellCoord);
+	if(!node) 
+		std::cout<<"\n [ERROR] cannot find blue node"<<i
+				<<" in cell"<<cellCoord;
+	return node;
+}
+
 /// red-red cut
 /// i 0:5
 BccNode * BccCell::redRedNode(const int & i,
@@ -535,6 +573,7 @@ bool BccCell::faceClosed(const int & i,
 }
 
 /// average of four blue
+/// i 0:5
 void BccCell::facePosition(Vector3F & dst,
 					const int & i,
 					sdb::Array<int, BccNode> * cell,
