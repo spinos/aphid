@@ -55,8 +55,9 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 				const aphid::Vector3F & seg2) const
 {
 	if(m_N < 1) return -1;
+	const Vector3F ref = firstUp(seg1, seg2);
 	Vector3F pos;
-	Vector3F sum(0.f, 0.f, 0.f);
+	
 	int i=0;
 	int r = -1;
 	float iDot, minD = 1e8f, minDot = 1e8f;
@@ -66,8 +67,8 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 			projectPointLineSegment(pos, d, m_smps[i], seg1, seg2);
 			pos = m_smps[i] - pos;
 			pos.normalize();
-			sum += pos;
-			iDot = pos.dot(sum);
+			
+			iDot = pos.dot(ref);
 			if(minDot > iDot) {
 				minDot = iDot;
 			}
@@ -79,7 +80,7 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 		}
 	}
 	
-	if(minDot > 0.f)
+	if(minDot > -0.4f)
 		return -1;
 	
 	if(r > -1) {
@@ -114,6 +115,24 @@ int ClosestSampleTest::getClosestOnSegment(aphid::Vector3F & dst, float & d,
 	}
 	
 	return r;
+}
+
+Vector3F ClosestSampleTest::firstUp(const Vector3F & seg1,
+				const Vector3F & seg2) const
+{
+	Vector3F dv;
+	float d;
+	int i=0;
+	for(;i<m_N;++i) {
+		if(distancePointLineSegment(d, m_smps[i], seg1, seg2) ) {
+			if(d > 1e-3f) {
+				projectPointLineSegment(dv, d, m_smps[i], seg1, seg2);
+				dv = m_smps[i] - dv;
+				return dv.normal(); 
+			}
+		}
+	}
+	return (seg2 - seg1).perpendicular();
 }
 
 float BccCell::TwentySixNeighborOffset[26][3] = {

@@ -273,12 +273,15 @@ void TetrahedralMesher::moveRed(const Vector3F & cellCenter,
 	float d;
 	if(samples->getClosest(closestP, d, redP) < 0)
 		return;
-
+#if 0
 	Vector3F dp = closestP - redP;
 	Vector3F prodp(0.f, 0.f, 0.f);
 	int j = dp.longestAxis();
 	prodp.setComp(dp.comp(j), j);
 	m_grid.moveRedNodeTo(cellCenter, cellCoord, redP + prodp);
+#else
+	m_grid.moveRedNodeTo(cellCenter, cellCoord, closestP);
+#endif
 }
 
 void TetrahedralMesher::cutFace(const Vector3F & cellCenter,
