@@ -252,7 +252,7 @@ void TetrahedralMesher::processCells()
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
 		cutFace(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
-		//cutBlueBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		cutBlueBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
 	

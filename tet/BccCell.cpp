@@ -65,6 +65,7 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 		if(distancePointLineSegment(d, m_smps[i], seg1, seg2) ) {
 			projectPointLineSegment(pos, d, m_smps[i], seg1, seg2);
 			pos = m_smps[i] - pos;
+			pos.normalize();
 			sum += pos;
 			iDot = pos.dot(sum);
 			if(minDot > iDot) {
@@ -78,8 +79,34 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 		}
 	}
 	
-	if(minDot > -.01f)
+	if(minDot > 0.f)
 		return -1;
+	
+	if(r > -1) {
+		d = minD;
+		projectPointLineSegment(dst, d, m_smps[r], seg1, seg2);
+	}
+	
+	return r;
+}
+
+int ClosestSampleTest::getClosestOnSegment(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & seg1,
+				const aphid::Vector3F & seg2) const
+{
+	if(m_N < 1) return -1;
+	int i=0;
+	int r = -1;
+	float iDot, minD = 1e8f;
+	for(int i=0;i<m_N;++i) {
+	
+		if(distancePointLineSegment(d, m_smps[i], seg1, seg2) ) {
+		if(d<minD) {
+			minD = d;
+			r = i;
+		}
+		}
+	}
 	
 	if(r > -1) {
 		d = minD;
@@ -146,6 +173,36 @@ int BccCell::SixNeighborOnFace[6][4] = {
 { 0, 1, 0, 2},
 { 0, 0,-1, 5},
 { 0, 0, 1, 4}
+};
+
+int BccCell::TwelveBlueBlueEdges[12][3] = {
+{ 6, 7, 67},
+{ 8, 9, 89},
+{10,11, 1011},
+{12,13, 1213},
+{ 6, 8, 68},
+{ 7, 9, 79},
+{10,12, 1012},
+{11,13, 1113},
+{ 6,10, 610},
+{ 7,11, 711},
+{ 8,12, 812},
+{ 9,13, 913},
+};
+
+int BccCell::ThreeNeighborOnEdge[36][4] = {
+{ 0, 0,-1, 1011}, { 0,-1,-1, 1213}, { 0,-1, 0, 89  },
+{ 0, 0,-1, 1213}, { 0, 1,-1, 1011}, { 0, 1, 0, 67  },
+{ 0, 0, 1, 67  }, { 0,-1, 1, 89  }, { 0,-1, 0, 1213},
+{ 0, 0, 1, 89  }, { 0, 1, 1, 67  }, { 0, 1, 0, 1011},
+{-1, 0, 0, 79  }, {-1, 0,-1, 1113}, { 0, 0,-1, 1012},
+{ 1, 0, 0, 68  }, { 1, 0,-1, 1012}, { 0, 0,-1, 1113},
+{-1, 0, 0, 1113}, {-1, 0, 1, 79  }, { 0, 0, 1, 68  },
+{ 1, 0, 0, 1012}, { 1, 0, 1, 68  }, { 0, 0, 1, 79  },
+{-1, 0, 0, 711 }, {-1,-1, 0, 913 }, { 0,-1, 0, 812 },
+{ 1, 0, 0, 610 }, { 1,-1, 0, 812 }, { 0,-1, 0, 913 },
+{-1, 0, 0, 913 }, {-1, 1, 0, 711 }, { 0, 1, 0, 610 },
+{ 1, 0, 0, 812 }, { 1, 1, 0, 610 }, { 0, 1, 0, 711 }
 };
 
 BccCell::BccCell(const Vector3F &center )
@@ -260,31 +317,6 @@ void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 							ired, nodeA->index, i, faces);
 
 	}
-	
-	
-/*
-	if(!grid->findCell(neighborCoord(cellCoord, 0) ) ) {
-		nodeA = faceNode(0, cell, grid, cellCoord);
-		connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 0, faces);
-	}
-	if(!grid->findCell(neighborCoord(cellCoord, 2) ) ) {
-		nodeA = faceNode(2, cell, grid, cellCoord);
-		connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 2, faces);
-	}
-	if(!grid->findCell(neighborCoord(cellCoord, 4) ) ) {
-		nodeA = faceNode(4, cell, grid, cellCoord);
-		connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 4, faces);
-	}
-		
-	nodeA = faceNode(1, cell, grid, cellCoord);
-	connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 1, faces);
-	
-	nodeA = faceNode(3, cell, grid, cellCoord);
-	connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 3, faces);
-	
-	nodeA = faceNode(5, cell, grid, cellCoord);
-	connectNodesOnFace(dest, grid, cell, cellCoord, ired, nodeA->index, 5, faces);
-	*/
 }
 
 void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
@@ -742,6 +774,61 @@ bool BccCell::getVertexNodeIndices(int vi, int * xi,
 		xi[2+j] = nei15->index;
 	}
 	return true;
+}
+
+/// i 0:11
+void BccCell::blueBlueEdgeV(int & v1,
+					int & v2,
+					const int & i) const
+{
+	v1 = TwelveBlueBlueEdges[i][0] - 6;
+	v2 = TwelveBlueBlueEdges[i][1] - 6;
+}
+
+BccNode * BccCell::addEdgeNode(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord)
+{
+	BccNode * ni = new BccNode;
+	ni->key = TwelveBlueBlueEdges[i][2];
+	grid->insert(cellCoord, ni);
+	return ni;
+}
+
+/// blue-blue cut
+/// i 0:11
+BccNode * BccCell::blueBlueNode(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * node = cell->find(TwelveBlueBlueEdges[i][2]);
+	if(!node)
+		node = findBlueBlueNodeInNeighbor(i, 
+								grid,
+								cellCoord);
+		
+	return node;
+}
+
+BccNode * BccCell::findBlueBlueNodeInNeighbor(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	int j = 0;
+	for(;j<3;++j) {
+		sdb::Coord3 neiC(cellCoord.x + ThreeNeighborOnEdge[i*3+j][0],
+					cellCoord.y + ThreeNeighborOnEdge[i*3+j][1],
+					cellCoord.z + ThreeNeighborOnEdge[i*3+j][2]);
+					
+		sdb::Array<int, BccNode> * cell = grid->findCell(neiC);
+		if(cell) {
+			BccNode * node = cell->find(ThreeNeighborOnEdge[i*3+j][3]);
+			if(node)
+				return node;
+		}
+	}
+	return NULL;
 }
 
 }

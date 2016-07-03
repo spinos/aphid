@@ -29,6 +29,10 @@ public:
 	int getIntersect(aphid::Vector3F & dst, float & d, 
 				const aphid::Vector3F & seg1,
 				const aphid::Vector3F & seg2) const;
+				
+	int getClosestOnSegment(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & seg1,
+				const aphid::Vector3F & seg2) const;
 };
 
 /// face shared by two tetra
@@ -66,6 +70,8 @@ class BccCell {
 	static int SevenNeighborOnCorner[8][7];
 	static int SixTetraFace[6][8];
 	static int SixNeighborOnFace[6][4];
+	static int TwelveBlueBlueEdges[12][3];
+	static int ThreeNeighborOnEdge[36][4];
 	
 public:
 	BccCell(const aphid::Vector3F &center );
@@ -96,6 +102,10 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * blueBlueNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * faceNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -110,6 +120,9 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * addFaceNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord);
+	BccNode * addEdgeNode(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
 	bool moveBlueTo(const aphid::Vector3F & p,
@@ -134,6 +147,9 @@ public:
 					const aphid::sdb::Coord3 & cellCoord);
 	const aphid::Vector3F * centerP() const;
 	const aphid::Vector3F facePosition(const int & i, const float & gz) const;
+	void blueBlueEdgeV(int & v1,
+					int & v2,
+					const int & i) const;
 	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
@@ -157,6 +173,9 @@ private:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * findRedRedNodeInNeighbor(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * findBlueBlueNodeInNeighbor(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	void addFace(STriangleArray * faces,
