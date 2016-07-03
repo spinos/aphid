@@ -9,7 +9,7 @@
 
 #ifndef TTG_BCC_TET_GRID_H
 #define TTG_BCC_TET_GRID_H
-
+#include "ClosestSampleTest.h"
 #include "BccCell.h"
 
 namespace ttg {

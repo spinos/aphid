@@ -32,7 +32,7 @@ bool BccTetrahedralize::createSamples()
 	m_mesher.setH(supsize);
 	
 	const float bsize = supsize * .5f;
-	m_pntSz = bsize * .0625f;
+	m_pntSz = bsize * .075f;
 	BoundingBox cbx;
 	
 	supg->begin();
