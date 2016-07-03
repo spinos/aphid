@@ -42,7 +42,8 @@ inline void projectPointLineSegment(Vector3F & q,
 	Vector3F v10 = P0 - P1;
 	float lq1 = sqrt(v10.length2() - d * d);
 	Vector3F v12 = P2 - P1;
-	q = P1 + v12.normal() * lq1;
+	v12.normalize();
+	q = P1 + v12 * lq1;
 }
 
 // http://mathworld.wolfram.com/SkewLines.html

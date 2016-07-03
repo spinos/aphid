@@ -119,7 +119,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	}
 #endif
 
-#define SHO_SAMPLES 0
+#define SHO_SAMPLES 1
 #if SHO_SAMPLES
 	dr->setColor(0.f, .3f, 0.1f);
 	for(i=m_sampleBegin;i<Nv;++i) {

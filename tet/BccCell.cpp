@@ -585,6 +585,47 @@ BccNode * BccCell::faceNode(const int & i,
 	return node;
 }
 
+/// looped by four blue
+bool BccCell::faceClosed(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	int j=0;
+	for(;j<4;++j) {
+		BccNode * nodeB = cell->find(SixTetraFace[i][j*2]);
+		if(!nodeB) {
+			nodeB = findCornerNodeInNeighbor(SixTetraFace[i][j*2],
+								grid,
+								cellCoord);
+		}
+		if(nodeB->prop < 0) 
+			return false;
+	}
+	return true;
+}
+
+/// average of four blue
+void BccCell::facePosition(Vector3F & dst,
+					const int & i,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	dst.set(0.f, 0.f, 0.f);
+	int j=0;
+	for(;j<4;++j) {
+		BccNode * nodeB = cell->find(SixTetraFace[i][j*2]);
+		if(!nodeB) {
+			nodeB = findCornerNodeInNeighbor(SixTetraFace[i][j*2],
+								grid,
+								cellCoord);
+		}
+		dst += nodeB->pos;
+	}
+	dst *= .25f;
+}
+
 /// i 0:5
 const Vector3F BccCell::facePosition(const int & i, const float & gz) const
 {

@@ -56,9 +56,6 @@ public:
 	int buildFrontFaces();
 	aphid::sdb::Array<aphid::sdb::Coord3, IFace > * frontFaces();
 	
-	void processCell(const aphid::Vector3F & c,
-						const std::vector<aphid::Vector3F> & pos);
-	
 protected:
 
 private:
