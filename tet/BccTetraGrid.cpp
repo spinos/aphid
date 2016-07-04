@@ -281,64 +281,36 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 	bool redOnFront = redn->prop > 0;
 	float d;
 	Vector3F q, closestP;
+	Vector3F facePs[8];
+	int nfaceP;
 /// for each red-red
 	int i=0;
 	for(;i<6;++i) {
+		bool toAdd = true;
 /// already cut
 		if(fCell.redRedNode(i, cell, this, cellCoord) )
-			continue;
-
-#define VERBOSE_CLOSED_FACE 0
-#if VERBOSE_CLOSED_FACE
-		bool fourBlues = fCell.faceClosed(i, cell, this, cellCoord);
-		bool nofront = false;
-#endif
-			
-		BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
-
-#define USE_REDREDMID 0		
-#if USE_REDREDMID
-		if(nend->key == i)
-			q = nend->pos;
-		else
-			q = (nend->pos + redP) * .5f;
-#else			
-		fCell.facePosition(q, i, cell, this, cellCoord);
-#endif
+			toAdd = false;
 		
-		bool toAdd = true;
-/// segment on front
-		if(nend->prop > 0 || redOnFront) {
-			samples->getClosest(closestP, d, q);
-			if(d < .1f * r || d > .53f * r)
-				toAdd = false;
-		}
-		else {
-#if VERBOSE_CLOSED_FACE
-			nofront = true;
-#endif
-/// intersect not foolproof
-			//if(samples->getIntersect(closestP, d, redP, nend->pos) < 0)
-			//	toAdd = false;
-			samples->getClosest(closestP, d, q);
-			if(closestP.distanceTo(q) > r || d > r )
-				toAdd = false;
-		}
+		if(toAdd)	
+			toAdd = fCell.anyBlueCut(i, cell, this, cellCoord);
 			
 		if(toAdd) {
+/// cut add face center
+			fCell.facePosition(q, facePs, nfaceP, i, cell, this, cellCoord);
+			
 			BccNode * node = fCell.addFaceNode(i, this, cellCoord);
-			node->pos = closestP;
-			node->prop = 5;
-		}
-#if VERBOSE_CLOSED_FACE
-		else {
-			if(fourBlues && nofront) {
-				std::cout<<"\n closed but not cut"<<closestP.distanceTo(q)
-				<<" "<<d
-				<<" "<<r;
+			node->pos = q;
+			node->prop = -1;
+			
+/// move to sample if possible
+			samples->getClosest(closestP, d, q);
+			BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
+			if(fCell.checkSplitFace(closestP, redP, nend->pos, r, facePs, nfaceP) ) {
+				node->pos = closestP;
+				node->prop = 5;
 			}
 		}
-#endif
+		
 	}
 }
 
@@ -375,12 +347,12 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		
 		q = (p1 + p2) * .5f;
 		
-		bool toAdd = true;
+		bool toAdd = samples->getClosest(closestP, d, q) > -1;
 		//if(prop1 > 0 || prop2 > 0) {
-			if(samples->getClosest(closestP, d, q) < 0)
-				toAdd = false;
-			if(d < .1f * r || d > r)
-				toAdd = false;
+		//	if(samples->getClosest(closestP, d, q) < 0)
+		//		toAdd = false;
+		//	if(d < .1f * r || d > r)
+		//		toAdd = false;
 		/*}
 		else {
 			if(samples->getClosestOnSegment(closestP, d, p1, p2) < 0)
@@ -394,9 +366,7 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		}*/
 		
 		if(toAdd) {
-			if(closestP.distanceTo(p1) < r
-				|| closestP.distanceTo(p2) < r)
-					toAdd = false;
+			toAdd = fCell.checkSplitEdge(closestP, p1, p2, r, i/4);
 		}
 		
 		if(toAdd) {

@@ -68,10 +68,10 @@ private:
 	void moveRed(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples);
-	void cutFace(const aphid::Vector3F & cellCenter,
+	void cutFaces(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples);
-	void cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
+	void cutEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples);
 };

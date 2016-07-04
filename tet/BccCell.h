@@ -98,7 +98,13 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	bool anyBlueCut(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	void facePosition(aphid::Vector3F & dst,
+					aphid::Vector3F * ps,
+					int & np,
 					const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -134,7 +140,18 @@ public:
 	void blueBlueEdgeV(int & v1,
 					int & v2,
 					const int & i) const;
-	
+	bool checkSplitEdge(const aphid::Vector3F & p0,
+					const aphid::Vector3F & p1,
+					const aphid::Vector3F & p2,
+					const float & r,
+					const int & comp) const;
+	bool checkSplitFace(const aphid::Vector3F & p0,
+					const aphid::Vector3F & p1,
+					const aphid::Vector3F & p2,
+					const float & r,
+					const aphid::Vector3F * ps,
+					const int & np) const;
+					
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;

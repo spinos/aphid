@@ -572,26 +572,54 @@ bool BccCell::faceClosed(const int & i,
 	return true;
 }
 
-/// average of four blue
 /// i 0:5
+bool BccCell::anyBlueCut(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	int j=0;
+	for(;j<4;++j) {
+		const int edgei = i * 4 + j;		
+		BccNode * nodeB = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
+									cell, grid, cellCoord);
+		if(nodeB)
+			return true;
+	}
+	return false;
+}
+
+/// average of four blue
+/// cache blue and blue-blue
+/// i 0:5
+/// ps[8]
+/// np 4:8
 void BccCell::facePosition(Vector3F & dst,
+					Vector3F * ps,
+					int & np,
 					const int & i,
 					sdb::Array<int, BccNode> * cell,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					const sdb::Coord3 & cellCoord) const
 {
 	dst.set(0.f, 0.f, 0.f);
+	np = 0;
 	int j=0;
 	for(;j<4;++j) {
-		BccNode * nodeB = cell->find(SixTetraFace[i][j*2]);
-		if(!nodeB) {
-			nodeB = findCornerNodeInNeighbor(SixTetraFace[i][j*2],
-								grid,
-								cellCoord);
-		}
+		const int edgei = i * 4 + j;
+		BccNode * nodeB = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
+									cell, grid, cellCoord);
 		dst += nodeB->pos;
+		ps[np++] = nodeB->pos;
+		
+		BccNode * nodeC = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
+									cell, grid, cellCoord);
+		if(nodeC) {
+			dst += nodeC->pos;
+			ps[np++] = nodeB->pos;
+		}
 	}
-	dst *= .25f;
+	dst *= 1.f / (float)np;
 }
 
 /// i 0:5
@@ -765,6 +793,71 @@ BccNode * BccCell::findBlueBlueNodeInNeighbor(const int & i,
 		}
 	}
 	return NULL;
+}
+
+/// p0 inside box p1 p2 r but not close to p0 p1
+bool BccCell::checkSplitEdge(const Vector3F & p0,
+					const Vector3F & p1,
+					const Vector3F & p2,
+					const float & r,
+					const int & comp) const
+{
+	BoundingBox bx;
+	bx.expandBy(p1, r);
+	bx.expandBy(p2, r);
+	
+	if(!bx.isPointInside(p0) )
+		return false;
+		
+	if(comp==0) {
+		if(p0.x < p1.x + r
+			|| p0.x > p2.x - r)
+				return false;
+	}
+	else if(comp==1) {
+		if(p0.y < p1.y + r
+			|| p0.y > p2.y - r)
+				return false;
+	}
+	else {
+		if(p0.z < p1.z + r
+			|| p0.z > p2.z - r)
+				return false;
+	}
+	
+	return true;
+}
+
+bool BccCell::checkSplitFace(const Vector3F & p0,
+					const Vector3F & p1,
+					const Vector3F & p2,
+					const float & r,
+					const Vector3F * ps,
+					const int & np) const
+{
+	BoundingBox bx;
+
+	bx.expandBy(p1, r);
+	bx.expandBy(p2, r);
+	
+	if(!bx.isPointInside(p0) )
+		return false;
+	
+	bx.reset();
+	
+	int i=0;
+	for(;i<np;++i)
+		bx.expandBy(ps[i], r);
+		
+	if(!bx.isPointInside(p0) )
+		return false;
+		
+	for(i=0;i<np;++i) {
+		if(p0.distanceTo(ps[i]) < r)
+			return false;
+	}
+	
+	return true;
 }
 
 }
