@@ -279,6 +279,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 	BccNode * redn = fCell.redNode(this, cellCoord);
 	Vector3F redP = redn->pos;
 	bool redOnFront = redn->prop > 0;
+	bool blueOnFront;
 	float d;
 	Vector3F q, closestP;
 	Vector3F facePs[8];
@@ -296,11 +297,14 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			
 		if(toAdd) {
 /// cut add face center
-			fCell.facePosition(q, facePs, nfaceP, i, cell, this, cellCoord);
+			fCell.facePosition(q, facePs, nfaceP, blueOnFront, i, cell, this, cellCoord);
 			
 			BccNode * node = fCell.addFaceNode(i, this, cellCoord);
 			node->pos = q;
-			node->prop = -1;
+			if(blueOnFront) 
+				node->prop = 5;
+			else
+				node->prop = -1;
 			
 /// move to sample if possible
 			samples->getClosest(closestP, d, q);
@@ -348,25 +352,17 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		q = (p1 + p2) * .5f;
 		
 		bool toAdd = samples->getClosest(closestP, d, q) > -1;
-		//if(prop1 > 0 || prop2 > 0) {
-		//	if(samples->getClosest(closestP, d, q) < 0)
-		//		toAdd = false;
-		//	if(d < .1f * r || d > r)
-		//		toAdd = false;
-		/*}
-		else {
-			if(samples->getClosestOnSegment(closestP, d, p1, p2) < 0)
-				toAdd = false;
-			if(closestP.distanceTo(q) > r || d > r)
-				toAdd = false;
-				
-			//std::cout<<"\n int"<<r<<" "<<d<<" "<<closestP.distanceTo(q)
-			//<<" "<<v1<<" "<<v2
-			//<<" "<<p1<<" "<<p2;
-		}*/
 		
 		if(toAdd) {
 			toAdd = fCell.checkSplitEdge(closestP, p1, p2, r, i/4);
+		}
+		
+		if(!toAdd) {
+/// mid point on front
+			if(prop1 > 0 && prop2 > 0) {
+				closestP = q;
+				toAdd = true;
+			}
 		}
 		
 		if(toAdd) {
@@ -377,58 +373,39 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 	}
 }
 
-/// limit minimum angles
-bool BccTetraGrid::isBlueCloseToRed(const aphid::Vector3F & p,
-					const aphid::Vector3F & blueP,
-					const aphid::Vector3F & redP,
-					const float & r) const
+void BccTetraGrid::loopBlueBlueEdges(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord)
 {
-/// limit in octan
-	Vector3F dp = p - blueP;
-	if(Absolute<float>(dp.x) > 2.f * r) return true;
-	if(Absolute<float>(dp.y) > 2.f * r) return true;
-	if(Absolute<float>(dp.z) > 2.f * r) return true;
-/// limit to red
-	dp = p - redP;
-	if(Absolute<float>(dp.x) < r) return true;
-	if(Absolute<float>(dp.y) < r) return true;
-	if(Absolute<float>(dp.z) < r) return true;
-	return false;
-}
-
-void BccTetraGrid::moveRedNodeIn(const aphid::Vector3F & cellCenter,
-					const Vector3F & pos,
-					aphid::Vector3F * X,
-					int * prop)
-{
-	BccCell cell(cellCenter);
-	int xi;
-	if(cell.moveNode15(xi, this, gridCoord((const float *)&cellCenter ),
-					pos) ) {
-		X[xi] = pos;
-		prop[xi] = 1;
+	BccCell fCell(cellCenter);
+	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
+	Vector3F p1, p2;
+	bool toCut = false;
+/// for each face
+	int i = 0, j;
+	for(;i<6;++i) {
+		if(fCell.anyBlueCut(i, cell, this, cellCoord) ) {
+			toCut = true;
+			break;
+		}
 	}
-}
-
-void BccTetraGrid::smoothBlueNodeIn(const aphid::Vector3F & cellCenter,
-					aphid::Vector3F * X)
-{
-	BccCell cell(cellCenter);
-	int xi[9];
-	Vector3F pos;
-/// for each vertex node
-	int i = 6;
-	for(;i<14;++i) {
-		if(cell.getVertexNodeIndices(i, xi, this, gridCoord((const float *)&cellCenter ) ) ) {
-/// average of eight nodes
-			X[xi[0]] = (X[xi[1]]
-						+ X[xi[2]]
-						+ X[xi[3]]
-						+ X[xi[4]]
-						+ X[xi[5]]
-						+ X[xi[6]]
-						+ X[xi[7]]
-						+ X[xi[8]]) * .125f;
+		
+	if(!toCut)
+		return;
+		
+	for(i=0;i<6;++i) {
+/// for each blue-blue edge			
+		for(j=0;j<4;++j) {
+			
+			BccNode * nodeC = fCell.faceVaryBlueBlueNode(i, j, cell, this, cellCoord);
+/// alread cut
+			if(nodeC)
+				continue;
+				
+			fCell.faceEdgePostion(p1, p2, i, j, cell, this, cellCoord);
+			
+			nodeC = fCell.addFaceVaryEdgeNode(i, j, this, cellCoord);
+			nodeC->pos = (p1 + p2) * .5f;
+			nodeC->prop = -1;
 		}
 	}
 }

@@ -292,6 +292,9 @@ void TetrahedralMesher::cutFaces(const Vector3F & cellCenter,
 void TetrahedralMesher::cutEdges(const Vector3F & cellCenter,
 					const sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples)
-{ m_grid.cutBlueBlueEdges(cellCenter, cellCoord, samples); }
+{ 
+	m_grid.cutBlueBlueEdges(cellCenter, cellCoord, samples); 
+	m_grid.loopBlueBlueEdges(cellCenter, cellCoord);
+}
 
 }

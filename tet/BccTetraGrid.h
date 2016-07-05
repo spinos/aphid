@@ -47,12 +47,8 @@ public:
 	void cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);	
-	void moveRedNodeIn(const aphid::Vector3F & cellCenter,
-					const  aphid::Vector3F & pos,
-					aphid::Vector3F * X,
-					int * prop);
-	void smoothBlueNodeIn(const aphid::Vector3F & cellCenter,
-					aphid::Vector3F * X);
+	void loopBlueBlueEdges(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord);
 					
 protected:
 
@@ -62,11 +58,6 @@ private:
 					int * destProp,
 					aphid::sdb::Array<int, BccNode> * cell);
 					
-	bool isBlueCloseToRed(const aphid::Vector3F & p,
-					const aphid::Vector3F & blueP,
-					const aphid::Vector3F & redP,
-					const float & r) const;
-	
 };
 
 }

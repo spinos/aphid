@@ -572,6 +572,7 @@ bool BccCell::faceClosed(const int & i,
 	return true;
 }
 
+/// for each face
 /// i 0:5
 bool BccCell::anyBlueCut(const int & i,
 					sdb::Array<int, BccNode> * cell,
@@ -593,33 +594,66 @@ bool BccCell::anyBlueCut(const int & i,
 /// cache blue and blue-blue
 /// i 0:5
 /// ps[8]
-/// np 4:8
+/// np 4
 void BccCell::facePosition(Vector3F & dst,
 					Vector3F * ps,
 					int & np,
+					bool & faceOnFront,
 					const int & i,
 					sdb::Array<int, BccNode> * cell,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					const sdb::Coord3 & cellCoord) const
 {
+	bool stat = anyBlueCut(i, cell, grid, cellCoord);
+		
+	faceOnFront = true;
 	dst.set(0.f, 0.f, 0.f);
 	np = 0;
 	int j=0;
 	for(;j<4;++j) {
 		const int edgei = i * 4 + j;
-		BccNode * nodeB = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
-									cell, grid, cellCoord);
-		dst += nodeB->pos;
-		ps[np++] = nodeB->pos;
 		
-		BccNode * nodeC = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
+		if(stat) {
+			BccNode * nodeC = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
 									cell, grid, cellCoord);
-		if(nodeC) {
-			dst += nodeC->pos;
-			ps[np++] = nodeB->pos;
+			if(nodeC) {
+				dst += nodeC->pos;
+				ps[np++] = nodeC->pos;
+				if(nodeC->prop < 0)
+					faceOnFront = false;
+			}
+			else {
+				std::cout<<"\n [ERROR] blue cut not looped "<<cellCoord;
+			}
 		}
+		else {
+			BccNode * nodeB = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
+									cell, grid, cellCoord);
+			dst += nodeB->pos;
+			ps[np++] = nodeB->pos;
+			if(nodeB->prop < 0)
+				faceOnFront = false;
+		}
+		
 	}
 	dst *= 1.f / (float)np;
+}
+
+void BccCell::faceEdgePostion(Vector3F & p1,
+					Vector3F & p2,
+					const int & iface, 
+					const int & iedge,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	BccNode * nodeA = blueNode6(TwentyFourFVBlueBlueEdge[iface *4 + iedge][0],
+									cell, grid, cellCoord);
+	p1 = nodeA->pos;
+	
+	BccNode * nodeB = blueNode6(TwentyFourFVBlueBlueEdge[iface *4 + iedge][1],
+									cell, grid, cellCoord);
+	p2 = nodeB->pos;
 }
 
 /// i 0:5
@@ -759,6 +793,17 @@ BccNode * BccCell::addEdgeNode(const int & i,
 	return ni;
 }
 
+/// i 0:5
+/// j 0:3
+BccNode * BccCell::addFaceVaryEdgeNode(const int & i,
+					const int & j,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord)
+{
+	int k = TwentyFourFVBlueBlueEdge[i *4 + j][2];
+	return addEdgeNode(k, grid, cellCoord);
+}
+
 /// blue-blue cut
 /// i 0:11
 BccNode * BccCell::blueBlueNode(const int & i,
@@ -773,6 +818,19 @@ BccNode * BccCell::blueBlueNode(const int & i,
 								cellCoord);
 		
 	return node;
+}
+
+/// i 0:5
+/// j 0:3
+BccNode * BccCell::faceVaryBlueBlueNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * nodeA = blueBlueNode(TwentyFourFVBlueBlueEdge[i *4 + j][2],
+									cell, grid, cellCoord);
+	return nodeA;
 }
 
 BccNode * BccCell::findBlueBlueNodeInNeighbor(const int & i,

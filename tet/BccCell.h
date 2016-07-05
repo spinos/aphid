@@ -90,6 +90,11 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * faceVaryBlueBlueNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * faceNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -105,6 +110,7 @@ public:
 	void facePosition(aphid::Vector3F & dst,
 					aphid::Vector3F * ps,
 					int & np,
+					bool & faceOnFront,
 					const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -113,6 +119,10 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
 	BccNode * addEdgeNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord);
+	BccNode * addFaceVaryEdgeNode(const int & i,
+					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
 	bool moveBlueTo(const aphid::Vector3F & p,
@@ -137,6 +147,13 @@ public:
 					const aphid::sdb::Coord3 & cellCoord);
 	const aphid::Vector3F * centerP() const;
 	const aphid::Vector3F facePosition(const int & i, const float & gz) const;
+	void faceEdgePostion(aphid::Vector3F & p1,
+					aphid::Vector3F & p2,
+					const int & iface, 
+					const int & iedge,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	void blueBlueEdgeV(int & v1,
 					int & v2,
 					const int & i) const;
