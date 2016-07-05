@@ -166,6 +166,7 @@ public:
 					const aphid::Vector3F & p1,
 					const aphid::Vector3F & p2,
 					const float & r,
+					const int & d,
 					const aphid::Vector3F * ps,
 					const int & np) const;
 					

@@ -890,19 +890,20 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 					const Vector3F & p1,
 					const Vector3F & p2,
 					const float & r,
+					const int & d,
 					const Vector3F * ps,
 					const int & np) const
 {
-	BoundingBox bx;
-
-	bx.expandBy(p1, r);
-	bx.expandBy(p2, r);
-	
-	if(!bx.isPointInside(p0) )
+	Vector3F q1 = p1;
+	Vector3F q2 = p2;
+	if(p1.comp(d) > p2.comp(d) ) {
+		q1 = p2;
+		q2 = p1;
+	}
+	if(!checkSplitEdge(p0, q1, q2, r, d) )
 		return false;
-	
-	bx.reset();
-	
+
+	BoundingBox bx;
 	int i=0;
 	for(;i<np;++i)
 		bx.expandBy(ps[i], r);

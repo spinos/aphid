@@ -278,8 +278,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	BccNode * redn = fCell.redNode(this, cellCoord);
 	Vector3F redP = redn->pos;
-	bool redOnFront = redn->prop > 0;
-	bool blueOnFront;
+	bool redOnFront, blueOnFront;
 	float d;
 	Vector3F q, closestP;
 	Vector3F facePs[8];
@@ -301,15 +300,19 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			
 			BccNode * node = fCell.addFaceNode(i, this, cellCoord);
 			node->pos = q;
-			if(blueOnFront) 
+			
+			BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
+			redOnFront = (redn->prop > -1 && nend->prop > -1);
+			
+			if(blueOnFront || redOnFront) 
 				node->prop = 5;
 			else
 				node->prop = -1;
 			
 /// move to sample if possible
 			samples->getClosest(closestP, d, q);
-			BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
-			if(fCell.checkSplitFace(closestP, redP, nend->pos, r, facePs, nfaceP) ) {
+			
+			if(fCell.checkSplitFace(closestP, redP, nend->pos, r, i/2, facePs, nfaceP) ) {
 				node->pos = closestP;
 				node->prop = 5;
 			}
