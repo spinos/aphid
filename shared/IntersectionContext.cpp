@@ -22,12 +22,20 @@ void IntersectionContext::reset()
 	m_cell = 0;
 	m_enableNormalRef = 0;
 	twoSided = 0;
+	m_tdelta = 0.01f;
 }
 
 void IntersectionContext::reset(const Ray & ray)
 {
+	m_ray = ray;
+	reset();
+}
+
+void IntersectionContext::reset(const Ray & ray, const float & delta)
+{
     m_ray = ray;
 	reset();
+	m_tdelta = delta;
 }
 
 void IntersectionContext::reset(const Ray & ray, 

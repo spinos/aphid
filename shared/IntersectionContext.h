@@ -28,6 +28,7 @@ public:
 	
 	void reset();
 	void reset(const Ray & ray);
+	void reset(const Ray & ray, const float & delta);
 	void reset(const Ray & ray, 
 				const Vector3F & ref, 
 				const float & scaling);
@@ -51,7 +52,7 @@ public:
 	char twoSided;
 	char * m_cell;
 	float m_coord[3];
-	float m_tmin, m_tmax;
+	float m_tmin, m_tmax, m_tdelta;
 	
 private:
 };

@@ -126,7 +126,7 @@ public:
         Vector3F w, pa, pb, q;
     
         Vector3F v = A.X(0);
-        if(v.length2() < 1e-6f) v = A.X(1);
+        if(v.length2() < 1e-4f) v = A.X(1);
     
         for(int i=0; i < 10; i++) {
     // SA-B(-v)

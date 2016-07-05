@@ -46,8 +46,11 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 	
 	clipNear = fnCamera.nearClippingPlane();
 	clipFar = fnCamera.farClippingPlane();
-
-	// validateSelection();
+	
+	if(clipFar > 1e7f) {
+		AHelper::Info<float>("[WARNING] truncate camera far clipping plane to ", 1e7f);
+		clipFar = 1e7f;
+	}
     
     if(event.isModifierShift()) m_currentOpt = opResizeBrush;
     else m_currentOpt = mOpt;
@@ -380,7 +383,10 @@ void proxyPaintContext::moveAlongAxis(short axis)
 
 void proxyPaintContext::selectGround()
 {
-	if(!PtrViz) return;
+	if(!PtrViz) {
+		std::cout<<"\n selectGround has no PtrViz";
+		return;
+	}
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
@@ -390,6 +396,7 @@ void proxyPaintContext::selectGround()
 
 void proxyPaintContext::startSelectGround()
 {
+	validateSelection();
 	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld (start_x, start_y, fromNear, fromFar );
@@ -417,6 +424,13 @@ char proxyPaintContext::validateSelection()
 			
     if(!PtrViz) return 0;
 
+/// limit radius
+	float gz = PtrViz->gridSize();
+	if(getBrushRadius() < gz * .1f) {
+		AHelper::Info<float>("[INFO] truncate brush radius ", gz * .1f);
+		setBrushRadius(gz * .1f);
+	}
+	
 	PtrViz->setSelectionRadius(getBrushRadius() );
 	return 1;
 }
@@ -455,6 +469,7 @@ void proxyPaintContext::erase()
 
 void proxyPaintContext::startProcessSelect()
 {
+	validateSelection();
 	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld (start_x, start_y, fromNear, fromFar );

@@ -58,6 +58,7 @@ public:
 	const unsigned & numActivePlants() const;
 	void removeAllPlants();
 	const float & selectionRadius() const;
+	const float & gridSize() const;
     
 protected:
 	void resetGrid(float gridSize);

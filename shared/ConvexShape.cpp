@@ -302,6 +302,8 @@ bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 	
 	float t = (m_p0.dot(nor) - ray.m_origin.dot(nor)) / ddotn;
 	
+	// std::cout<<"\n Triangle::intersect "<<nor<<" "<<ddotn<<" t "<<t;
+	
 	if(t < 0.f || t > ray.m_tmax) return 0;
 	
 	Vector3F onplane = ray.m_origin + ray.m_dir * t;
@@ -333,7 +335,7 @@ const Vector3F & Triangle::X(int idx) const
 
 const Vector3F & Triangle::supportPoint(const Vector3F & v, Vector3F * localP) const
 {
-	float maxdotv = -1e18f;
+	float maxdotv = -1e19f;
     float dotv;
 	int ir = 0;
 	

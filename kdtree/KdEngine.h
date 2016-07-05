@@ -215,6 +215,8 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 	const BoundingBox & b = tree->getBBox();
 	if(!b.intersect(ctx->m_ray)) return 0;
 	
+	std::cout<<"\n KdEngine::intersect"<<b;
+	
 	ctx->setBBox(b);
 	
 	const KdTreeNode * r = tree->root()->node(0);
@@ -413,10 +415,12 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 	const BoundingBox & b = ctx->getBBox();
 	float t0, t1;
 	b.intersect(ctx->m_ray, &t0, &t1);
-	Vector3F hit1 = ctx->m_ray.travel(t1 + 1e-3f);
+	Vector3F hit1 = ctx->m_ray.travel(t1 + ctx->m_tdelta);
 /// end inside 
-	if(b.isPointInside(hit1) )
+	if(b.isPointInside(hit1) ) {
+		std::cout<<"\n KdEngine::climbRope "<<hit1<<" out of "<<b;
 		return false;
+	}
 		
 	int side = b.pointOnSide(hit1);
 ///	std::cout<<"\n rope side "<<side;

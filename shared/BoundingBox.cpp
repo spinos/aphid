@@ -299,7 +299,7 @@ char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 			continue;
 		}
         // Update interval for _i_th bounding box slab
-        float invRayDir = 1.f / ray.m_dir.comp(i);
+        float invRayDir = 1.f / (ray.m_dir.comp(i) + 1e-15f);
         float tNear = (getMin(i) - ray.m_origin.comp(i)) * invRayDir;
         float tFar  = (getMax(i) - ray.m_origin.comp(i)) * invRayDir;
 

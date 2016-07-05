@@ -382,20 +382,12 @@ void BccTetraGrid::loopBlueBlueEdges(const Vector3F & cellCenter,
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	Vector3F p1, p2;
-	bool toCut = false;
 /// for each face
 	int i = 0, j;
 	for(;i<6;++i) {
-		if(fCell.anyBlueCut(i, cell, this, cellCoord) ) {
-			toCut = true;
-			break;
-		}
-	}
-		
-	if(!toCut)
-		return;
-		
-	for(i=0;i<6;++i) {
+		if(!fCell.anyBlueCut(i, cell, this, cellCoord) ) 
+			continue;
+	
 /// for each blue-blue edge			
 		for(j=0;j<4;++j) {
 			

@@ -221,12 +221,17 @@ void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 			}
 			nodeA = faceNode(i, cell, grid, cellCoord);
 		}
+		
 		connectNodesOnFace(dest, grid, cell, cellCoord, 
 							ired, nodeA->index, i, faces);
 
 	}
 }
 
+/// c-------b
+///  \    / |
+///   \  /  |
+///    red--a
 /// iface 0:5
 void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
@@ -237,7 +242,7 @@ void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 					const int & iface,
 					STriangleArray * faces) const
 {
-/// four edges
+/// for each edge
 	int i=0;
 	for(;i<4;++i) {
 		const int edgei = iface * 4 + i;
@@ -255,8 +260,7 @@ void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 		int c = nodeC->index;
 		
 		BccNode * nodeD = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
-									cell, grid, cellCoord);
-									
+									cell, grid, cellCoord);									
 		if(nodeD) {
 /// split into two
 			addTetrahedron(dest, faces, inode15, a, b, nodeD->index);

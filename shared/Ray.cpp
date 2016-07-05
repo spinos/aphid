@@ -8,6 +8,7 @@
  */
 
 #include "Ray.h"
+#include <iostream>
 namespace aphid {
 
 Ray::Ray() {}
@@ -18,6 +19,10 @@ Ray::Ray(const Vector3F& pfrom, const Vector3F& vdir, float tmin, float tmax)
 	m_dir = vdir;
 	m_tmin = tmin;
 	m_tmax = tmax;
+	if(m_tmax > 1e8f) {
+		std::cout<<"\n truncate ray max to 1e8f";
+		m_tmax = 1e8f;
+	}
 }
 
 Ray::Ray(const Vector3F& pfrom, const Vector3F& pto) 
@@ -26,6 +31,10 @@ Ray::Ray(const Vector3F& pfrom, const Vector3F& pto)
 	m_dir = pto - pfrom;
 	m_tmin = 0.f;
 	m_tmax = m_dir.length();
+	if(m_tmax > 1e8f) {
+		std::cout<<"\n truncate ray max to 1e8f";
+		m_tmax = 1e8f;
+	}
 	m_dir.normalize();
 }
 

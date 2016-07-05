@@ -55,6 +55,8 @@ void Forest::resetGrid(float gridSize)
 {
 	m_grid->clear();
 	m_grid->setGridSize(gridSize);
+	std::cout<<"\n reset grid "<<gridSize;
+	std::cout.flush();
 }
 
 void Forest::updateGrid()
@@ -129,7 +131,8 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 	if(numPlants() < 1) return false;
 	
 	if(!intersectGround(ray) ) {
-		if(!intersectGrid(ray) ) return false;
+		if(!intersectGrid(ray) ) 
+			return false;
 	}
 	
 	m_activePlants->setCenter(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN);
@@ -146,6 +149,8 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 		//	m_selectCtx->deselect();
 		return false;
 	}
+	
+	std::cout<<"\n Forest::selectGroundFaces "<<m_intersectCtx.m_hitP;
 	
 	m_selectCtx->reset(m_intersectCtx.m_hitP, m_activePlants->radius(),
 		mode);
@@ -307,16 +312,22 @@ bool Forest::intersectGround(const Ray & ray)
 {
     if(!m_ground) return false;
 	if(m_ground->isEmpty() ) return false;
-	
-	m_intersectCtx.reset(ray);
+
+	std::cout<<"\n Forest::intersectGround "<<ray.m_origin
+		<<" "<<ray.m_dir<<" "<<ray.m_tmax;
+		
+	m_intersectCtx.reset(ray, m_grid->gridSize() * 0.01f );
 	KdEngine engine;
 	engine.intersect<cvx::Triangle, KdNode4>(m_ground, &m_intersectCtx );
+	
+	if(!m_intersectCtx.m_success) std::cout<<"\n Forest::intersectGround result is false";
 	
 	return m_intersectCtx.m_success;
 }
 
 bool Forest::intersectGrid(const Ray & incident)
 {
+	std::cout<<"\n Forest::intersectGrid";
 	if(!m_march.begin(incident)) return false;
 	sdb::Sequence<sdb::Coord3> added;
 	BoundingBox touchedBox;
@@ -333,6 +344,7 @@ bool Forest::intersectGrid(const Ray & incident)
 			added.insert(c);
 
 			if(m_activePlants->touchCell(incident, c, pnt) ) {
+				std::cout<<"\n Forest::intersectGrid hit cell"<<c;
 				m_intersectCtx.m_hitP = pnt;
 				m_intersectCtx.m_hitN = Vector3F::YAxis;
 				return true;
@@ -403,5 +415,8 @@ std::string Forest::groundBuildLog() const
 
 const sdb::VectorArray<cvx::Triangle> & Forest::triangles() const
 { return m_triangles; }
+
+const float & Forest::gridSize() const
+{ return m_grid->gridSize(); }
 
 }

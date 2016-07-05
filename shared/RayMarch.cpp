@@ -23,7 +23,11 @@ void RayMarch::initialize(const BoundingBox & bb, const float & gridSize)
 bool RayMarch::begin(const Ray & r) 
 { 
 	float hitMin, hitMax;
-	if(!m_limit.intersect(r, &hitMin, &hitMax)) return false;
+	if(!m_limit.intersect(r, &hitMin, &hitMax)) {
+		return false;
+	}
+	
+	std::cout<<"\n RayMarch begin"<<m_limit<<" step "<<m_gridSize;
 	
 	m_path = r;
 	m_path.m_tmax = hitMax;
@@ -32,13 +36,13 @@ bool RayMarch::begin(const Ray & r)
 		m_path.m_tmax -= hitMin;
 	}
 	
-	m_path.m_origin += m_path.m_dir * 1e-4f;
+	m_path.m_origin += m_path.m_dir * m_gridSize * 1e-2f;
 
 	return true;
 }
 
 bool RayMarch::end() 
-{ return m_path.m_tmax < 1e-4f; }
+{ return m_path.m_tmax < m_gridSize * 1e-2f; }
 
 void RayMarch::step() 
 {
@@ -46,13 +50,13 @@ void RayMarch::step()
 	float hitMin, hitMax;
 	m_current.intersect(m_path, &hitMin, &hitMax);
 	
-	if(hitMax < 10e-4) {
-		//std::cout<<" step "<<hitMin<<","<<hitMax<<","<<m_path.m_tmax;
-		hitMax = 10e-4;
+	if(hitMax < m_gridSize * 1e-2f) {
+		hitMax = m_gridSize * 1e-2f;
 	}
-	hitMax += 10e-4;
+	hitMax += m_gridSize * 1e-2f;
 	m_path.m_origin += m_path.m_dir * hitMax;
 	m_path.m_tmax -= hitMax;
+	std::cout<<"\n RayMarch step "<<m_path.m_origin<<","<<m_path.m_tmax;
 }
 
 const BoundingBox RayMarch::gridBBox() const

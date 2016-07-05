@@ -311,6 +311,11 @@ void ViewCull::getFarClipDepth(float & clip, const BoundingBox & b) const
         float d = cameraDepth(b.X(i) );
         if(clip > d) clip = d;
     }
+/// truncate far large value
+	if(clip < -1e7f) {
+		std::cout<<"\n truncate large far clip "<<clip<<" to 1e7f";
+		clip = -1e7f;
+	}
 }
 
 const bool & ViewCull::hasView() const

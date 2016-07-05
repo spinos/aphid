@@ -461,7 +461,7 @@ bool VoxelEngine<T, Tn, NThread>::findIntersection(Vector3F & dst,
 		stat = box.intersect(incident, &tmin, &tmax);
 	}
 /// put p inside
-	if(stat) dst = incident.travel(tmin + 1e-5f);
+	if(stat) dst = incident.travel(tmin + 1e-3f);
 	return stat;
 }
 
