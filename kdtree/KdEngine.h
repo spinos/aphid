@@ -19,6 +19,8 @@ namespace aphid {
 
 class KdEngine {
 
+    int m_numRopeTraversed;
+    
 public:
 	template<typename T, typename Ts>
 	void buildSource(sdb::VectorArray<T> * dst,
@@ -157,6 +159,7 @@ void KdEngine::buildTree(KdNTree<T, Tn > * tree,
 	tree->init(source, box);
     
     std::cout<<"\n kdengine begin building "<<T::GetTypeStr()<<" tree "
+            <<"\n bbx "<<box
 			<<"\n max n prims per leaf "<<prof->_maxLeafPrims
 			<<"\n max build level "<<prof->_maxLevel;
     
@@ -216,7 +219,8 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 	if(!b.intersect(ctx->m_ray)) return 0;
 	
 	std::cout<<"\n KdEngine::intersect"<<b;
-	
+	m_numRopeTraversed = 0;
+    
 	ctx->setBBox(b);
 	
 	const KdTreeNode * r = tree->root()->node(0);
@@ -412,6 +416,14 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 									int & nodeIdx,
 									const KdTreeNode * r)
 {
+    m_numRopeTraversed++;
+/// limit rope traverse
+    if(m_numRopeTraversed > 99)
+        return false;
+    
+    const int oldBranch = branchIdx;
+    const int oldNode = nodeIdx;
+    
 	const BoundingBox & b = ctx->getBBox();
 	float t0, t1;
 	b.intersect(ctx->m_ray, &t0, &t1);
@@ -434,11 +446,15 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 		return false;
 	}
 	
-//	std::cout<<" rope["<<iRope<<"]";
+//    std::cout<<" rope["<<iRope<<"]";
 	const BoundingBox * rp = tree->ropes()[ iRope ];
 	BoxNeighbors::DecodeTreeletNodeHash(rp->m_padding1, KdNode4::BranchingFactor, 
 					branchIdx, nodeIdx);
-//	std::cout<<"\n branch "<<branchIdx;
+    
+    std::cout<<"\n rope branch "<<oldBranch<<":"<<oldNode
+    <<" to "<<branchIdx<<":"<<nodeIdx;
+            
+    std::cout.flush();
 	ctx->setBBox(*rp);
 	return true;
 }

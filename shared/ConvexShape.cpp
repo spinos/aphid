@@ -273,6 +273,7 @@ BoundingBox Triangle::calculateBBox() const
     b.expandBy(m_p0);
     b.expandBy(m_p1);
 	b.expandBy(m_p2);
+    b.expand(b.getLongestDistance() * 1e-4f);
     return b;
 }
 
@@ -302,7 +303,7 @@ bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 	
 	float t = (m_p0.dot(nor) - ray.m_origin.dot(nor)) / ddotn;
 	
-	// std::cout<<"\n Triangle::intersect "<<nor<<" "<<ddotn<<" t "<<t;
+	//std::cout<<"\n Triangle::intersect "<<nor<<" "<<ddotn<<" t "<<t;
 	
 	if(t < 0.f || t > ray.m_tmax) return 0;
 	

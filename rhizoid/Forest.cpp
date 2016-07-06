@@ -316,7 +316,7 @@ bool Forest::intersectGround(const Ray & ray)
 	std::cout<<"\n Forest::intersectGround "<<ray.m_origin
 		<<" "<<ray.m_dir<<" "<<ray.m_tmax;
 		
-	m_intersectCtx.reset(ray, m_grid->gridSize() * 0.01f );
+	m_intersectCtx.reset(ray, m_grid->gridSize() * 0.001f );
 	KdEngine engine;
 	engine.intersect<cvx::Triangle, KdNode4>(m_ground, &m_intersectCtx );
 	
