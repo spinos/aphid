@@ -113,6 +113,18 @@ int BccCell::ThreeNeighborOnEdge[36][4] = {
 { 1, 0, 0, 812 }, { 1, 1, 0, 610 }, { 0, 1, 0, 711 }
 };
 
+/// per-vertex blue-blue edge and face ind
+int BccCell::EightVVBlueBlueEdge[8][6] = {
+{0, 4, 8, 0, 2, 4}, /// 67 68 610
+{0, 5, 9, 1, 2, 4}, /// 67 79 711
+{1, 4,10, 0, 3, 4}, /// 68 89 812
+{1, 5,11, 1, 3, 4}, /// 79 89 913
+{2, 6, 8, 0, 2, 5}, /// 610 1011 1012
+{2, 7, 9, 1, 2, 5}, /// 1011 711 1113 
+{3, 6,10, 0, 3, 5}, /// 812 1012 1213 
+{3, 7,11, 1, 3, 5}  /// 913 1113 1213
+};
+
 BccCell::BccCell(const Vector3F &center )
 { m_center = center; }
 
@@ -793,6 +805,7 @@ BccNode * BccCell::addEdgeNode(const int & i,
 {
 	BccNode * ni = new BccNode;
 	ni->key = TwelveBlueBlueEdges[i][2];
+	ni->prop = -1;
 	grid->insert(cellCoord, ni);
 	return ni;
 }
@@ -921,6 +934,47 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 	}
 	
 	return true;
+}
+
+/// three face per vertex
+/// i 0:7
+int BccCell::blueNodeFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					bool & onFront)
+{
+	int c = 0;
+	int j = 0;
+	for(;j<3;++j) {
+/// adjunct blue-blue cut on front
+		BccNode * n = blueBlueNode(EightVVBlueBlueEdge[i][j], cell, grid, cellCoord);
+		if(n) {
+			if(n->prop > 0)
+				c++;
+		}
+	}
+	
+	for(j=3;j<6;++j) {
+		BccNode * rr = redRedNode(EightVVBlueBlueEdge[i][j], cell, grid, cellCoord);
+		if(rr) {
+			if(rr->prop > 0)
+				c++;
+		}
+	}
+	return c;
+}
+
+/// i 0:7
+BccNode * BccCell::addRedBlueEdgeNode(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord)
+{
+	BccNode * ni = new BccNode;
+	ni->key = 15006 + i;
+	ni->prop = -1;
+	grid->insert(cellCoord, ni);
+	return ni;
 }
 
 }

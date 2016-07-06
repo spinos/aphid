@@ -61,7 +61,7 @@ public:
 	const float & gridSize() const;
     
 protected:
-	void resetGrid(float gridSize);
+	void resetGrid(float x);
 	void updateGrid();
 	void updateNumPlants();
 	void clearGroundMeshes();

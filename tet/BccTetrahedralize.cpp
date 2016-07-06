@@ -281,9 +281,11 @@ void BccTetrahedralize::drawRedBlueGreen(aphid::GeoDrawer * dr)
 			dr->setColor(1.f, 0.f, 0.f);
 		else if(prop[i] == 5 ) /// red-red
 			dr->setColor(1.f, .5f, 0.f);
-		else// if(prop[i] == 6 ) /// blue-blue
+		else if(prop[i] == 6 ) /// blue-blue
 			dr->setColor(0.f, .58f, .88f);
-			
+		else// if(prop[i] == 7 ) /// red-blue
+			dr->setColor(0.79f, 0.f, .89f);	
+		
 		dr->cube(X[i], m_pntSz);
 	}
 }

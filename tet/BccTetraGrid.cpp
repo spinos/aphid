@@ -194,7 +194,7 @@ bool BccTetraGrid::moveRedNodeTo(const Vector3F & cellCenter,
 					const Vector3F & pos)
 {	
 /// guarantee in which red-blue distance
-	const float r = gridSize() * .25f;
+	const float r = gridSize() * .13f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	
@@ -382,12 +382,20 @@ void BccTetraGrid::loopBlueBlueEdges(const Vector3F & cellCenter,
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	Vector3F p1, p2;
+	bool toLoop = false;
 /// for each face
 	int i = 0, j;
 	for(;i<6;++i) {
-		if(!fCell.anyBlueCut(i, cell, this, cellCoord) ) 
-			continue;
+		if(fCell.anyBlueCut(i, cell, this, cellCoord) ) {
+			toLoop = true;
+			break;
+		}
+	}
 	
+	if(!toLoop)
+		return;
+		
+	for(i=0;i<6;++i) {
 /// for each blue-blue edge			
 		for(j=0;j<4;++j) {
 			
@@ -400,8 +408,47 @@ void BccTetraGrid::loopBlueBlueEdges(const Vector3F & cellCenter,
 			
 			nodeC = fCell.addFaceVaryEdgeNode(i, j, this, cellCoord);
 			nodeC->pos = (p1 + p2) * .5f;
-			nodeC->prop = -1;
 		}
+	}
+}
+
+void BccTetraGrid::cutRedBlueEdges(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples)
+{
+	return;
+	BccCell fCell(cellCenter);
+	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
+	
+	BccNode * redN = fCell.redNode(this, cellCoord);
+	if(redN->prop > 0)
+		return;
+	const Vector3F redP = redN->pos;
+	
+	Vector3F blueP;
+/// for each blue 
+	int i=0;
+	for(;i<8;++i) {
+		BccNode * blueN = fCell.blueNode(i, cell, this, cellCoord, blueP);
+		if(blueN->prop > 0)
+			continue;
+		
+		bool fof = false;
+		int nblueCuts = fCell.blueNodeFaceOnFront(i, cell, this, cellCoord, fof);
+		
+/// no blue-blue
+		if(nblueCuts < 1)
+			continue;
+			
+/// two blue-blue, blue, red-red all on front
+		if(nblueCuts > 2 )
+			continue;
+				
+		BccNode * redBlueN = fCell.addRedBlueEdgeNode(i, this, cellCoord);
+		redBlueN->pos = (redP + blueP) * .5f;
+		
+		redBlueN->prop = 7;
+		
 	}
 }
 

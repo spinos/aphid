@@ -52,6 +52,7 @@ class BccCell {
 	static int TwelveBlueBlueEdges[12][3];
 	static int ThreeNeighborOnEdge[36][4];
 	static int TwentyFourFVBlueBlueEdge[24][3];
+	static int EightVVBlueBlueEdge[8][6];
 	
 public:
 	BccCell(const aphid::Vector3F &center );
@@ -125,6 +126,9 @@ public:
 					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
+	BccNode * addRedBlueEdgeNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord);
 	bool moveBlueTo(const aphid::Vector3F & p,
 					const aphid::Vector3F & q,
 					const float & r);
@@ -169,6 +173,11 @@ public:
 					const int & d,
 					const aphid::Vector3F * ps,
 					const int & np) const;
+	int blueNodeFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					bool & onFront);
 					
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;

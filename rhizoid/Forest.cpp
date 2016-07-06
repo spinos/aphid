@@ -51,11 +51,11 @@ Forest::~Forest()
 void Forest::setSelectionRadius(float x)
 { m_activePlants->setRadius(x); }
 
-void Forest::resetGrid(float gridSize)
+void Forest::resetGrid(float x)
 {
 	m_grid->clear();
-	m_grid->setGridSize(gridSize);
-	std::cout<<"\n reset grid "<<gridSize;
+	m_grid->setGridSize(x);
+	std::cout<<"\n reset grid "<<x;
 	std::cout.flush();
 }
 

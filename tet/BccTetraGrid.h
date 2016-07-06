@@ -49,6 +49,9 @@ public:
 					const ClosestSampleTest * samples);	
 	void loopBlueBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord);
+	void cutRedBlueEdges(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples);
 					
 protected:
 
