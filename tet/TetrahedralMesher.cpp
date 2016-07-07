@@ -263,13 +263,20 @@ void TetrahedralMesher::processCells()
 		m_frontCellCoords.next();
 	}
 	
-	return;
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		//m_grid.moveFaces(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
 	
 	m_frontCellCoords.begin();
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		m_grid.cutRedBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		//moveRed(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		//m_grid.cutRedBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
 }

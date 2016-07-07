@@ -52,6 +52,9 @@ public:
 	void cutRedBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
+	void moveFaces(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples);
 					
 protected:
 

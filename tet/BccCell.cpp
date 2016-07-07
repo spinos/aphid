@@ -880,8 +880,10 @@ bool BccCell::checkSplitEdge(const Vector3F & p0,
 					const int & comp) const
 {		
 	float dts;
-	distancePointLineSegment(dts, p0, p1, p2);
-	if(dts > r)
+	if(!distancePointLineSegment(dts, p0, p1, p2) )
+		return false;
+		
+	if(dts > .8f *r)
 		return false;
 		
 	if(comp==0) {
@@ -986,6 +988,31 @@ int BccCell::blueNodeFaceOnFront(const int & i,
 		}
 	}
 	return c;
+}
+
+void BccCell::blueNodeConnectToFront(int & nedge, int & nface,
+					const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord)
+{
+	nedge = nface = 0;
+	int j = 0;
+	for(;j<3;++j) {
+/// adjunct blue-blue cut on front
+		BccNode * bn = blueBlueNode(EightVVBlueBlueEdge[i][j], cell, grid, cellCoord);
+		if(bn) {
+			if(bn->prop > 0)
+				nedge++;
+		}
+	}
+	for(j=3;j<6;++j) {
+		BccNode * rr = redRedNode(EightVVBlueBlueEdge[i][j], cell, grid, cellCoord);
+		if(rr) {
+			if(rr->prop > 0)
+				nface++;
+		}
+	}
 }
 
 /// i 0:7

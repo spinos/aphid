@@ -178,6 +178,11 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					bool & onFront);
+	void blueNodeConnectToFront(int & nedge, int & nface,
+					const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord);
 	bool checkWedgeFace(const aphid::Vector3F & p1,
 					const aphid::Vector3F & p2,
 					const aphid::Vector3F * corners,
