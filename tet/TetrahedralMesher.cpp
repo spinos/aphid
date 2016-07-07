@@ -251,25 +251,19 @@ void TetrahedralMesher::processCells()
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		cutFaces(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
+	
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
 		cutEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
 	
-	m_frontCellCoords.begin();
-	while(!m_frontCellCoords.end() ) {
-		
-		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		m_grid.loopBlueBlueEdges(pc, m_frontCellCoords.key());
-		m_frontCellCoords.next();
-	}
-	
-	m_frontCellCoords.begin();
-	while(!m_frontCellCoords.end() ) {
-		
-		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		cutFaces(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
-		m_frontCellCoords.next();
-	}
+	return;
 	
 	m_frontCellCoords.begin();
 	while(!m_frontCellCoords.end() ) {
@@ -295,15 +289,8 @@ void TetrahedralMesher::moveRed(const Vector3F & cellCenter,
 	float d;
 	if(samples->getClosest(closestP, d, redP) < 0)
 		return;
-#if 0
-	Vector3F dp = closestP - redP;
-	Vector3F prodp(0.f, 0.f, 0.f);
-	int j = dp.longestAxis();
-	prodp.setComp(dp.comp(j), j);
-	m_grid.moveRedNodeTo(cellCenter, cellCoord, redP + prodp);
-#else
+
 	m_grid.moveRedNodeTo(cellCenter, cellCoord, closestP);
-#endif
 }
 
 void TetrahedralMesher::cutFaces(const Vector3F & cellCenter,

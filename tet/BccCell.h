@@ -111,7 +111,7 @@ public:
 	void facePosition(aphid::Vector3F & dst,
 					aphid::Vector3F * ps,
 					int & np,
-					bool & faceOnFront,
+					int & numOnFront,
 					const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -178,6 +178,10 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					bool & onFront);
+	bool checkWedgeFace(const aphid::Vector3F & p1,
+					const aphid::Vector3F & p2,
+					const aphid::Vector3F * corners,
+					const float & r) const;
 					
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;

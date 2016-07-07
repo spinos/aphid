@@ -8,6 +8,7 @@
  */
 
 #include "BccCell.h"
+#include <line_math.h>
 
 using namespace aphid;
 
@@ -611,10 +612,11 @@ bool BccCell::anyBlueCut(const int & i,
 /// i 0:5
 /// ps[8]
 /// np 4
+/// n node on front
 void BccCell::facePosition(Vector3F & dst,
 					Vector3F * ps,
 					int & np,
-					bool & faceOnFront,
+					int & numOnFront,
 					const int & i,
 					sdb::Array<int, BccNode> * cell,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
@@ -622,7 +624,7 @@ void BccCell::facePosition(Vector3F & dst,
 {
 	bool stat = anyBlueCut(i, cell, grid, cellCoord);
 		
-	faceOnFront = true;
+	numOnFront = 0;
 	dst.set(0.f, 0.f, 0.f);
 	np = 0;
 	int j=0;
@@ -635,8 +637,8 @@ void BccCell::facePosition(Vector3F & dst,
 			if(nodeC) {
 				dst += nodeC->pos;
 				ps[np++] = nodeC->pos;
-				if(nodeC->prop < 0)
-					faceOnFront = false;
+				if(nodeC->prop > 0)
+					numOnFront++;
 			}
 			else {
 				std::cout<<"\n [ERROR] blue cut not looped "<<cellCoord;
@@ -647,8 +649,8 @@ void BccCell::facePosition(Vector3F & dst,
 									cell, grid, cellCoord);
 			dst += nodeB->pos;
 			ps[np++] = nodeB->pos;
-			if(nodeB->prop < 0)
-				faceOnFront = false;
+			if(nodeB->prop > 0)
+				numOnFront++;
 		}
 		
 	}
@@ -876,12 +878,10 @@ bool BccCell::checkSplitEdge(const Vector3F & p0,
 					const Vector3F & p2,
 					const float & r,
 					const int & comp) const
-{
-	BoundingBox bx;
-	bx.expandBy(p1, r);
-	bx.expandBy(p2, r);
-	
-	if(!bx.isPointInside(p0) )
+{		
+	float dts;
+	distancePointLineSegment(dts, p0, p1, p2);
+	if(dts > r)
 		return false;
 		
 	if(comp==0) {
@@ -919,6 +919,11 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 	}
 	if(!checkSplitEdge(p0, q1, q2, r, d) )
 		return false;
+	
+	float dts;
+	distancePointLineSegment(dts, p0, p1, p2);
+	if(dts > r)
+		return false;
 
 	BoundingBox bx;
 	int i=0;
@@ -934,6 +939,24 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 	}
 	
 	return true;
+}
+
+/// for each blue-blue edge, test distance to red-red edge
+bool BccCell::checkWedgeFace(const aphid::Vector3F & p1,
+					const aphid::Vector3F & p2,
+					const aphid::Vector3F * corners,
+					const float & r) const
+{
+	int i=0, j;
+	for(;i<4;++i) {
+		j = i+1;
+		if(j>3)
+			j = 0;
+			
+		if(distanceBetweenSkewLines(p1, p2, corners[i], corners[j] ) < r )
+			return true;
+	}
+	return false;
 }
 
 /// three face per vertex

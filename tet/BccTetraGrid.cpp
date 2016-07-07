@@ -278,7 +278,9 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	BccNode * redn = fCell.redNode(this, cellCoord);
 	Vector3F redP = redn->pos;
-	bool redOnFront, blueOnFront;
+	Vector3F antiRedP;
+	bool redOnFront;
+	int blueOnFront;
 	float d;
 	Vector3F q, closestP;
 	Vector3F facePs[8];
@@ -291,20 +293,23 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 		if(fCell.redRedNode(i, cell, this, cellCoord) )
 			toAdd = false;
 		
-		if(toAdd)	
-			toAdd = fCell.anyBlueCut(i, cell, this, cellCoord);
+		if(toAdd) {
+			fCell.facePosition(q, facePs, nfaceP, blueOnFront, i, cell, this, cellCoord);
+			BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
+			redOnFront = (redn->prop > -1 && nend->prop > -1);
+			antiRedP = nend->pos;
+			
+			if(blueOnFront<1 && !redOnFront) 
+				toAdd = fCell.checkWedgeFace(redP, antiRedP, facePs, r);
+		}
 			
 		if(toAdd) {
 /// cut add face center
-			fCell.facePosition(q, facePs, nfaceP, blueOnFront, i, cell, this, cellCoord);
-			
 			BccNode * node = fCell.addFaceNode(i, this, cellCoord);
 			node->pos = q;
 			
-			BccNode * nend = fCell.faceNode(i, cell, this, cellCoord);
-			redOnFront = (redn->prop > -1 && nend->prop > -1);
-			
-			if(blueOnFront || redOnFront) 
+/// mid pnt on front
+			if(redOnFront || blueOnFront>3) 
 				node->prop = 5;
 			else
 				node->prop = -1;
@@ -312,7 +317,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 /// move to sample if possible
 			samples->getClosest(closestP, d, q);
 			
-			if(fCell.checkSplitFace(closestP, redP, nend->pos, r, i/2, facePs, nfaceP) ) {
+			if(fCell.checkSplitFace(closestP, redP, antiRedP, r, i/2, facePs, nfaceP) ) {
 				node->pos = closestP;
 				node->prop = 5;
 			}
@@ -353,19 +358,13 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		prop1 = blueProp[v1]; prop2 = blueProp[v2];
 		
 		q = (p1 + p2) * .5f;
+		samples->getClosest(closestP, d, q) > -1;
 		
-		bool toAdd = samples->getClosest(closestP, d, q) > -1;
+/// skip edge on front
+		bool toAdd = prop1 < 0 || prop2 < 0;
 		
 		if(toAdd) {
 			toAdd = fCell.checkSplitEdge(closestP, p1, p2, r, i/4);
-		}
-		
-		if(!toAdd) {
-/// mid point on front
-			if(prop1 > 0 && prop2 > 0) {
-				closestP = q;
-				toAdd = true;
-			}
 		}
 		
 		if(toAdd) {
