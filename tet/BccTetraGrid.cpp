@@ -251,8 +251,9 @@ void BccTetraGrid::moveBlueNodes(const aphid::Vector3F & cellCenter,
 	}
 }
 
-Vector3F BccTetraGrid::moveRedToCellCenter(const Vector3F & cellCenter,
-					const sdb::Coord3 & cellCoord)
+void BccTetraGrid::moveRedToCellCenter(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples)
 {
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
@@ -266,7 +267,13 @@ Vector3F BccTetraGrid::moveRedToCellCenter(const Vector3F & cellCenter,
 	average *= .125;
 	BccNode * ni = fCell.redNode(this, cellCoord);
 	ni->pos = average;
-	return average;
+	
+/// closest to red
+	Vector3F closestP;
+	float d;
+	samples->getClosest(closestP, d, ni->pos);
+		
+	moveRedNodeTo(cellCenter, cellCoord, closestP);
 }
 
 void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
@@ -319,28 +326,20 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			samples->getClosest(closestP, d, q);
 			
 			if(fCell.checkSplitFace(closestP, redP, antiRedP, r, i/2, facePs, nfaceP) ) {
+
+/// limit distance moved		
+				if(closestP.distanceTo(q) < r) {
+					//std::cout<<"\n q > 1.4 r "<<closestP.distanceTo(q) / r;
+				//}
+					
 				node->pos = closestP;
 				node->prop = 5;
+				}
 			}
 		}
 		
 	}
 	
-	/*i=0;
-	for(;i<6;++i) {
-		fCell.checkFaceValume(i, cell, this, cellCoord);
-	}
-	
-	return;
-	if(redn->prop < 0) {
-	samples->getClosest(closestP, d, redP);
-		//std::cout<<"\n d/r"<<d/r;
-		if(d< 1.5f * r) {
-			std::cout<<"\n close red";
-			redn->pos = closestP;
-			redn->prop = 4;
-		}
-	}*/
 }
 
 void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
@@ -404,12 +403,12 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		
 /// limit distance moved
 		if(toMove) {
-			//if(closestP.distanceTo(q) > r) {
+			//if(closestP.distanceTo(q) < r) {
 			//	std::cout<<"\n d > r "<<closestP.distanceTo(q);
-			//}
+			
 			node->pos = closestP;
 			node->prop = 6;
-			
+			//}
 		}
 	}
 }

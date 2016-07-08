@@ -1104,7 +1104,7 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 	}
 	if(!checkSplitEdge(p0, q1, q2, r, d) )
 		return false;
-*/	
+*/
 	return true;
 }
 
@@ -1246,14 +1246,14 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 	if(!antiRedN1)
 		return false;
 	
-	BccNode * yellowN1 = faceNode(TwelveBlueBlueEdges[i][3],
-					cell, grid, cellCoord);
+	//BccNode * yellowN1 = faceNode(TwelveBlueBlueEdges[i][3],
+	//				cell, grid, cellCoord);
 					
-	if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
-		return false;
+	//if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
+	//	return false;
 		
-	if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
-		return false;
+	//if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
+	//	return false;
 			
 	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN1->pos, p1, p2, p0, .29f * r) )
 		return false;
@@ -1394,7 +1394,7 @@ void BccCell::edgeRedCenter(const int & i,
 }
 
 /// per edge i 0:11
-/// average four yellow
+/// find two yellow pair on front
 void BccCell::edgeYellowCenter(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -1403,34 +1403,53 @@ void BccCell::edgeYellowCenter(const int & i,
 					int & nyellow,
 					int & nyellowOnFront) const
 {
-	pcenter.setZero();
 	nyellowOnFront = nyellow = 0;
-	
-	int j = 0;
-	for(;j<2;++j) {
-		BccNode * yellowN1 = redRedNode(TwenlveEdgeYellowInd[i][j], cell, grid, cellCoord);
-		if(yellowN1) {
-			pcenter += yellowN1->pos;
-			nyellow++;
-			if(yellowN1->prop > 0)
-				nyellowOnFront++;
-		}
-	}
 	
 	sdb::Coord3 neiC(cellCoord.x + TwenlveEdgeYellowInd[i][4],
 					cellCoord.y + TwenlveEdgeYellowInd[i][5],
 					cellCoord.z + TwenlveEdgeYellowInd[i][6]);
 	sdb::Array<int, BccNode> * cellnei = grid->findCell(neiC);
-	if(cellnei) {
-		for(j=2;j<4;++j) {
-			BccNode * yellowN1 = redRedNode(TwenlveEdgeYellowInd[i][j], cellnei, grid, neiC);
-			if(yellowN1) {
-				pcenter += yellowN1->pos;
-				nyellow++;
-				if(yellowN1->prop > 0)
-					nyellowOnFront++;
-			}
-		}
+	if(!cellnei) 
+		return;
+		
+	pcenter.setZero();
+		
+	BccNode * yellowN1 = redRedNode(TwenlveEdgeYellowInd[i][0], cell, grid, cellCoord);
+	if(yellowN1) {
+		pcenter += yellowN1->pos;
+		nyellow++;
+		if(yellowN1->prop > 0)
+			nyellowOnFront++;
+	}
+
+	BccNode * yellowN2 = redRedNode(TwenlveEdgeYellowInd[i][2], cellnei, grid, neiC);
+	if(yellowN2) {
+		pcenter += yellowN2->pos;
+		nyellow++;
+		if(yellowN2->prop > 0)
+			nyellowOnFront++;
+	}
+	
+/// must in pairs
+	if(nyellowOnFront < 2) {
+		pcenter.setZero();
+		nyellowOnFront = 0;
+	}
+
+	BccNode * yellowN3 = redRedNode(TwenlveEdgeYellowInd[i][1], cell, grid, cellCoord);
+	if(yellowN3) {
+		pcenter += yellowN3->pos;
+		nyellow++;
+		if(yellowN3->prop > 0)
+			nyellowOnFront++;
+	}
+
+	BccNode * yellowN4 = redRedNode(TwenlveEdgeYellowInd[i][3], cellnei, grid, neiC);
+	if(yellowN4) {
+		pcenter += yellowN4->pos;
+		nyellow++;
+		if(yellowN4->prop > 0)
+			nyellowOnFront++;
 	}
 	
 	pcenter *= 1.f / (float)nyellow;
