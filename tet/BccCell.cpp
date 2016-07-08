@@ -771,6 +771,7 @@ BccNode * BccCell::addFaceNode(const int & i,
 {
 	BccNode * ni = new BccNode;
 	ni->key = 15000 + i;
+	ni->prop = -1;
 	grid->insert(cellCoord, ni);
 	return ni;
 }
@@ -780,9 +781,9 @@ bool BccCell::moveBlueTo(const Vector3F & p,
 					const float & r)
 {
 	Vector3F dp = p - q;
-	if(Absolute<float>(dp.x) >= r) return false;
-	if(Absolute<float>(dp.y) >= r) return false;
-	if(Absolute<float>(dp.z) >= r) return false;
+	if(Absolute<float>(dp.x) > r) return false;
+	if(Absolute<float>(dp.y) > r) return false;
+	if(Absolute<float>(dp.z) > r) return false;
 	return true;
 }
 
@@ -1246,14 +1247,14 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 	if(!antiRedN1)
 		return false;
 	
-	//BccNode * yellowN1 = faceNode(TwelveBlueBlueEdges[i][3],
-	//				cell, grid, cellCoord);
+	BccNode * yellowN1 = faceNode(TwelveBlueBlueEdges[i][3],
+					cell, grid, cellCoord);
 					
-	//if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
-	//	return false;
+	if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
+		return false;
 		
-	//if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
-	//	return false;
+	if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
+		return false;
 			
 	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN1->pos, p1, p2, p0, .29f * r) )
 		return false;
