@@ -55,6 +55,7 @@ class BccCell {
 	static int RedBlueEdge[24][3];
 	static int EightVVBlueBlueEdge[8][6];
 	static int ThreeYellowFace[3][4];
+	static int ThreeYellowEdge[3][2];
 	static int TwenlveEdgeYellowInd[12][7];
 	
 public:
@@ -238,6 +239,11 @@ public:
 					const aphid::Vector3F * corners,
 					const float & r) const;
 	bool yellowFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter) const;
+	bool yellowEdgeOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,

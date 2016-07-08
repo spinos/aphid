@@ -286,14 +286,6 @@ void TetrahedralMesher::processCells()
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		moveRed2(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
-		m_frontCellCoords.next();
-	}
-	
-	m_frontCellCoords.begin();
-	while(!m_frontCellCoords.end() ) {
-		
-		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
 		cutEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}

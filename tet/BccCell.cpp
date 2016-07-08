@@ -168,6 +168,12 @@ int BccCell::ThreeYellowFace[3][4] = {
 {2, 3, 4, 5}
 };
 
+int BccCell::ThreeYellowEdge[3][2] = {
+{0, 1},
+{2, 3},
+{4, 5}
+};
+
 BccCell::BccCell(const Vector3F &center )
 { m_center = center; }
 
@@ -1311,7 +1317,7 @@ bool BccCell::yellowFaceOnFront(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					aphid::Vector3F & pcenter) const
-{return false;
+{//return false;
 	pcenter.setZero();
 	int j = 0;
 	for(;j<4;++j) {
@@ -1325,6 +1331,29 @@ bool BccCell::yellowFaceOnFront(const int & i,
 		pcenter += yellowN->pos;
 	}
 	pcenter *= .25f;
+	return true;
+}
+
+/// two yellow on front i 0:2
+bool BccCell::yellowEdgeOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter) const
+{return false;
+	pcenter.setZero();
+	int j = 0;
+	for(;j<2;++j) {
+		BccNode * yellowN = redRedNode(ThreeYellowEdge[i][j], cell, grid, cellCoord);
+		if(!yellowN)
+			return false;
+			
+		if(yellowN->prop < 0)
+			return false;
+			
+		pcenter += yellowN->pos;
+	}
+	pcenter *= .5f;
 	return true;
 }
 
