@@ -71,22 +71,6 @@ bool BccTetrahedralize::createSamples()
 	}
 	
 	m_mesher.buildGrid();
-
-/*
-	supg->begin();
-	while(!supg->end() ) {
-	
-		std::vector<Vector3F> smps;
-		extractSamplePosIn(smps, supg->value() );
-		
-		Vector3F center = supg->coordToCellCenter(supg->key() );
-		m_mesher.processCell(center, smps);
-		
-		smps.clear();
-		
-		supg->next();
-	}
-*/
 	m_mesher.buildMesh();
 	m_sampleBegin = m_mesher.numNodes();
 	
@@ -95,6 +79,7 @@ bool BccTetrahedralize::createSamples()
 	m_mesher.extractGridPosProp();
 	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
 		
+	m_mesher.checkTetraVolume();
 	std::cout<<"\n n node "<<m_sampleBegin
 		<<"\n n tet "<<m_mesher.numTetrahedrons()
 		<<"\n n front face "<<m_mesher.buildFrontFaces();

@@ -142,6 +142,7 @@ void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)
 		faces.next();
 	}
 	faces.clear();
+	
 }
 
 void BccTetraGrid::moveNodeIn(const aphid::Vector3F & cellCenter,
@@ -194,7 +195,7 @@ bool BccTetraGrid::moveRedNodeTo(const Vector3F & cellCenter,
 					const Vector3F & pos)
 {	
 /// guarantee in which red-blue distance
-	const float r = gridSize() * .125f;
+	const float r = gridSize() * .25f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	
@@ -324,6 +325,22 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 		}
 		
 	}
+	
+	/*i=0;
+	for(;i<6;++i) {
+		fCell.checkFaceValume(i, cell, this, cellCoord);
+	}
+	
+	return;
+	if(redn->prop < 0) {
+	samples->getClosest(closestP, d, redP);
+		//std::cout<<"\n d/r"<<d/r;
+		if(d< 1.5f * r) {
+			std::cout<<"\n close red";
+			redn->pos = closestP;
+			redn->prop = 4;
+		}
+	}*/
 }
 
 void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
@@ -334,16 +351,10 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 	const float r = gz * .25f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
+	BccNode * redN = fCell.redNode(this, cellCoord);
+	const Vector3F redP = redN->pos;
 	
-	Vector3F blueP[8];
-	int blueProp[8];
-	int i=0;
-	for(;i<8;++i) {
-		BccNode * node = fCell.blueNode(i, cell, this, cellCoord, blueP[i]);
-		blueProp[i] = node->prop;
-	}
-	
-	int v1, v2, prop1, prop2;
+	int i, prop1, prop2;
 	Vector3F p1, p2, q, closestP;
 	float d;
 
@@ -353,24 +364,38 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		if(fCell.blueBlueNode(i, cell, this, cellCoord) )
 			continue;
 			
-		fCell.blueBlueEdgeV(v1, v2, i);
-		p1 = blueP[v1]; p2 = blueP[v2];
-		prop1 = blueProp[v1]; prop2 = blueProp[v2];
+		BccNode * b1 = fCell.blueBlueEdgeNode(i, 0, cell, this, cellCoord);
+		p1 = b1->pos;
+		prop1 = b1->prop;
+		
+		BccNode * b2 = fCell.blueBlueEdgeNode(i, 1, cell, this, cellCoord);
+		p2 = b2->pos;
+		prop2 = b2->prop;
 		
 		q = (p1 + p2) * .5f;
-		samples->getClosest(closestP, d, q) > -1;
+		
+/// add anyway
+		BccNode * node = fCell.addEdgeNode(i, this, cellCoord);
+		node->pos = q;
+/// both blue on front
+		if(prop1 > 0 && prop2 > 0)
+			node->prop = 6;
 		
 /// skip edge on front
-		bool toAdd = prop1 < 0 || prop2 < 0;
+		bool toAdd = true;//prop1 < 0 || prop2 < 0;
 		
 		if(toAdd) {
-			toAdd = fCell.checkSplitEdge(closestP, p1, p2, r, i/4);
+			samples->getClosest(closestP, d, q);
+			toAdd = fCell.checkSplitBlueBlueEdge(closestP, redP, p1, p2, r, i,
+					cell, this, cellCoord);
 		}
 		
+/// limit distance moved
 		if(toAdd) {
-			BccNode * node = fCell.addEdgeNode(i, this, cellCoord);
+		//if(closestP.distanceTo(q) < r) {
 			node->pos = closestP;
 			node->prop = 6;
+		//}
 		}
 	}
 }
@@ -414,38 +439,62 @@ void BccTetraGrid::loopBlueBlueEdges(const Vector3F & cellCenter,
 void BccTetraGrid::cutRedBlueEdges(const Vector3F & cellCenter,
 					const sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples)
-{
+{return;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	
 	BccNode * redN = fCell.redNode(this, cellCoord);
-	int ne = 2;
-	if(redN->prop > 0)
-		ne = 3;
 		
 	const Vector3F redP = redN->pos;
 	
-	Vector3F blueP;
+	const float r = gridSize() * .25f;
+	Vector3F closestP;
+	float d;
+	
+	
+	Vector3F blueP, cutP0, cutP1, faceP;
 	int nedgeCut, nfaceCut;
-/// for each blue 
-	int i=0;
-	for(;i<8;++i) {
-		BccNode * blueN = fCell.blueNode(i, cell, this, cellCoord, blueP);
-		//if(blueN->prop > 0)
-		//	continue;
+/// for each face 
+	int i=0, j;
+	for(;i<6;++i) {
 		
-		fCell.blueNodeConnectToFront(nedgeCut, nfaceCut, i, cell, this, cellCoord);
-			
-		if(nfaceCut >= ne || nedgeCut >= ne) {
+		BccNode * fn = fCell.redRedNode(i, cell, this, cellCoord);
+		//std::cout<<"\n facen"<<fn->key;
+			if(fn->key>14999 && fn->prop < 0) {
+			if(fCell.faceClosed(i, cell, this, cellCoord, faceP) ) {
+			std::cout<<"\n face closed";
+			fn->pos = faceP;
+			fn->prop = 5;
+			}
+		}
+		
+/// for each blue
+		for(j=0; j<4;++j) {
+			BccNode * blueN = fCell.faceVaryBlueNode(i, j, cell, this, cellCoord);
+/// blue on front
+			if(blueN->prop > 0)
+				continue;
+
+/// already cut
+			BccNode * rbn = fCell.faceVaryRedBlueNode(i, j, cell, this, cellCoord);
+			if(rbn)
+				continue;
 				
-		BccNode * redBlueN = fCell.addRedBlueEdgeNode(i, this, cellCoord);
-		redBlueN->pos = (redP + blueP) * .5f;
-		
-		redBlueN->prop = 7;
+			if(fCell.straddleBlueCut(i, j, cell, this, cellCoord,
+							cutP0, cutP1) < 2 )
+				continue;
+				
+			blueP = blueN->pos;
+			BccNode * redBlueN = fCell.addFaceVaryRedBlueEdgeNode(i, j, this, cellCoord);
+			redBlueN->pos = (cutP0 + cutP1) * .5f;
+			redBlueN->prop = 7;
+			
 		
 		}
 		
 	}
+	
+	
 }
 
 void BccTetraGrid::moveFaces(const Vector3F & cellCenter,
@@ -505,12 +554,13 @@ void BccTetraGrid::moveFaces(const Vector3F & cellCenter,
 		}
 	}
 	
+	
 /*
 	BccNode * redN = fCell.redNode(this, cellCoord);
 	if(redN->prop > 0)
 		return;
 		
-	const Vector3F redP = redN->pos;
+	
 	
 	i=0;
 	for(;i<8;++i) {
@@ -523,12 +573,7 @@ void BccTetraGrid::moveFaces(const Vector3F & cellCenter,
 		if(nedgeCut < 3)
 			continue;
 			
-		samples->getClosest(closestP, d, (blueN->pos + redP) * .5f);
 		
-		if(d< r) {
-			redN->pos = closestP;
-			redN->prop = 4;
-		}
 	}
 */
 }

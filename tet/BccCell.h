@@ -49,9 +49,10 @@ class BccCell {
 	static int SevenNeighborOnCorner[8][7];
 	static int SixTetraFace[6][8];
 	static int SixNeighborOnFace[6][4];
-	static int TwelveBlueBlueEdges[12][3];
+	static int TwelveBlueBlueEdges[12][5];
 	static int ThreeNeighborOnEdge[36][4];
-	static int TwentyFourFVBlueBlueEdge[24][3];
+	static int TwentyFourFVBlueBlueEdge[24][4];
+	static int RedBlueEdge[24][3];
 	static int EightVVBlueBlueEdge[8][6];
 	
 public:
@@ -72,6 +73,9 @@ public:
 					int * moved) const;
 	int indexToNode15(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * neighborRedNode(int i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * redNode(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * blueNode(const int & i,
@@ -79,6 +83,10 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					aphid::Vector3F & p) const;
+	BccNode * blueNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * blueNode6(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -91,6 +99,27 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * redBlueNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * faceVaryBlueNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * faceVaryRedBlueNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	int straddleBlueCut(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & p0, aphid::Vector3F & p1) const;
+	
 	BccNode * faceVaryBlueBlueNode(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell,
@@ -100,10 +129,15 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
-	bool faceClosed(const int & i,
+	BccNode * blueBlueEdgeNode(int i, int j,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	bool faceClosed(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & center) const;
 	bool anyBlueCut(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -126,7 +160,8 @@ public:
 					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
-	BccNode * addRedBlueEdgeNode(const int & i,
+	BccNode * addFaceVaryRedBlueEdgeNode(const int & i,
+					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
 	bool moveBlueTo(const aphid::Vector3F & p,
@@ -166,6 +201,15 @@ public:
 					const aphid::Vector3F & p2,
 					const float & r,
 					const int & comp) const;
+	bool checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
+					const aphid::Vector3F & redP,
+					const aphid::Vector3F & p1,
+					const aphid::Vector3F & p2,
+					const float & r,
+					const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	bool checkSplitFace(const aphid::Vector3F & p0,
 					const aphid::Vector3F & p1,
 					const aphid::Vector3F & p2,
@@ -173,6 +217,10 @@ public:
 					const int & d,
 					const aphid::Vector3F * ps,
 					const int & np) const;
+	bool checkFaceValume(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	int blueNodeFaceOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -187,7 +235,7 @@ public:
 					const aphid::Vector3F & p2,
 					const aphid::Vector3F * corners,
 					const float & r) const;
-					
+	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;
@@ -215,13 +263,16 @@ private:
 	BccNode * findBlueBlueNodeInNeighbor(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * findRedBlueNodeInNeighbor(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	void addTetrahedron(std::vector<ITetrahedron *> & dest,
 					STriangleArray * faces,
 					int v0, int a, int b, int c) const;
 	void addFace(STriangleArray * faces,
 				int a, int b, int c,
 				ITetrahedron * t) const;
-	
+				
 };
 
 }

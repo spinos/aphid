@@ -12,9 +12,7 @@
 
 namespace aphid {
 
-Plane::Plane() 
-{
-}
+Plane::Plane() {}
 
 Plane::Plane(float a, float b, float c, float d)
 {
@@ -27,6 +25,18 @@ Plane::Plane(float a, float b, float c, float d)
 Plane::Plane(const Vector3F & nor, const Vector3F & pop)
 {
     set(nor, pop);
+}
+
+Plane::Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2)
+{
+	Vector3F e01 = p1 - p0;
+	Vector3F e02 = p2 - p0;
+	Vector3F nn = e01.cross(e02);
+	nn.normalize();
+	m_a = nn.x;
+	m_b = nn.y;
+	m_c = nn.z;
+	m_d = - p0.dot(nn);
 }
 
 Plane::Plane(const Vector3F & p0, const Vector3F & p1, const Vector3F & p2, const Vector3F & p3)
@@ -82,6 +92,9 @@ float Plane::pointTo(const Vector3F & p0) const
 {
 	return -(p0.x * m_a + p0.y * m_b + p0.z * m_c + m_d) / ( - m_a * m_a - m_b * m_b - m_c * m_c);
 }
+
+float Plane::distanceTo(const Vector3F & p0) const
+{ return -(p0.x * m_a + p0.y * m_b + p0.z * m_c + m_d) / ( - m_a * m_a - m_b * m_b - m_c * m_c); }
 
 bool Plane::rayIntersect(const Ray & ray, Vector3F & dst, float & t, bool twoSided) const
 {

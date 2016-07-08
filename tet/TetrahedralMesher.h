@@ -43,6 +43,7 @@ public:
 	bool addPoint(const int & vi, bool & topologyChanged);
 	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
 	bool checkConnectivity();
+	void checkTetraVolume();
 	
 	const int & N() const;
 	aphid::Vector3F * X();
@@ -74,6 +75,7 @@ private:
 	void cutEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples);
+	
 };
 
 }

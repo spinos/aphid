@@ -123,6 +123,33 @@ int TetrahedralMesher::buildMesh()
 	return m_tets.size();
 }
 
+void TetrahedralMesher::checkTetraVolume()
+{
+	float mnvol = 1e20f, mxvol = -1e20f, vol;
+	Vector3F p[4];
+	const int n = numTetrahedrons();
+	int i = 0;
+	for(;i<n;++i) {
+		const ITetrahedron * t = m_tets[i];
+		if(!t) continue;
+		
+		p[0] = X()[t->iv0];
+		p[1] = X()[t->iv1];
+		p[2] = X()[t->iv2];
+		p[3] = X()[t->iv3];
+		
+		vol = tetrahedronVolume(p);
+		if(mnvol > vol)
+			mnvol = vol;
+		if(mxvol < vol)
+			mxvol = vol;
+	}
+
+	std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
+	if(mnvol < 0.f)
+		std::cout<<"\n [ERROR] negative volume";
+}
+
 bool TetrahedralMesher::addPoint(const int & vi,
 								bool & topologyChanged)
 {
@@ -263,22 +290,14 @@ void TetrahedralMesher::processCells()
 		m_frontCellCoords.next();
 	}
 	
+	/*
 	m_frontCellCoords.begin();
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		//m_grid.moveFaces(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_grid.cutRedBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
-	}
-	
-	m_frontCellCoords.begin();
-	while(!m_frontCellCoords.end() ) {
-		
-		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		//moveRed(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
-		//m_grid.cutRedBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
-		m_frontCellCoords.next();
-	}
+	}*/
 }
 
 void TetrahedralMesher::moveBlue(const Vector3F & cellCenter,

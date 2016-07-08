@@ -9,6 +9,8 @@
 
 #include "BccCell.h"
 #include <line_math.h>
+#include <tetrahedron_math.h>
+#include "Convexity.h"
 
 using namespace aphid;
 
@@ -56,14 +58,27 @@ int BccCell::SevenNeighborOnCorner[8][7] = {
 };
 
 /// six face, four edge per face
-/// edge ind
-int BccCell::TwentyFourFVBlueBlueEdge[24][3] = {
-{ 8, 6, 4 }, {12, 8, 10 }, {10,12, 6 }, { 6,10, 8 }, /// -x
-{ 7, 9, 5 }, { 9,13, 11 }, {13,11, 7 }, {11, 7, 9 }, /// +x
-{ 6, 7, 0 }, {10, 6, 8  }, {11,10, 2 }, { 7,11, 9 }, /// -y
-{ 9, 8, 1 }, { 8,12, 10 }, {12,13, 3 }, {13, 9, 11}, /// +y
-{ 7, 6, 0 }, { 9, 7, 5  }, { 8, 9, 1 }, { 6, 8, 4 }, /// -z
-{10,11, 2 }, {11,13, 7  }, {13,12, 3 }, {12,10, 6 }  /// +z
+/// vertex ind 0 1
+/// edge ind 0 1
+int BccCell::TwentyFourFVBlueBlueEdge[24][4] = {
+{ 8, 6, 4, 10}, {12, 8, 10, 6 }, {10,12, 6, 8 }, { 6,10, 8, 4 }, /// -x
+{ 7, 9, 5, 9 }, { 9,13, 11, 5 }, {13,11, 7, 11}, {11, 7, 9, 7 }, /// +x
+{ 6, 7, 0, 8 }, {10, 6, 8, 2  }, {11,10, 2, 9 }, { 7,11, 9, 0 }, /// -y
+{ 9, 8, 1, 11}, { 8,12, 10, 1 }, {12,13, 3, 10}, {13, 9, 11, 3}, /// +y
+{ 7, 6, 0, 5 }, { 9, 7, 5, 1  }, { 8, 9, 1, 4 }, { 6, 8, 4, 0 }, /// -z
+{10,11, 2, 6 }, {11,13, 7, 2  }, {13,12, 3, 7 }, {12,10, 6, 3 }  /// +z
+};
+
+/// red-blue ind
+/// face
+/// ind in neighbor
+int BccCell::RedBlueEdge[24][3] = {
+{15008, 0, 15009}, {15012, 0, 15013}, {15010, 0, 15011}, {15006, 0, 15007},
+{15007, 1, 15006}, {15019, 1, 15008}, {15013, 1, 15012}, {15011, 1, 15010},
+{15006, 2, 15008}, {15010, 2, 15012}, {15011, 2, 15013}, {15007, 2, 15009},
+{15009, 3, 15007}, {15008, 3, 15006}, {15012, 3, 15010}, {15013, 3, 15011},
+{15007, 4, 15011}, {15009, 4, 15013}, {15008, 4, 15012}, {15006, 4, 15010},
+{15010, 5, 15006}, {15011, 5, 15007}, {15013, 5, 15009}, {15012, 5, 15008}
 };
 
 int BccCell::SixTetraFace[6][8] = {
@@ -75,6 +90,8 @@ int BccCell::SixTetraFace[6][8] = {
 {10,11,11,13,13,12,12,10}
 };
 
+/// neighbor coord offset 
+/// opposite face in neighbor
 int BccCell::SixNeighborOnFace[6][4] = {
 {-1, 0, 0, 1},
 { 1, 0, 0, 0},
@@ -84,19 +101,22 @@ int BccCell::SixNeighborOnFace[6][4] = {
 { 0, 0, 1, 4}
 };
 
-int BccCell::TwelveBlueBlueEdges[12][3] = {
-{ 6, 7, 67}, /// x
-{ 8, 9, 89},
-{10,11, 1011},
-{12,13, 1213},
-{ 6, 8, 68}, /// y
-{ 7, 9, 79},
-{10,12, 1012},
-{11,13, 1113},
-{ 6,10, 610}, /// z
-{ 7,11, 711},
-{ 8,12, 812},
-{ 9,13, 913},
+/// vertex 0 1
+/// edge ind
+/// face ind 0 1
+int BccCell::TwelveBlueBlueEdges[12][5] = {
+{ 6, 7, 67, 2, 4}, /// x
+{ 8, 9, 89, 3, 4},
+{10,11, 1011, 2, 5},
+{12,13, 1213, 3, 5},
+{ 6, 8, 68, 0, 4}, /// y
+{ 7, 9, 79, 1, 4},
+{10,12, 1012, 0, 5},
+{11,13, 1113, 1, 5},
+{ 6,10, 610, 0, 2}, /// z
+{ 7,11, 711, 1, 2},
+{ 8,12, 812, 0, 3},
+{ 9,13, 913, 1, 3},
 };
 
 int BccCell::ThreeNeighborOnEdge[36][4] = {
@@ -472,6 +492,18 @@ int BccCell::indexToNode15(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>
 	return node15->index;
 }
 
+/// per face i 0:5
+BccNode * BccCell::neighborRedNode(int i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	sdb::Array<int, BccNode> * cell = grid->findCell(neighborCoord(cellCoord, i) );
+	if(!cell)
+		return NULL;
+		
+	return cell->find(15);
+}
+
 /// center node
 BccNode * BccCell::redNode(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const	
@@ -495,6 +527,19 @@ BccNode * BccCell::blueNode(const int & i,
 								grid,
 								cellCoord);
 	p = node->pos;
+	return node;
+}
+
+BccNode * BccCell::blueNode(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * node = cell->find(i);
+	if(!node) 
+		node = findCornerNodeInNeighbor(i,
+								grid,
+								cellCoord);
 	return node;
 }
 
@@ -569,23 +614,33 @@ BccNode * BccCell::faceNode(const int & i,
 	return node;
 }
 
-/// looped by four blue
+/// looped by four blue on front or blue straddled two blue-blue cut
+/// i 0:5
 bool BccCell::faceClosed(const int & i,
 					sdb::Array<int, BccNode> * cell,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
-					const sdb::Coord3 & cellCoord) const
+					const sdb::Coord3 & cellCoord,
+					Vector3F & center) const
 {
+	center.setZero();
+	Vector3F p0, p1;
+	int ns;
 	int j=0;
 	for(;j<4;++j) {
-		BccNode * nodeB = cell->find(SixTetraFace[i][j*2]);
-		if(!nodeB) {
-			nodeB = findCornerNodeInNeighbor(SixTetraFace[i][j*2],
-								grid,
-								cellCoord);
+		BccNode * nodeB = faceVaryBlueNode(i, j, cell, grid, cellCoord);
+
+		if(nodeB->prop < 0) {
+			ns = straddleBlueCut(i, j, cell, grid, cellCoord, p0, p1);
+			if(ns < 2)
+				return false;
+			
+				center += (p0 + p1) * .5f;
 		}
-		if(nodeB->prop < 0) 
-			return false;
+		else {
+			center += nodeB->pos;
+		}
 	}
+	center *= .25f;
 	return true;
 }
 
@@ -839,6 +894,37 @@ BccNode * BccCell::blueBlueNode(const int & i,
 	return node;
 }
 
+/// red-blue cut
+/// i 0:23
+BccNode * BccCell::redBlueNode(const int & i,
+					sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	return cell->find(RedBlueEdge[i][0]);
+}
+
+/// i 0:5
+/// j 0:3
+BccNode * BccCell::faceVaryBlueNode(const int & i,
+					const int & j,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	return blueNode6(TwentyFourFVBlueBlueEdge[i *4 + j][0],
+									cell, grid, cellCoord);
+}
+
+/// i 0:5
+/// j 0:3
+BccNode * BccCell::faceVaryRedBlueNode(const int & i,
+					const int & j,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{ return redBlueNode(i *4 + j, cell, grid, cellCoord); }
+
 /// i 0:5
 /// j 0:3
 BccNode * BccCell::faceVaryBlueBlueNode(const int & i,
@@ -872,6 +958,23 @@ BccNode * BccCell::findBlueBlueNodeInNeighbor(const int & i,
 	return NULL;
 }
 
+/// i 0:23
+BccNode * BccCell::findRedBlueNodeInNeighbor(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	const int c = RedBlueEdge[i][1];
+	sdb::Coord3 neiC(cellCoord.x + SixNeighborOnFace[c][0],
+					cellCoord.y + SixNeighborOnFace[c][1],
+					cellCoord.z + SixNeighborOnFace[c][2]);
+					
+	sdb::Array<int, BccNode> * cell = grid->findCell(neiC);
+	if(!cell) 
+		return NULL;
+		
+	return cell->find(RedBlueEdge[i][2]);
+}
+
 /// p0 inside box p1 p2 r but not close to p0 p1
 bool BccCell::checkSplitEdge(const Vector3F & p0,
 					const Vector3F & p1,
@@ -883,7 +986,19 @@ bool BccCell::checkSplitEdge(const Vector3F & p0,
 	if(!distancePointLineSegment(dts, p0, p1, p2) )
 		return false;
 		
-	if(dts > .8f *r)
+	if(dts > r)
+		return false;
+		
+	BoundingBox bx;
+	bx.expandBy(p1, r);
+	bx.expandBy(p2, r);
+	if(!bx.isPointInside(p0) )
+		return false;
+		
+	if(p0.distanceTo(p1) < r) 
+		return false;
+		
+	if(p0.distanceTo(p2) < r) 
 		return false;
 		
 	if(comp==0) {
@@ -913,6 +1028,45 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 					const Vector3F * ps,
 					const int & np) const
 {
+	int i = 0, i1, i0;
+	for(;i<4;++i) {
+		i0 = i-1;
+		if(i0<0)
+			i0 = 3;
+			
+		i1 = i+1;
+		if(i1>3)
+			i1 = 0;
+			
+		if(!Convexity::CheckDistanceTwoPlanes(p1, ps[i], ps[i0], ps[i1], p0, .3f * r) )
+			return false;
+		
+		if(!Convexity::CheckDistanceFourPoints(p1, ps[i], ps[i0], ps[i1], p0, r) )
+			return false;
+			
+		if(!Convexity::CheckDistanceTwoPlanes(p2, ps[i], ps[i0], ps[i1], p0, .3f * r) )
+			return false;
+		
+		if(!Convexity::CheckDistanceFourPoints(p2, ps[i], ps[i0], ps[i1], p0, r) )
+			return false;
+
+/*			
+/// low volume
+		float tvol = tetrahedronVolume1(p0, p1, ps[i], ps[i1]);
+		if(Absolute<float>(tvol) < 1e-2f) {
+			//std::cout<<"\n tvol"<<tvol;
+			return false;
+		}
+		
+		tvol = tetrahedronVolume1(p0, p2, ps[i], ps[i1]);
+		if(Absolute<float>(tvol) < 1e-2f) {
+			//std::cout<<"\n tvol"<<tvol;
+			return false;
+		}
+*/
+		
+	}
+/*
 	Vector3F q1 = p1;
 	Vector3F q2 = p2;
 	if(p1.comp(d) > p2.comp(d) ) {
@@ -921,25 +1075,7 @@ bool BccCell::checkSplitFace(const Vector3F & p0,
 	}
 	if(!checkSplitEdge(p0, q1, q2, r, d) )
 		return false;
-	
-	float dts;
-	distancePointLineSegment(dts, p0, p1, p2);
-	if(dts > r)
-		return false;
-
-	BoundingBox bx;
-	int i=0;
-	for(;i<np;++i)
-		bx.expandBy(ps[i], r);
-		
-	if(!bx.isPointInside(p0) )
-		return false;
-		
-	for(i=0;i<np;++i) {
-		if(p0.distanceTo(ps[i]) < r)
-			return false;
-	}
-	
+*/	
 	return true;
 }
 
@@ -1015,16 +1151,136 @@ void BccCell::blueNodeConnectToFront(int & nedge, int & nface,
 	}
 }
 
-/// i 0:7
-BccNode * BccCell::addRedBlueEdgeNode(const int & i,
+/// i 0:5
+/// j 0:3
+BccNode * BccCell::addFaceVaryRedBlueEdgeNode(const int & i,
+					const int & j,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					const sdb::Coord3 & cellCoord)
 {
 	BccNode * ni = new BccNode;
-	ni->key = 15006 + i;
+	ni->key = RedBlueEdge[i*4+j][0];
 	ni->prop = -1;
 	grid->insert(cellCoord, ni);
 	return ni;
+}
+
+int BccCell::straddleBlueCut(const int & i,
+					const int & j,
+					sdb::Array<int, BccNode> * cell,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord,
+					Vector3F & p0, Vector3F & p1) const
+{
+	int c = 0;
+	int fve = i * 4 + j;
+	BccNode * b0 = blueBlueNode(TwentyFourFVBlueBlueEdge[fve][2], cell, grid, cellCoord);
+	if(b0) {
+		c++;
+		p0 = b0->pos;
+	}
+	
+	BccNode * b1 = blueBlueNode(TwentyFourFVBlueBlueEdge[fve][3], cell, grid, cellCoord);
+	if(b1) {
+		c++;
+		p1 = b1->pos;
+	}
+	return c;
+}
+
+/// i 0:11 j 0:1
+BccNode * BccCell::blueBlueEdgeNode(int i, int j,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	return blueNode(TwelveBlueBlueEdges[i][j],
+					cell, grid, cellCoord);
+}
+
+/// cut edge cannot interset two face
+/// find two red
+/// keep split tetra volume positive
+/// i 0:11
+bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
+					const aphid::Vector3F & redP,
+					const aphid::Vector3F & p1,
+					const aphid::Vector3F & p2,
+					const float & r,
+					const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	
+	BccNode * antiRedN1 = neighborRedNode(TwelveBlueBlueEdges[i][3],
+						grid, cellCoord);
+	if(!antiRedN1)
+		return false;
+	
+	BccNode * yellowN1 = faceNode(TwelveBlueBlueEdges[i][3],
+					cell, grid, cellCoord);
+					
+	if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
+		return false;
+		
+	if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
+		return false;
+			
+	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN1->pos, p1, p2, p0, .29f * r) )
+		return false;
+		
+	if(!Convexity::CheckDistanceFourPoints(redP, yellowN1->pos, p1, p2, p0, 1.1f * r) )
+		return false;*/
+		
+	BccNode * antiRedN2 = neighborRedNode(TwelveBlueBlueEdges[i][4],
+						grid, cellCoord);
+	if(!antiRedN2)
+		return false;
+		
+	BccNode * yellowN2 = faceNode(TwelveBlueBlueEdges[i][4],
+					cell, grid, cellCoord);
+	
+	if(!Convexity::CheckTetraVolume(redP, yellowN2->pos, p0, p2) )
+		return false;
+		
+	if(!Convexity::CheckTetraVolume(antiRedN2->pos, yellowN2->pos, p2, p0) )
+		return false;
+		
+	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN2->pos, p1, p2, p0, .29f * r) )
+		return false;
+		
+	if(!Convexity::CheckDistanceFourPoints(redP, yellowN2->pos, p1, p2, p0, 1.1f * r) )
+		return false;*/
+	
+	return true;
+}
+
+bool BccCell::checkFaceValume(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * redN = cell->find(15);
+	Vector3F redP = redN->pos;
+	BccNode * yellowN = faceNode(i,
+					cell, grid, cellCoord);
+	Vector3F yellowP = yellowN->pos;
+	
+	int j = 0, j1;
+	for(;j<4;++j) {
+		j1 = j+1;
+		if(j1>3) j1 = 0;
+		
+		BccNode * blueN0 = faceVaryBlueNode(i, j, cell, grid, cellCoord);
+		BccNode * blueN1 = faceVaryBlueNode(i, j1, cell, grid, cellCoord);
+		
+		float tvol = tetrahedronVolume1(redP, yellowP, blueN0->pos, blueN1->pos);
+		
+		if(Absolute<float>(tvol) < 1e-2f) 
+			std::cout<<"\n low tetra vol "<<tvol;
+	}
+	return true;
 }
 
 }
