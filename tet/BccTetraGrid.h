@@ -55,7 +55,9 @@ public:
 	void moveFaces(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
-					
+	void moveRedToYellowCenter(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples);
 protected:
 
 private:

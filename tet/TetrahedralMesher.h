@@ -69,6 +69,9 @@ private:
 	void moveRed(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples);
+	void moveRed2(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples);
 	void cutFaces(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					ClosestSampleTest * samples);

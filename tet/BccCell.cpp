@@ -134,6 +134,22 @@ int BccCell::ThreeNeighborOnEdge[36][4] = {
 { 1, 0, 0, 812 }, { 1, 1, 0, 610 }, { 0, 1, 0, 711 }
 };
 
+/// per edge yellow ind in cell and neighbor
+int BccCell::TwenlveEdgeYellowInd[12][7] = {
+{2, 4, 3, 5, 0, -1, -1}, /// 67
+{3, 4, 2, 5, 0,  1, -1}, /// 89
+{2, 5, 3, 4, 0, -1,  1}, /// 1011
+{3, 5, 2, 4, 0,  1,  1}, /// 1213
+{0, 4, 1, 5,-1,  0, -1}, /// 68
+{1, 4, 0, 5, 1,  0, -1}, /// 79
+{0, 5, 1, 4,-1,  0,  1}, /// 1012
+{1, 5, 0, 4, 1,  0,  1}, /// 1113
+{0, 2, 1, 3,-1, -1,  0}, /// 610
+{1, 2, 0, 3, 1, -1,  0}, /// 711
+{0, 3, 1, 2,-1,  1,  0}, /// 812
+{1, 3, 0, 2, 1,  1,  0}, /// 913
+};
+
 /// per-vertex blue-blue edge and face ind
 int BccCell::EightVVBlueBlueEdge[8][6] = {
 {0, 4, 8, 0, 2, 4}, /// 67 68 610
@@ -144,6 +160,12 @@ int BccCell::EightVVBlueBlueEdge[8][6] = {
 {2, 7, 9, 1, 2, 5}, /// 1011 711 1113 
 {3, 6,10, 0, 3, 5}, /// 812 1012 1213 
 {3, 7,11, 1, 3, 5}  /// 913 1113 1213
+};
+
+int BccCell::ThreeYellowFace[3][4] = {
+{0, 1, 2, 3},
+{0, 1, 4, 5},
+{2, 3, 4, 5}
 };
 
 BccCell::BccCell(const Vector3F &center )
@@ -856,6 +878,7 @@ void BccCell::blueBlueEdgeV(int & v1,
 	v2 = TwelveBlueBlueEdges[i][1] - 6;
 }
 
+/// i 0:11
 BccNode * BccCell::addEdgeNode(const int & i,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 					const sdb::Coord3 & cellCoord)
@@ -1212,7 +1235,6 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const
 {
-	
 	BccNode * antiRedN1 = neighborRedNode(TwelveBlueBlueEdges[i][3],
 						grid, cellCoord);
 	if(!antiRedN1)
@@ -1281,6 +1303,108 @@ bool BccCell::checkFaceValume(const int & i,
 			std::cout<<"\n low tetra vol "<<tvol;
 	}
 	return true;
+}
+
+/// four yellow on front i 0:2
+bool BccCell::yellowFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter) const
+{return false;
+	pcenter.setZero();
+	int j = 0;
+	for(;j<4;++j) {
+		BccNode * yellowN = redRedNode(ThreeYellowFace[i][j], cell, grid, cellCoord);
+		if(!yellowN)
+			return false;
+			
+		if(yellowN->prop < 0)
+			return false;
+			
+		pcenter += yellowN->pos;
+	}
+	pcenter *= .25f;
+	return true;
+}
+
+/// per edge i 0:11
+/// average four red
+void BccCell::edgeRedCenter(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter,
+					int & nred,
+					int & redOnFront) const
+{
+	nred = 1;
+	redOnFront = 0;
+	BccNode * redN = cell->find(15);
+	pcenter = redN->pos;
+	if(redN->prop > 0)
+		redOnFront++;
+		
+	int j=0;
+	for(;j<3;++j) {
+		sdb::Coord3 neiC(cellCoord.x + ThreeNeighborOnEdge[i*3+j][0],
+					cellCoord.y + ThreeNeighborOnEdge[i*3+j][1],
+					cellCoord.z + ThreeNeighborOnEdge[i*3+j][2]);
+					
+		sdb::Array<int, BccNode> * cellj = grid->findCell(neiC);
+		if(cellj) {
+		BccNode * redjN = cellj->find(15);
+		pcenter += redjN->pos;
+		nred++;
+		if(redjN->prop > 0)
+			redOnFront++;
+		}
+	}
+	
+	pcenter *= 1.f / (float)nred;
+}
+
+/// per edge i 0:11
+/// average four yellow
+void BccCell::edgeYellowCenter(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter,
+					int & nyellow,
+					int & nyellowOnFront) const
+{
+	pcenter.setZero();
+	nyellowOnFront = nyellow = 0;
+	
+	int j = 0;
+	for(;j<2;++j) {
+		BccNode * yellowN1 = redRedNode(TwenlveEdgeYellowInd[i][j], cell, grid, cellCoord);
+		if(yellowN1) {
+			pcenter += yellowN1->pos;
+			nyellow++;
+			if(yellowN1->prop > 0)
+				nyellowOnFront++;
+		}
+	}
+	
+	sdb::Coord3 neiC(cellCoord.x + TwenlveEdgeYellowInd[i][4],
+					cellCoord.y + TwenlveEdgeYellowInd[i][5],
+					cellCoord.z + TwenlveEdgeYellowInd[i][6]);
+	sdb::Array<int, BccNode> * cellnei = grid->findCell(neiC);
+	if(cellnei) {
+		for(j=2;j<4;++j) {
+			BccNode * yellowN1 = redRedNode(TwenlveEdgeYellowInd[i][j], cellnei, grid, neiC);
+			if(yellowN1) {
+				pcenter += yellowN1->pos;
+				nyellow++;
+				if(yellowN1->prop > 0)
+					nyellowOnFront++;
+			}
+		}
+	}
+	
+	pcenter *= 1.f / (float)nyellow;
 }
 
 }

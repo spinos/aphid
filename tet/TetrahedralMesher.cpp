@@ -52,7 +52,7 @@ void TetrahedralMesher::addCell(const Vector3F & p)
 /// red only
 		BccNode * node15 = new BccNode;
 		node15->pos = m_grid.coordToCellCenter(c);
-		node15->prop = -1;
+		node15->prop = -4;
 		node15->key = 15;
 		m_grid.insert(c, node15 );
 }
@@ -286,6 +286,14 @@ void TetrahedralMesher::processCells()
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
+		moveRed2(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_frontCellCoords.next();
+	}
+	
+	m_frontCellCoords.begin();
+	while(!m_frontCellCoords.end() ) {
+		
+		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
 		cutEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
@@ -317,6 +325,13 @@ void TetrahedralMesher::moveRed(const Vector3F & cellCenter,
 		return;
 
 	m_grid.moveRedNodeTo(cellCenter, cellCoord, closestP);
+}
+
+void TetrahedralMesher::moveRed2(const Vector3F & cellCenter,
+					const sdb::Coord3 & cellCoord,
+					ClosestSampleTest * samples)
+{
+	m_grid.moveRedToYellowCenter(cellCenter, cellCoord, samples);
 }
 
 void TetrahedralMesher::cutFaces(const Vector3F & cellCenter,

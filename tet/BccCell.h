@@ -54,6 +54,8 @@ class BccCell {
 	static int TwentyFourFVBlueBlueEdge[24][4];
 	static int RedBlueEdge[24][3];
 	static int EightVVBlueBlueEdge[8][6];
+	static int ThreeYellowFace[3][4];
+	static int TwenlveEdgeYellowInd[12][7];
 	
 public:
 	BccCell(const aphid::Vector3F &center );
@@ -235,7 +237,25 @@ public:
 					const aphid::Vector3F & p2,
 					const aphid::Vector3F * corners,
 					const float & r) const;
-	
+	bool yellowFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter) const;
+	void edgeRedCenter(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter,
+					int & nred,
+					int & redOnFront) const;
+	void edgeYellowCenter(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & pcenter,
+					int & nyellow,
+					int & nyellowOnFront) const;
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;

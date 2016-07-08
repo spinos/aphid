@@ -354,8 +354,8 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 	BccNode * redN = fCell.redNode(this, cellCoord);
 	const Vector3F redP = redN->pos;
 	
-	int i, prop1, prop2;
-	Vector3F p1, p2, q, closestP;
+	int i, prop1, prop2, nredFront, nred, nyellowFront, nyellow;
+	Vector3F p1, p2, q, closestP, yellowCenter;
 	float d;
 
 	i=0;
@@ -372,7 +372,18 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		p2 = b2->pos;
 		prop2 = b2->prop;
 		
-		q = (p1 + p2) * .5f;
+		//q = (p1 + p2) * .5f;
+		
+		fCell.edgeRedCenter(i, cell, this, cellCoord, q, nred, nredFront);
+		if(nredFront < 4)
+			q = (p1 + p2) * .5f;
+			
+		if(nred < 4)
+			continue;
+			 
+		fCell.edgeYellowCenter(i, cell, this, cellCoord, yellowCenter, nyellow, nyellowFront);
+		if(nyellowFront > 3)
+			q = yellowCenter;
 		
 /// add anyway
 		BccNode * node = fCell.addEdgeNode(i, this, cellCoord);
@@ -380,18 +391,19 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 /// both blue on front
 		if(prop1 > 0 && prop2 > 0)
 			node->prop = 6;
+			
+		if(nredFront > 2 || nyellowFront > 2)
+			node->prop = 6;
 		
-/// skip edge on front
-		bool toAdd = true;//prop1 < 0 || prop2 < 0;
+		bool toMove = samples->getClosest(closestP, d, q) > -1;
 		
-		if(toAdd) {
-			samples->getClosest(closestP, d, q);
-			toAdd = fCell.checkSplitBlueBlueEdge(closestP, redP, p1, p2, r, i,
+		if(toMove) {
+			toMove = fCell.checkSplitBlueBlueEdge(closestP, redP, p1, p2, r, i,
 					cell, this, cellCoord);
 		}
 		
 /// limit distance moved
-		if(toAdd) {
+		if(toMove) {
 		//if(closestP.distanceTo(q) < r) {
 			node->pos = closestP;
 			node->prop = 6;
@@ -576,6 +588,29 @@ void BccTetraGrid::moveFaces(const Vector3F & cellCenter,
 		
 	}
 */
+}
+
+void BccTetraGrid::moveRedToYellowCenter(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples)
+{
+	BccCell fCell(cellCenter);
+	BccNode * redN = fCell.redNode(this, cellCoord);
+	if(redN->prop > 0)
+		return;
+		
+	const float r = gridSize() * .25f;
+	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
+	
+	Vector3F q;
+	int i = 0;
+	for(;i<3;++i) {
+		if(fCell.yellowFaceOnFront(i, cell, this, cellCoord, q) ) {
+		std::cout<<"\n close red";
+			redN->pos = q;
+			redN->prop = 4;
+		}
+	}
 }
 
 }
