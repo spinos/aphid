@@ -243,7 +243,7 @@ void BccTetraGrid::moveBlueNodes(const aphid::Vector3F & cellCenter,
 		fCell.getCellCorner(blueP, i, gz);
 		samples->getClosest(closestP, d, blueP);
 		
-		if(fCell.moveBlueTo(closestP, blueP, 1.732f * r) ) {
+		if(fCell.moveBlueTo(closestP, blueP, 1.4f * r) ) {
 			
 		// std::cout<<"\n move blue";
 		//xi->pos = closestP;
@@ -594,6 +594,25 @@ void BccTetraGrid::closeRedAtFaceFlowCenter(const aphid::Vector3F & cellCenter,
 			//}
 			redN->prop = 4;
 		}
+	}
+}
+
+void BccTetraGrid::moveRedToFront(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples)
+{
+	BccCell fCell(cellCenter);
+	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
+		
+	const float r = gridSize() * .25f;
+	BccNode * redN = cell->find(15);
+	float d;
+	Vector3F closestP;
+	samples->getClosest(closestP, d, redN->pos);
+		
+	if(fCell.checkMoveRed(closestP, r, cell, this, cellCoord) ) {
+		redN->pos = closestP;
+		redN->prop = 4;
 	}
 }
 

@@ -259,6 +259,12 @@ public:
 					aphid::Vector3F & pcenter,
 					int & nyellow,
 					int & nyellowOnFront) const;
+	bool checkMoveRed(const aphid::Vector3F & q,
+					const float & r,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;

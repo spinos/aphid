@@ -1509,4 +1509,25 @@ void BccCell::edgeYellowCenter(const int & i,
 	pcenter *= 1.f / (float)nyellow;
 }
 
+bool BccCell::checkMoveRed(const aphid::Vector3F & q,
+					const float & r,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	Vector3F p[4];
+	int i=0, j;
+	for(;i<6;++i) {
+		for(j=0;j<4;++j) {
+			const int edgei = i * 4 + j;
+			BccNode * blueN = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
+									cell, grid, cellCoord);
+			p[j] = blueN->pos;
+		}
+		if(!Convexity::CheckDistancePlane(p[0], p[1], p[2], p[3], q, r) )
+			return false;
+	}
+	return true;
+}
+
 }

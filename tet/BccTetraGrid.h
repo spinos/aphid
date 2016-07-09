@@ -56,7 +56,10 @@ public:
 	void closeRedAtFaceFlowCenter(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
-					
+	void moveRedToFront(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples);
+	
 protected:
 
 private:

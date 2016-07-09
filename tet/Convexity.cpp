@@ -77,4 +77,16 @@ bool Convexity::CheckTetraVolume(const aphid::Vector3F & a,
 	return tetrahedronVolume1(a, b, c, d) > 1e-2f;
 }
 
+bool Convexity::CheckDistancePlane(const aphid::Vector3F & a,
+						const aphid::Vector3F & b,
+						const aphid::Vector3F & c,
+						const aphid::Vector3F & d,
+						const aphid::Vector3F & p0,
+						const float & r)
+{
+	Plane plane1(a, b, c, d);
+	
+	return Absolute<float>(plane1.distanceTo(p0) ) > r;
+}
+
 }
