@@ -44,13 +44,8 @@ public:
 					const ClosestSampleTest * samples);	
 	void cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
-					const ClosestSampleTest * samples);	
-	void loopBlueBlueEdges(const aphid::Vector3F & cellCenter,
-					const aphid::sdb::Coord3 & cellCoord);
-	void cutRedBlueEdges(const aphid::Vector3F & cellCenter,
-					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
-	void moveFaces(const aphid::Vector3F & cellCenter,
+	void cutRedBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
 	void closeRedAtFaceFlowCenter(const aphid::Vector3F & cellCenter,
