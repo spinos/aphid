@@ -32,15 +32,15 @@ SuperformulaControl::SuperformulaControl(QWidget *parent)
 	
 	m_n1Value = new QDoubleEditSlider(tr("n1"), this);
 	m_n1Value->setLimit(-90, 90);
-	m_n1Value->setValue(10.0);
+	m_n1Value->setValue(4.0);
 	
 	m_n2Value = new QDoubleEditSlider(tr("n2"), this);
 	m_n2Value->setLimit(-90, 90);
-	m_n2Value->setValue(10.0);
+	m_n2Value->setValue(4.0);
 	
 	m_n3Value = new QDoubleEditSlider(tr("n3"), this);
 	m_n3Value->setLimit(-90, 90);
-	m_n3Value->setValue(10.0);
+	m_n3Value->setValue(4.0);
 	
 	S1Grp = new QGroupBox;
     QVBoxLayout * yLayout = new QVBoxLayout;
@@ -68,15 +68,15 @@ SuperformulaControl::SuperformulaControl(QWidget *parent)
 	
 	m_n21Value = new QDoubleEditSlider(tr("n1"), this);
 	m_n21Value->setLimit(-90, 90);
-	m_n21Value->setValue(10.0);
+	m_n21Value->setValue(4.0);
 	
 	m_n22Value = new QDoubleEditSlider(tr("n2"), this);
 	m_n22Value->setLimit(-90, 90);
-	m_n22Value->setValue(10.0);
+	m_n22Value->setValue(4.0);
 	
 	m_n23Value = new QDoubleEditSlider(tr("n3"), this);
 	m_n23Value->setLimit(-90, 90);
-	m_n23Value->setValue(10.0);
+	m_n23Value->setValue(4.0);
 	
 	S2Grp = new QGroupBox;
     QVBoxLayout * zLayout = new QVBoxLayout;

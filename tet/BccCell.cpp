@@ -180,6 +180,15 @@ BccCell::BccCell(const Vector3F &center )
 const Vector3F * BccCell::centerP() const
 { return &m_center; }
 
+/// per vertex i 0:7
+void BccCell::getCellCorner(aphid::Vector3F & p, const int & i,
+					const float & gridSize) const
+{
+	neighborOffset(&p, i+6);
+	p *= gridSize * .5f;
+	p += m_center;
+}
+
 void BccCell::addRedBlueNodes(sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
 						const sdb::Coord3 & cellCoord ) const
 {
@@ -558,6 +567,7 @@ BccNode * BccCell::blueNode(const int & i,
 	return node;
 }
 
+/// i 6:13
 BccNode * BccCell::blueNode(const int & i,
 					sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -776,15 +786,25 @@ BccNode * BccCell::addFaceNode(const int & i,
 	return ni;
 }
 
-bool BccCell::moveBlueTo(const Vector3F & p,
+bool BccCell::moveBlueTo(Vector3F & p,
 					const Vector3F & q,
 					const float & r)
 {
+#if 0
 	Vector3F dp = p - q;
 	if(Absolute<float>(dp.x) > r) return false;
 	if(Absolute<float>(dp.y) > r) return false;
 	if(Absolute<float>(dp.z) > r) return false;
 	return true;
+#else
+	Vector3F dp = p - q;
+	float d = dp.length();
+	if(d > r) {
+		dp.normalize();
+		p = q + dp * r;
+	}
+	return d < r;
+#endif
 }
 
 bool BccCell::moveFaceTo(const int & i,
@@ -1312,50 +1332,83 @@ bool BccCell::checkFaceValume(const int & i,
 	return true;
 }
 
-/// four yellow on front i 0:2
-bool BccCell::yellowFaceOnFront(const int & i,
+/// per face i 0:5
+/// find blue-cyan-blue trio on front
+int BccCell::faceHasEdgeOnFront(const int & i, 
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					aphid::Vector3F & pcenter) const
-{//return false;
-	pcenter.setZero();
-	int j = 0;
+					aphid::Vector3F & edgeCenter) const
+{
+	Vector3F curEdgeC;
+	const int edgei = i * 4;
+	int c = 0;
+/// for each edge
+	int j=0;
 	for(;j<4;++j) {
-		BccNode * yellowN = redRedNode(ThreeYellowFace[i][j], cell, grid, cellCoord);
-		if(!yellowN)
-			return false;
+		bool edgeOnFront = true;
+		curEdgeC.setZero();
+		
+		BccNode * blueN1 = blueNode6(TwentyFourFVBlueBlueEdge[edgei+j][0],
+									cell, grid, cellCoord);
+		
+		if(blueN1->prop > 0)
+			curEdgeC += blueN1->pos;
+		else
+			edgeOnFront = false;
+		
+		if(edgeOnFront) {
 			
-		if(yellowN->prop < 0)
-			return false;
-			
-		pcenter += yellowN->pos;
+			BccNode * blueN2 = blueNode6(TwentyFourFVBlueBlueEdge[edgei+j][1],
+									cell, grid, cellCoord);
+			if(blueN2->prop > 0)
+				curEdgeC += blueN2->pos;
+			else
+				edgeOnFront = false;
+		}
+		
+		if(edgeOnFront) {
+			c++;
+			edgeCenter = curEdgeC * .5f;
+		}
 	}
-	pcenter *= .25f;
-	return true;
+	
+	return c;
 }
 
 /// two yellow on front i 0:2
-bool BccCell::yellowEdgeOnFront(const int & i,
+bool BccCell::oppositeFacesOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					aphid::Vector3F & pcenter) const
-{return false;
+{
 	pcenter.setZero();
+	Vector3F edgeCenter;
+	int cyellow = 0, cblue = 0;
 	int j = 0;
 	for(;j<2;++j) {
+
 		BccNode * yellowN = redRedNode(ThreeYellowEdge[i][j], cell, grid, cellCoord);
-		if(!yellowN)
-			return false;
+		if(yellowN) {
 			
-		if(yellowN->prop < 0)
-			return false;
-			
-		pcenter += yellowN->pos;
+			if(yellowN->prop > 0) {
+				pcenter += yellowN->pos;
+				cyellow++;
+			}
+			else {
+				if(faceHasEdgeOnFront(ThreeYellowEdge[i][j], cell, grid, cellCoord, edgeCenter) > 0 )
+				cblue++;
+				pcenter += edgeCenter;
+			}
+		}
 	}
+	
+	if(cyellow < 1)
+		return false;
+			
 	pcenter *= .5f;
-	return true;
+	return (cyellow + cblue) > 1;
 }
 
 /// per edge i 0:11

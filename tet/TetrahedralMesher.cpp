@@ -259,9 +259,9 @@ sdb::Array<sdb::Coord3, IFace > * TetrahedralMesher::frontFaces()
 void TetrahedralMesher::processCells()
 {
 	moveBlue();
-	moveRed();
 	cutFaces();
 	cutEdges();
+	//closeRed();
 	//cutRedBlue();
 }
 
@@ -288,7 +288,7 @@ void TetrahedralMesher::cutEdges()
 }
 
 void TetrahedralMesher::moveBlue()
-{ 
+{
 	m_frontCellCoords.begin();
 	while(!m_frontCellCoords.end() ) {
 		
@@ -298,14 +298,14 @@ void TetrahedralMesher::moveBlue()
 	}
 }
 
-void TetrahedralMesher::moveRed()
+void TetrahedralMesher::closeRed()
 {
 	m_frontCellCoords.begin();
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F cellCenter = m_grid.coordToCellCenter(m_frontCellCoords.key() );
 		
-		m_grid.moveRedToCellCenter(cellCenter, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_grid.closeRedAtFaceFlowCenter(cellCenter, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
 }

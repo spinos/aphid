@@ -110,6 +110,8 @@ void Window::createMenus(Parameter::Operation opt)
 		|| opt == Parameter::kBccTetrahedralize ) {
 		windowMenu = menuBar()->addMenu(tr("&Window"));
 		windowMenu->addAction(showSFControlAct);
+		
+		m_superformulaControl->show();
 	}
 }
 

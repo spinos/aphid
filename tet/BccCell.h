@@ -60,6 +60,8 @@ class BccCell {
 	
 public:
 	BccCell(const aphid::Vector3F &center );
+	void getCellCorner(aphid::Vector3F & p, const int & i,
+					const float & gridSize) const;
 	void addRedBlueNodes(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	void getNodePositions(aphid::Vector3F * dest,
@@ -167,7 +169,7 @@ public:
 					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
-	bool moveBlueTo(const aphid::Vector3F & p,
+	bool moveBlueTo(aphid::Vector3F & p,
 					const aphid::Vector3F & q,
 					const float & r);
 	bool moveFaceTo(const int & i,
@@ -238,12 +240,7 @@ public:
 					const aphid::Vector3F & p2,
 					const aphid::Vector3F * corners,
 					const float & r) const;
-	bool yellowFaceOnFront(const int & i,
-					aphid::sdb::Array<int, BccNode> * cell,
-					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
-					const aphid::sdb::Coord3 & cellCoord,
-					aphid::Vector3F & pcenter) const;
-	bool yellowEdgeOnFront(const int & i,
+	bool oppositeFacesOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
@@ -298,6 +295,11 @@ private:
 	void addFace(STriangleArray * faces,
 				int a, int b, int c,
 				ITetrahedron * t) const;
+	int faceHasEdgeOnFront(const int & i, 
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & edgeCenter) const;
 				
 };
 

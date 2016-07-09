@@ -67,7 +67,7 @@ private:
 	void cutEdges();
 	void cutRedBlue();
 	void moveBlue();
-	void moveRed();
+	void closeRed();
 	
 };
 
