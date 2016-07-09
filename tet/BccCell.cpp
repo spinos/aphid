@@ -1484,11 +1484,14 @@ void BccCell::edgeYellowCenter(const int & i,
 			nyellowOnFront++;
 	}
 	
-/// must in pairs
-	if(nyellowOnFront < 2) {
-		pcenter.setZero();
-		nyellowOnFront = 0;
+	if(nyellowOnFront > 1) {
+		pcenter *= 1.f / (float)nyellow;
+		return;
 	}
+
+/// must in pairs	
+	pcenter.setZero();
+	nyellowOnFront = nyellow = 0;
 
 	BccNode * yellowN3 = redRedNode(TwenlveEdgeYellowInd[i][1], cell, grid, cellCoord);
 	if(yellowN3) {

@@ -357,23 +357,23 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		p2 = b2->pos;
 		prop2 = b2->prop;
 		
+/// blue mid
 		q = (p1 + p2) * .5f;
 		
 		if(node->prop < 0)
 			node->pos = q;
-					 
-		fCell.edgeYellowCenter(i, cell, this, cellCoord, yellowCenter, nyellow, nyellowFront);
-		if(nyellowFront > 1) {
-			//std::cout<<"\n yellow mid "<<yellowCenter;
-			//q = yellowCenter;
-		}
-		
-/// both blue on front
+			
+/// straddle blue on front
 		if(prop1 > 0 && prop2 > 0)
 			node->prop = 6;
-			
-		if(nyellowFront > 1)
-			node->prop = 6;
+		else {
+			fCell.edgeYellowCenter(i, cell, this, cellCoord, yellowCenter, nyellow, nyellowFront);
+/// straddle yellow on front
+			if(nyellowFront > 1) {
+				q = yellowCenter;
+				node->prop = 6;
+			}
+		}
 		
 		samples->getClosest(closestP, d, q);
 		

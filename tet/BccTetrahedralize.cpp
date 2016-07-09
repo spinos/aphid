@@ -31,9 +31,7 @@ bool BccTetrahedralize::createSamples()
 	const float supsize = supg->gridSize();
 	m_mesher.setH(supsize);
 	
-	const float bsize = supsize * .5f;
-	m_pntSz = bsize * .075f;
-	BoundingBox cbx;
+	m_pntSz = supsize * .075f;
 	
 	supg->begin();
 	while(!supg->end() ) {
@@ -46,24 +44,13 @@ bool BccTetrahedralize::createSamples()
 		
 		smps.clear();
 		
-		supg->getCellBoundingBox(&cbx);
-		
-		Vector3F bcn = cbx.center();
-		float bdx = cbx.distance(0) *.5f;
-		float bdy = cbx.distance(1) *.5f;
-		float bdz = cbx.distance(2) *.5f;
 /// force boundary		
 		for(int i=0; i<26; ++i) {
 			Vector3F voffset(PoissonSequence<Disk>::TwentySixNeighborCoord[i][0],
 							PoissonSequence<Disk>::TwentySixNeighborCoord[i][1],
 							PoissonSequence<Disk>::TwentySixNeighborCoord[i][2]);
 							
-			center = bcn + Vector3F(bdx * voffset.x,
-									bdy * voffset.y,
-									bdz * voffset.z)
-						+ voffset * bsize;
-		
-			m_mesher.addCell(center);
+			m_mesher.addCell(center + voffset * supsize);
 			
 		}
 		
