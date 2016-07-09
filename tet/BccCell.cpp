@@ -1267,7 +1267,7 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 	if(!antiRedN1)
 		return false;
 	
-	BccNode * yellowN1 = faceNode(TwelveBlueBlueEdges[i][3],
+	BccNode * yellowN1 = redRedNode(TwelveBlueBlueEdges[i][3],
 					cell, grid, cellCoord);
 					
 	if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
@@ -1275,7 +1275,7 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 		
 	if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
 		return false;
-			
+		
 	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN1->pos, p1, p2, p0, .29f * r) )
 		return false;
 		
@@ -1287,7 +1287,7 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 	if(!antiRedN2)
 		return false;
 		
-	BccNode * yellowN2 = faceNode(TwelveBlueBlueEdges[i][4],
+	BccNode * yellowN2 = redRedNode(TwelveBlueBlueEdges[i][4],
 					cell, grid, cellCoord);
 	
 	if(!Convexity::CheckTetraVolume(redP, yellowN2->pos, p0, p2) )

@@ -294,7 +294,7 @@ void TetrahedralMesher::moveBlue()
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		m_grid.moveBlueNodes(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_grid.moveBlueToFront(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
 }

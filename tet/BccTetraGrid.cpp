@@ -221,7 +221,7 @@ bool BccTetraGrid::moveRedNodeTo(const Vector3F & cellCenter,
 	return true;
 }
 
-void BccTetraGrid::moveBlueNodes(const aphid::Vector3F & cellCenter,
+void BccTetraGrid::moveBlueToFront(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples)
 {
@@ -236,14 +236,14 @@ void BccTetraGrid::moveBlueNodes(const aphid::Vector3F & cellCenter,
 	int i=0;
 	for(;i<8;++i) {
 		BccNode * xi = fCell.blueNode6(i+6, cell, this, cellCoord);
-/// already moved
+/// already on front
 		if(xi->prop > 0) 
 			continue;
 			
 		fCell.getCellCorner(blueP, i, gz);
 		samples->getClosest(closestP, d, blueP);
 		
-		if(fCell.moveBlueTo(closestP, blueP, 1.4f * r) ) {
+		if(fCell.moveBlueTo(closestP, blueP, 1.7f * r) ) {
 			
 		// std::cout<<"\n move blue";
 		//xi->pos = closestP;
@@ -293,7 +293,9 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			redOnFront = (redn->prop > -1 && nend->prop > -1);
 			antiRedP = nend->pos;
 			
-		q = (redP + antiRedP) * .5f;
+/// choose longer one
+		if(redP.distanceTo(antiRedP) * .5f > redP.distanceTo(q) )
+			q = (redP + antiRedP) * .5f;
 
 /// cut at mid
 		node->pos = q;
@@ -304,7 +306,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			if(fCell.checkSplitFace(closestP, redP, antiRedP, r, i/2, facePs, nfaceP) ) {
 
 /// limit distance moved		
-				if(closestP.distanceTo(node->pos) < 2.f * r) {
+				if(closestP.distanceTo(node->pos) < r) {
 					node->pos = closestP;
 					node->prop = 5;
 				}
@@ -362,14 +364,15 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 			node->prop = 6;
 		}
 		
-		fCell.edgeYellowCenter(i, cell, this, cellCoord, yellowCenter, nyellow, nyellowFront);
+		//fCell.edgeYellowCenter(i, cell, this, cellCoord, yellowCenter, nyellow, nyellowFront);
 /// straddle yellow on front
-			if(nyellowFront > 1) {
-				if(yellowCenter.distanceTo(q) < .7f * r ) {
-					node->prop = 6;
-					q = yellowCenter;
-				}
-			}
+			//if(nyellowFront > 1) {
+				//if(yellowCenter.distanceTo(q) < 2.f * r ) {
+					//node->prop = 6;
+					//q = (yellowCenter + q) * .5f;
+					//node->prop = -1;
+				//}
+			//}
 		
 		samples->getClosest(closestP, d, q);
 		
@@ -378,12 +381,12 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		
 /// limit distance moved
 		if(toMove) {
-			//if(closestP.distanceTo(q) < r) {
+			if(closestP.distanceTo(q) < r) {
 			//	std::cout<<"\n d > r "<<closestP.distanceTo(q);
 			
 			node->pos = closestP;
 			node->prop = 6;
-			//}
+			}
 		}
 	}
 }

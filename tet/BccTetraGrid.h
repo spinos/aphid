@@ -36,7 +36,7 @@ public:
 	bool moveRedNodeTo(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & pos);
-	void moveBlueNodes(const aphid::Vector3F & cellCenter,
+	void moveBlueToFront(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);	
 	void cutRedRedEdges(const aphid::Vector3F & cellCenter,
