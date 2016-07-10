@@ -41,6 +41,19 @@ public:
 						const aphid::Vector3F & d,
 						const aphid::Vector3F & p0,
 						const float & r);
+						
+	static bool CheckDistancePlane(const aphid::Vector3F & a,
+						const aphid::Vector3F & b,
+						const aphid::Vector3F & c,
+						const aphid::Vector3F & p0,
+						const float & r);
+	
+	static bool CheckInsideTetra(const aphid::Vector3F & a,
+						const aphid::Vector3F & b,
+						const aphid::Vector3F & c,
+						const aphid::Vector3F & d,
+						const aphid::Vector3F & p0,
+						const float & r);
 	
 };
 

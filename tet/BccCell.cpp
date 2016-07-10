@@ -1248,9 +1248,9 @@ BccNode * BccCell::blueBlueEdgeNode(int i, int j,
 					cell, grid, cellCoord);
 }
 
-/// cut edge cannot interset two face
-/// find two red
-/// keep split tetra volume positive
+/// connected to two face
+/// cyan inside either tetra formed by red-yello-blue-blue
+/// keep distance to tetra face
 /// i 0:11
 bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 					const aphid::Vector3F & redP,
@@ -1261,48 +1261,24 @@ bool BccCell::checkSplitBlueBlueEdge(const aphid::Vector3F & p0,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const
-{
-	BccNode * antiRedN1 = neighborRedNode(TwelveBlueBlueEdges[i][3],
-						grid, cellCoord);
-	if(!antiRedN1)
-		return false;
-	
+{	
 	BccNode * yellowN1 = redRedNode(TwelveBlueBlueEdges[i][3],
 					cell, grid, cellCoord);
 					
-	if(!Convexity::CheckTetraVolume(redP, yellowN1->pos, p0, p1) )
-		return false;
-		
-	if(!Convexity::CheckTetraVolume(antiRedN1->pos, yellowN1->pos, p1, p0) )
-		return false;
-		
-	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN1->pos, p1, p2, p0, .29f * r) )
-		return false;
-		
-	if(!Convexity::CheckDistanceFourPoints(redP, yellowN1->pos, p1, p2, p0, 1.1f * r) )
-		return false;*/
-		
-	BccNode * antiRedN2 = neighborRedNode(TwelveBlueBlueEdges[i][4],
-						grid, cellCoord);
-	if(!antiRedN2)
-		return false;
+	if(Convexity::CheckInsideTetra(redP, yellowN1->pos, p1, p2, p0, r) ) {
+		//std::cout<<"\n pass inside tetra check";
+		return true;
+	}
 		
 	BccNode * yellowN2 = redRedNode(TwelveBlueBlueEdges[i][4],
 					cell, grid, cellCoord);
 	
-	if(!Convexity::CheckTetraVolume(redP, yellowN2->pos, p0, p2) )
-		return false;
-		
-	if(!Convexity::CheckTetraVolume(antiRedN2->pos, yellowN2->pos, p2, p0) )
-		return false;
-		
-	/*if(!Convexity::CheckDistanceTwoPlanes(redP, yellowN2->pos, p1, p2, p0, .29f * r) )
-		return false;
-		
-	if(!Convexity::CheckDistanceFourPoints(redP, yellowN2->pos, p1, p2, p0, 1.1f * r) )
-		return false;*/
+	if(Convexity::CheckInsideTetra(redP, yellowN2->pos, p1, p2, p0, r) ) {
+		//std::cout<<"\n pass inside tetra check";
+		return true;
+	}
 	
-	return true;
+	return false;
 }
 
 bool BccCell::checkFaceValume(const int & i,

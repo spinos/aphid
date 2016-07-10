@@ -89,4 +89,59 @@ bool Convexity::CheckDistancePlane(const aphid::Vector3F & a,
 	return Absolute<float>(plane1.distanceTo(p0) ) > r;
 }
 
+bool Convexity::CheckDistancePlane(const aphid::Vector3F & a,
+						const aphid::Vector3F & b,
+						const aphid::Vector3F & c,
+						const aphid::Vector3F & p0,
+						const float & r)
+{
+	Plane plane1(a, b, c);
+	
+	return Absolute<float>(plane1.distanceTo(p0) ) > r;
+}
+
+bool Convexity::CheckInsideTetra(const aphid::Vector3F & a,
+						const aphid::Vector3F & b,
+						const aphid::Vector3F & c,
+						const aphid::Vector3F & d,
+						const aphid::Vector3F & p0,
+						const float & r)
+{
+	if(!CheckDistanceFourPoints(a, b, c, d, p0, r) )
+		return false;
+		
+	bool reversed = tetrahedronVolume1(a, b, c, d) < 0.f;
+	
+	Vector3F v[4];
+	v[0] = a;
+	v[1] = b;
+	if(reversed) {
+		v[2] = d;
+		v[3] = c;
+	}
+	else {
+		v[2] = c;
+		v[3] = d;
+	}
+	
+	if(!pointInsideTetrahedronTest(p0, v) )
+		return false;
+		
+	float r2 = r * .33f;
+	
+	if(!CheckDistancePlane(v[0], v[1], v[2], p0, r2) )
+		return false;
+		
+	if(!CheckDistancePlane(v[0], v[3], v[1], p0, r2) )
+		return false;
+		
+	if(!CheckDistancePlane(v[0], v[2], v[3], p0, r2) )
+		return false;
+		
+	if(!CheckDistancePlane(v[1], v[3], v[2], p0, r2) )
+		return false;
+		
+	return true;
+}
+
 }
