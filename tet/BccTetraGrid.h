@@ -48,10 +48,10 @@ public:
 	void cutRedBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
-	void closeRedAtFaceFlowCenter(const aphid::Vector3F & cellCenter,
+	void moveRedToFront(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
-	void moveRedToFront(const aphid::Vector3F & cellCenter,
+	void cutAndWrap(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples);
 	
@@ -62,7 +62,20 @@ private:
 	void extractNodePosPropIn(aphid::Vector3F * destPos,
 					int * destProp,
 					aphid::sdb::Array<int, BccNode> * cell);
-					
+	bool tetraIsOpenOnFront(const BccNode & a,
+					const BccNode & b,
+					const BccNode & c,
+					const BccNode & d) const;
+	bool tetraEncloseSample(aphid::Vector3F & sampleP, 
+					const aphid::Vector3F * v,
+					const ClosestSampleTest * samples) const;
+	bool awayFromTetraFront(const BccNode & a,
+					const BccNode & b,
+					const BccNode & c,
+					const BccNode & d,
+					const aphid::Vector3F & p0,
+					const float & r) const;
+										
 };
 
 }

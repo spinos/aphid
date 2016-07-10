@@ -65,10 +65,9 @@ private:
 	void processCells();
 	void cutFaces();
 	void cutEdges();
-	void cutRedBlue();
 	void moveBlue();
 	void moveRed();
-	void closeRed();
+	void refine();
 	
 };
 

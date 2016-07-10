@@ -144,4 +144,35 @@ bool Convexity::CheckInsideTetra(const aphid::Vector3F & a,
 	return true;
 }
 
+bool Convexity::CheckInsideTetra(const aphid::Vector3F * v,
+						const aphid::Vector3F & p0)
+{
+	Float4 coord;
+	if(!pointInsideTetrahedronTest1(p0, v, &coord) )
+		return false;
+		
+	float mnc = coord.x;
+	if(mnc > coord.y)
+		mnc = coord.y;
+		
+	if(mnc > coord.z)
+		mnc = coord.z;
+		
+	if(mnc > coord.w)
+		mnc = coord.w;
+		
+	float mxc = coord.x;
+	if(mxc < coord.y)
+		mxc = coord.y;
+		
+	if(mxc < coord.z)
+		mxc = coord.z;
+		
+	if(mxc < coord.w)
+		mxc = coord.w;	
+
+/// not on edge or face	or vertex
+	return mnc > 0.02f && mxc < .98f;
+}
+
 }

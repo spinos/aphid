@@ -262,8 +262,7 @@ void TetrahedralMesher::processCells()
 	moveRed();
 	cutFaces();
 	cutEdges();
-	//closeRed();
-	//cutRedBlue();
+	refine();
 }
 
 void TetrahedralMesher::cutFaces()
@@ -277,6 +276,7 @@ void TetrahedralMesher::cutFaces()
 	}
 }
 
+/// cut blue-blue keep refine inside cell
 void TetrahedralMesher::cutEdges()
 { 
 	m_frontCellCoords.begin();
@@ -310,25 +310,14 @@ void TetrahedralMesher::moveRed()
 	}
 }
 
-void TetrahedralMesher::closeRed()
-{
-	m_frontCellCoords.begin();
-	while(!m_frontCellCoords.end() ) {
-		
-		Vector3F cellCenter = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		
-		m_grid.closeRedAtFaceFlowCenter(cellCenter, m_frontCellCoords.key(), m_frontCellCoords.value() );
-		m_frontCellCoords.next();
-	}
-}
-
-void TetrahedralMesher::cutRedBlue()
+/// cut red to yellow blue cyan
+void TetrahedralMesher::refine()
 {
 	m_frontCellCoords.begin();
 	while(!m_frontCellCoords.end() ) {
 		
 		Vector3F pc = m_grid.coordToCellCenter(m_frontCellCoords.key() );
-		m_grid.cutRedBlueEdges(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
+		m_grid.cutAndWrap(pc, m_frontCellCoords.key(), m_frontCellCoords.value() );
 		m_frontCellCoords.next();
 	}
 }

@@ -54,6 +54,9 @@ public:
 						const aphid::Vector3F & d,
 						const aphid::Vector3F & p0,
 						const float & r);
+						
+	static bool CheckInsideTetra(const aphid::Vector3F * v,
+						const aphid::Vector3F & p0);
 	
 };
 

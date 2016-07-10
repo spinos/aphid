@@ -7,6 +7,7 @@
  *
  */
 #include <BccTetraGrid.h>
+#include "Convexity.h"
 
 using namespace aphid;
 
@@ -321,27 +322,22 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples)
 {
-	const float gz = gridSize();
-	const float r = gz * .25f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
-	BccNode * redN = fCell.redNode(this, cellCoord);
-	const Vector3F redP = redN->pos;
 	
-	int i, prop1, prop2, nredFront, nred, nyellowFront, nyellow;
-	Vector3F p1, p2, q, closestP, yellowCenter;
-	float d;
+	Vector3F p1, p2;
 
-	i=0;
+	int i=0, prop1, prop2;
 	for(;i<12;++i) {
 
 /// already cut ?
 		BccNode * node = fCell.blueBlueNode(i, cell, this, cellCoord);
 
-		if(!node ) {
+		if(node ) 
+			continue;
+			
 /// add anyway
-			node = fCell.addEdgeNode(i, this, cellCoord);
-		}
+		node = fCell.addEdgeNode(i, this, cellCoord);
 		
 		BccNode * b1 = fCell.blueBlueEdgeNode(i, 0, cell, this, cellCoord);
 		p1 = b1->pos;
@@ -350,32 +346,13 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 		BccNode * b2 = fCell.blueBlueEdgeNode(i, 1, cell, this, cellCoord);
 		p2 = b2->pos;
 		prop2 = b2->prop;
-		
-/// blue mid
-		q = (p1 + p2) * .5f;
 
-/// initial pos		
-		if(node->prop < 0)
-			node->pos = q;
+/// blue mid		
+		node->pos = (p1 + p2) * .5f;
 			
 /// straddle blue on front
 		if(prop1 > 0 && prop2 > 0) {
 			node->prop = 6;
-		}
-		
-		samples->getClosest(closestP, d, q);
-		
-		bool toMove = fCell.checkSplitBlueBlueEdge(closestP, redP, p1, p2, r, i,
-					cell, this, cellCoord);
-		
-/// limit distance moved
-		if(toMove) {
-			if(closestP.distanceTo(q) < r) {
-				//std::cout<<"\n d < r "<<closestP.distanceTo(q) / r;
-			
-			node->pos = closestP;
-			node->prop = 6;
-			}
 		}
 	}
 }
@@ -437,35 +414,6 @@ void BccTetraGrid::cutRedBlueEdges(const Vector3F & cellCenter,
 		}
 		
 	}
-	
-	
-}
-
-/// opposite face on front, yellow or blue-cyan-blue on front
-void BccTetraGrid::closeRedAtFaceFlowCenter(const aphid::Vector3F & cellCenter,
-					const aphid::sdb::Coord3 & cellCoord,
-					const ClosestSampleTest * samples)
-{
-	BccCell fCell(cellCenter);
-	BccNode * redN = fCell.redNode(this, cellCoord);
-	if(redN->prop > 0)
-		return;
-		
-	const float r = gridSize() * .25f;
-	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
-	
-	Vector3F q;
-	int i = 0;
-	for(;i<3;++i) {
-		if(fCell.oppositeFacesOnFront(i, cell, this, cellCoord, q) ) {
-		
-			//if(q.distanceTo(redN->pos) <r ) {
-				//std::cout<<"\n close red to yellow face flow";
-				//redN->pos = q;
-			//}
-			redN->prop = 4;
-		}
-	}
 }
 
 void BccTetraGrid::moveRedToFront(const aphid::Vector3F & cellCenter,
@@ -485,6 +433,104 @@ void BccTetraGrid::moveRedToFront(const aphid::Vector3F & cellCenter,
 		redN->pos = closestP;
 		redN->prop = 4;
 	}
+}
+
+void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples)
+{
+	const float r = gridSize() * .11f;
+	BccCell fCell(cellCenter);
+	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
+	BccNode * redN = cell->find(15);
+	
+	Vector3F tv[4], sampleP;
+	BccNode yellowN, b1N, b2N;
+	
+/// per tetra
+	int i = 0;
+	for(i;i<48;++i) {
+		
+		fCell.getTetraYellowBlueCyan(i, cell, this, cellCoord, yellowN, b1N, b2N);
+		//if(!Convexity::CheckTetraVolume(redN->pos,
+		//										yellowN.pos, b1N.pos, b2N.pos) )
+		//	std::cout<<"\n negative vol";
+		
+		bool toRefine = tetraIsOpenOnFront(*redN, yellowN, b1N, b2N);
+		
+		if(toRefine) {
+			tv[0] = redN->pos;
+			tv[1] = yellowN.pos;
+			tv[2] = b1N.pos;
+			tv[3] = b2N.pos;
+			toRefine = tetraEncloseSample(sampleP, tv, samples);
+		}
+		
+		if(toRefine) {
+			toRefine = awayFromTetraFront(*redN, yellowN, b1N, b2N, sampleP, r);
+		}
+			
+		if(toRefine)
+			fCell.cutTetraRedBlueCyanYellow(i, cell, this, cellCoord, redN, sampleP);
+	}
+}
+
+bool BccTetraGrid::tetraIsOpenOnFront(const BccNode & a,
+					const BccNode & b,
+					const BccNode & c,
+					const BccNode & d) const
+{	
+	if(b.prop > 0 && c.prop > 0 && d.prop > 0)
+		return false;
+		
+	int n = 0;
+	if(a.prop > 0)
+		n++;
+		
+	if(b.prop > 0)
+		n++;
+		
+	if(c.prop > 0)
+		n++;
+		
+	if(d.prop > 0)
+		n++;
+		
+	return (n>0 && n<4);
+}
+
+bool BccTetraGrid::tetraEncloseSample(aphid::Vector3F & sampleP, 
+					const aphid::Vector3F * v,
+					const ClosestSampleTest * samples) const
+{
+	Vector3F q;
+	float fd;
+	q = (v[0] + v[1] + v[2] + v[3]) * .25f;
+	samples->getClosest(sampleP, fd, q);
+	
+	return Convexity::CheckInsideTetra(v, sampleP);
+}
+
+bool  BccTetraGrid::awayFromTetraFront(const BccNode & a,
+					const BccNode & b,
+					const BccNode & c,
+					const BccNode & d,
+					const aphid::Vector3F & p0,
+					const float & r) const
+{
+	if(a.prop > 0 && p0.distanceTo(a.pos) < r )
+		return false;
+		
+	if(b.prop > 0 && p0.distanceTo(b.pos) < r )
+		return false;
+		
+	if(c.prop > 0 && p0.distanceTo(c.pos) < r )
+		return false;
+		
+	if(d.prop > 0 && p0.distanceTo(d.pos) < r )
+		return false;
+		
+	return true;
 }
 
 }

@@ -251,16 +251,20 @@ void BccTetrahedralize::drawRedBlueGreen(aphid::GeoDrawer * dr)
 				continue;
 		}
 			
-		if(prop[i] == 3 ) /// blue
+		if(prop[i] == BccCell::NBlue )
 			dr->setColor(0.f, 0.f, 1.f);
-		else if(prop[i] == 4 ) /// red
+		else if(prop[i] == BccCell::NRed )
 			dr->setColor(1.f, 0.f, 0.f);
-		else if(prop[i] == 5 ) /// red-red
-			dr->setColor(1.f, .5f, 0.f);
-		else if(prop[i] == 6 ) /// blue-blue
+		else if(prop[i] == BccCell::NYellow )
+			dr->setColor(1.f, .99f, 0.f);
+		else if(prop[i] == BccCell::NCyan )
 			dr->setColor(0.f, .58f, .88f);
-		else if(prop[i] == 7 ) /// red-blue
+		else if(prop[i] == BccCell::NRedBlue )
 			dr->setColor(0.79f, 0.f, .89f);	
+		else if(prop[i] == BccCell::NRedCyan )
+			dr->setColor(0.89f, .3f, .69f);
+		else if(prop[i] == BccCell::NRedYellow )
+			dr->setColor(0.89f, .38f, 0.f);
 		
 		dr->cube(X[i], m_pntSz);
 	}

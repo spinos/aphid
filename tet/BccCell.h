@@ -57,8 +57,19 @@ class BccCell {
 	static int ThreeYellowFace[3][4];
 	static int ThreeYellowEdge[3][2];
 	static int TwenlveEdgeYellowInd[12][7];
+	static int FortyEightTetraFace[48][3];
 	
 public:
+	enum NodePropertyType {
+		NBlue = 3,
+		NRed = 4,
+		NYellow = 5,
+		NCyan = 6,
+		NRedBlue = 46,
+		NRedCyan = 47,
+		NRedYellow = 48
+	};
+	
 	BccCell(const aphid::Vector3F &center );
 	void getCellCorner(aphid::Vector3F & p, const int & i,
 					const float & gridSize) const;
@@ -100,11 +111,19 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * yellowNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * blueBlueNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * redBlueNode(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * blueOrCyanNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
@@ -264,6 +283,19 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	void getTetraYellowBlueCyan(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					BccNode & yellow,
+					BccNode & b1,
+					BccNode & b2) const;
+	void cutTetraRedBlueCyanYellow(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const BccNode * redN,
+					const aphid::Vector3F & q) const;
 	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
@@ -306,7 +338,13 @@ private:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					aphid::Vector3F & edgeCenter) const;
-				
+		
+	bool isNodeBlue(const BccNode * n) const;
+	BccNode * addNode(const int & k,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	
 };
 
 }
