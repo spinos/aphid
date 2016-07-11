@@ -98,6 +98,7 @@ public:
 	static	MTypeId		id;
 	
 	void adjustPosition(short x0, short y0, short x1, short y1, float clipNear, float clipFar);
+	void rotateToDirection(short x0, short y0, short x1, short y1, float clipNear, float clipFar);
 	void pressToSave();
 	void pressToLoad();
 	void beginPickInView();
@@ -135,6 +136,8 @@ private:
 	void saveInternal();
 	bool loadInternal(MDataBlock& block);
 	void updateGeomBox(ExampVox * dst, MObject & node);
+	Ray getRayDisplace(Vector3F & v0, Vector3F & v1,
+				short start_x, short start_y, short last_x, short last_y);
 	
 };
 

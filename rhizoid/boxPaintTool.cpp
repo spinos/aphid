@@ -452,7 +452,8 @@ void proxyPaintContext::extractSelected()
 void proxyPaintContext::erectSelected()
 {
 	if(!PtrViz) return;
-	PtrViz->erectActive();
+	PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
+	PtrViz->rotateToDirection(start_x, start_y, last_x, last_y,  clipNear, clipFar);
 }
 
 void proxyPaintContext::snap()

@@ -71,6 +71,10 @@ protected:
 	void movePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,
 					const float & clipNear, const float & clipFar);
+	void rotatePlant(const Ray & ray,
+					const Vector3F & displaceNear, const Vector3F & displaceFar,
+					const float & clipNear, const float & clipFar);
+
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
     

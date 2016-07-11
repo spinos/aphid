@@ -398,13 +398,14 @@ void ModifyForest::movePlant(const Ray & ray,
 	const float depth = ctx->m_hitP.distanceTo(ray.m_origin);
 	const Vector3F disp = displaceNear 
 					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
+	if(disp.length() < .1f) return;
 	
 	Vector3F pos, bindPos;
 	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
-		if(wei > 1e-4f) { 
+		if(wei > 1e-3f) { 
 			PlantData * plantd = arr->value()->m_reference->index;
 			pos = plantd->t1->getTranslation() + disp * wei * (1.f + getNoise() );
 			
@@ -412,6 +413,34 @@ void ModifyForest::movePlant(const Ray & ray,
 			
 			plantd->t1->setTranslation(bindPos );
 			displacePlantInGrid(arr->value() );
+			
+		}
+		arr->next();
+	}
+}
+
+void ModifyForest::rotatePlant(const Ray & ray,
+					const Vector3F & displaceNear, const Vector3F & displaceFar,
+					const float & clipNear, const float & clipFar)
+{
+	if(!calculateSelecedWeight(ray)) return;
+	
+	IntersectionContext * ctx = intersection();
+	
+	const float depth = ctx->m_hitP.distanceTo(ray.m_origin);
+	const Vector3F disp = displaceNear 
+					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
+	if(disp.length() < .1f) return;
+	
+	Vector3F pos, bindPos;
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-3f) { 
+			PlantData * plantd = arr->value()->m_reference->index;
+			
+/// rotate here
 			
 		}
 		arr->next();
