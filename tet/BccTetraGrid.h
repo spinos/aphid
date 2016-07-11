@@ -56,7 +56,13 @@ public:
 					const ClosestSampleTest * samples);
 	
 protected:
-
+	enum RefineOption {
+		RoNone = 0,
+		RoSplitRedYellow = 1,
+		RoMoveCyan = 2,
+		RoSplitRedBlueCyan = 3
+	};
+	
 private:
 	void countNodesIn(aphid::sdb::Array<int, BccNode> * cell, int & c);
 	void extractNodePosPropIn(aphid::Vector3F * destPos,
@@ -69,12 +75,21 @@ private:
 	bool tetraEncloseSample(aphid::Vector3F & sampleP, 
 					const aphid::Vector3F * v,
 					const ClosestSampleTest * samples) const;
-	bool awayFromTetraFront(const BccNode & a,
+	bool edgeIntersectFront(const BccNode & a,
+					const BccNode & b,
+					const aphid::Vector3F * v,
+					const ClosestSampleTest * samples,
+					const float & r,
+					aphid::Vector3F & q) const;
+	bool vertexCloseToFront(const BccNode & a,
+					const aphid::Vector3F * v,
+					const ClosestSampleTest * samples,
+					const float & r,
+					aphid::Vector3F & q) const;
+	RefineOption getRefineOpt(const BccNode & a,
 					const BccNode & b,
 					const BccNode & c,
-					const BccNode & d,
-					const aphid::Vector3F & p0,
-					const float & r) const;
+					const BccNode & d) const;
 										
 };
 

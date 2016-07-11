@@ -8,6 +8,8 @@
  */
 #include <BccTetraGrid.h>
 #include "Convexity.h"
+#include <line_math.h>
+#include "tetrahedron_math.h"
 
 using namespace aphid;
 
@@ -439,39 +441,46 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples)
 {
-	const float r = gridSize() * .11f;
+	const float r = gridSize() * .125f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	BccNode * redN = cell->find(15);
 	
-	Vector3F tv[4], sampleP;
-	BccNode yellowN, b1N, b2N;
+	Vector3F q, tetv[4];
+	BccNode nodeJ[3];
+	tetv[0] = redN->pos;
 	
 /// per tetra
-	int i = 0;
+	int i = 0, j;
 	for(i;i<48;++i) {
 		
-		fCell.getTetraYellowBlueCyan(i, cell, this, cellCoord, yellowN, b1N, b2N);
-		//if(!Convexity::CheckTetraVolume(redN->pos,
-		//										yellowN.pos, b1N.pos, b2N.pos) )
-		//	std::cout<<"\n negative vol";
+		fCell.getTetraYellowBlueCyan(i, cell, this, cellCoord, nodeJ[0], nodeJ[1], nodeJ[2]);
+
+		tetv[1] = nodeJ[0].pos;
+		tetv[2] = nodeJ[1].pos;
+		tetv[3] = nodeJ[2].pos;
 		
-		bool toRefine = tetraIsOpenOnFront(*redN, yellowN, b1N, b2N);
-		
-		if(toRefine) {
-			tv[0] = redN->pos;
-			tv[1] = yellowN.pos;
-			tv[2] = b1N.pos;
-			tv[3] = b2N.pos;
-			toRefine = tetraEncloseSample(sampleP, tv, samples);
-		}
-		
-		if(toRefine) {
-			toRefine = awayFromTetraFront(*redN, yellowN, b1N, b2N, sampleP, r);
-		}
+		RefineOption op = getRefineOpt(*redN, nodeJ[0], nodeJ[1], nodeJ[2]);
 			
-		if(toRefine)
-			fCell.cutTetraRedBlueCyanYellow(i, cell, this, cellCoord, redN, sampleP);
+		if(op == RoSplitRedYellow) {
+			if(edgeIntersectFront(*redN, nodeJ[0], tetv, samples, r, q) )
+				fCell.cutTetraRedBlueCyanYellow(i, 0, cell, this, cellCoord, redN, q, r);
+		}
+		
+		else if(op == RoMoveCyan) { continue;
+			j = 1;
+			if(fCell.isNodeBlue(&nodeJ[j]) )
+				j = 2;
+			
+				//if(j==1) {	
+			BccNode cyanN = nodeJ[j];
+
+			if(vertexCloseToFront(cyanN, tetv, samples, r, q) )
+				fCell.moveTetraCyan(i, j, cell, this, cellCoord, q);
+				
+				//}
+		}
+		
 	}
 }
 
@@ -496,7 +505,7 @@ bool BccTetraGrid::tetraIsOpenOnFront(const BccNode & a,
 	if(d.prop > 0)
 		n++;
 		
-	return (n>0 && n<4);
+	return (n>1 && n<4);
 }
 
 bool BccTetraGrid::tetraEncloseSample(aphid::Vector3F & sampleP, 
@@ -511,26 +520,95 @@ bool BccTetraGrid::tetraEncloseSample(aphid::Vector3F & sampleP,
 	return Convexity::CheckInsideTetra(v, sampleP);
 }
 
-bool  BccTetraGrid::awayFromTetraFront(const BccNode & a,
+bool BccTetraGrid::edgeIntersectFront(const BccNode & a,
 					const BccNode & b,
-					const BccNode & c,
-					const BccNode & d,
-					const aphid::Vector3F & p0,
-					const float & r) const
+					const aphid::Vector3F * v,
+					const ClosestSampleTest * samples,
+					const float & r,
+					Vector3F & q) const
 {
-	if(a.prop > 0 && p0.distanceTo(a.pos) < r )
+/// on front
+	if(a.prop > 0 && b.prop >0) 
 		return false;
 		
-	if(b.prop > 0 && p0.distanceTo(b.pos) < r )
+	float d;
+	Vector3F pa, pb, va, vb, mid;
+	if(a.prop > 0) {
+		pa = a.pos;
+		va.setZero();
+	}
+	else {
+		samples->getClosest(pa, d, a.pos);
+		va = pa - a.pos;
+		va.normalize();
+	}
+	
+	if(b.prop > 0) {
+		pb = b.pos;
+		vb.setZero();
+	}
+	else {
+		samples->getClosest(pb, d, b.pos);
+		vb = pb - b.pos;
+		vb.normalize();
+	}
+		
+/// both end on the same side
+	if(va.dot(vb) > 0.f)
+		return false;
+
+/// close to average		
+	samples->getClosest(mid, d, (pa + pb) * .5f);
+	
+	//if(!pointInsideTetrahedronTest(mid, v) )
+	//	return false;
+	
+/// on line
+	projectPointLineSegment(q, d, mid, a.pos, b.pos);
+	
+	if(q.distanceTo(a.pos) < r)
 		return false;
 		
-	if(c.prop > 0 && p0.distanceTo(c.pos) < r )
-		return false;
+	return q.distanceTo(b.pos) > r;
+}
+
+bool BccTetraGrid::vertexCloseToFront(const BccNode & a,
+					const aphid::Vector3F * v,
+					const ClosestSampleTest * samples,
+					const float & r,
+					aphid::Vector3F & q) const
+{
+	float d;
+	samples->getClosest(q, d, a.pos);
+	//if(!Convexity::CheckInsideTetra(v, q) )
+	//	return false;
 		
-	if(d.prop > 0 && p0.distanceTo(d.pos) < r )
+	if(q.distanceTo(a.pos) > r)
 		return false;
 		
 	return true;
+}
+
+BccTetraGrid::RefineOption BccTetraGrid::getRefineOpt(const BccNode & a,
+					const BccNode & b,
+					const BccNode & c,
+					const BccNode & d) const
+{
+	if(a.prop > 0 && b.prop > 0 && c.prop > 0 && d.prop > 0)
+		return RoNone;
+	
+	if(a.prop < 0 && b.prop < 0 && c.prop > 0 && d.prop > 0)
+		return RoSplitRedYellow;
+		
+/// red-yellow on front, move cyan when edge has no blue on front
+	if(a.prop > 0 && b.prop > 0 && c.prop < 0 && d.prop < 0)
+		return RoMoveCyan;
+
+/// yellow-blue or yellow-cyan on front, split red and the other		
+	if(b.prop > 0 && (c.prop * d.prop < 0) )
+		return RoSplitRedBlueCyan;
+		
+	return RoNone;
 }
 
 }

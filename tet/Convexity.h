@@ -57,6 +57,12 @@ public:
 						
 	static bool CheckInsideTetra(const aphid::Vector3F * v,
 						const aphid::Vector3F & p0);
+						
+	static bool CheckSplitLine(const aphid::Vector3F & p0,
+						const aphid::Vector3F & p1,
+						const aphid::Vector3F & p2,
+						const float & r,
+						aphid::Vector3F & q);
 	
 };
 

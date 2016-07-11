@@ -9,6 +9,7 @@
 
 #include "Convexity.h"
 #include "tetrahedron_math.h"
+#include "line_math.h"
 
 using namespace aphid;
 
@@ -172,7 +173,25 @@ bool Convexity::CheckInsideTetra(const aphid::Vector3F * v,
 		mxc = coord.w;	
 
 /// not on edge or face	or vertex
-	return mnc > 0.02f && mxc < .98f;
+	return mnc > .05f && mxc < .95f;
+}
+
+bool Convexity::CheckSplitLine(const Vector3F & p0,
+						const Vector3F & p1,
+						const Vector3F & p2,
+						const float & r,
+						Vector3F & q)
+{
+	float d;
+	if(!distancePointLineSegment(d, p0, p1, p2) )
+		return false;
+		
+	//if(d > r)
+	//	return false;
+		
+	projectPointLineSegment(q, d, p0, p1, p2);
+			
+	return true;
 }
 
 }
