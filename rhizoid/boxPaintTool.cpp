@@ -95,6 +95,9 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 		case opRotateX :
 			rotateAroundAxis(0);
 			break;
+        case opRotateToDir :
+            erectSelected();
+            break;
 		case opSelectGround :
 			selectGround();
 			break;
@@ -226,6 +229,10 @@ void proxyPaintContext::setOperation(short val)
         case opSelectByType:
 			opstr="select by type";
             mOpt = opSelectByType;
+			break;
+        case opRotateToDir:
+			opstr="rotate to direction";
+            mOpt = opRotateToDir;
 			break;
 		default:
 			;

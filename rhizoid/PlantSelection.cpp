@@ -116,7 +116,7 @@ void PlantSelection::calculateWeight()
 		const Vector3F pr = m_plants->value()->m_reference->index->t1->getTranslation();
 		const float dist = m_center.distanceTo(pr);
 		if(dist < m_radius) {
-			m_plants->value()->m_weight = 1.f - dist / m_radius;
+			m_plants->value()->m_weight = 1.f - sqrt(dist / m_radius);
 		}
 		else {
 			m_plants->value()->m_weight = 0.f;

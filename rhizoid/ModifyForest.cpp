@@ -396,16 +396,18 @@ void ModifyForest::movePlant(const Ray & ray,
 	IntersectionContext * ctx = intersection();
 	
 	const float depth = ctx->m_hitP.distanceTo(ray.m_origin);
-	const Vector3F disp = displaceNear 
+	Vector3F disp = displaceNear 
 					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
 	if(disp.length() < .1f) return;
-	
+    disp *= .5f;
+
 	Vector3F pos, bindPos;
 	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-3f) { 
+            
 			PlantData * plantd = arr->value()->m_reference->index;
 			pos = plantd->t1->getTranslation() + disp * wei * (1.f + getNoise() );
 			
@@ -428,11 +430,17 @@ void ModifyForest::rotatePlant(const Ray & ray,
 	IntersectionContext * ctx = intersection();
 	
 	const float depth = ctx->m_hitP.distanceTo(ray.m_origin);
-	const Vector3F disp = displaceNear 
+    Vector3F disp = displaceNear 
 					+ (displaceFar - displaceNear) * depth / (clipFar-clipNear);
 	if(disp.length() < .1f) return;
+    disp.normalize();
+    disp.x *= .15f;
+    disp.y *= .5f;
+    disp.z *= .15f;
+    //std::cout<<"\n disp rot"<<disp;
+    //std::cout.flush();
 	
-	Vector3F pos, bindPos;
+	Vector3F pside, pup, pfront, vscale;
 	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
@@ -440,8 +448,25 @@ void ModifyForest::rotatePlant(const Ray & ray,
 		if(wei > 1e-3f) { 
 			PlantData * plantd = arr->value()->m_reference->index;
 			
-/// rotate here
-			
+            pside = plantd->t1->getSide();
+            pup = plantd->t1->getUp();
+            pfront = plantd->t1->getFront();
+            vscale.set(pside.length(), pup.length(), pfront.length() );
+            
+            pside.normalize();
+            pup.normalize();
+            
+            pup += disp * wei * (1.f + getNoise() );
+            pup.normalize();
+            
+            pfront = pside.cross(pup);
+            
+            pside = pup.cross(pfront);
+            pside.normalize();
+            
+            plantd->t1->setOrientations(pside * vscale.x, 
+                                        pup * vscale.y, 
+                                        pfront * vscale.z);
 		}
 		arr->next();
 	}

@@ -44,7 +44,8 @@ class proxyPaintContext : public MPxContext
         opFlood = 100,
         opExtract = 102,
         opDiscardFaceSelection = 103,
-        opDiscardPlantSelection = 104
+        opDiscardPlantSelection = 104,
+        opRotateToDir = 105
     };
     
     Operation m_currentOpt, mOpt;

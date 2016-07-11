@@ -632,22 +632,8 @@ bool ProxyViz::loadInternal(MDataBlock& block)
 
 void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar)
 {
-    useActiveView();
-	MPoint toNear, toFar;
-	_viewport.viewToWorld ( last_x, last_y, toNear, toFar );
-	
-	MPoint fromNear, fromFar;
-	_viewport.viewToWorld ( start_x, start_y, fromNear, fromFar );
-	
-	MVector dispNear = toNear - fromNear;
-	MVector dispFar = toFar - fromFar;
-	
-	Vector3F a(toNear.x, toNear.y, toNear.z);
-	Vector3F b(toFar.x, toFar.y, toFar.z);
-	Ray r(a, b);
-	
-	Vector3F v0(dispNear.x, dispNear.y, dispNear.z);
-	Vector3F v1(dispFar.x, dispFar.y, dispFar.z);
+    Vector3F v0, v1;
+	Ray r = getRayDisplace(v0, v1, start_x, start_y, last_x, last_y);
 	
 	movePlant(r, v0, v1, clipNear, clipFar);
 }
