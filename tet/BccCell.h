@@ -295,7 +295,6 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					const BccNode * redN,
 					const aphid::Vector3F & q,
 					const float & r) const;
 	void moveTetraCyan(const int & i,

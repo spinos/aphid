@@ -1651,25 +1651,44 @@ void BccCell::getTetraYellowBlueCyan(const int & i,
 
 /// per tetra i 0:47  
 /// j 0:2
-/// cut red-blue red-cyan red-yellow not on front
 void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					const BccNode * redN,
 					const Vector3F & q,
 					const float & r) const
 {
+	BccNode * redN = cell->find(15);
+	if(redN->pos.distanceTo(q) < r) {
+		std::cout<<"\n split close to red";
+		redN->pos = q;
+		redN->prop = BccCell::NRed;
+		return;
+	}
+	
 	BccNode * ycb;
 	if(j<1) 
 		ycb = yellowNode(FortyEightTetraFace[i][j], cell, grid, cellCoord);
 	else 
 		ycb = blueOrCyanNode(FortyEightTetraFace[i][j], cell, grid, cellCoord);
 		
-	//Vector3F pol;
-	
-		//if(Convexity::CheckSplitLine(q, redN->pos, ycb->pos, r, pol) ) {
+	if(ycb->pos.distanceTo(q) < r) {
+		if(isNodeYellow(ycb) ) {
+			std::cout<<"\n split close to yellow";
+			//ycb->prop = BccCell::NYellow;
+			//ycb->pos = q;
+		}
+		else if(isNodeBlue(ycb) ) {
+			std::cout<<"\n split close to blue";
+			ycb->prop = BccCell::NBlue;
+		}
+		else {
+			std::cout<<"\n split close to cyan";
+			ycb->prop = BccCell::NCyan;
+		}
+		return;
+	}
 			
 	BccNode * cutN = addNode(30000 + FortyEightTetraFace[i][j], cell, grid, cellCoord);
 	cutN->pos = q;
@@ -1680,7 +1699,7 @@ void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 		cutN->prop = NRedBlue;
 	else
 		cutN->prop = NRedCyan;
-		//}
+		
 }
 
 /// move cyan to front

@@ -309,7 +309,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			if(fCell.checkSplitFace(closestP, redP, antiRedP, r, i/2, facePs, nfaceP) ) {
 
 /// limit distance moved		
-				if(closestP.distanceTo(node->pos) < r) {
+				if(closestP.distanceTo(node->pos) < 1.5f * r) {
 					node->pos = closestP;
 					node->prop = 5;
 				}
@@ -324,10 +324,12 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples)
 {
+	const float r = gridSize() * .3f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	
-	Vector3F p1, p2;
+	Vector3F p1, p2, closestP;
+	float d;
 
 	int i=0, prop1, prop2;
 	for(;i<12;++i) {
@@ -354,7 +356,15 @@ void BccTetraGrid::cutBlueBlueEdges(const aphid::Vector3F & cellCenter,
 			
 /// straddle blue on front
 		if(prop1 > 0 && prop2 > 0) {
-			node->prop = 6;
+			node->prop = BccCell::NCyan;
+		}
+
+/// free cyan		
+		if(prop1 < 0 && prop2 < 0) {
+			samples->getClosest(closestP, d, node->pos);
+		
+			if(closestP.distanceTo(node->pos) < r)
+				node->prop = BccCell::NCyan;
 		}
 	}
 }
@@ -425,7 +435,8 @@ void BccTetraGrid::moveRedToFront(const aphid::Vector3F & cellCenter,
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 		
-	const float r = gridSize() * .25f;
+/// limit min red distance to faces
+	const float r = gridSize() * .22f;
 	BccNode * redN = cell->find(15);
 	float d;
 	Vector3F closestP;
@@ -433,7 +444,7 @@ void BccTetraGrid::moveRedToFront(const aphid::Vector3F & cellCenter,
 		
 	if(fCell.checkMoveRed(closestP, r, cell, this, cellCoord) ) {
 		redN->pos = closestP;
-		redN->prop = 4;
+		redN->prop = BccCell::NRed;
 	}
 }
 
@@ -441,12 +452,13 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples)
 {
+/// split distance
 	const float r = gridSize() * .125f;
 	BccCell fCell(cellCenter);
 	sdb::Array<int, BccNode> * cell = findCell(cellCoord );
 	BccNode * redN = cell->find(15);
 	
-	Vector3F q, tetv[4];
+	Vector3F tetv[4];
 	BccNode nodeJ[3];
 	tetv[0] = redN->pos;
 	
@@ -463,24 +475,13 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 		RefineOption op = getRefineOpt(*redN, nodeJ[0], nodeJ[1], nodeJ[2]);
 			
 		if(op == RoSplitRedYellow) {
-			if(edgeIntersectFront(*redN, nodeJ[0], tetv, samples, r, q) )
-				fCell.cutTetraRedBlueCyanYellow(i, 0, cell, this, cellCoord, redN, q, r);
+			processSplitRedYellow(i, redN, &nodeJ[0],
+								fCell, cell, cellCoord, samples, r);
 		}
 		
-		else if(op == RoMoveCyan) { continue;
-			j = 1;
-			if(fCell.isNodeBlue(&nodeJ[j]) )
-				j = 2;
+		else if(op == RoSplitRedBlueOrCyan) { 
 			
-				//if(j==1) {	
-			BccNode cyanN = nodeJ[j];
-
-			if(vertexCloseToFront(cyanN, tetv, samples, r, q) )
-				fCell.moveTetraCyan(i, j, cell, this, cellCoord, q);
-				
-				//}
 		}
-		
 	}
 }
 
@@ -522,9 +523,7 @@ bool BccTetraGrid::tetraEncloseSample(aphid::Vector3F & sampleP,
 
 bool BccTetraGrid::edgeIntersectFront(const BccNode & a,
 					const BccNode & b,
-					const aphid::Vector3F * v,
 					const ClosestSampleTest * samples,
-					const float & r,
 					Vector3F & q) const
 {
 /// on front
@@ -560,16 +559,13 @@ bool BccTetraGrid::edgeIntersectFront(const BccNode & a,
 /// close to average		
 	samples->getClosest(mid, d, (pa + pb) * .5f);
 	
-	//if(!pointInsideTetrahedronTest(mid, v) )
-	//	return false;
+	if(!distancePointLineSegment(d, mid, a.pos, b.pos) )
+		return false;
 	
-/// on line
+/// p on seg
 	projectPointLineSegment(q, d, mid, a.pos, b.pos);
 	
-	if(q.distanceTo(a.pos) < r)
-		return false;
-		
-	return q.distanceTo(b.pos) > r;
+	return true;
 }
 
 bool BccTetraGrid::vertexCloseToFront(const BccNode & a,
@@ -596,19 +592,36 @@ BccTetraGrid::RefineOption BccTetraGrid::getRefineOpt(const BccNode & a,
 {
 	if(a.prop > 0 && b.prop > 0 && c.prop > 0 && d.prop > 0)
 		return RoNone;
-	
+
+/// blue and cyan on front	
 	if(a.prop < 0 && b.prop < 0 && c.prop > 0 && d.prop > 0)
 		return RoSplitRedYellow;
 		
 /// red-yellow on front, move cyan when edge has no blue on front
-	if(a.prop > 0 && b.prop > 0 && c.prop < 0 && d.prop < 0)
-		return RoMoveCyan;
+//	if(a.prop > 0 && b.prop > 0 && c.prop < 0 && d.prop < 0)
+//		return RoMoveCyan;
 
 /// yellow-blue or yellow-cyan on front, split red and the other		
 	if(b.prop > 0 && (c.prop * d.prop < 0) )
-		return RoSplitRedBlueCyan;
+		return RoSplitRedBlueOrCyan;
 		
 	return RoNone;
+}
+
+void BccTetraGrid::processSplitRedYellow(const int & i,
+					BccNode * redN,
+					BccNode * yellowN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r)
+{
+	Vector3F q;
+	
+	if(edgeIntersectFront(*redN, *yellowN, samples, q) )
+		fCell.cutTetraRedBlueCyanYellow(i, 0, cell, this, cellCoord, q, r);
+	
 }
 
 }

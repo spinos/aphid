@@ -60,7 +60,7 @@ protected:
 		RoNone = 0,
 		RoSplitRedYellow = 1,
 		RoMoveCyan = 2,
-		RoSplitRedBlueCyan = 3
+		RoSplitRedBlueOrCyan = 3
 	};
 	
 private:
@@ -77,9 +77,7 @@ private:
 					const ClosestSampleTest * samples) const;
 	bool edgeIntersectFront(const BccNode & a,
 					const BccNode & b,
-					const aphid::Vector3F * v,
 					const ClosestSampleTest * samples,
-					const float & r,
 					aphid::Vector3F & q) const;
 	bool vertexCloseToFront(const BccNode & a,
 					const aphid::Vector3F * v,
@@ -90,6 +88,14 @@ private:
 					const BccNode & b,
 					const BccNode & c,
 					const BccNode & d) const;
+	void processSplitRedYellow(const int & i,
+					BccNode * redN,
+					BccNode * yellowN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
 										
 };
 
