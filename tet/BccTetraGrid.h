@@ -78,7 +78,8 @@ private:
 	bool edgeIntersectFront(const BccNode & a,
 					const BccNode & b,
 					const ClosestSampleTest * samples,
-					aphid::Vector3F & q) const;
+					aphid::Vector3F & q,
+					const float & r) const;
 	bool vertexCloseToFront(const BccNode & a,
 					const aphid::Vector3F * v,
 					const ClosestSampleTest * samples,
@@ -96,7 +97,15 @@ private:
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples,
 					const float & r);
-										
+	void processSplitRedBlueOrCyan(const int & i,
+					BccNode * redN,
+					BccNode * bc1N,
+					BccNode * bc2N,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
 };
 
 }

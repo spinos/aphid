@@ -1676,8 +1676,8 @@ void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 	if(ycb->pos.distanceTo(q) < r) {
 		if(isNodeYellow(ycb) ) {
 			std::cout<<"\n split close to yellow";
-			//ycb->prop = BccCell::NYellow;
-			//ycb->pos = q;
+			ycb->prop = BccCell::NYellow;
+			ycb->pos = q;
 		}
 		else if(isNodeBlue(ycb) ) {
 			std::cout<<"\n split close to blue";
