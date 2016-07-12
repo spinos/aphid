@@ -282,20 +282,28 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
-	void getTetraYellowBlueCyan(const int & i,
+	void getFVTetraBlueCyan(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					BccNode & yellow,
 					BccNode & b1,
 					BccNode & b2) const;
-	void cutTetraRedBlueCyanYellow(const int & i,
+	BccNode * cutTetraRedBlueCyanYellow(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & q,
 					const float & r) const;
+	BccNode * cutFaceVaryBlueCyanYellow(const int & i,
+					const int & j,
+					BccNode * endN,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & q,
+					const float & r) const;
+					
 	void moveTetraCyan(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell,
@@ -304,7 +312,18 @@ public:
 					const aphid::Vector3F & q) const;
 	bool isNodeBlue(const BccNode * n) const;
 	bool isNodeYellow(const BccNode * n) const;
-	
+	BccNode * orangeNode(const float & i, 
+					aphid::sdb::Array<int, BccNode> * cell) const;
+	BccNode * tetraRedBlueCyanYellow(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell) const;
+	BccNode * faceVaryRedBlueCutNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell) const;
+	BccNode * faceVaryRedCyanCutNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell) const;
+					
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;

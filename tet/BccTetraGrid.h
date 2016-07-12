@@ -59,8 +59,7 @@ protected:
 	enum RefineOption {
 		RoNone = 0,
 		RoSplitRedYellow = 1,
-		RoMoveCyan = 2,
-		RoSplitRedBlueOrCyan = 3
+		RoSplitRedBlueOrCyan = 2
 	};
 	
 private:
@@ -89,7 +88,7 @@ private:
 					const BccNode & b,
 					const BccNode & c,
 					const BccNode & d) const;
-	void processSplitRedYellow(const int & i,
+	BccNode * processSplitRedYellow(const int & i,
 					BccNode * redN,
 					BccNode * yellowN,
 					const BccCell & fCell,
@@ -97,10 +96,26 @@ private:
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples,
 					const float & r);
-	void processSplitRedBlueOrCyan(const int & i,
+	void wrapFace(const int & i,
+					BccNode * redN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
+	BccNode * processSplitRedBlueOrCyan(const int & i,
 					BccNode * redN,
 					BccNode * bc1N,
 					BccNode * bc2N,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
+	BccNode * splitFaceVaryEdge(const int & i,
+					const int & j,
+					BccNode * redN,
+					BccNode * endN,
 					const BccCell & fCell,
 					aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord,

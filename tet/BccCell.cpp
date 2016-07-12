@@ -1696,26 +1696,61 @@ bool BccCell::checkMoveRed(const aphid::Vector3F & q,
 }
 
 /// per tetra i 0:47 red yellow blue cyan
-void BccCell::getTetraYellowBlueCyan(const int & i,
+void BccCell::getFVTetraBlueCyan(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					BccNode & yellow,
 					BccNode & b1,
 					BccNode & b2) const
 {
-	BccNode * yellowN = yellowNode(FortyEightTetraFace[i][0], cell, grid, cellCoord);
 	BccNode * cN = blueOrCyanNode(FortyEightTetraFace[i][1], cell, grid, cellCoord);
 	BccNode * dN = blueOrCyanNode(FortyEightTetraFace[i][2], cell, grid, cellCoord);
-	yellow = *yellowN;
 	b1 = *cN;
 	b2 = *dN;
+}
+
+
+BccNode * BccCell::tetraRedBlueCyanYellow(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell) const
+{ return cell->find(30000 + FortyEightTetraFace[i][j]); }
+
+/// i 0:5 j 0:3
+BccNode * BccCell::cutFaceVaryBlueCyanYellow(const int & i,
+					const int & j,
+					BccNode * endN,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & q,
+					const float & r) const
+{
+	int k;
+	NodePropertyType ntype;
+	if(isNodeYellow(endN) ) {
+		k = i;
+		ntype = NRedYellow;
+	}
+	else if(isNodeBlue(endN) ) {
+		k = TwentyFourFVBlueBlueEdge[i * 4 + j][0];
+		ntype = NRedBlue;
+	}
+	else {
+		k = TwentyFourFVBlueBlueEdge[i * 4 + j][2];
+		k = TwelveBlueBlueEdges[k][2];
+		ntype = NRedCyan;
+	}
 	
+	BccNode * cutN = addNode(30000 + k, cell, grid, cellCoord);
+	cutN->pos = q;
+	cutN->prop = ntype;
+	
+	return cutN;
 }
 
 /// per tetra i 0:47  
 /// j 0:2
-void BccCell::cutTetraRedBlueCyanYellow(const int & i,
+BccNode * BccCell::cutTetraRedBlueCyanYellow(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -1728,7 +1763,7 @@ void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 		std::cout<<"\n split close to red";
 		redN->pos = q;
 		redN->prop = BccCell::NRed;
-		return;
+		return NULL;
 	}
 	
 	BccNode * ycb;
@@ -1751,7 +1786,7 @@ void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 			std::cout<<"\n split close to cyan";
 			ycb->prop = BccCell::NCyan;
 		}
-		return;
+		return NULL;
 	}
 			
 	BccNode * cutN = addNode(30000 + FortyEightTetraFace[i][j], cell, grid, cellCoord);
@@ -1764,7 +1799,8 @@ void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 		cutN->prop = NRedBlue;
 	else
 		cutN->prop = NRedCyan;
-		
+	
+	return cutN;
 }
 
 /// move cyan to front
@@ -1801,5 +1837,21 @@ BccNode * BccCell::addNode(const int & k,
 	}
 	return n;
 }
+
+BccNode * BccCell::orangeNode(const float & i, 
+					aphid::sdb::Array<int, BccNode> * cell) const
+{ return cell->find(30000 + i); }
+
+BccNode * BccCell::faceVaryRedBlueCutNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell) const
+{ return cell->find(30000 + TwentyFourFVBlueBlueEdge[i*4+j][0]); }
+
+BccNode * BccCell::faceVaryRedCyanCutNode(const int & i,
+					const int & j,
+					aphid::sdb::Array<int, BccNode> * cell) const
+{ 
+	int iedge = TwentyFourFVBlueBlueEdge[i*4+j][2];
+	return cell->find(30000 + TwelveBlueBlueEdges[iedge][2]); }
 
 }
