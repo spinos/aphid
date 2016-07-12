@@ -19,6 +19,7 @@ class BccTetrahedralize : public SuperformulaPoisson {
 	TetrahedralMesher m_mesher;
 	int m_sampleBegin;
 	float m_pntSz;
+	std::vector<int> m_itetnegative;
 	
 public:
 	BccTetrahedralize();
@@ -34,6 +35,8 @@ private:
 	void drawFrontEdges();
 	void drawFrontTets(aphid::GeoDrawer * dr);
 	void drawRedBlueGreen(aphid::GeoDrawer * dr);
+	void drawTetnegative(aphid::GeoDrawer * dr);
+	
 };
 
 }

@@ -31,7 +31,7 @@ bool BccTetrahedralize::createSamples()
 	const float supsize = supg->gridSize();
 	m_mesher.setH(supsize);
 	
-	m_pntSz = supsize * .075f;
+	m_pntSz = supsize * .0625f;
 	
 	supg->begin();
 	while(!supg->end() ) {
@@ -66,7 +66,7 @@ bool BccTetrahedralize::createSamples()
 	m_mesher.extractGridPosProp();
 	extractSamplePos(&m_mesher.X()[m_sampleBegin]);
 		
-	m_mesher.checkTetraVolume();
+	m_mesher.checkTetraVolume(m_itetnegative);
 	std::cout<<"\n n node "<<m_sampleBegin
 		<<"\n n tet "<<m_mesher.numTetrahedrons()
 		<<"\n n front face "<<m_mesher.buildFrontFaces();
@@ -150,6 +150,7 @@ void BccTetrahedralize::draw(aphid::GeoDrawer * dr)
 	//drawFrontEdges();
 	drawFrontTets(dr);
 	drawRedBlueGreen(dr);
+	drawTetnegative(dr);
 }
 
 void BccTetrahedralize::drawFrontTets(aphid::GeoDrawer * dr)
@@ -267,6 +268,25 @@ void BccTetrahedralize::drawRedBlueGreen(aphid::GeoDrawer * dr)
 			dr->setColor(0.89f, .38f, 0.f);
 		
 		dr->cube(X[i], m_pntSz);
+	}
+}
+
+void BccTetrahedralize::drawTetnegative(aphid::GeoDrawer * dr)
+{
+	if(m_itetnegative.size() < 0) return;
+	
+	dr->setColor(1.f, 0.f, 0.f);
+	const Vector3F * X = m_mesher.X();
+		
+	const int n = m_itetnegative.size();
+	for(int i=0; i<n; ++i) {
+		const ITetrahedron * t = m_mesher.tetrahedron(m_itetnegative[i]);
+		
+		Vector3F a = X[t->iv0];
+		Vector3F b = X[t->iv1];
+		Vector3F c = X[t->iv2];
+		Vector3F d = X[t->iv3];
+		dr->tetrahedronWire(a, b, c, d);
 	}
 }
 

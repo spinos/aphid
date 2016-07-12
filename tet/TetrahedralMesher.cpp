@@ -123,8 +123,10 @@ int TetrahedralMesher::buildMesh()
 	return m_tets.size();
 }
 
-void TetrahedralMesher::checkTetraVolume()
+int TetrahedralMesher::checkTetraVolume(std::vector<int> & itetnegative)
 {
+	itetnegative.clear();
+	
 	float mnvol = 1e20f, mxvol = -1e20f, vol;
 	Vector3F p[4];
 	const int n = numTetrahedrons();
@@ -143,11 +145,16 @@ void TetrahedralMesher::checkTetraVolume()
 			mnvol = vol;
 		if(mxvol < vol)
 			mxvol = vol;
+			
+		if(vol < 0.f)
+			itetnegative.push_back(i);
 	}
 
 	std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
 	if(mnvol < 0.f)
 		std::cout<<"\n [ERROR] negative volume";
+		
+	return itetnegative.size();
 }
 
 bool TetrahedralMesher::addPoint(const int & vi,

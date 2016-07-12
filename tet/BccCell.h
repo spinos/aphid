@@ -7,8 +7,7 @@
  *
  */
 
-#include "triangulation.h"
-#include "tetrahedron_graph.h"
+#include "BlueYellowCyanRefine.h"
 #include <WorldGrid.h>
 #include <Array.h>
 
@@ -347,11 +346,16 @@ private:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					aphid::Vector3F & edgeCenter) const;
-		
 	BccNode * addNode(const int & k,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+	void refineTetrahedron(const int & i, const int & j,
+					const int & iface,
+					std::vector<ITetrahedron *> & dest,
+					STriangleArray * faces,
+					int ired, int iyellow, int ibc1, int ibc2,
+					aphid::sdb::Array<int, BccNode> * cell) const;
 	
 };
 

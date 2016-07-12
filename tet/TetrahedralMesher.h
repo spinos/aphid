@@ -43,7 +43,7 @@ public:
 	bool addPoint(const int & vi, bool & topologyChanged);
 	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
 	bool checkConnectivity();
-	void checkTetraVolume();
+	int checkTetraVolume(std::vector<int> & itetnegative);
 	
 	const int & N() const;
 	aphid::Vector3F * X();

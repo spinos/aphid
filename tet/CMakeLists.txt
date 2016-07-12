@@ -32,6 +32,7 @@ Hilbert3D.h
 Delaunay2D.h
 ClosestSampleTest.h
 Convexity.h
+BlueYellowCyanRefine.h
 BccCell.h
 BccTetraGrid.h
 Bcc3dTest.h
@@ -54,6 +55,7 @@ Delaunay3D.cpp
 Hilbert3D.cpp
 ClosestSampleTest.cpp
 Convexity.cpp
+BlueYellowCyanRefine.cpp
 BccCell.cpp
 BccTetraGrid.cpp
 TetrahedralMesher.cpp

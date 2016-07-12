@@ -298,7 +298,7 @@ void BccTetraGrid::cutRedRedEdges(const aphid::Vector3F & cellCenter,
 			antiRedP = nend->pos;
 			
 /// choose longer one
-		if(redP.distanceTo(antiRedP) * .5f > redP.distanceTo(q) )
+		//if((redP.distanceTo(antiRedP) * .5f) > redP.distanceTo(q) )
 			q = (redP + antiRedP) * .5f;
 
 /// cut at mid
@@ -463,10 +463,36 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 	BccNode nodeJ[3];
 	tetv[0] = redN->pos;
 	
-/// per tetra
 	int i = 0, j;
-	for(i;i<48;++i) {
+	
+/// per face
+	for(;i<6;++i) {
+	
+/// red not on front
+/// red could be closed, which will affect other options
+/// do those in another loop
+
+		if(redN->prop > 0)
+			break;
+
+		BccNode * yellowN = fCell.yellowNode(i, cell, this, cellCoord);
+
+/// per face vary tetra 			
+		for(j=0; j<8;++j) {
+			fCell.getTetraYellowBlueCyan(i*8 + j, cell, this, cellCoord, nodeJ[0], nodeJ[1], nodeJ[2]);
 		
+			RefineOption op = getRefineOpt(*redN, nodeJ[0], nodeJ[1], nodeJ[2]);
+			
+			if(op == RoSplitRedYellow) {
+				processSplitRedYellow(i*8 + j, redN, &nodeJ[0],
+									fCell, cell, cellCoord, samples, r);
+			}
+		}
+
+	}
+	
+	for(i=0;i<48;++i) {
+	
 		fCell.getTetraYellowBlueCyan(i, cell, this, cellCoord, nodeJ[0], nodeJ[1], nodeJ[2]);
 
 		tetv[1] = nodeJ[0].pos;
@@ -474,13 +500,8 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 		tetv[3] = nodeJ[2].pos;
 		
 		RefineOption op = getRefineOpt(*redN, nodeJ[0], nodeJ[1], nodeJ[2]);
-			
-		if(op == RoSplitRedYellow) {
-			processSplitRedYellow(i, redN, &nodeJ[0],
-								fCell, cell, cellCoord, samples, r);
-		}
 		
-		else if(op == RoSplitRedBlueOrCyan) { 
+		if(op == RoSplitRedBlueOrCyan) {
 			processSplitRedBlueOrCyan(i, redN, &nodeJ[1], &nodeJ[2],
 								fCell, cell, cellCoord, samples, r);
 		}
@@ -530,11 +551,11 @@ bool BccTetraGrid::edgeIntersectFront(const BccNode & a,
 					const float & r) const
 {
 /// no vertex on front
-	if(a.prop > 0 || b.prop >0) 
+	if(a.prop > 0 || b.prop > 0) 
 		return false;
 	
 	float d;
-	if(samples->getIntersect(q, d, a.pos, b.pos) < 1)
+	if(samples->getIntersect(q, d, a.pos, b.pos) < 0)
 		return false;
 		
 	return d < r;
@@ -591,7 +612,7 @@ void BccTetraGrid::processSplitRedYellow(const int & i,
 {
 	Vector3F q;
 	
-	if(edgeIntersectFront(*redN, *yellowN, samples, q, 1.73f * r) )
+	if(edgeIntersectFront(*redN, *yellowN, samples, q, r) )
 		fCell.cutTetraRedBlueCyanYellow(i, 0, cell, this, cellCoord, q, r);
 	
 }
@@ -614,7 +635,7 @@ void BccTetraGrid::processSplitRedBlueOrCyan(const int & i,
 	}
 	Vector3F q;
 	
-	if(edgeIntersectFront(*redN, *bcN, samples, q, 1.73f * r) )
+	if(edgeIntersectFront(*redN, *bcN, samples, q, r) )
 		fCell.cutTetraRedBlueCyanYellow(i, j, cell, this, cellCoord, q, r);	
 	
 }

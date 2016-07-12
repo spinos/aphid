@@ -338,6 +338,7 @@ void BccCell::connectNodes(std::vector<ITetrahedron *> & dest,
 		
 		BccNode * nodeA = redRedNode(i, cell, grid, cellCoord);
 		if(!nodeA) {
+/// negative sides
 			if((i & 1)==0) {
 				if(grid->findCell(neighborCoord(cellCoord, i) ) )
 					continue;
@@ -371,27 +372,90 @@ void BccCell::connectNodesOnFace(std::vector<ITetrahedron *> & dest,
 		const int edgei = iface * 4 + i;
 		BccNode * nodeB = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
 									cell, grid, cellCoord);
-		if(!nodeB)
+		if(!nodeB) {
+			std::cout<<"\n [ERROR] no blue"<<TwentyFourFVBlueBlueEdge[edgei][0];
 			return;
+		}
 		
 		BccNode * nodeC = blueNode6(TwentyFourFVBlueBlueEdge[edgei][1],
 									cell, grid, cellCoord);
-		if(!nodeC)
+		if(!nodeC) {
+			std::cout<<"\n [ERROR] no blue"<<TwentyFourFVBlueBlueEdge[edgei][1];
 			return;
+		}
 		
 		int b = nodeB->index;
 		int c = nodeC->index;
-		
-		BccNode * nodeD = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
+
+		BccNode * cyanN = blueBlueNode(TwentyFourFVBlueBlueEdge[edgei][2],
 									cell, grid, cellCoord);									
-		if(nodeD) {
-/// split into two
-			addTetrahedron(dest, faces, inode15, a, b, nodeD->index);
-			addTetrahedron(dest, faces, inode15, a, nodeD->index, c);
+		if(cyanN) {
+		
+			refineTetrahedron(edgei, 0, iface, dest, faces, inode15, a, b, cyanN->index,
+								cell);
+			refineTetrahedron(edgei, 1, iface, dest, faces, inode15, a, cyanN->index, c,
+								cell);
 		}
 		else
 			addTetrahedron(dest, faces, inode15, a, b, c);
 	}
+}
+
+/// per face vary edge i 0:23
+/// j 0 blue first 1 cyan first
+void BccCell::refineTetrahedron(const int & i, const int & j,
+					const int & iface,
+					std::vector<ITetrahedron *> & dest,
+					STriangleArray * faces,
+					int ired, int iyellow, int ibc1, int ibc2,
+					aphid::sdb::Array<int, BccNode> * cell) const
+{
+	BlueYellowCyanRefine refiner(ired, iyellow, ibc1, ibc2);
+	
+	if(j==0) {
+
+		BccNode * redBlueN = cell->find(30000 + TwentyFourFVBlueBlueEdge[i][0]);
+		if(redBlueN) {
+			//if(iface == 4) std::cout<<" face4 red blue "<<redBlueN->key<<" i "<<i;
+			refiner.splitBlue(redBlueN->index);
+		}
+			
+		int iedge = TwentyFourFVBlueBlueEdge[i][2];
+		BccNode * redCyanN = cell->find(30000 + TwelveBlueBlueEdges[iedge][2]);
+		if(redCyanN) {
+			//if(iface == 4) std::cout<<" face4 red cyan "<<redCyanN->key<<" i "<<i;
+			refiner.splitCyan(redCyanN->index);
+		}
+	}
+	else {
+
+		int iedge = TwentyFourFVBlueBlueEdge[i][2];
+		BccNode * redCyanN = cell->find(30000 + TwelveBlueBlueEdges[iedge][2]);
+		if(redCyanN) {
+			//if(iface == 4) std::cout<<" face4 red cyan "<<redCyanN->key<<" i "<<i;
+			refiner.splitBlue(redCyanN->index);
+		}
+			
+		BccNode * redBlueN = cell->find(30000 + TwentyFourFVBlueBlueEdge[i][1]);
+		if(redBlueN) {
+			//if(iface == 4) std::cout<<" face4 red blue "<<redBlueN->key<<" i "<<i;
+			refiner.splitCyan(redBlueN->index);
+		}
+	}
+	
+	BccNode * redYellowN = cell->find(30000 + iface);
+	if(redYellowN) {
+		//if(iface == 4) std::cout<<" face4 red yellow "<<redYellowN->key;
+		refiner.splitYellow(redYellowN->index);
+	}
+	
+	const int nt = refiner.numTetra();
+	
+	for(int k=0; k<nt; ++k) {
+		const ITetrahedron * t = refiner.tetra(k);
+		addTetrahedron(dest, faces, t->iv0, t->iv1, t->iv2, t->iv3);
+	}
+	
 }
 
 void BccCell::addTetrahedron(std::vector<ITetrahedron *> & dest,
@@ -840,7 +904,7 @@ void BccCell::facePosition(Vector3F & dst,
 	bool stat = anyBlueCut(i, cell, grid, cellCoord);
 		
 	numOnFront = 0;
-	dst.set(0.f, 0.f, 0.f);
+	dst.setZero();
 	np = 0;
 	int j=0;
 	for(;j<4;++j) {
@@ -1693,8 +1757,9 @@ void BccCell::cutTetraRedBlueCyanYellow(const int & i,
 	BccNode * cutN = addNode(30000 + FortyEightTetraFace[i][j], cell, grid, cellCoord);
 	cutN->pos = q;
 	
-	if(isNodeYellow(ycb) )
+	if(isNodeYellow(ycb) ) {
 		cutN->prop = NRedYellow;
+	}
 	else if(isNodeBlue(ycb) )
 		cutN->prop = NRedBlue;
 	else
