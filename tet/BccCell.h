@@ -286,8 +286,7 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					BccNode & b1,
-					BccNode & b2) const;
+					BccNode ** bc) const;
 	BccNode * cutTetraRedBlueCyanYellow(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell,
@@ -314,6 +313,8 @@ public:
 	bool isNodeYellow(const BccNode * n) const;
 	BccNode * orangeNode(const float & i, 
 					aphid::sdb::Array<int, BccNode> * cell) const;
+	BccNode * redCyanNode(const int & i, 
+					aphid::sdb::Array<int, BccNode> * cell) const;
 	BccNode * tetraRedBlueCyanYellow(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell) const;
@@ -323,6 +324,26 @@ public:
 	BccNode * faceVaryRedCyanCutNode(const int & i,
 					const int & j,
 					aphid::sdb::Array<int, BccNode> * cell) const;
+	bool edgeCrossFront(const BccNode * endN,
+						const BccNode * cutN) const;
+	bool vertexHasThreeFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	bool edgeHasTwoFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	BccNode * cutBlue(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & q) const;
+	BccNode * cutCyan(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & q) const;
 					
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;

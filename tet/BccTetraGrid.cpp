@@ -460,18 +460,16 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 	BccNode * redN = cell->find(15);
 	
 	Vector3F tetv[4];
-	BccNode nodeJ[2];
+	BccNode *nodeJ[4];
 	tetv[0] = redN->pos;
 	
 	int i = 0, j;
 	
 /// per face
 	for(;i<6;++i) {
-	
-/// red not on front
+/// cut red-yellow
 /// red could be closed, which will affect other options
 /// do those in another loop
-
 		if(redN->prop > 0)
 			break;
 
@@ -481,9 +479,9 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 		
 /// per face vary tetra 			
 		for(j=0; j<8;++j) {
-			fCell.getFVTetraBlueCyan(i*8 + j, cell, this, cellCoord, nodeJ[0], nodeJ[1]);
+			fCell.getFVTetraBlueCyan(i*8 + j, cell, this, cellCoord, nodeJ);
 		
-			RefineOption op = getRefineOpt(*redN, *yellowN, nodeJ[0], nodeJ[1]);
+			RefineOption op = getRefineOpt(*redN, *yellowN, nodeJ, fCell);
 			
 			if(op == RoSplitRedYellow) {
 				orangeN = processSplitRedYellow(i*8 + j, redN, yellowN,
@@ -497,24 +495,37 @@ void BccTetraGrid::cutAndWrap(const aphid::Vector3F & cellCenter,
 	for(i=0;i<6;++i) {
 	
 		BccNode * yellowN = fCell.yellowNode(i, cell, this, cellCoord);
-
+		
+/// cut red-blue/cyan by other side cut
 		for(j=0; j<8;++j) {
 		
-			fCell.getFVTetraBlueCyan(i*8 + j, cell, this, cellCoord, nodeJ[0], nodeJ[1]);
+			fCell.getFVTetraBlueCyan(i*8 + j, cell, this, cellCoord, nodeJ);
 
-			RefineOption op = getRefineOpt(*redN, *yellowN, nodeJ[0], nodeJ[1]);
+			RefineOption op = getRefineOpt(*redN, *yellowN, nodeJ, fCell);
 			
 			if(op == RoSplitRedBlueOrCyan) {
-				processSplitRedBlueOrCyan(i*8 + j, redN, &nodeJ[0], &nodeJ[1],
+				processSplitRedBlueOrCyan(i*8 + j, redN, nodeJ,
 									fCell, cell, cellCoord, samples, r);
 			}
-		
+			else if(op == RoSplitRedBlueAndCyan) {
+				processSplitRedBlueAndCyan(i*8 + j, redN, nodeJ,
+									fCell, cell, cellCoord, samples, r);
+			}
 		}
 	}
 	
+	for(i=0;i<8;++i) {
+		//wrapVertex(i, redN, fCell, cell, cellCoord, samples, r);
+	}
+	
+	for(i=0;i<12;++i) {
+		//wrapEdge(i, redN, fCell, cell, cellCoord, samples, r);
+	}
+		
 	for(i=0;i<6;++i) {
 		wrapFace(i, redN, fCell, cell, cellCoord, samples, r);
 	}
+	
 }
 
 bool BccTetraGrid::tetraIsOpenOnFront(const BccNode & a,
@@ -567,7 +578,7 @@ bool BccTetraGrid::edgeIntersectFront(const BccNode & a,
 	if(samples->getIntersect(q, d, a.pos, b.pos) < 0)
 		return false;
 		
-	return d < r;
+	return true;//d < r;
 }
 
 bool BccTetraGrid::vertexCloseToFront(const BccNode & a,
@@ -587,20 +598,25 @@ bool BccTetraGrid::vertexCloseToFront(const BccNode & a,
 	return true;
 }
 
-BccTetraGrid::RefineOption BccTetraGrid::getRefineOpt(const BccNode & a,
-					const BccNode & b,
-					const BccNode & c,
-					const BccNode & d) const
+BccTetraGrid::RefineOption BccTetraGrid::getRefineOpt(const BccNode & redN,
+					const BccNode & yellowN,
+					BccNode ** bc,
+					const BccCell & fCell) const
 {
-	if(a.prop > 0 && b.prop > 0 && c.prop > 0 && d.prop > 0)
+	if(redN.prop > 0 && yellowN.prop > 0 && bc[0]->prop > 0 && bc[1]->prop > 0)
 		return RoNone;
 
 /// blue and cyan on front	
-	if(a.prop < 0 && b.prop < 0 && c.prop > 0 && d.prop > 0)
+	if(redN.prop < 0 && yellowN.prop < 0 && bc[0]->prop > 0 && bc[1]->prop > 0)
 		return RoSplitRedYellow;
+		
+	if(redN.prop < 0 && yellowN.prop > 0 && bc[0]->prop < 0 && bc[1]->prop < 0)
+		return RoSplitRedBlueAndCyan;
 
+	bool e1 = fCell.edgeCrossFront(bc[0], bc[2]);
+	bool e2 = fCell.edgeCrossFront(bc[1], bc[3]);
 /// yellow-blue or yellow-cyan on front, split red and the other		
-	if(a.prop < 0 && b.prop > 0 && (c.prop * d.prop < 0) )
+	if(redN.prop < 0 && yellowN.prop > 0 && (e1 ^ e2) )
 		return RoSplitRedBlueOrCyan;
 		
 	return RoNone;
@@ -616,7 +632,7 @@ BccNode * BccTetraGrid::processSplitRedYellow(const int & i,
 					const float & r)
 {
 	Vector3F q;	
-	if(edgeIntersectFront(*redN, *yellowN, samples, q, r) )
+	if(edgeIntersectFront(*redN, *yellowN, samples, q, 3.5f * r) )
 		return fCell.cutTetraRedBlueCyanYellow(i, 0, cell, this, cellCoord, q, r);
 	
 	return NULL;
@@ -624,18 +640,17 @@ BccNode * BccTetraGrid::processSplitRedYellow(const int & i,
 
 BccNode * BccTetraGrid::processSplitRedBlueOrCyan(const int & i,
 					BccNode * redN,
-					BccNode * bc1N,
-					BccNode * bc2N,
+					BccNode ** bc,
 					const BccCell & fCell,
 					aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples,
 					const float & r)
 {
-	BccNode * bcN = bc1N;
+	BccNode * bcN = bc[0];
 	int j = 1;
-	if(bc2N->prop < 0) {
-		bcN = bc2N;
+	if(!fCell.edgeCrossFront(bc[1], bc[3]) ) {
+		bcN = bc[1];
 		j = 2;
 	}
 	
@@ -644,10 +659,35 @@ BccNode * BccTetraGrid::processSplitRedBlueOrCyan(const int & i,
 		return NULL;
 	
 	Vector3F q;
-	if(edgeIntersectFront(*redN, *bcN, samples, q, r) )
-		return fCell.cutTetraRedBlueCyanYellow(i, j, cell, this, cellCoord, q, r);	
+	if(edgeIntersectFront(*redN, *bcN, samples, q, .5f * redN->pos.distanceTo(bcN->pos) ) )
+		return fCell.cutTetraRedBlueCyanYellow(i, j, cell, this, cellCoord, q, r);
 	
 	return NULL;
+}
+
+void BccTetraGrid::processSplitRedBlueAndCyan(const int & i,
+					BccNode * redN,
+					BccNode ** bc,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r)
+{	
+	//std::cout<<"\n cut blue and cyan";
+	Vector3F q;
+
+	if(!fCell.tetraRedBlueCyanYellow(i, 1, cell) ) {
+	
+		if(edgeIntersectFront(*redN, *bc[0], samples, q, 4.f * r) )
+			fCell.cutTetraRedBlueCyanYellow(i, 1, cell, this, cellCoord, q, r);
+	}
+	
+	if(!fCell.tetraRedBlueCyanYellow(i, 2, cell) ) {
+	
+		if(edgeIntersectFront(*redN, *bc[1], samples, q, 4.f * r) )
+			fCell.cutTetraRedBlueCyanYellow(i, 2, cell, this, cellCoord, q, r);
+	}
 }
 
 /// per face i 0:5
@@ -659,12 +699,16 @@ void BccTetraGrid::wrapFace(const int & i,
 					const ClosestSampleTest * samples,
 					const float & r)
 {
-/// get cuts
+/// get end and cut
+	BccNode * blueN[4];
+	BccNode * cyanN[4];
 	BccNode * redBlueN[4];
 	BccNode * redCyanN[4];
 /// per edge j 0:3
 	int j = 0, j0, j1;
 	for(;j<4;++j) {
+		blueN[j] = fCell.faceVaryBlueNode(i, j, cell, this, cellCoord);
+		cyanN[j] = fCell.faceVaryBlueBlueNode(i, j, cell, this, cellCoord);
 		redBlueN[j] = fCell.faceVaryRedBlueCutNode(i, j, cell);
 		redCyanN[j] = fCell.faceVaryRedCyanCutNode(i, j, cell);
 	}
@@ -677,21 +721,20 @@ void BccTetraGrid::wrapFace(const int & i,
 		j1 = j + 1;
 		if(j1 > 3)
 			j1 = 0;
-
 			
 		if(!redBlueN[j]) {
-			if(redCyanN[j] && redCyanN[j1]) {
-				BccNode * blueN = fCell.faceVaryBlueNode(i, j, cell, this, cellCoord);
-				//std::cout<<"\n wrap blue "<<blueN->key<<" "<<blueN->prop;
-				splitFaceVaryEdge(i, j, redN, blueN, fCell, cell, cellCoord, samples, r);
+			if(fCell.edgeCrossFront(cyanN[j], redCyanN[j]) 
+				&& fCell.edgeCrossFront(cyanN[j1], redCyanN[j1]) ) {
+				
+				splitFaceVaryEdge(i, j, redN, blueN[j], fCell, cell, cellCoord, samples, r);
 			}
 		}
 			
 		if(!redCyanN[j]) {
-			if(redBlueN[j] && redBlueN[j0]) {
-				BccNode * cyanN = fCell.faceVaryBlueBlueNode(i, j, cell, this, cellCoord);
-				//std::cout<<"\n wrap cyan "<<cyanN->key<<" "<<cyanN->prop;
-				splitFaceVaryEdge(i, j, redN, cyanN, fCell, cell, cellCoord, samples, r);
+			if(fCell.edgeCrossFront(blueN[j], redBlueN[j]) 
+				&& fCell.edgeCrossFront(blueN[j0], redBlueN[j0]) ) {
+				
+				splitFaceVaryEdge(i, j, redN, cyanN[j], fCell, cell, cellCoord, samples, r);
 			}
 		}
 	}
@@ -707,15 +750,56 @@ BccNode * BccTetraGrid::splitFaceVaryEdge(const int & i,
 					const ClosestSampleTest * samples,
 					const float & r)
 {
-	std::cout<<"\n split face vary edge "<<i<<" "<<j
-		<<"\n red prop "<<redN->prop
-		<<" end prop "<<endN->prop<<" k "<<endN->key;
-	Vector3F q;
-	if(edgeIntersectFront(*redN, *endN, samples, q, 1.5f * r) ) {
-			std::cout<<"  splitd";
+	//std::cout<<"\n split face vary edge "<<i<<" "<<j
+	//	<<"\n red prop "<<redN->prop
+	//	<<" end prop "<<endN->prop<<" k "<<endN->key;
+	Vector3F q = (redN->pos + endN->pos) * .5f;
+	if(edgeIntersectFront(*redN, *endN, samples, q, 4.f * r) ) {
+	//		std::cout<<"  splitd";
 		return fCell.cutFaceVaryBlueCyanYellow(i, j, endN, cell, this, cellCoord, q, r);	
 	}
 	return NULL;
+}
+
+void BccTetraGrid::wrapEdge(const int & i,
+					BccNode * redN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r)
+{
+	BccNode * cyanN = fCell.blueBlueNode(i, cell, this, cellCoord);
+	BccNode * redCyanN = fCell.redCyanNode(i, cell);
+	if(fCell.edgeCrossFront(cyanN, redCyanN) )
+		return;
+	
+	if(fCell.edgeHasTwoFaceOnFront(i, cell, this, cellCoord) ) {
+		Vector3F q = (redN->pos + cyanN->pos) * .5f;
+		//std::cout<<"\n wrap edge"<<i<<" "<<redN->prop<<" "<<cyanN->prop;
+		if(edgeIntersectFront(*redN, *cyanN, samples, q, 4.f * r ) )
+			fCell.cutCyan(i, cell, this, cellCoord, q);
+	}
+}
+	
+void BccTetraGrid::wrapVertex(const int & i,
+					BccNode * redN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r)
+{
+	BccNode * blueN = fCell.blueNode6(i + 6, cell, this, cellCoord);
+	BccNode * redBlueN = cell->find(30000 + i + 6);
+	if(fCell.edgeCrossFront(blueN, redBlueN) )
+		return;
+	
+	if(fCell.vertexHasThreeFaceOnFront(i, cell, this, cellCoord) ) {
+		Vector3F q = (redN->pos + blueN->pos) * .5f;
+		if(edgeIntersectFront(*redN, *blueN, samples, q, 4.f * r) )
+			fCell.cutBlue(i, cell, this, cellCoord, q);
+	}
 }
 
 }

@@ -1695,18 +1695,17 @@ bool BccCell::checkMoveRed(const aphid::Vector3F & q,
 	return true;
 }
 
-/// per tetra i 0:47 red yellow blue cyan
+/// per tetra i 0:47 blue cyan end and cut
 void BccCell::getFVTetraBlueCyan(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
-					BccNode & b1,
-					BccNode & b2) const
+					BccNode ** bc) const
 {
-	BccNode * cN = blueOrCyanNode(FortyEightTetraFace[i][1], cell, grid, cellCoord);
-	BccNode * dN = blueOrCyanNode(FortyEightTetraFace[i][2], cell, grid, cellCoord);
-	b1 = *cN;
-	b2 = *dN;
+	bc[0] = blueOrCyanNode(FortyEightTetraFace[i][1], cell, grid, cellCoord);
+	bc[1] = blueOrCyanNode(FortyEightTetraFace[i][2], cell, grid, cellCoord);
+	bc[2] = tetraRedBlueCyanYellow(i, 1, cell);
+	bc[3] = tetraRedBlueCyanYellow(i, 2, cell);
 }
 
 
@@ -1776,7 +1775,7 @@ BccNode * BccCell::cutTetraRedBlueCyanYellow(const int & i,
 		if(isNodeYellow(ycb) ) {
 			std::cout<<"\n split close to yellow";
 			ycb->prop = BccCell::NYellow;
-			ycb->pos = q;
+			//ycb->pos = q;
 		}
 		else if(isNodeBlue(ycb) ) {
 			std::cout<<"\n split close to blue";
@@ -1792,9 +1791,8 @@ BccNode * BccCell::cutTetraRedBlueCyanYellow(const int & i,
 	BccNode * cutN = addNode(30000 + FortyEightTetraFace[i][j], cell, grid, cellCoord);
 	cutN->pos = q;
 	
-	if(isNodeYellow(ycb) ) {
+	if(isNodeYellow(ycb) )
 		cutN->prop = NRedYellow;
-	}
 	else if(isNodeBlue(ycb) )
 		cutN->prop = NRedBlue;
 	else
@@ -1852,6 +1850,73 @@ BccNode * BccCell::faceVaryRedCyanCutNode(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell) const
 { 
 	int iedge = TwentyFourFVBlueBlueEdge[i*4+j][2];
-	return cell->find(30000 + TwelveBlueBlueEdges[iedge][2]); }
+	return cell->find(30000 + TwelveBlueBlueEdges[iedge][2]); 
+}
+
+BccNode * BccCell::redCyanNode(const int & i, 
+					aphid::sdb::Array<int, BccNode> * cell) const
+{ return cell->find(30000 + TwelveBlueBlueEdges[i][2]); }
+
+bool BccCell::edgeCrossFront(const BccNode * endN,
+						const BccNode * cutN) const
+{
+	if(cutN) return true;
+	return endN->prop > 0;
+}
+
+bool BccCell::vertexHasThreeFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	int c = 0;
+	int j = 3;
+	for(;j<6;++j) {
+		BccNode * yellowN = yellowNode(EightVVBlueBlueEdge[i][j], cell, grid, cellCoord);
+		if(yellowN->prop > 0)
+			c++;
+	}
+	return c>2;
+}
+
+bool BccCell::edgeHasTwoFaceOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * yellowN1 = yellowNode(TwenlveEdgeYellowInd[i][0], cell, grid, cellCoord);
+	if(yellowN1->prop < 0)
+		return false;
+		
+	BccNode * yellowN2 = yellowNode(TwenlveEdgeYellowInd[i][1], cell, grid, cellCoord);
+	if(yellowN2->prop < 0)
+		return false;
+			
+	return true;
+}
+
+BccNode * BccCell::cutBlue(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & q) const
+{
+	BccNode * cutN = addNode(30000 + i + 6, cell, grid, cellCoord);
+	cutN->pos = q;
+	cutN->prop = NRedBlue;
+	return cutN;
+}
+
+BccNode * BccCell::cutCyan(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					const aphid::Vector3F & q) const
+{
+	BccNode * cutN = addNode(30000 + TwelveBlueBlueEdges[i][2], cell, grid, cellCoord);
+	cutN->pos = q;
+	cutN->prop = NRedCyan;
+	return cutN;
+}
 
 }

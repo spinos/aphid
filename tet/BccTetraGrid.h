@@ -59,7 +59,8 @@ protected:
 	enum RefineOption {
 		RoNone = 0,
 		RoSplitRedYellow = 1,
-		RoSplitRedBlueOrCyan = 2
+		RoSplitRedBlueOrCyan = 2,
+		RoSplitRedBlueAndCyan = 3
 	};
 	
 private:
@@ -84,10 +85,10 @@ private:
 					const ClosestSampleTest * samples,
 					const float & r,
 					aphid::Vector3F & q) const;
-	RefineOption getRefineOpt(const BccNode & a,
-					const BccNode & b,
-					const BccNode & c,
-					const BccNode & d) const;
+	RefineOption getRefineOpt(const BccNode & redN,
+					const BccNode & yellowN,
+					BccNode ** bc,
+					const BccCell & fCell) const;
 	BccNode * processSplitRedYellow(const int & i,
 					BccNode * redN,
 					BccNode * yellowN,
@@ -103,10 +104,31 @@ private:
 					const aphid::sdb::Coord3 & cellCoord,
 					const ClosestSampleTest * samples,
 					const float & r);
+	void wrapEdge(const int & i,
+					BccNode * redN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
+	void wrapVertex(const int & i,
+					BccNode * redN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
 	BccNode * processSplitRedBlueOrCyan(const int & i,
 					BccNode * redN,
-					BccNode * bc1N,
-					BccNode * bc2N,
+					BccNode ** bc,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
+	void processSplitRedBlueAndCyan(const int & i,
+					BccNode * redN,
+					BccNode ** bc,
 					const BccCell & fCell,
 					aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord,
