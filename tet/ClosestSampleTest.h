@@ -28,6 +28,11 @@ public:
 				const aphid::Vector3F & seg1,
 				const aphid::Vector3F & seg2) const;
 				
+	int getIntersect(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & seg1,
+				const aphid::Vector3F & seg2,
+				const float & r) const;
+				
 	int getClosestOnSegment(aphid::Vector3F & dst, float & d, 
 				const aphid::Vector3F & seg1,
 				const aphid::Vector3F & seg2) const;

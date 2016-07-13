@@ -18,16 +18,16 @@ inline bool distancePointLineSegment(float & d,
 	Vector3F v12 = P2 - P1;
 	Vector3F v10 = P0 - P1;
 
-	if(v10.dot(v12) <= 0.f ) {
+	if(v10.dot(v12) < 0.f ) {
 		d = v10.length();
-		return false;
+		return true;
 	}
 		
 	Vector3F v20 = P0 - P2;
 	
-	if(v20.dot(v12) >= 0.f ) {
+	if(v20.dot(v12) > 0.f ) {
 		d = v20.length();
-		return false;
+		return true;
 	}
 	
     d = sqrt((v10.cross(v20)).length2() / v12.length2() );

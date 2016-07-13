@@ -69,7 +69,7 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 	vb.normalize();
 	
 /// both end on the same side
-	if(va.dot(vb) > 0.f)
+	if(va.dot(vb) > 0.1f)
 		return -1;
 	
 /// close to weighted average		
@@ -82,6 +82,33 @@ int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d,
 	projectPointLineSegment(dst, d, mid, seg1, seg2);
 	
 	return 1;
+}
+
+int ClosestSampleTest::getIntersect(aphid::Vector3F & dst, float & d, 
+				const aphid::Vector3F & seg1,
+				const aphid::Vector3F & seg2,
+				const float & r) const
+{
+	if(m_N < 1) return -1;
+	
+	float mnd = 1e8f;
+	int i=0, mni=0;
+	for(;i<m_N;++i) {
+		if(distancePointLineSegment(d, m_smps[i], seg1, seg2) ) {
+			if(mnd > d ) {
+				mnd = d;
+				mni = i;
+			}
+		}
+	}
+	
+	d = mnd;
+	
+	if(d < r) return -1;
+	
+	projectPointLineSegment(dst, d, m_smps[mni], seg1, seg2);
+	
+	return mni;
 }
 
 int ClosestSampleTest::getClosestOnSegment(aphid::Vector3F & dst, float & d, 

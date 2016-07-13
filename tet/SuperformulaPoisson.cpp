@@ -35,7 +35,7 @@ bool SuperformulaPoisson::createSamples()
 		}
 	}
 
-#define GFACTOR 10.f
+#define GFACTOR 8.f
 //#define RFACTOR .0909f /// 1 / 11
 //#define RFACTOR .0625f /// 1 / 16
 //#define RFACTOR .03125f /// 1 / 32

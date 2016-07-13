@@ -60,7 +60,8 @@ protected:
 		RoNone = 0,
 		RoSplitRedYellow = 1,
 		RoSplitRedBlueOrCyan = 2,
-		RoSplitRedBlueAndCyan = 3
+		RoSplitRedBlueAndCyan = 3,
+		RoHalfYellowBlueOrCyan = 4
 	};
 	
 private:
@@ -138,6 +139,15 @@ private:
 					const int & j,
 					BccNode * redN,
 					BccNode * endN,
+					const BccCell & fCell,
+					aphid::sdb::Array<int, BccNode> * cell,
+					const aphid::sdb::Coord3 & cellCoord,
+					const ClosestSampleTest * samples,
+					const float & r);
+	void processHalfYellowBlueOrCyan(const int & i,
+					BccNode * redN,
+					BccNode * yellowN,
+					BccNode ** bc,
 					const BccCell & fCell,
 					aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord,

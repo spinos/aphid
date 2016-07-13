@@ -429,17 +429,17 @@ void BccCell::refineTetrahedron(const int & i, const int & j,
 	}
 	else {
 
+		BccNode * redBlueN = cell->find(30000 + TwentyFourFVBlueBlueEdge[i][1]);
+		if(redBlueN) {
+			//if(iface == 4) std::cout<<" face4 red blue "<<redBlueN->key<<" i "<<i;
+			refiner.splitCyan(redBlueN->index);
+		}
+		
 		int iedge = TwentyFourFVBlueBlueEdge[i][2];
 		BccNode * redCyanN = cell->find(30000 + TwelveBlueBlueEdges[iedge][2]);
 		if(redCyanN) {
 			//if(iface == 4) std::cout<<" face4 red cyan "<<redCyanN->key<<" i "<<i;
 			refiner.splitBlue(redCyanN->index);
-		}
-			
-		BccNode * redBlueN = cell->find(30000 + TwentyFourFVBlueBlueEdge[i][1]);
-		if(redBlueN) {
-			//if(iface == 4) std::cout<<" face4 red blue "<<redBlueN->key<<" i "<<i;
-			refiner.splitCyan(redBlueN->index);
 		}
 	}
 	
@@ -1864,6 +1864,36 @@ bool BccCell::edgeCrossFront(const BccNode * endN,
 	return endN->prop > 0;
 }
 
+bool BccCell::vertexHasThreeEdgeOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & q) const
+{
+	q.setZero();
+	int c = 0;
+	int j = 0;
+	for(;j<3;++j) {
+		BccNode * cyanN = blueBlueNode(EightVVBlueBlueEdge[i][j], cell, grid, cellCoord);
+		if(cyanN->prop > 0) {
+			c++;
+			q += cyanN->pos;
+		}
+		else {
+			int iedge = EightVVBlueBlueEdge[i][j];
+			BccNode * cyanCutN = cell->find(30000 + TwelveBlueBlueEdges[i][2]);
+			if(cyanCutN) {
+				c++;
+				q += cyanCutN->pos;
+			}
+		}
+	}
+	
+	if(c>2)
+		q *= .33f;
+	return c>2;
+}
+
 bool BccCell::vertexHasThreeFaceOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -1882,16 +1912,21 @@ bool BccCell::vertexHasThreeFaceOnFront(const int & i,
 bool BccCell::edgeHasTwoFaceOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
-					const aphid::sdb::Coord3 & cellCoord) const
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & q) const
 {
 	BccNode * yellowN1 = yellowNode(TwenlveEdgeYellowInd[i][0], cell, grid, cellCoord);
 	if(yellowN1->prop < 0)
 		return false;
 		
+	q = yellowN1->pos;
+		
 	BccNode * yellowN2 = yellowNode(TwenlveEdgeYellowInd[i][1], cell, grid, cellCoord);
 	if(yellowN2->prop < 0)
 		return false;
 			
+	q += yellowN2->pos;
+	q *= .5f;
 	return true;
 }
 
@@ -1917,6 +1952,28 @@ BccNode * BccCell::cutCyan(const int & i,
 	cutN->pos = q;
 	cutN->prop = NRedCyan;
 	return cutN;
+}
+
+void BccCell::getBlueMean(aphid::Vector3F & q,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	float s = 0.f;
+	q.setZero();
+	int i = 6;
+	for(;i<14;++i) {
+		BccNode * bn = blueNode6(i, cell, grid, cellCoord);
+		if(bn->prop < 0) {
+			q += bn->pos * .5f;
+			s += .5f;
+		}
+		else {
+			q += bn->pos * .25f;
+			s += .25f;
+		}
+	}
+	q /= s;
 }
 
 }

@@ -326,6 +326,13 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell) const;
 	bool edgeCrossFront(const BccNode * endN,
 						const BccNode * cutN) const;
+						
+	bool vertexHasThreeEdgeOnFront(const int & i,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & q) const;
+					
 	bool vertexHasThreeFaceOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -333,7 +340,8 @@ public:
 	bool edgeHasTwoFaceOnFront(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
-					const aphid::sdb::Coord3 & cellCoord) const;
+					const aphid::sdb::Coord3 & cellCoord,
+					aphid::Vector3F & q) const;
 	BccNode * cutBlue(const int & i,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -344,7 +352,11 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord,
 					const aphid::Vector3F & q) const;
-					
+	void getBlueMean(aphid::Vector3F & q,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;

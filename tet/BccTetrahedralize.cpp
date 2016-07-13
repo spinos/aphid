@@ -31,7 +31,7 @@ bool BccTetrahedralize::createSamples()
 	const float supsize = supg->gridSize();
 	m_mesher.setH(supsize);
 	
-	m_pntSz = supsize * .0625f;
+	m_pntSz = supsize * .125f;
 	
 	supg->begin();
 	while(!supg->end() ) {
