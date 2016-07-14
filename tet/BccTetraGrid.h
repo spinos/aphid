@@ -66,6 +66,7 @@ protected:
 	
 private:
 	void countNodesIn(aphid::sdb::Array<int, BccNode> * cell, int & c);
+	
 	void extractNodePosPropIn(aphid::Vector3F * destPos,
 					int * destProp,
 					aphid::sdb::Array<int, BccNode> * cell);

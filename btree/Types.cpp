@@ -46,6 +46,17 @@ const bool Coord2::operator>(const Coord2 & another) const
 	return false;
 }
 
+Coord2 Coord2::ordered() const
+{
+	int a = x;
+	if(y < a) a = y;
+	
+	int b = x;
+	if(y > a) b = y;
+	
+	return Coord2(a, b);
+}
+
 const std::string Coord2::str() const 
 {
 	return (boost::format("(%1%,%2%)") % x % y).str();

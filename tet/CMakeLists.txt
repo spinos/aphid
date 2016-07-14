@@ -19,6 +19,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../shared/hilbertCurve.h
 ../shared/triangle_math.h
 ../shared/tetrahedron_math.h
+../shared/AGraph.h
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h
@@ -41,6 +42,8 @@ SuperformulaTest.h
 PoissonSequence.h
 SuperformulaPoisson.h
 BccTetrahedralize.h
+GridMaker.h
+DistanceFieldTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -63,6 +66,8 @@ Bcc3dTest.cpp
 SuperformulaTest.cpp
 SuperformulaPoisson.cpp
 BccTetrahedralize.cpp
+GridMaker.cpp
+DistanceFieldTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

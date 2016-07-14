@@ -22,7 +22,8 @@ public:
 		kBcc3D = 5,
 		kSuperformula = 6,
 		kSuperformulaPoissonDisk = 7,
-		kBccTetrahedralize = 8
+		kBccTetrahedralize = 8,
+		kDistanceField = 9
 	};
 	
 	Parameter(int argc, char *argv[]);

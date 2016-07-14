@@ -16,7 +16,7 @@ namespace ttg {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	m_operation = kBccTetrahedralize;
+	m_operation = kDistanceField;
 	
 	if(argc < 2) {
 		std::cout<<"\n tet (Tetrahedral Mesh Generation Research) version 20160601"
@@ -52,6 +52,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-bt") == 0 || strcmp(argv[i], "--bccTetrahedralize") == 0) {
 				m_operation = kBccTetrahedralize;
 			}
+			if(strcmp(argv[i], "-df") == 0 || strcmp(argv[i], "--distanceField") == 0) {
+				m_operation = kDistanceField;
+			}
 		}
 	}
 	
@@ -76,6 +79,7 @@ void Parameter::PrintHelp()
 	<<"\n -sf or --superformula    test 3D superformula"
 	<<"\n -sfp or --superformulaPoissonDisk    test 3D superformula + Poisson Disk Sampling"
 	<<"\n -bt or --bccTetrahedralize    test 3D superformula + Poisson Disk Sampling + BCC"
+	<<"\n -df or --distanceField    test 3D distance transform on BCC grid"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

@@ -11,6 +11,7 @@
 #include "SuperformulaPoisson.h"
 #include "SuperformulaControl.h"
 #include "BccTetrahedralize.h"
+#include "DistanceFieldTest.h"
 
 namespace ttg {
 
@@ -31,8 +32,10 @@ Window::Window(const Parameter * param)
 		sc = new SuperformulaTest;
 	else if(param->operation() == Parameter::kSuperformulaPoissonDisk)
 		sc = new SuperformulaPoisson;
-	else///if(param->operation() == Parameter::kBccTetrahedralize)
+	else if(param->operation() == Parameter::kBccTetrahedralize)
 		sc = new BccTetrahedralize;
+	else// if(param->operation() == Parameter::kDistanceField)
+		sc = new DistanceFieldTest;
 		
     glWidget = new GLWidget(sc, this);
 	
