@@ -24,8 +24,24 @@ namespace cvx {
         TCube = 2,
         TCapsule = 3,
 		TTriangle = 4,
-		TBox = 5
+		TBox = 5,
+		TTetrahedron = 6
     };
+	
+class Shape {
+
+public:
+	Shape();
+	virtual ~Shape();
+	
+	virtual float distanceTo(const Vector3F & p) const;
+	virtual ShapeType shapeType() const;
+	
+protected:
+
+private:
+
+};
 
 class Frustum {
 
@@ -86,7 +102,7 @@ private:
 
 };
 
-class Sphere {
+class Sphere : public Shape {
   
     Vector3F m_p;
     float m_r;
@@ -100,9 +116,20 @@ public:
     static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();
 	
+	virtual float distanceTo(const Vector3F & p) const;
+	virtual ShapeType shapeType() const;
+	
+	template<typename T>
+	bool intersect(const T * b) const
+	{
+		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
+	}
+	
+	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
+	
 };
 
-class Cube {
+class Cube : public Shape {
     
     Vector3F m_p;
     float m_r;
@@ -122,9 +149,20 @@ public:
     
     static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();
+	
+	virtual float distanceTo(const Vector3F & p) const;
+	virtual ShapeType shapeType() const;
+	
+	template<typename T>
+	bool intersect(const T * b) const
+	{ 
+		std::cout<<" todo cube intersect";
+		return false; 
+	}
+	
 };
 
-class Box {
+class Box : public Shape {
     
     Vector3F m_low; int m_pad0;
 	Vector3F m_high; int m_pad1;
@@ -146,6 +184,17 @@ public:
     
     static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();
+	
+	virtual float distanceTo(const Vector3F & p) const;
+	virtual ShapeType shapeType() const;
+	
+	template<typename T>
+	bool intersect(const T * b) const
+	{ 
+		std::cout<<" todo box intersect";
+		return false; 
+	}
+	
 };
 
 class Capsule {
@@ -235,6 +284,29 @@ void Triangle::closestToPoint(T * result) const
 	result->_igeometry = ind0();
 	result->_icomponent = ind1();
 }
+
+class Tetrahedron : public Shape {
+
+	Vector3F m_p[4];
+	
+public:
+	Tetrahedron();
+	void set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2, const Vector3F & p3);
+	
+	BoundingBox calculateBBox() const;
+	
+    static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
+	
+	virtual ShapeType shapeType() const;
+	
+	Vector3F X(int idx) const;
+	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
+	
+private:
+
+};
 
 template<int N>
 class Hull {

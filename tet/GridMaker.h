@@ -17,10 +17,7 @@ namespace ttg {
 class GridMaker {
 
 	BccTetraGrid m_grid;
-	aphid::sdb::Sequence<aphid::sdb::Coord2> m_graphEdges;
 	std::vector<ITetrahedron *> m_tets;
-	std::vector<int> m_vvEdgeBegins;
-	std::vector<int> m_vvEdgeInds;
 	
 public:
 	GridMaker();
@@ -30,17 +27,40 @@ public:
 	void addCell(const aphid::Vector3F & p);
 	void buildGrid();
 	void buildMesh();
-	void buildGraph();
-	int numNodes();
-	int numEdges();
 	int numTetrahedrons() const;
-	int numEdgeIndices() const;
 	
 protected:
 	BccTetraGrid * grid();
+	const ITetrahedron * tetra(const int & i) const;
+	
+	template<typename Tn>
+	void extractGridNodesIn(Tn * dst, int & i,
+						aphid::sdb::Array<int, BccNode> * cell) {
+		cell->begin();
+		while(!cell->end() ) {
+			
+			BccNode * n = cell->value();
+			
+			Tn * d = &dst[i++];
+			d->pos = n->pos;
+			
+			cell->next();
+		}
+	}
+	
+	template<typename Tn>
+	void extractGridNodes(Tn * dst) {
+		int i = 0;
+		m_grid.begin();
+		while(!m_grid.end() ) {
+			
+			extractGridNodesIn(dst, i, m_grid.value() );
+			m_grid.next();
+		}
+	}
 	
 private:
-	void pushIndices(const std::vector<int> & a);
+	void internalClear();
 	
 };
 

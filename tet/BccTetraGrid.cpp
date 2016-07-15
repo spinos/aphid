@@ -144,6 +144,7 @@ void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)
 		}
 		faces.next();
 	}
+	
 	faces.clear();
 	
 }

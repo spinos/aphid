@@ -14,6 +14,18 @@ namespace aphid {
     
 namespace cvx {
 
+Shape::Shape()
+{}
+
+Shape::~Shape()
+{}
+
+float Shape::distanceTo(const Vector3F & p) const
+{ return 1e10f; }
+
+ShapeType Shape::shapeType() const 
+{ return TUnknown; }
+
 Frustum::Frustum() {}
 
 void Frustum::set(float nearClip, float farClip,
@@ -124,6 +136,19 @@ ShapeType Sphere::ShapeTypeId = TSphere;
 std::string Sphere::GetTypeStr()
 { return "sphere"; }
 
+ShapeType Sphere::shapeType() const 
+{ return TSphere; }
+
+float Sphere::distanceTo(const Vector3F & p) const
+{ return p.distanceTo(m_p) - m_r; }
+
+Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	Vector3F res = m_p + v.normal() * m_r;
+	if(localP) *localP = res;
+	return res;
+}
+
 Cube::Cube() {}
 
 void Cube::set(const Vector3F & x, const float & r)
@@ -143,6 +168,30 @@ ShapeType Cube::ShapeTypeId = TCube;
 
 std::string Cube::GetTypeStr()
 { return "cube"; }
+
+float Cube::distanceTo(const Vector3F & p) const
+{
+	BoundingBox bx = calculateBBox();
+	float d = bx.distanceTo(p);
+	if(d >= 0.f)
+		return d;
+		
+/// inside box
+	float dx = m_r - Absolute<float>(p.x - m_p.x);
+	float dy = m_r - Absolute<float>(p.y - m_p.y);
+	float dz = m_r - Absolute<float>(p.z - m_p.z);
+	
+	if(dx < dy && dx < dz)
+		return -dx;
+		
+	if(dy < dx && dy < dz)
+		return -dy;
+		
+	return -dz;
+}
+
+ShapeType Cube::shapeType() const 
+{ return TCube; }
 
 Box::Box() {}
 
@@ -175,6 +224,31 @@ ShapeType Box::ShapeTypeId = TBox;
 
 std::string Box::GetTypeStr()
 { return "box"; }
+
+float Box::distanceTo(const Vector3F & p) const
+{
+	BoundingBox bx = calculateBBox();
+	float d = bx.distanceTo(p);
+	if(d >= 0.f)
+		return d;
+		
+/// inside box
+	Vector3F dp = p - bx.center();
+	float dx = bx.distance(0) * .5f - Absolute<float>(dp.x);
+	float dy = bx.distance(1) * .5f - Absolute<float>(dp.y);
+	float dz = bx.distance(2) * .5f - Absolute<float>(dp.z);
+	
+	if(dx < dy && dx < dz)
+		return -dx;
+		
+	if(dy < dx && dy < dz)
+		return -dy;
+		
+	return -dz;
+}
+
+ShapeType Box::shapeType() const 
+{ return TBox; }
 
 Capsule::Capsule() {}
 
@@ -366,6 +440,52 @@ bool Triangle::sampleP(Vector3F & dst, const BoundingBox &  box) const
 		if(box.isPointInside(dst) ) return true;
 	}
 	return false;
+}
+
+Tetrahedron::Tetrahedron()
+{}
+
+void Tetrahedron::set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2, const Vector3F & p3)
+{ m_p[0] = p0; m_p[1] = p1; m_p[2] = p2; m_p[3] = p3; }
+
+BoundingBox Tetrahedron::calculateBBox() const
+{ 
+	BoundingBox b;
+    b.expandBy(m_p[0]);
+    b.expandBy(m_p[1]);
+	b.expandBy(m_p[2]);
+	b.expandBy(m_p[3]);
+    b.expand(b.getLongestDistance() * 1e-4f);
+    return b;
+}
+
+ShapeType Tetrahedron::ShapeTypeId = TTetrahedron;
+
+std::string Tetrahedron::GetTypeStr()
+{ return "tetrahedron"; }
+
+ShapeType Tetrahedron::shapeType() const
+{ return TTetrahedron; }
+
+Vector3F Tetrahedron::X(int idx) const
+{ return m_p[idx]; }
+
+Vector3F Tetrahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	float maxdotv = -1e19f;
+    float dotv;
+	int ir = 0;
+	
+    for(int i=0; i < 4; ++i) {
+        dotv = X(i).dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            ir = i;
+        }
+    }
+    if(localP) *localP = X(ir);
+    return X(ir);
 }
 
 }

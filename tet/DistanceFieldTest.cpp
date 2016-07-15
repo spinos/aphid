@@ -14,7 +14,7 @@ using namespace aphid;
 namespace ttg {
 
 DistanceFieldTest::DistanceFieldTest() 
-{ std::cout<<"\n init distance field "; }
+{}
 
 DistanceFieldTest::~DistanceFieldTest() 
 {}
@@ -25,32 +25,79 @@ const char * DistanceFieldTest::titleStr() const
 bool DistanceFieldTest::init()
 {
 	int i, j, k;
-	int dimx = 6, dimy = 6, dimz = 6;
-	float gz = 4.f;
-	m_gridmk.setH(gz);
-	Vector3F ori(gz*.5f, gz*.5f, gz*.5f);
+	int dimx = 10, dimy = 8, dimz = 9;
+	float gz = 3.13f;
+	m_fld.setH(gz);
+	m_nodeColScl = 1.f / gz / 4;
+	m_nodeDrawSize = gz * .125f;
+	Vector3F ori(gz*.5f - gz*dimx/2, 
+					gz*.5f - gz*dimy/2, 
+					gz*.5f);
 	std::cout<<"\n cell size "<<gz
 		<<"\n grid dim "<<dimx<<" x "<<dimy<<" x "<<dimz;
 	for(k=0; k<dimz;++k) {
 		for(j=0; j<dimy;++j) {
 			for(i=0; i<dimx;++i) {
-				m_gridmk.addCell(ori + Vector3F(i, j, k) * gz );
+				m_fld.addCell(ori + Vector3F(i, j, k) * gz );
 			}
 		}
 	}
-	m_gridmk.buildGrid();
-	m_gridmk.buildMesh();
-	m_gridmk.buildGraph();
-	std::cout<<"\n grid n tetra "<<m_gridmk.numTetrahedrons()
-		<<"\n grid n node "<<m_gridmk.numNodes()
-		<<"\n grid n edge "<<m_gridmk.numEdges()
-		<<"\n grid n edge ind "<<m_gridmk.numEdgeIndices();
-	std::cout.flush();
+	m_fld.buildGrid();
+	m_fld.buildMesh();
+	m_fld.buildGraph();
+	m_fld.verbose();
+	
+	m_distFunc.addSphere(Vector3F(-2.56f, -3.46f, 17.435f), 9.737f );
+	
+	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc);
+	
 	return true;
 }
 
 void DistanceFieldTest::draw(aphid::GeoDrawer * dr)
 {
+	drawGraph(dr);
+}
+
+void DistanceFieldTest::drawGraph(aphid::GeoDrawer * dr)
+{
+	int i;
+#define SHO_NODE 1
+#define SHO_EDGE 0
+
+#if SHO_NODE	
+	dr->setColor(.5f, 0.f, 0.f);
+	DistanceNode * v = m_fld.nodes();
+	const int nv = m_fld.numNodes();
+
+	Vector3F col;
+	for(i = 0;i<nv;++i) {
+		const DistanceNode & vi = v[i];
+		
+		m_fld.nodeColor(col, vi, m_nodeColScl);
+		dr->setColor(col.x, col.y, col.z);
+		dr->cube(vi.pos, m_nodeDrawSize);
+		
+	}
+#endif
+
+#if SHO_EDGE	
+	dr->setColor(0.f, 0.f, .5f);
+	IGraphEdge * e = m_fld.edges();
+	const int ne = m_fld.numEdges();
+	
+	glBegin(GL_LINES);
+	for(i = 0;i<ne;++i) {
+		const IGraphEdge & ei = e[i];
+		
+		dr->vertex(v[ei.vi.x].pos);
+		dr->vertex(v[ei.vi.y].pos);
+		
+	}
+	glEnd();
+#endif
+
+	
 }
 
 }

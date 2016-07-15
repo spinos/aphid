@@ -20,6 +20,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../shared/triangle_math.h
 ../shared/tetrahedron_math.h
 ../shared/AGraph.h
+../shared/ADistanceField.h
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h
@@ -43,6 +44,7 @@ PoissonSequence.h
 SuperformulaPoisson.h
 BccTetrahedralize.h
 GridMaker.h
+TetraField.h
 DistanceFieldTest.h
 Delaunay3D.h)
 
@@ -67,6 +69,7 @@ SuperformulaTest.cpp
 SuperformulaPoisson.cpp
 BccTetrahedralize.cpp
 GridMaker.cpp
+TetraField.cpp
 DistanceFieldTest.cpp
 glwidget.cpp
 window.cpp
@@ -85,11 +88,13 @@ if (WIN32)
 set (Aphid_Library D:/aphid/lib/aphidMath.lib
 D:/aphid/lib/aphidGeom.lib
 D:/aphid/lib/aphidSdb.lib
+D:/aphid/lib/aphidGraph.lib
 D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
 /users/jianzhang/aphid/lib/libaphidSdb.a
+/users/jianzhang/aphid/lib/libaphidGraph.a
 /users/jianzhang/aphid/lib/libaphidUI.a)
 endif ()
 target_link_libraries (foo ${Aphid_Library})

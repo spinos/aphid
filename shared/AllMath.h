@@ -123,6 +123,18 @@ template<typename T>
 inline void SwapAB(T & a, T & b, T & c)
 { c = a; a = b; b = c; }
 
+template<typename T>
+inline T MixClamp01F(const T & a, const T & b, const float & w)
+{ 
+	if(w < 0.f) 
+		return a;
+		
+	if(w > 1.f)
+		return b;
+		
+	return a * (1.f - w) + b * w;
+}
+
 }
 #endif        //  #ifndef ALLMATH_H
 

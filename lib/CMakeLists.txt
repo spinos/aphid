@@ -218,6 +218,11 @@ ADD_LIBRARY (aphidSdb STATIC
 ../btree/MortonHash.cpp
 )
 
+ADD_LIBRARY (aphidGraph STATIC
+../shared/ADistanceField.cpp
+../shared/BDistanceFunction.cpp
+)
+
 add_library(aphid STATIC                 
 ##../shared/SpaceHandle.cpp                
     ../shared/SkeletonSubspaceDeformer.cpp                                  

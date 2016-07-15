@@ -9,13 +9,16 @@
 
 #include <AGraph.h>
 #include "Scene.h"
-#include "GridMaker.h"
+#include "TetraField.h"
+#include <BDistanceFunction.h>
 
 namespace ttg {
 
 class DistanceFieldTest : public Scene {
 
-	GridMaker m_gridmk;
+	TetraField m_fld;
+	aphid::BDistanceFunction m_distFunc;
+	float m_nodeDrawSize, m_nodeColScl;
 	
 public:
 	DistanceFieldTest();
@@ -24,7 +27,9 @@ public:
 	virtual const char * titleStr() const;
 	virtual bool init();
 	virtual void draw(aphid::GeoDrawer * dr);
-	
+
+private:
+	void drawGraph(aphid::GeoDrawer * dr);
 };
 
 }
