@@ -19,17 +19,17 @@ ADistanceField::~ADistanceField()
 
 void ADistanceField::nodeColor(Vector3F & dst, const DistanceNode & n,
 						const float & scale) const
-{
+{	
 	if(n.stat == sdf::StUnknown)
 		return dst.set(.3f, .3f, .3f);
 	
 	if(n.val > 0.f) {
 		float r = MixClamp01F<float>(1.f, 0.f, n.val * scale);
-		dst.set(r, 1.f - r, 0.f);
+		dst.set(.5f + r * .5f, 1.f - r, 0.f );
 	}
 	else {
 		float b = MixClamp01F<float>(1.f, 0.f, -n.val * scale);
-		dst.set(.5f * (1.f - b), 1.f - b, b);
+		dst.set(0.f, .5f * (1.f - b), .5f + b * .5f);
 	}
 }
 
@@ -105,6 +105,106 @@ void ADistanceField::propagate(std::map<int, int > & heap,
 				
 /// add to trial
 			heap[vj] = 0;
+		}
+	}
+}
+
+void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
+{
+	const DistanceNode & A = nodes()[i];
+	
+/// for each neighbor of A
+	const int endj = edgeBegins()[i+1];
+	int vj, j = edgeBegins()[i];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IGraphEdge & eg = edges()[k];
+		
+		vj = eg.vi.x;
+		if(vj == i)
+			vj = eg.vi.y;
+			
+		DistanceNode & B = nodes()[vj];
+	
+/// only visit outside
+		if( B.val > 0.f
+			&& B.stat == sdf::StFar) 
+			heap[vj] = 0;
+	}
+}
+
+/// Dijkstra
+void ADistanceField::markInsideOutside(const int & originNodeInd)
+{
+	setNodeFar();
+	int i = originNodeInd;
+	if(i < 0) {
+		i = lastBackgroundNode();
+	
+		DistanceNode & ln = nodes()[i];
+		std::cout<<"\n progress from "<<ln.pos;
+		std::cout.flush();
+	}
+	
+/// heap of trial
+	std::map<int, int> trials;
+	trials[i] = 0;
+	
+/// for each trial
+	while (trials.size() > 0) {
+
+/// A is first in trial		
+		i = trials.begin()->first;
+
+		nodes()[i].stat = sdf::StVisited;
+/// remove A from trial
+		trials.erase(trials.begin() );
+		
+/// from A
+		propagateVisit(trials, i);
+		
+		//std::cout<<"\n trial n "<<trials.size();
+		//std::cout.flush();
+	}
+	
+/// negate not visited
+	setFarNodeInside();
+	
+}
+
+/// un-visit all
+void ADistanceField::setNodeFar()
+{
+	const int n = numNodes();
+	int i = 0;
+	for(;i<n;++i) {
+		DistanceNode & d = nodes()[i];
+		d.stat = sdf::StFar;
+	}
+}
+
+int ADistanceField::lastBackgroundNode() const
+{
+	int i = numNodes() - 1;
+	for(;i>0;--i) {
+		if(nodes()[i].label == sdf::StBackGround)
+			return i;
+	}
+	return 0;
+}
+
+void ADistanceField::setFarNodeInside()
+{
+	const int n = numNodes();
+	int i = 0;
+	for(;i<n;++i) {
+		DistanceNode & d = nodes()[i];
+		if(d.stat == sdf::StFar) {
+/// inside distance is negative
+			if(d.val > 0.f)
+				d.val = -d.val;
 		}
 	}
 }

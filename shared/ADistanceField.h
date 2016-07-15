@@ -19,7 +19,9 @@ enum NodeState {
 	StBackGround = 0,
 	StFront = 1,
 	StUnknown = 2,
-	StKnown = 3
+	StKnown = 3,
+	StFar = 4,
+	StVisited = 5
 };
 
 }
@@ -40,6 +42,8 @@ public:
 	
 	void nodeColor(Vector3F & dst, const DistanceNode & n,
 					const float & scale) const;
+	
+	void markInsideOutside(const int & originNodeInd = -1);
 	
 protected:
 	void initNodes();
@@ -63,6 +67,10 @@ protected:
 	
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
+	void propagateVisit(std::map<int, int > & heap, const int & i);
+	int lastBackgroundNode() const;
+	void setFarNodeInside();
+	void setNodeFar();
 	
 };
 

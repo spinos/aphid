@@ -247,6 +247,52 @@ float Box::distanceTo(const Vector3F & p) const
 	return -dz;
 }
 
+Vector3F Box::X(int i) const
+{
+	Vector3F r(m_low);
+	if(i<4) { /// -z
+		if(i<2) { /// -y
+			if(i & 1) /// +x
+				r.x = m_high.x;
+		}
+		else { /// +y
+			r.y = m_high.y;
+			if(i & 1)
+				r.x = m_high.x;
+		}
+	}
+	else { /// +z
+		r.z = m_high.z;
+		if(i<6) { /// -y
+			if(i & 1) /// +x
+				r.x = m_high.x;
+		}
+		else { /// +y
+			r.y = m_high.y;
+			if(i & 1) /// +x
+				r.x = m_high.x;
+		}
+	}
+	return r;
+}
+
+Vector3F Box::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	float maxdotv = -1e19f;
+    float dotv;
+	int ir = 0;
+	
+    for(int i=0; i < 8; ++i) {
+        dotv = X(i).dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            ir = i;
+        }
+    }
+    if(localP) *localP = X(ir);
+    return X(ir);
+}
+
 ShapeType Box::shapeType() const 
 { return TBox; }
 

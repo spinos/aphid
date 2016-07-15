@@ -25,11 +25,11 @@ const char * DistanceFieldTest::titleStr() const
 bool DistanceFieldTest::init()
 {
 	int i, j, k;
-	int dimx = 10, dimy = 8, dimz = 9;
-	float gz = 3.13f;
+	int dimx = 12, dimy = 10, dimz = 9;
+	float gz = 2.9f;
 	m_fld.setH(gz);
 	m_nodeColScl = 1.f / gz / 8.f;
-	m_nodeDrawSize = gz * .125f;
+	m_nodeDrawSize = gz * .0625f;
 	Vector3F ori(gz*.5f - gz*dimx/2, 
 					gz*.5f - gz*dimy/2, 
 					gz*.5f);
@@ -47,9 +47,12 @@ bool DistanceFieldTest::init()
 	m_fld.buildGraph();
 	m_fld.verbose();
 	
-	m_distFunc.addSphere(Vector3F(-2.56f, 1.46f, 17.435f), 8.737f );
+	m_distFunc.addSphere(Vector3F(-3.56f, 1.26f, 18.435f), 11.637f );
+	m_distFunc.addBox(Vector3F(-40.f, -8.f, -10.f),
+						Vector3F(40.f, -5.f, 40.f) );
 	
 	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc);
+	m_fld.markInsideOutside();
 	
 	return true;
 }
