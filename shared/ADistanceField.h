@@ -10,13 +10,16 @@
 #pragma once
 #include "AGraph.h"
 #include "BDistanceFunction.h"
+#include <map>
 
 namespace aphid {
 
 namespace sdf {
 enum NodeState {
 	StBackGround = 0,
-	StFront = 1
+	StFront = 1,
+	StUnknown = 2,
+	StKnown = 3
 };
 
 }
@@ -25,8 +28,8 @@ struct DistanceNode {
 	
 	Vector3F pos;
 	float val;
-	int label;
-	
+	short label;
+	short stat;
 };
  
 class ADistanceField : public AGraph<DistanceNode> {
@@ -42,14 +45,7 @@ protected:
 	void initNodes();
 	
 	template<typename Tf>
-	float calculateDistance(const Vector3F & p,
-						const Tf & distanceFunc)
-	{ 
-		return distanceFunc.distanceTo(p);
-	}
-	
-	template<typename Tf>
-	void calculateDistanceNodeOnFront(const Tf * func)
+	void calculateDistanceOnFront(const Tf * func)
 	{
 		const int n = numNodes();
 		int i = 0;
@@ -57,13 +53,17 @@ protected:
 			DistanceNode * d = &nodes()[i];
 			if(d->label == sdf::StFront) {
 				d->val = func->calculateDistance(d->pos);
-				
+				d->stat = sdf::StKnown; /// accept
 			}
 		}
 	}
 	
+/// propagate distance value	
+	void fastMarchingMethod();
+	
 private:
-
+	void propagate(std::map<int, int > & heap, const int & i);
+	
 };
 
 }

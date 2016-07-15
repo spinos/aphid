@@ -79,7 +79,7 @@ void TetraField::buildGraph()
 	extractGridNodes(nodes() );
 	extractEdges(&egs);
 	extractEdgeBegins(edgeBegins);
-	extractEdgeIndices(edgeBegins);
+	extractEdgeIndices(edgeInds);
 	
 	vvemap.clear();
 	edgeBegins.clear();

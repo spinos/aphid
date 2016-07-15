@@ -40,7 +40,8 @@ public:
 			}
 		}
 		
-		calculateDistanceNodeOnFront(func);
+		calculateDistanceOnFront(func);
+		fastMarchingMethod();
 	}
 		
 	void verbose();

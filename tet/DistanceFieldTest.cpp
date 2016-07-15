@@ -28,7 +28,7 @@ bool DistanceFieldTest::init()
 	int dimx = 10, dimy = 8, dimz = 9;
 	float gz = 3.13f;
 	m_fld.setH(gz);
-	m_nodeColScl = 1.f / gz / 4;
+	m_nodeColScl = 1.f / gz / 8.f;
 	m_nodeDrawSize = gz * .125f;
 	Vector3F ori(gz*.5f - gz*dimx/2, 
 					gz*.5f - gz*dimy/2, 
@@ -47,7 +47,7 @@ bool DistanceFieldTest::init()
 	m_fld.buildGraph();
 	m_fld.verbose();
 	
-	m_distFunc.addSphere(Vector3F(-2.56f, -3.46f, 17.435f), 9.737f );
+	m_distFunc.addSphere(Vector3F(-2.56f, 1.46f, 17.435f), 8.737f );
 	
 	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc);
 	
