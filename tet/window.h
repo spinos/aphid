@@ -12,6 +12,7 @@ namespace ttg {
 
 class GLWidget;
 class SuperformulaControl;
+class RedBlueControl;
 
 class Window : public QMainWindow
 {
@@ -32,6 +33,8 @@ private:
 	QMenu * windowMenu;
 	SuperformulaControl * m_superformulaControl;
 	QAction * showSFControlAct;
+	RedBlueControl * m_redblueControl;
+	QAction * showRBControlAct;
 	
 };
 

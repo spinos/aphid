@@ -40,6 +40,11 @@ public slots:
 	void receiveN22(double x);
 	void receiveN23(double x);
 	
+	void receiveA(double x);
+	void receiveB(double x);
+	void receiveC(double x);
+	void receiveD(double x);
+	
 private:
 
 private slots:

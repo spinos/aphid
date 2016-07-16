@@ -4,6 +4,8 @@
 #include "glwidget.h"
 #include <GeoDrawer.h>
 #include "SuperformulaTest.h"
+#include "RedBlueTest.h"
+
 using namespace aphid;
 
 namespace ttg {
@@ -142,4 +144,28 @@ void GLWidget::receiveN23(double x)
 	update();
 }
 
+void GLWidget::receiveA(double x)
+{
+	reinterpret_cast<RedBlueTest *> (m_scene)->setA(x);
+	update();
+}
+
+void GLWidget::receiveB(double x)
+{
+	reinterpret_cast<RedBlueTest *> (m_scene)->setB(x);
+	update();
+}
+
+void GLWidget::receiveC(double x)
+{
+	reinterpret_cast<RedBlueTest *> (m_scene)->setC(x);
+	update();
+}
+
+void GLWidget::receiveD(double x)
+{
+	reinterpret_cast<RedBlueTest *> (m_scene)->setD(x);
+	update();
+}
+	
 }

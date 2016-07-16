@@ -128,8 +128,8 @@ void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
 			
 		DistanceNode & B = nodes()[vj];
 	
-/// only visit outside
-		if( B.val > 0.f
+/// do not visit inside
+		if( B.val >= 0.f
 			&& B.stat == sdf::StFar) 
 			heap[vj] = 0;
 	}

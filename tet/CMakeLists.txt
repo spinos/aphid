@@ -46,6 +46,9 @@ BccTetrahedralize.h
 GridMaker.h
 TetraField.h
 DistanceFieldTest.h
+RedBlueRefine.h
+RedBlueTest.h
+RedBlueControl.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -71,6 +74,9 @@ BccTetrahedralize.cpp
 GridMaker.cpp
 TetraField.cpp
 DistanceFieldTest.cpp
+RedBlueRefine.cpp
+RedBlueTest.cpp
+RedBlueControl.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

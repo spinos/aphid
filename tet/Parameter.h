@@ -23,7 +23,8 @@ public:
 		kSuperformula = 6,
 		kSuperformulaPoissonDisk = 7,
 		kBccTetrahedralize = 8,
-		kDistanceField = 9
+		kDistanceField = 9,
+		kRedblueRefine = 10
 	};
 	
 	Parameter(int argc, char *argv[]);

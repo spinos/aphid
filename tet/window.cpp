@@ -12,6 +12,8 @@
 #include "SuperformulaControl.h"
 #include "BccTetrahedralize.h"
 #include "DistanceFieldTest.h"
+#include "RedBlueTest.h"
+#include "RedBlueControl.h"
 
 namespace ttg {
 
@@ -34,8 +36,10 @@ Window::Window(const Parameter * param)
 		sc = new SuperformulaPoisson;
 	else if(param->operation() == Parameter::kBccTetrahedralize)
 		sc = new BccTetrahedralize;
-	else// if(param->operation() == Parameter::kDistanceField)
+	else if(param->operation() == Parameter::kDistanceField)
 		sc = new DistanceFieldTest;
+	else// if(param->operation() == Parameter::kRedblueRefine)
+		sc = new RedBlueTest;
 		
     glWidget = new GLWidget(sc, this);
 	
@@ -104,6 +108,25 @@ void Window::createActions(Parameter::Operation opt)
 			glWidget, SLOT(receiveN23(double)));
 			
 	}
+	else if(opt == Parameter::kRedblueRefine) {
+		m_redblueControl = new RedBlueControl(this);
+		showRBControlAct = new QAction(tr("&Red Blue Refine Control"), this);
+		showRBControlAct->setStatusTip(tr("Show Red Blue settings"));
+		connect(showRBControlAct, SIGNAL(triggered()), m_redblueControl, SLOT(show()));
+    
+		connect(m_redblueControl, SIGNAL(aChanged(double) ), 
+			glWidget, SLOT(receiveA(double)));
+			
+		connect(m_redblueControl, SIGNAL(bChanged(double) ), 
+			glWidget, SLOT(receiveB(double)));
+			
+		connect(m_redblueControl, SIGNAL(cChanged(double) ), 
+			glWidget, SLOT(receiveC(double)));
+			
+		connect(m_redblueControl, SIGNAL(dChanged(double) ), 
+			glWidget, SLOT(receiveD(double)));
+		
+	}
 }
 	
 void Window::createMenus(Parameter::Operation opt)
@@ -115,6 +138,12 @@ void Window::createMenus(Parameter::Operation opt)
 		windowMenu->addAction(showSFControlAct);
 		
 		m_superformulaControl->show();
+	}
+	else if(opt == Parameter::kRedblueRefine) {
+		windowMenu = menuBar()->addMenu(tr("&Window"));
+		windowMenu->addAction(showRBControlAct);
+		
+		m_redblueControl->show();
 	}
 }
 
