@@ -39,13 +39,13 @@ namespace ttg {
  *  1 red and 1 blue (+ - 0 +) split into 3 tetra
  *  2 blue one side (- 0 + +) split into 4 tetra
  *  2 blue both side (- - 0 +) split into 4 tetra
- *  1 red 2 blue both side (- - - +) split into 5 tetra
- *  cannot have 1 red 2 blue one side
+ *  1 red 2 blue down (- + - -) up (- - - +) split into 6 tetra
  *  cannot have 2 red split
  *  cannot have 3 blue split
  *  4 blue (- - + +) split into 8 tetra
  *  cannot have 1 red 4 blue
- *  2 red 4 blue (+ - + -) split into 8 tetra
+ *  2 red 2 blue (+ - + -) split into 8 tetra
+ *  cannot have 2 red 4 blue ?
  *  add 6 vertice at max
  */
 
@@ -65,12 +65,13 @@ class RedBlueRefine {
 		SpNone = 0,
 		SpOneRed = 1,
 		SpOneRedOneBlue = 2,
-		SpOneRedTwoBlue = 3,
-		SpTwoRedFourBlue = 4,
-		SpOneBlue = 5,
-		SpTwoBlueOneSide = 6,
-		SpTwoBlueTwoSide = 7,
-		SpFourBlue = 8
+		SpOneRedDownTwoBlue = 3,
+		SpOneRedUpTwoBlue = 4,
+		SpTwoRedTwoBlue = 5,
+		SpOneBlue = 6,
+		SpTwoBlueOneSide = 7,
+		SpTwoBlueTwoSide = 8,
+		SpFourBlue = 9
 	};
 	
 	SplitOption m_opt;
@@ -105,6 +106,8 @@ private:
 	void oneRedRefine();
 	void oneBlueRefine();
 	void oneRedOneBlueRefine();
+	void oneRedUpTwoBlueRefine();
+	void oneRedDownTwoBlueRefine();
 	void splitRed(int i, ITetrahedron & t0, ITetrahedron & t1,
 								int v);
 	void splitBlue(int i, ITetrahedron & t0, ITetrahedron & t1,

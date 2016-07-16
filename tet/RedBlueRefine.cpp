@@ -79,12 +79,14 @@ void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
 			m_opt = SpOneRed;
 		else if(cblue == 1)
 			m_opt = SpOneRedOneBlue;
-		else if(cblue == 2)
-			m_opt = SpOneRedTwoBlue;
+		else if(cblue == 2) {
+			if(m_red[1] > -1) m_opt = SpOneRedUpTwoBlue;
+			else m_opt = SpOneRedDownTwoBlue;
+		}
 	}
 	else {
-		if(cblue == 4)
-			m_opt = SpTwoRedFourBlue;
+		if(cblue == 2)
+			m_opt = SpTwoRedTwoBlue;
 	}
 	
 	auxiliarySplit();
@@ -101,11 +103,11 @@ void RedBlueRefine::verbose() const
 		case SpOneRedOneBlue:
 			strOpt = "1 red 1 blue";
 			break;
-		case SpOneRedTwoBlue:
-			strOpt = "1 red 2 blue";
+		case SpOneRedUpTwoBlue:
+			strOpt = "1 red up 2 blue";
 			break;
-		case SpTwoRedFourBlue:
-			strOpt = "2 red 4 blue";
+		case SpTwoRedTwoBlue:
+			strOpt = "2 red 2 blue";
 			break;
 		case SpOneBlue:
 			strOpt = "1 blue";
@@ -130,23 +132,13 @@ void RedBlueRefine::verbose() const
 
 void RedBlueRefine::auxiliarySplit()
 {
-	if(m_opt == SpOneRedOneBlue) {
-/// same side blue
-		if(m_blue[0] > -1)
-			m_blue[1] = 0;
-		else if(m_blue[1] > -1)
-			m_blue[0] = 0;
-		else if(m_blue[2] > -1)
-			m_blue[3] = 0;
-		else if(m_blue[3] > -1)
-			m_blue[2] = 0;
-	}
-	else if(m_opt == SpOneRedTwoBlue) {
+	if(m_opt == SpOneRedUpTwoBlue) {
 /// other red
-		if(m_red[0] > -1)
-			m_red[1] = 0;
-		else if(m_red[1] > -1)
-			m_red[0] = 0;
+		m_red[0] = 0;
+	}
+	else if(m_opt == SpOneRedDownTwoBlue) {
+/// other red
+		m_red[1] = 0;
 	}
 	else if(m_opt == SpTwoBlueOneSide) {
 /// red up
@@ -160,6 +152,13 @@ void RedBlueRefine::auxiliarySplit()
 /// both red
 		m_red[0] = 0;
 		m_red[1] = 0;
+	}
+	else if(m_opt == SpTwoRedTwoBlue) {
+/// all blue
+		m_blue[0] = 0;
+		m_blue[1] = 0;
+		m_blue[2] = 0;
+		m_blue[3] = 0;
 	}	
 }
 
@@ -210,6 +209,16 @@ void RedBlueRefine::refine()
 			break;
 		case SpOneRedOneBlue:
 			oneRedOneBlueRefine();
+			break;
+		case SpOneRedUpTwoBlue:
+			oneRedUpTwoBlueRefine();
+			break;
+		case SpOneRedDownTwoBlue:
+			oneRedDownTwoBlueRefine();
+			break;
+		case SpTwoRedTwoBlue:
+			break;
+		case SpFourBlue:
 			break;
 		default:
 			break;
@@ -273,12 +282,12 @@ void RedBlueRefine::splitBlue(int i, ITetrahedron & t0, ITetrahedron & t1,
 	int c = t0.iv2;
 	int d = t0.iv3;
 	if(i==0) {
-		setTetrahedronVertices(t0, v, b, c, d);
-		setTetrahedronVertices(t1, a, b, v, d);
+		setTetrahedronVertices(t0, a, b, v, d);
+		setTetrahedronVertices(t1, v, b, c, d);
 	}
 	else if(i==1) {
-		setTetrahedronVertices(t0, v, b, c, d);
-		setTetrahedronVertices(t1, a, b, c, v);
+		setTetrahedronVertices(t0, a, b, c, v);
+		setTetrahedronVertices(t1, v, b, c, d);
 	}
 	else if(i==2) {
 		setTetrahedronVertices(t0, a, v, c, d);
@@ -333,6 +342,45 @@ void RedBlueRefine::oneRedOneBlueRefine()
 		}
 	}
 	m_N = 3;
+}
+
+void RedBlueRefine::oneRedUpTwoBlueRefine()
+{
+	setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_c, m_red[1]);
+	setTetrahedronVertices(m_tet[1], m_a, m_red[0], m_red[1], m_d);
+	setTetrahedronVertices(m_tet[2], m_red[0], m_b, m_c, m_red[1]);
+	setTetrahedronVertices(m_tet[3], m_red[0], m_b, m_red[1], m_d);
+	
+	bool lhs = true;
+	if(m_blue[0] > 0) {
+		m_tet[0].iv2 = m_blue[0];
+	}
+	if(m_blue[1] > 0) {
+		m_tet[1].iv3 = m_blue[1];
+		lhs = false;
+	}
+	if(m_blue[2] > 0) {
+		m_tet[2].iv2 = m_blue[2];
+	}
+	if(m_blue[3] > 0) {
+		m_tet[3].iv3 = m_blue[3];
+	}
+	
+	if(lhs) {
+		setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[2], m_blue[0]);
+		setTetrahedronVertices(m_tet[5], m_red[1], m_c, m_blue[2], m_blue[0]);
+	}
+	else {
+		setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[1], m_blue[3]);
+		setTetrahedronVertices(m_tet[5], m_red[1], m_d, m_blue[1], m_blue[3]);
+	}
+	
+	m_N = 6;
+}
+
+void RedBlueRefine::oneRedDownTwoBlueRefine()
+{
+
 }
 
 }
