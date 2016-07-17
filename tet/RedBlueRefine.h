@@ -44,8 +44,8 @@ namespace ttg {
  *  cannot have 3 blue split
  *  cannot have 1 red 4 blue
  *  2 red 2 blue (+ - + -) split into 8 tetra
- *  cannot have 2 red 4 blue ?
  *  4 blue (- - + +) split into 8 tetra
+ *  auxoliary 2 red 4 blue
  *  add 6 vertice at max
  */
 
@@ -102,6 +102,7 @@ private:
 /// sign changes
 	bool splitCondition(const float & a,
 					const float & b) const;
+/// split not on front but needed to prevent frustum
 	void auxiliarySplit();
 	void oneRedRefine();
 	void oneBlueRefine();
@@ -110,6 +111,8 @@ private:
 	void oneRedDownTwoBlueRefine();
 	void twoRedTwoBlueRefine();
 	void fourBlueRefine();
+	void twoBlueUpRefine();
+	void twoBlueDownRefine();
 	void splitRed(int i, ITetrahedron & t0, ITetrahedron & t1,
 								int v);
 	void splitBlue(int i, ITetrahedron & t0, ITetrahedron & t1,

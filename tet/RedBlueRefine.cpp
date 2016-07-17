@@ -66,7 +66,8 @@ void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
 		if(cblue == 1)
 			m_opt = SpOneBlue;
 		else if(cblue == 2) {
-			if(m_blue[0] > -1 && m_blue[1] > -1)
+			if((m_blue[0] > -1 && m_blue[1] > -1)
+				|| (m_blue[2] > -1 && m_blue[3] > -1) )
 				m_opt = SpTwoBlueUp;
 			else
 				m_opt = SpTwoBlueDown;
@@ -226,8 +227,10 @@ void RedBlueRefine::refine()
 			fourBlueRefine();
 			break;
 		case SpTwoBlueUp:
+			twoBlueUpRefine();
 			break;
 		case SpTwoBlueDown:
+			twoBlueDownRefine();
 			break;	
 		default:
 			break;
@@ -449,6 +452,46 @@ void RedBlueRefine::fourBlueRefine()
 	setTetrahedronVertices(m_tet[7], m_blue[2], m_red[1], m_blue[1], m_blue[3]);
 	
 	m_N = 8;
+}
+
+void RedBlueRefine::twoBlueUpRefine()
+{
+	bool lhs = m_blue[0] > -1;
+	if(lhs) {
+		setTetrahedronVertices(m_tet[0], m_a, m_b, m_blue[0], m_blue[1]);
+		setTetrahedronVertices(m_tet[1], m_c, m_red[1], m_blue[0], m_b);
+		setTetrahedronVertices(m_tet[2], m_blue[0], m_blue[1], m_b, m_red[1]);
+		setTetrahedronVertices(m_tet[3], m_d, m_red[1], m_b, m_blue[1]);
+	
+	}
+	else {
+		setTetrahedronVertices(m_tet[0], m_a, m_b, m_blue[2], m_blue[3]);
+		setTetrahedronVertices(m_tet[1], m_c, m_red[1], m_a, m_blue[2]);
+		setTetrahedronVertices(m_tet[2], m_blue[2], m_blue[3], m_red[1], m_a);
+		setTetrahedronVertices(m_tet[3], m_d, m_red[1], m_blue[3], m_a);
+	
+	}
+	m_N = 4;
+}
+	
+void RedBlueRefine::twoBlueDownRefine()
+{
+	bool lhs = m_blue[0] > -1;
+	if(lhs) {
+		setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_blue[0], m_d);
+		setTetrahedronVertices(m_tet[1], m_blue[0], m_blue[2], m_c, m_d);
+		setTetrahedronVertices(m_tet[2], m_blue[0], m_blue[2], m_d, m_red[0]);
+		setTetrahedronVertices(m_tet[3], m_red[0], m_b, m_blue[2], m_d);
+	
+	}
+	else {
+		setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_c, m_blue[1]);
+		setTetrahedronVertices(m_tet[1], m_blue[1], m_blue[3], m_c, m_d);
+		setTetrahedronVertices(m_tet[2], m_blue[1], m_blue[3], m_red[0], m_c);
+		setTetrahedronVertices(m_tet[3], m_red[0], m_b, m_c, m_blue[3]);
+	
+	}
+	m_N = 4;
 }
 
 }
