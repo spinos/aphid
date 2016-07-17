@@ -42,10 +42,10 @@ namespace ttg {
  *  1 red 2 blue down (- + - -) up (- - - +) split into 6 tetra
  *  cannot have 2 red split
  *  cannot have 3 blue split
- *  4 blue (- - + +) split into 8 tetra
  *  cannot have 1 red 4 blue
  *  2 red 2 blue (+ - + -) split into 8 tetra
  *  cannot have 2 red 4 blue ?
+ *  4 blue (- - + +) split into 8 tetra
  *  add 6 vertice at max
  */
 
@@ -69,8 +69,8 @@ class RedBlueRefine {
 		SpOneRedUpTwoBlue = 4,
 		SpTwoRedTwoBlue = 5,
 		SpOneBlue = 6,
-		SpTwoBlueOneSide = 7,
-		SpTwoBlueTwoSide = 8,
+		SpTwoBlueUp = 7,
+		SpTwoBlueDown = 8,
 		SpFourBlue = 9
 	};
 	
@@ -108,6 +108,8 @@ private:
 	void oneRedOneBlueRefine();
 	void oneRedUpTwoBlueRefine();
 	void oneRedDownTwoBlueRefine();
+	void twoRedTwoBlueRefine();
+	void fourBlueRefine();
 	void splitRed(int i, ITetrahedron & t0, ITetrahedron & t1,
 								int v);
 	void splitBlue(int i, ITetrahedron & t0, ITetrahedron & t1,

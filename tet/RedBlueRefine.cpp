@@ -67,9 +67,9 @@ void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
 			m_opt = SpOneBlue;
 		else if(cblue == 2) {
 			if(m_blue[0] > -1 && m_blue[1] > -1)
-				m_opt = SpTwoBlueOneSide;
+				m_opt = SpTwoBlueUp;
 			else
-				m_opt = SpTwoBlueTwoSide;
+				m_opt = SpTwoBlueDown;
 		}
 		else if(cblue == 4)
 			m_opt = SpFourBlue;
@@ -106,17 +106,20 @@ void RedBlueRefine::verbose() const
 		case SpOneRedUpTwoBlue:
 			strOpt = "1 red up 2 blue";
 			break;
+		case SpOneRedDownTwoBlue:
+			strOpt = "1 red down 2 blue";
+			break;
 		case SpTwoRedTwoBlue:
 			strOpt = "2 red 2 blue";
 			break;
 		case SpOneBlue:
 			strOpt = "1 blue";
 			break;
-		case SpTwoBlueOneSide:
-			strOpt = "2 blue 1 side";
+		case SpTwoBlueUp:
+			strOpt = "2 blue up";
 			break;
-		case SpTwoBlueTwoSide:
-			strOpt = "2 blue 2 side";
+		case SpTwoBlueDown:
+			strOpt = "2 blue down";
 			break;
 		case SpFourBlue:
 			strOpt = "4 blue";
@@ -140,11 +143,11 @@ void RedBlueRefine::auxiliarySplit()
 /// other red
 		m_red[1] = 0;
 	}
-	else if(m_opt == SpTwoBlueOneSide) {
+	else if(m_opt == SpTwoBlueUp) {
 /// red up
 		m_red[1] = 0;
 	}
-	else if(m_opt == SpTwoBlueTwoSide) {
+	else if(m_opt == SpTwoBlueDown) {
 /// red bottom
 		m_red[0] = 0;
 	}
@@ -217,9 +220,15 @@ void RedBlueRefine::refine()
 			oneRedDownTwoBlueRefine();
 			break;
 		case SpTwoRedTwoBlue:
+			twoRedTwoBlueRefine();
 			break;
 		case SpFourBlue:
+			fourBlueRefine();
 			break;
+		case SpTwoBlueUp:
+			break;
+		case SpTwoBlueDown:
+			break;	
 		default:
 			break;
 	}
@@ -380,7 +389,66 @@ void RedBlueRefine::oneRedUpTwoBlueRefine()
 
 void RedBlueRefine::oneRedDownTwoBlueRefine()
 {
+	setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_c, m_red[1]);
+	setTetrahedronVertices(m_tet[1], m_a, m_red[0], m_red[1], m_d);
+	setTetrahedronVertices(m_tet[2], m_red[0], m_b, m_c, m_red[1]);
+	setTetrahedronVertices(m_tet[3], m_red[0], m_b, m_red[1], m_d);
+	
+	bool lhs = true;
+	if(m_blue[0] > 0) {
+		m_tet[0].iv0 = m_blue[0];
+	}
+	if(m_blue[1] > 0) {
+		m_tet[1].iv0 = m_blue[1];
+	}
+	if(m_blue[2] > 0) {
+		m_tet[2].iv1 = m_blue[2];
+		lhs = false;
+	}
+	if(m_blue[3] > 0) {
+		m_tet[3].iv1 = m_blue[3];
+	}
+	
+	if(lhs) {
+		setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[0], m_blue[1]);
+		setTetrahedronVertices(m_tet[5], m_a, m_red[0], m_blue[0], m_blue[1]);	
+	}
+	else {
+		setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[3], m_blue[2]);
+		setTetrahedronVertices(m_tet[5], m_red[0], m_b, m_blue[2], m_blue[3]);	
+	}
 
+	m_N = 6;
+}
+
+void RedBlueRefine::twoRedTwoBlueRefine()
+{
+	setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_blue[0], m_blue[1]);
+	setTetrahedronVertices(m_tet[1], m_red[0], m_b, m_blue[2], m_blue[3]);
+	setTetrahedronVertices(m_tet[2], m_c, m_red[1], m_blue[0], m_blue[2]);
+	setTetrahedronVertices(m_tet[3], m_d, m_red[1], m_blue[3], m_blue[1]);
+	
+	setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[0], m_blue[1]);
+	setTetrahedronVertices(m_tet[5], m_red[0], m_red[1], m_blue[1], m_blue[3]);
+	setTetrahedronVertices(m_tet[6], m_red[0], m_red[1], m_blue[3], m_blue[2]);
+	setTetrahedronVertices(m_tet[7], m_red[0], m_red[1], m_blue[2], m_blue[0]);
+	
+	m_N = 8;
+}
+
+void RedBlueRefine::fourBlueRefine()
+{
+	setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_blue[0], m_blue[1]);
+	setTetrahedronVertices(m_tet[1], m_red[0], m_b, m_blue[2], m_blue[3]);
+	setTetrahedronVertices(m_tet[2], m_c, m_red[1], m_blue[0], m_blue[2]);
+	setTetrahedronVertices(m_tet[3], m_d, m_red[1], m_blue[3], m_blue[1]);
+	
+	setTetrahedronVertices(m_tet[4], m_red[0], m_blue[2], m_blue[0], m_blue[1]);
+	setTetrahedronVertices(m_tet[5], m_red[0], m_blue[2], m_blue[1], m_blue[3]);
+	setTetrahedronVertices(m_tet[6], m_blue[2], m_red[1], m_blue[0], m_blue[1]);
+	setTetrahedronVertices(m_tet[7], m_blue[2], m_red[1], m_blue[1], m_blue[3]);
+	
+	m_N = 8;
 }
 
 }
