@@ -2218,9 +2218,9 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 		}
 		else {
 			int k = TwentyFourFVBlueBlueEdge[edgei][0];
-			BccNode * redBlueN = cell->find(30000 + i * 10000 + k);
+			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
 			if(!redBlueN) {
-				redBlueN = addNode(30000 + i * 10000 + k, cell, grid, cellCoord);
+				redBlueN = addNode(40000 + i * 10000 + k, cell, grid, cellCoord);
 				redBlueN->index = -1;
 				redBlueN->pos = refiner.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
 				redBlueN->prop = -1;
@@ -2241,9 +2241,9 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 		}
 		else {
 			int k = TwentyFourFVBlueBlueEdge[edgei][1];
-			BccNode * redBlueN = cell->find(30000 + i * 10000 + k);
+			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
 			if(!redBlueN) {
-				redBlueN = addNode(30000 + i * 10000 + k, cell, grid, cellCoord);
+				redBlueN = addNode(40000 + i * 10000 + k, cell, grid, cellCoord);
 				redBlueN->index = -1;
 				redBlueN->pos = refiner.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
 				redBlueN->prop = -1;
@@ -2270,6 +2270,181 @@ void BccCell::cutAuxEdge(RedBlueRefine & refiner,
 /// per tetra
 		for(j=0;j<4;++j) {
 			cutFVTetraAuxEdge(i, j, redN, faN, refiner, cell, grid, cellCoord);
+		}
+	}
+}
+
+void BccCell::connectTetrahedrons(std::vector<ITetrahedron *> & dest,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * redN = cell->find(15);
+	int i = 0, j;
+/// per face
+	for(;i<6;++i) {
+		BccNode * faN = faceNode(i, cell, grid, cellCoord);
+		if((i&1) == 0) {
+			if(faN->key == 15)
+				continue;
+		}
+/// per edge
+		for(j=0;j<4;++j) {
+			BccNode * cN = blueNode6(TwentyFourFVBlueBlueEdge[i*4+j][0],
+									cell, grid, cellCoord);
+			BccNode * dN = blueNode6(TwentyFourFVBlueBlueEdge[i*4+j][1],
+									cell, grid, cellCoord);
+									
+			ITetrahedron * t = new ITetrahedron;
+			resetTetrahedronNeighbors(*t);
+			setTetrahedronVertices(*t, redN->index, faN->index, cN->index, dN->index);
+			t->index = dest.size();
+			dest.push_back(t);
+		}
+	}
+}
+
+void BccCell::cutFVRefinerEdges(const int & i, const int & j,
+					const BccNode * nodeA, const BccNode * nodeB, 
+					const BccNode * nodeC, const BccNode * nodeD, 
+					RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	if(!refiner.hasOption() ) 
+		return;
+		
+	refiner.setP(nodeA->pos, nodeB->pos, nodeC->pos, nodeD->pos);
+		
+/// yellow
+	if(refiner.needSplitRedEdge(0) ) {
+		BccNode * yellowN = yellowNode(i, cell, grid, cellCoord);
+		if(yellowN)
+			refiner.splitRedEdge(0, yellowN->index, yellowN->pos);
+		else
+			std::cout<<"\n [ERROR] no yellow "<<cellCoord;
+	}
+	
+/// cyan
+	if(refiner.needSplitRedEdge(1) ) {
+		BccNode * cyanN = faceVaryBlueBlueNode(i, j, cell, grid, cellCoord);
+		if(cyanN) 
+			refiner.splitRedEdge(1, cyanN->index, cyanN->pos);
+		else
+			std::cout<<"\n [ERROR] no cyan "<<cellCoord;
+	}
+	
+	const int edgei = i * 4 + j;
+
+/// red blue	
+	if(refiner.needSplitBlueEdge(0) ) {
+		int k = TwentyFourFVBlueBlueEdge[edgei][0];
+		BccNode * redBlueN = cell->find(30000 + k);
+		if(redBlueN) 
+			refiner.splitBlueEdge(0, redBlueN->index, redBlueN->pos);
+		else
+			std::cout<<"\n [ERROR] no red blue0 "<<cellCoord;
+	}
+	
+	if(refiner.needSplitBlueEdge(1) ) {
+		int k = TwentyFourFVBlueBlueEdge[edgei][1];
+		BccNode * redBlueN = cell->find(30000 + k);
+		if(redBlueN) {
+			refiner.splitBlueEdge(1, redBlueN->index, redBlueN->pos);
+		}
+		else
+			std::cout<<"\n [ERROR] no red blue1 "<<cellCoord;
+	}
+	
+/// far side red blue in neighbor cell
+	const sdb::Coord3 neiC = neighborCoord(cellCoord, i);
+	sdb::Array<int, BccNode> * neiCell = grid->findCell(neiC);
+	
+	if(refiner.needSplitBlueEdge(2) ) {
+		if(neiCell) {
+			int k = TwentyFourFVBlueBlueEdge[edgei][4];
+			BccNode * redBlueN = neiCell->find(30000 + k);
+			if(redBlueN) 
+				refiner.splitBlueEdge(2, redBlueN->index, redBlueN->pos);
+			else
+				std::cout<<"\n [ERROR] no red blue2 "<<neiC;
+		}
+		else {
+			int k = TwentyFourFVBlueBlueEdge[edgei][0];
+			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
+			if(redBlueN) 
+				refiner.splitBlueEdge(2, redBlueN->index, redBlueN->pos);
+			else
+				std::cout<<"\n [ERROR] no red blue2 "<<cellCoord;
+		}
+	}
+	
+	if(refiner.needSplitBlueEdge(3) ) {
+		if(neiCell) {
+			int k = TwentyFourFVBlueBlueEdge[edgei][5];
+			BccNode * redBlueN = neiCell->find(30000 + k);
+			if(redBlueN) 
+				refiner.splitBlueEdge(3, redBlueN->index, redBlueN->pos);
+			else
+				std::cout<<"\n [ERROR] no red blue3 "<<neiC;
+		}
+		else {
+			int k = TwentyFourFVBlueBlueEdge[edgei][1];
+			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
+			if(redBlueN) {
+				refiner.splitBlueEdge(3, redBlueN->index, redBlueN->pos);
+			}
+			else
+				std::cout<<"\n [ERROR] no red blue3 "<<cellCoord;
+		}
+	}
+	
+	refiner.refine();
+	if(!refiner.checkTetraVolume() )
+		refiner.verbose();
+}
+
+void BccCell::connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
+					RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	BccNode * redN = cell->find(15);
+	int i = 0, j, k, nt;
+/// per face
+	for(;i<6;++i) {
+		BccNode * faN = faceNode(i, cell, grid, cellCoord);
+		if((i&1) == 0) {
+			if(faN->key == 15)
+				continue;
+		}
+/// per edge
+		for(j=0;j<4;++j) {
+			BccNode * cN = blueNode6(TwentyFourFVBlueBlueEdge[i*4+j][0],
+									cell, grid, cellCoord);
+			BccNode * dN = blueNode6(TwentyFourFVBlueBlueEdge[i*4+j][1],
+									cell, grid, cellCoord);
+			
+			refiner.set(redN->index, faN->index, cN->index, dN->index);
+			refiner.evaluateDistance(redN->val, faN->val, cN->val, dN->val);
+			
+			cutFVRefinerEdges(i, j, 
+									redN, faN, cN, dN,
+									refiner, cell, grid, cellCoord);
+			
+			nt = refiner.numTetra();
+			for(k=0;k<nt;++k) {
+				ITetrahedron * t = new ITetrahedron;
+				resetTetrahedronNeighbors(*t);
+				
+				const ITetrahedron * bt = refiner.tetra(k);
+				
+				setTetrahedronVertices(*t, bt->iv0, bt->iv1, bt->iv2, bt->iv3);
+				t->index = dest.size();
+				dest.push_back(t);
+			}
 		}
 	}
 }

@@ -21,7 +21,12 @@ GridMaker::~GridMaker()
 
 void GridMaker::internalClear()
 {
-	m_grid.clear(); 
+	m_grid.clear();
+	clearTetra();
+}
+
+void GridMaker::clearTetra()
+{
 	std::vector<ITetrahedron *>::iterator it = m_tets.begin();
 	for(;it!=m_tets.end();++it) {
 		delete *it;
@@ -31,7 +36,7 @@ void GridMaker::internalClear()
 
 void GridMaker::setH(const float & x)
 { 
-	internalClear();
+	m_grid.clear();
 	m_grid.setGridSize(x);
 }
 
@@ -62,7 +67,17 @@ void GridMaker::buildGrid()
 }
 
 void GridMaker::buildMesh()
-{ m_grid.buildTetrahedrons(m_tets); }
+{ 
+	clearTetra();
+	m_grid.countNodes();
+	m_grid.begin();
+	while(!m_grid.end() ) {
+		BccCell fCell(m_grid.coordToCellCenter(m_grid.key() ) );
+		
+		fCell.connectTetrahedrons(m_tets, m_grid.value(), &m_grid, m_grid.key() );
+		m_grid.next();
+	}
+}
 
 int GridMaker::numTetrahedrons() const
 { return m_tets.size(); }
@@ -77,7 +92,19 @@ void GridMaker::buildMesh1()
 {
 	m_grid.cutEdges();
 	std::cout<<"\n n grid node aft cut "<<m_grid.numNodes();
-	std::cout.flush();
+	std::cout<<"\n n tetra b4 refine "<<numTetrahedrons();
+	clearTetra();
+	m_grid.countNodes();
+	RedBlueRefine rbr;
+	m_grid.begin();
+	while(!m_grid.end() ) {
+		BccCell fCell(m_grid.coordToCellCenter(m_grid.key() ) );
+		
+		fCell.connectRefinedTetrahedrons(m_tets, rbr, m_grid.value(), &m_grid, m_grid.key() );
+		m_grid.next();
+	}
+	std::cout<<"\n n tetra aft refine "<<numTetrahedrons();
+	
 }
 
 }

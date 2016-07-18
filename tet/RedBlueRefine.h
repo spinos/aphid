@@ -51,6 +51,7 @@ namespace ttg {
 
 class RedBlueRefine {
 
+	aphid::Vector3F m_p[10];
 	ITetrahedron m_tet[8];
 	int m_a, m_b, m_c, m_d;
 /// ind to split v, 
@@ -81,6 +82,10 @@ public:
 	
 /// ind to vertices
 	void set(int a, int b, int c, int d);
+	void setP(const aphid::Vector3F & a,
+			const aphid::Vector3F & b,
+			const aphid::Vector3F & c,
+			const aphid::Vector3F & d);
 /// distance of vertices, determine six edge splits
 	void evaluateDistance(float a, float b, float c, float d);
 	const int & numTetra() const;
@@ -88,6 +93,8 @@ public:
 	
 	void splitRedEdge(int i, int v);
 	void splitBlueEdge(int i, int v);
+	void splitRedEdge(int i, int v, const aphid::Vector3F & p);
+	void splitBlueEdge(int i, int v, const aphid::Vector3F & p);
 	bool needSplitRedEdge(int i);
 	bool needSplitBlueEdge(int i);
 	
@@ -98,6 +105,8 @@ public:
 	void refine();
 	void verbose() const;
 	bool hasOption() const;
+	bool checkTetraVolume() const;
+	bool checkTetraVolume(const aphid::Vector3F * p) const;
 	
 private:
 /// sign changes
@@ -118,6 +127,8 @@ private:
 								int v);
 	void splitBlue(int i, ITetrahedron & t0, ITetrahedron & t1,
 								int v);
+	int pInd(int i) const;
+	
 };
 
 }

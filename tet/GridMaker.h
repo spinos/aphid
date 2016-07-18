@@ -122,6 +122,7 @@ protected:
 	
 private:
 	void internalClear();
+	void clearTetra();
 	
 };
 

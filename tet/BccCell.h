@@ -371,7 +371,18 @@ public:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
-					
+	
+	void connectTetrahedrons(std::vector<ITetrahedron *> & dest,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+	
+	void connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
+					RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+													
 	static void GetNodeColor(float & r, float & g, float & b,
 					const int & prop);
 	
@@ -441,6 +452,15 @@ private:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
+					
+	void cutFVRefinerEdges(const int & i, const int & j,
+					const BccNode * nodeA, const BccNode * nodeB, 
+					const BccNode * nodeC, const BccNode * nodeD, 
+					RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+					
 };
 
 }

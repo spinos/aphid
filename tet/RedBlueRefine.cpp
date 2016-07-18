@@ -8,6 +8,7 @@
  */
 
 #include "RedBlueRefine.h"
+#include <tetrahedron_math.h>
 
 using namespace aphid;
 
@@ -25,6 +26,15 @@ void RedBlueRefine::set(int a, int b, int c, int d)
 /// reset
 	m_red[0] = m_red[1] = -1;
 	m_blue[0] = m_blue[1] = m_blue[2] = m_blue[3] = -1;
+}
+
+void RedBlueRefine::setP(const aphid::Vector3F & a,
+			const aphid::Vector3F & b,
+			const aphid::Vector3F & c,
+			const aphid::Vector3F & d)
+{
+	m_p[0] = a; m_p[1] = b;
+	m_p[2] = c; m_p[3] = d;
 }
 
 void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
@@ -181,6 +191,12 @@ void RedBlueRefine::splitRedEdge(int i, int v)
 void RedBlueRefine::splitBlueEdge(int i, int v)
 { m_blue[i] = v; }
 
+void RedBlueRefine::splitRedEdge(int i, int v, const aphid::Vector3F & p)
+{ m_red[i] = v; m_p[4 + i] = p; }
+
+void RedBlueRefine::splitBlueEdge(int i, int v, const aphid::Vector3F & p)
+{ m_blue[i] = v; m_p[6 + i] = p; }
+
 bool RedBlueRefine::needSplitRedEdge(int i)
 { return m_red[i] > -1; }
 
@@ -201,6 +217,82 @@ Vector3F RedBlueRefine::splitPos(float a, float b,
 	float sa = Absolute<float>(a);
 	float sb = Absolute<float>(b);
 	return pa * (sb / (sa + sb)) + pb * (sa / (sa + sb));
+}
+
+int RedBlueRefine::pInd(int i) const
+{
+	if(i==m_a) return 0;
+	if(i==m_b) return 1;
+	if(i==m_c) return 2;
+	if(i==m_d) return 3;
+	if(i==m_red[0]) return 4;
+	if(i==m_red[1]) return 5;
+	if(i==m_blue[0]) return 6;
+	if(i==m_blue[1]) return 7;
+	if(i==m_blue[2]) return 8;
+	return 9;
+}
+
+bool RedBlueRefine::checkTetraVolume(const Vector3F * p) const
+{
+	float mnvol = 1e20f, mxvol = -1e20f, vol;
+	Vector3F tp[4];
+	const int n = numTetra();
+	int i = 0;
+	for(;i<n;++i) {
+		const ITetrahedron * t = tetra(i);
+		
+		tp[0] = p[t->iv0];
+		tp[1] = p[t->iv1];
+		tp[2] = p[t->iv2];
+		tp[3] = p[t->iv3];
+		
+		vol = tetrahedronVolume(p);
+		if(mnvol > vol)
+			mnvol = vol;
+		if(mxvol < vol)
+			mxvol = vol;
+			
+	}
+
+	std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
+	if(mnvol < 1e-5f) {
+		std::cout<<"\n [ERROR] negative(zero) volume "<<mnvol;
+		return false;
+	}
+	
+	return true;
+}
+
+bool RedBlueRefine::checkTetraVolume() const
+{
+	float mnvol = 1e20f, mxvol = -1e20f, vol;
+	Vector3F p[4];
+	const int n = numTetra();
+	int i = 0;
+	for(;i<n;++i) {
+		const ITetrahedron * t = tetra(i);
+		
+		p[0] = m_p[pInd(t->iv0)];
+		p[1] = m_p[pInd(t->iv1)];
+		p[2] = m_p[pInd(t->iv2)];
+		p[3] = m_p[pInd(t->iv3)];
+		
+		vol = tetrahedronVolume(p);
+		if(mnvol > vol)
+			mnvol = vol;
+		if(mxvol < vol)
+			mxvol = vol;
+			
+	}
+
+	// std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
+	if(mnvol < 1e-5f) {
+		std::cout<<"\n [ERROR] negative(zero) volume "<<mnvol;
+		return false;
+	}
+	
+	return true;
 }
 
 void RedBlueRefine::refine()

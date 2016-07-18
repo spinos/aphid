@@ -79,7 +79,7 @@ void RedBlueTest::doRefine()
 	
 	m_rbr.refine();
 	m_rbr.verbose();
-	checkTetraVolume();
+	m_rbr.checkTetraVolume(m_p);
 }
 
 void RedBlueTest::setA(double x)
@@ -104,34 +104,6 @@ void RedBlueTest::setD(double x)
 {
 	m_d[3] = x;
 	doRefine();
-}
-
-void RedBlueTest::checkTetraVolume()
-{
-	float mnvol = 1e20f, mxvol = -1e20f, vol;
-	Vector3F p[4];
-	const int n = m_rbr.numTetra();
-	int i = 0;
-	for(;i<n;++i) {
-		const ITetrahedron * t = m_rbr.tetra(i);
-		
-		p[0] = m_p[t->iv0];
-		p[1] = m_p[t->iv1];
-		p[2] = m_p[t->iv2];
-		p[3] = m_p[t->iv3];
-		
-		vol = tetrahedronVolume(p);
-		if(mnvol > vol)
-			mnvol = vol;
-		if(mxvol < vol)
-			mxvol = vol;
-			
-	}
-
-	std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
-	if(mnvol < 0.f)
-		std::cout<<"\n [ERROR] negative volume";
-		
 }
 
 void RedBlueTest::draw(aphid::GeoDrawer * dr)

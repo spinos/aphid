@@ -54,7 +54,9 @@ bool FieldTetrahedralizeTest::init()
 	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc);
 	m_fld.markInsideOutside();
 	m_fld.buildRefinedMesh();
-	m_fld.checkTetraVolume();
+	m_fld.buildGraph();
+	m_fld.verbose();
+	//m_fld.checkTetraVolume();
 	std::cout.flush();
 		
 	return true;
@@ -62,7 +64,7 @@ bool FieldTetrahedralizeTest::init()
 
 void FieldTetrahedralizeTest::draw(aphid::GeoDrawer * dr)
 {
-#define SHO_GRAPH 0
+#define SHO_GRAPH 1
 #define SHO_GRID 1
 
 #if SHO_GRAPH
@@ -76,15 +78,14 @@ void FieldTetrahedralizeTest::draw(aphid::GeoDrawer * dr)
 
 void FieldTetrahedralizeTest::drawGraph(aphid::GeoDrawer * dr)
 {
+#define SHO_NODE 0
+#define SHO_EDGE 1
+	DistanceNode * v = m_fld.nodes();
 	int i;
-#define SHO_NODE 1
-#define SHO_EDGE 0
-
 #if SHO_NODE	
 	dr->setColor(.5f, 0.f, 0.f);
-	DistanceNode * v = m_fld.nodes();
+	
 	const int nv = m_fld.numNodes();
-
 	Vector3F col;
 	for(i = 0;i<nv;++i) {
 		const DistanceNode & vi = v[i];

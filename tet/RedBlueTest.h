@@ -35,7 +35,6 @@ public:
 	
 private:
 	void doRefine();
-	void checkTetraVolume();
 	
 };
 
