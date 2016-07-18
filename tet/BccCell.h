@@ -460,7 +460,10 @@ private:
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
-					
+/// cut face to blue when there is no neighbor i 0:5 j 6:13
+	int keyToFaceBlueCut(const int & i, const int & j) const;
+/// i 6:13
+	int keyToRedBlueCut(const int & i) const;
 };
 
 }

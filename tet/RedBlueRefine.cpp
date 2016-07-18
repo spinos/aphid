@@ -28,17 +28,12 @@ void RedBlueRefine::set(int a, int b, int c, int d)
 	m_blue[0] = m_blue[1] = m_blue[2] = m_blue[3] = -1;
 }
 
-void RedBlueRefine::setP(const aphid::Vector3F & a,
-			const aphid::Vector3F & b,
-			const aphid::Vector3F & c,
-			const aphid::Vector3F & d)
-{
-	m_p[0] = a; m_p[1] = b;
-	m_p[2] = c; m_p[3] = d;
-}
-
 void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
 {
+	m_fa = a;
+	m_fb = b;
+	m_fc = c;
+	m_fd = d;
 	int cred = 0, cblue = 0;
 	if(splitCondition(a, b) ) {
 		m_red[0] = 0;
@@ -104,6 +99,67 @@ void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
 	
 }
 
+/// from low val to high val
+float RedBlueRefine::edgeDir(const float & a, const float & b) const
+{
+/// no sign change
+	if(a * b > 0.f)
+		return 0.f;
+		
+	if(b > a)
+		return 1.f;
+		
+	if(a > b)
+		return -1.f;
+
+/// a = 0 b = 0		
+	return 0.f;
+}
+
+void RedBlueRefine::estimateNormal(const aphid::Vector3F & a,
+							const aphid::Vector3F & b,
+							const aphid::Vector3F & c,
+							const aphid::Vector3F & d)
+{
+	m_p[0] = a; m_p[1] = b;
+	m_p[2] = c; m_p[3] = d;
+	m_normal.setZero();
+	
+	m_normalLen = edgeDir(m_fa, m_fb);
+	if(m_normalLen != 0.f) 
+		m_normal += (b - a).normal() * m_normalLen;
+		
+	m_normalLen = edgeDir(m_fc, m_fd);
+	if(m_normalLen != 0.f) 
+		m_normal += (d - c).normal() * m_normalLen;
+		
+	m_normalLen = edgeDir(m_fa, m_fc);
+	if(m_normalLen != 0.f) 
+		m_normal += (c - a).normal() * m_normalLen;
+		
+	m_normalLen = edgeDir(m_fa, m_fd);
+	if(m_normalLen != 0.f) 
+		m_normal += (d - a).normal() * m_normalLen;
+		
+	m_normalLen = edgeDir(m_fb, m_fc);
+	if(m_normalLen != 0.f) 
+		m_normal += (c - b).normal() * m_normalLen;
+		
+	m_normalLen = edgeDir(m_fb, m_fd);
+	if(m_normalLen != 0.f) 
+		m_normal += (d - b).normal() * m_normalLen;
+		
+	m_normalLen = m_normal.length();
+	if(m_normalLen > 0.f)
+		m_normal *= 1.f / m_normalLen;
+}
+
+bool RedBlueRefine::hasNormal() const
+{ return m_normalLen > 0.f; }
+
+const Vector3F & RedBlueRefine::normal() const
+{ return m_normal; }
+
 void RedBlueRefine::verbose() const
 {
 	std::string strOpt("none");
@@ -142,6 +198,9 @@ void RedBlueRefine::verbose() const
 	
 	std::cout<<"\n red "<<m_red[0]<<", "<<m_red[1]
 			<<"\n blue "<<m_blue[0]<<", "<<m_blue[1]<<", "<<m_blue[2]<<", "<<m_blue[3];
+	if(hasNormal() )
+		std::cout<<"\n estimated N "<<m_normal;
+		
 }
 
 bool RedBlueRefine::hasOption() const
@@ -185,12 +244,6 @@ const int & RedBlueRefine::numTetra() const
 const ITetrahedron * RedBlueRefine::tetra(int i) const
 { return &m_tet[i]; }
 
-void RedBlueRefine::splitRedEdge(int i, int v)
-{ m_red[i] = v; }
-
-void RedBlueRefine::splitBlueEdge(int i, int v)
-{ m_blue[i] = v; }
-
 void RedBlueRefine::splitRedEdge(int i, int v, const aphid::Vector3F & p)
 { m_red[i] = v; m_p[4 + i] = p; }
 
@@ -231,37 +284,6 @@ int RedBlueRefine::pInd(int i) const
 	if(i==m_blue[1]) return 7;
 	if(i==m_blue[2]) return 8;
 	return 9;
-}
-
-bool RedBlueRefine::checkTetraVolume(const Vector3F * p) const
-{
-	float mnvol = 1e20f, mxvol = -1e20f, vol;
-	Vector3F tp[4];
-	const int n = numTetra();
-	int i = 0;
-	for(;i<n;++i) {
-		const ITetrahedron * t = tetra(i);
-		
-		tp[0] = p[t->iv0];
-		tp[1] = p[t->iv1];
-		tp[2] = p[t->iv2];
-		tp[3] = p[t->iv3];
-		
-		vol = tetrahedronVolume(p);
-		if(mnvol > vol)
-			mnvol = vol;
-		if(mxvol < vol)
-			mxvol = vol;
-			
-	}
-
-	std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
-	if(mnvol < 1e-5f) {
-		std::cout<<"\n [ERROR] negative(zero) volume "<<mnvol;
-		return false;
-	}
-	
-	return true;
 }
 
 bool RedBlueRefine::checkTetraVolume() const

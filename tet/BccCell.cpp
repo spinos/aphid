@@ -2052,7 +2052,7 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const
 {
-	int i;
+	int i, k;
 /// per edge
 	i = 0;
 	for(;i<12;++i) {
@@ -2115,7 +2115,8 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 /// per vertex
 	i = 0;
 	for(;i<8;++i) {
-		BccNode * redBlueN = cell->find(30000 + i + 6);
+		k = keyToRedBlueCut(i+6);
+		BccNode * redBlueN = cell->find(k);
 		if(redBlueN)
 			continue;
 			
@@ -2126,7 +2127,7 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 					blueN->prop = NBlue;
 			}
 			else {
-				redBlueN = addNode(30000 + i + 6, cell, grid, cellCoord);
+				redBlueN = addNode(k, cell, grid, cellCoord);
 				redBlueN->prop = NRedBlue;
 				getSplitPos(redBlueN->pos, redN, blueN); 
 				redBlueN->val = 0.f;
@@ -2181,9 +2182,10 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 /// red blue	
 	if(refiner.needSplitBlueEdge(0) ) {
 		int k = TwentyFourFVBlueBlueEdge[edgei][0];
-		BccNode * redBlueN = cell->find(30000 + k);
+		k = keyToRedBlueCut(k);
+		BccNode * redBlueN = cell->find(k);
 		if(!redBlueN) {
-			redBlueN = addNode(30000 + k, cell, grid, cellCoord);
+			redBlueN = addNode(k, cell, grid, cellCoord);
 			redBlueN->index = -1;
 			redBlueN->pos = refiner.splitPos(nodeA->val, nodeC->val, nodeA->pos, nodeC->pos);
 			redBlueN->prop = -1;
@@ -2192,9 +2194,10 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 	
 	if(refiner.needSplitBlueEdge(1) ) {
 		int k = TwentyFourFVBlueBlueEdge[edgei][1];
-		BccNode * redBlueN = cell->find(30000 + k);
+		k = keyToRedBlueCut(k);
+		BccNode * redBlueN = cell->find(k);
 		if(!redBlueN) {
-			redBlueN = addNode(30000 + k, cell, grid, cellCoord);
+			redBlueN = addNode(k, cell, grid, cellCoord);
 			redBlueN->index = -1;
 			redBlueN->pos = refiner.splitPos(nodeA->val, nodeD->val, nodeA->pos, nodeD->pos);
 			redBlueN->prop = -1;
@@ -2208,9 +2211,10 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 	if(refiner.needSplitBlueEdge(2) ) {
 		if(neiCell) {
 			int k = TwentyFourFVBlueBlueEdge[edgei][4];
-			BccNode * redBlueN = neiCell->find(30000 + k);
+			k = keyToRedBlueCut(k);
+			BccNode * redBlueN = neiCell->find(k);
 			if(!redBlueN) {
-				redBlueN = addNode(30000 + k, neiCell, grid, neiC);
+				redBlueN = addNode(k, neiCell, grid, neiC);
 				redBlueN->index = -1;
 				redBlueN->pos = refiner.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
 				redBlueN->prop = -1;
@@ -2218,9 +2222,10 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 		}
 		else {
 			int k = TwentyFourFVBlueBlueEdge[edgei][0];
-			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
+			k = keyToFaceBlueCut(i, k);
+			BccNode * redBlueN = cell->find(k);
 			if(!redBlueN) {
-				redBlueN = addNode(40000 + i * 10000 + k, cell, grid, cellCoord);
+				redBlueN = addNode(k, cell, grid, cellCoord);
 				redBlueN->index = -1;
 				redBlueN->pos = refiner.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
 				redBlueN->prop = -1;
@@ -2231,9 +2236,10 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 	if(refiner.needSplitBlueEdge(3) ) {
 		if(neiCell) {
 			int k = TwentyFourFVBlueBlueEdge[edgei][5];
-			BccNode * redBlueN = neiCell->find(30000 + k);
+			k = keyToRedBlueCut(k);
+			BccNode * redBlueN = neiCell->find(k);
 			if(!redBlueN) {
-				redBlueN = addNode(30000 + k, neiCell, grid, neiC);
+				redBlueN = addNode(k, neiCell, grid, neiC);
 				redBlueN->index = -1;
 				redBlueN->pos = refiner.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
 				redBlueN->prop = -1;
@@ -2241,9 +2247,10 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 		}
 		else {
 			int k = TwentyFourFVBlueBlueEdge[edgei][1];
-			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
+			k = keyToFaceBlueCut(i, k);
+			BccNode * redBlueN = cell->find(k);
 			if(!redBlueN) {
-				redBlueN = addNode(40000 + i * 10000 + k, cell, grid, cellCoord);
+				redBlueN = addNode(k, cell, grid, cellCoord);
 				redBlueN->index = -1;
 				redBlueN->pos = refiner.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
 				redBlueN->prop = -1;
@@ -2315,8 +2322,6 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 	if(!refiner.hasOption() ) 
 		return;
 		
-	refiner.setP(nodeA->pos, nodeB->pos, nodeC->pos, nodeD->pos);
-		
 /// yellow
 	if(refiner.needSplitRedEdge(0) ) {
 		BccNode * yellowN = yellowNode(i, cell, grid, cellCoord);
@@ -2340,7 +2345,8 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 /// red blue	
 	if(refiner.needSplitBlueEdge(0) ) {
 		int k = TwentyFourFVBlueBlueEdge[edgei][0];
-		BccNode * redBlueN = cell->find(30000 + k);
+		k = keyToRedBlueCut(k);
+		BccNode * redBlueN = cell->find(k);
 		if(redBlueN) 
 			refiner.splitBlueEdge(0, redBlueN->index, redBlueN->pos);
 		else
@@ -2349,7 +2355,8 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 	
 	if(refiner.needSplitBlueEdge(1) ) {
 		int k = TwentyFourFVBlueBlueEdge[edgei][1];
-		BccNode * redBlueN = cell->find(30000 + k);
+		k = keyToRedBlueCut(k);
+		BccNode * redBlueN = cell->find(k);
 		if(redBlueN) {
 			refiner.splitBlueEdge(1, redBlueN->index, redBlueN->pos);
 		}
@@ -2364,7 +2371,8 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 	if(refiner.needSplitBlueEdge(2) ) {
 		if(neiCell) {
 			int k = TwentyFourFVBlueBlueEdge[edgei][4];
-			BccNode * redBlueN = neiCell->find(30000 + k);
+			k = keyToRedBlueCut(k);
+			BccNode * redBlueN = neiCell->find(k);
 			if(redBlueN) 
 				refiner.splitBlueEdge(2, redBlueN->index, redBlueN->pos);
 			else
@@ -2372,7 +2380,8 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 		}
 		else {
 			int k = TwentyFourFVBlueBlueEdge[edgei][0];
-			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
+			k = keyToFaceBlueCut(i, k);
+			BccNode * redBlueN = cell->find(k);
 			if(redBlueN) 
 				refiner.splitBlueEdge(2, redBlueN->index, redBlueN->pos);
 			else
@@ -2383,7 +2392,8 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 	if(refiner.needSplitBlueEdge(3) ) {
 		if(neiCell) {
 			int k = TwentyFourFVBlueBlueEdge[edgei][5];
-			BccNode * redBlueN = neiCell->find(30000 + k);
+			k = keyToRedBlueCut(k);
+			BccNode * redBlueN = neiCell->find(k);
 			if(redBlueN) 
 				refiner.splitBlueEdge(3, redBlueN->index, redBlueN->pos);
 			else
@@ -2391,7 +2401,8 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 		}
 		else {
 			int k = TwentyFourFVBlueBlueEdge[edgei][1];
-			BccNode * redBlueN = cell->find(40000 + i * 10000 + k);
+			k = keyToFaceBlueCut(i, k);
+			BccNode * redBlueN = cell->find(k);
 			if(redBlueN) {
 				refiner.splitBlueEdge(3, redBlueN->index, redBlueN->pos);
 			}
@@ -2429,7 +2440,7 @@ void BccCell::connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
 			
 			refiner.set(redN->index, faN->index, cN->index, dN->index);
 			refiner.evaluateDistance(redN->val, faN->val, cN->val, dN->val);
-			
+			refiner.estimateNormal(redN->pos, faN->pos, cN->pos, dN->pos);
 			cutFVRefinerEdges(i, j, 
 									redN, faN, cN, dN,
 									refiner, cell, grid, cellCoord);
@@ -2448,5 +2459,11 @@ void BccCell::connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
 		}
 	}
 }
+
+int BccCell::keyToFaceBlueCut(const int & i, const int & j) const
+{ return 40000 + i * 10000 + j; }
+
+int BccCell::keyToRedBlueCut(const int & i) const
+{ return 30000 + i; }
 
 }

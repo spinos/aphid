@@ -45,41 +45,48 @@ void RedBlueTest::doRefine()
 	m_rbr.set(0, 1, 2, 3);
 	
 	m_rbr.evaluateDistance(m_d[0], m_d[1], m_d[2], m_d[3]);
+	m_rbr.estimateNormal(m_p[0], m_p[1], m_p[2], m_p[3]);
 	
 	int auv = 4;
 	if(m_rbr.needSplitRedEdge(0) ) {
 		m_p[auv] = m_rbr.splitPos(m_d[0], m_d[1], m_p[0], m_p[1]);
-		m_rbr.splitRedEdge(0, auv++);
+		m_rbr.splitRedEdge(0, auv, m_p[auv]);
+		auv++;
 	}
 	
 	if(m_rbr.needSplitRedEdge(1) ) {
 		m_p[auv] = m_rbr.splitPos(m_d[2], m_d[3], m_p[2], m_p[3]);
-		m_rbr.splitRedEdge(1, auv++);
+		m_rbr.splitRedEdge(1, auv, m_p[auv]);
+		auv++;
 	}
 	
 	if(m_rbr.needSplitBlueEdge(0) ) {
 		m_p[auv] = m_rbr.splitPos(m_d[0], m_d[2], m_p[0], m_p[2]);
-		m_rbr.splitBlueEdge(0, auv++);
+		m_rbr.splitBlueEdge(0, auv, m_p[auv]);
+		auv++;
 	}
 	
 	if(m_rbr.needSplitBlueEdge(1) ) {
 		m_p[auv] = m_rbr.splitPos(m_d[0], m_d[3], m_p[0], m_p[3]);
-		m_rbr.splitBlueEdge(1, auv++);
+		m_rbr.splitBlueEdge(1, auv, m_p[auv]);
+		auv++;
 	}
 	
 	if(m_rbr.needSplitBlueEdge(2) ) {
 		m_p[auv] = m_rbr.splitPos(m_d[1], m_d[2], m_p[1], m_p[2]);
-		m_rbr.splitBlueEdge(2, auv++);
+		m_rbr.splitBlueEdge(2, auv, m_p[auv]);
+		auv++;
 	}
 	
 	if(m_rbr.needSplitBlueEdge(3) ) {
 		m_p[auv] = m_rbr.splitPos(m_d[1], m_d[3], m_p[1], m_p[3]);
-		m_rbr.splitBlueEdge(3, auv++);
+		m_rbr.splitBlueEdge(3, auv, m_p[auv]);
+		auv++;
 	}
 	
 	m_rbr.refine();
 	m_rbr.verbose();
-	m_rbr.checkTetraVolume(m_p);
+	m_rbr.checkTetraVolume();
 }
 
 void RedBlueTest::setA(double x)
@@ -119,6 +126,11 @@ void RedBlueTest::draw(aphid::GeoDrawer * dr)
 		Vector3F c = m_p[t->iv2];
 		Vector3F d = m_p[t->iv3];
 		dr->tetrahedronWire(a, b, c, d);
+	}
+	
+	if(m_rbr.hasNormal() ) {
+		dr->setColor(0.f, .7f, .4f);
+		dr->arrow(Vector3F(0.f, 0.f, 0.f), m_rbr.normal() * 10.f );
 	}
 }
 
