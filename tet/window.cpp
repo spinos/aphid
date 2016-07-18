@@ -14,6 +14,7 @@
 #include "DistanceFieldTest.h"
 #include "RedBlueTest.h"
 #include "RedBlueControl.h"
+#include "FieldTetrahedralizeTest.h"
 
 namespace ttg {
 
@@ -38,8 +39,10 @@ Window::Window(const Parameter * param)
 		sc = new BccTetrahedralize;
 	else if(param->operation() == Parameter::kDistanceField)
 		sc = new DistanceFieldTest;
-	else// if(param->operation() == Parameter::kRedblueRefine)
+	else if(param->operation() == Parameter::kRedblueRefine)
 		sc = new RedBlueTest;
+	else// if(param->operation() == Parameter::kFieldTetrahedralize)
+		sc = new FieldTetrahedralizeTest;
 		
     glWidget = new GLWidget(sc, this);
 	

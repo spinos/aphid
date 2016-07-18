@@ -49,6 +49,7 @@ DistanceFieldTest.h
 RedBlueRefine.h
 RedBlueTest.h
 RedBlueControl.h
+FieldTetrahedralizeTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -77,6 +78,7 @@ DistanceFieldTest.cpp
 RedBlueRefine.cpp
 RedBlueTest.cpp
 RedBlueControl.cpp
+FieldTetrahedralizeTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

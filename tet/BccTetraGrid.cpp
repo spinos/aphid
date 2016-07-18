@@ -149,6 +149,25 @@ void BccTetraGrid::buildTetrahedrons(std::vector<ITetrahedron *> & dest)
 	
 }
 
+void BccTetraGrid::cutEdges()
+{
+	begin();
+	while(!end() ) {
+		BccCell fCell(coordToCellCenter(key() ) );
+		fCell.cutSignChangeEdge(value(), this, key() );
+		next();
+	}
+	
+	RedBlueRefine rbr;
+	begin();
+	while(!end() ) {
+		BccCell fCell(coordToCellCenter(key() ) );
+		fCell.cutAuxEdge(rbr, value(), this, key() );
+		next();
+	}
+	
+}
+
 void BccTetraGrid::moveNodeIn(const aphid::Vector3F & cellCenter,
 					const Vector3F * pos, 
 					const int & n,

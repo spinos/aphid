@@ -16,7 +16,7 @@ namespace ttg {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	m_operation = kRedblueRefine;
+	m_operation = kFieldTetrahedralize;
 	
 	if(argc < 2) {
 		std::cout<<"\n tet (Tetrahedral Mesh Generation Research) version 20160601"
@@ -58,6 +58,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-rbr") == 0 || strcmp(argv[i], "--redBlueRefine") == 0) {
 				m_operation = kRedblueRefine;
 			}
+			if(strcmp(argv[i], "-ft") == 0 || strcmp(argv[i], "--fieldTetrahedralize") == 0) {
+				m_operation = kFieldTetrahedralize;
+			}
 		}
 	}
 	
@@ -84,6 +87,7 @@ void Parameter::PrintHelp()
 	<<"\n -bt or --bccTetrahedralize    test 3D superformula + Poisson Disk Sampling + BCC"
 	<<"\n -df or --distanceField    test 3D distance transform on BCC grid"
 	<<"\n -rbr or --redBlueRefine    test red blue refine of a tetrahedron"
+	<<"\n -ft or --fieldTetrahedralize    test tetrahedralize based on signed distance field"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

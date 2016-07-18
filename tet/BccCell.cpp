@@ -972,6 +972,17 @@ BccNode * BccCell::addFaceNode(const int & i,
 	return ni;
 }
 
+BccNode * BccCell::addYellowNode(const int & i,
+					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
+					const sdb::Coord3 & cellCoord) const
+{
+	BccNode * ni = new BccNode;
+	ni->key = 15000 + i;
+	ni->prop = -1;
+	grid->insert(cellCoord, ni);
+	return ni;
+}
+
 bool BccCell::moveBlueTo(Vector3F & p,
 					const Vector3F & q,
 					const float & r)
@@ -1094,7 +1105,7 @@ void BccCell::blueBlueEdgeV(int & v1,
 /// i 0:11
 BccNode * BccCell::addEdgeNode(const int & i,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
-					const sdb::Coord3 & cellCoord)
+					const sdb::Coord3 & cellCoord) const
 {
 	BccNode * ni = new BccNode;
 	ni->key = TwelveBlueBlueEdges[i][2];
@@ -1974,6 +1985,230 @@ void BccCell::getBlueMean(aphid::Vector3F & q,
 		}
 	}
 	q /= s;
+}
+
+void BccCell::GetNodeColor(float & r, float & g, float & b,
+					const int & prop)
+{
+	switch (prop) {
+		case NBlue:
+			r = 0.f; g = 0.f; b = 1.f;
+			break;
+		case NRed:
+			r = 1.f; g = 0.f; b = 0.f;
+			break;
+		case NYellow:
+			r = .99f; g = 0.99f; b = 0.f;
+			break;
+		case NCyan:
+			r = 0.f; g = 0.59f; b = 0.89f;
+			break;
+		case NRedBlue:
+			r = 0.79f; g = 0.f; b = 0.89f;
+			break;
+		case -4:
+			r = 0.3f; g = 0.f; b = 0.f;
+			break;
+		default:
+			r = g = b = .3f;
+			break;
+	}
+}
+
+bool BccCell::snapToFront(BccNode * a, BccNode * b) const
+{
+	const float la = Absolute<float>(a->val);
+	const float lb = Absolute<float>(b->val);
+	const float l = la + lb;
+	const float h = l * .1f;
+	
+	Vector3F v = b->pos - a->pos;
+	
+	if(la < h) {
+		a->val = 0.f;
+		a->pos += v * (la / l);  
+		return true;
+	}
+	
+	if(lb < h) {
+		b->val = 0.f;
+		b->pos -= v * (lb / l); 
+		return true;
+	}
+	
+	return false;
+}
+
+void BccCell::getSplitPos(aphid::Vector3F & dst,
+					BccNode * a, BccNode * b) const
+{
+	float sa = Absolute<float>(a->val);
+	float sb = Absolute<float>(b->val);
+	dst = a->pos * (sb / (sa + sb)) + b->pos * (sa / (sa + sb));
+}
+
+void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	int i;
+/// per edge
+	i = 0;
+	for(;i<12;++i) {
+		BccNode * cyanN = blueBlueNode(i, cell, grid, cellCoord);
+		if(cyanN)
+			continue;
+			
+		BccNode * b1N = blueBlueEdgeNode(i, 0, cell, grid, cellCoord);
+		BccNode * b2N = blueBlueEdgeNode(i, 1, cell, grid, cellCoord);
+		if(b1N->val * b2N->val < 0.f) {
+			if(snapToFront(b1N, b2N) ) {
+				if(b1N->val == 0.f)
+					b1N->prop = NBlue;
+				else 
+					b2N->prop = NBlue;
+			}
+			else {
+				cyanN = addEdgeNode(i, grid, cellCoord);
+				cyanN->prop = NCyan;
+				getSplitPos(cyanN->pos, b1N, b2N); 
+				cyanN->val = 0.f;
+				cyanN->index = -1;
+			}
+		}
+	}
+		
+	BccNode * redN = cell->find(15);
+	
+	if(redN->prop == NRed)
+		return;
+		
+/// per face
+	i = 0;
+	for(;i<6;++i) {
+		BccNode * yellowN = yellowNode(i, cell, grid, cellCoord);
+		if(yellowN)
+			continue;
+		
+		BccNode * faN = faceNode(i, cell, grid, cellCoord);
+		
+		if(redN->val * faN->val < 0.f) {
+			if(snapToFront(redN, faN) ) {
+				if(redN->val == 0.f) {
+					redN->prop = NRed;
+					return;
+				}
+				else 
+					faN->prop = NRed;
+			}
+			else {
+				yellowN = addYellowNode(i, grid, cellCoord);
+				yellowN->prop = NYellow;
+				getSplitPos(yellowN->pos, redN, faN); 
+				yellowN->val = 0.f;
+				yellowN->index = -1;
+			}
+		}
+	}
+		
+/// per vertex
+	i = 0;
+	for(;i<8;++i) {
+		BccNode * redBlueN = cell->find(30000 + i + 6);
+		if(redBlueN)
+			continue;
+			
+		BccNode * blueN = blueNode(i+6, cell, grid, cellCoord);
+		if(redN->val * blueN->val < 0.f) {
+			if(snapToFront(redN, blueN) ) {
+				if(blueN->val == 0.f)
+					blueN->prop = NBlue;
+			}
+			else {
+				redBlueN = addNode(30000 + i + 6, cell, grid, cellCoord);
+				redBlueN->prop = NRedBlue;
+				getSplitPos(redBlueN->pos, redN, blueN); 
+				redBlueN->val = 0.f;
+				redBlueN->index = -1;
+			}
+		}
+	}
+
+}
+
+void BccCell::cutFVTetraAuxEdge(const int & i,
+					const int & j,
+					const BccNode * nodeA,
+					const BccNode * nodeB,
+					RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	const int edgei = i * 4 + j;
+	BccNode * nodeC = blueNode6(TwentyFourFVBlueBlueEdge[edgei][0],
+									cell, grid, cellCoord);
+	BccNode * nodeD = blueNode6(TwentyFourFVBlueBlueEdge[edgei][1],
+									cell, grid, cellCoord);
+	refiner.set(nodeA->index, nodeB->index, nodeC->index, nodeD->index);
+	refiner.evaluateDistance(nodeA->val, nodeB->val, nodeC->val, nodeD->val);
+	if(!refiner.hasOption() )
+		return;
+		
+/// yellow
+	if(refiner.needSplitRedEdge(0) ) {
+		//m_rbr.splitPos(nodeA->val, nodeB->val, nodeA->pos, nodeB->pos);
+		
+	}
+	
+/// cyan
+	if(refiner.needSplitRedEdge(1) ) {
+		//m_rbr.splitPos(nodeC->val, nodeD->val, nodeC->pos, nodeD->pos);
+		
+	}
+
+/// red blue	
+	if(refiner.needSplitBlueEdge(0) ) {
+		//m_rbr.splitPos(nodeA->val, nodeC->val, nodeA->pos, nodeC->pos);
+		
+	}
+	
+	if(refiner.needSplitBlueEdge(1) ) {
+		//m_rbr.splitPos(nodeA->val, nodeD->val, nodeA->pos, nodeD->pos);
+		
+	}
+	
+	if(refiner.needSplitBlueEdge(2) ) {
+		//m_rbr.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
+		
+	}
+	
+	if(refiner.needSplitBlueEdge(3) ) {
+		//m_rbr.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
+		
+	}
+}
+
+void BccCell::cutAuxEdge(RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	const BccNode * redN = cell->find(15);
+	
+/// per face
+	int i = 0, j;
+	for(;i<6;++i) {
+		BccNode * faN = faceNode(i, cell, grid, cellCoord);
+/// negative side checked by previous cell
+		if((i&1) == 0 && faN->key == 15)
+			continue;
+			
+/// per tetra
+		for(j=0;j<4;++j) {
+			cutFVTetraAuxEdge(i, j, redN, faN, refiner, cell, grid, cellCoord);
+		}
+	}
 }
 
 }

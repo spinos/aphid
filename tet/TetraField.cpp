@@ -128,4 +128,20 @@ void TetraField::markTetraOnFront(const int & i)
 	nodes()[a->iv3].label = sdf::StFront;
 }
 
+void TetraField::buildRefinedMesh()
+{ 
+	obtainGridNodeVal(nodes() );
+	grid()->cutEdges();
+		
+	std::cout<<"\n n grid node aft cut "<<grid()->numNodes();
+	std::cout.flush();
+}
+
+bool TetraField::checkTetraVolume()
+{ 
+/// grid pos to field
+	extractGridNodes(nodes() );
+	return checkTetraVolumeExt(nodes() ); 
+}
+
 }

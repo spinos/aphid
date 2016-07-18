@@ -134,6 +134,9 @@ void RedBlueRefine::verbose() const
 			<<"\n blue "<<m_blue[0]<<", "<<m_blue[1]<<", "<<m_blue[2]<<", "<<m_blue[3];
 }
 
+bool RedBlueRefine::hasOption() const
+{ return m_opt != SpNone; }
+
 void RedBlueRefine::auxiliarySplit()
 {
 	if(m_opt == SpOneRedUpTwoBlue) {
@@ -197,7 +200,7 @@ Vector3F RedBlueRefine::splitPos(float a, float b,
 		
 	float sa = Absolute<float>(a);
 	float sb = Absolute<float>(b);
-	return pa * sb / (sa + sb) + pb * sa / (sa + sb);
+	return pa * (sb / (sa + sb)) + pb * (sa / (sa + sb));
 }
 
 void RedBlueRefine::refine()

@@ -10,6 +10,7 @@
 #include "BlueYellowCyanRefine.h"
 #include <WorldGrid.h>
 #include <Array.h>
+#include "RedBlueRefine.h"
 
 namespace ttg {
 
@@ -35,6 +36,7 @@ class BccNode {
 	
 public:
 	aphid::Vector3F pos;
+	float val;
 	int prop;
 	int key;
 	int index;
@@ -70,6 +72,7 @@ public:
 	};
 	
 	BccCell(const aphid::Vector3F &center );
+	
 	void getCellCorner(aphid::Vector3F & p, const int & i,
 					const float & gridSize) const;
 	void addRedBlueNodes(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -176,9 +179,12 @@ public:
 	BccNode * addFaceNode(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord);
+	BccNode * addYellowNode(const int & i,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * addEdgeNode(const int & i,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
-					const aphid::sdb::Coord3 & cellCoord);
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * addFaceVaryEdgeNode(const int & i,
 					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -357,6 +363,18 @@ public:
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const;
 	
+	void cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+/// for red blue refine
+	void cutAuxEdge(RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
+					
+	static void GetNodeColor(float & r, float & g, float & b,
+					const int & prop);
+	
 private:
 	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
 	void neighborOffset(aphid::Vector3F * dest, int i) const;
@@ -408,7 +426,21 @@ private:
 					STriangleArray * faces,
 					int ired, int iyellow, int ibc1, int ibc2,
 					aphid::sdb::Array<int, BccNode> * cell) const;
+/// if val close to zero, val <- 0, pos <- front pos
+	bool snapToFront(BccNode * a, BccNode * b) const;
+/// weighted average of val
+	void getSplitPos(aphid::Vector3F & dst,
+					BccNode * a, BccNode * b) const;
 	
+/// i 0:5 j 0:4
+	void cutFVTetraAuxEdge(const int & i,
+					const int & j,
+					const BccNode * nodeA,
+					const BccNode * nodeB,
+					RedBlueRefine & refiner,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const;
 };
 
 }

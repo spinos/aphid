@@ -97,6 +97,7 @@ public:
 	
 	void refine();
 	void verbose() const;
+	bool hasOption() const;
 	
 private:
 /// sign changes

@@ -28,6 +28,8 @@ public:
 	void extractNodePosProp(aphid::Vector3F * destPos,
 					int * destProp);
 	void buildTetrahedrons(std::vector<ITetrahedron *> & dest);
+/// cut edges with sign change
+	void cutEdges();
 	void moveNodeIn(const aphid::Vector3F & cellCenter,
 					const aphid::Vector3F * pos, 
 					const int & n,

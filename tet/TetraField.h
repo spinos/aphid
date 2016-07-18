@@ -43,7 +43,9 @@ public:
 		calculateDistanceOnFront(func);
 		fastMarchingMethod();
 	}
-		
+	
+	void buildRefinedMesh();
+	bool checkTetraVolume();
 	void verbose();
 	
 protected:
