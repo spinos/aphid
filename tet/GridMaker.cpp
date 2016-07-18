@@ -73,4 +73,11 @@ BccTetraGrid * GridMaker::grid()
 const ITetrahedron * GridMaker::tetra(const int & i) const
 { return m_tets[i]; }
 
+void GridMaker::buildMesh1()
+{
+	m_grid.cutEdges();
+	std::cout<<"\n n grid node aft cut "<<m_grid.numNodes();
+	std::cout.flush();
+}
+
 }

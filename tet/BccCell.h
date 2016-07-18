@@ -52,7 +52,7 @@ class BccCell {
 	static int SixNeighborOnFace[6][4];
 	static int TwelveBlueBlueEdges[12][5];
 	static int ThreeNeighborOnEdge[36][4];
-	static int TwentyFourFVBlueBlueEdge[24][4];
+	static int TwentyFourFVBlueBlueEdge[24][6];
 	static int RedBlueEdge[24][3];
 	static int EightVVBlueBlueEdge[8][6];
 	static int ThreeYellowFace[3][4];
@@ -188,7 +188,7 @@ public:
 	BccNode * addFaceVaryEdgeNode(const int & i,
 					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
-					const aphid::sdb::Coord3 & cellCoord);
+					const aphid::sdb::Coord3 & cellCoord) const;
 	BccNode * addFaceVaryRedBlueEdgeNode(const int & i,
 					const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,

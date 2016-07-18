@@ -131,10 +131,7 @@ void TetraField::markTetraOnFront(const int & i)
 void TetraField::buildRefinedMesh()
 { 
 	obtainGridNodeVal(nodes() );
-	grid()->cutEdges();
-		
-	std::cout<<"\n n grid node aft cut "<<grid()->numNodes();
-	std::cout.flush();
+	buildMesh1();
 }
 
 bool TetraField::checkTetraVolume()

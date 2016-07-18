@@ -36,14 +36,14 @@ protected:
 	const ITetrahedron * tetra(const int & i) const;
 	
 	template<typename Tn>
-	void extractGridNodesIn(Tn * dst, int & i,
+	void extractGridNodesIn(Tn * dst,
 						aphid::sdb::Array<int, BccNode> * cell) {
 		cell->begin();
 		while(!cell->end() ) {
 			
 			BccNode * n = cell->value();
 			if(n->index > -1) {
-				Tn * d = &dst[i++];
+				Tn * d = &dst[n->index];
 				d->pos = n->pos;
 			}
 			
@@ -53,11 +53,10 @@ protected:
 	
 	template<typename Tn>
 	void extractGridNodes(Tn * dst) {
-		int i = 0;
 		m_grid.begin();
 		while(!m_grid.end() ) {
 			
-			extractGridNodesIn(dst, i, m_grid.value() );
+			extractGridNodesIn(dst, m_grid.value() );
 			m_grid.next();
 		}
 	}
@@ -118,6 +117,8 @@ protected:
 			
 		return true;
 	}
+	
+	void buildMesh1();
 	
 private:
 	void internalClear();

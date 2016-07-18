@@ -60,13 +60,14 @@ int BccCell::SevenNeighborOnCorner[8][7] = {
 /// six face, four edge per face
 /// vertex ind 0 1
 /// edge ind 0 1
-int BccCell::TwentyFourFVBlueBlueEdge[24][4] = {
-{ 8, 6, 4, 10}, {12, 8, 10, 6 }, {10,12, 6, 8 }, { 6,10, 8, 4 }, /// -x
-{ 7, 9, 5, 9 }, { 9,13, 11, 5 }, {13,11, 7, 11}, {11, 7, 9, 7 }, /// +x
-{ 6, 7, 0, 8 }, {10, 6, 8, 2  }, {11,10, 2, 9 }, { 7,11, 9, 0 }, /// -y
-{ 9, 8, 1, 11}, { 8,12, 10, 1 }, {12,13, 3, 10}, {13, 9, 11, 3}, /// +y
-{ 7, 6, 0, 5 }, { 9, 7, 5, 1  }, { 8, 9, 1, 4 }, { 6, 8, 4, 0 }, /// -z
-{10,11, 2, 6 }, {11,13, 7, 2  }, {13,12, 3, 7 }, {12,10, 6, 3 }  /// +z
+/// opposite vertex ind 0 1 in neighbor
+int BccCell::TwentyFourFVBlueBlueEdge[24][6] = {
+{ 8, 6, 4, 10, 9, 7 }, {12, 8, 10, 6, 13, 11 }, {10,12, 6, 8, 11, 13 }, { 6,10,  8, 4,  7, 11 }, /// -x
+{ 7, 9, 5, 9,  6, 8 }, { 9,13, 11, 5,  8, 12 }, {13,11, 7, 11,12, 10 }, {11, 7,  9, 7, 10,  6 }, /// +x
+{ 6, 7, 0, 8,  8, 9 }, {10, 6,  8, 2, 12,  8 }, {11,10, 2, 9, 13, 12 }, { 7,11,  9, 0,  9, 13 }, /// -y
+{ 9, 8, 1, 11, 7, 6 }, { 8,12, 10, 1,  6, 10 }, {12,13, 3, 10,10, 11 }, {13, 9, 11, 3, 11,  7 }, /// +y
+{ 7, 6, 0, 5, 11,10 }, { 9, 7,  5, 1, 13, 11 }, { 8, 9, 1,  4,12, 13 }, { 6, 8,  4, 0, 10, 12 }, /// -z
+{10,11, 2, 6,  6, 7 }, {11,13,  7, 2,  7,  9 }, {13,12, 3,  7, 9,  8 }, {12,10,  6, 3,  8,  6 }  /// +z
 };
 
 /// red-blue ind
@@ -1119,7 +1120,7 @@ BccNode * BccCell::addEdgeNode(const int & i,
 BccNode * BccCell::addFaceVaryEdgeNode(const int & i,
 					const int & j,
 					sdb::WorldGrid<sdb::Array<int, BccNode>, BccNode > * grid,
-					const sdb::Coord3 & cellCoord)
+					const sdb::Coord3 & cellCoord) const
 {
 	int k = TwentyFourFVBlueBlueEdge[i *4 + j][2];
 	return addEdgeNode(k, grid, cellCoord);
@@ -2020,7 +2021,7 @@ bool BccCell::snapToFront(BccNode * a, BccNode * b) const
 	const float la = Absolute<float>(a->val);
 	const float lb = Absolute<float>(b->val);
 	const float l = la + lb;
-	const float h = l * .1f;
+	const float h = l * .107f;
 	
 	Vector3F v = b->pos - a->pos;
 	
@@ -2157,35 +2158,97 @@ void BccCell::cutFVTetraAuxEdge(const int & i,
 		
 /// yellow
 	if(refiner.needSplitRedEdge(0) ) {
-		//m_rbr.splitPos(nodeA->val, nodeB->val, nodeA->pos, nodeB->pos);
-		
+		BccNode * yellowN = yellowNode(i, cell, grid, cellCoord);
+		if(!yellowN) {
+			yellowN = addYellowNode(i, grid, cellCoord);
+			yellowN->index = -1;
+			yellowN->pos = refiner.splitPos(nodeA->val, nodeB->val, nodeA->pos, nodeB->pos);
+			yellowN->prop = -1;
+		}
 	}
 	
 /// cyan
 	if(refiner.needSplitRedEdge(1) ) {
-		//m_rbr.splitPos(nodeC->val, nodeD->val, nodeC->pos, nodeD->pos);
-		
+		BccNode * cyanN = faceVaryBlueBlueNode(i, j, cell, grid, cellCoord);
+		if(!cyanN) {
+			cyanN = addFaceVaryEdgeNode(i, j, grid, cellCoord);
+			cyanN->index = -1;
+			cyanN->pos = refiner.splitPos(nodeC->val, nodeD->val, nodeC->pos, nodeD->pos);
+			cyanN->prop = -1;
+		}
 	}
 
 /// red blue	
 	if(refiner.needSplitBlueEdge(0) ) {
-		//m_rbr.splitPos(nodeA->val, nodeC->val, nodeA->pos, nodeC->pos);
-		
+		int k = TwentyFourFVBlueBlueEdge[edgei][0];
+		BccNode * redBlueN = cell->find(30000 + k);
+		if(!redBlueN) {
+			redBlueN = addNode(30000 + k, cell, grid, cellCoord);
+			redBlueN->index = -1;
+			redBlueN->pos = refiner.splitPos(nodeA->val, nodeC->val, nodeA->pos, nodeC->pos);
+			redBlueN->prop = -1;
+		}
 	}
 	
 	if(refiner.needSplitBlueEdge(1) ) {
-		//m_rbr.splitPos(nodeA->val, nodeD->val, nodeA->pos, nodeD->pos);
-		
+		int k = TwentyFourFVBlueBlueEdge[edgei][1];
+		BccNode * redBlueN = cell->find(30000 + k);
+		if(!redBlueN) {
+			redBlueN = addNode(30000 + k, cell, grid, cellCoord);
+			redBlueN->index = -1;
+			redBlueN->pos = refiner.splitPos(nodeA->val, nodeD->val, nodeA->pos, nodeD->pos);
+			redBlueN->prop = -1;
+		}
 	}
 	
+/// far side red blue in neighbor cell
+	const sdb::Coord3 neiC = neighborCoord(cellCoord, i);
+	sdb::Array<int, BccNode> * neiCell = grid->findCell(neiC);
+	
 	if(refiner.needSplitBlueEdge(2) ) {
-		//m_rbr.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
-		
+		if(neiCell) {
+			int k = TwentyFourFVBlueBlueEdge[edgei][4];
+			BccNode * redBlueN = neiCell->find(30000 + k);
+			if(!redBlueN) {
+				redBlueN = addNode(30000 + k, neiCell, grid, neiC);
+				redBlueN->index = -1;
+				redBlueN->pos = refiner.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
+				redBlueN->prop = -1;
+			}
+		}
+		else {
+			int k = TwentyFourFVBlueBlueEdge[edgei][0];
+			BccNode * redBlueN = cell->find(30000 + i * 10000 + k);
+			if(!redBlueN) {
+				redBlueN = addNode(30000 + i * 10000 + k, cell, grid, cellCoord);
+				redBlueN->index = -1;
+				redBlueN->pos = refiner.splitPos(nodeB->val, nodeC->val, nodeB->pos, nodeC->pos);
+				redBlueN->prop = -1;
+			}
+		}
 	}
 	
 	if(refiner.needSplitBlueEdge(3) ) {
-		//m_rbr.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
-		
+		if(neiCell) {
+			int k = TwentyFourFVBlueBlueEdge[edgei][5];
+			BccNode * redBlueN = neiCell->find(30000 + k);
+			if(!redBlueN) {
+				redBlueN = addNode(30000 + k, neiCell, grid, neiC);
+				redBlueN->index = -1;
+				redBlueN->pos = refiner.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
+				redBlueN->prop = -1;
+			}
+		}
+		else {
+			int k = TwentyFourFVBlueBlueEdge[edgei][1];
+			BccNode * redBlueN = cell->find(30000 + i * 10000 + k);
+			if(!redBlueN) {
+				redBlueN = addNode(30000 + i * 10000 + k, cell, grid, cellCoord);
+				redBlueN->index = -1;
+				redBlueN->pos = refiner.splitPos(nodeB->val, nodeD->val, nodeB->pos, nodeD->pos);
+				redBlueN->prop = -1;
+			}
+		}
 	}
 }
 
@@ -2201,9 +2264,9 @@ void BccCell::cutAuxEdge(RedBlueRefine & refiner,
 	for(;i<6;++i) {
 		BccNode * faN = faceNode(i, cell, grid, cellCoord);
 /// negative side checked by previous cell
-		if((i&1) == 0 && faN->key == 15)
-			continue;
-			
+		//if((i&1) == 0 && faN->key == 15)
+		//	continue;
+						
 /// per tetra
 		for(j=0;j<4;++j) {
 			cutFVTetraAuxEdge(i, j, redN, faN, refiner, cell, grid, cellCoord);
