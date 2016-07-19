@@ -24,7 +24,7 @@ public:
 	void buildGraph();
 	
 	template<typename Tf>
-	void calculateDistance(const Tf * func)
+	void calculateDistance(const Tf * func, const float & shellThickness)
 	{
 		typename aphid::cvx::Tetrahedron;
 		aphid::cvx::Tetrahedron tetshp;
@@ -40,7 +40,7 @@ public:
 			}
 		}
 		
-		calculateDistanceOnFront(func);
+		calculateDistanceOnFront(func, shellThickness);
 		fastMarchingMethod();
 	}
 	

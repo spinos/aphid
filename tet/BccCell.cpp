@@ -2021,7 +2021,8 @@ bool BccCell::snapToFront(BccNode * a, BccNode * b) const
 	const float la = Absolute<float>(a->val);
 	const float lb = Absolute<float>(b->val);
 	const float l = la + lb;
-	const float h = l * .13f;
+#define SNAP_FACTOR 0.141f
+	const float h = l * SNAP_FACTOR;
 	
 	Vector3F v = b->pos - a->pos;
 	

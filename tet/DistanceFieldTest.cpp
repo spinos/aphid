@@ -51,7 +51,7 @@ bool DistanceFieldTest::init()
 	m_distFunc.addBox(Vector3F(-40.f, -8.f, -10.f),
 						Vector3F(40.f, -5.f, 40.f) );
 	
-	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc);
+	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc, .45f);
 	m_fld.markInsideOutside();
 	
 	return true;

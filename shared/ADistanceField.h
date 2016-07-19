@@ -49,14 +49,14 @@ protected:
 	void initNodes();
 	
 	template<typename Tf>
-	void calculateDistanceOnFront(const Tf * func)
+	void calculateDistanceOnFront(const Tf * func, const float & shellThickness)
 	{
 		const int n = numNodes();
 		int i = 0;
 		for(;i<n;++i) {
 			DistanceNode * d = &nodes()[i];
 			if(d->label == sdf::StFront) {
-				d->val = func->calculateDistance(d->pos);
+				d->val = func->calculateDistance(d->pos) - shellThickness;
 				d->stat = sdf::StKnown; /// accept
 			}
 		}
