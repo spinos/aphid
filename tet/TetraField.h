@@ -48,8 +48,10 @@ public:
 	bool checkTetraVolume();
 	void verbose();
 	
-protected:
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
+	void getTriangleShape(aphid::cvx::Triangle & t, const int & i) const;
+	
+protected:
 	void markTetraOnFront(const int & i);
 	
 private:

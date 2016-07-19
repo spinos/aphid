@@ -31,6 +31,7 @@ public:
 private:
 	void drawGraph(aphid::GeoDrawer * dr);
 	void drawGrid(aphid::GeoDrawer * dr);
+	void drawFront(aphid::GeoDrawer * dr);
 	
 };
 

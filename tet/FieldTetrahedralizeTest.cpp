@@ -25,8 +25,8 @@ const char * FieldTetrahedralizeTest::titleStr() const
 bool FieldTetrahedralizeTest::init()
 {
 	int i, j, k;
-	int dimx = 12, dimy = 10, dimz = 12;
-	float gz = 2.97f;
+	int dimx = 14, dimy = 14, dimz = 14;
+	float gz = 2.4f;
 	m_fld.setH(gz);
 	m_nodeColScl = 1.f / gz / 8.f;
 	m_nodeDrawSize = gz * .0625f;
@@ -47,12 +47,13 @@ bool FieldTetrahedralizeTest::init()
 	m_fld.buildGraph();
 	m_fld.verbose();
 	
-	m_distFunc.addSphere(Vector3F(-3.56f, 1.263f, 18.735f), 11.637f );
+	m_distFunc.addSphere(Vector3F(-3.56f, 2.063f, 18.735f), 11.637f );
 	m_distFunc.addBox(Vector3F(-40.f, -9.3f, -10.f),
-						Vector3F(40.f, -5.43125f, 40.f) );
+						Vector3F(40.f, -3.43125f, 40.f) );
 	
 	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc);
 	m_fld.markInsideOutside();
+	
 	m_fld.buildRefinedMesh();
 	m_fld.buildGraph();
 	m_fld.verbose();
@@ -64,8 +65,9 @@ bool FieldTetrahedralizeTest::init()
 
 void FieldTetrahedralizeTest::draw(aphid::GeoDrawer * dr)
 {
-#define SHO_GRAPH 1
-#define SHO_GRID 1
+#define SHO_GRAPH 0
+#define SHO_GRID 0
+#define SHO_TRI 1
 
 #if SHO_GRAPH
 	drawGraph(dr);
@@ -74,12 +76,16 @@ void FieldTetrahedralizeTest::draw(aphid::GeoDrawer * dr)
 #if SHO_GRID
 	drawGrid(dr);
 #endif
+
+#if SHO_TRI
+	drawFront(dr);
+#endif
 }
 
 void FieldTetrahedralizeTest::drawGraph(aphid::GeoDrawer * dr)
 {
-#define SHO_NODE 0
-#define SHO_EDGE 1
+#define SHO_NODE 1
+#define SHO_EDGE 0
 	DistanceNode * v = m_fld.nodes();
 	int i;
 #if SHO_NODE	
@@ -141,6 +147,42 @@ void FieldTetrahedralizeTest::drawGrid(aphid::GeoDrawer * dr)
 		grd->next();
 	}
 
+}
+
+void FieldTetrahedralizeTest::drawFront(aphid::GeoDrawer * dr)
+{
+	cvx::Triangle atri;
+	const int nt = m_fld.numTriangles();
+	int i = 0;
+	
+	dr->setColor(0.f, .5f, .4f);
+	glBegin(GL_TRIANGLES);
+	for(;i<nt;++i) {
+	
+		m_fld.getTriangleShape(atri, i);
+		
+		glVertex3fv((const float *)&atri.P(0) );
+		glVertex3fv((const float *)&atri.P(1) );
+		glVertex3fv((const float *)&atri.P(2) );
+			
+	}
+	glEnd();
+	
+	dr->setColor(.1f, .1f, .1f);
+	glBegin(GL_LINES);
+	for(i=0;i<nt;++i) {
+	
+		m_fld.getTriangleShape(atri, i);
+		
+		glVertex3fv((const float *)&atri.P(0) );
+		glVertex3fv((const float *)&atri.P(1) );
+		glVertex3fv((const float *)&atri.P(1) );
+		glVertex3fv((const float *)&atri.P(2) );
+		glVertex3fv((const float *)&atri.P(2) );
+		glVertex3fv((const float *)&atri.P(0) );
+		
+	}
+	glEnd();
 }
 
 }

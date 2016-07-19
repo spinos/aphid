@@ -107,6 +107,8 @@ void TetraField::verbose()
 		<<"\n grid n edge ind "<<numEdgeIndices()
 		<<"\n grid edge length min/max "<<minEdgeLength()
 								<<"/"<<maxEdgeLength();
+	if(numTriangles() > 0)
+		std::cout<<"\n n triangle "<<numTriangles();
 	std::cout.flush();
 }
 
@@ -117,6 +119,14 @@ void TetraField::getTetraShape(cvx::Tetrahedron & b, const int & i) const
 			nodes()[a->iv1].pos,
 			nodes()[a->iv2].pos,
 			nodes()[a->iv3].pos);
+}
+
+void TetraField::getTriangleShape(cvx::Triangle & t, const int & i) const
+{
+	const sdb::Coord3 & c = triangleInd(i);
+	t.set(nodes()[c.x].pos,
+			nodes()[c.y].pos,
+			nodes()[c.z].pos);
 }
 
 void TetraField::markTetraOnFront(const int & i)
@@ -135,10 +145,6 @@ void TetraField::buildRefinedMesh()
 }
 
 bool TetraField::checkTetraVolume()
-{ 
-/// grid pos to field
-	extractGridNodes(nodes() );
-	return checkTetraVolumeExt(nodes() ); 
-}
+{ return checkTetraVolumeExt(nodes() ); }
 
 }

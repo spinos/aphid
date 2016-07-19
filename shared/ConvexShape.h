@@ -224,6 +224,8 @@ class Triangle {
 
 public:
 	Triangle();
+	void set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2);
 	void setP(const Vector3F & p, const int & idx);
 	void resetNC();
 	void setN(const Vector3F & n, const int & idx);

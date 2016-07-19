@@ -22,6 +22,7 @@ GridMaker::~GridMaker()
 void GridMaker::internalClear()
 {
 	m_grid.clear();
+	m_triInds.clear();
 	clearTetra();
 }
 
@@ -88,23 +89,37 @@ BccTetraGrid * GridMaker::grid()
 const ITetrahedron * GridMaker::tetra(const int & i) const
 { return m_tets[i]; }
 
+int GridMaker::numTriangles() const
+{ return m_triInds.size(); }
+
+const sdb::Coord3 & GridMaker::triangleInd(const int & i) const
+{ return m_triInds[i]; }
+
 void GridMaker::buildMesh1()
 {
 	m_grid.cutEdges();
-	std::cout<<"\n n grid node aft cut "<<m_grid.numNodes();
-	std::cout<<"\n n tetra b4 refine "<<numTetrahedrons();
 	clearTetra();
 	m_grid.countNodes();
 	RedBlueRefine rbr;
+	aphid::sdb::Array<aphid::sdb::Coord3, IFace > tris;
 	m_grid.begin();
 	while(!m_grid.end() ) {
 		BccCell fCell(m_grid.coordToCellCenter(m_grid.key() ) );
 		
-		fCell.connectRefinedTetrahedrons(m_tets, rbr, m_grid.value(), &m_grid, m_grid.key() );
+		fCell.connectRefinedTetrahedrons(m_tets, tris, rbr, m_grid.value(), &m_grid, m_grid.key() );
 		m_grid.next();
 	}
-	std::cout<<"\n n tetra aft refine "<<numTetrahedrons();
 	
+	m_triInds.clear();
+	
+	tris.begin();
+	while(!tris.end() ) {
+	
+		m_triInds.push_back(tris.key() );
+		tris.next();
+	}
+	
+	tris.clear();
 }
 
 }

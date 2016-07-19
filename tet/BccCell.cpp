@@ -2021,7 +2021,7 @@ bool BccCell::snapToFront(BccNode * a, BccNode * b) const
 	const float la = Absolute<float>(a->val);
 	const float lb = Absolute<float>(b->val);
 	const float l = la + lb;
-	const float h = l * .107f;
+	const float h = l * .13f;
 	
 	Vector3F v = b->pos - a->pos;
 	
@@ -2319,8 +2319,10 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::sdb::Coord3 & cellCoord) const
 {
-	if(!refiner.hasOption() ) 
+	if(!refiner.hasOption() ) {
+		refiner.refine();
 		return;
+	}
 		
 /// yellow
 	if(refiner.needSplitRedEdge(0) ) {
@@ -2417,6 +2419,7 @@ void BccCell::cutFVRefinerEdges(const int & i, const int & j,
 }
 
 void BccCell::connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
+					sdb::Array<sdb::Coord3, IFace > & triangles,
 					RedBlueRefine & refiner,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
@@ -2455,6 +2458,18 @@ void BccCell::connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
 				setTetrahedronVertices(*t, bt->iv0, bt->iv1, bt->iv2, bt->iv3);
 				t->index = dest.size();
 				dest.push_back(t);
+			}
+			
+			nt = refiner.numFrontTriangles();
+			for(k=0;k<nt;++k) {
+				
+				const IFace * bt = refiner.frontTriangle(k);
+				
+				if(!triangles.find(bt->key) ) {
+					IFace * t = new IFace;
+					t->key = bt->key;
+					triangles.insert(bt->key, t);
+				}
 			}
 		}
 	}

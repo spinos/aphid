@@ -19,6 +19,7 @@ class GridMaker {
 
 	BccTetraGrid m_grid;
 	std::vector<ITetrahedron *> m_tets;
+	std::vector<aphid::sdb::Coord3 > m_triInds;
 	
 public:
 	GridMaker();
@@ -29,11 +30,13 @@ public:
 	void buildGrid();
 	void buildMesh();
 	int numTetrahedrons() const;
+	int numTriangles() const;
 	
 	BccTetraGrid * grid();
 	
 protected:
 	const ITetrahedron * tetra(const int & i) const;
+	const aphid::sdb::Coord3 & triangleInd(const int & i) const;
 	
 	template<typename Tn>
 	void extractGridNodesIn(Tn * dst,

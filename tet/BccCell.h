@@ -378,6 +378,7 @@ public:
 					const aphid::sdb::Coord3 & cellCoord) const;
 	
 	void connectRefinedTetrahedrons(std::vector<ITetrahedron *> & dest,
+					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & triangles,
 					RedBlueRefine & refiner,
 					aphid::sdb::Array<int, BccNode> * cell,
 					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,

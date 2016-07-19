@@ -318,6 +318,10 @@ ShapeType Capsule::ShapeTypeId = TCapsule;
 Triangle::Triangle()
 {}
 
+void Triangle::set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2)
+{ m_p0 = p0; m_p1 = p1; m_p2 = p2; }
+
 void Triangle::setP(const Vector3F & p, const int & idx)
 { 
 	if(idx == 0) m_p0 = p;
