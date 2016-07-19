@@ -115,10 +115,24 @@ void RedBlueTest::setD(double x)
 
 void RedBlueTest::draw(aphid::GeoDrawer * dr)
 {
-	dr->setColor(.3f, .3f, .4f);
+	dr->setColor(.5f, .43f, .1f);
+	int i;
+	const int & nf = m_rbr.numFrontTriangles();
+	glBegin(GL_TRIANGLES);
+	for(i=0;i<nf;++i) {
+		const IFace * f = m_rbr.frontTriangle(i);
+		Vector3F a = m_p[f->key.x];
+		Vector3F b = m_p[f->key.y];
+		Vector3F c = m_p[f->key.z];
+		glVertex3fv((const float *)&a);
+		glVertex3fv((const float *)&b);
+		glVertex3fv((const float *)&c);
+	}
+	glEnd();
+	
+	dr->setColor(.1f, .1f, .14f);
 	const int nt = m_rbr.numTetra();
-	int i=0;
-	for(;i<nt;++i) {
+	for(i=0;i<nt;++i) {
 		const ITetrahedron * t = m_rbr.tetra(i);
 		
 		Vector3F a = m_p[t->iv0];

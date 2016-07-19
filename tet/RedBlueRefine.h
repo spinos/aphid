@@ -59,14 +59,15 @@ class RedBlueRefine {
 	float m_fa, m_fb, m_fc, m_fd;
 	float m_normalLen;
 	ITetrahedron m_tet[8];
+	IFace m_frontTri[2];
 	int m_a, m_b, m_c, m_d;
+	int m_N, m_numTri;
 /// ind to split v, 
 /// -1 : no split
 ///  0 : wait for input
 /// >0 : valid
 	int m_red[2];
 	int m_blue[4];
-	int m_N;
 	
 	enum SplitOption {
 		SpNone = 0,
@@ -112,6 +113,8 @@ public:
 	bool checkTetraVolume() const;
 	bool hasNormal() const;
 	const aphid::Vector3F & normal() const;
+	const int & numFrontTriangles() const;
+	const IFace * frontTriangle(const int & i) const;
 	
 private:
 /// sign changes
@@ -137,6 +140,11 @@ private:
 ///  0: 0
 /// -1: b to a
 	float edgeDir(const float & a, const float & b) const;
+	void findOneTriangle();
+	void buildTriangle(IFace & t,
+						const int & va, const int & vb, const int & vc);
+/// 0,1 0,2 3,2 3,1 
+	void findTwoBlue(int & b1, int & b2) const;
 	
 };
 

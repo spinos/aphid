@@ -115,6 +115,26 @@ Coord3 Coord3::ordered() const
 	return Coord3(a, b, c);
 }
 
+void Coord3::makeUnique()
+{
+	if(z > y && z > x)
+		return;
+		
+	const Coord3 d = *this;
+	if(y > x && y > z) {
+		x = d.z;
+		y = d.x;
+		z = d.y;
+		return;
+	}
+	
+	if(x > y && x > z) {
+		x = d.y;
+		y = d.z;
+		z = d.x;
+	}
+}
+
 const std::string Coord3::str() const 
 {
 	return (boost::format("(%1%,%2%,%3%)") % x % y % z).str();

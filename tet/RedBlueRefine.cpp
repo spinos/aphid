@@ -26,6 +26,7 @@ void RedBlueRefine::set(int a, int b, int c, int d)
 /// reset
 	m_red[0] = m_red[1] = -1;
 	m_blue[0] = m_blue[1] = m_blue[2] = m_blue[3] = -1;
+	m_numTri = 0;
 }
 
 void RedBlueRefine::evaluateDistance(float a, float b, float c, float d)
@@ -199,8 +200,12 @@ void RedBlueRefine::verbose() const
 	std::cout<<"\n red "<<m_red[0]<<", "<<m_red[1]
 			<<"\n blue "<<m_blue[0]<<", "<<m_blue[1]<<", "<<m_blue[2]<<", "<<m_blue[3];
 	if(hasNormal() )
-		std::cout<<"\n estimated N "<<m_normal;
-		
+		std::cout<<"\n estimated N "<<m_normal
+				<<"\n n tri "<<m_numTri;
+	if(m_numTri > 0) {
+		for(int i=0; i<m_numTri;++i)
+			std::cout<<"\n tri["<<i<<"] "<<m_frontTri[i].key;
+	}	
 }
 
 bool RedBlueRefine::hasOption() const
@@ -243,6 +248,12 @@ const int & RedBlueRefine::numTetra() const
 
 const ITetrahedron * RedBlueRefine::tetra(int i) const
 { return &m_tet[i]; }
+
+const int & RedBlueRefine::numFrontTriangles() const
+{ return m_numTri; }
+
+const IFace * RedBlueRefine::frontTriangle(const int & i) const
+{ return &m_frontTri[i]; }
 
 void RedBlueRefine::splitRedEdge(int i, int v, const aphid::Vector3F & p)
 { m_red[i] = v; m_p[4 + i] = p; }
@@ -319,8 +330,6 @@ bool RedBlueRefine::checkTetraVolume() const
 
 void RedBlueRefine::refine()
 {
-	if(m_opt == SpNone) return;
-	
 	switch (m_opt) {
 		case SpOneRed:
 			oneRedRefine();
@@ -350,40 +359,94 @@ void RedBlueRefine::refine()
 			twoBlueDownRefine();
 			break;	
 		default:
+			findOneTriangle();
 			break;
 	}
+}
+
+void RedBlueRefine::buildTriangle(IFace & t,
+						const int & va, const int & vb, const int & vc)
+{
+	const Vector3F p0 = m_p[pInd(va)];
+	Vector3F ab = m_p[pInd(vb)] - p0;
+	Vector3F ac = m_p[pInd(vc)] - p0;
+	Vector3F tn = ab.cross(ac);
+	if(tn.dot(m_normal) > 0.f )
+		t.key = sdb::Coord3(va, vb, vc);
+	else
+		t.key = sdb::Coord3(va, vc, vb);
+	t.key.makeUnique();
+}	
+
+void RedBlueRefine::findOneTriangle()
+{
+	if(!hasNormal() )
+		return;
+		
+	int fva = -1, fvb, fvc;
+	if(m_fb == 0.f && m_fc == 0.f && m_fd == 0.f) {
+		fva = m_b;
+		fvb = m_c;
+		fvc = m_d;
+	}
+	else if(m_fa == 0.f && m_fc == 0.f && m_fd == 0.f) {
+		fva = m_a;
+		fvb = m_c;
+		fvc = m_d;
+	}
+	else if(m_fa == 0.f && m_fb == 0.f && m_fd == 0.f) {
+		fva = m_a;
+		fvb = m_b;
+		fvc = m_d;
+	}
+	else if(m_fa == 0.f && m_fc == 0.f && m_fb == 0.f) {
+		fva = m_a;
+		fvb = m_c;
+		fvc = m_b;
+	}
+	
+	if(fva < 0) return;
+	
+	buildTriangle(m_frontTri[0], fva, fvb, fvc);
+	m_numTri = 1;
 }
 	
 void RedBlueRefine::oneRedRefine()
 {
+	IFace & f = m_frontTri[0];
 	if(m_red[0] > 0) {
 		splitRed(0, m_tet[0], m_tet[1], m_red[0]);
+		buildTriangle(f, m_red[0], m_c, m_d);
 	}
 	else {
 		splitRed(1, m_tet[0], m_tet[1], m_red[1]);
+		buildTriangle(f, m_red[1], m_a, m_b);
 	}
 	m_N = 2;
+	m_numTri = 1;
 }
 
 void RedBlueRefine::oneBlueRefine()
 {
+	IFace & f = m_frontTri[0];
 	if(m_blue[0] > 0) {
 		splitBlue(0, m_tet[0], m_tet[1], m_blue[0]);
-	
+		buildTriangle(f, m_blue[0], m_b, m_d);
 	}
 	else if(m_blue[1] > 0) {
 		splitBlue(1, m_tet[0], m_tet[1], m_blue[1]);
-		
+		buildTriangle(f, m_blue[1], m_b, m_c);
 	}
 	else if(m_blue[2] > 0) {
 		splitBlue(2, m_tet[0], m_tet[1], m_blue[2]);
-		
+		buildTriangle(f, m_blue[2], m_a, m_d);
 	}
 	else {
 		splitBlue(3, m_tet[0], m_tet[1], m_blue[3]);
-
+		buildTriangle(f, m_blue[3], m_a, m_c);
 	}
 	m_N = 2;
+	m_numTri = 1;
 }
 
 void RedBlueRefine::splitRed(int i, ITetrahedron & t0, ITetrahedron & t1,
@@ -430,47 +493,60 @@ void RedBlueRefine::splitBlue(int i, ITetrahedron & t0, ITetrahedron & t1,
 
 void RedBlueRefine::oneRedOneBlueRefine()
 {
+	int fva, fvb, fvc;
 	if(m_red[0] > 0) {
 		splitRed(0, m_tet[0], m_tet[1], m_red[0]);
+		fva = m_red[0];
 		
 		if(m_blue[0] > 0) {
 			splitBlue(0, m_tet[0], m_tet[2], m_blue[0]);
-	
+			fvb = m_blue[0];
+			fvc = m_d;
 		}
 		else if(m_blue[1] > 0) {
 			splitBlue(1, m_tet[0], m_tet[2], m_blue[1]);
-			
+			fvb = m_blue[1];
+			fvc = m_c;
 		}
 		else if(m_blue[2] > 0) {
 			splitBlue(2, m_tet[1], m_tet[2], m_blue[2]);
-			
+			fvb = m_blue[2];
+			fvc = m_d;
 		}
 		else {
 			splitBlue(3, m_tet[1], m_tet[2], m_blue[3]);
-
+			fvb = m_blue[3];
+			fvc = m_c;
 		}
 	}
 	else {
 		splitRed(1, m_tet[0], m_tet[1], m_red[1]);
+		fva = m_red[1];
 		
 		if(m_blue[0] > 0) {
 			splitBlue(0, m_tet[0], m_tet[2], m_blue[0]);
-	
+			fvb = m_blue[0];
+			fvc = m_b;
 		}
 		else if(m_blue[1] > 0) {
 			splitBlue(1, m_tet[1], m_tet[2], m_blue[1]);
-			
+			fvb = m_blue[1];
+			fvc = m_b;
 		}
 		else if(m_blue[2] > 0) {
 			splitBlue(2, m_tet[0], m_tet[2], m_blue[2]);
-			
+			fvb = m_blue[2];
+			fvc = m_a;
 		}
 		else {
 			splitBlue(3, m_tet[1], m_tet[2], m_blue[3]);
-
+			fvb = m_blue[3];
+			fvc = m_a;
 		}
 	}
 	m_N = 3;
+	buildTriangle(m_frontTri[0], fva, fvb, fvc);
+	m_numTri = 1;
 }
 
 void RedBlueRefine::oneRedUpTwoBlueRefine()
@@ -503,8 +579,32 @@ void RedBlueRefine::oneRedUpTwoBlueRefine()
 		setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[1], m_blue[3]);
 		setTetrahedronVertices(m_tet[5], m_red[1], m_d, m_blue[1], m_blue[3]);
 	}
-	
 	m_N = 6;
+	
+	int fvb, fvc;
+	findTwoBlue(fvb, fvc);
+	buildTriangle(m_frontTri[0], m_red[1], fvb, fvc);
+	m_numTri = 1;
+}
+
+void RedBlueRefine::findTwoBlue(int & b1, int & b2) const
+{
+	if(m_blue[0] > 0) {
+		b1 = m_blue[0];
+		if(m_blue[1] > 0)
+			b2 = m_blue[1];
+		else 
+			b2 = m_blue[2];
+			
+	}
+	else {
+		b1 = m_blue[3];
+		if(m_blue[1] > 0)
+			b2 = m_blue[1];
+		else
+			b2 = m_blue[2];
+			
+	}
 }
 
 void RedBlueRefine::oneRedDownTwoBlueRefine()
@@ -537,8 +637,12 @@ void RedBlueRefine::oneRedDownTwoBlueRefine()
 		setTetrahedronVertices(m_tet[4], m_red[0], m_red[1], m_blue[3], m_blue[2]);
 		setTetrahedronVertices(m_tet[5], m_red[0], m_b, m_blue[2], m_blue[3]);	
 	}
-
 	m_N = 6;
+	
+	int fvb, fvc;
+	findTwoBlue(fvb, fvc);
+	buildTriangle(m_frontTri[0], m_red[0], fvb, fvc);
+	m_numTri = 1;
 }
 
 void RedBlueRefine::twoRedTwoBlueRefine()
@@ -554,6 +658,19 @@ void RedBlueRefine::twoRedTwoBlueRefine()
 	setTetrahedronVertices(m_tet[7], m_red[0], m_red[1], m_blue[2], m_blue[0]);
 	
 	m_N = 8;
+	
+	int b1, b2;
+	if(m_fa * m_fc < 0.f) {
+		b1 = m_blue[0];
+		b2 = m_blue[3];
+	}
+	else {
+		b1 = m_blue[1];
+		b2 = m_blue[2];
+	}
+	buildTriangle(m_frontTri[0], m_red[0], m_red[1], b1);
+	buildTriangle(m_frontTri[1], m_red[0], m_red[1], b2);
+	m_numTri = 2;
 }
 
 void RedBlueRefine::fourBlueRefine()
@@ -569,6 +686,10 @@ void RedBlueRefine::fourBlueRefine()
 	setTetrahedronVertices(m_tet[7], m_blue[2], m_red[1], m_blue[1], m_blue[3]);
 	
 	m_N = 8;
+	
+	buildTriangle(m_frontTri[0], m_blue[2], m_blue[0], m_blue[1]);
+	buildTriangle(m_frontTri[1], m_blue[2], m_blue[1], m_blue[3]);
+	m_numTri = 2;
 }
 
 void RedBlueRefine::twoBlueUpRefine()
@@ -579,16 +700,17 @@ void RedBlueRefine::twoBlueUpRefine()
 		setTetrahedronVertices(m_tet[1], m_c, m_red[1], m_blue[0], m_b);
 		setTetrahedronVertices(m_tet[2], m_blue[0], m_blue[1], m_b, m_red[1]);
 		setTetrahedronVertices(m_tet[3], m_d, m_red[1], m_b, m_blue[1]);
-	
+		buildTriangle(m_frontTri[0], m_blue[0], m_blue[1], m_b);
 	}
 	else {
 		setTetrahedronVertices(m_tet[0], m_a, m_b, m_blue[2], m_blue[3]);
 		setTetrahedronVertices(m_tet[1], m_c, m_red[1], m_a, m_blue[2]);
 		setTetrahedronVertices(m_tet[2], m_blue[2], m_blue[3], m_red[1], m_a);
 		setTetrahedronVertices(m_tet[3], m_d, m_red[1], m_blue[3], m_a);
-	
+		buildTriangle(m_frontTri[0], m_blue[2], m_blue[3], m_a);
 	}
 	m_N = 4;
+	m_numTri = 1;
 }
 	
 void RedBlueRefine::twoBlueDownRefine()
@@ -599,16 +721,17 @@ void RedBlueRefine::twoBlueDownRefine()
 		setTetrahedronVertices(m_tet[1], m_blue[0], m_blue[2], m_c, m_d);
 		setTetrahedronVertices(m_tet[2], m_blue[0], m_blue[2], m_d, m_red[0]);
 		setTetrahedronVertices(m_tet[3], m_red[0], m_b, m_blue[2], m_d);
-	
+		buildTriangle(m_frontTri[0], m_blue[0], m_blue[2], m_d);
 	}
 	else {
 		setTetrahedronVertices(m_tet[0], m_a, m_red[0], m_c, m_blue[1]);
 		setTetrahedronVertices(m_tet[1], m_blue[1], m_blue[3], m_c, m_d);
 		setTetrahedronVertices(m_tet[2], m_blue[1], m_blue[3], m_red[0], m_c);
 		setTetrahedronVertices(m_tet[3], m_red[0], m_b, m_c, m_blue[3]);
-	
+		buildTriangle(m_frontTri[0], m_blue[1], m_blue[3], m_c);
 	}
 	m_N = 4;
+	m_numTri = 1;
 }
 
 }
