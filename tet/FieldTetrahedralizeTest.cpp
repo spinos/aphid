@@ -26,7 +26,7 @@ bool FieldTetrahedralizeTest::init()
 {
 	int i, j, k;
 	int dimx = 14, dimy = 14, dimz = 14;
-	float gz = 2.2f;
+	float gz = 2.3f;
 	m_fld.setH(gz);
 	m_nodeColScl = 1.f / gz / 8.f;
 	m_nodeDrawSize = gz * .0625f;
@@ -51,7 +51,7 @@ bool FieldTetrahedralizeTest::init()
 	m_distFunc.addBox(Vector3F(-40.f, -9.3f, -10.f),
 						Vector3F(40.f, -3.33125f, 40.f) );
 	
-	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc, 1.1f);
+	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc, .5f);
 	m_fld.markInsideOutside();
 	
 	m_fld.buildRefinedMesh();

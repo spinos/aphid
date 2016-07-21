@@ -26,15 +26,18 @@ public:
 	template<typename Tf>
 	void calculateDistance(const Tf * func, const float & shellThickness)
 	{
+		clearDirtyEdges();
+		
 		typename aphid::cvx::Tetrahedron;
 		aphid::cvx::Tetrahedron tetshp;
-/// intersect any tetra
+
 		const int nt = numTetrahedrons();
 		int i = 0;
 		for(;i<nt;++i) {
 			
 			getTetraShape(tetshp, i);
-			
+
+/// intersect any tetra			
 			if(func-> template intersect <aphid::cvx::Tetrahedron>(&tetshp) ) {
 				markTetraOnFront(i);
 			}

@@ -15,7 +15,10 @@ ADistanceField::ADistanceField()
 {}
 
 ADistanceField::~ADistanceField()
-{}
+{ clearDirtyEdges(); }
+
+sdb::Array<sdb::Coord2, EdgeRec > * ADistanceField::dirtyEdges()
+{ return &m_dirtyEdges; }
 
 void ADistanceField::nodeColor(Vector3F & dst, const DistanceNode & n,
 						const float & scale) const
@@ -208,5 +211,19 @@ void ADistanceField::setFarNodeInside()
 		}
 	}
 }
+
+void ADistanceField::clearDirtyEdges()
+{ m_dirtyEdges.clear(); }
+
+void ADistanceField::addDirtyEdge(const int & a, const int & b)
+{ 
+	sdb::Coord2 k = sdb::Coord2(a, b).ordered();
+	EdgeRec * e = m_dirtyEdges.find(k);
+	if(!e) {
+		e = new EdgeRec;
+		e->key = k;
+		m_dirtyEdges.insert(k, e );
+	}
+}	  
 
 }

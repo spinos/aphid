@@ -136,6 +136,12 @@ void TetraField::markTetraOnFront(const int & i)
 	nodes()[a->iv1].label = sdf::StFront;
 	nodes()[a->iv2].label = sdf::StFront;
 	nodes()[a->iv3].label = sdf::StFront;
+	addDirtyEdge(a->iv0, a->iv1);
+	addDirtyEdge(a->iv0, a->iv2);
+	addDirtyEdge(a->iv0, a->iv3);
+	addDirtyEdge(a->iv1, a->iv2);
+	addDirtyEdge(a->iv1, a->iv3);
+	addDirtyEdge(a->iv2, a->iv3);
 }
 
 void TetraField::buildRefinedMesh()

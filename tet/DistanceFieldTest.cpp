@@ -25,8 +25,8 @@ const char * DistanceFieldTest::titleStr() const
 bool DistanceFieldTest::init()
 {
 	int i, j, k;
-	int dimx = 12, dimy = 10, dimz = 9;
-	float gz = 2.9f;
+	int dimx = 12, dimy = 12, dimz = 12;
+	float gz = 3.f;
 	m_fld.setH(gz);
 	m_nodeColScl = 1.f / gz / 8.f;
 	m_nodeDrawSize = gz * .0625f;
@@ -47,13 +47,16 @@ bool DistanceFieldTest::init()
 	m_fld.buildGraph();
 	m_fld.verbose();
 	
-	m_distFunc.addSphere(Vector3F(-3.56f, 1.26f, 18.435f), 11.637f );
-	m_distFunc.addBox(Vector3F(-40.f, -8.f, -10.f),
-						Vector3F(40.f, -5.f, 40.f) );
+	m_distFunc.addSphere(Vector3F(-3.56f, 4.216f, 17.435f), 11.637f );
+	m_distFunc.addSphere(Vector3F(0.f, -22.43f, 0.2f), 21.f );
+	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
+	//					Vector3F(40.f, -7.87f, 40.f) );
+	//m_distFunc.addSphere(Vector3F(0.f, -22200.f, 0.f), 22195.1f );
 	
-	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc, .45f);
+	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc, 0.1f);
 	m_fld.markInsideOutside();
-	
+	std::cout<<"\n max estimated error "<<m_fld.estimateError<BDistanceFunction>(&m_distFunc, 0.1f, gz * .5f);
+	std::cout.flush();
 	return true;
 }
 
@@ -65,12 +68,14 @@ void DistanceFieldTest::draw(aphid::GeoDrawer * dr)
 void DistanceFieldTest::drawGraph(aphid::GeoDrawer * dr)
 {
 	int i;
+	DistanceNode * v = m_fld.nodes();
+	
 #define SHO_NODE 1
 #define SHO_EDGE 0
+#define SHO_ERR 1
 
 #if SHO_NODE	
 	dr->setColor(.5f, 0.f, 0.f);
-	DistanceNode * v = m_fld.nodes();
 	const int nv = m_fld.numNodes();
 
 	Vector3F col;
@@ -100,7 +105,23 @@ void DistanceFieldTest::drawGraph(aphid::GeoDrawer * dr)
 	glEnd();
 #endif
 
-	
+#if SHO_ERR
+	dr->setColor(0.1f, 0.1f, .1f);
+	glBegin(GL_LINES);
+	sdb::Array<sdb::Coord2, EdgeRec > * egs = m_fld.dirtyEdges();
+	egs->begin();
+	while(!egs->end() ) {
+		
+		if(egs->value()->val > .06f) {
+			dr->vertex(v[egs->key().x].pos);
+			dr->vertex(v[egs->key().y].pos);
+		}
+		
+		egs->next();
+	}
+	glEnd();
+#endif
+
 }
 
 }

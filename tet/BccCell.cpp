@@ -2054,6 +2054,7 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 					const aphid::sdb::Coord3 & cellCoord) const
 {
 	int i, k;
+
 /// per edge
 	i = 0;
 	for(;i<12;++i) {
@@ -2079,13 +2080,14 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 			}
 		}
 	}
-		
+			
 	BccNode * redN = cell->find(15);
 	
 	if(redN->prop == NRed)
 		return;
 		
 /// per face
+	int nYellow = 0;
 	i = 0;
 	for(;i<6;++i) {
 		BccNode * yellowN = yellowNode(i, cell, grid, cellCoord);
@@ -2109,6 +2111,7 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 				getSplitPos(yellowN->pos, redN, faN); 
 				yellowN->val = 0.f;
 				yellowN->index = -1;
+				nYellow++;
 			}
 		}
 	}
@@ -2116,12 +2119,15 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 /// per vertex
 	i = 0;
 	for(;i<8;++i) {
+		BccNode * blueN = blueNode(i+6, cell, grid, cellCoord);
+		if(blueN->prop == NBlue)
+			continue;
+
 		k = keyToRedBlueCut(i+6);
 		BccNode * redBlueN = cell->find(k);
 		if(redBlueN)
 			continue;
-			
-		BccNode * blueN = blueNode(i+6, cell, grid, cellCoord);
+						
 		if(redN->val * blueN->val < 0.f) {
 			if(snapToFront(redN, blueN) ) {
 				if(blueN->val == 0.f)
@@ -2136,7 +2142,54 @@ void BccCell::cutSignChangeEdge(aphid::sdb::Array<int, BccNode> * cell,
 			}
 		}
 	}
+}
 
+/// when 2 faces are closer than front blue to red, move blue inside to cut red-blue edge
+void BccCell::wrapEdge(const BccNode * redN,
+					aphid::sdb::Array<int, BccNode> * cell,
+					aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
+					const aphid::sdb::Coord3 & cellCoord) const
+{
+	float y2y, r2b;
+	int i = 0;
+	for(;i<12;++i) {
+/// edge is cut, no blue on front
+		//BccNode * cyanN = blueBlueNode(i, cell, grid, cellCoord);
+		//if(cyanN)
+		//	continue;			
+		
+		BccNode * y1N = redRedNode(TwelveBlueBlueEdges[i][3], cell, grid, cellCoord);
+		if(!y1N)
+			continue;
+			
+		BccNode * y2N = redRedNode(TwelveBlueBlueEdges[i][4], cell, grid, cellCoord);
+		if(!y2N)
+			continue;
+
+		y2y = (y1N->pos - y2N->pos).length();
+		
+		BccNode * b1N = blueNode(TwelveBlueBlueEdges[i][0], cell, grid, cellCoord);
+		if(b1N->prop == NBlue) {
+			r2b = (b1N->pos - redN->pos).length();
+			
+			//if(r2b < y2y) {
+				b1N->val -= redN->val * 1.5f;
+				b1N->prop = -1;
+				std::cout<<"\n b1 "<<b1N->val;
+			//}
+		}
+		
+		BccNode * b2N = blueNode(TwelveBlueBlueEdges[i][1], cell, grid, cellCoord);
+		if(b2N->prop == NBlue) {
+			r2b = (b2N->pos - redN->pos).length();
+			
+			//if(r2b < y2y) {
+				b2N->val -= redN->val * .5f;
+				b2N->prop = -1;
+				std::cout<<"\n b2 "<<b2N->val;
+			//}
+		}
+	}
 }
 
 void BccCell::cutFVTetraAuxEdge(const int & i,
@@ -2272,8 +2325,8 @@ void BccCell::cutAuxEdge(RedBlueRefine & refiner,
 	for(;i<6;++i) {
 		BccNode * faN = faceNode(i, cell, grid, cellCoord);
 /// negative side checked by previous cell
-		//if((i&1) == 0 && faN->key == 15)
-		//	continue;
+		if((i&1) == 0 && faN->key == 15)
+			continue;
 						
 /// per tetra
 		for(j=0;j<4;++j) {

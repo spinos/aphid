@@ -10,6 +10,7 @@
 #pragma once
 #include "AGraph.h"
 #include "BDistanceFunction.h"
+#include <Array.h>
 #include <map>
 
 namespace aphid {
@@ -33,9 +34,16 @@ struct DistanceNode {
 	short label;
 	short stat;
 };
+
+struct EdgeRec {
+	sdb::Coord2 key;
+	float val;
+};
  
 class ADistanceField : public AGraph<DistanceNode> {
 
+	sdb::Array<sdb::Coord2, EdgeRec > m_dirtyEdges;
+	
 public:
 	ADistanceField();
 	virtual ~ADistanceField();
@@ -44,6 +52,43 @@ public:
 					const float & scale) const;
 	
 	void markInsideOutside(const int & originNodeInd = -1);
+	
+	sdb::Array<sdb::Coord2, EdgeRec > * dirtyEdges();
+
+/// per dirty edge, at linear center delta x, compare actual distance to recovered distance
+	template<typename Tf>
+	float estimateError(const Tf * func, const float & shellThickness,
+						const float & h)
+	{
+		m_dirtyEdges.begin();
+		float act, rec, err, mxErr = 0.f;
+		Vector3F q;
+		while(!m_dirtyEdges.end() ) {
+			
+			const sdb::Coord2 i = m_dirtyEdges.key();
+			const DistanceNode & n1 = nodes()[i.x];
+			const DistanceNode & n2 = nodes()[i.y];
+			
+/// do not test inside edge
+			if(n1.val * n2.val < 0.f
+			|| (n1.val > 0.f && n2.val > 0.f)  ) {
+				Vector3F q = (n1.pos + n2.pos ) * .5f;
+								
+				act = func->calculateDistance(q) - shellThickness;
+				rec = (n1.val + n2.val ) * .5f;
+				err = Absolute<float>(rec - act) / h;
+				if(mxErr < err)
+					mxErr = err;
+			}
+			else 
+				err = 0.f;
+				
+			m_dirtyEdges.value()->val = err;
+			
+			m_dirtyEdges.next();
+		}
+		return mxErr;
+	}
 	
 protected:
 	void initNodes();
@@ -61,6 +106,10 @@ protected:
 			}
 		}
 	}
+	
+/// edges marked to estimate error
+	void clearDirtyEdges();
+	void addDirtyEdge(const int & a, const int & b);
 	
 /// propagate distance value	
 	void fastMarchingMethod();
