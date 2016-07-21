@@ -55,27 +55,16 @@ void BccCell3::insertBlue0(const Vector3F & center,
 {
 	const float & gz = grid->levelCellSize(cellCoord.w);
 	int i, j;
-	for(i=0; i<6;++i) {
-		if(!grid->findNeighborCell(cellCoord, i ) ) {
-			BccNode * ni = new BccNode;
-			ni->key = i;
-			ni->prop = BccCell::NFace;
-			
-			grid->GetFaceNodeOffset(ni->pos, i);
-			ni->pos = center + ni->pos * .5f * gz;
-			insert(i, ni);
-		}
-	}
 	
 	Vector3F q;
 	for(i=0;i<8;++i) {
 		
 		bool toadd = true;
-		grid->GetVertexNodeOffset(q, i);
+		sdb::gdt::GetVertexNodeOffset(q, i);
 		q = center + q * gz * .5f;
 		
 		for(j=0;j<7;++j) {
-			int neighborJ = grid->GetVertexNeighborJ(i, j);
+			int neighborJ = sdb::gdt::GetVertexNeighborJ(i, j);
 			
 			BccCell3 * neighborCell = grid->findNeighborCell(cellCoord, neighborJ);
 			if(neighborCell) {
@@ -101,6 +90,26 @@ void BccCell3::insertBlue1(const Vector3F & center,
 					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
 {
 
+}
+
+void BccCell3::insertFaceOnBoundary(const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
+{
+	const float & gz = grid->levelCellSize(cellCoord.w);
+	const BccNode * redN = find(15);
+	const Vector3F & redP = redN->pos;
+	
+	for(int i=0; i<6;++i) {
+		if(grid->isCellFaceOnBoundray(cellCoord, i ) ) {
+			BccNode * ni = new BccNode;
+			ni->key = i;
+			ni->prop = BccCell::NFace;
+			
+			sdb::gdt::GetFaceNodeOffset(ni->pos, i);
+			ni->pos = redP + ni->pos * .5f * gz;
+			insert(i, ni);
+		}
+	}
 }
 
 const bool & BccCell3::hasChild() const

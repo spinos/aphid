@@ -33,6 +33,9 @@ private:
 	void drawGrid(aphid::GeoDrawer * dr);
 	void drawNode(BccCell3 * cell, aphid::GeoDrawer * dr);
 	void subdivideGrid(int level);
+/// for each cell divied, must have same level neighbor cell on six faces
+/// level change cross face < 2
+	void enforceBoundary(const std::vector<aphid::sdb::Coord4 > & ks);
 	
 };
 

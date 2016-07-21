@@ -49,8 +49,9 @@ bool AdaptiveGridTest::init()
 	m_distFunc.addSphere(Vector3F(0.f, 1.421f, 0.f), 8.437f );
 	
 	subdivideGrid(0);
-	//subdivideGrid(1);
+	subdivideGrid(1);
 	//subdivideGrid(2);
+	//subdivideGrid(3);
 	//m_distFunc.addSphere(Vector3F(0.f, -22.43f, 0.2f), 21.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
@@ -69,6 +70,9 @@ bool AdaptiveGridTest::init()
 
 void AdaptiveGridTest::subdivideGrid(int level)
 {
+/// track cells divided
+	std::vector<sdb::Coord4 > divided;
+	
 	BoundingBox cellBox;
 	
 	m_grd.begin();
@@ -80,13 +84,9 @@ void AdaptiveGridTest::subdivideGrid(int level)
 			
 			if(m_distFunc.intersect<BoundingBox >(&cellBox) ) {
 				
-				for(int i=0;i<8;++i) {
-					m_grd.getCellChildBox(cellBox, i, m_grd.key() );
-					//std::cout<<"\n child box"<<i<<" "<<cellBox;
-					if(m_distFunc.intersect<BoundingBox >(&cellBox) ) {
-						m_grd.subdivide(m_grd.key(), i);
-					}
-				}
+				m_grd.subdivideCell(m_grd.key() );
+				
+				divided.push_back(m_grd.key() );
 			}
 		}
 		
@@ -94,6 +94,27 @@ void AdaptiveGridTest::subdivideGrid(int level)
 			break;
 			
 		m_grd.next();
+	}
+	
+	if(level > 1)
+		enforceBoundary(divided);
+		
+	divided.clear();
+}
+
+void AdaptiveGridTest::enforceBoundary(const std::vector<sdb::Coord4 > & ks)
+{
+	std::vector<sdb::Coord4 >::const_iterator it = ks.begin();
+	for(;it!=ks.end();++it) {
+		
+		for(int i=0; i< 6;++i) {
+			const sdb::Coord4 nei = m_grd.neighborCoord(*it, i);
+
+			if(!m_grd.findCell(nei) ) {
+				const sdb::Coord4 par = m_grd.parentCoord(nei);
+				m_grd.subdivideCell(par );
+			}
+		}
 	}
 }
 
@@ -114,7 +135,7 @@ void AdaptiveGridTest::drawGrid(aphid::GeoDrawer * dr)
 		
 		m_grd.GetCellColor(cellCol, m_grd.key().w );
 		m_grd.getCellBBox(cellBox, m_grd.key() );
-		cellBox.expand(-.04f - .04f * m_grd.key().w );
+		//cellBox.expand(-.04f - .04f * m_grd.key().w );
 		
 		dr->setColor(cellCol.x, cellCol.y, cellCol.z);
 		dr->boundingBox(cellBox);

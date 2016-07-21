@@ -19,9 +19,9 @@ public:
 	virtual ~AdaptiveBccGrid3();
 	
 	BccCell3 * addCell(const aphid::Vector3F & pref, const int & level = 0);
-	BccCell3 * subdivide(const aphid::sdb::Coord4 & cellCoord, const int & i);
-	
-/// red blue to each cell
+/// add 8 child cells
+	void subdivideCell(const aphid::sdb::Coord4 & cellCoord);
+/// node to each cell
 	void build();
 	
 private:

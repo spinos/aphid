@@ -68,20 +68,16 @@ public:
 	CellType * subdivide(const Coord4 & cellCoord, const int & i);
 	
 	CellType * findCell(const Coord4 & c);
+	Coord4 parentCoord(const Coord4 & c) const;
 /// i 0:25
-	CellType * findNeighborCell(const Coord4 & c, const int & i);
+	Coord4 neighborCoord(const Coord4 & c, const int & i) const;
 	
+	CellType * findNeighborCell(const Coord4 & c, const int & i);
+/// i 0:5 search for level 0 cell	
+	bool isCellFaceOnBoundray(const Coord4 & cellCoord, const int & i);
 	
 	static float CellLevelLegend[12][3];
 	
-/// i 0:5
-	static void GetFaceNodeOffset(aphid::Vector3F & dst, const int & i);
-/// i 0:7
-	static void GetVertexNodeOffset(aphid::Vector3F & dst, const int & i);
-/// i 0:25
-	static void GetNeighborOffset(aphid::Vector3F & dst, const int & i);
-/// i 0:7 j 0:6
-	static int GetVertexNeighborJ(const int & i, const int & j);
 	static void GetCellColor(Vector3F & c, const int & level);
 	
 protected:
@@ -291,8 +287,14 @@ Vector3F AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellChildCenter(const Coo
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
-CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::findNeighborCell(const Coord4 & c,
-						const int & i)
+Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::parentCoord(const Coord4 & c) const
+{
+	const Vector3F q = cellCenter(c);
+	return cellCoordAtLevel(q, c.w - 1);
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::neighborCoord(const Coord4 & c, const int & i) const
 {
 	int g = m_levelCoord[c.w];
 	Coord4 nc;
@@ -300,36 +302,33 @@ CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::findNeighborCell(const 
 	nc.y = c.y + g * gdt::TwentySixNeighborOffset[i][1];
 	nc.z = c.z + g * gdt::TwentySixNeighborOffset[i][2];
 	nc.w = c.w;
+	return nc;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::findNeighborCell(const Coord4 & c,
+						const int & i)
+{
+	Coord4 nc = neighborCoord(c, i);
 	return findCell(nc);
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
-void AdaptiveGrid3<CellType, ValueType, MaxLevel>::GetFaceNodeOffset(aphid::Vector3F & dst, const int & i)
+bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::isCellFaceOnBoundray(const Coord4 & cellCoord, const int & i)
 {
-	dst.x = gdt::TwentySixNeighborOffset[i][0];
-	dst.y = gdt::TwentySixNeighborOffset[i][1];
-	dst.z = gdt::TwentySixNeighborOffset[i][2];
+	int g = m_levelCoord[cellCoord.w];
+	Coord4 nc;
+	nc.x = cellCoord.x + g * gdt::TwentySixNeighborOffset[i][0];
+	nc.y = cellCoord.y + g * gdt::TwentySixNeighborOffset[i][1];
+	nc.z = cellCoord.z + g * gdt::TwentySixNeighborOffset[i][2];
+	nc.w = cellCoord.w;
+	Vector3F q = cellCenter(nc);
+	nc = cellCoordAtLevel(q, 0);
+	if(findCell(nc) )
+		return false;
+		
+	return true;
 }
-
-template<typename CellType, typename ValueType, int MaxLevel>
-void AdaptiveGrid3<CellType, ValueType, MaxLevel>::GetVertexNodeOffset(aphid::Vector3F & dst, const int & i)
-{
-	dst.x = gdt::TwentySixNeighborOffset[i+6][0];
-	dst.y = gdt::TwentySixNeighborOffset[i+6][1];
-	dst.z = gdt::TwentySixNeighborOffset[i+6][2];
-}
-
-template<typename CellType, typename ValueType, int MaxLevel>
-void AdaptiveGrid3<CellType, ValueType, MaxLevel>::GetNeighborOffset(aphid::Vector3F & dst, const int & i)
-{
-	dst.x = gdt::TwentySixNeighborOffset[i][0];
-	dst.y = gdt::TwentySixNeighborOffset[i][1];
-	dst.z = gdt::TwentySixNeighborOffset[i][2];
-}
-
-template<typename CellType, typename ValueType, int MaxLevel>
-int AdaptiveGrid3<CellType, ValueType, MaxLevel>::GetVertexNeighborJ(const int & i, const int & j)
-{ return gdt::SevenNeighborOnCorner[i][j]; }
 
 }
 

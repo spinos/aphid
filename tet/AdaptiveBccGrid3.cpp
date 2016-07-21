@@ -26,15 +26,17 @@ BccCell3 * AdaptiveBccGrid3::addCell(const Vector3F & pref, const int & level)
 	const sdb::Coord4 k = cellCoordAtLevel(pref, level);
 	
 	c->insertRed( cellCenter(k) );
+	
 	return c;
 }
 
-BccCell3 * AdaptiveBccGrid3::subdivide(const sdb::Coord4 & cellCoord, const int & i)
+void AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord)
 {
-	BccCell3 * c = sdb::AdaptiveGrid3<BccCell3, BccNode >::subdivide(cellCoord, i);
+	for(int i=0; i< 8; ++i) { 
+		BccCell3 * c = sdb::AdaptiveGrid3<BccCell3, BccNode >::subdivide(cellCoord, i);
 	
-	c->insertRed( cellChildCenter(cellCoord, i) );
-	return c;
+		c->insertRed( cellChildCenter(cellCoord, i) );
+	}
 }
 
 void AdaptiveBccGrid3::build()
@@ -43,6 +45,7 @@ void AdaptiveBccGrid3::build()
 	while(!end() ) {
 		const sdb::Coord4 k = key();
 		BccCell3 * cell = value();
+		cell->insertFaceOnBoundary(k, this);
 		if(k.w == 0) {
 			cell->insertBlue(k, this);
 			if(cell->hasChild() ) {}
@@ -50,6 +53,7 @@ void AdaptiveBccGrid3::build()
 		else {
 			
 		}
+		
 		next();
 	}
 }

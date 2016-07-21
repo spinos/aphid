@@ -27,6 +27,8 @@ public:
 	void insertBlue(const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 	BccNode * findBlue(const aphid::Vector3F & pref);
+	void insertFaceOnBoundary(const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 	
 	const bool & hasChild() const;
 	

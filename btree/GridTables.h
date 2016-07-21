@@ -104,6 +104,34 @@ inline int KeyToBlue(const Vector3F & corner,
 	return 13;
 }
 
+/// i 0:7 j 0:6
+inline int GetVertexNeighborJ(const int & i, const int & j)
+{ return SevenNeighborOnCorner[i][j]; }
+
+/// i 0:5
+inline void GetFaceNodeOffset(aphid::Vector3F & dst, const int & i)
+{
+	dst.x = gdt::TwentySixNeighborOffset[i][0];
+	dst.y = gdt::TwentySixNeighborOffset[i][1];
+	dst.z = gdt::TwentySixNeighborOffset[i][2];
+}
+
+/// i 0:7
+inline void GetVertexNodeOffset(aphid::Vector3F & dst, const int & i)
+{
+	dst.x = gdt::TwentySixNeighborOffset[i+6][0];
+	dst.y = gdt::TwentySixNeighborOffset[i+6][1];
+	dst.z = gdt::TwentySixNeighborOffset[i+6][2];
+}
+
+/// i 0:25
+inline void GetNeighborOffset(aphid::Vector3F & dst, const int & i)
+{
+	dst.x = gdt::TwentySixNeighborOffset[i][0];
+	dst.y = gdt::TwentySixNeighborOffset[i][1];
+	dst.z = gdt::TwentySixNeighborOffset[i][2];
+}
+
 }
 
 }
