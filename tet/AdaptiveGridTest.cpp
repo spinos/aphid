@@ -30,8 +30,8 @@ bool AdaptiveGridTest::init()
 	int dimx = 2, dimy = 2, dimz = 2;
 	float gz = m_grd.coarsestCellSize();
 	
-	m_nodeColScl = gz / .03125f;
-	m_nodeDrawSize = gz * .032f;
+	m_nodeColScl = gz / .02f;
+	m_nodeDrawSize = gz * .022f;
 	Vector3F ori(gz*.5f - gz*dimx/2, 
 					gz*.5f - gz*dimy/2, 
 					gz*.5f - gz*dimz/2);
@@ -46,11 +46,11 @@ bool AdaptiveGridTest::init()
 		}
 	}	
 	
-	m_distFunc.addSphere(Vector3F(0.f, 0.21f, 0.f), 9.637f );
+	m_distFunc.addSphere(Vector3F(0.f, 1.421f, 0.f), 8.437f );
 	
 	subdivideGrid(0);
-	subdivideGrid(1);
-	subdivideGrid(2);
+	//subdivideGrid(1);
+	//subdivideGrid(2);
 	//m_distFunc.addSphere(Vector3F(0.f, -22.43f, 0.2f), 21.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
@@ -62,6 +62,7 @@ bool AdaptiveGridTest::init()
 	m_grd.calculateBBox();
 	std::cout<<"\n grid bbox "<<m_grd.boundingBox()
 			<<"\n grid n cell "<<m_grd.size();
+	m_grd.build();
 	std::cout.flush();
 	return true;
 }
@@ -111,14 +112,31 @@ void AdaptiveGridTest::drawGrid(aphid::GeoDrawer * dr)
 	m_grd.begin();
 	while(!m_grd.end() ) {
 		
-		m_grd.getCellColor(cellCol, m_grd.key().w );
+		m_grd.GetCellColor(cellCol, m_grd.key().w );
 		m_grd.getCellBBox(cellBox, m_grd.key() );
-		cellBox.expand(-.02f - .02f * m_grd.key().w );
+		cellBox.expand(-.04f - .04f * m_grd.key().w );
 		
 		dr->setColor(cellCol.x, cellCol.y, cellCol.z);
 		dr->boundingBox(cellBox);
 		
+		drawNode(m_grd.value(), dr );
+		
 		m_grd.next();
+	}
+}
+
+void AdaptiveGridTest::drawNode(BccCell3 * cell, aphid::GeoDrawer * dr)
+{
+	float r, g, b;
+	
+	cell->begin();
+	while(!cell->end() ) {
+		BccCell::GetNodeColor(r, g, b,
+					cell->value()->prop);
+		dr->setColor(r, g, b);
+		dr->cube(cell->value()->pos, m_nodeDrawSize);
+		
+		cell->next();
 	}
 }
 

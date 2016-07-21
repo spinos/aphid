@@ -520,7 +520,7 @@ BccNode * BccCell::findCornerNodeInNeighbor(const int & i,
 	return NULL;
 }
 
-sdb::Coord3 BccCell::neighborCoord(const sdb::Coord3 & cellCoord, int i) const
+sdb::Coord3 BccCell::neighborCoord(const sdb::Coord3 & cellCoord, int i)
 {
 	sdb::Coord3 r = cellCoord;
 	r.x += (int)TwentySixNeighborOffset[i][0];
@@ -529,7 +529,7 @@ sdb::Coord3 BccCell::neighborCoord(const sdb::Coord3 & cellCoord, int i) const
 	return r;
 }
 
-void BccCell::neighborOffset(aphid::Vector3F * dest, int i) const
+void BccCell::neighborOffset(aphid::Vector3F * dest, int i)
 {
 	dest->set(TwentySixNeighborOffset[i][0],
 					TwentySixNeighborOffset[i][1],
@@ -1992,6 +1992,9 @@ void BccCell::GetNodeColor(float & r, float & g, float & b,
 					const int & prop)
 {
 	switch (prop) {
+		case NFace:
+			r = 0.f; g = .45f; b = .55f;
+			break;
 		case NBlue:
 			r = 0.f; g = 0.f; b = 1.f;
 			break;

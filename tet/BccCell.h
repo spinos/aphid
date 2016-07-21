@@ -6,7 +6,7 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-
+#pragma once
 #include "BlueYellowCyanRefine.h"
 #include <WorldGrid.h>
 #include <Array.h>
@@ -62,6 +62,8 @@ class BccCell {
 	
 public:
 	enum NodePropertyType {
+		NUnKnown = 0,
+		NFace = 2,
 		NBlue = 3,
 		NRed = 4,
 		NYellow = 5,
@@ -386,10 +388,12 @@ public:
 													
 	static void GetNodeColor(float & r, float & g, float & b,
 					const int & prop);
+	static void neighborOffset(aphid::Vector3F * dest, int i);
+	static aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i);
+	
+protected:
 	
 private:
-	aphid::sdb::Coord3 neighborCoord(const aphid::sdb::Coord3 & cellCoord, int i) const;
-	void neighborOffset(aphid::Vector3F * dest, int i) const;
 	BccNode * findNeighborCorner(aphid::sdb::WorldGrid<aphid::sdb::Array<int, BccNode>, BccNode > * grid,
 					const aphid::Vector3F & pos, int icorner) const;
 	int keyToCorner(const aphid::Vector3F & corner,

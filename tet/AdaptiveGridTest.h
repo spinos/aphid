@@ -11,15 +11,13 @@
 #include "Scene.h"
 #include "TetraField.h"
 #include <BDistanceFunction.h>
-#include <AdaptiveGrid3.h>
+#include "AdaptiveBccGrid3.h"
 
 namespace ttg {
 
 class AdaptiveGridTest : public Scene {
 
-typedef aphid::sdb::Array<int, BccNode > AGCell;
-
-	aphid::sdb::AdaptiveGrid3<AGCell, BccNode > m_grd;
+	AdaptiveBccGrid3 m_grd;
 	aphid::BDistanceFunction m_distFunc;
 	float m_nodeDrawSize, m_nodeColScl;
 	
@@ -33,6 +31,7 @@ public:
 
 private:
 	void drawGrid(aphid::GeoDrawer * dr);
+	void drawNode(BccCell3 * cell, aphid::GeoDrawer * dr);
 	void subdivideGrid(int level);
 	
 };
