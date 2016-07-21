@@ -54,6 +54,28 @@ public:
 	int x, y, z;
 };
 
+/// w first
+class Coord4
+{
+public:
+	Coord4();
+	Coord4(int a, int b, int c, int d);
+	const bool operator==(const Coord4 & another) const;
+	const bool operator<(const Coord4 & another) const;
+	const bool operator>=(const Coord4 & another) const;
+	const bool operator>(const Coord4 & another) const;
+//	Coord4 ordered() const;
+/// w as highest and keep in order
+//	void makeUnique();
+	const std::string str() const;
+	friend std::ostream& operator<<(std::ostream &output, const Coord4 & p)
+    {
+        output << p.str();
+        return output;
+    }
+	int x, y, z, w;
+};
+
 class V3 {
 public:
 	V3() { data[0] = data[1] = data[2] = 0.f; }

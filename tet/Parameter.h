@@ -25,7 +25,8 @@ public:
 		kBccTetrahedralize = 8,
 		kDistanceField = 9,
 		kRedblueRefine = 10,
-		kFieldTetrahedralize = 11
+		kFieldTetrahedralize = 11,
+		kAaptiveGrid = 12
 	};
 	
 	Parameter(int argc, char *argv[]);

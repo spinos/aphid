@@ -145,6 +145,63 @@ const std::string V3::str() const
 	return (boost::format("(%1%,%2%,%3%)") % data[0] % data[1] % data[2]).str();
 }
 
+Coord4::Coord4() {x = y = z = w = 0;}
+Coord4::Coord4(int a, int b, int c, int d) 
+{ x =a; y= b; z=c; w = d; }
+
+const bool Coord4::operator==(const Coord4 & another) const 
+{
+	return (x == another.x && y == another.y 
+			&& z == another.z && w == another.w);
+}
+
+const bool Coord4::operator<(const Coord4 & another) const 
+{
+	if(w < another.w) return true;
+	if(w > another.w) return false;
+/// w equals	
+	if(z < another.z) return true;
+	if(z > another.z) return false;
+/// z equals
+	if(y < another.y) return true;
+	if(y > another.y) return false;
+/// y equals
+	return x < another.x;
+}
+
+const bool Coord4::operator>=(const Coord4 & another) const 
+{
+	if(w > another.w) return true;
+	if(w < another.w) return false;	
+/// w equals
+	if(z > another.z) return true;
+	if(z < another.z) return false;
+/// z equals
+	if(y > another.y) return true;
+	if(y < another.y) return false;
+/// y equals
+	return x >= another.x;
+}
+
+const bool Coord4::operator>(const Coord4 & another) const 
+{
+	if(w > another.w) return true;
+	if(w < another.w) return false;
+/// w equals
+	if(z > another.z) return true;
+	if(z < another.z) return false;
+/// z equals
+	if(y > another.y) return true;
+	if(y < another.y) return false;
+/// y equals
+	return x > another.x;
+}
+
+const std::string Coord4::str() const 
+{
+	return (boost::format("(%1%,%2%,%3%,%4%)") % x % y % z % w).str();
+}
+
 } // end namespace sdb
 
 }

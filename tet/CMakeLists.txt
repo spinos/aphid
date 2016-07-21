@@ -21,6 +21,8 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../shared/tetrahedron_math.h
 ../shared/AGraph.h
 ../shared/ADistanceField.h
+../shared/BDistanceFunction.h
+../btree/AdaptiveGrid3.h
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h
@@ -50,6 +52,7 @@ RedBlueRefine.h
 RedBlueTest.h
 RedBlueControl.h
 FieldTetrahedralizeTest.h
+AdaptiveGridTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -79,6 +82,7 @@ RedBlueRefine.cpp
 RedBlueTest.cpp
 RedBlueControl.cpp
 FieldTetrahedralizeTest.cpp
+AdaptiveGridTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

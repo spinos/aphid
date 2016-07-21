@@ -16,7 +16,7 @@ namespace ttg {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	m_operation = kFieldTetrahedralize;
+	m_operation = kAaptiveGrid;
 	
 	if(argc < 2) {
 		std::cout<<"\n tet (Tetrahedral Mesh Generation Research) version 20160601"
@@ -61,6 +61,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-ft") == 0 || strcmp(argv[i], "--fieldTetrahedralize") == 0) {
 				m_operation = kFieldTetrahedralize;
 			}
+			if(strcmp(argv[i], "-ag") == 0 || strcmp(argv[i], "--adaptiveGrid") == 0) {
+				m_operation = kAaptiveGrid;
+			}
 		}
 	}
 	
@@ -88,6 +91,7 @@ void Parameter::PrintHelp()
 	<<"\n -df or --distanceField    test 3D distance transform on BCC grid"
 	<<"\n -rbr or --redBlueRefine    test red blue refine of a tetrahedron"
 	<<"\n -ft or --fieldTetrahedralize    test tetrahedralize based on signed distance field"
+	<<"\n -ag or --adaptiveGrid    test adaptive grid"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";
