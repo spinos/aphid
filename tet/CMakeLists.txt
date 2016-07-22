@@ -23,6 +23,7 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../shared/ADistanceField.h
 ../shared/BDistanceFunction.h
 ../btree/AdaptiveGrid3.h
+../btree/GridTables.h
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h

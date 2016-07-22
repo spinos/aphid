@@ -14,13 +14,22 @@ using namespace aphid;
 namespace ttg {
 
 BccCell3::BccCell3(Entity * parent) : sdb::Array<int, BccNode >(parent)
-{ m_hasChild = false; }
+{ 
+	m_hasChild = false; 
+	m_parentCell = NULL;
+}
 
 BccCell3::~BccCell3()
 {}
 
 void BccCell3::setHasChild()
 { m_hasChild = true; }
+
+void BccCell3::setParentCell(BccCell3 * x, const int & i)
+{ 
+	m_parentCell = x;
+	m_childI = i;
+}
 
 void BccCell3::insertRed(const Vector3F & pref)
 {
@@ -41,10 +50,12 @@ BccNode * BccCell3::findBlue(const Vector3F & pref)
 void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
 {
+	if(cellCoord.w > 0) 
+		return;
+		
 	const BccNode * redN = find(15);
 	const Vector3F & redP = redN->pos;
-	if(cellCoord.w < 1)
-		insertBlue0(redP, cellCoord, grid);
+	insertBlue0(redP, cellCoord, grid);
 }
 
 void BccCell3::insertBlue0(const Vector3F & center,
@@ -116,6 +127,9 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
 					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
 {
+	if(cellCoord.w > 0)
+		return;
+		
 	int i=0;
 	for(;i<12;++i) {
 		if(cyanNode(i, cellCoord, grid) )

@@ -221,10 +221,12 @@ CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::subdivide(const Coord4 
 	
 	cell->setHasChild();
 	const float cz = m_cellSize[cellCoord.w + 1] * .5f;
-	return addCell( cellCenter(cellCoord) + Vector3F(gdt::EightCellChildOffset[i][0],
+	CellType * childCell = addCell( cellCenter(cellCoord) + Vector3F(gdt::EightCellChildOffset[i][0],
 										gdt::EightCellChildOffset[i][1],
 										gdt::EightCellChildOffset[i][2]) * cz, cellCoord.w + 1 );
-										
+	childCell->setParentCell(cell, i);
+	
+	return childCell;									
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
