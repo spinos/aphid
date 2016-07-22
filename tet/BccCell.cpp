@@ -1993,7 +1993,7 @@ void BccCell::GetNodeColor(float & r, float & g, float & b,
 {
 	switch (prop) {
 		case NFace:
-			r = 0.f; g = .45f; b = .55f;
+			r = .45f; g = .25f; b = .25f;
 			break;
 		case NBlue:
 			r = 0.f; g = 0.f; b = 1.f;

@@ -46,13 +46,16 @@ void AdaptiveBccGrid3::build()
 		const sdb::Coord4 k = key();
 		BccCell3 * cell = value();
 		cell->insertFaceOnBoundary(k, this);
+/// blue from parent's blue yellow cyan
 		if(k.w == 0) {
 			cell->insertBlue(k, this);
-			if(cell->hasChild() ) {}
+			if(cell->hasChild() ) {
+				cell->insertYellow(k, this);
+				cell->insertCyan(k, this);
+			}
 		}
-		else {
-			
-		}
+		
+		
 		
 		next();
 	}

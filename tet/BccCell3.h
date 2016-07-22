@@ -26,20 +26,36 @@ public:
 	void insertRed(const aphid::Vector3F & pref);
 	void insertBlue(const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
+	void insertYellow(const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
+	void insertCyan(const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 	BccNode * findBlue(const aphid::Vector3F & pref);
 	void insertFaceOnBoundary(const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 	
 	const bool & hasChild() const;
 	
+	BccNode * blueNode(const int & i,
+					const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
+	BccNode * yellowNode(const int & i,
+					const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
+	BccNode * cyanNode(const int & i,
+					const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 private:
 	void insertBlue0(const aphid::Vector3F & center,
 					const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
-	void insertBlue1(const aphid::Vector3F & center,
+	BccNode * BccCell3::findBlueNodeInNeighbor(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
-				
+	BccNode * findCyanNodeInNeighbor(const int & i,
+					const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
+								
 };
 
 }

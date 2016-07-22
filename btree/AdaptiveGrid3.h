@@ -71,8 +71,12 @@ public:
 	Coord4 parentCoord(const Coord4 & c) const;
 /// i 0:25
 	Coord4 neighborCoord(const Coord4 & c, const int & i) const;
-	
+	Coord4 edgeNeighborCoord(const Coord4 & c, 
+						const int & i, const int & j) const;
 	CellType * findNeighborCell(const Coord4 & c, const int & i);
+	CellType * findEdgeNeighborCell(const Coord4 & c, 
+								const int & i, const int & j);
+	
 /// i 0:5 search for level 0 cell	
 	bool isCellFaceOnBoundray(const Coord4 & cellCoord, const int & i);
 	
@@ -310,6 +314,27 @@ CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::findNeighborCell(const 
 						const int & i)
 {
 	Coord4 nc = neighborCoord(c, i);
+	return findCell(nc);
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::edgeNeighborCoord(const Coord4 & c, 
+						const int & i, const int & j) const
+{
+	int g = m_levelCoord[c.w];
+	Coord4 nc;
+	nc.x = c.x + g * gdt::ThreeNeighborOnEdge[i*3+j][0],
+	nc.y = c.y + g * gdt::ThreeNeighborOnEdge[i*3+j][1],
+	nc.z = c.z + g * gdt::ThreeNeighborOnEdge[i*3+j][2],
+	nc.w = c.w;
+	return nc;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::findEdgeNeighborCell(const Coord4 & c, 
+						const int & i, const int & j)
+{
+	Coord4 nc = edgeNeighborCoord(c, i, j);
 	return findCell(nc);
 }
 
