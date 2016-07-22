@@ -55,15 +55,8 @@ void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 		
 	const BccNode * redN = find(15);
 	const Vector3F & redP = redN->pos;
-	insertBlue0(redP, cellCoord, grid);
-}
-
-void BccCell3::insertBlue0(const Vector3F & center,
-					const sdb::Coord4 & cellCoord,
-					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
-{
 	const float & gz = grid->levelCellSize(cellCoord.w);
-	int i, j;
+	int i;
 	
 	Vector3F q;
 	for(i=0;i<8;++i) {
@@ -72,7 +65,7 @@ void BccCell3::insertBlue0(const Vector3F & center,
 			continue;
 		
 		sdb::gdt::GetVertexNodeOffset(q, i);
-		q = center + q * gz * .5f;
+		q = redP + q * gz * .5f;
 			
 		BccNode * ni = new BccNode;
 		ni->key = i + 6;
@@ -91,7 +84,7 @@ void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 	const Vector3F & redP = redN->pos;
 	
 	for(int i=0; i<6;++i) {
-		if(grid->isCellFaceOnBoundray(cellCoord, i ) ) {
+		if(!grid->findNeighborCell(cellCoord, i ) ) {
 			BccNode * ni = new BccNode;
 			ni->key = i;
 			ni->prop = BccCell::NFace;
@@ -127,11 +120,7 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
 					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
 {
-	if(cellCoord.w > 0)
-		return;
-		
-	int i=0;
-	for(;i<12;++i) {
+	for(int i=0;i<12;++i) {
 		if(cyanNode(i, cellCoord, grid) )
 			continue;
 			
@@ -153,6 +142,10 @@ BccNode * BccCell3::blueNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
 {
+/// level > 0 blue derived from parent red blue yellow cyan
+	if(m_parentCell)
+		return derivedBlueNode(i, cellCoord, grid);
+		
 	BccNode * node = find(i+6);
 	if(!node) 
 		node = findBlueNodeInNeighbor(i, cellCoord, grid);
@@ -163,7 +156,12 @@ BccNode * BccCell3::yellowNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
 {
-	BccNode * node = find(15000 + i);
+/// face node as yellow
+	BccNode * node = find(i);
+	if(node)
+		return node;
+		
+	node = find(15000 + i);
 	if(!node) {
 		BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
 		node = nei->find(15000 + sdb::gdt::SixNeighborOnFace[i][3]);
@@ -219,6 +217,26 @@ BccNode * BccCell3::findBlueNodeInNeighbor(const int & i,
 		}
 	}
 	return NULL;
+}
+
+BccNode * BccCell3::derivedBlueNode(const int & i,
+					const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid)
+{
+	sdb::Coord4 pc = grid->parentCoord(cellCoord);
+	if(sdb::gdt::isEighChildBlueInParentIsBlue(m_childI, i) )
+		return m_parentCell->blueNode(sdb::gdt::EightChildBlueInParentInd[m_childI][i],
+										pc, grid);
+		
+	if(sdb::gdt::isEighChildBlueInParentIsCyan(m_childI, i) )
+		return m_parentCell->cyanNode(sdb::gdt::EightChildBlueInParentInd[m_childI][i],
+										pc, grid);
+	
+	if(sdb::gdt::isEighChildBlueInParentIsYellow(m_childI, i) )
+		return m_parentCell->yellowNode(sdb::gdt::EightChildBlueInParentInd[m_childI][i],
+										pc, grid);
+	
+	return m_parentCell->find(15);
 }
 
 const bool & BccCell3::hasChild() const

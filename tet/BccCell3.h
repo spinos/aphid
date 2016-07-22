@@ -49,16 +49,16 @@ public:
 					const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 private:
-	void insertBlue0(const aphid::Vector3F & center,
-					const aphid::sdb::Coord4 & cellCoord,
-					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
-	BccNode * BccCell3::findBlueNodeInNeighbor(const int & i,
+	BccNode * findBlueNodeInNeighbor(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
 	BccNode * findCyanNodeInNeighbor(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
-								
+	BccNode * derivedBlueNode(const int & i,
+					const aphid::sdb::Coord4 & cellCoord,
+					aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > * grid);
+															
 };
 
 }
