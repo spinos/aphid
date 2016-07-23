@@ -209,6 +209,7 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/BaseField.cpp
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
+../shared/DrawDistanceField.cpp
 )
 
 ADD_LIBRARY (aphidSdb STATIC

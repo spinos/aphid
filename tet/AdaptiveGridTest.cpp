@@ -25,8 +25,8 @@ const char * AdaptiveGridTest::titleStr() const
 bool AdaptiveGridTest::init()
 {
 	float gz = 32.f;
-	m_nodeColScl = gz / .02f;
-	m_nodeDrawSize = gz * .022f;
+	setColorScale(gz);
+	setNodeDrawSize(gz * .022f);
 	m_msh.fillBox(BoundingBox(-30.f, -30.f, -30.f,
 								 30.f,  30.f,  30.f), gz);
 	
@@ -55,93 +55,29 @@ bool AdaptiveGridTest::init()
 
 void AdaptiveGridTest::draw(aphid::GeoDrawer * dr)
 {
-	drawGrid(dr);
-	//drawGraph(dr);
-}
-
-void AdaptiveGridTest::drawGrid(aphid::GeoDrawer * dr)
-{
-	dr->setColor(.15f, .15f, .15f);
-	
-	AdaptiveBccGrid3 * grd = m_msh.grid();
-	dr->boundingBox(grd->boundingBox() );
-	
-	Vector3F cellCol;
-	BoundingBox cellBox;
-	grd->begin();
-	while(!grd->end() ) {
-		
-		sdb::gdt::GetCellColor(cellCol, grd->key().w );
-		grd->getCellBBox(cellBox, grd->key() );
-		cellBox.expand(-.04f - .04f * grd->key().w );
-		
-		dr->setColor(cellCol.x, cellCol.y, cellCol.z);
-		dr->boundingBox(cellBox);
-		
-		//drawNode(grd->value(), dr, grd->key().w );
-		
-		grd->next();
-	}
-}
-
-void AdaptiveGridTest::drawNode(BccCell3 * cell, aphid::GeoDrawer * dr,
-								const float & level)
-{
-	float r, g, b;
-	float nz = m_nodeDrawSize * (1.f - .12f * level);
-	
-	cell->begin();
-	while(!cell->end() ) {
-		BccCell::GetNodeColor(r, g, b,
-					cell->value()->prop);
-		dr->setColor(r, g, b);
-		dr->cube(cell->value()->pos, nz );
-		
-		cell->next();
-	}
+	drawGridCell<AdaptiveBccGrid3>(m_msh.grid(), dr);
+	//drawGridNode<AdaptiveBccGrid3, BccCell3>(m_msh.grid(), dr);
+	drawGraph(dr);
 }
 
 void AdaptiveGridTest::drawGraph(aphid::GeoDrawer * dr)
 {
-	int i;
-	DistanceNode * v = m_msh.nodes();
-	
 #define SHO_NODE 0
-#define SHO_EDGE 1
+#define SHO_EDGE 0
 #define SHO_ERR 0
 
 #if SHO_NODE	
-	dr->setColor(.5f, 0.f, 0.f);
-	const int nv = m_msh.numNodes();
-
-	Vector3F col;
-	for(i = 0;i<nv;++i) {
-		const DistanceNode & vi = v[i];
-		
-		m_msh.nodeColor(col, vi, m_nodeColScl);
-		dr->setColor(col.x, col.y, col.z);
-		dr->cube(vi.pos, m_nodeDrawSize);
-		
-	}
+	drawNodes(&m_msh, dr);
 #endif
 
 #if SHO_EDGE	
-	dr->setColor(0.f, 0.f, .5f);
-	IGraphEdge * e = m_msh.edges();
-	const int ne = m_msh.numEdges();
-	
-	glBegin(GL_LINES);
-	for(i = 0;i<ne;++i) {
-		const IGraphEdge & ei = e[i];
-		
-		dr->vertex(v[ei.vi.x].pos);
-		dr->vertex(v[ei.vi.y].pos);
-		
-	}
-	glEnd();
+	dr->setColor(0.f, 0.f, .5f);	
+	drawEdges(&m_msh, dr);
 #endif
 
 #if SHO_ERR
+	DistanceNode * v = m_msh.nodes();
+	
 	dr->setColor(0.1f, 0.1f, .1f);
 	glBegin(GL_LINES);
 	sdb::Array<sdb::Coord2, EdgeRec > * egs = m_msh.dirtyEdges();

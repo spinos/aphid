@@ -276,6 +276,51 @@ inline void GetCellColor(Vector3F & c, const int & level)
 			gdt::TwelveCellLevelLegend[level][2]); 
 }
 
+namespace bcc {
+enum NodeColor {
+	NUnKnown = 0,
+	NFace = 2,
+	NBlue = 3,
+	NRed = 4,
+	NYellow = 5,
+	NCyan = 6,
+	NRedBlue = 46,
+	NRedCyan = 47,
+	NRedYellow = 48
+};
+}
+
+inline void GetNodeColor(float & r, float & g, float & b,
+					const int & prop)
+{
+	switch (prop) {
+		case bcc::NFace:
+			r = .45f; g = .25f; b = .25f;
+			break;
+		case bcc::NBlue:
+			r = 0.f; g = 0.f; b = 1.f;
+			break;
+		case bcc::NRed:
+			r = 1.f; g = 0.f; b = 0.f;
+			break;
+		case bcc::NYellow:
+			r = .99f; g = 0.99f; b = 0.f;
+			break;
+		case bcc::NCyan:
+			r = 0.f; g = 0.59f; b = 0.89f;
+			break;
+		case bcc::NRedBlue:
+			r = 0.79f; g = 0.f; b = 0.89f;
+			break;
+		case -4:
+			r = 0.3f; g = 0.f; b = 0.f;
+			break;
+		default:
+			r = g = b = .3f;
+			break;
+	}
+}
+
 }
 
 }
