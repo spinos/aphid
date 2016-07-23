@@ -21,7 +21,7 @@ namespace aphid {
 
 namespace sdb {
 
-template<typename CellType, typename ValueType, int MaxLevel = 4>
+template<typename CellType, typename ValueType, int MaxLevel>
 class AdaptiveGrid3 : public Sequence<Coord4>
 {
 	BoundingBox m_bbox;
@@ -37,10 +37,12 @@ public:
 	{}
 	
 	int maxLevel() const;
-	void setFinestCellSize(const float & x);
+	void setLevel0CellSize(const float & x);
 	const float & finestCellSize() const;
-	const float & coarsestCellSize() const;
+	const float & level0CellSize() const;
 	const float & levelCellSize(const int & x) const;
+	
+	int countNodes();
 	
 	CellType * value();
 	const Coord4 key() const;
@@ -61,14 +63,15 @@ public:
 						const int & i,
 						const Coord4 & c) const;
 	Vector3F cellCenter(const Coord4 & c) const;
-	Vector3F cellChildCenter(const Coord4 & c,
-						const int & i) const;
 						
 /// add child i of cell i 0:7
 	CellType * subdivide(const Coord4 & cellCoord, const int & i);
 	
 	CellType * findCell(const Coord4 & c);
 	Coord4 parentCoord(const Coord4 & c) const;
+/// i 0:7
+	Vector3F childCenter(const Coord4 & c, const int & i) const;
+	Coord4 childCoord(const Coord4 & c, const int & i) const;
 /// i 0:25
 	Coord4 neighborCoord(const Coord4 & c, const int & i) const;
 	Coord4 edgeNeighborCoord(const Coord4 & c, 
@@ -80,30 +83,11 @@ public:
 /// i 0:5 search for level 0 cell	
 	bool isCellFaceOnBoundray(const Coord4 & cellCoord, const int & i);
 	
-	static float CellLevelLegend[12][3];
-	
-	static void GetCellColor(Vector3F & c, const int & level);
-	
 protected:
 	
 private:
+	void countNodesIn(CellType * cell, int & c);
 	
-};
-
-template<typename CellType, typename ValueType, int MaxLevel>
-float AdaptiveGrid3<CellType, ValueType, MaxLevel>::CellLevelLegend[12][3] = {
-{1.f, 0.f, 0.f},
-{0.f, 1.f, 0.f},
-{0.f, 0.f, 1.f},
-{0.f, 1.f, 1.f},
-{1.f, 0.f, 1.f},
-{1.f, 1.f, 0.f},
-{1.f, .5f, 0.f},
-{.5f, 1.f, 0.f},
-{.5f, 0.f, 1.f},
-{0.f, .5f, .5f},
-{.5f, 0.f, .5f},
-{.5f, .5f, 0.f}
 };
 
 template<typename CellType, typename ValueType, int MaxLevel>
@@ -111,11 +95,11 @@ int AdaptiveGrid3<CellType, ValueType, MaxLevel>::maxLevel() const
 { return MaxLevel; }
 
 template<typename CellType, typename ValueType, int MaxLevel>
-void AdaptiveGrid3<CellType, ValueType, MaxLevel>::setFinestCellSize(const float & x)
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::setLevel0CellSize(const float & x)
 {
 	for(int i=0; i<=MaxLevel; ++i) {
 		m_levelCoord[i] = 1<<(MaxLevel-i);
-		m_cellSize[i] = x * m_levelCoord[i];
+		m_cellSize[i] = x / (float)(1<<i);
 	}
 }
 
@@ -124,7 +108,7 @@ const float & AdaptiveGrid3<CellType, ValueType, MaxLevel>::finestCellSize() con
 { return m_cellSize[MaxLevel]; }
 
 template<typename CellType, typename ValueType, int MaxLevel>
-const float & AdaptiveGrid3<CellType, ValueType, MaxLevel>::coarsestCellSize() const
+const float & AdaptiveGrid3<CellType, ValueType, MaxLevel>::level0CellSize() const
 { return m_cellSize[0]; }
 
 template<typename CellType, typename ValueType, int MaxLevel>
@@ -198,15 +182,6 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::getCellBBox(BoundingBox & b,
 	b.setMin(cz * c.x, cz * c.y, cz * c.z);
 	b.setMax(cz * (c.x + gz), cz * (c.y + gz), cz * (c.z + gz) );
 	
-}
-
-template<typename CellType, typename ValueType, int MaxLevel>
-void AdaptiveGrid3<CellType, ValueType, MaxLevel>::GetCellColor(Vector3F & c, 
-											const int & level)
-{
-	c.set(CellLevelLegend[level][0],
-			CellLevelLegend[level][1],
-			CellLevelLegend[level][2]); 
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
@@ -284,20 +259,24 @@ Vector3F AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellCenter(const Coord4 &
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
-Vector3F AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellChildCenter(const Coord4 & c,
-						const int & i) const
-{
-	BoundingBox b;
-	getCellChildBox(b, i, c);
-	return b.center();
-}
-
-template<typename CellType, typename ValueType, int MaxLevel>
 Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::parentCoord(const Coord4 & c) const
 {
 	const Vector3F q = cellCenter(c);
 	return cellCoordAtLevel(q, c.w - 1);
 }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+Vector3F AdaptiveGrid3<CellType, ValueType, MaxLevel>::childCenter(const Coord4 & c, const int & i) const
+{
+	const float cz = m_cellSize[c.w + 1] * .5f;
+	return cellCenter(c) + Vector3F(gdt::EightCellChildOffset[i][0],
+					gdt::EightCellChildOffset[i][1],
+					gdt::EightCellChildOffset[i][2]) * cz;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::childCoord(const Coord4 & c, const int & i) const
+{ return cellCoordAtLevel(childCenter(c, i), c.w + 1); }
 
 template<typename CellType, typename ValueType, int MaxLevel>
 Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::neighborCoord(const Coord4 & c, const int & i) const
@@ -355,6 +334,29 @@ bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::isCellFaceOnBoundray(const Co
 		return false;
 		
 	return true;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+int AdaptiveGrid3<CellType, ValueType, MaxLevel>::countNodes()
+{
+	int c = 0;
+	begin();
+	while(!end() ) {
+		countNodesIn(value(), c );
+		next();
+	}
+	return c;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::countNodesIn(CellType * cell, int & c)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		cell->value()->index = c;
+		c++;
+		cell->next();
+	}
 }
 
 }

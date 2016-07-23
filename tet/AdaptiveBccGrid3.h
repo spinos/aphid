@@ -12,7 +12,9 @@
 
 namespace ttg {
 
-class AdaptiveBccGrid3 : public aphid::sdb::AdaptiveGrid3<BccCell3, BccNode > {
+typedef aphid::sdb::AdaptiveGrid3<BccCell3, BccNode, 5 > AdaptiveGrid5T;
+
+class AdaptiveBccGrid3 : public AdaptiveGrid5T {
 
 public:
 	AdaptiveBccGrid3();

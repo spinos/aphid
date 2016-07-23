@@ -55,6 +55,8 @@ RedBlueControl.h
 FieldTetrahedralizeTest.h
 BccCell3.h
 AdaptiveBccGrid3.h
+AdaptiveBccMesher.h
+AdaptiveBccField.h
 AdaptiveGridTest.h
 Delaunay3D.h)
 
@@ -87,6 +89,8 @@ RedBlueControl.cpp
 FieldTetrahedralizeTest.cpp
 BccCell3.cpp
 AdaptiveBccGrid3.cpp
+AdaptiveBccMesher.cpp
+AdaptiveBccField.cpp
 AdaptiveGridTest.cpp
 glwidget.cpp
 window.cpp
