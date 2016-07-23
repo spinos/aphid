@@ -9,6 +9,7 @@
 #pragma once
 #include "ADistanceField.h"
 #include "GeoDrawer.h"
+#include <GridTables.h>
 
 namespace aphid {
 
@@ -81,6 +82,28 @@ protected:
 			cell->next();
 		}
 	}
+	
+	template<typename T>
+	void drawErrors(const ADistanceField * fld,
+					sdb::Array<sdb::Coord2, T > * egs,
+					const float & eps)
+	{
+		const DistanceNode * v = fld->nodes();
+	
+		glBegin(GL_LINES);
+		egs->begin();
+		while(!egs->end() ) {
+			
+			if(egs->value()->val > eps) {
+				glVertex3fv((const float *)&v[egs->key().x].pos);
+				glVertex3fv((const float *)&v[egs->key().y].pos);
+			}
+			
+			egs->next();
+		}
+		glEnd();
+	}
+	
 };
 
 }

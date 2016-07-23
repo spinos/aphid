@@ -132,10 +132,16 @@ public:
 	template<typename T>
 	bool intersect(const T * b) const
 	{
+		BoundingBox bb = b->calculateBBox();
+		BoundingBox ba = calculateBBox();
+		if(!ba.intersect(bb) )
+			return false;
+			
 		if(enclose(b) )
 			return false;
 			
 		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
+		//return gjk::Intersect1<Sphere, T >::Evaluate(*this, *b); 
 	}
 	
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;

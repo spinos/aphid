@@ -226,4 +226,10 @@ void ADistanceField::addDirtyEdge(const int & a, const int & b)
 	}
 }	  
 
+const float & ADistanceField::maxError() const
+{ return m_mxErr; }
+
+const float & ADistanceField::minError() const
+{ return m_mnErr; }
+
 }

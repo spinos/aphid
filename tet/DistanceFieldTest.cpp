@@ -28,8 +28,8 @@ bool DistanceFieldTest::init()
 	int dimx = 12, dimy = 12, dimz = 12;
 	float gz = 3.f;
 	m_fld.setH(gz);
-	m_nodeColScl = 1.f / gz / 8.f;
-	m_nodeDrawSize = gz * .0625f;
+	setColorScale(1.f / gz / 8.f);
+	setNodeDrawSize(gz * .0625f);
 	Vector3F ori(gz*.5f - gz*dimx/2, 
 					gz*.5f - gz*dimy/2, 
 					gz*.5f);
@@ -67,59 +67,22 @@ void DistanceFieldTest::draw(aphid::GeoDrawer * dr)
 
 void DistanceFieldTest::drawGraph(aphid::GeoDrawer * dr)
 {
-	int i;
-	DistanceNode * v = m_fld.nodes();
-	
 #define SHO_NODE 1
 #define SHO_EDGE 0
 #define SHO_ERR 1
 
-#if SHO_NODE	
-	dr->setColor(.5f, 0.f, 0.f);
-	const int nv = m_fld.numNodes();
-
-	Vector3F col;
-	for(i = 0;i<nv;++i) {
-		const DistanceNode & vi = v[i];
-		
-		m_fld.nodeColor(col, vi, m_nodeColScl);
-		dr->setColor(col.x, col.y, col.z);
-		dr->cube(vi.pos, m_nodeDrawSize);
-		
-	}
+#if SHO_NODE
+	drawNodes(&m_fld, dr);
 #endif
 
 #if SHO_EDGE	
 	dr->setColor(0.f, 0.f, .5f);
-	IGraphEdge * e = m_fld.edges();
-	const int ne = m_fld.numEdges();
-	
-	glBegin(GL_LINES);
-	for(i = 0;i<ne;++i) {
-		const IGraphEdge & ei = e[i];
-		
-		dr->vertex(v[ei.vi.x].pos);
-		dr->vertex(v[ei.vi.y].pos);
-		
-	}
-	glEnd();
+	drawEdges(&m_fld, dr);
 #endif
 
 #if SHO_ERR
 	dr->setColor(0.1f, 0.1f, .1f);
-	glBegin(GL_LINES);
-	sdb::Array<sdb::Coord2, EdgeRec > * egs = m_fld.dirtyEdges();
-	egs->begin();
-	while(!egs->end() ) {
-		
-		if(egs->value()->val > .06f) {
-			dr->vertex(v[egs->key().x].pos);
-			dr->vertex(v[egs->key().y].pos);
-		}
-		
-		egs->next();
-	}
-	glEnd();
+	drawErrors<EdgeRec>(&m_fld, m_fld.dirtyEdges(), .067f );
 #endif
 
 }

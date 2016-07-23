@@ -45,6 +45,7 @@ public:
 		
 		calculateDistanceOnFront(func, shellThickness);
 		fastMarchingMethod();
+		markInsideOutside();
 	}
 	
 	void buildRefinedMesh();

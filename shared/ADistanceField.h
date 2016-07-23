@@ -43,6 +43,7 @@ struct EdgeRec {
 class ADistanceField : public AGraph<DistanceNode> {
 
 	sdb::Array<sdb::Coord2, EdgeRec > m_dirtyEdges;
+	float m_mxErr, m_mnErr;
 	
 public:
 	ADistanceField();
@@ -61,7 +62,9 @@ public:
 						const float & h)
 	{
 		m_dirtyEdges.begin();
-		float act, rec, err, mxErr = 0.f;
+		float act, rec, err;
+		m_mxErr = 0.f;
+		m_mnErr = 10.f;
 		Vector3F q;
 		while(!m_dirtyEdges.end() ) {
 			
@@ -69,6 +72,11 @@ public:
 			const DistanceNode & n1 = nodes()[i.x];
 			const DistanceNode & n2 = nodes()[i.y];
 			
+			err = 0.f;
+			
+/// front nodes
+			if(n1.label == sdf::StFront
+				&& n2.label == sdf::StFront) {
 /// do not test inside edge
 			if(n1.val * n2.val < 0.f
 			|| (n1.val > 0.f && n2.val > 0.f)  ) {
@@ -77,18 +85,22 @@ public:
 				act = func->calculateDistance(q) - shellThickness;
 				rec = (n1.val + n2.val ) * .5f;
 				err = Absolute<float>(rec - act) / h;
-				if(mxErr < err)
-					mxErr = err;
+				if(m_mxErr < err)
+					m_mxErr = err;
+				if(m_mnErr > err)
+					m_mnErr = err;
 			}
-			else 
-				err = 0.f;
+			}
 				
 			m_dirtyEdges.value()->val = err;
 			
 			m_dirtyEdges.next();
 		}
-		return mxErr;
+		return m_mxErr;
 	}
+	
+	const float & maxError() const;
+	const float & minError() const;
 	
 protected:
 	void initNodes();

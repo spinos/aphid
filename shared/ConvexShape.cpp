@@ -144,7 +144,12 @@ float Sphere::distanceTo(const Vector3F & p) const
 
 Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
 {
-	Vector3F res = m_p + v.normal() * (m_r + 1e-2f);
+	Vector3F res;
+	//if(v.length() < 1e-5)
+	//	std::cout<<"\n low v"<<v;
+
+	res = m_p + v.normal() * m_r;
+		
 	if(localP) *localP = res;
 	return res;
 }
@@ -497,7 +502,14 @@ Tetrahedron::Tetrahedron()
 
 void Tetrahedron::set(const Vector3F & p0, const Vector3F & p1,
 			const Vector3F & p2, const Vector3F & p3)
-{ m_p[0] = p0; m_p[1] = p1; m_p[2] = p2; m_p[3] = p3; }
+{
+	Vector3F c = (p0 + p1 + p2 + p3) * .25f;
+	
+	m_p[0] = p0 + (p0 - c) * 1e-3f; 
+	m_p[1] = p1 + (p1 - c) * 1e-3f; 
+	m_p[2] = p2 + (p2 - c) * 1e-3f; 
+	m_p[3] = p3 + (p3 - c) * 1e-3f; 
+}
 
 BoundingBox Tetrahedron::calculateBBox() const
 { 
@@ -506,7 +518,7 @@ BoundingBox Tetrahedron::calculateBBox() const
     b.expandBy(m_p[1]);
 	b.expandBy(m_p[2]);
 	b.expandBy(m_p[3]);
-    b.expand(b.getLongestDistance() * 1e-4f);
+    b.expand(b.getLongestDistance() * 1e-3f);
     return b;
 }
 
@@ -538,6 +550,8 @@ Vector3F Tetrahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
         }
     }
     if(localP) *localP = X(ir);
+	if(X(ir).length() < 1e-3f)
+	std::cout<<"\n tet x"<<X(ir);
     return X(ir);
 }
 

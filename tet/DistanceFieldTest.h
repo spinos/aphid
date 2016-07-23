@@ -11,14 +11,14 @@
 #include "Scene.h"
 #include "TetraField.h"
 #include <BDistanceFunction.h>
+#include <DrawDistanceField.h>
 
 namespace ttg {
 
-class DistanceFieldTest : public Scene {
+class DistanceFieldTest : public Scene, public aphid::DrawDistanceField {
 
 	TetraField m_fld;
 	aphid::BDistanceFunction m_distFunc;
-	float m_nodeDrawSize, m_nodeColScl;
 	
 public:
 	DistanceFieldTest();

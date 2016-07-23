@@ -579,5 +579,8 @@ void BoundingBox::scale(const float * sc)
 	m_data[5] *= sc[2];
 }
 
+const BoundingBox & BoundingBox::calculateBBox() const
+{ return *this; }
+
 }
 //:~
