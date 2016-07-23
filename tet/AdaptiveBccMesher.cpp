@@ -13,8 +13,7 @@
 using namespace aphid;
 
 namespace ttg {
-AdaptiveBccMesher::AdaptiveBccMesher() :
-m_numVert(0)
+AdaptiveBccMesher::AdaptiveBccMesher()
 {}
 
 AdaptiveBccMesher::~AdaptiveBccMesher()
@@ -36,11 +35,35 @@ void AdaptiveBccMesher::clearTetra()
 	m_tets.clear();
 }
 
-void AdaptiveBccMesher::setH(const float & x)
-{ 
+void AdaptiveBccMesher::fillBox(const aphid::BoundingBox & b,
+				const float & h)
+{
 	m_grid.clear();
-	m_grid.setLevel0CellSize(x);
-	std::cout<<"\n grid max level "<<m_grid.maxLevel();
+	m_grid.setLevel0CellSize(h);
+	
+	int i, j, k;
+	int s = m_grid.level0CoordStride();
+	
+	sdb::Coord4 lc = m_grid.cellCoordAtLevel(b.getMin(), 0);
+	sdb::Coord4 hc = m_grid.cellCoordAtLevel(b.getMax(), 0);
+	int dimx = (hc.x - lc.x) / s + 1;
+	int dimy = (hc.y - lc.y) / s + 1; 
+	int dimz = (hc.z - lc.z) / s + 1;
+	float fh = m_grid.finestCellSize();
+	std::cout<<"\n level0 cell size "<<h
+		<<"\n grid dim "<<dimx<<" x "<<dimy<<" x "<<dimz;
+	
+	Vector3F ori(fh * (lc.x + s/2),
+				fh * (lc.y + s/2),
+				fh * (lc.z + s/2));
+	
+	for(k=0; k<dimz;++k) {
+		for(j=0; j<dimy;++j) {
+			for(i=0; i<dimx;++i) {
+				addCell(ori + Vector3F(i, j, k) * (fh * s) );
+			}
+		}
+	}
 }
 
 void AdaptiveBccMesher::addCell(const aphid::Vector3F & p)
@@ -58,6 +81,7 @@ void AdaptiveBccMesher::buildGrid()
 void AdaptiveBccMesher::buildMesh()
 { 
 	clearTetra();
+	m_numVert = 0;
 	m_numVert = m_grid.countNodes();
 	m_grid.begin();
 	while(!m_grid.end() ) {
@@ -121,10 +145,10 @@ void AdaptiveBccMesher::enforceBoundary(const std::vector<sdb::Coord4 > & ks)
 		
 		for(int i=0; i< 6;++i) {
 			const sdb::Coord4 nei = m_grid.neighborCoord(*it, i);
-
-			if(!m_grid.findCell(nei) ) {
-				const sdb::Coord4 par = m_grid.parentCoord(nei);
-				m_grid.subdivideCell(par );
+			const sdb::Coord4 par = m_grid.parentCoord(nei);
+			if(m_grid.findCell(par) ) {
+				if(!m_grid.findCell(nei) )
+					m_grid.subdivideCell(par );
 			}
 		}
 	}

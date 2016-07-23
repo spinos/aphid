@@ -67,7 +67,7 @@ int Frustum::numPoints() const
 
 Vector3F Frustum::supportPoint(const Vector3F & v, Vector3F * localP) const
 { 
-    float maxdotv = -1e8f;
+    float maxdotv = -1e18f;
     float dotv;
 	
     Vector3F res, q;
@@ -144,7 +144,7 @@ float Sphere::distanceTo(const Vector3F & p) const
 
 Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
 {
-	Vector3F res = m_p + v.normal() * m_r;
+	Vector3F res = m_p + v.normal() * (m_r + 1e-2f);
 	if(localP) *localP = res;
 	return res;
 }
@@ -517,6 +517,9 @@ std::string Tetrahedron::GetTypeStr()
 
 ShapeType Tetrahedron::shapeType() const
 { return TTetrahedron; }
+
+int Tetrahedron::numPoints() const
+{ return 4; }
 
 Vector3F Tetrahedron::X(int idx) const
 { return m_p[idx]; }

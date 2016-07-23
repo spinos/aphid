@@ -126,7 +126,7 @@ public:
         Vector3F w, pa, pb, q;
     
         Vector3F v = A.X(0);
-        if(v.length2() < 1e-4f) v = A.X(1);
+        if(v.length2() < 1e-2f) v = A.X(1);
     
         for(int i=0; i < 10; i++) {
     // SA-B(-v)
@@ -137,7 +137,7 @@ public:
     // terminate when v is close enough to v(A - B).
     // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
             v2 = v.length2();
-            if(v2 - w.dot(v) < 0.001f * v2) {
+            if(v2 - w.dot(v) < 1e-3f * v2) {
     // std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
                 break;
             }

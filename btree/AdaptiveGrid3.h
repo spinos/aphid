@@ -41,6 +41,7 @@ public:
 	const float & finestCellSize() const;
 	const float & level0CellSize() const;
 	const float & levelCellSize(const int & x) const;
+	const int & level0CoordStride() const;
 	
 	int countNodes();
 	
@@ -114,6 +115,10 @@ const float & AdaptiveGrid3<CellType, ValueType, MaxLevel>::level0CellSize() con
 template<typename CellType, typename ValueType, int MaxLevel>
 const float & AdaptiveGrid3<CellType, ValueType, MaxLevel>::levelCellSize(const int & x) const
 { return m_cellSize[x]; }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+const int & AdaptiveGrid3<CellType, ValueType, MaxLevel>::level0CoordStride() const
+{ return m_levelCoord[0]; }
 
 template<typename CellType, typename ValueType, int MaxLevel>
 CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::value() 

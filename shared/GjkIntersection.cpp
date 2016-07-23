@@ -151,7 +151,7 @@ void Simplex::reduceToSmallest()
 
 	float * bar = &_contributes.x;
 	for(int i = 0; i < _d; i++) {
-		if(bar[i] < 1e-6) {
+		if(bar[i] < 1e-6f) {
 			for(int j = i; j < _d - 1; j++) {
 				_p[j] = _p[j+1];
 				bar[j] = bar[j+1];

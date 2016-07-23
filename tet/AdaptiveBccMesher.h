@@ -27,7 +27,9 @@ public:
 	virtual ~AdaptiveBccMesher();
 	
 /// reset grid w level0 cell size
-	void setH(const float & x);
+	void fillBox(const aphid::BoundingBox & b,
+				const float & h);
+	
 	void addCell(const aphid::Vector3F & p);
 	void buildGrid();
 	void buildMesh();
@@ -66,8 +68,7 @@ public:
 			m_grid.next();
 		}
 		
-		if(level > 1)
-			enforceBoundary(divided);
+		if(level > 1) enforceBoundary(divided);
 			
 		divided.clear();
 	}

@@ -24,33 +24,18 @@ const char * AdaptiveGridTest::titleStr() const
 
 bool AdaptiveGridTest::init()
 {
-	float gz = 16.f;
-	m_msh.setH(gz);
-	
-	int i, j, k;
-	int dimx = 2, dimy = 2, dimz = 2;
-	
+	float gz = 32.f;
 	m_nodeColScl = gz / .02f;
 	m_nodeDrawSize = gz * .022f;
-	Vector3F ori(gz*.5f - gz*dimx/2, 
-					gz*.5f - gz*dimy/2, 
-					gz*.5f - gz*dimz/2);
-	std::cout<<"\n level0 cell size "<<gz
-		<<"\n grid dim "<<dimx<<" x "<<dimy<<" x "<<dimz;
-		
-	for(k=0; k<dimz;++k) {
-		for(j=0; j<dimy;++j) {
-			for(i=0; i<dimx;++i) {
-				m_msh.addCell(ori + Vector3F(i, j, k) * gz );
-			}
-		}
-	}	
+	m_msh.fillBox(BoundingBox(-30.f, -30.f, -30.f,
+								 30.f,  30.f,  30.f), gz);
 	
-	m_distFunc.addSphere(Vector3F(0.f, 1.421f, 0.f), 8.437f );
+	m_distFunc.addSphere(Vector3F(0.001f, 0.f, 0.f), 23.5f );
 	
 	m_msh.subdivideGrid<aphid::BDistanceFunction>(m_distFunc, 0);
 	m_msh.subdivideGrid<aphid::BDistanceFunction>(m_distFunc, 1);
-	//m_msh.subdivideGrid<aphid::BDistanceFunction>(m_distFunc, 2);
+	m_msh.subdivideGrid<aphid::BDistanceFunction>(m_distFunc, 2);
+	//m_msh.subdivideGrid<aphid::BDistanceFunction>(m_distFunc, 3);
 	//m_distFunc.addSphere(Vector3F(0.f, -22.43f, 0.2f), 21.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
@@ -71,7 +56,7 @@ bool AdaptiveGridTest::init()
 void AdaptiveGridTest::draw(aphid::GeoDrawer * dr)
 {
 	drawGrid(dr);
-	drawGraph(dr);
+	//drawGraph(dr);
 }
 
 void AdaptiveGridTest::drawGrid(aphid::GeoDrawer * dr)
@@ -88,12 +73,12 @@ void AdaptiveGridTest::drawGrid(aphid::GeoDrawer * dr)
 		
 		sdb::gdt::GetCellColor(cellCol, grd->key().w );
 		grd->getCellBBox(cellBox, grd->key() );
-		//cellBox.expand(-.04f - .04f * m_grd->key().w );
+		cellBox.expand(-.04f - .04f * grd->key().w );
 		
 		dr->setColor(cellCol.x, cellCol.y, cellCol.z);
 		dr->boundingBox(cellBox);
 		
-		drawNode(grd->value(), dr, grd->key().w );
+		//drawNode(grd->value(), dr, grd->key().w );
 		
 		grd->next();
 	}

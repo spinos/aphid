@@ -120,8 +120,21 @@ public:
 	virtual ShapeType shapeType() const;
 	
 	template<typename T>
+	bool enclose(const T * b) const
+	{
+		for(int i=0; i<b->numPoints(); ++i) {
+			if(b->X(i).distanceTo(m_p) > m_r )
+				return false;
+		}
+		return true;
+	}
+	
+	template<typename T>
 	bool intersect(const T * b) const
 	{
+		if(enclose(b) )
+			return false;
+			
 		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
 	}
 	
@@ -305,6 +318,7 @@ public:
 	
 	virtual ShapeType shapeType() const;
 	
+	int numPoints() const;
 	Vector3F X(int idx) const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 	
