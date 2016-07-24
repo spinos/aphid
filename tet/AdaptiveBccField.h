@@ -16,6 +16,8 @@ namespace ttg {
 
 class AdaptiveBccField : public AdaptiveBccMesher, public aphid::ADistanceField {
 
+	aphid::Vector3F m_insideOutsidePref;
+	
 public:
 	AdaptiveBccField();
 	virtual ~AdaptiveBccField();
@@ -85,7 +87,8 @@ public:
 		
 		calculateDistanceOnFront(func, shellThickness);
 		fastMarchingMethod();
-		markInsideOutside();
+		
+		markInsideOutside(findFarInd() );
 	}
 	
 	void buildRefinedMesh();
@@ -94,6 +97,8 @@ public:
 	
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
 	void getTriangleShape(aphid::cvx::Triangle & t, const int & i) const;
+	
+	void setInsideOutsidePref(const aphid::Vector3F & q);
 								
 protected:
 	void markTetraOnFront(const int & i);
@@ -103,7 +108,9 @@ private:
 					std::vector<int> & b);
 	void subdivideGridByError(const float & threshold,
 						const int & level);
-						
+/// background node ind in cell closest to pref 
+	int findFarInd();
+	
 };
 
 }

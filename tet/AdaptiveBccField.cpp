@@ -15,10 +15,13 @@ using namespace aphid;
 namespace ttg {
 
 AdaptiveBccField::AdaptiveBccField()
-{}
+{ m_insideOutsidePref.set(.577e6f, .577e6f, .577e6f); }
 
 AdaptiveBccField::~AdaptiveBccField()
 {}
+
+void AdaptiveBccField::setInsideOutsidePref(const Vector3F & q)
+{ m_insideOutsidePref = q; }
 
 void AdaptiveBccField::buildGraph()
 {
@@ -164,7 +167,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
-	const float r = g->levelCellSize(level) * .1f;
+	const float r = g->levelCellSize(level) * .123f;
 
 	BoundingBox dirtyBx;
 	
@@ -206,6 +209,21 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	divided.clear();
 
+}
+
+int AdaptiveBccField::findFarInd()
+{
+	BccCell3 * cell = grid()->cellClosestTo(m_insideOutsidePref);
+	cell->begin();
+	while(!cell->end() ) {
+	
+		if(isNodeBackground(cell->value()->index) ) {
+			std::cout<<"\n far node pos"<<cell->value()->pos;
+			return cell->value()->index;
+		}
+		cell->next();
+	}
+	return 0;
 }
 
 }

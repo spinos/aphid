@@ -125,6 +125,8 @@ protected:
 /// propagate distance value	
 	void fastMarchingMethod();
 	
+	bool isNodeBackground(const int & i) const;
+	
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);

@@ -90,8 +90,12 @@ public:
 						int level) const;
 	bool atCellCenter(const Vector3F & pref, 
 						int level) const;
+						
+/// through level0 cells
+	CellType * cellClosestTo(const Vector3F & pref);
+
 protected:
-	
+
 private:
 	void countNodesIn(CellType * cell, int & c);
 	
@@ -396,12 +400,32 @@ bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::atCellCenter(const Vector3F &
 	Coord4 c1 = cellCoordAtLevel(pref, level);
 	Coord4 c2 = cellCoordAtLevel(pref, level+1);
 	const int s = m_levelCoord[level+1];
-	//if(c2.x > c1.x
-	//	&& c2.y > c1.y
-	//	&& c2.z > c1.z) std::cout<<" c1"<<c1<<" c2"<<c2<<" s"<<s;
 	return (c1.x +s == c2.x
 			&& c1.y +s == c2.y
 			&& c1.z +s == c2.z);
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellClosestTo(const Vector3F & pref)
+{
+	float mnD = 1e18f, d;
+	begin();
+	CellType * c = NULL;
+	while(!end() ) {
+		
+		d = cellCenter(key() ).distanceTo(pref);
+		if(mnD > d) {
+			mnD = d;
+			c = value();
+		}
+		
+		if(key().w > 0)
+			break;
+			
+		next();
+	}
+	
+	return c;
 }
 
 }

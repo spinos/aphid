@@ -232,4 +232,7 @@ const float & ADistanceField::maxError() const
 const float & ADistanceField::minError() const
 { return m_mnErr; }
 
+bool ADistanceField::isNodeBackground(const int & i) const
+{ return nodes()[i].label == sdf::StBackGround; }
+
 }
