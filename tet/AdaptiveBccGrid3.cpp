@@ -30,13 +30,25 @@ BccCell3 * AdaptiveBccGrid3::addCell(const Vector3F & pref, const int & level)
 	return c;
 }
 
-void AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord)
+bool AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord)
 {
+	BccCell3 * cell = findCell(cellCoord);
+	if(!cell) {
+		std::cout<<"\n [ERROR] cannot find cell to subdivide "<<cellCoord;
+		return false;
+	}
+	
+	if(cell->hasChild() ) {
+		std::cout<<"\n [WARNING] cell already divided "<<cellCoord;
+		return false;
+	}
+	
 	for(int i=0; i< 8; ++i) { 
 		BccCell3 * c = AdaptiveGrid5T::subdivide(cellCoord, i);
 	
 		c->insertRed( childCenter(cellCoord, i) );
 	}
+	return true;
 }
 
 void AdaptiveBccGrid3::build()

@@ -582,5 +582,20 @@ void BoundingBox::scale(const float * sc)
 const BoundingBox & BoundingBox::calculateBBox() const
 { return *this; }
 
+int BoundingBox::numFlatAxis(const float & threshold) const
+{
+	int c = 0;
+	if(distance(0) < threshold)
+		c++;
+		
+	if(distance(1) < threshold)
+		c++;
+		
+	if(distance(2) < threshold)
+		c++;
+	
+	return c;
+}
+
 }
 //:~

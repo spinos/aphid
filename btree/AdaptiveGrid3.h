@@ -42,6 +42,7 @@ public:
 	const float & level0CellSize() const;
 	const float & levelCellSize(const int & x) const;
 	const int & level0CoordStride() const;
+	const int & levelCoordStride(const int & x) const;
 	
 	int countNodes();
 	
@@ -84,6 +85,10 @@ public:
 /// i 0:5 search for level 0 cell	
 	bool isCellFaceOnBoundray(const Coord4 & cellCoord, const int & i);
 	
+	bool atCellCorner(const Vector3F & pref, 
+						int level) const;
+	bool atCellCenter(const Vector3F & pref, 
+						int level) const;
 protected:
 	
 private:
@@ -121,6 +126,10 @@ const int & AdaptiveGrid3<CellType, ValueType, MaxLevel>::level0CoordStride() co
 { return m_levelCoord[0]; }
 
 template<typename CellType, typename ValueType, int MaxLevel>
+const int & AdaptiveGrid3<CellType, ValueType, MaxLevel>::levelCoordStride(const int & x) const
+{ return m_levelCoord[x]; }	
+
+template<typename CellType, typename ValueType, int MaxLevel>
 CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::value() 
 { return static_cast<CellType *>(Sequence<Coord4>::currentIndex() ); }
 
@@ -144,14 +153,16 @@ template<typename CellType, typename ValueType, int MaxLevel>
 const Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellCoordAtLevel(const Vector3F & pref,
 															int level) const
 {
-	const float & cz = m_cellSize[level];
+	const float & cz = 1.f / m_cellSize[level];
+	const float eps = cz * 1e-3f;
+	const int & s = m_levelCoord[level];
 	Coord4 r;
-	r.x = pref.x / cz; if(pref.x < 0.f) r.x--;
-	r.y = pref.y / cz; if(pref.y < 0.f) r.y--;
-	r.z = pref.z / cz; if(pref.z < 0.f) r.z--;
-	r.x *= m_levelCoord[level];
-	r.y *= m_levelCoord[level];
-	r.z *= m_levelCoord[level];
+	r.x = (pref.x + eps) * cz; if(pref.x + eps < 0.f) r.x--;
+	r.y = (pref.y + eps) * cz; if(pref.y + eps < 0.f) r.y--;
+	r.z = (pref.z + eps) * cz; if(pref.z + eps < 0.f) r.z--;
+	r.x *= s;
+	r.y *= s;
+	r.z *= s;
 	r.w = level;
 	return r;
 }
@@ -362,6 +373,31 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::countNodesIn(CellType * cell,
 		c++;
 		cell->next();
 	}
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::atCellCorner(const Vector3F & pref, 
+						int level) const
+{
+	Coord4 c1 = cellCoordAtLevel(pref, level);
+	Coord4 c2 = cellCoordAtLevel(pref, level+1);
+	c2.w = level;
+	return c1 == c2;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::atCellCenter(const Vector3F & pref, 
+						int level) const
+{
+	Coord4 c1 = cellCoordAtLevel(pref, level);
+	Coord4 c2 = cellCoordAtLevel(pref, level+1);
+	const int s = m_levelCoord[level+1];
+	if(c2.x > c1.x
+		&& c2.y > c1.y
+		&& c2.z > c1.z) std::cout<<" c1"<<c1<<" c2"<<c2<<" s"<<s;
+	return (c1.x == c2.x - s
+			&& c1.y == c2.y - s
+			&& c1.z == c2.z - s);
 }
 
 }

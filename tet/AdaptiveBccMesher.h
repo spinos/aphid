@@ -162,12 +162,20 @@ protected:
 	
 	void buildMesh1();
 	
+	void subdivideGridByBox(const aphid::BoundingBox & bx,
+							const int & level,
+							std::vector<aphid::sdb::Coord4 > & divided);
+	void subdivideGridByPnt(const aphid::Vector3F & pref,
+							const int & level,
+							std::vector<aphid::sdb::Coord4 > & divided);
+	
+/// for each cell divied, must have same level neighbor cell on six faces
+/// level change cross face < 2
+	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
+
 private:
 	void internalClear();
 	void clearTetra();
-/// for each cell divied, must have same level neighbor cell on six faces
-/// level change cross face < 2
-	void enforceBoundary(const std::vector<aphid::sdb::Coord4 > & ks);
 	
 };
 

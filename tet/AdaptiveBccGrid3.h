@@ -22,7 +22,7 @@ public:
 	
 	BccCell3 * addCell(const aphid::Vector3F & pref, const int & level = 0);
 /// add 8 child cells
-	void subdivideCell(const aphid::sdb::Coord4 & cellCoord);
+	bool subdivideCell(const aphid::sdb::Coord4 & cellCoord);
 /// node to each cell
 	void build();
 	

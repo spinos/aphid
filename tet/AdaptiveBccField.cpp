@@ -101,12 +101,16 @@ void AdaptiveBccField::pushIndices(const std::vector<int> & a,
 
 void AdaptiveBccField::verbose()
 {
-	std::cout<<"\n grid n tetra "<<numTetrahedrons()
+	std::cout<<"\n grid n cell "<<grid()->size()
+			<<"\n grid bbx "<<grid()->boundingBox()
+		<<"\n grid n tetra "<<numTetrahedrons()
 		<<"\n grid n node "<<numNodes()
 		<<"\n grid n edge "<<numEdges()
 		<<"\n grid n edge ind "<<numEdgeIndices()
 		<<"\n grid edge length min/max "<<minEdgeLength()
-								<<"/"<<maxEdgeLength();
+								<<"/"<<maxEdgeLength()
+		<<"\n estimated error (min/max) "<<minError()<<"/"<<maxError();
+		
 	if(numTriangles() > 0)
 		std::cout<<"\n n triangle "<<numTriangles();
 	std::cout.flush();
@@ -152,5 +156,49 @@ void AdaptiveBccField::buildRefinedMesh()
 
 bool AdaptiveBccField::checkTetraVolume()
 { return checkTetraVolumeExt(nodes() ); }
+
+void AdaptiveBccField::subdivideGridByError(const float & threshold,
+							const int & level)
+{
+	std::vector<aphid::sdb::Coord4 > divided;
+	
+	const DistanceNode * v = nodes();
+	AdaptiveBccGrid3 * g = grid();
+
+	sdb::Array<sdb::Coord2, EdgeRec > * egs = dirtyEdges();
+	egs->begin();
+	while(!egs->end() ) {
+	
+		if(egs->value()->val > threshold) {
+			
+			const Vector3F & p1 = v[egs->key().x].pos;
+			const Vector3F & p2 = v[egs->key().y].pos;
+			
+			if(g->atCellCenter(p1, level) )
+				subdivideGridByPnt(p1, level, divided);
+			if(g->atCellCenter(p2, level) )
+				subdivideGridByPnt(p2, level, divided);
+				
+			if(level>0) {
+			if(g->atCellCenter(p1, level-1) ) {
+				//std::cout<<"  red l"<<level-1;
+				subdivideGridByPnt(p1, level-1, divided);
+			}
+			if(g->atCellCenter(p2, level-1) ) {
+				//std::cout<<"  red l"<<level-1;
+				subdivideGridByPnt(p2, level-1, divided);
+			}
+			}
+				
+		}
+		
+		egs->next();
+	}
+	
+	enforceBoundary(divided);
+	
+	divided.clear();
+
+}
 
 }

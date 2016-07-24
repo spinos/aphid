@@ -20,6 +20,46 @@ public:
 	AdaptiveBccField();
 	virtual ~AdaptiveBccField();
 	
+/// subdive grid until either max level and max error condition is met
+	template<typename Tf>
+	void AdaptiveBccField::build(Tf * distanceFunc,
+				const int & levelLimit, 
+				const float & errorThreshild)
+	{
+		const float rgz = grid()->levelCellSize(2);
+		buildGrid();
+		buildMesh();
+		buildGraph();
+		
+		calculateDistance<Tf>(distanceFunc, 0.f);
+		estimateError<Tf>(distanceFunc, 0.f, rgz);
+		
+		verbose();
+		
+		float curErr = maxError();
+		
+		int level = 0;
+		while(level < levelLimit && curErr > errorThreshild) {
+		
+			subdivideGridByError(errorThreshild, level);
+			
+			buildGrid();
+			buildMesh();
+			buildGraph();
+			
+			calculateDistance<Tf>(distanceFunc, 0.f);
+			estimateError<Tf>(distanceFunc, 0.f, rgz);
+			
+			verbose();
+		
+			level++;
+			curErr = maxError();
+		}
+		
+		std::cout<<"\n build to level "<<level
+				<<"\n level cell size "<<grid()->levelCellSize(level);
+	}
+	
 /// push tetra node and edge to graph
 	void buildGraph();
 	
@@ -55,6 +95,9 @@ public:
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
 	void getTriangleShape(aphid::cvx::Triangle & t, const int & i) const;
 	
+	void subdivideGridByError(const float & threshold,
+						const int & level);
+								
 protected:
 	void markTetraOnFront(const int & i);
 	
