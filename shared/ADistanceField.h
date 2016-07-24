@@ -75,13 +75,10 @@ public:
 			err = 0.f;
 			
 /// front nodes
-			if(1//n1.label == sdf::StFront && n2.label == sdf::StFront
-				) {
+			if(n1.label == sdf::StFront && n2.label == sdf::StFront) {
 /// do not test inside edge
 			//if(n1.val * n2.val < 0.f
-			//|| (n1.val > 0.f && n2.val > 0.f)
-			//|| (n1.val < 0.f && n2.val < 0.f)
-			  if(n1.val > 0.f || n2.val > 0.f) {
+				//|| (n1.val > 0.f && n2.val > 0.f) ) {
 				Vector3F q = (n1.pos + n2.pos ) * .5f;
 								
 				act = func->calculateDistance(q) - shellThickness;
@@ -91,7 +88,7 @@ public:
 					m_mxErr = err;
 				if(m_mnErr > err)
 					m_mnErr = err;
-			}
+			//}
 			}
 				
 			m_dirtyEdges.value()->val = err;

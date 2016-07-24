@@ -164,7 +164,10 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
+	const float r = g->levelCellSize(level) * .1f;
 
+	BoundingBox dirtyBx;
+	
 	sdb::Array<sdb::Coord2, EdgeRec > * egs = dirtyEdges();
 	egs->begin();
 	while(!egs->end() ) {
@@ -174,22 +177,26 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 			const Vector3F & p1 = v[egs->key().x].pos;
 			const Vector3F & p2 = v[egs->key().y].pos;
 			
-			if(g->atCellCenter(p1, level) )
-				subdivideGridByPnt(p1, level, divided);
-			if(g->atCellCenter(p2, level) )
-				subdivideGridByPnt(p2, level, divided);
+			dirtyBx.reset();
+			dirtyBx.expandBy(p1);
+			dirtyBx.expandBy(p2);
 				
-			if(level>0) {
-			if(g->atCellCenter(p1, level-1) ) {
-				//std::cout<<"  red l"<<level-1;
-				subdivideGridByPnt(p1, level-1, divided);
+			if(dirtyBx.distance(0) < r ) {
+				dirtyBx.setMin(dirtyBx.getMin(0) - r, 0);
+				dirtyBx.setMax(dirtyBx.getMax(0) + r, 0);
 			}
-			if(g->atCellCenter(p2, level-1) ) {
-				//std::cout<<"  red l"<<level-1;
-				subdivideGridByPnt(p2, level-1, divided);
+			
+			if(dirtyBx.distance(1) < r ) {
+				dirtyBx.setMin(dirtyBx.getMin(1) - r, 1);
+				dirtyBx.setMax(dirtyBx.getMax(1) + r, 1);
 			}
+			
+			if(dirtyBx.distance(2) < r ) {
+				dirtyBx.setMin(dirtyBx.getMin(2) - r, 2);
+				dirtyBx.setMax(dirtyBx.getMax(2) + r, 2);
 			}
-				
+			
+			g->subdivideToLevel(dirtyBx, level+1, &divided);
 		}
 		
 		egs->next();

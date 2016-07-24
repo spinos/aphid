@@ -50,6 +50,7 @@ public:
 	const Coord4 key() const;
 	
 /// add cell at level
+	CellType * addCell(const Coord4 & c);
 	CellType * addCell(const Vector3F & pref, const int & level = 0);
 	
 	const Coord4 cellCoordAtLevel(const Vector3F & pref, 
@@ -138,16 +139,19 @@ const Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::key() const
 { return Sequence<Coord4>::currentKey(); }
 	
 template<typename CellType, typename ValueType, int MaxLevel>
-CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::addCell(const Vector3F & pref,
-														const int & level)
+CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::addCell(const Coord4 & c)
 {
-	Coord4 c = cellCoordAtLevel(pref, level);
 	Pair<Coord4, Entity> * p = Sequence<Coord4>::insert(c);
 	if(!p->index)
 		p->index = new CellType(this);
 
 	return static_cast<CellType *>(p->index);
 }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::addCell(const Vector3F & pref,
+														const int & level)
+{ return addCell(cellCoordAtLevel(pref, level) ); }
 
 template<typename CellType, typename ValueType, int MaxLevel>
 const Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellCoordAtLevel(const Vector3F & pref,
@@ -392,12 +396,12 @@ bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::atCellCenter(const Vector3F &
 	Coord4 c1 = cellCoordAtLevel(pref, level);
 	Coord4 c2 = cellCoordAtLevel(pref, level+1);
 	const int s = m_levelCoord[level+1];
-	if(c2.x > c1.x
-		&& c2.y > c1.y
-		&& c2.z > c1.z) std::cout<<" c1"<<c1<<" c2"<<c2<<" s"<<s;
-	return (c1.x == c2.x - s
-			&& c1.y == c2.y - s
-			&& c1.z == c2.z - s);
+	//if(c2.x > c1.x
+	//	&& c2.y > c1.y
+	//	&& c2.z > c1.z) std::cout<<" c1"<<c1<<" c2"<<c2<<" s"<<s;
+	return (c1.x +s == c2.x
+			&& c1.y +s == c2.y
+			&& c1.z +s == c2.z);
 }
 
 }

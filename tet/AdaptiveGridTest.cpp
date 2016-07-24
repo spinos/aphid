@@ -25,18 +25,19 @@ const char * AdaptiveGridTest::titleStr() const
 bool AdaptiveGridTest::init()
 {
 	float gz = 32.f;
-	setColorScale(1.f / gz);
+	setColorScale(.5f / gz);
 	setNodeDrawSize(gz * .022f);
-	m_msh.fillBox(BoundingBox(-40.f, -40.f, -40.f,
-								 40.f,  40.f,  40.f), gz);
+	m_msh.fillBox(BoundingBox(-50.f, -50.f, -50.f,
+								 50.f,  50.f,  50.f), gz);
 	
-	m_distFunc.addSphere(Vector3F(    10.f, 1.f, 0.f), 25.35f );
-	m_distFunc.addSphere(Vector3F(-120.43f, -1.f, 0.f), 111.f );
+	m_distFunc.addSphere(Vector3F(    7.f, 17.f, -1.f), 26.35f );
+	m_distFunc.addSphere(Vector3F(-55.43f, -19.f, 1.f), 49.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
-	//m_distFunc.addSphere(Vector3F(0.f, -22200.f, 0.f), 22195.1f );
+	m_distFunc.addSphere(Vector3F(34.f, -10.f, -20.f), 17.1f );
 	
-	m_msh.build<BDistanceFunction>(&m_distFunc, 3, .06f);
+#define MAX_BUILD_LEVEL 9
+	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, 0.06f);
 	//m_msh.verbose();
 	std::cout.flush();
 	return true;
@@ -44,7 +45,7 @@ bool AdaptiveGridTest::init()
 
 void AdaptiveGridTest::draw(aphid::GeoDrawer * dr)
 {
-	drawGridCell<AdaptiveBccGrid3>(m_msh.grid(), dr);
+	//drawGridCell<AdaptiveBccGrid3>(m_msh.grid(), dr);
 	//drawGridNode<AdaptiveBccGrid3, BccCell3>(m_msh.grid(), dr);
 	drawGraph(dr);
 }

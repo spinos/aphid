@@ -505,10 +505,10 @@ void Tetrahedron::set(const Vector3F & p0, const Vector3F & p1,
 {
 	Vector3F c = (p0 + p1 + p2 + p3) * .25f;
 	
-	m_p[0] = p0 + (p0 - c) * 1e-3f; 
-	m_p[1] = p1 + (p1 - c) * 1e-3f; 
-	m_p[2] = p2 + (p2 - c) * 1e-3f; 
-	m_p[3] = p3 + (p3 - c) * 1e-3f; 
+	m_p[0] = p0 + (c - p0) * 1e-3f; 
+	m_p[1] = p1 + (c - p1) * 1e-3f; 
+	m_p[2] = p2 + (c - p2) * 1e-3f; 
+	m_p[3] = p3 + (c - p3) * 1e-3f; 
 }
 
 BoundingBox Tetrahedron::calculateBBox() const

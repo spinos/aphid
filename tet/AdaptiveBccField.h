@@ -26,7 +26,7 @@ public:
 				const int & levelLimit, 
 				const float & errorThreshild)
 	{
-		const float rgz = grid()->levelCellSize(2);
+		const float rgz = grid()->levelCellSize(1);
 		buildGrid();
 		buildMesh();
 		buildGraph();
@@ -94,9 +94,6 @@ public:
 	
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
 	void getTriangleShape(aphid::cvx::Triangle & t, const int & i) const;
-	
-	void subdivideGridByError(const float & threshold,
-						const int & level);
 								
 protected:
 	void markTetraOnFront(const int & i);
@@ -104,7 +101,9 @@ protected:
 private:
 	void pushIndices(const std::vector<int> & a,
 					std::vector<int> & b);
-	
+	void subdivideGridByError(const float & threshold,
+						const int & level);
+						
 };
 
 }

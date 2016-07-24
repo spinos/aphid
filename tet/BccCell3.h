@@ -16,7 +16,7 @@ namespace ttg {
 
 class BccCell3 : public aphid::sdb::Array<int, BccNode > {
 
-	typedef aphid::sdb::AdaptiveGrid3<BccCell3, BccNode, 5 > AdaptiveGridT;
+	typedef aphid::sdb::AdaptiveGrid3<BccCell3, BccNode, 10 > AdaptiveGridT;
 
 	bool m_hasChild;
 	BccCell3 * m_parentCell;

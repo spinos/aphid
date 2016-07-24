@@ -70,7 +70,7 @@ protected:
 						GeoDrawer * dr)
 	{
 		float r, g, b;
-		float nz = nodeDrawSize() * (1.f - .12f * level);
+		float nz = nodeDrawSize() * (1.f - .05f * level);
 		
 		cell->begin();
 		while(!cell->end() ) {
