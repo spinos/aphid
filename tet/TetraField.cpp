@@ -76,7 +76,7 @@ void TetraField::buildGraph()
 	int ni = edgeInds.size();
 	ADistanceField::create(nv, ne, ni);
 	
-	extractGridNodes(nodes() );
+	extractGridNodes<BccTetraGrid, BccNode >(nodes(), grid() );
 	extractEdges(&egs);
 	extractEdgeBegins(edgeBegins);
 	extractEdgeIndices(edgeInds);
@@ -146,7 +146,7 @@ void TetraField::markTetraOnFront(const int & i)
 
 void TetraField::buildRefinedMesh()
 { 
-	obtainGridNodeVal(nodes() );
+	obtainGridNodeVal<BccTetraGrid, BccNode >(nodes(), grid() );
 	buildMesh1();
 }
 

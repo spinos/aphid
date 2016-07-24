@@ -10,6 +10,7 @@
 #include "ADistanceField.h"
 #include "GeoDrawer.h"
 #include <GridTables.h>
+#include "tetrahedron_math.h"
 
 namespace aphid {
 
@@ -102,6 +103,39 @@ protected:
 			egs->next();
 		}
 		glEnd();
+	}
+	
+	template<typename Tn, typename Tt>
+	bool checkTetraVolumeExt(const Tn * src,
+							const int & ntet,
+							const std::vector<Tt *> & tets) const
+	{
+		float mnvol = 1e20f, mxvol = -1e20f, vol;
+		aphid::Vector3F p[4];
+		int i = 0;
+		for(;i<ntet;++i) {
+			const Tt * t = tets[i];
+			if(!t) continue;
+			
+			p[0] = src[t->iv0].pos;
+			p[1] = src[t->iv1].pos;
+			p[2] = src[t->iv2].pos;
+			p[3] = src[t->iv3].pos;
+			
+			vol = tetrahedronVolume(p);
+			if(mnvol > vol)
+				mnvol = vol;
+			if(mxvol < vol)
+				mxvol = vol;
+				
+		}
+
+		std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
+		
+		if(mnvol <= 0.f)
+			std::cout<<"\n [ERROR] zero / negative volume";
+			
+		return mnvol > 0.f;
 	}
 	
 };

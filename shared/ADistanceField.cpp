@@ -92,7 +92,7 @@ void ADistanceField::propagate(std::map<int, int > & heap,
 		
 		int k = edgeIndices()[j];
 
-		const IGraphEdge & eg = edges()[k];
+		const IDistanceEdge & eg = edges()[k];
 		
 		vj = eg.vi.x;
 		if(vj == i)
@@ -123,7 +123,7 @@ void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
 		
 		int k = edgeIndices()[j];
 
-		const IGraphEdge & eg = edges()[k];
+		const IDistanceEdge & eg = edges()[k];
 		
 		vj = eg.vi.x;
 		if(vj == i)

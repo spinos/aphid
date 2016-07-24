@@ -23,6 +23,8 @@ public:
 	virtual ~AdaptiveBccField();
 	
 /// subdive grid until either max level and max error condition is met
+/// levelLimit < adaptive grid maxLevel
+/// errorThreshild is error distance / level1 cell size
 	template<typename Tf>
 	void AdaptiveBccField::build(Tf * distanceFunc,
 				const int & levelLimit, 
@@ -92,7 +94,6 @@ public:
 	}
 	
 	void buildRefinedMesh();
-	bool checkTetraVolume();
 	void verbose();
 	
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;

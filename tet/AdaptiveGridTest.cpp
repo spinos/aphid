@@ -36,9 +36,13 @@ bool AdaptiveGridTest::init()
 	//					Vector3F(40.f, -7.87f, 40.f) );
 	m_distFunc.addSphere(Vector3F(33.f, -11.f, -22.f), 19.1f );
 	
-#define MAX_BUILD_LEVEL 9
+#define MAX_BUILD_LEVEL 4
 	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .0313f);
-	//m_msh.verbose();
+	
+#if 0
+	checkTetraVolumeExt<DistanceNode, ITetrahedron>(m_msh.nodes(), m_msh.numTetrahedrons(),
+						m_msh.tetrahedrons() );
+#endif
 	std::cout.flush();
 	return true;
 }

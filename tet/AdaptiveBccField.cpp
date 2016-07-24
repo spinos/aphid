@@ -79,7 +79,7 @@ void AdaptiveBccField::buildGraph()
 	int ni = edgeInds.size();
 	ADistanceField::create(nv, ne, ni);
 	
-	extractGridNodes(nodes() );
+	extractGridNodes<AdaptiveBccGrid3, BccNode >(nodes(), grid() );
 	extractEdges(&egs);
 	extractEdgeBegins(edgeBegins);
 	extractEdgeIndices(edgeInds);
@@ -153,12 +153,9 @@ void AdaptiveBccField::markTetraOnFront(const int & i)
 
 void AdaptiveBccField::buildRefinedMesh()
 { 
-	obtainGridNodeVal(nodes() );
+	obtainGridNodeVal<AdaptiveBccGrid3, BccNode >(nodes(), grid() );
 	buildMesh1();
 }
-
-bool AdaptiveBccField::checkTetraVolume()
-{ return checkTetraVolumeExt(nodes() ); }
 
 void AdaptiveBccField::subdivideGridByError(const float & threshold,
 							const int & level)

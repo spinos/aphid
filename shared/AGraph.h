@@ -18,21 +18,13 @@
 
 namespace aphid {
 
-struct IGraphEdge {
-
-	sdb::Coord2 vi;
-	int index;
-	float len;
-	
-};
-
-template<typename Tn>
+template<typename Tn, typename Te>
 class AGraph {
 
 	int m_numNode, m_numEdge, m_numEdgeInd;
 	float m_minEdgeLen, m_maxEdgeLen;
 	
-	IGraphEdge * m_edges;
+	Te * m_edges;
 	int * m_vvEdgeIndices;
 	int * m_vvEdgeBegins;
 	Tn * m_nodes;
@@ -50,12 +42,12 @@ public:
 	const float & maxEdgeLength() const;
 	
 	Tn * nodes();
-	IGraphEdge * edges();
+	Te * edges();
 	int * edgeIndices();
 	int * edgeBegins();
 	
 	const Tn * nodes() const;
-	const IGraphEdge * edges() const;
+	const Te * edges() const;
 	const int * edgeIndices() const;
 	const int * edgeBegins() const;
 	
@@ -70,8 +62,8 @@ private:
 
 };
 
-template<typename Tn>
-AGraph<Tn>::AGraph() : 
+template<typename Tn, typename Te>
+AGraph<Tn, Te>::AGraph() : 
 m_numNode(0),
 m_numEdge(0),
 m_numEdgeInd(0),
@@ -81,12 +73,12 @@ m_vvEdgeBegins(NULL),
 m_nodes(NULL)
 {}
 
-template<typename Tn>
-AGraph<Tn>::~AGraph()
+template<typename Tn, typename Te>
+AGraph<Tn, Te>::~AGraph()
 { internalClear(); }
 
-template<typename Tn>
-void AGraph<Tn>::internalClear()
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::internalClear()
 {
 	if(m_edges) delete[] m_edges;
 	if(m_vvEdgeIndices) delete[] m_vvEdgeIndices;
@@ -94,72 +86,72 @@ void AGraph<Tn>::internalClear()
 	if(m_numNode > 0 && m_nodes) delete[] m_nodes;
 }
 
-template<typename Tn>
-void AGraph<Tn>::create(int nn, int ne, int ni)
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::create(int nn, int ne, int ni)
 {
 	internalClear();
 	m_numNode = nn;
 	m_numEdge = ne;
 	m_numEdgeInd = ni;
 	m_nodes = new Tn[m_numNode];
-	m_edges = new IGraphEdge[m_numEdge];
+	m_edges = new Te[m_numEdge];
 	m_vvEdgeBegins = new int[m_numNode + 1];
 	m_vvEdgeBegins[m_numNode] = m_numEdgeInd;
 	m_vvEdgeIndices = new int[m_numEdgeInd];
 }
 
-template<typename Tn>
-const int & AGraph<Tn>::numNodes() const
+template<typename Tn, typename Te>
+const int & AGraph<Tn, Te>::numNodes() const
 { return m_numNode; }
 	
-template<typename Tn>
-const int & AGraph<Tn>::numEdges() const
+template<typename Tn, typename Te>
+const int & AGraph<Tn, Te>::numEdges() const
 { return m_numEdge; }
 
-template<typename Tn>
-const int & AGraph<Tn>::numEdgeIndices() const
+template<typename Tn, typename Te>
+const int & AGraph<Tn, Te>::numEdgeIndices() const
 { return m_numEdgeInd; }
 
-template<typename Tn>
-Tn * AGraph<Tn>::nodes()
+template<typename Tn, typename Te>
+Tn * AGraph<Tn, Te>::nodes()
 { return m_nodes; }
 
-template<typename Tn>
-IGraphEdge * AGraph<Tn>::edges()
+template<typename Tn, typename Te>
+Te * AGraph<Tn, Te>::edges()
 { return m_edges; }
 
-template<typename Tn>
-int * AGraph<Tn>::edgeIndices()
+template<typename Tn, typename Te>
+int * AGraph<Tn, Te>::edgeIndices()
 { return m_vvEdgeIndices; }
 
-template<typename Tn>
-int * AGraph<Tn>::edgeBegins()
+template<typename Tn, typename Te>
+int * AGraph<Tn, Te>::edgeBegins()
 { return m_vvEdgeBegins; }
 
-template<typename Tn>
-const Tn * AGraph<Tn>::nodes() const
+template<typename Tn, typename Te>
+const Tn * AGraph<Tn, Te>::nodes() const
 { return m_nodes; }
 
-template<typename Tn>
-const IGraphEdge * AGraph<Tn>::edges() const
+template<typename Tn, typename Te>
+const Te * AGraph<Tn, Te>::edges() const
 { return m_edges; }
 
-template<typename Tn>
-const int * AGraph<Tn>::edgeIndices() const
+template<typename Tn, typename Te>
+const int * AGraph<Tn, Te>::edgeIndices() const
 { return m_vvEdgeIndices; }
 
-template<typename Tn>
-const int * AGraph<Tn>::edgeBegins() const
+template<typename Tn, typename Te>
+const int * AGraph<Tn, Te>::edgeBegins() const
 { return m_vvEdgeBegins; }
 
-template<typename Tn>
-void AGraph<Tn>::extractEdges(sdb::Sequence<sdb::Coord2> * a)
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::extractEdges(sdb::Sequence<sdb::Coord2> * a)
 {
 	int i = 0;
 	a->begin();
 	while(!a->end() ) {
 		
-		IGraphEdge * e = &m_edges[i];
+		Te * e = &m_edges[i];
 		e->vi = a->key();
 		e->index = i;
 		
@@ -168,8 +160,8 @@ void AGraph<Tn>::extractEdges(sdb::Sequence<sdb::Coord2> * a)
 	}
 }
 
-template<typename Tn>
-void AGraph<Tn>::extractEdgeBegins(const std::vector<int> & a)
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::extractEdgeBegins(const std::vector<int> & a)
 {
 	int i = 0;
 	std::vector<int>::const_iterator it = a.begin();
@@ -178,8 +170,8 @@ void AGraph<Tn>::extractEdgeBegins(const std::vector<int> & a)
 	}
 }
  
-template<typename Tn>
-void AGraph<Tn>::extractEdgeIndices(const std::vector<int> & a)
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::extractEdgeIndices(const std::vector<int> & a)
 {
 	int i = 0;
 	std::vector<int>::const_iterator it = a.begin();
@@ -188,8 +180,8 @@ void AGraph<Tn>::extractEdgeIndices(const std::vector<int> & a)
 	}
 }
 
-template<typename Tn>
-void AGraph<Tn>::calculateEdgeLength()
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::calculateEdgeLength()
 {
 	m_minEdgeLen = 1e9f;
 	m_maxEdgeLen = -1e9f;
@@ -198,7 +190,7 @@ void AGraph<Tn>::calculateEdgeLength()
 	int i = 0;
 	for(;i<n;++i) {
 		
-		IGraphEdge & ei = m_edges[i];
+		Te & ei = m_edges[i];
 		ei.len = m_nodes[ei.vi.x].pos.distanceTo(m_nodes[ei.vi.y].pos);
 		
 		if(m_minEdgeLen > ei.len)
@@ -209,12 +201,12 @@ void AGraph<Tn>::calculateEdgeLength()
 	}
 }
 
-template<typename Tn>
-const float & AGraph<Tn>::minEdgeLength() const
+template<typename Tn, typename Te>
+const float & AGraph<Tn, Te>::minEdgeLength() const
 { return m_minEdgeLen; }
 
-template<typename Tn>
-const float & AGraph<Tn>::maxEdgeLength() const
+template<typename Tn, typename Te>
+const float & AGraph<Tn, Te>::maxEdgeLength() const
 { return m_maxEdgeLen; }	
 	
 }

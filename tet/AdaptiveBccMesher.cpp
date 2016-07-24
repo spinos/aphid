@@ -76,6 +76,9 @@ AdaptiveBccGrid3 * AdaptiveBccMesher::grid()
 const ITetrahedron * AdaptiveBccMesher::tetra(const int & i) const
 { return m_tets[i]; }
 
+const std::vector<ITetrahedron *> & AdaptiveBccMesher::tetrahedrons() const
+{ return m_tets; }
+
 int AdaptiveBccMesher::numTriangles() const
 { return m_triInds.size(); }
 

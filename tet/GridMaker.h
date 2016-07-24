@@ -39,56 +39,6 @@ protected:
 	const aphid::sdb::Coord3 & triangleInd(const int & i) const;
 	
 	template<typename Tn>
-	void extractGridNodesIn(Tn * dst,
-						aphid::sdb::Array<int, BccNode> * cell) {
-		cell->begin();
-		while(!cell->end() ) {
-			
-			BccNode * n = cell->value();
-			if(n->index > -1) {
-				Tn * d = &dst[n->index];
-				d->pos = n->pos;
-			}
-			
-			cell->next();
-		}
-	}
-	
-	template<typename Tn>
-	void extractGridNodes(Tn * dst) {
-		m_grid.begin();
-		while(!m_grid.end() ) {
-			
-			extractGridNodesIn(dst, m_grid.value() );
-			m_grid.next();
-		}
-	}
-	
-	template<typename Tn>
-	void obtainGridNodeValIn(const Tn * src,
-							aphid::sdb::Array<int, BccNode> * cell) {
-		cell->begin();
-		while(!cell->end() ) {
-			
-			BccNode * n = cell->value();
-			
-			n->val = src[n->index].val;
-			
-			cell->next();
-		}
-	}
-	
-	template<typename Tn>
-	void obtainGridNodeVal(const Tn * src) {
-		m_grid.begin();
-		while(!m_grid.end() ) {
-			
-			obtainGridNodeValIn(src, m_grid.value() );
-			m_grid.next();
-		}
-	}
-	
-	template<typename Tn>
 	bool checkTetraVolumeExt(const Tn * src) const
 	{
 		float mnvol = 1e20f, mxvol = -1e20f, vol;

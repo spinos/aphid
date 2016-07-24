@@ -35,12 +35,20 @@ struct DistanceNode {
 	short stat;
 };
 
+struct IDistanceEdge {
+
+	sdb::Coord2 vi;
+	int index;
+	float len;
+	
+};
+
 struct EdgeRec {
 	sdb::Coord2 key;
 	float val;
 };
  
-class ADistanceField : public AGraph<DistanceNode> {
+class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
 
 	sdb::Array<sdb::Coord2, EdgeRec > m_dirtyEdges;
 	float m_mxErr, m_mnErr;
@@ -127,12 +135,66 @@ protected:
 	
 	bool isNodeBackground(const int & i) const;
 	
+/// into field
+	template<typename Tg, typename Ts>
+	void extractGridNodes(DistanceNode * dst, Tg * grd) {
+		grd->begin();
+		while(!grd->end() ) {
+			
+			extractGridNodesIn<Ts>(dst, grd->value() );
+			
+			grd->next();
+		}
+	}
+	
+/// out-of field
+	template<typename Tg, typename Ts>
+	void obtainGridNodeVal(const DistanceNode * src, Tg * grd) {
+		grd->begin();
+		while(!grd->end() ) {
+			
+			obtainGridNodeValIn<Ts>(src, grd->value() );
+			
+			grd->next();
+		}
+	}
+	
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);
 	int lastBackgroundNode() const;
 	void setFarNodeInside();
 	void setNodeFar();
+	
+	template<typename Ts>
+	void extractGridNodesIn(DistanceNode * dst,
+						sdb::Array<int, Ts> * cell) {
+		cell->begin();
+		while(!cell->end() ) {
+			
+			Ts * n = cell->value();
+			if(n->index > -1) {
+				DistanceNode * d = &dst[n->index];
+				d->pos = n->pos;
+			}
+			
+			cell->next();
+		}
+	}
+		
+	template<typename Ts>
+	void obtainGridNodeValIn(const DistanceNode * src,
+							sdb::Array<int, Ts> * cell) {
+		cell->begin();
+		while(!cell->end() ) {
+			
+			Ts * n = cell->value();
+			
+			n->val = src[n->index].val;
+			
+			cell->next();
+		}
+	}
 	
 };
 

@@ -26,7 +26,7 @@ public:
 	AdaptiveBccMesher();
 	virtual ~AdaptiveBccMesher();
 	
-/// reset grid w level0 cell size
+/// reset grid w level0 cell size and fill the box at level 0
 	void fillBox(const aphid::BoundingBox & b,
 				const float & h);
 	
@@ -37,127 +37,11 @@ public:
 	const int & numVertices() const;
 	
 	AdaptiveBccGrid3 * grid();
-	
-	template<typename Tf>
-	void subdivideGrid(Tf & distanceF, const int & level) {
-		
-/// track cells divided
-		std::vector<aphid::sdb::Coord4 > divided;
-		
-		aphid::BoundingBox cellBox;
-		
-		m_grid.begin();
-		while(!m_grid.end() ) {
-			
-			if(m_grid.key().w == level) {
-				m_grid.getCellBBox(cellBox, m_grid.key() );
-				//std::cout<<"\n cell box "<<cellBox;
-				
-				if(distanceF. template intersect<aphid::BoundingBox >(&cellBox) ) {
-					
-					m_grid.subdivideCell(m_grid.key() );
-					
-					divided.push_back(m_grid.key() );
-				}
-			}
-			
-			if(m_grid.key().w > level)
-				break;
-				
-			m_grid.next();
-		}
-		
-		if(level > 1) enforceBoundary(divided);
-			
-		divided.clear();
-	}
+	const std::vector<ITetrahedron *> & tetrahedrons() const;
 	
 protected:
 	const ITetrahedron * tetra(const int & i) const;
 	const aphid::sdb::Coord3 & triangleInd(const int & i) const;
-	
-	template<typename Tn>
-	void extractGridNodesIn(Tn * dst,
-						aphid::sdb::Array<int, BccNode> * cell) {
-		cell->begin();
-		while(!cell->end() ) {
-			
-			BccNode * n = cell->value();
-			if(n->index > -1) {
-				Tn * d = &dst[n->index];
-				d->pos = n->pos;
-			}
-			
-			cell->next();
-		}
-	}
-	
-	template<typename Tn>
-	void extractGridNodes(Tn * dst) {
-		m_grid.begin();
-		while(!m_grid.end() ) {
-			
-			extractGridNodesIn(dst, m_grid.value() );
-			m_grid.next();
-		}
-	}
-	
-	template<typename Tn>
-	void obtainGridNodeValIn(const Tn * src,
-							aphid::sdb::Array<int, BccNode> * cell) {
-		cell->begin();
-		while(!cell->end() ) {
-			
-			BccNode * n = cell->value();
-			
-			n->val = src[n->index].val;
-			
-			cell->next();
-		}
-	}
-	
-	template<typename Tn>
-	void obtainGridNodeVal(const Tn * src) {
-		m_grid.begin();
-		while(!m_grid.end() ) {
-			
-			obtainGridNodeValIn(src, m_grid.value() );
-			m_grid.next();
-		}
-	}
-	
-	template<typename Tn>
-	bool checkTetraVolumeExt(const Tn * src) const
-	{
-		float mnvol = 1e20f, mxvol = -1e20f, vol;
-		aphid::Vector3F p[4];
-		const int n = numTetrahedrons();
-		int i = 0;
-		for(;i<n;++i) {
-			const ITetrahedron * t = m_tets[i];
-			if(!t) continue;
-			
-			p[0] = src[t->iv0].pos;
-			p[1] = src[t->iv1].pos;
-			p[2] = src[t->iv2].pos;
-			p[3] = src[t->iv3].pos;
-			
-			vol = aphid::tetrahedronVolume(p);
-			if(mnvol > vol)
-				mnvol = vol;
-			if(mxvol < vol)
-				mxvol = vol;
-				
-		}
-
-		std::cout<<"\n min/max tetrahedron volume: "<<mnvol<<" / "<<mxvol;
-		if(mnvol < 0.f) {
-			std::cout<<"\n [ERROR] negative volume";
-			return false;
-		}
-			
-		return true;
-	}
 	
 	void buildMesh1();
 	

@@ -105,12 +105,12 @@ void FieldTetrahedralizeTest::drawGraph(aphid::GeoDrawer * dr)
 
 #if SHO_EDGE	
 	dr->setColor(0.f, 0.f, .5f);
-	IGraphEdge * e = m_fld.edges();
+	IDistanceEdge * e = m_fld.edges();
 	const int ne = m_fld.numEdges();
 	
 	glBegin(GL_LINES);
 	for(i = 0;i<ne;++i) {
-		const IGraphEdge & ei = e[i];
+		const IDistanceEdge & ei = e[i];
 		
 		dr->vertex(v[ei.vi.x].pos);
 		dr->vertex(v[ei.vi.y].pos);

@@ -46,12 +46,12 @@ void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr)
 {
 	const DistanceNode * v = fld->nodes();
 	
-	const IGraphEdge * e = fld->edges();
+	const IDistanceEdge * e = fld->edges();
 	const int ne = fld->numEdges();
 	
 	glBegin(GL_LINES);
 	for(int i = 0;i<ne;++i) {
-		const IGraphEdge & ei = e[i];
+		const IDistanceEdge & ei = e[i];
 		
 		dr->vertex(v[ei.vi.x].pos);
 		dr->vertex(v[ei.vi.y].pos);
