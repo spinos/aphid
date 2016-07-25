@@ -243,8 +243,10 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 		return false;
 
 	const Vector3F dv = v2.pos - v1.pos;
-	float eps = e.len * .14f;
-		
+	float eps = (e.err < h) ? .31f : .14f;
+	
+	eps *= e.len;
+	
 	if(eps < h)
 		eps = h;
 	
@@ -321,21 +323,21 @@ int ADistanceField::countFrontEdges() const
 	return c;
 }
 
-void ADistanceField::setConnectedEdgeError(const int & i, const float ve)
+int ADistanceField::edgeIndex(const int & v1, const int & v2) const
 {
-	const DistanceNode & A = nodes()[i];
-	const int endj = edgeBegins()[i+1];
-	int vj, j = edgeBegins()[i];
+	const DistanceNode & A = nodes()[v1];
+	const int endj = edgeBegins()[v1+1];
+	int j = edgeBegins()[v1];
 	for(;j<endj;++j) {
 		
 		int k = edgeIndices()[j];
 
-		IDistanceEdge & eg = edges()[k];
+		const IDistanceEdge & eg = edges()[k];
 		
-		if(eg.err < ve)
-			eg.err = ve;
-			
+		if(eg.vi.x == v2 || eg.vi.y == v2)
+			return k;
 	}
+	return -1;
 }
 
 }

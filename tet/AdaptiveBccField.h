@@ -17,6 +17,7 @@ namespace ttg {
 class AdaptiveBccField : public AdaptiveBccMesher, public aphid::ADistanceField {
 
 	aphid::Vector3F m_insideOutsidePref;
+	float m_errorThreshold;
 	
 public:
 	AdaptiveBccField();
@@ -30,6 +31,8 @@ public:
 				const int & levelLimit, 
 				const float & errorThreshild)
 	{
+		m_errorThreshold = errorThreshild;
+		
 		buildGrid();
 		buildMesh();
 		buildGraph();
@@ -98,6 +101,7 @@ public:
 								
 protected:
 	void markTetraOnFront(const int & i);
+	float seperateDistance() const;
 	
 private:
 	void pushIndices(const std::vector<int> & a,

@@ -98,9 +98,11 @@ public:
 			}
 				
 			m_dirtyEdges.value()->val = err;
+			
 			if(err > 0.f) {
-				setConnectedEdgeError(i.x, err);
-				setConnectedEdgeError(i.y, err);
+				int k = edgeIndex(i.x, i.y);
+				if(k>-1)
+					edges()[k].err = err;
 			}
 			
 			m_dirtyEdges.next();
@@ -167,8 +169,8 @@ protected:
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);
-/// for each edge to node[i], max error value by ve
-	void setConnectedEdgeError(const int & i, const float ve);
+/// ind to edge by vertex i
+	int edgeIndex(const int & v1, const int & v2) const;
 	int lastBackgroundNode() const;
 	void setFarNodeInside();
 	void setNodeFar();

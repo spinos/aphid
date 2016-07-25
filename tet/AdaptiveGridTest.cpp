@@ -25,8 +25,8 @@ const char * AdaptiveGridTest::titleStr() const
 bool AdaptiveGridTest::init()
 {
 	float gz = 128.f;
-	setColorScale(.4f / gz);
-	setNodeDrawSize(gz * .022f);
+	setColorScale(.25f / gz);
+	setNodeDrawSize(gz * .016f);
 	m_msh.fillBox(BoundingBox(-50.f, -50.f, -50.f,
 								 50.f,  50.f,  50.f), gz);
 	
@@ -37,7 +37,7 @@ bool AdaptiveGridTest::init()
 	m_distFunc.addSphere(Vector3F(34.f, -11.f, -22.f), 23.1f );
 	
 #define MAX_BUILD_LEVEL 8
-	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, 1.f);
+	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .7f);
 	
 	m_msh.triangulateFront();
 	
@@ -82,7 +82,7 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 
 void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 {
-#define SHO_NODE 0
+#define SHO_NODE 1
 #define SHO_EDGE 0
 #define SHO_ERR 1
 

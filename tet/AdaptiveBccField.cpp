@@ -148,7 +148,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
-	const float r = g->levelCellSize(level) * .124f;
+	const float r = g->levelCellSize(level) * .1f;
 
 	BoundingBox dirtyBx;
 	
@@ -206,5 +206,8 @@ int AdaptiveBccField::findFarInd()
 	}
 	return 0;
 }
+
+float AdaptiveBccField::seperateDistance() const
+{ return m_errorThreshold * .49f; }
 
 }
