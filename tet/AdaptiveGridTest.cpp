@@ -24,20 +24,20 @@ const char * AdaptiveGridTest::titleStr() const
 
 bool AdaptiveGridTest::init()
 {
-	float gz = 32.f;
+	float gz = 24.f;
 	setColorScale(.4f / gz);
 	setNodeDrawSize(gz * .022f);
 	m_msh.fillBox(BoundingBox(-50.f, -50.f, -50.f,
 								 50.f,  50.f,  50.f), gz);
 	
 	m_distFunc.addSphere(Vector3F(    9.f, 17.f, -1.f), 24.35f );
-	m_distFunc.addSphere(Vector3F(-55.43f, -19.f, 1.f), 62.f );
+	m_distFunc.addSphere(Vector3F(-53.f, -19.f, 1.f), 69.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
-	m_distFunc.addSphere(Vector3F(33.f, -11.f, -22.f), 22.1f );
+	m_distFunc.addSphere(Vector3F(33.f, -11.f, -22.f), 25.1f );
 	
-#define MAX_BUILD_LEVEL 5
-	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .04f);
+#define MAX_BUILD_LEVEL 3
+	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .05f);
 	
 	m_msh.triangulateFront();
 	
@@ -81,8 +81,8 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 
 void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 {
-#define SHO_NODE 1
-#define SHO_EDGE 1
+#define SHO_NODE 0
+#define SHO_EDGE 0
 #define SHO_ERR 1
 
 #if SHO_NODE	
@@ -96,7 +96,7 @@ void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 
 #if SHO_ERR
 	dr->setColor(0.1f, 0.1f, .1f);
-	drawErrors<EdgeRec>(&m_msh, m_msh.dirtyEdges(), .04f );
+	drawErrors<EdgeRec>(&m_msh, m_msh.dirtyEdges(), .05f );
 #endif
 
 }
@@ -134,7 +134,7 @@ void AdaptiveGridTest::drawFront(GeoDrawer * dr)
 		glVertex3fv((const float *)&p3);
 	}
 	glEnd();
-	
+#if 0	
 	dr->setColor(0.1f, .1f, .1f);
 	glBegin(GL_LINES);
 	for(int i=0; i<n; ++i) {		
@@ -175,6 +175,8 @@ void AdaptiveGridTest::drawFront(GeoDrawer * dr)
 		
 	}
 	glEnd();
+#endif
+
 }
 
 }

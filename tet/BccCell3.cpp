@@ -162,11 +162,19 @@ BccNode * BccCell3::yellowNode(const int & i,
 		return node;
 		
 	node = find(15000 + i);
-	if(!node) {
-		BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
-		node = nei->find(15000 + sdb::gdt::SixNeighborOnFace[i][3]);
-	}
-	return node;
+	if(node)
+		return node;
+		
+	BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+	if(!nei)
+		return NULL;
+		
+/// opposite face in neighbor
+	node = nei->find(sdb::gdt::SixNeighborOnFace[i][3]);
+	if(node)
+		return node;
+		
+	return nei->find(15000 + sdb::gdt::SixNeighborOnFace[i][3]);
 }
 
 BccNode * BccCell3::cyanNode(const int & i,
@@ -252,9 +260,8 @@ BccNode * BccCell3::faceNode(const int & i,
 		std::cout<<"\n [ERROR] no neighbor"<<i<<" in cell"<<cellCoord;
 		return NULL;
 	}
-	node = nei->find(15);
-
-	return node;
+	
+	return nei->find(15);
 }
 
 const bool & BccCell3::hasChild() const

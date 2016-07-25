@@ -40,8 +40,8 @@ public:
 protected:
 	const ITetrahedron * tetra(const int & i) const;
 	
-/// for each cell divied, must have same level neighbor cell on six faces
-/// level change cross face < 2
+/// for each cell divied, must have same level neighbor cell on six faces and twelve edges
+/// level change cross face or edge < 2
 	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
 
 private:

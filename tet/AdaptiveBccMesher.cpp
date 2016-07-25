@@ -83,6 +83,8 @@ void AdaptiveBccMesher::enforceBoundary(std::vector<sdb::Coord4 > & ks)
 	while(ks.size() > 0) {
 /// first one
 		const sdb::Coord4 c = ks[0];
+		
+/// per face
 		for(int i=0; i< 6;++i) {
 			const sdb::Coord4 nei = m_grid.neighborCoord(c, i);
 			const sdb::Coord4 par = m_grid.parentCoord(nei);
@@ -94,6 +96,20 @@ void AdaptiveBccMesher::enforceBoundary(std::vector<sdb::Coord4 > & ks)
 				}
 			}
 		}
+		
+/// per edge
+		for(int i=14; i< 26;++i) {
+			const sdb::Coord4 nei = m_grid.neighborCoord(c, i);
+			const sdb::Coord4 par = m_grid.parentCoord(nei);
+			if(m_grid.findCell(par) ) {
+				if(!m_grid.findCell(nei) ) {
+					if(m_grid.subdivideCell(par ) )
+/// last one
+						ks.push_back(par);
+				}
+			}
+		}
+		
 /// rm first one
 		ks.erase(ks.begin() );
 	}

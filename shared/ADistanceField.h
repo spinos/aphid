@@ -202,7 +202,7 @@ private:
 /// - -> 0     +	
 /// move node to front to prevent very close cut
 	bool snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
-						const float & eps);
+						const IDistanceEdge & e);
 						
 };
 
