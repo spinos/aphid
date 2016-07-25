@@ -22,7 +22,6 @@ AdaptiveBccMesher::~AdaptiveBccMesher()
 void AdaptiveBccMesher::internalClear()
 {
 	m_grid.clear();
-	m_triInds.clear();
 	clearTetra();
 }
 
@@ -78,39 +77,6 @@ const ITetrahedron * AdaptiveBccMesher::tetra(const int & i) const
 
 const std::vector<ITetrahedron *> & AdaptiveBccMesher::tetrahedrons() const
 { return m_tets; }
-
-int AdaptiveBccMesher::numTriangles() const
-{ return m_triInds.size(); }
-
-const sdb::Coord3 & AdaptiveBccMesher::triangleInd(const int & i) const
-{ return m_triInds[i]; }
-
-void AdaptiveBccMesher::buildMesh1()
-{
-	//m_grid.cutEdges();
-	clearTetra();
-	m_grid.countNodes();
-	RedBlueRefine rbr;
-	aphid::sdb::Array<aphid::sdb::Coord3, IFace > tris;
-	m_grid.begin();
-	while(!m_grid.end() ) {
-	//	BccCell fCell(m_grid.coordToCellCenter(m_grid.key() ) );
-		
-	//	fCell.connectRefinedTetrahedrons(m_tets, tris, rbr, m_grid.value(), &m_grid, m_grid.key() );
-		m_grid.next();
-	}
-	
-	m_triInds.clear();
-	
-	tris.begin();
-	while(!tris.end() ) {
-	
-		m_triInds.push_back(tris.key() );
-		tris.next();
-	}
-	
-	tris.clear();
-}
 
 void AdaptiveBccMesher::enforceBoundary(std::vector<sdb::Coord4 > & ks)
 {

@@ -235,4 +235,69 @@ const float & ADistanceField::minError() const
 bool ADistanceField::isNodeBackground(const int & i) const
 { return nodes()[i].label == sdf::StBackGround; }
 
+bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
+									const float & eps)
+{
+	Vector3F dv = v2.pos - v1.pos;
+	float dd = dv.length();
+	if(Absolute<float>(v1.val) + Absolute<float>(v2.val) < dd * .6f)
+		return false;
+	
+	dv /= dd;
+		
+	if(v1.val > 0.f) {
+		if(v1.val < eps) {
+		
+			v1.pos += dv * v1.val;
+			v1.val = 0.f;
+			return true;
+		}
+		else if(-v2.val < eps) {
+		
+			v2.pos += dv * v2.val;
+			v2.val = 0.f;
+			return true;
+		}
+	}
+	else {
+		if(v2.val < eps) {
+		
+			v2.pos -= dv * v2.val;
+			v2.val = 0.f;
+			return true;
+		}
+		else if(-v1.val < eps) {
+		
+			v1.pos -= dv * v1.val;
+			v1.val = 0.f;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+int ADistanceField::countFrontEdges()
+{
+	int c = 0;
+	DistanceNode * v = nodes();
+	IDistanceEdge * es = edges();
+	const int ne = numEdges();
+	for(int i=0; i< ne;++i) {
+		
+		IDistanceEdge & e = es[i];
+		
+		DistanceNode & v1 = v[e.vi.x];
+		DistanceNode & v2 = v[e.vi.y];
+		
+/// cross front
+		if(v1.val * v2.val < 0.f) {			
+			if(!snapNodeToFront(v1, v2, e.len * 0.2f) )
+				c++;			
+		}
+	}
+	
+	return c;
+}
+
 }

@@ -114,8 +114,6 @@ void AdaptiveBccField::verbose()
 								<<"/"<<maxEdgeLength()
 		<<"\n estimated error (min/max) "<<minError()<<"/"<<maxError();
 		
-	if(numTriangles() > 0)
-		std::cout<<"\n n triangle "<<numTriangles();
 	std::cout.flush();
 }
 
@@ -126,14 +124,6 @@ void AdaptiveBccField::getTetraShape(cvx::Tetrahedron & b, const int & i) const
 			nodes()[a->iv1].pos,
 			nodes()[a->iv2].pos,
 			nodes()[a->iv3].pos);
-}
-
-void AdaptiveBccField::getTriangleShape(cvx::Triangle & t, const int & i) const
-{
-	const sdb::Coord3 & c = triangleInd(i);
-	t.set(nodes()[c.x].pos,
-			nodes()[c.y].pos,
-			nodes()[c.z].pos);
 }
 
 void AdaptiveBccField::markTetraOnFront(const int & i)
@@ -149,12 +139,6 @@ void AdaptiveBccField::markTetraOnFront(const int & i)
 	addDirtyEdge(a->iv1, a->iv2);
 	addDirtyEdge(a->iv1, a->iv3);
 	addDirtyEdge(a->iv2, a->iv3);
-}
-
-void AdaptiveBccField::buildRefinedMesh()
-{ 
-	obtainGridNodeVal<AdaptiveBccGrid3, BccNode >(nodes(), grid() );
-	buildMesh1();
 }
 
 void AdaptiveBccField::subdivideGridByError(const float & threshold,

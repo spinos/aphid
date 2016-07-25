@@ -19,7 +19,6 @@ class AdaptiveBccMesher {
 
 	AdaptiveBccGrid3 m_grid;
 	std::vector<ITetrahedron *> m_tets;
-	std::vector<aphid::sdb::Coord3 > m_triInds;
 	int m_numVert;
 	
 public:
@@ -33,7 +32,6 @@ public:
 	void buildGrid();
 	void buildMesh();
 	int numTetrahedrons() const;
-	int numTriangles() const;
 	const int & numVertices() const;
 	
 	AdaptiveBccGrid3 * grid();
@@ -41,9 +39,6 @@ public:
 	
 protected:
 	const ITetrahedron * tetra(const int & i) const;
-	const aphid::sdb::Coord3 & triangleInd(const int & i) const;
-	
-	void buildMesh1();
 	
 /// for each cell divied, must have same level neighbor cell on six faces
 /// level change cross face < 2

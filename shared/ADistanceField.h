@@ -38,7 +38,7 @@ struct DistanceNode {
 struct IDistanceEdge {
 
 	sdb::Coord2 vi;
-	int index;
+	int ind;
 	float len;
 	
 };
@@ -158,7 +158,9 @@ protected:
 			grd->next();
 		}
 	}
-	
+
+	int countFrontEdges();
+					
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);
@@ -196,6 +198,12 @@ private:
 		}
 	}
 	
+/// + -> 0     -
+/// - -> 0     +	
+/// move node to front to prevent very close cut
+	bool snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
+						const float & eps);
+						
 };
 
 }

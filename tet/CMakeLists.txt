@@ -57,6 +57,7 @@ BccCell3.h
 AdaptiveBccGrid3.h
 AdaptiveBccMesher.h
 AdaptiveBccField.h
+FieldTriangulation.h
 AdaptiveGridTest.h
 Delaunay3D.h)
 
@@ -91,6 +92,7 @@ BccCell3.cpp
 AdaptiveBccGrid3.cpp
 AdaptiveBccMesher.cpp
 AdaptiveBccField.cpp
+FieldTriangulation.cpp
 AdaptiveGridTest.cpp
 glwidget.cpp
 window.cpp

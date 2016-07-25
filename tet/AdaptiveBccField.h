@@ -60,8 +60,7 @@ public:
 			curErr = maxError();
 		}
 		
-		std::cout<<"\n build to level "<<level
-				<<"\n level cell size "<<grid()->levelCellSize(level);
+		std::cout<<"\n build to level "<<level;
 	}
 	
 /// push tetra node and edge to graph
@@ -93,12 +92,9 @@ public:
 		markInsideOutside(findFarInd() );
 	}
 	
-	void buildRefinedMesh();
 	void verbose();
 	
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
-	void getTriangleShape(aphid::cvx::Triangle & t, const int & i) const;
-	
 	void setInsideOutsidePref(const aphid::Vector3F & q);
 								
 protected:
