@@ -24,19 +24,18 @@ public:
 	
 /// subdive grid until either max level and max error condition is met
 /// levelLimit < adaptive grid maxLevel
-/// errorThreshild is error distance / level1 cell size
+/// errorThreshild is min error distance triggers next level
 	template<typename Tf>
 	void AdaptiveBccField::build(Tf * distanceFunc,
 				const int & levelLimit, 
 				const float & errorThreshild)
 	{
-		const float rgz = grid()->levelCellSize(1);
 		buildGrid();
 		buildMesh();
 		buildGraph();
 		
 		calculateDistance<Tf>(distanceFunc, 0.f);
-		estimateError<Tf>(distanceFunc, 0.f, rgz);
+		estimateError<Tf>(distanceFunc, 0.f);
 		
 		verbose();
 		
@@ -52,7 +51,7 @@ public:
 			buildGraph();
 			
 			calculateDistance<Tf>(distanceFunc, 0.f);
-			estimateError<Tf>(distanceFunc, 0.f, rgz);
+			estimateError<Tf>(distanceFunc, 0.f);
 			
 			verbose();
 		

@@ -38,9 +38,8 @@ struct DistanceNode {
 struct IDistanceEdge {
 
 	sdb::Coord2 vi;
-	int ind;
 	float len;
-	
+	float err;
 };
 
 struct EdgeRec {
@@ -66,8 +65,7 @@ public:
 
 /// per dirty edge, at linear center delta x, compare actual distance to recovered distance
 	template<typename Tf>
-	float estimateError(const Tf * func, const float & shellThickness,
-						const float & h)
+	float estimateError(const Tf * func, const float & shellThickness)
 	{
 		m_dirtyEdges.begin();
 		float act, rec, err;
@@ -91,7 +89,7 @@ public:
 								
 				act = func->calculateDistance(q) - shellThickness;
 				rec = (n1.val + n2.val ) * .5f;
-				err = Absolute<float>(rec - act) / h;
+				err = Absolute<float>(rec - act);
 				if(m_mxErr < err)
 					m_mxErr = err;
 				if(m_mnErr > err)
@@ -100,6 +98,10 @@ public:
 			}
 				
 			m_dirtyEdges.value()->val = err;
+			if(err > 0.f) {
+				setConnectedEdgeError(i.x, err);
+				setConnectedEdgeError(i.y, err);
+			}
 			
 			m_dirtyEdges.next();
 		}
@@ -165,6 +167,8 @@ protected:
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);
+/// for each edge to node[i], max error value by ve
+	void setConnectedEdgeError(const int & i, const float ve);
 	int lastBackgroundNode() const;
 	void setFarNodeInside();
 	void setNodeFar();

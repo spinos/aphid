@@ -55,7 +55,7 @@ bool DistanceFieldTest::init()
 	
 	m_fld.calculateDistance<BDistanceFunction>(&m_distFunc, 0.1f);
 	m_fld.markInsideOutside();
-	std::cout<<"\n max estimated error "<<m_fld.estimateError<BDistanceFunction>(&m_distFunc, 0.1f, gz * .5f);
+	std::cout<<"\n max estimated error "<<m_fld.estimateError<BDistanceFunction>(&m_distFunc, 0.1f);
 	std::cout.flush();
 	return true;
 }
