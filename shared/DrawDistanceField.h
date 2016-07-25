@@ -43,7 +43,7 @@ protected:
 			
 			sdb::gdt::GetCellColor(cellCol, grd->key().w );
 			grd->getCellBBox(cellBox, grd->key() );
-			cellBox.expand(-.04f - .04f * grd->key().w );
+			//cellBox.expand(-.04f - .04f * grd->key().w );
 			
 			dr->setColor(cellCol.x, cellCol.y, cellCol.z);
 			dr->boundingBox(cellBox);

@@ -79,7 +79,7 @@ void AdaptiveBccField::buildGraph()
 	int ni = edgeInds.size();
 	ADistanceField::create(nv, ne, ni);
 	
-	extractGridNodes<AdaptiveBccGrid3, BccNode >(nodes(), grid() );
+	extractGridNodes<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 	extractEdges(&egs);
 	extractEdgeBegins(edgeBegins);
 	extractEdgeIndices(edgeInds);
@@ -148,7 +148,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
-	const float r = g->levelCellSize(level) * .123f;
+	const float r = g->levelCellSize(level) * .124f;
 
 	BoundingBox dirtyBx;
 	
@@ -162,9 +162,9 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 			const Vector3F & p2 = v[egs->key().y].pos;
 			
 			dirtyBx.reset();
-			dirtyBx.expandBy(p1);
-			dirtyBx.expandBy(p2);
-				
+			dirtyBx.expandBy(p1, r);
+			dirtyBx.expandBy(p2, r);
+/*				
 			if(dirtyBx.distance(0) < r ) {
 				dirtyBx.setMin(dirtyBx.getMin(0) - r, 0);
 				dirtyBx.setMax(dirtyBx.getMax(0) + r, 0);
@@ -179,7 +179,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 				dirtyBx.setMin(dirtyBx.getMin(2) - r, 2);
 				dirtyBx.setMax(dirtyBx.getMax(2) + r, 2);
 			}
-			
+*/			
 			g->subdivideToLevel(dirtyBx, level+1, &divided);
 		}
 		

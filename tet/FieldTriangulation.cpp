@@ -130,12 +130,13 @@ void FieldTriangulation::cutEdges(RedBlueRefine & refiner,
 
 void FieldTriangulation::triangulateFront()
 {
+	snapEdgeToFront(grid()->level0CellSize() * .008f );
 	int nfe = countFrontEdges();
-	//obtainGridNodeVal<AdaptiveBccGrid3, BccNode >(nodes(), grid() );
+	//obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 	
 	if(m_maxCutPosBuf > 0) delete[] m_cutPosBuf;
-/// twice as many cut pnts
-	m_maxCutPosBuf = nfe<<1;
+/// three as many cut pnts
+	m_maxCutPosBuf = nfe * 3;
 	std::cout<<"\n n front edge "<<nfe<<" max n cut pos "<<m_maxCutPosBuf;
 	
 	m_cutPosBuf = new Vector3F[m_maxCutPosBuf];

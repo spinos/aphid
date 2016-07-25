@@ -15,6 +15,18 @@ namespace sdb {
 
 namespace gdt {
 
+enum NodePropertyType {
+		NUnKnown = 0,
+		NFace = 2,
+		NBlue = 3,
+		NRed = 4,
+		NYellow = 5,
+		NCyan = 6,
+		NRedBlue = 46,
+		NRedCyan = 47,
+		NRedYellow = 48
+};
+
 static const float EightCellChildOffset[8][3] = {
 {-1.f, -1.f, -1.f},
 { 1.f, -1.f, -1.f},

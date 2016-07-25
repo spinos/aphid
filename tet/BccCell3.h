@@ -10,13 +10,22 @@
 #pragma once
 #include <Array.h>
 #include <AdaptiveGrid3.h>
-#include "BccCell.h"
+#include "RedBlueRefine.h"
 
 namespace ttg {
 
-class BccCell3 : public aphid::sdb::Array<int, BccNode > {
+class BccNode3 {
+	
+public:
+	aphid::Vector3F pos;
+	int prop;
+	int key;
+	int index;
+};
 
-	typedef aphid::sdb::AdaptiveGrid3<BccCell3, BccNode, 10 > AdaptiveGridT;
+class BccCell3 : public aphid::sdb::Array<int, BccNode3 > {
+
+	typedef aphid::sdb::AdaptiveGrid3<BccCell3, BccNode3, 10 > AdaptiveGridT;
 
 	bool m_hasChild;
 	BccCell3 * m_parentCell;
@@ -35,19 +44,19 @@ public:
 					AdaptiveGridT * grid);
 	void insertCyan(const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-	BccNode * findBlue(const aphid::Vector3F & pref);
+	BccNode3 * findBlue(const aphid::Vector3F & pref);
 	void insertFaceOnBoundary(const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
 	
 	const bool & hasChild() const;
 	
-	BccNode * blueNode(const int & i,
+	BccNode3 * blueNode(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-	BccNode * yellowNode(const int & i,
+	BccNode3 * yellowNode(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-	BccNode * cyanNode(const int & i,
+	BccNode3 * cyanNode(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
 					
@@ -56,17 +65,17 @@ public:
 					AdaptiveGridT * grid);
 	
 private:
-	BccNode * findBlueNodeInNeighbor(const int & i,
+	BccNode3 * findBlueNodeInNeighbor(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-	BccNode * findCyanNodeInNeighbor(const int & i,
+	BccNode3 * findCyanNodeInNeighbor(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-	BccNode * derivedBlueNode(const int & i,
+	BccNode3 * derivedBlueNode(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
 /// red, yellow, or face
-	BccNode * faceNode(const int & i,
+	BccNode3 * faceNode(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
 	bool isFaceDivided(const int & i,
@@ -82,7 +91,7 @@ private:
 ///   \ /
 ///    b
 	void addOneTetra(std::vector<ITetrahedron *> & dest,
-					BccNode * A, BccNode * B, BccNode * C, BccNode * D);
+					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D);
 /// c --x--- d
 /// \   |   /
 ///  \  |  /
@@ -93,7 +102,7 @@ private:
 					const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid,
-					BccNode * A, BccNode * B, BccNode * C, BccNode * D);
+					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D);
 /// c--- x---  d
 /// \   /|\   /
 ///  \ / | \ /
@@ -107,7 +116,7 @@ private:
 					const int & k,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid,
-					BccNode * A, BccNode * B, BccNode * C, BccNode * D);
+					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D);
 															
 };
 

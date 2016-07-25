@@ -24,20 +24,20 @@ const char * AdaptiveGridTest::titleStr() const
 
 bool AdaptiveGridTest::init()
 {
-	float gz = 24.f;
+	float gz = 32.f;
 	setColorScale(.4f / gz);
 	setNodeDrawSize(gz * .022f);
 	m_msh.fillBox(BoundingBox(-50.f, -50.f, -50.f,
 								 50.f,  50.f,  50.f), gz);
 	
 	m_distFunc.addSphere(Vector3F(    9.f, 17.f, -1.f), 24.35f );
-	m_distFunc.addSphere(Vector3F(-53.f, -19.f, 1.f), 69.f );
+	m_distFunc.addSphere(Vector3F(-53.f, -19.f, 1.f), 65.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
-	m_distFunc.addSphere(Vector3F(33.f, -11.f, -22.f), 25.1f );
+	m_distFunc.addSphere(Vector3F(33.f, -11.f, -22.f), 23.1f );
 	
-#define MAX_BUILD_LEVEL 3
-	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .05f);
+#define MAX_BUILD_LEVEL 7
+	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .032f);
 	
 	m_msh.triangulateFront();
 	
@@ -66,6 +66,10 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 	drawGridNode<AdaptiveBccGrid3, BccCell3>(m_msh.grid(), dr);
 #endif
 
+#if SHO_FRONT
+	drawFront(dr);
+#endif
+
 #if SHO_GRAPH
 	drawGraph(dr);
 #endif
@@ -74,9 +78,6 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 	drawCut(dr);
 #endif
 
-#if SHO_FRONT
-	drawFront(dr);
-#endif
 }
 
 void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
@@ -95,8 +96,8 @@ void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 #endif
 
 #if SHO_ERR
-	dr->setColor(0.1f, 0.1f, .1f);
-	drawErrors<EdgeRec>(&m_msh, m_msh.dirtyEdges(), .05f );
+	dr->setColor(0.99f, 0.1f, .1f);
+	drawErrors<EdgeRec>(&m_msh, m_msh.dirtyEdges(), .032f );
 #endif
 
 }
@@ -113,7 +114,7 @@ void AdaptiveGridTest::drawCut(GeoDrawer * dr)
 
 void AdaptiveGridTest::drawFront(GeoDrawer * dr)
 {
-	
+#define SHO_FRONT_WIRE 1
 	
 #if 1
 	const int & n = m_msh.numFrontTriangles();
@@ -134,7 +135,8 @@ void AdaptiveGridTest::drawFront(GeoDrawer * dr)
 		glVertex3fv((const float *)&p3);
 	}
 	glEnd();
-#if 0	
+	
+#if SHO_FRONT_WIRE	
 	dr->setColor(0.1f, .1f, .1f);
 	glBegin(GL_LINES);
 	for(int i=0; i<n; ++i) {		

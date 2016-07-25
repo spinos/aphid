@@ -13,7 +13,7 @@ using namespace aphid;
 
 namespace ttg {
 
-BccCell3::BccCell3(Entity * parent) : sdb::Array<int, BccNode >(parent)
+BccCell3::BccCell3(Entity * parent) : sdb::Array<int, BccNode3 >(parent)
 { 
 	m_hasChild = false; 
 	m_parentCell = NULL;
@@ -33,14 +33,14 @@ void BccCell3::setParentCell(BccCell3 * x, const int & i)
 
 void BccCell3::insertRed(const Vector3F & pref)
 {
-	BccNode * node15 = new BccNode;
+	BccNode3 * node15 = new BccNode3;
 	node15->pos = pref;
-	node15->prop = BccCell::NRed;
+	node15->prop = sdb::gdt::NRed;
 	node15->key = 15;
 	insert(15, node15 );
 }
 
-BccNode * BccCell3::findBlue(const Vector3F & pref)
+BccNode3 * BccCell3::findBlue(const Vector3F & pref)
 {
 	const Vector3F & center = find(15)->pos;
 	const int k = sdb::gdt::KeyToBlue(pref, center);
@@ -53,7 +53,7 @@ void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 	if(cellCoord.w > 0) 
 		return;
 		
-	const BccNode * redN = find(15);
+	const BccNode3 * redN = find(15);
 	const Vector3F & redP = redN->pos;
 	const float & gz = grid->levelCellSize(cellCoord.w);
 	int i;
@@ -67,9 +67,9 @@ void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 		sdb::gdt::GetVertexNodeOffset(q, i);
 		q = redP + q * gz * .5f;
 			
-		BccNode * ni = new BccNode;
+		BccNode3 * ni = new BccNode3;
 		ni->key = i + 6;
-		ni->prop = BccCell::NBlue;
+		ni->prop = sdb::gdt::NBlue;
 		ni->pos = q;
 		insert(i + 6, ni);
 		
@@ -80,14 +80,14 @@ void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
 	const float & gz = grid->levelCellSize(cellCoord.w);
-	const BccNode * redN = find(15);
+	const BccNode3 * redN = find(15);
 	const Vector3F & redP = redN->pos;
 	
 	for(int i=0; i<6;++i) {
 		if(!grid->findNeighborCell(cellCoord, i ) ) {
-			BccNode * ni = new BccNode;
+			BccNode3 * ni = new BccNode3;
 			ni->key = i;
-			ni->prop = BccCell::NFace;
+			ni->prop = sdb::gdt::NFace;
 			
 			sdb::gdt::GetFaceNodeOffset(ni->pos, i);
 			ni->pos = redP + ni->pos * .5f * gz;
@@ -99,7 +99,7 @@ void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
-	const BccNode * redN = find(15);
+	const BccNode3 * redN = find(15);
 	const Vector3F & redP = redN->pos;
 	for(int i=0; i<6;++i) {
 		if(find(i) )
@@ -109,9 +109,9 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 			continue;
 			
 		BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
-		BccNode * ni = new BccNode;
+		BccNode3 * ni = new BccNode3;
 		ni->key = 15000 + i;
-		ni->prop = BccCell::NYellow;
+		ni->prop = sdb::gdt::NYellow;
 		ni->pos = (redP + nei->find(15)->pos ) * .5f;
 		insert(15000 + i, ni);
 	}
@@ -124,13 +124,13 @@ void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
 		if(cyanNode(i, cellCoord, grid) )
 			continue;
 			
-		BccNode * ni = new BccNode;
+		BccNode3 * ni = new BccNode3;
 		ni->key = sdb::gdt::TwelveBlueBlueEdges[i][2];
-		ni->prop = BccCell::NCyan;
+		ni->prop = sdb::gdt::NCyan;
 		
-		BccNode * b1 = blueNode(sdb::gdt::TwelveBlueBlueEdges[i][0] - 6,
+		BccNode3 * b1 = blueNode(sdb::gdt::TwelveBlueBlueEdges[i][0] - 6,
 								cellCoord, grid);
-		BccNode * b2 = blueNode(sdb::gdt::TwelveBlueBlueEdges[i][1] - 6,
+		BccNode3 * b2 = blueNode(sdb::gdt::TwelveBlueBlueEdges[i][1] - 6,
 								cellCoord, grid);
 		ni->pos = (b1->pos + b2->pos ) * .5f;
 		
@@ -138,7 +138,7 @@ void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
 	}
 }
 
-BccNode * BccCell3::blueNode(const int & i,
+BccNode3 * BccCell3::blueNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
@@ -146,18 +146,18 @@ BccNode * BccCell3::blueNode(const int & i,
 	if(m_parentCell)
 		return derivedBlueNode(i, cellCoord, grid);
 		
-	BccNode * node = find(i+6);
+	BccNode3 * node = find(i+6);
 	if(!node) 
 		node = findBlueNodeInNeighbor(i, cellCoord, grid);
 	return node;
 }
 
-BccNode * BccCell3::yellowNode(const int & i,
+BccNode3 * BccCell3::yellowNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
 /// face node as yellow
-	BccNode * node = find(i);
+	BccNode3 * node = find(i);
 	if(node)
 		return node;
 		
@@ -177,25 +177,25 @@ BccNode * BccCell3::yellowNode(const int & i,
 	return nei->find(15000 + sdb::gdt::SixNeighborOnFace[i][3]);
 }
 
-BccNode * BccCell3::cyanNode(const int & i,
+BccNode3 * BccCell3::cyanNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
-	BccNode * node = find(sdb::gdt::TwelveBlueBlueEdges[i][2]);
+	BccNode3 * node = find(sdb::gdt::TwelveBlueBlueEdges[i][2]);
 	if(!node)
 		node = findCyanNodeInNeighbor(i, cellCoord, grid);
 		
 	return node;
 }
 
-BccNode * BccCell3::findCyanNodeInNeighbor(const int & i,
+BccNode3 * BccCell3::findCyanNodeInNeighbor(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
 	for(int j = 0;j<3;++j) {
 		BccCell3 * cell = grid->findEdgeNeighborCell(cellCoord, i, j);
 		if(cell) {
-			BccNode * node = cell->find(sdb::gdt::ThreeNeighborOnEdge[i*3+j][3]);
+			BccNode3 * node = cell->find(sdb::gdt::ThreeNeighborOnEdge[i*3+j][3]);
 			if(node)
 				return node;
 		}
@@ -203,7 +203,7 @@ BccNode * BccCell3::findCyanNodeInNeighbor(const int & i,
 	return NULL;
 }
 
-BccNode * BccCell3::findBlueNodeInNeighbor(const int & i,
+BccNode3 * BccCell3::findBlueNodeInNeighbor(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
@@ -219,7 +219,7 @@ BccNode * BccCell3::findBlueNodeInNeighbor(const int & i,
 		
 		BccCell3 * neighborCell = grid->findNeighborCell(cellCoord, neighborJ);
 		if(neighborCell) {
-			BccNode * node = neighborCell->findBlue(q);
+			BccNode3 * node = neighborCell->findBlue(q);
 			if(node)
 				return node;
 		}
@@ -227,7 +227,7 @@ BccNode * BccCell3::findBlueNodeInNeighbor(const int & i,
 	return NULL;
 }
 
-BccNode * BccCell3::derivedBlueNode(const int & i,
+BccNode3 * BccCell3::derivedBlueNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
@@ -247,11 +247,11 @@ BccNode * BccCell3::derivedBlueNode(const int & i,
 	return m_parentCell->find(15);
 }
 
-BccNode * BccCell3::faceNode(const int & i,
+BccNode3 * BccCell3::faceNode(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
-	BccNode * node = yellowNode(i, cellCoord, grid);
+	BccNode3 * node = yellowNode(i, cellCoord, grid);
 	if(node)
 		return node;
 		
@@ -271,20 +271,20 @@ void BccCell3::connectTetrahedrons(std::vector<ITetrahedron *> & dest,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
-	BccNode * redN = find(15);
+	BccNode3 * redN = find(15);
 	int i = 0, j, k;
 /// per face
 	for(;i<6;++i) {
-		BccNode * faN = faceNode(i, cellCoord, grid);
+		BccNode3 * faN = faceNode(i, cellCoord, grid);
 		if((i&1) == 0) {
 			if(faN->key == 15)
 				continue;
 		}
 /// per edge
 		for(j=0;j<4;++j) {
-			BccNode * cN = blueNode(sdb::gdt::TwentyFourFVBlueBlueEdge[i*4+j][0] - 6,
+			BccNode3 * cN = blueNode(sdb::gdt::TwentyFourFVBlueBlueEdge[i*4+j][0] - 6,
 									cellCoord, grid);
-			BccNode * dN = blueNode(sdb::gdt::TwentyFourFVBlueBlueEdge[i*4+j][1] - 6,
+			BccNode3 * dN = blueNode(sdb::gdt::TwentyFourFVBlueBlueEdge[i*4+j][1] - 6,
 									cellCoord, grid);
 			
 			k = sdb::gdt::TwentyFourFVBlueBlueEdge[i*4+j][2];
@@ -300,7 +300,7 @@ void BccCell3::connectTetrahedrons(std::vector<ITetrahedron *> & dest,
 }
 
 void BccCell3::addOneTetra(std::vector<ITetrahedron *> & dest,
-					BccNode * A, BccNode * B, BccNode * C, BccNode * D)
+					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D)
 {
 	ITetrahedron * t = new ITetrahedron;
 	resetTetrahedronNeighbors(*t);
@@ -311,11 +311,11 @@ void BccCell3::addOneTetra(std::vector<ITetrahedron *> & dest,
 
 void BccCell3::addTwoTetra(std::vector<ITetrahedron *> & dest,
 					const int & i,
-					const aphid::sdb::Coord4 & cellCoord,
+					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid,
-					BccNode * A, BccNode * B, BccNode * C, BccNode * D)
+					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D)
 {
-	BccNode * cyanN = cyanNode(i, cellCoord, grid);
+	BccNode3 * cyanN = cyanNode(i, cellCoord, grid);
 	addOneTetra(dest, A, B, cyanN, D);
 	addOneTetra(dest, A, B, C, cyanN);
 }
@@ -326,9 +326,9 @@ void BccCell3::addFourTetra(std::vector<ITetrahedron *> & dest,
 					const int & k,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid,
-					BccNode * A, BccNode * B, BccNode * C, BccNode * D)
+					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D)
 {
-	BccNode * cyanN = cyanNode(k, cellCoord, grid);
+	BccNode3 * cyanN = cyanNode(k, cellCoord, grid);
 	
 	sdb::Coord4 nc = grid->neighborCoord(cellCoord, i);
 	
@@ -346,14 +346,14 @@ void BccCell3::addFourTetra(std::vector<ITetrahedron *> & dest,
 		return;
 	}
 	
-	BccNode * f0 = cell0->faceNode(sdb::gdt::TwentyFourFVEdgeNeighborChildFace[i*4+j][2], 
+	BccNode3 * f0 = cell0->faceNode(sdb::gdt::TwentyFourFVEdgeNeighborChildFace[i*4+j][2], 
 						ncc0, grid);
 	if(!f0) {
 		std::cout<<"\n [ERROR] no neighbor child face "<<ncc0;
 		return;
 	}
 						
-	BccNode * f1 = cell1->faceNode(sdb::gdt::TwentyFourFVEdgeNeighborChildFace[i*4+j][2], 
+	BccNode3 * f1 = cell1->faceNode(sdb::gdt::TwentyFourFVEdgeNeighborChildFace[i*4+j][2], 
 						ncc1, grid);	
 	if(!f1) {
 		std::cout<<"\n [ERROR] no neighbor child face "<<ncc1;
@@ -367,7 +367,7 @@ void BccCell3::addFourTetra(std::vector<ITetrahedron *> & dest,
 }
 
 bool BccCell3::isFaceDivided(const int & i,
-					const aphid::sdb::Coord4 & cellCoord,
+					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 { 
 	BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
@@ -378,7 +378,7 @@ bool BccCell3::isFaceDivided(const int & i,
 }
 
 bool BccCell3::isEdgeDivided(const int & i,
-					const aphid::sdb::Coord4 & cellCoord,
+					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
 	for(int j = 0;j<3;++j) {

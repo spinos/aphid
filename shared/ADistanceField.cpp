@@ -236,22 +236,22 @@ bool ADistanceField::isNodeBackground(const int & i) const
 { return nodes()[i].label == sdf::StBackGround; }
 
 bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
-									const IDistanceEdge & e)
-{	
+									const IDistanceEdge & e,
+									const float & h)
+{
 	if(Absolute<float>(v1.val) + Absolute<float>(v2.val) < e.len * .7f)
 		return false;
 	
 	const Vector3F dv = v2.pos - v1.pos;
-	const float eps = e.len * .2f;
 	
 	if(v1.val > 0.f) {
-		if(v1.val < eps) {
+		if(v1.val < h) {
 		
 			v1.pos += dv.normal() * v1.val;
 			v1.val = 0.f;
 			return true;
 		}
-		else if(-v2.val < eps) {
+		else if(-v2.val < h) {
 		
 			v2.pos += dv.normal() * v2.val;
 			v2.val = 0.f;
@@ -259,13 +259,13 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 		}
 	}
 	else {
-		if(v2.val < eps) {
+		if(v2.val < h) {
 		
 			v2.pos -= dv.normal() * v2.val;
 			v2.val = 0.f;
 			return true;
 		}
-		else if(-v1.val < eps) {
+		else if(-v1.val < h) {
 		
 			v1.pos -= dv.normal() * v1.val;
 			v1.val = 0.f;
@@ -276,9 +276,8 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 	return false;
 }
 
-int ADistanceField::countFrontEdges()
+void ADistanceField::snapEdgeToFront(const float & h)
 {
-	int c = 0;
 	DistanceNode * v = nodes();
 	IDistanceEdge * es = edges();
 	const int ne = numEdges();
@@ -291,8 +290,27 @@ int ADistanceField::countFrontEdges()
 		
 /// cross front
 		if(v1.val * v2.val < 0.f) {			
-			if(!snapNodeToFront(v1, v2, e) )
-				c++;			
+			snapNodeToFront(v1, v2, e, h);			
+		}
+	}
+}
+
+int ADistanceField::countFrontEdges() const
+{
+	int c = 0;
+	const DistanceNode * v = nodes();
+	const IDistanceEdge * es = edges();
+	const int ne = numEdges();
+	for(int i=0; i< ne;++i) {
+		
+		const IDistanceEdge & e = es[i];
+		
+		const DistanceNode & v1 = v[e.vi.x];
+		const DistanceNode & v2 = v[e.vi.y];
+		
+/// cross front
+		if(v1.val * v2.val < 0.f) {			
+			c++;			
 		}
 	}
 	
