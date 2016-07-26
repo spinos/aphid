@@ -27,17 +27,18 @@ bool AdaptiveGridTest::init()
 	float gz = 128.f;
 	setColorScale(.25f / gz);
 	setNodeDrawSize(gz * .016f);
-	m_msh.fillBox(BoundingBox(-50.f, -50.f, -50.f,
-								 50.f,  50.f,  50.f), gz);
+	m_msh.fillBox(BoundingBox(-250.f, -50.f, -250.f,
+								 250.f,  50.f,  250.f), gz);
 	
 	m_distFunc.addSphere(Vector3F(    9.f, 17.f, -1.f), 27.f );
 	m_distFunc.addSphere(Vector3F(-54.f, -13.f, -1.f), 64.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
-	m_distFunc.addSphere(Vector3F(37.f, -10.f, -22.f), 21.1f );
+	m_distFunc.addSphere(Vector3F(38.f, -10.f, -22.f), 21.1f );
+	m_distFunc.addSphere(Vector3F(-100.f, -4420.f, -100.f), 4400.f );
 	
-#define MAX_BUILD_LEVEL 4
-#define MAX_BUILD_ERROR .8f
+#define MAX_BUILD_LEVEL 5
+#define MAX_BUILD_ERROR .3f
 	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	
 	m_msh.triangulateFront();

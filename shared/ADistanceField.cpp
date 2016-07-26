@@ -132,7 +132,7 @@ void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
 		DistanceNode & B = nodes()[vj];
 	
 /// do not visit inside
-		if( B.val >= 0.f
+		if( B.val > 0.f
 			&& B.stat == sdf::StFar) 
 			heap[vj] = 0;
 	}
@@ -231,12 +231,13 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 									const IDistanceEdge & e)
 {
 /// angle of crossing
-	if(Absolute<float>(v1.val) + Absolute<float>(v2.val) < e.len * .59f)
-		return false;
-
+	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
+		
+	float eps = e.len * .23f *glancing*glancing;
+	//if(eps < e.err )
+	//	return false;
+	
 	const Vector3F dv = v2.pos - v1.pos;
-/// larger error less tolerance
-	float eps = (e.len - e.err)  * .29f ;
 	
 	if(v1.val > 0.f) {
 		if(v1.val < eps) {
@@ -245,12 +246,14 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 			v1.val = 0.f;
 			return true;
 		}
+#if 1
 		else if(-v2.val < eps) {
 		
 			v2.pos += dv.normal() * v2.val;
 			v2.val = 0.f;
 			return true;
 		}
+#endif
 	}
 	else {
 		if(v2.val < eps) {
@@ -259,12 +262,14 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 			v2.val = 0.f;
 			return true;
 		}
+#if 1
 		else if(-v1.val < eps) {
 		
 			v1.pos -= dv.normal() * v1.val;
 			v1.val = 0.f;
 			return true;
 		}
+#endif
 	}
 	
 	return false;

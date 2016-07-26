@@ -137,8 +137,8 @@ public:
 		if(!ba.intersect(bb) )
 			return false;
 			
-		if(enclose(b) )
-			return false;
+		//if(enclose(b) )
+		//	return false;
 			
 		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
 		//return gjk::Intersect1<Sphere, T >::Evaluate(*this, *b); 
