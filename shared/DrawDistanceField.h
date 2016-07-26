@@ -84,26 +84,9 @@ protected:
 		}
 	}
 	
-	template<typename T>
 	void drawErrors(const ADistanceField * fld,
-					sdb::Array<sdb::Coord2, T > * egs,
-					const float & eps)
-	{
-		const DistanceNode * v = fld->nodes();
-	
-		glBegin(GL_LINES);
-		egs->begin();
-		while(!egs->end() ) {
-			
-			if(egs->value()->val > eps) {
-				glVertex3fv((const float *)&v[egs->key().x].pos);
-				glVertex3fv((const float *)&v[egs->key().y].pos);
-			}
-			
-			egs->next();
-		}
-		glEnd();
-	}
+					sdb::Sequence<sdb::Coord2 > * edgeInds,
+					const float & eps);
 	
 	template<typename Tn, typename Tt>
 	bool checkTetraVolumeExt(const Tn * src,

@@ -130,7 +130,7 @@ void FieldTriangulation::cutEdges(RedBlueRefine & refiner,
 
 void FieldTriangulation::triangulateFront()
 {
-	snapEdgeToFront(seperateDistance() );
+	snapEdgeToFront();
 	int nfe = countFrontEdges();
 	//obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 	

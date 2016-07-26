@@ -17,7 +17,7 @@ ADistanceField::ADistanceField()
 ADistanceField::~ADistanceField()
 { clearDirtyEdges(); }
 
-sdb::Array<sdb::Coord2, EdgeRec > * ADistanceField::dirtyEdges()
+sdb::Sequence<sdb::Coord2 > * ADistanceField::dirtyEdges()
 { return &m_dirtyEdges; }
 
 void ADistanceField::nodeColor(Vector3F & dst, const DistanceNode & n,
@@ -216,15 +216,7 @@ void ADistanceField::clearDirtyEdges()
 { m_dirtyEdges.clear(); }
 
 void ADistanceField::addDirtyEdge(const int & a, const int & b)
-{ 
-	sdb::Coord2 k = sdb::Coord2(a, b).ordered();
-	EdgeRec * e = m_dirtyEdges.find(k);
-	if(!e) {
-		e = new EdgeRec;
-		e->key = k;
-		m_dirtyEdges.insert(k, e );
-	}
-}	  
+{ m_dirtyEdges.insert(sdb::Coord2(a, b).ordered() ); }	  
 
 const float & ADistanceField::maxError() const
 { return m_mxErr; }
@@ -236,19 +228,15 @@ bool ADistanceField::isNodeBackground(const int & i) const
 { return nodes()[i].label == sdf::StBackGround; }
 
 bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
-									const IDistanceEdge & e,
-									const float & h)
+									const IDistanceEdge & e)
 {
-	if(Absolute<float>(v1.val) + Absolute<float>(v2.val) < e.len * .7f)
+/// angle of crossing
+	if(Absolute<float>(v1.val) + Absolute<float>(v2.val) < e.len * .59f)
 		return false;
 
 	const Vector3F dv = v2.pos - v1.pos;
-	float eps = (e.err < h) ? .31f : .14f;
-	
-	eps *= e.len;
-	
-	if(eps < h)
-		eps = h;
+/// larger error less tolerance
+	float eps = (e.len - e.err)  * .29f ;
 	
 	if(v1.val > 0.f) {
 		if(v1.val < eps) {
@@ -282,7 +270,7 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 	return false;
 }
 
-void ADistanceField::snapEdgeToFront(const float & h)
+void ADistanceField::snapEdgeToFront()
 {
 	DistanceNode * v = nodes();
 	IDistanceEdge * es = edges();
@@ -296,7 +284,7 @@ void ADistanceField::snapEdgeToFront(const float & h)
 		
 /// cross front
 		if(v1.val * v2.val < 0.f) {			
-			snapNodeToFront(v1, v2, e, h);			
+			snapNodeToFront(v1, v2, e);			
 		}
 	}
 }
@@ -321,23 +309,6 @@ int ADistanceField::countFrontEdges() const
 	}
 	
 	return c;
-}
-
-int ADistanceField::edgeIndex(const int & v1, const int & v2) const
-{
-	const DistanceNode & A = nodes()[v1];
-	const int endj = edgeBegins()[v1+1];
-	int j = edgeBegins()[v1];
-	for(;j<endj;++j) {
-		
-		int k = edgeIndices()[j];
-
-		const IDistanceEdge & eg = edges()[k];
-		
-		if(eg.vi.x == v2 || eg.vi.y == v2)
-			return k;
-	}
-	return -1;
 }
 
 }

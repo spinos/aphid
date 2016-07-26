@@ -30,14 +30,15 @@ bool AdaptiveGridTest::init()
 	m_msh.fillBox(BoundingBox(-50.f, -50.f, -50.f,
 								 50.f,  50.f,  50.f), gz);
 	
-	m_distFunc.addSphere(Vector3F(    9.f, 17.f, -1.f), 24.35f );
-	m_distFunc.addSphere(Vector3F(-53.f, -13.f, -1.f), 62.f );
+	m_distFunc.addSphere(Vector3F(    9.f, 17.f, -1.f), 27.f );
+	m_distFunc.addSphere(Vector3F(-54.f, -13.f, -1.f), 64.f );
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
-	m_distFunc.addSphere(Vector3F(34.f, -11.f, -22.f), 23.1f );
+	m_distFunc.addSphere(Vector3F(37.f, -10.f, -22.f), 21.1f );
 	
-#define MAX_BUILD_LEVEL 8
-	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, .7f);
+#define MAX_BUILD_LEVEL 5
+#define MAX_BUILD_ERROR 1.3f
+	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	
 	m_msh.triangulateFront();
 	
@@ -54,7 +55,7 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 {
 #define SHO_CELL 0
 #define SHO_CELL_NODE 0
-#define SHO_GRAPH 0
+#define SHO_GRAPH 1
 #define SHO_CUT 0
 #define SHO_FRONT 1
 
@@ -82,7 +83,7 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 
 void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 {
-#define SHO_NODE 1
+#define SHO_NODE 0
 #define SHO_EDGE 0
 #define SHO_ERR 1
 
@@ -96,8 +97,7 @@ void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 #endif
 
 #if SHO_ERR
-	dr->setColor(0.99f, 0.1f, .1f);
-	drawErrors<EdgeRec>(&m_msh, m_msh.dirtyEdges(), .3f );
+	drawErrors(&m_msh, m_msh.dirtyEdges(), m_msh.errorThreshold() );
 #endif
 
 }

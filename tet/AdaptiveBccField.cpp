@@ -152,35 +152,29 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 
 	BoundingBox dirtyBx;
 	
-	sdb::Array<sdb::Coord2, EdgeRec > * egs = dirtyEdges();
+	sdb::Sequence<sdb::Coord2 > * egs = dirtyEdges();
 	egs->begin();
 	while(!egs->end() ) {
-	
-		if(egs->value()->val > threshold) {
+		
+		const sdb::Coord2 & ei = egs->key();
+		const IDistanceEdge * ae = edge(ei.x, ei.y );
+		if(ae ) {
+#if 0
+			if(ae->err > threshold
+				|| ae->len > threshold * 64.f ) {
+#else
+			if(ae->err > threshold ) {
+#endif
 			
-			const Vector3F & p1 = v[egs->key().x].pos;
-			const Vector3F & p2 = v[egs->key().y].pos;
+			const Vector3F & p1 = v[ei.x].pos;
+			const Vector3F & p2 = v[ei.y].pos;
 			
 			dirtyBx.reset();
 			dirtyBx.expandBy(p1, r);
 			dirtyBx.expandBy(p2, r);
-/*				
-			if(dirtyBx.distance(0) < r ) {
-				dirtyBx.setMin(dirtyBx.getMin(0) - r, 0);
-				dirtyBx.setMax(dirtyBx.getMax(0) + r, 0);
-			}
 			
-			if(dirtyBx.distance(1) < r ) {
-				dirtyBx.setMin(dirtyBx.getMin(1) - r, 1);
-				dirtyBx.setMax(dirtyBx.getMax(1) + r, 1);
-			}
-			
-			if(dirtyBx.distance(2) < r ) {
-				dirtyBx.setMin(dirtyBx.getMin(2) - r, 2);
-				dirtyBx.setMax(dirtyBx.getMax(2) + r, 2);
-			}
-*/			
 			g->subdivideToLevel(dirtyBx, level+1, &divided);
+		}
 		}
 		
 		egs->next();
@@ -206,6 +200,9 @@ int AdaptiveBccField::findFarInd()
 	}
 	return 0;
 }
+
+const float & AdaptiveBccField::errorThreshold() const
+{ return m_errorThreshold; }
 
 float AdaptiveBccField::seperateDistance() const
 { return m_errorThreshold * .49f; }

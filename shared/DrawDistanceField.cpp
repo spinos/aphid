@@ -63,4 +63,32 @@ void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr)
 const float & DrawDistanceField::nodeDrawSize() const
 { return m_nodeDrawSize; }
 
+void DrawDistanceField::drawErrors(const ADistanceField * fld,
+					sdb::Sequence<sdb::Coord2 > * edgeInds,
+					const float & eps)
+{
+	const DistanceNode * v = fld->nodes();
+	const IDistanceEdge * e = fld->edges();
+	
+	glColor3f(1.f, 0.f, 0.f);
+				
+	glBegin(GL_LINES);
+	edgeInds->begin();
+	while(!edgeInds->end() ) {
+		
+		const sdb::Coord2 & ei = edgeInds->key();
+		const IDistanceEdge * ae = fld->edge(ei.x, ei.y );
+		if(ae) {
+			if(ae->err > eps) {
+				
+				glVertex3fv((const float *)&v[ei.x].pos);
+				glVertex3fv((const float *)&v[ei.y].pos);
+			}
+		}
+		
+		edgeInds->next();
+	}
+	glEnd();
+}
+
 }

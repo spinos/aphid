@@ -41,15 +41,10 @@ struct IDistanceEdge {
 	float len;
 	float err;
 };
-
-struct EdgeRec {
-	sdb::Coord2 key;
-	float val;
-};
  
 class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
 
-	sdb::Array<sdb::Coord2, EdgeRec > m_dirtyEdges;
+	sdb::Sequence<sdb::Coord2 > m_dirtyEdges;
 	float m_mxErr, m_mnErr;
 	
 public:
@@ -61,7 +56,7 @@ public:
 	
 	void markInsideOutside(const int & originNodeInd = -1);
 	
-	sdb::Array<sdb::Coord2, EdgeRec > * dirtyEdges();
+	sdb::Sequence<sdb::Coord2 > * dirtyEdges();
 
 /// per dirty edge, at linear center delta x, compare actual distance to recovered distance
 	template<typename Tf>
@@ -83,8 +78,8 @@ public:
 /// front nodes
 			if(n1.label == sdf::StFront && n2.label == sdf::StFront) {
 /// do not test inside edge
-			//if(n1.val * n2.val < 0.f
-			//	|| (n1.val > 0.f && n2.val > 0.f) ) {
+			if(n1.val * n2.val < 0.f
+				|| (n1.val > 0.f && n2.val > 0.f) ) {
 				Vector3F q = (n1.pos + n2.pos ) * .5f;
 								
 				act = func->calculateDistance(q) - shellThickness;
@@ -94,19 +89,19 @@ public:
 					m_mxErr = err;
 				if(m_mnErr > err)
 					m_mnErr = err;
-			//}
 			}
-				
-			m_dirtyEdges.value()->val = err;
+			}
 			
 			if(err > 0.f) {
 				int k = edgeIndex(i.x, i.y);
-				if(k>-1)
+				if(k>-1) {
 					edges()[k].err = err;
+				}
 			}
 			
 			m_dirtyEdges.next();
 		}
+		
 		return m_mxErr;
 	}
 	
@@ -163,14 +158,12 @@ protected:
 		}
 	}
 
-	void snapEdgeToFront(const float & h);
+	void snapEdgeToFront();
 	int countFrontEdges() const;
 					
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);
-/// ind to edge by vertex i
-	int edgeIndex(const int & v1, const int & v2) const;
 	int lastBackgroundNode() const;
 	void setFarNodeInside();
 	void setNodeFar();
@@ -209,8 +202,7 @@ private:
 /// - -> 0     +	
 /// move node to front to prevent very close cut
 	bool snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
-						const IDistanceEdge & e,
-						const float & h);
+						const IDistanceEdge & e);
 						
 };
 

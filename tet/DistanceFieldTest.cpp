@@ -81,8 +81,7 @@ void DistanceFieldTest::drawGraph(aphid::GeoDrawer * dr)
 #endif
 
 #if SHO_ERR
-	dr->setColor(0.1f, 0.1f, .1f);
-	drawErrors<EdgeRec>(&m_fld, m_fld.dirtyEdges(), .067f );
+	drawErrors(&m_fld, m_fld.dirtyEdges(), .067f );
 #endif
 
 }

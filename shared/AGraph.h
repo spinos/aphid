@@ -51,11 +51,15 @@ public:
 	const int * edgeIndices() const;
 	const int * edgeBegins() const;
 	
+	const Te * edge(const int & v1, const int & v2) const;
+
 protected:
 	void extractEdges(sdb::Sequence<sdb::Coord2> * a);
 	void extractEdgeBegins(const std::vector<int> & a);
 	void extractEdgeIndices(const std::vector<int> & a);
 	void calculateEdgeLength();
+/// ind to edge by vertex i
+	int edgeIndex(const int & v1, const int & v2) const;
 	
 private:
 	void internalClear();
@@ -209,4 +213,32 @@ template<typename Tn, typename Te>
 const float & AGraph<Tn, Te>::maxEdgeLength() const
 { return m_maxEdgeLen; }	
 	
+template<typename Tn, typename Te>
+int AGraph<Tn, Te>::edgeIndex(const int & v1, const int & v2) const
+{
+	const Tn & A = nodes()[v1];
+	const int endj = edgeBegins()[v1+1];
+	int j = edgeBegins()[v1];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const Te & eg = edges()[k];
+		
+		if(eg.vi.x == v2 || eg.vi.y == v2)
+			return k;
+	}
+	return -1;
+}
+
+template<typename Tn, typename Te>
+const Te * AGraph<Tn, Te>::edge(const int & v1, const int & v2) const
+{ 
+	int k = edgeIndex(v1, v2); 
+	if(k<0)
+		return NULL;
+		
+	return &edges()[k];
+}
+
 }
