@@ -27,7 +27,7 @@ public:
 /// levelLimit < adaptive grid maxLevel
 /// threshold is min error distance triggers next level
 	template<typename Tf>
-	void AdaptiveBccField::build(Tf * distanceFunc,
+	void build(Tf * distanceFunc,
 				const int & levelLimit, 
 				const float & threshold)
 	{

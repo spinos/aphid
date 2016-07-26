@@ -36,8 +36,8 @@ bool AdaptiveGridTest::init()
 	//					Vector3F(40.f, -7.87f, 40.f) );
 	m_distFunc.addSphere(Vector3F(37.f, -10.f, -22.f), 21.1f );
 	
-#define MAX_BUILD_LEVEL 5
-#define MAX_BUILD_ERROR 1.3f
+#define MAX_BUILD_LEVEL 4
+#define MAX_BUILD_ERROR .8f
 	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	
 	m_msh.triangulateFront();
