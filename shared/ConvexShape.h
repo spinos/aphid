@@ -10,6 +10,7 @@
 #pragma once
 #include "Matrix44F.h"
 #include "BoundingBox.h"
+#include "Boundary.h"
 #include "Ray.h"
 #include "GjkIntersection.h"
 #include "BarycentricCoordinate.h"
@@ -27,21 +28,6 @@ namespace cvx {
 		TBox = 5,
 		TTetrahedron = 6
     };
-	
-class Shape {
-
-public:
-	Shape();
-	virtual ~Shape();
-	
-	virtual float distanceTo(const Vector3F & p) const;
-	virtual ShapeType shapeType() const;
-	
-protected:
-
-private:
-
-};
 
 class Frustum {
 
@@ -102,7 +88,7 @@ private:
 
 };
 
-class Sphere : public Shape {
+class Sphere {
   
     Vector3F m_p;
     float m_r;
@@ -113,21 +99,7 @@ public:
     
     BoundingBox calculateBBox() const;
     
-    static ShapeType ShapeTypeId;
-	static std::string GetTypeStr();
-	
-	virtual float distanceTo(const Vector3F & p) const;
-	virtual ShapeType shapeType() const;
-	
-	template<typename T>
-	bool enclose(const T * b) const
-	{
-		for(int i=0; i<b->numPoints(); ++i) {
-			if(b->X(i).distanceTo(m_p) > m_r )
-				return false;
-		}
-		return true;
-	}
+	float distanceTo(const Vector3F & p) const;
 	
 	template<typename T>
 	bool intersect(const T * b) const
@@ -137,18 +109,17 @@ public:
 		if(!ba.intersect(bb) )
 			return false;
 			
-		//if(enclose(b) )
-		//	return false;
-			
 		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
-		//return gjk::Intersect1<Sphere, T >::Evaluate(*this, *b); 
 	}
 	
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
 	
+	static Domain::FunctionType FunctionTypeId;
+	bool intersectBBox(const BoundingBox & b) const;
+	
 };
 
-class Cube : public Shape {
+class Cube {
     
     Vector3F m_p;
     float m_r;
@@ -170,7 +141,6 @@ public:
 	static std::string GetTypeStr();
 	
 	virtual float distanceTo(const Vector3F & p) const;
-	virtual ShapeType shapeType() const;
 	
 	template<typename T>
 	bool intersect(const T * b) const
@@ -181,7 +151,7 @@ public:
 	
 };
 
-class Box : public Shape {
+class Box {
     
     Vector3F m_low; int m_pad0;
 	Vector3F m_high; int m_pad1;
@@ -201,11 +171,10 @@ public:
 		return true;
 	}
     
-    static ShapeType ShapeTypeId;
+    static Domain::FunctionType FunctionTypeId;
 	static std::string GetTypeStr();
 	
 	virtual float distanceTo(const Vector3F & p) const;
-	virtual ShapeType shapeType() const;
 	
 	template<typename T>
 	bool intersect(const T * b) const
@@ -215,6 +184,8 @@ public:
 	
 	Vector3F X(int i) const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
+	
+	bool intersectBBox(const BoundingBox & b) const;
 	
 };
 
@@ -308,7 +279,7 @@ void Triangle::closestToPoint(T * result) const
 	result->_icomponent = ind1();
 }
 
-class Tetrahedron : public Shape {
+class Tetrahedron {
 
 	Vector3F m_p[4];
 	
@@ -319,10 +290,7 @@ public:
 	
 	BoundingBox calculateBBox() const;
 	
-    static ShapeType ShapeTypeId;
-	static std::string GetTypeStr();
-	
-	virtual ShapeType shapeType() const;
+    static std::string GetTypeStr();
 	
 	int numPoints() const;
 	Vector3F X(int idx) const;

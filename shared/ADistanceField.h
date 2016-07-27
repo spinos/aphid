@@ -60,7 +60,7 @@ public:
 
 /// per dirty edge, at linear center delta x, compare actual distance to recovered distance
 	template<typename Tf>
-	float estimateError(const Tf * func, const float & shellThickness)
+	float estimateError(Tf * func, const float & shellThickness)
 	{
 		m_dirtyEdges.begin();
 		float act, rec, err;
@@ -111,7 +111,7 @@ protected:
 	void initNodes();
 	
 	template<typename Tf>
-	void calculateDistanceOnFront(const Tf * func, const float & shellThickness)
+	void calculateDistanceOnFront(Tf * func, const float & shellThickness)
 	{
 		const int n = numNodes();
 		int i = 0;

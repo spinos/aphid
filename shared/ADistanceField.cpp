@@ -233,7 +233,7 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 /// angle of crossing
 	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
 		
-	float eps = e.len * .23f *glancing*glancing;
+	float eps = e.len * .23f *glancing* (.6f + .4f *glancing);
 	//if(eps < e.err )
 	//	return false;
 	

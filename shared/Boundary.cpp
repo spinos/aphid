@@ -24,4 +24,19 @@ BoundingBox * Boundary::bbox()
 void Boundary::updateBBox(const BoundingBox & box)
 { m_bbox.expandBy(box); }
 
+Domain::Domain()
+{}
+
+Domain::FunctionType Domain::functionType() const
+{ return fnUnknown; }
+
+bool Domain::broadphaseIntersect(const BoundingBox & b)
+{ return false; }
+
+bool Domain::narrowphaseIntersect(Domain * b)
+{ return false; }
+
+float Domain::distanceTo(const Vector3F & pref)
+{ return 1e8f; }
+
 }

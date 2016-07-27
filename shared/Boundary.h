@@ -26,4 +26,28 @@ private:
 	
 };
 
+/*
+ *  boundary with type and functions
+ *
+ */
+class Domain : public Boundary {
+
+public:
+	Domain();
+	
+	enum FunctionType {
+		fnUnknown = 0,
+		fnSphere = 1,
+		fnBox = 2,
+		fnKdTree = 3,
+		fnTetrahedron = 4
+	};
+	
+	virtual FunctionType functionType() const;
+	virtual bool broadphaseIntersect(const BoundingBox & b);
+	virtual bool narrowphaseIntersect(Domain * b);
+	virtual float distanceTo(const Vector3F & pref);
+	
+};
+
 }

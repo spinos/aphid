@@ -24,7 +24,7 @@ public:
 	void buildGraph();
 	
 	template<typename Tf>
-	void calculateDistance(const Tf * func, const float & shellThickness)
+	void calculateDistance(Tf * func, const float & shellThickness)
 	{
 		clearDirtyEdges();
 		

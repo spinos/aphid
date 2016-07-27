@@ -19,40 +19,40 @@ BDistanceFunction::~BDistanceFunction()
 
 void BDistanceFunction::internalClear()
 {
-	std::vector<cvx::Shape *>::iterator it = m_shapes.begin();
-	for(;it!=m_shapes.end();++it) {
+	std::vector<Domain *>::iterator it = m_domains.begin();
+	for(;it!=m_domains.end();++it) {
 		delete *it;
 	}
-	m_shapes.clear();
+	m_domains.clear();
 }
 
 void BDistanceFunction::addSphere(const Vector3F & p, const float & r)
 {
 	cvx::Sphere * s = new cvx::Sphere;
 	s->set(p, r);
-	addFunction(s);
+	m_domains.push_back(new SphereDomain(s) );
 }
 
 void BDistanceFunction::addBox(const Vector3F & lo, const Vector3F & hi)
 {
 	cvx::Box * s = new cvx::Box;
 	s->set(lo, hi);
-	addFunction(s);
+	m_domains.push_back(new BoxDomain(s) );
 }
 
-void BDistanceFunction::addFunction(cvx::Shape * d)
-{ m_shapes.push_back(d); }
-
-float BDistanceFunction::calculateDistance(const Vector3F & p) const
+float BDistanceFunction::calculateDistance(const Vector3F & p)
 {
 #define DISTANCE_POSITIVEINF 1e8f;	
 	float d, mnd = DISTANCE_POSITIVEINF;
-	std::vector<cvx::Shape *>::const_iterator it = m_shapes.begin();
-	for(;it!=m_shapes.end();++it) {
+	std::vector<Domain *>::iterator it = m_domains.begin();
+	for(;it!=m_domains.end();++it) {
 		
 		d = (*it)->distanceTo(p);
 		if(mnd > d)
 			mnd = d;
+			
+		if(mnd < 0.f)
+			return mnd;
 	}
 	return mnd;
 }

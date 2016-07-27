@@ -14,18 +14,6 @@ namespace aphid {
     
 namespace cvx {
 
-Shape::Shape()
-{}
-
-Shape::~Shape()
-{}
-
-float Shape::distanceTo(const Vector3F & p) const
-{ return 1e10f; }
-
-ShapeType Shape::shapeType() const 
-{ return TUnknown; }
-
 Frustum::Frustum() {}
 
 void Frustum::set(float nearClip, float farClip,
@@ -131,13 +119,7 @@ BoundingBox Sphere::calculateBBox() const
 { return BoundingBox(m_p.x - m_r, m_p.y - m_r, m_p.z - m_r,
                     m_p.x + m_r, m_p.y + m_r, m_p.z + m_r); }
 
-ShapeType Sphere::ShapeTypeId = TSphere;
-
-std::string Sphere::GetTypeStr()
-{ return "sphere"; }
-
-ShapeType Sphere::shapeType() const 
-{ return TSphere; }
+Domain::FunctionType Sphere::FunctionTypeId = Domain::fnSphere;
 
 float Sphere::distanceTo(const Vector3F & p) const
 { return p.distanceTo(m_p) - m_r; }
@@ -153,6 +135,9 @@ Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
 	if(localP) *localP = res;
 	return res;
 }
+
+bool Sphere::intersectBBox(const BoundingBox & b) const
+{ return b.distanceTo(m_p) <= m_r; }
 
 Cube::Cube() {}
 
@@ -195,9 +180,6 @@ float Cube::distanceTo(const Vector3F & p) const
 	return -dz;
 }
 
-ShapeType Cube::shapeType() const 
-{ return TCube; }
-
 Box::Box() {}
 
 void Box::set(const Vector3F & lo, const Vector3F & hi)
@@ -225,7 +207,7 @@ bool Box::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 Vector3F Box::calculateNormal() const
 { return Vector3F::XAxis; }
 
-ShapeType Box::ShapeTypeId = TBox;
+Domain::FunctionType Box::FunctionTypeId = Domain::fnBox;
 
 std::string Box::GetTypeStr()
 { return "box"; }
@@ -298,8 +280,8 @@ Vector3F Box::supportPoint(const Vector3F & v, Vector3F * localP) const
     return X(ir);
 }
 
-ShapeType Box::shapeType() const 
-{ return TBox; }
+bool Box::intersectBBox(const BoundingBox & b) const
+{ return false; }
 
 Capsule::Capsule() {}
 
@@ -522,13 +504,8 @@ BoundingBox Tetrahedron::calculateBBox() const
     return b;
 }
 
-ShapeType Tetrahedron::ShapeTypeId = TTetrahedron;
-
 std::string Tetrahedron::GetTypeStr()
 { return "tetrahedron"; }
-
-ShapeType Tetrahedron::shapeType() const
-{ return TTetrahedron; }
 
 int Tetrahedron::numPoints() const
 { return 4; }
