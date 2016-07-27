@@ -1,5 +1,8 @@
+#ifndef TTG_KDISTANCETEST_H
+#define TTG_KDISTANCETEST_H
+
 /*
- *  AdaptiveGridTest.h
+ *  KDistanceTest.h
  *  foo
  *
  *  Created by jian zhang on 7/14/16.
@@ -13,26 +16,29 @@
 #include <BDistanceFunction.h>
 #include "FieldTriangulation.h"
 #include <DrawDistanceField.h>
+#include "Container.h"
 
 namespace ttg {
 
-class AdaptiveGridTest : public Scene, public aphid::DrawDistanceField {
+class KDistanceTest : public Scene, public aphid::DrawDistanceField {
 
 	FieldTriangulation m_msh;
 	aphid::BDistanceFunction m_distFunc;
+	std::string m_fileName;
+	Container<cvx::Triangle > m_container;
 	
 public:
-	AdaptiveGridTest();
-	virtual ~AdaptiveGridTest();
+	KDistanceTest(const std::string & filename);
+	virtual ~KDistanceTest();
 	
 	virtual const char * titleStr() const;
 	virtual bool init();
 	virtual void draw(aphid::GeoDrawer * dr);
 
 private:
-	void drawGraph(aphid::GeoDrawer * dr);
-	void drawCut(aphid::GeoDrawer * dr);
+	void drawTree(aphid::GeoDrawer * dr);
 	
 };
 
 }
+#endif        //  #ifndef KDISTANCETEST_H

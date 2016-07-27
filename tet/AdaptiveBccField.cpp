@@ -204,7 +204,4 @@ int AdaptiveBccField::findFarInd()
 const float & AdaptiveBccField::errorThreshold() const
 { return m_errorThreshold; }
 
-float AdaptiveBccField::seperateDistance() const
-{ return m_errorThreshold * .49f; }
-
 }

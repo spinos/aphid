@@ -10,12 +10,26 @@ include_directories (../shared
 ../bcc2d
 ../hesperis
 ../kdtree
-../btree)
+../btree
+../ntree)
 
-set (HEADER_FILES "../shared/Base3DView.h" 
-"window.h"
-"glwidget.h"
-"../shared/Morton3D.h"
+set (HEADER_FILES ../shared/Base3DView.h 
+../shared/Morton3D.h
+../shared/ConvexShape.h
+../shared/HElemAsset.h
+../shared/VoxelEngine.h
+../kdtree/KdBuilder.h
+../kdtree/KdEngine.h
+../kdtree/KdRope.h
+../kdtree/KdNTree.h
+../kdtree/KdNNode.h
+../kdtree/KdSah.h
+../kdtree/TreeProperty.h
+../kdtree/HNTree.h
+../kdtree/VoxelGrid.h
+window.h
+glwidget.h
+../shared/Morton3D.h
 ../shared/hilbertCurve.h
 ../shared/triangle_math.h
 ../shared/tetrahedron_math.h
@@ -24,6 +38,9 @@ set (HEADER_FILES "../shared/Base3DView.h"
 ../shared/BDistanceFunction.h
 ../btree/AdaptiveGrid3.h
 ../btree/GridTables.h
+../ntree/Container.h
+../ntree/NTreeIO.h
+../ntree/NTreeDrawer.h
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h
@@ -59,11 +76,26 @@ AdaptiveBccMesher.h
 AdaptiveBccField.h
 FieldTriangulation.h
 AdaptiveGridTest.h
+KDistanceTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
 ../shared/CartesianGrid.cpp
 ../shared/QDoubleEditSlider.cpp
+../shared/KdTreeNode.cpp
+../shared/MinMaxBins.cpp 
+../shared/SplitEvent.cpp
+../shared/BaseBinSplit.cpp 
+../shared/CartesianGrid.cpp
+../shared/HElemAsset.cpp
+../shared/PrincipalComponents.cpp
+../shared/DrawBox.cpp
+../kdtree/TreeProperty.cpp
+../kdtree/PrimBoundary.cpp
+../btree/GridClustering.cpp
+../btree/HWorldGrid.cpp
+../ntree/NTreeIO.cpp
+../kdtree/HNTree.cpp
 SuperformulaControl.cpp
 Parameter.cpp
 Scene.cpp
@@ -94,6 +126,7 @@ AdaptiveBccMesher.cpp
 AdaptiveBccField.cpp
 FieldTriangulation.cpp
 AdaptiveGridTest.cpp
+KDistanceTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
@@ -104,18 +137,85 @@ endif ()
 
 add_executable (foo ${HEADER_FILES} ${SOURCE_FILES})
 
+SET (INSTALLED_HDF5 OFF)
+if (WIN32)
+	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+# location of configure file FindHDF5.cmake
+		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
+        SET (INSTALLED_HDF5 ON)
+    ELSE (EXISTS "D:/usr/hdf5")
+        SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
+        SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
+	ENDIF ()
+ELSE ()
+	SET (INSTALLED_HDF5 ON)
+endif ()
+
+IF (INSTALLED_HDF5)
+FIND_PACKAGE (HDF5 REQUIRED)
+IF (WIN32)
+SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
+ENDIF ()
+ENDIF ()
+
+MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
+MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
+MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
+
+include_directories (${HDF5_INCLUDE_DIRS})
+target_link_libraries (foo ${HDF5_LIBRARIES})
+
+if(WIN32)
+##SET (ZLIB_DIR "C:/Program Files/ZLIB/cmake/ZLIB")
+##SET (ZLIB_INCLUDE_DIR "C:/Program Files/ZLIB/include")
+##SET (ZLIB_LIBRARY "C:/Program Files/ZLIB/lib/libzlib.lib")
+SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
+SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
+endif()
+
+FIND_PACKAGE (ZLIB REQUIRED)
+MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
+MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
+MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
+
+target_link_libraries (foo ${ZLIB_LIBRARIES})
+
+IF (WIN32)
+set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "C:/Program Files/SZIP/include")
+set (SZIP_LIBRARY "C:/Program Files/SZIP/lib/libszip.lib")
+
+ELSEIF (APPLE)
+set (SZIP_DIR "/usr/local/share/cmake/SZIP")
+set (SZIP_INCLUDE_DIR "/usr/local/include")
+set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
+
+ENDIF ()
+
+FIND_PACKAGE (SZIP REQUIRED)
+MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
+MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
+MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
+MESSAGE (" szip library is " ${SZIP_LIBRARY})
+
+target_link_libraries (foo ${SZIP_LIBRARY})
+
 find_package (OpenGL REQUIRED)
 target_link_libraries (foo ${OPENGL_LIBRARIES})
 
 if (WIN32)
 set (Aphid_Library D:/aphid/lib/aphidMath.lib
 D:/aphid/lib/aphidGeom.lib
+D:/aphid/lib/aphidH5.lib
 D:/aphid/lib/aphidSdb.lib
 D:/aphid/lib/aphidGraph.lib
 D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
+/users/jianzhang/aphid/lib/libaphidH5.a
 /users/jianzhang/aphid/lib/libaphidSdb.a
 /users/jianzhang/aphid/lib/libaphidGraph.a
 /users/jianzhang/aphid/lib/libaphidUI.a)

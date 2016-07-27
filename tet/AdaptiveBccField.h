@@ -98,7 +98,6 @@ public:
 	
 	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
 	void setInsideOutsidePref(const aphid::Vector3F & q);
-	float seperateDistance() const;
 	const float & errorThreshold() const;
 								
 protected:

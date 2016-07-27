@@ -1,3 +1,6 @@
+#ifndef NTREE_CONTAINER_H
+#define NTREE_CONTAINER_H
+
 /*
  *  Container.h
  *  
@@ -80,6 +83,11 @@ bool Container<T>::readTree(const std::string & filename, int gridLevel)
 	hio.end();
 	
 	buildTree();
+	if(gridLevel < 1) {
+		std::cout<<"\n skip voxelization";
+		return true;
+	}
+	
 	return buildGrid(gridLevel);
 }
 
@@ -174,3 +182,5 @@ void Container<T>::loadTriangles(const std::string & name)
 	}
 	ass.close();
 }
+#endif        //  #ifndef CONTAINER_H
+

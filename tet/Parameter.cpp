@@ -16,7 +16,7 @@ namespace ttg {
 
 Parameter::Parameter(int argc, char *argv[])
 {
-	m_operation = kAaptiveGrid;
+	m_operation = kKdistance;
 	
 	if(argc < 2) {
 		std::cout<<"\n tet (Tetrahedral Mesh Generation Research) version 20160601"
@@ -64,6 +64,15 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-ag") == 0 || strcmp(argv[i], "--adaptiveGrid") == 0) {
 				m_operation = kAaptiveGrid;
 			}
+			if(strcmp(argv[i], "-kd") == 0 || strcmp(argv[i], "--kdDistance") == 0) {
+				if(i==argc-1) {
+					std::cout<<"\n --kdDistance value is not set";
+					m_operation = kHelp;
+					break;
+				}
+				m_inFileName = argv[i+1];
+				m_operation = kKdistance;
+			}
 		}
 	}
 	
@@ -73,6 +82,12 @@ Parameter::~Parameter() {}
 
 Parameter::Operation Parameter::operation() const
 { return m_operation; }
+
+const std::string & Parameter::inFileName() const
+{ return m_inFileName; }
+
+const std::string & Parameter::outFileName() const
+{ return m_outFileName; }
 
 void Parameter::PrintHelp()
 {
@@ -92,6 +107,7 @@ void Parameter::PrintHelp()
 	<<"\n -rbr or --redBlueRefine    test red blue refine of a tetrahedron"
 	<<"\n -ft or --fieldTetrahedralize    test tetrahedralize based on signed distance field"
 	<<"\n -ag or --adaptiveGrid    test adaptive grid"
+	<<"\n -kd or --kdDistance    input_filename    test kd-tree distance field + adaptive grid"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

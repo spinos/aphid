@@ -87,6 +87,49 @@ protected:
 	void drawErrors(const ADistanceField * fld,
 					sdb::Sequence<sdb::Coord2 > * edgeInds,
 					const float & eps);
+					
+	template<typename T>
+	void drawFront(const T * fld)
+	{
+		const int & n = fld->numFrontTriangles();
+		Vector3F p1, p2, p3;
+		glBegin(GL_TRIANGLES);
+		for(int i=0; i<n; ++i) {
+			p1 = fld->triangleP(i, 0);
+			p2 = fld->triangleP(i, 1);
+			p3 = fld->triangleP(i, 2);
+			
+			glVertex3fv((const float *)&p1);
+			glVertex3fv((const float *)&p2);
+			glVertex3fv((const float *)&p3);
+		}
+		glEnd();		
+	
+	}
+	
+	template<typename T>
+	void drawFrontWire(const T * fld)
+	{
+		const int & n = fld->numFrontTriangles();
+		Vector3F p1, p2, p3;
+		glBegin(GL_LINES);
+		for(int i=0; i<n; ++i) {
+			p1 = fld->triangleP(i, 0);
+			p2 = fld->triangleP(i, 1);
+			p3 = fld->triangleP(i, 2);
+			
+			glVertex3fv((const float *)&p1);
+			glVertex3fv((const float *)&p2);
+			
+			glVertex3fv((const float *)&p2);
+			glVertex3fv((const float *)&p3);
+			
+			glVertex3fv((const float *)&p3);
+			glVertex3fv((const float *)&p1);
+		}
+		glEnd();		
+	
+	}
 	
 	template<typename Tn, typename Tt>
 	bool checkTetraVolumeExt(const Tn * src,

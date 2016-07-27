@@ -12,6 +12,9 @@ namespace ttg {
 
 class Parameter {
 	
+	std::string m_inFileName;
+	std::string m_outFileName;
+	
 public:
 	enum Operation {
 		kHelp = 0,
@@ -26,14 +29,16 @@ public:
 		kDistanceField = 9,
 		kRedblueRefine = 10,
 		kFieldTetrahedralize = 11,
-		kAaptiveGrid = 12
+		kAaptiveGrid = 12,
+		kKdistance = 13
 	};
 	
 	Parameter(int argc, char *argv[]);
 	virtual ~Parameter();
 	
 	Operation operation() const;
-	
+	const std::string & inFileName() const;
+	const std::string & outFileName() const;
 	static void PrintHelp();
 	
 protected:
