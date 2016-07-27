@@ -49,6 +49,13 @@ bool AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord)
 	return true;
 }
 
+void AdaptiveBccGrid3::subdivideCells(const std::vector<sdb::Coord4 > & divided)
+{
+	std::vector<sdb::Coord4 >::const_iterator it = divided.begin();
+	for(;it!=divided.end();++it)
+		subdivideCell(*it);
+}
+
 void AdaptiveBccGrid3::build()
 {
 	begin();

@@ -41,6 +41,7 @@ glwidget.h
 ../ntree/Container.h
 ../ntree/NTreeIO.h
 ../ntree/NTreeDrawer.h
+../ntree/NTreeDomain.h
 triangulation.h
 tetrahedron_graph.h
 bipyramid_flip.h

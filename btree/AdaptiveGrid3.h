@@ -44,8 +44,6 @@ public:
 	const int & level0CoordStride() const;
 	const int & levelCoordStride(const int & x) const;
 	
-	int countNodes();
-	
 	CellType * value();
 	const Coord4 key() const;
 	
@@ -94,6 +92,9 @@ public:
 /// through level0 cells
 	CellType * cellClosestTo(const Vector3F & pref);
 
+/// through each cell, give index to each element
+	int countNodes();
+	
 protected:
 
 private:

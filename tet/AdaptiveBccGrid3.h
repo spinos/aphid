@@ -9,6 +9,7 @@
 
 #pragma once
 #include <BccCell3.h>
+#include <BDistanceFunction.h>
 
 namespace ttg {
 
@@ -22,6 +23,7 @@ public:
 	
 /// add 8 child cells
 	bool subdivideCell(const aphid::sdb::Coord4 & cellCoord);
+	
 /// node to each cell
 	void build();
 /// find all level0 cell intersect box
@@ -35,9 +37,37 @@ public:
 						const aphid::BoundingBox & bx, 
 						const int & level,
 						std::vector<aphid::sdb::Coord4 > * divided);
+	
+/// find level cell intersect distance function
+	template<typename Tf>
+	void markCellIntersectDomainAtLevel(Tf * d, 
+						const float & shellThickness,
+						const int & level,
+						std::vector<aphid::sdb::Coord4 > & divided)
+	{
+		aphid::BoundingBox cb;
+		begin();
+		while(!end() ) {
+			const aphid::sdb::Coord4 k = key();
+			
+			if(k.w == level) {
+				getCellBBox(cb, k);
+				cb.expand(shellThickness);
+			
+				if(d-> template intersect<aphid::BoundingBox>(&cb) )
+					divided.push_back(k);
+			}
+			
+			next();
+		}
+	}
+	
+	void subdivideCells(const std::vector<aphid::sdb::Coord4 > & divided);
 						
 private:
 	BccCell3 * addCell(const aphid::sdb::Coord4 & cellCoord);
+	
+	
 	
 };
 

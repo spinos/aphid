@@ -51,6 +51,11 @@ public:
 	void intersectBox(KdNTree<T, Tn > * tree, 
 				BoxIntersectContext * ctx);
 
+/// domain of element much smaller than bx
+	template<typename T, typename Tn>
+	bool broadphase(KdNTree<T, Tn > * tree,
+				const BoundingBox & bx);
+	
 protected:
 
 private:
@@ -115,6 +120,19 @@ private:
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & b);
+				
+	template<typename T, typename Tn>
+	bool leafBroadphase(KdNTree<T, Tn > * tree,
+				const BoundingBox * b,
+				KdTreeNode * r);
+				
+	template <typename T, typename Tn>
+	bool innerBroadphase(KdNTree<T, Tn > * tree,
+				const BoundingBox * b,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & innerBx);
+				
 };
 
 template<typename T, typename Ts>
@@ -796,6 +814,108 @@ void KdEngine::innerIntersectBox(KdNTree<T, Tn > * tree,
 			if(ctx->isFull() ) return;
 		}
 	}
+}
+
+template<typename T, typename Tn>
+bool KdEngine::leafBroadphase(KdNTree<T, Tn > * tree,
+				const BoundingBox * b,
+				KdTreeNode * r)
+{
+	if(r->getNumPrims() < 1) return false;
+	int start, len;
+	tree->leafPrimStartLength(start, len, r->getPrimStart() );
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = tree->getSource(start + i );
+        if(b->intersect(c->calculateBBox() ) )
+			return true;
+			
+	}
+	return false;
+}
+
+template <typename T, typename Tn>
+bool KdEngine::innerBroadphase(KdNTree<T, Tn > * tree,
+				const BoundingBox * b,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & innerBx)
+{
+	Tn * currentBranch = tree->branches()[branchIdx];
+	KdTreeNode * r = currentBranch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		return leafBroadphase(tree, b, r);
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	innerBx.split(axis, splitPos, lftBox, rgtBox);
+	
+	bool stat = false;
+	const int offset = r->getOffset();
+	if(offset < Tn::TreeletOffsetMask) {
+		if(b->getMin(axis) < splitPos ) {
+			stat = innerBroadphase(tree, b, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+			if(stat ) return stat;
+		}
+		
+		if(b->getMax(axis) > splitPos ) {
+			stat = innerBroadphase(tree, b, 
+							branchIdx,
+							nodeIdx + offset + 1,
+							rgtBox);
+			if(stat ) return stat;
+		}
+	}
+	else {
+		if(b->getMin(axis) < splitPos ) {
+			stat = innerBroadphase(tree, b, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+			if(stat ) return stat;
+		}
+		
+		if(b->getMax(axis) > splitPos ) {
+			stat = innerBroadphase(tree, b, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+			if(stat ) return stat;
+		}
+	}
+	return stat;
+}
+
+template<typename T, typename Tn>
+bool KdEngine::broadphase(KdNTree<T, Tn > * tree,
+				const BoundingBox & bx)
+{
+	KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() )
+		return leafBroadphase(tree, &bx, r);
+	
+	const BoundingBox b = tree->getBBox();
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	
+	bool stat = false;
+	int branchIdx = tree->root()->internalOffset(0);
+	if(bx.getMin(axis) < splitPos) 
+		stat = innerBroadphase(tree, &bx, branchIdx, 0, lftBox);
+	
+	if(stat) return stat;
+		
+	if(bx.getMax(axis) > splitPos) 
+		stat = innerBroadphase(tree, &bx, branchIdx, 1, rgtBox);
+		
+	return stat;
 }
 
 }

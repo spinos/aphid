@@ -9,6 +9,7 @@
 #pragma once
 #include "ConvexShape.h"
 #include "ConvexDomain.h"
+#include <NTreeDomain.h>
 
 namespace aphid {
 
@@ -22,6 +23,10 @@ public:
 
 	void addSphere(const Vector3F & p, const float & r);
 	void addBox(const Vector3F & lo, const Vector3F & hi);
+	
+	template<typename T, typename Tn>
+	void addTree(KdNTree<T, Tn > * tree)
+	{ m_domains.push_back(new NTreeDomain<T, Tn>(tree) ); }
 	
 	float calculateDistance(const Vector3F & p);
 	

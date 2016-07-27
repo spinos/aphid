@@ -28,6 +28,32 @@ public:
 /// reset grid w level0 cell size and fill the box at level 0
 	void fillBox(const aphid::BoundingBox & b,
 				const float & h);
+				
+/// subdivide grid to level if cell intersect distance function
+	template<typename Tf>
+	void discretize(Tf * d, const int & level, const float & shellThickness)
+	{
+		std::vector<aphid::sdb::Coord4 > divided;
+		
+		m_grid.markCellIntersectDomainAtLevel(d, shellThickness, 0, divided);
+		
+		int li = 1;
+		while(li < level
+				&& divided.size() > 0) {
+		
+			m_grid.subdivideCells(divided);
+			
+			if(li < 2)
+				divided.clear();
+			else
+				enforceBoundary(divided);
+			
+			m_grid.markCellIntersectDomainAtLevel(d, shellThickness, li, divided);
+			
+			li++;
+		}
+		
+	}
 	
 	void buildGrid();
 	void buildMesh();

@@ -6,6 +6,7 @@ include_directories(../mallard ../shared ../lapl ../catmullclark
 ../../ofl/opium ../fit ../powell ../../ofl/shared
 ../btree
 ../kdtree
+../ntree
 ../hesperis)
 IF (WIN32)
 include_directories(D:/usr/libxml2/include D:/usr/HDF5/include)
