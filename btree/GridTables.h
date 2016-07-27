@@ -204,6 +204,12 @@ static const int TwentyFourFVEdgeNeighborChildFace[24][3] = {
 {2, 0, 4},
 };
 
+#define GDT_FAC_ONEOVER8  .125f
+#define GDT_FAC_ONEOVER16  .0625f
+#define GDT_FAC_ONEOVER32  .03125f
+#define GDT_FAC_ONEOVER64  .015625f
+#define GDT_FAC_ONEOVER128  .0078125f
+
 inline bool isEighChildBlueInParentIsBlue(const int & i, const int & j)
 { return EightChildBlueInParentTyp[i][j] == 0; }
 

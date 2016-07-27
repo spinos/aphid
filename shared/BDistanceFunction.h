@@ -28,12 +28,15 @@ public:
 	void addTree(KdNTree<T, Tn > * tree)
 	{ m_domains.push_back(new NTreeDomain<T, Tn>(tree) ); }
 	
+/// limit distance test of all domains
+	void setDomainDistanceRange(const float & x);
 	float calculateDistance(const Vector3F & p);
 	
 	template<typename Ts>
-	bool intersect(const Ts * a) const
+	bool intersect(const Ts * a, const float & shellThickness) const
 	{
-		const BoundingBox ab = a->calculateBBox();
+		BoundingBox ab = a->calculateBBox();
+		ab.expand(shellThickness);
 		
 		std::vector<Domain *>::const_iterator it = m_domains.begin();
 		for(;it!=m_domains.end();++it) {

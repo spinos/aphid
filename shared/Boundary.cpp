@@ -39,4 +39,10 @@ bool Domain::narrowphaseIntersect(Domain * b)
 float Domain::distanceTo(const Vector3F & pref)
 { return 1e8f; }
 
+void Domain::setDistanceRange(const float & x)
+{ m_distanceRange = x; }
+
+const float & Domain::distanceRange() const
+{ return m_distanceRange; }
+
 }

@@ -32,6 +32,8 @@ private:
  */
 class Domain : public Boundary {
 
+	float m_distanceRange;
+	
 public:
 	Domain();
 	
@@ -47,6 +49,9 @@ public:
 	virtual bool broadphaseIntersect(const BoundingBox & b);
 	virtual bool narrowphaseIntersect(Domain * b);
 	virtual float distanceTo(const Vector3F & pref);
+	
+	void setDistanceRange(const float & x);
+	const float & distanceRange() const;
 	
 };
 

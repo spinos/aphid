@@ -25,7 +25,7 @@ const char * AdaptiveGridTest::titleStr() const
 bool AdaptiveGridTest::init()
 {
 	float gz = 128.f;
-	setColorScale(.25f / gz);
+	setColorScale(.125f / gz);
 	setNodeDrawSize(gz * .016f);
 	m_msh.fillBox(BoundingBox(-250.f, -50.f, -250.f,
 								 250.f,  50.f,  250.f), gz);

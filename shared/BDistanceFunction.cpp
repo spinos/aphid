@@ -40,6 +40,15 @@ void BDistanceFunction::addBox(const Vector3F & lo, const Vector3F & hi)
 	m_domains.push_back(new BoxDomain(s) );
 }
 
+void BDistanceFunction::setDomainDistanceRange(const float & x)
+{
+    std::vector<Domain *>::iterator it = m_domains.begin();
+	for(;it!=m_domains.end();++it) {
+		
+		(*it)->setDistanceRange(x);
+	}
+}
+
 float BDistanceFunction::calculateDistance(const Vector3F & p)
 {
 #define DISTANCE_POSITIVEINF 1e8f;	

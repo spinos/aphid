@@ -83,7 +83,7 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template intersect <aphid::cvx::Tetrahedron>(&tetshp) ) {
+			if(func-> template intersect <aphid::cvx::Tetrahedron>(&tetshp, shellThickness) ) {
 				markTetraOnFront(i);
 			}
 		}

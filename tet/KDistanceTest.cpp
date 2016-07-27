@@ -31,28 +31,32 @@ bool KDistanceTest::init()
 	m_container.readTree(m_fileName, 0);
 	
 	BoundingBox tb = m_container.tree()->getBBox();
-	const float gz = tb.getLongestDistance() * .67f;
+	const float gz = tb.getLongestDistance() * .53f;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
-	setColorScale(.25f / gz);
-	setNodeDrawSize(gz * .016f);
+	setColorScale(.125f / gz);
+	setNodeDrawSize(gz * .004f);
 	
 	m_msh.fillBox(tb, gz);
 	
 	m_distFunc.addTree(m_container.tree() );
 	
-#define MAX_BUILD_LEVEL 1
-#define MAX_BUILD_ERROR_FAC .0078125f /// 1/128
-//#define MAX_BUILD_ERROR_FAC .015625f /// 1/64
-	//m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, gz * MAX_BUILD_ERROR_FAC);
-	m_msh.discretize<BDistanceFunction>(&m_distFunc, 6, gz * MAX_BUILD_ERROR_FAC );
+/// grid is very coarse relative to input mesh, error will be large
+/// just subdivide to level ignoring error
+	m_msh.discretize<BDistanceFunction>(&m_distFunc, 4, gz * GDT_FAC_ONEOVER16 );
 	
-	m_msh.grid()->calculateBBox();
-	m_msh.grid()->build();
-	
+	m_msh.buildGrid();
+	m_msh.buildMesh();
+	m_msh.buildGraph();
 	std::cout<<"\n grid n cell "<<m_msh.grid()->size()
-			<<"\n grid bbx "<<m_msh.grid()->boundingBox();
+			<<"\n grid bbx "<<m_msh.grid()->boundingBox()
+			<<"\n n node "<<m_msh.numNodes()
+			<<"\n n edge "<<m_msh.numEdges();
+	m_distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER16 * 1.9f );
+	m_msh.calculateDistance<BDistanceFunction>(&m_distFunc, gz * GDT_FAC_ONEOVER16);
+	m_msh.triangulateFront();
+	
 	std::cout.flush();
 	return true;
 }
@@ -60,7 +64,12 @@ bool KDistanceTest::init()
 void KDistanceTest::draw(GeoDrawer * dr)
 {
 #define SHO_TREE 0
-#define SHO_CELL 1
+#define SHO_CELL 0
+#define SHO_NODE 0
+#define SHO_EDGE 0
+#define SHO_ERR 0
+#define SHO_FRONT 1
+#define SHO_FRONT_WIRE 1
 
 #if SHO_TREE
 	drawTree(dr);
@@ -68,6 +77,25 @@ void KDistanceTest::draw(GeoDrawer * dr)
 
 #if SHO_CELL
 	drawGridCell<AdaptiveBccGrid3>(m_msh.grid(), dr);
+#endif
+
+#if SHO_NODE
+	drawNodes(&m_msh, dr);
+#endif
+
+#if SHO_EDGE	
+	dr->setColor(0.f, 0.f, .5f);
+	drawEdges(&m_msh, dr);
+#endif
+
+#if SHO_FRONT	
+	dr->setColor(0.f, .4f, .5f);
+	drawFront<FieldTriangulation >(&m_msh);
+		
+#if SHO_FRONT_WIRE	
+	dr->setColor(0.1f, .1f, .1f);
+	drawFrontWire<FieldTriangulation >(&m_msh);
+#endif
 #endif
 
 }

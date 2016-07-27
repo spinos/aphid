@@ -113,6 +113,7 @@ protected:
 	template<typename Tf>
 	void calculateDistanceOnFront(Tf * func, const float & shellThickness)
 	{
+		int c = 0;
 		const int n = numNodes();
 		int i = 0;
 		for(;i<n;++i) {
@@ -120,8 +121,11 @@ protected:
 			if(d->label == sdf::StFront) {
 				d->val = func->calculateDistance(d->pos) - shellThickness;
 				d->stat = sdf::StKnown; /// accept
+				c++;
 			}
 		}
+		std::cout<<"\n n distance sample "<<c;
+		
 	}
 	
 /// edges marked to estimate error
