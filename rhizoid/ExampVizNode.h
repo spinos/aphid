@@ -52,8 +52,7 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
-	virtual void voxelize(const std::vector<aphid::Geometry *> & geoms);
-	virtual void voxelize1(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
+	virtual void voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
 	
 private:

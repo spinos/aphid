@@ -10,6 +10,7 @@
 #include "ExampVox.h"
 #include <KdEngine.h>
 #include <VoxelGrid.h>
+#include <FieldTriangulation.h>
 
 namespace aphid {
 
@@ -35,7 +36,7 @@ ExampVox::~ExampVox()
 	if(m_boxNormalBuf) delete[] m_boxNormalBuf;
 }
 
-void ExampVox::voxelize1(sdb::VectorArray<cvx::Triangle> * tri,
+void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {
 	TreeProperty::BuildProfile bf;
@@ -44,53 +45,36 @@ void ExampVox::voxelize1(sdb::VectorArray<cvx::Triangle> * tri,
 	KdNTree<cvx::Triangle, KdNode4 > gtr;
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, tri, bbox, &bf);
 	
-	VoxelGrid<cvx::Triangle, KdNode4>::BuildProfile vf;
-	vf._maxLevel = 3;
-	vf._extractDOP = true;
-	vf._shellOnly = true;
+	BoundingBox tb = gtr.getBBox();
+	const float gz = tb.getLongestDistance() * .53f;
+	const Vector3F cent = tb.center();
+	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
+	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
 	
-	VoxelGrid<cvx::Triangle, KdNode4> ggd;
-	ggd.create(&gtr, bbox, &vf);
+	ttg::FieldTriangulation msh;
+	msh.fillBox(tb, gz);
 	
-	buildDOPDrawBuf(ggd.dops() );
-}
-
-void ExampVox::voxelize(const std::vector<Geometry *> & geoms)
-{
-	m_geomBox.reset();
-	unsigned n = 0;
-	std::vector<Geometry *>::const_iterator it = geoms.begin();
-	for(;it!=geoms.end();++it) {
-		n += (*it)->numComponents();
-		m_geomBox.expandBy((*it)->calculateBBox() );
-	}
+	BDistanceFunction distFunc;
+	distFunc.addTree(&gtr);
 	
-	if(n < 1) return;
+	msh.discretize<BDistanceFunction>(&distFunc, 4, gz * GDT_FAC_ONEOVER16 );
 	
-	m_geomBox.expand(0.01f);
-	sdb::WorldGrid<GroupCell, unsigned > grid;
-	grid.setGridSize(m_geomBox.getLongestDistance() / 15.f);
+	msh.buildGrid();
+	msh.buildMesh();
+	msh.buildGraph();
+	std::cout<<"\n grid n cell "<<msh.grid()->size()
+			<<"\n grid bbx "<<msh.grid()->boundingBox()
+			<<"\n n node "<<msh.numNodes()
+			<<"\n n edge "<<msh.numEdges();
+	distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER16 * 1.9f );
+	msh.calculateDistance<BDistanceFunction>(&distFunc, gz * GDT_FAC_ONEOVER16);
+	msh.triangulateFront();
 	
-	it = geoms.begin();
-	for(;it!=geoms.end();++it) {
-		fillGrid(&grid, *it);
-	}
+	std::cout.flush();
 	
-	setNumBoxes(grid.size() );
-	
-	unsigned i=0;
-	grid.begin();
-	while(!grid.end()) {
-		Vector3F center = grid.value()->m_box.center();
-		m_boxCenterSizeF4[i*4] = center.x;
-		m_boxCenterSizeF4[i*4+1] = center.y;
-		m_boxCenterSizeF4[i*4+2] = center.z;
-		m_boxCenterSizeF4[i*4+3] = grid.value()->m_box.getLongestDistance() * .67f;
-	    i++;
-		grid.next();   
-	}
-	
-	buildBoxDrawBuf();
+	buildTriangleDrawBuf(msh.numFrontTriangles(), msh.triangleIndices(),
+						msh.numVertices(), msh.triangleVertexP(), msh.triangleVertexN() );
+						
 }
 
 void ExampVox::fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
@@ -267,6 +251,22 @@ void ExampVox::setDOPDrawBufLen(const int & x)
 	m_dopBufLength = x;
 	m_dopNormalBuf.reset(new Vector3F[x]);
 	m_dopPositionBuf.reset(new Vector3F[x]);
+}
+
+void ExampVox::buildTriangleDrawBuf(const int & nt, const int * tri,
+				const int & nv, const Vector3F * vertP, const Vector3F * vertN )
+{
+	m_dopBufLength = nt * 3;
+	m_dopNormalBuf.reset(new Vector3F[m_dopBufLength]);
+	m_dopPositionBuf.reset(new Vector3F[m_dopBufLength]);
+	
+	int i=0, j;
+	for(;i<m_dopBufLength;++i) {
+		j = tri[i]; 
+		m_dopNormalBuf.get()[i] = vertN[j];
+		m_dopPositionBuf.get()[i] = vertP[j];
+	}
+	
 }
 
 }

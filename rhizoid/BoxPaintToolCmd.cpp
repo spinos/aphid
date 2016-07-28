@@ -506,7 +506,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 	aphid::AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
 		
 	ExampViz* pViz = (ExampViz*)fviz.userNode();
-	pViz->voxelize1(&tris, bbox);
+	pViz->voxelize2(&tris, bbox);
 	
 	return stat;
 }

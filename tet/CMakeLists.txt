@@ -24,7 +24,6 @@ set (HEADER_FILES ../shared/Base3DView.h
 ../kdtree/KdNTree.h
 ../kdtree/KdNNode.h
 ../kdtree/KdSah.h
-../kdtree/TreeProperty.h
 ../kdtree/HNTree.h
 ../kdtree/VoxelGrid.h
 window.h
@@ -81,19 +80,8 @@ KDistanceTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
-../shared/CartesianGrid.cpp
 ../shared/QDoubleEditSlider.cpp
-../shared/KdTreeNode.cpp
-../shared/MinMaxBins.cpp 
-../shared/SplitEvent.cpp
-../shared/BaseBinSplit.cpp 
-../shared/CartesianGrid.cpp
 ../shared/HElemAsset.cpp
-../shared/PrincipalComponents.cpp
-../shared/DrawBox.cpp
-../kdtree/TreeProperty.cpp
-../kdtree/PrimBoundary.cpp
-../btree/GridClustering.cpp
 ../btree/HWorldGrid.cpp
 ../ntree/NTreeIO.cpp
 ../kdtree/HNTree.cpp
@@ -219,6 +207,7 @@ set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidH5.a
 /users/jianzhang/aphid/lib/libaphidSdb.a
 /users/jianzhang/aphid/lib/libaphidGraph.a
+/users/jianzhang/aphid/lib/libaphidKd.a
 /users/jianzhang/aphid/lib/libaphidUI.a)
 endif ()
 target_link_libraries (foo ${Aphid_Library})

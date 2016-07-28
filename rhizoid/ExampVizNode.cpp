@@ -113,20 +113,19 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	view.beginGL();
 	drawBoundingBox(&bbox);
 	
-	if ( style == M3dView::kFlatShaded || 
-		    style == M3dView::kGouraudShaded ) {	
+	//if ( style == M3dView::kFlatShaded || 
+	//	    style == M3dView::kGouraudShaded ) {	
 			
 		glDepthFunc(GL_LEQUAL);
 		glPushAttrib(GL_LIGHTING_BIT);
 		glEnable(GL_LIGHTING);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffCol );
 			
-		//drawGrid();
 		drawDop();
 		
 		glDisable(GL_LIGHTING);
 		glPopAttrib();
-	} 
+	//} 
 	
 	aphid::Matrix44F mat;
 	mat.setFrontOrientation(aphid::Vector3F::YAxis);
@@ -271,10 +270,10 @@ MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
-void ExampViz::voxelize1(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
+void ExampViz::voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox)
 {
-	aphid::ExampVox::voxelize1(tri, bbox);
+	aphid::ExampVox::voxelize2(tri, bbox);
 	
 	MFnNumericData bbFn;
 	MObject bbData = bbFn.create(MFnNumericData::k3Float);
@@ -310,45 +309,7 @@ void ExampViz::voxelize1(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 	MPlug dopnPlug(thisMObject(), adopNBuf);
 	dopnPlug.setValue(onor);
 	
-	aphid::AHelper::Info<int>("dop draw buf len ", dopBufLength() );
-}
-
-void ExampViz::voxelize(const std::vector<aphid::Geometry *> & geoms)
-{
-	ExampVox::voxelize(geoms);
-	const aphid::BoundingBox bb = geomBox();
-	
-	MFnNumericData bbFn;
-	MObject bbData = bbFn.create(MFnNumericData::k3Float);
-	
-	bbFn.setData(bb.data()[0], bb.data()[1], bb.data()[2]);
-	MPlug bbmnPlug(thisMObject(), abboxminv);
-	bbmnPlug.setValue(bbData);
-	
-	bbFn.setData(bb.data()[3], bb.data()[4], bb.data()[5]);
-	MPlug bbmxPlug(thisMObject(), abboxmaxv);
-	bbmxPlug.setValue(bbData);
-	
-	const unsigned n = numBoxes();
-	MPlug ncellsPlug(thisMObject(), ancells);
-	ncellsPlug.setInt((int)n);
-	if(n < 1) return;
-	
-	float * src = boxCenterSizeF4();
-	MPointArray pnts;
-	pnts.setLength(n);
-	unsigned i=0;
-	for(;i<n;++i) {
-		pnts[i] = MPoint(src[i*4], src[i*4+1], src[i*4+2], src[i*4+3]);
-	}
-	
-	MFnPointArrayData pntFn;
-	MObject opnt = pntFn.create(pnts);
-	MPlug cellPlug(thisMObject(), acellBuf);
-	cellPlug.setValue(opnt);
-	
-	aphid::AHelper::Info<aphid::BoundingBox>(" ExampViz bounding", bb );	
-	aphid::AHelper::Info<unsigned>(" ExampViz generate n cells" , n);
+	aphid::AHelper::Info<int>("reduced draw n triangle ", dopBufLength() / 3 );
 }
 
 void ExampViz::updateGeomBox(MObject & node)

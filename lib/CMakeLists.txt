@@ -211,13 +211,25 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
 ../shared/DrawDistanceField.cpp
-)
+../shared/DrawBox.cpp)
 
 ADD_LIBRARY (aphidSdb STATIC
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp
 ../btree/MortonHash.cpp
+)
+
+ADD_LIBRARY (aphidKd STATIC
+../shared/KdTreeNode.cpp
+../shared/CartesianGrid.cpp
+../shared/PrincipalComponents.cpp
+../shared/MinMaxBins.cpp
+../shared/SplitEvent.cpp
+../shared/BaseBinSplit.cpp 
+../btree/GridClustering.cpp
+../kdtree/TreeProperty.cpp
+../kdtree/PrimBoundary.cpp
 )
 
 ADD_LIBRARY (aphidGraph STATIC
@@ -328,9 +340,7 @@ add_library(aphid STATIC
 ##../shared/BaseSampler.cpp
 ##../shared/AField.cpp
 ##../shared/HField.cpp
-##../shared/CartesianGrid.cpp
 ##../shared/TetrahedronMeshBuilder.cpp
-##../shared/DrawBox.cpp
 ##../shared/DrawCircle.cpp
 ##../shared/UniformGrid.cpp
 ##../hesperis/HAdaptiveField.cpp

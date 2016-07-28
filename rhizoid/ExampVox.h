@@ -43,8 +43,7 @@ public:
 	ExampVox();
 	virtual ~ExampVox();
 	
-	virtual void voxelize(const std::vector<Geometry *> & geoms);
-	virtual void voxelize1(sdb::VectorArray<cvx::Triangle> * tri,
+	virtual void voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox);
 	
 /// set b4 geom box
@@ -84,7 +83,9 @@ protected:
 	Vector3F * dopNormalR();
 	Vector3F * dopPositionR();
 	void setDOPDrawBufLen(const int & x);
-	
+	void buildTriangleDrawBuf(const int & nt, const int * tri,
+				const int & nv, const Vector3F * vertP, const Vector3F * vertN );
+						
 private:
 	void fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
 				Geometry * geo);

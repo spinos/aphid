@@ -282,7 +282,7 @@ void FieldTriangulation::calculateVertexNormal(aphid::sdb::Array<int, int> & ver
 		
 		getTriangleShape(atri, i);
 		triN = atri.calculateNormal();
-		triN *= atri.calculateArea();
+		//triN /= atri.calculateArea();
 		
 		j = *vertMap.find(k.x);
 		m_vertexN[j] += triN;
