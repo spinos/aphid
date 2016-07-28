@@ -53,7 +53,7 @@ bool NTreeDomain<T, Tn >::broadphaseIntersect(const BoundingBox & bx)
 template<typename T, typename Tn>
 float NTreeDomain<T, Tn >::distanceTo(const Vector3F & pref)
 {
-    m_closestPointCtx.reset(pref, distanceRange() );
+    m_closestPointCtx.reset(pref, distanceRange(), true );
 	m_engine.closestToPoint(m_tree, &m_closestPointCtx ); 
 	return m_closestPointCtx._distance;
 }

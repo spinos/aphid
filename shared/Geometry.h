@@ -31,11 +31,12 @@ public:
 		unsigned _igeometry;
 		bool _hasResult;
 		bool _isInside;
+		bool _isFast;
 		
 		ClosestToPointTestResult();
 		
 		void reset();
-		void reset(const Vector3F & p, float initialDistance);
+		void reset(const Vector3F & p, float initialDistance, bool fastOp = false);
 		bool closeTo(const BoundingBox & box);
 		bool closeEnough();
 	};

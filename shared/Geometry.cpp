@@ -16,12 +16,14 @@ Geometry::ClosestToPointTestResult::ClosestToPointTestResult() : _hasResult(fals
 void Geometry::ClosestToPointTestResult::reset()
 { _hasResult = false; }
 
-void Geometry::ClosestToPointTestResult::reset(const Vector3F & p, float initialDistance) 
+void Geometry::ClosestToPointTestResult::reset(const Vector3F & p, float initialDistance,
+												bool fastOp) 
 {
 	_distance = initialDistance;
 	_toPoint = p;
 	_hasResult = false;
 	_isInside = false;
+	_isFast = fastOp;
 }
 
 bool Geometry::ClosestToPointTestResult::closeTo(const BoundingBox & box)

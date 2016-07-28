@@ -264,13 +264,14 @@ void Triangle::closestToPoint(T * result) const
 	bar.compute();
 	if(!bar.insideTriangle()) bar.computeClosest();
 	
-	Vector3F clampledP = bar.getClosest();
-	d = (clampledP - result->_toPoint).length();
+	const Vector3F clampledP = bar.getClosest();
+	d = clampledP.distanceTo(result->_toPoint );
 	if(d>=result->_distance) return;
 	
 	result->_distance = d;
 	result->_hasResult = true;
 	result->_hitPoint = clampledP;
+	if(result->_isFast ) return;
 	result->_contributes[0] = bar.getV(0);
 	result->_contributes[1] = bar.getV(1);
 	result->_contributes[2] = bar.getV(2);

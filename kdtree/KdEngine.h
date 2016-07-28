@@ -620,6 +620,9 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 				int nodeIdx,
 				const BoundingBox & b)
 {
+	if(!ctx->closeTo(b) )
+		return;
+		
 	Tn * currentBranch = tree->branches()[branchIdx];
 	KdTreeNode * r = currentBranch->node(nodeIdx);
 	if(r->isLeaf() ) {

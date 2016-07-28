@@ -35,8 +35,8 @@ bool KDistanceTest::init()
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
-	setColorScale(.125f / gz);
-	setNodeDrawSize(gz * .004f);
+	setColorScale(.5f / gz);
+	setNodeDrawSize(gz * GDT_FAC_ONEOVER32 );
 	
 	m_msh.fillBox(tb, gz);
 	
@@ -91,11 +91,11 @@ void KDistanceTest::draw(GeoDrawer * dr)
 #if SHO_FRONT	
 	dr->setColor(0.f, .4f, .5f);
 	drawFront<FieldTriangulation >(&m_msh);
+#endif
 		
 #if SHO_FRONT_WIRE	
 	dr->setColor(0.1f, .1f, .1f);
 	drawFrontWire<FieldTriangulation >(&m_msh);
-#endif
 #endif
 
 }
