@@ -38,7 +38,7 @@ bool AdaptiveGridTest::init()
 	m_distFunc.addSphere(Vector3F(-100.f, -2420.f, -100.f), 2400.f );
 	
 #define MAX_BUILD_LEVEL 5
-#define MAX_BUILD_ERROR .3f
+#define MAX_BUILD_ERROR .27f
 	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	
 	m_msh.triangulateFront();
@@ -59,7 +59,7 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 #define SHO_GRAPH 1
 #define SHO_CUT 0
 #define SHO_FRONT 1
-#define SHO_FRONT_WIRE 1
+#define SHO_FRONT_WIRE 0
 
 #if SHO_CELL
 	drawGridCell<AdaptiveBccGrid3>(m_msh.grid(), dr);
@@ -78,10 +78,12 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 #endif
 
 #if SHO_FRONT	
+	dr->m_surfaceProfile.apply();
 	dr->setColor(0.f, .4f, .5f);
 	drawFront<FieldTriangulation >(&m_msh);
 		
 #if SHO_FRONT_WIRE	
+	dr->m_wireProfile.apply();
 	dr->setColor(0.1f, .1f, .1f);
 	drawFrontWire<FieldTriangulation >(&m_msh);
 #endif

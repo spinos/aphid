@@ -229,6 +229,7 @@ public:
 	const int & ind0() const;
 	const int & ind1() const;
 	Vector3F calculateNormal() const;
+	float calculateArea() const;
 	void translate(const Vector3F & v);
 
 	BoundingBox calculateBBox() const;

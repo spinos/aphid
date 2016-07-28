@@ -17,14 +17,21 @@ FieldTriangulation::FieldTriangulation()
 { 
 	m_maxCutPosBuf = 0; 
 	m_numFrontTris = 0;
+	m_numFrontTriangleVertices = 0;
 	m_cutPosBuf = NULL;
 	m_triInds = NULL;
+	m_vertexX = NULL;
+	m_vertexN = NULL;
 }
 
 FieldTriangulation::~FieldTriangulation()
 {
 	if(m_maxCutPosBuf > 0) delete[] m_cutPosBuf;
-	if(m_numFrontTris > 0) delete[] m_triInds; 
+	if(m_numFrontTris > 0) delete[] m_triInds;
+	if(m_numFrontTriangleVertices > 0) {
+		delete[] m_vertexX;
+		delete[] m_vertexN; 
+	}
 }
 
 const int & FieldTriangulation::numFrontTriangles() const
@@ -180,25 +187,134 @@ void FieldTriangulation::triangulateFront()
 	}
 	
 	m_numAddedVert = ncut;
-	if(m_numFrontTris > 0) delete[] m_triInds; 
-	m_numFrontTris = faceMap.size();
-	m_triInds = new sdb::Coord3[m_numFrontTris];
+	std::cout<<" n cut "<<m_numAddedVert;
 	
-	i=0;
-	faceMap.begin();
-	while(!faceMap.end() ) {
+	dumpTriangleInd(faceMap);
 	
-		m_triInds[i++] = faceMap.value()->key;
-		//std::cout<<" "<<faceMap.key();
-		
-		faceMap.next();
-	}
+	sdb::Array<int, int> vertMap;
+	countTriangleVertices(vertMap);
+	
+	dumpVertex(vertMap);
+	calculateVertexNormal(vertMap);
+	dumpIndices(vertMap);
 	
 	edgeMap.clear();
 	faceMap.clear();
+	vertMap.clear();
 	
 	std::cout<<"\n n front triangle "<<m_numFrontTris
-			<<"\n n cut "<<m_numAddedVert;
+			<<"\n n front vertex "<<m_numFrontTriangleVertices;
+}
+
+void FieldTriangulation::dumpTriangleInd(sdb::Array<sdb::Coord3, IFace > & faces)
+{
+	if(m_numFrontTris > 0) delete[] m_triInds; 
+	m_numFrontTris = faces.size();
+	m_triInds = new sdb::Coord3[m_numFrontTris];
+	
+	int i=0;
+	faces.begin();
+	while(!faces.end() ) {
+	
+		m_triInds[i++] = faces.value()->key;
+
+		faces.next();
+	}
+}
+
+void FieldTriangulation::countTriangleVertices(sdb::Array<int, int> & vertMap)
+{
+	int i;
+	for(i=0; i<m_numFrontTris; ++i) {
+		const sdb::Coord3 & k = m_triInds[i];
+		if(!vertMap.find(k.x))
+			vertMap.insert(k.x, new int() );
+		if(!vertMap.find(k.y))
+			vertMap.insert(k.y, new int() );
+		if(!vertMap.find(k.z))
+			vertMap.insert(k.z, new int() );
+	}
+	
+	i = 0;
+	vertMap.begin();
+	while(!vertMap.end() ) {
+		*vertMap.value() = i++;
+		vertMap.next();
+	}
+	
+	if(m_numFrontTriangleVertices > 0) {
+		delete[] m_vertexX;
+		delete[] m_vertexN; 
+	}
+	m_numFrontTriangleVertices = i;
+	m_vertexX = new Vector3F[i];
+	m_vertexN = new Vector3F[i];
+}
+
+void FieldTriangulation::dumpVertex(aphid::sdb::Array<int, int> & vertMap)
+{
+	int i, j;
+	for(i=0; i<m_numFrontTris; ++i) {
+		const sdb::Coord3 & k = m_triInds[i];
+		
+		j = *vertMap.find(k.x);
+		m_vertexX[j] = triangleP(i, 0);
+		
+		j = *vertMap.find(k.y);
+		m_vertexX[j] = triangleP(i, 1);
+		
+		j = *vertMap.find(k.z);
+		m_vertexX[j] = triangleP(i, 2);
+	}
+	
+}
+
+void FieldTriangulation::calculateVertexNormal(aphid::sdb::Array<int, int> & vertMap)
+{
+	cvx::Triangle atri;
+	Vector3F triN;
+	int i, j;
+	for(i=0; i<m_numFrontTriangleVertices; ++i)
+		m_vertexN[i].setZero();
+		
+	for(i=0; i<m_numFrontTris; ++i) {
+		const sdb::Coord3 & k = m_triInds[i];
+		
+		getTriangleShape(atri, i);
+		triN = atri.calculateNormal();
+		triN *= atri.calculateArea();
+		
+		j = *vertMap.find(k.x);
+		m_vertexN[j] += triN;
+		
+		j = *vertMap.find(k.y);
+		m_vertexN[j] += triN;
+		
+		j = *vertMap.find(k.z);
+		m_vertexN[j] += triN;
+
+	}
+	
+	for(i=0; i<m_numFrontTriangleVertices; ++i)
+		m_vertexN[i].normalize();
+}
+
+void FieldTriangulation::dumpIndices(aphid::sdb::Array<int, int> & vertMap)
+{
+	int i, j;
+	for(i=0; i<m_numFrontTris; ++i) {
+		sdb::Coord3 & k = m_triInds[i];
+		
+		j = *vertMap.find(k.x);
+		k.x = j;
+		
+		j = *vertMap.find(k.y);
+		k.y = j;
+		
+		j = *vertMap.find(k.z);
+		k.z = j;
+		
+	}
 }
 
 const int & FieldTriangulation::numAddedVertices() const
@@ -206,5 +322,17 @@ const int & FieldTriangulation::numAddedVertices() const
 
 const Vector3F & FieldTriangulation::addedVertex(const int & i) const
 { return m_cutPosBuf[i]; }
+
+const aphid::Vector3F * FieldTriangulation::triangleVertexP() const
+{ return m_vertexX; }
+
+const aphid::Vector3F * FieldTriangulation::triangleVertexN() const
+{ return m_vertexN; }
+
+const int & FieldTriangulation::numTriangleVertices() const
+{ return m_numFrontTriangleVertices; }
+
+const int * FieldTriangulation::triangleIndices() const
+{ return (const int *)m_triInds; }
 
 }

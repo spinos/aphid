@@ -397,6 +397,22 @@ Vector3F Triangle::calculateNormal() const
 	return nor;
 }
 
+float Triangle::calculateArea() const
+{
+	Vector3F d[3]; float l[3];
+
+	d[0] = m_p1 - m_p0;
+	l[0] = d[0].length();
+	
+	d[1] = m_p2 - m_p1;
+	l[1] = d[1].length();
+	
+	d[2] = m_p0 - m_p2;
+	l[2] = d[2].length();
+	
+	return (0.5*sqrt(l[0]*l[0]*l[2]*l[2] - (d[0].dot(d[2]))*(d[0].dot(d[2]))));
+}
+
 void Triangle::translate(const Vector3F & v)
 {
 	m_p0 += v;

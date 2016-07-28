@@ -69,7 +69,7 @@ void KDistanceTest::draw(GeoDrawer * dr)
 #define SHO_EDGE 0
 #define SHO_ERR 0
 #define SHO_FRONT 1
-#define SHO_FRONT_WIRE 1
+#define SHO_FRONT_WIRE 0
 
 #if SHO_TREE
 	drawTree(dr);
@@ -89,11 +89,13 @@ void KDistanceTest::draw(GeoDrawer * dr)
 #endif
 
 #if SHO_FRONT	
+	dr->m_surfaceProfile.apply();
 	dr->setColor(0.f, .4f, .5f);
 	drawFront<FieldTriangulation >(&m_msh);
 #endif
 		
 #if SHO_FRONT_WIRE	
+	dr->m_wireProfile.apply();
 	dr->setColor(0.1f, .1f, .1f);
 	drawFrontWire<FieldTriangulation >(&m_msh);
 #endif

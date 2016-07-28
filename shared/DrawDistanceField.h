@@ -92,16 +92,24 @@ protected:
 	void drawFront(const T * fld)
 	{
 		const int & n = fld->numFrontTriangles();
-		Vector3F p1, p2, p3;
+		const Vector3F * pos = fld->triangleVertexP();
+		const Vector3F * nrm = fld->triangleVertexN();
+		int i, j;
 		glBegin(GL_TRIANGLES);
-		for(int i=0; i<n; ++i) {
-			p1 = fld->triangleP(i, 0);
-			p2 = fld->triangleP(i, 1);
-			p3 = fld->triangleP(i, 2);
+		for(i=0; i<n; ++i) {
+
+			j = fld->triangleIndices()[i*3];
+			glNormal3fv((const float *)&nrm[j]);
+			glVertex3fv((const float *)&pos[j]);
 			
-			glVertex3fv((const float *)&p1);
-			glVertex3fv((const float *)&p2);
-			glVertex3fv((const float *)&p3);
+			j = fld->triangleIndices()[i*3+1];
+			glNormal3fv((const float *)&nrm[j]);
+			glVertex3fv((const float *)&pos[j]);
+			
+			j = fld->triangleIndices()[i*3+2];
+			glNormal3fv((const float *)&nrm[j]);
+			glVertex3fv((const float *)&pos[j]);
+
 		}
 		glEnd();		
 	
@@ -111,21 +119,25 @@ protected:
 	void drawFrontWire(const T * fld)
 	{
 		const int & n = fld->numFrontTriangles();
-		Vector3F p1, p2, p3;
+		const Vector3F * pos = fld->triangleVertexP();
+		const Vector3F * nrm = fld->triangleVertexN();
+		int i, j;
 		glBegin(GL_LINES);
-		for(int i=0; i<n; ++i) {
-			p1 = fld->triangleP(i, 0);
-			p2 = fld->triangleP(i, 1);
-			p3 = fld->triangleP(i, 2);
+		for(i=0; i<n; ++i) {
+
+			j = fld->triangleIndices()[i*3];
+			glVertex3fv((const float *)&pos[j]);
 			
-			glVertex3fv((const float *)&p1);
-			glVertex3fv((const float *)&p2);
+			j = fld->triangleIndices()[i*3+1];
+			glVertex3fv((const float *)&pos[j]);
+			glVertex3fv((const float *)&pos[j]);
 			
-			glVertex3fv((const float *)&p2);
-			glVertex3fv((const float *)&p3);
+			j = fld->triangleIndices()[i*3+2];
+			glVertex3fv((const float *)&pos[j]);
+			glVertex3fv((const float *)&pos[j]);
 			
-			glVertex3fv((const float *)&p3);
-			glVertex3fv((const float *)&p1);
+			j = fld->triangleIndices()[i*3];
+			glVertex3fv((const float *)&pos[j]);
 		}
 		glEnd();		
 	
