@@ -13,7 +13,9 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <ATriangleMesh.h>
-#include <PrincipalComponents.h> 
+#include <PrincipalComponents.h>
+#include <KdEngine.h>
+#include <FieldTriangulation.h>
 
 #define kBeginPickFlag "-bpk" 
 #define kBeginPickFlagLong "-beginPick"
@@ -37,6 +39,8 @@
 #define kSelectVoxFlagLong "-selectVox"
 #define kPCAFlag "-pca" 
 #define kPCAFlagLong "-principalComponent"
+#define kDFTFlag "-dft" 
+#define kDFTFlagLong "-distanceFieldTriangulate"
 
 using namespace aphid;
 
@@ -68,6 +72,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kConnectVoxFlag, kConnectVoxFlagLong);
 	syntax.addFlag(kSelectVoxFlag, kSelectVoxFlagLong, MSyntax::kLong);
 	syntax.addFlag(kPCAFlag, kPCAFlagLong);
+	syntax.addFlag(kDFTFlag, kDFTFlagLong, MSyntax::kLong);
 	return syntax;
 }
 
@@ -90,6 +95,8 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	if(m_operation == opConnectVoxel) return connectVoxelSelected();
 	
     if(m_operation == opPrincipalComponent) return performPCA();
+	
+	if(m_operation == opDistanceFieldTriangulate) return performDFT();
 		
 	aphid::ASearchHelper finder;
 
@@ -208,6 +215,15 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
     
     if (argData.isFlagSet(kPCAFlag)) {
 		m_operation = opPrincipalComponent;
+	}
+	
+	if (argData.isFlagSet(kDFTFlag)) {
+		status = argData.getFlagArgument(kDFTFlag, 0, m_dftLevel);
+		if (!status) {
+			status.perror("-dft flag parsing failed");
+			return status;
+		}
+		m_operation = opDistanceFieldTriangulate;
 	}
 	
 	return MS::kSuccess;
@@ -674,6 +690,111 @@ MStatus proxyPaintTool::performPCA()
     rd[14] = obox.center().z;
     rd[15] = 1.f;
     setResult(rd);
+	return stat;
+}
+
+MStatus proxyPaintTool::performDFT()
+{
+	MStatus stat;
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) to reduce");
+		return MS::kFailure;
+	}
+	
+	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		return MS::kFailure;
+	}
+	
+	aphid::sdb::VectorArray<aphid::cvx::Triangle> tris;
+	aphid::BoundingBox bbox;
+	
+	for(;!meshIter.isDone(); meshIter.next() ) {
+		
+		MDagPath meshPath;
+		meshIter.getDagPath(meshPath);
+		getMeshTris(tris, bbox, meshPath);
+	}
+	
+	if(tris.size() < 1) {
+		MGlobal::displayWarning("proxyPaintTool no triangle added");
+		return MS::kFailure;
+	}
+	
+	bbox.round();
+	AHelper::Info<unsigned>("proxyPaintTool reducing n triangle", tris.size() );
+
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 64;
+	KdEngine engine;
+	KdNTree<cvx::Triangle, KdNode4 > gtr;
+	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, &tris, bbox, &bf);
+	
+	BoundingBox tb = gtr.getBBox();
+	const float gz = tb.getLongestDistance() * .53f;
+	const Vector3F cent = tb.center();
+	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
+	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
+	
+	ttg::FieldTriangulation msh;
+	msh.fillBox(tb, gz);
+	
+	BDistanceFunction distFunc;
+	distFunc.addTree(&gtr);
+	
+	int bLevel = m_dftLevel;
+	if(bLevel < 4) {
+		AHelper::Info<int>("proxyPaintTool reducing level < ", 4 );
+		bLevel = 4;
+	}
+	else if(bLevel > 9) {
+		AHelper::Info<int>("proxyPaintTool reducing level > ", 9 );
+		bLevel = 9;
+	}
+	
+	const float facThickness = gz * sdb::gdt::FracOneOverTwoPowers[bLevel];
+	
+	msh.discretize<BDistanceFunction>(&distFunc, bLevel, facThickness );
+	
+	msh.buildGrid();
+	msh.buildMesh();
+	msh.buildGraph();
+	std::cout<<"\n grid n cell "<<msh.grid()->size()
+			<<"\n grid bbx "<<msh.grid()->boundingBox()
+			<<"\n n node "<<msh.numNodes()
+			<<"\n n edge "<<msh.numEdges();
+	distFunc.setDomainDistanceRange(facThickness * 1.9f );
+	msh.calculateDistance<BDistanceFunction>(&distFunc, facThickness );
+	msh.triangulateFront();
+	AHelper::Info<int>("proxyPaintTool reduce selected to n triangle ", msh.numFrontTriangles() );
+	AHelper::Info<int>(" n vertex ", msh.numTriangleVertices() );
+
+	const int numVertex = msh.numTriangleVertices();
+	const int numPolygon = msh.numFrontTriangles();
+	MPointArray vertexArray;
+	int i;
+	for(i=0; i<numVertex;++i) {
+		const Vector3F & p = msh.triangleVertexP()[i];
+		vertexArray.append(MPoint(p.x, p.y, p.z) );
+	}
+	
+	MIntArray polygonCounts;
+	MIntArray polygonConnects;
+	
+	for(i=0; i<numPolygon;++i) {
+		polygonCounts.append(3);
+		polygonConnects.append(msh.triangleIndices()[i*3]);
+		polygonConnects.append(msh.triangleIndices()[i*3+1]);
+		polygonConnects.append(msh.triangleIndices()[i*3+2]);
+	}
+	
+	MFnMesh meshFn;
+	meshFn.create( numVertex, numPolygon, vertexArray, polygonCounts, polygonConnects, MObject::kNullObj, &stat );
+	
 	return stat;
 }
 //:~

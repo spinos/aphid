@@ -28,7 +28,7 @@ void ADistanceField::nodeColor(Vector3F & dst, const DistanceNode & n,
 	
 	if(n.val > 0.f) {
 		float r = MixClamp01F<float>(1.f, 0.f, n.val * scale);
-		dst.set(r, 0.f, 0.f );
+		dst.set(r, 1.f - r, 0.f );
 	}
 	else {
 		float b = MixClamp01F<float>(1.f, 0.f, -n.val * scale);

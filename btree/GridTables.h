@@ -204,6 +204,20 @@ static const int TwentyFourFVEdgeNeighborChildFace[24][3] = {
 {2, 0, 4},
 };
 
+static const float FracOneOverTwoPowers[11] = {
+1.f,
+.5f,
+.25f,
+.125f,
+.0625f,
+.03125f,
+.015625f,
+.0078125f,
+.00390625f,
+.001953125f,
+.0009765625f
+};
+
 #define GDT_FAC_ONEOVER8  .125f
 #define GDT_FAC_ONEOVER16  .0625f
 #define GDT_FAC_ONEOVER32  .03125f

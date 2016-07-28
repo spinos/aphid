@@ -276,10 +276,7 @@ void BccCell3::connectTetrahedrons(std::vector<ITetrahedron *> & dest,
 /// per face
 	for(;i<6;++i) {
 		BccNode3 * faN = faceNode(i, cellCoord, grid);
-		if((i&1) == 0) {
-			if(faN->key == 15)
-				continue;
-		}
+		
 /// per edge
 		for(j=0;j<4;++j) {
 			BccNode3 * cN = blueNode(sdb::gdt::TwentyFourFVBlueBlueEdge[i*4+j][0] - 6,
@@ -293,8 +290,13 @@ void BccCell3::connectTetrahedrons(std::vector<ITetrahedron *> & dest,
 				addFourTetra(dest, i, j, k, cellCoord, grid, redN, faN, cN, dN);
 			else if(isEdgeDivided(k, cellCoord, grid) )
 				addTwoTetra(dest, k, cellCoord, grid, redN, faN, cN, dN);
-			else
+			else {
+				if((i&1) == 0) {
+					if(faN->key == 15)
+						continue;
+				}
 				addOneTetra(dest, redN, faN, cN, dN);
+			}
 		}
 	}
 }

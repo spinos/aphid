@@ -35,7 +35,7 @@ bool KDistanceTest::init()
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
-	setColorScale(.5f / gz);
+	setColorScale(.08f / gz);
 	setNodeDrawSize(gz * GDT_FAC_ONEOVER32 );
 	
 	m_msh.fillBox(tb, gz);

@@ -54,6 +54,7 @@ private:
 					aphid::BoundingBox & bbox,
 					const MDagPath & meshPath);
 	MStatus performPCA();
+	MStatus performDFT();
     
 private:
 	enum Operation {
@@ -67,7 +68,8 @@ private:
 		opLoadCache = 7,
 		opVoxelize = 8,
 		opConnectVoxel = 9,
-        opPrincipalComponent = 10
+        opPrincipalComponent = 10,
+		opDistanceFieldTriangulate = 11
 	};
 	
 	Operation m_operation;
@@ -75,6 +77,8 @@ private:
 	unsigned opt, nseg;
 	float lseg;
 	MString fBlockerName, fVizName, m_cacheName;
+	int m_dftLevel;
+	
 };
 #endif        //  #ifndef BOXPAINTTOOLCMD_H
 
