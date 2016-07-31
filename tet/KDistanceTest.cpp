@@ -25,6 +25,9 @@ KDistanceTest::~KDistanceTest()
 const char * KDistanceTest::titleStr() const
 { return "Kd-Tree + Adaptive Grid Test"; }
 
+bool KDistanceTest::viewPerspective() const
+{ return true; }
+
 bool KDistanceTest::init()
 {
 /// no grid

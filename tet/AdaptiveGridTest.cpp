@@ -21,6 +21,9 @@ AdaptiveGridTest::~AdaptiveGridTest()
 	
 const char * AdaptiveGridTest::titleStr() const
 { return "Adaptive Grid Test"; }
+ 
+bool AdaptiveGridTest::viewPerspective() const
+{ return true; }
 
 bool AdaptiveGridTest::init()
 {
@@ -35,7 +38,7 @@ bool AdaptiveGridTest::init()
 	//m_distFunc.addBox(Vector3F(-40.f, -12.f, -10.f),
 	//					Vector3F(40.f, -7.87f, 40.f) );
 	m_distFunc.addSphere(Vector3F(38.f, -10.f, -22.f), 21.1f );
-	m_distFunc.addSphere(Vector3F(-100.f, -2420.f, -100.f), 2400.f );
+	m_distFunc.addSphere(Vector3F(-100.f, -3420.f, -100.f), 3400.f );
 	
 #define MAX_BUILD_LEVEL 5
 #define MAX_BUILD_ERROR .27f

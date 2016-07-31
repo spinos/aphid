@@ -40,11 +40,11 @@ void AdaptiveBccMesher::fillBox(const aphid::BoundingBox & b,
 	m_grid.clear();
 	m_grid.setLevel0CellSize(h);
 	m_grid.subdivideToLevel(b, 0);
+	m_grid.calculateBBox();
 }
 
 void AdaptiveBccMesher::buildGrid()
 {
-	m_grid.calculateBBox();
 	m_grid.build();
 }
 

@@ -69,7 +69,7 @@ private:
 /// i face j vertex
 /// decode index to field node or added cut
 	const aphid::Vector3F & triangleP(const int & i, const int & j) const;			
-	void dumpTriangleInd(aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces);
+	void dumpTriangleInd(aphid::sdb::Sequence<aphid::sdb::Coord3 > & faces);
 	void countTriangleVertices(aphid::sdb::Array<int, int> & vertMap);
 	void dumpVertex(aphid::sdb::Array<int, int> & vertMap);
 	void calculateVertexNormal(aphid::sdb::Array<int, int> & vertMap);

@@ -28,6 +28,8 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {
 	m_scene->init();
+	if(m_scene->viewPerspective() )
+		usePerspCamera();
 	//connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 }
 

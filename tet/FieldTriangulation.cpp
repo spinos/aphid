@@ -139,10 +139,9 @@ void FieldTriangulation::triangulateFront()
 {
 	snapEdgeToFront();
 	int nfe = countFrontEdges();
-	//obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
-	
+
 	if(m_maxCutPosBuf > 0) delete[] m_cutPosBuf;
-/// three as many cut pnts
+/// three times as many as cut pnts
 	m_maxCutPosBuf = nfe * 3;
 	std::cout<<"\n n front edge "<<nfe<<" max n cut pos "<<m_maxCutPosBuf;
 	
@@ -151,7 +150,7 @@ void FieldTriangulation::triangulateFront()
 	RedBlueRefine rbr;
 	
 	sdb::Array<sdb::Coord2, ICutEdge > edgeMap;
-	sdb::Array<sdb::Coord3, IFace > faceMap;
+	sdb::Sequence<sdb::Coord3 > faceMap;
 	DistanceNode tetn[4];
 	int ncut = 0;
 	 
@@ -179,9 +178,7 @@ void FieldTriangulation::triangulateFront()
 			const IFace * fj = rbr.frontTriangle(j);
 			
 			if(!faceMap.find(fj->key) ) {
-				IFace * tri = new IFace;
-				tri->key = fj->key;
-				faceMap.insert(fj->key, tri);
+				faceMap.insert(fj->key);
 			}
 		}
 	}
@@ -206,7 +203,7 @@ void FieldTriangulation::triangulateFront()
 			<<"\n n front vertex "<<m_numFrontTriangleVertices;
 }
 
-void FieldTriangulation::dumpTriangleInd(sdb::Array<sdb::Coord3, IFace > & faces)
+void FieldTriangulation::dumpTriangleInd(sdb::Sequence<sdb::Coord3 > & faces)
 {
 	if(m_numFrontTris > 0) delete[] m_triInds; 
 	m_numFrontTris = faces.size();
@@ -216,7 +213,7 @@ void FieldTriangulation::dumpTriangleInd(sdb::Array<sdb::Coord3, IFace > & faces
 	faces.begin();
 	while(!faces.end() ) {
 	
-		m_triInds[i++] = faces.value()->key;
+		m_triInds[i++] = faces.key();
 
 		faces.next();
 	}

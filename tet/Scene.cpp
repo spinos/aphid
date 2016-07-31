@@ -28,4 +28,7 @@ const char * Scene::titleStr() const
 
 void Scene::draw(GeoDrawer * dr) {}
 
+bool Scene::viewPerspective() const
+{ return false; }
+
 }

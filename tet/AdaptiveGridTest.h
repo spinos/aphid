@@ -28,7 +28,8 @@ public:
 	virtual const char * titleStr() const;
 	virtual bool init();
 	virtual void draw(aphid::GeoDrawer * dr);
-
+	virtual bool viewPerspective() const;
+	
 private:
 	void drawGraph(aphid::GeoDrawer * dr);
 	void drawCut(aphid::GeoDrawer * dr);
