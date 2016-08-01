@@ -87,7 +87,6 @@ void TetraField::buildGraph()
 	egs.clear();
 	
 	calculateEdgeLength();
-	initNodes();
 	
 }
 

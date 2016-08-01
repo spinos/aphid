@@ -28,8 +28,8 @@ bool AdaptiveGridTest::viewPerspective() const
 bool AdaptiveGridTest::init()
 {
 	float gz = 128.f;
-	setColorScale(.125f / gz);
-	setNodeDrawSize(gz * .016f);
+	setColorScale(.43f / gz);
+	setNodeDrawSize(gz * .008f);
 	m_msh.fillBox(BoundingBox(-250.f, -50.f, -250.f,
 								 250.f,  50.f,  250.f), gz);
 	
@@ -41,7 +41,7 @@ bool AdaptiveGridTest::init()
 	m_distFunc.addSphere(Vector3F(-100.f, -3420.f, -100.f), 3400.f );
 	
 #define MAX_BUILD_LEVEL 5
-#define MAX_BUILD_ERROR .27f
+#define MAX_BUILD_ERROR .17f
 	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	
 	m_msh.triangulateFront();

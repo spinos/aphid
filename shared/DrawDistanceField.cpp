@@ -79,10 +79,11 @@ void DrawDistanceField::drawErrors(const ADistanceField * fld,
 		const sdb::Coord2 & ei = edgeInds->key();
 		const IDistanceEdge * ae = fld->edge(ei.x, ei.y );
 		if(ae) {
-			if(ae->err > eps) {
+			if(fld->reconstructError(ae) > eps) {
 				
 				glVertex3fv((const float *)&v[ei.x].pos);
 				glVertex3fv((const float *)&v[ei.y].pos);
+				
 			}
 		}
 		

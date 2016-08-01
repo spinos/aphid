@@ -204,6 +204,13 @@ static const int TwentyFourFVEdgeNeighborChildFace[24][3] = {
 {2, 0, 4},
 };
 
+static const int FourOppositeBluePair[4][2] = {
+{0, 7},
+{1, 6},
+{2, 5},
+{3, 4}
+};
+
 static const float FracOneOverTwoPowers[11] = {
 1.f,
 .5f,
