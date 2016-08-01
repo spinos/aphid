@@ -28,10 +28,11 @@ class AdaptiveGrid3 : public Sequence<Coord4>
 /// size of cell of each level
 	float m_cellSize[MaxLevel+1];
 	int m_levelCoord[MaxLevel+1];
+	int m_numNodes;
 	
 public:
 	AdaptiveGrid3(Entity * parent = NULL) : Sequence<Coord4>(parent) 
-	{}
+	{ m_numNodes = 0; }
 	
 	virtual ~AdaptiveGrid3() 
 	{}
@@ -92,8 +93,11 @@ public:
 /// through level0 cells
 	CellType * cellClosestTo(const Vector3F & pref);
 
-/// through each cell, give index to each element
+/// through each cell, start with current n nodes
+/// give index to each element w index < 0
 	int countNodes();
+	const int & numNodes() const;
+	void resetNumNodes();
 	
 protected:
 
@@ -364,12 +368,13 @@ bool AdaptiveGrid3<CellType, ValueType, MaxLevel>::isCellFaceOnBoundray(const Co
 template<typename CellType, typename ValueType, int MaxLevel>
 int AdaptiveGrid3<CellType, ValueType, MaxLevel>::countNodes()
 {
-	int c = 0;
+	int c = m_numNodes;
 	begin();
 	while(!end() ) {
 		countNodesIn(value(), c );
 		next();
 	}
+	m_numNodes = c;
 	return c;
 }
 
@@ -378,8 +383,10 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::countNodesIn(CellType * cell,
 {
 	cell->begin();
 	while(!cell->end() ) {
-		cell->value()->index = c;
-		c++;
+		if(cell->value()->index < 0) {
+			cell->value()->index = c;
+			c++;
+		}
 		cell->next();
 	}
 }
@@ -428,6 +435,14 @@ CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellClosestTo(const Vec
 	
 	return c;
 }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+const int & AdaptiveGrid3<CellType, ValueType, MaxLevel>::numNodes() const
+{ return m_numNodes; }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::resetNumNodes()
+{ m_numNodes = 0; }
 
 }
 

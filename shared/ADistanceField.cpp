@@ -319,4 +319,18 @@ int ADistanceField::countFrontEdges() const
 	return c;
 }
 
+float ADistanceField::reconstructError(const IDistanceEdge * edge) const
+{
+/// unknown distance
+	if(edge->val > 1e8f)
+		return 0.f;
+	
+	const DistanceNode & v1 = nodes()[edge->vi.x];
+	const DistanceNode & v2 = nodes()[edge->vi.y];
+	if(v1.val * v2.val >= 0.f)
+		return 0.f;
+		
+	return Absolute<float>((v1.val + v2.val) * .5f - edge->val);
+}
+
 }

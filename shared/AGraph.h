@@ -52,6 +52,8 @@ public:
 	const int * edgeBegins() const;
 	
 	const Te * edge(const int & v1, const int & v2) const;
+	
+	void verbose() const;
 
 protected:
 	void extractEdges(sdb::Sequence<sdb::Coord2> * a);
@@ -157,7 +159,7 @@ void AGraph<Tn, Te>::extractEdges(sdb::Sequence<sdb::Coord2> * a)
 		
 		Te * e = &m_edges[i];
 		e->vi = a->key();
-		e->err = 0.f;
+		e->val = 1e9f;
 		
 		i++;
 		a->next();
@@ -239,6 +241,16 @@ const Te * AGraph<Tn, Te>::edge(const int & v1, const int & v2) const
 		return NULL;
 		
 	return &edges()[k];
+}
+
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::verbose() const
+{
+	std::cout<<"\n graph n node "<<numNodes()
+			<<"\n       n edge "<<numEdges()
+			<<"\n       n ind "<<numEdgeIndices()
+			<<"\n       edge length min/max "<<minEdgeLength()
+								<<"/"<<maxEdgeLength();
 }
 
 }

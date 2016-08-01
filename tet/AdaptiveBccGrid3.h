@@ -24,8 +24,9 @@ public:
 /// add 8 child cells
 	bool subdivideCell(const aphid::sdb::Coord4 & cellCoord);
 	
-/// node to each cell
-	void build();
+/// create node in each cell
+/// reuse distance value in field
+	void build(aphid::ADistanceField * fld);
 /// find all level0 cell intersect box
 /// subdivide recursively to level
 	void subdivideToLevel(const aphid::BoundingBox & bx, 

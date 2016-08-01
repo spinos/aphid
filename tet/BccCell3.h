@@ -10,6 +10,7 @@
 #pragma once
 #include <Array.h>
 #include <AdaptiveGrid3.h>
+#include <ADistanceField.h>
 #include "RedBlueRefine.h"
 
 namespace ttg {
@@ -40,11 +41,14 @@ public:
 	void setParentCell(BccCell3 * x, const int & i);
 	void insertRed(const aphid::Vector3F & pref);
 	void insertBlue(const aphid::sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid);
+					AdaptiveGridT * grid,
+					aphid::ADistanceField * fld);
 	void insertYellow(const aphid::sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid);
+					AdaptiveGridT * grid,
+					aphid::ADistanceField * fld);
 	void insertCyan(const aphid::sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid);
+					AdaptiveGridT * grid,
+					aphid::ADistanceField * fld);
 	BccNode3 * findBlue(const aphid::Vector3F & pref);
 	void insertFaceOnBoundary(const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
@@ -66,6 +70,10 @@ public:
 					AdaptiveGridT * grid);
 	
 private:
+	void findRedValueFrontBlue(BccNode3 * redN,
+					const aphid::sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid,
+					aphid::ADistanceField * fld);
 	BccNode3 * findBlueNodeInNeighbor(const int & i,
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);

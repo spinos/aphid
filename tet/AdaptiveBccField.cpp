@@ -103,14 +103,9 @@ void AdaptiveBccField::pushIndices(const std::vector<int> & a,
 
 void AdaptiveBccField::verbose()
 {
+	ADistanceField::verbose();
 	std::cout<<"\n grid n cell "<<grid()->size()
-			<<"\n grid bbx "<<grid()->boundingBox()
-		<<"\n grid n tetra "<<numTetrahedrons()
-		<<"\n grid n node "<<numNodes()
-		<<"\n grid n edge "<<numEdges()
-		<<"\n grid n edge ind "<<numEdgeIndices()
-		<<"\n grid edge length min/max "<<minEdgeLength()
-								<<"/"<<maxEdgeLength()
+		<<"\n n tetra "<<numTetrahedrons()
 		<<"\n estimated error (min/max) "<<minError()<<"/"<<maxError();
 		
 	std::cout.flush();
@@ -147,7 +142,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
-	const float r = g->levelCellSize(level) * .19f;
+	const float r = g->levelCellSize(level) * .12f;
 
 	BoundingBox dirtyBx;
 	
@@ -158,12 +153,8 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 		const sdb::Coord2 & ei = egs->key();
 		const IDistanceEdge * ae = edge(ei.x, ei.y );
 		if(ae ) {
-#if 0
-			if(ae->err > threshold
-				|| ae->len > 16.f ) {
-#else
-			if(ae->err > threshold ) {
-#endif
+		
+			if(reconstructError(ae) > threshold ) {
 			
 			const Vector3F & p1 = v[ei.x].pos;
 			const Vector3F & p2 = v[ei.y].pos;
@@ -202,5 +193,8 @@ int AdaptiveBccField::findFarInd()
 
 const float & AdaptiveBccField::errorThreshold() const
 { return m_errorThreshold; }
+
+void AdaptiveBccField::buildGrid()
+{ grid()->build(this); }
 
 }

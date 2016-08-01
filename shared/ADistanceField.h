@@ -39,7 +39,7 @@ struct IDistanceEdge {
 
 	sdb::Coord2 vi;
 	float len;
-	float err;
+	float val;
 };
  
 class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
@@ -64,6 +64,7 @@ public:
 	{
 		m_dirtyEdges.begin();
 		float act, rec, err;
+		int c = 0;
 		m_mxErr = 0.f;
 		m_mnErr = 1.f;
 		Vector3F q;
@@ -72,8 +73,6 @@ public:
 			const sdb::Coord2 i = m_dirtyEdges.key();
 			const DistanceNode & n1 = nodes()[i.x];
 			const DistanceNode & n2 = nodes()[i.y];
-			
-			err = 0.f;
 			
 /// front nodes
 			if(n1.label == sdf::StFront && n2.label == sdf::StFront) {
@@ -88,24 +87,26 @@ public:
 					m_mxErr = err;
 				if(m_mnErr > err)
 					m_mnErr = err;
-			}
-			}
-			
-			if(err > 0.f) {
+					
 				int k = edgeIndex(i.x, i.y);
-				if(k>-1) {
-					edges()[k].err = err;
-				}
+				if(k>-1)
+					edges()[k].val = act;
+					
+				c++;
+			}
 			}
 			
 			m_dirtyEdges.next();
 		}
 		
+		std::cout<<"\n n error sample "<<c;
 		return m_mxErr;
 	}
 	
 	const float & maxError() const;
 	const float & minError() const;
+	
+	float reconstructError(const IDistanceEdge * edge) const;
 	
 protected:
 /// set all background, differentiate known node by distance
@@ -126,7 +127,7 @@ protected:
 				c++;
 			}
 		}
-		std::cout<<"\n n distance sample "<<c;
+		std::cout<<"\n n front sample "<<c;
 		
 	}
 	

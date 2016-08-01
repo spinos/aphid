@@ -56,21 +56,23 @@ void AdaptiveBccGrid3::subdivideCells(const std::vector<sdb::Coord4 > & divided)
 		subdivideCell(*it);
 }
 
-void AdaptiveBccGrid3::build()
+void AdaptiveBccGrid3::build(ADistanceField * fld)
 {
 	begin();
 	while(!end() ) {
 		const sdb::Coord4 k = key();
 		BccCell3 * cell = value();
 		cell->insertFaceOnBoundary(k, this);
-		cell->insertBlue(k, this);
+		cell->insertBlue(k, this, fld);
 		if(cell->hasChild() ) {
-			cell->insertYellow(k, this);
-			cell->insertCyan(k, this);
+			cell->insertYellow(k, this, fld);
+			cell->insertCyan(k, this, fld);
 		}
 		
 		next();
 	}
+	countNodes();
+	
 }
 
 void AdaptiveBccGrid3::subdivideToLevel(const BoundingBox & bx, 

@@ -22,6 +22,7 @@ AdaptiveBccMesher::~AdaptiveBccMesher()
 void AdaptiveBccMesher::internalClear()
 {
 	m_grid.clear();
+	m_grid.resetNumNodes();
 	clearTetra();
 }
 
@@ -38,21 +39,16 @@ void AdaptiveBccMesher::fillBox(const aphid::BoundingBox & b,
 				const float & h)
 {
 	m_grid.clear();
+	m_grid.resetNumNodes();
 	m_grid.setLevel0CellSize(h);
 	m_grid.subdivideToLevel(b, 0);
 	m_grid.calculateBBox();
-}
-
-void AdaptiveBccMesher::buildGrid()
-{
-	m_grid.build();
+	std::cout<<"\n adaptive bcc mesher grid bbx "<<m_grid.boundingBox();
 }
 
 void AdaptiveBccMesher::buildMesh()
 { 
 	clearTetra();
-	m_numVert = 0;
-	m_numVert = m_grid.countNodes();
 	m_grid.begin();
 	while(!m_grid.end() ) {
 /// undivided
@@ -64,7 +60,7 @@ void AdaptiveBccMesher::buildMesh()
 }
 
 const int & AdaptiveBccMesher::numVertices() const
-{ return m_numVert; }
+{ return m_grid.numNodes(); }
 
 int AdaptiveBccMesher::numTetrahedrons() const
 { return m_tets.size(); }

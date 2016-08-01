@@ -19,7 +19,6 @@ class AdaptiveBccMesher {
 
 	AdaptiveBccGrid3 m_grid;
 	std::vector<ITetrahedron *> m_tets;
-	int m_numVert;
 	
 public:
 	AdaptiveBccMesher();
@@ -55,7 +54,6 @@ public:
 		
 	}
 	
-	void buildGrid();
 	void buildMesh();
 	int numTetrahedrons() const;
 	const int & numVertices() const;

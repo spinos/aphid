@@ -67,6 +67,8 @@ public:
 		}
 	}
 	
+	void buildGrid();
+	
 /// push tetra node and edge to graph
 	void buildGraph();
 	
