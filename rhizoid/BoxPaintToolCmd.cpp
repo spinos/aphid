@@ -747,13 +747,13 @@ MStatus proxyPaintTool::performDFT()
 	distFunc.addTree(&gtr);
 	
 	int bLevel = m_dftLevel;
-	if(bLevel < 4) {
-		AHelper::Info<int>("proxyPaintTool reducing level < ", 4 );
-		bLevel = 4;
+	if(bLevel < 2) {
+		AHelper::Info<int>("proxyPaintTool reducing level < ", 2 );
+		bLevel = 2;
 	}
-	else if(bLevel > 9) {
-		AHelper::Info<int>("proxyPaintTool reducing level > ", 9 );
-		bLevel = 9;
+	else if(bLevel > 8) {
+		AHelper::Info<int>("proxyPaintTool reducing level > ", 8 );
+		bLevel = 8;
 	}
 	
 	const float facThickness = gz * sdb::gdt::FracOneOverTwoPowers[bLevel];

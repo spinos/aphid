@@ -200,6 +200,7 @@ D:/aphid/lib/aphidGeom.lib
 D:/aphid/lib/aphidH5.lib
 D:/aphid/lib/aphidSdb.lib
 D:/aphid/lib/aphidGraph.lib
+D:/aphid/lib/aphidKd.lib
 D:/aphid/lib/aphidUI.lib)
 else ()
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
