@@ -38,6 +38,7 @@ public:
 		buildGraph();
 		
 		calculateDistance<Tf>(distanceFunc, 0.f);
+		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 		estimateError<Tf>(distanceFunc, 0.f);
 		
 		verbose();
@@ -54,6 +55,7 @@ public:
 			buildGraph();
 			
 			calculateDistance<Tf>(distanceFunc, 0.f);
+			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 			estimateError<Tf>(distanceFunc, 0.f);
 			
 			verbose();
@@ -72,6 +74,7 @@ public:
 	void calculateDistance(Tf * func, const float & shellThickness)
 	{
 		clearDirtyEdges();
+		markUnknownNodes();
 		
 		typename aphid::cvx::Tetrahedron;
 		aphid::cvx::Tetrahedron tetshp;

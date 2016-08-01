@@ -90,7 +90,6 @@ void AdaptiveBccField::buildGraph()
 	egs.clear();
 	
 	calculateEdgeLength();
-	initNodes();
 	
 }
 

@@ -18,6 +18,7 @@ class BccNode3 {
 	
 public:
 	aphid::Vector3F pos;
+	float val;
 	int prop;
 	int key;
 	int index;

@@ -34,6 +34,7 @@ void BccCell3::setParentCell(BccCell3 * x, const int & i)
 void BccCell3::insertRed(const Vector3F & pref)
 {
 	BccNode3 * node15 = new BccNode3;
+	node15->val = 1e9f;
 	node15->pos = pref;
 	node15->prop = sdb::gdt::NRed;
 	node15->key = 15;
@@ -68,6 +69,7 @@ void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 		q = redP + q * gz * .5f;
 			
 		BccNode3 * ni = new BccNode3;
+		ni->val = 1e9f;
 		ni->key = i + 6;
 		ni->prop = sdb::gdt::NBlue;
 		ni->pos = q;
@@ -84,8 +86,11 @@ void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 	const Vector3F & redP = redN->pos;
 	
 	for(int i=0; i<6;++i) {
+		if(find(i) ) continue;
+		
 		if(!grid->findNeighborCell(cellCoord, i ) ) {
 			BccNode3 * ni = new BccNode3;
+			ni->val = 1e9f;
 			ni->key = i;
 			ni->prop = sdb::gdt::NFace;
 			
@@ -110,6 +115,7 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 			
 		BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
 		BccNode3 * ni = new BccNode3;
+		ni->val = 1e9f;
 		ni->key = 15000 + i;
 		ni->prop = sdb::gdt::NYellow;
 		ni->pos = (redP + nei->find(15)->pos ) * .5f;
@@ -125,6 +131,7 @@ void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
 			continue;
 			
 		BccNode3 * ni = new BccNode3;
+		ni->val = 1e9f;
 		ni->key = sdb::gdt::TwelveBlueBlueEdges[i][2];
 		ni->prop = sdb::gdt::NCyan;
 		

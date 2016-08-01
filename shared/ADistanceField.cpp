@@ -36,16 +36,19 @@ void ADistanceField::nodeColor(Vector3F & dst, const DistanceNode & n,
 	}
 }
 
-void ADistanceField::initNodes()
+void ADistanceField::markUnknownNodes()
 {
 	const int n = numNodes();
+	int ck = 0;
 	int i = 0;
 	for(;i<n;++i) {
 		DistanceNode & d = nodes()[i];
-		d.val = 1e9f;
 		d.label = sdf::StBackGround;
-		d.stat = sdf::StUnknown;
+/// decide by distance
+		d.stat = d.val > 1e8f ? sdf::StUnknown : sdf::StKnown;
+		if(d.stat == sdf::StKnown) ck++;
 	}
+	std::cout<<"\n known node "<<ck<<"/"<<n;
 }
 
 void ADistanceField::fastMarchingMethod()

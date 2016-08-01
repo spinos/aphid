@@ -108,7 +108,8 @@ public:
 	const float & minError() const;
 	
 protected:
-	void initNodes();
+/// set all background, differentiate known node by distance
+	void markUnknownNodes();
 	
 	template<typename Tf>
 	void calculateDistanceOnFront(Tf * func, const float & shellThickness)
@@ -118,7 +119,8 @@ protected:
 		int i = 0;
 		for(;i<n;++i) {
 			DistanceNode * d = &nodes()[i];
-			if(d->label == sdf::StFront) {
+			if(d->label == sdf::StFront
+				&& d->stat == sdf::StUnknown ) {
 				d->val = func->calculateDistance(d->pos) - shellThickness;
 				d->stat = sdf::StKnown; /// accept
 				c++;
@@ -181,6 +183,7 @@ private:
 			if(n->index > -1) {
 				DistanceNode * d = &dst[n->index];
 				d->pos = n->pos;
+				d->val = n->val;
 			}
 			
 			cell->next();
