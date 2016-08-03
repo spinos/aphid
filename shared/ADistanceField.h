@@ -107,6 +107,8 @@ public:
 	const float & minError() const;
 	
 	float reconstructError(const IDistanceEdge * edge) const;
+/// x > 0 positive -x 
+	void shrinkFront(const float & x);
 	
 protected:
 /// set all background, differentiate known node by distance

@@ -12,6 +12,8 @@
 #include <GeoDrawer.h>
 #include <IntersectionContext.h>
 #include <GLHUD.h>
+#include <PerspectiveView.h>
+
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -45,6 +47,7 @@ Base3DView::Base3DView(QWidget *parent)
 	m_hud = new GLHUD;
 	m_hud->setCamera(fCamera);
 	
+	m_perspView = new PerspectiveView(m_perspCamera);
 	m_lastTime = m_startTime = (boost::posix_time::ptime(boost::posix_time::microsec_clock::local_time()) - time_t_epoch).total_milliseconds();
 }
 //! [0]
@@ -566,6 +569,12 @@ void Base3DView::drawFrontImagePlane()
 
 BaseCamera * Base3DView::camera()
 { return fCamera; }
+
+void Base3DView::updatePerspectiveView()
+{ m_perspView->update(); }
+
+const PerspectiveView * Base3DView::perspectiveView() const
+{ return m_perspView; }
 
 }
 //:~

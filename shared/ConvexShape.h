@@ -81,6 +81,8 @@ public:
 	/// 4------------5
 	///
 	void split(Frustum & child0, Frustum & child1, float alpha, bool alongX = true) const;
+	static Domain::FunctionType FunctionTypeId;
+	bool intersectBBox(const BoundingBox & b) const;
 	
 protected:
 

@@ -73,6 +73,9 @@ Parameter::Parameter(int argc, char *argv[])
 				m_inFileName = argv[i+1];
 				m_operation = kKdistance;
 			}
+			if(strcmp(argv[i], "-vd") == 0 || strcmp(argv[i], "--viewDependent") == 0) {
+				m_operation = kViewDependentGrid;
+			}
 		}
 	}
 	
@@ -108,6 +111,7 @@ void Parameter::PrintHelp()
 	<<"\n -ft or --fieldTetrahedralize    test tetrahedralize based on signed distance field"
 	<<"\n -ag or --adaptiveGrid    test adaptive grid"
 	<<"\n -kd or --kdDistance    input_filename    test kd-tree distance field + adaptive grid"
+	<<"\n -vd or --viewDependent    test view dependent grid"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

@@ -333,4 +333,15 @@ float ADistanceField::reconstructError(const IDistanceEdge * edge) const
 	return Absolute<float>((v1.val + v2.val) * .5f - edge->val);
 }
 
+void ADistanceField::shrinkFront(const float & x)
+{
+	const int & n = numNodes();
+	int i = 0;
+	for(;i<n;++i) {
+		DistanceNode & d = nodes()[i];
+		if(d.val > x)
+			d.val -= x;
+	}
+}
+
 }

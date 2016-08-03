@@ -230,8 +230,8 @@ void LineDrawer::setAlignDir(const Vector3F & v)
 
 const Vector3F & LineDrawer::alignDir() const
 { return m_alignDir; }
-/*
-void LineDrawer::frustum(const Frustum * f)
+
+void LineDrawer::frustum(const cvx::Frustum * f)
 {	
 	glBegin(GL_LINES);
 	Vector3F p = f->X(0);
@@ -281,7 +281,7 @@ void LineDrawer::frustum(const Frustum * f)
 	p = f->X(3);
 	glVertex3fv((float *)&p);
 	glEnd();
-}*/
+}
 
 }
 //:~

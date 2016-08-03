@@ -297,8 +297,7 @@ bool ViewCull::cullByLod(const float & localZ, const float & radius,
 {
 	details = radius / (m_detailWidth * localZ / farClipPlane() );
 	if(details > .999f) details = .999f;
-	if(details < lowLod || details >= highLod) return true;
-	return false;
+	return (details < lowLod || details >= highLod);
 }
 
 float ViewCull::cameraDepth(const Vector3F & p) const

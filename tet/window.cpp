@@ -17,6 +17,7 @@
 #include "FieldTetrahedralizeTest.h"
 #include "AdaptiveGridTest.h"
 #include "KDistanceTest.h"
+#include "VDGridTest.h"
 
 namespace ttg {
 
@@ -47,8 +48,10 @@ Window::Window(const Parameter * param)
 		sc = new FieldTetrahedralizeTest;
 	else if(param->operation() == Parameter::kAaptiveGrid)
 		sc = new AdaptiveGridTest;
-	else // if(param->operation() == Parameter::kKdistance)
+	else if(param->operation() == Parameter::kKdistance)
 		sc = new KDistanceTest(param->inFileName() );
+	else // if(param->operation() == Parameter::kViewDependentGrid)
+		sc = new VDGridTest;
 		
     glWidget = new GLWidget(sc, this);
 	

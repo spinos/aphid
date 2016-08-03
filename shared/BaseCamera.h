@@ -36,6 +36,7 @@ public:
 	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	Vector3F eyePosition() const;
 	Vector3F eyeDirection() const;
+/// width / height
 	float aspectRatio() const;
 	float nearClipPlane() const;
 	float farClipPlane() const;
