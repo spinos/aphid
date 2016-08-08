@@ -18,6 +18,7 @@ class SelectionArray;
 class BaseBrush;
 class BaseTransform;
 class GLHUD;
+class PerspectiveView;
 
 class Base3DView : public QGLWidget
 {
@@ -100,6 +101,9 @@ protected:
 	void drawFrontImagePlane();
 	BaseCamera * camera();
 	
+	void updatePerspectiveView();
+	const PerspectiveView * perspectiveView() const;
+	
 private:
 	void computeIncidentRay(int x, int y);
 	
@@ -119,6 +123,7 @@ private:
 	int m_dx, m_dy;
 	char m_isFocused;
 	GLHUD * m_hud;
+	PerspectiveView * m_perspView;
 	long m_startTime, m_lastTime;
 };
 

@@ -42,7 +42,8 @@ public:
 		fnSphere = 1,
 		fnBox = 2,
 		fnKdTree = 3,
-		fnTetrahedron = 4
+		fnTetrahedron = 4,
+		fnFrustum = 5
 	};
 	
 	virtual FunctionType functionType() const;

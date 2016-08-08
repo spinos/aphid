@@ -13,6 +13,7 @@ namespace ttg {
 GLWidget::GLWidget(ttg::Scene * sc, QWidget *parent) : Base3DView(parent)
 {
 	m_scene = sc;
+	m_scene->setView(perspectiveView() );
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
@@ -34,6 +35,8 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	updatePerspectiveView();
+	getDrawer()->frustum(perspectiveView()->frustum() );
 	m_scene->draw(getDrawer() );
 }
 //! [7]

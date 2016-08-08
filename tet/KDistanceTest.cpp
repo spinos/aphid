@@ -53,11 +53,11 @@ bool KDistanceTest::init()
 	m_msh.buildMesh();
 	m_msh.buildGraph();
 	std::cout<<"\n grid n cell "<<m_msh.grid()->size()
-			<<"\n grid bbx "<<m_msh.grid()->boundingBox()
 			<<"\n n node "<<m_msh.numNodes()
 			<<"\n n edge "<<m_msh.numEdges();
 	m_distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER16 * 1.9f );
-	m_msh.calculateDistance<BDistanceFunction>(&m_distFunc, gz * GDT_FAC_ONEOVER16);
+	m_msh.calculateDistance<BDistanceFunction>(&m_distFunc, gz * GDT_FAC_ONEOVER16 );
+	//m_msh.shrinkFront(gz * GDT_FAC_ONEOVER16 * .25f);
 	m_msh.triangulateFront();
 	
 	std::cout.flush();

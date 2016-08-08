@@ -31,4 +31,10 @@ void Scene::draw(GeoDrawer * dr) {}
 bool Scene::viewPerspective() const
 { return false; }
 
+void Scene::setView(const PerspectiveView * f)
+{ m_view = f; }
+
+const PerspectiveView * Scene::view() const
+{ return m_view; }
+
 }

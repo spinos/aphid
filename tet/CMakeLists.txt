@@ -77,6 +77,7 @@ AdaptiveBccField.h
 FieldTriangulation.h
 AdaptiveGridTest.h
 KDistanceTest.h
+VDGridTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -116,6 +117,7 @@ AdaptiveBccField.cpp
 FieldTriangulation.cpp
 AdaptiveGridTest.cpp
 KDistanceTest.cpp
+VDGridTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

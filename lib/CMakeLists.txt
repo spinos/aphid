@@ -211,7 +211,8 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
 ../shared/DrawDistanceField.cpp
-../shared/DrawBox.cpp)
+../shared/DrawBox.cpp
+../shared/PerspectiveView.cpp)
 
 ADD_LIBRARY (aphidSdb STATIC
 ../btree/Types.cpp

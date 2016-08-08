@@ -110,6 +110,11 @@ void Frustum::split(Frustum & child0, Frustum & child1, float alpha, bool alongX
 	}
 }
 
+Domain::FunctionType Frustum::FunctionTypeId = Domain::fnFrustum;
+
+bool Frustum::intersectBBox(const BoundingBox & b) const
+{ return gjk::Intersect1<BoundingBox, Frustum>::Evaluate(b, *this); }
+
 Sphere::Sphere() {}
 
 void Sphere::set(const Vector3F & x, const float & r)

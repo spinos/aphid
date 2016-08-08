@@ -218,6 +218,7 @@ const float & AGraph<Tn, Te>::maxEdgeLength() const
 template<typename Tn, typename Te>
 int AGraph<Tn, Te>::edgeIndex(const int & v1, const int & v2) const
 {
+	if(numEdgeIndices() < 1) return -1;
 	const Tn & A = nodes()[v1];
 	const int endj = edgeBegins()[v1+1];
 	int j = edgeBegins()[v1];

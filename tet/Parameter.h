@@ -30,7 +30,8 @@ public:
 		kRedblueRefine = 10,
 		kFieldTetrahedralize = 11,
 		kAaptiveGrid = 12,
-		kKdistance = 13
+		kKdistance = 13,
+		kViewDependentGrid = 14
 	};
 	
 	Parameter(int argc, char *argv[]);
