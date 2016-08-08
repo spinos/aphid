@@ -25,6 +25,7 @@ void PerspectiveView::update()
 					1.f / m_camera->aspectRatio(),
 					m_camera->fieldOfView(),
 					m_camera->fSpace );
+	m_frameBase = tan(m_camera->fieldOfView()/360.f * 3.1415927f);
 }
 
 const cvx::Frustum * PerspectiveView::frustum() const
@@ -45,10 +46,7 @@ float PerspectiveView::lodBox(const BoundingBox & b) const
 	const float fcp = m_camera->farClipPlane();
 	
 	d = (d - ncp ) / (fcp - ncp );
-	
-	float frm = tan(m_camera->fieldOfView()/360.f * 3.1415927f);
-	
-	d = frm * ncp * (1.f - d) + frm * fcp * d;
+	d = m_frameBase * (ncp * (1.f - d) + fcp * d);
 	
 	return r / d; 
 }

@@ -57,7 +57,7 @@ bool KDistanceTest::init()
 			<<"\n n edge "<<m_msh.numEdges();
 	m_distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER16 * 1.9f );
 	m_msh.calculateDistance<BDistanceFunction>(&m_distFunc, gz * GDT_FAC_ONEOVER16 );
-	m_msh.shrinkFront(gz * GDT_FAC_ONEOVER16 * .25f);
+	//m_msh.shrinkFront(gz * GDT_FAC_ONEOVER16 * .25f);
 	m_msh.triangulateFront();
 	
 	std::cout.flush();

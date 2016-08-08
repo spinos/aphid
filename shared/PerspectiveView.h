@@ -17,6 +17,7 @@ class PerspectiveView {
 
 	cvx::Frustum m_frustum;
 	const PerspectiveCamera * m_camera;
+	float m_frameBase;
 	
 public:
 	PerspectiveView(const PerspectiveCamera * camera);

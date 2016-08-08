@@ -770,7 +770,7 @@ MStatus proxyPaintTool::performDFT()
 	distFunc.setDomainDistanceRange(facThickness * 1.9f );
 	msh.calculateDistance<BDistanceFunction>(&distFunc, facThickness );
 	msh.triangulateFront();
-	AHelper::Info<int>("proxyPaintTool reduce selected to n triangle ", msh.numFrontTriangles() );
+	AHelper::Info<int>(" proxyPaintTool reduce selected to n triangle ", msh.numFrontTriangles() );
 	AHelper::Info<int>(" n vertex ", msh.numTriangleVertices() );
 
 	const int numVertex = msh.numTriangleVertices();
