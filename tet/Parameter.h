@@ -31,7 +31,8 @@ public:
 		kFieldTetrahedralize = 11,
 		kAaptiveGrid = 12,
 		kKdistance = 13,
-		kViewDependentGrid = 14
+		kViewDependentGrid = 14,
+		kNoise3 = 15
 	};
 	
 	Parameter(int argc, char *argv[]);

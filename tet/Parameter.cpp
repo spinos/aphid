@@ -76,6 +76,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-vd") == 0 || strcmp(argv[i], "--viewDependent") == 0) {
 				m_operation = kViewDependentGrid;
 			}
+			if(strcmp(argv[i], "-n3") == 0 || strcmp(argv[i], "--noise3") == 0) {
+				m_operation = kNoise3;
+			}
 		}
 	}
 	
@@ -112,6 +115,7 @@ void Parameter::PrintHelp()
 	<<"\n -ag or --adaptiveGrid    test adaptive grid"
 	<<"\n -kd or --kdDistance    input_filename    test kd-tree distance field + adaptive grid"
 	<<"\n -vd or --viewDependent    test view dependent grid"
+	<<"\n -n3 or --noise3    test 3d noise"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

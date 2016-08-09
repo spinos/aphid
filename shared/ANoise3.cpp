@@ -23,20 +23,20 @@ float ANoise3::SampleGrid(const int & x,
 	int gy = y & 7;
 	int gz = z & 7;
 		
-	return PermuTable512[(gz<<6) + (gy<<3) + gz];
+	return PermuTable512[(gz<<6) + (gy<<3) + gx];
 }
 
 float ANoise3::Trilinear(const float & x,
 							const float & y,
 							const float & z)
 {
-	int g0x = x;
-	int g0y = y;
-	int g0z = z;
+	int g0x = x>0.f ? x : x-1.f;
+	int g0y = y>0.f ? y : y-1.f;
+	int g0z = z>0.f ? z : z-1.f;
 	
-	int g1x = x + 1;
-	int g1y = y + 1;
-	int g1z = z + 1;
+	int g1x = g0x + 1;
+	int g1y = g0y + 1;
+	int g1z = g0z + 1;
 	
 	float fx = x - g0x;
 	float fy = y - g0y;
@@ -58,9 +58,9 @@ float ANoise3::FractalF(const float * v,
 						const float & lacunarity,
 						const int & octaves)
 {
-	const float sx = v[0] * freq + o[0] * 8;
-	const float sy = v[1] * freq + o[1] * 8;
-	const float sz = v[2] * freq + o[2] * 8;
+	const float sx = v[0] * freq + o[0] * 8.f;
+	const float sy = v[1] * freq + o[1] * 8.f;
+	const float sz = v[2] * freq + o[2] * 8.f;
 	
 	float c = Trilinear(sx, sy, sz);
 	
