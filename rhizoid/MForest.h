@@ -20,6 +20,7 @@ public:
 					MGlobal::ListAdjustment adj);
 	void selectGround(const MPoint & origin, const MPoint & dest, 
 					MGlobal::ListAdjustment adj);
+/// cover selected faces
 	void flood(GrowOption & option);
 	void grow(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option);

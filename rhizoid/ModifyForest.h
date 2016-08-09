@@ -27,12 +27,17 @@ public:
     struct GrowOption {
 		Vector3F m_upDirection;
 		Vector3F m_centerPoint;
+		Vector3F m_noiseOrigin;
 		int m_plantId;
 		float m_minScale, m_maxScale;
 		float m_minMarginSize, m_maxMarginSize;
 		float m_rotateNoise;
 		float m_strength;
 		float m_radius;
+		float m_noiseFrequency;
+		float m_noiseLacunarity;
+		float m_noiseLevel;
+		int m_noiseOctave;
 		bool m_alongNormal;
 		bool m_multiGrow;
 		bool m_stickToGround;
@@ -49,6 +54,11 @@ public:
 			m_maxMarginSize = .1f;
 			m_strength = .67f;
 			m_stickToGround = true;
+			m_noiseFrequency = 1.f;
+			m_noiseLacunarity = 1.5f;
+			m_noiseOctave = 4;
+			m_noiseLevel = .5f;
+			m_noiseOrigin.set(.4315f, .63987f, .6589f);
 		}
 	};
     
@@ -85,7 +95,7 @@ private:
 					
 	void growOnFace(const int & geoId, const int & triId,
 					GrowOption & option);
-	
+/// dice a triangle and test each sample to grow on
 	void growOnTriangle(TriangleRaster * tri, 
 					BarycentricCoordinate * bar,
 					GroundBind & bind,
