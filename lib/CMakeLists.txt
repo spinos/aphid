@@ -93,6 +93,7 @@ ADD_LIBRARY (aphidMath STATIC
 ../shared/QuickSort.cpp
 ../shared/Plane.cpp
 ../shared/ViewCull.cpp
+../shared/ANoise3.cpp
 )
 
 ADD_LIBRARY (aphidGeom STATIC 
