@@ -18,6 +18,7 @@
 #include "AdaptiveGridTest.h"
 #include "KDistanceTest.h"
 #include "VDGridTest.h"
+#include "Noise3Test.h"
 
 namespace ttg {
 
@@ -50,8 +51,10 @@ Window::Window(const Parameter * param)
 		sc = new AdaptiveGridTest;
 	else if(param->operation() == Parameter::kKdistance)
 		sc = new KDistanceTest(param->inFileName() );
-	else // if(param->operation() == Parameter::kViewDependentGrid)
+	else if(param->operation() == Parameter::kViewDependentGrid)
 		sc = new VDGridTest;
+	else // if(param->operation() == Parameter::KNoise3)
+		sc = new Noise3Test;
 		
     glWidget = new GLWidget(sc, this);
 	

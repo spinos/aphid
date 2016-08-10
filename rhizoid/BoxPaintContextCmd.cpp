@@ -41,6 +41,20 @@
 #define kStickToGroundFlagLong "-stickToGround"
 #define kSelectVizFlag "-slv"
 #define kSelectVizFlagLong "-selectViz"
+#define kNoiseFreqFlag "-nfr"
+#define kNoiseFreqFlagLong "-noiseFrequency"
+#define kNoiseLacunarityFlag "-nlc"
+#define kNoiseLacunarityFlagLong "-noiseLacunarity"
+#define kNoiseOctaveFlag "-nov"
+#define kNoiseOctaveFlagLong "-noiseOctave"
+#define kNoiseLevelFlag "-nlv"
+#define kNoiseLevelFlagLong "-noiseLevel"
+#define kNoiseOriginXFlag "-nox"
+#define kNoiseOriginXFlagLong "-noiseOriginX"
+#define kNoiseOriginYFlag "-noy"
+#define kNoiseOriginYFlagLong "-noiseOriginY"
+#define kNoiseOriginZFlag "-noz"
+#define kNoiseOriginZFlagLong "-noiseOriginZ"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -207,6 +221,48 @@ MStatus proxyPaintContextCmd::doEditFlags()
 	if(argData.isFlagSet(kSelectVizFlag)) {
 		fContext->selectViz();
 	}
+	
+	if (argData.isFlagSet(kNoiseFreqFlag)) {
+		double freq = 1;
+		if (argData.getFlagArgument(kNoiseFreqFlag, 0, freq) )
+			fContext->setNoiseFrequency(freq);
+	}
+	
+	if (argData.isFlagSet(kNoiseLacunarityFlag)) {
+		double lac = 1;
+		if (argData.getFlagArgument(kNoiseLacunarityFlag, 0, lac) )
+			fContext->setNoiseLacunarity(lac);
+	}
+	
+	if (argData.isFlagSet(kNoiseOctaveFlag)) {
+		int oct = 1;
+		if (argData.getFlagArgument(kNoiseOctaveFlag, 0, oct) )
+			fContext->setNoiseOctave(oct);
+	}
+	
+	if (argData.isFlagSet(kNoiseLevelFlag)) {
+		double lev = 1;
+		if (argData.getFlagArgument(kNoiseLevelFlag, 0, lev) )
+			fContext->setNoiseLevel(lev);
+	}
+	
+	if (argData.isFlagSet(kNoiseOriginXFlag)) {
+		double nox = 1;
+		if (argData.getFlagArgument(kNoiseOriginXFlag, 0, nox) )
+			fContext->setNoiseOriginX(nox);
+	}
+	
+	if (argData.isFlagSet(kNoiseOriginYFlag)) {
+		double noy = 1;
+		if (argData.getFlagArgument(kNoiseOriginYFlag, 0, noy) )
+			fContext->setNoiseOriginY(noy);
+	}
+	
+	if (argData.isFlagSet(kNoiseOriginZFlag)) {
+		double noz = 1;
+		if (argData.getFlagArgument(kNoiseOriginZFlag, 0, noz) )
+			fContext->setNoiseOriginZ(noz);
+	}
 
 	return MS::kSuccess;
 }
@@ -262,6 +318,27 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		
 	if (argData.isFlagSet(kStickToGroundFlag))
 		setResult(fContext->stickToGround() );
+		
+	if (argData.isFlagSet(kNoiseFreqFlag))
+		setResult(fContext->noiseFrequency() );
+		
+	if (argData.isFlagSet(kNoiseLacunarityFlag))
+		setResult(fContext->noiseLacunarity() );
+		
+	if (argData.isFlagSet(kNoiseOctaveFlag))
+		setResult(fContext->noiseOctave() );
+	
+	if (argData.isFlagSet(kNoiseLevelFlag))
+		setResult(fContext->noiseLevel() );
+		
+	if (argData.isFlagSet(kNoiseOriginXFlag))
+		setResult(fContext->noiseOriginX() );
+		
+	if (argData.isFlagSet(kNoiseOriginYFlag))
+		setResult(fContext->noiseOriginY() );
+		
+	if (argData.isFlagSet(kNoiseOriginZFlag))
+		setResult(fContext->noiseOriginZ() );
 	
 	return MS::kSuccess;
 }
@@ -373,6 +450,48 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kSelectVizFlag, kSelectVizFlagLong, MSyntax::kNoArg);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add selectViz arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseFreqFlag, kNoiseFreqFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise frequency arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseLacunarityFlag, kNoiseLacunarityFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise lacunarity arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseOctaveFlag, kNoiseOctaveFlagLong, MSyntax::kLong);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise octave arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseLevelFlag, kNoiseLevelFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise level arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseOriginXFlag, kNoiseOriginXFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise origin x arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseOriginYFlag, kNoiseOriginYFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise origin y arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseOriginZFlag, kNoiseOriginZFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise origin z arg");
 		return MS::kFailure;
 	}
 	

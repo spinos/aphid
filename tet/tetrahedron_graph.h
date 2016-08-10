@@ -239,7 +239,7 @@ inline bool connectTetrahedrons(ITetrahedron * a, ITetrahedron * b)
 	if(a->index<0) return false;
 	if(b->index<0) return false;
 	
-	int i, j, ia, jb;
+	int i, ia, jb;
 	for(i=0;i<4;++i) {
 		if(findSharedFace(ia, jb, a, b) )
 			break;

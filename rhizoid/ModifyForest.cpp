@@ -10,6 +10,8 @@
 #include "ModifyForest.h"
 #include <TriangleRaster.h>
 #include <BarycentricCoordinate.h>
+#include <ANoise3.h>
+
 namespace aphid {
 
 ModifyForest::ModifyForest() 
@@ -106,10 +108,20 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 	tri->genSamples(sampleSize, grid_x, grid_y, samples, hits);
 	float scale;
 	Matrix44F tm;
+/// relative to grid
+	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
 	for(int s = 0; s < numSamples; s++) {
 		if(!hits[s]) continue;	
 	
 		Vector3F & pos = samples[s];
+		
+/// limited by noise level
+		if(ANoise3::FractalF((const float *)&pos,
+							(const float *)&option.m_noiseOrigin,
+							freq,
+							option.m_noiseLacunarity,
+							option.m_noiseOctave ) < option.m_noiseLevel )
+			continue;
 		
 		if(limitRadius) {
 			if(pos.distanceTo(option.m_centerPoint) >  option.m_radius)

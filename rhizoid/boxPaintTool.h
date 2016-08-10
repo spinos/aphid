@@ -102,6 +102,20 @@ public:
 	void setStickToGround(bool x);
 	const bool & stickToGround() const;
 	void selectViz();
+	const float & noiseFrequency() const;
+	const float & noiseLacunarity() const;
+	const int & noiseOctave() const;
+	const float & noiseLevel() const;
+	const float & noiseOriginX() const;
+	const float & noiseOriginY() const;
+	const float & noiseOriginZ() const;
+	void setNoiseFrequency(float x);
+	void setNoiseLacunarity(float x);
+	void setNoiseOctave(int x);
+	void setNoiseLevel(float x);
+	void setNoiseOriginX(float x);
+	void setNoiseOriginY(float x);
+	void setNoiseOriginZ(float x);
 	
 private:
 	void resize();

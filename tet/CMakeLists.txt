@@ -78,6 +78,7 @@ FieldTriangulation.h
 AdaptiveGridTest.h
 KDistanceTest.h
 VDGridTest.h
+Noise3Test.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -118,6 +119,7 @@ FieldTriangulation.cpp
 AdaptiveGridTest.cpp
 KDistanceTest.cpp
 VDGridTest.cpp
+Noise3Test.cpp
 glwidget.cpp
 window.cpp
 main.cpp)

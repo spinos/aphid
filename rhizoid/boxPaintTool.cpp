@@ -681,4 +681,67 @@ const bool & proxyPaintContext::stickToGround() const
 
 void proxyPaintContext::selectViz()
 { validateSelection(); }
+
+const float & proxyPaintContext::noiseFrequency() const
+{ return m_growOpt.m_noiseFrequency; }
+
+const float & proxyPaintContext::noiseLacunarity() const
+{ return m_growOpt.m_noiseLacunarity; }
+
+const int & proxyPaintContext::noiseOctave() const
+{ return m_growOpt.m_noiseOctave; }
+
+const float & proxyPaintContext::noiseLevel() const
+{ return m_growOpt.m_noiseLevel; }
+
+const float & proxyPaintContext::noiseOriginX() const
+{ return m_growOpt.m_noiseOrigin.x; }
+
+const float & proxyPaintContext::noiseOriginY() const
+{ return m_growOpt.m_noiseOrigin.y; }
+
+const float & proxyPaintContext::noiseOriginZ() const
+{ return m_growOpt.m_noiseOrigin.z; }
+
+void proxyPaintContext::setNoiseFrequency(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise frequency", x);
+	m_growOpt.m_noiseFrequency = x; 
+}
+
+void proxyPaintContext::setNoiseLacunarity(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise lacunarity", x);
+	m_growOpt.m_noiseLacunarity = x; 
+}
+
+void proxyPaintContext::setNoiseOctave(int x)
+{ 
+	AHelper::Info<int>(" proxyPaintContext set noise octace", x);
+	m_growOpt.m_noiseOctave = x; 
+}
+
+void proxyPaintContext::setNoiseLevel(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise level", x);
+	m_growOpt.m_noiseLevel = x; 
+}
+
+void proxyPaintContext::setNoiseOriginX(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise origin x", x);
+	m_growOpt.m_noiseOrigin.x = x; 
+}
+
+void proxyPaintContext::setNoiseOriginY(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise origin y", x);
+	m_growOpt.m_noiseOrigin.y = x; 
+}
+
+void proxyPaintContext::setNoiseOriginZ(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise origin z", x);
+	m_growOpt.m_noiseOrigin.z = x; 
+}
 //:~
