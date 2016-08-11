@@ -75,6 +75,7 @@ protected:
 	bool growAt(const Ray & ray, GrowOption & option);
 	bool growAt(const Matrix44F & trans, GrowOption & option);
 	void replaceAt(const Ray & ray, GrowOption & option);
+	void clearSelected();
 	void clearAt(const Ray & ray, GrowOption & option);
 	void scaleAt(const Ray & ray, float magnitude);
 	void rotateAt(const Ray & ray, float magnitude, int axis);
@@ -89,6 +90,7 @@ protected:
 	void scaleBrushAt(const Ray & ray, float magnitude);
     
 private:
+	void clearPlant(Plant * pl, int k);
 	void growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
 					int geoId,
 					GrowOption & option);

@@ -129,6 +129,7 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 
 void MForest::flood(GrowOption & option)
 {
+	clearSelected();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
 	if(!growOnGround(option))
         AHelper::Info<int>("MForest error empty flood ground", 0 );

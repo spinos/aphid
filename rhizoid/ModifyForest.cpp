@@ -264,6 +264,39 @@ void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
 	}
 }
 
+void ModifyForest::clearPlant(Plant * pl, int k)
+{
+	const Vector3F & pos = pl->index->t1->getTranslation();
+	sdb::Coord3 c0 = grid()->gridCoord((const float *)&pos);
+	sdb::Array<int, Plant> * cell = grid()->findCell(c0 );
+	if(cell) {
+		cell->remove(k );
+		if(cell->isEmpty() )
+			grid()->remove(c0);
+	}
+}
+
+void ModifyForest::clearSelected()
+{
+	std::vector<int> idToClear;
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		
+		idToClear.push_back(arr->key() );
+		Plant * pl = arr->value()->m_reference;
+		clearPlant(pl, arr->key() );
+			
+		arr->next();
+	}
+	
+	std::vector<int>::const_iterator it = idToClear.begin();
+	for(;it!=idToClear.end();++it) {
+		arr->remove(*it);
+	}
+	idToClear.clear();
+}
+
 void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 {
 	if(!calculateSelecedWeight(ray)) return;
@@ -277,14 +310,7 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 			if(m_pnoise.rfloat(m_seed) < option.m_strength) {
 				idToClear.push_back(arr->key() );
 				Plant * pl = arr->value()->m_reference;
-				Vector3F pos = pl->index->t1->getTranslation();
-				sdb::Coord3 c0 = grid()->gridCoord((const float *)&pos);
-				sdb::Array<int, Plant> * cell = grid()->findCell(c0 );
-				if(cell) {
-					cell->remove(arr->key() );
-					if(cell->isEmpty() )
-						grid()->remove(c0);
-				}
+				clearPlant(pl, arr->key() );
 			}
 			m_seed++;
 		}
