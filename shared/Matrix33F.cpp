@@ -42,6 +42,13 @@ float Matrix33F::operator() (int i, int j) const
 Vector3F Matrix33F::row(int i) const
 { return Vector3F(v[i*3], v[i*3 + 1], v[i*3 + 2]); }
 
+void Matrix33F::setRow(int i, const Vector3F & r)
+{
+	v[i*3    ] = r.x;
+	v[i*3 + 1] = r.y;
+	v[i*3 + 2] = r.z;
+}
+
 Vector3F Matrix33F::operator*( Vector3F other ) const
 {
 	Vector3F v;

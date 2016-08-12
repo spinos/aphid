@@ -17,11 +17,65 @@ AOrientedBox::~AOrientedBox() {}
 void AOrientedBox::setCenter(const Vector3F & p)
 { m_center = p; }
 
-void AOrientedBox::setOrientation(const Matrix33F & m)
-{ m_orientation = m; }
+void AOrientedBox::setOrientation(const Matrix33F & m,
+				const Matrix33F::RotateOrder & rod)
+{ 
+	switch (rod) {
+		case Matrix33F::YZX: /// swap ZXY
+			m_orientation.setRow(0, m.row(2) );
+			m_orientation.setRow(1, m.row(0) );
+			m_orientation.setRow(2, m.row(1) );
+			break;
+		case Matrix33F::ZXY: /// swap YZX
+			m_orientation.setRow(0, m.row(1) );
+			m_orientation.setRow(1, m.row(2) );
+			m_orientation.setRow(2, m.row(0) );
+			break;
+		case Matrix33F::XZY:
+			m_orientation.setRow(0, m.row(0) );
+			m_orientation.setRow(1, m.row(2) );
+			m_orientation.setRow(2, m.row(1) );
+			break;
+		case Matrix33F::YXZ:
+			m_orientation.setRow(0, m.row(1) );
+			m_orientation.setRow(1, m.row(0) );
+			m_orientation.setRow(2, m.row(2) );
+			break;
+		case Matrix33F::ZYX:
+			m_orientation.setRow(0, m.row(2) );
+			m_orientation.setRow(1, m.row(1) );
+			m_orientation.setRow(2, m.row(0) );
+			break;
+		default:
+			m_orientation = m; 
+			break;
+	}
+}
 
-void AOrientedBox::setExtent(const Vector3F & p)
-{ m_extent = p; }
+void AOrientedBox::setExtent(const Vector3F & p,				
+							const Matrix33F::RotateOrder & rod)
+{ 
+	switch (rod) {
+		case Matrix33F::YZX: /// swap ZXY
+			m_extent.set(p.z, p.x, p.y);
+			break;
+		case Matrix33F::ZXY: /// swap YZX
+			m_extent.set(p.y, p.z, p.x);
+			break;
+		case Matrix33F::XZY:
+			m_extent.set(p.x, p.z, p.y);
+			break;
+		case Matrix33F::YXZ:
+			m_extent.set(p.y, p.x, p.z);
+			break;
+		case Matrix33F::ZYX:
+			m_extent.set(p.z, p.y, p.x);
+			break;
+		default:
+			m_extent = p;  
+			break;
+	}
+}
 
 const Vector3F & AOrientedBox::center() const
 { return m_center; }

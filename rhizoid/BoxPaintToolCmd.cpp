@@ -2,6 +2,15 @@
  *  BoxPaintToolCmd.cpp
  *  proxyPaint
  *
+ *  test pca
+ *  select -r ball;
+ *  float $mm2[] = `proxyPaintTool -pca -rto zxy`;
+ *  xform -m $mm2[0] $mm2[1] $mm2[2] $mm2[3]
+ *           $mm2[4] $mm2[5] $mm2[6] $mm2[7]
+ *           $mm2[8] $mm2[9] $mm2[10] $mm2[11]
+ *           $mm2[12] $mm2[13] $mm2[14] $mm2[15] box;
+ *  select -r box;
+ *
  *  Created by jian zhang on 2/1/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
@@ -39,6 +48,8 @@
 #define kSelectVoxFlagLong "-selectVox"
 #define kPCAFlag "-pca" 
 #define kPCAFlagLong "-principalComponent"
+#define kRotateOrderPCAFlag "-rto" 
+#define kRotateOrderPCAFlagLong "-rotateOrderPCA"
 #define kDFTFlag "-dft" 
 #define kDFTFlagLong "-distanceFieldTriangulate"
 
@@ -72,6 +83,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kConnectVoxFlag, kConnectVoxFlagLong);
 	syntax.addFlag(kSelectVoxFlag, kSelectVoxFlagLong, MSyntax::kLong);
 	syntax.addFlag(kPCAFlag, kPCAFlagLong);
+	syntax.addFlag(kRotateOrderPCAFlag, kRotateOrderPCAFlagLong, MSyntax::kString);
 	syntax.addFlag(kDFTFlag, kDFTFlagLong, MSyntax::kLong);
 	return syntax;
 }
@@ -138,6 +150,8 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 {
 	m_operation = opUnknown;
     m_currentVoxInd = 0;
+	m_rotPca = Matrix33F::XYZ;
+	
 	MStatus status;
 	MArgDatabase argData(syntax(), args);
 
@@ -215,6 +229,16 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
     
     if (argData.isFlagSet(kPCAFlag)) {
 		m_operation = opPrincipalComponent;
+	}
+	
+	if (argData.isFlagSet(kRotateOrderPCAFlag)) {
+		MString srod;
+		status = argData.getFlagArgument(kRotateOrderPCAFlag, 0, srod);
+		if (!status) {
+			status.perror("pca rotate order -rto flag parsing failed");
+			return status;
+		}
+		strToRotateOrder(srod);
 	}
 	
 	if (argData.isFlagSet(kDFTFlag)) {
@@ -657,8 +681,9 @@ MStatus proxyPaintTool::performPCA()
     }
     
     PrincipalComponents<std::vector<Vector3F> > obpca;
-    AOrientedBox obox = obpca.analyze(pnts, pnts.size() );
+    AOrientedBox obox = obpca.analyze(pnts, pnts.size(), m_rotPca );
 	
+    AHelper::Info<int>("pca order", m_rotPca );
     AHelper::Info<Vector3F>("obox c", obox.center() );
     AHelper::Info<Matrix33F>("obox r", obox.orientation() );
     AHelper::Info<Vector3F>("obox e", obox.extent() );
@@ -666,20 +691,21 @@ MStatus proxyPaintTool::performPCA()
     rd.setLength(16);
     const Vector3F exob = obox.extent();
     const Matrix33F rtob = obox.orientation();
-    Vector3F rx = obox.orientation().row(0) * exob.x;
+/// scale to unit box
+    Vector3F rx = obox.orientation().row(0) * exob.x * 2.f;
     
     rd[0] = rx.x;
     rd[1] = rx.y;
     rd[2] = rx.z;
     rd[3] = 0.f; 
     
-    Vector3F ry = obox.orientation().row(1) * exob.y;
+    Vector3F ry = obox.orientation().row(1) * exob.y * 2.f;
     rd[4] = ry.x;
     rd[5] = ry.y;
     rd[6] = ry.z;
     rd[7] = 0.f;
     
-    Vector3F rz = obox.orientation().row(2) * exob.z;
+    Vector3F rz = obox.orientation().row(2) * exob.z * 2.f;
     rd[8] = rz.x;
     rd[9] = rz.y;
     rd[10] = rz.z;
@@ -691,6 +717,15 @@ MStatus proxyPaintTool::performPCA()
     rd[15] = 1.f;
     setResult(rd);
 	return stat;
+}
+
+void proxyPaintTool::strToRotateOrder(const MString & srod)
+{
+	if(srod == "yzx") m_rotPca = Matrix33F::YZX;
+	else if(srod == "zxy") m_rotPca = Matrix33F::ZXY;
+	else if(srod == "xzy") m_rotPca = Matrix33F::XZY;
+	else if(srod == "yxz") m_rotPca = Matrix33F::YXZ;
+	else if(srod == "zyx") m_rotPca = Matrix33F::ZYX;
 }
 
 MStatus proxyPaintTool::performDFT()

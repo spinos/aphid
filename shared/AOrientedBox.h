@@ -18,8 +18,10 @@ public:
 	virtual ~AOrientedBox();
 	
 	void setCenter(const Vector3F & p);
-	void setOrientation(const Matrix33F & m);
-	void setExtent(const Vector3F & p);
+	void setOrientation(const Matrix33F & m,
+					const Matrix33F::RotateOrder & rod = Matrix33F::XYZ);
+	void setExtent(const Vector3F & p,
+					const Matrix33F::RotateOrder & rod = Matrix33F::XYZ);
 	void set8DOPExtent(const float & x0, const float & x1,
 						const float & y0, const float & y1);
 	

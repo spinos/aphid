@@ -25,6 +25,7 @@
 class proxyPaintTool : public MPxToolCommand
 {
     int m_currentVoxInd;
+	aphid::Matrix33F::RotateOrder m_rotPca;
     
 public:
 					proxyPaintTool(); 
@@ -55,6 +56,7 @@ private:
 					const MDagPath & meshPath);
 	MStatus performPCA();
 	MStatus performDFT();
+	void strToRotateOrder(const MString & srod);
     
 private:
 	enum Operation {
