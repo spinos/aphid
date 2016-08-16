@@ -44,7 +44,9 @@ public:
 	virtual ~PrincipalComponents();
 	
 	void setOrientConstrain(int x);
-	AOrientedBox analyze(const T & pos, int n);
+/// find orientaion and bbox
+	AOrientedBox analyze(const T & pos, int n,
+					const Matrix33F::RotateOrder & rod = Matrix33F::XYZ);
 	
 protected:
 	Matrix33F getOrientation(int n) const;
@@ -111,30 +113,14 @@ Matrix33F PrincipalComponents<T>::getOrientation(int n) const
 	*covarianceMatrix.m(2,0) = covarianceMatrix.M(0,2);
 	*covarianceMatrix.m(2,1) = covarianceMatrix.M(1,2);
 	*covarianceMatrix.m(2,2) = slave[5].result();
-/*	
-// is symmetric
-	Matrix33F covarianceMatrix;
-	*covarianceMatrix.m(0,0) = covarianceXX(n);
-	*covarianceMatrix.m(0,1) = covarianceXY(n);
-	*covarianceMatrix.m(0,2) = covarianceXZ(n);
-	*covarianceMatrix.m(1,0) = covarianceMatrix.M(0,1);
-	*covarianceMatrix.m(1,1) = covarianceYY(n);
-	*covarianceMatrix.m(1,2) = covarianceYZ(n);
-	*covarianceMatrix.m(2,0) = covarianceMatrix.M(0,2);
-	*covarianceMatrix.m(2,1) = covarianceMatrix.M(1,2);
-	*covarianceMatrix.m(2,2) = covarianceZZ(n);
-*/	
-	//float domegv;
-	//std::cout//<<"\n marix "<<covarianceMatrix
-	//<<"\n dominant eigen vec "<<covarianceMatrix.eigenVector(domegv);
-	//std::cout<<"\n dominent eigen val "<<domegv;
-	//std::cout<<"\n eigen vals "<<covarianceMatrix.eigenValues();
+
 	Vector3F egv;
 	return covarianceMatrix.eigenSystem(egv);
 }
 
 template<typename T>
-AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n)
+AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n,
+									const Matrix33F::RotateOrder & rod)
 {
 	Vector3F bar = Vector3F::Zero;
 	int i=0;
@@ -146,7 +132,8 @@ AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n)
 	
 	Matrix33F egs = getOrientation(n);
 	AOrientedBox r;
-	r.setOrientation(egs);
+/// order of components
+	r.setOrientation(egs, rod);
 	
 /// extent in local space
 	Matrix33F invspace(egs);
@@ -161,7 +148,7 @@ AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n)
 	r.setCenter(bar + offset);
 	
 	Vector3F ext(bb.distance(0) * .5f, bb.distance(1) * .5f, bb.distance(2) * .5f);
-	r.setExtent(ext);
+	r.setExtent(ext, rod);
 	
 /// rotate 45 degs
 	const Vector3F dx = egs.row(0);
