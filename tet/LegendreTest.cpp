@@ -6,7 +6,6 @@
  *  http://faculty.washington.edu/finlayso/ebook/bvp/OC/Legendre.htm
  *  http://www.mhtlab.uwaterloo.ca/courses/me755/web_chap5.pdf
  *  http://archive.lib.msu.edu/crcmath/math/math/l/l175.htm
- *  http://web.cs.iastate.edu/~cs577/handouts/orthogonal-polys.pdf
  *  
  *  Created by jian zhang on 7/14/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
@@ -21,20 +20,6 @@
 
 using namespace aphid;
 namespace ttg {
-
-const float LegendreTest::NormWeightF[11] = {
-1.f,
-1.f,
-.6666667f,
-.4f,
-.22857143f,
-.12698413f,
-.06926407f,
-.037296037f,
-.01989122f,
-.01053064f,
-.005542445f
-};
 
 LegendreTest::LegendreTest() 
 {}
@@ -54,7 +39,7 @@ float LegendreTest::evaluateExact(const float & x) const
 	//return (x*x - 1.0/3.0);
 	//return exp(x) * (x*x - 1.0 / 3.0);
 	//return exp(x) * (x*x*x - 3.0 *x / 5.0);
-	//return 1.1f + exp(x*.5) * cos(x*3); 
+	return 1.1f + .4 * exp(x*.5) * cos(x*3); 
 	return exp(x); 
 }
 
@@ -67,10 +52,11 @@ bool LegendreTest::init()
 	
 	//std::cout<<"\n test integral "<<calc::trapezIntegral(INTERVAL_A, INTERVAL_B, M_NUM_EVAL, m_exactEvaluate);
 	
-	computeLegendrePolynomials();
+	calc::legendreRules(M_NUM_EVAL, POLY_MAX_DEG, m_v, INTERVAL_A, INTERVAL_B);
+
 	computePipi();
 	
-	int m = 7, n = 6;
+	int m = 7, n = 5;
 	std::cout<<"\n deg "<<n<<" sample "<<m;
 	
 	const float dx = (INTERVAL_B - INTERVAL_A) / (float)(m-1);
@@ -86,7 +72,7 @@ bool LegendreTest::init()
 	
 	printValues("X", m, X);
 	printValues("Y", m, Y);
-	
+#if 0
 	for(i=0;i<m;++i) {
 		Px[i] = samplePolyValue(0, X[i]);
 	}
@@ -106,7 +92,7 @@ bool LegendreTest::init()
 		Px[i] = samplePolyValue(3, X[i]);
 	}
 	printValues("P3(x)", m, Px);
-		
+#endif
 /// interpolate y through out samples
 	for(i=0;i<M_NUM_EVAL;++i) {
 		m_approximateEvaluate[i] = calc::interpolate(m, Y, M_NUM_EVAL, INTERVAL_A + DX_SAMPLE * i,
@@ -131,21 +117,13 @@ float LegendreTest::samplePolyValue(int i, float x) const
 	return m_v[M_NUM_EVAL * i + j];
 }
 
-void LegendreTest::computeLegendrePolynomials()
-{
-	calc::legendreRules(M_NUM_EVAL, POLY_MAX_DEG, m_v, INTERVAL_A, INTERVAL_B);
-}
-
-float LegendreTest::sampleAt(int i) const
-{ return INTERVAL_A + DX_SAMPLE * i; }
-
 void LegendreTest::computePipi()
 {
 	float px2[M_NUM_EVAL];
 	int i, j;
 	for(i=0; i<=POLY_MAX_DEG; ++i) {
 		for(j=0;j<M_NUM_EVAL; ++j) {
-			px2[j] = m_v[M_NUM_EVAL * i + j]  * NormWeightF[i]; /// normalize
+			px2[j] = m_v[M_NUM_EVAL * i + j];
 			px2[j] *= px2[j]; /// <pi, pi>
 		}
 		
@@ -158,7 +136,7 @@ void LegendreTest::computePipi()
 	std::cout<<"\n test orthogonality";
 	
 	for(j=0;j<M_NUM_EVAL; ++j) {
-			px2[j] = m_v[M_NUM_EVAL * 1 + j]; /// normalize
+			px2[j] = m_v[M_NUM_EVAL * 1 + j];
 			px2[j] *= m_v[M_NUM_EVAL * 2 + j]; /// <pi, pi>
 	}
 	
@@ -175,7 +153,7 @@ void LegendreTest::computeCoeff(float * coeff, int n, const float * y,
 	int i, j;
 	for(i=0; i<=n; ++i) {
 		for(j=0;j<M_NUM_EVAL;++j) {
-			Px[j] = m_v[M_NUM_EVAL * i + j] * NormWeightF[i];
+			Px[j] = m_v[M_NUM_EVAL * i + j];
 			Px[j] *= y[j];
 		}
 			
@@ -184,7 +162,7 @@ void LegendreTest::computeCoeff(float * coeff, int n, const float * y,
 		//std::cout<<"\n c"<<i<<" "<<coeff[i];
 		coeff[i] /= pipi[i];
 		
-		std::cout<<"  c"<<i<<" /<pi,pi> "<<coeff[i];
+		std::cout<<"\n  c"<<i<<" "<<coeff[i];
 	}
 }
 
@@ -194,78 +172,9 @@ void LegendreTest::computeApproximated(float * yhat, int n, const float * coeff)
 	for(i=0;i<M_NUM_EVAL;++i) {
 		yhat[i] = 0.f;
 		for(j=0; j<=n; ++j) {
-			yhat[i] += coeff[j] * m_v[j*M_NUM_EVAL + i] * NormWeightF[j];
+			yhat[i] += coeff[j] * m_v[j*M_NUM_EVAL + i];// * calc::LegendreNormWeightF[j];
 		}
 	}
-}
-
-void LegendreTest::computePix(float * m_v, float * pipi, float * xpipi,
-					int m, int n, const float * x) const
-{
-	int i, k;
-	
-	float pm1 = 0.f, pm2 = 0.f;
-	for(k=0; k<=m;++k) {
-		for(i=0; i<n; ++i) {
-			if(k>1) {
-				pm1 = m_v[i*(m+1) + k - 1];
-				pm2 = m_v[i*(m+1) + k - 2];
-			}
-			
-			m_v[i*(m+1) + k] = computePi(k, pipi, xpipi, x[i], pm1, pm2);
-			
-			std::cout<<"\n p"<<k<<"(x)["<<i<<"] "<<m_v[i*(m+1) + k];
-			
-		}
-		
-		pipi[k] = integratePipi(m_v, k, m, n);
-		//xpipi[k] = integrateXpipi(m_v, m_x, k, m, n);
-		
-		std::cout<<"\n <p"<<k<<",p"<<k<<"> "<<pipi[k]
-				<<"\n <xp"<<k<<",p"<<k<<"> "<<xpipi[k];
-		
-	}
-}
-
-float LegendreTest::computePi(int k, const float * pipi, const float * xpipi, const float & x,
-								const float & pm1, const float & pm2) const
-{
-	if(k==0) 
-		return 1.f;
-		
-	if(k==1)
-		return x - xpipi[0] / pipi[0];
-/// orthogonal polynomial sequence		
-	return (x - xpipi[k-1] / pipi[k-1] ) * pm1 - pipi[k-1] / pipi[k-2] * pm2;
-	
-}
-
-float LegendreTest::integratePipi(const float * v, int k, int m, int n) const
-{
-	float c = 0.f;
-	int i = 0;
-	for(;i<n;++i)
-		c += v[i*(m+1) + k] * v[i*(m+1) + k];
-		
-	return c;
-}
-
-float LegendreTest::integrateXpipi(const float * v, const float * x, int k, int m, int n) const
-{
-	float c = 0.f;
-	int i = 0;
-	for(;i<n;++i)
-		c += x[i] * v[i*(m+1) + k] * v[i*(m+1) + k];
-		
-	return c;
-}
-
-void LegendreTest::equalSpacingNodes(int n, float * x) const
-{
-	float dx = (INTERVAL_B - INTERVAL_A) / (float)(n-1);
-	int i=0;
-	for(;i<n;++i)
-		x[i] = INTERVAL_A + dx * i;
 }
 
 void LegendreTest::draw(GeoDrawer * dr)

@@ -13,6 +13,21 @@ namespace aphid {
 
 namespace calc {
 
+static const float LegendreNormWeightF[11] = {
+1.f,
+1.f,
+.6666667f,
+.4f,
+.22857143f,
+.12698413f,
+.06926407f,
+.037296037f,
+.01989122f,
+.01053064f,
+.005542445f
+};
+
+/// http://web.cs.iastate.edu/~cs577/handouts/orthogonal-polys.pdf
 /// evalute 0 - n th legendre polynomials through interval [a, b] 
 /// m number of evaluation nodes
 /// v length of m * (n+1)

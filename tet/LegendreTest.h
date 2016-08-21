@@ -32,8 +32,6 @@ class LegendreTest : public Scene {
 /// integral of xpi(x)pi(x)
 	float m_xpipi[POLY_MAX_DEG+1];
 	
-	static const float NormWeightF[11];
-	
 public:
 	LegendreTest();
 	virtual ~LegendreTest();
@@ -43,8 +41,6 @@ public:
 	virtual void draw(aphid::GeoDrawer * dr);
 	
 private:
-	void equalSpacingNodes(int n, float * x) const;
-	void computeLegendrePolynomials();
 /// integral <pi, pi>
 	void computePipi();
 	
@@ -63,17 +59,7 @@ private:
 	void computeCoeff(float * coeff, int n, const float * y,
 						const float * pipi) const;
 	void computeApproximated(float * yhat, int n, const float * coeff) const;
-/// http://mathworld.wolfram.com/Gram-SchmidtOrthonormalization.html
-/// eq 24 recurrence relation
-	void computePix(float * m_v, float * pipi, float * xpipi,
-					int m, int n, const float * x) const;
-	float computePi(int k, const float * pipi, const float * xpipi, const float & x,
-					const float & pm1, const float & pm2) const;
-	float integratePipi(const float * v, int k, int m, int n) const;
-	float integrateXpipi(const float * v, const float * x, int k, int m, int n) const;
-
-/// equal spacing sample points
-	float sampleAt(int i) const;
+	
 /// Pi(x) sample pre-ccomputed i-th polynomial
 	float samplePolyValue(int i, float x) const;
 	
