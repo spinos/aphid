@@ -56,8 +56,8 @@ bool LegendreTest::init()
 
 	computePipi();
 	
-	int m = 7, n = 5;
-	std::cout<<"\n deg "<<n<<" sample "<<m;
+	int m = 4, n = 3;
+	std::cout<<"\n deg "<<n<<" measurement "<<m;
 	
 	const float dx = (INTERVAL_B - INTERVAL_A) / (float)(m-1);
 	

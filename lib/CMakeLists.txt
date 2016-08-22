@@ -94,6 +94,7 @@ ADD_LIBRARY (aphidMath STATIC
 ../shared/Plane.cpp
 ../shared/ViewCull.cpp
 ../shared/ANoise3.cpp
+../shared/Calculus.cpp
 )
 
 ADD_LIBRARY (aphidGeom STATIC 
