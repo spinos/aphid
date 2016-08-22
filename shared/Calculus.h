@@ -92,6 +92,8 @@ inline float trapezIntegral(const float & a, const float & b, int m, const float
 	return c;
 }
 
+/// http://mathfaculty.fullerton.edu/mathews/n2003/SimpsonsRule2DMod.html
+
 }
 
 }
