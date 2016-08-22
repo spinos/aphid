@@ -1,5 +1,6 @@
 #include <ai.h>
 #include <cstdio>
+#include <iostream>
 
 extern AtNodeMethods* MallardFeatherUVMethod;
 

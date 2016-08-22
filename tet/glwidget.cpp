@@ -18,6 +18,7 @@ GLWidget::GLWidget(ttg::Scene * sc, QWidget *parent) : Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
+	usePerspCamera();
 }
 //! [0]
 
@@ -29,8 +30,6 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {
 	m_scene->init();
-	if(m_scene->viewPerspective() )
-		usePerspCamera();
 	//connect(internalTimer(), SIGNAL(timeout()), this, SLOT(update()));
 }
 

@@ -23,7 +23,7 @@ const char * AdaptiveGridTest::titleStr() const
 { return "Adaptive Grid Test"; }
  
 bool AdaptiveGridTest::viewPerspective() const
-{ return true; }
+{ return false; }
 
 bool AdaptiveGridTest::init()
 {
