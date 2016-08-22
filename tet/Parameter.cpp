@@ -79,6 +79,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-n3") == 0 || strcmp(argv[i], "--noise3") == 0) {
 				m_operation = kNoise3;
 			}
+			if(strcmp(argv[i], "-lg") == 0 || strcmp(argv[i], "--legendre") == 0) {
+				m_operation = kLegendre;
+			}
 		}
 	}
 	
@@ -116,6 +119,7 @@ void Parameter::PrintHelp()
 	<<"\n -kd or --kdDistance    input_filename    test kd-tree distance field + adaptive grid"
 	<<"\n -vd or --viewDependent    test view dependent grid"
 	<<"\n -n3 or --noise3    test 3d noise"
+	<<"\n -lg or --legendre    legendre polynomial approximation"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"
 	<<"\n";

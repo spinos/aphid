@@ -32,7 +32,8 @@ public:
 		kAaptiveGrid = 12,
 		kKdistance = 13,
 		kViewDependentGrid = 14,
-		kNoise3 = 15
+		kNoise3 = 15,
+		kLegendre = 16
 	};
 	
 	Parameter(int argc, char *argv[]);

@@ -79,6 +79,7 @@ AdaptiveGridTest.h
 KDistanceTest.h
 VDGridTest.h
 Noise3Test.h
+LegendreTest.h
 Delaunay3D.h)
 
 set (SOURCE_FILES ../shared/Base3DView.cpp
@@ -120,6 +121,7 @@ AdaptiveGridTest.cpp
 KDistanceTest.cpp
 VDGridTest.cpp
 Noise3Test.cpp
+LegendreTest.cpp
 glwidget.cpp
 window.cpp
 main.cpp)
