@@ -8,6 +8,7 @@
  */
 
 #include "ANoise3.h"
+#include "AllMath.h"
 
 namespace aphid {
 
@@ -77,28 +78,24 @@ float ANoise3::FractalF(const float * v,
 float ANoise3::Fbm(const float * v,
 						const float * o,
 						const float & scale,
-						const float & motion,
 						const int & octaves,
 						const float & lacunarity,
-						const float & gain,
-						const float & gamma)
+						const float & gain)
 {
-	const float sx = v[0] * freq + o[0] * 8.f;
-	const float sy = v[1] * freq + o[1] * 8.f;
-	const float sz = v[2] * freq + o[2] * 8.f;
+	const float sx = v[0] * scale + o[0] * 8.f;
+	const float sy = v[1] * scale + o[1] * 8.f;
+	const float sz = v[2] * scale + o[2] * 8.f;
 	
-	float c = Trilinear(sx, sy, sz) * gain;
+	float c = Trilinear(sx, sy, sz);
 	
 	float f = 1.f;
 	int i=1;
 	for(;i<octaves;++i) {
 		f *= lacunarity;
-		c += (Trilinear(sx*f, sy*f, sz*f) - .5f);
-		c *= gain;
+		c += (Trilinear(sx*f, sy*f, sz*f) - .5f) * gain;
 	}
 	
-/// Vout = Vin^gamma
-	return pow(Clamp01(c), gamma);
+	return c;
 }
 
 }

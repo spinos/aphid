@@ -40,11 +40,9 @@ public:
 	static float Fbm(const float * v,
 						const float * o,
 						const float & scale,
-						const float & motion,
 						const int & octaves = 4,
 						const float & lacunarity = 1.33f,
-						const float & gain = .5f,
-						const float & gamma = 1.f);
+						const float & gain = .5f);
 	
 }; 
  
