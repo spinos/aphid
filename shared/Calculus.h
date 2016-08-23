@@ -47,6 +47,12 @@ float trapezIntegral(const float & a, const float & b,
 	int m, const float * y);
 
 /// http://mathfaculty.fullerton.edu/mathews/n2003/SimpsonsRule2DMod.html
+/// http://mathfaculty.fullerton.edu/mathews/n2003/GaussianQuadMod.html
+/// https://en.wikipedia.org/wiki/Adaptive_Simpson%27s_method
+/// http://www.math.pitt.edu/~sussmanm/2070Fall07/lab_10/index.html
+/// http://ab-initio.mit.edu/wiki/index.php/Cubature
+/// http://math2.uncc.edu/~shaodeng/TEACHING/math5172/Lectures/Lect_15.PDF
+/// https://people.sc.fsu.edu/~jburkardt/cpp_src/product_rule/product_rule.html
 
 }
 
