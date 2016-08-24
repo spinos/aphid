@@ -160,6 +160,7 @@ void AGraph<Tn, Te>::extractEdges(sdb::Sequence<sdb::Coord2> * a)
 		Te * e = &m_edges[i];
 		e->vi = a->key();
 		e->val = 1e9f;
+		e->minVal = 1e9f;
 		
 		i++;
 		a->next();

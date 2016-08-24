@@ -11,6 +11,7 @@
 #include "AGraph.h"
 #include "BDistanceFunction.h"
 #include <Array.h>
+#include <Calculus.h>
 #include <map>
 
 namespace aphid {
@@ -40,6 +41,7 @@ struct IDistanceEdge {
 	sdb::Coord2 vi;
 	float len;
 	float val;
+	float minVal;
 };
  
 class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
@@ -133,6 +135,79 @@ protected:
 		
 	}
 	
+///          |						
+/// a----x---|-----b
+///          |
+///                  0.5
+///       0.25                 0.75
+/// 0.125      0.375     0.625      0.875
+/// measure distance at 7 x points
+/// as minVal of edge if below threshold
+	template<typename Tf>
+	void measureDistanceToEdge(Tf * func, const float & shellThickness,
+								IDistanceEdge * e,
+								const Vector3F & ca,
+								const Vector3F & cb,
+								const float & thre)
+	{
+		int i;
+		for(i=0; i<8;++i) {
+			float md = func->calculateDistance(ca + cb * calc::UniformlySpacingRecursive16Nodes[i]) 
+										- shellThickness;
+			if(i<1) {
+/// first is mid point
+				e->val = md;
+			}
+			
+			if(md <= thre) {
+/// close enough
+				e->minVal = md;
+				return;
+			}
+		}
+		
+	}
+
+/// for each edge has both node marked on front
+/// if distance less than |a,b| / 16
+/// edge intersects front, march will be blocked	
+	template<typename Tf>
+	void measureFrontEdges(Tf * func, const float & shellThickness)
+	{
+		Vector3F a, b;
+		float thre;
+		const DistanceNode * v = nodes();
+		IDistanceEdge * es = edges();
+		const int ne = numEdges();
+		for(int i=0; i< ne;++i) {
+			
+			IDistanceEdge & e = es[i];
+			
+			const DistanceNode & v1 = v[e.vi.x];
+			const DistanceNode & v2 = v[e.vi.y];
+			
+/// both on front
+			if(v1.label == sdf::StFront 
+					&& v2.label == sdf::StFront) {			
+				
+				a = v1.pos;
+				b = v2.pos - a;
+				thre = b.length() * .0625f;
+				
+				if(v1.val <= thre)
+					e.minVal = v1.val;
+					
+				if(v2.val <= thre)
+					e.minVal = v2.val;
+					
+				measureDistanceToEdge(func, shellThickness,
+										e, a, b, thre);
+				
+			}
+		}
+
+	}
+	
 /// edges marked to estimate error
 	void clearDirtyEdges();
 	void addDirtyEdge(const int & a, const int & b);
@@ -212,7 +287,7 @@ private:
 /// move node to front to prevent very close cut
 	bool snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 						const IDistanceEdge & e);
-						
+
 };
 
 }

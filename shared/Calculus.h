@@ -13,6 +13,13 @@ namespace aphid {
 
 namespace calc {
 
+static const float UniformlySpacingRecursive16Nodes[16] = {
+.5f,
+.25f, .75f,
+.125f, .375f, .625f, .875f,
+.0625f, .1875f, .3125f, .4375f, .5625f, .6875f, .8125f, .9375f
+};
+
 static const float LegendreNormWeightF[11] = {
 1.f,
 1.f,
