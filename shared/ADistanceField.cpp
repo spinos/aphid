@@ -133,11 +133,12 @@ void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
 			vj = eg.vi.y;
 			
 		DistanceNode & B = nodes()[vj];
-	
+/// do not cross front
+		if(eg.minVal > 1.f) {
 /// do not visit inside
-		if( B.val > 0.f
-			&& B.stat == sdf::StFar) 
-			heap[vj] = 0;
+			if( B.val > 0.f && B.stat == sdf::StFar) 
+				heap[vj] = 0;
+		}
 	}
 }
 
@@ -327,6 +328,8 @@ float ADistanceField::reconstructError(const IDistanceEdge * edge) const
 	
 	const DistanceNode & v1 = nodes()[edge->vi.x];
 	const DistanceNode & v2 = nodes()[edge->vi.y];
+	
+/// must cross front		
 	if(v1.val * v2.val >= 0.f)
 		return 0.f;
 		
@@ -341,6 +344,24 @@ void ADistanceField::shrinkFront(const float & x)
 		DistanceNode & d = nodes()[i];
 		if(d.val > x)
 			d.val -= x;
+	}
+}
+
+void ADistanceField::updateMinMaxError()
+{
+	m_mxErr = 0.f;
+	m_mnErr = 1e8f;
+		
+	const IDistanceEdge * es = edges();
+	const int ne = numEdges();
+	for(int i=0; i< ne;++i) {
+		
+		float err = reconstructError(&es[i]);
+		if(m_mxErr < err)
+			m_mxErr = err;
+		if(m_mnErr > err)
+			m_mnErr = err;
+		
 	}
 }
 

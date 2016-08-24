@@ -43,7 +43,7 @@ public:
 			}
 		}
 		
-		calculateDistanceOnFront(func, shellThickness);
+		messureFrontNodes(func, shellThickness);
 		fastMarchingMethod();
 	}
 	

@@ -117,7 +117,7 @@ protected:
 	void markUnknownNodes();
 	
 	template<typename Tf>
-	void calculateDistanceOnFront(Tf * func, const float & shellThickness)
+	void messureFrontNodes(Tf * func, const float & shellThickness)
 	{
 		int c = 0;
 		const int n = numNodes();
@@ -174,6 +174,7 @@ protected:
 	template<typename Tf>
 	void measureFrontEdges(Tf * func, const float & shellThickness)
 	{
+		int c = 0;
 		Vector3F a, b;
 		float thre;
 		const DistanceNode * v = nodes();
@@ -194,18 +195,23 @@ protected:
 				b = v2.pos - a;
 				thre = b.length() * .0625f;
 				
-				if(v1.val <= thre)
-					e.minVal = v1.val;
+				e.minVal = v1.val;
 					
 				if(v2.val <= thre)
 					e.minVal = v2.val;
 					
 				measureDistanceToEdge(func, shellThickness,
-										e, a, b, thre);
+										&e, a, b, thre);
+				
+/// relative to thre
+				e.minVal /= thre;
+				if(e.minVal <= 1.f)
+					c++;
 				
 			}
 		}
-
+		std::cout<<"\n n edge cross front "<<c;
+		
 	}
 	
 /// edges marked to estimate error
@@ -243,6 +249,7 @@ protected:
 
 	void snapEdgeToFront();
 	int countFrontEdges() const;
+	void updateMinMaxError();
 					
 private:
 	void propagate(std::map<int, int > & heap, const int & i);

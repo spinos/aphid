@@ -42,7 +42,7 @@ bool VDGridTest::init()
 	
 #define MAX_BUILD_LEVEL 5
 #define MAX_BUILD_ERROR .17f
-	m_msh.build<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
+	m_msh.adaptiveBuild<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	
 	m_msh.triangulateFront();
 	

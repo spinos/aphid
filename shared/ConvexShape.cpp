@@ -127,15 +127,14 @@ BoundingBox Sphere::calculateBBox() const
 Domain::FunctionType Sphere::FunctionTypeId = Domain::fnSphere;
 
 float Sphere::distanceTo(const Vector3F & p) const
-{ return p.distanceTo(m_p) - m_r; }
+{
+/// to front 
+	return Absolute<float>(p.distanceTo(m_p) - m_r); 
+}
 
 Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
 {
-	Vector3F res;
-	//if(v.length() < 1e-5)
-	//	std::cout<<"\n low v"<<v;
-
-	res = m_p + v.normal() * m_r;
+	Vector3F res = m_p + v.normal() * m_r;
 		
 	if(localP) *localP = res;
 	return res;

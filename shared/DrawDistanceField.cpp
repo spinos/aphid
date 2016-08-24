@@ -70,7 +70,7 @@ void DrawDistanceField::drawErrors(const ADistanceField * fld,
 	const DistanceNode * v = fld->nodes();
 	const IDistanceEdge * e = fld->edges();
 	
-	glColor3f(1.f, 0.f, 0.f);
+	float red;
 				
 	glBegin(GL_LINES);
 	edgeInds->begin();
@@ -79,7 +79,10 @@ void DrawDistanceField::drawErrors(const ADistanceField * fld,
 		const sdb::Coord2 & ei = edgeInds->key();
 		const IDistanceEdge * ae = fld->edge(ei.x, ei.y );
 		if(ae) {
-			if(fld->reconstructError(ae) > eps) {
+			red = fld->reconstructError(ae);
+			if(red > eps) {
+				red = (red - eps) / eps;
+				glColor3f(red, 1.f - red, 0.f);
 				
 				glVertex3fv((const float *)&v[ei.x].pos);
 				glVertex3fv((const float *)&v[ei.y].pos);

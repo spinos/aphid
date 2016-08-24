@@ -27,7 +27,7 @@ public:
 /// levelLimit < adaptive grid maxLevel
 /// threshold is min error distance triggers next level
 	template<typename Tf>
-	void build(Tf * distanceFunc,
+	void adaptiveBuild(Tf * distanceFunc,
 				const int & levelLimit, 
 				const float & threshold)
 	{
@@ -39,7 +39,8 @@ public:
 		
 		calculateDistance<Tf>(distanceFunc, 0.f);
 		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
-		estimateError<Tf>(distanceFunc, 0.f);
+		updateMinMaxError();
+		//estimateError<Tf>(distanceFunc, 0.f);
 		
 		verbose();
 		
@@ -56,7 +57,8 @@ public:
 			
 			calculateDistance<Tf>(distanceFunc, 0.f);
 			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
-			estimateError<Tf>(distanceFunc, 0.f);
+			updateMinMaxError();
+			//estimateError<Tf>(distanceFunc, 0.f);
 			
 			verbose();
 		
@@ -93,7 +95,8 @@ public:
 			}
 		}
 		
-		calculateDistanceOnFront(func, shellThickness);
+		messureFrontNodes(func, shellThickness);
+		measureFrontEdges(func, shellThickness);
 		fastMarchingMethod();
 		
 		markInsideOutside(findFarInd() );

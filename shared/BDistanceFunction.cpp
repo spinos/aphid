@@ -60,8 +60,6 @@ float BDistanceFunction::calculateDistance(const Vector3F & p)
 		if(mnd > d)
 			mnd = d;
 			
-		if(mnd < 0.f)
-			return mnd;
 	}
 	return mnd;
 }
