@@ -118,6 +118,7 @@ public:
 	
 	static Domain::FunctionType FunctionTypeId;
 	bool intersectBBox(const BoundingBox & b) const;
+	float rayIntersect(const Ray & r) const;
 	
 };
 
@@ -188,6 +189,8 @@ public:
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
 	
 	bool intersectBBox(const BoundingBox & b) const;
+	
+	float rayIntersect(const Ray & r) const;
 	
 };
 

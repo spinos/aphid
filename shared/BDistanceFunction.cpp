@@ -64,4 +64,25 @@ float BDistanceFunction::calculateDistance(const Vector3F & p)
 	return mnd;
 }
 
+float BDistanceFunction::calculateIntersection(const Vector3F & a,
+								const Vector3F & b)
+{
+	Ray r(a, b);
+	float md = 1e8f, d;
+	std::vector<Domain *>::iterator it = m_domains.begin();
+	for(;it!=m_domains.end();++it) {
+		
+		d = (*it)->rayIntersect(r);
+		
+		if(md > d)
+			md = d;
+			
+	}
+	
+	if(md > .99999e8f)
+		return -1;
+		
+	return md;
+}
+
 }

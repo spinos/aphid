@@ -142,7 +142,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
-	const float r = g->levelCellSize(level) * .05f;
+	const float r = g->levelCellSize(level) * .1f;
 
 	BoundingBox dirtyBx;
 	int c = 0;

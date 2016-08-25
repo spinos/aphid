@@ -53,11 +53,29 @@ void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr)
 	for(int i = 0;i<ne;++i) {
 		const IDistanceEdge & ei = e[i];
 		
+		if(ei.cx>=0.f)
+			dr->setColor(1.f, 0.f, 0.f);
+		else
+			dr->setColor(0.f, 1.f, 0.f);
+			
 		dr->vertex(v[ei.vi.x].pos);
 		dr->vertex(v[ei.vi.y].pos);
 		
 	}
 	glEnd();
+	
+	return;
+	for(int i = 0;i<ne;++i) {
+		const IDistanceEdge & ei = e[i];
+		std::cout<<" ecx"<<ei.cx;
+		if(ei.cx>=0.f) {
+			
+			dr->cube(v[ei.vi.x].pos * (1.f - ei.cx)
+						+ v[ei.vi.y].pos * ei.cx
+			      , m_nodeDrawSize);
+		}
+		
+	}
 }
 	
 const float & DrawDistanceField::nodeDrawSize() const

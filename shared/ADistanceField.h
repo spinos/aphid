@@ -41,7 +41,6 @@ struct IDistanceEdge {
 	sdb::Coord2 vi;
 	float len;
 	float val;
-	float minVal;
 	float cx;
 };
  
@@ -138,50 +137,19 @@ protected:
 		
 	}
 	
-///          |						
-/// a----x---|-----b
-///          |
+///         |						
+/// a-------x---->b
+///         |
 ///                  0.5
-///       0.25                 0.75
-/// 0.125      0.375     0.625      0.875
-/// measure distance at 7 x points
-/// as minVal of edge if below threshold
-	template<typename Tf>
-	void measureDistanceToEdge(Tf * func, const float & shellThickness,
-								IDistanceEdge * e,
-								const Vector3F & ca,
-								const Vector3F & cb,
-								const float & thre)
-	{
-		int i;
-		for(i=0; i<8;++i) {
-			float mx = calc::UniformlySpacingRecursive16Nodes[i];
-			float md = func->calculateDistance(ca + cb * mx) - shellThickness;
-			
-			if(i<1) {
-/// first is mid point
-				e->val = md;
-			}
-			
-			if(md <= thre) {
-/// close enough
-				e->minVal = md;
-				e->cx = mx;
-				return;
-			}
-		}
-		
-	}
-
+/// find x if a->b cross front
 /// for each edge has both node marked on front
-/// if distance less than |a,b| / 16
-/// edge intersects front, march will be blocked	
+/// find intersect point cx
+/// if edge intersects front, march will be blocked	
 	template<typename Tf>
 	void measureFrontEdges(Tf * func, const float & shellThickness)
 	{
 		int c = 0;
 		Vector3F a, b;
-		float thre;
 		const DistanceNode * vs = nodes();
 		IDistanceEdge * es = edges();
 		m_dirtyEdges.begin();
@@ -194,35 +162,16 @@ protected:
 			
 /// both on front
 			if(v1.label == sdf::StFront 
-					&& v2.label == sdf::StFront) {			
-				
+					&& v2.label == sdf::StFront) {	
+					
 				a = v1.pos;
-				b = v2.pos - a;
-				thre = e.len * .0625f;
+				b = v2.pos;
+				e.val = func->calculateDistance((a + b) * .5f) - shellThickness;
 				
-				e.minVal = 1e9f;
+				e.cx = func->calculateIntersection(a, b);
 				
-				if(Absolute<float>(v1.val) <= thre)
-					e.minVal = Absolute<float>(v1.val);
-					
-				if(Absolute<float>(v2.val) <= thre)
-					e.minVal = Absolute<float>(v2.val);
-
-/// cross front at
-				e.cx = .5f;
-				if(Absolute<float>(v1.val) <= thre)
-					e.cx = 0.f;
-				if(Absolute<float>(v2.val) <= thre)
-					e.cx = 1.f;
-					
-				measureDistanceToEdge(func, shellThickness,
-										&e, a, b, thre);
-				
-/// relative to thre
-				e.minVal /= thre;
-				if(e.minVal <= 1.f)
+				if(e.cx >= 0.f)
 					c++;
-				
 			}
 			
 			m_dirtyEdges.next();

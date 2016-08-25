@@ -27,6 +27,7 @@ public:
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & bx);
 	virtual float distanceTo(const Vector3F & pref);
+	virtual float rayIntersect(const Ray & r);
 	
 };
 
@@ -57,5 +58,9 @@ float NTreeDomain<T, Tn >::distanceTo(const Vector3F & pref)
 	m_engine.closestToPoint(m_tree, &m_closestPointCtx ); 
 	return m_closestPointCtx._distance;
 }
+
+template<typename T, typename Tn>
+float NTreeDomain<T, Tn >::rayIntersect(const Ray & r)
+{ return 1e8f; }
 
 }

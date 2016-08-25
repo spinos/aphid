@@ -9,6 +9,7 @@
 
 #include "ConvexShape.h"
 #include <Quantization.h>
+#include <line_math.h>
 #include <cmath>
 namespace aphid {
     
@@ -142,6 +143,66 @@ Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
 
 bool Sphere::intersectBBox(const BoundingBox & b) const
 { return b.distanceTo(m_p) <= m_r; }
+
+///         t1          tmax
+/// a-------e----d------b
+///          \   |
+///           r  |
+///            \ |
+///              c 
+float Sphere::rayIntersect(const Ray & r) const
+{
+	float cd = distancePointLine(m_p, r.m_origin, r.destination() );
+/// no intersect	
+	if(cd > m_r)
+		return 1e8f;
+		
+/// proj c on line
+	Vector3F pd;
+	projectPointLineSegment(pd, cd, m_p, r.m_origin, r.destination() );
+	
+	const Vector3F vac = m_p - r.m_origin;
+	const float ac = vac.length();
+	
+	float ad = vac.dot(r.m_dir); 
+	float ae;
+	
+/// c is behind a
+	if(ad <= 0.f) {
+		if(ac > m_r)
+			return 1e8f;
+			
+/// on sphere
+		else if(ac == m_r)
+			return 0.f;
+	
+/// a inside
+/// proj c on line
+		float d = sqrt(m_r * m_r - cd * cd);
+		Vector3F pe = pd + r.m_dir *d;
+		
+		ae = (pe - r.m_origin).length();
+		if(ae > r.m_tmax )
+			return 1e8f;
+			
+		return ae / r.m_tmax;
+	}
+	
+	float ed = 0.f;
+	
+	if(m_r - cd > 1e-3f)
+		ed = sqrt(m_r*m_r - cd*cd);
+	
+/// first hit
+	ae = ad - ed;
+	if(ae <= 0.f)
+		return 0.f;
+		
+	if(ae > r.m_tmax)
+		return 1e8f;
+	
+	return ae / r.m_tmax;
+}
 
 Cube::Cube() {}
 
@@ -286,6 +347,9 @@ Vector3F Box::supportPoint(const Vector3F & v, Vector3F * localP) const
 
 bool Box::intersectBBox(const BoundingBox & b) const
 { return false; }
+
+float Box::rayIntersect(const Ray & r) const
+{ return 1e8f; }
 
 Capsule::Capsule() {}
 

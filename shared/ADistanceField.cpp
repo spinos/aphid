@@ -134,7 +134,7 @@ void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
 			
 		DistanceNode & B = nodes()[vj];
 /// do not cross front
-		if(eg.minVal > 1.f) {
+		if(eg.cx < 0.f) {
 /// do not visit inside
 			if( B.val > 0.f && B.stat == sdf::StFar) 
 				heap[vj] = 0;
@@ -293,7 +293,7 @@ void ADistanceField::snapEdgeToFront()
 		
 /// cross front
 		if(v1.val * v2.val < 0.f) {			
-			snapNodeToFront(v1, v2, e);			
+			snapNodeToFront(v1, v2, e);
 		}
 	}
 }
@@ -326,7 +326,7 @@ float ADistanceField::reconstructError(const IDistanceEdge * edge) const
 	if(edge->val > 1e8f)
 		return 0.f;
 		
-	if(edge->minVal > 1.f)
+	if(edge->cx < 0.f)
 		return 0.f;
 	
 	const DistanceNode & v1 = nodes()[edge->vi.x];
@@ -335,8 +335,8 @@ float ADistanceField::reconstructError(const IDistanceEdge * edge) const
 /// must cross front		
 	if(v1.val < 0.f && v2.val < 0.f)
 		return 0.f;
-	if(v1.val * v2.val > 0.f)
-		return 0.f;
+	//if(v1.val * v2.val > 0.f)
+	//	return 0.f;
 	
 	if(v1.label == sdf::StFront 
 					&& v2.label == sdf::StFront)
@@ -390,7 +390,7 @@ void ADistanceField::updateMinMaxError()
 void ADistanceField::setFrontEdgeSign()
 {
 std::cout<<"\n ADistanceField::setFrontEdgeSign() begin"<<std::endl;
-	//int c = 0;
+	int c = 0;
 	//float s;
 	const DistanceNode * vs = nodes();
 	IDistanceEdge * es = edges();
@@ -412,39 +412,21 @@ std::cout<<"\n ADistanceField::setFrontEdgeSign() begin"<<std::endl;
 		IDistanceEdge & e = es[j];
 			
 /// cross front
-		if(v1.val * v2.val < 0.f) {
-			
+		
 			float o = e.val;
 			
-/// a --> b
-			if(v1.val > v2.val) {
-				if(e.cx < .5f)
-					e.val = -e.val;
-				else if(e.cx==.5f) 
-					SameSign<float>(e.val, v1.val*.5f + v2.val * .5f);
-			}
-			else {
-				if(e.cx > .5f)
-					e.val = -e.val;
-				else if(e.cx==.5f) 
-					SameSign<float>(e.val, v1.val*.5f + v2.val * .5f);
-			}
+			SameSign<float>(e.val, v1.val*.5f + v2.val * .5f);
 			
 			if(o*e.val < 0) {
-				
+				//std::cout<<"\n e"<<reconstructError(&e);
+				c++;
 			}
 			
-			//c++;
-		}
-		else if(v1.val<0.f) {
-			e.val = -e.val;
-			//std::cout<<"\n e"<<reconstructError(&e);
-		}
 		}
 		
 		m_dirtyEdges.next();
 	}
-	//std::cout<<"\n n edge cross "<<c;
+	std::cout<<"\n n edge cross "<<c;
 std::cout<<"\n ADistanceField::setFrontEdgeSign() end"<<std::endl;	
 }
 
@@ -453,7 +435,7 @@ void ADistanceField::printEdge(const IDistanceEdge * e) const
 	const sdb::Coord2 i = e->vi;
 	const DistanceNode & v1 = nodes()[i.x];
 	const DistanceNode & v2 = nodes()[i.y];
-	std::cout<<"\n "<<v1.val<<" "<<e->val<<" "<<v2.val<<" "<<e->cx<<" "<<e->minVal<<" "<<e->len;
+	std::cout<<"\n "<<v1.val<<" "<<e->val<<" "<<v2.val<<" "<<e->cx<<" "<<" "<<e->len;
 }
 
 void ADistanceField::printErrEdges(const float & thre)

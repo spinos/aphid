@@ -34,6 +34,17 @@ inline bool distancePointLineSegment(float & d,
 	return true;
 }
 
+///      p0
+///      |
+///      d
+///      |
+///  p1->q-------p2
+///
+///      p0
+///      |
+///      d
+///      |
+///      q<------p1-----------p2
 inline void projectPointLineSegment(Vector3F & q,
 						const float & d,
 						const Vector3F & P0, 
@@ -43,7 +54,10 @@ inline void projectPointLineSegment(Vector3F & q,
 	float lq1 = sqrt(v10.length2() - d * d);
 	Vector3F v12 = P2 - P1;
 	v12.normalize();
-	q = P1 + v12 * lq1;
+	if(v10.dot(v12) > 0 )
+		q = P1 + v12 * lq1;
+	else
+		q = P1 - v12 * lq1;
 }
 
 // http://mathworld.wolfram.com/SkewLines.html

@@ -31,6 +31,9 @@ public:
 /// limit distance test of all domains
 	void setDomainDistanceRange(const float & x);
 	float calculateDistance(const Vector3F & p);
+/// closest intersect v a->b, alpha of cross
+	float calculateIntersection(const Vector3F & a,
+								const Vector3F & b);
 	
 	template<typename Ts>
 	bool intersect(const Ts * a, const float & shellThickness) const

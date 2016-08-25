@@ -23,6 +23,7 @@ public:
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & bx);
 	virtual float distanceTo(const Vector3F & pref);
+	virtual float rayIntersect(const Ray & r);
 	
 };
 
@@ -49,6 +50,10 @@ bool ConvexDomain<T>::broadphaseIntersect(const BoundingBox & bx)
 template<typename T>
 float ConvexDomain<T>::distanceTo(const Vector3F & pref)
 { return m_shape->distanceTo(pref); }
+
+template<typename T>
+float ConvexDomain<T>::rayIntersect(const Ray & r)
+{ return m_shape->rayIntersect(r); }
 
 typedef ConvexDomain<cvx::Sphere> SphereDomain;
 typedef ConvexDomain<cvx::Box> BoxDomain;
