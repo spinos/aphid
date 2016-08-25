@@ -135,6 +135,13 @@ inline T MixClamp01F(const T & a, const T & b, const float & w)
 	return a * (1.f - w) + b * w;
 }
 
+template<typename T>
+inline void SameSign(T & a, const T & b)
+{
+	if(a * b < 0)
+		a = -a;
+}
+
 }
 #endif        //  #ifndef ALLMATH_H
 

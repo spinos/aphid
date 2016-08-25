@@ -71,6 +71,7 @@ void AdaptiveBccGrid3::build(ADistanceField * fld)
 		
 		next();
 	}
+	std::cout<<"\n AdaptiveBccGrid3::build"<<std::endl;
 	countNodes();
 	
 }

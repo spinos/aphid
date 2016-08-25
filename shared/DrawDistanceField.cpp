@@ -67,11 +67,13 @@ void DrawDistanceField::drawErrors(const ADistanceField * fld,
 					sdb::Sequence<sdb::Coord2 > * edgeInds,
 					const float & eps)
 {
+	//std::cout<<"\n DrawDistanceField::drawErrors begin "<<eps
+	//		<<" "<<edgeInds->size();
+			
 	const DistanceNode * v = fld->nodes();
-	const IDistanceEdge * e = fld->edges();
 	
 	float red;
-				
+	int c = 0;
 	glBegin(GL_LINES);
 	edgeInds->begin();
 	while(!edgeInds->end() ) {
@@ -86,13 +88,15 @@ void DrawDistanceField::drawErrors(const ADistanceField * fld,
 				
 				glVertex3fv((const float *)&v[ei.x].pos);
 				glVertex3fv((const float *)&v[ei.y].pos);
-				
+				c++;
 			}
 		}
 		
 		edgeInds->next();
 	}
 	glEnd();
+	//std::cout<<"\n draw err edge "<<c;
+	
 }
 
 }

@@ -55,7 +55,7 @@ void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 {
 	BccNode3 * redN = find(15);
 	if(cellCoord.w > 0) {
-		findRedValueFrontBlue(redN, cellCoord, grid, fld);
+		//findRedValueFrontBlue(redN, cellCoord, grid, fld);
 		return;
 	}
 		
@@ -81,6 +81,7 @@ void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
 		insert(i + 6, ni);
 		
 	}
+
 }
 
 void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
@@ -125,10 +126,10 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 		ni->prop = sdb::gdt::NYellow;
 		const BccNode3 * neiRedN = nei->find(15);
 		ni->pos = (redP + neiRedN->pos ) * .5f;
-		const IDistanceEdge * eg = fld->edge(redN->index, neiRedN->index);
-		if(eg)
-			ni->val = eg->val;
-		else
+		//const IDistanceEdge * eg = fld->edge(redN->index, neiRedN->index);
+		//if(eg)
+		//	ni->val = eg->val;
+		//else
 			ni->val = 1e9f;
 		ni->index = -1;
 		insert(15000 + i, ni);
@@ -152,10 +153,10 @@ void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
 		BccNode3 * b2 = blueNode(sdb::gdt::TwelveBlueBlueEdges[i][1] - 6,
 								cellCoord, grid);
 		ni->pos = (b1->pos + b2->pos ) * .5f;
-		const IDistanceEdge * eg = fld->edge(b1->index, b2->index);
-		if(eg)
-			ni->val = eg->val;
-		else
+		//const IDistanceEdge * eg = fld->edge(b1->index, b2->index);
+		//if(eg)
+		//	ni->val = eg->val;
+		//else
 			ni->val = 1e9f;
 		ni->index = -1;
 		insert(ni->key, ni);
@@ -428,9 +429,12 @@ void BccCell3::findRedValueFrontBlue(BccNode3 * redN,
 								cellCoord, grid);
 		BccNode3 * b2 = blueNode(sdb::gdt::FourOppositeBluePair[i][1],
 									cellCoord, grid);
+		if(b1 && b2) {
 		const IDistanceEdge * eg = fld->edge(b1->index, b2->index);
 		if(eg) 
 			redN->val = eg->val;
+		}
+			
 	}
 }
 

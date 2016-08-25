@@ -40,7 +40,6 @@ public:
 		calculateDistance<Tf>(distanceFunc, 0.f);
 		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 		updateMinMaxError();
-		//estimateError<Tf>(distanceFunc, 0.f);
 		
 		verbose();
 		
@@ -48,9 +47,11 @@ public:
 		
 		int level = 0;
 		while(level < levelLimit && curErr > threshold) {
-		
+			
+			std::cout<<"\n subdiv level"<<level<<std::endl;
 			subdivideGridByError(threshold, level);
 			
+			std::cout<<"\n build grid level"<<level<<std::endl;
 			buildGrid();
 			buildMesh();
 			buildGraph();
@@ -58,7 +59,6 @@ public:
 			calculateDistance<Tf>(distanceFunc, 0.f);
 			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 			updateMinMaxError();
-			//estimateError<Tf>(distanceFunc, 0.f);
 			
 			verbose();
 		
@@ -67,6 +67,9 @@ public:
 			std::cout<<"\n build to level "<<level<<"\n";
 			std::cout.flush();
 		}
+		
+		printErrEdges(threshold);
+		
 	}
 	
 	void buildGrid();
@@ -97,9 +100,10 @@ public:
 		
 		messureFrontNodes(func, shellThickness);
 		measureFrontEdges(func, shellThickness);
-		fastMarchingMethod();
-		
+		fastMarchingMethod();		
 		markInsideOutside(findFarInd() );
+		setFrontEdgeSign();
+		
 	}
 	
 	void verbose();

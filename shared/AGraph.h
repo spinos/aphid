@@ -220,12 +220,29 @@ template<typename Tn, typename Te>
 int AGraph<Tn, Te>::edgeIndex(const int & v1, const int & v2) const
 {
 	if(numEdgeIndices() < 1) return -1;
+	if(v1>= numNodes() ) {
+		std::cout<<"\n AGraph invalid node ind "<<v1;
+		return -1;
+	}
+	if(v2>= numNodes() ) {
+		std::cout<<"\n AGraph invalid node ind "<<v2;
+		return -1;
+	}
+	
 	const Tn & A = nodes()[v1];
 	const int endj = edgeBegins()[v1+1];
 	int j = edgeBegins()[v1];
 	for(;j<endj;++j) {
 		
+		if(j>numEdgeIndices()-1 ) {
+			std::cout<<"\n AGraph invalid edge ind "<<j;
+		}
+		
 		int k = edgeIndices()[j];
+		
+		if(k>numEdges()-1 ) {
+			std::cout<<"\n AGraph invalid edge i "<<k;
+		}
 
 		const Te & eg = edges()[k];
 		
@@ -239,8 +256,10 @@ template<typename Tn, typename Te>
 const Te * AGraph<Tn, Te>::edge(const int & v1, const int & v2) const
 { 
 	int k = edgeIndex(v1, v2); 
-	if(k<0)
+	if(k<0) {
+		//std::cout<<"\n invalid edge ("<<v1<<","<<v2<<")"<<std::endl;
 		return NULL;
+	}
 		
 	return &edges()[k];
 }

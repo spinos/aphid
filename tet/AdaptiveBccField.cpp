@@ -145,7 +145,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	const float r = g->levelCellSize(level) * .05f;
 
 	BoundingBox dirtyBx;
-	
+	int c = 0;
 	sdb::Sequence<sdb::Coord2 > * egs = dirtyEdges();
 	egs->begin();
 	while(!egs->end() ) {
@@ -164,6 +164,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 			dirtyBx.expandBy(p2, r);
 			
 			g->subdivideToLevel(dirtyBx, level+1, &divided);
+			c++;
 		}
 		}
 		
@@ -173,6 +174,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 	enforceBoundary(divided);
 	divided.clear();
 
+	std::cout<<"\n n split edge "<<c;
 }
 
 int AdaptiveBccField::findFarInd()

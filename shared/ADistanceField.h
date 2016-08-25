@@ -42,6 +42,7 @@ struct IDistanceEdge {
 	float len;
 	float val;
 	float minVal;
+	float cx;
 };
  
 class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
@@ -56,6 +57,8 @@ public:
 	void nodeColor(Vector3F & dst, const DistanceNode & n,
 					const float & scale) const;
 	
+/// march through unblocked edges
+/// negative nodes not visited 
 	void markInsideOutside(const int & originNodeInd = -1);
 	
 	sdb::Sequence<sdb::Coord2 > * dirtyEdges();
@@ -152,8 +155,9 @@ protected:
 	{
 		int i;
 		for(i=0; i<8;++i) {
-			float md = func->calculateDistance(ca + cb * calc::UniformlySpacingRecursive16Nodes[i]) 
-										- shellThickness;
+			float mx = calc::UniformlySpacingRecursive16Nodes[i];
+			float md = func->calculateDistance(ca + cb * mx) - shellThickness;
+			
 			if(i<1) {
 /// first is mid point
 				e->val = md;
@@ -162,6 +166,7 @@ protected:
 			if(md <= thre) {
 /// close enough
 				e->minVal = md;
+				e->cx = mx;
 				return;
 			}
 		}
@@ -177,15 +182,15 @@ protected:
 		int c = 0;
 		Vector3F a, b;
 		float thre;
-		const DistanceNode * v = nodes();
+		const DistanceNode * vs = nodes();
 		IDistanceEdge * es = edges();
-		const int ne = numEdges();
-		for(int i=0; i< ne;++i) {
+		m_dirtyEdges.begin();
+		while(!m_dirtyEdges.end() ) {
 			
-			IDistanceEdge & e = es[i];
-			
-			const DistanceNode & v1 = v[e.vi.x];
-			const DistanceNode & v2 = v[e.vi.y];
+			const sdb::Coord2 i = m_dirtyEdges.key();
+			const DistanceNode & v1 = vs[i.x];
+			const DistanceNode & v2 = vs[i.y];
+			IDistanceEdge & e = es[edgeIndex(i.x, i.y)];
 			
 /// both on front
 			if(v1.label == sdf::StFront 
@@ -193,12 +198,22 @@ protected:
 				
 				a = v1.pos;
 				b = v2.pos - a;
-				thre = b.length() * .0625f;
+				thre = e.len * .0625f;
 				
-				e.minVal = v1.val;
+				e.minVal = 1e9f;
+				
+				if(Absolute<float>(v1.val) <= thre)
+					e.minVal = Absolute<float>(v1.val);
 					
-				if(v2.val <= thre)
-					e.minVal = v2.val;
+				if(Absolute<float>(v2.val) <= thre)
+					e.minVal = Absolute<float>(v2.val);
+
+/// cross front at
+				e.cx = .5f;
+				if(Absolute<float>(v1.val) <= thre)
+					e.cx = 0.f;
+				if(Absolute<float>(v2.val) <= thre)
+					e.cx = 1.f;
 					
 				measureDistanceToEdge(func, shellThickness,
 										&e, a, b, thre);
@@ -209,10 +224,19 @@ protected:
 					c++;
 				
 			}
+			
+			m_dirtyEdges.next();
 		}
 		std::cout<<"\n n edge cross front "<<c;
 		
 	}
+
+/// ->	
+/// a-----.5---x--b
+/// march from positive to negative
+/// if mid after x, change sign
+/// if x is mid, same sign of (a+b)/2
+	void setFrontEdgeSign();
 	
 /// edges marked to estimate error
 	void clearDirtyEdges();
@@ -250,6 +274,7 @@ protected:
 	void snapEdgeToFront();
 	int countFrontEdges() const;
 	void updateMinMaxError();
+	void printErrEdges(const float & thre);
 					
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
@@ -295,6 +320,8 @@ private:
 	bool snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 						const IDistanceEdge & e);
 
+	void printEdge(const IDistanceEdge * e) const;
+	
 };
 
 }
