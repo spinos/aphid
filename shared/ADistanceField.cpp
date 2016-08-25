@@ -280,7 +280,7 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 }
 
 void ADistanceField::snapEdgeToFront()
-{return;
+{//return;
 	DistanceNode * v = nodes();
 	IDistanceEdge * es = edges();
 	const int ne = numEdges();

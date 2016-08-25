@@ -68,7 +68,7 @@ public:
 			std::cout.flush();
 		}
 		
-		printErrEdges(threshold);
+		//printErrEdges(threshold);
 		
 	}
 	

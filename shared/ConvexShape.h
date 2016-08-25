@@ -119,6 +119,8 @@ public:
 	static Domain::FunctionType FunctionTypeId;
 	bool intersectBBox(const BoundingBox & b) const;
 	float rayIntersect(const Ray & r) const;
+	const Vector3F & center() const;
+	const float & radius() const;
 	
 };
 

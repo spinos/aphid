@@ -152,14 +152,15 @@ bool Sphere::intersectBBox(const BoundingBox & b) const
 ///              c 
 float Sphere::rayIntersect(const Ray & r) const
 {
-	float cd = distancePointLine(m_p, r.m_origin, r.destination() );
+	const Vector3F b = r.destination();
+	float cd = distancePointLine(m_p, r.m_origin, b );
 /// no intersect	
 	if(cd > m_r)
 		return 1e8f;
 		
 /// proj c on line
 	Vector3F pd;
-	projectPointLineSegment(pd, cd, m_p, r.m_origin, r.destination() );
+	projectPointLineSegment(pd, cd, m_p, r.m_origin, b );
 	
 	const Vector3F vac = m_p - r.m_origin;
 	const float ac = vac.length();
@@ -187,22 +188,41 @@ float Sphere::rayIntersect(const Ray & r) const
 			
 		return ae / r.m_tmax;
 	}
-	
+
+/// c is in front of a	
 	float ed = 0.f;
-	
-	if(m_r - cd > 1e-3f)
-		ed = sqrt(m_r*m_r - cd*cd);
-	
-/// first hit
-	ae = ad - ed;
-	if(ae <= 0.f)
+	if(ac == m_r)
 		return 0.f;
 		
+	if(ac > m_r) {
+		
+		if(m_r - cd > 1e-3f)
+			ed = sqrt(m_r*m_r - cd*cd);
+		
+/// first hit t1
+		ae = ad - ed;
+		if(ae <= 0.f)
+			return 0.f;
+	}
+	else {
+		if(m_r - cd > 1e-3f)
+			ed = sqrt(m_r*m_r - cd*cd);
+			
+/// t2
+		ae = ad + ed;
+	}
+	
 	if(ae > r.m_tmax)
 		return 1e8f;
-	
+		
 	return ae / r.m_tmax;
 }
+
+const Vector3F & Sphere::center() const
+{ return m_p; }
+	
+const float & Sphere::radius() const
+{ return m_r; }
 
 Cube::Cube() {}
 
