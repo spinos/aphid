@@ -38,10 +38,10 @@ struct DistanceNode {
 
 struct IDistanceEdge {
 
-	sdb::Coord2 vi;
-	float len;
-	float val;
-	float cx;
+	sdb::Coord2 vi; /// ind to node
+	float len; /// length of edge
+	float err; /// max error of distance always positive
+	float cx; /// x [0,1] where front cross
 };
  
 class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
@@ -94,7 +94,7 @@ public:
 					
 				int k = edgeIndex(i.x, i.y);
 				if(k>-1)
-					edges()[k].val = act;
+					edges()[k].err = act;
 					
 				c++;
 			}
@@ -110,7 +110,7 @@ public:
 	const float & maxError() const;
 	const float & minError() const;
 	
-	float reconstructError(const IDistanceEdge * edge) const;
+	float reconstructError_(const IDistanceEdge * edge) const;
 /// x > 0 positive -x 
 	void shrinkFront(const float & x);
 	
@@ -146,10 +146,10 @@ protected:
 /// find intersect point cx
 /// if edge intersects front, march will be blocked	
 	template<typename Tf>
-	void measureFrontEdges(Tf * func, const float & shellThickness)
+	void findFrontEdgeCross(Tf * func, const float & shellThickness)
 	{
 		int c = 0;
-		Vector3F a, b;
+		//Vector3F a, b;
 		const DistanceNode * vs = nodes();
 		IDistanceEdge * es = edges();
 		m_dirtyEdges.begin();
@@ -164,11 +164,12 @@ protected:
 			if(v1.label == sdf::StFront 
 					&& v2.label == sdf::StFront) {	
 					
-				a = v1.pos;
-				b = v2.pos;
-				e.val = func->calculateDistance((a + b) * .5f) - shellThickness;
-				
-				e.cx = func->calculateIntersection(a, b);
+				if(Absolute<float>(v1.val) < 1e-2f)
+					e.cx = 1e-3f;
+				if(Absolute<float>(v2.val) < 1e-2f)
+					e.cx = .999f;
+				if(e.cx < 0.f)
+					e.cx = func->calculateIntersection(v1.pos, v2.pos);
 				
 				if(e.cx >= 0.f)
 					c++;
@@ -186,6 +187,62 @@ protected:
 /// if mid after x, change sign
 /// if x is mid, same sign of (a+b)/2
 	void setFrontEdgeSign();
+	
+/// for each front edge
+/// measure distance at .5 .25 .75
+/// test against interpolated distance front va,vb 
+/// e.err <- max abs(diff)
+	template<typename Tf>
+	float findEdgeMaxError(Tf * func, const float & shellThickness,
+							const Vector3F & pa, const Vector3F & pb,
+							const float & a, const float & b)
+	{
+		float mxErr = 0.f, err, act, rec, alpha;
+		for(int i=0; i<3;++i) {
+			alpha = calc::UniformlySpacingRecursive16Nodes[i];
+			act = func->calculateDistance(pa + pb * alpha) - shellThickness;
+			rec = a + b * alpha;
+			err = Absolute<float>(act - Absolute<float>(rec) );
+			if(mxErr < err)
+				mxErr = err;
+		}
+		return mxErr;
+	}
+	
+	template<typename Tf>
+	void estimateFrontEdgeError(Tf * func, const float & shellThickness)
+	{
+		int c = 0;
+		const DistanceNode * vs = nodes();
+		IDistanceEdge * es = edges();
+		m_dirtyEdges.begin();
+		while(!m_dirtyEdges.end() ) {
+			
+			const sdb::Coord2 i = m_dirtyEdges.key();
+			const DistanceNode & v1 = vs[i.x];
+			const DistanceNode & v2 = vs[i.y];
+			IDistanceEdge & e = es[edgeIndex(i.x, i.y)];
+			
+/// both on front
+			if(v1.label == sdf::StFront 
+					&& v2.label == sdf::StFront) {	
+
+/// skip inside					
+				if(v1.val <= 0.f && v2.val <= 0.f) {
+					e.err = 0.f;
+				}
+				else {
+					e.err = findEdgeMaxError(func, shellThickness, 
+												v1.pos, v2.pos - v1.pos, 
+												v1.val, v2.val - v1.val);
+					c++;
+				}
+			}
+			
+			m_dirtyEdges.next();
+		}
+		std::cout<<"\n n edge error estimate "<<c;
+	}
 	
 /// edges marked to estimate error
 	void clearDirtyEdges();

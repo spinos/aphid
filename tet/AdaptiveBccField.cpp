@@ -154,7 +154,7 @@ void AdaptiveBccField::subdivideGridByError(const float & threshold,
 		const IDistanceEdge * ae = edge(ei.x, ei.y );
 		if(ae ) {
 		
-			if(reconstructError(ae) > threshold ) {
+			if(ae->err > threshold ) {
 			
 			const Vector3F & p1 = v[ei.x].pos;
 			const Vector3F & p2 = v[ei.y].pos;

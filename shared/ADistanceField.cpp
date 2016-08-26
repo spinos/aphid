@@ -136,7 +136,7 @@ void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
 /// do not cross front
 		if(eg.cx < 0.f) {
 /// do not visit inside
-			if( B.val > 0.f && B.stat == sdf::StFar) 
+			if( B.val > 1e-3f && B.stat == sdf::StFar) 
 				heap[vj] = 0;
 		}
 	}
@@ -237,10 +237,8 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 /// angle of crossing
 	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
 		
-	float eps = e.len * .23f *glancing* (.6f + .4f *glancing);
-	//if(eps < e.err )
-	//	return false;
-	
+	float eps = e.len * .17f *glancing* (.6f + .4f *glancing);
+
 	const Vector3F dv = v2.pos - v1.pos;
 	
 	if(v1.val > 0.f) {
@@ -320,10 +318,10 @@ int ADistanceField::countFrontEdges() const
 	return c;
 }
 
-float ADistanceField::reconstructError(const IDistanceEdge * edge) const
+float ADistanceField::reconstructError_(const IDistanceEdge * edge) const
 {
 /// unknown distance
-	if(edge->val > 1e8f)
+	if(edge->err > 1e8f)
 		return 0.f;
 		
 	if(edge->cx < 0.f)
@@ -332,17 +330,14 @@ float ADistanceField::reconstructError(const IDistanceEdge * edge) const
 	const DistanceNode & v1 = nodes()[edge->vi.x];
 	const DistanceNode & v2 = nodes()[edge->vi.y];
 	
-/// must cross front		
+/// skip inside		
 	if(v1.val < 0.f && v2.val < 0.f)
 		return 0.f;
-	//if(v1.val * v2.val > 0.f)
-	//	return 0.f;
-	
+
 	if(v1.label == sdf::StFront 
 					&& v2.label == sdf::StFront)
-
 		
-			return Absolute<float>((v1.val + v2.val) * .5f - edge->val);
+			return Absolute<float>((v1.val + v2.val) * .5f - edge->err);
 	
 	return 0.f;
 }
@@ -360,8 +355,6 @@ void ADistanceField::shrinkFront(const float & x)
 
 void ADistanceField::updateMinMaxError()
 {
-	std::cout<<"\n update error";
-	
 	m_mxErr = 0.f;
 	m_mnErr = 1e8f;
 		
@@ -371,12 +364,7 @@ void ADistanceField::updateMinMaxError()
 		const sdb::Coord2 i = m_dirtyEdges.key();
 		const IDistanceEdge * ae = edge(i.x, i.y );
 		
-		float err = reconstructError(ae);
-		
-		if(err > 23) {
-			std::cout<<"\n large error "<<err;
-			printEdge(ae);
-		}
+		const float & err = ae->err;
 			
 		if(m_mxErr < err)
 			m_mxErr = err;
@@ -404,20 +392,16 @@ std::cout<<"\n ADistanceField::setFrontEdgeSign() begin"<<std::endl;
 		if(v1.label == sdf::StFront 
 					&& v2.label == sdf::StFront) {
 		const int j = edgeIndex(i.x, i.y);
-
-		if(j<0) {
-			std::cout<<"\n neg eind "<<i;
-		}
 		
 		IDistanceEdge & e = es[j];
 			
 /// cross front
 		
-			float o = e.val;
+			float o = e.err;
 			
-			SameSign<float>(e.val, v1.val*.5f + v2.val * .5f);
+			SameSign<float>(e.err, v1.val*.5f + v2.val * .5f);
 			
-			if(o*e.val < 0) {
+			if(o*e.err < 0) {
 				//std::cout<<"\n e"<<reconstructError(&e);
 				c++;
 			}
@@ -435,7 +419,8 @@ void ADistanceField::printEdge(const IDistanceEdge * e) const
 	const sdb::Coord2 i = e->vi;
 	const DistanceNode & v1 = nodes()[i.x];
 	const DistanceNode & v2 = nodes()[i.y];
-	std::cout<<"\n "<<v1.val<<" "<<e->val<<" "<<v2.val<<" "<<e->cx<<" "<<" "<<e->len;
+	std::cout<<"\n "<<v1.val<<" "<<v2.val
+		<<" "<<e->cx<<" "<<e->len<<" "<<e->err;
 }
 
 void ADistanceField::printErrEdges(const float & thre)
@@ -453,9 +438,8 @@ void ADistanceField::printErrEdges(const float & thre)
 		const IDistanceEdge * ae = edge(i.x, i.y );
 		if(ae ) {
 			
-			float err = reconstructError(ae);
-			if(err> thre ) {
-				std::cout<<"\n err "<<err;
+			if(ae->err > thre ) {
+				std::cout<<"\n err "<<ae->err;
 				printEdge(ae);
 				c++;
 			}

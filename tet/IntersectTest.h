@@ -14,7 +14,7 @@ namespace ttg {
 
 class IntersectTest : public Scene {
 	
-#define N_NUM_RAY 8
+#define N_NUM_RAY 10
 	aphid::cvx::Sphere m_sphere;
 	aphid::Ray m_rays[N_NUM_RAY];
 	

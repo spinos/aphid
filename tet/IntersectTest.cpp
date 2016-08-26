@@ -44,6 +44,10 @@ bool IntersectTest::init()
 					Vector3F(0.f, 15.f, -1.f) );				
 	m_rays[7] = Ray(Vector3F(3.f, -3.f, 0.f),
 					Vector3F(3.f, -9.f, -2.f) );
+	m_rays[8] = Ray(Vector3F(10.1f, 1.f, 0.f),
+					Vector3F(9.1f, 1.f, 0.f) );
+	m_rays[9] = Ray(Vector3F(9.91f, -1.f, 0.f),
+					Vector3F(10.91f, -2.f, 0.f) );
 	return true;
 }
 

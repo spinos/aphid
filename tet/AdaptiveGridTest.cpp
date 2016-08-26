@@ -38,7 +38,7 @@ bool AdaptiveGridTest::init()
 	m_distFunc.addSphere(Vector3F(38.f, -10.f, -22.f), 21.1f );
 	m_distFunc.addSphere(Vector3F(-100.f, -3420.1f, -100.f), 3400.f );
 	
-#define MAX_BUILD_LEVEL 5
+#define MAX_BUILD_LEVEL 6
 #define MAX_BUILD_ERROR .5f
 	m_msh.adaptiveBuild<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	std::cout<<"\n triangulating"<<std::endl;
@@ -57,10 +57,10 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 {
 #define SHO_CELL 0
 #define SHO_CELL_NODE 0
-#define SHO_GRAPH 0
+#define SHO_GRAPH 1
 #define SHO_CUT 0
 #define SHO_FRONT 1
-#define SHO_FRONT_WIRE 0
+#define SHO_FRONT_WIRE 1
 
 #if SHO_CELL
 	drawGridCell<AdaptiveBccGrid3>(m_msh.grid(), dr);
@@ -96,7 +96,7 @@ void AdaptiveGridTest::drawGraph(GeoDrawer * dr)
 {
 #define SHO_NODE 0
 #define SHO_EDGE 0
-#define SHO_ERR 1
+#define SHO_ERR 0
 
 #if SHO_NODE	
 	drawNodes(&m_msh, dr);

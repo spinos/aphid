@@ -67,8 +67,7 @@ public:
 			std::cout<<"\n build to level "<<level<<"\n";
 			std::cout.flush();
 		}
-		
-		//printErrEdges(threshold);
+		// printErrEdges(threshold);
 		
 	}
 	
@@ -99,10 +98,10 @@ public:
 		}
 		
 		messureFrontNodes(func, shellThickness);
-		measureFrontEdges(func, shellThickness);
+		findFrontEdgeCross(func, shellThickness);
 		fastMarchingMethod();		
 		markInsideOutside(findFarInd() );
-		setFrontEdgeSign();
+		estimateFrontEdgeError(func, shellThickness);
 		
 	}
 	

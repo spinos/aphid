@@ -99,7 +99,7 @@ void DrawDistanceField::drawErrors(const ADistanceField * fld,
 		const sdb::Coord2 & ei = edgeInds->key();
 		const IDistanceEdge * ae = fld->edge(ei.x, ei.y );
 		if(ae) {
-			red = fld->reconstructError(ae);
+			red = ae->err;
 			if(red > eps) {
 				red = (red - eps) / eps;
 				glColor3f(red, 1.f - red, 0.f);

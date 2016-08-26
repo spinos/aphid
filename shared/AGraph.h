@@ -159,7 +159,7 @@ void AGraph<Tn, Te>::extractEdges(sdb::Sequence<sdb::Coord2> * a)
 		
 		Te * e = &m_edges[i];
 		e->vi = a->key();
-		e->val = 1e9f;
+		e->err = 0.f;
 		e->cx = -1.f;
 		
 		i++;
@@ -268,9 +268,9 @@ template<typename Tn, typename Te>
 void AGraph<Tn, Te>::verbose() const
 {
 	std::cout<<"\n graph n node "<<numNodes()
-			<<"\n       n edge "<<numEdges()
-			<<"\n       n ind "<<numEdgeIndices()
-			<<"\n       edge length min/max "<<minEdgeLength()
+			<<"    n edge "<<numEdges()
+			<<"    n ind "<<numEdgeIndices()
+			<<"    min/max edge len "<<minEdgeLength()
 								<<"/"<<maxEdgeLength();
 }
 
