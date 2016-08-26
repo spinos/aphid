@@ -281,7 +281,7 @@ bool BoundingBox::intersect(const BoundingBox & another, BoundingBox * tightBox)
 }
 
 char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const 
-{
+{		
     float t0 = ray.m_tmin, t1 = ray.m_tmax;
     for (int i = 0; i < 3; ++i) {
 		const float diri = ray.m_dir.comp(i);

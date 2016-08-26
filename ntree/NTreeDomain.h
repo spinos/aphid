@@ -20,6 +20,7 @@ class NTreeDomain : public Domain {
 	KdNTree<T, Tn > * m_tree;
 	KdEngine m_engine;
 	Geometry::ClosestToPointTestResult m_closestPointCtx;
+	IntersectionContext m_intersectCtx;
 	
 public:
 	NTreeDomain(KdNTree<T, Tn > * tree);
@@ -61,6 +62,13 @@ float NTreeDomain<T, Tn >::distanceTo(const Vector3F & pref)
 
 template<typename T, typename Tn>
 float NTreeDomain<T, Tn >::rayIntersect(const Ray & r)
-{ return 1e8f; }
+{ 
+	m_intersectCtx.reset(r, distanceRange() * .01f );
+	m_engine.intersect(m_tree, &m_intersectCtx);
+	if(m_intersectCtx.m_success)
+		return m_intersectCtx.m_tmin / r.m_tmax;
+		 
+	return 1e8f; 
+}
 
 }

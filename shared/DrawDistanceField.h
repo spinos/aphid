@@ -29,7 +29,9 @@ protected:
 	const float & nodeDrawSize() const;
 	
 	void drawNodes(const ADistanceField * fld, GeoDrawer * dr);
-	void drawEdges(const ADistanceField * fld, GeoDrawer * dr);
+	void drawEdges(const ADistanceField * fld, GeoDrawer * dr,
+					bool blockedOnly = false);
+	void drawFrontEdges(const ADistanceField * fld, GeoDrawer * dr);
 	
 	template<typename T>
 	void drawGridCell(T * grd, GeoDrawer * dr)

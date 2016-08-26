@@ -42,10 +42,10 @@ void DrawDistanceField::drawNodes(const ADistanceField * fld, GeoDrawer * dr)
 	}
 }
 
-void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr)
+void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr,
+								bool blockedOnly)
 {
 	const DistanceNode * v = fld->nodes();
-	
 	const IDistanceEdge * e = fld->edges();
 	const int ne = fld->numEdges();
 	
@@ -55,9 +55,10 @@ void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr)
 		
 		if(ei.cx>=0.f)
 			dr->setColor(1.f, 0.f, 0.f);
-		else
+		else {
+			if(blockedOnly) continue;
 			dr->setColor(0.f, 1.f, 0.f);
-			
+		}	
 		dr->vertex(v[ei.vi.x].pos);
 		dr->vertex(v[ei.vi.y].pos);
 		
@@ -76,6 +77,29 @@ void DrawDistanceField::drawEdges(const ADistanceField * fld, GeoDrawer * dr)
 		}
 		
 	}
+}
+
+void DrawDistanceField::drawFrontEdges(const ADistanceField * fld, GeoDrawer * dr)
+{
+	dr->setColor(.5f, .5f, 0.f);
+	const DistanceNode * v = fld->nodes();
+	const IDistanceEdge * e = fld->edges();
+	const int ne = fld->numEdges();
+	
+	glBegin(GL_LINES);
+	for(int i = 0;i<ne;++i) {
+		const IDistanceEdge & ei = e[i];
+		
+		if(v[ei.vi.x].label == sdf::StFront
+			&& v[ei.vi.y].label == sdf::StFront) {
+			
+			dr->vertex(v[ei.vi.x].pos);
+			dr->vertex(v[ei.vi.y].pos);
+		}	
+		
+		
+	}
+	glEnd();
 }
 	
 const float & DrawDistanceField::nodeDrawSize() const

@@ -236,7 +236,6 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 	const BoundingBox & b = tree->getBBox();
 	if(!b.intersect(ctx->m_ray)) return 0;
 	
-	std::cout<<"\n KdEngine::intersect"<<b;
 	m_numRopeTraversed = 0;
     
 	ctx->setBBox(b);
@@ -436,14 +435,16 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 {
     m_numRopeTraversed++;
 /// limit rope traverse
-    if(m_numRopeTraversed > 99)
+    if(m_numRopeTraversed > 99) {
+		std::cout<<"\n KdEngine::climbRope out of rope traverse ";
         return false;
+	}
     
     const int oldBranch = branchIdx;
     const int oldNode = nodeIdx;
     
 	const BoundingBox & b = ctx->getBBox();
-	float t0, t1;
+	float t0 = 0.f, t1 = 0.f;
 	b.intersect(ctx->m_ray, &t0, &t1);
 	Vector3F hit1 = ctx->m_ray.travel(t1 + ctx->m_tdelta);
 /// end inside 
@@ -469,8 +470,8 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 	BoxNeighbors::DecodeTreeletNodeHash(rp->m_padding1, KdNode4::BranchingFactor, 
 					branchIdx, nodeIdx);
     
-    std::cout<<"\n rope branch "<<oldBranch<<":"<<oldNode
-    <<" to "<<branchIdx<<":"<<nodeIdx;
+    //std::cout<<"\n rope branch "<<oldBranch<<":"<<oldNode
+    //<<" to "<<branchIdx<<":"<<nodeIdx;
             
     std::cout.flush();
 	ctx->setBBox(*rp);
