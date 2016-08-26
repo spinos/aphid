@@ -281,6 +281,10 @@ protected:
 	int countFrontEdges() const;
 	void updateMinMaxError();
 	void printErrEdges(const float & thre);
+/// pnt where edge cross edge
+	Vector3F edgeFrontPos(const IDistanceEdge * e,
+							int va, int vb,
+							const Vector3F & pa, const Vector3F & pb) const;
 					
 private:
 	void propagate(std::map<int, int > & heap, const int & i);

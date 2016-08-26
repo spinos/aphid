@@ -241,7 +241,7 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 	const Vector3F dv = v2.pos - v1.pos;
 /// angle of crossing
 	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
-	float eps = .23f *glancing* (.8f + .2f *glancing);
+	float eps = .23f * sqrt(glancing);
 
 	if(e.cx < eps) {
 		v1.pos += dv.normal() * (e.len * e.cx);
@@ -429,6 +429,18 @@ void ADistanceField::printErrEdges(const float & thre)
 	}
 	std::cout<<"\n n err edge "<<c
 	<<"\n ADistanceField::printErrEdges end "<<std::endl;
+}
+
+Vector3F ADistanceField::edgeFrontPos(const IDistanceEdge * e,
+							int va, int vb,
+							const Vector3F & pa, const Vector3F & pb) const
+{
+	const float & alpha = e->cx;
+/// reverse 
+	if(e->vi.x == va)
+		return pa * (1.f - alpha) + pb * alpha;
+		
+	return pa * alpha + pb * (1.f - alpha);
 }
 
 }

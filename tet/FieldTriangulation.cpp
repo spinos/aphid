@@ -82,9 +82,12 @@ void FieldTriangulation::getCutEdgeIndPos(int & cutInd,
 		cutInd = e->ind = numCut | MEncode;
 		edgeMap.insert(k, e);
 		
-/// add a pnt
-		m_cutPosBuf[numCut++] = refiner.splitPos(a->val, b->val, 
-												a->pos, b->pos);
+/// cross pnt or mid pnt
+		const IDistanceEdge * eg = edge(iv0, iv1);
+		if(eg->cx > -1)
+			m_cutPosBuf[numCut++] = edgeFrontPos(eg, iv0, iv1, a->pos, b->pos);
+		else
+			m_cutPosBuf[numCut++] = (a->pos + b->pos) * .5f;
 	}
 }
 
