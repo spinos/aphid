@@ -234,44 +234,25 @@ bool ADistanceField::isNodeBackground(const int & i) const
 bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 									const IDistanceEdge & e)
 {
+/// no cross front 
+	if(e.cx < 0)
+		return false;
+	
+	const Vector3F dv = v2.pos - v1.pos;
 /// angle of crossing
 	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
-		
-	float eps = e.len * .17f *glancing* (.6f + .4f *glancing);
+	float eps = .23f *glancing* (.8f + .2f *glancing);
 
-	const Vector3F dv = v2.pos - v1.pos;
-	
-	if(v1.val > 0.f) {
-		if(v1.val < eps) {
-		
-			v1.pos += dv.normal() * v1.val;
-			v1.val = 0.f;
-			return true;
-		}
-#if 1
-		else if(-v2.val < eps) {
-		
-			v2.pos += dv.normal() * v2.val;
-			v2.val = 0.f;
-			return true;
-		}
-#endif
+	if(e.cx < eps) {
+		v1.pos += dv.normal() * (e.len * e.cx);
+		v1.val = 0.f;
+		return true;
 	}
-	else {
-		if(v2.val < eps) {
-		
-			v2.pos -= dv.normal() * v2.val;
-			v2.val = 0.f;
-			return true;
-		}
-#if 1
-		else if(-v1.val < eps) {
-		
-			v1.pos -= dv.normal() * v1.val;
-			v1.val = 0.f;
-			return true;
-		}
-#endif
+	
+	if(e.cx > 1.f - eps) {
+		v2.pos += dv.normal() * (e.len * (e.cx - 1.f));
+		v2.val = 0.f;
+		return true;
 	}
 	
 	return false;
