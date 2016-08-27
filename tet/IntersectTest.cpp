@@ -48,6 +48,14 @@ bool IntersectTest::init()
 					Vector3F(9.1f, 1.f, 0.f) );
 	m_rays[9] = Ray(Vector3F(9.91f, -1.f, 0.f),
 					Vector3F(10.91f, -2.f, 0.f) );
+					
+	m_beams = Beam(Vector3F(11.f, 0.f, 0.f),
+					Vector3F(30.f, 9.f, 0.f), 2.f, 4.f);
+	
+	m_triangleCenter[0].set(19.f, 0.f, 2.f);
+	m_triangleCenter[1].set(31.f, 3.f, 3.f);
+	m_triangleCenter[2].set(12.f, -1.f, 0.f);				
+	
 	return true;
 }
 
@@ -55,7 +63,8 @@ void IntersectTest::draw(GeoDrawer * dr)
 {
 	dr->alignedCircle(m_sphere.center(), m_sphere.radius() );
 	
-	for(int i=0;i<N_NUM_RAY;++i) {
+	int i;
+	for(i=0;i<N_NUM_RAY;++i) {
 		dr->setColor(.2f, .2f, .2f);
 		dr->arrow(m_rays[i].m_origin, m_rays[i].destination() );
 		
@@ -72,6 +81,50 @@ void IntersectTest::draw(GeoDrawer * dr)
 		m_rays[i].m_dir.normalize();
 		m_rays[i].m_tmax += RandomFn11() * .1f;
 	}
+	
+	dr->setColor(.2f, .2f, .2f);
+	dr->arrow(m_beams.origin(), m_beams.destination() );
+	m_beams.setLength(1.f + RandomF01(), 20.f + RandomF01() );
+	dr->alignedCircle(m_beams.ray().travel(m_beams.tmin() ), m_beams.radiusAt(m_beams.tmin() ) );
+	dr->alignedCircle(m_beams.destination(), m_beams.radiusAt(m_beams.tmax() ) );
+
+	for(i=0;i<N_NUM_TRI;++i) {
+		
+		m_triangle[i].set(m_triangleCenter[i] + Vector3F(1.f, 1.f, 1.f) + Vector3F(2.f, 1.f, 1.f) * RandomFn11(),
+				m_triangleCenter[i] + Vector3F(1.f, -1.f, 1.f) + Vector3F(2.f, 1.f, 1.f) * RandomFn11(),
+				m_triangleCenter[i] + Vector3F(-1.f, -1.f, -1.f) + Vector3F(2.f, 1.f, 1.f) * RandomFn11() );
+	}
+	
+	for(i=0;i<N_NUM_TRI;++i) {
+		const cvx::Triangle & tri = m_triangle[i];
+		
+		glBegin(GL_LINES);
+		dr->vertex(tri.P(0) );
+		dr->vertex(tri.P(1) );
+		dr->vertex(tri.P(1) );
+		dr->vertex(tri.P(2) );
+		dr->vertex(tri.P(2) );
+		dr->vertex(tri.P(0) );
+		glEnd();
+	}
+	
+	cvx::Sphere bs;
+	float t0, t1;
+	for(i=0;i<N_NUM_TRI;++i) {
+		const cvx::Triangle & tri = m_triangle[i];
+		
+		tri.getBoundingSphere(bs);
+		dr->setColor(.2f, .2f, .2f);
+		dr->alignedCircle(bs.center(), bs.radius() );
+		
+		if(tri.beamIntersect(m_beams, &t0, &t1) ) {
+			dr->setColor(0.f, 1.f, 0.f);
+			dr->alignedCircle(m_beams.ray().travel(t0), m_beams.radiusAt(t0) );
+			dr->arrow(bs.center(), m_beams.ray().travel(t0) );
+		}
+	}
+
+	
 }
 
 }

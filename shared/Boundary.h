@@ -51,7 +51,7 @@ public:
 	virtual bool broadphaseIntersect(const BoundingBox & b);
 	virtual bool narrowphaseIntersect(Domain * b);
 	virtual float distanceTo(const Vector3F & pref);
-	virtual float rayIntersect(const Ray & r);
+	virtual float beamIntersect(const Beam & b);
 	
 	void setDistanceRange(const float & x);
 	const float & distanceRange() const;

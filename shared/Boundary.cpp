@@ -39,7 +39,7 @@ bool Domain::narrowphaseIntersect(Domain * b)
 float Domain::distanceTo(const Vector3F & pref)
 { return 1e8f; }
 
-float Domain::rayIntersect(const Ray & r)
+float Domain::beamIntersect(const Beam & b)
 { return 1e8f; }
 
 void Domain::setDistanceRange(const float & x)

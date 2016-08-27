@@ -28,7 +28,7 @@ public:
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & bx);
 	virtual float distanceTo(const Vector3F & pref);
-	virtual float rayIntersect(const Ray & r);
+	virtual float beamIntersect(const Beam & b);
 	
 };
 
@@ -61,12 +61,12 @@ float NTreeDomain<T, Tn >::distanceTo(const Vector3F & pref)
 }
 
 template<typename T, typename Tn>
-float NTreeDomain<T, Tn >::rayIntersect(const Ray & r)
+float NTreeDomain<T, Tn >::beamIntersect(const Beam & b)
 { 
-	m_intersectCtx.reset(r, distanceRange() * .01f );
-	m_engine.intersect(m_tree, &m_intersectCtx);
+	m_intersectCtx.reset(b, distanceRange() * .001f );
+	m_engine.beamIntersect(m_tree, &m_intersectCtx);
 	if(m_intersectCtx.m_success)
-		return m_intersectCtx.m_tmin / r.m_tmax;
+		return m_intersectCtx.m_tmin / b.ray().m_tmax;
 		 
 	return 1e8f; 
 }

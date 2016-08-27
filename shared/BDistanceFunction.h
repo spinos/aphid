@@ -33,7 +33,9 @@ public:
 	float calculateDistance(const Vector3F & p);
 /// closest intersect v a->b, alpha of cross
 	float calculateIntersection(const Vector3F & a,
-								const Vector3F & b);
+								const Vector3F & b,
+								const float & ra,
+								const float & rb);
 	
 	template<typename Ts>
 	bool intersect(const Ts * a, const float & shellThickness) const

@@ -38,6 +38,14 @@ void IntersectionContext::reset(const Ray & ray, const float & delta)
 	m_tdelta = delta;
 }
 
+void IntersectionContext::reset(const Beam & beam, const float & delta)
+{
+    m_ray = beam.ray();
+	m_beam = beam;
+	reset();
+	m_tdelta = delta;
+}
+
 void IntersectionContext::reset(const Ray & ray, 
 								const Vector3F & ref, 
 								const float & scaling)

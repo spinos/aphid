@@ -119,6 +119,7 @@ public:
 	static Domain::FunctionType FunctionTypeId;
 	bool intersectBBox(const BoundingBox & b) const;
 	float rayIntersect(const Ray & r) const;
+	float beamIntersect(const Beam & bm) const;
 	const Vector3F & center() const;
 	const float & radius() const;
 	
@@ -193,6 +194,7 @@ public:
 	bool intersectBBox(const BoundingBox & b) const;
 	
 	float rayIntersect(const Ray & r) const;
+	float beamIntersect(const Beam & bm) const;
 	
 };
 
@@ -240,7 +242,9 @@ public:
 	void translate(const Vector3F & v);
 
 	BoundingBox calculateBBox() const;
-	bool intersect(const Ray &ray, float *hitt0, float *hitt1) const;
+	bool rayIntersect(const Ray &ray, float *hitt0, float *hitt1) const;
+	bool beamIntersect(const Beam &bm, float *hitt0, float *hitt1) const;
+	void getBoundingSphere(Sphere & s) const;
 	
 	template<typename T>
 	bool exactIntersect(const T & b) const {

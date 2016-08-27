@@ -38,7 +38,7 @@ bool AdaptiveGridTest::init()
 	m_distFunc.addSphere(Vector3F(38.f, -10.f, -22.f), 21.1f );
 	m_distFunc.addSphere(Vector3F(-100.f, -3420.1f, -100.f), 3400.f );
 	
-#define MAX_BUILD_LEVEL 3
+#define MAX_BUILD_LEVEL 5
 #define MAX_BUILD_ERROR .5f
 	m_msh.adaptiveBuild<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
 	std::cout<<"\n triangulating"<<std::endl;

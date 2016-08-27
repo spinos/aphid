@@ -32,6 +32,8 @@ public:
 	void reset(const Ray & ray, 
 				const Vector3F & ref, 
 				const float & scaling);
+	void reset(const Beam & beam, const float & delta);
+	
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
 	
@@ -40,6 +42,7 @@ public:
 	void verbose() const;
 
 	Ray m_ray;
+	Beam m_beam;
 	Vector3F m_hitP, m_hitN, m_closestP, m_refN, m_originP;
 	Vector2F m_patchUV;
 	float m_minHitDistance, m_elementHitDistance;

@@ -26,7 +26,8 @@ void DrawDistanceField::setColorScale(const float & x)
 void DrawDistanceField::setNodeDrawSize(const float & x)
 { m_nodeDrawSize = x; }
 	
-void DrawDistanceField::drawNodes(const ADistanceField * fld, GeoDrawer * dr)
+void DrawDistanceField::drawNodes(const ADistanceField * fld, GeoDrawer * dr,
+								bool frontOnly)
 {
 	const DistanceNode * v = fld->nodes();
 	const int nv = fld->numNodes();
@@ -34,6 +35,10 @@ void DrawDistanceField::drawNodes(const ADistanceField * fld, GeoDrawer * dr)
 	Vector3F col;
 	for(int i = 0;i<nv;++i) {
 		const DistanceNode & vi = v[i];
+		
+		if(frontOnly) {
+			if(vi.label != sdf::StFront) continue;
+		}
 		
 		fld->nodeColor(col, vi, m_nodeColScl);
 		dr->setColor(col.x, col.y, col.z);

@@ -55,6 +55,10 @@ public:
 	template<typename T, typename Tn>
 	bool broadphase(KdNTree<T, Tn > * tree,
 				const BoundingBox & bx);
+				
+	template<typename T, typename Tn>
+	bool beamIntersect(KdNTree<T, Tn > * tree, 
+				IntersectionContext * ctx);
 	
 protected:
 
@@ -79,14 +83,22 @@ private:
 	int firstVisit(IntersectionContext * ctx, 
 					const KdTreeNode * n);
 	
+/// -1 branch
+/// 1 leaf
+/// 0 empty
 	template <typename T, typename Tn>
-	int visitLeaf(IntersectionContext * ctx, 
+	int visitBranchOrLeaf(IntersectionContext * ctx, 
 					int & branchIdx,
 					int & nodeIdx,
 					const KdTreeNode * r);
 					
 	template <typename T, typename Tn>
-	int hitPrimitive(KdNTree<T, Tn > * tree, 
+	int rayPrimitive(KdNTree<T, Tn > * tree, 
+							IntersectionContext * ctx, 
+							const KdTreeNode * r);
+	
+	template <typename T, typename Tn>
+	int beamPrimitive(KdNTree<T, Tn > * tree, 
 							IntersectionContext * ctx, 
 							const KdTreeNode * r);
 	
@@ -243,7 +255,7 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 	const KdTreeNode * r = tree->root()->node(0);
 	if(r->isLeaf() ) {
 		ctx->m_leafIdx = r->getPrimStart();
-		hitPrimitive(tree, ctx, r);
+		rayPrimitive(tree, ctx, r);
 		return ctx->m_success;
 	}
 	
@@ -255,7 +267,7 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 	int stat;
 	bool hasNext = true;
 	while (hasNext) {
-		stat = visitLeaf<T, Tn>(ctx, branchIdx, nodeIdx, 
+		stat = visitBranchOrLeaf<T, Tn>(ctx, branchIdx, nodeIdx, 
 							kn);
 							
 		if(preBranchIdx != branchIdx) {
@@ -266,7 +278,7 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 		kn = currentBranch->node(nodeIdx);
 		
 		if(stat > 0 ) {
-			if(hitPrimitive(tree, ctx, kn ) ) hasNext = false;
+			if(rayPrimitive(tree, ctx, kn ) ) hasNext = false;
 			else stat = 0;
 		}
 		if(stat==0) {
@@ -288,7 +300,6 @@ template <typename T>
 int KdEngine::firstVisit(IntersectionContext * ctx, 
 								const KdTreeNode * n)
 {
-#if 1
     const BoundingBox & b = ctx->getBBox();
 	b.intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax);
 	
@@ -305,72 +316,11 @@ int KdEngine::firstVisit(IntersectionContext * ctx,
 		
 	ctx->setBBox(childBox);
 		
-	return above; 
-#else
-	const int axis = n->getAxis();
-	const float splitPos = n->getSplitPos();
-	
-	const Ray & ray = ctx->m_ray;
-	
-	const float o = ray.m_origin.comp(axis);
-	const float d = ray.m_dir.comp(axis);
-	
-	const BoundingBox & b = ctx->getBBox();
-	BoundingBox lftBox, rgtBox;
-	b.split(axis, splitPos, lftBox, rgtBox);
-	// std::cout<<"\n split "<<axis<<" "<<splitPos;
-	
-	bool above = o >= splitPos;
-/// parallel to split
-	if(Absolute<float>(d) < 1e-5f) {
-		if(above) ctx->setBBox(rgtBox);
-		else ctx->setBBox(lftBox);
-		
-		return above;
-	}
-	
-/// inside
-	if(lftBox.isPointInside(ray.m_origin) ) {
-		ctx->setBBox(lftBox);
-		return 0;
-	}
-	
-	if(rgtBox.isPointInside(ray.m_origin) ) {
-		ctx->setBBox(rgtBox);
-		return 1;
-	}
-	
-/// one side
-	float t = (splitPos - o) / d;
-	if(t< 0.f) {
-		if(above) ctx->setBBox(rgtBox);
-		else ctx->setBBox(lftBox);
-		return above;
-	}
-	
-/// near one
-	Vector3F hitP = ray.travel(t);
-	if(b.isPointInside(hitP) ) {
-		if(above) ctx->setBBox(rgtBox);
-		else ctx->setBBox(lftBox);
-		return above;
-	}
-	
-	BoundingBox p2h;
-	p2h.expandBy(ray.m_origin);
-	p2h.expandBy(hitP);
-/// swap side
-	if(!p2h.touch(b) ) above = !above;
-	
-	if(above) ctx->setBBox(rgtBox);
-	else ctx->setBBox(lftBox);
-		
 	return above;
-#endif
 }
 
 template <typename T, typename Tn>
-int KdEngine::visitLeaf(IntersectionContext * ctx, 
+int KdEngine::visitBranchOrLeaf(IntersectionContext * ctx, 
 									int & branchIdx,
 									int & nodeIdx,
 									const KdTreeNode * r)
@@ -380,9 +330,9 @@ int KdEngine::visitLeaf(IntersectionContext * ctx,
 	if(r->isLeaf() ) {
 //		std::cout<<"\n hit leaf "<<r->getPrimStart();
 		ctx->m_leafIdx = r->getPrimStart();
-		if(r->getNumPrims() < 1) {
+		if(r->getNumPrims() < 1)
 			return 0;
-		}
+		
 		return 1;
 	}
 	
@@ -401,7 +351,7 @@ int KdEngine::visitLeaf(IntersectionContext * ctx,
 }
 
 template <typename T, typename Tn>
-int KdEngine::hitPrimitive(KdNTree<T, Tn > * tree, 
+int KdEngine::rayPrimitive(KdNTree<T, Tn > * tree, 
 							IntersectionContext * ctx, 
 							const KdTreeNode * r)
 {
@@ -412,9 +362,10 @@ int KdEngine::hitPrimitive(KdNTree<T, Tn > * tree,
 	int i = 0;
 	for(;i<len;++i) {
 		const T * c = tree->getSource(start + i);
-		if(c->intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) ) {
+		if(c->rayIntersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) ) {
 			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
 			ctx->m_hitN = c->calculateNormal();
+/// shorten ray
 			ctx->m_ray.m_tmax = ctx->m_tmin;
 			ctx->m_success = 1;
 /// idx of source
@@ -423,6 +374,32 @@ int KdEngine::hitPrimitive(KdNTree<T, Tn > * tree,
 		}
 	}
 //	if(nhit<1) std::cout<<" no hit ";
+	return nhit;
+}
+
+template <typename T, typename Tn>
+int KdEngine::beamPrimitive(KdNTree<T, Tn > * tree, 
+							IntersectionContext * ctx, 
+							const KdTreeNode * r)
+{
+	int start, len;
+	tree->leafPrimStartLength(start, len, r->getPrimStart() );
+
+	int nhit = 0;
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = tree->getSource(start + i);
+		if(c->beamIntersect(ctx->m_beam, &ctx->m_tmin, &ctx->m_tmax) ) {
+			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
+			ctx->m_hitN = c->calculateNormal();
+			ctx->m_ray.m_tmax = ctx->m_tmin;
+/// shorten beam
+			ctx->m_beam.setTmax(ctx->m_tmin);
+			ctx->m_success = 1;
+			ctx->m_componentIdx = tree->primIndirectionAt(start + i);
+			nhit++;
+		}
+	}
 	return nhit;
 }
 
@@ -449,7 +426,7 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 	Vector3F hit1 = ctx->m_ray.travel(t1 + ctx->m_tdelta);
 /// end inside 
 	if(b.isPointInside(hit1) ) {
-		std::cout<<"\n KdEngine::climbRope "<<hit1<<" out of "<<b;
+		// std::cout<<"\n KdEngine::climbRope "<<hit1<<" out of "<<b;
 		return false;
 	}
 		
@@ -920,6 +897,63 @@ bool KdEngine::broadphase(KdNTree<T, Tn > * tree,
 		stat = innerBroadphase(tree, &bx, branchIdx, 1, rgtBox);
 		
 	return stat;
+}
+
+template<typename T, typename Tn>
+bool KdEngine::beamIntersect(KdNTree<T, Tn > * tree, 
+				IntersectionContext * ctx)
+{ 
+	if(tree->isEmpty()) return 0;
+	
+	const BoundingBox & b = tree->getBBox();
+	if(!b.intersect(ctx->m_ray)) return 0;
+	
+	m_numRopeTraversed = 0;
+    
+	ctx->setBBox(b);
+	
+	const KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() ) {
+		ctx->m_leafIdx = r->getPrimStart();
+		rayPrimitive(tree, ctx, r);
+		return ctx->m_success;
+	}
+	
+	int branchIdx = tree->root()->internalOffset(0);
+	int preBranchIdx = branchIdx;
+	Tn * currentBranch = tree->branches()[branchIdx];
+	int nodeIdx = firstVisit<T>(ctx, r);
+	KdTreeNode * kn = currentBranch->node(nodeIdx);
+	int stat;
+	bool hasNext = true;
+	while (hasNext) {
+		stat = visitBranchOrLeaf<T, Tn>(ctx, branchIdx, nodeIdx, 
+							kn);
+							
+		if(preBranchIdx != branchIdx) {
+			currentBranch = tree->branches()[branchIdx];
+			preBranchIdx = branchIdx;
+		}
+		
+		kn = currentBranch->node(nodeIdx);
+		
+		if(stat > 0 ) {
+			if(beamPrimitive(tree, ctx, kn ) ) hasNext = false;
+			else stat = 0;
+		}
+		if(stat==0) {
+			hasNext = climbRope(tree, ctx, branchIdx, nodeIdx, 
+							kn );
+							
+			if(preBranchIdx != branchIdx) {
+				currentBranch = tree->branches()[branchIdx];
+				preBranchIdx = branchIdx;
+			}
+			
+			kn = currentBranch->node(nodeIdx);
+		}
+	}
+	return ctx->m_success;
 }
 
 }

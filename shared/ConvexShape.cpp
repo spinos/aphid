@@ -142,7 +142,18 @@ Vector3F Sphere::supportPoint(const Vector3F & v, Vector3F * localP) const
 }
 
 bool Sphere::intersectBBox(const BoundingBox & b) const
-{ return b.distanceTo(m_p) <= m_r; }
+{ 
+	if(b.distanceTo(m_p) > m_r)
+		return false; 
+	
+	for(int i=0; i<8; ++i) {
+		if(b.X(i).distanceTo(m_p) > m_r )
+			return true;
+	}
+	
+/// all corners inside
+	return false;
+}
 
 ///         t1          tmax
 /// a-------e----d------b
@@ -216,6 +227,11 @@ float Sphere::rayIntersect(const Ray & r) const
 		return 1e8f;
 		
 	return ae / r.m_tmax;
+}
+
+float Sphere::beamIntersect(const Beam & bm) const
+{ 
+	return rayIntersect(bm.ray() );
 }
 
 const Vector3F & Sphere::center() const
@@ -371,6 +387,9 @@ bool Box::intersectBBox(const BoundingBox & b) const
 float Box::rayIntersect(const Ray & r) const
 { return 1e8f; }
 
+float Box::beamIntersect(const Beam & bm) const
+{ return 1e8f; }
+
 Capsule::Capsule() {}
 
 void Capsule::set(const Vector3F & x0, const float & r0,
@@ -508,7 +527,7 @@ void Triangle::translate(const Vector3F & v)
 	m_p2 += v;
 }
 
-bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
+bool Triangle::rayIntersect(const Ray &ray, float *hitt0, float *hitt1) const
 {
 	const Vector3F nor = calculateNormal();
 	
@@ -544,6 +563,37 @@ bool Triangle::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 	*hitt1 = t;
 	
     return true;
+}
+
+void Triangle::getBoundingSphere(Sphere & s) const
+{ 
+	BoundingBox bx = calculateBBox();
+	
+	s.set(bx.center(), bx.radius() );
+}
+
+bool Triangle::beamIntersect(const Beam &bm, float *hitt0, float *hitt1) const
+{
+	Sphere sp;
+	getBoundingSphere(sp);
+
+/// large enough to use ray
+	if(sp.radius() > bm.length() * .5f)
+		return rayIntersect(bm.ray(), hitt0, hitt1);
+		
+	Vector3F q;
+	float tc = bm.projectP(sp.center(), q);
+	if(tc < 0.f)
+		return false;
+	
+/// far apart
+	if((q - sp.center() ).length() > sp.radius() + bm.radiusAt(tc) )
+		return false;
+		
+/// 2 sphere overlapped
+	*hitt0 = tc;
+	*hitt1 = tc;
+	return true;
 }
 
 const Vector3F & Triangle::X(int idx) const

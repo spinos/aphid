@@ -149,7 +149,7 @@ protected:
 	void findFrontEdgeCross(Tf * func, const float & shellThickness)
 	{
 		int c = 0;
-		//Vector3F a, b;
+		float beamr;
 		const DistanceNode * vs = nodes();
 		IDistanceEdge * es = edges();
 		m_dirtyEdges.begin();
@@ -168,8 +168,11 @@ protected:
 					e.cx = 1e-3f;
 				if(Absolute<float>(v2.val) < 1e-2f)
 					e.cx = .999f;
-				if(e.cx < 0.f)
-					e.cx = func->calculateIntersection(v1.pos, v2.pos);
+				if(e.cx < 0.f) {
+					beamr = e.len * .5f;
+					e.cx = func->calculateIntersection(v1.pos, v2.pos,
+										beamr, beamr);
+				}
 				
 				if(e.cx >= 0.f)
 					c++;
