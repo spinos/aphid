@@ -241,7 +241,7 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 	const Vector3F dv = v2.pos - v1.pos;
 /// angle of crossing
 	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
-	float eps = .23f * glancing;
+	float eps = .31f * glancing;
 
 	if(e.cx < eps) {
 		v1.pos += dv.normal() * (e.len * e.cx);
@@ -458,12 +458,39 @@ bool ADistanceField::isNodeInsideFrontBoundary(int vi) const
 			vj = eg.vi.y;
 			
 		const DistanceNode & B = nodes()[vj];
-		if(B.stat != sdf::StFront) {
+		if(B.label != sdf::StFront) {
 /// connected to background
 			return false;
 		}
 	}
 	return true;
+}
+
+bool ADistanceField::isNodeOnFrontBoundary(int vi) const
+{
+/// not on front
+	if(nodes()[vi].label != sdf::StFront)
+		return false;
+		
+	const int endj = edgeBegins()[vi+1];
+	int vj, j = edgeBegins()[vi];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+		
+		vj = eg.vi.x;
+		if(vj == vi)
+			vj = eg.vi.y;
+			
+		const DistanceNode & B = nodes()[vj];
+		if(B.label != sdf::StFront) {
+/// connected to background
+			return true;
+		}
+	}
+	return false;
 }
 
 const IDistanceEdge * ADistanceField::longestConnectedEdge(int vi) const

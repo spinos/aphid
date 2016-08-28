@@ -34,7 +34,8 @@ bool KDistanceTest::init()
 	m_container.readTree(m_fileName, 0);
 	
 	BoundingBox tb = m_container.tree()->getBBox();
-	const float gz = tb.getLongestDistance() * .53f;
+/// larger grid size less faces
+	const float gz = tb.getLongestDistance() * 1.139f;
 	std::cout<<"\n gz "<<gz;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
@@ -49,8 +50,9 @@ bool KDistanceTest::init()
 	m_distFunc.setShellThickness(gz * GDT_FAC_ONEOVER32);
 	m_distFunc.setSplatRadius(gz * GDT_FAC_ONEOVER32);
 	
-	m_msh.frontAdaptiveBuild<BDistanceFunction>(&m_distFunc, 3, 5);
-	m_msh.verbose();
+/// level 4 rough 5 detail 6 fine
+/// large theta more round 
+	m_msh.frontAdaptiveBuild<BDistanceFunction>(&m_distFunc, 3, 5, .47f);
 	m_msh.triangulateFront();
 	
 	std::cout.flush();
@@ -61,10 +63,10 @@ void KDistanceTest::draw(GeoDrawer * dr)
 {
 #define SHO_TREE 1
 #define SHO_CELL 0
-#define SHO_NODE 1
+#define SHO_NODE 0
 #define SHO_EDGE 0
 #define SHO_ERR 0
-#define SHO_FRONT 0
+#define SHO_FRONT 1
 #define SHO_FRONT_WIRE 1
 
 #if SHO_NODE

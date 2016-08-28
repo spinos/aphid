@@ -432,6 +432,7 @@ protected:
 							int va, int vb,
 							const Vector3F & pa, const Vector3F & pb) const;
 	bool isNodeInsideFrontBoundary(int vi) const;
+	bool isNodeOnFrontBoundary(int vi) const;
 							
 private:
 	void propagate(std::map<int, int > & heap, const int & i);

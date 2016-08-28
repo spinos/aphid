@@ -57,7 +57,7 @@ void AdaptiveGridTest::draw(GeoDrawer * dr)
 {
 #define SHO_CELL 0
 #define SHO_CELL_NODE 0
-#define SHO_GRAPH 1
+#define SHO_GRAPH 0
 #define SHO_CUT 0
 #define SHO_FRONT 1
 #define SHO_FRONT_WIRE 1

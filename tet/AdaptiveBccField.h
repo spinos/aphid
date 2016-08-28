@@ -16,6 +16,7 @@ namespace ttg {
 
 class AdaptiveBccField : public AdaptiveBccMesher, public aphid::ADistanceField {
 
+	aphid::sdb::Sequence<int > m_frontNodes;
 	aphid::Vector3F m_insideOutsidePref;
 	float m_errorThreshold;
 	
@@ -57,18 +58,20 @@ public:
 			buildGraph();
 			
 			calculateDistance<Tf>(distanceFunc, 0.f);
-			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
-			updateMinMaxError();
 			
+			if(level+1 < levelLimit) {
+				obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
+				updateMinMaxError();
+			}
 			verbose();
 		
 			level++;
 			curErr = maxError();
-			std::cout<<"\n build to level "<<level<<"\n";
-			std::cout.flush();
+			
 		}
 		// printErrEdges(threshold);
-		
+		std::cout<<"\n build to level "<<level<<"\n";
+		std::cout.flush();
 	}
 
 /// grid is very coarse relative to input mesh, error will be large
@@ -77,30 +80,44 @@ public:
 	template<typename Tf>
 	void frontAdaptiveBuild(Tf * distanceFunc, 
 							int discreteLevel,
-							int maxLevel)
+							int maxLevel,
+							const float & thre)
 	{
-		int curLevel = discreteLevel;
+		int curLevel = discreteLevel, nbound;
 		discretize<Tf>(distanceFunc, curLevel);
 		
 		buildGrid();
 		buildMesh();
 		buildGraph();
 		
-		distanceFunc->setShellThickness(grid()->levelCellSize(curLevel) * .97f );
+		float thickness = grid()->levelCellSize(curLevel) * thre;
+		distanceFunc->setShellThickness(thickness );
 		calculateDistance2<Tf>(distanceFunc);
-		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 		verbose();
 		
-		subdivideByAllPositiveFront(curLevel);
-			
-		std::cout<<"\n subdiv level"<<curLevel<<std::endl;
-			
-		buildGrid();
-		buildMesh();
-		buildGraph();
+		while(curLevel < maxLevel) {
+			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 		
-		distanceFunc->setShellThickness(grid()->levelCellSize(curLevel+1) * .97f );
-		calculateDistance2<Tf>(distanceFunc);
+			std::cout<<"\n subdiv level"<<curLevel<<std::endl;
+		
+			subdivideByFront(curLevel);
+			nbound = m_frontNodes.size();
+			std::cout<<"\n n boundary nodes "<<nbound;
+			
+			buildGrid();
+			buildMesh();
+			buildGraph();
+			
+			thickness = grid()->levelCellSize(curLevel+1) * thre;
+			distanceFunc->setShellThickness(thickness);
+			moveFront(thickness);
+			calculateDistance2<Tf>(distanceFunc);
+		
+			std::cout<<"\n subdiv to level"<<curLevel;
+			verbose();
+			
+			curLevel++;
+		}
 		
 	}
 	
@@ -159,7 +176,6 @@ public:
 			}
 		}
 		
-		resetFrontBoundary();
 		messureFrontNodes2(func);
 		//int ifar = findFarInd();
 		//markInsideOutside2(func, ifar, false);
@@ -182,14 +198,13 @@ private:
 					std::vector<int> & b);
 	void subdivideGridByError(const float & threshold,
 						const int & level);
-	void subdivideByAllPositiveFront(int level);
+	void subdivideByFront(int level);
 /// background node ind in cell closest to pref 
 	int findFarInd();
-	bool isTetraOnFront(int iv0, int iv1, 
-									int iv2, int iv3) const;
-	bool isTetraInsideFrontBoundary(int iv0,
-		int iv1, int iv2, int iv3) const;
-	void resetFrontBoundary();
+	bool isTetraOnFront(int iv0, int iv1, int iv2, int iv3) const;
+	bool isTetraOnFrontBoundary(int iv0, int iv1, int iv2, int iv3) const;
+	bool isTetraAllPositive(int iv0, int iv1, int iv2, int iv3) const;
+	void moveFront(const float & x);
 	
 };
 

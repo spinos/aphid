@@ -201,48 +201,61 @@ void AdaptiveBccField::buildGrid()
 bool AdaptiveBccField::isTetraOnFront(int iv0,
 		int iv1, int iv2, int iv3) const
 {
-	const DistanceNode & n1 = nodes()[iv0];
-	if(n1.label != sdf::StFront)
-		return false;
-	if(n1.val <= 0.f)
+	if(nodes()[iv0].label != sdf::StFront)
 		return false;
 		
-	const DistanceNode & n2 = nodes()[iv1];
-	if(n2.label != sdf::StFront)
-		return false;
-	if(n2.val <= 0.f)
+	if(nodes()[iv1].label != sdf::StFront)
 		return false;
 		
-	const DistanceNode & n3 = nodes()[iv2];
-	if(n3.label != sdf::StFront)
-		return false;
-	if(n3.val <= 0.f)
+	if(nodes()[iv2].label != sdf::StFront)
 		return false;
 		
-	const DistanceNode & n4 = nodes()[iv3];
-	if(n4.label != sdf::StFront)
-		return false;
-	if(n4.val <= 0.f)
+	if(nodes()[iv3].label != sdf::StFront)
 		return false;
 		
 	return true;
 }
 
-bool AdaptiveBccField::isTetraInsideFrontBoundary(int iv0,
+bool AdaptiveBccField::isTetraOnFrontBoundary(int iv0,
 		int iv1, int iv2, int iv3) const
 {
-	return (isNodeInsideFrontBoundary(iv0) 
-			&& isNodeInsideFrontBoundary(iv1)
-			&& isNodeInsideFrontBoundary(iv2)
-			&& isNodeInsideFrontBoundary(iv3) );
+	if(isNodeOnFrontBoundary(iv0) ) return true;
+	if(isNodeOnFrontBoundary(iv1) ) return true;
+	if(isNodeOnFrontBoundary(iv2) ) return true;
+	if(isNodeOnFrontBoundary(iv3) ) return true;
+	return false;
 }
 
-void AdaptiveBccField::subdivideByAllPositiveFront(int level)
+bool AdaptiveBccField::isTetraAllPositive(int iv0, int iv1, int iv2, int iv3) const
 {
+	int c = 0;
+	float di = nodes()[iv0].val;
+	if(di < 1e-3f)
+		c++;
+	
+	di = nodes()[iv1].val;
+	if(di < 1e-3f)
+		c++;
+		
+	di = nodes()[iv2].val;
+	if(di < 1e-3f)
+		c++;
+		
+	di = nodes()[iv3].val;
+	if(di < 1e-3f)
+		c++;
+		
+	return c == 2;
+}
+
+void AdaptiveBccField::subdivideByFront(int level)
+{
+	m_frontNodes.clear();
+	
 	std::vector<aphid::sdb::Coord4 > divided;
 	const DistanceNode * vs = nodes();
 	AdaptiveBccGrid3 * g = grid();
-	const float r = g->levelCellSize(level) * -.5f;
+	const float r = g->levelCellSize(level) * .01f;
 	
 	int c = 0;
 	BoundingBox dirtyBx;
@@ -254,41 +267,43 @@ void AdaptiveBccField::subdivideByAllPositiveFront(int level)
 		if(!isTetraOnFront(a->iv0, a->iv1, a->iv2, a->iv3) ) 
 			continue;
 		
-		if(isTetraInsideFrontBoundary(a->iv0, a->iv1, a->iv2, a->iv3) )
+		if(!isTetraOnFrontBoundary(a->iv0, a->iv1, a->iv2, a->iv3) )
 			continue;
 			
-		dirtyBx.reset();
-		dirtyBx.expandBy(vs[a->iv0].pos, r);
-		dirtyBx.expandBy(vs[a->iv1].pos, r);
-		dirtyBx.expandBy(vs[a->iv2].pos, r);
-		dirtyBx.expandBy(vs[a->iv3].pos, r);
+		if(isTetraAllPositive(a->iv0, a->iv1, a->iv2, a->iv3) ) {
+			dirtyBx.reset();
+			dirtyBx.expandBy((vs[a->iv0].pos
+								+ vs[a->iv1].pos
+								+ vs[a->iv2].pos
+								+ vs[a->iv3].pos) * .25f);
+			dirtyBx.expand(r);
+
+			g->subdivideToLevel(dirtyBx, level+1, &divided);
+			c++;
+		}
 		
-		g->subdivideToLevel(dirtyBx, level+1, &divided);
-		
-		c++;
+		m_frontNodes.insert(a->iv0);
+		m_frontNodes.insert(a->iv1);
+		m_frontNodes.insert(a->iv2);
+		m_frontNodes.insert(a->iv3);
 
 	}
 	enforceBoundary(divided);
 	divided.clear();
 
 	std::cout<<"\n n split tetra "<<c;
+	
 }
 
-void AdaptiveBccField::resetFrontBoundary()
+void AdaptiveBccField::moveFront(const float & x)
 {
-	int c = 0;
-	const int n = numNodes();
-	int i = 0;
-	for(;i<n;++i) {
-		DistanceNode * d = &nodes()[i];
-		if(d->label == sdf::StFront
-			&& !isNodeInsideFrontBoundary(i) ) {
-				
-			d->stat = sdf::StUnknown;
-			c++;
-		}
+	m_frontNodes.begin();
+	while(!m_frontNodes.end() ) {
+	
+		nodes()[m_frontNodes.key()].val += x;
+		m_frontNodes.next();
 	}
-	std::cout<<"\n n reset front boundary "<<c;
+	
 }
 
 }

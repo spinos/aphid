@@ -32,7 +32,7 @@ public:
 	void subdivideToLevel(const aphid::BoundingBox & bx, 
 						const int & level,
 						std::vector<aphid::sdb::Coord4 > * divided = NULL);
-	
+						
 	void subdivideCellToLevel(BccCell3 * cell,
 						const aphid::sdb::Coord4 & cellCoord,
 						const aphid::BoundingBox & bx, 
