@@ -198,4 +198,97 @@ const float & AdaptiveBccField::errorThreshold() const
 void AdaptiveBccField::buildGrid()
 { grid()->build(this); }
 
+bool AdaptiveBccField::isTetraOnFront(int iv0,
+		int iv1, int iv2, int iv3) const
+{
+	const DistanceNode & n1 = nodes()[iv0];
+	if(n1.label != sdf::StFront)
+		return false;
+	if(n1.val <= 0.f)
+		return false;
+		
+	const DistanceNode & n2 = nodes()[iv1];
+	if(n2.label != sdf::StFront)
+		return false;
+	if(n2.val <= 0.f)
+		return false;
+		
+	const DistanceNode & n3 = nodes()[iv2];
+	if(n3.label != sdf::StFront)
+		return false;
+	if(n3.val <= 0.f)
+		return false;
+		
+	const DistanceNode & n4 = nodes()[iv3];
+	if(n4.label != sdf::StFront)
+		return false;
+	if(n4.val <= 0.f)
+		return false;
+		
+	return true;
+}
+
+bool AdaptiveBccField::isTetraInsideFrontBoundary(int iv0,
+		int iv1, int iv2, int iv3) const
+{
+	return (isNodeInsideFrontBoundary(iv0) 
+			&& isNodeInsideFrontBoundary(iv1)
+			&& isNodeInsideFrontBoundary(iv2)
+			&& isNodeInsideFrontBoundary(iv3) );
+}
+
+void AdaptiveBccField::subdivideByAllPositiveFront(int level)
+{
+	std::vector<aphid::sdb::Coord4 > divided;
+	const DistanceNode * vs = nodes();
+	AdaptiveBccGrid3 * g = grid();
+	const float r = g->levelCellSize(level) * -.5f;
+	
+	int c = 0;
+	BoundingBox dirtyBx;
+	const int nt = numTetrahedrons();
+	int i = 0;
+	for(;i<nt;++i) {
+		const ITetrahedron * a = tetra(i);
+	
+		if(!isTetraOnFront(a->iv0, a->iv1, a->iv2, a->iv3) ) 
+			continue;
+		
+		if(isTetraInsideFrontBoundary(a->iv0, a->iv1, a->iv2, a->iv3) )
+			continue;
+			
+		dirtyBx.reset();
+		dirtyBx.expandBy(vs[a->iv0].pos, r);
+		dirtyBx.expandBy(vs[a->iv1].pos, r);
+		dirtyBx.expandBy(vs[a->iv2].pos, r);
+		dirtyBx.expandBy(vs[a->iv3].pos, r);
+		
+		g->subdivideToLevel(dirtyBx, level+1, &divided);
+		
+		c++;
+
+	}
+	enforceBoundary(divided);
+	divided.clear();
+
+	std::cout<<"\n n split tetra "<<c;
+}
+
+void AdaptiveBccField::resetFrontBoundary()
+{
+	int c = 0;
+	const int n = numNodes();
+	int i = 0;
+	for(;i<n;++i) {
+		DistanceNode * d = &nodes()[i];
+		if(d->label == sdf::StFront
+			&& !isNodeInsideFrontBoundary(i) ) {
+				
+			d->stat = sdf::StUnknown;
+			c++;
+		}
+	}
+	std::cout<<"\n n reset front boundary "<<c;
+}
+
 }

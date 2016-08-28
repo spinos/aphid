@@ -36,7 +36,8 @@ bool Domain::broadphaseIntersect(const BoundingBox & b)
 float Domain::distanceTo(const Vector3F & pref)
 { return 1e8f; }
 
-float Domain::beamIntersect(const Beam & b)
+float Domain::beamIntersect(const Beam & b,
+						const float & splatRadius)
 { return 1e8f; }
 
 void Domain::setDistanceRange(const float & x)

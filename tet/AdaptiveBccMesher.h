@@ -30,11 +30,11 @@ public:
 				
 /// subdivide grid to level if cell intersect distance function
 	template<typename Tf>
-	void discretize(Tf * d, const int & level, const float & shellThickness)
+	void discretize(Tf * d, const int & level)
 	{
 		std::vector<aphid::sdb::Coord4 > divided;
 		
-		m_grid.markCellIntersectDomainAtLevel(d, shellThickness, 0, divided);
+		m_grid.markCellIntersectDomainAtLevel(d, 0, divided);
 		
 		int li = 1;
 		while(li < level
@@ -47,7 +47,7 @@ public:
 			else
 				enforceBoundary(divided);
 			
-			m_grid.markCellIntersectDomainAtLevel(d, shellThickness, li, divided);
+			m_grid.markCellIntersectDomainAtLevel(d, li, divided);
 			
 			li++;
 		}

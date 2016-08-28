@@ -572,7 +572,8 @@ void Triangle::getBoundingSphere(Sphere & s) const
 	s.set(bx.center(), bx.radius() );
 }
 
-bool Triangle::beamIntersect(const Beam &bm, float *hitt0, float *hitt1) const
+bool Triangle::beamIntersect(const Beam &bm, const float & swell,
+							float *hitt0, float *hitt1) const
 {
 	Sphere sp;
 	getBoundingSphere(sp);
@@ -585,9 +586,9 @@ bool Triangle::beamIntersect(const Beam &bm, float *hitt0, float *hitt1) const
 	float tc = bm.projectP(sp.center(), q);
 	if(tc < 0.f)
 		return false;
-	
+		
 /// far apart
-	if((q - sp.center() ).length() > sp.radius() + bm.radiusAt(tc) )
+	if((q - sp.center() ).length() > sp.radius() + bm.radiusAt(tc) + swell )
 		return false;
 		
 /// 2 sphere overlapped

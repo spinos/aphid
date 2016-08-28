@@ -50,7 +50,8 @@ public:
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & b);
 	virtual float distanceTo(const Vector3F & pref);
-	virtual float beamIntersect(const Beam & b);
+	virtual float beamIntersect(const Beam & b,
+								const float & splatRadius);
 	
 	void setDistanceRange(const float & x);
 	const float & distanceRange() const;

@@ -258,7 +258,8 @@ public:
 
 	BoundingBox calculateBBox() const;
 	bool rayIntersect(const Ray &ray, float *hitt0, float *hitt1) const;
-	bool beamIntersect(const Beam &bm, float *hitt0, float *hitt1) const;
+	bool beamIntersect(const Beam &bm, const float & swell,
+						float *hitt0, float *hitt1) const;
 	void getBoundingSphere(Sphere & s) const;
 	
 	template<typename T>

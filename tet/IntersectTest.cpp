@@ -117,7 +117,7 @@ void IntersectTest::draw(GeoDrawer * dr)
 		dr->setColor(.2f, .2f, .2f);
 		dr->alignedCircle(bs.center(), bs.radius() );
 		
-		if(tri.beamIntersect(m_beams, &t0, &t1) ) {
+		if(tri.beamIntersect(m_beams, .1f, &t0, &t1) ) {
 			dr->setColor(0.f, 1.f, 0.f);
 			dr->alignedCircle(m_beams.ray().travel(t0), m_beams.radiusAt(t0) );
 			dr->arrow(bs.center(), m_beams.ray().travel(t0) );

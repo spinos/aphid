@@ -288,18 +288,18 @@ char BoundingBox::intersect(const Ray &ray, float *hitt0, float *hitt1) const
 		const Vector3F o = ray.m_origin;
 		if(IsValueNearZero(diri)) {
 			if(i == 0) {
-				if(o.x < m_data[0] || o.x >= m_data[3]) return 0;
+				if(o.x <= m_data[0] || o.x >= m_data[3]) return 0;
 			}
 			else if(i == 1) {
-				if(o.y < m_data[1] || o.y >= m_data[4]) return 0;
+				if(o.y <= m_data[1] || o.y >= m_data[4]) return 0;
 			}
 			else {
-				if(o.z < m_data[2] || o.z >= m_data[5]) return 0;
+				if(o.z <= m_data[2] || o.z >= m_data[5]) return 0;
 			}
 			continue;
 		}
         // Update interval for _i_th bounding box slab
-        float invRayDir = 1.f / (ray.m_dir.comp(i) + 1e-15f);
+        float invRayDir = 1.f / (ray.m_dir.comp(i) + 1e-9f);
         float tNear = (getMin(i) - ray.m_origin.comp(i)) * invRayDir;
         float tFar  = (getMax(i) - ray.m_origin.comp(i)) * invRayDir;
 

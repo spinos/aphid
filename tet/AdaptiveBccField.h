@@ -70,6 +70,39 @@ public:
 		// printErrEdges(threshold);
 		
 	}
+
+/// grid is very coarse relative to input mesh, error will be large
+/// first subdivide to level ignoring error	
+/// subdivide front to find negative distance
+	template<typename Tf>
+	void frontAdaptiveBuild(Tf * distanceFunc, 
+							int discreteLevel,
+							int maxLevel)
+	{
+		int curLevel = discreteLevel;
+		discretize<Tf>(distanceFunc, curLevel);
+		
+		buildGrid();
+		buildMesh();
+		buildGraph();
+		
+		distanceFunc->setShellThickness(grid()->levelCellSize(curLevel) * .97f );
+		calculateDistance2<Tf>(distanceFunc);
+		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
+		verbose();
+		
+		subdivideByAllPositiveFront(curLevel);
+			
+		std::cout<<"\n subdiv level"<<curLevel<<std::endl;
+			
+		buildGrid();
+		buildMesh();
+		buildGraph();
+		
+		distanceFunc->setShellThickness(grid()->levelCellSize(curLevel+1) * .97f );
+		calculateDistance2<Tf>(distanceFunc);
+		
+	}
 	
 	void buildGrid();
 	
@@ -92,7 +125,7 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp, shellThickness) ) {
+			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
 				markTetraOnFront(i);
 			}
 		}
@@ -101,13 +134,12 @@ public:
 		fastMarchingMethod();
 		int ifar = findFarInd();
 		markInsideOutside2(func, ifar, true);
-		estimateFrontEdgeError(func, shellThickness);
+		estimateFrontEdgeError(func);
 		
 	}
 	
 	template<typename Tf>
-	void calculateDistance2(Tf * func, const float & shellThickness,
-							const float & innerOffset)
+	void calculateDistance2(Tf * func)
 	{
 		clearDirtyEdges();
 		markUnknownNodes();
@@ -122,15 +154,17 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp, shellThickness) ) {
+			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
 				markTetraOnFront(i);
 			}
 		}
 		
-		messureFrontNodes2(func, shellThickness, innerOffset);
-		int ifar = findFarInd();
-		fastMarchingMethod();		
-		markInsideOutside2(func, ifar, false);
+		resetFrontBoundary();
+		messureFrontNodes2(func);
+		//int ifar = findFarInd();
+		//markInsideOutside2(func, ifar, false);
+		fastMarchingMethod();
+		//estimateFrontEdgeError(func);
 		
 	}
 	
@@ -148,8 +182,14 @@ private:
 					std::vector<int> & b);
 	void subdivideGridByError(const float & threshold,
 						const int & level);
+	void subdivideByAllPositiveFront(int level);
 /// background node ind in cell closest to pref 
 	int findFarInd();
+	bool isTetraOnFront(int iv0, int iv1, 
+									int iv2, int iv3) const;
+	bool isTetraInsideFrontBoundary(int iv0,
+		int iv1, int iv2, int iv3) const;
+	void resetFrontBoundary();
 	
 };
 

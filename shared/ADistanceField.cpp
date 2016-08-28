@@ -466,4 +466,31 @@ bool ADistanceField::isNodeInsideFrontBoundary(int vi) const
 	return true;
 }
 
+const IDistanceEdge * ADistanceField::longestConnectedEdge(int vi) const
+{
+	const IDistanceEdge * r = NULL;
+	const int endj = edgeBegins()[vi+1];
+	int vj, j = edgeBegins()[vi];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+		
+		vj = eg.vi.x;
+		if(vj == vi)
+			vj = eg.vi.y;
+			
+		const DistanceNode & B = nodes()[vj];
+		if(!r) r = & eg;
+		else {
+			if(eg.len < r->len)
+				r = & eg;
+		} 
+		
+	}
+	
+	return r;
+}
+
 }

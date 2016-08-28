@@ -78,7 +78,7 @@ private:
 					int nodeIdx,
 					const BoundingBox & b);
 	
-/// 0 or 1
+/// 0 or 1 side of split, -1 no hit
 	template <typename T>
 	int firstVisit(IntersectionContext * ctx, 
 					const KdTreeNode * n);
@@ -281,6 +281,10 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 			if(rayPrimitive(tree, ctx, kn ) ) hasNext = false;
 			else stat = 0;
 		}
+		
+		if(ctx->m_ray.length() < 1e-3)
+			return true;
+			
 		if(stat==0) {
 			hasNext = climbRope(tree, ctx, branchIdx, nodeIdx, 
 							kn );
@@ -301,7 +305,8 @@ int KdEngine::firstVisit(IntersectionContext * ctx,
 								const KdTreeNode * n)
 {
     const BoundingBox & b = ctx->getBBox();
-	b.intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax);
+	if(!b.intersect(ctx->m_ray, &ctx->m_tmin, &ctx->m_tmax) )
+		return -1;
 	
 	Vector3F enterP = ctx->m_ray.travel(ctx->m_tmin);
 	const int axis = n->getAxis();
@@ -336,15 +341,25 @@ int KdEngine::visitBranchOrLeaf(IntersectionContext * ctx,
 		return 1;
 	}
 	
+	int fv; 
+	
 	const int offset = r->getOffset();
 	if(offset < Tn::TreeletOffsetMask) {
 		// std::cout<<"\n inner offset "<<offset;
-		nodeIdx += offset + firstVisit<T>(ctx, r);
+		fv = firstVisit<T>(ctx, r);
+		if(fv < 0)
+			return 0;
+			
+		nodeIdx += offset + fv;
 	}
 	else {
 		branchIdx += offset & Tn::TreeletOffsetMaskTau;
 //		std::cout<<"\n branch "<<branchIdx;
-		nodeIdx = firstVisit<T>(ctx, r);
+		fv = firstVisit<T>(ctx, r);
+		if(fv < 0)
+			return 0;
+			
+		nodeIdx = fv;
 	}
 	
 	return -1;
@@ -389,7 +404,7 @@ int KdEngine::beamPrimitive(KdNTree<T, Tn > * tree,
 	int i = 0;
 	for(;i<len;++i) {
 		const T * c = tree->getSource(start + i);
-		if(c->beamIntersect(ctx->m_beam, &ctx->m_tmin, &ctx->m_tmax) ) {
+		if(c->beamIntersect(ctx->m_beam, ctx->splatRadius(), &ctx->m_tmin, &ctx->m_tmax) ) {
 			ctx->m_hitP = ctx->m_ray.travel(ctx->m_tmin);
 			ctx->m_hitN = c->calculateNormal();
 			ctx->m_ray.m_tmax = ctx->m_tmin;
@@ -412,8 +427,9 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 {
     m_numRopeTraversed++;
 /// limit rope traverse
-    if(m_numRopeTraversed > 99) {
-		std::cout<<"\n KdEngine::climbRope out of rope traverse ";
+    if(m_numRopeTraversed > 19) {
+		std::cout<<"\n KdEngine::climbRope out of rope traverse "
+			<<ctx->m_ray<<" "<<ctx->getBBox();
         return false;
 	}
     
@@ -423,6 +439,7 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 	const BoundingBox & b = ctx->getBBox();
 	float t0 = 0.f, t1 = 0.f;
 	b.intersect(ctx->m_ray, &t0, &t1);
+		
 	Vector3F hit1 = ctx->m_ray.travel(t1 + ctx->m_tdelta);
 /// end inside 
 	if(b.isPointInside(hit1) ) {
@@ -941,6 +958,10 @@ bool KdEngine::beamIntersect(KdNTree<T, Tn > * tree,
 			if(beamPrimitive(tree, ctx, kn ) ) hasNext = false;
 			else stat = 0;
 		}
+		
+		if(ctx->m_ray.length() < 1e-3)
+			return true;
+			
 		if(stat==0) {
 			hasNext = climbRope(tree, ctx, branchIdx, nodeIdx, 
 							kn );

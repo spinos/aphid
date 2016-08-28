@@ -38,7 +38,7 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp, shellThickness ) ) {
+			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
 				markTetraOnFront(i);
 			}
 		}

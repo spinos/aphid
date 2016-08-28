@@ -46,17 +46,11 @@ bool KDistanceTest::init()
 	
 	m_distFunc.addTree(m_container.tree() );
 	m_distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER8 );
+	m_distFunc.setShellThickness(gz * GDT_FAC_ONEOVER32);
+	m_distFunc.setSplatRadius(gz * GDT_FAC_ONEOVER32);
 	
-/// grid is very coarse relative to input mesh, error will be large
-/// just subdivide to level ignoring error
-	m_msh.discretize<BDistanceFunction>(&m_distFunc, 4, 0.f );
-	
-	m_msh.buildGrid();
-	m_msh.buildMesh();
-	m_msh.buildGraph();
-	m_msh.calculateDistance2<BDistanceFunction>(&m_distFunc, 0.f, gz * GDT_FAC_ONEOVER16 * 0.f );
+	m_msh.frontAdaptiveBuild<BDistanceFunction>(&m_distFunc, 3, 5);
 	m_msh.verbose();
-
 	m_msh.triangulateFront();
 	
 	std::cout.flush();
@@ -68,7 +62,7 @@ void KDistanceTest::draw(GeoDrawer * dr)
 #define SHO_TREE 1
 #define SHO_CELL 0
 #define SHO_NODE 1
-#define SHO_EDGE 1
+#define SHO_EDGE 0
 #define SHO_ERR 0
 #define SHO_FRONT 0
 #define SHO_FRONT_WIRE 1

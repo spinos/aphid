@@ -23,6 +23,7 @@ void IntersectionContext::reset()
 	m_enableNormalRef = 0;
 	twoSided = 0;
 	m_tdelta = 0.01f;
+	m_splatR = 0.f;
 }
 
 void IntersectionContext::reset(const Ray & ray)
@@ -78,6 +79,12 @@ void IntersectionContext::verbose() const
 {
 	std::cout<<" bbox "<<m_bbox.getMin(0)<<" "<<m_bbox.getMin(1)<<" "<<m_bbox.getMin(2)<<" - "<<m_bbox.getMax(0)<<" "<<m_bbox.getMax(1)<<" "<<m_bbox.getMax(2)<<"\n";
 }
+
+void IntersectionContext::setSplatRadius(const float & x)
+{ m_splatR = x; }
+
+const float IntersectionContext::splatRadius() const
+{ return m_splatR; }
 
 BoxIntersectContext::BoxIntersectContext() :
 m_cap(1),

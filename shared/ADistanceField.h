@@ -268,8 +268,7 @@ protected:
 /// if node on boundary use actual distance 
 /// else minus offset
 	template<typename Tf>
-	void messureFrontNodes2(Tf * func, const float & shellThickness,
-							const float & innerOffset)
+	void messureFrontNodes2(Tf * func)
 	{
 		int c = 0;
 		const int n = numNodes();
@@ -278,8 +277,8 @@ protected:
 			DistanceNode * d = &nodes()[i];
 			if(d->label == sdf::StFront
 				&& d->stat == sdf::StUnknown ) {
-				d->val = func->calculateDistance(d->pos) - shellThickness;
-				d->val -= innerOffset;
+				
+				d->val = func->calculateDistance(d->pos);
 					
 				d->stat = sdf::StKnown; /// accept
 				c++;
@@ -290,7 +289,7 @@ protected:
 	}
 	
 	template<typename Tf>
-	void findFrontEdgeCross(Tf * func, const float & shellThickness)
+	void findFrontEdgeCross(Tf * func)
 	{
 		int c = 0;
 		float beamr;
@@ -340,14 +339,14 @@ protected:
 /// test against interpolated distance front va,vb 
 /// e.err <- max abs(diff)
 	template<typename Tf>
-	float findEdgeMaxError(Tf * func, const float & shellThickness,
+	float findEdgeMaxError(Tf * func,
 							const Vector3F & pa, const Vector3F & pb,
 							const float & a, const float & b)
 	{
 		float mxErr = 0.f, err, act, rec, alpha;
 		for(int i=0; i<3;++i) {
 			alpha = calc::UniformlySpacingRecursive16Nodes[i];
-			act = func->calculateDistance(pa + pb * alpha) - shellThickness;
+			act = func->calculateDistance(pa + pb * alpha);
 			rec = a + b * alpha;
 			err = Absolute<float>(act - Absolute<float>(rec) );
 			if(mxErr < err)
@@ -357,7 +356,7 @@ protected:
 	}
 	
 	template<typename Tf>
-	void estimateFrontEdgeError(Tf * func, const float & shellThickness)
+	void estimateFrontEdgeError(Tf * func)
 	{
 		int c = 0;
 		const DistanceNode * vs = nodes();
@@ -379,7 +378,7 @@ protected:
 					e.err = 0.f;
 				}
 				else {
-					e.err = findEdgeMaxError(func, shellThickness, 
+					e.err = findEdgeMaxError(func, 
 												v1.pos, v2.pos - v1.pos, 
 												v1.val, v2.val - v1.val);
 					c++;
@@ -432,7 +431,8 @@ protected:
 	Vector3F edgeFrontPos(const IDistanceEdge * e,
 							int va, int vb,
 							const Vector3F & pa, const Vector3F & pb) const;
-					
+	bool isNodeInsideFrontBoundary(int vi) const;
+							
 private:
 	void propagate(std::map<int, int > & heap, const int & i);
 	void propagateVisit(std::map<int, int > & heap, const int & i);
@@ -478,7 +478,7 @@ private:
 						const IDistanceEdge & e);
 
 	void printEdge(const IDistanceEdge * e) const;
-	bool isNodeInsideFrontBoundary(int vi) const;
+	const IDistanceEdge * longestConnectedEdge(int vi) const;
 	
 };
 

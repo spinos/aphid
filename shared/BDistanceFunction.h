@@ -16,10 +16,16 @@ namespace aphid {
 class BDistanceFunction {
 
 	std::vector<Domain *> m_domains;
-
+	float m_shellThickness, m_splatRadius;
+	
 public:
 	BDistanceFunction();
 	virtual ~BDistanceFunction();
+	
+	void setShellThickness(const float & x);
+	void setSplatRadius(const float & x);
+	const float & shellThickness() const;
+	const float & splatRadius() const;
 
 	void addSphere(const Vector3F & p, const float & r);
 	void addBox(const Vector3F & lo, const Vector3F & hi);
@@ -38,10 +44,10 @@ public:
 								const float & rb);
 	
 	template<typename Ts>
-	bool broadphase(const Ts * a, const float & shellThickness) const
+	bool broadphase(const Ts * a) const
 	{
 		BoundingBox ab = a->calculateBBox();
-		ab.expand(shellThickness);
+		//ab.expand(shellThickness() );
 		
 		std::vector<Domain *>::const_iterator it = m_domains.begin();
 		for(;it!=m_domains.end();++it) {

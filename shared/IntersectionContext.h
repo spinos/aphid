@@ -21,6 +21,7 @@ namespace aphid {
 class IntersectionContext : public PrimitiveFilter {
 	
 	BoundingBox m_bbox;
+	float m_splatR;
 	
 public:
 	IntersectionContext();
@@ -36,6 +37,9 @@ public:
 	
 	void setBBox(const BoundingBox & bbox);
 	BoundingBox getBBox() const;
+	
+	void setSplatRadius(const float & x);
+	const float splatRadius() const;
 	
 	void setNormalReference(const Vector3F & nor);
 	

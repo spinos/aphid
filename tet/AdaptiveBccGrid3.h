@@ -42,7 +42,6 @@ public:
 /// find level cell intersect distance function
 	template<typename Tf>
 	void markCellIntersectDomainAtLevel(Tf * d, 
-						const float & shellThickness,
 						const int & level,
 						std::vector<aphid::sdb::Coord4 > & divided)
 	{
@@ -54,7 +53,7 @@ public:
 			if(k.w == level) {
 				getCellBBox(cb, k);
 				
-				if(d-> template broadphase <aphid::BoundingBox>(&cb, shellThickness ) )
+				if(d-> template broadphase <aphid::BoundingBox>(&cb ) )
 					divided.push_back(k);
 			}
 			

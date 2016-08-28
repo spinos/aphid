@@ -11,7 +11,9 @@
 
 namespace aphid {
 
-BDistanceFunction::BDistanceFunction()
+BDistanceFunction::BDistanceFunction() :
+m_shellThickness(0.f),
+m_splatRadius(0.f)
 {}
 
 BDistanceFunction::~BDistanceFunction()
@@ -25,6 +27,18 @@ void BDistanceFunction::internalClear()
 	}
 	m_domains.clear();
 }
+
+void BDistanceFunction::setShellThickness(const float & x)
+{ m_shellThickness = x; }
+
+void BDistanceFunction::setSplatRadius(const float & x)
+{ m_splatRadius = x; }
+
+const float & BDistanceFunction::shellThickness() const
+{ return m_shellThickness; }
+
+const float & BDistanceFunction::splatRadius() const
+{ return m_splatRadius; }
 
 void BDistanceFunction::addSphere(const Vector3F & p, const float & r)
 {
@@ -56,7 +70,7 @@ float BDistanceFunction::calculateDistance(const Vector3F & p)
 	std::vector<Domain *>::iterator it = m_domains.begin();
 	for(;it!=m_domains.end();++it) {
 		
-		d = (*it)->distanceTo(p);
+		d = (*it)->distanceTo(p) - shellThickness();
 		if(mnd > d)
 			mnd = d;
 			
@@ -75,7 +89,7 @@ float BDistanceFunction::calculateIntersection(const Vector3F & a,
 	std::vector<Domain *>::iterator it = m_domains.begin();
 	for(;it!=m_domains.end();++it) {
 		
-		d = (*it)->beamIntersect(bm);
+		d = (*it)->beamIntersect(bm, splatRadius() );
 		
 		if(md > d)
 			md = d;
