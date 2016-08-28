@@ -40,30 +40,22 @@ bool KDistanceTest::init()
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
 	setColorScale(1.f / gz);
-	setNodeDrawSize(gz * GDT_FAC_ONEOVER32 );
+	setNodeDrawSize(gz * GDT_FAC_ONEOVER128 );
 	
-	m_msh.fillBox(tb, gz*.83f);
+	m_msh.fillBox(tb, gz);
 	
 	m_distFunc.addTree(m_container.tree() );
-	m_distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER16 * 1.9f );
+	m_distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER8 );
 	
-#if 1
 /// grid is very coarse relative to input mesh, error will be large
 /// just subdivide to level ignoring error
-	m_msh.discretize<BDistanceFunction>(&m_distFunc, 4, gz * GDT_FAC_ONEOVER16 );
+	m_msh.discretize<BDistanceFunction>(&m_distFunc, 4, 0.f );
 	
 	m_msh.buildGrid();
 	m_msh.buildMesh();
 	m_msh.buildGraph();
-	std::cout<<"\n grid n cell "<<m_msh.grid()->size()
-			<<"\n n node "<<m_msh.numNodes()
-			<<"\n n edge "<<m_msh.numEdges();
-	m_msh.calculateDistance<BDistanceFunction>(&m_distFunc, gz * GDT_FAC_ONEOVER16 );
-#else
-#define MAX_BUILD_LEVEL 4
-#define MAX_BUILD_ERROR .5f	
-	m_msh.adaptiveBuild<BDistanceFunction>(&m_distFunc, MAX_BUILD_LEVEL, MAX_BUILD_ERROR);
-#endif
+	m_msh.calculateDistance2<BDistanceFunction>(&m_distFunc, 0.f, gz * GDT_FAC_ONEOVER16 * 0.f );
+	m_msh.verbose();
 
 	m_msh.triangulateFront();
 	
@@ -73,13 +65,13 @@ bool KDistanceTest::init()
 
 void KDistanceTest::draw(GeoDrawer * dr)
 {
-#define SHO_TREE 0
+#define SHO_TREE 1
 #define SHO_CELL 0
-#define SHO_NODE 0
+#define SHO_NODE 1
 #define SHO_EDGE 1
 #define SHO_ERR 0
-#define SHO_FRONT 1
-#define SHO_FRONT_WIRE 0
+#define SHO_FRONT 0
+#define SHO_FRONT_WIRE 1
 
 #if SHO_NODE
 	drawNodes(&m_msh, dr, true);

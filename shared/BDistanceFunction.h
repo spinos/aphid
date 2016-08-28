@@ -38,7 +38,7 @@ public:
 								const float & rb);
 	
 	template<typename Ts>
-	bool intersect(const Ts * a, const float & shellThickness) const
+	bool broadphase(const Ts * a, const float & shellThickness) const
 	{
 		BoundingBox ab = a->calculateBBox();
 		ab.expand(shellThickness);
@@ -48,6 +48,26 @@ public:
 			
 			Domain * d = *it;
 			if(d->broadphaseIntersect(ab) )
+				return true;
+			
+		}
+		return false;
+	}
+	
+	template<typename Ts>
+	bool narrowphase(const Ts * a, const float & shellThickness) const
+	{
+		std::vector<Domain *>::const_iterator it = m_domains.begin();
+		for(;it!=m_domains.end();++it) {
+			
+			Domain * dm = *it;
+			bool stat = false;
+			if(dm->functionType() == Domain::fnSphere) {
+				SphereDomain * sd = static_cast<SphereDomain *> (dm);
+				stat = sd->narrowphaseIntersect <Ts> (a, shellThickness);
+			}
+			//if(d->narrowphaseIntersect(a, shellThickness) )
+			if(stat)
 				return true;
 			
 		}

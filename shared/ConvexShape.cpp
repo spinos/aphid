@@ -681,8 +681,6 @@ Vector3F Tetrahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
         }
     }
     if(localP) *localP = X(ir);
-	if(X(ir).length() < 1e-3f)
-	std::cout<<"\n tet x"<<X(ir);
     return X(ir);
 }
 

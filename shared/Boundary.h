@@ -49,7 +49,6 @@ public:
 	
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & b);
-	virtual bool narrowphaseIntersect(Domain * b);
 	virtual float distanceTo(const Vector3F & pref);
 	virtual float beamIntersect(const Beam & b);
 	

@@ -51,7 +51,7 @@ public:
 			
 			li++;
 		}
-		
+		std::cout<<"\n AdaptiveBccGrid3::discretize to level"<<level;
 	}
 	
 	void buildMesh();

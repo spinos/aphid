@@ -63,7 +63,7 @@ float NTreeDomain<T, Tn >::distanceTo(const Vector3F & pref)
 template<typename T, typename Tn>
 float NTreeDomain<T, Tn >::beamIntersect(const Beam & b)
 { 
-	m_intersectCtx.reset(b, distanceRange() * .001f );
+	m_intersectCtx.reset(b, distanceRange() * .0001f );
 	m_engine.beamIntersect(m_tree, &m_intersectCtx);
 	if(m_intersectCtx.m_success)
 		return m_intersectCtx.m_tmin / b.ray().m_tmax;

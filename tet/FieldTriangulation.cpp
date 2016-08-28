@@ -86,8 +86,8 @@ void FieldTriangulation::getCutEdgeIndPos(int & cutInd,
 		const IDistanceEdge * eg = edge(iv0, iv1);
 		if(eg->cx > -1)
 			m_cutPosBuf[numCut++] = edgeFrontPos(eg, iv0, iv1, a->pos, b->pos);
-		else
-			m_cutPosBuf[numCut++] = (a->pos + b->pos) * .5f;
+		else 
+			m_cutPosBuf[numCut++] = refiner.splitPos(a->val, b->val, a->pos, b->pos);
 	}
 }
 

@@ -241,7 +241,7 @@ bool ADistanceField::snapNodeToFront(DistanceNode & v1, DistanceNode & v2,
 	const Vector3F dv = v2.pos - v1.pos;
 /// angle of crossing
 	float glancing = (Absolute<float>(v1.val) + Absolute<float>(v2.val) ) / e.len;
-	float eps = .23f * sqrt(glancing);
+	float eps = .23f * glancing;
 
 	if(e.cx < eps) {
 		v1.pos += dv.normal() * (e.len * e.cx);
@@ -441,6 +441,29 @@ Vector3F ADistanceField::edgeFrontPos(const IDistanceEdge * e,
 		return pa * (1.f - alpha) + pb * alpha;
 		
 	return pa * alpha + pb * (1.f - alpha);
+}
+
+bool ADistanceField::isNodeInsideFrontBoundary(int vi) const
+{
+	const int endj = edgeBegins()[vi+1];
+	int vj, j = edgeBegins()[vi];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+		
+		vj = eg.vi.x;
+		if(vj == vi)
+			vj = eg.vi.y;
+			
+		const DistanceNode & B = nodes()[vj];
+		if(B.stat != sdf::StFront) {
+/// connected to background
+			return false;
+		}
+	}
+	return true;
 }
 
 }

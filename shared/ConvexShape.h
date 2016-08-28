@@ -114,6 +114,21 @@ public:
 		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
 	}
 	
+	template<typename T>
+	bool narrowphaseIntersect(const T * b, const float & shellThickness) const
+	{
+		if(!gjk::Intersect1<T, Sphere>::Evaluate(*b, *this) )
+			return false;
+			
+		const int n = b->numPoints();
+		for(int i=0; i<n; ++i) {
+			if(b->X(i).distanceTo(m_p) > m_r)
+				return true;
+		}
+/// all inside
+		return false;
+	}
+	
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
 	
 	static Domain::FunctionType FunctionTypeId;

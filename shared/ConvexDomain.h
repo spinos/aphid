@@ -25,6 +25,12 @@ public:
 	virtual float distanceTo(const Vector3F & pref);
 	virtual float beamIntersect(const Beam & b);
 	
+	template<typename Ts>
+	bool narrowphaseIntersect(const Ts * a, const float & shellThickness)
+	{
+		return m_shape->narrowphaseIntersect<Ts>(a, shellThickness);
+	}
+	
 };
 
 template<typename T>

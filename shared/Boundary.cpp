@@ -33,9 +33,6 @@ Domain::FunctionType Domain::functionType() const
 bool Domain::broadphaseIntersect(const BoundingBox & b)
 { return false; }
 
-bool Domain::narrowphaseIntersect(Domain * b)
-{ return false; }
-
 float Domain::distanceTo(const Vector3F & pref)
 { return 1e8f; }
 

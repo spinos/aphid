@@ -54,7 +54,7 @@ public:
 			if(k.w == level) {
 				getCellBBox(cb, k);
 				
-				if(d-> template intersect<aphid::BoundingBox>(&cb, shellThickness ) )
+				if(d-> template broadphase <aphid::BoundingBox>(&cb, shellThickness ) )
 					divided.push_back(k);
 			}
 			

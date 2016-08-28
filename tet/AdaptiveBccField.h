@@ -92,16 +92,45 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template intersect <aphid::cvx::Tetrahedron>(&tetshp, shellThickness) ) {
+			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp, shellThickness) ) {
 				markTetraOnFront(i);
 			}
 		}
 		
 		messureFrontNodes(func, shellThickness);
-		findFrontEdgeCross(func, shellThickness);
-		fastMarchingMethod();		
-		markInsideOutside(findFarInd() );
+		fastMarchingMethod();
+		int ifar = findFarInd();
+		markInsideOutside2(func, ifar, true);
 		estimateFrontEdgeError(func, shellThickness);
+		
+	}
+	
+	template<typename Tf>
+	void calculateDistance2(Tf * func, const float & shellThickness,
+							const float & innerOffset)
+	{
+		clearDirtyEdges();
+		markUnknownNodes();
+		
+		typename aphid::cvx::Tetrahedron;
+		aphid::cvx::Tetrahedron tetshp;
+
+		const int nt = numTetrahedrons();
+		int i = 0;
+		for(;i<nt;++i) {
+			
+			getTetraShape(tetshp, i);
+
+/// intersect any tetra			
+			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp, shellThickness) ) {
+				markTetraOnFront(i);
+			}
+		}
+		
+		messureFrontNodes2(func, shellThickness, innerOffset);
+		int ifar = findFarInd();
+		fastMarchingMethod();		
+		markInsideOutside2(func, ifar, false);
 		
 	}
 	

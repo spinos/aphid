@@ -60,6 +60,133 @@ public:
 /// negative nodes not visited 
 	void markInsideOutside(const int & originNodeInd = -1);
 	
+///         |						
+/// a-------x---->b
+///         |
+///                  0.5
+/// find x if a->b cross front
+/// for each edge has both node marked on front
+/// find intersect point cx
+/// if edge intersects front, march will be blocked	
+	template<typename Tf>
+	void findEdgeCross(Tf * func,
+						IDistanceEdge & eg, 
+						const DistanceNode & v1,
+						const DistanceNode & v2,
+						bool oneSided)
+	{
+		if(eg.cx > -1.f) return;
+			
+		if(Absolute<float>(v1.val) < 1e-2f)
+			eg.cx = 1e-3f;
+		if(Absolute<float>(v2.val) < 1e-2f)
+			eg.cx = .999f;
+			
+		float beamr = eg.len * .0625f;
+		if(eg.cx < 0.f) {
+			eg.cx = func->calculateIntersection(v1.pos, v2.pos,
+								beamr, beamr* 8.f);
+		}
+		
+		if(oneSided)
+			return;
+		
+		if(eg.cx < 0.f) {
+			eg.cx = func->calculateIntersection(v2.pos, v1.pos,
+								beamr, beamr* 8.f);
+								
+			if(eg.cx > -1.f)
+				eg.cx = 1.f - eg.cx;
+		}
+			
+	}
+	
+/// march through edges
+/// if both node on front, find cross along march direction
+/// if not blocked, go through	
+	template<typename Tf>
+	void propagateVisit2(Tf * func, std::map<int, int > & heap, const int & vi,
+						bool oneSided)
+	{
+/// A is i
+		const DistanceNode & A = nodes()[vi];
+		const bool aOnFront = (A.label == sdf::StFront);
+		bool reversed;
+		
+/// for each neighbor of A
+		const int endj = edgeBegins()[vi+1];
+		int vj, j = edgeBegins()[vi];
+		for(;j<endj;++j) {
+			
+			int k = edgeIndices()[j];
+
+			IDistanceEdge & eg = edges()[k];
+			
+			vj = eg.vi.x;
+			reversed = true;
+			if(vj == vi) {
+				vj = eg.vi.y;
+				reversed = false;
+			}
+/// B is j							
+			DistanceNode & B = nodes()[vj];
+			
+			if(aOnFront && (B.label == sdf::StFront) ) {
+				if(reversed) 
+					findEdgeCross(func, eg, B, A, oneSided);
+				else
+					findEdgeCross(func, eg, A, B, oneSided);
+			}
+			
+/// do not cross front
+			if(eg.cx < 0.f) {
+/// do not visit inside
+				if( B.val > 1e-3f && B.stat == sdf::StFar) 
+					heap[vj] = 0;
+			}
+		}
+	}
+
+	template<typename Tf>
+	void markInsideOutside2(Tf * func, const int & originNodeInd,
+							bool oneSided)
+	{
+		setNodeFar();
+		int i = originNodeInd;
+		if(i < 0) {
+			i = lastBackgroundNode();
+		
+			DistanceNode & ln = nodes()[i];
+			std::cout<<"\n progress from "<<ln.pos;
+			std::cout.flush();
+		}
+		
+/// heap of trial
+		std::map<int, int> trials;
+		trials[i] = 0;
+		
+/// for each trial
+		while (trials.size() > 0) {
+
+/// A is first in trial		
+			i = trials.begin()->first;
+
+			nodes()[i].stat = sdf::StVisited;
+/// remove A from trial
+			trials.erase(trials.begin() );
+			
+/// from A
+			propagateVisit2(func, trials, i, oneSided);
+			
+			//std::cout<<"\n trial n "<<trials.size();
+			//std::cout.flush();
+		}
+		
+/// negate not visited
+		setFarNodeInside();
+		
+	}
+	
 	sdb::Sequence<sdb::Coord2 > * dirtyEdges();
 
 /// per dirty edge, at linear center delta x, compare actual distance to recovered distance
@@ -137,14 +264,31 @@ protected:
 		
 	}
 	
-///         |						
-/// a-------x---->b
-///         |
-///                  0.5
-/// find x if a->b cross front
-/// for each edge has both node marked on front
-/// find intersect point cx
-/// if edge intersects front, march will be blocked	
+/// reduce inner node distance
+/// if node on boundary use actual distance 
+/// else minus offset
+	template<typename Tf>
+	void messureFrontNodes2(Tf * func, const float & shellThickness,
+							const float & innerOffset)
+	{
+		int c = 0;
+		const int n = numNodes();
+		int i = 0;
+		for(;i<n;++i) {
+			DistanceNode * d = &nodes()[i];
+			if(d->label == sdf::StFront
+				&& d->stat == sdf::StUnknown ) {
+				d->val = func->calculateDistance(d->pos) - shellThickness;
+				d->val -= innerOffset;
+					
+				d->stat = sdf::StKnown; /// accept
+				c++;
+			}
+		}
+		std::cout<<"\n n front sample "<<c;
+		
+	}
+	
 	template<typename Tf>
 	void findFrontEdgeCross(Tf * func, const float & shellThickness)
 	{
@@ -169,9 +313,9 @@ protected:
 				if(Absolute<float>(v2.val) < 1e-2f)
 					e.cx = .999f;
 				if(e.cx < 0.f) {
-					beamr = e.len * .5f;
+					beamr = e.len * .0625f;
 					e.cx = func->calculateIntersection(v1.pos, v2.pos,
-										beamr, beamr);
+										beamr, beamr* 8.f);
 				}
 				
 				if(e.cx >= 0.f)
@@ -334,6 +478,7 @@ private:
 						const IDistanceEdge & e);
 
 	void printEdge(const IDistanceEdge * e) const;
+	bool isNodeInsideFrontBoundary(int vi) const;
 	
 };
 
