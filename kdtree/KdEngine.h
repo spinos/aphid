@@ -433,8 +433,8 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
         return false;
 	}
     
-    const int oldBranch = branchIdx;
-    const int oldNode = nodeIdx;
+    // const int oldBranch = branchIdx;
+    // const int oldNode = nodeIdx;
     
 	const BoundingBox & b = ctx->getBBox();
 	float t0 = 0.f, t1 = 0.f;

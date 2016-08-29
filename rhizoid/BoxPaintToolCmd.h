@@ -77,9 +77,10 @@ private:
 	Operation m_operation;
 	
 	unsigned opt, nseg;
-	float lseg;
-	MString fBlockerName, fVizName, m_cacheName;
 	int m_dftLevel;
+	float lseg;
+	double m_dftScale, m_dftRound;
+	MString fBlockerName, fVizName, m_cacheName;
 	
 };
 #endif        //  #ifndef BOXPAINTTOOLCMD_H

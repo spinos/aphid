@@ -52,15 +52,19 @@
 #define kRotateOrderPCAFlagLong "-rotateOrderPCA"
 #define kDFTFlag "-dft" 
 #define kDFTFlagLong "-distanceFieldTriangulate"
+#define kDFTScaleFlag "-fts" 
+#define kDFTScaleFlagLong "-fieldTriangulateScale"
+#define kDFTRoundFlag "-ftr" 
+#define kDFTRoundFlagLong "-fieldTriangulateRound"
 
 using namespace aphid;
-
-proxyPaintTool::~proxyPaintTool() {}
 
 proxyPaintTool::proxyPaintTool()
 {
 	setCommandString("proxyPaintToolCmd");
 }
+
+proxyPaintTool::~proxyPaintTool() {}
 
 void* proxyPaintTool::creator()
 {
@@ -85,6 +89,8 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kPCAFlag, kPCAFlagLong);
 	syntax.addFlag(kRotateOrderPCAFlag, kRotateOrderPCAFlagLong, MSyntax::kString);
 	syntax.addFlag(kDFTFlag, kDFTFlagLong, MSyntax::kLong);
+	syntax.addFlag(kDFTScaleFlag, kDFTScaleFlagLong, MSyntax::kDouble);
+	syntax.addFlag(kDFTRoundFlag, kDFTRoundFlagLong, MSyntax::kDouble);
 	return syntax;
 }
 
@@ -151,6 +157,8 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 	m_operation = opUnknown;
     m_currentVoxInd = 0;
 	m_rotPca = Matrix33F::XYZ;
+	m_dftScale = 1;
+	m_dftRound = 0;
 	
 	MStatus status;
 	MArgDatabase argData(syntax(), args);
@@ -248,6 +256,20 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		m_operation = opDistanceFieldTriangulate;
+	}
+	
+	if(argData.isFlagSet(kDFTScaleFlag)) {
+		status = argData.getFlagArgument(kDFTScaleFlag, 0, m_dftScale);
+		if (!status) {
+			MGlobal::displayWarning(" proxyPaintTool cannot parse -fts flag");
+		}
+	}
+	
+	if(argData.isFlagSet(kDFTRoundFlag)) {
+		status = argData.getFlagArgument(kDFTRoundFlag, 0, m_dftRound);
+		if (!status) {
+			MGlobal::displayWarning(" proxyPaintTool cannot parse -ftr flag");
+		}
 	}
 	
 	return MS::kSuccess;
@@ -769,8 +791,28 @@ MStatus proxyPaintTool::performDFT()
 	KdNTree<cvx::Triangle, KdNode4 > gtr;
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, &tris, bbox, &bf);
 	
+	float uscale = m_dftScale;
+	if(uscale < 1.f) {
+		MGlobal::displayInfo(" proxyPaintTool dft scale truncate to 1");
+		uscale = 1.f;
+	}
+	else if(uscale > 4.f) {
+		MGlobal::displayInfo(" proxyPaintTool dft scale truncate to 2");
+		uscale = 4.f;
+	}
+	
+	float uround = m_dftRound;
+	if(uround < 0.f) {
+		MGlobal::displayInfo(" proxyPaintTool dft roundness truncate to 0");
+		uround = 1.f;
+	}
+	else if(uround > .5f) {
+		MGlobal::displayInfo(" proxyPaintTool dft roundness truncate to 0.5");
+		uround = .5f;
+	}
+	
 	BoundingBox tb = gtr.getBBox();
-	const float gz = tb.getLongestDistance() * .53f;
+	const float gz = tb.getLongestDistance() * 1.01f * uscale;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
@@ -780,30 +822,19 @@ MStatus proxyPaintTool::performDFT()
 	
 	BDistanceFunction distFunc;
 	distFunc.addTree(&gtr);
+	distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER8 );
 	
 	int bLevel = m_dftLevel;
-	if(bLevel < 2) {
-		AHelper::Info<int>("proxyPaintTool reducing level < ", 2 );
-		bLevel = 2;
+	if(bLevel < 3) {
+		AHelper::Info<int>("proxyPaintTool reducing level < ", 3 );
+		bLevel = 3;
 	}
-	else if(bLevel > 8) {
-		AHelper::Info<int>("proxyPaintTool reducing level > ", 8 );
-		bLevel = 8;
+	else if(bLevel > 6) {
+		AHelper::Info<int>("proxyPaintTool reducing level > ", 6 );
+		bLevel = 6;
 	}
 	
-	const float facThickness = gz * sdb::gdt::FracOneOverTwoPowers[bLevel];
-	
-	msh.discretize<BDistanceFunction>(&distFunc, bLevel, facThickness );
-	
-	msh.buildGrid();
-	msh.buildMesh();
-	msh.buildGraph();
-	std::cout<<"\n grid n cell "<<msh.grid()->size()
-			<<"\n grid bbx "<<msh.grid()->boundingBox()
-			<<"\n n node "<<msh.numNodes()
-			<<"\n n edge "<<msh.numEdges();
-	distFunc.setDomainDistanceRange(facThickness * 1.9f );
-	msh.calculateDistance<BDistanceFunction>(&distFunc, facThickness );
+	msh.frontAdaptiveBuild<BDistanceFunction>(&distFunc, 3, bLevel, .47f + uround );
 	msh.triangulateFront();
 	AHelper::Info<int>(" proxyPaintTool reduce selected to n triangle ", msh.numFrontTriangles() );
 	AHelper::Info<int>(" n vertex ", msh.numTriangleVertices() );

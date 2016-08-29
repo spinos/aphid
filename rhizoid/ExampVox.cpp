@@ -46,7 +46,7 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, tri, bbox, &bf);
 	
 	BoundingBox tb = gtr.getBBox();
-	const float gz = tb.getLongestDistance() * .53f;
+	const float gz = tb.getLongestDistance() * 1.01f;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
@@ -56,18 +56,9 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	
 	BDistanceFunction distFunc;
 	distFunc.addTree(&gtr);
+	distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER8 );
 	
-	msh.discretize<BDistanceFunction>(&distFunc, 4, gz * GDT_FAC_ONEOVER16 );
-	
-	msh.buildGrid();
-	msh.buildMesh();
-	msh.buildGraph();
-	std::cout<<"\n grid n cell "<<msh.grid()->size()
-			<<"\n grid bbx "<<msh.grid()->boundingBox()
-			<<"\n n node "<<msh.numNodes()
-			<<"\n n edge "<<msh.numEdges();
-	distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER16 * 1.9f );
-	msh.calculateDistance<BDistanceFunction>(&distFunc, gz * GDT_FAC_ONEOVER16);
+	msh.frontAdaptiveBuild<BDistanceFunction>(&distFunc, 3, 4, .47f );
 	msh.triangulateFront();
 	
 	std::cout.flush();

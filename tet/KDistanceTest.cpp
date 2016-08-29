@@ -35,7 +35,7 @@ bool KDistanceTest::init()
 	
 	BoundingBox tb = m_container.tree()->getBBox();
 /// larger grid size less faces
-	const float gz = tb.getLongestDistance() * 1.139f;
+	const float gz = tb.getLongestDistance() * 1.01f;
 	std::cout<<"\n gz "<<gz;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
@@ -52,7 +52,7 @@ bool KDistanceTest::init()
 	
 /// level 4 rough 5 detail 6 fine
 /// large theta more round 
-	m_msh.frontAdaptiveBuild<BDistanceFunction>(&m_distFunc, 3, 5, .47f);
+	m_msh.frontAdaptiveBuild<BDistanceFunction>(&m_distFunc, 3, 4, .47f);
 	m_msh.triangulateFront();
 	
 	std::cout.flush();
