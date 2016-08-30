@@ -93,9 +93,14 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			block.inputValue(abboxmaxy).asFloat(), 
 			block.inputValue(abboxmaxz).asFloat());
 		
+		const float grdsz = defBox->geomExtent() * 31.f ;
+		if(grdsz < 1e-1f) {
+			AHelper::Info(" ProxyViz input box is too small", grdsz);
+		}
+		
 		if(m_toSetGrid) {
 			m_toSetGrid = false;
-			resetGrid(defBox->geomExtent() * 16.f);
+			resetGrid(grdsz);
 		}
 		
 		if(_firstLoad) {

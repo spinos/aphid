@@ -57,34 +57,15 @@ float ANoise3::FractalF(const float * v,
 						const float * o,
 						const float & freq,
 						const float & lacunarity,
-						const int & octaves)
-{
-	const float sx = v[0] * freq + o[0] * 8.f;
-	const float sy = v[1] * freq + o[1] * 8.f;
-	const float sz = v[2] * freq + o[2] * 8.f;
-	
-	float c = Trilinear(sx, sy, sz);
-	
-	float f = 1.f;
-	int i=1;
-	for(;i<octaves;++i) {
-		f *= lacunarity;
-		c += (Trilinear(sx*f, sy*f, sz*f) - .5f) / f;
-	}
-	return c;
-}
-
-/// http://web.cs.wpi.edu/~emmanuel/courses/cs563/S07/talks/dmitriy_janaliyev_noise_wk9_p2.pdf
-float ANoise3::Fbm(const float * v,
-						const float * o,
-						const float & scale,
 						const int & octaves,
-						const float & lacunarity,
 						const float & gain)
 {
-	const float sx = v[0] * scale + o[0] * 8.f;
-	const float sy = v[1] * scale + o[1] * 8.f;
-	const float sz = v[2] * scale + o[2] * 8.f;
+	const float ox = o[0] * 8.f;
+	const float oy = o[1] * 8.f;
+	const float oz = o[2] * 8.f;
+	float sx = v[0] * freq + ox;
+	float sy = v[1] * freq + oy;
+	float sz = v[2] * freq + oz;
 	
 	float c = Trilinear(sx, sy, sz);
 	
@@ -93,9 +74,20 @@ float ANoise3::Fbm(const float * v,
 	for(;i<octaves;++i) {
 		f *= lacunarity;
 		c += (Trilinear(sx*f, sy*f, sz*f) - .5f) * gain;
+		sx += ox;
+		sy += oy;
+		sz += oz;
 	}
-	
 	return c;
 }
+
+/// http://web.cs.wpi.edu/~emmanuel/courses/cs563/S07/talks/dmitriy_janaliyev_noise_wk9_p2.pdf
+float ANoise3::Fbm(const float * v,
+						const float * o,
+						const float & freq,
+						const int & octaves,
+						const float & lacunarity,
+						const float & gain)
+{ return FractalF(v, o, freq, lacunarity, octaves, gain); }
 
 }

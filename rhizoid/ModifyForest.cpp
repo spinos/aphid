@@ -120,7 +120,8 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 							(const float *)&option.m_noiseOrigin,
 							freq,
 							option.m_noiseLacunarity,
-							option.m_noiseOctave ) < option.m_noiseLevel )
+							option.m_noiseOctave,
+							option.m_noiseGain ) < option.m_noiseLevel )
 			continue;
 		
 		if(limitRadius) {

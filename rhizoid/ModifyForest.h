@@ -37,6 +37,7 @@ public:
 		float m_noiseFrequency;
 		float m_noiseLacunarity;
 		float m_noiseLevel;
+		float m_noiseGain;
 		int m_noiseOctave;
 		bool m_alongNormal;
 		bool m_multiGrow;
@@ -58,6 +59,7 @@ public:
 			m_noiseLacunarity = 1.5f;
 			m_noiseOctave = 4;
 			m_noiseLevel = .5f;
+			m_noiseGain = .5f;
 			m_noiseOrigin.set(.4315f, .63987f, .6589f);
 		}
 	};

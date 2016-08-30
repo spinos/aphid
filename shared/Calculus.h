@@ -52,6 +52,18 @@ float interpolate(int nknots, const float * yknots,
 /// x0 = a, xm-1 = b
 float trapezIntegral(const float & a, const float & b, 
 	int m, const float * y);
+	
+/// coefficients and arguments for n-point integrals over [-1,1]
+/// n order number of points
+/// ci weights of rule
+/// xi abscissas of rule
+void gaussQuadratureRule(int n, float * ci, float * xi);
+
+/// M1 M2 minimum and maximum entries
+/// N number of components
+/// *Rank counts the elements
+/// X[N] input/output
+void tuple_next( int m1, int m2, int n, int *rank, int x[] );
 
 /// http://mathfaculty.fullerton.edu/mathews/n2003/SimpsonsRule2DMod.html
 /// http://mathfaculty.fullerton.edu/mathews/n2003/GaussianQuadMod.html

@@ -49,6 +49,8 @@
 #define kNoiseOctaveFlagLong "-noiseOctave"
 #define kNoiseLevelFlag "-nlv"
 #define kNoiseLevelFlagLong "-noiseLevel"
+#define kNoiseGainFlag "-ngn"
+#define kNoiseGainFlagLong "-noiseGain"
 #define kNoiseOriginXFlag "-nox"
 #define kNoiseOriginXFlagLong "-noiseOriginX"
 #define kNoiseOriginYFlag "-noy"
@@ -246,6 +248,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setNoiseLevel(lev);
 	}
 	
+	if (argData.isFlagSet(kNoiseGainFlag)) {
+		double gan = 1;
+		if (argData.getFlagArgument(kNoiseGainFlag, 0, gan) )
+			fContext->setNoiseGain(gan);
+	}
+	
 	if (argData.isFlagSet(kNoiseOriginXFlag)) {
 		double nox = 1;
 		if (argData.getFlagArgument(kNoiseOriginXFlag, 0, nox) )
@@ -330,6 +338,9 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kNoiseLevelFlag))
 		setResult(fContext->noiseLevel() );
+		
+	if (argData.isFlagSet(kNoiseGainFlag))
+		setResult(fContext->noiseGain() );
 		
 	if (argData.isFlagSet(kNoiseOriginXFlag))
 		setResult(fContext->noiseOriginX() );
@@ -474,6 +485,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kNoiseLevelFlag, kNoiseLevelFlagLong, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add noise level arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseGainFlag, kNoiseGainFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise gain arg");
 		return MS::kFailure;
 	}
 	

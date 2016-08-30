@@ -694,6 +694,9 @@ const int & proxyPaintContext::noiseOctave() const
 const float & proxyPaintContext::noiseLevel() const
 { return m_growOpt.m_noiseLevel; }
 
+const float & proxyPaintContext::noiseGain() const
+{ return m_growOpt.m_noiseGain; }
+
 const float & proxyPaintContext::noiseOriginX() const
 { return m_growOpt.m_noiseOrigin.x; }
 
@@ -725,6 +728,12 @@ void proxyPaintContext::setNoiseLevel(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise level", x);
 	m_growOpt.m_noiseLevel = x; 
+}
+
+void proxyPaintContext::setNoiseGain(float x)
+{ 
+	AHelper::Info<float>(" proxyPaintContext set noise gain", x);
+	m_growOpt.m_noiseGain = x; 
 }
 
 void proxyPaintContext::setNoiseOriginX(float x)
