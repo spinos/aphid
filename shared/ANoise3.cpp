@@ -69,16 +69,16 @@ float ANoise3::FractalF(const float * v,
 	
 	float c = Trilinear(sx, sy, sz);
 	
-	float f = 1.f, l = 1.f, lg = 1.01f + gain * .67f;
+	float f = lacunarity, lg = 1.23f + gain * .47f;
+	float l = 1.f / lg;
 	int i=1;
 	for(;i<octaves;++i) {
 		sx += ox;
 		sy += oy;
 		sz += oz;
+		c += (Trilinear(sx*f, sy*f, sz*f) - .5f) * gain * l;
 		f *= lacunarity;
 		l /= lg;
-		c += (Trilinear(sx*f, sy*f, sz*f) - .5f) * gain * l;
-		
 	}
 	return c;
 }

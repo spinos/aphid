@@ -26,18 +26,20 @@ const char * Legendre2DTest::titleStr() const
 
 bool Legendre2DTest::init()
 {
-	const float du = 1.f / 8;
+#define N_H_SEG 16
+#define N_SEG 32
+	const float du = 1.f / N_H_SEG;
 	Vector3F smp, orp(.6241f, .4534f, .2786f);
-	m_exact.create(16, 16);
+	m_exact.create(32, 32);
 	int i,j;
-	for(j=0;j<=16;++j) {
-		for(i=0;i<=16;++i) {
+	for(j=0;j<=N_SEG;++j) {
+		for(i=0;i<=N_SEG;++i) {
 			smp.set(du*i - 1.f, 0.f, du*j - 1.f);
 			smp.y = ANoise3::Fbm((const float *)&smp,
 										(const float *)&orp,
 										1.f,
 										3,
-										1.99f,
+										2.f,
 										.5f);
 			*m_exact.quadP(i, j) = smp;
 		}

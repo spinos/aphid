@@ -31,7 +31,7 @@ public:
 						const float * o,
 						const float & freq,
 						const float & lacunarity = 2.f,
-						const int & octaves = 4,
+						const int & octaves = 5,
 						const float & gain = .5f);
 /// mimic http://taukeke.com/2015/05/noise-in-nuke/
 /// scale x/ysize
@@ -40,8 +40,8 @@ public:
 	static float Fbm(const float * v,
 						const float * o,
 						const float & freq,
-						const int & octaves = 4,
-						const float & lacunarity = 1.33f,
+						const int & octaves = 5,
+						const float & lacunarity = 2.f,
 						const float & gain = .5f);
 	
 };
