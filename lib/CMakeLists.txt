@@ -119,13 +119,13 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/BaseBuffer.cpp
 ../shared/GeometryArray.cpp
 ../shared/Boundary.cpp
+../shared/AQuadMesh.cpp
 ../shared/ATriangleMeshGroup.cpp
 ../shared/APolygonalMesh.cpp
 ../shared/APolygonalUV.cpp
 ../shared/Triangle.cpp
 ../shared/BarycentricCoordinate.cpp  
 ../shared/IntersectionContext.cpp 
-##../shared/SelectionContext.cpp
 ../shared/BaseTransform.cpp
 ../shared/Segment.cpp
 ../shared/CurveBuilder.cpp 
@@ -248,8 +248,7 @@ add_library(aphid STATIC
 		../shared/IndexArray.cpp 
                 ##../shared/BoundingBoxList.cpp  
                 ##../shared/EasemodelUtil.cpp 
-                ../shared/AnchorGroup.cpp                 
-                ../shared/PatchMesh.cpp   
+                ../shared/AnchorGroup.cpp                    
                                 ../shared/BiLinearInterpolate.cpp 
                                 ../shared/LinearInterpolate.cpp  
                 ../shared/PointInsidePolygonTest.cpp 

@@ -16,6 +16,7 @@
 #include <Geometry.h>
 #include <GeometryArray.h>
 #include <ATriangleMesh.h>
+#include <AQuadMesh.h>
 #include <ATetrahedronMesh.h>
 #include <AOrientedBox.h>
 #include <tetrahedron_math.h>
@@ -724,6 +725,9 @@ void GeoDrawer::geometry(Geometry * geo) const
 			break;
 		case TypedEntity::TTriangleMesh:
 			triangleMesh((ATriangleMesh *)geo);
+			break;
+		case TypedEntity::TQuadMesh:
+			quadMesh1((AQuadMesh *)geo);
 			break;
 		default:
 			break;

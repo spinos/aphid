@@ -17,11 +17,14 @@ class BaseMesh;
 class BaseDeformer;
 class BaseField;
 class ATriangleMesh;
+class AQuadMesh;
+
 class MeshDrawer : public LineDrawer {
 public:
 	MeshDrawer();
 	virtual ~MeshDrawer();
 	void triangleMesh(const ATriangleMesh * mesh, const BaseDeformer * deformer = 0) const;
+	void quadMesh1(const AQuadMesh * mesh, const BaseDeformer * deformer = 0) const;
 	void quadMesh(const BaseMesh * mesh) const;
 	void drawMesh(const BaseMesh * mesh, const BaseDeformer * deformer = 0) const;
 	void drawPolygons(const BaseMesh * mesh, const BaseDeformer * deformer = 0);

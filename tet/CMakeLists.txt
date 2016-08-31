@@ -80,6 +80,7 @@ KDistanceTest.h
 VDGridTest.h
 Noise3Test.h
 LegendreTest.h
+Legendre2DTest.h
 IntersectTest.h
 Delaunay3D.h)
 
@@ -123,6 +124,7 @@ KDistanceTest.cpp
 VDGridTest.cpp
 Noise3Test.cpp
 LegendreTest.cpp
+Legendre2DTest.cpp
 IntersectTest.cpp
 glwidget.cpp
 window.cpp

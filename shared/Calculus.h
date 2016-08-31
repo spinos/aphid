@@ -8,6 +8,8 @@
  */
 #pragma once
 #include "AllMath.h"
+#include <iostream>
+#include <iomanip>
 
 namespace aphid {
 
@@ -60,10 +62,19 @@ float trapezIntegral(const float & a, const float & b,
 void gaussQuadratureRule(int n, float * ci, float * xi);
 
 /// M1 M2 minimum and maximum entries
-/// N number of components
+/// N number of components/dimensions
 /// *Rank counts the elements
 /// X[N] input/output
 void tuple_next( int m1, int m2, int n, int *rank, int x[] );
+
+template<typename T>
+void printValues(const char * desc, int n, const T * v)
+{
+	std::cout<<"\n "<<std::setw(8)<<desc;
+	int i=0;
+	for(;i<n;++i)
+		std::cout<<" "<<std::setw(12) <<std::setprecision(8)<<v[i];
+}
 
 /// http://mathfaculty.fullerton.edu/mathews/n2003/SimpsonsRule2DMod.html
 /// http://mathfaculty.fullerton.edu/mathews/n2003/GaussianQuadMod.html

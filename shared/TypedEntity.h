@@ -33,7 +33,8 @@ public:
 		TGeometryArray = 17,
 		TPointCloud = 18,
 		TOrientedBox = 19,
-		TAttribute = 20
+		TAttribute = 20,
+		TQuadMesh = 21
     };
     	
 	virtual const Type type() const;

@@ -34,7 +34,8 @@ public:
 		kViewDependentGrid = 14,
 		kNoise3 = 15,
 		kLegendre = 16,
-		kIntersect = 17
+		kLegendre2D = 17,
+		kIntersect = 18
 	};
 	
 	Parameter(int argc, char *argv[]);

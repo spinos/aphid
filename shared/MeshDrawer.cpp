@@ -12,6 +12,7 @@
 #include <BaseDeformer.h>
 #include <BaseField.h>
 #include <ATriangleMesh.h>
+#include <AQuadMesh.h>
 
 namespace aphid {
 
@@ -21,12 +22,24 @@ MeshDrawer::~MeshDrawer() {}
 void MeshDrawer::triangleMesh(const ATriangleMesh * mesh, const BaseDeformer * deformer) const
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
-	if(!deformer)
-		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->points());
-	else
+	if(deformer)
 		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->points());
+			glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
 
-	glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void MeshDrawer::quadMesh1(const AQuadMesh * mesh, const BaseDeformer * deformer) const
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	if(deformer)
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)deformer->getDeformedP());
+	else
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->points());
+		
+	glDrawElements(GL_QUADS, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
