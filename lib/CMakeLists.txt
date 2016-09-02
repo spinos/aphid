@@ -100,8 +100,7 @@ ADD_LIBRARY (aphidMath STATIC
 ADD_LIBRARY (aphidGeom STATIC 
 ../shared/SHelper.cpp 
 ../shared/AVerbose.cpp
-../shared/BaseArray.cpp
-../shared/IndexList.cpp 
+../shared/BaseArray.cpp 
 ../shared/AStripedModel.cpp
 ../shared/TypedEntity.cpp 
 ../shared/NamedEntity.cpp 
