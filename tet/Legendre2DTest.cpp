@@ -29,9 +29,9 @@ bool Legendre2DTest::init()
 	int i,j;
 	
 #if 0
-	float ppv[257*6];
-	calc::legendreRules(257, 5, ppv, -1.f, 1.f);
-	for(i=0;i<257*6;++i)
+	float ppv[257*7];
+	calc::LegendrePolynomial::sample(257, 6, ppv, -1.f, 1.f);
+	for(i=0;i<257*7;++i)
 		std::cout<<" "<<ppv[i]<<",";
 #endif
 

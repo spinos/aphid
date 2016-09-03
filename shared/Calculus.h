@@ -36,12 +36,6 @@ static const float LegendreNormWeightF[11] = {
 .005542445f
 };
 
-/// http://web.cs.iastate.edu/~cs577/handouts/orthogonal-polys.pdf
-/// evalute 0 - n th legendre polynomials through interval [a, b] 
-/// m number of evaluation nodes
-/// v length of m * (n+1)
-void legendreRules(int m, int n, float * v,
-		float a, float b);
 /// xi[M] abscissas	over [-1,1]	
 void legendreRule(int m, int n, float * v,
 		const float * xi);
@@ -103,14 +97,25 @@ int lexIndex(int n, int m, int * x, int offset = 0);
 
 class LegendrePolynomial {
 
-/// precomputed 257 uniformly placed points over [-1, 1] through 5-th degree
-	static const float mV[1542];
+/// precomputed 257 uniformly placed points over [-1, 1] through 6-th degree
+/// normalized
+	static const float mV[1799];
 	
 public:
 	LegendrePolynomial();
 	
+/// http://web.cs.iastate.edu/~cs577/handouts/orthogonal-polys.pdf
+/// evalute 0 - n th normalized legendre polynomials through interval [a, b] 
+/// m number of evaluation nodes
+/// v[m * (n+1)]
+	static void sample(int m, int n, float * v,
+		float a, float b);
+		
+/// i-th normal size sqrt ( 2 / ( float ) ( 2 * i + 1 ) );
+	static float norm(int i);
+		
 /// sample l-th polynomial at x
-	static float P(int l, float & x);
+	static float P(int l, const float & x);
 };
 
 }
