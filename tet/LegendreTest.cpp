@@ -85,7 +85,7 @@ void LegendreTest::computeCoeff(float * coeff, int n) const
 		}
 			
 		coeff[i] = calc::gaussQuadratureRuleIntegrate(1, N_ORD, Xi, Wi, Yi);
-		
+		coeff[i] /= calc::LegendrePolynomial::norm2(i); 
 		std::cout<<"\n  c"<<i<<" "<<coeff[i];
 	}
 }
@@ -142,11 +142,10 @@ void LegendreTest::drawLegendrePoly(int m, GeoDrawer * dr)
 	int i;
 	float norm, x;
 	for(i=0;i<M_NUM_EVAL-1;++i) {
-		norm = calc::LegendrePolynomial::norm(m);
 		x = INTERVAL_A + DX_SAMPLE * i;
-		glVertex3f(x, calc::LegendrePolynomial::P(m, x) * norm, 0.f);
+		glVertex3f(x, calc::LegendrePolynomial::P(m, x), 0.f);
 		x += DX_SAMPLE;
-		glVertex3f(x, calc::LegendrePolynomial::P(m, x) * norm, 0.f);
+		glVertex3f(x, calc::LegendrePolynomial::P(m, x), 0.f);
 	}
 	glEnd();
 	glPopMatrix();

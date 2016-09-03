@@ -17,9 +17,9 @@ class Legendre2DTest : public Scene {
 	aphid::AQuadMesh m_exact;
 	aphid::AQuadMesh m_appro;
 #define N_DIM 2
-#define N_ORD 3
-#define N_ORD2 9
-#define N_P 2
+#define N_ORD 4
+#define N_ORD2 16
+#define N_P 3
 	float m_Wi[N_ORD];
 	float m_Xi[N_ORD];
 	float m_Pv[N_ORD * (N_P+1)];

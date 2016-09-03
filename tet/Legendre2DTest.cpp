@@ -26,13 +26,18 @@ const char * Legendre2DTest::titleStr() const
 
 bool Legendre2DTest::init()
 {
-	int i,j;
+	int i,j, k;
 	
 #if 0
 	float ppv[257*7];
 	calc::LegendrePolynomial::sample(257, 6, ppv, -1.f, 1.f);
 	for(i=0;i<257*7;++i)
 		std::cout<<" "<<ppv[i]<<",";
+#endif
+
+#if 0
+	for(i=0;i<7;++i)
+		std::cout<<" "<< ( 2.f / ( float ) ( 2 * i + 1 ) )<<", ";
 #endif
 
 #define N_H_SEG 16
@@ -45,7 +50,6 @@ bool Legendre2DTest::init()
 	for(j=0;j<=N_SEG;++j) {
 		for(i=0;i<=N_SEG;++i) {
 			smp.set(du*i - 1.f, 0.f, du*j - 1.f);
-			*m_appro.quadP(i, j) = smp;
 			smp.y = exactMeasure(smp.x, smp.z);
 			*m_exact.quadP(i, j) = smp;
 		}
@@ -81,7 +85,16 @@ bool Legendre2DTest::init()
 		indx[1] = j;
 		for(i=0;i<=N_P;++i) {
 			indx[0] = i;
-			m_Coeij[calc::lexIndex(N_DIM, N_P+1, indx)] = computeCoeff(i, j);
+			k = calc::lexIndex(N_DIM, N_P+1, indx);
+			m_Coeij[k] = computeCoeff(i, j);
+		}
+	}
+	
+	for(j=0;j<=N_SEG;++j) {
+		for(i=0;i<=N_SEG;++i) {
+			smp.set(du*i - 1.f, 0.f, du*j - 1.f);
+			smp.y = approximate(smp.x, smp.z);
+			*m_appro.quadP(i, j) = smp;
 		}
 	}
 	
@@ -94,36 +107,58 @@ float Legendre2DTest::computeCoeff(int l, int m) const
 {
 	int indx[N_DIM];
 	float fpp[N_ORD2];
-	int i,j, li;
+	int i,j,k;
 	
 	for(j=0;j<N_ORD;++j) {
 		indx[1] = j;
 		for(i=0;i<N_ORD;++i) {
 			indx[0] = i;
 				
-			li = calc::lexIndex(N_DIM, N_ORD, indx);
+			k = calc::lexIndex(N_DIM, N_ORD, indx);
 			
 /// f(x,y)P(l,x)P(m,y)
-			fpp[li] = m_Yij[li] * m_Pv[i+N_ORD*l] * m_Pv[j+N_ORD*m];
+			fpp[k] = m_Yij[k] * m_Pv[i+N_ORD*l] * m_Pv[j+N_ORD*m];
 		}
 	}
 	
 	float result = calc::gaussQuadratureRuleIntegrate(N_DIM, N_ORD,
 												m_Xi, m_Wi, fpp);
-	result *= (2.f * l + 1) * (2.f * m + 1) / 4.f; 
+	result /= calc::LegendrePolynomial::norm2(l) * calc::LegendrePolynomial::norm2(m); 
 	std::cout<<"\n C("<<l<<","<<m<<") "<<result;
+	return result;
+}
+
+float Legendre2DTest::approximate(const float & x, const float & y) const
+{
+#define U_P 3
+	float result = 0.f;
+	int indx[N_DIM];
+	int i, j, k;
+	for(j=0;j<=U_P;++j) {
+		indx[1] = j;
+		for(i=0;i<=U_P;++i) {
+			indx[0] = i;
+			
+			k = calc::lexIndex(N_DIM, N_P+1, indx);
+			result += m_Coeij[k] 
+						* calc::LegendrePolynomial::P(i, x)
+						* calc::LegendrePolynomial::P(j, y);
+		
+		}
+	}
+	return result;
 }
 
 float Legendre2DTest::exactMeasure(const float & x, const float & y) const
 {
 	const Vector3F at(x, 0.f, y);
-	const Vector3F orp(.6241f, .4534f, .2786f);
+	const Vector3F orp(.6241f, .8534f, .2786f);
 	return ANoise3::Fbm((const float *)&at,
 										(const float *)&orp,
-										1.f,
-										3,
-										2.f,
-										.5f);
+										.8854f,
+										5,
+										1.24f,
+										.395f);
 }
 
 void Legendre2DTest::draw(GeoDrawer * dr)
