@@ -35,7 +35,8 @@ public:
 		kNoise3 = 15,
 		kLegendre = 16,
 		kLegendre2D = 17,
-		kIntersect = 18
+		kLegendre3D = 18,
+		kIntersect = 19
 	};
 	
 	Parameter(int argc, char *argv[]);

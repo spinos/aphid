@@ -85,6 +85,9 @@ Parameter::Parameter(int argc, char *argv[])
 			if(strcmp(argv[i], "-l2") == 0 || strcmp(argv[i], "--legendre2D") == 0) {
 				m_operation = kLegendre2D;
 			}
+			if(strcmp(argv[i], "-l3") == 0 || strcmp(argv[i], "--legendre3D") == 0) {
+				m_operation = kLegendre3D;
+			}
 			if(strcmp(argv[i], "-is") == 0 || strcmp(argv[i], "--intersect") == 0) {
 				m_operation = kIntersect;
 			}
@@ -127,6 +130,7 @@ void Parameter::PrintHelp()
 	<<"\n -n3 or --noise3    test 3d noise"
 	<<"\n -lg or --legendre    legendre polynomial approximation"
 	<<"\n -l2 or --legendre2D    2D legendre polynomial approximation"
+	<<"\n -l3 or --legendre3D    3D legendre polynomial approximation"
 	<<"\n -is or --intersect    intersect test"
 	<<"\nHot keys:"
 	<<"\n m/n    progress forward/backward"

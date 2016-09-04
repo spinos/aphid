@@ -23,7 +23,6 @@ class Legendre2DTest : public Scene {
 	float m_Wi[N_ORD];
 	float m_Xi[N_ORD];
 	float m_Pv[N_ORD * (N_P+1)];
-	float m_Pii[N_P+1];
 	float m_Yij[N_ORD2];
 	float m_Coeij[(N_P+1)*(N_P+1)];
 

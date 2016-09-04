@@ -81,6 +81,7 @@ VDGridTest.h
 Noise3Test.h
 LegendreTest.h
 Legendre2DTest.h
+Legendre3DTest.h
 IntersectTest.h
 Delaunay3D.h)
 
@@ -125,6 +126,7 @@ VDGridTest.cpp
 Noise3Test.cpp
 LegendreTest.cpp
 Legendre2DTest.cpp
+Legendre3DTest.cpp
 IntersectTest.cpp
 glwidget.cpp
 window.cpp

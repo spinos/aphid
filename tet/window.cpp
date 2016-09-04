@@ -21,6 +21,7 @@
 #include "Noise3Test.h"
 #include "LegendreTest.h"
 #include "Legendre2DTest.h"
+#include "Legendre3DTest.h"
 #include "IntersectTest.h"
 
 namespace ttg {
@@ -62,8 +63,10 @@ Window::Window(const Parameter * param)
 		sc = new LegendreTest;
 	else if(param->operation() == Parameter::kIntersect)
 		sc = new IntersectTest;
-	else //if(param->operation() == Parameter::kLegendre2D)
+	else if(param->operation() == Parameter::kLegendre2D)
 		sc = new Legendre2DTest;
+	else //if(param->operation() == Parameter::kLegendre3D)
+		sc = new Legendre3DTest;
 		
     glWidget = new GLWidget(sc, this);
 	
