@@ -1,6 +1,6 @@
 #include "H5AttribNode.h"
 #include <SHelper.h>
-#include <BaseUtil.h>
+#include <baseUtil.h>
 #include <boost/format.hpp>
 
 using namespace std;

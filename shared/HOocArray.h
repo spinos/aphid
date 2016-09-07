@@ -9,7 +9,7 @@
  */
 
 #pragma once
-#include "H2dDataset.h"
+#include "H2DDataset.h"
 
 namespace aphid {
     

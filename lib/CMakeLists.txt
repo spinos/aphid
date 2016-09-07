@@ -2,12 +2,16 @@ cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE RELEASE)
 include_directories(../mallard ../shared ../lapl ../catmullclark 
-#../easymodel 
 ../../ofl/opium ../fit ../powell ../../ofl/shared
 ../btree
 ../kdtree
 ../ntree
 ../hesperis)
+
+IF (UNIX)
+SET (CMAKE_CXX_FLAGS -fPIC)
+ENDIF ()
+
 IF (WIN32)
 include_directories(D:/usr/libxml2/include D:/usr/HDF5/include)
 ADD_DEFINITIONS( -DNDEBUG -D_WIN32_WINDOWS 
@@ -18,6 +22,8 @@ set (_HAS_CPP0X 0)
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
+ELSEIF (UNIX)
+    ADD_DEFINITIONS(-DBOOST_HAS_TR1)
 ELSE ()
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
@@ -33,7 +39,11 @@ if (WIN32)
     ELSEIF (EXISTS "D:/usr/hdf5")
         SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
         SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/libhdf5.lib")
-	ENDIF ()	
+	ENDIF ()
+ELSEIF (UNIX)
+	SET (HDF5_VERSION "1.8.17")
+	SET (HDF5_INCLUDE_DIRS "~/Public/hdf5-1.8.17/include")
+        SET (HDF5_LIBRARIES "~/Public/hdf5-1.8.17/lib/libhdf5.so")
 endif ()
 
 IF (INSTALLED_HDF5)
@@ -63,6 +73,9 @@ ELSEIF (APPLE)
 	ELSEIF (EXISTS "/users/jollyroger/Library/boost_1_43_0")
 		SET (Boost_INCLUDE_DIR "/users/jollyroger/Library/boost_1_43_0")
 	ENDIF ()
+
+ELSEIF (UNIX)
+	SET (BOOST_ROOT "~/Public/boost_1_51_0")
 	
 endif()
 
@@ -78,7 +91,7 @@ MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 include_directories (${Boost_INCLUDE_DIR})
 include_directories (${Boost_INCLUDE_DIR}/boost/tr1/tr1)
 
-ADD_LIBRARY (aphidMath STATIC 
+ADD_LIBRARY (aphidMath SHARED
 ../shared/Vector3F.cpp 
                 ../shared/Vector2F.cpp 
                 ../shared/Matrix44F.cpp 
@@ -97,7 +110,7 @@ ADD_LIBRARY (aphidMath STATIC
 ../shared/Calculus.cpp
 )
 
-ADD_LIBRARY (aphidGeom STATIC 
+ADD_LIBRARY (aphidGeom SHARED 
 ../shared/SHelper.cpp 
 ../shared/AVerbose.cpp
 ../shared/BaseArray.cpp
@@ -141,9 +154,16 @@ ADD_LIBRARY (aphidGeom STATIC
 ../shared/TriangleRaster.cpp
 ../shared/PrimitiveFilter.cpp
 ../shared/BoxNeighbors.cpp
+../shared/PatchMesh.cpp
+../shared/Patch.cpp  
+../shared/PointInsidePolygonTest.cpp  
+../shared/InverseBilinearInterpolate.cpp 
+../shared/BiLinearInterpolate.cpp 
+../shared/LinearInterpolate.cpp  
+../shared/VertexDataGroup.cpp
 )
 
-ADD_LIBRARY (aphidH5 STATIC
+ADD_LIBRARY (aphidH5 SHARED
     ../shared/HObject.cpp 
     ../shared/HDocument.cpp 
     ../shared/HGroup.cpp 
@@ -208,7 +228,6 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/VertexPath.cpp
 ../lapl/VertexAdjacency.cpp
 ../shared/MeshTopology.cpp 
-../shared/VertexDataGroup.cpp
 ../shared/BaseField.cpp
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
@@ -249,14 +268,9 @@ add_library(aphid STATIC
                 ##../shared/BoundingBoxList.cpp  
                 ##../shared/EasemodelUtil.cpp 
                 ../shared/AnchorGroup.cpp                    
-                                ../shared/BiLinearInterpolate.cpp 
-                                ../shared/LinearInterpolate.cpp  
-                ../shared/PointInsidePolygonTest.cpp 
-                                ../shared/AccPatchMesh.cpp 
+                               ## ../shared/AccPatchMesh.cpp 
 				../shared/PatchNeighborRec.cpp 
 				../shared/PatchTexture.cpp 
-                                ../shared/InverseBilinearInterpolate.cpp 
-                                ../shared/Patch.cpp   
                                 ##../shared/BaseTessellator.cpp 
                                 ##../shared/CollisionRegion.cpp 
                                 ## 

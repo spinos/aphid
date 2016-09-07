@@ -76,7 +76,7 @@ namespace aphid {
         return output;
     }
     
-	const std::string Matrix33F::str() const;
+	const std::string str() const;
 	
 	float v[9];
  };

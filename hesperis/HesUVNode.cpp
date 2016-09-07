@@ -10,7 +10,7 @@
 #include <AHelper.h>
 #include <SHelper.h>
 #include <HesperisPolygonalMeshIO.h>
-#include <BaseUtil.h>
+#include <baseUtil.h>
 #include <APolygonalMesh.h>
 
 #include "boost/filesystem/operations.hpp"

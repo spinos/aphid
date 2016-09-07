@@ -12,7 +12,7 @@
 #include <HTransform.h>
 #include <HPolygonalMesh.h>
 #include <AHelper.h>
-#include <BaseUtil.h>
+#include <baseUtil.h>
 
 namespace aphid {
     

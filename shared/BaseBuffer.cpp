@@ -9,6 +9,7 @@
 #include "BaseBuffer.h"
 #include <Vector3F.h>
 #include <iostream>
+#include <string.h>
 
 namespace aphid {
 

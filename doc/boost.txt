@@ -5,3 +5,6 @@ build boost with 64-bit address model
 options for compression
 
 -sNO_COMPRESSION=0 -sNO_ZLIB=0 -sZLIB_SOURCE=D:/usr/zlib-1.2.5 -sZLIB_LIBPATH=D:/usr/zlib-1.2.5 -sNO_SZIP=0 -sSZIP_SOURCE=D:/usr/szip-2.1
+
+./b2 variant=release threading=multi --with-iostreams -sNO_COMPRESSION=0 -sNO_ZLIB=0 -sZLIB_INCLUDE=/usr/include -sZLIB_LIBPATH=/usr/lib64
+

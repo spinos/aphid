@@ -21,7 +21,7 @@ public:
 	const Vector3F & origin() const;
 	Vector3F destination() const;
 	float length() const;
-	const Vector3F Ray::closetPointOnRay(const Vector3F & p, float * t = NULL) const;
+	const Vector3F closetPointOnRay(const Vector3F & p, float * t = NULL) const;
 	Vector3F m_origin;
 	float m_tmin;
 	Vector3F m_dir;

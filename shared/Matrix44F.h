@@ -70,7 +70,7 @@ namespace aphid {
         return output;
     }
 
-	const std::string str() const;
+    const std::string str() const;
 	
 	float v[16];
  };

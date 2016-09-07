@@ -3,7 +3,7 @@
 #include <maya/MFnMeshData.h>
 #include <Vector3F.h>
 #include <SHelper.h>
-#include <BaseUtil.h>
+#include <baseUtil.h>
 #include <HesperisPolygonalMeshIO.h>
 #include <APolygonalMesh.h>
 

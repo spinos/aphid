@@ -13,7 +13,7 @@
 #include <maya/MPlug.h>
 #include <maya/MGlobal.h>
 #include <HObject.h>
-#include <AnimUtil.h>
+#include <animUtil.h>
 #include <AHelper.h>
 
 namespace aphid {

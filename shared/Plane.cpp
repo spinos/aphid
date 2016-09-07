@@ -112,7 +112,7 @@ bool Plane::rayIntersect(const Ray & ray, Vector3F & dst, float & t, bool twoSid
 
 void Plane::verbose() const
 {
-	printf("ray %f %f %f %f ", m_a, m_b, m_c, m_d);
+	std::cout<<"plane ("<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<")";
 }
 
 }

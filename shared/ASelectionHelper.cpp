@@ -7,7 +7,7 @@
  *
  */
 
-#include "aSelectionHelper.h"
+#include "ASelectionHelper.h"
 #include <SHelper.h>
 
 namespace aphid {
