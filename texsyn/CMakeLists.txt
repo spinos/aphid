@@ -1,33 +1,41 @@
 cmake_minimum_required (VERSION 2.8)
-project (testla)
+project (txsn)
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
-set (HEADER_FILES ../shared/Morton3D.h
-clapackTempl.h
-linearMath.h
-regr.h
-psnr.h
-dctmn.h
-LfParameter.h
-LfMachine.h
-LfThread.h
-StatisticDialog.h
-LfWidget.h
-window.h)
 
-include_directories ( ../shared ../kdtree)
-add_executable (testla 
-LfParameter.cpp
-LfThread.cpp
-LfWidget.cpp
-LfMachine.cpp
-StatisticDialog.cpp
-window.cpp
-##testlapack.cpp)
+include_directories ( ../shared ../kdtree ../lfr)
+
+set (HEADER_FILES ../shared/BaseImagewidget.h
+../lfr/clapackTempl.h
+../lfr/linearMath.h
+../lfr/regr.h
+../lfr/psnr.h
+../lfr/dctmn.h
+../lfr/LfParameter.h
+../lfr/LfMachine.h
+../lfr/LfThread.h
+../lfr/StatisticDialog.h
+../lfr/DictionaryDialog.h
+../lfr/DictionaryView.h
+../lfr/ImageDialog.h
+TsParameter.h
+TsWindow.h)
+
+add_executable (txsn ${HEADER_FILES}
+../shared/BaseImagewidget.cpp
+../lfr/LfParameter.cpp
+../lfr/LfThread.cpp
+../lfr/LfMachine.cpp
+../lfr/StatisticDialog.cpp
+../lfr/DictionaryDialog.cpp
+../lfr/DictionaryView.cpp
+../lfr/ImageDialog.cpp
+TsParameter.cpp
+TsWindow.cpp
 main.cpp)
 
 if(WIN32)
@@ -48,9 +56,9 @@ message ("blas " ${BLAS_LIBRARY})
 message ("lapack " ${LAPACK_LIBRARY})
 message ("f2c " ${F2C_LIBRARY})
 
-target_link_libraries (testla ${F2C_LIBRARY})
-target_link_libraries (testla ${BLAS_LIBRARY})
-target_link_libraries (testla ${LAPACK_LIBRARY})
+target_link_libraries (txsn ${F2C_LIBRARY})
+target_link_libraries (txsn ${BLAS_LIBRARY})
+target_link_libraries (txsn ${LAPACK_LIBRARY})
 
 if (WIN32)
 add_definitions (-DOPENEXR_DLL)
@@ -67,7 +75,7 @@ set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
  /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
 endif ()
 include_directories (${OpenEXR_INCLUDE_DIR})
-target_link_libraries (testla ${OpenEXR_Library})
+target_link_libraries (txsn ${OpenEXR_Library})
 message (" openexr " ${OpenEXR_Library})
 
 if (WIN32)
@@ -76,7 +84,7 @@ if (WIN32)
 endif ()
 
 find_package (zlib REQUIRED)
-target_link_libraries (testla ${ZLIB_LIBRARIES})
+target_link_libraries (txsn ${ZLIB_LIBRARIES})
 
 if (WIN32)
 set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
@@ -90,21 +98,21 @@ if (WIN32)
 set (SZIP_INCLUDE_DIR "D:/usr/szip-2.1/src")
 set (SZIP_LIBRARIES "D:/usr/szip-2.1/szip.lib")
 include_directories (${SZIP_INCLUDE_DIR})
-target_link_libraries (testla ${SZIP_LIBRARIES})
+target_link_libraries (txsn ${SZIP_LIBRARIES})
 endif ()
 
 include_directories (${HDF5_INCLUDE_DIR})
-target_link_libraries (testla ${HDF5_LIBRARIES})
+target_link_libraries (txsn ${HDF5_LIBRARIES})
 
 if(WIN32)
 set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
 endif()
 
 find_package (Qt4 REQUIRED)
-target_link_libraries (testla Qt4::QtGui)
+target_link_libraries (txsn Qt4::QtGui)
 ## message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 ## set (QT_USE_QTOPENGL ON)
-## target_link_libraries (testla Qt4::QtGui Qt4::QtOpenGL)
+## target_link_libraries (txsn Qt4::QtGui Qt4::QtOpenGL)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -142,22 +150,23 @@ message ("boost thread " ${Boost_THREAD_LIBRARY})
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
-target_link_libraries (testla ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (testla ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (testla ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (testla ${Boost_REGEX_LIBRARY})
-target_link_libraries (testla ${Boost_THREAD_LIBRARY})
-target_link_libraries (testla ${Boost_CHRONO_LIBRARY})
+target_link_libraries (txsn ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (txsn ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (txsn ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (txsn ${Boost_REGEX_LIBRARY})
+target_link_libraries (txsn ${Boost_THREAD_LIBRARY})
+target_link_libraries (txsn ${Boost_CHRONO_LIBRARY})
 
 if (WIN32)
-set (Aphid_Library "D:/aphid/lib/aphid.lib")
+set (Aphid_Math_Library "D:/aphid/lib/aphidMath.lib")
+set (Aphid_Img_Library "D:/aphid/lib/aphidImg.lib")
 else ()
 set (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a)
 set (Aphid_Img_Library /users/jianzhang/aphid/lib/libaphidImg.a)
 endif ()
 
-target_link_libraries (testla ${Aphid_Math_Library})
-target_link_libraries (testla ${Aphid_Img_Library})
+target_link_libraries (txsn ${Aphid_Math_Library})
+target_link_libraries (txsn ${Aphid_Img_Library})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 

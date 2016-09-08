@@ -25,10 +25,13 @@ public:
 	virtual void cleanDictionary();
 	virtual void recycleData();
 	virtual float computePSNR(const aphid::ExrImage * image, int iImage);
+	virtual void computeYhat(unsigned * imageBits, int iImage, 
+							const aphid::ExrImage * image, bool asDifference = false);
 	virtual bool save();
 	
 protected:
-	void fillPatch(unsigned * dst, float * color, int s, int imageW, int rank = 3);
+	void fillPatch(unsigned * dst, float * color, int s, int imageW, 
+					bool toBrighten, int rank = 3);
 	LfParameter * param1();
 	
 private:

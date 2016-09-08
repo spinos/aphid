@@ -49,6 +49,8 @@ private:
 
 	QImage * m_spasityImg;
 	QImage * m_dictImg;
+	QImage * m_codedImg;
+	
 };
 
 }

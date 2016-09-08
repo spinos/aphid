@@ -76,6 +76,7 @@ T SquareErr<T>::compute(const DenseVector<T> & y, const DenseVector<T> & beta, c
 	}
 	
 	for(i=0;i<nl;i++) {
+/// |Yhat - Y|^2
 		e = 0.299 * m_yhat[i] + 0.587 * m_yhat[i + nl] + 0.114 * m_yhat[i + nl*2];
 		e -= 0.299 * y[i] + 0.587 * y[i + nl] + 0.114 * y[i + nl*2];
 		sum += e * e;

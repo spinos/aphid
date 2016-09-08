@@ -19,7 +19,8 @@ void LfMachine::initDictionary() {}
 
 void LfMachine::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH) {}
 
-void LfMachine::fillPatch(unsigned * dst, float * color, int s, int imageW, int rank)
+void LfMachine::fillPatch(unsigned * dst, float * color, int s, int imageW, 
+							bool toBrighten, int rank)
 {
     const int stride = s * s;
 	int crgb[3];
@@ -28,8 +29,12 @@ void LfMachine::fillPatch(unsigned * dst, float * color, int s, int imageW, int 
 	for(j=0;j<s; j++) {
 		for(i=0; i<s; i++) {
 			unsigned v = 255<<24;
-			for(k=0;k<rank;k++) {				
-				crgb[k] = 8 + 480 * color[(j * s + i) + k * stride];
+			for(k=0;k<rank;k++) {
+				if(toBrighten)
+					crgb[k] = 4 + 508 * color[(j * s + i) + k * stride];
+				else
+					crgb[k] = 256 * color[(j * s + i) + k * stride];
+					
 				crgb[k] = std::min<int>(crgb[k], 255);
 				crgb[k] = std::max<int>(crgb[k], 0);
 			}
@@ -56,6 +61,10 @@ float LfMachine::computePSNR(const ExrImage * image, int iImage)
 { return 0; }
 
 void LfMachine::recycleData() {}
+
+void LfMachine::computeYhat(unsigned * imageBits, int iImage, 
+							const aphid::ExrImage * image, bool asDifference)
+{}
 
 bool LfMachine::save() { return false; }
 }

@@ -1,18 +1,20 @@
 #include <QApplication>
 #include <QtCore>
-#include "dctmn.h"
-#include "window.h"
+#include <dctmn.h>
+#include "TsParameter.h"
+#include "TsWindow.h"
 
+using namespace tss;
 using namespace lfr;
 
 int main(int argc, char *argv[])
 {
-#if 1
-	LfParameter param(argc, argv);
+	tss::Parameter param(argc, argv);
 	
 	if(!param.isValid()) {
 		param.printHelp();
-		return 1;
+		if(param.isHelp() )
+			return 1;
 	}
 	
 	int nt = param.numThread();
@@ -98,13 +100,10 @@ int main(int argc, char *argv[])
 	
 	
     QApplication app(argc, argv);
-    Window window(machine);
+    TsWindow window(machine);
 	//window.showMaximized();
-    window.resize(800, 600);
+    window.resize(480, 320);
     window.show();
     return app.exec();
-#else
-	LfWorld::testLAR();
-    return 1;
-#endif
+
 }

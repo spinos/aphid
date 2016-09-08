@@ -15,9 +15,14 @@ LfThread::LfThread(LfMachine * world, QObject *parent)
     abort = false;
 /// 100 x 256 spasity visualization
 	m_spasityImg = new QImage(100, 256, QImage::Format_RGB32);
-	int w, h;
-	world->param()->getDictionaryImageSize(w, h);
-	m_dictImg = new QImage(w, h, QImage::Format_RGB32);
+	int dw = 10, dh = 10, w = 10, h = 10;
+	const LfParameter * lparam = world->param();
+	if(lparam->isValid() ) {
+		lparam->getDictionaryImageSize(dw, dh);
+		lparam->getImageSize(w, h, 0);
+	}
+	m_dictImg = new QImage(dw, dh, QImage::Format_RGB32);
+	m_codedImg = new QImage(w, h, QImage::Format_RGB32);
 }
 
 LfThread::~LfThread()
@@ -64,34 +69,37 @@ void LfThread::endLearn()
 
 void LfThread::run()
 {
+	const LfParameter * lparam = m_world->param();
 	int w, h;
-	m_world->param()->getDictionaryImageSize(w, h);
+	lparam->getDictionaryImageSize(w, h);
 	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
 	
 	ExrImage img;
-	const int n = m_world->param()->numImages();
+	const int n = lparam->numImages();
 	int i, j;
 	
 	uint *spasityLine = reinterpret_cast<uint *>(m_spasityImg->bits());
 	
+#if 0
 	unsigned cwhite = 255<<24;
 	cwhite = cwhite | ( 255 << 16 );
 	cwhite = cwhite | ( 255 << 8 );
 	cwhite = cwhite | ( 255 );
-	
-	const int totalNSignals = m_world->param()->totalNumPatches();
+#endif
+
+	const int totalNSignals = lparam->totalNumPatches();
 	QElapsedTimer timer;
 	timer.start();
 	int endp;
 	int niter = 0;
-	for(;niter< m_world->param()->maxIterations();++niter) {
+	for(;niter< lparam->maxIterations();++niter) {
 		for(i=0;i<n;i++) {
 			mutex.lock();
 			if (abort) return;
 			mutex.unlock();
 			
-			img.read(m_world->param()->imageName(i));
-			const int m = m_world->param()->imageNumPatches(i);
+			img.read(lparam->imageName(i) );
+			const int m = lparam->imageNumPatches(i);
 			int nbatch = m>>8;
 			if( (nbatch<<8) < m ) nbatch++;
 			for(j=0;j<nbatch;j++) {
@@ -113,12 +121,18 @@ void LfThread::run()
 			if (abort) return;
 			mutex.unlock();
 			
-			img.read(m_world->param()->imageName(i));
+			img.read(lparam->imageName(i));
 #if 1
             float e = m_world->computePSNR(&img, i);
             emit sendPSNR(e);
+			
+			if(i==0) {
+/// reconstruct image
+				uint *codedLine = reinterpret_cast<uint *>(m_codedImg->bits());
+				m_world->computeYhat(codedLine, i, &img);
+			}
 #else
-            const int m = m_world->param()->imageNumPatches(i);
+            const int m = lparam->imageNumPatches(i);
 			m_world->beginPSNR();
 			for(j=0;j<m;j++) {
 				m_world->computeError(&img, j);
@@ -144,42 +158,6 @@ void LfThread::run()
             //qDebug()<<" recycle"<<niter;
         }
 	}
-/*
-    forever {
-        mutex.lock();
 
-        QSize resultSize = this->resultSize;
-
-        mutex.unlock();
-
-        QImage image(resultSize, QImage::Format_RGB32);
-			
-			for (int y = 0; y < resultSize.height(); ++y) 
-			{
-				 if (restart)
-                    break;
-                if (abort)
-                    return;
-
-                uint *scanLine = reinterpret_cast<uint *>(image.scanLine(y));
-				for (int x = 0; x < resultSize.width(); ++x) 
-				{
-					int g = rand()%256;
-					*scanLine++ = qRgb(g, g, g);
-                }
-            }
-
-			if (!restart)
-				emit renderedImage(image);
-
-        mutex.lock();
-		
-        if (!restart)
-            condition.wait(&mutex);
-			
-        restart = false;
-        mutex.unlock();
-    }
-*/
 }
 }

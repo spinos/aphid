@@ -71,12 +71,15 @@ public:
 /// zero current epoch 
     virtual void recycleData(); 
     virtual T computePSNR(const aphid::ExrImage * image, int iImage);
+	virtual void computeYhat(unsigned * imageBits, int iImage, 
+							const aphid::ExrImage * image, bool asDifference = false);
 
 protected:
     
 private:
     void learnPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
     void computeErrPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
+    void computeYhatPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
     void fillPatchPt(const int iThread, unsigned * line, const int workBegin, const int workEnd,
 						const int dimx, const int s, const int imageW);
 	void computeLambda(int t);
@@ -385,16 +388,16 @@ void DictionaryMachine<NumThread, T>::cleanDictionary()
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::fillPatchPt(const int iThread, unsigned * line, 
 												const int workBegin, const int workEnd,
-												const int dimx, const int s, const int imageW)
+												const int numPatchX, const int s, const int imageW)
 {
 	const int k = param()->dictionaryLength();
 	int i, j;
 	for(j= workBegin;j<= workEnd;j++) {
-		for(i=0;i<dimx;i++) {
-			const int ind = dimx * j + i;
+		for(i=0;i<numPatchX;i++) {
+			const int ind = numPatchX * j + i;
 			if(ind < k) {
 			    float * d = m_D->column(ind);
-			    fillPatch(&line[i * s], d, s, imageW);
+			    fillPatch(&line[i * s], d, s, imageW, true);
 			}
 		}
 		line += imageW * s;
@@ -409,7 +412,6 @@ void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, in
 	const int dimy = imageH / s;
 	unsigned * line = imageBits;
 	
-#if 1
 	const int nt = (dimy < NumThread) ? dimy : NumThread;
 	const int workSize = dimy / nt;
 	boost::thread fillThread[NumThread];
@@ -424,20 +426,6 @@ void DictionaryMachine<NumThread, T>::dictionaryAsImage(unsigned * imageBits, in
 	for(tid=0;tid<nt;++tid)
 		fillThread[tid].join();
 		
-#else
-	int i, j;
-	const int k = param()->dictionaryLength();
-	for(j=0;j<dimy;j++) {
-		for(i=0;i<dimx;i++) {
-			const int ind = dimx * j + i;
-			if(ind < k) {
-			    float * d = m_D->column(ind);
-			    fillPatch(&line[i * s], d, s, imageW);
-			}
-		}
-		line += imageW * s;
-	}
-#endif
 }
 
 template<int NumThread, typename T>
@@ -489,7 +477,7 @@ T DictionaryMachine<NumThread, T>::computePSNR(const aphid::ExrImage * image, in
 	for(i=0;i<NumThread;++i)
 		sum += m_sqePt[i];
 	
-    return 10.0 * log10( T(1.0) / (1e-10 + sum / param()->totalNumPixels() ) );
+    return 10.0 * log10( T(1.0) / (1e-10 + sum / param()->imageNumPixels(iImage) ) );
 }
 
 template<int NumThread, typename T>
@@ -521,6 +509,44 @@ void DictionaryMachine<NumThread, T>::computeLambda(int t)
         m_lambda = 0.003 * tt * tt;
         std::cout<<" lambda "<<m_lambda;
     }
+}
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::computeYhatPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd)
+{
+	//T * ptch = new T[m_atomSize * m_atomSize * 3];
+    T sum = 0;
+    int i = workBegin;
+    for(;i<=workEnd;++i) {
+        image->getTile(m_yPt[iThread]->raw(), i, m_atomSize);
+        //m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
+        //m_sqeWorker[iThread].compute(ptch, *m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread]);
+    }
+	//delete[] ptch;
+}
+
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::computeYhat(unsigned * imageBits, int iImage, 
+							const aphid::ExrImage * image, bool asDifference)
+{
+	int w, h;
+	param()->getImageSize(w, h, iImage);
+	
+	const int numPatches = param()->imageNumPatches(iImage);
+    const int workSize = numPatches / NumThread;
+    boost::thread yhatThread[NumThread];
+    int workBegin, workEnd, i=0;
+    for(;i<NumThread;++i) {
+        workBegin = i * workSize;
+        workEnd = (i== NumThread - 1) ? numPatches - 1: workBegin + workSize - 1;
+        
+		yhatThread[i] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::computeYhatPt, 
+				this, i, image, workBegin, workEnd) );
+    }
+	
+	for(i=0;i<NumThread;++i)
+		yhatThread[i].join();
 }
 
 }

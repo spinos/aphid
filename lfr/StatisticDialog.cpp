@@ -7,11 +7,6 @@ namespace lfr {
 StatisticDialog::StatisticDialog(LfMachine * world, QWidget *parent)
     : QDialog(parent)
 {
-	int x, y;
-	world->param()->getDictionaryImageSize(x, y);
-	x *= 2;
-	y *= 2;
-
     setWindowTitle(tr("Statistics"));
 	m_iteration = 0;
     resize(520, 240);
