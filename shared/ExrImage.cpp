@@ -74,14 +74,17 @@ void readColor(half * data, InputFile& file, const Box2i & dw, int stride)
 ExrImage::ExrImage() : _pixels(0) {}
 
 ExrImage::~ExrImage() 
-{
-    if(_pixels) delete[] _pixels;
-}
+{ clear(); }
 
-bool ExrImage::doRead(const std::string & filename)
+void ExrImage::clear()
+{ if(_pixels) delete[] _pixels; }
+
+bool ExrImage::readImage(const std::string & filename)
 {
+	clear();
+	
     if(!IsOpenExrFile(filename)) {
-		std::cout<<"ERROR: "<<filename<<" is not an openEXR image\n";
+		std::cout<<"\n ExrImage ERROR: "<<filename<<" is not an openEXR image\n";
 		return false;
 	}
 	
@@ -89,7 +92,11 @@ bool ExrImage::doRead(const std::string & filename)
 	
 	const Header & inhead = infile.header();
 	ChannelRank rnk = checkExrColors(inhead);
-	if(rnk == None) return false;
+	if(rnk == None) {
+		std::cout<<"\n ExrImage ERROR: "<<filename<<" has no R channel\n";
+		return false;
+	}
+	
 	setChannelRank(rnk);
 	
 	const Box2i &dw = infile.header().dataWindow(); 
@@ -104,13 +111,6 @@ bool ExrImage::doRead(const std::string & filename)
 	_pixels = (char *)malloc(size * sizeof(half));
 	readColor((half *)_pixels, infile, dw, colorRank);
 	return true;
-}
-
-void ExrImage::doClear()
-{
-    if(_pixels) delete[] _pixels;
-	_pixels = 0;
-	BaseImage::doClear();
 }
 
 /// read R,G,B separatedly
@@ -152,13 +152,15 @@ void ExrImage::tileCoord(const int ind, const int tileSize, int & x, int & y) co
 	x = rind - y * dimx;
 }
 
-const char * ExrImage::formatName() const
-{ return "OpenEXR"; }
+BaseImage::IFormat ExrImage::formatName() const
+{ return FExr; }
 	
 bool ExrImage::IsOpenExrFile(const std::string& filename)
 {
     std::ifstream f (filename.c_str(), std::ios_base::binary); 
-	if(!f.is_open()) return false;
+	if(!f.is_open()) 
+		return false;
+	
 	char b[4]; 
 	f.read (b, sizeof (b)); 
 	return !!f && b[0] == 0x76 && b[1] == 0x2f && b[2] == 0x31 && b[3] == 0x01; 

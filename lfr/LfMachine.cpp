@@ -1,5 +1,7 @@
 #include "LfMachine.h"
 
+using namespace aphid;
+
 namespace lfr {
 
 LfMachine::LfMachine(LfParameter * param) 

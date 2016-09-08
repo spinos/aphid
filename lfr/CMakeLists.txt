@@ -7,7 +7,6 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 set (HEADER_FILES ../shared/Morton3D.h
-../shared/ExrImage.h
 clapackTempl.h
 linearMath.h
 regr.h
@@ -19,17 +18,17 @@ LfThread.h
 StatisticDialog.h
 LfWidget.h
 window.h)
+
 include_directories ( ../shared ../kdtree)
-add_executable (testla ${HEADER_FILES} 
-../shared/ExrImage.cpp
+add_executable (testla 
 LfParameter.cpp
 LfThread.cpp
 LfWidget.cpp
 LfMachine.cpp
 StatisticDialog.cpp
 window.cpp
-testlapack.cpp)
-##main.cpp)
+##testlapack.cpp)
+main.cpp)
 
 if(WIN32)
     include_directories (D:/usr/CLAPACK/include)
@@ -153,9 +152,11 @@ target_link_libraries (testla ${Boost_CHRONO_LIBRARY})
 if (WIN32)
 set (Aphid_Library "D:/aphid/lib/aphid.lib")
 else ()
-set (Aphid_Library "/users/jianzhang/aphid/lib/libaphid.a")
+set (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a)
+set (Aphid_Img_Library /users/jianzhang/aphid/lib/libaphidImg.a)
 endif ()
 
-target_link_libraries (testla ${Aphid_Library})
+target_link_libraries (testla ${Aphid_Math_Library})
+target_link_libraries (testla ${Aphid_Img_Library})
 
 

@@ -4,6 +4,8 @@
 #include "LfMachine.h"
 #include <ExrImage.h>
 
+using namespace aphid;
+
 namespace lfr {
 LfThread::LfThread(LfMachine * world, QObject *parent)
     : QThread(parent)
@@ -88,7 +90,7 @@ void LfThread::run()
 			if (abort) return;
 			mutex.unlock();
 			
-			img.open(m_world->param()->imageName(i));
+			img.read(m_world->param()->imageName(i));
 			const int m = m_world->param()->imageNumPatches(i);
 			int nbatch = m>>8;
 			if( (nbatch<<8) < m ) nbatch++;
@@ -111,7 +113,7 @@ void LfThread::run()
 			if (abort) return;
 			mutex.unlock();
 			
-			img.open(m_world->param()->imageName(i));
+			img.read(m_world->param()->imageName(i));
 #if 1
             float e = m_world->computePSNR(&img, i);
             emit sendPSNR(e);

@@ -8,9 +8,10 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 #define _WIN32
-#include <ExrImage.h>
 #include <iostream>
 // #include <OpenEXR/ImathLimits.h>
+
+using namespace aphid;
 
 namespace lfr {
 
@@ -184,7 +185,7 @@ bool LfParameter::countPatches()
 	std::vector<std::string >::const_iterator it = m_imageNames.begin();
 	for(; it!=m_imageNames.end();++it) {
 		std::string fn = *it;
-		if(img.open(fn.c_str())) {
+		if(img.read(fn)) {
 			m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
 			m_numTotalPatches += m_numPatches.back();
         }
@@ -252,7 +253,7 @@ ExrImage *LfParameter::openImage(const int ind)
 		m_openedImages[idx]._image = new ExrImage;
 	}
 	m_openedImages[idx]._ind = ind;
-	m_openedImages[idx]._image->open(imageName(ind));
+	m_openedImages[idx]._image->read(imageName(ind));
 	//std::cout<<" open "<<m_openedImages[idx]._image<<"   ";
 	m_currentImage = (m_currentImage + 1) % MAX_NUM_OPENED_IMAGES;
 	return m_openedImages[idx]._image;

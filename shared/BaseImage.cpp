@@ -11,26 +11,37 @@
 #include <iostream>
 namespace aphid {
 
-BaseImage::BaseImage()
-{
-}
-
-BaseImage::BaseImage(const char * filename) : BaseFile(filename) 
+BaseImage::BaseImage() : 
+m_isValid(false),
+m_fileName("")
 {}
 
+BaseImage::BaseImage(const std::string & filename)
+{ read(filename); }
+
 BaseImage::~BaseImage()
-{
+{}
+
+bool BaseImage::read(const std::string & filename)
+{ 
+	m_isValid = readImage(filename); 
+	m_fileName = "";
+	if(m_isValid) m_fileName = filename;
+	
+	return m_isValid;
 }
 
-void BaseImage::doClear() 
-{
-	BaseFile::doClear();
-}
+const bool & BaseImage::isValid() const
+{ return m_isValid; }
 
-const char * BaseImage::formatName() const
-{
-	return "Unknown";
-}
+const std::string & BaseImage::fileName() const
+{ return m_fileName; }
+
+bool BaseImage::readImage(const std::string & filename)
+{ return false; }
+
+BaseImage::IFormat BaseImage::formatName() const
+{ return FUnknown; }
 
 int BaseImage::getWidth() const
 {
@@ -64,28 +75,19 @@ int BaseImage::pixelLoc(float s, float t, bool flipV, int pixelRank) const
 }
 
 void BaseImage::allWhite()
-{
-
-}
+{}
 
 void BaseImage::allBlack()
-{
-
-}
+{}
 
 void BaseImage::sample(float u, float v, int count, float * dst) const
-{   
-}
+{}
 
 float BaseImage::sampleRed(float u, float v)
-{
-	return 0.f;
-}
+{ return 0.f; }
 
 float BaseImage::sampleRed(float u, float v) const
-{
-	return 0.f;
-}
+{ return 0.f; }
 
 void BaseImage::setRed(float u, float v, float red) {}
 
@@ -100,20 +102,33 @@ void BaseImage::setChannelRank(ChannelRank x)
 BaseImage::ChannelRank BaseImage::channelRank() const
 { return m_channelRank; }
 
+std::string BaseImage::formatNameStr() const
+{
+	if(formatName() < 1) return "unknown";
+	return "exr";
+}
+
+std::string BaseImage::channelRankStr() const
+{
+	if(m_channelRank == RGB)
+		return "RGB";
+	if(m_channelRank == RGBA)
+		return "RGBA";
+	return "RGBAZ";
+}
+
 void BaseImage::verbose() const
 {
-	std::cout<<"Image file: "<<fileName()<<"\n";
-	std::cout<<" format: "<<formatName()<<"\n";
-	std::cout<<" size: ("<<getWidth()<<", "<<getHeight()<<")\n";
-	if(m_channelRank == RGB)
-		std::cout<<" channels: RGB\n";
-	else if(m_channelRank == RGBA)
-		std::cout<<" channels: RGBA\n";
-	else
-	    std::cout<<" channels: RGBAZ\n";
+	if(!isValid() ) {
+		std::cout<<"\n invalid image file ";
+		return;
+	}
+		
+	std::cout<<"\n image file "<<fileName()
+			<<"\n format: "<<formatNameStr()
+			<<"\n size: ("<<getWidth()<<", "<<getHeight()
+			<<"\n channel: "<<channelRankStr();
 	
-	if(isOpened())
-		std::cout<<" image is verified\n";
 }
 
 }
