@@ -14,15 +14,17 @@ namespace lfr {
 template<typename T>
 class SquareErr {
     
-    DenseVector<T> m_yhat;
-	const DenseMatrix<T> * m_X;
+    const DenseMatrix<T> * m_X;
 	
 public:
     SquareErr();
 	virtual ~SquareErr();
 	
 	void create(const DenseMatrix<T> * X);
-	T compute(const DenseVector<T> & y, const DenseVector<T> & beta, const DenseVector<int> & ind);
+	T compute(DenseVector<T> & yhat, const DenseVector<T> & y, 
+				const DenseVector<T> & beta, const DenseVector<int> & ind) const;
+	void reconstruct(DenseVector<T> & yhat, 
+				const DenseVector<T> & beta, const DenseVector<int> & ind) const;
 	
 protected:
     
@@ -40,11 +42,11 @@ template<typename T>
 void SquareErr<T>::create(const DenseMatrix<T> * X)
 {
 	m_X = X;
-	m_yhat.create( X->numRows() );
 }
 
 template<typename T>
-T SquareErr<T>::compute(const DenseVector<T> & y, const DenseVector<T> & beta, const DenseVector<int> & ind)
+T SquareErr<T>::compute(DenseVector<T> & yhat, const DenseVector<T> & y, 
+						const DenseVector<T> & beta, const DenseVector<int> & ind) const
 {
     const int k = m_X->numColumns();
 	int nnz = 0;
@@ -66,22 +68,46 @@ T SquareErr<T>::compute(const DenseVector<T> & y, const DenseVector<T> & beta, c
 		return sum;
 	}
 	
-	m_yhat.setZero();
+	yhat.setZero();
 	
 	int j;
 	for(i=0;i<m;i++) {
 		for(j=0;j<nnz;j++) {
-			m_yhat[i] += m_X->column(ind[j])[i] * beta[j];
+			yhat[i] += m_X->column(ind[j])[i] * beta[j];
 		}
 	}
 	
 	for(i=0;i<nl;i++) {
 /// |Yhat - Y|^2
-		e = 0.299 * m_yhat[i] + 0.587 * m_yhat[i + nl] + 0.114 * m_yhat[i + nl*2];
+		e = 0.299 * yhat[i] + 0.587 * yhat[i + nl] + 0.114 * yhat[i + nl*2];
 		e -= 0.299 * y[i] + 0.587 * y[i + nl] + 0.114 * y[i + nl*2];
 		sum += e * e;
 	}
 	return sum;
+}
+
+template<typename T>
+void SquareErr<T>::reconstruct(DenseVector<T> & yhat, 
+							const DenseVector<T> & beta, const DenseVector<int> & ind) const
+{
+	const int k = m_X->numColumns();
+	int nnz = 0;
+	int i=0;
+	for(;i<k;++i) {
+		if(ind[i] < 0) break;
+		nnz++;
+	}
+	
+	yhat.setZero();
+	
+	const int m = yhat.numElements();
+	int j;
+	for(i=0;i<m;i++) {
+		for(j=0;j<nnz;j++) {
+			yhat[i] += m_X->column(ind[j])[i] * beta[j];
+		}
+	}
+	
 }
 
 template<typename T>

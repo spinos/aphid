@@ -34,6 +34,7 @@ signals:
 	void sendSparsity(const QImage &image);
     void sendPSNR(float value);
 	void sendIterDone(int n);
+	void sendCodedImage(const QImage &image);
 	
 protected:
     void run();

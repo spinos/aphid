@@ -73,20 +73,13 @@ void LfThread::run()
 	int w, h;
 	lparam->getDictionaryImageSize(w, h);
 	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
-	
+	uint *codedLine = reinterpret_cast<uint *>(m_codedImg->bits());
+				
 	ExrImage img;
 	const int n = lparam->numImages();
-	int i, j;
+	int i, j, m, nbatch;
+	float e;
 	
-	uint *spasityLine = reinterpret_cast<uint *>(m_spasityImg->bits());
-	
-#if 0
-	unsigned cwhite = 255<<24;
-	cwhite = cwhite | ( 255 << 16 );
-	cwhite = cwhite | ( 255 << 8 );
-	cwhite = cwhite | ( 255 );
-#endif
-
 	const int totalNSignals = lparam->totalNumPatches();
 	QElapsedTimer timer;
 	timer.start();
@@ -99,19 +92,18 @@ void LfThread::run()
 			mutex.unlock();
 			
 			img.read(lparam->imageName(i) );
-			const int m = lparam->imageNumPatches(i);
-			int nbatch = m>>8;
-			if( (nbatch<<8) < m ) nbatch++;
-			for(j=0;j<nbatch;j++) {
-			    endp = (j+1) * 256 - 1;
+			m = lparam->imageNumPatches(i);
+			nbatch = m>>11;
+			if( (nbatch<<11) < m ) nbatch++;
+			for(j=0;j<nbatch;++j) {
+			    endp = ((j+1)<<11) - 1;
 			    if(endp > m-1) endp = m-1;
-				m_world->learn(&img, j * 256, endp);
+				m_world->learn(&img, j<<11, endp);
 				
 				{
 				    m_world->updateDictionary( &img, niter );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
-					// emit sendSparsity(*m_spasityImg);
 				}
 			}
 		}
@@ -122,35 +114,18 @@ void LfThread::run()
 			mutex.unlock();
 			
 			img.read(lparam->imageName(i));
-#if 1
-            float e = m_world->computePSNR(&img, i);
+
+            e = m_world->computePSNR(&img, i);
             emit sendPSNR(e);
 			
 			if(i==0) {
-/// reconstruct image
-				uint *codedLine = reinterpret_cast<uint *>(m_codedImg->bits());
 				m_world->computeYhat(codedLine, i, &img);
-			}
-#else
-            const int m = lparam->imageNumPatches(i);
-			m_world->beginPSNR();
-			for(j=0;j<m;j++) {
-				m_world->computeError(&img, j);
-				//m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
+				emit sendCodedImage(*m_codedImg);
 				
-				//if(((j+1) & 255) == 0 || (j+1)==m) {
-				//	emit sendSparsity(*m_spasityImg);
-				//}
 			}
-			float err;
-			m_world->endPSNR(&err);
-			emit sendPSNR(err);
-#endif
 			
 		}
         
-        //m_world->cleanDictionary();
-        //if(niter > 1) 
         {
             m_world->recycleData();
 			emit sendIterDone(niter+1);

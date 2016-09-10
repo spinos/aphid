@@ -27,7 +27,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	m_atomSize = 8;
 	m_overcomplete = 1.f;
 	m_nthread = 2;
-	m_maxIter = 100;
+	m_maxIter = 1000;
 	m_searchPath = "";
 	m_dictWidth = m_dictHeight = 0;
 	bool foundImages = false;
@@ -317,7 +317,7 @@ void LfParameter::printOptions() const
 {
 	std::cout<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8, default is 8"
 	<<"\n -t or --thread    integer    number of threads to use, limit to 1 - 24, default is 2"
-	<<"\n -mi or --maxIteration    integer    limit of iterations, default is 100"
+	<<"\n -mi or --maxIteration    integer    limit of iterations, default is 1000"
 	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0, default is 1.0"
 	<<"\n -h or --help    print this information"
 	<<"\n";

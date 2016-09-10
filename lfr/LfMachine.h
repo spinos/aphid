@@ -30,8 +30,14 @@ public:
 	virtual bool save();
 	
 protected:
+/// dst ARGB first in patch
+/// color[s*s*rank] input
+/// s patch size
+/// imageW stride to next line
+/// toBrighten instead of actual color
+/// rank number of channels
 	void fillPatch(unsigned * dst, float * color, int s, int imageW, 
-					bool toBrighten, int rank = 3);
+					bool toBrighten, int rank = 3) const;
 	LfParameter * param1();
 	
 private:

@@ -31,8 +31,13 @@ TsWindow::TsWindow(LfMachine * world)
 	connect(m_thread, SIGNAL(sendIterDone(int)),
             m_statistics, SLOT(recvIterDone(int)));
 			
+	connect(m_thread, SIGNAL(sendCodedImage(QImage)),
+            m_image, SLOT(recvImage(QImage)));
+			
 	m_thread->initAtoms();
 	m_statistics->show();
+	m_dictionary->show();
+	m_image->show();
 }
 
 TsWindow::~TsWindow()

@@ -28,7 +28,7 @@ void DictionaryView::clientDraw(QPainter * pr)
 	if (m_pixmap.isNull()) 
 		return;
 		
-	pr->drawPixmap(QPoint(2,2), m_pixmap);
+	pr->drawPixmap(QPoint(0,0), m_pixmap);
 }
 
 }

@@ -20,7 +20,7 @@ void LfMachine::initDictionary() {}
 void LfMachine::dictionaryAsImage(unsigned * imageBits, int imageW, int imageH) {}
 
 void LfMachine::fillPatch(unsigned * dst, float * color, int s, int imageW, 
-							bool toBrighten, int rank)
+							bool toBrighten, int rank) const
 {
     const int stride = s * s;
 	int crgb[3];

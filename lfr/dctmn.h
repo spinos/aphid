@@ -48,6 +48,8 @@ class DictionaryMachine : public LfMachine {
 	DenseVector<int> * m_indPt[NumThread];
 	DenseMatrix<T> * m_batchAPt[NumThread];
     DenseMatrix<T> * m_batchBPt[NumThread];
+/// reconstructed Y
+	DenseVector<T> * m_yhatPt[NumThread];
 	
 	int m_atomSize;
 	int m_pret;
@@ -79,7 +81,10 @@ protected:
 private:
     void learnPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
     void computeErrPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
-    void computeYhatPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
+    void computeYhatPt(const int iThread, unsigned * line, 
+						const aphid::ExrImage * image, 
+						const int & imageWidth, const int & numPatchX,
+						const int workBegin, const int workEnd);
     void fillPatchPt(const int iThread, unsigned * line, const int workBegin, const int workEnd,
 						const int dimx, const int s, const int imageW);
 	void computeLambda(int t);
@@ -114,6 +119,7 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(LfParameter * param) :
         m_indPt[i] = new DenseVector<int>(p);
         m_batchAPt[i] = new DenseMatrix<T>(p, p);
         m_batchBPt[i] = new DenseMatrix<T>(m, p);
+		m_yhatPt[i] = new DenseVector<T>(m);
     }
 }
 
@@ -141,6 +147,7 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
         delete m_indPt[i];
         delete m_batchAPt[i];
         delete m_batchBPt[i];
+		delete m_yhatPt[i];
     }
 }
 
@@ -189,7 +196,7 @@ void DictionaryMachine<NumThread, T>::preLearn()
     m_pre0B->setZero();
     m_pret = 0;
     m_epoch = -1;
-    m_lambda = 1e-5;
+    m_lambda = 1e-8;
     int i=0;
     for(;i<NumThread;++i) {
         m_batchAPt[i]->setZero();
@@ -290,20 +297,20 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * i
     }
 #endif
     
-    if(t>1) {
+    if(t>0) {
 /// scale the past
         //m_A->scale(sc);
         //m_B->scale(sc);
 /// slow down early steps
-        m_batchA->scale(0.01);
-        m_batchB->scale(0.01);
+        m_batchA->scale(0.001);
+        m_batchB->scale(0.001);
     }
     
 /// add average of batch
-	m_A->add(*m_batchA, 1.0/256.0);
-    m_B->add(*m_batchB, 1.0/256.0);
-    m_pre0A->add(*m_batchA, 1.0/256.0);
-    m_pre0B->add(*m_batchB, 1.0/256.0);
+	m_A->add(*m_batchA, 1.0/2048);
+    m_B->add(*m_batchB, 1.0/2048);
+    m_pre0A->add(*m_batchA, 1.0/2048);
+    m_pre0B->add(*m_batchB, 1.0/2048);
     m_batchA->setZero();
     m_batchB->setZero();
     
@@ -311,7 +318,7 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * i
 	
     for (i = 0; i<p; ++i) {
         const T Aii = m_A->column(i)[i];
-        if (Aii > 1e-8) {
+        if (Aii > 1e-7) {
             DenseVector<T> di(m_D->column(i), m_D->numRows());
             DenseVector<T> ai(m_A->column(i), m_A->numRows());
             DenseVector<T> bi(m_B->column(i), m_B->numRows());
@@ -329,6 +336,7 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * i
        }
     }
     m_D->AtA(*m_G);	
+	
 }
 
 template<int NumThread, typename T>
@@ -451,7 +459,7 @@ void DictionaryMachine<NumThread, T>::computeErrPt(const int iThread, const aphi
     for(;i<=workEnd;++i) {
         image->getTile(m_yPt[iThread]->raw(), i, m_atomSize);
         m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
-        sum += m_sqeWorker[iThread].compute(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread]);
+        sum += m_sqeWorker[iThread].compute(*m_yhatPt[iThread], *m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread]);
     }
     m_sqePt[iThread] = sum;
 }
@@ -477,7 +485,7 @@ T DictionaryMachine<NumThread, T>::computePSNR(const aphid::ExrImage * image, in
 	for(i=0;i<NumThread;++i)
 		sum += m_sqePt[i];
 	
-    return 10.0 * log10( T(1.0) / (1e-10 + sum / param()->imageNumPixels(iImage) ) );
+    return 10.0 * log10( T(1.0) / (1e-9 + sum / param()->imageNumPixels(iImage) ) );
 }
 
 template<int NumThread, typename T>
@@ -512,17 +520,25 @@ void DictionaryMachine<NumThread, T>::computeLambda(int t)
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::computeYhatPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd)
+void DictionaryMachine<NumThread, T>::computeYhatPt(const int iThread, unsigned * line,
+									const aphid::ExrImage * image, 
+									const int & imageWidth, const int & numPatchX,
+									const int workBegin, const int workEnd)
 {
-	//T * ptch = new T[m_atomSize * m_atomSize * 3];
+	const int & s = m_atomSize;
+	int px, py;
     T sum = 0;
     int i = workBegin;
     for(;i<=workEnd;++i) {
-        image->getTile(m_yPt[iThread]->raw(), i, m_atomSize);
-        //m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
-        //m_sqeWorker[iThread].compute(ptch, *m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread]);
+        image->getTile(m_yPt[iThread]->raw(), i, s);
+		m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
+        m_sqeWorker[iThread].reconstruct(*m_yhatPt[iThread], *m_betaPt[iThread], *m_indPt[iThread]);
+		
+		py = i / numPatchX;
+		px = i - py * numPatchX;
+		fillPatch(&line[(py * imageWidth + px) * s], m_yhatPt[iThread]->raw(), s, imageWidth, false);
+        
     }
-	//delete[] ptch;
 }
 
 
@@ -532,6 +548,7 @@ void DictionaryMachine<NumThread, T>::computeYhat(unsigned * imageBits, int iIma
 {
 	int w, h;
 	param()->getImageSize(w, h, iImage);
+	const int numPatchX = w / m_atomSize;
 	
 	const int numPatches = param()->imageNumPatches(iImage);
     const int workSize = numPatches / NumThread;
@@ -542,7 +559,7 @@ void DictionaryMachine<NumThread, T>::computeYhat(unsigned * imageBits, int iIma
         workEnd = (i== NumThread - 1) ? numPatches - 1: workBegin + workSize - 1;
         
 		yhatThread[i] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::computeYhatPt, 
-				this, i, image, workBegin, workEnd) );
+				this, i, imageBits, image, w, numPatchX, workBegin, workEnd) );
     }
 	
 	for(i=0;i<NumThread;++i)
