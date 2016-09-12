@@ -11,6 +11,8 @@
  *  http://i-rep.emu.edu.tr:8080/xmlui/handle/11129/57
  *  http://cn.mathworks.com/help/wavelet/ref/dtfilters.html
  *  http://ocw.mit.edu/courses/mathematics/18-327-wavelets-filter-banks-and-applications-spring-2003/lecture-notes/
+ *  http://www.stat.washington.edu/courses/stat530/spring08/PDFFILES/ACHA-Kingsbury.pdf
+ *  http://www-sigproc.eng.cam.ac.uk/foswiki/pub/Main/NGK/ngk_ACHApap.pdf
  */
 
 #include <iostream>
