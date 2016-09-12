@@ -113,8 +113,7 @@ ADD_LIBRARY (aphidMath SHARED
 ADD_LIBRARY (aphidGeom SHARED 
 ../shared/SHelper.cpp 
 ../shared/AVerbose.cpp
-../shared/BaseArray.cpp
-../shared/IndexList.cpp 
+../shared/BaseArray.cpp 
 ../shared/AStripedModel.cpp
 ../shared/TypedEntity.cpp 
 ../shared/NamedEntity.cpp 
@@ -275,8 +274,7 @@ add_library(aphid STATIC
                                 ##../shared/CollisionRegion.cpp 
                                 ## 
                                 ##../shared/BlockDrawBuffer.cpp 
-                ##../shared/BaseScene.cpp  
-    ##../shared/BaseImage.cpp 
+                ##../shared/BaseScene.cpp   
     ##../shared/BaseFileGroup.cpp
     ##../shared/BakeDeformer.cpp 
     ##../shared/PlaybackControl.cpp 
@@ -364,6 +362,11 @@ add_library(aphid STATIC
 ##../hesperis/H5FieldOut.cpp
 ##../hesperis/AdaptiveGrid.cpp
 ##../hesperis/AdaptiveField.cpp
+)
+
+add_library(aphidImg STATIC
+../shared/BaseImage.cpp
+../shared/ExrImage.cpp
 )
 
 find_package (CUDA QUIET)

@@ -124,6 +124,13 @@ inline void SwapAB(T & a, T & b, T & c)
 { c = a; a = b; b = c; }
 
 template<typename T>
+inline void ClampInPlace(T & a, const T & lowLimit, const T & highLimit)
+{
+	if(a < lowLimit) a = lowLimit;
+	if(a > highLimit) a = highLimit;
+}
+
+template<typename T>
 inline T MixClamp01F(const T & a, const T & b, const float & w)
 { 
 	if(w < 0.f) 

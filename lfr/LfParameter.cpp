@@ -8,18 +8,14 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 #define _WIN32
-#include <ExrImage.h>
 #include <iostream>
-// #include <OpenEXR/ImathLimits.h>
+
+using namespace aphid;
 
 namespace lfr {
 
 LfParameter::LfParameter(int argc, char *argv[])
 {
-	// std::cout<<"\n exr limit "<<Imath::limits<int>::min();
-	// std::cout<<"\n test min "<<std::min<int>(-99, -98);
-	// std::cout<<"\n test abs "<<std::abs<int>(-75);
-	std::cout<<"\n lfr (Light Field Research) version 20151127";
 	int i = 0;
 	for(;i<MAX_NUM_OPENED_IMAGES;++i) {
 		m_openedImages[i]._ind = -1;
@@ -27,10 +23,13 @@ LfParameter::LfParameter(int argc, char *argv[])
 	}
 	m_currentImage = 0;
 	m_isValid = false;
+	m_isHelp = false;
 	m_atomSize = 8;
 	m_overcomplete = 1.f;
 	m_nthread = 2;
-	m_maxIter = 100;
+	m_maxIter = 1000;
+	m_searchPath = "";
+	m_dictWidth = m_dictHeight = 0;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -39,7 +38,8 @@ LfParameter::LfParameter(int argc, char *argv[])
 		i = 1;
 		for(;i<argc;++i) {
 			if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-				PrintHelp();
+				m_isHelp = true;
+				break;
 			}
 			if(strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--thread") == 0) {
 				if(i==argc-1) {
@@ -111,18 +111,22 @@ LfParameter::LfParameter(int argc, char *argv[])
 			}
 			if(i==argc-1) {
 				if(boost::filesystem::exists(argv[i])) {
-					m_imageNames.push_back(argv[i]);
-					std::cout<<"\n found image "<<argv[i];
-					m_isValid = true;
+					boost::filesystem::path p(argv[i]);
+					if(boost::filesystem::is_regular_file(p) ) {
+						m_imageNames.push_back(argv[i]);
+						std::cout<<"\n found image "<<argv[i];
+						m_isValid = true;
+					}
+					else {
+						m_searchPath = argv[i];
+						m_isValid = searchImagesIn(argv[i]);
+					}
 				}
-				else 
-					m_isValid = searchImagesIn("./");
-					// std::cout<<"\n image doesn't exist "<<argv[i];
 			}
 		}
 	}
 	if(m_isValid) {
-		std::cout<<"\n atom size "<<m_atomSize;
+		std::cout<<"\n image atom size "<<m_atomSize;
 		std::cout<<"\n dictionary overcompleteness "<<m_overcomplete;
 		m_isValid = countPatches();
 	}
@@ -134,15 +138,18 @@ LfParameter::LfParameter(int argc, char *argv[])
 		if(h*w < p) h++;
 		m_dictWidth = w * m_atomSize;
 		m_dictHeight = h * m_atomSize;
-		std::cout<<"\n dictionary image size "<<m_dictWidth<<" x "<<m_dictHeight
+		std::cout<<"\n dictionary image size ("<<m_dictWidth<<", "<<m_dictHeight<<")"
 		<<"\n passed parameter check\n";
 	}
 }
 
 LfParameter::~LfParameter() {}
 
-bool LfParameter::isValid() const
+const bool & LfParameter::isValid() const
 { return m_isValid; }
+
+const bool & LfParameter::isHelp() const
+{ return m_isHelp; }
 
 bool LfParameter::searchImagesIn(const char * dirname)
 {
@@ -151,7 +158,7 @@ bool LfParameter::searchImagesIn(const char * dirname)
 		std::cout<<"\n dir doesn't exist "<<dirname;
 		return false;
 	}
-	std::cout<<"\n searching images in dir "<<dirname<<" ...";
+	std::cout<<"\n searching images in dir "<<dirname;
 	
 	const std::string ext(".exr");
 	boost::filesystem::path head_path(dirname);
@@ -167,45 +174,54 @@ bool LfParameter::searchImagesIn(const char * dirname)
 				boost::algorithm::to_lower(fileext);
 				if(fileext == ext) {
 					m_imageNames.push_back( boost::filesystem::basename(itdir->path()) + ".exr");
+					std::cout<<"\n "<<m_imageNames.back();
 				}
 			}
 		}
 	}
 	
-	std::cout<<" found "<<m_imageNames.size();
+	std::cout<<"\n  found "<<m_imageNames.size();
 	return true;
 }
 
 bool LfParameter::countPatches()
 {
 	m_numPatches.clear();
+	m_imageSizes.clear();
+	
     ExrImage img;
 	m_numTotalPatches = 0;
-	std::vector<std::string >::const_iterator it = m_imageNames.begin();
-	for(; it!=m_imageNames.end();++it) {
-		std::string fn = *it;
-		if(img.open(fn.c_str())) {
+	const int n = numImages();
+	for(int i=0; i<n;++i) {
+		if(img.read(imageName(i) ) ) {
 			m_numPatches.push_back( (img.getWidth() / m_atomSize) * (img.getHeight() / m_atomSize) );
+			m_imageSizes.push_back(Int2(img.getWidth() / m_atomSize * m_atomSize, img.getHeight()  / m_atomSize * m_atomSize ) );
 			m_numTotalPatches += m_numPatches.back();
         }
-		else 
-			std::cout<<"\n cannot open exr "<<fn;
 	}
 	std::cout<<"\n num total patches "<<m_numTotalPatches;
 	return m_numTotalPatches > 0;
 }
 
-int LfParameter::atomSize() const
+const int & LfParameter::atomSize() const
 { return m_atomSize; }
 
 int LfParameter::dictionaryLength() const
 { return dimensionOfX() * m_overcomplete; }
 
 std::string LfParameter::imageName(int i) const
-{ return m_imageNames[i]; }
+{ 
+	if(m_searchPath.size() < 2)
+		return m_imageNames[i];
+		
+	return m_searchPath + "/" + m_imageNames[i]; 
+}
 
 int LfParameter::imageNumPatches(int i) const
 { return m_numPatches[i]; }
+
+int LfParameter::imageNumPixels(int i) const
+{ return imageNumPatches(i) * m_atomSize * m_atomSize; }
 
 int LfParameter::totalNumPatches() const
 { return m_numTotalPatches; }
@@ -252,7 +268,7 @@ ExrImage *LfParameter::openImage(const int ind)
 		m_openedImages[idx]._image = new ExrImage;
 	}
 	m_openedImages[idx]._ind = ind;
-	m_openedImages[idx]._image->open(imageName(ind));
+	m_openedImages[idx]._image->read(imageName(ind));
 	//std::cout<<" open "<<m_openedImages[idx]._image<<"   ";
 	m_currentImage = (m_currentImage + 1) % MAX_NUM_OPENED_IMAGES;
 	return m_openedImages[idx]._image;
@@ -261,23 +277,48 @@ ExrImage *LfParameter::openImage(const int ind)
 void LfParameter::getDictionaryImageSize(int & x, int & y) const
 { x = m_dictWidth; y = m_dictHeight; }
 
+void LfParameter::getImageSize(int & x, int & y, const int & i) const
+{ 
+	x = m_imageSizes[i].x; 
+	y = m_imageSizes[i].y; 
+}
+
 int LfParameter::numThread() const
 { return m_nthread; }
 
 int LfParameter::maxIterations() const
 { return m_maxIter; }
 
-void LfParameter::PrintHelp()
+void LfParameter::printHelp() const
 {
-	std::cout<<"\n lfr (Light Field Research) version 20151122"
-	<<"\nUsage:\n lfr [option] [file]"
-	<<"\nDescription:\n lfr learns the underlying pattern of input images."
-	<<"\n Input file must be image of OpenEXR format. If no file is provided,"
-	<<"\n current dir will be searched for any file with name ending in .exr."
-	<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8"
+	printVersion();
+	printDescription();
+	printUsage();
+	printOptions();
+}
+
+void LfParameter::printVersion() const
+{ std::cout<<"\n lfr (Light Field Research) version 20151122"; }
+
+void LfParameter::printDescription() const
+{
+	std::cout<<"\nDescription:\n lfr learns the underlying pattern of input images.";
+}
+
+void LfParameter::printUsage() const
+{
+	std::cout<<"\nUsage:\n lfr [option] [file]"
+	<<"\n Input file must be image of OpenEXR format. Last input can be a directory"
+	<<"\n to seach for any file with name ending in .exr." 
+	<<"\n If no file or directory is provided, current dir will be searched.";
+}
+
+void LfParameter::printOptions() const	
+{
+	std::cout<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8, default is 8"
 	<<"\n -t or --thread    integer    number of threads to use, limit to 1 - 24, default is 2"
-	<<"\n -mi or --maxIteration    integer    limit of iterations, default is 100"
-	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0"
+	<<"\n -mi or --maxIteration    integer    limit of iterations, default is 1000"
+	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0, default is 1.0"
 	<<"\n -h or --help    print this information"
 	<<"\n";
 }

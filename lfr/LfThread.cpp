@@ -4,6 +4,8 @@
 #include "LfMachine.h"
 #include <ExrImage.h>
 
+using namespace aphid;
+
 namespace lfr {
 LfThread::LfThread(LfMachine * world, QObject *parent)
     : QThread(parent)
@@ -13,9 +15,14 @@ LfThread::LfThread(LfMachine * world, QObject *parent)
     abort = false;
 /// 100 x 256 spasity visualization
 	m_spasityImg = new QImage(100, 256, QImage::Format_RGB32);
-	int w, h;
-	world->param()->getDictionaryImageSize(w, h);
-	m_dictImg = new QImage(w, h, QImage::Format_RGB32);
+	int dw = 10, dh = 10, w = 10, h = 10;
+	const LfParameter * lparam = world->param();
+	if(lparam->isValid() ) {
+		lparam->getDictionaryImageSize(dw, dh);
+		lparam->getImageSize(w, h, 0);
+	}
+	m_dictImg = new QImage(dw, dh, QImage::Format_RGB32);
+	m_codedImg = new QImage(w, h, QImage::Format_RGB32);
 }
 
 LfThread::~LfThread()
@@ -62,46 +69,41 @@ void LfThread::endLearn()
 
 void LfThread::run()
 {
+	const LfParameter * lparam = m_world->param();
 	int w, h;
-	m_world->param()->getDictionaryImageSize(w, h);
+	lparam->getDictionaryImageSize(w, h);
 	uint *scanLine = reinterpret_cast<uint *>(m_dictImg->bits());
-	
+	uint *codedLine = reinterpret_cast<uint *>(m_codedImg->bits());
+				
 	ExrImage img;
-	const int n = m_world->param()->numImages();
-	int i, j;
+	const int n = lparam->numImages();
+	int i, j, m, nbatch;
+	float e;
 	
-	uint *spasityLine = reinterpret_cast<uint *>(m_spasityImg->bits());
-	
-	unsigned cwhite = 255<<24;
-	cwhite = cwhite | ( 255 << 16 );
-	cwhite = cwhite | ( 255 << 8 );
-	cwhite = cwhite | ( 255 );
-	
-	const int totalNSignals = m_world->param()->totalNumPatches();
+	const int totalNSignals = lparam->totalNumPatches();
 	QElapsedTimer timer;
 	timer.start();
 	int endp;
 	int niter = 0;
-	for(;niter< m_world->param()->maxIterations();++niter) {
+	for(;niter< lparam->maxIterations();++niter) {
 		for(i=0;i<n;i++) {
 			mutex.lock();
 			if (abort) return;
 			mutex.unlock();
 			
-			img.open(m_world->param()->imageName(i));
-			const int m = m_world->param()->imageNumPatches(i);
-			int nbatch = m>>8;
-			if( (nbatch<<8) < m ) nbatch++;
-			for(j=0;j<nbatch;j++) {
-			    endp = (j+1) * 256 - 1;
+			img.read(lparam->imageName(i) );
+			m = lparam->imageNumPatches(i);
+			nbatch = m>>11;
+			if( (nbatch<<11) < m ) nbatch++;
+			for(j=0;j<nbatch;++j) {
+			    endp = ((j+1)<<11) - 1;
 			    if(endp > m-1) endp = m-1;
-				m_world->learn(&img, j * 256, endp);
+				m_world->learn(&img, j<<11, endp);
 				
 				{
 				    m_world->updateDictionary( &img, niter );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
-					// emit sendSparsity(*m_spasityImg);
 				}
 			}
 		}
@@ -111,30 +113,19 @@ void LfThread::run()
 			if (abort) return;
 			mutex.unlock();
 			
-			img.open(m_world->param()->imageName(i));
-#if 1
-            float e = m_world->computePSNR(&img, i);
+			img.read(lparam->imageName(i));
+
+            e = m_world->computePSNR(&img, i);
             emit sendPSNR(e);
-#else
-            const int m = m_world->param()->imageNumPatches(i);
-			m_world->beginPSNR();
-			for(j=0;j<m;j++) {
-				m_world->computeError(&img, j);
-				//m_world->fillSparsityGraph(spasityLine, j & 255, 100, cwhite);
+			
+			if(i==0) {
+				m_world->computeYhat(codedLine, i, &img);
+				emit sendCodedImage(*m_codedImg);
 				
-				//if(((j+1) & 255) == 0 || (j+1)==m) {
-				//	emit sendSparsity(*m_spasityImg);
-				//}
 			}
-			float err;
-			m_world->endPSNR(&err);
-			emit sendPSNR(err);
-#endif
 			
 		}
         
-        //m_world->cleanDictionary();
-        //if(niter > 1) 
         {
             m_world->recycleData();
 			emit sendIterDone(niter+1);
@@ -142,42 +133,6 @@ void LfThread::run()
             //qDebug()<<" recycle"<<niter;
         }
 	}
-/*
-    forever {
-        mutex.lock();
 
-        QSize resultSize = this->resultSize;
-
-        mutex.unlock();
-
-        QImage image(resultSize, QImage::Format_RGB32);
-			
-			for (int y = 0; y < resultSize.height(); ++y) 
-			{
-				 if (restart)
-                    break;
-                if (abort)
-                    return;
-
-                uint *scanLine = reinterpret_cast<uint *>(image.scanLine(y));
-				for (int x = 0; x < resultSize.width(); ++x) 
-				{
-					int g = rand()%256;
-					*scanLine++ = qRgb(g, g, g);
-                }
-            }
-
-			if (!restart)
-				emit renderedImage(image);
-
-        mutex.lock();
-		
-        if (!restart)
-            condition.wait(&mutex);
-			
-        restart = false;
-        mutex.unlock();
-    }
-*/
 }
 }

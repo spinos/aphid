@@ -36,12 +36,9 @@ static const float LegendreNormWeightF[11] = {
 .005542445f
 };
 
-/// http://web.cs.iastate.edu/~cs577/handouts/orthogonal-polys.pdf
-/// evalute 0 - n th legendre polynomials through interval [a, b] 
-/// m number of evaluation nodes
-/// v length of m * (n+1)
-void legendreRules(int m, int n, float * v,
-		float a, float b);
+/// xi[M] abscissas	over [-1,1]	
+void legendreRule(int m, int n, float * v,
+		const float * xi);
 
 /// linear interpolate between knots over interval [a, b]
 /// nknots a lot smaller than m
@@ -67,6 +64,13 @@ void gaussQuadratureRule(int n, float * ci, float * xi);
 /// X[N] input/output
 void tuple_next( int m1, int m2, int n, int *rank, int x[] );
 
+/// N number of dimensions
+/// M number of points 1D rule
+/// Xi abscissas of 1D rule
+/// Wi weights of 1D rule
+/// Y[M^N] evaluated 
+float gaussQuadratureRuleIntegrate(int n, int m, const float * xi, const float * wi, const float * Y);
+
 template<typename T>
 void printValues(const char * desc, int n, const T * v)
 {
@@ -76,6 +80,13 @@ void printValues(const char * desc, int n, const T * v)
 		std::cout<<" "<<std::setw(12) <<std::setprecision(8)<<v[i];
 }
 
+/// index in lexicographic order
+/// N number of dimensions
+/// M number of points per dimension
+/// X[N] coordinate in N dimension
+/// X[0] + X[1] * M + X[2] * M * M
+int lexIndex(int n, int m, int * x, int offset = 0);
+
 /// http://mathfaculty.fullerton.edu/mathews/n2003/SimpsonsRule2DMod.html
 /// http://mathfaculty.fullerton.edu/mathews/n2003/GaussianQuadMod.html
 /// https://en.wikipedia.org/wiki/Adaptive_Simpson%27s_method
@@ -83,6 +94,37 @@ void printValues(const char * desc, int n, const T * v)
 /// http://ab-initio.mit.edu/wiki/index.php/Cubature
 /// http://math2.uncc.edu/~shaodeng/TEACHING/math5172/Lectures/Lect_15.PDF
 /// https://people.sc.fsu.edu/~jburkardt/cpp_src/product_rule/product_rule.html
+
+/// orthogonal under the innter product defined as integration from -1 to 1
+/// integral P(i,x) * P(j,x) dx
+/// = 0 if i!=j
+/// = 2 / (2i+1) if i==j
+class LegendrePolynomial {
+
+/// precomputed 257 uniformly placed points over [-1, 1] through 6-th degree
+	static const float mV[1799];
+/// i-th normal size sqrt ( 2 / ( float ) ( 2 * i + 1 ) );
+	static const float mNorm[7];
+	static const float mNorm2[7];
+	
+public:
+	LegendrePolynomial();
+	
+/// http://web.cs.iastate.edu/~cs577/handouts/orthogonal-polys.pdf
+/// evalute 0 - n th legendre polynomials through interval [a, b] 
+/// m number of evaluation nodes
+/// v[m * (n+1)]
+	static void sample(int m, int n, float * v,
+		float a, float b);
+		
+	static float norm(int i);
+	static float norm2(int i);
+		
+/// interpolate l-th polynomial at x
+	static float P(int l, const float & x);
+/// normalized
+	static float Pn(int l, const float & x);
+};
 
 }
 

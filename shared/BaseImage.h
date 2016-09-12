@@ -7,12 +7,22 @@
  *
  */
 #pragma once
-#include <BaseFile.h>
+#include <string>
+
 namespace aphid {
 
-class BaseImage : public BaseFile {
+class BaseImage {
+
+		bool m_isValid;
     	int m_imageWidth, m_imageHeight;
+		std::string m_fileName;
+		
 public:
+	enum IFormat {
+		FUnknown = 0,
+		FExr = 1
+	};
+	
 	enum ChannelRank {
 		None = 0,
 		RED = 1,
@@ -22,11 +32,17 @@ public:
 	};
 	
 	BaseImage();
-	BaseImage(const char * filename);
+	BaseImage(const std::string & filename);
 	virtual ~BaseImage();
 	
-	virtual void doClear();
-	virtual const char * formatName() const;
+	bool read(const std::string & filename);
+	
+	const bool & isValid() const;
+	const std::string & fileName() const;
+	
+	virtual IFormat formatName() const;
+	std::string formatNameStr() const;
+	std::string channelRankStr() const;
 	virtual void allWhite();
 	virtual void allBlack();
 	
@@ -46,6 +62,10 @@ public:
 	virtual void applyMask(BaseImage * another);
 	bool isRGBAZ() const;
 	void verbose() const;
+	
+protected:
+	virtual bool readImage(const std::string & filename);
+	
 private:
     ChannelRank m_channelRank;
 	

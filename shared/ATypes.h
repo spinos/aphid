@@ -75,6 +75,21 @@ struct Float2 {
 	float x, y;
 };
 
+struct Int2 {
+	
+	Int2(): x(0), y(0)
+	{}
+	
+	Int2(int a, int b)
+	: x(a), y(b)
+	{}
+	
+	void set(int a, int b) 
+	{ x = a; y = b; }
+	
+	int x, y;
+};
+
 template<typename T>
 struct VectorN {
 	VectorN() {

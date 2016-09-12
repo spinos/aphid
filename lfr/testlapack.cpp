@@ -68,14 +68,14 @@ void testSVD3()
 	lfr::SvdSolver<double> slv;
 	slv.compute(S);
 	
-	std::cout<<" s"<<*slv.S();
-	std::cout<<" u"<<*slv.U();
-	std::cout<<" v"<<*slv.V();
+	std::cout<<" s"<<slv.S();
+	std::cout<<" u"<<slv.U();
+	std::cout<<" v"<<slv.Vt();
 	
 	lfr::DenseMatrix<double> M(3, 3);
 	lfr::DenseMatrix<double> D(3, 3); D.setZero(); D.addDiagonal(1.0);
-	slv.V()->transMult(M, D);
-	M.multTrans(D, *slv.U());
+	slv.Vt().transMult(M, D);
+	M.multTrans(D, slv.U());
 	std::cout<<" M"<<D;
 }
 

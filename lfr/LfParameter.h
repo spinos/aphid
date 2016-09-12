@@ -3,17 +3,15 @@
 
 #include <string>
 #include <vector>
-
-/// forward declaration 
-/// include openexr headers now will cause macros conflictions
-class ExrImage;
+#include <ExrImage.h>
+#include <ATypes.h>
 
 namespace lfr {
 
 class LfParameter {
 
     struct ImageInd {
-		ExrImage * _image;
+		aphid::ExrImage * _image;
 		int _ind;
 	};
 	
@@ -23,6 +21,9 @@ class LfParameter {
 	
 	std::vector<std::string > m_imageNames;
 	std::vector<int > m_numPatches;
+	std::vector<Int2 > m_imageSizes;
+	std::string m_searchPath;
+	
 	int m_nthread;
 	int m_maxIter;
 /// n x n atom
@@ -33,14 +34,15 @@ class LfParameter {
 	int m_numTotalPatches;
 /// dictionary image size
 	int m_dictWidth, m_dictHeight;
-	bool m_isValid;
+	bool m_isValid, m_isHelp;
 public:
 	LfParameter(int argc, char *argv[]);
 	virtual ~LfParameter();
 	
-	bool isValid() const;
+	const bool & isValid() const;
+	const bool & isHelp() const;
 	int numThread() const;
-	int atomSize() const;
+	const int & atomSize() const;
 	int dictionaryLength() const;
 	int totalNumPatches() const;
 	int totalNumPixels() const;
@@ -49,18 +51,27 @@ public:
 	int numImages() const;
 	std::string imageName(int i) const;
 	int imageNumPatches(int i) const;
+	int imageNumPixels(int i) const;
 	int maxIterations() const;
 	
 	bool isImageOpened(const int ind, int & idx) const;
-	ExrImage *openImage(const int ind);
+	aphid::ExrImage *openImage(const int ind);
 	
 	void getDictionaryImageSize(int & x, int & y) const;
-	static void PrintHelp();
+	void getImageSize(int & x, int & y, const int & i) const;
+	
+	void printHelp() const;
+	
 protected:
-
+	virtual void printVersion() const;
+	virtual void printUsage() const;
+	virtual void printDescription() const;
+	virtual void printOptions() const;
+	
 private:
 	bool searchImagesIn(const char * dirname);
 	bool countPatches();
+	
 };
 
 }

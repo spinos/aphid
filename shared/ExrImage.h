@@ -1,5 +1,5 @@
-#ifndef EXRIMAGE_H
-#define EXRIMAGE_H
+#ifndef APHID_EXR_IMAGE_H
+#define APHID_EXR_IMAGE_H
 
 #include "BaseImage.h"
 
@@ -12,19 +12,20 @@ public:
 	ExrImage();
 	virtual ~ExrImage();
 	
-	virtual bool doRead(const std::string & filename);
-	virtual void doClear();
-	virtual const char * formatName() const;
-	
+	virtual IFormat formatName() const;
 	
 	bool getTile(float * dst, const int ind, int tileSize, int rank = 3) const;
 	
 	static bool IsOpenExrFile(const std::string& filename);
-	
+
+protected:
+	virtual bool readImage(const std::string & filename);
+		
 private:
     void tileCoord(const int ind, const int tileSize, int & x, int & y) const;
+	void clear();
 	
 };
 }
-#endif        //  #ifndef EXRIMAGE_H
+#endif        //  #ifndef APHID_EXR_IMAGE_H
 
