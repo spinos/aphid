@@ -151,4 +151,23 @@ float * firlHann(const float * x, const int & n);
 
 }
 
+class UniformPlot2D {
+	
+	float * m_y;
+	Vector3F m_color;
+	int m_numY;
+	
+public:
+	UniformPlot2D();
+	virtual ~UniformPlot2D();
+	void create(const int & n);
+	void create(const float * y, const int & n);
+	void setColor(float r, float g, float b);
+	const Vector3F & color() const;
+	const float * y() const;
+	float * y();
+	const int & numY() const;
+	
+};
+
 }

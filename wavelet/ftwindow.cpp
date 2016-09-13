@@ -1,14 +1,14 @@
 #include <QtGui>
 
 #include "ftwindow.h"
+using namespace aphid;
 
-//! [0]
 Window::Window()
 {
     qDebug()<<"window";
-    //glWidget = new GLWidget;
+    m_plot = new Plot2DWidget(this);
 	
-	//setCentralWidget(glWidget);
+	setCentralWidget(m_plot);
     setWindowTitle(tr("Untitled"));
 }
 //! [1]

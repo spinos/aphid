@@ -53,7 +53,7 @@ inline int GetSign(float d) {
 }
 
 inline float RandomF01()
-{ return ((float)(rand() % 499))/499.f; }
+{ return ((float)(rand() & 1023)) * 0.0009765625f; }
 
 inline float RandomFn11()
 { return (RandomF01() - 0.5f) * 2.f; }
@@ -140,6 +140,15 @@ inline T MixClamp01F(const T & a, const T & b, const float & w)
 		return b;
 		
 	return a * (1.f - w) + b * w;
+}
+
+template<typename T>
+inline T RemapF(const T & a, const T & b, 
+				const float & low, const float & high,
+				const float & v)
+{ 
+	float w = (v - low) / (high - low);
+	return MixClamp01F(a, b, w);
 }
 
 template<typename T>

@@ -14,13 +14,16 @@ BaseImageWidget::BaseImageWidget(QWidget *parent)
 void BaseImageWidget::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), Qt::black);
+    painter.fillRect(rect(), backgroundCol() );
 
 	painter.translate(m_translation.x, m_translation.y);
 	painter.scale(m_scaling.x, m_scaling.y);	
 	
 	clientDraw(&painter);
 }
+
+QColor BaseImageWidget::backgroundCol() const
+{ return Qt::white; }
 
 void BaseImageWidget::resizeEvent(QResizeEvent * event)
 {
@@ -83,5 +86,11 @@ void BaseImageWidget::zoomCamera(int dx)
 
 void BaseImageWidget::clientDraw(QPainter * pr)
 {}
+
+const QSize & BaseImageWidget::portSize() const
+{ return m_portSize; }
+
+QSize BaseImageWidget::minimumSizeHint() const
+{ return QSize(160, 160); }
 
 }

@@ -24,9 +24,13 @@ public:
 	void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-
+	virtual QSize	minimumSizeHint() const;
+	
 protected:
 	virtual void clientDraw(QPainter * pr);
+	virtual QColor backgroundCol() const;
+	
+	const QSize & portSize() const; 
 	
 private:
 	void processCamera(QMouseEvent *event);

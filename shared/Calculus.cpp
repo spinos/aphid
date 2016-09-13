@@ -365,4 +365,48 @@ float * firlHann(const float * x, const int & n)
 
 }
 
+UniformPlot2D::UniformPlot2D() :
+m_numY(0),
+m_y(NULL)
+{}
+
+UniformPlot2D::~UniformPlot2D()
+{
+	if(m_numY) delete[] m_y;
+}
+
+void UniformPlot2D::create(const int & n)
+{
+	if(m_numY >= n) {
+		m_numY = n;
+		return;
+	}
+	
+	if(m_numY) delete[] m_y;
+	m_numY = n;
+	m_y = new float[n];
+}
+
+void UniformPlot2D::create(const float * y, const int & n)
+{
+	create(n);
+	for(int i=0;i<n;++i)
+		m_y[i] = y[i];
+}
+
+void UniformPlot2D::setColor(float r, float g, float b)
+{ m_color.set(r,g,b); }
+
+const Vector3F & UniformPlot2D::color() const
+{ return m_color; }
+
+const float * UniformPlot2D::y() const
+{ return m_y; }
+
+float * UniformPlot2D::y()
+{ return m_y; }
+
+const int & UniformPlot2D::numY() const
+{ return m_numY; }
+
 }
