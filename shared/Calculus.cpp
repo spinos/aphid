@@ -298,12 +298,13 @@ int periodic(const int & i, const int & n)
 	return i;
 }
 
+/// http://cn.mathworks.com/help/matlab/ref/circshift.html
 float * circshift(const float * x, const int & n, const int & p)
 {
 	float * y = new float[n];
 	int i=0;
 	for(;i<n;++i) {
-		y[i] = x[periodic(i+p, n)];
+		y[i] = x[periodic(i-p, n)];
 	}
 	return y;
 }
@@ -341,11 +342,39 @@ float * fir(const float * x, const int & n,
 	return y;
 }
 
-/// http://learn.mikroe.com/ebooks/digitalfilterdesign/chapter/examples/
-static const float HANNW10[11] = {
+static const float HANNWL10[11] = {
 -.045016, 0., .075026, .159155, .225079,
 .25,
 .225079, .159155, .075026, 0., -.045016};
+
+static const float HANNWH10[11] = {
+.045016f, 0.f, -.075026f, -.159155f, -.225079f,
+.75f,
+-.225079f, -.159155f, -.075026f, 0.f, .045016f};
+
+float * hannLowPass(int & n)
+{
+	float * y = new float[11];
+	int i=0;
+	for(;i<11;++i)
+		y[i] = HANNWL10[i];
+		
+	n = 11;
+		
+	return y;
+}
+
+float * hannHighPass(int & n)
+{
+	float * y = new float[11];
+	int i=0;
+	for(;i<11;++i)
+		y[i] = HANNWH10[i];
+		
+	n = 11;
+		
+	return y;
+}
 
 float * firlHann(const float * x, const int & n)
 {
@@ -356,7 +385,23 @@ float * firlHann(const float * x, const int & n)
 		y[i] = 0.f;
 		
 		for(j=0; j<11;++j) {
-			y[i] += HANNW10[10-j] * x[periodic(i-j, n)];
+			y[i] += HANNWL10[j] * x[periodic(i-j, n)];
+		}
+	}
+	
+	return y;
+}
+
+float * firhHann(const float * x, const int & n)
+{
+	float * y = new float[n];
+	
+	int i=0, j;
+	for(;i<n;++i) {
+		y[i] = 0.f;
+		
+		for(j=0; j<11;++j) {
+			y[i] += HANNWH10[j] * x[periodic(i-j, n)];
 		}
 	}
 	
@@ -365,17 +410,17 @@ float * firlHann(const float * x, const int & n)
 
 }
 
-UniformPlot2D::UniformPlot2D() :
+UniformPlot1D::UniformPlot1D() :
 m_numY(0),
 m_y(NULL)
 {}
 
-UniformPlot2D::~UniformPlot2D()
+UniformPlot1D::~UniformPlot1D()
 {
 	if(m_numY) delete[] m_y;
 }
 
-void UniformPlot2D::create(const int & n)
+void UniformPlot1D::create(const int & n)
 {
 	if(m_numY >= n) {
 		m_numY = n;
@@ -387,26 +432,26 @@ void UniformPlot2D::create(const int & n)
 	m_y = new float[n];
 }
 
-void UniformPlot2D::create(const float * y, const int & n)
+void UniformPlot1D::create(const float * y, const int & n)
 {
 	create(n);
 	for(int i=0;i<n;++i)
 		m_y[i] = y[i];
 }
 
-void UniformPlot2D::setColor(float r, float g, float b)
+void UniformPlot1D::setColor(float r, float g, float b)
 { m_color.set(r,g,b); }
 
-const Vector3F & UniformPlot2D::color() const
+const Vector3F & UniformPlot1D::color() const
 { return m_color; }
 
-const float * UniformPlot2D::y() const
+const float * UniformPlot1D::y() const
 { return m_y; }
 
-float * UniformPlot2D::y()
+float * UniformPlot1D::y()
 { return m_y; }
 
-const int & UniformPlot2D::numY() const
+const int & UniformPlot1D::numY() const
 { return m_numY; }
 
 }

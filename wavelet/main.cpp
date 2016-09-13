@@ -142,7 +142,7 @@ void testUpsampleCshift()
 	for(;i<10;++i)
 		X[i] = i+1;
 		
-	float * Xshf = calc::circshift(X, 10, -5);
+	float * Xshf = calc::circshift(X, 10, -3);
 	calc::printValues<float>("Xshf", 10, Xshf);
 }
 
@@ -164,7 +164,7 @@ int main(int argc, char * const argv[])
 {
 	std::cout<<"wavelet test\n";
 	
-	testUpsampleDownsample();
+	testUpsampleCshift();
 	
 	std::cout<<" end of test\n";
 	return 0;

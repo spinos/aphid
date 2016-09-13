@@ -138,7 +138,8 @@ float * downsample(int & ny, const float * x, const int & n,
 				const int & p, const int & phase = 0);
 
 int periodic(const int & i, const int & n);
-/// http://cn.mathworks.com/help/matlab/ref/circshift.html
+
+/// delay (p>0) or haste (p<0) the signal
 float * circshift(const float * x, const int & n, const int & p);
 
 /// apply finite impulse response filter 
@@ -147,19 +148,25 @@ float * circshift(const float * x, const int & n, const int & p);
 float * fir(const float * x, const int & n,
 			const float * w, const int & m);
 
+/// http://learn.mikroe.com/ebooks/digitalfilterdesign/chapter/examples/
+/// Hann window low pass filter coefficients 11-tap
+float * hannLowPass(int & n);
+float * hannHighPass(int & n);
+
 float * firlHann(const float * x, const int & n);
+float * firhHann(const float * x, const int & n);
 
 }
 
-class UniformPlot2D {
+class UniformPlot1D {
 	
 	float * m_y;
 	Vector3F m_color;
 	int m_numY;
 	
 public:
-	UniformPlot2D();
-	virtual ~UniformPlot2D();
+	UniformPlot1D();
+	virtual ~UniformPlot1D();
 	void create(const int & n);
 	void create(const float * y, const int & n);
 	void setColor(float r, float g, float b);

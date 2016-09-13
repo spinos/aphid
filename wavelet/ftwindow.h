@@ -7,7 +7,7 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
-#include <Plot2DWidget.h>
+class Ft1dWidget;
 
 class Window : public QMainWindow
 {
@@ -20,7 +20,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    aphid::Plot2DWidget * m_plot;
+    Ft1dWidget * m_plot;
 	
 };
 //! [0]

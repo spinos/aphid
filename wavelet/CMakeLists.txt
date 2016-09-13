@@ -81,6 +81,7 @@ message ("qt gui library is " ${QT_QTGUI_LIBRARY})
 SET (SHFT_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot2DWidget.cpp
 ftmain.cpp
+ft1dWidget.cpp
 ftwindow.cpp)
 
 add_executable (shoflt ${SHFT_SRC})

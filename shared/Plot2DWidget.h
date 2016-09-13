@@ -15,7 +15,7 @@
 
 namespace aphid {
 
-class UniformPlot2D;
+class UniformPlot1D;
 
 class Plot2DWidget : public BaseImageWidget {
 
@@ -34,7 +34,7 @@ public:
 					const float & vlow, const float & vhigh, 
 					const int & vnintv);
 					
-	void addPlot(UniformPlot2D * p);
+	void addPlot(UniformPlot1D * p);
 	
 public slots:
    	
@@ -45,7 +45,7 @@ private:
 	void drawCoordsys(QPainter * pr) const;
 	void drawHorizontalInterval(QPainter * pr) const;
 	void drawVerticalInterval(QPainter * pr) const;
-	void drawPlot(const UniformPlot2D * plt, QPainter * pr);
+	void drawPlot(const UniformPlot1D * plt, QPainter * pr);
 	
 /// left-up
 	QPoint luCorner() const;
@@ -58,7 +58,7 @@ private:
 	Vector2F m_vBound;
 	Int2 m_niterval;
 	
-	std::vector<UniformPlot2D *> m_curves;
+	std::vector<UniformPlot1D *> m_curves;
 	
 };
 

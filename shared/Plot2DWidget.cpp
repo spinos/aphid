@@ -16,17 +16,6 @@ Plot2DWidget::Plot2DWidget(QWidget *parent) : aphid::BaseImageWidget(parent)
 {
 	m_margin.set(48, 48);
 	setBound(-1.f, 1.f, 4, -1.f, 1.f, 4);
-	
-#if 0	
-	UniformPlot2D * ap = new UniformPlot2D;
-	ap->create(64);
-	int i=0;
-	for(;i<64;++i)
-		ap->y()[i] = RandomF01();
-		
-	ap->setColor(0,0,1);
-	addPlot(ap);
-#endif
 }
 
 Plot2DWidget::~Plot2DWidget()
@@ -40,7 +29,7 @@ void Plot2DWidget::clientDraw(QPainter * pr)
 	drawCoordsys(pr);
 	drawHorizontalInterval(pr);
 	drawVerticalInterval(pr);
-	std::vector<UniformPlot2D *>::const_iterator it = m_curves.begin();
+	std::vector<UniformPlot1D *>::const_iterator it = m_curves.begin();
 	for(;it!=m_curves.end();++it) {
 		drawPlot(*it, pr);
 	}
@@ -108,10 +97,10 @@ void Plot2DWidget::drawVerticalInterval(QPainter * pr) const
 	}
 }
 
-void Plot2DWidget::drawPlot(const UniformPlot2D * plt, QPainter * pr)
+void Plot2DWidget::drawPlot(const UniformPlot1D * plt, QPainter * pr)
 {
 	const Vector3F & cf = plt->color(); 
-	QPen pn(QColor((int)cf.x*255, (int)cf.y*255, (int)cf.z*255) );
+	QPen pn(QColor((int)(cf.x*255), (int)(cf.y*255), (int)(cf.z*255) ) );
 	pn.setWidth(1);
 	pr->setPen(pn);
 	
@@ -156,7 +145,7 @@ void Plot2DWidget::setBound(const float & hlow, const float & hhigh,
 	
 }
 
-void Plot2DWidget::addPlot(UniformPlot2D * p)
+void Plot2DWidget::addPlot(UniformPlot1D * p)
 { m_curves.push_back(p); }
 
 }
