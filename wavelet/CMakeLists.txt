@@ -4,9 +4,11 @@ project (wvlt)
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 set (CMAKE_BUILD_TYPE RELEASE)
-set (HEADER_FILES "../shared/Morton3D.h")
+SET (CMAKE_AUTOMOC ON)
+SET (CMAKE_INCLUDE_CURRENT_DIR ON)
+
 include_directories ( ../shared)
-add_executable (wvlt ${HEADER_FILES} main.cpp)
+add_executable (wvlt main.cpp)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -68,6 +70,30 @@ MESSAGE (" aphid geom library " ${APHID_GEOM_LIBRARY})
 target_link_libraries (wvlt ${APHID_MATH_LIBRARY})
 target_link_libraries (wvlt ${APHID_GEOM_LIBRARY})
 
-SET (EXECUTABLE_OUTPUT_PATH ../bin)
+if(WIN32)
+set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
+endif()
 
+find_package (Qt4 REQUIRED)
+
+message ("qt gui library is " ${QT_QTGUI_LIBRARY})
+
+SET (SHFT_SRC ../shared/BaseImageWidget.cpp
+ftmain.cpp
+ftwindow.cpp)
+
+add_executable (shoflt ${SHFT_SRC})
+target_link_libraries (shoflt ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (shoflt ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (shoflt ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (shoflt ${Boost_REGEX_LIBRARY})
+target_link_libraries (shoflt ${Boost_THREAD_LIBRARY})
+target_link_libraries (shoflt ${Boost_CHRONO_LIBRARY})
+
+target_link_libraries (shoflt ${APHID_MATH_LIBRARY})
+target_link_libraries (shoflt ${APHID_GEOM_LIBRARY})
+
+target_link_libraries (shoflt Qt4::QtGui)
+
+SET (EXECUTABLE_OUTPUT_PATH ../bin)
 

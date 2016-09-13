@@ -9,7 +9,7 @@ set (CMAKE_BUILD_TYPE RELEASE)
 
 include_directories ( ../shared ../kdtree ../lfr)
 
-set (HEADER_FILES ../shared/BaseImagewidget.h
+set (HEADER_FILES ../shared/BaseImageWidget.h
 ../lfr/clapackTempl.h
 ../lfr/linearMath.h
 ../lfr/regr.h
