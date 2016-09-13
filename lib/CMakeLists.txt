@@ -22,12 +22,12 @@ set (_HAS_CPP0X 0)
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
-ELSEIF (UNIX)
-    ADD_DEFINITIONS(-DBOOST_HAS_TR1)
-ELSE ()
-set (AttributeNoninline "__attribute__ ((noinline))")
+ELSEIF (APPLE)
+	set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
+ELSEIF (UNIX)
+    ADD_DEFINITIONS(-DBOOST_HAS_TR1)
 ENDIF()
 
 SET (INSTALLED_HDF5 OFF)
@@ -91,7 +91,17 @@ MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 include_directories (${Boost_INCLUDE_DIR})
 include_directories (${Boost_INCLUDE_DIR}/boost/tr1/tr1)
 
-ADD_LIBRARY (aphidMath SHARED
+IF (WIN32) 
+	SET (LIB_TYP STATIC)
+ELSEIF (APPLE)
+	SET (LIB_TYP STATIC)
+ELSE ()
+	SET (LIB_TYP SHARED)
+ENDIF ()
+
+MESSAGE (" library type is " ${LIB_TYP})
+
+ADD_LIBRARY (aphidMath ${LIB_TYP}
 ../shared/Vector3F.cpp 
                 ../shared/Vector2F.cpp 
                 ../shared/Matrix44F.cpp 
@@ -110,7 +120,7 @@ ADD_LIBRARY (aphidMath SHARED
 ../shared/Calculus.cpp
 )
 
-ADD_LIBRARY (aphidGeom SHARED 
+ADD_LIBRARY (aphidGeom ${LIB_TYP} 
 ../shared/SHelper.cpp 
 ../shared/AVerbose.cpp
 ../shared/BaseArray.cpp 
@@ -162,7 +172,7 @@ ADD_LIBRARY (aphidGeom SHARED
 ../shared/VertexDataGroup.cpp
 )
 
-ADD_LIBRARY (aphidH5 SHARED
+ADD_LIBRARY (aphidH5 ${LIB_TYP}
     ../shared/HObject.cpp 
     ../shared/HDocument.cpp 
     ../shared/HGroup.cpp 
@@ -201,7 +211,7 @@ ADD_LIBRARY (aphidH5 SHARED
 ../hesperis/HesperisFile.cpp
 )
 
-ADD_LIBRARY (aphidUI STATIC
+ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/BaseCamera.cpp
 ../shared/PerspectiveCamera.cpp 
 ../shared/BaseDrawer.cpp 
@@ -234,14 +244,14 @@ ADD_LIBRARY (aphidUI STATIC
 ../shared/DrawBox.cpp
 ../shared/PerspectiveView.cpp)
 
-ADD_LIBRARY (aphidSdb STATIC
+ADD_LIBRARY (aphidSdb ${LIB_TYP}
 ../btree/Types.cpp
 ../btree/Entity.cpp
 ../btree/BNode.cpp
 ../btree/MortonHash.cpp
 )
 
-ADD_LIBRARY (aphidKd STATIC
+ADD_LIBRARY (aphidKd ${LIB_TYP}
 ../shared/KdTreeNode.cpp
 ../shared/CartesianGrid.cpp
 ../shared/PrincipalComponents.cpp
@@ -253,12 +263,12 @@ ADD_LIBRARY (aphidKd STATIC
 ../kdtree/PrimBoundary.cpp
 )
 
-ADD_LIBRARY (aphidGraph STATIC
+ADD_LIBRARY (aphidGraph ${LIB_TYP}
 ../shared/ADistanceField.cpp
 ../shared/BDistanceFunction.cpp
 )
 
-add_library(aphid STATIC                 
+add_library(aphid ${LIB_TYP}                 
 ##../shared/SpaceHandle.cpp                
     ../shared/SkeletonSubspaceDeformer.cpp                                  
                 ../shared/PrimitiveArray.cpp                 
@@ -364,7 +374,7 @@ add_library(aphid STATIC
 ##../hesperis/AdaptiveField.cpp
 )
 
-add_library(aphidImg STATIC
+add_library(aphidImg ${LIB_TYP}
 ../shared/BaseImage.cpp
 ../shared/ExrImage.cpp
 )
@@ -381,7 +391,7 @@ message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
 message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
 message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
 
-CUDA_ADD_LIBRARY (aphidCu STATIC
+CUDA_ADD_LIBRARY (aphidCu ${LIB_TYP}
 ../shared/CudaBase.cpp
 ../shared/CudaGLBase.cpp
 ../shared/CUDABuffer.cpp

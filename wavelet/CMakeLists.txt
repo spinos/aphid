@@ -42,27 +42,28 @@ target_link_libraries (wvlt ${Boost_THREAD_LIBRARY})
 target_link_libraries (wvlt ${Boost_CHRONO_LIBRARY})
 
 IF(WIN32)
-    set (APHID_DIR "D:/aphid")
+    set (APHID_DIR D:/aphid)
+ELSEIF (APPLE)
+	SET (APHID_DIR /Users/jianzhang/aphid)
 ELSE ()
     set (APHID_DIR /home/td05/aphid)
 ENDIF ()
+
 message (" aphid is  " ${APHID_DIR} )
 
-IF (UNIX)
+IF (WIN32)
     SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.so)
     SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.so)
-    ##SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/libaphidH5.so)
+ELSEIF (APPLE)
+	SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.a)
+    SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.a)
 ELSE ()
-
+	SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.so)
+    SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.so)
 ENDIF ()
 
-if (WIN32)
-set (Aphid_Library D:/aphid/lib/aphidMath.lib
-D:/aphid/lib/aphidGeom.lib)
-else ()
-SET (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
-/users/jianzhang/aphid/lib/libaphidGeom.a)
-endif ()
+MESSAGE (" aphid math library " ${APHID_MATH_LIBRARY})
+MESSAGE (" aphid geom library " ${APHID_GEOM_LIBRARY})
 
 target_link_libraries (wvlt ${APHID_MATH_LIBRARY})
 target_link_libraries (wvlt ${APHID_GEOM_LIBRARY})

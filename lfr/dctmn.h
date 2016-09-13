@@ -66,7 +66,7 @@ public:
 	virtual void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
 	virtual void preLearn();
     virtual void learn(const aphid::ExrImage * image, int ibegin, int iend);
-    virtual void updateDictionary(const aphid::ExrImage * image, int t);
+    virtual void updateDictionary(const aphid::ExrImage * image, const int & nBatch, int t);
     virtual void cleanDictionary();
 /// keep coefficients of current epoch
 /// at end of epoch, set A and B to current epoch, 
@@ -75,7 +75,8 @@ public:
     virtual T computePSNR(const aphid::ExrImage * image, int iImage);
 	virtual void computeYhat(unsigned * imageBits, int iImage, 
 							const aphid::ExrImage * image, bool asDifference = false);
-
+	virtual void addLambda();
+	
 protected:
     
 private:
@@ -196,7 +197,7 @@ void DictionaryMachine<NumThread, T>::preLearn()
     m_pre0B->setZero();
     m_pret = 0;
     m_epoch = -1;
-    m_lambda = 1e-8;
+    m_lambda = 0.0;
     int i=0;
     for(;i<NumThread;++i) {
         m_batchAPt[i]->setZero();
@@ -275,7 +276,7 @@ void DictionaryMachine<NumThread, T>::learn(const aphid::ExrImage * image, int i
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * image, int t)
+void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * image, const int & nBatch, int t)
 {
     T sc = 1.0;
     //if(t>0) 
@@ -299,18 +300,20 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * i
     
     if(t>0) {
 /// scale the past
-        //m_A->scale(sc);
-        //m_B->scale(sc);
+        m_A->scale(sc);
+        m_B->scale(sc);
 /// slow down early steps
-        m_batchA->scale(0.001);
-        m_batchB->scale(0.001);
+        //m_batchA->scale(0.1 );
+        //m_batchB->scale(0.1 );
     }
+	
+	const float wei = 0.001 / nBatch;
     
 /// add average of batch
-	m_A->add(*m_batchA, 1.0/2048);
-    m_B->add(*m_batchB, 1.0/2048);
-    m_pre0A->add(*m_batchA, 1.0/2048);
-    m_pre0B->add(*m_batchB, 1.0/2048);
+	m_A->add(*m_batchA, wei);
+    m_B->add(*m_batchB, wei);
+    m_pre0A->add(*m_batchA, wei);
+    m_pre0B->add(*m_batchB, wei);
     m_batchA->setZero();
     m_batchB->setZero();
     
@@ -337,7 +340,12 @@ void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * i
     }
     m_D->AtA(*m_G);	
 	
+	
 }
+
+template<int NumThread, typename T>
+void DictionaryMachine<NumThread, T>::addLambda()
+{ m_lambda += 1e-8; }
 
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::cleanDictionary()
@@ -498,8 +506,8 @@ void DictionaryMachine<NumThread, T>::recycleData()
     
     //if(m_epoch>0) 
     {
-        m_A->scale(0.7);
-        m_B->scale(0.7);
+       m_A->scale(0.157);
+       m_B->scale(0.157);
     }
     
     m_pre0A->setZero();

@@ -80,6 +80,7 @@ void LfThread::run()
 	int i, j, m, nbatch;
 	float e;
 	
+#define N_BATCH_LG 8
 	const int totalNSignals = lparam->totalNumPatches();
 	QElapsedTimer timer;
 	timer.start();
@@ -93,15 +94,15 @@ void LfThread::run()
 			
 			img.read(lparam->imageName(i) );
 			m = lparam->imageNumPatches(i);
-			nbatch = m>>11;
-			if( (nbatch<<11) < m ) nbatch++;
+			nbatch = m>>N_BATCH_LG;
+			if( (nbatch<<N_BATCH_LG) < m ) nbatch++;
 			for(j=0;j<nbatch;++j) {
-			    endp = ((j+1)<<11) - 1;
+			    endp = ((j+1)<<N_BATCH_LG) - 1;
 			    if(endp > m-1) endp = m-1;
-				m_world->learn(&img, j<<11, endp);
+				m_world->learn(&img, j<<N_BATCH_LG, endp);
 				
 				{
-				    m_world->updateDictionary( &img, niter );
+				    m_world->updateDictionary( &img, endp - (j<<N_BATCH_LG) + 1, niter );
 					m_world->dictionaryAsImage(scanLine, w, h);
 					emit sendDictionary(*m_dictImg);
 				}
@@ -132,6 +133,8 @@ void LfThread::run()
 			// timer.elapsed() << "milliseconds";
             //qDebug()<<" recycle"<<niter;
         }
+		m_world->addLambda();
+		
 	}
 
 }

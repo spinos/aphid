@@ -53,7 +53,8 @@ void LfMachine::preLearn() {}
 
 void LfMachine::learn(const ExrImage * image, int iPatch0, int iPatch1) {}
 
-void LfMachine::updateDictionary(const ExrImage * image, int t) {}
+void LfMachine::updateDictionary(const ExrImage * image, const int & nBatch, int t) 
+{}
 
 void LfMachine::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor) {}
 
@@ -67,4 +68,8 @@ void LfMachine::computeYhat(unsigned * imageBits, int iImage,
 {}
 
 bool LfMachine::save() { return false; }
+
+void LfMachine::addLambda()
+{}
+
 }
