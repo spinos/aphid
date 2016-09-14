@@ -31,6 +31,7 @@ protected:
 	virtual QColor backgroundCol() const;
 	
 	const QSize & portSize() const; 
+	bool isLandscape() const;
 	
 private:
 	void processCamera(QMouseEvent *event);

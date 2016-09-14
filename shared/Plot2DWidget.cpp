@@ -12,154 +12,108 @@
 
 namespace aphid {
 
-Plot2DWidget::Plot2DWidget(QWidget *parent) : aphid::BaseImageWidget(parent)
+UniformPlot2DImage::UniformPlot2DImage()
+{}
+
+UniformPlot2DImage::~UniformPlot2DImage()
+{}
+
+void UniformPlot2DImage::updateImage()
 {
-	m_margin.set(48, 48);
-	setBound(-1.f, 1.f, 4, -1.f, 1.f, 4);
+	if(m_img.isNull() )
+		m_img = QImage(numCols(), numRows(), QImage::Format_RGB32);
+		
+	const int & w = numCols();
+	const int & h = numRows();
+	int nch = numChannels();
+	if(nch>4) nch = 4;
+	uint *scanLine = reinterpret_cast<uint *>(m_img.bits() );
+	int i, j, k;
+	unsigned v;
+	int col[4];
+	col[0] = col[1] = col[2] = 0;
+	col[3] = 255;
+			
+	for(j=0;j<h;++j) {
+		for(i=0;i<w;++i) {
+		
+			for(k=0;k<nch;++k) {
+				
+				const float * chan = y(k);
+				
+				col[k] = chan[iuv(i,j)] * 255;
+			}
+			
+/// copy r to g, b in case has only one channel
+			for(k=nch;k<3;++k) {
+				col[k] = col[nch-1];
+			}
+			
+			v = col[3] << 24;
+			v = v | ( col[0] << 16 );
+			v = v | ( col[1] << 8 );
+			v = v | ( col[2] );
+			
+			scanLine[j*w + i] = v;
+		}
+	}
 }
+
+const QImage & UniformPlot2DImage::image() const
+{ return m_img; }
+
+const int & UniformPlot2DImage::width() const
+{ return numCols(); }
+
+const int & UniformPlot2DImage::height() const
+{ return numRows(); }	
+	
+
+Plot2DWidget::Plot2DWidget(QWidget *parent) : Plot1DWidget(parent)
+{}
 
 Plot2DWidget::~Plot2DWidget()
 {
-	std::vector<UniformPlot1D *>::iterator it = m_curves.begin();
-	for(;it!=m_curves.end();++it) {
+	std::vector<UniformPlot2DImage * >::iterator it = m_images.begin();
+	for(;it!=m_images.end();++it)
 		delete *it;
-	}
-	m_curves.clear();
-	
+		
+	m_images.clear();
 }
 
 void Plot2DWidget::clientDraw(QPainter * pr)
 {
-	QPen pn(Qt::black);
-	pn.setWidth(1);
-	pr->setPen(pn);
-	drawCoordsys(pr);
-	drawHorizontalInterval(pr);
-	drawVerticalInterval(pr);
-	std::vector<UniformPlot1D *>::const_iterator it = m_curves.begin();
-	for(;it!=m_curves.end();++it) {
+	std::vector<UniformPlot2DImage *>::const_iterator it = m_images.begin();
+	for(;it!=m_images.end();++it) {
 		drawPlot(*it, pr);
 	}
 }
 
-void Plot2DWidget::drawCoordsys(QPainter * pr) const
+void Plot2DWidget::addImage(UniformPlot2DImage * img)
+{ m_images.push_back(img); }
+
+void Plot2DWidget::drawPlot(const UniformPlot2DImage * plt, QPainter * pr)
+{ 
+	pr->translate(luCorner() );
+	const float sc = scaleToFill(plt );
+	pr->scale(sc, sc);
+	pr->drawImage(QPoint(), plt->image() );
+}
+
+float Plot2DWidget::scaleToFill(const UniformPlot2DImage * plt) const
 {
+	if(plt->fillMode() == UniformPlot2D::flFixed)
+		return plt->drawScale();
+		
 	QPoint lu = luCorner();
 	QPoint rb = rbCorner();
-	const QPoint ori(lu.x(), rb.y() );
-	
-	pr->drawLine(ori, lu );
-	pr->drawLine(ori, rb );
+	int w = plt->width();
+	int h = plt->height();
+	if(plt->fillMode() == UniformPlot2D::flVertical )
+		return ((float)rb.y() - (float)lu.y() ) / (float)h;
+
+/// fill horizontally
+	return ((float)rb.x() - (float)lu.x() ) / (float)w;
 }
-
-void Plot2DWidget::drawHorizontalInterval(QPainter * pr) const
-{
-	QPoint lu = luCorner();
-	QPoint rb = rbCorner();
-	int l = rb.x() - lu.x();
-	int n = m_niterval.x;
-	int g = (float)l/(float)n+0.5;
-	if(g < 20) {
-		g = l;
-		n = 1;
-	}
-	
-	const QPoint ori(lu.x(), rb.y() );
-	
-	float h = (m_hBound.y - m_hBound.x) / n;
-	for(int i=0; i<= n; ++i) {
-		
-		float fv = m_hBound.x + h * i;
-		std::string sv = boost::str(boost::format("%=6d") % fv );
-		
-		QPoint p(ori.x() + g * i, ori.y() );
-		pr->drawText(QPoint(p.x() - 16, p.y() + 16), tr(sv.c_str() ) );
-		pr->drawLine(p, QPoint(p.x(), p.y() - 4) );
-	}
-}
-
-void Plot2DWidget::drawVerticalInterval(QPainter * pr) const
-{
-	QPoint lu = luCorner();
-	QPoint rb = rbCorner();
-	int l = rb.y() - lu.y();
-	int n = m_niterval.y;
-	int g = (float)l/(float)n+0.5;
-	if(g < 20) {
-		g = l;
-		n = 1;
-	}
-	
-	const QPoint ori(lu.x(), rb.y() );
-	
-	float h = (m_vBound.y - m_vBound.x) / n;
-	for(int i=0; i<= n; ++i) {
-		
-		float fv = m_vBound.x + h * i;
-		std::string sv = boost::str(boost::format("%=6d") % fv );
-		
-		QPoint p(ori.x(), ori.y() - g * i);
-		pr->drawText(QPoint(p.x() - 40, p.y() + 4 ), tr(sv.c_str() ) );
-		pr->drawLine(p, QPoint(p.x() + 4, p.y()) );
-	}
-}
-
-void Plot2DWidget::drawPlot(const UniformPlot1D * plt, QPainter * pr)
-{
-	const Vector3F & cf = plt->color(); 
-	QPen pn(QColor((int)(cf.x*255), (int)(cf.y*255), (int)(cf.z*255) ) );
-	pn.setWidth(1);
-	if(plt->lineStyle() > 0) {
-		if(plt->lineStyle() == UniformPlot1D::LsDash)
-			pn.setStyle(Qt::DashLine);
-		else if(plt->lineStyle() == UniformPlot1D::LsDot)
-			pn.setStyle(Qt::DotLine);
-	}
-	
-	pr->setPen(pn);
-	
-	QPoint lu = luCorner();
-	QPoint rb = rbCorner();
-	
-	const int & n = plt->numY() - 1;
-	const float h = 1.f / (float)n;
-	
-	QPoint p0(lu.x(), RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
-								plt->y()[0] ) );
-	QPoint p1;
-	
-	int i=1;
-	for(;i<=n;++i) {
-		p1.setX(MixClamp01F<int>(lu.x(), rb.x(), h*i) );
-		p1.setY(RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
-								plt->y()[i] ));
-		pr->drawLine(p0, p1 );
-		p0 = p1;
-	}
-	
-}
-
-void Plot2DWidget::setMargin(const int & h, const int & v)
-{ m_margin.set(h, v); }
-
-QPoint Plot2DWidget::luCorner() const
-{ return QPoint(m_margin.x, m_margin.y); }
-
-QPoint Plot2DWidget::rbCorner() const
-{ return QPoint(portSize().width() - m_margin.x, portSize().height() - m_margin.y); }
-
-void Plot2DWidget::setBound(const float & hlow, const float & hhigh, 
-					const int & hnintv,
-					const float & vlow, const float & vhigh, 
-					const int & vnintv)
-{
-	m_hBound.set(hlow, hhigh);
-	m_vBound.set(vlow, vhigh);
-	m_niterval.set(hnintv, vnintv);
-	
-}
-
-void Plot2DWidget::addPlot(UniformPlot1D * p)
-{ m_curves.push_back(p); }
 
 }

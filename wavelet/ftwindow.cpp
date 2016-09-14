@@ -11,7 +11,7 @@ Window::Window()
     m_plot = new Ft1dWidget(this);
 	
 	setCentralWidget(m_plot);
-    setWindowTitle(tr("Untitled"));
+    setWindowTitle(tr("1-D Discrete Wavelet Transform"));
 }
 //! [1]
 

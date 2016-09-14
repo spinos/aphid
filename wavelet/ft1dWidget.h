@@ -9,9 +9,9 @@
 #ifndef FT_1D_WIDGET_H
 #define FT_1D_WIDGET_H
 
-#include <Plot2DWidget.h>
+#include <Plot1DWidget.h>
 
-class Ft1dWidget : public aphid::Plot2DWidget {
+class Ft1dWidget : public aphid::Plot1DWidget {
 
 	Q_OBJECT
 	

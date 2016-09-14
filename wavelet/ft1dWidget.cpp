@@ -7,12 +7,13 @@
  *
  */
 #include <QtGui>
+#include <Calculus.h>
 #include "ft1dWidget.h"
 #include "fltbanks.h"
 
 using namespace aphid;
 
-Ft1dWidget::Ft1dWidget(QWidget *parent) : Plot2DWidget(parent)
+Ft1dWidget::Ft1dWidget(QWidget *parent) : Plot1DWidget(parent)
 {
 	UniformPlot1D * ap = new UniformPlot1D;
 	ap->create(64);
@@ -21,7 +22,7 @@ Ft1dWidget::Ft1dWidget(QWidget *parent) : Plot2DWidget(parent)
 		ap->y()[i] = RandomF01();
 		
 	ap->setColor(0,0,1);
-	addPlot(ap);
+	addVectorPlot(ap);
 
 	float * Xshf = wla::circshift(ap->y(), 64, -5);
 	
@@ -32,13 +33,13 @@ Ft1dWidget::Ft1dWidget(QWidget *parent) : Plot2DWidget(parent)
 	
 	UniformPlot1D * flo = new UniformPlot1D;
 	flo->create(locoeff, ncoeff);
-	flo->setColor(0,.9,.5);
-	addPlot(flo);
+	flo->setColor(1.,1.,0.);
+	addVectorPlot(flo);
 	
 	UniformPlot1D * fhi = new UniformPlot1D;
 	fhi->create(hicoeff, ncoeff);
-	fhi->setColor(.5,.9,0.);
-	addPlot(fhi);
+	fhi->setColor(0.,1.,1.);
+	addVectorPlot(fhi);
 	
 	float * ysyn;
 	int nysyn;
@@ -50,8 +51,8 @@ Ft1dWidget::Ft1dWidget(QWidget *parent) : Plot2DWidget(parent)
 	UniformPlot1D * fysn = new UniformPlot1D;
 	fysn->create(ysyn, nysyn);
 	fysn->setColor(1.,0.,0.);
-	fysn->setLineStyle(UniformPlot1D::LsDot);
-	addPlot(fysn);
+	fysn->setLineStyle(UniformPlot1D::LsDash);
+	addVectorPlot(fysn);
 	
 	delete[] Xshf;
 	delete[] locoeff;
@@ -69,12 +70,12 @@ Ft1dWidget::Ft1dWidget(QWidget *parent) : Plot2DWidget(parent)
 	UniformPlot1D * paf = new UniformPlot1D;
 	paf->create(aft[0], 10);
 	paf->setColor(1.,0., 0.);
-	//addPlot(paf);
+	addVectorPlot(paf);
 	
 	UniformPlot1D * psf = new UniformPlot1D;
 	psf->create(aft[1], 10);
 	psf->setColor(0.,1., 0.);
-	//addPlot(psf);
+	addVectorPlot(psf);
 	
 	delete[] aft[0];
 	delete[] aft[1];

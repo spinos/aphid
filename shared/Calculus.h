@@ -131,37 +131,4 @@ public:
 
 }
 
-class UniformPlot1D {
-
-public:
-	enum LineStyle {
-		LsSolid = 0,
-		LsDash = 1,
-		LsDot = 2
-	};
-	
-private:
-	float * m_y;
-	Vector3F m_color;
-	int m_numY;
-	LineStyle m_lstyle;	
-	
-public:
-	UniformPlot1D();
-	virtual ~UniformPlot1D();
-	void create(const int & n);
-	void create(const float * y, const int & n);
-	void setColor(float r, float g, float b);
-	const Vector3F & color() const;
-	const float * y() const;
-	float * y();
-	const int & numY() const;
-	void setLineStyle(LineStyle x);
-	const LineStyle & lineStyle() const;
-	
-private:
-	
-	
-};
-
 }

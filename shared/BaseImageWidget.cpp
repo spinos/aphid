@@ -93,4 +93,7 @@ const QSize & BaseImageWidget::portSize() const
 QSize BaseImageWidget::minimumSizeHint() const
 { return QSize(160, 160); }
 
+bool BaseImageWidget::isLandscape() const
+{ return m_portSize.width() > m_portSize.height(); }
+
 }

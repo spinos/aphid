@@ -10,14 +10,32 @@
 #ifndef APHID_PLOT_2D_WIDGET_H
 #define APHID_PLOT_2D_WIDGET_H
 
-#include <BaseImageWidget.h>
-#include <Calculus.h>
+#include <Plot1DWidget.h>
 
 namespace aphid {
 
-class UniformPlot1D;
+class UniformPlot2DImage : public UniformPlot2D {
 
-class Plot2DWidget : public BaseImageWidget {
+public:
+	UniformPlot2DImage();
+	virtual ~UniformPlot2DImage();
+	
+/// pack up to 4 channels to RGBA32 images
+/// assuming channel ordered in r, g, b, a
+	void updateImage();
+	
+	const QImage & image() const;
+	const int & width() const;
+	const int & height() const;
+	
+protected:
+
+private:
+	QImage m_img;
+	
+};
+
+class Plot2DWidget : public Plot1DWidget {
 
 	Q_OBJECT
 	
@@ -25,40 +43,20 @@ public:
 	Plot2DWidget(QWidget *parent = 0);
 	virtual ~Plot2DWidget();
 	
-/// horizontal and vertical margin size
-	void setMargin(const int & h, const int & v);
-/// horizontal and vertical bound 
-/// low high number of intervals
-	void setBound(const float & hlow, const float & hhigh, 
-					const int & hnintv,
-					const float & vlow, const float & vhigh, 
-					const int & vnintv);
-					
-	void addPlot(UniformPlot1D * p);
+	void addImage(UniformPlot2DImage * img);
 	
 public slots:
    	
 protected:
 	virtual void clientDraw(QPainter * pr);
 
-private:
-	void drawCoordsys(QPainter * pr) const;
-	void drawHorizontalInterval(QPainter * pr) const;
-	void drawVerticalInterval(QPainter * pr) const;
-	void drawPlot(const UniformPlot1D * plt, QPainter * pr);
-	
-/// left-up
-	QPoint luCorner() const;
-/// right-bottom
-	QPoint rbCorner() const;
+	float scaleToFill(const UniformPlot2DImage * plt) const;
 	
 private:
-	Int2 m_margin;
-	Vector2F m_hBound;
-	Vector2F m_vBound;
-	Int2 m_niterval;
+	void drawPlot(const UniformPlot2DImage * plt, QPainter * pr);
 	
-	std::vector<UniformPlot1D *> m_curves;
+private:
+	std::vector<UniformPlot2DImage * > m_images;
 	
 };
 

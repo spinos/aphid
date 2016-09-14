@@ -80,7 +80,7 @@ find_package (Qt4 REQUIRED)
 message ("qt gui library is " ${QT_QTGUI_LIBRARY})
 
 SET (SHFT_SRC ../shared/BaseImageWidget.cpp
-../shared/Plot2DWidget.cpp
+../shared/Plot1DWidget.cpp
 fltbanks.cpp
 ftmain.cpp
 ft1dWidget.cpp
@@ -98,6 +98,27 @@ target_link_libraries (shoflt ${APHID_MATH_LIBRARY})
 target_link_libraries (shoflt ${APHID_GEOM_LIBRARY})
 
 target_link_libraries (shoflt Qt4::QtGui)
+
+SET (2D_DWT_SRC ../shared/BaseImageWidget.cpp
+../shared/Plot1DWidget.cpp
+../shared/Plot2DWidget.cpp
+fltbanks.cpp
+ft2widget.cpp
+ft2window.cpp
+ft2main.cpp)
+
+add_executable (dwt2d ${2D_DWT_SRC})
+target_link_libraries (dwt2d ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (dwt2d ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (dwt2d ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (dwt2d ${Boost_REGEX_LIBRARY})
+target_link_libraries (dwt2d ${Boost_THREAD_LIBRARY})
+target_link_libraries (dwt2d ${Boost_CHRONO_LIBRARY})
+
+target_link_libraries (dwt2d ${APHID_MATH_LIBRARY})
+target_link_libraries (dwt2d ${APHID_GEOM_LIBRARY})
+
+target_link_libraries (dwt2d Qt4::QtGui)
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
