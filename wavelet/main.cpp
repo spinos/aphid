@@ -1,7 +1,6 @@
 /*
  *  main.cpp
  *  
- *
  *  Created by jian zhang on 9/13/15.
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *  http://eeweb.poly.edu/iselesni/WaveletSoftware/standard1D.html
@@ -24,54 +23,9 @@
 #include <map>
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
+#include "fltbanks.h"
 
 using namespace aphid;
-
-/// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/farras.m
-/// Farras nearly symmetric filters for orthogonal
-/// 2-channel perfect reconstruction filter bank
-static const float FarrasAnalysisFilter[2][10] = {
-{0,
-0,
--0.0883883476483,
-0.0883883476483,
-0.695879989034,
-0.695879989034,
-0.0883883476483,
--0.0883883476483,
-0.0112267921525,
-0.0112267921525},
-{-0.0112267921525,
-0.0112267921525,
-0.0883883476483,
-0.0883883476483,
--0.695879989034,
-0.695879989034,
--0.0883883476483,
--0.0883883476483,
-0,
-0}
-};
-
-/// http://www.vincentcheung.ca/research/matlabindexrepmat.html
-/// synthesis filter is row reverse of analysis filters
-/// sf = af(end:-1:1, :)
-/// all the rows and first column of x
-/// x(:, 1)
-/// all the rows and second column of x
-/// x(:, 2)
-
-/// af[2][10] analysis filter
-/// sf[2][10] synthesis filter
-void farras(float ** af, float ** sf)
-{
-	for(int i=0; i<10; ++i) {
-		af[0][i] = FarrasAnalysisFilter[0][i];
-		af[1][i] = FarrasAnalysisFilter[1][i];
-		sf[0][i] = af[1][i];
-		sf[1][i] = af[0][i];
-	}
-}
 
 /// http://cn.mathworks.com/help/signal/ref/upfirdn.html
 /// upsampleing x by factor of 1 (no upsample)
@@ -94,9 +48,9 @@ void afb(const float * x, const int & n, float ** af, const int & filterOrder=10
 {
 /// width of filter
 	int L = filterOrder/2;
-	float * Xshf = calc::circshift(x, n, -L);
+	float * Xshf = wla::circshift(x, n, -L);
 	
-	float * Xflt = calc::fir(Xshf, n, af[0], filterOrder);
+	float * Xflt = wla::fir(Xshf, n, af[0], filterOrder);
 	delete[] Xshf;
 	delete[] Xflt;
 }
@@ -124,12 +78,12 @@ void testUpsampleDownsample()
 	calc::printValues<float>("x", 16, X);
 	
 	int nXup;
-	float * Xup = calc::upsample(nXup, X, 16, 2);
+	float * Xup = wla::upsample(nXup, X, 16, 2);
 	
 	calc::printValues<float>("xup", nXup, Xup);
 	
 	int nXdn;
-	float * Xdn = calc::downsample(nXdn, Xup, nXup, 2);
+	float * Xdn = wla::downsample(nXdn, Xup, nXup, 2);
 	
 	calc::printValues<float>("xdn", nXdn, Xdn);
 }
@@ -142,7 +96,7 @@ void testUpsampleCshift()
 	for(;i<10;++i)
 		X[i] = i+1;
 		
-	float * Xshf = calc::circshift(X, 10, -3);
+	float * Xshf = wla::circshift(X, 10, -3);
 	calc::printValues<float>("Xshf", 10, Xshf);
 }
 
@@ -154,9 +108,9 @@ void testAnalysis()
 		X[i] = RandomF01();
 	calc::printValues<float>("X", 64, X);
 	
-	float * Xshf = calc::circshift(X, 64, -5);
+	float * Xshf = wla::circshift(X, 64, -5);
 		
-	float * Xflt = calc::firlHann(Xshf, 64);
+	float * Xflt = wla::firlHann(Xshf, 64);
 	calc::printValues<float>("Xflt", 64, Xflt);
 }
 

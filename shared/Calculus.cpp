@@ -4,6 +4,17 @@ namespace aphid {
 
 namespace calc {
 
+float maxAbsoluteError(const float * a, const float * b, const int & n)
+{
+	float mxe = 0.f, e;
+	for(int i=0; i< n; ++i) {
+		e = Absolute<float>(a[i] - b[i]);
+		if(mxe < e)
+			mxe = e;
+	}
+	return mxe;
+}
+
 void legendreRule(int m, int n, float * v,
 		const float * xi)
 {
@@ -246,172 +257,11 @@ float LegendrePolynomial::norm2(int i)
 float LegendrePolynomial::Pn(int l, const float & x)
 { return P(l, x) / mNorm[l]; }
 
-
-float * upsample(int & ny, const float * x, const int & n, 
-				const int & p, const int & phase)
-{
-	ny = n * p;
-	float * y = new float[ny];
-	int i=0, j;
-	for(;i<n;++i) {
-		for(j=0;j<p;++j) {
-			if(j==phase) 
-				y[i*p+j] = x[i];
-			else
-				y[i*p+j] = 0.f;
-		}
-	}
-	
-	return y;
-}
-
-float * downsample(int & ny, const float * x, const int & n, 
-				const int & p, const int & phase)
-{
-	int i=0, j=0;
-	for(;i<n;++i) {
-		if(i== j*p + phase) {
-			j++;
-		}
-	}
-	
-	ny = j;
-	
-	float * y = new float[ny];
-	
-	i=j=0;
-	for(;i<n;++i) {
-		if(i== j*p + phase) {
-			y[j++]=x[i];
-		}
-	}
-	
-	return y;
-}
-
-int periodic(const int & i, const int & n)
-{
-	if(i<0)
-		return n+i;
-	if(i>n-1)
-		return i-n;
-	return i;
-}
-
-/// http://cn.mathworks.com/help/matlab/ref/circshift.html
-float * circshift(const float * x, const int & n, const int & p)
-{
-	float * y = new float[n];
-	int i=0;
-	for(;i<n;++i) {
-		y[i] = x[periodic(i-p, n)];
-	}
-	return y;
-}
-
-/// http://learn.mikroe.com/ebooks/digitalfilterdesign/chapter/window-functions/
-/// 1D impulse response from binomial weights
-/// [1, 4, 6, 4, 1]/16
-/// 2D approximation
-/// [1  4  7  4 1]
-/// [4 16 26 16 4]
-/// [7 26 41 26 7]
-/// [4 16 26 16 4]
-/// [1  4  7  4 1]/273
-/// finite impulse response express each output sample as a weighted sum of the last N input samples
-/// y[n] = b0x[n] + b1x[n-1] + ... + bNx[n-N]
-///      = sigma (i=0,N) bi x[n-i]
-/// y[n] input signal
-/// x[n] output signal
-/// N filter order
-
-float * fir(const float * x, const int & n,
-			const float * w, const int & m)
-{
-	float * y = new float[n];
-	
-	int i=0, j;
-	for(;i<n;++i) {
-		y[i] = 0.f;
-		
-		for(j=0; j<m;++j) {
-			y[i] += w[j] * x[periodic(i-j, n)];
-		}
-	}
-	
-	return y;
-}
-
-static const float HANNWL10[11] = {
--.045016, 0., .075026, .159155, .225079,
-.25,
-.225079, .159155, .075026, 0., -.045016};
-
-static const float HANNWH10[11] = {
-.045016f, 0.f, -.075026f, -.159155f, -.225079f,
-.75f,
--.225079f, -.159155f, -.075026f, 0.f, .045016f};
-
-float * hannLowPass(int & n)
-{
-	float * y = new float[11];
-	int i=0;
-	for(;i<11;++i)
-		y[i] = HANNWL10[i];
-		
-	n = 11;
-		
-	return y;
-}
-
-float * hannHighPass(int & n)
-{
-	float * y = new float[11];
-	int i=0;
-	for(;i<11;++i)
-		y[i] = HANNWH10[i];
-		
-	n = 11;
-		
-	return y;
-}
-
-float * firlHann(const float * x, const int & n)
-{
-	float * y = new float[n];
-	
-	int i=0, j;
-	for(;i<n;++i) {
-		y[i] = 0.f;
-		
-		for(j=0; j<11;++j) {
-			y[i] += HANNWL10[j] * x[periodic(i-j, n)];
-		}
-	}
-	
-	return y;
-}
-
-float * firhHann(const float * x, const int & n)
-{
-	float * y = new float[n];
-	
-	int i=0, j;
-	for(;i<n;++i) {
-		y[i] = 0.f;
-		
-		for(j=0; j<11;++j) {
-			y[i] += HANNWH10[j] * x[periodic(i-j, n)];
-		}
-	}
-	
-	return y;
-}
-
 }
 
 UniformPlot1D::UniformPlot1D() :
 m_numY(0),
+m_lstyle(LsSolid),
 m_y(NULL)
 {}
 
@@ -453,5 +303,11 @@ float * UniformPlot1D::y()
 
 const int & UniformPlot1D::numY() const
 { return m_numY; }
+
+void UniformPlot1D::setLineStyle(UniformPlot1D::LineStyle x)
+{ m_lstyle = x; }
+
+const UniformPlot1D::LineStyle & UniformPlot1D::lineStyle() const
+{ return m_lstyle; }
 
 }

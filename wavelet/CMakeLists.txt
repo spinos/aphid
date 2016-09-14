@@ -8,7 +8,8 @@ SET (CMAKE_AUTOMOC ON)
 SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories ( ../shared)
-add_executable (wvlt main.cpp)
+add_executable (wvlt fltbanks.cpp
+main.cpp)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -80,6 +81,7 @@ message ("qt gui library is " ${QT_QTGUI_LIBRARY})
 
 SET (SHFT_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot2DWidget.cpp
+fltbanks.cpp
 ftmain.cpp
 ft1dWidget.cpp
 ftwindow.cpp)

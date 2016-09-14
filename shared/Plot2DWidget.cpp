@@ -19,7 +19,14 @@ Plot2DWidget::Plot2DWidget(QWidget *parent) : aphid::BaseImageWidget(parent)
 }
 
 Plot2DWidget::~Plot2DWidget()
-{}
+{
+	std::vector<UniformPlot1D *>::iterator it = m_curves.begin();
+	for(;it!=m_curves.end();++it) {
+		delete *it;
+	}
+	m_curves.clear();
+	
+}
 
 void Plot2DWidget::clientDraw(QPainter * pr)
 {
@@ -102,6 +109,13 @@ void Plot2DWidget::drawPlot(const UniformPlot1D * plt, QPainter * pr)
 	const Vector3F & cf = plt->color(); 
 	QPen pn(QColor((int)(cf.x*255), (int)(cf.y*255), (int)(cf.z*255) ) );
 	pn.setWidth(1);
+	if(plt->lineStyle() > 0) {
+		if(plt->lineStyle() == UniformPlot1D::LsDash)
+			pn.setStyle(Qt::DashLine);
+		else if(plt->lineStyle() == UniformPlot1D::LsDot)
+			pn.setStyle(Qt::DotLine);
+	}
+	
 	pr->setPen(pn);
 	
 	QPoint lu = luCorner();

@@ -148,7 +148,7 @@ inline T RemapF(const T & a, const T & b,
 				const float & v)
 { 
 	float w = (v - low) / (high - low);
-	return MixClamp01F(a, b, w);
+	return a * (1.f - w) + b * w;
 }
 
 template<typename T>
