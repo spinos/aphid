@@ -1,6 +1,8 @@
-#ifndef ATYPES_H
-#define ATYPES_H
+#ifndef APHID_TYPES_H
+#define APHID_TYPES_H
 #include <sstream>
+namespace aphid {
+
 struct Color4 {
 	Color4(): r(0.f), g(0.f), b(0.f), a(0.f)
 	{}
@@ -164,5 +166,129 @@ struct VectorN {
 	unsigned _ndim;
 	T * _data;
 };
+
+/// m-by-n array
+/// column major
+/// 0   m   ... (n-1)m
+/// 1   m+1     (n-1)m+1
+/// .   .       .
+/// .   .       .
+/// .   .       .
+/// m-1 2m-1... nm-1
+/// m number of rows
+/// n number of columns
+template<typename T>
+struct Array2 {
+
+	T * m_data;
+	int m_M, m_N;
+	
+	Array2() {
+		m_M = m_N = 0;
+		m_data = NULL;
+	}
+	
+	~Array2() {
+		if(m_M>0) delete[] m_data;
+	}
+	
+	void create(const int & m, const int & n) {
+		if(m_M * m_N < m*n) {
+			if(m_M) delete[] m_data;
+			m_data = new T[m*n];
+		}
+		
+		m_M = m;
+		m_N = n;
+	}
+	
+	const int & numRows() const {
+		return m_M;
+	}
+	
+	const int & numCols() const {
+		return m_N;
+	}
+	
+	const T * v() const {
+		return m_data;
+	}
+	
+	T * v() {
+		return m_data;
+	}
+
+	const T * column(const int & i) const {
+		return &m_data[i*m_M];
+	}
+	
+	T * column(const int & i) {
+		return &m_data[i*m_M];
+	}
+	
+/// u column v row
+	int iuv(const int & u, const int & v) const {
+		return u * m_M + v;
+	}
+	
+	void operator=(const Array2<T> & another) {
+		create(another.numRows(), another.numCols() );
+		memcpy(m_data, another.v(), m_M*m_N*sizeof(T) );
+	}
+	
+};
+
+/// http://www.owlnet.rice.edu/~ceng303/manuals/fortran/FOR5_3.html
+/// m-by-n-by-p array
+template<typename T>
+struct Array3 {
+	
+	Array2<T> * m_slice;
+	int m_P;
+	
+	Array3() {
+		m_slice = NULL;
+		m_P = 0;
+	}
+	
+	~Array3() {
+		if(m_P) delete[] m_slice;
+	}
+	
+	void create(const int & m, const int & n, const int & p = 1) {
+		if(m_P < p) {
+			if(m_P) delete[] m_slice;
+			m_slice = new Array2<T>[p];	
+		}
+		
+		for(int i=0; i<p; ++i)
+			m_slice[i].create(m,n);
+		
+		m_P = p;
+	}
+
+	const int & numRows() const {
+		return m_slice[0].numRows();
+	}
+	
+	const int & numCols() const {
+		return m_slice[0].numCols();
+	}
+	
+	const int & numRanks() const {
+		return m_P;
+	}
+	
+/// i-th rank
+	const Array2<T> * rank(const int & i) const {
+		return &m_slice[i];
+	}
+
+	Array2<T> * rank(const int & i) {
+		return &m_slice[i];
+	}
+};
+
+}
 #endif        //  #ifndef ATYPES_H
 

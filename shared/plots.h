@@ -67,9 +67,8 @@ public:
 	};
 
 private:
-	float * m_data;
+	Array3<float> m_data;
 	float m_drScale;
-	int m_M, m_N, m_numChannels;
 	FillMode m_fmd;
 	
 public:
@@ -78,8 +77,8 @@ public:
 
 /// M number of rows
 /// N number of columns
-/// K number of channels
-	void create(const int & m, const int & n, const int & k = 1);
+/// P number of channels
+	void create(const int & m, const int & n, const int & p = 1);
 	
 	void setFillMode(FillMode x);
 	void setDrawScale(float x);
@@ -93,6 +92,9 @@ public:
 /// k-th channel
 	float * y(const int & k=0);
 	const float * y(const int & k=0) const;
+	
+	Array2<float> * channel(const int & k=0);
+	const Array2<float> * channel(const int & k=0) const;
 	
 /// u column v row
 	int iuv(const int & u, const int & v) const;

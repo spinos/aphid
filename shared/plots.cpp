@@ -63,27 +63,15 @@ const UniformPlot1D::LineStyle & UniformPlot1D::lineStyle() const
 { return m_lstyle; }
 
 UniformPlot2D::UniformPlot2D() :
-m_data(NULL),
-m_M(0),
-m_N(0),
-m_numChannels(0),
 m_fmd(flFixed),
 m_drScale(1.f)
 {}
 
 UniformPlot2D::~UniformPlot2D()
-{
-	if(m_numChannels>0) delete[] m_data;
-}
+{}
 
-void UniformPlot2D::create(const int & m, const int & n, const int & k)
-{
-	m_M = m;
-	m_N = n;
-	m_numChannels = k;
-	if(m_numChannels>0) delete[] m_data;
-	m_data = new float[m*n*k];
-}
+void UniformPlot2D::create(const int & m, const int & n, const int & p)
+{ m_data.create(m,n,p); }
 
 void UniformPlot2D::setFillMode(FillMode x)
 { m_fmd = x; }
@@ -92,13 +80,13 @@ void UniformPlot2D::setDrawScale(float x)
 { m_drScale = x; }
 
 const int & UniformPlot2D::numRows() const
-{ return m_M; }
+{ return m_data.numRows(); }
 
 const int & UniformPlot2D::numCols() const
-{ return m_N; }
+{ return m_data.numCols(); }
 
 const int & UniformPlot2D::numChannels() const
-{ return m_numChannels; }
+{ return m_data.numRanks(); }
 
 UniformPlot2D::FillMode UniformPlot2D::fillMode() const
 { return m_fmd; }
@@ -107,12 +95,18 @@ const float & UniformPlot2D::drawScale() const
 { return m_drScale; }
 
 float * UniformPlot2D::y(const int & k)
-{ return &m_data[m_M*m_N*k]; }
+{ return channel(k)->v(); }
 
 const float * UniformPlot2D::y(const int & k) const
-{ return &m_data[m_M*m_N*k]; }
+{ return channel(k)->v(); }
 
 int UniformPlot2D::iuv(const int & u, const int & v) const
-{ return u * m_M + v; }
+{ return u * m_data.numRows() + v; }
+
+Array2<float> * UniformPlot2D::channel(const int & k)
+{ return m_data.rank(k); }
+
+const Array2<float> * UniformPlot2D::channel(const int & k) const
+{ return m_data.rank(k); }
 
 }

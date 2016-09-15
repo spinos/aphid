@@ -7,8 +7,10 @@ set (CMAKE_BUILD_TYPE RELEASE)
 SET (CMAKE_AUTOMOC ON)
 SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 
-include_directories ( ../shared)
+include_directories ( ../shared
+../lfr)
 add_executable (wvlt fltbanks.cpp
+dwt2.cpp
 main.cpp)
 
 if(WIN32)
@@ -102,6 +104,7 @@ target_link_libraries (shoflt Qt4::QtGui)
 SET (2D_DWT_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 ../shared/Plot2DWidget.cpp
+dwt2.cpp
 fltbanks.cpp
 ft2widget.cpp
 ft2window.cpp

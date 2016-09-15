@@ -24,6 +24,7 @@
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
 #include "fltbanks.h"
+#include "dwt2.h"
 
 using namespace aphid;
 
@@ -96,8 +97,13 @@ void testUpsampleCshift()
 	for(;i<10;++i)
 		X[i] = i+1;
 		
+#if 0
 	float * Xshf = wla::circshift(X, 10, -3);
 	calc::printValues<float>("Xshf", 10, Xshf);
+#else
+	wla::circleShift1(X, 10, 4);
+	calc::printValues<float>("X", 10, X);
+#endif
 }
 
 void testAnalysis()

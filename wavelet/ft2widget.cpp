@@ -17,14 +17,18 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	UniformPlot2DImage * Xp = new UniformPlot2DImage;
 #define DIM_Y 128
 #define DIM_X 64
-	Xp->create(128, DIM_X);
-	float * Xv = Xp->y();
+#define DIM_Z 1
+	Xp->create(DIM_Y, DIM_X, DIM_Z);
 	
-	int i, j;
+	int i, j, k;
+	for(k=0;k<DIM_Z;++k) {
+		float * Xv = Xp->y(k);
+		
 	for(j=0;j<DIM_X;++j) {
 		for(i=0;i<DIM_Y;++i) {
 			Xv[j*DIM_Y+i] = RandomF01();
 		}
+	}
 	}
 	
 	Xp->setDrawScale(2.f);
@@ -32,6 +36,17 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	
 	addImage(Xp);
 	
+	UniformPlot2DImage * Xsfp = new UniformPlot2DImage;
+	Xsfp->create(DIM_Y, DIM_X, DIM_Z);
+	for(k=0;k<DIM_Z;++k) {
+		
+		*Xsfp->channel(k) = *Xp->channel(k);
+		
+	}
+	
+	Xsfp->updateImage();
+	
+	addImage(Xsfp);
 }
 
 Ft2Widget::~Ft2Widget()
