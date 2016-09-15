@@ -8,7 +8,7 @@
  */
 #include <QtGui>
 #include "ft2widget.h"
-#include "fltbanks.h"
+#include "dwt2.h"
 
 using namespace aphid;
 
@@ -36,17 +36,28 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	
 	addImage(Xp);
 	
-	UniformPlot2DImage * Xsfp = new UniformPlot2DImage;
-	Xsfp->create(DIM_Y, DIM_X, DIM_Z);
+	UniformPlot2DImage * lowpassP = new UniformPlot2DImage;
+	lowpassP->create(DIM_Y/2, DIM_X, DIM_Z);
+	
+	UniformPlot2DImage * highpassP = new UniformPlot2DImage;
+	highpassP->create(DIM_Y/2, DIM_X, DIM_Z);
+	
 	for(k=0;k<DIM_Z;++k) {
 		
-		*Xsfp->channel(k) = *Xp->channel(k);
+		wla::afbRow(Xp->channel(k), 
+			lowpassP->channel(k), highpassP->channel(k) );
 		
 	}
 	
-	Xsfp->updateImage();
+	lowpassP->setDrawScale(2.f);
+	lowpassP->updateImage();
 	
-	addImage(Xsfp);
+	addImage(lowpassP);
+	
+	highpassP->setDrawScale(2.f);
+	highpassP->updateImage(true);
+	
+	addImage(highpassP);
 }
 
 Ft2Widget::~Ft2Widget()

@@ -14,7 +14,6 @@ namespace aphid {
 
 Plot1DWidget::Plot1DWidget(QWidget *parent) : BaseImageWidget(parent)
 {
-	m_margin.set(48, 48);
 	setBound(-1.f, 1.f, 4, -1.f, 1.f, 4);
 }
 
@@ -151,14 +150,11 @@ void Plot1DWidget::drawPlot(const UniformPlot1D * plt, QPainter * pr)
 	
 }
 
-void Plot1DWidget::setMargin(const int & h, const int & v)
-{ m_margin.set(h, v); }
-
 QPoint Plot1DWidget::luCorner() const
-{ return QPoint(m_margin.x, m_margin.y); }
+{ return QPoint(margin().x, margin().y); }
 
 QPoint Plot1DWidget::rbCorner() const
-{ return QPoint(portSize().width() - m_margin.x, portSize().height() - m_margin.y); }
+{ return QPoint(portSize().width() - margin().x, portSize().height() - margin().y); }
 
 void Plot1DWidget::setBound(const float & hlow, const float & hhigh, 
 					const int & hnintv,

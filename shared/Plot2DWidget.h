@@ -22,7 +22,8 @@ public:
 	
 /// pack up to 4 channels to RGBA32 images
 /// assuming channel ordered in r, g, b, a
-	void updateImage();
+/// remap from [-1,1] to [0,1] if negative
+	void updateImage(const bool & negative = false);
 	
 	const QImage & image() const;
 	const int & width() const;
@@ -50,10 +51,11 @@ public slots:
 protected:
 	virtual void clientDraw(QPainter * pr);
 
-	float scaleToFill(const UniformPlot2DImage * plt) const;
+	float scaleOf(const UniformPlot2DImage * plt) const;
 	
 private:
-	void drawPlot(const UniformPlot2DImage * plt, QPainter * pr);
+	void drawPlot(const UniformPlot2DImage * plt, const QPoint & offset, 
+					QPainter * pr);
 	
 private:
 	std::vector<UniformPlot2DImage * > m_images;

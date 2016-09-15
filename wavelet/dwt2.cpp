@@ -59,6 +59,37 @@ void circleShift2(Array2<float> * x, const int & p)
 	}
 }
 
+void afbRow(Array2<float> * x, Array2<float> * lo, Array2<float> * hi)
+{
+	circleShift2(x, -5);
+	const int & nrow = x->numRows();
+	const int & ncol = x->numCols();
+	const int nsubrow = nrow / 2;
+	
+	lo->create(nsubrow, ncol);
+	hi->create(nsubrow, ncol);
+	
+	float * locol;
+	float * hicol;
+	int m;
+	for(int i=0; i<ncol;++i) {
+		afb(x->column(i), nrow, locol, hicol, m);
+		
+		lo->copyColumn(i, locol);
+		hi->copyColumn(i, hicol);
+		
+		delete[] locol;
+		delete[] hicol;
+	}
+}
+
+void afb2(Array2<float> * x,
+		Array2<float> * lo, Array2<float> * lohi,
+		Array2<float> * hilo, Array2<float> * hihi)
+{
+
+}
+
 }
 
 }

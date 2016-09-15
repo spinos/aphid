@@ -8,7 +8,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QWidget>
-#include "Vector2F.h"
+#include "AllMath.h"
 
 namespace aphid {
 
@@ -26,12 +26,16 @@ public:
     void mouseMoveEvent(QMouseEvent *event);
 	virtual QSize	minimumSizeHint() const;
 	
+/// horizontal and vertical margin size
+	void setMargin(const int & h, const int & v);
+	
 protected:
 	virtual void clientDraw(QPainter * pr);
 	virtual QColor backgroundCol() const;
 	
 	const QSize & portSize() const; 
 	bool isLandscape() const;
+	const Int2 & margin() const;
 	
 private:
 	void processCamera(QMouseEvent *event);
@@ -39,6 +43,7 @@ private:
 	void zoomCamera(int dx);
 	
 private:
+	Int2 m_margin;
 	QSize m_portSize;
 	QPoint m_lastMousePos;
 	Vector2F m_translation, m_scaling;

@@ -18,7 +18,7 @@ UniformPlot2DImage::UniformPlot2DImage()
 UniformPlot2DImage::~UniformPlot2DImage()
 {}
 
-void UniformPlot2DImage::updateImage()
+void UniformPlot2DImage::updateImage(const bool & negative)
 {
 	if(m_img.isNull() )
 		m_img = QImage(numCols(), numRows(), QImage::Format_RGB32);
@@ -42,6 +42,12 @@ void UniformPlot2DImage::updateImage()
 				const float * chan = y(k);
 				
 				col[k] = chan[iuv(i,j)] * 255;
+				
+				if(negative && k < 3) {
+					col[k] = 127 + col[k] / 2;
+				}
+				
+				Clamp0255(col[k]);
 			}
 			
 /// copy r to g, b in case has only one channel
@@ -83,24 +89,32 @@ Plot2DWidget::~Plot2DWidget()
 
 void Plot2DWidget::clientDraw(QPainter * pr)
 {
+	QPoint pj = luCorner();
 	std::vector<UniformPlot2DImage *>::const_iterator it = m_images.begin();
 	for(;it!=m_images.end();++it) {
-		drawPlot(*it, pr);
+		drawPlot(*it, pj, pr);
+		
+		pj.rx() += (*it)->width() * scaleOf(*it) + margin().x;
 	}
 }
 
 void Plot2DWidget::addImage(UniformPlot2DImage * img)
 { m_images.push_back(img); }
 
-void Plot2DWidget::drawPlot(const UniformPlot2DImage * plt, QPainter * pr)
+void Plot2DWidget::drawPlot(const UniformPlot2DImage * plt, const QPoint & offset,
+							QPainter * pr)
 { 
-	pr->translate(luCorner() );
-	const float sc = scaleToFill(plt );
+	pr->translate(offset );
+	const float sc = scaleOf(plt);
 	pr->scale(sc, sc);
+	
 	pr->drawImage(QPoint(), plt->image() );
+	
+	pr->scale(1.f/sc, 1.f/sc);
+	pr->translate(QPoint(-offset.x(), -offset.y() ) );
 }
 
-float Plot2DWidget::scaleToFill(const UniformPlot2DImage * plt) const
+float Plot2DWidget::scaleOf(const UniformPlot2DImage * plt) const
 {
 	if(plt->fillMode() == UniformPlot2D::flFixed)
 		return plt->drawScale();

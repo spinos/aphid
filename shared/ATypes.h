@@ -236,6 +236,14 @@ struct Array2 {
 		memcpy(m_data, another.v(), m_M*m_N*sizeof(T) );
 	}
 	
+	void setZero() {
+		memset (m_data, 0, m_M*m_N*sizeof(T) );
+	}
+	
+	void copyColumn(const int & i, const T * b) {
+		memcpy(column(i), b, m_M *sizeof(T) );
+	}
+	
 };
 
 /// http://www.owlnet.rice.edu/~ceng303/manuals/fortran/FOR5_3.html

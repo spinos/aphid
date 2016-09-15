@@ -1,12 +1,12 @@
 #include <QtGui>
 #include "BaseImageWidget.h"
-#include "AllMath.h"
 
 namespace aphid {
 
 BaseImageWidget::BaseImageWidget(QWidget *parent)
     : QWidget(parent)
 {
+	m_margin.set(48, 48);
 	m_translation.set(0.f, 0.f);
 	m_scaling.set(1.f, 1.f);
 }
@@ -95,5 +95,11 @@ QSize BaseImageWidget::minimumSizeHint() const
 
 bool BaseImageWidget::isLandscape() const
 { return m_portSize.width() > m_portSize.height(); }
+
+void BaseImageWidget::setMargin(const int & h, const int & v)
+{ m_margin.set(h, v); }
+
+const Int2 & BaseImageWidget::margin() const
+{ return m_margin; }
 
 }

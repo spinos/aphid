@@ -23,8 +23,6 @@ public:
 	Plot1DWidget(QWidget *parent = 0);
 	virtual ~Plot1DWidget();
 	
-/// horizontal and vertical margin size
-	void setMargin(const int & h, const int & v);
 /// horizontal and vertical bound 
 /// low high number of intervals
 	void setBound(const float & hlow, const float & hhigh, 
@@ -43,7 +41,7 @@ protected:
 	QPoint luCorner() const;
 /// right-bottom
 	QPoint rbCorner() const;
-
+	
 private:
 	void drawCoordsys(QPainter * pr) const;
 	void drawHorizontalInterval(QPainter * pr) const;
@@ -51,7 +49,6 @@ private:
 	void drawPlot(const UniformPlot1D * plt, QPainter * pr);
 	
 private:
-	Int2 m_margin;
 	Vector2F m_hBound;
 	Vector2F m_vBound;
 	Int2 m_niterval;

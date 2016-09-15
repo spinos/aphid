@@ -30,6 +30,11 @@ inline void Clamp01(float &v) {
 	if(v > 1.f) v = 1.f;
 }
 
+inline void Clamp0255(int &x) {
+	if(x < 0) x = 0;
+	if(x > 255) x = 255;
+}
+
 #ifdef WIN32
 inline float log2f( float n )  
 {  

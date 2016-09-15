@@ -27,6 +27,23 @@ void circleShift1(float * x, const int & n, const int & p);
 /// y = x(3:4:0:1:2, :) 
 void circleShift2(Array2<float> * x, const int & p);
 
+/// analysis filter bank per column
+/// resulting subband of half input number of rows
+/// x m-by-n input signal
+/// lo output low pass subband
+/// hi output high pass subband
+void afbRow(Array2<float> * x, Array2<float> * lo, Array2<float> * hi);
+
+/// http://eeweb.poly.edu/iselesni/WaveletSoftware/standard2D.html
+/// 2d analysis filter bank
+/// filter along columns of x
+/// transpose the resulting 2 subbands
+/// filter again
+/// resulting 4 subbands half of the size of input signal x
+void afb2(Array2<float> * x,
+		Array2<float> * lo, Array2<float> * lohi,
+		Array2<float> * hilo, Array2<float> * hihi);
+
 }
 
 }
