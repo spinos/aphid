@@ -22,7 +22,7 @@ public:
 	
 /// pack up to 4 channels to RGBA32 images
 /// assuming channel ordered in r, g, b, a
-/// remap from [-1,1] to [0,1] if negative
+/// +0.5 if negative
 	void updateImage(const bool & negative = false);
 	
 	const QImage & image() const;

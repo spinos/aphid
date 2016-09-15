@@ -44,7 +44,7 @@ void UniformPlot2DImage::updateImage(const bool & negative)
 				col[k] = chan[iuv(i,j)] * 255;
 				
 				if(negative && k < 3) {
-					col[k] = 127 + col[k] / 2;
+					col[k] += 127;
 				}
 				
 				Clamp0255(col[k]);

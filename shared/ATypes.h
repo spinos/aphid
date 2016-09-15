@@ -188,6 +188,12 @@ struct Array2 {
 		m_data = NULL;
 	}
 	
+	Array2(const Array2<T> & another) {
+		m_M = m_N = 0;
+		m_data = NULL;
+		copy(another);
+	}
+	
 	~Array2() {
 		if(m_M>0) delete[] m_data;
 	}
@@ -232,6 +238,10 @@ struct Array2 {
 	}
 	
 	void operator=(const Array2<T> & another) {
+		copy(another);
+	}
+	
+	void copy(const Array2<T> & another) {
 		create(another.numRows(), another.numCols() );
 		memcpy(m_data, another.v(), m_M*m_N*sizeof(T) );
 	}
@@ -242,6 +252,25 @@ struct Array2 {
 	
 	void copyColumn(const int & i, const T * b) {
 		memcpy(column(i), b, m_M *sizeof(T) );
+	}
+	
+	void transpose() {
+		Array2 old(*this);
+		
+		int s = m_M;
+		m_M = m_N;
+		m_N = s;
+		
+		const T * src = old.v();
+		
+		int i, j;
+		for(j = 0;j<m_N;++j) {
+			
+			T * dst = column(j);
+			for(i=0;i<m_M;++i) {
+				dst[i] = src[i * m_N + j];
+			}
+		}
 	}
 	
 };
