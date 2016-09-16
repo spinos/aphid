@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef G_MATERIAL_H
-#define G_MATERIAL_H
+#ifndef APHID_G_MATERIAL_H
+#define APHID_G_MATERIAL_H
 
 #include <AllMath.h>
 
@@ -18,6 +18,8 @@
 #else
 #include <gl_heads.h>
 #endif
+
+namespace aphid {
 
 class GMaterial {
 public:
@@ -37,4 +39,5 @@ public:
     float  m_Shininess;
 };
 
+}
 #endif

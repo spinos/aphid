@@ -9,6 +9,8 @@
 
 #include <GProfile.h>
 
+namespace aphid {
+
 GProfile::GProfile() : m_lighting(false),
 		m_depthTest(false),
 		m_wired(false),
@@ -46,4 +48,6 @@ void GProfile::apply() const
 	if(m_material) {
 		m_material->apply();
 	}
+}
+
 }

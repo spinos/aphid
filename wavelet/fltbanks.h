@@ -69,6 +69,12 @@ void afb(const float * x, const int & n,
 /// N output length
 void sfb(const float * lo, const float * hi, const int & m,
 		float * & y, int & n);
+	
+/// get the filters
+/// af[4][10] analysis filters
+/// sf[4][10] synthesis filters
+void fsfarras(float ** af, float ** sf);
+void dualflt(float ** af, float ** sf);
 		
 }
 

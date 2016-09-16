@@ -23,9 +23,8 @@ public:
 	};
 	
 private:
-	float * m_y;
+	VectorN<float> m_data;
 	Vector3F m_color;
-	int m_numY;
 	LineStyle m_lstyle;	
 	
 public:

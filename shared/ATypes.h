@@ -99,7 +99,7 @@ struct VectorN {
 		_data = 0;
 	}
 	
-	VectorN(unsigned n) {
+	VectorN(const int & n) {
 		_ndim = n;
 		_data = new T[n];
 	}
@@ -108,62 +108,98 @@ struct VectorN {
 		if(_data) delete[] _data;
 	}
 	
-	void setZero(unsigned n) {
-		if(_data) delete[] _data;
+	const int & N() const
+	{ return _ndim; }
+	
+	const T * v() const {
+		return _data;
+	}
+	
+	T * v() {
+		return _data;
+	}
+	
+	void create(const int & n)
+	{
+		if(_ndim < (unsigned)n) {
+			if(_ndim > 0)
+				delete[] _data;
+			_data = new T[n];
+		}
 		_ndim = n;
-		_data = new T[n];
-		for(unsigned i = 0; i < _ndim; i++) _data[i] = 0;
+	}
+	
+	void create(const T * x, const int & n)
+	{
+		create(n);
+		memcpy(_data, x, sizeof(T) * n);
+	}
+	
+	void copy(const VectorN<T> & another) {
+		create(another.v(), another.N() );
+	}
+	
+	void setZero(const int & n) {
+		create(n);
+		memset(_data, 0, sizeof(T) * _ndim);
 	}
 	
 	void operator=(const VectorN<T> & another) {
-		if(_data) delete[] _data;
-		_ndim = another._ndim;
-		_data = new T[_ndim];
-		for(unsigned i = 0; i < _ndim; i++) _data[i] = another[i];
+		copy(another);
 	}
 	
-	T operator[](unsigned i) const {
+	T operator[](const int & i) const {
 		return _data[i];
 	}
 	
-	T* at(unsigned i) const {
+	T* at(const int & i) const {
 		return &_data[i];
 	}
 	
 	VectorN<T> operator+(const VectorN<T> & another) const {
 		VectorN<T> r(_ndim);
-		for(unsigned i = 0; i < _ndim; i++) *r.at(i) = _data[i] + another[i];
+		for(int i = 0; i < _ndim; i++) *r.at(i) = _data[i] + another[i];
 		return r;
 	}
 	
 	VectorN<T> operator-(const VectorN<T> & another) const {
 		VectorN<T> r(_ndim);
-		for(unsigned i = 0; i < _ndim; i++) *r.at(i) = _data[i] - another[i];
+		for(int i = 0; i < _ndim; i++) *r.at(i) = _data[i] - another[i];
 		return r;
 	}
 	
 	VectorN<T> operator*(const T & scale) const {
 		VectorN<T> r(_ndim);
-		for(unsigned i = 0; i < _ndim; i++) *r.at(i) = _data[i] * scale;
+		for(int i = 0; i < _ndim; i++) *r.at(i) = _data[i] * scale;
 		return r;
 	}
 	
 	T multiplyTranspose() const {
 		T r;
-		for(unsigned i = 0; i < _ndim; i++) r += _data[i] * _data[i];
+		for(int i = 0; i < _ndim; i++) r += _data[i] * _data[i];
 		return r;
+	}
+	
+	void maxAbsError(T & err, const VectorN & another) const {
+		int i = 0;
+		for(;i<_ndim;++i) {
+			T d = _data[i] - another.v()[i];
+			if(d < 0) d = -d;
+			if(err < d)
+				err = d;
+		}
 	}
 	
 	std::string info() const {
 		std::stringstream sst;
 		sst.str("");
 		sst<<"(";
-		for(unsigned i = 0; i < _ndim - 1; i++) sst<<_data[i]<<", ";
+		for(int i = 0; i < _ndim - 1; i++) sst<<_data[i]<<", ";
 		sst<<_data[_ndim - 1]<<")";
 		return sst.str();
 	}
 	
-	unsigned _ndim;
+	int _ndim;
 	T * _data;
 };
 
@@ -273,7 +309,7 @@ struct Array2 {
 		}
 	}
 	
-	void maxAbsError(T & err, const Array2 & another) {
+	void maxAbsError(T & err, const Array2 & another) const {
 		const int mn = m_M * m_N;
 		int i = 0;
 		for(;i<mn;++i) {

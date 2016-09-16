@@ -9,6 +9,8 @@
 
 #include <GLight.h>
 
+namespace aphid {
+
 GLight::GLight() 
 {
 	m_LightID = GL_LIGHT0;
@@ -45,4 +47,4 @@ void GLight::deactivate() const
 	glDisable( m_LightID );
 }
  
-    
+}   

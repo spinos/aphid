@@ -9,6 +9,8 @@
 
 #include <GMaterial.h>
 
+namespace aphid {
+
 GMaterial::GMaterial() 
 {
 	m_Ambient = Color4(0.1, 0.1, 0.1, 1.0);
@@ -38,4 +40,6 @@ void GMaterial::apply() const
 	glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, &(m_Specular.r) );
 	glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, &(m_Emission.r) );
 	glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, m_Shininess );
+}
+
 }

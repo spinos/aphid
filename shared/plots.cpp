@@ -12,34 +12,17 @@
 namespace aphid {
 
 UniformPlot1D::UniformPlot1D() :
-m_numY(0),
-m_lstyle(LsSolid),
-m_y(NULL)
+m_lstyle(LsSolid)
 {}
 
 UniformPlot1D::~UniformPlot1D()
-{
-	if(m_numY) delete[] m_y;
-}
+{}
 
 void UniformPlot1D::create(const int & n)
-{
-	if(m_numY >= n) {
-		m_numY = n;
-		return;
-	}
-	
-	if(m_numY) delete[] m_y;
-	m_numY = n;
-	m_y = new float[n];
-}
+{ m_data.create(n); }
 
 void UniformPlot1D::create(const float * y, const int & n)
-{
-	create(n);
-	for(int i=0;i<n;++i)
-		m_y[i] = y[i];
-}
+{ m_data.create(y, n); }
 
 void UniformPlot1D::setColor(float r, float g, float b)
 { m_color.set(r,g,b); }
@@ -48,13 +31,13 @@ const Vector3F & UniformPlot1D::color() const
 { return m_color; }
 
 const float * UniformPlot1D::y() const
-{ return m_y; }
+{ return m_data.v(); }
 
 float * UniformPlot1D::y()
-{ return m_y; }
+{ return m_data.v(); }
 
 const int & UniformPlot1D::numY() const
-{ return m_numY; }
+{ return m_data.N(); }
 
 void UniformPlot1D::setLineStyle(UniformPlot1D::LineStyle x)
 { m_lstyle = x; }

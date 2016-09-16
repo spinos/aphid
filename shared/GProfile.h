@@ -7,11 +7,13 @@
  *
  */
 
-#ifndef G_PROFILE_H
-#define G_PROFILE_H
+#ifndef APHID_G_PROFILE_H
+#define APHID_G_PROFILE_H
 
 #include <GMaterial.h>
 #include <GLight.h>
+
+namespace aphid {
 
 class GProfile {
 public:
@@ -24,4 +26,5 @@ public:
 	bool m_lighting, m_depthTest, m_wired, m_culled, m_textured;
 };
 
+}
 #endif
