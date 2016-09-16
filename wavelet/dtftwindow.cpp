@@ -10,7 +10,7 @@ dtftWindow::dtftWindow()
     m_plot = new DtFtWidget(this);
 	
 	setCentralWidget(m_plot);
-    setWindowTitle(tr("Dual Tree Discrete Wavelet Filters"));
+    setWindowTitle(tr("1-D Dual Tree Discrete Wavelet Transform"));
 }
 //! [1]
 

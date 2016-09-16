@@ -78,6 +78,7 @@ void fsfarras(float ** af, float ** sf);
 void dualflt(float ** af, float ** sf);
 
 /// dual tree first stage filters up and down
+/// analysis
 void afbDtFsU(const float * x, const int & n,
 		VectorN<float> & lo, VectorN<float> & hi);
 void afbDtFsD(const float * x, const int & n,
@@ -87,7 +88,16 @@ void afbDtU(const float * x, const int & n,
 		VectorN<float> & lo, VectorN<float> & hi);
 void afbDtD(const float * x, const int & n,
 		VectorN<float> & lo, VectorN<float> & hi);
-		
+/// synthesis
+void sfbDtFsU(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi);
+void sfbDtFsD(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi);
+/// stage > 0
+void sfbDtU(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi);
+void sfbDtD(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi);
 }
 
 }

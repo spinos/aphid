@@ -20,17 +20,18 @@ DtFtWidget::DtFtWidget(QWidget *parent) : Plot1DWidget(parent)
 	int i=0, j;
 	for(;i<256;++i) {
 #if 1
-		float slope = (float)(i - 128) / 128.f;
+		float slope = (float)(i - 128) / 200.f;
 		slope = Absolute<float>(slope);
-		xp->y()[i] = RandomFn11() * 0.17f 
-					+ (cos(.031f * 3.14f * i) + 0.5f * cos(.053f * 3.14f * i) )
-					* .71f * (1.f - slope);
+		slope = 1.f - slope;
+		xp->y()[i] = RandomFn11() * 0.13f * slope
+					+ (cos(.031f * 3.14f * i) + 0.5f * cos(.043f * 3.14f * i) )
+					* .571f * slope;
 #else
 		xp->y()[i] = RandomF01();
 #endif
 	}
 		
-	xp->setColor(0.5,0.5,.5);
+	xp->setColor(0.,0.,0.);
 	addVectorPlot(xp);
 	
 	wla::DualTree tree;
@@ -60,6 +61,19 @@ DtFtWidget::DtFtWidget(QWidget *parent) : Plot1DWidget(parent)
 		}
 	}
 	
+	VectorN<float> result;
+	tree.synthesize(result);
+	
+	float mxe = 0.f;
+	result.maxAbsError(mxe, xp->data() );
+	std::cout<<"\n sythesized n "<<result.N()<<" max err "<<mxe;
+	
+	UniformPlot1D * yp = new UniformPlot1D;
+	yp->create(result.v(), result.N() );
+	yp->setColor(1.,0.,.75);
+	yp->setLineStyle(UniformPlot1D::LsDash);
+	addVectorPlot(yp);
+	
 #if 0
 	
 	float *aft[4];
@@ -80,6 +94,7 @@ DtFtWidget::DtFtWidget(QWidget *parent) : Plot1DWidget(parent)
 		addVectorPlot(afp);
 	}
 #endif
+	std::cout.flush();
 	
 }
 

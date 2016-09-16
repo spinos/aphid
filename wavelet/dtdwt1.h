@@ -28,6 +28,7 @@ public:
 /// x input signal
 /// nstage number of stages, truncate to DT_MAX_N_STAGE
 	void analize(const VectorN<float> & x, const int & nstage);
+/// y output signal
 	void synthesize(VectorN<float> & y);
 	
 	const int & numStages() const;

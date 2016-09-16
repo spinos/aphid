@@ -136,8 +136,26 @@ struct VectorN {
 		memcpy(_data, x, sizeof(T) * n);
 	}
 	
-	void copy(const VectorN<T> & another) {
-		create(another.v(), another.N() );
+	int periodic(const int & i) const {
+		if(i<0)
+			return _ndim +i;
+		if(i>_ndim-1)
+			return i-_ndim;
+		return i;
+	}
+	
+/// copy with shift phase
+	void copy(const VectorN<T> & another, const int & p = 0) {
+		if(p==0) {
+			create(another.v(), another.N() );
+			return;
+		}
+		
+		const int & n = another.N();
+		create(n);
+		for(int i=0;i<n;++i) {
+			_data[i] = another[periodic(i-p)];
+		}
 	}
 	
 	void setZero(const int & n) {
@@ -149,7 +167,11 @@ struct VectorN {
 		copy(another);
 	}
 	
-	T operator[](const int & i) const {
+	const T & operator[](const int & i) const {
+		return _data[i];
+	}
+	
+	T & operator[](const int & i) {
 		return _data[i];
 	}
 	
@@ -216,6 +238,45 @@ struct VectorN {
 				v()[j++]=x[i];
 			}
 		}
+	}
+	
+/// P phase of shift |P| < N
+/// delay the signal when P > 0	
+	void circshift(const int & p) {
+		if(p==0) 
+			return;
+		
+		const int q = p>0 ? p : -p;
+		float * b = new float[q];
+		
+		const int & n = _ndim;
+		T * x = _data;
+		
+		int i;
+		if(p<0) {
+/// b at beginning
+			for(i=0; i<q;++i)
+				b[i] = x[i];
+				
+			for(i=0; i<n-q;++i)
+				x[i] = x[i+q];
+				
+			for(i=0; i<q;++i)
+				x[n-q+i] = b[i];
+		}
+		else {
+/// b at end
+			for(i=0; i<q;++i)
+				b[i] = x[n-q+i];
+				
+			for(i=n-1; i>=q;--i)
+				x[i] = x[i-q];
+				
+			for(i=0; i<q;++i)
+				x[i] = b[i];
+		}
+		
+		delete[] b;
 	}
 	
 	std::string info() const {

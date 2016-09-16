@@ -498,5 +498,45 @@ void afbDtD(const float * x, const int & n,
 		VectorN<float> & lo, VectorN<float> & hi)
 { afbflt(x, n, lo, hi, DualFilterDownAnalysis); }
 
+void sfbflt(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi,
+		const float flt[2][10])
+{
+	const int m = lo.N();
+	int n;
+	float * lo2 = upsample(n, lo.v(), m, 2);
+	float * hi2 = upsample(n, hi.v(), m, 2);
+	float * lo2ft = fir(lo2, n, flt[0], 10);
+	float * hi2ft = fir(hi2, n, flt[1], 10);
+	
+	y.create(n);
+	for(int i=0; i<n;++i)
+		y[i] = lo2ft[i] + hi2ft[i];
+		
+/// 1 - 10/2
+	y.circshift(-4);
+	
+	delete[] lo2;
+	delete[] hi2;
+	delete[] lo2ft;
+	delete[] hi2ft;
+}
+
+void sfbDtFsU(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi)
+{ sfbflt(y, lo, hi, FirstStageUpFarrasSynthesis); }
+
+void sfbDtFsD(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi)
+{ sfbflt(y, lo, hi, FirstStageDownFarrasSynthesis); }
+
+void sfbDtU(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi)
+{ sfbflt(y, lo, hi, DualFilterUpSynthesis); }
+
+void sfbDtD(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi)
+{ sfbflt(y, lo, hi, DualFilterDownSynthesis); }
+		
 }
 }

@@ -28,34 +28,6 @@
 
 using namespace aphid;
 
-/// analysis function
-/// x[N] N is 2x filter length L
-/// N numbers of x
-/// af[L] 
-/// 0 is lowpass filter, 1 is highpass filter
-void afb(const float * x, const int & n, float ** af, const int & filterOrder=10)
-{
-/// width of filter
-	int L = filterOrder/2;
-	float * Xshf = wla::circshift(x, n, -L);
-	
-	float * Xflt = wla::fir(Xshf, n, af[0], filterOrder);
-	delete[] Xshf;
-	delete[] Xflt;
-}
-
-/// w[j][k][d] DWT coefficients
-/// j = 0...J-1, k = 0...1, d = 0...2
-/// x M by N array
-/// J number of stages
-/// Faf first stage filters
-/// af filters for remaining stages
-///
-void dualtree2D(float **w, float *x, int J, float *Faf, float *af)
-{
-
-}
-
 void testUpsampleDownsample()
 {
 	std::cout<<"\n test upsample downsample";
@@ -108,11 +80,25 @@ void testAnalysis()
 	calc::printValues<float>("Xflt", 64, Xflt);
 }
 
+void testCshift()
+{
+	VectorN<int> X;
+	X.create(10);
+	int i=0;
+	for(;i<10;++i)
+		X[i] = i+1;
+		
+	//X.circshift(1);
+	VectorN<int> Y;
+	Y.copy(X, 1);
+	calc::printValues<int>("Cshift", 10, Y.v() );
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"wavelet test\n";
 	
-	testUpsampleCshift();
+	testCshift();
 	
 	std::cout<<" end of test\n";
 	return 0;
