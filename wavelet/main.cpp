@@ -28,18 +28,6 @@
 
 using namespace aphid;
 
-/// http://cn.mathworks.com/help/signal/ref/upfirdn.html
-/// upsampleing x by factor of 1 (no upsample)
-/// filtering with impulse response sequence given in the vector (or matrix) first column of af
-/// downsampling by factor of 2
-/// lo = upfirdn(x, af(:,1), 1, 2);
-/// http://cn.mathworks.com/help/matlab/ref/rand.html
-/// 1-by-64 array of random numbers
-/// x = rand(1,64);
-/// http://cn.mathworks.com/help/matlab/ref/length.html
-/// the length of the largest array dimension in X
-/// L = length(af)/2;
-
 /// analysis function
 /// x[N] N is 2x filter length L
 /// N numbers of x

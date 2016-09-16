@@ -8,6 +8,7 @@
  */
 #ifndef WLA_FLT_BANKS_H
 #define WLA_FLT_BANKS_H
+#include <ATypes.h>
 
 namespace aphid {
 
@@ -75,6 +76,17 @@ void sfb(const float * lo, const float * hi, const int & m,
 /// sf[4][10] synthesis filters
 void fsfarras(float ** af, float ** sf);
 void dualflt(float ** af, float ** sf);
+
+/// dual tree first stage filters up and down
+void afbDtFsU(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi);
+void afbDtFsD(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi);
+/// stage > 0
+void afbDtU(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi);
+void afbDtD(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi);
 		
 }
 

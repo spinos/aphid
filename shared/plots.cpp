@@ -45,6 +45,9 @@ void UniformPlot1D::setLineStyle(UniformPlot1D::LineStyle x)
 const UniformPlot1D::LineStyle & UniformPlot1D::lineStyle() const
 { return m_lstyle; }
 
+const VectorN<float> & UniformPlot1D::data() const
+{ return m_data; }
+
 UniformPlot2D::UniformPlot2D() :
 m_fmd(flFixed),
 m_drScale(1.f)

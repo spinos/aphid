@@ -126,6 +126,7 @@ target_link_libraries (dwt2d Qt4::QtGui)
 SET (DT_FLT_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 fltbanks.cpp
+dtdwt1.cpp
 dtftwidget.cpp
 dtftwindow.cpp
 dtftmain.cpp)

@@ -469,5 +469,34 @@ void dualflt(float ** af, float ** sf)
 	}
 }
 
+void afbflt(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi,
+		const float flt[2][10])
+{
+	float * lo2 = fir(x, n, flt[0], 10);
+	float * hi2 = fir(x, n, flt[1], 10);
+	lo.downsample(lo2, n, 2);
+	hi.downsample(hi2, n, 2);
+	
+	delete[] lo2;
+	delete[] hi2;
+}
+
+void afbDtFsU(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi)
+{ afbflt(x, n, lo, hi, FirstStageUpFarrasAnalysis); }
+
+void afbDtFsD(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi)
+{ afbflt(x, n, lo, hi, FirstStageDownFarrasAnalysis); }
+
+void afbDtU(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi)
+{ afbflt(x, n, lo, hi, DualFilterUpAnalysis); }
+
+void afbDtD(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi)
+{ afbflt(x, n, lo, hi, DualFilterDownAnalysis); }
+
 }
 }

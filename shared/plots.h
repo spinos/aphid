@@ -39,6 +39,7 @@ public:
 	const int & numY() const;
 	void setLineStyle(LineStyle x);
 	const LineStyle & lineStyle() const;
+	const VectorN<float> & data() const;
 	
 private:
 	

@@ -1,6 +1,7 @@
 #ifndef APHID_TYPES_H
 #define APHID_TYPES_H
 #include <sstream>
+
 namespace aphid {
 
 struct Color4 {
@@ -121,7 +122,7 @@ struct VectorN {
 	
 	void create(const int & n)
 	{
-		if(_ndim < (unsigned)n) {
+		if(_ndim < n) {
 			if(_ndim > 0)
 				delete[] _data;
 			_data = new T[n];
@@ -174,6 +175,11 @@ struct VectorN {
 		return r;
 	}
 	
+	void operator*=(const T & scale) {
+		for(int i = 0; i < _ndim; i++) 
+			_data[i] *= scale;
+	}
+	
 	T multiplyTranspose() const {
 		T r;
 		for(int i = 0; i < _ndim; i++) r += _data[i] * _data[i];
@@ -187,6 +193,28 @@ struct VectorN {
 			if(d < 0) d = -d;
 			if(err < d)
 				err = d;
+		}
+	}
+	
+/// decrease sampling rate by integer p with phase offset
+/// X[N] input signal
+	void downsample(const T * x, const int & n, 
+					const int & p, const int & phase=0) {
+	
+		int i=0, j=0;
+		for(;i<n;++i) {
+			if(i== j*p + phase) {
+				j++;
+			}
+		}
+		
+		create(j);
+		
+		i=j=0;
+		for(;i<n;++i) {
+			if(i== j*p + phase) {
+				v()[j++]=x[i];
+			}
 		}
 	}
 	
