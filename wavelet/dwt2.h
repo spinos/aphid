@@ -34,6 +34,11 @@ void circleShift2(Array2<float> * x, const int & p);
 /// hi output high pass subband
 void afbRow(Array2<float> * x, Array2<float> * lo, Array2<float> * hi);
 
+/// synthesis filter bank per column
+/// input lowpass and highpass subbands
+/// output y doubles the number of rows of input
+void sfbRow(Array2<float> * y, Array2<float> * lo, Array2<float> * hi);
+
 /// http://eeweb.poly.edu/iselesni/WaveletSoftware/standard2D.html
 /// 2d analysis filter bank
 /// filter along columns of x
@@ -44,6 +49,13 @@ void afb2(Array2<float> * x,
 		Array2<float> * lo, Array2<float> * lohi,
 		Array2<float> * hilo, Array2<float> * hihi);
 
+/// 2d synthesis filter banks
+/// 4 input subbands
+/// output y doubles the size of input
+void sfb2(Array2<float> * y,
+		Array2<float> * lo, Array2<float> * lohi,
+		Array2<float> * hilo, Array2<float> * hihi);
+		
 }
 
 }

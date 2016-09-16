@@ -273,6 +273,17 @@ struct Array2 {
 		}
 	}
 	
+	void maxAbsError(T & err, const Array2 & another) {
+		const int mn = m_M * m_N;
+		int i = 0;
+		for(;i<mn;++i) {
+			T d = m_data[i] - another.v()[i];
+			if(d < 0) d = -d;
+			if(err < d)
+				err = d;
+		}
+	}
+	
 };
 
 /// http://www.owlnet.rice.edu/~ceng303/manuals/fortran/FOR5_3.html

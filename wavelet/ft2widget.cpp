@@ -16,8 +16,8 @@ using namespace aphid;
 Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 {
 	UniformPlot2DImage * Xp = new UniformPlot2DImage;
-#define DIM_Y 128
-#define DIM_X 128
+#define DIM_Y 256
+#define DIM_X 256
 #define DIM_Z 1
 	Xp->create(DIM_Y, DIM_X, DIM_Z);
 	
@@ -27,7 +27,7 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	for(k=0;k<DIM_Z;++k) {
 		float * Xv = Xp->y(k);
 		
-		Vector3F o(0.435f + k, 0.73656f + k, 0.3765f + k);
+		Vector3F o(0.435f + 0.1 * k, 0.73656f + 0.1 * k, 0.71765f + 0.1 * k);
 		
 	for(j=0;j<DIM_X;++j) {
 		for(i=0;i<DIM_Y;++i) {
@@ -54,28 +54,70 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	
 	addImage(Xp);
 	
-	UniformPlot2DImage * lowpassP = new UniformPlot2DImage;
-	lowpassP->create(DIM_Y/2, DIM_X, DIM_Z);
+	UniformPlot2DImage * lowP = new UniformPlot2DImage;
+	lowP->create(DIM_Y/2, DIM_X/2, DIM_Z);
 	
-	UniformPlot2DImage * highpassP = new UniformPlot2DImage;
-	highpassP->create(DIM_Y/2, DIM_X, DIM_Z);
+	UniformPlot2DImage * lowhighP = new UniformPlot2DImage;
+	lowhighP->create(DIM_Y/2, DIM_X/2, DIM_Z);
+	
+	UniformPlot2DImage * highlowP = new UniformPlot2DImage;
+	highlowP->create(DIM_Y/2, DIM_X/2, DIM_Z);
+	
+	UniformPlot2DImage * highhighP = new UniformPlot2DImage;
+	highhighP->create(DIM_Y/2, DIM_X/2, DIM_Z);
 	
 	for(k=0;k<DIM_Z;++k) {
 		
-		wla::afbRow(Xp->channel(k), 
-			lowpassP->channel(k), highpassP->channel(k) );
+		wla::afb2(Xp->channel(k), 
+			lowP->channel(k), lowhighP->channel(k),
+			highlowP->channel(k), highhighP->channel(k) );
 		
 	}
 	
-	lowpassP->setDrawScale(1.f);
-	lowpassP->updateImage();
+	lowP->setDrawScale(1.f);
+	lowP->updateImage();
 	
-	addImage(lowpassP);
 	
-	highpassP->setDrawScale(1.f);
-	highpassP->updateImage(true);
+	lowhighP->setDrawScale(1.f);
+	lowhighP->updateImage(true);
 	
-	addImage(highpassP);
+	highlowP->setDrawScale(1.f);
+	highlowP->updateImage(true);
+	
+	highhighP->setDrawScale(1.f);
+	highhighP->updateImage(true);
+	
+	UniformPlot2DImage * yP = new UniformPlot2DImage;
+	yP->create(DIM_Y, DIM_X, DIM_Z);
+	
+	for(k=0;k<DIM_Z;++k) {
+		
+		wla::sfb2(yP->channel(k), 
+			lowP->channel(k), lowhighP->channel(k),
+			highlowP->channel(k), highhighP->channel(k) );
+		
+	}
+	
+	yP->setDrawScale(1.f);
+	yP->updateImage();
+	
+	addImage(yP);
+	addImage(lowP);
+	addImage(lowhighP);
+	addImage(highlowP);
+	addImage(highhighP);
+	
+	float mxe = 0.f;
+	
+	for(k=0;k<DIM_Z;++k) {
+/// original x
+		wla::circleShift2(Xp->channel(k), 5);
+		Xp->channel(k)->maxAbsError(mxe, *yP->channel(k) );
+		
+	}
+	
+	std::cout<<"\n max err "<<mxe;
+	std::cout.flush();
 }
 
 Ft2Widget::~Ft2Widget()
