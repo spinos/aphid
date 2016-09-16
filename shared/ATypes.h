@@ -146,16 +146,25 @@ struct VectorN {
 	
 /// copy with shift phase
 	void copy(const VectorN<T> & another, const int & p = 0) {
+		const int & n = another.N();
+		create(n);
+		
 		if(p==0) {
-			create(another.v(), another.N() );
+			memcpy(_data, another.v(), sizeof(T) * n);
 			return;
 		}
 		
-		const int & n = another.N();
-		create(n);
-		for(int i=0;i<n;++i) {
-			_data[i] = another[periodic(i-p)];
+		const int q = p>0 ? p : -p;
+
+		if(p<0) {
+			memcpy(_data, &another.v()[q], sizeof(T) * (n-q) );
+			memcpy(&_data[n-q], another.v(), sizeof(T) * q );
 		}
+		else {
+			memcpy(&_data[q], another.v(), sizeof(T) * (n-q) );
+			memcpy(_data, &another.v()[n-q], sizeof(T) * q );
+		}
+		
 	}
 	
 	void setZero(const int & n) {
@@ -463,5 +472,4 @@ struct Array3 {
 };
 
 }
-#endif        //  #ifndef ATYPES_H
-
+#endif        //  #ifndef APHID_TYPES_H

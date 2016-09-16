@@ -90,7 +90,7 @@ void testCshift()
 		
 	//X.circshift(1);
 	VectorN<int> Y;
-	Y.copy(X, 1);
+	Y.copy(X, -1);
 	calc::printValues<int>("Cshift", 10, Y.v() );
 }
 
