@@ -133,52 +133,6 @@ void sfbRowflt(Array2<float> * y,
 	}
 }
 
-void afb2(const Array2<float> * x,
-		Array2<float> * lo, Array2<float> * lohi,
-		Array2<float> * hilo, Array2<float> * hihi)
-{
-	Array2<float> L;
-	Array2<float> H;
-/// filter along columns of x
-	afbRow(x, &L, &H);
-	
-/// transpose to filter along columns
-	L.transpose();
-	H.transpose();
-	
-	afbRow(&L, lo, lohi);
-	afbRow(&H, hilo, hihi);
-	
-/// transpose back
-	lo->transpose();
-	lohi->transpose();
-	hilo->transpose();
-	hihi->transpose();
-}
-
-void sfb2(Array2<float> * y,
-		Array2<float> * lo, Array2<float> * lohi,
-		Array2<float> * hilo, Array2<float> * hihi)
-{
-	Array2<float> L;
-	Array2<float> H;
-	
-/// transpose to filter along columns
-	lo->transpose();
-	lohi->transpose();
-	hilo->transpose();
-	hihi->transpose();
-	
-	sfbRow(&L, lo, lohi);
-	sfbRow(&H, hilo, hihi);
-	
-/// transpose back to along columns
-	L.transpose();
-	H.transpose();
-	
-	sfbRow(y, &L, &H);
-}
-
 void afb2flt(const Array2<float> * x,
 		const float flt[2][10],
 		Array2<float> * lo, Array2<float> * lohi,

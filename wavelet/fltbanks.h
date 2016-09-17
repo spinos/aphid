@@ -31,6 +31,9 @@ public:
 	static const float DownAnalysis[2][10];
 	static const float UpSynthesis[2][10];
 	static const float DownSynthesis[2][10];
+	static const float FarrasAnalysisFilter[2][10];
+	static const float FarrasSynthesisFilter[2][10];
+	
 };
 
 /// http://cn.mathworks.com/help/signal/ref/upsample.html

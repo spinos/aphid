@@ -83,43 +83,45 @@ void DualTree2::analize(const Array3<float> & x, const int & nstage)
 	m_w[j][3] = xd;
 	
 	m_lastStage = j;
-/*
+
 /// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/dualtree2D.m
 /// sum and difference
 	for(j=0;j<m_lastStage;++j) {
+		
 		for(i=0;i<3;++i) {
 			for(k=0;k<p;++k) {
 				Array2<float> apb = *m_w[j][0+i].rank(k) + *m_w[j][3+i].rank(k);
-				Array2<float> amb = *m_w[j][3+i].rank(k) - *m_w[j][3+i].rank(k);
+				Array2<float> amb = *m_w[j][0+i].rank(k) - *m_w[j][3+i].rank(k);
+				apb *= 0.707106781187f; 
+				amb *= 0.707106781187f;
 				*m_w[j][0+i].rank(k) = apb;
-				*m_w[j][0+i].rank(k) *= 0.707106781187f;
 				*m_w[j][3+i].rank(k) = amb;
-				*m_w[j][3+i].rank(k) *= 0.707106781187f;
 			}
 		}
-	}*/
+	}
+
 }
 
 void DualTree2::synthesize(Array3<float> & y)
 {
 	const int & p = m_w[m_lastStage][0].numRanks();
 	int i, j, k;
-/*
+
 /// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/idualtree2D.m
 /// sum and difference
 	for(j=0;j<m_lastStage;++j) {
 		for(i=0;i<3;++i) {
 			for(k=0;k<p;++k) {
 				Array2<float> apb = *m_w[j][0+i].rank(k) + *m_w[j][3+i].rank(k);
-				Array2<float> amb = *m_w[j][3+i].rank(k) - *m_w[j][3+i].rank(k);
+				Array2<float> amb = *m_w[j][0+i].rank(k) - *m_w[j][3+i].rank(k);
+				apb *= 0.707106781187f; 
+				amb *= 0.707106781187f;
 				*m_w[j][0+i].rank(k) = apb;
-				*m_w[j][0+i].rank(k) *= 0.707106781187f;
 				*m_w[j][3+i].rank(k) = amb;
-				*m_w[j][3+i].rank(k) *= 0.707106781187f;
 			}
 		}
-	}*/
-	
+	}
+
 	j = m_lastStage;
 	Array3<float> yu;
 	yu = m_w[j][0];
@@ -128,7 +130,6 @@ void DualTree2::synthesize(Array3<float> & y)
 	
 	j--;
 	while(j>0) {
-		std::cout<<"\n synj"<<j;
 		for(k=0;k<p;++k) {
 			sfb2flt(yu.rank(k), Dtf::UpSynthesis,
 					yu.rank(k), m_w[j][0].rank(k), m_w[j][1].rank(k), m_w[j][2].rank(k) );
@@ -138,11 +139,11 @@ void DualTree2::synthesize(Array3<float> & y)
 		
 		j--;
 	}
-	std::cout<<"\n synj"<<j;
+	
 	for(k=0;k<p;++k) {
 		sfb2flt(yu.rank(k), Dtf::FirstStageUpFarrasSynthesis,
 				yu.rank(k), m_w[j][0].rank(k), m_w[j][1].rank(k), m_w[j][2].rank(k) );
-		sfb2flt(yd.rank(k), Dtf::FirstStageUpFarrasSynthesis,
+		sfb2flt(yd.rank(k), Dtf::FirstStageDownFarrasSynthesis,
 				yd.rank(k), m_w[j][3].rank(k), m_w[j][4].rank(k), m_w[j][5].rank(k) );
 	}
 	

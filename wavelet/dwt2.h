@@ -51,22 +51,14 @@ void sfbRowflt(Array2<float> * y,
 /// transpose the resulting 2 subbands
 /// filter again
 /// resulting 4 subbands half of the size of input signal x
-void afb2(const Array2<float> * x,
+void afb2flt(const Array2<float> * x,
+		const float flt[2][10],
 		Array2<float> * lo, Array2<float> * lohi,
 		Array2<float> * hilo, Array2<float> * hihi);
 
 /// 2d synthesis filter banks
 /// 4 input subbands
 /// output y doubles the size of input
-void sfb2(Array2<float> * y,
-		Array2<float> * lo, Array2<float> * lohi,
-		Array2<float> * hilo, Array2<float> * hihi);
-
-void afb2flt(const Array2<float> * x,
-		const float flt[2][10],
-		Array2<float> * lo, Array2<float> * lohi,
-		Array2<float> * hilo, Array2<float> * hihi);
-
 void sfb2flt(Array2<float> * y,
 		const float flt[2][10],
 		Array2<float> * lo, Array2<float> * lohi,

@@ -24,13 +24,13 @@ Dt2Widget::Dt2Widget(QWidget *parent) : Plot2DWidget(parent)
 	addImage(Xp);
 	
 	wla::DualTree2 tree;
-	tree.analize(Xp->data(), 1);
+	tree.analize(Xp->data(), 2);
 	
 	std::cout<<"\n last stage "<<tree.lastStage();
 	
 	int i, j, k;
 	
-#if 0
+#if 1
 	for(i=0;i<=tree.lastStage();++i) {
 #else
 	i=tree.lastStage();	
@@ -52,7 +52,7 @@ Dt2Widget::Dt2Widget(QWidget *parent) : Plot2DWidget(parent)
 				addImage(wp);
 			}
 		}
-#if 0
+#if 1
 	}
 #endif
 

@@ -206,38 +206,10 @@ const float Dtf::DownSynthesis[2][10] = {
 -0.03516384}
 };
 
-void Dtf::fsfarras(float ** af, float ** sf)
-{
-	for(int i=0; i<10; ++i) {
-		af[0][i] = Dtf::FirstStageUpFarrasAnalysis[0][i];
-		af[1][i] = Dtf::FirstStageUpFarrasAnalysis[1][i];
-		af[2][i] = Dtf::FirstStageDownFarrasAnalysis[0][i];
-		af[3][i] = Dtf::FirstStageDownFarrasAnalysis[1][i];
-		sf[0][i] = Dtf::FirstStageUpFarrasSynthesis[0][i];
-		sf[1][i] = Dtf::FirstStageUpFarrasSynthesis[1][i];
-		sf[2][i] = Dtf::FirstStageDownFarrasSynthesis[0][i];
-		sf[3][i] = Dtf::FirstStageDownFarrasSynthesis[1][i];
-	}
-}
-
-void Dtf::dualflt(float ** af, float ** sf)
-{
-	for(int i=0; i<10; ++i) {
-		af[0][i] = Dtf::UpAnalysis[0][i];
-		af[1][i] = Dtf::UpAnalysis[1][i];
-		af[2][i] = Dtf::DownAnalysis[0][i];
-		af[3][i] = Dtf::DownAnalysis[1][i];
-		sf[0][i] = Dtf::UpSynthesis[0][i];
-		sf[1][i] = Dtf::UpSynthesis[1][i];
-		sf[2][i] = Dtf::DownSynthesis[0][i];
-		sf[3][i] = Dtf::DownSynthesis[1][i];
-	}
-}
-
 /// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/farras.m
 /// Farras nearly symmetric filters for orthogonal
 /// 2-channel perfect reconstruction filter bank
-static const float FarrasAnalysisFilter[2][10] = {
+const float Dtf::FarrasAnalysisFilter[2][10] = {
 {0,
 0,
 -0.0883883476483,
@@ -267,7 +239,7 @@ static const float FarrasAnalysisFilter[2][10] = {
 /// x(:, 1)
 /// all the rows and second column of x
 /// x(:, 2)
-static const float FarrasSynthesisFilter[2][10] = {
+const float Dtf::FarrasSynthesisFilter[2][10] = {
 {0.0112267921525,
 0.0112267921525,
 -0.0883883476483,
@@ -290,13 +262,41 @@ static const float FarrasSynthesisFilter[2][10] = {
 -0.0112267921525}
 };
 
+void Dtf::fsfarras(float ** af, float ** sf)
+{
+	for(int i=0; i<10; ++i) {
+		af[0][i] = Dtf::FirstStageUpFarrasAnalysis[0][i];
+		af[1][i] = Dtf::FirstStageUpFarrasAnalysis[1][i];
+		af[2][i] = Dtf::FirstStageDownFarrasAnalysis[0][i];
+		af[3][i] = Dtf::FirstStageDownFarrasAnalysis[1][i];
+		sf[0][i] = Dtf::FirstStageUpFarrasSynthesis[0][i];
+		sf[1][i] = Dtf::FirstStageUpFarrasSynthesis[1][i];
+		sf[2][i] = Dtf::FirstStageDownFarrasSynthesis[0][i];
+		sf[3][i] = Dtf::FirstStageDownFarrasSynthesis[1][i];
+	}
+}
+
+void Dtf::dualflt(float ** af, float ** sf)
+{
+	for(int i=0; i<10; ++i) {
+		af[0][i] = Dtf::UpAnalysis[0][i];
+		af[1][i] = Dtf::UpAnalysis[1][i];
+		af[2][i] = Dtf::DownAnalysis[0][i];
+		af[3][i] = Dtf::DownAnalysis[1][i];
+		sf[0][i] = Dtf::UpSynthesis[0][i];
+		sf[1][i] = Dtf::UpSynthesis[1][i];
+		sf[2][i] = Dtf::DownSynthesis[0][i];
+		sf[3][i] = Dtf::DownSynthesis[1][i];
+	}
+}
+
 void farras(float ** af, float ** sf)
 {
 	for(int i=0; i<10; ++i) {
-		af[0][i] = FarrasAnalysisFilter[0][i];
-		af[1][i] = FarrasAnalysisFilter[1][i];
-		sf[0][i] = FarrasSynthesisFilter[0][i];
-		sf[1][i] = FarrasSynthesisFilter[1][i];
+		af[0][i] = Dtf::FarrasAnalysisFilter[0][i];
+		af[1][i] = Dtf::FarrasAnalysisFilter[1][i];
+		sf[0][i] = Dtf::FarrasSynthesisFilter[0][i];
+		sf[1][i] = Dtf::FarrasSynthesisFilter[1][i];
 	}
 }
 
@@ -438,8 +438,8 @@ float * firhHann(const float * x, const int & n)
 void afb(const float * x, const int & n,
 		float * & lo, float * & hi, int & m)
 {
-	float * lo2 = fir(x, n, FarrasAnalysisFilter[0], 10);
-	float * hi2 = fir(x, n, FarrasAnalysisFilter[1], 10);
+	float * lo2 = fir(x, n, Dtf::FarrasAnalysisFilter[0], 10);
+	float * hi2 = fir(x, n, Dtf::FarrasAnalysisFilter[1], 10);
 	lo = downsample(m, lo2, n, 2);
 	hi = downsample(m, hi2, n, 2);
 	
@@ -452,8 +452,8 @@ void sfb(const float * lo, const float * hi, const int & m,
 {
 	float * lo2 = upsample(n, lo, m, 2);
 	float * hi2 = upsample(n, hi, m, 2);
-	float * lo2ft = fir(lo2, n, FarrasSynthesisFilter[0], 10);
-	float * hi2ft = fir(hi2, n, FarrasSynthesisFilter[1], 10);
+	float * lo2ft = fir(lo2, n, Dtf::FarrasSynthesisFilter[0], 10);
+	float * hi2ft = fir(hi2, n, Dtf::FarrasSynthesisFilter[1], 10);
 	
 	float * yd = new float[n];
 	for(int i=0; i<n;++i)

@@ -41,7 +41,8 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	int k;
 	for(k=0;k<DIM_Z;++k) {
 		
-		wla::afb2(Xp->channel(k), 
+		wla::afb2flt(Xp->channel(k), 
+			wla::Dtf::FarrasAnalysisFilter,
 			lowP->channel(k), lowhighP->channel(k),
 			highlowP->channel(k), highhighP->channel(k) );
 		
@@ -64,7 +65,8 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	
 	for(k=0;k<DIM_Z;++k) {
 		
-		wla::sfb2(yP->channel(k), 
+		wla::sfb2flt(yP->channel(k), 
+			wla::Dtf::FarrasSynthesisFilter,
 			lowP->channel(k), lowhighP->channel(k),
 			highlowP->channel(k), highhighP->channel(k) );
 		

@@ -402,26 +402,28 @@ struct Array2 {
 	}
 	
 	Array2<T> operator+(const Array2<T> & another) const {
-		Array2<T> r(another);
-		r += *this;
+		Array2<T> r;
+		r.copy(*this);
+		r += another;
 		return r;
 	}
 	
 	Array2<T> operator-(const Array2<T> & another) const {
-		Array2<T> r(another);
-		r -= *this;
+		Array2<T> r;
+		r.copy(*this);
+		r -= another;
 		return r;
 	}
 	
 	void operator+=(const Array2<T> & another) {
 		const int mn = m_M * m_N;
-		for(int i = 0; i < mn; i++) 
+		for(int i = 0; i < mn;++i) 
 			m_data[i] += another.v()[i];
 	}
 	
 	void operator-=(const Array2<T> & another) {
 		const int mn = m_M * m_N;
-		for(int i = 0; i < mn; i++) 
+		for(int i = 0; i < mn;++i) 
 			m_data[i] -= another.v()[i];
 	}
 	
@@ -429,6 +431,27 @@ struct Array2 {
 		const int mn = m_M * m_N;
 		for(int i = 0; i < mn; i++) 
 			m_data[i] *= s;
+	}
+	
+	friend std::ostream& operator<<(std::ostream &output, const Array2 & p) {
+        output << p.str();
+        return output;
+    }
+	
+	const std::string str() const {
+		std::stringstream sst;
+		sst.str("");
+		
+		for(int j=0;j<m_M;++j) {
+			sst<<"\n|";
+			for(int i=0;i<m_N;++i) {
+				sst<<m_data[iuv(i,j)];
+				if(i<m_N-1)
+					sst<<", ";
+			}
+			sst<<"|";
+		}
+		return sst.str();
 	}
 	
 };

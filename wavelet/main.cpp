@@ -94,11 +94,43 @@ void testCshift()
 	calc::printValues<int>("Cshift", 10, Y.v() );
 }
 
+void testSumDifference()
+{
+	Array2<float> a, b;
+	a.create(4,3);
+	b.create(4,3);
+	float * va = a.v();
+	float * vb = b.v();
+	for(int i=0;i<12;++i) {
+		va[i] = i+1;
+		vb[i] = -i-1;
+	}
+	
+	Array2<float> sum = a + b;
+	sum *= 0.707106781187;
+	std::cout<<"\n S "<<sum;
+	
+	Array2<float> diff = a - b;
+	diff *= 0.707106781187;
+	std::cout<<"\n D "<<diff;
+	
+	std::cout<<"\n a "<<a;
+	std::cout<<"\n b "<<b;
+	
+	Array2<float> a1 = sum + diff;
+	a1 *= 0.707106781187;
+	std::cout<<"\n a1 "<<a1;
+	
+	Array2<float> b1 = sum - diff;
+	b1 *= 0.707106781187;
+	std::cout<<"\n b1 "<<b1;
+}
+
 int main(int argc, char * const argv[])
 {
 	std::cout<<"wavelet test\n";
 	
-	testCshift();
+	testSumDifference();
 	
 	std::cout<<" end of test\n";
 	return 0;
