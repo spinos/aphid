@@ -8,7 +8,7 @@
  */
 #include <QtGui>
 #include <Calculus.h>
-#include "DtFtWidget.h"
+#include "dtftwidget.h"
 #include "dtdwt1.h"
 
 using namespace aphid;

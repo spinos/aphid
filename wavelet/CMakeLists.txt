@@ -144,5 +144,28 @@ target_link_libraries (dtft ${APHID_GEOM_LIBRARY})
 
 target_link_libraries (dtft Qt4::QtGui)
 
+SET (DT_2_SRC ../shared/BaseImageWidget.cpp
+../shared/Plot1DWidget.cpp
+../shared/Plot2DWidget.cpp
+fltbanks.cpp
+dtdwt1.cpp
+dtdwt2.cpp
+dt2widget.cpp
+dt2window.cpp
+dt2main.cpp)
+
+add_executable (dt2dwt ${DT_2_SRC})
+target_link_libraries (dt2dwt ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (dt2dwt ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (dt2dwt ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (dt2dwt ${Boost_REGEX_LIBRARY})
+target_link_libraries (dt2dwt ${Boost_THREAD_LIBRARY})
+target_link_libraries (dt2dwt ${Boost_CHRONO_LIBRARY})
+
+target_link_libraries (dt2dwt ${APHID_MATH_LIBRARY})
+target_link_libraries (dt2dwt ${APHID_GEOM_LIBRARY})
+
+target_link_libraries (dt2dwt Qt4::QtGui)
+
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 

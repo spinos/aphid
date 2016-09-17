@@ -1,5 +1,5 @@
 /*
- *  dtftidget.h
+ *  dtftwidget.h
  *  
  *
  *  Created by jian zhang on 9/14/16.
