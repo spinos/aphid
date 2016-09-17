@@ -50,7 +50,6 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	lowP->setDrawScale(1.f);
 	lowP->updateImage();
 	
-	
 	lowhighP->setDrawScale(1.f);
 	lowhighP->updateImage(true);
 	
@@ -84,7 +83,7 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	
 	for(k=0;k<DIM_Z;++k) {
 /// original x
-		wla::circleShift2(Xp->channel(k), 5);
+		//wla::circleShift2(Xp->channel(k), 5);
 		Xp->channel(k)->maxAbsError(mxe, *yP->channel(k) );
 		
 	}

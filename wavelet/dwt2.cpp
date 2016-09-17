@@ -36,9 +36,8 @@ void circleShift2(Array2<float> * x, const int & p)
 	}
 }
 
-void afbRow(Array2<float> * x, Array2<float> * lo, Array2<float> * hi)
+void afbRow(const Array2<float> * x, Array2<float> * lo, Array2<float> * hi)
 {
-	circleShift2(x, -5);
 	const int & nrow = x->numRows();
 	const int & ncol = x->numCols();
 	const int nsubrow = nrow / 2;
@@ -46,17 +45,47 @@ void afbRow(Array2<float> * x, Array2<float> * lo, Array2<float> * hi)
 	lo->create(nsubrow, ncol);
 	hi->create(nsubrow, ncol);
 	
+	VectorN<float> bcol;
+	
 	float * locol;
 	float * hicol;
 	int m;
 	for(int i=0; i<ncol;++i) {
-		afb(x->column(i), nrow, locol, hicol, m);
+		bcol.copy(x->column(i), nrow, -5);
+	
+		afb(bcol.v(), nrow, locol, hicol, m);
 		
 		lo->copyColumn(i, locol);
 		hi->copyColumn(i, hicol);
 		
 		delete[] locol;
 		delete[] hicol;
+	}
+}
+
+void afbRowflt(const Array2<float> * x,
+		const float flt[2][10],
+		Array2<float> * lo, Array2<float> * hi)
+{
+	const int & nrow = x->numRows();
+	const int & ncol = x->numCols();
+	const int nsubrow = nrow / 2;
+	
+	lo->create(nsubrow, ncol);
+	hi->create(nsubrow, ncol);
+	
+	VectorN<float> bcol;
+	VectorN<float> locol;
+	VectorN<float> hicol;
+
+	for(int i=0; i<ncol;++i) {
+		bcol.copy(x->column(i), nrow, -5);
+	
+		afbflt(bcol.v(), nrow, locol, hicol, flt);
+		
+		lo->copyColumn(i, locol.v() );
+		hi->copyColumn(i, hicol.v() );
+		
 	}
 }
 
@@ -78,7 +107,33 @@ void sfbRow(Array2<float> * y, Array2<float> * lo, Array2<float> * hi)
 	}
 }
 
-void afb2(Array2<float> * x,
+void sfbRowflt(Array2<float> * y, 
+		const float flt[2][10],
+		Array2<float> * lo, Array2<float> * hi)
+{
+	const int & nrow = lo->numRows();
+	const int & ncol = lo->numCols();
+	y->create(nrow*2, ncol);
+	
+	VectorN<float> ycol;
+	VectorN<float> locol;
+	VectorN<float> hicol;
+	
+	for(int i=0; i<ncol;++i) {
+	
+		locol.copy(lo->column(i), nrow);
+		hicol.copy(hi->column(i), nrow);
+		
+		sfbflt(ycol,
+			locol, hicol,
+			flt);
+		
+		y->copyColumn(i, ycol.v() );
+		
+	}
+}
+
+void afb2(const Array2<float> * x,
 		Array2<float> * lo, Array2<float> * lohi,
 		Array2<float> * hilo, Array2<float> * hihi)
 {
@@ -122,6 +177,54 @@ void sfb2(Array2<float> * y,
 	H.transpose();
 	
 	sfbRow(y, &L, &H);
+}
+
+void afb2flt(const Array2<float> * x,
+		const float flt[2][10],
+		Array2<float> * lo, Array2<float> * lohi,
+		Array2<float> * hilo, Array2<float> * hihi)
+{
+	Array2<float> L;
+	Array2<float> H;
+/// filter along columns of x
+	afbRowflt(x, flt, &L, &H);
+	
+/// transpose to filter along columns
+	L.transpose();
+	H.transpose();
+	
+	afbRowflt(&L, flt, lo, lohi);
+	afbRowflt(&H, flt, hilo, hihi);
+	
+/// transpose back
+	lo->transpose();
+	lohi->transpose();
+	hilo->transpose();
+	hihi->transpose();
+}
+
+void sfb2flt(Array2<float> * y,
+		const float flt[2][10],
+		Array2<float> * lo, Array2<float> * lohi,
+		Array2<float> * hilo, Array2<float> * hihi)
+{
+	Array2<float> L;
+	Array2<float> H;
+	
+/// transpose to filter along columns
+	lo->transpose();
+	lohi->transpose();
+	hilo->transpose();
+	hihi->transpose();
+	
+	sfbRowflt(&L, flt, lo, lohi);
+	sfbRowflt(&H, flt, hilo, hihi);
+	
+/// transpose back to along columns
+	L.transpose();
+	H.transpose();
+	
+	sfbRowflt(y, flt, &L, &H);
 }
 
 }

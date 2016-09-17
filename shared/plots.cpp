@@ -59,6 +59,9 @@ UniformPlot2D::~UniformPlot2D()
 void UniformPlot2D::create(const int & m, const int & n, const int & p)
 { m_data.create(m,n,p); }
 
+void UniformPlot2D::create(const Array3<float> & b)
+{ m_data = b; }
+
 void UniformPlot2D::setFillMode(FillMode x)
 { m_fmd = x; }
 
@@ -94,5 +97,8 @@ Array2<float> * UniformPlot2D::channel(const int & k)
 
 const Array2<float> * UniformPlot2D::channel(const int & k) const
 { return m_data.rank(k); }
+
+const Array3<float> & UniformPlot2D::data() const
+{ return m_data; }
 
 }

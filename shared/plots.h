@@ -79,6 +79,7 @@ public:
 /// N number of columns
 /// P number of channels
 	void create(const int & m, const int & n, const int & p = 1);
+	void create(const Array3<float> & b);
 	
 	void setFillMode(FillMode x);
 	void setDrawScale(float x);
@@ -98,6 +99,8 @@ public:
 	
 /// u column v row
 	int iuv(const int & u, const int & v) const;
+	
+	const Array3<float> & data() const;
 	
 protected:
 

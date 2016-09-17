@@ -37,8 +37,8 @@ void DualTree::analize(const VectorN<float> & x, const int & nstage)
 	
 	int j = 0; 
 	
-	afbDtFsU(Xshf.v(), n, xu, m_w[0][0]);
-	afbDtFsD(Xshf.v(), n, xd, m_w[0][1]);
+	afbflt(Xshf.v(), n, xu, m_w[0][0], Dtf::FirstStageUpFarrasAnalysis);
+	afbflt(Xshf.v(), n, xd, m_w[0][1], Dtf::FirstStageDownFarrasAnalysis);
 	
 	j++;
 	
@@ -48,11 +48,11 @@ void DualTree::analize(const VectorN<float> & x, const int & nstage)
 		
 		Xshf.copy(xu, -5);
 
-		afbDtU(Xshf.v(), nj, xu, m_w[j][0]);
+		afbflt(Xshf.v(), nj, xu, m_w[j][0], Dtf::UpAnalysis);
 			
 		Xshf.copy(xd, -5);
 
-		afbDtD(Xshf.v(), nj, xd, m_w[j][1]);
+		afbflt(Xshf.v(), nj, xd, m_w[j][1], Dtf::DownAnalysis);
 		
 		j++;
 		
@@ -75,14 +75,14 @@ void DualTree::synthesize(VectorN<float> & y)
 	j--;
 	while(j>0) {
 		
-		sfbDtU(yu, yu, m_w[j][0]);
-		sfbDtD(yd, yd, m_w[j][1]);
+		sfbflt(yu, yu, m_w[j][0], Dtf::UpSynthesis);
+		sfbflt(yd, yd, m_w[j][1], Dtf::DownSynthesis);
 		
 		j--;
 	}
 	
-	sfbDtFsU(yu, yu, m_w[j][0]);
-	sfbDtFsD(yd, yd, m_w[j][1]);
+	sfbflt(yu, yu, m_w[j][0], Dtf::FirstStageUpFarrasSynthesis);
+	sfbflt(yd, yd, m_w[j][1], Dtf::FirstStageDownFarrasSynthesis);
 	
 	const int & n = yu.N();
 	y.copy(yu);

@@ -73,8 +73,8 @@ DtFtWidget::DtFtWidget(QWidget *parent) : Plot1DWidget(parent)
 		sft[i] = new float[10];
 	}
 	
-	//wla::fsfarras(aft, sft);
-	wla::dualflt(aft, sft);
+	//wla::Dtf::fsfarras(aft, sft);
+	wla::Dtf::dualflt(aft, sft);
 	
 	for(i=0;i<4;++i) {
 		UniformPlot1D * afp = new UniformPlot1D;

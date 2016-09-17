@@ -14,6 +14,25 @@ namespace aphid {
 
 namespace wla {
 
+class Dtf {
+
+public:
+/// get the filters
+/// af[4][10] analysis filters
+/// sf[4][10] synthesis filters
+	static void fsfarras(float ** af, float ** sf);
+	static void dualflt(float ** af, float ** sf);
+
+	static const float FirstStageUpFarrasAnalysis[2][10];
+	static const float FirstStageUpFarrasSynthesis[2][10];
+	static const float FirstStageDownFarrasAnalysis[2][10];
+	static const float FirstStageDownFarrasSynthesis[2][10];
+	static const float UpAnalysis[2][10];
+	static const float DownAnalysis[2][10];
+	static const float UpSynthesis[2][10];
+	static const float DownSynthesis[2][10];
+};
+
 /// http://cn.mathworks.com/help/signal/ref/upsample.html
 /// increase sampling rate by integer factor p with phase offset
 /// by inserting p – 1 zeros between samples
@@ -70,34 +89,17 @@ void afb(const float * x, const int & n,
 /// N output length
 void sfb(const float * lo, const float * hi, const int & m,
 		float * & y, int & n);
-	
-/// get the filters
-/// af[4][10] analysis filters
-/// sf[4][10] synthesis filters
-void fsfarras(float ** af, float ** sf);
-void dualflt(float ** af, float ** sf);
 
-/// dual tree first stage filters up and down
+/// dual tree
 /// analysis
-void afbDtFsU(const float * x, const int & n,
-		VectorN<float> & lo, VectorN<float> & hi);
-void afbDtFsD(const float * x, const int & n,
-		VectorN<float> & lo, VectorN<float> & hi);
-/// stage > 0
-void afbDtU(const float * x, const int & n,
-		VectorN<float> & lo, VectorN<float> & hi);
-void afbDtD(const float * x, const int & n,
-		VectorN<float> & lo, VectorN<float> & hi);
+void afbflt(const float * x, const int & n,
+		VectorN<float> & lo, VectorN<float> & hi,
+		const float flt[2][10]);
 /// synthesis
-void sfbDtFsU(VectorN<float> & y,
-		const VectorN<float> & lo, const VectorN<float> & hi);
-void sfbDtFsD(VectorN<float> & y,
-		const VectorN<float> & lo, const VectorN<float> & hi);
-/// stage > 0
-void sfbDtU(VectorN<float> & y,
-		const VectorN<float> & lo, const VectorN<float> & hi);
-void sfbDtD(VectorN<float> & y,
-		const VectorN<float> & lo, const VectorN<float> & hi);
+void sfbflt(VectorN<float> & y,
+		const VectorN<float> & lo, const VectorN<float> & hi,
+		const float flt[2][10]);
+		
 }
 
 }

@@ -17,29 +17,32 @@ namespace wla {
 
 class DualTree2 {
 
-#define DT_MAX_N_STAGE 6
-	VectorN<float> m_w[DT_MAX_N_STAGE][2];
-	int m_numStages;
+#define DT2_MAX_N_STAGE 6
+/// lohi hilo hihi for up and down tree
+	Array3<float> m_w[DT2_MAX_N_STAGE][6];
+	int m_lastStage, m_numRanks;
 
 public:
 	DualTree2();
 	virtual ~DualTree2();
 	
 /// x input signal
-/// nstage number of stages, truncate to DT_MAX_N_STAGE
-	void analize(const VectorN<float> & x, const int & nstage);
+/// nstage number of stages, truncate to DT2_MAX_N_STAGE
+	void analize(const Array3<float> & x, const int & nstage);
 /// y output signal
-	void synthesize(VectorN<float> & y);
+	void synthesize(Array3<float> & y);
 	
-	const int & numStages() const;
+	const int & lastStage() const;
 /// i stage
 /// j [0,1] up or down
-	const VectorN<float> & stage(const int & i, const int & j ) const;
+/// k [0,2] lohi hilo hihi
+	const Array3<float> & stage(const int & i, const int & j, const int & k ) const;
 	
 protected:
 
 private:
-
+	void createStage(int j, int m, int n, int p);
+	
 };
 
 }

@@ -151,7 +151,7 @@ SET (DT_2_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot2DWidget.cpp
 fltbanks.cpp
 gensig.cpp
-dtdwt1.cpp
+dwt2.cpp
 dtdwt2.cpp
 dt2widget.cpp
 dt2window.cpp

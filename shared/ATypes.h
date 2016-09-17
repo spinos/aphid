@@ -144,27 +144,28 @@ struct VectorN {
 		return i;
 	}
 	
-/// copy with shift phase
-	void copy(const VectorN<T> & another, const int & p = 0) {
-		const int & n = another.N();
+	void copy(const T * v, const int & n, const int & p=0) {
 		create(n);
-		
 		if(p==0) {
-			memcpy(_data, another.v(), sizeof(T) * n);
+			memcpy(_data, v, sizeof(T) * n);
 			return;
 		}
 		
 		const int q = p>0 ? p : -p;
 
 		if(p<0) {
-			memcpy(_data, &another.v()[q], sizeof(T) * (n-q) );
-			memcpy(&_data[n-q], another.v(), sizeof(T) * q );
+			memcpy(_data, &v[q], sizeof(T) * (n-q) );
+			memcpy(&_data[n-q], v, sizeof(T) * q );
 		}
 		else {
-			memcpy(&_data[q], another.v(), sizeof(T) * (n-q) );
-			memcpy(_data, &another.v()[n-q], sizeof(T) * q );
+			memcpy(&_data[q], v, sizeof(T) * (n-q) );
+			memcpy(_data, &v[n-q], sizeof(T) * q );
 		}
-		
+	}
+	
+/// copy with shift phase
+	void copy(const VectorN<T> & another, const int & p = 0) {
+		copy(another.v(), another.N(), p);
 	}
 	
 	void setZero(const int & n) {
@@ -209,6 +210,11 @@ struct VectorN {
 	void operator*=(const T & scale) {
 		for(int i = 0; i < _ndim; i++) 
 			_data[i] *= scale;
+	}
+	
+	void operator+=(const VectorN<T> & another) {
+		for(int i = 0; i < _ndim; i++) 
+			_data[i] += another[i];
 	}
 	
 	T multiplyTranspose() const {
@@ -395,6 +401,36 @@ struct Array2 {
 		return m_M > m_N ? m_M : m_N;
 	}
 	
+	Array2<T> operator+(const Array2<T> & another) const {
+		Array2<T> r(another);
+		r += *this;
+		return r;
+	}
+	
+	Array2<T> operator-(const Array2<T> & another) const {
+		Array2<T> r(another);
+		r -= *this;
+		return r;
+	}
+	
+	void operator+=(const Array2<T> & another) {
+		const int mn = m_M * m_N;
+		for(int i = 0; i < mn; i++) 
+			m_data[i] += another.v()[i];
+	}
+	
+	void operator-=(const Array2<T> & another) {
+		const int mn = m_M * m_N;
+		for(int i = 0; i < mn; i++) 
+			m_data[i] -= another.v()[i];
+	}
+	
+	void operator*=(const T & s) {
+		const int mn = m_M * m_N;
+		for(int i = 0; i < mn; i++) 
+			m_data[i] *= s;
+	}
+	
 };
 
 /// http://www.owlnet.rice.edu/~ceng303/manuals/fortran/FOR5_3.html
@@ -408,6 +444,12 @@ struct Array3 {
 	Array3() {
 		m_slice = NULL;
 		m_P = 0;
+	}
+	
+	Array3(const Array3 & another) {
+		m_slice = NULL;
+		m_P = 0;
+		copy(another);
 	}
 	
 	~Array3() {
@@ -445,6 +487,18 @@ struct Array3 {
 
 	Array2<T> * rank(const int & i) {
 		return &m_slice[i];
+	}
+	
+	void copy(const Array3<T> & another) {
+		create(another.numRows(), another.numCols(),
+				another.numRanks() );
+		for(int i=0;i<another.numRanks();++i) {
+			rank(i)->copy(*another.rank(i) );
+		}
+	}
+	
+	void operator=(const Array3<T> & another) {
+		copy(another);
 	}
 };
 
