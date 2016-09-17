@@ -10,26 +10,14 @@
 #include <Calculus.h>
 #include "dtftwidget.h"
 #include "dtdwt1.h"
+#include "gensig.h"
 
 using namespace aphid;
 
 DtFtWidget::DtFtWidget(QWidget *parent) : Plot1DWidget(parent)
 {
 	UniformPlot1D * xp = new UniformPlot1D;
-	xp->create(256);
-	int i=0, j;
-	for(;i<256;++i) {
-#if 1
-		float slope = (float)(i - 128) / 200.f;
-		slope = Absolute<float>(slope);
-		slope = 1.f - slope;
-		xp->y()[i] = RandomFn11() * 0.13f * slope
-					+ (cos(.031f * 3.14f * i) + 0.5f * cos(.043f * 3.14f * i) )
-					* .571f * slope;
-#else
-		xp->y()[i] = RandomF01();
-#endif
-	}
+	gen1dsig(xp, 256);
 		
 	xp->setColor(0.,0.,0.);
 	addVectorPlot(xp);
@@ -44,6 +32,7 @@ DtFtWidget::DtFtWidget(QWidget *parent) : Plot1DWidget(parent)
 		{1,.5,0}, {0,.5,1}
 	};
 	
+	int i, j;
 	for(j=0;j<=tree.numStages();++j) {
 	
 		for(int i=0;i<2;++i) {

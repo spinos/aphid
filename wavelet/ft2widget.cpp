@@ -9,7 +9,7 @@
 #include <QtGui>
 #include "ft2widget.h"
 #include "dwt2.h"
-#include <ANoise3.h>
+#include "gensig.h"
 
 using namespace aphid;
 
@@ -19,35 +19,7 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 #define DIM_Y 256
 #define DIM_X 256
 #define DIM_Z 1
-	Xp->create(DIM_Y, DIM_X, DIM_Z);
-	
-	float d = .012352f;
-	
-	int i, j, k;
-	for(k=0;k<DIM_Z;++k) {
-		float * Xv = Xp->y(k);
-		
-		Vector3F o(0.6435f + 0.1 * k, 0.53656f + 0.1 * k, 0.71765f + 0.1 * k);
-		
-	for(j=0;j<DIM_X;++j) {
-		for(i=0;i<DIM_Y;++i) {
-#if 1
-			Vector3F p(d*(i-31), d*(j-31), d*(k-31) );
-			float r = ANoise3::Fbm((const float *)&p,
-											(const float *)&o,
-											3.23f,
-											11,
-											1.4141f,
-											.853f);
-			Clamp01(r);
-			r *= .9f;
-#else
-			float r = RandomF01();
-#endif
-			Xv[j*DIM_Y+i] = r;
-		}
-	}
-	}
+	gen2dsig(Xp, DIM_Y, DIM_X, DIM_Z);
 	
 	Xp->setDrawScale(1.f);
 	Xp->updateImage();
@@ -66,6 +38,7 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	UniformPlot2DImage * highhighP = new UniformPlot2DImage;
 	highhighP->create(DIM_Y/2, DIM_X/2, DIM_Z);
 	
+	int k;
 	for(k=0;k<DIM_Z;++k) {
 		
 		wla::afb2(Xp->channel(k), 

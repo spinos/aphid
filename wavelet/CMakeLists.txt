@@ -104,6 +104,7 @@ target_link_libraries (shoflt Qt4::QtGui)
 SET (2D_DWT_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 ../shared/Plot2DWidget.cpp
+gensig.cpp
 dwt2.cpp
 fltbanks.cpp
 ft2widget.cpp
@@ -126,6 +127,7 @@ target_link_libraries (dwt2d Qt4::QtGui)
 SET (DT_FLT_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 fltbanks.cpp
+gensig.cpp
 dtdwt1.cpp
 dtftwidget.cpp
 dtftwindow.cpp
@@ -148,6 +150,7 @@ SET (DT_2_SRC ../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 ../shared/Plot2DWidget.cpp
 fltbanks.cpp
+gensig.cpp
 dtdwt1.cpp
 dtdwt2.cpp
 dt2widget.cpp

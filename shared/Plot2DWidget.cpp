@@ -94,7 +94,7 @@ void Plot2DWidget::clientDraw(QPainter * pr)
 	for(;it!=m_images.end();++it) {
 		drawPlot(*it, pj, pr);
 		
-		pj.rx() += (*it)->width() * scaleOf(*it) + margin().x;
+		pj.rx() += (*it)->width() * scaleOf(*it);
 	}
 }
 
