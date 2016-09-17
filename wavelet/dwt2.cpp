@@ -19,34 +19,11 @@ void circleShift1(float * x, const int & n, const int & p)
 	if(p==0) 
 		return;
 		
-	const int q = Absolute<int>(p);
-	float * b = new float[q];
+	VectorN<float> b;
+	b.create(x, n);
+	b.circshift(p);
+	memcpy(x, b.v(), 4 * n );
 	
-	int i;
-	if(p<0) {
-/// b at beginning
-		for(i=0; i<q;++i)
-			b[i] = x[i];
-			
-		for(i=0; i<n-q;++i)
-			x[i] = x[i+q];
-			
-		for(i=0; i<q;++i)
-			x[n-q+i] = b[i];
-	}
-	else {
-/// b at end
-		for(i=0; i<q;++i)
-			b[i] = x[n-q+i];
-			
-		for(i=n-1; i>=q;--i)
-			x[i] = x[i-q];
-			
-		for(i=0; i<q;++i)
-			x[i] = b[i];
-	}
-	
-	delete[] b;
 }
 
 void circleShift2(Array2<float> * x, const int & p)
@@ -119,9 +96,9 @@ void afb2(Array2<float> * x,
 	
 /// transpose back
 	lo->transpose();
-	//lohi->transpose();
-	//hilo->transpose();
-	//hihi->transpose();
+	lohi->transpose();
+	hilo->transpose();
+	hihi->transpose();
 }
 
 void sfb2(Array2<float> * y,
@@ -133,9 +110,9 @@ void sfb2(Array2<float> * y,
 	
 /// transpose to filter along columns
 	lo->transpose();
-	//lohi->transpose();
-	//hilo->transpose();
-	//hihi->transpose();
+	lohi->transpose();
+	hilo->transpose();
+	hihi->transpose();
 	
 	sfbRow(&L, lo, lohi);
 	sfbRow(&H, hilo, hihi);

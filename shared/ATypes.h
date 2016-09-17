@@ -255,37 +255,10 @@ struct VectorN {
 		if(p==0) 
 			return;
 		
-		const int q = p>0 ? p : -p;
-		float * b = new float[q];
+		VectorN<float> b;
+		b.copy(*this);
+		copy(b, p);
 		
-		const int & n = _ndim;
-		T * x = _data;
-		
-		int i;
-		if(p<0) {
-/// b at beginning
-			for(i=0; i<q;++i)
-				b[i] = x[i];
-				
-			for(i=0; i<n-q;++i)
-				x[i] = x[i+q];
-				
-			for(i=0; i<q;++i)
-				x[n-q+i] = b[i];
-		}
-		else {
-/// b at end
-			for(i=0; i<q;++i)
-				b[i] = x[n-q+i];
-				
-			for(i=n-1; i>=q;--i)
-				x[i] = x[i-q];
-				
-			for(i=0; i<q;++i)
-				x[i] = b[i];
-		}
-		
-		delete[] b;
 	}
 	
 	std::string info() const {
@@ -416,6 +389,10 @@ struct Array2 {
 			if(err < d)
 				err = d;
 		}
+	}
+	
+	int maxDim() const {
+		return m_M > m_N ? m_M : m_N;
 	}
 	
 };

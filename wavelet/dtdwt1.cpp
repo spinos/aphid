@@ -8,7 +8,6 @@
  */
 
 #include "dtdwt1.h"
-#include <iostream>
 
 namespace aphid {
 

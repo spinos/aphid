@@ -27,7 +27,7 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	for(k=0;k<DIM_Z;++k) {
 		float * Xv = Xp->y(k);
 		
-		Vector3F o(0.435f + 0.1 * k, 0.73656f + 0.1 * k, 0.71765f + 0.1 * k);
+		Vector3F o(0.6435f + 0.1 * k, 0.53656f + 0.1 * k, 0.71765f + 0.1 * k);
 		
 	for(j=0;j<DIM_X;++j) {
 		for(i=0;i<DIM_Y;++i) {
