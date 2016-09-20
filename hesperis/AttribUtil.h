@@ -20,6 +20,8 @@ public:
 	virtual ~AttribUtil();
 	
 	void save3(const MDagPathArray & entities);
+	void saveBoundle(const MDagPathArray & entities,
+	                const std::string & parentName);
 	void saveUDA(AnimIO& doc);
     void saveUserDefinedAttrib(AnimIO & doc, MObject & entity);
     void loadUserDefinedAttrib(AnimIO & doc, MObject & entity);

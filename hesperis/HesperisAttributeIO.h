@@ -17,6 +17,10 @@ public:
 	HesperisAttributeIO();
 	virtual ~HesperisAttributeIO();
 	
+	static bool WriteAttributeBoundle(const std::map<std::string, char> & attrNames,
+                            const MPlugArray & attribs,
+                            const std::string & parentName,
+                            HesperisFile * file);
 	static bool WriteAttributes(const MPlugArray & attribs, HesperisFile * file);
     static bool AddAttribute(const MPlug & attrib, HesperisFile * file);
 	

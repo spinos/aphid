@@ -69,6 +69,8 @@ bool HesperisFile::doWrite(const std::string & fileName)
 		case WAttrib:
 			writeAttribute();
 			break;
+	    case WRaw:
+	        writeRaw();
 		default:
 			break;
 	}
@@ -438,6 +440,22 @@ std::string HesperisFile::modifiedTime()
 	grpWorld.load();
 	grpWorld.close();
 	return grpWorld.modifiedTimeStr();
+}
+
+bool HesperisFile::writeRaw()
+{
+    std::cout<<"\n todo write raw "<<m_rawPath<<m_rawName;
+    return true;
+}
+
+void HesperisFile::setRawDataEntry(const char * d, const int & length,
+	                    const std::string & name,
+	                    const std::string & parentName)
+{
+    m_rawData = d;
+    m_rawSize = length;
+    m_rawName = boost::str(boost::format(".%1%") % name);
+    m_rawPath = parentName;
 }
 
 }
