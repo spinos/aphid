@@ -158,8 +158,30 @@ void DualTree2::synthesize(Array3<float> & y)
 const int & DualTree2::lastStage() const
 { return m_lastStage; }
 
-const Array3<float> & DualTree2::stage(const int & i, const int & j, const int & k ) const
+const Array3<float> & DualTree2::stageBand(const int & i, const int & j, const int & k ) const
 { return m_w[i][j*3+k]; }
+
+const Array3<float> & DualTree2::lastStageBand(const int & j) const
+{ return m_w[m_lastStage][j*3]; }
+
+void DualTree2::nns(const DualTree2 & ts,
+			const int & crow, const int & ccol) const
+{
+	std::cout<<"\n last stage dim "<<lastStageBand(0).numRows()
+			<<" "<<lastStageBand(0).numCols();
+	
+	Array2<float> pch;
+	pch.create(1,1);
+	ts.lastStageBand(0).rank(0)->sub(pch, crow, ccol);
+	std::cout<<"\n up tree patch texel val "<<pch.v()[0];
+	ts.lastStageBand(1).rank(0)->sub(pch, crow, ccol);
+	std::cout<<"\n dn tree patch texel val "<<pch.v()[0];
+	
+	lastStageBand(0).rank(0)->sub(pch, crow, ccol);
+	std::cout<<"\n e up tree patch texel val "<<pch.v()[0];
+	lastStageBand(1).rank(0)->sub(pch, crow, ccol);
+	std::cout<<"\n e dn tree patch texel val "<<pch.v()[0];
+}
 
 }
 

@@ -36,7 +36,17 @@ public:
 /// i stage
 /// j [0,1] up or down
 /// k [0,2] lohi hilo hihi
-	const Array3<float> & stage(const int & i, const int & j, const int & k ) const;
+	const Array3<float> & stageBand(const int & i, const int & j, const int & k ) const;
+	const Array3<float> & lastStageBand(const int & j) const;
+	
+/// nearest neightbor search
+/// a 16x16 patch will shrink to 1x1 after 4 stages
+/// provide the coordinate in level 4 texture
+/// Ts input tree
+/// Crow input row coordinate of texel in last stage of Ts
+/// Ccol input column coordinate of texel in last stage of Ts
+	void nns(const DualTree2 & ts,
+			const int & crow, const int & ccol) const;
 	
 protected:
 

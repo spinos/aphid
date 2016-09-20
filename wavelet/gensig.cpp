@@ -29,29 +29,47 @@ void gen1dsig(UniformPlot1D * line,
 	}
 }
 
-void gen2dsig(UniformPlot2D * img,
-				int m, int n, int p)
+void gen2dsig(aphid::UniformPlot2D * img,
+				int m, int n, int p,
+				float noi)
 {
-	img->create(m, n, p);
-	
-	float d = .012352f;
+	int i, j, k;
+	for(k=0;k<p;++k) {
+		float * Xv = img->y(k);
+		
+		for(j=0;j<n;++j) {
+			for(i=0;i<m;++i) {
+
+				float r = RandomFn11() * noi;
+
+				Xv[j*m+i] = .5 + r * .5f;
+			}
+		}
+	}
+}
+
+void gen2dsigFrac(UniformPlot2D * img,
+				int m, int n, int p,
+				int m0, int n0, int m1, int n1)
+{
+	float d = .01f;
 	
 	int i, j, k;
 	for(k=0;k<p;++k) {
 		float * Xv = img->y(k);
 		
-		Vector3F o(0.6435f + 0.1 * k, 0.53656f + 0.1 * k, 0.71765f + 0.1 * k);
+		Vector3F o(0.3435f + 0.1 * k, 0.23656f + 0.1 * k, 0.41765f + 0.1 * k);
 		
-		for(j=0;j<n;++j) {
-			for(i=0;i<m;++i) {
+		for(j=n0;j<n1;++j) {
+			for(i=m0;i<m1;++i) {
 
 				Vector3F p(d*(i-31), d*(j-31), d*(k-31) );
 				float r = ANoise3::Fbm((const float *)&p,
 												(const float *)&o,
-												3.23f,
-												11,
-												1.4141f,
-												.853f);
+												1.f,
+												6,
+												1.79f,
+												.79f);
 				Clamp01(r);
 				r *= .9f;
 

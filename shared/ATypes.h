@@ -1,6 +1,7 @@
 #ifndef APHID_TYPES_H
 #define APHID_TYPES_H
 #include <sstream>
+// #include <iostream>
 
 namespace aphid {
 
@@ -452,6 +453,18 @@ struct Array2 {
 			sst<<"|";
 		}
 		return sst.str();
+	}
+	
+/// get a part of 
+	void sub(Array2 & d,
+			const int & m0, const int & n0) const {
+		
+		const int & ms = d.numRows();
+		const int & ns = d.numCols();
+		
+		for(int i=0;i<ns;++i) {
+			memcpy(d.column(i), &column(n0+i)[m0], sizeof(T) * ms);
+		}
 	}
 	
 };
