@@ -118,6 +118,7 @@ ADD_LIBRARY (aphidMath ${LIB_TYP}
 ../shared/ViewCull.cpp
 ../shared/ANoise3.cpp
 ../shared/Calculus.cpp
+../shared/plots.cpp
 )
 
 ADD_LIBRARY (aphidGeom ${LIB_TYP} 

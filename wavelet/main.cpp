@@ -1,7 +1,6 @@
 /*
  *  main.cpp
  *  
- *
  *  Created by jian zhang on 9/13/15.
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *  http://eeweb.poly.edu/iselesni/WaveletSoftware/standard1D.html
@@ -24,94 +23,10 @@
 #include <map>
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
+#include "fltbanks.h"
+#include "dwt2.h"
 
 using namespace aphid;
-
-/// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/farras.m
-/// Farras nearly symmetric filters for orthogonal
-/// 2-channel perfect reconstruction filter bank
-static const float FarrasAnalysisFilter[2][10] = {
-{0,
-0,
--0.0883883476483,
-0.0883883476483,
-0.695879989034,
-0.695879989034,
-0.0883883476483,
--0.0883883476483,
-0.0112267921525,
-0.0112267921525},
-{-0.0112267921525,
-0.0112267921525,
-0.0883883476483,
-0.0883883476483,
--0.695879989034,
-0.695879989034,
--0.0883883476483,
--0.0883883476483,
-0,
-0}
-};
-
-/// http://www.vincentcheung.ca/research/matlabindexrepmat.html
-/// synthesis filter is row reverse of analysis filters
-/// sf = af(end:-1:1, :)
-/// all the rows and first column of x
-/// x(:, 1)
-/// all the rows and second column of x
-/// x(:, 2)
-
-/// af[2][10] analysis filter
-/// sf[2][10] synthesis filter
-void farras(float ** af, float ** sf)
-{
-	for(int i=0; i<10; ++i) {
-		af[0][i] = FarrasAnalysisFilter[0][i];
-		af[1][i] = FarrasAnalysisFilter[1][i];
-		sf[0][i] = af[1][i];
-		sf[1][i] = af[0][i];
-	}
-}
-
-/// http://cn.mathworks.com/help/signal/ref/upfirdn.html
-/// upsampleing x by factor of 1 (no upsample)
-/// filtering with impulse response sequence given in the vector (or matrix) first column of af
-/// downsampling by factor of 2
-/// lo = upfirdn(x, af(:,1), 1, 2);
-/// http://cn.mathworks.com/help/matlab/ref/rand.html
-/// 1-by-64 array of random numbers
-/// x = rand(1,64);
-/// http://cn.mathworks.com/help/matlab/ref/length.html
-/// the length of the largest array dimension in X
-/// L = length(af)/2;
-
-/// analysis function
-/// x[N] N is 2x filter length L
-/// N numbers of x
-/// af[L] 
-/// 0 is lowpass filter, 1 is highpass filter
-void afb(const float * x, const int & n, float ** af, const int & filterOrder=10)
-{
-/// width of filter
-	int L = filterOrder/2;
-	float * Xshf = calc::circshift(x, n, -L);
-	
-	float * Xflt = calc::fir(Xshf, n, af[0], filterOrder);
-	delete[] Xshf;
-	delete[] Xflt;
-}
-
-/// w[j][k][d] DWT coefficients
-/// j = 0...J-1, k = 0...1, d = 0...2
-/// x M by N array
-/// J number of stages
-/// Faf first stage filters
-/// af filters for remaining stages
-///
-void dualtree2D(float **w, float *x, int J, float *Faf, float *af)
-{
-
-}
 
 void testUpsampleDownsample()
 {
@@ -124,12 +39,12 @@ void testUpsampleDownsample()
 	calc::printValues<float>("x", 16, X);
 	
 	int nXup;
-	float * Xup = calc::upsample(nXup, X, 16, 2);
+	float * Xup = wla::upsample(nXup, X, 16, 2);
 	
 	calc::printValues<float>("xup", nXup, Xup);
 	
 	int nXdn;
-	float * Xdn = calc::downsample(nXdn, Xup, nXup, 2);
+	float * Xdn = wla::downsample(nXdn, Xup, nXup, 2);
 	
 	calc::printValues<float>("xdn", nXdn, Xdn);
 }
@@ -142,8 +57,13 @@ void testUpsampleCshift()
 	for(;i<10;++i)
 		X[i] = i+1;
 		
-	float * Xshf = calc::circshift(X, 10, -5);
+#if 0
+	float * Xshf = wla::circshift(X, 10, -3);
 	calc::printValues<float>("Xshf", 10, Xshf);
+#else
+	wla::circleShift1(X, 10, 4);
+	calc::printValues<float>("X", 10, X);
+#endif
 }
 
 void testAnalysis()
@@ -154,17 +74,63 @@ void testAnalysis()
 		X[i] = RandomF01();
 	calc::printValues<float>("X", 64, X);
 	
-	float * Xshf = calc::circshift(X, 64, -5);
+	float * Xshf = wla::circshift(X, 64, -5);
 		
-	float * Xflt = calc::firlHann(Xshf, 64);
+	float * Xflt = wla::firlHann(Xshf, 64);
 	calc::printValues<float>("Xflt", 64, Xflt);
+}
+
+void testCshift()
+{
+	VectorN<int> X;
+	X.create(10);
+	int i=0;
+	for(;i<10;++i)
+		X[i] = i+1;
+		
+	//X.circshift(1);
+	VectorN<int> Y;
+	Y.copy(X, -1);
+	calc::printValues<int>("Cshift", 10, Y.v() );
+}
+
+void testSumDifference()
+{
+	Array2<float> a, b;
+	a.create(4,3);
+	b.create(4,3);
+	float * va = a.v();
+	float * vb = b.v();
+	for(int i=0;i<12;++i) {
+		va[i] = i+1;
+		vb[i] = -i-1;
+	}
+	
+	Array2<float> sum = a + b;
+	sum *= 0.707106781187;
+	std::cout<<"\n S "<<sum;
+	
+	Array2<float> diff = a - b;
+	diff *= 0.707106781187;
+	std::cout<<"\n D "<<diff;
+	
+	std::cout<<"\n a "<<a;
+	std::cout<<"\n b "<<b;
+	
+	Array2<float> a1 = sum + diff;
+	a1 *= 0.707106781187;
+	std::cout<<"\n a1 "<<a1;
+	
+	Array2<float> b1 = sum - diff;
+	b1 *= 0.707106781187;
+	std::cout<<"\n b1 "<<b1;
 }
 
 int main(int argc, char * const argv[])
 {
 	std::cout<<"wavelet test\n";
 	
-	testUpsampleDownsample();
+	testSumDifference();
 	
 	std::cout<<" end of test\n";
 	return 0;

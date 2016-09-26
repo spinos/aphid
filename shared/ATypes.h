@@ -1,6 +1,10 @@
-#ifndef ATYPES_H
-#define ATYPES_H
+#ifndef APHID_TYPES_H
+#define APHID_TYPES_H
 #include <sstream>
+// #include <iostream>
+
+namespace aphid {
+
 struct Color4 {
 	Color4(): r(0.f), g(0.f), b(0.f), a(0.f)
 	{}
@@ -97,7 +101,7 @@ struct VectorN {
 		_data = 0;
 	}
 	
-	VectorN(unsigned n) {
+	VectorN(const int & n) {
 		_ndim = n;
 		_data = new T[n];
 	}
@@ -106,63 +110,433 @@ struct VectorN {
 		if(_data) delete[] _data;
 	}
 	
-	void setZero(unsigned n) {
-		if(_data) delete[] _data;
+	const int & N() const
+	{ return _ndim; }
+	
+	const T * v() const {
+		return _data;
+	}
+	
+	T * v() {
+		return _data;
+	}
+	
+	void create(const int & n)
+	{
+		if(_ndim < n) {
+			if(_ndim > 0)
+				delete[] _data;
+			_data = new T[n];
+		}
 		_ndim = n;
-		_data = new T[n];
-		for(unsigned i = 0; i < _ndim; i++) _data[i] = 0;
+	}
+	
+	void create(const T * x, const int & n)
+	{
+		create(n);
+		memcpy(_data, x, sizeof(T) * n);
+	}
+	
+	int periodic(const int & i) const {
+		if(i<0)
+			return _ndim +i;
+		if(i>_ndim-1)
+			return i-_ndim;
+		return i;
+	}
+	
+	void copy(const T * v, const int & n, const int & p=0) {
+		create(n);
+		if(p==0) {
+			memcpy(_data, v, sizeof(T) * n);
+			return;
+		}
+		
+		const int q = p>0 ? p : -p;
+
+		if(p<0) {
+			memcpy(_data, &v[q], sizeof(T) * (n-q) );
+			memcpy(&_data[n-q], v, sizeof(T) * q );
+		}
+		else {
+			memcpy(&_data[q], v, sizeof(T) * (n-q) );
+			memcpy(_data, &v[n-q], sizeof(T) * q );
+		}
+	}
+	
+/// copy with shift phase
+	void copy(const VectorN<T> & another, const int & p = 0) {
+		copy(another.v(), another.N(), p);
+	}
+	
+	void setZero(const int & n) {
+		create(n);
+		memset(_data, 0, sizeof(T) * _ndim);
 	}
 	
 	void operator=(const VectorN<T> & another) {
-		if(_data) delete[] _data;
-		_ndim = another._ndim;
-		_data = new T[_ndim];
-		for(unsigned i = 0; i < _ndim; i++) _data[i] = another[i];
+		copy(another);
 	}
 	
-	T operator[](unsigned i) const {
+	const T & operator[](const int & i) const {
 		return _data[i];
 	}
 	
-	T* at(unsigned i) const {
+	T & operator[](const int & i) {
+		return _data[i];
+	}
+	
+	T* at(const int & i) const {
 		return &_data[i];
 	}
 	
 	VectorN<T> operator+(const VectorN<T> & another) const {
 		VectorN<T> r(_ndim);
-		for(unsigned i = 0; i < _ndim; i++) *r.at(i) = _data[i] + another[i];
+		for(int i = 0; i < _ndim; i++) *r.at(i) = _data[i] + another[i];
 		return r;
 	}
 	
 	VectorN<T> operator-(const VectorN<T> & another) const {
 		VectorN<T> r(_ndim);
-		for(unsigned i = 0; i < _ndim; i++) *r.at(i) = _data[i] - another[i];
+		for(int i = 0; i < _ndim; i++) *r.at(i) = _data[i] - another[i];
 		return r;
 	}
 	
 	VectorN<T> operator*(const T & scale) const {
 		VectorN<T> r(_ndim);
-		for(unsigned i = 0; i < _ndim; i++) *r.at(i) = _data[i] * scale;
+		for(int i = 0; i < _ndim; i++) *r.at(i) = _data[i] * scale;
 		return r;
+	}
+	
+	void operator*=(const T & scale) {
+		for(int i = 0; i < _ndim; i++) 
+			_data[i] *= scale;
+	}
+	
+	void operator+=(const VectorN<T> & another) {
+		for(int i = 0; i < _ndim; i++) 
+			_data[i] += another[i];
 	}
 	
 	T multiplyTranspose() const {
 		T r;
-		for(unsigned i = 0; i < _ndim; i++) r += _data[i] * _data[i];
+		for(int i = 0; i < _ndim; i++) r += _data[i] * _data[i];
 		return r;
+	}
+	
+	void maxAbsError(T & err, const VectorN & another) const {
+		int i = 0;
+		for(;i<_ndim;++i) {
+			T d = _data[i] - another.v()[i];
+			if(d < 0) d = -d;
+			if(err < d)
+				err = d;
+		}
+	}
+	
+/// decrease sampling rate by integer p with phase offset
+/// X[N] input signal
+	void downsample(const T * x, const int & n, 
+					const int & p, const int & phase=0) {
+	
+		int i=0, j=0;
+		for(;i<n;++i) {
+			if(i== j*p + phase) {
+				j++;
+			}
+		}
+		
+		create(j);
+		
+		i=j=0;
+		for(;i<n;++i) {
+			if(i== j*p + phase) {
+				v()[j++]=x[i];
+			}
+		}
+	}
+	
+/// P phase of shift |P| < N
+/// delay the signal when P > 0	
+	void circshift(const int & p) {
+		if(p==0) 
+			return;
+		
+		VectorN<float> b;
+		b.copy(*this);
+		copy(b, p);
+		
 	}
 	
 	std::string info() const {
 		std::stringstream sst;
 		sst.str("");
 		sst<<"(";
-		for(unsigned i = 0; i < _ndim - 1; i++) sst<<_data[i]<<", ";
+		for(int i = 0; i < _ndim - 1; i++) sst<<_data[i]<<", ";
 		sst<<_data[_ndim - 1]<<")";
 		return sst.str();
 	}
 	
-	unsigned _ndim;
+	int _ndim;
 	T * _data;
 };
-#endif        //  #ifndef ATYPES_H
 
+/// m-by-n array
+/// column major
+/// 0   m   ... (n-1)m
+/// 1   m+1     (n-1)m+1
+/// .   .       .
+/// .   .       .
+/// .   .       .
+/// m-1 2m-1... nm-1
+/// m number of rows
+/// n number of columns
+template<typename T>
+struct Array2 {
+
+	T * m_data;
+	int m_M, m_N;
+	
+	Array2() {
+		m_M = m_N = 0;
+		m_data = NULL;
+	}
+	
+	Array2(const Array2<T> & another) {
+		m_M = m_N = 0;
+		m_data = NULL;
+		copy(another);
+	}
+	
+	~Array2() {
+		if(m_M>0) delete[] m_data;
+	}
+	
+	void create(const int & m, const int & n) {
+		if(m_M * m_N < m*n) {
+			if(m_M) delete[] m_data;
+			m_data = new T[m*n];
+		}
+		
+		m_M = m;
+		m_N = n;
+	}
+	
+	const int & numRows() const {
+		return m_M;
+	}
+	
+	const int & numCols() const {
+		return m_N;
+	}
+	
+	const T * v() const {
+		return m_data;
+	}
+	
+	T * v() {
+		return m_data;
+	}
+
+	const T * column(const int & i) const {
+		return &m_data[i*m_M];
+	}
+	
+	T * column(const int & i) {
+		return &m_data[i*m_M];
+	}
+	
+/// u column v row
+	int iuv(const int & u, const int & v) const {
+		return u * m_M + v;
+	}
+	
+	void operator=(const Array2<T> & another) {
+		copy(another);
+	}
+	
+	void copy(const Array2<T> & another) {
+		create(another.numRows(), another.numCols() );
+		memcpy(m_data, another.v(), m_M*m_N*sizeof(T) );
+	}
+	
+	void setZero() {
+		memset (m_data, 0, m_M*m_N*sizeof(T) );
+	}
+	
+	void copyColumn(const int & i, const T * b) {
+		memcpy(column(i), b, m_M *sizeof(T) );
+	}
+	
+	void transpose() {
+		Array2 old(*this);
+		
+		int s = m_M;
+		m_M = m_N;
+		m_N = s;
+		
+		const T * src = old.v();
+		
+		int i, j;
+		for(j = 0;j<m_N;++j) {
+			
+			T * dst = column(j);
+			for(i=0;i<m_M;++i) {
+				dst[i] = src[i * m_N + j];
+			}
+		}
+	}
+	
+	void maxAbsError(T & err, const Array2 & another) const {
+		const int mn = m_M * m_N;
+		int i = 0;
+		for(;i<mn;++i) {
+			T d = m_data[i] - another.v()[i];
+			if(d < 0) d = -d;
+			if(err < d)
+				err = d;
+		}
+	}
+	
+	int maxDim() const {
+		return m_M > m_N ? m_M : m_N;
+	}
+	
+	Array2<T> operator+(const Array2<T> & another) const {
+		Array2<T> r;
+		r.copy(*this);
+		r += another;
+		return r;
+	}
+	
+	Array2<T> operator-(const Array2<T> & another) const {
+		Array2<T> r;
+		r.copy(*this);
+		r -= another;
+		return r;
+	}
+	
+	void operator+=(const Array2<T> & another) {
+		const int mn = m_M * m_N;
+		for(int i = 0; i < mn;++i) 
+			m_data[i] += another.v()[i];
+	}
+	
+	void operator-=(const Array2<T> & another) {
+		const int mn = m_M * m_N;
+		for(int i = 0; i < mn;++i) 
+			m_data[i] -= another.v()[i];
+	}
+	
+	void operator*=(const T & s) {
+		const int mn = m_M * m_N;
+		for(int i = 0; i < mn; i++) 
+			m_data[i] *= s;
+	}
+	
+	friend std::ostream& operator<<(std::ostream &output, const Array2 & p) {
+        output << p.str();
+        return output;
+    }
+	
+	const std::string str() const {
+		std::stringstream sst;
+		sst.str("");
+		
+		for(int j=0;j<m_M;++j) {
+			sst<<"\n|";
+			for(int i=0;i<m_N;++i) {
+				sst<<m_data[iuv(i,j)];
+				if(i<m_N-1)
+					sst<<", ";
+			}
+			sst<<"|";
+		}
+		return sst.str();
+	}
+	
+/// get a part of 
+	void sub(Array2 & d,
+			const int & m0, const int & n0) const {
+		
+		const int & ms = d.numRows();
+		const int & ns = d.numCols();
+		
+		for(int i=0;i<ns;++i) {
+			memcpy(d.column(i), &column(n0+i)[m0], sizeof(T) * ms);
+		}
+	}
+	
+};
+
+/// http://www.owlnet.rice.edu/~ceng303/manuals/fortran/FOR5_3.html
+/// m-by-n-by-p array
+template<typename T>
+struct Array3 {
+	
+	Array2<T> * m_slice;
+	int m_P;
+	
+	Array3() {
+		m_slice = NULL;
+		m_P = 0;
+	}
+	
+	Array3(const Array3 & another) {
+		m_slice = NULL;
+		m_P = 0;
+		copy(another);
+	}
+	
+	~Array3() {
+		if(m_P) delete[] m_slice;
+	}
+	
+	void create(const int & m, const int & n, const int & p = 1) {
+		if(m_P < p) {
+			if(m_P) delete[] m_slice;
+			m_slice = new Array2<T>[p];	
+		}
+		
+		for(int i=0; i<p; ++i)
+			m_slice[i].create(m,n);
+		
+		m_P = p;
+	}
+
+	const int & numRows() const {
+		return m_slice[0].numRows();
+	}
+	
+	const int & numCols() const {
+		return m_slice[0].numCols();
+	}
+	
+	const int & numRanks() const {
+		return m_P;
+	}
+	
+/// i-th rank
+	const Array2<T> * rank(const int & i) const {
+		return &m_slice[i];
+	}
+
+	Array2<T> * rank(const int & i) {
+		return &m_slice[i];
+	}
+	
+	void copy(const Array3<T> & another) {
+		create(another.numRows(), another.numCols(),
+				another.numRanks() );
+		for(int i=0;i<another.numRanks();++i) {
+			rank(i)->copy(*another.rank(i) );
+		}
+	}
+	
+	void operator=(const Array3<T> & another) {
+		copy(another);
+	}
+};
+
+}
+#endif        //  #ifndef APHID_TYPES_H

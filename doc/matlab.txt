@@ -1,0 +1,55 @@
+http://cn.mathworks.com/help/matlab/ref/circshift.html
+http://cn.mathworks.com/help/matlab/matlab_prog/array-vs-matrix-operations.html
+
+array transpose
+
+x = x'
+
+x = cshift2D(x,-L);
+
+http://cn.mathworks.com/help/matlab/ref/size.html
+
+sizes of each dimension of array
+[N, M] = size(x);
+[m,n,p] = size(rand(2,3,4))
+m = 2 n =3 p = 4
+
+n = 0:N-1;
+
+when N = 5
+
+n = [0 1 2 3 4]
+
+when m = 2
+
+n = mod(n-m, N);
+
+n = [3 4 0 1 2]
+
+y = x(n+1,:);
+
+http://cn.mathworks.com/help/matlab/ref/colon.html
+A(i,:) is the ith row of A
+
+y = x(4:5:1:2:3, :)
+
+circle shift rows
+http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/cshift2D.m
+
+http://cn.mathworks.com/help/signal/ref/upfirdn.html
+x is matrix lpf is vector, convolves each column of x,
+output is matrix with the same number of columns as x
+lo = upfirdn(x, lpf, 1, 2);
+
+/// http://cn.mathworks.com/help/signal/ref/upfirdn.html
+/// upsampleing x by factor of 1 (no upsample)
+/// filtering with impulse response sequence given in the vector (or matrix) first column of af
+/// downsampling by factor of 2
+/// lo = upfirdn(x, af(:,1), 1, 2);
+/// http://cn.mathworks.com/help/matlab/ref/rand.html
+/// 1-by-64 array of random numbers
+/// x = rand(1,64);
+/// http://cn.mathworks.com/help/matlab/ref/length.html
+/// the length of the largest array dimension in X
+/// L = length(af)/2;
+

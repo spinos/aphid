@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef G_LIGHT_H
-#define G_LIGHT_H
+#ifndef APHID_G_LIGHT_H
+#define APHID_G_LIGHT_H
 
 #include <AllMath.h>
 
@@ -18,6 +18,9 @@
 #else
 #include <gl_heads.h>
 #endif
+
+namespace aphid {
+
 class GLight {
 public:
 	GLight();
@@ -38,4 +41,5 @@ public:
 
 };
 
+}
 #endif

@@ -15,6 +15,9 @@ namespace aphid {
 
 namespace calc {
 
+/// max |a-b|
+float maxAbsoluteError(const float * a, const float * b, const int & n);
+
 static const float UniformlySpacingRecursive16Nodes[16] = {
 .5f,
 .25f, .75f,
@@ -125,29 +128,6 @@ public:
 /// normalized
 	static float Pn(int l, const float & x);
 };
-
-/// http://cn.mathworks.com/help/signal/ref/upsample.html
-/// increase sampling rate by integer factor p with phase offset
-/// by inserting p – 1 zeros between samples
-float * upsample(int & ny, const float * x, const int & n, 
-				const int & p, const int & phase = 0);
-				
-/// http://cn.mathworks.com/help/signal/ref/downsample.html
-/// decrease sampling rate by integer factor p with phase offset
-float * downsample(int & ny, const float * x, const int & n, 
-				const int & p, const int & phase = 0);
-
-int periodic(const int & i, const int & n);
-/// http://cn.mathworks.com/help/matlab/ref/circshift.html
-float * circshift(const float * x, const int & n, const int & p);
-
-/// apply finite impulse response filter 
-/// to signal X[N]
-/// W[M] response coefficients
-float * fir(const float * x, const int & n,
-			const float * w, const int & m);
-
-float * firlHann(const float * x, const int & n);
 
 }
 

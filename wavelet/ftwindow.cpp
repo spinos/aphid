@@ -1,15 +1,17 @@
 #include <QtGui>
 
 #include "ftwindow.h"
+#include "ft1dWidget.h"
 
-//! [0]
+using namespace aphid;
+
 Window::Window()
 {
     qDebug()<<"window";
-    //glWidget = new GLWidget;
+    m_plot = new Ft1dWidget(this);
 	
-	//setCentralWidget(glWidget);
-    setWindowTitle(tr("Untitled"));
+	setCentralWidget(m_plot);
+    setWindowTitle(tr("1-D Discrete Wavelet Transform"));
 }
 //! [1]
 

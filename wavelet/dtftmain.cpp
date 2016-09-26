@@ -1,13 +1,13 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QtCore>
-#include "ftwindow.h"
+#include "dtftwindow.h"
 
 int main(int argc, char *argv[])
 {
     qDebug()<<"main";
     QApplication app(argc, argv);
-    Window window;
+    dtftWindow window;
     //window.showMaximized();
     window.resize(400, 300);
     window.show();

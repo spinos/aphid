@@ -1,15 +1,15 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QtCore>
-#include "ftwindow.h"
+#include "dt2window.h"
 
 int main(int argc, char *argv[])
 {
     qDebug()<<"main";
     QApplication app(argc, argv);
-    Window window;
+    dt2Window window;
     //window.showMaximized();
-    window.resize(400, 300);
+    window.resize(640, 320);
     window.show();
     return app.exec();
 }

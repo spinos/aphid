@@ -1,15 +1,14 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QtCore>
-#include "ftwindow.h"
+#include "ft2window.h"
 
 int main(int argc, char *argv[])
 {
-    qDebug()<<"main";
     QApplication app(argc, argv);
-    Window window;
+    Ft2Window window;
     //window.showMaximized();
-    window.resize(400, 300);
+    window.resize(640, 480);
     window.show();
     return app.exec();
 }

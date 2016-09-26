@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef DT_FT_2D_WINDOW_H
+#define DT_FT_2D_WINDOW_H
 
 #include <QMainWindow>
 
@@ -7,20 +7,20 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
-class Ft1dWidget;
+class Dt2Widget;
 
-class Window : public QMainWindow
+class dt2Window : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    Window();
+    dt2Window();
 
 protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    Ft1dWidget * m_plot;
+    Dt2Widget * m_plot;
 	
 };
 //! [0]
