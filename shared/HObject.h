@@ -27,6 +27,7 @@ public:
 	virtual char exists();
 	
 	std::string lastName() const;
+	std::string parentName() const;
 
 	static std::string ValidPathName(const std::string & name);
 	static std::string FullPath(const std::string & entryName, const std::string & sliceName);

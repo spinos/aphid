@@ -96,6 +96,22 @@ bool HesperisIO::WriteMeshes(const MDagPathArray & paths,
 	return true;
 }
 
+void HesperisIO::LsChildren(MObjectArray & dst, 
+	            const std::string & name, 
+	            const int & maxCount,
+	            MObject & oparent)
+{
+    std::cout<<"\n todo ls children "<<name;
+    MObject base;
+    char found = AHelper::getObjByFullName(name.c_str(), 
+                base);
+                
+    if(!found) {
+        AHelper::Info<std::string>("cannot find ", name);
+        return;
+    }
+}
+
 bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject & oparent)
 {
     if(oparent == MObject::kNullObj) {

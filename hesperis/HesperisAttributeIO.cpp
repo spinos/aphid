@@ -11,6 +11,7 @@
 #include <AAttributeHelper.h>
 #include <HWorld.h>
 #include <HAttributeGroup.h>
+#include <HNumericBundle.h>
 #include <HOocArray.h>
 #include <boost/format.hpp>
 #include "HesperisAttribConnector.h"
@@ -94,7 +95,7 @@ void saveBundle(const std::vector<ANumericAttribute * > & bd,
     }
 
     AHelper::Info<std::string>("\n HesperisAttributeIO save bundle", name);
-    
+
     file->setBundleEntry(&bnd, parentName);
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WBundle);
@@ -179,9 +180,66 @@ bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file
 	return true;
 }
 
+bool HesperisAttributeIO::ReadAttributeBundle(MObject &target)
+{
+    MGlobal::displayInfo("HesperisAttributeIO read attribute bundle");
+    HWorld grpWorld;
+    ReadAttributeBundle(&grpWorld, target);
+    grpWorld.close();
+    return true;
+}
+
+bool HesperisAttributeIO::ReadAttributeBundle(const ABundleAttribute * d,
+                        const std::string & name,
+                        MObject &target)
+{
+    std::cout<<"\n todo read attr bundle "<<name<<" n "<<d->shortName()<<" "<<d->longName()<<" "<<d->size();
+    MObjectArray obs;
+    LsChildren(obs, name, d->size(), target);
+}
+
+bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, MObject &target)
+{
+    std::vector<std::string > allGrps;
+	std::vector<std::string > allAttrs;
+	parent->lsTypedChild<HBase>(allGrps);
+	std::vector<std::string>::const_iterator it = allGrps.begin();
+	for(;it!=allGrps.end();++it) {
+			
+		HBase child(*it);
+		if(child.hasNamedAttr(".bundle_num_typ")) {
+            allAttrs.push_back(*it);
+		}
+		else {
+			MObject otm;
+			if( FindNamedChild(otm, child.lastName(), target) )
+				ReadAttributeBundle(&child, otm);
+		}
+		child.close();
+	}
+	
+	it = allAttrs.begin();
+	for(;it!=allAttrs.end();++it) {
+
+		HNumericBundle a(*it);
+		ABundleAttribute wrap;
+		if(a.load(&wrap)) {
+		    ReadAttributeBundle(&wrap, a.parentName(), target);
+		}
+		a.close();
+	}
+	
+	std::cout.flush();
+	
+	allAttrs.clear();
+	allGrps.clear();
+	
+	return true;
+}
+
 bool HesperisAttributeIO::ReadAttributes(MObject &target)
 {
-	MGlobal::displayInfo("opium v3 read attribute");
+	MGlobal::displayInfo("HesperisAttributeIO read attribute");
     HWorld grpWorld;
     ReadAttributes(&grpWorld, target);
     grpWorld.close();

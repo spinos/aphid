@@ -24,6 +24,8 @@ public:
 	static bool WriteAttributes(const MPlugArray & attribs, HesperisFile * file);
     static bool AddAttribute(const MPlug & attrib, HesperisFile * file);
 	
+	static bool ReadAttributeBundle(MObject &target = MObject::kNullObj);
+	static bool ReadAttributeBundle(HBase * parent, MObject &target);
 	static bool ReadAttributes(MObject &target = MObject::kNullObj);
 	static bool ReadAttributes(HBase * parent, MObject &target);
 	
@@ -39,6 +41,9 @@ protected:
 	static std::map<std::string, HObject * > MappedBakeData;
 	
 private:
+    static bool ReadAttributeBundle(const ABundleAttribute * d,
+                        const std::string & name,
+                        MObject &target);
 	static bool ReadAttribute(MObject & dst, AAttribute * data, MObject &target);
 	static bool ReadStringAttribute(MObject & dst, AStringAttribute * data, MObject &target);
 	static bool ReadNumericAttribute(MObject & dst, ANumericAttribute * data, MObject &target);

@@ -18,6 +18,9 @@ char HNumericBundle::verifyType()
 	if(!hasNamedAttr(".bundle_sz"))
 		return 0;
 		
+    if(!hasNamedAttr(".longname"))
+		return 0;
+		
 	return 1;
 }
 
@@ -49,21 +52,46 @@ char HNumericBundle::save(const ABundleAttribute * d)
 
 char HNumericBundle::load(ABundleAttribute * d)
 {
-/*
-	int nv = 3;
-	readIntAttr(".nv", &nv);
-	int npoly = 1;
-	readIntAttr(".npoly", &npoly);
-	int nfv = 3;
-	readIntAttr(".ninds", &nfv);
-	poly->create(nv, nfv, npoly);
+	int nt = 0;
+	readIntAttr(".bundle_num_typ", &nt);
 	
-	readVector3Data(".p", poly->numPoints(), (Vector3F *)poly->points());
-	readIntData(".a", poly->numPoints(), (unsigned *)poly->anchors());
-	readIntData(".v", poly->numIndices(), (unsigned *)poly->indices());
-	readIntData(".fcnt", poly->numPolygons(), (unsigned *)poly->faceCounts());
-	readIntData(".fdft", poly->numPolygons(), (unsigned *)poly->faceDrifts());
-*/	
+	int sz = 0;
+	readIntAttr(".bundle_sz", &sz);
+	
+	ANumericAttribute::NumericAttributeType dt = ANumericAttribute::TUnkownNumeric;
+	if( nt == ANumericAttribute::TByteNumeric ) {
+		dt = ANumericAttribute::TByteNumeric;
+	}
+	else if( nt == ANumericAttribute::TShortNumeric ) {
+		dt = ANumericAttribute::TShortNumeric;
+	}
+	else if( nt == ANumericAttribute::TIntNumeric ) {
+		dt = ANumericAttribute::TIntNumeric;
+	}
+	else if( nt == ANumericAttribute::TFloatNumeric ) {
+		dt = ANumericAttribute::TIntNumeric;
+	}
+	else if( nt == ANumericAttribute::TDoubleNumeric ) {
+		dt = ANumericAttribute::TDoubleNumeric;
+	}
+	else if( nt == ANumericAttribute::TBooleanNumeric ) {
+		dt = ANumericAttribute::TBooleanNumeric;
+	}
+	
+	if(dt == ANumericAttribute::TUnkownNumeric)
+	    return 0;
+	
+	d->create(sz, dt);
+	
+	int l = d->dataLength();
+	readCharData(".raw", l, d->value() );
+	
+	std::string lnm;
+	readStringAttr(".longname", lnm);
+	
+	d->setLongName(lnm);
+	d->setShortName(lastName());
+
     return 1;
 }
 
