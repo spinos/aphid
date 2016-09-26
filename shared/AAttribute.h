@@ -17,13 +17,14 @@ namespace aphid {
 class AAttribute : public TypedEntity {
 public:
 	enum AttributeType {
-	    aUnknown,
+	    aUnknown = 0,
 	    aNumeric,
 	    aEnum,
 	    aTyped,
 	    aCompound,
 	    aString,
-		aUnit
+		aUnit,
+		aNumericBundle
 	};
 	
 	AAttribute();
@@ -236,6 +237,35 @@ protected:
 	
 private:
 	bool m_value;
+};
+
+class ABundleAttribute : public ANumericAttribute {
+
+    char * m_v;
+    int m_bundleSize;
+    int m_stride;
+    NumericAttributeType m_ntyp;
+    
+public:
+    ABundleAttribute();
+    virtual ~ABundleAttribute();
+    
+    virtual AttributeType attrType() const;
+    virtual NumericAttributeType numericType() const;
+	
+	void create(const int & sz,
+	            NumericAttributeType ntyp);
+	            
+	const char * value() const;
+	char * value();
+	const int & size() const;
+/// size * stride
+	const int dataLength() const;
+	
+protected:
+
+private:
+
 };
 
 }

@@ -263,5 +263,54 @@ bool ABooleanNumericAttribute::value() const
 char ABooleanNumericAttribute::asChar() const
 { return (char)value(); }
 
+ABundleAttribute::ABundleAttribute() :
+m_bundleSize(0),
+m_stride(0),
+m_ntyp(TUnkownNumeric),
+m_v(NULL)
+{}
+
+ABundleAttribute::~ABundleAttribute()
+{ if(m_v) delete[] m_v; }
+
+AAttribute::AttributeType ABundleAttribute::attrType() const
+{ return aNumericBundle; }
+
+ANumericAttribute::NumericAttributeType ABundleAttribute::numericType() const
+{ return m_ntyp; }
+
+void ABundleAttribute::create(const int & sz,
+	            NumericAttributeType ntyp)
+{
+    m_ntyp = ntyp;
+    if(ntyp == TByteNumeric)
+        m_stride = sizeof(char);
+    else if(ntyp == TShortNumeric)
+        m_stride = sizeof(short);
+    else if(ntyp == TIntNumeric)
+        m_stride = sizeof(int);
+    else if(ntyp == TFloatNumeric)
+        m_stride = sizeof(float);
+    else if(ntyp == TDoubleNumeric)
+        m_stride = sizeof(double);
+    else if(ntyp == TBooleanNumeric)
+        m_stride = sizeof(bool);
+        
+    m_v = new char[sz*m_stride];
+    m_bundleSize = sz;
+}
+
+const char * ABundleAttribute::value() const
+{ return m_v; }
+	
+char * ABundleAttribute::value()
+{ return m_v; }
+
+const int & ABundleAttribute::size() const
+{ return m_bundleSize; }
+
+const int ABundleAttribute::dataLength() const
+{ return m_bundleSize * m_stride; }
+
 }
 //:~

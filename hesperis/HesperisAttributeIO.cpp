@@ -50,63 +50,58 @@ void saveBundle(const std::vector<ANumericAttribute * > & bd,
                 const std::string & parentName,
                 HesperisFile * file)
 {  
-    int stride = 4;
-    ANumericAttribute::NumericAttributeType nt = bd[0]->numericType();
-    if(nt == ANumericAttribute::TDoubleNumeric)
-        stride = 8;
-    else if(nt == ANumericAttribute::TByteNumeric)
-        stride = 1;
-    else if(nt == ANumericAttribute::TShortNumeric)
-        stride = 2;
-    else if(nt == ANumericAttribute::TBooleanNumeric)
-        stride = sizeof(bool);
-        
     const int n = bd.size();
+    ANumericAttribute::NumericAttributeType nt = bd[0]->numericType();
+    ABundleAttribute bnd;
+    bnd.create(n, nt);
     
-    char * d = new char[n * stride];
+    if(bnd.numericType() == ANumericAttribute::TUnkownNumeric) {
+        AHelper::Info<std::string>("\n HesperisAttributeIO numeric attr type not supported", name);
+        return;
+    }
+        
+    bnd.setLongName(bd[0]->longName() );
+    bnd.setShortName(bd[0]->shortName() );
+    
     int i=0;
     for(;i<n;++i) {
         
         if(nt == ANumericAttribute::TDoubleNumeric) {
             double dv = ((ADoubleNumericAttribute *)bd[i])->value();
-            memcpy(d, &dv, stride);
+            memcpy(&bnd.value()[i], &dv, sizeof(double) );
         }
         else if(nt == ANumericAttribute::TBooleanNumeric) {
             bool bv = ((ABooleanNumericAttribute *)bd[i])->value();
-            memcpy(d, &bv, stride);
+            memcpy(&bnd.value()[i], &bv, sizeof(bool) );
         }
         else if(nt == ANumericAttribute::TFloatNumeric) {
             float fv = ((AFloatNumericAttribute *)bd[i])->value();
-            memcpy(d, &fv, stride);
+            memcpy(&bnd.value()[i], &fv, sizeof(float) );
         }
         else if(nt == ANumericAttribute::TIntNumeric) {
             int iv = ((AIntNumericAttribute *)bd[i])->value();
-            memcpy(d, &iv, stride);
+            memcpy(&bnd.value()[i], &iv, sizeof(int) );
         }
         else if(nt == ANumericAttribute::TShortNumeric) {
             short sv = ((AShortNumericAttribute *)bd[i])->value();
-            memcpy(d, &sv, stride);
+            memcpy(&bnd.value()[i], &sv, sizeof(short) );
         }
         else if(nt == ANumericAttribute::TByteNumeric) {
             char cv = ((AByteNumericAttribute *)bd[i])->asChar();
-            memcpy(d, &cv, stride);
+            memcpy(&bnd.value()[i], &cv, sizeof(char) );
         }
         
-        d+= stride;
     }
-    d -= stride * n;
 
     AHelper::Info<std::string>("\n HesperisAttributeIO save bundle", name);
     
-    file->setRawDataEntry(d, stride * n, name, parentName);
+    file->setBundleEntry(&bnd, parentName);
 	file->setDirty();
-	file->setWriteComponent(HesperisFile::WRaw);
+	file->setWriteComponent(HesperisFile::WBundle);
     bool fstat = file->save();
 	if(!fstat) 
 	    AHelper::Info<std::string>("\n HesperisAttributeIO cannot save attrib bundle to file ", file->fileName() );
-	file->close();
-    
-    delete[] d;
+
 }
 
 void clearBundle(std::vector<ANumericAttribute * > & bundle)
@@ -131,7 +126,6 @@ bool HesperisAttributeIO::WriteAttributeBoundle(const std::map<std::string, char
     std::map<std::string, char>::const_iterator it = attrNames.begin();
     for(;it!=attrNames.end();++it) {
         buildBundle(bd, it->first, attribs);
-        std::cout<<"\n boundle size"<<bd.size();
         if(bd.size() > 0) {
             saveBundle(bd, it->first, parentName, file);
             clearBundle(bd);

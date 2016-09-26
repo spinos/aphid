@@ -69,8 +69,8 @@ bool HesperisFile::doWrite(const std::string & fileName)
 		case WAttrib:
 			writeAttribute();
 			break;
-	    case WRaw:
-	        writeRaw();
+	    case WBundle:
+	        writeBundle();
 		default:
 			break;
 	}
@@ -442,20 +442,20 @@ std::string HesperisFile::modifiedTime()
 	return grpWorld.modifiedTimeStr();
 }
 
-bool HesperisFile::writeRaw()
+bool HesperisFile::writeBundle()
 {
-    std::cout<<"\n todo write raw "<<m_rawPath<<m_rawName;
+    std::cout<<"\n write numeric bundle "<<m_bundlePath;
+    HNumericBundle grp(WorldPath(m_bundlePath));
+		grp.save(m_bundle);
+		grp.close();
     return true;
 }
 
-void HesperisFile::setRawDataEntry(const char * d, const int & length,
-	                    const std::string & name,
+void HesperisFile::setBundleEntry(const ABundleAttribute * d,
 	                    const std::string & parentName)
 {
-    m_rawData = d;
-    m_rawSize = length;
-    m_rawName = boost::str(boost::format(".%1%") % name);
-    m_rawPath = parentName;
+    m_bundle = d;
+    m_bundlePath = boost::str(boost::format("%1%|%2%") % parentName % d->shortName() );
 }
 
 }
