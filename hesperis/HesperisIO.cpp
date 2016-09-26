@@ -97,30 +97,29 @@ bool HesperisIO::WriteMeshes(const MDagPathArray & paths,
 }
 
 void HesperisIO::LsChildren(MObjectArray & dst, 
-	            const std::string & name, 
 	            const int & maxCount,
-	            MObject & oparent)
+	            const MObject & oparent)
 {
-    std::cout<<"\n todo ls children "<<name;
-    MObject base;
-    char found = AHelper::getObjByFullName(name.c_str(), 
-                base);
-                
-    if(!found) {
-        AHelper::Info<std::string>("cannot find ", name);
-        return;
+    MFnDagNode ppf(oparent);
+    for(unsigned i = 0; i <ppf.childCount(); i++) {
+        dst.append(ppf.child(i) );
+        if(dst.length() >= maxCount)
+            return;
     }
 }
 
-bool HesperisIO::FindNamedChild(MObject & dst, const std::string & name, MObject & oparent)
+bool HesperisIO::FindNamedChild(MObject & dst, 
+                const std::string & name, 
+                const MObject & oparent)
 {
-    if(oparent == MObject::kNullObj) {
+    MObject uparent = oparent;
+    if(uparent == MObject::kNullObj) {
         MItDag itdag(MItDag::kBreadthFirst);
-        oparent = itdag.currentItem();
-        MGlobal::displayInfo(MFnDagNode(oparent).name() + " as default parent");
+        uparent = itdag.currentItem();
+        MGlobal::displayInfo(MFnDagNode(uparent).name() + " as default parent");
     }
     
-    MFnDagNode ppf(oparent);
+    MFnDagNode ppf(uparent);
     for(unsigned i = 0; i <ppf.childCount(); i++) {
         MFnDagNode pf(ppf.child(i));
         std::string curname = pf.name().asChar();

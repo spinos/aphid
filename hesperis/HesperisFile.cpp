@@ -19,6 +19,7 @@
 #include <SHelper.h>
 #include <sstream>
 #include <boost/format.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace aphid {
 
@@ -355,6 +356,22 @@ std::string HesperisFile::WorldPath(const std::string & name)
 	if(SHelper::IsPullPath(name))
 		return boost::str(boost::format("/world%1%") % name); 
 	return boost::str(boost::format("/world/%1%") % name); 
+}
+
+std::string HesperisFile::LocalPath(const std::string & name)
+{
+	std::string r;
+	std::string str = name;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(str, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter) {
+	    if(*tok_iter != "world")
+		    r = r + "|" +(*tok_iter);
+	}
+		
+	return r;
 }
 
 std::string HesperisFile::checkPath(const std::string & name) const

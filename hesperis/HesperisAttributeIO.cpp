@@ -180,7 +180,7 @@ bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file
 	return true;
 }
 
-bool HesperisAttributeIO::ReadAttributeBundle(MObject &target)
+bool HesperisAttributeIO::ReadAttributeBundle(const MObject &target)
 {
     MGlobal::displayInfo("HesperisAttributeIO read attribute bundle");
     HWorld grpWorld;
@@ -190,15 +190,17 @@ bool HesperisAttributeIO::ReadAttributeBundle(MObject &target)
 }
 
 bool HesperisAttributeIO::ReadAttributeBundle(const ABundleAttribute * d,
-                        const std::string & name,
-                        MObject &target)
+                        const MObject &target)
 {
-    std::cout<<"\n todo read attr bundle "<<name<<" n "<<d->shortName()<<" "<<d->longName()<<" "<<d->size();
     MObjectArray obs;
-    LsChildren(obs, name, d->size(), target);
+    LsChildren(obs, d->size(), target);
+/// add attrib to each child
+    const int n = obs.length();
+    for(int i=0;i< n;++i) {
+    }
 }
 
-bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, MObject &target)
+bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, const MObject &target)
 {
     std::vector<std::string > allGrps;
 	std::vector<std::string > allAttrs;
@@ -224,7 +226,7 @@ bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, MObject &target)
 		HNumericBundle a(*it);
 		ABundleAttribute wrap;
 		if(a.load(&wrap)) {
-		    ReadAttributeBundle(&wrap, a.parentName(), target);
+		    ReadAttributeBundle(&wrap, target);
 		}
 		a.close();
 	}
@@ -237,7 +239,7 @@ bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, MObject &target)
 	return true;
 }
 
-bool HesperisAttributeIO::ReadAttributes(MObject &target)
+bool HesperisAttributeIO::ReadAttributes(const MObject &target)
 {
 	MGlobal::displayInfo("HesperisAttributeIO read attribute");
     HWorld grpWorld;
@@ -246,7 +248,7 @@ bool HesperisAttributeIO::ReadAttributes(MObject &target)
     return true;
 }
 
-bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
+bool HesperisAttributeIO::ReadAttributes(HBase * parent, const MObject &target)
 {
 	std::vector<std::string > allGrps;
 	std::vector<std::string > allAttrs;
@@ -290,7 +292,9 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, MObject &target)
 	return true;
 }
 
-bool HesperisAttributeIO::ReadAttribute(MObject & dst, AAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadAttribute(MObject & dst, 
+                                AAttribute * data, 
+                                const MObject &target)
 {
 	switch(data->attrType()) {
 		case AAttribute::aString:
@@ -311,7 +315,8 @@ bool HesperisAttributeIO::ReadAttribute(MObject & dst, AAttribute * data, MObjec
 	return true;
 }
 
-bool HesperisAttributeIO::ReadStringAttribute(MObject & dst, AStringAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadStringAttribute(MObject & dst, AStringAttribute * data, 
+                const MObject &target)
 {
 	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
 		if(!AAttributeHelper::IsStringAttr(dst) ) {
@@ -332,7 +337,8 @@ bool HesperisAttributeIO::ReadStringAttribute(MObject & dst, AStringAttribute * 
 	return true;
 }
 
-bool HesperisAttributeIO::ReadNumericAttribute(MObject & dst, ANumericAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadNumericAttribute(MObject & dst, ANumericAttribute * data, 
+                const MObject &target)
 {
 	MFnNumericData::Type dt = MFnNumericData::kInvalid;
 	switch(data->numericType()) {
@@ -413,13 +419,15 @@ bool HesperisAttributeIO::ReadNumericAttribute(MObject & dst, ANumericAttribute 
 	return true;
 }
 
-bool HesperisAttributeIO::ReadCompoundAttribute(MObject & dst, ACompoundAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadCompoundAttribute(MObject & dst, ACompoundAttribute * data, 
+                const MObject &target)
 {
 	AHelper::Info<std::string >(" todo compound attrib ", data->longName() );
 	return false;
 }
 
-bool HesperisAttributeIO::ReadEnumAttribute(MObject & dst, AEnumAttribute * data, MObject &target)
+bool HesperisAttributeIO::ReadEnumAttribute(MObject & dst, AEnumAttribute * data, 
+                const MObject &target)
 {
 	if(data->numFields() < 1) {
 		AHelper::Info<std::string >(" enum attrib has no field ", data->longName() );
@@ -639,7 +647,8 @@ bool HesperisAttributeIO::BakeEnum(const std::string & attrName, AEnumAttribute 
 void HesperisAttributeIO::ClearBakeData()
 { MappedBakeData.clear(); }
 
-bool HesperisAttributeIO::ConnectBaked(HBase * parent, AAttribute * data, MObject & entity, MObject & attr)
+bool HesperisAttributeIO::ConnectBaked(HBase * parent, AAttribute * data, 
+                    const MObject & entity, MObject & attr)
 {
 	if(!parent->hasNamedData(".bake")) return false;
 	

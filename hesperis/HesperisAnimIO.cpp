@@ -78,7 +78,7 @@ bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCu
 	return true;
 }
 
-bool HesperisAnimIO::ReadAnimation(HBase * parent, MObject & entity, MObject & attr)
+bool HesperisAnimIO::ReadAnimation(HBase * parent, const MObject & entity, MObject & attr)
 {	
 	MPlug panim(entity, attr);
 	if(panim.isNull() ) return false;

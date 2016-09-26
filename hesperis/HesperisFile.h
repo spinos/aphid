@@ -122,6 +122,8 @@ public:
     }
     
     static std::string WorldPath(const std::string & name);
+/// rm world in path
+    static std::string LocalPath(const std::string & name);
     
 protected: 
 
