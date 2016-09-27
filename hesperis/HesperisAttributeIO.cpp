@@ -66,32 +66,7 @@ void saveBundle(const std::vector<ANumericAttribute * > & bd,
     
     int i=0;
     for(;i<n;++i) {
-        
-        if(nt == ANumericAttribute::TDoubleNumeric) {
-            double dv = ((ADoubleNumericAttribute *)bd[i])->value();
-            memcpy(&bnd.value()[i], &dv, sizeof(double) );
-        }
-        else if(nt == ANumericAttribute::TBooleanNumeric) {
-            bool bv = ((ABooleanNumericAttribute *)bd[i])->value();
-            memcpy(&bnd.value()[i], &bv, sizeof(bool) );
-        }
-        else if(nt == ANumericAttribute::TFloatNumeric) {
-            float fv = ((AFloatNumericAttribute *)bd[i])->value();
-            memcpy(&bnd.value()[i], &fv, sizeof(float) );
-        }
-        else if(nt == ANumericAttribute::TIntNumeric) {
-            int iv = ((AIntNumericAttribute *)bd[i])->value();
-            memcpy(&bnd.value()[i], &iv, sizeof(int) );
-        }
-        else if(nt == ANumericAttribute::TShortNumeric) {
-            short sv = ((AShortNumericAttribute *)bd[i])->value();
-            memcpy(&bnd.value()[i], &sv, sizeof(short) );
-        }
-        else if(nt == ANumericAttribute::TByteNumeric) {
-            char cv = ((AByteNumericAttribute *)bd[i])->asChar();
-            memcpy(&bnd.value()[i], &cv, sizeof(char) );
-        }
-        
+        bnd.setAttribValue(bd[i], i);
     }
 
     AHelper::Info<std::string>("\n HesperisAttributeIO save bundle", name);
@@ -192,11 +167,22 @@ bool HesperisAttributeIO::ReadAttributeBundle(const MObject &target)
 bool HesperisAttributeIO::ReadAttributeBundle(const ABundleAttribute * d,
                         const MObject &target)
 {
+    ANumericAttribute * solAtt = NULL;
+    d->getNumericAttrib(solAtt);
+    
+    if(!solAtt) {
+        AHelper::Info<std::string >("HesperisAttributeIO read attrib bundle numeric type not supported", d->longName() );
+        return false;
+    }
+    
     MObjectArray obs;
     LsChildren(obs, d->size(), target);
 /// add attrib to each child
     const int n = obs.length();
     for(int i=0;i< n;++i) {
+        d->getAttribValue(solAtt, i);
+        MObject oattr;
+		ReadAttribute(oattr, solAtt, obs[i]);
     }
 }
 

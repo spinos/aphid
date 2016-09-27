@@ -211,6 +211,7 @@ public:
 	
 	virtual void setValue(const int & x);
 	virtual void setValue(const float & x);
+	void setValue(const double & x);
 	
 	double value() const;
 protected:
@@ -262,9 +263,25 @@ public:
 /// size * stride
 	const int dataLength() const;
 	
+	void getNumericAttrib(ANumericAttribute * & dst) const;
+	void setAttribValue(ANumericAttribute * a, const int & i);
+	void getAttribValue(ANumericAttribute * dst, const int & i) const;
+	
 protected:
 
 private:
+    template<typename Tv, typename Ta>
+	void setValue(Ta * a, const int & i) {
+	    Tv v = a->value();
+	    memcpy(&m_v[i*m_stride], &v, sizeof(Tv) );
+	}
+	
+    template<typename Tv, typename Ta>
+	void getValue(Ta * a, const int & i) const {
+	    Tv v;
+        memcpy(&v, &m_v[i*m_stride], sizeof(Tv) );
+        a->setValue(v);
+	}
 
 };
 
