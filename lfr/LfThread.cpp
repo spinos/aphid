@@ -76,40 +76,35 @@ void LfThread::run()
 	uint *codedLine = reinterpret_cast<uint *>(m_codedImg->bits());
 				
 	ExrImage img;
-	const int n = lparam->numImages();
-	int i, j, m, nbatch;
+	const int nimage = lparam->numImages();
+	int i, j, m;
 	float e;
 	
-#define N_BATCH_LG 8
 	const int totalNSignals = lparam->totalNumPatches();
 	QElapsedTimer timer;
 	timer.start();
-	int endp;
+
+	srand(1);
 	int niter = 0;
 	for(;niter< lparam->maxIterations();++niter) {
-		for(i=0;i<n;i++) {
+		
+		for(i=0;i<nimage;i++) {
 			mutex.lock();
 			if (abort) return;
 			mutex.unlock();
 			
 			img.read(lparam->imageName(i) );
 			m = lparam->imageNumPatches(i);
-			nbatch = m>>N_BATCH_LG;
-			if( (nbatch<<N_BATCH_LG) < m ) nbatch++;
-			for(j=0;j<nbatch;++j) {
-			    endp = ((j+1)<<N_BATCH_LG) - 1;
-			    if(endp > m-1) endp = m-1;
-				m_world->learn(&img, j<<N_BATCH_LG, endp);
-				
-				{
-				    m_world->updateDictionary( &img, endp - (j<<N_BATCH_LG) + 1, niter );
-					m_world->dictionaryAsImage(scanLine, w, h);
-					emit sendDictionary(*m_dictImg);
-				}
-			}
+			
+			m_world->learn(&img, m);
+			m_world->updateDictionary( &img, niter );
+			
+			m_world->dictionaryAsImage(scanLine, w, h);
+			emit sendDictionary(*m_dictImg);
+
 		}
 		
-		for(i=0;i<n;i++) {
+		for(i=0;i<nimage;i++) {
 			mutex.lock();
 			if (abort) return;
 			mutex.unlock();

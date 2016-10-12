@@ -63,6 +63,7 @@ public:
 /// http://mathworld.wolfram.com/VectorMultiplication.html
 	T dot(const DenseVector<T> & x) const;
 	T dot(const T * x) const;
+	void thrsPos();
 	
 	void add(const DenseVector<T> & x, const T alpha = 1.0);
 	void add(T * x, const T alpha = 1.0);
@@ -179,7 +180,7 @@ template<typename T>
 void DenseVector<T>::normalize()
 {
 	const T s = norm();
-	if(s > 1e-5) scale(1.0 / s);
+	if(s > 1e-6) scale(1.0 / s);
 }
 
 template<typename T>
@@ -327,6 +328,14 @@ void DenseVector<T>::clear()
 	m_numElements = 0;
 	m_capacity = 0;
 	m_isReferenced = false;
+}
+
+template<typename T>
+void DenseVector<T>::thrsPos()
+{
+	for (int i = 0; i<m_numElements; ++i) {
+	  if(m_v[i]<0) m_v[i]=0;
+	}
 }
 
 /// column-major dense matrix
@@ -707,6 +716,7 @@ void DenseMatrix<T>::addDiagonal(const T diag)
 		m_v[i*m_numRows+i] += diag; 
 };
 
+/// A <- A + alpha * vec1 * vec2' 
 template <typename T>  
 void DenseMatrix<T>::rank1Update(const DenseVector<T> & vec1, const DenseVector<T> & vec2, const DenseVector<int> & ind2,
 						const int n2, const T alpha)
@@ -719,6 +729,7 @@ void DenseMatrix<T>::rank1Update(const DenseVector<T> & vec1, const DenseVector<
 	}
 }
 
+/// A <- A + alpha * vec1 * vec1' 
 template <typename T>  
 void DenseMatrix<T>::rank1Update(const DenseVector<T> & vec1, const DenseVector<int> & ind,
 	const int n, const T alpha) 

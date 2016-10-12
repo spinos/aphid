@@ -51,10 +51,9 @@ void LfMachine::cleanDictionary() {}
 
 void LfMachine::preLearn() {}
 
-void LfMachine::learn(const ExrImage * image, int iPatch0, int iPatch1) {}
+void LfMachine::learn(const ExrImage * image, const int & numPatch) {}
 
-void LfMachine::updateDictionary(const ExrImage * image, const int & nBatch, int t) 
-{}
+void LfMachine::updateDictionary(const ExrImage * image, int t) {}
 
 void LfMachine::fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor) {}
 
@@ -71,5 +70,18 @@ bool LfMachine::save() { return false; }
 
 void LfMachine::addLambda()
 {}
+
+double LfMachine::getBeta(const int & t) const
+{
+	if(t<1) return 1.0;
+	const double eta = param()->batchSize();
+	const double tt = t;
+	double theta;
+	if(tt<eta)
+		theta = tt*eta;
+	else	
+		theta = eta*eta + tt - eta;
+	return (theta + 1 - eta)/(theta + 1);
+}
 
 }

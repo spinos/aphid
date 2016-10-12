@@ -22,7 +22,6 @@ class DictionaryMachine : public LfMachine {
 	DenseVector<T> * m_beta;
 /// sparse indices
 	DenseVector<int> * m_ind;
-	DenseVector<T> * m_ui;
 /// dictionary
 	DenseMatrix<T> * m_D;
 /// gram of D
@@ -65,22 +64,25 @@ public:
     virtual void dictionaryAsImage(unsigned * imageBits, int imageW, int imageH);
 	virtual void fillSparsityGraph(unsigned * imageBits, int iLine, int imageW, unsigned fillColor);
 	virtual void preLearn();
-    virtual void learn(const aphid::ExrImage * image, int ibegin, int iend);
-    virtual void updateDictionary(const aphid::ExrImage * image, const int & nBatch, int t);
+    virtual void learn(const aphid::ExrImage * image, const int & numPatch);
+    virtual void updateDictionary(const aphid::ExrImage * image, int t);
     virtual void cleanDictionary();
+
 /// keep coefficients of current epoch
 /// at end of epoch, set A and B to current epoch, 
 /// zero current epoch 
     virtual void recycleData(); 
+	virtual void addLambda();
     virtual T computePSNR(const aphid::ExrImage * image, int iImage);
 	virtual void computeYhat(unsigned * imageBits, int iImage, 
 							const aphid::ExrImage * image, bool asDifference = false);
-	virtual void addLambda();
 	
 protected:
     
 private:
-    void learnPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
+    void learnPt(const int iThread, const aphid::ExrImage * image, 
+				const int n,
+				const int workBegin, const int workEnd);
     void computeErrPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd);
     void computeYhatPt(const int iThread, unsigned * line, 
 						const aphid::ExrImage * image, 
@@ -109,7 +111,6 @@ DictionaryMachine<NumThread, T>::DictionaryMachine(LfParameter * param) :
 	m_batchB = new DenseMatrix<T>(m, p);
 	m_pre0A = new DenseMatrix<T>(p, p);
 	m_pre0B = new DenseMatrix<T>(m, p);
-    m_ui = new DenseVector<T>(m);
     m_epoch = -1;
     int i=0;
     for(;i<NumThread;++i) {
@@ -139,7 +140,6 @@ DictionaryMachine<NumThread, T>::~DictionaryMachine()
     delete m_batchB;
     delete m_pre0A;
     delete m_pre0B;
-    delete m_ui;
     int i=0;
     for(;i<NumThread;++i) {
         delete m_larPt[i];
@@ -197,7 +197,7 @@ void DictionaryMachine<NumThread, T>::preLearn()
     m_pre0B->setZero();
     m_pret = 0;
     m_epoch = -1;
-    m_lambda = 0.0;
+    m_lambda = 0;
     int i=0;
     for(;i<NumThread;++i) {
         m_batchAPt[i]->setZero();
@@ -206,24 +206,32 @@ void DictionaryMachine<NumThread, T>::preLearn()
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::learnPt(const int iThread, const aphid::ExrImage * image, const int workBegin, const int workEnd)
+void DictionaryMachine<NumThread, T>::learnPt(const int iThread, const aphid::ExrImage * image,
+												const int n,
+												const int workBegin, const int workEnd)
 {
     const int k = m_D->numColumns();
-    int i = workBegin;
-    for(;i<=workEnd;++i) {
-        image->getTile(m_yPt[iThread]->raw(), i, m_atomSize);
+	
+/// randomly draw n signals
+    int pj = 0;
+    for(;pj<n;++pj) {
+        image->getTile(m_yPt[iThread]->raw(), workBegin + rand() % (workEnd - workBegin), m_atomSize);
 
         m_larPt[iThread]->lars(*m_yPt[iThread], *m_betaPt[iThread], *m_indPt[iThread], m_lambda);
 	
         int nnz = 0;
         int i=0;
         for(;i<k;++i) {
-            if((*m_indPt[iThread])[i] < 0) break;
-            nnz++;
+            if((*m_indPt[iThread])[i] > -1)
+				nnz++;
         }
         if(nnz < 1) continue;
         
         sort<T, int>(m_indPt[iThread]->raw(), m_betaPt[iThread]->raw(), 0, nnz-1);
+		
+		//if(iThread < 1)
+		//	std::cout<<"\n beta "<<*m_betaPt[iThread]
+		//		<<"\n ind "<<*m_indPt[iThread];
         
 /// A <- A + beta * beta^t
 	    m_batchAPt[iThread]->rank1Update(*m_betaPt[iThread], *m_indPt[iThread], nnz);
@@ -233,17 +241,25 @@ void DictionaryMachine<NumThread, T>::learnPt(const int iThread, const aphid::Ex
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::learn(const aphid::ExrImage * image, int ibegin, int iend)
+void DictionaryMachine<NumThread, T>::learn(const aphid::ExrImage * image, const int & numPatch)
 {
 #if 1
-    const int workSize = (iend - ibegin + 1) / NumThread;
+    int workSize = param()->batchSize() / NumThread;
+	if(workSize < 1) workSize = 1;
+	
+	int patchPt = numPatch / NumThread;
+	
     boost::thread learnThread[NumThread];
-    int workBegin, workEnd, i=0;
+	int patchBegin, patchEnd;
+    int i=0;
     for(;i<NumThread;++i) {
-        workBegin = ibegin + i * workSize;
-        workEnd = (i== NumThread - 1) ? iend: workBegin + workSize - 1;
+		patchBegin = i*patchPt;
+		patchEnd = patchBegin + patchPt;
+		if(patchEnd > numPatch)
+			patchEnd = numPatch;
+			
         learnThread[i] = boost::thread( boost::bind(&DictionaryMachine<NumThread, T>::learnPt, 
-            this, i, image, workBegin, workEnd) );
+            this, i, image, workSize, patchBegin, patchEnd) );
     }
     
     for(i=0;i<NumThread;++i)
@@ -266,7 +282,7 @@ void DictionaryMachine<NumThread, T>::learn(const aphid::ExrImage * image, int i
         if(nnz < 1) continue;
         
         sort<T, int>(m_ind->raw(), m_beta->raw(), 0, nnz-1);
-        
+		
 /// A <- A + beta * beta^t
 	    m_batchA->rank1Update(*m_beta, *m_ind, nnz);
 /// B <- B + y * beta^t
@@ -276,70 +292,68 @@ void DictionaryMachine<NumThread, T>::learn(const aphid::ExrImage * image, int i
 }
 
 template<int NumThread, typename T>
-void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * image, const int & nBatch, int t)
+void DictionaryMachine<NumThread, T>::updateDictionary(const aphid::ExrImage * image, int t)
 {
-    T sc = 1.0;
+/// scaling A and B from previous batch
+    T sc = getBeta(t);
     //if(t>0) 
         m_pret = t;
-/// scaling A and B from previous batch
-    int tn = t+1;
-    if(tn < 256) tn = tn * 256;
-    else tn = 256 * 256 + t - 256;
-        sc = T(tn+1-256)/T(tn+1);
-        
+
+	const float wei = 1.f / param()->batchSize();
+    
 /// accumulate pre-thread works
     int i = 0;
-#if 1
     for(;i<NumThread;++i) {
-        m_batchA->add(*m_batchAPt[i]);
-        m_batchB->add(*m_batchBPt[i]);
+        m_batchA->add(*m_batchAPt[i], wei);
+        m_batchB->add(*m_batchBPt[i], wei);
         m_batchAPt[i]->setZero();
         m_batchBPt[i]->setZero();
     }
-#endif
     
-    if(t>0) {
 /// scale the past
-        m_A->scale(sc);
-        m_B->scale(sc);
+	//m_A->scale(sc);
+	//m_B->scale(sc);
 /// slow down early steps
-        //m_batchA->scale(0.1 );
-        //m_batchB->scale(0.1 );
-    }
+	//m_batchA->scale(sc);
+	//m_batchB->scale(sc);
 	
-	const float wei = 0.001 / nBatch;
-    
 /// add average of batch
-	m_A->add(*m_batchA, wei);
-    m_B->add(*m_batchB, wei);
-    m_pre0A->add(*m_batchA, wei);
-    m_pre0B->add(*m_batchB, wei);
+	m_A->add(*m_batchA);
+    m_B->add(*m_batchB);
+    m_pre0A->add(*m_batchA);
+    m_pre0B->add(*m_batchB);
+	
     m_batchA->setZero();
     m_batchB->setZero();
-    
-	const int p = m_D->numColumns();
 	
-    for (i = 0; i<p; ++i) {
+    DenseVector<T> ui(m_D->numRows());
+	const int p = m_D->numColumns();
+
+	for (i = 0; i<p; ++i) {
         const T Aii = m_A->column(i)[i];
-        if (Aii > 1e-7) {
+        if (Aii > 1e-4) {
             DenseVector<T> di(m_D->column(i), m_D->numRows());
             DenseVector<T> ai(m_A->column(i), m_A->numRows());
             DenseVector<T> bi(m_B->column(i), m_B->numRows());
-/// ui <- (bi - D * ai) / Aii + di
-            m_D->mult(*m_ui, ai, -1.0);
-            m_ui->add(bi);
-            m_ui->scale(1.0/Aii);
-            m_ui->add(di);
-/// di <- ui / max(|| ui ||, 1)	?			
-            float unm = m_ui->norm();
+			
+/// ui <- 1 / Aii * (bi - D * ai)  + di
+            m_D->mult(ui, ai, -1.0);
+            ui.add(bi);
+            ui.scale(1.0/Aii);
+            ui.add(di);
+			
+/// di <- ui / max(l2norm( ui ), 1)		
+            float unm = ui.norm();
             if(unm > 1.0) 
-            	m_ui->scale(1.f/unm);
+				ui.scale(1.f/unm);
             
-            m_D->copyColumn(i, m_ui->v());
+            m_D->copyColumn(i, ui.v());
        }
     }
-    m_D->AtA(*m_G);	
 	
+	//if((t & 1)==1)
+		m_D->normalize();
+	m_D->AtA(*m_G);	
 	
 }
 
@@ -548,7 +562,6 @@ void DictionaryMachine<NumThread, T>::computeYhatPt(const int iThread, unsigned 
         
     }
 }
-
 
 template<int NumThread, typename T>
 void DictionaryMachine<NumThread, T>::computeYhat(unsigned * imageBits, int iImage, 

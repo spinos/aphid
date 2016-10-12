@@ -21,7 +21,7 @@ class LfParameter {
 	
 	std::vector<std::string > m_imageNames;
 	std::vector<int > m_numPatches;
-	std::vector<Int2 > m_imageSizes;
+	std::vector<aphid::Int2 > m_imageSizes;
 	std::string m_searchPath;
 	
 	int m_nthread;
@@ -34,6 +34,8 @@ class LfParameter {
 	int m_numTotalPatches;
 /// dictionary image size
 	int m_dictWidth, m_dictHeight;
+/// draw n signals per iteration
+	int m_batchSize;
 	bool m_isValid, m_isHelp;
 public:
 	LfParameter(int argc, char *argv[]);
@@ -53,6 +55,7 @@ public:
 	int imageNumPatches(int i) const;
 	int imageNumPixels(int i) const;
 	int maxIterations() const;
+	const int & batchSize() const;
 	
 	bool isImageOpened(const int ind, int & idx) const;
 	aphid::ExrImage *openImage(const int ind);
@@ -71,6 +74,8 @@ protected:
 private:
 	bool searchImagesIn(const char * dirname);
 	bool countPatches();
+/// assuming batch size < num signals
+	void limitBatchSize();
 	
 };
 

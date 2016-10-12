@@ -30,6 +30,7 @@ LfParameter::LfParameter(int argc, char *argv[])
 	m_maxIter = 1000;
 	m_searchPath = "";
 	m_dictWidth = m_dictHeight = 0;
+	m_batchSize = 256;
 	bool foundImages = false;
 	if(argc == 1) {
 		m_isValid = searchImagesIn("./");
@@ -72,6 +73,23 @@ LfParameter::LfParameter(int argc, char *argv[])
 				}
 				catch(const boost::bad_lexical_cast &) {
 					std::cout<<"\n bad --maxIteration value "<<argv[i+1];
+					break;
+				}
+			}
+			if(strcmp(argv[i], "-bs") == 0 || strcmp(argv[i], "--batchSize") == 0) {
+				if(i==argc-1) {
+					std::cout<<"\n --batchSize value is not set";
+					break;
+				}
+				try {
+					m_batchSize = boost::lexical_cast<int>(argv[i+1]);
+					if(m_batchSize < 2) {
+						std::cout<<"\n bad --batchSize value (< 2)";
+						break;
+					}
+				}
+				catch(const boost::bad_lexical_cast &) {
+					std::cout<<"\n bad --atomSize value "<<argv[i+1];
 					break;
 				}
 			}
@@ -126,11 +144,13 @@ LfParameter::LfParameter(int argc, char *argv[])
 		}
 	}
 	if(m_isValid) {
-		std::cout<<"\n image atom size "<<m_atomSize;
-		std::cout<<"\n dictionary overcompleteness "<<m_overcomplete;
+		std::cout<<"\n image atom size "<<m_atomSize
+			<<"\n dictionary overcompleteness "<<m_overcomplete;
 		m_isValid = countPatches();
 	}
 	if(m_isValid) {
+		limitBatchSize();
+		std::cout<<"\n batch size "<<m_batchSize;
 		const float p = dictionaryLength();
 		int w = sqrt(p); 
 		if(w*w < p) w++;
@@ -138,7 +158,8 @@ LfParameter::LfParameter(int argc, char *argv[])
 		if(h*w < p) h++;
 		m_dictWidth = w * m_atomSize;
 		m_dictHeight = h * m_atomSize;
-		std::cout<<"\n dictionary image size ("<<m_dictWidth<<", "<<m_dictHeight<<")"
+		std::cout<<"\n p = "<<p
+				<<"\n dictionary image size ("<<m_dictWidth<<", "<<m_dictHeight<<")"
 		<<"\n passed parameter check\n";
 	}
 }
@@ -297,6 +318,21 @@ void LfParameter::printHelp() const
 	printOptions();
 }
 
+const int & LfParameter::batchSize() const
+{ return m_batchSize; }
+
+void LfParameter::limitBatchSize() 
+{
+	if(m_numTotalPatches > m_batchSize)
+		return;
+	
+	m_batchSize = 1;
+	while ((m_batchSize<<1) < m_numTotalPatches) {
+		m_batchSize = m_batchSize<<1;
+	}
+	
+}
+
 void LfParameter::printVersion() const
 { std::cout<<"\n lfr (Light Field Research) version 20151122"; }
 
@@ -316,6 +352,7 @@ void LfParameter::printUsage() const
 void LfParameter::printOptions() const	
 {
 	std::cout<<"\nOptions:\n -as or --atomSize    integer    size of image atoms, no less than 8, default is 8"
+	<<"\n -bs or --batchSize    integer    draw n signals per iteration, no less than 2, default is 256"
 	<<"\n -t or --thread    integer    number of threads to use, limit to 1 - 24, default is 2"
 	<<"\n -mi or --maxIteration    integer    limit of iterations, default is 1000"
 	<<"\n -oc or --overcomplete    float    overcompleteness of dictionary, d/m, no less than 1.0, default is 1.0"

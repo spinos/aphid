@@ -53,3 +53,14 @@ lo = upfirdn(x, lpf, 1, 2);
 /// the length of the largest array dimension in X
 /// L = length(af)/2;
 
+
+https://www.mathworks.com/help/matlab/ref/reshape.html
+B = reshape(A, sz1, sz2)
+
+reshape A into a sz1-by-sz2
+
+https://www.mathworks.com/help/matlab/ref/sum.html?searchHighlight=sum
+
+sum(A)
+returns a row vector containing the sum of each column
+ 

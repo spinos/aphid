@@ -234,8 +234,7 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 /// beta <- beta + step * u
 		clapack_axpy<T>(i+1, step, m_u.v(),1, beta.raw(),1);
 /// non-negative
-        for (j = 0; j<=i; ++j)
-  {          
+        for (j = 0; j<=i; ++j) {          
             if (beta[j] < 0) beta[j]=0;
         }
 		
@@ -288,10 +287,11 @@ void LAR<T>::lars(const DenseVector<T> & Y, DenseVector<T> & beta, DenseVector<i
 			toSelect = true;
 			
 /// exit condition
-		if(numIter++ >= maxNumIter || absoluteValue<T>(step) < 1e-4
-				|| step == (currentCorrelation - lambda)
-				|| normX < 1e-8
-				|| m_numSel >= 20
+		if(numIter++ >= maxNumIter 
+				|| absoluteValue<T>(step) < 1e-7
+				//|| step == (currentCorrelation - lambda)
+				|| normX < 1e-6
+				|| m_numSel >= 32
 				) break;
 	}
 }

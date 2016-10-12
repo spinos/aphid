@@ -1,0 +1,4 @@
+http://www.cs.ubc.ca/~schmidtm/Software/lasso.html
+
+min(w): ||Xw - y||^2 + v|w|
+
