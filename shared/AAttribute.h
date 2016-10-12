@@ -17,13 +17,14 @@ namespace aphid {
 class AAttribute : public TypedEntity {
 public:
 	enum AttributeType {
-	    aUnknown,
+	    aUnknown = 0,
 	    aNumeric,
 	    aEnum,
 	    aTyped,
 	    aCompound,
 	    aString,
-		aUnit
+		aUnit,
+		aNumericBundle
 	};
 	
 	AAttribute();
@@ -210,6 +211,7 @@ public:
 	
 	virtual void setValue(const int & x);
 	virtual void setValue(const float & x);
+	void setValue(const double & x);
 	
 	double value() const;
 protected:
@@ -236,6 +238,51 @@ protected:
 	
 private:
 	bool m_value;
+};
+
+class ABundleAttribute : public ANumericAttribute {
+
+    char * m_v;
+    int m_bundleSize;
+    int m_stride;
+    NumericAttributeType m_ntyp;
+    
+public:
+    ABundleAttribute();
+    virtual ~ABundleAttribute();
+    
+    virtual AttributeType attrType() const;
+    virtual NumericAttributeType numericType() const;
+	
+	void create(const int & sz,
+	            NumericAttributeType ntyp);
+	            
+	const char * value() const;
+	char * value();
+	const int & size() const;
+/// size * stride
+	const int dataLength() const;
+	
+	void getNumericAttrib(ANumericAttribute * & dst) const;
+	void setAttribValue(ANumericAttribute * a, const int & i);
+	void getAttribValue(ANumericAttribute * dst, const int & i) const;
+	
+protected:
+
+private:
+    template<typename Tv, typename Ta>
+	void setValue(Ta * a, const int & i) {
+	    Tv v = a->value();
+	    memcpy(&m_v[i*m_stride], &v, sizeof(Tv) );
+	}
+	
+    template<typename Tv, typename Ta>
+	void getValue(Ta * a, const int & i) const {
+	    Tv v;
+        memcpy(&v, &m_v[i*m_stride], sizeof(Tv) );
+        a->setValue(v);
+	}
+
 };
 
 }

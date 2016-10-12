@@ -19,6 +19,7 @@
 #include <SHelper.h>
 #include <sstream>
 #include <boost/format.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace aphid {
 
@@ -69,6 +70,8 @@ bool HesperisFile::doWrite(const std::string & fileName)
 		case WAttrib:
 			writeAttribute();
 			break;
+	    case WBundle:
+	        writeBundle();
 		default:
 			break;
 	}
@@ -355,6 +358,22 @@ std::string HesperisFile::WorldPath(const std::string & name)
 	return boost::str(boost::format("/world/%1%") % name); 
 }
 
+std::string HesperisFile::LocalPath(const std::string & name)
+{
+	std::string r;
+	std::string str = name;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("|/");
+	tokenizer tokens(str, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter) {
+	    if(*tok_iter != "world")
+		    r = r + "|" +(*tok_iter);
+	}
+		
+	return r;
+}
+
 std::string HesperisFile::checkPath(const std::string & name) const
 {
 	std::string r(name);
@@ -438,6 +457,22 @@ std::string HesperisFile::modifiedTime()
 	grpWorld.load();
 	grpWorld.close();
 	return grpWorld.modifiedTimeStr();
+}
+
+bool HesperisFile::writeBundle()
+{
+    std::cout<<"\n write numeric bundle "<<m_bundlePath;
+    HNumericBundle grp(WorldPath(m_bundlePath));
+		grp.save(m_bundle);
+		grp.close();
+    return true;
+}
+
+void HesperisFile::setBundleEntry(const ABundleAttribute * d,
+	                    const std::string & parentName)
+{
+    m_bundle = d;
+    m_bundlePath = boost::str(boost::format("%1%|%2%") % parentName % d->shortName() );
 }
 
 }

@@ -38,6 +38,17 @@ void AttribUtil::save3(const MDagPathArray & entities)
 	m_dirtyPlugs.clear();
 }
 
+void AttribUtil::saveBoundle(const MDagPathArray & entities,
+                            const std::string & parentName)
+{
+    unsigned i = 0;
+	for(; i< entities.length(); i++) scan(entities[i]);
+	if(m_dirtyPlugs.length() < 1) return;
+	HesperisAttributeIO::WriteAttributeBoundle(UserDefinedAttribFilter,
+	                        m_dirtyPlugs, parentName, HesDoc); 
+	m_dirtyPlugs.clear();
+}
+
 void AttribUtil::scan(const MDagPath &entity)
 {
 	MFnDagNode pf(entity);

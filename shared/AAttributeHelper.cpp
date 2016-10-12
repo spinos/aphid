@@ -187,7 +187,8 @@ AEnumAttribute * AAttributeHelper::AsEnumData(const MPlug & plg)
 	return r;
 }
 
-bool AAttributeHelper::HasNamedAttribute(MObject & attrib, MObject & node, const std::string & name)
+bool AAttributeHelper::HasNamedAttribute(MObject & attrib, 
+                        const MObject & node, const std::string & name)
 {
 	MFnDependencyNode fn(node);
 	MStatus stat;
@@ -214,7 +215,8 @@ bool AAttributeHelper::IsNumericAttr(MObject & entity, MFnNumericData::Type t)
 	return true;
 }
 
-bool AAttributeHelper::AddStringAttr(MObject & attr, MObject & node, 
+bool AAttributeHelper::AddStringAttr(MObject & attr, 
+                            const MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort)
 {
@@ -226,7 +228,8 @@ bool AAttributeHelper::AddStringAttr(MObject & attr, MObject & node,
 	return stat == MS::kSuccess;
 }
 
-bool AAttributeHelper::AddNumericAttr(MObject & attr, MObject & node, 
+bool AAttributeHelper::AddNumericAttr(MObject & attr, 
+                            const MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort,
 									MFnNumericData::Type t)
@@ -240,7 +243,8 @@ bool AAttributeHelper::AddNumericAttr(MObject & attr, MObject & node,
 	return stat == MS::kSuccess;
 }
 
-bool AAttributeHelper::AddEnumAttr(MObject & attr, MObject & node, 
+bool AAttributeHelper::AddEnumAttr(MObject & attr, 
+                            const MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort,
 									const std::map<short, std::string > & fields)

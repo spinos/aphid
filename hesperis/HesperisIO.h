@@ -13,6 +13,7 @@
 #include <maya/MMatrix.h>
 #include <maya/MTransformationMatrix.h>
 #include <maya/MObject.h>
+#include <maya/MObjectArray.h>
 #include <AllMath.h>
 #include <BaseTransform.h>
 #include <HTransform.h>
@@ -42,7 +43,12 @@ public:
 							const std::string & parentName = "");
     static bool CreateMeshGroup(const MDagPathArray & paths, 
 								ATriangleMeshGroup * dst);
-    static bool FindNamedChild(MObject & dst, const std::string & name, MObject & oparent = MObject::kNullObj);
+	static void LsChildren(MObjectArray & dst, 
+	            const int & maxCount,
+	            const MObject & oparent);
+    static bool FindNamedChild(MObject & dst, 
+                const std::string & name,
+                const MObject & oparent = MObject::kNullObj);
     static bool GetTransform(BaseTransform * dst, const MDagPath & path);
     static bool LsCurves(std::vector<std::string > & dst);
     static bool LsMeshes(std::vector<std::string > & dst);

@@ -207,6 +207,7 @@ ADD_LIBRARY (aphidH5 ${LIB_TYP}
 ../shared/HAnimationCurve.cpp
 ../shared/AAttribute.cpp
 ../shared/HAttributeGroup.cpp
+../shared/HNumericBundle.cpp
 ../hesperis/H5IO.cpp
 ../hesperis/H5Availability.cpp
 ../hesperis/HesperisFile.cpp

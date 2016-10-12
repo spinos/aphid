@@ -8,6 +8,8 @@
  */
 
 #include "AAttribute.h"
+#include <algorithm>
+#include <memory.h>
 
 namespace aphid {
 
@@ -237,6 +239,9 @@ void ADoubleNumericAttribute::setValue(const int & x)
 void ADoubleNumericAttribute::setValue(const float & x) 
 { m_value = x; }
 
+void ADoubleNumericAttribute::setValue(const double & x)
+{ m_value = x; }
+
 double ADoubleNumericAttribute::value() const
 { return m_value; }
 
@@ -263,5 +268,151 @@ bool ABooleanNumericAttribute::value() const
 char ABooleanNumericAttribute::asChar() const
 { return (char)value(); }
 
+ABundleAttribute::ABundleAttribute() :
+m_bundleSize(0),
+m_stride(0),
+m_ntyp(TUnkownNumeric),
+m_v(NULL)
+{}
+
+ABundleAttribute::~ABundleAttribute()
+{ if(m_v) delete[] m_v; }
+
+AAttribute::AttributeType ABundleAttribute::attrType() const
+{ return aNumericBundle; }
+
+ANumericAttribute::NumericAttributeType ABundleAttribute::numericType() const
+{ return m_ntyp; }
+
+void ABundleAttribute::create(const int & sz,
+	            NumericAttributeType ntyp)
+{
+    m_ntyp = ntyp;
+    if(ntyp == TByteNumeric)
+        m_stride = sizeof(char);
+    else if(ntyp == TShortNumeric)
+        m_stride = sizeof(short);
+    else if(ntyp == TIntNumeric)
+        m_stride = sizeof(int);
+    else if(ntyp == TFloatNumeric)
+        m_stride = sizeof(float);
+    else if(ntyp == TDoubleNumeric)
+        m_stride = sizeof(double);
+    else if(ntyp == TBooleanNumeric)
+        m_stride = sizeof(bool);
+        
+    m_v = new char[sz*m_stride];
+    m_bundleSize = sz;
+}
+
+const char * ABundleAttribute::value() const
+{ return m_v; }
+	
+char * ABundleAttribute::value()
+{ return m_v; }
+
+const int & ABundleAttribute::size() const
+{ return m_bundleSize; }
+
+const int ABundleAttribute::dataLength() const
+{ return m_bundleSize * m_stride; }
+
+void ABundleAttribute::setAttribValue(ANumericAttribute * a, const int & i)
+{
+    switch (a->numericType() ) {
+        case TByteNumeric:
+            setValue<char, AByteNumericAttribute>(
+                static_cast<AByteNumericAttribute *>(a), i);
+            break;
+        case TShortNumeric:
+            setValue<short, AShortNumericAttribute>(
+                static_cast<AShortNumericAttribute *>(a), i);
+            break;
+        case TIntNumeric:
+            setValue<int, AIntNumericAttribute>(
+                static_cast<AIntNumericAttribute *>(a), i);
+            break;
+        case TFloatNumeric:
+            setValue<float, AFloatNumericAttribute>(
+                static_cast<AFloatNumericAttribute *>(a), i);
+            break;
+        case TDoubleNumeric:
+            setValue<double, ADoubleNumericAttribute>(
+                static_cast<ADoubleNumericAttribute *>(a), i);
+            break;
+        case TBooleanNumeric:
+            setValue<bool, ABooleanNumericAttribute>(
+                static_cast<ABooleanNumericAttribute *>(a), i);
+            break;
+        default:
+            break;
+    }
+}
+
+void ABundleAttribute::getAttribValue(ANumericAttribute * dst, 
+                                        const int & i) const
+{
+    switch (numericType() ) {
+        case TByteNumeric:
+            getValue<char, AByteNumericAttribute>(
+                static_cast<AByteNumericAttribute *>(dst), i);
+            break;
+        case TShortNumeric:
+            getValue<short, AShortNumericAttribute>(
+                static_cast<AShortNumericAttribute *>(dst), i);
+            break;
+        case TIntNumeric:
+            getValue<int, AIntNumericAttribute>(
+                static_cast<AIntNumericAttribute *>(dst), i);
+            break;
+        case TFloatNumeric:
+            getValue<float, AFloatNumericAttribute>(
+                static_cast<AFloatNumericAttribute *>(dst), i);
+            break;
+        case TDoubleNumeric:
+            getValue<double, ADoubleNumericAttribute>(
+                static_cast<ADoubleNumericAttribute *>(dst), i);
+            break;
+        case TBooleanNumeric:
+            getValue<bool, ABooleanNumericAttribute>(
+                static_cast<ABooleanNumericAttribute *>(dst), i);
+            break;
+        default:
+            break;
+    }
+}
+
+void ABundleAttribute::getNumericAttrib(ANumericAttribute * & dst) const
+{
+    switch (numericType() ) {
+        case TByteNumeric:
+            dst = new AByteNumericAttribute;
+            break;
+        case TShortNumeric:
+            dst = new AShortNumericAttribute;
+            break;
+        case TIntNumeric:
+            dst = new AIntNumericAttribute;
+            break;
+        case TFloatNumeric:
+            dst = new AFloatNumericAttribute;
+            break;
+        case TDoubleNumeric:
+            dst = new ADoubleNumericAttribute;
+            break;
+        case TBooleanNumeric:
+            dst = new ABooleanNumericAttribute;
+            break;
+        default:
+            break;
+    }
+    
+    if(!dst)
+        return;
+        
+    dst->setShortName(shortName() );
+    dst->setLongName(longName() );
+}
+	
 }
 //:~

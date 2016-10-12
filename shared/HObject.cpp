@@ -100,5 +100,15 @@ std::string HObject::lastName() const
 	return result;
 }
 
+std::string HObject::parentName() const
+{
+    std::string result = fObjectPath;
+	int found = result.rfind('/')+1;
+	if(found > -1)
+		result = result.erase(found);
+
+	return result;
+}
+
 }
 //:~

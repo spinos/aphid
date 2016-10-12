@@ -17,7 +17,7 @@ class HesperisAnimIO : public HesperisIO {
 public:
 	static bool WriteAnimation(const MPlug & attrib, const MObject & animCurveObj);
 	
-	static bool ReadAnimation(HBase * parent, MObject & entity, MObject & attr);
+	static bool ReadAnimation(HBase * parent, const MObject & entity, MObject & attr);
 	static bool ProcessAnimationCurve(const AAnimationCurve & data, MPlug & dst);
 
 	static double SecondsPerFrame;

@@ -20,6 +20,7 @@
 #include <HWorld.h>
 #include <HPolygonalMesh.h>
 #include <HAttributeGroup.h>
+#include <HNumericBundle.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -38,6 +39,11 @@ class APolygonalMesh;
 class AAttribute;
 
 class HesperisFile : public HFile {
+    
+/// 1-D array of data stored to path
+    const ABundleAttribute * m_bundle;
+    std::string m_bundlePath;
+    
 public:
 	enum ReadComponent {
 		RNone = 0,
@@ -54,7 +60,8 @@ public:
 		WTri = 2,
 		WTransform = 3,
         WPoly = 4,
-		WAttrib = 5
+		WAttrib = 5,
+	    WBundle = 6
 	};
 	
 	HesperisFile();
@@ -64,6 +71,8 @@ public:
 	void setReadComponent(ReadComponent comp);
 	void setWriteComponent(WriteComponent comp);
 	
+	void setBundleEntry(const ABundleAttribute * d,
+	                    const std::string & parentName);
 	void addAttribute(const std::string & name, AAttribute * data);
     void addTransform(const std::string & name, BaseTransform * data);
 	void addCurve(const std::string & name, CurveGroup * data);
@@ -113,6 +122,8 @@ public:
     }
     
     static std::string WorldPath(const std::string & name);
+/// rm world in path
+    static std::string LocalPath(const std::string & name);
     
 protected: 
 
@@ -124,6 +135,7 @@ private:
 	bool writeTriangle();
     bool writePolygon();
 	bool writeAttribute();
+	bool writeBundle();
     
 	bool readFrames(HBase * grp);
 	bool listCurve(HBase * grp);

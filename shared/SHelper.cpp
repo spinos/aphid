@@ -288,8 +288,6 @@ void SHelper::changeFrameNumberFistDot4Digit(std::string& res, int frame)
 	res.insert(first, mid);
 }
 
-//#include <maya/MGlobal.h>
-
 char SHelper::isInArrayDividedBySpace(const char* handle, const char* array)
 {
 	std::string full = array;

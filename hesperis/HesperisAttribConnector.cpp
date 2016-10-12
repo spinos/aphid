@@ -47,7 +47,7 @@ void HesperisAttribConnector::ClearMasterNode()
 { MasterAttribNode = MObject::kNullObj; }
 
 void HesperisAttribConnector::ConnectNumeric(const std::string & name, ANumericAttribute::NumericAttributeType typ,
-								MObject & entity, MObject & attr)
+								const MObject & entity, MObject & attr)
 {
 	std::string plgName("");
 	std::string srcName("");
@@ -85,11 +85,13 @@ void HesperisAttribConnector::ConnectNumeric(const std::string & name, ANumericA
 	Connect(name, plgName, srcName, entity, attr);
 }
 
-void HesperisAttribConnector::ConnectEnum(const std::string & name, MObject & entity, MObject & attr)
+void HesperisAttribConnector::ConnectEnum(const std::string & name, 
+                const MObject & entity, MObject & attr)
 { Connect(name, "ennm", "outEnum", entity, attr); }
 
-void HesperisAttribConnector::Connect(const std::string & name, const std::string & plgName, const std::string & srcName,
-									MObject & entity, MObject & attr)	
+void HesperisAttribConnector::Connect(const std::string & name, const std::string & plgName, 
+const std::string & srcName,
+                                const MObject & entity, MObject & attr)	
 {
 	if(MasterAttribNode.isNull()) CreateMasterNode();
 	
