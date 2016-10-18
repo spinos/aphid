@@ -63,4 +63,25 @@ https://www.mathworks.com/help/matlab/ref/sum.html?searchHighlight=sum
 
 sum(A)
 returns a row vector containing the sum of each column
+
+https://www.mathworks.com/help/matlab/ref/randn.html
+
+randn(sz1,sz2);
+
+sz1-by-sz2 array of random numbers
+
+https://www.mathworks.com/help/matlab/ref/gt.html
+A > B returns a logical array 0 or 1 where A > B
+
+A = [1 12 18 7 9 11 2 15];
+A > 10
+[0   1   1   0   0   1   0   1]
+
+http://www.tutorialspoint.com/matlab/matlab_operators.htm
+A.*B is the element-by-element product of the arrays A and B
+
+https://www.mathworks.com/help/matlab/ref/chol.html?searchHighlight=chol
+R = chol(A)
+Cholesky factorization
+R'*R=A
  
