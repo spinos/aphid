@@ -8,6 +8,8 @@
  */
 
 #include "Boundary.h"
+#include "ConvexShape.h"
+
 namespace aphid {
 
 Boundary::Boundary() {}
@@ -31,6 +33,9 @@ Domain::FunctionType Domain::functionType() const
 { return fnUnknown; }
 
 bool Domain::broadphaseIntersect(const BoundingBox & b)
+{ return false; }
+
+bool Domain::narrowphaseHexahedron(const cvx::Hexahedron & hexa)
 { return false; }
 
 float Domain::distanceTo(const Vector3F & pref)

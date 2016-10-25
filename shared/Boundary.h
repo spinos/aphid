@@ -31,6 +31,10 @@ private:
  *  boundary with type and functions
  *
  */
+namespace cvx {
+class Hexahedron;
+}
+
 class Domain : public Boundary {
 
 	float m_distanceRange;
@@ -44,11 +48,13 @@ public:
 		fnBox = 2,
 		fnKdTree = 3,
 		fnTetrahedron = 4,
+		fnHexahedron = 6,
 		fnFrustum = 5
 	};
 	
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & b);
+	virtual bool narrowphaseHexahedron(const cvx::Hexahedron & hexa);
 	virtual float distanceTo(const Vector3F & pref);
 	virtual float beamIntersect(const Beam & b,
 								const float & splatRadius);

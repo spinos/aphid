@@ -11,7 +11,7 @@
 
 #include "BccTetraGrid.h"
 
-struct Float4;
+struct aphid::Float4;
 
 namespace ttg {
 
@@ -41,7 +41,7 @@ public:
 	void extractGridPosProp();
 	int buildMesh();
 	bool addPoint(const int & vi, bool & topologyChanged);
-	ITetrahedron * searchTet(const aphid::Vector3F & p, Float4 * coord);
+	ITetrahedron * searchTet(const aphid::Vector3F & p, aphid::Float4 * coord);
 	bool checkConnectivity();
 	int checkTetraVolume(std::vector<int> & itetnegative);
 	

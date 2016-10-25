@@ -685,6 +685,94 @@ Vector3F Tetrahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
     return X(ir);
 }
 
+Vector3F Tetrahedron::getCenter() const
+{ return (m_p[0] + m_p[1] + m_p[2] + m_p[3]) * .25f; }
+
+Vector3F Tetrahedron::getFaceCenter(const int & i) const
+{
+	if(i==0)
+		return (m_p[0] + m_p[1] + m_p[2]) * .3333f;
+	if(i==1)
+		return (m_p[0] + m_p[2] + m_p[3]) * .3333f;
+	if(i==2)
+		return (m_p[0] + m_p[3] + m_p[1]) * .3333f;
+		
+	return (m_p[1] + m_p[3] + m_p[2]) * .3333f;
+}
+
+Vector3F Tetrahedron::getEdgeCenter(const int & i) const
+{
+	if(i<3) {
+		return (m_p[0] + m_p[i+1]) * .5f;
+	}
+	if(i<5) {
+		return (m_p[1] + m_p[i-1]) * .5f;
+	}
+	return (m_p[2] + m_p[3]) * .5f;
+}
+
+Hexahedron::Hexahedron()
+{}
+
+void Hexahedron::set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2, const Vector3F & p3,
+			const Vector3F & p4, const Vector3F & p5,
+			const Vector3F & p6, const Vector3F & p7)
+{
+	Vector3F c = (p0 + p1 + p2 + p3
+				+ p4 + p5 + p6 + p7) * .125f;
+	
+	m_p[0] = p0 + (p0 - c) * 1e-3f; 
+	m_p[1] = p1 + (p1 - c) * 1e-3f; 
+	m_p[2] = p2 + (p2 - c) * 1e-3f; 
+	m_p[3] = p3 + (p3 - c) * 1e-3f;
+	m_p[4] = p4 + (p4 - c) * 1e-3f; 
+	m_p[5] = p5 + (p5 - c) * 1e-3f; 
+	m_p[6] = p6 + (p6 - c) * 1e-3f; 
+	m_p[7] = p7 + (p7 - c) * 1e-3f; 
+}
+
+BoundingBox Hexahedron::calculateBBox() const
+{ 
+	BoundingBox b;
+    b.expandBy(m_p[0]);
+    b.expandBy(m_p[1]);
+	b.expandBy(m_p[2]);
+	b.expandBy(m_p[3]);
+	b.expandBy(m_p[4]);
+    b.expandBy(m_p[5]);
+	b.expandBy(m_p[6]);
+	b.expandBy(m_p[7]);
+    b.expand(b.getLongestDistance() * 1e-3f);
+    return b;
+}
+
+std::string Hexahedron::GetTypeStr()
+{ return "hexahedron"; }
+
+int Hexahedron::numPoints() const
+{ return 8; }
+
+Vector3F Hexahedron::X(int idx) const
+{ return m_p[idx]; }
+
+Vector3F Hexahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	float maxdotv = -1e19f;
+    float dotv;
+	int ir = 0;
+	
+    for(int i=0; i < 8; ++i) {
+        dotv = X(i).dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            ir = i;
+        }
+    }
+    if(localP) *localP = X(ir);
+    return X(ir);
+}
+
 }
 
 }

@@ -121,6 +121,45 @@ public:
 		
 	}
 	
+/// only front cells are subdivided
+	template<typename Tf>
+	void marchFrontBuild(Tf * distanceFunc, 
+							int discreteLevel,
+							int maxLevel)
+	{
+		int curLevel = discreteLevel, nbound;
+		discretize<Tf>(distanceFunc, curLevel);
+		
+		buildGrid();
+		buildMesh();
+		buildGraph();
+		
+		calculateDistance2<Tf>(distanceFunc);
+		
+		verbose();
+		/*
+		while(curLevel < maxLevel) {
+			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
+		
+			std::cout<<"\n subdiv level"<<curLevel<<std::endl;
+		
+			subdivideByFront(curLevel);
+			nbound = m_frontNodes.size();
+			std::cout<<"\n n boundary nodes "<<nbound;
+			
+			buildGrid();
+			buildMesh();
+			buildGraph();
+			
+			calculateDistance2<Tf>(distanceFunc);
+		
+			std::cout<<"\n subdiv to level"<<curLevel;
+			verbose();
+			
+			curLevel++;
+		}*/
+	}
+	
 	void buildGrid();
 	
 /// push tetra node and edge to graph
@@ -155,10 +194,58 @@ public:
 		
 	}
 	
+/// split tetrahedron to four hexahedron
+/// if hexahedron intersect, block three edges
+	template<typename Tf>
+	void findTetraEdgeCross(Tf * func, 
+							const aphid::cvx::Tetrahedron * tetshp,
+							const int & itet) 
+	{
+		aphid::Vector3F c = tetshp->getCenter();
+		aphid::Vector3F f0 = tetshp->getFaceCenter(0);
+		aphid::Vector3F f1 = tetshp->getFaceCenter(1);
+		aphid::Vector3F f2 = tetshp->getFaceCenter(2);
+		aphid::Vector3F f3 = tetshp->getFaceCenter(3);
+		aphid::Vector3F e0 = tetshp->getFaceCenter(0);
+		aphid::Vector3F e1 = tetshp->getFaceCenter(1);
+		aphid::Vector3F e2 = tetshp->getFaceCenter(2);
+		aphid::Vector3F e3 = tetshp->getFaceCenter(3);
+		aphid::Vector3F e4 = tetshp->getFaceCenter(4);
+		aphid::Vector3F e5 = tetshp->getFaceCenter(5);
+		
+		aphid::cvx::Hexahedron hexashp;
+
+/// split tetra to four hexa		
+/// 1 vertex 3 edge 3 face 1 volume
+/// hexa0
+		hexashp.set(hexashp.X(0), e0, e1, e2, f0, f1, f2, c);
+		if(func-> narrowphase (hexashp) ) {
+			setTetraVertexEdgeCross(itet, 0, .5f);
+		}
+		
+/// hexa1
+		hexashp.set(hexashp.X(1), e0, e3, e4, f0, f2, f3, c);
+		if(func-> narrowphase (hexashp) ) {
+			setTetraVertexEdgeCross(itet, 1, .5f);
+		}
+		
+/// hexa2
+		hexashp.set(hexashp.X(2), e1, e3, e5, f0, f1, f3, c);
+		if(func-> narrowphase (hexashp) ) {
+			setTetraVertexEdgeCross(itet, 2, .5f);
+		}
+		
+/// hexa3
+		hexashp.set(hexashp.X(3), e2, e4, e5, f1, f2, f3, c);
+		if(func-> narrowphase (hexashp) ) {
+			setTetraVertexEdgeCross(itet, 3, .5f);
+		}
+	}
+	
 	template<typename Tf>
 	void calculateDistance2(Tf * func)
 	{
-		clearDirtyEdges();
+		//clearDirtyEdges();
 		markUnknownNodes();
 		
 		typename aphid::cvx::Tetrahedron;
@@ -172,15 +259,15 @@ public:
 
 /// intersect any tetra			
 			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
-				markTetraOnFront(i);
+				markTetraNodeOnFront(i);
+				findTetraEdgeCross(func, &tetshp, i);
 			}
 		}
 		
 		messureFrontNodes2(func);
-		//int ifar = findFarInd();
-		//markInsideOutside2(func, ifar, false);
+		int ifar = findFarInd();
+		markInsideOutside2(func, ifar, false);
 		fastMarchingMethod();
-		//estimateFrontEdgeError(func);
 		
 	}
 	
@@ -191,6 +278,9 @@ public:
 	const float & errorThreshold() const;
 								
 protected:
+	void markTetraNodeOnFront(const int & i);
+/// four nodes on front
+/// six edges dirty
 	void markTetraOnFront(const int & i);
 	
 private:
@@ -205,6 +295,9 @@ private:
 	bool isTetraOnFrontBoundary(int iv0, int iv1, int iv2, int iv3) const;
 	bool isTetraAllPositive(int iv0, int iv1, int iv2, int iv3) const;
 	void moveFront(const float & x);
+	void setTetraVertexEdgeCross(const int & itet,
+								const int & ivertex,
+								const float & val);
 	
 };
 

@@ -28,9 +28,7 @@ public:
 	
 	template<typename Ts>
 	bool narrowphaseIntersect(const Ts * a, const float & shellThickness)
-	{
-		return m_shape->narrowphaseIntersect<Ts>(a, shellThickness);
-	}
+	{ return m_shape->narrowphaseIntersect<Ts>(a, shellThickness); }
 	
 };
 
@@ -65,5 +63,6 @@ float ConvexDomain<T>::beamIntersect(const Beam & b,
 
 typedef ConvexDomain<cvx::Sphere> SphereDomain;
 typedef ConvexDomain<cvx::Box> BoxDomain;
+typedef ConvexDomain<cvx::Hexahedron> HexahedronDomain;
 
 }
