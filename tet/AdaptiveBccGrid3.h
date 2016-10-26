@@ -38,6 +38,10 @@ public:
 						const aphid::BoundingBox & bx, 
 						const int & level,
 						std::vector<aphid::sdb::Coord4 > * divided);
+					
+/// to level + 1
+	void subdivideCell(const aphid::sdb::Coord4 & cellCoord,
+						std::vector<aphid::sdb::Coord4 > * divided);
 	
 /// find level cell intersect distance function
 	template<typename Tf>

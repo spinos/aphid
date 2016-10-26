@@ -438,4 +438,29 @@ void BccCell3::findRedValueFrontBlue(BccNode3 * redN,
 	}
 }
 
+bool BccCell3::isFront(const sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid)
+{
+	const float vred = find(15)->val;
+	for(int i=0;i<8;++i) {
+		if((blueNode(i, cellCoord, grid)->val * vred) < 0.f)
+			return true;
+	}
+	return false;
+}
+
+bool BccCell3::isInterior(const aphid::sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid)
+{
+	const float vred = find(15)->val;
+	if(vred > 0.f)
+		return false;
+		
+	for(int i=0;i<8;++i) {
+		if((blueNode(i, cellCoord, grid)->val * vred) < 0.f)
+			return false;
+	}
+	return true;
+}
+
 }

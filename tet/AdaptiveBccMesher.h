@@ -37,7 +37,7 @@ public:
 		m_grid.markCellIntersectDomainAtLevel(d, 0, divided);
 		
 		int li = 1;
-		while(li < level
+		while(li <= level
 				&& divided.size() > 0) {
 		
 			m_grid.subdivideCells(divided);

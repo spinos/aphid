@@ -159,4 +159,24 @@ void AdaptiveBccGrid3::subdivideCellToLevel(BccCell3 * cell,
 	}
 }
 
+void AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord,
+						std::vector<sdb::Coord4 > * divided)
+{
+	BccCell3 * cell = findCell(cellCoord);
+	if(cell->hasChild() ) 
+		return;
+		
+	int i;	
+/// add 8 children
+	for(i=0; i< 8; ++i) { 
+		BccCell3 * c = subdivide(cellCoord, i);
+
+		c->insertRed( childCenter(cellCoord, i) );
+	}
+	
+	if(divided)
+		divided->push_back(cellCoord);
+			
+}
+
 }

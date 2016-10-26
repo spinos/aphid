@@ -25,7 +25,7 @@ vdfScene::~vdfScene()
 { delete m_msh; }
 	
 const char * vdfScene::titleStr() const
-{ return "Distance Field form Geom"; }
+{ return "Geom Distance Field"; }
 
 bool vdfScene::viewPerspective() const
 { return true; }
@@ -37,7 +37,7 @@ bool vdfScene::init()
 	
 	BoundingBox tb = m_container.tree()->getBBox();
 /// larger grid size less faces
-	const float gz = tb.getLongestDistance() * .59f;
+	const float gz = tb.getLongestDistance() * .53f;
 	std::cout<<"\n gz "<<gz;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
@@ -52,7 +52,7 @@ bool vdfScene::init()
 	m_distFunc.setShellThickness(0.f);
 	m_distFunc.setSplatRadius(gz * GDT_FAC_ONEOVER32);
 	
-	m_msh->marchFrontBuild<BDistanceFunction>(&m_distFunc, 4, 4);
+	m_msh->marchFrontBuild<BDistanceFunction>(&m_distFunc, 5);
 	//m_msh->triangulateFront();
 	
 	std::cout.flush();
@@ -61,10 +61,14 @@ bool vdfScene::init()
 
 void vdfScene::draw(GeoDrawer * dr)
 {
-#define SHO_TREE 1
+	dr->setColor(.15f, .15f, .15f);
+	dr->boundingBox(m_msh->grid()->boundingBox() );
+		
+#define SHO_TREE 0
 #define SHO_CELL 1
+#define SHO_FRONT_CELL 0
 #define SHO_NODE 1
-#define SHO_EDGE 1
+#define SHO_EDGE 0
 #define SHO_ERR 0
 #define SHO_FRONT 0
 #define SHO_FRONT_WIRE 0
@@ -79,7 +83,7 @@ void vdfScene::draw(GeoDrawer * dr)
 
 #if SHO_CELL
 	dr->m_wireProfile.apply();
-	drawGridCell<AdaptiveBccGrid3>(m_msh->grid(), dr);
+	drawGridCell<AdaptiveBccGrid3>(m_msh->grid(), dr, 4, 5);
 #endif
 
 #if SHO_EDGE	
@@ -100,6 +104,16 @@ void vdfScene::draw(GeoDrawer * dr)
 	dr->setColor(0.1f, .1f, .1f);
 	drawFrontWire<FieldTriangulation >(m_msh);
 #endif
+
+#if SHO_FRONT_CELL
+	dr->m_wireProfile.apply();
+	dr->setColor(0.25f, 0.25f, 0.45f);
+	drawGridCell<AdaptiveBccGrid3>(m_msh->grid(), dr, 2, 2);
+	dr->setColor(0.85f, 0.55f, 0.f);
+	drawInteriorGridCell<AdaptiveBccGrid3>(m_msh->grid(), 2, dr);
+	dr->setColor(0.f, 0.75f, 0.55f);
+	drawFrontGridCell<AdaptiveBccGrid3>(m_msh->grid(), 2, dr);
+#endif
 	
 }
 
@@ -118,8 +132,8 @@ void vdfScene::drawTree(aphid::GeoDrawer * dr)
 
 	if(!m_container.source() ) return;
 	
-	//dr->m_surfaceProfile.apply();
-	dr->m_wireProfile.apply();
+	dr->m_surfaceProfile.apply();
+	//dr->m_wireProfile.apply();
 	dr->setColor(.8f, .8f, .8f);
 		
 	const sdb::VectorArray<cvx::Triangle> * src = m_container.source();

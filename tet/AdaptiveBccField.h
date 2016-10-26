@@ -122,14 +122,65 @@ public:
 	}
 
 /// block edges by split tetrahedron
-/// detect front cells by distance sign changes
+/// detect front cells by distance sign changes and geom intersect
 /// only front cells are subdivided
+/// skip interior (all negative) cells
+	template<typename Tf>
+	void subdivideFront(Tf * distanceFunc, 
+							int curLevel)
+	{
+		std::cout<<"\n subdiv level"<<curLevel<<std::endl;
+		AdaptiveBccGrid3 * g = grid();
+		
+/// key to all front cells
+		std::vector<aphid::sdb::Coord4 > frontCells;
+		
+		aphid::sdb::Coord4 k;
+		aphid::BoundingBox dirtyBx;
+		
+		g->begin();
+		while(!g->end() ) {
+		
+			k = g->key();
+			if(k.w == curLevel) {
+				if(g->value()->isFront(k, g) ) {
+					frontCells.push_back(k);
+				}
+				else if (!g->value()->isInterior(k, g) ) {
+				
+					g->getCellBBox(dirtyBx, k);
+					
+/// not interior but intersect 
+					if(distanceFunc-> template broadphase <aphid::BoundingBox>(&dirtyBx )) 
+						frontCells.push_back(k);
+				}
+			}
+			
+			g->next();
+		}
+		
+		std::vector<aphid::sdb::Coord4 > divided;
+		
+		const int level1 = curLevel+1;
+		std::vector<aphid::sdb::Coord4 >::const_iterator it = frontCells.begin();
+		for(;it!=frontCells.end();++it) {
+			g->subdivideCell(*it, &divided);
+			
+		}
+		
+		enforceBoundary(divided);
+		divided.clear();
+		
+		std::cout<<"\n n front cell "<<frontCells.size();
+	
+		frontCells.clear();
+	}
+	
 	template<typename Tf>
 	void marchFrontBuild(Tf * distanceFunc, 
-							int discreteLevel,
 							int maxLevel)
 	{
-		int curLevel = discreteLevel, nbound;
+		int curLevel = 3, nbound;
 		discretize<Tf>(distanceFunc, curLevel);
 		
 		buildGrid();
@@ -137,29 +188,25 @@ public:
 		buildGraph();
 		
 		calculateDistance2<Tf>(distanceFunc);
+		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
 		
 		verbose();
-		/*
+		
 		while(curLevel < maxLevel) {
-			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
-		
-			std::cout<<"\n subdiv level"<<curLevel<<std::endl;
-		
-			subdivideByFront(curLevel);
-			nbound = m_frontNodes.size();
-			std::cout<<"\n n boundary nodes "<<nbound;
+			
+			subdivideFront(distanceFunc, curLevel);
 			
 			buildGrid();
 			buildMesh();
 			buildGraph();
 			
 			calculateDistance2<Tf>(distanceFunc);
-		
-			std::cout<<"\n subdiv to level"<<curLevel;
+			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
+			
 			verbose();
 			
-			curLevel++;
-		}*/
+			std::cout<<"\n subdiv to level"<<++curLevel;
+		}
 	}
 	
 	void buildGrid();
@@ -223,7 +270,7 @@ public:
 	template<typename Tf>
 	void calculateDistance2(Tf * func)
 	{
-		//clearDirtyEdges();
+		std::cout<<"\n AdaptiveBccField::calculateDistance2 begin"<<std::endl;
 		markUnknownNodes();
 		
 		typename aphid::cvx::Tetrahedron;
@@ -247,8 +294,9 @@ public:
 		
 		messureFrontNodes2(func);
 		int ifar = findFarInd();
-		markInsideOutside2(func, ifar, false);
+		markInsideOutside(ifar);
 		fastMarchingMethod();
+		std::cout<<"\n AdaptiveBccField::calculateDistance2 end"<<std::endl;
 		
 	}
 	
