@@ -369,4 +369,21 @@ target_link_libraries (vdf ${Boost_REGEX_LIBRARY})
 target_link_libraries (vdf ${Boost_THREAD_LIBRARY})
 target_link_libraries (vdf ${Boost_CHRONO_LIBRARY})
 
+set (HEG_SOURCE_FILES ../shared/Base3DView.cpp
+hegWidget.cpp
+hegWindow.cpp
+hegMain.cpp)
+
+add_executable (hexasplit ${HEG_SOURCE_FILES})
+
+target_link_libraries (hexasplit Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (hexasplit ${OPENGL_LIBRARIES})
+target_link_libraries (hexasplit ${Aphid_Library})
+target_link_libraries (hexasplit ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (hexasplit ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (hexasplit ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (hexasplit ${Boost_REGEX_LIBRARY})
+target_link_libraries (hexasplit ${Boost_THREAD_LIBRARY})
+target_link_libraries (hexasplit ${Boost_CHRONO_LIBRARY})
+
 SET (EXECUTABLE_OUTPUT_PATH ../bin)

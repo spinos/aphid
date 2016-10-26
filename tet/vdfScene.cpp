@@ -64,7 +64,7 @@ void vdfScene::draw(GeoDrawer * dr)
 #define SHO_TREE 1
 #define SHO_CELL 1
 #define SHO_NODE 1
-#define SHO_EDGE 0
+#define SHO_EDGE 1
 #define SHO_ERR 0
 #define SHO_FRONT 0
 #define SHO_FRONT_WIRE 0
@@ -84,7 +84,7 @@ void vdfScene::draw(GeoDrawer * dr)
 
 #if SHO_EDGE	
 	dr->m_wireProfile.apply();
-	drawFrontEdges(m_msh, dr);
+	//drawFrontEdges(m_msh, dr);
 	dr->setColor(0.f, 0.f, .5f);
 	drawEdges(m_msh, dr, true);
 #endif
@@ -118,7 +118,8 @@ void vdfScene::drawTree(aphid::GeoDrawer * dr)
 
 	if(!m_container.source() ) return;
 	
-	dr->m_surfaceProfile.apply();
+	//dr->m_surfaceProfile.apply();
+	dr->m_wireProfile.apply();
 	dr->setColor(.8f, .8f, .8f);
 		
 	const sdb::VectorArray<cvx::Triangle> * src = m_container.source();

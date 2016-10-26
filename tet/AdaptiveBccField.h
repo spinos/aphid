@@ -120,7 +120,9 @@ public:
 		}
 		
 	}
-	
+
+/// block edges by split tetrahedron
+/// detect front cells by distance sign changes
 /// only front cells are subdivided
 	template<typename Tf>
 	void marchFrontBuild(Tf * distanceFunc, 
@@ -198,46 +200,22 @@ public:
 /// if hexahedron intersect, block three edges
 	template<typename Tf>
 	void findTetraEdgeCross(Tf * func, 
-							const aphid::cvx::Tetrahedron * tetshp,
-							const int & itet) 
+							const int & itet,
+							const aphid::cvx::Hexahedron * hexashp) 
 	{
-		aphid::Vector3F c = tetshp->getCenter();
-		aphid::Vector3F f0 = tetshp->getFaceCenter(0);
-		aphid::Vector3F f1 = tetshp->getFaceCenter(1);
-		aphid::Vector3F f2 = tetshp->getFaceCenter(2);
-		aphid::Vector3F f3 = tetshp->getFaceCenter(3);
-		aphid::Vector3F e0 = tetshp->getFaceCenter(0);
-		aphid::Vector3F e1 = tetshp->getFaceCenter(1);
-		aphid::Vector3F e2 = tetshp->getFaceCenter(2);
-		aphid::Vector3F e3 = tetshp->getFaceCenter(3);
-		aphid::Vector3F e4 = tetshp->getFaceCenter(4);
-		aphid::Vector3F e5 = tetshp->getFaceCenter(5);
-		
-		aphid::cvx::Hexahedron hexashp;
-
-/// split tetra to four hexa		
-/// 1 vertex 3 edge 3 face 1 volume
-/// hexa0
-		hexashp.set(hexashp.X(0), e0, e1, e2, f0, f1, f2, c);
-		if(func-> narrowphase (hexashp) ) {
+		if(func-> narrowphase (hexashp[0]) ) {
 			setTetraVertexEdgeCross(itet, 0, .5f);
 		}
-		
-/// hexa1
-		hexashp.set(hexashp.X(1), e0, e3, e4, f0, f2, f3, c);
-		if(func-> narrowphase (hexashp) ) {
+
+		if(func-> narrowphase (hexashp[1]) ) {
 			setTetraVertexEdgeCross(itet, 1, .5f);
 		}
 		
-/// hexa2
-		hexashp.set(hexashp.X(2), e1, e3, e5, f0, f1, f3, c);
-		if(func-> narrowphase (hexashp) ) {
+		if(func-> narrowphase (hexashp[2]) ) {
 			setTetraVertexEdgeCross(itet, 2, .5f);
 		}
 		
-/// hexa3
-		hexashp.set(hexashp.X(3), e2, e4, e5, f1, f2, f3, c);
-		if(func-> narrowphase (hexashp) ) {
+		if(func-> narrowphase (hexashp[3]) ) {
 			setTetraVertexEdgeCross(itet, 3, .5f);
 		}
 	}
@@ -250,7 +228,8 @@ public:
 		
 		typename aphid::cvx::Tetrahedron;
 		aphid::cvx::Tetrahedron tetshp;
-
+		aphid::cvx::Hexahedron hexashp[4];
+		
 		const int nt = numTetrahedrons();
 		int i = 0;
 		for(;i<nt;++i) {
@@ -260,7 +239,9 @@ public:
 /// intersect any tetra			
 			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
 				markTetraNodeOnFront(i);
-				findTetraEdgeCross(func, &tetshp, i);
+				tetshp.split(hexashp);
+
+				findTetraEdgeCross(func, i, hexashp);
 			}
 		}
 		
