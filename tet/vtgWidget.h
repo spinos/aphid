@@ -1,19 +1,22 @@
-#ifndef HEG_GLWIDGET_H
-#define HEG_GLWIDGET_H
+#ifndef VTG_GLWIDGET_H
+#define VTG_GLWIDGET_H
 
 #include <QGLWidget>
 #include <Base3DView.h>
 
+#include "TetrahedronGrid.h"
+
+
 namespace ttg {
 
-class hegWidget : public aphid::Base3DView
+class vtgWidget : public aphid::Base3DView
 {
     Q_OBJECT
 
 public:
-    
-    hegWidget(QWidget *parent = 0);
-    ~hegWidget();
+
+    vtgWidget(QWidget *parent = 0);
+    ~vtgWidget();
 	
 protected:    
     virtual void clientInit();
@@ -31,7 +34,9 @@ private:
 private slots:
 
 private:
-
+#define GORDER 5
+	typedef aphid::TetrahedronGrid<float, GORDER> GridT;
+	GridT * m_tg;
 };
 
 }

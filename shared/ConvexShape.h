@@ -344,7 +344,7 @@ public:
 	BoundingBox calculateBBox() const;
 	
 	int numPoints() const;
-	Vector3F X(int idx) const;
+	const Vector3F & X(int idx) const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
 	
 	Vector3F getCenter() const;

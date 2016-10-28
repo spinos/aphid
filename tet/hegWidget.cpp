@@ -29,7 +29,7 @@ void hegWidget::clientInit()
 void hegWidget::clientDraw()
 {
 	updatePerspectiveView();
-	getDrawer()->frustum(perspectiveView()->frustum() );
+	//getDrawer()->frustum(perspectiveView()->frustum() );
 	
 	getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->setColor(.8f, .8f, .8f);
