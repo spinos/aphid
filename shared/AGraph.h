@@ -52,6 +52,7 @@ public:
 	const int * edgeBegins() const;
 	
 	const Te * edge(const int & v1, const int & v2) const;
+	Te * edge(const int & v1, const int & v2);
 	
 	void verbose() const;
 
@@ -254,6 +255,18 @@ int AGraph<Tn, Te>::edgeIndex(const int & v1, const int & v2) const
 
 template<typename Tn, typename Te>
 const Te * AGraph<Tn, Te>::edge(const int & v1, const int & v2) const
+{ 
+	int k = edgeIndex(v1, v2); 
+	if(k<0) {
+		//std::cout<<"\n invalid edge ("<<v1<<","<<v2<<")"<<std::endl;
+		return NULL;
+	}
+		
+	return &edges()[k];
+}
+
+template<typename Tn, typename Te>
+Te * AGraph<Tn, Te>::edge(const int & v1, const int & v2)
 { 
 	int k = edgeIndex(v1, v2); 
 	if(k<0) {

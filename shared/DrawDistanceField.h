@@ -35,23 +35,66 @@ protected:
 	void drawFrontEdges(const ADistanceField * fld, GeoDrawer * dr);
 	
 	template<typename T>
-	void drawGridCell(T * grd, GeoDrawer * dr)
+	void drawFrontGridCell(T * grd, int level, GeoDrawer * dr)
 	{
-		dr->setColor(.15f, .15f, .15f);
-		dr->boundingBox(grd->boundingBox() );
-		Vector3F cellCol;
 		BoundingBox cellBox;
 		grd->begin();
 		while(!grd->end() ) {
 			
-			sdb::gdt::GetCellColor(cellCol, grd->key().w );
-			grd->getCellBBox(cellBox, grd->key() );
-			//cellBox.expand(-.04f - .04f * grd->key().w );
+			if(grd->key().w > level) return;
 			
-			dr->setColor(cellCol.x, cellCol.y, cellCol.z);
-			dr->boundingBox(cellBox);
+			if(grd->key().w == level) {
+				if(grd->value()->isFront(grd->key(), grd) ) {
+					grd->getCellBBox(cellBox, grd->key() );
+					dr->boundingBox(cellBox);
+				}
+			}
 			
-			//drawNode(grd->value(), dr, grd->key().w );
+			grd->next();
+		}
+	}
+	
+	template<typename T>
+	void drawInteriorGridCell(T * grd, int level, GeoDrawer * dr)
+	{
+		BoundingBox cellBox;
+		grd->begin();
+		while(!grd->end() ) {
+			
+			if(grd->key().w > level) return;
+			
+			if(grd->key().w == level) {
+				if(grd->value()->isInterior(grd->key(), grd) ) {
+					grd->getCellBBox(cellBox, grd->key() );
+					dr->boundingBox(cellBox);
+				}
+			}
+			
+			grd->next();
+		}
+	}
+	
+	template<typename T>
+	void drawGridCell(T * grd, GeoDrawer * dr,
+						int minLevel = 0,
+						int maxLevel = 10)
+	{
+		Vector3F cellCol;
+		BoundingBox cellBox;
+		grd->begin();
+		while(!grd->end() ) {
+		
+			const int & l = grd->key().w;
+			if(l > maxLevel) return;
+			
+			if(l >= minLevel &&
+				l <= maxLevel) {
+				sdb::gdt::GetCellColor(cellCol, l );
+				grd->getCellBBox(cellBox, grd->key() );
+				
+				dr->setColor(cellCol.x, cellCol.y, cellCol.z);
+				dr->boundingBox(cellBox);
+			}
 			
 			grd->next();
 		}

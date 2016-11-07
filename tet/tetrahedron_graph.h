@@ -355,7 +355,7 @@ inline bool findEdgeNeighborPair(IEdge * e,
 
 inline bool findTetrahedronEdge(IEdge * e,
                                 const ITetrahedron * a,
-                                 const Float4 & coord)
+                                 const aphid::Float4 & coord)
 {
     bool hasOne = false;
     bool hasTwo = false;
@@ -470,7 +470,7 @@ inline ITRIANGLE oppositeFace(const ITetrahedron * t,
 
 inline bool findTetrahedronFace(IFace * f,
 								 ITetrahedron * a,
-                                 const Float4 & coord)
+                                 const aphid::Float4 & coord)
 {
 	int vx = -1;
 	if(coord.x < .03f) vx = a->iv0;

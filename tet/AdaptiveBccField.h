@@ -120,6 +120,94 @@ public:
 		}
 		
 	}
+
+/// block edges by split tetrahedron
+/// detect front cells by distance sign changes and geom intersect
+/// only front cells are subdivided
+/// skip interior (all negative) cells
+	template<typename Tf>
+	void subdivideFront(Tf * distanceFunc, 
+							int curLevel)
+	{
+		std::cout<<"\n subdiv level"<<curLevel<<std::endl;
+		AdaptiveBccGrid3 * g = grid();
+		
+/// key to all front cells
+		std::vector<aphid::sdb::Coord4 > frontCells;
+		
+		aphid::sdb::Coord4 k;
+		aphid::BoundingBox dirtyBx;
+		
+		g->begin();
+		while(!g->end() ) {
+		
+			k = g->key();
+			if(k.w == curLevel) {
+				if(g->value()->isFront(k, g) ) {
+					frontCells.push_back(k);
+				}
+				else if (!g->value()->isInterior(k, g) ) {
+				
+					g->getCellBBox(dirtyBx, k);
+					
+/// not interior but intersect 
+					if(distanceFunc-> template broadphase <aphid::BoundingBox>(&dirtyBx )) 
+						frontCells.push_back(k);
+				}
+			}
+			
+			g->next();
+		}
+		
+		std::vector<aphid::sdb::Coord4 > divided;
+		
+		const int level1 = curLevel+1;
+		std::vector<aphid::sdb::Coord4 >::const_iterator it = frontCells.begin();
+		for(;it!=frontCells.end();++it) {
+			g->subdivideCell(*it, &divided);
+			
+		}
+		
+		enforceBoundary(divided);
+		divided.clear();
+		
+		std::cout<<"\n n front cell "<<frontCells.size();
+	
+		frontCells.clear();
+	}
+	
+	template<typename Tf>
+	void marchFrontBuild(Tf * distanceFunc, 
+							int maxLevel)
+	{
+		int curLevel = 3, nbound;
+		discretize<Tf>(distanceFunc, curLevel);
+		
+		buildGrid();
+		buildMesh();
+		buildGraph();
+		
+		calculateDistance2<Tf>(distanceFunc);
+		obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
+		
+		verbose();
+		
+		while(curLevel < maxLevel) {
+			
+			subdivideFront(distanceFunc, curLevel);
+			
+			buildGrid();
+			buildMesh();
+			buildGraph();
+			
+			calculateDistance2<Tf>(distanceFunc);
+			obtainGridNodeVal<AdaptiveBccGrid3, BccNode3 >(nodes(), grid() );
+			
+			verbose();
+			
+			std::cout<<"\n subdiv to level"<<++curLevel;
+		}
+	}
 	
 	void buildGrid();
 	
@@ -155,15 +243,40 @@ public:
 		
 	}
 	
+/// split tetrahedron to four hexahedron
+/// if hexahedron intersect, block three edges
+	template<typename Tf>
+	void findTetraEdgeCross(Tf * func, 
+							const int & itet,
+							const aphid::cvx::Hexahedron * hexashp) 
+	{
+		if(func-> narrowphase (hexashp[0]) ) {
+			setTetraVertexEdgeCross(itet, 0, .5f);
+		}
+
+		if(func-> narrowphase (hexashp[1]) ) {
+			setTetraVertexEdgeCross(itet, 1, .5f);
+		}
+		
+		if(func-> narrowphase (hexashp[2]) ) {
+			setTetraVertexEdgeCross(itet, 2, .5f);
+		}
+		
+		if(func-> narrowphase (hexashp[3]) ) {
+			setTetraVertexEdgeCross(itet, 3, .5f);
+		}
+	}
+	
 	template<typename Tf>
 	void calculateDistance2(Tf * func)
 	{
-		clearDirtyEdges();
+		std::cout<<"\n AdaptiveBccField::calculateDistance2 begin"<<std::endl;
 		markUnknownNodes();
 		
 		typename aphid::cvx::Tetrahedron;
 		aphid::cvx::Tetrahedron tetshp;
-
+		aphid::cvx::Hexahedron hexashp[4];
+		
 		const int nt = numTetrahedrons();
 		int i = 0;
 		for(;i<nt;++i) {
@@ -172,15 +285,18 @@ public:
 
 /// intersect any tetra			
 			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
-				markTetraOnFront(i);
+				markTetraNodeOnFront(i);
+				tetshp.split(hexashp);
+
+				findTetraEdgeCross(func, i, hexashp);
 			}
 		}
 		
 		messureFrontNodes2(func);
-		//int ifar = findFarInd();
-		//markInsideOutside2(func, ifar, false);
+		int ifar = findFarInd();
+		markInsideOutside(ifar);
 		fastMarchingMethod();
-		//estimateFrontEdgeError(func);
+		std::cout<<"\n AdaptiveBccField::calculateDistance2 end"<<std::endl;
 		
 	}
 	
@@ -191,6 +307,9 @@ public:
 	const float & errorThreshold() const;
 								
 protected:
+	void markTetraNodeOnFront(const int & i);
+/// four nodes on front
+/// six edges dirty
 	void markTetraOnFront(const int & i);
 	
 private:
@@ -205,6 +324,9 @@ private:
 	bool isTetraOnFrontBoundary(int iv0, int iv1, int iv2, int iv3) const;
 	bool isTetraAllPositive(int iv0, int iv1, int iv2, int iv3) const;
 	void moveFront(const float & x);
+	void setTetraVertexEdgeCross(const int & itet,
+								const int & ivertex,
+								const float & val);
 	
 };
 

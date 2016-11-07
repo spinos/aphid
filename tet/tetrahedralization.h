@@ -270,7 +270,7 @@ inline void threeWaySplit(ITetrahedron * t,
 inline void splitTetrahedronFace(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vx,
-							const Float4 & coord,
+							const aphid::Float4 & coord,
 							const aphid::Vector3F * X)
 {
 	IFace fs;
@@ -341,7 +341,7 @@ inline void splitTwoWay(ITetrahedron * t,
 inline void splitTetrahedronEdge(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
-                            const Float4 & coord,
+                            const aphid::Float4 & coord,
 							const aphid::Vector3F * X)
 {
     IEdge e;
@@ -381,7 +381,7 @@ inline void splitTetrahedron1(std::vector<ITetrahedron *> & tets,
 inline bool insertToTetrahedralMesh(std::vector<ITetrahedron *> & tets,
 							ITetrahedron * t,
 							const int & vi,
-							const Float4 & coord,
+							const aphid::Float4 & coord,
 							aphid::Vector3F * X,
 							const float & snapThreshold,
 							int * prop)

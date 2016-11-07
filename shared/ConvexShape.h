@@ -26,7 +26,9 @@ namespace cvx {
         TCapsule = 3,
 		TTriangle = 4,
 		TBox = 5,
-		TTetrahedron = 6
+		TTetrahedron = 6,
+		THexahedron = 7,
+		TQuad = 8
     };
 
 class Frustum {
@@ -308,6 +310,28 @@ void Triangle::closestToPoint(T * result) const
 	result->_icomponent = ind1();
 }
 
+/// 3 -- 2
+/// |    |
+/// 0 -- 1
+class Quad {
+	
+	Vector3F m_p[4];
+	
+public:
+	Quad();
+	void set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2, const Vector3F & p3);
+	const Vector3F * p(int idx) const;
+	const Vector3F & P(int idx) const;
+	Vector3F calculateNormal() const;
+	
+	static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
+	
+};
+
+class Hexahedron;
+
 class Tetrahedron {
 
 	Vector3F m_p[4];
@@ -319,11 +343,76 @@ public:
 	
 	BoundingBox calculateBBox() const;
 	
-    static std::string GetTypeStr();
+	int numPoints() const;
+	const Vector3F & X(int idx) const;
+	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
+	
+	Vector3F getCenter() const;
+/// 0-----------3
+/// | \        /
+/// |   \     /
+/// |     \  /
+/// 1-------2
+/// 0: 0 1 2 
+/// 1: 0 2 3
+/// 2: 0 3 1
+/// 3: 1 3 2  
+	Vector3F getFaceCenter(const int & i) const;
+/// 0: 0 1
+/// 1: 0 2
+/// 2: 0 3
+/// 3: 1 2
+/// 4: 1 3
+/// 5: 2 3
+	Vector3F getEdgeCenter(const int & i) const;
+	void getFace(Triangle & tri, const int & i) const;
+/// into 4 hexa
+	void split(Hexahedron * hexa) const;
+	
+	static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
+	
+private:
+
+};
+
+///    2-----3
+///	  /|    /|
+/// 6-----7  |
+/// |  0 -| -1
+/// | /   | /
+/// 4-----5
+class Hexahedron {
+
+	Vector3F m_p[8];
+	
+public:
+	Hexahedron();
+	void set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2, const Vector3F & p3,
+			const Vector3F & p4, const Vector3F & p5,
+			const Vector3F & p6, const Vector3F & p7);
+	
+	BoundingBox calculateBBox() const;
+	
+    static ShapeType ShapeTypeId;
+	static std::string GetTypeStr();
 	
 	int numPoints() const;
 	Vector3F X(int idx) const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
+	
+/// 0: 0 4 6 2
+/// 1: 1 3 7 5
+/// 2: 0 1 5 4
+/// 3: 2 6 7 3
+/// 4: 0 2 3 1
+/// 5: 4 5 7 6
+	void getFace(Quad & qud, const int & i) const;
+	const Vector3F * p(int idx) const;
+	const Vector3F & P(int idx) const;
+	void expand(const float & eps);
+	Vector3F getCenter() const;
 	
 private:
 

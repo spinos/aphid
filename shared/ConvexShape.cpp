@@ -634,18 +634,45 @@ bool Triangle::sampleP(Vector3F & dst, const BoundingBox &  box) const
 	return false;
 }
 
+Quad::Quad()
+{}
+
+void Quad::set(const Vector3F & p0, const Vector3F & p1,
+			const Vector3F & p2, const Vector3F & p3)
+{
+	m_p[0] = p0;
+	m_p[1] = p1;
+	m_p[2] = p2;
+	m_p[3] = p3;
+}
+
+const Vector3F * Quad::p(int idx) const
+{ return &m_p[idx]; }
+
+const Vector3F & Quad::P(int idx) const
+{ return m_p[idx]; }
+
+Vector3F Quad::calculateNormal() const
+{
+	Vector3F r = (m_p[2] - m_p[0]).cross(m_p[3] - m_p[1]);
+	return r.normal();
+}
+	
+ShapeType Quad::ShapeTypeId = TQuad;
+
+std::string Quad::GetTypeStr()
+{ return "quad"; }
+
 Tetrahedron::Tetrahedron()
 {}
 
 void Tetrahedron::set(const Vector3F & p0, const Vector3F & p1,
 			const Vector3F & p2, const Vector3F & p3)
 {
-	Vector3F c = (p0 + p1 + p2 + p3) * .25f;
-	
-	m_p[0] = p0 + (p0 - c) * 1e-3f; 
-	m_p[1] = p1 + (p1 - c) * 1e-3f; 
-	m_p[2] = p2 + (p2 - c) * 1e-3f; 
-	m_p[3] = p3 + (p3 - c) * 1e-3f; 
+	m_p[0] = p0; 
+	m_p[1] = p1; 
+	m_p[2] = p2; 
+	m_p[3] = p3; 
 }
 
 BoundingBox Tetrahedron::calculateBBox() const
@@ -655,9 +682,10 @@ BoundingBox Tetrahedron::calculateBBox() const
     b.expandBy(m_p[1]);
 	b.expandBy(m_p[2]);
 	b.expandBy(m_p[3]);
-    b.expand(b.getLongestDistance() * 1e-3f);
     return b;
 }
+
+ShapeType Tetrahedron::ShapeTypeId = TTetrahedron;
 
 std::string Tetrahedron::GetTypeStr()
 { return "tetrahedron"; }
@@ -665,7 +693,7 @@ std::string Tetrahedron::GetTypeStr()
 int Tetrahedron::numPoints() const
 { return 4; }
 
-Vector3F Tetrahedron::X(int idx) const
+const Vector3F & Tetrahedron::X(int idx) const
 { return m_p[idx]; }
 
 Vector3F Tetrahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
@@ -683,6 +711,160 @@ Vector3F Tetrahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
     }
     if(localP) *localP = X(ir);
     return X(ir);
+}
+
+Vector3F Tetrahedron::getCenter() const
+{ return (m_p[0] + m_p[1] + m_p[2] + m_p[3]) * .25f; }
+
+Vector3F Tetrahedron::getFaceCenter(const int & i) const
+{
+	if(i<2)
+		return (m_p[0] + m_p[i+1] + m_p[i+2]) * .333333f;
+	if(i==2)
+		return (m_p[0] + m_p[3] + m_p[1]) * .333333f;
+		
+	return (m_p[1] + m_p[3] + m_p[2]) * .333333f;
+}
+
+void Tetrahedron::getFace(Triangle & tri, const int & i) const
+{
+	if(i<2)
+		return tri.set(m_p[0], m_p[i+1], m_p[i+2]);
+	if(i==2)
+		return tri.set(m_p[0], m_p[3], m_p[1]);
+		
+	return tri.set(m_p[1], m_p[3], m_p[2]);
+}
+
+Vector3F Tetrahedron::getEdgeCenter(const int & i) const
+{
+	if(i<3) {
+		return (m_p[0] + m_p[i+1]) * .5f;
+	}
+	if(i<5) {
+		return (m_p[1] + m_p[i-1]) * .5f;
+	}
+	return (m_p[2] + m_p[3]) * .5f;
+}
+
+void Tetrahedron::split(Hexahedron * hexa) const
+{
+	Vector3F tc = getCenter();
+	Vector3F f0 = getFaceCenter(0);
+	Vector3F f1 = getFaceCenter(1);
+	Vector3F f2 = getFaceCenter(2);
+	Vector3F f3 = getFaceCenter(3);
+	Vector3F e0 = getEdgeCenter(0);
+	Vector3F e1 = getEdgeCenter(1);
+	Vector3F e2 = getEdgeCenter(2);
+	Vector3F e3 = getEdgeCenter(3);
+	Vector3F e4 = getEdgeCenter(4);
+	Vector3F e5 = getEdgeCenter(5);
+	
+	hexa[0].set(f2, tc, e2, f1, e0, f0, X(0), e1);
+	hexa[1].set(e4, f3, f2, tc, X(1), e3, e0, f0);
+	hexa[2].set(f3, e5, tc, f1, e3, X(2), f0, e1);
+	hexa[3].set(e4, X(3), f2, e2, f3, e5, tc, f1);
+	
+}
+
+Hexahedron::Hexahedron()
+{}
+
+void Hexahedron::set(const Vector3F & p0, const Vector3F & p1,
+					const Vector3F & p2, const Vector3F & p3,
+					const Vector3F & p4, const Vector3F & p5,
+					const Vector3F & p6, const Vector3F & p7)
+{
+	m_p[0] = p0; 
+	m_p[1] = p1; 
+	m_p[2] = p2; 
+	m_p[3] = p3;
+	m_p[4] = p4; 
+	m_p[5] = p5; 
+	m_p[6] = p6; 
+	m_p[7] = p7; 
+}
+
+BoundingBox Hexahedron::calculateBBox() const
+{ 
+	BoundingBox b;
+    b.expandBy(m_p[0]);
+    b.expandBy(m_p[1]);
+	b.expandBy(m_p[2]);
+	b.expandBy(m_p[3]);
+	b.expandBy(m_p[4]);
+    b.expandBy(m_p[5]);
+	b.expandBy(m_p[6]);
+	b.expandBy(m_p[7]);
+    return b;
+}
+
+ShapeType Hexahedron::ShapeTypeId = THexahedron;
+
+std::string Hexahedron::GetTypeStr()
+{ return "hexahedron"; }
+
+int Hexahedron::numPoints() const
+{ return 8; }
+
+Vector3F Hexahedron::X(int idx) const
+{ return m_p[idx]; }
+
+Vector3F Hexahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
+{
+	float maxdotv = -1e19f;
+    float dotv;
+	int ir = 0;
+	
+    for(int i=0; i < 8; ++i) {
+        dotv = X(i).dot(v);
+        if(dotv > maxdotv) {
+            maxdotv = dotv;
+            ir = i;
+        }
+    }
+    if(localP) *localP = X(ir);
+    return X(ir);
+}
+
+const Vector3F * Hexahedron::p(int idx) const
+{ return &m_p[idx]; }
+
+const Vector3F & Hexahedron::P(int idx) const
+{ return m_p[idx]; }
+
+void Hexahedron::getFace(Quad & qud, const int & i) const
+{
+	if(i==0)
+		qud.set(P(0), P(4), P(6), P(2) );
+	else if(i==1)
+		qud.set(P(1), P(3), P(7), P(5) );
+	else if(i==2)
+		qud.set(P(0), P(1), P(5), P(4) );
+	else if(i==3)
+		qud.set(P(2), P(6), P(7), P(3) );
+	else if(i==4)
+		qud.set(P(0), P(2), P(3), P(1) );
+	else
+		qud.set(P(4), P(5), P(7), P(6) );
+}
+
+Vector3F Hexahedron::getCenter() const
+{ return (m_p[0]+m_p[1]+m_p[2]+m_p[3]
+		 +m_p[4]+m_p[5]+m_p[6]+m_p[7]) * .125f; }
+
+void Hexahedron::expand(const float & eps)
+{ 
+	const Vector3F c = getCenter();
+	m_p[0] += (m_p[0] - c)*eps;
+	m_p[1] += (m_p[1] - c)*eps;
+	m_p[2] += (m_p[2] - c)*eps;
+	m_p[3] += (m_p[3] - c)*eps;
+	m_p[4] += (m_p[4] - c)*eps;
+	m_p[5] += (m_p[5] - c)*eps;
+	m_p[6] += (m_p[6] - c)*eps;
+	m_p[7] += (m_p[7] - c)*eps;
 }
 
 }
