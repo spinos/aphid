@@ -81,8 +81,8 @@ void LfThread::run()
 	float e;
 	
 	const int totalNSignals = lparam->totalNumPatches();
-	QElapsedTimer timer;
-	timer.start();
+	// QElapsedTimer timer;
+	// timer.start();
 
 	srand(1);
 	int niter = 0;

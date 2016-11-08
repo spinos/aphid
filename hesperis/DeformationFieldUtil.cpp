@@ -37,7 +37,7 @@ void DeformationFieldUtil::dump(const char *filename,
                             MDagPathArray &active_list)
 {
     if(active_list.length() < 1) {
-        MGlobal::displayInfo("insufficient selection! select group(s) of geometries to push opium curve cache.");
+        MGlobal::displayInfo("insufficient selection! select group(s) of geometries to push deformation field.");
         return;
     }
 	
@@ -60,14 +60,11 @@ void DeformationFieldUtil::dump(const char *filename,
 	}
     saveFormatVersion(doc, 3.f);
 	AnimUtil::ResolveFPS(HesperisAnimIO::SecondsPerFrame);
-    AttribUtil atu;
-    atu.saveUDA(doc);
-	
-	if(H5IO::BeheadName.size() > 0) saveBehead( doc, H5IO::BeheadName );
-	doc.recordDataSize();
-	doc.save(filename);
+    doc.save(filename);
 	doc.free();
-
+	
+	
+    
 }
 
 //:~
