@@ -27,6 +27,7 @@ public:
 	
 	virtual FunctionType functionType() const;
 	virtual bool broadphaseIntersect(const BoundingBox & bx);
+	virtual bool narrowphaseHexahedron(const cvx::Hexahedron & hexa);
 	virtual float distanceTo(const Vector3F & pref);
 	virtual float beamIntersect(const Beam & b,
 							const float & splatRadius);
@@ -72,6 +73,12 @@ float NTreeDomain<T, Tn >::beamIntersect(const Beam & b,
 		return m_intersectCtx.m_tmin / b.ray().m_tmax;
 		 
 	return 1e8f; 
+}
+
+template<typename T, typename Tn>
+bool NTreeDomain<T, Tn >::narrowphaseHexahedron(const cvx::Hexahedron & hexa)
+{
+	return m_engine.narrowphase(m_tree, hexa);;
 }
 
 }

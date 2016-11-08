@@ -28,7 +28,6 @@ set (HEADER_FILES ../shared/Base3DView.h
 ../kdtree/VoxelGrid.h
 window.h
 glwidget.h
-../shared/Morton3D.h
 ../shared/hilbertCurve.h
 ../shared/triangle_math.h
 ../shared/tetrahedron_math.h
@@ -239,9 +238,6 @@ endif()
 
 target_link_libraries (foo ${OpenEXR_Library})
 
-find_package (zlib REQUIRED)
-target_link_libraries (foo ${ZLIB_LIBRARIES})
-
 if(WIN32)
 set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
 endif()
@@ -295,5 +291,111 @@ add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 message (${Boost_LIBRARIES})
 target_link_libraries(foo ${Boost_LIBRARIES})
+
+set (VDF_HEADER_FILES ../shared/Base3DView.h 
+../shared/Morton3D.h
+../shared/ConvexShape.h
+../shared/HElemAsset.h
+../shared/VoxelEngine.h
+../kdtree/KdBuilder.h
+../kdtree/KdEngine.h
+../kdtree/KdRope.h
+../kdtree/KdNTree.h
+../kdtree/KdNNode.h
+../kdtree/KdSah.h
+../kdtree/HNTree.h
+../kdtree/VoxelGrid.h
+../shared/hilbertCurve.h
+../shared/triangle_math.h
+../shared/tetrahedron_math.h
+../shared/AGraph.h
+../shared/ADistanceField.h
+../shared/BDistanceFunction.h
+../btree/AdaptiveGrid3.h
+../btree/GridTables.h
+../ntree/Container.h
+../ntree/NTreeIO.h
+../ntree/NTreeDrawer.h
+../ntree/NTreeDomain.h
+triangulation.h
+tetrahedron_graph.h
+tetrahedralization.h
+vdfParameter.h
+Scene.h
+RedBlueRefine.h
+BccCell3.h
+AdaptiveBccGrid3.h
+AdaptiveBccMesher.h
+AdaptiveBccField.h
+FieldTriangulation.h
+vdfScene.h
+vdfWindow.h
+vdfWidget.h)
+
+set (VDF_SOURCE_FILES ../shared/Base3DView.cpp
+../shared/HElemAsset.cpp
+../btree/HWorldGrid.cpp
+../ntree/NTreeIO.cpp
+../kdtree/HNTree.cpp
+vdfParameter.cpp
+Scene.cpp
+RedBlueRefine.cpp
+BccCell3.cpp
+AdaptiveBccGrid3.cpp
+AdaptiveBccMesher.cpp
+AdaptiveBccField.cpp
+FieldTriangulation.cpp
+vdfScene.cpp
+vdfWidget.cpp
+vdfWindow.cpp
+vdfMain.cpp)
+
+if (WIN32)
+set (VDF_SOURCE_FILES ${VDF_SOURCE_FILES} "../shared/gExtension.cpp")
+endif ()
+
+add_executable (vdf ${VDF_HEADER_FILES} ${VDF_SOURCE_FILES})
+
+target_link_libraries (vdf ${HDF5_LIBRARIES})
+target_link_libraries (vdf ${ZLIB_LIBRARIES})
+target_link_libraries (vdf Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (vdf ${SZIP_LIBRARY})
+target_link_libraries (vdf ${OPENGL_LIBRARIES})
+target_link_libraries (vdf ${Aphid_Library})
+target_link_libraries (vdf ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (vdf ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (vdf ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (vdf ${Boost_REGEX_LIBRARY})
+target_link_libraries (vdf ${Boost_THREAD_LIBRARY})
+target_link_libraries (vdf ${Boost_CHRONO_LIBRARY})
+
+set (HEG_SOURCE_FILES ../shared/Base3DView.cpp
+hegWidget.cpp
+hegWindow.cpp
+hegMain.cpp)
+
+add_executable (hexasplit ${HEG_SOURCE_FILES})
+
+target_link_libraries (hexasplit Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (hexasplit ${OPENGL_LIBRARIES})
+target_link_libraries (hexasplit ${Aphid_Library})
+target_link_libraries (hexasplit ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (hexasplit ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (hexasplit ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (hexasplit ${Boost_REGEX_LIBRARY})
+target_link_libraries (hexasplit ${Boost_THREAD_LIBRARY})
+target_link_libraries (hexasplit ${Boost_CHRONO_LIBRARY})
+
+set (VTG_HEADER_FILES TetrahedronGrid.h)
+set (VTG_SOURCE_FILES ../shared/Base3DView.cpp
+vtgWidget.cpp
+vtgWindow.cpp
+vtgMain.cpp)
+
+add_executable (tetsubdiv ${VTG_HEADER_FILES} ${VTG_SOURCE_FILES})
+
+target_link_libraries (tetsubdiv Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (tetsubdiv ${OPENGL_LIBRARIES})
+target_link_libraries (tetsubdiv ${Aphid_Library})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)

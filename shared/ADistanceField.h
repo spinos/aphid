@@ -264,9 +264,6 @@ protected:
 		
 	}
 	
-/// reduce inner node distance
-/// if node on boundary use actual distance 
-/// else minus offset
 	template<typename Tf>
 	void messureFrontNodes2(Tf * func)
 	{
@@ -411,7 +408,7 @@ protected:
 		}
 	}
 	
-/// out-of field
+/// out-of field into grid
 	template<typename Tg, typename Ts>
 	void obtainGridNodeVal(const DistanceNode * src, Tg * grd) {
 		grd->begin();

@@ -120,6 +120,43 @@ void AdaptiveBccField::getTetraShape(cvx::Tetrahedron & b, const int & i) const
 			nodes()[a->iv3].pos);
 }
 
+void AdaptiveBccField::setTetraVertexEdgeCross(const int & itet,
+								const int & ivertex,
+								const float & val)
+{
+	const ITetrahedron * a = tetra(itet);
+	if(ivertex ==0) {
+		edge(a->iv0, a->iv1)->cx = val;
+		edge(a->iv0, a->iv2)->cx = val;
+		edge(a->iv0, a->iv3)->cx = val;
+		return;
+	}
+	if(ivertex ==1) {
+		edge(a->iv1, a->iv0)->cx = val;
+		edge(a->iv1, a->iv2)->cx = val;
+		edge(a->iv1, a->iv3)->cx = val;
+		return;
+	}
+	if(ivertex ==2) {
+		edge(a->iv2, a->iv0)->cx = val;
+		edge(a->iv2, a->iv1)->cx = val;
+		edge(a->iv2, a->iv3)->cx = val;
+		return;
+	}
+	edge(a->iv3, a->iv0)->cx = val;
+	edge(a->iv3, a->iv1)->cx = val;
+	edge(a->iv3, a->iv2)->cx = val;
+}
+
+void AdaptiveBccField::markTetraNodeOnFront(const int & i)
+{
+	const ITetrahedron * a = tetra(i);
+	nodes()[a->iv0].label = sdf::StFront;
+	nodes()[a->iv1].label = sdf::StFront;
+	nodes()[a->iv2].label = sdf::StFront;
+	nodes()[a->iv3].label = sdf::StFront;
+}
+
 void AdaptiveBccField::markTetraOnFront(const int & i)
 {
 	const ITetrahedron * a = tetra(i);

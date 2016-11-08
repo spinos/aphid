@@ -160,7 +160,7 @@ int TetrahedralMesher::checkTetraVolume(std::vector<int> & itetnegative)
 bool TetrahedralMesher::addPoint(const int & vi,
 								bool & topologyChanged)
 {
-	Float4 coord;
+	aphid::Float4 coord;
 	ITetrahedron * t = searchTet(m_X[vi], &coord);
 	if(!t ) return false;
 	
@@ -173,7 +173,7 @@ bool TetrahedralMesher::addPoint(const int & vi,
 	return true;
 }
 
-ITetrahedron * TetrahedralMesher::searchTet(const Vector3F & p, Float4 * coord)
+ITetrahedron * TetrahedralMesher::searchTet(const Vector3F & p, aphid::Float4 * coord)
 {
 	Vector3F v[4];
 	std::vector<ITetrahedron *>::iterator it = m_tets.begin();

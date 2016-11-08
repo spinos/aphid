@@ -69,6 +69,13 @@ public:
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
 	
+/// node value sign changed
+	bool isFront(const aphid::sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid);
+/// all node value negative
+	bool isInterior(const aphid::sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid);
+					
 private:
 	void findRedValueFrontBlue(BccNode3 * redN,
 					const aphid::sdb::Coord4 & cellCoord,
@@ -126,7 +133,7 @@ private:
 					const aphid::sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid,
 					BccNode3 * A, BccNode3 * B, BccNode3 * C, BccNode3 * D);
-															
+	
 };
 
 }

@@ -14,6 +14,7 @@
 #include <IntersectionContext.h>
 #include <SelectionContext.h>
 #include <Geometry.h>
+#include <ConvexShape.h>
 
 namespace aphid {
 
@@ -59,6 +60,10 @@ public:
 	template<typename T, typename Tn>
 	bool beamIntersect(KdNTree<T, Tn > * tree, 
 				IntersectionContext * ctx);
+				
+	template<typename T, typename Tn>
+	bool narrowphase(KdNTree<T, Tn > * tree, 
+				const cvx::Hexahedron & hexa);			
 	
 protected:
 
@@ -141,6 +146,20 @@ private:
 	template <typename T, typename Tn>
 	bool innerBroadphase(KdNTree<T, Tn > * tree,
 				const BoundingBox * b,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & innerBx);
+				
+	template<typename T, typename Tn>
+	bool leafNarrowphase(KdNTree<T, Tn > * tree,
+				const cvx::Hexahedron & hexa,
+				const BoundingBox & b,
+				KdTreeNode * r);
+				
+	template <typename T, typename Tn>
+	bool innerNarrowphase(KdNTree<T, Tn > * tree,
+				const cvx::Hexahedron & hexa,
+				const BoundingBox & b,
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & innerBx);
@@ -975,6 +994,113 @@ bool KdEngine::beamIntersect(KdNTree<T, Tn > * tree,
 		}
 	}
 	return ctx->m_success;
+}
+
+template<typename T, typename Tn>
+bool KdEngine::leafNarrowphase(KdNTree<T, Tn > * tree,
+			const cvx::Hexahedron & hexa,
+			const BoundingBox & b,
+			KdTreeNode * r)
+{
+	if(r->getNumPrims() < 1) return false;
+	int start, len;
+	tree->leafPrimStartLength(start, len, r->getPrimStart() );
+	int i = 0;
+	for(;i<len;++i) {
+		const T * c = tree->getSource(start + i );
+        if(b.intersect(c->calculateBBox() ) ) {
+			if(c-> template exactIntersect <cvx::Hexahedron > (hexa) )
+				return true;
+		}
+	}
+	return false;
+}
+			
+template<typename T, typename Tn>
+bool KdEngine::innerNarrowphase(KdNTree<T, Tn > * tree,
+			const cvx::Hexahedron & hexa,
+			const BoundingBox & b,
+			int branchIdx,
+			int nodeIdx,
+			const BoundingBox & innerBx)
+{
+	Tn * currentBranch = tree->branches()[branchIdx];
+	KdTreeNode * r = currentBranch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		return leafNarrowphase(tree, hexa, b, r);
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	innerBx.split(axis, splitPos, lftBox, rgtBox);
+	
+	bool stat = false;
+	const int offset = r->getOffset();
+	if(offset < Tn::TreeletOffsetMask) {
+		if(b.getMin(axis) < splitPos ) {
+			stat = innerNarrowphase(tree, hexa, b, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+			if(stat ) return stat;
+		}
+		
+		if(b.getMax(axis) > splitPos ) {
+			stat = innerNarrowphase(tree, hexa, b, 
+							branchIdx,
+							nodeIdx + offset + 1,
+							rgtBox);
+			if(stat ) return stat;
+		}
+	}
+	else {
+		if(b.getMin(axis) < splitPos ) {
+			stat = innerNarrowphase(tree, hexa, b, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+			if(stat ) return stat;
+		}
+		
+		if(b.getMax(axis) > splitPos ) {
+			stat = innerNarrowphase(tree, hexa, b, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+			if(stat ) return stat;
+		}
+	}
+	return stat;
+}
+
+
+template<typename T, typename Tn>
+bool KdEngine::narrowphase(KdNTree<T, Tn > * tree, 
+				const cvx::Hexahedron & hexa)
+{
+	const BoundingBox bx = hexa.calculateBBox();
+	KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() )
+		return leafNarrowphase(tree, hexa, bx, r);
+	
+	const BoundingBox b = tree->getBBox();
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	
+	bool stat = false;
+	int branchIdx = tree->root()->internalOffset(0);
+	if(bx.getMin(axis) < splitPos) 
+		stat = innerNarrowphase(tree, hexa, bx, branchIdx, 0, lftBox);
+	
+	if(stat) return stat;
+		
+	if(bx.getMax(axis) > splitPos) 
+		stat = innerNarrowphase(tree, hexa, bx, branchIdx, 1, rgtBox);
+		
+	return stat;
 }
 
 }

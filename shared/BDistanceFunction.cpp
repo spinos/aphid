@@ -102,4 +102,20 @@ float BDistanceFunction::calculateIntersection(const Vector3F & a,
 	return md;
 }
 
+bool BDistanceFunction::narrowphase(const cvx::Hexahedron & a) const
+	{
+		std::vector<Domain *>::const_iterator it = m_domains.begin();
+		for(;it!=m_domains.end();++it) {
+			
+			Domain * dm = *it;
+			bool stat = dm->narrowphaseHexahedron (a);
+			
+			if(stat)
+				return true;
+			
+		}
+		return false;
+	}
+
+
 }
