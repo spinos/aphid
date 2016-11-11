@@ -10,7 +10,7 @@
 #include "MeshDrawer.h"
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
-#include <BaseField.h>
+//#include <BaseField.h>
 #include <ATriangleMesh.h>
 #include <AQuadMesh.h>
 
@@ -273,7 +273,7 @@ void MeshDrawer::tangentFrame(const BaseMesh * mesh, const BaseDeformer * deform
 				glPopMatrix();
 	}
 }
-
+/*
 void MeshDrawer::field(const BaseField * f)
 {
 	BaseMesh *mesh = f->m_mesh;
@@ -290,5 +290,6 @@ void MeshDrawer::field(const BaseField * f)
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
+*/
 
 }

@@ -67,13 +67,13 @@ char VertexAdjacency::findOneRingNeighbors()
 
 	Edge incoming;
 	if(!findIncomming(outgoing, incoming)) {
-		printf("cannot find incoming edge ");
+		//printf("cannot find incoming edge ");
 		return 0;
 	}
 	//printf("e %i-%i ", incoming.v0()->getIndex(), incoming.v1()->getIndex());
 	
 	if(!findOppositeEdge(incoming, outgoing)) {
-		printf("cannot find outgoing edge ");
+		//printf("cannot find outgoing edge ");
 		return 0;
 	}
 	
@@ -489,14 +489,14 @@ unsigned VertexAdjacency::numRealEdgeNeighbors() const
 
 void VertexAdjacency::verbose() const
 {
-	printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());
+	//printf("\nv %i\n adjacent edge count: %i\n", getIndex(), (int)m_edges.size());
 	std::vector<Edge *>::const_iterator eit;
 	for(eit = m_edges.begin(); eit < m_edges.end(); eit++) {
-		printf(" %d - %d f %i", (*eit)->v0()->getIndex(), (*eit)->v1()->getIndex(), ((Facet *)(*eit)->getFace())->getPolygonIndex());
+		//printf(" %d - %d f %i", (*eit)->v0()->getIndex(), (*eit)->v1()->getIndex(), ((Facet *)(*eit)->getFace())->getPolygonIndex());
 	}
 	std::vector<VertexNeighbor *>::const_iterator it;
 	for(it = m_neighbors.begin(); it < m_neighbors.end(); it++) {
-		printf(" %i ", (*it)->v->getIndex());
+		//printf(" %i ", (*it)->v->getIndex());
 	}
 }
 

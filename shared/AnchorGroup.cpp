@@ -117,7 +117,6 @@ Anchor * AnchorGroup::activeAnchor() const
 void AnchorGroup::removeLast()
 {
 	if(numAnchors() < 1) return;
-	printf("rm last");
 	removeAnchor(numAnchors() - 1);
 }
 
@@ -132,7 +131,6 @@ void AnchorGroup::removeActive()
 
 void AnchorGroup::removeAnchor(unsigned idx)
 {
-    printf("rm %i ", idx);
     m_anchorIt = m_anchors.begin();
     m_anchorIt += idx;
     delete *m_anchorIt;
@@ -145,7 +143,6 @@ void AnchorGroup::removeAnchor(unsigned idx)
 
 void AnchorGroup::removeRelevantAnchor(unsigned idx)
 {
-    printf("rm rel %i ", idx);
     for(unsigned i = 0; i < m_relevantIndex.size(); ++i) {
         if(m_relevantIndex[i] == idx) {
             removeAnchor(i);

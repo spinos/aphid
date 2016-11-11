@@ -15,7 +15,7 @@ namespace aphid {
 
 class BaseMesh;
 class BaseDeformer;
-class BaseField;
+//class BaseField;
 class ATriangleMesh;
 class AQuadMesh;
 
@@ -38,7 +38,7 @@ public:
 	void perVertexVector(BaseMesh * mesh, const std::string & name);
 	void vertexNormal(BaseMesh * mesh);
 	void tangentFrame(const BaseMesh * mesh, const BaseDeformer * deformer = 0);
-	void field(const BaseField * f);
+	//void field(const BaseField * f);
 };
 
 }

@@ -162,19 +162,19 @@ char Facet::getEdgeOnHorizon(std::vector<Edge *> & horizons) const
          Edge *opposite = m_edges[i]->getTwin();
 		 if(!opposite) 
 		 {
-			printf("edge not connected\n");
+			//printf("edge not connected\n");
 			return 0;
 		}
 		 Facet * f = (Facet *)(opposite->getFace());
 		 
 		 if(!f){
-			printf("edge has no face\n");
+			//printf("edge has no face\n");
 			return 0;
 		}
 		
 		if(f->getIndex() < 0)
 		{
-			printf("face %d is removed\n", f->getIndex());
+			//printf("face %d is removed\n", f->getIndex());
 			return 0;
 		}
 		 
@@ -194,19 +194,19 @@ char Facet::isClosed() const
          Edge *opposite = m_edges[i]->getTwin();
 		 if(!opposite) 
 		 {
-			printf("edge not connected\n");
+			//printf("edge not connected\n");
 			return 0;
 		}
 		 Facet * f = (Facet *)(opposite->getFace());
 		 
 		 if(!f){
-			printf("edge has no face\n");
+			//printf("edge has no face\n");
 			return 0;
 		}
 		
 		if(f->getIndex() < 0)
 		{
-			printf("face %d is removed\n", f->getIndex());
+			//printf("face %d is removed\n", f->getIndex());
 			return 0;
 		}
 		 

@@ -147,8 +147,12 @@ if (WIN32)
         SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
         SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
 	ENDIF ()
-ELSE ()
+ELSEIF (APPLE)
 	SET (INSTALLED_HDF5 ON)
+ELSE ()
+    SET (HDF5_VERSION "1.8.17")
+	SET (HDF5_INCLUDE_DIRS "~/Public/hdf5-1.8.17/include")
+        SET (HDF5_LIBRARIES "~/Public/hdf5-1.8.17/lib/libhdf5.so")
 endif ()
 
 IF (INSTALLED_HDF5)
@@ -180,7 +184,9 @@ MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
 MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
 MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
 
+IF (WIN32)
 target_link_libraries (foo ${ZLIB_LIBRARIES})
+ENDIF ()
 
 IF (WIN32)
 set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
@@ -194,6 +200,7 @@ set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
 
 ENDIF ()
 
+IF (WIN32)
 FIND_PACKAGE (SZIP REQUIRED)
 MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
 MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
@@ -201,6 +208,7 @@ MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
 MESSAGE (" szip library is " ${SZIP_LIBRARY})
 
 target_link_libraries (foo ${SZIP_LIBRARY})
+ENDIF ()
 
 find_package (OpenGL REQUIRED)
 target_link_libraries (foo ${OPENGL_LIBRARIES})
@@ -213,7 +221,7 @@ D:/aphid/lib/aphidSdb.lib
 D:/aphid/lib/aphidGraph.lib
 D:/aphid/lib/aphidKd.lib
 D:/aphid/lib/aphidUI.lib)
-else ()
+elseif (APPLE)
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
 /users/jianzhang/aphid/lib/libaphidH5.a
@@ -221,20 +229,47 @@ set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGraph.a
 /users/jianzhang/aphid/lib/libaphidKd.a
 /users/jianzhang/aphid/lib/libaphidUI.a)
+ELSE ()
+    SET (APHID_DIR "~/aphid")
+    SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.so)
+    SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.so)
+    SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/libaphidH5.so)
+    SET (APHID_UI_LIBRARY ${APHID_DIR}/lib/libaphidUI.so)
+    SET (APHID_KD_LIBRARY ${APHID_DIR}/lib/libaphidKd.so)
+    SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.so)
+    SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
 endif ()
-target_link_libraries (foo ${Aphid_Library})
+
+target_link_libraries (foo ${APHID_MATH_LIBRARY})
+target_link_libraries (foo ${APHID_GEOM_LIBRARY})
+target_link_libraries (foo ${APHID_UI_LIBRARY})
+target_link_libraries (foo ${APHID_KD_LIBRARY})
+target_link_libraries (foo ${APHID_SDB_LIBRARY})
+target_link_libraries (foo ${APHID_GRAPH_LIBRARY})
+target_link_libraries (foo ${APHID_H5_LIBRARY})
 
 if (WIN32)
+add_definitions (-DOPENEXR_DLL)
 set (OpenEXR_Library "D:/usr/openEXR/lib/Half.lib"
 "D:/usr/openEXR/lib/Iex.lib"
 "D:/usr/openEXR/lib/IlmImf.lib"
 "D:/usr/openEXR/lib/IlmThread.lib")  
+elseif (APPLE)
+set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)
+set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIex-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmImf-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
 else()
-set (OpenEXR_Library "/usr/local/lib/libHalf.a"
-"/usr/local/lib/libIex.a"
-"/usr/local/lib/libIlmImf.a"
-"/usr/local/lib/libIlmThread.a")
-endif()
+SET (ILMBASE_PACKAGE_PREFIX /usr/local)
+
+set (OpenEXR_INCLUDE_DIR ${ILMBASE_PACKAGE_PREFIX}/include)
+set (OpenEXR_Library ${ILMBASE_PACKAGE_PREFIX}/lib/libHalf.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIex-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libImath-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmImf-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmThread-2_2.so)
+endif ()
 
 target_link_libraries (foo ${OpenEXR_Library})
 
@@ -254,9 +289,8 @@ if(WIN32)
 	set (Boost_USE_MULTITHREADED ON)
 	include_directories ("D:/usr/boost_1_51_0")
 	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono)
-else()
 
-if(APPLE)
+elseif(APPLE)
 	set (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
 	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
 	include_directories ("/users/jianzhang/Library/boost_1_55_0")
@@ -264,13 +298,9 @@ if(APPLE)
 	include_directories ("/usr/local/include")
 
 else()
-	set (Boost_INCLUDE_DIR "/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	set (Boost_USE_STATIC_LIBS ON)
-	set (Boost_USE_MULTITHREADED ON)
-	include_directories ("/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono)	
-endif()
-	
+    include_directories ("~/Public/boost_1_51_0")
+    SET (BOOST_ROOT "~/Public/boost_1_51_0")
+	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono zlib)	
 endif()
 
 message ("boost system is" ${Boost_SYSTEM_LIBRARY})
@@ -288,9 +318,6 @@ target_link_libraries (foo ${Boost_CHRONO_LIBRARY})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
-
-message (${Boost_LIBRARIES})
-target_link_libraries(foo ${Boost_LIBRARIES})
 
 set (VDF_HEADER_FILES ../shared/Base3DView.h 
 ../shared/Morton3D.h
@@ -361,7 +388,13 @@ target_link_libraries (vdf ${ZLIB_LIBRARIES})
 target_link_libraries (vdf Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (vdf ${SZIP_LIBRARY})
 target_link_libraries (vdf ${OPENGL_LIBRARIES})
-target_link_libraries (vdf ${Aphid_Library})
+target_link_libraries (vdf ${APHID_MATH_LIBRARY})
+target_link_libraries (vdf ${APHID_GEOM_LIBRARY})
+target_link_libraries (vdf ${APHID_UI_LIBRARY})
+target_link_libraries (vdf ${APHID_KD_LIBRARY})
+target_link_libraries (vdf ${APHID_SDB_LIBRARY})
+target_link_libraries (vdf ${APHID_GRAPH_LIBRARY})
+target_link_libraries (vdf ${APHID_H5_LIBRARY})
 target_link_libraries (vdf ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (vdf ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (vdf ${Boost_DATE_TIME_LIBRARY})
@@ -378,7 +411,12 @@ add_executable (hexasplit ${HEG_SOURCE_FILES})
 
 target_link_libraries (hexasplit Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (hexasplit ${OPENGL_LIBRARIES})
-target_link_libraries (hexasplit ${Aphid_Library})
+target_link_libraries (hexasplit ${APHID_MATH_LIBRARY})
+target_link_libraries (hexasplit ${APHID_GEOM_LIBRARY})
+target_link_libraries (hexasplit ${APHID_UI_LIBRARY})
+target_link_libraries (hexasplit ${APHID_KD_LIBRARY})
+target_link_libraries (hexasplit ${APHID_SDB_LIBRARY})
+target_link_libraries (hexasplit ${APHID_GRAPH_LIBRARY})
 target_link_libraries (hexasplit ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (hexasplit ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (hexasplit ${Boost_DATE_TIME_LIBRARY})
@@ -396,6 +434,12 @@ add_executable (tetsubdiv ${VTG_HEADER_FILES} ${VTG_SOURCE_FILES})
 
 target_link_libraries (tetsubdiv Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (tetsubdiv ${OPENGL_LIBRARIES})
-target_link_libraries (tetsubdiv ${Aphid_Library})
+target_link_libraries (tetsubdiv ${APHID_MATH_LIBRARY})
+target_link_libraries (tetsubdiv ${APHID_GEOM_LIBRARY})
+target_link_libraries (tetsubdiv ${APHID_KD_LIBRARY})
+target_link_libraries (tetsubdiv ${APHID_SDB_LIBRARY})
+target_link_libraries (tetsubdiv ${APHID_GRAPH_LIBRARY})
+target_link_libraries (tetsubdiv ${APHID_UI_LIBRARY})
+target_link_libraries (tetsubdiv ${Boost_THREAD_LIBRARY})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
