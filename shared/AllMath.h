@@ -18,6 +18,7 @@
 #include <Matrix33F.h>
 #include <Matrix44F.h>
 #include <Vector2F.h>
+#include <limits>
 
 namespace aphid {
 
@@ -161,6 +162,33 @@ inline void SameSign(T & a, const T & b)
 {
 	if(a * b < 0)
 		a = -a;
+}
+
+/// Box-Muller transform
+template<typename T>
+inline T GenerateGaussianNoise(T mu, T sigma)
+{
+	const T epsilon = 1e-6;
+	const T two_pi = 6.283185307179586;
+
+	static T z0, z1;
+	static bool generate;
+	generate = !generate;
+
+	if (!generate)
+	   return z1 * sigma + mu;
+
+	double u1, u2;
+	do
+	 {
+	   u1 = rand() * (1.0 / RAND_MAX);
+	   u2 = rand() * (1.0 / RAND_MAX);
+	 }
+	while ( u1 <= epsilon );
+
+	z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
+	z1 = sqrt(-2.0 * log(u1)) * sin(two_pi * u2);
+	return z0 * sigma + mu;
 }
 
 }

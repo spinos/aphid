@@ -143,10 +143,6 @@ void UniformPlot2D::floatToColor(const float * x,
 
             ssc = x[j*m+i] * scale + shift;
             Clamp01(ssc);
-
-            //redv[j*m+i] = ssc;
-            //greenv[j*m+i] = .5f - Absolute<float>(ssc - .5f);
-            //bluev[j*m+i] = 1.f - ssc;
             plotColor(redv[j*m+i], greenv[j*m+i], bluev[j*m+i],
                     ssc, ColorCurve);
         }

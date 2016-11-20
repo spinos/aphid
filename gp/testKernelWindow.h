@@ -11,6 +11,7 @@ namespace aphid {
 namespace gpr {
     
 class KernelWidget;
+class SampleKernelDialog;
 
 class TestKernelWindow : public QMainWindow
 {
@@ -34,6 +35,7 @@ private:
 	QMenu * windowMenu;
 	QMenu * generateMenu;
 	KernelWidget * m_kernView;
+	SampleKernelDialog * m_smpdlg;
 	
 };
 

@@ -1,9 +1,10 @@
-#ifndef LINEARMATH_H
-#define LINEARMATH_H
+#ifndef LFR_LINEARMATH_H
+#define LFR_LINEARMATH_H
 
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <deque>
 
 #include "clapackTempl.h"
 

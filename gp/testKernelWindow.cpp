@@ -1,9 +1,10 @@
 #include <QtGui>
+#include <iostream>
 #include "testKernelWindow.h"
 #include "kernelWidget.h"
-#include <iostream>
-#include "RbfKernel.h"
 #include "Covariance.h"
+#include "sampleKernelDialog.h"
+#include "RbfKernel.h"
 #include "linspace.h"
 
 using namespace lfr;
@@ -21,7 +22,7 @@ TestKernelWindow::TestKernelWindow()
     
     
     std::cout<<"\n build kernel";
-    RbfKernel<float> rbf(0.3);
+    RbfKernel<float> rbf(0.33);
     
     Covariance<float, RbfKernel<float> > cov;
     cov.create(X, rbf);
@@ -30,6 +31,13 @@ TestKernelWindow::TestKernelWindow()
     m_kernView->plotK(&cov.K());
     setCentralWidget(m_kernView);
     
+    QDateTime local(QDateTime::currentDateTime());
+    qDebug() << "Local time is:" << local;
+    srand (local.toTime_t() );
+    
+    m_smpdlg = new SampleKernelDialog(cov, 
+        this);
+	
 	setWindowTitle(tr("RBF Kernel"));
 	
 	createActions();
@@ -38,6 +46,8 @@ TestKernelWindow::TestKernelWindow()
 	qRegisterMetaType<QImage>("QImage");
     //connect(m_thread, SIGNAL(sendInitialDictionary(QImage)),
       //      this, SLOT(recvInitialDictionary(QImage)));
+      
+    m_smpdlg->show();
 }
 
 TestKernelWindow::~TestKernelWindow()

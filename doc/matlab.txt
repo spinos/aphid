@@ -106,7 +106,10 @@ mean(A) row vector containing the mean of each column
 mean(A, dim) mean along the dimension dim, mean(A, 2) is mean of each row, so mean(A,1) is mean of each column?
 
 https://www.mathworks.com/help/matlab/ref/eig.html?searchHighlight=eig
-eig(A) eigen value and vectors
+
+[V, D] = eig(covar) 
+diagonal matrix D of eigenvalue
+matrix V whose columns are eighvectors
 
 https://www.mathworks.com/help/matlab/ref/linspace.html?searchHighlight=linspace
 

@@ -15,6 +15,8 @@ set (TKERN_HEADER_FILES ../shared/BaseImageWidget.h
 Covariance.h
 RbfKernel.h
 kernelWidget.h
+sampleKernelWidget.h
+sampleKernelDialog.h
 testKernelWindow.h)
 
 add_executable (testkernel ${TKERN_HEADER_FILES}
@@ -22,6 +24,8 @@ add_executable (testkernel ${TKERN_HEADER_FILES}
 ../shared/Plot1DWidget.cpp
 ../shared/Plot2DWidget.cpp
 kernelWidget.cpp
+sampleKernelWidget.cpp
+sampleKernelDialog.cpp
 testKernelWindow.cpp
 testKernel.cpp)
 
