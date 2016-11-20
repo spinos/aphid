@@ -1,5 +1,5 @@
 #include "LfParameter.h"
-
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -7,7 +7,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
-#define _WIN32
+//#define _WIN32
 #include <iostream>
 
 using namespace aphid;

@@ -26,7 +26,7 @@ TsParameter.h
 TsWindow.h)
 
 add_executable (txsn ${HEADER_FILES}
-../shared/BaseImagewidget.cpp
+../shared/BaseImageWidget.cpp
 ../lfr/LfParameter.cpp
 ../lfr/LfThread.cpp
 ../lfr/LfMachine.cpp
@@ -50,6 +50,13 @@ if(APPLE)
 	set(F2C_LIBRARY libf2c.a)
 	set(BLAS_LIBRARY libblas.a)
 	set(LAPACK_LIBRARY liblapack.a)
+
+else ()
+include_directories (/usr/local/include)
+	set(BLAS_LIBRARY /usr/local/lib/libblas.a)
+	set(LAPACK_LIBRARY /usr/local/lib/liblapack.a)
+	set(F2C_LIBRARY /usr/local/libf2c.a)
+
 endif()
 
 message ("blas " ${BLAS_LIBRARY})
@@ -79,12 +86,18 @@ target_link_libraries (txsn ${OpenEXR_Library})
 message (" openexr " ${OpenEXR_Library})
 
 if (WIN32)
+SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
     set (ZLIB_INCLUDE_DIR d:/usr/zlib-1.2.5)
     set (ZLIB_LIBRARY d:/usr/zlib-1.2.5/zdll.lib)
 endif ()
 
-find_package (zlib REQUIRED)
-target_link_libraries (txsn ${ZLIB_LIBRARIES})
+find_package (ZLIB REQUIRED)
+MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
+MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
+MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
+MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
+
+target_link_libraries (txsn ${ZLIB_LIBRARY})
 
 if (WIN32)
 set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
@@ -105,6 +118,66 @@ include_directories (${HDF5_INCLUDE_DIR})
 target_link_libraries (txsn ${HDF5_LIBRARIES})
 
 if(WIN32)
+set (Boost_INCLUDE_DIR d:/usr/boost_1_51_0)
+set (Boost_LIBRARY_DIR d:/usr/boost_1_51_0/stage/lib)
+	set (Boost_USE_STATIC_LIBS ON)
+	set (Boost_USE_MULTITHREADED ON)
+	include_directories ("D:/usr/boost_1_51_0")
+
+elseif (APPLE)
+set (HOME "/home/OF3D/zhangjian")
+set (BOOST_ROOT ${HOME}/Documents/boost_1_51_0)
+set (BOOST_LIBRARYDIR ${BOOST_ROOT}/stage/lib)
+SET( Boost_USE_STATIC_LIBS TRUE )
+SET( Boost_USE_MULTITHREADED TRUE )
+SET( Boost_NO_BOOST_CMAKE TRUE ) 
+
+ELSEIF (UNIX)
+	SET (BOOST_ROOT "~/Public/boost_1_51_0")
+endif()
+
+if(WIN32)
+    find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono 
+iostreams zlib)
+else()
+    find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono iostreams zlib)
+endif()
+
+message (" boost system is " ${Boost_SYSTEM_LIBRARY})
+message (" boost date_time is " ${Boost_DATE_TIME_LIBRARY})
+message (" boost regex is " ${Boost_REGEX_LIBRARY})
+message (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
+message (" boost thread is " ${Boost_THREAD_LIBRARY})
+message (" boost chrono is " ${Boost_CHRONO_LIBRARY})
+message (" boost iostreams is " ${Boost_IOSTREAMS_LIBRARY})
+message (" boost zlib is " ${Boost_ZLIB_LIBRARY})
+
+ADD_DEFINITIONS (-DNOMINMAX )
+ADD_DEFINITIONS (-DBOOST_PREVENT_MACRO_SUBSTITUTION)
+ADD_DEFINITIONS (-DBOOST_USE_STD_MIN )
+ADD_DEFINITIONS (-DBOOST_USE_STD_MAX )
+#ADD_DEFINITIONS (-DBOOST_NO_STD_MIN_MAX)
+
+include_directories (${BOOST_ROOT})
+
+if(WIN32)
+else()
+set (LINK_FLAGS ${LINK_FLAGS} -shared -fPIC -Wl)
+endif()
+
+set (AttributeNoninline "__attribute__ ((noinline))")
+add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+
+
+
+target_link_libraries (txsn ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (txsn ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (txsn ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (txsn ${Boost_REGEX_LIBRARY})
+target_link_libraries (txsn ${Boost_THREAD_LIBRARY})
+target_link_libraries (txsn ${Boost_CHRONO_LIBRARY})
+
+if(WIN32)
 set (QT_QMAKE_EXECUTABLE "D:/usr/qt4.8.6/bin/qmake.exe")
 endif()
 
@@ -113,49 +186,6 @@ target_link_libraries (txsn Qt4::QtGui)
 ## message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
 ## set (QT_USE_QTOPENGL ON)
 ## target_link_libraries (txsn Qt4::QtGui Qt4::QtOpenGL)
-
-if(WIN32)
-	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
-	set (Boost_LIBRARY_DIR "D:/usr/boost_1_51_0/stage/lib")
-	set (Boost_USE_STATIC_LIBS ON)
-	set (Boost_USE_MULTITHREADED ON)
-	include_directories ("D:/usr/boost_1_51_0")
-	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono)
-else()
-
-if(APPLE)
-	set (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
-	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
-	include_directories ("/users/jianzhang/Library/boost_1_55_0")
-	find_package(Boost 1.55 COMPONENTS system filesystem date_time regex thread)
-	include_directories ("/usr/local/include")
-
-else()
-	set (Boost_INCLUDE_DIR "/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	set (Boost_USE_STATIC_LIBS ON)
-	set (Boost_USE_MULTITHREADED ON)
-	include_directories ("/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread)
-	
-endif()
-	
-endif()
-
-message ("boost system " ${Boost_SYSTEM_LIBRARY})
-message ("boost date_time " ${Boost_DATE_TIME_LIBRARY})
-message ("boost regex " ${Boost_REGEX_LIBRARY})
-message ("boost filesystem " ${Boost_FILESYSTEM_LIBRARY})
-message ("boost thread " ${Boost_THREAD_LIBRARY})
-
-set (AttributeNoninline "__attribute__ ((noinline))")
-add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
-
-target_link_libraries (txsn ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (txsn ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (txsn ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (txsn ${Boost_REGEX_LIBRARY})
-target_link_libraries (txsn ${Boost_THREAD_LIBRARY})
-target_link_libraries (txsn ${Boost_CHRONO_LIBRARY})
 
 if (WIN32)
 set (Aphid_Math_Library "D:/aphid/lib/aphidMath.lib")
