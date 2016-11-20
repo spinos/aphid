@@ -1,3 +1,12 @@
+https://cn.mathworks.com/company/newsletters/articles/matrix-indexing-in-matlab.html
+
+A(2,4) % extract the element in row 2, column 4
+
+http://cn.mathworks.com/help/matlab/ref/colon.html
+
+A(:,j) % is jth column of A
+A(i,:) % is ith row of A
+
 http://cn.mathworks.com/help/matlab/ref/circshift.html
 http://cn.mathworks.com/help/matlab/matlab_prog/array-vs-matrix-operations.html
 
@@ -10,6 +19,8 @@ x = cshift2D(x,-L);
 http://cn.mathworks.com/help/matlab/ref/size.html
 
 sizes of each dimension of array
+size(A, dim) length of dimension dim, size(A, 1) numbers of rows, size(A, 2) numbers of columns
+
 [N, M] = size(x);
 [m,n,p] = size(rand(2,3,4))
 m = 2 n =3 p = 4
@@ -84,4 +95,25 @@ https://www.mathworks.com/help/matlab/ref/chol.html?searchHighlight=chol
 R = chol(A)
 Cholesky factorization
 R'*R=A
- 
+
+https://www.mathworks.com/help/matlab/ref/bsxfun.html
+
+bsxfun(fun,A,B)
+
+https://www.mathworks.com/help/matlab/ref/mean.html?searchHighlight=mean
+
+mean(A) row vector containing the mean of each column
+mean(A, dim) mean along the dimension dim, mean(A, 2) is mean of each row, so mean(A,1) is mean of each column?
+
+https://www.mathworks.com/help/matlab/ref/eig.html?searchHighlight=eig
+eig(A) eigen value and vectors
+
+https://www.mathworks.com/help/matlab/ref/linspace.html?searchHighlight=linspace
+
+linspace(x1,x2,n) generate n points spacing (x2-x1)/(n-1)
+
+clf - clear current figure window
+
+https://www.mathworks.com/help/matlab/ref/repmat.html?searchHighlight=repmat
+
+repmat(A, n) returns an array containing n copies of A in the row and column dimensions

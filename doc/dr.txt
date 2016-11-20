@@ -1,0 +1,3 @@
+https://lvdmaaten.github.io/software/
+http://staffwww.dcs.shef.ac.uk/people/N.Lawrence/projects/motion/
+https://github.com/SheffieldML/GPmat/tree/master/gp

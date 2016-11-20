@@ -101,4 +101,57 @@ const Array2<float> * UniformPlot2D::channel(const int & k) const
 const Array3<float> & UniformPlot2D::data() const
 { return m_data; }
 
+static const float ColorCurve[6][3]= {
+{ 0.f, 0.f, .65f},
+{ 0.f, .35f, 1.f},
+{.15f, 1.f, .95f},
+{.95f, 1.f, .15f},
+{1.f, .35f, 0.f},
+{.65f, 0.f, 0.f}
+};
+
+static inline void plotColor(float & r, float & g, float & b,
+    const float & x, 
+    const float curve[6][3])
+{
+    float s;
+    int i = x * 5.f;
+    if(i>4) i=4;
+    s = (x - .2f * i) * 5.f;
+    
+    r = curve[i][0] * (1.f - s) 
+        +curve[i+1][0] * s;
+    g = curve[i][1] * (1.f - s) 
+        +curve[i+1][1] * s;
+    b = curve[i][2] * (1.f - s) 
+        +curve[i+1][2] * s;
+}
+
+void UniformPlot2D::floatToColor(const float * x,
+	                    const float scale,
+	                    const float shift)
+{
+    int n = numCols();
+    int m = numRows();
+	float * redv = y(0);
+	float * greenv = y(1);
+	float * bluev = y(2);
+	float ssc;
+		
+    for(int j=0;j<n;++j) {
+        for(int i=0;i<m;++i) {
+
+            ssc = x[j*m+i] * scale + shift;
+            Clamp01(ssc);
+
+            //redv[j*m+i] = ssc;
+            //greenv[j*m+i] = .5f - Absolute<float>(ssc - .5f);
+            //bluev[j*m+i] = 1.f - ssc;
+            plotColor(redv[j*m+i], greenv[j*m+i], bluev[j*m+i],
+                    ssc, ColorCurve);
+        }
+    }
+	
+}
+
 }

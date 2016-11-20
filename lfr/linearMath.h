@@ -71,6 +71,9 @@ public:
 	void copy(const DenseVector<T> & x);
 	void copyData(const T * x);
 	
+	DenseVector<T> operator+(const DenseVector<T> & x) const;
+	DenseVector<T> operator-(const DenseVector<T> & x) const;
+	
 	static void PrintVector(char* desc, int n, T* a)
 	{
 		std::cout<<"\n "<<desc<<"\n| ";
@@ -296,6 +299,24 @@ void DenseVector<T>::minus(const DenseVector<T> & x, const T alpha)
 { add(x.v(), -alpha); }
 
 template<typename T>
+DenseVector<T> DenseVector<T>::operator+(const DenseVector<T> & x) const
+{
+    DenseVector<T> c;
+    c.copy(*this);
+    c.add(x);
+    return c;
+}
+
+template<typename T>
+DenseVector<T> DenseVector<T>::operator-(const DenseVector<T> & x) const
+{
+    DenseVector<T> c;
+    c.copy(*this);
+    c.add(x, T(-1.0));
+    return c;
+}
+
+template<typename T>
 void DenseVector<T>::copy(const DenseVector<T> & x)
 {
 	create(x.numElements());
@@ -367,6 +388,7 @@ public:
     T operator()(const int i, const int j) const;
 	T* column(const int i) const;
 	T* raw();
+	void getRow(DenseVector<T> & x, const int i) const;
 	void getColumn(DenseVector<T> & x, const int i) const;
 	
 	void copy(const DenseMatrix<T> & x);
@@ -374,6 +396,7 @@ public:
 	void copyData(const T * x);
 	
 	void setZero();
+/// A <- A * s
 	void scale(const T s);
 	void scaleColumn(const int i, const T s);
 	void add(const DenseMatrix<T> & x, const T alpha = 1.0);
@@ -403,10 +426,10 @@ public:
 /// b = alpha A * x + beta b
 	void mult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
-/// b = alpha AT * x + beta b
+/// b = alpha A^T * x + beta b
 	void multTrans(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
-/// b = xT * A
+/// b = x^T * A
 	void lefthandMult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
 /// A = b * b
@@ -426,6 +449,9 @@ public:
 /// A <- A + alpha * vec * vec^t
 	void rank1Update(const DenseVector<T> & vec1, const DenseVector<int> & ind,
 						const int n, const T alpha=1.0);
+
+/// A <- A^T
+    DenseMatrix<T> transposed() const;  
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseMatrix<T> & p) {
         output << p.str();
@@ -435,7 +461,8 @@ public:
 	static void PrintMatrix(char* desc, int m, int n, T* a)
 	{
 		int i, j;
-		std::cout<<"\n "<<desc;
+		std::cout<<"\n "<<desc
+		<<"\n dim "<<m<<"-by-"<<n;
 		for(i=0; i< m; i++) {
 			std::cout<<"\n| ";
 			for(j=0; j< n; j++) {
@@ -523,6 +550,15 @@ T* DenseMatrix<T>::column(const int i) const
 template <typename T>
 T* DenseMatrix<T>::raw()
 { return m_v; }
+
+template <typename T>
+void DenseMatrix<T>::getRow(DenseVector<T> & x, const int i) const
+{ 
+    int j=0;
+    for(;j<m_numColumns;++j) {
+        x[j] = column(j)[i];
+    }
+}
 
 template <typename T>
 void DenseMatrix<T>::getColumn(DenseVector<T> & x, const int i) const
@@ -839,6 +875,22 @@ void DenseMatrix<T>::clear()
     m_numColumns = 0;
     m_numRows = 0;
 	m_capacity = 0;
+}
+
+/// b[i,j] = a[j,i]
+template<typename T>
+DenseMatrix<T> DenseMatrix<T>::transposed() const
+{
+    DenseMatrix<T> b(numColumns(), numRows() );
+    
+    for(int j=0;j<numRows();++j) {
+        T * cc = b.column(j);
+        for(int i=0;i<numColumns();++i) {
+            cc[i] = column(i)[j];
+        }
+    }
+    
+    return b;
 }
 
 /// column-major sparse matrix in csr
