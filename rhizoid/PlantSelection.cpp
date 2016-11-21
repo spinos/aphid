@@ -24,10 +24,7 @@ PlantSelection::~PlantSelection()
 { delete m_plants; }
 	
 void PlantSelection::setRadius(float x)
-{ 
-    m_radius = x; 
-    if(m_radius < .1f) m_radius = .1f;
-}
+{ m_radius = (x > 0.1f) ? x : 0.1f; }
 
 void PlantSelection::setCenter(const Vector3F & center, const Vector3F & direction)
 {
@@ -72,6 +69,29 @@ void PlantSelection::select(const sdb::Coord3 & c, SelectionContext::SelectMode 
 			if(mode == SelectionContext::Append) select(cell->value() );
 			else if(mode == SelectionContext::Remove) m_plants->remove(cell->key() );
 		}
+		
+		cell->next();
+	}
+}
+
+void PlantSelection::selectByType(int x)
+{
+	if(m_grid->isEmpty() ) return;
+	m_grid->begin();
+	while(!m_grid->end() ) {
+		selectByTypeInCell(m_grid->value(), x);
+		m_grid->next();
+	}
+	m_numSelected = m_plants->size();
+}
+
+void PlantSelection::selectByTypeInCell(sdb::Array<int, Plant> * cell, int x)
+{
+	if(cell->isEmpty() ) return;
+	cell->begin();
+	while(!cell->end()) {
+		PlantData * d = cell->value()->index;
+		if(x == *d->t3) select(cell->value() );
 		
 		cell->next();
 	}

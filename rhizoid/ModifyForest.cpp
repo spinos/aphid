@@ -116,13 +116,15 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 		Vector3F & pos = samples[s];
 		
 /// limited by noise level
-		if(ANoise3::FractalF((const float *)&pos,
+		if(option.m_noiseLevel > 0.001f) {
+			if(ANoise3::FractalF((const float *)&pos,
 							(const float *)&option.m_noiseOrigin,
 							freq,
 							option.m_noiseLacunarity,
 							option.m_noiseOctave,
 							option.m_noiseGain ) < option.m_noiseLevel )
-			continue;
+				continue;
+		}
 		
 		if(limitRadius) {
 			if(pos.distanceTo(option.m_centerPoint) >  option.m_radius)
@@ -669,6 +671,19 @@ void ModifyForest::erectActive()
 		
 		arr->next();
 	}
+}
+
+void ModifyForest::removeTypedPlants(int x)
+{
+	if(numPlantExamples() < 1) {
+		removeAllPlants();
+		return;
+	}
+	selection()->deselect();
+	selectTypedPlants(x);
+	std::cout<<"\n remove "<<numActivePlants()<<" type"<<x<<" plants";
+	std::cout.flush();
+	clearSelected();
 }
 
 }

@@ -68,6 +68,7 @@ protected:
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     void buildGround();
     void setSelectTypeFilter(int flt);
+	bool selectTypedPlants(int x);
     bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
 	bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
 	
@@ -112,6 +113,7 @@ protected:
 	std::string groundBuildLog() const;
 	
 	const sdb::VectorArray<cvx::Triangle> & triangles() const;
+	int numPlantExamples() const;
 	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 

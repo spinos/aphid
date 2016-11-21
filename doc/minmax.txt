@@ -1,0 +1,12 @@
+min max wrong argument error when 
+#include <limits>
+
+should be
+
+#undef max
+#undef min
+
+#include <limits>
+
+http://forums.codeguru.com/showthread.php?369447-can-t-assign-numeric_limits-lt-double-gt-max%28%29
+

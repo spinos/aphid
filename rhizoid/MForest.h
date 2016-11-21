@@ -76,7 +76,9 @@ private:
 					MIntArray & plantTris,
 					MVectorArray & plantCoords);
 	void getDataInCell(sdb::Array<int, Plant> *cell, 
-					float * data, unsigned & it);
+					float * data, 
+					int * typd,
+					unsigned & it);
 	void pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
 					float lodLowGate, float lodHighGate, 
 					int totalGroups, int currentGroup, 

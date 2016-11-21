@@ -377,13 +377,14 @@ void MForest::loadExternal(const char* filename)
 	chFile.read((char*)&numRec, sizeof(int));
 	AHelper::Info<int>("MForest read record count ", numRec);
 	float *data = new float[numRec * 16];
+	int *typd = new int[numRec];
 	chFile.read((char*)data, sizeof(float) * numRec * 16);
+	chFile.read((char*)typd, sizeof(int) * numRec);
 	chFile.close();
 	
 	Matrix44F space;
 	GroundBind bind;
 	bind.m_geomComp = -1;
-	int typId = 0;	
 	for(int i=0; i < numRec; i++) {
 		const int ii = i * 16;
 		*space.m(0, 0) = data[ii];
@@ -399,9 +400,10 @@ void MForest::loadExternal(const char* filename)
 		*space.m(3, 1) = data[ii+13];
 		*space.m(3, 2) = data[ii+14];
 		
-		addPlant(space, bind, typId);
+		addPlant(space, bind, typd[i]);
 	}
 	delete[] data;
+	delete[] typd;
 	finishGrow();
 	moveWithGround();
 	AHelper::Info<const char *>("MForest read cache from ", filename);
@@ -421,22 +423,27 @@ void MForest::saveExternal(const char* filename)
 	chFile.write((char*)&numRec, sizeof(int));
 	
 	float *data = new float[numRec * 16];
+	int * tpi = new int[numRec];
 	unsigned it = 0;
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
-		getDataInCell(g->value(), data, it);
+		getDataInCell(g->value(), data, tpi, it);
 		g->next();
 	}
 	
 	chFile.write((char*)data, sizeof(float) * numRec * 16);
+	chFile.write((char*)tpi, sizeof(int) * numRec);
 	chFile.close();
 	AHelper::Info<const char *>(" Proxy saved to file: ", filename);
 	delete[] data;
+	delete[] tpi;
 }
 
 void MForest::getDataInCell(sdb::Array<int, Plant> *cell, 
-							float * data, unsigned & it)
+							float * data, 
+							int * typd,
+							unsigned & it)
 {
 	cell->begin();
 	while(!cell->end() ) {
@@ -455,6 +462,7 @@ void MForest::getDataInCell(sdb::Array<int, Plant> *cell,
 		data[ii+12] = mat->M(3, 0);
 		data[ii+13] = mat->M(3, 1);
 		data[ii+14] = mat->M(3, 2);
+		typd[it] = *d->t3;
 		it++;
 		cell->next();
 	}

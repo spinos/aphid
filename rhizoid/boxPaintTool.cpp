@@ -178,6 +178,11 @@ void proxyPaintContext::setOperation(short val)
 		return;
 	}
 	
+	if(val == opCleanByType) {
+		clearByType();
+		return;
+	}
+	
     std::string opstr("unknown");
 	mOpt = opUnknown;
 	switch (val)
@@ -431,13 +436,6 @@ char proxyPaintContext::validateSelection()
 			
     if(!PtrViz) return 0;
 
-/// limit radius
-	float gz = PtrViz->gridSize();
-	if(getBrushRadius() < gz * .1f) {
-		AHelper::Info<float>("[INFO] truncate brush radius ", gz * .1f);
-		setBrushRadius(gz * .1f);
-	}
-	
 	PtrViz->setSelectionRadius(getBrushRadius() );
 	return 1;
 }
@@ -547,6 +545,15 @@ void proxyPaintContext::cleanup()
 	if(!getSelectedViz())
 		return;
 	PtrViz->removeAllPlants();	
+}
+
+void proxyPaintContext::clearByType()
+{
+	MGlobal::displayInfo("proxyPaint set to clear by type");
+	if(!getSelectedViz())
+		return;
+	AHelper::Info<int>("active plant type", m_growOpt.m_plantId);
+	PtrViz->removeTypedPlants(m_growOpt.m_plantId);	
 }
 
 void proxyPaintContext::finishGrow()

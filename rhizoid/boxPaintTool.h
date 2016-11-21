@@ -45,7 +45,8 @@ class proxyPaintContext : public MPxContext
         opExtract = 102,
         opDiscardFaceSelection = 103,
         opDiscardPlantSelection = 104,
-        opRotateToDir = 105
+        opRotateToDir = 105,
+		opCleanByType = 106
     };
     
     Operation m_currentOpt, mOpt;
@@ -92,6 +93,7 @@ public:
 	void setWriteCache(MString filename);
 	void setReadCache(MString filename);
 	void cleanup();
+	void clearByType();
 	char getSelectedViz();
 	void setMinCreateMargin(float x);
 	const float & minCreateMargin();

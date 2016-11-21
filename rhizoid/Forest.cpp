@@ -126,6 +126,13 @@ void Forest::buildGround()
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(m_ground, &m_triangles, gridBox, &bf);
 }
 
+bool Forest::selectTypedPlants(int x)
+{
+	if(numPlants() < 1) return false;
+	m_activePlants->selectByType(x);
+	return true;
+}
+
 bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 {
 	if(numPlants() < 1) return false;
@@ -390,6 +397,9 @@ bool Forest::isGroundEmpty() const
     if(!m_ground) return true;
     return m_ground->isEmpty();
 }
+
+int Forest::numPlantExamples() const
+{ return m_examples.size(); }
 
 void Forest::addPlantExample(ExampVox * x)
 {
