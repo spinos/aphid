@@ -102,6 +102,12 @@ public:
 	
 	const Array3<float> & data() const;
 	
+/// assuming [m,n] = size(x)
+/// scale and shift to (0,1)
+	void floatToColor(const float * x,
+	                    const float scale = 1.f,
+	                    const float shift = 0.f);
+	
 protected:
 
 private:
