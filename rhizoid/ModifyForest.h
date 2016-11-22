@@ -70,6 +70,8 @@ public:
     void setNoiseWeight(float x);
     void erectActive();
 	void scalePlant(GrowOption & option);
+	void movePlant(GrowOption & option);
+    void rotatePlant(GrowOption & option);
     void removeTypedPlants(int x);
 	
 protected:

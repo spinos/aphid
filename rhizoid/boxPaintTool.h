@@ -39,6 +39,9 @@ class proxyPaintContext : public MPxContext
         opCreate = 11,
         opSelectByType= 12,
 		opRandResize = 13,
+		opRandMove = 14,
+		opRandRotate = 15,
+		opErect = 16,
         opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
@@ -129,7 +132,8 @@ private:
 	void erase();
 	void move();
 	void extractSelected();
-	void erectSelected();
+	void rotateByStroke();
+	void erect();
 	void rotateAroundAxis(short axis);
 	void moveAlongAxis(short axis);
 	void startProcessSelect();
@@ -147,6 +151,8 @@ private:
     void discardPlantSelection();
     void injectSelectedTransform();
 	void resizeSelectedRandomly();
+	void moveRandomly();
+	void rotateRandomly();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);
