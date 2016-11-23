@@ -1,6 +1,6 @@
 /*
- *  rotaCmd.h
- *  rotaConstraint
+ *  frustumBoxCmd.h
+ *  frustumBox
  *
  *  Created by jian zhang on 7/7/15.
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
@@ -54,6 +54,7 @@ private:
 	};
 	WorkMode m_mode;
 	MString m_cameraName;
+	double m_cameraScale;
     int m_startTime, m_endTime;
     bool m_doListVisible;
 };

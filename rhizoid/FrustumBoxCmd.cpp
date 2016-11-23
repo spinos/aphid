@@ -5,6 +5,8 @@
  *  Created by jian zhang on 7/7/15.
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
+ *  frustumBox -fr 1 24 -lv -cms 1.3 -cam |persp'perspShape -cms 1.1
+ *  default cameraScale 1.0
  */
 
 #include "FrustumBoxCmd.h"
@@ -17,6 +19,9 @@
 #include <maya/MItDependencyNodes.h>
 #include <GjkIntersection.h>
 #include <PrincipalComponents.h>
+
+#define kCameraScaleFlag "-cms" 
+#define kCameraScaleFlagLong "-cameraScale"
 
 using namespace aphid;
 
@@ -36,6 +41,7 @@ MSyntax FrustumBoxCmd::newSyntax()
     syntax.addFlag("-fr", "-frameRange", MSyntax::kLong, MSyntax::kLong);
 	syntax.addFlag("-cam", "-camera", MSyntax::kString);
     syntax.addFlag("-lv", "-listVisible", MSyntax::kNoArg);
+	syntax.addFlag(kCameraScaleFlag, kCameraScaleFlagLong, MSyntax::kDouble);
 	syntax.enableQuery(false);
 	syntax.enableEdit(false);
 
@@ -44,6 +50,8 @@ MSyntax FrustumBoxCmd::newSyntax()
 
 MStatus FrustumBoxCmd::parseArgs(const MArgList &args)
 {
+	m_cameraScale = 1.0;
+	
 	MStatus			stat;
 	MArgDatabase	argData(syntax(), args, &stat);
 
@@ -76,6 +84,18 @@ MStatus FrustumBoxCmd::parseArgs(const MArgList &args)
     }
     
     if(argData.isFlagSet("-lv")) m_doListVisible = true;
+	
+	if(argData.isFlagSet(kCameraScaleFlag)) {
+		stat = argData.getFlagArgument(kCameraScaleFlag, 0, m_cameraScale);
+		if (!stat) {
+			MGlobal::displayWarning(" frustumBox cannot parse -cms flag");
+		}
+		
+		if(m_cameraScale < 0.1) {
+			MGlobal::displayWarning(" frustumBox -cms truncated to 0.1");
+			m_cameraScale = 0.1;
+		}
+	}
     
 	if(argData.isFlagSet("-h")) m_mode = WHelp;
 	
@@ -172,6 +192,7 @@ MStatus FrustumBoxCmd::printHelp()
 		+MString("\n -cam/-camera string is full path to camera shape")
 		+MString("\n -fr/-frameRange int int is begin and end frame of test")
         +MString("\n -lv/-listVisible is set to return visible objects instead of invisible ones")
+		+MString("\n -cms/-cameraScale double scaling focal length of camera to expand or shrink region of contact default 1")
 		+MString("\n return value is string[] of objects NOT visible to camera"));
 	
 	return MS::kSuccess;
@@ -325,7 +346,11 @@ void FrustumBoxCmd::worldFrustum(Vector3F * corners, MObject & camera) const
     const double farClip = fcam.farClippingPlane() - 0.001f;
     const double hAperture = fcam.horizontalFilmAperture();
     const double vAperture = fcam.verticalFilmAperture();
-    const double fl = fcam.focalLength();
+	double fl = fcam.focalLength();
+	if(m_cameraScale != 1.0) {
+		fl /= m_cameraScale;
+		AHelper::Info<double>("scale focal length by", 1.0/m_cameraScale);
+	}
     
     float h_fov = hAperture * 0.5 / ( fl * 0.03937 );
     float v_fov = vAperture * 0.5 / ( fl * 0.03937 );
