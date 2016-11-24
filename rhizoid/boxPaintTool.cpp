@@ -695,7 +695,7 @@ void proxyPaintContext::injectSelectedTransform()
 void proxyPaintContext::resizeSelectedRandomly()
 {
 	if(!PtrViz) return;
-	MGlobal::displayWarning("proxyPaintContext scale randomly");
+	MGlobal::displayInfo("proxyPaintContext scale randomly");
 	PtrViz->scalePlant(m_growOpt);
 }
 

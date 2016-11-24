@@ -65,7 +65,7 @@ void AttribUtil::scan(const MDagPath &entity)
 	AHelper::Merge(m_dirtyPlugs, pls);
 }
 
-void AttribUtil::saveUDA(AnimIO& doc)
+void AttribUtil::saveUDANames(AnimIO& doc)
 {
     if( UserDefinedAttribFilter.size() < 1 ) return;
     
@@ -541,6 +541,7 @@ void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int f
 	std::map<std::string, MDagPath >::const_iterator ita = entities.begin();
 	for(;ita!=entities.end();++ita) scan(ita->second);
 	
+// AHelper::Info<int>("num dirty plug", m_dirtyPlugs.length());
 	if(m_dirtyPlugs.length() < 1) return;
 	
 	const unsigned n = m_dirtyPlugs.length();
@@ -636,7 +637,7 @@ void AttribUtil::dump(const char *filename, MDagPathArray &active_list)
         return;
     }
 	
-	AHelper::Info<std::string>("opium v3 write ", "attribute");
+	AHelper::Info<std::string>("opium v3 write", "attribute");
     AHelper::Info<int>("bundle count ", active_list.length());
 	
 	if(AFrameRange::isValid())
@@ -648,13 +649,19 @@ void AttribUtil::dump(const char *filename, MDagPathArray &active_list)
 	SceneIO doc;
 	doc.create(filename);
 	doc.recordTime();
-	if(AFrameRange::isValid()) {
-		doc.addFraneRange(FirstFrame, LastFrame);
-		doc.addSPF(SamplesPerFrame);
+	if(!AFrameRange::isValid()) {
+	    MTime currentt = MAnimControl::currentTime ();
+	    int currentf = currentt.value();
+	    AHelper::Info<int>("static attrib at frame", currentf);
+	    FirstFrame = LastFrame = currentf;
+	    SamplesPerFrame = 1;
 	}
+	doc.addFraneRange(FirstFrame, LastFrame);
+	doc.addSPF(SamplesPerFrame);
+	
     saveFormatVersion(doc, 3.f);
 	AnimUtil::ResolveFPS(HesperisAnimIO::SecondsPerFrame);
-    saveUDA(doc);
+    saveUDANames(doc);
 	
 	if(H5IO::BeheadName.size() > 0) saveBehead( doc, H5IO::BeheadName );
 	doc.recordDataSize();
@@ -666,11 +673,7 @@ void AttribUtil::dump(const char *filename, MDagPathArray &active_list)
 }
 
 void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
-{
-    if(!AFrameRange::isValid()) {
-		return;
-	}
-    
+{    
     BaseUtil::CloseH5();
 	
     if(!BaseUtil::OpenH5(filename, HDocument::oCreate)) {
