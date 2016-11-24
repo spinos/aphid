@@ -47,7 +47,9 @@ private:
 	void drawHorizontalInterval(QPainter * pr) const;
 	void drawVerticalInterval(QPainter * pr) const;
 	void drawPlot(const UniformPlot1D * plt, QPainter * pr);
-	
+	void drawLine(const UniformPlot1D * plt, QPainter * pr);
+	void drawMark(const UniformPlot1D * plt, QPainter * pr);
+
 private:
 	Vector2F m_hBound;
 	Vector2F m_vBound;

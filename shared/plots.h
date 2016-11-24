@@ -16,16 +16,30 @@ namespace aphid {
 class UniformPlot1D {
 
 public:
+	enum GeomType {
+		GtLine = 0,
+		GtMark = 1
+	};
+	
 	enum LineStyle {
 		LsSolid = 0,
 		LsDash = 1,
 		LsDot = 2
 	};
 	
+	enum MarkStyle {
+		MsQuad = 0,
+		MsTriangle = 1,
+		MsDiamond = 2
+	};
+	
 private:
-	VectorN<float> m_data;
+	VectorN<float> m_yvar;
+	VectorN<float> m_xvar;
 	Vector3F m_color;
+	GeomType m_gt;
 	LineStyle m_lstyle;	
+	MarkStyle m_mstyle;
 	
 public:
 	UniformPlot1D();
@@ -34,15 +48,21 @@ public:
 	void create(const float * y, const int & n);
 	void setColor(float r, float g, float b);
 	const Vector3F & color() const;
+	const float * x() const;
+	float * x();
 	const float * y() const;
 	float * y();
 	const int & numY() const;
 	void setLineStyle(LineStyle x);
 	const LineStyle & lineStyle() const;
+	const GeomType & geomType() const;
 	const VectorN<float> & data() const;
+	void setGeomType(GeomType t);
+	void setMarkStyle(MarkStyle t);
+	const MarkStyle & markStyle() const;
 	
 private:
-	
+	void linspacex(const int & n);
 	
 };
 
