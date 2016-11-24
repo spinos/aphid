@@ -1,17 +1,5 @@
 #pragma once
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <OpenGL/glext.h>
-#include <GLUT/glut.h>
-#endif
-
-#ifdef WIN32
-#include <windows.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#endif
+#include <gl_heads.h>
 #include <string>
 
 namespace aphid {

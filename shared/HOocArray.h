@@ -10,6 +10,7 @@
 
 #pragma once
 #include "H2DDataset.h"
+#include <string.h>
 
 namespace aphid {
     

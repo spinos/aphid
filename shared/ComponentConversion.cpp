@@ -28,7 +28,7 @@ void ComponentConversion::edgeRing(const unsigned & src, std::vector<unsigned> &
 	Edge *para = m_topology->parallelEdge(e);
 	if(!para) return;
 	
-	printf("para %i %i\n", para->v0()->getIndex(), para->v1()->getIndex());
+	//printf("para %i %i\n", para->v0()->getIndex(), para->v1()->getIndex());
 	if(!appendUnique(para->getIndex(), edgeIds)) return;
 		
 	Edge * opp = para->getTwin();
@@ -37,7 +37,7 @@ void ComponentConversion::edgeRing(const unsigned & src, std::vector<unsigned> &
 		para = m_topology->parallelEdge(opp);
 		if(!para) return;
 		
-		printf("para %i %i\n", para->v0()->getIndex(), para->v1()->getIndex());
+		//printf("para %i %i\n", para->v0()->getIndex(), para->v1()->getIndex());
 		if(!appendUnique(para->getIndex(), edgeIds)) return;
 		
 		opp = para->getTwin();

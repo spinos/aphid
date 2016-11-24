@@ -1,7 +1,7 @@
 #ifndef APHID_TYPES_H
 #define APHID_TYPES_H
 #include <sstream>
-// #include <iostream>
+#include <string.h>
 
 namespace aphid {
 

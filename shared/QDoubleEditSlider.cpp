@@ -17,7 +17,7 @@ QDoubleEditSlider::QDoubleEditSlider(const QString & name, QWidget *parent)
 	m_edit = new QLineEdit;
 	m_edit->setMaximumWidth(80);
 	m_slider = new QSlider(Qt::Horizontal);
-	m_validate = new QDoubleValidator;
+	m_validate = new QDoubleValidator(this);
 	
 	m_edit->setValidator(m_validate);
 	m_slider->setRange(0, 100);
