@@ -411,6 +411,9 @@ public:
 	void addDiagonal(const T diag);
 /// copy upper-right part to lower-left part
 	void fillSymmetric();
+/// in case most non-zero elements concentrating around diagonal, 
+/// diagonal line must over 1 to be correctly inversed
+	bool inverse();
 	bool inverseSymmetric();
 /// b = alpha A^T * x + beta b
 	void transMult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
@@ -442,7 +445,7 @@ public:
 	bool sqrtRRR(DenseMatrix<T>& b) const;
 	
 /// b = (AT A)^-1AT
-	bool pseudoInverse(DenseMatrix<T>& b) const;
+//	bool pseudoInverse(DenseMatrix<T>& b) const;
 	
 /// A <- A + alpha * vec1 * vec2^t
 	void rank1Update(const DenseVector<T> & vec1, const DenseVector<T> & vec2, const DenseVector<int> & ind2,
@@ -723,6 +726,43 @@ void DenseMatrix<T>::fillSymmetric()
    }
 }
 
+/// http://people.sc.fsu.edu/~jburkardt/cpp_src/clapack/clapack_prb.cpp
+template<typename T>
+bool DenseMatrix<T>::inverse()
+{
+	integer * ipiv = new integer[m_numRows];
+	integer info;
+
+	clapack_getrf<T>(m_numRows, m_numColumns, m_v, m_numRows, ipiv, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR getrf returned INFO="<<info<<"\n";
+		return false;
+	}
+	
+	T * work;
+	T queryWork;
+	work = &queryWork;
+	integer lwork = -1;
+	
+	clapack_getri<T>(m_numRows, m_v, m_numRows, ipiv, work, &lwork, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR sytri returned INFO="<<info<<"\n";
+		return false;
+	}
+	
+	lwork = work[0];
+	work = new T[lwork];
+	clapack_getri<T>(m_numRows, m_v, m_numRows, ipiv, work, &lwork, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR sytri returned INFO="<<info<<"\n";
+		return false;
+	}
+	
+	delete[] work;
+	delete[] ipiv;
+	return info==0;
+}
+
 template<typename T>
 bool DenseMatrix<T>::inverseSymmetric()
 {
@@ -730,15 +770,28 @@ bool DenseMatrix<T>::inverseSymmetric()
 	T queryWork;
 	work = &queryWork;
 	integer * ipiv = new integer[m_numRows];
-	int i;
-	for(i=0;i<m_numRows;i++) ipiv[i] = i;
 	integer info;
 	integer lwork = -1;
 	clapack_sytrf<T>("U",m_numRows,m_v,m_numRows, ipiv, work, &lwork, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR sytrf query returned INFO="<<info<<"\n";
+		return false;
+	}
+	
 	lwork = work[0];
 	work = new T[lwork];
 	clapack_sytrf<T>("U",m_numRows,m_v,m_numRows, ipiv, work, &lwork, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR sytrf returned INFO="<<info<<"\n";
+		return false;
+	}
+	
 	clapack_sytri<T>("U",m_numRows,m_v,m_numRows, ipiv, work, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR sytri returned INFO="<<info<<"\n";
+		return false;
+	}
+	
 	fillSymmetric();
 	delete[] work;
 	delete[] ipiv;

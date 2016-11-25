@@ -27,6 +27,10 @@ public:
     
     bool create(const TMatrix & x,
                 const TKernel & k);
+				
+	bool create(const TMatrix & x1,
+				const TMatrix & x2,
+                const TKernel & k);
     
     const TMatrix & K() const;
     
@@ -48,6 +52,24 @@ bool Covariance<TScalar, TKernel>::create(const TMatrix & x,
                                         const TKernel & k)
 {
     dist2(m_K, x, x);
+    int nc = m_K.numColumns();
+    int nr = m_K.numRows();
+    for(int j=0;j<nc;++j) {
+        TScalar * kc = m_K.column(j);
+        for(int i=0;i<nr;++i) {
+            kc[i] = k(kc[i]);
+        }
+    }
+    
+    return 1;
+}
+
+template <class TScalar, typename TKernel>
+bool Covariance<TScalar, TKernel>::create(const TMatrix & x1,
+				const TMatrix & x2,
+                const TKernel & k)
+{
+	dist2(m_K, x1, x2);
     int nc = m_K.numColumns();
     int nr = m_K.numRows();
     for(int j=0;j<nc;++j) {

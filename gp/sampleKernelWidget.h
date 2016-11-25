@@ -19,7 +19,7 @@ class SampleKernelWidget : public Plot1DWidget {
 	Q_OBJECT
 	
 public:
-	SampleKernelWidget(const lfr::DenseMatrix<float> & x, QWidget *parent = 0);
+	SampleKernelWidget(const lfr::DenseMatrix<float> & yActual, QWidget *parent = 0);
 	virtual ~SampleKernelWidget();
 	
 protected:
