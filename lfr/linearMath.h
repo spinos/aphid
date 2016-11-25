@@ -382,7 +382,8 @@ public:
 	void resizeNumRow(int numRow);
 	void resizeNumCol(int numCol);
 	int numColumns() const;
-    int numRows() const;
+    const int & numCols() const;
+    const int & numRows() const;
 	
 /// i is column index, j is row index
     T& operator()(const int i, const int j);
@@ -536,8 +537,12 @@ int DenseMatrix<T>::numColumns() const
 { return m_numColumns; }
 
 template<typename T>
-int DenseMatrix<T>::numRows() const
+const int & DenseMatrix<T>::numRows() const
 { return m_numRows; }
+
+template<typename T>
+const int & DenseMatrix<T>::numCols() const
+{ return m_numColumns; }
 
 template <typename T> 
 T& DenseMatrix<T>::operator()(const int i, const int j) 
@@ -1028,9 +1033,10 @@ void SparseMatrix<T>::clear()
 template<typename T>
 class SvdSolver {
 
-	lfr::DenseVector<T> m_s;
-	lfr::DenseMatrix<T> m_u; 
-	lfr::DenseMatrix<T> m_v;
+	DenseMatrix<T> m_local;
+	DenseVector<T> m_s;
+	DenseMatrix<T> m_u; 
+	DenseMatrix<T> m_v;
 	
 	T * m_work;
 	int m_l;
@@ -1038,7 +1044,7 @@ public:
 	SvdSolver();
 	virtual ~SvdSolver();
 	
-	bool compute(const DenseMatrix<T> & M);
+	bool compute(const DenseMatrix<T> & A);
 	
 	const DenseMatrix<T> & U() const;
 	const DenseVector<T> & S() const;
@@ -1067,11 +1073,13 @@ SvdSolver<T>::~SvdSolver()
 /// M is changed
 /// V is V^T actually
 template<typename T>
-bool SvdSolver<T>::compute(const DenseMatrix<T> & M)
+bool SvdSolver<T>::compute(const DenseMatrix<T> & A)
 {
-	const int m = M.numRows();
-	const int n = M.numColumns();
-	
+	const int m = A.numRows();
+	const int n = A.numCols();
+/// keep M unchanged
+	m_local.resize(m, n);
+	m_local.copy(A);
 	m_s.resize(m );
 	m_u.resize(m, m );
 	m_v.resize(n, n );
@@ -1080,7 +1088,7 @@ bool SvdSolver<T>::compute(const DenseMatrix<T> & M)
 
 /// Query and allocate the optimal workspace
 	integer lwork = -1, info;
-	clapack_gesvd<T>( "All", "All", m, n, M.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, &wkopt, &lwork, &info );
+	clapack_gesvd<T>( "All", "All", m, n, m_local.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, &wkopt, &lwork, &info );
 	lwork = (int)wkopt;
 	// std::cout<<"\n work l "<<lwork;
 	
@@ -1090,7 +1098,7 @@ bool SvdSolver<T>::compute(const DenseMatrix<T> & M)
 		m_work = (T*)malloc( lwork*sizeof(T) );
 	}
 /// Compute SVD 
-	clapack_gesvd<T>( "All", "All", m, n, M.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, m_work, &lwork, &info );
+	clapack_gesvd<T>( "All", "All", m, n, m_local.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, m_work, &lwork, &info );
 /// Check for convergence
 	if( info > 0 ) {
 			std::cout<< "The algorithm computing SVD failed to converge.\n";

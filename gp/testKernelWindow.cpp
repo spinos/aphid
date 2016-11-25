@@ -17,8 +17,8 @@ TestKernelWindow::TestKernelWindow()
     std::cout<<" test kernel ";
     std::cout<<"\n build X";
     
-    DenseMatrix<float> X(25,1);
-    linspace<float>(X.column(0), -1.f, 1.f, 25);
+    DenseMatrix<float> X(30,1);
+    linspace<float>(X.column(0), -1.f, 1.f, 30);
     
     std::cout<<"\n build kernel";
     RbfKernel<float> rbf(0.33);
