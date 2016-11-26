@@ -87,10 +87,14 @@ find_package (OpenGL REQUIRED)
 message ("opengl is " ${OPENGL_LIBRARIES})
 
 set (INST_HEADER_FILES ../shared/Base3DView.h 
+../shared/GlslBase.h
+../shared/GlslInstancer.h
 instwindow.h
 instwidget.h)
 
 set (INST_SOURCE_FILES ../shared/Base3DView.cpp
+../shared/GlslBase.cpp
+../shared/GlslInstancer.cpp
 instwidget.cpp
 instwindow.cpp
 instmain.cpp)

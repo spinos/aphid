@@ -1,5 +1,5 @@
-#ifndef GLSLBASE_H
-#define GLSLBASE_H
+#ifndef APH_GLSLBASE_H
+#define APH_GLSLBASE_H
 
 /*
  *  glslBase.h
@@ -12,15 +12,16 @@
 
 #include <gl_heads.h>
 #include <string>
-
+namespace aphid {
+    
 class GLSLBase
 {
 	char fHasDiagnosis, fHasExtensions, fHasFBO;
 	
+	GLhandleARB vertex_shader, fragment_shader, program_object;
 	GLuint fbo;
 	GLuint depthBuffer;
 	GLuint img;
-	
 	float *fPixels;
 	
 public:
@@ -52,7 +53,8 @@ protected:
 	virtual void defaultShaderParameters();
 
 	const float * pixels() const;
-	GLhandleARB vertex_shader, fragment_shader, program_object;
+	
 };
+}
 #endif        //  #ifndef GLSLBASE_H
 

@@ -8,6 +8,9 @@
  */
 
 #include "GlslBase.h"
+#include <sstream>
+
+namespace aphid {
 
 typedef struct glExtensionEntry {
     char* name;
@@ -29,7 +32,11 @@ glExtensionEntry entriesNeeded[] = {
 {"GL_ARB_texture_rectangle",      0.0, 0},
 };
 
-GLSLBase::GLSLBase() : fHasDiagnosis(0), fHasExtensions(0), fHasFBO(0),fPixels(0)
+GLSLBase::GLSLBase() : 
+fHasDiagnosis(0), 
+fHasExtensions(0), 
+fHasFBO(0),
+fPixels(0)
 {}
 
 GLSLBase::~GLSLBase() 
@@ -54,29 +61,29 @@ const char* GLSLBase::fragmentProgramSource() const
 {
 	return "void main()"
 "{"
-"		gl_FragColor = gl_Color * vec4 (0.5);"
+"		gl_FragColor = gl_Color * vec4 (0.25);"
 "}";
 }
 
-#include <sstream>
 char GLSLBase::diagnose(std::string& log)
 {
 	float core_version;
-	// sscanf((char *)glGetString(GL_VERSION), "%f", &core_version);
-	std::stringstream sst;
-	sst.str((char *)glGetString(GL_VERSION));
+	std::string sver((char *)glGetString(GL_VERSION));
+	std::stringstream sst(sver);
 	sst>>core_version;
 	
-	//char sbuf[64];
-	//sprintf(sbuf, "%s version %s\n", (char *)glGetString(GL_RENDERER), (char *)glGetString(GL_VERSION));
-	//log = sbuf;
-
-	std::stringstream sst1;
-	sst1.str("");
-	sst1<<(char *)glGetString(GL_RENDERER)<<" version "<<(char *)glGetString(GL_VERSION);
+	sst.str("");
+	sst<<"\n GL_Version "<<sver
+	    <<"\n GL_Renderer "<<((char *)glGetString(GL_RENDERER));
+	
 	log = sst.str();
 	
-
+	if(core_version < 1.4) {
+		log += "OpenGL version too low, this thing may not work correctly!\n";
+	}
+	
+	log += "\n support routines: ";
+	
 	int supported = 1;
 	int j = sizeof(entriesNeeded)/sizeof(glExtensionEntry);
 	
@@ -96,18 +103,16 @@ char GLSLBase::diagnose(std::string& log)
 		entriesNeeded[i].supported = gluCheckExtension((GLubyte*)entriesNeeded[i].name, strExt) |
 		(entriesNeeded[i].promoted && (core_version >= entriesNeeded[i].promoted));
 		// sprintf(sbuf, "%-32s %d\n", entriesNeeded[i].name, entriesNeeded[i].supported);
-		sst1.str("");
-		sst1<<entriesNeeded[i].name<<" "<<entriesNeeded[i].supported;
-		log += sst1.str();
+		sst.str("");
+		sst<<"\n "<<entriesNeeded[i].name<<" "<<(int)entriesNeeded[i].supported;
+		log += sst.str();
 		supported &= entriesNeeded[i].supported;
 	}
 #endif	
-	if(core_version < 1.4) {
-		log += "OpenGL version too low, this thing may not work correctly!\n";
-	}
 	
 	if(supported != 1) return 0;
 
+	log += "\n Glsl shaders compiled";
 	fHasExtensions = initializeShaders(log);
 		
 	fHasDiagnosis = 1;
@@ -173,6 +178,7 @@ char GLSLBase::initializeShaders(std::string& log)
 	}
 
 	defaultShaderParameters();
+	log += "\n Glsl shaders compiled";
 	return 1;
 }
 
@@ -277,3 +283,5 @@ void GLSLBase::drawFrameBuffer()
 
 const float * GLSLBase::pixels() const
 { return fPixels; }
+}
+

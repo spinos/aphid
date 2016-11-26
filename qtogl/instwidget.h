@@ -5,6 +5,7 @@
 
 namespace aphid {
 class TriangleGeodesicSphere;
+class GlslInstancer;
 }
 
 class GLWidget : public aphid::Base3DView
@@ -25,6 +26,7 @@ signals:
     
 private:
     aphid::TriangleGeodesicSphere * m_sphere;
+    aphid::GlslInstancer * m_instancer;
     
 };
 
