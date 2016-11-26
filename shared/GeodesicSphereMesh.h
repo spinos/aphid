@@ -7,9 +7,27 @@
  *
  */
 
-#pragma once
+#ifndef APH_GEODESIC_SPHERE_MESH_H
+#define APH_GEODESIC_SPHERE_MESH_H
 #include <BaseMesh.h>
+#include "ATriangleMesh.h"
+
 namespace aphid {
+    
+class TriangleGeodesicSphere : public ATriangleMesh {
+     
+public:
+    TriangleGeodesicSphere(int level = 5);
+    virtual ~TriangleGeodesicSphere();
+    
+protected:
+    
+private:
+    void subdivide(int level, unsigned & currentVertex, unsigned & currentIndex, 
+        Vector3F * p, unsigned * idx, 
+        const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & d);
+    
+};
 
 class GeodesicSphereMesh : public BaseMesh {
 public:
@@ -21,3 +39,4 @@ private:
 };
 
 }
+#endif

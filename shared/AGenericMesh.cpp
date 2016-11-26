@@ -15,6 +15,7 @@ namespace aphid {
 AGenericMesh::AGenericMesh() 
 {
 	m_points = new BaseBuffer;
+	m_normals = new BaseBuffer;
 	m_indices = new BaseBuffer;
 	m_anchors = new BaseBuffer;
 	m_numPoints = m_numIndices = 0;
@@ -23,6 +24,7 @@ AGenericMesh::AGenericMesh()
 AGenericMesh::~AGenericMesh() 
 {
 	delete m_points;
+	delete m_normals;
 	delete m_indices;
 	delete m_anchors;
 }
@@ -45,12 +47,16 @@ const BoundingBox AGenericMesh::calculateBBox() const
 void AGenericMesh::createBuffer(unsigned np, unsigned ni)
 {
 	m_points->create(np * 12);
+	m_normals->create(np * 12);
 	m_indices->create(ni * 4);
 	m_anchors->create(np * 4);
 }
 
 Vector3F * AGenericMesh::points() const
 { return (Vector3F *)m_points->data(); }
+
+Vector3F * AGenericMesh::vertexNormals() const
+{ return (Vector3F *)m_normals->data(); }
 	
 unsigned * AGenericMesh::indices() const
 { return (unsigned *)m_indices->data(); }

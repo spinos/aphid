@@ -3,6 +3,10 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 
+namespace aphid {
+class TriangleGeodesicSphere;
+}
+
 class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
@@ -20,6 +24,7 @@ public slots:
 signals:
     
 private:
+    aphid::TriangleGeodesicSphere * m_sphere;
     
 };
 
