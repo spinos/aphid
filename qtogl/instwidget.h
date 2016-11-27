@@ -2,10 +2,11 @@
 #define INST_GLWIDGET_H
 #include <QGLWidget>
 #include <Base3DView.h>
+#include <AllMath.h>
 
 namespace aphid {
 class TriangleGeodesicSphere;
-class GlslInstancer;
+class GlslLegacyInstancer;
 }
 
 class GLWidget : public aphid::Base3DView
@@ -26,7 +27,9 @@ signals:
     
 private:
     aphid::TriangleGeodesicSphere * m_sphere;
-    aphid::GlslInstancer * m_instancer;
+    aphid::GlslLegacyInstancer * m_instancer;
+    aphid::Float4 * m_particles;
+    int m_numParticles;
     
 };
 

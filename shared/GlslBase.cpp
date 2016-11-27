@@ -32,9 +32,10 @@ glExtensionEntry entriesNeeded[] = {
 {"GL_ARB_texture_rectangle",      0.0, 0},
 };
 
-GLSLBase::GLSLBase() : 
-fHasDiagnosis(0), 
-fHasExtensions(0), 
+float GLSLBase::CoreVersion = 0.f;
+
+GLSLBase::GLSLBase() :  
+m_hasShaders(0), 
 fHasFBO(0),
 fPixels(0)
 {}
@@ -65,12 +66,11 @@ const char* GLSLBase::fragmentProgramSource() const
 "}";
 }
 
-char GLSLBase::diagnose(std::string& log)
+bool GLSLBase::diagnose(std::string& log)
 {
-	float core_version;
 	std::string sver((char *)glGetString(GL_VERSION));
 	std::stringstream sst(sver);
-	sst>>core_version;
+	sst>>CoreVersion;
 	
 	sst.str("");
 	sst<<"\n GL_Version "<<sver
@@ -78,7 +78,7 @@ char GLSLBase::diagnose(std::string& log)
 	
 	log = sst.str();
 	
-	if(core_version < 1.4) {
+	if(CoreVersion < 1.4) {
 		log += "OpenGL version too low, this thing may not work correctly!\n";
 	}
 	
@@ -101,7 +101,7 @@ char GLSLBase::diagnose(std::string& log)
 	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
 	for (int i = 0; i < j; i++) {
 		entriesNeeded[i].supported = gluCheckExtension((GLubyte*)entriesNeeded[i].name, strExt) |
-		(entriesNeeded[i].promoted && (core_version >= entriesNeeded[i].promoted));
+		(entriesNeeded[i].promoted && (CoreVersion >= entriesNeeded[i].promoted));
 		// sprintf(sbuf, "%-32s %d\n", entriesNeeded[i].name, entriesNeeded[i].supported);
 		sst.str("");
 		sst<<"\n "<<entriesNeeded[i].name<<" "<<(int)entriesNeeded[i].supported;
@@ -112,15 +112,17 @@ char GLSLBase::diagnose(std::string& log)
 	
 	if(supported != 1) return 0;
 
-	log += "\n Glsl shaders compiled";
-	fHasExtensions = initializeShaders(log);
-		
-	fHasDiagnosis = 1;
+	log += "\n OGL diagnosed";
+	
 	return 1;
 }
 
+bool GLSLBase::isDiagnosed() const 
+{ return CoreVersion > 0; }
+
 char GLSLBase::initializeShaders(std::string& log)
 {
+    log = "";
 	GLint vertex_compiled, fragment_compiled;
 	GLint linked;
 		
@@ -179,6 +181,7 @@ char GLSLBase::initializeShaders(std::string& log)
 
 	defaultShaderParameters();
 	log += "\n Glsl shaders compiled";
+	m_hasShaders = 1;
 	return 1;
 }
 
@@ -187,6 +190,9 @@ void GLSLBase::defaultShaderParameters()
 
 void GLSLBase::updateShaderParameters() const
 {}
+
+GLhandleARB * GLSLBase::program()
+{ return &program_object; }
 
 void GLSLBase::programBegin() const
 {
@@ -198,6 +204,9 @@ void GLSLBase::programEnd() const
 {
 	glUseProgramObjectARB(NULL);
 }
+
+char GLSLBase::hasFBO() const 
+{ return fHasFBO; }
 
 char GLSLBase::initializeFBO(std::string& log)
 {

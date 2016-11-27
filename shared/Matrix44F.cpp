@@ -45,7 +45,7 @@ Matrix44F::~Matrix44F() {}
 
 /*
  *   layout
- *
+ *   row-major
  *   0  1  2  3
  *   4  5  6  7
  *   8  9  10 11
@@ -58,6 +58,7 @@ Matrix44F::~Matrix44F() {}
  *   10 11 12 13
  *   20 21 22 23
  *   30 31 32 33
+ *   row3 is translation part
  */
 float Matrix44F::operator() (int i, int j)
 {
