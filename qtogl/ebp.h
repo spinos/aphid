@@ -10,6 +10,7 @@
 #define APH_EBP_H
 #include <AdaptiveGrid3.h>
 #include <Array.h>
+#include <boost/scoped_array.hpp>
 
 namespace aphid {
 
@@ -49,8 +50,10 @@ bool PrimInd<Tind, Tsrc, Tprim>::intersect(const BoundingBox & box)
 	while(!m_ind->end() ) {
 		
 		const Tprim * t = rsrc[m_ind->key() ];
+		if(box.intersect(t->calculateBBox() ) ) {
 		if(t-> template exactIntersect<BoundingBox >(box) )
 			return true;
+		}
 		
 		m_ind->next();
 	}
@@ -104,8 +107,13 @@ void EbpCell::setParentCell(EbpCell * x, const int & i)
 
 class EbpGrid : public sdb::AdaptiveGrid3<EbpCell, EbpNode, 10 > {
 
+	boost::scoped_array<Vector3F > m_pos;
+	int m_numParticles;
+	float m_repelDistance;
+	
 public:
-	EbpGrid()
+	EbpGrid() :
+	m_numParticles(0)
 	{}
 	virtual ~EbpGrid()
 	{}
@@ -139,10 +147,17 @@ public:
 			}
 			level++;
 		}
+		m_repelDistance = .67f / levelCellSize(level);
+		//std::cout<<"\n repel "<<levelCellSize(level);
 	}
 	
 	void insertNodeAtLevel(int level);
-	void extractPos(Vector3F * dst, const int & bufSize);
+	void cachePositions();
+	const Vector3F * positions() const;
+	
+	const int & numParticles() const;
+	
+	void update();
 			
 private:
 	template<typename Tf>
@@ -168,6 +183,14 @@ private:
 				subdivide(cell, cellCoord, i);
 		}
 	}
+	
+	void extractPos(Vector3F * dst);
+	void repelForce(Vector3F & frepel,
+						const EbpNode * node, 
+						const sdb::Coord4 & cellCood);
+	void repelForceInCell(Vector3F & frepel,
+					EbpCell * cell,
+					const EbpNode * node);
 	
 };
 
@@ -208,16 +231,20 @@ void EbpGrid::fillBox(const BoundingBox & b,
 	}
 	
 	calculateBBox();
-	std::cout<<"\n ebp grid bbx "<<boundingBox();
 }
 
 void EbpGrid::insertNodeAtLevel(int level)
 {
+	const float hgz = levelCellSize(level) * .49f;
 	begin();
 	while(!end() ) {
 		if(key().w == level) {
 			EbpNode * par = new EbpNode;
-			par->pos = cellCenter(key() );
+			
+			Vector3F r(RandomFn11(), RandomFn11(), RandomFn11() );
+			r.normalize();
+			
+			par->pos = cellCenter(key() ) + r * (hgz * RandomF01()) ;
 			par->index = -1;
 			value()->insert(0, par);
 			
@@ -226,7 +253,7 @@ void EbpGrid::insertNodeAtLevel(int level)
 	}
 }
 
-void EbpGrid::extractPos(Vector3F * dst, const int & bufSize)
+void EbpGrid::extractPos(Vector3F * dst)
 {
 	begin();
 	while(!end() ) {
@@ -235,12 +262,91 @@ void EbpGrid::extractPos(Vector3F * dst, const int & bufSize)
 		cell->begin();
 		while(!cell->end() ) {
 			
-			dst[cell->value()->index] = cell->value()->pos;
+			const EbpNode * node = cell->value();
+			dst[node->index] = node->pos;
 			cell->next();
 		}
 		
+		next();
+	}
+}
+
+void EbpGrid::cachePositions()
+{
+	const int n = countNodes();
+	if(m_numParticles < n)
+		m_pos.reset(new Vector3F[n]);
+	m_numParticles = n;
+	extractPos(m_pos.get());
+}
+
+const Vector3F * EbpGrid::positions() const
+{ return m_pos.get(); }
+
+const int & EbpGrid::numParticles() const
+{ return m_numParticles; }
+
+void EbpGrid::update()
+{
+	Vector3F frepel;
+	begin();
+	while(!end() ) {
+		
+		EbpCell * cell = value();
+		cell->begin();
+		while(!cell->end() ) {
+			
+			EbpNode * node = cell->value();
+			
+			frepel.set(0.f,0.f,0.f);
+			repelForce(frepel, node, key() );
+			repelForceInCell(frepel, cell, node);
+			
+			node->pos += frepel;
+			
+			cell->next();
+		}
 		
 		next();
+	}
+	
+	extractPos(m_pos.get());
+	
+	std::cout.flush();
+}
+
+/// search 27 cells for neighbors
+void EbpGrid::repelForce(Vector3F & frepel,
+						const EbpNode * node,
+						const sdb::Coord4 & cellCood)
+{
+	int i=0;
+	for(;i<26;++i) {
+		repelForceInCell(frepel, findNeighborCell(cellCood, i), node);
+	}
+}
+
+void EbpGrid::repelForceInCell(Vector3F & frepel,
+					EbpCell * cell,
+					const EbpNode * node)
+{
+	if(!cell) return;
+	Vector3F vd;
+	float l;
+	cell->begin();
+	while(!cell->end() ) {
+		
+		const EbpNode * nei = cell->value();
+		
+		if(nei->index != node->index) {
+			vd = node->pos - m_pos.get()[nei->index];
+			l = vd.length();
+			vd /= l;
+			l *= m_repelDistance;
+			frepel += vd * std::exp(-8.f*l*l);
+		}
+		
+		cell->next();
 	}
 }
 

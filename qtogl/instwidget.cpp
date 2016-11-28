@@ -16,10 +16,10 @@ GLWidget::GLWidget(QWidget *parent)
 	
 	std::vector<cvx::Triangle * > tris;
 	cvx::Triangle * ta = new cvx::Triangle;
-	ta->set(Vector3F(-8, -3, 8), Vector3F(8, 0, 1), Vector3F(-1, 12, -4) );
+	ta->set(Vector3F(-12, -2, 8), Vector3F(8, 0, 1), Vector3F(-1, 12, -4) );
 	tris.push_back(ta);
 	cvx::Triangle * tb = new cvx::Triangle;
-	tb->set(Vector3F(-1, 12, -4), Vector3F(8, 0, 1), Vector3F(10, 7, -13) );
+	tb->set(Vector3F(-1, 12, -4), Vector3F(8, 0, 1), Vector3F(5, 0, -20) );
 	tris.push_back(tb);
 	
 	sdb::Sequence<int> sels;
@@ -29,32 +29,32 @@ GLWidget::GLWidget(QWidget *parent)
 typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(&sels, &tris);
 	
-	float gz = 2.1f;
-	EbpGrid grid;
-	grid.fillBox(fintersect, 16.8);
-	grid.subdivideToLevel<TIntersect>(fintersect, 0, 3);
-	grid.insertNodeAtLevel(3);
-	std::cout<<"\n grid n cell "<<grid.numCellsAtLevel(3);
+	float gz = 1.5f;
+	m_grid = new EbpGrid;
+	m_grid->fillBox(fintersect, 12);
+	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	m_grid->insertNodeAtLevel(3);
+	m_grid->cachePositions();
+	int numParticles = m_grid->numParticles();
+	qDebug()<<" num instances "<<numParticles;
 	
-	m_numParticles = grid.countNodes();
-	qDebug()<<" num instances "<<m_numParticles;
+	m_grid->update();
 	
-	Vector3F * poss = new Vector3F[m_numParticles]; 
-	grid.extractPos(poss, m_numParticles);
-    
-    m_particles = new Float4[m_numParticles * 4];
-    
+	for(int i=0;i<20;++i) {
+		m_grid->update();    
+	}
+	
+    m_particles = new Float4[numParticles * 4];
+	const Vector3F * poss = m_grid->positions(); 
+	
 // column-major element[3] is translate  
-    for(int i=0;i<m_numParticles;++i) {
+    for(int i=0;i<numParticles;++i) {
 		int k = i*4;
             m_particles[k] = Float4(1 ,0,0,poss[i].x);
             m_particles[k+1] = Float4(0,1 ,0,poss[i].y);
             m_particles[k+2] = Float4(0,0,1 ,poss[i].z);
             m_particles[k+3] = Float4(0,0,1,1);
     }
-	
-	delete[] poss;
-
 }
 
 GLWidget::~GLWidget()
@@ -78,7 +78,8 @@ void GLWidget::clientDraw()
 
 	m_instancer->programBegin();
 	
-	for(int i=0;i<m_numParticles;++i) {
+	int numParticles = m_grid->numParticles();
+	for(int i=0;i<numParticles;++i) {
 	    const Float4 *d = &m_particles[i*4];
 	    glMultiTexCoord4fv(GL_TEXTURE1, (const float *)d);
 	    glMultiTexCoord4fv(GL_TEXTURE2, (const float *)&d[1]);
@@ -96,6 +97,18 @@ void GLWidget::clientDraw()
 	
 	m_instancer->programEnd();
 	
+#if 0
+	for(int i=0;i<20;++i) {
+		m_grid->update();    
+	}
+	
+	const Vector3F * poss = m_grid->positions(); 
+	
+    for(int i=0;i<numParticles;++i) {
+		int k = i*4;
+            m_particles[k].w = poss[i].x;
+            m_particles[k+1].w = poss[i].y;
+            m_particles[k+2].w = poss[i].z;
+    }
+#endif
 }
-
-

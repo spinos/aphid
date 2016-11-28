@@ -7,6 +7,7 @@
 namespace aphid {
 class TriangleGeodesicSphere;
 class GlslLegacyInstancer;
+class EbpGrid;
 }
 
 class GLWidget : public aphid::Base3DView
@@ -29,8 +30,8 @@ private:
     aphid::TriangleGeodesicSphere * m_sphere;
     aphid::GlslLegacyInstancer * m_instancer;
     aphid::Float4 * m_particles;
-    int m_numParticles;
-    
+    aphid::EbpGrid * m_grid;
+	
 };
 
 #endif
