@@ -129,6 +129,7 @@ add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 target_link_libraries (instdr ${APHID_MATH_LIBRARY})
 target_link_libraries (instdr ${APHID_GEOM_LIBRARY})
 target_link_libraries (instdr ${APHID_UI_LIBRARY})
+target_link_libraries (instdr ${APHID_SDB_LIBRARY})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 

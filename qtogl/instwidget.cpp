@@ -4,28 +4,57 @@
 #include "instwidget.h"
 #include <GeoDrawer.h>
 #include <GlslInstancer.h>
+#include "ebp.h"
 
 using namespace aphid;
 
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 {
-    m_sphere = new TriangleGeodesicSphere(7);
+	m_sphere = new TriangleGeodesicSphere(7);
     m_instancer = new GlslLegacyInstancer;
-    const int N = 25;
-    m_numParticles = N * N;
+	
+	std::vector<cvx::Triangle * > tris;
+	cvx::Triangle * ta = new cvx::Triangle;
+	ta->set(Vector3F(-8, -3, 8), Vector3F(8, 0, 1), Vector3F(-1, 12, -4) );
+	tris.push_back(ta);
+	cvx::Triangle * tb = new cvx::Triangle;
+	tb->set(Vector3F(-1, 12, -4), Vector3F(8, 0, 1), Vector3F(10, 7, -13) );
+	tris.push_back(tb);
+	
+	sdb::Sequence<int> sels;
+	sels.insert(0);
+	sels.insert(1);
+	
+typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
+	TIntersect fintersect(&sels, &tris);
+	
+	float gz = 2.1f;
+	EbpGrid grid;
+	grid.fillBox(fintersect, 16.8);
+	grid.subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	grid.insertNodeAtLevel(3);
+	std::cout<<"\n grid n cell "<<grid.numCellsAtLevel(3);
+	
+	m_numParticles = grid.countNodes();
+	qDebug()<<" num instances "<<m_numParticles;
+	
+	Vector3F * poss = new Vector3F[m_numParticles]; 
+	grid.extractPos(poss, m_numParticles);
+    
     m_particles = new Float4[m_numParticles * 4];
-    qDebug()<<" num instances "<<m_numParticles;
+    
 // column-major element[3] is translate  
-    for(int j=0;j<N;++j) {
-        for(int i=0;i<N;++i) {
-            int k = (j*N+i)*4;
-            m_particles[k] = Float4(1+RandomF01(),0,0,i*7);
-            m_particles[k+1] = Float4(0,1+RandomF01(),0,0.1*(N-j));
-            m_particles[k+2] = Float4(0,0,1+RandomF01(),(j-N)*7);
+    for(int i=0;i<m_numParticles;++i) {
+		int k = i*4;
+            m_particles[k] = Float4(1 ,0,0,poss[i].x);
+            m_particles[k+1] = Float4(0,1 ,0,poss[i].y);
+            m_particles[k+2] = Float4(0,0,1 ,poss[i].z);
             m_particles[k+3] = Float4(0,0,1,1);
-        }
     }
+	
+	delete[] poss;
+
 }
 
 GLWidget::~GLWidget()

@@ -68,6 +68,9 @@ public:
 						
 /// add child i of cell i 0:7
 	CellType * subdivide(const Coord4 & cellCoord, const int & i);
+	CellType * subdivide(CellType * cell,
+						const Coord4 & cellCoord,
+						const int & i);
 	
 	CellType * findCell(const Coord4 & c);
 	Coord4 parentCoord(const Coord4 & c) const;
@@ -98,6 +101,9 @@ public:
 	int countNodes();
 	const int & numNodes() const;
 	void resetNumNodes();
+	
+/// count cells at level
+	int numCellsAtLevel(int level);
 	
 protected:
 
@@ -211,6 +217,21 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::getCellBBox(BoundingBox & b,
 	b.setMin(cz * c.x, cz * c.y, cz * c.z);
 	b.setMax(cz * (c.x + gz), cz * (c.y + gz), cz * (c.z + gz) );
 	
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::subdivide(CellType * cell,
+												const Coord4 & cellCoord,
+												const int & i)
+{	
+	cell->setHasChild();
+	const float cz = m_cellSize[cellCoord.w + 1] * .5f;
+	CellType * childCell = addCell( cellCenter(cellCoord) + Vector3F(gdt::EightCellChildOffset[i][0],
+										gdt::EightCellChildOffset[i][1],
+										gdt::EightCellChildOffset[i][2]) * cz, cellCoord.w + 1 );
+	childCell->setParentCell(cell, i);
+	
+	return childCell;									
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
@@ -443,6 +464,19 @@ const int & AdaptiveGrid3<CellType, ValueType, MaxLevel>::numNodes() const
 template<typename CellType, typename ValueType, int MaxLevel>
 void AdaptiveGrid3<CellType, ValueType, MaxLevel>::resetNumNodes()
 { m_numNodes = 0; }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+int AdaptiveGrid3<CellType, ValueType, MaxLevel>::numCellsAtLevel(int level)
+{
+	int r = 0;
+	begin();
+	while(!end() ) {
+		if(key().w == level)
+			r++;
+		next();
+	}
+	return r;
+}
 
 }
 
