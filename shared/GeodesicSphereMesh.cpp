@@ -23,12 +23,12 @@ TriangleGeodesicSphere::TriangleGeodesicSphere(int level)
 	unsigned currentidx = 0;
 	unsigned currentver = 0;
 	
-	Vector3F a(0.f, 1.f, 0.f);
-	Vector3F b(-1.f, 0.f, 0.f);
-	Vector3F c(0.f, 0.f, 1.f);
-	Vector3F d(1.f, 0.f, 0.f);
-	Vector3F e(0.f, 0.f, -1.f);
-	Vector3F f(0.f, -1.f, 0.f);
+	const Vector3F a(0.f, 1.f, 0.f);
+	const Vector3F b(-1.f, 0.f, 0.f);
+	const Vector3F c(0.f, 0.f, 1.f);
+	const Vector3F d(1.f, 0.f, 0.f);
+	const Vector3F e(0.f, 0.f, -1.f);
+	const Vector3F f(0.f, -1.f, 0.f);
 	
 	subdivide(level, currentver, currentidx, p, idx, a, b, c, d);
 	subdivide(level, currentver, currentidx, p, idx, a, d, e, b);

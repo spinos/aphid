@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include <GeodesicSphereMesh.h>
+#include <geom/SuperQuadricGlyph.h>
 #include "instwidget.h"
 #include <GeoDrawer.h>
 #include <GlslInstancer.h>
@@ -11,6 +12,8 @@ using namespace aphid;
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 {
+	m_glyph = new SuperQuadricGlyph(8);
+	m_glyph->computePositions(2.5f, .5f);
 	m_sphere = new TriangleGeodesicSphere(7);
     m_instancer = new GlslLegacyInstancer;
 	
@@ -77,8 +80,14 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(.75f, .85f, .7f);
 
 	m_instancer->programBegin();
-	
+#if 0
+	m_particles[0].set(10.f, 0.f, 0.f, 0.f);	
+	m_particles[1].set(0.f, 10.f, 0.f, 0.f);	
+	m_particles[2].set(0.f, 0.f, 10.f, 0.f);	
+	int numParticles = 1;
+#else
 	int numParticles = m_grid->numParticles();
+#endif
 	for(int i=0;i<numParticles;++i) {
 	    const Float4 *d = &m_particles[i*4];
 	    glMultiTexCoord4fv(GL_TEXTURE1, (const float *)d);
@@ -87,9 +96,9 @@ void GLWidget::clientDraw()
 	    
 	    glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
-        glNormalPointer(GL_FLOAT, 0, (GLfloat*)m_sphere->vertexNormals());
-        glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_sphere->points());
-        glDrawElements(GL_TRIANGLES, m_sphere->numIndices(), GL_UNSIGNED_INT, m_sphere->indices());
+        glNormalPointer(GL_FLOAT, 0, (GLfloat*)m_glyph->vertexNormals());
+        glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_glyph->points());
+        glDrawElements(GL_TRIANGLES, m_glyph->numIndices(), GL_UNSIGNED_INT, m_glyph->indices());
         
         glDisableClientState(GL_NORMAL_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);

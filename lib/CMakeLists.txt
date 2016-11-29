@@ -121,6 +121,8 @@ ADD_LIBRARY (aphidMath ${LIB_TYP}
 ../shared/plots.cpp
 )
 
+SET (APHID_GEOM_PATH ../shared/geom)
+
 ADD_LIBRARY (aphidGeom ${LIB_TYP} 
 ../shared/SHelper.cpp 
 ../shared/AVerbose.cpp
@@ -171,6 +173,7 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/BiLinearInterpolate.cpp 
 ../shared/LinearInterpolate.cpp  
 ../shared/VertexDataGroup.cpp
+${APHID_GEOM_PATH}/SuperQuadricGlyph.cpp
 )
 
 ADD_LIBRARY (aphidH5 ${LIB_TYP}

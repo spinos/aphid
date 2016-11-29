@@ -40,7 +40,11 @@ inline float log2f( float n )
 }
 #endif
 
-#define PI 3.1415926535
+#define PI 3.14159265358979323846
+#define PIF 3.1415926535f
+#define HALFPIF 1.5707963268f
+#define TWOPIF 6.2831853072f
+#define ONEHALFPIF 4.71238898f
 #define EPSILON 10e-7
 #define GoldenRatio 1.618
 #define ReGoldenRatio 0.382

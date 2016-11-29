@@ -6,6 +6,7 @@
 
 namespace aphid {
 class TriangleGeodesicSphere;
+class SuperQuadricGlyph;
 class GlslLegacyInstancer;
 class EbpGrid;
 }
@@ -28,6 +29,7 @@ signals:
     
 private:
     aphid::TriangleGeodesicSphere * m_sphere;
+	aphid::SuperQuadricGlyph * m_glyph;
     aphid::GlslLegacyInstancer * m_instancer;
     aphid::Float4 * m_particles;
     aphid::EbpGrid * m_grid;
