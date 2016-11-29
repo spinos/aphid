@@ -10,7 +10,6 @@
 #include "DrawForest.h"
 #include <gl_heads.h>
 #include <CircleCurve.h>
-#include <DepthCull.h>
 #include <ExampVox.h>
 
 namespace aphid {
