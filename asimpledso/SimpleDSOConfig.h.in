@@ -1,3 +1,0 @@
-// the configured options and settings for Tutorial
-#define SimpleDSO_VERSION_MAJOR @SimpleDSO_VERSION_MAJOR@
-#define SimpleDSO_VERSION_MINOR @SimpleDSO_VERSION_MINOR@

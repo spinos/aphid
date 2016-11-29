@@ -1,1 +1,0 @@
-remove TEMPLATE #define inside cholmod_solve.c to compile in MSVC
