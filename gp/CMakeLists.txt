@@ -53,7 +53,7 @@ message ("f2c " ${F2C_LIBRARY})
 
 target_link_libraries (testkernel ${BLAS_LIBRARY})
 target_link_libraries (testkernel ${LAPACK_LIBRARY})
-##target_link_libraries (testkernel ${F2C_LIBRARY})
+target_link_libraries (testkernel ${F2C_LIBRARY})
 
 if (WIN32)
 add_definitions (-DOPENEXR_DLL)
@@ -184,7 +184,7 @@ set (Aphid_Geom_Library ~/aphid/lib/libaphidGeom.so)
 endif ()
 
 target_link_libraries (testkernel ${Aphid_Math_Library})
-target_link_libraries (testkernel ${Aphid_Img_Library})
+##target_link_libraries (testkernel ${Aphid_Img_Library})
 target_link_libraries (testkernel ${Aphid_Geom_Library})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)

@@ -214,13 +214,14 @@ find_package (OpenGL REQUIRED)
 target_link_libraries (foo ${OPENGL_LIBRARIES})
 
 if (WIN32)
-set (Aphid_Library D:/aphid/lib/aphidMath.lib
-D:/aphid/lib/aphidGeom.lib
-D:/aphid/lib/aphidH5.lib
-D:/aphid/lib/aphidSdb.lib
-D:/aphid/lib/aphidGraph.lib
-D:/aphid/lib/aphidKd.lib
-D:/aphid/lib/aphidUI.lib)
+SET (APHID_DIR "D:/aphid")
+SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
+    SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/aphidGeom.lib)
+    SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/aphidH5.lib)
+    SET (APHID_UI_LIBRARY ${APHID_DIR}/lib/aphidUI.lib)
+    SET (APHID_KD_LIBRARY ${APHID_DIR}/lib/aphidKd.lib)
+    SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/aphidSdb.lib)
+    SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/aphidGraph.lib)
 elseif (APPLE)
 set (Aphid_Library /users/jianzhang/aphid/lib/libaphidMath.a
 /users/jianzhang/aphid/lib/libaphidGeom.a
@@ -303,11 +304,11 @@ else()
 	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono zlib)	
 endif()
 
-message ("boost system is" ${Boost_SYSTEM_LIBRARY})
-message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
-message ("boost regex is" ${Boost_REGEX_LIBRARY})
+message ("boost system is    " ${Boost_SYSTEM_LIBRARY})
+message ("boost date_time is " ${Boost_DATE_TIME_LIBRARY})
+message ("boost regex is     " ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
-message ("boost thread is" ${Boost_THREAD_LIBRARY})
+message ("boost thread is    " ${Boost_THREAD_LIBRARY})
 
 target_link_libraries (foo ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (foo ${Boost_FILESYSTEM_LIBRARY})
@@ -430,6 +431,10 @@ vtgWidget.cpp
 vtgWindow.cpp
 vtgMain.cpp)
 
+if (WIN32)
+set (VTG_SOURCE_FILES ${VTG_SOURCE_FILES} "../shared/gExtension.cpp")
+endif ()
+
 add_executable (tetsubdiv ${VTG_HEADER_FILES} ${VTG_SOURCE_FILES})
 
 target_link_libraries (tetsubdiv Qt4::QtGui Qt4::QtOpenGL)
@@ -441,5 +446,6 @@ target_link_libraries (tetsubdiv ${APHID_SDB_LIBRARY})
 target_link_libraries (tetsubdiv ${APHID_GRAPH_LIBRARY})
 target_link_libraries (tetsubdiv ${APHID_UI_LIBRARY})
 target_link_libraries (tetsubdiv ${Boost_THREAD_LIBRARY})
+target_link_libraries (tetsubdiv ${Boost_DATE_TIME_LIBRARY})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)

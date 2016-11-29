@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
-set (CMAKE_BUILD_TYPE RELEASE)
+set (CMAKE_BUILD_TYPE Release)
 include_directories(../mallard ../shared ../lapl ../catmullclark 
 ../../ofl/opium ../fit ../powell ../../ofl/shared
 ../btree
@@ -81,11 +81,11 @@ endif()
 
 FIND_PACKAGE (Boost REQUIRED COMPONENTS system filesystem date_time regex)	
 	
-MESSAGE (" boost version is " ${Boost_VERSION})
-MESSAGE (" boost include is " ${Boost_INCLUDE_DIR} )
-MESSAGE (" boost system is " ${Boost_SYSTEM_LIBRARY})
-MESSAGE (" boost date_time is " ${Boost_DATE_TIME_LIBRARY})
-MESSAGE (" boost regex is " ${Boost_REGEX_LIBRARY})
+MESSAGE (" boost version is    " ${Boost_VERSION})
+MESSAGE (" boost include is    " ${Boost_INCLUDE_DIR} )
+MESSAGE (" boost system is     " ${Boost_SYSTEM_LIBRARY})
+MESSAGE (" boost date_time is  " ${Boost_DATE_TIME_LIBRARY})
+MESSAGE (" boost regex is      " ${Boost_REGEX_LIBRARY})
 MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 
 include_directories (${Boost_INCLUDE_DIR})
