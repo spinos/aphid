@@ -907,5 +907,11 @@ void ProxyViz::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & opti
 	finishGrow();
 }
 
+void ProxyViz::finishGroundSelection(GrowOption & option)
+{
+    ModifyForest::finishGroundSelection(option);
+    AHelper::Info<unsigned>("n active faces", numActiveGroundFaces() );
+}
+
 }
 //:~

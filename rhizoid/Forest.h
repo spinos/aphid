@@ -7,7 +7,8 @@
  *
  */
 
-#pragma once
+#ifndef APH_FOREST_H
+#define APH_FOREST_H
 #include "PlantSelection.h"
 #include <Quaternion.h>
 #include <Matrix44F.h>
@@ -17,20 +18,9 @@
 #include <IntersectionContext.h>
 #include <RayMarch.h>
 
-/* http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
- * qw= √(1 + m00 + m11 + m22) /2
- * qx = (m21 - m12)/( 4 *qw)
- * qy = (m02 - m20)/( 4 *qw)
- * qz = (m10 - m01)/( 4 *qw)
- */
 namespace aphid {
 
 class ExampVox;
-
-/*
- *  plant and ground data
- *
- */
 
 class Forest {
 
@@ -123,3 +113,4 @@ private:
 };
 
 }
+#endif

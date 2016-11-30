@@ -5,6 +5,12 @@
  *  Created by jian zhang on 1/29/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
+ * 
+ * http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+ * qw= sqrt(1 + m00 + m11 + m22) /2
+ * qx = (m21 - m12)/( 4 *qw)
+ * qy = (m02 - m20)/( 4 *qw)
+ * qz = (m10 - m01)/( 4 *qw)
  */
 
 #include "Forest.h"
@@ -23,6 +29,7 @@ Forest::Forest()
 	addPlantExample(defE);
 	
 	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
+	
 }
 
 Forest::~Forest() 

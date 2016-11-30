@@ -141,6 +141,8 @@ public:
 				next();
 			}
 			
+			std::cout<<"\n level"<<level<<" divd "<<dirty.size();
+			
 			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
 				subdivideCell(fintersect, *it);
@@ -148,7 +150,6 @@ public:
 			level++;
 		}
 		m_repelDistance = .67f / levelCellSize(level);
-		//std::cout<<"\n repel "<<levelCellSize(level);
 	}
 	
 	void insertNodeAtLevel(int level);

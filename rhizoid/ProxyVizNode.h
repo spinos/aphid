@@ -111,6 +111,7 @@ public:
     void deselectFaces();
     void deselectPlants();
     void injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option);
+    virtual void finishGroundSelection(GrowOption & option);
     
 private:
     void drawBrush(M3dView & view);

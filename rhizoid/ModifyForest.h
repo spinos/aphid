@@ -14,11 +14,13 @@ namespace aphid {
 
 class TriangleRaster;
 class BarycentricCoordinate;
+class EbpGrid;
 
 class ModifyForest : public Forest {
 	
 	TriangleRaster * m_raster;
 	BarycentricCoordinate * m_bary;
+	EbpGrid * m_ebpSampler;
 	PseudoNoise m_pnoise;
 	int m_seed;
 	float m_noiseWeight;
@@ -73,7 +75,8 @@ public:
 	void movePlant(GrowOption & option);
     void rotatePlant(GrowOption & option);
     void removeTypedPlants(int x);
-	
+	virtual void finishGroundSelection(GrowOption & option);
+    
 protected:
 	bool growOnGround(GrowOption & option);
 	

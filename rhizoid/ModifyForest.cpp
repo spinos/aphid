@@ -11,6 +11,7 @@
 #include <TriangleRaster.h>
 #include <BarycentricCoordinate.h>
 #include <ANoise3.h>
+#include <../qtogl/ebp.h>
 
 namespace aphid {
 
@@ -20,6 +21,7 @@ ModifyForest::ModifyForest()
 	m_bary = new BarycentricCoordinate;
 	m_seed = rand() % 999999; 
     m_noiseWeight = 0.f;
+    m_ebpSampler = new EbpGrid;
 }
 
 ModifyForest::~ModifyForest() 
@@ -751,6 +753,31 @@ void ModifyForest::removeTypedPlants(int x)
 	std::cout<<"\n remove "<<numActivePlants()<<" type"<<x<<" plants";
 	std::cout.flush();
 	clearSelected();
+}
+
+void ModifyForest::finishGroundSelection(GrowOption & option)
+{
+    if(numActiveGroundFaces() < 1) return;
+    const float gz = 2.f * (plantSize(option.m_plantId) + option.m_minMarginSize + option.m_maxMarginSize);
+    std::cout<<"\n sample ground by "<<gz;
+    
+typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Triangle > TIntersect;
+	TIntersect fintersect(activeGround()->primIndices(), 
+	                        &triangles() );
+	std::cout<<"\n bbox "<<fintersect;
+	m_ebpSampler->fillBox(fintersect, gz * 8.f);
+	m_ebpSampler->subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	m_ebpSampler->insertNodeAtLevel(3);
+	m_ebpSampler->cachePositions();
+	int numParticles = m_ebpSampler->numParticles();
+	std::cout<<"\n num cells "<<m_ebpSampler->numCellsAtLevel(3)
+	    <<"\n num instances "<<numParticles;
+	m_ebpSampler->calculateBBox();
+	std::cout<<"\n box sample "<<m_ebpSampler->boundingBox();
+	std::cout.flush();
+	for(int i=0;i<7;++i) {
+		m_ebpSampler->update();    
+	}
 }
 
 }
