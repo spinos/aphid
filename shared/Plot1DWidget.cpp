@@ -112,6 +112,20 @@ void Plot1DWidget::drawVerticalInterval(QPainter * pr) const
 
 void Plot1DWidget::drawPlot(const UniformPlot1D * plt, QPainter * pr)
 {
+	switch(plt->geomType() ) {
+		case UniformPlot1D::GtLine :
+			drawLine(plt, pr);
+			break;
+		case UniformPlot1D::GtMark :
+			drawMark(plt, pr);
+			break;
+		default:
+			break;
+	}
+}
+	
+void Plot1DWidget::drawLine(const UniformPlot1D * plt, QPainter * pr)
+{
 	const Vector3F & cf = plt->color(); 
 	QPen pn(QColor((int)(cf.x*255), (int)(cf.y*255), (int)(cf.z*255) ) );
 	pn.setWidth(1);
@@ -133,19 +147,59 @@ void Plot1DWidget::drawPlot(const UniformPlot1D * plt, QPainter * pr)
 	QPoint rb = rbCorner();
 	
 	const int & n = plt->numY() - 1;
-	const float h = 1.f / (float)n;
+
+	QPoint p0, p1;
 	
-	QPoint p0(lu.x(), RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
-								plt->y()[0] ) );
-	QPoint p1;
+/// linspace x
+	p0.setX(MixClamp01F<int>(lu.x(), rb.x(), plt->x()[0]) );
+	p0.setY(RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
+								plt->y()[0] ));
 	
 	int i=1;
 	for(;i<=n;++i) {
-		p1.setX(MixClamp01F<int>(lu.x(), rb.x(), h*i) );
+		p1.setX(MixClamp01F<int>(lu.x(), rb.x(), plt->x()[i]) );
 		p1.setY(RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
 								plt->y()[i] ));
 		pr->drawLine(p0, p1 );
 		p0 = p1;
+	}
+	
+}
+
+static const QPointF quadPoints[4] = {
+     QPointF(-4.0, -4.0),
+     QPointF( 4.0, -4.0),
+     QPointF( 4.0, 4.0),
+	 QPointF(-4.0, 4.0)
+ };
+
+void Plot1DWidget::drawMark(const UniformPlot1D * plt, QPainter * pr)
+{
+	const Vector3F & cf = plt->color(); 
+	QPen pn(QColor((int)(cf.x*255), (int)(cf.y*255), (int)(cf.z*255) ) );
+	pn.setWidth(1);
+	
+	pr->setPen(pn);
+	
+	QPoint lu = luCorner();
+	QPoint rb = rbCorner();
+	
+	const int & n = plt->numY();
+
+	QPoint p1;
+	
+	int i=0;
+	for(;i<n;++i) {
+/// actual x
+		p1.setX(RemapF<int>(lu.x(), rb.x(), m_hBound.x, m_hBound.y,
+								plt->x()[i] ));
+		p1.setY(RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
+								plt->y()[i] ));
+								
+		pr->translate(p1);
+		pr->drawPolygon(quadPoints, 4);
+		pr->translate(p1*(-1.0));
+
 	}
 	
 }

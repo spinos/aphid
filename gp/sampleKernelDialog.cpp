@@ -3,6 +3,8 @@
 #include "sampleKernelWidget.h"
 #include "gsamp.h"
 
+using namespace lfr;
+
 namespace aphid {
 namespace gpr {
 
@@ -10,11 +12,25 @@ SampleKernelDialog::SampleKernelDialog(const Covariance<float, RbfKernel<float> 
 										QWidget *parent)
     : QDialog(parent)
 {
-	    
-    qDebug()<<"\n sample gaussian distribution";
-    lfr::DenseMatrix<float> smps;
-    lfr::SvdSolver<float> svder;
+#if 0
+	DenseMatrix<float> A(covar.K().numRows(), covar.K().numCols() );
+	A.copy(covar.K() );
+/// K * K^-1 is I if add diag
+/// otherwise is symmetric
+	// A.addDiagonal(0.1f);
+	DenseMatrix<float> KKi(A.numRows(), A.numColumns() );
+	A.mult(KKi, covar.Kinv() );
+	 
+	std::cout<<"\n K*K^-1"<<KKi;
+#endif
+	 
+    DenseMatrix<float> smps;
+    SvdSolver<float> svder;
     gsamp(smps, covar.K(), 1, &svder);
+	
+#if 0
+	std::cout<<"\n K"<<covar.K();
+#endif
 	
 	m_wig = new SampleKernelWidget(smps, this);
 	QVBoxLayout *layout = new QVBoxLayout;
@@ -23,7 +39,7 @@ SampleKernelDialog::SampleKernelDialog(const Covariance<float, RbfKernel<float> 
 	layout->setSpacing(4);
 	
 	setLayout(layout);
-    setWindowTitle(tr("Sample Gaussian distribution") );
+    setWindowTitle(tr("Simple Interpolation") );
     resize(480, 480);
 }
 

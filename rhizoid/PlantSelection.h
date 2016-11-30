@@ -70,6 +70,7 @@ public:
     void setRadius(float x);
 	void setCenter(const Vector3F & center, const Vector3F & direction);
 	void select(SelectionContext::SelectMode mode);
+	void selectByType(int x);
     void deselect();
 	const unsigned & numSelected() const;
 	sdb::Array<int, PlantInstance> * data();
@@ -87,6 +88,7 @@ protected:
 
 private:
 	void select(const sdb::Coord3 & c, SelectionContext::SelectMode mode);
+	void selectByTypeInCell(sdb::Array<int, Plant> * cell, int x);
 	
 };
 

@@ -116,13 +116,15 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 		Vector3F & pos = samples[s];
 		
 /// limited by noise level
-		if(ANoise3::FractalF((const float *)&pos,
+		if(option.m_noiseLevel > 0.001f) {
+			if(ANoise3::FractalF((const float *)&pos,
 							(const float *)&option.m_noiseOrigin,
 							freq,
 							option.m_noiseLacunarity,
 							option.m_noiseOctave,
 							option.m_noiseGain ) < option.m_noiseLevel )
-			continue;
+				continue;
+		}
 		
 		if(limitRadius) {
 			if(pos.distanceTo(option.m_centerPoint) >  option.m_radius)
@@ -353,6 +355,73 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 			Matrix44F * mat = plantd->t1;
             mat->scaleBy(1.f + magnitude * wei * (1.f + getNoise() ) );
 		}
+		arr->next();
+	}
+}
+
+void ModifyForest::movePlant(GrowOption & option)
+{
+	Vector3F tv, pos, bindPos;
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		tv.x = getNoise2(-option.m_maxMarginSize, option.m_maxMarginSize);
+		tv.y = getNoise2(-option.m_maxMarginSize, option.m_maxMarginSize);
+		tv.z = getNoise2(-option.m_maxMarginSize, option.m_maxMarginSize);
+		
+		PlantData * plantd = arr->value()->m_reference->index;
+		pos = plantd->t1->getTranslation() + tv;
+		
+		bindToGround(plantd, pos, bindPos);
+			
+		plantd->t1->setTranslation(bindPos );
+		displacePlantInGrid(arr->value() );
+		
+		arr->next();
+	}
+}
+
+void ModifyForest::rotatePlant(GrowOption & option)
+{
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		Matrix44F * mat = arr->value()->m_reference->index->t1;
+		
+		Vector3F vx(mat->M(0, 0), mat->M(0, 1), mat->M(0, 2));
+		Vector3F vy(mat->M(1, 0), mat->M(1, 1), mat->M(1, 2));
+		Vector3F vz(mat->M(2, 0), mat->M(2, 1), mat->M(2, 2));
+		
+		float sx = vx.length();
+		float sy = vy.length();
+		float sz = vz.length();
+		
+		vx.normalize();
+		vx.x += getNoise2(-option.m_rotateNoise, option.m_rotateNoise);
+		vx.y += getNoise2(-option.m_rotateNoise, option.m_rotateNoise);
+		vx.z += getNoise2(-option.m_rotateNoise, option.m_rotateNoise);
+		vx.normalize();
+		
+		vz = vx.cross(vy);
+		vz.normalize();
+		
+		vy = vz.cross(vx);
+		vy.normalize();
+		
+		vx *= sx;
+		vy *= sy;
+		vz *= sz;
+		
+		*mat->m(0, 0) = vx.x;
+		*mat->m(0, 1) = vx.y;
+		*mat->m(0, 2) = vx.z;
+		*mat->m(1, 0) = vy.x;
+		*mat->m(1, 1) = vy.y;
+		*mat->m(1, 2) = vy.z;
+		*mat->m(2, 0) = vz.x;
+		*mat->m(2, 1) = vz.y;
+		*mat->m(2, 2) = vz.z;
+		
 		arr->next();
 	}
 }
@@ -669,6 +738,19 @@ void ModifyForest::erectActive()
 		
 		arr->next();
 	}
+}
+
+void ModifyForest::removeTypedPlants(int x)
+{
+	if(numPlantExamples() < 1) {
+		removeAllPlants();
+		return;
+	}
+	selection()->deselect();
+	selectTypedPlants(x);
+	std::cout<<"\n remove "<<numActivePlants()<<" type"<<x<<" plants";
+	std::cout.flush();
+	clearSelected();
 }
 
 }

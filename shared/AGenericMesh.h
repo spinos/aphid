@@ -28,6 +28,7 @@ public:
 	const unsigned numPoints() const;
 	const unsigned numIndices() const;
 	Vector3F * points() const;
+	Vector3F * vertexNormals() const;
 	unsigned * indices() const;
 	unsigned * anchors() const;
 	
@@ -45,6 +46,7 @@ protected:
 	void setNumIndices(unsigned n);
 private:
 	BaseBuffer * m_points;
+	BaseBuffer * m_normals;
 	BaseBuffer * m_indices;
 	BaseBuffer * m_anchors;
 	unsigned m_numPoints, m_numIndices;

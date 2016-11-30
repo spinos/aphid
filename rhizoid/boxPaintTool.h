@@ -39,13 +39,17 @@ class proxyPaintContext : public MPxContext
         opCreate = 11,
         opSelectByType= 12,
 		opRandResize = 13,
+		opRandMove = 14,
+		opRandRotate = 15,
+		opErect = 16,
         opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
         opExtract = 102,
         opDiscardFaceSelection = 103,
         opDiscardPlantSelection = 104,
-        opRotateToDir = 105
+        opRotateToDir = 105,
+		opCleanByType = 106
     };
     
     Operation m_currentOpt, mOpt;
@@ -92,6 +96,7 @@ public:
 	void setWriteCache(MString filename);
 	void setReadCache(MString filename);
 	void cleanup();
+	void clearByType();
 	char getSelectedViz();
 	void setMinCreateMargin(float x);
 	const float & minCreateMargin();
@@ -127,7 +132,8 @@ private:
 	void erase();
 	void move();
 	void extractSelected();
-	void erectSelected();
+	void rotateByStroke();
+	void erect();
 	void rotateAroundAxis(short axis);
 	void moveAlongAxis(short axis);
 	void startProcessSelect();
@@ -145,6 +151,8 @@ private:
     void discardPlantSelection();
     void injectSelectedTransform();
 	void resizeSelectedRandomly();
+	void moveRandomly();
+	void rotateRandomly();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

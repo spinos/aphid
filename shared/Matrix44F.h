@@ -3,7 +3,6 @@
 
 /*
  *  Matrix44F.h
- *  easymodel
  *
  *  Created by jian zhang on 10/30/11.
  *  Copyright 2011 __MyCompanyName__. All rights reserved.

@@ -10,6 +10,88 @@
 #include "GeodesicSphereMesh.h"
 #include <cmath>
 namespace aphid {
+    
+TriangleGeodesicSphere::TriangleGeodesicSphere(int level)
+{
+    unsigned np = (level + 1) * (level + 1) * 4;
+    unsigned nt = level * level * 2 * 4;
+    create(np, nt);
+    
+    Vector3F * p = points();
+	unsigned * idx = indices();
+	
+	unsigned currentidx = 0;
+	unsigned currentver = 0;
+	
+	Vector3F a(0.f, 1.f, 0.f);
+	Vector3F b(-1.f, 0.f, 0.f);
+	Vector3F c(0.f, 0.f, 1.f);
+	Vector3F d(1.f, 0.f, 0.f);
+	Vector3F e(0.f, 0.f, -1.f);
+	Vector3F f(0.f, -1.f, 0.f);
+	
+	subdivide(level, currentver, currentidx, p, idx, a, b, c, d);
+	subdivide(level, currentver, currentidx, p, idx, a, d, e, b);
+	subdivide(level, currentver, currentidx, p, idx, f, d, c, b);
+	subdivide(level, currentver, currentidx, p, idx, f, b, e, d);
+
+	for(unsigned i=0;i<np;++i) {
+	     p[i].normalize();
+	     vertexNormals()[i] = p[i];
+	}
+}
+
+TriangleGeodesicSphere::~TriangleGeodesicSphere()
+{}
+
+void TriangleGeodesicSphere::subdivide(int level, unsigned & currentVertex, unsigned & currentIndex, 
+        Vector3F * p, unsigned * idx, 
+        const Vector3F & a, const Vector3F & b, const Vector3F & c, const Vector3F & d)
+{
+    unsigned offset = currentVertex;
+    Vector3F delta_ab = (b - a) / (float)level;
+    Vector3F delta_bc = (c - b) / (float)level;
+    Vector3F delta_ad = (d - a) / (float)level;
+    for(int j = 0; j <= level; j++)
+    {
+        Vector3F row = a + delta_ab * (float)j;
+        p[currentVertex] = row;           
+        currentVertex++; 
+        for(int i = 1; i <= level; i++)
+        {
+            if(i <= j) row += delta_bc;
+            else row += delta_ad;
+            
+            p[currentVertex] = row;           
+            currentVertex++; 
+        }
+    }
+    
+    for(int j = 0; j < level; j++)
+    {
+        for(int i = 0; i < level; i++)
+        {
+            idx[currentIndex] = j * (level + 1) + i + offset;           
+            currentIndex++;
+            
+            idx[currentIndex] = (j + 1) * (level + 1) + i + offset;           
+            currentIndex++;
+			
+			idx[currentIndex] = (j + 1) * (level + 1) + (i + 1) + offset;           
+            currentIndex++;
+            
+            idx[currentIndex] = j * (level + 1) + i + offset;           
+            currentIndex++;
+            
+            idx[currentIndex] = (j + 1) * (level + 1) + (i + 1) + offset;           
+            currentIndex++;
+			
+			idx[currentIndex] = j * (level + 1) + i + 1 + offset;           
+            currentIndex++;
+        }
+    }
+}
+    
 
 GeodesicSphereMesh::GeodesicSphereMesh(unsigned level)
 {

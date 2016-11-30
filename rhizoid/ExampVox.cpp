@@ -46,7 +46,7 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, tri, bbox, &bf);
 	
 	BoundingBox tb = gtr.getBBox();
-	const float gz = tb.getLongestDistance() * 1.01f;
+	const float gz = tb.getLongestDistance() * 1.23f;
 	const Vector3F cent = tb.center();
 	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
 	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
@@ -58,7 +58,7 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	distFunc.addTree(&gtr);
 	distFunc.setDomainDistanceRange(gz * GDT_FAC_ONEOVER8 );
 	
-	msh.frontAdaptiveBuild<BDistanceFunction>(&distFunc, 3, 4, .47f );
+	msh.frontAdaptiveBuild<BDistanceFunction>(&distFunc, 3, 4, .3f);
 	msh.triangulateFront();
 	
 	std::cout.flush();

@@ -21,7 +21,7 @@ public:
     
     typedef lfr::DenseVector<TScalar> TVector;
     
-    RbfKernel(TScalar lengthScale, TScalar sigma=1.0);
+    RbfKernel(TScalar lengthScale, TScalar sigma=1);
     virtual ~RbfKernel();
     
     virtual TScalar operator()(const TScalar & d) const;

@@ -44,7 +44,7 @@ void vtgWidget::clientInit()
 
 void vtgWidget::clientDraw()
 {
-	updatePerspectiveView();
+	//updatePerspectiveView();
 	//getDrawer()->frustum(perspectiveView()->frustum() );
 	
 	getDrawer()->m_markerProfile.apply();

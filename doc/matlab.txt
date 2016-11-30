@@ -120,3 +120,7 @@ clf - clear current figure window
 https://www.mathworks.com/help/matlab/ref/repmat.html?searchHighlight=repmat
 
 repmat(A, n) returns an array containing n copies of A in the row and column dimensions
+
+http://www.math.jhu.edu/~shiffman/370/help/techdoc/ref/pinv.html
+
+B = pinv(A) pseudoinverse of A

@@ -22,7 +22,7 @@ public:
 	void save3(const MDagPathArray & entities);
 	void saveBoundle(const MDagPathArray & entities,
 	                const std::string & parentName);
-	void saveUDA(AnimIO& doc);
+	void saveUDANames(AnimIO& doc);
     void saveUserDefinedAttrib(AnimIO & doc, MObject & entity);
     void loadUserDefinedAttrib(AnimIO & doc, MObject & entity);
 	void saveH5(const std::map<std::string, MDagPath > & entities);

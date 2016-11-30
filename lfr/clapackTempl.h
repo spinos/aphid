@@ -83,6 +83,16 @@ template <typename T> int clapack_syrk(char *uplo, char *trans, integer n, integ
 	T alpha, T *a, integer lda, T beta, 
 	T *c__, integer ldc);
 	
+/// http://www.math.utah.edu/software/lapack/lapack-d/dgetrf.html
+/// LU factorization
+template <typename T> int clapack_getrf(integer m, integer n, T *a, integer lda, 
+	integer *ipiv, integer *info);
+	
+/// http://www.math.utah.edu/software/lapack/lapack-d/dgetri.html
+/// inverse using the LU factorization computed by getrf
+template <typename T> int clapack_getri(integer n, T *a, integer lda, 
+	integer *ipiv, T *work, integer *lwork, integer *info);
+	
 template <typename T> int clapack_sytrf(char *uplo, integer n, T *a, integer lda, 
 	integer *ipiv, T *work, integer *lwork, integer *info);
 	
@@ -249,6 +259,14 @@ template <> inline int clapack_syrk<float>(char *uplo, char *trans, integer n, i
 	c__, &ldc);
 }
 
+template <> inline int clapack_getrf<double>(integer m, integer n, double *a, integer lda, 
+	integer *ipiv, integer *info)
+{ return dgetrf_(&m, &n, a, &lda, ipiv, info); }
+
+template <> inline int clapack_getrf<float>(integer m, integer n, float *a, integer lda, 
+	integer *ipiv, integer *info)
+{ return sgetrf_(&m, &n, a, &lda, ipiv, info); }
+
 template <> inline int clapack_sytrf<double>(char *uplo, integer n, double *a, integer lda, 
 	integer *ipiv, double *work, integer *lwork, integer *info)
 {
@@ -260,6 +278,20 @@ template <> inline int clapack_sytrf<float>(char *uplo, integer n, float *a, int
 	integer *ipiv, float *work, integer *lwork, integer *info)
 {
 	return ssytrf_(uplo,  &n, a, &lda, 
+		ipiv, work, lwork, info);
+}
+
+template <> inline int clapack_getri<double>(integer n, double *a, integer lda, 
+	integer *ipiv, double *work, integer *lwork, integer *info)
+{
+	return dgetri_(&n, a, &lda,
+		ipiv, work, lwork, info);
+}
+
+template <> inline int clapack_getri<float>(integer n, float *a, integer lda, 
+	integer *ipiv, float *work, integer *lwork, integer *info)
+{
+	return sgetri_(&n, a, &lda,
 		ipiv, work, lwork, info);
 }
 

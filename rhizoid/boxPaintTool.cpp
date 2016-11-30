@@ -96,7 +96,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 			rotateAroundAxis(0);
 			break;
         case opRotateToDir :
-            erectSelected();
+            rotateByStroke();
             break;
 		case opSelectGround :
 			selectGround();
@@ -143,6 +143,16 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(short val)
 {
+	if(val == opRandMove) {
+		moveRandomly();
+		return;
+	}
+	
+	if(val == opRandRotate) {
+		rotateRandomly();
+		return;
+	}
+	
 	if(val == opRandResize) {
 		resizeSelectedRandomly();
 		return;
@@ -175,6 +185,16 @@ void proxyPaintContext::setOperation(short val)
 	
 	if(val ==opExtract) {
 		extractSelected();
+		return;
+	}
+	
+	if(val == opCleanByType) {
+		clearByType();
+		return;
+	}
+	
+	if(val == opErect) {
+		erect();
 		return;
 	}
 	
@@ -431,13 +451,6 @@ char proxyPaintContext::validateSelection()
 			
     if(!PtrViz) return 0;
 
-/// limit radius
-	float gz = PtrViz->gridSize();
-	if(getBrushRadius() < gz * .1f) {
-		AHelper::Info<float>("[INFO] truncate brush radius ", gz * .1f);
-		setBrushRadius(gz * .1f);
-	}
-	
 	PtrViz->setSelectionRadius(getBrushRadius() );
 	return 1;
 }
@@ -456,7 +469,14 @@ void proxyPaintContext::extractSelected()
 	PtrViz->extractActive(m_extractGroupCount);
 }
 
-void proxyPaintContext::erectSelected()
+void proxyPaintContext::erect()
+{
+	if(!PtrViz) return;
+	MGlobal::displayInfo("proxyPaint right up");
+	PtrViz->erectActive();
+}
+
+void proxyPaintContext::rotateByStroke()
 {
 	if(!PtrViz) return;
 	PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
@@ -547,6 +567,15 @@ void proxyPaintContext::cleanup()
 	if(!getSelectedViz())
 		return;
 	PtrViz->removeAllPlants();	
+}
+
+void proxyPaintContext::clearByType()
+{
+	MGlobal::displayInfo("proxyPaint set to clear by type");
+	if(!getSelectedViz())
+		return;
+	AHelper::Info<int>("active plant type", m_growOpt.m_plantId);
+	PtrViz->removeTypedPlants(m_growOpt.m_plantId);	
 }
 
 void proxyPaintContext::finishGrow()
@@ -666,8 +695,22 @@ void proxyPaintContext::injectSelectedTransform()
 void proxyPaintContext::resizeSelectedRandomly()
 {
 	if(!PtrViz) return;
-    
+	MGlobal::displayInfo("proxyPaintContext scale randomly");
 	PtrViz->scalePlant(m_growOpt);
+}
+
+void proxyPaintContext::moveRandomly()
+{
+	if(!PtrViz) return;
+	AHelper::Info<float>("proxyPaintContext move randomly by max margin ", m_growOpt.m_maxMarginSize);
+	PtrViz->movePlant(m_growOpt);
+}
+
+void proxyPaintContext::rotateRandomly()
+{
+	if(!PtrViz) return;
+	AHelper::Info<float>("proxyPaintContext move randomly by rotate noise ", m_growOpt.m_rotateNoise);
+	PtrViz->rotatePlant(m_growOpt);
 }
 
 void proxyPaintContext::setStickToGround(bool x)

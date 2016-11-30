@@ -1,3 +1,6 @@
 https://lvdmaaten.github.io/software/
 http://staffwww.dcs.shef.ac.uk/people/N.Lawrence/projects/motion/
 https://github.com/SheffieldML/GPmat/tree/master/gp
+http://stats.stackexchange.com/questions/30279/gaussian-process-regression-for-high-dimensional-data-sets
+http://www.gaussianprocess.org/gpml/code/matlab/doc/
+

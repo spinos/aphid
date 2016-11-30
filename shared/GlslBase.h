@@ -1,5 +1,5 @@
-#ifndef GLSLBASE_H
-#define GLSLBASE_H
+#ifndef APH_GLSLBASE_H
+#define APH_GLSLBASE_H
 
 /*
  *  glslBase.h
@@ -12,27 +12,30 @@
 
 #include <gl_heads.h>
 #include <string>
-
+namespace aphid {
+    
 class GLSLBase
 {
-	char fHasDiagnosis, fHasExtensions, fHasFBO;
+	char m_hasShaders, fHasFBO;
 	
+	GLhandleARB vertex_shader, fragment_shader, program_object;
 	GLuint fbo;
 	GLuint depthBuffer;
 	GLuint img;
-	
 	float *fPixels;
+	
+	static float CoreVersion;
 	
 public:
 	GLSLBase();
 	virtual ~GLSLBase();
 	
-	char diagnose(std::string& log);
+	static bool diagnose(std::string& log);
 	char initializeShaders(std::string& log);
 	char initializeFBO(std::string& log);
 	
-	char isDiagnosed() const { return fHasDiagnosis; }
-	char hasFBO() const { return fHasFBO; }
+	bool isDiagnosed() const;
+	char hasFBO() const;
 	
 	void programBegin() const;
 	void programEnd() const;
@@ -48,11 +51,14 @@ public:
 protected:	
 	virtual const char* vertexProgramSource() const;
 	virtual const char* fragmentProgramSource() const;
-	virtual void updateShaderParameters() const;
 	virtual void defaultShaderParameters();
-
+	virtual void updateShaderParameters() const;
+	
+	GLhandleARB * program();
+	
 	const float * pixels() const;
-	GLhandleARB vertex_shader, fragment_shader, program_object;
+	
 };
+}
 #endif        //  #ifndef GLSLBASE_H
 
