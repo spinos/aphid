@@ -9,7 +9,7 @@
 
 #ifndef APH_SUPER_QUADRIC_GLYPH_H
 #define APH_SUPER_QUADRIC_GLYPH_H
-#include <GeodesicSphereMesh.h>
+#include <geom/GeodesicSphereMesh.h>
 #include <boost/scoped_array.hpp>
 
 namespace aphid {

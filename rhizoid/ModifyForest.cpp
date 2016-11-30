@@ -10,6 +10,7 @@
 #include "ModifyForest.h"
 #include <TriangleRaster.h>
 #include <BarycentricCoordinate.h>
+#include <geom/ATriangleMesh.h>
 #include <ANoise3.h>
 #include <../qtogl/ebp.h>
 #include <ctime>

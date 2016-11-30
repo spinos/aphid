@@ -15,6 +15,7 @@
 
 #include "Forest.h"
 #include "ExampVox.h"
+#include <geom/ATriangleMesh.h>
 
 namespace aphid {
 

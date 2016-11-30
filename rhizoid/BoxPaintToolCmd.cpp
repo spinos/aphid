@@ -21,7 +21,7 @@
 #include "ProxyVizNode.h"
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
-#include <ATriangleMesh.h>
+#include <geom/ATriangleMesh.h>
 #include <PrincipalComponents.h>
 #include <KdEngine.h>
 #include <FieldTriangulation.h>

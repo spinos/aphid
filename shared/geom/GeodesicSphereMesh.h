@@ -10,7 +10,7 @@
 #ifndef APH_GEODESIC_SPHERE_MESH_H
 #define APH_GEODESIC_SPHERE_MESH_H
 #include <BaseMesh.h>
-#include "ATriangleMesh.h"
+#include <geom/ATriangleMesh.h>
 
 namespace aphid {
     

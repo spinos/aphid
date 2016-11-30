@@ -6,6 +6,7 @@
 #include <AHelper.h>
 #include <ExampData.h>
 #include <ExampVox.h>
+#include <geom/ATriangleMesh.h>
 #include <fstream> 
 
 namespace aphid {

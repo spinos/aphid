@@ -11,6 +11,7 @@
 #include <gl_heads.h>
 #include <CircleCurve.h>
 #include <ExampVox.h>
+#include <geom/ATriangleMesh.h>
 
 namespace aphid {
 

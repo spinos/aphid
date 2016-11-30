@@ -1,5 +1,5 @@
-#ifndef ATRIANGLEMESH_H
-#define ATRIANGLEMESH_H
+#ifndef APH_TRIANGLE_MESH_H
+#define APH_TRIANGLE_MESH_H
 
 /*
  *  ATriangleMesh.h
@@ -9,7 +9,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include "AGenericMesh.h"
+#include <geom/AGenericMesh.h>
 
 namespace aphid {
 
@@ -44,4 +44,4 @@ private:
 };
 
 }
-#endif        //  #ifndef ATRIANGLEMESH_H
+#endif        //  #ifndef APH_TRIANGLE_MESH_H

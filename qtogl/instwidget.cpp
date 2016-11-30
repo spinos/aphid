@@ -1,6 +1,5 @@
 #include <QtGui>
 #include <QtOpenGL>
-#include <GeodesicSphereMesh.h>
 #include <geom/SuperQuadricGlyph.h>
 #include "instwidget.h"
 #include <GeoDrawer.h>

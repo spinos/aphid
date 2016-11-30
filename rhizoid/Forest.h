@@ -14,13 +14,13 @@
 #include <Matrix44F.h>
 #include <KdEngine.h>
 #include <ConvexShape.h>
-#include <ATriangleMesh.h>
 #include <IntersectionContext.h>
 #include <RayMarch.h>
 
 namespace aphid {
 
 class ExampVox;
+class ATriangleMesh;
 
 class Forest {
 

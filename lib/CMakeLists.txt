@@ -134,20 +134,12 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/Primitive.cpp
 ../shared/BaseCurve.cpp
 ../shared/CircleCurve.cpp 
-../shared/BezierCurve.cpp
-../shared/AGenericMesh.cpp 
-../shared/ATriangleMesh.cpp
-../shared/ATetrahedronMesh.cpp
-../shared/ATetrahedronMeshGroup.cpp
+../shared/BezierCurve.cpp 
 ../shared/GjkIntersection.cpp
 ../shared/CurveGroup.cpp 
 ../shared/BaseBuffer.cpp
 ../shared/GeometryArray.cpp
 ../shared/Boundary.cpp
-../shared/AQuadMesh.cpp
-../shared/ATriangleMeshGroup.cpp
-../shared/APolygonalMesh.cpp
-../shared/APolygonalUV.cpp
 ../shared/Triangle.cpp
 ../shared/BarycentricCoordinate.cpp  
 ../shared/IntersectionContext.cpp 
@@ -155,7 +147,6 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/Segment.cpp
 ../shared/CurveBuilder.cpp 
 ../shared/BaseMesh.cpp
-../shared/GeodesicSphereMesh.cpp 
 ../shared/PyramidMesh.cpp 
 ../shared/CubeMesh.cpp 
 ../shared/DiscMesh.cpp
@@ -173,8 +164,16 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/BiLinearInterpolate.cpp 
 ../shared/LinearInterpolate.cpp  
 ../shared/VertexDataGroup.cpp
+${APHID_GEOM_PATH}/AQuadMesh.cpp
+${APHID_GEOM_PATH}/AGenericMesh.cpp
+${APHID_GEOM_PATH}/ATriangleMesh.cpp 
+${APHID_GEOM_PATH}/GeodesicSphereMesh.cpp 
 ${APHID_GEOM_PATH}/SuperQuadricGlyph.cpp
-)
+${APHID_GEOM_PATH}/ATriangleMeshGroup.cpp
+${APHID_GEOM_PATH}/ATetrahedronMesh.cpp
+${APHID_GEOM_PATH}/ATetrahedronMeshGroup.cpp
+${APHID_GEOM_PATH}/APolygonalMesh.cpp
+${APHID_GEOM_PATH}/APolygonalUV.cpp)
 
 ADD_LIBRARY (aphidH5 ${LIB_TYP}
     ../shared/HObject.cpp 
