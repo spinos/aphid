@@ -8,7 +8,7 @@
  */
 #ifndef APH_EBP_H
 #define APH_EBP_H
-#include <AdaptiveGrid3.h>
+#include <sdb/AdaptiveGrid3.h>
 #include <Array.h>
 #include <boost/scoped_array.hpp>
 
