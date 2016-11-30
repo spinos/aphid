@@ -775,7 +775,7 @@ typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Trian
 	m_ebpSampler->calculateBBox();
 	std::cout<<"\n box sample "<<m_ebpSampler->boundingBox();
 	std::cout.flush();
-	for(int i=0;i<7;++i) {
+	for(int i=0;i<20;++i) {
 		m_ebpSampler->update();    
 	}
 }

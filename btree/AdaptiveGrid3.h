@@ -21,6 +21,35 @@ namespace aphid {
 
 namespace sdb {
 
+class AdaptiveGridCell {
+
+public:
+typedef AdaptiveGridCell * SelfPtrType;
+
+private:
+	SelfPtrType m_parentCell;
+	SelfPtrType m_neighbors[26];
+	int m_numNeighbors;
+	int m_childI;
+	bool m_hasChild;
+	
+public:
+	AdaptiveGridCell();
+	virtual ~AdaptiveGridCell();
+	
+	const bool & hasChild() const;
+	
+	void setHasChild();
+	void setParentCell(SelfPtrType x, const int & i);
+	void clearNeighbors();
+	void addNeighbor(SelfPtrType x);
+	
+	const int & numNeighbors() const;
+	AdaptiveGridCell * neighbor(const int & x);
+	
+protected:
+};
+
 template<typename CellType, typename ValueType, int MaxLevel>
 class AdaptiveGrid3 : public Sequence<Coord4>
 {
@@ -105,8 +134,11 @@ public:
 /// count cells at level
 	int numCellsAtLevel(int level);
 	
+	virtual void clear();
+	
 protected:
-
+	void storeCellNeighbors();
+	
 private:
 	void countNodesIn(CellType * cell, int & c);
 	
@@ -476,6 +508,39 @@ int AdaptiveGrid3<CellType, ValueType, MaxLevel>::numCellsAtLevel(int level)
 		next();
 	}
 	return r;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::clear()
+{ 
+	std::cout<<"\n adaptive grid3 clear";
+	begin();
+	while(!end() ) {
+		value()->clear();
+		
+		next();
+	}
+	Sequence<Coord4>::clear();
+	m_numNodes = 0;
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::storeCellNeighbors()
+{
+	begin();
+	while(!end() ) {
+		
+		CellType * cell = value();
+		
+/// search 26 cells for neighbors
+		for(int i=0;i<26;++i) {
+			CellType * nei = findNeighborCell(key(), i);
+			if(nei)
+				cell->addNeighbor(nei);
+		}
+		
+		next();
+	}
 }
 
 }

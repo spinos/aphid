@@ -39,9 +39,17 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
 	m_grid->insertNodeAtLevel(3);
 	m_grid->cachePositions();
 	int numParticles = m_grid->numParticles();
-	qDebug()<<" num instances "<<numParticles;
+	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(3)
+			<<" num instances "<<numParticles;
 	
-	m_grid->update();
+
+	m_grid->fillBox(fintersect, 12);
+	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	m_grid->insertNodeAtLevel(3);
+	m_grid->cachePositions();
+	numParticles = m_grid->numParticles();
+	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(3)
+			<<" num instances "<<numParticles;
 	
 	for(int i=0;i<20;++i) {
 		m_grid->update();    

@@ -66,6 +66,8 @@ public:
 	EbpNode()
 	{}
 	
+	~EbpNode();
+	
 	Vector3F pos;
 	int index;
 	
@@ -73,47 +75,42 @@ private:
 
 };
 
-class EbpCell : public sdb::Array<int, EbpNode > {
+EbpNode::~EbpNode()
+{}
 
-	EbpCell * m_parentCell;
-	int m_childI;
-	bool m_hasChild;
+class EbpCell : public sdb::Array<int, EbpNode >, public sdb::AdaptiveGridCell {
+
+typedef sdb::Array<int, EbpNode > TParent;
 	
 public:
-	EbpCell(Entity * parent = NULL) :
-	m_hasChild(false),
-	m_parentCell(NULL)
-	{}
+	EbpCell(Entity * parent = NULL);
 	virtual ~EbpCell()
 	{}
 	
-	const bool & hasChild() const;
-	
-	void setHasChild();
-	void setParentCell(EbpCell * x, const int & i);
+	virtual void clear();
 	
 private:
 
 };
 
-const bool & EbpCell::hasChild() const
-{ return m_hasChild; }
+EbpCell::EbpCell(Entity * parent) :
+sdb::Array<int, EbpNode >(parent)
+{}
 
-void EbpCell::setHasChild()
-{ m_hasChild = true; }
-
-void EbpCell::setParentCell(EbpCell * x, const int & i)
-{ m_parentCell = x; m_childI = i; }
+void EbpCell::clear()
+{ 
+	TParent::clear();
+}
 
 class EbpGrid : public sdb::AdaptiveGrid3<EbpCell, EbpNode, 10 > {
 
+typedef sdb::AdaptiveGrid3<EbpCell, EbpNode, 10 > TParent;
+
 	boost::scoped_array<Vector3F > m_pos;
-	int m_numParticles;
 	float m_repelDistance;
 	
 public:
-	EbpGrid() :
-	m_numParticles(0)
+	EbpGrid()
 	{}
 	virtual ~EbpGrid()
 	{}
@@ -141,7 +138,7 @@ public:
 				next();
 			}
 			
-			std::cout<<"\n level"<<level<<" divd "<<dirty.size();
+			// std::cout<<"\n level"<<level<<" divd "<<dirty.size();
 			
 			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
@@ -150,6 +147,7 @@ public:
 			level++;
 		}
 		m_repelDistance = .67f / levelCellSize(level);
+		storeCellNeighbors();
 	}
 	
 	void insertNodeAtLevel(int level);
@@ -159,6 +157,7 @@ public:
 	const int & numParticles() const;
 	
 	void update();
+	virtual void clear(); 
 			
 private:
 	template<typename Tf>
@@ -187,8 +186,8 @@ private:
 	
 	void extractPos(Vector3F * dst);
 	void repelForce(Vector3F & frepel,
-						const EbpNode * node, 
-						const sdb::Coord4 & cellCood);
+					EbpCell * cell,
+					const EbpNode * node);
 	void repelForceInCell(Vector3F & frepel,
 					EbpCell * cell,
 					const EbpNode * node);
@@ -275,9 +274,7 @@ void EbpGrid::extractPos(Vector3F * dst)
 void EbpGrid::cachePositions()
 {
 	const int n = countNodes();
-	if(m_numParticles < n)
-		m_pos.reset(new Vector3F[n]);
-	m_numParticles = n;
+	m_pos.reset(new Vector3F[n]);
 	extractPos(m_pos.get());
 }
 
@@ -285,7 +282,7 @@ const Vector3F * EbpGrid::positions() const
 { return m_pos.get(); }
 
 const int & EbpGrid::numParticles() const
-{ return m_numParticles; }
+{ return numNodes(); }
 
 void EbpGrid::update()
 {
@@ -300,7 +297,7 @@ void EbpGrid::update()
 			EbpNode * node = cell->value();
 			
 			frepel.set(0.f,0.f,0.f);
-			repelForce(frepel, node, key() );
+			repelForce(frepel, cell, node);
 			repelForceInCell(frepel, cell, node);
 			
 			node->pos += frepel;
@@ -316,14 +313,14 @@ void EbpGrid::update()
 	std::cout.flush();
 }
 
-/// search 27 cells for neighbors
 void EbpGrid::repelForce(Vector3F & frepel,
-						const EbpNode * node,
-						const sdb::Coord4 & cellCood)
+						EbpCell * cell,
+						const EbpNode * node)
 {
 	int i=0;
-	for(;i<26;++i) {
-		repelForceInCell(frepel, findNeighborCell(cellCood, i), node);
+	for(;i<cell->numNeighbors();++i) {
+		repelForceInCell(frepel, 
+					static_cast<EbpCell *>(cell->neighbor(i) ), node);
 	}
 }
 
@@ -332,6 +329,7 @@ void EbpGrid::repelForceInCell(Vector3F & frepel,
 					const EbpNode * node)
 {
 	if(!cell) return;
+	
 	Vector3F vd;
 	float l;
 	cell->begin();
@@ -349,6 +347,11 @@ void EbpGrid::repelForceInCell(Vector3F & frepel,
 		
 		cell->next();
 	}
+}
+
+void EbpGrid::clear()
+{
+	TParent::clear(); 
 }
 
 }

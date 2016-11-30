@@ -254,6 +254,7 @@ ADD_LIBRARY (aphidSdb ${LIB_TYP}
 ../btree/Entity.cpp
 ../btree/BNode.cpp
 ../btree/MortonHash.cpp
+../shared/sdb/AdaptiveGrid3.cpp
 )
 
 ADD_LIBRARY (aphidKd ${LIB_TYP}
