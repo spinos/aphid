@@ -230,7 +230,7 @@ int AGraph<Tn, Te>::edgeIndex(const int & v1, const int & v2) const
 		return -1;
 	}
 	
-	const Tn & A = nodes()[v1];
+	// const Tn & A = nodes()[v1];
 	const int endj = edgeBegins()[v1+1];
 	int j = edgeBegins()[v1];
 	for(;j<endj;++j) {

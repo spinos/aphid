@@ -235,7 +235,7 @@ void EbpGrid::fillBox(const BoundingBox & b,
 
 void EbpGrid::insertNodeAtLevel(int level)
 {
-	const float hgz = levelCellSize(level) * .49f;
+	const float hgz = levelCellSize(level) * .493f;
 	begin();
 	while(!end() ) {
 		if(key().w == level) {

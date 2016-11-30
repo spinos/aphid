@@ -425,10 +425,10 @@ void BccCell3::findRedValueFrontBlue(BccNode3 * redN,
 {
 	int i = 0;
 	for(;i<4;++i) {
-		BccNode3 * b1 = blueNode(sdb::gdt::FourOppositeBluePair[i][0],
-								cellCoord, grid);
-		BccNode3 * b2 = blueNode(sdb::gdt::FourOppositeBluePair[i][1],
-									cellCoord, grid);
+		// BccNode3 * b1 = blueNode(sdb::gdt::FourOppositeBluePair[i][0],
+								//cellCoord, grid);
+		// BccNode3 * b2 = blueNode(sdb::gdt::FourOppositeBluePair[i][1],
+								//	cellCoord, grid);
 		//if(b1 && b2) {
 		//const IDistanceEdge * eg = fld->edge(b1->index, b2->index);
 		//if(eg) 

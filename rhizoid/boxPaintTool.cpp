@@ -605,13 +605,13 @@ char proxyPaintContext::getSelectedViz()
 }
 
 void proxyPaintContext::setMinCreateMargin(float x)
-{ m_growOpt.m_minMarginSize = x; }
+{ m_growOpt.m_minMarginSize = x > .1f ? x : .1f; }
 
 const float & proxyPaintContext::minCreateMargin()
 { return m_growOpt.m_minMarginSize; }
 
 void proxyPaintContext::setMaxCreateMargin(float x)
-{ m_growOpt.m_maxMarginSize = x; }
+{ m_growOpt.m_maxMarginSize = x > .1f ? x : .1f; }
 
 const float & proxyPaintContext::maxCreateMargin()
 { return m_growOpt.m_maxMarginSize; }

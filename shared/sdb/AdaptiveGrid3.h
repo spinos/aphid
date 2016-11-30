@@ -221,7 +221,7 @@ const Coord4 AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellCoordAtLevel(cons
 template<typename CellType, typename ValueType, int MaxLevel>
 void AdaptiveGrid3<CellType, ValueType, MaxLevel>::calculateBBox()
 {
-	const float & cz = m_cellSize[0];
+	// const float & cz = m_cellSize[0];
 	BoundingBox cb;
 	m_bbox.reset();
 	begin();

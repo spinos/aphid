@@ -12,6 +12,7 @@
 #include <BarycentricCoordinate.h>
 #include <ANoise3.h>
 #include <../qtogl/ebp.h>
+#include <ctime>
 
 namespace aphid {
 
@@ -22,6 +23,8 @@ ModifyForest::ModifyForest()
 	m_seed = rand() % 999999; 
     m_noiseWeight = 0.f;
     m_ebpSampler = new EbpGrid;
+	std::time_t tim(NULL);
+	srand((int)tim);
 }
 
 ModifyForest::~ModifyForest() 
@@ -31,21 +34,57 @@ ModifyForest::~ModifyForest()
 }
 
 void ModifyForest::setNoiseWeight(float x)
-{ m_noiseWeight = x; } 
+{ m_noiseWeight = x; }
 
 bool ModifyForest::growOnGround(GrowOption & option)
-{
-	if(numActiveGroundFaces() < 1) return false;
-	sdb::Sequence<int> * prims = activeGround()->primIndices();
-	const sdb::VectorArray<cvx::Triangle> & tris = triangles();
-	
-	prims->begin();
-	while(!prims->end() ) {
-	
-		const cvx::Triangle * t = tris[prims->key() ];
-		growOnFace(t->ind0(), t->ind1(), option);
+{	
+	if(!sampleGround(option))
+		return false;
 		
-		prims->next();
+	const int & nsamp = m_ebpSampler->numParticles();
+	const Vector3F * psamp = m_ebpSampler->positions();
+	const float ml = m_ebpSampler->levelCellSize(3);
+	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
+	const bool limitRadius = option.m_radius > 1e-3f;
+	const float sampleSize = plantSize(option.m_plantId) * .67f;
+	
+	GroundBind bind;
+	float scale;
+	Matrix44F tm;
+	Vector3F pog;
+	for(int i=0;i<nsamp;++i) {
+		if(!closestPointOnGround(pog, psamp[i], ml) ) 
+			continue;
+	
+		if(option.m_noiseLevel > 0.001f) {
+			if(ANoise3::FractalF((const float *)&pog,
+							(const float *)&option.m_noiseOrigin,
+							freq,
+							option.m_noiseLacunarity,
+							option.m_noiseOctave,
+							option.m_noiseGain ) < option.m_noiseLevel )
+				continue;
+		}
+		
+		if(limitRadius) {
+			if(pog.distanceTo(option.m_centerPoint) >  option.m_radius)
+				continue;
+		}
+		
+		randomSpaceAt(pog, option, tm, scale);
+		if(closeToOccupiedPosition(pog, option.m_minMarginSize + sampleSize * scale) ) 
+			continue;
+		
+		m_bary->project(pog);
+		m_bary->compute();
+		if(!m_bary->insideTriangle()) continue;
+		
+		bind.m_w0 = m_bary->getV(0);
+		bind.m_w1 = m_bary->getV(1);
+		bind.m_w2 = m_bary->getV(2);
+		
+		addPlant(tm, bind, option.m_plantId);
+
 	}
 	
     return true;
@@ -755,29 +794,32 @@ void ModifyForest::removeTypedPlants(int x)
 	clearSelected();
 }
 
-void ModifyForest::finishGroundSelection(GrowOption & option)
+bool ModifyForest::sampleGround(GrowOption & option)
 {
-    if(numActiveGroundFaces() < 1) return;
-    const float gz = 2.f * (plantSize(option.m_plantId) + option.m_minMarginSize + option.m_maxMarginSize);
-    std::cout<<"\n sample ground by "<<gz;
+	if(numActiveGroundFaces() < 1) {
+		std::cout<<"\n ModifyForest has no active ground to sample";
+		m_ebpSampler->clear();
+		return false;
+	}
+	
+	float gz = 2.f * plantSize(option.m_plantId) + option.m_maxMarginSize;
+    std::cout<<"\n flood ground w grid size "<<gz;
     
 typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(activeGround()->primIndices(), 
 	                        &triangles() );
-	std::cout<<"\n bbox "<<fintersect;
 	m_ebpSampler->fillBox(fintersect, gz * 8.f);
 	m_ebpSampler->subdivideToLevel<TIntersect>(fintersect, 0, 3);
 	m_ebpSampler->insertNodeAtLevel(3);
 	m_ebpSampler->cachePositions();
-	int numParticles = m_ebpSampler->numParticles();
-	std::cout<<"\n num cells "<<m_ebpSampler->numCellsAtLevel(3)
-	    <<"\n num instances "<<numParticles;
-	m_ebpSampler->calculateBBox();
-	std::cout<<"\n box sample "<<m_ebpSampler->boundingBox();
+	std::cout<<"\n flood box    "<<m_ebpSampler->boundingBox();
+	
+	for(int i=0;i<20;++i)
+		m_ebpSampler->update();
+	
+	std::cout<<"\n num sample "<<m_ebpSampler->numParticles();
 	std::cout.flush();
-	for(int i=0;i<20;++i) {
-		m_ebpSampler->update();    
-	}
+	return true;
 }
 
 }

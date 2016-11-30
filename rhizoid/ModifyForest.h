@@ -75,8 +75,7 @@ public:
 	void movePlant(GrowOption & option);
     void rotatePlant(GrowOption & option);
     void removeTypedPlants(int x);
-	virtual void finishGroundSelection(GrowOption & option);
-    
+	
 protected:
 	bool growOnGround(GrowOption & option);
 	
@@ -117,7 +116,8 @@ private:
 	bool calculateSelecedWeight(const Ray & ray);
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;
-    
+    bool sampleGround(GrowOption & option);
+	
 };
 
 }

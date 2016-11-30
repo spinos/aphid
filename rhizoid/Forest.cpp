@@ -300,23 +300,32 @@ void Forest::displacePlantInGrid(PlantInstance * inst )
 	if(moved) inst->m_reference = moved;
 }
 
-bool Forest::bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest)
+bool Forest::closestPointOnGround(Vector3F & dest,
+								const Vector3F & origin,
+								const float & maxDistance)
 {
-	m_closestPointTest.reset(origin, 1e7f);
+	m_closestPointTest.reset(origin, maxDistance);
 	KdEngine engine;
 	engine.closestToPoint<cvx::Triangle>(m_ground, &m_closestPointTest);
-	if(m_closestPointTest._hasResult) {
+	if(m_closestPointTest._hasResult)
+		dest = m_closestPointTest._hitPoint;
+	else 
+		dest = origin;
+	return m_closestPointTest._hasResult;
+}
+
+bool Forest::bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest)
+{
+	if(closestPointOnGround(dest, origin, 1e7f) ) {
 		bind->setGeomComp(m_closestPointTest._igeometry, 
 								m_closestPointTest._icomponent );
 		bind->m_w0 = m_closestPointTest._contributes[0];
 		bind->m_w1 = m_closestPointTest._contributes[1];
 		bind->m_w2 = m_closestPointTest._contributes[2];
-		
-		dest = m_closestPointTest._hitPoint;
+		return true;
 	}
-	else 
-		dest = origin;
-	return m_closestPointTest._hasResult;
+	
+	return false;
 }
 
 void Forest::bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest)

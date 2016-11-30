@@ -104,7 +104,10 @@ protected:
 	
 	const sdb::VectorArray<cvx::Triangle> & triangles() const;
 	int numPlantExamples() const;
-	
+	bool closestPointOnGround(Vector3F & dest,
+					const Vector3F & origin,
+					const float & maxDistance);
+					
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
