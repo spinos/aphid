@@ -127,9 +127,6 @@ endif()
 
 find_package (Qt4 REQUIRED)
 target_link_libraries (testkernel Qt4::QtGui)
-## message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
-## set (QT_USE_QTOPENGL ON)
-## target_link_libraries (testkernel Qt4::QtGui Qt4::QtOpenGL)
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -173,19 +170,69 @@ if (WIN32)
 set (Aphid_Math_Library "D:/aphid/lib/aphidMath.lib")
 set (Aphid_Img_Library "D:/aphid/lib/aphidImg.lib")
 set (Aphid_Geom_Library "D:/aphid/lib/aphidGeom.lib")
+set (Aphid_UI_Library "D:/aphid/lib/aphidUI.lib")
 elseif (APPLE)
 set (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a)
 set (Aphid_Img_Library /users/jianzhang/aphid/lib/libaphidImg.a)
 set (Aphid_Geom_Library /users/jianzhang/aphid/lib/libaphidGeom.a)
+set (Aphid_UI_Library /users/jianzhang/aphid/lib/libaphidUI.a)
 else()
     set (Aphid_Math_Library ~/aphid/lib/libaphidMath.so)
 set (Aphid_Img_Library ~/aphid/lib/libaphidImg.so)
 set (Aphid_Geom_Library ~/aphid/lib/libaphidGeom.so)
+set (Aphid_UI_Library ~/aphid/lib/libaphidUI.so)
 endif ()
 
 target_link_libraries (testkernel ${Aphid_Math_Library})
-##target_link_libraries (testkernel ${Aphid_Img_Library})
 target_link_libraries (testkernel ${Aphid_Geom_Library})
+
+set (TSHAPE_HEADER_FILES ../shared/BaseImageWidget.h
+../shared/Base3DView.h
+../shared/GlslBase.h
+../shared/GlslInstancer.h
+../lfr/clapackTempl.h
+../lfr/linearMath.h
+Covariance.h
+RbfKernel.h
+kernelWidget.h
+shapewidget.h
+shapewindow.h)
+
+set (TSHAPE_SOURCE_FILES ../shared/BaseImageWidget.cpp
+../shared/Base3DView.cpp
+../shared/GlslBase.cpp
+../shared/GlslInstancer.cpp
+../shared/Plot1DWidget.cpp
+../shared/Plot2DWidget.cpp
+kernelWidget.cpp
+shapewidget.cpp
+shapewindow.cpp
+shapemain.cpp)
+
+add_executable (testshape ${TSHAPE_HEADER_FILES} ${TSHAPE_SOURCE_FILES})
+
+target_link_libraries (testshape ${BLAS_LIBRARY})
+target_link_libraries (testshape ${LAPACK_LIBRARY})
+target_link_libraries (testshape ${F2C_LIBRARY})
+
+find_package (OpenGL REQUIRED)
+message ("opengl is " ${OPENGL_LIBRARIES})
+target_link_libraries (testshape ${OPENGL_LIBRARIES})
+
+message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
+set (QT_USE_QTOPENGL ON)
+target_link_libraries (testshape Qt4::QtGui Qt4::QtOpenGL)
+
+target_link_libraries (testshape ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (testshape ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (testshape ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (testshape ${Boost_REGEX_LIBRARY})
+target_link_libraries (testshape ${Boost_THREAD_LIBRARY})
+target_link_libraries (testshape ${Boost_CHRONO_LIBRARY})
+
+target_link_libraries (testshape ${Aphid_Math_Library})
+target_link_libraries (testshape ${Aphid_Geom_Library})
+target_link_libraries (testshape ${Aphid_UI_Library})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
