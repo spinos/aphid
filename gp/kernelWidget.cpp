@@ -8,6 +8,7 @@
  */
 #include <QtGui>
 #include "kernelWidget.h"
+#include <linearMath.h>
 using namespace lfr;
 
 namespace aphid {

@@ -7,6 +7,10 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 
+if(WIN32)
+add_definitions (-DWIN32)
+endif()
+
 include_directories ( ../shared ../kdtree ../lfr)
 
 set (TKERN_HEADER_FILES ../shared/BaseImageWidget.h
@@ -156,9 +160,6 @@ message ("boost regex " ${Boost_REGEX_LIBRARY})
 message ("boost filesystem " ${Boost_FILESYSTEM_LIBRARY})
 message ("boost thread " ${Boost_THREAD_LIBRARY})
 
-set (AttributeNoninline "__attribute__ ((noinline))")
-add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
-
 target_link_libraries (testkernel ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (testkernel ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testkernel ${Boost_DATE_TIME_LIBRARY})
@@ -186,6 +187,11 @@ endif ()
 target_link_libraries (testkernel ${Aphid_Math_Library})
 target_link_libraries (testkernel ${Aphid_Geom_Library})
 
+set (AttributeNoninline "__attribute__ ((noinline))")
+add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
+
+SET (EXECUTABLE_OUTPUT_PATH ../bin)
+
 set (TSHAPE_HEADER_FILES ../shared/BaseImageWidget.h
 ../shared/Base3DView.h
 ../shared/GlslBase.h
@@ -209,30 +215,36 @@ shapewidget.cpp
 shapewindow.cpp
 shapemain.cpp)
 
-add_executable (testshape ${TSHAPE_HEADER_FILES} ${TSHAPE_SOURCE_FILES})
+if (WIN32)
+set (TSHAPE_SOURCE_FILES ${TSHAPE_SOURCE_FILES} "../shared/gExtension.cpp")
+endif ()
 
-target_link_libraries (testshape ${BLAS_LIBRARY})
-target_link_libraries (testshape ${LAPACK_LIBRARY})
-target_link_libraries (testshape ${F2C_LIBRARY})
+add_executable (shapeinterp ${TSHAPE_HEADER_FILES} ${TSHAPE_SOURCE_FILES})
+
+if(WIN32)
+add_definitions (-DWIN32)
+endif()
 
 find_package (OpenGL REQUIRED)
 message ("opengl is " ${OPENGL_LIBRARIES})
-target_link_libraries (testshape ${OPENGL_LIBRARIES})
 
-message ("qt opengl " ${QT_QTOPENGL_LIBRARY})
+message ("qt opengl is " ${QT_QTOPENGL_LIBRARY})
 set (QT_USE_QTOPENGL ON)
-target_link_libraries (testshape Qt4::QtGui Qt4::QtOpenGL)
 
-target_link_libraries (testshape ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (testshape ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (testshape ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (testshape ${Boost_REGEX_LIBRARY})
-target_link_libraries (testshape ${Boost_THREAD_LIBRARY})
-target_link_libraries (testshape ${Boost_CHRONO_LIBRARY})
+target_link_libraries (shapeinterp Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (shapeinterp ${OPENGL_LIBRARIES})
 
-target_link_libraries (testshape ${Aphid_Math_Library})
-target_link_libraries (testshape ${Aphid_Geom_Library})
-target_link_libraries (testshape ${Aphid_UI_Library})
+target_link_libraries (shapeinterp ${Aphid_Math_Library})
+target_link_libraries (shapeinterp ${Aphid_Geom_Library})
+target_link_libraries (shapeinterp ${Aphid_UI_Library})
 
-SET (EXECUTABLE_OUTPUT_PATH ../bin)
+target_link_libraries (shapeinterp ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (shapeinterp ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (shapeinterp ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (shapeinterp ${Boost_REGEX_LIBRARY})
+target_link_libraries (shapeinterp ${Boost_THREAD_LIBRARY})
+target_link_libraries (shapeinterp ${Boost_CHRONO_LIBRARY})
 
+target_link_libraries (shapeinterp ${BLAS_LIBRARY})
+target_link_libraries (shapeinterp ${LAPACK_LIBRARY})
+target_link_libraries (shapeinterp ${F2C_LIBRARY})

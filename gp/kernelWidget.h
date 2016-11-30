@@ -10,7 +10,12 @@
 #define GPR_KERNEL_WIDGET_H
 
 #include <Plot2DWidget.h>
-#include <linearMath.h>
+
+/// forward declear cannot include linear math header here
+namespace lfr {
+template<typename T>
+class DenseMatrix;
+}
 
 namespace aphid {
 namespace gpr {
