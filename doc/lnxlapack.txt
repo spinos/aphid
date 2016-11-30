@@ -1,0 +1,6 @@
+how to build clapack on linux
+set library type to SHARED
+add line to F2CLIBS/libf2c/main.c
+
+int  MAIN__( ) {  return 0; }
+

@@ -20,7 +20,7 @@ sampleKernelDialog.h
 testKernelWindow.h)
 
 add_executable (testkernel ${TKERN_HEADER_FILES}
-../shared/BaseImagewidget.cpp
+../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 ../shared/Plot2DWidget.cpp
 kernelWidget.cpp
@@ -34,22 +34,26 @@ if(WIN32)
     set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
 	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
     set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
-    
-endif()
 
-if(APPLE)
+elseif(APPLE)
 	set(F2C_LIBRARY libf2c.a)
 	set(BLAS_LIBRARY libblas.a)
 	set(LAPACK_LIBRARY liblapack.a)
+else ()
+include_directories (/usr/local/include)
+	set(F2C_LIBRARY /usr/local/lib/libf2c.so)
+    set(BLAS_LIBRARY /usr/local/lib/libblas.so)
+	set(LAPACK_LIBRARY /usr/local/lib/liblapack.so)
+	
 endif()
 
 message ("blas " ${BLAS_LIBRARY})
 message ("lapack " ${LAPACK_LIBRARY})
 message ("f2c " ${F2C_LIBRARY})
 
-target_link_libraries (testkernel ${F2C_LIBRARY})
 target_link_libraries (testkernel ${BLAS_LIBRARY})
 target_link_libraries (testkernel ${LAPACK_LIBRARY})
+##target_link_libraries (testkernel ${F2C_LIBRARY})
 
 if (WIN32)
 add_definitions (-DOPENEXR_DLL)
@@ -58,31 +62,53 @@ set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
 "D:/usr/openexr21/lib/Iex-2_1.lib"
 "D:/usr/openexr21/lib/IlmImf-2_1.lib"
 "D:/usr/openexr21/lib/IlmThread-2_1.lib")
-else ()
+elseif (APPLE)
 set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)
 set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
  /Users/jianzhang/Library/openexr21/lib/libIex-2_1.dylib
  /Users/jianzhang/Library/openexr21/lib/libIlmImf-2_1.dylib
  /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
+else ()
+SET (ILMBASE_PACKAGE_PREFIX /usr/local)
+
+set (OpenEXR_INCLUDE_DIR ${ILMBASE_PACKAGE_PREFIX}/include)
+set (OpenEXR_Library ${ILMBASE_PACKAGE_PREFIX}/lib/libHalf.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIex-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libImath-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmImf-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmThread-2_2.so)
 endif ()
+
+message (" openexr inc is " ${OpenEXR_INCLUDE_DIR})
+message (" openexr lib is " ${OpenEXR_Library})
+
 include_directories (${OpenEXR_INCLUDE_DIR})
 target_link_libraries (testkernel ${OpenEXR_Library})
-message (" openexr " ${OpenEXR_Library})
 
 if (WIN32)
     set (ZLIB_INCLUDE_DIR d:/usr/zlib-1.2.5)
     set (ZLIB_LIBRARY d:/usr/zlib-1.2.5/zdll.lib)
+else ()
+    set (ZLIB_INCLUDE_DIR /usr/include)
+    set (ZLIB_LIBRARY /usr/lib64/libz.so)
 endif ()
 
-find_package (zlib REQUIRED)
+##find_package (zlib REQUIRED)
+
+message (" zlib is " ${ZLIB_LIBRARY})
 target_link_libraries (testkernel ${ZLIB_LIBRARIES})
 
 if (WIN32)
 set (HDF5_INCLUDE_DIR "D:/usr/hdf5/include")
 set (HDF5_LIBRARIES "D:/usr/hdf5/lib/hdf5.lib")
-else ()
+elseif (APPLE)
 set (HDF5_INCLUDE_DIR "/users/jianzhang/Library/hdf5/include")
 set (HDF5_LIBRARIES "/users/jianzhang/Library/hdf5/lib/libhdf5.dylib")
+else ()
+    SET (HDF5_VERSION "1.8.17")
+	SET (HDF5_INCLUDE_DIRS "~/Public/hdf5-1.8.17/include")
+        SET (HDF5_LIBRARIES "~/Public/hdf5-1.8.17/lib/libhdf5.so")
+##    FIND_PACKAGE (HDF5 REQUIRED)
 endif ()
 
 if (WIN32)
@@ -112,9 +138,8 @@ if(WIN32)
 	set (Boost_USE_MULTITHREADED ON)
 	include_directories ("D:/usr/boost_1_51_0")
 	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono)
-else()
-
-if(APPLE)
+	
+elseif (APPLE)
 	set (Boost_INCLUDE_DIR "/users/jianzhang/Library/boost_1_55_0")
 	set (Boost_LIBRARY_DIR "/users/jianzhang/Library/boost_1_55_0/stage/lib")
 	include_directories ("/users/jianzhang/Library/boost_1_55_0")
@@ -122,13 +147,9 @@ if(APPLE)
 	include_directories ("/usr/local/include")
 
 else()
-	set (Boost_INCLUDE_DIR "/home/OF3D/zhangjian/Documents/boost_1_51_0")
-	set (Boost_USE_STATIC_LIBS ON)
-	set (Boost_USE_MULTITHREADED ON)
-	include_directories ("/home/OF3D/zhangjian/Documents/boost_1_51_0")
+	SET (BOOST_ROOT "~/Public/boost_1_51_0")
+	include_directories (${BOOST_ROOT})
 	find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread)
-	
-endif()
 	
 endif()
 
@@ -151,13 +172,20 @@ target_link_libraries (testkernel ${Boost_CHRONO_LIBRARY})
 if (WIN32)
 set (Aphid_Math_Library "D:/aphid/lib/aphidMath.lib")
 set (Aphid_Img_Library "D:/aphid/lib/aphidImg.lib")
-else ()
+set (Aphid_Geom_Library "D:/aphid/lib/aphidGeom.lib")
+elseif (APPLE)
 set (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a)
 set (Aphid_Img_Library /users/jianzhang/aphid/lib/libaphidImg.a)
+set (Aphid_Geom_Library /users/jianzhang/aphid/lib/libaphidGeom.a)
+else()
+    set (Aphid_Math_Library ~/aphid/lib/libaphidMath.so)
+set (Aphid_Img_Library ~/aphid/lib/libaphidImg.so)
+set (Aphid_Geom_Library ~/aphid/lib/libaphidGeom.so)
 endif ()
 
 target_link_libraries (testkernel ${Aphid_Math_Library})
 target_link_libraries (testkernel ${Aphid_Img_Library})
+target_link_libraries (testkernel ${Aphid_Geom_Library})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
