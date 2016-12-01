@@ -44,6 +44,7 @@ public:
 		bool m_alongNormal;
 		bool m_multiGrow;
 		bool m_stickToGround;
+		float m_strokeMagnitude;
 		
 		GrowOption() {
 			m_upDirection = Vector3F::YAxis;
@@ -64,6 +65,15 @@ public:
 			m_noiseGain = .5f;
 			m_noiseOrigin.set(.4315f, .63987f, .6589f);
 		}
+		
+		void setStrokeMagnitude(const float & x) 
+		{
+			m_strokeMagnitude = x;
+			if(m_strokeMagnitude < -.5f)
+				m_strokeMagnitude = -.5f;
+			if(m_strokeMagnitude > .5f)
+				m_strokeMagnitude = .5f;
+		}
 	};
     
 	ModifyForest();
@@ -75,6 +85,7 @@ public:
 	void movePlant(GrowOption & option);
     void rotatePlant(GrowOption & option);
     void removeTypedPlants(int x);
+	void clearPlantOffset(GrowOption & option);
 	
 protected:
 	bool growOnGround(GrowOption & option);
@@ -95,6 +106,7 @@ protected:
 
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
+	void raiseOffsetAt(const Ray & ray, GrowOption & option);
     
 private:
 	void clearPlant(Plant * pl, int k);

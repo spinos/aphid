@@ -1,4 +1,3 @@
-#include <Vector2F.h>
 #include "proxyVizNode.h"
 #include <maya/MFnMatrixAttribute.h>
 #include <maya/MFnNumericAttribute.h>
@@ -16,10 +15,6 @@
 #include <EnvVar.h>
 #include <AHelper.h>
 #include <ExampVox.h>
-
-#ifdef WIN32
-#include <gExtension.h>
-#endif	
 
 namespace aphid {
 
@@ -47,7 +42,6 @@ MObject ProxyViz::aymultiplier;
 MObject ProxyViz::azmultiplier;
 MObject ProxyViz::agroupcount;
 MObject ProxyViz::ainstanceId;
-MObject ProxyViz::ainmesh;
 MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
 MObject ProxyViz::agroundMesh;
@@ -56,6 +50,7 @@ MObject ProxyViz::aplantTransformCache;
 MObject ProxyViz::aplantIdCache;
 MObject ProxyViz::aplantTriangleIdCache;
 MObject ProxyViz::aplantTriangleCoordCache;
+MObject ProxyViz::aplantOffsetCache;
 MObject ProxyViz::ainexamp;
 MObject ProxyViz::adisplayVox;
 MObject ProxyViz::acheckDepth;
@@ -104,13 +99,10 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		}
 		
 		if(_firstLoad) {
-/// internal cache has the priority
-			if(!loadInternal(block) ) {
-				MString filename =  block.inputValue( acachename ).asString();
-				if(filename != "") {
-					loadExternal(replaceEnvVar(filename).c_str());
-				}
-			}
+/// internal cache only, initializing from external cache is obsolete 
+			if(!loadInternal(block) )
+				std::cout<<"\n ERROR proxviz cannot load internal cache";
+
 			_firstLoad = 0;
 		}
         
@@ -442,12 +434,6 @@ MStatus ProxyViz::initialize()
 	numFn.setConnectable(true);
 	addAttribute( afocallength );
 	
-	ainmesh = typedAttrFn.create("displayMesh", "dspm", MFnMeshData::kMesh);
-	typedAttrFn.setStorable(false);
-	typedAttrFn.setWritable(true);
-	typedAttrFn.setConnectable(true);
-	addAttribute( ainmesh );
-	
 	aconvertPercentage = numFn.create( "convertPercentage", "cvp", MFnNumericData::kDouble );
 	numFn.setStorable(false);
 	numFn.setConnectable(true);
@@ -512,6 +498,14 @@ MStatus ProxyViz::initialize()
     typedAttrFn.setStorable(true);
 	addAttribute(aplantTriangleCoordCache);
 	
+	aplantOffsetCache = typedAttrFn.create( "offsetCachePlant",
+											"otcpl",
+											MFnData::kVectorArray,
+											vectArrayDataFn.object(),
+											&stat );
+    typedAttrFn.setStorable(true);
+	addAttribute(aplantOffsetCache);
+	
 	ainexamp = typedAttrFn.create("inExample", "ixmp", MFnData::kPlugin);
 	typedAttrFn.setStorable(false);
 	typedAttrFn.setConnectable(true);
@@ -549,7 +543,6 @@ MStatus ProxyViz::initialize()
 	attributeAffects(abboxmaxy, outValue);
 	attributeAffects(abboxminz, outValue);
 	attributeAffects(abboxmaxz, outValue);
-	attributeAffects(ainmesh, outValue);
 	attributeAffects(outPositionPP, outValue);
 	
 	return MS::kSuccess;
@@ -586,8 +579,9 @@ void ProxyViz::saveInternal()
 	MIntArray plantIds;
 	MIntArray plantTris;
 	MVectorArray plantCoords;
+	MVectorArray plantOffsets;
 	
-	savePlants(plantTms, plantIds, plantTris, plantCoords);
+	savePlants(plantTms, plantIds, plantTris, plantCoords, plantOffsets);
 	
 	MFnPointArrayData tmFn;
 	MObject otm = tmFn.create(plantTms);
@@ -608,6 +602,11 @@ void ProxyViz::saveInternal()
 	MObject ocrd = crdFn.create(plantCoords);
 	MPlug crdPlug(thisMObject(), aplantTriangleCoordCache);
 	crdPlug.setValue(ocrd);
+	
+	MFnVectorArrayData cotFn;
+	MObject ocot = cotFn.create(plantOffsets);
+	MPlug cotPlug(thisMObject(), aplantOffsetCache);
+	cotPlug.setValue(ocot);
 }
 
 bool ProxyViz::loadInternal(MDataBlock& block)
@@ -631,8 +630,12 @@ bool ProxyViz::loadInternal(MDataBlock& block)
 	MFnVectorArrayData crdFn(crdH.data());
 	MVectorArray plantCoords = crdFn.array();
 	if(plantCoords.length() < 1) return false;
+	
+	MDataHandle cotH = block.inputValue(aplantOffsetCache);
+	MFnVectorArrayData cotFn(cotH.data());
+	MVectorArray plantOffsets = cotFn.array();
 		
-	return loadPlants(plantTms, plantIds, plantTris, plantCoords);
+	return loadPlants(plantTms, plantIds, plantTris, plantCoords, plantOffsets);
 }
 
 void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar)
@@ -719,18 +722,6 @@ MMatrix ProxyViz::worldizeSpace(const MMatrix & s) const
 
 void ProxyViz::useActiveView()
 { _viewport = M3dView::active3dView(); }
-
-char ProxyViz::hasDisplayMesh() const
-{
-	MPlug pm(thisMObject(), ainmesh);
-	if(!pm.isConnected())
-		return 0;
-		
-	if(fDisplayMesh == MObject::kNullObj)
-		return 0;
-
-	return 1;
-}
 
 const MMatrix & ProxyViz::worldSpace() const
 { return _worldSpace; }
@@ -881,34 +872,6 @@ void ProxyViz::drawBrush(M3dView & view)
 	
     DrawForest::drawBrush();
 }
-
-void ProxyViz::deselectFaces()
-{
-    activeGround()->deselect();
-    MGlobal::displayInfo(" discard selected faces");
-    if(hasView() ) _viewport.refresh();
-}
-
-void ProxyViz::deselectPlants()
-{
-    selection()->deselect();
-    MGlobal::displayInfo(" discard selected plants");
-    if(hasView() ) _viewport.refresh();
-}
-
-void ProxyViz::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option)
-{
-    std::vector<Matrix44F>::const_iterator it = ms.begin();
-    for(;it!=ms.end();++it) {
-		if(!growAt(*it, option) )
-			AHelper::Info<Vector3F>("no grow at ", (*it).getTranslation());		
-	}
-		
-	finishGrow();
-}
-
-void ProxyViz::finishGroundSelection(GrowOption & option)
-{ AHelper::Info<unsigned>("ProxyViz sel n faces", numActiveGroundFaces() ); }
 
 }
 //:~

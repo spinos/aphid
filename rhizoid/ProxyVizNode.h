@@ -79,7 +79,6 @@ public:
 	static MObject azmultiplier;
 	static MObject agroupcount;
 	static MObject ainstanceId;
-	static MObject ainmesh;
 	static MObject aconvertPercentage;
 	static MObject astandinNames;
     static MObject agroundMesh;
@@ -88,6 +87,7 @@ public:
 	static MObject aplantIdCache;
 	static MObject aplantTriangleIdCache;
 	static MObject aplantTriangleCoordCache;
+	static MObject aplantOffsetCache;
 	static MObject ainexamp;
     static MObject adisplayVox;
 	static MObject acheckDepth;
@@ -108,16 +108,10 @@ public:
 	const MMatrix & worldSpace() const;
 	void setEnableCompute(bool x);
 	
-    void deselectFaces();
-    void deselectPlants();
-    void injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option);
-    virtual void finishGroundSelection(GrowOption & option);
-    
 private:
     void drawBrush(M3dView & view);
 	
 private:
-	char hasDisplayMesh() const;
 	std::string replaceEnvVar(const MString & filename) const;
     
 	void updateWorldSpace();

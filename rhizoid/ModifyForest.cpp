@@ -559,9 +559,10 @@ void ModifyForest::movePlant(const Ray & ray,
 		if(wei > 1e-3f) { 
             
 			PlantData * plantd = arr->value()->m_reference->index;
-			pos = plantd->t1->getTranslation() + disp * wei * (1.f + getNoise() );
-			
+			pos = plantd->t1->getTranslation() + disp * (wei * (1.f + getNoise() ) );
+			pos -= plantd->t2->m_offset;
 			bindToGround(plantd, pos, bindPos);
+			bindPos += plantd->t2->m_offset;
 			
 			plantd->t1->setTranslation(bindPos );
 			displacePlantInGrid(arr->value() );
@@ -606,7 +607,7 @@ void ModifyForest::rotatePlant(const Ray & ray,
             pside.normalize();
             pup.normalize();
             
-            pup += disp * wei * (1.f + getNoise() );
+            pup += disp * (wei * (1.f + getNoise() ) );
             pup.normalize();
             
             pfront = pside.cross(pup);
@@ -821,6 +822,56 @@ typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Trian
 	std::cout<<"\n num sample "<<m_ebpSampler->numParticles();
 	std::cout.flush();
 	return true;
+}
+
+void ModifyForest::clearPlantOffset(GrowOption & option)
+{
+	Vector3F pos;
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+
+		PlantData * plantd = arr->value()->m_reference->index;
+		pos = plantd->t1->getTranslation();
+		
+		GroundBind * bind = plantd->t2;
+		
+		pos -= bind->m_offset;
+		plantd->t1->setTranslation(pos );
+		
+		bind->m_offset.setZero();
+		
+		arr->next();
+	}
+}
+
+void ModifyForest::raiseOffsetAt(const Ray & ray, 
+								GrowOption & option)
+{
+    if(!calculateSelecedWeight(ray)) return;
+    
+	const Vector3F offsetVec = selectionNormal() * (option.m_strokeMagnitude * plantSize(option.m_plantId) * 10.f);
+    std::cout<<"\n offset vec "<<offsetVec;
+	Vector3F pos, deltaPos;
+    sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		float wei = arr->value()->m_weight;
+		if(wei > 1e-4f) { 
+			deltaPos = offsetVec * (wei * (1.f + getNoise() ) );
+            
+			PlantData * plantd = arr->value()->m_reference->index;
+			pos = plantd->t1->getTranslation();
+			pos += deltaPos;
+			
+			plantd->t1->setTranslation(pos);
+		
+			GroundBind * bind = plantd->t2;
+			bind->m_offset += deltaPos;
+			
+		}
+		arr->next();
+	}
 }
 
 }

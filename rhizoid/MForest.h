@@ -40,7 +40,13 @@ public:
 	
 	void loadExternal(const char* filename);
 	void saveExternal(const char* filename);
-	
+	void deselectFaces();
+    void deselectPlants();
+    void injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option);
+	void offsetAlongNormal(const MPoint & origin, const MPoint & dest,
+					GrowOption & option);
+    virtual void finishGroundSelection(GrowOption & option);
+    
 protected:
     bool updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
 	void drawSolidMesh(MItMeshPolygon & iter);
@@ -49,11 +55,13 @@ protected:
 	void savePlants(MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
-					MVectorArray & plantCoords);
+					MVectorArray & plantCoords,
+					MVectorArray & plantOffsets);
 	bool loadPlants(const MPointArray & plantTms, 
 					const MIntArray & plantIds,
 					const MIntArray & plantTris,
-					const MVectorArray & plantCoords);
+					const MVectorArray & plantCoords,
+					MVectorArray & plantOffsets);
 	void bakePass(const char* filename, 
 					const MVectorArray & position, 
 					const MVectorArray & scale, 
@@ -74,7 +82,8 @@ private:
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
-					MVectorArray & plantCoords);
+					MVectorArray & plantCoords,
+					MVectorArray & plantOffsets);
 	void getDataInCell(sdb::Array<int, Plant> *cell, 
 					float * data, 
 					int * typd,

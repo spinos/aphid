@@ -107,6 +107,12 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
         case opResizeBrush :
             scaleBrush();
             break;
+		case opRaise :
+            raiseOffset();
+            break;
+		case opDepress :
+            depressOffset();
+            break;
 		default:
 			;
 	}
@@ -144,6 +150,11 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(short val)
 {
+	if(val == opClearOffset) {
+		clearOffset();
+		return;
+	}
+	
 	if(val == opRandMove) {
 		moveRandomly();
 		return;
@@ -254,6 +265,14 @@ void proxyPaintContext::setOperation(short val)
         case opRotateToDir:
 			opstr="rotate to direction";
             mOpt = opRotateToDir;
+			break;
+		case opRaise:
+			opstr="raise offset";
+            mOpt = opRaise;
+			break;
+		case opDepress:
+			opstr="depress offset";
+            mOpt = opDepress;
 			break;
 		default:
 			;
@@ -593,6 +612,28 @@ void proxyPaintContext::replace()
 	PtrViz->replacePlant(fromNear, fromFar, m_growOpt);
 }
 
+void proxyPaintContext::raiseOffset()
+{
+	if(!PtrViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+	float mag = last_x - start_x - last_y + start_y;
+	mag /= 48;
+	m_growOpt.setStrokeMagnitude(mag);
+	PtrViz->offsetAlongNormal(fromNear, fromFar, m_growOpt);
+}
+
+void proxyPaintContext::depressOffset()
+{
+	if(!PtrViz) return;
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+	float mag = last_x - start_x - last_y + start_y;
+	mag /= 48;
+	m_growOpt.setStrokeMagnitude(mag * -1.f);
+	PtrViz->offsetAlongNormal(fromNear, fromFar, m_growOpt);
+}
+
 char proxyPaintContext::getSelectedViz()
 {
 	MSelectionList slist;
@@ -712,6 +753,13 @@ void proxyPaintContext::rotateRandomly()
 	if(!PtrViz) return;
 	AHelper::Info<float>("proxyPaintContext move randomly by rotate noise ", m_growOpt.m_rotateNoise);
 	PtrViz->rotatePlant(m_growOpt);
+}
+
+void proxyPaintContext::clearOffset()
+{
+	if(!PtrViz) return;
+	AHelper::Info<Vector3F >("proxyPaintContext reset offset ", Vector3F::Zero);
+	PtrViz->clearPlantOffset(m_growOpt);
 }
 
 void proxyPaintContext::setStickToGround(bool x)

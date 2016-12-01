@@ -17,6 +17,9 @@ namespace aphid {
 struct GroundBind {
 	float m_w0, m_w1, m_w2;
 	int m_geomComp;
+/// real_pos <- surface_pos + vec_offset
+	Vector3F m_offset;
+	
 	void setGeomComp(int geom, int comp)
 	{
 		m_geomComp = ((geom<<22) | comp);

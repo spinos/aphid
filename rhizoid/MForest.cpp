@@ -270,13 +270,14 @@ void MForest::adjustRotation(const MPoint & origin, const MPoint & dest,
 void MForest::savePlants(MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
-					MVectorArray & plantCoords)
+					MVectorArray & plantCoords,
+					MVectorArray & plantOffsets)
 {
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		saveCell(g->value(), plantTms, plantIds,
-					plantTris, plantCoords);
+					plantTris, plantCoords, plantOffsets);
 		g->next();
 	}
 	AHelper::Info<unsigned>(" MForest saved num plants", plantIds.length() );
@@ -286,7 +287,8 @@ void MForest::saveCell(sdb::Array<int, Plant> *cell,
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
-					MVectorArray & plantCoords)
+					MVectorArray & plantCoords,
+					MVectorArray & plantOffsets)
 {
 	cell->begin();
 	while(!cell->end() ) {
@@ -300,7 +302,10 @@ void MForest::saveCell(sdb::Array<int, Plant> *cell,
 		GroundBind * bind = d->t2;
 		plantTris.append(bind->m_geomComp);
 		plantCoords.append(MVector(bind->m_w0, bind->m_w1, bind->m_w2) );
-		
+		plantOffsets.append(MVector(bind->m_offset.x, 
+									bind->m_offset.y, 
+									bind->m_offset.z));
+									
 		int * pltyp = d->t3;
 		plantIds.append(*pltyp);
 		
@@ -311,7 +316,8 @@ void MForest::saveCell(sdb::Array<int, Plant> *cell,
 bool MForest::loadPlants(const MPointArray & plantTms, 
 					const MIntArray & plantIds,
 					const MIntArray & plantTris,
-					const MVectorArray & plantCoords)
+					const MVectorArray & plantCoords,
+					MVectorArray & plantOffsets)
 {
 	const unsigned npl = plantIds.length();
 	if(npl<1) return false;
@@ -320,11 +326,18 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 	const unsigned ntm = plantTms.length();
 	if(ntm != npl * 4) return false;
 	
+	unsigned i;
+	if(plantOffsets.length() != npl) {
+		AHelper::Info<Vector3F >("reset all plant offset", Vector3F::Zero);
+		plantOffsets.setLength(npl);
+		for(i=0;i<npl;++i)
+			plantOffsets[i]=MVector(0,0,0);
+	}
+	
 	Matrix44F tms;
 	GroundBind bind;
 	int typId;
-	unsigned i =0;
-	for(;i<npl;++i) {
+	for(i=0;i<npl;++i) {
 		const MPoint & c0 = plantTms[i*4];
 		*tms.m(0, 0) = c0.x;
 		*tms.m(0, 1) = c0.y;
@@ -347,6 +360,8 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 		bind.m_w0 = crd.x;
 		bind.m_w1 = crd.y;
 		bind.m_w2 = crd.z;
+		const MVector & cot = plantOffsets[i]; 
+		bind.m_offset.set(cot.x, cot.y, cot.z);
 		addPlant(tms, bind, typId);
 	}
 	finishGrow();
@@ -679,6 +694,41 @@ void MForest::updateExamples(MArrayDataHandle & dataArray)
 		}
 		dataArray.next();
 	}
+}
+
+void MForest::deselectFaces()
+{
+    activeGround()->deselect();
+    MGlobal::displayInfo(" discard selected faces");
+}
+
+void MForest::deselectPlants()
+{
+    selection()->deselect();
+    MGlobal::displayInfo(" discard selected plants");
+}
+
+void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option)
+{
+    std::vector<Matrix44F>::const_iterator it = ms.begin();
+    for(;it!=ms.end();++it) {
+		if(!growAt(*it, option) )
+			AHelper::Info<Vector3F>("no grow at ", (*it).getTranslation());		
+	}
+		
+	finishGrow();
+}
+
+void MForest::finishGroundSelection(GrowOption & option)
+{ AHelper::Info<unsigned>("ProxyViz sel n faces", numActiveGroundFaces() ); }
+
+void MForest::offsetAlongNormal(const MPoint & origin, const MPoint & dest,
+					GrowOption & option)
+{
+	Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F b(dest.x, dest.y, dest.z);
+	Ray r(a, b);
+	raiseOffsetAt(r, option);
 }
 
 }

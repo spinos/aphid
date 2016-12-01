@@ -288,6 +288,7 @@ int Forest::getBindPoint(Vector3F & pos, GroundBind * bind)
 	pos = pnt[tri[0]] * bind->m_w0
 			+ pnt[tri[1]] * bind->m_w1
 			+ pnt[tri[2]] * bind->m_w2;
+	pos += bind->m_offset;
 	return 1;
 }
 
