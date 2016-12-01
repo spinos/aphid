@@ -398,13 +398,12 @@ void Forest::addPlant(const Matrix44F & tm,
 	
 	const Vector3F & at = tm.getTranslation();
 	
-	std::cout<<" add sample"<<at;
-	
+	try {
 	m_grid->insert((const float *)&at, p );
+	} catch (const std::string& ex) {
+		std::cout<<"\n forest add plant caught "<<ex;
+	}
     m_activePlants->select(p);
-    
-    std::cout<<" added";
-    std::cout.flush();
 }
 
 const float & Forest::selectionRadius() const

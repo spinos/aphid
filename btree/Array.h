@@ -8,6 +8,8 @@ template<typename KeyType, typename ValueType>
 class Array : public Sequence<KeyType>
 {
 public:
+	typedef Single<ValueType> SingleType;
+	
     Array(Entity * parent = NULL) : Sequence<KeyType>(parent) {}
 	
 	virtual ~Array() {}
@@ -15,21 +17,20 @@ public:
     void insert(const KeyType & x, ValueType * v) {
 		Pair<KeyType, Entity> * p = Sequence<KeyType>::insert(x);
 		if(!p) {
-		    std::cout<<"\n array cannot insert"<<x;
-		    return;   
+		    throw "array cannot insert";
 		}
-		std::cout<<"\n array insert"<<x;
-		if(!p->index) p->index = new Single<ValueType>;
-		Single<ValueType> * d = static_cast<Single<ValueType> *>(p->index);
-		std::cout<<" d"<<d<<"v"<<v;
-		std::cout.flush();
-		d->setData(v);
-		std::cout<<" finished";
-		std::cout.flush();
+		if(!p->index) p->index = new SingleType();
+		SingleType * d = static_cast<SingleType *>(p->index);
+		
+		try {
+			d->setData(v);
+		} catch(...) {
+			std::cout<<" array insert caught d "<<d<<" v "<<v;
+		}
 	}
 	
 	ValueType * value() const {
-		Single<ValueType> * s = static_cast<Single<ValueType> *>(Sequence<KeyType>::currentIndex());
+		SingleType * s = static_cast<SingleType *>(Sequence<KeyType>::currentIndex());
 		return s->data();
 	}
 	
@@ -39,7 +40,7 @@ public:
 
 		if(!g.index) return NULL;
 		
-		Single<ValueType> * s = static_cast<Single<ValueType> *>(g.index);
+		SingleType * s = static_cast<SingleType *>(g.index);
 		
 		return s->data();
 	}

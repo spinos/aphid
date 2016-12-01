@@ -54,7 +54,7 @@ public:
 			m_maxScale = 1.f;
 			m_rotateNoise = 0.f;
 			m_plantId = 0;
-			m_multiGrow = 0;
+			m_multiGrow = 1;
 			m_minMarginSize = .1f;
 			m_maxMarginSize = .1f;
 			m_strength = .67f;
@@ -62,7 +62,7 @@ public:
 			m_noiseFrequency = 1.f;
 			m_noiseLacunarity = 1.5f;
 			m_noiseOctave = 4;
-			m_noiseLevel = .5f;
+			m_noiseLevel = 0.f;
 			m_noiseGain = .5f;
 			m_noiseOrigin.set(.4315f, .63987f, .6589f);
 		}

@@ -125,14 +125,17 @@ void WorldGrid<ChildType, ValueType>::insert(const Coord3 & x , ValueType * v)
 {
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
 	if(!p) {
-	     std::cout<<"\n world grid cannot insert";
-	     std::cout.flush();
-	     return;
+	     throw "world grid cannot insert";
 	}
-	std::cout<<"\n world grid insert"<<x;
-	std::cout.flush();
 	if(!p->index) p->index = new ChildType(this);
-	static_cast<ChildType *>(p->index)->insert(v->key, v);
+	ChildType *d = static_cast<ChildType *>(p->index);
+	try {
+	d->insert(v->key, v);
+	} catch (const std::string& ex) {
+		std::cout<<" world grid insert caught "<<ex;
+	} catch(...) {
+		std::cout<<" world grid insert caught x "<<x<<" v "<<v;
+	}
 }
 
 template<typename ChildType, typename ValueType>

@@ -33,9 +33,9 @@ template<typename T>
 class Single : public Entity
 {
 public:
-	Single(Entity * parent = NULL) : Entity(parent) {
-		m_p = NULL;
-	}
+	Single(Entity * parent = NULL) : Entity(parent),
+	m_p(NULL)
+	{}
 	
 	T * data() {
 		return m_p;
