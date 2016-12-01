@@ -21,7 +21,7 @@ namespace aphid {
 
 Forest::Forest() 
 {    
-	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >;
+	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >();
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
 	m_selectCtx = new SphereSelectionContext;
@@ -399,9 +399,10 @@ void Forest::addPlant(const Matrix44F & tm,
 	const Vector3F & at = tm.getTranslation();
 	
 	try {
-	m_grid->insert((const float *)&at, p );
-	} catch (const std::string& ex) {
-		std::cout<<"\n forest add plant caught "<<ex;
+		m_grid->insert((const float *)&at, p );
+	} catch (const char * ex) {
+		std::cerr<<"forest add plant caught: "<<ex;
+		return;
 	}
     m_activePlants->select(p);
 }

@@ -11,7 +11,9 @@
 #include <sdb/Types.h>
 #include <sdb/Array.h>
 #include <sdb/Sequence.h>
+#include <sdb/WorldGrid.h>
 #include <PseudoNoise.h>
+#include <AllMath.h>
 using namespace aphid::sdb;
 
 void testFind(Array<int, int> & arr, int k)
@@ -216,6 +218,93 @@ void testSequenceRemove()
     delete[] keystorm;
 }
 
+class ANode {
+
+	int * m_x;
+public:
+	ANode()
+	{ 
+		try {
+		m_x = new int[100000]; 
+		} catch (std::bad_alloc& ba) {
+			std::cerr << "\n anode caught bad_alloc: "<< ba.what();
+			throw "anode bad alloc";
+		}
+	}
+	~ANode()
+	{ delete[] m_x; }
+};
+
+void testArrayInsert(int n)
+{
+	std::cout<<"\n test array n "<<n<<std::endl;
+	Array<int, ANode > arr(NULL);
+	for(int i=0;i<n;++i) {
+		try {
+		ANode * node = new ANode();
+		arr.insert(i, node );
+		} catch (const char * ex) {
+			std::cout<<"\n caught: "<<ex
+				<<"\n abort at "<<i;
+			std::cout.flush();
+			
+			break;
+		}
+	}
+	arr.clear();
+	std::cout<<"\n passed ";
+}
+
+class PNode {
+
+	double * x;
+public:
+	PNode() {
+		try {
+			x = new double[10];
+		} catch (std::bad_alloc& ba) {
+			std::cerr << "\n pnode caught bad_alloc: "<< ba.what();
+			throw "pnode bad alloc";
+		}
+	}
+	
+	int key;
+};
+
+void testWorldG(int n)
+{
+	std::cout<<"\n test world grid n "<<n<<std::endl;
+	
+	aphid::Vector3F pos;
+	
+	WorldGrid<Array<int, PNode>, PNode > grid;
+	grid.setGridSize(25.f);
+	
+	for(int i=0;i<n;++i) {
+		pos.x = aphid::RandomF01() * 100.f;
+		pos.y = aphid::RandomF01() * 100.f;
+		pos.z = aphid::RandomF01() * 100.f;
+		
+		try {
+		PNode * node = new PNode();
+		node->key = i;
+		
+		grid.insert((const float *)&pos, node );
+		} catch (const char * ex) {
+			std::cout<<"\n caught: "<<ex
+				<<"\n abort at "<<i;
+			std::cout.flush();
+			
+			break;
+		}
+	}
+	
+	std::cout<<"\n grid n cell "<<grid.size()
+			<<"\n grid n elm "<<grid.elementCount();
+	grid.clear();
+	std::cout<<"\n passed ";
+}
+
 int main()
 {
 	/*
@@ -394,6 +483,8 @@ int main()
 	std::cout<<"\n p"<<p0->index;
 	*/
 	testSequenceRemove();
+	testArrayInsert(1000000);
+	testWorldG(1000000);
 	std::cout<<"\n end of test\n";
 	return 0;
 }

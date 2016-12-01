@@ -16,16 +16,28 @@ public:
     
     void insert(const KeyType & x, ValueType * v) {
 		Pair<KeyType, Entity> * p = Sequence<KeyType>::insert(x);
-		if(!p) {
+		if(p == NULL) {
 		    throw "array cannot insert";
+			return;
 		}
-		if(!p->index) p->index = new SingleType();
-		SingleType * d = static_cast<SingleType *>(p->index);
+		
+		if(p->index == NULL) {
+			try {
+				p->index = new SingleType();
+			} catch (std::bad_alloc& ba) {
+				std::cerr << " array insert caught bad_alloc: "<< ba.what();
+				return;
+			} catch(...) {
+				throw " array insert caught alloc index";
+				return;
+			}
+		}
 		
 		try {
+			SingleType * d = dynamic_cast<SingleType *>(p->index);
 			d->setData(v);
 		} catch(...) {
-			std::cout<<" array insert caught d "<<d<<" v "<<v;
+			throw "array insert caught set data";
 		}
 	}
 	

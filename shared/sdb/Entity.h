@@ -18,7 +18,7 @@ class Entity
 {
 public:
 	Entity(Entity * parent = NULL);
-	virtual ~Entity() {}
+	virtual ~Entity();
 	
 	Entity * parent() const;
 	void setParent(Entity * parent);

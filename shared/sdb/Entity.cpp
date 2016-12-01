@@ -12,10 +12,12 @@ namespace aphid {
 
 namespace sdb {
 
-Entity::Entity(Entity * parent)
-{
-	m_parent = parent;
-}
+Entity::Entity(Entity * parent) :
+m_parent(parent)
+{}
+
+Entity::~Entity()
+{}
 
 Entity * Entity::parent() const
 {

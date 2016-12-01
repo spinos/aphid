@@ -2,8 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (btree)
  
 include_directories ("." "../shared")
+SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
-add_executable(btree 
+add_executable(tbtree 
 ../shared/PseudoNoise.cpp
 main.cpp)
 
@@ -76,9 +77,10 @@ message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
 message ("boost regex is" ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
 
-target_link_libraries (btree ${APHID_SDB_LIBRARY})
+target_link_libraries (tbtree ${APHID_MATH_LIBRARY})
+target_link_libraries (tbtree ${APHID_SDB_LIBRARY})
 
-target_link_libraries (btree ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (btree ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (btree ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (btree ${Boost_REGEX_LIBRARY})
+target_link_libraries (tbtree ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (tbtree ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (tbtree ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (tbtree ${Boost_REGEX_LIBRARY})

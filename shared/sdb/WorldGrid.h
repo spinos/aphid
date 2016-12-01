@@ -131,10 +131,10 @@ void WorldGrid<ChildType, ValueType>::insert(const Coord3 & x , ValueType * v)
 	ChildType *d = static_cast<ChildType *>(p->index);
 	try {
 	d->insert(v->key, v);
-	} catch (const std::string& ex) {
-		std::cout<<" world grid insert caught "<<ex;
+	} catch (const char * ex) {
+		std::cerr<<" world grid insert caught "<<ex;
 	} catch(...) {
-		std::cout<<" world grid insert caught x "<<x<<" v "<<v;
+		std::cerr<<" world grid insert caught something";
 	}
 }
 
