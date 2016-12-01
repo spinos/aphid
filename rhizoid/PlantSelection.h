@@ -90,7 +90,8 @@ public:
 protected:
 
 private:
-	void select(const sdb::Coord3 & c, SelectionContext::SelectMode mode);
+	void select(const sdb::Coord3 & c, 
+	            const SelectionContext::SelectMode & mode);
 	void selectByTypeInCell(sdb::Array<int, Plant> * cell, int x);
 	
 };

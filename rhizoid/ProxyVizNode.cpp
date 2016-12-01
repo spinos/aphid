@@ -182,7 +182,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 void ProxyViz::draw( M3dView & view, const MDagPath & path, 
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
-{ 	
+{
 	if(!m_enableCompute) return;
 	updateWorldSpace();
 	MObject thisNode = thisMObject();
@@ -211,6 +211,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	_viewport = view;
 	fHasView = 1;
 	
+	std::cout<<"\n proxy node draw begin";
+	std::cout.flush();
 	view.beginGL();
 	
 	double mm[16];
@@ -246,6 +248,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawGround();
 	glPopMatrix();
 	view.endGL();
+	std::cout<<"\n proxy node draw end";
+	std::cout.flush();
 }
 
 bool ProxyViz::isBounded() const

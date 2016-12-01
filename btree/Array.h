@@ -14,9 +14,18 @@ public:
     
     void insert(const KeyType & x, ValueType * v) {
 		Pair<KeyType, Entity> * p = Sequence<KeyType>::insert(x);
+		if(!p) {
+		    std::cout<<"\n array cannot insert"<<x;
+		    return;   
+		}
+		std::cout<<"\n array insert"<<x;
 		if(!p->index) p->index = new Single<ValueType>;
 		Single<ValueType> * d = static_cast<Single<ValueType> *>(p->index);
+		std::cout<<" d"<<d<<"v"<<v;
+		std::cout.flush();
 		d->setData(v);
+		std::cout<<" finished";
+		std::cout.flush();
 	}
 	
 	ValueType * value() const {

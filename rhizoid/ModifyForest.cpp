@@ -17,7 +17,8 @@
 
 namespace aphid {
 
-ModifyForest::ModifyForest() 
+ModifyForest::ModifyForest() :
+m_isSampling(false)
 { 
 	m_raster = new TriangleRaster;
 	m_bary = new BarycentricCoordinate;
@@ -42,18 +43,23 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	if(!sampleGround(option))
 		return false;
 		
-	const int & nsamp = m_ebpSampler->numParticles();
 	const Vector3F * psamp = m_ebpSampler->positions();
 	const float ml = m_ebpSampler->levelCellSize(3);
 	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
 	const bool limitRadius = option.m_radius > 1e-3f;
 	const float sampleSize = plantSize(option.m_plantId) * .67f;
-	
+	std::cout<<"\n range "<<m_ebpSampler->numParticles();
+	        
 	GroundBind bind;
 	float scale;
 	Matrix44F tm;
 	Vector3F pog;
-	for(int i=0;i<nsamp;++i) {
+	for(int i=0;i<m_ebpSampler->numParticles();++i) {
+	    if(i>=m_ebpSampler->numParticles() ) {
+	        std::cout<<"\n oor error "<<i<<" "<<m_ebpSampler->numParticles();
+	        break;
+	    }
+	    
 		if(!closestPointOnGround(pog, psamp[i], ml) ) 
 			continue;
 	
@@ -87,7 +93,9 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		addPlant(tm, bind, option.m_plantId);
 
 	}
-	
+	std::cout<<" added";
+	std::cout.flush();
+	m_isSampling = false;
     return true;
 }
 
@@ -207,8 +215,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 /// limit radius
 		option.m_centerPoint = ctx->m_hitP;
 		option.m_radius = selection()->radius();
-		growOnGround(option);
-		return true;
+		return growOnGround(option);
 	}
 	
 /// ind to source
@@ -798,7 +805,13 @@ void ModifyForest::removeTypedPlants(int x)
 
 bool ModifyForest::sampleGround(GrowOption & option)
 {
-	if(numActiveGroundFaces() < 1) {
+    if(m_isSampling) {
+        std::cout<<"\n sampling in progress";
+        std::cout.flush();
+        return false;
+    }
+    m_isSampling = true;
+    if(numActiveGroundFaces() < 1) {
 		std::cout<<"\n ModifyForest has no active ground to sample";
 		m_ebpSampler->clear();
 		return false;

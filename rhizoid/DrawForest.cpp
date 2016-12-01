@@ -12,10 +12,12 @@
 #include <CircleCurve.h>
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
+#include <iostream>
 
 namespace aphid {
 
-DrawForest::DrawForest() : m_showVoxLodThresold(1.f)
+DrawForest::DrawForest() : m_showVoxLodThresold(1.f),
+m_enabled(true)
 {
 	m_scalbuf[0] = 1.f; 
 	m_scalbuf[1] = 1.f; 
@@ -30,6 +32,7 @@ void DrawForest::setScaleMuliplier(float x, float y, float z)
 
 void DrawForest::drawGround() 
 {
+    if(!m_enabled) return;
 	if(numActiveGroundFaces() < 1) return;
 	sdb::Sequence<int> * prims = activeGround()->primIndices();
 	const sdb::VectorArray<cvx::Triangle> & tris = triangles();
@@ -66,6 +69,7 @@ void DrawForest::drawFace(const int & geoId, const int & triId)
 
 void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 {
+    if(!m_enabled) return;
 	ATriangleMesh * mesh = static_cast<ATriangleMesh *>(geo);
 	Vector3F *p = mesh->points();
 	components->begin();
@@ -80,6 +84,7 @@ void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 
 void DrawForest::drawWiredPlants()
 {
+    if(!m_enabled) return;
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	const float margin = g->gridSize() * .13f;
@@ -122,6 +127,7 @@ void DrawForest::drawWiredPlant(PlantData * data)
 
 void DrawForest::drawPlants()
 {
+    if(!m_enabled) return;
     sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	const float margin = g->gridSize() * .1f;
@@ -206,6 +212,7 @@ void DrawForest::drawGridBounding()
 
 void DrawForest::drawGrid()
 {
+    if(!m_enabled) return;
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	g->begin();
@@ -229,6 +236,7 @@ void DrawForest::drawPlantBox(PlantData * data)
 
 void DrawForest::drawActivePlants()
 {
+    if(!m_enabled) return;
 	if(numActivePlants() < 1) return;
 	glDepthFunc(GL_LEQUAL);
 	glColor3f(.1f, .9f, .43f);
@@ -304,6 +312,20 @@ void DrawForest::setWireColor(const float & r, const float & g, const float & b)
     m_wireColor[0] = r;
     m_wireColor[1] = g;
     m_wireColor[2] = b;
+}
+
+void DrawForest::enableDrawing()
+{
+    std::cout<<"\n DrawForest enable draw";
+    std::cout.flush();
+    m_enabled = true;
+}
+
+void DrawForest::disableDrawing()
+{
+     std::cout<<"\n DrawForest disable draw";
+     std::cout.flush();
+     m_enabled = false;
 }
 
 }

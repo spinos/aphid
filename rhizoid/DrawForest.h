@@ -24,6 +24,7 @@ class DrawForest : public ModifyForest, public ViewObscureCull, public DrawBox, 
 	float m_transbuf[16];
 	float m_scalbuf[3];
     float m_showVoxLodThresold;
+    bool m_enabled;
 	
 public:
     DrawForest();
@@ -44,6 +45,8 @@ protected:
 	void setShowVoxLodThresold(const float & x);
     void drawBrush();
 	void setWireColor(const float & r, const float & g, const float & b);
+    void enableDrawing();
+    void disableDrawing();
     
 private:
     void drawFace(const int & geoId, const int & triId);

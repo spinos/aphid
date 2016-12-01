@@ -130,31 +130,37 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 
 void MForest::flood(GrowOption & option)
 {
+    disableDrawing();
 	clearSelected();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
 	if(!growOnGround(option))
         AHelper::Info<int>("MForest error empty flood ground", 0 );
 	finishGrow();
+	enableDrawing();
 	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
 }
 
 void MForest::grow(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option)
 {
+    disableDrawing();
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	growAt(r, option);
 	finishGrow();
+	enableDrawing();
 }
 
 void MForest::replacePlant(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option)
 {
+    disableDrawing();
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	replaceAt(r, option);
+	enableDrawing();
 }
 
 void MForest::drawSolidMesh(MItMeshPolygon & iter)
@@ -213,6 +219,8 @@ void MForest::matrix_as_array(const MMatrix &space, double *mm)
 
 void MForest::finishGrow()
 {
+    std::cout<<"MForest finish grow";
+    std::cout.flush();
 	updateGrid();
 	updateNumPlants();
 	selection()->updateNumSelected();
@@ -710,6 +718,7 @@ void MForest::deselectPlants()
 
 void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option)
 {
+    disableDrawing();
     std::vector<Matrix44F>::const_iterator it = ms.begin();
     for(;it!=ms.end();++it) {
 		if(!growAt(*it, option) )
@@ -717,6 +726,7 @@ void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & optio
 	}
 		
 	finishGrow();
+	enableDrawing();
 }
 
 void MForest::finishGroundSelection(GrowOption & option)

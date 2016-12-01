@@ -24,6 +24,7 @@ class ModifyForest : public Forest {
 	PseudoNoise m_pnoise;
 	int m_seed;
 	float m_noiseWeight;
+	bool m_isSampling;
     
 public:
     struct GrowOption {

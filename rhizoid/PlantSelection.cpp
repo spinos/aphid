@@ -52,22 +52,29 @@ void PlantSelection::select(SelectionContext::SelectMode mode)
 	m_numSelected = m_plants->size();
 }
 
-void PlantSelection::select(const sdb::Coord3 & c, SelectionContext::SelectMode mode)
+void PlantSelection::select(const sdb::Coord3 & c, 
+                        const SelectionContext::SelectMode & mode)
 {
 	BoundingBox b = m_grid->coordToGridBBox(c);
 	if(!b.isPointAround(m_center, m_radius) ) return;
 	sdb::Array<int, Plant> * cell = m_grid->findCell(c);
 	if(!cell) return;
 	if(cell->isEmpty() ) return;
+	
+	SelectionContext::SelectMode usemode = mode;
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
 		if(m_center.distanceTo(d->t1->getTranslation() ) < m_radius) {
             if(m_typeFilter > -1 ) {
-                if(m_typeFilter != *d->t3) mode = SelectionContext::Unknown;
+                if(m_typeFilter == *d->t3) 
+                    usemode = mode;
+                else
+                    usemode = SelectionContext::Unknown;
+                    
             }
-			if(mode == SelectionContext::Append) select(cell->value() );
-			else if(mode == SelectionContext::Remove) m_plants->remove(cell->key() );
+			if(usemode == SelectionContext::Append) select(cell->value() );
+			else if(usemode == SelectionContext::Remove) m_plants->remove(cell->key() );
 		}
 		
 		cell->next();

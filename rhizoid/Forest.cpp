@@ -396,9 +396,15 @@ void Forest::addPlant(const Matrix44F & tm,
 	p->index = m_pool.back();
 	m_plants.push_back(p);
 	
-	const Vector3F at = tm.getTranslation();
+	const Vector3F & at = tm.getTranslation();
+	
+	std::cout<<" add sample"<<at;
+	
 	m_grid->insert((const float *)&at, p );
     m_activePlants->select(p);
+    
+    std::cout<<" added";
+    std::cout.flush();
 }
 
 const float & Forest::selectionRadius() const

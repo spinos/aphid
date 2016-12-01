@@ -456,6 +456,11 @@ void proxyPaintContext::smoothSelected()
 
 void proxyPaintContext::grow()
 {
+/// limit frequency of action
+    if(Absolute<int>(last_x - start_x) 
+        + Absolute<int>(last_y - start_y) < 4)
+        return;
+        
 	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
