@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <Array.h>
+#include <sdb/Array.h>
 #include <sdb/AdaptiveGrid3.h>
 #include <ADistanceField.h>
 #include "RedBlueRefine.h"

@@ -9,7 +9,7 @@
 #ifndef APH_EBP_H
 #define APH_EBP_H
 #include <sdb/AdaptiveGrid3.h>
-#include <Array.h>
+#include <sdb/Array.h>
 #include <boost/scoped_array.hpp>
 
 namespace aphid {

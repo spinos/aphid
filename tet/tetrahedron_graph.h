@@ -10,7 +10,7 @@
 #ifndef TTG_TETRAHEDRON_GRAPH_H
 #define TTG_TETRAHEDRON_GRAPH_H
 
-#include <Array.h>
+#include <sdb/Array.h>
 
 namespace ttg {
 

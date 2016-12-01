@@ -19,7 +19,7 @@
 #include <maya/MArgParser.h>
 #include <maya/MArgDatabase.h>
 #include <maya/MArgList.h>
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 
 class proxyPaintTool : public MPxToolCommand

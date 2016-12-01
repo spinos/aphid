@@ -1,7 +1,7 @@
 #ifndef MORTONHASH_H
 #define MORTONHASH_H
 
-#include <Array.h>
+#include <sdb/Array.h>
 
 namespace aphid {
 

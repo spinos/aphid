@@ -248,12 +248,13 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/DrawBox.cpp
 ../shared/PerspectiveView.cpp)
 
+set (APH_SDB_PATH ../shared/sdb)
 ADD_LIBRARY (aphidSdb ${LIB_TYP}
-../btree/Types.cpp
-../btree/Entity.cpp
-../btree/BNode.cpp
-../btree/MortonHash.cpp
-../shared/sdb/AdaptiveGrid3.cpp
+${APH_SDB_PATH}/Types.cpp
+${APH_SDB_PATH}/Entity.cpp
+${APH_SDB_PATH}/BNode.cpp
+${APH_SDB_PATH}/MortonHash.cpp
+${APH_SDB_PATH}/AdaptiveGrid3.cpp
 )
 
 ADD_LIBRARY (aphidKd ${LIB_TYP}

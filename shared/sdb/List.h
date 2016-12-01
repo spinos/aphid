@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include <Entity.h>
+#include <sdb/Entity.h>
 #include <vector>
 
 namespace aphid {

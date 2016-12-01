@@ -12,7 +12,7 @@
 #include <KdTreeNode.h>
 #include <BuildKdTreeStream.h>
 #include <KdTreeBuilder.h>
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 #include <TreeProperty.h>
 
 namespace aphid {

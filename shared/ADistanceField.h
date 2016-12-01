@@ -10,7 +10,7 @@
 #pragma once
 #include "AGraph.h"
 #include "BDistanceFunction.h"
-#include <Array.h>
+#include <sdb/Array.h>
 #include <Calculus.h>
 #include <map>
 

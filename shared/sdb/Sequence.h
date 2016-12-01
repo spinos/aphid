@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include <BNode.h>
+#include <sdb/BNode.h>
 #include <deque>
 
 namespace aphid {

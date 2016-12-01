@@ -2,8 +2,8 @@
 #define CARTESIANGRID_H
 
 #include <BoundingBox.h>
-#include <MortonHash.h>
-#include <VectorArray.h>
+#include <sdb/MortonHash.h>
+#include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 
 namespace aphid {

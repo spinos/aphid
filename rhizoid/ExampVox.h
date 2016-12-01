@@ -10,7 +10,7 @@
 #include <BoundingBox.h>
 #include <Geometry.h>
 #include <vector>
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 #include <GridClustering.h>
 #include <AOrientedBox.h>

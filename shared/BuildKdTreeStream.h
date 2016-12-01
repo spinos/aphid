@@ -9,7 +9,7 @@
 
 #pragma once
 #include <BoundingBox.h>
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 #include <BaseMesh.h>
 #include <KdTreeNode.h>
 #include <vector>

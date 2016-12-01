@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
-#include <Entity.h>
-#include <Types.h>
+#include <sdb/Entity.h>
+#include <sdb/Types.h>
 
 namespace aphid {
 

@@ -7,11 +7,11 @@
  *
  */
 #include <iostream>
-#include <BTree.h>
-#include <Types.h>
-#include <Array.h>
-#include "Sequence.h"
-#include "../shared/PseudoNoise.h"
+#include <sdb/BTree.h>
+#include <sdb/Types.h>
+#include <sdb/Array.h>
+#include <sdb/Sequence.h>
+#include <PseudoNoise.h>
 using namespace aphid::sdb;
 
 void testFind(Array<int, int> & arr, int k)

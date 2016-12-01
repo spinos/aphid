@@ -11,7 +11,7 @@
 #include <SplitEvent.h>
 #include <MinMaxBins.h>
 #include <BoundingBox.h>
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 #include <GridClustering.h>
 
 namespace aphid {

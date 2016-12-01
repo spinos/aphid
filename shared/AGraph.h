@@ -11,8 +11,8 @@
  */
 
 #pragma once
-#include <Types.h>
-#include <Sequence.h>
+#include <sdb/Types.h>
+#include <sdb/Sequence.h>
 #include <vector>
 #include <iostream>
 

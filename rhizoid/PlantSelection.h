@@ -8,8 +8,8 @@
  */
 #pragma once
 #include <Vector3F.h>
-#include <WorldGrid.h>
-#include <Array.h>
+#include <sdb/WorldGrid.h>
+#include <sdb/Array.h>
 #include <SelectionContext.h>
 
 namespace aphid {

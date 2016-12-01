@@ -3,9 +3,52 @@ project (btree)
  
 include_directories ("." "../shared")
 
-add_executable(btree Types.cpp Entity.cpp BNode.cpp BTree.cpp 
+add_executable(btree 
 ../shared/PseudoNoise.cpp
 main.cpp)
+
+if (WIN32)
+SET (APHID_DIR "D:/aphid")
+elseif (APPLE)
+SET (APHID_DIR "/Users/jianzhang/aphid")
+else()
+SET (APHID_DIR "~/aphid")
+endif ()
+
+if (WIN32)
+SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
+    SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/aphidGeom.lib)
+    SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/aphidH5.lib)
+    SET (APHID_UI_LIBRARY ${APHID_DIR}/lib/aphidUI.lib)
+    SET (APHID_KD_LIBRARY ${APHID_DIR}/lib/aphidKd.lib)
+    SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/aphidSdb.lib)
+    SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/aphidGraph.lib)
+elseif (APPLE)
+    set (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.a)
+    set (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.a)
+    set (APHID_H5_LIBRARY ${APHID_DIR}/lib/libaphidH5.a)
+    set (APHID_UI_LIBRARY ${APHID_DIR}/lib/libaphidUI.a)
+    set (APHID_KD_LIBRARY ${APHID_DIR}/lib/libaphidKd.a)
+    set (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.a)
+    set (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.a)
+ELSE ()
+    SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.so)
+    SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.so)
+    SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/libaphidH5.so)
+    SET (APHID_UI_LIBRARY ${APHID_DIR}/lib/libaphidUI.so)
+    SET (APHID_KD_LIBRARY ${APHID_DIR}/lib/libaphidKd.so)
+    SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.so)
+    SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
+endif ()
+
+message ("aphid math is " ${APHID_MATH_LIBRARY})
+message ("aphid geom is " ${APHID_GEOM_LIBRARY})
+message ("aphid h5 is " ${APHID_H5_LIBRARY})
+message ("aphid ui is " ${APHID_UI_LIBRARY})
+message ("aphid kd is " ${APHID_KD_LIBRARY})
+message ("aphid sdb is " ${APHID_SDB_LIBRARY})
+message ("aphid graph is " ${APHID_GRAPH_LIBRARY})
+
 
 if(WIN32)
 	set (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -32,6 +75,8 @@ message ("boost system is" ${Boost_SYSTEM_LIBRARY})
 message ("boost date_time is" ${Boost_DATE_TIME_LIBRARY})
 message ("boost regex is" ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is" ${Boost_FILESYSTEM_LIBRARY})
+
+target_link_libraries (btree ${APHID_SDB_LIBRARY})
 
 target_link_libraries (btree ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (btree ${Boost_FILESYSTEM_LIBRARY})
