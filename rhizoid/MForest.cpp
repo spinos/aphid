@@ -232,8 +232,9 @@ void MForest::erase(const MPoint & origin, const MPoint & dest,
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
-	
+	disableDrawing();
 	clearAt(r, option);
+	enableDrawing();
 }
 
 void MForest::finishErase()
@@ -407,6 +408,7 @@ void MForest::loadExternal(const char* filename)
 	chFile.close();
 	
 	Matrix44F space;
+	Vector3F bindPos;
 	GroundBind bind;
 	bind.m_geomComp = -1;
 	for(int i=0; i < numRec; i++) {
@@ -423,6 +425,9 @@ void MForest::loadExternal(const char* filename)
 		*space.m(3, 0) = data[ii+12];
 		*space.m(3, 1) = data[ii+13];
 		*space.m(3, 2) = data[ii+14];
+		
+		bindToGround(&bind, space.getTranslation(), bindPos);
+		space.setTranslation(bindPos);
 		
 		addPlant(space, bind, typd[i]);
 	}

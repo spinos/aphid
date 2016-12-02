@@ -9,13 +9,13 @@
 
 #ifndef APH_FOREST_H
 #define APH_FOREST_H
-#include "PlantSelection.h"
 #include <Quaternion.h>
 #include <Matrix44F.h>
 #include <KdEngine.h>
 #include <ConvexShape.h>
 #include <IntersectionContext.h>
 #include <RayMarch.h>
+#include "PlantSelection.h"
 
 namespace aphid {
 

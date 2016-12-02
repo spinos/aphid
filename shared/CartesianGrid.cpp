@@ -1,7 +1,7 @@
 #include "CartesianGrid.h"
 #include <iostream>
 #include <Morton3D.h>
-#include <BNode.h>
+#include <sdb/BNode.h>
 #include <BaseBuffer.h>
 
 namespace aphid {

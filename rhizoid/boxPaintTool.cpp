@@ -458,7 +458,7 @@ void proxyPaintContext::grow()
 {
 /// limit frequency of action
     if(Absolute<int>(last_x - start_x) 
-        + Absolute<int>(last_y - start_y) < 4)
+        + Absolute<int>(last_y - start_y) < 3)
         return;
         
 	if(!PtrViz) return;
@@ -514,6 +514,10 @@ void proxyPaintContext::snap()
 void proxyPaintContext::erase()
 {
     if(!PtrViz) return;
+    if(Absolute<int>(last_x - start_x) 
+        + Absolute<int>(last_y - start_y) < 2)
+        return;
+        
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	PtrViz->erase(fromNear, fromFar, m_growOpt);

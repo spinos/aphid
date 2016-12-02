@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (btree)
- 
+
+set (CMAKE_BUILD_TYPE Release)
 include_directories ("." "../shared")
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
