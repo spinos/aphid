@@ -101,6 +101,7 @@ void MForest::updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned
 void MForest::selectPlantByType(const MPoint & origin, const MPoint & dest,  int typ,
 					MGlobal::ListAdjustment adj)
 {
+    disableDrawing();
     Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
@@ -112,10 +113,12 @@ void MForest::selectPlantByType(const MPoint & origin, const MPoint & dest,  int
 	setSelectTypeFilter(typ);
 	bool stat = selectPlants(r, m);
 	if(!stat) AHelper::Info<int>("MForest error empty selection", 0);
+	enableDrawing();
 }
 
 void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::ListAdjustment adj)
 {
+    disableDrawing();
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
@@ -126,6 +129,7 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 	
 	bool stat = selectGroundFaces(r, m);
 	if(!stat) AHelper::Info<int>("MForest error empty ground", 0);
+	enableDrawing();
 }
 
 void MForest::flood(GrowOption & option)

@@ -430,6 +430,10 @@ void proxyPaintContext::moveAlongAxis(short axis)
 
 void proxyPaintContext::selectGround()
 {
+    if(Absolute<int>(last_x - start_x) 
+        + Absolute<int>(last_y - start_y) < 2)
+        return;
+        
 	if(!PtrViz) {
 		std::cout<<"\n selectGround has no PtrViz";
 		return;
@@ -537,6 +541,10 @@ void proxyPaintContext::startProcessSelect()
 void proxyPaintContext::processSelect()
 {
 	if(!PtrViz) return;
+	if(Absolute<int>(last_x - start_x) 
+        + Absolute<int>(last_y - start_y) < 2)
+        return;
+        
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
@@ -546,6 +554,10 @@ void proxyPaintContext::processSelect()
 void proxyPaintContext::processSelectByType()
 {
     if(!PtrViz) return;
+    if(Absolute<int>(last_x - start_x) 
+        + Absolute<int>(last_y - start_y) < 2)
+        return;
+        
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
