@@ -42,8 +42,13 @@ public:
 	}
 	
 	ValueType * value() const {
-		SingleType * s = static_cast<SingleType *>(Sequence<KeyType>::currentIndex());
+		try {
+		SingleType * s = dynamic_cast<SingleType *>(Sequence<KeyType>::currentIndex());
+		if(s==NULL) throw "array cast null value";
 		return s->data();
+		} catch(...) {
+			throw "array wrong value";
+		}
 	}
 	
 	ValueType * find(const KeyType & k, MatchFunction::Condition mf = MatchFunction::mExact, KeyType * extraKey = NULL) const

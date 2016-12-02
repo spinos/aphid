@@ -32,6 +32,7 @@ void DrawForest::setScaleMuliplier(float x, float y, float z)
 
 void DrawForest::drawGround() 
 {
+	std::cout<<" DrawForest draw ground begin"<<std::endl;
     if(!m_enabled) return;
 	if(numActiveGroundFaces() < 1) return;
 	sdb::Sequence<int> * prims = activeGround()->primIndices();
@@ -43,6 +44,7 @@ void DrawForest::drawGround()
 	
 	glBegin(GL_TRIANGLES);
 	
+	try {
 	prims->begin();
 	while(!prims->end() ) {
 	
@@ -50,6 +52,9 @@ void DrawForest::drawGround()
 		drawFace(t->ind0(), t->ind1() );
 		
 		prims->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw ground caught something";
 	}
 	
 	glEnd();
@@ -84,6 +89,7 @@ void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 
 void DrawForest::drawWiredPlants()
 {
+	std::cout<<" DrawForest draw wired plants begin"<<std::endl;
     if(!m_enabled) return;
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
@@ -92,6 +98,7 @@ void DrawForest::drawWiredPlants()
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
 	glColor3fv(m_wireColor);
+	try {
 	g->begin();
 	while(!g->end() ) {
 		BoundingBox cellBox = g->coordToGridBBox(g->key() );
@@ -100,7 +107,9 @@ void DrawForest::drawWiredPlants()
 			drawWiredPlants(g->value() );
 		g->next();
 	}
-	
+	} catch (...) {
+		std::cerr<<"DrawForest draw wired plants caught something";
+	}
 	glPopAttrib();
 }
 
@@ -127,6 +136,7 @@ void DrawForest::drawWiredPlant(PlantData * data)
 
 void DrawForest::drawPlants()
 {
+	std::cout<<" DrawForest draw plants begin"<<std::endl;
     if(!m_enabled) return;
     sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
@@ -134,6 +144,7 @@ void DrawForest::drawPlants()
 	glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT);
 	glEnable(GL_LIGHTING);
+	try {
 	g->begin();
 	while(!g->end() ) {
         BoundingBox cellBox = g->coordToGridBBox(g->key() );
@@ -141,6 +152,9 @@ void DrawForest::drawPlants()
         if(!cullByFrustum(cellBox ) )
             drawPlants(g->value() );
 		g->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw plants caught something";
 	}
 	
 	glPopAttrib();
@@ -212,13 +226,18 @@ void DrawForest::drawGridBounding()
 
 void DrawForest::drawGrid()
 {
+	std::cout<<" DrawForest draw grid begin"<<std::endl;
     if(!m_enabled) return;
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
+	try {
 	g->begin();
 	while(!g->end() ) {
 		drawBoundingBox(&g->coordToGridBBox(g->key() ) );
 		g->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw grid caught something";
 	}
 }
 
@@ -241,10 +260,14 @@ void DrawForest::drawActivePlants()
 	glDepthFunc(GL_LEQUAL);
 	glColor3f(.1f, .9f, .43f);
 	sdb::Array<int, PlantInstance> * arr = activePlants();
+	try {
 	arr->begin();
 	while(!arr->end() ) {
 		drawPlantBox(arr->value()->m_reference->index );
 		arr->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw active plants caught something";
 	}
 }
 

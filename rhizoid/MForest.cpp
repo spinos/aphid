@@ -222,6 +222,11 @@ void MForest::matrix_as_array(const MMatrix &space, double *mm)
 	mm[15] = space(3,3);
 }
 
+void MForest::finishPlantSelection()
+{
+	AHelper::Info<unsigned>("n active plants", numActivePlants() );
+}
+
 void MForest::finishGrow()
 {
     std::cout<<"MForest finish grow";
@@ -239,6 +244,7 @@ void MForest::erase(const MPoint & origin, const MPoint & dest,
 	Ray r(a, b);
 	disableDrawing();
 	clearAt(r, option);
+	finishErase();
 	enableDrawing();
 }
 
@@ -786,8 +792,8 @@ void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & optio
 	enableDrawing();
 }
 
-void MForest::finishGroundSelection(GrowOption & option)
-{ AHelper::Info<unsigned>("ProxyViz sel n faces", numActiveGroundFaces() ); }
+void MForest::finishGroundSelection()
+{ AHelper::Info<unsigned>("MForest sel n faces", numActiveGroundFaces() ); }
 
 void MForest::offsetAlongNormal(const MPoint & origin, const MPoint & dest,
 					GrowOption & option)
@@ -796,6 +802,16 @@ void MForest::offsetAlongNormal(const MPoint & origin, const MPoint & dest,
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	raiseOffsetAt(r, option);
+}
+
+void MForest::movePlantByVec(const Ray & ray,
+						const Vector3F & displaceNear, const Vector3F & displaceFar,
+						const float & clipNear, const float & clipFar)
+{
+	disableDrawing();
+	movePlant(ray, displaceNear, displaceFar, clipNear, clipFar);
+	finishErase();
+	enableDrawing();
 }
 
 }

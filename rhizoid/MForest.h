@@ -18,8 +18,10 @@ public:
     
 	void selectPlantByType(const MPoint & origin, const MPoint & dest,  int typ,
 					MGlobal::ListAdjustment adj);
+	void finishPlantSelection();
 	void selectGround(const MPoint & origin, const MPoint & dest, 
 					MGlobal::ListAdjustment adj);
+	void finishGroundSelection();
 /// cover selected faces
 	void flood(GrowOption & option);
 	void grow(const MPoint & origin, const MPoint & dest, 
@@ -45,7 +47,9 @@ public:
     void injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option);
 	void offsetAlongNormal(const MPoint & origin, const MPoint & dest,
 					GrowOption & option);
-    virtual void finishGroundSelection(GrowOption & option);
+	void movePlantByVec(const Ray & ray,
+						const Vector3F & displaceNear, const Vector3F & displaceFar,
+						const float & clipNear, const float & clipFar);
     
 protected:
     bool updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);

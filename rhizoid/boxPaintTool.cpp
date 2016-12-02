@@ -129,11 +129,11 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	event.getPosition( last_x, last_y );
 	
 	if(!PtrViz) return MS::kSuccess;
-	if(m_currentOpt==opErase ||
-		m_currentOpt==opMove ) PtrViz->finishErase();
-	if(m_currentOpt==opSelect || m_currentOpt==opSelectByType) AHelper::Info<unsigned>("n active plants", PtrViz->numActivePlants() );
+	
+	if(m_currentOpt==opSelect || m_currentOpt==opSelectByType) 
+		PtrViz->finishPlantSelection();
 	if(m_currentOpt==opSelectGround)
-	    PtrViz->finishGroundSelection(m_growOpt);
+	    PtrViz->finishGroundSelection();
 	
 	return MS::kSuccess;		
 }
@@ -407,6 +407,8 @@ void proxyPaintContext::resize()
 void proxyPaintContext::move()
 {
 	if(!PtrViz) return;
+	if(rejectSmallDragDistance() )
+        return;
 		
 	PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
 	PtrViz->adjustPosition(start_x, start_y, last_x, last_y,  clipNear, clipFar);
@@ -429,15 +431,14 @@ void proxyPaintContext::moveAlongAxis(short axis)
 {}
 
 void proxyPaintContext::selectGround()
-{
-    if(Absolute<int>(last_x - start_x) 
-        + Absolute<int>(last_y - start_y) < 2)
-        return;
-        
+{   
 	if(!PtrViz) {
 		std::cout<<"\n selectGround has no PtrViz";
 		return;
 	}
+	if(rejectSmallDragDistance() )
+        return;
+     
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
@@ -460,9 +461,7 @@ void proxyPaintContext::smoothSelected()
 
 void proxyPaintContext::grow()
 {
-/// limit frequency of action
-    if(Absolute<int>(last_x - start_x) 
-        + Absolute<int>(last_y - start_y) < 3)
+    if(rejectSmallDragDistance() )
         return;
         
 	if(!PtrViz) return;
@@ -518,8 +517,7 @@ void proxyPaintContext::snap()
 void proxyPaintContext::erase()
 {
     if(!PtrViz) return;
-    if(Absolute<int>(last_x - start_x) 
-        + Absolute<int>(last_y - start_y) < 2)
+    if(rejectSmallDragDistance() )
         return;
         
 	MPoint fromNear, fromFar;
@@ -541,8 +539,7 @@ void proxyPaintContext::startProcessSelect()
 void proxyPaintContext::processSelect()
 {
 	if(!PtrViz) return;
-	if(Absolute<int>(last_x - start_x) 
-        + Absolute<int>(last_y - start_y) < 2)
+	if(rejectSmallDragDistance() )
         return;
         
 	MPoint fromNear, fromFar;
@@ -554,8 +551,7 @@ void proxyPaintContext::processSelect()
 void proxyPaintContext::processSelectByType()
 {
     if(!PtrViz) return;
-    if(Absolute<int>(last_x - start_x) 
-        + Absolute<int>(last_y - start_y) < 2)
+    if(rejectSmallDragDistance() )
         return;
         
 	MPoint fromNear, fromFar;
@@ -865,5 +861,12 @@ void proxyPaintContext::setNoiseOriginZ(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise origin z", x);
 	m_growOpt.m_noiseOrigin.z = x; 
+}
+
+/// limit frequency of action
+bool proxyPaintContext::rejectSmallDragDistance(int d) const
+{
+	return (Absolute<int>(last_x - start_x) 
+        + Absolute<int>(last_y - start_y)) < d;
 }
 //:~

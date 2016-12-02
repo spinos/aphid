@@ -123,6 +123,11 @@ ADD_LIBRARY (aphidMath ${LIB_TYP}
 
 SET (APHID_GEOM_PATH ../shared/geom)
 
+file (GLOB Geom_SRC
+    "../shared/geom/*.h"
+    "../shared/geom/*.cpp"
+)
+
 ADD_LIBRARY (aphidGeom ${LIB_TYP} 
 ../shared/SHelper.cpp 
 ../shared/AVerbose.cpp
@@ -164,16 +169,7 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/BiLinearInterpolate.cpp 
 ../shared/LinearInterpolate.cpp  
 ../shared/VertexDataGroup.cpp
-${APHID_GEOM_PATH}/AQuadMesh.cpp
-${APHID_GEOM_PATH}/AGenericMesh.cpp
-${APHID_GEOM_PATH}/ATriangleMesh.cpp 
-${APHID_GEOM_PATH}/GeodesicSphereMesh.cpp 
-${APHID_GEOM_PATH}/SuperQuadricGlyph.cpp
-${APHID_GEOM_PATH}/ATriangleMeshGroup.cpp
-${APHID_GEOM_PATH}/ATetrahedronMesh.cpp
-${APHID_GEOM_PATH}/ATetrahedronMeshGroup.cpp
-${APHID_GEOM_PATH}/APolygonalMesh.cpp
-${APHID_GEOM_PATH}/APolygonalUV.cpp)
+${Geom_SRC})
 
 ADD_LIBRARY (aphidH5 ${LIB_TYP}
     ../shared/HObject.cpp 
@@ -249,13 +245,14 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/PerspectiveView.cpp)
 
 set (APH_SDB_PATH ../shared/sdb)
-ADD_LIBRARY (aphidSdb ${LIB_TYP}
-${APH_SDB_PATH}/Types.cpp
-${APH_SDB_PATH}/Entity.cpp
-${APH_SDB_PATH}/BNode.cpp
-${APH_SDB_PATH}/MortonHash.cpp
-${APH_SDB_PATH}/AdaptiveGrid3.cpp
+
+file (GLOB Sdb_SRC
+    "../shared/sdb/*.h"
+    "../shared/sdb/*.cpp"
 )
+
+ADD_LIBRARY (aphidSdb ${LIB_TYP}
+${Sdb_SRC})
 
 ADD_LIBRARY (aphidKd ${LIB_TYP}
 ../shared/KdTreeNode.cpp

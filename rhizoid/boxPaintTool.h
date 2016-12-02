@@ -159,6 +159,7 @@ private:
 	void clearOffset();
 	void raiseOffset();
 	void depressOffset();
+	bool rejectSmallDragDistance(int d = 2) const;
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

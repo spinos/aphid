@@ -73,7 +73,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 	if(!m_enableCompute) return MS::kSuccess;
 	if( plug == outValue ) {
 		
-		updateWorldSpace();
+		updateWorldSpace(thisMObject() );
 		
 		MStatus status;
 
@@ -88,9 +88,11 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			block.inputValue(abboxmaxy).asFloat(), 
 			block.inputValue(abboxmaxz).asFloat());
 		
-		const float grdsz = defBox->geomExtent() * 31.f ;
-		if(grdsz < 1e-1f) {
-			AHelper::Info(" ProxyViz input box is too small", grdsz);
+		float grdsz = defBox->geomExtent() * 32.f ;
+		if(grdsz < 32.f) {
+			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
+			grdsz = 32.f;
+			AHelper::Info<float>(" trancated to", grdsz);
 		}
 		
 		if(m_toSetGrid) {
@@ -184,8 +186,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStatus status )
 {
 	if(!m_enableCompute) return;
-	updateWorldSpace();
 	MObject thisNode = thisMObject();
+	updateWorldSpace(thisNode);
 	
 	MPlug mutxplug( thisNode, axmultiplier);
 	MPlug mutyplug( thisNode, aymultiplier);
@@ -246,7 +248,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawGround();
 	glPopMatrix();
 	view.endGL();
-	
+	std::cout<<" viz node draw end";
 }
 
 bool ProxyViz::isBounded() const
@@ -644,7 +646,7 @@ void ProxyViz::adjustPosition(short start_x, short start_y, short last_x, short 
     Vector3F v0, v1;
 	Ray r = getRayDisplace(v0, v1, start_x, start_y, last_x, last_y);
 	
-	movePlant(r, v0, v1, clipNear, clipFar);
+	movePlantByVec(r, v0, v1, clipNear, clipFar);
 }
 
 void ProxyViz::rotateToDirection(short start_x, short start_y, short last_x, short last_y, float clipNear, float clipFar)
@@ -698,9 +700,8 @@ void ProxyViz::pressToLoad()
 		AHelper::Info<int>("ProxyViz error empty external cache filename", 0);
 }
 
-void ProxyViz::updateWorldSpace()
+void ProxyViz::updateWorldSpace(const MObject & thisNode)
 {
-	MObject thisNode = thisMObject();
 	MDagPath thisPath;
 	MDagPath::getAPathTo(thisNode, thisPath);
 	_worldSpace = thisPath.inclusiveMatrix();
@@ -825,7 +826,8 @@ void ProxyViz::beginPickInView()
 void ProxyViz::processPickInView(const int & plantTyp)
 {
 	useActiveView();
-	_viewport.refresh();
+/// not needed?
+//  _viewport.refresh();
 	
 	MObject node = thisMObject();
 	

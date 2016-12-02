@@ -114,7 +114,7 @@ private:
 private:
 	std::string replaceEnvVar(const MString & filename) const;
     
-	void updateWorldSpace();
+	void updateWorldSpace(const MObject & thisNode);
 	MMatrix localizeSpace(const MMatrix & s) const;
 	MMatrix worldizeSpace(const MMatrix & s) const;
 	void useActiveView();
