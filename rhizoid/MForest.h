@@ -93,6 +93,13 @@ private:
 					int totalGroups, int currentGroup, 
 					double percentage, int plantTyp, 
                     int & it);
+    void saveActiveExternal(const char* filename);
+    void saveAllExternel(const char* filename);
+    void getDataRef(PlantData * plt, 
+					float * data, 
+					int * typd,
+					unsigned & it);
+	
 };
 
 }

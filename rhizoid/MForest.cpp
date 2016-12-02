@@ -440,6 +440,46 @@ void MForest::loadExternal(const char* filename)
 
 void MForest::saveExternal(const char* filename)
 {
+    if(numActivePlants() < 1) saveAllExternel(filename);
+    else saveActiveExternal(filename);
+}
+
+void MForest::saveActiveExternal(const char* filename)
+{
+    std::ofstream chFile;
+	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
+	if(!chFile.is_open()) {
+		AHelper::Info<const char *>("MForest cannot open file: ", filename);
+		return;
+	}
+	
+	unsigned numRec = numActivePlants();
+	AHelper::Info<unsigned>("MForest write n plants ", numRec);
+	chFile.write((char*)&numRec, sizeof(int));
+	
+	float *data = new float[numRec * 16];
+	int * tpi = new int[numRec];
+	
+	unsigned it = 0;
+	
+	sdb::Array<int, PlantInstance> * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		getDataRef(arr->value()->m_reference->index, data, tpi, it);
+	    
+		arr->next();
+	}
+	
+	chFile.write((char*)data, sizeof(float) * numRec * 16);
+	chFile.write((char*)tpi, sizeof(int) * numRec);
+	chFile.close();
+	AHelper::Info<const char *>(" Proxy saved to file: ", filename);
+	delete[] data;
+	delete[] tpi;
+}
+
+void MForest::saveAllExternel(const char* filename)
+{
 	std::ofstream chFile;
 	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
 	if(!chFile.is_open()) {
@@ -469,6 +509,29 @@ void MForest::saveExternal(const char* filename)
 	delete[] tpi;
 }
 
+void MForest::getDataRef(PlantData * plt, 
+					float * data, 
+					int * typd,
+					unsigned & it)
+{
+    Matrix44F * mat = plt->t1;
+    const int ii = it * 16;
+    data[ii] = mat->M(0, 0);
+    data[ii+1] = mat->M(0, 1);
+    data[ii+2] = mat->M(0, 2);
+    data[ii+4] = mat->M(1, 0);
+    data[ii+5] = mat->M(1, 1);
+    data[ii+6] = mat->M(1, 2);
+    data[ii+8] = mat->M(2, 0);
+    data[ii+9] = mat->M(2, 1);
+    data[ii+10] = mat->M(2, 2);
+    data[ii+12] = mat->M(3, 0);
+    data[ii+13] = mat->M(3, 1);
+    data[ii+14] = mat->M(3, 2);
+    typd[it] = *plt->t3;
+    it++;
+}
+
 void MForest::getDataInCell(sdb::Array<int, Plant> *cell, 
 							float * data, 
 							int * typd,
@@ -476,23 +539,7 @@ void MForest::getDataInCell(sdb::Array<int, Plant> *cell,
 {
 	cell->begin();
 	while(!cell->end() ) {
-		PlantData * d = cell->value()->index;
-		Matrix44F * mat = d->t1;
-		const int ii = it * 16;
-		data[ii] = mat->M(0, 0);
-		data[ii+1] = mat->M(0, 1);
-		data[ii+2] = mat->M(0, 2);
-		data[ii+4] = mat->M(1, 0);
-		data[ii+5] = mat->M(1, 1);
-		data[ii+6] = mat->M(1, 2);
-		data[ii+8] = mat->M(2, 0);
-		data[ii+9] = mat->M(2, 1);
-		data[ii+10] = mat->M(2, 2);
-		data[ii+12] = mat->M(3, 0);
-		data[ii+13] = mat->M(3, 1);
-		data[ii+14] = mat->M(3, 2);
-		typd[it] = *d->t3;
-		it++;
+	    getDataRef(cell->value()->index, data, typd, it);
 		cell->next();
 	}
 }
