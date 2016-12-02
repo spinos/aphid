@@ -133,9 +133,10 @@ void MForest::flood(GrowOption & option)
     disableDrawing();
 	clearSelected();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
-	if(!growOnGround(option))
+	if(growOnGround(option)) {
+	    finishGrow();
         AHelper::Info<int>("MForest error empty flood ground", 0 );
-	finishGrow();
+	}
 	enableDrawing();
 	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
 }

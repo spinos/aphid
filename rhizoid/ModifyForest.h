@@ -20,12 +20,10 @@ class ModifyForest : public Forest {
 	
 	TriangleRaster * m_raster;
 	BarycentricCoordinate * m_bary;
-	EbpGrid * m_ebpSampler;
 	PseudoNoise m_pnoise;
 	int m_seed;
 	float m_noiseWeight;
-	bool m_isSampling;
-    
+	
 public:
     struct GrowOption {
 		Vector3F m_upDirection;
@@ -129,7 +127,7 @@ private:
 	bool calculateSelecedWeight(const Ray & ray);
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;
-    bool sampleGround(GrowOption & option);
+    bool sampleGround(EbpGrid * sampler, GrowOption & option);
 	
 };
 

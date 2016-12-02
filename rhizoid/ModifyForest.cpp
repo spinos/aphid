@@ -17,14 +17,12 @@
 
 namespace aphid {
 
-ModifyForest::ModifyForest() :
-m_isSampling(false)
+ModifyForest::ModifyForest()
 { 
 	m_raster = new TriangleRaster;
 	m_bary = new BarycentricCoordinate;
 	m_seed = rand() % 999999; 
     m_noiseWeight = 0.f;
-    m_ebpSampler = new EbpGrid;
 	std::time_t tim(NULL);
 	srand((int)tim);
 }
@@ -40,26 +38,28 @@ void ModifyForest::setNoiseWeight(float x)
 
 bool ModifyForest::growOnGround(GrowOption & option)
 {	
-	if(!sampleGround(option))
+    if(numActiveGroundFaces() < 1) {
+		std::cout<<"\n ModifyForest has no active ground to sample";
+		return false;
+	}
+	
+    EbpGrid ebpSampler;
+	if(!sampleGround(&ebpSampler, option))
 		return false;
 		
-	const Vector3F * psamp = m_ebpSampler->positions();
-	const float ml = m_ebpSampler->levelCellSize(3);
+	const Vector3F * psamp = ebpSampler.positions();
+	const float ml = ebpSampler.levelCellSize(3);
 	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
 	const bool limitRadius = option.m_radius > 1e-3f;
 	const float sampleSize = plantSize(option.m_plantId) * .67f;
-	std::cout<<"\n range "<<m_ebpSampler->numParticles();
+	std::cout<<"\n range "<<ebpSampler.numParticles();
 	        
 	GroundBind bind;
 	float scale;
 	Matrix44F tm;
 	Vector3F pog;
-	for(int i=0;i<m_ebpSampler->numParticles();++i) {
-	    if(i>=m_ebpSampler->numParticles() ) {
-	        std::cout<<"\n oor error "<<i<<" "<<m_ebpSampler->numParticles();
-	        break;
-	    }
-	    
+	for(int i=0;i<ebpSampler.numParticles();++i) {
+
 		if(!closestPointOnGround(pog, psamp[i], ml) ) 
 			continue;
 	
@@ -95,7 +95,7 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	}
 	std::cout<<" added";
 	std::cout.flush();
-	m_isSampling = false;
+	ebpSampler.clear();
     return true;
 }
 
@@ -803,36 +803,24 @@ void ModifyForest::removeTypedPlants(int x)
 	clearSelected();
 }
 
-bool ModifyForest::sampleGround(GrowOption & option)
+bool ModifyForest::sampleGround(EbpGrid * sampler, GrowOption & option)
 {
-    if(m_isSampling) {
-        std::cout<<"\n sampling in progress";
-        std::cout.flush();
-        return false;
-    }
-    m_isSampling = true;
-    if(numActiveGroundFaces() < 1) {
-		std::cout<<"\n ModifyForest has no active ground to sample";
-		m_ebpSampler->clear();
-		return false;
-	}
-	
 	float gz = 2.f * plantSize(option.m_plantId) + option.m_maxMarginSize;
     std::cout<<"\n flood ground w grid size "<<gz;
     
 typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(activeGround()->primIndices(), 
 	                        &triangles() );
-	m_ebpSampler->fillBox(fintersect, gz * 8.f);
-	m_ebpSampler->subdivideToLevel<TIntersect>(fintersect, 0, 3);
-	m_ebpSampler->insertNodeAtLevel(3);
-	m_ebpSampler->cachePositions();
-	std::cout<<"\n flood box    "<<m_ebpSampler->boundingBox();
+	sampler->fillBox(fintersect, gz * 8.f);
+	sampler->subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	sampler->insertNodeAtLevel(3);
+	sampler->cachePositions();
+	std::cout<<"\n flood box    "<<sampler->boundingBox();
 	
 	for(int i=0;i<20;++i)
-		m_ebpSampler->update();
+		sampler->update();
 	
-	std::cout<<"\n num sample "<<m_ebpSampler->numParticles();
+	std::cout<<"\n num sample "<<sampler->numParticles();
 	std::cout.flush();
 	return true;
 }
