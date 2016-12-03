@@ -305,6 +305,50 @@ void testWorldG(int n)
 	std::cout<<"\n passed ";
 }
 
+class A {
+	int x;
+public:
+	A() {}
+	virtual ~A() {}
+	virtual void show() {
+		std::cout<<" show A ";
+	}
+};
+
+class B : public A {
+
+	int y;
+public:
+	B() {}
+	virtual ~B() {}
+	virtual void show() {
+		std::cout<<" show B ";
+	}
+};
+
+void testPolymex()
+{
+	std::cout<<"\n test cast "<<std::endl;
+	
+	try {
+		A * dev = new A();
+/// static cast return A *
+/// dynamic cast return NULL
+/// debug only
+		assert (dynamic_cast<B *>(dev) == const_cast<B *>(dev) );
+		B * cd = dynamic_cast<B *>(dev);
+
+		if(cd == NULL) throw "bad cast to B";
+		cd->show();
+	
+	} catch (const char * ex) {
+		std::cerr<<" caught "<<ex;
+	} catch (...) {
+		std::cerr<<" caught something";
+	}
+	std::cout<<"\n passed ";
+}
+
 int main()
 {
 	/*
@@ -485,6 +529,7 @@ int main()
 	testSequenceRemove();
 	testArrayInsert(1000000);
 	testWorldG(1000000);
+	testPolymex();
 	std::cout<<"\n end of test\n";
 	return 0;
 }

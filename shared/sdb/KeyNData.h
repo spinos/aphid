@@ -84,11 +84,17 @@ const int & KeyNData<KeyType, MaxNKey>::numKeys() const
 
 template <typename KeyType, int MaxNKey>
 const KeyType & KeyNData<KeyType, MaxNKey>::key(const int & i) const
-{ return m_data[i].key; }
+{ 
+	if(i >= m_numKeys ) throw "KeyNData key is out-of-range";
+	return m_data[i].key; 
+}
 
 template <typename KeyType, int MaxNKey>
 Entity * KeyNData<KeyType, MaxNKey>::index(const int & i) const
-{ return m_data[i].index; }
+{ 
+	if(i >= m_numKeys ) throw "KeyNData data is out-of-range";
+	return m_data[i].index; 
+}
 
 template <typename KeyType, int MaxNKey>
 bool KeyNData<KeyType, MaxNKey>::isFull() const

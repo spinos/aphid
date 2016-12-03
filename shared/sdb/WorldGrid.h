@@ -24,20 +24,23 @@ class WorldGrid : public Sequence<Coord3>
 	float m_gridSize;
 	
 public:
-	WorldGrid(Entity * parent = NULL) : Sequence<Coord3>(parent) 
-	{
-		m_gridSize = 1.f;
-	}
+	WorldGrid(Entity * parent = NULL) : Sequence<Coord3>(parent),
+	m_gridSize(32.f)
+	{}
 	
-	virtual ~WorldGrid() {}
+	virtual ~WorldGrid() 
+	{}
 	
-	void setGridSize(float x)
-	{ m_gridSize = x; }
+	void setGridSize(float x);
 	
 	ChildType * value() 
-	{ return static_cast<ChildType *>(Sequence<Coord3>::currentIndex() ); }
+	{ 
+		ChildType * r = dynamic_cast<ChildType *>(Sequence<Coord3>::currentIndex() );
+		if(r == NULL) throw "World Grid value null ";
+		return r;
+	}
 	
-	const Coord3 key() const 
+	const Coord3 & key() const 
 	{ return Sequence<Coord3>::currentKey(); }
 	
 	ChildType * insertChild(const float * at);
@@ -78,6 +81,10 @@ protected:
 private:
 	
 };
+
+template<typename ChildType, typename ValueType>
+void WorldGrid<ChildType, ValueType>::setGridSize(float x)
+{ m_gridSize = (x>32.f) ? x : 32.f; }
 
 template<typename ChildType, typename ValueType>
 const Coord3 WorldGrid<ChildType, ValueType>::gridCoord(const float * p) const

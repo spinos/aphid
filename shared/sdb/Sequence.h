@@ -232,7 +232,7 @@ protected:
 		return m_current->index(m_currentData);
 	}
 	
-	const T currentKey() const {
+	const T & currentKey() const {
 		return m_current->key(m_currentData);
 	}
 	

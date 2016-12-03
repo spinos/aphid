@@ -110,6 +110,7 @@ protected:
 					const float & maxDistance);
 		
 	void onPlantChanged();
+	void intersectWorldBox(const Ray & ray);
 	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 

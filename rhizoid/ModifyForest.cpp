@@ -199,7 +199,10 @@ void ModifyForest::growOnTriangle(TriangleRaster * tri,
 
 bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 {
-	if(!intersectGround(ray) ) return false;
+	if(!intersectGround(ray) ) {
+		intersectWorldBox(ray);
+		return false;
+	}
 	
 	IntersectionContext * ctx = intersection();
 	
@@ -373,7 +376,10 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 void ModifyForest::scaleBrushAt(const Ray & ray, float magnitude)
 {
     if(!intersectGround(ray)) {
-		if(!intersectGrid(ray)) return;
+		if(!intersectGrid(ray)) {
+			intersectWorldBox(ray);
+			return;
+		}
 	}
 	
 	IntersectionContext * ctx = intersection();
@@ -726,7 +732,10 @@ bool ModifyForest::calculateSelecedWeight(const Ray & ray)
 {
     if(numActivePlants() < 1 ) return false;
 	if(!intersectGround(ray) ) {
-		if(!intersectGrid(ray)) return false;
+		if(!intersectGrid(ray)) {
+			intersectWorldBox(ray);
+			return false;
+		}
 	}
 	
 	IntersectionContext * ctx = intersection();

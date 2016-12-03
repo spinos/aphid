@@ -146,8 +146,10 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 	if(numPlants() < 1) return false;
 	
 	if(!intersectGround(ray) ) {
-		if(!intersectGrid(ray) ) 
+		if(!intersectGrid(ray) ) {
+			intersectWorldBox(ray);
 			return false;
+		}
 	}
 	
 	m_activePlants->setCenter(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN);
@@ -159,9 +161,7 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode)
 {
 	if(!intersectGround(ray) ) {
-/// empty previous selection if hit nothing
-		//if(mode == SelectionContext::Replace)
-		//	m_selectCtx->deselect();
+		intersectWorldBox(ray);
 		return false;
 	}
 	
@@ -235,6 +235,7 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
+		if(d == NULL) throw "Forest testNeighborsInCell null data";
 		float scale = d->t1->getSide().length();
 		if(pos.distanceTo(d->t1->getTranslation() ) - plantSize(*d->t3) * scale < minDistance) return true;
 		  
@@ -468,6 +469,15 @@ void Forest::onPlantChanged()
     std::cout.flush();
 	updateGrid();
 	updateNumPlants();
+}
+
+void Forest::intersectWorldBox(const Ray & ray)
+{
+	float h0, h1;
+	if(!gridBoundingBox().intersect(ray, &h0, &h1) )
+		h1 = 1e6f;
+	m_intersectCtx.m_hitP = ray.travel(h1);
+	m_intersectCtx.m_hitN = ray.m_dir;
 }
 
 }
