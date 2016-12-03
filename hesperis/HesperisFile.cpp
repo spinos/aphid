@@ -10,9 +10,9 @@
 #include "HesperisFile.h"
 #include <CurveGroup.h>
 #include <BaseBuffer.h>
-#include <APolygonalMesh.h>
-#include <ATriangleMeshGroup.h>
-#include <ATetrahedronMeshGroup.h>
+#include <geom/APolygonalMesh.h>
+#include <geom/ATriangleMeshGroup.h>
+#include <geom/ATetrahedronMeshGroup.h>
 #include <BaseTransform.h>
 #include <AAttribute.h>
 #include <GeometryArray.h>

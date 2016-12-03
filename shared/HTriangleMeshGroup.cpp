@@ -8,7 +8,7 @@
  */
 
 #include "HTriangleMeshGroup.h"
-#include "ATriangleMeshGroup.h"
+#include "geom/ATriangleMeshGroup.h"
 
 namespace aphid {
 

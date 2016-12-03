@@ -11,8 +11,8 @@
 #include <BaseMesh.h>
 #include <BaseDeformer.h>
 //#include <BaseField.h>
-#include <ATriangleMesh.h>
-#include <AQuadMesh.h>
+#include <geom/ATriangleMesh.h>
+#include <geom/AQuadMesh.h>
 
 namespace aphid {
 

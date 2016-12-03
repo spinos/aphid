@@ -9,7 +9,7 @@
 #pragma once
 #include "ADistanceField.h"
 #include "GeoDrawer.h"
-#include <GridTables.h>
+#include <sdb/GridTables.h>
 #include "tetrahedron_math.h"
 
 namespace aphid {

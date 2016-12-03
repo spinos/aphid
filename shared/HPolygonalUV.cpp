@@ -1,5 +1,5 @@
 #include "HPolygonalUV.h"
-#include <APolygonalUV.h>
+#include <geom/APolygonalUV.h>
 
 namespace aphid {
 

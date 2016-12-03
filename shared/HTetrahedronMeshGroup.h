@@ -1,3 +1,5 @@
+#ifndef APH_H_TETRAHEDRON_MESH_GROUP_H
+#define APH_H_TETRAHEDRON_MESH_GROUP_H
 #include "HTetrahedronMesh.h"
 
 namespace aphid {
@@ -14,3 +16,5 @@ public:
 };
 
 }
+#endif
+

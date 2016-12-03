@@ -1,7 +1,7 @@
 #include "HPolygonalMesh.h"
 #include <AllHdf.h>
-#include <APolygonalMesh.h>
-#include <APolygonalUV.h>
+#include <geom/APolygonalMesh.h>
+#include <geom/APolygonalUV.h>
 #include <HPolygonalUV.h>
 
 namespace aphid {

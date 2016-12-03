@@ -14,7 +14,7 @@
 #include <iostream>
 #include <CurveGroup.h>
 #include <BaseBuffer.h>
-#include <ATriangleMesh.h>
+#include <geom/ATriangleMesh.h>
 
 namespace aphid {
 

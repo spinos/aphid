@@ -8,16 +8,16 @@
  */
 
 #include "GeoDrawer.h"
-#include <GeodesicSphereMesh.h>
+#include <geom/GeodesicSphereMesh.h>
 #include <PyramidMesh.h>
 #include <CubeMesh.h>
 #include <CircleCurve.h>
 #include <DiscMesh.h>
 #include <Geometry.h>
 #include <GeometryArray.h>
-#include <ATriangleMesh.h>
-#include <AQuadMesh.h>
-#include <ATetrahedronMesh.h>
+#include <geom/ATriangleMesh.h>
+#include <geom/AQuadMesh.h>
+#include <geom/ATetrahedronMesh.h>
 #include <AOrientedBox.h>
 #include <tetrahedron_math.h>
 //#include <BaseTransform.h>
