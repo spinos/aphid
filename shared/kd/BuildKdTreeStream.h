@@ -11,7 +11,7 @@
 #include <BoundingBox.h>
 #include <sdb/VectorArray.h>
 #include <BaseMesh.h>
-#include <KdTreeNode.h>
+#include <kd/KdTreeNode.h>
 #include <vector>
 
 namespace aphid {

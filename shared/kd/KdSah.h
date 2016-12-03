@@ -1,6 +1,6 @@
 #pragma once
-#include <BaseBinSplit.h>
-#include <PrimBoundary.h>
+#include <kd/BaseBinSplit.h>
+#include <kd/PrimBoundary.h>
 #include <boost/thread.hpp>
 
 namespace aphid {

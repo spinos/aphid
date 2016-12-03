@@ -7,10 +7,10 @@
  *
  */
 
-#include <CartesianGrid.h>
+#include <sdb/CartesianGrid.h>
 #include <IntersectionContext.h>
 #include <Morton3D.h>
-#include <KdEngine.h>
+#include <kd/KdEngine.h>
 
 namespace aphid {
 

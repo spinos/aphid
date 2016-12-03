@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <BaseBinSplit.h>
-#include <BuildKdTreeContext.h>
+#include <kd/BaseBinSplit.h>
+#include <kd/BuildKdTreeContext.h>
 
 namespace aphid {
 

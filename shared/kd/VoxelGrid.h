@@ -9,9 +9,9 @@
  */
 #ifndef VOXELGRID_H
 #define VOXELGRID_H
-#include <VoxelEngine.h>
+#include <kd/VoxelEngine.h>
 #include <sdb/VectorArray.h>
-#include <GridBuilder.h>
+#include <kd/GridBuilder.h>
 
 namespace aphid {
 

@@ -1,10 +1,10 @@
 #pragma once
 #include <Geometry.h>
 #include <Boundary.h>
-#include <TreeProperty.h>
+#include <kd/TreeProperty.h>
 #include <IntersectionContext.h>
-#include <KdNNode.h>
-#include "KdSah.h"
+#include <kd/KdNNode.h>
+#include <kd/KdSah.h>
 #include "BoxNeighbors.h"
 #include <sstream>
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <KdTreeNode.h>
+#include <kd/KdTreeNode.h>
 
 namespace aphid {
 

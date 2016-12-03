@@ -9,11 +9,11 @@
 #pragma once
 #include <Geometry.h>
 #include <Boundary.h>
-#include <KdTreeNode.h>
-#include <BuildKdTreeStream.h>
-#include <KdTreeBuilder.h>
+#include <kd/KdTreeNode.h>
+#include <kd/BuildKdTreeStream.h>
+#include <kd/KdTreeBuilder.h>
 #include <sdb/VectorArray.h>
-#include <TreeProperty.h>
+#include <kd/TreeProperty.h>
 
 namespace aphid {
 

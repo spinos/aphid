@@ -15,11 +15,6 @@
 #include <BoundingBox.h>
 #include <AHelper.h>
 #include <ExampData.h>
-#include <KdTree.h>
-
-#ifdef WIN32
-#include <gExtension.h>
-#endif
 
 MTypeId ExampViz::id( 0x95a20e );
 MObject ExampViz::abboxminv;

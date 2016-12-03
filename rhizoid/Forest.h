@@ -10,7 +10,7 @@
 #ifndef APH_FOREST_H
 #define APH_FOREST_H
 #include <PlantCommon.h>
-#include <KdEngine.h>
+#include <kd/KdEngine.h>
 #include <ConvexShape.h>
 #include <IntersectionContext.h>
 #include <RayMarch.h>

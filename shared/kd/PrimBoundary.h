@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Boundary.h>
-#include <GridClustering.h>
+#include <sdb/GridClustering.h>
 
 namespace aphid {
 

@@ -7,7 +7,7 @@
  *
  */
 
-#include "KdTreeBuilder.h"
+#include <kd/KdTreeBuilder.h>
 #include <boost/thread.hpp>  
 
 namespace aphid {

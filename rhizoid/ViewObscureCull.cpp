@@ -8,7 +8,6 @@
  */
 
 #include "ViewObscureCull.h"
-#include <KdTree.h>
 
 namespace aphid {
 

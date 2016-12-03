@@ -8,8 +8,8 @@
  */
 
 #pragma once
-#include <BuildKdTreeStream.h>
-#include <PrimBoundary.h>
+#include <kd/BuildKdTreeStream.h>
+#include <kd/PrimBoundary.h>
 
 namespace aphid {
 

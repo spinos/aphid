@@ -4,8 +4,6 @@ set (CMAKE_BUILD_TYPE Release)
 include_directories(../mallard ../shared ../lapl ../catmullclark 
 ../../ofl/opium ../fit ../powell ../../ofl/shared
 ../btree
-../kdtree
-../ntree
 ../hesperis)
 
 IF (UNIX)
@@ -254,17 +252,13 @@ file (GLOB Sdb_SRC
 ADD_LIBRARY (aphidSdb ${LIB_TYP}
 ${Sdb_SRC})
 
-ADD_LIBRARY (aphidKd ${LIB_TYP}
-../shared/KdTreeNode.cpp
-../shared/CartesianGrid.cpp
-../shared/PrincipalComponents.cpp
-../shared/MinMaxBins.cpp
-../shared/SplitEvent.cpp
-../shared/BaseBinSplit.cpp 
-../btree/GridClustering.cpp
-../kdtree/TreeProperty.cpp
-../kdtree/PrimBoundary.cpp
+file (GLOB APH_Kd_SRC
+	"../shared/kd/*.h"
+    "../shared/kd/*.cpp"
 )
+
+ADD_LIBRARY (aphidKd ${LIB_TYP}
+${APH_Kd_SRC})
 
 ADD_LIBRARY (aphidGraph ${LIB_TYP}
 ../shared/ADistanceField.cpp

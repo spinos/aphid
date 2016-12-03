@@ -12,7 +12,7 @@
 #include <vector>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
-#include <GridClustering.h>
+#include <sdb/GridClustering.h>
 #include <AOrientedBox.h>
 #include <boost/scoped_ptr.hpp>
 

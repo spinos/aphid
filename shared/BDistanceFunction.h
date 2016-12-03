@@ -9,7 +9,7 @@
 #pragma once
 #include "ConvexShape.h"
 #include "ConvexDomain.h"
-#include <NTreeDomain.h>
+#include <kd/NTreeDomain.h>
 
 namespace aphid {
 

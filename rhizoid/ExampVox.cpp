@@ -8,8 +8,8 @@
  */
 
 #include "ExampVox.h"
-#include <KdEngine.h>
-#include <VoxelGrid.h>
+#include <kd/KdEngine.h>
+#include <kd/VoxelGrid.h>
 #include <FieldTriangulation.h>
 
 namespace aphid {

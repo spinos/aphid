@@ -22,8 +22,8 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <geom/ATriangleMesh.h>
-#include <PrincipalComponents.h>
-#include <KdEngine.h>
+#include <kd/PrincipalComponents.h>
+#include <kd/KdEngine.h>
 #include <FieldTriangulation.h>
 
 #define kBeginPickFlag "-bpk" 

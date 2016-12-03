@@ -7,9 +7,9 @@
  *
  */
 
-#include "BuildKdTreeContext.h"
+#include <kd/BuildKdTreeContext.h>
 #include "Geometry.h"
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 
 namespace aphid {
 

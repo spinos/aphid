@@ -7,7 +7,7 @@
  *
  */
 
-#include "BuildKdTreeStream.h"
+#include <kd/BuildKdTreeStream.h>
 
 namespace aphid {
 

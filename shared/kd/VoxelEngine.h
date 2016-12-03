@@ -11,7 +11,7 @@
 #include <Boundary.h>
 #include <Morton3D.h>
 #include <Quantization.h>
-#include <PrincipalComponents.h> 
+#include <kd/PrincipalComponents.h> 
 #include <vector>
 
 namespace aphid {
