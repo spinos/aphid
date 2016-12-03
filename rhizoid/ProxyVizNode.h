@@ -21,8 +21,6 @@
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
 #include <maya/MSceneMessage.h>
-#include <Matrix44F.h>
-#include <Vector3F.h>
 #include "MForest.h"
 
 class MItMeshPolygon;

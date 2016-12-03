@@ -7,6 +7,7 @@
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
 #include <fstream> 
+#include <PlantSelection.h>
 
 namespace aphid {
 
@@ -335,7 +336,7 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 	}
 	onPlantChanged();
 	AHelper::Info<unsigned>(" MForest load num plants", numPlants() );
-	selection()->deselect();
+	deselectPlants();
 	return true;
 }
 

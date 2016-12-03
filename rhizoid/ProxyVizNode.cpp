@@ -819,7 +819,7 @@ void ProxyViz::beginPickInView()
 {
 	MGlobal::displayInfo("MForest begin pick in view");
 	initRandGroup();
-	selection()->deselect();
+	deselectPlants();
 	m_toCheckVisibility = true;
 }
 

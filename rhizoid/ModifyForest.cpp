@@ -13,6 +13,7 @@
 #include <geom/ATriangleMesh.h>
 #include <ANoise3.h>
 #include <../qtogl/ebp.h>
+#include <PlantSelection.h>
 #include <ctime>
 
 namespace aphid {

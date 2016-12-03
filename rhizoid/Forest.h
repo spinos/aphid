@@ -9,18 +9,17 @@
 
 #ifndef APH_FOREST_H
 #define APH_FOREST_H
-#include <Quaternion.h>
-#include <Matrix44F.h>
+#include <PlantCommon.h>
 #include <KdEngine.h>
 #include <ConvexShape.h>
 #include <IntersectionContext.h>
 #include <RayMarch.h>
-#include "PlantSelection.h"
 
 namespace aphid {
 
 class ExampVox;
 class ATriangleMesh;
+class PlantSelection;
 
 class Forest {
 
