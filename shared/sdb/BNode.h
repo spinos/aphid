@@ -427,12 +427,18 @@ BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::firstLeaf()
 	if(isLeaf())
 		return this;
 	
-	return static_cast<BNode *>(leftChild())->firstLeaf();
+	BNode * c = dynamic_cast<BNode *>(leftChild());
+	if(c==NULL) {
+		throw "BNode first leaf null";
+	}
+	return c->firstLeaf();
 }
 
 template <typename KeyType, int MaxNKey>
 BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::nextLeaf() 
-{ return static_cast<BNode *>(sibling()); }
+{ 
+	return dynamic_cast<BNode *>(sibling());
+}
 
 template <typename KeyType, int MaxNKey> 
 void BNode<KeyType, MaxNKey>::connectToChildren()

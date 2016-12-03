@@ -34,6 +34,7 @@ void PlantSelection::setCenter(const Vector3F & center, const Vector3F & directi
 
 void PlantSelection::select(SelectionContext::SelectMode mode)
 {
+	std::cout<<"PlantSelection select begin "<<std::endl;
 	int ng = 1 + m_radius / m_grid->gridSize();
 	
 	const sdb::Coord3 c0 = m_grid->gridCoord((const float *)&m_center);
@@ -45,14 +46,15 @@ void PlantSelection::select(SelectionContext::SelectMode mode)
 			c1.y = c0.y + j;
 			for(i=-ng; i<=ng; ++i) {
 				c1.x = c0.x + i;
-				select(c1, mode);
+				selectInCell(c1, mode);
 			}
 		}
 	}
-	m_numSelected = m_plants->size();
+	updateNumSelected();
+	std::cout<<"PlantSelection select end "<<std::endl;
 }
 
-void PlantSelection::select(const sdb::Coord3 & c, 
+void PlantSelection::selectInCell(const sdb::Coord3 & c, 
                         const SelectionContext::SelectMode & mode)
 {
 	BoundingBox b = m_grid->coordToGridBBox(c);
@@ -62,6 +64,7 @@ void PlantSelection::select(const sdb::Coord3 & c,
 	if(cell->isEmpty() ) return;
 	
 	SelectionContext::SelectMode usemode = mode;
+	try {
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
@@ -73,11 +76,17 @@ void PlantSelection::select(const sdb::Coord3 & c,
                     usemode = SelectionContext::Unknown;
                     
             }
-			if(usemode == SelectionContext::Append) select(cell->value() );
-			else if(usemode == SelectionContext::Remove) m_plants->remove(cell->key() );
+			if(usemode == SelectionContext::Append) 
+				select(cell->value() );
+			else if(usemode == SelectionContext::Remove) {
+				m_plants->remove(cell->key() );
+			}
 		}
 		
 		cell->next();
+	}
+	} catch (...) {
+		std::cerr<<"PlantSelection select caught something";
 	}
 }
 
@@ -95,17 +104,29 @@ void PlantSelection::selectByType(int x)
 void PlantSelection::selectByTypeInCell(sdb::Array<int, Plant> * cell, int x)
 {
 	if(cell->isEmpty() ) return;
+	try {
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
+		if(!d) {
+			throw "PlantSelection select in cell null data";
+		}
 		if(x == *d->t3) select(cell->value() );
 		
 		cell->next();
+	}
+	} catch (...) {
+		std::cerr<<"PlantSelection select in cell caught something";
 	}
 }
 
 void PlantSelection::select(Plant * p)
 { 
+	if(m_plants->find(p->key) ) {
+		//std::cout<<" already selected "<<p->key;
+		return;
+	}
+	
 	PlantData * backup = new PlantData;
 	*backup->t1 = *p->index->t1;
 	*backup->t2 = *p->index->t2;
@@ -119,6 +140,7 @@ void PlantSelection::select(Plant * p)
 	inst->m_backup = b;
 	inst->m_reference = p;
 	m_plants->insert(p->key, inst);
+	m_numSelected++;
 }
 
 void PlantSelection::deselect()
@@ -130,7 +152,7 @@ void PlantSelection::deselect()
 void PlantSelection::updateNumSelected()
 { m_numSelected = m_plants->size(); }
 
-const unsigned & PlantSelection::numSelected() const
+const int & PlantSelection::numSelected() const
 { return m_numSelected; }
 	
 sdb::Array<int, PlantInstance> * PlantSelection::data()

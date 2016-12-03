@@ -2,7 +2,6 @@
 #include <maya/MFnMesh.h>
 #include <maya/MDagModifier.h>
 #include <maya/MEulerRotation.h>
-#include <gl_heads.h>
 #include <AHelper.h>
 #include <ExampData.h>
 #include <ExampVox.h>
@@ -138,7 +137,7 @@ void MForest::flood(GrowOption & option)
 	clearSelected();
 	AHelper::Info<int>("ProxyViz begin flood plant", option.m_plantId);
 	if(growOnGround(option)) {
-	    finishGrow();
+	    onPlantChanged();
         AHelper::Info<int>("MForest error empty flood ground", 0 );
 	}
 	enableDrawing();
@@ -153,7 +152,7 @@ void MForest::grow(const MPoint & origin, const MPoint & dest,
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	growAt(r, option);
-	finishGrow();
+	onPlantChanged();
 	enableDrawing();
 }
 
@@ -166,40 +165,6 @@ void MForest::replacePlant(const MPoint & origin, const MPoint & dest,
 	Ray r(a, b);
 	replaceAt(r, option);
 	enableDrawing();
-}
-
-void MForest::drawSolidMesh(MItMeshPolygon & iter)
-{
-	iter.reset();
-	for(; !iter.isDone(); iter.next()) {
-		int vertexCount = iter.polygonVertexCount();
-		glBegin(GL_POLYGON);
-		for(int i=0; i < vertexCount; i++) {
-			MPoint p = iter.point (i);
-			MVector n;
-			iter.getNormal(i, n);
-			glNormal3f(n.x, n.y, n.z);
-			glVertex3f(p.x, p.y, p.z);
-		}
-		glEnd();
-	}
-}
-
-void MForest::drawWireMesh(MItMeshPolygon & iter)
-{
-	iter.reset();
-	glBegin(GL_LINES);
-	for(; !iter.isDone(); iter.next()) {
-		int vertexCount = iter.polygonVertexCount();
-		
-		for(int i=0; i < vertexCount-1; i++) {
-			MPoint p = iter.point (i);
-			glVertex3f(p.x, p.y, p.z);
-			p = iter.point (i+1);
-			glVertex3f(p.x, p.y, p.z);
-		}		
-	}
-	glEnd();
 }
 
 void MForest::matrix_as_array(const MMatrix &space, double *mm)
@@ -227,15 +192,6 @@ void MForest::finishPlantSelection()
 	AHelper::Info<unsigned>("n active plants", numActivePlants() );
 }
 
-void MForest::finishGrow()
-{
-    std::cout<<"MForest finish grow";
-    std::cout.flush();
-	updateGrid();
-	updateNumPlants();
-	selection()->updateNumSelected();
-}
-
 void MForest::erase(const MPoint & origin, const MPoint & dest,
 					GrowOption & option)
 {
@@ -244,15 +200,8 @@ void MForest::erase(const MPoint & origin, const MPoint & dest,
 	Ray r(a, b);
 	disableDrawing();
 	clearAt(r, option);
-	finishErase();
+	onPlantChanged();
 	enableDrawing();
-}
-
-void MForest::finishErase()
-{
-	updateGrid();
-	updateNumPlants();
-	selection()->updateNumSelected();
 }
 
 void MForest::adjustBrushSize(const MPoint & origin, const MPoint & dest, 
@@ -384,7 +333,7 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 		bind.m_offset.set(cot.x, cot.y, cot.z);
 		addPlant(tms, bind, typId);
 	}
-	finishGrow();
+	onPlantChanged();
 	AHelper::Info<unsigned>(" MForest load num plants", numPlants() );
 	selection()->deselect();
 	return true;
@@ -444,7 +393,7 @@ void MForest::loadExternal(const char* filename)
 	}
 	delete[] data;
 	delete[] typd;
-	finishGrow();
+	onPlantChanged();
 	moveWithGround();
 	AHelper::Info<const char *>("MForest read cache from ", filename);
 }
@@ -661,7 +610,6 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
 					percentage, plantTyp, i);
 		g->next();
 	}
-	selection()->updateNumSelected();
 	AHelper::Info<int>(" n visible plants", numActivePlants() );
 }
 
@@ -788,7 +736,7 @@ void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & optio
 			AHelper::Info<Vector3F>("no grow at ", (*it).getTranslation());		
 	}
 		
-	finishGrow();
+	onPlantChanged();
 	enableDrawing();
 }
 
@@ -798,10 +746,12 @@ void MForest::finishGroundSelection()
 void MForest::offsetAlongNormal(const MPoint & origin, const MPoint & dest,
 					GrowOption & option)
 {
+	disableDrawing();
 	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	raiseOffsetAt(r, option);
+	enableDrawing();
 }
 
 void MForest::movePlantByVec(const Ray & ray,
@@ -810,7 +760,7 @@ void MForest::movePlantByVec(const Ray & ray,
 {
 	disableDrawing();
 	movePlant(ray, displaceNear, displaceFar, clipNear, clipFar);
-	finishErase();
+	onPlantChanged();
 	enableDrawing();
 }
 

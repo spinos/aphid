@@ -249,7 +249,7 @@ const float & Forest::plantSize(int idx) const
 sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * Forest::grid()
 { return m_grid; }
 
-const unsigned & Forest::numActivePlants() const
+const int & Forest::numActivePlants() const
 { return m_activePlants->numSelected(); }
 
 sdb::Array<int, PlantInstance> * Forest::activePlants()
@@ -314,6 +314,15 @@ bool Forest::closestPointOnGround(Vector3F & dest,
 	else 
 		dest = origin;
 	return m_closestPointTest._hasResult;
+}
+
+void Forest::setBind(GroundBind * bind) const
+{
+	bind->setGeomComp(m_closestPointTest._igeometry, 
+								m_closestPointTest._icomponent );
+	bind->m_w0 = m_closestPointTest._contributes[0];
+	bind->m_w1 = m_closestPointTest._contributes[1];
+	bind->m_w2 = m_closestPointTest._contributes[2];
 }
 
 bool Forest::bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest)
@@ -452,5 +461,13 @@ const sdb::VectorArray<cvx::Triangle> & Forest::triangles() const
 
 const float & Forest::gridSize() const
 { return m_grid->gridSize(); }
+
+void Forest::onPlantChanged()
+{
+	std::cout<<"Forest on plant changed";
+    std::cout.flush();
+	updateGrid();
+	updateNumPlants();
+}
 
 }

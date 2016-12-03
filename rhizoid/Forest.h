@@ -45,7 +45,7 @@ public:
 	
     void setSelectionRadius(float x);
 	unsigned numActiveGroundFaces();
-	const unsigned & numActivePlants() const;
+	const int & numActivePlants() const;
 	void removeAllPlants();
 	const float & selectionRadius() const;
 	const float & gridSize() const;
@@ -81,6 +81,7 @@ protected:
 	void displacePlantInGrid(PlantInstance * inst );
 	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
+	void setBind(GroundBind * bind) const;
 /// -1: disable binding
 ///  0: failed, rebind
 ///  1: success
@@ -107,7 +108,9 @@ protected:
 	bool closestPointOnGround(Vector3F & dest,
 					const Vector3F & origin,
 					const float & maxDistance);
-					
+		
+	void onPlantChanged();
+	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,

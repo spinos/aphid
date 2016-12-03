@@ -44,8 +44,11 @@ public:
 	ValueType * value() const {
 		try {
 		SingleType * s = dynamic_cast<SingleType *>(Sequence<KeyType>::currentIndex());
-		if(s==NULL) throw "array cast null value";
-		return s->data();
+		if(s==NULL) throw "array cast null single";
+		
+		ValueType * r = s->data();
+		if(r==NULL) throw "array value null";
+		return r;
 		} catch(...) {
 			throw "array wrong value";
 		}
@@ -57,7 +60,8 @@ public:
 
 		if(!g.index) return NULL;
 		
-		SingleType * s = static_cast<SingleType *>(g.index);
+		SingleType * s = dynamic_cast<SingleType *>(g.index);
+		if(s == NULL) throw "array find null single";
 		
 		return s->data();
 	}

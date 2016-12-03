@@ -61,7 +61,7 @@ class PlantSelection {
 	
 	Vector3F m_center, m_direction;
 	float m_radius;
-	unsigned m_numSelected;
+	int m_numSelected;
     int m_typeFilter;
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * m_grid;
 	sdb::Array<int, PlantInstance> * m_plants;
@@ -75,12 +75,11 @@ public:
 	void select(SelectionContext::SelectMode mode);
 	void selectByType(int x);
     void deselect();
-	const unsigned & numSelected() const;
+	const int & numSelected() const;
 	sdb::Array<int, PlantInstance> * data();
 	void calculateWeight();
 	void select(Plant * p);
-	void updateNumSelected();
-    const float & radius() const;
+	const float & radius() const;
     
     void setTypeFilter(int x);
     
@@ -88,9 +87,10 @@ public:
 					Vector3F & pnt);
 	
 protected:
-
+	void updateNumSelected();
+    
 private:
-	void select(const sdb::Coord3 & c, 
+	void selectInCell(const sdb::Coord3 & c, 
 	            const SelectionContext::SelectMode & mode);
 	void selectByTypeInCell(sdb::Array<int, Plant> * cell, int x);
 	

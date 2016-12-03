@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 2.8)
 project (btree)
 
-set (CMAKE_BUILD_TYPE Release)
+## CMAKE_BUILD_TYPE={DEBUG/MINSIZEREL/RELWITHDEBINFO/RELEASE}
+set (CMAKE_BUILD_TYPE RELWITHDEBINFO)
+set(CMAKE_CXX_FLAGS "-O0")
 include_directories ("." "../shared")
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 

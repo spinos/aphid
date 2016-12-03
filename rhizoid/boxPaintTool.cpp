@@ -615,12 +615,6 @@ void proxyPaintContext::clearByType()
 	PtrViz->removeTypedPlants(m_growOpt.m_plantId);	
 }
 
-void proxyPaintContext::finishGrow()
-{
-	if(!PtrViz) return;
-	PtrViz->finishGrow();
-}
-
 void proxyPaintContext::replace()
 {
 	if(!PtrViz) return;

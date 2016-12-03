@@ -2,8 +2,9 @@
 #include "DrawForest.h"
 #include <maya/MGlobal.h>
 #include <maya/MArrayDataHandle.h>
-#include <maya/MItMeshPolygon.h>
 #include <maya/MMatrix.h>
+#include <maya/MVectorArray.h>
+#include <maya/MPointArray.h>
 
 namespace aphid {
 
@@ -28,10 +29,8 @@ public:
 					GrowOption & option);
 	void replacePlant(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option);
-	void finishGrow();
 	void erase(const MPoint & origin, const MPoint & dest,
 					GrowOption & option);
-	void finishErase();
     void adjustBrushSize(const MPoint & origin, const MPoint & dest, 
                     float magnitude);
 	void adjustSize(const MPoint & origin, const MPoint & dest, 
@@ -53,8 +52,6 @@ public:
     
 protected:
     bool updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
-	void drawSolidMesh(MItMeshPolygon & iter);
-	void drawWireMesh(MItMeshPolygon & iter);
 	static void matrix_as_array(const MMatrix &space, double *mm);
 	void savePlants(MPointArray & plantTms, 
 					MIntArray & plantIds,

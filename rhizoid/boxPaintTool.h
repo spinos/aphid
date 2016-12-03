@@ -147,7 +147,6 @@ private:
 	void smoothSelected();
 	void selectGround();
 	void startSelectGround();
-	void finishGrow();
 	void replace();
     void scaleBrush();
     void discardFaceSelection();

@@ -46,3 +46,30 @@ SET (HDF5_ENABLE_SZIP_SUPPORT ON)
 IF (WIN32)
 SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")
 ENDIF ()
+
+http://stackoverflow.com/questions/22140520/how-to-enable-assert-in-cmake-release-mode
+
+# Debug
+# ... -g ...
+
+# Release
+# ... -O3 -DNDEBUG ...
+
+# RelWithDebInfo
+# ... -O2 -g -DNDEBUG ...
+
+# MyRel
+# ... -O3 ...
+
+#if (MY_DEBUG)
+# define MY_ASSERT(A) ... checks here ...
+#else
+# define MY_ASSERT(A) ... ignore A ...
+#endif
+
+option(ENABLE_MY_ASSERT "Turn on MY_ASSERT checks" OFF)
+if(ENABLE_MY_ASSERT)
+  add_definitions(-DMY_DEBUG=1)
+else()
+  add_definitions(-DMY_DEBUG=0)
+endif()

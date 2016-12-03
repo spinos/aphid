@@ -79,22 +79,16 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		}
 		
 		randomSpaceAt(pog, option, tm, scale);
+		
 		if(closeToOccupiedPosition(pog, option.m_minMarginSize + sampleSize * scale) ) 
 			continue;
 		
-		m_bary->project(pog);
-		m_bary->compute();
-		if(!m_bary->insideTriangle()) continue;
-		
-		bind.m_w0 = m_bary->getV(0);
-		bind.m_w1 = m_bary->getV(1);
-		bind.m_w2 = m_bary->getV(2);
+		setBind(&bind);
 		
 		addPlant(tm, bind, option.m_plantId);
 
 	}
-	std::cout<<" added";
-	std::cout.flush();
+	
 	ebpSampler.clear();
     return true;
 }

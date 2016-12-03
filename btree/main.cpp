@@ -483,7 +483,7 @@ int main()
 	std::cout<<"\n p"<<p0->index;
 	*/
 	testSequenceRemove();
-	//testArrayInsert(1000000);
+	testArrayInsert(1000000);
 	testWorldG(1000000);
 	std::cout<<"\n end of test\n";
 	return 0;

@@ -141,10 +141,16 @@ public:
 	
 	int size() {
 		int c = 0;
+		try {
 		beginLeaf();
 		while(!leafEnd()) {
 			c += leafSize();
 			nextLeaf();
+		}
+		} catch (const char * ex) {
+			std::cerr<<"Sequence size caught "<<ex;
+		} catch (...) {
+			std::cerr<<"Sequence size caught something";
 		}
 		return c;
 	}
@@ -208,7 +214,7 @@ protected:
 	}
 	
 	void nextLeaf() {
-		m_current = static_cast<BNode<T> *>(m_current->sibling()); 
+		m_current = m_current->nextLeaf();
 	}
 	
 	const bool leafEnd() const {
@@ -222,7 +228,7 @@ protected:
 	}
 	
 	Entity * currentIndex() const {
-		if(!m_current) return NULL;
+		if(m_current == NULL) return NULL;
 		return m_current->index(m_currentData);
 	}
 	
