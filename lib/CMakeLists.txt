@@ -159,7 +159,6 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/AFrustum.cpp
 ../shared/TriangleRaster.cpp
 ../shared/PrimitiveFilter.cpp
-../shared/BoxNeighbors.cpp
 ../shared/PatchMesh.cpp
 ../shared/Patch.cpp  
 ../shared/PointInsidePolygonTest.cpp  

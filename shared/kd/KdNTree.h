@@ -5,7 +5,7 @@
 #include <IntersectionContext.h>
 #include <kd/KdNNode.h>
 #include <kd/KdSah.h>
-#include "BoxNeighbors.h"
+#include <kd/BoxNeighbors.h>
 #include <sstream>
 
 namespace aphid {

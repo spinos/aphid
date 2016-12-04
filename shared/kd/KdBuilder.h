@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include "KdRope.h"
+#include <kd/KdRope.h>
 
 namespace aphid {
 

@@ -8,8 +8,8 @@
  */
 
 #pragma once
-#include "Treelet.h"
-#include "KdNTree.h"
+#include <kd/Treelet.h>
+#include <kd/KdNTree.h>
 
 namespace aphid {
 

@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "KdNTree.h"
-#include "KdBuilder.h"
+#include <kd/KdNTree.h>
+#include <kd/KdBuilder.h>
 #include <IntersectionContext.h>
 #include <SelectionContext.h>
 #include <Geometry.h>

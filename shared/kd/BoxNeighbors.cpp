@@ -7,7 +7,7 @@
  *
  */
 
-#include "BoxNeighbors.h"
+#include <kd/BoxNeighbors.h>
 #include <iostream>
 #include <AllMath.h>
 
