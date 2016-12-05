@@ -89,6 +89,36 @@ MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 include_directories (${Boost_INCLUDE_DIR})
 include_directories (${Boost_INCLUDE_DIR}/boost/tr1/tr1)
 
+if (WIN32)
+add_definitions (-DOPENEXR_DLL)
+set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
+set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
+"D:/usr/openexr21/lib/Iex-2_1.lib"
+"D:/usr/openexr21/lib/IlmImf-2_1.lib"
+"D:/usr/openexr21/lib/IlmThread-2_1.lib")
+elseif (APPLE)
+set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)
+set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIex-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmImf-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
+else ()
+
+SET (ILMBASE_PACKAGE_PREFIX /usr/local)
+
+set (OpenEXR_INCLUDE_DIR ${ILMBASE_PACKAGE_PREFIX}/include)
+set (OpenEXR_Library ${ILMBASE_PACKAGE_PREFIX}/lib/libHalf.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIex-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libImath-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmImf-2_2.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmThread-2_2.so)
+endif ()
+
+message (" openexr include is " ${OpenEXR_INCLUDE_DIR})
+
+include_directories (${OpenEXR_INCLUDE_DIR})
+
+
 IF (WIN32) 
 	SET (LIB_TYP STATIC)
 ELSEIF (APPLE)
