@@ -22,7 +22,7 @@
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
 #include <geom/ATriangleMesh.h>
-#include <kd/PrincipalComponents.h>
+#include <geom/PrincipalComponents.h>
 #include <kd/KdEngine.h>
 #include <FieldTriangulation.h>
 

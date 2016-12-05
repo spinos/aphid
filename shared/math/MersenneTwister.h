@@ -8,6 +8,7 @@
  */
 #ifndef MERSENNETWISTER_H
 #define MERSENNETWISTER_H
+namespace aphid {
 typedef   signed long int32;     
 typedef unsigned long uint32;
 class MersenneTwister {
@@ -41,4 +42,5 @@ private:
 		
 	TArch Architecture; 
 };
+}
 #endif

@@ -129,6 +129,11 @@ ENDIF ()
 
 MESSAGE (" library type is " ${LIB_TYP})
 
+file (GLOB Math_SRC
+    "../shared/math/*.h"
+    "../shared/math/*.cpp"
+)
+
 ADD_LIBRARY (aphidMath ${LIB_TYP}
 ../shared/Vector3F.cpp 
                 ../shared/Vector2F.cpp 
@@ -139,15 +144,10 @@ ADD_LIBRARY (aphidMath ${LIB_TYP}
     ../shared/BoundingRectangle.cpp
 ../shared/AOrientedBox.cpp
 ../shared/Ray.cpp
-../shared/MersenneTwister.cpp
-../shared/PseudoNoise.cpp
-../shared/QuickSort.cpp
 ../shared/Plane.cpp
 ../shared/ViewCull.cpp
-../shared/ANoise3.cpp
-../shared/Calculus.cpp
 ../shared/plots.cpp
-)
+${Math_SRC})
 
 SET (APHID_GEOM_PATH ../shared/geom)
 
@@ -174,7 +174,6 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/GeometryArray.cpp
 ../shared/Boundary.cpp
 ../shared/Triangle.cpp
-../shared/BarycentricCoordinate.cpp  
 ../shared/IntersectionContext.cpp 
 ../shared/BaseTransform.cpp
 ../shared/Segment.cpp
@@ -382,7 +381,6 @@ add_library(aphid ${LIB_TYP}
 ##../kdtree/KdIntersection.cpp
 ##../shared/APointCloud.cpp
 ##../shared/MeshSeparator.cpp
-##../shared/PrincipalComponents.cpp
 ##../shared/DynamicBody.cpp
 ##../shared/ViewFrame.cpp
 ##../btree/BTree.cpp

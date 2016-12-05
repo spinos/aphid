@@ -8,10 +8,10 @@
  */
 
 #include "ModifyForest.h"
-#include <TriangleRaster.h>
-#include <BarycentricCoordinate.h>
+#include <math/BarycentricCoordinate.h>
+#include <math/PseudoNoise.h>
 #include <geom/ATriangleMesh.h>
-#include <ANoise3.h>
+#include <math/ANoise3.h>
 #include <../qtogl/ebp.h>
 #include <PlantSelection.h>
 #include <ctime>
@@ -20,8 +20,8 @@ namespace aphid {
 
 ModifyForest::ModifyForest()
 { 
-	m_raster = new TriangleRaster;
 	m_bary = new BarycentricCoordinate;
+	m_pnoise = new PseudoNoise;
 	m_seed = rand() % 999999; 
     m_noiseWeight = 0.f;
 	std::time_t tim(NULL);
@@ -30,8 +30,8 @@ ModifyForest::ModifyForest()
 
 ModifyForest::~ModifyForest() 
 {
-	delete m_raster;
 	delete m_bary;
+	delete m_pnoise;
 }
 
 void ModifyForest::setNoiseWeight(float x)
@@ -94,110 +94,6 @@ bool ModifyForest::growOnGround(GrowOption & option)
     return true;
 }
 
-void ModifyForest::growOnFace(const int & geoId, const int & triId,
-					GrowOption & option)
-{
-	GroundBind bind;
-	const ATriangleMesh * mesh = groundMeshes()[geoId];
-	Vector3F * p = mesh->points();
-	if(option.m_alongNormal)
-		option.m_upDirection = mesh->triangleNormal(triId );
-		
-	unsigned * tri = mesh->triangleIndices(triId );
-	
-	if(m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) {
-		m_bary->create(p[tri[0]], p[tri[1]], p[tri[2]] );
-		
-		bind.setGeomComp(geoId, triId );
-		growOnTriangle(m_raster, m_bary, bind, option);
-	}
-}
-
-void ModifyForest::growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
-						int geoId,
-						GrowOption & option)
-{
-	GroundBind bind;
-	ATriangleMesh * mesh = static_cast<ATriangleMesh *>(geo);
-	Vector3F * p = mesh->points();
-	components->begin();
-	while(!components->end()) {
-		if(option.m_alongNormal)
-			option.m_upDirection = mesh->triangleNormal(components->key() );
-		
-		unsigned * tri = mesh->triangleIndices(components->key() );
-		
-		if(m_raster->create(p[tri[0]], p[tri[1]], p[tri[2]] ) ) {
-			m_bary->create(p[tri[0]], p[tri[1]], p[tri[2]] );
-			
-			bind.setGeomComp(geoId, components->key() );
-			growOnTriangle(m_raster, m_bary, bind, option);
-		}
-		components->next();
-	}
-}
-
-void ModifyForest::growOnTriangle(TriangleRaster * tri, 
-							BarycentricCoordinate * bar,
-							GroundBind & bind,
-							GrowOption & option)
-{
-	float sampleSize = plantSize(option.m_plantId) * .67f;
-	int grid_x, grid_y;
-	tri->gridSize(sampleSize, grid_x, grid_y);
-	int numSamples = grid_x * grid_y;
-	
-	const bool limitRadius = option.m_radius > 1e-3f;
-	Vector3F *samples = new Vector3F[numSamples];
-	char *hits = new char[numSamples];
-	tri->genSamples(sampleSize, grid_x, grid_y, samples, hits);
-	float scale;
-	Matrix44F tm;
-/// relative to grid
-	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
-	for(int s = 0; s < numSamples; s++) {
-		if(!hits[s]) continue;	
-	
-		Vector3F & pos = samples[s];
-		
-/// limited by noise level
-		if(option.m_noiseLevel > 0.001f) {
-			if(ANoise3::FractalF((const float *)&pos,
-							(const float *)&option.m_noiseOrigin,
-							freq,
-							option.m_noiseLacunarity,
-							option.m_noiseOctave,
-							option.m_noiseGain ) < option.m_noiseLevel )
-				continue;
-		}
-		
-		if(limitRadius) {
-			if(pos.distanceTo(option.m_centerPoint) >  option.m_radius)
-				continue;
-		}
-			
-		randomSpaceAt(pos, option, tm, scale);
-		float scaledSize = sampleSize * 1.5f * scale;
-		float limitedMargin = getNoise2(option.m_minMarginSize, option.m_maxMarginSize);
-/// limit low margin
-		if(limitedMargin < -.99f * scaledSize) limitedMargin = -.99f * scaledSize;
-		float delta = limitedMargin + scaledSize;
-		if(closeToOccupiedPosition(pos, delta)) continue;
-		
-		bar->project(pos);
-		bar->compute();
-		if(!bar->insideTriangle()) continue;
-		
-		bind.m_w0 = bar->getV(0);
-		bind.m_w1 = bar->getV(1);
-		bind.m_w2 = bar->getV(2);
-		
-		addPlant(tm, bind, option.m_plantId);
-	}
-	delete[] samples;
-	delete[] hits;
-}
-
 bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 {
 	if(!intersectGround(ray) ) {
@@ -235,8 +131,6 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	if(option.m_alongNormal)
 		option.m_upDirection = t->calculateNormal();
     
-	if(!m_raster->create(t->P(0), t->P(1), t->P(2) ) ) return false;
-	
 	m_bary->create(t->P(0), t->P(1), t->P(2) );
     
 	GroundBind bind;
@@ -304,7 +198,7 @@ void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
-			if(m_pnoise.rfloat(m_seed) < option.m_strength) {
+			if(m_pnoise->rfloat(m_seed) < option.m_strength) {
 				Plant * pl = arr->value()->m_reference;
 				*pl->index->t3 = option.m_plantId;
 			}
@@ -357,7 +251,7 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
-			if(m_pnoise.rfloat(m_seed) < option.m_strength) {
+			if(m_pnoise->rfloat(m_seed) < option.m_strength) {
 				idToClear.push_back(arr->key() );
 				Plant * pl = arr->value()->m_reference;
 				clearPlant(pl, arr->key() );
@@ -703,13 +597,13 @@ void ModifyForest::randomSpaceAt(const Vector3F & pos, const GrowOption & option
 	side = up.cross(front);
 	side.normalize();
 	
-	scale = (m_pnoise.rfloat(m_seed)) * (option.m_maxScale - option.m_minScale)
+	scale = (m_pnoise->rfloat(m_seed)) * (option.m_maxScale - option.m_minScale)
 				+ option.m_minScale;
 	m_seed++;
 	
 	Vector3F vside(side.x, side.y, side.z);
 	Vector3F vaxis(up.x, up.y, up.z);
-	float ang = (m_pnoise.rfloat(m_seed) - 0.5f) * option.m_rotateNoise * 2.f * 3.14f;
+	float ang = (m_pnoise->rfloat(m_seed) - 0.5f) * option.m_rotateNoise * 2.f * 3.14f;
 	m_seed++;
 	
 	vside.rotateAroundAxis(vaxis, ang);

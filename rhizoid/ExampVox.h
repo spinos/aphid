@@ -9,10 +9,8 @@
 #include <DrawBox.h>
 #include <BoundingBox.h>
 #include <Geometry.h>
-#include <vector>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
-#include <sdb/GridClustering.h>
 #include <AOrientedBox.h>
 #include <boost/scoped_ptr.hpp>
 
@@ -87,8 +85,7 @@ protected:
 				const int & nv, const Vector3F * vertP, const Vector3F * vertN );
 						
 private:
-	void fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
-				Geometry * geo);
+	
 };
 
 }

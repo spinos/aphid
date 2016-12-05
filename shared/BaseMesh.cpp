@@ -7,7 +7,7 @@
  *
  */
 #include <iostream>
-#include <BarycentricCoordinate.h>
+#include <math/BarycentricCoordinate.h>
 #include "BaseMesh.h"
 //#include <SelectionContext.h>
 #include <map>

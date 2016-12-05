@@ -11,7 +11,7 @@
 #include "AGraph.h"
 #include "BDistanceFunction.h"
 #include <sdb/Array.h>
-#include <Calculus.h>
+#include <math/Calculus.h>
 #include <map>
 
 namespace aphid {

@@ -7,10 +7,12 @@
  *
  */
 
-#include "GridClustering.h"
+#include <sdb/GridClustering.h>
 #include <iostream>
 
 namespace aphid {
+
+namespace sdb {
 
 GridClustering::GridClustering() {}
 GridClustering::~GridClustering() {}
@@ -61,6 +63,8 @@ void GridClustering::extractCellInside(GroupCell * cell, sdb::VectorArray<unsign
 			dst.insert(cell->key() );
 		cell->next();
 	}
+}
+
 }
 
 }

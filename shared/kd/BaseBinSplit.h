@@ -42,12 +42,12 @@ protected:
 			const unsigned nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
-	void calcEvent(GridClustering * grd, 
+	void calcEvent(sdb::GridClustering * grd, 
 	        const BoundingBox & box);
 	void calculateCosts(const BoundingBox & box);
-	void calcEvenBin(GridClustering * grd, const BoundingBox & box);
+	void calcEvenBin(sdb::GridClustering * grd, const BoundingBox & box);
 	
-	void calcSoftBin(GridClustering * grd, const BoundingBox & box);
+	void calcSoftBin(sdb::GridClustering * grd, const BoundingBox & box);
 	void calcSoftBin(const unsigned & nprim, 
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes,
@@ -61,10 +61,10 @@ private:
 			const sdb::VectorArray<unsigned> & indices,
 			const sdb::VectorArray<BoundingBox> & primBoxes);
 	void updateEventBBoxAlong(const int &axis,
-			GridClustering * grd, const BoundingBox & box);
+			sdb::GridClustering * grd, const BoundingBox & box);
 	void splitSoftBinAlong(MinMaxBins * dst,
 			const int & axis,
-			GridClustering * grd, const BoundingBox & box);
+			sdb::GridClustering * grd, const BoundingBox & box);
 	void splitSoftBinAlong(MinMaxBins * dst, 
 			const int & axis,
 			const BoundingBox & box,

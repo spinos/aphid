@@ -10,6 +10,7 @@
 #pragma once
 #include <kd/Treelet.h>
 #include <kd/KdNTree.h>
+#include <map>
 
 namespace aphid {
 

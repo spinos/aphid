@@ -7,7 +7,9 @@
  *
  */
 
-#include "MersenneTwister.h"
+#include <math/MersenneTwister.h>
+
+namespace aphid {
 
 MersenneTwister::MersenneTwister(uint32 seed) 
 {
@@ -105,5 +107,7 @@ int MersenneTwister::iRandom(int min, int max)
   if (r > max) r = max;
   if (max < min) return 0x80000000;
   return r;
+}
+
 }
 //:~

@@ -11,7 +11,6 @@
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
-#include <PseudoNoise.h>
 #include <EnvVar.h>
 #include <AHelper.h>
 #include <ExampVox.h>

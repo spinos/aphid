@@ -128,7 +128,7 @@ void SahSplit<T>::partitionCompress(const SplitEvent * e,
 					const BoundingBox & leftBox, const BoundingBox & rightBox,
 						SahSplit * leftCtx, SahSplit * rightCtx)
 {
-	GridClustering * grd = grid();
+	sdb::GridClustering * grd = grid();
 	const BoundingBox & bb = getBBox();
 	
 	if(e->leftCount() > 0)

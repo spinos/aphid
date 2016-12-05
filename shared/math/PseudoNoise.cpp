@@ -7,9 +7,11 @@
  *
  */
 
-#include "PseudoNoise.h"
+#include <math/PseudoNoise.h>
 #include <cmath>
-#include <iostream>
+
+namespace aphid {
+
 unsigned PseudoNoise::xRand;
 unsigned PseudoNoise::yRand;
 unsigned PseudoNoise::zRand;
@@ -96,4 +98,6 @@ void PseudoNoise::sphereRand(float& x, float& y, float& z, float r, unsigned int
 	rd = rd - ((int)rd);
 	
 	x *= rd; y *= rd; z *= rd;
+}
+
 }

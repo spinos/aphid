@@ -9,11 +9,13 @@
  */
 
 #pragma once
-#include <sdb/WorldGrid.h>
 #include <BoundingBox.h>
+#include <sdb/WorldGrid.h>
 #include <sdb/VectorArray.h>
 
 namespace aphid {
+
+namespace sdb {
 
 class GroupCell : public sdb::Sequence<unsigned>
 {
@@ -42,4 +44,5 @@ private:
 					
 };
 
+}
 }

@@ -13,7 +13,7 @@
 #include <Vector2F.h>
 #include <Vector3F.h>
 #include <Matrix44F.h>
-#include <PseudoNoise.h>
+#include <math/PseudoNoise.h>
 
 namespace aphid {
 

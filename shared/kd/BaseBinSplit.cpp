@@ -22,7 +22,7 @@ BaseBinSplit::~BaseBinSplit()
 
 void BaseBinSplit::splitSoftBinAlong(MinMaxBins * dst,
 			const int & axis,
-			GridClustering * grd, const BoundingBox & box)
+			sdb::GridClustering * grd, const BoundingBox & box)
 {
 	float geoRight, rightMost = box.getMin(axis);
 	grd->begin();
@@ -271,7 +271,7 @@ void BaseBinSplit::calcSoftBin(const unsigned & nprim,
 	}
 }
 
-void BaseBinSplit::calcSoftBin(GridClustering * grd, const BoundingBox & box)
+void BaseBinSplit::calcSoftBin(sdb::GridClustering * grd, const BoundingBox & box)
 {
 	const float thre = box.getLongestDistance() * MMBINISFLATRATIO;
 	for(int axis = 0; axis < 3; axis++) {
@@ -298,7 +298,7 @@ void BaseBinSplit::calcSoftBin(GridClustering * grd, const BoundingBox & box)
 	}
 }
 
-void BaseBinSplit::calcEvenBin(GridClustering * grd, const BoundingBox & b)
+void BaseBinSplit::calcEvenBin(sdb::GridClustering * grd, const BoundingBox & b)
 {
 	const float thre = b.getLongestDistance() * MMBINISFLATRATIO;
 	for(int axis = 0; axis < 3; axis++) {
@@ -323,7 +323,7 @@ void BaseBinSplit::calcEvenBin(GridClustering * grd, const BoundingBox & b)
 	}
 }
 
-void BaseBinSplit::calcEvent(GridClustering * grd, const BoundingBox & box)
+void BaseBinSplit::calcEvent(sdb::GridClustering * grd, const BoundingBox & box)
 {	
 	for(int axis = 0; axis < 3; axis++) {
 		if(isEmptyAlong(axis))
@@ -333,7 +333,7 @@ void BaseBinSplit::calcEvent(GridClustering * grd, const BoundingBox & box)
 }
 
 void BaseBinSplit::updateEventBBoxAlong(const int &axis,
-				GridClustering * grd, const BoundingBox & box)
+				sdb::GridClustering * grd, const BoundingBox & box)
 {
 	SplitEvent * eventOffset = firstEventAlong(axis);
 	

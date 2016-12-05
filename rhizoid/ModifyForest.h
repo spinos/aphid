@@ -8,19 +8,17 @@
  */
 #pragma once
 #include "Forest.h"
-#include <PseudoNoise.h>
 
 namespace aphid {
 
-class TriangleRaster;
+class PseudoNoise;
 class BarycentricCoordinate;
 class EbpGrid;
 
 class ModifyForest : public Forest {
 	
-	TriangleRaster * m_raster;
 	BarycentricCoordinate * m_bary;
-	PseudoNoise m_pnoise;
+	PseudoNoise * m_pnoise;
 	int m_seed;
 	float m_noiseWeight;
 	
@@ -109,17 +107,6 @@ protected:
     
 private:
 	void clearPlant(Plant * pl, int k);
-	void growOnFaces(Geometry * geo, sdb::Sequence<unsigned> * components, 
-					int geoId,
-					GrowOption & option);
-					
-	void growOnFace(const int & geoId, const int & triId,
-					GrowOption & option);
-/// dice a triangle and test each sample to grow on
-	void growOnTriangle(TriangleRaster * tri, 
-					BarycentricCoordinate * bar,
-					GroundBind & bind,
-					GrowOption & option);
 	void randomSpaceAt(const Vector3F & pos, 
 							const GrowOption & option,
 							Matrix44F & space, float & scale);

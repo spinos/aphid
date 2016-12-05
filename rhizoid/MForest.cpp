@@ -6,6 +6,7 @@
 #include <ExampData.h>
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
+#include <math/PseudoNoise.h>
 #include <fstream> 
 #include <PlantSelection.h>
 

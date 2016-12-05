@@ -13,7 +13,7 @@
 #include "Boundary.h"
 #include "Ray.h"
 #include "GjkIntersection.h"
-#include "BarycentricCoordinate.h"
+#include <math/BarycentricCoordinate.h>
 
 namespace aphid {
     

@@ -8,7 +8,8 @@
  */
 
 #include "SelectionContext.h"
-#include "QuickSort.h"
+#include <math/QuickSort.h>
+
 namespace aphid {
 
 SelectionContext::SelectionContext() { m_mode = Replace; }

@@ -11,7 +11,7 @@ class PrimBoundary : public Boundary {
 
     sdb::VectorArray<BoundingBox> m_primitiveBoxes;
     sdb::VectorArray<unsigned> m_indices;
-    GridClustering * m_grid;
+    sdb::GridClustering * m_grid;
 	int m_numPrims;
     
 public:
@@ -28,9 +28,9 @@ public:
 	bool isCompressed() const;
 	void verbose() const;
 	bool canEndSubdivide(const SplitEvent * split) const;
-	GridClustering * grid();
+	sdb::GridClustering * grid();
 	void createGrid(const float & x);
-	void addCell(const sdb::Coord3 & x, GroupCell * c);
+	void addCell(const sdb::Coord3 & x, sdb::GroupCell * c);
 	void addPrimitive(const unsigned & idx);
 	
 protected:

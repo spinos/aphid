@@ -7,9 +7,9 @@
  *
  */
 
-#include "ATriangleMesh.h"
+#include <geom/ATriangleMesh.h>
 #include "BaseBuffer.h"
-#include "BarycentricCoordinate.h"
+#include <math/BarycentricCoordinate.h>
 #include <iostream>
 
 namespace aphid {

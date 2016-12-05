@@ -9,6 +9,7 @@
 
 #ifndef _Pseudo_NOISE_H
 #define _Pseudo_NOISE_H
+namespace aphid {
 
 class PseudoNoise
 {
@@ -26,5 +27,5 @@ private:
 	void seedd(unsigned int nx, unsigned int ny, unsigned int nz);
 	unsigned randomize();
 };
-
+}
 #endif

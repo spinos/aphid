@@ -7,8 +7,8 @@
  *
  */
 
-#include "ANoise3.h"
-#include "AllMath.h"
+#include <math/ANoise3.h>
+#include <AllMath.h>
 
 namespace aphid {
 

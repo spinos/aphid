@@ -6,6 +6,8 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef APH_A_NOISE_3_H
+#define APH_A_NOISE_3_H
 
 namespace aphid {
 
@@ -47,3 +49,4 @@ public:
 };
 
 }
+#endif

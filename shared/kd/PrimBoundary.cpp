@@ -1,5 +1,5 @@
-#include "PrimBoundary.h"
-#include "SplitEvent.h"
+#include <kd/PrimBoundary.h>
+#include <kd/SplitEvent.h>
 
 namespace aphid {
 
@@ -31,7 +31,7 @@ void PrimBoundary::addPrimitiveBox(const BoundingBox & b)
 
 void PrimBoundary::compressPrimitives()
 {
-	m_grid = new GridClustering();
+	m_grid = new sdb::GridClustering();
 	m_grid->setGridSize(getBBox().getLongestDistance() / 64.f);
 	
 	int i = 0;
@@ -44,7 +44,7 @@ void PrimBoundary::compressPrimitives()
 const sdb::VectorArray<unsigned> & PrimBoundary::indices() const
 { return m_indices; }
 
-GridClustering * PrimBoundary::grid()
+sdb::GridClustering * PrimBoundary::grid()
 { return m_grid; }
 
 const sdb::VectorArray<BoundingBox> & PrimBoundary::primitiveBoxes() const
@@ -88,12 +88,12 @@ bool PrimBoundary::decompress(const sdb::VectorArray<BoundingBox> & boxSrc,
 
 void PrimBoundary::createGrid(const float & x)
 {
-	m_grid = new GridClustering();
+	m_grid = new sdb::GridClustering();
 	m_grid->setGridSize(x);
 	m_grid->setDataExternal();
 }
 
-void PrimBoundary::addCell(const sdb::Coord3 & x, GroupCell * c)
+void PrimBoundary::addCell(const sdb::Coord3 & x, sdb::GroupCell * c)
 { m_grid->insertChildValue(x, c); }
 
 void PrimBoundary::countPrimsInGrid()

@@ -9,7 +9,6 @@
 
 #include "ExampVox.h"
 #include <kd/KdEngine.h>
-#include <kd/VoxelGrid.h>
 #include <FieldTriangulation.h>
 
 namespace aphid {
@@ -66,25 +65,6 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	buildTriangleDrawBuf(msh.numFrontTriangles(), msh.triangleIndices(),
 						msh.numVertices(), msh.triangleVertexP(), msh.triangleVertexN() );
 						
-}
-
-void ExampVox::fillGrid(sdb::WorldGrid<GroupCell, unsigned > * grid,
-				Geometry * geo)
-{
-	const int n = geo->numComponents();
-	for(int i = 0; i < n; i++) {
-		BoundingBox ab = geo->calculateBBox(i);
-		const Vector3F center = ab.center();
-		GroupCell * c = grid->insertChild((const float *)&center);
-		
-		if(!c) {
-			std::cout<<"\n error cast to GroupCell";
-			return;
-		}
-		
-		c->insert(i);
-		c->m_box.expandBy(ab);
-	}
 }
 
 void ExampVox::buildBoxDrawBuf() 

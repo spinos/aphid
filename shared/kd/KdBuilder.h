@@ -9,6 +9,7 @@
 
 #pragma once
 #include <kd/KdRope.h>
+#include <kd/KdSah.h>
 
 namespace aphid {
 

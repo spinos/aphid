@@ -72,7 +72,7 @@ void KdTreeBuilder::partitionCompress(const SplitEvent & e,
 					const BoundingBox & leftBox, const BoundingBox & rightBox,
 						BuildKdTreeContext &leftCtx, BuildKdTreeContext &rightCtx)
 {
-	sdb::WorldGrid<GroupCell, unsigned > * grd = m_context->grid();
+	sdb::WorldGrid<sdb::GroupCell, unsigned > * grd = m_context->grid();
 	
 	if(e.leftCount() > 0)
 		leftCtx.createGrid(grd->gridSize() );

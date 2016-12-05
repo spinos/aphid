@@ -7,7 +7,7 @@
  *
  */
 
-#include "PrincipalComponents.h"
+#include <geom/PrincipalComponents.h>
 
 namespace aphid {
 
