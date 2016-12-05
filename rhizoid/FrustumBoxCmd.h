@@ -13,7 +13,7 @@
 #include <maya/MArgDatabase.h>
 #include <vector>
 #include <AllMath.h>
-#include <VectorArray.h>
+#include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 
 class FrustumBoxCmd : public MPxCommand 
@@ -45,7 +45,8 @@ protected:
 					 
 	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
 					aphid::BoundingBox & bbox,
-					const MDagPath & meshPath) const;
+					const MDagPath & meshPath,
+					const MDagPath & tansformPath) const;
 								
 private:
 	enum WorkMode {

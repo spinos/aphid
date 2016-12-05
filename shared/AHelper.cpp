@@ -944,6 +944,37 @@ std::string AHelper::FullPathNameToObj(const MObject & node)
     return std::string(pf.fullPathName().asChar());
 }
 
+MDagPath AHelper::FindMatchedPath(const MDagPath & rel,
+	                const MDagPathArray & paths)
+{
+    for(unsigned i=0;i<paths.length();++i) {
+        MDagPath parentPath = paths[i];
+        MStatus stat;
+        for(;;) {
+            stat = parentPath.pop();
+            if(!stat) break;
+            
+            if(parentPath == rel)
+                return paths[i];
+            
+        }
+    }
+    return MDagPath();
+}
+
+MMatrix AHelper::GetWorldParentTransformMatrix2(const MDagPath & path,
+                    const MDagPath & transformPath)
+{
+    MDagPath usePath = path;
+    if(path.isInstanced()) {
+         MDagPathArray pathto;
+         MDagPath::getAllPathsTo(path.node(), pathto);
+         usePath = FindMatchedPath(transformPath, pathto);
+         Info<MString>("use instanced path",usePath.fullPathName() );
+    }
+    return GetWorldParentTransformMatrix(usePath);
+}
+
 MMatrix AHelper::GetWorldParentTransformMatrix(const MDagPath & path)
 {
 	MMatrix m;
@@ -1118,6 +1149,12 @@ double AHelper::AreaOfTriangle(const MPoint & a, const MPoint & b, const MPoint 
 	double dd = ab  * ca ;
 	
 	return 0.5 * sqrt(l0 * l0 * l2 *l2 - dd * dd ) ;
+}
+
+void AHelper::PrintFullPath(const MDagPathArray & paths)
+{
+    for(unsigned i=0;i<paths.length();++i)
+        MGlobal::displayInfo(paths[i].fullPathName() );
 }
 
 }

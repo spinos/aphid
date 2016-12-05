@@ -134,6 +134,9 @@ public:
 	
 	static MMatrix GetWorldParentTransformMatrix(const MDagPath & path);
 	static MMatrix GetParentTransform(const MDagPath & path);
+/// relative to instanced transform
+	static MMatrix GetWorldParentTransformMatrix2(const MDagPath & path,
+                    const MDagPath & transformPath);
 /// include itself
 	static MMatrix GetWorldTransformMatrix(const MDagPath & path);
 	static double AreaOfTriangle(const MPoint & a, const MPoint & b, const MPoint & c);
@@ -193,6 +196,9 @@ public:
     
     static bool IsReferenced(const MObject & node);
 	static MObject CreateDeformer(const MString & name);
+	static void PrintFullPath(const MDagPathArray & paths);
+	static MDagPath FindMatchedPath(const MDagPath & rel,
+	                const MDagPathArray & paths);
 };
 
 }

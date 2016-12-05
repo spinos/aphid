@@ -18,7 +18,7 @@
 #include <maya/MFnAnimCurve.h>
 #include <maya/MItDependencyNodes.h>
 #include <GjkIntersection.h>
-#include <PrincipalComponents.h>
+#include <kd/PrincipalComponents.h>
 
 #define kCameraScaleFlag "-cms" 
 #define kCameraScaleFlagLong "-cameraScale"
@@ -157,7 +157,7 @@ MStatus	FrustumBoxCmd::redoIt()
         paths.append(apath);
 	}
     
-    MGlobal::displayInfo(MString("n objects ") + paths.length());
+    AHelper::Info<unsigned>("n objects ", paths.length());
     std::vector<int> visibilities;
     int i;
     for(i=0; i< paths.length(); i++) visibilities.push_back(0);
@@ -226,11 +226,12 @@ void FrustumBoxCmd::collide(std::vector<int> & visibilities,
 
 void FrustumBoxCmd::getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
 								aphid::BoundingBox & bbox,
-								const MDagPath & meshPath) const
+								const MDagPath & meshPath,
+								const MDagPath & tansformPath) const
 {
-	aphid::AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
+	AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
 	
-	MMatrix worldTm = aphid::AHelper::GetWorldParentTransformMatrix(meshPath);
+	MMatrix worldTm = AHelper::GetWorldParentTransformMatrix2(meshPath, tansformPath);
 	
     MStatus stat;
 	
@@ -267,9 +268,10 @@ void FrustumBoxCmd::getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & 
 
 void FrustumBoxCmd::worldOrientedBox(aphid::Vector3F * corners, const MDagPath & path) const
 {
+    AHelper::Info<const char *>("get world oriented box", path.fullPathName().asChar() );
 	MDagPathArray meshPaths;
 	ASearchHelper::LsAllTypedPaths(meshPaths, path, MFn::kMesh);
-	
+
 	const int n = meshPaths.length();
 	if(n < 1) {
 		AHelper::Info<MString>(" FrustumBoxCmd find no mesh in path, use world bbox", path.fullPathName() );
@@ -282,7 +284,7 @@ void FrustumBoxCmd::worldOrientedBox(aphid::Vector3F * corners, const MDagPath &
 	
 	int i=0;
 	for(;i<n;++i) 
-		getMeshTris(tris, bbox, meshPaths[i]);
+		getMeshTris(tris, bbox, meshPaths[i], path);
 	
 	const int nt = tris.size();
 	if(nt < 1) {
