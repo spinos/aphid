@@ -354,8 +354,13 @@ bool Forest::intersectGround(const Ray & ray)
 		
 	m_intersectCtx.reset(ray, m_grid->gridSize() * 0.001f );
 	KdEngine engine;
+	try {
 	engine.intersect<cvx::Triangle, KdNode4>(m_ground, &m_intersectCtx );
-	
+	} catch(const char * ex) {
+	    std::cerr<<"Forest intersectGround caught: "<<ex;
+	} catch(...) {
+	    std::cerr<<"Forest intersectGround caught something";
+	}
 	if(!m_intersectCtx.m_success) std::cout<<"\n Forest::intersectGround result is false";
 	
 	return m_intersectCtx.m_success;

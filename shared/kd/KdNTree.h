@@ -271,12 +271,26 @@ void KdNTree<T, Tn>::setLeafRope(unsigned idx, const BoxNeighbors & ns)
 
 template <typename T, typename Tn>
 const int & KdNTree<T, Tn>::leafRopeInd(unsigned idx, int ri) const
-{ return m_leafNodes[idx]->_ropeInd[ri]; }
+{ 
+    if(idx >= m_leafNodes.size() ) {
+        std::cerr<<"KdNTree leafRopeInd idx "<<idx;
+        throw "KdNTree leafRopeInd idx out of range";
+    }
+    if(ri > 5 ) {
+        std::cerr<<"KdNTree leafRopeInd ri "<<ri;
+        throw "KdNTree leafRopeInd ri out of range";
+    }
+    return m_leafNodes[idx]->_ropeInd[ri]; 
+}
 
 template <typename T, typename Tn>
 void KdNTree<T, Tn>::setLeafRopeInd(unsigned x, unsigned idx, int ri)
 { 
 	// if(x<1) std::cout<<"\n warning map leaf "<<idx<<" rope "<<ri<<" to "<<x;
+	if(idx >= m_leafNodes.size() )
+        throw "KdNTree setLeafRopeInd idx out of range";
+    if(ri >= m_leafNodes.size() )
+        throw "KdNTree setLeafRopeInd ri out of range";
 	m_leafNodes[idx]->_ropeInd[ri] = x; 
 }
 
