@@ -8,7 +8,7 @@
  */
 
 #include <geom/ATriangleMesh.h>
-#include "BaseBuffer.h"
+#include <foundation/BaseBuffer.h>
 #include <math/BarycentricCoordinate.h>
 #include <iostream>
 

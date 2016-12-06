@@ -1,6 +1,6 @@
 #ifndef APOLYGONALUV_H
 #define APOLYGONALUV_H
-#include <AVerbose.h>
+#include <foundation/AVerbose.h>
 
 namespace aphid {
 

@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include <TypedEntity.h>
-#include <AVerbose.h>
-#include <NamedEntity.h>
+#include <foundation/TypedEntity.h>
+#include <foundation/AVerbose.h>
+#include <foundation/NamedEntity.h>
 #include <BoundingBox.h>
 #include <GjkIntersection.h>
 #include "math/BarycentricCoordinate.h"

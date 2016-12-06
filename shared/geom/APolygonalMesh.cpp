@@ -1,7 +1,7 @@
-#include "APolygonalMesh.h"
-#include "BaseBuffer.h"
-#include "APolygonalUV.h"
-#include "SHelper.h"
+#include <geom/APolygonalMesh.h>
+#include <foundation/BaseBuffer.h>
+#include <geom/APolygonalUV.h>
+#include <foundation/SHelper.h>
 
 namespace aphid {
 

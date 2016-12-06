@@ -1,4 +1,5 @@
-#include "ATetrahedronMeshGroup.h"
+#include <geom/ATetrahedronMeshGroup.h>
+
 namespace aphid {
 
 ATetrahedronMeshGroup::ATetrahedronMeshGroup() {}

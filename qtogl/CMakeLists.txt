@@ -6,12 +6,7 @@ project (glstrudy)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
-include_directories (../shared
-../bcc2d
-../hesperis
-../kdtree
-../btree
-../ntree)
+include_directories (../shared)
 
 set (INST_HEADER_FILES ../shared/Base3DView.h 
 ../shared/GlslBase.h
@@ -46,6 +41,7 @@ find_package (OpenGL REQUIRED)
 message ("opengl is " ${OPENGL_LIBRARIES})
 
 if (WIN32)
+SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/aphidFoundation.lib)
 SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
     SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/aphidGeom.lib)
     SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/aphidH5.lib)
@@ -54,6 +50,7 @@ SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
     SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/aphidSdb.lib)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/aphidGraph.lib)
 elseif (APPLE)
+SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
     set (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.a)
     set (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.a)
     set (APHID_H5_LIBRARY ${APHID_DIR}/lib/libaphidH5.a)
@@ -62,6 +59,7 @@ elseif (APPLE)
     set (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.a)
     set (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.a)
 ELSE ()
+SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
     SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.so)
     SET (APHID_GEOM_LIBRARY ${APHID_DIR}/lib/libaphidGeom.so)
     SET (APHID_H5_LIBRARY ${APHID_DIR}/lib/libaphidH5.so)
@@ -71,6 +69,7 @@ ELSE ()
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
 endif ()
 
+message ("aphid foundation is " ${APHID_FOUND_LIBRARY})
 message ("aphid math is " ${APHID_MATH_LIBRARY})
 message ("aphid geom is " ${APHID_GEOM_LIBRARY})
 message ("aphid h5 is " ${APHID_H5_LIBRARY})
@@ -118,6 +117,7 @@ add_executable (psinst ${INST_HEADER_FILES} ${INST_SOURCE_FILES})
 
 target_link_libraries (psinst Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (psinst ${OPENGL_LIBRARIES})
+target_link_libraries (psinst ${APHID_FOUND_LIBRARY})
 target_link_libraries (psinst ${APHID_MATH_LIBRARY})
 target_link_libraries (psinst ${APHID_GEOM_LIBRARY})
 target_link_libraries (psinst ${APHID_UI_LIBRARY})

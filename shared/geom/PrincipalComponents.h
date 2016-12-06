@@ -9,7 +9,7 @@
 #ifndef APHID_VOXEL_PRINCIPALCOMPONENTS_H
 #define APHID_VOXEL_PRINCIPALCOMPONENTS_H
 #include <AllMath.h>
-#include <AOrientedBox.h>
+#include <math/AOrientedBox.h>
 #include <boost/thread.hpp>  
 
 namespace aphid {

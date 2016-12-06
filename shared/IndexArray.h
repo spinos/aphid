@@ -9,7 +9,9 @@
 
 #pragma once
 
-#include <BaseArray.h>
+#include <foundation/BaseArray.h>
+
+namespace aphid {
 
 class IndexArray : public BaseArray<unsigned> {
 public:
@@ -20,3 +22,5 @@ public:
 	unsigned *asIndex(unsigned i);
 
 };
+
+}

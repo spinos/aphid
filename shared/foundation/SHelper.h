@@ -1,9 +1,10 @@
 #ifndef _S_HELPER_H
 #define _S_HELPER_H
-#include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
+namespace aphid {
 
 class SHelper
 {
@@ -73,5 +74,7 @@ public:
     static std::string GetParentName(const std::string& name, const std::string & term);
     static std::string GetFollowupName(const std::string& name, const std::string & term);
 };
+
+}
 #endif
 //:~

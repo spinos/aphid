@@ -10,7 +10,7 @@
 #ifndef CUDARENDER_H
 #define CUDARENDER_H
 
-#include <BaseBuffer.h>
+#include <foundation/BaseBuffer.h>
 #include <CUDABuffer.h>
 #include <ViewCull.h>
 

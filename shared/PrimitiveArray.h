@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <BaseArray.h>
+#include <foundation/BaseArray.h>
 #include <Primitive.h>
 namespace aphid {
 

@@ -13,7 +13,7 @@
 #include <sstream>
 #include <iostream>
 #include <CurveGroup.h>
-#include <BaseBuffer.h>
+#include <foundation/BaseBuffer.h>
 #include <geom/ATriangleMesh.h>
 
 namespace aphid {

@@ -8,7 +8,8 @@
  */
 
 #include <geom/ATriangleMesh.h>
-#include "AStripedModel.h"
+#include <foundation/AStripedModel.h>
+
 namespace aphid {
 
 class ATriangleMeshGroup : public ATriangleMesh, public AStripedModel {

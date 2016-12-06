@@ -8,7 +8,7 @@
  */
 #include "H5Availability.h"
 #include <HBase.h>
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <sstream>
 namespace aphid {
     

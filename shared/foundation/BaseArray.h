@@ -7,9 +7,14 @@
  *
  */
 
-#pragma once
+#ifndef APH_BASE_ARRAY_H
+#define APH_BASE_ARRAY_H
+
 #include <vector>
 #include <iostream>
+
+namespace aphid {
+
 #define BASEARRNUMELEMPERBLK 8192
 #define BASEARRNUMELEMPERBLKM1 8191
 #define BASEARRNUMELEMPERBLKL2 13
@@ -281,3 +286,6 @@ void BaseArray<T>::verbose() const
     std::cout<<"capacity "<<capacity()<<"\n";
     std::cout<<"current index "<<index()<<"\n";
 }
+
+}
+#endif

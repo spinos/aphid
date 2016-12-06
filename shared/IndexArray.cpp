@@ -9,19 +9,14 @@
 
 #include "IndexArray.h"
 
+namespace aphid {
+
 IndexArray::IndexArray()
-{
-}
+{}
 
 IndexArray::~IndexArray() 
-{
-}
-/*
-unsigned *IndexArray::asIndex(unsigned index)
-{
-	return (unsigned *)at(index);
-}
-*/
+{}
+
 unsigned *IndexArray::asIndex(unsigned x) 
 {
 	return at(x);
@@ -30,5 +25,7 @@ unsigned *IndexArray::asIndex(unsigned x)
 unsigned *IndexArray::asIndex()
 {
 	return current();
+}
+
 }
 //:~

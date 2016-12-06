@@ -7,8 +7,9 @@
  *
  */
 
-#include "AStripedModel.h"
-#include <BaseBuffer.h>
+#include <foundation/AStripedModel.h>
+#include <foundation/BaseBuffer.h>
+
 namespace aphid {
 
 AStripedModel::AStripedModel() 

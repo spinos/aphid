@@ -8,7 +8,7 @@
  */
 
 #include "AGenericMesh.h"
-#include "BaseBuffer.h"
+#include <foundation/BaseBuffer.h>
 
 namespace aphid {
 

@@ -1,8 +1,9 @@
 #ifndef ATETRAHEDRONMESHGROUP_H
 #define ATETRAHEDRONMESHGROUP_H
 
-#include "ATetrahedronMesh.h"
-#include "AStripedModel.h"
+#include <geom/ATetrahedronMesh.h>
+#include <foundation/AStripedModel.h>
+
 namespace aphid {
 
 class ATetrahedronMeshGroup : public ATetrahedronMesh, public AStripedModel {

@@ -7,7 +7,8 @@
  *
  */
 
-#include "AOrientedBox.h"
+#include <math/AOrientedBox.h>
+#include <Ray.h>
 
 namespace aphid {
 
@@ -121,9 +122,6 @@ void AOrientedBox::getBoxVertices(Vector3F * dst) const
 	dst[6] = m_center - rx * eh.x + ry * eh.y + rz * eh.z;
 	dst[7] = m_center + rx * eh.x + ry * eh.y + rz * eh.z;
 }
-
-const TypedEntity::Type AOrientedBox::type() const
-{ return TOrientedBox; }
 
 const BoundingBox AOrientedBox::calculateBBox() const
 {

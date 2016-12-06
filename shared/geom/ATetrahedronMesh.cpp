@@ -7,8 +7,8 @@
  *
  */
 
-#include "ATetrahedronMesh.h"
-#include "BaseBuffer.h"
+#include <geom/ATetrahedronMesh.h>
+#include <foundation/BaseBuffer.h>
 #include "tetrahedron_math.h"
 #include <GjkIntersection.h>
 namespace aphid {

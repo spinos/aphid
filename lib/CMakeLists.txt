@@ -3,7 +3,6 @@ project (aphid)
 set (CMAKE_BUILD_TYPE Release)
 include_directories(../mallard ../shared ../lapl ../catmullclark 
 ../../ofl/opium ../fit ../powell ../../ofl/shared
-../btree
 ../hesperis)
 
 IF (UNIX)
@@ -129,6 +128,14 @@ ENDIF ()
 
 MESSAGE (" library type is " ${LIB_TYP})
 
+file (GLOB Foundation_SRC
+"../shared/foundation/*.h"
+    "../shared/foundation/*.cpp"
+)
+
+ADD_LIBRARY (aphidFoundation ${LIB_TYP}
+${Foundation_SRC})
+
 file (GLOB Math_SRC
     "../shared/math/*.h"
     "../shared/math/*.cpp"
@@ -142,7 +149,6 @@ ADD_LIBRARY (aphidMath ${LIB_TYP}
                 ../shared/Quaternion.cpp 
     ../shared/BoundingBox.cpp 
     ../shared/BoundingRectangle.cpp
-../shared/AOrientedBox.cpp
 ../shared/Ray.cpp
 ../shared/Plane.cpp
 ../shared/ViewCull.cpp
@@ -156,21 +162,14 @@ file (GLOB Geom_SRC
     "../shared/geom/*.cpp"
 )
 
-ADD_LIBRARY (aphidGeom ${LIB_TYP} 
-../shared/SHelper.cpp 
-../shared/AVerbose.cpp
-../shared/BaseArray.cpp 
-../shared/AStripedModel.cpp
-../shared/TypedEntity.cpp 
-../shared/NamedEntity.cpp 
+ADD_LIBRARY (aphidGeom ${LIB_TYP}  
 ../shared/Geometry.cpp
 ../shared/Primitive.cpp
 ../shared/BaseCurve.cpp
 ../shared/CircleCurve.cpp 
 ../shared/BezierCurve.cpp 
 ../shared/GjkIntersection.cpp
-../shared/CurveGroup.cpp 
-../shared/BaseBuffer.cpp
+../shared/CurveGroup.cpp
 ../shared/GeometryArray.cpp
 ../shared/Boundary.cpp
 ../shared/Triangle.cpp

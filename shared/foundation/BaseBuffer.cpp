@@ -6,7 +6,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include "BaseBuffer.h"
+#include <foundation/BaseBuffer.h>
 #include <Vector3F.h>
 #include <iostream>
 #include <string.h>

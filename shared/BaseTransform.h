@@ -11,7 +11,7 @@
 #include <AllMath.h>
 #include <Geometry.h>
 #include <Boundary.h>
-#include <NamedEntity.h>
+#include <foundation/NamedEntity.h>
 #include <Ray.h>
 namespace aphid {
 

@@ -6,13 +6,14 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
-#include <AllMath.h>
-#include <Geometry.h>
+#ifndef APH_ORIENTED_BOX_H
+#define APH_ORIENTED_BOX_H
+#include <Matrix33F.h>
+#include <BoundingBox.h>
 
 namespace aphid {
 
-class AOrientedBox : public Geometry {
+class AOrientedBox {
 public:
 	AOrientedBox();
 	virtual ~AOrientedBox();
@@ -35,8 +36,7 @@ public:
 	Vector3F minorVector(bool low) const;
 	void getBoxVertices(Vector3F * dst) const;
 	
-	virtual const Type type() const;
-	virtual const BoundingBox calculateBBox() const;
+	const BoundingBox calculateBBox() const;
 	void limitMinThickness(const float & x);
 
 	Vector3F get8DOPFaceX() const;
@@ -69,3 +69,4 @@ public:
 };
 
 }
+#endif

@@ -18,7 +18,7 @@
 #include <geom/ATriangleMesh.h>
 #include <geom/AQuadMesh.h>
 #include <geom/ATetrahedronMesh.h>
-#include <AOrientedBox.h>
+#include <math/AOrientedBox.h>
 #include <tetrahedron_math.h>
 //#include <BaseTransform.h>
 //#include <TransformManipulator.h>

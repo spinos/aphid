@@ -8,7 +8,7 @@
  */
 
 #include "H5IO.h"
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 
 namespace aphid {
 

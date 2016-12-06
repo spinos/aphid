@@ -12,6 +12,8 @@
 #include <boost/algorithm/string.hpp>
 using namespace std;
 
+namespace aphid {
+
 void SHelper::divideByFirstSpace(std::string& ab2a, std::string& b)
 {
 	b = ab2a;
@@ -1035,5 +1037,7 @@ std::string SHelper::GetFollowupName(const std::string& name, const std::string 
 
 		}
 	return r;
+}
+
 }
 //:~

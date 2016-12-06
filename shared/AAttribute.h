@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include "TypedEntity.h"
+#include <foundation/TypedEntity.h>
 #include <string>
 #include <vector>
 #include <map>
