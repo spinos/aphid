@@ -20,7 +20,7 @@
 #include <maya/MItSelectionList.h>
 #include <maya/MGlobal.h>
 #include "ASearchHelper.h"
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>

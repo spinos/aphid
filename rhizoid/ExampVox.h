@@ -11,7 +11,7 @@
 #include <Geometry.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
-#include <AOrientedBox.h>
+#include <math/AOrientedBox.h>
 #include <boost/scoped_ptr.hpp>
 
 namespace aphid {

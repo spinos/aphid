@@ -8,7 +8,7 @@
  */
 
 #include "ASelectionHelper.h"
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 
 namespace aphid {
     
