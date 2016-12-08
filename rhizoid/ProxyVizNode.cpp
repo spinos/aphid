@@ -28,6 +28,7 @@ MObject ProxyViz::aradiusMult;
 MObject ProxyViz::outPositionPP;
 MObject ProxyViz::outScalePP;
 MObject ProxyViz::outRotationPP;
+MObject ProxyViz::outReplacePP;
 MObject ProxyViz::outValue;
 MObject ProxyViz::acachename;
 MObject ProxyViz::acameraspace;
@@ -122,6 +123,8 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
             return MS::kSuccess;
 		}
 		
+		const int ngroups = block.inputValue(agroupcount).asInt();
+		
 		MDataHandle hdata = block.inputValue(outPositionPP, &status);
         MFnVectorArrayData farray(hdata.data(), &status);
         if(!status) {
@@ -146,18 +149,26 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
             return MS::kSuccess;
         }
 		
+		MDataHandle replaceData = block.inputValue(outReplacePP, &status);
+        MFnDoubleArrayData replaceArrayFn(replaceData.data(), &status);
+        if(!status) {
+            MGlobal::displayInfo("proxy viz is not properly connected to a particle system, needs userScalarPP");
+			block.setClean(plug);
+            return MS::kSuccess;
+        }
+		
 		MVectorArray outPosArray = farray.array();	
         MVectorArray outScaleArray = scalearray.array();
 		MVectorArray outRotateArray = rotatearray.array();
+		MDoubleArray outReplaceArray = replaceArrayFn.array();
 		
 		if( outPosArray.length() < 1) {
 			block.setClean(plug);
 			return MS::kSuccess;
 		}
 		
-		MGlobal::displayInfo(MString("proxy viz computes particle attributes"));
-        
-		saveParticles(outPosArray, outRotateArray, outScaleArray);
+		computePPAttribs(outPosArray, outRotateArray, outScaleArray, outReplaceArray,
+						ngroups);
 
         float result = outPosArray.length();
 
@@ -392,8 +403,25 @@ MStatus ProxyViz::initialize()
         typedAttrFn.setStorable(false);
         if(addAttribute(outRotationPP) != MS::kSuccess) MGlobal::displayWarning("failed add rotpp");
 		
-
-        
+	MDoubleArray defaultDArray;
+	MFnDoubleArrayData dArrayDataFn;
+	dArrayDataFn.create( defaultDArray );
+	
+	outReplacePP = typedAttrFn.create( "outReplace", "orpl",
+									MFnData::kDoubleArray, dArrayDataFn.object(),
+									&stat );
+											
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning("failed create outReplace");
+	}
+	
+	typedAttrFn.setStorable(false);
+	
+	stat = addAttribute(outReplacePP);
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning("failed add outReplace");
+	}
+	
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
 	numFn.setWritable(false);
@@ -475,6 +503,7 @@ MStatus ProxyViz::initialize()
 	
 	MIntArray defaultIntArray;
 	MFnIntArrayData intArrayDataFn;
+	
 	intArrayDataFn.create( defaultIntArray );
 	aplantIdCache = typedAttrFn.create( "idCachePlant",
 											"idcpl",
@@ -836,15 +865,16 @@ void ProxyViz::processPickInView(const int & plantTyp)
 	MPlug gateLowPlg(node, alodgatelow);
 	float gateLow = gateLowPlg.asFloat();
 	
-	MPlug gcPlg(node, agroupcount);
-	int groupCount = gcPlg.asInt();
+//	MPlug gcPlg(node, agroupcount);
+//	int groupCount = gcPlg.asInt();
 	
-	MPlug giPlg(node, ainstanceId);
-	int groupId = giPlg.asInt();
+//	MPlug giPlg(node, ainstanceId);
+//	int groupId = giPlg.asInt();
 	
 	MPlug perPlg(node, aconvertPercentage);
 	double percentage = perPlg.asDouble();
-	pickVisiblePlants(gateLow, gateHigh, groupCount, groupId, percentage, plantTyp);
+	pickVisiblePlants(gateLow, gateHigh, percentage, plantTyp);
+	AHelper::Info<int>("proxyviz picks up n visible plants", numActivePlants() );
 }
 
 void ProxyViz::endPickInView()

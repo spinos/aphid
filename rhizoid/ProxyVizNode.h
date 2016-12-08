@@ -65,6 +65,7 @@ public:
 	static MObject outPositionPP;
 	static MObject outScalePP;
 	static MObject outRotationPP;
+	static MObject outReplacePP;
 	static MObject acachename;
 	static MObject acameraspace;
 	static MObject alodgatehigh;

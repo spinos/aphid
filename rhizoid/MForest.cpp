@@ -12,12 +12,11 @@
 
 namespace aphid {
 
-MForest::MForest() :
-m_randGroup(NULL)
+MForest::MForest()
 {}
 
 MForest::~MForest()
-{ if(m_randGroup) delete[] m_randGroup; }
+{}
 
 bool MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray)
 {
@@ -589,8 +588,7 @@ void MForest::initRandGroup()
 		return;
 	}
 	
-	if(m_randGroup) delete[] m_randGroup;
-	m_randGroup = new int[n];
+	m_randGroup.reset(new int[n]);
 	
 	PseudoNoise pnoise;
 	unsigned i = 0;
@@ -598,85 +596,28 @@ void MForest::initRandGroup()
 	AHelper::Info<int>(" total n plants", n );
 }
 
-void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate, 
-					int totalGroups, int currentGroup, 
-					double percentage,
-                    int plantTyp)
-{
-	int i = 0;
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
-	g->begin();
-	while(!g->end() ) {
-		pickupVisiblePlantsInCell(g->value(), lodLowGate, lodHighGate, 
-					totalGroups, currentGroup, 
-					percentage, plantTyp, i);
-		g->next();
-	}
-	AHelper::Info<int>(" n visible plants", numActivePlants() );
-}
-
-void MForest::pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
-					float lodLowGate, float lodHighGate, 
-					int totalGroups, int currentGroup, 
-					double percentage, int plantTyp,
-                    int & it)
-{
-	cell->begin();
-	while(!cell->end() ) {
-		Plant * pl = cell->value();
-		
-		bool survived = (*pl->index->t3 == plantTyp);
-		if(survived) {
-            if(activePlants()->find(pl->key) ) 
-                survived = false;
-        }
-		
-		if(survived) {
-			if(totalGroups > 1) {
-				if((m_randGroup[it] % totalGroups) != currentGroup)
-					survived = false;
-			}
-		}
-		
-		if(survived) {
-			if(percentage < 1.0) {
-			    double dart = ((double)(m_randGroup[it]&1023))/1024.0;
-			    if(dart > percentage) 
-					survived = false;
-			}
-		}
-			
-		if(survived) {
-			if(hasView() ) {
-				survived = isVisibleInView(pl, lodLowGate, lodHighGate );
-			}
-		}
-		
-		if(survived) selection()->select(pl );
-		
-		it++;
-		cell->next();
-	}
-}
-
-void MForest::saveParticles(MVectorArray & positions,
+void MForest::computePPAttribs(MVectorArray & positions,
 						MVectorArray & rotations,
-						MVectorArray & scales)
+						MVectorArray & scales,
+						MDoubleArray & replacers,
+						const int & numGroups)
 {
+	MGlobal::displayInfo("MForest computes per-particle attributes");
+        
 	positions.clear();
 	rotations.clear();
 	scales.clear();
+	replacers.clear();
 	
 	if(numActivePlants() < 1) {
-		//positions.append(MVector(0,0,0));
-		//rotations.append(MVector(0,0,0));
-		//scales.append(MVector(1,1,1));
-		AHelper::Info<int>(" no active plants to save", 0);
+		MGlobal::displayInfo("MForest has no active plants to replace");
 		return;
 	}
 	
 	MMatrix mm;
 	MEulerRotation eula;
+	double sz;
+	int igroup = 0;
 	sdb::Array<int, PlantInstance> * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
@@ -689,8 +630,14 @@ void MForest::saveParticles(MVectorArray & positions,
 		eula = mm;
 		rotations.append(eula.asVector());
 		
-		double sz = MVector(mm(0,0), mm(0,1), mm(0,2)).length();
+/// size x actually
+		sz = MVector(mm(0,0), mm(0,1), mm(0,2)).length();
 		scales.append(MVector(sz, sz, sz) );
+		
+		if(numGroups > 1)
+			igroup = (arr->value()->m_seed) % numGroups;
+			
+		replacers.append((double)igroup);
 			
 		arr->next();
 	}
@@ -764,6 +711,57 @@ void MForest::movePlantByVec(const Ray & ray,
 	movePlant(ray, displaceNear, displaceFar, clipNear, clipFar);
 	onPlantChanged();
 	enableDrawing();
+}
+
+
+void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate, 
+					double percentage,
+                    int plantTyp)
+{
+	int i = 0;
+	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+	g->begin();
+	while(!g->end() ) {
+		pickupVisiblePlantsInCell(g->value(), lodLowGate, lodHighGate, 
+					percentage, plantTyp, i);
+		g->next();
+	}
+}
+
+void MForest::pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
+					float lodLowGate, float lodHighGate, 
+					double percentage, int plantTyp,
+                    int & it)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		Plant * pl = cell->value();
+		
+		bool survived = (*pl->index->t3 == plantTyp);
+		if(survived) {
+            if(activePlants()->find(pl->key) ) 
+                survived = false;
+        }
+		
+		if(survived) {
+			if(percentage < 1.0) {
+			    double dart = ((double)(m_randGroup[it]&1023))*0.0009765625f;
+			    if(dart > percentage) 
+					survived = false;
+			}
+		}
+			
+		if(survived) {
+			if(hasView() ) {
+				survived = isVisibleInView(pl, lodLowGate, lodHighGate );
+			}
+		}
+		
+		if(survived) selection()->select(pl, m_randGroup[it]);
+		
+		it++;
+		cell->next();
+	}
 }
 
 }

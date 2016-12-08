@@ -49,6 +49,7 @@ public:
 	static MObject adrawColorB;
 	static MObject adrawColor;
 	static MObject aradiusMult;
+	static MObject aininstspace;
 	static MObject outValue;
 	static	MTypeId		id;
 	

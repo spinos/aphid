@@ -120,7 +120,7 @@ void PlantSelection::selectByTypeInCell(sdb::Array<int, Plant> * cell, int x)
 	}
 }
 
-void PlantSelection::select(Plant * p)
+void PlantSelection::select(Plant * p, const int & sd)
 { 
 	if(m_plants->find(p->key) ) {
 		//std::cout<<" already selected "<<p->key;
@@ -139,6 +139,7 @@ void PlantSelection::select(Plant * p)
 	PlantInstance * inst = new PlantInstance;
 	inst->m_backup = b;
 	inst->m_reference = p;
+	inst->m_seed = sd;
 	m_plants->insert(p->key, inst);
 	m_numSelected++;
 }
