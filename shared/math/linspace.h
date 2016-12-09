@@ -1,10 +1,9 @@
-#ifndef APH_GPR_LINE_SPACE_H
-#define APH_GPR_LINE_SPACE_H
+#ifndef APH_MATH_LIN_SPACE_H
+#define APH_MATH_LIN_SPACE_H
 /*
  * linspace(x1,x2,n) generate n points spacing (x2-x1)/(n-1)
  */
 namespace aphid {
-namespace gpr {
     
 template<typename T>
 inline void linspace(T * y, T x1, T x2, int n)
@@ -15,6 +14,5 @@ inline void linspace(T * y, T x1, T x2, int n)
     }
 }
 
-}
 }
 #endif

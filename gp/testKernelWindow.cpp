@@ -5,7 +5,7 @@
 #include "Covariance.h"
 #include "sampleKernelDialog.h"
 #include "RbfKernel.h"
-#include "linspace.h"
+#include <math/linspace.h>
 
 namespace aphid {
 namespace gpr {

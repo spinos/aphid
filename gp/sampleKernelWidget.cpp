@@ -10,7 +10,7 @@
 #include "sampleKernelWidget.h"
 #include "RbfKernel.h"
 #include "Covariance.h"
-#include "linspace.h"
+#include <math/linspace.h>
 #include <math/linearMath.h>
 
 namespace aphid {
