@@ -1,5 +1,4 @@
 #pragma once
-#include <Geometry.h>
 #include <Boundary.h>
 #include <IntersectionContext.h>
 #include <sdb/VectorArray.h>

@@ -12,7 +12,6 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <CurveGroup.h>
 #include <geom/ATetrahedronMesh.h>
 
 namespace aphid {

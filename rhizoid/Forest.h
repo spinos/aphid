@@ -11,8 +11,6 @@
 #define APH_FOREST_H
 #include <PlantCommon.h>
 #include <kd/KdEngine.h>
-#include <ConvexShape.h>
-#include <IntersectionContext.h>
 #include <RayMarch.h>
 
 namespace aphid {
@@ -33,7 +31,7 @@ class Forest {
 	sdb::VectorArray<cvx::Triangle> m_triangles;
 	PlantSelection * m_activePlants;
 	IntersectionContext m_intersectCtx;
-	Geometry::ClosestToPointTestResult m_closestPointTest;
+	ClosestToPointTestResult m_closestPointTest;
 	SphereSelectionContext * m_selectCtx;
 	RayMarch m_march;
 	unsigned m_numPlants;

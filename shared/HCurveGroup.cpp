@@ -12,7 +12,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <CurveGroup.h>
+#include <geom/CurveGroup.h>
 
 namespace aphid {
 

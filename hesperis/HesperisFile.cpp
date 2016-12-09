@@ -8,14 +8,14 @@
  */
 
 #include "HesperisFile.h"
-#include <CurveGroup.h>
+#include <geom/CurveGroup.h>
 #include <foundation/BaseBuffer.h>
 #include <geom/APolygonalMesh.h>
 #include <geom/ATriangleMeshGroup.h>
 #include <geom/ATetrahedronMeshGroup.h>
 #include <BaseTransform.h>
 #include <AAttribute.h>
-#include <GeometryArray.h>
+#include <geom/GeometryArray.h>
 #include <foundation/SHelper.h>
 #include <sstream>
 #include <boost/format.hpp>

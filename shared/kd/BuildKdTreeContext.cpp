@@ -8,7 +8,7 @@
  */
 
 #include <kd/BuildKdTreeContext.h>
-#include "Geometry.h"
+#include <geom/Geometry.h>
 #include <sdb/VectorArray.h>
 
 namespace aphid {

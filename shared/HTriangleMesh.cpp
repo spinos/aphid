@@ -12,7 +12,6 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <CurveGroup.h>
 #include <foundation/BaseBuffer.h>
 #include <geom/ATriangleMesh.h>
 

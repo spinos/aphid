@@ -13,7 +13,7 @@
 #include <kd/KdBuilder.h>
 #include <IntersectionContext.h>
 #include <SelectionContext.h>
-#include <Geometry.h>
+#include <geom/ClosestToPointTest.h>
 #include <ConvexShape.h>
 
 namespace aphid {
@@ -46,7 +46,7 @@ public:
 				
 	template<typename T, typename Tn>
 	void closestToPoint(KdNTree<T, Tn > * tree, 
-				Geometry::ClosestToPointTestResult * ctx);
+				ClosestToPointTestResult * ctx);
 				
 	template<typename T, typename Tn>
 	void intersectBox(KdNTree<T, Tn > * tree, 
@@ -116,12 +116,12 @@ private:
 									
 	template<typename T, typename Tn>
 	void leafClosestToPoint(KdNTree<T, Tn > * tree, 
-								Geometry::ClosestToPointTestResult * result,
+								ClosestToPointTestResult * result,
 								KdTreeNode *node, const BoundingBox &box);
 								
 	template<typename T, typename Tn>
 	void innerClosestToPoint(KdNTree<T, Tn > * tree, 
-				Geometry::ClosestToPointTestResult * ctx,
+				ClosestToPointTestResult * ctx,
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & b);
@@ -587,7 +587,7 @@ void KdEngine::innerSelect(KdNTree<T, Tn > * tree,
 
 template<typename T, typename Tn>
 void KdEngine::closestToPoint(KdNTree<T, Tn > * tree, 
-				Geometry::ClosestToPointTestResult * ctx)
+				ClosestToPointTestResult * ctx)
 {
 	if(ctx->closeEnough() ) return;
 	if(tree->isEmpty() ) return;
@@ -622,7 +622,7 @@ void KdEngine::closestToPoint(KdNTree<T, Tn > * tree,
 	
 template<typename T, typename Tn>
 void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree, 
-				Geometry::ClosestToPointTestResult * ctx,
+				ClosestToPointTestResult * ctx,
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & b)
@@ -705,7 +705,7 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 
 template<typename T, typename Tn>
 void KdEngine::leafClosestToPoint(KdNTree<T, Tn > * tree, 
-								Geometry::ClosestToPointTestResult * result,
+								ClosestToPointTestResult * result,
 								KdTreeNode *node, const BoundingBox &box)
 {
 	if(node->getNumPrims() < 1) return;
@@ -714,7 +714,7 @@ void KdEngine::leafClosestToPoint(KdNTree<T, Tn > * tree,
 	int i = 0;
 	for(;i<len;++i) {
 		const T * c = tree->getSource(start + i );
-		c-> template closestToPoint<Geometry::ClosestToPointTestResult>(result);
+		c-> template closestToPoint<ClosestToPointTestResult>(result);
 	}
 	
 }

@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Boundary.h>
+#include <geom/ClosestToPointTest.h>
 #include <kd/KdEngine.h>
 #include <ConvexShape.h>
 
@@ -19,7 +20,7 @@ class NTreeDomain : public Domain {
 
 	KdNTree<T, Tn > * m_tree;
 	KdEngine m_engine;
-	Geometry::ClosestToPointTestResult m_closestPointCtx;
+	ClosestToPointTestResult m_closestPointCtx;
 	IntersectionContext m_intersectCtx;
 	
 public:

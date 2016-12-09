@@ -8,7 +8,7 @@
  */
 #include <DrawBox.h>
 #include <BoundingBox.h>
-#include <Geometry.h>
+#include <geom/Geometry.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 #include <math/AOrientedBox.h>

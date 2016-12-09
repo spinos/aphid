@@ -13,8 +13,8 @@
 #include <CubeMesh.h>
 #include <CircleCurve.h>
 #include <DiscMesh.h>
-#include <Geometry.h>
-#include <GeometryArray.h>
+#include <geom/Geometry.h>
+#include <geom/GeometryArray.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/AQuadMesh.h>
 #include <geom/ATetrahedronMesh.h>

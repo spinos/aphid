@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include <Geometry.h>
+#include <geom/Geometry.h>
 #include <Boundary.h>
 #include <kd/KdTreeNode.h>
 #include <kd/BuildKdTreeStream.h>
