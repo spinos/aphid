@@ -10,7 +10,7 @@
 #include <geom/ATriangleMesh.h>
 #include <foundation/BaseBuffer.h>
 #include <math/BarycentricCoordinate.h>
-#include <iostream>
+#include <geom/ClosestToPointTest.h>
 
 namespace aphid {
 

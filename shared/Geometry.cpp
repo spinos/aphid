@@ -11,27 +11,6 @@
 
 namespace aphid {
 
-Geometry::ClosestToPointTestResult::ClosestToPointTestResult() : _hasResult(false) {}
-
-void Geometry::ClosestToPointTestResult::reset()
-{ _hasResult = false; }
-
-void Geometry::ClosestToPointTestResult::reset(const Vector3F & p, float initialDistance,
-												bool fastOp) 
-{
-	_distance = initialDistance;
-	_toPoint = p;
-	_hasResult = false;
-	_isInside = false;
-	_isFast = fastOp;
-}
-
-bool Geometry::ClosestToPointTestResult::closeTo(const BoundingBox & box)
-{ return box.distanceTo(_toPoint) < _distance; }
-
-bool Geometry::ClosestToPointTestResult::closeEnough()
-{ return _distance < 1e-3f; }
-
 Geometry::Geometry() {}
 Geometry::~Geometry() {}
 
@@ -71,7 +50,8 @@ void Geometry::closestToPointElms(const std::vector<unsigned > & elements, Close
 	for(;it!=elements.end();++it) closestToPoint(*it, result);
 }
 
-void Geometry::closestToPoint(unsigned icomponent, ClosestToPointTestResult * result) {}
+void Geometry::closestToPoint(unsigned icomponent, ClosestToPointTestResult * result) 
+{}
 
 const Vector3F Geometry::boundingCenter() const
 {

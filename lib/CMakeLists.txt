@@ -1,8 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE Release)
-include_directories(../mallard ../shared ../lapl ../catmullclark 
-../../ofl/opium ../fit ../powell ../../ofl/shared
+include_directories(../shared ../lapl ../catmullclark 
 ../hesperis)
 
 IF (UNIX)

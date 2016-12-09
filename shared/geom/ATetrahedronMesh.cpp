@@ -11,6 +11,8 @@
 #include <foundation/BaseBuffer.h>
 #include "tetrahedron_math.h"
 #include <GjkIntersection.h>
+#include <geom/ClosestToPointTest.h>
+
 namespace aphid {
 
 ATetrahedronMesh::ATetrahedronMesh() 
