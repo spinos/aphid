@@ -81,6 +81,7 @@ public:
 	void scalePlant(GrowOption & option);
 	void movePlant(GrowOption & option);
     void rotatePlant(GrowOption & option);
+    void removeActivePlants();
     void removeTypedPlants(int x);
 	void clearPlantOffset(GrowOption & option);
 	

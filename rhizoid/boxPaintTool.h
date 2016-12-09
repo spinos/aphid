@@ -99,7 +99,6 @@ public:
 	void setWriteCache(MString filename);
 	void setReadCache(MString filename);
 	void cleanup();
-	void clearByType();
 	char getSelectedViz();
 	void setMinCreateMargin(float x);
 	const float & minCreateMargin();
@@ -159,6 +158,8 @@ private:
 	void raiseOffset();
 	void depressOffset();
 	bool rejectSmallDragDistance(int d = 2) const;
+	void clearByType();
+	void clearBySelections();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

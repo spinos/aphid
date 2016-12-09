@@ -53,16 +53,18 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
 	const bool limitRadius = option.m_radius > 1e-3f;
 	const float sampleSize = plantSize(option.m_plantId) * .67f;
-	std::cout<<"\n range "<<ebpSampler.numParticles();
-	        
+       
 	GroundBind bind;
 	float scale;
 	Matrix44F tm;
 	Vector3F pog;
+	try {
 	for(int i=0;i<ebpSampler.numParticles();++i) {
 
 		if(!closestPointOnGround(pog, psamp[i], ml) ) 
 			continue;
+		
+		setBind(&bind);
 	
 		if(option.m_noiseLevel > 0.001f) {
 			if(ANoise3::FractalF((const float *)&pog,
@@ -79,15 +81,21 @@ bool ModifyForest::growOnGround(GrowOption & option)
 				continue;
 		}
 		
-		randomSpaceAt(pog, option, tm, scale);
-		
 		if(closeToOccupiedPosition(pog, option.m_minMarginSize + sampleSize * scale) ) 
 			continue;
 		
-		setBind(&bind);
+		if(option.m_alongNormal)
+		    option.m_upDirection = bindNormal(&bind);
 		
+		randomSpaceAt(pog, option, tm, scale);
+
 		addPlant(tm, bind, option.m_plantId);
 
+	}
+	} catch (const char * ex) {
+	    std::cerr<<"ModifyForest growOnGround caught: "<<ex;
+	} catch (...) {
+	    std::cerr<<"ModifyForest growOnGround caught something";
 	}
 	
 	ebpSampler.clear();
@@ -688,6 +696,14 @@ void ModifyForest::erectActive()
 	}
 }
 
+void ModifyForest::removeActivePlants()
+{
+    std::cout<<"\n remove "<<numActivePlants()<<" plants"<<std::endl;
+    clearSelected(); 
+    selection()->deselect();
+    onPlantChanged();
+}
+
 void ModifyForest::removeTypedPlants(int x)
 {
 	if(numPlantExamples() < 1) {
@@ -696,9 +712,8 @@ void ModifyForest::removeTypedPlants(int x)
 	}
 	selection()->deselect();
 	selectTypedPlants(x);
-	std::cout<<"\n remove "<<numActivePlants()<<" type"<<x<<" plants";
-	std::cout.flush();
-	clearSelected();
+	std::cout<<"\n select "<<" type"<<x<<" plants"<<std::endl;
+	removeActivePlants();
 }
 
 bool ModifyForest::sampleGround(EbpGrid * sampler, GrowOption & option)

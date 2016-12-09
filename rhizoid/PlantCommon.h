@@ -26,7 +26,7 @@ struct GroundBind {
 	{
 		m_geomComp = ((geom<<22) | comp);
 	}
-	void getGeomComp(int & geom, int & comp)
+	void getGeomComp(int & geom, int & comp) const
 	{
 		geom = m_geomComp>>22;
 		comp = (m_geomComp << 10)>>10;

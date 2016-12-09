@@ -72,7 +72,7 @@ protected:
 	const KdNTree<cvx::Triangle, KdNode4 > * ground() const;
 	IntersectionContext * intersection();
 	SphereSelectionContext * activeGround();
-	ATriangleMesh * getGroundMesh(unsigned idx) const;
+	ATriangleMesh * getGroundMesh(const int & idx) const;
 	const std::vector<ATriangleMesh *> & groundMeshes() const;
 	
 	const float & plantSize(int idx) const;
@@ -81,6 +81,8 @@ protected:
 	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
 	void setBind(GroundBind * bind) const;
+/// ground normal at bind point
+	Vector3F bindNormal(const GroundBind * bind) const;
 /// -1: disable binding
 ///  0: failed, rebind
 ///  1: success

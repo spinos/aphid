@@ -351,6 +351,8 @@ void proxyPaintContext::setGrowAlongNormal(unsigned val)
 	else
 		MGlobal::displayInfo("proxyPaint disable grow along face normal");
 	m_growOpt.m_alongNormal = val;
+/// reset up anyway
+	m_growOpt.m_upDirection = Vector3F::YAxis;
 	MToolsInfo::setDirtyFlag(*this);
 }
 
@@ -606,11 +608,23 @@ void proxyPaintContext::cleanup()
 	PtrViz->removeAllPlants();	
 }
 
+void proxyPaintContext::clearBySelections()
+{
+    if(!getSelectedViz())
+		return;
+	MGlobal::displayInfo("proxyPaint set to clear all selected");
+	PtrViz->removeActivePlants();	
+}
+
 void proxyPaintContext::clearByType()
 {
-	MGlobal::displayInfo("proxyPaint set to clear by type");
 	if(!getSelectedViz())
 		return;
+	if(PtrViz->numActivePlants() > 0 ) {
+	    clearBySelections();
+	    return;
+	}
+	MGlobal::displayInfo("proxyPaint set to clear by type");
 	AHelper::Info<int>("active plant type", m_growOpt.m_plantId);
 	PtrViz->removeTypedPlants(m_growOpt.m_plantId);	
 }

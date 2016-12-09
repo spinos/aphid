@@ -110,7 +110,7 @@ void Forest::setGroundMesh(ATriangleMesh * trimesh, unsigned idx)
     else m_grounds[idx] = trimesh;
 }
 
-ATriangleMesh * Forest::getGroundMesh(unsigned idx) const
+ATriangleMesh * Forest::getGroundMesh(const int & idx) const
 {
     if(idx >= numGroundMeshes() ) return NULL;
     return m_grounds[idx];
@@ -316,6 +316,22 @@ bool Forest::closestPointOnGround(Vector3F & dest,
 	else 
 		dest = origin;
 	return m_closestPointTest._hasResult;
+}
+
+Vector3F Forest::bindNormal(const GroundBind * bind) const
+{
+    int igeom, icomp;
+    bind->getGeomComp(igeom, icomp);
+    if(igeom >= numGroundMeshes() ) {
+        throw "Forest bindNormal igeom out of range";   
+    }
+    
+    const ATriangleMesh * msh = getGroundMesh(igeom);
+    if(icomp >= msh->numTriangles() ) {
+        throw "Forest bindNormal icomp out of range";   
+    }
+    
+    return msh->triangleNormal(icomp);
 }
 
 void Forest::setBind(GroundBind * bind) const
