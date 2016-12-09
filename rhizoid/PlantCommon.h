@@ -56,6 +56,7 @@ public:
 	Plant * m_reference;
 	Plant * m_backup;
 	float m_weight;
+	int m_seed;
 	
 };
 

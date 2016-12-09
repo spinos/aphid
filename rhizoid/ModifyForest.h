@@ -105,7 +105,7 @@ protected:
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
 	void raiseOffsetAt(const Ray & ray, GrowOption & option);
-    
+					
 private:
 	void clearPlant(Plant * pl, int k);
 	void randomSpaceAt(const Vector3F & pos, 
@@ -116,7 +116,7 @@ private:
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;
     bool sampleGround(EbpGrid * sampler, GrowOption & option);
-	
+					
 };
 
 }

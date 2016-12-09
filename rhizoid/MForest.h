@@ -5,13 +5,15 @@
 #include <maya/MMatrix.h>
 #include <maya/MVectorArray.h>
 #include <maya/MPointArray.h>
+#include <maya/MDoubleArray.h>
+#include <boost/scoped_array.hpp>
 
 namespace aphid {
 
 /// maya interface
 class MForest : public DrawForest {
 	
-	int * m_randGroup;
+	boost::scoped_array<int> m_randGroup;
 	
 public:
     MForest();
@@ -68,14 +70,16 @@ protected:
 					const MVectorArray & scale, 
 					const MVectorArray & rotation);
 	void initRandGroup();
-	void pickVisiblePlants(float lodLowGate, float lodHighGate, 
-					int totalGroups, int currentGroup, 
-					double percentage,
-                    int plantTyp);
-	void saveParticles(MVectorArray & positions,
+/// Per-Particle attribs for instancer
+	void computePPAttribs(MVectorArray & positions,
 						MVectorArray & rotations,
-						MVectorArray & scales);
-	void updateExamples(MArrayDataHandle & dataArray);	
+						MVectorArray & scales,
+						MDoubleArray & replacers,
+						const int & numGroups);
+	void updateExamples(MArrayDataHandle & dataArray);
+	void pickVisiblePlants(float lodLowGate, float lodHighGate, 
+					double percentage,
+                    int plantTyp);	
 				
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
@@ -89,18 +93,17 @@ private:
 					float * data, 
 					int * typd,
 					unsigned & it);
-	void pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
-					float lodLowGate, float lodHighGate, 
-					int totalGroups, int currentGroup, 
-					double percentage, int plantTyp, 
-                    int & it);
     void saveActiveExternal(const char* filename);
     void saveAllExternel(const char* filename);
     void getDataRef(PlantData * plt, 
 					float * data, 
 					int * typd,
 					unsigned & it);
-	
+	void pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
+					float lodLowGate, float lodHighGate, 
+					double percentage, int plantTyp, 
+                    int & it);
+					
 };
 
 }

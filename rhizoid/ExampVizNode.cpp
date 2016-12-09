@@ -29,6 +29,7 @@ MObject ExampViz::adrawColorR;
 MObject ExampViz::adrawColorG;
 MObject ExampViz::adrawColorB;
 MObject ExampViz::aradiusMult;
+MObject ExampViz::aininstspace;
 MObject ExampViz::outValue;
 
 ExampViz::ExampViz()
@@ -237,6 +238,15 @@ MStatus ExampViz::initialize()
 											&stat );
     typedFn.setStorable(true);
 	addAttribute(adopNBuf);
+	
+	MFnMatrixAttribute matAttr;
+	aininstspace = matAttr.create("instanceSpace", "sinst", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setWritable(true);
+	matAttr.setConnectable(true);
+    matAttr.setArray(true);
+    matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
+	addAttribute( aininstspace );
 	
 	attributeAffects(aradiusMult, outValue);
 	attributeAffects(ancells, outValue);

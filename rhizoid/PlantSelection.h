@@ -33,7 +33,7 @@ public:
 	const int & numSelected() const;
 	sdb::Array<int, PlantInstance> * data();
 	void calculateWeight();
-	void select(Plant * p);
+	void select(Plant * p, const int & sd=0);
 	const float & radius() const;
     
     void setTypeFilter(int x);
