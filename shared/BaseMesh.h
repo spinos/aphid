@@ -9,15 +9,13 @@
 
 #pragma once
 #include <AllMath.h>
-#include <Geometry.h>
+#include <geom/Geometry.h>
 #include <Boundary.h>
 #include <IntersectionContext.h>
 #include <Ray.h>
 #include <VertexDataGroup.h>
 
 namespace aphid {
-
-//class SelectionContext;
 
 class BaseMesh : public Geometry, public Boundary {
 public:
@@ -84,8 +82,6 @@ public:
 	virtual unsigned closestVertex(unsigned idx, const Vector3F & px) const;
 	char triangleIntersect(const Vector3F * threeCorners, IntersectionContext * ctx) const;
 	char selectComponent(IntersectionContext * ctx) const;
-	
-	//virtual char selectFace(const unsigned & idx, SelectionContext * ctx) const;
 	
 	void putIntoObjectSpace();
 	

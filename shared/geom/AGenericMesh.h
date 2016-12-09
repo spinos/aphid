@@ -1,5 +1,5 @@
-#ifndef AGENERICMESH_H
-#define AGENERICMESH_H
+#ifndef APH_GENERIC_MESH_H
+#define APH_GENERIC_MESH_H
 
 /*
  *  AGenericMesh.h
@@ -10,7 +10,7 @@
  *
  */
 
-#include "Geometry.h"
+#include <geom/Geometry.h>
 #include <Matrix44F.h>
 #include <map>
 

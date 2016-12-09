@@ -161,15 +161,12 @@ file (GLOB Geom_SRC
     "../shared/geom/*.cpp"
 )
 
-ADD_LIBRARY (aphidGeom ${LIB_TYP}  
-../shared/Geometry.cpp
+ADD_LIBRARY (aphidGeom ${LIB_TYP} 
 ../shared/Primitive.cpp
 ../shared/BaseCurve.cpp
 ../shared/CircleCurve.cpp 
 ../shared/BezierCurve.cpp 
 ../shared/GjkIntersection.cpp
-../shared/CurveGroup.cpp
-../shared/GeometryArray.cpp
 ../shared/Boundary.cpp
 ../shared/Triangle.cpp
 ../shared/IntersectionContext.cpp 

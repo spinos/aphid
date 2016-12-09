@@ -9,7 +9,7 @@
 
 #pragma once
 #include <AllMath.h>
-#include <Geometry.h>
+#include <geom/Geometry.h>
 #include <Boundary.h>
 #include <foundation/NamedEntity.h>
 #include <Ray.h>

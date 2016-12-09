@@ -7,7 +7,7 @@
  *
  */
 
-#include "GeometryArray.h"
+#include <geom/GeometryArray.h>
 
 namespace aphid {
 

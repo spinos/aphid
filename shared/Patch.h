@@ -12,7 +12,7 @@
 #include <Plane.h>
 #include <Segment.h>
 #include <BoundingBox.h>
-#include <Geometry.h>
+#include <geom/Geometry.h>
 #include <Boundary.h>
 
 namespace aphid {

@@ -1,5 +1,5 @@
-#ifndef CURVEGROUP_H
-#define CURVEGROUP_H
+#ifndef APH_CURVE_GROUP_H
+#define APH_CURVE_GROUP_H
 
 /*
  *  CurveGroup.h
@@ -10,7 +10,7 @@
  *
  */
 #include <AllMath.h>
-#include <Geometry.h>
+#include <geom/Geometry.h>
 
 namespace aphid {
 

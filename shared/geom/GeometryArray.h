@@ -10,7 +10,7 @@
  *
  */
 
-#include <Geometry.h>
+#include <geom/Geometry.h>
 
 namespace aphid {
 

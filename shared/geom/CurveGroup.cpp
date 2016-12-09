@@ -7,7 +7,8 @@
  *
  */
 
-#include "CurveGroup.h"
+#include <geom/CurveGroup.h>
+
 namespace aphid {
 
 CurveGroup::CurveGroup() 

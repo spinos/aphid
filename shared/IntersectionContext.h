@@ -12,7 +12,7 @@
 #include <BoundingBox.h>
 #include <Primitive.h>
 #include <PrimitiveFilter.h>
-#include <Geometry.h>
+#include <geom/Geometry.h>
 #include <Ray.h>
 #include <Vector2F.h>
 

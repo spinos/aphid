@@ -9,7 +9,6 @@
 #include <iostream>
 #include <math/BarycentricCoordinate.h>
 #include "BaseMesh.h"
-//#include <SelectionContext.h>
 #include <map>
 
 namespace aphid {
@@ -567,18 +566,7 @@ unsigned * BaseMesh::getQuadIndices() const
 {
 	return 0;
 }
-/*
-char BaseMesh::selectFace(const unsigned & idx, SelectionContext * ctx) const
-{
-	const BoundingBox b = calculateBBox(idx);
-	if(!ctx->closeTo(getFaceNormal(idx))) return 0;
-	if(!ctx->closeTo(b)) return 0;
-		
-	ctx->addToSelection(idx);
-	
-	return 1;
-}
-*/
+
 void BaseMesh::verbose() const
 {
 	std::cout<<"mesh status:\n";
