@@ -4,7 +4,7 @@
  * Squared Exponential, also known as Radial Basis Function, kernel
  * k(x,x')=sigmaf^2 * exp(-(x-x')^2/(2 * l^2))
  */
-#include <linearMath.h>
+#include <math/linearMath.h>
 
 namespace aphid {
 namespace gpr {
@@ -19,7 +19,7 @@ class RbfKernel {
     
 public:
     
-    typedef lfr::DenseVector<TScalar> TVector;
+    typedef DenseVector<TScalar> TVector;
     
     RbfKernel(TScalar lengthScale, TScalar sigma=1);
     virtual ~RbfKernel();

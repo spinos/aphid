@@ -1,9 +1,7 @@
 #include <QtGui>
 #include "sampleKernelDialog.h"
 #include "sampleKernelWidget.h"
-#include "gsamp.h"
-
-using namespace lfr;
+#include <math/gsamp.h>
 
 namespace aphid {
 namespace gpr {

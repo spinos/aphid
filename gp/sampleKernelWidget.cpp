@@ -11,8 +11,7 @@
 #include "RbfKernel.h"
 #include "Covariance.h"
 #include "linspace.h"
-
-using namespace lfr;
+#include <math/linearMath.h>
 
 namespace aphid {
 namespace gpr {

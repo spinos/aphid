@@ -7,8 +7,6 @@
 #include "RbfKernel.h"
 #include "linspace.h"
 
-using namespace lfr;
-
 namespace aphid {
 namespace gpr {
 

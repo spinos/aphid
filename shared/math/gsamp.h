@@ -1,5 +1,5 @@
-#ifndef APH_GPR_GSAMP_H
-#define APH_GPR_GSAMP_H
+#ifndef APH_MATH_GSAMP_H
+#define APH_MATH_GSAMP_H
 /*
  * X = gsamp(covar, nsamp) Sample from a D-dimensional 
  * Gaussian distribution
@@ -9,15 +9,14 @@
  * 
  * https://github.com/sods/netlab/blob/master/gsamp.m
  */
-#include <linearMath.h>
+#include <math/linearMath.h>
 
 namespace aphid {
-namespace gpr {
-    
+   
 template<typename T>
-inline void gsamp(lfr::DenseMatrix<T> & X,
-    const lfr::DenseMatrix<T> & covar, int nsamp,
-                    lfr::SvdSolver<T> * solver)
+inline void gsamp(DenseMatrix<T> & X,
+    const DenseMatrix<T> & covar, int nsamp,
+                    SvdSolver<T> * solver)
 {
     int d = covar.numRows();
     if(!solver->compute(covar)) {
@@ -25,12 +24,12 @@ inline void gsamp(lfr::DenseMatrix<T> & X,
         return;
     }
     
-    lfr::DenseVector<T> sqs(d);
+    DenseVector<T> sqs(d);
     
     for(int j=0;j<d;++j)
         sqs[j] = sqrt(solver->S()[j]);
     
-    lfr::DenseMatrix<T> coeffs(nsamp, d);
+    DenseMatrix<T> coeffs(nsamp, d);
     for(int j=0;j<d;++j) {
         T * cc = coeffs.column(j);
         for(int i=0;i<nsamp;++i) {
@@ -42,6 +41,5 @@ inline void gsamp(lfr::DenseMatrix<T> & X,
     coeffs.mult(X, solver->Vt() );
 }
 
-}
 }
 #endif

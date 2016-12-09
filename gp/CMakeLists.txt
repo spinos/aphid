@@ -11,11 +11,9 @@ if(WIN32)
 add_definitions (-DWIN32)
 endif()
 
-include_directories ( ../shared ../kdtree ../lfr)
+include_directories ( ../shared)
 
 set (TKERN_HEADER_FILES ../shared/BaseImageWidget.h
-../lfr/clapackTempl.h
-../lfr/linearMath.h
 Covariance.h
 RbfKernel.h
 kernelWidget.h
@@ -168,22 +166,26 @@ target_link_libraries (testkernel ${Boost_THREAD_LIBRARY})
 target_link_libraries (testkernel ${Boost_CHRONO_LIBRARY})
 
 if (WIN32)
+set (Aphid_Found_Library "D:/aphid/lib/aphidFoundation.lib")
 set (Aphid_Math_Library "D:/aphid/lib/aphidMath.lib")
 set (Aphid_Img_Library "D:/aphid/lib/aphidImg.lib")
 set (Aphid_Geom_Library "D:/aphid/lib/aphidGeom.lib")
 set (Aphid_UI_Library "D:/aphid/lib/aphidUI.lib")
 elseif (APPLE)
+set (Aphid_Found_Library /users/jianzhang/aphid/lib/libaphidFoundation.a)
 set (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a)
 set (Aphid_Img_Library /users/jianzhang/aphid/lib/libaphidImg.a)
 set (Aphid_Geom_Library /users/jianzhang/aphid/lib/libaphidGeom.a)
 set (Aphid_UI_Library /users/jianzhang/aphid/lib/libaphidUI.a)
 else()
+set (Aphid_Found_Library ~/aphid/lib/libaphidFoundation.so)
     set (Aphid_Math_Library ~/aphid/lib/libaphidMath.so)
 set (Aphid_Img_Library ~/aphid/lib/libaphidImg.so)
 set (Aphid_Geom_Library ~/aphid/lib/libaphidGeom.so)
 set (Aphid_UI_Library ~/aphid/lib/libaphidUI.so)
 endif ()
 
+target_link_libraries (testkernel ${Aphid_Found_Library})
 target_link_libraries (testkernel ${Aphid_Math_Library})
 target_link_libraries (testkernel ${Aphid_Geom_Library})
 
@@ -196,8 +198,6 @@ set (TSHAPE_HEADER_FILES ../shared/BaseImageWidget.h
 ../shared/Base3DView.h
 ../shared/GlslBase.h
 ../shared/GlslInstancer.h
-../lfr/clapackTempl.h
-../lfr/linearMath.h
 Covariance.h
 RbfKernel.h
 kernelWidget.h
@@ -234,6 +234,7 @@ set (QT_USE_QTOPENGL ON)
 target_link_libraries (shapeinterp Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (shapeinterp ${OPENGL_LIBRARIES})
 
+target_link_libraries (shapeinterp ${Aphid_Found_Library})
 target_link_libraries (shapeinterp ${Aphid_Math_Library})
 target_link_libraries (shapeinterp ${Aphid_Geom_Library})
 target_link_libraries (shapeinterp ${Aphid_UI_Library})

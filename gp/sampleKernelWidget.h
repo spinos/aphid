@@ -10,8 +10,12 @@
 #define APH_GPR_SAMPLE_KERNEL_WIDGET_H
 
 #include <Plot1DWidget.h>
-#include <linearMath.h>
+
 namespace aphid {
+
+template<typename T>
+class DenseMatrix;
+
 namespace gpr {
 
 class SampleKernelWidget : public Plot1DWidget {
@@ -19,7 +23,7 @@ class SampleKernelWidget : public Plot1DWidget {
 	Q_OBJECT
 	
 public:
-	SampleKernelWidget(const lfr::DenseMatrix<float> & yActual, QWidget *parent = 0);
+	SampleKernelWidget(const DenseMatrix<float> & yActual, QWidget *parent = 0);
 	virtual ~SampleKernelWidget();
 	
 protected:

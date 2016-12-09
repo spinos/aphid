@@ -1,5 +1,5 @@
-#ifndef LFR_LINEARMATH_H
-#define LFR_LINEARMATH_H
+#ifndef APH_LINEARMATH_H
+#define APH_LINEARMATH_H
 
 #include <iostream>
 #include <sstream>
@@ -8,7 +8,7 @@
 
 #include "clapackTempl.h"
 
-namespace lfr {
+namespace aphid {
 
 template<typename T>
 class DenseVector {

@@ -1,5 +1,5 @@
-#ifndef APH_GPR_DISTANCE_2_H
-#define APH_GPR_DISTANCE_2_H
+#ifndef APH_MATH_DISTANCE_2_H
+#define APH_MATH_DISTANCE_2_H
 /*
  *  http://cseweb.ucsd.edu/~mdailey/netlab-help/dist2.htm
  *  C = dist2(A, B)
@@ -10,21 +10,20 @@
  *  C m-by-n
  */
  
-#include <linearMath.h>
+#include <math/linearMath.h>
 
 namespace aphid {
-namespace gpr {
-    
+   
 template<typename T>
-inline void dist2(lfr::DenseMatrix<T> & C,
-                    const lfr::DenseMatrix<T> & A,
-                    const lfr::DenseMatrix<T> & B)
+inline void dist2(DenseMatrix<T> & C,
+                    const DenseMatrix<T> & A,
+                    const DenseMatrix<T> & B)
 {
     const int nr = A.numRows();
     const int nc = B.numRows();
     const int np = A.numColumns();
-    lfr::DenseVector<T> irow(np);
-    lfr::DenseVector<T> jrow(np);
+    DenseVector<T> irow(np);
+    DenseVector<T> jrow(np);
     C.resize(nr, nc);
     int i, j;
     for(j=0;j<nc;++j) {
@@ -39,7 +38,6 @@ inline void dist2(lfr::DenseMatrix<T> & C,
     }
 }
 
-}
 }
 #endif
 

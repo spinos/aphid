@@ -9,8 +9,7 @@
  *     [    .       .       .    .    ]
  *     [k(x1,x1) k(x1,x2) ... k(x1,xn)]
  */
-#include <linearMath.h>
-#include "dist2.h"
+#include <math/dist2.h>
 
 namespace aphid {
 namespace gpr {
@@ -20,7 +19,7 @@ class Covariance {
    
 public:
     
-    typedef lfr::DenseMatrix<TScalar> TMatrix;
+    typedef DenseMatrix<TScalar> TMatrix;
     
     Covariance();
     virtual ~Covariance();
@@ -95,11 +94,11 @@ bool Covariance<TScalar, TKernel>::create(const TMatrix & x1,
 }
 
 template <class TScalar, typename TKernel>
-const lfr::DenseMatrix<TScalar> & Covariance<TScalar, TKernel>::K() const
+const DenseMatrix<TScalar> & Covariance<TScalar, TKernel>::K() const
 { return m_K; }
 
 template <class TScalar, typename TKernel>
-const lfr::DenseMatrix<TScalar> & Covariance<TScalar, TKernel>::Kinv() const
+const DenseMatrix<TScalar> & Covariance<TScalar, TKernel>::Kinv() const
 { return m_invK; }
 
 }
