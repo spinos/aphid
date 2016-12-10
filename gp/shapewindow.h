@@ -7,6 +7,12 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
+namespace aphid {
+namespace gpr {
+class ViewKernelDialog;
+}
+}
+
 class GLWidget;
 
 class Window : public QMainWindow
@@ -23,6 +29,7 @@ protected:
 private:
 
     GLWidget *glWidget;
+	aphid::gpr::ViewKernelDialog * m_kernDlg;
     
 };
 #endif

@@ -212,6 +212,7 @@ set (TSHAPE_SOURCE_FILES ../shared/BaseImageWidget.cpp
 ../shared/Plot2DWidget.cpp
 kernelWidget.cpp
 shapewidget.cpp
+viewKernelDialog.cpp
 shapewindow.cpp
 shapemain.cpp)
 
