@@ -503,7 +503,8 @@ void proxyPaintContext::erect()
 {
 	if(!PtrViz) return;
 	MGlobal::displayInfo("proxyPaint right up");
-	PtrViz->erectActive();
+	m_growOpt.m_upDirection = Vector3F::YAxis;
+	PtrViz->rightUp(m_growOpt);
 }
 
 void proxyPaintContext::rotateByStroke()

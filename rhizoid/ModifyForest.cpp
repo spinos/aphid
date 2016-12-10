@@ -315,6 +315,7 @@ void ModifyForest::movePlant(GrowOption & option)
 {
 	Vector3F tv, pos, bindPos;
 	sdb::Array<int, PlantInstance> * arr = activePlants();
+	try {
 	arr->begin();
 	while(!arr->end() ) {
 		tv.x = getNoise2(-option.m_maxMarginSize, option.m_maxMarginSize);
@@ -330,6 +331,9 @@ void ModifyForest::movePlant(GrowOption & option)
 		displacePlantInGrid(arr->value() );
 		
 		arr->next();
+	}
+	} catch (...) {
+		std::cerr<<" ModifyForest movePlant caught something ";
 	}
 }
 
@@ -654,32 +658,42 @@ float ModifyForest::getNoise() const
 float ModifyForest::getNoise2(const float & a, const float & b) const
 { return a + (b - a) * (float(rand()%991) ) / 991.f; }
 
-void ModifyForest::erectActive()
+void ModifyForest::rightUp(GrowOption & option)
 {
 	if(numActivePlants() < 1) return;
 	
-	Vector3F worldUp(0.f, 1.f, 0.f);	
+	Vector3F useUp = option.m_upDirection;
 	sdb::Array<int, PlantInstance> * arr = activePlants();
+	try {
 	arr->begin();
 	while(!arr->end() ) {
-		Matrix44F * mat = arr->value()->m_reference->index->t1;
+	
+		PlantData * plantd = arr->value()->m_reference->index;
+		
+		if(option.m_alongNormal) {
+			useUp = bindNormal(plantd->t2);
+		}
+
+		Matrix44F * mat = plantd->t1;
 		
 		Vector3F vx(mat->M(0, 0), mat->M(0, 1), mat->M(0, 2));
 		Vector3F vy(mat->M(1, 0), mat->M(1, 1), mat->M(1, 2));
 		Vector3F vz(mat->M(2, 0), mat->M(2, 1), mat->M(2, 2));
 		
-		float sx = vx.length();
-		float sy = vy.length();
-		float sz = vz.length();
+		const float sx = vx.length();
+		const float sy = vy.length();
+		const float sz = vz.length();
 		
-		vx.y = 0.f;
 		vx.normalize();
 		
-		vz = vx.cross(worldUp);
+		vz = vx.cross(useUp);
 		vz.normalize();
 		
+		vx = useUp.cross(vz);
+		vx.normalize();
+		
 		vx *= sx;
-		vy = Vector3F(0.f, sy, 0.f);
+		vy = useUp * sy;
 		vz *= sz;
 		
 		*mat->m(0, 0) = vx.x;
@@ -693,6 +707,9 @@ void ModifyForest::erectActive()
 		*mat->m(2, 2) = vz.z;
 		
 		arr->next();
+	}
+	} catch (...) {
+		std::cerr<<" ModifyForest rightUp caught something ";
 	}
 }
 

@@ -77,7 +77,7 @@ public:
 	virtual ~ModifyForest();
 	
     void setNoiseWeight(float x);
-    void erectActive();
+    void rightUp(GrowOption & option);
 	void scalePlant(GrowOption & option);
 	void movePlant(GrowOption & option);
     void rotatePlant(GrowOption & option);
