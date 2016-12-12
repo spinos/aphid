@@ -18,10 +18,12 @@
 #include <maya/MFnAnimCurve.h>
 #include <maya/MItDependencyNodes.h>
 #include <GjkIntersection.h>
-#include <kd/PrincipalComponents.h>
+#include <geom/PrincipalComponents.h>
 
 #define kCameraScaleFlag "-cms" 
 #define kCameraScaleFlagLong "-cameraScale"
+#define kTimeStepFlag "-ts" 
+#define kTimeStepFlagLong "-timeStep"
 
 using namespace aphid;
 
@@ -39,6 +41,7 @@ MSyntax FrustumBoxCmd::newSyntax()
 
 	syntax.addFlag("-h", "-help", MSyntax::kNoArg);
     syntax.addFlag("-fr", "-frameRange", MSyntax::kLong, MSyntax::kLong);
+    syntax.addFlag("-ts", "-timeStep", MSyntax::kLong);
 	syntax.addFlag("-cam", "-camera", MSyntax::kString);
     syntax.addFlag("-lv", "-listVisible", MSyntax::kNoArg);
 	syntax.addFlag(kCameraScaleFlag, kCameraScaleFlagLong, MSyntax::kDouble);
@@ -51,6 +54,7 @@ MSyntax FrustumBoxCmd::newSyntax()
 MStatus FrustumBoxCmd::parseArgs(const MArgList &args)
 {
 	m_cameraScale = 1.0;
+	m_timeStep = 1;
 	
 	MStatus			stat;
 	MArgDatabase	argData(syntax(), args, &stat);
@@ -71,6 +75,19 @@ MStatus FrustumBoxCmd::parseArgs(const MArgList &args)
         if(!stat) {
             MGlobal::displayWarning("invalid -fr argument");
             m_mode = WHelp;
+        }
+    }
+    
+    if(argData.isFlagSet(kTimeStepFlag)) {
+        stat = argData.getFlagArgument(kTimeStepFlag, 0, m_timeStep);
+        if(!stat) {
+            MGlobal::displayWarning("invalid -ts argument");
+            m_mode = WHelp;
+        }
+        
+        if(m_timeStep<1) {
+            m_timeStep = 1;
+            AHelper::Info<int>("FrustumBoxCmd parseArgs truncate timeStep to ", m_timeStep);
         }
     }
 	
@@ -162,7 +179,7 @@ MStatus	FrustumBoxCmd::redoIt()
     int i;
     for(i=0; i< paths.length(); i++) visibilities.push_back(0);
     
-    for(i=m_startTime; i<= m_endTime; i++) {
+    for(i=m_startTime; i<= m_endTime; i += m_timeStep) {
         MGlobal::executeCommand(MString("currentTime ") + i);
         collide(visibilities,
                  paths,
@@ -188,9 +205,10 @@ MStatus FrustumBoxCmd::printHelp()
 	MGlobal::displayInfo(MString("FrustumBox help info:\n test if objects are visible through a camera")
 		+MString("\n by intersecting object oriented box and camera frustum. \n example:")
 		+MString("\n select object(s) to test")
-		+MString("\n frustumBox -cam |persp|perspShape -fr 1 100")
+		+MString("\n frustumBox -cam |persp|perspShape -fr 1 100 -ts 5")
 		+MString("\n -cam/-camera string is full path to camera shape")
 		+MString("\n -fr/-frameRange int int is begin and end frame of test")
+        +MString("\n -ts/-timeStep int is number of frames of each step within frame range, default is 1")
         +MString("\n -lv/-listVisible is set to return visible objects instead of invisible ones")
 		+MString("\n -cms/-cameraScale double scaling focal length of camera to expand or shrink region of contact default 1")
 		+MString("\n return value is string[] of objects NOT visible to camera"));

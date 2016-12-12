@@ -947,6 +947,7 @@ std::string AHelper::FullPathNameToObj(const MObject & node)
 MDagPath AHelper::FindMatchedPath(const MDagPath & rel,
 	                const MDagPathArray & paths)
 {
+    const unsigned relCount = rel.pathCount();
     for(unsigned i=0;i<paths.length();++i) {
         MDagPath parentPath = paths[i];
         MStatus stat;
@@ -956,6 +957,9 @@ MDagPath AHelper::FindMatchedPath(const MDagPath & rel,
             
             if(parentPath == rel)
                 return paths[i];
+/// cannot shorter than rel
+            if(parentPath.pathCount	() < relCount)
+                break;
             
         }
     }
