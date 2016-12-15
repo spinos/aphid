@@ -49,7 +49,6 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		return false;
 		
 	const Vector3F * psamp = ebpSampler.positions();
-	const float ml = ebpSampler.levelCellSize(3);
 	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
 	const bool limitRadius = option.m_radius > 1e-3f;
 	const float sampleSize = plantSize(option.m_plantId) * .67f;
@@ -60,9 +59,12 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	Vector3F pog;
 	try {
 	for(int i=0;i<ebpSampler.numParticles();++i) {
-
-		if(!closestPointOnGround(pog, psamp[i], ml) ) 
-			continue;
+/// tree division may not satify distance condition
+/// on the safe side to start at very large distance
+		if(!closestPointOnGround(pog, psamp[i], 1e7f) ) {
+		    std::cout<<"failed closestPointOnGround test"<<psamp[i];
+		    continue;
+		}
 		
 		setBind(&bind);
 	
@@ -77,8 +79,9 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		}
 		
 		if(limitRadius) {
-			if(pog.distanceTo(option.m_centerPoint) >  option.m_radius)
-				continue;
+			if(pog.distanceTo(option.m_centerPoint) >  option.m_radius) {
+			    continue;
+			}
 		}
 		
 		if(closeToOccupiedPosition(pog, option.m_minMarginSize + sampleSize * scale) ) 
