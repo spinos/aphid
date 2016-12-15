@@ -18,10 +18,7 @@
 #include <OpenGL/glext.h>
 #include <GLUT/glut.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#include <X11/Intrinsic.h>
+#include <GL/glew.h>
 #endif
 
 #endif

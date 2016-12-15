@@ -236,11 +236,9 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/BaseCamera.cpp
 ../shared/PerspectiveCamera.cpp 
 ../shared/BaseDrawer.cpp 
-##../shared/DrawBuffer.cpp
 ../shared/LineDrawer.cpp 
 ../shared/MeshDrawer.cpp 
-../shared/GeoDrawer.cpp 
-##../shared/LightDrawer.cpp 
+../shared/GeoDrawer.cpp  
 ../shared/LineBuffer.cpp
 ../shared/AdaptableStripeBuffer.cpp
 ../shared/GLHUD.cpp
@@ -258,10 +256,8 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/VertexPath.cpp
 ../lapl/VertexAdjacency.cpp
 ../shared/MeshTopology.cpp 
-##../shared/BaseField.cpp
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
-../shared/DrawDistanceField.cpp
 ../shared/DrawBox.cpp
 ../shared/PerspectiveView.cpp)
 

@@ -11,13 +11,7 @@
 #define APHID_G_MATERIAL_H
 
 #include <AllMath.h>
-
-#ifdef WIN32
-#include <windows.h>
-#include <GL/gl.h>
-#else
 #include <gl_heads.h>
-#endif
 
 namespace aphid {
 

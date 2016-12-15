@@ -7,7 +7,7 @@
  *
  */
 
-#include "GlslBase.h"
+#include <GlslBase.h>
 #include <sstream>
 
 namespace aphid {
@@ -98,6 +98,13 @@ bool GLSLBase::diagnose(std::string& log)
 		log += sbuf;
 	}
 #else
+
+#ifdef __APPLE__
+
+#else
+    glewInit();
+#endif
+
 	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
 	for (int i = 0; i < j; i++) {
 		entriesNeeded[i].supported = gluCheckExtension((GLubyte*)entriesNeeded[i].name, strExt) |
