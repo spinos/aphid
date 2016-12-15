@@ -37,6 +37,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPlugArray.h>
 #include <maya/MFnTransform.h>
+#include <maya/MArgList.h>
 #include <sstream>
 #undef min
 #undef max
@@ -216,6 +217,12 @@ public:
 	static void GetOutputConnections(MPlugArray & dst, const MPlug & p);
 	static void GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p);
 	static bool GetDepNodeByName(MObject & dst, MFn::Type type, const MString & name);
+	static bool GetStringArgument(MString & res,
+	                            unsigned & it,
+	                            const unsigned & argc,
+	                            const MArgList &args,
+	                            const std::string & log1,
+	                            const std::string & log2);
 	
 };
 

@@ -1205,5 +1205,26 @@ bool AHelper::GetDepNodeByName(MObject & dst, MFn::Type type, const MString & na
     return false;
 }
 
+ bool AHelper::GetStringArgument(MString & res,
+	                            unsigned & it,
+	                            const unsigned & argc,
+	                            const MArgList &args,
+	                            const std::string & log1,
+	                            const std::string & log2)
+{
+    if(it==argc-1) {
+        MGlobal::displayWarning(log1.c_str() );
+		return false;
+    }
+    it++;
+    MStatus stat;
+    res = args.asString( it, &stat );
+    if(!stat) {
+        MGlobal::displayWarning(log2.c_str() );
+		return false;
+    }
+    return true;
+}
+
 }
 //:~
