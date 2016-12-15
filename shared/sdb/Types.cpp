@@ -62,8 +62,11 @@ const std::string Coord2::str() const
 	return (boost::format("(%1%,%2%)") % x % y).str();
 }
 
-Coord3::Coord3() {x = y = z = 0;}
-Coord3::Coord3(int a, int b, int c) { x =a; y= b; z=c; }
+Coord3::Coord3() 
+{x = y = z = 0;}
+
+Coord3::Coord3(int a, int b, int c) 
+{ x =a; y= b; z=c; }
 
 const bool Coord3::operator==(const Coord3 & another) const {
 	return x == another.x && y == another.y && z == another.z;
@@ -138,6 +141,20 @@ void Coord3::makeUnique()
 const std::string Coord3::str() const 
 {
 	return (boost::format("(%1%,%2%,%3%)") % x % y % z).str();
+}
+
+bool Coord3::intersects(const int & v) const
+{
+	if(x == v) return true;
+	if(y == v) return true;
+	return (z == v);
+}
+
+bool Coord3::intersects(const Coord2 & e) const
+{
+	if(e.x == x && e.y == y ) return true;
+	if(e.x == y && e.y == z ) return true;
+	return (e.x == z && e.y == x );
 }
 
 const std::string V3::str() const 

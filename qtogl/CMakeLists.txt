@@ -49,6 +49,8 @@ SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
     SET (APHID_KD_LIBRARY ${APHID_DIR}/lib/aphidKd.lib)
     SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/aphidSdb.lib)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/aphidGraph.lib)
+set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/aphidTopology.lib)
+
 elseif (APPLE)
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
     set (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.a)
@@ -58,6 +60,8 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
     set (APHID_KD_LIBRARY ${APHID_DIR}/lib/libaphidKd.a)
     set (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.a)
     set (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.a)
+set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidTopology.a)
+
 ELSE ()
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
     SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/libaphidMath.so)
@@ -67,6 +71,8 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
     SET (APHID_KD_LIBRARY ${APHID_DIR}/lib/libaphidKd.so)
     SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.so)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
+set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
+
 endif ()
 
 message ("aphid foundation is " ${APHID_FOUND_LIBRARY})
@@ -77,6 +83,7 @@ message ("aphid ui is " ${APHID_UI_LIBRARY})
 message ("aphid kd is " ${APHID_KD_LIBRARY})
 message ("aphid sdb is " ${APHID_SDB_LIBRARY})
 message ("aphid graph is " ${APHID_GRAPH_LIBRARY})
+message ("aphid topo is " ${APHID_TOPO_LIBRARY})
 
 
 if(WIN32)
@@ -134,4 +141,18 @@ set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
+
+add_executable (testclique testClique.cpp)
+target_link_libraries (testclique ${APHID_FOUND_LIBRARY})
+target_link_libraries (testclique ${APHID_MATH_LIBRARY})
+target_link_libraries (testclique ${APHID_GEOM_LIBRARY})
+target_link_libraries (testclique ${APHID_TOPO_LIBRARY})
+target_link_libraries (testclique ${APHID_SDB_LIBRARY})
+
+target_link_libraries (testclique ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (testclique ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (testclique ${Boost_REGEX_LIBRARY})
+target_link_libraries (testclique ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (testclique ${Boost_THREAD_LIBRARY})
+target_link_libraries (testclique ${Boost_CHRONO_LIBRARY})
 
