@@ -37,6 +37,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MPlugArray.h>
 #include <maya/MFnTransform.h>
+#include <maya/MArgList.h>
 #include <sstream>
 #undef min
 #undef max
@@ -193,12 +194,36 @@ public:
 			return 0;
 		}
 	}
+	
+	template<typename T1, typename T2>
+	static bool BelongsTo(const T1 & a, const T2 & b) 
+	{
+	    const unsigned n = b.length();
+		for(unsigned i=0; i<n; i++) {
+			
+			if(a == b[i]) {
+			    return true;
+			}
+		}
+		return false;
+	}
     
     static bool IsReferenced(const MObject & node);
 	static MObject CreateDeformer(const MString & name);
 	static void PrintFullPath(const MDagPathArray & paths);
 	static MDagPath FindMatchedPath(const MDagPath & rel,
 	                const MDagPathArray & paths);
+	static void GetInputConnections(MPlugArray & dst, const MPlug & p);
+	static void GetOutputConnections(MPlugArray & dst, const MPlug & p);
+	static void GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p);
+	static bool GetDepNodeByName(MObject & dst, MFn::Type type, const MString & name);
+	static bool GetStringArgument(MString & res,
+	                            unsigned & it,
+	                            const unsigned & argc,
+	                            const MArgList &args,
+	                            const std::string & log1,
+	                            const std::string & log2);
+	
 };
 
 }

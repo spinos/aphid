@@ -56,6 +56,6 @@ private:
 	WorkMode m_mode;
 	MString m_cameraName;
 	double m_cameraScale;
-    int m_startTime, m_endTime;
+    int m_startTime, m_endTime, m_timeStep;
     bool m_doListVisible;
 };

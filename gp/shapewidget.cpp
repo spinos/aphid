@@ -1,9 +1,9 @@
+#include <GeoDrawer.h>
+#include <GlslInstancer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include <geom/SuperQuadricGlyph.h>
 #include "shapewidget.h"
-#include <GeoDrawer.h>
-#include <GlslInstancer.h>
 #include "RbfKernel.h"
 #include "Covariance.h"
 #include <Plane.h>

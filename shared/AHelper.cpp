@@ -242,17 +242,14 @@ void AHelper::getTypedDepNode(MFn::Type type, MObject& root, MObject& node)
 
 void AHelper::getTypedDepNodeByName(MFn::Type type, MString& name, MObject& root, MObject& node)
 {	
-//MFnDependencyNode rf(root);MGlobal::displayInfo(rf.name());
 	node = MObject::kNullObj;
 	MStatus stat;
 	MItDependencyGraph itdep(root, type, MItDependencyGraph::kUpstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
 	        
-	//if(!stat) MGlobal::displayInfo("no it");
-	//else MGlobal::displayInfo("it it why po1");
-        for(; !itdep.isDone(); itdep.next())
-        {
+// if(!stat) MGlobal::displayInfo("no it");
+        for(; !itdep.isDone(); itdep.next()) {
         		MFnDependencyNode pf(itdep.currentItem());
-				//MGlobal::displayInfo(pf.name());
+// MGlobal::displayInfo(pf.name());
 				if(pf.name()==name) {
 					node = itdep.currentItem();
 					return;
@@ -947,6 +944,7 @@ std::string AHelper::FullPathNameToObj(const MObject & node)
 MDagPath AHelper::FindMatchedPath(const MDagPath & rel,
 	                const MDagPathArray & paths)
 {
+    const unsigned relCount = rel.pathCount();
     for(unsigned i=0;i<paths.length();++i) {
         MDagPath parentPath = paths[i];
         MStatus stat;
@@ -956,6 +954,9 @@ MDagPath AHelper::FindMatchedPath(const MDagPath & rel,
             
             if(parentPath == rel)
                 return paths[i];
+/// cannot shorter than rel
+            if(parentPath.pathCount	() < relCount)
+                break;
             
         }
     }
@@ -1155,6 +1156,74 @@ void AHelper::PrintFullPath(const MDagPathArray & paths)
 {
     for(unsigned i=0;i<paths.length();++i)
         MGlobal::displayInfo(paths[i].fullPathName() );
+}
+
+void AHelper::GetInputConnections(MPlugArray & dst, const MPlug & p)
+{
+/// as dst not as src
+    p.connectedTo ( dst , true, false );
+}
+
+void AHelper::GetOutputConnections(MPlugArray & dst, const MPlug & p)
+{ p.connectedTo ( dst , false, true ); }
+
+void AHelper::GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p)
+{
+    if(!p.isArray() ) {
+        Info<MString>("plug is not array", p.name() );
+        return;
+    }
+    
+    unsigned ne = p.numElements();
+    for(unsigned i=0;i<ne;++i) {
+        MPlugArray ac;
+        GetInputConnections(ac, p.elementByPhysicalIndex(i) );
+        Merge<MPlugArray >(dst, ac);
+    }
+    
+}
+
+bool AHelper::GetDepNodeByName(MObject & dst, MFn::Type type, const MString & name)
+{
+    MItDependencyNodes nodeIt(type);
+    for (; !nodeIt.isDone(); nodeIt.next()) {
+        MObject node = nodeIt.item();
+        if (node.isNull()) {
+            continue;
+        }
+// dependency node only
+        if (node.hasFn (MFn::kDagNode)) {
+            continue;
+        }
+        
+        MFnDependencyNode pf(node);
+		if(pf.name()==name) {
+			dst = node;
+			return true;
+		}
+    }
+    return false;
+}
+
+ bool AHelper::GetStringArgument(MString & res,
+	                            unsigned & it,
+	                            const unsigned & argc,
+	                            const MArgList &args,
+	                            const std::string & log1,
+	                            const std::string & log2)
+{
+    if(it==argc-1) {
+        MGlobal::displayWarning(log1.c_str() );
+		return false;
+    }
+    it++;
+    MStatus stat;
+    res = args.asString( it, &stat );
+    if(!stat) {
+        MGlobal::displayWarning(log2.c_str() );
+		return false;
+    }
+    return true;
 }
 
 }

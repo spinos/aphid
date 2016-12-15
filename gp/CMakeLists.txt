@@ -226,6 +226,12 @@ if(WIN32)
 add_definitions (-DWIN32)
 endif()
 
+IF(WIN32)
+ELSEIF (APPLE)
+ELSE()
+    SET (GLEW_LIBRARY /usr/lib64/libGLEW.so )
+ENDIF()
+
 find_package (OpenGL REQUIRED)
 message ("opengl is " ${OPENGL_LIBRARIES})
 
@@ -250,3 +256,9 @@ target_link_libraries (shapeinterp ${Boost_CHRONO_LIBRARY})
 target_link_libraries (shapeinterp ${BLAS_LIBRARY})
 target_link_libraries (shapeinterp ${LAPACK_LIBRARY})
 target_link_libraries (shapeinterp ${F2C_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSE()
+    target_link_libraries (shapeinterp ${GLEW_LIBRARY})
+ENDIF()

@@ -73,6 +73,11 @@ public:
     static bool GetFirstNamespace(std::string & res);
     static std::string GetParentName(const std::string& name, const std::string & term);
     static std::string GetFollowupName(const std::string& name, const std::string & term);
+/// a, b <- a.b
+/// separated by one dot
+    static bool SeparateNodeAttrib(std::string & a, std::string & b,
+                                    const std::string & ab);
+    
 };
 
 }

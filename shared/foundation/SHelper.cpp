@@ -1039,5 +1039,26 @@ std::string SHelper::GetFollowupName(const std::string& name, const std::string 
 	return r;
 }
 
+bool SHelper::SeparateNodeAttrib(std::string & a, std::string & b,
+                                    const std::string & ab)
+{
+    std::string r;
+	std::string str = ab;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep(".");
+	tokenizer tokens(str, sep);
+	for (tokenizer::iterator tok_iter = tokens.begin();
+		tok_iter != tokens.end(); ++tok_iter) {
+			if(tok_iter == tokens.begin()) {
+			    a = *tok_iter;
+			}
+			else {
+			    b = *tok_iter;
+			    return true;
+			}
+		}
+    return false;
+}
+
 }
 //:~
