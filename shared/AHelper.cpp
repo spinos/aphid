@@ -1226,5 +1226,23 @@ bool AHelper::GetDepNodeByName(MObject & dst, MFn::Type type, const MString & na
     return true;
 }
 
+void AHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
+{
+    const unsigned np = p.evaluateNumElements();
+    if(np < 1) {
+        dst = p.elementByLogicalIndex(0);
+        return;
+    }
+    
+    for(unsigned i=0;i<1000;++i) {
+        MPlug ap = p.elementByLogicalIndex(i);
+        if(!ap.isConnected() ) {
+            AHelper::Info<unsigned>("available elem", i);
+            dst = ap;
+            return;
+        }
+    }
+}
+
 }
 //:~

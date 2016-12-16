@@ -223,6 +223,8 @@ public:
 	                            const MArgList &args,
 	                            const std::string & log1,
 	                            const std::string & log2);
+/// first in array not connected
+	static void GetAvailablePlug(MPlug & dst, MPlug & p);
 	
 };
 
