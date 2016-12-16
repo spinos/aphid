@@ -51,6 +51,10 @@ public:
         output << p.str();
         return output;
     }
+	
+	bool intersects(const int & v) const;
+	bool intersects(const Coord2 & e) const;
+	
 	int x, y, z;
 };
 

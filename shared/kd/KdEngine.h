@@ -607,15 +607,21 @@ void KdEngine::closestToPoint(KdNTree<T, Tn > * tree,
 	const float cp = ctx->_toPoint.comp(axis) - splitPos;
 	if(cp < 0.f) {
 		innerClosestToPoint(tree, ctx, branchIdx, 0, leftBox);
-		if(ctx->closeEnough() ) return;
-		if( -cp < ctx->_distance) 
+		if(ctx->closeEnough() ) {
+			return;
+		}
+		if( -cp < ctx->_distance) {
 			innerClosestToPoint(tree, ctx, branchIdx, 1, rightBox);
+		}
 	}
 	else {
 		innerClosestToPoint(tree, ctx, branchIdx, 1, rightBox);
-		if(ctx->closeEnough() ) return;
-		if(cp < ctx->_distance)
+		if(ctx->closeEnough() ) {
+			return;
+		}
+		if(cp < ctx->_distance) {
 			innerClosestToPoint(tree, ctx, branchIdx, 0, leftBox);
+		}
 	}
 	
 }
@@ -627,8 +633,9 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 				int nodeIdx,
 				const BoundingBox & b)
 {
-	if(!ctx->closeTo(b) )
+	if(!ctx->closeTo(b) ) {
 		return;
+	}
 		
 	Tn * currentBranch = tree->branches()[branchIdx];
 	KdTreeNode * r = currentBranch->node(nodeIdx);
@@ -651,13 +658,16 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 							nodeIdx + offset,
 							lftBox);
 			
-			if(ctx->closeEnough() ) return;
+			if(ctx->closeEnough() ) {
+				return;
+			}
 			
-			if( -cp < ctx->_distance) 
+			if( -cp < ctx->_distance) {
 				innerClosestToPoint(tree, ctx, 
 							branchIdx, 
 							nodeIdx + offset + 1, 
 							rgtBox);
+			}
 		}
 		else {
 			innerClosestToPoint(tree, ctx, 
@@ -665,12 +675,16 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 							nodeIdx + offset + 1,
 							rgtBox);
 							
-			if(ctx->closeEnough() ) return;
+			if(ctx->closeEnough() ) {
+				return;
+			}
 			
-			innerClosestToPoint(tree, ctx, 
+			if(cp < ctx->_distance) {
+				innerClosestToPoint(tree, ctx, 
 							branchIdx,
 							nodeIdx + offset,
 							lftBox);
+			}
 		}
 	}
 	else {
@@ -680,12 +694,16 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 							0,
 							lftBox);
 							
-			if(ctx->closeEnough() ) return;
+			if(ctx->closeEnough() ) {
+				return;
+			}
 			
-			innerClosestToPoint(tree, ctx, 
+			if( -cp < ctx->_distance) {
+				innerClosestToPoint(tree, ctx, 
 							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							1,
 							rgtBox);
+			}
 		}
 		else {
 			innerClosestToPoint(tree, ctx, 
@@ -693,12 +711,16 @@ void KdEngine::innerClosestToPoint(KdNTree<T, Tn > * tree,
 							1,
 							rgtBox);
 							
-			if(ctx->closeEnough() ) return;
+			if(ctx->closeEnough() ) {
+				return;
+			}
 			
-			innerClosestToPoint(tree, ctx, 
+			if(cp < ctx->_distance) {
+				innerClosestToPoint(tree, ctx, 
 							branchIdx + offset & Tn::TreeletOffsetMaskTau,
 							0,
 							lftBox);
+			}
 		}
 	}
 }
@@ -708,7 +730,10 @@ void KdEngine::leafClosestToPoint(KdNTree<T, Tn > * tree,
 								ClosestToPointTestResult * result,
 								KdTreeNode *node, const BoundingBox &box)
 {
-	if(node->getNumPrims() < 1) return;
+	if(node->getNumPrims() < 1) {
+		return;
+	}
+	
 	int start, len;
 	tree->leafPrimStartLength(start, len, node->getPrimStart() );
 	int i = 0;
@@ -724,7 +749,10 @@ template<typename T, typename Tn>
 void KdEngine::intersectBox(KdNTree<T, Tn > * tree, 
 				BoxIntersectContext * ctx)
 {
-	if(tree->isEmpty() ) return;
+	if(tree->isEmpty() ) {
+		return;
+	}
+	
 	KdTreeNode * r = tree->root()->node(0);
 	if(r->isLeaf() ) {
 		leafIntersectBox(tree, ctx, r);
