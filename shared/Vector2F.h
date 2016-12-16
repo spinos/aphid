@@ -9,6 +9,8 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#include <iostream>
+
 namespace aphid {
 	
 class Vector2F{
@@ -42,7 +44,14 @@ public:
 	Vector2F reversed() const;
 	
 	float cross(const Vector2F & b) const;
-	void verbose(const char * pref) const;
+	
+	friend std::ostream& operator<<(std::ostream &output, const Vector2F & p) {
+        output << p.str();
+        return output;
+    }
+
+	const std::string str() const;
+	
 	float x,y;
 };
 

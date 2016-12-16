@@ -8,8 +8,8 @@
  */
 #include <QtGui>
 #include "sampleKernelWidget.h"
-#include "RbfKernel.h"
-#include "Covariance.h"
+#include <gpr/RbfKernel.h>
+#include <gpr/Covariance.h>
 #include <math/linspace.h>
 #include <math/linearMath.h>
 

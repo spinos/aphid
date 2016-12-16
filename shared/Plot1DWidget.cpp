@@ -224,4 +224,22 @@ void Plot1DWidget::setBound(const float & hlow, const float & hhigh,
 void Plot1DWidget::addVectorPlot(UniformPlot1D * p)
 { m_curves.push_back(p); }
 
+Vector2F Plot1DWidget::toRealSpace(const int & x,
+	                    const int & y) const
+{
+    const QPoint lu = luCorner();
+    const QPoint rb = rbCorner();
+    Vector2F r;
+    r.x = RemapF<float>(m_hBound.x, m_hBound.y, lu.x(), rb.x(), 
+								x);
+	r.y = RemapF<float>(m_vBound.x, m_vBound.y, rb.y(), lu.y(), 
+								y);
+	return r;
+}
+
+float Plot1DWidget::xToBound(const float & x) const
+{
+    return m_hBound.x + (m_hBound.y - m_hBound.x) * x;
+}
+
 }

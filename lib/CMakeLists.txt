@@ -292,6 +292,14 @@ file (GLOB Topo_SRC
 ADD_LIBRARY (aphidTopology ${LIB_TYP}
 ${Topo_SRC})
 
+file (GLOB Gpr_SRC
+    "../shared/gpr/*.h"
+    "../shared/gpr/*.cpp"
+)
+
+ADD_LIBRARY (aphidGp ${LIB_TYP}
+${Gpr_SRC})
+
 add_library(aphid ${LIB_TYP}                 
 ##../shared/SpaceHandle.cpp                
     ../shared/SkeletonSubspaceDeformer.cpp                                  

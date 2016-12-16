@@ -1,8 +1,8 @@
 #ifndef APH_GPR_SAMPLE_KERNEL_DIALOG_H
 #define APH_GPR_SAMPLE_KERNEL_DIALOG_H
 #include <QDialog>
-#include "RbfKernel.h"
-#include "Covariance.h"
+#include <gpr/RbfKernel.h>
+#include <gpr/Covariance.h>
 
 namespace aphid {
 namespace gpr {

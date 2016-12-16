@@ -4,8 +4,8 @@
 #include <QtOpenGL>
 #include <geom/SuperQuadricGlyph.h>
 #include "shapewidget.h"
-#include "RbfKernel.h"
-#include "Covariance.h"
+#include <gpr/RbfKernel.h>
+#include <gpr/Covariance.h>
 #include <Plane.h>
 
 using namespace aphid;
