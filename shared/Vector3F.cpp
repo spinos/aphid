@@ -323,19 +323,6 @@ Vector3F Vector3F::FromPolarXYZ(float phi, float theta, float zdir)
     return result;
 }
 
-void Vector3F::verbose(const char * pref) const
-{
-	std::cout<<pref<<str()<<"\n";
-}
-
-const std::string Vector3F::str() const
-{
-	std::stringstream sst;
-	sst.str("");
-    sst<<"("<<x<<","<<y<<","<<z<<")";
-	return sst.str();
-}
-
 int Vector3F::orientation() const
 { 
 	int j = longestAxis();
@@ -362,4 +349,10 @@ Vector3F Vector3F::inOrientation(const float & l) const
 	return Vector3F(0.f, 0.f, l);
 }
 
+std::ostream& operator<<(std::ostream &output, const Vector3F & p) 
+{
+    output <<"("<<p.x<<","<<p.y<<","<<p.z<<")";
+    return output;
+}
+    
 }

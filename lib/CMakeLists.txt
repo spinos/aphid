@@ -116,6 +116,27 @@ message (" openexr include is " ${OpenEXR_INCLUDE_DIR})
 
 include_directories (${OpenEXR_INCLUDE_DIR})
 
+if(WIN32)
+    include_directories (D:/usr/CLAPACK/include)
+    set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
+	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
+    set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
+
+elseif(APPLE)
+	set(F2C_LIBRARY libf2c.a)
+	set(BLAS_LIBRARY libblas.a)
+	set(LAPACK_LIBRARY liblapack.a)
+else ()
+include_directories (/usr/local/include)
+	set(F2C_LIBRARY /usr/local/lib/libf2c.so)
+    set(BLAS_LIBRARY /usr/local/lib/libblas.so)
+	set(LAPACK_LIBRARY /usr/local/lib/liblapack.so)
+	
+endif()
+
+message ("blas " ${BLAS_LIBRARY})
+message ("lapack " ${LAPACK_LIBRARY})
+message ("f2c " ${F2C_LIBRARY})
 
 IF (WIN32) 
 	SET (LIB_TYP STATIC)

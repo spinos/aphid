@@ -8,11 +8,7 @@
  */
 #include <QtGui>
 #include "interpWidget.h"
-#include <gpr/RbfKernel.h>
-#include <gpr/Covariance.h>
 #include <gpr/Interpolate1D.h>
-#include <math/linspace.h>
-#include <math/linearMath.h>
 
 using namespace aphid;
 
@@ -35,7 +31,7 @@ static const float initTrain[DIM_TRAIN][2] = {
 	
 	m_trainPlot = new UniformPlot1D;
 	m_trainPlot->create(DIM_TRAIN);
-	int i=0, j;
+	int i=0;
 	for(;i<DIM_TRAIN;++i) {
 		m_trainPlot->x()[i] = initTrain[i][0];
 		m_trainPlot->y()[i] = initTrain[i][1];
@@ -74,7 +70,7 @@ void InterpWidget::mousePressEvent(QMouseEvent *event)
 	const int & n = m_trainPlot->numY();
 	for(int i=0;i<n;++i) {
 	    Vector2F vtest(m_trainPlot->x()[i], m_trainPlot->y()[i]);
-	    if(vtest.distantTo(vmouse) < 0.1f ) {
+	    if(vtest.distanceTo(vmouse) < 0.1f ) {
 	        m_selectedTrainInd = i;
 	        break;
 	    }

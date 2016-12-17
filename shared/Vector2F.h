@@ -13,7 +13,7 @@
 
 namespace aphid {
 	
-class Vector2F{
+class Vector2F {
 public:
 	Vector2F();
 	Vector2F(float vx, float vy);
@@ -25,8 +25,7 @@ public:
 	
 	void operator+=( const Vector2F& other );
 	void operator-=( const Vector2F& other );
-	//void operator-=( Vector2F other );
-	
+
 	void operator/=( const float& scale );	
 	void operator*=( const float& scale );
 	
@@ -38,20 +37,15 @@ public:
 	Vector2F operator+(const Vector2F& other ) const;	
 	Vector2F operator-(const Vector2F& other ) const;
 	
-	float distantTo(const Vector2F & other) const;
+	float distanceTo(const Vector2F & other) const;
 	float length() const;
 	void reverse();	
 	Vector2F reversed() const;
 	
 	float cross(const Vector2F & b) const;
 	
-	friend std::ostream& operator<<(std::ostream &output, const Vector2F & p) {
-        output << p.str();
-        return output;
-    }
+	friend std::ostream& operator<<(std::ostream &output, const Vector2F & p);
 
-	const std::string str() const;
-	
 	float x,y;
 };
 

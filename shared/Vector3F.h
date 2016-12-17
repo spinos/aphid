@@ -38,13 +38,8 @@ public:
 	Vector3F operator-( Vector3F & other ) const;		
 	Vector3F operator-( const Vector3F& other ) const;
 	
-	friend std::ostream& operator<<(std::ostream &output, const Vector3F & p) {
-        output << p.str();
-        return output;
-    }
+	friend std::ostream& operator<<(std::ostream &output, const Vector3F & p);
 
-	const std::string str() const;
-	
 	const float length() const;
 	const float length2() const;
 	
@@ -76,8 +71,7 @@ public:
 	int orientation() const;
 /// quantized
 	Vector3F inOrientation(const float & l = 1.f) const;
-    void verbose(const char * pref) const;
-	
+
     static Vector3F FromPolarXYZ(float phi, float theta, float zdir=-1.f);
 	static Vector3F XAxis;
 	static Vector3F YAxis;

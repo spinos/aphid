@@ -112,7 +112,7 @@ inline Float4 getBarycentricCoordinate4(const Vector3F & p, const Vector3F * v)
     
     float D0 = determinantTetrahedron(mat, v[0], v[1], v[2], v[3]);
     if(D0 == 0.f) {
-        std::cout<<" tetrahedron is degenerate ("<<v[0].str()<<","<<v[1].str()<<","<<v[2].str()<<","<<v[3].str()<<")\n";
+        std::cout<<" tetrahedron is degenerate ("<<v[0]<<","<<v[1]<<","<<v[2]<<","<<v[3]<<")\n";
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  
@@ -368,7 +368,7 @@ inline Float4 getBarycentricCoordinate2(const Vector3F & p, const Vector3F * v)
 	Vector3F dv = v[1] - v[0];
 	float D0 = dv.length();
 	if(D0 < 1e-6f) {
-        std::cout<<" line is degenerate ("<<v[0].str()<<","<<v[1].str()<<")\n";
+        std::cout<<" line is degenerate ("<<v[0]<<","<<v[1]<<")\n";
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  
@@ -389,7 +389,7 @@ inline Float4 getBarycentricCoordinate3(const Vector3F & p, const Vector3F * v)
 	
     float D0 = n.length2();
     if(D0 < 1e-10f) {
-        std::cout<<" tiangle is degenerate ("<<v[0].str()<<","<<v[1].str()<<","<<v[2].str()<<")\n";
+        std::cout<<" tiangle is degenerate ("<<v[0]<<","<<v[1]<<","<<v[2]<<")\n";
         coord.x = coord.y = coord.z = coord.w = -1.f;
         return coord;
     }  

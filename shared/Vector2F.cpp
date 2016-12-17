@@ -112,7 +112,7 @@ Vector2F Vector2F::operator-(const Vector2F& other ) const
         return Vector2F(x-other.x, y-other.y);
 }
 
-float Vector2F::distantTo(const Vector2F & other) const
+float Vector2F::distanceTo(const Vector2F & other) const
 {
 	return sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
 }
@@ -138,12 +138,10 @@ float Vector2F::cross(const Vector2F & b) const
 	return x * b.y - y * b.x;
 }
 
-const std::string Vector2F::str() const
+std::ostream& operator<<(std::ostream &output, const Vector2F & p) 
 {
-	std::stringstream sst;
-	sst.str("");
-    sst<<"("<<x<<","<<y<<")";
-	return sst.str();
+    output << "("<<p.x<<","<<p.y<<")";
+    return output;
 }
 
 }
