@@ -14,8 +14,6 @@ endif()
 include_directories ( ../shared)
 
 set (TKERN_HEADER_FILES ../shared/BaseImageWidget.h
-Covariance.h
-RbfKernel.h
 kernelWidget.h
 sampleKernelWidget.h
 sampleKernelDialog.h
@@ -171,23 +169,25 @@ set (Aphid_Math_Library "D:/aphid/lib/aphidMath.lib")
 set (Aphid_Img_Library "D:/aphid/lib/aphidImg.lib")
 set (Aphid_Geom_Library "D:/aphid/lib/aphidGeom.lib")
 set (Aphid_UI_Library "D:/aphid/lib/aphidUI.lib")
+set (Aphid_Gp_Library "D:/aphid/lib/aphidGp.lib")
 elseif (APPLE)
 set (Aphid_Found_Library /users/jianzhang/aphid/lib/libaphidFoundation.a)
 set (Aphid_Math_Library /users/jianzhang/aphid/lib/libaphidMath.a)
 set (Aphid_Img_Library /users/jianzhang/aphid/lib/libaphidImg.a)
 set (Aphid_Geom_Library /users/jianzhang/aphid/lib/libaphidGeom.a)
 set (Aphid_UI_Library /users/jianzhang/aphid/lib/libaphidUI.a)
+set (Aphid_Gp_Library /users/jianzhang/aphid/lib/libaphidGp.a)
 else()
 set (Aphid_Found_Library ~/aphid/lib/libaphidFoundation.so)
     set (Aphid_Math_Library ~/aphid/lib/libaphidMath.so)
 set (Aphid_Img_Library ~/aphid/lib/libaphidImg.so)
 set (Aphid_Geom_Library ~/aphid/lib/libaphidGeom.so)
 set (Aphid_UI_Library ~/aphid/lib/libaphidUI.so)
+set (Aphid_Gp_Library ~/aphid/lib/libaphidGp.so)
 endif ()
 
 target_link_libraries (testkernel ${Aphid_Found_Library})
 target_link_libraries (testkernel ${Aphid_Math_Library})
-target_link_libraries (testkernel ${Aphid_Geom_Library})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
@@ -198,8 +198,6 @@ set (TSHAPE_HEADER_FILES ../shared/BaseImageWidget.h
 ../shared/Base3DView.h
 ../shared/GlslBase.h
 ../shared/GlslInstancer.h
-Covariance.h
-RbfKernel.h
 kernelWidget.h
 shapewidget.h
 shapewindow.h)
@@ -262,3 +260,19 @@ ELSEIF (APPLE)
 ELSE()
     target_link_libraries (shapeinterp ${GLEW_LIBRARY})
 ENDIF()
+
+set (INTERP_HEADER_FILES interpWindow.h
+interpWidget.h)
+set (INTERP_SOURCE_FILES ../shared/BaseImageWidget.cpp
+../shared/Plot1DWidget.cpp
+interpWidget.cpp
+interpWindow.cpp
+interpmain.cpp)
+
+add_executable (interpgp ${INTERP_HEADER_FILES} ${INTERP_SOURCE_FILES})
+target_link_libraries (interpgp ${Aphid_Math_Library})
+target_link_libraries (interpgp ${Aphid_Gp_Library})
+target_link_libraries (interpgp Qt4::QtGui)
+target_link_libraries (interpgp ${BLAS_LIBRARY})
+target_link_libraries (interpgp ${LAPACK_LIBRARY})
+target_link_libraries (interpgp ${F2C_LIBRARY})

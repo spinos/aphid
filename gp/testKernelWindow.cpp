@@ -2,9 +2,9 @@
 #include <iostream>
 #include "testKernelWindow.h"
 #include "kernelWidget.h"
-#include "Covariance.h"
 #include "sampleKernelDialog.h"
-#include "RbfKernel.h"
+#include <gpr/Covariance.h>
+#include <gpr/RbfKernel.h>
 #include <math/linspace.h>
 
 namespace aphid {

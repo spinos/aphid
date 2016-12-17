@@ -8,7 +8,7 @@
  */
 
 #include "Vector2F.h"
-#include <iostream>
+#include <sstream>
 #include <cmath>
 namespace aphid {
 
@@ -138,9 +138,12 @@ float Vector2F::cross(const Vector2F & b) const
 	return x * b.y - y * b.x;
 }
 
-void Vector2F::verbose(const char * pref) const
+const std::string Vector2F::str() const
 {
-	std::cout<<pref<<" ("<<x<<","<<y<<")\n";
+	std::stringstream sst;
+	sst.str("");
+    sst<<"("<<x<<","<<y<<")";
+	return sst.str();
 }
 
 }

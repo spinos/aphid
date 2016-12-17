@@ -41,6 +41,11 @@ protected:
 	QPoint luCorner() const;
 /// right-bottom
 	QPoint rbCorner() const;
+/// from draw coordinate
+	Vector2F toRealSpace(const int & x,
+	                    const int & y) const;
+/// remap input [0,1] to bound
+	float xToBound(const float & x) const;
 	
 private:
 	void drawCoordsys(QPainter * pr) const;
