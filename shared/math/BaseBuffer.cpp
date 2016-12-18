@@ -6,8 +6,8 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <foundation/BaseBuffer.h>
-#include <Vector3F.h>
+#include <math/BaseBuffer.h>
+#include <math/Vector3F.h>
 #include <iostream>
 #include <string.h>
 
@@ -91,23 +91,18 @@ unsigned TypedBuffer::numElements() const
 
 void TypedBuffer::operator-=( const BaseBuffer * other )
 {
+	unsigned n = numElements();
     switch (valueType()) {
 		case TFlt:
-            minusFlt(other);
+            minus<float>(other, n);
 			break;
 		case TVec3:
-            minusVec3(other);
+            minus<Vector3F >(other, n);
 			break;
 		default:
 			break;
 	}
 }
-
-void TypedBuffer::minusFlt(const BaseBuffer * other)
-{ minus<float>(other, numElements()); }
-
-void TypedBuffer::minusVec3(const BaseBuffer * other)
-{ minus<Vector3F>(other, numElements()); }
 
 }
 //:~

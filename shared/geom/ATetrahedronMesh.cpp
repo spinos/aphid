@@ -8,7 +8,7 @@
  */
 
 #include <geom/ATetrahedronMesh.h>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include "tetrahedron_math.h"
 #include <GjkIntersection.h>
 #include <geom/ClosestToPointTest.h>

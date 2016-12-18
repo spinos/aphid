@@ -8,7 +8,7 @@
  */
 
 #include "ConvexShape.h"
-#include <Quantization.h>
+#include <math/Quantization.h>
 #include <line_math.h>
 #include <cmath>
 namespace aphid {

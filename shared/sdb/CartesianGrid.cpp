@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Morton3D.h>
 #include <sdb/BNode.h>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 
 namespace aphid {
 

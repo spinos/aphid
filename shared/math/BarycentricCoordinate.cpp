@@ -8,7 +8,6 @@
  */
 
 #include <math/BarycentricCoordinate.h>
-#include <iostream>
 
 namespace aphid {
 

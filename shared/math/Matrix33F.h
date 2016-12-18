@@ -1,4 +1,5 @@
-#pragma once
+#ifndef APH_MATRIX_33_F_H
+#define APH_MATRIX_33_F_H
 /*
  *  Matrix33F.h
  *
@@ -6,8 +7,8 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include "Vector3F.h"
-#include "Quaternion.h"
+#include <math/Quaternion.h>
+
 namespace aphid {
 
  class Matrix33F
@@ -82,3 +83,4 @@ namespace aphid {
  };
 
 }
+#endif

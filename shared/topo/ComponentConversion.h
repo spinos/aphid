@@ -8,11 +8,12 @@
  */
 
 #pragma once
-#include <AllGeometry.h>
+#include <math/Vector3F.h>
 #include <vector>
 
 namespace aphid {
 
+class Edge;
 class MeshTopology;
 
 class ComponentConversion {

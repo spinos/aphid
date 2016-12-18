@@ -8,7 +8,7 @@
  */
 
 #include <math/AOrientedBox.h>
-#include <Ray.h>
+#include <math/Ray.h>
 
 namespace aphid {
 

@@ -1,4 +1,4 @@
-	/*
+/*
  *  BoundingBox.h
  *  kdtree
  *
@@ -6,8 +6,10 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
-#include <Vector3F.h>
+#ifndef APH_BOUNDING_BOX_H
+#define APH_BOUNDING_BOX_H
+#include <math/Vector3F.h>
+
 namespace aphid {
 
 class Ray;
@@ -92,3 +94,4 @@ public:
 	int m_padding0, m_padding1;
 };
 }
+#endif

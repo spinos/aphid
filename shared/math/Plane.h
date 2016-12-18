@@ -7,9 +7,10 @@
  *
  */
 
-#pragma once
-#include <AllMath.h>
-#include <Ray.h>
+#ifndef APH_PLANE_H
+#define APH_PLANE_H
+
+#include <math/Ray.h>
 namespace aphid {
 
 class Plane {
@@ -35,3 +36,4 @@ private:
 };
 
 }
+#endif

@@ -161,19 +161,9 @@ file (GLOB Math_SRC
     "../shared/math/*.cpp"
 )
 
-ADD_LIBRARY (aphidMath ${LIB_TYP}
-../shared/Vector3F.cpp 
-                ../shared/Vector2F.cpp 
-                ../shared/Matrix44F.cpp 
-                ../shared/Matrix33F.cpp 
-                ../shared/Quaternion.cpp 
-    ../shared/BoundingBox.cpp 
-    ../shared/BoundingRectangle.cpp
-../shared/Ray.cpp
-../shared/Plane.cpp
-../shared/ViewCull.cpp
-../shared/plots.cpp
-${Math_SRC})
+ADD_LIBRARY (aphidMath ${LIB_TYP} 
+${Math_SRC}
+../shared/plots.cpp)
 
 SET (APHID_GEOM_PATH ../shared/geom)
 
@@ -211,6 +201,7 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/BiLinearInterpolate.cpp 
 ../shared/LinearInterpolate.cpp  
 ../shared/VertexDataGroup.cpp
+../shared/ViewCull.cpp
 ${Geom_SRC})
 
 ADD_LIBRARY (aphidH5 ${LIB_TYP}
@@ -269,14 +260,6 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/BaseBrush.cpp
 ../shared/ToolContext.cpp
 ../shared/SelectionArray.cpp
-../shared/ComponentConversion.cpp
-../shared/GeoElement.cpp 
-../shared/Vertex.cpp 
-../shared/Edge.cpp 
-../shared/Facet.cpp 
-../shared/VertexPath.cpp
-../lapl/VertexAdjacency.cpp
-../shared/MeshTopology.cpp 
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
 ../shared/DrawBox.cpp
@@ -329,7 +312,8 @@ add_library(aphid ${LIB_TYP}
 		../shared/IndexArray.cpp 
                 ##../shared/BoundingBoxList.cpp  
                 ##../shared/EasemodelUtil.cpp 
-                ../shared/AnchorGroup.cpp                    
+                ../shared/AnchorGroup.cpp 
+../shared/Anchor.cpp                   
                                ## ../shared/AccPatchMesh.cpp 
 				../shared/PatchNeighborRec.cpp 
 				##../shared/PatchTexture.cpp 
@@ -383,8 +367,7 @@ add_library(aphid ${LIB_TYP}
 ##../shared/TriangleDifference.cpp
 ##../shared/ADeformer.cpp
 ##../shared/TriangleAnchorDeformer.cpp
-##../shared/SplineMap1D.cpp
-##../lapl/Anchor.cpp 
+##../shared/SplineMap1D.cpp 
 ##../catmullclark/BaseQuad.cpp 
 ##../catmullclark/LODQuad.cpp 
 ##../catmullclark/accPatch.cpp 

@@ -8,7 +8,7 @@
  */
 #ifndef APH_GPR_INTERPOLATE_1D_H
 #define APH_GPR_INTERPOLATE_1D_H
-#include <ATypes.h>
+#include <math/ATypes.h>
 #include <vector>
 namespace aphid {
 

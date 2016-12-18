@@ -9,6 +9,7 @@
 
 #include "ViewCull.h"
 #include <GjkIntersection.h>
+#include <cmath>
 
 namespace aphid {
 

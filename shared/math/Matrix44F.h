@@ -1,5 +1,5 @@
-#ifndef MATRIX44F_H
-#define MATRIX44F_H
+#ifndef APH_MATRIX_44_F_H
+#define APH_MATRIX_44_F_H
 
 /*
  *  Matrix44F.h
@@ -8,8 +8,8 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <Vector3F.h>
-#include <Matrix33F.h>
+#include <math/Matrix33F.h>
+
 namespace aphid {
 
  class Matrix44F

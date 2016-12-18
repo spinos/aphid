@@ -7,7 +7,6 @@
  *
  */
 #include "KdTree.h"
-#include <Ray.h>
 #include <IntersectionContext.h>
 #include <geom/ClosestToPointTest.h>
 #include "SelectionContext.h"

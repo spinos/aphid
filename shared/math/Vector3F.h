@@ -1,7 +1,6 @@
-#ifndef VECTOR3F_H
-#define VECTOR3F_H
-#include <ATypes.h>
-#include <Vector2F.h>
+#ifndef APH_VECTOR3F_H
+#define APH_VECTOR3F_H
+#include <math/Vector2F.h>
 
 namespace aphid {
 

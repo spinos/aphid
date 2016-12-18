@@ -9,7 +9,7 @@
 
 #pragma once
 #include <AllMath.h>
-#include <Ray.h>
+
 namespace aphid {
 
 class BaseBrush {

@@ -12,7 +12,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <geom/ATriangleMesh.h>
 
 namespace aphid {

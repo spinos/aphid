@@ -8,11 +8,12 @@
  */
 
 #include "Plane.h"
-#include <iostream>
+#include <math/miscfuncs.h>
 
 namespace aphid {
 
-Plane::Plane() {}
+Plane::Plane() 
+{}
 
 Plane::Plane(float a, float b, float c, float d)
 {

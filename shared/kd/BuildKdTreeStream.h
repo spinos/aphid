@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 #include <sdb/VectorArray.h>
 #include <BaseMesh.h>
 #include <kd/KdTreeNode.h>

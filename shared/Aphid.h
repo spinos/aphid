@@ -7,17 +7,6 @@
  *
  */
 #include <iostream>
-inline char IsValueNearZero(const float & value)
-{
-	return (value < 10e-5 && value > -10e-5);
-}
-
-inline void SwapValues(float &a, float &b)
-{
-	float t = a;
-	a = b;
-	b = t;
-}
 
 inline const char *byte_to_binary(int x)
 {

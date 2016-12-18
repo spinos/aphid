@@ -8,7 +8,8 @@
  */
 
 #include "Edge.h"
-#include <Facet.h>
+#include <topo/Vertex.h>
+#include <topo/Facet.h>
 
 namespace aphid {
 

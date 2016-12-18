@@ -7,7 +7,6 @@
  *
  */
 #pragma once
-#include "AllMath.h"
 #include <iostream>
 #include <iomanip>
 

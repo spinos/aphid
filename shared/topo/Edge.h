@@ -8,10 +8,11 @@
  */
 
 #pragma once
-#include <Vertex.h>
-#include <GeoElement.h>
+#include <topo/GeoElement.h>
 
 namespace aphid {
+
+class Vertex;
 
 class Edge: public GeoElement {
 public:

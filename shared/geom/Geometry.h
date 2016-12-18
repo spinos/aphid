@@ -12,7 +12,9 @@
 #include <foundation/AVerbose.h>
 #include <foundation/NamedEntity.h>
 #include <GjkIntersection.h>
-#include <Ray.h>
+#include <math/Ray.h>
+#include <math/BoundingBox.h>
+#include <vector>
 
 namespace aphid {
 

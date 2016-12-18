@@ -10,7 +10,6 @@
 #pragma once
 #include <AllMath.h>
 #include <Patch.h>
-#include <Ray.h>
 
 namespace aphid {
 

@@ -14,7 +14,7 @@
 
 #pragma once
 #include <sdb/Sequence.h>
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 #include <sdb/GridTables.h>
 
 namespace aphid {

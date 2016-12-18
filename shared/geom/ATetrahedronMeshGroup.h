@@ -2,7 +2,7 @@
 #define ATETRAHEDRONMESHGROUP_H
 
 #include <geom/ATetrahedronMesh.h>
-#include <foundation/AStripedModel.h>
+#include <math/AStripedModel.h>
 
 namespace aphid {
 

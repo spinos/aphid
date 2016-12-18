@@ -1,7 +1,8 @@
-#ifndef QUATERNION_H
-#define QUATERNION_H
+#ifndef APH_QUATERNION_H
+#define APH_QUATERNION_H
 
-#include <Vector3F.h>
+#include <math/Vector3F.h>
+
 namespace aphid {
 
 class Quaternion {

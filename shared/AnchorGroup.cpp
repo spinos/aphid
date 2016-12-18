@@ -8,7 +8,6 @@
  */
 
 #include "AnchorGroup.h"
-#include <Ray.h>
 
 namespace aphid {
 

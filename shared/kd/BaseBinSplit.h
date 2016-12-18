@@ -10,7 +10,7 @@
 #pragma once
 #include <kd/SplitEvent.h>
 #include <kd/MinMaxBins.h>
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 #include <sdb/VectorArray.h>
 #include <sdb/GridClustering.h>
 

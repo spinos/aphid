@@ -7,9 +7,10 @@
  *
  */
 
-#pragma once
-#include <Vector3F.h>
-#include <Matrix44F.h>
+#ifndef APH_BARYCENTRIC_COORDINATE_H
+#define APH_BARYCENTRIC_COORDINATE_H
+
+#include <math/Vector3F.h>
 
 namespace aphid {
 
@@ -40,3 +41,4 @@ private:
 };
 
 }
+#endif

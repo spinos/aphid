@@ -8,8 +8,8 @@
  */
 
 #pragma once
-#include <Vector3F.h>
-#include <BoundingBox.h>
+#include <math/Vector3F.h>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 

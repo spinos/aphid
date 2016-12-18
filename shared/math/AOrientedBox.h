@@ -8,8 +8,9 @@
  */
 #ifndef APH_ORIENTED_BOX_H
 #define APH_ORIENTED_BOX_H
-#include <Matrix33F.h>
-#include <BoundingBox.h>
+
+#include <math/Matrix33F.h>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 

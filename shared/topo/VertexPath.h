@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <AllGeometry.h>
+#include <math/Vector3F.h>
 
 namespace aphid {
 

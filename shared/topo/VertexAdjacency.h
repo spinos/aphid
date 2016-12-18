@@ -9,7 +9,7 @@
 #pragma once
 #include <AllMath.h>
 #include <map>
-#include <Vertex.h>
+#include <topo/Vertex.h>
 
 namespace aphid {
 

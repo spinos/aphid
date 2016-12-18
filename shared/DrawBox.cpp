@@ -9,7 +9,7 @@
 
 #include "DrawBox.h"
 #include <gl_heads.h>
-#include "BoundingBox.h"
+#include <math/BoundingBox.h>
 
 namespace aphid {
 

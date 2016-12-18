@@ -11,7 +11,7 @@
  */
 
 #include <geom/Geometry.h>
-#include <Matrix44F.h>
+#include <math/Matrix44F.h>
 #include <map>
 
 namespace aphid {

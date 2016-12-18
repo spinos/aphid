@@ -10,10 +10,7 @@
  *
  */
 
-#include <Vector2F.h>
-#include <Vector3F.h>
-#include <Matrix44F.h>
-#include <math/PseudoNoise.h>
+#include <AllMath.h>
 
 namespace aphid {
 

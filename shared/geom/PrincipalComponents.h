@@ -124,11 +124,15 @@ AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n,
 {
 	Vector3F bar = Vector3F::Zero;
 	int i=0;
-	for(;i<n;i++) bar += pos.at(i);
+	for(;i<n;i++) {
+		bar += pos.at(i);
+	}
 	bar *= 1.f/(float)n;
 	
 	m_pos = new Vector3F[n];
-	for(i=0;i<n;i++) m_pos[i] = pos.at(i) - bar;
+	for(i=0;i<n;i++) {
+		m_pos[i] = pos.at(i) - bar;
+	}
 	
 	Matrix33F egs = getOrientation(n);
 	AOrientedBox r;

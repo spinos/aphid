@@ -10,17 +10,12 @@ int main(int argc, char *argv[])
 	SuperQuadricGlyph glyph(10);
 	std::cout<<"\n n site "<<glyph.numTriangles();
 	TriangleMeshClique clique(&glyph);
-	clique.findClique(99);
+	clique.findClique(53, glyph.numTriangles() );
 	
-	std::vector<int> cinds;
-	clique.getCliqueSiteIndices(cinds);
+	std::cout<<"\n clique size "<<clique.numSites();
 	
-	std::vector<int>::const_iterator it = cinds.begin();
-	for(;it!=cinds.end();++it) {
-		std::cout<<" "<<*it;
-	}
-	
-	std::cout<<"\n clique size "<<cinds.size();
+	sdb::Sequence<int> visited;
+	clique.getCliqueSiteIndices(visited);
 	
     return 1;
 }

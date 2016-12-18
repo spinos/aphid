@@ -9,8 +9,8 @@
 
 #pragma once
 #include <AFrustum.h>
-#include <BoundingBox.h>
-#include <BoundingRectangle.h>
+#include <math/BoundingBox.h>
+#include <math/BoundingRectangle.h>
 
 namespace aphid {
     

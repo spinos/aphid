@@ -8,7 +8,7 @@
  */
 
 #include <geom/ATriangleMesh.h>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <math/BarycentricCoordinate.h>
 #include <geom/ClosestToPointTest.h>
 

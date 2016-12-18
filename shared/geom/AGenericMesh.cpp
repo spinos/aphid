@@ -8,7 +8,7 @@
  */
 
 #include <geom/AGenericMesh.h>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 
 namespace aphid {
 

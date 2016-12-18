@@ -9,7 +9,7 @@
 
 #pragma once
 #include <HBase.h>
-#include <Vector3F.h>
+#include <math/Vector3F.h>
 namespace aphid {
 
 class HAttributeEntry : public HBase {

@@ -1,5 +1,5 @@
-#ifndef VECTOR2F_H
-#define VECTOR2F_H
+#ifndef APH_VECTOR2F_H
+#define APH_VECTOR2F_H
 
 /*
  *  Vector2F.h
@@ -10,6 +10,7 @@
  *
  */
 #include <iostream>
+#include <math/ATypes.h>
 
 namespace aphid {
 	

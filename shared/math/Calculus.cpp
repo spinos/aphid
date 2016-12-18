@@ -1,4 +1,5 @@
 #include "Calculus.h"
+#include <math/miscfuncs.h>
 
 namespace aphid {
 

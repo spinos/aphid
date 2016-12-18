@@ -6,9 +6,9 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
-#include <Vector2F.h>
-#include <iostream>
+#ifndef APH_BOUNDING_RECTANGLE_H
+#define APH_BOUNDING_RECTANGLE_H
+#include <math/Vector2F.h>
 #include <string>
 
 namespace aphid {
@@ -57,4 +57,4 @@ private:
 };
 
 }
-
+#endif

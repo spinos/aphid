@@ -12,7 +12,7 @@
 #include <geom/Geometry.h>
 #include <Boundary.h>
 #include <IntersectionContext.h>
-#include <Ray.h>
+#include <math/Ray.h>
 #include <VertexDataGroup.h>
 
 namespace aphid {

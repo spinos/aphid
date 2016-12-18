@@ -31,7 +31,8 @@ TriangleMeshClique::~TriangleMeshClique()
 	m_sites.clear();
 }
 
-void TriangleMeshClique::findClique(const unsigned & idx)
+bool TriangleMeshClique::findClique(const unsigned & idx,
+								const int & maxSiteCount)
 {
 	unsigned * v = m_mesh->triangleIndices(idx);
 	sdb::Coord3 vs = sdb::Coord3(v[0], v[1], v[2]).ordered();
@@ -39,6 +40,7 @@ void TriangleMeshClique::findClique(const unsigned & idx)
 	sdb::Sequence<sdb::Coord3 > expanded[2];
 	
 	m_c.clear();
+	m_cSize = 0;
 	
 	int a = 0, b = 1;
 	expanded[b].insert(vs);
@@ -52,8 +54,13 @@ void TriangleMeshClique::findClique(const unsigned & idx)
 		
 		added = expanded[b].size() > 0;
 		
+		m_cSize = m_c.size();
+		
+		if(m_cSize > maxSiteCount) {
+			return false;
+		}
 	}
-	
+	return m_cSize > 1;
 }
 
 void TriangleMeshClique::expandClique(sdb::Sequence<sdb::Coord3 > & result,
@@ -127,5 +134,21 @@ void TriangleMeshClique::getCliqueSiteIndices(std::vector<int> & dst)
 		m_c.next();
 	}
 }
+
+void TriangleMeshClique::getCliqueSiteIndices(sdb::Sequence<int> & dst)
+{
+	m_c.begin();
+	while(!m_c.end() ) {
+		SiteData * d = m_sites.find(m_c.key() );
+		if(!d) {
+			throw "cannot find site";
+		}
+		dst.insert(d->x );
+		m_c.next();
+	}
+}
+
+const int & TriangleMeshClique::numSites() const
+{ return m_cSize; }
 
 }

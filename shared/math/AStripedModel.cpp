@@ -7,8 +7,8 @@
  *
  */
 
-#include <foundation/AStripedModel.h>
-#include <foundation/BaseBuffer.h>
+#include <math/AStripedModel.h>
+#include <math/BaseBuffer.h>
 
 namespace aphid {
 

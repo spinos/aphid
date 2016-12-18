@@ -10,9 +10,9 @@
 #include "SelectionArray.h"
 #include "Primitive.h"
 #include "BaseMesh.h"
-#include <VertexPath.h>
-#include <ComponentConversion.h>
-#include <MeshTopology.h>
+#include <topo/VertexPath.h>
+#include <topo/ComponentConversion.h>
+#include <topo/MeshTopology.h>
 
 namespace aphid {
 

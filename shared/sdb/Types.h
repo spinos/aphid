@@ -9,7 +9,7 @@
 
 #pragma once
 #include <string>
-#include <Vector3F.h>
+#include <math/Vector3F.h>
 namespace aphid {
 
 namespace sdb {

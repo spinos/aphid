@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <AllMath.h>
+#include <math/Vector3F.h>
 #include <vector>
 #include <boost/scoped_array.hpp>
 

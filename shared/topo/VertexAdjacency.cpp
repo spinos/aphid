@@ -10,7 +10,7 @@
 #include "VertexAdjacency.h"
 #include "Edge.h"
 #include "Facet.h"
-#include "Matrix44F.h"
+#include <math/Matrix44F.h>
 
 #include <cmath>
 

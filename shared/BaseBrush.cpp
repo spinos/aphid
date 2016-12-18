@@ -8,7 +8,6 @@
  */
 
 #include "BaseBrush.h"
-#include <Plane.h>
 
 namespace aphid {
 

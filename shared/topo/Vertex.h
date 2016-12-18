@@ -7,8 +7,8 @@
  *
  */
 #pragma once
-#include <Vector3F.h>
-#include <GeoElement.h>
+#include <math/Vector3F.h>
+#include <topo/GeoElement.h>
 
 namespace aphid {
 

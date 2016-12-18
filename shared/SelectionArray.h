@@ -9,10 +9,10 @@
 #pragma once
 #include <vector>
 #include <PrimitiveFilter.h>
-#include <AllGeometry.h>
 
 namespace aphid {
 
+class Edge;
 class Vector3F;
 class Primitive;
 class Geometry;

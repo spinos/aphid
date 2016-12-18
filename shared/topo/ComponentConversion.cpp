@@ -8,9 +8,10 @@
  */
 
 #include "ComponentConversion.h"
-#include <MeshTopology.h>
-#include <VertexAdjacency.h>
-#include <AllGeometry.h>
+#include <topo/MeshTopology.h>
+#include <topo/VertexAdjacency.h>
+#include <topo/Edge.h>
+#include <topo/Facet.h>
 
 namespace aphid {
 

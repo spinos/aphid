@@ -73,8 +73,7 @@ public:
     void operator-=( const BaseBuffer * other );
 
 protected:
-    void minusFlt(const BaseBuffer * other);
-    void minusVec3(const BaseBuffer * other);
+    
 private:
 	ValueType m_type;
 };

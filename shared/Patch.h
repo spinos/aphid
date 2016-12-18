@@ -9,9 +9,8 @@
 
 #pragma once
 #include <AllMath.h>
-#include <Plane.h>
+#include <math/Plane.h>
 #include <Segment.h>
-#include <BoundingBox.h>
 #include <geom/Geometry.h>
 #include <Boundary.h>
 

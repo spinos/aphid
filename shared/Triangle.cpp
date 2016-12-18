@@ -8,7 +8,7 @@
  */
 #include <iostream>
 #include "Triangle.h"
-#include <Plane.h>
+#include <math/Plane.h>
 namespace aphid {
 
 void project_point_on_line(const Vector3F & p, const Vector3F & lineDir, const Vector3F & onLine, float & l)

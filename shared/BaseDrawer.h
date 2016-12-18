@@ -8,9 +8,6 @@
  */
 #pragma once
 #include <AllMath.h>
-
-#include <BoundingBox.h>
-#include <BoundingRectangle.h>
 #include <GProfile.h>
 
 namespace aphid {

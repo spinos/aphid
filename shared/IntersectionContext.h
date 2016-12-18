@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include <BoundingBox.h>
 #include <Primitive.h>
 #include <PrimitiveFilter.h>
 #include <geom/Geometry.h>
-#include <Ray.h>
-#include <Vector2F.h>
+#include <math/Ray.h>
+#include <math/Vector2F.h>
 
 namespace aphid {
 

@@ -8,11 +8,13 @@
  */
 #pragma once
 #include <vector>
-#include <Vertex.h>
-#include <Edge.h>
-#include <GeoElement.h>
+#include <math/Vector3F.h>
+#include <topo/GeoElement.h>
 
 namespace aphid {
+
+class Vertex;
+class Edge;
 
 class Facet : public GeoElement {
 public:

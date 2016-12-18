@@ -6,10 +6,11 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include "Aphid.h"
 #include "BoundingBox.h"
-#include <Ray.h>
-#include <Plane.h>
+#include <math/Ray.h>
+#include <math/Plane.h>
+#include <math/miscfuncs.h>
+
 namespace aphid {
 
 BoundingBox::BoundingBox()

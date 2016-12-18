@@ -8,8 +8,6 @@
  */
 
 #include <kd/BoxNeighbors.h>
-#include <iostream>
-#include <AllMath.h>
 
 namespace aphid {
 

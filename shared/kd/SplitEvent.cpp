@@ -7,7 +7,6 @@
  *
  */
 #include "SplitEvent.h"
-#include <iostream>
 
 namespace aphid {
 

@@ -6,13 +6,14 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef APH_RAY_H
+#define APH_RAY_H
 
-#pragma once
-#include <Vector3F.h>
+#include <math/Vector3F.h>
+
 namespace aphid {
 
-class Ray
-{
+class Ray {
 public:
 	Ray();
 	Ray(const Vector3F& pfrom, const Vector3F& vdir, float tmin, float tmax);
@@ -67,3 +68,4 @@ public:
 };
 
 }
+#endif

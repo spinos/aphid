@@ -9,7 +9,6 @@
  */
 
 #pragma once
-#include <BoundingBox.h>
 #include <sdb/WorldGrid.h>
 #include <sdb/VectorArray.h>
 

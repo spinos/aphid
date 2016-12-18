@@ -26,14 +26,19 @@ class TriangleMeshClique {
 	sdb::Array<sdb::Coord3, SiteData > m_sites;
 	sdb::Sequence<sdb::Coord3 > m_c;
 	const ATriangleMesh * m_mesh;
+	int m_cSize;
 	
 public:
 	TriangleMeshClique(const ATriangleMesh * mesh);
 	virtual ~TriangleMeshClique();
 	
-/// given a site s by face idx, find c connected to s  
-	void findClique(const unsigned & idx);
+/// given a site s by idx, find c connected to s
+/// limit site count  
+	bool findClique(const unsigned & idx,
+					const int & maxSiteCount);
 	void getCliqueSiteIndices(std::vector<int> & dst);
+	void getCliqueSiteIndices(sdb::Sequence<int> & dst);
+	const int & numSites() const;
 	
 protected:
 

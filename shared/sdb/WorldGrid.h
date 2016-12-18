@@ -10,7 +10,7 @@
 
 #pragma once
 #include <sdb/Sequence.h>
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 

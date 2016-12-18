@@ -9,7 +9,7 @@
 
 #include "HesperisFile.h"
 #include <geom/CurveGroup.h>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <geom/APolygonalMesh.h>
 #include <geom/ATriangleMeshGroup.h>
 #include <geom/ATetrahedronMeshGroup.h>

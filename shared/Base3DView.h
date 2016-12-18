@@ -3,7 +3,6 @@
 
 #include <QGLWidget>
 #include <AllMath.h>
-#include <Ray.h>
 
 class QTimer;
 

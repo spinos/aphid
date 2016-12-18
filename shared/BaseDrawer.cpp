@@ -13,8 +13,6 @@
 #endif
 
 #include "BaseDrawer.h"
-#include "Matrix33F.h"
-#include <cmath>
 
 namespace aphid {
 

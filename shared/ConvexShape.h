@@ -8,12 +8,9 @@
  */
 
 #pragma once
-#include "Matrix44F.h"
-#include "BoundingBox.h"
+#include "AllMath.h"
 #include "Boundary.h"
-#include "Ray.h"
 #include "GjkIntersection.h"
-#include <math/BarycentricCoordinate.h>
 
 namespace aphid {
     

@@ -1,6 +1,6 @@
-#pragma once
-#include <AllMath.h>
-#include <BoundingBox.h>
+#ifndef APH_GJK_INTERSECTION_H
+#define APH_GJK_INTERSECTION_H
+#include <math/BoundingBox.h>
 
 namespace aphid {
 
@@ -160,3 +160,4 @@ public:
 }
 
 }
+#endif

@@ -7,8 +7,7 @@
  *
  */
 #pragma once
-#include <BoundingBox.h>
-#include <Ray.h>
+#include <AllMath.h>
 namespace aphid {
 
 class Boundary {

@@ -1,7 +1,7 @@
 #ifndef CARTESIANGRID_H
 #define CARTESIANGRID_H
 
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 #include <sdb/MortonHash.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>

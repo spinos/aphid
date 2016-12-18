@@ -8,7 +8,6 @@
  */
 #pragma once
 #include <AllMath.h>
-#include <BoundingBox.h>
 
 namespace aphid {
 

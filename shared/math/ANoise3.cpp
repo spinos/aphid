@@ -8,7 +8,6 @@
  */
 
 #include <math/ANoise3.h>
-#include <AllMath.h>
 
 namespace aphid {
 

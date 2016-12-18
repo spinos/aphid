@@ -1,6 +1,6 @@
-#include <VertexPath.h>
-#include <MeshTopology.h>
-#include <VertexAdjacency.h>
+#include <topo/VertexPath.h>
+#include <topo/MeshTopology.h>
+#include <topo/VertexAdjacency.h>
 
 namespace aphid {
 

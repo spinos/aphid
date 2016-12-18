@@ -1,5 +1,5 @@
 #include "APolygonalUV.h"
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <sstream>
 
 namespace aphid {

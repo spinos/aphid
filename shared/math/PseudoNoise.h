@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _Pseudo_NOISE_H
-#define _Pseudo_NOISE_H
+#ifndef APH_Pseudo_NOISE_H
+#define APH_Pseudo_NOISE_H
 namespace aphid {
 
 class PseudoNoise

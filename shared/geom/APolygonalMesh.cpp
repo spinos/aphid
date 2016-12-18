@@ -1,5 +1,5 @@
 #include <geom/APolygonalMesh.h>
-#include <foundation/BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <geom/APolygonalUV.h>
 #include <foundation/SHelper.h>
 

@@ -12,7 +12,7 @@
 #include <geom/Geometry.h>
 #include <Boundary.h>
 #include <foundation/NamedEntity.h>
-#include <Ray.h>
+
 namespace aphid {
 
 class BaseTransform : public Geometry, public Boundary {

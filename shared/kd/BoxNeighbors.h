@@ -7,8 +7,9 @@
  *
  */
 
-#pragma once
-#include <BoundingBox.h>
+#ifndef APH_KD_NEIGHBORS_H
+#define APH_KD_NEIGHBORS_H
+#include <math/BoundingBox.h>
 
 namespace aphid {
 
@@ -37,4 +38,4 @@ public:
 };
 
 }
-
+#endif

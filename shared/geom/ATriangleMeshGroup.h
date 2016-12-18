@@ -8,7 +8,7 @@
  */
 
 #include <geom/ATriangleMesh.h>
-#include <foundation/AStripedModel.h>
+#include <math/AStripedModel.h>
 
 namespace aphid {
 

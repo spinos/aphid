@@ -6,7 +6,7 @@
 #include "shapewidget.h"
 #include <gpr/RbfKernel.h>
 #include <gpr/Covariance.h>
-#include <Plane.h>
+#include <math/Plane.h>
 
 using namespace aphid;
 

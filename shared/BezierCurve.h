@@ -7,7 +7,6 @@
  *
  */
 #pragma once
-#include <BoundingBox.h>
 #include <BaseCurve.h>
 #include <Primitive.h>
 namespace aphid {

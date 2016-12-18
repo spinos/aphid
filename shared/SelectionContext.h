@@ -9,7 +9,6 @@
 
 #pragma once
 #include <AllMath.h>
-#include <BoundingBox.h>
 #include <geom/Geometry.h>
 #include <sdb/Sequence.h>
 #include <deque>

@@ -10,7 +10,7 @@
 #ifndef APH_GEOM_CLOSEST_TO_POINT_TEST_H
 #define APH_GEOM_CLOSEST_TO_POINT_TEST_H
 #include <math/BarycentricCoordinate.h>
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 

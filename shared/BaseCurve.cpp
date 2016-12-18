@@ -8,8 +8,6 @@
  */
 
 #include "BaseCurve.h"
-#include "BoundingBox.h"
-#include <Ray.h>
 #include <line_math.h>
 
 namespace aphid {
