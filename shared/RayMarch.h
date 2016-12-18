@@ -9,8 +9,8 @@
 
 #pragma once
 #include <deque>
-#include <Ray.h>
-#include <BoundingBox.h>
+#include <math/Ray.h>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 

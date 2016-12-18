@@ -7,7 +7,7 @@
  */
 #include <cmath>
 #include "Matrix33F.h"
-#include <iostream>
+
 namespace aphid {
 
 Matrix33F Matrix33F::IdentityMatrix;
@@ -524,15 +524,12 @@ float Matrix33F::distanceTo(const Matrix33F & another) const
 	return r;
 }
 
-const std::string Matrix33F::str() const
+std::ostream& operator<<(std::ostream &output, const Matrix33F & p) 
 {
-	std::stringstream sst;
-	sst.str("\n");
-    sst<<"["<<v[0]<<", "<<v[1]<<", "<<v[2]<<"]\n";
-    sst<<"["<<v[3]<<", "<<v[4]<<", "<<v[5]<<"]\n";
-	sst<<"["<<v[6]<<", "<<v[7]<<", "<<v[8]<<"]\n";
-	
-	return sst.str();
+    output<<"["<<p.v[0]<<", "<<p.v[1]<<", "<<p.v[2]
+		<<"]\n["<<p.v[3]<<", "<<p.v[4]<<", "<<p.v[5]
+		<<"]\n["<<p.v[6]<<", "<<p.v[7]<<", "<<p.v[8]<<"]";
+	return output;
 }
 
 Vector3F Matrix33F::SolveAxb(const Matrix33F & A, const Vector3F & b)

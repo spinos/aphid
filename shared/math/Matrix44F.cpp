@@ -465,15 +465,13 @@ void Matrix44F::scaleBy(float sc)
 	*m(2, 2) *= sc;
 }
 
-const std::string Matrix44F::str() const
+std::ostream& operator<<(std::ostream &output, const Matrix44F & p) 
 {
-	std::stringstream sst;
-	sst.str("");
-    sst<<"["<<v[0]<<", "<<v[1]<<", "<<v[2]<<", "<<v[3]<<"]\n";
-    sst<<"["<<v[4]<<", "<<v[5]<<", "<<v[6]<<", "<<v[7]<<"]\n";
-    sst<<"["<<v[8]<<", "<<v[9]<<", "<<v[10]<<", "<<v[11]<<"]\n";
-    sst<<"["<<v[12]<<", "<<v[13]<<", "<<v[14]<<", "<<v[15]<<"]\n";
-	return sst.str();
+	output << "["<<p.v[0]<<", "<<p.v[1]<<", "<<p.v[2]<<", "<<p.v[3]
+		<<"]\n["<<p.v[4]<<", "<<p.v[5]<<", "<<p.v[6]<<", "<<p.v[7]
+		<<"]\n["<<p.v[8]<<", "<<p.v[9]<<", "<<p.v[10]<<", "<<p.v[11]
+		<<"]\n["<<p.v[12]<<", "<<p.v[13]<<", "<<p.v[14]<<", "<<p.v[15]<<"]";
+	return output;
 }
 
 }

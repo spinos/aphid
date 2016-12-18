@@ -9,8 +9,7 @@
 
 #ifndef APH_PLANT_COMMON_H
 #define APH_PLANT_COMMON_H
-#include <Quaternion.h>
-#include <Matrix44F.h>
+#include <AllMath.h>
 #include <sdb/Array.h>
 #include <sdb/WorldGrid.h>
 

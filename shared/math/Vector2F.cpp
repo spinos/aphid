@@ -140,7 +140,7 @@ float Vector2F::cross(const Vector2F & b) const
 
 std::ostream& operator<<(std::ostream &output, const Vector2F & p) 
 {
-    output << "("<<p.x<<","<<p.y<<")";
+    output << "("<<p.x<<", "<<p.y<<")";
     return output;
 }
 

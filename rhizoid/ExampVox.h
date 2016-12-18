@@ -7,7 +7,7 @@
  *
  */
 #include <DrawBox.h>
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 #include <geom/Geometry.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>

@@ -12,6 +12,7 @@
 
 #include <sdb/Array.h>
 #include <sdb/Types.h>
+#include <math/Vector3F.h>
 
 namespace aphid {
 
@@ -38,6 +39,8 @@ public:
 					const int & maxSiteCount);
 	void getCliqueSiteIndices(std::vector<int> & dst);
 	void getCliqueSiteIndices(sdb::Sequence<int> & dst);
+/// extract positions of vertices connected to s in c
+	void getCliqueVertexPositions(std::vector<Vector3F> & dst);
 	const int & numSites() const;
 	
 protected:

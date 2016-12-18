@@ -42,7 +42,7 @@
 #undef min
 #undef max
 #include <boost/lexical_cast.hpp>
-#include <Matrix44F.h>
+#include <math/Matrix44F.h>
 
 namespace aphid {
 

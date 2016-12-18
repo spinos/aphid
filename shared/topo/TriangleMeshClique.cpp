@@ -148,6 +148,30 @@ void TriangleMeshClique::getCliqueSiteIndices(sdb::Sequence<int> & dst)
 	}
 }
 
+void TriangleMeshClique::getCliqueVertexPositions(std::vector<Vector3F> & dst)
+{
+	sdb::Sequence<int > vertInd;
+	m_c.begin();
+	while(!m_c.end() ) {
+		const sdb::Coord3 & k = m_c.key();
+		vertInd.insert(k.x);
+		vertInd.insert(k.y);
+		vertInd.insert(k.z);
+		
+		m_c.next();
+	}
+	
+	const Vector3F * vertPos = m_mesh->points();
+	
+	vertInd.begin();
+	while(!vertInd.end() ) {
+		dst.push_back(vertPos[vertInd.key() ]);
+		
+		vertInd.next();
+	}
+	vertInd.clear();
+}
+
 const int & TriangleMeshClique::numSites() const
 { return m_cSize; }
 

@@ -72,13 +72,8 @@ namespace aphid {
 	
 	static Matrix33F IdentityMatrix;
 	
-    friend std::ostream& operator<<(std::ostream &output, const Matrix33F & p) {
-        output << p.str();
-        return output;
-    }
+    friend std::ostream& operator<<(std::ostream &output, const Matrix33F & p);
     
-	const std::string str() const;
-	
 	float v[9];
  };
 

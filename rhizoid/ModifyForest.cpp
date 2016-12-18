@@ -8,8 +8,6 @@
  */
 
 #include "ModifyForest.h"
-#include <math/BarycentricCoordinate.h>
-#include <math/PseudoNoise.h>
 #include <geom/ATriangleMesh.h>
 #include <math/ANoise3.h>
 #include <../qtogl/ebp.h>

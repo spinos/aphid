@@ -1,7 +1,7 @@
 #include "Vector3F.h"
 
-#include <cmath>
-#include <iostream>
+#include <math/miscfuncs.h>
+
 namespace aphid {
 
 Vector3F Vector3F::XAxis(1.f, 0.f, 0.f);
@@ -110,6 +110,13 @@ void Vector3F::operator*=( const float& scale )
     x *= scale;
     y *= scale;
     z *= scale;
+}
+
+void Vector3F::operator*=( const Vector3F & scale )
+{
+	x *= scale.x;
+    y *= scale.y;
+    z *= scale.z;
 }
 
 Vector3F Vector3F::operator*(const float& scale ) const
@@ -351,8 +358,28 @@ Vector3F Vector3F::inOrientation(const float & l) const
 
 std::ostream& operator<<(std::ostream &output, const Vector3F & p) 
 {
-    output <<"("<<p.x<<","<<p.y<<","<<p.z<<")";
+    output <<"("<<p.x<<", "<<p.y<<", "<<p.z<<")";
     return output;
+}
+
+void Vector3F::inverse()
+{
+	if(Absolute<float>(x) > 1e-4f) {
+		x = 1.f/ x;
+	}
+	if(Absolute<float>(y) > 1e-4f) {
+		y = 1.f/ y;
+	}
+	if(Absolute<float>(z) > 1e-4f) {
+		z = 1.f/ z;
+	}
+}
+
+Vector3F Vector3F::inversed() const
+{
+	Vector3F r = *this;
+	r.inverse();
+	return r;
 }
     
 }

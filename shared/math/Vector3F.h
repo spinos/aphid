@@ -25,6 +25,7 @@ public:
 	
 	void operator/=( const float& scale );	
 	void operator*=( const float& scale );
+	void operator*=( const Vector3F & scale );
 	
 	Vector3F operator*( const float& scale ) const;	
 	Vector3F operator*( const Float3 & scale ) const;	
@@ -50,6 +51,9 @@ public:
 	
 	void reverse();	
 	Vector3F reversed() const;
+/// 1 / v
+	void inverse();
+	Vector3F inversed() const;
 	
 	void rotateAroundAxis(const Vector3F& axis, float theta);
 	Vector3F perpendicular() const;

@@ -129,6 +129,7 @@ target_link_libraries (psinst ${APHID_MATH_LIBRARY})
 target_link_libraries (psinst ${APHID_GEOM_LIBRARY})
 target_link_libraries (psinst ${APHID_UI_LIBRARY})
 target_link_libraries (psinst ${APHID_SDB_LIBRARY})
+target_link_libraries (psinst ${APHID_TOPO_LIBRARY})
 
 target_link_libraries (psinst ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (psinst ${Boost_DATE_TIME_LIBRARY})

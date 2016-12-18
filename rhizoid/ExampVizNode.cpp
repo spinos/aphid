@@ -12,7 +12,7 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFloatVector.h>
-#include <BoundingBox.h>
+#include <math/BoundingBox.h>
 #include <AHelper.h>
 #include <ExampData.h>
 

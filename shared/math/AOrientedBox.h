@@ -42,6 +42,27 @@ public:
 
 	Vector3F get8DOPFaceX() const;
 	Vector3F get8DOPFaceY() const;
+	
+/// transform points to local space
+/// scale to [-1, 1]
+	template<typename T>
+	void projectToLocalUnit(T & pnts, const int & npnts) const
+	{
+		Matrix33F localspace(m_orientation);
+		localspace.inverse();
+		std::cout<<" inv rot "<<localspace;
+		Vector3F scaling = m_extent.inversed();
+		std::cout<<" inv scale "<<scaling;
+		
+		for(int i=0;i<npnts;++i) {
+			Vector3F plocal = pnts[i] - m_center;
+			plocal = localspace.transform(plocal);
+			plocal *= scaling;
+			pnts[i] = plocal;
+		}
+	}
+	
+	friend std::ostream& operator<<(std::ostream &output, const AOrientedBox & p);
 		
 protected:
 

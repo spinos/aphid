@@ -162,6 +162,14 @@ Vector3F AOrientedBox::get8DOPFaceY() const
 	return m_orientation.transform(up);
 }
 
+std::ostream& operator<<(std::ostream &output, const AOrientedBox & p)
+{ 
+	output << "(" << p.orientation() << ",\n"  
+			<< p.center() << ",\n"
+			<< p.extent() << ")"; 
+	return output;
+}
+
 DOP8Builder::DOP8Builder()
 {}
 
