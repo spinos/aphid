@@ -124,3 +124,9 @@ repmat(A, n) returns an array containing n copies of A in the row and column dim
 http://www.math.jhu.edu/~shiffman/370/help/techdoc/ref/pinv.html
 
 B = pinv(A) pseudoinverse of A
+
+https://www.mathworks.com/help/matlab/ref/mean.html
+
+mean(X, dim) mean along dimension 
+dim = 1 row vector containing the mean of each columns
+dim = 2 column vector containing the mean of each row

@@ -10,7 +10,6 @@
 #define APH_MISC_FUNCS_H
 
 #include <cmath>
-#include <vector>
 
 namespace aphid {
 
@@ -78,6 +77,7 @@ inline T Absolute(T const& a)
 	return (a >= 0.0) ? a : -a;
 }
 
+/*
 template<typename T>
 inline bool IsElementIn(T const& a, const std::vector<T>& array)
 {
@@ -87,6 +87,7 @@ inline bool IsElementIn(T const& a, const std::vector<T>& array)
 	}
 	return false;
 }
+*/
 
 template<typename T>
 inline T DegreeToAngle(T const & a)

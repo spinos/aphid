@@ -143,6 +143,28 @@ add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
 
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
+if(WIN32)
+    include_directories (D:/usr/CLAPACK/include)
+    set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
+	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
+    set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
+
+elseif(APPLE)
+	set(F2C_LIBRARY libf2c.a)
+	set(BLAS_LIBRARY libblas.a)
+	set(LAPACK_LIBRARY liblapack.a)
+else ()
+include_directories (/usr/local/include)
+	set(F2C_LIBRARY /usr/local/lib/libf2c.so)
+    set(BLAS_LIBRARY /usr/local/lib/libblas.so)
+	set(LAPACK_LIBRARY /usr/local/lib/liblapack.so)
+	
+endif()
+
+message ("blas " ${BLAS_LIBRARY})
+message ("lapack " ${LAPACK_LIBRARY})
+message ("f2c " ${F2C_LIBRARY})
+
 add_executable (testclique testClique.cpp)
 target_link_libraries (testclique ${APHID_FOUND_LIBRARY})
 target_link_libraries (testclique ${APHID_MATH_LIBRARY})
@@ -150,10 +172,22 @@ target_link_libraries (testclique ${APHID_GEOM_LIBRARY})
 target_link_libraries (testclique ${APHID_TOPO_LIBRARY})
 target_link_libraries (testclique ${APHID_SDB_LIBRARY})
 
+target_link_libraries (testclique ${BLAS_LIBRARY})
+target_link_libraries (testclique ${LAPACK_LIBRARY})
+target_link_libraries (testclique ${F2C_LIBRARY})
+
 target_link_libraries (testclique ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (testclique ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (testclique ${Boost_REGEX_LIBRARY})
 target_link_libraries (testclique ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testclique ${Boost_THREAD_LIBRARY})
 target_link_libraries (testclique ${Boost_CHRONO_LIBRARY})
+
+add_executable (drpca testDrpca.cpp)
+target_link_libraries (drpca ${APHID_MATH_LIBRARY})
+target_link_libraries (drpca ${APHID_SDB_LIBRARY})
+
+target_link_libraries (drpca ${BLAS_LIBRARY})
+target_link_libraries (drpca ${LAPACK_LIBRARY})
+target_link_libraries (drpca ${F2C_LIBRARY})
 
