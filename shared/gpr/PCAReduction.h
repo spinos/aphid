@@ -20,6 +20,7 @@
 #define APH_PCA_REDUCTION_H
 
 #include <math/center_data.h>
+#include <math/sort.h>
 
 namespace aphid {
 
@@ -32,8 +33,8 @@ public:
 	PCAReduction();
 	virtual ~PCAReduction();
 	
-/// d dimension of data
-/// n number of data
+/// d number of variables per observation
+/// n number of observations
 	void createX(const int & d, 
 				const int & n);
 	
@@ -43,6 +44,11 @@ public:
 
 	void compute(DenseMatrix<T> & reducedX,
 				const int & toDim=2);
+
+/// d	
+	const int & nvars() const;
+/// n
+	const int & nobs() const;
 	
 protected:
 
@@ -76,37 +82,53 @@ template<typename T>
 void PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 							const int & toDim)
 {
-	center_data(m_x, 1);
+/// https://cn.mathworks.com/help/matlab/ref/cov.html
+/// remove mean
+	center_data(m_x, 1, (float)nobs() );
+	
 	DenseMatrix<T> cov;
-	
 	m_x.AtA(cov);
-	cov.scale((T)1.0 / (T)m_x.numRows() );
 	
-	std::cout<<"\n c "<<cov.numRows()<<"-by-"<<cov.numCols();
+/// normalized by n - 1
+	cov.scale((T)1.0 / (T)(nobs()-1) );
 		
-	SvdSolver<float> solv;
-	solv.compute(cov);
+	EigSolver<float> eig;
+	eig.computeSymmetry(cov);
 	
-	const DenseMatrix<T> & V = solv.Vt();//.transposed();
-	DenseMatrix<T> reducedM(V.numCols(), toDim);
+	DenseVector<float> sortedS(nvars());
+	sortedS.copyData(eig.S().v() );
 	
-	for(int j=0;j<toDim;++j) {
-		const T * vc = V.column(j);
-		for(int i=0;i<V.numCols();++i) {
-			reducedM.column(j)[i] = vc[i];
-		}
+	DenseVector<int> sortedInd(nvars());
+	for(int i=0;i<nvars();++i) {
+		sortedInd[i] = i;
 	}
 	
-	std::cout<<" M "<<reducedM;
+	sort_descent<float, int>(sortedInd.raw(), sortedS.raw(), (int)0, (int)(nvars() - 1) );
 	
-	reducedX.resize(m_x.numRows(), toDim);
+	const DenseMatrix<T> & V = eig.V();
+
+	DenseMatrix<T> reducedM(nvars(), toDim);
 	
-	std::cout<<" x "<<m_x.numRows()<<"-by-"<<m_x.numCols();
+/// v is eigenvectors stored columnwise
+/// select first ndim columns based on sorted eigenvalues
+	for(int i=0;i<toDim;++i) {
+		float * vs = V.column(sortedInd[i]);
+		reducedM.copyColumn(i, vs);
+	}
+	
+	reducedX.resize(nobs(), toDim);
 	
 	m_x.mult(reducedX, reducedM);
-	std::cout<<" s "<<solv.S();
 	
 }
+
+template<typename T>
+const int &  PCAReduction<T>::nvars() const
+{ return m_x.numCols(); }
+
+template<typename T>
+const int &  PCAReduction<T>::nobs() const
+{ return m_x.numRows(); }
 
 }
 #endif

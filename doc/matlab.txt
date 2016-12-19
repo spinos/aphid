@@ -130,3 +130,7 @@ https://www.mathworks.com/help/matlab/ref/mean.html
 mean(X, dim) mean along dimension 
 dim = 1 row vector containing the mean of each columns
 dim = 2 column vector containing the mean of each row
+
+https://www.mathworks.com/help/matlab/ref/cov.html
+cov(A)
+If A is a matrix whose columns represent random variables and whose rows represent observations, C is the covariance matrix with the corresponding column variances along the diagonal.

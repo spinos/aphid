@@ -4,41 +4,6 @@
 #include <f2c.h>
 #include <clapack.h>
 
-template<typename T>
-T absoluteValue(T a)
-{ return a > 0 ? a : -a; }
-
-template <typename T, typename I>
-void sort(I* irOut, T* prOut,I beg, I end) {
-   I i;
-   if (end <= beg) return;
-   I pivot=beg;
-   for (i = beg+1; i<=end; ++i) {
-      if (irOut[i] < irOut[pivot]) {
-         if (i == pivot+1) {
-            I tmp = irOut[i];
-            T tmpd = prOut[i];
-            irOut[i]=irOut[pivot];
-            prOut[i]=prOut[pivot];
-            irOut[pivot]=tmp;
-            prOut[pivot]=tmpd;
-         } else {
-            I tmp = irOut[pivot+1];
-            T tmpd = prOut[pivot+1];
-            irOut[pivot+1]=irOut[pivot];
-            prOut[pivot+1]=prOut[pivot];
-            irOut[pivot]=irOut[i];
-            prOut[pivot]=prOut[i];
-            irOut[i]=tmp;
-            prOut[i]=tmpd;
-         }
-         ++pivot;
-      }
-   }
-   sort(irOut,prOut,beg,pivot-1);
-   sort(irOut,prOut,pivot+1,end);
-}
-
 /// res = dot(x, y)
 template <typename T> T clapack_dot(integer n, T *dx, integer incx, T *dy, integer incy);
 
@@ -98,7 +63,15 @@ template <typename T> int clapack_sytrf(char *uplo, integer n, T *a, integer lda
 	
 template <typename T> int clapack_sytri(char *uplo, integer n, T *a, integer lda, 
 	integer *ipiv, T *work, integer *info);
+	
+/// http://www.math.utah.edu/software/lapack/lapack-d/dsyev.html
+/// compute all eigenvalues and, optionally, eigenvectors of a real symmetric matrix A
 
+template <typename T> int clapack_syev(char *jobz, char *uplo, 
+									integer n, T *a, 
+									integer lda, T *w,
+									T *work, integer *ipiv, integer *info);
+	
 template <> inline double clapack_dot<double>(integer n, double *dx, integer incx, double *dy, integer incy)
 {
 	return ddot_(&n, dx, &incx, dy, &incy);
@@ -305,6 +278,22 @@ template <> inline int clapack_sytri<float>(char *uplo, integer n, float *a, int
 	integer *ipiv, float *work, integer *info)
 {
 	return ssytri_(uplo, &n, a, &lda, ipiv, work, info);
+}
+
+template <> int clapack_syev<double>(char *jobz, char *uplo, 
+									integer n, double *a, 
+									integer lda, double *w,
+									double *work, integer *ipiv, integer *info)
+{
+	return dsyev_(jobz, uplo, &n, a, &lda, w, work, ipiv, info);
+}
+
+template <> int clapack_syev<float>(char *jobz, char *uplo, 
+									integer n, float *a, 
+									integer lda, float *w,
+									float *work, integer *ipiv, integer *info)
+{
+	return ssyev_(jobz, uplo, &n, a, &lda, w, work, ipiv, info);
 }
 #endif        //  #ifndef CLAPACKTEMPL_H
 

@@ -1,7 +1,9 @@
 /*
  *  center_data.h
  *  
+ *  remove mean
  *	X <- X - mean(X, dim)
+ *
  *  Created by jian zhang on 12/19/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
@@ -17,7 +19,8 @@ namespace aphid {
 /// mean of each column
 template<typename T>
 inline void col_mean(DenseVector<T> & m,
-					const DenseMatrix<T> & X)
+					const DenseMatrix<T> & X,
+					const T & nn)
 {
 	const int & d = X.numCols();
 	m.resize(d);
@@ -28,13 +31,14 @@ inline void col_mean(DenseVector<T> & m,
 			m[i] += cx[j];		
 		}
 	}
-	m.scale(T(1.0)/(T)X.numRows() );
+	m.scale(T(1.0)/nn );
 }
 
 /// mean of each row
 template<typename T>
 inline void row_mean(DenseVector<T> & m,
-					const DenseMatrix<T> & X)
+					const DenseMatrix<T> & X,
+					const T & nn)
 {
 	const int & d = X.numRows();
 	m.resize(d);
@@ -45,7 +49,7 @@ inline void row_mean(DenseVector<T> & m,
 		
 		}
 	}
-	m.scale(T(1.0)/(T)X.numCols() );
+	m.scale(T(1.0)/nn );
 }
 
 template<typename T>
@@ -74,14 +78,15 @@ inline void center_row(DenseMatrix<T> & X,
 }
 
 template<typename T>
-inline void center_data(DenseMatrix<T> & X, int dim)
+inline void center_data(DenseMatrix<T> & X, int dim,
+						const T & nn)
 {
 	DenseVector<T> vmean;
 	if(dim==1) {
-		col_mean(vmean, X);
+		col_mean(vmean, X, nn);
 		center_col(X, vmean);
 	} else {
-		row_mean(vmean, X);
+		row_mean(vmean, X, nn);
 		center_row(X, vmean);
 	}
 }

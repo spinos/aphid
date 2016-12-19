@@ -11,6 +11,10 @@
 namespace aphid {
 
 template<typename T>
+inline T absoluteValue(const T & a)
+{ return a > 0 ? a : -a; }
+
+template<typename T>
 class DenseVector {
    
     T * m_v;
@@ -1069,8 +1073,10 @@ template<typename T>
 SvdSolver<T>::~SvdSolver() 
 { if(m_work) free(m_work); }
 
-/// A mxn = U mxm S mxn V^T nxn
-/// M is changed
+/// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lse/functn_gesvd.htm
+/// http://web.mit.edu/be.400/www/SVD/Singular_Value_Decomposition.htm
+/// http://www.netlib.org/lapack/lug/node32.html
+/// A mxn = U mxm Sigma mxn V^T nxn
 /// V is V^T actually
 template<typename T>
 bool SvdSolver<T>::compute(const DenseMatrix<T> & A)
@@ -1088,7 +1094,7 @@ bool SvdSolver<T>::compute(const DenseMatrix<T> & A)
 
 /// Query and allocate the optimal workspace
 	integer lwork = -1, info;
-	clapack_gesvd<T>( "All", "All", m, n, m_local.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, &wkopt, &lwork, &info );
+	clapack_gesvd<T>( "A", "A", m, n, m_local.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, &wkopt, &lwork, &info );
 	lwork = (int)wkopt;
 	// std::cout<<"\n work l "<<lwork;
 	
@@ -1098,7 +1104,7 @@ bool SvdSolver<T>::compute(const DenseMatrix<T> & A)
 		m_work = (T*)malloc( lwork*sizeof(T) );
 	}
 /// Compute SVD 
-	clapack_gesvd<T>( "All", "All", m, n, m_local.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, m_work, &lwork, &info );
+	clapack_gesvd<T>( "A", "A", m, n, m_local.column(0), m, m_s.raw(), m_u.column(0), m, m_v.column(0), n, m_work, &lwork, &info );
 /// Check for convergence
 	if( info > 0 ) {
 			std::cout<< "The algorithm computing SVD failed to converge.\n";
@@ -1123,8 +1129,93 @@ const DenseMatrix<T> & SvdSolver<T>::Vt() const
 template<typename T>
 DenseVector<T> * SvdSolver<T>::SR()
 { return &m_s; }
+
+
+template<typename T>
+class EigSolver {
+
+	DenseVector<T> m_s;
+	DenseMatrix<T> m_v;
 	
-} /// end of namespace lfr
+	T * m_work;
+	int m_l;
+	
+public:
+	EigSolver();
+	virtual ~EigSolver();
+	
+	bool computeSymmetry(const DenseMatrix<T> & A);
+	const DenseVector<T> & S() const;
+	const DenseMatrix<T> & V() const;
+	
+protected:
+
+private:
+
+};
+
+template<typename T>
+EigSolver<T>::EigSolver() 
+{ 
+	m_l = 0;
+	m_work = NULL; 
+}
+
+template<typename T>
+EigSolver<T>::~EigSolver() 
+{ 
+	if(m_work) {
+		free(m_work);
+	} 
+}
+
+/// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lse/functn_syev.htm
+/// https://software.intel.com/sites/products/documentation/doclib/mkl_sa/11/mkl_lapack_examples/index.htm#_geev.htm 
+/// Computes all eigenvalues and, optionally, eigenvectors of a real symmetric matrix.
+
+template<typename T>
+bool EigSolver<T>::computeSymmetry(const DenseMatrix<T> & A)
+{
+	const int m = A.numRows();
+/// keep M unchanged
+	m_v.resize(m, m);
+	m_v.copy(A);
+	m_s.resize(m );
+	
+	T wkopt;
+
+/// Query and allocate the optimal workspace
+	integer lwork = -1, info;
+	clapack_syev<T>( "V", "U", m, m_v.column(0), m, m_s.raw(), &wkopt, &lwork, &info );
+	lwork = (int)wkopt;
+	// std::cout<<"\n work l "<<lwork;
+	
+	if(m_l < lwork) {
+		m_l = lwork;
+		if(m_work) free(m_work);
+		m_work = (T*)malloc( lwork*sizeof(T) );
+	}
+/// Compute SVD 
+	clapack_syev<T>( "V", "U", m, m_v.column(0), m, m_s.raw(), m_work, &lwork, &info );
+/// Check for convergence
+	if( info > 0 ) {
+			std::cout<< "The algorithm failed to compute eigenvalues.\n";
+			return false;
+	}
+	
+	return true;
+}
+
+template<typename T>
+const DenseVector<T> & EigSolver<T>::S() const
+{ return m_s; }
+
+template<typename T>
+const DenseMatrix<T> & EigSolver<T>::V() const
+{ return m_v; }
+
+
+} /// end of namespace aphid
 
 #endif        //  #ifndef LINEARMATH_H
 

@@ -24,12 +24,12 @@ inline void swiss_roll(DenseMatrix<T> & X, const int & n,
 	T height;
 	X.resize(3, n);
 	for(int i=0;i<n;++i) {
-		t = GenerateGaussianNoise((T)0.0, (T)0.5) * PI;
-		height = 30.0 * GenerateGaussianNoise((T)0.0, (T)0.5);
+		t = PI * RandomF01() * 4.0;
+		height = GenerateGaussianNoise((T)2.0, (T)1.0);
 		T * e = X.column(i);
-		e[0] = t * cos(t) + GenerateGaussianNoise((T)0.0, noise); 
+		e[0] = 0.5 * t * cos(t) + GenerateGaussianNoise((T)0.0, noise); 
 		e[1] = height + GenerateGaussianNoise((T)0.0, noise);
-		e[2] = t * sin(t) + GenerateGaussianNoise((T)0.0, noise);
+		e[2] = 0.5 * t * sin(t) + GenerateGaussianNoise((T)0.0, noise);
 	}
 }
 

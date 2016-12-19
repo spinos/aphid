@@ -183,9 +183,19 @@ target_link_libraries (testclique ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (testclique ${Boost_THREAD_LIBRARY})
 target_link_libraries (testclique ${Boost_CHRONO_LIBRARY})
 
-add_executable (drpca testDrpca.cpp)
+SET (PCA_SRC ../shared/Base3DView.cpp
+drpcawidget.cpp
+drpcawindow.cpp
+testDrpca.cpp)
+add_executable (drpca ${PCA_SRC})
+target_link_libraries (drpca Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (drpca ${OPENGL_LIBRARIES})
+target_link_libraries (drpca ${APHID_FOUND_LIBRARY})
 target_link_libraries (drpca ${APHID_MATH_LIBRARY})
+target_link_libraries (drpca ${APHID_GEOM_LIBRARY})
+target_link_libraries (drpca ${APHID_UI_LIBRARY})
 target_link_libraries (drpca ${APHID_SDB_LIBRARY})
+target_link_libraries (drpca ${APHID_TOPO_LIBRARY})
 
 target_link_libraries (drpca ${BLAS_LIBRARY})
 target_link_libraries (drpca ${LAPACK_LIBRARY})
