@@ -49,7 +49,10 @@ public:
 	const int & nvars() const;
 /// n
 	const int & nobs() const;
-	
+/// idx-th observation
+	void getXi(DenseVector<T> & xi,
+				const int & idx) const;
+				
 protected:
 
 private:
@@ -85,7 +88,8 @@ void PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 /// https://cn.mathworks.com/help/matlab/ref/cov.html
 /// remove mean
 	center_data(m_x, 1, (float)nobs() );
-	
+
+#if 0
 	DenseMatrix<T> cov;
 	m_x.AtA(cov);
 	
@@ -119,6 +123,34 @@ void PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 	reducedX.resize(nobs(), toDim);
 	
 	m_x.mult(reducedX, reducedM);
+#else
+	SvdSolver<T> svd;
+	svd.compute(m_x);
+
+/// svd	X
+/// X = USV^t
+/// pc stored as rows of V^t
+/// project a point (column vector x) to pc coordinate
+/// V^tx	
+/// take first m coordinates of V^tx
+	
+	reducedX.resize(nobs(), toDim);
+	
+	DenseVector<T> ax(nvars() );
+	DenseVector<T> vtax(nvars() );
+			
+	for(int i=0;i<nobs();++i) {
+		
+		getXi(ax, i);
+		
+		svd.Vt().mult(vtax, ax);
+		
+		for(int j=0;j<toDim;++j) {
+			reducedX.column(j)[i] = vtax[j];
+		}
+	}
+	
+#endif
 	
 }
 
@@ -129,6 +161,16 @@ const int &  PCAReduction<T>::nvars() const
 template<typename T>
 const int &  PCAReduction<T>::nobs() const
 { return m_x.numRows(); }
+
+template<typename T>
+void PCAReduction<T>::getXi(DenseVector<T> & xi,
+							const int & idx) const
+{ 
+	const int & n = nvars();
+	for(int i=0;i<n;++i) {
+		xi[i] = m_x.column(i)[idx];
+	}
+}
 
 }
 #endif

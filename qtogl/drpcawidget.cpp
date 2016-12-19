@@ -11,6 +11,7 @@ using namespace aphid;
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 {
+#if 0
 /// http://matlab.izmiran.ru/help/techdoc/ref/cov.html	
 /// A = [-1 1 2 ; -2 3 1 ; 4 0 3]
 /// C = 
@@ -67,6 +68,7 @@ GLWidget::GLWidget(QWidget *parent)
 	eig.computeSymmetry(A);
 	std::cout<<"\n eigenvalues"<<eig.S()
 			<<"\n eigenvectors"<<eig.V();
+#endif
 			
 	m_D = 480;
 	int np = m_D/3;
