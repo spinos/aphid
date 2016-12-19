@@ -916,7 +916,7 @@ template<typename T>
 const std::string DenseMatrix<T>::str() const
 {
 	std::stringstream sst;
-	sst<<"\n "<<m_numRows<<"-by-"<<m_numColumns<<" matrix ";
+	sst<<" "<<m_numRows<<"-by-"<<m_numColumns<<" matrix ";
 	for (int i = 0; i<m_numRows; ++i) {
       sst<<"\n|";
 	  for (int j = 0; j<m_numColumns; ++j) {
@@ -1180,7 +1180,7 @@ bool EigSolver<T>::computeSymmetry(const DenseMatrix<T> & A)
 /// keep M unchanged
 	m_v.resize(m, m);
 	m_v.copy(A);
-	m_s.resize(m );
+	m_s.resize(m);
 	
 	T wkopt;
 
@@ -1199,8 +1199,8 @@ bool EigSolver<T>::computeSymmetry(const DenseMatrix<T> & A)
 	clapack_syev<T>( "V", "U", m, m_v.column(0), m, m_s.raw(), m_work, &lwork, &info );
 /// Check for convergence
 	if( info > 0 ) {
-			std::cout<< "The algorithm failed to compute eigenvalues.\n";
-			return false;
+		std::cout<< "The algorithm failed to compute eigenvalues.\n";
+		return false;
 	}
 	
 	return true;

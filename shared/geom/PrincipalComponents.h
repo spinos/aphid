@@ -127,7 +127,7 @@ AOrientedBox PrincipalComponents<T>::analyze(const T & pos, int n,
 	for(;i<n;i++) {
 		bar += pos.at(i);
 	}
-	bar *= 1.f/(float)n;
+	bar /= (float)n;
 	
 	m_pos = new Vector3F[n];
 	for(i=0;i<n;i++) {

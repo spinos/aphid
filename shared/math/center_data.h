@@ -79,7 +79,8 @@ inline void center_row(DenseMatrix<T> & X,
 
 template<typename T>
 inline void center_data(DenseMatrix<T> & X, int dim,
-						const T & nn)
+						const T & nn,
+						T * mean = NULL)
 {
 	DenseVector<T> vmean;
 	if(dim==1) {
@@ -88,6 +89,9 @@ inline void center_data(DenseMatrix<T> & X, int dim,
 	} else {
 		row_mean(vmean, X, nn);
 		center_row(X, vmean);
+	}
+	if(mean) {
+		memcpy(mean, vmean.v(), vmean.numElements()*sizeof(T));
 	}
 }
 
