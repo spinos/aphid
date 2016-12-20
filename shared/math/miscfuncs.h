@@ -77,18 +77,6 @@ inline T Absolute(T const& a)
 	return (a >= 0.0) ? a : -a;
 }
 
-/*
-template<typename T>
-inline bool IsElementIn(T const& a, const std::vector<T>& array)
-{
-	typename std::vector<T>::const_iterator it;
-	for(it = array.begin(); it != array.end(); ++it) {
-		if(a == *it) return true;
-	}
-	return false;
-}
-*/
-
 template<typename T>
 inline T DegreeToAngle(T const & a)
 {

@@ -426,6 +426,16 @@ void VertexAdjacency::connectEdges()
 	}
 }
 
+template<typename T>
+inline bool IsElementIn(T const& a, const std::vector<T>& array)
+{
+	typename std::vector<T>::const_iterator it;
+	for(it = array.begin(); it != array.end(); ++it) {
+		if(a == *it) return true;
+	}
+	return false;
+}
+
 void VertexAdjacency::getConnectedFacets(std::vector<unsigned> & dst) const
 {
 	const unsigned numNeighbors = m_neighbors.size();
