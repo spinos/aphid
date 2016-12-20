@@ -2,8 +2,8 @@
  *  PCAReduction.h
  *  
  *	dimensionality reduction via principle component analysis
- *  draw n d-dimensional data
- *  x is n-by-d, each row a data
+ *  draw n d-dimensional data points
+ *  x is n-by-d, each row a data point
  *  reduce dimensionality from d to m 
  *  center x
  *  calculate d-by-d covariance matrix c = x^t * x
@@ -37,7 +37,10 @@ public:
 /// n number of observations
 	void createX(const int & d, 
 				const int & n);
-	
+/// pack all columns of v into i-th row as a data point
+	void setXi(const DenseMatrix<T> & v,
+				const int & idx);
+				
 	void setXiCompj(const T & v,
 				const int & i,
 				const int & j);
@@ -71,6 +74,24 @@ void PCAReduction<T>::createX(const int & d,
 								const int & n)
 {
 	m_x.resize(n, d);
+}
+
+template<typename T>
+void PCAReduction<T>::setXi(const DenseMatrix<T> & v,
+				const int & idx)
+{
+	const int & ncv = v.numCols();
+	const int & nrv = v.numRows();
+	const int d = ncv * nrv;
+	if(d != m_x.numCols() ) {
+		throw " PCAReduction setXi has wrong input dims";
+	}
+	
+	const T * vv = v.column(0);
+	for(int i=0;i<d;++i) {
+		m_x.column(i)[idx] = vv[i];
+	}
+	
 }
 
 template<typename T>

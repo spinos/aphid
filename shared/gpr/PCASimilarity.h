@@ -10,7 +10,7 @@
 #ifndef APH_PCA_SIMILARITY_H
 #define APH_PCA_SIMILARITY_H
 
-#include <math/linearMath.h>
+#include <gpr/PCAReduction.h>
 
 namespace aphid {
 
@@ -224,7 +224,19 @@ void PCASimilarity<T, Tf>::computeSimilarity()
 	for(int i=0;i<n;++i) {
 		m_features[i]->toLocalSpace();
 	}
-/// todo pca dimensionality reduction and k-mean clustering
+
+	const int fd = featureDim() * Tf::numVars();
+	PCAReduction<float> dimred;
+	dimred.createX(fd, n);
+	for(int i=0;i<n;++i) {
+		dimred.setXi(m_features[i]->dataPoints(), i);
+	}
+	
+	DenseMatrix<float> redX;
+	dimred.compute(redX);
+	
+	std::cout<<" reduced x "<<redX;
+	
 }
 
 template<typename T, typename Tf>

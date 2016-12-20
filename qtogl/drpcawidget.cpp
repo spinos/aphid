@@ -2,11 +2,10 @@
 #include <GeoDrawer.h>
 #include <QtOpenGL>
 #include "drpcawidget.h"
-#include <gpr/PCAReduction.h>
 #include <math/generate_data.h>
 #include <math/transform_data.h>
-#include <gpr/PCAFeature.h>
 #include <gpr/PCASimilarity.h>
+#include <gpr/PCAFeature.h>
 
 using namespace aphid;
 
@@ -75,7 +74,7 @@ GLWidget::GLWidget(QWidget *parent)
 
 	m_features = new PCASimilarity<float, PCAFeature<float, 3> >;
 			
-	m_D = 480;
+	m_D = 540;
 	int np = m_D/3;
 	m_N = 49;
 	int nlg2 = 7;
@@ -88,32 +87,34 @@ GLWidget::GLWidget(QWidget *parent)
 				generate_data<float>("swiss_roll", *m_data[k], np, 0.f);
 				
 				Matrix33F mrot;
-				Vector3F vpos(5,5,10);
+				Vector3F vpos;
 				
 				transform_data<float>(*m_data[k], mrot, vpos, 0.0f);
 				
 				m_features->begin(*m_data[k], 1);
 				
 			} else if(k==1) {
-				generate_data<float>("helix", *m_data[k], np, 0.1f);
+				generate_data<float>("helix", *m_data[k], np, 0.f);
 				Matrix33F mrot;
-				Vector3F vpos(10,10,-5);
+				Vector3F vpos;
 				
 				transform_data<float>(*m_data[k], mrot, vpos, 0.0f);
 				
 				m_features->select(*m_data[k], 1);
 				
 			} else {
-				m_data[k]->copy(*m_data[k&1]);
+				m_data[k]->copy(*m_data[k>25]);
 				Matrix33F mrot;
-				mrot.rotateEuler(0.5 * PI * RandomF01(),
-							0.5 * PI * RandomF01(),
-							0.5 * PI * RandomF01() );
-				Vector3F vpos(40.f * RandomFn11(),
-							40.f * RandomFn11(),
-							40.f * RandomFn11() );
+						
+				mrot.rotateEuler(0.5f * PI * RandomFn11(),
+							0.99f * PI * RandomFn11(),
+							0.5f * PI * RandomF01() );
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.1f);
+				Vector3F vpos(9.f * i + 0.f * RandomFn11() + 30 * (k>25),
+							9.f * j + 0.f * RandomFn11(),
+							0.f);
+				
+				transform_data<float>(*m_data[k], mrot, vpos, 0.001f);
 				
 				m_features->select(*m_data[k], 1);
 			}
@@ -121,8 +122,6 @@ GLWidget::GLWidget(QWidget *parent)
 	}
 	
 #if 0
-	DenseMatrix<float> X;
-	
 	PCAReduction<float> pca;
 	pca.createX(m_D, m_N);
 	for(int i=0;i<m_N;++i) {
@@ -189,7 +188,7 @@ void GLWidget::drawFeatures()
 		glMultMatrixf((const GLfloat*)mm);
 		
 		getDrawer()->coordsys();
-		
+#if 1
 		m_features->getFeaturePoints(pdr, i, 1);
 		
 		getDrawer()->setColor(.95f, .85f, .85f);
@@ -200,7 +199,7 @@ void GLWidget::drawFeatures()
         glDrawArrays(GL_POINTS, 0, pdr.numCols() );
         
         glDisableClientState(GL_VERTEX_ARRAY);
-		
+#endif
 /// bounding box is columnwise
 		m_features->getFeatureBound((float *)&box, i, 1);
 		

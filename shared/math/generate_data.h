@@ -24,12 +24,12 @@ inline void swiss_roll(DenseMatrix<T> & X, const int & n,
 	T height;
 	X.resize(3, n);
 	for(int i=0;i<n;++i) {
-		t = PI * RandomF01() * 4.0;
-		height = GenerateGaussianNoise((T)2.0, (T)1.0);
+		t = (T)2.5 * PI * RandomF01();
+		height = GenerateGaussianNoise((T)0.0, (T)0.5);
 		T * e = X.column(i);
-		e[0] = 0.5 * t * cos(t) + GenerateGaussianNoise((T)0.0, noise); 
-		e[1] = height + GenerateGaussianNoise((T)0.0, noise);
-		e[2] = 0.5 * t * sin(t) + GenerateGaussianNoise((T)0.0, noise);
+		e[0] = (T)0.75 * t * cos(t) + GenerateGaussianNoise((T)0.0, noise); 
+		e[1] = height;
+		e[2] = (T)0.75 * t * sin(t) + GenerateGaussianNoise((T)0.0, noise);
 	}
 }
 
@@ -40,10 +40,11 @@ inline void helix(DenseMatrix<T> & X, const int & n,
 	T t;
 	X.resize(3, n);
 	for(int i=0;i<n;++i) {
-		t = (T)(i+1)/(T)n * PI;
+		t = (T)(i+1)/(T)(n+1) * PI * (T)1.1;
+		t *= 0.5 + 0.5 * (T)i/(T)n;
 		T * e = X.column(i);
-		e[0] = ((T)2.0 + cos(t * (T)8.0) ) * cos(t) + GenerateGaussianNoise((T)0.0, noise); 
-		e[1] = ((T)2.0 + cos(t * (T)8.0) ) * sin(t) + GenerateGaussianNoise((T)0.0, noise);
+		e[0] = ((T)3.0 + cos(t * (T)8.0) ) * cos(t) + GenerateGaussianNoise((T)0.0, noise); 
+		e[1] = ((T)3.0 + cos(t * (T)8.0) ) * sin(t) + GenerateGaussianNoise((T)0.0, noise);
 		e[2] = sin(t * (T)8.0) + GenerateGaussianNoise((T)0.0, noise);
 	}
 }

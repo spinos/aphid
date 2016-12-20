@@ -12,6 +12,7 @@
 
 #include <math/center_data.h>
 #include <math/sort.h>
+#include <math/Matrix33F.h>
 
 namespace aphid {
 
@@ -51,7 +52,12 @@ public:
 protected:
 	
 private:
-
+/// fix flip problem, make more points with positive values of first 2 variables
+	void rotatePositiveX();
+	void rotatePositiveY();
+	void makeRighthanded();
+	void flipX();
+	
 };
 
 template<typename T, int Nvar>
@@ -100,7 +106,7 @@ template<typename T, int Nvar>
 void PCAFeature <T, Nvar>::toLocalSpace()
 {
 	center_data(m_pnts, 1, (T)numPnts(), m_mean);
-
+#if 0
 	DenseMatrix<T> cov;
 	m_pnts.AtA(cov);
 	
@@ -129,6 +135,39 @@ void PCAFeature <T, Nvar>::toLocalSpace()
 	lft.copy(m_pnts);
 	
 	lft.mult(m_pnts, m_pcSpace);
+	
+#else
+	SvdSolver<T> svd;
+	svd.compute(m_pnts);
+	
+	m_pcSpace.resize(Nvar, Nvar);
+	
+/// Vt is pc vectors stored rowwise
+	for(int i=0;i<Nvar;++i) {
+		float * vs = m_pcSpace.column(i);
+		for(int j=0;j<Nvar;++j) {
+			vs[j] = svd.Vt().column(j)[i];
+		}
+	}
+	
+	DenseVector<T> ax(Nvar );
+	DenseVector<T> vtax(Nvar );
+			
+	for(int i=0;i<numPnts();++i) {
+		
+		getDataPoint(ax.raw(), i);		
+		svd.Vt().mult(vtax, ax);
+		
+		for(int j=0;j<Nvar;++j) {
+			m_pnts.column(j)[i] = vtax[j];
+		}
+	}
+	
+#endif
+ 
+	makeRighthanded();
+	rotatePositiveX();
+	rotatePositiveY();
 	
 	m_bound.resize(2, Nvar);
 	m_pnts.getBound(m_bound);
@@ -170,6 +209,91 @@ void PCAFeature<T, Nvar>::getBound(T * dst, const int & dim) const
 	} else {
 		m_bound.extractData(dst);
 		
+	}
+}
+
+template<typename T, int Nvar>
+void PCAFeature<T, Nvar>::rotatePositiveX()
+{
+	int posx = 0, negx = 0;
+	for(int i=0;i<numPnts();++i) {
+		if(m_pnts.column(0)[i] > 0) {
+			posx++;
+		} else {
+			negx++;
+		}
+	}
+	if(posx > negx) {
+		return;
+	}
+	
+/// rotate around y axis
+	for(int i=0;i<Nvar;++i) {
+		if(i==1) continue;
+		for(int j=0;j<Nvar;++j) {
+			m_pcSpace.column(i)[j] *= (T)-1.0;
+		}
+	}
+	
+	for(int i=0;i<numPnts();++i) {
+		for(int j=0;j<Nvar;++j) {
+			if(j==1) continue;
+			m_pnts.column(j)[i] *= (T)-1.0;
+		}
+	}
+}
+
+template<typename T, int Nvar>
+void PCAFeature<T, Nvar>::rotatePositiveY()
+{
+	int posx = 0, negx = 0;
+	for(int i=0;i<numPnts();++i) {
+		if(m_pnts.column(1)[i] > 0) {
+			posx++;
+		} else {
+			negx++;
+		}
+	}
+	if(posx > negx) {
+		return;
+	}
+	
+/// flip around x axis
+	for(int i=1;i<Nvar;++i) {
+		for(int j=0;j<Nvar;++j) {
+			m_pcSpace.column(i)[j] *= (T)-1.0;
+		}
+	}
+	
+	for(int i=0;i<numPnts();++i) {
+		for(int j=1;j<Nvar;++j) {
+			m_pnts.column(j)[i] *= (T)-1.0;
+		}
+	}
+	
+}
+
+template<typename T, int Nvar>
+void PCAFeature<T, Nvar>::makeRighthanded()
+{
+	Vector3F vx(m_pcSpace.column(0));
+	Vector3F vy(m_pcSpace.column(1));
+	Vector3F vz(m_pcSpace.column(2));
+				
+	if(vx.cross(vy).dot(vz) < 0.5f) {
+		flipX();
+	}
+}
+
+template<typename T, int Nvar>
+void PCAFeature<T, Nvar>::flipX()
+{
+	for(int j=0;j<Nvar;++j) {
+		m_pcSpace.column(0)[j] *= (T)-1.0;
+	}
+	
+	for(int i=0;i<numPnts();++i) {
+		m_pnts.column(0)[i] *= (T)-1.0;
 	}
 }
 
