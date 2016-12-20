@@ -75,6 +75,7 @@ public:
 	void minus(const DenseVector<T> & x, const T alpha = 1.0);
 	void copy(const DenseVector<T> & x);
 	void copyData(const T * x);
+	void extractData(T * b) const;
 	
 	DenseVector<T> operator+(const DenseVector<T> & x) const;
 	DenseVector<T> operator-(const DenseVector<T> & x) const;
@@ -330,7 +331,11 @@ void DenseVector<T>::copy(const DenseVector<T> & x)
 
 template<typename T>
 void DenseVector<T>::copyData(const T * x)
-{ memcpy(m_v, x, m_numElements*sizeof(T)); }
+{ memcpy(m_v, x, m_numElements*sizeof(T) ); }
+
+template<typename T>
+void DenseVector<T>::extractData(T * b) const
+{ memcpy(b, m_v, m_numElements*sizeof(T) ); }
 
 template<typename T>
 const std::string DenseVector<T>::str() const
@@ -400,6 +405,8 @@ public:
 	void copy(const DenseMatrix<T> & x);
 	void copyColumn(const int i, const T * x);
 	void copyData(const T * x);
+	void extractData(T * b) const;
+	void extractColumnData(T * b, const int & i) const;
 	
 	void setZero();
 /// A <- A * s
@@ -460,7 +467,10 @@ public:
 						const int n, const T alpha=1.0);
 
 /// A <- A^T
-    DenseMatrix<T> transposed() const;  
+    DenseMatrix<T> transposed() const; 
+	
+/// [min;max] of each column
+	void getBound(DenseMatrix<T> & b) const;
 	
 	friend std::ostream& operator<<(std::ostream &output, const DenseMatrix<T> & p) {
         output << p.str();
@@ -588,6 +598,15 @@ void DenseMatrix<T>::copyColumn(const int i, const T * x)
 template <typename T>
 void DenseMatrix<T>::copyData(const T * x)
 { memcpy(m_v, x, m_numRows * m_numColumns * sizeof(T)); }
+
+template <typename T>
+void DenseMatrix<T>::extractData(T * b) const
+{ memcpy(b, m_v, m_numRows * m_numColumns * sizeof(T)); }
+
+template <typename T>
+void DenseMatrix<T>::extractColumnData(T * b, const int & i) const
+{ memcpy(b, &m_v[i*m_numRows], m_numRows * sizeof(T)); }
+
 
 template <typename T> 
 void DenseMatrix<T>::setZero()
@@ -849,7 +868,7 @@ void DenseMatrix<T>::rank1Update(const DenseVector<T> & vec1, const DenseVector<
 		 }
 	  }
 	}
-};
+}
 
 /// http://scc.qibebt.cas.cn/docs/library/Intel%20MKL/2011/mkl_manual/lse/functn_syevr.htm
 /// all eigenvalues and eigenvectors
@@ -954,6 +973,27 @@ DenseMatrix<T> DenseMatrix<T>::transposed() const
     }
     
     return b;
+}
+
+template <typename T>  
+void DenseMatrix<T>::getBound(DenseMatrix<T> & b) const
+{
+	for(int i=0;i<numColumns();++i) {
+		T & lowb = b.column(i)[0];
+		T & highb = b.column(i)[1];
+		
+		const T * cc = column(i);
+		
+		lowb = 1e20;
+		highb = -1e20;
+		
+		for(int j=0;j<numRows();++j) {
+			
+			if(lowb > cc[j]) lowb = cc[j];
+			if(highb < cc[j]) highb = cc[j];
+			
+		}
+	}
 }
 
 /// column-major sparse matrix in csr

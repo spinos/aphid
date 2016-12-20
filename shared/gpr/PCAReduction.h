@@ -87,7 +87,8 @@ void PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 {
 /// https://cn.mathworks.com/help/matlab/ref/cov.html
 /// remove mean
-	center_data(m_x, 1, (float)nobs() );
+	DenseVector<T> vmean;
+	center_data(m_x, 1, (float)nobs(), vmean);
 
 #if 0
 	DenseMatrix<T> cov;

@@ -8,6 +8,12 @@ namespace aphid {
 template<typename T>
 class DenseMatrix;
 
+template<typename T, int N>
+class PCAFeature;
+
+template<typename T, typename Tf>
+class PCASimilarity;
+
 }
 
 class GLWidget : public aphid::Base3DView
@@ -25,8 +31,13 @@ protected:
 public slots:
 
 signals:
+
+private:
+	void drawFeatures();
     
 private:
+	aphid::PCASimilarity<float, aphid::PCAFeature<float, 3> > * m_features;
+	
 #define MAX_N_DATA 100
 	aphid::DenseMatrix<float > * m_data[MAX_N_DATA];
 	int m_N;

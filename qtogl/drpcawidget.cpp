@@ -5,6 +5,8 @@
 #include <gpr/PCAReduction.h>
 #include <math/generate_data.h>
 #include <math/transform_data.h>
+#include <gpr/PCAFeature.h>
+#include <gpr/PCASimilarity.h>
 
 using namespace aphid;
 
@@ -33,7 +35,8 @@ GLWidget::GLWidget(QWidget *parent)
 	
 	std::cout<<"A"<<A;
 	
-	center_data(A, 1, 3.f);
+	DenseVector vm;
+	center_data(A, 1, 3.f, vm);
 
 	DenseMatrix<float> At = A.transposed();
 	
@@ -69,11 +72,13 @@ GLWidget::GLWidget(QWidget *parent)
 	std::cout<<"\n eigenvalues"<<eig.S()
 			<<"\n eigenvectors"<<eig.V();
 #endif
+
+	m_features = new PCASimilarity<float, PCAFeature<float, 3> >;
 			
 	m_D = 480;
 	int np = m_D/3;
-	m_N = 36;
-	int nlg2 = 6;
+	m_N = 49;
+	int nlg2 = 7;
 	
 	for(int j=0;j<nlg2;++j) {
 		for(int i=0;i<nlg2;++i) {
@@ -83,34 +88,39 @@ GLWidget::GLWidget(QWidget *parent)
 				generate_data<float>("swiss_roll", *m_data[k], np, 0.f);
 				
 				Matrix33F mrot;
-				mrot.rotateEuler(PI * RandomF01(),
-							PI * RandomF01(),
-							PI * RandomF01() );
 				Vector3F vpos(5,5,10);
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.1f);
+				transform_data<float>(*m_data[k], mrot, vpos, 0.0f);
+				
+				m_features->begin(*m_data[k], 1);
 				
 			} else if(k==1) {
 				generate_data<float>("helix", *m_data[k], np, 0.1f);
 				Matrix33F mrot;
 				Vector3F vpos(10,10,-5);
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.1f);
+				transform_data<float>(*m_data[k], mrot, vpos, 0.0f);
+				
+				m_features->select(*m_data[k], 1);
 				
 			} else {
 				m_data[k]->copy(*m_data[k&1]);
 				Matrix33F mrot;
-				mrot.rotateEuler(0.1 * RandomF01(),
-							0.0,
-							0.1 * RandomF01() );
-				Vector3F vpos;
+				mrot.rotateEuler(0.5 * PI * RandomF01(),
+							0.5 * PI * RandomF01(),
+							0.5 * PI * RandomF01() );
+				Vector3F vpos(40.f * RandomFn11(),
+							40.f * RandomFn11(),
+							40.f * RandomFn11() );
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.2f);
+				transform_data<float>(*m_data[k], mrot, vpos, 0.1f);
 				
+				m_features->select(*m_data[k], 1);
 			}
 		}
 	}
 	
+#if 0
 	DenseMatrix<float> X;
 	
 	PCAReduction<float> pca;
@@ -126,6 +136,11 @@ GLWidget::GLWidget(QWidget *parent)
 	DenseMatrix<float> redX;
 	pca.compute(redX);
 	std::cout<<" reduced x "<<redX;
+#endif
+	std::cout<<"\n n feature "<<m_features->numFeatures();
+	m_features->computeSimilarity();
+	std::cout.flush();
+	
 }
 
 GLWidget::~GLWidget()
@@ -138,7 +153,8 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
     getDrawer()->m_markerProfile.apply();
-	getDrawer()->setColor(0.f, .85f, .55f);
+#if 0
+	getDrawer()->setColor(0.f, .0f, .55f);
 
 	for(int i=0;i<m_N;++i) {
 	    
@@ -148,5 +164,49 @@ void GLWidget::clientDraw()
         glDrawArrays(GL_POINTS, 0, m_data[i]->numCols() );
         
         glDisableClientState(GL_VERTEX_ARRAY);
+	}
+#endif	
+	drawFeatures();
+}
+
+void GLWidget::drawFeatures()
+{
+	float mm[16] = 
+	{1, 0, 0, 0, 
+	0, 1, 0, 0, 
+	0, 0, 1, 0, 
+	0, 0, 0, 1};
+	
+/// stored columnwise
+	DenseMatrix<float> pdr(3, m_features->featureDim() );
+	BoundingBox box;
+	
+	const int n = m_features->numFeatures();
+	for(int i=0;i<n;++i) {
+		m_features->getFeatureSpace(mm, i);
+		
+		glPushMatrix();
+		glMultMatrixf((const GLfloat*)mm);
+		
+		getDrawer()->coordsys();
+		
+		m_features->getFeaturePoints(pdr, i, 1);
+		
+		getDrawer()->setColor(.95f, .85f, .85f);
+		
+		glEnableClientState(GL_VERTEX_ARRAY);
+        
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pdr.column(0) );
+        glDrawArrays(GL_POINTS, 0, pdr.numCols() );
+        
+        glDisableClientState(GL_VERTEX_ARRAY);
+		
+/// bounding box is columnwise
+		m_features->getFeatureBound((float *)&box, i, 1);
+		
+		getDrawer()->setColor(0.f, .85f, .45f);
+		getDrawer()->boundingBox(box);
+		
+		glPopMatrix();
 	}
 }
