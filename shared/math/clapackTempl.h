@@ -280,7 +280,7 @@ template <> inline int clapack_sytri<float>(char *uplo, integer n, float *a, int
 	return ssytri_(uplo, &n, a, &lda, ipiv, work, info);
 }
 
-template <> int clapack_syev<double>(char *jobz, char *uplo, 
+template <> inline int clapack_syev<double>(char *jobz, char *uplo, 
 									integer n, double *a, 
 									integer lda, double *w,
 									double *work, integer *ipiv, integer *info)
@@ -288,7 +288,7 @@ template <> int clapack_syev<double>(char *jobz, char *uplo,
 	return dsyev_(jobz, uplo, &n, a, &lda, w, work, ipiv, info);
 }
 
-template <> int clapack_syev<float>(char *jobz, char *uplo, 
+template <> inline int clapack_syev<float>(char *jobz, char *uplo, 
 									integer n, float *a, 
 									integer lda, float *w,
 									float *work, integer *ipiv, integer *info)

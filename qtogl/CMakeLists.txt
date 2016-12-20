@@ -187,6 +187,11 @@ SET (PCA_SRC ../shared/Base3DView.cpp
 drpcawidget.cpp
 drpcawindow.cpp
 testDrpca.cpp)
+
+if (WIN32)
+set (PCA_SRC ${PCA_SRC} "../shared/gExtension.cpp")
+endif ()
+
 add_executable (drpca ${PCA_SRC})
 target_link_libraries (drpca Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (drpca ${OPENGL_LIBRARIES})
@@ -200,4 +205,6 @@ target_link_libraries (drpca ${APHID_TOPO_LIBRARY})
 target_link_libraries (drpca ${BLAS_LIBRARY})
 target_link_libraries (drpca ${LAPACK_LIBRARY})
 target_link_libraries (drpca ${F2C_LIBRARY})
+
+target_link_libraries (drpca ${Boost_DATE_TIME_LIBRARY})
 
