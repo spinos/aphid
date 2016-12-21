@@ -11,7 +11,7 @@ Window::Window()
     glWidget = new GLWidget(this);
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Dimensionality Reduction PCA"));
+    setWindowTitle(tr("Dimensionality Reduction PCA + KMean-Clustering"));
 }
 
 Window::~Window()

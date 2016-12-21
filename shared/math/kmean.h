@@ -1,0 +1,244 @@
+/*
+ *  kmean.h
+ *  
+ *	cluster N D-dimensional points into K groups
+ *
+ *  Created by jian zhang on 12/21/16.
+ *  Copyright 2016 __MyCompanyName__. All rights reserved.
+ *
+ */
+#ifndef APH_MATH_K_MEAN_H
+#define APH_MATH_K_MEAN_H
+
+#include <math/linearMath.h>
+#include <boost/scoped_array.hpp>
+
+namespace aphid {
+
+template<typename T>
+class KMeansClustering2 {
+
+/// size D-by-K, stored columnwise
+	DenseMatrix<T> m_centroids;
+	DenseMatrix<T> m_groupMean;
+/// ind to group per point, size N
+	boost::scoped_array<int> m_groupInd;
+/// count points in group, size K
+	boost::scoped_array<int> m_groupCount;
+	int m_K, m_N, m_D;
+
+public:
+	KMeansClustering2();
+	virtual ~KMeansClustering2();
+	
+	void setKND(const int & k,
+				const int & n,
+				const int & d);
+	
+/// points stored rowwise, size N-by-D
+	bool compute(const DenseMatrix<T> & points);
+	
+	const DenseMatrix<T> & groupCentroids() const;
+	const int * groupIndices() const;
+	
+protected:
+
+private:
+/// get i-th row point
+	void getXi(DenseVector<T> & dst, 
+				const DenseMatrix<T> & points,
+				const int & idx) const;
+	bool assignPointsToGroup(DenseVector<T> & apoint,
+				const DenseMatrix<T> & points);
+	int closestGroupTo(const DenseVector<T> & apoint) const;
+	void moveCentroid();
+	bool farEnoughToPreviousCentroids(const DenseVector<T> & pnt,
+							const int & end) const;
+							
+};
+
+template<typename T>
+KMeansClustering2<T>::KMeansClustering2()
+{}
+
+template<typename T>
+KMeansClustering2<T>::~KMeansClustering2()
+{}
+
+template<typename T>
+void KMeansClustering2<T>::setKND(const int & k,
+				const int & n,
+				const int & d)
+{
+	m_N = n;
+	m_groupInd.reset(new int[m_N]);
+	
+	m_K = k;
+	m_groupCount.reset(new int[m_K]);
+	
+	m_D = d;
+	m_centroids.resize(m_D, m_K);
+	m_groupMean.resize(m_D, m_K);
+}
+
+template<typename T>
+void KMeansClustering2<T>::getXi(DenseVector<T> & dst, 
+				const DenseMatrix<T> & points,
+				const int & idx) const
+{
+	for(int i=0;i<m_D;++i) {
+		dst[i] = points.column(i)[idx];
+	}
+}
+
+template<typename T>
+bool KMeansClustering2<T>::farEnoughToPreviousCentroids(const DenseVector<T> & pnt,
+							const int & end) const
+{
+	T minD = 1e20;
+	for(int i=0;i<end;++i) {
+		DenseVector<T> gcen(m_D);
+		gcen.copyData(m_centroids.column(i) );
+		
+		T diff = (gcen - pnt).norm();
+		if(minD > diff) {
+			minD = diff;
+		}
+	}
+	return minD > 1.0;
+}
+
+template<typename T>
+bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
+{
+	DenseVector<T> apnt(m_D);
+	
+/// initial guess
+/// go through point select one with large difference 
+/// to previously selected ones
+
+	getXi(apnt, points, 0);
+	m_centroids.copyColumn(0, apnt.v() );
+	int nsel = 1;
+	
+	for(int i=1;i<m_N;++i) {
+		getXi(apnt, points, i);
+		if(farEnoughToPreviousCentroids(apnt, i) ) {
+			m_centroids.copyColumn(nsel, apnt.v() );
+			std::cout<<"\n select point "<<i<<" as centroid "<<nsel;
+			nsel++;
+			if(nsel==m_K) {
+				break;
+			}
+		}
+	}
+	
+	if(nsel!=m_K) {
+		std::cout<<"\n kmean cannot find enough deviation to have "<<m_K<<" groups ";
+		return false;
+	}
+	
+/// all to group 0
+	for(int i=0;i<m_N;++i) {
+		m_groupInd[i] = 0;
+	}
+	
+	int i=0;
+	for(;i<29;++i) {
+		std::cout<<"\n centroid "<<i<<" "<<m_centroids;
+	
+		bool changed = assignPointsToGroup(apnt, points);
+		moveCentroid();
+		if(!changed) {
+			break;
+		}
+		
+	}
+	
+	std::cout<<"\n kmean finish after "<<i<<" updates ";
+	std::cout.flush();
+	return true;
+	
+}
+
+template<typename T>
+int KMeansClustering2<T>::closestGroupTo(const DenseVector<T> & apoint) const
+{
+	DenseVector<T> gcen(m_D);
+	
+	T maxDist = 1e20;
+	int ind = 0;
+	for(int i=0;i<m_K;++i) {
+		gcen.copyData(m_centroids.column(i));
+		
+		DenseVector<T> diff = gcen - apoint;
+		T dist = diff.norm();
+		if(maxDist > dist) {
+			ind = i;
+			maxDist = dist;
+		}
+	}
+	return ind;
+}
+
+template<typename T>
+bool KMeansClustering2<T>::assignPointsToGroup(DenseVector<T> & apoint,
+					const DenseMatrix<T> & points)
+{
+	m_groupMean.setZero();
+	
+	for(int i=0;i<m_K;++i) {
+		m_groupCount[i] = 0;
+	}
+	
+	bool changed = false;
+	for(int i=0;i<m_N;++i) {
+		getXi(apoint, points, i);
+		
+		const int closestG = closestGroupTo(apoint);
+		
+		DenseVector<T> gmean(m_groupMean.column(closestG), m_D);
+		gmean.add(apoint);
+		m_groupCount[closestG] += 1;
+		
+		if(m_groupInd[i] != closestG) {
+			m_groupInd[i] = closestG;
+			changed = true;
+		}
+	}
+	return changed;
+}
+
+template<typename T>
+void KMeansClustering2<T>::moveCentroid()
+{
+	T sumMoved = 0;
+	
+	DenseVector<T> vmean(m_D);
+		
+	for(int i=0;i<m_K;++i) {
+		vmean.copyData(m_groupMean.column(i) );
+		vmean.scale((T)1 / (T)m_groupCount[i]);
+		
+		DenseVector<T> gcen(m_centroids.column(i), m_D);
+		
+		DenseVector<T> diff = gcen - vmean;
+		sumMoved += diff.norm();
+		
+		gcen.copy(vmean);
+	}
+	
+	std::cout<<"\n moved "<<(sumMoved/ (T)m_K);
+}
+
+template<typename T>
+const DenseMatrix<T> & KMeansClustering2<T>::groupCentroids() const
+{ return m_centroids; }
+
+template<typename T>
+const int * KMeansClustering2<T>::groupIndices() const
+{ return &m_groupInd[0]; }
+
+}
+
+#endif

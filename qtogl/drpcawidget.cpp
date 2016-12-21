@@ -74,10 +74,10 @@ GLWidget::GLWidget(QWidget *parent)
 
 	m_features = new PCASimilarity<float, PCAFeature<float, 3> >;
 			
-	m_D = 540;
+	m_D = 1200;
 	int np = m_D/3;
-	m_N = 49;
-	int nlg2 = 7;
+	m_N = 64;
+	int nlg2 = 8;
 	
 	for(int j=0;j<nlg2;++j) {
 		for(int i=0;i<nlg2;++i) {
@@ -103,7 +103,11 @@ GLWidget::GLWidget(QWidget *parent)
 				m_features->select(*m_data[k], 1);
 				
 			} else {
+#if 0
 				m_data[k]->copy(*m_data[k>25]);
+#else
+				m_data[k]->copy(*m_data[rand() & 1]);
+#endif
 				Matrix33F mrot;
 						
 				mrot.rotateEuler(0.5f * PI * RandomFn11(),
@@ -170,6 +174,11 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawFeatures()
 {
+	const float groupCol[2][3] = {
+		{.85f, .45f, 0.f},
+		{0.f, .85f, .45f}
+	};
+	
 	float mm[16] = 
 	{1, 0, 0, 0, 
 	0, 1, 0, 0, 
@@ -203,7 +212,8 @@ void GLWidget::drawFeatures()
 /// bounding box is columnwise
 		m_features->getFeatureBound((float *)&box, i, 1);
 		
-		getDrawer()->setColor(0.f, .85f, .45f);
+		const float * gcol = groupCol[m_features->groupIndices()[i]];
+		getDrawer()->setColor(gcol[0], gcol[1], gcol[2]);
 		getDrawer()->boundingBox(box);
 		
 		glPopMatrix();

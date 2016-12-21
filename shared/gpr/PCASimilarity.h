@@ -2,6 +2,7 @@
  *  PCASimilarity.h
  *  
  *  similarity search via pca
+ *  separate via kmean-clustering
  *
  *  Created by jian zhang on 12/20/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
@@ -11,12 +12,14 @@
 #define APH_PCA_SIMILARITY_H
 
 #include <gpr/PCAReduction.h>
+#include <math/kmean.h>
 
 namespace aphid {
 
 template<typename T, typename Tf>
 class PCASimilarity {
 
+	KMeansClustering2<T> m_cluster;
 	std::vector<Tf * > m_features;
 	
 public:
@@ -52,6 +55,8 @@ public:
 	void getFeatureBound(T * dst,
 					const int & idx,
 					const int & dim) const;
+	
+	const int * groupIndices() const;
 	
 protected:
 
@@ -235,8 +240,12 @@ void PCASimilarity<T, Tf>::computeSimilarity()
 	DenseMatrix<float> redX;
 	dimred.compute(redX);
 	
-	std::cout<<" reduced x "<<redX;
+///	std::cout<<" reduced x "<<redX;
 	
+	m_cluster.setKND(2, n, 2);
+	if(!m_cluster.compute(redX) ) {
+		std::cout<<"\n PCASimilarity keam failed ";
+	}
 }
 
 template<typename T, typename Tf>
@@ -266,6 +275,10 @@ void PCASimilarity<T, Tf>::getFeatureBound(T * dst,
 					const int & idx,
 					const int & dim) const
 { m_features[idx]->getBound(dst, dim); }
+
+template<typename T, typename Tf>
+const int * PCASimilarity<T, Tf>::groupIndices() const
+{ return m_cluster.groupIndices(); }
 
 }
 
