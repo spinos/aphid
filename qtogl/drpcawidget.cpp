@@ -78,6 +78,7 @@ GLWidget::GLWidget(QWidget *parent)
 	int np = m_D/3;
 	m_N = 64;
 	int nlg2 = 8;
+	int ndv2 = 32;
 	
 	for(int j=0;j<nlg2;++j) {
 		for(int i=0;i<nlg2;++i) {
@@ -88,8 +89,9 @@ GLWidget::GLWidget(QWidget *parent)
 				
 				Matrix33F mrot;
 				Vector3F vpos;
+				Vector3F vsca(1.f, 1.f, 1.f);
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.0f);
+				transform_data<float>(*m_data[k], vsca, mrot, vpos, 0.0f);
 				
 				m_features->begin(*m_data[k], 1);
 				
@@ -97,14 +99,15 @@ GLWidget::GLWidget(QWidget *parent)
 				generate_data<float>("helix", *m_data[k], np, 0.f);
 				Matrix33F mrot;
 				Vector3F vpos;
+				Vector3F vsca(1.f, 1.f, 1.f);
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.0f);
+				transform_data<float>(*m_data[k], vsca, mrot, vpos, 0.0f);
 				
 				m_features->select(*m_data[k], 1);
 				
 			} else {
-#if 0
-				m_data[k]->copy(*m_data[k>25]);
+#if 1
+				m_data[k]->copy(*m_data[k>ndv2]);
 #else
 				m_data[k]->copy(*m_data[rand() & 1]);
 #endif
@@ -114,32 +117,20 @@ GLWidget::GLWidget(QWidget *parent)
 							0.99f * PI * RandomFn11(),
 							0.5f * PI * RandomF01() );
 				
-				Vector3F vpos(9.f * i + 0.f * RandomFn11() + 30 * (k>25),
+				Vector3F vpos(9.f * i + 0.f * RandomFn11() + 30 * (k>ndv2),
 							9.f * j + 0.f * RandomFn11(),
 							0.f);
+/// same scale all axises 
+				float nsca = RandomFlh(0.5, 1.5);
+				Vector3F vsca(nsca, nsca, nsca);
 				
-				transform_data<float>(*m_data[k], mrot, vpos, 0.001f);
+				transform_data<float>(*m_data[k], vsca, mrot, vpos, 0.03f);
 				
 				m_features->select(*m_data[k], 1);
 			}
 		}
 	}
 	
-#if 0
-	PCAReduction<float> pca;
-	pca.createX(m_D, m_N);
-	for(int i=0;i<m_N;++i) {
-		const float * src = m_data[i]->column(0);
-		
-		for(int j=0;j<m_D;++j) {
-			pca.setXiCompj(src[j], i, j);
-		}
-	}
-	
-	DenseMatrix<float> redX;
-	pca.compute(redX);
-	std::cout<<" reduced x "<<redX;
-#endif
 	std::cout<<"\n n feature "<<m_features->numFeatures();
 	m_features->computeSimilarity();
 	std::cout.flush();

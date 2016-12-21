@@ -403,6 +403,7 @@ public:
 	void getColumn(DenseVector<T> & x, const int i) const;
 	
 	void copy(const DenseMatrix<T> & x);
+	void copyRow(const int i, const T * x);
 	void copyColumn(const int i, const T * x);
 	void copyData(const T * x);
 	void extractData(T * b) const;
@@ -590,6 +591,14 @@ void DenseMatrix<T>::getColumn(DenseVector<T> & x, const int i) const
 template <typename T>
 void DenseMatrix<T>::copy(const DenseMatrix<T> & x)
 { memcpy(m_v, x.column(0), m_numRows*m_numColumns*sizeof(T)); }
+
+template <typename T>
+void DenseMatrix<T>::copyRow(const int i, const T * x)
+{ 
+	for(int j=0;j<m_numColumns;++j) {
+		column(j)[i] = x[j];
+	}
+}
 
 template <typename T>
 void DenseMatrix<T>::copyColumn(const int i, const T * x)

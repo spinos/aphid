@@ -71,6 +71,9 @@ inline float RandomF01()
 inline float RandomFn11()
 { return (RandomF01() - 0.5f) * 2.f; }
 
+inline float RandomFlh(const float & lo, const float & hi)
+{ return (lo + (hi - lo) * RandomF01() ); }
+
 template<typename T>
 inline T Absolute(T const& a)
 {

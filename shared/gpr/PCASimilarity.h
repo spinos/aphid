@@ -240,7 +240,7 @@ void PCASimilarity<T, Tf>::computeSimilarity()
 	DenseMatrix<float> redX;
 	dimred.compute(redX);
 	
-///	std::cout<<" reduced x "<<redX;
+	std::cout<<" reduced x "<<redX;
 	
 	m_cluster.setKND(2, n, 2);
 	if(!m_cluster.compute(redX) ) {
@@ -258,15 +258,22 @@ void PCASimilarity<T, Tf>::getFeaturePoints(DenseMatrix<T> & dst,
 					const int & idx,
 					const int & dim) const
 { 
+	const Tf * f = m_features[idx];
+	const int np = f->numPnts();
+		
 	if(dim==1) {
-		const Tf * f = m_features[idx];
-		const int np = f->numPnts();
 		for(int i=0;i<np;++i) {
-			f->getDataPoint(dst.column(i), i);
+			f->getScaledDataPoint(dst.column(i), i);
 		}
+		
 	} else {
-		const DenseMatrix<T> & src = m_features[idx]->dataPoints();
-		dst.copy(src);
+		DenseVector<T> apnt(Tf::numVars() );
+		for(int i=0;i<np;++i) {
+			f->getScaledDataPoint(apnt.raw(), i);
+			dst.copyRow(i, apnt.v() );
+			
+		}
+		
 	}
 }
 

@@ -24,8 +24,8 @@ class PCAFeature {
 	DenseMatrix<T> m_pcSpace;
 /// nvar stores mean of each dimension
 	DenseVector<T> m_mean;
-/// 2-by-nvar lowest and highest of each dimension
-/// stored rowwise
+/// 2-by-nvar lowest, highest of each dimension
+/// stored columnwise
 	DenseMatrix<T> m_bound;
 	
 public:
@@ -48,6 +48,7 @@ public:
 /// dim = 1 stored columnwise
 /// dim = 2 stored rowwise
 	void getBound(T * dst, const int & dim) const;
+	void getScaledDataPoint(T * p, const int & idx) const;
 	
 protected:
 	
@@ -171,7 +172,23 @@ void PCAFeature <T, Nvar>::toLocalSpace()
 	
 	m_bound.resize(2, Nvar);
 	m_pnts.getBound(m_bound);
-	
+
+/// remove scaling	
+	for(int j=0;j<Nvar;++j) {	
+		const T loinv = m_bound.column(j)[0];
+		
+		T sca = m_bound.column(j)[1] - loinv;
+		if(sca < (T)1.0e-4) {
+			continue;
+		}
+		
+		sca = (T)1.0 / sca;
+		
+		for(int i=0;i<numPnts();++i) {
+			T & cr = m_pnts.column(j)[i];
+			cr = (cr - loinv) * sca;
+		}
+	}
 }
 
 template<typename T, int Nvar>
@@ -184,6 +201,24 @@ void PCAFeature <T, Nvar>::getPCSpace(T * dst) const
 	
 	m_mean.extractData(&dst[(Nvar+1)*Nvar]);
 	
+}
+
+template<typename T, int Nvar>
+void PCAFeature<T, Nvar>::getScaledDataPoint(T * p, 
+				const int & idx) const
+{
+	for(int i=0;i<Nvar;++i) {
+	
+		const T lob = m_bound.column(i)[0];
+		
+		T sca = m_bound.column(i)[1] - lob;
+		if(sca < (T)1.0e-4) {
+			sca = (T)1.0;
+		}
+		
+		p[i] = m_pnts.column(i)[idx] * sca + lob;
+
+	}
 }
 
 template<typename T, int Nvar>
