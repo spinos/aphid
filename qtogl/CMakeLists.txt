@@ -211,8 +211,12 @@ target_link_libraries (drpca ${Boost_DATE_TIME_LIBRARY})
 SET (GP_HEADER cactus.h)
 
 SET (GP_SRC ../shared/Base3DView.cpp
+../shared/BaseImageWidget.cpp
+../shared/Plot1DWidget.cpp
 gpdfwidget.cpp
 gpdfwindow.cpp
+gpdfxwidget.cpp
+gpdfxdialog.cpp
 gpdfmain.cpp)
 
 if (WIN32)
