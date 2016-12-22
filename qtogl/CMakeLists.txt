@@ -208,3 +208,29 @@ target_link_libraries (drpca ${F2C_LIBRARY})
 
 target_link_libraries (drpca ${Boost_DATE_TIME_LIBRARY})
 
+SET (GP_HEADER cactus.h)
+
+SET (GP_SRC ../shared/Base3DView.cpp
+gpdfwidget.cpp
+gpdfwindow.cpp
+gpdfmain.cpp)
+
+if (WIN32)
+set (GP_SRC ${PCA_SRC} "../shared/gExtension.cpp")
+endif ()
+
+add_executable (gpdeform ${GP_HEADER} ${GP_SRC})
+target_link_libraries (gpdeform Qt4::QtGui Qt4::QtOpenGL)
+target_link_libraries (gpdeform ${OPENGL_LIBRARIES})
+target_link_libraries (gpdeform ${APHID_FOUND_LIBRARY})
+target_link_libraries (gpdeform ${APHID_MATH_LIBRARY})
+target_link_libraries (gpdeform ${APHID_GEOM_LIBRARY})
+target_link_libraries (gpdeform ${APHID_UI_LIBRARY})
+target_link_libraries (gpdeform ${APHID_SDB_LIBRARY})
+target_link_libraries (gpdeform ${APHID_TOPO_LIBRARY})
+
+target_link_libraries (gpdeform ${BLAS_LIBRARY})
+target_link_libraries (gpdeform ${LAPACK_LIBRARY})
+target_link_libraries (gpdeform ${F2C_LIBRARY})
+
+target_link_libraries (gpdeform ${Boost_DATE_TIME_LIBRARY})

@@ -21,9 +21,12 @@ public:
     
     typedef DenseVector<TScalar> TVector;
     
+    RbfKernel();
     RbfKernel(TScalar lengthScale, TScalar sigma=1);
     virtual ~RbfKernel();
     
+	void setParameter(TScalar lengthScale, TScalar sigma);
+	
     virtual TScalar operator()(const TScalar & d) const;
     
 private:
@@ -31,17 +34,29 @@ private:
 };
 
 template <class TScalar>
-RbfKernel<TScalar>::RbfKernel(TScalar lengthScale, TScalar sigma) :
-m_lengthScale(lengthScale),
-m_sigma(sigma)
+RbfKernel<TScalar>::RbfKernel()
 {
-    m_sigma2 = sigma * sigma;
-    m_invlengthScale2 = -0.5 / lengthScale / lengthScale;
+    setParameter(0.5, 1.0);
+}
+
+template <class TScalar>
+RbfKernel<TScalar>::RbfKernel(TScalar lengthScale, TScalar sigma)
+{
+	setParameter(lengthScale, sigma);
 }
     
 template <class TScalar>
 RbfKernel<TScalar>::~RbfKernel()
 {}
+
+template <class TScalar>
+void RbfKernel<TScalar>::setParameter(TScalar lengthScale, TScalar sigma)
+{
+	m_lengthScale = lengthScale;
+	m_sigma = sigma;
+	m_sigma2 = sigma * sigma;
+    m_invlengthScale2 = -0.5 / lengthScale / lengthScale;
+}
 
 template <class TScalar>
 TScalar RbfKernel<TScalar>::operator()(const TScalar & d) const
