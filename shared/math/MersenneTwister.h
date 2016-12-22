@@ -22,6 +22,7 @@ class MersenneTwister {
     #define MERS_A   0x9908B0DF
     #define MERS_B   0x9D2C5680
     #define MERS_C   0xEFC60000
+    
 public:
 	MersenneTwister(uint32 seed);
 	virtual ~MersenneTwister();
@@ -32,14 +33,17 @@ public:
 	
 protected:
 	void randomInit(uint32 seed);        // re-seed
+	
 private:
 	uint32 mt[MERS_N];                   // state vector
 	int mti;
-	enum TArch {
-		LITTLEENDIAN, 
-		BIGENDIAN, 
-		NONIEEE};
 		
+	enum TArch {
+		achLITTLEENDIAN = 0, 
+		achBIGENDIAN = 1, 
+		achNONIEEE = 2
+	};
+	
 	TArch Architecture; 
 };
 }

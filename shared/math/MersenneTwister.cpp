@@ -30,9 +30,9 @@ void MersenneTwister::randomInit(uint32 seed)
   convert.f = 1.0;
   // Note: Old versions of the Gnu g++ compiler may make an error here,
   // compile with the option  -fenum-int-equiv  to fix the problem
-  if (convert.i[1] == 0x3FF00000) Architecture = LITTLEENDIAN;
-  else if (convert.i[0] == 0x3FF00000) Architecture = BIGENDIAN;
-  else Architecture = NONIEEE;
+  if (convert.i[1] == 0x3FF00000) Architecture = achLITTLEENDIAN;
+  else if (convert.i[0] == 0x3FF00000) Architecture = achBIGENDIAN;
+  else Architecture = achNONIEEE;
 }
 
 uint32 MersenneTwister::bRandom() 
@@ -84,15 +84,15 @@ double MersenneTwister::random()
   // omitted if the architecture is known. (A PC running Windows or Linux uses
   // LITTLEENDIAN architecture):
   switch (Architecture) {
-	case LITTLEENDIAN:
+	case achLITTLEENDIAN:
 	convert.i[0] =  r << 20;
 	convert.i[1] = (r >> 12) | 0x3FF00000;
 	return convert.f - 1.0;
-	case BIGENDIAN:
+	case achBIGENDIAN:
 	convert.i[1] =  r << 20;
 	convert.i[0] = (r >> 12) | 0x3FF00000;
 	return convert.f - 1.0;
-	case NONIEEE: default:
+	case achNONIEEE: default:
   ;} 
   // This somewhat slower method works for all architectures, including 
   // non-IEEE floating point representation:

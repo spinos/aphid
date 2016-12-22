@@ -76,6 +76,8 @@ public:
 	void copy(const DenseVector<T> & x);
 	void copyData(const T * x);
 	void extractData(T * b) const;
+/// ||Ai - Bi||_2
+	T distanceTo(const DenseVector<T> & b) const;
 	
 	DenseVector<T> operator+(const DenseVector<T> & x) const;
 	DenseVector<T> operator-(const DenseVector<T> & x) const;
@@ -303,6 +305,18 @@ void DenseVector<T>::add(T * x, const T alpha)
 template<typename T>
 void DenseVector<T>::minus(const DenseVector<T> & x, const T alpha)
 { add(x.v(), -alpha); }
+
+template<typename T>
+T DenseVector<T>::distanceTo(const DenseVector<T> & b) const
+{
+    T d;
+    T s = 0.0;
+	for(int i=0; i<m_numElements; i++) {
+	    d = m_v[i] - b[i];
+	    s += d * d;
+	}
+	return s;
+}
 
 template<typename T>
 DenseVector<T> DenseVector<T>::operator+(const DenseVector<T> & x) const
