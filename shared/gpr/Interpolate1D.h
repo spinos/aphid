@@ -13,6 +13,9 @@
 namespace aphid {
 
 template<typename T>
+class DenseVector;
+
+template<typename T>
 class DenseMatrix;
 
 namespace gpr {
@@ -31,6 +34,7 @@ class Interpolate1D {
 	DenseMatrix<float > * m_yTrain;
 	RbfKernel<float > * m_rbf;
 	Covariance<float, RbfKernel<float > > * m_covTrain;
+	DenseVector<float > * m_mean;
 	
 public:
 	Interpolate1D();

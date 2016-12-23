@@ -11,6 +11,7 @@
 #include <math/linearMath.h>
 #include <gpr/RbfKernel.h>
 #include <gpr/Covariance.h>
+#include <math/center_data.h>
 
 namespace aphid {
 namespace gpr {
@@ -22,7 +23,7 @@ m_rbf(NULL)
 	m_covTrain = new Covariance<float, RbfKernel<float> >();
 	m_xTrain = new DenseMatrix<float >();
 	m_yTrain = new DenseMatrix<float >();
-	
+	m_mean = new DenseVector<float >(1);
 }
 
 Interpolate1D::~Interpolate1D()
@@ -30,6 +31,9 @@ Interpolate1D::~Interpolate1D()
 	clearObservations(); 
 	if(m_rbf) delete m_rbf;
 	delete m_covTrain;
+	delete m_xTrain;
+	delete m_yTrain;
+	delete m_mean;
 }
 
 void Interpolate1D::clearObservations()
@@ -76,6 +80,7 @@ bool Interpolate1D::learn()
 		m_yTrain->column(0)[i] = m_observations[i].y;
 	}
 	
+	center_data(*m_xTrain, 1, (float)dim, *m_mean);
 	
 	if(m_rbf) delete m_rbf;
 	m_rbf = new RbfKernel<float> (.125f * (m_bound.y - m_bound.x) );
@@ -86,7 +91,7 @@ bool Interpolate1D::learn()
 float Interpolate1D::predict(const float & x) const
 {
 	DenseMatrix<float > xTest(1,1);
-	xTest.column(0)[0] = x;
+	xTest.column(0)[0] = x - m_mean->v()[0];
 	Covariance<float, RbfKernel<float> > covTest;
     covTest.create(xTest, *m_xTrain, *m_rbf);
 	

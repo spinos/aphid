@@ -14,7 +14,7 @@ using namespace aphid;
 
 GpdfxWidget::GpdfxWidget(QWidget *parent) : Plot1DWidget(parent)
 {
-	setBound(-1.5, 1.5, 6, -1.5, 1.5, 6);
+	setBound(-2., 2., 4, -2., 2., 4);
 	int dim = sCactusNumObservations;
 	UniformPlot1D * ap = new UniformPlot1D;
 	ap->create(dim);
