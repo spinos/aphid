@@ -432,6 +432,7 @@ public:
 /// dim: 1 Ai - Bi columnwise
 /// dim: 2 Ai - Bi rowwise
 	void minus(const DenseVector<T> & b, int dim = 1);
+	void add(const DenseVector<T> & b, int dim = 1);
 	
 /// normalize each column
 	void normalize();
@@ -689,6 +690,26 @@ void DenseMatrix<T>::minus(const DenseVector<T> & b, int dim)
 			T * ci = column(i);
 			for(int j=0;j<m_numRows;++j) {
 				ci[j] -= b[j];
+			}
+		}
+	}
+}
+
+template <typename T> 
+void DenseMatrix<T>::add(const DenseVector<T> & b, int dim)
+{
+	if(dim==1) {
+		for(int i=0;i<m_numColumns;++i) {
+			T * ci = column(i);
+			for(int j=0;j<m_numRows;++j) {
+				ci[j] += b[i];
+			}
+		}
+	} else {
+		for(int i=0;i<m_numColumns;++i) {
+			T * ci = column(i);
+			for(int j=0;j<m_numRows;++j) {
+				ci[j] += b[j];
 			}
 		}
 	}

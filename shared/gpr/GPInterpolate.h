@@ -28,7 +28,8 @@ class GPInterpolate {
 	DenseMatrix<T > m_xPredict;
 	DenseMatrix<T > m_yPredict;
 /// nvar row vector mean of each x variable
-	DenseVector<T> m_mean;
+	DenseVector<T> m_xMean;
+	DenseVector<T> m_yMean;
 	RbfKernel<T > m_rbf;
 	Covariance<T, RbfKernel<T > > m_covTrain;
 	Covariance<T, RbfKernel<T > > m_covPredict;
@@ -79,7 +80,8 @@ void GPInterpolate<T>::create(const int & nobs,
 	m_xPredict.resize(1, xnvar);
 	m_yPredict.resize(1, ynvar);
 	m_rbf.setParameter(1.0, 1.0);
-	m_mean.resize(xnvar);
+	m_xMean.resize(xnvar);
+	m_yMean.resize(ynvar);
 }
 
 template<typename T>
@@ -105,7 +107,8 @@ void GPInterpolate<T>::setObservationi(const int & idx,
 template<typename T>
 bool GPInterpolate<T>::learn()
 {
-	center_data(m_xTrain, 1, (T)numXVars(), m_mean);
+	center_data(m_xTrain, 1, (T)numXVars(), m_xMean);
+	center_data(m_yTrain, 1, (T)numYVars(), m_yMean);
 	return m_covTrain.create(m_xTrain, m_rbf);
 }
 
@@ -114,7 +117,7 @@ void GPInterpolate<T>::predict(const T * x)
 {
 	m_xPredict.copyRow(0, x);
 /// remove mean
-	m_xPredict.minus(m_mean);
+	m_xPredict.minus(m_xMean);
 	m_covPredict.create(m_xPredict, m_xTrain, m_rbf);
 	
 	DenseMatrix<float> KxKtraininv(m_covPredict.K().numRows(),
@@ -124,6 +127,7 @@ void GPInterpolate<T>::predict(const T * x)
 	
 /// yPred = Ktest * inv(Ktrain) * yTrain
 	KxKtraininv.mult(m_yPredict, m_yTrain);
+	m_yPredict.add(m_yMean);
 }
 
 template<typename T>
