@@ -1,11 +1,11 @@
 #include <AHelper.h>
 #include "HesMeshNode.h"
 #include <maya/MFnMeshData.h>
-#include <Vector3F.h>
-#include <SHelper.h>
+#include <math/Vector3F.h>
+#include <foundation/SHelper.h>
 #include <baseUtil.h>
 #include <HesperisPolygonalMeshIO.h>
-#include <APolygonalMesh.h>
+#include <geom/APolygonalMesh.h>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

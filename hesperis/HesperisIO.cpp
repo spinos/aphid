@@ -15,14 +15,13 @@
 #include <maya/MIntArray.h>
 #include <maya/MFnTransform.h>
 #include <maya/MItDag.h>
-#include <CurveGroup.h>
-#include <ATriangleMeshGroup.h>
+#include <geom/CurveGroup.h>
+#include <geom/ATriangleMeshGroup.h>
 #include <HBase.h>
 #include <HWorld.h>
 #include <HCurveGroup.h>
 #include <HTriangleMeshGroup.h>
 #include <AAttributeHelper.h>
-#include <CurveGroup.h>
 #include <sstream>
 #include <boost/format.hpp>
 

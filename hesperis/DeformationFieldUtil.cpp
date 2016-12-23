@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string>
 
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <ASearchHelper.h>
 #include <AAttributeHelper.h>
 #include "AttribUtil.h"

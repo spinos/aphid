@@ -1244,5 +1244,37 @@ void AHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
     }
 }
 
+unsigned AHelper::GetMeshNv(const MObject & meshNode)
+{
+    MStatus stat;
+    MFnMesh fmesh(meshNode, &stat);
+    if(!stat) {
+        std::cout<<"AHelper::GetMeshNv no mesh fn to node";
+        return 0;   
+    }
+    return fmesh.numVertices(); 
+}
+
+bool AHelper::GetUpstreamDepNodeByTypeName(const MString & name,
+                        MObject& root, MObject& node)
+{
+    node = MObject::kNullObj;
+    MStatus stat;
+	MItDependencyGraph itdep(root, MFn::kInvalid, MItDependencyGraph::kUpstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kNodeLevel, &stat );
+	        
+	if(!stat) {
+	    std::cout<<"cannot create dependency graph it";
+	    return false;
+	}
+	
+	for(; !itdep.isDone(); itdep.next()) {
+		node = itdep.currentItem();
+		if(MFnDependencyNode(node).typeName() == name	) {
+		    return true;
+		}
+	}
+	return false;
+}
+
 }
 //:~

@@ -4,11 +4,11 @@
 #include <maya/MPointArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MItMeshPolygon.h>
-#include <APolygonalMesh.h>
-#include <APolygonalUV.h>
+#include <geom/APolygonalMesh.h>
+#include <geom/APolygonalUV.h>
 #include "HesperisFile.h"
 #include <HWorld.h>
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <HTransform.h>
 #include <HPolygonalMesh.h>
 #include <AHelper.h>

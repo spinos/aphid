@@ -1,5 +1,5 @@
 #include "H5AttribNode.h"
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <baseUtil.h>
 #include <boost/format.hpp>
 

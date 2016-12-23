@@ -225,6 +225,9 @@ public:
 	                            const std::string & log2);
 /// first in array not connected
 	static void GetAvailablePlug(MPlug & dst, MPlug & p);
+	static unsigned GetMeshNv(const MObject & meshNode);
+	static bool GetUpstreamDepNodeByTypeName(const MString & name, 
+	                            MObject& root, MObject& node);
 	
 };
 

@@ -13,7 +13,7 @@
 #include <maya/MPointArray.h>
 #include <HWorld.h>
 #include <HCurveGroup.h>
-#include <CurveGroup.h>
+#include <geom/CurveGroup.h>
 #include <ASearchHelper.h>
 #include <boost/format.hpp>
 namespace aphid {

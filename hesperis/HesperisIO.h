@@ -17,7 +17,7 @@
 #include <AllMath.h>
 #include <BaseTransform.h>
 #include <HTransform.h>
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <string>
 #include <map>
 #include "HesperisFile.h"

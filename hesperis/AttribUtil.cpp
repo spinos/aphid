@@ -14,7 +14,7 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
 #include <AHelper.h>
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <ASearchHelper.h>
 #include <HesperisAttributeIO.h>
 #include <HesperisAttribConnector.h>

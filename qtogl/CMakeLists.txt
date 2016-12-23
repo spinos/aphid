@@ -208,9 +208,9 @@ target_link_libraries (drpca ${F2C_LIBRARY})
 
 target_link_libraries (drpca ${Boost_DATE_TIME_LIBRARY})
 
-SET (GP_HEADER cactus.h)
+SET (GPDF_HEADER cactus.h)
 
-SET (GP_SRC ../shared/Base3DView.cpp
+SET (GPDF_SOURCE ../shared/Base3DView.cpp
 ../shared/BaseImageWidget.cpp
 ../shared/Plot1DWidget.cpp
 gpdfwidget.cpp
@@ -220,10 +220,10 @@ gpdfxdialog.cpp
 gpdfmain.cpp)
 
 if (WIN32)
-set (GP_SRC ${PCA_SRC} "../shared/gExtension.cpp")
+set (GPDF_SOURCE ${GPDF_SOURCE} "../shared/gExtension.cpp")
 endif ()
 
-add_executable (gpdeform ${GP_HEADER} ${GP_SRC})
+add_executable (gpdeform ${GP_HEADER} ${GPDF_SOURCE})
 target_link_libraries (gpdeform Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (gpdeform ${OPENGL_LIBRARIES})
 target_link_libraries (gpdeform ${APHID_FOUND_LIBRARY})

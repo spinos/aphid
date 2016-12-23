@@ -8,10 +8,10 @@
 #include <maya/MIOStream.h>
 #include <maya/MFnMesh.h>
 #include <AHelper.h>
-#include <SHelper.h>
+#include <foundation/SHelper.h>
 #include <HesperisPolygonalMeshIO.h>
 #include <baseUtil.h>
-#include <APolygonalMesh.h>
+#include <geom/APolygonalMesh.h>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
