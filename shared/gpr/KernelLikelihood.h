@@ -26,12 +26,16 @@ public:
 					DenseMatrix<TScalar> * x, DenseMatrix<TScalar> * y);
 	virtual ~KernelLikelihood();
 	
+/// calculate all interval within range, find the largest
 	TScalar optimise(TScalar lmin, TScalar lmax);
 	
 protected:
 
 private:
-
+	TScalar computeModelFit(DenseMatrix<TScalar> & Yi, 
+							DenseMatrix<TScalar> & YtKinv, 
+							DenseMatrix<TScalar> & YtKinvY);
+	
 };
 
 template <typename TScalar, typename TCovariance, typename TKernel>
@@ -53,17 +57,19 @@ TScalar KernelLikelihood<TScalar, TCovariance, TKernel>::optimise(TScalar lmin, 
 {
 	const int dim = m_cov->K().numRows();
 	TScalar logDetK;
-	TScalar thetai;
+	TScalar modelFit;
 	TScalar lli;
 	TScalar llmax = -1.0e24;
+	TScalar thetai;
 	TScalar thetamax;
 	DenseMatrix<TScalar> U(dim, dim);
+	DenseMatrix<TScalar> Yi(dim, 1);
 	DenseMatrix<TScalar> YtKinv(1, dim);
 	DenseMatrix<TScalar> YtKinvY(1, 1);
 	
 	std::cout<<"\n estimate theta within ("<<lmin<<", "<<lmax<<") by brute force";
-	const TScalar deltal = (lmax - lmin) / 39;
-	for(int i=0;i<40;++i) {
+	const TScalar deltal = (lmax - lmin) / 49;
+	for(int i=0;i<50;++i) {
 	
 		thetai = lmin + deltal * i;
 		m_kern->setParameter(thetai, (TScalar)1.0);
@@ -76,12 +82,11 @@ TScalar KernelLikelihood<TScalar, TCovariance, TKernel>::optimise(TScalar lmin, 
 		}
  	
 		logDetK = logdet<TScalar>(U);
-/// model fit	
-		m_y->transMult(YtKinv,  m_cov->Kinv() );
-		YtKinv.mult(YtKinvY, *m_y);	
+
+		modelFit = computeModelFit(Yi, YtKinv, YtKinvY);
 			
 /// n * log(2 * PI)	not added	
-		lli = -0.5 * (logDetK + YtKinvY.column(0)[0]);
+		lli = -0.5 * (logDetK + modelFit);
 		
 		if(lli > llmax) {
 			llmax = lli;
@@ -99,6 +104,22 @@ TScalar KernelLikelihood<TScalar, TCovariance, TKernel>::optimise(TScalar lmin, 
 	return llmax;
 }
 
+template <typename TScalar, typename TCovariance, typename TKernel>
+TScalar KernelLikelihood<TScalar, TCovariance, TKernel>::computeModelFit(DenseMatrix<TScalar> & Yi, 
+							DenseMatrix<TScalar> & YtKinv, 
+							DenseMatrix<TScalar> & YtKinvY)
+{
+/// sum of each variable of y
+	TScalar r = 0;
+	const int nvar = m_y->numCols();
+	for(int i=0;i<nvar;++i) {
+		Yi.copyColumn(0, m_y->column(i) );
+		Yi.transMult(YtKinv,  m_cov->Kinv() );
+		YtKinv.mult(YtKinvY, Yi);	
+		r += YtKinvY.column(0)[0];
+	}
+	return r;
+}
 
 }
 }

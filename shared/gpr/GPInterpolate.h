@@ -13,6 +13,7 @@
 #include <gpr/RbfKernel.h>
 #include <gpr/Covariance.h>
 #include <math/center_data.h>
+#include <gpr/KernelLikelihood.h>
 
 namespace aphid {
 
@@ -27,8 +28,7 @@ class GPInterpolate {
 /// 1-by-nvar nvar-dimensional row vector
 	DenseMatrix<T > m_xPredict;
 	DenseMatrix<T > m_yPredict;
-/// nvar row vector mean of each x variable
-	DenseVector<T> m_xMean;
+/// nvar row vector mean of each y variable
 	DenseVector<T> m_yMean;
 	RbfKernel<T > m_rbf;
 	Covariance<T, RbfKernel<T > > m_covTrain;
@@ -79,8 +79,6 @@ void GPInterpolate<T>::create(const int & nobs,
 	m_yTrain.resize(nobs, ynvar);
 	m_xPredict.resize(1, xnvar);
 	m_yPredict.resize(1, ynvar);
-	m_rbf.setParameter(1.0, 1.0);
-	m_xMean.resize(xnvar);
 	m_yMean.resize(ynvar);
 }
 
@@ -107,17 +105,25 @@ void GPInterpolate<T>::setObservationi(const int & idx,
 template<typename T>
 bool GPInterpolate<T>::learn()
 {
-	center_data(m_xTrain, 1, (T)numXVars(), m_xMean);
 	center_data(m_yTrain, 1, (T)numYVars(), m_yMean);
-	return m_covTrain.create(m_xTrain, m_rbf);
+	
+/// default length scale
+	T fltL = 1.0;
+	m_rbf.setParameter(fltL, 1.0);
+	
+	bool stat = m_covTrain.create(m_xTrain, m_rbf);
+	
+	KernelLikelihood<T, Covariance<T, RbfKernel<T> >, RbfKernel<T> > likelihood(&m_covTrain, 
+																	&m_rbf, &m_xTrain, &m_yTrain);
+	likelihood.optimise(fltL * .7f, fltL * 1.4);
+	
+	return stat;
 }
 
 template<typename T>
 void GPInterpolate<T>::predict(const T * x)
 {
 	m_xPredict.copyRow(0, x);
-/// remove mean
-	m_xPredict.minus(m_xMean);
 	m_covPredict.create(m_xPredict, m_xTrain, m_rbf);
 	
 	DenseMatrix<float> KxKtraininv(m_covPredict.K().numRows(),
