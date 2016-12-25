@@ -9,19 +9,53 @@
 #include <QtGui>
 #include "interpWidget.h"
 #include <gpr/Interpolate1D.h>
+#include <math/linearMath.h>
 
 using namespace aphid;
 
 InterpWidget::InterpWidget(QWidget *parent) : Plot1DWidget(parent),
 m_selectedTrainInd(-1)
 {
-#define DIM_TRAIN 5
+#if 1
+	std::cout<<"\n test transMult";
+	
+	static const float vK[3*3] = {
+		2,0,0,
+		0,2,0,
+		0,0,2
+	};
+	DenseMatrix<float> K(3,3); K.copyData(vK);
+	
+	static const float vY[3] = {1,2,3};
+	DenseMatrix<float> Y(3,1); Y.copyData(vY);
+	
+	DenseMatrix<float> Yt = Y.transposed();
+	
+	DenseMatrix<float> YtK(1,3);
+	Y.transMult(YtK, K);
+	
+	DenseMatrix<float> YtKY(1,1);
+	YtK.mult(YtKY, Y);
+	
+	std::cout<<"\n Y = "<<Y
+			<<"\n Y**T = "<<Yt
+			<<"\n K = "<<K
+			<<"\n Y**T * K = "<<YtK
+			<<"\n Y**T * K * Y= "<<YtKY;
+	
+#endif
+
+#define DIM_TRAIN 9
 static const float initTrain[DIM_TRAIN][2] = {
-    {-1.f, -1.f},
-    {-.5f, -.1f},
-    {-.1f, 1.5f},
-    { .5f, 2.f},
-    { 1.f,  -.4f}
+    {-1.5f, -1.f},
+    {-.75f, -.1f},
+	{-.25f, .4f},
+    { .0f, 1.5f},
+	{ .3f, 1.45f},
+    { .5f, 1.75f},
+    { .67f,  .6f},
+	{ 1.5f,  .1f},
+	{ 1.75f,  -.4f}
 };
 
     setBound(-2, 2, 4, -3, 3, 4);

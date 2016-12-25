@@ -12,6 +12,7 @@
 #include <gpr/RbfKernel.h>
 #include <gpr/Covariance.h>
 #include <math/center_data.h>
+#include <gpr/KernelLikelihood.h>
 
 namespace aphid {
 namespace gpr {
@@ -86,9 +87,19 @@ bool Interpolate1D::learn()
 	center_data(*m_yTrain, 1, (float)dim, *m_yMean);
 	
 	if(m_rbf) delete m_rbf;
-	m_rbf = new RbfKernel<float> (.125f * (m_bound.y - m_bound.x) );
-    
-	return m_covTrain->create(*m_xTrain, *m_rbf);
+	
+/// assuming x is uniformly distributed within bound
+	float defL = 1.f / (dim + 1) * (m_bound.y - m_bound.x);
+	m_rbf = new RbfKernel<float> (defL );
+	
+	bool stat = m_covTrain->create(*m_xTrain, *m_rbf);
+	
+#if 0
+	KernelLikelihood<float, Covariance<float, RbfKernel<float> >, RbfKernel<float> > likelihood(m_covTrain, m_rbf, m_xTrain, m_yTrain);
+	likelihood.optimise(defL * .3f, defL * 3.f);
+#endif
+
+	return stat;
 }
 
 float Interpolate1D::predict(const float & x) const

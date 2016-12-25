@@ -58,6 +58,12 @@ template <typename T> int clapack_getrf(integer m, integer n, T *a, integer lda,
 template <typename T> int clapack_getri(integer n, T *a, integer lda, 
 	integer *ipiv, T *work, integer *lwork, integer *info);
 	
+/// http://physics.oregonstate.edu/~landaur/nacphy/lapack/routines/sgetrs.html
+/// solve a system of linear equations  A * X = B or A' * X = B with a
+/// general N-by-N matrix	A using	the LU factorization computed by SGETRF
+template <typename T> int clapack_getrs(char * trans, integer n, integer nrhs,
+	T * a, integer lda, integer * ipiv, T * b, integer ldb, integer *info);
+	
 template <typename T> int clapack_sytrf(char *uplo, integer n, T *a, integer lda, 
 	integer *ipiv, T *work, integer *lwork, integer *info);
 	
@@ -71,7 +77,44 @@ template <typename T> int clapack_syev(char *jobz, char *uplo,
 									integer n, T *a, 
 									integer lda, T *w,
 									T *work, integer *ipiv, integer *info);
-	
+
+/// http://www.math.utah.edu/software/lapack/lapack-d/dpotrf.html
+/// compute the Cholesky factorization of a real symmetric positive definite matrix A
+/// A = U**T * U if UPLO = 'U'
+/// A = L * L**T if UPLO = 'L'
+
+template <typename T> int clapack_potrf(char *uplo, integer n, T *a, integer lda, integer *info);
+		
+/// http://www.math.utah.edu/software/lapack/lapack-d/dsysv.html
+/// compute the solution to a real system of linear equations
+/// A * X = B
+
+template <typename T> int clapack_sysv(char *uplo, integer n, integer nrhs,
+									T *a, integer lda, 
+									integer *ipiv,
+									T *b, integer ldb,
+									T *work,
+									integer *lwork,
+									integer *info);
+									
+/// http://physics.oregonstate.edu/~landaur/nacphy/lapack/routines/spptrs.html
+/// solve a system of linear equations A*X = B with a symmetric positive definite matrix A
+
+template <typename T> int clapack_pptrs(char *uplo, integer n, integer nrhs,
+									T *a, T *b, integer ldb,
+									integer *info);
+									
+/// http://physics.oregonstate.edu/~landaur/nacphy/lapack/routines/dsytrs.html
+/// solve a system of linear equations A*X = B with a real symmetric
+/// matrix A using the factorization A = U*D*U**T	or A = L*D*L**T	computed by
+/// SYTRF
+
+template <typename T> int clapack_sytrs(char *uplo, integer n, integer nrhs,
+									T *a, integer lda, 
+									integer * ipiv,
+									T *b, integer ldb,
+									integer *info);
+									
 template <> inline double clapack_dot<double>(integer n, double *dx, integer incx, double *dy, integer incy)
 {
 	return ddot_(&n, dx, &incx, dy, &incy);
@@ -294,6 +337,82 @@ template <> inline int clapack_syev<float>(char *jobz, char *uplo,
 									float *work, integer *ipiv, integer *info)
 {
 	return ssyev_(jobz, uplo, &n, a, &lda, w, work, ipiv, info);
+}
+
+template <> inline int clapack_potrf<double>(char *uplo, integer n, double *a, integer lda, integer *info)
+{
+	return dpotrf_(uplo, &n, a, &lda, info);
+}
+
+template <> inline int clapack_potrf<float>(char *uplo, integer n, float *a, integer lda, integer *info)
+{
+	return spotrf_(uplo, &n, a, &lda, info);
+}
+
+template <> inline int clapack_sysv<double>(char *uplo, integer n, integer nrhs,
+									double *a, integer lda, 
+									integer *ipiv,
+									double *b, integer ldb,
+									double *work,
+									integer *lwork,
+									integer *info)
+{
+	return dsysv_(uplo, &n, &nrhs, a, &lda, ipiv, b, &ldb, work, lwork, info);
+}
+
+template <> inline int clapack_sysv<float>(char *uplo, integer n, integer nrhs,
+									float *a, integer lda, 
+									integer *ipiv,
+									float *b, integer ldb,
+									float *work,
+									integer *lwork,
+									integer *info)
+{
+	return ssysv_(uplo, &n, &nrhs, a, &lda, ipiv, b, &ldb, work, lwork, info);
+}
+
+template <> inline int clapack_pptrs<double>(char *uplo, integer n, integer nrhs,
+									double *a, double *b, integer ldb,
+									integer *info)
+{
+	return dpptrs_(uplo, &n, &nrhs, a, b, &ldb, info);
+}
+
+template <> inline int clapack_pptrs<float>(char *uplo, integer n, integer nrhs,
+									float *a, float *b, integer ldb,
+									integer *info)
+{
+	return spptrs_(uplo, &n, &nrhs, a, b, &ldb, info);
+}
+
+template <> inline int clapack_sytrs<double>(char *uplo, integer n, integer nrhs,
+									double *a, integer lda, 
+									integer * ipiv,
+									double *b, integer ldb,
+									integer *info)
+{
+	return dsytrs_(uplo, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+}
+
+template <> inline int clapack_sytrs<float>(char *uplo, integer n, integer nrhs,
+									float *a, integer lda, 
+									integer * ipiv,
+									float *b, integer ldb,
+									integer *info)
+{
+	return ssytrs_(uplo, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+}
+
+template <> inline int clapack_getrs<double>(char * trans, integer n, integer nrhs,
+		double* a, integer lda, integer * ipiv, double* b, integer ldb, integer *info)
+{
+	return dgetrs_(trans, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+}
+
+template <> inline int clapack_getrs<float>(char * trans, integer n, integer nrhs,
+		float* a, integer lda, integer * ipiv, float* b, integer ldb, integer *info)
+{
+	return sgetrs_(trans, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
 }
 #endif        //  #ifndef CLAPACKTEMPL_H
 

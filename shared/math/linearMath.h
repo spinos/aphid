@@ -442,6 +442,8 @@ public:
 	void addDiagonal(const T diag);
 /// copy upper-right part to lower-left part
 	void fillSymmetric();
+/// set zero to entries below main diagonal
+	void zeroLowerTriangle();
 /// in case most non-zero elements concentrating around diagonal, 
 /// diagonal line must over 1 to be correctly inversed
 	bool inverse();
@@ -730,13 +732,23 @@ void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const
     dst.fillSymmetric();
 }
 
+/// http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
+/// b <- a**T * x
+
 template <typename T>
 void DenseMatrix<T>::transMult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
             const T alpha, const T beta) const
 {
-	clapack_gemm<T>("T", "N", m_numColumns, m_numRows, m_numRows, 
-							alpha, m_v, m_numRows, 
-							x.column(0), x.numRows(), beta, b.raw(), m_numColumns);
+	integer M = numCols();
+	integer N = x.numCols();
+	integer K = numRows();
+	integer LDA = K;
+	integer LDB = K;
+	integer LDC = M;
+	
+	clapack_gemm<T>("T", "N", M, N, K, alpha, m_v, LDA, 
+							x.column(0), LDB, beta, 
+							b.raw(), LDC);
 }
 
 template <typename T>
@@ -748,7 +760,7 @@ void DenseMatrix<T>::transMultTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x,
 							x.column(0), x.numRows(), beta, b.raw(), m_numColumns);
 }
 
-/// b = alpha A * x^T + beta b
+/// b = alpha A * x**T + beta b
 /// M A.m
 /// N x^T.n
 /// K A.n
@@ -756,11 +768,16 @@ template <typename T>
 void DenseMatrix<T>::multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
             const T alpha, const T beta) const
 {
-	clapack_gemm<T>("N", "T", m_numRows, 
-							x.numRows(), 
-							m_numColumns, 
-							alpha, m_v, m_numRows, 
-							x.column(0), x.numRows(), beta, b.raw(), m_numRows);
+	integer M = numRows();
+	integer N = x.numRows();
+	integer K = numCols();
+	integer LDA = M;
+	integer LDB = x.numCols();
+	integer LDC = M;
+	
+	clapack_gemm<T>("N", "T", M, N, K, alpha, m_v, LDA, 
+							x.column(0), LDB, beta, 
+							b.raw(), LDC);
 }
 
 /// reference http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
@@ -819,6 +836,17 @@ void DenseMatrix<T>::fillSymmetric()
          m_v[j*m_numRows+i]=m_v[i*m_numRows+j];
       }
    }
+}
+
+template <typename T>
+void DenseMatrix<T>::zeroLowerTriangle()
+{
+	for (int i = 0; i<m_numColumns; ++i) {
+      for (int j =i+1; j<m_numRows; ++j) {
+         m_v[i*m_numRows+j]=0;
+      }
+   }
+
 }
 
 /// http://people.sc.fsu.edu/~jburkardt/cpp_src/clapack/clapack_prb.cpp

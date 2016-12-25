@@ -66,7 +66,7 @@ bool Covariance<TScalar, TKernel>::create(const TMatrix & x,
 	m_invK.copy(m_K);
 /// A * A^-1 is not I
 /// make it inversable ?
-	//m_invK.addDiagonal(TScalar(0.01) );
+	//m_invK.addDiagonal(TScalar(0.1) );
 	
 	if(!m_invK.inverseSymmetric() ) {
 		std::cout<<"\n ERROR Covariance K cannot inverse!";
