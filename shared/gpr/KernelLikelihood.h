@@ -51,57 +51,46 @@ KernelLikelihood<TScalar, TCovariance, TKernel>::~KernelLikelihood()
 template <typename TScalar, typename TCovariance, typename TKernel>
 TScalar KernelLikelihood<TScalar, TCovariance, TKernel>::optimise(TScalar lmin, TScalar lmax)
 {
-	std::cout<<"\n Y = "<<*m_y;
-	
 	const int dim = m_cov->K().numRows();
 	TScalar logDetK;
 	TScalar thetai;
 	TScalar lli;
 	TScalar llmax = -1.0e24;
 	TScalar thetamax;
+	DenseMatrix<TScalar> U(dim, dim);
+	DenseMatrix<TScalar> YtKinv(1, dim);
+	DenseMatrix<TScalar> YtKinvY(1, 1);
 	
-	std::cout<<"\n estimate theta within ("<<lmin<<", "<<lmax<<")";
-	const TScalar deltal = (lmax - lmin) / 49;
-	for(int i=0;i<50;++i) {
+	std::cout<<"\n estimate theta within ("<<lmin<<", "<<lmax<<") by brute force";
+	const TScalar deltal = (lmax - lmin) / 39;
+	for(int i=0;i<40;++i) {
 	
 		thetai = lmin + deltal * i;
 		m_kern->setParameter(thetai, (TScalar)1.0);
 		
 		m_cov->create(*m_x, *m_kern);
-		
-		DenseMatrix<TScalar> Kinv(dim, dim);
-	DenseMatrix<TScalar> U(dim, dim);
-	DenseMatrix<TScalar> YtKinv(1, dim);
-	DenseMatrix<TScalar> YtKinvY(1, 1);
-	
-/// pdinv
-		if(!cholesky_inv<TScalar>(U, Kinv, m_cov->K() ) ) {
+
+/// complexity	
+		if(!cholesky_fac<TScalar>(U, m_cov->K() ) ) {
 			continue;
 		}
-	
+ 	
 		logDetK = logdet<TScalar>(U);
-	
-		m_y->transMult(YtKinv, Kinv );
-	
-		YtKinv.mult(YtKinvY, *m_y);
-		
-		std::cout<<"\n log|Kinv|"<<logDetK
-			<<"\n YtKinv"<<YtKinv
-			<<"\n model fit "<<YtKinvY.column(0)[0];
-		
-/// n * log(2 * PI)		
-		lli = -0.5 * (logDetK + YtKinvY.column(0)[0] + (TScalar)dim * 1.8378770664093453);
+/// model fit	
+		m_y->transMult(YtKinv,  m_cov->Kinv() );
+		YtKinv.mult(YtKinvY, *m_y);	
+			
+/// n * log(2 * PI)	not added	
+		lli = -0.5 * (logDetK + YtKinvY.column(0)[0]);
 		
 		if(lli > llmax) {
 			llmax = lli;
 			thetamax = thetai;
 		}
-		//std::cout<<"\n ll["<<i<<"] = "<<lli
-		//		<<" theta["<<i<<"] = "<<thetai;
-		
 	}
 
-	std::cout<<"\n use theat "<<thetamax;
+	std::cout<<"\n use theta "<<thetamax
+		<<"\n max likelihood "<<llmax;
 	std::cout.flush();
 	
 	m_kern->setParameter(thetamax, (TScalar)1.0);

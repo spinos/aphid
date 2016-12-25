@@ -34,7 +34,6 @@ class Interpolate1D {
 	DenseMatrix<float > * m_yTrain;
 	RbfKernel<float > * m_rbf;
 	Covariance<float, RbfKernel<float > > * m_covTrain;
-	DenseVector<float > * m_xMean;
 	DenseVector<float > * m_yMean;
 	
 public:

@@ -4,6 +4,7 @@
  *  http://cseweb.ucsd.edu/~mdailey/netlab-help/dist2.htm
  *  C = dist2(A, B)
  *  Euclidean distances between vectors in A and B
+ *  p-dimensional data points stored rowwise
  *  The i, jth entry is the squared distance from the ith row of A to the jth row of B.
  *  A m-by-p
  *  B n-by-p

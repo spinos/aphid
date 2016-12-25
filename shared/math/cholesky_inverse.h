@@ -26,6 +26,23 @@
 namespace aphid {
 
 template<typename T>
+inline bool cholesky_fac(DenseMatrix<T> & U,
+						const DenseMatrix<T> & A)
+{
+	U.copy(A);
+	const int m = A.numRows();
+	integer info;
+	clapack_potrf<T>("U", m, U.raw(), m, &info);
+	if(info != 0) {
+		std::cout<<"\n ERROR cholesky_inv potrf INFO="<<info<<"\n";
+		return false;
+	}
+	
+	U.zeroLowerTriangle();
+	return true;
+}
+
+template<typename T>
 inline bool cholesky_inv(DenseMatrix<T> & U,
 						DenseMatrix<T> & Ainv,
 						const DenseMatrix<T> & A) 
@@ -65,9 +82,7 @@ inline bool cholesky_inv(DenseMatrix<T> & U,
 	std::cout<<"U * Uinv"<<UUinv;
 #endif
 
-	B.copy(Uinv);
-
-	Uinv.multTrans(Ainv, B);
+	Uinv.AAt(Ainv);
 	return true;
 }
 

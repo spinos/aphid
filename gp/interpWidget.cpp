@@ -43,6 +43,15 @@ m_selectedTrainInd(-1)
 			<<"\n Y**T * K = "<<YtK
 			<<"\n Y**T * K * Y= "<<YtKY;
 	
+	std::cout<<"\n test ata";
+	DenseMatrix<float> YtY(1,1);
+	Y.AtA(YtY);
+	std::cout<<"\n YtY = "<<YtY;
+	
+	std::cout<<"\n test aat";
+	DenseMatrix<float> YYt(3,3);
+	Y.AAt(YYt);
+	std::cout<<"\n YYt = "<<YYt;
 #endif
 
 #define DIM_TRAIN 9
@@ -80,7 +89,7 @@ static const float initTrain[DIM_TRAIN][2] = {
 	     throw "gp failed to learn";   
 	}
 	
-	const int predDim = 50;
+	const int predDim = 70;
 	const float oox = 1.f / (predDim-1);
 	
 	m_predictPlot = new UniformPlot1D;

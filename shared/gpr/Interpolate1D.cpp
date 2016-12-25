@@ -24,7 +24,6 @@ m_rbf(NULL)
 	m_covTrain = new Covariance<float, RbfKernel<float> >();
 	m_xTrain = new DenseMatrix<float >();
 	m_yTrain = new DenseMatrix<float >();
-	m_xMean = new DenseVector<float >(1);
 	m_yMean = new DenseVector<float >(1);
 }
 
@@ -35,7 +34,6 @@ Interpolate1D::~Interpolate1D()
 	delete m_covTrain;
 	delete m_xTrain;
 	delete m_yTrain;
-	delete m_xMean;
 	delete m_yMean;
 }
 
@@ -83,7 +81,6 @@ bool Interpolate1D::learn()
 		m_yTrain->column(0)[i] = m_observations[i].y;
 	}
 	
-	center_data(*m_xTrain, 1, (float)dim, *m_xMean);
 	center_data(*m_yTrain, 1, (float)dim, *m_yMean);
 	
 	if(m_rbf) delete m_rbf;
@@ -94,9 +91,9 @@ bool Interpolate1D::learn()
 	
 	bool stat = m_covTrain->create(*m_xTrain, *m_rbf);
 	
-#if 0
+#if 1
 	KernelLikelihood<float, Covariance<float, RbfKernel<float> >, RbfKernel<float> > likelihood(m_covTrain, m_rbf, m_xTrain, m_yTrain);
-	likelihood.optimise(defL * .3f, defL * 3.f);
+	likelihood.optimise(defL * .7f, defL * 1.4f);
 #endif
 
 	return stat;
@@ -105,7 +102,7 @@ bool Interpolate1D::learn()
 float Interpolate1D::predict(const float & x) const
 {
 	DenseMatrix<float > xTest(1,1);
-	xTest.column(0)[0] = x - m_xMean->v()[0];
+	xTest.column(0)[0] = x;
 	Covariance<float, RbfKernel<float> > covTest;
     covTest.create(xTest, *m_xTrain, *m_rbf);
 	

@@ -30,6 +30,9 @@ public:
 	bool create(const TMatrix & x1,
 				const TMatrix & x2,
                 const TKernel & k);
+				
+	void computeK(const TMatrix & x,
+                const TKernel & k);
     
     const TMatrix & K() const;
 	const TMatrix & Kinv() const;
@@ -52,15 +55,7 @@ template <class TScalar, typename TKernel>
 bool Covariance<TScalar, TKernel>::create(const TMatrix & x,
                                         const TKernel & k)
 {
-    dist2(m_K, x, x);
-    int nc = m_K.numColumns();
-    int nr = m_K.numRows();
-    for(int j=0;j<nc;++j) {
-        TScalar * kc = m_K.column(j);
-        for(int i=0;i<nr;++i) {
-            kc[i] = k(kc[i]);
-        }
-    }
+    computeK(x, k);
 
 	m_invK.resize(m_K.numRows(), m_K.numCols() );
 	m_invK.copy(m_K);
@@ -91,6 +86,21 @@ bool Covariance<TScalar, TKernel>::create(const TMatrix & x1,
     }
     
     return 1;
+}
+
+template <class TScalar, typename TKernel>
+void Covariance<TScalar, TKernel>::computeK(const TMatrix & x,
+                const TKernel & k)
+{
+	dist2(m_K, x, x);
+    int nc = m_K.numColumns();
+    int nr = m_K.numRows();
+    for(int j=0;j<nc;++j) {
+        TScalar * kc = m_K.column(j);
+        for(int i=0;i<nr;++i) {
+            kc[i] = k(kc[i]);
+        }
+    }
 }
 
 template <class TScalar, typename TKernel>

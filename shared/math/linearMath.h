@@ -436,8 +436,10 @@ public:
 	
 /// normalize each column
 	void normalize();
-/// AT * A
-	void AtA(DenseMatrix<T>& dst) const;
+/// b <- A * A**T
+	void AAt(DenseMatrix<T>& b) const;
+/// b <- A**T * A
+	void AtA(DenseMatrix<T>& b) const;
 /// aii += diag
 	void addDiagonal(const T diag);
 /// copy upper-right part to lower-left part
@@ -718,18 +720,36 @@ void DenseMatrix<T>::add(const DenseVector<T> & b, int dim)
 }
 
 template <typename T>
-void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const 
+void DenseMatrix<T>::AtA(DenseMatrix<T>& b) const 
 {
-/// syrk performs a rank-n update of an n-by-n symmetric matrix c, that is:
-/// c := alpha*a'*a + beta*c
+/// syrk performs a rank-n update of an n-by-n symmetric matrix b, that is:
+/// b := a'*a
 /// a is k-by-n matrix
-/// c is n-by-n matrix
-/// alpha = 1, beta = 0 
-	dst.resize(m_numColumns, m_numColumns);
-	clapack_syrk<T>("U", "T", m_numColumns, m_numRows, 
-										T(1.0), m_v, m_numRows, 
-										T(0.0), dst.raw(), m_numColumns);
-    dst.fillSymmetric();
+/// b is n-by-n matrix
+	integer N = numCols();
+	integer K = numRows();
+	integer LDA = K;
+	integer LDC = N;
+	b.resize(N, N);
+	clapack_syrk<T>("U", "T", N, K, T(1.0), m_v, LDA, 
+										T(0.0), b.raw(), LDC);
+    b.fillSymmetric();
+}
+
+/// https://software.intel.com/en-us/node/520780
+/// b <- a * a**T
+/// a n-by-k
+/// b n-by-n
+template <typename T>
+void DenseMatrix<T>::AAt(DenseMatrix<T>& b) const 
+{
+	integer N = numRows();
+	integer K = numCols();
+	integer LDA = N;
+	integer LDC = N;
+	clapack_syrk<T>("U", "N", N, K, T(1.0), m_v, LDA, 
+										T(0.0), b.raw(), LDC);
+	b.fillSymmetric();
 }
 
 /// http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
