@@ -14,6 +14,7 @@
 #include <gpr/PCASimilarity.h>
 #include <gpr/PCAFeature.h>
 #include <AllMath.h>
+#include <sdb/Types.h>
 
 namespace aphid {
 
@@ -31,7 +32,7 @@ void ShrubWorks::countMeshNv(int & nv,
 }
 
 void ShrubWorks::getMeshVertices(DenseMatrix<float> * vertices, 
-					int iRow, 
+					int & iRow, 
 					BoundingBox & bbox, 
 					const MDagPath & meshPath, 
 					const MDagPath & transformPath) const
@@ -41,7 +42,13 @@ void ShrubWorks::getMeshVertices(DenseMatrix<float> * vertices,
 	MMatrix worldTm = AHelper::GetWorldParentTransformMatrix2(meshPath, transformPath);
 	
 	Vector3F fpnt;
-	MItMeshVertex vertIt(meshPath);
+	MStatus stat;
+	MItMeshVertex vertIt(meshPath, MObject::kNullObj, &stat);
+	if(!stat) {
+		AHelper::Info<MString >(" ShrubWorks getMeshVertices cannot it mesh vertex", meshPath.fullPathName() );
+		return;
+	}
+	
 	for(;!vertIt.isDone();vertIt.next() ) {
 		
 		MPoint pnt = vertIt.position();
@@ -49,11 +56,12 @@ void ShrubWorks::getMeshVertices(DenseMatrix<float> * vertices,
 		pnt *= worldTm;
 		
 		fpnt.set(pnt.x, pnt.y, pnt.z);
-		bbox.expandBy(fpnt);
 		
 		vertices->copyRow(iRow, (const float *)&fpnt);
 		
 		iRow++;
+		
+		bbox.expandBy(fpnt);
 	}
 	
 }
@@ -92,11 +100,13 @@ int ShrubWorks::getGroupMeshVertices(DenseMatrix<float> * vertices,
 }
 
 void ShrubWorks::addSimilarity(std::vector<SimilarityType * > & similarities, 
-					const DenseMatrix<float> & vertices) const
+					const DenseMatrix<float> & vertices,
+					const int & groupi) const
 {
 	SimilarityType * asim = new SimilarityType();
 	similarities.push_back(asim);
-	asim->begin(vertices, 2);
+	*asim->t1 = groupi;
+	asim->t2->begin(vertices, 2);
 }
 
 bool ShrubWorks::findSimilar(std::vector<SimilarityType * > & similarities, 
@@ -108,7 +118,7 @@ bool ShrubWorks::findSimilar(std::vector<SimilarityType * > & similarities,
 	}
 	
 	for(int i=0;i<n;++i) {
-		if(similarities[i]->select(vertices, 2) ) {
+		if(similarities[i]->t2->select(vertices, 2) ) {
 			return true;
 		}
 	}
@@ -128,16 +138,84 @@ void ShrubWorks::clearSimilarity(std::vector<SimilarityType * > & similarities) 
 	similarities.clear();
 }
 
-void ShrubWorks::separateFeatures(std::vector<SimilarityType * > & similarities) const
+void ShrubWorks::scaleSpace(DenseMatrix<float> & space,
+					const float * a,
+					const float * b) const
 {
-	const int n = similarities.size();
-	if(n<1) {
-		return;
+	for(int i=0;i<3;++i) {
+		float r = b[3+i] / a[3+i];
+		float * c = space.column(i);
+		c[0] *= r;
+		c[1] *= r;
+		c[2] *= r;
+	}
+}
+
+int ShrubWorks::countExamples(const std::vector<SimilarityType * > & similarities,
+								FeatureExampleMap & ind) const
+{
+	const int ns = similarities.size();
+	for(int i=0;i<ns;++i) {
+		AHelper::Info<int>(" separate similarity", i);
+/// K = 2
+		similarities[i]->t2->separateFeatures();
+		
+		const int & ne = similarities[i]->t2->numGroups();
+		AHelper::Info<int>(" into n example", ne );
+		
+		for(int j=0;j<ne;++j) {
+			const int ej = similarities[i]->t2->bestFeatureInGroup(j);
+			ind[(i<<8) | j] = Int2(ej, -1);
+		}
 	}
 	
-	for(int i=0;i<n;++i) {
-/// K = 2
-		similarities[i]->separateFeatures();
+	int c = 0;
+	FeatureExampleMap::iterator it = ind.begin();
+	for(;it != ind.end();++it) {
+		it->second.y = c;
+		c++; 
+	}
+	return c;
+}
+
+void ShrubWorks::addInstances(const std::vector<SimilarityType * > & similarities,
+							 FeatureExampleMap & exampleGroupInd) const
+{
+	const int ns = similarities.size();
+	DenseMatrix<float> transFeature(4, 4);
+	transFeature.setIdentity();
+	BoundingBox boxFeature, boxExample;
+	
+	for(int i=0;i<ns;++i) {
+		const int & nf = similarities[i]->t2->numFeatures();
+		for(int j=0;j<nf;++j) {
+			similarities[i]->t2->getFeatureSpace(transFeature.raw(), j);
+			similarities[i]->t2->getFeatureBound((float *)&boxFeature, j, 1);
+			similarities[i]->t2->getFeatureBound((float *)&boxExample, exampleGroupInd[(i<<8) | j].x, 1);
+			scaleSpace(transFeature, (const float *)&boxFeature, (const float *)&boxExample );
+			std::cout<<"\n feature space"<<transFeature;
+		}
+	}
+}
+
+void ShrubWorks::addSimilarities(std::vector<SimilarityType * > & similarities,
+					BoundingBox & totalBox,
+					const MDagPathArray & paths) const
+{
+	const int ngrp = paths.length();
+	for(int i=0;i<ngrp;++i) {
+		BoundingBox grpBox;
+		DenseMatrix<float> grpVertD;
+		const int nv = getGroupMeshVertices(&grpVertD, grpBox, paths[i]);
+		if(nv < 10 ) {
+			continue;
+		}
+		
+		if(!findSimilar(similarities, grpVertD)) {
+			addSimilarity(similarities, grpVertD, i);
+		}
+		
+		totalBox.expandBy(grpBox);
 	}
 }
 
@@ -159,38 +237,35 @@ MStatus ShrubWorks::creatShrub()
 	}
 	
 	const int ngrp = paths.length();
-	AHelper::Info<int>(" ShrubWorks select n groups", ngrp );
-	
-	std::vector<SimilarityType * > similarities;
-	
-	BoundingBox totalBox;
-	DenseMatrix<float> grpVertD;
-	for(int i=0;i<ngrp;++i) {
-		BoundingBox grpBox;
-		const int nv = getGroupMeshVertices(&grpVertD, grpBox, paths[i]);
-		if(nv < 10 ) {
-			continue;
-		}
-		
-		if(!findSimilar(similarities, grpVertD)) {
-			addSimilarity(similarities, grpVertD);
-		}
-		
-		totalBox.expandBy(grpBox);
-	}
-	
-	const int & ns = similarities.size();
-	if(ns < 1) {
-		AHelper::Info<int>(" ERROR ShrubWorks found no mesh in selected groups", ns );
+	if(ngrp < 1) {
+		AHelper::Info<int>(" ERROR ShrubWorks found no mesh in selected groups", ngrp );
 		return MS::kSuccess;
 	}
 	
-	AHelper::Info<int>(" ShrubWorks found n similariy", ns );
+	AHelper::Info<int>(" ShrubWorks select n groups", ngrp );
 	
-	separateFeatures(similarities);
+	std::vector<SimilarityType * > similarities;
+	BoundingBox totalBox;
 	
+	addSimilarities(similarities, totalBox, paths);
+	
+	const int ns = similarities.size();
+	AHelper::Info<int>(" found n similariy", ns );
+	AHelper::Info<BoundingBox>(" total bbox", totalBox );
+	
+	FeatureExampleMap exampleGroupInd;
+	
+	int totalNe = countExamples(similarities, exampleGroupInd);
+	AHelper::Info<int>(" total n example", totalNe );
+	
+	addInstances(similarities, exampleGroupInd);
+
+//DenseMatrix<float> featurePnts;
+/// stored columnwise
+//similarities[i]->t2->getFeaturePoints(featurePnts, j, 1);
 	
 	clearSimilarity(similarities);
+	exampleGroupInd.clear();
 	return MS::kSuccess;
 }
 

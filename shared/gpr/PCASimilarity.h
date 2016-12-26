@@ -13,13 +13,13 @@
 
 #include <gpr/PCAReduction.h>
 #include <math/kmean.h>
-#include <math/deviate_mean.h>
 
 namespace aphid {
 
 template<typename T, typename Tf>
 class PCASimilarity {
 
+	DenseMatrix<float> m_reducedX;
 	KMeansClustering2<T> m_cluster;
 	std::vector<Tf * > m_features;
 	
@@ -58,6 +58,9 @@ public:
 					const int & dim) const;
 	
 	const int * groupIndices() const;
+	const int & numGroups() const;
+/// ind to feature closest to group i centroid
+	int bestFeatureInGroup(const int & igroup) const;
 	
 protected:
 
@@ -97,10 +100,7 @@ void PCASimilarity<T, Tf>::addFeature(const DenseMatrix<T> & pnts,
 		
 		Tf * af = new Tf(np);
 		for(int i=0;i<np;++i) {
-			for(int j=0;j<nvar;++j) {
-				apnt[j] = pnts.column(i)[j];
-			}
-			
+			pnts.extractRowData(apnt.raw(), i);
 			af->setPnt(apnt.v(), i);
 		}
 		m_features.push_back(af);
@@ -226,40 +226,40 @@ int PCASimilarity<T, Tf>::numFeatures() const
 template<typename T, typename Tf>
 bool PCASimilarity<T, Tf>::separateFeatures(int nsep)
 {
+	int K = nsep;
 	const int n = numFeatures();
+	std::cout<<"\n PCASimilarity separate "<<n<<" features ";
+	
 	for(int i=0;i<n;++i) {
 		m_features[i]->toLocalSpace();
 	}
 
 	const int fd = featureDim() * Tf::numVars();
-	PCAReduction<float> dimred;
+	PCAReduction<T> dimred;
 	dimred.createX(fd, n);
 	for(int i=0;i<n;++i) {
 		dimred.setXi(m_features[i]->dataPoints(), i);
 	}
 	
-	DenseMatrix<float> redX;
-	dimred.compute(redX);
+	bool red = dimred.compute(m_reducedX);
 	
-	std::cout<<" reduced x "<<redX;
-	
-	const T dev = deviate_from_mean(redX, 2);
-	int K = nsep;
-	if(dev < 1.0e-2) {
-		std::cout<<" PCASimilarity found not enough deviation "<<dev
-					<<" to separate features, return in 1 group ";		
+	if(!red) {
+		std::cout<<"\n PCASimilarity found all features in 1 group ";		
 		K = 1;
-	}
+	} else {
 	
-	if(nsep>n) {
-		std::cout<<" PCASimilarity has not enough features to separate into "<<nsep
+		std::cout<<" reduced x "<<m_reducedX;
+	
+		if(nsep>n) {
+			std::cout<<"\n PCASimilarity has not enough features to separate into "<<nsep
 					<<" groups, return in "<<n<<" groups ";
-		K = n;
+			K = n;
+		}
 	}
 	
 	m_cluster.setKND(K, n, 2);
-	if(!m_cluster.compute(redX) ) {
-		std::cout<<"\n PCASimilarity keam failed ";
+	if(!m_cluster.compute(m_reducedX) ) {
+		std::cout<<"\n PCASimilarity kmean failed ";
 		return false;
 	}
 	return true;
@@ -279,11 +279,13 @@ void PCASimilarity<T, Tf>::getFeaturePoints(DenseMatrix<T> & dst,
 	const int np = f->numPnts();
 		
 	if(dim==1) {
+		dst.resize(Tf::numVars(), np);
 		for(int i=0;i<np;++i) {
 			f->getScaledDataPoint(dst.column(i), i);
 		}
 		
 	} else {
+		dst.resize(np, Tf::numVars());
 		DenseVector<T> apnt(Tf::numVars() );
 		for(int i=0;i<np;++i) {
 			f->getScaledDataPoint(apnt.raw(), i);
@@ -303,6 +305,45 @@ void PCASimilarity<T, Tf>::getFeatureBound(T * dst,
 template<typename T, typename Tf>
 const int * PCASimilarity<T, Tf>::groupIndices() const
 { return m_cluster.groupIndices(); }
+
+template<typename T, typename Tf>
+const int & PCASimilarity<T, Tf>::numGroups() const
+{ return m_cluster.K(); }
+
+template<typename T, typename Tf>
+int PCASimilarity<T, Tf>::bestFeatureInGroup(const int & igroup) const
+{
+/// no separation
+	if(numGroups() < 2) {
+		return 0;
+	}
+	
+	int indr = 0;
+	
+	DenseVector<T> center;
+	m_cluster.getGroupCentroid(center, igroup);
+	
+	// std::cout<<"\n cluster "<<igroup<<" centroid "<<center;
+	
+	T minD = 1.0e20;
+	T d;
+	DenseVector<T> featureX(Tf::numVars() );
+	const int & n = m_reducedX.numRows();
+	for(int i=0;i<n;++i) {
+		if(groupIndices()[i] == igroup) {
+			m_reducedX.extractRowData(featureX.raw(), i);
+			d = center.distanceTo(featureX);
+			if(minD > d) {
+				minD = d;
+				indr = i;
+			}
+		}
+	}
+	
+	// std::cout<<"\n choose "<<indr<<" min dist "<<minD;
+	
+	return indr;
+}
 
 }
 

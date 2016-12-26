@@ -425,6 +425,7 @@ public:
 	void extractColumnData(T * b, const int & i) const;
 	
 	void setZero();
+	void setIdentity();
 /// A <- A * s
 	void scale(const T s);
 	void scaleColumn(const int i, const T s);
@@ -651,9 +652,17 @@ void DenseMatrix<T>::extractColumnData(T * b, const int & i) const
 template <typename T> 
 void DenseMatrix<T>::setZero()
 {
+	memset(m_v,0,m_numRows * m_numColumns * sizeof(T));
+}
+
+template <typename T>
+void DenseMatrix<T>::setIdentity()
+{
+	setZero();
 	for(int i = 0;i<m_numColumns;i++) {
-		DenseVector<T> d(&m_v[i*m_numRows], m_numRows);
-		d.setZero();
+		if(i<m_numRows) {
+			column(i)[i] = 1.0;
+		}
 	}
 }
 

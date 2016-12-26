@@ -40,6 +40,9 @@ public:
 	
 	const DenseMatrix<T> & groupCentroids() const;
 	const int * groupIndices() const;
+	const int & K() const;
+	void getGroupCentroid(DenseVector<T> & d, 
+							const int & i) const;
 	
 protected:
 
@@ -88,9 +91,7 @@ void KMeansClustering2<T>::getXi(DenseVector<T> & dst,
 				const DenseMatrix<T> & points,
 				const int & idx) const
 {
-	for(int i=0;i<m_D;++i) {
-		dst[i] = points.column(i)[idx];
-	}
+	points.extractRowData(dst.raw(), idx);
 }
 
 template<typename T>
@@ -275,6 +276,18 @@ const DenseMatrix<T> & KMeansClustering2<T>::groupCentroids() const
 template<typename T>
 const int * KMeansClustering2<T>::groupIndices() const
 { return &m_groupInd[0]; }
+
+template<typename T>
+const int & KMeansClustering2<T>::K() const
+{ return m_K; }
+
+template<typename T>
+void KMeansClustering2<T>::getGroupCentroid(DenseVector<T> & d, 
+							const int & i) const
+{
+	d.resize(m_D);
+	d.copyData(m_centroids.column(i) );
+}
 
 }
 
