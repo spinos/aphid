@@ -13,6 +13,7 @@
 
 #include <gpr/PCAReduction.h>
 #include <math/kmean.h>
+#include <math/deviate_mean.h>
 
 namespace aphid {
 
@@ -38,7 +39,7 @@ public:
 	bool select(const DenseMatrix<T> & pnts,
 				const int & dim);
 	
-	void computeSimilarity();
+	bool separateFeatures(int nsep=2);
 	
 /// n row of first feature
 	int featureDim() const;
@@ -223,7 +224,7 @@ int PCASimilarity<T, Tf>::numFeatures() const
 { return m_features.size(); }
 
 template<typename T, typename Tf>
-void PCASimilarity<T, Tf>::computeSimilarity()
+bool PCASimilarity<T, Tf>::separateFeatures(int nsep)
 {
 	const int n = numFeatures();
 	for(int i=0;i<n;++i) {
@@ -242,10 +243,26 @@ void PCASimilarity<T, Tf>::computeSimilarity()
 	
 	std::cout<<" reduced x "<<redX;
 	
-	m_cluster.setKND(2, n, 2);
+	const T dev = deviate_from_mean(redX, 2);
+	int K = nsep;
+	if(dev < 1.0e-2) {
+		std::cout<<" PCASimilarity found not enough deviation "<<dev
+					<<" to separate features, return in 1 group ";		
+		K = 1;
+	}
+	
+	if(nsep>n) {
+		std::cout<<" PCASimilarity has not enough features to separate into "<<nsep
+					<<" groups, return in "<<n<<" groups ";
+		K = n;
+	}
+	
+	m_cluster.setKND(K, n, 2);
 	if(!m_cluster.compute(redX) ) {
 		std::cout<<"\n PCASimilarity keam failed ";
+		return false;
 	}
+	return true;
 }
 
 template<typename T, typename Tf>

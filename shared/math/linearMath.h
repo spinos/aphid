@@ -421,6 +421,7 @@ public:
 	void copyColumn(const int i, const T * x);
 	void copyData(const T * x);
 	void extractData(T * b) const;
+	void extractRowData(T * b, const int & i) const;
 	void extractColumnData(T * b, const int & i) const;
 	
 	void setZero();
@@ -633,6 +634,14 @@ void DenseMatrix<T>::copyData(const T * x)
 template <typename T>
 void DenseMatrix<T>::extractData(T * b) const
 { memcpy(b, m_v, m_numRows * m_numColumns * sizeof(T)); }
+
+template <typename T>
+void DenseMatrix<T>::extractRowData(T * b, const int & i) const
+{
+	for(int j=0;j<m_numColumns;++j) {
+		b[j] = column(j)[i];
+	}
+}
 
 template <typename T>
 void DenseMatrix<T>::extractColumnData(T * b, const int & i) const

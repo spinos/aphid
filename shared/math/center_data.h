@@ -16,7 +16,7 @@
 
 namespace aphid {
 
-/// mean of each column
+/// row vector mean of each column
 template<typename T>
 inline void col_mean(DenseVector<T> & m,
 					const DenseMatrix<T> & X,
@@ -34,7 +34,7 @@ inline void col_mean(DenseVector<T> & m,
 	m.scale(T(1.0)/nn );
 }
 
-/// mean of each row
+/// column vector mean of each row
 template<typename T>
 inline void row_mean(DenseVector<T> & m,
 					const DenseMatrix<T> & X,
