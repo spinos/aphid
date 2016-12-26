@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <HDataset.h>
+#include <h5/HDataset.h>
 namespace aphid {
 
 class HCharData : public HDataset {

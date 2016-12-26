@@ -8,7 +8,7 @@
  */
 
 #include "HFile.h"
-#include <HObject.h>
+#include <h5/HObject.h>
 #include <iostream>
 
 namespace aphid {

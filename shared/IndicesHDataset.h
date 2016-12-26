@@ -6,8 +6,9 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-
-#include <HDataset.h>
+#ifndef APH_INDICES_H_DATA_SET_H
+#define APH_INDICES_H_DATA_SET_H
+#include <h5/HDataset.h>
 namespace aphid {
 
 class IndicesHDataset : public HDataset {
@@ -22,3 +23,4 @@ public:
 };
 
 }
+#endif

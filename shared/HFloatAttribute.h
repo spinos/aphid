@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <HAttribute.h>
+#include <h5/HAttribute.h>
 
 namespace aphid {
 

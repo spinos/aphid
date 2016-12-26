@@ -204,12 +204,12 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/ViewCull.cpp
 ${Geom_SRC})
 
+file (GLOB H5_SRC
+    "../shared/h5/*.h"
+    "../shared/h5/*.cpp")
+
 ADD_LIBRARY (aphidH5 ${LIB_TYP}
-    ../shared/HObject.cpp 
-    ../shared/HDocument.cpp 
-    ../shared/HGroup.cpp 
-    ../shared/HDataset.cpp 
-    ../shared/HAttribute.cpp 
+    ${H5_SRC}
     ../shared/VerticesHDataset.cpp 
     ../shared/IndicesHDataset.cpp 
     ../shared/FloatsHDataset.cpp 

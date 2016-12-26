@@ -6,7 +6,9 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include <HDocument.h>
+#ifndef APH_H5_AVAILABILITY_H
+#define APH_H5_AVAILABILITY_H
+#include <h5/HDocument.h>
 #include <string>
 #include <map>
 namespace aphid {
@@ -26,3 +28,4 @@ private:
 };
 
 }
+#endif
