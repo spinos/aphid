@@ -197,6 +197,13 @@ void ExampVox::buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops)
 const int & ExampVox::dopBufLength() const
 { return m_dopBufLength; }
 
+void ExampVox::drawWiredTriangles()
+{
+	if(m_dopBufLength < 1) return;
+	drawWiredTriangleArray((const float *)m_dopPositionBuf.get(),
+						m_dopBufLength);
+}
+
 void ExampVox::drawDop()
 {
 	if(m_dopBufLength < 1) return;

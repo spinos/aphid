@@ -2,6 +2,8 @@
 #include <maya/MFnMesh.h>
 #include <maya/MDagModifier.h>
 #include <maya/MEulerRotation.h>
+#include <maya/MFnTransform.h>
+#include <maya/MFnPluginData.h>
 #include <AHelper.h>
 #include <ExampData.h>
 #include <ExampVox.h>

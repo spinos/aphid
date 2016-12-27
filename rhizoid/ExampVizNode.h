@@ -15,6 +15,15 @@
 #include <maya/M3dView.h>
 #include <maya/MPointArray.h>
 
+namespace aphid {
+
+class BoundingBox;
+
+template<typename T>
+class DenseMatrix;
+
+}
+
 class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public DrawCircle
 {
 	float m_transBuf[16];
@@ -53,6 +62,10 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 	
+	void setTriangleMesh(const aphid::DenseMatrix<float> & pnts,
+						const MIntArray & triangleVertices,
+						const aphid::BoundingBox & bbox);
+						
 	virtual void voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
 	

@@ -8,6 +8,9 @@
  */
 
 #include "ASelectionHelper.h"
+#include <maya/MItDag.h>
+#include <maya/MFnDagNode.h>
+#include <maya/MItMeshPolygon.h>
 #include <foundation/SHelper.h>
 
 namespace aphid {

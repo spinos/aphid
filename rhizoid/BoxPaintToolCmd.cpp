@@ -18,6 +18,8 @@
 
 #include "BoxPaintToolCmd.h"
 #include <maya/MDagModifier.h>
+#include <maya/MItMeshPolygon.h>
+#include <maya/MFnMesh.h>
 #include "ProxyVizNode.h"
 #include "ExampVizNode.h"
 #include <ASearchHelper.h>
@@ -545,7 +547,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 	
 	MObject vizobj = getSelectedViz(sels, "proxyExample", stat);
 	if(!stat) {
-		vizobj = createViz("proxyExample", "proxyExample");
+		vizobj = AHelper::CreateDagNode("proxyExample", "proxyExample");
 		if(vizobj.isNull()) {
 			MGlobal::displayWarning("proxyPaintTool cannot create example viz");
 			return MS::kFailure;
@@ -624,20 +626,6 @@ void proxyPaintTool::getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> &
 			tris.insert(tri);
         }
     }
-}
-
-MObject proxyPaintTool::createViz(const MString & typName,
-									const MString & transName)
-{
-	MDagModifier modif;
-	MObject trans = modif.createNode("transform");
-	modif.renameNode (trans, transName);
-	MObject viz = modif.createNode(typName, trans);
-	modif.doIt();
-	MString vizName = MFnDependencyNode(trans).name() + "Shape";
-	modif.renameNode(viz, vizName);
-	modif.doIt();
-	return viz;
 }
 
 void proxyPaintTool::checkOutputConnection(MObject & node, const MString & outName)

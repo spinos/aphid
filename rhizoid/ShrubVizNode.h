@@ -46,7 +46,8 @@ public:
 
 	static MTypeId id;
 	static MObject ashrubbox;
-	static MObject outValue;
+	static MObject ainexamp;
+    static MObject outValue;
 	
 	const MMatrix & worldSpace() const;
 	
