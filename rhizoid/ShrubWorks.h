@@ -83,6 +83,7 @@ typedef std::map<int, Int2 > FeatureExampleMap;
 					FeatureExampleMap & exampleGroupInd) const;
 	void addInstances(const std::vector<SimilarityType * > & similarities,
 					 FeatureExampleMap & exampleGroupInd) const;
+	MObject createShrubViz(const BoundingBox & bbox) const;
 	
 };
 

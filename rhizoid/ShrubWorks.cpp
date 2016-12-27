@@ -10,7 +10,9 @@
 #include "ShrubWorks.h"
 #include <maya/MSelectionList.h>
 #include <maya/MItMeshVertex.h>
+#include <maya/MDagModifier.h>
 #include <ASearchHelper.h>
+#include "ShrubVizNode.h"
 #include <gpr/PCASimilarity.h>
 #include <gpr/PCAFeature.h>
 #include <AllMath.h>
@@ -145,9 +147,11 @@ void ShrubWorks::scaleSpace(DenseMatrix<float> & space,
 	for(int i=0;i<3;++i) {
 		float r = b[3+i] / a[3+i];
 		float * c = space.column(i);
-		c[0] *= r;
-		c[1] *= r;
-		c[2] *= r;
+		Vector3F v(c);
+		v.normalize();
+		c[0] = v.x * r;
+		c[1] = v.y * r;
+		c[2] = v.x * r;
 	}
 }
 
@@ -219,6 +223,22 @@ void ShrubWorks::addSimilarities(std::vector<SimilarityType * > & similarities,
 	}
 }
 
+MObject ShrubWorks::createShrubViz(const BoundingBox & bbox) const
+{
+	MDagModifier modif;
+	MObject trans = modif.createNode("transform");
+	modif.renameNode (trans, "shrubViz");
+	MObject viz = modif.createNode("shrubViz", trans);
+	modif.doIt();
+	MString vizName = MFnDependencyNode(trans).name() + "Shape";
+	modif.renameNode(viz, vizName);
+	modif.doIt();
+	
+	ShrubVizNode * unode = (ShrubVizNode *)MFnDependencyNode(viz).userNode();
+	unode->setBBox(bbox);
+	return viz;
+}
+
 MStatus ShrubWorks::creatShrub()
 {
 	MSelectionList selList;
@@ -248,6 +268,8 @@ MStatus ShrubWorks::creatShrub()
 	BoundingBox totalBox;
 	
 	addSimilarities(similarities, totalBox, paths);
+	
+	MObject shrubNode = createShrubViz(totalBox);
 	
 	const int ns = similarities.size();
 	AHelper::Info<int>(" found n similariy", ns );
