@@ -12,7 +12,7 @@
 #include <maya/MFnDependencyNode.h>
 #include <maya/MPlug.h>
 #include <maya/MGlobal.h>
-#include <HObject.h>
+#include <h5/HObject.h>
 #include <animUtil.h>
 #include <AHelper.h>
 

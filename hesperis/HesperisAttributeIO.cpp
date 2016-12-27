@@ -12,7 +12,7 @@
 #include <HWorld.h>
 #include <HAttributeGroup.h>
 #include <HNumericBundle.h>
-#include <HOocArray.h>
+#include <h5/HOocArray.h>
 #include <boost/format.hpp>
 #include "HesperisAttribConnector.h"
 

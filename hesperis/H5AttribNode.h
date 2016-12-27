@@ -6,7 +6,7 @@
 #include <maya/MString.h>
 #include <EnvVar.h>
 #include <H5Holder.h>
-#include <HOocArray.h>
+#include <h5/HOocArray.h>
 #include <HBase.h>
 #include <AHelper.h>
 
