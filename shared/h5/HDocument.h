@@ -1,5 +1,5 @@
-#ifndef HDOCUMENT_H
-#define HDOCUMENT_H
+#ifndef APH_H_DOCUMENT_H
+#define APH_H_DOCUMENT_H
 
 /*
  *  HDoc.h
@@ -9,7 +9,7 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
-#include "hdf5.h"
+#include <hdf5.h>
 
 #include <string>
 

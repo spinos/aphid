@@ -1,5 +1,5 @@
-#ifndef HDATASET_H
-#define HDATASET_H
+#ifndef APH_H_DATASET_H
+#define APH_H_DATASET_H
 
 /*
  *  HDataset.h

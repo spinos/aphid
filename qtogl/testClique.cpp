@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	}
 	
 	std::cout<<"\n n features "<<features.numFeatures();
-	features.computeSimilarity();
+	features.separateFeatures();
 	
     return 1;
 }

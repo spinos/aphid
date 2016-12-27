@@ -105,8 +105,9 @@ void PCAFeature <T, Nvar>::copy(const PCAFeature & another)
 
 template<typename T, int Nvar>
 void PCAFeature <T, Nvar>::toLocalSpace()
-{
+{	
 	center_data(m_pnts, 1, (T)numPnts(), m_mean);
+	
 #if 0
 	DenseMatrix<T> cov;
 	m_pnts.AtA(cov);
@@ -172,7 +173,7 @@ void PCAFeature <T, Nvar>::toLocalSpace()
 	
 	m_bound.resize(2, Nvar);
 	m_pnts.getBound(m_bound);
-
+	
 /// remove scaling	
 	for(int j=0;j<Nvar;++j) {	
 		const T loinv = m_bound.column(j)[0];

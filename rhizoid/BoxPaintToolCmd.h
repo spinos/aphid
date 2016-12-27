@@ -21,8 +21,9 @@
 #include <maya/MArgList.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
+#include "ShrubWorks.h"
 
-class proxyPaintTool : public MPxToolCommand
+class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks
 {
     int m_currentVoxInd;
 	aphid::Matrix33F::RotateOrder m_rotPca;
@@ -70,8 +71,9 @@ private:
 		opLoadCache = 7,
 		opVoxelize = 8,
 		opConnectVoxel = 9,
-        opPrincipalComponent = 10,
-		opDistanceFieldTriangulate = 11
+		opCreateShrub = 10,
+        opPrincipalComponent = 11,
+		opDistanceFieldTriangulate = 12
 	};
 	
 	Operation m_operation;

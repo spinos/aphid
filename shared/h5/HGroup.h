@@ -1,5 +1,5 @@
-#ifndef HGROUP_H
-#define HGROUP_H
+#ifndef APH_H_GROUP_H
+#define APH_H_GROUP_H
 
 /*
  *  HGroup.h

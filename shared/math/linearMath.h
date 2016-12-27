@@ -421,9 +421,11 @@ public:
 	void copyColumn(const int i, const T * x);
 	void copyData(const T * x);
 	void extractData(T * b) const;
+	void extractRowData(T * b, const int & i) const;
 	void extractColumnData(T * b, const int & i) const;
 	
 	void setZero();
+	void setIdentity();
 /// A <- A * s
 	void scale(const T s);
 	void scaleColumn(const int i, const T s);
@@ -436,12 +438,16 @@ public:
 	
 /// normalize each column
 	void normalize();
-/// AT * A
-	void AtA(DenseMatrix<T>& dst) const;
+/// b <- A * A**T
+	void AAt(DenseMatrix<T>& b) const;
+/// b <- A**T * A
+	void AtA(DenseMatrix<T>& b) const;
 /// aii += diag
 	void addDiagonal(const T diag);
 /// copy upper-right part to lower-left part
 	void fillSymmetric();
+/// set zero to entries below main diagonal
+	void zeroLowerTriangle();
 /// in case most non-zero elements concentrating around diagonal, 
 /// diagonal line must over 1 to be correctly inversed
 	bool inverse();
@@ -631,6 +637,14 @@ void DenseMatrix<T>::extractData(T * b) const
 { memcpy(b, m_v, m_numRows * m_numColumns * sizeof(T)); }
 
 template <typename T>
+void DenseMatrix<T>::extractRowData(T * b, const int & i) const
+{
+	for(int j=0;j<m_numColumns;++j) {
+		b[j] = column(j)[i];
+	}
+}
+
+template <typename T>
 void DenseMatrix<T>::extractColumnData(T * b, const int & i) const
 { memcpy(b, &m_v[i*m_numRows], m_numRows * sizeof(T)); }
 
@@ -638,9 +652,17 @@ void DenseMatrix<T>::extractColumnData(T * b, const int & i) const
 template <typename T> 
 void DenseMatrix<T>::setZero()
 {
+	memset(m_v,0,m_numRows * m_numColumns * sizeof(T));
+}
+
+template <typename T>
+void DenseMatrix<T>::setIdentity()
+{
+	setZero();
 	for(int i = 0;i<m_numColumns;i++) {
-		DenseVector<T> d(&m_v[i*m_numRows], m_numRows);
-		d.setZero();
+		if(i<m_numRows) {
+			column(i)[i] = 1.0;
+		}
 	}
 }
 
@@ -716,27 +738,55 @@ void DenseMatrix<T>::add(const DenseVector<T> & b, int dim)
 }
 
 template <typename T>
-void DenseMatrix<T>::AtA(DenseMatrix<T>& dst) const 
+void DenseMatrix<T>::AtA(DenseMatrix<T>& b) const 
 {
-/// syrk performs a rank-n update of an n-by-n symmetric matrix c, that is:
-/// c := alpha*a'*a + beta*c
+/// syrk performs a rank-n update of an n-by-n symmetric matrix b, that is:
+/// b := a'*a
 /// a is k-by-n matrix
-/// c is n-by-n matrix
-/// alpha = 1, beta = 0 
-	dst.resize(m_numColumns, m_numColumns);
-	clapack_syrk<T>("U", "T", m_numColumns, m_numRows, 
-										T(1.0), m_v, m_numRows, 
-										T(0.0), dst.raw(), m_numColumns);
-    dst.fillSymmetric();
+/// b is n-by-n matrix
+	integer N = numCols();
+	integer K = numRows();
+	integer LDA = K;
+	integer LDC = N;
+	b.resize(N, N);
+	clapack_syrk<T>("U", "T", N, K, T(1.0), m_v, LDA, 
+										T(0.0), b.raw(), LDC);
+    b.fillSymmetric();
 }
+
+/// https://software.intel.com/en-us/node/520780
+/// b <- a * a**T
+/// a n-by-k
+/// b n-by-n
+template <typename T>
+void DenseMatrix<T>::AAt(DenseMatrix<T>& b) const 
+{
+	integer N = numRows();
+	integer K = numCols();
+	integer LDA = N;
+	integer LDC = N;
+	clapack_syrk<T>("U", "N", N, K, T(1.0), m_v, LDA, 
+										T(0.0), b.raw(), LDC);
+	b.fillSymmetric();
+}
+
+/// http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
+/// b <- a**T * x
 
 template <typename T>
 void DenseMatrix<T>::transMult(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
             const T alpha, const T beta) const
 {
-	clapack_gemm<T>("T", "N", m_numColumns, m_numRows, m_numRows, 
-							alpha, m_v, m_numRows, 
-							x.column(0), x.numRows(), beta, b.raw(), m_numColumns);
+	integer M = numCols();
+	integer N = x.numCols();
+	integer K = numRows();
+	integer LDA = K;
+	integer LDB = K;
+	integer LDC = M;
+	
+	clapack_gemm<T>("T", "N", M, N, K, alpha, m_v, LDA, 
+							x.column(0), LDB, beta, 
+							b.raw(), LDC);
 }
 
 template <typename T>
@@ -748,7 +798,7 @@ void DenseMatrix<T>::transMultTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x,
 							x.column(0), x.numRows(), beta, b.raw(), m_numColumns);
 }
 
-/// b = alpha A * x^T + beta b
+/// b = alpha A * x**T + beta b
 /// M A.m
 /// N x^T.n
 /// K A.n
@@ -756,11 +806,16 @@ template <typename T>
 void DenseMatrix<T>::multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x, 
             const T alpha, const T beta) const
 {
-	clapack_gemm<T>("N", "T", m_numRows, 
-							x.numRows(), 
-							m_numColumns, 
-							alpha, m_v, m_numRows, 
-							x.column(0), x.numRows(), beta, b.raw(), m_numRows);
+	integer M = numRows();
+	integer N = x.numRows();
+	integer K = numCols();
+	integer LDA = M;
+	integer LDB = x.numCols();
+	integer LDC = M;
+	
+	clapack_gemm<T>("N", "T", M, N, K, alpha, m_v, LDA, 
+							x.column(0), LDB, beta, 
+							b.raw(), LDC);
 }
 
 /// reference http://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
@@ -819,6 +874,17 @@ void DenseMatrix<T>::fillSymmetric()
          m_v[j*m_numRows+i]=m_v[i*m_numRows+j];
       }
    }
+}
+
+template <typename T>
+void DenseMatrix<T>::zeroLowerTriangle()
+{
+	for (int i = 0; i<m_numColumns; ++i) {
+      for (int j =i+1; j<m_numRows; ++j) {
+         m_v[i*m_numRows+j]=0;
+      }
+   }
+
 }
 
 /// http://people.sc.fsu.edu/~jburkardt/cpp_src/clapack/clapack_prb.cpp

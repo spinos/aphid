@@ -23,8 +23,6 @@
 #include <maya/MSceneMessage.h>
 #include "MForest.h"
 
-class MItMeshPolygon;
-
 namespace aphid {
 
 class ProxyViz : public MPxLocatorNode, public MForest

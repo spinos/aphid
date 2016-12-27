@@ -1,5 +1,5 @@
-#ifndef HOBJECT_H
-#define HOBJECT_H
+#ifndef APH_H_OBJECT_H
+#define APH_H_OBJECT_H
 
 /*
  *  HObject.h

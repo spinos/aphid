@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <HDocument.h>
+#include <h5/HDocument.h>
 #include <HBase.h>
 namespace aphid {
 

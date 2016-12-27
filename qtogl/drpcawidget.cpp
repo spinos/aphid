@@ -132,7 +132,7 @@ GLWidget::GLWidget(QWidget *parent)
 	}
 	
 	std::cout<<"\n n feature "<<m_features->numFeatures();
-	m_features->computeSimilarity();
+	m_features->separateFeatures();
 	std::cout.flush();
 	
 }

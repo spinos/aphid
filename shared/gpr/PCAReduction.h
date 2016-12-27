@@ -21,6 +21,7 @@
 
 #include <math/center_data.h>
 #include <math/sort.h>
+#include <math/deviate_mean.h>
 
 namespace aphid {
 
@@ -45,7 +46,7 @@ public:
 				const int & i,
 				const int & j);
 
-	void compute(DenseMatrix<T> & reducedX,
+	bool compute(DenseMatrix<T> & reducedX,
 				const int & toDim=2);
 
 /// d	
@@ -103,13 +104,20 @@ void PCAReduction<T>::setXiCompj(const T & v,
 }
 
 template<typename T>
-void PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
+bool PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 							const int & toDim)
 {
 /// https://cn.mathworks.com/help/matlab/ref/cov.html
 /// remove mean
 	DenseVector<T> vmean;
 	center_data(m_x, 1, (float)nobs(), vmean);
+	
+	const T dev = deviate_from_mean(m_x, 2);
+/// fuzziness
+	if(dev < 1.0) {
+		std::cout<<"\n PCAReduction too small deviation "<<dev;		
+		return false;
+	} 
 
 #if 0
 	DenseMatrix<T> cov;
@@ -147,7 +155,10 @@ void PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 	m_x.mult(reducedX, reducedM);
 #else
 	SvdSolver<T> svd;
-	svd.compute(m_x);
+	if(!svd.compute(m_x) ) {
+		std::cout<<"\n PCA reduction cannot compute";
+		return false;
+	}
 
 /// svd	X
 /// X = USV^t

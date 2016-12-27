@@ -57,6 +57,9 @@
 #define kDFTRoundFlag "-ftr" 
 #define kDFTRoundFlagLong "-fieldTriangulateRound"
 
+#define kShrubCreateFlag "-csb" 
+#define kShrubCreateFlagLong "-createShrub"
+
 using namespace aphid;
 
 proxyPaintTool::proxyPaintTool()
@@ -91,6 +94,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kDFTFlag, kDFTFlagLong, MSyntax::kLong);
 	syntax.addFlag(kDFTScaleFlag, kDFTScaleFlagLong, MSyntax::kDouble);
 	syntax.addFlag(kDFTRoundFlag, kDFTRoundFlagLong, MSyntax::kDouble);
+	syntax.addFlag(kShrubCreateFlag, kShrubCreateFlagLong, MSyntax::kNoArg);
 	return syntax;
 }
 
@@ -115,6 +119,10 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
     if(m_operation == opPrincipalComponent) return performPCA();
 	
 	if(m_operation == opDistanceFieldTriangulate) return performDFT();
+	
+	if(m_operation == opCreateShrub) {
+		return creatShrub();
+	}
 		
 	aphid::ASearchHelper finder;
 
@@ -270,6 +278,10 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 		if (!status) {
 			MGlobal::displayWarning(" proxyPaintTool cannot parse -ftr flag");
 		}
+	}
+	
+	if(argData.isFlagSet(kShrubCreateFlag)) {
+		m_operation = opCreateShrub;
 	}
 	
 	return MS::kSuccess;

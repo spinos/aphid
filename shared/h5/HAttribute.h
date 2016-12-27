@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include "HObject.h"
+#include <h5/HObject.h>
 
 namespace aphid {
 
