@@ -1,5 +1,20 @@
 #include "AHelper.h"
 #include <maya/MFnAnimCurve.h>
+#include <maya/MFnTransform.h>
+#include <maya/MItDag.h>
+#include <maya/MItDependencyNodes.h>
+#include <maya/MItDependencyGraph.h>
+#include <maya/MFnMatrixData.h>
+#include <maya/MFnMatrixAttribute.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
+#include <maya/MFnCompoundAttribute.h>
+#include <maya/MFnVectorArrayData.h>
+#include <maya/MFnDoubleArrayData.h>
+#include <maya/MFnMesh.h>
+#include <maya/MItMeshPolygon.h>
+#include <maya/MItMeshVertex.h>
+#include <maya/MDagModifier.h>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
 class MString;
@@ -1226,35 +1241,6 @@ bool AHelper::GetDepNodeByName(MObject & dst, MFn::Type type, const MString & na
     return true;
 }
 
-void AHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
-{
-    const unsigned np = p.evaluateNumElements();
-    if(np < 1) {
-        dst = p.elementByLogicalIndex(0);
-        return;
-    }
-    
-    for(unsigned i=0;i<1000;++i) {
-        MPlug ap = p.elementByLogicalIndex(i);
-        if(!ap.isConnected() ) {
-            AHelper::Info<unsigned>("available elem", i);
-            dst = ap;
-            return;
-        }
-    }
-}
-
-unsigned AHelper::GetMeshNv(const MObject & meshNode)
-{
-    MStatus stat;
-    MFnMesh fmesh(meshNode, &stat);
-    if(!stat) {
-        std::cout<<"AHelper::GetMeshNv no mesh fn to node";
-        return 0;   
-    }
-    return fmesh.numVertices(); 
-}
-
 bool AHelper::GetUpstreamDepNodeByTypeName(const MString & name,
                         MObject& root, MObject& node)
 {
@@ -1275,6 +1261,22 @@ bool AHelper::GetUpstreamDepNodeByTypeName(const MString & name,
 	}
 	return false;
 }
+
+MObject AHelper::CreateDagNode(const MString & nodeType,
+								const MString & nodeName)
+{
+	MDagModifier modif;
+	MObject trans = modif.createNode("transform");
+	modif.renameNode (trans, nodeName);
+	MObject viz = modif.createNode(nodeType, trans);
+	modif.doIt();
+	MString vizName = MFnDependencyNode(trans).name() + "Shape";
+	modif.renameNode(viz, vizName);
+	modif.doIt();
+	return viz;
+}
+
+
 
 }
 //:~

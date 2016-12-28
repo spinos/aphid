@@ -8,9 +8,8 @@
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnIntArrayData.h>
-#include <maya/MIntArray.h>
-#include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
+#include <maya/MFnCamera.h>
 #include <EnvVar.h>
 #include <AHelper.h>
 #include <ExampVox.h>

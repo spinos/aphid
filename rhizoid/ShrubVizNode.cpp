@@ -18,6 +18,7 @@ namespace aphid {
 
 MTypeId ShrubVizNode::id( 0x7809778 );
 MObject ShrubVizNode::ashrubbox;
+MObject ShrubVizNode::ainexamp;
 MObject ShrubVizNode::outValue;
 
 ShrubVizNode::ShrubVizNode()
@@ -114,6 +115,12 @@ MStatus ShrubVizNode::initialize()
 	if(stat != MS::kSuccess) {
 		MGlobal::displayWarning("failed add shrub box attrib");
 	}
+	
+	ainexamp = typFn.create("inExample", "ixmp", MFnData::kPlugin);
+	typFn.setStorable(false);
+	typFn.setConnectable(true);
+	typFn.setArray(true);
+	addAttribute(ainexamp);
 		
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
@@ -124,7 +131,7 @@ MStatus ShrubVizNode::initialize()
 	MFnPointArrayData pntArrayDataFn;
 	pntArrayDataFn.create( defaultPntArray );
 	    
-	attributeAffects(ashrubbox, outValue);
+	attributeAffects(ainexamp, outValue);
 	
 	return MS::kSuccess;
 }
@@ -161,14 +168,14 @@ bool ShrubVizNode::loadInternal(MDataBlock& block)
 
 MStatus ShrubVizNode::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	//if(plug == acameraspace) enableView();
+	if(plug.parent() == ainexamp) {}
 	//AHelper::Info<MString>("connect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
 MStatus ShrubVizNode::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	//if(plug == acameraspace) disableView();
+	if(plug.parent() == ainexamp) {}
 	//AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }

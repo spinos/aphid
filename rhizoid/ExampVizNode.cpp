@@ -12,9 +12,14 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFloatVector.h>
+#include <maya/MFnPluginData.h>
+#include <maya/MFnVectorArrayData.h>
+#include <maya/MFnMatrixAttribute.h>
 #include <math/BoundingBox.h>
 #include <AHelper.h>
 #include <ExampData.h>
+#include <math/linearMath.h>
+#include <mama/MeshHelper.h>
 
 MTypeId ExampViz::id( 0x95a20e );
 MObject ExampViz::abboxminv;
@@ -32,6 +37,8 @@ MObject ExampViz::aradiusMult;
 MObject ExampViz::aininstspace;
 MObject ExampViz::outValue;
 
+using namespace aphid;
+
 ExampViz::ExampViz()
 {}
 
@@ -46,7 +53,7 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		float radiusScal = radiusMultH.asFloat();
 		setGeomSizeMult(radiusScal);
 		
-		aphid::BoundingBox bb;
+		BoundingBox bb;
 		
 		MDataHandle bbminH = block.inputValue(abboxminv);
 		MFloatVector& vmin = bbminH.asFloatVector();
@@ -70,9 +77,9 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
-		MObject newDataObject = fnPluginData.create(aphid::ExampData::id, &status);
+		MObject newDataObject = fnPluginData.create(ExampData::id, &status);
 		
-		aphid::ExampData * pData = (aphid::ExampData *) fnPluginData.data(&status);
+		ExampData * pData = (ExampData *) fnPluginData.data(&status);
 		
 		if(pData) pData->setDesc(this);
 
@@ -88,7 +95,7 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
-	const aphid::BoundingBox & bbox = geomBox();
+	const BoundingBox & bbox = geomBox();
 	MObject selfNode = thisMObject();
 	MPlug rPlug(selfNode, adrawColorR);
 	MPlug gPlug(selfNode, adrawColorG);
@@ -111,7 +118,7 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	
 	//if ( style == M3dView::kFlatShaded || 
 	//	    style == M3dView::kGouraudShaded ) {	
-			
+#if 0
 		glDepthFunc(GL_LEQUAL);
 		glPushAttrib(GL_LIGHTING_BIT);
 		glEnable(GL_LIGHTING);
@@ -121,10 +128,12 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		
 		glDisable(GL_LIGHTING);
 		glPopAttrib();
+#endif
+	drawWiredTriangles();
 	//} 
 	
-	aphid::Matrix44F mat;
-	mat.setFrontOrientation(aphid::Vector3F::YAxis);
+	Matrix44F mat;
+	mat.setFrontOrientation(Vector3F::YAxis);
 	mat.scaleBy(geomSize() );
     mat.glMatrix(m_transBuf);
 	
@@ -137,7 +146,7 @@ bool ExampViz::isBounded() const
 
 MBoundingBox ExampViz::boundingBox() const
 {   
-	const aphid::BoundingBox & bbox = geomBox();
+	const BoundingBox & bbox = geomBox();
 	
 	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);
 	MPoint corner2(bbox.m_data[3], bbox.m_data[4], bbox.m_data[5]);
@@ -264,21 +273,64 @@ MStatus ExampViz::initialize()
 MStatus ExampViz::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == outValue)
-		aphid::AHelper::Info<MString>("connect", plug.name());
+		AHelper::Info<MString>("connect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
 MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == outValue)
-		aphid::AHelper::Info<MString>("disconnect", plug.name());
+		AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
-void ExampViz::voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
-							const aphid::BoundingBox & bbox)
+void ExampViz::setTriangleMesh(const DenseMatrix<float> & pnts,
+						const MIntArray & triangleVertices,
+						const BoundingBox & bbox)
 {
-	aphid::ExampVox::voxelize2(tri, bbox);
+	MFnNumericData bbFn;
+	MObject bbData = bbFn.create(MFnNumericData::k3Float);
+	
+	bbFn.setData(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2));
+	MPlug bbmnPlug(thisMObject(), abboxminv);
+	bbmnPlug.setValue(bbData);
+	
+	bbFn.setData(bbox.getMax(0), bbox.getMax(1), bbox.getMax(2));
+	MPlug bbmxPlug(thisMObject(), abboxmaxv);
+	bbmxPlug.setValue(bbData);
+	
+	const int nind = triangleVertices.length();
+	const int & np = pnts.numCols();
+	MPlug dopLenPlug(thisMObject(), adoplen);
+	dopLenPlug.setInt(nind);
+	
+	MVectorArray vecp; 
+	MeshHelper::ScatterTriangleVerticesPosition(vecp,
+						pnts.column(0), np,
+						triangleVertices, nind);
+						
+	MVectorArray vecn; 
+	MeshHelper::CalculateTriangleVerticesNormal(vecn,
+						pnts.column(0), np,
+						triangleVertices, nind);
+						
+	MFnVectorArrayData vecFn;
+	MObject opnt = vecFn.create(vecp);
+	MPlug doppPlug(thisMObject(), adopPBuf);
+	doppPlug.setValue(opnt);
+	
+	MObject onor = vecFn.create(vecn);
+	MPlug dopnPlug(thisMObject(), adopNBuf);
+	dopnPlug.setValue(onor);
+	
+	AHelper::Info<unsigned>(" ExampViz load n points", np );
+	AHelper::Info<unsigned>(" n triangle vertex", nind );
+}
+
+void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox)
+{
+	ExampVox::voxelize2(tri, bbox);
 	
 	MFnNumericData bbFn;
 	MObject bbData = bbFn.create(MFnNumericData::k3Float);
@@ -298,8 +350,8 @@ void ExampViz::voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 	
 	MVectorArray dopp; dopp.setLength(n);
 	MVectorArray dopn; dopn.setLength(n);
-	const aphid::Vector3F * ps = dopPositionR();
-	const aphid::Vector3F * ns = dopNormalR();
+	const Vector3F * ps = dopPositionR();
+	const Vector3F * ns = dopNormalR();
 	for(int i=0; i<n; ++i) {
 		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
 		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
@@ -314,7 +366,7 @@ void ExampViz::voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 	MPlug dopnPlug(thisMObject(), adopNBuf);
 	dopnPlug.setValue(onor);
 	
-	aphid::AHelper::Info<int>("reduced draw n triangle ", dopBufLength() / 3 );
+	AHelper::Info<int>("reduced draw n triangle ", dopBufLength() / 3 );
 }
 
 void ExampViz::updateGeomBox(MObject & node)
@@ -323,7 +375,7 @@ void ExampViz::updateGeomBox(MObject & node)
 	float radiusScal = radiusMultPlug.asFloat();
 	setGeomSizeMult(radiusScal);
 	
-	aphid::BoundingBox bb;
+	BoundingBox bb;
 	
 	MObject bbmn;
 	MPlug bbmnPlug(node, abboxminv);
@@ -358,21 +410,21 @@ void ExampViz::loadBoxes(MObject & node)
 	
 	unsigned n = pnts.length();
 	if(n < numBoxes() ) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error wrong cell data length", n );
+		AHelper::Info<unsigned>(" ExampViz error wrong cell data length", n );
 		return;
 	}
 	
 	n = numBoxes();
 	setBoxes(pnts, n);
 	
-	aphid::AHelper::Info<unsigned>(" ExampViz load n boxes", n );
+	AHelper::Info<unsigned>(" ExampViz load n boxes", n );
 }
 
 bool ExampViz::loadBoxes(MDataBlock & data)
 {
 	unsigned nc = data.inputValue(ancells).asInt();
 	if(nc < 1) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
+		AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
 		return false;
 	}
 
@@ -383,7 +435,7 @@ bool ExampViz::loadBoxes(MDataBlock & data)
 	unsigned n = pnts.length();
 	
 	if(n < nc) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
+		AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
 		return false;
 	}
 	
@@ -391,7 +443,7 @@ bool ExampViz::loadBoxes(MDataBlock & data)
 	n = numBoxes();
 	setBoxes(pnts, n);
 	
-	aphid::AHelper::Info<unsigned>(" ExampViz update n boxes", numBoxes() );
+	AHelper::Info<unsigned>(" ExampViz update n boxes", numBoxes() );
 	return true;
 }
 
@@ -413,7 +465,7 @@ bool ExampViz::loadDops(MDataBlock & data)
 {
 	int n = data.inputValue(adoplen).asInt();
 	if(n < 1) {
-		aphid::AHelper::Info<int>(" ExampViz error zero n dops", n);
+		AHelper::Info<int>(" ExampViz error zero n dops", n);
 		return false;
 	}
 	
@@ -422,7 +474,7 @@ bool ExampViz::loadDops(MDataBlock & data)
 	MVectorArray pnts = pntFn.array();
 	
 	if(pnts.length() < n) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop position length", pnts.length() );
+		AHelper::Info<unsigned>(" ExampViz error wrong dop position length", pnts.length() );
 		return false;
 	}
 	
@@ -431,20 +483,20 @@ bool ExampViz::loadDops(MDataBlock & data)
 	MVectorArray nors = norFn.array();
 	
 	if(nors.length() < n) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", pnts.length() );
+		AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", pnts.length() );
 		return false;
 	}
 	
 	setDOPDrawBufLen(n);
 	
-	aphid::Vector3F * ps = dopPositionR();
-	aphid::Vector3F * ns = dopNormalR();
+	Vector3F * ps = dopPositionR();
+	Vector3F * ns = dopNormalR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
 		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
 	}
 	
-	aphid::AHelper::Info<int>(" ExampViz load dop buf length", dopBufLength() );
+	AHelper::Info<int>(" ExampViz load dop buf length", dopBufLength() );
 		
 	return true;
 }
@@ -464,7 +516,7 @@ bool ExampViz::loadDOPs(MObject & node)
 	
 	unsigned np = pnts.length();
 	if(np < n ) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop position length", np );
+		AHelper::Info<unsigned>(" ExampViz error wrong dop position length", np );
 		return false;
 	}
 	
@@ -477,20 +529,20 @@ bool ExampViz::loadDOPs(MObject & node)
 	
 	unsigned nn = nors.length();
 	if(nn < n ) {
-		aphid::AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", nn );
+		AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", nn );
 		return false;
 	}
 
 	setDOPDrawBufLen(n);
 	
-	aphid::Vector3F * ps = dopPositionR();
-	aphid::Vector3F * ns = dopNormalR();
+	Vector3F * ps = dopPositionR();
+	Vector3F * ns = dopNormalR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
 		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
 	}
 	
-	aphid::AHelper::Info<unsigned>(" ExampViz load n dops", n );
+	AHelper::Info<unsigned>(" ExampViz load n dops", n );
 	
 	return true;
 }

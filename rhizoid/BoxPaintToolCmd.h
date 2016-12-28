@@ -50,7 +50,6 @@ private:
 							const MString & typName,
 							MStatus & stat);
 	MStatus voxelizeSelected();
-	MObject createViz(const MString & typName, const MString & transName);
 	void checkOutputConnection(MObject & node, const MString & outName);
 	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
 					aphid::BoundingBox & bbox,

@@ -47,8 +47,6 @@ private:
 	int getGroupMeshVertices(DenseMatrix<float> * vertices,
 					BoundingBox & bbox, 
 					const MDagPath & path) const;
-	void countMeshNv(int & nv,
-					const MDagPath & meshPath) const;
 	void getMeshVertices(DenseMatrix<float> * vertices, 
 					int & iRow, 
 					BoundingBox & bbox, 
@@ -81,9 +79,14 @@ typedef std::map<int, Int2 > FeatureExampleMap;
 /// serialize global_ind
 	int countExamples(const std::vector<SimilarityType * > & similarities,
 					FeatureExampleMap & exampleGroupInd) const;
+	void addExamples(const MObject & vizNode,
+					const std::vector<SimilarityType * > & similarities,
+					FeatureExampleMap & exampleGroupInd,
+					const MDagPathArray & paths) const;
+	void connectExampleToViz(const MObject & exampleNode,
+					const MObject & vizNode) const;
 	void addInstances(const std::vector<SimilarityType * > & similarities,
 					 FeatureExampleMap & exampleGroupInd) const;
-	MObject createShrubViz(const BoundingBox & bbox) const;
 	
 };
 

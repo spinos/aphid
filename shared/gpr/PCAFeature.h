@@ -195,7 +195,6 @@ void PCAFeature <T, Nvar>::toLocalSpace()
 template<typename T, int Nvar>
 void PCAFeature <T, Nvar>::getPCSpace(T * dst) const
 {
-	const int sizecp = Nvar*sizeof(T);
 	for(int i=0;i<Nvar;++i) {
 		m_pcSpace.extractColumnData(&dst[(Nvar+1)*i], i);
 	}

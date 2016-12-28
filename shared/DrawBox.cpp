@@ -318,6 +318,20 @@ void DrawBox::setSolidBoxDrawBuffer(const float * center, const float & scale,
 	
 }
 
+void DrawBox::drawWiredTriangleArray(const float * ps,
+						const unsigned & count) const
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
+
+	glDrawArrays(GL_TRIANGLES, 0, count);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+}
+
 void DrawBox::drawSolidBoxArray(const float * ps,
 						const float * ns,
 						const unsigned & count) const

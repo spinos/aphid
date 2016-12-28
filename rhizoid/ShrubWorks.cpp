@@ -12,7 +12,10 @@
 #include <maya/MItMeshVertex.h>
 #include <maya/MDagModifier.h>
 #include <ASearchHelper.h>
+#include <mama/MeshHelper.h>
+#include <mama/ConnectionHelper.h>
 #include "ShrubVizNode.h"
+#include "ExampVizNode.h"
 #include <gpr/PCASimilarity.h>
 #include <gpr/PCAFeature.h>
 #include <AllMath.h>
@@ -25,13 +28,6 @@ ShrubWorks::ShrubWorks()
 
 ShrubWorks::~ShrubWorks()
 {}
-
-void ShrubWorks::countMeshNv(int & nv,
-					const MDagPath & meshPath) const
-{
-	MItMeshVertex vertIt(meshPath);
-	nv += (int)vertIt.count();
-}
 
 void ShrubWorks::getMeshVertices(DenseMatrix<float> * vertices, 
 					int & iRow, 
@@ -84,7 +80,7 @@ int ShrubWorks::getGroupMeshVertices(DenseMatrix<float> * vertices,
 	
 	int nv = 0;
 	for(int i=0;i<n;++i) {
-		countMeshNv(nv, meshPaths[i]);
+		MeshHelper::CountMeshNv(nv, meshPaths[i]);
 	}
 	
 	AHelper::Info<int>(" group mesh n v", nv );
@@ -135,7 +131,8 @@ void ShrubWorks::clearSimilarity(std::vector<SimilarityType * > & similarities) 
 	}
 	
 	for(int i=0;i<n;++i) {
-		delete similarities[i];
+		delete similarities[i]->t1;
+		delete similarities[i]->t2;
 	}
 	similarities.clear();
 }
@@ -223,20 +220,42 @@ void ShrubWorks::addSimilarities(std::vector<SimilarityType * > & similarities,
 	}
 }
 
-MObject ShrubWorks::createShrubViz(const BoundingBox & bbox) const
+void ShrubWorks::connectExampleToViz(const MObject & exampleNode,
+					const MObject & vizNode) const
 {
-	MDagModifier modif;
-	MObject trans = modif.createNode("transform");
-	modif.renameNode (trans, "shrubViz");
-	MObject viz = modif.createNode("shrubViz", trans);
-	modif.doIt();
-	MString vizName = MFnDependencyNode(trans).name() + "Shape";
-	modif.renameNode(viz, vizName);
-	modif.doIt();
-	
-	ShrubVizNode * unode = (ShrubVizNode *)MFnDependencyNode(viz).userNode();
-	unode->setBBox(bbox);
-	return viz;
+	ConnectionHelper::ConnectToArray(exampleNode, "outValue",
+							vizNode, "inExample");
+}
+
+void ShrubWorks::addExamples(const MObject & vizNode,
+					const std::vector<SimilarityType * > & similarities,
+					FeatureExampleMap & exampleGroupInd,
+					const MDagPathArray & paths) const
+{
+	const int ns = similarities.size();
+	for(int i=0;i<ns;++i) {
+		const int & ne = similarities[i]->t2->numGroups();
+		
+		MIntArray tris;
+		MeshHelper::GetMeshTrianglesInGroup(tris, paths[*similarities[i]->t1]);
+		
+		for(int j=0;j<ne;++j) {
+			const Int2 groupI = exampleGroupInd[(i<<8) | j];
+			AHelper::Info<int>("example grp", groupI.x);
+			AHelper::Info<int>("glb grp", groupI.y);
+			
+			DenseMatrix<float> pnts;
+			similarities[i]->t2->getFeaturePoints(pnts, groupI.x, 1);
+			BoundingBox bbox;
+			similarities[i]->t2->getFeatureBound((float *)&bbox, groupI.x, 1);
+			
+			MObject exampleNode = AHelper::CreateDagNode("proxyExample", "proxyExample");
+			ExampViz * example = (ExampViz *)MFnDependencyNode(exampleNode).userNode();
+			example->setTriangleMesh(pnts, tris, bbox);
+			
+			connectExampleToViz(exampleNode, vizNode);
+		}
+	}
 }
 
 MStatus ShrubWorks::creatShrub()
@@ -269,7 +288,9 @@ MStatus ShrubWorks::creatShrub()
 	
 	addSimilarities(similarities, totalBox, paths);
 	
-	MObject shrubNode = createShrubViz(totalBox);
+	MObject shrubNode = AHelper::CreateDagNode("shrubViz", "shrubViz");
+	ShrubVizNode * viz = (ShrubVizNode *)MFnDependencyNode(shrubNode).userNode();
+	viz->setBBox(totalBox);
 	
 	const int ns = similarities.size();
 	AHelper::Info<int>(" found n similariy", ns );
@@ -279,6 +300,8 @@ MStatus ShrubWorks::creatShrub()
 	
 	int totalNe = countExamples(similarities, exampleGroupInd);
 	AHelper::Info<int>(" total n example", totalNe );
+	
+	addExamples(shrubNode, similarities, exampleGroupInd, paths);
 	
 	addInstances(similarities, exampleGroupInd);
 

@@ -3,14 +3,8 @@
 
 #include <maya/MFnDependencyNode.h>
 #include <maya/MPlug.h>
-#include <maya/MFnMatrixAttribute.h>
-#include <maya/MFnNumericAttribute.h>
-#include <maya/MFnTypedAttribute.h>
-#include <maya/MFnCompoundAttribute.h>
-#include <maya/MFnVectorArrayData.h>
-#include <maya/MFnDoubleArrayData.h>
-#include <maya/MFnMatrixData.h>
 #include <maya/MObject.h>
+#include <maya/MObjectArray.h>
 #include <maya/MString.h>
 #include <maya/MStatus.h>
 #include <maya/MGlobal.h>
@@ -27,16 +21,8 @@
 #include <maya/MDoubleArray.h>
 #include <maya/MTime.h>
 #include <maya/MDGContext.h>
-#include <maya/MItDag.h>
-#include <maya/MItDependencyNodes.h>
-#include <maya/MItDependencyGraph.h>
-#include <maya/MFnCamera.h>
-#include <maya/MFnPluginData.h>
 #include <maya/MFnUnitAttribute.h>
-#include <maya/MFnMesh.h>
-#include <maya/MItMeshPolygon.h>
 #include <maya/MPlugArray.h>
-#include <maya/MFnTransform.h>
 #include <maya/MArgList.h>
 #include <sstream>
 #undef min
@@ -223,11 +209,10 @@ public:
 	                            const MArgList &args,
 	                            const std::string & log1,
 	                            const std::string & log2);
-/// first in array not connected
-	static void GetAvailablePlug(MPlug & dst, MPlug & p);
-	static unsigned GetMeshNv(const MObject & meshNode);
 	static bool GetUpstreamDepNodeByTypeName(const MString & name, 
 	                            MObject& root, MObject& node);
+	static MObject CreateDagNode(const MString & nodeType,
+								const MString & nodeName);
 	
 };
 

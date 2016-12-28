@@ -70,6 +70,7 @@ public:
 	const float * dopPositionBuf() const;
 	
 protected:
+	void drawWiredTriangles();
 	void drawDop();
 	void drawGrid();
 	void drawWireGrid();
