@@ -21,6 +21,7 @@
 #include <maya/MGlobal.h>
 #include "ASearchHelper.h"
 #include <foundation/SHelper.h>
+#include <AHelper.h>
 
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
@@ -33,6 +34,9 @@
 using namespace std;
 
 namespace aphid {
+
+ASearchHelper::ASearchHelper()
+{}
 
 std::string ASearchHelper::getPullPathName(MObject &node)
 {
@@ -883,7 +887,7 @@ bool ASearchHelper::FirstObjByAttrValInArray(MObjectArray &objarr, MString &attr
 {
 	MString meshname;
 	for(unsigned i = 0; i <objarr.length(); i++) {
-		if(getStringAttributeByName(objarr[i], attrname.asChar(), meshname)) {
+		if(AHelper::getStringAttrib(objarr[i], attrname.asChar(), meshname)) {
 			if(meshname == attrval) {
 				res = objarr[i];
 				return true;

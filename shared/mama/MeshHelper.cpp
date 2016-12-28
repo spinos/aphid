@@ -11,6 +11,7 @@
 #include <maya/MFnMesh.h>
 #include <maya/MItMeshPolygon.h>
 #include <maya/MItMeshVertex.h>
+#include <AHelper.h>
 #include <ASearchHelper.h>
 #include <ConvexShape.h>
 

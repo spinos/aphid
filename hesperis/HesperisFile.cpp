@@ -14,7 +14,7 @@
 #include <geom/ATriangleMeshGroup.h>
 #include <geom/ATetrahedronMeshGroup.h>
 #include <BaseTransform.h>
-#include <AAttribute.h>
+#include <foundation/AAttribute.h>
 #include <geom/GeometryArray.h>
 #include <foundation/SHelper.h>
 #include <sstream>

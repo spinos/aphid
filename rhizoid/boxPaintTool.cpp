@@ -3,6 +3,7 @@
 #include <maya/MPointArray.h>
 #include <maya/MDagModifier.h>
 #include <maya/MToolsInfo.h>
+#include <AHelper.h>
 #include <ASearchHelper.h>
 
 const char helpString[] =

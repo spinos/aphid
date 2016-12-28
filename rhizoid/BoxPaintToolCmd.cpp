@@ -22,6 +22,7 @@
 #include <maya/MFnMesh.h>
 #include "ProxyVizNode.h"
 #include "ExampVizNode.h"
+#include <AHelper.h>
 #include <ASearchHelper.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/PrincipalComponents.h>

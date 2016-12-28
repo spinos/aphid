@@ -27,11 +27,21 @@ using namespace std;
 namespace aphid {
 
 AHelper::AHelper(void)
-{
-}
+{}
 
 AHelper::~AHelper(void)
+{}
+
+char AHelper::getStringAttrib(MObject node, const char* nameLong, MString& value)
 {
+	MFnDependencyNode fdep(node);
+	MStatus stat;
+	if(!fdep.hasAttribute(nameLong, &stat))
+		return 0;
+	
+	MPlug plug = fdep.findPlug(nameLong, false, &stat);	
+	value = plug.asString();
+	return 1;
 }
 
 MStatus AHelper::createVectorAttr(MObject& attr, 
@@ -661,71 +671,6 @@ void AHelper::displayIntParam(const char* str, int val)
 void AHelper::displayVectorParam(const char* str, double x, double y, double z)
 {
 	MGlobal::displayInfo(MString(str) + ": " + x + " " + y + " " + z);
-}
-
-void AHelper::getColorAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b)
-{
-	MPlug plgR = fnode.findPlug(MString(attrname)+"R");
-	plgR.getValue(r);
-	
-	MPlug plgG = fnode.findPlug(MString(attrname)+"G");
-	plgG.getValue(g);
-	
-	MPlug plgB = fnode.findPlug(MString(attrname)+"B");
-	plgB.getValue(b);
-}
-
-void AHelper::getNormalAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b)
-{
-	MPlug plgR = fnode.findPlug(MString(attrname)+"X");
-	plgR.getValue(r);
-	
-	MPlug plgG = fnode.findPlug(MString(attrname)+"Y");
-	plgG.getValue(g);
-	
-	MPlug plgB = fnode.findPlug(MString(attrname)+"Z");
-	plgB.getValue(b);
-}
-
-char AHelper::getBoolAttributeByName(const MFnDependencyNode& fnode, const char* attrname, bool& v)
-{
-	MPlug plgV = fnode.findPlug(MString(attrname));
-	if(plgV.isNull()) return 0;
-	plgV.getValue(v);
-	return 1;
-}
-
-char AHelper::getDoubleAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& v)
-{
-	MPlug plgV = fnode.findPlug(MString(attrname));
-	if(plgV.isNull()) return 0;
-	plgV.getValue(v);
-	return 1;
-}
-
-char AHelper::getDoubleAttributeByNameAndTime(const MFnDependencyNode& fnode, const char* attrname, MDGContext & ctx, double& v)
-{
-	MPlug plgV = fnode.findPlug(MString(attrname));
-	if(plgV.isNull()) return 0;
-	plgV.getValue(v, ctx);
-	return 1;
-}
-
-char AHelper::getStringAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v)
-{
-	MPlug plgV = fnode.findPlug(MString(attrname));
-	if(plgV.isNull()) return 0;
-	plgV.getValue(v);
-	return 1;
-}
-
-char AHelper::getStringAttributeByName(const MObject& node, const char* attrname, MString& v)
-{
-	MFnDependencyNode fnode(node);
-	MPlug plgV = fnode.findPlug(MString(attrname));
-	if(plgV.isNull()) return 0;
-	plgV.getValue(v);
-	return 1;
 }
 
 int AHelper::getConnectedAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v)

@@ -1,5 +1,5 @@
 /*
- *  aAttributeHelper.cpp
+ *  AttributeHelper.cpp
  *  opium
  *
  *  Created by jian zhang on 9/19/11.
@@ -7,13 +7,86 @@
  *
  */
 
-#include "AAttributeHelper.h"
+#include "AttributeHelper.h"
 #include <maya/MFnEnumAttribute.h>
 #include <maya/MFnAnimCurve.h>
+#include <maya/MFnDependencyNode.h>
+#include <maya/MFnTypedAttribute.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnCompoundAttribute.h>
+#include <maya/MPlugArray.h>
 
 namespace aphid {
 
-void AAttributeHelper::setCustomStringAttrib(MObject node, const char* nameLong, const char* nameShort, const char* value)
+AttributeHelper::AttributeHelper()
+{}
+
+void AttributeHelper::getColorAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b)
+{
+	MPlug plgR = fnode.findPlug(MString(attrname)+"R");
+	plgR.getValue(r);
+	
+	MPlug plgG = fnode.findPlug(MString(attrname)+"G");
+	plgG.getValue(g);
+	
+	MPlug plgB = fnode.findPlug(MString(attrname)+"B");
+	plgB.getValue(b);
+}
+
+void AttributeHelper::getNormalAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b)
+{
+	MPlug plgR = fnode.findPlug(MString(attrname)+"X");
+	plgR.getValue(r);
+	
+	MPlug plgG = fnode.findPlug(MString(attrname)+"Y");
+	plgG.getValue(g);
+	
+	MPlug plgB = fnode.findPlug(MString(attrname)+"Z");
+	plgB.getValue(b);
+}
+
+char AttributeHelper::getDoubleAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& v)
+{
+	MPlug plgV = fnode.findPlug(MString(attrname));
+	if(plgV.isNull()) return 0;
+	plgV.getValue(v);
+	return 1;
+}
+
+char AttributeHelper::getBoolAttributeByName(const MFnDependencyNode& fnode, const char* attrname, bool& v)
+{
+	MPlug plgV = fnode.findPlug(MString(attrname));
+	if(plgV.isNull()) return 0;
+	plgV.getValue(v);
+	return 1;
+}
+
+char AttributeHelper::getDoubleAttributeByNameAndTime(const MFnDependencyNode& fnode, const char* attrname, MDGContext & ctx, double& v)
+{
+	MPlug plgV = fnode.findPlug(MString(attrname));
+	if(plgV.isNull()) return 0;
+	plgV.getValue(v, ctx);
+	return 1;
+}
+
+char AttributeHelper::getStringAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v)
+{
+	MPlug plgV = fnode.findPlug(MString(attrname));
+	if(plgV.isNull()) return 0;
+	plgV.getValue(v);
+	return 1;
+}
+
+char AttributeHelper::getStringAttributeByName(const MObject& node, const char* attrname, MString& v)
+{
+	MFnDependencyNode fnode(node);
+	MPlug plgV = fnode.findPlug(MString(attrname));
+	if(plgV.isNull()) return 0;
+	plgV.getValue(v);
+	return 1;
+}
+
+void AttributeHelper::setCustomStringAttrib(MObject node, const char* nameLong, const char* nameShort, const char* value)
 {
 	MFnDependencyNode fdep(node);
 	MStatus stat;
@@ -30,19 +103,7 @@ void AAttributeHelper::setCustomStringAttrib(MObject node, const char* nameLong,
 	attribPlug.setLocked(1);
 }
 
-char AAttributeHelper::getStringAttrib(MObject node, const char* nameLong, MString& value)
-{
-	MFnDependencyNode fdep(node);
-	MStatus stat;
-	if(!fdep.hasAttribute(nameLong, &stat))
-		return 0;
-	
-	MPlug plug = fdep.findPlug(nameLong, false, &stat);	
-	value = plug.asString();
-	return 1;
-}
-
-AAttribute::AttributeType AAttributeHelper::GetAttribType(const MObject & entity)
+AAttribute::AttributeType AttributeHelper::GetAttribType(const MObject & entity)
 {
 	if(entity.isNull()) {
         return AAttribute::aUnknown;
@@ -70,7 +131,7 @@ AAttribute::AttributeType AAttributeHelper::GetAttribType(const MObject & entity
     return AAttribute::aUnknown;
 }
 
-MFnNumericData::Type AAttributeHelper::GetNumericAttributeType(const std::string & name)
+MFnNumericData::Type AttributeHelper::GetNumericAttributeType(const std::string & name)
 {
 	if(name == "short") return MFnNumericData::kShort;
 	if(name == "int") return MFnNumericData::kInt;
@@ -80,7 +141,7 @@ MFnNumericData::Type AAttributeHelper::GetNumericAttributeType(const std::string
 	return MFnNumericData::kInvalid;
 }
 
-AAttribute::AttributeType AAttributeHelper::AsAttributeType(const std::string & name)
+AAttribute::AttributeType AttributeHelper::AsAttributeType(const std::string & name)
 {
     if(name == "string") return AAttribute::aString;
     if(name == "enum") return AAttribute::aEnum;
@@ -88,7 +149,7 @@ AAttribute::AttributeType AAttributeHelper::AsAttributeType(const std::string & 
     return AAttribute::aNumeric;
 }
 
-AStringAttribute * AAttributeHelper::AsStrData(const MPlug & plg)
+AStringAttribute * AttributeHelper::AsStrData(const MPlug & plg)
 {
 	MFnTypedAttribute fn( plg.attribute() );
 	AStringAttribute * r = new AStringAttribute;
@@ -100,7 +161,7 @@ AStringAttribute * AAttributeHelper::AsStrData(const MPlug & plg)
 	return r;
 }
 
-ANumericAttribute * AAttributeHelper::AsNumericData(const MPlug & plg)
+ANumericAttribute * AttributeHelper::AsNumericData(const MPlug & plg)
 {
 	short va;
 	int vb;
@@ -149,7 +210,7 @@ ANumericAttribute * AAttributeHelper::AsNumericData(const MPlug & plg)
    return r;
 }
 
-ACompoundAttribute * AAttributeHelper::AsCompoundData(const MPlug & plg)
+ACompoundAttribute * AttributeHelper::AsCompoundData(const MPlug & plg)
 {
 	ACompoundAttribute * r = new ACompoundAttribute;
 	MFnCompoundAttribute fn(plg.attribute());
@@ -167,7 +228,7 @@ ACompoundAttribute * AAttributeHelper::AsCompoundData(const MPlug & plg)
 	return r;
 }
 
-AEnumAttribute * AAttributeHelper::AsEnumData(const MPlug & plg)
+AEnumAttribute * AttributeHelper::AsEnumData(const MPlug & plg)
 {
 	AEnumAttribute * r = new AEnumAttribute;
 	MFnEnumAttribute fn(plg.attribute());
@@ -187,7 +248,7 @@ AEnumAttribute * AAttributeHelper::AsEnumData(const MPlug & plg)
 	return r;
 }
 
-bool AAttributeHelper::HasNamedAttribute(MObject & attrib, 
+bool AttributeHelper::HasNamedAttribute(MObject & attrib, 
                         const MObject & node, const std::string & name)
 {
 	MFnDependencyNode fn(node);
@@ -196,7 +257,7 @@ bool AAttributeHelper::HasNamedAttribute(MObject & attrib,
 	return stat == MS::kSuccess;
 }
 
-bool AAttributeHelper::IsStringAttr(MObject & entity)
+bool AttributeHelper::IsStringAttr(MObject & entity)
 {
 	if(!entity.hasFn(MFn::kTypedAttribute)) return false;
 	MFnTypedAttribute fn(entity);
@@ -204,10 +265,10 @@ bool AAttributeHelper::IsStringAttr(MObject & entity)
 	return true;
 }
 
-bool AAttributeHelper::IsEnumAttr(MObject & entity)
+bool AttributeHelper::IsEnumAttr(MObject & entity)
 { return entity.hasFn(MFn::kEnumAttribute); }
 
-bool AAttributeHelper::IsNumericAttr(MObject & entity, MFnNumericData::Type t)
+bool AttributeHelper::IsNumericAttr(MObject & entity, MFnNumericData::Type t)
 {
 	if(!entity.hasFn(MFn::kNumericAttribute)) return false;
 	MFnNumericAttribute fn(entity);
@@ -215,7 +276,7 @@ bool AAttributeHelper::IsNumericAttr(MObject & entity, MFnNumericData::Type t)
 	return true;
 }
 
-bool AAttributeHelper::AddStringAttr(MObject & attr, 
+bool AttributeHelper::AddStringAttr(MObject & attr, 
                             const MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort)
@@ -228,7 +289,7 @@ bool AAttributeHelper::AddStringAttr(MObject & attr,
 	return stat == MS::kSuccess;
 }
 
-bool AAttributeHelper::AddNumericAttr(MObject & attr, 
+bool AttributeHelper::AddNumericAttr(MObject & attr, 
                             const MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort,
@@ -243,7 +304,7 @@ bool AAttributeHelper::AddNumericAttr(MObject & attr,
 	return stat == MS::kSuccess;
 }
 
-bool AAttributeHelper::AddEnumAttr(MObject & attr, 
+bool AttributeHelper::AddEnumAttr(MObject & attr, 
                             const MObject & node, 
 									const std::string & nameLong, 
 									const std::string & nameShort,
@@ -262,7 +323,7 @@ bool AAttributeHelper::AddEnumAttr(MObject & attr,
 	return stat == MS::kSuccess;
 }
 
-bool AAttributeHelper::IsDirectAnimated(const MPlug & attrib)
+bool AttributeHelper::IsDirectAnimated(const MPlug & attrib)
 {
 	MPlugArray conns;
 	attrib.connectedTo ( conns, true, false);

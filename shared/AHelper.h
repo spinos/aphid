@@ -38,13 +38,7 @@ public:
 	AHelper(void);
 	~AHelper(void);
 
-	static void getColorAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b);
-	static void getNormalAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b);
-	static char getDoubleAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& v);
-	static char getBoolAttributeByName(const MFnDependencyNode& fnode, const char* attrname, bool& v);
-	static char getDoubleAttributeByNameAndTime(const MFnDependencyNode& fnode, const char* attrname, MDGContext & ctx, double& v);
-	static char getStringAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v);
-	static char getStringAttributeByName(const MObject& node, const char* attrname, MString& v);
+	static char getStringAttrib(MObject node, const char* nameLong, MString& value);
 	static int getConnectedAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v);
 	
 	static void getNamedPlug(MPlug& val, const MObject& node, const char* attrname);

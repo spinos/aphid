@@ -6,8 +6,12 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef _SEARCH_HELPER_H
-#define _SEARCH_HELPER_H
+#ifndef APH_MAMA_SEARCH_HELPER_H
+#define APH_MAMA_SEARCH_HELPER_H
+
+#include <string>
+#include <vector>
+#include <map>
 
 class MString;
 class MObject;
@@ -17,17 +21,13 @@ class MMatrix;
 class MDagPath;
 class MPlug;
 class MDagPathArray;
-#include <string>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <AHelper.h>
 
 namespace aphid {
 
-class ASearchHelper : public AHelper {
+class ASearchHelper {
 public:
-	ASearchHelper() {}
+	ASearchHelper();
+	
 	std::string getPullPathName(MObject &node);
 	char findObjDirectChildByName(MObject &parent, MObject &result, std::string &name);
 	char findObjDirectChildByNameIgnoreNamespace(MObject &parent,MObject &result,std::string &name);

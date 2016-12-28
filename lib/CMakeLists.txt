@@ -236,7 +236,6 @@ ADD_LIBRARY (aphidH5 ${LIB_TYP}
 ../shared/HPolygonalUV.cpp
 ../shared/AAnimationCurve.cpp
 ../shared/HAnimationCurve.cpp
-../shared/AAttribute.cpp
 ../shared/HAttributeGroup.cpp
 ../shared/HNumericBundle.cpp
 ../hesperis/H5IO.cpp

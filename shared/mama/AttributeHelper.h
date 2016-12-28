@@ -1,25 +1,40 @@
 /*
- *  aAttributeHelper.h
+ *  AttributeHelper.h
  *  opium
  *
  *  Created by jian zhang on 9/19/11.
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef APH_MAMA_ATTRIBUTE_HELPER_H
+#define APH_MAMA_ATTRIBUTE_HELPER_H
 
-#include "AHelper.h"
-#include <AAttribute.h>
+#include <foundation/AAttribute.h>
+#include <maya/MFnNumericData.h>
+#include <maya/MGlobal.h>
+#include <maya/MPlug.h>
+#include <boost/lexical_cast.hpp>
 
-class MString;
 class MObject;
+class MFnDependencyNode;
+class MDGContext;
+class MString;
 
 namespace aphid {
 
-class AAttributeHelper : public AHelper {
+class AttributeHelper {
 public:
-	AAttributeHelper() {}
+	AttributeHelper();
+	
+	static void getColorAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b);
+	static void getNormalAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b);
+	static char getDoubleAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& v);
+	static char getBoolAttributeByName(const MFnDependencyNode& fnode, const char* attrname, bool& v);
+	static char getDoubleAttributeByNameAndTime(const MFnDependencyNode& fnode, const char* attrname, MDGContext & ctx, double& v);
+	static char getStringAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v);
+	static char getStringAttributeByName(const MObject& node, const char* attrname, MString& v);
+	
 	static void setCustomStringAttrib(MObject node, const char* nameLong, const char* nameShort, const char* value);
-	static char getStringAttrib(MObject node, const char* nameLong, MString& value);
 	
 	template<typename T>
 	static T GetPlugValue(const MPlug & pl)
@@ -74,6 +89,8 @@ public:
 							const std::string & nameShort,
 							MFnNumericData::Type t);
 	static bool IsDirectAnimated(const MPlug & attrib);
+	
 };
 
 }
+#endif

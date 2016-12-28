@@ -1,6 +1,6 @@
 #include "HNumericBundle.h"
 #include <AllHdf.h>
-#include <AAttribute.h>
+#include <foundation/AAttribute.h>
 
 namespace aphid {
 
