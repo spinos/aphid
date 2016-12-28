@@ -199,9 +199,6 @@ public:
 	static void PrintFullPath(const MDagPathArray & paths);
 	static MDagPath FindMatchedPath(const MDagPath & rel,
 	                const MDagPathArray & paths);
-	static void GetInputConnections(MPlugArray & dst, const MPlug & p);
-	static void GetOutputConnections(MPlugArray & dst, const MPlug & p);
-	static void GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p);
 	static bool GetDepNodeByName(MObject & dst, MFn::Type type, const MString & name);
 	static bool GetStringArgument(MString & res,
 	                            unsigned & it,

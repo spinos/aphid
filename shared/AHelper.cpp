@@ -1173,31 +1173,6 @@ void AHelper::PrintFullPath(const MDagPathArray & paths)
         MGlobal::displayInfo(paths[i].fullPathName() );
 }
 
-void AHelper::GetInputConnections(MPlugArray & dst, const MPlug & p)
-{
-/// as dst not as src
-    p.connectedTo ( dst , true, false );
-}
-
-void AHelper::GetOutputConnections(MPlugArray & dst, const MPlug & p)
-{ p.connectedTo ( dst , false, true ); }
-
-void AHelper::GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p)
-{
-    if(!p.isArray() ) {
-        Info<MString>("plug is not array", p.name() );
-        return;
-    }
-    
-    unsigned ne = p.numElements();
-    for(unsigned i=0;i<ne;++i) {
-        MPlugArray ac;
-        GetInputConnections(ac, p.elementByPhysicalIndex(i) );
-        Merge<MPlugArray >(dst, ac);
-    }
-    
-}
-
 bool AHelper::GetDepNodeByName(MObject & dst, MFn::Type type, const MString & name)
 {
     MItDependencyNodes nodeIt(type);

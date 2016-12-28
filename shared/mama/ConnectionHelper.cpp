@@ -10,11 +10,37 @@
 #include "ConnectionHelper.h"
 #include <AHelper.h>
 #include <maya/MDGModifier.h>
+#include <maya/MPlugArray.h>
 
 namespace aphid {
 
 ConnectionHelper::ConnectionHelper()
 {}
+
+void ConnectionHelper::GetInputConnections(MPlugArray & dst, const MPlug & p)
+{
+/// as dst not as src
+    p.connectedTo ( dst , true, false );
+}
+
+void ConnectionHelper::GetOutputConnections(MPlugArray & dst, const MPlug & p)
+{ p.connectedTo ( dst , false, true ); }
+
+void ConnectionHelper::GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p)
+{
+    if(!p.isArray() ) {
+        AHelper::Info<MString>("plug is not array", p.name() );
+        return;
+    }
+    
+    unsigned ne = p.numElements();
+    for(unsigned i=0;i<ne;++i) {
+        MPlugArray ac;
+        GetInputConnections(ac, p.elementByPhysicalIndex(i) );
+        AHelper::Merge<MPlugArray >(dst, ac);
+    }
+    
+}
 
 void ConnectionHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
 {
