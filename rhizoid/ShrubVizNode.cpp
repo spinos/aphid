@@ -2,13 +2,11 @@
 #include <maya/MFnMatrixAttribute.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
-#include <maya/MVectorArray.h>
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnMatrixData.h>
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnIntArrayData.h>
-#include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MFnPluginData.h>
@@ -16,11 +14,14 @@
 #include <ExampVox.h>
 #include <ExampData.h>
 #include <math/linearMath.h>
+#include <mama/AttributeHelper.h>
 
 namespace aphid {
 
 MTypeId ShrubVizNode::id( 0x7809778 );
 MObject ShrubVizNode::ashrubbox;
+MObject ShrubVizNode::ainsttrans;
+MObject ShrubVizNode::ainstexamp;
 MObject ShrubVizNode::ainexamp;
 MObject ShrubVizNode::outValue;
 
@@ -56,7 +57,12 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 		return;
 	}
 	
-	const int nins = numInstances();
+	int nins = numInstances();
+	
+	if(nins < 1) {
+		loadInternal();
+		nins = numInstances();
+	}
 	
 	if(nins < 1) {
 		return;
@@ -130,6 +136,10 @@ MStatus ShrubVizNode::initialize()
 	MFnVectorArrayData vectArrayDataFn;
 	vectArrayDataFn.create( defaultVectArray );
 	
+	MIntArray defaultIArray;
+	MFnIntArrayData iArrayDataFn;
+	iArrayDataFn.create( defaultIArray );
+	
 	ashrubbox = typFn.create( "shrubBox", "sbbx",
 									MFnData::kVectorArray, vectArrayDataFn.object(),
 									&stat );
@@ -143,6 +153,34 @@ MStatus ShrubVizNode::initialize()
 	stat = addAttribute(ashrubbox);
 	if(stat != MS::kSuccess) {
 		MGlobal::displayWarning("failed add shrub box attrib");
+	}
+	
+	ainstexamp = typFn.create( "shrubExampleInd", "sbei",
+									MFnData::kIntArray, iArrayDataFn.object(),
+									&stat );
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning("failed create shrub example ind attrib");
+	}
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(ainstexamp);
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning("failed add shrub example ind attrib");
+	}
+	
+	ainsttrans = typFn.create( "shrubExampleTrans", "sbet",
+									MFnData::kVectorArray, vectArrayDataFn.object(),
+									&stat );
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning("failed create shrub example trans attrib");
+	}
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(ainsttrans);
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning("failed add shrub example trans attrib");
 	}
 	
 	ainexamp = typFn.create("inExample", "ixmp", MFnData::kPlugin);
@@ -187,12 +225,89 @@ void ShrubVizNode::releaseCallback(void* clientData)
 void ShrubVizNode::saveInternal()
 {
 	AHelper::Info<MString>("shrub save internal", MFnDependencyNode(thisMObject()).name() );
+	const int n = m_instances.size();
+	AHelper::Info<int>(" n instance", n );
+	MIntArray exmpi; exmpi.setLength(n);
+	MVectorArray exmpt; exmpt.setLength(n<<2);
+	
+	for(int i=0;i<n;++i) {
+		const InstanceD & ins = m_instances[i];
+		exmpi[i] = ins._exampleId;
+		int j = i<<2;
+		const float * t = ins._trans;
+		exmpt[j] = MVector(t[0], t[1], t[2]);
+		exmpt[j+1] = MVector(t[4], t[5], t[6]);
+		exmpt[j+2] = MVector(t[8], t[9], t[10]);
+		exmpt[j+3] = MVector(t[12], t[13], t[14]);
+	}
+	
+	MPlug exmpPlug(thisMObject(), ainstexamp);
+	AttributeHelper::SaveArrayDataPlug<MIntArray, MFnIntArrayData>(exmpi, exmpPlug);
+	
+	MPlug transPlug(thisMObject(), ainsttrans);
+	AttributeHelper::SaveArrayDataPlug<MVectorArray, MFnVectorArrayData>(exmpt, transPlug);
+	
+}
+
+bool ShrubVizNode::loadInstances(const MVectorArray & instvecs,
+						const MIntArray & instexmps)
+{
+	const int n = instexmps.length();
+	if(n<1) {
+		AHelper::Info<int>(" ShrubVizNode load no instance", n);
+		return false;
+	}
+	
+	if((n<<2) != instvecs.length() ) {
+		AHelper::Info<unsigned>(" ShrubVizNode load wrong instance trans", instvecs.length() );
+		return false;
+	}
+	
+	DenseMatrix<float> trans(4,4);
+	trans.setIdentity();
+	
+	for(int i=0;i<n;++i) {
+		for(int j =0;j<4;++j) {
+			const MVector & a = instvecs[(i<<2) + j];
+			float * cj = trans.column(j);
+			cj[0] = a.x;
+			cj[1] = a.y;
+			cj[2] = a.z;
+		}
+		addInstance(trans, instexmps[i]);
+	}
+	
+	return true;
+}
+
+bool ShrubVizNode::loadInternal()
+{
+	AHelper::Info<MString>("shrub load internal", MFnDependencyNode(thisMObject()).name() );
+	
+	MPlug exmpPlug(thisMObject(), ainstexamp);
+	MIntArray insti;
+	AttributeHelper::LoadArrayDataPlug<MIntArray, MFnIntArrayData>(insti, exmpPlug);
+	
+	MPlug transPlug(thisMObject(), ainsttrans);
+	MVectorArray instt;
+	AttributeHelper::LoadArrayDataPlug<MVectorArray, MFnVectorArrayData>(instt, transPlug);
+	
+	return loadInstances(instt, insti);
 }
 
 bool ShrubVizNode::loadInternal(MDataBlock& block)
 {
 	AHelper::Info<MString>("shrub load internal", MFnDependencyNode(thisMObject()).name() );
-	return true;
+	
+	MDataHandle exmpH = block.inputValue(ainstexamp);
+	MIntArray insti;
+	AttributeHelper::LoadArrayDataHandle<MIntArray, MFnIntArrayData>(insti, exmpH);
+	
+	MDataHandle transH = block.inputValue(ainsttrans);
+	MVectorArray instt;
+	AttributeHelper::LoadArrayDataHandle<MVectorArray, MFnVectorArrayData>(instt, transH);
+	
+	return loadInstances(instt, insti);
 }
 
 MStatus ShrubVizNode::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )

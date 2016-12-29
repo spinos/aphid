@@ -17,6 +17,8 @@
 #include <maya/M3dView.h>
 #include <maya/MDagPath.h>
 #include <maya/MSceneMessage.h>
+#include <maya/MIntArray.h>
+#include <maya/MVectorArray.h>
 #include <DrawBox.h>
 #include <vector>
 
@@ -60,6 +62,8 @@ public:
 
 	static MTypeId id;
 	static MObject ashrubbox;
+	static MObject ainsttrans;
+	static MObject ainstexamp;
 	static MObject ainexamp;
     static MObject outValue;
 	
@@ -85,6 +89,9 @@ private:
 
 	MCallbackId fBeforeSaveCB;
 	void saveInternal();
+	bool loadInstances(const MVectorArray & instvecs,
+						const MIntArray & instexmps);
+	bool loadInternal();
 	bool loadInternal(MDataBlock& block);
 	void addExample(const MPlug & plug);
 	

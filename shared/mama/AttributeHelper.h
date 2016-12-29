@@ -13,6 +13,7 @@
 #include <maya/MFnNumericData.h>
 #include <maya/MGlobal.h>
 #include <maya/MPlug.h>
+#include <maya/MDataHandle.h>
 #include <boost/lexical_cast.hpp>
 
 class MObject;
@@ -25,6 +26,50 @@ namespace aphid {
 class AttributeHelper {
 public:
 	AttributeHelper();
+	
+	template<typename Td, typename Tf>
+	static bool SaveArrayDataPlug(const Td & dataArray, MPlug & plug)
+	{
+		Tf dataFn;
+		MStatus stat;
+		MObject od = dataFn.create(dataArray, &stat);
+		if(!stat) {
+			return false;
+		}
+		plug.setValue(od);
+		return true;
+	}
+	
+	template<typename Td, typename Tf>
+	static bool LoadArrayDataPlug(Td & dataArray, const MPlug & plug)
+	{
+		MObject od;
+		MStatus stat;
+		stat = plug.getValue(od);
+		if(!stat) {
+			return false;
+		}
+		Tf dataFn(od, &stat);
+		if(!stat) {
+			return false;
+		}
+		
+		dataArray = dataFn.array();
+		return true;
+	}
+	
+	template<typename Td, typename Tf>
+	static bool LoadArrayDataHandle(Td & dataArray, MDataHandle & dataH)
+	{
+		MStatus stat;
+		Tf dataFn(dataH.data(), &stat);
+		if(!stat) {
+			return false;
+		}
+		
+		dataArray = dataFn.array();
+		return true;
+	}
 	
 	static void getColorAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b);
 	static void getNormalAttributeByName(const MFnDependencyNode& fnode, const char* attrname, double& r, double& g, double& b);

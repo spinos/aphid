@@ -184,7 +184,7 @@ bool PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 	}
 	
 #endif
-	
+	return true;
 }
 
 template<typename T>
