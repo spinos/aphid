@@ -15,6 +15,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MItMeshVertex.h>
 #include <maya/MDagModifier.h>
+#include <maya/MDGModifier.h>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
 class MString;
@@ -1196,7 +1197,21 @@ MObject AHelper::CreateDagNode(const MString & nodeType,
 	return viz;
 }
 
-
+MObject AHelper::CreateDGNode(const MTypeId & typeId,
+								const MString & nodeName)
+{
+    MDGModifier modif;
+    MStatus stat;
+    MObject node = modif.createNode (typeId, &stat);
+    stat = modif.doIt();
+    if(!stat) {
+        return MObject::kNullObj;
+    }
+    modif.renameNode (node, nodeName);
+    modif.doIt();
+    
+    return node;
+}
 
 }
 //:~

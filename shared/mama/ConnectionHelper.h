@@ -24,9 +24,15 @@ public:
 	static void GetInputConnections(MPlugArray & dst, const MPlug & p);
 	static void GetOutputConnections(MPlugArray & dst, const MPlug & p);
 	static void GetArrayPlugInputConnections(MPlugArray & dst, const MPlug & p);
+/// element of p as well
+	static void GetArrayPlugInputConnections2(MPlugArray & dst, 
+	                                        MPlugArray & elm, const MPlug & p);
 	
 /// first in array not connected
 	static void GetAvailablePlug(MPlug & dst, MPlug & p);
+	
+	static bool ConnectToArray(MPlug & srcPlug,
+							MPlug & dstArrayPlug);
 	
 	static bool ConnectToArray(MPlug & srcPlug,
 							const MObject & dstNode,
@@ -41,6 +47,10 @@ public:
 							const MObject & dstNode);
 							
 	static void BreakArrayPlugInputConnections(MPlug & dstPlug);
+	
+	static bool ConnnectArrayOneToOne(MPlugArray & srcPlugs, 
+	                        const MObject & dstNode,
+							const MString & dstArrayAttrName);
 	
 };
 

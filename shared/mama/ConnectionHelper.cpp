@@ -42,6 +42,25 @@ void ConnectionHelper::GetArrayPlugInputConnections(MPlugArray & dst, const MPlu
     
 }
 
+void ConnectionHelper::GetArrayPlugInputConnections2(MPlugArray & dst, 
+	                                        MPlugArray & elm, const MPlug & p)
+{
+    if(!p.isArray() ) {
+        AHelper::Info<MString>("plug is not array", p.name() );
+        return;
+    }
+    dst.clear();
+    unsigned ne = p.numElements();
+    for(unsigned i=0;i<ne;++i) {
+        MPlugArray ac;
+        GetInputConnections(ac, p.elementByPhysicalIndex(i) );
+        if(ac.length() > 0) {
+            dst.append(ac[0]);
+            elm.append(p.elementByPhysicalIndex(i) );
+        }
+    }
+}
+
 void ConnectionHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
 {
     const unsigned np = p.evaluateNumElements();
@@ -61,17 +80,9 @@ void ConnectionHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
 }
 
 bool ConnectionHelper::ConnectToArray(MPlug & srcPlug,
-							const MObject & dstNode,
-							const MString & dstArrayAttrName)
+							MPlug & dstArrayPlug)
 {
-	MPlug dstArrayPlug;
-	AHelper::getNamedPlug(dstArrayPlug, dstNode, dstArrayAttrName.asChar() );
-	if(dstArrayPlug.isNull() ) {
-		AHelper::Info<MString>("no destination attrib", dstArrayAttrName);
-		return false;
-	}
-	
-	MPlug dstPlug;
+    MPlug dstPlug;
 	
 	if(dstArrayPlug.isArray() ) {
 		GetAvailablePlug(dstPlug, dstArrayPlug);
@@ -84,9 +95,24 @@ bool ConnectionHelper::ConnectToArray(MPlug & srcPlug,
 
 	MDGModifier modif;
 	modif.connect(srcPlug, dstPlug );
-	modif.doIt();
-	
-	return true;
+	if(modif.doIt() ) {
+	    return true;    
+	}
+	return false;
+}
+
+bool ConnectionHelper::ConnectToArray(MPlug & srcPlug,
+							const MObject & dstNode,
+							const MString & dstArrayAttrName)
+{
+	MPlug dstArrayPlug;
+	AHelper::getNamedPlug(dstArrayPlug, dstNode, dstArrayAttrName.asChar() );
+	if(dstArrayPlug.isNull() ) {
+		AHelper::Info<MString>("no destination attrib", dstArrayAttrName);
+		return false;
+	}
+
+	return ConnectToArray(srcPlug, dstArrayPlug);
 }
 	
 bool ConnectionHelper::ConnectToArray(const MObject & srcNode,
@@ -123,14 +149,51 @@ bool ConnectionHelper::ConnectedToNode(const MPlug & srcPlug,
 
 void ConnectionHelper::BreakArrayPlugInputConnections(MPlug & dstPlug)
 {
-	MPlugArray connected;
-	GetArrayPlugInputConnections(connected, dstPlug);
-	MDGModifier modif;
-	unsigned i = 0;
-	for(;i<connected.length();++i) {
-		modif.disconnect(connected[i], dstPlug );
-		modif.doIt();
+	MPlugArray connectedFrom;
+	MPlugArray connectedTo;
+	GetArrayPlugInputConnections2(connectedFrom, connectedTo, dstPlug);
+	const int n = connectedFrom.length();
+	if(n<1) {
+	    return;    
 	}
+	
+	AHelper::Info<int>(" break n connection", n );
+	AHelper::Info<MString>(" to", dstPlug.name() );
+		     
+	MDGModifier modif;
+
+	for(int i=0;i<n;++i) {
+	    AHelper::Info<MString>(" disconnect", connectedFrom[i].name() );
+		AHelper::Info<MString>(" and", connectedTo[i].name() );
+		     
+		modif.disconnect(connectedFrom[i], connectedTo[i] );
+		
+		if(!modif.doIt() ) {
+		     AHelper::Info<MString>(" WARNING cannot disconnect", connectedFrom[i].name() );
+		     AHelper::Info<MString>(" and", connectedTo[i].name() );
+		}
+	}
+}
+
+bool ConnectionHelper::ConnnectArrayOneToOne(MPlugArray & srcPlugs, 
+	                        const MObject & dstNode,
+							const MString & dstArrayAttrName)
+{
+    MPlug dstArrPlug;
+	AHelper::getNamedPlug(dstArrPlug, dstNode, dstArrayAttrName.asChar() );
+	if(dstArrPlug.isNull() ) {
+	    AHelper::Info<MString>("no destination attrib", dstArrayAttrName);
+		return false;
+	}
+	
+	BreakArrayPlugInputConnections(dstArrPlug);
+	
+	const int n = srcPlugs.length();
+	for(int i=0; i<n;++i) {
+	    ConnectToArray(srcPlugs[i], dstArrPlug);
+	}
+	
+	return true;
 }
 
 }

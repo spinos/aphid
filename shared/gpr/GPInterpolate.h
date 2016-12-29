@@ -49,7 +49,10 @@ public:
 /// set idx-th row of X and Y
 	void setObservationi(const int & idx,
 			const T * x, const T * y);
-	
+	void setXi(const int & idx,
+			    const T * b);
+	void setYi(const int & idx,
+			    const T * b);
 	bool learn();
 	
 	void predict(const T * x);
@@ -101,6 +104,16 @@ void GPInterpolate<T>::setObservationi(const int & idx,
 	m_xTrain.copyRow(idx, x); 
 	m_yTrain.copyRow(idx, y); 
 }
+
+template<typename T>
+void GPInterpolate<T>::setXi(const int & idx,
+			    const T * b)
+{ m_xTrain.copyRow(idx, b); }
+
+template<typename T>
+void GPInterpolate<T>::setYi(const int & idx,
+			    const T * b)
+{ m_yTrain.copyRow(idx, b); }
 
 template<typename T>
 bool GPInterpolate<T>::learn()

@@ -204,6 +204,8 @@ public:
 	                            MObject& root, MObject& node);
 	static MObject CreateDagNode(const MString & nodeType,
 								const MString & nodeName);
+	static MObject CreateDGNode(const MTypeId &typeId,
+								const MString & nodeName);
 	
 };
 
