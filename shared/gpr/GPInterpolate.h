@@ -53,11 +53,17 @@ public:
 			    const T * b);
 	void setYi(const int & idx,
 			    const T * b);
+/// as a whole
+	void copyX(const T * b);
+	void copyY(const T * b);
+	
 	bool learn();
 	
 	void predict(const T * x);
 	
 	const DenseMatrix<T > & predictedY() const;
+	const DenseMatrix<T > & X() const;
+	const DenseMatrix<T > & Y() const;
 	
 protected:
 
@@ -152,6 +158,22 @@ void GPInterpolate<T>::predict(const T * x)
 template<typename T>
 const DenseMatrix<T > & GPInterpolate<T>::predictedY() const
 { return m_yPredict; }
+
+template<typename T>
+const DenseMatrix<T > & GPInterpolate<T>::X() const
+{ return m_xTrain; }
+
+template<typename T>
+const DenseMatrix<T > & GPInterpolate<T>::Y() const
+{ return m_yTrain; }
+
+template<typename T>
+void GPInterpolate<T>::copyX(const T * b)
+{ m_xTrain.copyData(b); }
+
+template<typename T>
+void GPInterpolate<T>::copyY(const T * b)
+{ m_yTrain.copyData(b); }
 
 }
 
