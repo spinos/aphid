@@ -24,6 +24,7 @@
 #include "ExampVizNode.h"
 #include <AHelper.h>
 #include <ASearchHelper.h>
+#include <mama/ConnectionHelper.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/PrincipalComponents.h>
 #include <kd/KdEngine.h>
@@ -394,28 +395,10 @@ bool proxyPaintTool::connectMeshToViz(MObject & meshObj, MObject & vizObj, unsig
 {
 	MFnDependencyNode fmesh(meshObj);
 	MPlug srcMesh = fmesh.findPlug("outMesh");
-	aphid::AHelper::Info<MString>("check", srcMesh.name() );
-	
-	MStatus stat;
-	MPlugArray connected;
-	srcMesh.connectedTo ( connected , false, true, &stat );
-	unsigned i = 0;
-	for(;i<connected.length();++i) {
-		if(connected[i].node() == vizObj) {
-			aphid::AHelper::Info<MString>("already connected to", connected[i].name() );
-			return false;
-		}
+	if(ConnectionHelper::ConnectedToNode(srcMesh, vizObj) ) {
+		return false;
 	}
-	
-	MFnDependencyNode fviz(vizObj);
-	MPlug dstGround = fviz.findPlug("groundMesh");
-	slot = dstGround.numElements();
-	MPlug dst = dstGround.elementByLogicalIndex(slot);
-	aphid::AHelper::Info<MString>("connect to", dst.name() );
-	
-	MDGModifier modif;
-	modif.connect(srcMesh, dst );
-	modif.doIt();
+	ConnectionHelper::ConnectToArray(meshObj, "outMesh", vizObj, "groundMesh");
 	return true;
 }
 
@@ -423,28 +406,10 @@ bool proxyPaintTool::connectVoxToViz(MObject & voxObj, MObject & vizObj, unsigne
 {
 	MFnDependencyNode fvox(voxObj);
 	MPlug srcPlug = fvox.findPlug("ov");
-	aphid::AHelper::Info<MString>("check", srcPlug.name() );
-	
-	MStatus stat;
-	MPlugArray connected;
-	srcPlug.connectedTo ( connected , false, true, &stat );
-	unsigned i = 0;
-	for(;i<connected.length();++i) {
-		if(connected[i].node() == vizObj) {
-			aphid::AHelper::Info<MString>("already connected to", connected[i].name() );
-			return false;
-		}
-	}
-	
-	MFnDependencyNode fviz(vizObj);
-	MPlug inExample = fviz.findPlug("ixmp");
-	slot = inExample.numElements();
-	MPlug dstPlug = inExample.elementByLogicalIndex(slot);
-	aphid::AHelper::Info<MString>("connect to", dstPlug.name() );
-	
-	MDGModifier modif;
-	modif.connect(srcPlug, dstPlug );
-	modif.doIt();
+	if(ConnectionHelper::ConnectedToNode(srcPlug, vizObj) ) {
+		return false;
+	}	
+	ConnectionHelper::ConnectToArray(voxObj, "ov", vizObj, "ixmp");
 	return true;
 }
 
@@ -452,16 +417,10 @@ void proxyPaintTool::connectTransform(MObject & transObj, MObject & vizObj, cons
 {
 	MFnDependencyNode ftrans(transObj);
 	MPlug srcSpace = ftrans.findPlug("worldMatrix").elementByLogicalIndex(0);
-	aphid::AHelper::Info<MString>("check mesh", srcSpace.name() );
-
-	MFnDependencyNode fviz(vizObj);
-	MPlug dstGround = fviz.findPlug("groundSpace");
-	MPlug dst = dstGround.elementByLogicalIndex(slot);
-	aphid::AHelper::Info<MString>("connect to", dst.name() );
-	
-	MDGModifier modif;
-	modif.connect(srcSpace, dst );
-	modif.doIt();
+	if(ConnectionHelper::ConnectedToNode(srcSpace, vizObj) ) {
+		return;
+	}
+	ConnectionHelper::ConnectToArray(srcSpace, vizObj, "groundSpace");
 }
 
 MStatus proxyPaintTool::saveCacheSelected()

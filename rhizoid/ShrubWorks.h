@@ -53,8 +53,9 @@ private:
 					const MDagPath & meshPath, 
 					const MDagPath & transformPath) const;
 		
+typedef PCASimilarity<float, PCAFeature<float, 3> > TSimilarity;
 /// groupId and similarity
-typedef sdb::Couple<int, PCASimilarity<float, PCAFeature<float, 3> > > SimilarityType;
+typedef sdb::Couple<int, TSimilarity > SimilarityType;
 
 	bool findSimilar(std::vector<SimilarityType * > & similarities, 
 					const DenseMatrix<float> & vertices) const;
@@ -67,8 +68,8 @@ typedef sdb::Couple<int, PCASimilarity<float, PCAFeature<float, 3> > > Similarit
 					BoundingBox & totalBox,
 					const MDagPathArray & paths) const;
 
-/// similarity<<8 | example as key
-/// (group, global_ind) as value
+/// similarity<<8 | group as key
+/// (local_example, global_example) as value
 typedef std::map<int, Int2 > FeatureExampleMap;
 
 /// a relative to b
@@ -83,9 +84,8 @@ typedef std::map<int, Int2 > FeatureExampleMap;
 					const std::vector<SimilarityType * > & similarities,
 					FeatureExampleMap & exampleGroupInd,
 					const MDagPathArray & paths) const;
-	void connectExampleToViz(const MObject & exampleNode,
-					const MObject & vizNode) const;
-	void addInstances(const std::vector<SimilarityType * > & similarities,
+	void addInstances(const MObject & vizNode,
+					const std::vector<SimilarityType * > & similarities,
 					 FeatureExampleMap & exampleGroupInd) const;
 	
 };

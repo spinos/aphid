@@ -197,13 +197,6 @@ void ExampVox::buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops)
 const int & ExampVox::dopBufLength() const
 { return m_dopBufLength; }
 
-void ExampVox::drawWiredTriangles()
-{
-	if(m_dopBufLength < 1) return;
-	drawWiredTriangleArray((const float *)m_dopPositionBuf.get(),
-						m_dopBufLength);
-}
-
 void ExampVox::drawDop()
 {
 	if(m_dopBufLength < 1) return;
@@ -245,6 +238,24 @@ void ExampVox::buildTriangleDrawBuf(const int & nt, const int * tri,
 		m_dopPositionBuf.get()[i] = vertP[j];
 	}
 	
+}
+
+void ExampVox::drawWiredBound() const
+{
+	drawBoundingBox(&m_geomBox);
+}
+
+void ExampVox::drawWiredTriangles() const
+{
+	drawWiredTriangleArray((const float *)m_dopPositionBuf.get(),
+						m_dopBufLength, m_diffuseMaterialColV);
+}
+
+void ExampVox::drawSolidTriangles() const
+{
+	drawSolidTriangleArray((const float *)m_dopPositionBuf.get(),
+						(const float *)m_dopNormalBuf.get(),
+						m_dopBufLength, m_diffuseMaterialColV);
 }
 
 }

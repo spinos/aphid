@@ -45,8 +45,12 @@ protected:
 	void drawHLSolidBox(const float * v) const;
 	void drawHLBox(const float * v) const;
 	void drawWiredTriangleArray(const float * ps,
-						const unsigned & count) const;
-	
+						const unsigned & count,
+						const float * col) const;
+	void drawSolidTriangleArray(const float * ps,
+						const float * ns,
+						const unsigned & count,
+						const float * col) const;
 private:
 	static const float UnitBoxLine[24][3];
 	static const float UnitBoxTriangle[36][3];

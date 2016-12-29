@@ -46,6 +46,8 @@ public:
 	
 	int numFeatures() const;
 	
+	void getFeatureGroup(int & dst,
+					const int & idx) const;
 	void getFeatureSpace(T * dst,
 					const int & idx) const;
 /// dim = 1 stored columnwise
@@ -264,6 +266,11 @@ bool PCASimilarity<T, Tf>::separateFeatures(int nsep)
 	}
 	return true;
 }
+
+template<typename T, typename Tf>
+void PCASimilarity<T, Tf>::getFeatureGroup(int & dst,
+					const int & idx) const
+{ dst = m_cluster.groupIndices()[idx]; }
 
 template<typename T, typename Tf>
 void PCASimilarity<T, Tf>::getFeatureSpace(T * dst,

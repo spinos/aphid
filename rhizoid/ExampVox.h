@@ -69,8 +69,11 @@ public:
 	const float * dopNormalBuf() const;
 	const float * dopPositionBuf() const;
 	
+	virtual void drawWiredBound() const;
+	virtual void drawWiredTriangles() const;
+	virtual void drawSolidTriangles() const;
+	
 protected:
-	void drawWiredTriangles();
 	void drawDop();
 	void drawGrid();
 	void drawWireGrid();

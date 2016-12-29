@@ -18,13 +18,27 @@
 #include <maya/MDagPath.h>
 #include <maya/MSceneMessage.h>
 #include <DrawBox.h>
+#include <vector>
 
 namespace aphid {
+
+class ExampVox;
+
+template<typename T>
+class DenseMatrix;
 
 class BoundingBox;
 
 class ShrubVizNode : public MPxLocatorNode, public DrawBox
 {
+	struct InstanceD {
+		float _trans[16];
+		int _exampleId;
+		int _instanceId;
+	};
+	
+	std::vector<InstanceD > m_instances;
+	std::vector<ExampVox * > m_examples;
 	
 public:
 	ShrubVizNode();
@@ -52,9 +66,17 @@ public:
 	const MMatrix & worldSpace() const;
 	
 	void setBBox(const BoundingBox & bbox);
+/// instance as transform 4-by-4 and example_id
+	void addInstance(const DenseMatrix<float> & trans,
+					const int & exampleId);
 	
 protected:
 	void getBBox(BoundingBox & bbox) const;
+	int numInstances() const;
+	int numExamples() const;
+	void drawWiredBoundInstances() const;
+	void drawSolidInstances() const;
+	void drawWiredInstances() const;
 	   
 private:
 	void attachSceneCallbacks();
@@ -64,6 +86,7 @@ private:
 	MCallbackId fBeforeSaveCB;
 	void saveInternal();
 	bool loadInternal(MDataBlock& block);
+	void addExample(const MPlug & plug);
 	
 };
 

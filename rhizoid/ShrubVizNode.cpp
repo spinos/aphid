@@ -11,8 +11,11 @@
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
+#include <maya/MFnPluginData.h>
 #include <AHelper.h>
 #include <ExampVox.h>
+#include <ExampData.h>
+#include <math/linearMath.h>
 
 namespace aphid {
 
@@ -25,7 +28,11 @@ ShrubVizNode::ShrubVizNode()
 { attachSceneCallbacks(); }
 
 ShrubVizNode::~ShrubVizNode() 
-{ detachSceneCallbacks(); }
+{ 
+	m_instances.clear();
+	m_examples.clear();
+	detachSceneCallbacks(); 
+}
 
 MStatus ShrubVizNode::compute( const MPlug& plug, MDataBlock& block )
 {
@@ -43,6 +50,18 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
+	const int nexp = numExamples();
+	
+	if(nexp < 1) {
+		return;
+	}
+	
+	const int nins = numInstances();
+	
+	if(nins < 1) {
+		return;
+	}
+	
 	MObject thisNode = thisMObject();
 		
 	view.beginGL();
@@ -53,13 +72,23 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 	getBBox(bbox);
 	
 	drawBoundingBox(&bbox);
+	
+	drawWiredBoundInstances();
 
 	if ( style == M3dView::kFlatShaded || 
-		    style == M3dView::kGouraudShaded ) {		
+		    style == M3dView::kGouraudShaded ) {	
+			
+		glDepthFunc(GL_LEQUAL);
+		glPushAttrib(GL_LIGHTING_BIT);
+		glEnable(GL_LIGHTING);
+			
+		drawSolidInstances();
 		
+		glDisable(GL_LIGHTING);
+		glPopAttrib();
 	}
 	else {
-		
+		drawWiredInstances();
 	}
 	
 	glPopMatrix();
@@ -168,15 +197,17 @@ bool ShrubVizNode::loadInternal(MDataBlock& block)
 
 MStatus ShrubVizNode::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	if(plug.parent() == ainexamp) {}
-	//AHelper::Info<MString>("connect", plug.name());
+	if(plug == ainexamp) {
+		addExample(plug);
+	}
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
 MStatus ShrubVizNode::connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
-	if(plug.parent() == ainexamp) {}
-	//AHelper::Info<MString>("disconnect", plug.name());
+	if(plug.parent() == ainexamp) {
+		AHelper::Info<MString>("disconnect", plug.name());
+	}
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
 
@@ -207,6 +238,98 @@ void ShrubVizNode::getBBox(BoundingBox & bbox) const
 	
 	bbox.setMin(dbox[0].x, dbox[0].y, dbox[0].z );
 	bbox.setMax(dbox[1].x, dbox[1].y, dbox[1].z );
+}
+
+int ShrubVizNode::numInstances() const
+{ return m_instances.size(); }
+
+int ShrubVizNode::numExamples() const
+{ return m_examples.size(); }
+
+void ShrubVizNode::addExample(const MPlug & plug)
+{
+	AHelper::Info<MString>(" ShrubVizNode add example", plug.name());
+	MObject oslot;
+	plug.getValue(oslot);
+	MFnPluginData fslot(oslot);
+	ExampData * dslot = (ExampData *)fslot.data();
+	ExampVox * desc = dslot->getDesc();
+	if(!desc) {
+		AHelper::Info<MString>(" WARNING ShrubVizNode cannot get example data", plug.name());
+		return;
+	}
+	m_examples.push_back(desc);
+}
+
+void ShrubVizNode::addInstance(const DenseMatrix<float> & trans,
+					const int & exampleId)
+{
+	std::cout<<"\n add instance of exmp "<<exampleId;
+	InstanceD ainstance;
+	trans.extractData(ainstance._trans);
+	ainstance._exampleId = exampleId;
+	ainstance._instanceId = m_instances.size();
+	m_instances.push_back(ainstance);
+}
+
+void ShrubVizNode::drawWiredBoundInstances() const
+{
+	const int nexp = numExamples();
+	const int nins = numInstances();
+	for(int i=0;i<nins;++i) {
+		const InstanceD & ins = m_instances[i];
+		glPushMatrix();
+		glMultMatrixf(ins._trans);
+		
+		if(ins._exampleId < nexp) {
+			m_examples[ins._exampleId]->drawWiredBound();
+		} else {
+			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
+			AHelper::Info<int>(" instance", i);
+		}
+		
+		glPopMatrix();
+	}
+}
+
+void ShrubVizNode::drawSolidInstances() const
+{
+	const int nexp = numExamples();
+	const int nins = numInstances();
+	for(int i=0;i<nins;++i) {
+		const InstanceD & ins = m_instances[i];
+		glPushMatrix();
+		glMultMatrixf(ins._trans);
+		
+		if(ins._exampleId < nexp) {
+			m_examples[ins._exampleId]->drawSolidTriangles();
+		} else {
+			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
+			AHelper::Info<int>(" instance", i);
+		}
+		
+		glPopMatrix();
+	}
+}
+
+void ShrubVizNode::drawWiredInstances() const
+{
+	const int nexp = numExamples();
+	const int nins = numInstances();
+	for(int i=0;i<nins;++i) {
+		const InstanceD & ins = m_instances[i];
+		glPushMatrix();
+		glMultMatrixf(ins._trans);
+		
+		if(ins._exampleId < nexp) {
+			m_examples[ins._exampleId]->drawWiredTriangles();
+		} else {
+			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
+			AHelper::Info<int>(" instance", i);
+		}
+		
+		glPopMatrix();
+	}
 }
 
 }

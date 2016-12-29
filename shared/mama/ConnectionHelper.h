@@ -28,10 +28,19 @@ public:
 /// first in array not connected
 	static void GetAvailablePlug(MPlug & dst, MPlug & p);
 	
+	static bool ConnectToArray(MPlug & srcPlug,
+							const MObject & dstNode,
+							const MString & dstArrayAttrName);
+							
 	static bool ConnectToArray(const MObject & srcNode,
 							const MString & srcAttrName,
 							const MObject & dstNode,
 							const MString & dstArrayAttrName);
+							
+	static bool ConnectedToNode(const MPlug & srcPlug, 
+							const MObject & dstNode);
+							
+	static void BreakArrayPlugInputConnections(MPlug & dstPlug);
 	
 };
 

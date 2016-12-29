@@ -143,13 +143,17 @@ void ShrubWorks::scaleSpace(DenseMatrix<float> & space,
 					const float * b) const
 {
 	for(int i=0;i<3;++i) {
-		float r = b[3+i] / a[3+i];
+		float r = 1.f;
+		if(b[3+i] > 1.0e-3f) {
+			r = a[3+i] / b[3+i];
+		}
+		
 		float * c = space.column(i);
 		Vector3F v(c);
 		v.normalize();
 		c[0] = v.x * r;
 		c[1] = v.y * r;
-		c[2] = v.x * r;
+		c[2] = v.z * r;
 	}
 }
 
@@ -180,22 +184,35 @@ int ShrubWorks::countExamples(const std::vector<SimilarityType * > & similaritie
 	return c;
 }
 
-void ShrubWorks::addInstances(const std::vector<SimilarityType * > & similarities,
+void ShrubWorks::addInstances(const MObject & vizNode,
+							const std::vector<SimilarityType * > & similarities,
 							 FeatureExampleMap & exampleGroupInd) const
 {
+	ShrubVizNode * viz = (ShrubVizNode *)MFnDependencyNode(vizNode).userNode();
+	
 	const int ns = similarities.size();
 	DenseMatrix<float> transFeature(4, 4);
 	transFeature.setIdentity();
 	BoundingBox boxFeature, boxExample;
+	int grpFeature = 0;
 	
 	for(int i=0;i<ns;++i) {
 		const int & nf = similarities[i]->t2->numFeatures();
 		for(int j=0;j<nf;++j) {
-			similarities[i]->t2->getFeatureSpace(transFeature.raw(), j);
-			similarities[i]->t2->getFeatureBound((float *)&boxFeature, j, 1);
-			similarities[i]->t2->getFeatureBound((float *)&boxExample, exampleGroupInd[(i<<8) | j].x, 1);
+			const TSimilarity * simi = similarities[i]->t2;
+			
+			simi->getFeatureGroup(grpFeature, j);
+			simi->getFeatureSpace(transFeature.raw(), j);
+			simi->getFeatureBound((float *)&boxFeature, j, 1);
+			
+			const Int2 groupI = exampleGroupInd[(i<<8) | grpFeature];
+			
+/// best local example in similarity
+			simi->getFeatureBound((float *)&boxExample, groupI.x, 1);
 			scaleSpace(transFeature, (const float *)&boxFeature, (const float *)&boxExample );
-			std::cout<<"\n feature space"<<transFeature;
+			
+/// global example in viz
+			viz->addInstance(transFeature, groupI.y);
 		}
 	}
 }
@@ -221,13 +238,6 @@ void ShrubWorks::addSimilarities(std::vector<SimilarityType * > & similarities,
 	}
 }
 
-void ShrubWorks::connectExampleToViz(const MObject & exampleNode,
-					const MObject & vizNode) const
-{
-	ConnectionHelper::ConnectToArray(exampleNode, "outValue",
-							vizNode, "inExample");
-}
-
 void ShrubWorks::addExamples(const MObject & vizNode,
 					const std::vector<SimilarityType * > & similarities,
 					FeatureExampleMap & exampleGroupInd,
@@ -242,7 +252,7 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 		
 		for(int j=0;j<ne;++j) {
 			const Int2 groupI = exampleGroupInd[(i<<8) | j];
-			AHelper::Info<int>("example grp", groupI.x);
+			AHelper::Info<int>("loc grp", groupI.x);
 			AHelper::Info<int>("glb grp", groupI.y);
 			
 			DenseMatrix<float> pnts;
@@ -254,7 +264,8 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 			ExampViz * example = (ExampViz *)MFnDependencyNode(exampleNode).userNode();
 			example->setTriangleMesh(pnts, tris, bbox);
 			
-			connectExampleToViz(exampleNode, vizNode);
+			ConnectionHelper::ConnectToArray(exampleNode, "outValue",
+							vizNode, "inExample");
 		}
 	}
 }
@@ -304,7 +315,7 @@ MStatus ShrubWorks::creatShrub()
 	
 	addExamples(shrubNode, similarities, exampleGroupInd, paths);
 	
-	addInstances(similarities, exampleGroupInd);
+	addInstances(shrubNode, similarities, exampleGroupInd);
 
 //DenseMatrix<float> featurePnts;
 /// stored columnwise

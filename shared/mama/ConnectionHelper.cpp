@@ -59,19 +59,11 @@ void ConnectionHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
         }
     }
 }
-	
-bool ConnectionHelper::ConnectToArray(const MObject & srcNode,
-							const MString & srcAttrName,
+
+bool ConnectionHelper::ConnectToArray(MPlug & srcPlug,
 							const MObject & dstNode,
 							const MString & dstArrayAttrName)
 {
-	MPlug srcPlug;
-	AHelper::getNamedPlug(srcPlug, srcNode, srcAttrName.asChar() );
-	if(srcPlug.isNull() ) {
-		AHelper::Info<MString>("no source attrib", srcAttrName);
-		return false;
-	}
-	
 	MPlug dstArrayPlug;
 	AHelper::getNamedPlug(dstArrayPlug, dstNode, dstArrayAttrName.asChar() );
 	if(dstArrayPlug.isNull() ) {
@@ -86,12 +78,59 @@ bool ConnectionHelper::ConnectToArray(const MObject & srcNode,
 	} else {
 		dstPlug = dstArrayPlug;
 	}
+	
+	AHelper::Info<MString>(" connect ", srcPlug.name() );
+	AHelper::Info<MString>(" to ", dstPlug.name() );
 
 	MDGModifier modif;
 	modif.connect(srcPlug, dstPlug );
 	modif.doIt();
 	
 	return true;
+}
+	
+bool ConnectionHelper::ConnectToArray(const MObject & srcNode,
+							const MString & srcAttrName,
+							const MObject & dstNode,
+							const MString & dstArrayAttrName)
+{
+	MPlug srcPlug;
+	AHelper::getNamedPlug(srcPlug, srcNode, srcAttrName.asChar() );
+	if(srcPlug.isNull() ) {
+		AHelper::Info<MString>("no source attrib", srcAttrName);
+		return false;
+	}
+	
+	return ConnectToArray(srcPlug, dstNode, dstArrayAttrName);
+}
+
+bool ConnectionHelper::ConnectedToNode(const MPlug & srcPlug, 
+							const MObject & dstNode)
+{
+	MPlugArray connected;
+	GetOutputConnections(connected, srcPlug);
+	
+	unsigned i = 0;
+	for(;i<connected.length();++i) {
+		if(connected[i].node() == dstNode) {
+			AHelper::Info<MString>(" plug ", srcPlug.name() );
+			AHelper::Info<MString>(" connected to", connected[i].name() );
+			return true;
+		}
+	}
+	return false;
+}
+
+void ConnectionHelper::BreakArrayPlugInputConnections(MPlug & dstPlug)
+{
+	MPlugArray connected;
+	GetArrayPlugInputConnections(connected, dstPlug);
+	MDGModifier modif;
+	unsigned i = 0;
+	for(;i<connected.length();++i) {
+		modif.disconnect(connected[i], dstPlug );
+		modif.doIt();
+	}
 }
 
 }
