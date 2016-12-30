@@ -19,13 +19,11 @@
 #include <maya/MSceneMessage.h>
 #include <maya/MIntArray.h>
 #include <maya/MVectorArray.h>
-#include <DrawBox.h>
+#include <ogl/DrawBox.h>
+#include <ogl/DrawInstance.h>
 #include <vector>
 
 namespace aphid {
-
-class GlslLegacyInstancer;
-class GlslLegacyFlatInstancer;
 
 class ExampVox;
 
@@ -34,7 +32,7 @@ class DenseMatrix;
 
 class BoundingBox;
 
-class ShrubVizNode : public MPxLocatorNode, public DrawBox
+class ShrubVizNode : public MPxLocatorNode, public DrawBox, public DrawInstance
 {
 	struct InstanceD {
 		float _trans[16];
@@ -44,8 +42,6 @@ class ShrubVizNode : public MPxLocatorNode, public DrawBox
 	
 	std::vector<InstanceD > m_instances;
 	std::vector<ExampVox * > m_examples;
-	static GlslLegacyInstancer * m_instancer;
-	static GlslLegacyFlatInstancer * m_wireInstancer;
 	
 public:
 	ShrubVizNode();

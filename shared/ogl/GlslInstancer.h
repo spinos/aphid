@@ -1,7 +1,7 @@
 #ifndef APH_GLSL_INSTANCER_H
 #define APH_GLSL_INSTANCER_H
 
-#include "GlslBase.h"
+#include <ogl/GlslBase.h>
 #include <AllMath.h>
 
 namespace aphid {

@@ -15,7 +15,7 @@
 #include <ExampData.h>
 #include <math/linearMath.h>
 #include <mama/AttributeHelper.h>
-#include <GlslInstancer.h>
+#include <ogl/GlslInstancer.h>
 
 namespace aphid {
 
@@ -25,9 +25,6 @@ MObject ShrubVizNode::ainsttrans;
 MObject ShrubVizNode::ainstexamp;
 MObject ShrubVizNode::ainexamp;
 MObject ShrubVizNode::outValue;
-
-GlslLegacyInstancer * ShrubVizNode::m_instancer = new GlslLegacyInstancer;
-GlslLegacyFlatInstancer * ShrubVizNode::m_wireInstancer = new GlslLegacyFlatInstancer;
 	
 ShrubVizNode::ShrubVizNode()
 { attachSceneCallbacks(); }
@@ -81,29 +78,12 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 	
 	drawBoundingBox(&bbox);
 	
-	bool hasGlsl = GLSLBase::isDiagnosed();
-	if(!hasGlsl) {
-		std::string log;
-		hasGlsl = GLSLBase::diagnose(log);
-		std::cout<<"\n "<<log;
+	bool hasGlsl = isGlslReady();
+	if(!hasGlsl ) {
+		hasGlsl = prepareGlsl();
 	}
 	
-	if(hasGlsl) {
-		if(!m_instancer->hasShaders() ) {
-			std::string log;
-			m_instancer->initializeShaders(log);
-			std::cout<<"\n "<<log;
-		}
-		
-		if(!m_wireInstancer->hasShaders() ) {
-			std::string log;
-			m_wireInstancer->initializeShaders(log);
-			std::cout<<"\n "<<log;
-		}
-	}
-	
-	if(hasGlsl && m_instancer->hasShaders()
-			 && m_wireInstancer->hasShaders() ) {
+	if(hasGlsl ) {
 
 	drawWiredBoundInstances();
 /// https://www.opengl.org/sdk/docs/man2/xhtml/glPushAttrib.xml	

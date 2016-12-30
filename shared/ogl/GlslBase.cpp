@@ -7,7 +7,7 @@
  *
  */
 
-#include <GlslBase.h>
+#include <ogl/GlslBase.h>
 #include <sstream>
 
 namespace aphid {

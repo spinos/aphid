@@ -118,17 +118,6 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	
 	//if ( style == M3dView::kFlatShaded || 
 	//	    style == M3dView::kGouraudShaded ) {	
-#if 0
-		glDepthFunc(GL_LEQUAL);
-		glPushAttrib(GL_LIGHTING_BIT);
-		glEnable(GL_LIGHTING);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffCol );
-			
-		drawDop();
-		
-		glDisable(GL_LIGHTING);
-		glPopAttrib();
-#endif
 	drawWiredTriangles();
 	//} 
 	

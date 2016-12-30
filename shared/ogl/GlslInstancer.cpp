@@ -53,6 +53,7 @@ const char* GlslLegacyInstancer::fragmentProgramSource() const
 "{"
 "   float ldn = dot(shadingNormal, distantLightVec);"
 "   if(ldn < 0.0) ldn = 0.0;\n"
+"   ldn = 0.2 + 0.8 * ldn;\n"
 "	gl_FragColor = vec4(diffuseColor * ldn, 1.0);"
 "}";
 }

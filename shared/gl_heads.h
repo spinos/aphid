@@ -8,7 +8,7 @@
  */
  
 #ifdef WIN32
-#include <gExtension.h>
+#include <ogl/gExtension.h>
 
 #else
 

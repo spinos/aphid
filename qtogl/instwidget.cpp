@@ -3,7 +3,7 @@
 #include <geom/SuperQuadricGlyph.h>
 #include "instwidget.h"
 #include <GeoDrawer.h>
-#include <GlslInstancer.h>
+#include <ogl/GlslInstancer.h>
 #include "ebp.h"
 
 using namespace aphid;

@@ -6,7 +6,7 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#include <DrawBox.h>
+#include <ogl/DrawBox.h>
 #include <math/BoundingBox.h>
 #include <geom/Geometry.h>
 #include <sdb/VectorArray.h>

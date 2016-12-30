@@ -13,6 +13,7 @@
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
 #include <iostream>
+#include <ogl/GlslInstancer.h>
 
 namespace aphid {
 
@@ -135,16 +136,25 @@ void DrawForest::drawWiredPlant(PlantData * data)
 	glPopMatrix();
 }
 
-void DrawForest::drawPlants()
+void DrawForest::drawSolidPlants()
 {
 	std::cout<<" DrawForest draw plants begin"<<std::endl;
-    if(!m_enabled) return;
+    if(!m_enabled) {
+		return;
+	}
+	
     sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
-	if(g->isEmpty() ) return;
+	if(g->isEmpty() ) {
+		return;
+	}
+	
 	const float margin = g->gridSize() * .1f;
 	//glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT);
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
+	
+	m_instancer->programBegin();
+	
 	try {
 	g->begin();
 	while(!g->end() ) {
@@ -158,6 +168,8 @@ void DrawForest::drawPlants()
 	} catch (...) {
 		std::cerr<<"DrawForest draw plants caught something";
 	}
+	
+	m_instancer->programEnd();
 	
 	glPopAttrib();
 }
@@ -173,15 +185,16 @@ void DrawForest::drawPlants(sdb::Array<int, Plant> * cell)
 
 void DrawForest::drawPlant(PlantData * data)
 {
-	glPushMatrix();
-    
-	data->t1->glMatrix(m_transbuf);
-	glMultMatrixf(m_transbuf);
-	glScalef(m_scalbuf[0], m_scalbuf[1], m_scalbuf[2]);
+	const Matrix44F & trans = *(data->t1);
+	glMultiTexCoord4f(GL_TEXTURE1, trans(0,0), trans(1,0), trans(2,0), trans(3,0) );
+	glMultiTexCoord4f(GL_TEXTURE2, trans(0,1), trans(1,1), trans(2,1), trans(3,1) );
+	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
+	    
 	const ExampVox * v = plantExample(*data->t3);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, v->diffuseMaterialColor() );
+	const float * c = v->diffuseMaterialColor();
+			
+	m_instancer->setDiffueColorVec(c);
 	drawPlant(v , data);
-	glPopMatrix();
 }
 
 void DrawForest::drawPlant(const ExampVox * v, PlantData * data)

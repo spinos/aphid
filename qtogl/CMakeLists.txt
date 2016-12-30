@@ -9,14 +9,10 @@ set (CMAKE_BUILD_TYPE RELEASE)
 include_directories (../shared)
 
 set (INST_HEADER_FILES ../shared/Base3DView.h 
-../shared/GlslBase.h
-../shared/GlslInstancer.h
 instwindow.h
 instwidget.h)
 
 set (INST_SOURCE_FILES ../shared/Base3DView.cpp
-../shared/GlslBase.cpp
-../shared/GlslInstancer.cpp
 instwidget.cpp
 instwindow.cpp
 instmain.cpp)
@@ -50,6 +46,7 @@ SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
     SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/aphidSdb.lib)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/aphidGraph.lib)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/aphidTopology.lib)
+set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/aphidOgl.lib)
 
 elseif (APPLE)
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
@@ -61,6 +58,7 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
     set (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.a)
     set (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.a)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidTopology.a)
+set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.a)
 
 ELSE ()
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
@@ -72,6 +70,7 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
     SET (APHID_SDB_LIBRARY ${APHID_DIR}/lib/libaphidSdb.so)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
+set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.so)
 
 endif ()
 
@@ -84,6 +83,7 @@ message ("aphid kd is " ${APHID_KD_LIBRARY})
 message ("aphid sdb is " ${APHID_SDB_LIBRARY})
 message ("aphid graph is " ${APHID_GRAPH_LIBRARY})
 message ("aphid topo is " ${APHID_TOPO_LIBRARY})
+message ("aphid ogl is " ${APHID_OGL_LIBRARY})
 
 
 if(WIN32)
@@ -130,6 +130,7 @@ target_link_libraries (psinst ${APHID_GEOM_LIBRARY})
 target_link_libraries (psinst ${APHID_UI_LIBRARY})
 target_link_libraries (psinst ${APHID_SDB_LIBRARY})
 target_link_libraries (psinst ${APHID_TOPO_LIBRARY})
+target_link_libraries (psinst ${APHID_OGL_LIBRARY})
 
 target_link_libraries (psinst ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (psinst ${Boost_DATE_TIME_LIBRARY})

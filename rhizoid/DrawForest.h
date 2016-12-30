@@ -9,14 +9,16 @@
 #pragma once
 #include "ModifyForest.h"
 #include <ViewObscureCull.h>
-#include <DrawBox.h>
+#include <ogl/DrawBox.h>
+#include <ogl/DrawInstance.h>
 #include <DrawCircle.h>
 
 namespace aphid {
 
 class CircleCurve;
 
-class DrawForest : public ModifyForest, public ViewObscureCull, public DrawBox, public DrawCircle
+class DrawForest : public ModifyForest, public ViewObscureCull, 
+public DrawBox, public DrawCircle, public DrawInstance
 {
 	
     Matrix44F m_useMat;
@@ -34,7 +36,7 @@ protected:
 	void setScaleMuliplier(float x, float y, float z);
     void drawGround();
 	float plantExtent(int idx) const;
-	void drawPlants();
+	void drawSolidPlants();
 	void drawWiredPlants();
 	void drawGridBounding();
 	void drawGrid();

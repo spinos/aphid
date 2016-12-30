@@ -245,15 +245,27 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawGridBounding();
 	// drawGrid();
 
+	bool hasGlsl = isGlslReady();
+	if(!hasGlsl ) {
+		hasGlsl = prepareGlsl();
+	}
+	
+	if(hasGlsl ) {
+	
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {		
-		drawPlants();
+		drawSolidPlants();
 	}
 	else 
 		drawWiredPlants();
+	} else {
+		AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
+	}
 	
-    if(hasView() ) drawViewFrustum();
-    
+    if(hasView() ) {
+		drawViewFrustum();
+    }
+	
 	drawBrush(view);
 	drawActivePlants();
 	drawGround();

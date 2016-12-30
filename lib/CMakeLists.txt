@@ -261,7 +261,6 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/SelectionArray.cpp
 ../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
-../shared/DrawBox.cpp
 ../shared/PerspectiveView.cpp)
 
 set (APH_SDB_PATH ../shared/sdb)
@@ -302,6 +301,14 @@ file (GLOB Gpr_SRC
 
 ADD_LIBRARY (aphidGp ${LIB_TYP}
 ${Gpr_SRC})
+
+file (GLOB Ogl_SRC
+    "../shared/ogl/*.h"
+    "../shared/ogl/*.cpp"
+)
+
+ADD_LIBRARY (aphidOgl ${LIB_TYP}
+${Ogl_SRC})
 
 add_library(aphid ${LIB_TYP}                 
 ##../shared/SpaceHandle.cpp                

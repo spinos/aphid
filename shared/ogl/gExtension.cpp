@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include "gExtension.h"
+#ifdef WIN32
 
 PFNGLISRENDERBUFFEREXTPROC glIsRenderbufferEXT = NULL;
 PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbufferEXT = NULL;
@@ -253,4 +254,5 @@ char gCheckExtension(char* extName)
         }
     return 0;
 }
+#endif
 //~:

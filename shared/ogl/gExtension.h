@@ -2,12 +2,11 @@
 #define APH_OPENGL_EXTENSION_H
 
 #ifdef WIN32
-//#include <winsock2.h>
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
-#endif
+
 
 extern PFNGLISRENDERBUFFEREXTPROC glIsRenderbufferEXT;
 extern PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbufferEXT;
@@ -97,5 +96,7 @@ extern PFNGLCLIENTACTIVETEXTUREPROC glClientActiveTexture;
 char gExtensionInit();
 const char* getExtension();
 char gCheckExtension(char* extName);
+
+#endif
 #endif
 //~:
