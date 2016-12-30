@@ -40,8 +40,6 @@ const char* GlslLegacyInstancer::vertexProgramSource() const
 "   normalWorld.z = dot(gl_MultiTexCoord3.xyz, gl_Normal);"
 "   normalWorld = normalize(normalWorld);"
 "   shadingNormal = normalWorld;"
-"	gl_FrontColor = gl_MultiTexCoord4;"
-"	gl_BackColor = vec4(1.0, 1.0, 0.0, 1.0);"
 "}";
 }
 
@@ -49,12 +47,13 @@ const char* GlslLegacyInstancer::fragmentProgramSource() const
 {
 	return "#version 120\n"
 "uniform vec3 distantLightVec;"
+"uniform vec3 diffuseColor;"
 "varying vec3 shadingNormal;"
 "void main()"
 "{"
 "   float ldn = dot(shadingNormal, distantLightVec);"
-"   if(ldn < 0.0) ldn = 0.0;"
-"	gl_FragColor = gl_Color * vec4 (0.2 + 0.8 * ldn );"
+"   if(ldn < 0.0) ldn = 0.0;\n"
+"	gl_FragColor = vec4(diffuseColor * ldn, 1.0);"
 "}";
 }
 
@@ -62,6 +61,7 @@ void GlslLegacyInstancer::defaultShaderParameters()
 {
     m_worldMatLoc = glGetUniformLocationARB(*program(), "worldMatrix");
     m_distantLightVecLoc = glGetUniformLocationARB(*program(), "distantLightVec");
+	m_diffColorLoc = glGetUniformLocationARB(*program(), "diffuseColor");
 }
 
 void GlslLegacyInstancer::updateShaderParameters() const
@@ -75,7 +75,62 @@ void GlslLegacyInstancer::setWorldTm(const Matrix44F & x)
 
 void GlslLegacyInstancer::setDistantLightVec(const Vector3F & x)
 { m_distantLightVec = x.normal(); }
-    
+
+void GlslLegacyInstancer::setDiffueColorVec(const float * x)
+{ glUniform3fvARB(m_diffColorLoc, 1, x); }
+
+
+GlslLegacyFlatInstancer::GlslLegacyFlatInstancer()
+{}
+
+GlslLegacyFlatInstancer::~GlslLegacyFlatInstancer()
+{}
+
+const char* GlslLegacyFlatInstancer::vertexProgramSource() const
+{
+	return "#version 120\n"
+"uniform mat4 worldMatrix;"
+"void main()"
+"{"
+"   vec4 positionWorld;"
+"   vec4 worldViewPosition;"
+"   positionWorld.x = dot(gl_MultiTexCoord1, gl_Vertex);"
+"   positionWorld.y = dot(gl_MultiTexCoord2, gl_Vertex);"
+"   positionWorld.z = dot(gl_MultiTexCoord3, gl_Vertex);"
+"   positionWorld.w = 1.0;"
+"   worldViewPosition = worldMatrix * positionWorld;"
+"   gl_Position = gl_ModelViewProjectionMatrix * worldViewPosition;"
+"}";
+}
+
+const char* GlslLegacyFlatInstancer::fragmentProgramSource() const
+{
+	return "#version 120\n"
+"uniform vec3 diffuseColor;"
+"void main()"
+"{"
+"	gl_FragColor = vec4(diffuseColor, 1.0);"
+"}";
+}
+
+void GlslLegacyFlatInstancer::defaultShaderParameters()
+{
+    m_worldMatLoc = glGetUniformLocationARB(*program(), "worldMatrix");
+    m_diffColorLoc = glGetUniformLocationARB(*program(), "diffuseColor");
+}
+
+void GlslLegacyFlatInstancer::updateShaderParameters() const
+{
+    glUniformMatrix4fvARB(m_worldMatLoc, 1, 0, (float*)&m_worldMat);
+}
+
+void GlslLegacyFlatInstancer::setWorldTm(const Matrix44F & x)
+{ m_worldMat = x; }
+
+void GlslLegacyFlatInstancer::setDiffueColorVec(const float * x)
+{ glUniform3fvARB(m_diffColorLoc, 1, x); }
+
+
 GlslInstancer::GlslInstancer()
 {}
 

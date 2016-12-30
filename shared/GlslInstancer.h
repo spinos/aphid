@@ -12,6 +12,7 @@ class GlslLegacyInstancer : public GLSLBase
     GLint m_worldMatLoc;
     Vector3F m_distantLightVec;
     GLint m_distantLightVecLoc;
+    GLint m_diffColorLoc;
     
 public:
     GlslLegacyInstancer();
@@ -19,6 +20,7 @@ public:
     
     void setWorldTm(const Matrix44F & x);
     void setDistantLightVec(const Vector3F & x);
+    void setDiffueColorVec(const float * x);
     
 protected:
     virtual const char* vertexProgramSource() const;
@@ -28,7 +30,30 @@ protected:
 	
 private:
     
-};    
+};   
+
+class GlslLegacyFlatInstancer : public GLSLBase 
+{
+    Matrix44F m_worldMat;
+    GLint m_worldMatLoc;
+	GLint m_diffColorLoc;
+    
+public:
+    GlslLegacyFlatInstancer();
+    virtual ~GlslLegacyFlatInstancer();
+    
+    void setWorldTm(const Matrix44F & x);
+    void setDiffueColorVec(const float * x);
+    
+protected:
+    virtual const char* vertexProgramSource() const;
+	virtual const char* fragmentProgramSource() const;
+	virtual void defaultShaderParameters();
+	virtual void updateShaderParameters() const;
+	
+private:
+    
+}; 
 
 class GlslInstancer : public GLSLBase 
 {

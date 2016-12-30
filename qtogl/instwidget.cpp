@@ -63,7 +63,7 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
             m_particles[k] = Float4(1 ,0,0,poss[i].x);
             m_particles[k+1] = Float4(0,1 ,0,poss[i].y);
             m_particles[k+2] = Float4(0,0,1 ,poss[i].z);
-            m_particles[k+3] = Float4(1,1,1,1);
+            m_particles[k+3] = Float4(RandomF01(),RandomF01(),RandomF01(),1);
     }
 }
 
@@ -100,7 +100,7 @@ void GLWidget::clientDraw()
 	    glMultiTexCoord4fv(GL_TEXTURE1, (const float *)d);
 	    glMultiTexCoord4fv(GL_TEXTURE2, (const float *)&d[1]);
 	    glMultiTexCoord4fv(GL_TEXTURE3, (const float *)&d[2]);
-		glMultiTexCoord4fv(GL_TEXTURE4, (const float *)&d[3]);
+		m_instancer->setDiffueColorVec((const float *)&d[3]);
 	    
 	    glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);

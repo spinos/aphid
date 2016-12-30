@@ -36,6 +36,7 @@ public:
 	char initializeShaders(std::string& log);
 	char initializeFBO(std::string& log);
 	
+	char hasShaders() const;
 	char hasFBO() const;
 	
 	void programBegin() const;

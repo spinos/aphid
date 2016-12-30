@@ -26,17 +26,16 @@ MObject ShrubVizNode::ainstexamp;
 MObject ShrubVizNode::ainexamp;
 MObject ShrubVizNode::outValue;
 
+GlslLegacyInstancer * ShrubVizNode::m_instancer = new GlslLegacyInstancer;
+GlslLegacyFlatInstancer * ShrubVizNode::m_wireInstancer = new GlslLegacyFlatInstancer;
+	
 ShrubVizNode::ShrubVizNode()
-{ 
-	m_instancer = new GlslLegacyInstancer;
-	attachSceneCallbacks(); 
-}
+{ attachSceneCallbacks(); }
 
 ShrubVizNode::~ShrubVizNode() 
 { 
 	m_instances.clear();
 	m_examples.clear();
-	delete m_instancer;
 	detachSceneCallbacks(); 
 }
 
@@ -77,29 +76,38 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 		
 	view.beginGL();
 	
-	bool hasGlsl = GLSLBase::isDiagnosed();
-	if(!hasGlsl ) {
-		std::string log;
-		hasGlsl = GLSLBase::diagnose(log);
-		std::cout<<"\n "<<log;
-		hasGlsl = m_instancer->initializeShaders(log);
-		std::cout<<"\n "<<log;
-		if(!hasGlsl) {
-			AHelper::Info<std::string >(" ERROR opengl ", log);
-		}
-	}
-	
 	BoundingBox bbox;
 	getBBox(bbox);
 	
 	drawBoundingBox(&bbox);
 	
-	drawWiredBoundInstances();
+	bool hasGlsl = GLSLBase::isDiagnosed();
+	if(!hasGlsl) {
+		std::string log;
+		hasGlsl = GLSLBase::diagnose(log);
+		std::cout<<"\n "<<log;
+	}
 	
-	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_COLOR_MATERIAL);
-	glColor3f(1.f, 1.f, 1.f);
+	if(hasGlsl) {
+		if(!m_instancer->hasShaders() ) {
+			std::string log;
+			m_instancer->initializeShaders(log);
+			std::cout<<"\n "<<log;
+		}
+		
+		if(!m_wireInstancer->hasShaders() ) {
+			std::string log;
+			m_wireInstancer->initializeShaders(log);
+			std::cout<<"\n "<<log;
+		}
+	}
+	
+	if(hasGlsl && m_instancer->hasShaders()
+			 && m_wireInstancer->hasShaders() ) {
+
+	drawWiredBoundInstances();
+/// https://www.opengl.org/sdk/docs/man2/xhtml/glPushAttrib.xml	
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 		
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {	
@@ -112,6 +120,10 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 	}
 	
 	glPopAttrib();
+	
+	} else {
+		AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
+	}
 	
 	view.endGL();
 }
@@ -424,6 +436,7 @@ void ShrubVizNode::drawWiredBoundInstances() const
 void ShrubVizNode::drawSolidInstances() const
 {
 	m_instancer->programBegin();
+	
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
@@ -440,8 +453,8 @@ void ShrubVizNode::drawSolidInstances() const
 		if(ins._exampleId < nexp) {
 			const ExampVox * v = m_examples[ins._exampleId];
 			const float * c = v->diffuseMaterialColor();
-			glMultiTexCoord4f(GL_TEXTURE4, c[1], c[2], c[3], 1.f);
-	    
+			
+			m_instancer->setDiffueColorVec(c);
 			v->drawSolidTriangles();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
@@ -458,7 +471,8 @@ void ShrubVizNode::drawSolidInstances() const
 
 void ShrubVizNode::drawWiredInstances() const
 {
-	m_instancer->programBegin();
+	m_wireInstancer->programBegin();
+	
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
@@ -471,8 +485,8 @@ void ShrubVizNode::drawWiredInstances() const
 		if(ins._exampleId < nexp) {
 			const ExampVox * v = m_examples[ins._exampleId];
 			const float * c = v->diffuseMaterialColor();
-			glMultiTexCoord4f(GL_TEXTURE4, c[1], c[2], c[3], 1.f);
-	    
+			
+			m_wireInstancer->setDiffueColorVec(c);
 			v->drawWiredTriangles();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
@@ -480,7 +494,7 @@ void ShrubVizNode::drawWiredInstances() const
 		}
 		
 	}
-	m_instancer->programEnd();
+	m_wireInstancer->programEnd();
 	
 }
 

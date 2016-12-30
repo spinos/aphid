@@ -68,7 +68,7 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 	
 		float * diffCol = diffuseMaterialColV();
 		
-		MFloatVector& c = block.inputValue(adrawColor).asFloatVector();
+		MFloatVector c = block.inputValue(adrawColor).asFloatVector();
 		diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
 		
 /// dop first, then box

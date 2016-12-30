@@ -88,6 +88,7 @@ bool GLSLBase::diagnose(std::string& log)
 	int j = sizeof(entriesNeeded)/sizeof(glExtensionEntry);
 	
 #ifdef WIN32
+	gExtensionInit();
      char sbuf[64];
 	 for (int i = 0; i < j; i++) {
 		 if(!gCheckExtension(entriesNeeded[i].name)) {
@@ -125,7 +126,7 @@ bool GLSLBase::diagnose(std::string& log)
 }
 
 bool GLSLBase::isDiagnosed() 
-{ return CoreVersion > 0; }
+{ return CoreVersion >= 2.0; }
 
 char GLSLBase::initializeShaders(std::string& log)
 {
@@ -191,6 +192,9 @@ char GLSLBase::initializeShaders(std::string& log)
 	m_hasShaders = 1;
 	return 1;
 }
+
+char GLSLBase::hasShaders() const
+{ return m_hasShaders; }
 
 void GLSLBase::defaultShaderParameters()
 {}
