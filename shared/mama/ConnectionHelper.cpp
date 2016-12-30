@@ -190,7 +190,8 @@ bool ConnectionHelper::ConnnectArrayOneToOne(MPlugArray & srcPlugs,
 	
 	const int n = srcPlugs.length();
 	for(int i=0; i<n;++i) {
-	    ConnectToArray(srcPlugs[i], dstArrPlug);
+		MPlug src = srcPlugs[i];
+	    ConnectToArray(src, dstArrPlug);
 	}
 	
 	return true;

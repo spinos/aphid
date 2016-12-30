@@ -24,6 +24,8 @@
 
 namespace aphid {
 
+class GlslLegacyInstancer;
+
 class ExampVox;
 
 template<typename T>
@@ -41,6 +43,7 @@ class ShrubVizNode : public MPxLocatorNode, public DrawBox
 	
 	std::vector<InstanceD > m_instances;
 	std::vector<ExampVox * > m_examples;
+	GlslLegacyInstancer * m_instancer;
 	
 public:
 	ShrubVizNode();

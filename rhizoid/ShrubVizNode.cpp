@@ -15,6 +15,7 @@
 #include <ExampData.h>
 #include <math/linearMath.h>
 #include <mama/AttributeHelper.h>
+#include <GlslInstancer.h>
 
 namespace aphid {
 
@@ -26,12 +27,16 @@ MObject ShrubVizNode::ainexamp;
 MObject ShrubVizNode::outValue;
 
 ShrubVizNode::ShrubVizNode()
-{ attachSceneCallbacks(); }
+{ 
+	m_instancer = new GlslLegacyInstancer;
+	attachSceneCallbacks(); 
+}
 
 ShrubVizNode::~ShrubVizNode() 
 { 
 	m_instances.clear();
 	m_examples.clear();
+	delete m_instancer;
 	detachSceneCallbacks(); 
 }
 
@@ -72,7 +77,17 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 		
 	view.beginGL();
 	
-	glPushMatrix();
+	bool hasGlsl = GLSLBase::isDiagnosed();
+	if(!hasGlsl ) {
+		std::string log;
+		hasGlsl = GLSLBase::diagnose(log);
+		std::cout<<"\n "<<log;
+		hasGlsl = m_instancer->initializeShaders(log);
+		std::cout<<"\n "<<log;
+		if(!hasGlsl) {
+			AHelper::Info<std::string >(" ERROR opengl ", log);
+		}
+	}
 	
 	BoundingBox bbox;
 	getBBox(bbox);
@@ -80,24 +95,23 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 	drawBoundingBox(&bbox);
 	
 	drawWiredBoundInstances();
-
+	
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_COLOR_MATERIAL);
+	glColor3f(1.f, 1.f, 1.f);
+		
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {	
-			
-		glDepthFunc(GL_LEQUAL);
-		glPushAttrib(GL_LIGHTING_BIT);
-		glEnable(GL_LIGHTING);
-			
+
 		drawSolidInstances();
-		
-		glDisable(GL_LIGHTING);
-		glPopAttrib();
+
 	}
 	else {
 		drawWiredInstances();
 	}
 	
-	glPopMatrix();
+	glPopAttrib();
 	
 	view.endGL();
 }
@@ -409,42 +423,65 @@ void ShrubVizNode::drawWiredBoundInstances() const
 
 void ShrubVizNode::drawSolidInstances() const
 {
+	m_instancer->programBegin();
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
 		const InstanceD & ins = m_instances[i];
+#if 0
 		glPushMatrix();
 		glMultMatrixf(ins._trans);
-		
+#endif
+		const float *d = ins._trans;
+	    glMultiTexCoord4f(GL_TEXTURE1, d[0], d[4], d[8], d[12]);
+	    glMultiTexCoord4f(GL_TEXTURE2, d[1], d[5], d[9], d[13]);
+	    glMultiTexCoord4f(GL_TEXTURE3, d[2], d[6], d[10], d[14]);
+	    
 		if(ins._exampleId < nexp) {
-			m_examples[ins._exampleId]->drawSolidTriangles();
+			const ExampVox * v = m_examples[ins._exampleId];
+			const float * c = v->diffuseMaterialColor();
+			glMultiTexCoord4f(GL_TEXTURE4, c[1], c[2], c[3], 1.f);
+	    
+			v->drawSolidTriangles();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);
 		}
 		
+#if 0
 		glPopMatrix();
+#endif
 	}
+	m_instancer->programEnd();
+	
 }
 
 void ShrubVizNode::drawWiredInstances() const
 {
+	m_instancer->programBegin();
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
 		const InstanceD & ins = m_instances[i];
-		glPushMatrix();
-		glMultMatrixf(ins._trans);
-		
+		const float *d = ins._trans;
+	    glMultiTexCoord4f(GL_TEXTURE1, d[0], d[4], d[8], d[12]);
+	    glMultiTexCoord4f(GL_TEXTURE2, d[1], d[5], d[9], d[13]);
+	    glMultiTexCoord4f(GL_TEXTURE3, d[2], d[6], d[10], d[14]);
+	    
 		if(ins._exampleId < nexp) {
-			m_examples[ins._exampleId]->drawWiredTriangles();
+			const ExampVox * v = m_examples[ins._exampleId];
+			const float * c = v->diffuseMaterialColor();
+			glMultiTexCoord4f(GL_TEXTURE4, c[1], c[2], c[3], 1.f);
+	    
+			v->drawWiredTriangles();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);
 		}
 		
-		glPopMatrix();
 	}
+	m_instancer->programEnd();
+	
 }
 
 }

@@ -31,10 +31,11 @@ public:
 	virtual ~GLSLBase();
 	
 	static bool diagnose(std::string& log);
+	static bool isDiagnosed();
+	
 	char initializeShaders(std::string& log);
 	char initializeFBO(std::string& log);
 	
-	bool isDiagnosed() const;
 	char hasFBO() const;
 	
 	void programBegin() const;

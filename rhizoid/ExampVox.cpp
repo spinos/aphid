@@ -24,7 +24,7 @@ m_sizeMult(1.f)
 { 
 	m_diffuseMaterialColV[0] = 0.47f;
 	m_diffuseMaterialColV[1] = 0.46f;
-	m_diffuseMaterialColV[2] = 0.45f;
+	m_diffuseMaterialColV[2] = 0.48f;
 	m_geomBox.setOne(); 
 }
 
@@ -85,14 +85,14 @@ const float & ExampVox::geomExtent() const
 const float & ExampVox::geomSize() const
 { return m_geomSize; }
 
-const float * ExampVox::geomCenterV() const
-{ return (const float *)&m_geomCenter; }
+//const float * ExampVox::geomCenterV() const
+//{ return (const float *)&m_geomCenter; }
 
 const Vector3F & ExampVox::geomCenter() const
 { return m_geomCenter; }
 
-const float * ExampVox::geomScale() const
-{ return m_geomScale; }
+//const float * ExampVox::geomScale() const
+//{ return m_geomScale; }
 
 void ExampVox::drawGrid()
 { drawSolidBoxArray((const float *)m_boxPositionBuf, (const float *)m_boxNormalBuf, m_numBoxes * 36); }
@@ -141,20 +141,14 @@ void ExampVox::setGeomBox(const float & a,
 					const float & e,
 					const float & f)
 {
-	m_geomBox.m_data[0] = a;
-	m_geomBox.m_data[1] = b;
-	m_geomBox.m_data[2] = c;
-	m_geomBox.m_data[3] = d;
-	m_geomBox.m_data[4] = e;
-	m_geomBox.m_data[5] = f;
+	m_geomBox.setMin(a, b, c);
+	m_geomBox.setMax(d, e, f);
 	m_geomExtent = m_geomBox.radius();
 	m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); 
-	m_geomCenter.x = (a + d) * .5f;
-	m_geomCenter.y = (b + e) * .5f;
-	m_geomCenter.z = (c + f) * .5f;
-	m_geomScale[0] = (d - a);
-	m_geomScale[1] = (e - b);
-	m_geomScale[2] = (f - c);
+	m_geomCenter = m_geomBox.center();
+	//m_geomScale[0] = (d - a);
+	//m_geomScale[1] = (e - b);
+	//m_geomScale[2] = (f - c);
 }
 
 const float * ExampVox::diffuseMaterialColor() const
@@ -245,17 +239,22 @@ void ExampVox::drawWiredBound() const
 	drawBoundingBox(&m_geomBox);
 }
 
+void ExampVox::drawSolidBound() const
+{
+	drawSolidBoundingBox(&m_geomBox);
+}
+
 void ExampVox::drawWiredTriangles() const
 {
 	drawWiredTriangleArray((const float *)m_dopPositionBuf.get(),
-						m_dopBufLength, m_diffuseMaterialColV);
+						m_dopBufLength);
 }
 
 void ExampVox::drawSolidTriangles() const
 {
 	drawSolidTriangleArray((const float *)m_dopPositionBuf.get(),
 						(const float *)m_dopNormalBuf.get(),
-						m_dopBufLength, m_diffuseMaterialColV);
+						m_dopBufLength);
 }
 
 }

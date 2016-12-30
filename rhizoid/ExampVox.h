@@ -26,7 +26,7 @@ class ExampVox : public DrawBox {
 	boost::scoped_ptr<Vector3F> m_dopPositionBuf;
 	float * m_boxCenterSizeF4;
 	float m_diffuseMaterialColV[3];
-	float m_geomScale[3];
+	//float m_geomScale[3];
 /// radius of bbox
 	float m_geomExtent;
 /// radius exclusion
@@ -56,9 +56,9 @@ public:
 	const float & geomExtent() const;
 	const float & geomSize() const;
 	const BoundingBox & geomBox() const;
-	const float * geomCenterV() const;
+	//const float * geomCenterV() const;
 	const Vector3F & geomCenter() const;
-	const float * geomScale() const;
+	//const float * geomScale() const;
 	const float * diffuseMaterialColor() const;
 	const float * boxCenterSizeF4() const;
 	const unsigned & numBoxes() const;
@@ -70,6 +70,7 @@ public:
 	const float * dopPositionBuf() const;
 	
 	virtual void drawWiredBound() const;
+	virtual void drawSolidBound() const;
 	virtual void drawWiredTriangles() const;
 	virtual void drawSolidTriangles() const;
 	

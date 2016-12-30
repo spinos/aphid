@@ -79,7 +79,7 @@ bool GLSLBase::diagnose(std::string& log)
 	log = sst.str();
 	
 	if(CoreVersion < 1.4) {
-		log += "OpenGL version too low, this thing may not work correctly!\n";
+		log += " ERROR OpenGL version too low, this thing may not work correctly!\n";
 	}
 	
 	log += "\n support routines: ";
@@ -119,12 +119,12 @@ bool GLSLBase::diagnose(std::string& log)
 	
 	if(supported != 1) return 0;
 
-	log += "\n OGL diagnosed";
+	log += "\n OpenGL diagnosed";
 	
 	return 1;
 }
 
-bool GLSLBase::isDiagnosed() const 
+bool GLSLBase::isDiagnosed() 
 { return CoreVersion > 0; }
 
 char GLSLBase::initializeShaders(std::string& log)

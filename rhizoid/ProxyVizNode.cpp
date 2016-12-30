@@ -12,6 +12,7 @@
 #include <maya/MFnCamera.h>
 #include <EnvVar.h>
 #include <AHelper.h>
+#include <mama/AttributeHelper.h>
 #include <ExampVox.h>
 
 namespace aphid {
@@ -232,7 +233,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	ExampVox * defBox = plantExample(0);
 	updateGeomBox(defBox, thisNode);
-	drawWireBox(defBox->geomCenterV(), defBox->geomScale() );
+	defBox->drawWiredBound();
+	//drawWireBox(defBox->geomCenterV(), defBox->geomScale() );
 	Matrix44F mat;
 	mat.setFrontOrientation(Vector3F::YAxis);
 	mat.scaleBy(defBox->geomSize() );
@@ -613,57 +615,47 @@ void ProxyViz::saveInternal()
 	
 	savePlants(plantTms, plantIds, plantTris, plantCoords, plantOffsets);
 	
-	MFnPointArrayData tmFn;
-	MObject otm = tmFn.create(plantTms);
 	MPlug tmPlug(thisMObject(), aplantTransformCache);
-	tmPlug.setValue(otm);
+	AttributeHelper::SaveArrayDataPlug<MPointArray, MFnPointArrayData >(plantTms, tmPlug);
 	
-	MFnIntArrayData idFn;
-	MObject oid = idFn.create(plantIds);
 	MPlug idPlug(thisMObject(), aplantIdCache);
-	idPlug.setValue(oid);
+	AttributeHelper::SaveArrayDataPlug<MIntArray, MFnIntArrayData >(plantIds, idPlug);
 	
-	MFnIntArrayData triFn;
-	MObject otri = idFn.create(plantTris);
 	MPlug triPlug(thisMObject(), aplantTriangleIdCache);
-	triPlug.setValue(otri);
+	AttributeHelper::SaveArrayDataPlug<MIntArray, MFnIntArrayData >(plantTris, triPlug);
 	
-	MFnVectorArrayData crdFn;
-	MObject ocrd = crdFn.create(plantCoords);
 	MPlug crdPlug(thisMObject(), aplantTriangleCoordCache);
-	crdPlug.setValue(ocrd);
+	AttributeHelper::SaveArrayDataPlug<MVectorArray, MFnVectorArrayData >(plantCoords, crdPlug);
 	
-	MFnVectorArrayData cotFn;
-	MObject ocot = cotFn.create(plantOffsets);
 	MPlug cotPlug(thisMObject(), aplantOffsetCache);
-	cotPlug.setValue(ocot);
+	AttributeHelper::SaveArrayDataPlug<MVectorArray, MFnVectorArrayData >(plantOffsets, cotPlug);
 }
 
 bool ProxyViz::loadInternal(MDataBlock& block)
 {
 	MDataHandle tmH = block.inputValue(aplantTransformCache);
-	MFnPointArrayData tmFn(tmH.data());
-	MPointArray plantTms = tmFn.array();
+	MPointArray plantTms;
+	AttributeHelper::LoadArrayDataHandle<MPointArray, MFnPointArrayData >(plantTms, tmH);
 	if(plantTms.length() < 1) return false;
 	
 	MDataHandle idH = block.inputValue(aplantIdCache);
-	MFnIntArrayData idFn(idH.data());
-	MIntArray plantIds = idFn.array();
+	MIntArray plantIds;
+	AttributeHelper::LoadArrayDataHandle<MIntArray, MFnIntArrayData >(plantIds, idH);
 	if(plantIds.length() < 1) return false;
 	
 	MDataHandle triH = block.inputValue(aplantTriangleIdCache);
-	MFnIntArrayData triFn(triH.data());
-	MIntArray plantTris = triFn.array();
+	MIntArray plantTris;
+	AttributeHelper::LoadArrayDataHandle<MIntArray, MFnIntArrayData >(plantTris, triH);
 	if(plantTris.length() < 1) return false;
 	
 	MDataHandle crdH = block.inputValue(aplantTriangleCoordCache);
-	MFnVectorArrayData crdFn(crdH.data());
-	MVectorArray plantCoords = crdFn.array();
+	MVectorArray plantCoords;
+	AttributeHelper::LoadArrayDataHandle<MVectorArray, MFnVectorArrayData >(plantCoords, crdH);
 	if(plantCoords.length() < 1) return false;
 	
 	MDataHandle cotH = block.inputValue(aplantOffsetCache);
-	MFnVectorArrayData cotFn(cotH.data());
-	MVectorArray plantOffsets = cotFn.array();
+	MVectorArray plantOffsets;
+	AttributeHelper::LoadArrayDataHandle<MVectorArray, MFnVectorArrayData >(plantOffsets, cotH);
 		
 	return loadPlants(plantTms, plantIds, plantTris, plantCoords, plantOffsets);
 }
@@ -853,9 +845,7 @@ void ProxyViz::beginPickInView()
 void ProxyViz::processPickInView(const int & plantTyp)
 {
 	useActiveView();
-/// not needed?
-//  _viewport.refresh();
-	
+
 	MObject node = thisMObject();
 	
 	MPlug gateHighPlg(node, alodgatehigh);
@@ -863,12 +853,6 @@ void ProxyViz::processPickInView(const int & plantTyp)
 	
 	MPlug gateLowPlg(node, alodgatelow);
 	float gateLow = gateLowPlg.asFloat();
-	
-//	MPlug gcPlg(node, agroupcount);
-//	int groupCount = gcPlg.asInt();
-	
-//	MPlug giPlg(node, ainstanceId);
-//	int groupId = giPlg.asInt();
 	
 	MPlug perPlg(node, aconvertPercentage);
 	double percentage = perPlg.asDouble();

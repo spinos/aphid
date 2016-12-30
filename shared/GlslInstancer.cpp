@@ -40,7 +40,8 @@ const char* GlslLegacyInstancer::vertexProgramSource() const
 "   normalWorld.z = dot(gl_MultiTexCoord3.xyz, gl_Normal);"
 "   normalWorld = normalize(normalWorld);"
 "   shadingNormal = normalWorld;"
-"	gl_FrontColor = gl_Color;"
+"	gl_FrontColor = gl_MultiTexCoord4;"
+"	gl_BackColor = vec4(1.0, 1.0, 0.0, 1.0);"
 "}";
 }
 
@@ -53,7 +54,7 @@ const char* GlslLegacyInstancer::fragmentProgramSource() const
 "{"
 "   float ldn = dot(shadingNormal, distantLightVec);"
 "   if(ldn < 0.0) ldn = 0.0;"
-"		gl_FragColor = gl_Color * vec4 (0.2 + 0.8 * ldn );"
+"	gl_FragColor = gl_Color * vec4 (0.2 + 0.8 * ldn );"
 "}";
 }
 
@@ -86,7 +87,7 @@ const char* GlslInstancer::vertexProgramSource() const
 	return "#version 330\n"
 "uniform mat4 ModelViewMatrix;"
 "uniform mat4 ProjectionMatrix;"
-// "layout(locationÊ=Ê0)ÊinÊvec3Êin_position;"
+// "layout(locationÂ =Â 0)Â inÂ vec3Â in_position;"
 "void main()"
 "{"
 // "		gl_Position = ftransform();"

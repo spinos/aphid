@@ -129,7 +129,8 @@ void DrawForest::drawWiredPlant(PlantData * data)
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf((const GLfloat*)m_transbuf);
 	const ExampVox * v = plantExample(*data->t3);
-	drawWireBox(v->geomCenterV(), v->geomScale() );
+	v->drawWiredBound();
+	//drawWireBox(v->geomCenterV(), v->geomScale() );
 		
 	glPopMatrix();
 }
@@ -141,7 +142,7 @@ void DrawForest::drawPlants()
     sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	const float margin = g->gridSize() * .1f;
-	glDepthFunc(GL_LEQUAL);
+	//glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT);
 	glEnable(GL_LIGHTING);
 	try {
@@ -149,8 +150,9 @@ void DrawForest::drawPlants()
 	while(!g->end() ) {
         BoundingBox cellBox = g->coordToGridBBox(g->key() );
         cellBox.expand(margin);
-        if(!cullByFrustum(cellBox ) )
+        if(!cullByFrustum(cellBox ) ) {
             drawPlants(g->value() );
+		}
 		g->next();
 	}
 	} catch (...) {
@@ -185,13 +187,15 @@ void DrawForest::drawPlant(PlantData * data)
 void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 {	
 	if(m_showVoxLodThresold >.9999f) {
-        drawSolidBox(v->geomCenterV(), v->geomScale() );
+        //drawSolidBox(v->geomCenterV(), v->geomScale() );
+		v->drawSolidBound();
 		return;
     }
 	
 /// no box or dop
 	if(v->numBoxes() < 1 && v->dopBufLength() < 1) {
-		drawSolidBox(v->geomCenterV(), v->geomScale() );
+		//drawSolidBox(v->geomCenterV(), v->geomScale() );
+		v->drawSolidBound();
 		return;
 	}
 	
@@ -205,17 +209,17 @@ void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 	float camZ = cameraDepth(worldP);
 	float lod;
 	if(cullByLod(camZ, r, m_showVoxLodThresold, 1.9f, lod) ) {
-		drawSolidBox(v->geomCenterV(), v->geomScale() );
+		//drawSolidBox(v->geomCenterV(), v->geomScale() );
+		v->drawSolidBound();
 		return;
 	}
 	
 /// draw dop first, then box
-	if(v->dopBufLength() )
-		drawSolidBoxArray(v->dopPositionBuf(), v->dopNormalBuf(), 
-						v->dopBufLength() );
-	else
-		drawSolidBoxArray(v->boxPositionBuf(), v->boxNormalBuf(), 
-						v->boxBufLength() );
+	//if(v->dopBufLength() )
+	//	drawSolidBoxArray(v->dopPositionBuf(), v->dopNormalBuf(), 
+	//					v->dopBufLength() );
+	v->drawSolidTriangles();
+	
 }
 
 void DrawForest::drawGridBounding()
@@ -248,7 +252,8 @@ void DrawForest::drawPlantBox(PlantData * data)
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf((const GLfloat*)m_transbuf);
 	const ExampVox * v = plantExample(*data->t3);
-	drawWireBox(v->geomCenterV(), v->geomScale() );
+	//drawWireBox(v->geomCenterV(), v->geomScale() );
+	v->drawWiredBound();
 		
 	glPopMatrix();
 }
