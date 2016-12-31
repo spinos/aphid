@@ -19,6 +19,8 @@ class QSlider;
 class QIntValidator;
 QT_END_NAMESPACE
 
+namespace aphid {
+
 class QIntEditSlider : public QWidget 
 {
 	Q_OBJECT
@@ -48,4 +50,5 @@ private:
 	int m_bottomValue, m_topValue;
 };
 
+}
 #endif

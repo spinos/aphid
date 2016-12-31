@@ -14,20 +14,31 @@ namespace aphid {
 class Airfoil {
 
 /// NACA Four-Digit Series
-/// c maximum chord (airfoil length)
-/// m maximum camber
-/// p position of maximum camber
-/// t maximum thickness
+/// c maximum chord (airfoil length) in meters
+/// m maximum camber in meters
+/// p position of maximum camber in percentages
+/// t maximum thickness in meters
 
 	float m_c, m_m, m_p, m_t;
  
 public:
 	Airfoil();
+/// m in percentages
+/// p in tenths [0,9]
+/// t1 in tenths [0,9]
+/// t2 in percentages [0,9]
 	Airfoil(const float & c,
 			const int & m,
 			const int & p,
 			const int & t1,
 			const int & t2);
+/// m relative to c [0,1]
+/// p [0,1]
+/// t [0,1]
+	Airfoil(const float & c,
+			const float & m,
+			const float & p,
+			const float & t);
 	virtual ~Airfoil();
 	
 	void setChord(const float & c);
@@ -42,7 +53,7 @@ public:
 	const float & chord() const;
 	
 /// mean camber line coordinate
-/// x [0, c]
+/// x [0, 1]
 	float calcYc(const float & x) const;
 /// thickness distribution above and below the camber line	
 /// x [0, 1]

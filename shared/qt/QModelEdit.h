@@ -10,6 +10,8 @@
 #pragma once
 #include <QtGui>
 
+namespace aphid {
+
 class QModelEdit : public QLineEdit
 {
     Q_OBJECT
@@ -25,3 +27,5 @@ protected:
 private:
 	QModelIndex m_index;
 };
+
+}

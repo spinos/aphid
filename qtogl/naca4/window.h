@@ -7,7 +7,7 @@ QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
 class GLWidget;
-//class GpdfxDialog;
+class ParamDialog;
 
 class Window : public QMainWindow
 {
@@ -23,7 +23,7 @@ protected:
 private:
 
     GLWidget *glWidget;
-    //GpdfxDialog * m_xDlg;
+    ParamDialog * m_xDlg;
 	
 };
 #endif

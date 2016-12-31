@@ -14,6 +14,9 @@
 QT_BEGIN_NAMESPACE
 class QLabel;
 QT_END_NAMESPACE
+
+namespace aphid {
+
 class QAngleEdit;
 class QPolarCoordinateEdit : public QWidget 
 {
@@ -39,4 +42,6 @@ private:
 	QAngleEdit * m_theta;
 	QAngleEdit * m_phi;
 };
+
+}
 #endif

@@ -9,6 +9,8 @@
 #include <QtGui>
 #include "QIntEditSlider.h"
 
+namespace aphid {
+
 QIntEditSlider::QIntEditSlider(const QString & name, QWidget *parent)
     : QWidget(parent)
 {
@@ -87,3 +89,4 @@ void QIntEditSlider::setEditValue(int x)
 	emit valueChanged(x);
 }
 
+}

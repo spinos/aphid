@@ -1,6 +1,8 @@
 #pragma once
 #include "QModelEdit.h"
 
+namespace aphid {
+
 class QFileNameEdit : public QModelEdit
 {
     Q_OBJECT
@@ -18,4 +20,6 @@ protected:
 private:
     std::string m_fileName;
 };
+
+}
 

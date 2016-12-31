@@ -19,6 +19,8 @@ class QSlider;
 class QDoubleValidator;
 QT_END_NAMESPACE
 
+namespace aphid {
+
 class QDoubleEditSlider : public QWidget 
 {
 	Q_OBJECT
@@ -50,4 +52,5 @@ private:
 	double m_slideMin, m_slideMax;
 };
 
+}
 #endif

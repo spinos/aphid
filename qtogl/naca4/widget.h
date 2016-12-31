@@ -2,19 +2,7 @@
 #define NACA_4_WIDGET_H
 
 #include <Base3DView.h>
-
-namespace aphid {
-
-template<typename T>
-class DenseMatrix;
-
-namespace gpr {
-template<typename T>
-class GPInterpolate;
-
-}
-
-}
+#include <math/ATypes.h>
 
 class GLWidget : public aphid::Base3DView
 {
@@ -29,11 +17,12 @@ protected:
     virtual void clientDraw();
 
 public slots:
-	void recvXValue(QPointF vx);
+	void recvParam(aphid::Float3 v);
 	
 signals:
 
 private:
+	aphid::Float3 m_cpt;
 	
 };
 

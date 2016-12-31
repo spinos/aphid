@@ -2,21 +2,22 @@
 #include <GeoDrawer.h>
 #include <QtOpenGL>
 #include "widget.h"
-#include <math/linspace.h>
 #include <geom/Airfoil.h>
+#include <math/linspace.h>
 
 using namespace aphid;
 
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
-{
-}
+{}
 
 GLWidget::~GLWidget()
 {}
 
 void GLWidget::clientInit()
-{}
+{
+	m_cpt.set(.02f, .4f, .15f);
+}
 
 void GLWidget::clientDraw()
 {
@@ -24,7 +25,7 @@ void GLWidget::clientDraw()
 
 	getDrawer()->setColor(0.f, .34f, .55f);
 
-	Airfoil airfoil(20.f, 1, 3, 1, 5);
+	Airfoil airfoil(32.f, m_cpt.x, m_cpt.y, m_cpt.z);
 	const float & ch = airfoil.chord();
 	
 	const int n = 50;
@@ -33,7 +34,7 @@ void GLWidget::clientDraw()
 	float * x = new float[n];
 	linspace<float>(x, 0.f, ch, n);
 	for(int i=0;i<n;++i) {
-		yc[i] = airfoil.calcYc(x[i]);
+		yc[i] = airfoil.calcYc(x[i] / ch);
 		yt[i] = airfoil.calcYt(x[i] / ch);
 	}	
 	
@@ -70,8 +71,8 @@ void GLWidget::clientDraw()
 	delete[] yt;
 }
 
-void GLWidget::recvXValue(QPointF vx)
+void GLWidget::recvParam(Float3 vx)
 { 
-	float xtest[2] = {vx.x(), vx.y()};
+	m_cpt = vx;
 	update();
 }

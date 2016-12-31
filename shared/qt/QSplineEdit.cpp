@@ -9,6 +9,8 @@
 #include <QtGui>
 #include "QSplineEdit.h"
 
+namespace aphid {
+
 QSplineEdit::QSplineEdit(QWidget *parent)
 	: QWidget(parent)
 {
@@ -227,5 +229,7 @@ void QSplineEdit::moveControlRight(int x, int y)
 	m_endCvx = toValueSpaceX(x);
 	m_endCvy = toValueSpaceY(y);
 	emit rightControlChanged(QPointF(m_endCvx, m_endCvy));
+}
+
 }
 //:~

@@ -30,6 +30,17 @@ Airfoil::Airfoil(const float & c,
 	set4Digit(m, p, t1, t2);
 }
 
+Airfoil::Airfoil(const float & c,
+			const float & m,
+			const float & p,
+			const float & t)
+{
+	m_c = c;
+	m_m = m * m_c;
+	m_p = p;
+	m_t = t * m_c;
+}
+
 Airfoil::~Airfoil()
 {}
 
@@ -42,7 +53,7 @@ void Airfoil::set4Digit(const int & m,
 					const int & t2)
 {
 	m_m = .01f * m * m_c;
-	m_p = .1f * p * m_c;
+	m_p = .1f * p;
 	m_t = (.1f * t1 + .01f * t2) * m_c;
 }
 
@@ -85,8 +96,8 @@ float Airfoil::calcTheta(const float & x) const
 		x1 = m_c;
 	}
 	
-	float yc0 = calcYc(x0);
-	float yc1 = calcYc(x1);
+	float yc0 = calcYc(x0 / m_c);
+	float yc1 = calcYc(x1 / m_c);
 	
 	return atan((yc1 - yc0) / dx);
 }

@@ -9,6 +9,8 @@
 #include <QtGui>
 #include "QDoubleEditSlider.h"
 
+namespace aphid {
+
 QDoubleEditSlider::QDoubleEditSlider(const QString & name, QWidget *parent)
     : QWidget(parent)
 {
@@ -101,3 +103,4 @@ void QDoubleEditSlider::convertEditValue(int x)
 	setEditValue(d);
 }
 
+}

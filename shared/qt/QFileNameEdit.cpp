@@ -1,5 +1,7 @@
 #include "QFileNameEdit.h"
 
+namespace aphid {
+
 QFileNameEdit::QFileNameEdit(const QModelIndex & idx, QWidget * parent) : QModelEdit(idx, parent) {}
 
 void QFileNameEdit::setValue(const std::string & x)
@@ -25,5 +27,7 @@ std::string QFileNameEdit::pickFile()
 							&selectedFilter,
 							QFileDialog::DontUseNativeDialog);
 	return fileName.toUtf8().data();
+}
+
 }
 

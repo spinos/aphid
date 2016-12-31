@@ -1,5 +1,5 @@
 /*
- *  QIntEdit.h
+ *  QDoubleEdit.h
  *  mallard
  *
  *  Created by jian zhang on 1/18/14.
@@ -10,13 +10,15 @@
 #pragma once
 #include "QModelEdit.h"
 
-class QIntEdit : public QModelEdit
+namespace aphid {
+
+class QDoubleEdit : public QModelEdit
 {
     Q_OBJECT
 public:
-    QIntEdit(const QModelIndex & idx, QWidget * parent = 0);
-    void setValue(int x);
-	int value();
+    QDoubleEdit(const QModelIndex & idx, QWidget * parent = 0);
+    void setValue(double x);
+	double value();
 
 public slots:
     
@@ -25,6 +27,8 @@ signals:
 protected:
     
 private:
-	QIntValidator m_validate;
-    int m_value;
+	QDoubleValidator m_validate;
+    double m_value;
 };
+
+}

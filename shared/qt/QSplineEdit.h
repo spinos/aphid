@@ -15,6 +15,8 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
+namespace aphid {
+
 class QSplineEdit : public QWidget 
 {
 	Q_OBJECT
@@ -67,4 +69,6 @@ private:
 	
 	SelectedHandle m_selected;
 };
+
+}
 #endif

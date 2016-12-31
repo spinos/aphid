@@ -9,6 +9,8 @@
 
 #include "QIntEdit.h"
 
+namespace aphid {
+
 QIntEdit::QIntEdit(const QModelIndex & idx, QWidget * parent) : QModelEdit(idx, parent)
 {
 	setValidator(&m_validate);
@@ -26,4 +28,6 @@ int QIntEdit::value()
 {
 	m_value = text().toInt();
 	return m_value;
+}
+
 }

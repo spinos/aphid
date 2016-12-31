@@ -1,8 +1,13 @@
 set (NACA4_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+paramdialog.h
+paramwidget.h
 window.h
 widget.h)
 
 set (NACA4_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+${APHID_DIR}/shared/qt/QDoubleEditSlider.cpp 
+paramdialog.cpp
+paramwidget.cpp
 widget.cpp
 window.cpp
 main.cpp)

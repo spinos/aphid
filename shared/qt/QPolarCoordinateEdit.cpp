@@ -10,6 +10,8 @@
 #include "QPolarCoordinateEdit.h"
 #include "QAngleEdit.h"
 
+namespace aphid {
+
 QPolarCoordinateEdit::QPolarCoordinateEdit(const QString & name, QWidget *parent)
 	: QWidget(parent)
 {
@@ -43,4 +45,6 @@ void QPolarCoordinateEdit::sendPhi(double x)
 
 void QPolarCoordinateEdit::sendTheta(double x)
 { emit valueChanged(QPointF(m_phi->value(), x)); }
+
+}
 //:~

@@ -9,6 +9,8 @@
 
 #include "QModelEdit.h"
 
+namespace aphid {
+
 QModelEdit::QModelEdit(const QModelIndex & idx, QWidget * parent) : QLineEdit(parent)
 {
 	m_index = idx;
@@ -17,4 +19,6 @@ QModelEdit::QModelEdit(const QModelIndex & idx, QWidget * parent) : QLineEdit(pa
 QModelIndex QModelEdit::index() const
 {
 	return m_index;
+}
+
 }

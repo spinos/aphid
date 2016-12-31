@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "widget.h"
 #include "window.h"
-//#include "gpdfxdialog.h"
+#include "paramdialog.h"
 
 Window::Window()
 {
@@ -14,12 +14,12 @@ Window::Window()
 	setCentralWidget(glWidget);
     setWindowTitle(tr("NACA 4-digit Series"));
 	
-	//m_xDlg = new GpdfxDialog(this);
-    //m_xDlg->show();
-	//m_xDlg->move(0,0);
+	m_xDlg = new ParamDialog(this);
+    m_xDlg->show();
+	m_xDlg->move(0,0);
 	
-	//connect(m_xDlg, SIGNAL(xValueChanged(QPointF) ), 
-	//		glWidget, SLOT(recvXValue(QPointF) ) );
+	connect(m_xDlg, SIGNAL(paramChanged(aphid::Float3) ), 
+			glWidget, SLOT(recvParam(aphid::Float3) ) );
     
 }
 

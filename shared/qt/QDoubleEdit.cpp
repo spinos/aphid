@@ -9,6 +9,8 @@
 
 #include "QDoubleEdit.h"
 
+namespace aphid {
+
 QDoubleEdit::QDoubleEdit(const QModelIndex & idx, QWidget * parent) : QModelEdit(idx, parent)
 {
 	setValidator(&m_validate);
@@ -26,4 +28,6 @@ double QDoubleEdit::value()
 {
 	m_value = text().toDouble();
 	return m_value;
+}
+
 }
