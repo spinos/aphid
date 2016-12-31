@@ -10,7 +10,7 @@ ENDIF ()
 
 IF (WIN32)
 include_directories(D:/usr/libxml2/include D:/usr/HDF5/include)
-ADD_DEFINITIONS( -DNDEBUG -D_WIN32_WINDOWS 
+ADD_DEFINITIONS(-DWIN32 -DNDEBUG -D_WIN32_WINDOWS 
 ## http://www.boost.org/doc/libs/1_49_0/libs/config/doc/html/boost_config/boost_macro_reference.html
 -DBOOST_HAS_TR1)
 ## http://stackoverflow.com/questions/3499487/replacing-native-vs-2010-vc10-tr1-libraries-with-boost-tr1

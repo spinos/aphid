@@ -149,9 +149,8 @@ void DrawForest::drawSolidPlants()
 	}
 	
 	const float margin = g->gridSize() * .1f;
-	//glDepthFunc(GL_LEQUAL);
+	
 	glPushAttrib(GL_LIGHTING_BIT);
-	//glEnable(GL_LIGHTING);
 	
 	m_instancer->programBegin();
 	
@@ -159,7 +158,7 @@ void DrawForest::drawSolidPlants()
 	g->begin();
 	while(!g->end() ) {
         BoundingBox cellBox = g->coordToGridBBox(g->key() );
-        cellBox.expand(margin);
+		cellBox.expand(margin);
         if(!cullByFrustum(cellBox ) ) {
             drawPlants(g->value() );
 		}
@@ -200,14 +199,12 @@ void DrawForest::drawPlant(PlantData * data)
 void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 {	
 	if(m_showVoxLodThresold >.9999f) {
-        //drawSolidBox(v->geomCenterV(), v->geomScale() );
-		v->drawSolidBound();
+        v->drawSolidBound();
 		return;
     }
 	
 /// no box or dop
 	if(v->numBoxes() < 1 && v->dopBufLength() < 1) {
-		//drawSolidBox(v->geomCenterV(), v->geomScale() );
 		v->drawSolidBound();
 		return;
 	}
@@ -222,15 +219,10 @@ void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 	float camZ = cameraDepth(worldP);
 	float lod;
 	if(cullByLod(camZ, r, m_showVoxLodThresold, 1.9f, lod) ) {
-		//drawSolidBox(v->geomCenterV(), v->geomScale() );
 		v->drawSolidBound();
 		return;
 	}
 	
-/// draw dop first, then box
-	//if(v->dopBufLength() )
-	//	drawSolidBoxArray(v->dopPositionBuf(), v->dopNormalBuf(), 
-	//					v->dopBufLength() );
 	v->drawSolidTriangles();
 	
 }

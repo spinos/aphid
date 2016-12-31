@@ -239,3 +239,5 @@ target_link_libraries (gpdeform ${LAPACK_LIBRARY})
 target_link_libraries (gpdeform ${F2C_LIBRARY})
 
 target_link_libraries (gpdeform ${Boost_DATE_TIME_LIBRARY})
+
+add_subdirectory(naca4)
