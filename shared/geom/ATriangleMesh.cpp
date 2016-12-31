@@ -15,12 +15,10 @@
 namespace aphid {
 
 ATriangleMesh::ATriangleMesh() 
-{
-}
+{}
 
 ATriangleMesh::~ATriangleMesh() 
-{
-}
+{}
 
 const TypedEntity::Type ATriangleMesh::type() const
 { return TTriangleMesh; }

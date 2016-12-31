@@ -1,9 +1,9 @@
 #include <QtGui>
-#include <GeoDrawer.h>
 #include <QtOpenGL>
 #include "widget.h"
-#include <geom/Airfoil.h>
+#include <geom/AirfoilMesh.h>
 #include <math/linspace.h>
+#include <GeoDrawer.h>
 
 using namespace aphid;
 
@@ -21,10 +21,12 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    getDrawer()->m_wireProfile.apply();
+	//getDrawer()->m_wireProfile.apply();
+	getDrawer()->m_surfaceProfile.apply();
 
-	getDrawer()->setColor(0.f, .34f, .55f);
+	getDrawer()->setColor(0.f, .34f, .45f);
 
+#if 0
 	Airfoil airfoil(32.f, m_cpt.x, m_cpt.y, m_cpt.z);
 	const float & ch = airfoil.chord();
 	
@@ -39,7 +41,7 @@ void GLWidget::clientDraw()
 	}	
 	
 	glBegin(GL_LINE_STRIP);
-	
+/// camber line
 	for(int i=0;i<n;++i) {
 		glVertex3f(x[i], yc[i], 0.f);
 	}
@@ -49,7 +51,7 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(0.f, 0.f, .55f);
 	
 	glBegin(GL_LINE_STRIP);
-	
+/// up	
 	for(int i=0;i<n;++i) {
 		float theta = airfoil.calcTheta(x[i]);
 		glVertex3f(x[i] - yt[i] * sin(theta), yc[i] + yt[i] * cos(theta), 0.f);
@@ -58,7 +60,7 @@ void GLWidget::clientDraw()
 	glEnd();
 	
 	glBegin(GL_LINE_STRIP);
-	
+/// down	
 	for(int i=0;i<n;++i) {
 		float theta = airfoil.calcTheta(x[i]);
 		glVertex3f(x[i] + yt[i] * sin(theta), yc[i] - yt[i]* cos(theta), 0.f);
@@ -69,6 +71,18 @@ void GLWidget::clientDraw()
 	delete[] x;
 	delete[] yc;
 	delete[] yt;
+#endif
+
+	AirfoilMesh msh(32.f, m_cpt.x, m_cpt.y, m_cpt.z);
+	msh.tessellate();
+	// msh.flipAlongChord();
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)msh.points() );
+        glDrawElements(GL_TRIANGLES, msh.numIndices(), GL_UNSIGNED_INT, msh.indices());
+        
+        glDisableClientState(GL_VERTEX_ARRAY);
+
 }
 
 void GLWidget::recvParam(Float3 vx)

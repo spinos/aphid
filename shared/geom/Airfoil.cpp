@@ -35,10 +35,7 @@ Airfoil::Airfoil(const float & c,
 			const float & p,
 			const float & t)
 {
-	m_c = c;
-	m_m = m * m_c;
-	m_p = p;
-	m_t = t * m_c;
+	setCMPT(c, m, p, t);
 }
 
 Airfoil::~Airfoil()
@@ -57,8 +54,25 @@ void Airfoil::set4Digit(const int & m,
 	m_t = (.1f * t1 + .01f * t2) * m_c;
 }
 
+void Airfoil::setCMPT(const float & c,
+			const float & m,
+			const float & p,
+			const float & t)
+{
+	m_c = c;
+	m_m = m * m_c;
+	m_p = p;
+	m_t = t * m_c;
+}
+
 const float & Airfoil::chord() const
 { return m_c; }
+
+const float Airfoil::camberRatio() const
+{ return m_m / m_c; }
+
+const float & Airfoil::position() const
+{ return m_p; }
 
 float Airfoil::calcYc(const float & x) const
 {

@@ -1,5 +1,5 @@
-#ifndef APH_TRIANGLE_MESH_H
-#define APH_TRIANGLE_MESH_H
+#ifndef APH_GEOM_TRIANGLE_MESH_H
+#define APH_GEOM_TRIANGLE_MESH_H
 
 /*
  *  ATriangleMesh.h
@@ -44,4 +44,4 @@ private:
 };
 
 }
-#endif        //  #ifndef APH_TRIANGLE_MESH_H
+#endif        //  #ifndef APH_GEOM_TRIANGLE_MESH_H

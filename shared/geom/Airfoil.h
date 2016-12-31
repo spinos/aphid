@@ -1,6 +1,5 @@
 /*
  *  Airfoil.h
- *  proxyPaint
  *
  *  Created by jian zhang on 12/31/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
@@ -49,8 +48,18 @@ public:
 					const int & p,
 					const int &t1,
 					const int & t2);
+/// m relative to c [0,1]
+/// p [0,1]
+/// t [0,1]					
+	void setCMPT(const float & c,
+			const float & m,
+			const float & p,
+			const float & t);
 		
 	const float & chord() const;
+/// maximum camber in percentage of the chord
+	const float camberRatio() const;
+	const float & position() const;
 	
 /// mean camber line coordinate
 /// x [0, 1]

@@ -44,6 +44,7 @@ protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);
 	void setNumIndices(unsigned n);
+	
 private:
 	BaseBuffer * m_points;
 	BaseBuffer * m_normals;
