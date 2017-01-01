@@ -531,7 +531,7 @@ MStatus AHelper::createTimeAttrInternal(MObject& attr, const MString& nameLong,c
 	return status;
 }
 
-MMatrix AHelper::getMatrixAttr(const MObject& node, MObject& attr)
+MMatrix AHelper::getMatrixAttr(const MObject& node, const MObject& attr)
 {
 	MPlug matplg( node, attr );
 	MObject matobj;
@@ -540,7 +540,7 @@ MMatrix AHelper::getMatrixAttr(const MObject& node, MObject& attr)
     	return matdata.matrix();
 }
 
-MString AHelper::getStringAttr(const MObject& node, MObject& attr)
+MString AHelper::getStringAttr(const MObject& node, const MObject& attr)
 {
 	MPlug strplg( node, attr );
 	MString res;

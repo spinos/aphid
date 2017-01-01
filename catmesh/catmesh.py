@@ -71,5 +71,88 @@ def CatchSelectedMesh(fileName, prefix):
     print('catched mesh into file: %s' % fileName)
     return True
     
+def writeTrianglePs(rec, trips):
+    n = trips.length()
+    i = 0;
+    for i in range(0, n):
+        ap = trips[i]
+        rec.write("%ff, %ff, %ff,\n" % (ap.x, ap.y, ap.z))
+        
+        
+def writeTriangleNs(rec, trips):
+    n = trips.length()
+    i = 0;
+    for i in range(0, n/3):
+        ap = trips[i*3]
+        bp = trips[i*3+1]
+        cp = trips[i*3+2]
+        
+        abv = bp - ap
+        acv = cp - ap
+        nv = abv ^ acv
+        nv.normalize()
+        
+        rec.write("%ff, %ff, %ff,\n" % (nv.x, nv.y, nv.z))
+        rec.write("%ff, %ff, %ff,\n" % (nv.x, nv.y, nv.z))
+        rec.write("%ff, %ff, %ff,\n" % (nv.x, nv.y, nv.z))
+        
+   
+def CatchSelectedMeshFV(fileName, prefix):
+    mesh = om.MDagPath()
+    if not GetSelectedMesh(mesh):
+        return False
+        
+    print('selected mesh %s' % mesh.fullPathName())
+    
+    itpoly = om.MItMeshPolygon(mesh.node())
+    print('face count: %i' % itpoly.count())
+    
+    ntriv = 0
+    while not itpoly.isDone():
+        trips = om.MPointArray()
+        triind = om.MIntArray()
+        itpoly.getTriangles(trips, triind)
+        
+        ntriv += triind.length()
+        
+        itpoly.next()
+        
+    print('triangle vertices count: %i' % ntriv )
+    
+    rec = open(fileName, 'w')
+    
+    rec.write('static const int s%sNumTriangleFVVertices = %i;\n' % (prefix, ntriv ) )
+    rec.write('static const float s%sTriangleFVVertices[] = {' % prefix)
+    
+    itpoly.reset()
+    while not itpoly.isDone():
+        trips = om.MPointArray()
+        triind = om.MIntArray()
+        itpoly.getTriangles(trips, triind)
+        
+        writeTrianglePs(rec, trips)
+        
+        itpoly.next()
+        
+    rec.write('};\n')
+    
+    
+    rec.write('static const float s%sTriangleFVNormals[] = {' % prefix)
+    
+    itpoly.reset()
+    while not itpoly.isDone():
+        trips = om.MPointArray()
+        triind = om.MIntArray()
+        itpoly.getTriangles(trips, triind)
+        
+        writeTriangleNs(rec, trips)
+        
+        itpoly.next()
+        
+    rec.write('};\n')
+      
+    rec.close()
+    print('catched mesh into file: %s' % fileName)
+    return True
 
-CatchSelectedMesh('D:/aphid/wheeled/Silverstone.h', 'Silverstone')
+CatchSelectedMeshFV('/Users/jianzhang/aphid/data/box.h', 'box')

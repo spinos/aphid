@@ -4,6 +4,7 @@
 #include <geom/AirfoilMesh.h>
 #include <math/linspace.h>
 #include <GeoDrawer.h>
+#include <ogl/DrawArrow.h>
 
 using namespace aphid;
 
@@ -83,6 +84,9 @@ void GLWidget::clientDraw()
         
         glDisableClientState(GL_VERTEX_ARRAY);
 
+	Matrix44F space;
+	DrawArrow da;
+	da.drawCoordinateAt(&space);
 }
 
 void GLWidget::recvParam(Float3 vx)

@@ -76,8 +76,8 @@ public:
 	
 	static void getNamedObject(MString& name, MObject& obj);
 	
-	static MMatrix getMatrixAttr(const MObject& node, MObject& attr);
-	static MString getStringAttr(const MObject& node, MObject& attr);
+	static MMatrix getMatrixAttr(const MObject& node, const MObject& attr);
+	static MString getStringAttr(const MObject& node, const MObject& attr);
 	
 	static MVectorArray getVectorArrayAttr(MDataBlock& data, MObject& attr);
 	static MDoubleArray getDoubleArrayAttr(MDataBlock& data, MObject& attr);
