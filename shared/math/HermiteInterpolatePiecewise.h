@@ -33,6 +33,8 @@ public:
 /// x [0,1] within idx-th piece
 	T2 interpolate(const int & idx,
 				const T1 & x) const;
+				
+	const int & numPieces() const;
 	
 protected:
 
@@ -105,6 +107,10 @@ T2 HermiteInterpolatePiecewise<T1, T2>::interpolate(const int & idx,
              m_tg[i+1] * h4);
 			 
 }
+
+template<typename T1, typename T2>
+const int & HermiteInterpolatePiecewise<T1, T2>::numPieces() const
+{ return m_numPieces; }
 
 }
 #endif

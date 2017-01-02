@@ -135,6 +135,10 @@ public:
 							MFnNumericData::Type t);
 	static bool IsDirectAnimated(const MPlug & attrib);
 	
+	static MStatus CreateVector3FAttrib(MObject & a,
+						MObject & ax, MObject & ay, MObject & az,
+						const MString & longName, const MString & shortName,
+						const float & dx, const float & dy, const float & dz);
 };
 
 }

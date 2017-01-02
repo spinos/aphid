@@ -336,5 +336,32 @@ bool AttributeHelper::IsDirectAnimated(const MPlug & attrib)
 			node.hasFn( MFn::kAnimCurveTimeToUnitless ) );
 }
 
+MStatus AttributeHelper::CreateVector3FAttrib(MObject & a,
+						MObject & ax, MObject & ay, MObject & az,
+						const MString & longName, const MString & shortName,
+						const float & dx, const float & dy, const float & dz)
+{
+	MFnNumericAttribute numFn;
+	
+	ax = numFn.create( longName+"x", shortName+"x", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+
+	ay = numFn.create( longName+"y", shortName+"y", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+
+	az = numFn.create( longName+"z", shortName+"z", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+
+	a = numFn.create( longName, shortName, ax, ay, az );
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(dx, dy, dz);
+	
+	return MS::kSuccess;
+}
+
 }
 //:~
