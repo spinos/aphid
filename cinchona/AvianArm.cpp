@@ -15,7 +15,7 @@ using namespace aphid;
 
 AvianArm::AvianArm()
 {
-	m_skeletonMatrices = new Matrix44F[7];
+	m_skeletonMatrices = new Matrix44F[11];
 	m_leadingLigament = new Ligament(3);
 	m_trailingLigament = new Ligament(4);
 	m_secondDigitLength = 2.f;
@@ -37,11 +37,26 @@ const Matrix44F & AvianArm::skeletonMatrix(const int & idx) const
 Matrix44F * AvianArm::skeletonMatricesR()
 { return m_skeletonMatrices; }
 
-Matrix44F * AvianArm::principleMatricesR()
+Matrix44F * AvianArm::principleMatrixR()
 { return &m_skeletonMatrices[5]; }
 
-Matrix44F * AvianArm::invPrincipleMatricesR()
+Matrix44F * AvianArm::invPrincipleMatrixR()
 { return &m_skeletonMatrices[6]; }
+
+Matrix44F * AvianArm::secondDigitMatirxR()
+{ return &m_skeletonMatrices[4]; }
+
+Matrix44F * AvianArm::handMatrixR()
+{ return &m_skeletonMatrices[7]; }
+	
+Matrix44F * AvianArm::invHandMatrixR()
+{ return &m_skeletonMatrices[8]; }
+
+Matrix44F * AvianArm::fingerMatrixR()
+{ return &m_skeletonMatrices[9]; }
+
+Matrix44F * AvianArm::invFingerMatrixR()
+{ return &m_skeletonMatrices[10]; }
 
 Vector3F AvianArm::shoulderPosition() const
 { return m_skeletonMatrices[0].getTranslation(); }
@@ -78,30 +93,84 @@ bool AvianArm::updatePrincipleMatrix()
 	Vector3F front = side.cross(up);
 	front.normalize();
 	
-	principleMatricesR()->setOrientations(side, up, front );
-	principleMatricesR()->setTranslation(shoulderPosition() );
-	*invPrincipleMatricesR() = *principleMatricesR();
-	invPrincipleMatricesR()->inverse();
+	principleMatrixR()->setOrientations(side, up, front );
+	principleMatrixR()->setTranslation(shoulderPosition() );
+	*invPrincipleMatrixR() = *principleMatrixR();
+	invPrincipleMatrixR()->inverse();
 	
+	return true;
+}
+
+bool AvianArm::updateHandMatrix()
+{
+	Vector3F side = secondDigitPosition() - m_skeletonMatrices[2].getTranslation();
+	if(side.length2() < 1.0e-4f) {
+		std::cout<<"\n ERROR AvianArm updateHandMatrix 2nd_digit too close to radius";
+		return false;
+	}
+	
+	side = invPrincipleMatrixR()->transformAsNormal(side);
+	side.normalize();
+	
+	Vector3F up = skeletonMatricesR()[2].getUp();
+	up = invPrincipleMatrixR()->transformAsNormal(up);
+	up.normalize();
+	
+	Vector3F front = side.cross(up);
+	front.normalize();
+	
+	handMatrixR()->setOrientations(side, up, front );
+	handMatrixR()->setTranslation(wristPosition() );
+	*invHandMatrixR() = *handMatrixR();
+	invHandMatrixR()->inverse();
+	
+	return true;
+}
+
+bool AvianArm::updateFingerMatrix()
+{
+	Vector3F side = secondDigitEndPosition() - wristPosition();
+	if(side.length2() < 1.0e-4f) {
+		std::cout<<"\n ERROR AvianArm updateHandMatrix 2nd_digit_end too close to wrist";
+		return false;
+	}
+	
+	side = invPrincipleMatrixR()->transformAsNormal(side);
+	side.normalize();
+	
+	Vector3F up = handMatrixR()->getUp();
+	up.normalize();
+	
+	Vector3F front = side.cross(up);
+	front.normalize();
+	
+	fingerMatrixR()->setOrientations(side, up, front );
+	fingerMatrixR()->setTranslation(secondDigitPosition() );
+	*invFingerMatrixR() = *fingerMatrixR();
+	invFingerMatrixR()->inverse();
+
 	return true;
 }
 
 void AvianArm::updateLigaments()
 {
-	const Vector3F shoulderP = shoulderPosition();
-	const Vector3F elbowP = elbowPosition();
-	const Vector3F wristP = wristPosition();
-	const Vector3F snddigitP = secondDigitPosition();
-	const Vector3F endP = secondDigitEndPosition();
+	Vector3F elbowP = elbowPosition();
+	elbowP = invPrincipleMatrixR()->transform(elbowP);
+	Vector3F wristP = wristPosition();
+	wristP = invPrincipleMatrixR()->transform(wristP);
+	Vector3F snddigitP = secondDigitPosition();
+	snddigitP = invPrincipleMatrixR()->transform(snddigitP);
+	Vector3F endP = secondDigitEndPosition();
+	endP = invPrincipleMatrixR()->transform(endP);
 	
-	m_leadingLigament->setKnotPoint(0, shoulderP);
+	m_leadingLigament->setKnotPoint(0, Vector3F::Zero);
 	m_leadingLigament->setKnotPoint(1, wristP);
 	m_leadingLigament->setKnotPoint(2, snddigitP);
 	m_leadingLigament->setKnotPoint(3, endP);
 	
 	m_leadingLigament->update();
 	
-	m_trailingLigament->setKnotPoint(0, shoulderP);
+	m_trailingLigament->setKnotPoint(0, Vector3F::Zero);
 	m_trailingLigament->setKnotPoint(1, elbowP);
 	m_trailingLigament->setKnotPoint(2, wristP);
 	m_trailingLigament->setKnotPoint(3, snddigitP);
@@ -111,13 +180,28 @@ void AvianArm::updateLigaments()
 }
 
 void AvianArm::setLeadingLigamentOffset(const int & idx,
-							const Vector3F & v) const
+							const Vector3F & v)
 {
 	m_leadingLigament->setKnotOffset(idx, v);
 }
 	
 void AvianArm::setTrailingLigamentOffset(const int & idx,
-							const Vector3F & v) const
+							const Vector3F & v)
 {
 	m_trailingLigament->setKnotOffset(idx, v);
 }
+
+void AvianArm::setLeadingLigamentTangent(const int & idx,
+							const aphid::Vector3F & v)
+{
+	m_leadingLigament->setKnotTangent(idx, v);
+}
+
+void AvianArm::setTrailingLigamentTangent(const int & idx,
+							const aphid::Vector3F & v)
+{
+	m_trailingLigament->setKnotTangent(idx, v);
+}
+
+Ligament * AvianArm::leadingLigamentR()
+{ return m_leadingLigament; }

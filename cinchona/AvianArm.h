@@ -29,6 +29,10 @@ class AvianArm {
 /// second_digit
 /// principle
 /// inverse_principle
+/// hand
+/// inverse_hand
+/// finger
+/// inverse_finger
 	aphid::Matrix44F * m_skeletonMatrices;
 /// shoulder-wrist-2nd_digit-2nd_digit_end
 	Ligament * m_leadingLigament;
@@ -44,13 +48,20 @@ public:
 	const aphid::Matrix44F & skeletonMatrix(const int & idx) const;
 /// shoulder to wrist
 	bool updatePrincipleMatrix();
-	
+	bool updateHandMatrix();
+	bool updateFingerMatrix();
 	void updateLigaments();
 	
 protected:
 	aphid::Matrix44F * skeletonMatricesR();
-	aphid::Matrix44F * principleMatricesR();
-	aphid::Matrix44F * invPrincipleMatricesR();
+	aphid::Matrix44F * principleMatrixR();
+	aphid::Matrix44F * invPrincipleMatrixR();
+	aphid::Matrix44F * handMatrixR();
+	aphid::Matrix44F * invHandMatrixR();
+	aphid::Matrix44F * fingerMatrixR();
+	aphid::Matrix44F * invFingerMatrixR();
+	aphid::Matrix44F * secondDigitMatirxR();
+	
 	aphid::Vector3F shoulderPosition() const;
 	aphid::Vector3F elbowPosition() const;
 	aphid::Vector3F wristPosition() const;
@@ -59,12 +70,18 @@ protected:
 	
 	void set2ndDigitLength(const float & x);
 	void setLeadingLigamentOffset(const int & idx,
-							const aphid::Vector3F & v) const;
+							const aphid::Vector3F & v);
 	void setTrailingLigamentOffset(const int & idx,
-							const aphid::Vector3F & v) const;
+							const aphid::Vector3F & v);
+	void setLeadingLigamentTangent(const int & idx,
+							const aphid::Vector3F & v);
+	void setTrailingLigamentTangent(const int & idx,
+							const aphid::Vector3F & v);	
 	
 	const Ligament & leadingLigament() const;
 	const Ligament & trailingLigament() const;
+	
+	Ligament * leadingLigamentR();
 	
 private:
 };

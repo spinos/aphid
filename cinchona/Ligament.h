@@ -37,8 +37,9 @@ public:
 				const aphid::Vector3F & v);
 				
 	void setKnotTangent(const int & idx,
-				const aphid::Vector3F & v);
-				
+				const aphid::Vector3F & v,
+				int side=2);
+							
 	void update();
 				
 	aphid::Vector3F getPoint(const int & idx,
@@ -53,7 +54,8 @@ protected:
 /// else (idx-1)-th piece end and idx-th piece begin
 	void setKnot(const int & idx,
 				const aphid::Vector3F & pt,
-				const aphid::Vector3F & tg);
+				const aphid::Vector3F & tg0,
+				const aphid::Vector3F & tg1);
 				
 private:
 };

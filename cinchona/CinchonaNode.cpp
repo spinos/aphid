@@ -79,6 +79,8 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	MObject thisNode = thisMObject();
 	setSkeletonMatrices(thisNode, ahumerusmat, aulnamat, aradiusmat, acarpusmat, aseconddigitmat);
 	updatePrincipleMatrix();
+	updateHandMatrix();
+	updateFingerMatrix();
 	setLigamentParams(thisNode, aligament0x, aligament0y, aligament0z,
 					aligament1x, aligament1y, aligament1z);
 	setElbowParams(thisNode, aelbowos1x, aelbowos1y, aelbowos1z);
@@ -87,7 +89,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	set2ndDigitParams(thisNode, adigitos0x, adigitos0y, adigitos0z,
 					adigitos1x, adigitos1y, adigitos1z,
 					adigitl);
-					
+	setFirstLeadingLigament();
 	updateLigaments();
 	
 	view.beginGL();

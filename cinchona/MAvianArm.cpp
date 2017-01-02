@@ -8,6 +8,7 @@
  */
 
 #include "MAvianArm.h"
+#include "Ligament.h"
 #include <AHelper.h>
 
 using namespace aphid;
@@ -56,14 +57,22 @@ void MAvianArm::setLigamentParams(const MObject & node,
 	offset0.y = MPlug(node, lig0yAttr).asFloat();
 	offset0.z = MPlug(node, lig0zAttr).asFloat();
 	
-	setLeadingLigamentOffset(0, offset0);
+	const float l0 = offset0.length();
+	
+	offset0 = invPrincipleMatrixR()->transformAsNormal(offset0);
+	
+	setLeadingLigamentOffset(0, offset0 * l0);
 	
 	Vector3F offset1;
 	offset1.x = MPlug(node, lig1xAttr).asFloat();
 	offset1.y = MPlug(node, lig1yAttr).asFloat();
 	offset1.z = MPlug(node, lig1zAttr).asFloat();
 	
-	setTrailingLigamentOffset(0, offset1);
+	const float l1 = offset1.length();
+	
+	offset1 = invPrincipleMatrixR()->transformAsNormal(offset1);
+	
+	setTrailingLigamentOffset(0, offset1 * l1);
 
 }
 
@@ -92,15 +101,27 @@ void MAvianArm::setWristParams(const MObject & node,
 	offset0.x = MPlug(node, x0Attr).asFloat();
 	offset0.y = MPlug(node, y0Attr).asFloat();
 	offset0.z = MPlug(node, z0Attr).asFloat();
+	const float l0 = offset0.length();
+	offset0 = handMatrixR()->transformAsNormal(offset0);
 	
-	setLeadingLigamentOffset(1, offset0);
+	setLeadingLigamentOffset(1, offset0 * l0);
 	
 	Vector3F offset1;
 	offset1.x = MPlug(node, x1Attr).asFloat();
 	offset1.y = MPlug(node, y1Attr).asFloat();
 	offset1.z = MPlug(node, z1Attr).asFloat();
+	const float l1 = offset1.length();
+	offset1 = handMatrixR()->transformAsNormal(offset1);
 	
-	setTrailingLigamentOffset(2, offset1);
+	setTrailingLigamentOffset(2, offset1 * l1);
+	
+	Vector3F tgt0(1.f, 0.f, 0.f);
+	
+	tgt0 = handMatrixR()->transformAsNormal(tgt0);
+	tgt0.normalize();
+	
+	setLeadingLigamentTangent(1, tgt0);
+	setTrailingLigamentTangent(2, tgt0);
 }
 
 void MAvianArm::set2ndDigitParams(const MObject & node,
@@ -116,22 +137,77 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	offset0.x = MPlug(node, x0Attr).asFloat();
 	offset0.y = MPlug(node, y0Attr).asFloat();
 	offset0.z = MPlug(node, z0Attr).asFloat();
+	const float l0 = offset0.length();
+	offset0 = fingerMatrixR()->transformAsNormal(offset0);
+	offset0.normalize();
 	
-	setLeadingLigamentOffset(2, offset0);
+	setLeadingLigamentOffset(2, offset0 * l0);
 	
 	float digitL = MPlug(node, lAttr).asFloat();
 	set2ndDigitLength(digitL);
 	
-	setLeadingLigamentOffset(3, Vector3F(0.f, 0.f, digitL * .15f) );
+	Vector3F tip0(0.f, 0.f, 1.f);
+	tip0 = secondDigitMatirxR()->transformAsNormal(tip0);
+	tip0.normalize();
+	tip0 = invPrincipleMatrixR()->transformAsNormal(tip0);
+	tip0.normalize();
+	
+	setLeadingLigamentOffset(3, tip0 * (digitL * .15f) );
 	
 	Vector3F offset1;
 	offset1.x = MPlug(node, x1Attr).asFloat();
 	offset1.y = MPlug(node, y1Attr).asFloat();
 	offset1.z = MPlug(node, z1Attr).asFloat();
+	const float l1 = offset1.length();
+	offset1 = fingerMatrixR()->transformAsNormal(offset1);
+	offset1.normalize();
 	
-	setTrailingLigamentOffset(3, offset1);
+	setTrailingLigamentOffset(3, offset1 * l1);
 	
-	setLeadingLigamentOffset(4, Vector3F(0.f, 0.f, -digitL * .15f) );
+	Vector3F tip1(0.f, 0.f,-1.f);
+	tip1 = secondDigitMatirxR()->transformAsNormal(tip1);
+	tip1.normalize();
+	tip1 = invPrincipleMatrixR()->transformAsNormal(tip1);
+	tip1.normalize();
 	
+	setTrailingLigamentOffset(4, tip1 * (digitL * .15f) );
+	
+	Vector3F tgt0(1.f, 0.f, 0.f);
+	
+	tgt0 = fingerMatrixR()->transformAsNormal(tgt0);
+	tgt0.normalize();
+	
+	setLeadingLigamentTangent(2, tgt0);
+	setTrailingLigamentTangent(3, tgt0);
+
+	Vector3F tgt1(1.f, 0.f, 0.f);
+	
+	tgt1 = secondDigitMatirxR()->transformAsNormal(tgt1);
+	tgt1.normalize();
+	tgt1 = invPrincipleMatrixR()->transformAsNormal(tgt1);
+	tgt1.normalize();
+	
+	setLeadingLigamentTangent(3, tgt1);
+	setTrailingLigamentTangent(4, tgt1);
+	
+}
+
+void MAvianArm::setFirstLeadingLigament()
+{
+	Vector3F tgt0 = elbowPosition() - shoulderPosition();
+	const float humerusL = tgt0.length();
+	tgt0 = invPrincipleMatrixR()->transformAsNormal(tgt0);
+	tgt0.normalize();
+	tgt0 *= humerusL * 1.4f;
+	
+	setLeadingLigamentTangent(0, tgt0);
+	
+	Vector3F tgt1 = wristPosition() - elbowPosition();
+	const float ulnaL = tgt1.length();
+	tgt1 = invPrincipleMatrixR()->transformAsNormal(tgt1);
+	tgt1.normalize();
+	tgt1 *= ulnaL * 1.4f;
+	
+	leadingLigamentR()->setKnotTangent(1, tgt1, 0);
 	
 }

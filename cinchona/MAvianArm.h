@@ -57,7 +57,8 @@ protected:
 					const MObject & y1Attr,
 					const MObject & z1Attr,
 					const MObject & lAttr);
-					
+	void setFirstLeadingLigament();
+	
 private:
 
 };

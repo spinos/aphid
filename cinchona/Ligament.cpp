@@ -23,11 +23,12 @@ Ligament::Ligament(const int & np)
 	
 	m_knotPoint = new Vector3F[np+1]; 
 	m_knotOffset = new Vector3F[np+1];
-	m_knotTangent = new Vector3F[np+1];
+	m_knotTangent = new Vector3F[(np+1)<<1];
 	for(int i=0;i<=np;++i) {
 		m_knotPoint[i].set(i, 0.f, 0.f);
 		m_knotOffset[i].set(0.f, 0.f, 0.f);
-		m_knotTangent[i].set(1.f, 0.f, 0.f);
+		m_knotTangent[i<<1].set(1.f, 0.f, 0.f);
+		m_knotTangent[(i<<1)+1].set(1.f, 0.f, 0.f);
 	}
 	
 }
@@ -53,9 +54,17 @@ void Ligament::setKnotPoint(const int & idx,
 }
 
 void Ligament::setKnotTangent(const int & idx,
-				const aphid::Vector3F & v)
+				const aphid::Vector3F & v,
+				int side)
 {
-	m_knotTangent[idx] = v;
+	if(side == 0) {
+		m_knotTangent[idx<<1] = v;
+	} else if (side == 1) {
+		m_knotTangent[(idx<<1)+1] = v;
+	} else {
+		m_knotTangent[idx<<1] = v;
+		m_knotTangent[(idx<<1)+1] = v;
+	}
 }
 
 void Ligament::update()
@@ -63,21 +72,23 @@ void Ligament::update()
 	const int n = m_interp->numPieces() + 1;
 	for(int i=0;i<n;++i) {
 		setKnot(i, m_knotPoint[i] + m_knotOffset[i], 
-				m_knotTangent[i]);
+				m_knotTangent[i<<1],
+				m_knotTangent[(i<<1)+1]);
 	}
 }
 
 void Ligament::setKnot(const int & idx,
-				const aphid::Vector3F & pt,
-				const aphid::Vector3F & tg)
+				const Vector3F & pt,
+				const Vector3F & tg0,
+				const Vector3F & tg1)
 {
 	if(idx==0) {
-		m_interp->setPieceBegin(0, pt, tg);
+		m_interp->setPieceBegin(0, pt, tg1);
 	} else if (idx == m_interp->numPieces() ) {
-		m_interp->setPieceEnd(idx - 1, pt, tg);
+		m_interp->setPieceEnd(idx - 1, pt, tg0);
 	} else {
-		m_interp->setPieceEnd(idx - 1, pt, tg);
-		m_interp->setPieceBegin(idx, pt, tg);
+		m_interp->setPieceEnd(idx - 1, pt, tg0);
+		m_interp->setPieceBegin(idx, pt, tg1);
 	}
 }
 
