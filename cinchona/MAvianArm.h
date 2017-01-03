@@ -59,6 +59,12 @@ protected:
 					const MObject & lAttr);
 	void setFirstLeadingLigament();
 	
+	void setFeatherGeomParam(const MObject & node,
+					const MObject & n0Attr,
+					const MObject & n1Attr,
+					const MObject & n2Attr,
+					const MObject & n3Attr);
+	
 private:
 
 };

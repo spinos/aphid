@@ -9,6 +9,7 @@
 
 #include "MAvianArm.h"
 #include "Ligament.h"
+#include "FeatherGeomParam.h"
 #include <AHelper.h>
 
 using namespace aphid;
@@ -152,7 +153,7 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	tip0 = invPrincipleMatrixR()->transformAsNormal(tip0);
 	tip0.normalize();
 	
-	setLeadingLigamentOffset(3, tip0 * (digitL * .15f) );
+	setLeadingLigamentOffset(3, tip0 * (digitL * .05f) );
 	
 	Vector3F offset1;
 	offset1.x = MPlug(node, x1Attr).asFloat();
@@ -170,7 +171,7 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	tip1 = invPrincipleMatrixR()->transformAsNormal(tip1);
 	tip1.normalize();
 	
-	setTrailingLigamentOffset(4, tip1 * (digitL * .15f) );
+	setTrailingLigamentOffset(4, tip1 * (digitL * .05f) );
 	
 	Vector3F tgt0(1.f, 0.f, 0.f);
 	
@@ -210,4 +211,19 @@ void MAvianArm::setFirstLeadingLigament()
 	
 	leadingLigamentR()->setKnotTangent(1, tgt1, 0);
 	
+}
+
+void MAvianArm::setFeatherGeomParam(const MObject & node,
+					const MObject & n0Attr,
+					const MObject & n1Attr,
+					const MObject & n2Attr,
+					const MObject & n3Attr)
+{
+	int nps[4];
+	nps[0] = MPlug(node, n0Attr).asInt();
+	nps[1] = MPlug(node, n1Attr).asInt();
+	nps[2] = MPlug(node, n2Attr).asInt();
+	nps[3] = MPlug(node, n3Attr).asInt();
+	
+	featherGeomParameter()->set(nps);
 }

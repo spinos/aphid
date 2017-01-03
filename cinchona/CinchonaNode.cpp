@@ -22,7 +22,11 @@ MObject CinchonaNode::ahumerusmat;
 MObject CinchonaNode::aulnamat;
 MObject CinchonaNode::aradiusmat;
 MObject CinchonaNode::acarpusmat;
-MObject CinchonaNode::aseconddigitmat;	
+MObject CinchonaNode::aseconddigitmat;
+MObject CinchonaNode::anumfeather0;
+MObject CinchonaNode::anumfeather1;
+MObject CinchonaNode::anumfeather2;
+MObject CinchonaNode::anumfeather3;
 MObject CinchonaNode::aligament0x;
 MObject CinchonaNode::aligament0y;
 MObject CinchonaNode::aligament0z;
@@ -91,6 +95,8 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 					adigitl);
 	setFirstLeadingLigament();
 	updateLigaments();
+	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3);
+	updateFeatherGeom();
 	
 	view.beginGL();
 	
@@ -150,10 +156,36 @@ MStatus CinchonaNode::initialize()
 { 
 	MFnNumericAttribute numFn;
 	MFnTypedAttribute typFn;
+	MFnMatrixAttribute matAttr;
 	MStatus			 stat;
 	
+	anumfeather0 = numFn.create( "numFeather0", "nfr0", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(4);
+	numFn.setMin(1);
+	addAttribute(anumfeather0);
 	
-	MFnMatrixAttribute matAttr;
+	anumfeather1 = numFn.create( "numFeather1", "nfr1", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(5);
+	numFn.setMin(1);
+	addAttribute(anumfeather1);
+	
+	anumfeather2 = numFn.create( "numFeather2", "nfr2", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(9);
+	numFn.setMin(1);
+	addAttribute(anumfeather2);
+	
+	anumfeather3 = numFn.create( "numFeather3", "nfr3", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(7);
+	numFn.setMin(1);
+	addAttribute(anumfeather3);
 	
 	AttributeHelper::CreateVector3FAttrib(aligament0, aligament0x, aligament0y, aligament0z,
 		"shoulderos0", "sd0", 0.f, 0.f, 1.f);
@@ -244,6 +276,10 @@ MStatus CinchonaNode::initialize()
 	MFnPointArrayData pntArrayDataFn;
 	pntArrayDataFn.create( defaultPntArray );
 	    
+	attributeAffects(anumfeather0, outValue);
+	attributeAffects(anumfeather1, outValue);
+	attributeAffects(anumfeather2, outValue);
+	attributeAffects(anumfeather3, outValue);
 	attributeAffects(aligament0x, outValue);
 	attributeAffects(aligament0y, outValue);
 	attributeAffects(aligament0z, outValue);

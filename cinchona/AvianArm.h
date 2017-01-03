@@ -18,9 +18,13 @@ class Matrix44F;
 }
 
 class Ligament;
+class FeatherMesh;
+class FeatherGeomParam;
 
 class AvianArm {
 
+	FeatherGeomParam * m_featherGeomParam;
+	
 /// in order
 /// humerus
 /// ulna
@@ -83,6 +87,13 @@ protected:
 	
 	Ligament * leadingLigamentR();
 	
+	FeatherGeomParam * featherGeomParameter();
+	bool isFeatherGeomParameterChanged() const;
+	void updateFeatherGeom();
+	
 private:
+
+	
+	
 };
 #endif

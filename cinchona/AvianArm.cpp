@@ -9,12 +9,15 @@
 
 #include "AvianArm.h"
 #include "Ligament.h"
+#include "FeatherMesh.h"
+#include "FeatherGeomParam.h"
 #include <AllMath.h>
 
 using namespace aphid;
 
 AvianArm::AvianArm()
 {
+	m_featherGeomParam = new FeatherGeomParam;
 	m_skeletonMatrices = new Matrix44F[11];
 	m_leadingLigament = new Ligament(3);
 	m_trailingLigament = new Ligament(4);
@@ -23,6 +26,7 @@ AvianArm::AvianArm()
 
 AvianArm::~AvianArm()
 {
+	delete m_featherGeomParam;
 	delete[] m_skeletonMatrices;
 	delete m_leadingLigament;
 	delete m_trailingLigament;
@@ -205,3 +209,17 @@ void AvianArm::setTrailingLigamentTangent(const int & idx,
 
 Ligament * AvianArm::leadingLigamentR()
 { return m_leadingLigament; }
+
+FeatherGeomParam * AvianArm::featherGeomParameter()
+{ return m_featherGeomParam; }
+
+bool AvianArm::isFeatherGeomParameterChanged() const
+{ return m_featherGeomParam->isChanged(); }
+
+void AvianArm::updateFeatherGeom()
+{
+	if(!isFeatherGeomParameterChanged() ) {
+		return;
+	}
+	
+}
