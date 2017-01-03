@@ -18,10 +18,6 @@ instwindow.cpp
 instmain.cpp)
 
 if (WIN32)
-set (INST_SOURCE_FILES ${INST_SOURCE_FILES} "../shared/gExtension.cpp")
-endif ()
-
-if (WIN32)
 SET (APHID_DIR "D:/aphid")
 elseif (APPLE)
 SET (APHID_DIR "/Users/jianzhang/aphid")
@@ -189,10 +185,6 @@ drpcawidget.cpp
 drpcawindow.cpp
 testDrpca.cpp)
 
-if (WIN32)
-set (PCA_SRC ${PCA_SRC} "../shared/gExtension.cpp")
-endif ()
-
 add_executable (drpca ${PCA_SRC})
 target_link_libraries (drpca Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (drpca ${OPENGL_LIBRARIES})
@@ -202,6 +194,7 @@ target_link_libraries (drpca ${APHID_GEOM_LIBRARY})
 target_link_libraries (drpca ${APHID_UI_LIBRARY})
 target_link_libraries (drpca ${APHID_SDB_LIBRARY})
 target_link_libraries (drpca ${APHID_TOPO_LIBRARY})
+target_link_libraries (drpca ${APHID_OGL_LIBRARY})
 
 target_link_libraries (drpca ${BLAS_LIBRARY})
 target_link_libraries (drpca ${LAPACK_LIBRARY})
@@ -220,10 +213,6 @@ gpdfxwidget.cpp
 gpdfxdialog.cpp
 gpdfmain.cpp)
 
-if (WIN32)
-set (GPDF_SOURCE ${GPDF_SOURCE} "../shared/gExtension.cpp")
-endif ()
-
 add_executable (gpdeform ${GP_HEADER} ${GPDF_SOURCE})
 target_link_libraries (gpdeform Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (gpdeform ${OPENGL_LIBRARIES})
@@ -233,6 +222,7 @@ target_link_libraries (gpdeform ${APHID_GEOM_LIBRARY})
 target_link_libraries (gpdeform ${APHID_UI_LIBRARY})
 target_link_libraries (gpdeform ${APHID_SDB_LIBRARY})
 target_link_libraries (gpdeform ${APHID_TOPO_LIBRARY})
+target_link_libraries (gpdeform ${APHID_OGL_LIBRARY})
 
 target_link_libraries (gpdeform ${BLAS_LIBRARY})
 target_link_libraries (gpdeform ${LAPACK_LIBRARY})

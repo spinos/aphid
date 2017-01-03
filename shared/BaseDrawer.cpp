@@ -6,12 +6,7 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#ifdef WIN32
-#include <gExtension.h>
-#else
 #include <gl_heads.h>
-#endif
-
 #include "BaseDrawer.h"
 
 namespace aphid {
