@@ -13,6 +13,7 @@
 #include "AvianArm.h"
 
 class Ligament;
+class FeatherMesh;
 
 class DrawAvianArm : public AvianArm, public aphid::DrawArrow {
 
@@ -23,9 +24,11 @@ public:
 protected:
 	void drawSkeletonCoordinates();
 	void drawLigaments();
+	void drawFeathers();
 	
 private:
 	void drawLigament(const Ligament & lig);
+	void drawFeatherMesh(const FeatherMesh * mesh);
 	
 };
 #endif

@@ -61,3 +61,13 @@ void FeatherGeomParam::set(const int * nps)
 
 bool FeatherGeomParam::isChanged() const
 { return _changed; }
+
+int FeatherGeomParam::numSegments() const
+{ return 4; }
+
+const int & FeatherGeomParam::numFeatherOnSegment(int i) const
+{ return _numFPerSeg[i]; }
+
+const float * FeatherGeomParam::xOnSegment(int i) const
+{ return _xsPerSeg[i]; }
+

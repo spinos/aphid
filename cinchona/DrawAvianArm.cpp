@@ -11,6 +11,8 @@
 #include "Ligament.h"
 #include <math/Vector3F.h>
 #include <math/Matrix44F.h>
+#include "FeatherMesh.h"
+#include "FeatherObject.h"
 #include <gl_heads.h>
 
 using namespace aphid; 
@@ -41,6 +43,34 @@ void DrawAvianArm::drawLigaments()
 	
 }
 
+void DrawAvianArm::drawFeathers()
+{
+    const int n = numFeathers();
+    if(n<1) {
+        return;   
+    }
+    
+    glColor3f(.65f, .65f, .65f);
+    
+    float m[16];
+	principleMatrixR()->glMatrix(m);
+	glPushMatrix();
+	glMultMatrixf(m);
+	
+	for(int i=0;i<n;++i) {
+	    const FeatherObject * f = feather(i);
+	    
+	    f->glMatrix(m);
+	    glPushMatrix();
+	    glMultMatrixf(m);
+	    
+	    drawFeatherMesh(f->mesh() );
+	    
+	    glPopMatrix();
+	}
+	glPopMatrix();
+}
+
 void DrawAvianArm::drawLigament(const Ligament & lig)
 {
 	const int & np = lig.numPieces();
@@ -53,4 +83,13 @@ void DrawAvianArm::drawLigament(const Ligament & lig)
 	}
 	glEnd();
 	
+}
+
+void DrawAvianArm::drawFeatherMesh(const FeatherMesh * mesh)
+{
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)mesh->points() );
+    glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
+    
+    glDisableClientState(GL_VERTEX_ARRAY);
 }

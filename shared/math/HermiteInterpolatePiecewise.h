@@ -43,8 +43,8 @@ private:
 
 template<typename T1, typename T2>
 HermiteInterpolatePiecewise<T1, T2>::HermiteInterpolatePiecewise(const int & np) :
-m_pt(NULL),
-m_tg(NULL)
+m_pt(0),
+m_tg(0)
 { create(np); }
 
 template<typename T1, typename T2>

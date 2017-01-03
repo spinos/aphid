@@ -10,6 +10,8 @@
 #ifndef AVIAN_ARM_H
 #define AVIAN_ARM_H
 
+#include <vector>
+
 namespace aphid {
 
 class Vector3F;
@@ -18,7 +20,7 @@ class Matrix44F;
 }
 
 class Ligament;
-class FeatherMesh;
+class FeatherObject;
 class FeatherGeomParam;
 
 class AvianArm {
@@ -43,6 +45,7 @@ class AvianArm {
 /// shoulder-elbow-wrist-2nd_digit-2nd_digit_end
 	Ligament * m_trailingLigament;
 	float m_secondDigitLength;
+	std::vector<FeatherObject *> m_feathers;
 	
 public:
 	AvianArm();
@@ -90,9 +93,13 @@ protected:
 	FeatherGeomParam * featherGeomParameter();
 	bool isFeatherGeomParameterChanged() const;
 	void updateFeatherGeom();
+	void updateFeatherTransform();
+	
+	int numFeathers() const;
+	const FeatherObject * feather(int i) const;
 	
 private:
-
+    void clearFeathers();
 	
 	
 };

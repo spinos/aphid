@@ -10,6 +10,7 @@
 #include "AvianArm.h"
 #include "Ligament.h"
 #include "FeatherMesh.h"
+#include "FeatherObject.h"
 #include "FeatherGeomParam.h"
 #include <AllMath.h>
 
@@ -30,6 +31,7 @@ AvianArm::~AvianArm()
 	delete[] m_skeletonMatrices;
 	delete m_leadingLigament;
 	delete m_trailingLigament;
+	clearFeathers();
 }
 
 void AvianArm::set2ndDigitLength(const float & x)
@@ -216,10 +218,62 @@ FeatherGeomParam * AvianArm::featherGeomParameter()
 bool AvianArm::isFeatherGeomParameterChanged() const
 { return m_featherGeomParam->isChanged(); }
 
+int AvianArm::numFeathers() const
+{ return m_feathers.size(); }
+
+const FeatherObject * AvianArm::feather(int i) const
+{ return m_feathers[i]; }
+
+void AvianArm::clearFeathers()
+{
+    std::vector<FeatherObject *>::iterator it = m_feathers.begin();
+    for(;it!= m_feathers.end();++it) {
+        delete *it;
+    }
+    m_feathers.clear();
+}
+
 void AvianArm::updateFeatherGeom()
 {
 	if(!isFeatherGeomParameterChanged() ) {
 		return;
 	}
 	
+	clearFeathers();
+	
+	const int nseg = m_featherGeomParam->numSegments();
+	for(int i=0;i<nseg;++i) {
+	    const int & nf = m_featherGeomParam->numFeatherOnSegment(i);
+	    const float * xs = m_featherGeomParam->xOnSegment(i);
+	    for(int j=0;j<nf;++j) {
+	        FeatherMesh * msh = new FeatherMesh(20.f, 0.02f, 0.4f, 0.15f);
+	        msh->create(20, 2);
+	        FeatherObject * f = new FeatherObject(msh);
+	        Vector3F p = m_trailingLigament->getPoint(i, xs[j] );
+	        f->setTranslation(p);
+	        
+	        m_feathers.push_back(f);
+	    }
+	}
+	
+	std::cout<<"AvianArm update n feather geom "<<numFeathers();
+	std::cout.flush();
+	
+}
+
+void AvianArm::updateFeatherTransform()
+{
+    int it = 0;
+    const int nseg = m_featherGeomParam->numSegments();
+	for(int i=0;i<nseg;++i) {
+	    const int & nf = m_featherGeomParam->numFeatherOnSegment(i);
+	    const float * xs = m_featherGeomParam->xOnSegment(i);
+	    for(int j=0;j<nf;++j) {
+	        FeatherObject * f = m_feathers[it];
+	        Vector3F p = m_trailingLigament->getPoint(i, xs[j] );
+	        f->setTranslation(p);
+	        
+	        it++;
+	    }
+	}
 }

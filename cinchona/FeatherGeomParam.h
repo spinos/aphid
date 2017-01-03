@@ -32,6 +32,11 @@ public:
 	
 	bool isChanged() const;
 	
+	int numSegments() const;
+	const int & numFeatherOnSegment(int i) const;
+/// i-th segment
+	const float * xOnSegment(int i) const;
+	
 };
 	
 #endif

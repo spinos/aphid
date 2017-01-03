@@ -11,9 +11,10 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MFnPluginData.h>
 #include <AHelper.h>
-#include <math/linearMath.h>
 #include <mama/AttributeHelper.h>
 #include <ogl/GlslInstancer.h>
+/// linear math afer opengl
+#include <math/linearMath.h>
 
 using namespace aphid;
 
@@ -97,6 +98,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	updateLigaments();
 	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3);
 	updateFeatherGeom();
+	updateFeatherTransform();
 	
 	view.beginGL();
 	
@@ -111,11 +113,15 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 #else
 	bool hasGlsl = false;
 #endif
-	
+
+#if 0
 	if(hasGlsl ) {
+#endif
 
 /// https://www.opengl.org/sdk/docs/man2/xhtml/glPushAttrib.xml	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
+	drawFeathers();
 		
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {
@@ -127,10 +133,12 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	
 	glPopAttrib();
 	
+#if 0
 	} else {
-		//AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
+		AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
 	}
-	
+#endif
+
 	view.endGL();
 }
 
