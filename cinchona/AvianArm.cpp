@@ -14,6 +14,7 @@
 #include "FeatherGeomParam.h"
 #include <AllMath.h>
 #include <math/linspace.h>
+#include <gpr/GPInterpolate.h>
 
 using namespace aphid;
 
@@ -72,8 +73,11 @@ Matrix44F * AvianArm::invFingerMatrixR()
 Matrix44F * AvianArm::inboardMarixR()
 { return &m_skeletonMatrices[11]; }
 
-Matrix44F * AvianArm::midsectionMarixR()
+Matrix44F * AvianArm::midsection0MarixR()
 { return &m_skeletonMatrices[12]; }
+
+Matrix44F * AvianArm::midsection1MarixR()
+{ return &m_skeletonMatrices[13]; }
 
 Vector3F AvianArm::shoulderPosition() const
 { return m_skeletonMatrices[0].getTranslation(); }
@@ -271,7 +275,7 @@ void AvianArm::updateFeatherGeom()
 	}
 	
 	m_featherX = new float[n];
-/// from tip to root
+/// from tip 0 to root 1
 	linspace_center_reverse<float>(m_featherX, 0.f, 1.f, n);
 	
 }
@@ -293,26 +297,72 @@ void AvianArm::updateFeatherTransform()
 	    }
 	}
 /// interpolate orientation
-	Vector3F vtip = secondDigitMatirxR()->getSide();
-	vtip = invPrincipleMatrixR()->transformAsNormal(vtip);
-	vtip.normalize();
-	Vector3F vroot = inboardMarixR()->getSide();
-	vroot = invPrincipleMatrixR()->transformAsNormal(vroot);
-	vroot.normalize();
+	Vector3F vside[4];
+	vside[0] = secondDigitMatirxR()->getSide();
+	vside[0] = invPrincipleMatrixR()->transformAsNormal(vside[0]);
+	vside[0].normalize();
 	
-	Vector3F htip = secondDigitMatirxR()->getUp();
-	htip = invPrincipleMatrixR()->transformAsNormal(htip);
-	htip.normalize();
-	Vector3F hroot = inboardMarixR()->getUp();
-	hroot = invPrincipleMatrixR()->transformAsNormal(hroot);
-	hroot.normalize();
+	vside[1] = midsection1MarixR()->getSide();
+	vside[1].normalize();
+	
+	vside[2] = midsection0MarixR()->getSide();
+	vside[2].normalize();
+	
+	vside[3] = inboardMarixR()->getSide();
+	vside[3] = invPrincipleMatrixR()->transformAsNormal(vside[3]);
+	vside[3].normalize();
+	
+	float vx[4] = {0.01f, .33f, .67f, .99f};
+	
+	gpr::GPInterpolate<float> sideInterp;
+	sideInterp.create(4, 1, 3);
+	for(int i=0;i<4;++i) {
+		sideInterp.setObservationi(i, &vx[i], (const float *)&vside[i]);
+	}
+	
+	if(!sideInterp.learn() ) {
+		std::cout<<"AvianArm updateFeatherTransform side interpolate failed to learn";
+	}
+	
+	Vector3F vup[4];
+	vup[0] = secondDigitMatirxR()->getUp();
+	vup[0] = invPrincipleMatrixR()->transformAsNormal(vup[0]);
+	vup[0].normalize();
+	
+	vup[1] = midsection1MarixR()->getUp();
+	vup[1].normalize();
+	
+	vup[2] = midsection0MarixR()->getUp();
+	vup[2].normalize();
+	
+	vup[3] = inboardMarixR()->getUp();
+	vup[3] = invPrincipleMatrixR()->transformAsNormal(vup[3]);
+	vup[3].normalize();
+	
+	gpr::GPInterpolate<float> upInterp;
+	upInterp.create(4, 1, 3);
+	for(int i=0;i<4;++i) {
+		upInterp.setObservationi(i, &vx[i], (const float *)&vup[i]);
+	}
+	
+	if(!upInterp.learn() ) {
+		std::cout<<"AvianArm updateFeatherTransform up interpolate failed to learn";
+	}
 	
 	const int n = numFeathers();
 	for(int i=0;i<n;++i) {
-		Vector3F side = vtip * (1.f - m_featherX[i]) + vroot * m_featherX[i];
+		sideInterp.predict(&m_featherX[i]);
+		
+		const float * sideY = sideInterp.predictedY().column(0);
+		
+		Vector3F side(sideY[0], sideY[1], sideY[2]);
 		side.normalize();
 		
-		Vector3F up = htip * (1.f - m_featherX[i]) + hroot * m_featherX[i];
+		upInterp.predict(&m_featherX[i]);
+		
+		const float * upY = upInterp.predictedY().column(0);
+		
+		Vector3F up(upY[0], upY[1], upY[2]);
 		
 		Vector3F front = side.cross(up);
 		front.normalize();
@@ -322,4 +372,5 @@ void AvianArm::updateFeatherTransform()
 		
 		m_feathers[i]->setOrientations(side, up, front);
 	}
+	
 }

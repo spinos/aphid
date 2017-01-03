@@ -227,11 +227,13 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 
 void MAvianArm::setFeatherOrientation(const MObject & node,
 					const MObject & m0Attr,
-					const MObject & m1Attr)
+					const MObject & m1Attr,
+					const MObject & m2Attr)
 {
 	MMatrix inboardM = AHelper::getMatrixAttr(node, m0Attr);
 	AHelper::ConvertToMatrix44F(*inboardMarixR(), inboardM);
-	MMatrix midsectM = AHelper::getMatrixAttr(node, m1Attr);
-	AHelper::ConvertToMatrix44F(*midsectionMarixR(), midsectM);
-
+	MMatrix midsect1M = AHelper::getMatrixAttr(node, m1Attr);
+	AHelper::ConvertToMatrix44F(*midsection0MarixR(), midsect1M);
+	MMatrix midsect2M = AHelper::getMatrixAttr(node, m2Attr);
+	AHelper::ConvertToMatrix44F(*midsection1MarixR(), midsect2M);
 }

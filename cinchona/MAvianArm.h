@@ -67,7 +67,8 @@ protected:
 					
 	void setFeatherOrientation(const MObject & node,
 					const MObject & m0Attr,
-					const MObject & m1Attr);
+					const MObject & m1Attr,
+					const MObject & m2Attr);
 	
 private:
 

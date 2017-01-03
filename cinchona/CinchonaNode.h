@@ -86,7 +86,8 @@ public:
 	static MObject adigitos1;
 	static MObject adigitl;
 	static MObject ainboardmat;
-	static MObject amidsectmat;
+	static MObject amidsectmat0;
+	static MObject amidsectmat1;
 	static MObject outValue;
 	
 protected:

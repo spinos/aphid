@@ -118,14 +118,20 @@ void DrawAvianArm::drawFeatherOrietations()
 	
 	drawFlatArrowAt(&locm );
 	
+	locm = *midsection1MarixR();
+	locm.setTranslation(trailingLigament().getPoint(1, 0.99f) + Vector3F(0, 4, -4) );
+	
+	drawFlatArrowAt(&locm);
+	
+	locm = *midsection0MarixR();
+	locm.setTranslation(trailingLigament().getPoint(0, 0.99f) + Vector3F(0, 4, -4) );
+	
+	drawFlatArrowAt(&locm);
+	
 	locm = *inboardMarixR();
+	locm.setTranslation(shoulderPosition() + Vector3F(0, 4, -4) );
+	
 	locm *= *invPrincipleMatrixR();
-	drawFlatArrowAt(&locm );
-	
-/// already in local space
-	locm = *midsectionMarixR();
-	locm.setTranslation(trailingLigament().getPoint(1, 0.5f) + Vector3F(0, 4, -4) );
-	
 	drawFlatArrowAt(&locm );
 	
 	glPopMatrix();

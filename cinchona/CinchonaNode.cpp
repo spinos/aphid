@@ -58,7 +58,8 @@ MObject CinchonaNode::adigitos1z;
 MObject CinchonaNode::adigitos1;
 MObject CinchonaNode::adigitl;
 MObject CinchonaNode::ainboardmat;
-MObject CinchonaNode::amidsectmat;
+MObject CinchonaNode::amidsectmat0;
+MObject CinchonaNode::amidsectmat1;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -100,7 +101,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	updateLigaments();
 	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3);
 	updateFeatherGeom();
-	setFeatherOrientation(thisNode, ainboardmat, amidsectmat);
+	setFeatherOrientation(thisNode, ainboardmat, amidsectmat0, amidsectmat1);
 	updateFeatherTransform();
 	
 	view.beginGL();
@@ -289,10 +290,15 @@ MStatus CinchonaNode::initialize()
 	matAttr.setConnectable(true);
 	addAttribute(ainboardmat);
 	
-	amidsectmat = matAttr.create("midsectionMatrix", "msm", MFnMatrixAttribute::kDouble);
+	amidsectmat0 = matAttr.create("midsection0Matrix", "ms0m", MFnMatrixAttribute::kDouble);
 	matAttr.setStorable(false);
 	matAttr.setConnectable(true);
-	addAttribute(amidsectmat);
+	addAttribute(amidsectmat0);
+	
+	amidsectmat1 = matAttr.create("midsection1Matrix", "ms1m", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(amidsectmat1);
 
 		
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
@@ -333,7 +339,8 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(ahumerusmat, outValue);
 	attributeAffects(aulnamat, outValue);
 	attributeAffects(ainboardmat, outValue);
-	attributeAffects(amidsectmat, outValue);
+	attributeAffects(amidsectmat0, outValue);
+	attributeAffects(amidsectmat1, outValue);
 	attributeAffects(aradiusmat, outValue);
 	
 	return MS::kSuccess;
