@@ -252,11 +252,26 @@ void AvianArm::updateFeatherGeom()
 	clearFeathers();
 	
 	const int nseg = m_featherGeomParam->numSegments();
+	
+	int it = 0;
+	for(int i=0;i<nseg;++i) {
+	    const int nf = m_featherGeomParam->numFeatherOnSegment(i);
+	    it += nf-1;
+	}
+	
+	const float dx = 1.f / (float)it;
+	
+	it = 0;
 	for(int i=0;i<nseg;++i) {
 	    const int nf = m_featherGeomParam->numFeatherOnSegment(i);
 	    const float * xs = m_featherGeomParam->xOnSegment(i);
 	    for(int j=1;j<nf;++j) {
-	        FeatherMesh * msh = new FeatherMesh(20.f, 0.02f, 0.4f, 0.15f);
+			float vx = dx * (it + 0.5f);
+			it++;
+			const float c = m_featherGeomParam->predictChord(&vx);
+			const float t = m_featherGeomParam->predictThickness(&vx);
+			
+	        FeatherMesh * msh = new FeatherMesh(c, 0.03f, 0.14f, t);
 	        msh->create(20, 2);
 	        FeatherObject * f = new FeatherObject(msh);
 	        Vector3F p = m_trailingLigament->getPoint(i, xs[j] );

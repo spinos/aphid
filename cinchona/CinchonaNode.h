@@ -88,6 +88,14 @@ public:
 	static MObject ainboardmat;
 	static MObject amidsectmat0;
 	static MObject amidsectmat1;
+	static MObject achord0;
+	static MObject achord1;
+	static MObject achord2;
+	static MObject achord3;
+	static MObject athickness0;
+	static MObject athickness1;
+	static MObject athickness2;
+	static MObject athickness3;
 	static MObject outValue;
 	
 protected:

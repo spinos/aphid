@@ -60,6 +60,14 @@ MObject CinchonaNode::adigitl;
 MObject CinchonaNode::ainboardmat;
 MObject CinchonaNode::amidsectmat0;
 MObject CinchonaNode::amidsectmat1;
+MObject CinchonaNode::achord0;
+MObject CinchonaNode::achord1;
+MObject CinchonaNode::achord2;
+MObject CinchonaNode::achord3;
+MObject CinchonaNode::athickness0;
+MObject CinchonaNode::athickness1;
+MObject CinchonaNode::athickness2;
+MObject CinchonaNode::athickness3;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -99,7 +107,9 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 					adigitl);
 	setFirstLeadingLigament();
 	updateLigaments();
-	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3);
+	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3,
+						achord0, achord1, achord2, achord3,
+						athickness0, athickness1, athickness2, athickness3);
 	updateFeatherGeom();
 	setFeatherOrientation(thisNode, ainboardmat, amidsectmat0, amidsectmat1);
 	updateFeatherTransform();
@@ -204,6 +214,62 @@ MStatus CinchonaNode::initialize()
 	numFn.setDefault(7);
 	numFn.setMin(1);
 	addAttribute(anumfeather3);
+	
+	achord0 = numFn.create( "chord0", "chd0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(20.f);
+	numFn.setMin(1.f);
+	addAttribute(achord0);
+	
+	achord1 = numFn.create( "chord1", "chd1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(20.f);
+	numFn.setMin(1.f);
+	addAttribute(achord1);
+	
+	achord2 = numFn.create( "chord2", "chd2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(20.f);
+	numFn.setMin(1);
+	addAttribute(achord2);
+	
+	achord3 = numFn.create( "chord3", "chd3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(20.f);
+	numFn.setMin(1.f);
+	addAttribute(achord3);
+	
+	athickness0 = numFn.create( "thickness0", "thk0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.15f);
+	numFn.setMin(0.01f);
+	addAttribute(athickness0);
+	
+	athickness1 = numFn.create( "thickness1", "thk1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.15f);
+	numFn.setMin(0.01f);
+	addAttribute(athickness1);
+	
+	athickness2 = numFn.create( "thickness2", "thk2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.15f);
+	numFn.setMin(0.01f);
+	addAttribute(athickness2);
+	
+	athickness3 = numFn.create( "thickness3", "thk3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.15f);
+	numFn.setMin(0.01f);
+	addAttribute(athickness3);
 	
 	AttributeHelper::CreateVector3FAttrib(aligament0, aligament0x, aligament0y, aligament0z,
 		"shoulderos0", "sd0", 0.f, 0.f, 1.f);
@@ -310,6 +376,14 @@ MStatus CinchonaNode::initialize()
 	MFnPointArrayData pntArrayDataFn;
 	pntArrayDataFn.create( defaultPntArray );
 	    
+	attributeAffects(achord0, outValue);
+	attributeAffects(achord1, outValue);
+	attributeAffects(achord2, outValue);
+	attributeAffects(achord3, outValue);
+	attributeAffects(athickness0, outValue);
+	attributeAffects(athickness1, outValue);
+	attributeAffects(athickness2, outValue);
+	attributeAffects(athickness3, outValue);
 	attributeAffects(anumfeather0, outValue);
 	attributeAffects(anumfeather1, outValue);
 	attributeAffects(anumfeather2, outValue);

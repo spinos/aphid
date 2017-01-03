@@ -33,6 +33,7 @@ class GPInterpolate {
 	RbfKernel<T > m_rbf;
 	Covariance<T, RbfKernel<T > > m_covTrain;
 	Covariance<T, RbfKernel<T > > m_covPredict;
+	T m_filterLength;
 	
 public:
 	GPInterpolate();
@@ -41,7 +42,7 @@ public:
 	void create(const int & nobs,
 				const int & xnvar,
 				const int & ynvar);
-	
+	void setFilterLength(T x);
 	const int & numObservations() const;
 	const int & numXVars() const;
 	const int & numYVars() const;
@@ -73,7 +74,7 @@ private:
 
 template<typename T>
 GPInterpolate<T>::GPInterpolate()
-{}
+{ m_filterLength = 1.0; }
 
 template<typename T>
 GPInterpolate<T>::~GPInterpolate()
@@ -90,6 +91,10 @@ void GPInterpolate<T>::create(const int & nobs,
 	m_yPredict.resize(1, ynvar);
 	m_yMean.resize(ynvar);
 }
+
+template<typename T>
+void GPInterpolate<T>::setFilterLength(T x)
+{ m_filterLength = x; }
 
 template<typename T>
 const int & GPInterpolate<T>::numObservations() const
@@ -127,7 +132,7 @@ bool GPInterpolate<T>::learn()
 	center_data(m_yTrain, 1, (T)numYVars(), m_yMean);
 	
 /// default length scale
-	T fltL = 1.0;
+	T fltL = m_filterLength;
 	m_rbf.setParameter(fltL, 1.0);
 	
 	bool stat = m_covTrain.create(m_xTrain, m_rbf);

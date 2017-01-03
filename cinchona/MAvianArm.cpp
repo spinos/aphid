@@ -214,15 +214,32 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 					const MObject & n0Attr,
 					const MObject & n1Attr,
 					const MObject & n2Attr,
-					const MObject & n3Attr)
+					const MObject & n3Attr,
+					const MObject & c0Attr,
+					const MObject & c1Attr,
+					const MObject & c2Attr,
+					const MObject & c3Attr,
+					const MObject & t0Attr,
+					const MObject & t1Attr,
+					const MObject & t2Attr,
+					const MObject & t3Attr)
 {
 	int nps[4];
 	nps[0] = MPlug(node, n0Attr).asInt();
 	nps[1] = MPlug(node, n1Attr).asInt();
 	nps[2] = MPlug(node, n2Attr).asInt();
 	nps[3] = MPlug(node, n3Attr).asInt();
-	
-	featherGeomParameter()->set(nps);
+	float chs[4];
+	chs[0] = MPlug(node, c0Attr).asFloat();
+	chs[1] = MPlug(node, c1Attr).asFloat();
+	chs[2] = MPlug(node, c2Attr).asFloat();
+	chs[3] = MPlug(node, c3Attr).asFloat();
+	float thickness[4];
+	thickness[0] = MPlug(node, t0Attr).asFloat();
+	thickness[1] = MPlug(node, t1Attr).asFloat();
+	thickness[2] = MPlug(node, t2Attr).asFloat();
+	thickness[3] = MPlug(node, t3Attr).asFloat();
+	featherGeomParameter()->set(nps, chs, thickness);
 }
 
 void MAvianArm::setFeatherOrientation(const MObject & node,
