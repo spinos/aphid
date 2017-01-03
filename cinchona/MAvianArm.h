@@ -63,7 +63,6 @@ protected:
 					const MObject & n0Attr,
 					const MObject & n1Attr,
 					const MObject & n2Attr,
-					const MObject & n3Attr,
 					const MObject & c0Attr,
 					const MObject & c1Attr,
 					const MObject & c2Attr,

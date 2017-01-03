@@ -27,7 +27,6 @@ MObject CinchonaNode::aseconddigitmat;
 MObject CinchonaNode::anumfeather0;
 MObject CinchonaNode::anumfeather1;
 MObject CinchonaNode::anumfeather2;
-MObject CinchonaNode::anumfeather3;
 MObject CinchonaNode::aligament0x;
 MObject CinchonaNode::aligament0y;
 MObject CinchonaNode::aligament0z;
@@ -107,7 +106,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 					adigitl);
 	setFirstLeadingLigament();
 	updateLigaments();
-	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3,
+	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2,
 						achord0, achord1, achord2, achord3,
 						athickness0, athickness1, athickness2, athickness3);
 	updateFeatherGeom();
@@ -207,13 +206,6 @@ MStatus CinchonaNode::initialize()
 	numFn.setDefault(7);
 	numFn.setMin(1);
 	addAttribute(anumfeather2);
-	
-	anumfeather3 = numFn.create( "numFeather3", "nfr3", MFnNumericData::kInt);
-	numFn.setStorable(true);
-	numFn.setKeyable(true);
-	numFn.setDefault(7);
-	numFn.setMin(1);
-	addAttribute(anumfeather3);
 	
 	achord0 = numFn.create( "chord0", "chd0", MFnNumericData::kFloat);
 	numFn.setStorable(true);
@@ -387,7 +379,6 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(anumfeather0, outValue);
 	attributeAffects(anumfeather1, outValue);
 	attributeAffects(anumfeather2, outValue);
-	attributeAffects(anumfeather3, outValue);
 	attributeAffects(aligament0x, outValue);
 	attributeAffects(aligament0y, outValue);
 	attributeAffects(aligament0z, outValue);

@@ -55,7 +55,6 @@ public:
 	static MObject anumfeather0;
 	static MObject anumfeather1;
 	static MObject anumfeather2;
-	static MObject anumfeather3;
 	static MObject aligament0x;
 	static MObject aligament0y;
 	static MObject aligament0z;
