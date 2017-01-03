@@ -484,4 +484,34 @@ void DrawArrow::drawCoordinateAt(const Matrix44F * mat)
 	glPopMatrix();
 }
 
+static const int sXZFlatArrowNumVertices = 7;
+static const float sXZFlatArrowVertices[] = {
+0.f, 0.f, 1.f,
+5.f, 0.f, 1.f,
+5.f, 0.f, 1.618f,
+6.618f, 0.f, 0.f,
+5.f, 0.f,-1.618f,
+5.f, 0.f,-1.f,
+0.f, 0.f,-1.f
+};
+
+void DrawArrow::drawFlatArrowAt(const Matrix44F * mat)
+{
+	glPushMatrix();
+	
+	float transbuf[16];
+	mat->glMatrix(transbuf);
+	glMultMatrixf((const GLfloat*)transbuf);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXZFlatArrowVertices);
+	
+	glDrawArrays(GL_LINE_STRIP, 0, sXZFlatArrowNumVertices);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	glPopMatrix();
+}
+
 }

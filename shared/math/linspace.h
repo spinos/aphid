@@ -23,5 +23,14 @@ inline void linspace_center(T * y, T x1, T x2, int n)
     }
 }
 
+template<typename T>
+inline void linspace_center_reverse(T * y, T x1, T x2, int n)
+{
+    T d = (x2 - x1)/(T)n;
+    for(int i=0;i<n;++i) {
+        y[i] = x2 - d * (i + 0.5);
+    }
+}
+
 }
 #endif

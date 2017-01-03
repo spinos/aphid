@@ -25,10 +25,13 @@ protected:
 	void drawSkeletonCoordinates();
 	void drawLigaments();
 	void drawFeathers();
+	void drawFeatherOrietations();
+	void drawFeatherLeadingEdges();
 	
 private:
 	void drawLigament(const Ligament & lig);
 	void drawFeatherMesh(const FeatherMesh * mesh);
+	void drawFeatherLeadingEdge(const FeatherMesh * mesh);
 	
 };
 #endif

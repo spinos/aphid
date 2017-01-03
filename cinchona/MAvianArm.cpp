@@ -163,15 +163,13 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	offset1 = fingerMatrixR()->transformAsNormal(offset1);
 	offset1.normalize();
 	
-	setTrailingLigamentOffset(3, offset1 * l1);
-	
 	Vector3F tip1(0.f, 0.f,-1.f);
 	tip1 = secondDigitMatirxR()->transformAsNormal(tip1);
 	tip1.normalize();
 	tip1 = invPrincipleMatrixR()->transformAsNormal(tip1);
 	tip1.normalize();
 	
-	setTrailingLigamentOffset(4, tip1 * (digitL * .05f) );
+	setTrailingLigamentOffset(3, tip1 * (digitL * .05f) );
 	
 	Vector3F tgt0(1.f, 0.f, 0.f);
 	
@@ -179,8 +177,7 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	tgt0.normalize();
 	
 	setLeadingLigamentTangent(2, tgt0);
-	setTrailingLigamentTangent(3, tgt0);
-
+	
 	Vector3F tgt1(1.f, 0.f, 0.f);
 	
 	tgt1 = secondDigitMatirxR()->transformAsNormal(tgt1);
@@ -189,7 +186,7 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	tgt1.normalize();
 	
 	setLeadingLigamentTangent(3, tgt1);
-	setTrailingLigamentTangent(4, tgt1);
+	setTrailingLigamentTangent(3, tgt1 * 4.f);
 	
 }
 
@@ -226,4 +223,15 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 	nps[3] = MPlug(node, n3Attr).asInt();
 	
 	featherGeomParameter()->set(nps);
+}
+
+void MAvianArm::setFeatherOrientation(const MObject & node,
+					const MObject & m0Attr,
+					const MObject & m1Attr)
+{
+	MMatrix inboardM = AHelper::getMatrixAttr(node, m0Attr);
+	AHelper::ConvertToMatrix44F(*inboardMarixR(), inboardM);
+	MMatrix midsectM = AHelper::getMatrixAttr(node, m1Attr);
+	AHelper::ConvertToMatrix44F(*midsectionMarixR(), midsectM);
+
 }

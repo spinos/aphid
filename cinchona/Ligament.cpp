@@ -27,8 +27,8 @@ Ligament::Ligament(const int & np)
 	for(int i=0;i<=np;++i) {
 		m_knotPoint[i].set(i, 0.f, 0.f);
 		m_knotOffset[i].set(0.f, 0.f, 0.f);
-		m_knotTangent[i<<1].set(1.f, 0.f, 0.f);
-		m_knotTangent[(i<<1)+1].set(1.f, 0.f, 0.f);
+		m_knotTangent[i<<1].set(4.f, 0.f, 0.f);
+		m_knotTangent[(i<<1)+1].set(4.f, 0.f, 0.f);
 	}
 	
 }

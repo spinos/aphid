@@ -22,6 +22,7 @@ public:
 	
 	void drawArrowAt(const Matrix44F * mat);
 	void drawCoordinateAt(const Matrix44F * mat);
+	void drawFlatArrowAt(const Matrix44F * mat);
 	
 protected:
 

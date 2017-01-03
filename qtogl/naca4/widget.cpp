@@ -84,9 +84,10 @@ void GLWidget::clientDraw()
         
         glDisableClientState(GL_VERTEX_ARRAY);
 
+	glColor3f(0,0,1);
 	Matrix44F space;
 	DrawArrow da;
-	da.drawCoordinateAt(&space);
+	da.drawFlatArrowAt(&space);
 }
 
 void GLWidget::recvParam(Float3 vx)

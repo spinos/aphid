@@ -26,7 +26,7 @@ class FeatherGeomParam;
 class AvianArm {
 
 	FeatherGeomParam * m_featherGeomParam;
-	
+#define NUM_MAT 13
 /// in order
 /// humerus
 /// ulna
@@ -39,13 +39,16 @@ class AvianArm {
 /// inverse_hand
 /// finger
 /// inverse_finger
+/// inboard 
+/// mid_section
 	aphid::Matrix44F * m_skeletonMatrices;
 /// shoulder-wrist-2nd_digit-2nd_digit_end
 	Ligament * m_leadingLigament;
-/// shoulder-elbow-wrist-2nd_digit-2nd_digit_end
+/// shoulder-elbow-wrist-2nd_digit_end
 	Ligament * m_trailingLigament;
 	float m_secondDigitLength;
 	std::vector<FeatherObject *> m_feathers;
+	float * m_featherX;
 	
 public:
 	AvianArm();
@@ -68,6 +71,8 @@ protected:
 	aphid::Matrix44F * fingerMatrixR();
 	aphid::Matrix44F * invFingerMatrixR();
 	aphid::Matrix44F * secondDigitMatirxR();
+	aphid::Matrix44F * inboardMarixR();
+	aphid::Matrix44F * midsectionMarixR();
 	
 	aphid::Vector3F shoulderPosition() const;
 	aphid::Vector3F elbowPosition() const;

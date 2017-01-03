@@ -16,7 +16,7 @@ using namespace aphid;
 FeatherGeomParam::FeatherGeomParam() 
 {
 	_numTotalF = 0;
-	for(int i=0;i<4;++i) {
+	for(int i=0;i<3;++i) {
 		_numFPerSeg[i] = 0;
 		_xsPerSeg[i] = NULL;
 		_psPerSeg[i] = NULL;
@@ -25,7 +25,7 @@ FeatherGeomParam::FeatherGeomParam()
 
 FeatherGeomParam::~FeatherGeomParam()
 {
-	for(int i=0;i<4;++i) {
+	for(int i=0;i<3;++i) {
 		if(_xsPerSeg[i]) delete[] _xsPerSeg[i];
 		if(_psPerSeg[i]) delete[] _psPerSeg[i];
 	}
@@ -35,7 +35,7 @@ void FeatherGeomParam::set(const int * nps)
 {
 	_changed = false;
 	_numTotalF = 0;
-	for(int i=0;i<4;++i) {
+	for(int i=0;i<3;++i) {
 		const int nf = nps[i];
 		if(nf != _numFPerSeg[i]) {
 			_changed = true;
@@ -63,7 +63,7 @@ bool FeatherGeomParam::isChanged() const
 { return _changed; }
 
 int FeatherGeomParam::numSegments() const
-{ return 4; }
+{ return 3; }
 
 const int & FeatherGeomParam::numFeatherOnSegment(int i) const
 { return _numFPerSeg[i]; }

@@ -18,10 +18,10 @@ class Vector3F;
 
 class FeatherGeomParam {
 
-	int _numFPerSeg[4];
+	int _numFPerSeg[3];
 	int _numTotalF;
-	float * _xsPerSeg[4];
-	aphid::Vector3F * _psPerSeg[4]; 
+	float * _xsPerSeg[3];
+	aphid::Vector3F * _psPerSeg[3]; 
 	bool _changed;
 		
 public:

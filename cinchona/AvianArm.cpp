@@ -13,16 +13,18 @@
 #include "FeatherObject.h"
 #include "FeatherGeomParam.h"
 #include <AllMath.h>
+#include <math/linspace.h>
 
 using namespace aphid;
 
 AvianArm::AvianArm()
 {
 	m_featherGeomParam = new FeatherGeomParam;
-	m_skeletonMatrices = new Matrix44F[11];
+	m_skeletonMatrices = new Matrix44F[NUM_MAT];
 	m_leadingLigament = new Ligament(3);
-	m_trailingLigament = new Ligament(4);
+	m_trailingLigament = new Ligament(3);
 	m_secondDigitLength = 2.f;
+	m_featherX = NULL;
 }
 
 AvianArm::~AvianArm()
@@ -31,6 +33,9 @@ AvianArm::~AvianArm()
 	delete[] m_skeletonMatrices;
 	delete m_leadingLigament;
 	delete m_trailingLigament;
+	if(m_featherX) {
+		delete[] m_featherX;
+	}
 	clearFeathers();
 }
 
@@ -63,6 +68,12 @@ Matrix44F * AvianArm::fingerMatrixR()
 
 Matrix44F * AvianArm::invFingerMatrixR()
 { return &m_skeletonMatrices[10]; }
+
+Matrix44F * AvianArm::inboardMarixR()
+{ return &m_skeletonMatrices[11]; }
+
+Matrix44F * AvianArm::midsectionMarixR()
+{ return &m_skeletonMatrices[12]; }
 
 Vector3F AvianArm::shoulderPosition() const
 { return m_skeletonMatrices[0].getTranslation(); }
@@ -135,13 +146,9 @@ bool AvianArm::updateHandMatrix()
 
 bool AvianArm::updateFingerMatrix()
 {
-	Vector3F side = secondDigitEndPosition() - wristPosition();
-	if(side.length2() < 1.0e-4f) {
-		std::cout<<"\n ERROR AvianArm updateHandMatrix 2nd_digit_end too close to wrist";
-		return false;
-	}
+	Vector3F side = secondDigitMatirxR()->getSide();
 	
-	side = invPrincipleMatrixR()->transformAsNormal(side);
+	//side = invPrincipleMatrixR()->transformAsNormal(side);
 	side.normalize();
 	
 	Vector3F up = handMatrixR()->getUp();
@@ -179,8 +186,7 @@ void AvianArm::updateLigaments()
 	m_trailingLigament->setKnotPoint(0, Vector3F::Zero);
 	m_trailingLigament->setKnotPoint(1, elbowP);
 	m_trailingLigament->setKnotPoint(2, wristP);
-	m_trailingLigament->setKnotPoint(3, snddigitP);
-	m_trailingLigament->setKnotPoint(4, endP);
+	m_trailingLigament->setKnotPoint(3, endP);
 	
 	m_trailingLigament->update();
 }
@@ -243,9 +249,9 @@ void AvianArm::updateFeatherGeom()
 	
 	const int nseg = m_featherGeomParam->numSegments();
 	for(int i=0;i<nseg;++i) {
-	    const int & nf = m_featherGeomParam->numFeatherOnSegment(i);
+	    const int nf = m_featherGeomParam->numFeatherOnSegment(i);
 	    const float * xs = m_featherGeomParam->xOnSegment(i);
-	    for(int j=0;j<nf;++j) {
+	    for(int j=1;j<nf;++j) {
 	        FeatherMesh * msh = new FeatherMesh(20.f, 0.02f, 0.4f, 0.15f);
 	        msh->create(20, 2);
 	        FeatherObject * f = new FeatherObject(msh);
@@ -256,24 +262,64 @@ void AvianArm::updateFeatherGeom()
 	    }
 	}
 	
-	std::cout<<"AvianArm update n feather geom "<<numFeathers();
+	const int n = numFeathers();
+	std::cout<<"AvianArm update n feather geom "<<n;
 	std::cout.flush();
+	
+	if(m_featherX) {
+		delete[] m_featherX;
+	}
+	
+	m_featherX = new float[n];
+/// from tip to root
+	linspace_center_reverse<float>(m_featherX, 0.f, 1.f, n);
 	
 }
 
 void AvianArm::updateFeatherTransform()
 {
+/// point on ligament
     int it = 0;
     const int nseg = m_featherGeomParam->numSegments();
 	for(int i=0;i<nseg;++i) {
-	    const int & nf = m_featherGeomParam->numFeatherOnSegment(i);
+	    const int nf = m_featherGeomParam->numFeatherOnSegment(i);
 	    const float * xs = m_featherGeomParam->xOnSegment(i);
-	    for(int j=0;j<nf;++j) {
+	    for(int j=1;j<nf;++j) {
 	        FeatherObject * f = m_feathers[it];
 	        Vector3F p = m_trailingLigament->getPoint(i, xs[j] );
 	        f->setTranslation(p);
 	        
 	        it++;
 	    }
+	}
+/// interpolate orientation
+	Vector3F vtip = secondDigitMatirxR()->getSide();
+	vtip = invPrincipleMatrixR()->transformAsNormal(vtip);
+	vtip.normalize();
+	Vector3F vroot = inboardMarixR()->getSide();
+	vroot = invPrincipleMatrixR()->transformAsNormal(vroot);
+	vroot.normalize();
+	
+	Vector3F htip = secondDigitMatirxR()->getUp();
+	htip = invPrincipleMatrixR()->transformAsNormal(htip);
+	htip.normalize();
+	Vector3F hroot = inboardMarixR()->getUp();
+	hroot = invPrincipleMatrixR()->transformAsNormal(hroot);
+	hroot.normalize();
+	
+	const int n = numFeathers();
+	for(int i=0;i<n;++i) {
+		Vector3F side = vtip * (1.f - m_featherX[i]) + vroot * m_featherX[i];
+		side.normalize();
+		
+		Vector3F up = htip * (1.f - m_featherX[i]) + hroot * m_featherX[i];
+		
+		Vector3F front = side.cross(up);
+		front.normalize();
+		
+		up = front.cross(side);
+		up.normalize();
+		
+		m_feathers[i]->setOrientations(side, up, front);
 	}
 }

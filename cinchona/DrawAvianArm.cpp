@@ -50,7 +50,7 @@ void DrawAvianArm::drawFeathers()
         return;   
     }
     
-    glColor3f(.65f, .65f, .65f);
+    glColor3f(.45f, .55f, .65f);
     
     float m[16];
 	principleMatrixR()->glMatrix(m);
@@ -85,11 +85,78 @@ void DrawAvianArm::drawLigament(const Ligament & lig)
 	
 }
 
+void DrawAvianArm::drawFeatherLeadingEdge(const FeatherMesh * mesh)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)mesh->leadingEdgeVertices() );
+    glDrawArrays(GL_LINE_STRIP, 0, mesh->numLeadingEdgeVertices() );
+    
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void DrawAvianArm::drawFeatherMesh(const FeatherMesh * mesh)
 {
     glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)mesh->points() );
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, (const GLfloat*)mesh->vertexNormals());
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)mesh->points() );
     glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
     
-    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void DrawAvianArm::drawFeatherOrietations()
+{
+	float m[16];
+	principleMatrixR()->glMatrix(m);
+	glPushMatrix();
+	glMultMatrixf(m);
+	
+	Matrix44F locm = *secondDigitMatirxR();
+	locm *= *invPrincipleMatrixR();
+	
+	drawFlatArrowAt(&locm );
+	
+	locm = *inboardMarixR();
+	locm *= *invPrincipleMatrixR();
+	drawFlatArrowAt(&locm );
+	
+/// already in local space
+	locm = *midsectionMarixR();
+	locm.setTranslation(trailingLigament().getPoint(1, 0.5f) + Vector3F(0, 4, -4) );
+	
+	drawFlatArrowAt(&locm );
+	
+	glPopMatrix();
+	
+}
+
+void DrawAvianArm::drawFeatherLeadingEdges()
+{
+	const int n = numFeathers();
+    if(n<1) {
+        return;   
+    }
+    
+    glColor3f(.35f, .15f, .85f);
+    
+    float m[16];
+	principleMatrixR()->glMatrix(m);
+	glPushMatrix();
+	glMultMatrixf(m);
+	
+	for(int i=0;i<n;++i) {
+	    const FeatherObject * f = feather(i);
+	    
+	    f->glMatrix(m);
+	    glPushMatrix();
+	    glMultMatrixf(m);
+	    
+	    drawFeatherLeadingEdge(f->mesh() );
+	    
+	    glPopMatrix();
+	}
+	glPopMatrix();
+
 }

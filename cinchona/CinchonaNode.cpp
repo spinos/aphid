@@ -57,6 +57,8 @@ MObject CinchonaNode::adigitos1y;
 MObject CinchonaNode::adigitos1z;
 MObject CinchonaNode::adigitos1;
 MObject CinchonaNode::adigitl;
+MObject CinchonaNode::ainboardmat;
+MObject CinchonaNode::amidsectmat;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -98,12 +100,15 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	updateLigaments();
 	setFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2, anumfeather3);
 	updateFeatherGeom();
+	setFeatherOrientation(thisNode, ainboardmat, amidsectmat);
 	updateFeatherTransform();
 	
 	view.beginGL();
 	
 	drawSkeletonCoordinates();
 	drawLigaments();
+	drawFeatherOrietations();
+	drawFeatherLeadingEdges();
 	
 #if 0
 	bool hasGlsl = isGlslReady();
@@ -120,7 +125,11 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 
 /// https://www.opengl.org/sdk/docs/man2/xhtml/glPushAttrib.xml	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	
+	float colf[] = {.5f, .6f, .7f};
+	float colb[] = {.9f, .9f, 0.f};
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, colf);
+	glMaterialfv(GL_BACK, GL_DIFFUSE, colb);
+	glEnable(GL_LIGHTING);
 	drawFeathers();
 		
 	if ( style == M3dView::kFlatShaded || 
@@ -170,21 +179,21 @@ MStatus CinchonaNode::initialize()
 	anumfeather0 = numFn.create( "numFeather0", "nfr0", MFnNumericData::kInt);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
-	numFn.setDefault(4);
+	numFn.setDefault(7);
 	numFn.setMin(1);
 	addAttribute(anumfeather0);
 	
 	anumfeather1 = numFn.create( "numFeather1", "nfr1", MFnNumericData::kInt);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
-	numFn.setDefault(5);
+	numFn.setDefault(7);
 	numFn.setMin(1);
 	addAttribute(anumfeather1);
 	
 	anumfeather2 = numFn.create( "numFeather2", "nfr2", MFnNumericData::kInt);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
-	numFn.setDefault(9);
+	numFn.setDefault(7);
 	numFn.setMin(1);
 	addAttribute(anumfeather2);
 	
@@ -274,6 +283,17 @@ MStatus CinchonaNode::initialize()
 	matAttr.setStorable(false);
 	matAttr.setConnectable(true);
 	addAttribute(aseconddigitmat);
+	
+	ainboardmat = matAttr.create("inboardMatrix", "ibm", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(ainboardmat);
+	
+	amidsectmat = matAttr.create("midsectionMatrix", "msm", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(amidsectmat);
+
 		
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
@@ -312,6 +332,8 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(adigitl, outValue);
 	attributeAffects(ahumerusmat, outValue);
 	attributeAffects(aulnamat, outValue);
+	attributeAffects(ainboardmat, outValue);
+	attributeAffects(amidsectmat, outValue);
 	attributeAffects(aradiusmat, outValue);
 	
 	return MS::kSuccess;
