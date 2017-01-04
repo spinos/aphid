@@ -51,10 +51,6 @@ MObject CinchonaNode::adigitos0x;
 MObject CinchonaNode::adigitos0y;
 MObject CinchonaNode::adigitos0z;
 MObject CinchonaNode::adigitos0;
-MObject CinchonaNode::adigitos1x;
-MObject CinchonaNode::adigitos1y;
-MObject CinchonaNode::adigitos1z;
-MObject CinchonaNode::adigitos1;
 MObject CinchonaNode::adigitl;
 MObject CinchonaNode::ainboardmat;
 MObject CinchonaNode::amidsectmat0;
@@ -102,7 +98,6 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	setWristParams(thisNode, awristos0x, awristos0y, awristos0z,
 					awristos1x, awristos1y, awristos1z);
 	set2ndDigitParams(thisNode, adigitos0x, adigitos0y, adigitos0z,
-					adigitos1x, adigitos1y, adigitos1z,
 					adigitl);
 	setFirstLeadingLigament();
 	updateLigaments();
@@ -305,13 +300,6 @@ MStatus CinchonaNode::initialize()
 	addAttribute(adigitos0z);
 	addAttribute(adigitos0);
 	
-	AttributeHelper::CreateVector3FAttrib(adigitos1, adigitos1x, adigitos1y, adigitos1z,
-		"snddigos1", "ds1", 0.f, 0.f, -.7f);
-	addAttribute(adigitos1x);
-	addAttribute(adigitos1y);
-	addAttribute(adigitos1z);
-	addAttribute(adigitos1);
-	
 	adigitl = numFn.create( "snddiglen", "dgl", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
@@ -397,9 +385,6 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(adigitos0x, outValue);
 	attributeAffects(adigitos0y, outValue);
 	attributeAffects(adigitos0z, outValue);
-	attributeAffects(adigitos1x, outValue);
-	attributeAffects(adigitos1y, outValue);
-	attributeAffects(adigitos1z, outValue);
 	attributeAffects(adigitl, outValue);
 	attributeAffects(ahumerusmat, outValue);
 	attributeAffects(aulnamat, outValue);

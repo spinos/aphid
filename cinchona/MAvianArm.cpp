@@ -129,9 +129,6 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 					const MObject & x0Attr,
 					const MObject & y0Attr,
 					const MObject & z0Attr,
-					const MObject & x1Attr,
-					const MObject & y1Attr,
-					const MObject & z1Attr,
 					const MObject & lAttr)
 {
 	Vector3F offset0;
@@ -154,14 +151,6 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	tip0.normalize();
 	
 	setLeadingLigamentOffset(3, tip0 * (digitL * .05f) );
-	
-	Vector3F offset1;
-	offset1.x = MPlug(node, x1Attr).asFloat();
-	offset1.y = MPlug(node, y1Attr).asFloat();
-	offset1.z = MPlug(node, z1Attr).asFloat();
-	const float l1 = offset1.length();
-	offset1 = fingerMatrixR()->transformAsNormal(offset1);
-	offset1.normalize();
 	
 	Vector3F tip1(0.f, 0.f,-1.f);
 	tip1 = secondDigitMatirxR()->transformAsNormal(tip1);

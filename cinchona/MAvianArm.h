@@ -53,10 +53,8 @@ protected:
 					const MObject & x0Attr,
 					const MObject & y0Attr,
 					const MObject & z0Attr,
-					const MObject & x1Attr,
-					const MObject & y1Attr,
-					const MObject & z1Attr,
 					const MObject & lAttr);
+					
 	void setFirstLeadingLigament();
 	
 	void setFeatherGeomParam(const MObject & node,

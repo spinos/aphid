@@ -79,10 +79,6 @@ public:
 	static MObject adigitos0y;
 	static MObject adigitos0z;
 	static MObject adigitos0;
-	static MObject adigitos1x;
-	static MObject adigitos1y;
-	static MObject adigitos1z;
-	static MObject adigitos1;
 	static MObject adigitl;
 	static MObject ainboardmat;
 	static MObject amidsectmat0;
