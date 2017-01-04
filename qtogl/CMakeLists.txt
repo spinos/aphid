@@ -230,5 +230,6 @@ target_link_libraries (gpdeform ${F2C_LIBRARY})
 
 target_link_libraries (gpdeform ${Boost_DATE_TIME_LIBRARY})
 
+add_subdirectory(rott)
 add_subdirectory(naca4)
 add_subdirectory(hermite)

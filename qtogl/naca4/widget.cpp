@@ -88,6 +88,7 @@ void GLWidget::clientDraw()
 	Matrix44F space;
 	DrawArrow da;
 	da.drawFlatArrowAt(&space);
+	
 }
 
 void GLWidget::recvParam(Float3 vx)

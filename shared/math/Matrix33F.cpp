@@ -27,6 +27,9 @@ Matrix33F::Matrix33F(const Vector3F& r0, const Vector3F & r1, const Vector3F & r
     fill(r0, r1, r2);
 }
 
+Matrix33F::Matrix33F(const Quaternion & q)
+{ set(q); }
+
 Matrix33F::~Matrix33F() {}
 
 float Matrix33F::operator() (int i, int j)
@@ -57,6 +60,11 @@ Vector3F Matrix33F::operator*( Vector3F other ) const
 	v.z = M(2, 0) * other.x + M(2, 1) * other.y + M(2, 2) * other.z;
 	
 	return v;
+}
+
+void Matrix33F::operator*= (const Matrix33F & another)
+{
+	multiply(another);
 }
 
 Matrix33F Matrix33F::operator*( Matrix33F other ) const

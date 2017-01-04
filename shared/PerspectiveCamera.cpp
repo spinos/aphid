@@ -51,11 +51,11 @@ void PerspectiveCamera::zoom(int y)
 
 void PerspectiveCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const
 {
-	origin.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
-	origin.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
-	origin.z = -1.f;
-	origin = fSpace.transform(origin);
-	worldVec = origin - eyePosition();
+	worldVec.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
+	worldVec.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
+	worldVec.z = -2.f;
+	worldVec = fSpace.transformAsNormal(worldVec);
+	origin = fSpace.getTranslation();
 }
 
 void PerspectiveCamera::setFieldOfView(float x)

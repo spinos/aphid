@@ -27,6 +27,7 @@ namespace aphid {
 	Matrix33F();
 	Matrix33F(const Matrix33F & a);
 	Matrix33F(const Vector3F& r0, const Vector3F & r1, const Vector3F & r2);
+	Matrix33F(const Quaternion & q);
 	~Matrix33F();
 	float operator() (int i, int j);
 	float operator() (int i, int j) const;
@@ -34,6 +35,7 @@ namespace aphid {
 	void setRow(int i, const Vector3F & r);
 	Vector3F operator*( Vector3F other ) const;
 	void operator*= (float scaling);
+	void operator*= (const Matrix33F & another);
 	void operator+=(Matrix33F other);
 	Matrix33F operator+( Matrix33F other ) const;
 	Matrix33F operator*( Matrix33F other ) const;

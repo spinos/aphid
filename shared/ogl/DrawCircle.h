@@ -1,28 +1,34 @@
 /*
  *  DrawCircle.h
- *  proxyPaint
+ *
  *
  *  Created by jian zhang on 2/7/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
 
-#pragma once
+#ifndef APH_OGL_DRAW_CIRCLE
+#define APH_OGL_DRAW_CIRCLE
 
-#include <CircleCurve.h>
+namespace aphid {
 
 class DrawCircle {
-	static aphid::CircleCurve UnitCircleCurve;
 	
 public:
 	DrawCircle();
 	virtual ~DrawCircle();
 	
-protected:
+	void drawZCircle(const float * mat) const;
+	void drawZRing(const float * mat) const;
 	void drawCircle(const float * mat) const;
 	void draw3Circles(const float * mat) const;
+	
+protected:
+
+private:
 	void drawCircle() const;
 	
-private:
-
 };
+
+}
+#endif

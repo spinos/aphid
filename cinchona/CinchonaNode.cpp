@@ -185,21 +185,24 @@ MStatus CinchonaNode::initialize()
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(7);
-	numFn.setMin(1);
+	numFn.setMin(2);
+	numFn.setMax(50);
 	addAttribute(anumfeather0);
 	
 	anumfeather1 = numFn.create( "numFeather1", "nfr1", MFnNumericData::kInt);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(7);
-	numFn.setMin(1);
+	numFn.setMin(2);
+	numFn.setMax(50);
 	addAttribute(anumfeather1);
 	
 	anumfeather2 = numFn.create( "numFeather2", "nfr2", MFnNumericData::kInt);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(7);
-	numFn.setMin(1);
+	numFn.setMin(2);
+	numFn.setMax(50);
 	addAttribute(anumfeather2);
 	
 	achord0 = numFn.create( "chord0", "chd0", MFnNumericData::kFloat);

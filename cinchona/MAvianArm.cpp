@@ -213,9 +213,9 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 					const MObject & t3Attr)
 {
 	int nps[3];
-	nps[0] = MPlug(node, n0Attr).asInt();
-	nps[1] = MPlug(node, n1Attr).asInt();
-	nps[2] = MPlug(node, n2Attr).asInt();
+	nps[0] = MPlug(node, n0Attr).asInt() + 1;
+	nps[1] = MPlug(node, n1Attr).asInt() + 1;
+	nps[2] = MPlug(node, n2Attr).asInt() + 1;
 	float chs[4];
 	chs[0] = MPlug(node, c0Attr).asFloat();
 	chs[1] = MPlug(node, c1Attr).asFloat();
