@@ -8,6 +8,8 @@
  */
 #include <gl_heads.h>
 #include "BaseDrawer.h"
+#include <ogl/GProfile.h>
+#include <ogl/GMaterial.h>
 
 namespace aphid {
 
