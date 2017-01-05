@@ -7,7 +7,8 @@
  *
  */
 
-#include <GMaterial.h>
+#include "GMaterial.h"
+#include <gl_heads.h>
 
 namespace aphid {
 

@@ -10,8 +10,7 @@
 #ifndef APHID_G_MATERIAL_H
 #define APHID_G_MATERIAL_H
 
-#include <AllMath.h>
-#include <gl_heads.h>
+#include <math/ATypes.h>
 
 namespace aphid {
 

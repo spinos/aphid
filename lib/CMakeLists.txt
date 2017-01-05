@@ -253,9 +253,6 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/LineBuffer.cpp
 ../shared/AdaptableStripeBuffer.cpp
 ../shared/GLHUD.cpp
-../shared/GLight.cpp 
-../shared/GMaterial.cpp 
-../shared/GProfile.cpp
 ../shared/BaseBrush.cpp
 ../shared/ToolContext.cpp
 ../shared/SelectionArray.cpp

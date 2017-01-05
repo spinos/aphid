@@ -10,10 +10,9 @@
 #ifndef APHID_G_PROFILE_H
 #define APHID_G_PROFILE_H
 
-#include <GMaterial.h>
-#include <GLight.h>
-
 namespace aphid {
+
+class GMaterial;
 
 class GProfile {
 public:

@@ -10,7 +10,7 @@
 #ifndef APHID_G_LIGHT_H
 #define APHID_G_LIGHT_H
 
-#include <AllMath.h>
+#include <math/ATypes.h>
 #include <gl_heads.h>
 
 namespace aphid {

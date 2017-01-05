@@ -7,7 +7,7 @@
  *
  */
 
-#include <GLight.h>
+#include "GLight.h"
 
 namespace aphid {
 

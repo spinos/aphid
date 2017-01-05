@@ -8,7 +8,8 @@
  */
 #pragma once
 #include <AllMath.h>
-#include <GProfile.h>
+#include <ogl/GProfile.h>
+#include <ogl/GLight.h>
 
 namespace aphid {
 
@@ -65,12 +66,12 @@ public:
 	GProfile m_surfaceProfile;
 	GProfile m_wireProfile;
 	GProfile m_paintProfile;
-	GMaterial *surfaceMat;
-	GMaterial *paintMat;
-	GLight majorLit;
-	GLight fillLit;
 	
 protected:
+	GLight majorLit;
+	GLight fillLit;
+	GMaterial *surfaceMat;
+	GMaterial *paintMat;
 	
 private:
 	int addTexture();
