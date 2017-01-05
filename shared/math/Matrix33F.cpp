@@ -590,5 +590,20 @@ Vector3F Matrix33F::SolveAxb(const Matrix33F & A, const Vector3F & b)
 	return sol;
 }
 
+void Matrix33F::getSide(Vector3F & dst) const
+{
+	dst.set(M(0, 0), M(0, 1), M(0, 2));
+}
+
+void Matrix33F::getUp(Vector3F & dst) const
+{
+	dst.set(M(1, 0), M(1, 1), M(1, 2));
+}
+
+void Matrix33F::getFront(Vector3F & dst) const
+{
+	dst.set(M(2, 0), M(2, 1), M(2, 2));
+}
+
 }
 //:~

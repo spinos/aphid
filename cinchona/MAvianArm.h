@@ -74,6 +74,12 @@ protected:
 					const MObject & m0Attr,
 					const MObject & m1Attr,
 					const MObject & m2Attr);
+					
+	void setFeatherDeformationParam(const MObject & node, 
+					const MObject & brt0Attr, 
+					const MObject & brt1Attr, 
+					const MObject & brt2Attr, 
+					const MObject & brt3Attr);
 	
 private:
 

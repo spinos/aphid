@@ -13,6 +13,8 @@
 #include <math/Matrix44F.h>
 #include "FeatherMesh.h"
 #include "FeatherObject.h"
+#include "FeatherDeformParam.h"
+#include "FeatherDeformer.h"
 #include <gl_heads.h>
 
 using namespace aphid; 
@@ -25,9 +27,7 @@ DrawAvianArm::~DrawAvianArm()
 
 void DrawAvianArm::drawSkeletonCoordinates()
 {
-	for(int i=0;i<6;++i) {
-		drawCoordinateAt(&skeletonMatrix(i) );
-	}
+	drawCoordinateAt(principleMatrixR() );
 	
 }
 
@@ -64,7 +64,7 @@ void DrawAvianArm::drawFeathers()
 	    glPushMatrix();
 	    glMultMatrixf(m);
 	    
-	    drawFeatherMesh(f->mesh() );
+	    drawFeatherMesh(f->mesh(), f->deformer() );
 	    
 	    glPopMatrix();
 	}
@@ -85,21 +85,23 @@ void DrawAvianArm::drawLigament(const Ligament & lig)
 	
 }
 
-void DrawAvianArm::drawFeatherLeadingEdge(const FeatherMesh * mesh)
+void DrawAvianArm::drawFeatherLeadingEdge(const FeatherMesh * mesh,
+										const FeatherDeformer * deformer)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)mesh->leadingEdgeVertices() );
+    glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)deformer->deformedLeadingEdgePoints() );
     glDrawArrays(GL_LINE_STRIP, 0, mesh->numLeadingEdgeVertices() );
     
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void DrawAvianArm::drawFeatherMesh(const FeatherMesh * mesh)
+void DrawAvianArm::drawFeatherMesh(const FeatherMesh * mesh,
+										const FeatherDeformer * deformer)
 {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
-    glNormalPointer(GL_FLOAT, 0, (const GLfloat*)mesh->vertexNormals());
-	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)mesh->points() );
+    glNormalPointer(GL_FLOAT, 0, (const GLfloat*)deformer->deformedNormals());
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)deformer->deformedPoints() );
     glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices());
     
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -108,31 +110,35 @@ void DrawAvianArm::drawFeatherMesh(const FeatherMesh * mesh)
 
 void DrawAvianArm::drawFeatherOrietations()
 {
+	FeatherDeformParam * param = featherDeformParameter();
+	const Vector3F localOffset(0,5,0);
 	float m[16];
 	principleMatrixR()->glMatrix(m);
 	glPushMatrix();
 	glMultMatrixf(m);
 	
 	Matrix44F locm = *secondDigitMatirxR();
+	locm.setTranslation(secondDigitEndPosition() );
 	locm *= *invPrincipleMatrixR();
+	locm.setTranslation(trailingLigament().getPoint(2, 0.99f) + localOffset);
 	
-	drawFlatArrowAt(&locm );
+	drawFlatArrowTandem(&locm, &param->rotation(3) );
 	
 	locm = *midsection1MarixR();
-	locm.setTranslation(trailingLigament().getPoint(1, 0.99f) + Vector3F(0, 4, -4) );
+	locm.setTranslation(trailingLigament().getPoint(1, 0.99f) + localOffset);
 	
-	drawFlatArrowAt(&locm);
+	drawFlatArrowTandem(&locm, &param->rotation(2) );
 	
 	locm = *midsection0MarixR();
-	locm.setTranslation(trailingLigament().getPoint(0, 0.99f) + Vector3F(0, 4, -4) );
+	locm.setTranslation(trailingLigament().getPoint(0, 0.99f) + localOffset);
 	
-	drawFlatArrowAt(&locm);
+	drawFlatArrowTandem(&locm, &param->rotation(1) );
 	
 	locm = *inboardMarixR();
-	locm.setTranslation(shoulderPosition() + Vector3F(0, 4, -4) );
+	locm.setTranslation(shoulderPosition() + localOffset);
 	
 	locm *= *invPrincipleMatrixR();
-	drawFlatArrowAt(&locm );
+	drawFlatArrowTandem(&locm, &param->rotation(0) );
 	
 	glPopMatrix();
 	
@@ -159,7 +165,7 @@ void DrawAvianArm::drawFeatherLeadingEdges()
 	    glPushMatrix();
 	    glMultMatrixf(m);
 	    
-	    drawFeatherLeadingEdge(f->mesh() );
+	    drawFeatherLeadingEdge(f->mesh(), f->deformer() );
 	    
 	    glPopMatrix();
 	}

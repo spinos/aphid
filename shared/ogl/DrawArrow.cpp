@@ -484,6 +484,40 @@ void DrawArrow::drawCoordinateAt(const Matrix44F * mat)
 	glPopMatrix();
 }
 
+void DrawArrow::drawFlatArrowAt(const Matrix44F * mat)
+{
+	glPushMatrix();
+	
+	float transbuf[16];
+	mat->glMatrix(transbuf);
+	glMultMatrixf((const GLfloat*)transbuf);
+	
+	drawFlatArraw();
+
+	glPopMatrix();
+}
+
+void DrawArrow::drawFlatArrowTandem(const Matrix44F * mat,
+						const Matrix33F * mat1)
+{
+	glPushMatrix();
+	
+	float transbuf[16];
+	mat->glMatrix(transbuf);
+	glMultMatrixf((const GLfloat*)transbuf);
+	
+	drawFlatArraw();
+	
+	mat1->glMatrix(transbuf);
+	transbuf[12] = 6.767f;
+	transbuf[13] = 0.f;
+	transbuf[14] = 0.f;
+	glMultMatrixf((const GLfloat*)transbuf);
+	drawFlatArraw();
+
+	glPopMatrix();
+}
+
 static const int sXZFlatArrowNumVertices = 7;
 static const float sXZFlatArrowVertices[] = {
 0.f, 0.f, 1.f,
@@ -495,14 +529,8 @@ static const float sXZFlatArrowVertices[] = {
 0.f, 0.f,-1.f
 };
 
-void DrawArrow::drawFlatArrowAt(const Matrix44F * mat)
+void DrawArrow::drawFlatArraw()
 {
-	glPushMatrix();
-	
-	float transbuf[16];
-	mat->glMatrix(transbuf);
-	glMultMatrixf((const GLfloat*)transbuf);
-	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXZFlatArrowVertices);
@@ -510,8 +538,6 @@ void DrawArrow::drawFlatArrowAt(const Matrix44F * mat)
 	glDrawArrays(GL_LINE_STRIP, 0, sXZFlatArrowNumVertices);
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
-
-	glPopMatrix();
 }
 
 }

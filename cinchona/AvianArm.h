@@ -22,10 +22,13 @@ class Matrix44F;
 class Ligament;
 class FeatherObject;
 class FeatherGeomParam;
+class FeatherDeformParam;
 
 class AvianArm {
 
 	FeatherGeomParam * m_featherGeomParam;
+	FeatherDeformParam * m_featherDeformParam;
+	
 #define NUM_MAT 14
 /// in order
 /// humerus
@@ -104,6 +107,9 @@ protected:
 	
 	int numFeathers() const;
 	const FeatherObject * feather(int i) const;
+	
+	FeatherDeformParam * featherDeformParameter();
+	void updateFeatherDeformation();
 	
 private:
     void clearFeathers();

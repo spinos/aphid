@@ -10,6 +10,7 @@
 #include "MAvianArm.h"
 #include "Ligament.h"
 #include "FeatherGeomParam.h"
+#include "FeatherDeformParam.h"
 #include <AHelper.h>
 
 using namespace aphid;
@@ -240,4 +241,31 @@ void MAvianArm::setFeatherOrientation(const MObject & node,
 	AHelper::ConvertToMatrix44F(*midsection0MarixR(), midsect1M);
 	MMatrix midsect2M = AHelper::getMatrixAttr(node, m2Attr);
 	AHelper::ConvertToMatrix44F(*midsection1MarixR(), midsect2M);
+}
+
+void MAvianArm::setFeatherDeformationParam(const MObject & node, 
+					const MObject & brt0Attr, 
+					const MObject & brt1Attr, 
+					const MObject & brt2Attr, 
+					const MObject & brt3Attr)
+{
+	MMatrix brtM;
+	Matrix33F orient[4];
+	
+	brtM = AHelper::getMatrixAttr(node, brt0Attr);
+	AHelper::ConvertToMatrix33F(orient[0], brtM);
+	
+	brtM = AHelper::getMatrixAttr(node, brt1Attr);
+	AHelper::ConvertToMatrix33F(orient[1], brtM);
+	
+	brtM = AHelper::getMatrixAttr(node, brt2Attr);
+	AHelper::ConvertToMatrix33F(orient[2], brtM);
+	
+	brtM = AHelper::getMatrixAttr(node, brt3Attr);
+	AHelper::ConvertToMatrix33F(orient[3], brtM);
+	
+	
+	FeatherDeformParam * param = featherDeformParameter();
+	param->set(orient);
+	
 }

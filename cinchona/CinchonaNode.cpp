@@ -63,6 +63,10 @@ MObject CinchonaNode::athickness0;
 MObject CinchonaNode::athickness1;
 MObject CinchonaNode::athickness2;
 MObject CinchonaNode::athickness3;
+MObject CinchonaNode::abrt0mat;
+MObject CinchonaNode::abrt1mat;
+MObject CinchonaNode::abrt2mat;
+MObject CinchonaNode::abrt3mat;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -107,6 +111,8 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	updateFeatherGeom();
 	setFeatherOrientation(thisNode, ainboardmat, amidsectmat0, amidsectmat1);
 	updateFeatherTransform();
+	setFeatherDeformationParam(thisNode, abrt0mat, abrt1mat, abrt2mat, abrt3mat);
+	updateFeatherDeformation();
 	
 	view.beginGL();
 	
@@ -120,7 +126,6 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	if(!hasGlsl ) {
 		hasGlsl = prepareGlsl();
 	}
-#else
 	bool hasGlsl = false;
 #endif
 
@@ -349,7 +354,26 @@ MStatus CinchonaNode::initialize()
 	matAttr.setConnectable(true);
 	addAttribute(amidsectmat1);
 
-		
+	abrt0mat = matAttr.create("bendRollTwist0Matrix", "brt0m", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(abrt0mat);
+	
+	abrt1mat = matAttr.create("bendRollTwist1Matrix", "brt1m", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(abrt1mat);
+	
+	abrt2mat = matAttr.create("bendRollTwist2Matrix", "brt2m", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(abrt2mat);
+	
+	abrt3mat = matAttr.create("bendRollTwist3Matrix", "brt3m", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setConnectable(true);
+	addAttribute(abrt3mat);
+	
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
 	numFn.setWritable(false);

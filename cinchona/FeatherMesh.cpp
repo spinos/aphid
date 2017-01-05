@@ -16,10 +16,20 @@ FeatherMesh::FeatherMesh(const float & c,
 			const float & m,
 			const float & p,
 			const float & t) : AirfoilMesh(c, m, p, t)
-{ m_leadingEdgeVertices = NULL; }
+{ 
+	m_leadingEdgeVertices = NULL; 
+	m_leadingEdgeIndices = NULL;
+}
 
 FeatherMesh::~FeatherMesh()
-{ delete[] m_leadingEdgeVertices; }
+{ 
+	if(m_leadingEdgeVertices) {
+		delete[] m_leadingEdgeVertices; 
+	}
+	if(m_leadingEdgeIndices) {
+		delete[] m_leadingEdgeIndices;
+	}
+}
 
 void FeatherMesh::create(const int & gx,
 				const int & gy)
@@ -44,16 +54,24 @@ void FeatherMesh::create(const int & gx,
 		delete[] m_leadingEdgeVertices;
 	}
 	
+	if(m_leadingEdgeIndices) {
+		delete[] m_leadingEdgeIndices;
+	}
+	
 	m_leadingEdgeVertices = new Vector3F[gx+1];
+	m_leadingEdgeIndices = new int[gx+1];
 	m_leadingEdgeVertices[0] = p[0];
+	m_leadingEdgeIndices[0] = 0;
 	m_nvprow = gy*2+1;
 	m_1strow = 1;
 	int it = 1;
 	for(int i=0;i<gx-1;++i) {
 		m_leadingEdgeVertices[it] = p[1 + i*m_nvprow];
+		m_leadingEdgeIndices[it] = 1 + i*m_nvprow;
 		it++;
 	}
 	m_leadingEdgeVertices[it] = p[numPoints() - 1];
+	m_leadingEdgeIndices[it] = numPoints() - 1;
 	m_numLeadingEdgeVertices = gx+1;
 }
 
@@ -62,6 +80,9 @@ const int & FeatherMesh::numLeadingEdgeVertices() const
 
 const Vector3F * FeatherMesh::leadingEdgeVertices() const
 { return m_leadingEdgeVertices; }
+
+const int * FeatherMesh::leadingEdgeIndices() const
+{ return m_leadingEdgeIndices; }
 
 const int & FeatherMesh::numVerticesPerRow() const
 { return m_nvprow; }

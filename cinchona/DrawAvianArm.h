@@ -14,6 +14,7 @@
 
 class Ligament;
 class FeatherMesh;
+class FeatherDeformer;
 
 class DrawAvianArm : public AvianArm, public aphid::DrawArrow {
 
@@ -30,8 +31,10 @@ protected:
 	
 private:
 	void drawLigament(const Ligament & lig);
-	void drawFeatherMesh(const FeatherMesh * mesh);
-	void drawFeatherLeadingEdge(const FeatherMesh * mesh);
+	void drawFeatherMesh(const FeatherMesh * mesh,
+						const FeatherDeformer * deformer);
+	void drawFeatherLeadingEdge(const FeatherMesh * mesh,
+						const FeatherDeformer * deformer);
 	
 };
 #endif

@@ -27,6 +27,7 @@ class FeatherDeformer {
 	const FeatherMesh * m_mesh;
 	boost::scoped_array<aphid::Vector3F > m_points;
 	boost::scoped_array<aphid::Vector3F > m_normals;
+	boost::scoped_array<aphid::Vector3F > m_leadingEdgePoints;
 	
 public:
 	FeatherDeformer(const FeatherMesh * mesh);
@@ -35,6 +36,7 @@ public:
 	void deform(const aphid::Matrix33F & mat);
 	void calculateNormal();
 
+	const aphid::Vector3F * deformedLeadingEdgePoints() const;
 	const aphid::Vector3F * deformedPoints() const;
 	const aphid::Vector3F * deformedNormals() const;
 	

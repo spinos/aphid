@@ -12,6 +12,7 @@
 #include "FeatherMesh.h"
 #include "FeatherObject.h"
 #include "FeatherGeomParam.h"
+#include "FeatherDeformParam.h"
 #include <AllMath.h>
 #include <math/linspace.h>
 #include <gpr/GPInterpolate.h>
@@ -21,6 +22,7 @@ using namespace aphid;
 AvianArm::AvianArm()
 {
 	m_featherGeomParam = new FeatherGeomParam;
+	m_featherDeformParam = new FeatherDeformParam;
 	m_skeletonMatrices = new Matrix44F[NUM_MAT];
 	m_leadingLigament = new Ligament(3);
 	m_trailingLigament = new Ligament(3);
@@ -31,6 +33,7 @@ AvianArm::AvianArm()
 AvianArm::~AvianArm()
 {
 	delete m_featherGeomParam;
+	delete m_featherDeformParam;
 	delete[] m_skeletonMatrices;
 	delete m_leadingLigament;
 	delete m_trailingLigament;
@@ -388,4 +391,25 @@ void AvianArm::updateFeatherTransform()
 		m_feathers[i]->setOrientations(side, up, front);
 	}
 	
+}
+
+FeatherDeformParam * AvianArm::featherDeformParameter()
+{ return m_featherDeformParam; }
+
+void AvianArm::updateFeatherDeformation()
+{
+	FeatherDeformParam * param = featherDeformParameter();
+	if(!param->isChanged()
+	 && !isFeatherGeomParameterChanged() ) {
+		return;
+	}
+	
+	Matrix33F deformM;
+	const int n = numFeathers();
+	for(int i=0;i<n;++i) {
+		param->predictRotation(deformM, &m_featherX[i]);
+		
+		m_feathers[i]->deform(deformM);
+	}
+
 }

@@ -13,6 +13,7 @@
 namespace aphid {
 
 class Matrix44F;
+class Matrix33F;
 
 class DrawArrow {
 
@@ -23,10 +24,14 @@ public:
 	void drawArrowAt(const Matrix44F * mat);
 	void drawCoordinateAt(const Matrix44F * mat);
 	void drawFlatArrowAt(const Matrix44F * mat);
+	void drawFlatArrowTandem(const Matrix44F * mat,
+						const Matrix33F * mat1);
 	
 protected:
 
 private:
+	void drawFlatArraw();
+	
 };
 
 }

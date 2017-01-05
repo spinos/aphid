@@ -91,6 +91,10 @@ public:
 	static MObject athickness1;
 	static MObject athickness2;
 	static MObject athickness3;
+	static MObject abrt0mat;
+	static MObject abrt1mat;
+	static MObject abrt2mat;
+	static MObject abrt3mat;
 	static MObject outValue;
 	
 protected:

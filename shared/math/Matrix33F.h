@@ -13,6 +13,8 @@ namespace aphid {
 
  class Matrix33F
  {
+	float v[9];
+	
  public:
 	enum RotateOrder {
 		Unknown = 0,
@@ -70,13 +72,17 @@ namespace aphid {
 	float trace() const;
 	bool isSymmetric() const;
 	float distanceTo(const Matrix33F & another) const;
+	void getSide(Vector3F & dst) const;
+	void getUp(Vector3F & dst) const;
+	void getFront(Vector3F & dst) const;
+	
 	static Vector3F SolveAxb(const Matrix33F & A, const Vector3F & b);
 	
 	static Matrix33F IdentityMatrix;
 	
     friend std::ostream& operator<<(std::ostream &output, const Matrix33F & p);
     
-	float v[9];
+	
  };
 
 }

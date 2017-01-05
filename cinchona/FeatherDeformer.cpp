@@ -19,6 +19,7 @@ FeatherDeformer::FeatherDeformer(const FeatherMesh * mesh)
 	m_mesh = mesh; 
 	m_points.reset(new Vector3F[mesh->numPoints() ]);
 	m_normals.reset(new Vector3F[mesh->numPoints() ]);
+	m_leadingEdgePoints.reset(new Vector3F[mesh->numLeadingEdgeVertices() ]);
 }
 
 FeatherDeformer::~FeatherDeformer()
@@ -29,6 +30,9 @@ const Vector3F * FeatherDeformer::deformedPoints() const
 
 const Vector3F * FeatherDeformer::deformedNormals() const
 { return m_normals.get(); }
+
+const Vector3F * FeatherDeformer::deformedLeadingEdgePoints() const
+{ return m_leadingEdgePoints.get(); }
 
 void FeatherDeformer::deform(const Matrix33F & mat)
 {
@@ -74,7 +78,13 @@ void FeatherDeformer::deform(const Matrix33F & mat)
 		lastXMean = xMean;
 		
 	}
-	
+
+/// update leading edge
+	const int & nev = m_mesh->numLeadingEdgeVertices();
+	const int * eind = m_mesh->leadingEdgeIndices();
+	for(int i=0;i<nev;++i) {
+		m_leadingEdgePoints[i] = m_points[eind[i]];
+	}
 }
 
 void FeatherDeformer::calculateNormal()
