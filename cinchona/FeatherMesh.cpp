@@ -46,10 +46,11 @@ void FeatherMesh::create(const int & gx,
 	
 	m_leadingEdgeVertices = new Vector3F[gx+1];
 	m_leadingEdgeVertices[0] = p[0];
-	const int npc = gy*2+1;
+	m_nvprow = gy*2+1;
+	m_1strow = 1;
 	int it = 1;
 	for(int i=0;i<gx-1;++i) {
-		m_leadingEdgeVertices[it] = p[1 + i*npc];
+		m_leadingEdgeVertices[it] = p[1 + i*m_nvprow];
 		it++;
 	}
 	m_leadingEdgeVertices[it] = p[numPoints() - 1];
@@ -61,3 +62,9 @@ const int & FeatherMesh::numLeadingEdgeVertices() const
 
 const Vector3F * FeatherMesh::leadingEdgeVertices() const
 { return m_leadingEdgeVertices; }
+
+const int & FeatherMesh::numVerticesPerRow() const
+{ return m_nvprow; }
+	
+const int & FeatherMesh::vertexFirstRow() const
+{ return m_1strow; }

@@ -17,6 +17,8 @@ class FeatherMesh : public aphid::AirfoilMesh {
 
 	aphid::Vector3F * m_leadingEdgeVertices;
 	int m_numLeadingEdgeVertices;
+	int m_1strow;
+	int m_nvprow;
 	
 public:
 	FeatherMesh(const float & c,
@@ -31,6 +33,8 @@ public:
 	
 	const int & numLeadingEdgeVertices() const;
 	const aphid::Vector3F * leadingEdgeVertices() const;
+	const int & numVerticesPerRow() const;
+	const int & vertexFirstRow() const;
 	
 protected:
 

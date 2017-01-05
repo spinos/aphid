@@ -21,11 +21,14 @@ class RotationHandle {
 	Matrix44F * m_space;
 	Vector3F m_center;
 	Vector3F m_lastV;
+	float m_speed;
 	bool m_active;
 	
 public:
 	RotationHandle(Matrix44F * space);
 	virtual ~RotationHandle();
+	
+	void setSpeed(float x);
 	
 	bool begin(const Ray * r);
 	void end();

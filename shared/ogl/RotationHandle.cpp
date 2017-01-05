@@ -17,11 +17,15 @@ RotationHandle::RotationHandle(Matrix44F * space)
 { 
 	m_space = space; 
 	m_center = space->getTranslation();
+	m_speed = 1.f;
 	m_active = false;
 }
 
 RotationHandle::~RotationHandle()
 {}
+
+void RotationHandle::setSpeed(float x)
+{ m_speed = x; }
 
 bool RotationHandle::begin(const Ray * r)
 {
@@ -62,10 +66,10 @@ void RotationHandle::rotate(const Ray * r)
 		
 	Vector3F curV = pol - m_center;
 	
-	Vector3F axis = m_lastV.cross(curV);
+	Vector3F axis = curV.cross(m_lastV);
 	axis.normalize();
 	
-	float ang = (curV - m_lastV).length();
+	float ang = (curV - m_lastV).length() * m_speed;
 	Quaternion q(ang, axis);
 	
 	Matrix33F srot = m_space->rotation();
