@@ -29,6 +29,7 @@ class FeatherGeomParam {
 	float * _xsPerSeg[3];
 	float _chordLength[4];
 	float _thickness[4];
+	float _longestChord;
 	aphid::Vector3F * _psPerSeg[3]; 
 	aphid::gpr::GPInterpolate<float > * m_chordInterp;
 	aphid::gpr::GPInterpolate<float > * m_thicknessInterp;
@@ -51,6 +52,7 @@ public:
 	
 	float predictChord(const float * x);
 	float predictThickness(const float * x);
+	const float & longestChord() const;
 	
 private:
 	void learnChord();

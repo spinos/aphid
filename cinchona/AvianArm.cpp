@@ -344,10 +344,14 @@ void AvianArm::updateFeatherDeformation()
 		return;
 	}
 	
+	const float & longestC = featherGeomParameter()->longestChord();
+	
 	Matrix33F deformM;
 	const int n = numFeathers();
 	for(int i=0;i<n;++i) {
-		param->predictRotation(deformM, &m_featherX[i]);
+		float relspeed = m_feathers[i]->mesh()->chord() / longestC * 0.1f;
+		
+		param->predictRotation(deformM, &m_featherX[i], relspeed);
 		
 		m_feathers[i]->deform(deformM);
 	}

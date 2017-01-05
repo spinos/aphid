@@ -19,7 +19,8 @@ public:
 	virtual ~FeatherDeformParam();
 	
 	void predictRotation(aphid::Matrix33F & dst,
-						const float * x);
+						const float * x,
+						const float & relspeed);
 	
 protected:
 	

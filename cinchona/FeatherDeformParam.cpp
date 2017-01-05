@@ -20,7 +20,8 @@ FeatherDeformParam::~FeatherDeformParam()
 {}
 
 void FeatherDeformParam::predictRotation(aphid::Matrix33F & dst,
-						const float * x)
+						const float * x,
+						const float & relspeed)
 {
 	sideInterp()->predict(x);
 	upInterp()->predict(x);
@@ -33,10 +34,10 @@ void FeatherDeformParam::predictRotation(aphid::Matrix33F & dst,
 	Vector3F vup(upY[0], upY[1], upY[2]);
 	vup.normalize();
 	
-	vside = Vector3F::XAxis + (vside - Vector3F::XAxis) * 0.1f;
+	vside = Vector3F::XAxis + (vside - Vector3F::XAxis) * relspeed;
 	vside.normalize();
 	
-	vup = Vector3F::YAxis + (vup - Vector3F::YAxis) * 0.1f;
+	vup = Vector3F::YAxis + (vup - Vector3F::YAxis) * relspeed;
 	vup.normalize();
 	
 	Vector3F vfront = vside.cross(vup);

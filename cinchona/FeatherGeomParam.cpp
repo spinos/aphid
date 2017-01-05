@@ -74,8 +74,12 @@ void FeatherGeomParam::set(const int * nps,
 		
 	}
 	
+	float longestC = 0.f;
 	bool chordChanged = false;
 	for(int i=0;i<4;++i) {
+		if(longestC < chords[i]) {
+			longestC = chords[i];
+		}
 		if(chords[i] != _chordLength[i]) {
 			_changed = true;
 			chordChanged = true;
@@ -84,6 +88,7 @@ void FeatherGeomParam::set(const int * nps,
 	}
 
 	if(chordChanged) {
+		_longestChord = longestC;
 		learnChord();
 	}
 	
@@ -150,3 +155,6 @@ float FeatherGeomParam::predictThickness(const float * x)
 	m_thicknessInterp->predict(x);
 	return *m_thicknessInterp->predictedY().column(0);
 }
+
+const float & FeatherGeomParam::longestChord() const
+{ return _longestChord; }
