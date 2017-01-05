@@ -33,9 +33,6 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
 	getDrawer()->m_markerProfile.apply();
-	//getDrawer()->m_surfaceProfile.apply();
-
-	//getDrawer()->setColor(0.f, .34f, .45f);
 
 	float m[16];
 	m_space.glMatrix(m);
@@ -48,9 +45,10 @@ void GLWidget::clientDraw()
 	meye.glMatrix(m);
 
 	m_roth->draw(m);
+
+	getDrawer()->m_surfaceProfile.apply();
 	
 	drawFeather();
-	
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)
@@ -76,21 +74,20 @@ void GLWidget::drawFeather()
 {
 	const Matrix33F rot = m_space.rotation();
 	m_deform->deform(rot);
-	
-	getDrawer()->m_wireProfile.apply();
-
-	getDrawer()->setColor(0.f, .64f, .25f);
+	m_deform->calculateNormal();
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+    glNormalPointer(GL_FLOAT, 0, (const GLfloat*)m_deform->deformedNormals());
         glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_deform->deformedPoints() );
         glDrawElements(GL_TRIANGLES, m_mesh->numIndices(), GL_UNSIGNED_INT, m_mesh->indices());
         
-        
-	getDrawer()->setColor(0.f, .24f, .55f);
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
+	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)m_mesh->vertexNormals());
         glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_mesh->points() );
         glDrawElements(GL_TRIANGLES, m_mesh->numIndices(), GL_UNSIGNED_INT, m_mesh->indices());
         
-        glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
 }

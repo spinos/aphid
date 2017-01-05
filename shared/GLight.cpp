@@ -14,8 +14,8 @@ namespace aphid {
 GLight::GLight() 
 {
 	m_LightID = GL_LIGHT0;
-	m_Ambient = Color4( 0.02, 0.02, 0.02, 1.0 );
-	m_Diffuse = Color4( .8, .8, .8, 1.0 );
+	m_Ambient = Color4( 0.2, 0.2, 0.2, 1.0 );
+	m_Diffuse = Color4( .89, .89, .9, 1.0 );
 	m_Specular = Color4( .8, .8, .9, 1.0 );
 	m_Position = Float4( 100.0, 100.0, 100.0, 1.0 );
 }
@@ -35,11 +35,14 @@ GLight::GLight(GLenum LightID,
 
 void GLight::activate() const
 {
+	glEnable(GL_LIGHTING);
 	glEnable( m_LightID );
 	glLightfv( m_LightID, GL_AMBIENT, &(m_Ambient.r) );
 	glLightfv( m_LightID, GL_DIFFUSE, &(m_Diffuse.r) );
 	glLightfv( m_LightID, GL_SPECULAR, &(m_Specular.r) );
 	glLightfv( m_LightID, GL_POSITION, &(m_Position.x) );
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	
 }
 
 void GLight::deactivate() const

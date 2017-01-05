@@ -100,6 +100,7 @@ void RotationHandle::draw(const float * camspace) const
 	
 	DrawCircle dc;
 	dc.drawZRing(m);
+	
 }
 
 }

@@ -10,6 +10,7 @@
 #include "FeatherDeformer.h"
 #include "FeatherMesh.h"
 #include <math/Matrix44F.h>
+#include <ConvexShape.h>
 
 using namespace aphid;
 
@@ -17,7 +18,7 @@ FeatherDeformer::FeatherDeformer(const FeatherMesh * mesh)
 { 
 	m_mesh = mesh; 
 	m_points.reset(new Vector3F[mesh->numPoints() ]);
-	
+	m_normals.reset(new Vector3F[mesh->numPoints() ]);
 }
 
 FeatherDeformer::~FeatherDeformer()
@@ -25,6 +26,9 @@ FeatherDeformer::~FeatherDeformer()
 
 const Vector3F * FeatherDeformer::deformedPoints() const
 { return m_points.get(); }
+
+const Vector3F * FeatherDeformer::deformedNormals() const
+{ return m_normals.get(); }
 
 void FeatherDeformer::deform(const Matrix33F & mat)
 {
@@ -71,4 +75,38 @@ void FeatherDeformer::deform(const Matrix33F & mat)
 		
 	}
 	
+}
+
+void FeatherDeformer::calculateNormal()
+{
+	const int nv = m_mesh->numPoints();
+	std::memset(m_normals.get(), 0, nv * 12);
+	const int ni = m_mesh->numIndices();
+	const unsigned * ind = m_mesh->indices();
+	const Vector3F * ps = m_points.get();
+	
+	cvx::Triangle atri;
+	Vector3F triNm;
+
+	for(int i=0;i<ni;i+=3) {
+		const unsigned & i0 = ind[i];
+		const unsigned & i1 = ind[i+1];
+		const unsigned & i2 = ind[i+2];
+		
+		const Vector3F & a = ps[i0];
+		const Vector3F & b = ps[i1];
+		const Vector3F & c = ps[i2];
+		
+		atri.set(a, b, c);
+		triNm = atri.calculateNormal();
+		
+		m_normals[i0] += triNm;
+		m_normals[i1] += triNm;
+		m_normals[i2] += triNm;
+	}
+	
+	for(int i=0;i<nv;++i) {
+		m_normals[i].normalize();
+	}
+
 }

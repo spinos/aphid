@@ -19,7 +19,8 @@ class GMaterial {
 public:
 	GMaterial();		
 	GMaterial( Color4 ambient,
-             Color4 diffuse,
+             Color4 frontDiffuse,
+			 Color4 backDiffuse,
              Color4 specular,
              Color4 emission,
              float shininess);
@@ -28,6 +29,7 @@ public:
  
     Color4 m_Ambient;
     Color4 m_Diffuse;
+	Color4 m_backDiffuse;
     Color4 m_Specular;
     Color4 m_Emission;
     float  m_Shininess;

@@ -118,10 +118,7 @@ void Base3DView::initializeGL()
 #endif
 	qglClearColor(m_backgroundColor.dark());
 
-    glEnable(GL_DEPTH_TEST);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_TEXTURE_2D);
-	glShadeModel(GL_SMOOTH);
+    glShadeModel(GL_SMOOTH);
 	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
     // glEnable(GL_MULTISAMPLE);
@@ -145,8 +142,11 @@ void Base3DView::paintGL()
 	
 	getDrawer()->m_markerProfile.apply();
 	getDrawer()->coordsys(20.f);
+
 	getDrawer()->setAlignDir(getCamera()->eyeDirection() );
+	
 	clientDraw();
+	return;
 	if(m_isFocused) {
 		Vector3F corners[4];
 		getCamera()->frameCorners(corners[0], corners[1], corners[2], corners[3]);
