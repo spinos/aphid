@@ -605,5 +605,8 @@ void Matrix33F::getFront(Vector3F & dst) const
 	dst.set(M(2, 0), M(2, 1), M(2, 2));
 }
 
+void Matrix33F::copy(const Matrix33F & another)
+{ memcpy(v, another.v, 36); }
+
 }
 //:~

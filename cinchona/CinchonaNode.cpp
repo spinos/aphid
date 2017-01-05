@@ -109,7 +109,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 						achord0, achord1, achord2, achord3,
 						athickness0, athickness1, athickness2, athickness3);
 	updateFeatherGeom();
-	setFeatherOrientation(thisNode, ainboardmat, amidsectmat0, amidsectmat1);
+	setFeatherOrientationParam(thisNode, ainboardmat, amidsectmat0, amidsectmat1);
 	updateFeatherTransform();
 	setFeatherDeformationParam(thisNode, abrt0mat, abrt1mat, abrt2mat, abrt3mat);
 	updateFeatherDeformation();

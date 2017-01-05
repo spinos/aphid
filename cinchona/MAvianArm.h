@@ -70,7 +70,7 @@ protected:
 					const MObject & t2Attr,
 					const MObject & t3Attr);
 					
-	void setFeatherOrientation(const MObject & node,
+	void setFeatherOrientationParam(const MObject & node,
 					const MObject & m0Attr,
 					const MObject & m1Attr,
 					const MObject & m2Attr);

@@ -21,11 +21,13 @@ class Matrix44F;
 
 class Ligament;
 class FeatherObject;
+class FeatherOrientationParam;
 class FeatherGeomParam;
 class FeatherDeformParam;
 
 class AvianArm {
 
+	FeatherOrientationParam * m_orientationParam;
 	FeatherGeomParam * m_featherGeomParam;
 	FeatherDeformParam * m_featherDeformParam;
 	
@@ -108,6 +110,7 @@ protected:
 	int numFeathers() const;
 	const FeatherObject * feather(int i) const;
 	
+	FeatherOrientationParam * orientationParameter();
 	FeatherDeformParam * featherDeformParameter();
 	void updateFeatherDeformation();
 	

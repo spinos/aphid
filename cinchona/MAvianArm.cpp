@@ -230,7 +230,7 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 	featherGeomParameter()->set(nps, chs, thickness);
 }
 
-void MAvianArm::setFeatherOrientation(const MObject & node,
+void MAvianArm::setFeatherOrientationParam(const MObject & node,
 					const MObject & m0Attr,
 					const MObject & m1Attr,
 					const MObject & m2Attr)
@@ -241,6 +241,19 @@ void MAvianArm::setFeatherOrientation(const MObject & node,
 	AHelper::ConvertToMatrix44F(*midsection0MarixR(), midsect1M);
 	MMatrix midsect2M = AHelper::getMatrixAttr(node, m2Attr);
 	AHelper::ConvertToMatrix44F(*midsection1MarixR(), midsect2M);
+	
+	Matrix33F invrot = invPrincipleMatrixR()->rotation();
+	Matrix33F orient[4];
+	orient[0] = inboardMarixR()->rotation();
+	orient[0] = invrot * orient[0];
+	
+	orient[1] = midsection0MarixR()->rotation();
+	orient[2] = midsection1MarixR()->rotation();
+	orient[3] = secondDigitMatirxR()->rotation();
+	orient[3] = invrot * orient[3];
+	
+	FeatherOrientationParam * param = orientationParameter();
+	param->set(orient);
 }
 
 void MAvianArm::setFeatherDeformationParam(const MObject & node, 

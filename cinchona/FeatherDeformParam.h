@@ -10,47 +10,20 @@
 #ifndef FEATHER_DEFORM_PARAM_H
 #define FEATHER_DEFORM_PARAM_H
 
-namespace aphid {
+#include "FeatherOrientationParam.h"
 
-class Vector3F;
-class Matrix33F;
+class FeatherDeformParam : public FeatherOrientationParam {
 
-namespace gpr {
-template<typename T>
-class GPInterpolate;
-
-}
-
-}
-
-class FeatherDeformParam {
-
-	aphid::Vector3F * m_vecs;
-	aphid::Matrix33F * m_rots;
-	aphid::gpr::GPInterpolate<float > * m_sideInterp;
-	aphid::gpr::GPInterpolate<float > * m_upInterp;
-	
-	bool m_changed;
-	
 public:
 	FeatherDeformParam();
-	~FeatherDeformParam();
-	
-	void set(const aphid::Matrix33F * mats);
-			
-	bool isChanged() const;
-	
-	const aphid::Matrix33F & rotation(int i) const;
+	virtual ~FeatherDeformParam();
 	
 	void predictRotation(aphid::Matrix33F & dst,
 						const float * x);
 	
 protected:
-	aphid::Vector3F * rotationSideR(int i);
-	aphid::Vector3F * rotationUpR(int i);
 	
 private:
-	void learnOrientation();
 	
 };
 #endif
