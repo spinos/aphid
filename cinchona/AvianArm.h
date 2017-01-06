@@ -24,6 +24,7 @@ class FeatherObject;
 class FeatherOrientationParam;
 class FeatherGeomParam;
 class FeatherDeformParam;
+class Geom1LineParam;
 class WingRib;
 class WingSpar;
 
@@ -59,7 +60,6 @@ class AvianArm {
 	Ligament * m_trailingLigament;
 	float m_secondDigitLength;
 	std::vector<FeatherObject *> m_feathers;
-	float * m_featherX;
 	
 public:
 	AvianArm();
@@ -128,7 +128,8 @@ protected:
 	
 private:
     void clearFeathers();
-	
-	
+	void updateFeatherLineTransform(Geom1LineParam * line, int & it);
+	void updateFeatherLineGeom(Geom1LineParam * line);
+
 };
 #endif

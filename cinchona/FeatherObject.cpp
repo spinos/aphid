@@ -27,3 +27,9 @@ void FeatherObject::deform(const Matrix33F & mat)
 	m_deformer->deform(mat);
 	m_deformer->calculateNormal();
 }
+
+void FeatherObject::setPredictX(float v)
+{ m_xline = v; }
+
+const float * FeatherObject::predictX() const
+{ return &m_xline; }

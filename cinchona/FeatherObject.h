@@ -13,6 +13,8 @@ class FeatherObject : public aphid::Matrix44F {
 
     FeatherMesh * m_mesh;
     FeatherDeformer * m_deformer;
+/// for gp predict
+	float m_xline;
 	
 public:
     FeatherObject(FeatherMesh * mesh);
@@ -22,7 +24,10 @@ public:
 	const FeatherDeformer * deformer() const;
 	
 	void deform(const aphid::Matrix33F & mat);
-    
+	
+	void setPredictX(float v);
+    const float * predictX() const;
+	
 protected:
 };
 

@@ -10,53 +10,28 @@
 #ifndef FEATHER_GEOM_PARAM_H
 #define FEATHER_GEOM_PARAM_H
 
-namespace aphid {
-
-class Vector3F;
-
-namespace gpr {
-template<typename T>
-class GPInterpolate;
-
-}
-
-}
+class Geom1LineParam;
 
 class FeatherGeomParam {
-
-	int _numFPerSeg[3];
-	int _numTotalF;
-	float * _xsPerSeg[3];
-	float _chordLength[4];
-	float _thickness[4];
-	float _longestChord;
-	aphid::Vector3F * _psPerSeg[3]; 
-	aphid::gpr::GPInterpolate<float > * m_chordInterp;
-	aphid::gpr::GPInterpolate<float > * m_thicknessInterp;
-	bool _changed;
-		
+	
+/// 0  flying
+/// 1:2 upper covert
+/// 3:4 lower covert 
+	Geom1LineParam * m_lines[5];
+	
 public:
 	FeatherGeomParam();
-	~FeatherGeomParam();	
+	~FeatherGeomParam();
 	
-	void set(const int * nps,
-			const float * chords,
-			const float * ts);
-	
+	void setFlying(const int * nps,
+						const float * chords,
+						const float * ts);
+						
 	bool isChanged() const;
-	
-	int numSegments() const;
-	const int & numFeatherOnSegment(int i) const;
-/// i-th segment
-	const float * xOnSegment(int i) const;
-	
-	float predictChord(const float * x);
-	float predictThickness(const float * x);
 	const float & longestChord() const;
+	Geom1LineParam * line(int i);
 	
 private:
-	void learnChord();
-	void learnThickness();
 	
 };
 	

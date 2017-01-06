@@ -227,7 +227,8 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 	thickness[1] = MPlug(node, t1Attr).asFloat();
 	thickness[2] = MPlug(node, t2Attr).asFloat();
 	thickness[3] = MPlug(node, t3Attr).asFloat();
-	featherGeomParameter()->set(nps, chs, thickness);
+	FeatherGeomParam * param = featherGeomParameter();
+	param->setFlying(nps, chs, thickness);
 }
 
 void MAvianArm::setFeatherOrientationParam(const MObject & node,
