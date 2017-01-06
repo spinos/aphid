@@ -121,6 +121,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	drawFeatherOrietations();
 	drawFeatherLeadingEdges();
 	drawRibs();
+	drawSpars();
 	
 #if 0
 	bool hasGlsl = isGlslReady();

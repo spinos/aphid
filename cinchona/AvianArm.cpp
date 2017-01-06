@@ -14,6 +14,7 @@
 #include "FeatherGeomParam.h"
 #include "FeatherDeformParam.h"
 #include "WingRib.h"
+#include "WingSpar.h"
 #include <AllMath.h>
 #include <math/linspace.h>
 
@@ -32,6 +33,9 @@ AvianArm::AvianArm()
 	for(int i=0;i<5;++i) {
 		m_ribs[i] = new WingRib(2.f, 0.f, .5f, .2f);
 	}
+	for(int i=0;i<4;++i) {
+		m_spars[i] = new WingSpar(4);
+	}
 }
 
 AvianArm::~AvianArm()
@@ -48,6 +52,9 @@ AvianArm::~AvianArm()
 	clearFeathers();
 	for(int i=0;i<5;++i) {
 		delete m_ribs[i];
+	}
+	for(int i=0;i<4;++i) {
+		delete m_spars[i];
 	}
 }
 
@@ -206,7 +213,7 @@ void AvianArm::updateLigaments()
 	m_trailingLigament->update();
 	
 	updateRibs();
-	
+	updateSpars();
 }
 
 void AvianArm::setLeadingLigamentOffset(const int & idx,
@@ -378,7 +385,7 @@ static const int sTrailRibSeg[5] = {
 };
 
 static const float sLeadRibX[5] = {
-0.05f, 0.5f, 0.01f, 0.05f, 0.73f
+0.05f, 0.5f, 0.01f, 0.1f, 0.73f
 };
 
 static const float sTrailRibX[5] = {
@@ -405,9 +412,32 @@ void AvianArm::updateRibs()
 		
 		m_ribs[i]->setOrientations(side, up, front);
 		
+		q = trailingLigament().getDerivative(sTrailRibSeg[i], sTrailRibX[i]);
+		m_ribs[i]->setSparTangent(q);
+		
+	}
+}
+
+static const float sSparX[4] = {
+0.8f, 0.6f,
+-0.2f,-0.4f
+};
+
+void AvianArm::updateSpars()
+{
+	Vector3F pnt, tng;
+	for(int i=0;i<4;++i) {
+		WingSpar & spari = *m_spars[i];
+		for(int j=0;j<5;++j) {
+			tng = m_ribs[j]->sparTangent();
+			m_ribs[j]->getPoint(pnt, sSparX[i]);
+			spari.setKnot(j, pnt, tng);
+		}
 	}
 }
 
 const WingRib * AvianArm::rib(int i) const
 { return m_ribs[i]; }
 
+const WingSpar * AvianArm::spar(int i) const
+{ return m_spars[i]; }

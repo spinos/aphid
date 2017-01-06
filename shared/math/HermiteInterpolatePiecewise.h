@@ -34,6 +34,9 @@ public:
 	T2 interpolate(const int & idx,
 				const T1 & x) const;
 				
+	T2 derivative(const int & idx,
+				const T1 & x) const;
+				
 	const int & numPieces() const;
 	
 protected:
@@ -106,6 +109,23 @@ T2 HermiteInterpolatePiecewise<T1, T2>::interpolate(const int & idx,
              m_tg[i] * h3 +                    // point along the curve.
              m_tg[i+1] * h4);
 			 
+}
+
+template<typename T1, typename T2>
+T2 HermiteInterpolatePiecewise<T1, T2>::derivative(const int & idx,
+				const T1 & x) const
+{
+	float x0 = x;
+	float x1 = x + 0.01;
+	if(x1 > 1.0) {
+		x0 = x - 0.01;
+		x1 = x;
+	}
+	
+	T2 v0 = interpolate(idx, x0);
+	T2 v1 = interpolate(idx, x1);
+	
+	return (v1 - v0) * 100.0;
 }
 
 template<typename T1, typename T2>

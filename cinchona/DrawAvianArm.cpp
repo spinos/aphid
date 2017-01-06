@@ -16,6 +16,7 @@
 #include "FeatherDeformParam.h"
 #include "FeatherDeformer.h"
 #include "WingRib.h"
+#include "WingSpar.h"
 #include <gl_heads.h>
 
 using namespace aphid; 
@@ -202,4 +203,32 @@ void DrawAvianArm::drawRibs()
 	}
 	
 	glPopMatrix();
+}
+
+void DrawAvianArm::drawSpars()
+{
+	float m[16];
+	principleMatrixR()->glMatrix(m);
+	glPushMatrix();
+	glMultMatrixf(m);
+	
+	Vector3F p;
+	
+	for(int i=0;i<4;++i) {
+		const WingSpar * s = spar(i);
+		
+		glBegin(GL_LINE_STRIP);
+		
+		for(int j =0;j<100;++j) {
+			
+			s->getPoint(p, j);
+			
+			glVertex3fv((const float *)&p);
+		
+		}
+		glEnd();
+	}
+	
+	glPopMatrix();
+
 }

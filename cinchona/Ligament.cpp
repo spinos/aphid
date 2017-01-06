@@ -98,5 +98,11 @@ Vector3F Ligament::getPoint(const int & idx,
 	return m_interp->interpolate(idx, param);
 }
 
+Vector3F Ligament::getDerivative(const int & idx,
+				const float & param) const
+{
+	return m_interp->derivative(idx, param);
+}
+
 const int & Ligament::numPieces() const
 { return m_interp->numPieces(); }

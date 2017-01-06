@@ -37,3 +37,11 @@ void WingRib::getPoint(Vector3F & dst, const float & param) const
 	
 }
 
+void WingRib::setSparTangent(const Vector3F & v)
+{ 
+	m_tng = v;
+	m_tng.normalize();
+}
+
+const Vector3F & WingRib::sparTangent() const
+{ return m_tng; }

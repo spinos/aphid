@@ -25,6 +25,7 @@ class FeatherOrientationParam;
 class FeatherGeomParam;
 class FeatherDeformParam;
 class WingRib;
+class WingSpar;
 
 class AvianArm {
 
@@ -32,6 +33,8 @@ class AvianArm {
 	FeatherGeomParam * m_featherGeomParam;
 	FeatherDeformParam * m_featherDeformParam;
 	WingRib * m_ribs[5];
+/// 2 upper 2 lower
+	WingSpar * m_spars[4];
 	
 #define NUM_MAT 14
 /// in order
@@ -109,6 +112,7 @@ protected:
 	void updateFeatherGeom();
 	void updateFeatherTransform();
 	void updateRibs();
+	void updateSpars();
 	
 	int numFeathers() const;
 	const FeatherObject * feather(int i) const;
@@ -119,6 +123,8 @@ protected:
 	
 /// i-th rib
 	const WingRib * rib(int i) const;
+/// 0:1 upper 2:3 lower
+	const WingSpar * spar(int i) const;
 	
 private:
     void clearFeathers();

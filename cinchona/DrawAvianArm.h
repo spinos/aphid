@@ -29,6 +29,7 @@ protected:
 	void drawFeatherOrietations();
 	void drawFeatherLeadingEdges();
 	void drawRibs();
+	void drawSpars();
 	
 private:
 	void drawLigament(const Ligament & lig);

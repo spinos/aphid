@@ -15,6 +15,8 @@
 
 class WingRib : public aphid::Airfoil, public aphid::Matrix44F {
 
+	aphid::Vector3F m_tng;
+	
 public:
 	WingRib(const float & c,
 			const float & m,
@@ -26,6 +28,9 @@ public:
 /// [  0,  1.0  ] upper
 /// [-1.0,-0.001] lower 
 	void getPoint(aphid::Vector3F & dst, const float & param) const;
+	
+	void setSparTangent(const aphid::Vector3F & v);
+	const aphid::Vector3F & sparTangent() const;
 	
 private:
 };

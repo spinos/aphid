@@ -44,7 +44,10 @@ public:
 				
 	aphid::Vector3F getPoint(const int & idx,
 				const float & param) const;
-				
+	
+	aphid::Vector3F getDerivative(const int & idx,
+				const float & param) const;
+	
 	const int & numPieces() const;
 	
 protected:
