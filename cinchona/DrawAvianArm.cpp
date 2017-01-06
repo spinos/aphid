@@ -172,3 +172,39 @@ void DrawAvianArm::drawFeatherLeadingEdges()
 	glPopMatrix();
 
 }
+
+static const int sLeadRibSeg[5] = {
+0, 0, 1, 2, 2
+};
+
+static const int sTrailRibSeg[5] = {
+0, 1, 1, 2, 2
+};
+
+static const float sLeadRibX[5] = {
+0.05f, 0.5f, 0.01f, 0.01f, 0.43f
+};
+
+static const float sTrailRibX[5] = {
+0.1f, 0.01f, .9f, 0.37f, 0.6f
+};
+
+void DrawAvianArm::drawRibs()
+{
+	float m[16];
+	principleMatrixR()->glMatrix(m);
+	glPushMatrix();
+	glMultMatrixf(m);
+	
+	Vector3F p;
+	glBegin(GL_LINES);
+	for(int i=0;i<5;++i) {
+		p = leadingLigament().getPoint(sLeadRibSeg[i], sLeadRibX[i]);
+		glVertex3fv((const float *)&p);
+		p = trailingLigament().getPoint(sTrailRibSeg[i], sTrailRibX[i]);
+		glVertex3fv((const float *)&p);
+	}
+	glEnd();
+	
+	glPopMatrix();
+}

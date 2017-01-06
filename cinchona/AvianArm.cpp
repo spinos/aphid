@@ -320,7 +320,8 @@ void AvianArm::updateFeatherTransform()
 	}
 /// interpolate orientation
 	FeatherOrientationParam * param = orientationParameter();
-	if(!param->isChanged() ) {
+	if(!param->isChanged()
+		&& !isFeatherGeomParameterChanged() ) {
 		return;
 	}
 	
