@@ -15,6 +15,7 @@
 #include "FeatherObject.h"
 #include "FeatherDeformParam.h"
 #include "FeatherDeformer.h"
+#include "WingRib.h"
 #include <gl_heads.h>
 
 using namespace aphid; 
@@ -173,20 +174,9 @@ void DrawAvianArm::drawFeatherLeadingEdges()
 
 }
 
-static const int sLeadRibSeg[5] = {
-0, 0, 1, 2, 2
-};
-
-static const int sTrailRibSeg[5] = {
-0, 1, 1, 2, 2
-};
-
-static const float sLeadRibX[5] = {
-0.05f, 0.5f, 0.01f, 0.01f, 0.43f
-};
-
-static const float sTrailRibX[5] = {
-0.1f, 0.01f, .9f, 0.37f, 0.6f
+static const float sRibLineParam[21] = {
+0.f, 0.1f, 0.2f, 0.3f, 0.4f, .5f, .6f, .7f, .8f, .9f, .999f, 
+-.1f, -.2f, -.3f, -.4f, -.5f, -.6f, -.7f, -.8f, -.9f, -1.f
 };
 
 void DrawAvianArm::drawRibs()
@@ -197,14 +187,19 @@ void DrawAvianArm::drawRibs()
 	glMultMatrixf(m);
 	
 	Vector3F p;
-	glBegin(GL_LINES);
+	
 	for(int i=0;i<5;++i) {
-		p = leadingLigament().getPoint(sLeadRibSeg[i], sLeadRibX[i]);
-		glVertex3fv((const float *)&p);
-		p = trailingLigament().getPoint(sTrailRibSeg[i], sTrailRibX[i]);
-		glVertex3fv((const float *)&p);
+		const WingRib * r = rib(i);
+		
+		glBegin(GL_LINE_STRIP);
+		
+		for(int j =0;j<21;++j) {
+			r->getPoint(p, sRibLineParam[j]);
+			glVertex3fv((const float *)&p);
+		
+		}
+		glEnd();
 	}
-	glEnd();
 	
 	glPopMatrix();
 }

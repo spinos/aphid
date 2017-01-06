@@ -13,6 +13,7 @@
 #include "FeatherObject.h"
 #include "FeatherGeomParam.h"
 #include "FeatherDeformParam.h"
+#include "WingRib.h"
 #include <AllMath.h>
 #include <math/linspace.h>
 
@@ -28,6 +29,9 @@ AvianArm::AvianArm()
 	m_trailingLigament = new Ligament(3);
 	m_secondDigitLength = 2.f;
 	m_featherX = NULL;
+	for(int i=0;i<5;++i) {
+		m_ribs[i] = new WingRib(2.f, 0.f, .5f, .2f);
+	}
 }
 
 AvianArm::~AvianArm()
@@ -42,6 +46,9 @@ AvianArm::~AvianArm()
 		delete[] m_featherX;
 	}
 	clearFeathers();
+	for(int i=0;i<5;++i) {
+		delete m_ribs[i];
+	}
 }
 
 void AvianArm::set2ndDigitLength(const float & x)
@@ -197,6 +204,9 @@ void AvianArm::updateLigaments()
 	m_trailingLigament->setKnotPoint(3, endP);
 	
 	m_trailingLigament->update();
+	
+	updateRibs();
+	
 }
 
 void AvianArm::setLeadingLigamentOffset(const int & idx,
@@ -358,3 +368,46 @@ void AvianArm::updateFeatherDeformation()
 	}
 
 }
+
+static const int sLeadRibSeg[5] = {
+0, 0, 1, 2, 2
+};
+
+static const int sTrailRibSeg[5] = {
+0, 1, 1, 2, 2
+};
+
+static const float sLeadRibX[5] = {
+0.05f, 0.5f, 0.01f, 0.05f, 0.73f
+};
+
+static const float sTrailRibX[5] = {
+0.1f, 0.01f, .9f, 0.41f, 0.83f
+};
+
+void AvianArm::updateRibs()
+{
+	float c;
+	Vector3F p, q, side, up, front;
+	
+	for(int i=0;i<5;++i) {
+		p = leadingLigament().getPoint(sLeadRibSeg[i], sLeadRibX[i]);
+		q = trailingLigament().getPoint(sTrailRibSeg[i], sTrailRibX[i]);
+		side = q - p;
+		c = p.distanceTo(q);
+		side /= c;
+		m_ribs[i]->setCMPT(c, 0.f, 0.4f, 0.2f);
+		m_ribs[i]->setTranslation(p);
+		front = side.cross(Vector3F::YAxis);
+		front.normalize();
+		
+		up = front.cross(side);
+		
+		m_ribs[i]->setOrientations(side, up, front);
+		
+	}
+}
+
+const WingRib * AvianArm::rib(int i) const
+{ return m_ribs[i]; }
+
