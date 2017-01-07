@@ -333,11 +333,11 @@ static const int sTrailRibSeg[5] = {
 };
 
 static const float sLeadRibX[5] = {
-0.05f, 0.5f, 0.01f, 0.1f, 0.73f
+0.05f, 0.5f, 0.01f, 0.1f, 0.95f
 };
 
 static const float sTrailRibX[5] = {
-0.1f, 0.01f, .9f, 0.41f, 0.83f
+0.1f, 0.01f, .9f, 0.41f, 0.9f
 };
 
 void AvianArm::updateRibs()
@@ -398,6 +398,7 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line)
 	float * vxs = new float[ngeom];
 	line->calculateX(vxs);
 	
+	float rz = line->rotateOffsetZ();
 	int it = 0;
 	for(int i=0;i<nseg;++i) {
 	    const int nf = line->numFeatherOnSegment(i);
@@ -413,6 +414,7 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line)
 	        
 			FeatherObject * f = new FeatherObject(msh);
 			f->setPredictX(vx);
+			f->setRotationOffset(-0.05f, 0.f, rz);
 			
 	        m_feathers.push_back(f);
 	    }

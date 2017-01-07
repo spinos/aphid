@@ -33,6 +33,7 @@ class Geom1LineParam {
 	float _chordLength[NUM_OBS_MAX];
 	float _thickness[NUM_OBS_MAX];
 	float _longestChord;
+	float m_rotateOffsetZ;
 	aphid::Vector3F * _psPerSeg[NUM_OBS_MAX]; 
 	aphid::gpr::GPInterpolate<float > * m_chordInterp;
 	aphid::gpr::GPInterpolate<float > * m_thicknessInterp;
@@ -61,6 +62,9 @@ public:
 	float predictThickness(const float * x);
 	const float & longestChord() const;
 	void calculateX(float * xs) const;
+	
+	void setRotateOffsetZ(float x);
+	const float & rotateOffsetZ() const;
 	
 private:
 	void learnChord();

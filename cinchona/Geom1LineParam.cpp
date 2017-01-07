@@ -35,6 +35,7 @@ Geom1LineParam::Geom1LineParam(int nobs)
 	m_thicknessInterp = new gpr::GPInterpolate<float>();
 	m_thicknessInterp->create(nobs,1,1);
 	m_thicknessInterp->setFilterLength(.43f);
+	m_rotateOffsetZ = 0.f;
 }
 
 Geom1LineParam::~Geom1LineParam()
@@ -187,3 +188,9 @@ void Geom1LineParam::calculateX(float * xs) const
 	//	std::cout<<" x["<<i<<"] = "<<xs[i];
 	//}
 }
+
+void Geom1LineParam::setRotateOffsetZ(float x)
+{ m_rotateOffsetZ = x; }
+	
+const float & Geom1LineParam::rotateOffsetZ() const
+{ return m_rotateOffsetZ; }

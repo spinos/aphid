@@ -33,3 +33,15 @@ void FeatherObject::setPredictX(float v)
 
 const float * FeatherObject::predictX() const
 { return &m_xline; }
+
+void FeatherObject::setRotationOffset(const float & rx,
+							const float & ry,
+							const float & rz)
+{
+	m_rotOffset.rotateEuler(rx, ry, rz);
+}
+
+void FeatherObject::setRotation(const aphid::Matrix33F & mat)
+{
+	Matrix44F::setRotation(m_rotOffset * mat);
+}

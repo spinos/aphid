@@ -1,5 +1,5 @@
 /*
- *  feather with mesh, transform
+ *  feather with mesh, transform, rotation offset
  */
 
 #ifndef FEATHER_OBJECT_H
@@ -13,6 +13,7 @@ class FeatherObject : public aphid::Matrix44F {
 
     FeatherMesh * m_mesh;
     FeatherDeformer * m_deformer;
+	aphid::Matrix33F m_rotOffset;
 /// for gp predict
 	float m_xline;
 	
@@ -27,6 +28,12 @@ public:
 	
 	void setPredictX(float v);
     const float * predictX() const;
+	
+	void setRotationOffset(const float & rx,
+							const float & ry,
+							const float & rz);
+							
+	void setRotation(const aphid::Matrix33F & mat);
 	
 protected:
 };
