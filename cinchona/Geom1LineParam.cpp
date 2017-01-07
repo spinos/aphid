@@ -15,6 +15,7 @@ using namespace aphid;
 
 Geom1LineParam::Geom1LineParam(int nobs) 
 {
+	_changed = false;
 	m_numObservations = nobs;
 	linspace<float>(m_xTrain, 0.01f, .99f, nobs);
 	
@@ -65,8 +66,7 @@ void Geom1LineParam::set(const int * nps,
 			}
 			_xsPerSeg[i] = new float[nf];
 			
-/// at center of each segment
-			linspace_center<float>(_xsPerSeg[i], 0.f, 1.f, nf);
+			linspace<float>(_xsPerSeg[i], .001f, 1.f - 1.f/(float)(nf+1), nf);
 			
 			if(_psPerSeg[i]) {
 				delete[] _psPerSeg[i];

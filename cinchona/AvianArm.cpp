@@ -31,7 +31,8 @@ AvianArm::AvianArm()
 	m_secondDigitLength = 2.f;
 
 	for(int i=0;i<5;++i) {
-		m_ribs[i] = new WingRib(2.f, 0.f, .5f, .2f);
+/// thickness of rib
+		m_ribs[i] = new WingRib(2.f, 0.001f, .3f, .33f);
 	}
 	for(int i=0;i<4;++i) {
 		m_spars[i] = new WingSpar(4);
@@ -371,8 +372,8 @@ void AvianArm::updateRibs()
 }
 
 static const float sSparX[4] = {
-0.8f, 0.6f,
--0.2f,-0.4f
+0.75f, 0.5f,
+-0.25f,-0.5f
 };
 
 void AvianArm::updateSpars()
@@ -452,7 +453,7 @@ void AvianArm::updateFeatherLineTranslation(Geom1LineParam * line,
 							const WingSpar * spr,
 							int & it)
 {
-const int nseg = line->numSegments();
+	const int nseg = line->numSegments();
 	for(int i=0;i<nseg;++i) {
 	    const int nf = line->numFeatherOnSegment(i);
 	    const float * xs = line->xOnSegment(i);

@@ -1,6 +1,6 @@
 //Maya ASCII 2008 scene
 //Name: avian.ma
-//Last modified: Sat, Jan 7, 2017 5:51:30 PM
+//Last modified: Sun, Jan 8, 2017 4:49:19 AM
 //Codeset: UTF-8
 requires maya "2008";
 requires "cinchona" "0.0.1 build Mon Feb 22 16:38:52 CST 2016 kdtree memory";
@@ -12,12 +12,12 @@ fileInfo "cutIdentifier" "200802242336-718079";
 fileInfo "osv" "Mac OS X 10.5.8";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 14.100338204974467 68.707260440878287 17.868360356244722 ;
-	setAttr ".r" -type "double3" -72.938352726942938 -2160.2000000001412 1.4908940899730302e-16 ;
+	setAttr ".t" -type "double3" 9.5419300306075492 8.702242766829432 -39.990457511451709 ;
+	setAttr ".r" -type "double3" -16.538352726679278 -1617.799999999153 0 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999993;
-	setAttr ".coi" 74.655066395164937;
+	setAttr ".coi" 33.059261561352557;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -116,16 +116,21 @@ createNode cinchonaViz -n "cinchonaViz1" -p "transform1";
 	setAttr ".chd1" 16.799999237060547;
 	setAttr ".chd2" 16.700000762939453;
 	setAttr ".chd3" 26.499998092651367;
-	setAttr ".thk0" 0.18000000715255737;
-	setAttr ".thk1" 0.30000001192092896;
-	setAttr ".thk2" 0.27000007033348083;
+	setAttr ".thk1" 0.14000000059604645;
+	setAttr ".thk2" 0.12999999523162842;
 	setAttr ".thk3" 0.10000000149011612;
 	setAttr ".sd1" -type "float3" 0 0 -1.7 ;
+	setAttr ".u0n0" 10;
+	setAttr ".u0n1" 11;
+	setAttr ".u0n2" 5;
+	setAttr ".u0n3" 9;
 	setAttr ".u0c0" 9.1999998092651367;
 	setAttr ".u0c1" 7.9000000953674316;
 	setAttr ".u0c2" 7.0999999046325684;
 	setAttr ".u0c3" 8.1000003814697266;
 	setAttr ".u0c4" 11.899999618530273;
+	setAttr ".u0t0" 0.15999999642372131;
+	setAttr ".u0t1" 0.15000000596046448;
 	setAttr ".u0t2" 0.17000000178813934;
 	setAttr ".u0t3" 0.18000000715255737;
 createNode transform -n "locator1";
@@ -135,12 +140,12 @@ createNode locator -n "locatorShape1" -p "locator1";
 	setAttr -k off ".v";
 createNode transform -n "locator2";
 	setAttr ".t" -type "double3" 7.8452754112377612 0 15.949100864153218 ;
-	setAttr ".r" -type "double3" 0 90 0 ;
+	setAttr ".r" -type "double3" 89.999999999996035 99.987992590517123 89.999999999996177 ;
 createNode locator -n "locatorShape2" -p "locator2";
 	setAttr -k off ".v";
 createNode transform -n "locator3";
 	setAttr ".t" -type "double3" 15.480924332678647 0 15.702246081615597 ;
-	setAttr ".r" -type "double3" 0 90 0 ;
+	setAttr ".r" -type "double3" -89.999999999997556 100.03141072285142 -89.999999999997655 ;
 createNode locator -n "locatorShape3" -p "locator3";
 	setAttr -k off ".v";
 createNode transform -n "locator4";
