@@ -106,3 +106,6 @@ Vector3F Ligament::getDerivative(const int & idx,
 
 const int & Ligament::numPieces() const
 { return m_interp->numPieces(); }
+
+const HermiteInterpolatePiecewise<float, Vector3F > *  Ligament::curve() const
+{ return m_interp; }

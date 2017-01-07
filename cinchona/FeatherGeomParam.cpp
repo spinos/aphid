@@ -18,10 +18,10 @@ FeatherGeomParam::FeatherGeomParam()
 	for(int i=1;i<5;++i) {
 		m_lines[i] = new Geom1LineParam(5);
 	}
-	m_lines[1]->setRotateOffsetZ(0.025f);
-	m_lines[2]->setRotateOffsetZ(0.05f);
-	m_lines[3]->setRotateOffsetZ(-0.025f);
-	m_lines[4]->setRotateOffsetZ(-0.05f);
+	m_lines[1]->setRotateOffsetZ(0.05f);
+	m_lines[2]->setRotateOffsetZ(0.1f);
+	m_lines[3]->setRotateOffsetZ(-0.05f);
+	m_lines[4]->setRotateOffsetZ(-0.1f);
 	
 }
 

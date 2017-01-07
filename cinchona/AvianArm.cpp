@@ -270,9 +270,13 @@ void AvianArm::updateFeatherGeom()
 	
 	clearFeathers();
 	
+	updateFeatherLineGeom(m_featherGeomParam->line(0), 
+							m_trailingLigament->curve() );
+	
 /// two line for now
-	for(int i=0;i<2;++i) {
-		updateFeatherLineGeom(m_featherGeomParam->line(i) );
+	for(int i=1;i<2;++i) {
+		updateFeatherLineGeom(m_featherGeomParam->line(i),
+							spar(i) );
 	}
 	
 	const int n = numFeathers();
@@ -390,15 +394,16 @@ const WingRib * AvianArm::rib(int i) const
 const WingSpar * AvianArm::spar(int i) const
 { return m_spars[i]; }
 
-void AvianArm::updateFeatherLineGeom(Geom1LineParam * line)
+void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
+				const HermiteInterpolatePiecewise<float, Vector3F > * curve)
 {
 	const int nseg = line->numSegments();
 	const int ngeom = line->numGeoms();
 	
 	float * vxs = new float[ngeom];
-	line->calculateX(vxs);
+	line->calculateX<HermiteInterpolatePiecewise<float, Vector3F > >(vxs, curve);
 	
-	float rz = line->rotateOffsetZ();
+	//float rz = line->rotateOffsetZ();
 	int it = 0;
 	for(int i=0;i<nseg;++i) {
 	    const int nf = line->numFeatherOnSegment(i);
@@ -414,7 +419,7 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line)
 	        
 			FeatherObject * f = new FeatherObject(msh);
 			f->setPredictX(vx);
-			f->setRotationOffset(-0.05f, 0.f, rz);
+			f->setRotationOffset(-0.05f, 0.f, 0.f);
 			
 	        m_feathers.push_back(f);
 	    }

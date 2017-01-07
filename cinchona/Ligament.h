@@ -50,6 +50,8 @@ public:
 	
 	const int & numPieces() const;
 	
+	const aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * curve() const;
+	
 protected:
 /// idx-th knot
 /// idx = 0: 0-th piece begin

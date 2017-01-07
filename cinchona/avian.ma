@@ -1,6 +1,6 @@
 //Maya ASCII 2008 scene
 //Name: avian.ma
-//Last modified: Sat, Jan 7, 2017 3:07:47 PM
+//Last modified: Sat, Jan 7, 2017 5:51:30 PM
 //Codeset: UTF-8
 requires maya "2008";
 requires "cinchona" "0.0.1 build Mon Feb 22 16:38:52 CST 2016 kdtree memory";
@@ -12,12 +12,12 @@ fileInfo "cutIdentifier" "200802242336-718079";
 fileInfo "osv" "Mac OS X 10.5.8";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 16.691343222835282 57.849728937608255 23.736583791498642 ;
-	setAttr ".r" -type "double3" -65.738352727020953 -2155.7999999997055 0 ;
+	setAttr ".t" -type "double3" 14.100338204974467 68.707260440878287 17.868360356244722 ;
+	setAttr ".r" -type "double3" -72.938352726942938 -2160.2000000001412 1.4908940899730302e-16 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999993;
-	setAttr ".coi" 66.780425674302748;
+	setAttr ".coi" 74.655066395164937;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -121,20 +121,13 @@ createNode cinchonaViz -n "cinchonaViz1" -p "transform1";
 	setAttr ".thk2" 0.27000007033348083;
 	setAttr ".thk3" 0.10000000149011612;
 	setAttr ".sd1" -type "float3" 0 0 -1.7 ;
-	setAttr ".dgl" 5;
-	setAttr ".u0n0" 7;
-	setAttr ".u0n1" 9;
-	setAttr ".u0n2" 4;
 	setAttr ".u0c0" 9.1999998092651367;
 	setAttr ".u0c1" 7.9000000953674316;
 	setAttr ".u0c2" 7.0999999046325684;
 	setAttr ".u0c3" 8.1000003814697266;
 	setAttr ".u0c4" 11.899999618530273;
-	setAttr ".u0t0" 0.20000000298023224;
-	setAttr ".u0t1" 0.20000000298023224;
 	setAttr ".u0t2" 0.17000000178813934;
 	setAttr ".u0t3" 0.18000000715255737;
-	setAttr ".u0t4" 0.17000000178813934;
 createNode transform -n "locator1";
 	setAttr ".t" -type "double3" 1.9997717029697655 0 15.207866967477175 ;
 	setAttr ".r" -type "double3" 0 90 0 ;

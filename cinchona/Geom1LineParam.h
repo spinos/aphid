@@ -10,6 +10,9 @@
 #ifndef GEOM_1_LINE_PARAM_H
 #define GEOM_1_LINE_PARAM_H
 
+#include <iostream>
+#include <math/linspace.h>
+
 namespace aphid {
 
 class Vector3F;
@@ -61,7 +64,43 @@ public:
 	float predictChord(const float * x);
 	float predictThickness(const float * x);
 	const float & longestChord() const;
-	void calculateX(float * xs) const;
+	
+	template<typename T>
+	void Geom1LineParam::calculateX(float * xs,
+						const T * line) const
+	{
+		int nseg;
+		float totalL;
+		float * segLs;
+		line->getLengths(segLs, nseg, totalL);
+		
+		for(int i=0;i < nseg;++i) {
+			segLs[i] /= totalL;
+			//std::cout<<" l["<<i<<"] = "<<segLs[i];
+		}
+		
+		float segL = 0.f;
+		float segH = segLs[0];
+		int segI = 0;
+		for(int i=0;i < nseg;++i) {
+			const int & nf = numFeatherOnSegment(i);
+			aphid::linspace<float>(&xs[segI], segL, segH, nf);
+			
+			segI += nf;
+			segL = segH;
+			if((i+1) < nseg ) {
+				segH += segLs[i+1];
+			}
+		}
+		
+		delete[] segLs;
+#if 0
+		int ng = numGeoms();
+		for(int i=0;i < ng;++i) {
+			std::cout<<" x["<<i<<"] = "<<xs[i];
+		}
+#endif
+	}
 	
 	void setRotateOffsetZ(float x);
 	const float & rotateOffsetZ() const;

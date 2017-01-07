@@ -9,7 +9,6 @@
 
 #include "Geom1LineParam.h"
 #include <math/Vector3F.h>
-#include <math/linspace.h>
 #include <gpr/GPInterpolate.h>
 
 using namespace aphid;
@@ -166,27 +165,6 @@ const int Geom1LineParam::numGeoms() const
 	    n += numFeatherOnSegment(i);
 	}
 	return n;
-}
-
-void Geom1LineParam::calculateX(float * xs) const
-{ 
-	const float step = 1.f / (float)numSegments();
-	float segL = 0.f;
-	float segH = step;
-	int segI = 0;
-	for(int i=0;i < numSegments();++i) {
-	    const int & nf = numFeatherOnSegment(i);
-		linspace<float>(&xs[segI], segL, segH, nf);
-		
-		segI += nf;
-		segL += step;
-		segH += step;
-	}
-	
-	//int ng = numGeoms();
-	//for(int i=0;i < ng;++i) {
-	//	std::cout<<" x["<<i<<"] = "<<xs[i];
-	//}
 }
 
 void Geom1LineParam::setRotateOffsetZ(float x)

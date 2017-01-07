@@ -17,6 +17,9 @@ namespace aphid {
 class Vector3F;
 class Matrix44F;
 
+template<typename T1, typename T2>
+class HermiteInterpolatePiecewise;
+
 }
 
 class Ligament;
@@ -135,7 +138,8 @@ private:
 							const WingSpar * spr,
 							int & it);
 	void updateFeatherRotation();
-	void updateFeatherLineGeom(Geom1LineParam * line);
+	void updateFeatherLineGeom(Geom1LineParam * line,
+				const aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * curve);
 
 };
 #endif

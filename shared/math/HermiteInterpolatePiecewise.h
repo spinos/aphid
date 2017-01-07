@@ -10,6 +10,8 @@
 #ifndef APH_MATH_HERMITE_INTERPOLATE_PIECE_WISE_H
 #define APH_MATH_HERMITE_INTERPOLATE_PIECE_WISE_H
 
+#include <math/linspace.h>
+
 namespace aphid {
 
 template<typename T1, typename T2>
@@ -38,6 +40,11 @@ public:
 				const T1 & x) const;
 				
 	const int & numPieces() const;
+	
+/// length of each piece and sum
+	void getLengths(float * & segmentLs,
+					int & np,
+					float & totalL) const;
 	
 protected:
 
@@ -131,6 +138,34 @@ T2 HermiteInterpolatePiecewise<T1, T2>::derivative(const int & idx,
 template<typename T1, typename T2>
 const int & HermiteInterpolatePiecewise<T1, T2>::numPieces() const
 { return m_numPieces; }
+
+template<typename T1, typename T2>
+void HermiteInterpolatePiecewise<T1, T2>::getLengths(float * & segmentLs,
+					int & np,
+					float & totalL) const
+{
+	np = numPieces();
+	segmentLs = new float[np];
+	totalL = 0.f;
+	T1 xs[17];
+	linspace<T1>(xs, 0.f, 1.f, 17);
+	
+	T2 p, q;
+	for(int i=0;i<np;++i) {
+		segmentLs[i] = 0.f;
+		
+		p = interpolate(i, xs[0]);
+		for(int j=1;j<17;++j) {
+			q = interpolate(i, xs[j]);
+			
+			segmentLs[i] += p.distanceTo(q);
+			
+			p = q;
+		}
+		
+		totalL += segmentLs[i];
+	}
+}
 
 }
 #endif
