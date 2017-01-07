@@ -95,6 +95,20 @@ public:
 	static MObject abrt1mat;
 	static MObject abrt2mat;
 	static MObject abrt3mat;
+	static MObject aup0n0;
+	static MObject aup0n1;
+	static MObject aup0n2;
+	static MObject aup0n3;
+	static MObject aup0c0;
+	static MObject aup0c1;
+	static MObject aup0c2;
+	static MObject aup0c3;
+	static MObject aup0c4;
+	static MObject aup0t0;
+	static MObject aup0t1;
+	static MObject aup0t2;
+	static MObject aup0t3;
+	static MObject aup0t4;
 	static MObject outValue;
 	
 protected:

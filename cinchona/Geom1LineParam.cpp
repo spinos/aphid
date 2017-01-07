@@ -17,7 +17,7 @@ using namespace aphid;
 Geom1LineParam::Geom1LineParam(int nobs) 
 {
 	m_numObservations = nobs;
-	linspace<float>(m_xTrain, 0.f, 1.f, nobs);
+	linspace<float>(m_xTrain, 0.01f, .99f, nobs);
 	
 	_numTotalF = 0;
 	for(int i=0;i< numSegments();++i) {
@@ -178,7 +178,12 @@ void Geom1LineParam::calculateX(float * xs) const
 		linspace<float>(&xs[segI], segL, segH, nf);
 		
 		segI += nf;
-		segL = segH;
+		segL += step;
 		segH += step;
 	}
+	
+	//int ng = numGeoms();
+	//for(int i=0;i < ng;++i) {
+	//	std::cout<<" x["<<i<<"] = "<<xs[i];
+	//}
 }

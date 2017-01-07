@@ -39,3 +39,9 @@ void WingSpar::getPoint(Vector3F & dst, const int & i) const
 	float x = (float)(i-seg*25) / 25.f;
 	dst = interpolate(seg, x);
 }
+
+Vector3F WingSpar::getPoint(const int & idx,
+				const float & param) const
+{
+	return interpolate(idx, param);
+}

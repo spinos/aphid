@@ -128,7 +128,13 @@ protected:
 	
 private:
     void clearFeathers();
-	void updateFeatherLineTransform(Geom1LineParam * line, int & it);
+	void updateFeatherLineTranslation(Geom1LineParam * line, 
+							const Ligament * lig,
+							int & it);
+	void updateFeatherLineTranslation(Geom1LineParam * line, 
+							const WingSpar * spr,
+							int & it);
+	void updateFeatherRotation();
 	void updateFeatherLineGeom(Geom1LineParam * line);
 
 };

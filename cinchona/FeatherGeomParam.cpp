@@ -34,6 +34,14 @@ void FeatherGeomParam::setFlying(const int * nps,
 	m_lines[0]->set(nps, chords, ts);
 }
 
+void FeatherGeomParam::setCovert(int i,
+						const int * nps,
+						const float * chords,
+						const float * ts)
+{
+	m_lines[i]->set(nps, chords, ts);
+}
+
 bool FeatherGeomParam::isChanged() const
 {
 	for(int i=0;i<5;++i) {

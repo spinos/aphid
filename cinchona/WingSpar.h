@@ -32,6 +32,9 @@ public:
 /// i 0:99
 	void getPoint(aphid::Vector3F & dst, const int & i) const;
 	
+	aphid::Vector3F getPoint(const int & idx,
+				const float & param) const;
+				
 protected:
 
 private:

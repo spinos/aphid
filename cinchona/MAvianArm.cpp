@@ -200,7 +200,7 @@ void MAvianArm::setFirstLeadingLigament()
 	
 }
 
-void MAvianArm::setFeatherGeomParam(const MObject & node,
+void MAvianArm::setFlyingFeatherGeomParam(const MObject & node,
 					const MObject & n0Attr,
 					const MObject & n1Attr,
 					const MObject & n2Attr,
@@ -229,6 +229,44 @@ void MAvianArm::setFeatherGeomParam(const MObject & node,
 	thickness[3] = MPlug(node, t3Attr).asFloat();
 	FeatherGeomParam * param = featherGeomParameter();
 	param->setFlying(nps, chs, thickness);
+}
+
+void MAvianArm::setCovertFeatherGeomParam(int i,
+					const MObject & node,
+					const MObject & n0Attr,
+					const MObject & n1Attr,
+					const MObject & n2Attr,
+					const MObject & n3Attr,
+					const MObject & c0Attr,
+					const MObject & c1Attr,
+					const MObject & c2Attr,
+					const MObject & c3Attr,
+					const MObject & c4Attr,
+					const MObject & t0Attr,
+					const MObject & t1Attr,
+					const MObject & t2Attr,
+					const MObject & t3Attr,
+					const MObject & t4Attr)
+{
+	int nps[4];
+	nps[0] = MPlug(node, n0Attr).asInt() + 1;
+	nps[1] = MPlug(node, n1Attr).asInt() + 1;
+	nps[2] = MPlug(node, n2Attr).asInt() + 1;
+	nps[3] = MPlug(node, n3Attr).asInt() + 1;
+	float chs[5];
+	chs[0] = MPlug(node, c0Attr).asFloat();
+	chs[1] = MPlug(node, c1Attr).asFloat();
+	chs[2] = MPlug(node, c2Attr).asFloat();
+	chs[3] = MPlug(node, c3Attr).asFloat();
+	chs[4] = MPlug(node, c4Attr).asFloat();
+	float thickness[5];
+	thickness[0] = MPlug(node, t0Attr).asFloat();
+	thickness[1] = MPlug(node, t1Attr).asFloat();
+	thickness[2] = MPlug(node, t2Attr).asFloat();
+	thickness[3] = MPlug(node, t3Attr).asFloat();
+	thickness[4] = MPlug(node, t4Attr).asFloat();
+	FeatherGeomParam * param = featherGeomParameter();
+	param->setCovert(i, nps, chs, thickness);
 }
 
 void MAvianArm::setFeatherOrientationParam(const MObject & node,

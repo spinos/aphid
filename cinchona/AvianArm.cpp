@@ -270,8 +270,8 @@ void AvianArm::updateFeatherGeom()
 	
 	clearFeathers();
 	
-/// one line for now
-	for(int i=0;i<1;++i) {
+/// two line for now
+	for(int i=0;i<2;++i) {
 		updateFeatherLineGeom(m_featherGeomParam->line(i) );
 	}
 	
@@ -287,11 +287,16 @@ FeatherOrientationParam * AvianArm::orientationParameter()
 void AvianArm::updateFeatherTransform()
 {
     int it = 0;
-/// one line for now
-    for(int i=0;i<1;++i) {
-		updateFeatherLineTransform(m_featherGeomParam->line(i), it);
+	updateFeatherLineTranslation(m_featherGeomParam->line(0), 
+		m_trailingLigament, it);
+	
+/// two line for now
+    for(int i=1;i<2;++i) {
+		updateFeatherLineTranslation(m_featherGeomParam->line(i), 
+			spar(i-1), it);
 	}
 	
+	updateFeatherRotation();
 }
 
 FeatherDeformParam * AvianArm::featherDeformParameter()
@@ -396,10 +401,9 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line)
 	int it = 0;
 	for(int i=0;i<nseg;++i) {
 	    const int nf = line->numFeatherOnSegment(i);
-	    const float * xs = line->xOnSegment(i);
 	    for(int j=1;j<nf;++j) {
-			const float & vx = vxs[it];
-			it++;
+			const float & vx = vxs[it+j];
+			
 			
 			const float c = line->predictChord(&vx);
 			const float t = line->predictThickness(&vx);
@@ -408,20 +412,19 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line)
 	        msh->create(20, 2);
 	        
 			FeatherObject * f = new FeatherObject(msh);
-/// from tip 0 to root 1
-			f->setPredictX(1.f - vx);
+			f->setPredictX(vx);
 			
-	        Vector3F p = m_trailingLigament->getPoint(i, xs[j] );
-	        f->setTranslation(p);
-	        
 	        m_feathers.push_back(f);
 	    }
+		it += nf;
 	}
 	
 	delete[] vxs;
 }
 
-void AvianArm::updateFeatherLineTransform(Geom1LineParam * line, int & it)
+void AvianArm::updateFeatherLineTranslation(Geom1LineParam * line, 
+					const Ligament * lig,
+					int & it)
 {
 	const int nseg = line->numSegments();
 	for(int i=0;i<nseg;++i) {
@@ -430,13 +433,35 @@ void AvianArm::updateFeatherLineTransform(Geom1LineParam * line, int & it)
 	    for(int j=1;j<nf;++j) {
 	        FeatherObject * f = m_feathers[it];
 /// point on ligament
-	        Vector3F p = m_trailingLigament->getPoint(i, xs[j] );
+	        Vector3F p = lig->getPoint(i, xs[j] );
 	        f->setTranslation(p);
 	        
 	        it++;
 	    }
 	}
+}
+
+void AvianArm::updateFeatherLineTranslation(Geom1LineParam * line, 
+							const WingSpar * spr,
+							int & it)
+{
+const int nseg = line->numSegments();
+	for(int i=0;i<nseg;++i) {
+	    const int nf = line->numFeatherOnSegment(i);
+	    const float * xs = line->xOnSegment(i);
+	    for(int j=1;j<nf;++j) {
+	        FeatherObject * f = m_feathers[it];
+/// point on spar
+	        Vector3F p = spr->getPoint(i, xs[j] );
+	        f->setTranslation(p);
+	        
+	        it++;
+	    }
+	}
+}
 	
+void AvianArm::updateFeatherRotation()
+{	
 	FeatherOrientationParam * param = orientationParameter();
 	if(!param->isChanged()
 		&& !isFeatherGeomParameterChanged() ) {

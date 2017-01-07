@@ -57,7 +57,7 @@ protected:
 					
 	void setFirstLeadingLigament();
 	
-	void setFeatherGeomParam(const MObject & node,
+	void setFlyingFeatherGeomParam(const MObject & node,
 					const MObject & n0Attr,
 					const MObject & n1Attr,
 					const MObject & n2Attr,
@@ -80,6 +80,24 @@ protected:
 					const MObject & brt1Attr, 
 					const MObject & brt2Attr, 
 					const MObject & brt3Attr);
+/// i 1:2 upper
+/// i 3:4 lower					
+	void setCovertFeatherGeomParam(int i,
+					const MObject & node,
+					const MObject & n0Attr,
+					const MObject & n1Attr,
+					const MObject & n2Attr,
+					const MObject & n3Attr,
+					const MObject & c0Attr,
+					const MObject & c1Attr,
+					const MObject & c2Attr,
+					const MObject & c3Attr,
+					const MObject & c4Attr,
+					const MObject & t0Attr,
+					const MObject & t1Attr,
+					const MObject & t2Attr,
+					const MObject & t3Attr,
+					const MObject & t4Attr);
 	
 private:
 

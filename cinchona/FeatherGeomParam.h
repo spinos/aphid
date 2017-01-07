@@ -26,6 +26,10 @@ public:
 	void setFlying(const int * nps,
 						const float * chords,
 						const float * ts);
+	void setCovert(int i,
+						const int * nps,
+						const float * chords,
+						const float * ts);
 						
 	bool isChanged() const;
 	const float & longestChord() const;
