@@ -178,6 +178,22 @@ void DrawAvianArm::drawFeatherLeadingEdges()
 
 }
 
+void DrawAvianArm::drawFeatherContours()
+{
+	float m[16];
+	principleMatrixR()->glMatrix(m);
+	glPushMatrix();
+	glMultMatrixf(m);
+	
+	int it = 0;
+	for(int i=0;i<5;++i) {
+		Geom1LineParam * line = featherGeomParameter()->line(i);
+		drawFeatherLineContour(line, it);
+	}
+	
+	glPopMatrix();
+}
+
 static const float sRibLineParam[21] = {
 0.f, 0.1f, 0.2f, 0.3f, 0.4f, .5f, .6f, .7f, .8f, .9f, .999f, 
 -.1f, -.2f, -.3f, -.4f, -.5f, -.6f, -.7f, -.8f, -.9f, -1.f
@@ -234,6 +250,23 @@ void DrawAvianArm::drawSpars()
 	
 	glPopMatrix();
 
+}
+
+void DrawAvianArm::drawFeatherLineContour(const Geom1LineParam * line,
+									int & it)
+{
+	int n = line->numGeomsM1();
+	Vector3F samp[2];
+	glBegin(GL_LINE_STRIP);
+	for(int i=0;i<n;++i) {
+	
+		const FeatherObject * f = feather(it);
+		f->getEndPoints(samp);
+		
+		glVertex3fv((const float *)&samp[0]);
+		it++;
+	}
+	glEnd();
 }
 
 void DrawAvianArm::drawPlane()

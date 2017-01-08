@@ -13,8 +13,6 @@
 #include <AHelper.h>
 #include <mama/AttributeHelper.h>
 #include <ogl/GlslInstancer.h>
-/// linear math afer opengl
-#include <math/linearMath.h>
 
 using namespace aphid;
 
@@ -82,6 +80,51 @@ MObject CinchonaNode::aup0t2;
 MObject CinchonaNode::aup0t3;
 MObject CinchonaNode::aup0t4;
 MObject CinchonaNode::aup0rz;
+MObject CinchonaNode::aup1n0;
+MObject CinchonaNode::aup1n1;
+MObject CinchonaNode::aup1n2;
+MObject CinchonaNode::aup1n3;
+MObject CinchonaNode::aup1c0;
+MObject CinchonaNode::aup1c1;
+MObject CinchonaNode::aup1c2;
+MObject CinchonaNode::aup1c3;
+MObject CinchonaNode::aup1c4;
+MObject CinchonaNode::aup1t0;
+MObject CinchonaNode::aup1t1;
+MObject CinchonaNode::aup1t2;
+MObject CinchonaNode::aup1t3;
+MObject CinchonaNode::aup1t4;
+MObject CinchonaNode::aup1rz;
+MObject CinchonaNode::alow0n0;
+MObject CinchonaNode::alow0n1;
+MObject CinchonaNode::alow0n2;
+MObject CinchonaNode::alow0n3;
+MObject CinchonaNode::alow0c0;
+MObject CinchonaNode::alow0c1;
+MObject CinchonaNode::alow0c2;
+MObject CinchonaNode::alow0c3;
+MObject CinchonaNode::alow0c4;
+MObject CinchonaNode::alow0t0;
+MObject CinchonaNode::alow0t1;
+MObject CinchonaNode::alow0t2;
+MObject CinchonaNode::alow0t3;
+MObject CinchonaNode::alow0t4;
+MObject CinchonaNode::alow0rz;
+MObject CinchonaNode::alow1n0;
+MObject CinchonaNode::alow1n1;
+MObject CinchonaNode::alow1n2;
+MObject CinchonaNode::alow1n3;
+MObject CinchonaNode::alow1c0;
+MObject CinchonaNode::alow1c1;
+MObject CinchonaNode::alow1c2;
+MObject CinchonaNode::alow1c3;
+MObject CinchonaNode::alow1c4;
+MObject CinchonaNode::alow1t0;
+MObject CinchonaNode::alow1t1;
+MObject CinchonaNode::alow1t2;
+MObject CinchonaNode::alow1t3;
+MObject CinchonaNode::alow1t4;
+MObject CinchonaNode::alow1rz;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -126,20 +169,30 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	setCovertFeatherGeomParam(1, thisNode, aup0n0, aup0n1, aup0n2, aup0n3,
 						aup0c0, aup0c1, aup0c2, aup0c3, aup0c4,
 						aup0t0, aup0t1, aup0t2, aup0t3, aup0t4);
+	setCovertFeatherGeomParam(2, thisNode, aup1n0, aup1n1, aup1n2, aup1n3,
+						aup1c0, aup1c1, aup1c2, aup1c3, aup1c4,
+						aup1t0, aup1t1, aup1t2, aup1t3, aup1t4);
+	setCovertFeatherGeomParam(3, thisNode, alow0n0, alow0n1, alow0n2, alow0n3,
+						alow0c0, alow0c1, alow0c2, alow0c3, alow0c4,
+						alow0t0, alow0t1, alow0t2, alow0t3, alow0t4);
+	setCovertFeatherGeomParam(4, thisNode, alow1n0, alow1n1, alow1n2, alow1n3,
+						alow1c0, alow1c1, alow1c2, alow1c3, alow1c4,
+						alow1t0, alow1t1, alow1t2, alow1t3, alow1t4);
 						
 	updateFeatherGeom();
 	setFeatherOrientationParam(thisNode, ainboardmat, amidsectmat0, amidsectmat1,
-						aup0rz);
+						aup0rz, aup1rz, alow0rz, alow1rz);
 	updateFeatherTransform();
 	setFeatherDeformationParam(thisNode, abrt0mat, abrt1mat, abrt2mat, abrt3mat);
 	updateFeatherDeformation();
 	
 	view.beginGL();
 	
+	drawFeatherLeadingEdges();
+	drawFeatherContours();
 	drawSkeletonCoordinates();
 	drawLigaments();
 	drawFeatherOrietations();
-	drawFeatherLeadingEdges();
 	drawRibs();
 	drawSpars();
 	
@@ -498,14 +551,345 @@ MStatus CinchonaNode::initialize()
 	numFn.setMin(0.01f);
 	addAttribute(aup0t4);
 	
+		aup1n0 = numFn.create( "up1NumFeather0", "u1n0", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(aup1n0);
+	
+	aup1n1 = numFn.create( "up1NumFeather1", "u1n1", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(11);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(aup1n1);
+	
+	aup1n2 = numFn.create( "up1NumFeather2", "u1n2", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(6);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(aup1n2);
+	
+	aup1n3 = numFn.create( "up1NumFeather3", "u1n3", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(6);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(aup1n3);
+	
+	aup1c0 = numFn.create( "up1Chord0", "u1c0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(9.f);
+	numFn.setMin(0.5f);
+	addAttribute(aup1c0);
+	
+	aup1c1 = numFn.create( "up1Chord1", "u1c1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(9.f);
+	numFn.setMin(0.5f);
+	addAttribute(aup1c1);
+	
+	aup1c2 = numFn.create( "up1Chord2", "u1c2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(7.f);
+	numFn.setMin(0.5f);
+	addAttribute(aup1c2);
+	
+	aup1c3 = numFn.create( "up1Chord3", "u1c3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(6.f);
+	numFn.setMin(0.5f);
+	addAttribute(aup1c3);
+	
+	aup1c4 = numFn.create( "up1Chord4", "u1c4", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(6.f);
+	numFn.setMin(0.5f);
+	addAttribute(aup1c4);
+	
+	aup1t0 = numFn.create( "up1Thickness0", "u1t0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.23f);
+	numFn.setMin(0.01f);
+	addAttribute(aup1t0);
+	
+	aup1t1 = numFn.create( "up1Thickness1", "u1t1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.3f);
+	numFn.setMin(0.01f);
+	addAttribute(aup1t1);
+	
+	aup1t2 = numFn.create( "up1Thickness2", "u1t2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.29f);
+	numFn.setMin(0.01f);
+	addAttribute(aup1t2);
+	
+	aup1t3 = numFn.create( "up1Thickness3", "u1t3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.29f);
+	numFn.setMin(0.01f);
+	addAttribute(aup1t3);
+	
+	aup1t4 = numFn.create( "up1Thickness4", "u1t4", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.27f);
+	numFn.setMin(0.01f);
+	addAttribute(aup1t4);
+	
+	alow0n0 = numFn.create( "low0NumFeather0", "l0n0", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(7);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow0n0);
+	
+	alow0n1 = numFn.create( "low0NumFeather1", "l0n1", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(9);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow0n1);
+	
+	alow0n2 = numFn.create( "low0NumFeather2", "l0n2", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(4);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow0n2);
+	
+	alow0n3 = numFn.create( "low0NumFeather3", "l0n3", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow0n3);
+	
+	alow0c0 = numFn.create( "low0Chord0", "l0c0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow0c0);
+	
+	alow0c1 = numFn.create( "low0Chord1", "l0c1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow0c1);
+	
+	alow0c2 = numFn.create( "low0Chord2", "l0c2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow0c2);
+	
+	alow0c3 = numFn.create( "low0Chord3", "l0c3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow0c3);
+	
+	alow0c4 = numFn.create( "low0Chord4", "l0c4", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(12.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow0c4);
+	
+	alow0t0 = numFn.create( "low0Thickness0", "l0t0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.2f);
+	numFn.setMin(0.01f);
+	addAttribute(alow0t0);
+	
+	alow0t1 = numFn.create( "low0Thickness1", "l0t1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.2f);
+	numFn.setMin(0.01f);
+	addAttribute(alow0t1);
+	
+	alow0t2 = numFn.create( "low0Thickness2", "l0t2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.19f);
+	numFn.setMin(0.01f);
+	addAttribute(alow0t2);
+	
+	alow0t3 = numFn.create( "low0Thickness3", "l0t3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.19f);
+	numFn.setMin(0.01f);
+	addAttribute(alow0t3);
+	
+	alow0t4 = numFn.create( "low0Thickness4", "l0t4", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.17f);
+	numFn.setMin(0.01f);
+	addAttribute(alow0t4);
+	
+		alow1n0 = numFn.create( "low1NumFeather0", "l1n0", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(10);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow1n0);
+	
+	alow1n1 = numFn.create( "low1NumFeather1", "l1n1", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(11);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow1n1);
+	
+	alow1n2 = numFn.create( "low1NumFeather2", "l1n2", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(6);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow1n2);
+	
+	alow1n3 = numFn.create( "low1NumFeather3", "l1n3", MFnNumericData::kInt);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(6);
+	numFn.setMin(2);
+	numFn.setMax(50);
+	addAttribute(alow1n3);
+	
+	alow1c0 = numFn.create( "low1Chord0", "l1c0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(7.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow1c0);
+	
+	alow1c1 = numFn.create( "low1Chord1", "l1c1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(8.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow1c1);
+	
+	alow1c2 = numFn.create( "low1Chord2", "l1c2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(5.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow1c2);
+	
+	alow1c3 = numFn.create( "low1Chord3", "l1c3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(4.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow1c3);
+	
+	alow1c4 = numFn.create( "low1Chord4", "l1c4", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(3.f);
+	numFn.setMin(0.5f);
+	addAttribute(alow1c4);
+	
+	alow1t0 = numFn.create( "low1Thickness0", "l1t0", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.23f);
+	numFn.setMin(0.01f);
+	addAttribute(alow1t0);
+	
+	alow1t1 = numFn.create( "low1Thickness1", "l1t1", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.3f);
+	numFn.setMin(0.01f);
+	addAttribute(alow1t1);
+	
+	alow1t2 = numFn.create( "low1Thickness2", "l1t2", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.29f);
+	numFn.setMin(0.01f);
+	addAttribute(alow1t2);
+	
+	alow1t3 = numFn.create( "low1Thickness3", "l1t3", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.29f);
+	numFn.setMin(0.01f);
+	addAttribute(alow1t3);
+	
+	alow1t4 = numFn.create( "low1Thickness4", "l1t4", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.27f);
+	numFn.setMin(0.01f);
+	addAttribute(alow1t4);
+	
 	aup0rz = numFn.create( "up0RotateZ", "u0rz", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
-	numFn.setDefault(1.f);
+	numFn.setDefault(.25f);
 	numFn.setMin(0.f);
 	numFn.setMax(10.f);
 	addAttribute(aup0rz);
 	
+	aup1rz = numFn.create( "up1RotateZ", "u1rz", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(.25f);
+	numFn.setMin(0.f);
+	numFn.setMax(10.f);
+	addAttribute(aup1rz);
+	
+	alow0rz = numFn.create( "low0RotateZ", "l0rz", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(.25f);
+	numFn.setMin(0.f);
+	numFn.setMax(10.f);
+	addAttribute(alow0rz);
+	
+	alow1rz = numFn.create( "low1RotateZ", "l1rz", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(.25f);
+	numFn.setMin(0.f);
+	numFn.setMax(10.f);
+	addAttribute(alow1rz);
+
+
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
 	numFn.setWritable(false);
@@ -566,6 +950,54 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(aup0t3, outValue);
 	attributeAffects(aup0t4, outValue);
 	attributeAffects(aup0rz, outValue);
+	
+	attributeAffects(aup1n0, outValue);
+	attributeAffects(aup1n1, outValue);
+	attributeAffects(aup1n2, outValue);
+	attributeAffects(aup1n3, outValue);
+	attributeAffects(aup1c0, outValue);
+	attributeAffects(aup1c1, outValue);
+	attributeAffects(aup1c2, outValue);
+	attributeAffects(aup1c3, outValue);
+	attributeAffects(aup1c4, outValue);
+	attributeAffects(aup1t0, outValue);
+	attributeAffects(aup1t1, outValue);
+	attributeAffects(aup1t2, outValue);
+	attributeAffects(aup1t3, outValue);
+	attributeAffects(aup1t4, outValue);
+	attributeAffects(aup1rz, outValue);
+	
+	attributeAffects(alow0n0, outValue);
+	attributeAffects(alow0n1, outValue);
+	attributeAffects(alow0n2, outValue);
+	attributeAffects(alow0n3, outValue);
+	attributeAffects(alow0c0, outValue);
+	attributeAffects(alow0c1, outValue);
+	attributeAffects(alow0c2, outValue);
+	attributeAffects(alow0c3, outValue);
+	attributeAffects(alow0c4, outValue);
+	attributeAffects(alow0t0, outValue);
+	attributeAffects(alow0t1, outValue);
+	attributeAffects(alow0t2, outValue);
+	attributeAffects(alow0t3, outValue);
+	attributeAffects(alow0t4, outValue);
+	attributeAffects(alow0rz, outValue);
+	
+	attributeAffects(alow1n0, outValue);
+	attributeAffects(alow1n1, outValue);
+	attributeAffects(alow1n2, outValue);
+	attributeAffects(alow1n3, outValue);
+	attributeAffects(alow1c0, outValue);
+	attributeAffects(alow1c1, outValue);
+	attributeAffects(alow1c2, outValue);
+	attributeAffects(alow1c3, outValue);
+	attributeAffects(alow1c4, outValue);
+	attributeAffects(alow1t0, outValue);
+	attributeAffects(alow1t1, outValue);
+	attributeAffects(alow1t2, outValue);
+	attributeAffects(alow1t3, outValue);
+	attributeAffects(alow1t4, outValue);
+	attributeAffects(alow1rz, outValue);
 	
 	attributeAffects(aradiusmat, outValue);
 	

@@ -274,10 +274,9 @@ void AvianArm::updateFeatherGeom()
 	updateFeatherLineGeom(m_featherGeomParam->line(0), 
 							m_trailingLigament->curve() );
 	
-/// two line for now
-	for(int i=1;i<2;++i) {
+	for(int i=1;i<5;++i) {
 		updateFeatherLineGeom(m_featherGeomParam->line(i),
-							spar(i) );
+							spar(i-1) );
 	}
 	
 	const int n = numFeathers();
@@ -298,20 +297,19 @@ void AvianArm::updateFeatherTransform()
 	updateFeatherLineTranslation(m_featherGeomParam->line(0), 
 		m_trailingLigament, it);
 	
-/// two line for now
-    for(int i=1;i<2;++i) {
+    for(int i=1;i<5;++i) {
 		updateFeatherLineTranslation(m_featherGeomParam->line(i), 
 			spar(i-1), it);
 	}
 	
 	it = 0;
-	for(int i=0;i<2;++i) {
+	for(int i=0;i<5;++i) {
 		updateFeatherLineRotation(i, m_featherGeomParam->line(i), it);
 	}
 	
 	it = 0;
-	for(int i=0;i<2;++i) {
-		updateWarp(m_featherGeomParam->line(0), it);
+	for(int i=0;i<5;++i) {
+		updateWarp(m_featherGeomParam->line(i), it);
 	}
 }
 
@@ -384,8 +382,8 @@ void AvianArm::updateRibs()
 }
 
 static const float sSparX[4] = {
-0.75f, 0.5f,
--0.25f,-0.5f
+0.75f, 0.67f,
+-0.25f,-0.33f
 };
 
 void AvianArm::updateSpars()
@@ -416,7 +414,6 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
 	float * vxs = new float[ngeom];
 	line->calculateX<HermiteInterpolatePiecewise<float, Vector3F > >(vxs, curve);
 	
-	//float rz = line->rotateOffsetZ();
 	int it = 0;
 	for(int i=0;i<nseg;++i) {
 	    const int nf = line->numFeatherOnSegment(i);

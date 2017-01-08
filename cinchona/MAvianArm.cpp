@@ -273,7 +273,10 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 					const MObject & m0Attr,
 					const MObject & m1Attr,
 					const MObject & m2Attr,
-					const MObject & u0rzAttr)
+					const MObject & u0rzAttr,
+					const MObject & u1rzAttr,
+					const MObject & l0rzAttr,
+					const MObject & l1rzAttr)
 {
 	MMatrix inboardM = AHelper::getMatrixAttr(node, m0Attr);
 	AHelper::ConvertToMatrix44F(*inboardMarixR(), inboardM);
@@ -291,14 +294,16 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 	orient[2] = midsection1MarixR()->rotation();
 	orient[3] = secondDigitMatirxR()->rotation();
 /// offset second digit 
-	Quaternion q(0.1f, Vector3F::YAxis);
+	Quaternion q(0.2f, Vector3F::YAxis);
 	Matrix33F offset(q);
 	orient[3] *= offset;
 	orient[3] = invrot * orient[3];
 	
 	float covertRz[4];
-	memset(covertRz, 0, 4*4);
 	covertRz[0] = MPlug(node, u0rzAttr).asFloat() * .1f;
+	covertRz[1] = MPlug(node, u1rzAttr).asFloat() * .1f + covertRz[0];
+	covertRz[2] = MPlug(node, l0rzAttr).asFloat() * -.1f;
+	covertRz[3] = MPlug(node, l1rzAttr).asFloat() * -.1f + covertRz[2];
 	
 	FeatherOrientationParam * param = orientationParameter();
 	param->set(orient, covertRz);

@@ -15,6 +15,7 @@
 class Ligament;
 class FeatherMesh;
 class FeatherDeformer;
+class Geom1LineParam;
 
 class DrawAvianArm : public AvianArm, public aphid::DrawArrow {
 
@@ -28,6 +29,7 @@ protected:
 	void drawFeathers();
 	void drawFeatherOrietations();
 	void drawFeatherLeadingEdges();
+	void drawFeatherContours();
 	void drawRibs();
 	void drawSpars();
 	
@@ -38,6 +40,7 @@ private:
 						const FeatherDeformer * deformer);
 	void drawFeatherLeadingEdge(const FeatherMesh * mesh,
 						const FeatherDeformer * deformer);
+	void drawFeatherLineContour(const Geom1LineParam * line, int & it);
 	void drawPlane();
 	
 };
