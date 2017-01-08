@@ -31,12 +31,14 @@ protected:
 	void drawRibs();
 	void drawSpars();
 	
+	
 private:
 	void drawLigament(const Ligament & lig);
 	void drawFeatherMesh(const FeatherMesh * mesh,
 						const FeatherDeformer * deformer);
 	void drawFeatherLeadingEdge(const FeatherMesh * mesh,
 						const FeatherDeformer * deformer);
+	void drawPlane();
 	
 };
 #endif

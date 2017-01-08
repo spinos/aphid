@@ -28,10 +28,13 @@ class FeatherDeformer {
 	boost::scoped_array<aphid::Vector3F > m_points;
 	boost::scoped_array<aphid::Vector3F > m_normals;
 	boost::scoped_array<aphid::Vector3F > m_leadingEdgePoints;
+	float m_warpAngle[2];
 	
 public:
 	FeatherDeformer(const FeatherMesh * mesh);
 	virtual ~FeatherDeformer();
+	
+	void setWarpAngles(const float * v);
 	
 	void deform(const aphid::Matrix33F & mat);
 	void calculateNormal();

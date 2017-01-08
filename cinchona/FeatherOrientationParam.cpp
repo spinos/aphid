@@ -22,10 +22,10 @@ FeatherOrientationParam::FeatherOrientationParam()
 	std::memset(m_vecs, 0, 8 * 12);
 	m_sideInterp = new gpr::GPInterpolate<float>();
 	m_sideInterp->create(4,1,3);
-	m_sideInterp->setFilterLength(.5f);
+	m_sideInterp->setFilterLength(.3f);
 	m_upInterp = new gpr::GPInterpolate<float>();
 	m_upInterp->create(4,1,3);
-	m_upInterp->setFilterLength(.5f);
+	m_upInterp->setFilterLength(.3f);
 }
 
 FeatherOrientationParam::~FeatherOrientationParam()

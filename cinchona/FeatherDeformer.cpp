@@ -20,6 +20,7 @@ FeatherDeformer::FeatherDeformer(const FeatherMesh * mesh)
 	m_points.reset(new Vector3F[mesh->numPoints() ]);
 	m_normals.reset(new Vector3F[mesh->numPoints() ]);
 	m_leadingEdgePoints.reset(new Vector3F[mesh->numLeadingEdgeVertices() ]);
+	m_warpAngle[0] = m_warpAngle[1] = 0.f;
 }
 
 FeatherDeformer::~FeatherDeformer()
@@ -47,8 +48,12 @@ void FeatherDeformer::deform(const Matrix33F & mat)
 	float lastXMean = 0.f;
 	const int & nvpr = m_mesh->numVerticesPerRow();
 	const int & nv = m_mesh->numPoints();
+	const int & nrow = (nv-2) / nvpr;
+	const float drow = 1.f / (float)nrow;
+	
 	int it = nv - 1 - m_mesh->vertexFirstRow();
-	for(;it >= 0;it -= nvpr) {
+	int irow = 0;
+	for(;it >= 0;it -= nvpr, irow++) {
 		
 		int rowEnd = it - nvpr;
 		if(rowEnd < -1) {
@@ -68,6 +73,13 @@ void FeatherDeformer::deform(const Matrix33F & mat)
 		}
 		
 /// local warp
+		Quaternion q(m_warpAngle[0] + m_warpAngle[1] * (drow * irow), Vector3F::XAxis);
+		Matrix33F mwarp(q);
+		for(int i=it;i>rowEnd;--i) {
+			
+			m_points[i] = mwarp.transform(m_points[i]);
+		}
+
 		for(int i=it;i>rowEnd;--i) {
 			m_points[i] = acct.transform(m_points[i]);
 		}
@@ -78,7 +90,7 @@ void FeatherDeformer::deform(const Matrix33F & mat)
 		lastXMean = xMean;
 		
 	}
-
+	
 /// update leading edge
 	const int & nev = m_mesh->numLeadingEdgeVertices();
 	const int * eind = m_mesh->leadingEdgeIndices();
@@ -119,4 +131,10 @@ void FeatherDeformer::calculateNormal()
 		m_normals[i].normalize();
 	}
 
+}
+
+void FeatherDeformer::setWarpAngles(const float * v)
+{ 
+	m_warpAngle[0] = v[1];
+	m_warpAngle[1] = v[0] - v[1];
 }

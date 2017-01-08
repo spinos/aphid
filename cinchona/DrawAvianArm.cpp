@@ -17,6 +17,8 @@
 #include "FeatherDeformer.h"
 #include "WingRib.h"
 #include "WingSpar.h"
+#include "FeatherGeomParam.h"
+#include "Geom1LineParam.h"
 #include <gl_heads.h>
 
 using namespace aphid; 
@@ -70,6 +72,8 @@ void DrawAvianArm::drawFeathers()
 	    
 	    glPopMatrix();
 	}
+	
+	drawPlane();
 	glPopMatrix();
 }
 
@@ -231,4 +235,102 @@ void DrawAvianArm::drawSpars()
 	
 	glPopMatrix();
 
+}
+
+void DrawAvianArm::drawPlane()
+{
+	glDisable(GL_LIGHTING);
+	int it = 0;
+	Geom1LineParam * line = featherGeomParameter()->line(0);
+	Vector3F samp[2];
+	Vector3F dev0[2];
+	Vector3F dev1[2];
+	
+	glBegin(GL_LINES);
+	
+	int n = 0;
+	const int nseg = line->numSegments();
+	for(int i=0;i<nseg;++i) {
+		const int nf = line->numFeatherOnSegment(i);
+		n += nf - 1;
+	}
+	    
+		
+	    for(int i=0;i<n;++i) {
+			const FeatherObject * f = feather(it);
+
+	        f->getEndPoints(samp);
+			
+			if(i==0) {
+				feather(it+1)->getEndPoints(dev1);
+				dev1[0] -= samp[0];
+				dev1[1] -= samp[1];
+				dev0[0] = dev1[0];
+				dev0[1] = dev1[1];
+			} else if(i+1 == n) {
+				feather(it-1)->getEndPoints(dev0);
+				dev0[0] = samp[0] - dev0[0];
+				dev0[1] = samp[1] - dev0[1];
+				dev1[0] = dev0[0];
+				dev1[1] = dev0[1];
+			} else {
+				feather(it-1)->getEndPoints(dev0);
+				feather(it+1)->getEndPoints(dev1);
+				dev0[0] = samp[0] - dev0[0];
+				dev0[1] = samp[1] - dev0[1];
+				dev1[0] -= samp[0];
+				dev1[1] -= samp[1];
+			}
+		
+			glColor3f(1,0,0);
+			glVertex3fv((const float *)&samp[0]);
+			glVertex3fv((const float *)&(samp[0]+dev0[0]) );
+			
+			glVertex3fv((const float *)&samp[1]);
+			glVertex3fv((const float *)&(samp[1]+dev0[1]) );
+			
+			glColor3f(1,1,0);
+			glVertex3fv((const float *)&samp[0]);
+			glVertex3fv((const float *)&(samp[0]+dev1[0]) );
+			
+			glVertex3fv((const float *)&samp[1]);
+			glVertex3fv((const float *)&(samp[1]+dev1[1]) );
+
+			
+			
+			Matrix44F invRot = *f;
+			invRot.inverse();
+			dev0[0] = invRot.transformAsNormal(dev0[0]);
+			
+			if(dev0[0].y > 0.f) {
+				Vector3F zdir = f->getFront();
+			glColor3f(0,0,1);
+			glVertex3fv((const float *)&samp[0]);
+			glVertex3fv((const float *)&(samp[0]+zdir) );
+			
+			Vector3F ydir = f->getUp();
+			glColor3f(0,1,0);
+			glVertex3fv((const float *)&samp[0]);
+			glVertex3fv((const float *)&(samp[0]+ydir) );
+			}
+			
+			dev0[1] = invRot.transformAsNormal(dev0[1]);
+			
+			if(dev0[1].y > 0.f) {
+				Vector3F zdir = f->getFront();
+			glColor3f(0,0,1);
+			glVertex3fv((const float *)&samp[1]);
+			glVertex3fv((const float *)&(samp[1]+zdir) );
+			
+			Vector3F ydir = f->getUp();
+			glColor3f(0,1,0);
+			glVertex3fv((const float *)&samp[1]);
+			glVertex3fv((const float *)&(samp[1]+ydir) );
+			}
+			
+	        it++;
+	    }
+	
+	
+	glEnd();
 }

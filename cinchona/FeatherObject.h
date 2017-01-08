@@ -35,6 +35,12 @@ public:
 							
 	void setRotation(const aphid::Matrix33F & mat);
 	
+/// first and last pnt in world space
+	void getEndPoints(aphid::Vector3F * smp) const;
+	
+/// derivative to previous feather at two points
+	void setWarp(aphid::Vector3F * dev0);
+	
 protected:
 };
 

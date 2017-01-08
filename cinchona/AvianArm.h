@@ -140,6 +140,8 @@ private:
 	void updateFeatherRotation();
 	void updateFeatherLineGeom(Geom1LineParam * line,
 				const aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * curve);
+	void updateWarp(Geom1LineParam * line, 
+							int & it);
 
 };
 #endif

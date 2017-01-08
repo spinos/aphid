@@ -302,6 +302,10 @@ void AvianArm::updateFeatherTransform()
 	}
 	
 	updateFeatherRotation();
+	
+	it = 0;
+	updateWarp(m_featherGeomParam->line(0), it);
+	
 }
 
 FeatherDeformParam * AvianArm::featherDeformParameter()
@@ -310,10 +314,10 @@ FeatherDeformParam * AvianArm::featherDeformParameter()
 void AvianArm::updateFeatherDeformation()
 {
 	FeatherDeformParam * param = featherDeformParameter();
-	if(!param->isChanged()
-	 && !isFeatherGeomParameterChanged() ) {
-		return;
-	}
+	//if(!param->isChanged()
+	 //&& !isFeatherGeomParameterChanged() ) {
+		//return;
+	//}
 	
 	const float & longestC = featherGeomParameter()->longestChord();
 	
@@ -420,7 +424,8 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
 	        
 			FeatherObject * f = new FeatherObject(msh);
 			f->setPredictX(vx);
-			f->setRotationOffset(-0.05f, 0.f, 0.f);
+/// rotate down from root to tip
+			f->setRotationOffset(0.f, 0.f, 0.05f - 0.1f * vx );
 			
 	        m_feathers.push_back(f);
 	    }
@@ -482,5 +487,50 @@ void AvianArm::updateFeatherRotation()
 	for(int i=0;i<n;++i) {
 		param->predictRotation(rotM, m_feathers[i]->predictX() );
 		m_feathers[i]->setRotation(rotM);
+	}
+}
+
+void AvianArm::updateWarp(Geom1LineParam * line, 
+							int & it)
+{
+	int n = 0;
+	const int nseg = line->numSegments();
+	for(int i=0;i<nseg;++i) {
+		const int nf = line->numFeatherOnSegment(i);
+		n += nf - 1;
+	}
+	
+	Vector3F samp[2];
+	Vector3F dev0[2];
+	Vector3F dev1[2];
+	
+	for(int i=0;i<n;++i) {
+		FeatherObject * f = m_feathers[it];
+		f->getEndPoints(samp);
+			
+		if(i==0) {
+			feather(it+1)->getEndPoints(dev1);
+			dev1[0] -= samp[0];
+			dev1[1] -= samp[1];
+			dev0[0] = dev1[0];
+			dev0[1] = dev1[1];
+		} else if(i+1 == n) {
+			feather(it-1)->getEndPoints(dev0);
+			dev0[0] = samp[0] - dev0[0];
+			dev0[1] = samp[1] - dev0[1];
+			dev1[0] = dev0[0];
+			dev1[1] = dev0[1];
+		} else {
+			feather(it-1)->getEndPoints(dev0);
+			feather(it+1)->getEndPoints(dev1);
+			dev0[0] = samp[0] - dev0[0];
+			dev0[1] = samp[1] - dev0[1];
+			dev1[0] -= samp[0];
+			dev1[1] -= samp[1];
+		}
+		
+		f->setWarp(dev0);
+		
+		it++;
 	}
 }
