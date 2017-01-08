@@ -96,6 +96,9 @@ Matrix44F * AvianArm::midsection0MarixR()
 Matrix44F * AvianArm::midsection1MarixR()
 { return &m_skeletonMatrices[13]; }
 
+Matrix44F * AvianArm::radiusMatrixR()
+{ return &m_skeletonMatrices[2]; }
+
 Vector3F AvianArm::shoulderPosition() const
 { return m_skeletonMatrices[0].getTranslation(); }
 
@@ -141,7 +144,7 @@ bool AvianArm::updatePrincipleMatrix()
 
 bool AvianArm::updateHandMatrix()
 {
-	Vector3F side = secondDigitPosition() - m_skeletonMatrices[2].getTranslation();
+	Vector3F side = secondDigitPosition() - radiusMatrixR()->getTranslation();
 	if(side.length2() < 1.0e-4f) {
 		std::cout<<"\n ERROR AvianArm updateHandMatrix 2nd_digit too close to radius";
 		return false;
@@ -150,7 +153,7 @@ bool AvianArm::updateHandMatrix()
 	side = invPrincipleMatrixR()->transformAsNormal(side);
 	side.normalize();
 	
-	Vector3F up = skeletonMatricesR()[2].getUp();
+	Vector3F up = radiusMatrixR()->getUp();
 	up = invPrincipleMatrixR()->transformAsNormal(up);
 	up.normalize();
 	
@@ -274,13 +277,16 @@ void AvianArm::updateFeatherGeom()
 	updateFeatherLineGeom(m_featherGeomParam->line(0), 
 							m_trailingLigament->curve() );
 	
+	const float maxC = m_featherGeomParam->longestChord();
+	
 	for(int i=1;i<5;++i) {
 		updateFeatherLineGeom(m_featherGeomParam->line(i),
-							spar(i-1) );
+							spar(i-1), maxC );
 	}
 	
 	const int n = numFeathers();
-	std::cout<<"AvianArm update n feather geom "<<n;
+	std::cout<<"\n AvianArm update n feather geom "<<n
+			<<"\n longest chord "<<maxC;
 	std::cout.flush();
 		
 }
@@ -330,7 +336,8 @@ void AvianArm::updateFeatherDeformation()
 	Matrix33F deformM;
 	const int n = numFeathers();
 	for(int i=0;i<n;++i) {
-		float relspeed = m_feathers[i]->mesh()->chord() / longestC * 0.1f;
+		const FeatherMesh * msh = m_feathers[i]->mesh();
+		float relspeed = msh->chord() / longestC * 0.076f * 31.f / (float)msh->numVertexRows();
 		
 		param->predictRotation(deformM, m_feathers[i]->predictX(), relspeed);
 		
@@ -406,13 +413,16 @@ const WingSpar * AvianArm::spar(int i) const
 { return m_spars[i]; }
 
 void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
-				const HermiteInterpolatePiecewise<float, Vector3F > * curve)
+				const HermiteInterpolatePiecewise<float, Vector3F > * curve,
+				const float & maxC)
 {
 	const int nseg = line->numSegments();
 	const int ngeom = line->numGeoms();
 	
 	float * vxs = new float[ngeom];
 	line->calculateX<HermiteInterpolatePiecewise<float, Vector3F > >(vxs, curve);
+	
+	int gx = 32;
 	
 	int it = 0;
 	for(int i=0;i<nseg;++i) {
@@ -425,7 +435,17 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
 			const float t = line->predictThickness(&vx);
 			
 	        FeatherMesh * msh = new FeatherMesh(c, 0.03f, 0.14f, t);
-	        msh->create(20, 2);
+			
+			if(maxC < c) {
+				gx = 32;
+			} else {
+				gx = 32.f * (c / maxC);
+				if(gx < 5) {
+					gx = 5;
+				}
+			}
+			
+	        msh->create(gx, 2);
 	        
 			FeatherObject * f = new FeatherObject(msh);
 			f->setPredictX(vx);

@@ -88,6 +88,7 @@ protected:
 	aphid::Matrix44F * inboardMarixR();
 	aphid::Matrix44F * midsection0MarixR();
 	aphid::Matrix44F * midsection1MarixR();
+	aphid::Matrix44F * radiusMatrixR();
 	
 	aphid::Vector3F shoulderPosition() const;
 	aphid::Vector3F elbowPosition() const;
@@ -143,7 +144,8 @@ private:
 							Geom1LineParam * line, 
 							int & it);
 	void updateFeatherLineGeom(Geom1LineParam * line,
-				const aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * curve);
+				const aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * curve,
+				const float & maxC = -1.f);
 	void updateWarp(Geom1LineParam * line, 
 							int & it);
 

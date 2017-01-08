@@ -37,6 +37,7 @@ public:
 	const int * leadingEdgeIndices() const;
 	const int & numVerticesPerRow() const;
 	const int & vertexFirstRow() const;
+	int numVertexRows() const;
 	
 protected:
 

@@ -32,6 +32,7 @@ DrawAvianArm::~DrawAvianArm()
 void DrawAvianArm::drawSkeletonCoordinates()
 {
 	drawCoordinateAt(principleMatrixR() );
+	drawCoordinateAt(handMatrixR() );
 	
 }
 
@@ -127,22 +128,30 @@ void DrawAvianArm::drawFeatherOrietations()
 	locm *= *invPrincipleMatrixR();
 	locm.setTranslation(trailingLigament().getPoint(2, 0.99f) + localOffset);
 	
+	drawCoordinateTandem(&locm, &param->rotation(3) );
 	drawFlatArrowTandem(&locm, &param->rotation(3) );
 	
 	locm = *midsection1MarixR();
+/// local to hand
+//	Matrix33F m1rot = locm.rotation() * handMatrixR()->rotation();
+//	locm.setRotation(m1rot); 
 	locm.setTranslation(trailingLigament().getPoint(1, 0.99f) + localOffset);
 	
+	drawCoordinateTandem(&locm, &param->rotation(2) );
 	drawFlatArrowTandem(&locm, &param->rotation(2) );
 	
 	locm = *midsection0MarixR();
 	locm.setTranslation(trailingLigament().getPoint(0, 0.99f) + localOffset);
 	
+	drawCoordinateTandem(&locm, &param->rotation(1) );
 	drawFlatArrowTandem(&locm, &param->rotation(1) );
 	
 	locm = *inboardMarixR();
 	locm.setTranslation(shoulderPosition() + localOffset);
 	
 	locm *= *invPrincipleMatrixR();
+	
+	drawCoordinateTandem(&locm, &param->rotation(0) );
 	drawFlatArrowTandem(&locm, &param->rotation(0) );
 	
 	glPopMatrix();

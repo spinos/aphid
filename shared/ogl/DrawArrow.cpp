@@ -458,28 +458,7 @@ void DrawArrow::drawCoordinateAt(const Matrix44F * mat)
 	mat->glMatrix(transbuf);
 	glMultMatrixf((const GLfloat*)transbuf);
 	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	
-	glColor3f(1,0,0);
-	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sXArrowTriangleFVNormals);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXArrowTriangleFVVertices);
-	
-	glDrawArrays(GL_TRIANGLES, 0, sXArrowNumTriangleFVVertices);
-	
-	glColor3f(0,1,0);
-	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sYArrowTriangleFVNormals);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sYArrowTriangleFVVertices);
-	
-	glDrawArrays(GL_TRIANGLES, 0, sYArrowNumTriangleFVVertices);
-	
-	glColor3f(0,0,1);
-	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sZArrowTriangleFVNormals);
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sZArrowTriangleFVVertices);
-	glDrawArrays(GL_TRIANGLES, 0, sZArrowNumTriangleFVVertices);
-	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	drawCoordinate();
 	
 	glPopMatrix();
 }
@@ -518,6 +497,28 @@ void DrawArrow::drawFlatArrowTandem(const Matrix44F * mat,
 	glPopMatrix();
 }
 
+void DrawArrow::drawCoordinateTandem(const Matrix44F * mat,
+						const Matrix33F * mat1)
+{
+	glPushMatrix();
+	
+	float transbuf[16];
+	mat->glMatrix(transbuf);
+	glMultMatrixf((const GLfloat*)transbuf);
+	
+	drawCoordinate();
+	
+	mat1->glMatrix(transbuf);
+	transbuf[12] = 6.767f;
+	transbuf[13] = 0.f;
+	transbuf[14] = 0.f;
+	glMultMatrixf((const GLfloat*)transbuf);
+	
+	drawCoordinate();
+
+	glPopMatrix();
+}
+
 static const int sXZFlatArrowNumVertices = 7;
 static const float sXZFlatArrowVertices[] = {
 0.f, 0.f, 1.f,
@@ -531,6 +532,7 @@ static const float sXZFlatArrowVertices[] = {
 
 void DrawArrow::drawFlatArraw()
 {
+/*
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
 	glVertex3f(0,0,0);
@@ -542,6 +544,7 @@ void DrawArrow::drawFlatArraw()
 	glVertex3f(0,0,0);
 	glVertex3f(0,0,1);
 	glEnd();
+*/
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXZFlatArrowVertices);
@@ -549,6 +552,33 @@ void DrawArrow::drawFlatArraw()
 	glDrawArrays(GL_LINE_STRIP, 0, sXZFlatArrowNumVertices);
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void DrawArrow::drawCoordinate()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	glColor3f(1,0,0);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sXArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXArrowTriangleFVVertices);
+	
+	glDrawArrays(GL_TRIANGLES, 0, sXArrowNumTriangleFVVertices);
+	
+	glColor3f(0,1,0);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sYArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sYArrowTriangleFVVertices);
+	
+	glDrawArrays(GL_TRIANGLES, 0, sYArrowNumTriangleFVVertices);
+	
+	glColor3f(0,0,1);
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sZArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sZArrowTriangleFVVertices);
+	glDrawArrays(GL_TRIANGLES, 0, sZArrowNumTriangleFVVertices);
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
 }
 
 }

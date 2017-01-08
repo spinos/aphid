@@ -86,6 +86,9 @@ const int * FeatherMesh::leadingEdgeIndices() const
 
 const int & FeatherMesh::numVerticesPerRow() const
 { return m_nvprow; }
-	
+
 const int & FeatherMesh::vertexFirstRow() const
 { return m_1strow; }
+
+int FeatherMesh::numVertexRows() const
+{ return numPoints() / m_nvprow; }

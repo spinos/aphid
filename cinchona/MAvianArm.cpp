@@ -288,16 +288,18 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 	Matrix33F invrot = invPrincipleMatrixR()->rotation();
 	Matrix33F orient[4];
 	orient[0] = inboardMarixR()->rotation();
-	orient[0] = invrot * orient[0];
+	orient[0] *= invrot;
 	
 	orient[1] = midsection0MarixR()->rotation();
 	orient[2] = midsection1MarixR()->rotation();
+/// local to hand
+///	orient[2] *= handMatrixR()->rotation();
 	orient[3] = secondDigitMatirxR()->rotation();
 /// offset second digit 
 	Quaternion q(0.2f, Vector3F::YAxis);
 	Matrix33F offset(q);
 	orient[3] *= offset;
-	orient[3] = invrot * orient[3];
+	orient[3] *= invrot;
 	
 	float covertRz[4];
 	covertRz[0] = MPlug(node, u0rzAttr).asFloat() * .1f;
