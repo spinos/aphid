@@ -289,6 +289,10 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 	orient[1] = midsection0MarixR()->rotation();
 	orient[2] = midsection1MarixR()->rotation();
 	orient[3] = secondDigitMatirxR()->rotation();
+/// offset second digit 
+	Quaternion q(0.1f, Vector3F::YAxis);
+	Matrix33F offset(q);
+	orient[3] *= offset;
 	orient[3] = invrot * orient[3];
 	
 	FeatherOrientationParam * param = orientationParameter();

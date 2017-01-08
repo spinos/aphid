@@ -191,6 +191,7 @@ void AvianArm::updateLigaments()
 	Vector3F elbowP = elbowPosition();
 	elbowP = invPrincipleMatrixR()->transform(elbowP);
 	Vector3F wristP = wristPosition();
+	Vector3F wristP1 = wristP - fingerMatrixR()->getFront() * .5f;
 	wristP = invPrincipleMatrixR()->transform(wristP);
 	Vector3F snddigitP = secondDigitPosition();
 	snddigitP = invPrincipleMatrixR()->transform(snddigitP);
@@ -206,7 +207,7 @@ void AvianArm::updateLigaments()
 	
 	m_trailingLigament->setKnotPoint(0, Vector3F::Zero);
 	m_trailingLigament->setKnotPoint(1, elbowP);
-	m_trailingLigament->setKnotPoint(2, wristP);
+	m_trailingLigament->setKnotPoint(2, wristP1);
 	m_trailingLigament->setKnotPoint(3, endP);
 	
 	m_trailingLigament->update();
@@ -305,6 +306,7 @@ void AvianArm::updateFeatherTransform()
 	
 	it = 0;
 	updateWarp(m_featherGeomParam->line(0), it);
+	updateWarp(m_featherGeomParam->line(1), it);
 	
 }
 

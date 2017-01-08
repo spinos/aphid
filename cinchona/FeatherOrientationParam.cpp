@@ -80,7 +80,7 @@ const Matrix33F & FeatherOrientationParam::rotation(int i) const
 
 void FeatherOrientationParam::learnOrientation()
 {
-	float vx[4] = {0.01f, .333f, .667f, .99f};
+	float vx[4] = {-0.01f, .333f, .667f, 1.01f};
 	for(int i=0;i<4;++i) {
 		m_sideInterp->setObservationi(i, &vx[i], (const float *)rotationSideR(i));
 		m_upInterp->setObservationi(i, &vx[i], (const float *)rotationUpR(i));

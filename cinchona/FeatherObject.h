@@ -42,6 +42,10 @@ public:
 	void setWarp(aphid::Vector3F * dev0);
 	
 protected:
+
+private:
+	float calcWarpAngle(aphid::Vector3F & vi) const;
+	
 };
 
 #endif

@@ -60,34 +60,37 @@ void FeatherObject::setWarp(Vector3F * dev0)
 	invRot.inverse();
 	dev0[0] = invRot.transformAsNormal(dev0[0]);
 	dev0[1] = invRot.transformAsNormal(dev0[1]);
-	dev0[0].x *= 0.1f;
-	dev0[1].x *= 0.1f;
-	dev0[0].y *= 1.125f;
-	dev0[1].y *= 1.125f;
-
-	dev0[0].normalize();
-	dev0[1].normalize();
 	
-	float ang[2] = {0.f, 0.f};
-
-	dev0[0].x = 0.f;
-	dev0[1].x = 0.f;
+	float ang[2];
+	ang[0] = calcWarpAngle(dev0[0]);
+	ang[1] = calcWarpAngle(dev0[1]);
 	
-	if(dev0[0].y > 0.f) {
-		ang[0] = -acos(dev0[0].dot(Vector3F::ZAxis) );
-	}
-	
-	if(dev0[1].y > 0.f) {
-		ang[1] = -acos(dev0[1].dot(Vector3F::ZAxis) );
-	}
-	
-	if(ang[0] > 0.f) {
-		ang[0] = 0.f;
-	}
-	
-	if(ang[1] > 0.f) {
-		ang[1] = 0.f;
-		//std::cout<<"\n ang"<<ang[0]<<","<<ang[1];
-	}
 	m_deformer->setWarpAngles(ang);
+}
+
+float FeatherObject::calcWarpAngle(Vector3F & vi) const
+{
+	vi.x *= 0.1f;
+	vi.y *= 1.25f;
+
+	vi.x = 0.f;
+	
+	if(vi.length2() < 1e-5f) {
+		return 0.f;
+	}
+	
+	vi.x = 0.f;
+	
+	vi.normalize();
+	
+	float ang = 0.f;
+	if(vi.y > 0.f) {
+		ang = -acos(vi.dot(Vector3F::ZAxis) );
+	}
+	
+	if(ang > 0.f) {
+		ang = 0.f;
+	}
+	
+	return ang;
 }
