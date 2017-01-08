@@ -77,7 +77,8 @@ protected:
 					const MObject & u0rzAttr,
 					const MObject & u1rzAttr,
 					const MObject & l0rzAttr,
-					const MObject & l1rzAttr);
+					const MObject & l1rzAttr,
+					const MObject & yawnoiAttr);
 					
 	void setFeatherDeformationParam(const MObject & node, 
 					const MObject & brt0Attr, 

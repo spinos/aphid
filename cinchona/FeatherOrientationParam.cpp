@@ -28,7 +28,7 @@ FeatherOrientationParam::FeatherOrientationParam()
 	m_upInterp->create(4,1,3);
 	m_upInterp->setFilterLength(.3f);
 	memset(m_rzOffset, 0, 4*5);
-	
+	m_yawNoiseWeight = 0.f;
 }
 
 FeatherOrientationParam::~FeatherOrientationParam()
@@ -70,7 +70,8 @@ void FeatherOrientationParam::set(const Matrix33F * mats)
 }
 
 void FeatherOrientationParam::set(const Matrix33F * mats,
-									const float * rzs)
+									const float * rzs,
+									const float * yawNoiseWeight)
 {
 	set(mats);
 	for(int i=0;i<4;++i) {
@@ -78,6 +79,11 @@ void FeatherOrientationParam::set(const Matrix33F * mats,
 			m_changed = true;
 			m_rzOffset[i+1] = rzs[i];
 		}
+	}
+	
+	if(m_yawNoiseWeight != yawNoiseWeight[0]) {
+		m_changed = true;
+		m_yawNoiseWeight = yawNoiseWeight[0];
 	}
 }
 
@@ -151,3 +157,6 @@ gpr::GPInterpolate<float > * FeatherOrientationParam::sideInterp()
 	
 gpr::GPInterpolate<float > * FeatherOrientationParam::upInterp()
 { return m_upInterp; }
+
+const float * FeatherOrientationParam::yawNoise() const
+{ return &m_yawNoiseWeight; }

@@ -155,6 +155,7 @@ public:
 	static MObject alow1t3;
 	static MObject alow1t4;
 	static MObject alow1rz;
+	static MObject ayawnoi;
 	static MObject outValue;
 	
 protected:

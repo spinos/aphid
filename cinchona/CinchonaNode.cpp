@@ -125,6 +125,7 @@ MObject CinchonaNode::alow1t2;
 MObject CinchonaNode::alow1t3;
 MObject CinchonaNode::alow1t4;
 MObject CinchonaNode::alow1rz;
+MObject CinchonaNode::ayawnoi;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -181,7 +182,8 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 						
 	updateFeatherGeom();
 	setFeatherOrientationParam(thisNode, ainboardmat, amidsectmat0, amidsectmat1,
-						aup0rz, aup1rz, alow0rz, alow1rz);
+						aup0rz, aup1rz, alow0rz, alow1rz,
+						ayawnoi);
 	updateFeatherTransform();
 	setFeatherDeformationParam(thisNode, abrt0mat, abrt1mat, abrt2mat, abrt3mat);
 	updateFeatherDeformation();
@@ -857,7 +859,7 @@ MStatus CinchonaNode::initialize()
 	numFn.setMin(0.01f);
 	addAttribute(alow1t4);
 	
-	aup0rz = numFn.create( "up0RotateZ", "u0rz", MFnNumericData::kFloat);
+	aup0rz = numFn.create( "up0Pitch", "u0ph", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(.25f);
@@ -865,7 +867,7 @@ MStatus CinchonaNode::initialize()
 	numFn.setMax(10.f);
 	addAttribute(aup0rz);
 	
-	aup1rz = numFn.create( "up1RotateZ", "u1rz", MFnNumericData::kFloat);
+	aup1rz = numFn.create( "up1Pitch", "u1ph", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(.25f);
@@ -873,7 +875,7 @@ MStatus CinchonaNode::initialize()
 	numFn.setMax(10.f);
 	addAttribute(aup1rz);
 	
-	alow0rz = numFn.create( "low0RotateZ", "l0rz", MFnNumericData::kFloat);
+	alow0rz = numFn.create( "low0Pitch", "l0ph", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(.25f);
@@ -881,7 +883,7 @@ MStatus CinchonaNode::initialize()
 	numFn.setMax(10.f);
 	addAttribute(alow0rz);
 	
-	alow1rz = numFn.create( "low1RotateZ", "l1rz", MFnNumericData::kFloat);
+	alow1rz = numFn.create( "low1Pitch", "l1ph", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(.25f);
@@ -889,7 +891,14 @@ MStatus CinchonaNode::initialize()
 	numFn.setMax(10.f);
 	addAttribute(alow1rz);
 
-
+	ayawnoi = numFn.create( "yawNoise", "ywns", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.f);
+	numFn.setMin(0.f);
+	numFn.setMax(10.f);
+	addAttribute(ayawnoi);
+	
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
 	numFn.setWritable(false);
@@ -998,6 +1007,8 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(alow1t3, outValue);
 	attributeAffects(alow1t4, outValue);
 	attributeAffects(alow1rz, outValue);
+	
+	attributeAffects(ayawnoi, outValue);
 	
 	attributeAffects(aradiusmat, outValue);
 	

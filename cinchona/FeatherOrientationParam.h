@@ -33,6 +33,7 @@ class FeatherOrientationParam {
 /// 1:2 upper covert
 /// 3:4 lower covert
 	float m_rzOffset[5];
+	float m_yawNoiseWeight;
 	bool m_changed;
 	
 public:
@@ -41,7 +42,9 @@ public:
 	
 	void set(const aphid::Matrix33F * mats);
 /// rzs[4] 0:1 upper 2:3 lower covert offset
-	void set(const aphid::Matrix33F * mats, const float * rzs);
+	void set(const aphid::Matrix33F * mats, 
+			const float * rzs,
+			const float * yawNoiseWeight);
 		
 	bool isChanged() const;
 	
@@ -53,6 +56,8 @@ public:
 	void predictLineRotation(aphid::Matrix33F & dst,
 						const int & iline,
 						const float * x);
+						
+	const float * yawNoise() const;
 	
 protected:
 	aphid::Vector3F * rotationSideR(int i);

@@ -38,6 +38,7 @@ void FeatherObject::setRotationOffset(const float & rx,
 							const float & ry,
 							const float & rz)
 {
+	m_rotOffset.setIdentity();
 	m_rotOffset.rotateEuler(rx, ry, rz);
 }
 
@@ -78,8 +79,6 @@ float FeatherObject::calcWarpAngle(Vector3F & vi) const
 	if(vi.length2() < 1e-5f) {
 		return 0.f;
 	}
-	
-	vi.x = 0.f;
 	
 	vi.normalize();
 	

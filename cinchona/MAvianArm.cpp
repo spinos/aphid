@@ -276,7 +276,8 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 					const MObject & u0rzAttr,
 					const MObject & u1rzAttr,
 					const MObject & l0rzAttr,
-					const MObject & l1rzAttr)
+					const MObject & l1rzAttr,
+					const MObject & yawnoiAttr)
 {
 	MMatrix inboardM = AHelper::getMatrixAttr(node, m0Attr);
 	AHelper::ConvertToMatrix44F(*inboardMarixR(), inboardM);
@@ -307,8 +308,10 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 	covertRz[2] = MPlug(node, l0rzAttr).asFloat() * -.1f;
 	covertRz[3] = MPlug(node, l1rzAttr).asFloat() * -.1f + covertRz[2];
 	
+	float yawnoi[2];
+	yawnoi[0] = MPlug(node, yawnoiAttr).asFloat() * .01f;
 	FeatherOrientationParam * param = orientationParameter();
-	param->set(orient, covertRz);
+	param->set(orient, covertRz, yawnoi);
 }
 
 void MAvianArm::setFeatherDeformationParam(const MObject & node, 

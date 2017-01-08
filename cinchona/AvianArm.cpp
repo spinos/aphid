@@ -16,6 +16,7 @@
 #include "FeatherDeformParam.h"
 #include "WingRib.h"
 #include "WingSpar.h"
+#include <math/PseudoNoise.h>
 #include <AllMath.h>
 
 using namespace aphid;
@@ -299,7 +300,18 @@ bool AvianArm::isFeatherOrientationChanged() const
 
 void AvianArm::updateFeatherTransform()
 {
+	const float * yawwei = orientationParameter()->yawNoise();
+	float pithDirection = 1.f;
     int it = 0;
+	for(int i=0;i<5;++i) {
+		if(i>2) {
+			pithDirection = -1.f;
+		}
+		updateFeatherLineRotationOffset(m_featherGeomParam->line(i), 
+			yawwei, pithDirection, it);
+	}
+	
+	it = 0;
 	updateFeatherLineTranslation(m_featherGeomParam->line(0), 
 		m_trailingLigament, it);
 	
@@ -449,9 +461,7 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
 	        
 			FeatherObject * f = new FeatherObject(msh);
 			f->setPredictX(vx);
-/// rotate down from root to tip
-			f->setRotationOffset(0.f, 0.f, 0.05f - 0.1f * vx );
-			
+
 	        m_feathers.push_back(f);
 	    }
 		it += nf;
@@ -560,4 +570,39 @@ void AvianArm::updateWarp(Geom1LineParam * line,
 		
 		it++;
 	}
+}
+
+void AvianArm::updateFeatherLineRotationOffset(Geom1LineParam * line, 
+							const float * yawWeight,
+							float pitchDirection,
+							int & it)
+{
+	const float maxC = featherGeomParameter()->longestChord();
+	
+	PseudoNoise psn;
+	
+	float vpitch, lastPitch = -.05f;
+/// separate up and low
+	if(pitchDirection < 0) {
+		lastPitch -= .05f;
+	}
+	float vyaw = 0.f;
+	const int n = line->numGeomsM1();
+/// gap between 
+	float delta = .005f;
+
+	for(int i=n-1;i>=0;--i) {
+		FeatherObject * f = m_feathers[it+i];
+		
+		if(yawWeight[0] > 0.f) {
+			vyaw = (psn.rfloat(it+i) - .5f) * yawWeight[0] * (1.f - f->mesh()->chord() / maxC);
+		}
+		
+/// rotate down from root to tip
+		vpitch = lastPitch + delta;
+		f->setRotationOffset(0.f, vyaw, vpitch );
+			
+		lastPitch = vpitch;
+	}
+	it+=n;
 }
