@@ -191,7 +191,6 @@ void AvianArm::updateLigaments()
 	Vector3F elbowP = elbowPosition();
 	elbowP = invPrincipleMatrixR()->transform(elbowP);
 	Vector3F wristP = wristPosition();
-	Vector3F wristP1 = wristP - fingerMatrixR()->getFront() * .5f;
 	wristP = invPrincipleMatrixR()->transform(wristP);
 	Vector3F snddigitP = secondDigitPosition();
 	snddigitP = invPrincipleMatrixR()->transform(snddigitP);
@@ -207,7 +206,7 @@ void AvianArm::updateLigaments()
 	
 	m_trailingLigament->setKnotPoint(0, Vector3F::Zero);
 	m_trailingLigament->setKnotPoint(1, elbowP);
-	m_trailingLigament->setKnotPoint(2, wristP1);
+	m_trailingLigament->setKnotPoint(2, wristP);
 	m_trailingLigament->setKnotPoint(3, endP);
 	
 	m_trailingLigament->update();
@@ -290,6 +289,9 @@ void AvianArm::updateFeatherGeom()
 FeatherOrientationParam * AvianArm::orientationParameter()
 { return m_orientationParam; }
 
+bool AvianArm::isFeatherOrientationChanged() const
+{ return m_orientationParam->isChanged(); }
+
 void AvianArm::updateFeatherTransform()
 {
     int it = 0;
@@ -302,12 +304,15 @@ void AvianArm::updateFeatherTransform()
 			spar(i-1), it);
 	}
 	
-	updateFeatherRotation();
+	it = 0;
+	for(int i=0;i<2;++i) {
+		updateFeatherLineRotation(i, m_featherGeomParam->line(i), it);
+	}
 	
 	it = 0;
-	updateWarp(m_featherGeomParam->line(0), it);
-	updateWarp(m_featherGeomParam->line(1), it);
-	
+	for(int i=0;i<2;++i) {
+		updateWarp(m_featherGeomParam->line(0), it);
+	}
 }
 
 FeatherDeformParam * AvianArm::featherDeformParameter()
@@ -316,10 +321,11 @@ FeatherDeformParam * AvianArm::featherDeformParameter()
 void AvianArm::updateFeatherDeformation()
 {
 	FeatherDeformParam * param = featherDeformParameter();
-	//if(!param->isChanged()
-	 //&& !isFeatherGeomParameterChanged() ) {
-		//return;
-	//}
+	if(!param->isChanged()
+	 && !isFeatherGeomParameterChanged() 
+	 && !isFeatherOrientationChanged() ) {
+		return;
+	}
 	
 	const float & longestC = featherGeomParameter()->longestChord();
 	
@@ -475,7 +481,9 @@ void AvianArm::updateFeatherLineTranslation(Geom1LineParam * line,
 	}
 }
 	
-void AvianArm::updateFeatherRotation()
+void AvianArm::updateFeatherLineRotation(const int & iline,
+							Geom1LineParam * line, 
+							int & it)
 {	
 	FeatherOrientationParam * param = orientationParameter();
 	if(!param->isChanged()
@@ -483,27 +491,27 @@ void AvianArm::updateFeatherRotation()
 		return;
 	}
 	
+	const int n = line->numGeomsM1();
+	
 /// interpolate orientation	
 	Matrix33F rotM;
-	const int n = numFeathers();
 	for(int i=0;i<n;++i) {
-		param->predictRotation(rotM, m_feathers[i]->predictX() );
-		m_feathers[i]->setRotation(rotM);
+		FeatherObject * fea = m_feathers[it];
+		param->predictLineRotation(rotM, iline, fea->predictX() );
+		fea->setRotation(rotM);
+		it++;
 	}
 }
 
 void AvianArm::updateWarp(Geom1LineParam * line, 
 							int & it)
 {
-	int n = 0;
-	const int nseg = line->numSegments();
-	for(int i=0;i<nseg;++i) {
-		const int nf = line->numFeatherOnSegment(i);
-		n += nf - 1;
-	}
-	
+	const int n = line->numGeomsM1();
+/// current
 	Vector3F samp[2];
+/// from inboard
 	Vector3F dev0[2];
+/// to outboard
 	Vector3F dev1[2];
 	
 	for(int i=0;i<n;++i) {
@@ -520,15 +528,15 @@ void AvianArm::updateWarp(Geom1LineParam * line,
 			feather(it-1)->getEndPoints(dev0);
 			dev0[0] = samp[0] - dev0[0];
 			dev0[1] = samp[1] - dev0[1];
-			dev1[0] = dev0[0];
-			dev1[1] = dev0[1];
+			//dev1[0] = dev0[0];
+			//dev1[1] = dev0[1];
 		} else {
 			feather(it-1)->getEndPoints(dev0);
-			feather(it+1)->getEndPoints(dev1);
+			//feather(it+1)->getEndPoints(dev1);
 			dev0[0] = samp[0] - dev0[0];
 			dev0[1] = samp[1] - dev0[1];
-			dev1[0] -= samp[0];
-			dev1[1] -= samp[1];
+			//dev1[0] -= samp[0];
+			//dev1[1] -= samp[1];
 		}
 		
 		f->setWarp(dev0);

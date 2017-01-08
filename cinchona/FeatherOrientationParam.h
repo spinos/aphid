@@ -29,7 +29,10 @@ class FeatherOrientationParam {
 	aphid::Matrix33F * m_rots;
 	aphid::gpr::GPInterpolate<float > * m_sideInterp;
 	aphid::gpr::GPInterpolate<float > * m_upInterp;
-	
+/// 0 flying
+/// 1:2 upper covert
+/// 3:4 lower covert
+	float m_rzOffset[5];
 	bool m_changed;
 	
 public:
@@ -37,12 +40,18 @@ public:
 	virtual ~FeatherOrientationParam();
 	
 	void set(const aphid::Matrix33F * mats);
-			
+/// rzs[4] 0:1 upper 2:3 lower covert offset
+	void set(const aphid::Matrix33F * mats, const float * rzs);
+		
 	bool isChanged() const;
 	
 	const aphid::Matrix33F & rotation(int i) const;
 	
 	void predictRotation(aphid::Matrix33F & dst,
+						const float * x);
+/// plus i-th line offset
+	void predictLineRotation(aphid::Matrix33F & dst,
+						const int & iline,
 						const float * x);
 	
 protected:

@@ -109,6 +109,7 @@ public:
 	static MObject aup0t2;
 	static MObject aup0t3;
 	static MObject aup0t4;
+	static MObject aup0rz;
 	static MObject outValue;
 	
 protected:

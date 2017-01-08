@@ -73,7 +73,8 @@ protected:
 	void setFeatherOrientationParam(const MObject & node,
 					const MObject & m0Attr,
 					const MObject & m1Attr,
-					const MObject & m2Attr);
+					const MObject & m2Attr,
+					const MObject & u0rzAttr);
 					
 	void setFeatherDeformationParam(const MObject & node, 
 					const MObject & brt0Attr, 

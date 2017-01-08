@@ -81,6 +81,7 @@ MObject CinchonaNode::aup0t1;
 MObject CinchonaNode::aup0t2;
 MObject CinchonaNode::aup0t3;
 MObject CinchonaNode::aup0t4;
+MObject CinchonaNode::aup0rz;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -127,7 +128,8 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 						aup0t0, aup0t1, aup0t2, aup0t3, aup0t4);
 						
 	updateFeatherGeom();
-	setFeatherOrientationParam(thisNode, ainboardmat, amidsectmat0, amidsectmat1);
+	setFeatherOrientationParam(thisNode, ainboardmat, amidsectmat0, amidsectmat1,
+						aup0rz);
 	updateFeatherTransform();
 	setFeatherDeformationParam(thisNode, abrt0mat, abrt1mat, abrt2mat, abrt3mat);
 	updateFeatherDeformation();
@@ -496,6 +498,14 @@ MStatus CinchonaNode::initialize()
 	numFn.setMin(0.01f);
 	addAttribute(aup0t4);
 	
+	aup0rz = numFn.create( "up0RotateZ", "u0rz", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(1.f);
+	numFn.setMin(0.f);
+	numFn.setMax(10.f);
+	addAttribute(aup0rz);
+	
     outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
 	numFn.setStorable(false);
 	numFn.setWritable(false);
@@ -555,6 +565,7 @@ MStatus CinchonaNode::initialize()
 	attributeAffects(aup0t2, outValue);
 	attributeAffects(aup0t3, outValue);
 	attributeAffects(aup0t4, outValue);
+	attributeAffects(aup0rz, outValue);
 	
 	attributeAffects(aradiusmat, outValue);
 	

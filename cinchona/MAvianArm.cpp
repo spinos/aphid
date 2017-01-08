@@ -272,7 +272,8 @@ void MAvianArm::setCovertFeatherGeomParam(int i,
 void MAvianArm::setFeatherOrientationParam(const MObject & node,
 					const MObject & m0Attr,
 					const MObject & m1Attr,
-					const MObject & m2Attr)
+					const MObject & m2Attr,
+					const MObject & u0rzAttr)
 {
 	MMatrix inboardM = AHelper::getMatrixAttr(node, m0Attr);
 	AHelper::ConvertToMatrix44F(*inboardMarixR(), inboardM);
@@ -295,8 +296,12 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 	orient[3] *= offset;
 	orient[3] = invrot * orient[3];
 	
+	float covertRz[4];
+	memset(covertRz, 0, 4*4);
+	covertRz[0] = MPlug(node, u0rzAttr).asFloat() * .1f;
+	
 	FeatherOrientationParam * param = orientationParameter();
-	param->set(orient);
+	param->set(orient, covertRz);
 }
 
 void MAvianArm::setFeatherDeformationParam(const MObject & node, 
@@ -319,7 +324,6 @@ void MAvianArm::setFeatherDeformationParam(const MObject & node,
 	
 	brtM = AHelper::getMatrixAttr(node, brt3Attr);
 	AHelper::ConvertToMatrix33F(orient[3], brtM);
-	
 	
 	FeatherDeformParam * param = featherDeformParameter();
 	param->set(orient);

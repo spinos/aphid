@@ -158,13 +158,18 @@ float Geom1LineParam::predictThickness(const float * x)
 const float & Geom1LineParam::longestChord() const
 { return _longestChord; }
 
-const int Geom1LineParam::numGeoms() const
+int Geom1LineParam::numGeoms() const
 {
 	int n = 0;
 	for(int i=0;i < numSegments();++i) {
 	    n += numFeatherOnSegment(i);
 	}
 	return n;
+}
+
+int Geom1LineParam::numGeomsM1() const
+{
+	return numGeoms() - numSegments();
 }
 
 void Geom1LineParam::setRotateOffsetZ(float x)

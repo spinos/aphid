@@ -112,6 +112,7 @@ protected:
 	
 	FeatherGeomParam * featherGeomParameter();
 	bool isFeatherGeomParameterChanged() const;
+	bool isFeatherOrientationChanged() const;
 	void updateFeatherGeom();
 	void updateFeatherTransform();
 	void updateRibs();
@@ -137,7 +138,10 @@ private:
 	void updateFeatherLineTranslation(Geom1LineParam * line, 
 							const WingSpar * spr,
 							int & it);
-	void updateFeatherRotation();
+/// i-th line
+	void updateFeatherLineRotation(const int & iline,
+							Geom1LineParam * line, 
+							int & it);
 	void updateFeatherLineGeom(Geom1LineParam * line,
 				const aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * curve);
 	void updateWarp(Geom1LineParam * line, 

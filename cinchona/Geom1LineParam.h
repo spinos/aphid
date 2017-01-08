@@ -55,7 +55,9 @@ public:
 	bool isChanged() const;
 	
 	int numSegments() const;
-	const int numGeoms() const;
+	int numGeoms() const;
+/// each segment minus 1
+	int numGeomsM1() const;
 	
 	const int & numFeatherOnSegment(int i) const;
 /// i-th segment

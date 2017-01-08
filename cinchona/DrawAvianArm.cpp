@@ -73,7 +73,6 @@ void DrawAvianArm::drawFeathers()
 	    glPopMatrix();
 	}
 	
-	drawPlane();
 	glPopMatrix();
 }
 

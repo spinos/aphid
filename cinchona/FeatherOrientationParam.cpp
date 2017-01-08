@@ -11,6 +11,7 @@
 
 #include <math/Matrix33F.h>
 #include <gpr/GPInterpolate.h>
+#include <math/miscfuncs.h>
 
 using namespace aphid;
 
@@ -26,6 +27,8 @@ FeatherOrientationParam::FeatherOrientationParam()
 	m_upInterp = new gpr::GPInterpolate<float>();
 	m_upInterp->create(4,1,3);
 	m_upInterp->setFilterLength(.3f);
+	memset(m_rzOffset, 0, 4*5);
+	
 }
 
 FeatherOrientationParam::~FeatherOrientationParam()
@@ -63,6 +66,18 @@ void FeatherOrientationParam::set(const Matrix33F * mats)
 	
 	if(m_changed) {
 		learnOrientation();
+	}
+}
+
+void FeatherOrientationParam::set(const Matrix33F * mats,
+									const float * rzs)
+{
+	set(mats);
+	for(int i=0;i<4;++i) {
+		if(m_rzOffset[i+1] != rzs[i]) {
+			m_changed = true;
+			m_rzOffset[i+1] = rzs[i];
+		}
 	}
 }
 
@@ -115,6 +130,20 @@ void FeatherOrientationParam::predictRotation(aphid::Matrix33F & dst,
 	vside.normalize();
 	
 	dst.fill(vside, vup, vfront);
+}
+
+void FeatherOrientationParam::predictLineRotation(Matrix33F & dst,
+						const int & iline,
+						const float * x)
+{
+	predictRotation(dst, x);
+	if(Absolute<float>(m_rzOffset[iline]) > 1e-3f) {
+		Vector3F ax;
+		dst.getFront(ax);
+		Quaternion q(m_rzOffset[iline], ax );
+		Matrix33F om(q);
+		dst *= om;
+	}
 }
 
 gpr::GPInterpolate<float > * FeatherOrientationParam::sideInterp()
