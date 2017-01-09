@@ -104,6 +104,9 @@ protected:
 					const MObject & t3Attr,
 					const MObject & t4Attr);
 	
+	void setWingSide(const MObject & node,
+					const MObject & sdAttr);
+	
 private:
 
 };

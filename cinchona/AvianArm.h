@@ -39,6 +39,7 @@ class AvianArm {
 	WingRib * m_ribs[5];
 /// 2 upper 2 lower
 	WingSpar * m_spars[4];
+	bool m_starboard;
 	
 #define NUM_MAT 14
 /// in order
@@ -130,6 +131,9 @@ protected:
 	const WingRib * rib(int i) const;
 /// 0:1 upper 2:3 lower
 	const WingSpar * spar(int i) const;
+	
+	void setStarboard(bool x);
+	const bool & isStarboard() const;
 	
 private:
     void clearFeathers();

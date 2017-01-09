@@ -339,3 +339,10 @@ void MAvianArm::setFeatherDeformationParam(const MObject & node,
 	param->set(orient);
 	
 }
+
+void MAvianArm::setWingSide(const MObject & node,
+					const MObject & sdAttr)
+{
+	bool sd = MPlug(node, sdAttr).asBool();
+	setStarboard(sd);
+}

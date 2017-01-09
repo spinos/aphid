@@ -126,6 +126,7 @@ MObject CinchonaNode::alow1t3;
 MObject CinchonaNode::alow1t4;
 MObject CinchonaNode::alow1rz;
 MObject CinchonaNode::ayawnoi;
+MObject CinchonaNode::astarboard;
 MObject CinchonaNode::outValue;
 	
 CinchonaNode::CinchonaNode()
@@ -151,6 +152,7 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStatus status )
 {	
 	MObject thisNode = thisMObject();
+	setWingSide(thisNode, astarboard);
 	setSkeletonMatrices(thisNode, ahumerusmat, aulnamat, aradiusmat, acarpusmat, aseconddigitmat);
 	updatePrincipleMatrix();
 	updateHandMatrix();
@@ -262,6 +264,12 @@ MStatus CinchonaNode::initialize()
 	MFnTypedAttribute typFn;
 	MFnMatrixAttribute matAttr;
 	MStatus			 stat;
+	
+	astarboard = numFn.create( "starboardSide", "stb", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(false);
+	addAttribute(astarboard);
 	
 	anumfeather0 = numFn.create( "numFeather0", "nfr0", MFnNumericData::kInt);
 	numFn.setStorable(true);
@@ -907,6 +915,8 @@ MStatus CinchonaNode::initialize()
 	MPointArray defaultPntArray;
 	MFnPointArrayData pntArrayDataFn;
 	pntArrayDataFn.create( defaultPntArray );
+	
+	attributeAffects(astarboard, outValue);
 	    
 	attributeAffects(achord0, outValue);
 	attributeAffects(achord1, outValue);

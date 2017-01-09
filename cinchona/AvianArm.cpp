@@ -38,6 +38,7 @@ AvianArm::AvianArm()
 	for(int i=0;i<4;++i) {
 		m_spars[i] = new WingSpar(4);
 	}
+	m_starboard = false;
 }
 
 AvianArm::~AvianArm()
@@ -606,3 +607,9 @@ void AvianArm::updateFeatherLineRotationOffset(Geom1LineParam * line,
 	}
 	it+=n;
 }
+
+void AvianArm::setStarboard(bool x)
+{ m_starboard = x; }
+
+const bool & AvianArm::isStarboard() const
+{ return m_starboard; }
