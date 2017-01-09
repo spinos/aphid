@@ -85,8 +85,12 @@ protected:
 					const MObject & brt1Attr, 
 					const MObject & brt2Attr, 
 					const MObject & brt3Attr);
+/// port side
 /// i 1:2 upper
-/// i 3:4 lower					
+/// i 3:4 lower	
+/// starboard side
+/// i 3:4 upper
+/// i 1:2 lower				
 	void setCovertFeatherGeomParam(int i,
 					const MObject & node,
 					const MObject & n0Attr,

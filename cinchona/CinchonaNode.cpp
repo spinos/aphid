@@ -169,16 +169,21 @@ void CinchonaNode::draw( M3dView & view, const MDagPath & path,
 	setFlyingFeatherGeomParam(thisNode, anumfeather0, anumfeather1, anumfeather2,
 						achord0, achord1, achord2, achord3,
 						athickness0, athickness1, athickness2, athickness3);
-	setCovertFeatherGeomParam(1, thisNode, aup0n0, aup0n1, aup0n2, aup0n3,
+	static const int scCovertI[8] = {1,2,3,4,3,4,1,2};
+	const int * covertI = &scCovertI[0];
+	if(isStarboard()) {
+		covertI = &scCovertI[4];
+	}
+	setCovertFeatherGeomParam(covertI[0], thisNode, aup0n0, aup0n1, aup0n2, aup0n3,
 						aup0c0, aup0c1, aup0c2, aup0c3, aup0c4,
 						aup0t0, aup0t1, aup0t2, aup0t3, aup0t4);
-	setCovertFeatherGeomParam(2, thisNode, aup1n0, aup1n1, aup1n2, aup1n3,
+	setCovertFeatherGeomParam(covertI[1], thisNode, aup1n0, aup1n1, aup1n2, aup1n3,
 						aup1c0, aup1c1, aup1c2, aup1c3, aup1c4,
 						aup1t0, aup1t1, aup1t2, aup1t3, aup1t4);
-	setCovertFeatherGeomParam(3, thisNode, alow0n0, alow0n1, alow0n2, alow0n3,
+	setCovertFeatherGeomParam(covertI[2], thisNode, alow0n0, alow0n1, alow0n2, alow0n3,
 						alow0c0, alow0c1, alow0c2, alow0c3, alow0c4,
 						alow0t0, alow0t1, alow0t2, alow0t3, alow0t4);
-	setCovertFeatherGeomParam(4, thisNode, alow1n0, alow1n1, alow1n2, alow1n3,
+	setCovertFeatherGeomParam(covertI[3], thisNode, alow1n0, alow1n1, alow1n2, alow1n3,
 						alow1c0, alow1c1, alow1c2, alow1c3, alow1c4,
 						alow1t0, alow1t1, alow1t2, alow1t3, alow1t4);
 						

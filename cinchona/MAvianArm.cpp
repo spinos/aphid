@@ -323,11 +323,18 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 	orient[3] *= offset;
 	orient[3] *= invrot;
 	
+	static const int scCovertI[8] = {0,1,2,3,2,3,0,1};
+	const int * covertI = &scCovertI[0];
+	int dir = 1.f;
+	if(isStarboard()) {
+		covertI = &scCovertI[4];
+		dir = -1.f;
+	}
 	float covertRz[4];
-	covertRz[0] = MPlug(node, u0rzAttr).asFloat() * .1f;
-	covertRz[1] = MPlug(node, u1rzAttr).asFloat() * .1f + covertRz[0];
-	covertRz[2] = MPlug(node, l0rzAttr).asFloat() * -.1f;
-	covertRz[3] = MPlug(node, l1rzAttr).asFloat() * -.1f + covertRz[2];
+	covertRz[covertI[0]] = MPlug(node, u0rzAttr).asFloat() * .1f * dir;
+	covertRz[covertI[1]] = MPlug(node, u1rzAttr).asFloat() * .1f * dir + covertRz[covertI[0]];
+	covertRz[covertI[2]] = MPlug(node, l0rzAttr).asFloat() * -.1f * dir;
+	covertRz[covertI[3]] = MPlug(node, l1rzAttr).asFloat() * -.1f * dir + covertRz[covertI[2]];
 	
 	float yawnoi[2];
 	yawnoi[0] = MPlug(node, yawnoiAttr).asFloat() * .01f;
