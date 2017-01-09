@@ -39,12 +39,15 @@ public:
 	void getEndPoints(aphid::Vector3F * smp) const;
 	
 /// derivative to previous feather at two points
-	void setWarp(aphid::Vector3F * dev0);
+	void setWarp(aphid::Vector3F * dev0, bool reverseZ);
+	
+	void flipZ();
 	
 protected:
 
 private:
 	float calcWarpAngle(aphid::Vector3F & vi) const;
+	float calcWarpAngleReversed(aphid::Vector3F & vi) const;
 	
 };
 

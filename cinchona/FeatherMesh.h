@@ -39,6 +39,8 @@ public:
 	const int & vertexFirstRow() const;
 	int numVertexRows() const;
 	
+	void flipZ();
+	
 protected:
 
 private:

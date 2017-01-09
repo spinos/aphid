@@ -139,7 +139,6 @@ private:
     void clearFeathers();
 	void updateFeatherLineRotationOffset(Geom1LineParam * line, 
 							const float * yawWeight,
-							float pitchDirection,
 							int & it);
 	void updateFeatherLineTranslation(Geom1LineParam * line, 
 							const Ligament * lig,

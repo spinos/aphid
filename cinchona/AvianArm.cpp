@@ -304,14 +304,10 @@ bool AvianArm::isFeatherOrientationChanged() const
 void AvianArm::updateFeatherTransform()
 {
 	const float * yawwei = orientationParameter()->yawNoise();
-	float pithDirection = 1.f;
-    int it = 0;
+	int it = 0;
 	for(int i=0;i<5;++i) {
-		if(i>2) {
-			pithDirection = -1.f;
-		}
 		updateFeatherLineRotationOffset(m_featherGeomParam->line(i), 
-			yawwei, pithDirection, it);
+			yawwei, it);
 	}
 	
 	it = 0;
@@ -411,19 +407,26 @@ void AvianArm::updateRibs()
 	}
 }
 
-static const float sSparX[4] = {
-0.75f, 0.67f,
--0.25f,-0.33f
+static const float sSparX[8] = {
+0.65f, 0.5f,
+-0.35f,-0.5f,
+-0.35f,-0.5f,
+0.65f, 0.5f
 };
 
 void AvianArm::updateSpars()
 {
+	const float * usesparx = &sSparX[0];
+	//if(isStarboard()) {
+	//	usesparx = &sSparX[4];
+	//}
+	
 	Vector3F pnt, tng;
 	for(int i=0;i<4;++i) {
 		WingSpar & spari = *m_spars[i];
 		for(int j=0;j<5;++j) {
 			tng = m_ribs[j]->sparTangent();
-			m_ribs[j]->getPoint(pnt, sSparX[i]);
+			m_ribs[j]->getPoint(pnt, usesparx[i]);
 			spari.setKnot(j, pnt, tng);
 		}
 	}
@@ -472,6 +475,10 @@ void AvianArm::updateFeatherLineGeom(Geom1LineParam * line,
 	        
 			FeatherObject * f = new FeatherObject(msh);
 			f->setPredictX(vx);
+			
+			if(isStarboard()) {
+				f->flipZ();
+			}
 
 	        m_feathers.push_back(f);
 	    }
@@ -577,7 +584,7 @@ void AvianArm::updateWarp(Geom1LineParam * line,
 			//dev1[1] -= samp[1];
 		}
 		
-		f->setWarp(dev0);
+		f->setWarp(dev0, isStarboard() );
 		
 		it++;
 	}
@@ -585,22 +592,22 @@ void AvianArm::updateWarp(Geom1LineParam * line,
 
 void AvianArm::updateFeatherLineRotationOffset(Geom1LineParam * line, 
 							const float * yawWeight,
-							float pitchDirection,
 							int & it)
 {
 	const float maxC = featherGeomParameter()->longestChord();
 	
 	PseudoNoise psn;
 	
-	float vpitch, lastPitch = -.05f;
-/// separate up and low
-	if(pitchDirection < 0) {
-		lastPitch -= .05f;
-	}
+	float vpitch, lastPitch = 0.f;
+
 	float vyaw = 0.f;
 	const int n = line->numGeomsM1();
 /// gap between 
-	float delta = .005f;
+	float delta = .0053f;
+	
+	//if(isStarboard()) {
+	//	delta *= -1.f;
+	//}
 
 	for(int i=n-1;i>=0;--i) {
 		FeatherObject * f = m_feathers[it+i];

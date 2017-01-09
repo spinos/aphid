@@ -51,7 +51,6 @@ void MAvianArm::setSkeletonMatrices(const MObject & node,
 		flipm.getSide(s);
 		s.reverse();
 		flipm.getUp(u);
-		u.reverse();
 		f = s.cross(u);
 		flipm.fill(s, u, f);
 		secondDigitMatirxR()->setRotation(flipm);

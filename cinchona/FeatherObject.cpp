@@ -55,7 +55,7 @@ void FeatherObject::getEndPoints(Vector3F * smp) const
 	smp[1] = transform(smp[1]);
 }
 
-void FeatherObject::setWarp(Vector3F * dev0)
+void FeatherObject::setWarp(Vector3F * dev0, bool reverseZ)
 {
 	Matrix44F invRot = *this;
 	invRot.inverse();
@@ -63,35 +63,59 @@ void FeatherObject::setWarp(Vector3F * dev0)
 	dev0[1] = invRot.transformAsNormal(dev0[1]);
 	
 	float ang[2];
-	ang[0] = calcWarpAngle(dev0[0]);
-	ang[1] = calcWarpAngle(dev0[1]);
 	
-	ang[0]=ang[1] = 0.f;
-	
+	if(reverseZ) {
+		ang[0] = calcWarpAngleReversed(dev0[0]);
+		ang[1] = calcWarpAngleReversed(dev0[1]);
+	} else {
+		ang[0] = calcWarpAngle(dev0[0]);
+		ang[1] = calcWarpAngle(dev0[1]);
+	}
+	//ang[0] = ang[1] = 0;
 	m_deformer->setWarpAngles(ang);
+}
+
+float FeatherObject::calcWarpAngleReversed(Vector3F & vi) const
+{
+	float ang = 0.f;
+	
+	vi.y -= .1f;
+	vi.x = 0.f;
+	
+	vi.normalize();
+	
+	if(vi.y < 0.f) {
+		ang = acos(vi.dot(Vector3F::ZAxis) );
+	}
+	
+	if(ang > 1.f) {
+		ang = 1.f;
+	}
+	
+	return ang;
 }
 
 float FeatherObject::calcWarpAngle(Vector3F & vi) const
 {
-	vi.x *= 0.1f;
-	vi.y *= 1.25f;
+	float ang = 0.f;
 
+	vi.y += .1f;
 	vi.x = 0.f;
-	
-	if(vi.length2() < 1e-5f) {
-		return 0.f;
-	}
 	
 	vi.normalize();
 	
-	float ang = 0.f;
 	if(vi.y > 0.f) {
 		ang = -acos(vi.dot(Vector3F::ZAxis) );
 	}
 	
-	if(ang > 0.f) {
-		ang = 0.f;
+	if(ang < -1.f) {
+		ang = -1.f;
 	}
 	
 	return ang;
+}
+
+void FeatherObject::flipZ()
+{
+	m_mesh->reverseTriangleNormals();
 }

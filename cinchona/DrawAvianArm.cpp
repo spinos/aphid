@@ -151,7 +151,7 @@ void DrawAvianArm::drawFeatherOrietations()
 	drawFlatArrowTandem(&locm, &param->rotation(1) );
 	
 	locm = *inboardMarixR();
-	locm.setTranslation(shoulderPosition() + localOffset);
+	locm.setTranslation(shoulderPosition() + Vector3F(0,5,0));
 	
 	locm *= *invPrincipleMatrixR();
 	

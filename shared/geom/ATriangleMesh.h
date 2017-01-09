@@ -37,6 +37,9 @@ public:
 	const Vector3F triangleCenter(unsigned idx) const;
 	const Vector3F triangleNormal(unsigned idx) const;
 	virtual std::string verbosestr() const;
+	
+	void reverseTriangleNormals();
+	
 protected:
 	
 private:

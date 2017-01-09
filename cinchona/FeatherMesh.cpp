@@ -92,3 +92,13 @@ const int & FeatherMesh::vertexFirstRow() const
 
 int FeatherMesh::numVertexRows() const
 { return numPoints() / m_nvprow; }
+
+void FeatherMesh::flipZ()
+{
+	const int n = numPoints();
+	for(int i=0;i<n;++i) {
+		points()[i].z *= -1.f;
+	}
+	reverseTriangleNormals();
+	
+}

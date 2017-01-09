@@ -184,5 +184,16 @@ bool ATriangleMesh::intersectBox(unsigned icomponent, const BoundingBox & box)
 	return gjk::Intersect1<gjk::TriangleSet, BoundingBox>::Evaluate(m_componentTriangle, box);
 }
 
+void ATriangleMesh::reverseTriangleNormals()
+{
+	const unsigned n = numTriangles();
+	for(unsigned i=0;i<n;++i) {
+		unsigned * v = triangleIndices(i);
+		unsigned t = v[0];
+		v[0] = v[2];
+		v[2] = t;
+	}
+}
+
 }
 //:~
