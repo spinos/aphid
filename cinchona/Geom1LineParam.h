@@ -68,7 +68,7 @@ public:
 	const float & longestChord() const;
 	
 	template<typename T>
-	void Geom1LineParam::calculateX(float * xs,
+	void calculateX(float * xs,
 						const T * line) const
 	{
 		int nseg;
