@@ -33,7 +33,7 @@ void DrawAvianArm::drawSkeletonCoordinates()
 {
 	drawCoordinateAt(principleMatrixR() );
 	drawCoordinateAt(handMatrixR() );
-	
+	drawCoordinateAt(fingerMatrixR() );
 }
 
 void DrawAvianArm::drawLigaments()
@@ -117,7 +117,11 @@ void DrawAvianArm::drawFeatherMesh(const FeatherMesh * mesh,
 void DrawAvianArm::drawFeatherOrietations()
 {
 	FeatherDeformParam * param = featherDeformParameter();
-	const Vector3F localOffset(0,5,0);
+	Vector3F localOffset(0,5,0);
+	if(isStarboard() ) {
+		localOffset.y = -5.f;
+	}
+	
 	float m[16];
 	principleMatrixR()->glMatrix(m);
 	glPushMatrix();

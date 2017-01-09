@@ -114,7 +114,10 @@ Vector3F AvianArm::secondDigitPosition() const
 { return m_skeletonMatrices[4].getTranslation(); }
 
 Vector3F AvianArm::secondDigitEndPosition() const
-{ return (secondDigitPosition() + m_skeletonMatrices[4].getSide() * m_secondDigitLength ); }
+{ 
+	Vector3F p = secondDigitPosition() + m_skeletonMatrices[4].getSide() * m_secondDigitLength;
+	return p; 
+}
 
 const Ligament & AvianArm::leadingLigament() const
 { return *m_leadingLigament; }
@@ -152,11 +155,12 @@ bool AvianArm::updateHandMatrix()
 		return false;
 	}
 	
-	side = invPrincipleMatrixR()->transformAsNormal(side);
+	//side = invPrincipleMatrixR()->transformAsNormal(side);
 	side.normalize();
 	
 	Vector3F up = radiusMatrixR()->getUp();
-	up = invPrincipleMatrixR()->transformAsNormal(up);
+	
+	//up = invPrincipleMatrixR()->transformAsNormal(up);
 	up.normalize();
 	
 	Vector3F front = side.cross(up);
@@ -173,8 +177,6 @@ bool AvianArm::updateHandMatrix()
 bool AvianArm::updateFingerMatrix()
 {
 	Vector3F side = secondDigitMatirxR()->getSide();
-	
-	//side = invPrincipleMatrixR()->transformAsNormal(side);
 	side.normalize();
 	
 	Vector3F up = handMatrixR()->getUp();
@@ -388,7 +390,15 @@ void AvianArm::updateRibs()
 		side /= c;
 		m_ribs[i]->setCMPT(c, 0.f, 0.4f, 0.2f);
 		m_ribs[i]->setTranslation(p);
-		front = side.cross(Vector3F::YAxis);
+		
+		if(i<2) {
+			up = Vector3F::YAxis;
+		} else {
+			up = handMatrixR()->getUp();
+			up = invPrincipleMatrixR()->transformAsNormal(up);
+		}
+		
+		front = side.cross(up);
 		front.normalize();
 		
 		up = front.cross(side);

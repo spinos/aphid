@@ -12,6 +12,7 @@
 #include "FeatherGeomParam.h"
 #include "FeatherDeformParam.h"
 #include <AHelper.h>
+#include <math/miscfuncs.h>
 
 using namespace aphid;
 
@@ -43,6 +44,18 @@ void MAvianArm::setSkeletonMatrices(const MObject & node,
 	AHelper::ConvertToMatrix44F(skeletonMatricesR()[2], radiusM);
 	AHelper::ConvertToMatrix44F(skeletonMatricesR()[3], carpusM);
 	AHelper::ConvertToMatrix44F(skeletonMatricesR()[4], secondDigitM);
+	
+	if(isStarboard()) {
+		Matrix33F flipm = secondDigitMatirxR()->rotation();
+		Vector3F s, u, f;
+		flipm.getSide(s);
+		s.reverse();
+		flipm.getUp(u);
+		u.reverse();
+		f = s.cross(u);
+		flipm.fill(s, u, f);
+		secondDigitMatirxR()->setRotation(flipm);
+	}
 
 }
 
@@ -87,7 +100,6 @@ void MAvianArm::setElbowParams(const MObject & node,
 	offset1.x = MPlug(node, elbowxAttr).asFloat();
 	offset1.y = MPlug(node, elbowyAttr).asFloat();
 	offset1.z = MPlug(node, elbowzAttr).asFloat();
-	
 	setTrailingLigamentOffset(1, offset1);
 }
 
@@ -105,6 +117,8 @@ void MAvianArm::setWristParams(const MObject & node,
 	offset0.z = MPlug(node, z0Attr).asFloat();
 	const float l0 = offset0.length();
 	offset0 = handMatrixR()->transformAsNormal(offset0);
+	offset0 = invPrincipleMatrixR()->transformAsNormal(offset0);
+	offset0.normalize();
 	
 	setLeadingLigamentOffset(1, offset0 * l0);
 	
@@ -114,12 +128,16 @@ void MAvianArm::setWristParams(const MObject & node,
 	offset1.z = MPlug(node, z1Attr).asFloat();
 	const float l1 = offset1.length();
 	offset1 = handMatrixR()->transformAsNormal(offset1);
+	offset1 = invPrincipleMatrixR()->transformAsNormal(offset1);
+	offset1.normalize();
 	
 	setTrailingLigamentOffset(2, offset1 * l1);
 	
-	Vector3F tgt0(1.f, 0.f, 0.f);
+	Vector3F loc0 = handMatrixR()->transform(Vector3F(0,0,1));
+	Vector3F loc1 = fingerMatrixR()->transform(Vector3F(0,0,1));
 	
-	tgt0 = handMatrixR()->transformAsNormal(tgt0);
+	Vector3F tgt0 = loc1 - loc0;
+	tgt0 = invPrincipleMatrixR()->transformAsNormal(tgt0);
 	tgt0.normalize();
 	
 	setLeadingLigamentTangent(1, tgt0);
@@ -138,6 +156,7 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	offset0.z = MPlug(node, z0Attr).asFloat();
 	const float l0 = offset0.length();
 	offset0 = fingerMatrixR()->transformAsNormal(offset0);
+	offset0 = invPrincipleMatrixR()->transformAsNormal(offset0);
 	offset0.normalize();
 	
 	setLeadingLigamentOffset(2, offset0 * l0);
@@ -146,32 +165,31 @@ void MAvianArm::set2ndDigitParams(const MObject & node,
 	set2ndDigitLength(digitL);
 	
 	Vector3F tip0(0.f, 0.f, 1.f);
-	tip0 = secondDigitMatirxR()->transformAsNormal(tip0);
-	tip0.normalize();
+	tip0 = fingerMatrixR()->getFront();
 	tip0 = invPrincipleMatrixR()->transformAsNormal(tip0);
 	tip0.normalize();
 	
 	setLeadingLigamentOffset(3, tip0 * (digitL * .05f) );
 	
 	Vector3F tip1(0.f, 0.f,-1.f);
-	tip1 = secondDigitMatirxR()->transformAsNormal(tip1);
-	tip1.normalize();
+	tip1 = fingerMatrixR()->getFront();
+	tip1.reverse();
 	tip1 = invPrincipleMatrixR()->transformAsNormal(tip1);
 	tip1.normalize();
 	
 	setTrailingLigamentOffset(3, tip1 * (digitL * .05f) );
 	
-	Vector3F tgt0(1.f, 0.f, 0.f);
+	Vector3F tgt0(1.f, 0.f, -.3f);
 	
 	tgt0 = fingerMatrixR()->transformAsNormal(tgt0);
+	tgt0 = invPrincipleMatrixR()->transformAsNormal(tgt0);
 	tgt0.normalize();
 	
 	setLeadingLigamentTangent(2, tgt0);
 	
 	Vector3F tgt1(1.f, 0.f, 0.f);
 	
-	tgt1 = secondDigitMatirxR()->transformAsNormal(tgt1);
-	tgt1.normalize();
+	tgt1 = fingerMatrixR()->getSide();
 	tgt1 = invPrincipleMatrixR()->transformAsNormal(tgt1);
 	tgt1.normalize();
 	
@@ -195,7 +213,7 @@ void MAvianArm::setFirstLeadingLigament()
 	tgt1 = invPrincipleMatrixR()->transformAsNormal(tgt1);
 	tgt1.normalize();
 	tgt1 *= ulnaL * 1.4f;
-	
+
 	leadingLigamentR()->setKnotTangent(1, tgt1, 0);
 	
 }
@@ -297,7 +315,11 @@ void MAvianArm::setFeatherOrientationParam(const MObject & node,
 ///	orient[2] *= handMatrixR()->rotation();
 	orient[3] = secondDigitMatirxR()->rotation();
 /// offset second digit 
-	Quaternion q(0.2f, Vector3F::YAxis);
+	float ang = .2f;
+	if(isStarboard()) {
+		ang = -.2f;
+	}
+	Quaternion q(ang, Vector3F::YAxis);
 	Matrix33F offset(q);
 	orient[3] *= offset;
 	orient[3] *= invrot;

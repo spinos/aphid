@@ -19,7 +19,7 @@ Matrix33F::Matrix33F()
 
 Matrix33F::Matrix33F(const Matrix33F & a)
 {
-	for(int i = 0; i < 9; i++) v[i] = a.v[i];
+	copy(a);
 }
 
 Matrix33F::Matrix33F(const Vector3F& r0, const Vector3F & r1, const Vector3F & r2)
@@ -116,13 +116,13 @@ float Matrix33F::M(int i, int j) const
 
 void Matrix33F::setIdentity()
 {
+	setZero();
 	*m(0, 0) = *m(1, 1) = *m(2, 2) = 1.0f;
-	*m(0, 1) = *m(0, 2) = *m(1, 0) = *m(1, 2) = *m(2, 0) = *m(2, 1) = 0.0f;
 }
 
 void Matrix33F::setZero()
 {
-	for(int i = 0; i < 9; i++) v[i] = 0.f;
+	memset(v, 0, 36);
 }
 
 void Matrix33F::fill(const Vector3F& a, const Vector3F& b, const Vector3F& c)

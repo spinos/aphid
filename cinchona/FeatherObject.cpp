@@ -66,6 +66,8 @@ void FeatherObject::setWarp(Vector3F * dev0)
 	ang[0] = calcWarpAngle(dev0[0]);
 	ang[1] = calcWarpAngle(dev0[1]);
 	
+	ang[0]=ang[1] = 0.f;
+	
 	m_deformer->setWarpAngles(ang);
 }
 
