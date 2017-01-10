@@ -80,58 +80,77 @@ void ConnectionHelper::GetAvailablePlug(MPlug & dst, MPlug & p)
 }
 
 bool ConnectionHelper::ConnectToArray(MPlug & srcPlug,
-							MPlug & dstArrayPlug)
+							MPlug & dstArrayPlug,
+							const int & refSlot)
 {
     MPlug dstPlug;
-	
+	MStatus stat;
 	if(dstArrayPlug.isArray() ) {
-		GetAvailablePlug(dstPlug, dstArrayPlug);
+		if(refSlot < 0) {
+			GetAvailablePlug(dstPlug, dstArrayPlug);
+		} else {
+			dstPlug = dstArrayPlug.elementByPhysicalIndex((unsigned)refSlot, &stat);
+			if(!stat) {
+				AHelper::Info<MString>(" ERROR destinate plug ", dstArrayPlug.name() );
+				AHelper::Info<int>(" has no slot ", refSlot );
+				return false;
+			}
+		}
 	} else {
 		dstPlug = dstArrayPlug;
+	}
+	
+	MDGModifier modif;
+	modif.connect(srcPlug, dstPlug );
+	stat = modif.doIt();
+	if(!stat) {
+	    AHelper::Info<MString>(" ERROR cannot connect ", srcPlug.name() );   
+		AHelper::Info<MString>(" to ", dstPlug.name() );  
+		return false; 
 	}
 	
 	AHelper::Info<MString>(" connect ", srcPlug.name() );
 	AHelper::Info<MString>(" to ", dstPlug.name() );
 
-	MDGModifier modif;
-	modif.connect(srcPlug, dstPlug );
-	if(modif.doIt() ) {
-	    return true;    
-	}
-	return false;
+	return true;
 }
 
 bool ConnectionHelper::ConnectToArray(MPlug & srcPlug,
 							const MObject & dstNode,
-							const MString & dstArrayAttrName)
+							const MString & dstArrayAttrName,
+							const int & refSlot)
 {
 	MPlug dstArrayPlug;
 	AHelper::getNamedPlug(dstArrayPlug, dstNode, dstArrayAttrName.asChar() );
 	if(dstArrayPlug.isNull() ) {
-		AHelper::Info<MString>("no destination attrib", dstArrayAttrName);
+		AHelper::Info<MString>(" destination node", MFnDependencyNode(dstNode).name() );
+		AHelper::Info<MString>(" has no attrib", dstArrayAttrName);
 		return false;
 	}
 
-	return ConnectToArray(srcPlug, dstArrayPlug);
+	return ConnectToArray(srcPlug, dstArrayPlug, refSlot);
 }
 	
 bool ConnectionHelper::ConnectToArray(const MObject & srcNode,
 							const MString & srcAttrName,
 							const MObject & dstNode,
-							const MString & dstArrayAttrName)
+							const MString & dstArrayAttrName,
+							const int & refSlot)
 {
 	MPlug srcPlug;
 	AHelper::getNamedPlug(srcPlug, srcNode, srcAttrName.asChar() );
 	if(srcPlug.isNull() ) {
-		AHelper::Info<MString>("no source attrib", srcAttrName);
+		AHelper::Info<MString>(" source node", MFnDependencyNode(srcNode).name() );
+		AHelper::Info<MString>(" has no attrib", srcAttrName);
 		return false;
 	}
 	
-	return ConnectToArray(srcPlug, dstNode, dstArrayAttrName);
+	return ConnectToArray(srcPlug, dstNode, dstArrayAttrName, refSlot);
 }
 
 bool ConnectionHelper::ConnectedToNode(const MPlug & srcPlug, 
-							const MObject & dstNode)
+							const MObject & dstNode,
+							int * outSlot)
 {
 	MPlugArray connected;
 	GetOutputConnections(connected, srcPlug);
@@ -140,7 +159,13 @@ bool ConnectionHelper::ConnectedToNode(const MPlug & srcPlug,
 	for(;i<connected.length();++i) {
 		if(connected[i].node() == dstNode) {
 			AHelper::Info<MString>(" plug ", srcPlug.name() );
-			AHelper::Info<MString>(" connected to", connected[i].name() );
+			AHelper::Info<MString>(" is connected to", connected[i].name() );
+			if(outSlot && connected[i].isElement() ) {
+				unsigned phyInd = connected[i].logicalIndex();
+				*outSlot = (int)phyInd;
+				AHelper::Info<int>(" physical index ", *outSlot );
+
+			}
 			return true;
 		}
 	}

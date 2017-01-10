@@ -34,7 +34,9 @@ bool MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & 
 	MMatrix space = MMatrix::identity;
     for(unsigned i=0;i<nslots;++i) {
         MDataHandle spaceData = spaceDataArray.inputValue(&hasSpace);
-		if(hasSpace) space = spaceData.asMatrix();
+		if(hasSpace) {
+			space = spaceData.asMatrix();
+		}
 		MDataHandle meshData = meshDataArray.inputValue();
         MObject mesh = meshData.asMesh();
         if(mesh.isNull()) {

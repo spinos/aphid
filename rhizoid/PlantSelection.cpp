@@ -191,7 +191,7 @@ bool PlantSelection::touchCell(const Ray & incident, const sdb::Coord3 & c,
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
-		pnt = incident.closetPointOnRay(d->t1->getTranslation(), &tt );
+		pnt = incident.closestPointOnRay(d->t1->getTranslation(), &tt );
 		if(tt < -1.f 
 			&& pnt.distanceTo(d->t1->getTranslation() ) < m_radius)
             return true;

@@ -33,7 +33,7 @@ void DrawForest::setScaleMuliplier(float x, float y, float z)
 
 void DrawForest::drawGround() 
 {
-	std::cout<<" DrawForest draw ground begin"<<std::endl;
+	//std::cout<<" DrawForest draw ground begin"<<std::endl;
     if(!m_enabled) return;
 	if(numActiveGroundFaces() < 1) return;
 	sdb::Sequence<int> * prims = activeGround()->primIndices();
@@ -138,7 +138,7 @@ void DrawForest::drawWiredPlant(PlantData * data)
 
 void DrawForest::drawSolidPlants()
 {
-	std::cout<<" DrawForest draw plants begin"<<std::endl;
+	//std::cout<<" DrawForest draw plants begin"<<std::endl;
     if(!m_enabled) {
 		return;
 	}
@@ -152,6 +152,9 @@ void DrawForest::drawSolidPlants()
 	
 	glPushAttrib(GL_LIGHTING_BIT);
 	
+	Vector3F lightVec(1,1,1);
+	lightVec = cameraSpace().transformAsNormal(lightVec);
+	m_instancer->setDistantLightVec(lightVec);
 	m_instancer->programBegin();
 	
 	try {
@@ -160,7 +163,7 @@ void DrawForest::drawSolidPlants()
         BoundingBox cellBox = g->coordToGridBBox(g->key() );
 		cellBox.expand(margin);
         if(!cullByFrustum(cellBox ) ) {
-            drawPlants(g->value() );
+            drawPlantsInCell(g->value(), cellBox );
 		}
 		g->next();
 	}
@@ -173,13 +176,50 @@ void DrawForest::drawSolidPlants()
 	glPopAttrib();
 }
 
-void DrawForest::drawPlants(sdb::Array<int, Plant> * cell)
+void DrawForest::drawPlantsInCell(sdb::Array<int, Plant> * cell,
+								const BoundingBox & box)
 {
+	if(m_showVoxLodThresold > .9999f) {
+        drawPlantSolidBoundInCell(cell);
+		return;
+    }
+	
+	Vector3F worldP = box.center();
+	const float r = gridSize() * .5f;
+	if(cullByFrustum(worldP, r) ) {
+		drawPlantSolidBoundInCell(cell);
+		return;
+	}
+	
 	cell->begin();
 	while(!cell->end() ) {
 		drawPlant(cell->value()->index);
 		cell->next();
 	}
+}
+
+void DrawForest::drawPlantSolidBoundInCell(sdb::Array<int, Plant> * cell)
+{
+	cell->begin();
+	while(!cell->end() ) {
+		drawPlantSolidBound(cell->value()->index);
+
+		cell->next();
+	}
+}
+
+void DrawForest::drawPlantSolidBound(PlantData * data)
+{
+	const Matrix44F & trans = *(data->t1);
+	glMultiTexCoord4f(GL_TEXTURE1, trans(0,0), trans(1,0), trans(2,0), trans(3,0) );
+	glMultiTexCoord4f(GL_TEXTURE2, trans(0,1), trans(1,1), trans(2,1), trans(3,1) );
+	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
+	    
+	const ExampVox * v = plantExample(*data->t3);
+	const float * c = v->diffuseMaterialColor();
+			
+	m_instancer->setDiffueColorVec(c);
+	v->drawSolidBound();
 }
 
 void DrawForest::drawPlant(PlantData * data)
@@ -309,7 +349,34 @@ void DrawForest::drawBrush()
     m_useMat.glMatrix(m_transbuf);
     
     draw3Circles(m_transbuf);
+	
     glPopMatrix();
+	
+/// view-aligned circle
+	glPushMatrix();
+	
+	Matrix44F vmat; 
+	Vector3F s, u, f;
+	s = cameraSpaceR()->getSide();
+	s.normalize();
+	s *= radius;
+	
+	u = cameraSpaceR()->getUp();
+	u.normalize();
+	u *= radius;
+	
+	f = cameraSpaceR()->getFront();
+	f.normalize();
+	f *= radius;
+	
+	vmat.setOrientations(s, u, f);
+	vmat.setTranslation(position + direction);
+	
+    vmat.glMatrix(m_transbuf);
+	
+	drawZRing(m_transbuf);
+	
+	glPopMatrix();
 	
     glPopAttrib();
 }

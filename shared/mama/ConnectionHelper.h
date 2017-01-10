@@ -30,21 +30,25 @@ public:
 	
 /// first in array not connected
 	static void GetAvailablePlug(MPlug & dst, MPlug & p);
-	
+/// to prefered physical index slot
 	static bool ConnectToArray(MPlug & srcPlug,
-							MPlug & dstArrayPlug);
+							MPlug & dstArrayPlug,
+							const int & refSlot = -1);
 	
 	static bool ConnectToArray(MPlug & srcPlug,
 							const MObject & dstNode,
-							const MString & dstArrayAttrName);
-							
+							const MString & dstArrayAttrName,
+							const int & refSlot = -1);
+				
 	static bool ConnectToArray(const MObject & srcNode,
 							const MString & srcAttrName,
 							const MObject & dstNode,
-							const MString & dstArrayAttrName);
+							const MString & dstArrayAttrName,
+							const int & refSlot = -1);
 							
 	static bool ConnectedToNode(const MPlug & srcPlug, 
-							const MObject & dstNode);
+							const MObject & dstNode,
+							int * outSlot = NULL);
 							
 	static void BreakArrayPlugInputConnections(MPlug & dstPlug);
 	

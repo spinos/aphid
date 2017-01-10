@@ -7,7 +7,7 @@
  *
  */
 #include "ExampVox.h"
-#include <DrawCircle.h>
+#include <ogl/DrawCircle.h>
 #include <maya/MPxLocatorNode.h> 
 #include <maya/MTypeId.h> 
 #include <maya/MPlug.h>
@@ -24,7 +24,7 @@ class DenseMatrix;
 
 }
 
-class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public DrawCircle
+class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public aphid::DrawCircle
 {
 	float m_transBuf[16];
 	

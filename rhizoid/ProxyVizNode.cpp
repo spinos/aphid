@@ -88,10 +88,10 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			block.inputValue(abboxmaxy).asFloat(), 
 			block.inputValue(abboxmaxz).asFloat());
 		
-		float grdsz = defBox->geomExtent() * 32.f ;
-		if(grdsz < 32.f) {
+		float grdsz = defBox->geomExtent() * 25.f ;
+		if(grdsz < 512.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
-			grdsz = 32.f;
+			grdsz = 512.f;
 			AHelper::Info<float>(" trancated to", grdsz);
 		}
 		
@@ -271,7 +271,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawGround();
 	glPopMatrix();
 	view.endGL();
-	std::cout<<" viz node draw end";
+	//std::cout<<" viz node draw end";
 }
 
 bool ProxyViz::isBounded() const
@@ -313,34 +313,40 @@ MStatus ProxyViz::initialize()
 	numFn.setMax(0.999f);
 	addAttribute(alodgatelow);
 
-	abboxminx = numFn.create( "bBoxMinX", "bbmnx", MFnNumericData::kFloat, -1.f );
+	abboxminx = numFn.create( "bBoxMinX", "bbmnx", MFnNumericData::kFloat, -16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
+	numFn.setMax(0.f);
 	addAttribute(abboxminx);
 	
-	abboxminy = numFn.create( "bBoxMinY", "bbmny", MFnNumericData::kFloat, -1.f );
+	abboxminy = numFn.create( "bBoxMinY", "bbmny", MFnNumericData::kFloat, -16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
+	numFn.setMax(0.f);
 	addAttribute(abboxminy);
 	
-	abboxminz = numFn.create( "bBoxMinZ", "bbmnz", MFnNumericData::kFloat, -1.f );
+	abboxminz = numFn.create( "bBoxMinZ", "bbmnz", MFnNumericData::kFloat, -16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
+	numFn.setMax(0.f);
 	addAttribute(abboxminz);
 	
-	abboxmaxx = numFn.create( "bBoxMaxX", "bbmxx", MFnNumericData::kFloat, 1.f );
+	abboxmaxx = numFn.create( "bBoxMaxX", "bbmxx", MFnNumericData::kFloat, 16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
+	numFn.setMin(16.f);
 	addAttribute(abboxmaxx);
 	
-	abboxmaxy = numFn.create( "bBoxMaxY", "bbmxy", MFnNumericData::kFloat, 1.f);
+	abboxmaxy = numFn.create( "bBoxMaxY", "bbmxy", MFnNumericData::kFloat, 16.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
+	numFn.setMin(16.f);
 	addAttribute(abboxmaxy);
 	
-	abboxmaxz = numFn.create( "bBoxMaxZ", "bbmxz", MFnNumericData::kFloat, 1.f);
+	abboxmaxz = numFn.create( "bBoxMaxZ", "bbmxz", MFnNumericData::kFloat, 16.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
+	numFn.setMin(16.f);
 	addAttribute(abboxmaxz);
 	
 	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);

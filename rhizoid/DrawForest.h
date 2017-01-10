@@ -11,7 +11,7 @@
 #include <ViewObscureCull.h>
 #include <ogl/DrawBox.h>
 #include <ogl/DrawInstance.h>
-#include <DrawCircle.h>
+#include <ogl/DrawCircle.h>
 
 namespace aphid {
 
@@ -53,13 +53,16 @@ protected:
 private:
     void drawFace(const int & geoId, const int & triId);
 	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
-	void drawPlants(sdb::Array<int, Plant> * cell);
+	void drawPlantsInCell(sdb::Array<int, Plant> * cell,
+					const BoundingBox & box);
 	void drawPlant(PlantData * data);
 	void drawWiredPlants(sdb::Array<int, Plant> * cell);
 	void drawWiredPlant(PlantData * data);
 	void drawPlantBox(PlantData * data);
 	void drawPlant(const ExampVox * v, PlantData * data);
-	
+	void drawPlantSolidBoundInCell(sdb::Array<int, Plant> * cell);
+	void drawPlantSolidBound(PlantData * data);
+
 };
 
 }
