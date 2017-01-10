@@ -185,7 +185,7 @@ void DrawForest::drawPlantsInCell(sdb::Array<int, Plant> * cell,
     }
 	
 	Vector3F worldP = box.center();
-	const float r = gridSize() * .5f;
+	const float r = gridSize();
 	if(cullByFrustum(worldP, r) ) {
 		drawPlantSolidBoundInCell(cell);
 		return;

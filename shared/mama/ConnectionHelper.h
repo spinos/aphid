@@ -48,7 +48,7 @@ public:
 							
 	static bool ConnectedToNode(const MPlug & srcPlug, 
 							const MObject & dstNode,
-							int * outSlot = NULL);
+							int * outSlot = 0);
 							
 	static void BreakArrayPlugInputConnections(MPlug & dstPlug);
 	
