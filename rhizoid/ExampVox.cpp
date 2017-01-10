@@ -146,9 +146,7 @@ void ExampVox::setGeomBox(const float & a,
 	m_geomExtent = m_geomBox.radius();
 	m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); 
 	m_geomCenter = m_geomBox.center();
-	//m_geomScale[0] = (d - a);
-	//m_geomScale[1] = (e - b);
-	//m_geomScale[2] = (f - c);
+	updatePoints(&m_geomBox);
 }
 
 const float * ExampVox::diffuseMaterialColor() const
@@ -241,7 +239,7 @@ void ExampVox::drawWiredBound() const
 
 void ExampVox::drawSolidBound() const
 {
-	drawSolidBoundingBox(&m_geomBox);
+	drawASolidBox();
 }
 
 void ExampVox::drawWiredTriangles() const

@@ -234,7 +234,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	ExampVox * defBox = plantExample(0);
 	updateGeomBox(defBox, thisNode);
 	defBox->drawWiredBound();
-	//drawWireBox(defBox->geomCenterV(), defBox->geomScale() );
+	
 	Matrix44F mat;
 	mat.setFrontOrientation(Vector3F::YAxis);
 	mat.scaleBy(defBox->geomSize() );

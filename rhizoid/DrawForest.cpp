@@ -90,10 +90,15 @@ void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
 
 void DrawForest::drawWiredPlants()
 {
-	std::cout<<" DrawForest draw wired plants begin"<<std::endl;
-    if(!m_enabled) return;
+	if(!m_enabled) {
+		return;
+	}
+	
 	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
-	if(g->isEmpty() ) return;
+	if(g->isEmpty() ) {
+		return;
+	}
+	
 	const float margin = g->gridSize() * .13f;
 	glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
@@ -131,8 +136,7 @@ void DrawForest::drawWiredPlant(PlantData * data)
 	glMultMatrixf((const GLfloat*)m_transbuf);
 	const ExampVox * v = plantExample(*data->t3);
 	v->drawWiredBound();
-	//drawWireBox(v->geomCenterV(), v->geomScale() );
-		
+	
 	glPopMatrix();
 }
 
@@ -157,6 +161,9 @@ void DrawForest::drawSolidPlants()
 	m_instancer->setDistantLightVec(lightVec);
 	m_instancer->programBegin();
 	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
 	try {
 	g->begin();
 	while(!g->end() ) {
@@ -172,6 +179,9 @@ void DrawForest::drawSolidPlants()
 	}
 	
 	m_instancer->programEnd();
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	glPopAttrib();
 }

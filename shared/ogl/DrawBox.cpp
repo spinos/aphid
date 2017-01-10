@@ -321,45 +321,27 @@ void DrawBox::setSolidBoxDrawBuffer(const float * center, const float & scale,
 void DrawBox::drawWiredTriangleArray(const float * ps,
 						const unsigned & count) const
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
-
 	glDrawArrays(GL_TRIANGLES, 0, count);
-	
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
 }
 
 void DrawBox::drawSolidTriangleArray(const float * ps,
 						const float * ns,
 						const unsigned & count) const
 {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
 	glNormalPointer(GL_FLOAT, 0, (GLfloat*)ns);
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
-
 	glDrawArrays(GL_TRIANGLES, 0, count);
-	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void DrawBox::drawSolidBoxArray(const float * ps,
 						const float * ns,
 						const unsigned & count) const
 {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
 	glNormalPointer(GL_FLOAT, 0, (GLfloat*)ns);
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)ps);
 
 	glDrawArrays(GL_TRIANGLES, 0, count);
-	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 const int DrawBox::HLBoxLine[24][3] = {

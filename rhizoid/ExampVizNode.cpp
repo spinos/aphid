@@ -117,8 +117,12 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	drawBoundingBox(&bbox);
 	
 	//if ( style == M3dView::kFlatShaded || 
-	//	    style == M3dView::kGouraudShaded ) {	
+	//	    style == M3dView::kGouraudShaded ) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnableClientState(GL_VERTEX_ARRAY);
 	drawWiredTriangles();
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//} 
 	
 	Matrix44F mat;

@@ -415,6 +415,9 @@ void ShrubVizNode::drawWiredBoundInstances() const
 
 void ShrubVizNode::drawSolidInstances() const
 {
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+
 	m_instancer->programBegin();
 	
 	const int nexp = numExamples();
@@ -447,14 +450,20 @@ void ShrubVizNode::drawSolidInstances() const
 	}
 	m_instancer->programEnd();
 	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void ShrubVizNode::drawWiredInstances() const
 {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
 	m_wireInstancer->programBegin();
 	
 	const int nexp = numExamples();
 	const int nins = numInstances();
+	
 	for(int i=0;i<nins;++i) {
 		const InstanceD & ins = m_instances[i];
 		const float *d = ins._trans;
@@ -476,6 +485,8 @@ void ShrubVizNode::drawWiredInstances() const
 	}
 	m_wireInstancer->programEnd();
 	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 }
