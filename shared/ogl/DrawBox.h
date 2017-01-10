@@ -15,10 +15,27 @@ class BoundingBox;
 class Vector3F;
 class DrawBox {
 
+	float m_trianglePoints[36][3];
+	float m_linePoints[24][3];
+
 public:
 
 	DrawBox();
 	virtual ~DrawBox();
+	
+	void updatePoints(const BoundingBox * box);
+/// between
+/// glEnableClientState(GL_VERTEX_ARRAY);
+/// and
+/// glDisableClientState(GL_VERTEX_ARRAY);	
+	void drawAWireBox() const;
+/// between
+/// glEnableClientState(GL_VERTEX_ARRAY);
+///	glEnableClientState(GL_NORMAL_ARRAY);
+/// and
+/// glDisableClientState(GL_NORMAL_ARRAY);
+/// glDisableClientState(GL_VERTEX_ARRAY);
+	void drawASolidBox() const;
 	
 protected:
 

@@ -471,4 +471,40 @@ void DrawBox::drawHLSolidBox(const float * v) const
 	glEnd();
 }
 
+void DrawBox::updatePoints(const BoundingBox * box)
+{
+	const Vector3F cen = box->center();
+	const float dx = box->distance(0);
+	const float dy = box->distance(1);
+	const float dz = box->distance(2);
+	
+	for(int i=0;i<36;i++) {
+		m_trianglePoints[i][0] = UnitBoxTriangle[i][0] * dx + cen.x,
+		m_trianglePoints[i][1] = UnitBoxTriangle[i][1] * dy + cen.y,
+		m_trianglePoints[i][2] = UnitBoxTriangle[i][2] * dz + cen.z;
+    }
+	
+	const float * boxd = box->data();
+	
+	for(int i=0;i<24;i++) {
+        m_linePoints[i][0] = boxd[HLBoxLine[i][0]]; 
+		m_linePoints[i][1] = boxd[HLBoxLine[i][1]]; 
+		m_linePoints[i][2] = boxd[HLBoxLine[i][2]];
+    }
+}
+
+void DrawBox::drawAWireBox() const
+{
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_linePoints);
+	glDrawArrays(GL_LINES, 0, 24);
+}
+	
+void DrawBox::drawASolidBox() const
+{
+	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)UnitBoxNormal);
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_trianglePoints);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
 }

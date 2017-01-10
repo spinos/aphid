@@ -30,6 +30,9 @@ public slots:
 signals:
 
 private:
+	void testBoxes();
+
+private:
 
 	aphid::Matrix44F m_space;
 	aphid::Ray m_incident;

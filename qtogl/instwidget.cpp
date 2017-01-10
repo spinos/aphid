@@ -95,6 +95,9 @@ void GLWidget::clientDraw()
 #else
 	int numParticles = m_grid->numParticles();
 #endif
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+        
 	for(int i=0;i<numParticles;++i) {
 	    const Float4 *d = &m_particles[i*4];
 	    glMultiTexCoord4fv(GL_TEXTURE1, (const float *)d);
@@ -102,15 +105,15 @@ void GLWidget::clientDraw()
 	    glMultiTexCoord4fv(GL_TEXTURE3, (const float *)&d[2]);
 		m_instancer->setDiffueColorVec((const float *)&d[3]);
 	    
-	    glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
-        glNormalPointer(GL_FLOAT, 0, (GLfloat*)m_glyph->vertexNormals());
+	    glNormalPointer(GL_FLOAT, 0, (GLfloat*)m_glyph->vertexNormals());
         glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_glyph->points());
         glDrawElements(GL_TRIANGLES, m_glyph->numIndices(), GL_UNSIGNED_INT, m_glyph->indices());
         
-        glDisableClientState(GL_NORMAL_ARRAY);
-        glDisableClientState(GL_VERTEX_ARRAY);
+        
 	}
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	m_instancer->programEnd();
 	
