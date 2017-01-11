@@ -74,21 +74,5 @@ private:
 	float m_8DOPExtent[4];
 };
 
-class DOP8Builder {
-
-	Vector3F m_vert[18];
-	Vector3F m_facevert[84];
-	Vector3F m_facenor[84];
-	int m_tri[84];
-	int m_ntri;
-	
-public:
-	DOP8Builder();
-	void build(const AOrientedBox & ob);
-	const int & numTriangles() const;
-	const Vector3F * vertex() const;
-	const Vector3F * normal() const;
-};
-
 }
 #endif

@@ -6,6 +6,8 @@
 #include <ogl/RotationHandle.h>
 #include <BaseCamera.h>
 #include <ogl/DrawBox.h>
+#include <ogl/DrawDop.h>
+#include <math/AOrientedBox.h>
 
 using namespace aphid;
 
@@ -44,7 +46,7 @@ void GLWidget::clientDraw()
 	m_roth->draw(m);
 	
 	getDrawer()->m_surfaceProfile.apply();
-	testBoxes();
+	testDops();
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)
@@ -85,6 +87,35 @@ void GLWidget::testBoxes()
 	dbb.drawASolidBox();
 	glDisableClientState(GL_NORMAL_ARRAY);
 	
+	glDisableClientState(GL_VERTEX_ARRAY);	
+}
+
+void GLWidget::testDops()
+{
+	AOrientedBox ob;
+	ob.setCenter(Vector3F(4, -2, 3) );
+	
+	Matrix33F rot;
+	rot.rotateX(-1.57f);
+	ob.setOrientation(rot);
+	ob.setExtent(Vector3F(4,2,1) );
+	ob.set8DOPExtent(-3,3,-1,2);
+	
+	DrawDop dd;
+	dd.update8DopPoints(ob);
+	
+#if 0
+	getDrawer()->m_wireProfile.apply();
+#endif
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+#if 0
+	dd.drawAWireDop();
+#else
+	glEnableClientState(GL_NORMAL_ARRAY);
+	dd.drawASolidDop();
+	glDisableClientState(GL_NORMAL_ARRAY);
+#endif
 	glDisableClientState(GL_VERTEX_ARRAY);	
 }
 	

@@ -31,7 +31,8 @@ signals:
 
 private:
 	void testBoxes();
-
+	void testDops();
+	
 private:
 
 	aphid::Matrix44F m_space;
