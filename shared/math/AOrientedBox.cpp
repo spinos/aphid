@@ -171,18 +171,24 @@ std::ostream& operator<<(std::ostream &output, const AOrientedBox & p)
 }
 
 void AOrientedBox::calculateCenterExtents(const float * p,
-					const int & np)
+					const int & np,
+					const BoundingBox * box)
 {
-	m_center.set(0.f, 0.f, 0.f);
-	
+	Matrix33F invspace(m_orientation);
+	invspace.inverse();
+
 	BoundingBox bbox;
 	
 	for(int i=0;i<np;++i) {
 		int j = i * 3;
-		bbox.expandBy(Vector3F(p[j], p[j+1], p[j+2]) );
+		Vector3F vp(p[j], p[j+1], p[j+2]);
+		box->putInside(vp);
+		vp = invspace.transform(vp);
+		bbox.expandBy(vp);
 	}
 	
-	m_center = bbox.center();
+	Vector3F offset = bbox.center();
+	m_center = m_orientation.transform(offset);
 	
 	m_extent.set(bbox.distance(0) * .5f,
 				bbox.distance(1) * .5f,
@@ -206,7 +212,9 @@ void AOrientedBox::calculateCenterExtents(const float * p,
 	for(int i=0;i<np;++i) {
 		int j = i * 3;
 		Vector3F vp(p[j], p[j+1], p[j+2]);
+		box->putInside(vp);
 		vp -= m_center;
+		
 		vp = invhalfspace.transform(vp);
 		
 		if(m_8DOPExtent[0] > vp.x ) {
@@ -223,6 +231,115 @@ void AOrientedBox::calculateCenterExtents(const float * p,
 		}
 	}
 	
+}
+
+void AOrientedBox::caluclateOrientation(const BoundingBox * box)
+{
+	int axis[3];
+	box->getSizeOrder(axis);
+	
+	Vector3F s(1,0,0);
+	if(axis[0] == 1) {
+		s.set(0,1,0);
+	}
+	if(axis[0] == 2) {
+		s.set(0,0,1);
+	}
+	Vector3F f(0,0,1);
+	if(axis[2] == 0) {
+		f.set(1,0,0);
+	}
+	if(axis[2] == 1) {
+		f.set(0,1,0);
+	}
+	Vector3F u = f.cross(s);
+	m_orientation.fill(s,u,f);
+}
+
+void AOrientedBox::calculateCenterExtents(const BoundingBox * box,
+						const float * sx)
+{
+	int axis[3];
+	box->getSizeOrder(axis);
+	
+	Matrix33F invspace(m_orientation);
+	invspace.inverse();
+
+	BoundingBox bbox;
+	
+	for(int i=0;i<8;++i) {
+		Vector3F vp = invspace.transform(box->X(i) );
+		bbox.expandBy(vp);
+	}
+	
+	Vector3F offset = bbox.center();
+	m_center = m_orientation.transform(offset);
+	
+	m_extent.set(bbox.distance(0) * .5f,
+				bbox.distance(1) * .5f,
+				bbox.distance(2) * .5f);
+				
+/// rotate 45 degs
+	const Vector3F dx = m_orientation.row(0);
+	const Vector3F dy = m_orientation.row(1);
+	const Vector3F dz = m_orientation.row(2);
+	Vector3F rgt = dx + dy;
+	Vector3F up = dz.cross(rgt);
+	up.normalize();
+	rgt.normalize();
+	
+	Matrix33F invhalfspace(rgt, up, dz);
+	invhalfspace.inverse();
+	
+	float yox = bbox.distance(1) / bbox.distance(0);
+	
+	m_8DOPExtent[0] = 1e10f, m_8DOPExtent[1] = -1e10f;
+	m_8DOPExtent[2] = 1e10f, m_8DOPExtent[3] = -1e10f;
+	
+	for(int i=0;i<8;++i) {
+		Vector3F vp = box->X(i);
+		vp -= m_center;
+		
+		float * vr = (float * )&vp;
+/// move
+		if(vr[axis[0]] < 0) {
+			if(vr[axis[1]] < 0) {
+				vp *= remap(sx[0]);
+			} else {
+				vp *= remap(sx[1]);
+			}
+		} else {
+			if(vr[axis[1]] < 0) {
+				vp *= remap(sx[2]);
+			} else {
+				vp *= remap(sx[3]);
+			}
+		}
+		
+		vp = invhalfspace.transform(vp);
+
+		if(m_8DOPExtent[0] > vr[0] ) {
+			m_8DOPExtent[0] = vr[0];
+		}
+		if(m_8DOPExtent[1] < vr[0] ) {
+			m_8DOPExtent[1] = vr[0];
+		}
+		
+		if(m_8DOPExtent[2] > vr[1] ) {
+			m_8DOPExtent[2] = vr[1];
+		}
+		if(m_8DOPExtent[3] < vr[1] ) {
+			m_8DOPExtent[3] = vr[1];
+		}
+	}
+}
+
+float AOrientedBox::remap(float x)
+{
+	if(x>0) {
+		return .7 + .1 * x;
+	}
+	return .7 + .3 * x;
 }
 
 }

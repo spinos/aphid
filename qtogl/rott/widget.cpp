@@ -93,13 +93,11 @@ void GLWidget::testBoxes()
 void GLWidget::testDops()
 {
 	AOrientedBox ob;
-	ob.setCenter(Vector3F(4, -2, 3) );
+	BoundingBox box(1,1,1,16,4,3 );
+	ob.caluclateOrientation(&box);
 	
-	Matrix33F rot;
-	rot.rotateX(-1.57f);
-	ob.setOrientation(rot);
-	ob.setExtent(Vector3F(4,2,1) );
-	ob.set8DOPExtent(-3,3,-1,2);
+	float sx[4] = { -.99, -.99, -.99,-.99};
+	ob.calculateCenterExtents(&box, sx);
 	
 	DrawDop dd;
 	dd.update8DopPoints(ob);

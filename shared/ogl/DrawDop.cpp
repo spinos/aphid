@@ -18,6 +18,7 @@ DrawDop::DrawDop()
 { 
 	m_vertexNormals = 0;
 	m_vertexPoints = 0;
+	m_numVertices = 0;
 }
 
 DrawDop::~DrawDop()

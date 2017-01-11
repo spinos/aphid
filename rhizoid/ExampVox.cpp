@@ -64,7 +64,17 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	
 	buildTriangleDrawBuf(msh.numFrontTriangles(), msh.triangleIndices(),
 						msh.numVertices(), msh.triangleVertexP(), msh.triangleVertexN() );
-						
+	buildBounding8Dop(bbox);
+}
+
+void ExampVox::buildBounding8Dop(const BoundingBox & bbox)
+{
+	AOrientedBox ob;
+	Matrix33F zup;
+	zup.rotateX(-1.57f);
+	ob.setOrientation(zup);
+	ob.calculateCenterExtents((const float *)&m_dopPositionBuf[0], m_dopBufLength, &bbox );
+	update8DopPoints(ob);
 }
 
 void ExampVox::buildBoxDrawBuf() 
@@ -164,6 +174,7 @@ const float * ExampVox::boxPositionBuf() const
 const unsigned & ExampVox::boxBufLength() const
 { return m_boxBufLength; }
 
+/*
 void ExampVox::buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops)
 {
 	const int ndop = dops.size();
@@ -185,6 +196,7 @@ void ExampVox::buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops)
 	}
 	m_dopBufLength = bufLen;
 }
+*/
 
 const int & ExampVox::dopBufLength() const
 { return m_dopBufLength; }
@@ -226,8 +238,8 @@ void ExampVox::buildTriangleDrawBuf(const int & nt, const int * tri,
 	int i=0, j;
 	for(;i<m_dopBufLength;++i) {
 		j = tri[i]; 
-		m_dopNormalBuf.get()[i] = vertN[j];
-		m_dopPositionBuf.get()[i] = vertP[j];
+		m_dopNormalBuf[i] = vertN[j];
+		m_dopPositionBuf[i] = vertP[j];
 	}
 	
 }

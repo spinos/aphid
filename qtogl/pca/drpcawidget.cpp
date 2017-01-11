@@ -181,8 +181,10 @@ void GLWidget::drawFeatures()
 /// stored columnwise
 	DenseMatrix<float> pdr(3, m_features->featureDim() );
 	BoundingBox box;
-/// center at zero and no rotation
+	Matrix33F mrot;
+	//mrot.rotateX(-1.57f);
 	AOrientedBox ob;
+	ob.setOrientation(mrot);
 	DrawDop dd;
 	
 	const int n = m_features->numFeatures();
@@ -212,7 +214,7 @@ void GLWidget::drawFeatures()
 		getDrawer()->setColor(gcol[0], gcol[1], gcol[2]);
 		getDrawer()->boundingBox(box);
 		
-		ob.calculateCenterExtents(pdr.column(0), pdr.numCols() );
+		ob.calculateCenterExtents(pdr.column(0), pdr.numCols(), &box );
 		dd.update8DopPoints(ob);
 
 		glEnableClientState(GL_VERTEX_ARRAY);

@@ -89,6 +89,10 @@ public:
 	void scale(const float & sc);
 	void scale(const float * sc);
 	int numFlatAxis(const float & threshold) const;
+/// longest first
+/// shortest last
+	void getSizeOrder(int * d) const;
+	void putInside(Vector3F & p) const;
 	
 	float m_data[6];
 	int m_padding0, m_padding1;

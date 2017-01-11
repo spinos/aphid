@@ -7,23 +7,24 @@
  *
  */
 #include <ogl/DrawBox.h>
+#include <ogl/DrawDop.h>
 #include <math/BoundingBox.h>
 #include <geom/Geometry.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 #include <math/AOrientedBox.h>
-#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
 
 namespace aphid {
 
-class ExampVox : public DrawBox {
+class ExampVox : public DrawBox, public DrawDop {
 
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;
 	Vector3F * m_boxNormalBuf;
 	Vector3F * m_boxPositionBuf;
-	boost::scoped_ptr<Vector3F> m_dopNormalBuf;
-	boost::scoped_ptr<Vector3F> m_dopPositionBuf;
+	boost::scoped_array<Vector3F> m_dopNormalBuf;
+	boost::scoped_array<Vector3F> m_dopPositionBuf;
 	float * m_boxCenterSizeF4;
 	float m_diffuseMaterialColV[3];
 	//float m_geomScale[3];
@@ -82,7 +83,8 @@ protected:
 	float * boxCenterSizeF4();
 	bool setNumBoxes(unsigned n);
 	void buildBoxDrawBuf();
-	void buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops);
+	void buildBounding8Dop(const BoundingBox & bbox);
+	//void buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops);
 	Vector3F * dopNormalR();
 	Vector3F * dopPositionR();
 	void setDOPDrawBufLen(const int & x);

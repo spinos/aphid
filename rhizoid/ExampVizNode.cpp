@@ -72,8 +72,9 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
 		
 /// dop first, then box
-		if(!loadDops(block) )
-			loadBoxes(block);
+		if(!loadDops(block) ) {
+			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
+		}
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
@@ -95,8 +96,9 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
-	const BoundingBox & bbox = geomBox();
 	MObject selfNode = thisMObject();
+	updateGeomBox(selfNode);
+	
 	MPlug rPlug(selfNode, adrawColorR);
 	MPlug gPlug(selfNode, adrawColorG);
 	MPlug bPlug(selfNode, adrawColorB);
@@ -108,18 +110,25 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	
 /// load dop first, then box
 	bool stat = dopBufLength() > 0;
-	if(!stat) stat = loadDOPs(selfNode);
-	if(!stat) loadBoxes(selfNode);
+	if(!stat) {
+		stat = loadDOPs(selfNode);
+	}
+	if(!stat) {
+		AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(selfNode).name() );
+		return;
+	}
 	
-	updateGeomBox(selfNode);
-		
 	view.beginGL();
+	
+	const BoundingBox & bbox = geomBox();
 	drawBoundingBox(&bbox);
 	
 	//if ( style == M3dView::kFlatShaded || 
 	//	    style == M3dView::kGouraudShaded ) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnableClientState(GL_VERTEX_ARRAY);
+	drawAWireDop();
+	glColor3fv(diffCol);
 	drawWiredTriangles();
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -490,7 +499,7 @@ bool ExampViz::loadDops(MDataBlock & data)
 	}
 	
 	AHelper::Info<int>(" ExampViz load dop buf length", dopBufLength() );
-		
+	buildBounding8Dop(geomBox() );
 	return true;
 }
 
@@ -536,7 +545,7 @@ bool ExampViz::loadDOPs(MObject & node)
 	}
 	
 	AHelper::Info<unsigned>(" ExampViz load n dops", n );
-	
+	buildBounding8Dop(geomBox() );
 	return true;
 }
 //:~

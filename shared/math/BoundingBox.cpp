@@ -598,5 +598,44 @@ int BoundingBox::numFlatAxis(const float & threshold) const
 	return c;
 }
 
+void BoundingBox::getSizeOrder(int * d) const
+{
+	const float lx = distance(0);
+	const float ly = distance(1);
+	const float lz = distance(2);
+	d[0] = 0;
+	if(ly > lx && ly > lz) {
+		d[0] = 1;
+	}
+	if(lz > lx && lz > ly) {
+		d[0] = 2;
+	}
+	d[2] = 2;
+	if(lx < ly && lx < lz) {
+		d[2] = 0;
+	}
+	if(ly < lx && ly < lz) {
+		d[2] = 1;
+	}
+	
+	d[1] = 1;
+	if(d[0] != 0 && d[2] != 0) {
+		d[1] = 0;
+	}
+	if(d[0] != 2 && d[2] != 2) {
+		d[1] = 2;
+	}
+}
+
+void BoundingBox::putInside(Vector3F & p) const
+{
+	if(p.x < getMin(0)) p.x = getMin(0);
+	if(p.x > getMax(0)) p.x = getMax(0);
+	if(p.y < getMin(1)) p.y = getMin(1);
+	if(p.y > getMax(1)) p.y = getMax(1);
+	if(p.z < getMin(2)) p.z = getMin(2);
+	if(p.z > getMax(2)) p.z = getMax(2);
+}
+
 }
 //:~

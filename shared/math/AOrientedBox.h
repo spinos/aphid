@@ -26,12 +26,15 @@ public:
 					const Matrix33F::RotateOrder & rod = Matrix33F::XYZ);
 	void set8DOPExtent(const float & x0, const float & x1,
 						const float & y0, const float & y1);
-/// p in local space
-/// center at bbox center
-/// extent by bbox distance
-/// 8dop extent by p - center
 	void calculateCenterExtents(const float * p,
-					const int & np);
+					const int & np,
+					const BoundingBox * box);
+/// longest axis as x
+/// 2nd longest axis as y
+	void caluclateOrientation(const BoundingBox * box);
+/// sx[4] dop xy move around .707 value [-1, 1] 
+	void calculateCenterExtents(const BoundingBox * box,
+					const float * sx);
 	
 	const Vector3F & center() const;
 	const Matrix33F & orientation() const;
@@ -71,6 +74,9 @@ public:
 	friend std::ostream& operator<<(std::ostream &output, const AOrientedBox & p);
 		
 protected:
+
+private:
+	float remap(float x);
 
 private:
 	Matrix33F m_orientation;

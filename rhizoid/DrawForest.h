@@ -24,7 +24,6 @@ public DrawBox, public DrawCircle, public DrawInstance
     Matrix44F m_useMat;
     float m_wireColor[3];
 	float m_transbuf[16];
-	float m_scalbuf[3];
     float m_showVoxLodThresold;
     bool m_enabled;
 	

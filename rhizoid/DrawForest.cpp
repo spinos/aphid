@@ -20,16 +20,11 @@ namespace aphid {
 DrawForest::DrawForest() : m_showVoxLodThresold(1.f),
 m_enabled(true)
 {
-	m_scalbuf[0] = 1.f; 
-	m_scalbuf[1] = 1.f; 
-	m_scalbuf[2] = 1.f;
-    m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
+	m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
 }
 
-DrawForest::~DrawForest() {}
-
-void DrawForest::setScaleMuliplier(float x, float y, float z)
-{ m_scalbuf[0] = x; m_scalbuf[1] = y; m_scalbuf[2] = z; }
+DrawForest::~DrawForest() 
+{}
 
 void DrawForest::drawGround() 
 {
@@ -188,15 +183,13 @@ void DrawForest::drawSolidPlants()
 
 void DrawForest::drawPlantsInCell(sdb::Array<int, Plant> * cell,
 								const BoundingBox & box)
-{
-	if(m_showVoxLodThresold > .9999f) {
-        drawPlantSolidBoundInCell(cell);
-		return;
-    }
-	
+{	
 	Vector3F worldP = box.center();
 	const float r = gridSize();
-	if(cullByFrustum(worldP, r) ) {
+	float camZ = cameraDepth(worldP);
+	camZ += r;
+	float lod;
+	if(cullByLod(camZ, r*0.1f, .4f, 1.9f, lod) ) {
 		drawPlantSolidBoundInCell(cell);
 		return;
 	}
@@ -226,8 +219,7 @@ void DrawForest::drawPlantSolidBound(PlantData * data)
 	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
 	    
 	const ExampVox * v = plantExample(*data->t3);
-	const float * c = v->diffuseMaterialColor();
-			
+	const float * c = v->diffuseMaterialColor();	
 	m_instancer->setDiffueColorVec(c);
 	v->drawSolidBound();
 }
@@ -249,15 +241,9 @@ void DrawForest::drawPlant(PlantData * data)
 void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 {	
 	if(m_showVoxLodThresold >.9999f) {
-        v->drawSolidBound();
+        v->drawASolidDop();
 		return;
     }
-	
-/// no box or dop
-	if(v->numBoxes() < 1 && v->dopBufLength() < 1) {
-		v->drawSolidBound();
-		return;
-	}
 	
 	const Vector3F & localP = v->geomCenter();
 	Vector3F worldP = data->t1->transform(localP);
@@ -266,15 +252,18 @@ void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 		return;
 	}
 	
-	float camZ = cameraDepth(worldP);
-	float lod;
-	if(cullByLod(camZ, r, m_showVoxLodThresold, 1.9f, lod) ) {
-		v->drawSolidBound();
+	if(v->dopBufLength() < 1) {
+		v->drawASolidDop();
 		return;
 	}
 	
-	v->drawSolidTriangles();
-	
+	float camZ = cameraDepth(worldP);
+	float lod;
+	if(cullByLod(camZ, r, m_showVoxLodThresold, 1.9f, lod) ) {
+		v->drawASolidDop();
+	} else {
+		v->drawSolidTriangles();
+	}
 }
 
 void DrawForest::drawGridBounding()

@@ -21,6 +21,7 @@
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
 #include <maya/MSceneMessage.h>
+#include <ogl/DrawDop.h>
 #include "MForest.h"
 
 namespace aphid {
@@ -74,6 +75,7 @@ public:
 	static MObject axmultiplier;
 	static MObject aymultiplier;
 	static MObject azmultiplier;
+	static MObject awmultiplier;
 	static MObject agroupcount;
 	static MObject ainstanceId;
 	static MObject aconvertPercentage;
@@ -127,9 +129,13 @@ private:
 	MCallbackId fBeforeSaveCB;
 	void saveInternal();
 	bool loadInternal(MDataBlock& block);
-	void updateGeomBox(ExampVox * dst, MObject & node);
 	Ray getRayDisplace(Vector3F & v0, Vector3F & v1,
 				short start_x, short start_y, short last_x, short last_y);
+	
+	void updateGeomBox(ExampVox * dst, const MObject & node);
+	void updateGeomBox(ExampVox * dst, MDataBlock & block);
+	void updateGeomDop(ExampVox * dst, const MObject & node);
+	void updateGeomDop(ExampVox * dst, MDataBlock & block);
 	
 };
 

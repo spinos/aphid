@@ -40,6 +40,7 @@ MObject ProxyViz::alodgatelow;
 MObject ProxyViz::axmultiplier;
 MObject ProxyViz::aymultiplier;
 MObject ProxyViz::azmultiplier;
+MObject ProxyViz::awmultiplier;
 MObject ProxyViz::agroupcount;
 MObject ProxyViz::ainstanceId;
 MObject ProxyViz::astandinNames;
@@ -78,21 +79,14 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		MStatus status;
 
 		ExampVox * defBox = plantExample(0);
-		
-		defBox->setGeomSizeMult(block.inputValue(aradiusMult).asFloat() );
-		
-		defBox->setGeomBox(block.inputValue(abboxminx).asFloat(),
-			block.inputValue(abboxminy).asFloat(), 
-			block.inputValue(abboxminz).asFloat(), 
-			block.inputValue(abboxmaxx).asFloat(), 
-			block.inputValue(abboxmaxy).asFloat(), 
-			block.inputValue(abboxmaxz).asFloat());
+		updateGeomBox(defBox, block);
+		updateGeomDop(defBox, block);
 		
 		float grdsz = defBox->geomExtent() * 25.f ;
 		if(grdsz < 512.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
 			grdsz = 512.f;
-			AHelper::Info<float>(" trancated to", grdsz);
+			AHelper::Info<float>(" truncated to", grdsz);
 		}
 		
 		if(m_toSetGrid) {
@@ -198,14 +192,11 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	if(!m_enableCompute) return;
 	MObject thisNode = thisMObject();
 	updateWorldSpace(thisNode);
-	
-	MPlug mutxplug( thisNode, axmultiplier);
-	MPlug mutyplug( thisNode, aymultiplier);
-	MPlug mutzplug( thisNode, azmultiplier);
-	setScaleMuliplier(mutxplug.asFloat(), 
-						mutyplug.asFloat(),
-						mutzplug.asFloat() );	
-                        
+					
+	ExampVox * defBox = plantExample(0);
+	updateGeomBox(defBox, thisNode);
+	updateGeomDop(defBox, thisNode);
+	                    
     MPlug svtPlug(thisNode, adisplayVox);
     setShowVoxLodThresold(svtPlug.asFloat() );
 	
@@ -231,9 +222,13 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	glPushMatrix();
 	glMultMatrixd(mm);	
 	
-	ExampVox * defBox = plantExample(0);
-	updateGeomBox(defBox, thisNode);
 	defBox->drawWiredBound();
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	defBox->drawAWireDop();
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	Matrix44F mat;
 	mat.setFrontOrientation(Vector3F::YAxis);
@@ -356,22 +351,32 @@ MStatus ProxyViz::initialize()
 	numFn.setMin(.05f);
 	addAttribute(aradiusMult);
 	
-	axmultiplier = numFn.create( "visualMultiplierX", "vmx", MFnNumericData::kFloat, 1.f);
+	axmultiplier = numFn.create( "visualCornerX", "vcx", MFnNumericData::kFloat, 0.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMin(0.001f);
+	numFn.setMin(-1.f);
+	numFn.setMax(1.f);
 	addAttribute(axmultiplier);	
-	aymultiplier = numFn.create( "visualMultiplierY", "vmy", MFnNumericData::kFloat, 1.f);
+	aymultiplier = numFn.create( "visualCornerY", "vcy", MFnNumericData::kFloat, 0.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMin(0.001f);
+	numFn.setMin(-1.f);
+	numFn.setMax(1.f);
 	addAttribute(aymultiplier);
 	
-	azmultiplier = numFn.create( "visualMultiplierZ", "vmz", MFnNumericData::kFloat, 1.f);
+	azmultiplier = numFn.create( "visualCornerZ", "vcz", MFnNumericData::kFloat, 0.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMin(0.001f);
+	numFn.setMin(-1.f);
+	numFn.setMax(1.f);
 	addAttribute(azmultiplier);
+	
+	awmultiplier = numFn.create( "visualCornerW", "vcw", MFnNumericData::kFloat, 0.f);
+	numFn.setKeyable(true);
+	numFn.setStorable(true);
+	numFn.setMin(-1.f);
+	numFn.setMax(1.f);
+	addAttribute(awmultiplier);
 	
 	agroupcount = numFn.create( "numberInstances", "nis", MFnNumericData::kInt, 1);
 	numFn.setKeyable(false);
@@ -883,17 +888,6 @@ void ProxyViz::endPickInView()
 
 void ProxyViz::setEnableCompute(bool x)
 { m_enableCompute = x; }
-	
-void ProxyViz::updateGeomBox(ExampVox * dst, MObject & node)
-{
-	dst->setGeomSizeMult(MPlug(node, aradiusMult).asFloat() );
-	dst->setGeomBox(MPlug(node, abboxminx).asFloat(),
-			MPlug(node, abboxminy).asFloat(), 
-			MPlug(node, abboxminz).asFloat(), 
-			MPlug(node, abboxmaxx).asFloat(), 
-			MPlug(node, abboxmaxy).asFloat(), 
-			MPlug(node, abboxmaxz).asFloat());
-}
 
 void ProxyViz::drawBrush(M3dView & view)
 {
@@ -904,6 +898,61 @@ void ProxyViz::drawBrush(M3dView & view)
     view.drawText(radstr, MPoint(position.x, position.y, position.z) );
 	
     DrawForest::drawBrush();
+}
+
+void ProxyViz::updateGeomBox(ExampVox * dst, const MObject & node)
+{
+	dst->setGeomSizeMult(MPlug(node, aradiusMult).asFloat() );
+	dst->setGeomBox(MPlug(node, abboxminx).asFloat(),
+			MPlug(node, abboxminy).asFloat(), 
+			MPlug(node, abboxminz).asFloat(), 
+			MPlug(node, abboxmaxx).asFloat(), 
+			MPlug(node, abboxmaxy).asFloat(), 
+			MPlug(node, abboxmaxz).asFloat());
+}
+
+void ProxyViz::updateGeomBox(ExampVox * dst, MDataBlock & block)
+{
+	dst->setGeomSizeMult(block.inputValue(aradiusMult).asFloat() );
+	dst->setGeomBox(block.inputValue(abboxminx).asFloat(),
+		block.inputValue(abboxminy).asFloat(), 
+		block.inputValue(abboxminz).asFloat(), 
+		block.inputValue(abboxmaxx).asFloat(), 
+		block.inputValue(abboxmaxy).asFloat(), 
+		block.inputValue(abboxmaxz).asFloat());
+}
+
+void ProxyViz::updateGeomDop(ExampVox * dst, const MObject & node)
+{
+	MPlug mutxplug( node, axmultiplier);
+	MPlug mutyplug( node, aymultiplier);
+	MPlug mutzplug( node, azmultiplier);
+	MPlug mutwplug( node, awmultiplier);
+
+	float dopcorner[4];
+	dopcorner[0] = mutxplug.asFloat(); 
+	dopcorner[1] = mutyplug.asFloat();
+	dopcorner[2] = mutzplug.asFloat();
+	dopcorner[3] = mutwplug.asFloat();
+						
+    AOrientedBox ob;
+	ob.caluclateOrientation(&dst->geomBox() );
+	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
+	dst->update8DopPoints(ob);
+}
+
+void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
+{
+	float dopcorner[4];
+	dopcorner[0] = block.inputValue(axmultiplier).asFloat(); 
+	dopcorner[1] = block.inputValue(aymultiplier).asFloat();
+	dopcorner[2] = block.inputValue(azmultiplier).asFloat();
+	dopcorner[3] = block.inputValue(awmultiplier).asFloat();
+						
+    AOrientedBox ob;
+	ob.caluclateOrientation(&dst->geomBox() );
+	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
+	dst->update8DopPoints(ob);
 }
 
 }

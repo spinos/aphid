@@ -297,7 +297,12 @@ bool ViewCull::cullByLod(const float & localZ, const float & radius,
 					float & details) const
 {
 	details = radius / (m_detailWidth * localZ / farClipPlane() );
-	if(details > .999f) details = .999f;
+	if(details < 0.f) {
+		return false;
+	}
+	if(details > .999f) {
+		details = .999f;
+	}
 	return (details < lowLod || details >= highLod);
 }
 
@@ -342,7 +347,7 @@ void ViewCull::setFrustum(const float & horizontalApeture,
 	BaseView::setFrustum(horizontalApeture, verticalApeture, 
 					focalLength, clipNear, clipFar);
 /// 1 / 30 of port width
-	m_detailWidth = -clipFar * hfov() * .066f;
+	m_detailWidth = -clipFar * hfov() * .068f;
 }
 
 void ViewCull::setOrthoFrustum(const float & orthoWidth,
@@ -352,7 +357,7 @@ void ViewCull::setOrthoFrustum(const float & orthoWidth,
 {
 	BaseView::setOrthoFrustum(orthoWidth, orthoHeight,
 					clipNear, clipFar);
-	m_detailWidth = orthoWidth * .066f;
+	m_detailWidth = orthoWidth * .068f;
 }
 
 }
