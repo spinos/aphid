@@ -2,12 +2,12 @@ set (ROTT_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h
 window.h
 widget.h)
 
-set (NACA4_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (ROTT_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
 widget.cpp
 window.cpp
 main.cpp)
 
-add_executable (rott ${NACA4_HEADER_FILES} ${NACA4_SOURCE_FILES})
+add_executable (rott ${ROTT_HEADER_FILES} ${ROTT_SOURCE_FILES})
 
 target_link_libraries (rott Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (rott ${OPENGL_LIBRARIES})

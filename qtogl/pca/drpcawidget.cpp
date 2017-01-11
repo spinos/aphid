@@ -2,6 +2,7 @@
 #include <GeoDrawer.h>
 #include <QtOpenGL>
 #include "drpcawidget.h"
+#include <ogl/DrawDop.h>
 #include <math/generate_data.h>
 #include <math/transform_data.h>
 #include <gpr/PCASimilarity.h>
@@ -146,7 +147,6 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    getDrawer()->m_markerProfile.apply();
 #if 0
 	getDrawer()->setColor(0.f, .0f, .55f);
 
@@ -165,6 +165,8 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawFeatures()
 {
+	getDrawer()->m_wireProfile.apply();
+	
 	const float groupCol[2][3] = {
 		{.85f, .45f, 0.f},
 		{0.f, .85f, .45f}
@@ -179,6 +181,9 @@ void GLWidget::drawFeatures()
 /// stored columnwise
 	DenseMatrix<float> pdr(3, m_features->featureDim() );
 	BoundingBox box;
+/// center at zero and no rotation
+	AOrientedBox ob;
+	DrawDop dd;
 	
 	const int n = m_features->numFeatures();
 	for(int i=0;i<n;++i) {
@@ -195,7 +200,7 @@ void GLWidget::drawFeatures()
 		
 		glEnableClientState(GL_VERTEX_ARRAY);
         
-		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pdr.column(0) );
+		glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)pdr.column(0) );
         glDrawArrays(GL_POINTS, 0, pdr.numCols() );
         
         glDisableClientState(GL_VERTEX_ARRAY);
@@ -206,6 +211,13 @@ void GLWidget::drawFeatures()
 		const float * gcol = groupCol[m_features->groupIndices()[i]];
 		getDrawer()->setColor(gcol[0], gcol[1], gcol[2]);
 		getDrawer()->boundingBox(box);
+		
+		ob.calculateCenterExtents(pdr.column(0), pdr.numCols() );
+		dd.update8DopPoints(ob);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+        dd.drawAWireDop();
+		glDisableClientState(GL_VERTEX_ARRAY);
 		
 		glPopMatrix();
 	}

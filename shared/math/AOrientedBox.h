@@ -26,6 +26,12 @@ public:
 					const Matrix33F::RotateOrder & rod = Matrix33F::XYZ);
 	void set8DOPExtent(const float & x0, const float & x1,
 						const float & y0, const float & y1);
+/// p in local space
+/// center at bbox center
+/// extent by bbox distance
+/// 8dop extent by p - center
+	void calculateCenterExtents(const float * p,
+					const int & np);
 	
 	const Vector3F & center() const;
 	const Matrix33F & orientation() const;

@@ -19,6 +19,7 @@
 #include <geom/AQuadMesh.h>
 #include <geom/ATetrahedronMesh.h>
 #include <math/AOrientedBox.h>
+#include <math/DOP8Builder.h>
 #include <tetrahedron_math.h>
 //#include <BaseTransform.h>
 //#include <TransformManipulator.h>
@@ -303,7 +304,6 @@ void GeoDrawer::arrow2(const Vector3F& origin, const Vector3F& dest, float width
 
 void GeoDrawer::coordsys(float scale) const
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(1.f, 0.f, 0.f);
 	arrow(Vector3F::Zero, Vector3F(scale, 0.f, 0.f));
 	glColor3f(0.f, 1.f, 0.f);
@@ -314,7 +314,6 @@ void GeoDrawer::coordsys(float scale) const
 
 void GeoDrawer::coordsys(const Vector3F & scale) const
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glColor3f(1.f, 0.f, 0.f);
 	arrow(Vector3F::Zero, Vector3F(scale.x, 0.f, 0.f));
 	glColor3f(0.f, 1.f, 0.f);
