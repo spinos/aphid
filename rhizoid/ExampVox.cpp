@@ -70,9 +70,10 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 void ExampVox::buildBounding8Dop(const BoundingBox & bbox)
 {
 	AOrientedBox ob;
-	Matrix33F zup;
-	zup.rotateX(-1.57f);
-	ob.setOrientation(zup);
+	//Matrix33F zup;
+	//zup.rotateX(-1.57f);
+	//ob.setOrientation(zup);
+	ob.caluclateOrientation(&bbox);
 	ob.calculateCenterExtents((const float *)&m_dopPositionBuf[0], m_dopBufLength, &bbox );
 	update8DopPoints(ob);
 }

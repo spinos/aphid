@@ -27,12 +27,16 @@ MObject ShrubVizNode::ainexamp;
 MObject ShrubVizNode::outValue;
 	
 ShrubVizNode::ShrubVizNode()
-{ attachSceneCallbacks(); }
+{ 
+	m_cameraSpace = new Matrix44F;
+	attachSceneCallbacks(); 
+}
 
 ShrubVizNode::~ShrubVizNode() 
 { 
 	m_instances.clear();
 	m_examples.clear();
+	delete m_cameraSpace;
 	detachSceneCallbacks(); 
 }
 
@@ -69,7 +73,10 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 		return;
 	}
 	
-	MObject thisNode = thisMObject();
+	MDagPath cameraPath;
+	view.getCamera(cameraPath);
+	MMatrix cameraMat = cameraPath.inclusiveMatrix();
+	AHelper::ConvertToMatrix44F(*m_cameraSpace, cameraMat);
 		
 	view.beginGL();
 	
@@ -395,6 +402,9 @@ void ShrubVizNode::addInstance(const DenseMatrix<float> & trans,
 
 void ShrubVizNode::drawWiredBoundInstances() const
 {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
@@ -403,7 +413,8 @@ void ShrubVizNode::drawWiredBoundInstances() const
 		glMultMatrixf(ins._trans);
 		
 		if(ins._exampleId < nexp) {
-			m_examples[ins._exampleId]->drawWiredBound();
+			//m_examples[ins._exampleId]->drawWiredBound();
+			m_examples[ins._exampleId]->drawAWireDop();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);
@@ -411,10 +422,16 @@ void ShrubVizNode::drawWiredBoundInstances() const
 		
 		glPopMatrix();
 	}
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void ShrubVizNode::drawSolidInstances() const
 {
+	Vector3F lightVec(1,1,1);
+	lightVec = m_cameraSpace->transformAsNormal(lightVec);
+	m_instancer->setDistantLightVec(lightVec);
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 

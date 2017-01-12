@@ -25,6 +25,7 @@
 
 namespace aphid {
 
+class Matrix44F;
 class ExampVox;
 
 template<typename T>
@@ -42,6 +43,7 @@ class ShrubVizNode : public MPxLocatorNode, public DrawBox, public DrawInstance
 	
 	std::vector<InstanceD > m_instances;
 	std::vector<ExampVox * > m_examples;
+	Matrix44F * m_cameraSpace;
 	
 public:
 	ShrubVizNode();
