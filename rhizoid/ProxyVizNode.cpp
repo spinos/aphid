@@ -57,6 +57,10 @@ MObject ProxyViz::adisplayVox;
 MObject ProxyViz::acheckDepth;
 MObject ProxyViz::ainoverscan;
 MObject ProxyViz::aactivated;
+MObject ProxyViz::adrawDopSizeX;
+MObject ProxyViz::adrawDopSizeY;
+MObject ProxyViz::adrawDopSizeZ;
+MObject ProxyViz::adrawDopSize;
 MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
@@ -79,6 +83,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		MStatus status;
 
 		ExampVox * defBox = plantExample(0);
+		
+		MDataHandle drszx = block.inputValue(adrawDopSizeX);
+		MDataHandle drszy = block.inputValue(adrawDopSizeY);
+		MDataHandle drszz = block.inputValue(adrawDopSizeZ);
+		defBox->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat());
+		
 		updateGeomBox(defBox, block);
 		updateGeomDop(defBox, block);
 		
@@ -194,6 +204,12 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	updateWorldSpace(thisNode);
 					
 	ExampVox * defBox = plantExample(0);
+	
+	MPlug drszx(thisNode, adrawDopSizeX);
+	MPlug drszy(thisNode, adrawDopSizeY);
+	MPlug drszz(thisNode, adrawDopSizeZ);
+	defBox->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat() );
+		
 	updateGeomBox(defBox, thisNode);
 	updateGeomDop(defBox, thisNode);
 	                    
@@ -377,6 +393,37 @@ MStatus ProxyViz::initialize()
 	numFn.setMin(-1.f);
 	numFn.setMax(1.f);
 	addAttribute(awmultiplier);
+	
+	adrawDopSizeX = numFn.create( "dspDopX", "ddpx", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.9f);
+	numFn.setMin(0.1f);
+	numFn.setMax(1.f);
+	addAttribute(adrawDopSizeX);
+	
+	adrawDopSizeY = numFn.create( "dspDopY", "ddpy", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.9f);
+	numFn.setMin(0.1f);
+	numFn.setMax(1.f);
+	addAttribute(adrawDopSizeY);
+	
+	adrawDopSizeZ = numFn.create( "dspDopZ", "ddpz", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.9f);
+	numFn.setMin(0.1f);
+	numFn.setMax(1.f);
+	addAttribute(adrawDopSizeZ);
+	
+	adrawDopSize = numFn.create( "dspDop", "ddps", adrawDopSizeX, adrawDopSizeY, adrawDopSizeZ );
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setUsedAsColor(true);
+	numFn.setDefault(0.9f, 0.9f, 0.9f);
+	addAttribute(adrawDopSize);
 	
 	agroupcount = numFn.create( "numberInstances", "nis", MFnNumericData::kInt, 1);
 	numFn.setKeyable(false);
@@ -938,7 +985,7 @@ void ProxyViz::updateGeomDop(ExampVox * dst, const MObject & node)
     AOrientedBox ob;
 	ob.caluclateOrientation(&dst->geomBox() );
 	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
-	dst->update8DopPoints(ob);
+	dst->update8DopPoints(ob, dst->dopSize() );
 }
 
 void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
@@ -952,7 +999,7 @@ void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
     AOrientedBox ob;
 	ob.caluclateOrientation(&dst->geomBox() );
 	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
-	dst->update8DopPoints(ob);
+	dst->update8DopPoints(ob, dst->dopSize());
 }
 
 }

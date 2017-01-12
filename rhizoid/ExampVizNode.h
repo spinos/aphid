@@ -57,6 +57,10 @@ public:
 	static MObject adrawColorG;
 	static MObject adrawColorB;
 	static MObject adrawColor;
+	static MObject adrawDopSizeX;
+	static MObject adrawDopSizeY;
+	static MObject adrawDopSizeZ;
+	static MObject adrawDopSize;
 	static MObject aradiusMult;
 	static MObject aininstspace;
 	static MObject outValue;

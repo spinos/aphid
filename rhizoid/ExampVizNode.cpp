@@ -33,6 +33,10 @@ MObject ExampViz::adrawColor;
 MObject ExampViz::adrawColorR;
 MObject ExampViz::adrawColorG;
 MObject ExampViz::adrawColorB;
+MObject ExampViz::adrawDopSizeX;
+MObject ExampViz::adrawDopSizeY;
+MObject ExampViz::adrawDopSizeZ;
+MObject ExampViz::adrawDopSize;
 MObject ExampViz::aradiusMult;
 MObject ExampViz::aininstspace;
 MObject ExampViz::outValue;
@@ -65,13 +69,17 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 
 		setGeomBox(vmin.x, vmin.y, vmin.z,
 				vmax.x, vmax.y, vmax.z);
+		
+		MDataHandle drszx = block.inputValue(adrawDopSizeX);
+		MDataHandle drszy = block.inputValue(adrawDopSizeY);
+		MDataHandle drszz = block.inputValue(adrawDopSizeZ);
+		setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat() );
 	
 		float * diffCol = diffuseMaterialColV();
 		
 		MFloatVector c = block.inputValue(adrawColor).asFloatVector();
 		diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
 		
-/// dop first, then box
 		if(!loadDops(block) ) {
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
@@ -107,6 +115,11 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	diffCol[0] = rPlug.asFloat();
 	diffCol[1] = gPlug.asFloat();
 	diffCol[2] = bPlug.asFloat();
+	
+	MPlug szxp(selfNode, adrawDopSizeX);
+	MPlug szyp(selfNode, adrawDopSizeY);
+	MPlug szzp(selfNode, adrawDopSizeZ);
+	setDopSize(szxp.asFloat(), szyp.asFloat(), szzp.asFloat() );
 	
 /// load dop first, then box
 	bool stat = dopBufLength() > 0;
@@ -193,6 +206,37 @@ MStatus ExampViz::initialize()
 	numFn.setDefault(0.47f, 0.46f, 0.45f);
 	addAttribute(adrawColor);
 	
+	adrawDopSizeX = numFn.create( "dspDopX", "ddpx", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.9f);
+	numFn.setMin(0.1f);
+	numFn.setMax(1.f);
+	addAttribute(adrawDopSizeX);
+	
+	adrawDopSizeY = numFn.create( "dspDopY", "ddpy", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.9f);
+	numFn.setMin(0.1f);
+	numFn.setMax(1.f);
+	addAttribute(adrawDopSizeY);
+	
+	adrawDopSizeZ = numFn.create( "dspDopZ", "ddpz", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.9f);
+	numFn.setMin(0.1f);
+	numFn.setMax(1.f);
+	addAttribute(adrawDopSizeZ);
+	
+	adrawDopSize = numFn.create( "dspDop", "ddps", adrawDopSizeX, adrawDopSizeY, adrawDopSizeZ );
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setUsedAsColor(true);
+	numFn.setDefault(0.9f, 0.9f, 0.9f);
+	addAttribute(adrawDopSize);
+	
 	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
@@ -268,7 +312,9 @@ MStatus ExampViz::initialize()
 	attributeAffects(adrawColorR, outValue);
 	attributeAffects(adrawColorG, outValue);
 	attributeAffects(adrawColorB, outValue);
-	attributeAffects(adrawColor, outValue);
+	attributeAffects(adrawDopSizeX, outValue);
+	attributeAffects(adrawDopSizeY, outValue);
+	attributeAffects(adrawDopSizeZ, outValue);
 	return MS::kSuccess;
 }
 

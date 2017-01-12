@@ -21,6 +21,7 @@ class ExampVox : public DrawBox, public DrawDop {
 
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;
+	Vector3F m_dopSize;
 	Vector3F * m_boxNormalBuf;
 	Vector3F * m_boxPositionBuf;
 	boost::scoped_array<Vector3F> m_dopNormalBuf;
@@ -53,6 +54,9 @@ public:
 					const float & d,
 					const float & e,
 					const float & f);
+	void setDopSize(const float & a,
+	                const float & b,
+	                const float &c);
 	
 	const float & geomExtent() const;
 	const float & geomSize() const;
@@ -69,6 +73,7 @@ public:
 	const int & dopBufLength() const;
 	const float * dopNormalBuf() const;
 	const float * dopPositionBuf() const;
+	const float * dopSize() const;
 	
 	virtual void drawWiredBound() const;
 	virtual void drawSolidBound() const;

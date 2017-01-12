@@ -34,7 +34,8 @@ void DrawDop::clear()
 	}
 }
 
-void DrawDop::update8DopPoints(const AOrientedBox & ob)
+void DrawDop::update8DopPoints(const AOrientedBox & ob,
+                                const float * sizing)
 {
 	DOP8Builder bd;
 	bd.build(ob);
@@ -60,6 +61,17 @@ void DrawDop::update8DopPoints(const AOrientedBox & ob)
 		m_vertexPoints[i3] = bv[i].x;
 		m_vertexPoints[i3+1] = bv[i].y;
 		m_vertexPoints[i3+2] = bv[i].z;
+	}
+	
+	if(!sizing) {
+	    return;
+	}
+	
+	for(int i=0;i<m_numVertices;++i) {
+		const int i3 = i * 3;
+		m_vertexPoints[i3] *= sizing[0];
+		m_vertexPoints[i3+1] *= sizing[1];
+		m_vertexPoints[i3+2] *= sizing[2];
 	}
 }
 

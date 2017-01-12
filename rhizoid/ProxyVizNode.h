@@ -92,6 +92,10 @@ public:
 	static MObject acheckDepth;
 	static MObject ainoverscan;
     static MObject aactivated;
+    static MObject adrawDopSizeX;
+	static MObject adrawDopSizeY;
+	static MObject adrawDopSizeZ;
+	static MObject adrawDopSize;
 	static MObject outValue1;
 	static MObject outValue;
 	static	MTypeId		id;

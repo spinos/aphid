@@ -26,7 +26,8 @@ public:
 	DrawDop();
 	virtual ~DrawDop();
 	
-	void update8DopPoints(const AOrientedBox & ob);
+	void update8DopPoints(const AOrientedBox & ob,
+	                    const float * sizing=0 );
 	
 	void drawAWireDop() const;
 	void drawASolidDop() const;

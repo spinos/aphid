@@ -25,6 +25,7 @@ m_sizeMult(1.f)
 	m_diffuseMaterialColV[0] = 0.47f;
 	m_diffuseMaterialColV[1] = 0.46f;
 	m_diffuseMaterialColV[2] = 0.48f;
+	m_dopSize.set(.9f, .9f, .9f);
 	m_geomBox.setOne(); 
 }
 
@@ -75,7 +76,7 @@ void ExampVox::buildBounding8Dop(const BoundingBox & bbox)
 	//ob.setOrientation(zup);
 	ob.caluclateOrientation(&bbox);
 	ob.calculateCenterExtents((const float *)&m_dopPositionBuf[0], m_dopBufLength, &bbox );
-	update8DopPoints(ob);
+	update8DopPoints(ob, (const float * )&m_dopSize);
 }
 
 void ExampVox::buildBoxDrawBuf() 
@@ -267,5 +268,15 @@ void ExampVox::drawSolidTriangles() const
 						(const float *)m_dopNormalBuf.get(),
 						m_dopBufLength);
 }
+
+void ExampVox::setDopSize(const float & a,
+	                const float & b,
+	                const float &c)
+{
+    m_dopSize.set(a, b, c);
+}
+
+const float * ExampVox::dopSize() const
+{ return (const float * )&m_dopSize; }
 
 }
