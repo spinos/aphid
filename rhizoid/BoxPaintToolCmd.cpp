@@ -310,19 +310,22 @@ MStatus proxyPaintTool::connectGroundSelected()
 	
 	MStatus stat;
 	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
-	if(!stat) return stat;
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool found no viz selected, select mesh(es) and a viz to connect");
+		return stat;
+	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
-		
-	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
-	pViz->setEnableCompute(false);
 	
 	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
 	if(!stat) {
 		MGlobal::displayWarning("proxyPaintTool no mesh selected");
 		return MS::kFailure;
 	}
+	
+	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	pViz->setEnableCompute(false);
 	
 	bool connStat;
 	
@@ -333,11 +336,11 @@ MStatus proxyPaintTool::connectGroundSelected()
 		MDagPath transPath;
 		meshIter.getDagPath ( transPath );
 		transPath.pop();
-		MObject transobj = transPath.node();
 		
+		MPlug worldSpacePlug;
 		int slotI = -1;
-		if(isTransformConnected(transobj, vizobj, slotI) ) {
-			AHelper::Info<MString>(" skip connected transform", transPath.fullPathName() );
+		if(isTransformConnected(transPath, vizobj, slotI, worldSpacePlug) ) {
+			AHelper::Info<MString>(" WARNING skip connected transform", transPath.fullPathName() );
 			if(isMeshConnectedSlot(meshobj, vizobj, slotI) ) {
 				continue;
 			}
@@ -349,7 +352,7 @@ MStatus proxyPaintTool::connectGroundSelected()
 
 		if(connStat) {
 			AHelper::Info<MString>("proxyPaintTool connect ground", transPath.fullPathName() );
-			connectTransform(transobj, vizobj);
+			connectTransform(worldSpacePlug, vizobj);
 			checkOutputConnection(vizobj, "ov");
 		}
 	}
@@ -412,14 +415,12 @@ bool proxyPaintTool::connectVoxToViz(MObject & voxObj, MObject & vizObj)
 	return true;
 }
 
-void proxyPaintTool::connectTransform(MObject & transObj, MObject & vizObj)
+void proxyPaintTool::connectTransform(MPlug & worldSpacePlug, MObject & vizObj)
 {
-	MFnDependencyNode ftrans(transObj);
-	MPlug srcSpace = ftrans.findPlug("worldMatrix").elementByLogicalIndex(0);
-	if(ConnectionHelper::ConnectedToNode(srcSpace, vizObj) ) {
+	if(ConnectionHelper::ConnectedToNode(worldSpacePlug, vizObj) ) {
 		return;
 	}
-	ConnectionHelper::ConnectToArray(srcSpace, vizObj, "groundSpace");
+	ConnectionHelper::ConnectToArray(worldSpacePlug, vizObj, "groundSpace");
 }
 
 MStatus proxyPaintTool::saveCacheSelected()
@@ -824,12 +825,20 @@ MStatus proxyPaintTool::performDFT()
 	return stat;
 }
 
-bool proxyPaintTool::isTransformConnected(const MObject & transObj, const MObject & vizObj,
-								int & slotPhyInd)
+bool proxyPaintTool::isTransformConnected(const MDagPath & transPath, 
+								const MObject & vizObj,
+								int & slotPhyInd,
+								MPlug & worldSpacePlug)
 {
-	MFnDependencyNode ftrans(transObj);
-	MPlug srcSpace = ftrans.findPlug("worldMatrix").elementByLogicalIndex(0);
-	return ConnectionHelper::ConnectedToNode(srcSpace, vizObj, &slotPhyInd);
+	MFnDependencyNode ftrans(transPath.node() );
+	unsigned wsi = 0;
+	if(transPath.isInstanced() ) {
+		wsi = transPath.instanceNumber();
+		AHelper::Info<MString>(" instanced transform", transPath.fullPathName() );
+		AHelper::Info<unsigned>(" world matrix space id", wsi );
+	}
+	worldSpacePlug = ftrans.findPlug("worldMatrix").elementByLogicalIndex(wsi);
+	return ConnectionHelper::ConnectedToNode(worldSpacePlug, vizObj, &slotPhyInd);
 }
 
 bool proxyPaintTool::isMeshConnectedSlot(const MObject & meshObj, 

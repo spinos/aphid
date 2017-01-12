@@ -42,7 +42,6 @@ private:
 	MStatus connectGroundSelected();
 	MStatus connectVoxelSelected();
 	bool connectVoxToViz(MObject & voxObj, MObject & vizObj);
-	void connectTransform(MObject & transObj, MObject & vizOb);
 	MStatus saveCacheSelected();
 	MStatus loadCacheSelected();
 	MObject getSelectedViz(const MSelectionList & sels, 
@@ -56,12 +55,15 @@ private:
 	MStatus performPCA();
 	MStatus performDFT();
 	void strToRotateOrder(const MString & srod);
-    bool isTransformConnected(const MObject & transObj, 
+    bool isTransformConnected(const MDagPath & transPath, 
 					const MObject & vizObj,
-					int & slotPhyInd);
+					int & slotPhyInd,
+					MPlug & worldSpacePlug);
 	bool isMeshConnectedSlot(const MObject & meshObj, 
 					const MObject & vizObj,
 					const int & slotPhyInd);
+	void connectTransform(MPlug & worldSpacePlug, 
+					MObject & vizOb);
 	
 private:
 	enum Operation {
