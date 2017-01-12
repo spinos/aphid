@@ -8,6 +8,7 @@
  */
 
 #include "Vertex.h"
+#include <math/Vector3F.h>
 
 namespace aphid {
 

@@ -7,8 +7,14 @@
  *
  */
 #pragma once
-#include <GraphArch.h>
 #include <vector>
+namespace aphid {
+
+class GeoElement;
+class Vertex;
+class Facet;
+class GraphArch;
+
 class ConflictGraph {
 public:
 	ConflictGraph(char faceOriented);
@@ -23,3 +29,5 @@ private:
 	GraphArch *m_head;
 	char m_faceOriented;
 };
+
+}

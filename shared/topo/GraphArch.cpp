@@ -8,6 +8,10 @@
  */
 
 #include "GraphArch.h"
+#include <topo/Vertex.h>
+#include <topo/Facet.h>
+
+namespace aphid {
 
 GraphArch::GraphArch() {}
 GraphArch::~GraphArch() {}
@@ -20,4 +24,6 @@ GraphArch::GraphArch(Facet *f, Vertex *v)
 	previousFace = 0;
 	nextVertex = 0;
 	nextFace = 0;
+}
+
 }

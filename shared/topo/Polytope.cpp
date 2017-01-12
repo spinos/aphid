@@ -1,5 +1,5 @@
 /*
- *  Polytode.cpp
+ *  Polytope.cpp
  *  convexHull
  *
  *  Created by jian zhang on 9/10/12.
@@ -7,34 +7,41 @@
  *
  */
 
-#include "Polytode.h"
+#include "Polytope.h"
+#include <topo/Vertex.h>
+#include <topo/Facet.h>
 
-Polytode::Polytode() {}
-Polytode::~Polytode() {}
+namespace aphid {
 
-void Polytode::destroy()
+Polytope::Polytope() 
+{}
+
+Polytope::~Polytope() 
+{}
+
+void Polytope::destroy()
 {
 	m_vertices.clear();
 	m_faces.clear();
 }
 
-int Polytode::getNumVertex() const
+int Polytope::getNumVertex() const
 {
 	return m_vertices.size();
 }
 	
-int Polytode::getNumFace() const
+int Polytope::getNumFace() const
 {
 	return m_faces.size();
 }
 
-void Polytode::addVertex(Vertex *p)
+void Polytope::addVertex(Vertex * p)
 {
 	p->setIndex(getNumVertex());
 	m_vertices.push_back(p);
 }
 
-void Polytode::addFacet(Facet *f)
+void Polytope::addFacet(Facet * f)
 {
 	f->setIndex(getNumFace());
 	m_faces.push_back(f);
@@ -43,7 +50,7 @@ void Polytode::addFacet(Facet *f)
 #endif
 }
 
-void Polytode::removeFaces()
+void Polytope::removeFaces()
 {
 	//printf("remove face\n");
 	//printf("b4\n");
@@ -79,17 +86,22 @@ void Polytode::removeFaces()
 	
 }
 
-Facet Polytode::getFacet(int idx) const
+const Facet & Polytope::getFacet(int idx) const
 {
 	return *m_faces[idx];
 }
 
-Vertex Polytode::getVertex(int idx) const
+const Vertex & Polytope::getVertex(int idx) const
 {
 	return *m_vertices[idx];
 }
 
-Vertex *Polytode::vertex(int idx)
+Vertex * Polytope::vertex(int idx)
 {
 	return m_vertices[idx];
+}
+
+std::vector<Facet *> & Polytope::faces()
+{ return m_faces; }
+
 }

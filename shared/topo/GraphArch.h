@@ -7,8 +7,12 @@
  *
  */
 #pragma once
-#include <Vertex.h>
-#include <Facet.h>
+
+namespace aphid {
+
+class Vertex;
+class Facet;
+
 class GraphArch {
 public:
 	GraphArch();
@@ -24,3 +28,5 @@ public:
 	GraphArch *nextVertex;
 	GraphArch *nextFace;
 };
+
+}

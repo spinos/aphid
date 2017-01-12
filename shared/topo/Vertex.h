@@ -7,10 +7,11 @@
  *
  */
 #pragma once
-#include <math/Vector3F.h>
 #include <topo/GeoElement.h>
 
 namespace aphid {
+
+class Vector3F;
 
 class Vertex : public GeoElement {
 public:

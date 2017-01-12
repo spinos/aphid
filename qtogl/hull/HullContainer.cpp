@@ -8,11 +8,20 @@
  */
 #include <iostream>
 #include "HullContainer.h"
-#include <ConflictGraph.h>
+#include <topo/Vertex.h>
+#include <topo/Facet.h>
+#include <topo/Edge.h>
+#include <topo/GraphArch.h>
+#include <topo/ConflictGraph.h>
 #include <cmath>
 
-HullContainer::HullContainer() {}
-HullContainer::~HullContainer() {}
+using namespace aphid;
+
+HullContainer::HullContainer() 
+{}
+
+HullContainer::~HullContainer() 
+{}
 
 void HullContainer::initHull()
 {
@@ -23,9 +32,11 @@ void HullContainer::initHull()
 		float r = ((float)(rand() % 24091)) / 24091.f * 10.f + 12.f;
 		float phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
 		float theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
-		v->x = sin(theta) * cos(phi) * r + 16.f;
-		v->y = sin(theta) * sin(phi) * r + 16.f;
-		v->z = cos(theta) * r + 16.f;
+		
+		v->m_v = new Vector3F;
+		v->m_v->x = sin(theta) * cos(phi) * r + 16.f;
+		v->m_v->y = sin(theta) * sin(phi) * r + 16.f;
+		v->m_v->z = cos(theta) * r + 16.f;
 		//v->x = ((float)(rand() % 218091)) / 8092.f;
 		//v->y = ((float)(rand() % 308391)) / 8392.f;
 		//v->z = ((float)(rand() % 298331)) / 8332.f;
@@ -42,10 +53,10 @@ void HullContainer::processHull()
 	Vertex *c = vertex(2);
 	Vertex *d = vertex(3);
 	
-	Facet *f1 = new Facet(a, b, c, d);
-	Facet *f2 = new Facet(a, c, d, b);
-	Facet *f3 = new Facet(a, b, d, c);
-	Facet *f4 = new Facet(b, c, d, a);
+	Facet *f1 = new Facet(a, b, c, d->m_v);
+	Facet *f2 = new Facet(a, c, d, b->m_v);
+	Facet *f3 = new Facet(a, b, d, c->m_v);
+	Facet *f4 = new Facet(b, c, d, a->m_v);
 	
 	f1->setData((char*)new ConflictGraph(1));
 	f2->setData((char*)new ConflictGraph(1));
@@ -104,8 +115,9 @@ void HullContainer::processHull()
 		}
 	}
 #ifndef NDEBUG	
-	if(i == getNumVertex())
+	if(i == getNumVertex()) {
 		printf("well done!");
+	}
 #endif
 }
 
@@ -122,9 +134,10 @@ char HullContainer::searchVisibleFaces(Vertex *v)
 
 char HullContainer::searchHorizons()
 {
-	std::vector<Facet *>::iterator it;
-	for(it = m_faces.begin(); it < m_faces.end(); it++ )
+	std::vector<Facet *>::iterator it = faces().begin();
+	for(; it < faces().end(); it++ ) {
 		(*it)->setMarked(0);
+	}
 	
 	for (it = visibleFaces.begin(); it < visibleFaces.end(); it++) 
 	{ 
@@ -305,8 +318,8 @@ char HullContainer::finishStep(Vertex *v)
 	}
 	removeFaces();
 	
-	std::vector<Facet *>::iterator it;
-	for(it = m_faces.begin(); it < m_faces.end(); it++ )
+	std::vector<Facet *>::iterator it = faces().begin();
+	for(; it < faces().end(); it++ )
 	{
 		if(!(*it)->isClosed()) {
 #ifndef NDEBUG
@@ -318,6 +331,7 @@ char HullContainer::finishStep(Vertex *v)
 	return 1;
 }
 
+/*
 void HullContainer::renderWorld(ShapeDrawer * drawer)
 {
 	std::vector<Facet *>::iterator it;
@@ -358,6 +372,7 @@ void HullContainer::renderWorld(ShapeDrawer * drawer)
 	
 	drawer->end();
 }
+*/
 
 void HullContainer::addConflict(Facet *f, Vertex *v)
 {
@@ -414,10 +429,7 @@ void HullContainer::addConflict(Facet *f, Facet *f1, Facet *f2)
 		}
 	}
 	
-	printf(" \n");
-
-	for(int i=(int)visible.size() - 1; i >= 0; i--) 
-	{
+	for(int i=(int)visible.size() - 1; i >= 0; i--) {
 		Vertex *v = visible.at(i);
 		if (f->isVertexAbove(*v)) addConflict(f, v);
 	}
@@ -435,4 +447,3 @@ void HullContainer::removeConflict(Facet *f)
 	}
 	delete conflictedV;
 }
-

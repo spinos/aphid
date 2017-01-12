@@ -8,6 +8,11 @@
  */
 
 #include "ConflictGraph.h"
+#include <topo/Vertex.h>
+#include <topo/Facet.h>
+#include <topo/GraphArch.h>
+
+namespace aphid {
 
 ConflictGraph::ConflictGraph(char faceOriented) 
 {
@@ -15,7 +20,8 @@ ConflictGraph::ConflictGraph(char faceOriented)
 	m_faceOriented = faceOriented;
 }
 
-ConflictGraph::~ConflictGraph() {}
+ConflictGraph::~ConflictGraph() 
+{}
 
 void ConflictGraph::clear()
 {
@@ -89,4 +95,6 @@ void ConflictGraph::getVertices(GeoElement * dest) const
 		dest = dest->next;
 		arch = arch->nextFace;
 	}
+}
+
 }
