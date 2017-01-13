@@ -180,8 +180,8 @@ void KdEngine::buildSource(sdb::VectorArray<T> * dst,
 					const int & numIndices,
 					const int * elementIndices)
 {
-	box.reset();
 	T acomp;
+	box.reset();
 	for(int i=0;i<numIndices;i+=Ies) {
 		const int * ind = &elementIndices[i];
 		for(int j=0;j<Ies;++j) {
@@ -190,8 +190,9 @@ void KdEngine::buildSource(sdb::VectorArray<T> * dst,
 			box.expandBy(pj, 1e-4f);
 			acomp.setP(pj, j);
 			acomp.setInd(i/Ies, 1);
-			dst->insert(acomp);
+			
 		}
+		dst->insert(acomp);
 	}
 	box.round();
 }

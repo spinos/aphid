@@ -1,17 +1,14 @@
 #ifndef INST_GLWIDGET_H
 #define INST_GLWIDGET_H
-#include <QGLWidget>
+
 #include <Base3DView.h>
-#include <AllMath.h>
+#include <ogl/DrawParticle.h>
 
 namespace aphid {
-class TriangleGeodesicSphere;
-class SuperQuadricGlyph;
-class GlslLegacyInstancer;
 class EbpGrid;
 }
 
-class GLWidget : public aphid::Base3DView
+class GLWidget : public aphid::Base3DView, public aphid::DrawParticle
 {
     Q_OBJECT
 
@@ -28,11 +25,7 @@ public slots:
 signals:
     
 private:
-    aphid::TriangleGeodesicSphere * m_sphere;
-	aphid::SuperQuadricGlyph * m_glyph;
-    aphid::GlslLegacyInstancer * m_instancer;
-    aphid::Float4 * m_particles;
-    aphid::EbpGrid * m_grid;
+	aphid::EbpGrid * m_grid;
 	
 };
 

@@ -1,9 +1,7 @@
 #include <QtGui>
 #include <QtOpenGL>
-#include <geom/SuperQuadricGlyph.h>
 #include "instwidget.h"
 #include <GeoDrawer.h>
-#include <ogl/GlslInstancer.h>
 #include <sdb/ebp.h>
 
 using namespace aphid;
@@ -11,10 +9,7 @@ using namespace aphid;
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 {
-	m_glyph = new SuperQuadricGlyph(8);
-	m_glyph->computePositions(2.5f, .5f);
-	m_sphere = new TriangleGeodesicSphere(7);
-    m_instancer = new GlslLegacyInstancer;
+	updateGlyph(.5f, .5f);
 	
 	std::vector<cvx::Triangle * > tris;
 	cvx::Triangle * ta = new cvx::Triangle;
@@ -37,34 +32,28 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
 	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, 3);
 	m_grid->insertNodeAtLevel(3);
 	m_grid->cachePositions();
-	int numParticles = m_grid->numParticles();
+	const int np = m_grid->numParticles();
 	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(3)
-			<<" num instances "<<numParticles;
-	
-
-	m_grid->fillBox(fintersect, 12);
-	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, 3);
-	m_grid->insertNodeAtLevel(3);
-	m_grid->cachePositions();
-	numParticles = m_grid->numParticles();
-	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(3)
-			<<" num instances "<<numParticles;
+			<<" num instances "<<np;
 	
 	for(int i=0;i<20;++i) {
 		m_grid->update();    
 	}
 	
-    m_particles = new Float4[numParticles * 4];
-	const Vector3F * poss = m_grid->positions(); 
+	createParticles(np);
+	
+    const Vector3F * poss = m_grid->positions(); 
 	
 // column-major element[3] is translate  
-    for(int i=0;i<numParticles;++i) {
-		int k = i*4;
-            m_particles[k] = Float4(1 ,0,0,poss[i].x);
-            m_particles[k+1] = Float4(0,1 ,0,poss[i].y);
-            m_particles[k+2] = Float4(0,0,1 ,poss[i].z);
-            m_particles[k+3] = Float4(RandomF01(),RandomF01(),RandomF01(),1);
+    for(int i=0;i<np;++i) {
+		Float4 * pr = particleR(i);
+            pr[0] = Float4(1 ,0,0,poss[i].x);
+            pr[1] = Float4(0,1 ,0,poss[i].y);
+            pr[2] = Float4(0,0,1 ,poss[i].z);
     }
+	
+	permutateParticleColors();
+	
 }
 
 GLWidget::~GLWidget()
@@ -72,50 +61,15 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
-    std::string diaglog;
-    m_instancer->diagnose(diaglog);
-    std::cout<<diaglog;
-    m_instancer->initializeShaders(diaglog);
-    std::cout<<diaglog;
-    std::cout.flush();
-    
+    initGlsl();
 }
 
 void GLWidget::clientDraw()
 {
     getDrawer()->m_markerProfile.apply();
 	getDrawer()->setColor(.5f, .85f, .7f);
-
-	m_instancer->programBegin();
-#if 0
-	m_particles[0].set(10.f, 0.f, 0.f, 0.f);	
-	m_particles[1].set(0.f, 10.f, 0.f, 0.f);	
-	m_particles[2].set(0.f, 0.f, 10.f, 0.f);	
-	int numParticles = 1;
-#else
-	int numParticles = m_grid->numParticles();
-#endif
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-        
-	for(int i=0;i<numParticles;++i) {
-	    const Float4 *d = &m_particles[i*4];
-	    glMultiTexCoord4fv(GL_TEXTURE1, (const float *)d);
-	    glMultiTexCoord4fv(GL_TEXTURE2, (const float *)&d[1]);
-	    glMultiTexCoord4fv(GL_TEXTURE3, (const float *)&d[2]);
-		m_instancer->setDiffueColorVec((const float *)&d[3]);
-	    
-	    glNormalPointer(GL_FLOAT, 0, (GLfloat*)m_glyph->vertexNormals());
-        glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_glyph->points());
-        glDrawElements(GL_TRIANGLES, m_glyph->numIndices(), GL_UNSIGNED_INT, m_glyph->indices());
-        
-        
-	}
 	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	
-	m_instancer->programEnd();
+	drawParticles();
 	
 #if 0
 	for(int i=0;i<20;++i) {
@@ -124,11 +78,11 @@ void GLWidget::clientDraw()
 	
 	const Vector3F * poss = m_grid->positions(); 
 	
-    for(int i=0;i<numParticles;++i) {
-		int k = i*4;
-            m_particles[k].w = poss[i].x;
-            m_particles[k+1].w = poss[i].y;
-            m_particles[k+2].w = poss[i].z;
+    for(int i=0;i<numParticles();++i) {
+		Float4 * pr = particleR(i);
+            pr[0].w = poss[i].x;
+            pr[1].w = poss[i].y;
+            pr[2].w = poss[i].z;
     }
 #endif
 }

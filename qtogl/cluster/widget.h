@@ -2,7 +2,7 @@
 #define ROTT_WIDGET_H
 
 #include <Base3DView.h>
-#include <math/ATypes.h>
+#include <ogl/DrawParticle.h>
 
 namespace aphid {
 
@@ -27,9 +27,11 @@ class KdNNode;
 template<typename T1, typename T2>
 class KdNTree;
 
+class EbpGrid;
+
 }
 
-class GLWidget : public aphid::Base3DView
+class GLWidget : public aphid::Base3DView, public aphid::DrawParticle
 {
     Q_OBJECT
 
@@ -53,6 +55,7 @@ private:
 private:
 typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	TreeTyp * m_tree;
+	aphid::EbpGrid * m_grid;
 	aphid::sdb::VectorArray<aphid::cvx::Triangle > * m_triangles;
 	aphid::Matrix44F m_space;
 	aphid::Ray m_incident;

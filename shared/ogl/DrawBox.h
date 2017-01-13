@@ -38,14 +38,14 @@ public:
 	void drawASolidBox() const;
 	
 protected:
-
+	void drawBoundingBox(const BoundingBox * box) const;
+	void drawWiredBoundingBox(const BoundingBox * box) const;
+	void drawSolidBoundingBox(const BoundingBox * box) const;
+	
 	void drawWireBox(const float * center, const float & scale) const;
 	void drawSolidBox(const float * center, const float & scale) const;
 	void drawWireBox(const float * center, const float * scale) const;
 	void drawSolidBox(const float * center, const float * scale) const;
-	void drawBoundingBox(const BoundingBox * box) const;
-	void drawWiredBoundingBox(const BoundingBox * box) const;
-	void drawSolidBoundingBox(const BoundingBox * box) const;
 	void drawSolidBoxArray(const float * data,
 						const unsigned & count,
 						const unsigned & stride = 1) const;

@@ -10,8 +10,11 @@
 #include <math/AOrientedBox.h>
 #include <ConvexShape.h>
 #include <sdb/VectorArray.h>
-#include <kd/KdEngine.h>
+#include <kd/IntersectEngine.h>
+#include <ogl/DrawKdTree.h>
+#include <ogl/DrawGrid.h>
 #include "../cactus.h"
+#include <sdb/ebp.h>
 
 using namespace aphid;
 
@@ -22,7 +25,6 @@ GLWidget::GLWidget(QWidget *parent)
 	m_space.translate(1,1,1);
 	m_roth = new RotationHandle(&m_space);
 	m_triangles = new sdb::VectorArray<cvx::Triangle>();
-	
 /// prepare kd tree
 	BoundingBox gridBox;
 	KdEngine eng;
@@ -31,41 +33,93 @@ GLWidget::GLWidget(QWidget *parent)
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
-	std::cout<<"\n kd tree source bbox"<<gridBox;
+	std::cout<<"\n kd tree source bbox"<<gridBox
+			<<"\n n tri "<<m_triangles->size();
 	
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 64;
+	bf._maxLeafPrims = 16;
 	
-	TreeTyp * m_tree = new TreeTyp;
+	m_tree = new TreeTyp;
 	
 	eng.buildTree<cvx::Triangle, KdNode4, 4>(m_tree, m_triangles, gridBox, &bf);
 	
-	std::cout.flush();
+typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
+
+	FIntersectTyp ineng(m_tree);
+	const float sz0 = m_tree->getBBox().getLongestDistance() * .67f;
+	m_grid = new EbpGrid;
+	m_grid->fillBox(m_tree->getBBox(), sz0 );
+	m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 3);
+	m_grid->insertNodeAtLevel(3);
+	m_grid->cachePositions();
+	int np = m_grid->numParticles();
+	qDebug()<<"\n grid n cell "<<m_grid->numCellsAtLevel(3);
 	
+	for(int i=0;i<20;++i) {
+		m_grid->update();    
+	}
+	
+	createParticles(np);
+	
+	const Vector3F * poss = m_grid->positions(); 
+	
+// column-major element[3] is translate  
+    for(int i=0;i<np;++i) {
+		Float4 * pr = particleR(i);
+            pr[0] = Float4(.25 ,0,0,poss[i].x);
+            pr[1] = Float4(0,.25 ,0,poss[i].y);
+            pr[2] = Float4(0,0,.25 ,poss[i].z);
+    }
+	
+	permutateParticleColors();
+	
+	std::cout.flush();	
 }
 
 GLWidget::~GLWidget()
 {}
 
 void GLWidget::clientInit()
-{}
+{
+	initGlsl();
+}
 
 void GLWidget::clientDraw()
 {
-	getDrawer()->m_markerProfile.apply();
+	
 
 	getDrawer()->setColor(0.f, .35f, .45f);
 
-	getDrawer()->m_surfaceProfile.apply();
 	
 	getDrawer()->m_wireProfile.apply();
-	
+/*
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sCactusMeshVertices[0] );
 	glDrawElements(GL_TRIANGLES, sCactusNumTriangleIndices, GL_UNSIGNED_INT, sCactusMeshTriangleIndices );
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
+*/
+		
+	glBegin(GL_TRIANGLES);
+	for(int i=0;i<m_triangles->size();++i) {
+		const cvx::Triangle * t = m_triangles->get(i);
+		glVertex3fv((const GLfloat *)&t->P(0));
+		glVertex3fv((const GLfloat *)&t->P(1));
+		glVertex3fv((const GLfloat *)&t->P(2));
+	}
+	glEnd();
+	
+	DrawKdTree<cvx::Triangle, KdNode4 > drt(m_tree);
+	drt.drawCells();
+	
+	DrawGrid<EbpGrid> dgd(m_grid);
+	dgd.drawLevelCells(3);
+	
+	//getDrawer()->m_surfaceProfile.apply();
+	getDrawer()->m_markerProfile.apply();
+	
+	drawParticles();
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)
