@@ -4,7 +4,7 @@
 #include "instwidget.h"
 #include <GeoDrawer.h>
 #include <ogl/GlslInstancer.h>
-#include "ebp.h"
+#include <sdb/ebp.h>
 
 using namespace aphid;
 

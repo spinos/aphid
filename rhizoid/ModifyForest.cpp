@@ -10,7 +10,7 @@
 #include "ModifyForest.h"
 #include <geom/ATriangleMesh.h>
 #include <math/ANoise3.h>
-#include <../qtogl/ebp.h>
+#include <sbd/ebp.h>
 #include <PlantSelection.h>
 #include <ctime>
 

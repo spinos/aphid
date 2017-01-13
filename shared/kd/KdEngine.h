@@ -23,6 +23,13 @@ class KdEngine {
     int m_numRopeTraversed;
     
 public:
+	template<typename T, int Ies>
+	void buildSource(sdb::VectorArray<T> * dst,
+					BoundingBox & box,
+					const float * points,
+					const int & numIndices,
+					const int * elementIndices);
+					
 	template<typename T, typename Ts>
 	void buildSource(sdb::VectorArray<T> * dst,
 					BoundingBox & box,
@@ -165,6 +172,29 @@ private:
 				const BoundingBox & innerBx);
 				
 };
+
+template<typename T, int Ies>
+void KdEngine::buildSource(sdb::VectorArray<T> * dst,
+					BoundingBox & box,
+					const float * points,
+					const int & numIndices,
+					const int * elementIndices)
+{
+	box.reset();
+	T acomp;
+	for(int i=0;i<numIndices;i+=Ies) {
+		const int * ind = &elementIndices[i];
+		for(int j=0;j<Ies;++j) {
+			const int & vj = ind[j];
+			const Vector3F pj(points[vj*3], points[vj*3 + 1], points[vj*3 + 2]);
+			box.expandBy(pj, 1e-4f);
+			acomp.setP(pj, j);
+			acomp.setInd(i/Ies, 1);
+			dst->insert(acomp);
+		}
+	}
+	box.round();
+}
 
 template<typename T, typename Ts>
 void KdEngine::buildSource(sdb::VectorArray<T> * dst,
