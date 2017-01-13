@@ -11,6 +11,7 @@
 #include <ConvexShape.h>
 #include <sdb/VectorArray.h>
 #include <kd/IntersectEngine.h>
+#include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawKdTree.h>
 #include <ogl/DrawGrid.h>
 #include "../cactus.h"
@@ -46,7 +47,7 @@ GLWidget::GLWidget(QWidget *parent)
 typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
-	const float sz0 = m_tree->getBBox().getLongestDistance() * .67f;
+	const float sz0 = m_tree->getBBox().getLongestDistance() * .73f;
 	m_grid = new EbpGrid;
 	m_grid->fillBox(m_tree->getBBox(), sz0 );
 	m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 3);
@@ -61,14 +62,30 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	
 	createParticles(np);
 	
-	const Vector3F * poss = m_grid->positions(); 
+typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	
-// column-major element[3] is translate  
+	FClosestTyp clseng(m_tree);
+	Vector3F top;
+	
+	const Vector3F * poss = m_grid->positions(); 
+#if 0
+	int igeom, icomp;
+	float contrib[4];
+#endif	
+
     for(int i=0;i<np;++i) {
+		clseng.closestTo(top, poss[i]);
+#if 0
+		clseng.getGeomCompContribute(igeom, icomp, contrib);
+		std::cout<<"\n closest to geom_"<<igeom
+					<<" comp_"<<icomp
+					<<" contrib "<<contrib[0]<<","<<contrib[1]<<","<<contrib[2];
+#endif
+// column-major element[3] is translate  
 		Float4 * pr = particleR(i);
-            pr[0] = Float4(.25 ,0,0,poss[i].x);
-            pr[1] = Float4(0,.25 ,0,poss[i].y);
-            pr[2] = Float4(0,0,.25 ,poss[i].z);
+            pr[0] = Float4(.25 ,0,0,top.x);
+            pr[1] = Float4(0,.25 ,0,top.y);
+            pr[2] = Float4(0,0,.25 ,top.z);
     }
 	
 	permutateParticleColors();
@@ -86,10 +103,7 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	
-
 	getDrawer()->setColor(0.f, .35f, .45f);
-
 	
 	getDrawer()->m_wireProfile.apply();
 /*
@@ -110,8 +124,12 @@ void GLWidget::clientDraw()
 	}
 	glEnd();
 	
+	getDrawer()->setColor(0.f, .15f, .25f);
+
 	DrawKdTree<cvx::Triangle, KdNode4 > drt(m_tree);
 	drt.drawCells();
+	
+	getDrawer()->setColor(.35f, .15f, 0.f);
 	
 	DrawGrid<EbpGrid> dgd(m_grid);
 	dgd.drawLevelCells(3);
