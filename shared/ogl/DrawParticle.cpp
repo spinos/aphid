@@ -23,7 +23,7 @@ DrawParticle::DrawParticle()
 DrawParticle::~DrawParticle()
 {}
 
-int DrawParticle::initGlsl()
+bool DrawParticle::initGlsl()
 {
 	std::string diaglog;
     m_instancer->diagnose(diaglog);
@@ -31,6 +31,7 @@ int DrawParticle::initGlsl()
     m_instancer->initializeShaders(diaglog);
     std::cout<<diaglog;
     std::cout.flush();
+    return m_instancer->isDiagnosed();
 }
 
 void DrawParticle::createParticles(int np)

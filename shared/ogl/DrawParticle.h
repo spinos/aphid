@@ -30,7 +30,7 @@ public:
 	virtual ~DrawParticle();
 	
 protected:
-	int initGlsl();
+	bool initGlsl();
 	
 	void createParticles(int np);
 	
