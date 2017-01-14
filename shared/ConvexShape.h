@@ -251,6 +251,7 @@ public:
 	Vector3F C(int idx) const;
 	const int & ind0() const;
 	const int & ind1() const;
+	Vector3F center() const;
 	Vector3F calculateNormal() const;
 	float calculateArea() const;
 	void translate(const Vector3F & v);

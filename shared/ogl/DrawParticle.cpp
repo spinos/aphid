@@ -87,5 +87,11 @@ void DrawParticle::permutateParticleColors()
     }
 }
 
+Float4 * DrawParticle::particleColor(int i)
+{ return &particleR(i)[3]; }
+
+const Float4 * DrawParticle::particleColor(int i) const
+{ return &particleR(i)[3]; }
+
 }
 

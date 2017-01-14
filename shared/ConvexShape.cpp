@@ -485,6 +485,9 @@ const int & Triangle::ind0() const
 const int & Triangle::ind1() const
 { return m_nc1; }
 
+Vector3F Triangle::center() const
+{ return (m_p0 + m_p1 + m_p2) * .333333f; }
+
 BoundingBox Triangle::calculateBBox() const
 {
 	BoundingBox b;

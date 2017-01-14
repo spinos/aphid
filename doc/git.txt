@@ -9,3 +9,7 @@ Host github.com
   Port 443
 
 ssh -T git@github.com
+
+
+git log -p <path>
+shows commits that touch the specified path

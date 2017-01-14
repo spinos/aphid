@@ -51,6 +51,7 @@ public slots:
 signals:
 
 private:
+	void drawFaceCliques();
 	
 private:
 typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
@@ -60,6 +61,7 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	aphid::Matrix44F m_space;
 	aphid::Ray m_incident;
 	aphid::RotationHandle * m_roth;
+	boost::scoped_array<int> m_cs;
 	
 };
 

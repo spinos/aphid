@@ -152,9 +152,18 @@ bool Coord3::intersects(const int & v) const
 
 bool Coord3::intersects(const Coord2 & e) const
 {
-	if(e.x == x && e.y == y ) return true;
-	if(e.x == y && e.y == z ) return true;
-	return (e.x == z && e.y == x );
+	int c = 0;
+	if(x == e.x || x == e.y) {
+		c++;
+	}
+	if(y == e.x || y == e.y) {
+		c++;
+	}
+	if(z == e.x || z == e.y) {
+		c++;
+	}
+	
+	return (c > 1);
 }
 
 const std::string V3::str() const 

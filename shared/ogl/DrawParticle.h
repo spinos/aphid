@@ -46,6 +46,9 @@ protected:
 	Float4 * particleR(int i);
 	const Float4 * particleR(int i) const;
 	
+	Float4 * particleColor(int i);
+	const Float4 * particleColor(int i) const;
+	
 	void permutateParticleColors();
 	
 };
