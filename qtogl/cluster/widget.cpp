@@ -48,7 +48,7 @@ GLWidget::GLWidget(QWidget *parent)
 typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
-	const float sz0 = m_tree->getBBox().getLongestDistance() * .79f;
+	const float sz0 = m_tree->getBBox().getLongestDistance() * .89f;
 	m_grid = new EbpGrid;
 	m_grid->fillBox(m_tree->getBBox(), sz0 );
 	m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 3);
@@ -93,7 +93,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 					<<" contrib "<<contrib[0]<<","<<contrib[1]<<","<<contrib[2];
 #endif
 
-		cluster->assignToClique(&sCactusMeshTriangleIndices[icomp * 3], 
+		cluster->assignToCliqueOrigin(&sCactusMeshTriangleIndices[icomp * 3], 
 								i);
 		
 // column-major element[3] is translate  
@@ -105,7 +105,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	
 	permutateParticleColors();
 	
-	float cliqueDistance = sz0 / 4.f;
+	float cliqueDistance = sz0 / 5.f;
 	cluster->buildCliques(cliqueDistance);
 	cluster->extractCliques(m_cs.get() );
 	delete cluster;

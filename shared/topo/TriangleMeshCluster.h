@@ -43,7 +43,7 @@ public:
 				const int & numTriangleIndices,
 				const int * triangleIndices);
 				
-	void assignToClique(const int * triangleInd,
+	void assignToCliqueOrigin(const int * triangleInd,
 						const int & iclique);
 	
 	int numSites();
@@ -62,16 +62,19 @@ private:
 				const Vector3F & p0,
 				const Vector3F & p1);
 	void expandCliqueFrom(const sdb::Coord3 & coord);
+/// expand from q, store result in c
 	void expandClique(sdb::Sequence<sdb::Coord3 > & c,
 					sdb::Sequence<sdb::Coord3 > & q);
-	void findConnectedSites(sdb::Sequence<sdb::Coord3 > & result,
+	void connectSiteOnEdge(sdb::Sequence<sdb::Coord3 > & result,
 					const sdb::Coord2 & ec,
 					const sdb::Coord3 & vs,
 					const SiteData * src);
-	bool isSiteCloseTo(const SiteData * dst,
+/// d geodesic distance to clique origin
+	bool isSiteCloseTo(float & d,
+					const SiteData * dst,
 					const EdgeData * edge,
 					const SiteData * src);
-	
+
 };
 	
 }

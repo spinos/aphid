@@ -10,6 +10,7 @@
 #include "TriangleMeshCluster.h"
 #include <geom/ATriangleMesh.h>
 #include <ConvexShape.h>
+#include <sdb/cache_diff.h>
 
 namespace aphid {
 
@@ -72,14 +73,25 @@ void TriangleMeshCluster::addEdge(const sdb::Coord2 & c,
 		e->_center = (p0 + p1) * .5f;
 		return;
 	}
-	e = new EdgeData();
+	e = new EdgeData;
 	e->_face0 = f;
 	e->_face1.x = -1;
 	e->_center = (p0 + p1) * .5f;
 	m_edges.insert(c, e);
 }
 
-void TriangleMeshCluster::assignToClique(const int * triangleInd,
+void TriangleMeshCluster::extractCliques(int * dst)
+{
+	m_sites.begin();
+	while(!m_sites.end() ) {
+		const SiteData * d = m_sites.value();
+		dst[d->_idx] = d->_clique;
+		
+		m_sites.next();
+	}
+}
+
+void TriangleMeshCluster::assignToCliqueOrigin(const int * triangleInd,
 						const int & iclique)
 {
 	sdb::Coord3 vs(triangleInd[0], triangleInd[1], triangleInd[2]);
@@ -121,33 +133,24 @@ void TriangleMeshCluster::buildCliques(const float & maxDistance)
 	
 }
 
-void TriangleMeshCluster::extractCliques(int * dst)
-{
-	m_sites.begin();
-	while(!m_sites.end() ) {
-		const SiteData * d = m_sites.value();
-		dst[d->_idx] = d->_clique;
-		
-		m_sites.next();
-	}
-}
-
 void TriangleMeshCluster::expandCliqueFrom(const sdb::Coord3 & coord)
 {
-	sdb::Sequence<sdb::Coord3 > c;
+	//std::cout<<"\n expand from "<<coord;
 	sdb::Sequence<sdb::Coord3 > expanded[2];
 	expanded[1].insert(coord);
 	
 	bool added = true;
-	//while(added) {
+	while(added) {
 	
-		expandClique(c, expanded[1]);
+		//std::cout<<" expand nc "<<expanded[1].size();
+		expandClique(expanded[0], expanded[1]);
 		
-		//bufferExpansion(m_c, expanded[a], expanded[b]);
+		int diff = sdb::cache_diff<sdb::Sequence<sdb::Coord3 > >(expanded[1], expanded[0]);
+		//std::cout<<" diff nc "<<diff;
 		
-	//	added = expanded[1].size() > 0;
+		added = (diff > 0);
 		
-	//}
+	}
 }
 
 void TriangleMeshCluster::expandClique(sdb::Sequence<sdb::Coord3 > & c,
@@ -160,20 +163,20 @@ void TriangleMeshCluster::expandClique(sdb::Sequence<sdb::Coord3 > & c,
 		const sdb::Coord3 & vs = q.key();
 		
 		const sdb::Coord2 e1(vs.x, vs.y);
-		findConnectedSites(c, e1, vs, d);
+		connectSiteOnEdge(c, e1, vs, d);
 		
 		const sdb::Coord2 e2(vs.y, vs.z);
-		findConnectedSites(c, e2, vs, d);
+		connectSiteOnEdge(c, e2, vs, d);
 		
 /// order last edge
 		const sdb::Coord2 e3(vs.x, vs.z);
-		findConnectedSites(c, e3, vs, d);
+		connectSiteOnEdge(c, e3, vs, d);
 		
 		q.next();
 	}
 }
 
-void TriangleMeshCluster::findConnectedSites(sdb::Sequence<sdb::Coord3 > & result,
+void TriangleMeshCluster::connectSiteOnEdge(sdb::Sequence<sdb::Coord3 > & result,
 					const sdb::Coord2 & ec,
 					const sdb::Coord3 & vs,
 					const SiteData * src)
@@ -201,26 +204,31 @@ void TriangleMeshCluster::findConnectedSites(sdb::Sequence<sdb::Coord3 > & resul
 		return;
 	}
 
-	if(isSiteCloseTo(dst, ed, src) ) {
+	float geod;
+	if(isSiteCloseTo(geod, dst, ed, src) ) {
+		//std::cout<<" d "<<geod;
 /// assign to clique
 		dst->_clique = src->_clique;
+		dst->_distance = geod;
 /// add to expanded
 		result.insert(f1c);
 		
 	}
 }
 
-bool TriangleMeshCluster::isSiteCloseTo(const SiteData * dst,
+bool TriangleMeshCluster::isSiteCloseTo(float & d,
+						const SiteData * dst,
 						const EdgeData * edge,
 						const SiteData * src)
 {
 	if(dst->_distance == 0.f) {
 		return false;
 	}
-/// geodesic distance
-	float d = src->_center.distanceTo(edge->_center)
-				+ edge->_center.distanceTo(dst->_center)
-				+ src->_distance;
+
+	d = src->_center.distanceTo(edge->_center)
+				+ edge->_center.distanceTo(dst->_center);
+	d += d * (1.f - src->_normal.dot(dst->_normal) ); 
+	d += src->_distance;
 				
 	if(d > m_distanceLimit) {
 		return false;
