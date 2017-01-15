@@ -84,15 +84,12 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 
 		ExampVox * defBox = plantExample(0);
 		
-		MDataHandle drszx = block.inputValue(adrawDopSizeX);
-		MDataHandle drszy = block.inputValue(adrawDopSizeY);
-		MDataHandle drszz = block.inputValue(adrawDopSizeZ);
-		defBox->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat());
-		
+		updateDrawSize(defBox, block);
 		updateGeomBox(defBox, block);
 		updateGeomDop(defBox, block);
 		
 		float grdsz = defBox->geomExtent() * 25.f ;
+		grdsz = (int)grdsz + 1.f;
 		if(grdsz < 512.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
 			grdsz = 512.f;
@@ -205,11 +202,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 					
 	ExampVox * defBox = plantExample(0);
 	
-	MPlug drszx(thisNode, adrawDopSizeX);
-	MPlug drszy(thisNode, adrawDopSizeY);
-	MPlug drszz(thisNode, adrawDopSizeZ);
-	defBox->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat() );
-		
+	updateDrawSize(defBox, thisNode);
 	updateGeomBox(defBox, thisNode);
 	updateGeomDop(defBox, thisNode);
 	                    
@@ -639,12 +632,6 @@ MStatus ProxyViz::initialize()
     
 	attributeAffects(ainexamp, outValue1);
 	attributeAffects(aradiusMult, outValue1);
-	attributeAffects(abboxminx, outValue);
-	attributeAffects(abboxmaxx, outValue);
-	attributeAffects(abboxminy, outValue);
-	attributeAffects(abboxmaxy, outValue);
-	attributeAffects(abboxminz, outValue);
-	attributeAffects(abboxmaxz, outValue);
 	attributeAffects(outPositionPP, outValue);
 	
 	return MS::kSuccess;
@@ -950,23 +937,25 @@ void ProxyViz::drawBrush(M3dView & view)
 void ProxyViz::updateGeomBox(ExampVox * dst, const MObject & node)
 {
 	dst->setGeomSizeMult(MPlug(node, aradiusMult).asFloat() );
-	dst->setGeomBox(MPlug(node, abboxminx).asFloat(),
+	BoundingBox b(MPlug(node, abboxminx).asFloat(),
 			MPlug(node, abboxminy).asFloat(), 
 			MPlug(node, abboxminz).asFloat(), 
 			MPlug(node, abboxmaxx).asFloat(), 
 			MPlug(node, abboxmaxy).asFloat(), 
-			MPlug(node, abboxmaxz).asFloat());
+			MPlug(node, abboxmaxz).asFloat() );
+	dst->setGeomBox(&b);
 }
 
 void ProxyViz::updateGeomBox(ExampVox * dst, MDataBlock & block)
 {
 	dst->setGeomSizeMult(block.inputValue(aradiusMult).asFloat() );
-	dst->setGeomBox(block.inputValue(abboxminx).asFloat(),
+	BoundingBox b(block.inputValue(abboxminx).asFloat(),
 		block.inputValue(abboxminy).asFloat(), 
 		block.inputValue(abboxminz).asFloat(), 
 		block.inputValue(abboxmaxx).asFloat(), 
 		block.inputValue(abboxmaxy).asFloat(), 
-		block.inputValue(abboxmaxz).asFloat());
+		block.inputValue(abboxmaxz).asFloat() );
+	dst->setGeomBox(&b);
 }
 
 void ProxyViz::updateGeomDop(ExampVox * dst, const MObject & node)
@@ -1000,6 +989,24 @@ void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
 	ob.caluclateOrientation(&dst->geomBox() );
 	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
 	dst->update8DopPoints(ob, dst->dopSize());
+}
+
+void ProxyViz::updateDrawSize(ExampVox * dst, MDataBlock & block)
+{
+	MDataHandle drszx = block.inputValue(adrawDopSizeX);
+	MDataHandle drszy = block.inputValue(adrawDopSizeY);
+	MDataHandle drszz = block.inputValue(adrawDopSizeZ);
+	dst->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat());
+		
+}
+
+void ProxyViz::updateDrawSize(ExampVox * dst, const MObject & node)
+{
+	MPlug drszx(node, adrawDopSizeX);
+	MPlug drszy(node, adrawDopSizeY);
+	MPlug drszz(node, adrawDopSizeZ);
+	dst->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat() );
+		
 }
 
 }

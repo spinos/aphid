@@ -146,15 +146,22 @@ bool ExampVox::setNumBoxes(unsigned n)
 void ExampVox::setGeomSizeMult(const float & x)
 { m_sizeMult = x; }
 
-void ExampVox::setGeomBox(const float & a, 
-					const float & b,
-					const float & c,
-					const float & d,
-					const float & e,
-					const float & f)
+void ExampVox::setGeomBox(BoundingBox * bx)
 {
-	m_geomBox.setMin(a, b, c);
-	m_geomBox.setMax(d, e, f);
+/// limit box (-16 0 -16 16 16 16)
+	if(bx->distance(0) < 1e-1f) {
+		bx->setMin(-16.f, 0);
+		bx->setMax( 16.f, 0);
+	}
+	if(bx->distance(1) < 1e-1f) {
+		bx->setMin( 0.f, 1);
+		bx->setMax( 16.f, 1);
+	}
+	if(bx->distance(2) < 1e-1f) {
+		bx->setMin(-16.f, 2);
+		bx->setMax( 16.f, 2);
+	}
+	m_geomBox = *bx;
 	m_geomExtent = m_geomBox.radius();
 	m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); 
 	m_geomCenter = m_geomBox.center();

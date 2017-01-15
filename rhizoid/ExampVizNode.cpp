@@ -67,8 +67,7 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		MFloatVector& vmax = bbmaxH.asFloatVector();
 		bb.setMax(vmax.x, vmax.y, vmax.z);
 
-		setGeomBox(vmin.x, vmin.y, vmin.z,
-				vmax.x, vmax.y, vmax.z);
+		setGeomBox(&bb);
 		
 		MDataHandle drszx = block.inputValue(adrawDopSizeX);
 		MDataHandle drszy = block.inputValue(adrawDopSizeY);
@@ -136,6 +135,8 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	const BoundingBox & bbox = geomBox();
 	drawBoundingBox(&bbox);
 	
+	glPushAttrib(GL_CURRENT_BIT);
+	
 	//if ( style == M3dView::kFlatShaded || 
 	//	    style == M3dView::kGouraudShaded ) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -153,6 +154,9 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
     mat.glMatrix(m_transBuf);
 	
 	drawCircle(m_transBuf);
+	
+	glPopAttrib();
+	
 	view.endGL();
 }
 
@@ -437,8 +441,7 @@ void ExampViz::updateGeomBox(MObject & node)
 	MFnNumericData bbmxFn(bbmx);
 	bbmxFn.getData3Float(bb.m_data[3], bb.m_data[4], bb.m_data[5]);
 	
-	setGeomBox(bb.m_data[0], bb.m_data[1], bb.m_data[2],
-				bb.m_data[3], bb.m_data[4], bb.m_data[5]);
+	setGeomBox(&bb);
 				
 }
 

@@ -20,6 +20,7 @@ void DOP8Builder::build(const AOrientedBox & ob)
 {
 	const Vector3F & et = ob.extent();
 	const float * dopEt = ob.dopExtent();
+	
 /// top side
 	int nvert = 4;
 	m_vert[0].set(-et.x, -et.y, et.z);
@@ -48,9 +49,9 @@ void DOP8Builder::build(const AOrientedBox & ob)
 	int splitEdge = 3;
 	BoundingBox box(-et.x, -et.y, -et.z,
 					 et.x,  et.y,  et.z);
-	
+
 	float cutThre = et.y < et.x ? et.y : et.x; 
-	cutThre *= .19f;
+	cutThre *= .2f;
 	Vector3F o = rgt * dopEt[0] + up * dopEt[3];
 	Vector3F d = rgt * dopEt[0] + up * dopEt[2];
 	Vector3F phit;

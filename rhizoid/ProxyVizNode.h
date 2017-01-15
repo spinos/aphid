@@ -136,6 +136,8 @@ private:
 	Ray getRayDisplace(Vector3F & v0, Vector3F & v1,
 				short start_x, short start_y, short last_x, short last_y);
 	
+	void updateDrawSize(ExampVox * dst, const MObject & node);
+	void updateDrawSize(ExampVox * dst, MDataBlock & block);
 	void updateGeomBox(ExampVox * dst, const MObject & node);
 	void updateGeomBox(ExampVox * dst, MDataBlock & block);
 	void updateGeomDop(ExampVox * dst, const MObject & node);

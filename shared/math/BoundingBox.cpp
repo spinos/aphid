@@ -600,9 +600,23 @@ int BoundingBox::numFlatAxis(const float & threshold) const
 
 void BoundingBox::getSizeOrder(int * d) const
 {
-	const float lx = distance(0);
-	const float ly = distance(1);
-	const float lz = distance(2);
+	float lx = distance(0);
+	float ly = distance(1);
+	float lz = distance(2);
+/// separate
+	if(lx == ly) {
+		lx += 1e-4f;
+	}
+	
+	if(lx == lz) {
+		lx += 1e-4f;
+		lz -= 1e-4f;
+	}
+	
+	if(lz == ly) {
+		lz -= 1e-4f;
+	}
+	
 	d[0] = 0;
 	if(ly > lx && ly > lz) {
 		d[0] = 1;
