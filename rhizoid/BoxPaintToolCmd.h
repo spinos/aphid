@@ -44,9 +44,6 @@ private:
 	bool connectVoxToViz(MObject & voxObj, MObject & vizObj);
 	MStatus saveCacheSelected();
 	MStatus loadCacheSelected();
-	MObject getSelectedViz(const MSelectionList & sels, 
-							const MString & typName,
-							MStatus & stat);
 	MStatus voxelizeSelected();
 	void checkOutputConnection(MObject & node, const MString & outName);
 	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,

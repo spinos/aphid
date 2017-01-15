@@ -7,13 +7,16 @@
  *
  */
 
-#include "ASelectionHelper.h"
+#include <mama/SelectionHelper.h>
 #include <maya/MItDag.h>
 #include <maya/MFnDagNode.h>
 #include <maya/MItMeshPolygon.h>
 #include <foundation/SHelper.h>
 
 namespace aphid {
+
+SelectionHelper::SelectionHelper()
+{}
     
 void SelectionHelper::setBehead(const MString &name)
 {
@@ -277,6 +280,27 @@ char SelectionHelper::getSelected(MDagPathArray &active_list)
 	reportNumActive(active_list);
 	
 	return 1;
+}
+
+MObject SelectionHelper::GetTypedNode(const MSelectionList & sels,
+								const MString & typName,
+							 MFn::Type fltTyp)
+{
+	MStatus stat;
+	MItSelectionList iter(sels, fltTyp, &stat );
+	
+	for(;!iter.isDone();iter.next() ) {
+		MObject vizobj;
+		iter.getDependNode(vizobj);
+		MFnDependencyNode fviz(vizobj, &stat);
+		if(stat) {
+			if(fviz.typeName() == typName) {
+				return vizobj;
+			}
+		}
+	}
+	
+	return MObject::kNullObj;
 }
 
 }

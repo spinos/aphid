@@ -17,7 +17,7 @@ namespace aphid {
     
 class SelectionHelper : public AHelper {
 public:
-	SelectionHelper() {}
+	SelectionHelper();
 	void setBehead(const MString &name);
 	void excludeHeads(MDagPathArray &arr);
 	
@@ -35,6 +35,10 @@ public:
 	std::vector<std::string> _behead_list;
 	std::map<std::string,std::string> _nameMap;
 	std::map<std::string,std::string> _ignoreMap;
+	
+	static MObject GetTypedNode(const MSelectionList & sels,
+								const MString & typName,
+							 MFn::Type fltTyp = MFn::kInvalid);
 	
 private:
     void getParents(MDagPath & root, MDagPathArray &active_list);

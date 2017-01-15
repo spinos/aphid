@@ -15,6 +15,7 @@
 #include <ASearchHelper.h>
 #include <mama/MeshHelper.h>
 #include <mama/ConnectionHelper.h>
+#include <mama/SelectionHelper.h>
 #include "ShrubVizNode.h"
 #include "ExampVizNode.h"
 #include <gpr/PCASimilarity.h>
@@ -300,7 +301,10 @@ MStatus ShrubWorks::creatShrub()
 	
 	addSimilarities(similarities, totalBox, paths);
 	
-	MObject shrubNode = AHelper::CreateDagNode("shrubViz", "shrubViz");
+	MObject shrubNode = SelectionHelper::GetTypedNode(selList, "shrubViz", MFn::kPluginLocatorNode);
+	if(shrubNode == MObject::kNullObj) {
+		shrubNode = AHelper::CreateDagNode("shrubViz", "shrubViz");
+	}
 	ShrubVizNode * viz = (ShrubVizNode *)MFnDependencyNode(shrubNode).userNode();
 	viz->setBBox(totalBox);
 	

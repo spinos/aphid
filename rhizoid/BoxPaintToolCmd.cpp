@@ -25,6 +25,7 @@
 #include <AHelper.h>
 #include <ASearchHelper.h>
 #include <mama/ConnectionHelper.h>
+#include <mama/SelectionHelper.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/PrincipalComponents.h>
 #include <kd/KdEngine.h>
@@ -309,10 +310,10 @@ MStatus proxyPaintTool::connectGroundSelected()
 	}
 	
 	MStatus stat;
-	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
-	if(!stat) {
+	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
+	if(vizobj == MObject::kNullObj ) {
 		MGlobal::displayWarning("proxyPaintTool found no viz selected, select mesh(es) and a viz to connect");
-		return stat;
+		return MS::kFailure;
 	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
@@ -373,8 +374,10 @@ MStatus proxyPaintTool::connectVoxelSelected()
 	}
 	
 	MStatus stat;
-	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
-	if(!stat) return stat;
+	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
+	if(vizobj == MObject::kNullObj ) {
+		return MS::kFailure;
+	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
@@ -434,8 +437,10 @@ MStatus proxyPaintTool::saveCacheSelected()
 		return MS::kFailure;
 	}
 	
-	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
-	if(!stat) return stat;
+	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
+	if(vizobj == MObject::kNullObj ) {
+		return MS::kFailure;
+	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
@@ -457,8 +462,10 @@ MStatus proxyPaintTool::loadCacheSelected()
 		return MS::kFailure;
 	}
 	
-	MObject vizobj = getSelectedViz(sels, "proxyViz", stat);
-	if(!stat) return stat;
+	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
+	if(vizobj == MObject::kNullObj ) {
+		return MS::kFailure;
+	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
@@ -467,32 +474,6 @@ MStatus proxyPaintTool::loadCacheSelected()
 	pViz->loadExternal(m_cacheName.asChar() );
 	
 	return stat;
-}
-
-MObject proxyPaintTool::getSelectedViz(const MSelectionList & sels, 
-									const MString & typName,
-									MStatus & stat)
-{
-	MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
-	stat = MS::kFailure;
-	MObject vizobj;
-	for(;!iter.isDone();iter.next() ) {
-		iter.getDependNode(vizobj);
-		MFnDependencyNode fviz(vizobj, &stat);
-		if(stat) {
-			MFnDependencyNode fviz(vizobj);
-			if(fviz.typeName() == typName) {
-				stat = MS::kSuccess;
-				break;
-			}
-		}
-	}
-	
-	if(!stat ) {
-		AHelper::Info<MString>("proxyPaintTool select no node by type", typName);
-	}
-	
-	return vizobj;
 }
 
 MStatus proxyPaintTool::voxelizeSelected()
@@ -506,8 +487,8 @@ MStatus proxyPaintTool::voxelizeSelected()
 		return MS::kFailure;
 	}
 	
-	MObject vizobj = getSelectedViz(sels, "proxyExample", stat);
-	if(!stat) {
+	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyExample", MFn::kPluginLocatorNode);
+	if(vizobj == MObject::kNullObj ) {
 		vizobj = AHelper::CreateDagNode("proxyExample", "proxyExample");
 		if(vizobj.isNull()) {
 			MGlobal::displayWarning("proxyPaintTool cannot create example viz");
