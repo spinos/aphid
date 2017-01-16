@@ -222,4 +222,41 @@ bool ConnectionHelper::ConnnectArrayOneToOne(MPlugArray & srcPlugs,
 	return true;
 }
 
+MObject ConnectionHelper::GetConnectedNode(const MObject & node,
+							const MString & attrName,
+							const int & refSlot)
+{
+	MPlug attrPlug;
+	AHelper::getNamedPlug(attrPlug, node, attrName.asChar() );
+	if(attrPlug.isNull() ) {
+	    AHelper::Info<MString>("no destination attrib", attrName);
+		return MObject::kNullObj;
+	}
+	
+	MPlugArray srcPlugs;
+	if(attrPlug.isArray() ) {
+		GetArrayPlugInputConnections(srcPlugs, attrPlug );
+	} else {
+		GetInputConnections(srcPlugs, attrPlug );
+	}
+	
+	if(srcPlugs.length() < 1) {
+		return MObject::kNullObj;
+	}
+	
+	if(!attrPlug.isArray() || refSlot < 0) {
+		return srcPlugs[0].node();
+	}
+	
+	int j = srcPlugs.length() - 1;
+	if(refSlot > j) {
+		AHelper::Info<MString>("destination attrib out of referred slot", attrName);
+		AHelper::Info<int>("last", j);
+		return MObject::kNullObj;
+	}
+	
+	return srcPlugs[refSlot].node();
+	
+}
+
 }

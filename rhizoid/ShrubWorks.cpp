@@ -190,6 +190,7 @@ void ShrubWorks::addInstances(const MObject & vizNode,
 							 FeatureExampleMap & exampleGroupInd) const
 {
 	ShrubVizNode * viz = (ShrubVizNode *)MFnDependencyNode(vizNode).userNode();
+	viz->clearInstances();
 	
 	const int ns = similarities.size();
 	DenseMatrix<float> transFeature(4, 4);
@@ -244,6 +245,7 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 					FeatureExampleMap & exampleGroupInd,
 					const MDagPathArray & paths) const
 {
+	int nps = 0;
 	const int ns = similarities.size();
 	for(int i=0;i<ns;++i) {
 		const int & ne = similarities[i]->t2->numGroups();
@@ -261,13 +263,31 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 			BoundingBox bbox;
 			similarities[i]->t2->getFeatureBound((float *)&bbox, groupI.x, 1);
 			
-			MObject exampleNode = AHelper::CreateDagNode("proxyExample", "proxyExample");
+			MObject exampleNode = ConnectionHelper::GetConnectedNode(vizNode, "inExample", nps);
+			bool toConnect = false;
+			if(exampleNode == MObject::kNullObj) {
+				exampleNode = AHelper::CreateDagNode("proxyExample", "proxyExample");
+				toConnect = true;
+			}
 			ExampViz * example = (ExampViz *)MFnDependencyNode(exampleNode).userNode();
 			example->setTriangleMesh(pnts, tris, bbox);
 			
-			ConnectionHelper::ConnectToArray(exampleNode, "outValue",
+			if(toConnect) {
+				ConnectionHelper::ConnectToArray(exampleNode, "outValue",
 							vizNode, "inExample");
+			}
+							
+			nps++;
 		}
+	}
+	
+/// evaluate input examples
+	MPlug exmPlug;
+	MObject nouse;
+	AHelper::getNamedPlug(exmPlug, vizNode, "inExample" );
+	for(int i=0;i<exmPlug.numElements();++i) {
+		MPlug anexm = exmPlug.elementByLogicalIndex(i);
+		anexm.getValue(nouse);
 	}
 }
 
@@ -318,12 +338,8 @@ MStatus ShrubWorks::creatShrub()
 	AHelper::Info<int>(" total n example", totalNe );
 	
 	addExamples(shrubNode, similarities, exampleGroupInd, paths);
-	
-	addInstances(shrubNode, similarities, exampleGroupInd);
 
-//DenseMatrix<float> featurePnts;
-/// stored columnwise
-//similarities[i]->t2->getFeaturePoints(featurePnts, j, 1);
+	addInstances(shrubNode, similarities, exampleGroupInd);
 	
 	clearSimilarity(similarities);
 	exampleGroupInd.clear();

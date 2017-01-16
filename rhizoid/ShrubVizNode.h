@@ -76,6 +76,7 @@ public:
 /// instance as transform 4-by-4 and example_id
 	void addInstance(const DenseMatrix<float> & trans,
 					const int & exampleId);
+	void clearInstances();
 	
 protected:
 	void getBBox(BoundingBox & bbox) const;

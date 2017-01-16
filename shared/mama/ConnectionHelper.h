@@ -55,6 +55,10 @@ public:
 	static bool ConnnectArrayOneToOne(MPlugArray & srcPlugs, 
 	                        const MObject & dstNode,
 							const MString & dstArrayAttrName);
+/// if specified attr is array, test referred slot							
+	static MObject GetConnectedNode(const MObject & node,
+							const MString & attrName,
+							const int & refSlot = -1);
 	
 };
 

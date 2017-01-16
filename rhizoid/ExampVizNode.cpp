@@ -377,6 +377,7 @@ void ExampViz::setTriangleMesh(const DenseMatrix<float> & pnts,
 	
 	AHelper::Info<unsigned>(" ExampViz load n points", np );
 	AHelper::Info<unsigned>(" n triangle vertex", nind );
+	
 }
 
 void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,

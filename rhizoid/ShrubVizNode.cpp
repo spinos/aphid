@@ -34,7 +34,7 @@ ShrubVizNode::ShrubVizNode()
 
 ShrubVizNode::~ShrubVizNode() 
 { 
-	m_instances.clear();
+	clearInstances();
 	m_examples.clear();
 	delete m_cameraSpace;
 	detachSceneCallbacks(); 
@@ -398,6 +398,11 @@ void ShrubVizNode::addInstance(const DenseMatrix<float> & trans,
 	ainstance._exampleId = exampleId;
 	ainstance._instanceId = m_instances.size();
 	m_instances.push_back(ainstance);
+}
+
+void ShrubVizNode::clearInstances()
+{
+	m_instances.clear();
 }
 
 void ShrubVizNode::drawWiredBoundInstances() const
