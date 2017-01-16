@@ -9,7 +9,7 @@
 
 #pragma once
 #include <ActiveGroup.h>
-#include <WorldGrid.h>
+#include <sdb/WorldGrid.h>
 #include <RayMarch.h>
 #include <Dropoff.h>
 #include <SimpleTopology.h>

@@ -10,9 +10,16 @@
 #include "StickyLocator.h"
 #include <maya/MFnMeshData.h>
 #include <maya/MFnIntArrayData.h>
+#include <maya/MFnVectorArrayData.h>
 #include <maya/MPxManipContainer.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
+#include <maya/MFnMatrixAttribute.h>
 #include <AHelper.h>
-#include <linearMath.h>
+#include <CircleCurve.h>
+#include <math/linearMath.h>
+
+using namespace aphid;
 
 MTypeId StickyLocator::id( 0x38d650db );
 MObject StickyLocator::size;
@@ -32,16 +39,16 @@ StickyLocator::StickyLocator()
 	m_circle = new CircleCurve;
 	m_refScale = 0.f;
 	m_origin = MPoint(0.0, 0.0, 0.0);
-	m_P = new lfr::DenseMatrix<float>();
-	m_Q = new lfr::DenseMatrix<float>();
-	m_S = new lfr::DenseMatrix<float>(3, 3);
-	m_Vd = new lfr::DenseMatrix<float>(3, 3);
-	m_Ri = new lfr::DenseMatrix<float>(3, 3);
+	m_P = new DenseMatrix<float>();
+	m_Q = new DenseMatrix<float>();
+	m_S = new DenseMatrix<float>(3, 3);
+	m_Vd = new DenseMatrix<float>(3, 3);
+	m_Ri = new DenseMatrix<float>(3, 3);
 	m_Ri->setZero();
 	m_Ri->addDiagonal(1.f);
-	m_scad = new lfr::DenseMatrix<float>(3, 3);
+	m_scad = new DenseMatrix<float>(3, 3);
 	m_scad->setZero();
-	m_svdSolver = new lfr::SvdSolver<float>();
+	m_svdSolver = new SvdSolver<float>();
 }
 
 StickyLocator::~StickyLocator() 

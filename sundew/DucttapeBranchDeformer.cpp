@@ -8,6 +8,8 @@
  */
 
 #include "DucttapeBranchDeformer.h"
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MItGeometry.h>
 #include <AHelper.h>

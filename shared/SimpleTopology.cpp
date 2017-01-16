@@ -8,9 +8,9 @@
  */
 
 #include "SimpleTopology.h"
-#include <Facet.h>
-#include <Edge.h>
-#include <VertexAdjacency.h>
+#include <topo/Facet.h>
+#include <topo/Edge.h>
+#include <topo/VertexAdjacency.h>
 
 namespace aphid {
 

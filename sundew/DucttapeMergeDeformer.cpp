@@ -8,7 +8,8 @@
  */
 
 #include "DucttapeMergeDeformer.h"
-
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
 #include <maya/MItGeometry.h>
 #include <AHelper.h>
 

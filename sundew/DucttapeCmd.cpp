@@ -15,9 +15,12 @@
 #include <maya/MDagModifier.h>
 #include <maya/MDGModifier.h>
 #include <maya/MFnIntArrayData.h>
+#include <maya/MItSelectionList.h>
 #include <maya/MItMeshPolygon.h>
 #include <maya/MItMeshVertex.h>
 #include <maya/MDGModifier.h>
+#include <maya/MFnMesh.h>
+#include <AHelper.h>
 #include <ASearchHelper.h>
 
 using namespace aphid;

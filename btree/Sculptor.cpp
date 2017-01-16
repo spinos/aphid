@@ -136,7 +136,7 @@ bool Sculptor::intersect(Array<int, VertexP> * d, const Ray & ray)
 	d->begin();
 	while(!d->end() ) {
 		Vector3F & p = *(d->value()->index->t1);
-		pop = ray.closetPointOnRay(p, &tt);
+		pop = ray.closestPointOnRay(p, &tt);
 /// select here
 		if(p.distanceTo(pop) < selectRadius()) {
 			VertexP * vert = d->value();

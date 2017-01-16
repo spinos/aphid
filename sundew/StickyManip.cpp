@@ -13,8 +13,11 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnMeshData.h>
+#include <maya/MFnMatrixData.h>
 #include <maya/MFnIntArrayData.h>
 #include <AHelper.h>
+
+using namespace aphid;
 
 MVector StickyLocatorManip::nodeTranslation() const
 {
@@ -78,6 +81,8 @@ MStatus StickyLocatorManip::connectToDependNode(const MObject &node)
 
 	MFnDagNode dagNodeFn(node);
 	dagNodeFn.getPath(fNodePath);
+
+	AHelper::Info<MString>("sticky manip connect to", fNodePath.fullPathName() );
 	
 	MPlug spacePlug = dagNodeFn.findPlug("vertexMatrix");
 	MObject om;

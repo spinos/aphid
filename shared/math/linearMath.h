@@ -810,7 +810,7 @@ void DenseMatrix<T>::multTrans(DenseMatrix<T>& b, const DenseMatrix<T>& x,
 	integer N = x.numRows();
 	integer K = numCols();
 	integer LDA = M;
-	integer LDB = x.numCols();
+	integer LDB = N;
 	integer LDC = M;
 	
 	clapack_gemm<T>("N", "T", M, N, K, alpha, m_v, LDA, 

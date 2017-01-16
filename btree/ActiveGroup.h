@@ -8,8 +8,8 @@
  */
 
 #pragma once
-#include <Ray.h>
-#include <Array.h>
+#include <math/Ray.h>
+#include <sdb/Array.h>
 #include <Dropoff.h>
 
 namespace aphid {

@@ -25,6 +25,7 @@
 #include <maya/MProgressWindow.h>
 #include <maya/MFnSingleIndexedComponent.h>
 #include <maya/MFnPluginData.h>
+#include <maya/MFnMatrixAttribute.h>
 #include <Mplg.h>
 #include <AHelper.h>
 

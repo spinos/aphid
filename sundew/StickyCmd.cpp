@@ -10,7 +10,11 @@
 #include <maya/MDagModifier.h>
 #include <maya/MDGModifier.h>
 #include <maya/MFnIntArrayData.h>
+#include <maya/MFnVectorArrayData.h>
+#include <maya/MFnMatrixAttribute.h>
 #include <maya/MItMeshVertex.h>
+#include <maya/MFnMesh.h>
+#include <AHelper.h>
 #include <ASearchHelper.h>
 
 using namespace aphid;

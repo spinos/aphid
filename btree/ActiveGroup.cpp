@@ -55,7 +55,7 @@ void ActiveGroup::finish()
 	if(nsel > 1) {
 		meanPosition *= 1.f / (float)nsel;
 		
-		meanPosition = incidentRay.closetPointOnRay(meanPosition);
+		meanPosition = incidentRay.closestPointOnRay(meanPosition);
 		
 		meanNormal.normalize();
 	}
@@ -86,7 +86,7 @@ void ActiveGroup::calculateWeight(Array<int, VertexP> * d)
 	while(!d->end()) {
 		Vector3F * p = d->value()->index->t1;
 		if(m_volumeType==VCylinder) {
-			const Vector3F por = incidentRay.closetPointOnRay(*p);
+			const Vector3F por = incidentRay.closestPointOnRay(*p);
 			wei = m_drop->f(p->distanceTo(por), threshold);
 		}
 		else 

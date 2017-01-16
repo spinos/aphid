@@ -9,7 +9,7 @@
 
 #pragma once
 #include <AllMath.h>
-#include <Types.h>
+#include <sdb/Types.h>
 #include <vector>
 #include <boost/scoped_array.hpp>
 

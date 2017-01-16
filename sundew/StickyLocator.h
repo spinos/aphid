@@ -11,28 +11,26 @@
 
 #include <maya/MFnMesh.h>
 #include <maya/MPxLocatorNode.h> 
-#include <CircleCurve.h>
 
-namespace lfr {
+namespace aphid {
+	class CircleCurve;
 template <typename T> class DenseMatrix;
 template <typename T> class DenseVector;
 template <typename T> class SvdSolver;
 }
 
-using namespace aphid;
-
 class StickyLocator : public MPxLocatorNode
 {
 	MPoint m_origin;
 	float m_refScale;
-	CircleCurve * m_circle;
-	lfr::DenseMatrix<float> *m_P;
-	lfr::DenseMatrix<float> *m_Q;
-	lfr::DenseMatrix<float> *m_S;
-	lfr::DenseMatrix<float> *m_Vd;
-	lfr::DenseMatrix<float> *m_Ri;
-	lfr::DenseMatrix<float> *m_scad;
-	lfr::SvdSolver<float> *m_svdSolver;
+	aphid::CircleCurve * m_circle;
+	aphid::DenseMatrix<float> *m_P;
+	aphid::DenseMatrix<float> *m_Q;
+	aphid::DenseMatrix<float> *m_S;
+	aphid::DenseMatrix<float> *m_Vd;
+	aphid::DenseMatrix<float> *m_Ri;
+	aphid::DenseMatrix<float> *m_scad;
+	aphid::SvdSolver<float> *m_svdSolver;
 	
 public:
 	StickyLocator();
