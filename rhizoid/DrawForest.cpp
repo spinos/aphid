@@ -252,7 +252,7 @@ void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
 		return;
 	}
 	
-	if(v->dopBufLength() < 1) {
+	if(v->triBufLength() < 1) {
 		v->drawASolidDop();
 		return;
 	}

@@ -8,36 +8,28 @@
  */
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
+#include <ogl/DrawTriangle.h>
 #include <math/BoundingBox.h>
 #include <geom/Geometry.h>
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 #include <math/AOrientedBox.h>
-#include <boost/scoped_array.hpp>
 
 namespace aphid {
 
-class ExampVox : public DrawBox, public DrawDop {
+class ExampVox : public DrawBox, public DrawDop, public DrawTriangle {
 
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;
 	Vector3F m_dopSize;
-	Vector3F * m_boxNormalBuf;
-	Vector3F * m_boxPositionBuf;
-	boost::scoped_array<Vector3F> m_dopNormalBuf;
-	boost::scoped_array<Vector3F> m_dopPositionBuf;
-	float * m_boxCenterSizeF4;
+	
 	float m_diffuseMaterialColV[3];
-	//float m_geomScale[3];
 /// radius of bbox
 	float m_geomExtent;
-/// radius exclusion
+/// radius of exclusion
 	float m_geomSize;
 /// scaling radius of exclusion
 	float m_sizeMult;
-	unsigned m_numBoxes;
-	unsigned m_boxBufLength;
-	int m_dopBufLength;
 	
 public:
 	ExampVox();
@@ -56,40 +48,16 @@ public:
 	const float & geomExtent() const;
 	const float & geomSize() const;
 	const BoundingBox & geomBox() const;
-	//const float * geomCenterV() const;
 	const Vector3F & geomCenter() const;
-	//const float * geomScale() const;
 	const float * diffuseMaterialColor() const;
-	const float * boxCenterSizeF4() const;
-	const unsigned & numBoxes() const;
-	const float * boxNormalBuf() const;
-	const float * boxPositionBuf() const;
-	const unsigned & boxBufLength() const;
-	const int & dopBufLength() const;
-	const float * dopNormalBuf() const;
-	const float * dopPositionBuf() const;
 	const float * dopSize() const;
 	
 	virtual void drawWiredBound() const;
 	virtual void drawSolidBound() const;
-	virtual void drawWiredTriangles() const;
-	virtual void drawSolidTriangles() const;
 	
 protected:
-	void drawDop();
-	void drawGrid();
-	void drawWireGrid();
 	float * diffuseMaterialColV();
-	float * boxCenterSizeF4();
-	bool setNumBoxes(unsigned n);
-	void buildBoxDrawBuf();
 	void buildBounding8Dop(const BoundingBox & bbox);
-	//void buildDOPDrawBuf(const sdb::VectorArray<AOrientedBox> & dops);
-	Vector3F * dopNormalR();
-	Vector3F * dopPositionR();
-	void setDOPDrawBufLen(const int & x);
-	void buildTriangleDrawBuf(const int & nt, const int * tri,
-				const int & nv, const Vector3F * vertP, const Vector3F * vertN );
 						
 private:
 	

@@ -24,8 +24,6 @@
 MTypeId ExampViz::id( 0x95a20e );
 MObject ExampViz::abboxminv;
 MObject ExampViz::abboxmaxv;
-MObject ExampViz::ancells;
-MObject ExampViz::acellBuf;
 MObject ExampViz::adoplen;
 MObject ExampViz::adopPBuf;
 MObject ExampViz::adopNBuf;
@@ -79,7 +77,7 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		MFloatVector c = block.inputValue(adrawColor).asFloatVector();
 		diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
 		
-		if(!loadDops(block) ) {
+		if(!loadTriangles(block) ) {
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
 		
@@ -120,10 +118,9 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	MPlug szzp(selfNode, adrawDopSizeZ);
 	setDopSize(szxp.asFloat(), szyp.asFloat(), szzp.asFloat() );
 	
-/// load dop first, then box
-	bool stat = dopBufLength() > 0;
+	bool stat = triBufLength() > 0;
 	if(!stat) {
-		stat = loadDOPs(selfNode);
+		stat = loadTriangles(selfNode);
 	}
 	if(!stat) {
 		AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(selfNode).name() );
@@ -248,10 +245,6 @@ MStatus ExampViz::initialize()
 	numFn.setMin(.05f);
 	addAttribute(aradiusMult);
 	
-	ancells = numFn.create( "numCells", "ncl", MFnNumericData::kInt, 0 );
-	numFn.setStorable(true);
-	addAttribute(ancells);
-	
 	abboxminv = numFn.create( "BBoxMin", "bbxmn", MFnNumericData::k3Float );
 	numFn.setStorable(true);
 	numFn.setDefault(-1.f, -1.f, -1.f);
@@ -270,12 +263,6 @@ MStatus ExampViz::initialize()
 	MPointArray defaultPntArray;
 	MFnPointArrayData pntArrayDataFn;
 	pntArrayDataFn.create( defaultPntArray );
-	acellBuf = typedFn.create( "cellData", "cld",
-											MFnData::kPointArray,
-											pntArrayDataFn.object(),
-											&stat );
-    typedFn.setStorable(true);
-	addAttribute(acellBuf);
 	
 	adoplen = numFn.create( "dopLen", "dpl", MFnNumericData::kInt, 0 );
 	numFn.setStorable(true);
@@ -308,8 +295,6 @@ MStatus ExampViz::initialize()
 	addAttribute( aininstspace );
 	
 	attributeAffects(aradiusMult, outValue);
-	attributeAffects(ancells, outValue);
-	attributeAffects(acellBuf, outValue);
 	attributeAffects(adoplen, outValue);
 	attributeAffects(adopPBuf, outValue);
 	attributeAffects(adopNBuf, outValue);
@@ -396,15 +381,15 @@ void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	MPlug bbmxPlug(thisMObject(), abboxmaxv);
 	bbmxPlug.setValue(bbData);
 	
-	const int n = dopBufLength();
+	const int n = triBufLength();
 	MPlug dopLenPlug(thisMObject(), adoplen);
 	dopLenPlug.setInt(n);
 	if(n < 1) return;
 	
 	MVectorArray dopp; dopp.setLength(n);
 	MVectorArray dopn; dopn.setLength(n);
-	const Vector3F * ps = dopPositionR();
-	const Vector3F * ns = dopNormalR();
+	const Vector3F * ps = triPositionR();
+	const Vector3F * ns = triNormalR();
 	for(int i=0; i<n; ++i) {
 		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
 		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
@@ -419,7 +404,7 @@ void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	MPlug dopnPlug(thisMObject(), adopNBuf);
 	dopnPlug.setValue(onor);
 	
-	AHelper::Info<int>("reduced draw n triangle ", dopBufLength() / 3 );
+	AHelper::Info<int>("reduced draw n triangle ", triBufLength() / 3 );
 }
 
 void ExampViz::updateGeomBox(MObject & node)
@@ -446,78 +431,11 @@ void ExampViz::updateGeomBox(MObject & node)
 				
 }
 
-void ExampViz::loadBoxes(MObject & node)
-{	
-	MPlug ncellsPlug(node, ancells);
-	int nc = ncellsPlug.asInt();
-	if(nc<1) return;
-	setNumBoxes(nc);
-	
-	MPlug cellPlug(node, acellBuf);
-	MObject cellObj;
-	cellPlug.getValue(cellObj);
-	
-	MFnPointArrayData pntFn(cellObj);
-	MPointArray pnts = pntFn.array();
-	
-	unsigned n = pnts.length();
-	if(n < numBoxes() ) {
-		AHelper::Info<unsigned>(" ExampViz error wrong cell data length", n );
-		return;
-	}
-	
-	n = numBoxes();
-	setBoxes(pnts, n);
-	
-	AHelper::Info<unsigned>(" ExampViz load n boxes", n );
-}
-
-bool ExampViz::loadBoxes(MDataBlock & data)
-{
-	unsigned nc = data.inputValue(ancells).asInt();
-	if(nc < 1) {
-		AHelper::Info<unsigned>(" ExampViz error zero n cells", 0);
-		return false;
-	}
-
-	MDataHandle pntH = data.inputValue(acellBuf);
-	MFnPointArrayData pntFn(pntH.data());
-	MPointArray pnts = pntFn.array();
-
-	unsigned n = pnts.length();
-	
-	if(n < nc) {
-		AHelper::Info<unsigned>(" ExampViz error wrong cells length", pnts.length() );
-		return false;
-	}
-	
-	setNumBoxes(nc);
-	n = numBoxes();
-	setBoxes(pnts, n);
-	
-	AHelper::Info<unsigned>(" ExampViz update n boxes", numBoxes() );
-	return true;
-}
-
-void ExampViz::setBoxes(const MPointArray & src, const unsigned & num)
-{
-	float * dst = boxCenterSizeF4();
-	unsigned i=0;
-	for(;i<num;++i) {
-		const MPoint & p = src[i];
-		dst[i*4] = p.x;
-		dst[i*4+1] = p.y;
-		dst[i*4+2] = p.z;
-		dst[i*4+3] = p.w;
-	}
-	buildBoxDrawBuf();
-}
-
-bool ExampViz::loadDops(MDataBlock & data)
+bool ExampViz::loadTriangles(MDataBlock & data)
 {
 	int n = data.inputValue(adoplen).asInt();
 	if(n < 1) {
-		AHelper::Info<int>(" ExampViz error zero n dops", n);
+		AHelper::Info<int>(" ExampViz error zero n triangle", n);
 		return false;
 	}
 	
@@ -526,7 +444,7 @@ bool ExampViz::loadDops(MDataBlock & data)
 	MVectorArray pnts = pntFn.array();
 	
 	if(pnts.length() < n) {
-		AHelper::Info<unsigned>(" ExampViz error wrong dop position length", pnts.length() );
+		AHelper::Info<unsigned>(" ExampViz error wrong triangle position length", pnts.length() );
 		return false;
 	}
 	
@@ -535,25 +453,25 @@ bool ExampViz::loadDops(MDataBlock & data)
 	MVectorArray nors = norFn.array();
 	
 	if(nors.length() < n) {
-		AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", pnts.length() );
+		AHelper::Info<unsigned>(" ExampViz error wrong triangle normal length", pnts.length() );
 		return false;
 	}
 	
-	setDOPDrawBufLen(n);
+	setTriDrawBufLen(n);
 	
-	Vector3F * ps = dopPositionR();
-	Vector3F * ns = dopNormalR();
+	Vector3F * ps = triPositionR();
+	Vector3F * ns = triNormalR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
 		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
 	}
 	
-	AHelper::Info<int>(" ExampViz load dop buf length", dopBufLength() );
+	AHelper::Info<int>(" ExampViz load dop buf triangle", n/3 );
 	buildBounding8Dop(geomBox() );
 	return true;
 }
 
-bool ExampViz::loadDOPs(MObject & node)
+bool ExampViz::loadTriangles(MObject & node)
 {
 	MPlug doplenPlug(node, adoplen);
 	int n = doplenPlug.asInt();
@@ -568,7 +486,7 @@ bool ExampViz::loadDOPs(MObject & node)
 	
 	unsigned np = pnts.length();
 	if(np < n ) {
-		AHelper::Info<unsigned>(" ExampViz error wrong dop position length", np );
+		AHelper::Info<unsigned>(" ExampViz error wrong triangle position length", np );
 		return false;
 	}
 	
@@ -581,20 +499,20 @@ bool ExampViz::loadDOPs(MObject & node)
 	
 	unsigned nn = nors.length();
 	if(nn < n ) {
-		AHelper::Info<unsigned>(" ExampViz error wrong dop normal length", nn );
+		AHelper::Info<unsigned>(" ExampViz error wrong triangle normal length", nn );
 		return false;
 	}
 
-	setDOPDrawBufLen(n);
+	setTriDrawBufLen(n);
 	
-	Vector3F * ps = dopPositionR();
-	Vector3F * ns = dopNormalR();
+	Vector3F * ps = triPositionR();
+	Vector3F * ns = triNormalR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
 		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
 	}
 	
-	AHelper::Info<unsigned>(" ExampViz load n dops", n );
+	AHelper::Info<unsigned>(" ExampViz load n triangle", n/3 );
 	buildBounding8Dop(geomBox() );
 	return true;
 }

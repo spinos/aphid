@@ -48,8 +48,6 @@ public:
 
 	static  MObject         abboxminv;
 	static  MObject         abboxmaxv;
-	static  MObject         ancells;
-	static  MObject         acellBuf;
 	static  MObject         adoplen;
 	static  MObject         adopPBuf;
 	static  MObject         adopNBuf;
@@ -74,11 +72,8 @@ public:
 							const aphid::BoundingBox & bbox);
 	
 private:
-	bool loadDops(MDataBlock & data);
-	bool loadBoxes(MDataBlock & data);
-	void setBoxes(const MPointArray & src, const unsigned & num);
-	void loadBoxes(MObject & node);
 	void updateGeomBox(MObject & node);
-	bool loadDOPs(MObject & node);
+	bool loadTriangles(MDataBlock & data);
+	bool loadTriangles(MObject & node);
 	
 };
