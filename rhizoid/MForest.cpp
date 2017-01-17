@@ -650,17 +650,20 @@ void MForest::computePPAttribs(MVectorArray & positions,
 
 void MForest::updateExamples(MArrayDataHandle & dataArray)
 {
-	int numSlots = dataArray.elementCount();
-	if(numSlots < 1) return;
+	const int numSlots = dataArray.elementCount();
+	if(numSlots < 1) {
+		return;
+	}
 	
 	for(int i=0; i < numSlots; i++) {
 		MObject oslot = dataArray.inputValue().data();
 		MFnPluginData fslot(oslot);
 		ExampData * dslot = (ExampData *)fslot.data();
 		if(dslot) {
-			ExampVox * desc = dslot->getDesc();
-			if(desc) {
-				addPlantExample(desc);
+			ExampVox * v = dslot->getDesc();
+			if(v) {
+/// 0 is default example
+				addPlantExample(v, i + 1);
 			}
 		}
 		dataArray.next();

@@ -26,10 +26,6 @@ Forest::Forest()
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
 	m_selectCtx = new SphereSelectionContext;
-    
-	ExampVox * defE = new ExampVox;
-	addPlantExample(defE);
-	
 	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
 	
 }
@@ -245,7 +241,7 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 	return false;
 }
 
-const float & Forest::plantSize(int idx) const
+const float & Forest::plantSize(const int & idx)
 { return m_examples[idx]->geomSize(); }
 
 sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * Forest::grid()
@@ -457,17 +453,32 @@ bool Forest::isGroundEmpty() const
 int Forest::numPlantExamples() const
 { return m_examples.size(); }
 
-void Forest::addPlantExample(ExampVox * x)
+void Forest::addPlantExample(ExampVox * x, const int & islot)
 {
-	if(m_exampleIndices.find(x) != m_exampleIndices.end() ) return;
+	if(m_exampleIndices.find(x) != m_exampleIndices.end() ) {
+		return;
+	}
+	
+	std::cout<<"\n add example "<<islot;
+	
 	m_exampleIndices[x] = m_examples.size();
-	m_examples.push_back(x);
+	m_examples[islot] = x;
+	const int ne = x->numExamples();
+	if(ne > 1) {
+		std::cout<<"\n add bundle n example "<<ne;
+		std::cout.flush();
+		for(int i=0;i<ne;++i) {
+			int elmi = islot | (i+1)<<10;
+			std::cout<<" "<<elmi;
+			m_examples[elmi] = x->getExample(i);
+		}
+	}
+	
+	std::cout<<"\n example "<<islot<<" n example "<<plantExample(islot)->numExamples();
+	std::cout.flush();
 }
 
-ExampVox * Forest::plantExample(unsigned idx)
-{ return m_examples[idx]; }
-
-const ExampVox * Forest::plantExample(unsigned idx) const
+ExampVox * Forest::plantExample(const int & idx)
 { return m_examples[idx]; }
 
 void Forest::setSelectTypeFilter(int flt)
@@ -475,7 +486,9 @@ void Forest::setSelectTypeFilter(int flt)
 
 std::string Forest::groundBuildLog() const
 { 
-    if(!m_ground) return " error ground Kdtree not built"; 
+    if(!m_ground) {
+		return " error ground Kdtree not built"; 
+	}
     return "";//m_ground->buildLog();
 }
 

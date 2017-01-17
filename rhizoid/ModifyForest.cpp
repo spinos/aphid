@@ -12,6 +12,7 @@
 #include <math/ANoise3.h>
 #include <sdb/ebp.h>
 #include <PlantSelection.h>
+#include "ExampVox.h"
 #include <ctime>
 
 namespace aphid {
@@ -82,6 +83,14 @@ bool ModifyForest::growOnGround(GrowOption & option)
 			}
 		}
 		
+		std::cout<<"\n example "<<option.m_plantId<<" n example "<<plantExample(option.m_plantId)->numExamples();
+		
+		if(plantExample(option.m_plantId)->numExamples() > 1) {
+			std::cout<<"\n todo bundle create "<<plantExample(option.m_plantId)->numExamples();
+			std::cout.flush();
+		
+		} else {
+		
 		if(closeToOccupiedPosition(pog, option.m_minMarginSize + sampleSize * scale) ) 
 			continue;
 		
@@ -91,6 +100,8 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		randomSpaceAt(pog, option, tm, scale);
 
 		addPlant(tm, bind, option.m_plantId);
+		
+		}
 
 	}
 	} catch (const char * ex) {

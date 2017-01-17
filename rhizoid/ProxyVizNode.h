@@ -30,6 +30,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 {
 	M3dView _viewport;
 	MMatrix _worldSpace, _worldInverseSpace;
+	ExampVox * m_defExample;
 	float m_transBuf[16];
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;

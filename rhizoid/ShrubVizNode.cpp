@@ -34,9 +34,7 @@ ShrubVizNode::ShrubVizNode()
 }
 
 ShrubVizNode::~ShrubVizNode() 
-{ 
-	clearInstances();
-	
+{	
 	delete m_cameraSpace;
 	detachSceneCallbacks(); 
 }
@@ -44,9 +42,32 @@ ShrubVizNode::~ShrubVizNode()
 MStatus ShrubVizNode::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == outValue ) {
+	
+		BoundingBox bb;
+		getBBox(bb);
+		setGeomBox(&bb);
+	
+		const int nexp = numExamples();
+		AHelper::Info<int>("shrub viz n example", nexp);
+		
+		int nins = numInstances();
+		
+		if(nins < 1) {
+			loadInternal();
+			nins = numInstances();
+		}
+		AHelper::Info<int>("shrub viz n instance", nins);
+		
+		MFnPluginData fnPluginData;
+		MStatus status;
+		MObject newDataObject = fnPluginData.create(ExampData::id, &status);
+		
+		ExampData * pData = (ExampData *) fnPluginData.data(&status);
+		
+		if(pData) pData->setDesc(this);
 		
 		MDataHandle outputHandle = block.outputValue( outValue );
-		outputHandle.set( 42 );
+		outputHandle.set( pData );
 		block.setClean(plug);
     }
 
@@ -205,9 +226,9 @@ MStatus ShrubVizNode::initialize()
 	typFn.setArray(true);
 	addAttribute(ainexamp);
 		
-    outValue = numFn.create( "outValue", "ov", MFnNumericData::kFloat );
-	numFn.setStorable(false);
-	numFn.setWritable(false);
+    outValue = typFn.create( "outValue", "ov", MFnData::kPlugin );
+	typFn.setStorable(false);
+	typFn.setWritable(false);
 	addAttribute(outValue);
 	
 	MPointArray defaultPntArray;

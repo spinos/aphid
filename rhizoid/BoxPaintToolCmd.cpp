@@ -394,10 +394,11 @@ MStatus proxyPaintTool::connectVoxelSelected()
 		MFnDependencyNode fvox(vox, &stat);
 		if(!stat) continue;
 		
-		if(fvox.typeName() != "proxyExample") continue;
+		if(fvox.typeName() != "proxyExample"
+			&& fvox.typeName() != "shrubViz") continue;
 			
 		if(connectVoxToViz(vox, vizobj) ) {
-			AHelper::Info<MString>("proxyPaintTool connect example", fvox.name() );
+			AHelper::Info<MString>("proxyPaintTool connect (bundle) example", fvox.name() );
 			checkOutputConnection(vizobj, "ov1");
 		}
 	}

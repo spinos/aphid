@@ -25,7 +25,7 @@ class Forest {
 	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
-	std::vector<ExampVox *> m_examples;
+	std::map<int, ExampVox *> m_examples;
 	std::map<ExampVox *, unsigned> m_exampleIndices;
 	KdNTree<cvx::Triangle, KdNode4 > * m_ground;
 	sdb::VectorArray<cvx::Triangle> m_triangles;
@@ -73,7 +73,7 @@ protected:
 	ATriangleMesh * getGroundMesh(const int & idx) const;
 	const std::vector<ATriangleMesh *> & groundMeshes() const;
 	
-	const float & plantSize(int idx) const;
+	const float & plantSize(const int & idx);
 	
 	void displacePlantInGrid(PlantInstance * inst );
 	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
@@ -97,9 +97,9 @@ protected:
     const Vector3F & selectionNormal() const;
     
     bool isGroundEmpty() const;
-    void addPlantExample(ExampVox * x);
-	ExampVox * plantExample(unsigned idx);
-	const ExampVox * plantExample(unsigned idx) const;
+    void addPlantExample(ExampVox * x, const int & islot);
+	ExampVox * plantExample(const int & idx);
+	
 	std::string groundBuildLog() const;
 	
 	const sdb::VectorArray<cvx::Triangle> & triangles() const;

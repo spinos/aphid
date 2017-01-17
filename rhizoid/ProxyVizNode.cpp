@@ -68,10 +68,17 @@ m_toSetGrid(true),
 m_toCheckVisibility(false),
 m_enableCompute(true),
 m_hasParticle(false)
-{ attachSceneCallbacks(); }
+{ 
+	attachSceneCallbacks(); 
+	m_defExample = new ExampVox;
+	addPlantExample(m_defExample, 0);
+}
 
 ProxyViz::~ProxyViz() 
-{ detachSceneCallbacks(); }
+{ 
+	detachSceneCallbacks(); 
+	delete m_defExample;
+}
 
 MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 {
@@ -283,9 +290,12 @@ bool ProxyViz::isBounded() const
 
 MBoundingBox ProxyViz::boundingBox() const
 {   
-	BoundingBox bbox = plantExample(0)->geomBox();
-	if(numPlants() > 0) bbox = gridBoundingBox();
-	else if(!isGroundEmpty() ) bbox = ground()->getBBox();
+	BoundingBox bbox = m_defExample->geomBox();
+	if(numPlants() > 0) {
+		bbox = gridBoundingBox();
+	} else if(!isGroundEmpty() ) {
+		bbox = ground()->getBBox();
+	}
 	
 	MPoint corner1(bbox.m_data[0], bbox.m_data[1], bbox.m_data[2]);
 	MPoint corner2(bbox.m_data[3], bbox.m_data[4], bbox.m_data[5]);

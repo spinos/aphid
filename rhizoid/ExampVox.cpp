@@ -153,6 +153,9 @@ int ExampVox::numInstances() const
 const ExampVox * ExampVox::getExample(const int & i) const
 { return this; } 
 
+ExampVox * ExampVox::getExample(const int & i)
+{ return this; }
+
 const ExampVox::InstanceD & ExampVox::getInstance(const int & i) const
 { return m_defInstance; }
 

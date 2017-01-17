@@ -70,6 +70,7 @@ public:
 	virtual int numExamples() const;
 	virtual int numInstances() const;
 	virtual const ExampVox * getExample(const int & i) const;
+	virtual ExampVox * getExample(const int & i);
 	
 	struct InstanceD {
 		float _trans[16];

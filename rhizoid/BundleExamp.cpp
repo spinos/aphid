@@ -32,6 +32,9 @@ int BundleExamp::numInstances() const
 const ExampVox * BundleExamp::getExample(const int & i) const
 { return m_examples[i]; } 
 
+ExampVox * BundleExamp::getExample(const int & i)
+{ return m_examples[i]; }
+
 const ExampVox::InstanceD & BundleExamp::getInstance(const int & i) const
 { return m_instances[i]; }
 
