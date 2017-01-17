@@ -245,6 +245,10 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 					FeatureExampleMap & exampleGroupInd,
 					const MDagPathArray & paths) const
 {
+    ShrubVizNode * viz = (ShrubVizNode *)MFnDependencyNode(vizNode).userNode();
+    viz->clearExamples();
+    viz->disableExampleInput();
+	
 	int nps = 0;
 	const int ns = similarities.size();
 	for(int i=0;i<ns;++i) {
@@ -276,10 +280,14 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 				ConnectionHelper::ConnectToArray(exampleNode, "outValue",
 							vizNode, "inExample");
 			}
+			
+			viz->addAExample(example);
 							
 			nps++;
 		}
 	}
+	
+	viz->enableExampleInput();
 	
 /// evaluate input examples
 	MPlug exmPlug;

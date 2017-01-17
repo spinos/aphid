@@ -19,9 +19,8 @@
 #include <maya/MSceneMessage.h>
 #include <maya/MIntArray.h>
 #include <maya/MVectorArray.h>
-#include <ogl/DrawBox.h>
 #include <ogl/DrawInstance.h>
-#include <vector>
+#include "BundleExamp.h"
 
 namespace aphid {
 
@@ -33,17 +32,10 @@ class DenseMatrix;
 
 class BoundingBox;
 
-class ShrubVizNode : public MPxLocatorNode, public DrawBox, public DrawInstance
+class ShrubVizNode : public MPxLocatorNode, public BundleExamp, public DrawInstance
 {
-	struct InstanceD {
-		float _trans[16];
-		int _exampleId;
-		int _instanceId;
-	};
-	
-	std::vector<InstanceD > m_instances;
-	std::vector<ExampVox * > m_examples;
 	Matrix44F * m_cameraSpace;
+	bool m_useExampleInput;
 	
 public:
 	ShrubVizNode();
@@ -76,12 +68,13 @@ public:
 /// instance as transform 4-by-4 and example_id
 	void addInstance(const DenseMatrix<float> & trans,
 					const int & exampleId);
-	void clearInstances();
+	
+	void enableExampleInput();
+	void disableExampleInput();
 	
 protected:
 	void getBBox(BoundingBox & bbox) const;
-	int numInstances() const;
-	int numExamples() const;
+
 	void drawWiredBoundInstances() const;
 	void drawSolidInstances() const;
 	void drawWiredInstances() const;

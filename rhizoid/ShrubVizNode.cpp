@@ -29,13 +29,14 @@ MObject ShrubVizNode::outValue;
 ShrubVizNode::ShrubVizNode()
 { 
 	m_cameraSpace = new Matrix44F;
+	m_useExampleInput = true;
 	attachSceneCallbacks(); 
 }
 
 ShrubVizNode::~ShrubVizNode() 
 { 
 	clearInstances();
-	m_examples.clear();
+	
 	delete m_cameraSpace;
 	detachSceneCallbacks(); 
 }
@@ -57,6 +58,7 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStatus status )
 {
 	const int nexp = numExamples();
+//AHelper::Info<int>("nexp", nexp);
 	
 	if(nexp < 1) {
 		return;
@@ -68,6 +70,7 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 		loadInternal();
 		nins = numInstances();
 	}
+//AHelper::Info<int>("nins", nins);
 	
 	if(nins < 1) {
 		return;
@@ -238,13 +241,13 @@ void ShrubVizNode::releaseCallback(void* clientData)
 void ShrubVizNode::saveInternal()
 {
 	AHelper::Info<MString>("shrub save internal", MFnDependencyNode(thisMObject()).name() );
-	const int n = m_instances.size();
+	const int n = numInstances();
 	AHelper::Info<int>(" n instance", n );
 	MIntArray exmpi; exmpi.setLength(n);
 	MVectorArray exmpt; exmpt.setLength(n<<2);
 	
 	for(int i=0;i<n;++i) {
-		const InstanceD & ins = m_instances[i];
+		const InstanceD & ins = getInstance(i);
 		exmpi[i] = ins._exampleId;
 		int j = i<<2;
 		const float * t = ins._trans;
@@ -326,7 +329,7 @@ bool ShrubVizNode::loadInternal(MDataBlock& block)
 MStatus ShrubVizNode::connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc )
 {
 	if(plug == ainexamp) {
-		addExample(plug);
+		if(m_useExampleInput) addExample(plug);
 	}
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
 }
@@ -368,12 +371,6 @@ void ShrubVizNode::getBBox(BoundingBox & bbox) const
 	bbox.setMax(dbox[1].x, dbox[1].y, dbox[1].z );
 }
 
-int ShrubVizNode::numInstances() const
-{ return m_instances.size(); }
-
-int ShrubVizNode::numExamples() const
-{ return m_examples.size(); }
-
 void ShrubVizNode::addExample(const MPlug & plug)
 {
 	AHelper::Info<MString>(" ShrubVizNode add example", plug.name());
@@ -386,7 +383,7 @@ void ShrubVizNode::addExample(const MPlug & plug)
 		AHelper::Info<MString>(" WARNING ShrubVizNode cannot get example data", plug.name());
 		return;
 	}
-	m_examples.push_back(desc);
+	addAExample(desc);
 }
 
 void ShrubVizNode::addInstance(const DenseMatrix<float> & trans,
@@ -396,13 +393,8 @@ void ShrubVizNode::addInstance(const DenseMatrix<float> & trans,
 	InstanceD ainstance;
 	trans.extractData(ainstance._trans);
 	ainstance._exampleId = exampleId;
-	ainstance._instanceId = m_instances.size();
-	m_instances.push_back(ainstance);
-}
-
-void ShrubVizNode::clearInstances()
-{
-	m_instances.clear();
+	ainstance._instanceId = numInstances();
+	addAInstance(ainstance);
 }
 
 void ShrubVizNode::drawWiredBoundInstances() const
@@ -413,13 +405,13 @@ void ShrubVizNode::drawWiredBoundInstances() const
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
-		const InstanceD & ins = m_instances[i];
+		const InstanceD & ins = getInstance(i);
 		glPushMatrix();
 		glMultMatrixf(ins._trans);
 		
 		if(ins._exampleId < nexp) {
 			//m_examples[ins._exampleId]->drawWiredBound();
-			m_examples[ins._exampleId]->drawAWireDop();
+			getExample(ins._exampleId)->drawAWireDop();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);
@@ -445,7 +437,7 @@ void ShrubVizNode::drawSolidInstances() const
 	const int nexp = numExamples();
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
-		const InstanceD & ins = m_instances[i];
+		const InstanceD & ins = getInstance(i);
 #if 0
 		glPushMatrix();
 		glMultMatrixf(ins._trans);
@@ -456,7 +448,7 @@ void ShrubVizNode::drawSolidInstances() const
 	    glMultiTexCoord4f(GL_TEXTURE3, d[2], d[6], d[10], d[14]);
 	    
 		if(ins._exampleId < nexp) {
-			const ExampVox * v = m_examples[ins._exampleId];
+			const ExampVox * v = getExample(ins._exampleId);
 			const float * c = v->diffuseMaterialColor();
 			
 			m_instancer->setDiffueColorVec(c);
@@ -487,14 +479,14 @@ void ShrubVizNode::drawWiredInstances() const
 	const int nins = numInstances();
 	
 	for(int i=0;i<nins;++i) {
-		const InstanceD & ins = m_instances[i];
+		const InstanceD & ins = getInstance(i);
 		const float *d = ins._trans;
 	    glMultiTexCoord4f(GL_TEXTURE1, d[0], d[4], d[8], d[12]);
 	    glMultiTexCoord4f(GL_TEXTURE2, d[1], d[5], d[9], d[13]);
 	    glMultiTexCoord4f(GL_TEXTURE3, d[2], d[6], d[10], d[14]);
 	    
 		if(ins._exampleId < nexp) {
-			const ExampVox * v = m_examples[ins._exampleId];
+			const ExampVox * v = getExample(ins._exampleId);
 			const float * c = v->diffuseMaterialColor();
 			
 			m_wireInstancer->setDiffueColorVec(c);
@@ -510,6 +502,12 @@ void ShrubVizNode::drawWiredInstances() const
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
+
+void ShrubVizNode::enableExampleInput()
+{ m_useExampleInput = true; }
+	
+void ShrubVizNode::disableExampleInput()
+{ m_useExampleInput = false; }
 
 }
 //:~

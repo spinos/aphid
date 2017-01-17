@@ -6,16 +6,28 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef APH_EXAMP_VOX_H
+#define APH_EXAMP_VOX_H
+
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
 #include <ogl/DrawTriangle.h>
 #include <math/BoundingBox.h>
-#include <geom/Geometry.h>
-#include <sdb/VectorArray.h>
-#include <ConvexShape.h>
-#include <math/AOrientedBox.h>
 
 namespace aphid {
+ 
+namespace sdb {
+
+template<typename T>
+class VectorArray;
+
+}
+    
+namespace cvx {
+
+class Triangle;
+
+}
 
 class ExampVox : public DrawBox, public DrawDop, public DrawTriangle {
 
@@ -55,12 +67,26 @@ public:
 	virtual void drawWiredBound() const;
 	virtual void drawSolidBound() const;
 	
+	virtual int numExamples() const;
+	virtual int numInstances() const;
+	virtual const ExampVox * getExample(const int & i) const;
+	
+	struct InstanceD {
+		float _trans[16];
+		int _exampleId;
+		int _instanceId;
+	};
+	
+	virtual const InstanceD & getInstance(const int & i) const;
+	
 protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
 						
 private:
+	InstanceD m_defInstance;
 	
 };
 
 }
+#endif

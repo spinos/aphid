@@ -10,12 +10,21 @@
 #include "ExampVox.h"
 #include <kd/KdEngine.h>
 #include <FieldTriangulation.h>
+#include <ConvexShape.h>
+#include <sdb/VectorArray.h>
 
 namespace aphid {
 
 ExampVox::ExampVox() : 
 m_sizeMult(1.f)
 { 
+    memset(m_defInstance._trans, 0, 64);
+    m_defInstance._trans[0] = 1.f;
+    m_defInstance._trans[5] = 1.f;
+    m_defInstance._trans[10] = 1.f;
+    m_defInstance._trans[15] = 1.f;
+    m_defInstance._exampleId = 0;
+    m_defInstance._instanceId = 0;
 	m_diffuseMaterialColV[0] = 0.47f;
 	m_diffuseMaterialColV[1] = 0.46f;
 	m_diffuseMaterialColV[2] = 0.48f;
@@ -134,5 +143,17 @@ void ExampVox::setDopSize(const float & a,
 
 const float * ExampVox::dopSize() const
 { return (const float * )&m_dopSize; }
+
+int ExampVox::numExamples() const
+{ return 1; }
+
+int ExampVox::numInstances() const
+{ return 1; }
+
+const ExampVox * ExampVox::getExample(const int & i) const
+{ return this; } 
+
+const ExampVox::InstanceD & ExampVox::getInstance(const int & i) const
+{ return m_defInstance; }
 
 }
