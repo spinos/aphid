@@ -66,8 +66,8 @@ void DrawTriangle::drawWiredTriangles() const
 
 void DrawTriangle::drawSolidTriangles() const
 {
-	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)m_triPositionBuf.get() );
-	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_triNormalBuf.get() );
+	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)m_triNormalBuf.get() );
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_triPositionBuf.get() );
 	glDrawArrays(GL_TRIANGLES, 0, m_triBufLength);
 }
 
