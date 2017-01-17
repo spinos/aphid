@@ -110,6 +110,7 @@ protected:
 		
 	void onPlantChanged();
 	void intersectWorldBox(const Ray & ray);
+	int exampleIndex(const int & iBundle, const int & iChild) const;
 	
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 

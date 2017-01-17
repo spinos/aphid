@@ -116,7 +116,20 @@ private:
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;
     bool sampleGround(EbpGrid * sampler, GrowOption & option);
-					
+	bool growSingle(GrowOption & option,
+				GroundBind & bind,
+				const int & iExample,
+				const Matrix44F & tm,
+				const Vector3F & sampleP,
+				const float & scale);
+	void growMulti(GrowOption & option,
+				GroundBind & bind,
+				const ExampVox * bundle,
+				const int & iExample,
+				const Matrix44F & tm,
+				const Vector3F & sampleP,
+				const float & scale);
+				
 };
 
 }

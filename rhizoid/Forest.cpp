@@ -453,6 +453,9 @@ bool Forest::isGroundEmpty() const
 int Forest::numPlantExamples() const
 { return m_examples.size(); }
 
+int Forest::exampleIndex(const int & iBundle, const int & iChild) const
+{ return iBundle | (iChild+1)<<10; }
+
 void Forest::addPlantExample(ExampVox * x, const int & islot)
 {
 	if(m_exampleIndices.find(x) != m_exampleIndices.end() ) {
@@ -465,17 +468,12 @@ void Forest::addPlantExample(ExampVox * x, const int & islot)
 	m_examples[islot] = x;
 	const int ne = x->numExamples();
 	if(ne > 1) {
-		std::cout<<"\n add bundle n example "<<ne;
-		std::cout.flush();
 		for(int i=0;i<ne;++i) {
-			int elmi = islot | (i+1)<<10;
-			std::cout<<" "<<elmi;
+			int elmi = exampleIndex(islot, i);
 			m_examples[elmi] = x->getExample(i);
 		}
 	}
 	
-	std::cout<<"\n example "<<islot<<" n example "<<plantExample(islot)->numExamples();
-	std::cout.flush();
 }
 
 ExampVox * Forest::plantExample(const int & idx)

@@ -50,8 +50,7 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	const Vector3F * psamp = ebpSampler.positions();
 	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
 	const bool limitRadius = option.m_radius > 1e-3f;
-	const float sampleSize = plantSize(option.m_plantId) * .67f;
-       
+   
 	GroundBind bind;
 	float scale;
 	Matrix44F tm;
@@ -83,24 +82,19 @@ bool ModifyForest::growOnGround(GrowOption & option)
 			}
 		}
 		
-		std::cout<<"\n example "<<option.m_plantId<<" n example "<<plantExample(option.m_plantId)->numExamples();
-		
-		if(plantExample(option.m_plantId)->numExamples() > 1) {
-			std::cout<<"\n todo bundle create "<<plantExample(option.m_plantId)->numExamples();
-			std::cout.flush();
-		
-		} else {
-		
-		if(closeToOccupiedPosition(pog, option.m_minMarginSize + sampleSize * scale) ) 
-			continue;
-		
-		if(option.m_alongNormal)
-		    option.m_upDirection = bindNormal(&bind);
+		if(option.m_alongNormal) {
+			option.m_upDirection = bindNormal(&bind);
+		}
 		
 		randomSpaceAt(pog, option, tm, scale);
-
-		addPlant(tm, bind, option.m_plantId);
 		
+		const ExampVox * v = plantExample(option.m_plantId);
+		if(v->numExamples() > 1) {
+			growMulti(option, bind, v, option.m_plantId, tm, pog, scale);			
+		
+		} else {
+			growSingle(option, bind, option.m_plantId, tm, pog, scale);
+					
 		}
 
 	}
@@ -112,6 +106,48 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	
 	ebpSampler.clear();
     return true;
+}
+
+void ModifyForest::growMulti(GrowOption & option,
+				GroundBind & bind,
+				const ExampVox * bundle,
+				const int & iExample,
+				const Matrix44F & tm,
+				const Vector3F & sampleP,
+				const float & scale)
+{			
+	for(int i=0;i<bundle->numInstances();++i) {
+		const ExampVox::InstanceD & inst = bundle->getInstance(i);
+		Matrix44F instTm(inst._trans);
+		instTm *= tm;
+		
+		bind.m_offset = instTm.getTranslation() - sampleP; 
+		bind.m_offset *= scale;
+		
+		instTm.scaleBy(scale);
+		
+		Vector3F instP = instTm.getTranslation();
+
+		const int instExample = exampleIndex(iExample, inst._exampleId );
+		growSingle(option, bind, instExample, instTm, instP, scale);
+		
+	}
+}
+
+bool ModifyForest::growSingle(GrowOption & option,
+				GroundBind & bind,
+				const int & iExample,
+				const Matrix44F & tm,
+				const Vector3F & sampleP,
+				const float & scale)
+{
+	const float minDist = option.m_minMarginSize + plantSize(iExample) * scale * .5f;
+	if(closeToOccupiedPosition(sampleP, minDist) ) {
+		return false;
+	}
+
+	addPlant(tm, bind, iExample);
+	return true;
 }
 
 bool ModifyForest::growAt(const Ray & ray, GrowOption & option)

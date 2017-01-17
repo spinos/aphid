@@ -23,12 +23,12 @@ Matrix44F::Matrix44F(float x)
 }
 
 Matrix44F::Matrix44F(const Matrix44F & a)
-{ for(int i = 0; i < 16; i++) v[i] = a.v[i]; }
+{ memcpy(v, a.v, 64); }
 
-Matrix44F::Matrix44F(float * mat)
-{ for(int i = 0; i < 16; i++) v[i] = mat[i]; }
+Matrix44F::Matrix44F(const float * mat)
+{ memcpy(v, mat, 64); }
 
-Matrix44F::Matrix44F(double * mat)
+Matrix44F::Matrix44F(const double * mat)
 { for(int i = 0; i < 16; i++) v[i] = mat[i]; }
 
 Matrix44F::Matrix44F(const Matrix33F & r, const Vector3F & t)
