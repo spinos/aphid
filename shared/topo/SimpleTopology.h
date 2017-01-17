@@ -8,13 +8,14 @@
  */
 
 #pragma once
-#include <AllMath.h>
+
 #include <sdb/Types.h>
 #include <vector>
 #include <boost/scoped_array.hpp>
 
 namespace aphid {
 
+class Vector3F;
 class VertexAdjacency;
 class Facet;
 class Edge;

@@ -1,6 +1,5 @@
 /*
  *  SimpleTopology.cpp
- *  fit
  *
  *  Created by jian zhang on 4/22/13.
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
@@ -11,6 +10,7 @@
 #include <topo/Facet.h>
 #include <topo/Edge.h>
 #include <topo/VertexAdjacency.h>
+#include <math/Vector3F.h>
 
 namespace aphid {
 
