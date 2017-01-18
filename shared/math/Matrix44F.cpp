@@ -10,7 +10,7 @@
 #include "Matrix44F.h"
 namespace aphid {
 
-Matrix44F Matrix44F::Identitiy;
+Matrix44F Matrix44F::IdentityMatrix;
 
 Matrix44F::Matrix44F() 
 {
@@ -23,7 +23,7 @@ Matrix44F::Matrix44F(float x)
 }
 
 Matrix44F::Matrix44F(const Matrix44F & a)
-{ memcpy(v, a.v, 64); }
+{ copy(a); }
 
 Matrix44F::Matrix44F(const float * mat)
 { memcpy(v, mat, 64); }
@@ -121,13 +121,13 @@ const float & Matrix44F::M(int i, int j) const
 
 void Matrix44F::setIdentity()
 {
+	setZero();
 	*m(0, 0) = *m(1, 1) = *m(2, 2) = *m(3, 3) = 1.0f;
-	*m(0, 1) = *m(0, 2) = *m(0, 3) = *m(1, 0) = *m(1, 2) = *m(1, 3) = *m(2, 0) = *m(2, 1) = *m(2, 3) = *m(3, 0) = *m(3, 1) = *m(3, 2) = 0.0f;
 }
 
 void Matrix44F::setZero()
 {
-	for(int i = 0; i < 16; i++) v[i] = 0.f;
+	memset(v, 0, 64);
 }
 
 float Matrix44F::determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i ) const
@@ -465,6 +465,13 @@ void Matrix44F::scaleBy(float sc)
 	*m(2, 2) *= sc;
 }
 
+void Matrix44F::scaleTranslationBy(float sc)
+{
+	*m(3, 0) *= sc;
+	*m(3, 1) *= sc;
+	*m(3, 2) *= sc;
+}
+
 std::ostream& operator<<(std::ostream &output, const Matrix44F & p) 
 {
 	output << "["<<p.v[0]<<", "<<p.v[1]<<", "<<p.v[2]<<", "<<p.v[3]
@@ -473,6 +480,9 @@ std::ostream& operator<<(std::ostream &output, const Matrix44F & p)
 		<<"]\n["<<p.v[12]<<", "<<p.v[13]<<", "<<p.v[14]<<", "<<p.v[15]<<"]";
 	return output;
 }
+
+void Matrix44F::copy(const Matrix44F & another)
+{ memcpy(v, another.v, 64); }
 
 }
 //:~

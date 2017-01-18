@@ -59,10 +59,13 @@ namespace aphid {
 	void transpose();
 	void glMatrix(float *m) const;
 	const float determinant() const;
+/// 3x3 only
 	void scaleBy(float sc);
+	void scaleTranslationBy(float sc);
+	void copy(const Matrix44F & another);
 	
 	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
-	static Matrix44F Identitiy;
+	static Matrix44F IdentityMatrix;
 	
 	friend std::ostream& operator<<(std::ostream &output, const Matrix44F & p);
 

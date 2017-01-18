@@ -540,6 +540,9 @@ bool Forest::closeToOccupiedBundlePosition(const int & iBundle,
 		return false;
 	}
 	
+	Vector3F pos1;
+	float size1;
+	
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
@@ -549,8 +552,9 @@ bool Forest::closeToOccupiedBundlePosition(const int & iBundle,
 		
 		if(bundleIndex(*d->t3) == iBundle) {
 		
-		float size1 = bundleSize * (d->t1->getSide().length() );
-			if(pos.distanceTo(d->t1->getTranslation() )  < minDistance + size1 ) {
+			size1 = bundleSize * (d->t1->getSide().length() );
+			pos1 = d->t1->getTranslation() - d->t2->m_offset;
+			if(pos.distanceTo(pos1)  < minDistance + size1 ) {
 				return true;
 			}
 		}

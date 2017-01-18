@@ -116,23 +116,56 @@ void ModifyForest::growMulti(GrowOption & option,
 				const Vector3F & sampleP,
 				const float & scale)
 {	
+	IntersectionContext * ctx = intersection();
+	const float rayD = bundle->geomExtent() * 2.f;
 	const float bundleSize = plantSize(iExample);
 	const float exclDist = option.m_minMarginSize + bundleSize * scale * .5f;
 	if(closeToOccupiedBundlePosition(iExample, bundleSize, sampleP, exclDist) ) {
 		return;
 	}
 	
+	Matrix44F invTm = tm;
+	invTm.inverse();
+
+	const Vector3F vdown(0.f, -1.f, 0.f);
+/// world ray dir pointing object down
+	Vector3F wdir;
+/// instance pos in local space
+	Vector3F locP;
+/// ground pos offset in local space
+	Vector3F groundP;
+/// world space instance pos
+	Vector3F instP;
+	
 	for(int i=0;i<bundle->numInstances();++i) {
 		const ExampVox::InstanceD & inst = bundle->getInstance(i);
 		Matrix44F instTm(inst._trans);
+		locP = instTm.getTranslation();
+		bind.m_offset = locP;
+		locP.y = 0.f;
+		
+/// to world
 		instTm *= tm;
+		bind.m_offset = tm.transformAsNormal(bind.m_offset);
 		
-		bind.m_offset = instTm.getTranslation() - sampleP; 
-		bind.m_offset *= scale;
+		instP = instTm.getTranslation();
+
+		wdir = tm.transformAsNormal(vdown);
+		wdir.normalize();
+		const Ray incident(instP, wdir, 0.f, rayD );
+		if(!intersectGround(incident) ) {
+			continue;
+		}
 		
-		instTm.scaleBy(scale);
-		
-		Vector3F instP = instTm.getTranslation();
+/// to local		
+		groundP = invTm.transform(ctx->m_hitP);
+		groundP -= locP;
+/// to world
+		groundP = tm.transformAsNormal(groundP);
+/// move in world
+		instP += groundP;
+		instTm.setTranslation(instP);
+		bind.m_offset += groundP;
 
 		const int instExample = exampleIndex(iExample, inst._exampleId );
 		growSingle(option, bind, instExample, instTm, instP, scale);
