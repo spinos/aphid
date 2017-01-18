@@ -35,6 +35,7 @@ class Forest {
 	SphereSelectionContext * m_selectCtx;
 	RayMarch m_march;
 	unsigned m_numPlants;
+	int m_lastPlantInd;
 	
 public:
 	Forest();
@@ -86,12 +87,48 @@ protected:
 ///  1: success
 	int getBindPoint(Vector3F & pos, GroundBind * bind);
 	
-	bool closeToOccupiedPosition(const Vector3F & pos, 
-					const float & minDistance);
-	bool closeToOccupiedBundlePosition(const int & iBundle,
-					const float & bundleSize,
-					const Vector3F & pos, 
-					const float & minDistance);
+	struct CollisionContext {
+		Vector3F _pos;
+		int _bundleIndex;
+		int _minIndex;
+		float _minDistance;
+		float _maxDistance;
+		float _bundleScaling;
+		float _radius;
+		
+		float getXMin() {
+			return _pos.x - _radius;
+		}
+		
+		float getXMax() {
+			return _pos.x + _radius;
+		}
+		
+		float getYMin() {
+			return _pos.y - _radius;
+		}
+		
+		float getYMax() {
+			return _pos.y + _radius;
+		}
+		
+		float getZMin() {
+			return _pos.z - _radius;
+		}
+		
+		float getZMax() {
+			return _pos.z + _radius;
+		}
+		
+		bool contact(const Vector3F & q,
+					const float & r) {
+			return _pos.distanceTo(q) < (_radius + _minDistance + r);
+		}
+		
+	};
+	
+	bool closeToOccupiedPosition(CollisionContext * ctx);
+	bool closeToOccupiedBundlePosition(CollisionContext * ctx);
 	bool intersectGround(const Ray & ray);
 	bool intersectGrid(const Ray & ray);
 	void addPlant(const Matrix44F & tm,
@@ -116,10 +153,10 @@ protected:
 	void intersectWorldBox(const Ray & ray);
 	int exampleIndex(const int & iBundle, const int & iChild) const;
 	int bundleIndex(const int & iExample) const;
+	const int & lastPlantIndex() const;
 
 private:
-	bool testNeighborsInCell(const Vector3F & pos, 
-					const float & minDistance,
+	bool testNeighborsInCell(CollisionContext * ctx,
 					sdb::Array<int, Plant> * cell);
 	
 };

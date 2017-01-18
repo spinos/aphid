@@ -95,11 +95,11 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		updateGeomBox(defBox, block);
 		updateGeomDop(defBox, block);
 		
-		float grdsz = defBox->geomExtent() * 25.f ;
+		float grdsz = defBox->geomExtent() * 20.f ;
 		grdsz = (int)grdsz + 1.f;
-		if(grdsz < 512.f) {
+		if(grdsz < 400.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
-			grdsz = 512.f;
+			grdsz = 400.f;
 			AHelper::Info<float>(" truncated to", grdsz);
 		}
 		

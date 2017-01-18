@@ -116,19 +116,19 @@ private:
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;
     bool sampleGround(EbpGrid * sampler, GrowOption & option);
+/// when bundleBegin > -1
+/// does not collide plant id >= bundleBegin
 	bool growSingle(GrowOption & option,
 				GroundBind & bind,
 				const int & iExample,
 				const Matrix44F & tm,
-				const Vector3F & sampleP,
-				const float & scale);
-	void growMulti(GrowOption & option,
+				CollisionContext * collctx);
+	void growBundle(GrowOption & option,
 				GroundBind & bind,
 				const ExampVox * bundle,
 				const int & iExample,
 				const Matrix44F & tm,
-				const Vector3F & sampleP,
-				const float & scale);
+				CollisionContext * collctx);
 				
 };
 

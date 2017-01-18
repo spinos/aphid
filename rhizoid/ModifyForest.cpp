@@ -55,6 +55,9 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	float scale;
 	Matrix44F tm;
 	Vector3F pog;
+	CollisionContext collctx;
+	collctx._minIndex = -1;
+	
 	try {
 	for(int i=0;i<ebpSampler.numParticles();++i) {
 /// tree division may not satify distance condition
@@ -89,11 +92,16 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		randomSpaceAt(pog, option, tm, scale);
 		
 		const ExampVox * v = plantExample(option.m_plantId);
+		
+		collctx._radius = v->geomSize() * scale * .5f;
+		collctx._minDistance = option.m_minMarginSize;
+		collctx._maxDistance = option.m_maxMarginSize;
+		collctx._pos = pog;
 		if(v->numExamples() > 1) {
-			growMulti(option, bind, v, option.m_plantId, tm, pog, scale);			
+			growBundle(option, bind, v, option.m_plantId, tm, &collctx);			
 		
 		} else {
-			growSingle(option, bind, option.m_plantId, tm, pog, scale);
+			growSingle(option, bind, option.m_plantId, tm, &collctx);
 					
 		}
 
@@ -108,21 +116,22 @@ bool ModifyForest::growOnGround(GrowOption & option)
     return true;
 }
 
-void ModifyForest::growMulti(GrowOption & option,
+void ModifyForest::growBundle(GrowOption & option,
 				GroundBind & bind,
 				const ExampVox * bundle,
 				const int & iExample,
 				const Matrix44F & tm,
-				const Vector3F & sampleP,
-				const float & scale)
+				CollisionContext * collctx)
 {	
 	IntersectionContext * ctx = intersection();
-	const float rayD = bundle->geomExtent() * 2.f;
-	const float bundleSize = plantSize(iExample);
-	const float exclDist = option.m_minMarginSize + bundleSize * scale * .5f;
-	if(closeToOccupiedBundlePosition(iExample, bundleSize, sampleP, exclDist) ) {
+	const float rayD = bundle->geomExtent() * 4.f;
+	collctx->_bundleIndex = iExample;
+	collctx->_bundleScaling = bundle->geomSize();
+	if(closeToOccupiedBundlePosition(collctx) ) {
 		return;
 	}
+	
+	const float scaling = tm.getSide().length();
 	
 	Matrix44F invTm = tm;
 	invTm.inverse();
@@ -137,7 +146,10 @@ void ModifyForest::growMulti(GrowOption & option,
 /// world space instance pos
 	Vector3F instP;
 	
-	for(int i=0;i<bundle->numInstances();++i) {
+	collctx->_minIndex = lastPlantIndex();
+		
+	const int bundleCount = bundle->numInstances();
+	for(int i=0;i<bundleCount;++i) {
 		const ExampVox::InstanceD & inst = bundle->getInstance(i);
 		Matrix44F instTm(inst._trans);
 		locP = instTm.getTranslation();
@@ -168,7 +180,13 @@ void ModifyForest::growMulti(GrowOption & option,
 		bind.m_offset += groundP;
 
 		const int instExample = exampleIndex(iExample, inst._exampleId );
-		growSingle(option, bind, instExample, instTm, instP, scale);
+		
+		collctx->_pos = instP;
+		collctx->_radius = plantSize(instExample) * scaling * .5f;
+		collctx->_minDistance = 0.f;
+		collctx->_maxDistance = 0.f;
+	
+		growSingle(option, bind, instExample, instTm, collctx);
 		
 	}
 }
@@ -177,11 +195,9 @@ bool ModifyForest::growSingle(GrowOption & option,
 				GroundBind & bind,
 				const int & iExample,
 				const Matrix44F & tm,
-				const Vector3F & sampleP,
-				const float & scale)
+				CollisionContext * collctx)
 {
-	const float exclDist = option.m_minMarginSize + plantSize(iExample) * scale * .5f;
-	if(closeToOccupiedPosition(sampleP, exclDist) ) {
+	if(closeToOccupiedPosition(collctx) ) {
 		return false;
 	}
 
@@ -245,13 +261,21 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	Matrix44F tm;
 	float scale;
 	randomSpaceAt(ctx->m_hitP, option, tm, scale); 
-		
+	
 	const ExampVox * v = plantExample(option.m_plantId);
+	
+	CollisionContext collctx;
+	collctx._minIndex = -1;
+	collctx._radius = v->geomSize() * scale * .5f;
+	collctx._minDistance = option.m_minMarginSize;
+	collctx._maxDistance = option.m_maxMarginSize;
+	collctx._pos = ctx->m_hitP;
+	
 	if(v->numExamples() > 1) {
-		growMulti(option, bind, v, option.m_plantId, tm, ctx->m_hitP, scale);			
+		growBundle(option, bind, v, option.m_plantId, tm, &collctx);			
 	
 	} else {
-		growSingle(option, bind, option.m_plantId, tm, ctx->m_hitP, scale);
+		growSingle(option, bind, option.m_plantId, tm, &collctx);
 				
 	}
 		
@@ -268,8 +292,13 @@ bool ModifyForest::growAt(const Matrix44F & trans, GrowOption & option)
 	
 /// x size
 	float scale = trans.getSide().length();
-	float scaledSize = plantSize(option.m_plantId) * scale;
-	if(closeToOccupiedPosition(pog, scaledSize)) 
+	CollisionContext collctx;
+	collctx._minIndex = -1;
+	collctx._radius = plantSize(option.m_plantId) * scale * .5f;
+	collctx._minDistance = option.m_minMarginSize;
+	collctx._maxDistance = option.m_maxMarginSize;
+	collctx._pos = pog;
+	if(closeToOccupiedPosition(&collctx) ) 
 		return false;
         
 	Matrix44F tm = trans;

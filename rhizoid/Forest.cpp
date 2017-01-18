@@ -27,7 +27,7 @@ Forest::Forest()
 	m_activePlants = new PlantSelection(m_grid);
 	m_selectCtx = new SphereSelectionContext;
 	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
-	
+	m_lastPlantInd = -1;
 }
 
 Forest::~Forest() 
@@ -178,53 +178,51 @@ unsigned Forest::numActiveGroundFaces()
 SphereSelectionContext * Forest::activeGround()
 { return m_selectCtx; }
 
-bool Forest::closeToOccupiedPosition(const Vector3F & pos, 
-					const float & minDistance)
+bool Forest::closeToOccupiedPosition(CollisionContext * ctx)
 {
-	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&pos);
+	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&ctx->_pos);
 	sdb::Array<int, Plant> * cell = m_grid->findCell(c0);
-	if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+	if(testNeighborsInCell(ctx, cell) ) return true;
 	
 	BoundingBox b = m_grid->coordToGridBBox(c0);
 	
 	sdb::Coord3 c1 = c0;
-	if(pos.x - minDistance < b.getMin(0) ) {
+	if(ctx->getXMin() < b.getMin(0) ) {
 		 c1.x = c0.x - 1;
 		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+		 if(testNeighborsInCell(ctx, cell) ) return true;
 	}
-	if(pos.x + minDistance > b.getMax(0) ) {
+	if(ctx->getXMax() > b.getMax(0) ) {
 		 c1.x = c0.x + 1;
 		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+		 if(testNeighborsInCell(ctx, cell) ) return true;
 	}
 	c1.x = c0.x;
-	if(pos.y - minDistance < b.getMin(1) ) {
+	if(ctx->getYMin() < b.getMin(1) ) {
 		 c1.y = c0.y - 1;
 		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+		 if(testNeighborsInCell(ctx, cell) ) return true;
 	}
-	if(pos.y + minDistance > b.getMax(1) ) {
+	if(ctx->getYMax() > b.getMax(1) ) {
 		 c1.y = c0.y + 1;
 		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+		 if(testNeighborsInCell(ctx, cell) ) return true;
 	}
 	c1.y = c0.y;
-	if(pos.z - minDistance < b.getMin(2) ) {
+	if(ctx->getZMin() < b.getMin(2) ) {
 		 c1.z = c0.z - 1;
 		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+		 if(testNeighborsInCell(ctx, cell) ) return true;
 	}
-	if(pos.z + minDistance > b.getMax(2) ) {
+	if(ctx->getZMax() > b.getMax(2) ) {
 		 c1.z = c0.z + 1;
 		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(pos, minDistance, cell) ) return true;
+		 if(testNeighborsInCell(ctx, cell) ) return true;
 	}
 	return false;
 }
 
-bool Forest::testNeighborsInCell(const Vector3F & pos, 
-					const float & minDistance,
+bool Forest::testNeighborsInCell(CollisionContext * ctx,
 					sdb::Array<int, Plant> * cell)
 {
 	if(!cell) {
@@ -235,6 +233,8 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 		return false;
 	}
 	
+	bool doCollide;
+	
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
@@ -242,9 +242,20 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 			throw "Forest testNeighborsInCell null data";
 		}
 		
-		float scale = d->t1->getSide().length();
-		if(pos.distanceTo(d->t1->getTranslation() ) - plantSize(*d->t3) * scale < minDistance) return true;
-		  
+		if(ctx->_minIndex > -1) {
+			doCollide = cell->key() < ctx->_minIndex;
+		} else {
+			doCollide = true;
+		}
+		
+		if(doCollide) {
+			float scale = d->t1->getSide().length() * .5f;
+			if(ctx->contact(d->t1->getTranslation(),
+							plantSize(*d->t3) * scale) ) {
+				return true;
+			}
+		}
+		
 		cell->next();
 	}
 	return false;
@@ -432,6 +443,7 @@ void Forest::addPlant(const Matrix44F & tm,
 	p->key = m_plants.size();
 	p->index = m_pool.back();
 	m_plants.push_back(p);
+	m_lastPlantInd = p->key;
 	
 	const Vector3F & at = tm.getTranslation();
 	
@@ -525,12 +537,9 @@ void Forest::intersectWorldBox(const Ray & ray)
 	m_intersectCtx.m_hitN = ray.m_dir;
 }
 
-bool Forest::closeToOccupiedBundlePosition(const int & iBundle,
-					const float & bundleSize,
-					const Vector3F & pos, 
-					const float & minDistance)
+bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 {
-	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&pos);
+	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&ctx->_pos);
 	sdb::Array<int, Plant> * cell = m_grid->findCell(c0);
 	if(!cell) {
 		return false;
@@ -550,11 +559,11 @@ bool Forest::closeToOccupiedBundlePosition(const int & iBundle,
 			throw "Forest testNeighborsInCell null data";
 		}
 		
-		if(bundleIndex(*d->t3) == iBundle) {
+		if(bundleIndex(*d->t3) == ctx->_bundleIndex) {
 		
-			size1 = bundleSize * (d->t1->getSide().length() );
+			size1 = d->t1->getSide().length() * ctx->_bundleScaling * .5f;
 			pos1 = d->t1->getTranslation() - d->t2->m_offset;
-			if(pos.distanceTo(pos1)  < minDistance + size1 ) {
+			if(ctx->contact(pos1, size1) ) {
 				return true;
 			}
 		}
@@ -564,5 +573,8 @@ bool Forest::closeToOccupiedBundlePosition(const int & iBundle,
 	
 	return false;
 }
+
+const int & Forest::lastPlantIndex() const
+{ return m_lastPlantInd; }
 
 }

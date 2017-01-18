@@ -189,7 +189,7 @@ void DrawForest::drawPlantsInCell(sdb::Array<int, Plant> * cell,
 	float camZ = cameraDepth(worldP);
 	camZ += r;
 	float lod;
-	if(cullByLod(camZ, r*0.1f, .4f, 1.9f, lod) ) {
+	if(cullByLod(camZ, r * .2f, .99f, 1.9f, lod) ) {
 		drawPlantSolidBoundInCell(cell);
 		return;
 	}
@@ -296,7 +296,6 @@ void DrawForest::drawPlantBox(PlantData * data)
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf((const GLfloat*)m_transbuf);
 	const ExampVox * v = plantExample(*data->t3);
-	//drawWireBox(v->geomCenterV(), v->geomScale() );
 	v->drawWiredBound();
 		
 	glPopMatrix();
