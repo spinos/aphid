@@ -127,10 +127,19 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		return;
 	}
 	
+	MDagPath cameraPath;
+	view.getCamera(cameraPath);
+	Matrix33F mf;
+	AHelper::GetViewMatrix(&mf, cameraPath);
+	mf *= geomSize();
+    mf.glMatrix(m_transBuf);
+	
 	view.beginGL();
 	
 	const BoundingBox & bbox = geomBox();
 	drawBoundingBox(&bbox);
+	
+	drawZCircle(m_transBuf);
 	
 	glPushAttrib(GL_CURRENT_BIT);
 	
@@ -144,13 +153,6 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//} 
-	
-	Matrix44F mat;
-	mat.setFrontOrientation(Vector3F::YAxis);
-	mat.scaleBy(geomSize() );
-    mat.glMatrix(m_transBuf);
-	
-	drawCircle(m_transBuf);
 	
 	glPopAttrib();
 	

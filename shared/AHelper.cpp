@@ -1226,5 +1226,19 @@ MObject AHelper::CreateDGNode(const MTypeId & typeId,
     return node;
 }
 
+void AHelper::GetViewMatrix(Matrix33F * mat,
+								const MDagPath & cameraPath)
+{
+	MMatrix cameraMat = cameraPath.inclusiveMatrix();
+	AHelper::ConvertToMatrix33F(*mat, cameraMat);
+}
+
+void AHelper::GetViewMatrix(Matrix44F * mat,
+								const MDagPath & cameraPath)
+{
+	MMatrix cameraMat = cameraPath.inclusiveMatrix();
+	AHelper::ConvertToMatrix44F(*mat, cameraMat);
+}
+
 }
 //:~

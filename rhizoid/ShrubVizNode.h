@@ -20,6 +20,7 @@
 #include <maya/MIntArray.h>
 #include <maya/MVectorArray.h>
 #include <ogl/DrawInstance.h>
+#include <ogl/DrawCircle.h>
 #include "BundleExamp.h"
 
 namespace aphid {
@@ -32,8 +33,9 @@ class DenseMatrix;
 
 class BoundingBox;
 
-class ShrubVizNode : public MPxLocatorNode, public BundleExamp, public DrawInstance
+class ShrubVizNode : public MPxLocatorNode, public BundleExamp, public DrawInstance, public aphid::DrawCircle
 {
+	float m_transBuf[16];
 	Matrix44F * m_cameraSpace;
 	bool m_useExampleInput;
 	
@@ -56,6 +58,7 @@ public:
 	static  MStatus         initialize();
 
 	static MTypeId id;
+	static MObject aradiusMult;
 	static MObject ashrubbox;
 	static MObject ainsttrans;
 	static MObject ainstexamp;

@@ -246,12 +246,11 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
-	Matrix44F mat;
-	mat.setFrontOrientation(Vector3F::YAxis);
-	mat.scaleBy(defBox->geomSize() );
+	Matrix33F mat = cameraSpaceR()->rotation();
+	mat *= defBox->geomSize();
     mat.glMatrix(m_transBuf);
 	
-	drawCircle(m_transBuf);
+	drawZCircle(m_transBuf);
 	
 	drawGridBounding();
 	// drawGrid();

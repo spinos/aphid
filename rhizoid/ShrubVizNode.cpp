@@ -20,6 +20,7 @@
 namespace aphid {
 
 MTypeId ShrubVizNode::id( 0x7809778 );
+MObject ShrubVizNode::aradiusMult;
 MObject ShrubVizNode::ashrubbox;
 MObject ShrubVizNode::ainsttrans;
 MObject ShrubVizNode::ainstexamp;
@@ -28,6 +29,7 @@ MObject ShrubVizNode::outValue;
 	
 ShrubVizNode::ShrubVizNode()
 { 
+	memset(m_transBuf, 0, 64);
 	m_cameraSpace = new Matrix44F;
 	m_useExampleInput = true;
 	attachSceneCallbacks(); 
@@ -42,6 +44,10 @@ ShrubVizNode::~ShrubVizNode()
 MStatus ShrubVizNode::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == outValue ) {
+	
+		MDataHandle radiusMultH = block.inputValue(aradiusMult);
+		float radiusScal = radiusMultH.asFloat();
+		setGeomSizeMult(radiusScal);
 	
 		BoundingBox bb;
 		getBBox(bb);
@@ -78,6 +84,14 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
+	MPlug radiusMultPlug(thisMObject(), aradiusMult);
+	float radiusScal = radiusMultPlug.asFloat();
+	setGeomSizeMult(radiusScal);
+	
+	BoundingBox bb;
+	getBBox(bb);
+	setGeomBox(&bb);
+	
 	const int nexp = numExamples();
 //AHelper::Info<int>("nexp", nexp);
 	
@@ -99,15 +113,16 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
-	MMatrix cameraMat = cameraPath.inclusiveMatrix();
-	AHelper::ConvertToMatrix44F(*m_cameraSpace, cameraMat);
+	AHelper::GetViewMatrix(m_cameraSpace, cameraPath);
+	Matrix33F mf = m_cameraSpace->rotation();
+	mf *= geomSize();
+    mf.glMatrix(m_transBuf);
 		
 	view.beginGL();
 	
-	BoundingBox bbox;
-	getBBox(bbox);
+	drawBoundingBox(&bb);
 	
-	drawBoundingBox(&bbox);
+	drawZCircle(m_transBuf);
 	
 	bool hasGlsl = isGlslReady();
 	if(!hasGlsl ) {
@@ -164,6 +179,13 @@ MStatus ShrubVizNode::initialize()
 	MFnNumericAttribute numFn;
 	MFnTypedAttribute typFn;
 	MStatus			 stat;
+	
+	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(1.f);
+	numFn.setMin(.05f);
+	addAttribute(aradiusMult);
 	
 	MDoubleArray defaultDArray;
 	MFnDoubleArrayData dArrayDataFn;
@@ -235,6 +257,7 @@ MStatus ShrubVizNode::initialize()
 	MFnPointArrayData pntArrayDataFn;
 	pntArrayDataFn.create( defaultPntArray );
 	    
+	attributeAffects(aradiusMult, outValue);
 	attributeAffects(ainexamp, outValue);
 	
 	return MS::kSuccess;

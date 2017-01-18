@@ -207,7 +207,12 @@ public:
 								const MString & nodeName);
 	static MObject CreateDGNode(const MTypeId &typeId,
 								const MString & nodeName);
-	
+/// rotation only
+	static void GetViewMatrix(Matrix33F * mat,
+								const MDagPath & cameraPath);
+	static void GetViewMatrix(Matrix44F * mat,
+								const MDagPath & cameraPath);
+								
 };
 
 }
