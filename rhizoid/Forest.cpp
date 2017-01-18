@@ -227,12 +227,21 @@ bool Forest::testNeighborsInCell(const Vector3F & pos,
 					const float & minDistance,
 					sdb::Array<int, Plant> * cell)
 {
-	if(!cell) return false;
-	if(cell->isEmpty() ) return false;
+	if(!cell) {
+		return false;
+	}
+	
+	if(cell->isEmpty() ) {
+		return false;
+	}
+	
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
-		if(d == NULL) throw "Forest testNeighborsInCell null data";
+		if(d == NULL) {
+			throw "Forest testNeighborsInCell null data";
+		}
+		
 		float scale = d->t1->getSide().length();
 		if(pos.distanceTo(d->t1->getTranslation() ) - plantSize(*d->t3) * scale < minDistance) return true;
 		  
@@ -456,6 +465,9 @@ int Forest::numPlantExamples() const
 int Forest::exampleIndex(const int & iBundle, const int & iChild) const
 { return iBundle | (iChild+1)<<10; }
 
+int Forest::bundleIndex(const int & iExample) const
+{ return iExample>>10; }
+
 void Forest::addPlantExample(ExampVox * x, const int & islot)
 {
 	if(m_exampleIndices.find(x) != m_exampleIndices.end() ) {
@@ -511,6 +523,42 @@ void Forest::intersectWorldBox(const Ray & ray)
 		h1 = 1e6f;
 	m_intersectCtx.m_hitP = ray.travel(h1);
 	m_intersectCtx.m_hitN = ray.m_dir;
+}
+
+bool Forest::closeToOccupiedBundlePosition(const int & iBundle,
+					const float & bundleSize,
+					const Vector3F & pos, 
+					const float & minDistance)
+{
+	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&pos);
+	sdb::Array<int, Plant> * cell = m_grid->findCell(c0);
+	if(!cell) {
+		return false;
+	}
+	
+	if(cell->isEmpty() ) {
+		return false;
+	}
+	
+	cell->begin();
+	while(!cell->end()) {
+		PlantData * d = cell->value()->index;
+		if(d == NULL) {
+			throw "Forest testNeighborsInCell null data";
+		}
+		
+		if(bundleIndex(*d->t3) == iBundle) {
+		
+		float size1 = bundleSize * (d->t1->getSide().length() );
+			if(pos.distanceTo(d->t1->getTranslation() )  < minDistance + size1 ) {
+				return true;
+			}
+		}
+		
+		cell->next();
+	}
+	
+	return false;
 }
 
 }

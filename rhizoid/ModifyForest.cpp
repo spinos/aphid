@@ -115,7 +115,13 @@ void ModifyForest::growMulti(GrowOption & option,
 				const Matrix44F & tm,
 				const Vector3F & sampleP,
 				const float & scale)
-{			
+{	
+	const float bundleSize = plantSize(iExample);
+	const float exclDist = option.m_minMarginSize + bundleSize * scale * .5f;
+	if(closeToOccupiedBundlePosition(iExample, bundleSize, sampleP, exclDist) ) {
+		return;
+	}
+	
 	for(int i=0;i<bundle->numInstances();++i) {
 		const ExampVox::InstanceD & inst = bundle->getInstance(i);
 		Matrix44F instTm(inst._trans);
@@ -141,8 +147,8 @@ bool ModifyForest::growSingle(GrowOption & option,
 				const Vector3F & sampleP,
 				const float & scale)
 {
-	const float minDist = option.m_minMarginSize + plantSize(iExample) * scale * .5f;
-	if(closeToOccupiedPosition(sampleP, minDist) ) {
+	const float exclDist = option.m_minMarginSize + plantSize(iExample) * scale * .5f;
+	if(closeToOccupiedPosition(sampleP, exclDist) ) {
 		return false;
 	}
 
@@ -191,29 +197,31 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
     
 	GroundBind bind;
 	bind.setGeomComp(t->ind0(), t->ind1() );
-		Matrix44F tm;
-		float scale;
-		randomSpaceAt(ctx->m_hitP, option, tm, scale); 
-		float scaledSize = plantSize(option.m_plantId) * scale;
-		float limitedMargin = getNoise2(option.m_minMarginSize, option.m_maxMarginSize);
-/// limit low margin
-		if(limitedMargin < -.99f * scaledSize) limitedMargin = -.99f * scaledSize;
-		float delta = limitedMargin + scaledSize;
-		if(closeToOccupiedPosition(ctx->m_hitP, delta)) return false;
-		
-		m_bary->project(ctx->m_hitP);
-		m_bary->compute();
-		if(!m_bary->insideTriangle()) {
-			std::cout<<"\n out of triangle pnt "<<ctx->m_hitP;
-            return false;
-        }
-        
-		bind.m_w0 = m_bary->getV(0);
-		bind.m_w1 = m_bary->getV(1);
-		bind.m_w2 = m_bary->getV(2);
-		
-		addPlant(tm, bind, option.m_plantId);
 	
+	m_bary->project(ctx->m_hitP);
+	m_bary->compute();
+	if(!m_bary->insideTriangle()) {
+		std::cout<<"\n out of triangle pnt "<<ctx->m_hitP;
+		return false;
+	}
+	
+	bind.m_w0 = m_bary->getV(0);
+	bind.m_w1 = m_bary->getV(1);
+	bind.m_w2 = m_bary->getV(2);
+		
+	Matrix44F tm;
+	float scale;
+	randomSpaceAt(ctx->m_hitP, option, tm, scale); 
+		
+	const ExampVox * v = plantExample(option.m_plantId);
+	if(v->numExamples() > 1) {
+		growMulti(option, bind, v, option.m_plantId, tm, ctx->m_hitP, scale);			
+	
+	} else {
+		growSingle(option, bind, option.m_plantId, tm, ctx->m_hitP, scale);
+				
+	}
+		
     return true;
 }
 

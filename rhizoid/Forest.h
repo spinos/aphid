@@ -88,6 +88,10 @@ protected:
 	
 	bool closeToOccupiedPosition(const Vector3F & pos, 
 					const float & minDistance);
+	bool closeToOccupiedBundlePosition(const int & iBundle,
+					const float & bundleSize,
+					const Vector3F & pos, 
+					const float & minDistance);
 	bool intersectGround(const Ray & ray);
 	bool intersectGrid(const Ray & ray);
 	void addPlant(const Matrix44F & tm,
@@ -111,7 +115,8 @@ protected:
 	void onPlantChanged();
 	void intersectWorldBox(const Ray & ray);
 	int exampleIndex(const int & iBundle, const int & iChild) const;
-	
+	int bundleIndex(const int & iExample) const;
+
 private:
 	bool testNeighborsInCell(const Vector3F & pos, 
 					const float & minDistance,
