@@ -220,14 +220,15 @@ void MForest::adjustBrushSize(const MPoint & origin, const MPoint & dest,
 }
 
 void MForest::adjustSize(const MPoint & origin, const MPoint & dest, 
-                         float magnitude)
+                         float magnitude,
+						 bool isBundled)
 {
     Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	if(magnitude > .5f) magnitude = .5f;
     if(magnitude < -.5f) magnitude = -.5f;
-    scaleAt(r, magnitude);
+    scaleAt(r, magnitude, isBundled);
 }
 
 void MForest::adjustRotation(const MPoint & origin, const MPoint & dest,

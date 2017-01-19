@@ -152,8 +152,6 @@ protected:
 		
 	void onPlantChanged();
 	void intersectWorldBox(const Ray & ray);
-	int exampleIndex(const int & iBundle, const int & iChild) const;
-	int bundleIndex(const int & iExample) const;
 	const int & lastPlantIndex() const;
 
 private:

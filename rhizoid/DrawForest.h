@@ -62,8 +62,6 @@ private:
 	void drawWiredPlants(ForestCell * cell);
 	void drawWiredPlant(PlantData * data,
 					const ExampVox * v);
-	void drawPlantBox(PlantData * data,
-					const ExampVox * v);
 	void drawLODPlant(PlantData * data,
 					const ExampVox * v);
 	void drawPlantSolidBoundInCell(ForestCell * cell);

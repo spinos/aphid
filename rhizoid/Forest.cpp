@@ -472,12 +472,6 @@ bool Forest::isGroundEmpty() const
 int Forest::numPlantExamples() const
 { return m_examples.size(); }
 
-int Forest::exampleIndex(const int & iBundle, const int & iChild) const
-{ return iBundle | (iChild+1)<<10; }
-
-int Forest::bundleIndex(const int & iExample) const
-{ return iExample>>10; }
-
 void Forest::addPlantExample(ExampVox * x, const int & islot)
 {
 	if(m_exampleIndices.find(x) != m_exampleIndices.end() ) {
@@ -491,7 +485,7 @@ void Forest::addPlantExample(ExampVox * x, const int & islot)
 	const int ne = x->numExamples();
 	if(ne > 1) {
 		for(int i=0;i<ne;++i) {
-			int elmi = exampleIndex(islot, i);
+			int elmi = plant::exampleIndex(islot, i);
 			m_examples[elmi] = x->getExample(i);
 		}
 	}
@@ -499,7 +493,12 @@ void Forest::addPlantExample(ExampVox * x, const int & islot)
 }
 
 ExampVox * Forest::plantExample(const int & idx)
-{ return m_examples[idx]; }
+{
+	if(m_examples.find(idx) == m_examples.end() ) {
+		return NULL;
+	}
+	return m_examples[idx]; 
+}
 
 void Forest::setSelectTypeFilter(int flt)
 { m_activePlants->setTypeFilter(flt); }
@@ -557,7 +556,7 @@ bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 			throw "Forest testNeighborsInCell null data";
 		}
 		
-		if(bundleIndex(cell->key().y) == ctx->_bundleIndex) {
+		if(plant::bundleIndex(cell->key().y) == ctx->_bundleIndex) {
 		
 			size1 = d->t1->getSide().length() * ctx->_bundleScaling * .5f;
 			pos1 = d->t1->getTranslation() - d->t2->m_offset;

@@ -82,7 +82,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 			processSelectByType();
 			break;
 		case opResize :
-			resize();
+			resize(false);
 			break;
 		case opMove :
 			move();
@@ -113,6 +113,9 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
             break;
 		case opDepress :
             depressOffset();
+            break;
+		case opBundleResize :
+            resize(true);
             break;
 		default:
 			;
@@ -228,7 +231,7 @@ void proxyPaintContext::setOperation(short val)
             mOpt =opSelect;
 			break;
 		case opResize:
-			opstr="scale";
+			opstr="resize";
             mOpt = opResize;
 			break;
 		case opMove:
@@ -274,6 +277,10 @@ void proxyPaintContext::setOperation(short val)
 		case opDepress:
 			opstr="depress offset";
             mOpt = opDepress;
+			break;
+		case opBundleResize:
+			opstr="bundle resize";
+            mOpt = opBundleResize;
 			break;
 		default:
 			;
@@ -394,7 +401,7 @@ void proxyPaintContext::scaleBrush()
 	PtrViz->adjustBrushSize(fromNear, fromFar, mag);
 }
 
-void proxyPaintContext::resize()
+void proxyPaintContext::resize(bool isBundled)
 {
 	if(!PtrViz) return;
 	MPoint fromNear, fromFar;
@@ -404,7 +411,7 @@ void proxyPaintContext::resize()
 	mag /= 48;
 	
     PtrViz->setNoiseWeight(m_growOpt.m_rotateNoise);
-	PtrViz->adjustSize(fromNear, fromFar, mag);
+	PtrViz->adjustSize(fromNear, fromFar, mag, isBundled);
 }
 
 void proxyPaintContext::move()

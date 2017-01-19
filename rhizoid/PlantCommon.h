@@ -59,5 +59,22 @@ public:
 	
 };
 
+
+namespace plant {
+
+inline int exampleIndex(const int & iBundle, const int & iChild)
+{ return iBundle | (iChild+1)<<10; }
+
+inline int bundleIndex(const int & iExample)
+{ return iExample & 1023; }
+
+inline int childIndex(const int & iExample)
+{ return (iExample >> 10) - 1; }
+
+inline bool isChildOfBundle(const int & iExample)
+{ return iExample > 1024; }
+
+}
+
 }
 #endif

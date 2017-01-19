@@ -179,7 +179,7 @@ void ModifyForest::growBundle(GrowOption & option,
 		instTm.setTranslation(instP);
 		bind.m_offset += groundP;
 
-		const int instExample = exampleIndex(iExample, inst._exampleId );
+		const int instExample = plant::exampleIndex(iExample, inst._exampleId );
 		
 		collctx->_pos = instP;
 		collctx->_radius = plantSize(instExample) * scaling * .5f;
@@ -325,9 +325,9 @@ void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
 			if(m_pnoise->rfloat(m_seed) < option.m_strength) {
-				Plant * pl = arr->value()->m_reference;
-/// todo remove and add 
-				///*pl->index->t3 = option.m_plantId;
+/// todo remove and add
+				// Plant * pl = arr->value()->m_reference; 
+				// *pl->index->t3 = option.m_plantId;
 			}
 			m_seed++;
 		}
@@ -413,7 +413,8 @@ void ModifyForest::scaleBrushAt(const Ray & ray, float magnitude)
     selection()->setRadius(r);
 }
 
-void ModifyForest::scaleAt(const Ray & ray, float magnitude)
+void ModifyForest::scaleAt(const Ray & ray, float magnitude,
+							bool isBundled)
 {
     if(!calculateSelecedWeight(ray)) return;
     
@@ -424,7 +425,15 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 		if(wei > 1e-4f) { 
 			PlantData * plantd = arr->value()->m_reference->index;
 			Matrix44F * mat = plantd->t1;
-            mat->scaleBy(1.f + magnitude * wei * (1.f + getNoise() ) );
+			float scaling = 1.f + magnitude * wei * (1.f + getNoise() );
+            mat->scaleBy(scaling );
+			if(isBundled && plant::isChildOfBundle(arr->key().y) ) {
+				Vector3F & voffset = plantd->t2->m_offset;
+				Vector3F psurf = mat->getTranslation() - voffset;
+				voffset *= scaling;
+				psurf += voffset;
+				mat->setTranslation(psurf);
+			}
 		}
 		arr->next();
 	}

@@ -94,7 +94,8 @@ protected:
 	void replaceAt(const Ray & ray, GrowOption & option);
 	void clearSelected();
 	void clearAt(const Ray & ray, GrowOption & option);
-	void scaleAt(const Ray & ray, float magnitude);
+	void scaleAt(const Ray & ray, float magnitude,
+				bool isBundled);
 	void rotateAt(const Ray & ray, float magnitude, int axis);
 	void movePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,

@@ -44,6 +44,7 @@ class proxyPaintContext : public MPxContext
 		opErect = 16,
 		opRaise = 17,
 		opDepress = 18,
+		opBundleResize = 19,
 		opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
@@ -127,7 +128,7 @@ public:
 	void setNoiseOriginZ(float x);
 	
 private:
-	void resize();
+	void resize(bool isBundled);
 	void grow();
 	void flood();
 	void snap();

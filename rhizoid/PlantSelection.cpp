@@ -65,20 +65,26 @@ void PlantSelection::selectInCell(const sdb::Coord3 & c,
 	if(cell->isEmpty() ) return;
 	
 	SelectionContext::SelectMode usemode = mode;
+	Vector3F samp;
 	try {
 	cell->begin();
 	while(!cell->end()) {
 		PlantData * d = cell->value()->index;
-		if(m_center.distanceTo(d->t1->getTranslation() ) < m_radius) {
+		samp = d->t1->getTranslation() - d->t2->m_offset;
+		
+		if(m_center.distanceTo(samp ) < m_radius) {
             if(m_typeFilter > -1 ) {
-                if(m_typeFilter == cell->key().y ) 
+                if(m_typeFilter == plant::bundleIndex(cell->key().y) ) {
                     usemode = mode;
-                else
+				}
+                else {
                     usemode = SelectionContext::Unknown;
-                    
+				}
             }
-			if(usemode == SelectionContext::Append) 
+			
+			if(usemode == SelectionContext::Append) {
 				select(cell->value() );
+			}
 			else if(usemode == SelectionContext::Remove) {
 				m_plants->remove(cell->key() );
 			}
@@ -161,10 +167,13 @@ PlantSelection::SelectionTyp * PlantSelection::data()
 
 void PlantSelection::calculateWeight()
 {
+	Vector3F pr;
+	float dist;
 	m_plants->begin();
 	while(!m_plants->end() ) {
-		const Vector3F pr = m_plants->value()->m_reference->index->t1->getTranslation();
-		const float dist = m_center.distanceTo(pr);
+		PlantData * d = m_plants->value()->m_reference->index;
+		pr = d->t1->getTranslation() - d->t2->m_offset;
+		dist = m_center.distanceTo(pr);
 		if(dist < m_radius) {
 			m_plants->value()->m_weight = 1.f - sqrt(dist / m_radius);
 		}
@@ -193,8 +202,9 @@ bool PlantSelection::touchCell(const Ray & incident, const sdb::Coord3 & c,
 		PlantData * d = cell->value()->index;
 		pnt = incident.closestPointOnRay(d->t1->getTranslation(), &tt );
 		if(tt < -1.f 
-			&& pnt.distanceTo(d->t1->getTranslation() ) < m_radius)
+			&& pnt.distanceTo(d->t1->getTranslation() ) < m_radius) {
             return true;
+		}
 		
 		cell->next();
 	}

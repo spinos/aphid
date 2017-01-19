@@ -104,8 +104,10 @@ void DrawForest::drawWiredPlants()
 	while(!g->end() ) {
 		BoundingBox cellBox = g->coordToGridBBox(g->key() );
         cellBox.expand(margin);
-        if(!cullByFrustum(cellBox ) )
+        if(!cullByFrustum(cellBox ) ) {
 			drawWiredPlants(g->value() );
+		}
+		
 		g->next();
 	}
 	} catch (...) {
@@ -262,7 +264,7 @@ void DrawForest::drawPlant(PlantData * data,
 void DrawForest::drawLODPlant(PlantData * data,
 					const ExampVox * v)
 {	
-	if(m_showVoxLodThresold >.9999f) {
+	if(m_showVoxLodThresold > .9999f) {
         v->drawASolidDop();
 		return;
     }
@@ -315,18 +317,6 @@ void DrawForest::drawGrid()
 	}
 }
 
-void DrawForest::drawPlantBox(PlantData * data,
-							const ExampVox * v)
-{
-	glPushMatrix();
-    
-	data->t1->glMatrix(m_transbuf);
-	glMultMatrixf((const GLfloat*)m_transbuf);
-	v->drawWiredBound();
-		
-	glPopMatrix();
-}
-
 void DrawForest::drawActivePlants()
 {
     if(!m_enabled) return;
@@ -343,7 +333,7 @@ void DrawForest::drawActivePlants()
 			iExample = arr->key().y;
 			v = plantExample(iExample );
 		}
-		drawPlantBox(arr->value()->m_reference->index, v );
+		drawWiredPlant(arr->value()->m_reference->index, v );
 		
 		arr->next();
 	}
@@ -420,8 +410,10 @@ bool DrawForest::isVisibleInView(Plant * pl,
 	const Vector3F & localP = v->geomCenter();
 	Vector3F worldP = d->t1->transform(localP);
 	const float r = v->geomExtent() * d->t1->getSide().length();
-	if(cullByFrustum(worldP, r) ) return false;
-    
+	if(cullByFrustum(worldP, r) ) {
+		return false;
+    }
+	
 	float camZ;
 	if(cullByDepth<cvx::Triangle, KdNTree<cvx::Triangle, KdNode4 > >(worldP, r * 2.f, camZ, ground() ) ) return false;
 	

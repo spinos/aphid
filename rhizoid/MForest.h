@@ -38,7 +38,8 @@ public:
     void adjustBrushSize(const MPoint & origin, const MPoint & dest, 
                     float magnitude);
 	void adjustSize(const MPoint & origin, const MPoint & dest, 
-                     float magnitude);
+                     float magnitude,
+					 bool isBundled);
 	void adjustRotation(const MPoint & origin, const MPoint & dest, 
                         float magnitude, short axis);
 	void extractActive(int numGroups);
