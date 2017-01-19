@@ -11,6 +11,7 @@
 #include <math/PseudoNoise.h>
 #include <fstream> 
 #include <PlantSelection.h>
+#include <ForestCell.h>
 
 namespace aphid {
 
@@ -246,7 +247,7 @@ void MForest::savePlants(MPointArray & plantTms,
 					MVectorArray & plantCoords,
 					MVectorArray & plantOffsets)
 {
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		saveCell(g->value(), plantTms, plantIds,
@@ -458,7 +459,7 @@ void MForest::saveAllExternel(const char* filename)
 	float *data = new float[numRec * 16];
 	int * tpi = new int[numRec];
 	unsigned it = 0;
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		getDataInCell(g->value(), data, tpi, it);
@@ -725,7 +726,7 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
                     int plantTyp)
 {
 	int i = 0;
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
 		pickupVisiblePlantsInCell(g->value(), lodLowGate, lodHighGate, 

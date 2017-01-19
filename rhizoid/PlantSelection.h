@@ -12,17 +12,19 @@
 
 namespace aphid {
 
+class ForestCell;
+
 class PlantSelection {
 	
 	Vector3F m_center, m_direction;
 	float m_radius;
 	int m_numSelected;
     int m_typeFilter;
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * m_grid;
+	sdb::WorldGrid<ForestCell, Plant > * m_grid;
 	sdb::Array<int, PlantInstance> * m_plants;
 	
 public:
-	PlantSelection(sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid);
+	PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid);
 	virtual ~PlantSelection();
 	
     void setRadius(float x);
@@ -47,7 +49,7 @@ protected:
 private:
 	void selectInCell(const sdb::Coord3 & c, 
 	            const SelectionContext::SelectMode & mode);
-	void selectByTypeInCell(sdb::Array<int, Plant> * cell, int x);
+	void selectByTypeInCell(ForestCell * cell, int x);
 	
 };
 

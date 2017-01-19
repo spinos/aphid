@@ -13,6 +13,7 @@
 #include <sdb/ebp.h>
 #include <PlantSelection.h>
 #include "ExampVox.h"
+#include <ForestCell.h>
 #include <ctime>
 
 namespace aphid {
@@ -338,7 +339,7 @@ void ModifyForest::clearPlant(Plant * pl, int k)
 {
 	const Vector3F & pos = pl->index->t1->getTranslation();
 	sdb::Coord3 c0 = grid()->gridCoord((const float *)&pos);
-	sdb::Array<int, Plant> * cell = grid()->findCell(c0 );
+	ForestCell * cell = grid()->findCell(c0 );
 	if(cell) {
 		cell->remove(k );
 		if(cell->isEmpty() )
@@ -680,7 +681,7 @@ void ModifyForest::moveWithGround()
 	updateGrid();
 }
 
-void ModifyForest::movePlantsWithGround(sdb::Array<int, Plant> * arr)
+void ModifyForest::movePlantsWithGround(ForestCell * arr)
 {
 	Vector3F bindP, curP;
 	arr->begin();

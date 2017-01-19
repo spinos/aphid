@@ -15,6 +15,7 @@
 
 namespace aphid {
 
+class ForestCell;
 class CircleCurve;
 
 class DrawForest : public ModifyForest, public ViewObscureCull, 
@@ -52,14 +53,14 @@ protected:
 private:
     void drawFace(const int & geoId, const int & triId);
 	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
-	void drawPlantsInCell(sdb::Array<int, Plant> * cell,
+	void drawPlantsInCell(ForestCell * cell,
 					const BoundingBox & box);
 	void drawPlant(PlantData * data);
-	void drawWiredPlants(sdb::Array<int, Plant> * cell);
+	void drawWiredPlants(ForestCell * cell);
 	void drawWiredPlant(PlantData * data);
 	void drawPlantBox(PlantData * data);
 	void drawPlant(const ExampVox * v, PlantData * data);
-	void drawPlantSolidBoundInCell(sdb::Array<int, Plant> * cell);
+	void drawPlantSolidBoundInCell(ForestCell * cell);
 	void drawPlantSolidBound(PlantData * data);
 
 };

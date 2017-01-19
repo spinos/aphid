@@ -8,10 +8,11 @@
  */
 
 #include "PlantSelection.h"
+#include "ForestCell.h"
 
 namespace aphid {
 
-PlantSelection::PlantSelection(sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid)
+PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid)
 { 
 	m_grid = grid; 
 	m_plants = new sdb::Array<int, PlantInstance>();
@@ -59,7 +60,7 @@ void PlantSelection::selectInCell(const sdb::Coord3 & c,
 {
 	BoundingBox b = m_grid->coordToGridBBox(c);
 	if(!b.isPointAround(m_center, m_radius) ) return;
-	sdb::Array<int, Plant> * cell = m_grid->findCell(c);
+	ForestCell * cell = m_grid->findCell(c);
 	if(!cell) return;
 	if(cell->isEmpty() ) return;
 	
@@ -101,7 +102,7 @@ void PlantSelection::selectByType(int x)
 	m_numSelected = m_plants->size();
 }
 
-void PlantSelection::selectByTypeInCell(sdb::Array<int, Plant> * cell, int x)
+void PlantSelection::selectByTypeInCell(ForestCell * cell, int x)
 {
 	if(cell->isEmpty() ) return;
 	try {
@@ -184,7 +185,7 @@ void PlantSelection::setTypeFilter(int x)
 bool PlantSelection::touchCell(const Ray & incident, const sdb::Coord3 & c, 
 								Vector3F & pnt)
 {
-	sdb::Array<int, Plant> * cell = m_grid->findCell(c);
+	ForestCell * cell = m_grid->findCell(c);
 	if(!cell) return false;
 	if(cell->isEmpty() ) return false;
 	float tt;

@@ -11,6 +11,7 @@
 
 namespace aphid {
 
+class ForestCell;
 class PseudoNoise;
 class BarycentricCoordinate;
 class EbpGrid;
@@ -111,7 +112,7 @@ private:
 	void randomSpaceAt(const Vector3F & pos, 
 							const GrowOption & option,
 							Matrix44F & space, float & scale);
-	void movePlantsWithGround(sdb::Array<int, Plant> * arr);
+	void movePlantsWithGround(ForestCell * arr);
 	bool calculateSelecedWeight(const Ray & ray);
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;

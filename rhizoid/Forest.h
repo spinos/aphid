@@ -15,13 +15,14 @@
 
 namespace aphid {
 
+class ForestCell;
 class ExampVox;
 class ATriangleMesh;
 class PlantSelection;
 
 class Forest {
 
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * m_grid;
+	sdb::WorldGrid<ForestCell, Plant > * m_grid;
 	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
@@ -64,7 +65,7 @@ protected:
 	unsigned numGroundMeshes() const;
     unsigned numPlants() const;
 	const BoundingBox & gridBoundingBox() const;
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * grid();
+	sdb::WorldGrid<ForestCell, Plant > * grid();
 	sdb::Array<int, PlantInstance> * activePlants();
 	PlantSelection * selection();
 	KdNTree<cvx::Triangle, KdNode4 > * ground();
@@ -157,7 +158,7 @@ protected:
 
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,
-					sdb::Array<int, Plant> * cell);
+					ForestCell * cell);
 	
 };
 

@@ -14,6 +14,7 @@
  */
 
 #include "Forest.h"
+#include "ForestCell.h"
 #include "ExampVox.h"
 #include <geom/ATriangleMesh.h>
 #include "PlantSelection.h"
@@ -22,7 +23,7 @@ namespace aphid {
 
 Forest::Forest() 
 {    
-	m_grid = new sdb::WorldGrid<sdb::Array<int, Plant>, Plant >();
+	m_grid = new sdb::WorldGrid<ForestCell, Plant >();
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
 	m_selectCtx = new SphereSelectionContext;
@@ -81,7 +82,7 @@ void Forest::updateNumPlants()
 	m_numPlants = 0;
 	m_grid->begin();
 	while(!m_grid->end() ) {
-		sdb::Array<int, Plant> * cell = m_grid->value();
+		ForestCell * cell = m_grid->value();
 		m_numPlants += cell->size();
 		m_grid->next();
 	}
@@ -181,7 +182,7 @@ SphereSelectionContext * Forest::activeGround()
 bool Forest::closeToOccupiedPosition(CollisionContext * ctx)
 {
 	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&ctx->_pos);
-	sdb::Array<int, Plant> * cell = m_grid->findCell(c0);
+	ForestCell * cell = m_grid->findCell(c0);
 	if(testNeighborsInCell(ctx, cell) ) return true;
 	
 	BoundingBox b = m_grid->coordToGridBBox(c0);
@@ -223,7 +224,7 @@ bool Forest::closeToOccupiedPosition(CollisionContext * ctx)
 }
 
 bool Forest::testNeighborsInCell(CollisionContext * ctx,
-					sdb::Array<int, Plant> * cell)
+					ForestCell * cell)
 {
 	if(!cell) {
 		return false;
@@ -264,7 +265,7 @@ bool Forest::testNeighborsInCell(CollisionContext * ctx,
 const float & Forest::plantSize(const int & idx)
 { return m_examples[idx]->geomSize(); }
 
-sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * Forest::grid()
+sdb::WorldGrid<ForestCell, Plant > * Forest::grid()
 { return m_grid; }
 
 const int & Forest::numActivePlants() const
@@ -540,7 +541,7 @@ void Forest::intersectWorldBox(const Ray & ray)
 bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 {
 	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&ctx->_pos);
-	sdb::Array<int, Plant> * cell = m_grid->findCell(c0);
+	ForestCell * cell = m_grid->findCell(c0);
 	if(!cell) {
 		return false;
 	}

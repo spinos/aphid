@@ -12,7 +12,7 @@
 #include <CircleCurve.h>
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
-#include <iostream>
+#include <ForestCell.h>
 #include <ogl/GlslInstancer.h>
 
 namespace aphid {
@@ -89,7 +89,7 @@ void DrawForest::drawWiredPlants()
 		return;
 	}
 	
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	if(g->isEmpty() ) {
 		return;
 	}
@@ -114,7 +114,7 @@ void DrawForest::drawWiredPlants()
 	glPopAttrib();
 }
 
-void DrawForest::drawWiredPlants(sdb::Array<int, Plant> * cell)
+void DrawForest::drawWiredPlants(ForestCell * cell)
 {
 	cell->begin();
 	while(!cell->end() ) {
@@ -142,7 +142,7 @@ void DrawForest::drawSolidPlants()
 		return;
 	}
 	
-    sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+    sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	if(g->isEmpty() ) {
 		return;
 	}
@@ -181,7 +181,7 @@ void DrawForest::drawSolidPlants()
 	glPopAttrib();
 }
 
-void DrawForest::drawPlantsInCell(sdb::Array<int, Plant> * cell,
+void DrawForest::drawPlantsInCell(ForestCell * cell,
 								const BoundingBox & box)
 {	
 	Vector3F worldP = box.center();
@@ -201,7 +201,7 @@ void DrawForest::drawPlantsInCell(sdb::Array<int, Plant> * cell,
 	}
 }
 
-void DrawForest::drawPlantSolidBoundInCell(sdb::Array<int, Plant> * cell)
+void DrawForest::drawPlantSolidBoundInCell(ForestCell * cell)
 {
 	cell->begin();
 	while(!cell->end() ) {
@@ -276,7 +276,7 @@ void DrawForest::drawGrid()
 {
 	std::cout<<" DrawForest draw grid begin"<<std::endl;
     if(!m_enabled) return;
-	sdb::WorldGrid<sdb::Array<int, Plant>, Plant > * g = grid();
+	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	try {
 	g->begin();
