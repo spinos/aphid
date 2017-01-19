@@ -1,21 +1,19 @@
 #pragma once
 #include "DrawForest.h"
+#include "GroupSelect.h"
 #include <maya/MGlobal.h>
 #include <maya/MArrayDataHandle.h>
 #include <maya/MMatrix.h>
 #include <maya/MVectorArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MDoubleArray.h>
-#include <boost/scoped_array.hpp>
 
 namespace aphid {
 
 class ForestCell;
 
 /// maya interface
-class MForest : public DrawForest {
-	
-	boost::scoped_array<int> m_randGroup;
+class MForest : public DrawForest, public GroupSelect {
 	
 public:
     MForest();

@@ -590,18 +590,15 @@ void MForest::extractActive(int numGroups)
 
 void MForest::initRandGroup()
 {
-	const unsigned n = numPlants();
+	const int n = numPlants();
 	if(n < 1) {
 		MGlobal::displayInfo("MForest no plant to pick");
 		return;
 	}
 	
-	m_randGroup.reset(new int[n]);
+	createEntityKeys(n);
 	
-	PseudoNoise pnoise;
-	unsigned i = 0;
-	for(;i<n;++i) m_randGroup[i] = pnoise.rint1(i + 2397 * i, n * 5);
-	AHelper::Info<int>(" total n plants", n );
+	AHelper::Info<int>("init n plant", n );
 }
 
 void MForest::computePPAttribs(MVectorArray & positions,
@@ -626,6 +623,7 @@ void MForest::computePPAttribs(MVectorArray & positions,
 	MEulerRotation eula;
 	double sz;
 	int igroup = 0;
+	int iExample;
 	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
@@ -642,9 +640,15 @@ void MForest::computePPAttribs(MVectorArray & positions,
 		sz = MVector(mm(0,0), mm(0,1), mm(0,2)).length();
 		scales.append(MVector(sz, sz, sz) );
 		
-		if(numGroups > 1)
+		iExample = arr->key().y;
+		if(plant::isChildOfBundle(iExample) ) {
+/// need per child group		
+		}
+		
+		if(numGroups > 1) {
 			igroup = (arr->value()->m_seed) % numGroups;
-			
+		}
+		
 		replacers.append((double)igroup);
 			
 		arr->next();
@@ -750,17 +754,19 @@ void MForest::pickupVisiblePlantsInCell(ForestCell *cell,
 		Plant * pl = cell->value();
 		ExampVox * v = plantExample(cell->key().y );
 		
-		bool survived = (cell->key().y == plantTyp);
+		bool survived = (plant::bundleIndex(cell->key().y) == plantTyp);
 		if(survived) {
-            if(arr->find(pl->key) ) 
+            if(arr->find(pl->key) ) {
                 survived = false;
+			}
         }
 		
 		if(survived) {
 			if(percentage < 1.0) {
-			    double dart = ((double)(m_randGroup[it]&1023))*0.0009765625f;
-			    if(dart > percentage) 
+			    double dart = ((double)(entityKey(it)&1023))*0.0009765625f;
+			    if(dart > percentage) {
 					survived = false;
+				}
 			}
 		}
 			
@@ -770,7 +776,9 @@ void MForest::pickupVisiblePlantsInCell(ForestCell *cell,
 			}
 		}
 		
-		if(survived) selection()->select(pl, m_randGroup[it]);
+		if(survived) {
+			selection()->select(pl, entityKey(it));
+		}
 		
 		it++;
 		cell->next();
