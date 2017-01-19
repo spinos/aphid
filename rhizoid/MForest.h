@@ -10,6 +10,8 @@
 
 namespace aphid {
 
+class ForestCell;
+
 /// maya interface
 class MForest : public DrawForest {
 	
@@ -83,23 +85,24 @@ protected:
 				
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
-    void saveCell(sdb::Array<int, Plant> *cell,
+    void saveCell(ForestCell *cell,
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
 					MVectorArray & plantCoords,
 					MVectorArray & plantOffsets);
-	void getDataInCell(sdb::Array<int, Plant> *cell, 
+	void getDataInCell(ForestCell *cell, 
 					float * data, 
 					int * typd,
 					unsigned & it);
     void saveActiveExternal(const char* filename);
     void saveAllExternel(const char* filename);
     void getDataRef(PlantData * plt, 
+					const int & plantTyp,
 					float * data, 
 					int * typd,
 					unsigned & it);
-	void pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
+	void pickupVisiblePlantsInCell(ForestCell *cell,
 					float lodLowGate, float lodHighGate, 
 					double percentage, int plantTyp, 
                     int & it);

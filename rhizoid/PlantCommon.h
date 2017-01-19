@@ -9,7 +9,7 @@
 
 #ifndef APH_PLANT_COMMON_H
 #define APH_PLANT_COMMON_H
-#include <AllMath.h>
+#include <math/Matrix44F.h>
 #include <sdb/Array.h>
 #include <sdb/WorldGrid.h>
 
@@ -32,9 +32,9 @@ struct GroundBind {
 	}
 };
 
-/// (plant id, (transformation, triangle bind, plant type id) )
-typedef sdb::Triple<Matrix44F, GroundBind, int > PlantData;
-class Plant : public sdb::Pair<int, PlantData>
+/// ((plant id, plant type id), (transformation, triangle bind) )
+typedef sdb::Couple<Matrix44F, GroundBind > PlantData;
+class Plant : public sdb::Pair<sdb::Coord2, PlantData>
 {
 public:
 	

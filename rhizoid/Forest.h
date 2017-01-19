@@ -12,13 +12,13 @@
 #include <PlantCommon.h>
 #include <kd/KdEngine.h>
 #include <RayMarch.h>
+#include <PlantSelection.h>
 
 namespace aphid {
 
 class ForestCell;
 class ExampVox;
 class ATriangleMesh;
-class PlantSelection;
 
 class Forest {
 
@@ -66,8 +66,8 @@ protected:
     unsigned numPlants() const;
 	const BoundingBox & gridBoundingBox() const;
 	sdb::WorldGrid<ForestCell, Plant > * grid();
-	sdb::Array<int, PlantInstance> * activePlants();
 	PlantSelection * selection();
+	PlantSelection::SelectionTyp * activePlants();
 	KdNTree<cvx::Triangle, KdNode4 > * ground();
 	const KdNTree<cvx::Triangle, KdNode4 > * ground() const;
 	IntersectionContext * intersection();

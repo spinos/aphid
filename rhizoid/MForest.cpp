@@ -10,7 +10,6 @@
 #include <geom/ATriangleMesh.h>
 #include <math/PseudoNoise.h>
 #include <fstream> 
-#include <PlantSelection.h>
 #include <ForestCell.h>
 
 namespace aphid {
@@ -257,7 +256,7 @@ void MForest::savePlants(MPointArray & plantTms,
 	AHelper::Info<unsigned>(" MForest saved num plants", plantIds.length() );
 }
 
-void MForest::saveCell(sdb::Array<int, Plant> *cell,
+void MForest::saveCell(ForestCell *cell,
 					MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,
@@ -280,8 +279,7 @@ void MForest::saveCell(sdb::Array<int, Plant> *cell,
 									bind->m_offset.y, 
 									bind->m_offset.z));
 									
-		int * pltyp = d->t3;
-		plantIds.append(*pltyp);
+		plantIds.append(cell->key().y);
 		
 		cell->next();
 	}
@@ -427,10 +425,12 @@ void MForest::saveActiveExternal(const char* filename)
 	
 	unsigned it = 0;
 	
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
-		getDataRef(arr->value()->m_reference->index, data, tpi, it);
+		getDataRef(arr->value()->m_reference->index,
+				arr->key().y,
+				data, tpi, it);
 	    
 		arr->next();
 	}
@@ -475,6 +475,7 @@ void MForest::saveAllExternel(const char* filename)
 }
 
 void MForest::getDataRef(PlantData * plt, 
+					const int & plantTyp,
 					float * data, 
 					int * typd,
 					unsigned & it)
@@ -493,18 +494,20 @@ void MForest::getDataRef(PlantData * plt,
     data[ii+12] = mat->M(3, 0);
     data[ii+13] = mat->M(3, 1);
     data[ii+14] = mat->M(3, 2);
-    typd[it] = *plt->t3;
+    typd[it] = plantTyp;
     it++;
 }
 
-void MForest::getDataInCell(sdb::Array<int, Plant> *cell, 
+void MForest::getDataInCell(ForestCell *cell, 
 							float * data, 
 							int * typd,
 							unsigned & it)
 {
 	cell->begin();
 	while(!cell->end() ) {
-	    getDataRef(cell->value()->index, data, typd, it);
+	    getDataRef(cell->value()->index, 
+					cell->key().y,
+					data, typd, it);
 		cell->next();
 	}
 }
@@ -563,13 +566,13 @@ void MForest::extractActive(int numGroups)
 
 	MMatrix mm;
 	PseudoNoise pnoise;	
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 	
 		Matrix44F * mat = arr->value()->m_reference->index->t1;
 		AHelper::ConvertToMMatrix(mm, *mat);
-		const int idx =  arr->value()->m_reference->key;
+		const int idx =  arr->value()->m_reference->key.x;
 		const int groupId = pnoise.rint1(idx + 2397 * idx, numGroups * 4) % numGroups;
 		MObject tra = mod.createNode("transform", instanceGroups[groupId], &stat);
 		mod.doIt();
@@ -622,7 +625,7 @@ void MForest::computePPAttribs(MVectorArray & positions,
 	MEulerRotation eula;
 	double sz;
 	int igroup = 0;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 	
@@ -735,18 +738,20 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
 	}
 }
 
-void MForest::pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
+void MForest::pickupVisiblePlantsInCell(ForestCell *cell,
 					float lodLowGate, float lodHighGate, 
 					double percentage, int plantTyp,
                     int & it)
 {
+	PlantSelection::SelectionTyp * arr = activePlants();
 	cell->begin();
 	while(!cell->end() ) {
 		Plant * pl = cell->value();
+		ExampVox * v = plantExample(cell->key().y );
 		
-		bool survived = (*pl->index->t3 == plantTyp);
+		bool survived = (cell->key().y == plantTyp);
 		if(survived) {
-            if(activePlants()->find(pl->key) ) 
+            if(arr->find(pl->key) ) 
                 survived = false;
         }
 		
@@ -760,7 +765,7 @@ void MForest::pickupVisiblePlantsInCell(sdb::Array<int, Plant> *cell,
 			
 		if(survived) {
 			if(hasView() ) {
-				survived = isVisibleInView(pl, lodLowGate, lodHighGate );
+				survived = isVisibleInView(pl, v, lodLowGate, lodHighGate );
 			}
 		}
 		

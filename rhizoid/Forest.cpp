@@ -17,7 +17,6 @@
 #include "ForestCell.h"
 #include "ExampVox.h"
 #include <geom/ATriangleMesh.h>
-#include "PlantSelection.h"
 
 namespace aphid {
 
@@ -44,7 +43,6 @@ Forest::~Forest()
 	for(;itb!=m_pool.end();++itb) {
 		delete (*itb)->t1;
 		delete (*itb)->t2;
-		delete (*itb)->t3;
 		delete (*itb);
 	}
     m_pool.clear();
@@ -244,7 +242,7 @@ bool Forest::testNeighborsInCell(CollisionContext * ctx,
 		}
 		
 		if(ctx->_minIndex > -1) {
-			doCollide = cell->key() < ctx->_minIndex;
+			doCollide = cell->key().x < ctx->_minIndex;
 		} else {
 			doCollide = true;
 		}
@@ -252,7 +250,7 @@ bool Forest::testNeighborsInCell(CollisionContext * ctx,
 		if(doCollide) {
 			float scale = d->t1->getSide().length() * .5f;
 			if(ctx->contact(d->t1->getTranslation(),
-							plantSize(*d->t3) * scale) ) {
+							plantSize(cell->key().y) * scale) ) {
 				return true;
 			}
 		}
@@ -271,9 +269,6 @@ sdb::WorldGrid<ForestCell, Plant > * Forest::grid()
 const int & Forest::numActivePlants() const
 { return m_activePlants->numSelected(); }
 
-sdb::Array<int, PlantInstance> * Forest::activePlants()
-{ return m_activePlants->data(); }
-
 KdNTree<cvx::Triangle, KdNode4 > * Forest::ground()
 { return m_ground; }
 
@@ -285,6 +280,9 @@ IntersectionContext * Forest::intersection()
 
 PlantSelection * Forest::selection()
 { return m_activePlants; }
+
+PlantSelection::SelectionTyp * Forest::activePlants()
+{ return m_activePlants->data(); }
 
 void Forest::removeAllPlants()
 {
@@ -437,14 +435,13 @@ void Forest::addPlant(const Matrix44F & tm,
 	PlantData * d = new PlantData;
 	*d->t1 = tm;
 	*d->t2 = bind;
-	*d->t3 = plantTypeId;
 	m_pool.push_back(d);
 	
 	Plant * p = new Plant;
-	p->key = m_plants.size();
+	p->key = sdb::Coord2(m_plants.size(), plantTypeId);
 	p->index = m_pool.back();
 	m_plants.push_back(p);
-	m_lastPlantInd = p->key;
+	m_lastPlantInd = p->key.x;
 	
 	const Vector3F & at = tm.getTranslation();
 	
@@ -560,7 +557,7 @@ bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 			throw "Forest testNeighborsInCell null data";
 		}
 		
-		if(bundleIndex(*d->t3) == ctx->_bundleIndex) {
+		if(bundleIndex(cell->key().y) == ctx->_bundleIndex) {
 		
 			size1 = d->t1->getSide().length() * ctx->_bundleScaling * .5f;
 			pos1 = d->t1->getTranslation() - d->t2->m_offset;

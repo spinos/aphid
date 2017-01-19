@@ -16,7 +16,7 @@ namespace aphid {
 
 class Plant;
 
-class ForestCell : public sdb::Array<int, Plant> {
+class ForestCell : public sdb::Array<sdb::Coord2, Plant> {
 
 public:
 	ForestCell(Entity * parent = NULL);

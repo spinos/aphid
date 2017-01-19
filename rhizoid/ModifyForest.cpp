@@ -11,7 +11,6 @@
 #include <geom/ATriangleMesh.h>
 #include <math/ANoise3.h>
 #include <sdb/ebp.h>
-#include <PlantSelection.h>
 #include "ExampVox.h"
 #include <ForestCell.h>
 #include <ctime>
@@ -320,14 +319,15 @@ void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
 {
 	if(!calculateSelecedWeight(ray)) return;
 	
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
 		if(wei > 1e-4f) { 
 			if(m_pnoise->rfloat(m_seed) < option.m_strength) {
 				Plant * pl = arr->value()->m_reference;
-				*pl->index->t3 = option.m_plantId;
+/// todo remove and add 
+				///*pl->index->t3 = option.m_plantId;
 			}
 			m_seed++;
 		}
@@ -335,7 +335,7 @@ void ModifyForest::replaceAt(const Ray & ray, GrowOption & option)
 	}
 }
 
-void ModifyForest::clearPlant(Plant * pl, int k)
+void ModifyForest::clearPlant(Plant * pl, const sdb::Coord2 & k)
 {
 	const Vector3F & pos = pl->index->t1->getTranslation();
 	sdb::Coord3 c0 = grid()->gridCoord((const float *)&pos);
@@ -349,8 +349,8 @@ void ModifyForest::clearPlant(Plant * pl, int k)
 
 void ModifyForest::clearSelected()
 {
-	std::vector<int> idToClear;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	std::vector<sdb::Coord2> idToClear;
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		
@@ -361,7 +361,7 @@ void ModifyForest::clearSelected()
 		arr->next();
 	}
 	
-	std::vector<int>::const_iterator it = idToClear.begin();
+	std::vector<sdb::Coord2>::const_iterator it = idToClear.begin();
 	for(;it!=idToClear.end();++it) {
 		arr->remove(*it);
 	}
@@ -372,8 +372,8 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 {
 	if(!calculateSelecedWeight(ray)) return;
 	
-	std::vector<int> idToClear;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	std::vector<sdb::Coord2> idToClear;
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -388,7 +388,7 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 		arr->next();
 	}
 	
-	std::vector<int>::const_iterator it = idToClear.begin();
+	std::vector<sdb::Coord2>::const_iterator it = idToClear.begin();
 	for(;it!=idToClear.end();++it) {
 		arr->remove(*it);
 	}
@@ -417,7 +417,7 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 {
     if(!calculateSelecedWeight(ray)) return;
     
-    sdb::Array<int, PlantInstance> * arr = activePlants();
+    PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -433,7 +433,7 @@ void ModifyForest::scaleAt(const Ray & ray, float magnitude)
 void ModifyForest::movePlant(GrowOption & option)
 {
 	Vector3F tv, pos, bindPos;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	try {
 	arr->begin();
 	while(!arr->end() ) {
@@ -458,7 +458,7 @@ void ModifyForest::movePlant(GrowOption & option)
 
 void ModifyForest::rotatePlant(GrowOption & option)
 {
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		Matrix44F * mat = arr->value()->m_reference->index->t1;
@@ -503,7 +503,7 @@ void ModifyForest::rotatePlant(GrowOption & option)
 
 void ModifyForest::scalePlant(GrowOption & option)
 {
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		PlantData * plantd = arr->value()->m_reference->index;
@@ -520,7 +520,7 @@ void ModifyForest::rotateAt(const Ray & ray, float magnitude, int axis)
     if(!calculateSelecedWeight(ray)) return;
     Vector3F first, second, third;
     float scaling;
-    sdb::Array<int, PlantInstance> * arr = activePlants();
+    PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -585,7 +585,7 @@ void ModifyForest::movePlant(const Ray & ray,
     disp *= .5f;
 
 	Vector3F pos, bindPos;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -625,7 +625,7 @@ void ModifyForest::rotatePlant(const Ray & ray,
     //std::cout.flush();
 	
 	Vector3F pside, pup, pfront, vscale;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;
@@ -669,7 +669,7 @@ void ModifyForest::moveWithGround()
 		grid()->next();
 	}
 	
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	if(arr->size() < 1) return;
 	
 	arr->begin();
@@ -782,7 +782,7 @@ void ModifyForest::rightUp(GrowOption & option)
 	if(numActivePlants() < 1) return;
 	
 	Vector3F useUp = option.m_upDirection;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	try {
 	arr->begin();
 	while(!arr->end() ) {
@@ -877,7 +877,7 @@ typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Trian
 void ModifyForest::clearPlantOffset(GrowOption & option)
 {
 	Vector3F pos;
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 
@@ -903,7 +903,7 @@ void ModifyForest::raiseOffsetAt(const Ray & ray,
 	const Vector3F offsetVec = selectionNormal() * (option.m_strokeMagnitude * plantSize(option.m_plantId) * 10.f);
     std::cout<<"\n offset vec "<<offsetVec;
 	Vector3F pos, deltaPos;
-    sdb::Array<int, PlantInstance> * arr = activePlants();
+    PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
 		float wei = arr->value()->m_weight;

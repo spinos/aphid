@@ -108,7 +108,7 @@ protected:
 	void raiseOffsetAt(const Ray & ray, GrowOption & option);
 					
 private:
-	void clearPlant(Plant * pl, int k);
+	void clearPlant(Plant * pl, const sdb::Coord2 & k);
 	void randomSpaceAt(const Vector3F & pos, 
 							const GrowOption & option,
 							Matrix44F & space, float & scale);

@@ -15,7 +15,7 @@ namespace aphid {
 PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid)
 { 
 	m_grid = grid; 
-	m_plants = new sdb::Array<int, PlantInstance>();
+	m_plants = new SelectionTyp;
 	m_numSelected = 0;
     m_radius = 8.f;
     m_typeFilter = -1;
@@ -71,7 +71,7 @@ void PlantSelection::selectInCell(const sdb::Coord3 & c,
 		PlantData * d = cell->value()->index;
 		if(m_center.distanceTo(d->t1->getTranslation() ) < m_radius) {
             if(m_typeFilter > -1 ) {
-                if(m_typeFilter == *d->t3) 
+                if(m_typeFilter == cell->key().y ) 
                     usemode = mode;
                 else
                     usemode = SelectionContext::Unknown;
@@ -112,7 +112,7 @@ void PlantSelection::selectByTypeInCell(ForestCell * cell, int x)
 		if(!d) {
 			throw "PlantSelection select in cell null data";
 		}
-		if(x == *d->t3) select(cell->value() );
+		if(x == cell->key().y) select(cell->value() );
 		
 		cell->next();
 	}
@@ -131,7 +131,6 @@ void PlantSelection::select(Plant * p, const int & sd)
 	PlantData * backup = new PlantData;
 	*backup->t1 = *p->index->t1;
 	*backup->t2 = *p->index->t2;
-	*backup->t3 = *p->index->t3;
 	
 	Plant * b = new Plant;
 	b->key = p->key;
@@ -157,7 +156,7 @@ void PlantSelection::updateNumSelected()
 const int & PlantSelection::numSelected() const
 { return m_numSelected; }
 	
-sdb::Array<int, PlantInstance> * PlantSelection::data()
+PlantSelection::SelectionTyp * PlantSelection::data()
 { return m_plants; }
 
 void PlantSelection::calculateWeight()

@@ -116,20 +116,27 @@ void DrawForest::drawWiredPlants()
 
 void DrawForest::drawWiredPlants(ForestCell * cell)
 {
+	int iExample = -1;
+	ExampVox * v = 0;
 	cell->begin();
 	while(!cell->end() ) {
-		drawWiredPlant(cell->value()->index);
+		if(cell->key().y != iExample) {
+			iExample = cell->key().y;
+			v = plantExample(iExample );
+		}
+		drawWiredPlant(cell->value()->index, v );
+		
 		cell->next();
 	}
 }
 
-void DrawForest::drawWiredPlant(PlantData * data)
+void DrawForest::drawWiredPlant(PlantData * data, 
+						const ExampVox * v)
 {
 	glPushMatrix();
     
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf((const GLfloat*)m_transbuf);
-	const ExampVox * v = plantExample(*data->t3);
 	v->drawWiredBound();
 	
 	glPopMatrix();
@@ -194,51 +201,66 @@ void DrawForest::drawPlantsInCell(ForestCell * cell,
 		return;
 	}
 	
+	int iExample = -1;
+	ExampVox * v = 0;
 	cell->begin();
 	while(!cell->end() ) {
-		drawPlant(cell->value()->index);
+		if(cell->key().y != iExample) {
+			iExample = cell->key().y;
+			v = plantExample(iExample );
+			const float * c = v->diffuseMaterialColor();
+			m_instancer->setDiffueColorVec(c);
+		}
+		
+		drawPlant(cell->value()->index, v);
+		
 		cell->next();
 	}
 }
 
 void DrawForest::drawPlantSolidBoundInCell(ForestCell * cell)
 {
+	int iExample = -1;
+	ExampVox * v = 0;
 	cell->begin();
 	while(!cell->end() ) {
-		drawPlantSolidBound(cell->value()->index);
+		if(cell->key().y != iExample) {
+			iExample = cell->key().y;
+			v = plantExample(iExample );
+			const float * c = v->diffuseMaterialColor();	
+			m_instancer->setDiffueColorVec(c);
+		}
+
+		drawPlantSolidBound(cell->value()->index, v);
 
 		cell->next();
 	}
 }
 
-void DrawForest::drawPlantSolidBound(PlantData * data)
+void DrawForest::drawPlantSolidBound(PlantData * data,
+								const ExampVox * v)
 {
 	const Matrix44F & trans = *(data->t1);
 	glMultiTexCoord4f(GL_TEXTURE1, trans(0,0), trans(1,0), trans(2,0), trans(3,0) );
 	glMultiTexCoord4f(GL_TEXTURE2, trans(0,1), trans(1,1), trans(2,1), trans(3,1) );
 	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
-	    
-	const ExampVox * v = plantExample(*data->t3);
-	const float * c = v->diffuseMaterialColor();	
-	m_instancer->setDiffueColorVec(c);
+	
 	v->drawSolidBound();
 }
 
-void DrawForest::drawPlant(PlantData * data)
+void DrawForest::drawPlant(PlantData * data,
+						const ExampVox * v)
 {
 	const Matrix44F & trans = *(data->t1);
 	glMultiTexCoord4f(GL_TEXTURE1, trans(0,0), trans(1,0), trans(2,0), trans(3,0) );
 	glMultiTexCoord4f(GL_TEXTURE2, trans(0,1), trans(1,1), trans(2,1), trans(3,1) );
 	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
-	    
-	const ExampVox * v = plantExample(*data->t3);
-	const float * c = v->diffuseMaterialColor();
-			
-	m_instancer->setDiffueColorVec(c);
-	drawPlant(v , data);
+	
+	drawLODPlant(data, v);
 }
 
-void DrawForest::drawPlant(const ExampVox * v, PlantData * data)
+void DrawForest::drawLODPlant(PlantData * data,
+					const ExampVox * v)
 {	
 	if(m_showVoxLodThresold >.9999f) {
         v->drawASolidDop();
@@ -274,8 +296,12 @@ void DrawForest::drawGridBounding()
 
 void DrawForest::drawGrid()
 {
+	if(!m_enabled) {
+		return;
+	}
+	
 	std::cout<<" DrawForest draw grid begin"<<std::endl;
-    if(!m_enabled) return;
+    
 	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	if(g->isEmpty() ) return;
 	try {
@@ -289,13 +315,13 @@ void DrawForest::drawGrid()
 	}
 }
 
-void DrawForest::drawPlantBox(PlantData * data)
+void DrawForest::drawPlantBox(PlantData * data,
+							const ExampVox * v)
 {
 	glPushMatrix();
     
 	data->t1->glMatrix(m_transbuf);
 	glMultMatrixf((const GLfloat*)m_transbuf);
-	const ExampVox * v = plantExample(*data->t3);
 	v->drawWiredBound();
 		
 	glPopMatrix();
@@ -307,11 +333,18 @@ void DrawForest::drawActivePlants()
 	if(numActivePlants() < 1) return;
 	glDepthFunc(GL_LEQUAL);
 	glColor3f(.1f, .9f, .43f);
-	sdb::Array<int, PlantInstance> * arr = activePlants();
+	PlantSelection::SelectionTyp * arr = activePlants();
+	int iExample = -1;
+	ExampVox * v = 0;
 	try {
 	arr->begin();
 	while(!arr->end() ) {
-		drawPlantBox(arr->value()->m_reference->index );
+		if(arr->key().y != iExample) {
+			iExample = arr->key().y;
+			v = plantExample(iExample );
+		}
+		drawPlantBox(arr->value()->m_reference->index, v );
+		
 		arr->next();
 	}
 	} catch (...) {
@@ -380,11 +413,10 @@ void DrawForest::drawBrush()
 }
 
 bool DrawForest::isVisibleInView(Plant * pl,
+					const ExampVox * v,
 					const float lowLod, const float highLod)
 {
 	PlantData * d = pl->index;
-	int typ = *d->t3;
-	ExampVox * v = plantExample(typ);
 	const Vector3F & localP = v->geomCenter();
 	Vector3F worldP = d->t1->transform(localP);
 	const float r = v->geomExtent() * d->t1->getSide().length();

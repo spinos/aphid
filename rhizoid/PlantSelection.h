@@ -15,13 +15,17 @@ namespace aphid {
 class ForestCell;
 
 class PlantSelection {
-	
+
+public:
+	typedef sdb::Array<sdb::Coord2, PlantInstance> SelectionTyp;
+
+private:	
 	Vector3F m_center, m_direction;
 	float m_radius;
 	int m_numSelected;
     int m_typeFilter;
 	sdb::WorldGrid<ForestCell, Plant > * m_grid;
-	sdb::Array<int, PlantInstance> * m_plants;
+	SelectionTyp * m_plants;
 	
 public:
 	PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid);
@@ -33,7 +37,7 @@ public:
 	void selectByType(int x);
     void deselect();
 	const int & numSelected() const;
-	sdb::Array<int, PlantInstance> * data();
+	SelectionTyp * data();
 	void calculateWeight();
 	void select(Plant * p, const int & sd=0);
 	const float & radius() const;

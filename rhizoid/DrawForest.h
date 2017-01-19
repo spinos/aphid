@@ -15,6 +15,7 @@
 
 namespace aphid {
 
+class ExampVox;
 class ForestCell;
 class CircleCurve;
 
@@ -43,6 +44,7 @@ protected:
 	void drawActivePlants();
 	void drawViewFrustum();
 	bool isVisibleInView(Plant * pl, 
+					const ExampVox * v,
 					const float lowLod, const float highLod);
 	void setShowVoxLodThresold(const float & x);
     void drawBrush();
@@ -55,13 +57,18 @@ private:
 	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
 	void drawPlantsInCell(ForestCell * cell,
 					const BoundingBox & box);
-	void drawPlant(PlantData * data);
+	void drawPlant(PlantData * data,
+					const ExampVox * v);
 	void drawWiredPlants(ForestCell * cell);
-	void drawWiredPlant(PlantData * data);
-	void drawPlantBox(PlantData * data);
-	void drawPlant(const ExampVox * v, PlantData * data);
+	void drawWiredPlant(PlantData * data,
+					const ExampVox * v);
+	void drawPlantBox(PlantData * data,
+					const ExampVox * v);
+	void drawLODPlant(PlantData * data,
+					const ExampVox * v);
 	void drawPlantSolidBoundInCell(ForestCell * cell);
-	void drawPlantSolidBound(PlantData * data);
+	void drawPlantSolidBound(PlantData * data,
+					const ExampVox * v);
 
 };
 

@@ -12,7 +12,7 @@
 
 namespace aphid {
 
-ForestCell::ForestCell(Entity * parent) : sdb::Array<int, Plant>(parent)
+ForestCell::ForestCell(Entity * parent) : sdb::Array<sdb::Coord2, Plant>(parent)
 {}
 
 ForestCell::~ForestCell()
