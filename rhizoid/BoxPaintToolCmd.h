@@ -22,8 +22,9 @@
 #include <sdb/VectorArray.h>
 #include <ConvexShape.h>
 #include "ShrubWorks.h"
+#include "ReplacerWorks.h"
 
-class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks
+class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks, public ReplacerWorks
 {
     int m_currentVoxInd;
 	aphid::Matrix33F::RotateOrder m_rotPca;

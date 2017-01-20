@@ -145,9 +145,11 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 		return MS::kSuccess;
 	}
 	
+	int ng;
 	switch(m_operation) {
 		case opBeginPick:
-			pViz->beginPickInView();
+			ng = countInstanceGroup(pViz, oViz, m_currentVoxInd);
+			setResult(ng);
 			break;
 		case opDoPick:
 			pViz->processPickInView(m_currentVoxInd);
@@ -156,10 +158,17 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 			pViz->endPickInView();
 			break;
 		case opGetPick:
-			setResult((int)pViz->numActivePlants() );
+			ng = pViz->numActivePlants();
+			setResult(ng);
 			break;
 		default:
 			;
+	}
+	
+	if(ng > 0) {
+		if(m_operation == opBeginPick) {
+			pViz->beginPickInView();
+		}
 	}
 
 	return MS::kSuccess;
@@ -837,4 +846,5 @@ bool proxyPaintTool::isMeshConnectedSlot(const MObject & meshObj,
 	
 	return false;
 }
+
 //:~

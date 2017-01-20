@@ -77,8 +77,6 @@ public:
 	static MObject aymultiplier;
 	static MObject azmultiplier;
 	static MObject awmultiplier;
-	static MObject agroupcount;
-	static MObject ainstanceId;
 	static MObject aconvertPercentage;
 	static MObject astandinNames;
     static MObject agroundMesh;
@@ -97,6 +95,7 @@ public:
 	static MObject adrawDopSizeY;
 	static MObject adrawDopSizeZ;
 	static MObject adrawDopSize;
+	static MObject aininstspace;
 	static MObject outValue1;
 	static MObject outValue;
 	static	MTypeId		id;

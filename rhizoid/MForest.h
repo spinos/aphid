@@ -75,8 +75,7 @@ protected:
 	void computePPAttribs(MVectorArray & positions,
 						MVectorArray & rotations,
 						MVectorArray & scales,
-						MDoubleArray & replacers,
-						const int & numGroups);
+						MDoubleArray & replacers);
 	void updateExamples(MArrayDataHandle & dataArray);
 	void pickVisiblePlants(float lodLowGate, float lodHighGate, 
 					double percentage,

@@ -28,14 +28,14 @@ public:
 	GroupSelect();
 	virtual ~GroupSelect();
 	
-protected:
-/// assign a random number to each entity
-	void createEntityKeys(int n);
-	
 	void clearGroups();
 	void addGroup(int c);
 /// assign start index to each group
 	void finishGroups();
+	
+protected:
+/// assign a random number to each entity
+	void createEntityKeys(int n);
 	
 	const int & entityKey(int i) const;
 /// in i-th group select a child by random number k

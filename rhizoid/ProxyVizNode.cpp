@@ -41,8 +41,6 @@ MObject ProxyViz::axmultiplier;
 MObject ProxyViz::aymultiplier;
 MObject ProxyViz::azmultiplier;
 MObject ProxyViz::awmultiplier;
-MObject ProxyViz::agroupcount;
-MObject ProxyViz::ainstanceId;
 MObject ProxyViz::astandinNames;
 MObject ProxyViz::aconvertPercentage;
 MObject ProxyViz::agroundMesh;
@@ -61,6 +59,7 @@ MObject ProxyViz::adrawDopSizeX;
 MObject ProxyViz::adrawDopSizeY;
 MObject ProxyViz::adrawDopSizeZ;
 MObject ProxyViz::adrawDopSize;
+MObject ProxyViz::aininstspace;
 MObject ProxyViz::outValue1;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
@@ -131,8 +130,6 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
             return MS::kSuccess;
 		}
 		
-		const int ngroups = block.inputValue(agroupcount).asInt();
-		
 		MDataHandle hdata = block.inputValue(outPositionPP, &status);
         MFnVectorArrayData farray(hdata.data(), &status);
         if(!status) {
@@ -175,8 +172,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 			return MS::kSuccess;
 		}
 		
-		computePPAttribs(outPosArray, outRotateArray, outScaleArray, outReplaceArray,
-						ngroups);
+		computePPAttribs(outPosArray, outRotateArray, outScaleArray, outReplaceArray);
 
         float result = outPosArray.length();
 
@@ -427,18 +423,6 @@ MStatus ProxyViz::initialize()
 	numFn.setDefault(0.9f, 0.9f, 0.9f);
 	addAttribute(adrawDopSize);
 	
-	agroupcount = numFn.create( "numberInstances", "nis", MFnNumericData::kInt, 1);
-	numFn.setKeyable(false);
-	numFn.setStorable(true);
-	numFn.setMin(1);
-	addAttribute(agroupcount);
-	
-	ainstanceId = numFn.create( "instanceId", "iis", MFnNumericData::kInt, 0);
-	numFn.setKeyable(false);
-	numFn.setStorable(true);
-	numFn.setMin(0);
-	addAttribute(ainstanceId);
-
 	MFnTypedAttribute typedAttrFn;
 	MVectorArray defaultVectArray;
 	MFnVectorArrayData vectArrayDataFn;
@@ -638,6 +622,14 @@ MStatus ProxyViz::initialize()
 	numFn.setDefault(0);
 	numFn.setStorable(false);
 	addAttribute(aactivated);
+	
+	aininstspace = matAttr.create("instanceSpace", "sinst", MFnMatrixAttribute::kDouble);
+	matAttr.setStorable(false);
+	matAttr.setWritable(true);
+	matAttr.setConnectable(true);
+    matAttr.setArray(true);
+    matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
+	addAttribute( aininstspace );
     
 	attributeAffects(ainexamp, outValue1);
 	attributeAffects(aradiusMult, outValue1);
@@ -902,7 +894,7 @@ void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 
 void ProxyViz::beginPickInView()
 {
-	MGlobal::displayInfo("MForest begin pick in view");
+	MGlobal::displayInfo("proxyviz begin pick in view");
 	initRandGroup();
 	deselectPlants();
 	m_toCheckVisibility = true;
@@ -910,6 +902,11 @@ void ProxyViz::beginPickInView()
 
 void ProxyViz::processPickInView(const int & plantTyp)
 {
+	if(!m_toCheckVisibility) {
+		AHelper::Info<bool>("proxyviz not in pick mode", m_toCheckVisibility );
+		return;
+	}
+	
 	useActiveView();
 
 	MObject node = thisMObject();
@@ -927,7 +924,11 @@ void ProxyViz::processPickInView(const int & plantTyp)
 }
 
 void ProxyViz::endPickInView()
-{ m_toCheckVisibility = false; }
+{ 
+	MGlobal::displayInfo("proxyviz end pick in view");
+	clearGroups();
+	m_toCheckVisibility = false; 
+}
 
 void ProxyViz::setEnableCompute(bool x)
 { m_enableCompute = x; }

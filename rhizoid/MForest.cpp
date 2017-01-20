@@ -604,8 +604,7 @@ void MForest::initRandGroup()
 void MForest::computePPAttribs(MVectorArray & positions,
 						MVectorArray & rotations,
 						MVectorArray & scales,
-						MDoubleArray & replacers,
-						const int & numGroups)
+						MDoubleArray & replacers)
 {
 	MGlobal::displayInfo("MForest computes per-particle attributes");
         
@@ -642,11 +641,9 @@ void MForest::computePPAttribs(MVectorArray & positions,
 		
 		iExample = arr->key().y;
 		if(plant::isChildOfBundle(iExample) ) {
-/// need per child group		
-		}
-		
-		if(numGroups > 1) {
-			igroup = (arr->value()->m_seed) % numGroups;
+			igroup = selectInstance(plant::childIndex(iExample), arr->value()->m_seed );
+		} else {
+			igroup = selectInstance(0, arr->value()->m_seed );
 		}
 		
 		replacers.append((double)igroup);
