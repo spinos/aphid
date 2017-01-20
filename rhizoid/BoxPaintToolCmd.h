@@ -77,7 +77,8 @@ private:
 		opConnectVoxel = 9,
 		opCreateShrub = 10,
         opPrincipalComponent = 11,
-		opDistanceFieldTriangulate = 12
+		opDistanceFieldTriangulate = 12,
+		opListReplacer = 13
 	};
 	
 	Operation m_operation;

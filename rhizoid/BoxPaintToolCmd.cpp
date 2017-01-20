@@ -61,7 +61,8 @@
 #define kDFTScaleFlagLong "-fieldTriangulateScale"
 #define kDFTRoundFlag "-ftr" 
 #define kDFTRoundFlagLong "-fieldTriangulateRound"
-
+#define kLsReplacerFlag "-ltr" 
+#define kLsReplacerFlagLong "-listReplacer"
 #define kShrubCreateFlag "-csb" 
 #define kShrubCreateFlagLong "-createShrub"
 
@@ -88,6 +89,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
+	syntax.addFlag(kLsReplacerFlag, kLsReplacerFlagLong, MSyntax::kString);
 	syntax.addFlag(kSaveCacheFlag, kSaveCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kLoadCacheFlag, kLoadCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
@@ -145,8 +147,13 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 		return MS::kSuccess;
 	}
 	
+	MStringArray instNames;
 	int ng;
 	switch(m_operation) {
+		case opListReplacer:
+			ng = listInstanceGroup(instNames, oViz, m_currentVoxInd);
+			setResult(instNames);
+			break;
 		case opBeginPick:
 			ng = countInstanceGroup(pViz, oViz, m_currentVoxInd);
 			setResult(ng);
@@ -228,6 +235,15 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		m_operation = opGetPick;
+	}
+	
+	if (argData.isFlagSet(kLsReplacerFlag)) {
+		status = argData.getFlagArgument(kLsReplacerFlag, 0, fVizName);
+		if (!status) {
+			status.perror("viz flag parsing failed");
+			return status;
+		}
+		m_operation = opListReplacer;
 	}
 	
 	if (argData.isFlagSet(kConnectGroundFlag))
