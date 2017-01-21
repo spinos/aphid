@@ -20,7 +20,6 @@
 #include "ExampVizNode.h"
 #include <gpr/PCASimilarity.h>
 #include <gpr/PCAFeature.h>
-#include <AllMath.h>
 #include <sdb/Types.h>
 
 namespace aphid {
@@ -164,7 +163,7 @@ int ShrubWorks::countExamples(const std::vector<SimilarityType * > & similaritie
 	const int ns = similarities.size();
 	for(int i=0;i<ns;++i) {
 		AHelper::Info<int>(" separate similarity", i);
-/// K = 2
+/// K = 4 by default
 		similarities[i]->t2->separateFeatures();
 		
 		const int & ne = similarities[i]->t2->numGroups();

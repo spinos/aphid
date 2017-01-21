@@ -114,10 +114,10 @@ bool PCAReduction<T>::compute(DenseMatrix<T> & reducedX,
 	
 	const T dev = deviate_from_mean(m_x, 2);
 /// fuzziness
-	if(dev < 1.0) {
+	if(dev < 0.4) {
 		std::cout<<"\n PCAReduction too small deviation "<<dev;		
 		return false;
-	} 
+	}
 
 #if 0
 	DenseMatrix<T> cov;

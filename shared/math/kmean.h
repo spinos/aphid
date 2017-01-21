@@ -56,10 +56,10 @@ private:
 	int closestGroupTo(const DenseVector<T> & apoint) const;
 	void moveCentroid();
 	bool farEnoughToPreviousCentroids(const DenseVector<T> & pnt,
-							const int & end) const;
+							const int & lastI) const;
 	bool assignToOneGroup(const DenseMatrix<T> & points);
 	bool assignToEachGroup(const DenseMatrix<T> & points);
-	
+								
 };
 
 template<typename T>
@@ -96,10 +96,10 @@ void KMeansClustering2<T>::getXi(DenseVector<T> & dst,
 
 template<typename T>
 bool KMeansClustering2<T>::farEnoughToPreviousCentroids(const DenseVector<T> & pnt,
-							const int & end) const
+							const int & lastI) const
 {
 	T minD = 1e20;
-	for(int i=0;i<end;++i) {
+	for(int i=0;i <= lastI;++i) {
 		DenseVector<T> gcen(m_D);
 		gcen.copyData(m_centroids.column(i) );
 		
@@ -108,7 +108,7 @@ bool KMeansClustering2<T>::farEnoughToPreviousCentroids(const DenseVector<T> & p
 			minD = diff;
 		}
 	}
-	return minD > 1.0;
+	return minD > 0.4;
 }
 
 template<typename T>
@@ -171,9 +171,10 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 		}
 	}
 	
-	if(nsel!=m_K) {
-		std::cout<<"\n kmean cannot find enough deviation to have "<<m_K<<" groups ";
-		return false;
+	if(nsel < m_K) {
+		std::cout<<"\n kmean cannot find enough deviation to have "<<m_K<<" groups "
+				<<"\n K = "<<nsel;
+		m_K = nsel;
 	}
 	
 /// all to group 0

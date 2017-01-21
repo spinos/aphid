@@ -13,6 +13,7 @@
 
 #include <gpr/PCAReduction.h>
 #include <math/kmean.h>
+#include <math/count_distinctions.h>
 
 namespace aphid {
 
@@ -39,7 +40,7 @@ public:
 	bool select(const DenseMatrix<T> & pnts,
 				const int & dim);
 	
-	bool separateFeatures(int nsep=2);
+	bool separateFeatures(int nsep=4);
 	
 /// n row of first feature
 	int featureDim() const;
@@ -258,6 +259,13 @@ bool PCASimilarity<T, Tf>::separateFeatures(int nsep)
 			K = n;
 		}
 	}
+	
+	int rsep = count_distinctions<T>(m_reducedX);
+	if(K > rsep) {
+		K = rsep;
+	}
+	
+	std::cout<<"\n K "<<K;
 	
 	m_cluster.setKND(K, n, 2);
 	if(!m_cluster.compute(m_reducedX) ) {
