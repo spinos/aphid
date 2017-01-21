@@ -40,6 +40,11 @@ void GroupSelect::finishGroups()
 		m_groups[i].y = b;
 		b += m_groups[i].x;
 	}
+	
+	std::cout<<"\n GroupSelect finish n group "<<m_groups.size();
+	for(int i=0;i<m_groups.size();++i) {
+		std::cout<<"\n "<<i<<": "<<m_groups[i].x<<","<<m_groups[i].y;
+	}
 }
 
 int GroupSelect::selectInstance(int iGroup, int k) const

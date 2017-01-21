@@ -730,6 +730,7 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
 					double percentage,
                     int plantTyp)
 {
+	std::cout<<"\n MForest begin pick plant type "<<plantTyp;
 	int i = 0;
 	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	g->begin();
@@ -738,6 +739,7 @@ void MForest::pickVisiblePlants(float lodLowGate, float lodHighGate,
 					percentage, plantTyp, i);
 		g->next();
 	}
+	std::cout<<"\n MForest end pick plant";
 }
 
 void MForest::pickupVisiblePlantsInCell(ForestCell *cell,
