@@ -137,4 +137,42 @@ void DrawCircle::drawCircle() const
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+void DrawCircle::drawXRing() const
+{
+	glPushMatrix();
+    
+	drawCircle();
+	
+	glScalef(1.1, 1.1, 1.1);
+	drawCircle();
+	
+	glPopMatrix();
+}
+
+void DrawCircle::drawYRing() const
+{
+	glPushMatrix();
+    glRotatef(90, 0, 0, 1);
+	
+	drawCircle();
+	
+	glScalef(1.1, 1.1, 1.1);
+	drawCircle();
+	
+	glPopMatrix();
+}
+	
+void DrawCircle::drawZRing() const
+{
+	glPushMatrix();
+    glRotatef(90, 0, 1, 0);
+	
+	drawCircle();
+	
+	glScalef(1.1, 1.1, 1.1);
+	drawCircle();
+	
+	glPopMatrix();
+}
+
 }

@@ -211,15 +211,6 @@ Vector3F Matrix44F::transformAsNormal(const Vector3F& p) const
 	return Vector3F(tx, ty, tz);
 }
 
-Vector3F Matrix44F::transformAsNormal(const Vector3F& p)
-{
-	float tx = p.x* *m(0, 0) + p.y* *m(1, 0) + p.z* *m(2, 0);
-	float ty = p.x* *m(0, 1) + p.y* *m(1, 1) + p.z* *m(2, 1);
-	float tz = p.x* *m(0, 2) + p.y* *m(1, 2) + p.z* *m(2, 2);
-		
-	return Vector3F(tx, ty, tz);
-}
-
 void Matrix44F::translate(const Vector3F& p)
 {
 	translate( p.x, p.y, p.z);

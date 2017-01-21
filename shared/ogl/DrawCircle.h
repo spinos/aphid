@@ -24,9 +24,13 @@ public:
 	void draw3Circles(const float * mat) const;
 	
 protected:
-
+	void drawXRing() const;
+	void drawYRing() const;
+	void drawZRing() const;
+	
 private:
 	void drawCircle() const;
+	
 	
 };
 

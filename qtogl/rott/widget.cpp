@@ -7,6 +7,7 @@
 #include <BaseCamera.h>
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
+#include <ogl/DrawArrow.h>
 #include <math/AOrientedBox.h>
 
 using namespace aphid;
@@ -37,6 +38,9 @@ void GLWidget::clientDraw()
 	m_space.glMatrix(m);
 	DrawCircle dc;
 	dc.draw3Circles(m);
+	
+	//DrawArrow da;
+	//da.drawCoordinateAt(&m_space);
 	
 	Vector3F veye = getCamera()->eyeDirection();
 	Matrix44F meye = m_space;

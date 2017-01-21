@@ -37,7 +37,6 @@ namespace aphid {
 	Vector3F transform(const Vector3F& p) const;
 	Vector3F transform(const Vector3F& p);
 	Vector3F transformAsNormal(const Vector3F& p) const;
-	Vector3F transformAsNormal(const Vector3F& p);
 	const Matrix44F transformBy(const Matrix44F & a) const;
 	void translate(const Vector3F& p);
 	void translate(float x, float y, float z);

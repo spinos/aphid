@@ -48,9 +48,9 @@ Vector3F Ray::destination() const
 
 const Vector3F Ray::closestPointOnRay(const Vector3F & p, float * t) const
 {
-	float tt = m_origin.dot(m_dir) - p.dot(m_dir);
+	float tt = (p - m_origin).dot(m_dir);
 	if(t) *t = tt;
-	return m_origin - m_dir * tt;
+	return m_origin + m_dir * tt;
 }
 
 const Vector3F & Ray::origin() const
