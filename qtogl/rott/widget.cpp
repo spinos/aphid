@@ -25,7 +25,7 @@ void GLWidget::clientInit()
 {
 	m_space.translate(1,1,1);
 	m_roth = new RotationHandle(&m_space);
-	
+	m_roth->setRadius(3.2f);
 }
 
 void GLWidget::clientDraw()
@@ -36,18 +36,15 @@ void GLWidget::clientDraw()
 
 	float m[16];
 	m_space.glMatrix(m);
-	DrawCircle dc;
-	dc.draw3Circles(m);
 	
-	//DrawArrow da;
-	//da.drawCoordinateAt(&m_space);
+	DrawArrow da;
+	da.drawCoordinateAt(&m_space);
 	
 	Vector3F veye = getCamera()->eyeDirection();
 	Matrix44F meye = m_space;
 	meye.setFrontOrientation(veye );
-	meye.glMatrix(m);
 
-	m_roth->draw(m);
+	m_roth->draw(&meye);
 	
 	getDrawer()->m_surfaceProfile.apply();
 	testDops();

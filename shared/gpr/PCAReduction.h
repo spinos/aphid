@@ -1,7 +1,7 @@
 /*
  *  PCAReduction.h
  *  
- *	dimensionality reduction via principle component analysis
+ *	dimensionality reduction via principal component analysis
  *  draw n d-dimensional data points
  *  x is n-by-d, each row a data point
  *  reduce dimensionality from d to m 

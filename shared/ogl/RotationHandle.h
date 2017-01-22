@@ -23,6 +23,7 @@ class RotationHandle : public DrawCircle {
 	Vector3F m_center;
 	Vector3F m_lastV;
 	Vector3F m_localV;
+	float m_radius;
 	float m_speed;
 	bool m_active;
 	
@@ -39,12 +40,13 @@ public:
 	RotationHandle(Matrix44F * space);
 	virtual ~RotationHandle();
 	
+	void setRadius(float x);
 	void setSpeed(float x);
 	
 	bool begin(const Ray * r);
 	void end();
 	void rotate(const Ray * r);
-	void draw(const float * camspace) const;
+	void draw(const Matrix44F * camspace) const;
 	
 };
 

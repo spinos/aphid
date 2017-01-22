@@ -16,35 +16,42 @@ namespace aphid {
 RotationHandle::RotationHandle(Matrix44F * space)
 { 
 	m_space = space; 
-	m_center = space->getTranslation();
 	m_speed = 1.f;
+	m_radius = 1.f;
 	m_active = false;
 }
 
 RotationHandle::~RotationHandle()
 {}
 
+void RotationHandle::setRadius(float x)
+{ m_radius = x; }
+
 void RotationHandle::setSpeed(float x)
 { m_speed = x; }
 
 bool RotationHandle::begin(const Ray * r)
 {
+	m_center = m_space->getTranslation();
+	
 	float dep;
 	Vector3F pol = r->closestPointOnRay(m_center, &dep );
 	const float d = pol.distanceTo(m_center);
-	if(d > 1.f ) {
+	if(d > m_radius ) {
 		return false;
 	}
 	
-	dep -= sqrt(1.f - d * d );
+	dep -= sqrt(m_radius * m_radius - d * d );
 	pol = r->travel(dep);
 		
 	m_lastV = pol - m_center;
+	m_lastV.normalize();
 	
 	m_invSpace = *m_space;
 	m_invSpace.inverse();
 	
 	m_localV = m_invSpace.transformAsNormal(m_lastV);
+	m_localV.normalize();
 	
 	if(Absolute<float>(m_localV.x) < .14f ) {
 		m_snap = saX;
@@ -75,14 +82,15 @@ void RotationHandle::rotate(const Ray * r)
 	float dep;
 	Vector3F pol = r->closestPointOnRay(m_center, &dep );
 	const float d = pol.distanceTo(m_center);
-	if(d > 1.f ) {
+	if(d > m_radius ) {
 		return;
 	}
 	
-	dep -= sqrt(1.f - d * d );
+	dep -= sqrt(m_radius * m_radius - d * d );
 	pol = r->travel(dep);
 		
 	Vector3F curV = pol - m_center;
+	curV.normalize();
 	
 	Vector3F axisC = m_lastV.cross(curV);
 	axisC.normalize();
@@ -92,8 +100,10 @@ void RotationHandle::rotate(const Ray * r)
 	m_invSpace.inverse();
 	
 	Vector3F lastlocalV = m_invSpace.transformAsNormal(m_lastV);
+	lastlocalV.normalize();
 	
 	Vector3F curLocalV = m_invSpace.transformAsNormal(curV);
+	curLocalV.normalize();
 	
 	Vector3F axis;
 	switch (m_snap) {
@@ -144,14 +154,26 @@ void RotationHandle::rotate(const Ray * r)
 	m_lastV = curV;
 }
 
-void RotationHandle::draw(const float * camspace) const
+void RotationHandle::draw(const Matrix44F * camspace) const
 {
+	float m[16];
+
+	Matrix33F rot = m_space->rotation();
+	rot.orthoNormalize();
+	rot *= m_radius;
+	rot.glMatrix(m);
+	
+	Vector3F tv = m_space->getTranslation();
+	m[12] = tv.x;
+	m[13] = tv.y;
+	m[14] = tv.z;
+		
+	draw3Circles(m);
+	
 	if(!m_active) {
 		return;
 	}
 	
-	float m[16];
-	m_space->glMatrix(m);
 	glPushMatrix();
     glMultMatrixf(m);
 	
@@ -183,7 +205,10 @@ void RotationHandle::draw(const float * camspace) const
 		return;
 	}
 	
-	memcpy(m, camspace, 64);
+	rot = camspace->rotation();
+	rot.orthoNormalize();
+	rot *= m_radius;
+	rot.glMatrix(m);
 	m[12] = m_center.x;
 	m[13] = m_center.y;
 	m[14] = m_center.z;

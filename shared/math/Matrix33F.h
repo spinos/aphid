@@ -76,7 +76,7 @@ namespace aphid {
 	void getUp(Vector3F & dst) const;
 	void getFront(Vector3F & dst) const;
 	void copy(const Matrix33F & another);
-	
+
 	static Vector3F SolveAxb(const Matrix33F & A, const Vector3F & b);
 	
 	static Matrix33F IdentityMatrix;
