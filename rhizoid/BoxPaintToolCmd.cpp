@@ -63,6 +63,10 @@
 #define kDFTRoundFlagLong "-fieldTriangulateRound"
 #define kLsReplacerFlag "-ltr" 
 #define kLsReplacerFlagLong "-listReplacer"
+#define kConnectReplacerFlag "-cnr" 
+#define kConnectReplacerFlagLong "-connectReplacer"
+#define kL2VoxFlag "-l2v" 
+#define kL2VoxFlagLong "-l2Vox"
 #define kShrubCreateFlag "-csb" 
 #define kShrubCreateFlagLong "-createShrub"
 
@@ -87,15 +91,16 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kBeginPickFlag, kBeginPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kDoPickFlag, kDoPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
-	syntax.addFlag(kEndPickFlag, kEndPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kGetPickFlag, kGetPickFlagLong, MSyntax::kString);
 	syntax.addFlag(kLsReplacerFlag, kLsReplacerFlagLong, MSyntax::kString);
+	syntax.addFlag(kConnectReplacerFlag, kConnectReplacerFlagLong, MSyntax::kString);
 	syntax.addFlag(kSaveCacheFlag, kSaveCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kLoadCacheFlag, kLoadCacheFlagLong, MSyntax::kString);
 	syntax.addFlag(kConnectGroundFlag, kConnectGroundFlagLong);
 	syntax.addFlag(kVoxFlag, kVoxFlagLong);
 	syntax.addFlag(kConnectVoxFlag, kConnectVoxFlagLong);
 	syntax.addFlag(kSelectVoxFlag, kSelectVoxFlagLong, MSyntax::kLong);
+	syntax.addFlag(kL2VoxFlag, kL2VoxFlagLong, MSyntax::kLong);
 	syntax.addFlag(kPCAFlag, kPCAFlagLong);
 	syntax.addFlag(kRotateOrderPCAFlag, kRotateOrderPCAFlagLong, MSyntax::kString);
 	syntax.addFlag(kDFTFlag, kDFTFlagLong, MSyntax::kLong);
@@ -168,6 +173,10 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 			ng = pViz->numActivePlants();
 			setResult(ng);
 			break;
+		case opConnectReplacer:
+			connectInstanceGroup(instNames, oViz, m_currentVoxInd, m_l2VoxInd);
+			setResult(instNames);
+			break;
 		default:
 			;
 	}
@@ -185,6 +194,7 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 {
 	m_operation = opUnknown;
     m_currentVoxInd = 0;
+	m_l2VoxInd = 0;
 	m_rotPca = Matrix33F::XYZ;
 	m_dftScale = 1;
 	m_dftRound = 0;
@@ -208,6 +218,24 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		AHelper::Info<int>(" proxyPaintTool select example", m_currentVoxInd);
+	}
+	
+	if (argData.isFlagSet(kL2VoxFlag)) {
+		status = argData.getFlagArgument(kL2VoxFlag, 0, m_l2VoxInd );
+		if (!status) {
+			status.perror("-l2Vox flag parsing failed");
+			return status;
+		}
+		AHelper::Info<int>(" proxyPaintTool select l2 example", m_l2VoxInd);
+	}
+	
+	if (argData.isFlagSet(kConnectReplacerFlag)) {
+		status = argData.getFlagArgument(kConnectReplacerFlag, 0, fVizName);
+		if (!status) {
+			status.perror("-connectReplacer flag parsing failed");
+			return status;
+		}
+		m_operation = opConnectReplacer;
 	}
 	
 	if (argData.isFlagSet(kDoPickFlag)) {

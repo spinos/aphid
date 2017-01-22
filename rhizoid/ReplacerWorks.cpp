@@ -2,16 +2,24 @@
  *  ReplacerWorks.cpp
  *  proxyPaint
  *
+ *  select transforms. connect to example 1 sub-example 1
+ *  $viz is long name to proxy viz node
+ *  proxyPaintTool -svx 1 -l2v 1 -cnr $viz;
+ *  return connected transforms
+ *
  *  list objects connected to example 0
  *  each input to shrub is separated by <example>
- *  $viz is long name to proxy viz node
  *  proxyPaintTool -svx 0 -ltr $viz;
+ *
  *  begin pick example 0
  *  proxyPaintTool -svx 0 -bpk $viz;
+ *
  *  pick example 0 a few times
  *  proxyPaintTool -svx 0 -dpk $viz;
+ *
  *  end pick
  *  proxyPaintTool -epk $viz;
+ *
  *  get number of picked
  *  proxyPaintTool -gpk $viz;
  *
@@ -188,4 +196,91 @@ int ReplacerWorks::listInstanceToShrub(MStringArray & instanceNames,
 	
 	}
 	return totalNg;
+}
+
+void ReplacerWorks::connectInstanceGroup(MStringArray & instanceNames,
+					const MObject& node,
+					const int & iExample,
+					const int & iL2Example)
+{
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintTool empty selection, select transform(s) to connect replacer");
+		return;
+	}
+	
+	if(iExample == 0) {
+		connectInstanceTo(instanceNames, sels, node);
+		return;
+	}
+	
+	MPlug dstPlug;
+	AHelper::getNamedPlug(dstPlug, node, "inExample");
+	MPlugArray srcPlugs;
+	ConnectionHelper::GetArrayPlugInputConnections(srcPlugs, dstPlug);
+	if(srcPlugs.length() < iExample) {
+		AHelper::Info<int>("no connection to example", iExample );
+		return;
+	}
+	
+	MPlug iexPlug = srcPlugs[iExample - 1];
+	MObject iexNode = iexPlug.node();
+	MFnDependencyNode fex(iexNode);
+	if(fex.typeName() == "shrubViz") {
+		connectInstanceToShrub(instanceNames, sels, iexNode, iL2Example);
+		return;
+	}
+	connectInstanceTo(instanceNames, sels, iexNode);
+	
+}
+
+void ReplacerWorks::connectInstanceTo(MStringArray & instanceNames,
+					MSelectionList & sels, 
+					const MObject& node)
+{
+	MStatus stat;
+	MItSelectionList transIter(sels, MFn::kTransform, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select transform(s) to connect replacer");
+		return;
+	}
+	
+	MPlug dstPlug;
+	AHelper::getNamedPlug(dstPlug, node, "instanceSpace");
+	ConnectionHelper::BreakArrayPlugInputConnections(dstPlug);
+	
+	for(;!transIter.isDone(); transIter.next() ) {
+		MDagPath transPath;
+		transIter.getDagPath (transPath);
+		instanceNames.append(transPath.partialPathName() );
+		
+		MObject transobj;
+		transIter.getDependNode(transobj);
+		ConnectionHelper::ConnectToArray(transobj, "matrix", 
+										node, "instanceSpace",
+										-1);
+										
+	}
+}
+
+void ReplacerWorks::connectInstanceToShrub(MStringArray & instanceNames,
+					MSelectionList & sels, 
+					const MObject& node, 
+					const int & iExample)
+{
+	MPlug dstPlug;
+	AHelper::getNamedPlug(dstPlug, node, "inExample");
+	MPlugArray srcPlugs;
+	ConnectionHelper::GetArrayPlugInputConnections(srcPlugs, dstPlug);
+	if(srcPlugs.length() <= iExample) {
+		AHelper::Info<int>("no connection to example", iExample );
+		return;
+	}
+	
+	MPlug iexPlug = srcPlugs[iExample];
+	MObject iexNode = iexPlug.node();
+	MFnDependencyNode fex(iexNode);
+	connectInstanceTo(instanceNames, sels, iexNode);
 }

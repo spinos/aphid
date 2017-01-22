@@ -27,8 +27,9 @@
 class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks, public ReplacerWorks
 {
     int m_currentVoxInd;
+	int m_l2VoxInd;
 	aphid::Matrix33F::RotateOrder m_rotPca;
-    
+	
 public:
 					proxyPaintTool(); 
 	virtual			~proxyPaintTool(); 
@@ -78,7 +79,8 @@ private:
 		opCreateShrub = 10,
         opPrincipalComponent = 11,
 		opDistanceFieldTriangulate = 12,
-		opListReplacer = 13
+		opListReplacer = 13,
+		opConnectReplacer = 14
 	};
 	
 	Operation m_operation;
