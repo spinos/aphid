@@ -16,6 +16,7 @@ class ProxyViz;
 
 class MObject;
 class MStringArray;
+class MSelectionList;
 
 class ReplacerWorks {
 
@@ -30,6 +31,11 @@ protected:
 	int countInstanceGroup(aphid::ProxyViz * viz,
 					const MObject& node,
 					const int & iExample);
+	void connectInstanceGroup(MStringArray & instanceNames,
+					const MObject& node,
+					const int & iExample,
+					const int & iL2Example);
+	
 private:
 	int countInstanceTo(const MObject& node);
 	int countInstanceToShrub(aphid::ProxyViz * viz,
@@ -38,6 +44,13 @@ private:
 					const MObject& node);
 	int listInstanceToShrub(MStringArray & instanceNames,
 					const MObject& node);
+	void connectInstanceTo(MStringArray & instanceNames,
+					MSelectionList & sels, 
+					const MObject& node);
+	void connectInstanceToShrub(MStringArray & instanceNames,
+					MSelectionList & sels, 
+					const MObject& node, 
+					const int & iExample);
 	
 };
 #endif

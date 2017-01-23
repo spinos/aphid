@@ -61,6 +61,7 @@ MObject ProxyViz::adrawDopSizeZ;
 MObject ProxyViz::adrawDopSize;
 MObject ProxyViz::aininstspace;
 MObject ProxyViz::outValue1;
+MObject ProxyViz::outValue2;
 
 ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
 m_toSetGrid(true),
@@ -81,12 +82,13 @@ ProxyViz::~ProxyViz()
 
 MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 {
-	if(!m_enableCompute) return MS::kSuccess;
+	if(!m_enableCompute) {
+		return MS::kSuccess;
+	}
+	
 	if( plug == outValue ) {
 		
 		updateWorldSpace(thisMObject() );
-		
-		MStatus status;
 
 		ExampVox * defBox = plantExample(0);
 		
@@ -96,9 +98,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		float grdsz = defBox->geomExtent() * 20.f ;
 		grdsz = (int)grdsz + 1.f;
-		if(grdsz < 400.f) {
+		if(grdsz < 100.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
-			grdsz = 400.f;
+			grdsz = 100.f;
 			AHelper::Info<float>(" truncated to", grdsz);
 		}
 		
@@ -125,11 +127,30 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
             }
 		}
 		
+		float result = 42.f;
+		MDataHandle outputHandle = block.outputValue( outValue );
+		outputHandle.set( result );
+		block.setClean(plug);
+		
+    } else if(plug == outValue1) {
+		
+		MArrayDataHandle hArray = block.inputArrayValue(ainexamp);
+		updateExamples(hArray);
+
+		float result = 91.f;
+
+		MDataHandle outputHandle = block.outputValue( outValue1 );
+		outputHandle.set( result );
+		block.setClean(plug);
+		
+	} else if(plug == outValue2) {
+		
 		if(!m_hasParticle) {
 			block.setClean(plug);
             return MS::kSuccess;
 		}
 		
+		MStatus status;
 		MDataHandle hdata = block.inputValue(outPositionPP, &status);
         MFnVectorArrayData farray(hdata.data(), &status);
         if(!status) {
@@ -176,18 +197,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 
         float result = outPosArray.length();
 
-		MDataHandle outputHandle = block.outputValue( outValue );
-		outputHandle.set( result );
-		block.setClean(plug);
-    }
-	if(plug == outValue1) {
-		
-		MArrayDataHandle hArray = block.inputArrayValue(ainexamp);
-		updateExamples(hArray);
-
-		float result = 91.f;
-
-		MDataHandle outputHandle = block.outputValue( outValue1 );
+		MDataHandle outputHandle = block.outputValue( outValue2 );
 		outputHandle.set( result );
 		block.setClean(plug);
 	}
@@ -489,6 +499,11 @@ MStatus ProxyViz::initialize()
 	numFn.setWritable(false);
 	addAttribute(outValue1);
 	
+	outValue2 = numFn.create( "outValue2", "ov2", MFnNumericData::kFloat );
+	numFn.setStorable(false);
+	numFn.setWritable(false);
+	addAttribute(outValue2);
+	
 	MFnTypedAttribute   stringAttr;
 	acachename = stringAttr.create( "cachePath", "cp", MFnData::kString );
  	stringAttr.setStorable(true);
@@ -536,7 +551,6 @@ MStatus ProxyViz::initialize()
     typedAttrFn.setArray(true);
     typedAttrFn.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( agroundMesh );
-	attributeAffects(agroundMesh, outValue);
 	
 	agroundSpace = matAttr.create("groundSpace", "grdsp", MFnMatrixAttribute::kDouble);
 	matAttr.setStorable(false);
@@ -545,7 +559,6 @@ MStatus ProxyViz::initialize()
     matAttr.setArray(true);
     matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( agroundSpace );
-	attributeAffects(agroundSpace, outValue);
 	
 	MPointArray defaultPntArray;
 	MFnPointArrayData pntArrayDataFn;
@@ -631,9 +644,10 @@ MStatus ProxyViz::initialize()
     matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( aininstspace );
     
+	attributeAffects(agroundMesh, outValue);
+	attributeAffects(agroundSpace, outValue);
 	attributeAffects(ainexamp, outValue1);
-	attributeAffects(aradiusMult, outValue1);
-	attributeAffects(outPositionPP, outValue);
+	attributeAffects(outPositionPP, outValue2);
 	
 	return MS::kSuccess;
 }
