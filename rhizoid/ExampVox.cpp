@@ -101,7 +101,7 @@ void ExampVox::setGeomSizeMult(const float & x)
 
 void ExampVox::setGeomBox(BoundingBox * bx)
 {
-/// limit box (-16 0 -16 16 16 16)
+/// limit box (-1 0 -1 1 1 1)
 	if(bx->distance(0) < 1e-1f) {
 		bx->setMin(-1.f, 0);
 		bx->setMax( 1.f, 0);

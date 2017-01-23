@@ -96,6 +96,7 @@ public:
 	static MObject adrawDopSizeZ;
 	static MObject adrawDopSize;
 	static MObject aininstspace;
+	static MObject ashogrid;
 	static MObject outValue1;
 	static MObject outValue2;
 	static MObject outValue;

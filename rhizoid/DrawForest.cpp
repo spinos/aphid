@@ -135,6 +135,11 @@ void DrawForest::drawWiredPlants(ForestCell * cell)
 void DrawForest::drawWiredPlant(PlantData * data, 
 						const ExampVox * v)
 {
+    if(!v) {
+        std::cout<<"drawWiredPlant v is null";
+        return;    
+    }
+    
 	glPushMatrix();
     
 	data->t1->glMatrix(m_transbuf);
@@ -192,7 +197,11 @@ void DrawForest::drawSolidPlants()
 
 void DrawForest::drawPlantsInCell(ForestCell * cell,
 								const BoundingBox & box)
-{	
+{
+	if(!cell) {
+		throw " drawPlantsInCell cell is null";
+	}
+
 	Vector3F worldP = box.center();
 	const float r = gridSize();
 	float camZ = cameraDepth(worldP);
@@ -210,11 +219,18 @@ void DrawForest::drawPlantsInCell(ForestCell * cell,
 		if(cell->key().y != iExample) {
 			iExample = cell->key().y;
 			v = plantExample(iExample );
-			const float * c = v->diffuseMaterialColor();
-			m_instancer->setDiffueColorVec(c);
+			if(v) {
+			    const float * c = v->diffuseMaterialColor();
+			    m_instancer->setDiffueColorVec(c);
+			} else {
+			    std::cout<<"drawWiredPlant v is null";
+			}
+			
 		}
 		
-		drawPlant(cell->value()->index, v);
+		if(v) {
+		    drawPlant(cell->value()->index, v);
+		}
 		
 		cell->next();
 	}
@@ -229,11 +245,17 @@ void DrawForest::drawPlantSolidBoundInCell(ForestCell * cell)
 		if(cell->key().y != iExample) {
 			iExample = cell->key().y;
 			v = plantExample(iExample );
-			const float * c = v->diffuseMaterialColor();	
-			m_instancer->setDiffueColorVec(c);
+			if(v) {
+				const float * c = v->diffuseMaterialColor();	
+				m_instancer->setDiffueColorVec(c);
+			} else {
+				std::cout<<"drawPlantSolidBoundInCell v is null";
+			}
 		}
 
-		drawPlantSolidBound(cell->value()->index, v);
+		if(v) {
+			drawPlantSolidBound(cell->value()->index, v);
+		}
 
 		cell->next();
 	}

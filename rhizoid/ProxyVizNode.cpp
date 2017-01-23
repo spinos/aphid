@@ -60,6 +60,7 @@ MObject ProxyViz::adrawDopSizeY;
 MObject ProxyViz::adrawDopSizeZ;
 MObject ProxyViz::adrawDopSize;
 MObject ProxyViz::aininstspace;
+MObject ProxyViz::ashogrid;
 MObject ProxyViz::outValue1;
 MObject ProxyViz::outValue2;
 
@@ -95,6 +96,11 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		updateDrawSize(defBox, block);
 		updateGeomBox(defBox, block);
 		updateGeomDop(defBox, block);
+		
+		AHelper::Info<MString>("ProxyViz", MFnDependencyNode(thisMObject() ).name() );
+		AHelper::Info<BoundingBox>("bbox", defBox->geomBox() );
+		//std::cout<<"\n ProxyViz "<< MFnDependencyNode(thisMObject() ).name();
+		//std::cout<<"\n ProxyViz default Geom Box"<<defBox->geomBox();
 		
 		float grdsz = defBox->geomExtent() * 20.f ;
 		grdsz = (int)grdsz + 1.f;
@@ -209,7 +215,13 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
-	if(!m_enableCompute) return;
+    if(_firstLoad) {
+        return;
+    }
+	if(!m_enableCompute) {
+	    return;
+	}
+	
 	MObject thisNode = thisMObject();
 	updateWorldSpace(thisNode);
 					
@@ -232,6 +244,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	MPlug actp(thisNode, aactivated);
 	if(actp.asBool()) setWireColor(.125f, .1925f, .1725f);
     else setWireColor(.0675f, .0675f, .0675f);
+    
+    MPlug shogridPlug(thisNode, ashogrid);
+	const bool showGrid = shogridPlug.asBool();
 
 	_viewport = view;
 	fHasView = 1;
@@ -259,7 +274,10 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	drawZCircle(m_transBuf);
 	
 	drawGridBounding();
-	// drawGrid();
+	
+	if(showGrid) {
+	    drawGrid();
+	}
 
 	bool hasGlsl = isGlslReady();
 	if(!hasGlsl ) {
@@ -643,6 +661,12 @@ MStatus ProxyViz::initialize()
     matAttr.setArray(true);
     matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( aininstspace );
+	
+	ashogrid = numFn.create( "showGrid", "shg", MFnNumericData::kBoolean );
+	numFn.setDefault(0);
+	numFn.setKeyable(true);
+	numFn.setStorable(false);
+	addAttribute(ashogrid);
     
 	attributeAffects(agroundMesh, outValue);
 	attributeAffects(agroundSpace, outValue);
