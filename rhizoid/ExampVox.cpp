@@ -103,16 +103,16 @@ void ExampVox::setGeomBox(BoundingBox * bx)
 {
 /// limit box (-16 0 -16 16 16 16)
 	if(bx->distance(0) < 1e-1f) {
-		bx->setMin(-16.f, 0);
-		bx->setMax( 16.f, 0);
+		bx->setMin(-1.f, 0);
+		bx->setMax( 1.f, 0);
 	}
 	if(bx->distance(1) < 1e-1f) {
 		bx->setMin( 0.f, 1);
-		bx->setMax( 16.f, 1);
+		bx->setMax( 1.f, 1);
 	}
 	if(bx->distance(2) < 1e-1f) {
-		bx->setMin(-16.f, 2);
-		bx->setMax( 16.f, 2);
+		bx->setMin(-1.f, 2);
+		bx->setMax( 1.f, 2);
 	}
 	m_geomBox = *bx;
 	m_geomExtent = m_geomBox.radius();

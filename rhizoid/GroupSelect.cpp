@@ -9,6 +9,7 @@
 
 #include "GroupSelect.h"
 #include <math/PseudoNoise.h>
+#include <iostream>
 
 namespace aphid {
 

@@ -325,7 +325,7 @@ MStatus ProxyViz::initialize()
 	abboxminx = numFn.create( "bBoxMinX", "bbmnx", MFnNumericData::kFloat, -16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMax(-16.f);
+	numFn.setMax(-1.f);
 	addAttribute(abboxminx);
 	
 	abboxminy = numFn.create( "bBoxMinY", "bbmny", MFnNumericData::kFloat, -16.f );
@@ -337,25 +337,25 @@ MStatus ProxyViz::initialize()
 	abboxminz = numFn.create( "bBoxMinZ", "bbmnz", MFnNumericData::kFloat, -16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMax(-16.f);
+	numFn.setMax(-1.f);
 	addAttribute(abboxminz);
 	
 	abboxmaxx = numFn.create( "bBoxMaxX", "bbmxx", MFnNumericData::kFloat, 16.f );
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMin(16.f);
+	numFn.setMin(1.f);
 	addAttribute(abboxmaxx);
 	
 	abboxmaxy = numFn.create( "bBoxMaxY", "bbmxy", MFnNumericData::kFloat, 16.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMin(16.f);
+	numFn.setMin(1.f);
 	addAttribute(abboxmaxy);
 	
 	abboxmaxz = numFn.create( "bBoxMaxZ", "bbmxz", MFnNumericData::kFloat, 16.f);
 	numFn.setKeyable(true);
 	numFn.setStorable(true);
-	numFn.setMin(16.f);
+	numFn.setMin(1.f);
 	addAttribute(abboxmaxz);
 	
 	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
