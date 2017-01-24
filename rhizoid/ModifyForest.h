@@ -17,11 +17,19 @@ class BarycentricCoordinate;
 class EbpGrid;
 
 class ModifyForest : public Forest {
+    
+public:
+    enum ManipulateMode {
+		manNone = 0,
+		manRotate = 1
+	};
 	
+private:
 	BarycentricCoordinate * m_bary;
 	PseudoNoise * m_pnoise;
 	int m_seed;
 	float m_noiseWeight;
+	ManipulateMode m_manipulateMode;
 	
 public:
     struct GrowOption {
@@ -85,6 +93,8 @@ public:
     void removeActivePlants();
     void removeTypedPlants(int x);
 	void clearPlantOffset(GrowOption & option);
+	void setManipulatMode(ManipulateMode x);
+	ManipulateMode manipulateMode() const;
 	
 protected:
 	bool growOnGround(GrowOption & option);
@@ -103,6 +113,8 @@ protected:
 	void rotatePlant(const Ray & ray,
 					const Vector3F & displaceNear, const Vector3F & displaceFar,
 					const float & clipNear, const float & clipFar);
+/// use delta rotation
+	void rotatePlant();
 
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
@@ -110,15 +122,7 @@ protected:
 	
 	virtual void getDeltaRotation(Matrix33F & mat,
 					const float & weight = 1.f) const;
-	
-	enum ManipulateMode {
-		manNone = 0,
-		manRotate = 1
-	};
-	
-private:
-	ManipulateMode m_manipulateMode;
-					
+				
 private:
 	void clearPlant(Plant * pl, const sdb::Coord2 & k);
 	void randomSpaceAt(const Vector3F & pos, 

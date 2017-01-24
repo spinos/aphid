@@ -1,0 +1,1100 @@
+proc string[] proxyPaint_GetMenuItemNames()
+{
+    string $items[] = {"proxyPaint_menu_item_01"};    
+    return $items;
+}
+
+proc proxyPaint_appendMenuItems(string $master)
+{
+    menuItem -p $master -l "Proxy Paint" -subMenu true proxyPaint_menu_item_01;
+    menuItem -l "Paint Tool" -c "proxyPaint_comb" proxyPaint_toolMenuItem;
+    menuItem -l "Create Proxy Viz On Selected" -c "proxyPaint_cviz";
+    menuItem -l "Connect Ground To Viz" -c "proxyPaintTool -cgm";
+    menuItem -l "Create Example On Selected Mesh" -c "proxyPaintTool -vxl";
+    menuItem -l "Connect Example To Viz" -c "proxyPaintTool -cvx";
+    menuItem -l "Connect Camera To Viz" -c "proxyPaint_connectCameraToViz";
+    menuItem -l "Save Cache" -c "proxyPaint_saveCache";
+    menuItem -l "Load Cache" -c "proxyPaintTool -lcf `fileDialog -m 0`";
+    menuItem -l "Convert Selected Viz To Instancer" -c "proxyPaint_instance";
+    menuItem -l "Convert Locators To Objects" -c "proxyPaint_realize";
+    menuItem -l "Display Select As" -subMenu true;
+    menuItem -l "BoundingBox" -c "proxyPaint_display(0)";
+    menuItem -l "Particles" -c "proxyPaint_display(1)";
+    menuItem -l "Instancer BoundingBoxes"  -c "proxyPaint_display(2)";    
+    setParent -menu ..;
+    menuItem -l "Create Bundle Example" -c "proxyPaint_createBundle";
+
+	menuItem -e -ann `proxyPaintToolContext` proxyPaint_toolMenuItem;
+}
+
+global proc proxyPaint_saveCache()
+{
+    string $sctFilter = "*.sct";
+    string $filenm[] = `fileDialog2 -fileFilter $sctFilter`;
+    if(size($filenm) < 1) {
+        print("proxyPaint_saveCache aborted");
+        return;   
+    }
+    proxyPaintTool -scf $filenm[0];
+}
+
+global proc proxyPaintRemoveMenus()
+{
+    string $items[] = proxyPaint_GetMenuItemNames();
+    zCustomizeMenus_RemoveFromMaster($items);
+}
+
+global proc proxyPaintMakeMenus()
+{
+    string $masterMenu = zCustomizeMenus_FindMaster();
+    if($masterMenu == "") 
+        return;
+    
+    proxyPaint_appendMenuItems($masterMenu);
+}
+
+global proc int proxyPaint_getNodeVersion(string $node)
+{
+    if($node == "") {
+        return 0;
+    }
+// differentiate v4.0
+    if(`attributeExists nis $node` == 0) {
+        return 4;   
+    }
+// differentiate v3.0
+    if(`attributeExists outReplace $node`) {
+        return 3;   
+    }
+// differentiate v2.0
+    if(`attributeExists ecl $node`) {
+        return 1;
+    }
+    return 2;
+}
+
+global proc proxyPaint_cviz()
+{
+    string $sel[] = `ls -sl -type transform`;
+    if(size($sel) < 1) {
+        print("To create a proxy viz, you must select the object to be instanced(replaced).");
+        return;
+    }
+    
+    string $obj2instance = $sel[0];
+    string $viz = `createNode proxyViz`;
+    string $trans = firstParentOf($viz);
+    $trans = `rename $trans ($obj2instance+"_Viz")`;
+    float $v = `getAttr ($obj2instance+".boundingBoxMinX")`;
+    if($v > -1) {
+        $v = -1;   
+    }
+    setAttr ($viz+".bbmnx") $v;
+    $v = `getAttr ($obj2instance+".boundingBoxMinY")`;
+    if($v > 0) {
+        $v = 0;   
+    }
+    setAttr ($viz+".bbmny") $v;
+    $v = `getAttr ($obj2instance+".boundingBoxMinZ")`;
+    if($v > -1) {
+        $v = -1;   
+    }
+    setAttr ($viz+".bbmnz") $v;
+    $v = `getAttr ($obj2instance+".boundingBoxMaxX")`;
+    if($v < 1) {
+        $v = 1;   
+    }
+    setAttr ($viz+".bbmxx") $v;
+    $v = `getAttr ($obj2instance+".boundingBoxMaxY")`;
+    if($v < 1) {
+        $v = 1;   
+    }
+    setAttr ($viz+".bbmxy") $v;
+    $v = `getAttr ($obj2instance+".boundingBoxMaxZ")`;
+    if($v < 1) {
+        $v = 1;   
+    }
+    setAttr ($viz+".bbmxz") $v;
+    
+    setAttr -l true ($viz+".bbmnx");
+    setAttr -l true ($viz+".bbmny");
+    setAttr -l true ($viz+".bbmnz");
+    setAttr -l true ($viz+".bbmxx");
+    setAttr -l true ($viz+".bbmxy");
+    setAttr -l true ($viz+".bbmxz");
+    
+    string $tail = `createNode -n "dummy" transform`;
+    connectAttr -f ($viz +".outValue") ($tail+".translateX");
+    parent $tail $trans;
+}
+
+global proc proxyPaint_dsp()
+{
+    string $sel[] = `ls -sl`;
+    if(size($sel) != 2) {
+        print("To connect display mesh to a proxy viz, you must select the object and shift-select the viz.");
+        return;
+    }
+    
+    string $node[] = `pickWalk -d down`;
+    if(`nodeType $node[0]` != "mesh"){
+        print("First selection is not a mesh.");
+        return;
+    }
+    
+    if(`nodeType $node[1]` != "proxyViz"){
+        print("Second selection is not a viz.");
+        return;
+    }
+    
+    connectAttr -f ($node[0] + ".outMesh") ($node[1] + ".displayMesh");
+}
+
+global proc proxyPaint_comb()
+{
+	string $ctx = `menuItem -q -ann proxyPaint_toolMenuItem`;
+	print(" set tool to "+$ctx);
+	setToolTo $ctx;
+}
+
+proc string[] proxyPaint_allPerspCameras()
+{
+    string $allCam[] = `ls -type camera`;
+    string $perspCam[];
+    int $i = 0;
+    string $aCam;
+    for($aCam in $allCam) {
+        if(`getAttr ($aCam +".orthographic")` == 0) {
+            $perspCam[$i] = $aCam;
+            $i++;
+        }
+    }
+    return $perspCam;
+}
+
+global proc proxyPaint_instance()
+{
+    pickWalk -d down;
+    string $viz[] = `ls -sl -l -type locator`;
+    if(size($viz) < 1) {
+        print("\n must select a proxyViz to convert to particle"); 
+        return;
+    }
+    
+    if(`nodeType $viz[0]` != "proxyViz") {
+        print("\n must select a proxyViz to convert to particle"); 
+        return;
+    }
+    
+    int $nodeVer = proxyPaint_getNodeVersion($viz[0]);
+    
+    //If such a window already exists, destory it.
+    if ( (`window -exists proxyPaint_Note`) == true ) deleteUI proxyPaint_Note;
+ 
+//Create the window.
+	window -title ("Conver Proxy to Instancer version 4.0 Mon Jan 23 20:47:26 2017")  -wh 480 320 proxyPaint_Note;
+	
+		//Layout
+string $form = `formLayout -numberOfDivisions 100`;
+string $bline = `columnLayout -adjustableColumn true`;//  -columnWidth3 120 120 120 -columnAttach 1 "both" 0 -columnAttach 2 "both" 0 -columnAttach 3 "both" 0`;
+string $scroll = `scrollLayout -p $form -cr on`;
+
+	columnLayout -adjustableColumn true -p $scroll;
+	text -label ("Plugin Version: "+$nodeVer) -align left;
+    
+	textScrollList -ams on 
+	    -sc "proxyPaint_selectAViz" 
+	    proxyPaint_VizScroll;
+	    
+	attrFieldSliderGrp -min 0.01 -max 1.0 -at ($viz[0]+".convertPercentage") proxyPaint_convertPercentage;
+	
+	checkBox -l "View Dependent" -cc "proxyPaint_checkLODControls" -v 0 proxyPaint_viewDependentCheck;
+	optionMenuGrp -en 0 -label "Through Camera" -ann $viz[0] -columnWidth 2 240 -cc "proxyPaint_connectCamera" proxyPaint_cameraGrp;
+	
+	string $perspCams[] = proxyPaint_allPerspCameras();
+	string $aperspCam;
+	for($aperspCam in $perspCams) {
+	    menuItem -label $aperspCam;
+	}
+	
+	attrFieldSliderGrp -en 0 -min 0.001 -max 2.0 -at ($viz[0]+".lodGateMax") proxyPaint_lodMax;
+	attrFieldSliderGrp -en 0 -min 0.0 -max 0.999 -at ($viz[0]+".lodGateMin") proxyPaint_lodMin;
+	intFieldGrp -en 0 -numberOfFields 3 -label "Frame Start/End/Step" -value1 `playbackOptions -q -min` -value2 `playbackOptions -q -max` -value3 4 proxyPaint_frameRange;
+
+	text -l "";
+	text -l "Object(s) to be Instanced(Replaced)";
+	textScrollList -ams on proxyPaint_targetList;
+	rowColumnLayout -numberOfColumns 2 -cw 1 300 -cw 2 300;
+	button -l "Add Selected (Connect to Example)" -c "proxyPaint_addSelectedTarget";
+	setParent..;
+	
+	text -label $viz[0] proxyPaint_cvtVizNameText;
+	
+	rowColumnLayout -numberOfColumns 2 -cw 1 300 -cw 2 300;
+	textScrollList -allowMultiSelection false 
+	    -sc "proxyPaint_cvtSelectExample"
+	    proxyPaint_cvtExampleScroll;
+	    
+	textScrollList -allowMultiSelection false 
+	    -sc "proxyPaint_cvtSelectL2Example"
+	    proxyPaint_cvtL2ExampleScroll;
+	setParent..;
+
+	setParent..;
+	rowColumnLayout -numberOfColumns 3 -p $bline;
+	button -l "Create Instancer" -c "proxyPaint_MultiConvert";
+	button -l "Close" -c "deleteUI proxyPaint_Note";
+	setParent..;
+	
+	formLayout -edit
+        -attachNone  $bline     "top"
+        -attachForm     $bline     "left"   2
+        -attachForm    $bline     "bottom" 2
+        -attachForm     $bline     "right"  2
+
+        -attachForm     $scroll "top"    2
+        -attachForm    $scroll "left"   2
+        -attachControl    $scroll "bottom" 2 $bline
+        -attachForm     $scroll "right"  2
+    $form;
+	
+	showWindow proxyPaint_Note;
+	
+	proxyPaint_listAllViz();
+	proxyPaint_UpdateCvtExampleScroll();
+	proxyPaint_connectCamera();
+	proxyPaint_checkLODControls();
+	
+}
+
+global proc string proxyPaint_getCurrentViz()
+{
+    pickWalk -d down;
+    string $sel[] = `ls -sl -type proxyViz`;
+    if(size($sel) < 1)
+        return "";
+    
+    return $sel[0];
+}
+
+global proc proxyPaint_UpdateCvtExampleScroll()
+{
+    textScrollList -e -ra proxyPaint_cvtExampleScroll;
+    string $node = proxyPaint_getCurrentViz();
+    if($node == "")
+        return;
+    
+    textScrollList -e -a "none" proxyPaint_cvtExampleScroll;
+    
+    string $conns[] = `listConnections -s on -d off ($node + ".inExample")`;
+    string $aconn;
+    for($aconn in $conns) {
+        textScrollList -e -a $aconn proxyPaint_cvtExampleScroll;
+    
+    }
+    textScrollList -e -sii 1 proxyPaint_cvtExampleScroll;
+}
+
+proc string proxyPaint_cvtSelectExampleName(string $scroll)
+{
+    string $seledExmp[] = `textScrollList -q -selectItem $scroll`;
+    if(size($seledExmp) < 1){
+        return "none";   
+    }
+    return $seledExmp[0];
+}
+
+proc int proxyPaint_cvtSelectExampleInd(string $scroll)
+{
+    int $oneBasedInd[] = `textScrollList -q -sii $scroll`;
+    int $realInd = $oneBasedInd[0];
+    if($realInd > 0) $realInd = $realInd - 1;
+    return $realInd;
+}
+
+global proc proxyPaint_lsCompoundExample(string $names[])
+{
+    proxyPaint_clearL2Example();
+    
+    int $i;
+    int $count = size($names);
+    string $aname;
+    int $firstExample = 0;
+    for($i=0; $i < $count; $i=$i+1) {
+        $aname = $names[$i];
+        if($aname == "<example>") {
+            $firstExample = 1;
+        } else {
+            if($firstExample == 1) {
+                proxyPaint_addL2Example($aname);
+                $firstExample = 0;
+            } else {
+                
+            }
+        }
+    }
+}
+
+global proc proxyPaint_lsInputReplacer(string $viz, int $channel)
+{
+    string $insts[] = `proxyPaintTool -svx $channel -ltr $viz`;
+    proxyPaint_clearL2Example();
+    proxyPaint_clearNamedTarget();
+    if($insts[0] == "<example>") {
+        proxyPaint_lsCompoundExample($insts);
+    } else {
+        proxyPaint_addNamedTarget($insts);
+    }
+}
+
+global proc proxyPaint_cvtSelectExample()
+{
+    string $viz = `textScrollList -q -ann proxyPaint_VizScroll `;
+    int $nodeVer = proxyPaint_getNodeVersion($viz);
+    int $ind = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtExampleScroll");
+    if($nodeVer >= 4) {
+        proxyPaint_lsInputReplacer($viz, $ind);
+    } else {
+        proxyPaint_legacySelectExample($viz, $ind);
+    }
+}
+   
+global proc proxyPaint_legacySelectExample(string $viz, int $ind)
+{
+    print("\n select example "+ $viz +".example["+$ind+"]");
+    if($ind < 1) {
+        return;   
+    }
+
+    string $emps[] = `listConnections -s on -d off -shapes on ($viz + ".inExample["+($ind-1)+"]")`;
+    if(size($emps)<1) {
+        print("\n WARNING no example connected to .inExample["+($ind-1)+"]");
+        return;
+    }
+    
+    textScrollList -e -ann $emps[0] proxyPaint_cvtExampleScroll;
+    
+    string $insts[] = `listConnections -s on -d off ($emps[0]+".instanceSpace")`;
+    if(size($insts)<1) {
+        print("\n no object connected to example "+$emps[0]);
+        return;
+    }
+    print("\n list object connected to example "+$emps[0]);
+    proxyPaint_addNamedTarget($insts);
+}
+
+global proc proxyPaint_listAllViz()
+{
+    string $vizs[] = `ls -l -type proxyViz`;
+    string $aviz;
+    for($aviz in $vizs) {
+        textScrollList -e -append $aviz proxyPaint_VizScroll;
+    }
+}
+
+global proc proxyPaint_MultiConvert()
+{
+    string $vizs[] = `textScrollList -q -selectItem proxyPaint_VizScroll`;
+    if(size($vizs) < 1) {
+        print "no proxyViz selected, do nothing\n";
+        return;
+    }
+    
+    string $aviz;
+    for($aviz in $vizs) {
+        optionMenuGrp -e -ann $aviz proxyPaint_cameraGrp;
+        proxyPaint_connectCamera();
+        proxyPaint_checkLODControls();
+        proxyPaint_convert();
+    }
+}
+
+global proc proxyPaint_selectAViz()
+{
+    string $vizs[] = `textScrollList -q -selectItem proxyPaint_VizScroll`;
+    if(size($vizs) < 1) {
+        print ("\n WARING no viz selected");
+        return;
+    }
+    select -r $vizs[0];
+    textScrollList -e -ann  $vizs[0] proxyPaint_VizScroll;
+    proxyPaint_UpdateCvtExampleScroll;
+}
+
+proc proxyPaint_disconnectAttr(string $dest)
+{
+    string $src[] = `listConnections -d on -s on -p on $dest`;
+    string $s;
+    for($s in $src) {
+        print ("disconnect "+$s+" from " + $dest + "\n");
+        disconnectAttr $s $dest;
+    }
+}
+
+global proc proxyPaint_connectCamera()
+{
+    string $viz = `optionMenuGrp -q -ann proxyPaint_cameraGrp`;
+    proxyPaint_disconnectAttr($viz + ".cameraSpace");
+    proxyPaint_disconnectAttr($viz + ".horizontalFilmAperture");
+    proxyPaint_disconnectAttr($viz + ".verticalFilmAperture");
+    proxyPaint_disconnectAttr($viz + ".focalLength");
+    proxyPaint_disconnectAttr($viz + ".cos");
+    
+    if(`checkBox -q -v proxyPaint_viewDependentCheck` != 1) {
+        print("disconnect camera to "+$viz+"\n");
+        return;
+    }
+    
+    string $cam = `optionMenuGrp -q -v proxyPaint_cameraGrp`;
+    
+    print("connect "+$cam+" to "+$viz+"\n");
+    
+    int $nodeVer = proxyPaint_getNodeVersion($viz);
+    if($nodeVer == 1)
+        connectAttr -f ($cam + ".worldInverseMatrix") ($viz + ".cameraSpace");
+    else 
+        connectAttr -f ($cam + ".worldMatrix") ($viz + ".cameraSpace");
+
+    connectAttr -f ($cam + ".horizontalFilmAperture") ($viz + ".horizontalFilmAperture");
+    connectAttr -f ($cam + ".verticalFilmAperture") ($viz + ".verticalFilmAperture");
+    connectAttr -f ($cam + ".focalLength") ($viz + ".focalLength");
+    connectAttr -f ($cam + ".overscan") ($viz + ".cos");
+}
+
+proc string proxyPaint_datetimeAsString()
+{
+    python("import datetime");
+    return python("datetime.datetime.now().strftime('%y%m%dT%H%M%S%m')");
+}
+
+proc proxyPaint_bakeInParticle(string $bakeName, string $particle, string $grp)
+{
+    string $cache = `createNode particleProxyCache`;
+    setAttr -type "string" ($cache + ".cachePath") $bakeName;
+    string $dummy = `createNode transform`;
+    connectAttr ($cache + ".outValue") ($dummy+".translateY") ; 
+    connectAttr ($particle +".position") ($cache+".outPosition"); 
+    connectAttr ($particle +".scalePP") ($cache+".outScale");
+    connectAttr ($particle +".rotationPP") ($cache+".outRotation");
+    parent $dummy $grp;
+    delete $cache;
+}
+
+proc string proxyPaint_genV3Paticle(string $viz, int $start, int $end, string $grp)
+{
+    int $ninst = `proxyPaintTool -gpk $viz`;
+    if($ninst < 1) {
+        print "\n zero particle count";
+        return "";
+    }
+    
+    string $par[] = `particle -jbp 0 0 0 -nj $ninst -jr 1 -c 1`;
+    setAttr ($par[0]+".inheritsTransform") 0;
+    setAttr ($par[1]+".isDynamic") 0;
+    setAttr ($par[1]+".startFrame") -999;
+    addAttr -ln "scalePP0"  -dt vectorArray $par[1];
+    addAttr -ln "scalePP"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP0"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP"  -dt vectorArray $par[1];
+    addAttr -ln "userScalar1PP0"  -dt doubleArray $par[1];
+    addAttr -ln "userScalar1PP"  -dt doubleArray $par[1];
+    connectAttr ($par[1]+".position") ($viz+".outPosition"); 
+    connectAttr ($par[1]+".scalePP") ($viz+".outScale");
+    connectAttr ($par[1]+".rotationPP") ($viz+".outRotation");
+    connectAttr ($par[1]+".userScalar1PP") ($viz+".outReplace");
+    
+    currentTime $start;
+    print ("instancer count " + $ninst + "\n");
+    
+    disconnectAttr ($par[1]+".position") ($viz+".outPosition"); 
+    disconnectAttr ($par[1]+".scalePP") ($viz+".outScale");
+    disconnectAttr ($par[1]+".rotationPP") ($viz+".outRotation");
+    disconnectAttr ($par[1]+".userScalar1PP") ($viz+".outReplace");
+    
+    setAttr ($par[0] + ".visibility") 0;
+    saveInitialState $par[1];
+
+    parent $par[0] $grp;
+        
+    return $par[1];
+}
+
+proc string proxyPaint_genPaticle(string $viz, int $start, int $end, string $grp)
+{
+    int $ninst = `proxyPaintTool -gpk $viz`;
+    if($ninst < 1) {
+        print "\n zero particle count";
+        return "";
+    }
+    
+    string $par[] = `particle -jbp 0 0 0 -nj $ninst -jr 1 -c 1`;
+    setAttr ($par[0]+".inheritsTransform") 0;
+    setAttr ($par[1]+".isDynamic") 0;
+    setAttr ($par[1]+".startFrame") -999;
+    addAttr -ln "scalePP0"  -dt vectorArray $par[1];
+    addAttr -ln "scalePP"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP0"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP"  -dt vectorArray $par[1];
+    connectAttr ($par[1]+".position") ($viz+".outPosition"); 
+    connectAttr ($par[1]+".scalePP") ($viz+".outScale");
+    connectAttr ($par[1]+".rotationPP") ($viz+".outRotation");
+    connectAttr ($par[1]+".userScalar1PP") ($viz+".outReplace");
+    
+    currentTime $start;
+    print ("instancer count " + $ninst + "\n");
+    
+    disconnectAttr ($par[1]+".position") ($viz+".outPosition"); 
+    disconnectAttr ($par[1]+".scalePP") ($viz+".outScale");
+    disconnectAttr ($par[1]+".rotationPP") ($viz+".outRotation");
+
+    setAttr ($par[0] + ".visibility") 0;
+    saveInitialState $par[1];
+
+    parent $par[0] $grp;
+        
+    return $par[1];
+}
+
+global proc proxyPaint_convert()
+{
+    string $viz = `optionMenuGrp -q -ann proxyPaint_cameraGrp`;
+    int $nodeVer = proxyPaint_getNodeVersion($viz);
+	if($nodeVer == 3) {
+	    proxyPaint_v3Convert($viz);
+	} else if($nodeVer == 2) {
+	    proxyPaint_v2Convert($viz);
+	} else {
+	    proxyPaint_v4Convert($viz);
+	}
+}
+
+global proc string[] proxyPaint_v4GenReplaceNames(string $names[])
+{
+    int $n = size($names);
+    string $result[];
+    int $c = 0;
+    int $isExample = 0;
+    int $i;
+    for($i=0; $i<$n;$i=$i+1) {
+        if($names[$i] == "<example>") {
+            $isExample = 1;
+        } else {
+            if($isExample == 1) {
+                $isExample = 0;
+            } else {
+                $result[$c] = $names[$i];
+                print("\n replace object "+$names[$i]);
+                $c = $c + 1;
+            }
+        }
+    }
+    return $result;
+}
+
+global proc proxyPaint_v4Convert(string $viz)
+{
+    string $exampName = proxyPaint_cvtSelectExampleName("proxyPaint_cvtExampleScroll");
+    int $exampInd = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtExampleScroll");
+/// list objects connected to example
+    string $targetNames[] = proxyPaint_v4GenReplaceNames(`proxyPaintTool -svx $exampInd -ltr $viz`);
+    int $numTargets = size($targetNames);
+    if($numTargets < 1) {
+        print("\n ERROR proxyViz "+ $viz + " example["+$exampInd+"] "+$exampName+" has zero object connected. Cannot proceed.");
+        return;
+    }
+    
+    string $addObjCmd;
+    string $ainstancer;
+    for($ainstancer in $targetNames) {
+        $addObjCmd = $addObjCmd + " -object " + $ainstancer;
+    }
+    
+    string $vizname = firstParentOf($viz);
+    
+    int $start = `intFieldGrp -q -value1 proxyPaint_frameRange`;
+    int $end = `intFieldGrp -q -value2 proxyPaint_frameRange`;
+    int $step = `intFieldGrp -q -value3 proxyPaint_frameRange`;
+    if($step < 1) $step = 1;
+    if(!`intFieldGrp -q -en proxyPaint_frameRange`)
+        $end = $start+2;
+    
+
+    print("\n convert example "+`text -q -l proxyPaint_cvtVizNameText`+".example["+$exampInd+"]");
+    
+    float $lodmax = `getAttr ($viz+".lodGateMax")`;
+    float $lodmin = `getAttr ($viz+".lodGateMin")`;
+    string $grp = `createNode -n ($vizname + "_xmp_" + $exampName + "_instLOD_"+$lodmax+"_to_"+$lodmin+"_") transform`;
+    string $pgrp = `createNode -n "particles" -p $grp transform`;
+    
+        int $iFrame = $start - 1;
+        currentTime $iFrame;
+        
+    proxyPaintTool -svx $exampInd -bpk $viz;
+    
+    string $dummy2 = `createNode transform`;
+    connectAttr -f ($viz+".outValue2") ($dummy2 + ".translateX");
+
+        for($iFrame = $start; $iFrame <= $end; $iFrame = $iFrame + $step) {
+            currentTime $iFrame;
+            proxyPaintTool -svx $exampInd -dpk $viz;
+        }
+
+        string $particle = proxyPaint_genV3Paticle($viz, $start, $end, $pgrp);
+        if($particle == "") {
+            print("\n WARNING proxy viz gen no particles");
+            return;
+        }
+        
+        proxyPaintTool -epk $viz;
+    delete $dummy2;
+        
+        print(" proxy viz replacing " + `particle -q -count $particle` + " " + $addObjCmd + "\n");
+        
+        string $replacer = `eval("particleInstancer -addObject " 
+            + $addObjCmd 
+            + " -cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail BoundingBox -rotationUnits Radians -rotationOrder XYZ -position worldPosition -scale scalePP -rotation rotationPP -objectIndex userScalar1PP "
+            + $particle)`;
+        parent $replacer $grp;
+    
+    currentTime $start;
+}
+
+global proc proxyPaint_v3Convert(string $viz)
+{
+    string $vizname = firstParentOf($viz);
+    int $numInstancer = `textScrollList -q -numberOfItems proxyPaint_targetList`;
+    setAttr ($viz+".nis") $numInstancer;
+    
+    string $instancers[] = `textScrollList -q -ai proxyPaint_targetList`;
+    string $addObjCmd;
+    string $ainstancer;
+    for($ainstancer in $instancers) {
+        $addObjCmd = $addObjCmd + " -object " + $ainstancer;
+    }
+    
+    int $start = `intFieldGrp -q -value1 proxyPaint_frameRange`;
+    int $end = `intFieldGrp -q -value2 proxyPaint_frameRange`;
+    int $step = `intFieldGrp -q -value3 proxyPaint_frameRange`;
+    if($step < 1) $step = 1;
+    if(!`intFieldGrp -q -en proxyPaint_frameRange`)
+        $end = $start+2;
+    
+    string $exampName = proxyPaint_cvtSelectExampleName("proxyPaint_cvtExampleScroll");
+    int $exampInd = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtExampleScroll");
+    print("\n convert example "+`text -q -l proxyPaint_cvtVizNameText`+".example["+$exampInd+"]");
+    
+    float $lodmax = `getAttr ($viz+".lodGateMax")`;
+    float $lodmin = `getAttr ($viz+".lodGateMin")`;
+    string $grp = `createNode -n ($vizname + "_xmp_" + $exampName + "_instLOD_"+$lodmax+"_to_"+$lodmin+"_") transform`;
+    string $pgrp = `createNode -n "particles" -p $grp transform`;
+    
+        int $iFrame = $start - 1;
+        currentTime $iFrame;
+        
+        proxyPaintTool -bpk $viz;
+        
+        for($iFrame = $start; $iFrame <= $end; $iFrame = $iFrame + $step) {
+            currentTime $iFrame;
+            proxyPaintTool -svx $exampInd -dpk $viz;
+        }
+
+        string $particle = proxyPaint_genV3Paticle($viz, $start, $end, $pgrp);
+        if($particle == "") {
+            print("\n WARNING proxy viz gen no particles");
+            return;
+        }
+        
+        proxyPaintTool -epk $viz;
+        
+        print(" proxy viz replacing " + `particle -q -count $particle` + " " + $addObjCmd + "\n");
+        
+        string $replacer = `eval("particleInstancer -addObject " 
+            + $addObjCmd 
+            + " -cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail BoundingBox -rotationUnits Radians -rotationOrder XYZ -position worldPosition -scale scalePP -rotation rotationPP -objectIndex userScalar1PP "
+            + $particle)`;
+        parent $replacer $grp;
+    
+    currentTime $start;
+}
+	
+global proc proxyPaint_v2Convert(string $viz)
+{
+	string $vizname = firstParentOf($viz);
+    int $numInstancer = `textScrollList -q -numberOfItems proxyPaint_targetList`;
+    setAttr ($viz+".nis") $numInstancer;
+    
+    string $instancers[] = `textScrollList -q -ai proxyPaint_targetList`;
+    
+    int $start = `intFieldGrp -q -value1 proxyPaint_frameRange`;
+    int $end = `intFieldGrp -q -value2 proxyPaint_frameRange`;
+    int $step = `intFieldGrp -q -value3 proxyPaint_frameRange`;
+    if($step < 1) $step = 1;
+    if(!`intFieldGrp -q -en proxyPaint_frameRange`)
+        $end = $start+2;
+    
+    int $exampInd = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtExampleScroll");
+    print("\n convert example "+`text -q -l proxyPaint_cvtVizNameText`+".example["+$exampInd+"]");
+    
+    float $lodmax = `getAttr ($viz+".lodGateMax")`;
+    float $lodmin = `getAttr ($viz+".lodGateMin")`;
+    string $grp = `createNode -n ($vizname + "_xmp_" + $exampInd + "_instLOD_"+$lodmax+"_to_"+$lodmin+"_") transform`;
+    string $pgrp = `createNode -n "particles" -p $grp transform`;
+    
+    int $iInstancer = 0;
+    for($iInstancer = 0; $iInstancer < $numInstancer; $iInstancer++) {
+        setAttr ($viz+".iis") $iInstancer;
+        
+        int $iFrame = $start - 1;
+        currentTime $iFrame;
+        
+        proxyPaintTool -bpk $viz;
+        
+        for($iFrame = $start; $iFrame <= $end; $iFrame = $iFrame + $step) {
+            currentTime $iFrame;
+            proxyPaintTool -svx $exampInd -dpk $viz;
+        }
+
+        string $particle = proxyPaint_genPaticle($viz, $start, $end, $pgrp);
+        
+        proxyPaintTool -epk $viz;
+        
+        if($particle == "") continue;
+        
+        string $aInstancer = $instancers[$iInstancer];
+        
+        print(" proxy viz replacing " + `particle -q -count $particle` + " " + $aInstancer + "\n");
+        
+        string $replacer = `particleInstancer -addObject -object $aInstancer -cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail BoundingBox -rotationUnits Radians -rotationOrder XYZ -position worldPosition -scale scalePP -rotation rotationPP $particle`;
+        parent $replacer $grp;
+    } 
+    
+    currentTime $start;
+}
+
+proc string proxyPaint_legacyGenPaticle(string $viz, int $start, int $end, string $grp)
+{
+    string $par[] = `particle -jbp 0 0 0 -nj 100 -jr 1 -c 1`;
+    setAttr ($par[1]+".isDynamic") 0;
+    setAttr ($par[1]+".startFrame") -999;
+    addAttr -ln "scalePP0"  -dt vectorArray $par[1];
+    addAttr -ln "scalePP"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP0"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP"  -dt vectorArray $par[1];
+    connectAttr ($par[1]+".position") ($viz+".outPosition"); 
+    connectAttr ($par[1]+".scalePP") ($viz+".outScale");
+    connectAttr ($par[1]+".rotationPP") ($viz+".outRotation");
+    
+    string $bakeName = `getAttr ($viz+".cachePath")`;
+    $bakeName = $bakeName + proxyPaint_datetimeAsString() + ".par";
+    
+    setAttr -type "string" ($viz + ".bakePath") $bakeName;
+
+    currentTime $end;
+    
+    int $ninst = `getAttr ($viz + ".ov")`;
+    $ninst = $ninst + 1;
+    
+    setAttr -type "string" ($viz + ".bakePath") "";
+    
+    currentTime $start;
+
+    print ("instancer count " + $ninst + "\n");
+    delete $par[0];
+    
+    $par = `particle -jbp 0 0 0 -nj $ninst -jr 1 -c 1`;
+    setAttr ($par[1]+".isDynamic") 0;
+    setAttr ($par[1]+".startFrame") -999;
+    addAttr -ln "scalePP0"  -dt vectorArray $par[1];
+    addAttr -ln "scalePP"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP0"  -dt vectorArray $par[1];
+    addAttr -ln "rotationPP"  -dt vectorArray $par[1];
+    
+    proxyPaint_bakeInParticle($bakeName, $par[1], $grp);
+    
+    setAttr ($par[0] + ".visibility") 0;
+
+    currentTime ($start + 1);
+    
+    saveInitialState $par[1];
+
+    parent $par[0] $grp;
+        
+    return $par[1];
+}
+
+global proc proxyPaint_clearL2Example()
+{
+    textScrollList -e -ra proxyPaint_cvtL2ExampleScroll;
+}
+
+global proc proxyPaint_addL2Example(string $name)
+{
+    textScrollList -e -append $name proxyPaint_cvtL2ExampleScroll;
+}
+
+global proc proxyPaint_clearNamedTarget()
+{
+    textScrollList -e -ra proxyPaint_targetList;
+}
+
+global proc proxyPaint_addNamedTarget(string $names[])
+{
+    string $at;
+    for($at in $names) {
+        textScrollList -e -append $at proxyPaint_targetList;
+    }
+}
+
+global proc proxyPaint_connectExampleReplacer(string $names[])
+{
+    string $xmp = `textScrollList -q -ann proxyPaint_cvtExampleScroll `;
+    print(" connect example "+$xmp);
+    if(`nodeType shrubVizShape` == "proxyExample") {
+        proxyPaint_connectL1ExampleReplacer($xmp, $names);
+    } 
+    if(`nodeType shrubVizShape` == "shrubViz") {
+        //proxyPaint_connectL2ExampleReplacer($xmp, $names);
+    }
+}
+ 
+global proc proxyPaint_connectL1ExampleReplacer(string $xmp, string $names[])
+{
+    string $conns[] = `listConnections -s on -d off -p on ($xmp+".instanceSpace")`;
+    int $i;
+    for($i=0;$i<size($conns);$i=$i+1) {
+        disconnectAttr $conns[$i] ($xmp+".instanceSpace["+$i+"]");
+    }
+    
+    for($i=0;$i<size($names);$i=$i+1) {
+        connectAttr -f ($names[$i]+".matrix") ($xmp+".instanceSpace["+$i+"]");
+        inheritTransform -p -off $names[$i];
+    }
+}
+
+global proc proxyPaint_addSelectedTarget()
+{
+    string $viz = `textScrollList -q -ann proxyPaint_VizScroll `;
+    int $nodeVer = proxyPaint_getNodeVersion($viz);
+    if($nodeVer >= 4) {
+        proxyPaint_v4AddSelectedTarget($viz);
+    } else {
+        proxyPaint_legacyAddSelectedTarget();
+    }
+}
+
+global proc proxyPaint_v4AddSelectedTarget(string $viz)
+{
+    proxyPaint_clearNamedTarget();
+    int $ixmp = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtExampleScroll");
+    int $il2xmp = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtL2ExampleScroll");
+    string $insts[] = `proxyPaintTool -svx $ixmp -l2v $il2xmp -cnr $viz`;
+    int $ni = size($insts);
+    print("proxyPaint connect "+$ni+" targets to replace");
+    proxyPaint_addNamedTarget($insts);
+
+}
+
+global proc proxyPaint_legacyAddSelectedTarget()
+{    
+    string $trans[] = `ls -sl -type transform`;
+    proxyPaint_addNamedTarget($trans);
+    proxyPaint_connectExampleReplacer($trans);
+}
+
+global proc proxyPaint_display(int $mode)
+{
+    string $sel[] = `ls -sl -type transform`;
+    string $nodes[] = `listRelatives -f -ad $sel`;
+    string $anode;
+    for($anode in $nodes) {
+        string $typ = `nodeType $anode`;
+        if($mode == 0) {
+            if($typ == "particle") {
+                string $trans = firstParentOf($anode);
+                setAttr ($trans + ".visibility") 0;
+            }
+            if($typ == "instancer") {
+                setAttr ($anode + ".levelOfDetail") 2;
+            }
+        }
+        else if($mode == 1) {
+            if($typ == "particle") {
+                string $trans = firstParentOf($anode);
+                setAttr ($trans + ".visibility") 1;
+            }
+            if($typ == "instancer") {
+                setAttr ($anode + ".levelOfDetail") 2;
+            }
+        }
+        else if($mode == 2) {
+            if($typ == "particle") {
+                string $trans = firstParentOf($anode);
+                setAttr ($trans + ".visibility") 0;
+            }
+            if($typ == "instancer") {
+                setAttr ($anode + ".levelOfDetail") 1;
+            }
+        }
+    }
+}
+
+global proc proxyPaint_checkLODControls()
+{
+    string $viz = `optionMenuGrp -q -ann proxyPaint_cameraGrp`;
+    print ("check lod "+$viz+"\n");
+    int $enable = `checkBox -q -v proxyPaint_viewDependentCheck`;
+    int $nodeVer = proxyPaint_getNodeVersion($viz);
+	
+    optionMenuGrp -e -en $enable proxyPaint_cameraGrp;
+    attrFieldSliderGrp -e -en $enable proxyPaint_lodMax;
+    attrFieldSliderGrp -e -en $enable proxyPaint_lodMin;
+    intFieldGrp -e -en $enable proxyPaint_frameRange;
+    
+    if($nodeVer == 1) {
+        setAttr ($viz + ".ecl") $enable;
+        textFieldButtonGrp -e -en $enable proxyPaint_blockerEdit;
+    }
+}
+
+global proc proxyPaint_cleanupPPC()
+{
+    string $appc; 
+    string $ppcs[] = `ls -type particleProxyCache`;
+    for($appc in $ppcs) {
+        print("delete particle cache node "+$appc+"\n");
+        delete $appc;
+    }
+    saveInitialState -all;   
+}
+
+global proc proxyPaint_doc()
+{
+    string $docpath = `pluginInfo -query -path configmaya.py` ;
+    string $docFile = `dirname( $docpath )` + "/documentation/Proxy_Paint_Manual.docx" ;
+    system("load " + $docFile );
+}
+
+global proc proxyPaint_realize()
+{
+    string $sel[] = `ls -sl -type transform`;
+    if(size($sel) < 2) {
+        print "select source object then shift-select group of locators to convert!";
+        return;
+    }
+    
+    string $src = $sel[0];
+    string $grp = $sel[1];
+    select -r $grp;
+    select -hi;
+    string $loc[] = `ls -sl -l -type locator`;
+    if(size($loc) < 1) {
+        print "no locator in the second group!";
+        return;
+    }
+    
+    string $tgts[], $t[];
+    string $aloc;
+    int $it = 0;
+    for($aloc in $loc) {
+        $t = `listRelatives -p $aloc`;
+        $tgts[$it] = $t[0];
+        $it++;
+    }
+    print("convert count: "+$it + "\n");
+    
+    string $atgt, $dst;
+    for($atgt in $tgts) {
+        $t = `duplicate -rr $src`;
+        $dst = $t[0];
+        parent $dst $atgt;
+        xform -a -ro 0 0 0 -t 0 0 0 -s 1 1 1 $dst;
+        parent $dst $grp;
+    }
+    print "locator to object convert is a success!";
+}
+
+proc string proxyPaint_getCurrentPerspCamera()
+{
+    pickWalk -d down;
+    string $allCam[] = `ls -sl -type camera`;
+    if(size($allCam) < 1)
+        return "";
+
+    string $aCam;
+    for($aCam in $allCam) {
+        if(`getAttr ($aCam +".orthographic")` == 0) {
+            return $aCam;
+        }
+    }
+
+    return "";
+}
+
+global proc proxyPaint_connectCameraToViz()
+{
+    string $viz = proxyPaint_getCurrentViz();
+    if($viz == "") {
+        print("\n must select a proxyViz and a perspective camera to connect"); 
+        return;
+    }
+    
+    string $cam = proxyPaint_getCurrentPerspCamera();
+    if($cam == "") {
+        print("\n must select a proxyViz and a perspective camera to connect"); 
+        return;
+    }
+    
+    print("connect "+$cam+" to "+$viz+"\n");
+    
+    int $nodeVer = proxyPaint_getNodeVersion($viz);
+    if($nodeVer == 1)
+        connectAttr -f ($cam + ".worldInverseMatrix") ($viz + ".cameraSpace");
+    else 
+        connectAttr -f ($cam + ".worldMatrix") ($viz + ".cameraSpace");
+    
+    connectAttr -f ($cam + ".horizontalFilmAperture") ($viz + ".horizontalFilmAperture");
+    connectAttr -f ($cam + ".verticalFilmAperture") ($viz + ".verticalFilmAperture");
+    connectAttr -f ($cam + ".focalLength") ($viz + ".focalLength");
+    connectAttr -f ($cam + ".overscan") ($viz + ".cos");
+}
+
+global proc proxyPaint_createBundle()
+{
+    proxyPaintTool -csb;
+}
+
+global proc proxyPaint_cvtSelectL2Example()
+{
+    proxyPaint_clearNamedTarget();
+    
+    string $viz = `textScrollList -q -ann proxyPaint_VizScroll `;
+    string $slxmp[] = `textScrollList -q -selectItem proxyPaint_cvtL2ExampleScroll`;
+    string $xmp = $slxmp[0];
+    select -r $xmp;
+    int $ind = proxyPaint_cvtSelectExampleInd("proxyPaint_cvtExampleScroll");
+    string $insts[] = `proxyPaintTool -svx $ind -ltr $viz`;
+    int $i;
+    int $count = size($insts);
+    string $aname;
+    int $active = 0;
+    string $l2insts[];
+    int $ninst = 0;
+    for($i=0; $i < $count; $i=$i+1) {
+        $aname = $insts[$i];
+        if($aname == $xmp) {
+            $active = 1;   
+        } else if($aname =="<example>") {
+            $active = 0; 
+        } else {
+            if($active == 1) {
+                $l2insts[$ninst] = $aname;
+                $ninst = $ninst + 1;
+            }
+        }
+    }
+    
+    if(size($l2insts) > 0) {
+        proxyPaint_addNamedTarget($l2insts);
+    }
+}
+

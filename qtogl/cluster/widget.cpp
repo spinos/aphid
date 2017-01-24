@@ -205,7 +205,6 @@ void GLWidget::clientDeselect(QMouseEvent *event)
 void GLWidget::clientMouseInput(QMouseEvent *event)
 {
 	m_roth->rotate(getIncidentRay() );
-	
 	update();
 }
 	

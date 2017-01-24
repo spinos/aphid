@@ -381,22 +381,14 @@ void DrawForest::drawViewFrustum()
 void DrawForest::drawBrush()
 {
 	glPushAttrib(GL_CURRENT_BIT);
+	glDepthFunc(GL_ALWAYS);
 	
     const float & radius = selectionRadius();
     const Vector3F & position = selectionCenter();
     const Vector3F & direction = selectionNormal();
-    
-	glPushMatrix();
-    glTranslatef(position.x, position.y, position.z);
-    glTranslatef(direction.x, direction.y, direction.z);
-    
+    m_useMat.setTranslation(position);
     m_useMat.setFrontOrientation(direction);
 	m_useMat.scaleBy(radius);
-    m_useMat.glMatrix(m_transbuf);
-    
-    draw3Circles(m_transbuf);
-	
-    glPopMatrix();
 	
 /// view-aligned circle
 	glPushMatrix();
@@ -407,14 +399,14 @@ void DrawForest::drawBrush()
 	rmat *= radius;
 	
 	vmat.setRotation(rmat);
-	vmat.setTranslation(position + direction);
+	vmat.setTranslation(position);
 	
     vmat.glMatrix(m_transbuf);
 	
-	drawZRing(m_transbuf);
+	drawZCircle(m_transbuf);
 	
 	glPopMatrix();
-	
+	glDepthFunc(GL_LEQUAL);
     glPopAttrib();
 }
 
@@ -455,19 +447,20 @@ void DrawForest::setWireColor(const float & r, const float & g, const float & b)
 void DrawForest::enableDrawing()
 {
     std::cout<<"\n DrawForest enable draw";
-    std::cout.flush();
     m_enabled = true;
 }
 
 void DrawForest::disableDrawing()
 {
      std::cout<<"\n DrawForest disable draw";
-     std::cout.flush();
      m_enabled = false;
 }
 
 void DrawForest::drawManipulator()
 {
+    if(manipulateMode() == manNone) {
+        return;   
+    }
 	Matrix33F rmat = cameraSpaceR()->rotation();
 	rmat.orthoNormalize();
 	const Vector3F & pos = selectionCenter();
@@ -476,6 +469,32 @@ void DrawForest::drawManipulator()
 	mat.setRotation(rmat);
 	m_rotHand->setRadius(relativeSizeAtDepth(pos, .25f) );
 	m_rotHand->draw(&mat);
+}
+
+void DrawForest::startRotate(const Ray & r)
+{
+    disableDrawing();
+    m_rotHand->begin(&r);
+    enableDrawing();
+}
+
+void DrawForest::processRotate(const Ray & r)
+{
+    disableDrawing();
+    m_rotHand->rotate(&r);
+    rotatePlant();
+    enableDrawing();
+}
+
+void DrawForest::finishRotate()
+{
+    m_rotHand->end();
+}
+
+void DrawForest::getDeltaRotation(Matrix33F & mat,
+					const float & weight) const
+{
+    m_rotHand->getDetlaRotation(mat, weight);
 }
 
 }

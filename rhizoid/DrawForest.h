@@ -35,6 +35,11 @@ public:
     DrawForest();
     virtual ~DrawForest();
     
+/// manipulate 
+    void startRotate(const Ray & r);
+    void processRotate(const Ray & r);
+    void finishRotate();
+    
 protected:
 	void setScaleMuliplier(float x, float y, float z);
     void drawGround();
@@ -55,6 +60,8 @@ protected:
     void disableDrawing();
 	void drawManipulator();
     
+	virtual void getDeltaRotation(Matrix33F & mat,
+					const float & weight = 1.f) const;
 private:
     void drawFace(const int & geoId, const int & triId);
 	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);

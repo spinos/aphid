@@ -162,6 +162,9 @@ private:
 	bool rejectSmallDragDistance(int d = 2) const;
 	void clearByType();
 	void clearBySelections();
+	void setManipulator(ModifyForest::ManipulateMode x);
+	void startRotate();
+	void processRotate();
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

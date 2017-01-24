@@ -33,9 +33,10 @@ void proxyPaintContext::toolOnSetup ( MEvent & )
 MStatus proxyPaintContext::doPress( MEvent & event )
 {
 	m_listAdjustment = MGlobal::kAddToList;
-	if ( event.isModifierControl() )
+	if ( event.isModifierControl() ) {
 		m_listAdjustment = MGlobal::kRemoveFromList;
-
+	}
+	
 	event.getPosition( start_x, start_y );
 	
 	view = M3dView::active3dView();
@@ -53,12 +54,27 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 		clipFar = 1e7f;
 	}
     
-    if(event.isModifierShift()) m_currentOpt = opResizeBrush;
-    else m_currentOpt = mOpt;
+    if(event.isModifierShift()) {
+        m_currentOpt = opResizeBrush;
+    } else {
+        m_currentOpt = mOpt;
+    }
+    
+    switch (m_currentOpt) {
+        case opSelectGround:
+            startSelectGround();
+            break;
+        case opSelect:
+        case opSelectByType:
+            startProcessSelect();
+            break;
+        case opBundleRotate:
+            startRotate();
+            break;
+        default:
+            ;
+    }
 
-	if(m_currentOpt == opSelect || m_currentOpt == opSelectByType) startProcessSelect();
-	if(m_currentOpt == opSelectGround) startSelectGround();
-	
 	return MS::kSuccess;		
 }
 
@@ -67,8 +83,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 {
 	event.getPosition( last_x, last_y );
 
-	switch (m_currentOpt)
-	{
+	switch (m_currentOpt) {
 		case opCreate :
 			grow();
 			break;
@@ -118,7 +133,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
             resize(true);
             break;
 		case opBundleRotate :
-            /// todo
+            processRotate();
             break;
 		default:
 			;
@@ -137,10 +152,20 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 	
 	if(!PtrViz) return MS::kSuccess;
 	
-	if(m_currentOpt==opSelect || m_currentOpt==opSelectByType) 
-		PtrViz->finishPlantSelection();
-	if(m_currentOpt==opSelectGround)
-	    PtrViz->finishGroundSelection();
+	switch (m_currentOpt) {
+        case opSelectGround :
+            PtrViz->finishGroundSelection();
+            break;
+		case opSelect :
+		case opSelectByType :
+			PtrViz->finishPlantSelection();
+			break;
+		case opBundleRotate :
+            PtrViz->finishRotate();
+            break;
+		default:
+		    ;
+	}
 	
 	return MS::kSuccess;		
 }
@@ -215,6 +240,8 @@ void proxyPaintContext::setOperation(short val)
 		return;
 	}
 	
+	ModifyForest::ManipulateMode khand = ModifyForest::manNone;
+	
     std::string opstr("unknown");
 	mOpt = opUnknown;
 	switch (val)
@@ -286,11 +313,13 @@ void proxyPaintContext::setOperation(short val)
 		case opBundleRotate:
 			opstr="bundle rotate";
             mOpt = opBundleRotate;
+            khand = ModifyForest::manRotate;
 			break;
 		default:
 			;
 	}
 	AHelper::Info<std::string>("proxyPaintTool set operation mode", opstr);
+	setManipulator(khand);
     MToolsInfo::setDirtyFlag(*this);
 }
 
@@ -890,5 +919,40 @@ bool proxyPaintContext::rejectSmallDragDistance(int d) const
 {
 	return (Absolute<int>(last_x - start_x) 
         + Absolute<int>(last_y - start_y)) < d;
+}
+
+void proxyPaintContext::setManipulator(ModifyForest::ManipulateMode x)
+{
+    if(!PtrViz) return;
+	PtrViz->setManipulatMode(x);
+}
+
+void proxyPaintContext::startRotate()
+{
+    if(!PtrViz) {
+        return;
+    }
+   
+	MPoint fromNear, fromFar;
+	view.viewToWorld ( start_x, start_y, fromNear, fromFar );
+	Vector3F a(fromNear.x, fromNear.y, fromNear.z);
+	Vector3F b(fromFar.x, fromFar.y, fromFar.z);
+	Ray r(a, b);
+	PtrViz->startRotate(r);
+}
+
+void proxyPaintContext::processRotate()
+{
+    if(!PtrViz) {
+        return;
+    }
+
+    MPoint fromNear, fromFar;
+	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+	Vector3F a(fromNear.x, fromNear.y, fromNear.z);
+	Vector3F b(fromFar.x, fromFar.y, fromFar.z);
+	Ray r(a, b);
+	PtrViz->processRotate(r);
+    
 }
 //:~

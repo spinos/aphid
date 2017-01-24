@@ -1,0 +1,73 @@
+global proc proxyPaintValues(string $toolName) 
+{
+	string $parent = 
+		(`toolPropertyWindow -q -location` + "|proxyPaint|proxyPaintTabs|proxyPaintTab");
+	setParent $parent;
+
+	string $icon = "proxyPaintTool.xpm";
+	string $help = "";
+	toolPropertySetCommon $toolName $icon $help;
+
+	frameLayout -e -en true -cl false proxyPaintFrame;
+	proxyPaintOptionValues($toolName);
+
+	toolPropertySelect proxyPaint;
+	proxyPaint_listAllVizToPaint();
+}
+
+
+global proc proxyPaintOptionValues(string $toolName)
+{
+	int $aln = eval("proxyPaintToolContext -q -anl " + $toolName);
+ 	checkBox -e -value $aln proxyPaintSlider_ALN;
+ 	
+	if(`text -q -ann proxyPaint_vizNameText` == "1") {
+		int $cus = eval("proxyPaintToolContext -q -cus " + $toolName);
+		checkBox -e -value $cus proxyPaintSlider_cullCheck;
+	}
+	
+	$aln = eval("proxyPaintToolContext -q -nov " + $toolName);
+ 	intSliderGrp -e -value $aln proxyPaintSlider_noise3dOctave;
+ 	
+ 	int $mct = eval("proxyPaintToolContext -q -mct " + $toolName);
+ 	intSliderGrp -e -value $mct proxyPaintSlider_multiCreate;
+ 	
+ 	int $igc = eval("proxyPaintToolContext -q -igc " + $toolName);
+ 	intSliderGrp -e -value $igc proxyPaintSlider_instanceGroupCount;
+	
+	float $fval;
+	$fval = eval("proxyPaintToolContext -q -brd " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_BRad;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -bwt " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_BWei;
+	
+	$fval = eval("proxyPaintToolContext -q -smn " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_ScaleMin;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -smx " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_ScaleMax;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -rno " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_rotateNoise;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -mng " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaint_minMarginSlider;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -mxg " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaint_maxMarginSlider;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -nlv " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_noise3dLevel;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -nfr " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_noise3dFrequency;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -nlc " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_noise3dLacunarity;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -ngn " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_noise3dGain;
+ 	
+}
+

@@ -158,6 +158,7 @@ void RotationHandle::rotate(const Ray * r)
 
 void RotationHandle::draw(const Matrix44F * camspace) const
 {
+    glDepthFunc(GL_ALWAYS);
 	float m[16];
 
 	Matrix33F rot = m_space->rotation();
@@ -217,13 +218,14 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	m[15] = 1.f;
 	
 	drawZRing(m);
-	
+	glDepthFunc(GL_LEQUAL);
 }
 
 void RotationHandle::getDetlaRotation(Matrix33F & mat, const float & weight) const
 {
 	Quaternion q(m_rotAngle * weight, m_rotAxis);
 	mat.set(q);
+	mat.orthoNormalize();
 }
 
 }
