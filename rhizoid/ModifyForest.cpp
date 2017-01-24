@@ -668,20 +668,18 @@ void ModifyForest::rotatePlant(const Ray & ray,
 
 void ModifyForest::rotatePlant()
 {
-    Matrix33F rot, invrot, drot;
+    Matrix33F rot, drot;
     Vector3F pos, vof;
     float lof;
     PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
-		// float wei = arr->value()->m_weight;
-		// if(wei > 1e-3f) { 
+		 float wei = arr->value()->m_weight;
+		 if(wei > 1e-3f) { 
 			PlantData * plantd = arr->value()->m_reference->index;
 			
 			Matrix44F * mat = plantd->t1;
 			rot = mat->rotation();
-			invrot = rot;
-			invrot.inverse();
 			
 			getDeltaRotation(drot);
 			rot *= drot;
@@ -691,14 +689,13 @@ void ModifyForest::rotatePlant()
 			vof = plantd->t2->m_offset;
 			lof = vof.length();
 			if(lof > 1e-2f) {
-			pos = mat->getTranslation() - vof;
-			vof = drot.transform(vof);
-			vof.normalize();
-			vof *= lof;
-			
-			mat->setTranslation(pos + vof);
+				pos = mat->getTranslation() - vof;
+				vof = drot.transform(vof);
+				plantd->t2->m_offset = vof;
+				
+				mat->setTranslation(pos + vof);
             }
-		// }
+		}
 		arr->next();
 	}
 }
@@ -811,11 +808,16 @@ bool ModifyForest::calculateSelecedWeight(const Ray & ray)
 		}
 	}
 	
+	calculateSelectedWeight();
+	return true;
+}
+	
+void ModifyForest::calculateSelectedWeight()
+{
 	IntersectionContext * ctx = intersection();
 	
 	selection()->setCenter(ctx->m_hitP, ctx->m_hitN);
 	selection()->calculateWeight();
-    return true;
 }
 
 float ModifyForest::getNoise() const

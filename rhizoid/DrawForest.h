@@ -36,6 +36,7 @@ public:
     virtual ~DrawForest();
     
 /// manipulate 
+	void updateManipulateSpace(GrowOption & option);
     void startRotate(const Ray & r);
     void processRotate(const Ray & r);
     void finishRotate();

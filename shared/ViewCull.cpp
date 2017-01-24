@@ -257,7 +257,7 @@ float BaseView::relativeSizeAtDepth(const Vector3F & p,
 				const float & w) const
 {
 	if(!isPerspective() ) {
-		return frustum().X(0).distanceTo(frustum().X(1) ) * w; 
+		return frustum().X(0).distanceTo(frustum().X(1) ) * .5f * w; 
 	}
 	
 	const float d = cameraDepth(p);

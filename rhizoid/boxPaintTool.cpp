@@ -81,6 +81,10 @@ MStatus proxyPaintContext::doPress( MEvent & event )
 
 MStatus proxyPaintContext::doDrag( MEvent & event )
 {
+	if(!PtrViz) {
+		return MS::kSuccess;
+	}
+	
 	event.getPosition( last_x, last_y );
 
 	switch (m_currentOpt) {
@@ -122,6 +126,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 			break;
         case opResizeBrush :
             scaleBrush();
+			PtrViz->updateManipulateSpace(m_growOpt);
             break;
 		case opRaise :
             raiseOffset();
@@ -159,6 +164,8 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 		case opSelect :
 		case opSelectByType :
 			PtrViz->finishPlantSelection();
+		case opResizeBrush :
+			PtrViz->updateManipulateSpace(m_growOpt);
 			break;
 		case opBundleRotate :
             PtrViz->finishRotate();

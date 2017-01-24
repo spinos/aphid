@@ -463,18 +463,32 @@ void DrawForest::drawManipulator()
     }
 	Matrix33F rmat = cameraSpaceR()->rotation();
 	rmat.orthoNormalize();
-	const Vector3F & pos = selectionCenter();
-	m_rotMat.setTranslation(pos);
 	Matrix44F mat;
 	mat.setRotation(rmat);
-	m_rotHand->setRadius(relativeSizeAtDepth(pos, .25f) );
+	const Vector3F & pos = selectionCenter();
+	m_rotHand->setRadius(relativeSizeAtDepth(pos, .39f) );
 	m_rotHand->draw(&mat);
+}
+
+void DrawForest::updateManipulateSpace(GrowOption & option)
+{
+	const Vector3F & pos = selectionCenter();
+	m_rotMat.setTranslation(pos);
+	Matrix33F rot;
+	if(option.m_alongNormal) {
+		Vector3F u = selectionNormal();
+		Vector3F f = u.perpendicular();
+		Vector3F s = u.cross(f);
+		rot.fill(s, u, f);
+	}
+	m_rotMat.setRotation(rot);
 }
 
 void DrawForest::startRotate(const Ray & r)
 {
     disableDrawing();
     m_rotHand->begin(&r);
+	calculateSelectedWeight();
     enableDrawing();
 }
 
