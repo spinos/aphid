@@ -152,6 +152,8 @@ void RotationHandle::rotate(const Ray * r)
 	m_space->setRotation(srot);
 	
 	m_lastV = curV;
+	m_rotAxis = axis;
+	m_rotAngle = ang;
 }
 
 void RotationHandle::draw(const Matrix44F * camspace) const
@@ -216,6 +218,12 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	
 	drawZRing(m);
 	
+}
+
+void RotationHandle::getDetlaRotation(Matrix33F & mat, const float & weight) const
+{
+	Quaternion q(m_rotAngle * weight, m_rotAxis);
+	mat.set(q);
 }
 
 }

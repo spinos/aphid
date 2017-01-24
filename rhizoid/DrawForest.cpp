@@ -9,11 +9,11 @@
 
 #include "DrawForest.h"
 #include <gl_heads.h>
-#include <CircleCurve.h>
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
 #include <ForestCell.h>
 #include <ogl/GlslInstancer.h>
+#include <ogl/RotationHandle.h>
 
 namespace aphid {
 
@@ -21,10 +21,13 @@ DrawForest::DrawForest() : m_showVoxLodThresold(1.f),
 m_enabled(true)
 {
 	m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
+	m_rotHand = new RotationHandle(&m_rotMat);
 }
 
 DrawForest::~DrawForest() 
-{}
+{
+	delete m_rotHand;
+}
 
 void DrawForest::drawGround() 
 {
@@ -399,20 +402,11 @@ void DrawForest::drawBrush()
 	glPushMatrix();
 	
 	Matrix44F vmat; 
-	Vector3F s, u, f;
-	s = cameraSpaceR()->getSide();
-	s.normalize();
-	s *= radius;
+	Matrix33F rmat = cameraSpaceR()->rotation();
+	rmat.orthoNormalize();
+	rmat *= radius;
 	
-	u = cameraSpaceR()->getUp();
-	u.normalize();
-	u *= radius;
-	
-	f = cameraSpaceR()->getFront();
-	f.normalize();
-	f *= radius;
-	
-	vmat.setOrientations(s, u, f);
+	vmat.setRotation(rmat);
 	vmat.setTranslation(position + direction);
 	
     vmat.glMatrix(m_transbuf);
@@ -470,6 +464,18 @@ void DrawForest::disableDrawing()
      std::cout<<"\n DrawForest disable draw";
      std::cout.flush();
      m_enabled = false;
+}
+
+void DrawForest::drawManipulator()
+{
+	Matrix33F rmat = cameraSpaceR()->rotation();
+	rmat.orthoNormalize();
+	const Vector3F & pos = selectionCenter();
+	m_rotMat.setTranslation(pos);
+	Matrix44F mat;
+	mat.setRotation(rmat);
+	m_rotHand->setRadius(relativeSizeAtDepth(pos, .25f) );
+	m_rotHand->draw(&mat);
 }
 
 }

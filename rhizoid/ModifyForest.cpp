@@ -19,6 +19,7 @@ namespace aphid {
 
 ModifyForest::ModifyForest()
 { 
+	m_manipulateMode = manNone;
 	m_bary = new BarycentricCoordinate;
 	m_pnoise = new PseudoNoise;
 	m_seed = rand() % 999999; 
@@ -932,5 +933,9 @@ void ModifyForest::raiseOffsetAt(const Ray & ray,
 		arr->next();
 	}
 }
+
+void ModifyForest::getDeltaRotation(Matrix33F & mat,
+					const float & weight) const
+{ mat.setIdentity(); }
 
 }

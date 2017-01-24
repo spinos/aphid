@@ -117,6 +117,9 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 		case opBundleResize :
             resize(true);
             break;
+		case opBundleRotate :
+            /// todo
+            break;
 		default:
 			;
 	}
@@ -154,63 +157,61 @@ void proxyPaintContext::getClassName( MString & name ) const
 
 void proxyPaintContext::setOperation(short val)
 {
-	if(val == opClearOffset) {
-		clearOffset();
-		return;
+	bool toReturn = false;
+	switch (val) {
+		case opClearOffset:
+			clearOffset();
+			toReturn = true;
+		break;
+		case opRandMove:
+			moveRandomly();
+			toReturn = true;
+		break;
+		case opRandRotate:
+			rotateRandomly();
+			toReturn = true;
+		break;
+		case opRandResize:
+			resizeSelectedRandomly();
+			toReturn = true;
+		break;
+		case opInjectTransform:
+			injectSelectedTransform();
+			toReturn = true;
+		break;
+		case opDiscardFaceSelection:
+			discardFaceSelection();
+			toReturn = true;
+		break;
+		case opDiscardPlantSelection:
+			discardPlantSelection();
+			toReturn = true;
+		break;
+		case opClean:
+			cleanup();
+			toReturn = true;
+		break;
+		case opFlood:
+			flood();
+			toReturn = true;
+		break;
+		case opExtract:
+			extractSelected();
+			toReturn = true;
+		break;
+		case opCleanByType:
+			clearByType();
+			toReturn = true;
+		break;
+		case opErect:
+			erect();
+			toReturn = true;
+		break;
+		default:
+		;
 	}
 	
-	if(val == opRandMove) {
-		moveRandomly();
-		return;
-	}
-	
-	if(val == opRandRotate) {
-		rotateRandomly();
-		return;
-	}
-	
-	if(val == opRandResize) {
-		resizeSelectedRandomly();
-		return;
-	}
-	
-    if(val == opInjectTransform) {
-		injectSelectedTransform();
-		return;
-	}
-    
-    if(val == opDiscardFaceSelection) {
-		discardFaceSelection();
-		return;
-	}
-    
-    if(val == opDiscardPlantSelection) {
-		discardPlantSelection();
-		return;
-	}
-    
-	if(val == opClean) {
-		cleanup();
-		return;
-	}
-	
-	if(val==opFlood) {
-		flood();
-		return;
-	}
-	
-	if(val ==opExtract) {
-		extractSelected();
-		return;
-	}
-	
-	if(val == opCleanByType) {
-		clearByType();
-		return;
-	}
-	
-	if(val == opErect) {
-		erect();
+	if(toReturn) {
 		return;
 	}
 	
@@ -281,6 +282,10 @@ void proxyPaintContext::setOperation(short val)
 		case opBundleResize:
 			opstr="bundle resize";
             mOpt = opBundleResize;
+			break;
+		case opBundleRotate:
+			opstr="bundle rotate";
+            mOpt = opBundleRotate;
 			break;
 		default:
 			;

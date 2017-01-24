@@ -208,6 +208,9 @@ target_link_libraries (gpdeform ${F2C_LIBRARY})
 
 target_link_libraries (gpdeform ${Boost_DATE_TIME_LIBRARY})
 
+## https://cmake.org/Wiki/CMake:Bundles_And_Frameworks
+set(CMAKE_MACOSX_BUNDLE ON)
+
 add_subdirectory(rott)
 add_subdirectory(naca4)
 add_subdirectory(hermite)

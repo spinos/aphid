@@ -20,11 +20,13 @@ class RotationHandle : public DrawCircle {
 
 	Matrix44F * m_space;
 	Matrix44F m_invSpace;
+	Vector3F m_rotAxis;
 	Vector3F m_center;
 	Vector3F m_lastV;
 	Vector3F m_localV;
 	float m_radius;
 	float m_speed;
+	float m_rotAngle;
 	bool m_active;
 	
 	enum SnapAxis {
@@ -47,6 +49,8 @@ public:
 	void end();
 	void rotate(const Ray * r);
 	void draw(const Matrix44F * camspace) const;
+	
+	void getDetlaRotation(Matrix33F & mat, const float & weight = 1.f) const;
 	
 };
 

@@ -45,6 +45,7 @@ class proxyPaintContext : public MPxContext
 		opRaise = 17,
 		opDepress = 18,
 		opBundleResize = 19,
+		opBundleRotate = 20,
 		opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
