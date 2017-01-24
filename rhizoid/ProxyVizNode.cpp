@@ -300,10 +300,10 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		drawViewFrustum();
     }
 	
-	drawBrush(view);
-	drawManipulator();
 	drawActivePlants();
 	drawGround();
+	drawBrush(view);
+	drawManipulator();
 	glPopMatrix();
 	view.endGL();
 	//std::cout<<" viz node draw end";
@@ -1057,6 +1057,9 @@ void ProxyViz::updateDrawSize(ExampVox * dst, const MObject & node)
 	dst->setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat() );
 		
 }
+
+bool ProxyViz::drawLast () const
+{ return true; }
 
 }
 //:~

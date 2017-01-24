@@ -34,20 +34,7 @@ void DrawCircle::draw3Circles(const float * mat) const
 	glPushMatrix();
     glMultMatrixf(mat);
 	
-	glColor3f(0,0,1);
-	glBegin(GL_LINES);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0, 0, 1);
-	
-	glColor3f(0,1,0);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0, 1, 0);
-	
 	glColor3f(1,0,0);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(1, 0, 0);
-    glEnd();
-	
 /// x
 	drawCircle();
 	
@@ -83,7 +70,7 @@ void DrawCircle::drawZRing(const float * mat) const
 	glRotatef(90, 0, 1, 0);
 	drawCircle();
 	
-	glScalef(1.1, 1.1, 1.1);
+	glScalef(1.05f, 1.05f, 1.05f);
 	drawCircle();
 	
 	glPopMatrix();
@@ -143,7 +130,7 @@ void DrawCircle::drawXRing() const
     
 	drawCircle();
 	
-	glScalef(1.1, 1.1, 1.1);
+	glScalef(1.05f, 1.05f, 1.05f);
 	drawCircle();
 	
 	glPopMatrix();
@@ -156,7 +143,7 @@ void DrawCircle::drawYRing() const
 	
 	drawCircle();
 	
-	glScalef(1.1, 1.1, 1.1);
+	glScalef(1.05f, 1.05f, 1.05f);
 	drawCircle();
 	
 	glPopMatrix();
@@ -169,7 +156,7 @@ void DrawCircle::drawZRing() const
 	
 	drawCircle();
 	
-	glScalef(1.1, 1.1, 1.1);
+	glScalef(1.05f, 1.05f, 1.05f);
 	drawCircle();
 	
 	glPopMatrix();

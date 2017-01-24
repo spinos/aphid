@@ -158,8 +158,7 @@ void RotationHandle::rotate(const Ray * r)
 
 void RotationHandle::draw(const Matrix44F * camspace) const
 {
-    glDepthFunc(GL_ALWAYS);
-	float m[16];
+    float m[16];
 
 	Matrix33F rot = m_space->rotation();
 	rot.orthoNormalize();
@@ -170,13 +169,34 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	m[12] = tv.x;
 	m[13] = tv.y;
 	m[14] = tv.z;
-		
+	
+	//glDisable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+	//glDepthFunc(GL_GREATER);
+	//glEnable(GL_DEPTH_TEST);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glPushMatrix();
+	glMultMatrixf(m);
+	glScalef(.99f, .99f, .99f);
+    
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	drawAGlyph();
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glPopMatrix();
+	
+	glDepthFunc(GL_LEQUAL);
+	//glEnable(GL_DEPTH_TEST);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	
+	
 	draw3Circles(m);
 	
-	if(!m_active) {
-		return;
-	}
+	if(m_active) {
 	
+	glDepthFunc(GL_ALWAYS);
 	glPushMatrix();
     glMultMatrixf(m);
 	
@@ -186,6 +206,7 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	glVertex3fv((const float *)&m_localV);
 	glEnd();
 	
+	glDepthFunc(GL_LEQUAL);
 	glColor3f(1.f, 1.f, 0.f);
 	
 	switch (m_snap) {
@@ -203,22 +224,26 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	}
 	
 	glPopMatrix();
-	
-	if(m_snap != saNone) {
-		return;
 	}
 	
 	rot = camspace->rotation();
 	rot.orthoNormalize();
 	rot *= m_radius;
 	rot.glMatrix(m);
-	m[12] = m_center.x;
-	m[13] = m_center.y;
-	m[14] = m_center.z;
-	m[15] = 1.f;
+	m[12] = tv.x;
+	m[13] = tv.y;
+	m[14] = tv.z;
 	
-	drawZRing(m);
-	glDepthFunc(GL_LEQUAL);
+	glColor3f(.1f, .1f, .1f);
+	drawZCircle(m);
+	
+	if(m_active) {
+		if(m_snap == saNone) {
+			glColor3f(1.f, 1.f, 0.f);
+			drawZRing(m);
+		}
+	}
+	
 }
 
 void RotationHandle::getDetlaRotation(Matrix33F & mat, const float & weight) const

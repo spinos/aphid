@@ -30,6 +30,9 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	getDrawer()->m_surfaceProfile.apply();
+	testDops();
+
 	getDrawer()->m_markerProfile.apply();
 
 	//getDrawer()->setColor(0.f, .34f, .45f);
@@ -46,8 +49,6 @@ void GLWidget::clientDraw()
 
 	m_roth->draw(&meye);
 	
-	getDrawer()->m_surfaceProfile.apply();
-	testDops();
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)

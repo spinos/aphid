@@ -54,7 +54,7 @@ public:
 	
 	static  void *          creator();
 	static  MStatus         initialize();
-
+	virtual bool 	drawLast () const;
 	static  MObject         abboxminx;
 	static  MObject         abboxminy;
 	static  MObject         abboxminz;

@@ -13,10 +13,11 @@
 #include <math/Matrix44F.h>
 #include <math/Ray.h>
 #include "DrawCircle.h"
+#include "DrawGlyph.h"
 
 namespace aphid {
 
-class RotationHandle : public DrawCircle {
+class RotationHandle : public DrawCircle, public DrawGlyph {
 
 	Matrix44F * m_space;
 	Matrix44F m_invSpace;
