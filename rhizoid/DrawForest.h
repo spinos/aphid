@@ -17,13 +17,15 @@ namespace aphid {
 
 class ExampVox;
 class ForestCell;
-class CircleCurve;
+class RotationHandle;
 
 class DrawForest : public ModifyForest, public ViewObscureCull, 
 public DrawBox, public DrawCircle, public DrawInstance
 {
 	
     Matrix44F m_useMat;
+	Matrix44F m_rotMat;
+	RotationHandle * m_rotHand;
     float m_wireColor[3];
 	float m_transbuf[16];
     float m_showVoxLodThresold;
@@ -51,6 +53,7 @@ protected:
 	void setWireColor(const float & r, const float & g, const float & b);
     void enableDrawing();
     void disableDrawing();
+	void drawManipulator();
     
 private:
     void drawFace(const int & geoId, const int & triId);

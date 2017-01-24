@@ -94,8 +94,9 @@ void BaseView::zoom(int dz, int portWidth)
 	const float fra = (float)dz/(float)portWidth * 7.f;
 	
 	eye += front * dist * -fra;
-	if(fra > 0.f && dist < 10.f)
+	if(fra > 0.f && dist < 10.f) {
 		m_centerOfInterest += front * dist * -fra * 0.1f;
+	}
 	
 	m_space.setTranslation(eye);
 	m_invSpace = m_space;
@@ -249,6 +250,24 @@ void BaseView::updateInvSpace()
 void BaseView::updateFrustum()
 { setFrustum(.864f, .63f, 35.f, -1.f, m_farClip); }
 
+float BaseView::cameraDepth(const Vector3F & p) const
+{ return cameraInvSpace().transform(p).z; }
+
+float BaseView::relativeSizeAtDepth(const Vector3F & p, 
+				const float & w) const
+{
+	if(!isPerspective() ) {
+		return frustum().X(0).distanceTo(frustum().X(1) ) * w; 
+	}
+	
+	const float d = cameraDepth(p);
+	if(d > -1e-2f) {
+		return 1.f;
+	}
+	
+	return d / farClipPlane() * hfov() * (frustum().X(4).distanceTo(frustum().X(5) ) ) * w;
+}
+
 ViewCull::ViewCull() : m_enabled(false), m_portAspectRatio(1.f) {}
 ViewCull::~ViewCull() {}
 	
@@ -306,9 +325,6 @@ bool ViewCull::cullByLod(const float & localZ, const float & radius,
 	return (details < lowLod || details >= highLod);
 }
 
-float ViewCull::cameraDepth(const Vector3F & p) const
-{ return cameraInvSpace().transform(p).z; }
-
 void ViewCull::getFarClipDepth(float & clip, const BoundingBox & b) const
 {
     int i = 0;
@@ -347,7 +363,7 @@ void ViewCull::setFrustum(const float & horizontalApeture,
 	BaseView::setFrustum(horizontalApeture, verticalApeture, 
 					focalLength, clipNear, clipFar);
 /// 1 / 30 of port width
-	m_detailWidth = -clipFar * hfov() * .068f;
+	m_detailWidth = hfov() * (frustum().X(4).distanceTo(frustum().X(5) ) ) * .067f;
 }
 
 void ViewCull::setOrthoFrustum(const float & orthoWidth,
@@ -357,7 +373,7 @@ void ViewCull::setOrthoFrustum(const float & orthoWidth,
 {
 	BaseView::setOrthoFrustum(orthoWidth, orthoHeight,
 					clipNear, clipFar);
-	m_detailWidth = orthoWidth * .068f;
+	m_detailWidth = orthoWidth * .067f;
 }
 
 }

@@ -283,6 +283,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
     }
 	
 	drawBrush(view);
+	drawManipulator();
 	drawActivePlants();
 	drawGround();
 	glPopMatrix();

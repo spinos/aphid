@@ -107,6 +107,17 @@ protected:
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
 	void raiseOffsetAt(const Ray & ray, GrowOption & option);
+	
+	virtual void getDeltaRotation(Matrix33F & mat,
+					const float & weight = 1.f) const;
+	
+	enum ManipulateMode {
+		manNone = 0,
+		manRotate = 1
+	};
+	
+private:
+	ManipulateMode m_manipulateMode;
 					
 private:
 	void clearPlant(Plant * pl, const sdb::Coord2 & k);

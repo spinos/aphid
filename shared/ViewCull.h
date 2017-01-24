@@ -45,6 +45,9 @@ public:
 	const RectangleI & rect() const;
 	const RectangleI & subRect() const;
 	const int numPixels() const;
+	float cameraDepth(const Vector3F & p) const;
+	float relativeSizeAtDepth(const Vector3F & p, 
+				const float & w) const;
 	
 protected:
 	void setRect(const int & x, const int & y);
@@ -54,7 +57,7 @@ protected:
 	void setFarClip(const float & x);
 	Matrix44F *	cameraSpaceR();
 	Matrix44F * cameraInvSpaceR();
-	
+/// half field of view	
 	const float & hfov() const;
 	
 /// cliping is negative in camera space
@@ -104,7 +107,6 @@ public:
 					const float & lowLod, const float & highLod,
 					float & details) const;
 	
-	float cameraDepth(const Vector3F & p) const;
 	void getFarClipDepth(float & clip, const BoundingBox & b) const;
     
 protected:
