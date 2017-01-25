@@ -21,6 +21,25 @@ namespace aphid {
 DrawCircle::DrawCircle() {}
 DrawCircle::~DrawCircle() {}
 
+void DrawCircle::drawXCircle() const
+{ drawCircle(); }
+
+void DrawCircle::drawYCircle() const
+{
+	glPushMatrix();
+    glRotatef(90, 0, 0, 1);
+	drawCircle();
+	glPopMatrix();
+}
+
+void DrawCircle::drawZCircle() const
+{
+	glPushMatrix();
+    glRotatef(90, 0, 1, 0);
+	drawCircle();
+	glPopMatrix();
+}
+
 void DrawCircle::drawCircle(const float * mat) const
 {
 	glPushMatrix();

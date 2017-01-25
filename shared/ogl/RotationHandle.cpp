@@ -158,6 +158,17 @@ void RotationHandle::rotate(const Ray * r)
 
 void RotationHandle::draw(const Matrix44F * camspace) const
 {
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_STENCIL_TEST);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glDepthMask(GL_FALSE);
+	glStencilFunc(GL_NEVER, 1, 0xFF);
+	glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // draw 1s on test fail (always)
+
+/// draw stencil pattern
+	glStencilMask(0xFF);
+	glClear(GL_STENCIL_BUFFER_BIT);  // needs mask=0xFF
+  
     float m[16];
 
 	Matrix33F rot = m_space->rotation();
@@ -170,14 +181,10 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	m[13] = tv.y;
 	m[14] = tv.z;
 	
-	//glDisable(GL_DEPTH_TEST);
-	glDepthFunc(GL_ALWAYS);
-	//glDepthFunc(GL_GREATER);
-	//glEnable(GL_DEPTH_TEST);
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+/// enlarged sphere
 	glPushMatrix();
 	glMultMatrixf(m);
-	glScalef(.99f, .99f, .99f);
+	glScalef(1.09f, 1.09f, 1.09f);
     
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -187,45 +194,96 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	
 	glPopMatrix();
 	
-	glDepthFunc(GL_LEQUAL);
-	//glEnable(GL_DEPTH_TEST);
+/// cull behind sphere
+  glDepthMask(GL_TRUE);
+  glStencilMask(0x00);
+  // draw where stencil's value is 0
+  //glStencilFunc(GL_EQUAL, 0, 0xFF);
+	
+  // draw only where stencil's value is 1
+  glStencilFunc(GL_EQUAL, 1, 0xFF);
+  
+  glPushMatrix();
+	glMultMatrixf(m);
+	glScalef(.97f, .97f, .97f);
+    
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	drawAGlyph();
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	
-	
-	draw3Circles(m);
-	
-	if(m_active) {
+	glScalef(1.031f, 1.031f, 1.031f);
 	
 	glDepthFunc(GL_ALWAYS);
-	glPushMatrix();
-    glMultMatrixf(m);
-	
-	glColor3f(.1f, .1f, .1f);
 	glBegin(GL_LINES);
+	glColor3f(1,0,0);
 	glVertex3f(0.f, 0.f, 0.f);
-	glVertex3fv((const float *)&m_localV);
+	glVertex3f(1.f, 0.f, 0.f);
+	glColor3f(0,1,0);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(0.f, 1.f, 0.f);
+	glColor3f(0,0,1);
+	glVertex3f(0.f, 0.f, 0.f);
+	glVertex3f(0.f, 0.f, 1.f);
+	
+	if(m_active) {
+		glColor3f(.1f, .1f, .1f);	
+		glVertex3f(0.f, 0.f, 0.f);
+		glVertex3fv((const float *)&m_localV);
+	}
 	glEnd();
 	
 	glDepthFunc(GL_LEQUAL);
-	glColor3f(1.f, 1.f, 0.f);
 	
-	switch (m_snap) {
+	if(m_active) {
+		switch (m_snap) {
 		case saX:
-			drawXRing();
+			glColor3f(1.f, 1.f, 0.f);
+			drawXCircle();
+			glColor3f(0,1,0);
+			drawYCircle();
+			glColor3f(0,0,1);
+			drawZCircle();
 			break;
 		case saY:
-			drawYRing();
+			glColor3f(1,0,0);
+			drawXCircle();
+			glColor3f(1.f, 1.f, 0.f);
+			drawYCircle();
+			glColor3f(0,0,1);
+			drawZCircle();
 			break;
 		case saZ:
-			drawZRing();
+			glColor3f(1,0,0);
+			drawXCircle();
+			glColor3f(0,1,0);
+			drawYCircle();
+			glColor3f(1.f, 1.f, 0.f);
+			drawZCircle();
 			break;
 		default:
+			glColor3f(1,0,0);
+			drawXCircle();
+			glColor3f(0,1,0);
+			drawYCircle();
+			glColor3f(0,0,1);
+			drawZCircle();
 			break;
+		}
+	} else {
+		glColor3f(1,0,0);
+		drawXCircle();
+		glColor3f(0,1,0);
+		drawYCircle();
+		glColor3f(0,0,1);
+		drawZCircle();
 	}
 	
 	glPopMatrix();
-	}
-	
+/// align to view
 	rot = camspace->rotation();
 	rot.orthoNormalize();
 	rot *= m_radius;
@@ -234,16 +292,20 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	m[13] = tv.y;
 	m[14] = tv.z;
 	
-	glColor3f(.1f, .1f, .1f);
-	drawZCircle(m);
-	
 	if(m_active) {
 		if(m_snap == saNone) {
 			glColor3f(1.f, 1.f, 0.f);
-			drawZRing(m);
+			drawZCircle(m);
+		} else {
+			glColor3f(.1f, .1f, .1f);
+			drawZCircle(m);
 		}
+	} else {
+		glColor3f(.1f, .1f, .1f);
+		drawZCircle(m);
 	}
 	
+	glDisable(GL_STENCIL_TEST);
 }
 
 void RotationHandle::getDetlaRotation(Matrix33F & mat, const float & weight) const

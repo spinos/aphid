@@ -17,7 +17,10 @@ class DrawCircle {
 public:
 	DrawCircle();
 	virtual ~DrawCircle();
-	
+/// around local axis
+	void drawXCircle() const;
+	void drawYCircle() const;
+	void drawZCircle() const;
 	void drawZCircle(const float * mat) const;
 	void drawZRing(const float * mat) const;
 	void drawCircle(const float * mat) const;

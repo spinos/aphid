@@ -466,7 +466,7 @@ void DrawForest::drawManipulator()
 	Matrix44F mat;
 	mat.setRotation(rmat);
 	const Vector3F & pos = selectionCenter();
-	m_rotHand->setRadius(relativeSizeAtDepth(pos, .39f) );
+	m_rotHand->setRadius(relativeSizeAtDepth(pos, .29f) );
 	m_rotHand->draw(&mat);
 }
 
