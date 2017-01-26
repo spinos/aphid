@@ -13,12 +13,13 @@
 #include <math/Matrix44F.h>
 #include <math/Ray.h>
 #include <ogl/DrawArrow.h>
+#include <ogl/DrawBox.h>
 
 namespace aphid {
 
 class Plane;
 
-class TranslationHandle : public DrawArrow {
+class TranslationHandle : public DrawArrow, public DrawBox {
 
 	Matrix44F * m_space;
 	Matrix44F m_invSpace;
@@ -32,7 +33,10 @@ class TranslationHandle : public DrawArrow {
 		saNone = 0,
 		saX = 1,
 		saY = 2,
-		saZ = 3
+		saZ = 3,
+        saXY = 4,
+        saYZ = 5,
+        saXZ = 6
 	};
 	
 	SnapAxis m_snap;
@@ -52,9 +56,10 @@ public:
 	void getDetlaTranslation(Vector3F & vec, const float & weight = 1.f) const;
 
 private:
-    bool translateLocal(Vector3F & q,
+    bool projectLocal(Vector3F & q,
             const Ray * r, const Plane & p1, const Plane & p2);
-    
+     bool projectPlaneLocal(Vector3F & q,
+            const Ray * r, const Plane & p1);
 };
 
 }

@@ -9,6 +9,7 @@
 
 #include "TranslationHandle.h"
 #include <math/Plane.h>
+#include <math/BoundingBox.h>
 #include <math/miscfuncs.h>
 #include <gl_heads.h>
 
@@ -109,6 +110,33 @@ bool TranslationHandle::begin(const Ray * r)
     
     }
     
+    if(m_snap == saNone) {
+        if(projectPlaneLocal(m_localV, r, xy) ) {
+            if(m_localV.x > 0.f &&  m_localV.x < m_radius
+                && m_localV.y > 0.f &&  m_localV.y < m_radius) {
+                m_snap = saXY;
+            }
+        }
+    }
+    
+    if(m_snap == saNone) {
+        if(projectPlaneLocal(m_localV, r, yz) ) {
+            if(m_localV.y > 0.f &&  m_localV.y < m_radius
+                && m_localV.z > 0.f &&  m_localV.z < m_radius) {
+                m_snap = saYZ;
+            }
+        }
+    }
+    
+    if(m_snap == saNone) {
+        if(projectPlaneLocal(m_localV, r, xz) ) {
+            if(m_localV.x > 0.f &&  m_localV.x < m_radius
+                && m_localV.z > 0.f &&  m_localV.z < m_radius) {
+                m_snap = saXZ;
+            }
+        }
+    }
+    
     switch (m_snap) {
     case saX:
         m_localV.y = m_localV.z = 0.f;
@@ -118,6 +146,15 @@ bool TranslationHandle::begin(const Ray * r)
         break;
     case saZ:
         m_localV.x = m_localV.y = 0.f;
+        break;
+    case saXY:
+        m_localV.z = 0.f;
+        break;
+    case saXZ:
+        m_localV.y = 0.f;
+        break;
+    case saYZ:
+        m_localV.x = 0.f;
         break;
     default:
         break;
@@ -158,16 +195,28 @@ void TranslationHandle::translate(const Ray * r)
     Vector3F q;
     switch (m_snap) {
     case saX:
-        stat = translateLocal(q, r, xy, xz);
+        stat = projectLocal(q, r, xy, xz);
         q.y = q.z = 0.f;
         break;
     case saY:
-        stat = translateLocal(q, r, xy, yz);
+        stat = projectLocal(q, r, xy, yz);
         q.x = q.z = 0.f;
         break;
     case saZ:
-        stat = translateLocal(q, r, xz, yz);
+        stat = projectLocal(q, r, xz, yz);
         q.x = q.y = 0.f;
+        break;
+    case saXY:
+        stat = projectPlaneLocal(q, r, xy);
+        q.z = 0.f;
+        break;
+    case saXZ:
+        stat = projectPlaneLocal(q, r, xz);
+        q.y = 0.f;
+        break;
+    case saYZ:
+        stat = projectPlaneLocal(q, r, yz);
+        q.x = 0.f;
         break;
     default:
         break;
@@ -178,34 +227,66 @@ void TranslationHandle::translate(const Ray * r)
     }
     
     m_deltaV = q - m_localV;
+    m_deltaV *= m_speed;
     
     Vector3F wdv = m_space->transformAsNormal(m_deltaV);
     
     m_space->setTranslation(pop + wdv);
 }
 
-bool TranslationHandle::translateLocal(Vector3F & q,
+bool TranslationHandle::projectLocal(Vector3F & q,
                 const Ray * r, const Plane & p1, const Plane & p2)
 {
+    const float a1 = Absolute<float>(p1.normal().dot(r->m_dir) );
+    const float a2 = Absolute<float>(p2.normal().dot(r->m_dir) );
     float t;
-    if(p1.rayIntersect(*r, q, t, true) ) {
-        q = m_invSpace.transform(q);
-        if(q.length() < 1.1f * m_radius) {
-            return true;
+    if(a1 > a2 ) {
+        if(p1.rayIntersect(*r, q, t, true) ) {
+            q = m_invSpace.transform(q);
+            if(q.length() < 1.1f * m_radius) {
+                return true;
+            }
         }
-    }
-    if(p2.rayIntersect(*r, q, t, true) ) {
-        q = m_invSpace.transform(q);
-        if(q.length() < 1.1f * m_radius) {
-            return true;
+    } else {
+        if(p2.rayIntersect(*r, q, t, true) ) {
+            q = m_invSpace.transform(q);
+            if(q.length() < 1.1f * m_radius) {
+                return true;
+            }
         }
     }
     return false;
 }
 
+bool TranslationHandle::projectPlaneLocal(Vector3F & q,
+                const Ray * r, const Plane & p1)
+{
+    float t;
+    if(p1.rayIntersect(*r, q, t, true) ) {
+        q = m_invSpace.transform(q);
+        if(Absolute<float>(q.x) < m_radius
+            && Absolute<float>(q.y) < m_radius
+            && Absolute<float>(q.z) < m_radius) {
+            return true;
+        }
+    }
+    
+    return false;
+}
 
 void TranslationHandle::draw(const Matrix44F * camspace) const
 {
+    glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_STENCIL_TEST);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glDepthMask(GL_FALSE);
+	glStencilFunc(GL_NEVER, 1, 0xFF);
+	glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // draw 1s on test fail (always)
+
+/// draw stencil pattern
+	glStencilMask(0xFF);
+	glClear(GL_STENCIL_BUFFER_BIT);  // needs mask=0xFF
+    
 	glPushMatrix();
 	
 	float transbuf[16];
@@ -213,6 +294,13 @@ void TranslationHandle::draw(const Matrix44F * camspace) const
 	glMultMatrixf((const GLfloat*)transbuf);
     
     glScalef(m_radius, m_radius, m_radius);
+    
+    BoundingBox b(-.03f, -.03f, -.03f, 1.03f , 1.03f, 1.03f);
+    drawSolidBoundingBox(&b);
+    
+    glDepthMask(GL_TRUE);
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -239,15 +327,42 @@ void TranslationHandle::draw(const Matrix44F * camspace) const
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
     
-    const float invr = 1.f / m_radius;
-    glScalef(invr, invr, invr);
-    glBegin(GL_LINES);
-    glColor3f(.1f, .1f, .1f);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3fv((const float *)&m_localV);
-    glEnd();
+    if(m_snap == saXY) {
+        glColor3f(1,1,0);
+    } else {
+        glColor3f(.1f,.1f,.1f);
+    }
+        glBegin(GL_LINE_STRIP);
+        glVertex3f(1.f, 0.f, 0.f);
+        glVertex3f(1.f, 1.f, 0.f);
+        glVertex3f(0.f, 1.f, 0.f);
+        glEnd();
+    
+    if(m_snap == saYZ) {
+        glColor3f(1,1,0);
+    } else {
+        glColor3f(.1f,.1f,.1f);
+    }
+        glBegin(GL_LINE_STRIP);
+        glVertex3f(0.f, 1.f, 0.f);
+        glVertex3f(0.f, 1.f, 1.f);
+        glVertex3f(0.f, 0.f, 1.f);
+        glEnd();
+    
+    if(m_snap == saXZ) {
+        glColor3f(1,1,0);
+    } else {
+        glColor3f(.1f,.1f,.1f);
+    }
+        glBegin(GL_LINE_STRIP);
+        glVertex3f(1.f, 0.f, 0.f);
+        glVertex3f(1.f, 0.f, 1.f);
+        glVertex3f(0.f, 0.f, 1.f);
+        glEnd();
 	
 	glPopMatrix();
+    
+    glDisable(GL_STENCIL_TEST);
 }
 
 void TranslationHandle::getDetlaTranslation(Vector3F & vec, const float & weight) const
