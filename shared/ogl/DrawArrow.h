@@ -30,7 +30,10 @@ public:
 						const Matrix33F * mat1);
 	
 protected:
-
+    void drawXArrow() const;
+    void drawYArrow() const;
+    void drawZArrow() const;
+    
 private:
 	void drawFlatArraw();
 	void drawCoordinate();

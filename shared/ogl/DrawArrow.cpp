@@ -581,4 +581,25 @@ void DrawArrow::drawCoordinate()
 
 }
 
+void DrawArrow::drawXArrow() const
+{
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)sXArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXArrowTriangleFVVertices);
+    glDrawArrays(GL_TRIANGLES, 0, sXArrowNumTriangleFVVertices);
+}
+    
+void DrawArrow::drawYArrow() const
+{
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)sYArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sYArrowTriangleFVVertices);
+	glDrawArrays(GL_TRIANGLES, 0, sYArrowNumTriangleFVVertices);
+}
+    
+void DrawArrow::drawZArrow() const
+{
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)sZArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sZArrowTriangleFVVertices);
+	glDrawArrays(GL_TRIANGLES, 0, sZArrowNumTriangleFVVertices);
+}
+
 }

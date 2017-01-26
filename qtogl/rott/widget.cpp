@@ -4,6 +4,7 @@
 #include <GeoDrawer.h>
 #include <ogl/DrawCircle.h>
 #include <ogl/RotationHandle.h>
+#include <ogl/TranslationHandle.h>
 #include <BaseCamera.h>
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
@@ -26,6 +27,8 @@ void GLWidget::clientInit()
 	m_space.translate(1,1,1);
 	m_roth = new RotationHandle(&m_space);
 	m_roth->setRadius(3.2f);
+    m_tranh = new TranslationHandle(&m_space);
+    m_tranh->setRadius(3.2f);
 }
 
 void GLWidget::clientDraw()
@@ -33,12 +36,23 @@ void GLWidget::clientDraw()
 	getDrawer()->m_surfaceProfile.apply();
 	testDops();
 	
-
-	
 	getDrawer()->m_markerProfile.apply();
 
 	//getDrawer()->setColor(0.f, .34f, .45f);
+    drawTranslate();
+}
 
+void GLWidget::drawTranslate()
+{
+    Vector3F veye = getCamera()->eyeDirection();
+	Matrix44F meye = m_space;
+	meye.setFrontOrientation(veye );
+
+	m_tranh->draw(&meye);
+}
+
+void GLWidget::drawRotate()
+{
 	float m[16];
 	m_space.glMatrix(m);
 	
@@ -55,20 +69,22 @@ void GLWidget::clientDraw()
 
 void GLWidget::clientSelect(QMouseEvent *event)
 {
-	m_roth->begin(getIncidentRay() );
+	//m_roth->begin(getIncidentRay() );
+    m_tranh->begin(getIncidentRay() );
 	update();
 }
 
 void GLWidget::clientDeselect(QMouseEvent *event)
 {
-	m_roth->end();
+	//m_roth->end();
+    m_tranh->end();
 	update();
 }
 
 void GLWidget::clientMouseInput(QMouseEvent *event)
 {
-	m_roth->rotate(getIncidentRay() );
-	
+	//m_roth->rotate(getIncidentRay() );
+    m_tranh->translate(getIncidentRay() );
 	update();
 }
 

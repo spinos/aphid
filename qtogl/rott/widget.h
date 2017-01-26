@@ -7,6 +7,7 @@
 namespace aphid {
 
 class RotationHandle;
+class TranslationHandle;
 
 }
 
@@ -32,13 +33,16 @@ signals:
 private:
 	void testBoxes();
 	void testDops();
+    void drawRotate();
+    void drawTranslate();
 	
 private:
 
 	aphid::Matrix44F m_space;
 	aphid::Ray m_incident;
 	aphid::RotationHandle * m_roth;
-	
+	aphid::TranslationHandle * m_tranh;
+    
 };
 
 #endif
