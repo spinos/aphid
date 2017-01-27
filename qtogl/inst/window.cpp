@@ -1,6 +1,6 @@
 #include <QtGui>
-#include "instwidget.h"
-#include "instwindow.h"
+#include "widget.h"
+#include "window.h"
 
 Window::Window()
 {

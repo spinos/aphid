@@ -4,19 +4,16 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 
-#include "TetrahedronGrid.h"
+#include <ttg/TetrahedronGrid.h>
 
-
-namespace ttg {
-
-class vtgWidget : public aphid::Base3DView
+class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
 
 public:
 
-    vtgWidget(QWidget *parent = 0);
-    ~vtgWidget();
+    GLWidget(QWidget *parent = 0);
+    ~GLWidget();
 	
 protected:    
     virtual void clientInit();
@@ -39,5 +36,4 @@ private:
 	GridT * m_tg;
 };
 
-}
 #endif

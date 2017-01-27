@@ -8,15 +8,6 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 include_directories (../shared)
 
-set (INST_HEADER_FILES ../shared/Base3DView.h 
-instwindow.h
-instwidget.h)
-
-set (INST_SOURCE_FILES ../shared/Base3DView.cpp
-instwidget.cpp
-instwindow.cpp
-instmain.cpp)
-
 if (WIN32)
 SET (APHID_DIR "D:/aphid")
 elseif (APPLE)
@@ -103,8 +94,8 @@ elseif(APPLE)
 	set (Boost_INCLUDE_DIR ${APPLE_HOME}/Library/boost_1_55_0)
 	set (Boost_LIBRARY_DIR ${APPLE_HOME}/Library/boost_1_55_0/stage/lib)
 	include_directories (${APPLE_HOME}/Library/boost_1_55_0)
-	find_package(Boost 1.55 COMPONENTS system filesystem date_time regex thread chrono)
-	include_directories ("/usr/local/include")
+	set (Boost_USE_STATIC_LIBS ON)
+	find_package(Boost 1.55 REQUIRED  COMPONENTS system filesystem date_time regex thread)
 else()
     include_directories ("~/Public/boost_1_51_0")
     SET (BOOST_ROOT "~/Public/boost_1_51_0")
@@ -116,25 +107,6 @@ message ("boost date_time is  " ${Boost_DATE_TIME_LIBRARY})
 message ("boost regex is      " ${Boost_REGEX_LIBRARY})
 message ("boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 message ("boost thread is     " ${Boost_THREAD_LIBRARY})
-
-add_executable (psinst ${INST_HEADER_FILES} ${INST_SOURCE_FILES})
-
-target_link_libraries (psinst Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (psinst ${OPENGL_LIBRARIES})
-target_link_libraries (psinst ${APHID_FOUND_LIBRARY})
-target_link_libraries (psinst ${APHID_MATH_LIBRARY})
-target_link_libraries (psinst ${APHID_GEOM_LIBRARY})
-target_link_libraries (psinst ${APHID_UI_LIBRARY})
-target_link_libraries (psinst ${APHID_SDB_LIBRARY})
-target_link_libraries (psinst ${APHID_TOPO_LIBRARY})
-target_link_libraries (psinst ${APHID_OGL_LIBRARY})
-
-target_link_libraries (psinst ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (psinst ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (psinst ${Boost_REGEX_LIBRARY})
-target_link_libraries (psinst ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (psinst ${Boost_THREAD_LIBRARY})
-target_link_libraries (psinst ${Boost_CHRONO_LIBRARY})
 
 set (AttributeNoninline "__attribute__ ((noinline))")
 add_definitions (-DBOOST_NOINLINE=${AttributeNoninline})
@@ -162,24 +134,6 @@ endif()
 message ("blas " ${BLAS_LIBRARY})
 message ("lapack " ${LAPACK_LIBRARY})
 message ("f2c " ${F2C_LIBRARY})
-
-add_executable (testclique testClique.cpp)
-target_link_libraries (testclique ${APHID_FOUND_LIBRARY})
-target_link_libraries (testclique ${APHID_MATH_LIBRARY})
-target_link_libraries (testclique ${APHID_GEOM_LIBRARY})
-target_link_libraries (testclique ${APHID_TOPO_LIBRARY})
-target_link_libraries (testclique ${APHID_SDB_LIBRARY})
-
-target_link_libraries (testclique ${BLAS_LIBRARY})
-target_link_libraries (testclique ${LAPACK_LIBRARY})
-target_link_libraries (testclique ${F2C_LIBRARY})
-
-target_link_libraries (testclique ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (testclique ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (testclique ${Boost_REGEX_LIBRARY})
-target_link_libraries (testclique ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (testclique ${Boost_THREAD_LIBRARY})
-target_link_libraries (testclique ${Boost_CHRONO_LIBRARY})
 
 SET (GPDF_HEADER cactus.h)
 
@@ -218,3 +172,5 @@ add_subdirectory(hermite)
 add_subdirectory(pca)
 add_subdirectory(hull)
 add_subdirectory(cluster)
+add_subdirectory(inst)
+add_subdirectory(tetf)

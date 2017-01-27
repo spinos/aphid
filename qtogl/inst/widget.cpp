@@ -1,6 +1,6 @@
 #include <QtGui>
 #include <QtOpenGL>
-#include "instwidget.h"
+#include "widget.h"
 #include <GeoDrawer.h>
 #include <sdb/ebp.h>
 

@@ -2,14 +2,12 @@
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
-#include "vtgWidget.h"
+#include "widget.h"
 #include <GeoDrawer.h>
 
 using namespace aphid;
 
-namespace ttg {
-
-vtgWidget::vtgWidget(QWidget *parent) : Base3DView(parent)
+GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
@@ -19,10 +17,10 @@ vtgWidget::vtgWidget(QWidget *parent) : Base3DView(parent)
 	
 }
 
-vtgWidget::~vtgWidget()
+GLWidget::~GLWidget()
 {}
 
-void vtgWidget::clientInit()
+void GLWidget::clientInit()
 {
 	cvx::Tetrahedron tetra;
 	tetra.set(Vector3F(0.f, 10.f, 0.f), 
@@ -42,7 +40,7 @@ void vtgWidget::clientInit()
 	
 }
 
-void vtgWidget::clientDraw()
+void GLWidget::clientDraw()
 {
 	//updatePerspectiveView();
 	//getDrawer()->frustum(perspectiveView()->frustum() );
@@ -63,21 +61,21 @@ void vtgWidget::clientDraw()
 //! [7]
 
 //! [9]
-void vtgWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
+void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
 }
 //! [9]
 
-void vtgWidget::clientDeselect()
+void GLWidget::clientDeselect()
 {
 }
 
 //! [10]
-void vtgWidget::clientMouseInput(Vector3F & stir)
+void GLWidget::clientMouseInput(Vector3F & stir)
 {
 }
 
-void vtgWidget::keyPressEvent(QKeyEvent *e)
+void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
 		case Qt::Key_M:
@@ -92,9 +90,8 @@ void vtgWidget::keyPressEvent(QKeyEvent *e)
 	Base3DView::keyPressEvent(e);
 }
 
-void vtgWidget::keyReleaseEvent(QKeyEvent *event)
+void GLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	Base3DView::keyReleaseEvent(event);
 }
 	
-}

@@ -1,16 +1,14 @@
 #include <QtGui>
 
-#include "vtgWindow.h"
-#include "vtgWidget.h"
-
-namespace ttg {
+#include "window.h"
+#include "widget.h"
 
 Window::Window()
 {
-	glWidget = new vtgWidget(this);
+	glWidget = new GLWidget(this);
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("hexahedron grid") );
+    setWindowTitle(tr("tetrahedral grid") );
 	
 	createActions();
     createMenus();
@@ -32,7 +30,5 @@ void Window::createActions()
 	
 void Window::createMenus()
 {
-
-}
 
 }

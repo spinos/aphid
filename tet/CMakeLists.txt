@@ -425,27 +425,4 @@ target_link_libraries (hexasplit ${Boost_REGEX_LIBRARY})
 target_link_libraries (hexasplit ${Boost_THREAD_LIBRARY})
 target_link_libraries (hexasplit ${Boost_CHRONO_LIBRARY})
 
-set (VTG_HEADER_FILES TetrahedronGrid.h)
-set (VTG_SOURCE_FILES ../shared/Base3DView.cpp
-vtgWidget.cpp
-vtgWindow.cpp
-vtgMain.cpp)
-
-if (WIN32)
-set (VTG_SOURCE_FILES ${VTG_SOURCE_FILES} "../shared/gExtension.cpp")
-endif ()
-
-add_executable (tetsubdiv ${VTG_HEADER_FILES} ${VTG_SOURCE_FILES})
-
-target_link_libraries (tetsubdiv Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (tetsubdiv ${OPENGL_LIBRARIES})
-target_link_libraries (tetsubdiv ${APHID_MATH_LIBRARY})
-target_link_libraries (tetsubdiv ${APHID_GEOM_LIBRARY})
-target_link_libraries (tetsubdiv ${APHID_KD_LIBRARY})
-target_link_libraries (tetsubdiv ${APHID_SDB_LIBRARY})
-target_link_libraries (tetsubdiv ${APHID_GRAPH_LIBRARY})
-target_link_libraries (tetsubdiv ${APHID_UI_LIBRARY})
-target_link_libraries (tetsubdiv ${Boost_THREAD_LIBRARY})
-target_link_libraries (tetsubdiv ${Boost_DATE_TIME_LIBRARY})
-
 SET (EXECUTABLE_OUTPUT_PATH ../bin)

@@ -8,9 +8,7 @@ class QMenu;
 class QAction;
 QT_END_NAMESPACE
 
-namespace ttg {
-
-class vtgWidget;
+class GLWidget;
 
 class Window : public QMainWindow
 {
@@ -27,9 +25,7 @@ private:
 	void createMenus();
 	
 private:
-    vtgWidget *glWidget;
+    GLWidget *glWidget;
 	
 };
-
-}
 #endif
