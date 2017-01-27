@@ -7,7 +7,7 @@
  *
  */
 
-#include <GlslBase.h>
+#include <ogl/GlslBase.h>
 #include <vector>
 class ATriangleMesh;
 class DepthCull : public GLSLBase

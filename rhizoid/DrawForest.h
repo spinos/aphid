@@ -18,6 +18,7 @@ namespace aphid {
 class ExampVox;
 class ForestCell;
 class RotationHandle;
+class TranslationHandle;
 
 class DrawForest : public ModifyForest, public ViewObscureCull, 
 public DrawBox, public DrawCircle, public DrawInstance
@@ -26,6 +27,7 @@ public DrawBox, public DrawCircle, public DrawInstance
     Matrix44F m_useMat;
 	Matrix44F m_rotMat;
 	RotationHandle * m_rotHand;
+    TranslationHandle * m_transHand;
     float m_wireColor[3];
 	float m_transbuf[16];
     float m_showVoxLodThresold;
@@ -40,6 +42,9 @@ public:
     void startRotate(const Ray & r);
     void processRotate(const Ray & r);
     void finishRotate();
+    void startTranslate(const Ray & r);
+    void processTranslate(const Ray & r);
+    void finishTranslate();
     
 protected:
 	void setScaleMuliplier(float x, float y, float z);
@@ -63,6 +68,9 @@ protected:
     
 	virtual void getDeltaRotation(Matrix33F & mat,
 					const float & weight = 1.f) const;
+    virtual void getDeltaTranslation(Vector3F & vec,
+					const float & weight = 1.f) const;
+                    
 private:
     void drawFace(const int & geoId, const int & triId);
 	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);

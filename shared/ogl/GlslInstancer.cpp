@@ -20,42 +20,42 @@ GlslLegacyInstancer::~GlslLegacyInstancer()
 
 const char* GlslLegacyInstancer::vertexProgramSource() const
 {
-	return "#version 120\n"
-"uniform mat4 worldMatrix;"
-"varying vec3 shadingNormal;"
-"void main()"
-"{"
-"   vec4 positionWorld;"
-"   vec4 worldViewPosition;"
-"   vec3 normalWorld;"
-"   positionWorld.x = dot(gl_MultiTexCoord1, gl_Vertex);"
-"   positionWorld.y = dot(gl_MultiTexCoord2, gl_Vertex);"
-"   positionWorld.z = dot(gl_MultiTexCoord3, gl_Vertex);"
-"   positionWorld.w = 1.0;"
-"   worldViewPosition = worldMatrix * positionWorld;"
+	return //"#version 120\n"
+"\nuniform mat4 worldMatrix;"
+"\nvarying vec3 shadingNormal;"
+"\nvoid main()"
+"\n{"
+"\n   vec4 positionWorld;"
+"\n   vec4 worldViewPosition;"
+"\n   vec3 normalWorld;"
+"\n   positionWorld.x = dot(gl_MultiTexCoord1, gl_Vertex);"
+"\n   positionWorld.y = dot(gl_MultiTexCoord2, gl_Vertex);"
+"\n   positionWorld.z = dot(gl_MultiTexCoord3, gl_Vertex);"
+"\n   positionWorld.w = 1.0;"
+"\n   worldViewPosition = worldMatrix * positionWorld;"
 //"   gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix *  worldViewPosition;"
-"   gl_Position = gl_ModelViewProjectionMatrix * worldViewPosition;"
-"   normalWorld.x = dot(gl_MultiTexCoord1.xyz, gl_Normal);"
-"   normalWorld.y = dot(gl_MultiTexCoord2.xyz, gl_Normal);"
-"   normalWorld.z = dot(gl_MultiTexCoord3.xyz, gl_Normal);"
-"   normalWorld = normalize(normalWorld);"
-"   shadingNormal = normalWorld;"
-"}";
+"\n   gl_Position = gl_ModelViewProjectionMatrix * worldViewPosition;"
+"\n   normalWorld.x = dot(gl_MultiTexCoord1.xyz, gl_Normal);"
+"\n   normalWorld.y = dot(gl_MultiTexCoord2.xyz, gl_Normal);"
+"\n   normalWorld.z = dot(gl_MultiTexCoord3.xyz, gl_Normal);"
+"\n   normalWorld = normalize(normalWorld);"
+"\n   shadingNormal = normalWorld;"
+"\n}\n";
 }
 
 const char* GlslLegacyInstancer::fragmentProgramSource() const
 {
-	return "#version 120\n"
-"uniform vec3 distantLightVec;"
-"uniform vec3 diffuseColor;"
-"varying vec3 shadingNormal;"
-"void main()"
-"{"
-"   float ldn = dot(shadingNormal, distantLightVec);"
-"   if(ldn < 0.0) ldn = 0.0;\n"
-"   ldn = 0.2 + 0.8 * ldn;\n"
-"	gl_FragColor = vec4(diffuseColor * ldn, 1.0);"
-"}";
+	return //"#version 120\n"
+"\nuniform vec3 distantLightVec;"
+"\nuniform vec3 diffuseColor;"
+"\nvarying vec3 shadingNormal;"
+"\nvoid main()"
+"\n{"
+"\n   float ldn = dot(shadingNormal, distantLightVec);"
+"\n   if(ldn < 0.0) ldn = 0.0;\n"
+"\n   ldn = 0.2 + 0.8 * ldn;\n"
+"\n	gl_FragColor = vec4(diffuseColor * ldn, 1.0);"
+"\n}\n";
 }
 
 void GlslLegacyInstancer::defaultShaderParameters()
@@ -89,29 +89,29 @@ GlslLegacyFlatInstancer::~GlslLegacyFlatInstancer()
 
 const char* GlslLegacyFlatInstancer::vertexProgramSource() const
 {
-	return "#version 120\n"
-"uniform mat4 worldMatrix;"
-"void main()"
-"{"
-"   vec4 positionWorld;"
-"   vec4 worldViewPosition;"
-"   positionWorld.x = dot(gl_MultiTexCoord1, gl_Vertex);"
-"   positionWorld.y = dot(gl_MultiTexCoord2, gl_Vertex);"
-"   positionWorld.z = dot(gl_MultiTexCoord3, gl_Vertex);"
-"   positionWorld.w = 1.0;"
-"   worldViewPosition = worldMatrix * positionWorld;"
-"   gl_Position = gl_ModelViewProjectionMatrix * worldViewPosition;"
-"}";
+	return //"#version 120\n"
+"\nuniform mat4 worldMatrix;"
+"\nvoid main()"
+"\n{"
+"\n   vec4 positionWorld;"
+"\n   vec4 worldViewPosition;"
+"\n   positionWorld.x = dot(gl_MultiTexCoord1, gl_Vertex);"
+"\n   positionWorld.y = dot(gl_MultiTexCoord2, gl_Vertex);"
+"\n   positionWorld.z = dot(gl_MultiTexCoord3, gl_Vertex);"
+"\n   positionWorld.w = 1.0;"
+"\n   worldViewPosition = worldMatrix * positionWorld;"
+"\n   gl_Position = gl_ModelViewProjectionMatrix * worldViewPosition;"
+"\n}\n";
 }
 
 const char* GlslLegacyFlatInstancer::fragmentProgramSource() const
 {
-	return "#version 120\n"
-"uniform vec3 diffuseColor;"
-"void main()"
-"{"
-"	gl_FragColor = vec4(diffuseColor, 1.0);"
-"}";
+	return //"#version 120\n"
+"\nuniform vec3 diffuseColor;"
+"\nvoid main()"
+"\n{"
+"\n	gl_FragColor = vec4(diffuseColor, 1.0);"
+"\n}\n";
 }
 
 void GlslLegacyFlatInstancer::defaultShaderParameters()

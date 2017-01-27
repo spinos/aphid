@@ -21,7 +21,7 @@ public:
 
 private:	
 	Vector3F m_center, m_direction;
-	float m_radius;
+	float m_radius, m_weightDecay;
 	int m_numSelected;
     int m_typeFilter;
 	sdb::WorldGrid<ForestCell, Plant > * m_grid;

@@ -18,6 +18,7 @@ PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid)
 	m_plants = new SelectionTyp;
 	m_numSelected = 0;
     m_radius = 8.f;
+    m_weightDecay = 2.f;
     m_typeFilter = -1;
 }
 
@@ -175,7 +176,7 @@ void PlantSelection::calculateWeight()
 		pr = d->t1->getTranslation() - d->t2->m_offset;
 		dist = m_center.distanceTo(pr);
 		if(dist < m_radius) {
-			m_plants->value()->m_weight = 1.f - sqrt(dist / m_radius);
+			m_plants->value()->m_weight = exp(- m_weightDecay * dist / m_radius);
 		}
 		else {
 			m_plants->value()->m_weight = 0.f;

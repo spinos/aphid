@@ -21,7 +21,8 @@ class ModifyForest : public Forest {
 public:
     enum ManipulateMode {
 		manNone = 0,
-		manRotate = 1
+		manRotate = 1,
+        manTranslate = 2
 	};
 	
 private:
@@ -115,12 +116,16 @@ protected:
 					const float & clipNear, const float & clipFar);
 /// use delta rotation
 	void rotatePlant();
+/// use delta translation
+	void translatePlant();
 
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
 	void raiseOffsetAt(const Ray & ray, GrowOption & option);
 	void calculateSelectedWeight();
 	virtual void getDeltaRotation(Matrix33F & mat,
+					const float & weight = 1.f) const;
+    virtual void getDeltaTranslation(Vector3F & vec,
 					const float & weight = 1.f) const;
 				
 private:

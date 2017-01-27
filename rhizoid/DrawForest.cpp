@@ -14,6 +14,7 @@
 #include <ForestCell.h>
 #include <ogl/GlslInstancer.h>
 #include <ogl/RotationHandle.h>
+#include <ogl/TranslationHandle.h>
 
 namespace aphid {
 
@@ -22,11 +23,13 @@ m_enabled(true)
 {
 	m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
 	m_rotHand = new RotationHandle(&m_rotMat);
+    m_transHand = new TranslationHandle(&m_rotMat);
 }
 
 DrawForest::~DrawForest() 
 {
 	delete m_rotHand;
+    delete m_transHand;
 }
 
 void DrawForest::drawGround() 
@@ -467,7 +470,19 @@ void DrawForest::drawManipulator()
 	mat.setRotation(rmat);
 	const Vector3F & pos = selectionCenter();
 	m_rotHand->setRadius(relativeSizeAtDepth(pos, .29f) );
-	m_rotHand->draw(&mat);
+    m_transHand->setRadius(relativeSizeAtDepth(pos, .29f) );
+    
+    switch (manipulateMode() ) {
+    case manRotate:
+        m_rotHand->draw(&mat);
+        break;
+    case manTranslate:
+        m_transHand->draw(&mat);
+        break;
+    default:
+        break;
+    }
+	
 }
 
 void DrawForest::updateManipulateSpace(GrowOption & option)
@@ -509,6 +524,33 @@ void DrawForest::getDeltaRotation(Matrix33F & mat,
 					const float & weight) const
 {
     m_rotHand->getDetlaRotation(mat, weight);
+}
+
+void DrawForest::startTranslate(const Ray & r)
+{
+    disableDrawing();
+    m_transHand->begin(&r);
+	calculateSelectedWeight();
+    enableDrawing();
+}
+    
+void DrawForest::processTranslate(const Ray & r)
+{
+    disableDrawing();
+    m_transHand->translate(&r);
+    translatePlant();
+    enableDrawing();
+}
+    
+void DrawForest::finishTranslate()
+{
+    m_transHand->end();
+}
+
+void DrawForest::getDeltaTranslation(Vector3F & vec,
+					const float & weight) const
+{
+    m_transHand->getDetlaTranslation(vec, weight);
 }
 
 }

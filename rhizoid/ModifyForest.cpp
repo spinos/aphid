@@ -666,6 +666,32 @@ void ModifyForest::rotatePlant(const Ray & ray,
 	}
 }
 
+void ModifyForest::translatePlant()
+{
+    Vector3F pos, dpos, bindPos;
+    float lof;
+    PlantSelection::SelectionTyp * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		 float wei = arr->value()->m_weight;
+		 if(wei > 1e-3f) { 
+			PlantData * plantd = arr->value()->m_reference->index;
+			
+			Matrix44F * mat = plantd->t1;
+			pos = mat->getTranslation() - plantd->t2->m_offset;
+			
+			getDeltaTranslation(dpos, wei);
+			pos += dpos;
+            bindToGround(plantd, pos, bindPos);
+			
+			plantd->t1->setTranslation(bindPos + plantd->t2->m_offset );
+			displacePlantInGrid(arr->value() );
+			
+		}
+		arr->next();
+	}
+}
+
 void ModifyForest::rotatePlant()
 {
     Matrix33F rot, drot;
@@ -681,7 +707,7 @@ void ModifyForest::rotatePlant()
 			Matrix44F * mat = plantd->t1;
 			rot = mat->rotation();
 			
-			getDeltaRotation(drot);
+			getDeltaRotation(drot, wei);
 			rot *= drot;
 			
 			mat->setRotation(rot);
@@ -976,6 +1002,10 @@ void ModifyForest::raiseOffsetAt(const Ray & ray,
 void ModifyForest::getDeltaRotation(Matrix33F & mat,
 					const float & weight) const
 { mat.setIdentity(); }
+
+void ModifyForest::getDeltaTranslation(Vector3F & vec,
+					const float & weight) const
+{ vec.set(0.f, 0.f, 0.f); }
 
 void ModifyForest::setManipulatMode(ModifyForest::ManipulateMode x)
 { m_manipulateMode = x; }

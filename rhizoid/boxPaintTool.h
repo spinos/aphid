@@ -14,13 +14,11 @@
 #include "ProxyVizNode.h"
 #include <maya/MSceneMessage.h>
 
-using namespace aphid;
-
 class proxyPaintContext : public MPxContext
 {
     
 	M3dView					view;
-	static ProxyViz * PtrViz;
+	static aphid::ProxyViz * PtrViz;
 	
 	double clipNear, clipFar;
 	
@@ -46,6 +44,7 @@ class proxyPaintContext : public MPxContext
 		opDepress = 18,
 		opBundleResize = 19,
 		opBundleRotate = 20,
+        opBundleTranslate = 21,
 		opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
@@ -59,7 +58,7 @@ class proxyPaintContext : public MPxContext
     
     Operation m_currentOpt, mOpt;
     
-    ModifyForest::GrowOption m_growOpt;
+    aphid::ModifyForest::GrowOption m_growOpt;
     
 	int m_extractGroupCount;
 	short					start_x, start_y;
@@ -162,9 +161,13 @@ private:
 	bool rejectSmallDragDistance(int d = 2) const;
 	void clearByType();
 	void clearBySelections();
-	void setManipulator(ModifyForest::ManipulateMode x);
+	void setManipulator(aphid::ModifyForest::ManipulateMode x);
 	void startRotate();
 	void processRotate();
+    void startTranslate();
+	void processTranslate();
+    aphid::Ray getIncidentAt(int x, int y);
+    
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();
 	static void releaseCallback(void* clientData);

@@ -8,6 +8,8 @@
 
 const char helpString[] =
 			"Select a proxy viz to paint on";
+            
+using namespace aphid;
 
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
@@ -70,6 +72,9 @@ MStatus proxyPaintContext::doPress( MEvent & event )
             break;
         case opBundleRotate:
             startRotate();
+            break;
+        case opBundleTranslate:
+            startTranslate();
             break;
         default:
             ;
@@ -140,6 +145,9 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 		case opBundleRotate :
             processRotate();
             break;
+        case opBundleTranslate :
+            processTranslate();
+            break;
 		default:
 			;
 	}
@@ -169,6 +177,9 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 			break;
 		case opBundleRotate :
             PtrViz->finishRotate();
+            break;
+        case opBundleTranslate :
+            PtrViz->finishTranslate();
             break;
 		default:
 		    ;
@@ -321,6 +332,11 @@ void proxyPaintContext::setOperation(short val)
 			opstr="bundle rotate";
             mOpt = opBundleRotate;
             khand = ModifyForest::manRotate;
+			break;
+        case opBundleTranslate:
+			opstr="bundle move";
+            mOpt = opBundleTranslate;
+            khand = ModifyForest::manTranslate;
 			break;
 		default:
 			;
@@ -939,13 +955,7 @@ void proxyPaintContext::startRotate()
     if(!PtrViz) {
         return;
     }
-   
-	MPoint fromNear, fromFar;
-	view.viewToWorld ( start_x, start_y, fromNear, fromFar );
-	Vector3F a(fromNear.x, fromNear.y, fromNear.z);
-	Vector3F b(fromFar.x, fromFar.y, fromFar.z);
-	Ray r(a, b);
-	PtrViz->startRotate(r);
+	PtrViz->startRotate(getIncidentAt(start_x, start_y) );
 }
 
 void proxyPaintContext::processRotate()
@@ -953,13 +963,31 @@ void proxyPaintContext::processRotate()
     if(!PtrViz) {
         return;
     }
+	PtrViz->processRotate(getIncidentAt(last_x, last_y) );
+}
 
+void proxyPaintContext::startTranslate()
+{
+    if(!PtrViz) {
+        return;
+    }
+    PtrViz->startTranslate(getIncidentAt(start_x, start_y) );
+}
+	
+void proxyPaintContext::processTranslate()
+{
+    if(!PtrViz) {
+        return;
+    }
+	PtrViz->processTranslate(getIncidentAt(last_x, last_y) );
+}
+
+Ray proxyPaintContext::getIncidentAt(int x, int y)
+{
     MPoint fromNear, fromFar;
-	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
+	view.viewToWorld ( x, y, fromNear, fromFar );
 	Vector3F a(fromNear.x, fromNear.y, fromNear.z);
 	Vector3F b(fromFar.x, fromFar.y, fromFar.z);
-	Ray r(a, b);
-	PtrViz->processRotate(r);
-    
+	return Ray(a, b);
 }
 //:~
