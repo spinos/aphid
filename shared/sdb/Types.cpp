@@ -102,6 +102,11 @@ const bool Coord3::operator>(const Coord3 & another) const {
 	return x > another.x;
 }
 
+Coord3 Coord3::operator+(const Coord3 & another) const
+{
+    return Coord3(x + another.x, y + another.y, z + another.z);
+}
+
 Coord3 Coord3::ordered() const
 {
 	int a = x;

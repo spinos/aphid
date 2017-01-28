@@ -5,8 +5,9 @@
 #include <Base3DView.h>
 
 #include <ttg/TetrahedronGrid.h>
+#include <ogl/DrawTetrahedron.h>
 
-class GLWidget : public aphid::Base3DView
+class GLWidget : public aphid::Base3DView, public aphid::DrawTetrahedron
 {
     Q_OBJECT
 
@@ -27,12 +28,14 @@ protected:
 public slots:
 		
 private:
-
+    void drawWiredGrid();
+    void drawSolidGrid();
+    
 private slots:
 
 private:
-#define GORDER 5
-	typedef aphid::TetrahedronGrid<float, GORDER> GridT;
+#define G_ORDER 5
+	typedef aphid::TetrahedronGrid<float, G_ORDER> GridT;
 	GridT * m_tg;
 };
 

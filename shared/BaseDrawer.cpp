@@ -48,7 +48,7 @@ void BaseDrawer::initializeProfile()
 	m_markerProfile = GProfile(false, true, false, false, false);
 	m_surfaceProfile = GProfile(true, true, false, false, false);
 	surfaceMat = new GMaterial(Color4(0.1, 0.1, 0.1, 1.0),
-								Color4(0.22, 0.59, 0.84, 1.0),
+								Color4(0.22, 0.59, 0.81, 1.0),
 								Color4(0.95, 0.05, 0.0, 1.0),
 								Color4(0.0, 0.0, 0.0, 1.0),
 								Color4(0.0, 0.0, 0.0, 1.0), 

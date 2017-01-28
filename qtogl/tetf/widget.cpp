@@ -20,18 +20,25 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 GLWidget::~GLWidget()
 {}
 
+static const float stetvs[4][3] = {
+{ 0.f, 0.f, 0.f}, 
+{ 0.f, 12.f, 0.f},
+{ 12.f, 0.f, 0.f}, 
+{ -1.f, 1.f, 12.f}
+};
+
 void GLWidget::clientInit()
 {
 	cvx::Tetrahedron tetra;
-	tetra.set(Vector3F(0.f, 10.f, 0.f), 
-				Vector3F(-14.f, 4.f, 10.f),
-				Vector3F(0.f,-10.f, 0.f), 
-				Vector3F(-10.f, 4.f, -14.f) );
+	tetra.set(Vector3F(stetvs[0]), 
+				Vector3F(stetvs[1]),
+				Vector3F(stetvs[2]), 
+				Vector3F(stetvs[3]) );
 				
-	int n = GORDER;
+	int n = G_ORDER;
 	std::cout << "  N = " << n << "\n";
 	
-	TetrahedronGridUtil<GORDER> tu4;
+	TetrahedronGridUtil<G_ORDER> tu4;
 	
 	int ng = tu4.Ng;
 	std::cout << "  Ng = " << ng << "\n";
@@ -52,15 +59,61 @@ void GLWidget::clientDraw()
 	const int ng = m_tg->numPoints();
 	int i = 0;
 	for(;i<ng;++i) {
-		getDrawer()->cube(m_tg->pos(i), nz );
+		//getDrawer()->cube(m_tg->pos(i), nz );
 			
 	}
 	
-	
+	//drawWiredGrid();
+    
+    getDrawer()->m_surfaceProfile.apply();
+	drawSolidGrid();
+/*
+    glEnable(GL_CULL_FACE);
+    glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+    
+    cvx::Tetrahedron tetra;
+	tetra.set(Vector3F(stetvs[0]), 
+				Vector3F(stetvs[1]),
+				Vector3F(stetvs[2]), 
+				Vector3F(stetvs[3]) );
+    drawASolidTetrahedron(tetra);            
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+*/
 }
-//! [7]
 
-//! [9]
+void GLWidget::drawSolidGrid()
+{
+        glEnable(GL_CULL_FACE);
+    glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	cvx::Tetrahedron atet;
+    const int n = m_tg->numCells();
+    for(int i=0;i<n;++i) {
+        m_tg->getCell(atet, i);
+        glColor3f(RandomF01(), .5f, RandomF01() );
+        drawAShrinkSolidTetrahedron(atet, .67f);
+    }
+    
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void GLWidget::drawWiredGrid()
+{
+    glEnableClientState(GL_VERTEX_ARRAY);
+	cvx::Tetrahedron atet;
+    const int n = m_tg->numCells();
+    for(int i=0;i<n;++i) {
+        m_tg->getCell(atet, i);
+        drawAWireTetrahedron(atet);
+    }
+    
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+}
+
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
 }
