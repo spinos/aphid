@@ -278,10 +278,13 @@ file (GLOB APH_Kd_SRC
 ADD_LIBRARY (aphidKd ${LIB_TYP}
 ${APH_Kd_SRC})
 
-ADD_LIBRARY (aphidGraph ${LIB_TYP}
-../shared/ADistanceField.cpp
-../shared/BDistanceFunction.cpp
+file (GLOB graph_SRC
+	"../shared/graph/*.h"
+    "../shared/graph/*.cpp"
 )
+
+ADD_LIBRARY (aphidGraph ${LIB_TYP}
+${graph_SRC})
 
 file (GLOB Topo_SRC
     "../shared/topo/*.h"
@@ -306,6 +309,14 @@ file (GLOB Ogl_SRC
 
 ADD_LIBRARY (aphidOgl ${LIB_TYP}
 ${Ogl_SRC})
+
+file (GLOB ttg_SRC
+    "../shared/ttg/*.h"
+    "../shared/ttg/*.cpp"
+)
+
+ADD_LIBRARY (aphidTtg ${LIB_TYP}
+${ttg_SRC})
 
 add_library(aphid ${LIB_TYP}                 
 ##../shared/SpaceHandle.cpp                

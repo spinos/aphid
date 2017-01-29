@@ -10,7 +10,7 @@
 #include "RedBlueRefine.h"
 #include <tetrahedron_math.h>
 
-using namespace aphid;
+namespace aphid {
 
 namespace ttg {
 
@@ -117,10 +117,10 @@ float RedBlueRefine::edgeDir(const float & a, const float & b) const
 	return 0.f;
 }
 
-void RedBlueRefine::estimateNormal(const aphid::Vector3F & a,
-							const aphid::Vector3F & b,
-							const aphid::Vector3F & c,
-							const aphid::Vector3F & d)
+void RedBlueRefine::estimateNormal(const Vector3F & a,
+							const Vector3F & b,
+							const Vector3F & c,
+							const Vector3F & d)
 {
 	m_p[0] = a; m_p[1] = b;
 	m_p[2] = c; m_p[3] = d;
@@ -255,10 +255,10 @@ const int & RedBlueRefine::numFrontTriangles() const
 const IFace * RedBlueRefine::frontTriangle(const int & i) const
 { return &m_frontTri[i]; }
 
-void RedBlueRefine::splitRedEdge(int i, int v, const aphid::Vector3F & p)
+void RedBlueRefine::splitRedEdge(int i, int v, const Vector3F & p)
 { m_red[i] = v; m_p[4 + i] = p; }
 
-void RedBlueRefine::splitBlueEdge(int i, int v, const aphid::Vector3F & p)
+void RedBlueRefine::splitBlueEdge(int i, int v, const Vector3F & p)
 { m_blue[i] = v; m_p[6 + i] = p; }
 
 bool RedBlueRefine::needSplitRedEdge(int i)
@@ -732,6 +732,8 @@ void RedBlueRefine::twoBlueDownRefine()
 	}
 	m_N = 4;
 	m_numTri = 1;
+}
+
 }
 
 }

@@ -4,6 +4,9 @@
 #include <PerspectiveView.h>
 #include "widget.h"
 #include <GeoDrawer.h>
+#include <ogl/DrawGrid.h>
+#include <ttg/RedBlueRefine.h>
+#include <ttg/TetraGridEdgeMap.h>
 
 using namespace aphid;
 
@@ -21,10 +24,10 @@ GLWidget::~GLWidget()
 {}
 
 static const float stetvs[4][3] = {
-{ 0.f, 0.f, 0.f}, 
+{ -12.f, -4.f, -5.f}, 
 { 0.f, 12.f, 0.f},
-{ 12.f, 0.f, 0.f}, 
-{ -1.f, 1.f, 12.f}
+{ 16.f, -2.5f, -9.5f}, 
+{ 4.f, -8.f, 12.f}
 };
 
 void GLWidget::clientInit()
@@ -34,17 +37,21 @@ void GLWidget::clientInit()
 				Vector3F(stetvs[1]),
 				Vector3F(stetvs[2]), 
 				Vector3F(stetvs[3]) );
-				
-	int n = G_ORDER;
-	std::cout << "  N = " << n << "\n";
-	
-	TetrahedronGridUtil<G_ORDER> tu4;
-	
-	int ng = tu4.Ng;
-	std::cout << "  Ng = " << ng << "\n";
-	
-	m_tg = new GridT(tetra);
-	
+		
+    TetrahedronGridUtil<5 > tu4;
+	m_grd = new MesherT::GridT(tetra, 0);
+    
+    TFTNode anode;
+    const int nn = m_grd->numPoints();
+    std::cout << "\n n node " << nn;
+    for(int i=0;i<nn;++i) {
+        anode._distance = m_grd->pos(i).y  + 1.4f * sin(m_grd->pos(i).x * .2f + 1.f)
+                                        - cos(m_grd->pos(i).z  * .3f - 2.f) ;
+        m_grd->setValue(anode, i);
+    }
+    
+    m_mesher.triangulate(m_grd);
+    
 }
 
 void GLWidget::clientDraw()
@@ -55,18 +62,10 @@ void GLWidget::clientDraw()
 	getDrawer()->m_markerProfile.apply();
 	getDrawer()->setColor(.125f, .125f, .5f);
 	
-	const float nz = .5f;
-	const int ng = m_tg->numPoints();
-	int i = 0;
-	for(;i<ng;++i) {
-		//getDrawer()->cube(m_tg->pos(i), nz );
-			
-	}
-	
 	//drawWiredGrid();
-    
-    getDrawer()->m_surfaceProfile.apply();
-	drawSolidGrid();
+    //drawSolidGrid();
+    drawGridEdges();
+    testTriangulation();
 /*
     glEnable(GL_CULL_FACE);
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -83,16 +82,36 @@ void GLWidget::clientDraw()
 */
 }
 
+void GLWidget::drawGridEdges()
+{
+    TetraGridEdgeMap<MesherT::GridT > & edges = m_mesher.gridEdges();
+    
+    glBegin(GL_LINES);
+    edges.begin();
+    while(!edges.end() ) {
+        const sdb::Coord2 & k = edges.key();
+        
+        glVertex3fv((const float *)&m_grd->pos(k.x) );
+        glVertex3fv((const float *)&m_grd->pos(k.y) );
+        
+        edges.next();
+    }
+    glEnd();
+    
+}
+
 void GLWidget::drawSolidGrid()
 {
+    getDrawer()->m_surfaceProfile.apply();
+	
         glEnable(GL_CULL_FACE);
     glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	cvx::Tetrahedron atet;
-    const int n = m_tg->numCells();
+    const int n = m_grd->numCells();
     for(int i=0;i<n;++i) {
-        m_tg->getCell(atet, i);
-        glColor3f(RandomF01(), .5f, RandomF01() );
+        m_grd->getCell(atet, i);
+       // glColor3f(RandomF01(), .5f, RandomF01() );
         drawAShrinkSolidTetrahedron(atet, .67f);
     }
     
@@ -104,14 +123,35 @@ void GLWidget::drawWiredGrid()
 {
     glEnableClientState(GL_VERTEX_ARRAY);
 	cvx::Tetrahedron atet;
-    const int n = m_tg->numCells();
+    const int n = m_grd->numCells();
     for(int i=0;i<n;++i) {
-        m_tg->getCell(atet, i);
+        m_grd->getCell(atet, i);
         drawAWireTetrahedron(atet);
     }
     
     glDisableClientState(GL_VERTEX_ARRAY);
 
+}
+
+void GLWidget::testTriangulation()
+{
+    int ntri = m_mesher.numFrontTriangles();
+    std::cout<<"\n n tri "<<ntri;
+    
+    Vector3F * trips = new Vector3F[ntri * 3];
+    m_mesher.extractFrontTriangles(trips);
+    
+     getDrawer()->m_wireProfile.apply();
+     getDrawer()->setColor(1,.7,0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+	
+    glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)trips );
+    glDrawArrays(GL_TRIANGLES, 0, ntri * 3);
+    
+    glDisableClientState(GL_VERTEX_ARRAY);
+    
+    delete[] trips;
+        std::cout.flush();
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

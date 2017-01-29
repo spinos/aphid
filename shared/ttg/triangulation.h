@@ -6,10 +6,13 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef TTG_TRIANGULATION_H
-#define TTG_TRIANGULATION_H
-#include <AllMath.h>
+#ifndef APH_TTG_TRIANGULATION_H
+#define APH_TTG_TRIANGULATION_H
+
+#include <math/Matrix33F.h>
 #include <deque>
+
+namespace aphid {
 
 namespace ttg {
 
@@ -27,7 +30,7 @@ typedef struct {
 } IEDGE;
 
 typedef struct {
-   aphid::Vector3F pc;
+   Vector3F pc;
    float r;
 } TriCircle;
 
@@ -166,9 +169,9 @@ inline IEDGE findOppositeEdge(const ITRIANGLE * tri, const int & p)
 /// calculate circumcircle of a triangle in 2D
 /// reference http://mathworld.wolfram.com/Circumcircle.html
 inline void circumCircle(TriCircle & circ,
-						const aphid::Vector3F & p1,
-						const aphid::Vector3F & p2,
-						const aphid::Vector3F & p3)
+						const Vector3F & p1,
+						const Vector3F & p2,
+						const Vector3F & p3)
 {
 /// reference http://mathworld.wolfram.com/Circumradius.html
 	//float a = p1.distanceTo(p2);
@@ -176,7 +179,7 @@ inline void circumCircle(TriCircle & circ,
 	//float c = p3.distanceTo(p1);	
 	//circ.r = a * b * c / sqrt((a + b + c) * (b + c - a) * (c + a - b) * (a + b - c) );
 	
-	aphid::Matrix33F ma;
+	Matrix33F ma;
 	*ma.m(0, 0) = p1.x; *ma.m(0, 1) = p1.y; *ma.m(0, 2) = 1.f;
 	*ma.m(1, 0) = p2.x; *ma.m(1, 1) = p2.y; *ma.m(1, 2) = 1.f;
 	*ma.m(2, 0) = p3.x; *ma.m(2, 1) = p3.y; *ma.m(2, 2) = 1.f;
@@ -201,23 +204,23 @@ inline void circumCircle(TriCircle & circ,
 	circ.r = circ.pc.distanceTo(p1);
 }
 
-inline bool insideTri(const aphid::Vector3F & p,
-					const aphid::Vector3F & a,
-					const aphid::Vector3F & b,
-					const aphid::Vector3F & c)
+inline bool insideTri(const Vector3F & p,
+					const Vector3F & a,
+					const Vector3F & b,
+					const Vector3F & c)
 {
-	aphid::Vector3F nor = aphid::Vector3F::ZAxis;
+	Vector3F nor = Vector3F::ZAxis;
 	
-	aphid::Vector3F e01 = b - a;
-	aphid::Vector3F x0 = p - a;
+	Vector3F e01 = b - a;
+	Vector3F x0 = p - a;
 	if(e01.cross(x0).dot(nor) < 0.f) return false;
 	
-	aphid::Vector3F e12 = c - b;
-	aphid::Vector3F x1 = p - b;
+	Vector3F e12 = c - b;
+	Vector3F x1 = p - b;
 	if(e12.cross(x1).dot(nor) < 0.f) return false;
 	
-	aphid::Vector3F e20 = a - c;
-	aphid::Vector3F x2 = p - c;
+	Vector3F e20 = a - c;
+	Vector3F x2 = p - c;
 	if(e20.cross(x2).dot(nor) < 0.f) return false;
 	
 	return true;
@@ -369,7 +372,7 @@ inline void spawnEdges(std::deque<Quadrilateral> & qls)
 }
 
 inline bool canEdgeFlip(const Quadrilateral & q, 
-							const aphid::Vector3F * X)
+							const Vector3F * X)
 {
 	ITRIANGLE * tb = q.tb;
 	if(!tb) return false;
@@ -396,7 +399,7 @@ inline bool canEdgeFlip(const Quadrilateral & q,
 
 /// Lawson's algorithm
 inline void flipEdges(std::deque<Quadrilateral> & qls, 
-							const aphid::Vector3F * X)
+							const Vector3F * X)
 {
 	int nq = qls.size();
 	int i=0;
@@ -410,6 +413,8 @@ inline void flipEdges(std::deque<Quadrilateral> & qls,
 		qls.erase(qls.begin() );
 		nq = qls.size();
 	}
+}
+
 }
 
 }

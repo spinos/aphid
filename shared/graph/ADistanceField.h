@@ -9,9 +9,9 @@
 
 #pragma once
 #include "AGraph.h"
-#include "BDistanceFunction.h"
 #include <sdb/Array.h>
 #include <math/Calculus.h>
+#include <math/miscfuncs.h>
 #include <map>
 
 namespace aphid {

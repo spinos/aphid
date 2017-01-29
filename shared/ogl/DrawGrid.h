@@ -1,6 +1,7 @@
 /*
  *  DrawGrid.h
  *  
+ *  axis aligned bounding boxes as cell
  *
  *  Created by jian zhang on 1/13/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.

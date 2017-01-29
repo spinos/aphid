@@ -35,6 +35,7 @@ SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/aphidGraph.lib)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/aphidTopology.lib)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/aphidOgl.lib)
+set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/aphidTtg.lib)
 
 elseif (APPLE)
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
@@ -47,6 +48,7 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
     set (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.a)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidTopology.a)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.a)
+set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/libaphidTtg.a)
 
 ELSE ()
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
@@ -59,6 +61,7 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
     SET (APHID_GRAPH_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.so)
+set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/libaphidTtg.so)
 
 endif ()
 
@@ -72,6 +75,7 @@ message ("aphid sdb is " ${APHID_SDB_LIBRARY})
 message ("aphid graph is " ${APHID_GRAPH_LIBRARY})
 message ("aphid topo is " ${APHID_TOPO_LIBRARY})
 message ("aphid ogl is " ${APHID_OGL_LIBRARY})
+message ("aphid ttg is " ${APHID_TTG_LIBRARY})
 
 
 if(WIN32)

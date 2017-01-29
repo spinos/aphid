@@ -6,9 +6,12 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
-#include "triangulation.h"
+#ifndef APH_TTG_RED_BLUE_REFINE_H
+#define APH_TTG_RED_BLUE_REFINE_H
+
 #include "tetrahedron_graph.h"
+
+namespace aphid {
 
 namespace ttg {
 
@@ -54,8 +57,8 @@ namespace ttg {
 
 class RedBlueRefine {
 
-	aphid::Vector3F m_p[10];
-	aphid::Vector3F m_normal;
+	Vector3F m_p[10];
+	Vector3F m_normal;
 	float m_fa, m_fb, m_fc, m_fd;
 	float m_normalLen;
 	ITetrahedron m_tet[8];
@@ -91,28 +94,28 @@ public:
 	void set(int a, int b, int c, int d);
 /// distance of vertices, determine six edge splits
 	void evaluateDistance(float a, float b, float c, float d);
-	void estimateNormal(const aphid::Vector3F & a,
-							const aphid::Vector3F & b,
-							const aphid::Vector3F & c,
-							const aphid::Vector3F & d);
+	void estimateNormal(const Vector3F & a,
+							const Vector3F & b,
+							const Vector3F & c,
+							const Vector3F & d);
 	const int & numTetra() const;
 	const ITetrahedron * tetra(int i) const;
 	
-	void splitRedEdge(int i, int v, const aphid::Vector3F & p);
-	void splitBlueEdge(int i, int v, const aphid::Vector3F & p);
+	void splitRedEdge(int i, int v, const Vector3F & p);
+	void splitBlueEdge(int i, int v, const Vector3F & p);
 	bool needSplitRedEdge(int i);
 	bool needSplitBlueEdge(int i);
 	
-	aphid::Vector3F splitPos(float a, float b,
-						const aphid::Vector3F & pa,
-						const aphid::Vector3F & pb) const;
+	Vector3F splitPos(float a, float b,
+						const Vector3F & pa,
+						const Vector3F & pb) const;
 	
 	void refine();
 	void verbose() const;
 	bool hasOption() const;
 	bool checkTetraVolume() const;
 	bool hasNormal() const;
-	const aphid::Vector3F & normal() const;
+	const Vector3F & normal() const;
 	const int & numFrontTriangles() const;
 	const IFace * frontTriangle(const int & i) const;
 	
@@ -149,3 +152,6 @@ private:
 };
 
 }
+
+}
+#endif

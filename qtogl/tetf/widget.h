@@ -4,8 +4,26 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 
-#include <ttg/TetrahedronGrid.h>
+#include <ttg/TetraGridTriangulation.h>
 #include <ogl/DrawTetrahedron.h>
+
+namespace aphid {
+template<typename T>
+class TetraGridEdgeMap;
+
+namespace ttg {
+class RedBlueRefine;
+}
+
+namespace sdb {
+class Coord4;
+}
+
+}
+
+struct TFTNode {
+    float _distance;
+};
 
 class GLWidget : public aphid::Base3DView, public aphid::DrawTetrahedron
 {
@@ -30,13 +48,16 @@ public slots:
 private:
     void drawWiredGrid();
     void drawSolidGrid();
-    
+    void drawGridEdges();
+    void testTriangulation();
+               
 private slots:
 
 private:
-#define G_ORDER 5
-	typedef aphid::TetrahedronGrid<float, G_ORDER> GridT;
-	GridT * m_tg;
+typedef aphid::TetraGridTriangulation<TFTNode, 5> MesherT;
+    MesherT m_mesher;
+	MesherT::GridT * m_grd;
+
 };
 
 #endif

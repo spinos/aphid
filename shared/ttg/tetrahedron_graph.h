@@ -7,10 +7,13 @@
  *
  */
 
-#ifndef TTG_TETRAHEDRON_GRAPH_H
-#define TTG_TETRAHEDRON_GRAPH_H
+#ifndef APH_TTG_TETRAHEDRON_GRAPH_H
+#define APH_TTG_TETRAHEDRON_GRAPH_H
 
+#include "triangulation.h"
 #include <sdb/Array.h>
+
+namespace aphid {
 
 namespace ttg {
 
@@ -44,7 +47,7 @@ struct IFace {
 		tb = NULL;
 	}
 	
-	aphid::sdb::Coord3 key;
+	sdb::Coord3 key;
 	ITetrahedron * ta;
 	ITetrahedron * tb;
 };
@@ -355,7 +358,7 @@ inline bool findEdgeNeighborPair(IEdge * e,
 
 inline bool findTetrahedronEdge(IEdge * e,
                                 const ITetrahedron * a,
-                                 const aphid::Float4 & coord)
+                                 const Float4 & coord)
 {
     bool hasOne = false;
     bool hasTwo = false;
@@ -470,7 +473,7 @@ inline ITRIANGLE oppositeFace(const ITetrahedron * t,
 
 inline bool findTetrahedronFace(IFace * f,
 								 ITetrahedron * a,
-                                 const aphid::Float4 & coord)
+                                 const Float4 & coord)
 {
 	int vx = -1;
 	if(coord.x < .03f) vx = a->iv0;
@@ -481,7 +484,7 @@ inline bool findTetrahedronFace(IFace * f,
 	
 	ITRIANGLE trif = oppositeFace(a, vx);
 	
-	f->key = aphid::sdb::Coord3(trif.p1, trif.p2, trif.p3);
+	f->key = sdb::Coord3(trif.p1, trif.p2, trif.p3);
 	f->ta = a;
 	int side = findTetrahedronFace(a, &trif);
 	f->tb = tetrahedronNeighbor(a, side);
@@ -489,7 +492,7 @@ inline bool findTetrahedronFace(IFace * f,
 	return true;
 }
 
-inline void connectTetrahedrons(aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+inline void connectTetrahedrons(sdb::Array<sdb::Coord3, IFace > & faces)
 {
 	faces.begin();
 	while(!faces.end() ) {
@@ -509,7 +512,7 @@ inline void connectTetrahedrons(aphid::sdb::Array<aphid::sdb::Coord3, IFace > & 
 }
 
 inline void getBoundary(std::vector<IFace *> & boundary,
-						aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+						sdb::Array<sdb::Coord3, IFace > & faces)
 {
 	faces.begin();
 	while(!faces.end() ) {
@@ -610,13 +613,12 @@ inline void expandTetrahedronRegion(std::vector<ITetrahedron *> & tets,
 }
 
 inline void addTetrahedronFaces(ITetrahedron * t,
-					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+					sdb::Array<sdb::Coord3, IFace > & faces)
 {
 	ITRIANGLE fa;
-	int i=0;
-	for(;i<4;++i) {
+	for(int i=0;i<4;++i) {
 		faceOfTetrahedron(&fa, t, i);
-		aphid::sdb::Coord3 itri = aphid::sdb::Coord3(fa.p1, fa.p2, fa.p3).ordered();
+		sdb::Coord3 itri = sdb::Coord3(fa.p1, fa.p2, fa.p3).ordered();
 		IFace * tri = faces.find(itri );
 		if(!tri) {
 			tri = new IFace;
@@ -633,9 +635,9 @@ inline void addTetrahedronFaces(ITetrahedron * t,
 
 inline void addTetrahedronFace(ITetrahedron * t,
 					const int & va, const int & vb, const int & vc,
-					aphid::sdb::Array<aphid::sdb::Coord3, IFace > & faces)
+					sdb::Array<sdb::Coord3, IFace > & faces)
 {
-	aphid::sdb::Coord3 itri = aphid::sdb::Coord3(va, vb, vc).ordered();
+	sdb::Coord3 itri = sdb::Coord3(va, vb, vc).ordered();
 	IFace * tri = faces.find(itri );
 	if(tri)
 		tri->tb = t;
@@ -659,6 +661,8 @@ inline void printBipyramidVertices(const Bipyramid * pyra)
 	std::cout<<" bipyramid ("<<pyra->iv0<<", "
 		<<pyra->iv1<<", "<<pyra->iv2<<", "<<pyra->iv3<<", "
 		<<pyra->iv4<<") ";
+}
+
 }
 
 }

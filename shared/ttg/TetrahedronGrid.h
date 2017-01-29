@@ -25,7 +25,8 @@ public:
 	
 	static void BuildVertices(sdb::Array<sdb::Coord3, int> & verts,
                 Vector3F * pos,
-				const cvx::Tetrahedron & teta);
+				const cvx::Tetrahedron & teta,
+                const int & firstVertex);
 	static void BuildCells(std::vector<sdb::Coord4> & tets,
                 sdb::Array<sdb::Coord3, int> & verts);
 
@@ -116,7 +117,8 @@ void TetrahedronGridUtil<N>::initWei()
 template <int N>
 void TetrahedronGridUtil<N>::BuildVertices(sdb::Array<sdb::Coord3, int> & verts,
                 Vector3F * pos,
-				const cvx::Tetrahedron & teta)
+				const cvx::Tetrahedron & teta,
+                const int & firstVertex)
 {
 	int i;
   int j;
@@ -138,7 +140,7 @@ void TetrahedronGridUtil<N>::BuildVertices(sdb::Array<sdb::Coord3, int> & verts,
                         
         sdb::Coord3 t0(i, j, k);
             int * ind = new int;
-            *ind = p;
+            *ind = p + firstVertex;
             verts.insert(t0, ind);
 						
         p++;
@@ -219,9 +221,11 @@ class TetrahedronGrid
 	Vector3F * m_pos;
     sdb::Coord4 * m_cells;
     int m_numCells;
+    int m_vertexOffset;
 	
 public:
-	TetrahedronGrid(const cvx::Tetrahedron & tetra);
+	TetrahedronGrid(const cvx::Tetrahedron & tetra,
+                    const int & firstVertex = 0);
 	virtual ~TetrahedronGrid();
 	
 	int numPoints() const;
@@ -229,6 +233,10 @@ public:
 	const Vector3F & pos(const int & i) const;
 	const Tv & value(const int & i) const;
     void getCell(cvx::Tetrahedron & tet,
+                const int & i) const;
+    const sdb::Coord4 & cellVertices(const int & i) const;
+                
+    void setValue(const Tv & v,
                 const int & i);
 	
 protected:
@@ -238,32 +246,28 @@ private:
 };
 
 template <typename Tv, int N>
-TetrahedronGrid<Tv, N>::TetrahedronGrid(const cvx::Tetrahedron & tetra)
+TetrahedronGrid<Tv, N>::TetrahedronGrid(const cvx::Tetrahedron & tetra,
+                                const int & firstVertex)
 {
+    m_vertexOffset = firstVertex;
+    
 	int ng = numPoints();
 	m_value = new Tv[ng];
 	m_pos = new Vector3F[ng];
 	
     sdb::Array<sdb::Coord3, int> vind;
-	TetrahedronGridUtil<N>::BuildVertices(vind, m_pos, tetra);
-    
-    vind.begin();
-    while(!vind.end() ) {
-         std::cout<<"\n v "<<vind.key()
-                    <<" = "<<*vind.value();
-        vind.next();
-    }
+	TetrahedronGridUtil<N>::BuildVertices(vind, m_pos, tetra, firstVertex);
 	
     std::vector<sdb::Coord4> cind;
     TetrahedronGridUtil<N>::BuildCells(cind, vind);
     
     m_numCells = cind.size();
-    std::cout<<"\n ncells "<<m_numCells;
     m_cells = new sdb::Coord4[m_numCells];
     for(int i=0;i<m_numCells;++i) {
         m_cells[i] = cind[i];
     }
     
+    vind.clear();
 }
 
 template <typename Tv, int N>
@@ -291,11 +295,25 @@ const int & TetrahedronGrid<Tv, N>::numCells() const
 { return m_numCells; }
 
 template <typename Tv, int N>
+const sdb::Coord4 & TetrahedronGrid<Tv, N>::cellVertices(const int & i) const
+{ return m_cells[i]; }
+
+template <typename Tv, int N>
 void TetrahedronGrid<Tv, N>::getCell(cvx::Tetrahedron & tet,
+                const int & i) const
+{
+    const sdb::Coord4 & c = cellVertices(i);
+    tet.set(m_pos[c.x - m_vertexOffset], 
+            m_pos[c.y - m_vertexOffset], 
+            m_pos[c.z - m_vertexOffset], 
+            m_pos[c.w - m_vertexOffset]);
+}
+
+template <typename Tv, int N>
+void TetrahedronGrid<Tv, N>::setValue(const Tv & v,
                 const int & i)
 {
-    const sdb::Coord4 & c = m_cells[i];
-    tet.set(m_pos[c.x], m_pos[c.y], m_pos[c.z], m_pos[c.w]);
+    m_value[i] = v;
 }
 
 }
