@@ -30,6 +30,7 @@ class AGraph {
 	Tn * m_nodes;
 	
 public:
+
 	AGraph();
 	virtual ~AGraph();
 	

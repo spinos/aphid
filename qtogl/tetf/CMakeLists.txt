@@ -18,6 +18,7 @@ target_link_libraries (tetf ${APHID_UI_LIBRARY})
 target_link_libraries (tetf ${APHID_SDB_LIBRARY})
 target_link_libraries (tetf ${APHID_TOPO_LIBRARY})
 target_link_libraries (tetf ${APHID_OGL_LIBRARY})
+target_link_libraries (tetf ${APHID_GRAPH_LIBRARY})
 target_link_libraries (tetf ${APHID_TTG_LIBRARY})
 
 target_link_libraries (tetf ${Boost_SYSTEM_LIBRARY})

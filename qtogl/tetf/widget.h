@@ -8,16 +8,19 @@
 #include <ogl/DrawTetrahedron.h>
 
 namespace aphid {
-template<typename T>
-class TetraGridEdgeMap;
 
 namespace ttg {
-class RedBlueRefine;
+
+template<typename T>
+class TetrahedronDistanceField;
+
 }
 
-namespace sdb {
-class Coord4;
-}
+template<typename T1, typename T2>
+class DrawGraph;
+
+struct DistanceNode;
+struct IDistanceEdge;
 
 }
 
@@ -49,7 +52,8 @@ private:
     void drawWiredGrid();
     void drawSolidGrid();
     void drawGridEdges();
-    void testTriangulation();
+    void drawField();
+    void drawTriangulation();
                
 private slots:
 
@@ -57,7 +61,11 @@ private:
 typedef aphid::TetraGridTriangulation<TFTNode, 5> MesherT;
     MesherT m_mesher;
 	MesherT::GridT * m_grd;
+    aphid::ttg::TetrahedronDistanceField<MesherT::GridT > * m_field;
 
+typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
+    FieldDrawerT * m_fieldDrawer;
+    
 };
 
 #endif

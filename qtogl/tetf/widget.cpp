@@ -6,7 +6,8 @@
 #include <GeoDrawer.h>
 #include <ogl/DrawGrid.h>
 #include <ttg/RedBlueRefine.h>
-#include <ttg/TetraGridEdgeMap.h>
+#include <ttg/TetrahedronDistanceField.h>
+#include <ogl/DrawGraph.h>
 
 using namespace aphid;
 
@@ -24,7 +25,7 @@ GLWidget::~GLWidget()
 {}
 
 static const float stetvs[4][3] = {
-{ -12.f, -4.f, -5.f}, 
+{ -12.f, -4.f, -9.f}, 
 { 0.f, 12.f, 0.f},
 { 16.f, -2.5f, -9.5f}, 
 { 4.f, -8.f, 12.f}
@@ -52,6 +53,11 @@ void GLWidget::clientInit()
     
     m_mesher.triangulate(m_grd);
     
+    m_field = new ttg::TetrahedronDistanceField<MesherT::GridT >();
+    m_field->buildGraph(m_grd, &m_mesher.gridEdges() );
+    
+    m_fieldDrawer = new FieldDrawerT;
+    m_fieldDrawer->initGlsl();
 }
 
 void GLWidget::clientDraw()
@@ -64,8 +70,8 @@ void GLWidget::clientDraw()
 	
 	//drawWiredGrid();
     //drawSolidGrid();
-    drawGridEdges();
-    testTriangulation();
+    drawField();
+    drawTriangulation();
 /*
     glEnable(GL_CULL_FACE);
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -97,7 +103,13 @@ void GLWidget::drawGridEdges()
         edges.next();
     }
     glEnd();
-    
+
+}
+
+void GLWidget::drawField()
+{
+    m_fieldDrawer->drawEdge(m_field);
+    m_fieldDrawer->drawNode(m_field);
 }
 
 void GLWidget::drawSolidGrid()
@@ -133,11 +145,10 @@ void GLWidget::drawWiredGrid()
 
 }
 
-void GLWidget::testTriangulation()
+void GLWidget::drawTriangulation()
 {
     int ntri = m_mesher.numFrontTriangles();
-    std::cout<<"\n n tri "<<ntri;
-    
+
     Vector3F * trips = new Vector3F[ntri * 3];
     m_mesher.extractFrontTriangles(trips);
     
@@ -151,7 +162,6 @@ void GLWidget::testTriangulation()
     glDisableClientState(GL_VERTEX_ARRAY);
     
     delete[] trips;
-        std::cout.flush();
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

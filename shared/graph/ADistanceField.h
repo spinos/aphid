@@ -52,7 +52,7 @@ class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
 public:
 	ADistanceField();
 	virtual ~ADistanceField();
-	
+    
 	void nodeColor(Vector3F & dst, const DistanceNode & n,
 					const float & scale) const;
 	
