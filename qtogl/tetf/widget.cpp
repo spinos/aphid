@@ -27,9 +27,9 @@ GLWidget::~GLWidget()
 
 static const float stetvs[4][3] = {
 { -12.f, -4.f, -9.f}, 
-{ 0.f, 12.f, 0.f},
+{ 0.f, 15.f, -2.f},
 { 16.f, -2.5f, -9.5f}, 
-{ 4.f, -8.f, 12.f}
+{ 4.f, -12.f, 12.f}
 };
 
 void GLWidget::clientInit()
@@ -43,6 +43,7 @@ void GLWidget::clientInit()
     TetrahedronGridUtil<5 > tu4;
 	m_grd = new MesherT::GridT(tetra, 0);
     
+#if 0
     TFTNode anode;
     const int nn = m_grd->numPoints();
     std::cout << "\n n node " << nn;
@@ -51,8 +52,9 @@ void GLWidget::clientInit()
                                         - cos(m_grd->pos(i).z  * .3f - 2.f) ;
         m_grd->setValue(anode, i);
     }
+#endif
     
-    m_mesher.triangulate(m_grd);
+    m_mesher.setGrid(m_grd);
     
     m_field = new ttg::TetrahedronDistanceField<MesherT::GridT >();
     m_field->buildGraph(m_grd, &m_mesher.gridEdges() );
@@ -61,13 +63,13 @@ void GLWidget::clientInit()
     m_fieldDrawer->initGlsl();
     
     cvx::Triangle * ta = new cvx::Triangle;
-	ta->set(Vector3F(-12, -4, 8), Vector3F(3, -1, 13), Vector3F(-7, 1, -14) );
+	ta->set(Vector3F(-12, -4, 8), Vector3F(3, -5, 14), Vector3F(-7, 1, -14) );
 	m_ground.push_back(ta);
 	cvx::Triangle * tb = new cvx::Triangle;
-	tb->set(Vector3F(-7, 1, -14), Vector3F(3, -1, 13), Vector3F(8, 2, -12) );
+	tb->set(Vector3F(-7, 1, -14), Vector3F(3, -5, 14), Vector3F(8, 2, -12) );
 	m_ground.push_back(tb);
     cvx::Triangle * tc = new cvx::Triangle;
-	tc->set(Vector3F(8, 2, -12), Vector3F(3, -1, 13), Vector3F(22, -3, -8) );
+	tc->set(Vector3F(8, 2, -12), Vector3F(3, -5, 14), Vector3F(22, -5, -8) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
 	td->set(Vector3F(-7, 1, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
@@ -81,7 +83,10 @@ void GLWidget::clientInit()
 typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(&m_sels, &m_ground);
     
-    m_field->findEdgeCross<TIntersect>(&fintersect);
+    m_field->calculateDistance<TIntersect>(&fintersect);
+    m_field->updateGrid(m_grd);
+    
+    m_mesher.triangulate();
     
 }
 

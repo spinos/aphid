@@ -32,6 +32,9 @@ public:
     const Vector3F & rayIntersectPoint() const;
 	const Vector3F & rayIntersectNormal() const;
     
+    void getAggregatedPositionNormal(Vector3F & resultP,
+                        Vector3F& resultN);
+                        
 };
 
 template<typename Tind, typename Tsrc, typename Tprim>
@@ -104,6 +107,32 @@ const Vector3F & PrimInd<Tind, Tsrc, Tprim>::rayIntersectPoint() const
 template<typename Tind, typename Tsrc, typename Tprim>
 const Vector3F & PrimInd<Tind, Tsrc, Tprim>::rayIntersectNormal() const
 { return m_ctx.m_hitN; }
+
+template<typename Tind, typename Tsrc, typename Tprim>
+void PrimInd<Tind, Tsrc, Tprim>::getAggregatedPositionNormal(Vector3F & resultP,
+                        Vector3F& resultN)
+{
+    resultP.set(0.f, 0.f, 0.f);
+    resultN.set(0.f, 0.f, 0.f);
+    
+    int c = 0;
+    const Tsrc & rsrc = *m_src;
+	m_ind->begin();
+	while(!m_ind->end() ) {
+		
+		const Tprim * t = rsrc[m_ind->key() ];
+		
+        resultP += t->center();
+        resultN += t->calculateNormal();
+		c++;
+		
+		m_ind->next();
+	}
+    
+    resultP /= (float)c;
+    resultN.normalize();
+    
+}
 
 }
 

@@ -51,101 +51,10 @@ void ADistanceField::markUnknownNodes()
 	std::cout<<"\n known node "<<ck<<"/"<<n;
 }
 
-void ADistanceField::fastMarchingMethod()
-{
-/// heap of trial
-	std::map<int, int> trials;
-	const int n = numNodes();
-	int i = 0;
-	for(;i<n;++i) {
-		DistanceNode & d = nodes()[i];
-		if(d.stat == sdf::StKnown) {
-			propagate(trials, i);
-		}
-	}
-	
-/// for each trial
-	while (trials.size() > 0) {
-
-/// A is first in trial		
-		i = trials.begin()->first;
-/// distance is known after propagation
-		nodes()[i].stat = sdf::StKnown;
-/// remove A from trial
-		trials.erase(trials.begin() );
-		
-/// from A
-		propagate(trials, i);
-		
-		//std::cout<<"\n trial n "<<trials.size();
-		//std::cout.flush();
-	}
-}
-
-/// A to B
-void ADistanceField::propagate(std::map<int, int > & heap, 
-												const int & i)
-{
-	const DistanceNode & A = nodes()[i];
-	
-/// for each neighbor of A
-	const int endj = edgeBegins()[i+1];
-	int vj, j = edgeBegins()[i];
-	for(;j<endj;++j) {
-		
-		int k = edgeIndices()[j];
-
-		const IDistanceEdge & eg = edges()[k];
-		
-		vj = eg.vi.x;
-		if(vj == i)
-			vj = eg.vi.y;
-			
-		DistanceNode & B = nodes()[vj];
-		if(B.stat == sdf::StUnknown) {
-		
-/// min distance to B via A
-/// need eikonal approximation here
-			if(A.val + eg.len < B.val)
-				B.val = A.val + eg.len;
-				
-/// add to trial
-			heap[vj] = 0;
-		}
-	}
-}
-
-void ADistanceField::propagateVisit(std::map<int, int > & heap, const int & i)
-{
-	const DistanceNode & A = nodes()[i];
-	
-/// for each neighbor of A
-	const int endj = edgeBegins()[i+1];
-	int vj, j = edgeBegins()[i];
-	for(;j<endj;++j) {
-		
-		int k = edgeIndices()[j];
-
-		const IDistanceEdge & eg = edges()[k];
-		
-		vj = eg.vi.x;
-		if(vj == i)
-			vj = eg.vi.y;
-			
-		DistanceNode & B = nodes()[vj];
-/// do not cross front
-		if(eg.cx < 0.f) {
-/// do not visit inside
-			if( B.val > 1e-3f && B.stat == sdf::StFar) 
-				heap[vj] = 0;
-		}
-	}
-}
-
 /// Dijkstra
 void ADistanceField::markInsideOutside(const int & originNodeInd)
 {
-	setNodeFar();
+	unvisitAllNodes();
 	int i = originNodeInd;
 	if(i < 0) {
 		i = lastBackgroundNode();
@@ -181,17 +90,6 @@ void ADistanceField::markInsideOutside(const int & originNodeInd)
 	
 }
 
-/// un-visit all
-void ADistanceField::setNodeFar()
-{
-	const int n = numNodes();
-	int i = 0;
-	for(;i<n;++i) {
-		DistanceNode & d = nodes()[i];
-		d.stat = sdf::StFar;
-	}
-}
-
 int ADistanceField::lastBackgroundNode() const
 {
 	int i = numNodes() - 1;
@@ -200,20 +98,6 @@ int ADistanceField::lastBackgroundNode() const
 			return i;
 	}
 	return 0;
-}
-
-void ADistanceField::setFarNodeInside()
-{
-	const int n = numNodes();
-	int i = 0;
-	for(;i<n;++i) {
-		DistanceNode & d = nodes()[i];
-		if(d.stat == sdf::StFar) {
-/// inside distance is negative
-			if(d.val > 0.f)
-				d.val = -d.val;
-		}
-	}
 }
 
 void ADistanceField::clearDirtyEdges()

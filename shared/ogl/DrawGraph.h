@@ -35,7 +35,8 @@ public:
     void drawNode(const AGraph<Tn, Te > * gph);
     
 protected:
-
+    void getNodeColor(float * col, const float & val);
+    
 private:
 
 };
@@ -112,6 +113,8 @@ void DrawGraph<Tn, Te>::drawNode(const AGraph<Tn, Te > * gph)
 	    glMultiTexCoord4fv(GL_TEXTURE1, (const float *)&row[0]);
 	    glMultiTexCoord4fv(GL_TEXTURE2, (const float *)&row[1]);
 	    glMultiTexCoord4fv(GL_TEXTURE3, (const float *)&row[2]);
+        
+        getNodeColor((float *)&row[3], ns[i].val);
 		m_instancer->setDiffueColorVec((const float *)&row[3]);
 	    
 	    drawAGlyph();
@@ -123,6 +126,30 @@ void DrawGraph<Tn, Te>::drawNode(const AGraph<Tn, Te > * gph)
 	
 	m_instancer->programEnd();
     
+}
+
+template<typename Tn, typename Te>
+void DrawGraph<Tn, Te>::getNodeColor(float * col, const float & val)
+{
+    if(val > 1e7f) {
+        col[0] = col[1] = col[2] = .1f;
+    } else if (val < 0.f) {
+        float a = -val / 16.f;
+        if(a > 1.f) {
+            a = 1.f;
+        }
+        col[0] = 0.f;
+        col[1] = a;
+        col[2] = 1.f;
+    } else {
+        float a = val / 16.f;
+        if(a > 1.f) {
+            a = 1.f;
+        }
+        col[0] = 1.f;
+        col[1] = a;
+        col[2] = 0.f;
+    }
 }
 
 }

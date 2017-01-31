@@ -12,7 +12,6 @@
 #include <sdb/Array.h>
 #include <math/Calculus.h>
 #include <math/miscfuncs.h>
-#include <map>
 
 namespace aphid {
  
@@ -123,7 +122,7 @@ public:
 	void markInsideOutside2(Tf * func, const int & originNodeInd,
 							bool oneSided)
 	{
-		setNodeFar();
+		unvisitAllNodes();
 		int i = originNodeInd;
 		if(i < 0) {
 			i = lastBackgroundNode();
@@ -362,10 +361,7 @@ protected:
 /// edges marked to estimate error
 	void clearDirtyEdges();
 	void addDirtyEdge(const int & a, const int & b);
-	
-/// propagate distance value	
-	void fastMarchingMethod();
-	
+
 	bool isNodeBackground(const int & i) const;
 	
 /// into field
@@ -404,11 +400,7 @@ protected:
 	bool isNodeOnFrontBoundary(int vi) const;
 							
 private:
-	void propagate(std::map<int, int > & heap, const int & i);
-	void propagateVisit(std::map<int, int > & heap, const int & i);
 	int lastBackgroundNode() const;
-	void setFarNodeInside();
-	void setNodeFar();
 	
 	template<typename Ts>
 	void extractGridNodesIn(DistanceNode * dst,

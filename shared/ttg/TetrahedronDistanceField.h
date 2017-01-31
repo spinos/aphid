@@ -27,6 +27,7 @@ public:
     virtual ~TetrahedronDistanceField();
     
     void buildGraph(T * grid, TetraGridEdgeMap<T > * edgeMap);
+    void updateGrid(T * grid) const;
     
 protected:
 
@@ -114,6 +115,15 @@ void TetrahedronDistanceField<T>::extractGridPos(T * grid)
     const int n = grid->numPoints();
     for(int i=0;i<n;++i) {
         dst[i].pos = grid->pos(i);
+    }
+}
+
+template<typename T>
+void TetrahedronDistanceField<T>::updateGrid(T * grid) const
+{
+    const int & nv = grid->numPoints();
+    for(int i=0;i<nv;++i) {
+        grid->setNodeDistance(nodes()[i].val, i);
     }
 }
 

@@ -238,6 +238,8 @@ public:
                 
     void setValue(const Tv & v,
                 const int & i);
+                
+    void setNodeDistance(const float & v, const int & i);
 	
 protected:
 
@@ -314,6 +316,12 @@ void TetrahedronGrid<Tv, N>::setValue(const Tv & v,
                 const int & i)
 {
     m_value[i] = v;
+}
+
+template <typename Tv, int N>
+void TetrahedronGrid<Tv, N>::setNodeDistance(const float & v, const int & i)
+{
+    m_value[i]._distance = v;
 }
 
 }

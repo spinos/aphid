@@ -34,7 +34,9 @@ public:
     TetraGridTriangulation();
     virtual ~TetraGridTriangulation();
     
-    void triangulate(TetrahedronGrid<Tv, N> * g);
+    void setGrid(TetrahedronGrid<Tv, N> * g);
+    
+    void triangulate();
     
     TetraGridEdgeMap<TetrahedronGrid<Tv, N> > & gridEdges();
     int numFrontTriangles();
@@ -83,12 +85,15 @@ TetraGridTriangulation<Tv, N>::~TetraGridTriangulation()
 }
 
 template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::triangulate(TetrahedronGrid<Tv, N> * g)
+void TetraGridTriangulation<Tv, N>::setGrid(TetrahedronGrid<Tv, N> * g)
 {
     m_tg = g;
-    
     m_edgeMap = new TetraGridEdgeMap<GridT >(m_tg);
-    
+}
+
+template <typename Tv, int N>
+void TetraGridTriangulation<Tv, N>::triangulate()
+{
     const int ne = m_edgeMap->size();
     m_cutEdgePos = new Vector3F[ne];
     

@@ -11,6 +11,7 @@
 #define APH_GRAPH_BASE_DISTANCE_FIELD_H
 
 #include "AGraph.h"
+#include <map>
 
 namespace aphid {
 
@@ -50,13 +51,15 @@ public:
     BaseDistanceField();
     virtual ~BaseDistanceField();
     
-/// find edge cross front, assign distance to nodes
     template<typename Tf>
-    void findEdgeCross(Tf * intersectF) 
+    void calculateDistance(Tf * intersectF) 
     {
+        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+        
         IDistanceEdge * egs = edges();
         DistanceNode * nds = nodes();
         
+/// find edge cross front, assign distance to connected nodes        
         Vector3F por;
         const int & ne = numEdges();
         for(int i=0;i<ne;++i) {
@@ -69,24 +72,59 @@ public:
            
             if(intersectF->rayIntersect(r) ) {
                 const Vector3F & crossp = intersectF->rayIntersectPoint();
-                const float d1 = crossp.distanceTo(node1.pos);
+                float d1 = crossp.distanceTo(node1.pos);
+                float d2 = e.len - d1;
+                
                 if(node1.val > d1) {
                     node1.val = d1;
+                    node1.stat = sdf::StKnown;
                 }
-                const float d2 = crossp.distanceTo(node2.pos);
+                
                 if(node2.val > d2) {
                     node2.val = d2;
+                    node2.stat = sdf::StKnown;
                 }
-                e.cx = d1 / (d1 + d2);
+                e.cx = d1 / e.len;
+            } else {
+                e.cx = -1.f;
             }
             
         }
+        
+/// propagate distance to all nodes        
+        fastMarchingMethod();
+        
+        //expandFront(1.f);
+        
+        unvisitAllNodes();
+        
+        Vector3F agp, agn;
+        intersectF->getAggregatedPositionNormal(agp, agn);
+        
+        int iFar = nodeFarthestFrom(agp, agn);
+/// visit out nodes
+        marchOutside(iFar);
+        
+/// unvisited nodes are inside
+        setFarNodeInside();
+        
     }
     
-protected:
-
+protected:	
+	void resetNodes(float val, sdf::NodeState lab, sdf::NodeState stat);
+    void unvisitAllNodes();
+    void fastMarchingMethod();
+	void marchOutside(const int & originNodeInd);
+    void setFarNodeInside();
+    void propagateVisit(std::map<int, int > & heap, const int & i);
+	void expandFront(const float & x);
+    
 private:
-
+/// propagate distance value
+    void propagate(std::map<int, int > & heap, const int & i);
+	int nodeFarthestFrom(const Vector3F & origin,
+                        const Vector3F & dir) const;
+        
 };
 
 }
