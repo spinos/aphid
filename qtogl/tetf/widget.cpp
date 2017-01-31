@@ -8,6 +8,7 @@
 #include <ttg/RedBlueRefine.h>
 #include <ttg/TetrahedronDistanceField.h>
 #include <ogl/DrawGraph.h>
+#include <geom/PrimInd.h>
 
 using namespace aphid;
 
@@ -58,6 +59,30 @@ void GLWidget::clientInit()
     
     m_fieldDrawer = new FieldDrawerT;
     m_fieldDrawer->initGlsl();
+    
+    cvx::Triangle * ta = new cvx::Triangle;
+	ta->set(Vector3F(-12, -4, 8), Vector3F(3, -1, 13), Vector3F(-7, 1, -14) );
+	m_ground.push_back(ta);
+	cvx::Triangle * tb = new cvx::Triangle;
+	tb->set(Vector3F(-7, 1, -14), Vector3F(3, -1, 13), Vector3F(8, 2, -12) );
+	m_ground.push_back(tb);
+    cvx::Triangle * tc = new cvx::Triangle;
+	tc->set(Vector3F(8, 2, -12), Vector3F(3, -1, 13), Vector3F(22, -3, -8) );
+	m_ground.push_back(tc);
+    cvx::Triangle * td = new cvx::Triangle;
+	td->set(Vector3F(-7, 1, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
+	m_ground.push_back(td);
+	
+	m_sels.insert(0);
+	m_sels.insert(1);
+    m_sels.insert(2);
+    m_sels.insert(3);
+    
+typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
+	TIntersect fintersect(&m_sels, &m_ground);
+    
+    m_field->findEdgeCross<TIntersect>(&fintersect);
+    
 }
 
 void GLWidget::clientDraw()
@@ -68,7 +93,7 @@ void GLWidget::clientDraw()
 	getDrawer()->m_markerProfile.apply();
 	getDrawer()->setColor(.125f, .125f, .5f);
 	
-	//drawWiredGrid();
+	drawGround();
     //drawSolidGrid();
     drawField();
     drawTriangulation();
@@ -86,6 +111,26 @@ void GLWidget::clientDraw()
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 */
+}
+
+void GLWidget::drawGround()
+{
+    glBegin(GL_LINES);
+    m_sels.begin();
+    while(!m_sels.end() ) {
+        const int & k = m_sels.key();
+        const cvx::Triangle * t = m_ground[k];
+        
+        glVertex3fv((const float *)&t->X(0) );
+        glVertex3fv((const float *)&t->X(1) );
+        glVertex3fv((const float *)&t->X(1) );
+        glVertex3fv((const float *)&t->X(2) );
+        glVertex3fv((const float *)&t->X(2) );
+        glVertex3fv((const float *)&t->X(0) );
+        
+        m_sels.next();
+    }
+    glEnd();
 }
 
 void GLWidget::drawGridEdges()

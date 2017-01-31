@@ -8,43 +8,15 @@
  */
 
 #pragma once
-#include "AGraph.h"
+#include "BaseDistanceField.h"
 #include <sdb/Array.h>
 #include <math/Calculus.h>
 #include <math/miscfuncs.h>
 #include <map>
 
 namespace aphid {
-
-namespace sdf {
-enum NodeState {
-	StBackGround = 0,
-	StFront = 1,
-	StUnknown = 2,
-	StKnown = 3,
-	StFar = 4,
-	StVisited = 5
-};
-
-}
-
-struct DistanceNode {
-	
-	Vector3F pos;
-	float val;
-	short label;
-	short stat;
-};
-
-struct IDistanceEdge {
-
-	sdb::Coord2 vi; /// ind to node
-	float len; /// length of edge
-	float err; /// max error of distance always positive
-	float cx; /// x [0,1] where front cross
-};
  
-class ADistanceField : public AGraph<DistanceNode, IDistanceEdge > {
+class ADistanceField : public BaseDistanceField {
 
 	sdb::Sequence<sdb::Coord2 > m_dirtyEdges;
 	float m_mxErr, m_mnErr;

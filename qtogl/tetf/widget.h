@@ -9,6 +9,10 @@
 
 namespace aphid {
 
+namespace cvx {
+class Triangle;
+}
+
 namespace ttg {
 
 template<typename T>
@@ -49,6 +53,7 @@ protected:
 public slots:
 		
 private:
+    void drawGround();
     void drawWiredGrid();
     void drawSolidGrid();
     void drawGridEdges();
@@ -65,6 +70,9 @@ typedef aphid::TetraGridTriangulation<TFTNode, 5> MesherT;
 
 typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
     FieldDrawerT * m_fieldDrawer;
+    
+    std::vector<aphid::cvx::Triangle * > m_ground;
+    aphid::sdb::Sequence<int> m_sels;
     
 };
 

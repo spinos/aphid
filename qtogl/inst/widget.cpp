@@ -3,6 +3,7 @@
 #include "widget.h"
 #include <GeoDrawer.h>
 #include <sdb/ebp.h>
+#include <geom/PrimInd.h>
 
 using namespace aphid;
 

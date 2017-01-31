@@ -10,7 +10,7 @@
 #ifndef APH_TTG_TETRAHEDRON_DISTANCE_FIELD_H
 #define APH_TTG_TETRAHEDRON_DISTANCE_FIELD_H
 
-#include <graph/ADistanceField.h>
+#include <graph/BaseDistanceField.h>
 #include <ttg/TetraGridEdgeMap.h>
 #include <vector>
 #include <map>
@@ -20,7 +20,7 @@ namespace aphid {
 namespace ttg {
 
 template<typename T>
-class TetrahedronDistanceField : public ADistanceField {
+class TetrahedronDistanceField : public BaseDistanceField {
 
 public:
     TetrahedronDistanceField();
@@ -82,7 +82,7 @@ void TetrahedronDistanceField<T>::buildGraph(T * grid,
     int nv = grid->numPoints();
 	int ne = edgeMap->size();
 	int ni = edgeInds.size();
-	ADistanceField::create(nv, ne, ni);
+	BaseDistanceField::create(nv, ne, ni);
     
     extractGridPos(grid);
 	extractEdges(edgeMap);

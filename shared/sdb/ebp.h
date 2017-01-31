@@ -14,52 +14,6 @@
 
 namespace aphid {
 
-template<typename Tind, typename Tsrc, typename Tprim>
-class PrimInd : public BoundingBox {
-	
-	Tind * m_ind;
-	const Tsrc * m_src;
-	
-public:
-	PrimInd(Tind * ind, const Tsrc * src)
-	{
-		m_ind = ind;
-		m_src = src;
-		const Tsrc & rsrc = *src;
-		m_ind->begin();
-		while(!m_ind->end() ) {
-			
-			const Tprim * t = rsrc[m_ind->key() ];
-			expandBy(t->calculateBBox() );
-			
-			m_ind->next();
-		}
-	}
-	
-	bool intersect(const BoundingBox & box);
-	
-};
-
-template<typename Tind, typename Tsrc, typename Tprim>
-bool PrimInd<Tind, Tsrc, Tprim>::intersect(const BoundingBox & box)
-{
-	if(!box.intersect(*this) ) return false;
-	
-	const Tsrc & rsrc = *m_src;
-	m_ind->begin();
-	while(!m_ind->end() ) {
-		
-		const Tprim * t = rsrc[m_ind->key() ];
-		if(box.intersect(t->calculateBBox() ) ) {
-		if(t-> template exactIntersect<BoundingBox >(box) )
-			return true;
-		}
-		
-		m_ind->next();
-	}
-	return false;
-}
-
 class EbpNode {
 
 public:
