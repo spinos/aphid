@@ -1,6 +1,6 @@
 /*
  *  BccCell3.cpp
- *  foo
+ *  ttg
  *
  *  Created by jian zhang on 7/22/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
@@ -9,7 +9,7 @@
 
 #include "BccCell3.h"
 
-using namespace aphid;
+namespace aphid {
 
 namespace ttg {
 
@@ -50,8 +50,7 @@ BccNode3 * BccCell3::findBlue(const Vector3F & pref)
 }
 
 void BccCell3::insertBlue(const sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid,
-					ADistanceField * fld)
+					AdaptiveGridT * grid)
 {
 	BccNode3 * redN = find(15);
 	if(cellCoord.w > 0) {
@@ -108,8 +107,7 @@ void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 }
 
 void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid,
-					ADistanceField * fld)
+					AdaptiveGridT * grid)
 {
 	const BccNode3 * redN = find(15);
 	const Vector3F & redP = redN->pos;
@@ -137,8 +135,7 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 }
 
 void BccCell3::insertCyan(const sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid,
-					ADistanceField * fld)
+					AdaptiveGridT * grid)
 {
 	for(int i=0;i<12;++i) {
 		if(cyanNode(i, cellCoord, grid) )
@@ -419,12 +416,11 @@ bool BccCell3::isEdgeDivided(const int & i,
 }
 
 void BccCell3::findRedValueFrontBlue(BccNode3 * redN,
-					const aphid::sdb::Coord4 & cellCoord,
-					AdaptiveGridT * grid,
-					aphid::ADistanceField * fld)
+					const sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid)
 {
-	int i = 0;
-	for(;i<4;++i) {
+	//int i = 0;
+	//for(;i<4;++i) {
 		// BccNode3 * b1 = blueNode(sdb::gdt::FourOppositeBluePair[i][0],
 								//cellCoord, grid);
 		// BccNode3 * b2 = blueNode(sdb::gdt::FourOppositeBluePair[i][1],
@@ -435,7 +431,7 @@ void BccCell3::findRedValueFrontBlue(BccNode3 * redN,
 			//redN->val = eg->val;
 		//}
 			
-	}
+	//}
 }
 
 bool BccCell3::isFront(const sdb::Coord4 & cellCoord,
@@ -449,7 +445,7 @@ bool BccCell3::isFront(const sdb::Coord4 & cellCoord,
 	return false;
 }
 
-bool BccCell3::isInterior(const aphid::sdb::Coord4 & cellCoord,
+bool BccCell3::isInterior(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 {
 	const float vred = find(15)->val;
@@ -463,4 +459,5 @@ bool BccCell3::isInterior(const aphid::sdb::Coord4 & cellCoord,
 	return true;
 }
 
+}
 }

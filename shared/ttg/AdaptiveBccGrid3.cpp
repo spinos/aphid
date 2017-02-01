@@ -1,6 +1,6 @@
 /*
  *  AdaptiveBccGrid.cpp
- *  foo
+ *  ttg
  *
  *  Created by jian zhang on 7/21/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
@@ -9,7 +9,7 @@
 
 #include "AdaptiveBccGrid3.h"
 
-using namespace aphid;
+namespace aphid {
 
 namespace ttg {
 
@@ -19,7 +19,17 @@ AdaptiveBccGrid3::AdaptiveBccGrid3()
 AdaptiveBccGrid3::~AdaptiveBccGrid3()
 {}
 
-BccCell3 * AdaptiveBccGrid3::addCell(const aphid::sdb::Coord4 & cellCoord)
+void AdaptiveBccGrid3::fillBox(const BoundingBox & b,
+                const float & h)
+{
+    clear();
+	resetNumNodes();
+	setLevel0CellSize(h);
+	subdivideToLevel(b, 0);
+	calculateBBox();
+}
+
+BccCell3 * AdaptiveBccGrid3::addCell(const sdb::Coord4 & cellCoord)
 {
 	BccCell3 * c = AdaptiveGrid10T::addCell(cellCoord);
 	
@@ -56,17 +66,17 @@ void AdaptiveBccGrid3::subdivideCells(const std::vector<sdb::Coord4 > & divided)
 		subdivideCell(*it);
 }
 
-void AdaptiveBccGrid3::build(ADistanceField * fld)
+void AdaptiveBccGrid3::build()
 {
 	begin();
 	while(!end() ) {
 		const sdb::Coord4 k = key();
 		BccCell3 * cell = value();
 		cell->insertFaceOnBoundary(k, this);
-		cell->insertBlue(k, this, fld);
+		cell->insertBlue(k, this);
 		if(cell->hasChild() ) {
-			cell->insertYellow(k, this, fld);
-			cell->insertCyan(k, this, fld);
+			cell->insertYellow(k, this);
+			cell->insertCyan(k, this);
 		}
 		
 		next();
@@ -179,4 +189,42 @@ void AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord,
 			
 }
 
+void AdaptiveBccGrid3::enforceBoundary(std::vector<sdb::Coord4 > & ks)
+{
+	while(ks.size() > 0) {
+/// first one
+		const sdb::Coord4 c = ks[0];
+		
+/// per face
+		for(int i=0; i< 6;++i) {
+			const sdb::Coord4 nei = neighborCoord(c, i);
+			const sdb::Coord4 par = parentCoord(nei);
+			if(findCell(par) ) {
+				if(!findCell(nei) ) {
+					if(subdivideCell(par ) )
+/// last one
+						ks.push_back(par);
+				}
+			}
+		}
+		
+/// per edge
+		for(int i=14; i< 26;++i) {
+			const sdb::Coord4 nei = neighborCoord(c, i);
+			const sdb::Coord4 par = parentCoord(nei);
+			if(findCell(par) ) {
+				if(!findCell(nei) ) {
+					if(subdivideCell(par ) )
+/// last one
+						ks.push_back(par);
+				}
+			}
+		}
+		
+/// rm first one
+		ks.erase(ks.begin() );
+	}
+}
+
+}
 }
