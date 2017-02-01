@@ -84,6 +84,43 @@ void DrawGraph<Tn, Te>::drawEdge(const AGraph<Tn, Te > * gph)
     }
     glEnd();
     
+    Float4 row[4];
+    row[0].set(m_nodeSize,0,0,0);
+    row[1].set(0,m_nodeSize,0,0);
+    row[2].set(0,0,m_nodeSize,0);
+    row[3].set(1,0,1,0);
+    
+    Vector3F pcut;
+    
+    m_instancer->programBegin();
+    m_instancer->setDiffueColorVec((const float *)&row[3]);
+	    
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+    
+    for(int i=0;i<ne;++i) {
+        const Te & ei = egs[i];
+        const sdb::Coord2 & k = ei.vi;
+        
+        if(ei.cx > 0.f) {
+            pcut = ns[k.y].pos * ei.cx + ns[k.x].pos * (1.f - ei.cx);
+            row[0].w = pcut.x;
+            row[1].w = pcut.y;
+            row[2].w = pcut.z;
+    
+            glMultiTexCoord4fv(GL_TEXTURE1, (const float *)&row[0]);
+            glMultiTexCoord4fv(GL_TEXTURE2, (const float *)&row[1]);
+            glMultiTexCoord4fv(GL_TEXTURE3, (const float *)&row[2]);
+            
+            drawAGlyph();
+        }
+        
+    }
+    
+    glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	m_instancer->programEnd();
 }
 
 template<typename Tn, typename Te>

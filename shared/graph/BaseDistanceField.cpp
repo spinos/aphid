@@ -190,7 +190,7 @@ void BaseDistanceField::propagateVisit(std::map<int, int > & heap, const int & i
 /// do not cross front
 		if(eg.cx < 0.f) {
 /// do not visit inside
-			if( B.val > 1e-2f && B.stat == sdf::StFar) {
+			if( B.val > 0.f && B.stat == sdf::StFar) {
 				heap[vj] = 0;
             }
 		}

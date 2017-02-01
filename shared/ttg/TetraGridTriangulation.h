@@ -13,6 +13,7 @@
 
 #include <ttg/TetrahedronGrid.h>
 #include <ttg/TetraGridEdgeMap.h>
+#include <ttg/TetrahedronDistanceField.h>
 #include <ttg/RedBlueRefine.h>
 
 namespace aphid {
@@ -22,9 +23,11 @@ class TetraGridTriangulation {
     
 public: 
 typedef TetrahedronGrid<Tv, N> GridT;
+typedef ttg::TetrahedronDistanceField<GridT > FieldT;
 
 private:
 	GridT * m_tg;
+    FieldT * m_field;
 
     TetraGridEdgeMap<GridT > * m_edgeMap;
     Vector3F * m_cutEdgePos;
@@ -34,13 +37,16 @@ public:
     TetraGridTriangulation();
     virtual ~TetraGridTriangulation();
     
-    void setGrid(TetrahedronGrid<Tv, N> * g);
+    void setGrid(GridT * g);
     
     void triangulate();
     
     TetraGridEdgeMap<TetrahedronGrid<Tv, N> > & gridEdges();
     int numFrontTriangles();
     void extractFrontTriangles(Vector3F * vs);
+    
+    FieldT * field();
+    const FieldT * field() const;
     
 protected:
 
@@ -85,10 +91,13 @@ TetraGridTriangulation<Tv, N>::~TetraGridTriangulation()
 }
 
 template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::setGrid(TetrahedronGrid<Tv, N> * g)
+void TetraGridTriangulation<Tv, N>::setGrid(GridT * g)
 {
     m_tg = g;
     m_edgeMap = new TetraGridEdgeMap<GridT >(m_tg);
+    m_field = new FieldT;
+    m_field->buildGraph(g, m_edgeMap );
+    
 }
 
 template <typename Tv, int N>
@@ -97,6 +106,8 @@ void TetraGridTriangulation<Tv, N>::triangulate()
     const int ne = m_edgeMap->size();
     m_cutEdgePos = new Vector3F[ne];
     
+    const DistanceNode * nds = m_field->nodes();
+    
     m_frontTriangleMap.clear();
     int numCuts = 0;
     ttg::RedBlueRefine rbr;
@@ -104,27 +115,25 @@ void TetraGridTriangulation<Tv, N>::triangulate()
     for(int i=0;i<nt;++i) {
         const sdb::Coord4 & itet = m_tg->cellVertices(i);
         rbr.set(itet.x, itet.y, itet.z, itet.w);
-		rbr.evaluateDistance(m_tg->value(itet.x)._distance, 
-                             m_tg->value(itet.y)._distance, 
-							m_tg->value(itet.z)._distance, 
-                            m_tg->value(itet.w)._distance );
-		rbr.estimateNormal(m_tg->pos(itet.x),
-                            m_tg->pos(itet.y),
-                            m_tg->pos(itet.z),
-                            m_tg->pos(itet.w) );
+		rbr.evaluateDistance(nds[itet.x].val, 
+                             nds[itet.y].val, 
+							nds[itet.z].val, 
+                            nds[itet.w].val );
+		rbr.estimateNormal(nds[itet.x].pos,
+                            nds[itet.y].pos,
+                            nds[itet.z].pos,
+                            nds[itet.w].pos );
         cutEdges(numCuts, rbr, itet);
         rbr.refine();
         
         const int nft = rbr.numFrontTriangles();
 		for(int j=0; j<nft; ++j) {
 			const ttg::IFace * fj = rbr.frontTriangle(j);
-			//std::cout<<"\n ftri["<<j<<"] "<<fj->key;
-            if(!m_frontTriangleMap.find(fj->key) ) {
+			if(!m_frontTriangleMap.find(fj->key) ) {
 				m_frontTriangleMap.insert(fj->key);
 			}
 		}
     }
-    std::cout<<"\n n cut "<<numCuts;
     
 }
 
@@ -159,74 +168,38 @@ void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
     Vector3F p0, p1;
 	int icut;
 	if(refiner.needSplitRedEdge(0) ) {
-        icut = cutEdgeInd(numCuts, itet.x, itet.y);
-        
-        d0 = m_tg->value(itet.x)._distance;
-        d1 = m_tg->value(itet.y)._distance;
-        p0 = m_tg->pos(itet.x);
-        p1 = m_tg->pos(itet.y);
-        m_cutEdgePos[icut] = refiner.splitPos(d0, d1, p0, p1);
-        
+        icut = cutEdgeInd(numCuts, itet.x, itet.y);        
+        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.y);
 		refiner.splitRedEdge(0,icut | MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitRedEdge(1) ) {
-		icut = cutEdgeInd(numCuts, itet.z, itet.w);
-		
-        d0 = m_tg->value(itet.z)._distance;
-        d1 = m_tg->value(itet.w)._distance;
-        p0 = m_tg->pos(itet.z);
-        p1 = m_tg->pos(itet.w);
-        m_cutEdgePos[icut] = refiner.splitPos(d0, d1, p0, p1);
-        
+		icut = cutEdgeInd(numCuts, itet.z, itet.w);		
+        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.z, itet.w);
         refiner.splitRedEdge(1,icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(0) ) {
-		icut = cutEdgeInd(numCuts, itet.x, itet.z);
-        
-        d0 = m_tg->value(itet.x)._distance;
-        d1 = m_tg->value(itet.z)._distance;
-        p0 = m_tg->pos(itet.x);
-        p1 = m_tg->pos(itet.z);
-        m_cutEdgePos[icut] = refiner.splitPos(d0, d1, p0, p1);
-        
+		icut = cutEdgeInd(numCuts, itet.x, itet.z);        
+        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.z);
 		refiner.splitBlueEdge(0, icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(1) ) {
-		icut = cutEdgeInd(numCuts, itet.x, itet.w);
-        
-        d0 = m_tg->value(itet.x)._distance;
-        d1 = m_tg->value(itet.w)._distance;
-        p0 = m_tg->pos(itet.x);
-        p1 = m_tg->pos(itet.w);
-        m_cutEdgePos[icut] = refiner.splitPos(d0, d1, p0, p1);
-        
+		icut = cutEdgeInd(numCuts, itet.x, itet.w);        
+        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.w);
 		refiner.splitBlueEdge(1, icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(2) ) {
-		icut = cutEdgeInd(numCuts, itet.y, itet.z);
-        
-        d0 = m_tg->value(itet.y)._distance;
-        d1 = m_tg->value(itet.z)._distance;
-        p0 = m_tg->pos(itet.y);
-        p1 = m_tg->pos(itet.z);
-        m_cutEdgePos[icut] = refiner.splitPos(d0, d1, p0, p1);
-        
+		icut = cutEdgeInd(numCuts, itet.y, itet.z);        
+        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.y, itet.z);
 		refiner.splitBlueEdge(2, icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(3) ) {
-		icut = cutEdgeInd(numCuts, itet.y, itet.w);
-        
-        d0 = m_tg->value(itet.y)._distance;
-        d1 = m_tg->value(itet.w)._distance;
-        p0 = m_tg->pos(itet.y);
-        p1 = m_tg->pos(itet.w);
-        m_cutEdgePos[icut] = refiner.splitPos(d0, d1, p0, p1);
-        
+		icut = cutEdgeInd(numCuts, itet.y, itet.w);        
+        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.y, itet.w);
 		refiner.splitBlueEdge(3, icut| MEncode, m_cutEdgePos[icut]);
 	}
 }
@@ -258,6 +231,14 @@ void TetraGridTriangulation<Tv, N>::extractFrontTriangles(Vector3F * vs)
 		m_frontTriangleMap.next();
 	}
 }
+
+template <typename Tv, int N>
+ttg::TetrahedronDistanceField<TetrahedronGrid<Tv, N> > * TetraGridTriangulation<Tv, N>::field()
+{ return m_field; }
+
+template <typename Tv, int N>
+const ttg::TetrahedronDistanceField<TetrahedronGrid<Tv, N> > * TetraGridTriangulation<Tv, N>::field() const
+{ return m_field; }
 
 }
 #endif

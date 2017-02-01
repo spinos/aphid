@@ -28,7 +28,7 @@ GLWidget::~GLWidget()
 static const float stetvs[4][3] = {
 { -12.f, -4.f, -9.f}, 
 { 0.f, 15.f, -2.f},
-{ 16.f, -2.5f, -9.5f}, 
+{ 16.f, 2.5f, -9.5f}, 
 { 4.f, -12.f, 12.f}
 };
 
@@ -56,35 +56,36 @@ void GLWidget::clientInit()
     
     m_mesher.setGrid(m_grd);
     
-    m_field = new ttg::TetrahedronDistanceField<MesherT::GridT >();
-    m_field->buildGraph(m_grd, &m_mesher.gridEdges() );
-    
     m_fieldDrawer = new FieldDrawerT;
     m_fieldDrawer->initGlsl();
     
     cvx::Triangle * ta = new cvx::Triangle;
-	ta->set(Vector3F(-12, -4, 8), Vector3F(3, -5, 14), Vector3F(-7, 1, -14) );
+	ta->set(Vector3F(-12, -4, 8), Vector3F(-5, -1, 14), Vector3F(-5, 4, -14) );
 	m_ground.push_back(ta);
 	cvx::Triangle * tb = new cvx::Triangle;
-	tb->set(Vector3F(-7, 1, -14), Vector3F(3, -5, 14), Vector3F(8, 2, -12) );
+	tb->set(Vector3F(-5, 4, -14), Vector3F(-5, -1, 14), Vector3F(8, 2, -11) );
 	m_ground.push_back(tb);
     cvx::Triangle * tc = new cvx::Triangle;
-	tc->set(Vector3F(8, 2, -12), Vector3F(3, -5, 14), Vector3F(22, -5, -8) );
+	tc->set(Vector3F(8, 2, -11), Vector3F(-5, -1, 14), Vector3F(19, -3, -13) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
-	td->set(Vector3F(-7, 1, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
+	td->set(Vector3F(-5, 4, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
 	m_ground.push_back(td);
-	
+	cvx::Triangle * te = new cvx::Triangle;
+	te->set(Vector3F(19, -3, -13), Vector3F(-5, -1, 14), Vector3F(9, -13, 15) );
+	m_ground.push_back(te);
+    
 	m_sels.insert(0);
 	m_sels.insert(1);
     m_sels.insert(2);
     m_sels.insert(3);
+    m_sels.insert(4);
     
 typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(&m_sels, &m_ground);
     
-    m_field->calculateDistance<TIntersect>(&fintersect);
-    m_field->updateGrid(m_grd);
+    m_mesher.field()->calculateDistance<TIntersect>(&fintersect);
+    //m_field->updateGrid(m_grd);
     
     m_mesher.triangulate();
     
@@ -158,8 +159,8 @@ void GLWidget::drawGridEdges()
 
 void GLWidget::drawField()
 {
-    m_fieldDrawer->drawEdge(m_field);
-    m_fieldDrawer->drawNode(m_field);
+    m_fieldDrawer->drawEdge(m_mesher.field() );
+    m_fieldDrawer->drawNode(m_mesher.field() );
 }
 
 void GLWidget::drawSolidGrid()
@@ -173,7 +174,6 @@ void GLWidget::drawSolidGrid()
     const int n = m_grd->numCells();
     for(int i=0;i<n;++i) {
         m_grd->getCell(atet, i);
-       // glColor3f(RandomF01(), .5f, RandomF01() );
         drawAShrinkSolidTetrahedron(atet, .67f);
     }
     

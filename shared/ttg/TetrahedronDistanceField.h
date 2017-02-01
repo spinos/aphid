@@ -28,6 +28,8 @@ public:
     
     void buildGraph(T * grid, TetraGridEdgeMap<T > * edgeMap);
     void updateGrid(T * grid) const;
+    void getCutEdgePos(Vector3F & pdst,
+                const int & v1, const int & v2) const;
     
 protected:
 
@@ -124,6 +126,19 @@ void TetrahedronDistanceField<T>::updateGrid(T * grid) const
     const int & nv = grid->numPoints();
     for(int i=0;i<nv;++i) {
         grid->setNodeDistance(nodes()[i].val, i);
+    }
+}
+
+template<typename T>
+void TetrahedronDistanceField<T>::getCutEdgePos(Vector3F & pdst,
+                                const int & v1, const int & v2) const
+{
+    int ei = edgeIndex(v1, v2);
+    const IDistanceEdge & e = edges()[ei];
+    if(e.vi.x == v1) {
+        pdst = nodes()[v2].pos * e.cx + nodes()[v1].pos * (1.f - e.cx);
+    } else {
+        pdst = nodes()[v1].pos * e.cx + nodes()[v2].pos * (1.f - e.cx);
     }
 }
 

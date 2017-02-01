@@ -63,11 +63,10 @@ private:
 private slots:
 
 private:
-typedef aphid::TetraGridTriangulation<TFTNode, 5> MesherT;
+typedef aphid::TetraGridTriangulation<TFTNode, 5 > MesherT;
     MesherT m_mesher;
 	MesherT::GridT * m_grd;
-    aphid::ttg::TetrahedronDistanceField<MesherT::GridT > * m_field;
-
+    
 typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
     FieldDrawerT * m_fieldDrawer;
     
