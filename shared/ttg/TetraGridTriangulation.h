@@ -207,22 +207,23 @@ void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
 template <typename Tv, int N>
 void TetraGridTriangulation<Tv, N>::extractFrontTriangles(Vector3F * vs)
 {
+    const DistanceNode * nds = m_field->nodes(); 
     int itri = 0;
     m_frontTriangleMap.begin();
 	while(!m_frontTriangleMap.end() ) {
         const sdb::Coord3 & k = m_frontTriangleMap.key();
         if(k.x < MDecode) {
-            vs[itri * 3] = m_tg->pos(k.x);
+            vs[itri * 3] = nds[k.x].pos;
         } else {
             vs[itri * 3] = m_cutEdgePos[k.x & MDecode];
         }
         if(k.y < MDecode) {
-            vs[itri * 3 + 1] = m_tg->pos(k.y);
+            vs[itri * 3 + 1] = nds[k.y].pos;
         } else {
             vs[itri * 3 + 1] = m_cutEdgePos[k.y & MDecode];
         }
         if(k.z < MDecode) {
-            vs[itri * 3 + 2] = m_tg->pos(k.z);
+            vs[itri * 3 + 2] = nds[k.z].pos;
         } else {
             vs[itri * 3 + 2] = m_cutEdgePos[k.z & MDecode];
         }

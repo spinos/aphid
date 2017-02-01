@@ -197,5 +197,82 @@ void BaseDistanceField::propagateVisit(std::map<int, int > & heap, const int & i
 	}
 }
 
+float BaseDistanceField::distanceToFront(int & closestEdgeIdx,
+                                const int & idx) const
+{
+    const DistanceNode & d = nodes()[idx];
+    
+    float closestCut = 2.f;
+    float currentCut = 3.f;
+    
+/// for each neighbor of A find closest cut
+	const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+		if(eg.cx > 0.f) {
+/// from A
+            if(eg.vi.x == idx) {
+                currentCut = eg.cx;
+            } else {
+                currentCut = 1.f - eg.cx;
+                if(currentCut < 1e-3f) {
+                    currentCut = 0.f;
+                }
+            }
+            
+            if(closestCut > currentCut) {
+                closestEdgeIdx = k;
+                closestCut = currentCut;
+            }
+        }
+	}
+    
+    return closestCut;
+}
+
+
+void BaseDistanceField::moveToFront(const int & idx,
+                            const int & edgeIdx)
+{    
+    DistanceNode & d = nodes()[idx];
+    
+    const IDistanceEdge & ce = edges()[edgeIdx];
+    const Vector3F dv = nodes()[ce.vi.y].pos - nodes()[ce.vi.x].pos;
+    if(ce.vi.x == idx) {        
+       d.pos += dv * ce.cx;
+    } else {
+       d.pos += dv * (ce.cx - 1.f);
+    }
+    
+    d.val = 0.f;
+    
+    const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+        IDistanceEdge & eg = edges()[k];
+		eg.cx = -1.f;
+	}
+    
+}
+
+void BaseDistanceField::snapToFront(const float & threshold)
+{
+    int iedge;
+    const int n = numNodes();
+	for(int i = 0;i<n;++i) {
+        float d = distanceToFront(iedge, i);
+        if(d < threshold) {
+            moveToFront(i, iedge);
+        }
+		
+	}
+}
 
 }

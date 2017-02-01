@@ -104,9 +104,10 @@ public:
         int iFar = nodeFarthestFrom(agp, agn);
 /// visit out nodes
         marchOutside(iFar);
-        
 /// unvisited nodes are inside
         setFarNodeInside();
+/// merge short edges
+        snapToFront();
         
     }
     
@@ -118,12 +119,21 @@ protected:
     void setFarNodeInside();
     void propagateVisit(std::map<int, int > & heap, const int & i);
 	void expandFront(const float & x);
+/// if node connected to edge cut close to 0 or 1
+/// un-cut all edges connected and set node val zero
+    void snapToFront(const float & threshold = .17f);
     
 private:
 /// propagate distance value
     void propagate(std::map<int, int > & heap, const int & i);
 	int nodeFarthestFrom(const Vector3F & origin,
                         const Vector3F & dir) const;
+/// lowest edge cut connected to node
+    float distanceToFront(int & closestEdgeIdx,
+                const int & idx) const;
+/// move node to front and un-cut all connected edges
+    void moveToFront(const int & idx,
+                const int & edgeIdx);
         
 };
 

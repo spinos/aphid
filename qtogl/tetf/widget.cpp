@@ -28,7 +28,7 @@ GLWidget::~GLWidget()
 static const float stetvs[4][3] = {
 { -12.f, -4.f, -9.f}, 
 { 0.f, 15.f, -2.f},
-{ 16.f, 2.5f, -9.5f}, 
+{ 16.f, 2.f, -10.f}, 
 { 4.f, -12.f, 12.f}
 };
 
@@ -60,19 +60,19 @@ void GLWidget::clientInit()
     m_fieldDrawer->initGlsl();
     
     cvx::Triangle * ta = new cvx::Triangle;
-	ta->set(Vector3F(-12, -4, 8), Vector3F(-5, -1, 14), Vector3F(-5, 4, -14) );
+	ta->set(Vector3F(-12, -4, 8), Vector3F(-5, -1, 14), Vector3F(-4, 4, -14) );
 	m_ground.push_back(ta);
 	cvx::Triangle * tb = new cvx::Triangle;
-	tb->set(Vector3F(-5, 4, -14), Vector3F(-5, -1, 14), Vector3F(8, 2, -11) );
+	tb->set(Vector3F(-4, 4, -14), Vector3F(-5, -1, 14), Vector3F(8, 2, -11) );
 	m_ground.push_back(tb);
     cvx::Triangle * tc = new cvx::Triangle;
-	tc->set(Vector3F(8, 2, -11), Vector3F(-5, -1, 14), Vector3F(19, -3, -13) );
+	tc->set(Vector3F(8, 2, -11), Vector3F(-5, -1, 14), Vector3F(18, -3, -13) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
-	td->set(Vector3F(-5, 4, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
+	td->set(Vector3F(-4, 4, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
 	m_ground.push_back(td);
 	cvx::Triangle * te = new cvx::Triangle;
-	te->set(Vector3F(19, -3, -13), Vector3F(-5, -1, 14), Vector3F(9, -13, 15) );
+	te->set(Vector3F(18, -3, -13), Vector3F(-5, -1, 14), Vector3F(9, -13, 15) );
 	m_ground.push_back(te);
     
 	m_sels.insert(0);
