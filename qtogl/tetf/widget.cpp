@@ -60,9 +60,9 @@ void GLWidget::clientInit()
     m_fieldDrawer->initGlsl();
     
 static const float scCorners[5][3] = {
-{9, -4, 3},
+{9, -4, 7},
 {-9, 11, -14},
-{0, -4, 1},
+{0, -1, 4},
 {11, 6, -13},
 {7, 9, -11}
 };
@@ -77,7 +77,7 @@ static const float scCorners[5][3] = {
 	tc->set(Vector3F(scCorners[4]), Vector3F(scCorners[0]), Vector3F(scCorners[3]) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
-	td->set(Vector3F(scCorners[1]), Vector3F(scCorners[2]), Vector3F(-16, 5, -12) );
+	td->set(Vector3F(scCorners[1]), Vector3F(scCorners[2]), Vector3F(-19, -5, -12) );
 	m_ground.push_back(td);
 	cvx::Triangle * te = new cvx::Triangle;
 	te->set(Vector3F(scCorners[3]), Vector3F(scCorners[0]), Vector3F(19, 3, 2) );

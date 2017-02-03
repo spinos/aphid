@@ -94,14 +94,29 @@ public:
                 
                 e.cx = d1 / e.len;
                 
-                if(node1.val > d1 ) {
+                if(Absolute<float>(node1.val) > d1 ) {
                     node1.val = d1;
                     node1.stat = sdf::StKnown;
                 }
                 
-                if(node2.val > d2 ) {
+                if(Absolute<float>(node2.val) > d2 ) {
                     node2.val = d2;
                     node2.stat = sdf::StKnown;
+                }
+                
+                if(r.m_dir.dot(agn ) < -.5f) {
+                if(rpos) {
+                    if(node2.val > 0.f) {
+                        node2.val *= -1.f;
+                    }
+                    
+                    
+                } else {
+                    if(node1.val > 0.f) {
+                        node1.val *= -1.f;
+                    }
+                    
+                }
                 }
                 
             } else {
@@ -109,9 +124,7 @@ public:
             }
             
         }
-/// both ends of the edge inside        
-       // expandFrontEdge();
-        
+
 /// propagate distance to all nodes        
         fastMarchingMethod();
         
