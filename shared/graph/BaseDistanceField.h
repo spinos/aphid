@@ -12,10 +12,10 @@
 
 #include "AGraph.h"
 #include <map>
+#include <math/miscfuncs.h>
+#include <math/Ray.h>
 
 namespace aphid {
-
-class Ray;
 
 namespace sdf {
 enum NodeState {
@@ -59,6 +59,9 @@ public:
         IDistanceEdge * egs = edges();
         DistanceNode * nds = nodes();
         
+        Vector3F agp, agn;
+        intersectF->getAggregatedPositionNormal(agp, agn);
+        
 /// find edge cross front, assign distance to connected nodes        
         Vector3F por;
         const int & ne = numEdges();
@@ -68,38 +71,49 @@ public:
             DistanceNode & node1 = nds[k.x];
             DistanceNode & node2 = nds[k.y];
             
+            bool rpos = true;
             Ray r(node1.pos, node2.pos);
+/// from outside to inside
+            if(r.m_dir.dot(agn) > 0.f ) {
+                r.m_origin = node2.pos;
+                r.m_dir.reverse();
+                rpos = false;
+            }
            
             if(intersectF->rayIntersect(r) ) {
                 const Vector3F & crossp = intersectF->rayIntersectPoint();
-                float d1 = crossp.distanceTo(node1.pos);
-                float d2 = e.len - d1;
+                float d1, d2;
+                if(rpos) {
+                    d1 = crossp.distanceTo(node1.pos);
+                    d2 = e.len - d1;
                 
-                if(node1.val > d1) {
+                } else {
+                    d2 = crossp.distanceTo(node2.pos);
+                    d1 = e.len - d2;
+                }
+                
+                e.cx = d1 / e.len;
+                
+                if(node1.val > d1 ) {
                     node1.val = d1;
                     node1.stat = sdf::StKnown;
                 }
                 
-                if(node2.val > d2) {
+                if(node2.val > d2 ) {
                     node2.val = d2;
                     node2.stat = sdf::StKnown;
                 }
-                e.cx = d1 / e.len;
+                
             } else {
                 e.cx = -1.f;
             }
             
         }
+/// both ends of the edge inside        
+       // expandFrontEdge();
         
 /// propagate distance to all nodes        
         fastMarchingMethod();
-        
-        //expandFront(1.f);
-        
-        unvisitAllNodes();
-        
-        Vector3F agp, agn;
-        intersectF->getAggregatedPositionNormal(agp, agn);
         
         int iFar = nodeFarthestFrom(agp, agn);
 /// visit out nodes
@@ -118,10 +132,12 @@ protected:
 	void marchOutside(const int & originNodeInd);
     void setFarNodeInside();
     void propagateVisit(std::map<int, int > & heap, const int & i);
-	void expandFront(const float & x);
+/// for each node connected to cut edge
+/// val minus shortest cut edge length
+	void expandFrontEdge();
 /// if node connected to edge cut close to 0 or 1
 /// un-cut all edges connected and set node val zero
-    void snapToFront(const float & threshold = .17f);
+    void snapToFront(const float & threshold = .19f);
     
 private:
 /// propagate distance value
@@ -134,6 +150,11 @@ private:
 /// move node to front and un-cut all connected edges
     void moveToFront(const int & idx,
                 const int & edgeIdx);
+    float distanceToFront2(int & closestEdgeIdx,
+                const int & idx) const;
+    void moveToFront2(const int & idx,
+                const int & edgeIdx);
+    float getShortestCutEdgeLength(const int & idx) const;
         
 };
 

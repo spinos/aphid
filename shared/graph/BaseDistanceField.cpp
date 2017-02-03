@@ -8,7 +8,6 @@
  */
 
 #include "BaseDistanceField.h"
-#include <math/Ray.h>
 
 namespace aphid {
 
@@ -85,16 +84,18 @@ void BaseDistanceField::propagate(std::map<int, int > & heap,
 		const IDistanceEdge & eg = edges()[k];
 		
 		vj = eg.vi.x;
-		if(vj == i)
+		if(vj == i) {
 			vj = eg.vi.y;
-			
+        }
+            
 		DistanceNode & B = nodes()[vj];
 		if(B.stat == sdf::StUnknown) {
 		
 /// min distance to B via A
 /// need eikonal approximation here
-			if(A.val + eg.len < B.val)
+			if(A.val + eg.len < B.val) {
 				B.val = A.val + eg.len;
+            }
 				
 /// add to trial
 			heap[vj] = 0;
@@ -133,17 +134,10 @@ void BaseDistanceField::setFarNodeInside()
 	}
 }
 
-void BaseDistanceField::expandFront(const float & x)
-{
-    const int n = numNodes();
-	for(int i = 0;i<n;++i) {
-		DistanceNode & d = nodes()[i];
-		d.val -= x;
-	}
-}
-
 void BaseDistanceField::marchOutside(const int & originNodeInd)
 {
+    unvisitAllNodes();
+        
 	int i = originNodeInd;
 	
 /// heap of trial
@@ -195,6 +189,39 @@ void BaseDistanceField::propagateVisit(std::map<int, int > & heap, const int & i
             }
 		}
 	}
+}
+
+ float BaseDistanceField::getShortestCutEdgeLength(const int & idx) const
+ {
+    float r = 1e8f;
+    const DistanceNode & A = nodes()[idx];
+    const int endj = edgeBegins()[idx+1];
+	int vj, j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+		const IDistanceEdge & eg = edges()[k];
+		
+		if(eg.cx > -1.f) {
+			if(r > eg.len) {
+				r = eg.len;
+            }
+		}
+	}
+    return r;
+ }
+
+void BaseDistanceField::expandFrontEdge()
+{
+    DistanceNode * nds = nodes();
+    const int & nv = numNodes();
+    for(int i = 0;i<nv;++i) {
+        float l = getShortestCutEdgeLength(i);
+        if(l < 1e7f) {
+            nds[i].val -= l;
+        }
+    }
+
 }
 
 float BaseDistanceField::distanceToFront(int & closestEdgeIdx,
@@ -262,14 +289,82 @@ void BaseDistanceField::moveToFront(const int & idx,
     
 }
 
+float BaseDistanceField::distanceToFront2(int & closestEdgeIdx,
+                                const int & idx) const
+{
+    const DistanceNode & d = nodes()[idx];
+    
+    float closestCut = 2.f;
+    float currentCut = 3.f;
+    
+/// for each neighbor of A find closest cut
+	const int endj = edgeBegins()[idx+1];
+	int vj, j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+        
+        vj = eg.vi.x;
+		if(vj == idx) {
+			vj = eg.vi.y;
+        }
+        
+/// sign changes
+		if(nodes()[vj].val * d.val < 0.f) {
+            currentCut = Absolute<float>(d.val) / (Absolute<float>(d.val) +
+                                                    Absolute<float>(nodes()[vj].val ) );
+            
+            if(closestCut > currentCut) {
+                closestEdgeIdx = k;
+                closestCut = currentCut;
+            }
+        }
+	}
+    
+    return closestCut;
+}
+
+void BaseDistanceField::moveToFront2(const int & idx,
+                            const int & edgeIdx)
+{    
+    DistanceNode & d = nodes()[idx];
+    
+    IDistanceEdge & ce = edges()[edgeIdx];
+    const DistanceNode & va = nodes()[ce.vi.x];
+    const DistanceNode & vb = nodes()[ce.vi.y];
+    
+    Vector3F dv = vb.pos - va.pos;
+    if(idx == ce.vi.y) {
+        dv.reverse();
+    }
+    
+    const float l = Absolute<float>(va.val) + Absolute<float>(vb.val);
+    
+    d.pos += dv * Absolute<float>(d.val) / l;
+    d.val = 0.f;
+    
+    const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+        IDistanceEdge & eg = edges()[k];
+		eg.cx = -1.f;
+	}
+    
+}
+
 void BaseDistanceField::snapToFront(const float & threshold)
 {
     int iedge;
     const int n = numNodes();
 	for(int i = 0;i<n;++i) {
-        float d = distanceToFront(iedge, i);
+        float d = distanceToFront2(iedge, i);
         if(d < threshold) {
-            moveToFront(i, iedge);
+            moveToFront2(i, iedge);
         }
 		
 	}

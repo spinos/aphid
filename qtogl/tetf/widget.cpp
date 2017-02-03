@@ -59,20 +59,28 @@ void GLWidget::clientInit()
     m_fieldDrawer = new FieldDrawerT;
     m_fieldDrawer->initGlsl();
     
+static const float scCorners[5][3] = {
+{9, -4, 3},
+{-9, 11, -14},
+{0, -4, 1},
+{11, 6, -13},
+{7, 9, -11}
+};
+
     cvx::Triangle * ta = new cvx::Triangle;
-	ta->set(Vector3F(-12, -4, 8), Vector3F(-5, -1, 14), Vector3F(-4, 4, -14) );
+	ta->set(Vector3F(scCorners[2]), Vector3F(scCorners[0]), Vector3F(scCorners[1]) );
 	m_ground.push_back(ta);
 	cvx::Triangle * tb = new cvx::Triangle;
-	tb->set(Vector3F(-4, 4, -14), Vector3F(-5, -1, 14), Vector3F(8, 2, -11) );
+	tb->set(Vector3F(scCorners[1]), Vector3F(scCorners[0]), Vector3F(scCorners[4]) );
 	m_ground.push_back(tb);
     cvx::Triangle * tc = new cvx::Triangle;
-	tc->set(Vector3F(8, 2, -11), Vector3F(-5, -1, 14), Vector3F(18, -3, -13) );
+	tc->set(Vector3F(scCorners[4]), Vector3F(scCorners[0]), Vector3F(scCorners[3]) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
-	td->set(Vector3F(-4, 4, -14), Vector3F(-12, -4, 8), Vector3F(-16, -5, -12) );
+	td->set(Vector3F(scCorners[1]), Vector3F(scCorners[2]), Vector3F(-16, 5, -12) );
 	m_ground.push_back(td);
 	cvx::Triangle * te = new cvx::Triangle;
-	te->set(Vector3F(18, -3, -13), Vector3F(-5, -1, 14), Vector3F(9, -13, 15) );
+	te->set(Vector3F(scCorners[3]), Vector3F(scCorners[0]), Vector3F(19, 3, 2) );
 	m_ground.push_back(te);
     
 	m_sels.insert(0);
@@ -97,10 +105,11 @@ void GLWidget::clientDraw()
 	//getDrawer()->frustum(perspectiveView()->frustum() );
 	
 	getDrawer()->m_markerProfile.apply();
-	getDrawer()->setColor(.125f, .125f, .5f);
-	
+	getDrawer()->setColor(.5f, .125f, .5f);
 	drawGround();
-    //drawSolidGrid();
+    
+    getDrawer()->setColor(.025f, .25f, .125f);
+	//drawSolidGrid();
     drawField();
     drawTriangulation();
 /*
