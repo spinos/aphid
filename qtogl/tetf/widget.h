@@ -13,6 +13,9 @@ namespace cvx {
 class Triangle;
 }
 
+template<typename T1, typename T2, typename T3>
+class PrimInd;
+
 namespace ttg {
 
 template<typename T>
@@ -58,6 +61,7 @@ private:
     void drawSolidGrid();
     void drawGridEdges();
     void drawField();
+    void drawCellCut();
     void drawTriangulation();
                
 private slots:
@@ -72,7 +76,10 @@ typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawer
     
     std::vector<aphid::cvx::Triangle * > m_ground;
     aphid::sdb::Sequence<int> m_sels;
-    
+
+typedef aphid::PrimInd<aphid::sdb::Sequence<int>, std::vector<aphid::cvx::Triangle * >, aphid::cvx::Triangle > TIntersect;
+	
+            
 };
 
 #endif

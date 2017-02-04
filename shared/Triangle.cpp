@@ -370,7 +370,7 @@ bool Triangle::intersect(const BoundingBox & bb) const
             tangentMax = -10e8;
             tangentMin = 10e8;
             for(k = 0; k < 3; k++) {
-                tangentD = tangentPlane.pointTo(corner(k));
+                tangentD = tangentPlane.distanceTo(corner(k));
                 if(tangentD < tangentMin) tangentMin = tangentD;
                 if(tangentD > tangentMax) tangentMax = tangentD;
             }

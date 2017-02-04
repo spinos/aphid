@@ -12,10 +12,10 @@
 
 #include "AGraph.h"
 #include <map>
+#include <math/miscfuncs.h>
+#include <math/Ray.h>
 
 namespace aphid {
-
-class Ray;
 
 namespace sdf {
 enum NodeState {
@@ -51,66 +51,6 @@ public:
     BaseDistanceField();
     virtual ~BaseDistanceField();
     
-    template<typename Tf>
-    void calculateDistance(Tf * intersectF) 
-    {
-        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
-        
-        IDistanceEdge * egs = edges();
-        DistanceNode * nds = nodes();
-        
-/// find edge cross front, assign distance to connected nodes        
-        Vector3F por;
-        const int & ne = numEdges();
-        for(int i=0;i<ne;++i) {
-            IDistanceEdge & e = egs[i];
-            const sdb::Coord2 & k = e.vi;
-            DistanceNode & node1 = nds[k.x];
-            DistanceNode & node2 = nds[k.y];
-            
-            Ray r(node1.pos, node2.pos);
-           
-            if(intersectF->rayIntersect(r) ) {
-                const Vector3F & crossp = intersectF->rayIntersectPoint();
-                float d1 = crossp.distanceTo(node1.pos);
-                float d2 = e.len - d1;
-                
-                if(node1.val > d1) {
-                    node1.val = d1;
-                    node1.stat = sdf::StKnown;
-                }
-                
-                if(node2.val > d2) {
-                    node2.val = d2;
-                    node2.stat = sdf::StKnown;
-                }
-                e.cx = d1 / e.len;
-            } else {
-                e.cx = -1.f;
-            }
-            
-        }
-        
-/// propagate distance to all nodes        
-        fastMarchingMethod();
-        
-        //expandFront(1.f);
-        
-        unvisitAllNodes();
-        
-        Vector3F agp, agn;
-        intersectF->getAggregatedPositionNormal(agp, agn);
-        
-        int iFar = nodeFarthestFrom(agp, agn);
-/// visit out nodes
-        marchOutside(iFar);
-/// unvisited nodes are inside
-        setFarNodeInside();
-/// merge short edges
-        snapToFront();
-        
-    }
-    
 protected:	
 	void resetNodes(float val, sdf::NodeState lab, sdf::NodeState stat);
     void unvisitAllNodes();
@@ -118,22 +58,37 @@ protected:
 	void marchOutside(const int & originNodeInd);
     void setFarNodeInside();
     void propagateVisit(std::map<int, int > & heap, const int & i);
-	void expandFront(const float & x);
+/// for each node connected to cut edge
+/// val minus shortest cut edge length
+	void expandFrontEdge();
 /// if node connected to edge cut close to 0 or 1
 /// un-cut all edges connected and set node val zero
-    void snapToFront(const float & threshold = .17f);
+    void snapToFront(const float & threshold = .2f);
+    int nodeFarthestFrom(const Vector3F & origin,
+                        const Vector3F & dir) const;
+    void setNodeDistance(const int & idx,
+                        const float & v);
+                        
+    void uncutEdges();
+/// when sign changes
+    void cutEdge(const int & v1, const int & v2,
+                const float & d1, const float & d2);
+    void cutEdges();
     
 private:
 /// propagate distance value
     void propagate(std::map<int, int > & heap, const int & i);
-	int nodeFarthestFrom(const Vector3F & origin,
-                        const Vector3F & dir) const;
 /// lowest edge cut connected to node
     float distanceToFront(int & closestEdgeIdx,
                 const int & idx) const;
 /// move node to front and un-cut all connected edges
     void moveToFront(const int & idx,
                 const int & edgeIdx);
+    float distanceToFront2(int & closestEdgeIdx,
+                const int & idx) const;
+    void moveToFront2(const int & idx,
+                const int & edgeIdx);
+    float getShortestCutEdgeLength(const int & idx) const;
         
 };
 

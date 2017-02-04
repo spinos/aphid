@@ -8,6 +8,7 @@
  */
 
 #include "ClosestToPointTest.h"
+#include <math/Plane.h>
 
 namespace aphid {
 
@@ -33,5 +34,8 @@ bool ClosestToPointTestResult::closeTo(const BoundingBox & box) const
 
 bool ClosestToPointTestResult::closeEnough() const
 { return _distance < 1e-3f; }
+
+Plane ClosestToPointTestResult::asPlane() const
+{ return Plane(_hitNormal, _hitPoint); }
 
 }

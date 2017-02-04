@@ -63,6 +63,11 @@ private:
     void cutEdges(int & numCuts,
                     ttg::RedBlueRefine & refiner, 
                     const sdb::Coord4 & itet);
+                    
+    void getEdgeValuePos(float & va, float & vb,
+                    Vector3F & pa, Vector3F & pb,
+                    const int & v1, const int & v2);
+                    
 };
 
 template <typename Tv, int N>
@@ -157,6 +162,19 @@ int TetraGridTriangulation<Tv, N>::cutEdgeInd(int & numCuts, const int & v0, con
 }
 
 template <typename Tv, int N>
+void TetraGridTriangulation<Tv, N>::getEdgeValuePos(float & va, float & vb,
+                    Vector3F & pa, Vector3F & pb,
+                    const int & v1, const int & v2)
+{
+    const DistanceNode & n1 = m_field->nodes()[v1];
+    va = n1.val;
+    pa = n1.pos;
+    const DistanceNode & n2 = m_field->nodes()[v2];
+    vb = n2.val;
+    pb = n2.pos;
+}
+
+template <typename Tv, int N>
 void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
                     ttg::RedBlueRefine & refiner, 
                     const sdb::Coord4 & itet)
@@ -164,42 +182,60 @@ void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
     if(!refiner.hasOption() )
 		return;
 	
-    float d0, d1;
-    Vector3F p0, p1;
+    float da, db;
+    Vector3F pa, pb;
 	int icut;
 	if(refiner.needSplitRedEdge(0) ) {
         icut = cutEdgeInd(numCuts, itet.x, itet.y);        
-        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.y);
+        if(!m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.y) ) {
+            getEdgeValuePos(da, db, pa, pb, itet.x, itet.y);
+            m_cutEdgePos[icut] = refiner.splitPos(da, db, pa, pb);
+        }
 		refiner.splitRedEdge(0,icut | MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitRedEdge(1) ) {
 		icut = cutEdgeInd(numCuts, itet.z, itet.w);		
-        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.z, itet.w);
+        if(!m_field->getCutEdgePos(m_cutEdgePos[icut], itet.z, itet.w) ) {
+            getEdgeValuePos(da, db, pa, pb, itet.z, itet.w);
+            m_cutEdgePos[icut] = refiner.splitPos(da, db, pa, pb);
+        }
         refiner.splitRedEdge(1,icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(0) ) {
 		icut = cutEdgeInd(numCuts, itet.x, itet.z);        
-        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.z);
+        if(!m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.z) ) {
+            getEdgeValuePos(da, db, pa, pb, itet.x, itet.z);
+            m_cutEdgePos[icut] = refiner.splitPos(da, db, pa, pb);
+        }
 		refiner.splitBlueEdge(0, icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(1) ) {
 		icut = cutEdgeInd(numCuts, itet.x, itet.w);        
-        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.w);
+        if(!m_field->getCutEdgePos(m_cutEdgePos[icut], itet.x, itet.w) ) {
+            getEdgeValuePos(da, db, pa, pb, itet.x, itet.w);
+            m_cutEdgePos[icut] = refiner.splitPos(da, db, pa, pb);
+        }
 		refiner.splitBlueEdge(1, icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(2) ) {
 		icut = cutEdgeInd(numCuts, itet.y, itet.z);        
-        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.y, itet.z);
+        if(!m_field->getCutEdgePos(m_cutEdgePos[icut], itet.y, itet.z) ) {
+            getEdgeValuePos(da, db, pa, pb, itet.y, itet.z);
+            m_cutEdgePos[icut] = refiner.splitPos(da, db, pa, pb);
+        }
 		refiner.splitBlueEdge(2, icut| MEncode, m_cutEdgePos[icut]);
 	}
 	
 	if(refiner.needSplitBlueEdge(3) ) {
 		icut = cutEdgeInd(numCuts, itet.y, itet.w);        
-        m_field->getCutEdgePos(m_cutEdgePos[icut], itet.y, itet.w);
+        if(!m_field->getCutEdgePos(m_cutEdgePos[icut], itet.y, itet.w) ) {
+            getEdgeValuePos(da, db, pa, pb, itet.y, itet.w);
+            m_cutEdgePos[icut] = refiner.splitPos(da, db, pa, pb);
+        }
 		refiner.splitBlueEdge(3, icut| MEncode, m_cutEdgePos[icut]);
 	}
 }

@@ -12,6 +12,7 @@
 
 #include <graph/BaseDistanceField.h>
 #include <ttg/TetraGridEdgeMap.h>
+#include <ttg/TetraDistance.h>
 #include <vector>
 #include <map>
 
@@ -28,8 +29,85 @@ public:
     
     void buildGraph(T * grid, TetraGridEdgeMap<T > * edgeMap);
     void updateGrid(T * grid) const;
-    void getCutEdgePos(Vector3F & pdst,
+    bool getCutEdgePos(Vector3F & pdst,
                 const int & v1, const int & v2) const;
+    
+    template<typename Tf>
+    void calculateDistance(T * grid, Tf * intersectF) 
+    {
+        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+        uncutEdges();
+        
+/// for each cell
+        cvx::Tetrahedron atet;
+        const int & nt = grid->numCells();
+        for(int i=0;i<nt;++i) {
+            grid->getCell(atet, i);
+            
+            Vector3F tcen = atet.getCenter();
+            if(!intersectF->closestToPoint(tcen) ) {
+                continue;
+            }
+            
+/// approximate as node distance to plane
+            TetraDistance cutDist(atet);
+            cutDist.compute(intersectF);
+            
+            const sdb::Coord4 & tetv = grid->cellVertices(i);
+            const float * dist = cutDist.result();
+            const bool * validD = cutDist.isValid();
+            if(validD[0]) {
+                setNodeDistance(tetv.x, dist[0]);
+            }
+            if(validD[1]) {
+                setNodeDistance(tetv.y, dist[1]);
+            }
+            if(validD[2]) {
+                setNodeDistance(tetv.z, dist[2]);
+            }
+            if(validD[3]) {
+                setNodeDistance(tetv.w, dist[3]);
+            }
+            
+            if(validD[0] && validD[1]) {
+                cutEdge(tetv.x, tetv.y, dist[0], dist[1]);
+            }
+            
+            if(validD[1] && validD[2]) {
+                cutEdge(tetv.y, tetv.z, dist[1], dist[2]);
+            }
+            
+            if(validD[2] && validD[0]) {
+                cutEdge(tetv.z, tetv.x, dist[2], dist[0]);
+            }
+            
+            if(validD[0] && validD[3]) {
+                cutEdge(tetv.x, tetv.w, dist[0], dist[3]);
+            }
+            
+            if(validD[1] && validD[3]) {
+                cutEdge(tetv.y, tetv.w, dist[1], dist[3]);
+            }
+            
+            if(validD[2] && validD[3]) {
+                cutEdge(tetv.z, tetv.w, dist[2], dist[3]);
+            }
+        }
+        
+/// propagate distance to all nodes        
+        fastMarchingMethod();
+        
+        Vector3F agp, agn;
+        intersectF->getAggregatedPositionNormal(agp, agn);
+        
+        int iFar = nodeFarthestFrom(agp, agn);
+/// visit out nodes
+        marchOutside(iFar);
+/// unvisited nodes are inside
+        setFarNodeInside();
+/// merge short edges
+       snapToFront();
+    }
     
 protected:
 
@@ -130,16 +208,20 @@ void TetrahedronDistanceField<T>::updateGrid(T * grid) const
 }
 
 template<typename T>
-void TetrahedronDistanceField<T>::getCutEdgePos(Vector3F & pdst,
+bool TetrahedronDistanceField<T>::getCutEdgePos(Vector3F & pdst,
                                 const int & v1, const int & v2) const
 {
     int ei = edgeIndex(v1, v2);
     const IDistanceEdge & e = edges()[ei];
+    if(e.cx < 0.f) {
+        return false;
+    }
     if(e.vi.x == v1) {
         pdst = nodes()[v2].pos * e.cx + nodes()[v1].pos * (1.f - e.cx);
     } else {
         pdst = nodes()[v1].pos * e.cx + nodes()[v2].pos * (1.f - e.cx);
     }
+    return true;
 }
 
 }
