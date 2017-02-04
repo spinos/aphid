@@ -63,12 +63,16 @@ protected:
 	void expandFrontEdge();
 /// if node connected to edge cut close to 0 or 1
 /// un-cut all edges connected and set node val zero
-    void snapToFront(const float & threshold = .19f);
+    void snapToFront(const float & threshold = .2f);
     int nodeFarthestFrom(const Vector3F & origin,
                         const Vector3F & dir) const;
     void setNodeDistance(const int & idx,
                         const float & v);
+                        
+    void uncutEdges();
 /// when sign changes
+    void cutEdge(const int & v1, const int & v2,
+                const float & d1, const float & d2);
     void cutEdges();
     
 private:

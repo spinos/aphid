@@ -36,6 +36,7 @@ public:
     void calculateDistance(T * grid, Tf * intersectF) 
     {
         resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+        uncutEdges();
         
 /// for each cell
         cvx::Tetrahedron atet;
@@ -54,15 +55,45 @@ public:
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = cutDist.result();
-            setNodeDistance(tetv.x, dist[0]);
-            setNodeDistance(tetv.y, dist[1]);
-            setNodeDistance(tetv.z, dist[2]);
-            setNodeDistance(tetv.w, dist[3]);
+            const bool * validD = cutDist.isValid();
+            if(validD[0]) {
+                setNodeDistance(tetv.x, dist[0]);
+            }
+            if(validD[1]) {
+                setNodeDistance(tetv.y, dist[1]);
+            }
+            if(validD[2]) {
+                setNodeDistance(tetv.z, dist[2]);
+            }
+            if(validD[3]) {
+                setNodeDistance(tetv.w, dist[3]);
+            }
             
+            if(validD[0] && validD[1]) {
+                cutEdge(tetv.x, tetv.y, dist[0], dist[1]);
+            }
+            
+            if(validD[1] && validD[2]) {
+                cutEdge(tetv.y, tetv.z, dist[1], dist[2]);
+            }
+            
+            if(validD[2] && validD[0]) {
+                cutEdge(tetv.z, tetv.x, dist[2], dist[0]);
+            }
+            
+            if(validD[0] && validD[3]) {
+                cutEdge(tetv.x, tetv.w, dist[0], dist[3]);
+            }
+            
+            if(validD[1] && validD[3]) {
+                cutEdge(tetv.y, tetv.w, dist[1], dist[3]);
+            }
+            
+            if(validD[2] && validD[3]) {
+                cutEdge(tetv.z, tetv.w, dist[2], dist[3]);
+            }
         }
-
-        cutEdges();
-
+        
 /// propagate distance to all nodes        
         fastMarchingMethod();
         
@@ -75,8 +106,7 @@ public:
 /// unvisited nodes are inside
         setFarNodeInside();
 /// merge short edges
-        snapToFront();
-        std::cout.flush();
+       snapToFront();
     }
     
 protected:

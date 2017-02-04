@@ -374,10 +374,48 @@ void BaseDistanceField::setNodeDistance(const int & idx,
                         const float & v) 
 {
     DistanceNode & d = nodes()[idx];
-    if(Absolute<float>(d.val) > Absolute<float>(v) ) {
+    if(d.stat != sdf::StKnown) {
         d.val = v;
+        d.stat = sdf::StKnown;
+    } else {
+        if(Absolute<float>(d.val) > Absolute<float>(v) ) {
+            d.val = v;
+        }
     }
-    d.stat = sdf::StKnown;
+    
+}
+
+void BaseDistanceField::uncutEdges()
+{
+    IDistanceEdge * egs = edges();
+    const int & ne = numEdges();
+    for(int i=0;i<ne;++i) {
+        IDistanceEdge & e = egs[i];
+        e.cx = -1.f;
+    }
+}
+
+void BaseDistanceField::cutEdge(const int & v1, const int & v2,
+                const float & d1, const float & d2)
+{
+    if(d1 * d2 >= 0.f) {
+        return;
+    }
+    
+    IDistanceEdge * e = edge(v1, v2);
+    if(!e) {
+        return;
+    }
+    
+    const sdb::Coord2 & k = e->vi;
+
+    if(k.x == v1) {
+        e->cx = Absolute<float>(d1) / 
+                    (Absolute<float>(d1) + Absolute<float>(d2) );
+    } else {
+        e->cx = Absolute<float>(d2) / 
+                    (Absolute<float>(d1) + Absolute<float>(d2) );
+    }
 }
 
 void BaseDistanceField::cutEdges()
@@ -395,7 +433,7 @@ void BaseDistanceField::cutEdges()
             node2.stat == sdf::StKnown) {
             if(node1.val * node2.val < 0.f) {
                 e.cx = Absolute<float>(node1.val) / 
-                    (Absolute<float>(node1.val) + Absolute<float>(node2.val));
+                    (Absolute<float>(node1.val) + Absolute<float>(node2.val) );
             } 
         }
     }

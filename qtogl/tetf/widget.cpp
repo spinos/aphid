@@ -59,12 +59,13 @@ void GLWidget::clientInit()
     m_fieldDrawer = new FieldDrawerT;
     m_fieldDrawer->initGlsl();
     
-static const float scCorners[5][3] = {
-{4, -2, 1},
-{-7, 11, -14},
-{2, -3, 1},
+static const float scCorners[6][3] = {
+{4, -2, 0},
+{2, 17, -9},
+{-2, 0, -1},
 {9, 6, -13},
-{4, 11, -11}
+{6, 12, -11},
+{4, -5, 1}
 };
 
     cvx::Triangle * ta = new cvx::Triangle;
@@ -77,17 +78,21 @@ static const float scCorners[5][3] = {
 	tc->set(Vector3F(scCorners[4]), Vector3F(scCorners[0]), Vector3F(scCorners[3]) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
-	td->set(Vector3F(scCorners[2]), Vector3F(scCorners[1]), Vector3F(-3, -5, 0) );
+	td->set(Vector3F(scCorners[2]), Vector3F(scCorners[1]), Vector3F(-10, 5, -13) );
 	m_ground.push_back(td);
 	cvx::Triangle * te = new cvx::Triangle;
-	te->set(Vector3F(scCorners[3]), Vector3F(scCorners[0]), Vector3F(16, -9, 2) );
+	te->set(Vector3F(scCorners[3]), Vector3F(scCorners[0]), Vector3F(scCorners[5]) );
 	m_ground.push_back(te);
+    cvx::Triangle * tf = new cvx::Triangle;
+	tf->set(Vector3F(scCorners[5]), Vector3F(scCorners[0]), Vector3F(scCorners[2]) );
+	m_ground.push_back(tf);
     
 	m_sels.insert(0);
 	m_sels.insert(1);
     m_sels.insert(2);
     m_sels.insert(3);
     m_sels.insert(4);
+    m_sels.insert(5);
     
     TIntersect fintersect(&m_sels, &m_ground);
     
