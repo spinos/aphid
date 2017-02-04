@@ -14,6 +14,8 @@
 
 namespace aphid {
 
+class Plane;
+
 class ClosestToPointTestResult {
 
 public:
@@ -35,6 +37,8 @@ public:
 	void reset(const Vector3F & p, float initialDistance, bool fastOp = false);
 	bool closeTo(const BoundingBox & box) const;
 	bool closeEnough() const;
+    
+    Plane asPlane() const;
 	
 };
 	

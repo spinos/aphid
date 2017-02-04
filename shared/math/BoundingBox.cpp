@@ -383,7 +383,7 @@ bool BoundingBox::intersect(const Plane & p, float & tmin, float & tmax) const
     tmin = 10e8;
     tmax = -10e8;
     for(int i = 0; i < 8; i++) {
-        t = p.pointTo(corner(i));
+        t = p.distanceTo(corner(i));
         if(t < tmin) tmin = t;
         if(t > tmax) tmax = t;
     }

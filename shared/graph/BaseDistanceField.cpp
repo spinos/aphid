@@ -93,7 +93,7 @@ void BaseDistanceField::propagate(std::map<int, int > & heap,
 		
 /// min distance to B via A
 /// need eikonal approximation here
-			if(A.val + eg.len < B.val) {
+			if(B.val > A.val + eg.len) {
 				B.val = A.val + eg.len;
             }
 				
@@ -368,6 +368,37 @@ void BaseDistanceField::snapToFront(const float & threshold)
         }
 		
 	}
+}
+
+void BaseDistanceField::setNodeDistance(const int & idx,
+                        const float & v) 
+{
+    DistanceNode & d = nodes()[idx];
+    if(Absolute<float>(d.val) > Absolute<float>(v) ) {
+        d.val = v;
+    }
+    d.stat = sdf::StKnown;
+}
+
+void BaseDistanceField::cutEdges()
+{
+    DistanceNode * nds = nodes();
+    IDistanceEdge * egs = edges();
+    const int & ne = numEdges();
+    for(int i=0;i<ne;++i) {
+        IDistanceEdge & e = egs[i];
+        e.cx = -1.f;
+        const sdb::Coord2 & k = e.vi;
+        DistanceNode & node1 = nds[k.x];
+        DistanceNode & node2 = nds[k.y];
+        if(node1.stat == sdf::StKnown && 
+            node2.stat == sdf::StKnown) {
+            if(node1.val * node2.val < 0.f) {
+                e.cx = Absolute<float>(node1.val) / 
+                    (Absolute<float>(node1.val) + Absolute<float>(node2.val));
+            } 
+        }
+    }
 }
 
 }

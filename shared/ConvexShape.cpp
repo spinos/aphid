@@ -10,6 +10,7 @@
 #include "ConvexShape.h"
 #include <math/Quantization.h>
 #include <line_math.h>
+#include <tetrahedron_math.h>
 #include <cmath>
 namespace aphid {
     
@@ -769,6 +770,11 @@ void Tetrahedron::split(Hexahedron * hexa) const
 	hexa[2].set(f3, e5, tc, f1, e3, X(2), f0, e1);
 	hexa[3].set(e4, X(3), f2, e2, f3, e5, tc, f1);
 	
+}
+
+bool Tetrahedron::isPointInside(const Vector3F & q) const
+{
+    return pointInsideTetrahedronTest(q, m_p);
 }
 
 Hexahedron::Hexahedron()

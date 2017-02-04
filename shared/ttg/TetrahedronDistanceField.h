@@ -12,6 +12,7 @@
 
 #include <graph/BaseDistanceField.h>
 #include <ttg/TetraGridEdgeMap.h>
+#include <ttg/TetraDistance.h>
 #include <vector>
 #include <map>
 
@@ -30,6 +31,53 @@ public:
     void updateGrid(T * grid) const;
     bool getCutEdgePos(Vector3F & pdst,
                 const int & v1, const int & v2) const;
+    
+    template<typename Tf>
+    void calculateDistance(T * grid, Tf * intersectF) 
+    {
+        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+        
+/// for each cell
+        cvx::Tetrahedron atet;
+        const int & nt = grid->numCells();
+        for(int i=0;i<nt;++i) {
+            grid->getCell(atet, i);
+            
+            Vector3F tcen = atet.getCenter();
+            if(!intersectF->closestToPoint(tcen) ) {
+                continue;
+            }
+            
+/// approximate as node distance to plane
+            TetraDistance cutDist(atet);
+            cutDist.compute(intersectF);
+            
+            const sdb::Coord4 & tetv = grid->cellVertices(i);
+            const float * dist = cutDist.result();
+            setNodeDistance(tetv.x, dist[0]);
+            setNodeDistance(tetv.y, dist[1]);
+            setNodeDistance(tetv.z, dist[2]);
+            setNodeDistance(tetv.w, dist[3]);
+            
+        }
+
+        cutEdges();
+
+/// propagate distance to all nodes        
+        fastMarchingMethod();
+        
+        Vector3F agp, agn;
+        intersectF->getAggregatedPositionNormal(agp, agn);
+        
+        int iFar = nodeFarthestFrom(agp, agn);
+/// visit out nodes
+        marchOutside(iFar);
+/// unvisited nodes are inside
+        setFarNodeInside();
+/// merge short edges
+        snapToFront();
+        std::cout.flush();
+    }
     
 protected:
 

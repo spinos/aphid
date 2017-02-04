@@ -51,93 +51,6 @@ public:
     BaseDistanceField();
     virtual ~BaseDistanceField();
     
-    template<typename Tf>
-    void calculateDistance(Tf * intersectF) 
-    {
-        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
-        
-        IDistanceEdge * egs = edges();
-        DistanceNode * nds = nodes();
-        
-        Vector3F agp, agn;
-        intersectF->getAggregatedPositionNormal(agp, agn);
-        
-/// find edge cross front, assign distance to connected nodes        
-        Vector3F por;
-        const int & ne = numEdges();
-        for(int i=0;i<ne;++i) {
-            IDistanceEdge & e = egs[i];
-            const sdb::Coord2 & k = e.vi;
-            DistanceNode & node1 = nds[k.x];
-            DistanceNode & node2 = nds[k.y];
-            
-            bool rpos = true;
-            Ray r(node1.pos, node2.pos);
-/// from outside to inside
-            if(r.m_dir.dot(agn) > 0.f ) {
-                r.m_origin = node2.pos;
-                r.m_dir.reverse();
-                rpos = false;
-            }
-           
-            if(intersectF->rayIntersect(r) ) {
-                const Vector3F & crossp = intersectF->rayIntersectPoint();
-                float d1, d2;
-                if(rpos) {
-                    d1 = crossp.distanceTo(node1.pos);
-                    d2 = e.len - d1;
-                
-                } else {
-                    d2 = crossp.distanceTo(node2.pos);
-                    d1 = e.len - d2;
-                }
-                
-                e.cx = d1 / e.len;
-                
-                if(Absolute<float>(node1.val) > d1 ) {
-                    node1.val = d1;
-                    node1.stat = sdf::StKnown;
-                }
-                
-                if(Absolute<float>(node2.val) > d2 ) {
-                    node2.val = d2;
-                    node2.stat = sdf::StKnown;
-                }
-                
-                if(r.m_dir.dot(agn ) < -.5f) {
-                if(rpos) {
-                    if(node2.val > 0.f) {
-                        node2.val *= -1.f;
-                    }
-                    
-                    
-                } else {
-                    if(node1.val > 0.f) {
-                        node1.val *= -1.f;
-                    }
-                    
-                }
-                }
-                
-            } else {
-                e.cx = -1.f;
-            }
-            
-        }
-
-/// propagate distance to all nodes        
-        fastMarchingMethod();
-        
-        int iFar = nodeFarthestFrom(agp, agn);
-/// visit out nodes
-        marchOutside(iFar);
-/// unvisited nodes are inside
-        setFarNodeInside();
-/// merge short edges
-        snapToFront();
-        
-    }
-    
 protected:	
 	void resetNodes(float val, sdf::NodeState lab, sdf::NodeState stat);
     void unvisitAllNodes();
@@ -151,12 +64,16 @@ protected:
 /// if node connected to edge cut close to 0 or 1
 /// un-cut all edges connected and set node val zero
     void snapToFront(const float & threshold = .19f);
+    int nodeFarthestFrom(const Vector3F & origin,
+                        const Vector3F & dir) const;
+    void setNodeDistance(const int & idx,
+                        const float & v);
+/// when sign changes
+    void cutEdges();
     
 private:
 /// propagate distance value
     void propagate(std::map<int, int > & heap, const int & i);
-	int nodeFarthestFrom(const Vector3F & origin,
-                        const Vector3F & dir) const;
 /// lowest edge cut connected to node
     float distanceToFront(int & closestEdgeIdx,
                 const int & idx) const;

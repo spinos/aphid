@@ -11,8 +11,10 @@
 #ifndef APH_GEOM_PRIM_IND_H
 #define APH_GEOM_PRIM_IND_H
 
-#include <math/BoundingBox.h>
+#include <ConvexShape.h>
 #include <IntersectionContext.h>
+#include <geom/ClosestToPointTest.h>
+#include <math/Plane.h>
 
 namespace aphid {
 
@@ -22,15 +24,21 @@ class PrimInd : public BoundingBox {
 	Tind * m_ind;
 	const Tsrc * m_src;
 	IntersectionContext m_ctx;
+    ClosestToPointTestResult m_closestPointTest;
     
 public:
 	PrimInd(Tind * ind, const Tsrc * src);
 	
 	bool intersect(const BoundingBox & box);
     bool rayIntersect(const Ray & r);
+    bool tetrahedronIntersect(const cvx::Tetrahedron & tet);
+    bool closestToPoint(const Vector3F & origin);
+    Plane closestPlane() const;
     
     const Vector3F & rayIntersectPoint() const;
 	const Vector3F & rayIntersectNormal() const;
+    const Vector3F & closestToPointPoint() const;
+	const Vector3F & closestToPointNormal() const;
     
     void getAggregatedPositionNormal(Vector3F & resultP,
                         Vector3F& resultN);
@@ -101,12 +109,61 @@ bool PrimInd<Tind, Tsrc, Tprim>::rayIntersect(const Ray & r)
 }
 
 template<typename Tind, typename Tsrc, typename Tprim>
+bool PrimInd<Tind, Tsrc, Tprim>::tetrahedronIntersect(const cvx::Tetrahedron & tet)
+{
+    const Tsrc & rsrc = *m_src;
+	m_ind->begin();
+	while(!m_ind->end() ) {
+		
+		const Tprim * t = rsrc[m_ind->key() ];
+		
+		if(t-> template exactIntersect<cvx::Tetrahedron>(tet) ) {
+			return true;
+		}
+		
+		m_ind->next();
+	}
+    
+    return false;
+}
+
+template<typename Tind, typename Tsrc, typename Tprim>
+bool PrimInd<Tind, Tsrc, Tprim>::closestToPoint(const Vector3F & origin)
+{
+    m_closestPointTest.reset(origin, 1e8f);
+    const Tsrc & rsrc = *m_src;
+	m_ind->begin();
+	while(!m_ind->end() ) {
+		
+		const Tprim * t = rsrc[m_ind->key() ];
+		
+		t-> template closestToPoint<ClosestToPointTestResult>(&m_closestPointTest);
+		
+		m_ind->next();
+	}
+    return m_closestPointTest._hasResult;
+    
+}
+
+template<typename Tind, typename Tsrc, typename Tprim>
+Plane PrimInd<Tind, Tsrc, Tprim>::closestPlane() const
+{ return m_closestPointTest.asPlane(); }
+
+template<typename Tind, typename Tsrc, typename Tprim>
 const Vector3F & PrimInd<Tind, Tsrc, Tprim>::rayIntersectPoint() const
 { return m_ctx.m_hitP; }
 
 template<typename Tind, typename Tsrc, typename Tprim>
 const Vector3F & PrimInd<Tind, Tsrc, Tprim>::rayIntersectNormal() const
 { return m_ctx.m_hitN; }
+
+template<typename Tind, typename Tsrc, typename Tprim>
+const Vector3F & PrimInd<Tind, Tsrc, Tprim>::closestToPointPoint() const
+{ return m_closestPointTest._hitPoint; }
+
+template<typename Tind, typename Tsrc, typename Tprim>
+const Vector3F & PrimInd<Tind, Tsrc, Tprim>::closestToPointNormal() const
+{ return m_closestPointTest._hitNormal; }
 
 template<typename Tind, typename Tsrc, typename Tprim>
 void PrimInd<Tind, Tsrc, Tprim>::getAggregatedPositionNormal(Vector3F & resultP,

@@ -26,8 +26,8 @@ GLWidget::~GLWidget()
 {}
 
 static const float stetvs[4][3] = {
-{ -12.f, -4.f, -9.f}, 
-{ 0.f, 15.f, -2.f},
+{ -13.f, -3.f, -9.f}, 
+{ 0.f, 17.f, -5.f},
 { 16.f, 2.f, -10.f}, 
 { 4.f, -12.f, 12.f}
 };
@@ -60,11 +60,11 @@ void GLWidget::clientInit()
     m_fieldDrawer->initGlsl();
     
 static const float scCorners[5][3] = {
-{9, -4, 7},
-{-9, 11, -14},
-{0, -1, 4},
-{11, 6, -13},
-{7, 9, -11}
+{4, -2, 1},
+{-7, 11, -14},
+{2, -3, 1},
+{9, 6, -13},
+{4, 11, -11}
 };
 
     cvx::Triangle * ta = new cvx::Triangle;
@@ -77,10 +77,10 @@ static const float scCorners[5][3] = {
 	tc->set(Vector3F(scCorners[4]), Vector3F(scCorners[0]), Vector3F(scCorners[3]) );
 	m_ground.push_back(tc);
     cvx::Triangle * td = new cvx::Triangle;
-	td->set(Vector3F(scCorners[1]), Vector3F(scCorners[2]), Vector3F(-19, -5, -12) );
+	td->set(Vector3F(scCorners[2]), Vector3F(scCorners[1]), Vector3F(-3, -5, 0) );
 	m_ground.push_back(td);
 	cvx::Triangle * te = new cvx::Triangle;
-	te->set(Vector3F(scCorners[3]), Vector3F(scCorners[0]), Vector3F(19, 3, 2) );
+	te->set(Vector3F(scCorners[3]), Vector3F(scCorners[0]), Vector3F(16, -9, 2) );
 	m_ground.push_back(te);
     
 	m_sels.insert(0);
@@ -89,10 +89,9 @@ static const float scCorners[5][3] = {
     m_sels.insert(3);
     m_sels.insert(4);
     
-typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
-	TIntersect fintersect(&m_sels, &m_ground);
+    TIntersect fintersect(&m_sels, &m_ground);
     
-    m_mesher.field()->calculateDistance<TIntersect>(&fintersect);
+    m_mesher.field()->calculateDistance<TIntersect>(m_grd, &fintersect);
     //m_field->updateGrid(m_grd);
     
     m_mesher.triangulate();
@@ -111,6 +110,7 @@ void GLWidget::clientDraw()
     getDrawer()->setColor(.025f, .25f, .125f);
 	//drawSolidGrid();
     drawField();
+    drawCellCut();
     drawTriangulation();
 /*
     glEnable(GL_CULL_FACE);
@@ -126,6 +126,37 @@ void GLWidget::clientDraw()
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 */
+}
+
+void GLWidget::drawCellCut()
+{
+    TIntersect fintersect(&m_sels, &m_ground);
+    
+    glBegin(GL_LINES);
+    cvx::Tetrahedron atet;
+    const int n = m_grd->numCells();
+    for(int i=0;i<n;++i) {
+        m_grd->getCell(atet, i);
+        
+        if(!fintersect.tetrahedronIntersect(atet) ) {
+            continue;
+        }
+        
+        Vector3F tcen = atet.getCenter();
+        fintersect.closestToPoint(tcen);
+        
+        Vector3F pop = fintersect.closestToPointPoint();
+        
+        glColor3f(.01f, .3f, .2f);
+        glVertex3fv((const float *)&tcen );
+        glVertex3fv((const float *)&pop );
+        glColor3f(.01f, .5f, .4f);
+        glVertex3fv((const float *)&pop );
+        Vector3F pnm = pop + fintersect.closestToPointNormal();
+        glVertex3fv((const float *)&pnm );
+    }
+    glEnd();
+    
 }
 
 void GLWidget::drawGround()

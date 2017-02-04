@@ -288,13 +288,13 @@ void Triangle::closestToPoint(T * result) const
 	BarycentricCoordinate & bar = result->_bar;
 	bar.create(m_p0, m_p1, m_p2);
 	float d = bar.project(result->_toPoint);
-	if(d>=result->_distance) return;
+	if(d > result->_distance) return;
 	bar.compute();
 	if(!bar.insideTriangle()) bar.computeClosest();
 	
 	const Vector3F clampledP = bar.getClosest();
 	d = clampledP.distanceTo(result->_toPoint );
-	if(d>=result->_distance) return;
+	if(d > result->_distance) return;
 	
 	result->_distance = d;
 	result->_hasResult = true;
@@ -366,6 +366,8 @@ public:
 	void getFace(Triangle & tri, const int & i) const;
 /// into 4 hexa
 	void split(Hexahedron * hexa) const;
+    
+    bool isPointInside(const Vector3F & q) const;
 	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();
