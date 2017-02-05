@@ -67,17 +67,20 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     ttg::TetraMeshBuilder teter;
     teter.buildMesh(m_tetg, m_grid);
     
-    TetraGridEdgeMap<TetGridTyp > tetgedge(m_tetg);
-    
-    m_field = new FieldTyp;
-    m_field->buildGraph(m_tetg, &tetgedge );
+    m_mesher = new MesherT;
+    m_mesher->setGrid(m_tetg);
     
 typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_tree);
     
     Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
-    float offset = m_grid->levelCellSize(6);
-    m_field->calculateDistance<FClosestTyp>(m_tetg, &clseng, rgp, rgn, offset);
+    float offset = m_grid->levelCellSize(9);
+    
+    FieldTyp * fld = m_mesher->field();
+    
+    fld->calculateDistance<FClosestTyp>(m_tetg, &clseng, rgp, rgn, offset);
+    
+    m_mesher->triangulate();
     
     m_fieldDrawer = new FieldDrawerT;
     
@@ -113,8 +116,28 @@ void GLWidget::clientDraw()
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(.05f, .5f, .15f);
     //drawTetraMesh();
-    drawField();
+    //drawField();
+    drawTriangulation();
     
+}
+
+void GLWidget::drawTriangulation()
+{
+    int ntri = m_mesher->numFrontTriangles();
+
+    Vector3F * trips = new Vector3F[ntri * 3];
+    m_mesher->extractFrontTriangles(trips);
+    
+     getDrawer()->m_wireProfile.apply();
+     getDrawer()->setColor(1,.7,0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+	
+    glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)trips );
+    glDrawArrays(GL_TRIANGLES, 0, ntri * 3);
+    
+    glDisableClientState(GL_VERTEX_ARRAY);
+    
+    delete[] trips;
 }
 
 void GLWidget::drawTetraMesh()
@@ -176,8 +199,8 @@ void GLWidget::draw3LevelGrid(int level)
 
 void GLWidget::drawField()
 {
-   // m_fieldDrawer->drawEdge(m_field );
-    m_fieldDrawer->drawNode(m_field);
+   // m_fieldDrawer->drawEdge(m_mesher->field() );
+    m_fieldDrawer->drawNode(m_mesher->field() );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

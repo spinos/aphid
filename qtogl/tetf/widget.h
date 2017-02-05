@@ -4,8 +4,8 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 
-#include <ttg/TetraGridTriangulation.h>
 #include <ogl/DrawTetrahedron.h>
+#include <sdb/Sequence.h>
 
 namespace aphid {
 
@@ -15,6 +15,12 @@ class Triangle;
 
 template<typename T1, typename T2, typename T3>
 class PrimInd;
+
+template <typename Tv, int N>
+class TetrahedronGrid;
+
+template <typename Tv, typename Tg>
+class TetraGridTriangulation;
 
 namespace ttg {
 
@@ -67,10 +73,13 @@ private:
 private slots:
 
 private:
-typedef aphid::TetraGridTriangulation<TFTNode, 5 > MesherT;
-    MesherT m_mesher;
-	MesherT::GridT * m_grd;
+
+typedef aphid::TetrahedronGrid<TFTNode, 5 > GridT;
+    GridT * m_grd;
     
+typedef aphid::TetraGridTriangulation<TFTNode, GridT > MesherT;
+    MesherT * m_mesher;
+	
 typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
     FieldDrawerT * m_fieldDrawer;
     

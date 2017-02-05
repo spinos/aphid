@@ -2,7 +2,7 @@
  *  TetraGridTriangulation.h
  *  
  *  Tv is node value type
- *  N is order of grid
+ *  Tg is grid type
  *  Created by zhang on 17-1-30.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
@@ -11,25 +11,23 @@
 #ifndef APH_TTG_TETRA_GRID_TRIANGULATION_H
 #define APH_TTG_TETRA_GRID_TRIANGULATION_H
 
-#include <ttg/TetrahedronGrid.h>
 #include <ttg/TetraGridEdgeMap.h>
 #include <ttg/TetrahedronDistanceField.h>
 #include <ttg/RedBlueRefine.h>
 
 namespace aphid {
 
-template <typename Tv, int N>
+template <typename Tv, typename Tg>
 class TetraGridTriangulation {
     
 public: 
-typedef TetrahedronGrid<Tv, N> GridT;
-typedef ttg::TetrahedronDistanceField<GridT > FieldT;
+typedef ttg::TetrahedronDistanceField<Tg > FieldT;
 
 private:
-	GridT * m_tg;
+	Tg * m_tg;
     FieldT * m_field;
 
-    TetraGridEdgeMap<GridT > * m_edgeMap;
+    TetraGridEdgeMap<Tg > * m_edgeMap;
     Vector3F * m_cutEdgePos;
     sdb::Sequence<sdb::Coord3 > m_frontTriangleMap;
     
@@ -37,11 +35,11 @@ public:
     TetraGridTriangulation();
     virtual ~TetraGridTriangulation();
     
-    void setGrid(GridT * g);
+    void setGrid(Tg * g);
     
     void triangulate();
     
-    TetraGridEdgeMap<TetrahedronGrid<Tv, N> > & gridEdges();
+    TetraGridEdgeMap<Tg > & gridEdges();
     int numFrontTriangles();
     void extractFrontTriangles(Vector3F * vs);
     
@@ -70,16 +68,16 @@ private:
                     
 };
 
-template <typename Tv, int N>
-TetraGridTriangulation<Tv, N>::TetraGridTriangulation()
+template <typename Tv, typename Tg>
+TetraGridTriangulation<Tv, Tg>::TetraGridTriangulation()
 { 
     m_tg = 0;
     m_edgeMap = 0;
     m_cutEdgePos = 0;
 }
 
-template <typename Tv, int N>
-TetraGridTriangulation<Tv, N>::~TetraGridTriangulation()
+template <typename Tv, typename Tg>
+TetraGridTriangulation<Tv, Tg>::~TetraGridTriangulation()
 {
     if(m_tg) {
         delete m_tg;
@@ -95,18 +93,18 @@ TetraGridTriangulation<Tv, N>::~TetraGridTriangulation()
     }
 }
 
-template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::setGrid(GridT * g)
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::setGrid(Tg * g)
 {
     m_tg = g;
-    m_edgeMap = new TetraGridEdgeMap<GridT >(m_tg);
+    m_edgeMap = new TetraGridEdgeMap<Tg >(m_tg);
     m_field = new FieldT;
     m_field->buildGraph(g, m_edgeMap );
     
 }
 
-template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::triangulate()
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::triangulate()
 {
     const int ne = m_edgeMap->size();
     m_cutEdgePos = new Vector3F[ne];
@@ -142,16 +140,16 @@ void TetraGridTriangulation<Tv, N>::triangulate()
     
 }
 
-template <typename Tv, int N>
-TetraGridEdgeMap<TetrahedronGrid<Tv, N> > & TetraGridTriangulation<Tv, N>::gridEdges()
+template <typename Tv, typename Tg>
+TetraGridEdgeMap<Tg > & TetraGridTriangulation<Tv, Tg>::gridEdges()
 { return *m_edgeMap; }
 
-template <typename Tv, int N>
-int TetraGridTriangulation<Tv, N>::numFrontTriangles()
+template <typename Tv, typename Tg>
+int TetraGridTriangulation<Tv, Tg>::numFrontTriangles()
 { return m_frontTriangleMap.size(); }
 
-template <typename Tv, int N>
-int TetraGridTriangulation<Tv, N>::cutEdgeInd(int & numCuts, const int & v0, const int & v1)
+template <typename Tv, typename Tg>
+int TetraGridTriangulation<Tv, Tg>::cutEdgeInd(int & numCuts, const int & v0, const int & v1)
 {
     int  * e = m_edgeMap->findEdge(v0, v1);
     if(* e < 0) {
@@ -161,8 +159,8 @@ int TetraGridTriangulation<Tv, N>::cutEdgeInd(int & numCuts, const int & v0, con
     return *e;
 }
 
-template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::getEdgeValuePos(float & va, float & vb,
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::getEdgeValuePos(float & va, float & vb,
                     Vector3F & pa, Vector3F & pb,
                     const int & v1, const int & v2)
 {
@@ -174,8 +172,8 @@ void TetraGridTriangulation<Tv, N>::getEdgeValuePos(float & va, float & vb,
     pb = n2.pos;
 }
 
-template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::cutEdges(int & numCuts,
                     ttg::RedBlueRefine & refiner, 
                     const sdb::Coord4 & itet)
 {
@@ -241,8 +239,8 @@ void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
 	}
 }
 
-template <typename Tv, int N>
-void TetraGridTriangulation<Tv, N>::extractFrontTriangles(Vector3F * vs)
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::extractFrontTriangles(Vector3F * vs)
 {
     const DistanceNode * nds = m_field->nodes(); 
     int itri = 0;
@@ -270,12 +268,12 @@ void TetraGridTriangulation<Tv, N>::extractFrontTriangles(Vector3F * vs)
 	}
 }
 
-template <typename Tv, int N>
-ttg::TetrahedronDistanceField<TetrahedronGrid<Tv, N> > * TetraGridTriangulation<Tv, N>::field()
+template <typename Tv, typename Tg>
+ttg::TetrahedronDistanceField<Tg > * TetraGridTriangulation<Tv, Tg>::field()
 { return m_field; }
 
-template <typename Tv, int N>
-const ttg::TetrahedronDistanceField<TetrahedronGrid<Tv, N> > * TetraGridTriangulation<Tv, N>::field() const
+template <typename Tv, typename Tg>
+const ttg::TetrahedronDistanceField<Tg > * TetraGridTriangulation<Tv, Tg>::field() const
 { return m_field; }
 
 }

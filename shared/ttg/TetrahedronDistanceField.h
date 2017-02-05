@@ -13,6 +13,7 @@
 #include <graph/BaseDistanceField.h>
 #include <ttg/TetraGridEdgeMap.h>
 #include <ttg/TetraDistance.h>
+#include <geom/ConvexShape.h>
 #include <vector>
 #include <map>
 
