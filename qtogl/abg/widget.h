@@ -4,7 +4,6 @@
 #include <QGLWidget>
 #include <Base3DView.h>
 
-#include <ttg/TetraGridTriangulation.h>
 #include <ogl/DrawTetrahedron.h>
 
 namespace aphid {
@@ -26,6 +25,10 @@ class KdNNode;
 template<typename T1, typename T2>
 class KdNTree;
 
+template <typename Tv, typename Tg>
+class TetraGridTriangulation;
+
+class ATriangleMesh;
 
 namespace ttg {
 
@@ -97,6 +100,8 @@ typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawer
 
 typedef aphid::TetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
     MesherT * m_mesher;
+    
+    aphid::ATriangleMesh * m_frontMesh;
             
 };
 

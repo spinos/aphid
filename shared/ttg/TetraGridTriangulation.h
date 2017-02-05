@@ -14,6 +14,7 @@
 #include <ttg/TetraGridEdgeMap.h>
 #include <ttg/TetrahedronDistanceField.h>
 #include <ttg/RedBlueRefine.h>
+#include <geom/ATriangleMesh.h>
 
 namespace aphid {
 
@@ -41,7 +42,7 @@ public:
     
     TetraGridEdgeMap<Tg > & gridEdges();
     int numFrontTriangles();
-    void extractFrontTriangles(Vector3F * vs);
+    void dumpFrontTriangleMesh(ATriangleMesh * trimesh);
     
     FieldT * field();
     const FieldT * field() const;
@@ -65,6 +66,14 @@ private:
     void getEdgeValuePos(float & va, float & vb,
                     Vector3F & pa, Vector3F & pb,
                     const int & v1, const int & v2);
+                    
+    struct VertexInd {
+        int key;
+        int ind;
+    };
+    
+    void addAVertex(sdb::Array<int, VertexInd > & vertmap,
+                    const int & k);
                     
 };
 
@@ -240,41 +249,103 @@ void TetraGridTriangulation<Tv, Tg>::cutEdges(int & numCuts,
 }
 
 template <typename Tv, typename Tg>
-void TetraGridTriangulation<Tv, Tg>::extractFrontTriangles(Vector3F * vs)
-{
-    const DistanceNode * nds = m_field->nodes(); 
-    int itri = 0;
-    m_frontTriangleMap.begin();
-	while(!m_frontTriangleMap.end() ) {
-        const sdb::Coord3 & k = m_frontTriangleMap.key();
-        if(k.x < MDecode) {
-            vs[itri * 3] = nds[k.x].pos;
-        } else {
-            vs[itri * 3] = m_cutEdgePos[k.x & MDecode];
-        }
-        if(k.y < MDecode) {
-            vs[itri * 3 + 1] = nds[k.y].pos;
-        } else {
-            vs[itri * 3 + 1] = m_cutEdgePos[k.y & MDecode];
-        }
-        if(k.z < MDecode) {
-            vs[itri * 3 + 2] = nds[k.z].pos;
-        } else {
-            vs[itri * 3 + 2] = m_cutEdgePos[k.z & MDecode];
-        }
-		itri++; 
-
-		m_frontTriangleMap.next();
-	}
-}
-
-template <typename Tv, typename Tg>
 ttg::TetrahedronDistanceField<Tg > * TetraGridTriangulation<Tv, Tg>::field()
 { return m_field; }
 
 template <typename Tv, typename Tg>
 const ttg::TetrahedronDistanceField<Tg > * TetraGridTriangulation<Tv, Tg>::field() const
 { return m_field; }
+
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::addAVertex(sdb::Array<int, VertexInd > & vertmap,
+                    const int & k)
+{
+    VertexInd * v = new VertexInd;
+    v->key = k;
+    v->ind = -1;
+    vertmap.insert(k, v);
+}
+
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::dumpFrontTriangleMesh(ATriangleMesh * trimesh)
+{
+    const unsigned nt = numFrontTriangles();
+    
+    sdb::Array<int, VertexInd > vertmap;
+    m_frontTriangleMap.begin();
+	while(!m_frontTriangleMap.end() ) {
+        const sdb::Coord3 & k = m_frontTriangleMap.key();
+        
+        if(!vertmap.find(k.x) ) {
+            addAVertex(vertmap, k.x);
+        }
+        
+        if(!vertmap.find(k.y) ) {
+            addAVertex(vertmap, k.y);
+        }
+        
+        if(!vertmap.find(k.z) ) {
+            addAVertex(vertmap, k.z);
+        }
+
+		m_frontTriangleMap.next();
+	}
+    
+    const unsigned np = vertmap.size();
+    
+    int acc = 0;
+    vertmap.begin();
+    while(!vertmap.end() ) {
+        VertexInd * vi = vertmap.value();
+        if(vi->ind < 0) {
+            vi->ind = acc;
+            acc++;
+        }
+        
+		vertmap.next();
+	}
+    
+    trimesh->create(np, nt);
+    
+    unsigned * indDst = trimesh->indices();
+    Vector3F * pntDst = trimesh->points();
+    
+    const DistanceNode * nds = m_field->nodes(); 
+    int itri = 0;
+    m_frontTriangleMap.begin();
+	while(!m_frontTriangleMap.end() ) {
+        const sdb::Coord3 & k = m_frontTriangleMap.key();
+        
+        const VertexInd * v1 = vertmap.find(k.x);
+        const VertexInd * v2 = vertmap.find(k.y);
+        const VertexInd * v3 = vertmap.find(k.z);
+        
+        indDst[itri * 3] = v1->ind;
+        indDst[itri * 3 + 1] = v2->ind;
+        indDst[itri * 3 + 2] = v3->ind;
+        itri++;
+        
+        if(k.x < MDecode) {
+            pntDst[v1->ind] = nds[k.x].pos;
+        } else {
+            pntDst[v1->ind] = m_cutEdgePos[k.x & MDecode];
+        }
+        if(k.y < MDecode) {
+            pntDst[v2->ind] = nds[k.y].pos;
+        } else {
+            pntDst[v2->ind] = m_cutEdgePos[k.y & MDecode];
+        }
+        if(k.z < MDecode) {
+            pntDst[v3->ind] = nds[k.z].pos;
+        } else {
+            pntDst[v3->ind] = m_cutEdgePos[k.z & MDecode];
+        }
+
+		m_frontTriangleMap.next();
+	}
+    
+    vertmap.clear();
+}
 
 }
 #endif

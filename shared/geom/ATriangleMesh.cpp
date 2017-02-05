@@ -195,5 +195,29 @@ void ATriangleMesh::reverseTriangleNormals()
 	}
 }
 
+void ATriangleMesh::calculateVertexNormals()
+{
+    const int nv = numPoints();
+    Vector3F * ndst = vertexNormals();
+    for(int i=0;i<nv;++i) {
+        ndst[i].set(0.f, 0.f, 0.f);
+    }
+    
+    const unsigned * inds = indices();
+    const unsigned ntris = numTriangles();
+    for(unsigned i=0;i<ntris;++i) {
+        const Vector3F triNm = triangleNormal(i);
+        const unsigned * triInd = triangleIndices(i);
+        ndst[triInd[0]] += triNm;
+        ndst[triInd[1]] += triNm;
+        ndst[triInd[2]] += triNm;
+    }
+    
+    for(int i=0;i<nv;++i) {
+        ndst[i].normalize();
+    }
+    
+}
+
 }
 //:~

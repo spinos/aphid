@@ -39,6 +39,7 @@ public:
 	virtual std::string verbosestr() const;
 	
 	void reverseTriangleNormals();
+    void calculateVertexNormals();
 	
 protected:
 	
