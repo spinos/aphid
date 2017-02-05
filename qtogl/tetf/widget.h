@@ -22,6 +22,8 @@ class TetrahedronGrid;
 template <typename Tv, typename Tg>
 class TetraGridTriangulation;
 
+class ATriangleMesh;
+
 namespace ttg {
 
 template<typename T>
@@ -88,6 +90,7 @@ typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawer
 
 typedef aphid::PrimInd<aphid::sdb::Sequence<int>, std::vector<aphid::cvx::Triangle * >, aphid::cvx::Triangle > TIntersect;
 	
+    aphid::ATriangleMesh * m_frontMesh;
             
 };
 

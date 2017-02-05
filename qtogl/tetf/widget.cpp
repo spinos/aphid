@@ -105,6 +105,10 @@ static const float scCorners[6][3] = {
     
     m_mesher->triangulate();
     
+    m_frontMesh = new ATriangleMesh;
+    m_mesher->dumpFrontTriangleMesh(m_frontMesh);
+    m_frontMesh->calculateVertexNormals();
+    
 }
 
 void GLWidget::clientDraw()
@@ -120,6 +124,7 @@ void GLWidget::clientDraw()
 	//drawSolidGrid();
     drawField();
     drawCellCut();
+    
     drawTriangulation();
 /*
     glEnable(GL_CULL_FACE);
@@ -246,21 +251,24 @@ void GLWidget::drawWiredGrid()
 
 void GLWidget::drawTriangulation()
 {
-    int ntri = m_mesher->numFrontTriangles();
-
-    Vector3F * trips = new Vector3F[ntri * 3];
-    m_mesher->extractFrontTriangles(trips);
-    
-     getDrawer()->m_wireProfile.apply();
+    getDrawer()->m_surfaceProfile.apply();
      getDrawer()->setColor(1,.7,0);
+
+    const unsigned nind = m_frontMesh->numIndices();
+    const unsigned * inds = m_frontMesh->indices();
+    const Vector3F * pos = m_frontMesh->points();
+    const Vector3F * nms = m_frontMesh->vertexNormals();
+    
     glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
 	
-    glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)trips );
-    glDrawArrays(GL_TRIANGLES, 0, ntri * 3);
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
+    glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
     
-    glDisableClientState(GL_VERTEX_ARRAY);
-    
-    delete[] trips;
+    glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

@@ -14,7 +14,7 @@
 #include <ttg/TetrahedronDistanceField.h>
 #include <ttg/GenericTetraGrid.h>
 #include <ttg/TetraMeshBuilder.h>
-#include <ttg/TetraGridEdgeMap.h>
+#include <ttg/TetraGridTriangulation.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
@@ -37,7 +37,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[5],
+									sCactusMeshVertices[4],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -55,7 +55,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .99f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .79f;
     
     m_grid = new GridTyp;
     m_grid->fillBox(m_tree->getBBox(), sz0 );
@@ -81,6 +81,10 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     fld->calculateDistance<FClosestTyp>(m_tetg, &clseng, rgp, rgn, offset);
     
     m_mesher->triangulate();
+    
+    m_frontMesh = new ATriangleMesh;
+    m_mesher->dumpFrontTriangleMesh(m_frontMesh);
+    m_frontMesh->calculateVertexNormals();
     
     m_fieldDrawer = new FieldDrawerT;
     
@@ -123,21 +127,24 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawTriangulation()
 {
-    int ntri = m_mesher->numFrontTriangles();
+    //getDrawer()->m_wireProfile.apply();
+    getDrawer()->m_surfaceProfile.apply();
+    getDrawer()->setColor(1,.7,0);
 
-    Vector3F * trips = new Vector3F[ntri * 3];
-    m_mesher->extractFrontTriangles(trips);
+    const unsigned nind = m_frontMesh->numIndices();
+    const unsigned * inds = m_frontMesh->indices();
+    const Vector3F * pos = m_frontMesh->points();
+    const Vector3F * nms = m_frontMesh->vertexNormals();
     
-     getDrawer()->m_wireProfile.apply();
-     getDrawer()->setColor(1,.7,0);
     glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
 	
-    glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)trips );
-    glDrawArrays(GL_TRIANGLES, 0, ntri * 3);
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
+    glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
     
-    glDisableClientState(GL_VERTEX_ARRAY);
-    
-    delete[] trips;
+    glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::drawTetraMesh()
