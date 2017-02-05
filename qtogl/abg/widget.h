@@ -34,7 +34,8 @@ class AdaptiveBccGrid3;
 template<typename T>
 class TetrahedronDistanceField;
 
-class TetraMeshBuilder;
+template<typename T>
+class GenericTetraGrid;
 
 }
 
@@ -73,7 +74,8 @@ public slots:
 private:
     void drawTetraMesh();
     void draw3LevelGrid(int level);
-               
+    void drawField();
+    
 private slots:
 
 private:
@@ -84,8 +86,15 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 typedef aphid::ttg::AdaptiveBccGrid3 GridTyp;    
     GridTyp * m_grid;
     
-    aphid::ttg::TetraMeshBuilder * m_teter;
+typedef aphid::ttg::GenericTetraGrid<float> TetGridTyp;
+    TetGridTyp * m_tetg;
     
+typedef aphid::ttg::TetrahedronDistanceField<TetGridTyp > FieldTyp;
+    FieldTyp * m_field;
+    
+typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
+    FieldDrawerT * m_fieldDrawer;
+        
 };
 
 #endif

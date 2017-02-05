@@ -24,6 +24,9 @@ typedef KdNTree<T, Tn > TreeTyp;
 	
 public:
 	ClosestToPointEngine(TreeTyp * tree);
+    
+    bool closestToPoint(const Vector3F & origin,
+                        const float & maxDistance = 1e8f);
 	
 	bool closestTo(Vector3F & dest, 
 					const Vector3F & origin);
@@ -32,6 +35,10 @@ public:
 					int & icomp,
 					float * contrib) const;
 
+    const Vector3F & closestToPointPoint() const;
+	const Vector3F & closestToPointNormal() const;
+    Plane closestPlane() const;
+    
 };
 
 template<typename T, typename Tn>
@@ -41,11 +48,21 @@ ClosestToPointEngine<T, Tn>::ClosestToPointEngine(TreeTyp * tree)
 }
 
 template<typename T, typename Tn>
+bool ClosestToPointEngine<T, Tn>::closestToPoint(const Vector3F & origin,
+                                    const float & maxDistance)
+{
+    m_ctx.reset(origin, maxDistance);
+    KdEngine::closestToPoint(m_tree, &m_ctx);
+    return m_ctx._hasResult;
+    
+}
+
+template<typename T, typename Tn>
 bool ClosestToPointEngine<T, Tn>::closestTo(Vector3F & dest, 
 					const Vector3F & origin)
 {
 	m_ctx.reset(origin, 1e9f);
-	closestToPoint(m_tree, &m_ctx);
+	KdEngine::closestToPoint(m_tree, &m_ctx);
 	if(m_ctx._hasResult) {
 		dest = m_ctx._hitPoint;
 	} else {
@@ -67,6 +84,18 @@ void ClosestToPointEngine<T, Tn>::getGeomCompContribute(int & igeom,
 	contrib[2] = m_ctx._contributes[2];
 	contrib[3] = m_ctx._contributes[3];
 }
+
+template<typename T, typename Tn>
+const Vector3F & ClosestToPointEngine<T, Tn>::closestToPointPoint() const
+{ return m_ctx._hitPoint; }
+
+template<typename T, typename Tn>
+const Vector3F & ClosestToPointEngine<T, Tn>::closestToPointNormal() const
+{ return m_ctx._hitNormal; }
+
+template<typename T, typename Tn>
+Plane ClosestToPointEngine<T, Tn>::closestPlane() const
+{ return m_ctx.asPlane(); }
 
 }
 #endif

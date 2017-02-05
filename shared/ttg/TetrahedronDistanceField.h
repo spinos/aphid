@@ -33,25 +33,30 @@ public:
                 const int & v1, const int & v2) const;
     
     template<typename Tf>
-    void calculateDistance(T * grid, Tf * intersectF) 
+    void calculateDistance(T * grid, Tf * intersectF,
+                            const Vector3F & refPoint,
+                            const Vector3F & refDirection,
+                            const float & offset) 
     {
         resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
         uncutEdges();
         
 /// for each cell
         cvx::Tetrahedron atet;
+        Vector3F tcen;
+        float trad;
         const int & nt = grid->numCells();
         for(int i=0;i<nt;++i) {
             grid->getCell(atet, i);
             
-            Vector3F tcen = atet.getCenter();
-            if(!intersectF->closestToPoint(tcen) ) {
+            atet.circumSphere(tcen, trad);
+            if(!intersectF->closestToPoint(tcen, trad) ) {
                 continue;
             }
             
 /// approximate as node distance to plane
             TetraDistance cutDist(atet);
-            cutDist.compute(intersectF);
+            cutDist.compute(intersectF, trad * 2.f, offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = cutDist.result();
@@ -97,16 +102,13 @@ public:
 /// propagate distance to all nodes        
         fastMarchingMethod();
         
-        Vector3F agp, agn;
-        intersectF->getAggregatedPositionNormal(agp, agn);
-        
-        int iFar = nodeFarthestFrom(agp, agn);
+        int iFar = nodeFarthestFrom(refPoint, refDirection);
 /// visit out nodes
         marchOutside(iFar);
 /// unvisited nodes are inside
         setFarNodeInside();
 /// merge short edges
-       snapToFront();
+        snapToFront();
     }
     
 protected:

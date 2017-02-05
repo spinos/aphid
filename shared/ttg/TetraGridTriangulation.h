@@ -179,8 +179,9 @@ void TetraGridTriangulation<Tv, N>::cutEdges(int & numCuts,
                     ttg::RedBlueRefine & refiner, 
                     const sdb::Coord4 & itet)
 {
-    if(!refiner.hasOption() )
+    if(!refiner.hasOption() ) {
 		return;
+    }
 	
     float da, db;
     Vector3F pa, pb;

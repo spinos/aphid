@@ -26,25 +26,25 @@ class TetraDistance {
     Vector3F m_p[4];
     float m_d[4];
     bool m_valid[4];
-    float m_maxDistance;
     
 public:
     TetraDistance(const cvx::Tetrahedron & tet);
     virtual ~TetraDistance();
     
     template<typename Tf>
-    void compute(Tf * intersectF)
+    void compute(Tf * intersectF, const float & maxDistance,
+                const float & offset)
     {
         for(int i=0;i<4;++i) {
-            if(!intersectF->closestToPoint(m_p[i]) ) {
+            if(!intersectF->closestToPoint(m_p[i], maxDistance) ) {
                 continue;
             }
             m_valid[i] = true;
             Plane pl = intersectF->closestPlane();
-            m_d[i] = pl.distanceTo(m_p[i]);
+            m_d[i] = pl.distanceTo(m_p[i]) - offset;
             Vector3F dv = intersectF->closestToPointPoint() - m_p[i];
             const float ldv = dv.length();
-            if(ldv > m_maxDistance) {
+            if(ldv > maxDistance) {
                 m_valid[i] = false;
             } else if(ldv > 1e-2f) {
                 dv /= ldv;
@@ -52,7 +52,7 @@ public:
                 if(dvdotn < .3f) {
                     m_valid[i] = false;
                 } else if(dvdotn < .8f) {
-                    m_d[i] = ldv;
+                    m_d[i] = ldv - offset;
                 }
             }
             
