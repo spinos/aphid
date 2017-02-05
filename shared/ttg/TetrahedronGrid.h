@@ -2,6 +2,7 @@
  *  TetrahedronGrid.h
  *  
  *  tetrahedon grid of value Tv and order N
+ *  defined by a tetrahedron cage
  *
  *  Created by jian zhang on 10/28/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.

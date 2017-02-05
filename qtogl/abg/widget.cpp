@@ -12,11 +12,14 @@
 #include <ogl/DrawGrid.h>
 #include <ttg/AdaptiveBccGrid3.h>
 #include <ttg/TetrahedronDistanceField.h>
+#include <ttg/GenericTetraGrid.h>
 #include <ttg/TetraMeshBuilder.h>
+#include <ttg/TetraGridEdgeMap.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
 #include <kd/ClosestToPointEngine.h>
+#include <ogl/DrawGraph.h>
 #include "../cactus.h"
 
 using namespace aphid;
@@ -34,7 +37,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[3],
+									sCactusMeshVertices[5],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -59,8 +62,24 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
     m_grid->build();
     
-    m_teter = new ttg::TetraMeshBuilder;
-    m_teter->buildMesh(m_grid);
+    m_tetg = new TetGridTyp;
+    
+    ttg::TetraMeshBuilder teter;
+    teter.buildMesh(m_tetg, m_grid);
+    
+    TetraGridEdgeMap<TetGridTyp > tetgedge(m_tetg);
+    
+    m_field = new FieldTyp;
+    m_field->buildGraph(m_tetg, &tetgedge );
+    
+typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_tree);
+    
+    Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
+    float offset = m_grid->levelCellSize(6);
+    m_field->calculateDistance<FClosestTyp>(m_tetg, &clseng, rgp, rgn, offset);
+    
+    m_fieldDrawer = new FieldDrawerT;
     
 }
 
@@ -69,6 +88,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
+    m_fieldDrawer->initGlsl();
 }
 
 void GLWidget::clientDraw()
@@ -89,14 +109,17 @@ void GLWidget::clientDraw()
 	glEnd();
     
     //draw3LevelGrid(4);
+    
+    getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(.05f, .5f, .15f);
-    drawTetraMesh();
+    //drawTetraMesh();
+    drawField();
+    
 }
 
 void GLWidget::drawTetraMesh()
 {
-    const Vector3F * pnts = m_teter->vertices(); 
-    const int nt = m_teter->numTetrahedrons();
+    const int nt = m_tetg->numCells();
     cvx::Tetrahedron atet;
     
 	KdEngine seleng;
@@ -106,7 +129,7 @@ void GLWidget::drawTetraMesh()
     
     glBegin(GL_LINES);
     for(int i=0;i<nt;++i) {
-        m_teter->getTetra(atet, i);
+        m_tetg->getCell(atet, i);
         atet.circumSphere(pcen, frad);
         
         selctx.deselect();
@@ -149,6 +172,12 @@ void GLWidget::draw3LevelGrid(int level)
     dgd.drawLevelCells(level-1);
     getDrawer()->setColor(0.f, .1f, .5f);
     dgd.drawLevelCells(level);
+}
+
+void GLWidget::drawField()
+{
+   // m_fieldDrawer->drawEdge(m_field );
+    m_fieldDrawer->drawNode(m_field);
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

@@ -96,7 +96,10 @@ static const float scCorners[6][3] = {
     
     TIntersect fintersect(&m_sels, &m_ground);
     
-    m_mesher.field()->calculateDistance<TIntersect>(m_grd, &fintersect);
+    Vector3F agp, agn;
+    fintersect.getAggregatedPositionNormal(agp, agn);
+        
+    m_mesher.field()->calculateDistance<TIntersect>(m_grd, &fintersect, agp, agn, 1.f);
     //m_field->updateGrid(m_grd);
     
     m_mesher.triangulate();

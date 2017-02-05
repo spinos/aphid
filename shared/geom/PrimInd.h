@@ -14,7 +14,6 @@
 #include <geom/ConvexShape.h>
 #include <IntersectionContext.h>
 #include <geom/ClosestToPointTest.h>
-#include <math/Plane.h>
 
 namespace aphid {
 
@@ -32,7 +31,8 @@ public:
 	bool intersect(const BoundingBox & box);
     bool rayIntersect(const Ray & r);
     bool tetrahedronIntersect(const cvx::Tetrahedron & tet);
-    bool closestToPoint(const Vector3F & origin);
+    bool closestToPoint(const Vector3F & origin,
+                        const float & maxDistance = 1e8f);
     Plane closestPlane() const;
     
     const Vector3F & rayIntersectPoint() const;
@@ -128,9 +128,10 @@ bool PrimInd<Tind, Tsrc, Tprim>::tetrahedronIntersect(const cvx::Tetrahedron & t
 }
 
 template<typename Tind, typename Tsrc, typename Tprim>
-bool PrimInd<Tind, Tsrc, Tprim>::closestToPoint(const Vector3F & origin)
+bool PrimInd<Tind, Tsrc, Tprim>::closestToPoint(const Vector3F & origin,
+                                    const float & maxDistance)
 {
-    m_closestPointTest.reset(origin, 1e8f);
+    m_closestPointTest.reset(origin, maxDistance);
     const Tsrc & rsrc = *m_src;
 	m_ind->begin();
 	while(!m_ind->end() ) {
