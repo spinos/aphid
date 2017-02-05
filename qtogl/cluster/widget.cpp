@@ -8,7 +8,6 @@
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
 #include <math/AOrientedBox.h>
-#include <ConvexShape.h>
 #include <sdb/VectorArray.h>
 #include <kd/IntersectEngine.h>
 #include <kd/ClosestToPointEngine.h>
