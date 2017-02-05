@@ -10,12 +10,14 @@
 #ifndef APH_TTG_TETRA_DISTANCE_H
 #define APH_TTG_TETRA_DISTANCE_H
 
-#include <ConvexShape.h>
 #include <math/Plane.h>
+#include <math/miscfuncs.h>
 
 namespace aphid {
 
-class Plane;
+namespace cvx {
+class Tetrahedron;
+}
 
 namespace ttg {
 

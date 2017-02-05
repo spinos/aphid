@@ -8,8 +8,9 @@
  */
 
 #pragma once
-#include "ConvexShape.h"
+
 #include "PerspectiveCamera.h"
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

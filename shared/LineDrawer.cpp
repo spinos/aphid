@@ -12,6 +12,7 @@
 #include <AdaptableStripeBuffer.h>
 #include <BaseCurve.h>
 #include <BezierCurve.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

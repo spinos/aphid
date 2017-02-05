@@ -368,6 +368,7 @@ public:
 	void split(Hexahedron * hexa) const;
     
     bool isPointInside(const Vector3F & q) const;
+    void circumSphere(Vector3F & center, float & radius) const;
 	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();

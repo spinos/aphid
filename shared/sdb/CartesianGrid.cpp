@@ -3,6 +3,7 @@
 #include <Morton3D.h>
 #include <sdb/BNode.h>
 #include <math/BaseBuffer.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

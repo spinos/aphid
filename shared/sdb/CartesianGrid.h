@@ -4,9 +4,13 @@
 #include <math/BoundingBox.h>
 #include <sdb/MortonHash.h>
 #include <sdb/VectorArray.h>
-#include <ConvexShape.h>
 
 namespace aphid {
+
+namespace cvx {
+class Cube;
+
+}
 
 class BaseBuffer;
 

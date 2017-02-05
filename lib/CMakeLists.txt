@@ -189,7 +189,6 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/CubeMesh.cpp 
 ../shared/DiscMesh.cpp
 ../shared/PlaneMesh.cpp
-../shared/ConvexShape.cpp
 ../catmullclark/bezierPatch.cpp 
 ../shared/AFrustum.cpp
 ../shared/TriangleRaster.cpp
