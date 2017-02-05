@@ -8,7 +8,7 @@
  */
 
 #include "Boundary.h"
-#include "ConvexShape.h"
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

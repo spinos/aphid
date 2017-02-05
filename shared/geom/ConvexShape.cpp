@@ -777,6 +777,52 @@ bool Tetrahedron::isPointInside(const Vector3F & q) const
     return pointInsideTetrahedronTest(q, m_p);
 }
 
+void Tetrahedron::circumSphere(Vector3F & center, float & radius) const
+{
+    const Vector3F & p1 = m_p[0];
+    const Vector3F & p2 = m_p[1];
+    const Vector3F & p3 = m_p[2];
+    const Vector3F & p4 = m_p[3];
+    
+    Matrix44F a;
+	*a.m(0,0) = p1.x; *a.m(0,1) = p1.y; *a.m(0,2) = p1.z; *a.m(0,3) = 1.f;
+	*a.m(1,0) = p2.x; *a.m(1,1) = p2.y; *a.m(1,2) = p2.z; *a.m(1,3) = 1.f;
+	*a.m(2,0) = p3.x; *a.m(2,1) = p3.y; *a.m(2,2) = p3.z; *a.m(2,3) = 1.f;
+	*a.m(3,0) = p4.x; *a.m(3,1) = p4.y; *a.m(3,2) = p4.z; *a.m(3,3) = 1.f;
+	float da = 2.f * a.determinant();
+	
+	float d1 = p1.length2();
+	float d2 = p2.length2();
+	float d3 = p3.length2();
+	float d4 = p4.length2();
+	
+	*a.m(0,0) = d1;
+	*a.m(1,0) = d2;
+	*a.m(2,0) = d3;
+	*a.m(3,0) = d4;
+	
+	float dx = a.determinant();
+	
+	*a.m(0,1) = p1.x; *a.m(0,2) = p1.z;
+	*a.m(1,1) = p2.x; *a.m(1,2) = p2.z;
+	*a.m(2,1) = p3.x; *a.m(2,2) = p3.z;
+	*a.m(3,1) = p4.x; *a.m(3,2) = p4.z;
+	
+	float dy = -a.determinant();
+	
+	*a.m(0,1) = p1.x; *a.m(0,2) = p1.y;
+	*a.m(1,1) = p2.x; *a.m(1,2) = p2.y;
+	*a.m(2,1) = p3.x; *a.m(2,2) = p3.y;
+	*a.m(3,1) = p4.x; *a.m(3,2) = p4.y;
+	
+	float dz = a.determinant();
+	
+	center.x = dx / da;
+	center.y = dy / da;
+	center.z = dz / da;
+	radius = p1.distanceTo(center);
+}
+
 Hexahedron::Hexahedron()
 {}
 

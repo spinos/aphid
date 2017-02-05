@@ -9,7 +9,7 @@
 
 #include "TriangleMeshCluster.h"
 #include <geom/ATriangleMesh.h>
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 #include <sdb/cache_diff.h>
 
 namespace aphid {

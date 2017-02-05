@@ -14,7 +14,7 @@
 #include <IntersectionContext.h>
 #include <SelectionContext.h>
 #include <geom/ClosestToPointTest.h>
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

@@ -11,7 +11,7 @@
 #ifndef APH_GEOM_PRIM_IND_H
 #define APH_GEOM_PRIM_IND_H
 
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 #include <IntersectionContext.h>
 #include <geom/ClosestToPointTest.h>
 #include <math/Plane.h>

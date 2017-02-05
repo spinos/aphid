@@ -8,7 +8,7 @@
  */
 
 #include "TetraDistance.h"
-#include <math/Plane.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

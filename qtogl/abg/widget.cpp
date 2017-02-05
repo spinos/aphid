@@ -12,6 +12,7 @@
 #include <ogl/DrawGrid.h>
 #include <ttg/AdaptiveBccGrid3.h>
 #include <ttg/TetrahedronDistanceField.h>
+#include <ttg/TetraMeshBuilder.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
@@ -50,11 +51,16 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
+    
     const float sz0 = m_tree->getBBox().getLongestDistance() * .99f;
     
     m_grid = new GridTyp;
     m_grid->fillBox(m_tree->getBBox(), sz0 );
-    m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 5);
+    m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
+    m_grid->build();
+    
+    m_teter = new ttg::TetraMeshBuilder;
+    m_teter->buildMesh(m_grid);
     
 }
 
@@ -82,13 +88,67 @@ void GLWidget::clientDraw()
 	}
 	glEnd();
     
+    //draw3LevelGrid(4);
+    getDrawer()->setColor(.05f, .5f, .15f);
+    drawTetraMesh();
+}
+
+void GLWidget::drawTetraMesh()
+{
+    const Vector3F * pnts = m_teter->vertices(); 
+    const int nt = m_teter->numTetrahedrons();
+    cvx::Tetrahedron atet;
+    
+	KdEngine seleng;
+    SphereSelectionContext selctx;
+    Vector3F pcen;
+    float frad;
+    
+    glBegin(GL_LINES);
+    for(int i=0;i<nt;++i) {
+        m_teter->getTetra(atet, i);
+        atet.circumSphere(pcen, frad);
+        
+        selctx.deselect();
+        selctx.reset(pcen, frad, SelectionContext::Append, true);
+                
+        seleng.select(m_tree, &selctx );
+        if(selctx.numSelected() < 1) {
+            continue;
+        }
+        
+        glVertex3fv((const GLfloat *)&atet.X(0) );
+        glVertex3fv((const GLfloat *)&atet.X(1) );
+        
+        glVertex3fv((const GLfloat *)&atet.X(1) );
+        glVertex3fv((const GLfloat *)&atet.X(2) );
+        
+        glVertex3fv((const GLfloat *)&atet.X(2) );
+        glVertex3fv((const GLfloat *)&atet.X(0) );
+        
+        glVertex3fv((const GLfloat *)&atet.X(0) );
+        glVertex3fv((const GLfloat *)&atet.X(3) );
+        
+        glVertex3fv((const GLfloat *)&atet.X(1) );
+        glVertex3fv((const GLfloat *)&atet.X(3) );
+        
+        glVertex3fv((const GLfloat *)&atet.X(2) );
+        glVertex3fv((const GLfloat *)&atet.X(3) );
+        
+    }
+    glEnd();
+    
+}
+
+void GLWidget::draw3LevelGrid(int level)
+{    
     DrawGrid<GridTyp> dgd(m_grid);
 	getDrawer()->setColor(.5f, .05f, .05f);
-    dgd.drawLevelCells(3);
+    dgd.drawLevelCells(level-2);
     getDrawer()->setColor(.125f, .5f, .25f);
-    dgd.drawLevelCells(4);
+    dgd.drawLevelCells(level-1);
     getDrawer()->setColor(0.f, .1f, .5f);
-    dgd.drawLevelCells(5);
+    dgd.drawLevelCells(level);
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

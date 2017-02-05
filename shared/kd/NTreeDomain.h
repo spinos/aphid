@@ -11,7 +11,7 @@
 #include <Boundary.h>
 #include <geom/ClosestToPointTest.h>
 #include <kd/KdEngine.h>
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

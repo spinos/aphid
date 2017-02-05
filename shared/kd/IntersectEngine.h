@@ -26,6 +26,7 @@ public:
 	IntersectEngine(TreeTyp * tree);
 	
 	bool intersect(const BoundingBox & box);
+    bool intersect(const cvx::Tetrahedron & tet);
 
 };
 
@@ -42,6 +43,12 @@ bool IntersectEngine<T, Tn>::intersect(const BoundingBox & box)
 	m_boxCtx.reset();
 	intersectBox(m_tree, &m_boxCtx);
 	return m_boxCtx.numIntersect() > 0;
+}
+
+template<typename T, typename Tn>
+bool IntersectEngine<T, Tn>::intersect(const cvx::Tetrahedron & tet)
+{
+    return false;
 }
 
 }

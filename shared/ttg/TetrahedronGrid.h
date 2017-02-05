@@ -10,7 +10,7 @@
 #ifndef APHID_TETRAHEDRON_GRID_H
 #define APHID_TETRAHEDRON_GRID_H
 
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 #include <sdb/Array.h>
 #include <vector>
 

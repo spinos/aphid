@@ -9,9 +9,13 @@
 #pragma once
 
 #include "BaseDrawer.h"
-#include "ConvexShape.h"
 
 namespace aphid {
+
+namespace cvx {
+class Frustum;
+
+}
 
 class LineBuffer;
 class AdaptableStripeBuffer;

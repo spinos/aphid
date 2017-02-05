@@ -8,7 +8,7 @@
  */
 
 #include "DrawTetrahedron.h"
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 #include <gl_heads.h>
 
 namespace aphid {

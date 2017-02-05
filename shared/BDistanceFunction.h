@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include "ConvexShape.h"
+
 #include "ConvexDomain.h"
 #include <kd/NTreeDomain.h>
 
