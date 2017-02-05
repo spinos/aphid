@@ -75,6 +75,7 @@ private:
     void drawTetraMesh();
     void draw3LevelGrid(int level);
     void drawField();
+    void drawTriangulation();
     
 private slots:
 
@@ -86,15 +87,17 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 typedef aphid::ttg::AdaptiveBccGrid3 GridTyp;    
     GridTyp * m_grid;
     
-typedef aphid::ttg::GenericTetraGrid<float> TetGridTyp;
+typedef aphid::ttg::GenericTetraGrid<TFTNode > TetGridTyp;
     TetGridTyp * m_tetg;
     
 typedef aphid::ttg::TetrahedronDistanceField<TetGridTyp > FieldTyp;
-    FieldTyp * m_field;
     
 typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
     FieldDrawerT * m_fieldDrawer;
-        
+
+typedef aphid::TetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
+    MesherT * m_mesher;
+            
 };
 
 #endif

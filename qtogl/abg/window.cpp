@@ -8,7 +8,7 @@ Window::Window()
 	glWidget = new GLWidget(this);
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("adaprive bcc grid") );
+    setWindowTitle(tr("adaptive bcc grid") );
 	
 	createActions();
     createMenus();

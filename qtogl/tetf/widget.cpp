@@ -5,8 +5,8 @@
 #include "widget.h"
 #include <GeoDrawer.h>
 #include <ogl/DrawGrid.h>
-#include <ttg/RedBlueRefine.h>
-#include <ttg/TetrahedronDistanceField.h>
+#include <ttg/TetrahedronGrid.h>
+#include <ttg/TetraGridTriangulation.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 
@@ -41,7 +41,7 @@ void GLWidget::clientInit()
 				Vector3F(stetvs[3]) );
 		
     TetrahedronGridUtil<5 > tu4;
-	m_grd = new MesherT::GridT(tetra, 0);
+	m_grd = new GridT(tetra, 0);
     
 #if 0
     TFTNode anode;
@@ -54,7 +54,8 @@ void GLWidget::clientInit()
     }
 #endif
     
-    m_mesher.setGrid(m_grd);
+    m_mesher = new MesherT;
+    m_mesher->setGrid(m_grd);
     
     m_fieldDrawer = new FieldDrawerT;
     m_fieldDrawer->initGlsl();
@@ -99,10 +100,10 @@ static const float scCorners[6][3] = {
     Vector3F agp, agn;
     fintersect.getAggregatedPositionNormal(agp, agn);
         
-    m_mesher.field()->calculateDistance<TIntersect>(m_grd, &fintersect, agp, agn, 1.f);
+    m_mesher->field()->calculateDistance<TIntersect>(m_grd, &fintersect, agp, agn, 1.f);
     //m_field->updateGrid(m_grd);
     
-    m_mesher.triangulate();
+    m_mesher->triangulate();
     
 }
 
@@ -189,7 +190,7 @@ void GLWidget::drawGround()
 
 void GLWidget::drawGridEdges()
 {
-    TetraGridEdgeMap<MesherT::GridT > & edges = m_mesher.gridEdges();
+    TetraGridEdgeMap<GridT > & edges = m_mesher->gridEdges();
     
     glBegin(GL_LINES);
     edges.begin();
@@ -207,8 +208,8 @@ void GLWidget::drawGridEdges()
 
 void GLWidget::drawField()
 {
-    m_fieldDrawer->drawEdge(m_mesher.field() );
-    m_fieldDrawer->drawNode(m_mesher.field() );
+    m_fieldDrawer->drawEdge(m_mesher->field() );
+    m_fieldDrawer->drawNode(m_mesher->field() );
 }
 
 void GLWidget::drawSolidGrid()
@@ -245,10 +246,10 @@ void GLWidget::drawWiredGrid()
 
 void GLWidget::drawTriangulation()
 {
-    int ntri = m_mesher.numFrontTriangles();
+    int ntri = m_mesher->numFrontTriangles();
 
     Vector3F * trips = new Vector3F[ntri * 3];
-    m_mesher.extractFrontTriangles(trips);
+    m_mesher->extractFrontTriangles(trips);
     
      getDrawer()->m_wireProfile.apply();
      getDrawer()->setColor(1,.7,0);
