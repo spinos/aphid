@@ -475,5 +475,23 @@ std::ostream& operator<<(std::ostream &output, const Matrix44F & p)
 void Matrix44F::copy(const Matrix44F & another)
 { memcpy(v, another.v, 64); }
 
+Vector3F Matrix44F::scale() const
+{ return Vector3F(getSide().length(),
+					getUp().length(),
+					getFront().length() ); }
+					
+void Matrix44F::scaleBy(const Vector3F & scv)
+{
+	*m(0, 0) *= scv.x;
+	*m(0, 1) *= scv.x;
+	*m(0, 2) *= scv.x;
+	*m(1, 0) *= scv.y;
+	*m(1, 1) *= scv.y;
+	*m(1, 2) *= scv.y;
+	*m(2, 0) *= scv.z;
+	*m(2, 1) *= scv.z;
+	*m(2, 2) *= scv.z;
+}
+
 }
 //:~

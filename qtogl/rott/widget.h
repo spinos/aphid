@@ -8,6 +8,7 @@ namespace aphid {
 
 class RotationHandle;
 class TranslationHandle;
+class ScalingHandle;
 
 }
 
@@ -35,6 +36,7 @@ private:
 	void testDops();
     void drawRotate();
     void drawTranslate();
+	void drawScaling();
 	
 private:
 
@@ -42,6 +44,7 @@ private:
 	aphid::Ray m_incident;
 	aphid::RotationHandle * m_roth;
 	aphid::TranslationHandle * m_tranh;
+	aphid::ScalingHandle * m_scalh;
     
 };
 

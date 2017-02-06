@@ -5,6 +5,7 @@
 #include <ogl/DrawCircle.h>
 #include <ogl/RotationHandle.h>
 #include <ogl/TranslationHandle.h>
+#include <ogl/ScalingHandle.h>
 #include <BaseCamera.h>
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
@@ -29,6 +30,8 @@ void GLWidget::clientInit()
 	m_roth->setRadius(3.2f);
     m_tranh = new TranslationHandle(&m_space);
     m_tranh->setRadius(3.2f);
+	m_scalh = new ScalingHandle(&m_space);
+    m_scalh->setRadius(3.2f);
 }
 
 void GLWidget::clientDraw()
@@ -39,7 +42,10 @@ void GLWidget::clientDraw()
 	getDrawer()->m_markerProfile.apply();
 
 	//getDrawer()->setColor(0.f, .34f, .45f);
-    drawTranslate();
+	DrawArrow da;
+	da.drawCoordinateAt(&m_space);
+	
+    drawScaling();
 }
 
 void GLWidget::drawTranslate()
@@ -56,9 +62,6 @@ void GLWidget::drawRotate()
 	float m[16];
 	m_space.glMatrix(m);
 	
-	DrawArrow da;
-	da.drawCoordinateAt(&m_space);
-	
 	Vector3F veye = getCamera()->eyeDirection();
 	Matrix44F meye = m_space;
 	meye.setFrontOrientation(veye );
@@ -67,24 +70,36 @@ void GLWidget::drawRotate()
 	
 }
 
+void GLWidget::drawScaling()
+{
+	Vector3F veye = getCamera()->eyeDirection();
+	Matrix44F meye = m_space;
+	meye.setFrontOrientation(veye );
+
+	m_scalh->draw(&meye);
+}
+
 void GLWidget::clientSelect(QMouseEvent *event)
 {
 	//m_roth->begin(getIncidentRay() );
-    m_tranh->begin(getIncidentRay() );
+    //m_tranh->begin(getIncidentRay() );
+	m_scalh->begin(getIncidentRay() );
 	update();
 }
 
 void GLWidget::clientDeselect(QMouseEvent *event)
 {
 	//m_roth->end();
-    m_tranh->end();
+    //m_tranh->end();
+	m_scalh->end();
 	update();
 }
 
 void GLWidget::clientMouseInput(QMouseEvent *event)
 {
 	//m_roth->rotate(getIncidentRay() );
-    m_tranh->translate(getIncidentRay() );
+    //m_tranh->translate(getIncidentRay() );
+	m_scalh->scale(getIncidentRay() );
 	update();
 }
 

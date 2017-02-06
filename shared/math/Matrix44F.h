@@ -54,12 +54,14 @@ namespace aphid {
 	Vector3F getSide() const;
 	Vector3F getUp() const;
 	Vector3F getFront() const;
+	Vector3F scale() const;
 	void transposed(float * mat) const;
 	void transpose();
 	void glMatrix(float *m) const;
 	const float determinant() const;
 /// 3x3 only
 	void scaleBy(float sc);
+	void scaleBy(const Vector3F & scv);
 	void scaleTranslationBy(float sc);
 	void copy(const Matrix44F & another);
 	
