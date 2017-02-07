@@ -173,6 +173,7 @@ file (GLOB Geom_SRC
 )
 
 ADD_LIBRARY (aphidGeom ${LIB_TYP} 
+${Geom_SRC}
 ../shared/Primitive.cpp
 ../shared/BaseCurve.cpp
 ../shared/CircleCurve.cpp 
@@ -200,46 +201,17 @@ ADD_LIBRARY (aphidGeom ${LIB_TYP}
 ../shared/BiLinearInterpolate.cpp 
 ../shared/LinearInterpolate.cpp  
 ../shared/VertexDataGroup.cpp
-../shared/ViewCull.cpp
-${Geom_SRC})
+../shared/ViewCull.cpp)
 
 file (GLOB H5_SRC
     "../shared/h5/*.h"
     "../shared/h5/*.cpp")
 
 ADD_LIBRARY (aphidH5 ${LIB_TYP}
-    ${H5_SRC}
-    ../shared/VerticesHDataset.cpp 
-    ../shared/IndicesHDataset.cpp 
-    ../shared/FloatsHDataset.cpp 
-    ../shared/XformHDataset.cpp 
-    ../shared/HIntAttribute.cpp 
-    ../shared/HFloatAttribute.cpp 
-    ../shared/HStringAttribute.cpp 
-    ../shared/HCharData.cpp 
-    ../shared/HBase.cpp 
-    ../shared/HWorld.cpp 
-    ../shared/HMesh.cpp
-../shared/HCurveGroup.cpp
-../shared/AFrameRange.cpp 
-../shared/HFrameRange.cpp
-../shared/HTransform.cpp
-../shared/HTriangleMesh.cpp
-../shared/HTetrahedronMesh.cpp
-../shared/HAttributeEntry.cpp
+    ${H5_SRC} 
+../shared/AFrameRange.cpp  
 ../shared/BaseFile.cpp
-../shared/HFile.cpp
-../shared/HTetrahedronMeshGroup.cpp 
-../shared/HTriangleMeshGroup.cpp
-../shared/HPolygonalMesh.cpp
-../shared/HPolygonalUV.cpp
 ../shared/AAnimationCurve.cpp
-../shared/HAnimationCurve.cpp
-../shared/HAttributeGroup.cpp
-../shared/HNumericBundle.cpp
-../hesperis/H5IO.cpp
-../hesperis/H5Availability.cpp
-../hesperis/HesperisFile.cpp
 )
 
 ADD_LIBRARY (aphidUI ${LIB_TYP}
@@ -317,22 +289,19 @@ file (GLOB ttg_SRC
 ADD_LIBRARY (aphidTtg ${LIB_TYP}
 ${ttg_SRC})
 
-add_library(aphid ${LIB_TYP}                 
-##../shared/SpaceHandle.cpp                
+add_library(aphid ${LIB_TYP}                                
     ../shared/SkeletonSubspaceDeformer.cpp                                  
                 ../shared/PrimitiveArray.cpp                 
                 ../shared/ClassificationStorage.cpp 
 		../shared/IndexArray.cpp 
-                ##../shared/BoundingBoxList.cpp  
-                ##../shared/EasemodelUtil.cpp 
+                ##../shared/BoundingBoxList.cpp   
                 ../shared/AnchorGroup.cpp 
 ../shared/Anchor.cpp                   
                                ## ../shared/AccPatchMesh.cpp 
 				../shared/PatchNeighborRec.cpp 
 				##../shared/PatchTexture.cpp 
                                 ##../shared/BaseTessellator.cpp 
-                                ##../shared/CollisionRegion.cpp 
-                                ## 
+                                ##../shared/CollisionRegion.cpp  
                                 ##../shared/BlockDrawBuffer.cpp 
                 ##../shared/BaseScene.cpp   
     ##../shared/BaseFileGroup.cpp
@@ -392,34 +361,16 @@ add_library(aphid ${LIB_TYP}
                ## ../catmullclark/BezierDrawer.cpp 
 		##		../powell/PowellMethod.cpp 
 		##		../powell/BaseFunction.cpp
-##../shared/KdTreeNode.cpp 
-                ##../shared/BuildKdTreeContext.cpp 
-                ##../shared/KdTreeNodeArray.cpp 
-                ##../shared/KdTree.cpp 
-                ##../shared/KdTreeBuilder.cpp 
-                ##../shared/SplitEvent.cpp 
-                ##../shared/MinMaxBins.cpp 
-                ##../shared/BuildKdTreeStream.cpp 
                 ## ../shared/BaseServer.cpp
-##../kdtree/KdCluster.cpp
-##../kdtree/KdIntersection.cpp
 ##../shared/APointCloud.cpp
 ##../shared/MeshSeparator.cpp
 ##../shared/DynamicBody.cpp
 ##../shared/ViewFrame.cpp
-##../btree/BTree.cpp
 ##../btree/MortonHash.cpp
 ##../shared/BaseSampler.cpp
 ##../shared/AField.cpp
 ##../shared/HField.cpp
-##../shared/TetrahedronMeshBuilder.cpp
-##../shared/DrawCircle.cpp
 ##../shared/UniformGrid.cpp
-##../hesperis/HAdaptiveField.cpp
-##../hesperis/H5FieldIn.cpp
-##../hesperis/H5FieldOut.cpp
-##../hesperis/AdaptiveGrid.cpp
-##../hesperis/AdaptiveField.cpp
 )
 
 add_library(aphidImg ${LIB_TYP}

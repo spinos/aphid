@@ -1,7 +1,7 @@
 #ifndef HPOLYGONALMESH_H
 #define HPOLYGONALMESH_H
 
-#include <HBase.h>
+#include <h5/HBase.h>
 
 namespace aphid {
 

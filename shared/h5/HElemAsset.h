@@ -10,11 +10,11 @@
  *  with bounding box
  */
 #pragma once
-#include <HBase.h>
-#include <HOocArray.h>
+#include <h5/HBase.h>
+#include <h5/HOocArray.h>
 #include <Boundary.h>
-#include <ConvexShape.h>
-#include <VectorArray.h>
+#include <geom/ConvexShape.h>
+#include <sdb/VectorArray.h>
 
 namespace aphid {
 

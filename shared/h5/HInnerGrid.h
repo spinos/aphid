@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include <HBase.h>
-#include <HOocArray.h>
-#include <BoundingBox.h>
-#include "Entity.h"
+#include <h5/HBase.h>
+#include <h5/HOocArray.h>
+#include <math/BoundingBox.h>
+#include <sdb/Entity.h>
 
 namespace aphid {
 namespace sdb {

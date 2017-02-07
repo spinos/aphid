@@ -1,6 +1,6 @@
 #include "HSearch.h"
-#include <HBase.h>
-#include <HTransform.h>
+#include <h5/HBase.h>
+#include <h5/HTransform.h>
 #include <foundation/SHelper.h>
 #include <deque>
 

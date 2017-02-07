@@ -7,9 +7,10 @@
  *
  */
 #include "H5Availability.h"
-#include <HBase.h>
+#include <h5/HBase.h>
 #include <foundation/SHelper.h>
 #include <sstream>
+
 namespace aphid {
     
 H5Availability::H5Availability() {}

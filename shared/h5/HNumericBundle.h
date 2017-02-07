@@ -1,7 +1,7 @@
 #ifndef APHID_H_NUMERIC_BUNDLE_H
 #define APHID_H_NUMERIC_BUNDLE_H
 
-#include <HBase.h>
+#include <h5/HBase.h>
 
 namespace aphid {
 

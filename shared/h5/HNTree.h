@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include <KdNTree.h>
-#include <HBase.h>
-#include <HOocArray.h>
+#include <kd/KdNTree.h>
+#include <h5/HBase.h>
+#include <h5/HOocArray.h>
 
 namespace aphid {
 

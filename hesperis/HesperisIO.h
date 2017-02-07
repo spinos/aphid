@@ -21,7 +21,7 @@
 #include <string>
 #include <map>
 #include "HesperisFile.h"
-#include "H5IO.h"
+#include <h5/H5IO.h>
 
 namespace aphid {
     

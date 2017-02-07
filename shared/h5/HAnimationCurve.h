@@ -9,7 +9,7 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include <HBase.h>
+#include <h5/HBase.h>
 
 namespace aphid {
 

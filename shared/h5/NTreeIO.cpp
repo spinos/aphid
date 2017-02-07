@@ -8,8 +8,8 @@
  */
 
 #include "NTreeIO.h"
-#include <HWorldGrid.h>
-#include <HInnerGrid.h>
+#include <h5/HWorldGrid.h>
+#include <h5/HInnerGrid.h>
 
 namespace aphid {
 

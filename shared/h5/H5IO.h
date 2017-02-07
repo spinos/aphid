@@ -9,7 +9,8 @@
 
 #pragma once
 #include <h5/HDocument.h>
-#include <HBase.h>
+#include <h5/HBase.h>
+
 namespace aphid {
 
 class H5IO {

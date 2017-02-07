@@ -9,18 +9,17 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include <AllHdf.h>
-#include <HFile.h>
-#include <HBase.h>
-#include <HTransform.h>
-#include <HFrameRange.h>
-#include <HTriangleMeshGroup.h>
-#include <HTetrahedronMeshGroup.h>
-#include <HCurveGroup.h>
-#include <HWorld.h>
-#include <HPolygonalMesh.h>
-#include <HAttributeGroup.h>
-#include <HNumericBundle.h>
+#include <h5/HFile.h>
+#include <h5/HBase.h>
+#include <h5/HTransform.h>
+#include <h5/HFrameRange.h>
+#include <h5/HTriangleMeshGroup.h>
+#include <h5/HTetrahedronMeshGroup.h>
+#include <h5/HCurveGroup.h>
+#include <h5/HWorld.h>
+#include <h5/HPolygonalMesh.h>
+#include <h5/HAttributeGroup.h>
+#include <h5/HNumericBundle.h>
 #include <string>
 #include <map>
 #include <vector>

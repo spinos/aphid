@@ -8,11 +8,11 @@
  */
 
 #pragma once
-#include <H5IO.h>
-#include <HNTree.h>
-#include <VectorArray.h>
-#include <HElemAsset.h>
-#include <HAssetGrid.h>
+#include <h5/H5IO.h>
+#include <h5/HNTree.h>
+#include <sdb/VectorArray.h>
+#include <h5/HElemAsset.h>
+#include <h5/HAssetGrid.h>
 
 namespace aphid {
 

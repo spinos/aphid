@@ -16,11 +16,11 @@
  *  /.tree
  */
 
-#include <HBase.h>
-#include <HElemAsset.h>
-#include <KdEngine.h>
-#include <HNTree.h>
-#include <VoxelGrid.h>
+#include <h5/HBase.h>
+#include <h5/HElemAsset.h>
+#include <kd/KdEngine.h>
+#include <h5/HNTree.h>
+#include <kd/VoxelGrid.h>
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 

@@ -15,12 +15,12 @@
  *  /.tree 
  */
 
-#include "WorldGrid.h"
-#include <HBase.h>
-#include <HOocArray.h>
-#include <KdEngine.h>
-#include <HNTree.h>
-#include <ConvexShape.h>
+#include <sdb/WorldGrid.h>
+#include <h5/HBase.h>
+#include <h5/HOocArray.h>
+#include <kd/KdEngine.h>
+#include <h5/HNTree.h>
+#include <geom/ConvexShape.h>
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
