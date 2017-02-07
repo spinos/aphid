@@ -135,6 +135,7 @@ void ScalingHandle::end()
 { 
 	m_scaleV.set(1.f, 1.f, 1.f);
 	m_active = false; 
+	m_snap == saNone;
 }
 
 void ScalingHandle::scale(const Ray * r)
@@ -142,7 +143,7 @@ void ScalingHandle::scale(const Ray * r)
 	if(!m_active) {
 		return;
 	}
-    
+	
     const Vector3F pop = m_space->getTranslation();
     Matrix33F rot = m_space->rotation();
     rot.orthoNormalize();
@@ -167,33 +168,24 @@ void ScalingHandle::scale(const Ray * r)
     case saX:
         stat = projectLocal(q, r, xy, xz);
         q.y = q.z = 1.f;
+		stat = (q.x / m_radius > .2f);
         break;
     case saY:
         stat = projectLocal(q, r, xy, yz);
         q.x = q.z = 1.f;
+		stat = (q.y / m_radius > .2f);
         break;
     case saZ:
         stat = projectLocal(q, r, xz, yz);
         q.x = q.y = 1.f;
+		stat = (q.z / m_radius > .2f);
         break;
     default:
         break;
     }
 	
-	if(q.x / m_radius < .2f) {
-		stat = false;
-	}
-	
-	if(q.y / m_radius < .2f) {
-		stat = false;
-	}
-    
-	if(q.z / m_radius < .2f) {
-		stat = false;
-	}
-	
-	if(!stat) {
-        return;
+	if(!stat) { 
+		return;
     }
 	
     m_deltaV.x = q.x / m_localV.x;
@@ -327,10 +319,16 @@ void ScalingHandle::draw(const Matrix44F * camspace) const
     glDisable(GL_STENCIL_TEST);
 }
 
-void ScalingHandle::getDetlaScaling(Vector3F & vec, const float & weight) const
+void ScalingHandle::getDeltaScaling(Vector3F & vec, const float & weight) const
 {
-	Vector3F wdv = m_space->transformAsNormal(m_deltaV);
-    vec = wdv * weight;
+	const Vector3F vone(1.f, 1.f, 1.f);
+	if(!m_active) {
+		vec = vone;
+		return;
+	}
+	
+	const Vector3F o2dv = m_deltaV - vone;
+    vec = vone + o2dv * weight;
 }
 
 }

@@ -15,10 +15,10 @@
 namespace aphid {
 namespace ttg {
 
-class AdaptiveBccField : public AdaptiveBccMesher, public aphid::ADistanceField {
+class AdaptiveBccField : public AdaptiveBccMesher, public ADistanceField {
 
-	aphid::sdb::Sequence<int > m_frontNodes;
-	aphid::Vector3F m_insideOutsidePref;
+	sdb::Sequence<int > m_frontNodes;
+	Vector3F m_insideOutsidePref;
 	float m_errorThreshold;
 	
 public:
@@ -134,10 +134,10 @@ public:
 		AdaptiveBccGrid3 * g = grid();
 		
 /// key to all front cells
-		std::vector<aphid::sdb::Coord4 > frontCells;
+		std::vector<sdb::Coord4 > frontCells;
 		
-		aphid::sdb::Coord4 k;
-		aphid::BoundingBox dirtyBx;
+		sdb::Coord4 k;
+		BoundingBox dirtyBx;
 		
 		g->begin();
 		while(!g->end() ) {
@@ -152,7 +152,7 @@ public:
 					g->getCellBBox(dirtyBx, k);
 					
 /// not interior but intersect 
-					if(distanceFunc-> template broadphase <aphid::BoundingBox>(&dirtyBx )) 
+					if(distanceFunc-> template broadphase <BoundingBox>(&dirtyBx )) 
 						frontCells.push_back(k);
 				}
 			}
@@ -160,10 +160,10 @@ public:
 			g->next();
 		}
 		
-		std::vector<aphid::sdb::Coord4 > divided;
+		std::vector<sdb::Coord4 > divided;
 		
 		const int level1 = curLevel+1;
-		std::vector<aphid::sdb::Coord4 >::const_iterator it = frontCells.begin();
+		std::vector<sdb::Coord4 >::const_iterator it = frontCells.begin();
 		for(;it!=frontCells.end();++it) {
 			g->subdivideCell(*it, &divided);
 			
@@ -221,8 +221,8 @@ public:
 		clearDirtyEdges();
 		markUnknownNodes();
 		
-		typename aphid::cvx::Tetrahedron;
-		aphid::cvx::Tetrahedron tetshp;
+		typename cvx::Tetrahedron;
+		cvx::Tetrahedron tetshp;
 
 		const int nt = numTetrahedrons();
 		int i = 0;
@@ -231,7 +231,7 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
+			if(func-> template broadphase <cvx::Tetrahedron>(&tetshp ) ) {
 				markTetraOnFront(i);
 			}
 		}
@@ -249,7 +249,7 @@ public:
 	template<typename Tf>
 	void findTetraEdgeCross(Tf * func, 
 							const int & itet,
-							const aphid::cvx::Hexahedron * hexashp) 
+							const cvx::Hexahedron * hexashp) 
 	{
 		if(func-> narrowphase (hexashp[0]) ) {
 			setTetraVertexEdgeCross(itet, 0, .5f);
@@ -274,9 +274,9 @@ public:
 		std::cout<<"\n AdaptiveBccField::calculateDistance2 begin"<<std::endl;
 		markUnknownNodes();
 		
-		typename aphid::cvx::Tetrahedron;
-		aphid::cvx::Tetrahedron tetshp;
-		aphid::cvx::Hexahedron hexashp[4];
+		typename cvx::Tetrahedron;
+		cvx::Tetrahedron tetshp;
+		cvx::Hexahedron hexashp[4];
 		
 		const int nt = numTetrahedrons();
 		int i = 0;
@@ -285,7 +285,7 @@ public:
 			getTetraShape(tetshp, i);
 
 /// intersect any tetra			
-			if(func-> template broadphase <aphid::cvx::Tetrahedron>(&tetshp ) ) {
+			if(func-> template broadphase <cvx::Tetrahedron>(&tetshp ) ) {
 				markTetraNodeOnFront(i);
 				tetshp.split(hexashp);
 
@@ -303,8 +303,8 @@ public:
 	
 	void verbose();
 	
-	void getTetraShape(aphid::cvx::Tetrahedron & b, const int & i) const;
-	void setInsideOutsidePref(const aphid::Vector3F & q);
+	void getTetraShape(cvx::Tetrahedron & b, const int & i) const;
+	void setInsideOutsidePref(const Vector3F & q);
 	const float & errorThreshold() const;
 								
 protected:

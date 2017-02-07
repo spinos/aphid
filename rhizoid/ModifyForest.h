@@ -22,7 +22,8 @@ public:
     enum ManipulateMode {
 		manNone = 0,
 		manRotate = 1,
-        manTranslate = 2
+        manTranslate = 2,
+		manScaling = 3
 	};
 	
 private:
@@ -118,6 +119,8 @@ protected:
 	void rotatePlant();
 /// use delta translation
 	void translatePlant();
+/// use delta scaling
+	void resizePlant();
 
 	void moveWithGround();
 	void scaleBrushAt(const Ray & ray, float magnitude);
@@ -126,6 +129,8 @@ protected:
 	virtual void getDeltaRotation(Matrix33F & mat,
 					const float & weight = 1.f) const;
     virtual void getDeltaTranslation(Vector3F & vec,
+					const float & weight = 1.f) const;
+	virtual void getDeltaScaling(Vector3F & vec,
 					const float & weight = 1.f) const;
 				
 private:

@@ -175,7 +175,7 @@ void AdaptiveBccField::markTetraOnFront(const int & i)
 void AdaptiveBccField::subdivideGridByError(const float & threshold,
 							const int & level)
 {
-	std::vector<aphid::sdb::Coord4 > divided;
+	std::vector<sdb::Coord4 > divided;
 	
 	const DistanceNode * v = nodes();
 	AdaptiveBccGrid3 * g = grid();
@@ -289,7 +289,7 @@ void AdaptiveBccField::subdivideByFront(int level)
 {
 	m_frontNodes.clear();
 	
-	std::vector<aphid::sdb::Coord4 > divided;
+	std::vector<sdb::Coord4 > divided;
 	const DistanceNode * vs = nodes();
 	AdaptiveBccGrid3 * g = grid();
 	const float r = g->levelCellSize(level) * .01f;

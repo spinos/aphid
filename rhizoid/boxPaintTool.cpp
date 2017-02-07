@@ -70,6 +70,9 @@ MStatus proxyPaintContext::doPress( MEvent & event )
         case opSelectByType:
             startProcessSelect();
             break;
+		case opBundleResize:
+            startResize();
+            break;
         case opBundleRotate:
             startRotate();
             break;
@@ -140,7 +143,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
             depressOffset();
             break;
 		case opBundleResize :
-            resize(true);
+            processResize();
             break;
 		case opBundleRotate :
             processRotate();
@@ -175,6 +178,9 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 		case opResizeBrush :
 			PtrViz->updateManipulateSpace(m_growOpt);
 			break;
+		case opBundleResize:
+            PtrViz->finishResize();
+            break;
 		case opBundleRotate :
             PtrViz->finishRotate();
             break;
@@ -327,6 +333,7 @@ void proxyPaintContext::setOperation(short val)
 		case opBundleResize:
 			opstr="bundle resize";
             mOpt = opBundleResize;
+			khand = ModifyForest::manScaling;
 			break;
 		case opBundleRotate:
 			opstr="bundle rotate";
@@ -946,40 +953,40 @@ bool proxyPaintContext::rejectSmallDragDistance(int d) const
 
 void proxyPaintContext::setManipulator(ModifyForest::ManipulateMode x)
 {
-    if(!PtrViz) return;
+    if(!PtrViz) {
+		return;
+	}
 	PtrViz->setManipulatMode(x);
 }
 
 void proxyPaintContext::startRotate()
 {
-    if(!PtrViz) {
-        return;
-    }
 	PtrViz->startRotate(getIncidentAt(start_x, start_y) );
 }
 
 void proxyPaintContext::processRotate()
 {
-    if(!PtrViz) {
-        return;
-    }
 	PtrViz->processRotate(getIncidentAt(last_x, last_y) );
 }
 
 void proxyPaintContext::startTranslate()
 {
-    if(!PtrViz) {
-        return;
-    }
     PtrViz->startTranslate(getIncidentAt(start_x, start_y) );
 }
 	
 void proxyPaintContext::processTranslate()
 {
-    if(!PtrViz) {
-        return;
-    }
 	PtrViz->processTranslate(getIncidentAt(last_x, last_y) );
+}
+
+void proxyPaintContext::startResize()
+{
+    PtrViz->startResize(getIncidentAt(start_x, start_y) );
+}
+	
+void proxyPaintContext::processResize()
+{
+	PtrViz->processResize(getIncidentAt(last_x, last_y) );
 }
 
 Ray proxyPaintContext::getIncidentAt(int x, int y)

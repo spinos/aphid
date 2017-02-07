@@ -15,6 +15,7 @@
 #include <ogl/GlslInstancer.h>
 #include <ogl/RotationHandle.h>
 #include <ogl/TranslationHandle.h>
+#include <ogl/ScalingHandle.h>
 
 namespace aphid {
 
@@ -24,12 +25,14 @@ m_enabled(true)
 	m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
 	m_rotHand = new RotationHandle(&m_rotMat);
     m_transHand = new TranslationHandle(&m_rotMat);
+	m_scalHand = new ScalingHandle(&m_rotMat);
 }
 
 DrawForest::~DrawForest() 
 {
 	delete m_rotHand;
     delete m_transHand;
+	delete m_scalHand;
 }
 
 void DrawForest::drawGround() 
@@ -464,6 +467,7 @@ void DrawForest::drawManipulator()
     if(manipulateMode() == manNone) {
         return;   
     }
+	
 	Matrix33F rmat = cameraSpaceR()->rotation();
 	rmat.orthoNormalize();
 	Matrix44F mat;
@@ -471,6 +475,7 @@ void DrawForest::drawManipulator()
 	const Vector3F & pos = selectionCenter();
 	m_rotHand->setRadius(relativeSizeAtDepth(pos, .29f) );
     m_transHand->setRadius(relativeSizeAtDepth(pos, .29f) );
+    m_scalHand->setRadius(relativeSizeAtDepth(pos, .29f) );
     
     switch (manipulateMode() ) {
     case manRotate:
@@ -478,6 +483,9 @@ void DrawForest::drawManipulator()
         break;
     case manTranslate:
         m_transHand->draw(&mat);
+        break;
+	case manScaling:
+        m_scalHand->draw(&mat);
         break;
     default:
         break;
@@ -523,7 +531,7 @@ void DrawForest::finishRotate()
 void DrawForest::getDeltaRotation(Matrix33F & mat,
 					const float & weight) const
 {
-    m_rotHand->getDetlaRotation(mat, weight);
+    m_rotHand->getDeltaRotation(mat, weight);
 }
 
 void DrawForest::startTranslate(const Ray & r)
@@ -543,15 +551,39 @@ void DrawForest::processTranslate(const Ray & r)
 }
     
 void DrawForest::finishTranslate()
-{
-    m_transHand->end();
-}
+{ m_transHand->end(); }
 
 void DrawForest::getDeltaTranslation(Vector3F & vec,
 					const float & weight) const
+{ m_transHand->getDeltaTranslation(vec, weight); }
+
+void DrawForest::startResize(const Ray & r)
 {
-    m_transHand->getDetlaTranslation(vec, weight);
+	disableDrawing();
+    m_scalHand->begin(&r);
+	calculateSelectedWeight();
+    enableDrawing();
 }
 
+void DrawForest::processResize(const Ray & r)
+{
+	disableDrawing();
+    m_scalHand->scale(&r);
+    resizePlant();
+    enableDrawing();
+}
+
+void DrawForest::getDeltaScaling(Vector3F & vec,
+					const float & weight) const
+{ m_scalHand->getDeltaScaling(vec, weight); }
+
+void DrawForest::finishResize()
+{ 
+	m_scalHand->end(); 
+	Matrix33F rot = m_rotMat.rotation();
+	rot.orthoNormalize();
+	m_rotMat.setRotation(rot);
+}
+	
 }
 //:~

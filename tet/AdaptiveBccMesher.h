@@ -26,14 +26,14 @@ public:
 	virtual ~AdaptiveBccMesher();
 	
 /// reset grid w level0 cell size and fill the box at level 0
-	void fillBox(const aphid::BoundingBox & b,
+	void fillBox(const BoundingBox & b,
 				const float & h);
 				
 /// subdivide grid to level if cell intersect distance function
 	template<typename Tf>
 	void discretize(Tf * d, const int & level)
 	{
-		std::vector<aphid::sdb::Coord4 > divided;
+		std::vector<sdb::Coord4 > divided;
 		
 		m_grid.markCellIntersectDomainAtLevel(d, 0, divided);
 		
@@ -67,7 +67,7 @@ protected:
 	
 /// for each cell divied, must have same level neighbor cell on six faces and twelve edges
 /// level change cross face or edge < 2
-	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
+	void enforceBoundary(std::vector<sdb::Coord4 > & ks);
 
 private:
 	void internalClear();

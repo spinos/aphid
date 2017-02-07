@@ -53,7 +53,7 @@ public:
 	void translate(const Ray * r);
 	void draw(const Matrix44F * camspace) const;
 	
-	void getDetlaTranslation(Vector3F & vec, const float & weight = 1.f) const;
+	void getDeltaTranslation(Vector3F & vec, const float & weight = 1.f) const;
 
 private:
     bool projectLocal(Vector3F & q,

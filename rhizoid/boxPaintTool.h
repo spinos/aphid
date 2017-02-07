@@ -166,6 +166,8 @@ private:
 	void processRotate();
     void startTranslate();
 	void processTranslate();
+	void startResize();
+	void processResize();
     aphid::Ray getIncidentAt(int x, int y);
     
 	void attachSceneCallbacks();

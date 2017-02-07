@@ -251,7 +251,7 @@ void FieldTriangulation::countTriangleVertices(sdb::Array<int, int> & vertMap)
 	m_vertexN = new Vector3F[i];
 }
 
-void FieldTriangulation::dumpVertex(aphid::sdb::Array<int, int> & vertMap)
+void FieldTriangulation::dumpVertex(sdb::Array<int, int> & vertMap)
 {
 	int i, j;
 	for(i=0; i<m_numFrontTris; ++i) {
@@ -269,7 +269,7 @@ void FieldTriangulation::dumpVertex(aphid::sdb::Array<int, int> & vertMap)
 	
 }
 
-void FieldTriangulation::calculateVertexNormal(aphid::sdb::Array<int, int> & vertMap)
+void FieldTriangulation::calculateVertexNormal(sdb::Array<int, int> & vertMap)
 {
 	cvx::Triangle atri;
 	Vector3F triN;
@@ -299,7 +299,7 @@ void FieldTriangulation::calculateVertexNormal(aphid::sdb::Array<int, int> & ver
 		m_vertexN[i].normalize();
 }
 
-void FieldTriangulation::dumpIndices(aphid::sdb::Array<int, int> & vertMap)
+void FieldTriangulation::dumpIndices(sdb::Array<int, int> & vertMap)
 {
 	int i, j;
 	for(i=0; i<m_numFrontTris; ++i) {
@@ -323,10 +323,10 @@ const int & FieldTriangulation::numAddedVertices() const
 const Vector3F & FieldTriangulation::addedVertex(const int & i) const
 { return m_cutPosBuf[i]; }
 
-const aphid::Vector3F * FieldTriangulation::triangleVertexP() const
+const Vector3F * FieldTriangulation::triangleVertexP() const
 { return m_vertexX; }
 
-const aphid::Vector3F * FieldTriangulation::triangleVertexN() const
+const Vector3F * FieldTriangulation::triangleVertexN() const
 { return m_vertexN; }
 
 const int & FieldTriangulation::numTriangleVertices() const

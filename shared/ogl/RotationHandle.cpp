@@ -71,7 +71,10 @@ bool RotationHandle::begin(const Ray * r)
 }
 
 void RotationHandle::end()
-{ m_active = false; }
+{ 
+	m_active = false; 
+	m_snap == saNone;
+}
 
 void RotationHandle::rotate(const Ray * r)
 { 
@@ -308,7 +311,7 @@ void RotationHandle::draw(const Matrix44F * camspace) const
 	glDisable(GL_STENCIL_TEST);
 }
 
-void RotationHandle::getDetlaRotation(Matrix33F & mat, const float & weight) const
+void RotationHandle::getDeltaRotation(Matrix33F & mat, const float & weight) const
 {
 	Quaternion q(m_rotAngle * weight, m_rotAxis);
 	mat.set(q);

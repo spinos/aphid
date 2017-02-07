@@ -667,10 +667,58 @@ void ModifyForest::rotatePlant(const Ray & ray,
 	}
 }
 
+void ModifyForest::resizePlant()
+{
+	Matrix33F rot;
+    Vector3F vdscal, pos, vof;
+    float fdscal, lof;
+    PlantSelection::SelectionTyp * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		 float wei = arr->value()->m_weight;
+		 if(wei > 1e-3f) { 
+			PlantData * plantd = arr->value()->m_reference->index;
+			
+			Matrix44F * mat = plantd->t1;
+			rot = mat->rotation();
+			
+			getDeltaScaling(vdscal, wei);
+			
+			fdscal = 1.f;
+			
+/// scale 3 axises
+			if(vdscal.x != 1.f) {
+				fdscal = vdscal.x;
+			}
+			if(vdscal.y != 1.f) {
+				fdscal = vdscal.y;
+			}
+			if(vdscal.z != 1.f) {
+				fdscal = vdscal.z;
+			}
+			
+			rot *= fdscal;
+			
+			mat->setRotation(rot);
+			
+			vof = plantd->t2->m_offset;
+			lof = vof.length();
+			if(lof > 1e-2f) {
+				pos = mat->getTranslation() - vof;
+				vof *= vdscal;
+				plantd->t2->m_offset = vof;
+				
+				mat->setTranslation(pos + vof);
+            }
+		}
+		arr->next();
+	}
+}
+
 void ModifyForest::translatePlant()
 {
     Vector3F pos, dpos, bindPos;
-    float lof;
+	
     PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
@@ -1007,6 +1055,10 @@ void ModifyForest::getDeltaRotation(Matrix33F & mat,
 void ModifyForest::getDeltaTranslation(Vector3F & vec,
 					const float & weight) const
 { vec.set(0.f, 0.f, 0.f); }
+
+void ModifyForest::getDeltaScaling(Vector3F & vec,
+					const float & weight) const
+{ vec.set(1.f, 1.f, 1.f); }
 
 void ModifyForest::setManipulatMode(ModifyForest::ManipulateMode x)
 { m_manipulateMode = x; }

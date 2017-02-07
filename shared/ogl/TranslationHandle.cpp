@@ -165,7 +165,10 @@ bool TranslationHandle::begin(const Ray * r)
 }
 
 void TranslationHandle::end()
-{ m_active = false; }
+{	
+	m_active = false; 
+	m_snap == saNone;
+}
 
 void TranslationHandle::translate(const Ray * r)
 { 
@@ -365,7 +368,7 @@ void TranslationHandle::draw(const Matrix44F * camspace) const
     glDisable(GL_STENCIL_TEST);
 }
 
-void TranslationHandle::getDetlaTranslation(Vector3F & vec, const float & weight) const
+void TranslationHandle::getDeltaTranslation(Vector3F & vec, const float & weight) const
 {
 	Vector3F wdv = m_space->transformAsNormal(m_deltaV);
     vec = wdv * weight;

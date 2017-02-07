@@ -19,6 +19,7 @@ class ExampVox;
 class ForestCell;
 class RotationHandle;
 class TranslationHandle;
+class ScalingHandle;
 
 class DrawForest : public ModifyForest, public ViewObscureCull, 
 public DrawBox, public DrawCircle, public DrawInstance
@@ -28,6 +29,7 @@ public DrawBox, public DrawCircle, public DrawInstance
 	Matrix44F m_rotMat;
 	RotationHandle * m_rotHand;
     TranslationHandle * m_transHand;
+	ScalingHandle * m_scalHand;
     float m_wireColor[3];
 	float m_transbuf[16];
     float m_showVoxLodThresold;
@@ -45,6 +47,9 @@ public:
     void startTranslate(const Ray & r);
     void processTranslate(const Ray & r);
     void finishTranslate();
+	void startResize(const Ray & r);
+    void processResize(const Ray & r);
+    void finishResize();
     
 protected:
 	void setScaleMuliplier(float x, float y, float z);
@@ -69,6 +74,8 @@ protected:
 	virtual void getDeltaRotation(Matrix33F & mat,
 					const float & weight = 1.f) const;
     virtual void getDeltaTranslation(Vector3F & vec,
+					const float & weight = 1.f) const;
+	virtual void getDeltaScaling(Vector3F & vec,
 					const float & weight = 1.f) const;
                     
 private:

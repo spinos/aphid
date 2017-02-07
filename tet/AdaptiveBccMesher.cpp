@@ -35,7 +35,7 @@ void AdaptiveBccMesher::clearTetra()
 	m_tets.clear();
 }
 
-void AdaptiveBccMesher::fillBox(const aphid::BoundingBox & b,
+void AdaptiveBccMesher::fillBox(const BoundingBox & b,
 				const float & h)
 {
 	m_grid.clear();

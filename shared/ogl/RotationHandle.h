@@ -51,7 +51,7 @@ public:
 	void rotate(const Ray * r);
 	void draw(const Matrix44F * camspace) const;
 	
-	void getDetlaRotation(Matrix33F & mat, const float & weight = 1.f) const;
+	void getDeltaRotation(Matrix33F & mat, const float & weight = 1.f) const;
 	
 };
 

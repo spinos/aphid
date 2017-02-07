@@ -50,7 +50,7 @@ public:
 	void scale(const Ray * r);
 	void draw(const Matrix44F * camspace) const;
 	
-	void getDetlaScaling(Vector3F & vec, const float & weight = 1.f) const;
+	void getDeltaScaling(Vector3F & vec, const float & weight = 1.f) const;
 
 private:
     bool projectLocal(Vector3F & q,

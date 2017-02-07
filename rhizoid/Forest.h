@@ -11,7 +11,7 @@
 #define APH_FOREST_H
 #include <PlantCommon.h>
 #include <kd/KdEngine.h>
-#include <RayMarch.h>
+#include <math/RayMarch.h>
 #include <PlantSelection.h>
 
 namespace aphid {
