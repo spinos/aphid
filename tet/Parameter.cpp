@@ -10,7 +10,6 @@
 #define _WIN32
 #include <ExrImage.h>
 #include <iostream>
-// #include <OpenEXR/ImathLimits.h>
 
 namespace ttg {
 
