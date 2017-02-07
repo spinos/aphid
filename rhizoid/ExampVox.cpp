@@ -10,7 +10,7 @@
 #include "ExampVox.h"
 #include <kd/KdEngine.h>
 #include <FieldTriangulation.h>
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 #include <sdb/VectorArray.h>
 
 namespace aphid {

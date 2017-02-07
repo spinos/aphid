@@ -9,8 +9,9 @@
  */
 #pragma once
 #include "AdaptiveBccField.h"
-#include "RedBlueRefine.h"
+#include <ttg/RedBlueRefine.h>
 
+namespace aphid {
 namespace ttg {
 
 class FieldTriangulation : public AdaptiveBccField {
@@ -77,4 +78,5 @@ private:
 	
 };
 
+}
 }

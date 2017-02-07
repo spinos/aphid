@@ -13,7 +13,7 @@
 #include <maya/MItMeshVertex.h>
 #include <AHelper.h>
 #include <ASearchHelper.h>
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 

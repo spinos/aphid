@@ -22,3 +22,8 @@ target_link_libraries (tetf ${APHID_GRAPH_LIBRARY})
 target_link_libraries (tetf ${APHID_TTG_LIBRARY})
 
 target_link_libraries (tetf ${Boost_SYSTEM_LIBRARY})
+IF (WIN32)
+target_link_libraries (tetf ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (tetf ${Boost_THREAD_LIBRARY})
+target_link_libraries (tetf ${Boost_CHRONO_LIBRARY})
+ENDIF ()

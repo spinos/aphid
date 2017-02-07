@@ -22,3 +22,8 @@ target_link_libraries (clust ${APHID_OGL_LIBRARY})
 target_link_libraries (clust ${APHID_KD_LIBRARY})
 
 target_link_libraries (clust ${Boost_SYSTEM_LIBRARY})
+IF (WIN32)
+target_link_libraries (clust ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (clust ${Boost_THREAD_LIBRARY})
+target_link_libraries (clust ${Boost_CHRONO_LIBRARY})
+ENDIF ()

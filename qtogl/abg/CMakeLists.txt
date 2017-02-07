@@ -24,3 +24,8 @@ target_link_libraries (abg ${APHID_TTG_LIBRARY})
 target_link_libraries (abg ${APHID_KD_LIBRARY})
 
 target_link_libraries (abg ${Boost_SYSTEM_LIBRARY})
+IF (WIN32)
+target_link_libraries (abg ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (abg ${Boost_THREAD_LIBRARY})
+target_link_libraries (abg ${Boost_CHRONO_LIBRARY})
+ENDIF ()

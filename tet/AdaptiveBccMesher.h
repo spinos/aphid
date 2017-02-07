@@ -10,9 +10,10 @@
 #ifndef TTG_ADAPTIVE_BCC_MESHER_H
 #define TTG_ADAPTIVE_BCC_MESHER_H
 
-#include "AdaptiveBccGrid3.h"
+#include <ttg/AdaptiveBccGrid3.h>
 #include "tetrahedron_math.h"
 
+namespace aphid {
 namespace ttg {
 
 class AdaptiveBccMesher {
@@ -74,5 +75,6 @@ private:
 	
 };
 
+}
 }
 #endif

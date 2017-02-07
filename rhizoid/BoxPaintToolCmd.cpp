@@ -28,6 +28,7 @@
 #include <mama/SelectionHelper.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/PrincipalComponents.h>
+#include <geom/ConvexShape.h>
 #include <kd/KdEngine.h>
 #include <FieldTriangulation.h>
 

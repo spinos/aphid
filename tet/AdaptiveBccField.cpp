@@ -10,7 +10,7 @@
 #include "AdaptiveBccField.h"
 #include <iostream>
 
-using namespace aphid;
+namespace aphid {
 
 namespace ttg {
 
@@ -233,7 +233,7 @@ const float & AdaptiveBccField::errorThreshold() const
 { return m_errorThreshold; }
 
 void AdaptiveBccField::buildGrid()
-{ grid()->build(this); }
+{ grid()->build(); }
 
 bool AdaptiveBccField::isTetraOnFront(int iv0,
 		int iv1, int iv2, int iv3) const
@@ -343,4 +343,5 @@ void AdaptiveBccField::moveFront(const float & x)
 	
 }
 
+}
 }

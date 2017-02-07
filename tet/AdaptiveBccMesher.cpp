@@ -10,7 +10,7 @@
 #include "AdaptiveBccMesher.h"
 #include <iostream>
 
-using namespace aphid;
+namespace aphid {
 
 namespace ttg {
 AdaptiveBccMesher::AdaptiveBccMesher()
@@ -111,4 +111,5 @@ void AdaptiveBccMesher::enforceBoundary(std::vector<sdb::Coord4 > & ks)
 	}
 }
 
+}
 }

@@ -20,9 +20,19 @@
 #include <maya/MArgDatabase.h>
 #include <maya/MArgList.h>
 #include <sdb/VectorArray.h>
-#include <ConvexShape.h>
+#include <math/Matrix33F.h>
 #include "ShrubWorks.h"
 #include "ReplacerWorks.h"
+
+namespace aphid {
+
+namespace cvx {
+
+class Triangle;
+
+}
+
+}
 
 class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks, public ReplacerWorks
 {

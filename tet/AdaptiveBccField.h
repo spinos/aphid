@@ -9,9 +9,10 @@
 
 #pragma once
 #include "AdaptiveBccMesher.h"
-#include <ADistanceField.h>
-#include <ConvexShape.h>
+#include <graph/ADistanceField.h>
+#include <geom/ConvexShape.h>
 
+namespace aphid {
 namespace ttg {
 
 class AdaptiveBccField : public AdaptiveBccMesher, public aphid::ADistanceField {
@@ -330,4 +331,5 @@ private:
 	
 };
 
+}
 }

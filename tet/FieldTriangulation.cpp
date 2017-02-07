@@ -9,7 +9,7 @@
 
 #include "FieldTriangulation.h"
 
-using namespace aphid;
+namespace aphid {
 
 namespace ttg {
 
@@ -335,4 +335,5 @@ const int & FieldTriangulation::numTriangleVertices() const
 const int * FieldTriangulation::triangleIndices() const
 { return (const int *)m_triInds; }
 
+}
 }

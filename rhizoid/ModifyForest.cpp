@@ -13,6 +13,7 @@
 #include <sdb/ebp.h>
 #include "ExampVox.h"
 #include <ForestCell.h>
+#include <geom/PrimInd.h>
 #include <ctime>
 
 namespace aphid {
