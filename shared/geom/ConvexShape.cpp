@@ -823,6 +823,12 @@ void Tetrahedron::circumSphere(Vector3F & center, float & radius) const
 	radius = p1.distanceTo(center);
 }
 
+void Tetrahedron::getCenterRadius(Vector3F & center, float & radius) const
+{
+	center = getCenter();
+	radius = m_p[0].distanceTo(center);
+}
+
 Hexahedron::Hexahedron()
 {}
 

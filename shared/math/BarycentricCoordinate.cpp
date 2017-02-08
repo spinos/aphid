@@ -39,6 +39,9 @@ float BarycentricCoordinate::project(const Vector3F & pos)
 	float t = pa.dot(m_n);
 	m_onplane = pos - m_n * t;
 	
+	if(t < 0.f) {
+		t = -t;
+	}
 	return t;
 }
 
@@ -59,7 +62,11 @@ void BarycentricCoordinate::compute()
 	float areaPAB = m_n.dot(ap.cross(bp));
 	m_v[2] = areaPAB / m_area;;	
 	
-	if(insideTriangle()) m_closest = m_onplane;
+	computeInsideTriangle();
+	
+	if(m_isInsideTriangle) {
+		m_closest = m_onplane;
+	}
 }
 
 void BarycentricCoordinate::computeClosest()
@@ -79,32 +86,29 @@ void BarycentricCoordinate::computeClosest()
 	ac /= lc;
 	Vector3F nc = ac.cross(m_n);
 	
-	Vector3F onEdge[3];
-	
 	Vector3F pa = m_onplane - getP(0);
 	float da = pa.dot(na);
-	onEdge[0] = m_onplane - na * da;
+	m_onEdge[0] = m_onplane - na * da;
 	
 	Vector3F pb = m_onplane - getP(1);
 	float db = pb.dot(nb);
-	onEdge[1] = m_onplane - nb * db;
+	m_onEdge[1] = m_onplane - nb * db;
 	
 	Vector3F pc = m_onplane - getP(2);
 	float dc = pc.dot(nc);
-	onEdge[2] = m_onplane - nc * dc;
+	m_onEdge[2] = m_onplane - nc * dc;
 	
 	float lpa = pa.length();
 	float lpb = pb.length();
 	float lpc = pc.length();
 	
-	float mindist = 10e6;
-	if(lpa < mindist) {
-		mindist = lpa;
-		m_closest = getP(0);
-		m_v[0] = 1.f;
-		m_v[1] = 0.f;
-		m_v[2] = 0.f;
-	}
+	float mindist = lpa;
+/// to vertex
+	m_closest = getP(0);
+	m_v[0] = 1.f;
+	m_v[1] = 0.f;
+	m_v[2] = 0.f;
+	
 	if(lpb < mindist) {
 		mindist = lpb;
 		m_closest = getP(1);
@@ -119,28 +123,29 @@ void BarycentricCoordinate::computeClosest()
 		m_v[1] = 0.f;
 		m_v[2] = 1.f;
 	}
-
-	if(da > 0.f && da < mindist && (onEdge[0] - getP(1)).dot(onEdge[0] - getP(0)) < 0.f) {
+/// to edge
+	const Vector3F v1e0 = m_onEdge[0] - getP(1);
+	if(da > 0.f && da < mindist && v1e0.dot(m_onEdge[0] - getP(0)) < 0.f) {
 		mindist = da;
-		m_closest = onEdge[0];
-		m_v[0] = (onEdge[0] - getP(1)).length() / la;
+		m_closest = m_onEdge[0];
+		m_v[0] = v1e0.length() / la;
 		m_v[1] = 1.f - m_v[0];
 		m_v[2] = 0.f;
 	}
-	
-	if(db > 0.f && db < mindist && (onEdge[1] - getP(2)).dot(onEdge[1] - getP(1)) < 0.f) {
+	const Vector3F v2e1 = m_onEdge[1] - getP(2);
+	if(db > 0.f && db < mindist && v2e1.dot(m_onEdge[1] - getP(1)) < 0.f) {
 		mindist = db;
-		m_closest = onEdge[1];
+		m_closest = m_onEdge[1];
 		m_v[0] = 0.f;
-		m_v[1] = (onEdge[1] - getP(2)).length() / lb;
+		m_v[1] = v2e1.length() / lb;
 		m_v[2] = 1.f - m_v[1];
 	}
-	
-	if(dc > 0.f && dc < mindist && (onEdge[2] - getP(0)).dot(onEdge[2] - getP(2)) < 0.f) {
+	const Vector3F v0e2 = m_onEdge[2] - getP(0);
+	if(dc > 0.f && dc < mindist && v0e2.dot(m_onEdge[2] - getP(2)) < 0.f) {
 		mindist = dc;
-		m_closest = onEdge[2];
+		m_closest = m_onEdge[2];
 		m_v[1] = 0.f;
-		m_v[2] = (onEdge[2] - getP(0)).length() / lc;
+		m_v[2] = v0e2.length() / lc;
 		m_v[0] = 1.f - m_v[2];
 	}
 }
@@ -160,12 +165,23 @@ float BarycentricCoordinate::getV(unsigned idx) const
 	return m_v[idx];
 }
 
-char BarycentricCoordinate::insideTriangle() const
+void BarycentricCoordinate::computeInsideTriangle()
 {
-	if(m_v[0] < 0.f || m_v[0] > 1.f ) return 0;
-	if(m_v[1] < 0.f || m_v[1] > 1.f ) return 0;
-	if(m_v[2] < 0.f || m_v[2] > 1.f ) return 0;
-	return 1;
+	m_isInsideTriangle = false;
+		
+	if(m_v[0] < 0.f || m_v[0] > 1.f ) {
+		return;
+	}
+	
+	if(m_v[1] < 0.f || m_v[1] > 1.f ) {
+		return;
+	}
+
+	if(m_v[2] < 0.f || m_v[2] > 1.f ) {
+		return;
+	}
+
+	m_isInsideTriangle = true;
 }
 
 Vector3F BarycentricCoordinate::getClosest() const
@@ -182,6 +198,9 @@ Vector3F BarycentricCoordinate::getNormal() const
 {
 	return m_n;
 }
+
+const bool & BarycentricCoordinate::insideTriangle() const
+{ return m_isInsideTriangle; }
 
 }
 //:~

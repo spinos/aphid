@@ -42,6 +42,8 @@ public:
     template<typename T>
     void buildMesh(T * grid, AdaptiveBccGrid3 * bccg)
     {
+		std::cout<<"\n TetraMeshBuilder::buildMesh";
+	
         std::vector<ITetrahedron *> tets;
         
         bccg->begin();
@@ -81,7 +83,7 @@ public:
         
         vertmap.clear();
         clearTetra(tets);
-        
+        std::cout<<"\n done.";
     }
                 
 protected:

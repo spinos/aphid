@@ -26,18 +26,23 @@ public:
 	Vector3F getP(unsigned idx) const;
 	float getV(unsigned idx) const;
 	
-	char insideTriangle() const;
+	const bool & insideTriangle() const;
 	Vector3F getClosest() const;
 	Vector3F getOnPlane() const;
 	Vector3F getNormal() const;
 	
 private:
+	void computeInsideTriangle();
+
 	Vector3F m_p[3];
+	Vector3F m_onEdge[3];
 	Vector3F m_n;
 	Vector3F m_closest;
 	Vector3F m_onplane;
 	float m_area;
+/// contributes
 	float m_v[3];
+	bool m_isInsideTriangle;
 };
 
 }

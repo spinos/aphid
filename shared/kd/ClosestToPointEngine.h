@@ -10,27 +10,25 @@
 #ifndef APH_KD_CLOSEST_TO_POINT_ENGINE_H
 #define APH_KD_CLOSEST_TO_POINT_ENGINE_H
 
-#include <kd/KdEngine.h>
+#include <kd/SelectEngine.h>
 
 namespace aphid {
 
 template<typename T, typename Tn>
-class ClosestToPointEngine : public KdEngine {
-
-typedef KdNTree<T, Tn > TreeTyp;
+class ClosestToPointEngine : public SelectEngine<T, Tn> {
 
 	ClosestToPointTestResult m_ctx;
-	TreeTyp * m_tree;
 	
 public:
-	ClosestToPointEngine(TreeTyp * tree);
+
+	ClosestToPointEngine(KdNTree<T, Tn > * tree);
     
     bool closestToPoint(const Vector3F & origin,
                         const float & maxDistance = 1e8f);
+						
+	bool selectedClosestToPoint(const Vector3F & origin,
+                        const float & maxDistance = 1e8f);
 	
-	bool closestTo(Vector3F & dest, 
-					const Vector3F & origin);
-					
 	void getGeomCompContribute(int & igeom,
 					int & icomp,
 					float * contrib) const;
@@ -42,33 +40,39 @@ public:
 };
 
 template<typename T, typename Tn>
-ClosestToPointEngine<T, Tn>::ClosestToPointEngine(TreeTyp * tree)
-{
-	m_tree = tree;
-}
+ClosestToPointEngine<T, Tn>::ClosestToPointEngine(KdNTree<T, Tn > * tree) :
+SelectEngine<T, Tn>(tree)
+{}
 
 template<typename T, typename Tn>
 bool ClosestToPointEngine<T, Tn>::closestToPoint(const Vector3F & origin,
                                     const float & maxDistance)
 {
     m_ctx.reset(origin, maxDistance);
-    KdEngine::closestToPoint(m_tree, &m_ctx);
+    KdEngine::closestToPoint(SelectEngine<T, Tn>::tree(), &m_ctx);
     return m_ctx._hasResult;
     
 }
 
 template<typename T, typename Tn>
-bool ClosestToPointEngine<T, Tn>::closestTo(Vector3F & dest, 
-					const Vector3F & origin)
+bool ClosestToPointEngine<T, Tn>::selectedClosestToPoint(const Vector3F & origin,
+                        const float & maxDistance)
 {
-	m_ctx.reset(origin, 1e9f);
-	KdEngine::closestToPoint(m_tree, &m_ctx);
-	if(m_ctx._hasResult) {
-		dest = m_ctx._hitPoint;
-	} else {
-		dest = origin;
+	m_ctx.reset(origin, maxDistance);
+	
+	sdb::Sequence<int> * prims = SelectEngine<T, Tn>::primIndices();
+	const sdb::VectorArray<T> & src = SelectEngine<T, Tn>::source();
+	
+	prims->begin();
+	while(!prims->end() ) {
+	
+		const T * ts = src[prims->key() ];
+		ts-> template closestToPoint<ClosestToPointTestResult>(&m_ctx);
+		
+		prims->next();
 	}
 	return m_ctx._hasResult;
+    
 }
 
 template<typename T, typename Tn>

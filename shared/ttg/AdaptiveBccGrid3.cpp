@@ -68,6 +68,8 @@ void AdaptiveBccGrid3::subdivideCells(const std::vector<sdb::Coord4 > & divided)
 
 void AdaptiveBccGrid3::build()
 {
+	std::cout<<"\n AdaptiveBccGrid3::build";
+	
 	begin();
 	while(!end() ) {
 		const sdb::Coord4 k = key();
@@ -81,9 +83,8 @@ void AdaptiveBccGrid3::build()
 		
 		next();
 	}
-	std::cout<<"\n AdaptiveBccGrid3::build"<<std::endl;
 	countNodes();
-	
+	std::cout<<"\n done.";
 }
 
 void AdaptiveBccGrid3::subdivideToLevel(const BoundingBox & bx, 

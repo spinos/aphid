@@ -379,7 +379,9 @@ void BaseDistanceField::setNodeDistance(const int & idx,
         d.stat = sdf::StKnown;
     } else {
 /// closer to zero
-        if(Absolute<float>(d.val) > Absolute<float>(v) ) {
+        //if(Absolute<float>(d.val) > Absolute<float>(v) ) {
+/// inside first
+		if(d.val > v) {
             d.val = v;
         }
     }

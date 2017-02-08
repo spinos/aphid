@@ -16,10 +16,8 @@ namespace ttg {
 
 TetraDistance::TetraDistance(const cvx::Tetrahedron & tet)
 {
-    const Vector3F cen = tet.getCenter();
-    for(int i=0;i<4;++i) {
-        Vector3F dv = tet.X(i) - cen;
-        m_p[i] = cen + dv *.8f;
+	for(int i=0;i<4;++i) {
+        m_p[i] = tet.X(i);
         m_valid[i] = false;
     }
 }

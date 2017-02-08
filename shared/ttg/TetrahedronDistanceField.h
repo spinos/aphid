@@ -39,6 +39,9 @@ public:
                             const Vector3F & refDirection,
                             const float & offset) 
     {
+		std::cout<<"\n TetrahedronDistanceField::calculateDistance";
+		std::cout.flush();
+		
         resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
         uncutEdges();
         
@@ -50,11 +53,11 @@ public:
         for(int i=0;i<nt;++i) {
             grid->getCell(atet, i);
             
-            atet.circumSphere(tcen, trad);
-            if(!intersectF->closestToPoint(tcen, trad) ) {
+            atet.getCenterRadius(tcen, trad);
+            if(!intersectF->select(tcen, trad) ) {
                 continue;
             }
-            
+			
 /// approximate as node distance to plane
             TetraDistance cutDist(atet);
             cutDist.compute(intersectF, trad * 2.f, offset);
@@ -110,6 +113,7 @@ public:
         setFarNodeInside();
 /// merge short edges
         snapToFront();
+		std::cout<<"\n done.";
     }
     
 protected:

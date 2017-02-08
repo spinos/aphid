@@ -290,7 +290,9 @@ void Triangle::closestToPoint(T * result) const
 	float d = bar.project(result->_toPoint);
 	if(d > result->_distance) return;
 	bar.compute();
-	if(!bar.insideTriangle()) bar.computeClosest();
+	if(!bar.insideTriangle()) {
+		bar.computeClosest();
+	}
 	
 	const Vector3F clampledP = bar.getClosest();
 	d = clampledP.distanceTo(result->_toPoint );
@@ -369,6 +371,7 @@ public:
     
     bool isPointInside(const Vector3F & q) const;
     void circumSphere(Vector3F & center, float & radius) const;
+	void getCenterRadius(Vector3F & center, float & radius) const;
 	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();

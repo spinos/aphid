@@ -50,7 +50,7 @@ public:
 				next();
 			}
 			
-			// std::cout<<"\n level"<<level<<" divd "<<dirty.size();
+			std::cout<<"\n subdiv level "<<level;
 			
 			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {

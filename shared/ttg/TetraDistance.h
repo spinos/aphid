@@ -36,26 +36,30 @@ public:
                 const float & offset)
     {
         for(int i=0;i<4;++i) {
-            if(!intersectF->closestToPoint(m_p[i], maxDistance) ) {
+            if(!intersectF->selectedClosestToPoint(m_p[i], maxDistance) ) {
                 continue;
             }
+
             m_valid[i] = true;
-            Plane pl = intersectF->closestPlane();
-            m_d[i] = pl.distanceTo(m_p[i]) - offset;
             Vector3F dv = intersectF->closestToPointPoint() - m_p[i];
-            const float ldv = dv.length();
-            if(ldv > maxDistance) {
-                m_valid[i] = false;
-            } else if(ldv > 1e-2f) {
+			float ldv = dv.length();
+           if(ldv > 1e-3f) {
                 dv /= ldv;
-                const float dvdotn = Absolute<float>(intersectF->closestToPointNormal().dot(dv) );
-                if(dvdotn < .3f) {
-                    m_valid[i] = false;
-                } else if(dvdotn < .8f) {
-                    m_d[i] = ldv - offset;
-                }
-            }
-            
+                const float dvdotn = intersectF->closestToPointNormal().dot(dv);
+				float dvdotu = Vector3F(0,1,0).dot(dv);
+				if(dvdotn > 0.f) {
+/// back side					
+					if(dvdotn < .2f) {
+/// no effect
+						m_valid[i] = false;
+						
+					} else if(dvdotn > .8f) {
+/// inside
+						ldv = -ldv;
+					}
+				} 
+			}
+            m_d[i] = ldv  - offset;
         }
     }
     

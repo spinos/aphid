@@ -39,7 +39,7 @@ GLWidget::GLWidget(const std::string & fileName, QWidget *parent) : Base3DView(p
 	
 	KdEngine eng;
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 128;
+	bf._maxLeafPrims = 64;
 	
 	m_tree = new TreeTyp;
 	
@@ -58,11 +58,13 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .49f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .73f;
     
     m_grid = new GridTyp;
-    m_grid->fillBox(m_tree->getBBox(), sz0 );
-    m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
+	
+	rootBox.expand(1.f);
+    m_grid->fillBox(rootBox, sz0 );
+    m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 5);
     m_grid->build();
     
     m_tetg = new TetGridTyp;
@@ -77,7 +79,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_tree);
     
     Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
-    float offset = m_grid->levelCellSize(9);
+    float offset = m_grid->levelCellSize(7);
     
     FieldTyp * fld = m_mesher->field();
     
@@ -123,7 +125,7 @@ void GLWidget::clientDraw()
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(.05f, .5f, .15f);
     //drawTetraMesh();
-    drawField();
+    //drawField();
 	drawTriangulation();
     
 }
@@ -209,8 +211,8 @@ void GLWidget::draw3LevelGrid(int level)
 
 void GLWidget::drawField()
 {
-   // m_fieldDrawer->drawEdge(m_mesher->field() );
-    m_fieldDrawer->drawNode(m_mesher->field() );
+	m_fieldDrawer->drawEdge(m_mesher->field() );
+    //m_fieldDrawer->drawNode(m_mesher->field() );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

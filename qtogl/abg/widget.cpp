@@ -74,7 +74,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_tree);
     
     Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
-    float offset = m_grid->levelCellSize(9);
+    float offset = m_grid->levelCellSize(6);
     
     FieldTyp * fld = m_mesher->field();
     
