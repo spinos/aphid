@@ -93,6 +93,9 @@ public:
 /// shortest last
 	void getSizeOrder(int * d) const;
 	void putInside(Vector3F & p) const;
+	void getSubBox(BoundingBox & dst,
+				const Vector3F & coord,
+				const float & delta) const;
 	
 	float m_data[6];
 	int m_padding0, m_padding1;

@@ -21,6 +21,8 @@
 #include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawGraph.h>
 #include <h5/LoadElemAsset.h>
+#include <sdb/LodGrid.h>
+#include <ogl/DrawGridSample.h>
 
 using namespace aphid;
 
@@ -58,11 +60,15 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .73f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .59f;
     
-    m_grid = new GridTyp;
-	
 	rootBox.expand(1.f);
+	
+	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_tree);
+	
+#if 0
+	m_grid = new GridTyp;
     m_grid->fillBox(rootBox, sz0 );
     m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 5);
     m_grid->build();
@@ -74,9 +80,6 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     
     m_mesher = new MesherT;
     m_mesher->setGrid(m_tetg);
-    
-typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
-    FClosestTyp clseng(m_tree);
     
     Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
     float offset = m_grid->levelCellSize(7);
@@ -90,9 +93,16 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     m_frontMesh = new ATriangleMesh;
     m_mesher->dumpFrontTriangleMesh(m_frontMesh);
     m_frontMesh->calculateVertexNormals();
-    
+#endif    
     m_fieldDrawer = new FieldDrawerT;
     
+	m_lodg = new LodGridTyp;
+	m_lodg->fillBox(rootBox, sz0);
+	m_lodg->subdivideToLevel<FIntersectTyp>(ineng, 0, 5);
+	m_lodg->insertNodeAtLevel<FClosestTyp, 3 >(5, clseng);
+
+	m_sampleDrawer = new GridSampleDrawerT(m_lodg);
+	
 }
 
 GLWidget::~GLWidget()
@@ -101,6 +111,7 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {
     m_fieldDrawer->initGlsl();
+	m_sampleDrawer->initGlsl();
 }
 
 void GLWidget::clientDraw()
@@ -126,8 +137,14 @@ void GLWidget::clientDraw()
     getDrawer()->setColor(.05f, .5f, .15f);
     //drawTetraMesh();
     //drawField();
-	drawTriangulation();
-    
+	//drawTriangulation();
+    //draw3LevelGrid(5);
+	drawLevelGridSamples(5);
+}
+
+void GLWidget::drawLevelGridSamples(int level)
+{
+	m_sampleDrawer->drawLevelSamples(level);
 }
 
 void GLWidget::drawTriangulation()
@@ -200,12 +217,12 @@ void GLWidget::drawTetraMesh()
 
 void GLWidget::draw3LevelGrid(int level)
 {    
-    DrawGrid<GridTyp> dgd(m_grid);
-	getDrawer()->setColor(.5f, .05f, .05f);
+    DrawGrid<LodGridTyp> dgd(m_lodg);
+	getDrawer()->setColor(.025f, .5f, .25f);
     dgd.drawLevelCells(level-2);
-    getDrawer()->setColor(.125f, .5f, .25f);
+    getDrawer()->setColor(.5f, .05f, .05f);
     dgd.drawLevelCells(level-1);
-    getDrawer()->setColor(0.f, .1f, .5f);
+    getDrawer()->setColor(.5f, .25f, 0.f);
     dgd.drawLevelCells(level);
 }
 

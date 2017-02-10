@@ -32,6 +32,8 @@ public:
 	bool select(const Vector3F & center,
 				const float & radius);
 				
+	bool select(const BoundingBox & bx);
+				
 	unsigned numSelected();
  
 protected:
@@ -53,6 +55,16 @@ bool SelectEngine<T, Tn>::select(const Vector3F & center,
 {
 	m_selectCtx.deselect();
 	m_selectCtx.reset(center, radius, SelectionContext::Append);
+		
+	KdEngine::select(m_tree, &m_selectCtx);
+	return numSelected() > 0;
+}
+
+template<typename T, typename Tn>
+bool SelectEngine<T, Tn>::select(const BoundingBox & bx)
+{
+	m_selectCtx.deselect();
+	m_selectCtx.reset(bx.center(), bx.radius(), SelectionContext::Append);
 		
 	KdEngine::select(m_tree, &m_selectCtx);
 	return numSelected() > 0;

@@ -651,5 +651,22 @@ void BoundingBox::putInside(Vector3F & p) const
 	if(p.z > getMax(2)) p.z = getMax(2);
 }
 
+void BoundingBox::getSubBox(BoundingBox & dst,
+				const Vector3F & coord,
+				const float & delta) const
+{
+	const float d0 = distance(0);
+	dst.m_data[0] = m_data[0] + d0 * coord.x;
+	dst.m_data[3] = dst.m_data[0] + d0 * delta;
+	
+	const float d1 = distance(1);
+	dst.m_data[1] = m_data[1] + d1 * coord.y;
+	dst.m_data[4] = dst.m_data[1] + d1 * delta;
+	
+	const float d2 = distance(2);
+	dst.m_data[2] = m_data[2] + d2 * coord.z;
+	dst.m_data[5] = dst.m_data[2] + d2 * delta;
+}
+
 }
 //:~

@@ -17,6 +17,12 @@ namespace sdb {
 template<typename T>
 class VectorArray;
 
+class LodGrid;
+
+class LodCell;
+
+class LodNode;
+
 }
 
 template<int I>
@@ -48,6 +54,9 @@ class DrawGraph;
 struct DistanceNode;
 struct IDistanceEdge;
 
+template<typename T, typename T1, typename T2>
+class DrawGridSample;
+
 }
 
 struct TFTNode {
@@ -77,6 +86,7 @@ public slots:
 private:
     void drawTetraMesh();
     void draw3LevelGrid(int level);
+	void drawLevelGridSamples(int level);
     void drawField();
     void drawTriangulation();
     
@@ -102,7 +112,13 @@ typedef aphid::TetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
     MesherT * m_mesher;
     
     aphid::ATriangleMesh * m_frontMesh;
-            
+     
+typedef aphid::sdb::LodGrid LodGridTyp; 
+	LodGridTyp * m_lodg;
+	
+typedef aphid::DrawGridSample<LodGridTyp, aphid::sdb::LodCell, aphid::sdb::LodNode > GridSampleDrawerT; 
+	GridSampleDrawerT * m_sampleDrawer;
+	
 };
 
 #endif
