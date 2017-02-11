@@ -1390,5 +1390,9 @@ const DenseMatrix<T> & EigSolver<T>::V() const
 
 } /// end of namespace aphid
 
+#undef abs
+#undef min
+#undef max
+
 #endif        //  #ifndef LINEARMATH_H
 

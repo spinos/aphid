@@ -42,11 +42,13 @@ fPixels(0)
 
 GLSLBase::~GLSLBase() 
 {
-	if (program_object) 
+	if (program_object) {
 		glDeleteObjectARB(program_object);
+	}
 		
-	if(fPixels)
+	if(fPixels) {
 		delete[] fPixels;
+	}
 }
 
 const char* GLSLBase::vertexProgramSource() const
@@ -68,6 +70,10 @@ const char* GLSLBase::fragmentProgramSource() const
 
 bool GLSLBase::diagnose(std::string& log)
 {
+	if(isDiagnosed() ) {
+		return true;
+	}
+	
 	std::string sver((char *)glGetString(GL_VERSION));
 	std::stringstream sst(sver);
 	sst>>CoreVersion;

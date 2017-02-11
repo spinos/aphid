@@ -1,6 +1,10 @@
 /*
  *  GridSampler.h
  *  
+ *	Tf as closetToPointTest type, Tn as node type, Ndiv as order of grid
+ *  Ndiv cells along each dimension
+ *  test closet point in each cell 
+ *  kmean to reduce number of samples 
  *
  *  Created by jian zhang on 2/11/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -11,6 +15,7 @@
 #define APH_SDB_GRID_SAMPLER_H
 
 #include <math/BoundingBox.h>
+#include <math/kmean.h>
 
 namespace aphid {
 
@@ -19,6 +24,8 @@ namespace sdb {
 template<typename Tf, typename Tn, int Ndiv>
 class GridSampler {
 
+	KMeansClustering2<float> m_cluster;
+	DenseMatrix<float> m_data;
 	Vector3F m_gridCoord[Ndiv * Ndiv * Ndiv];
 	Tn m_samples[Ndiv * Ndiv * Ndiv];
 	float m_cellDelta;
@@ -32,6 +39,9 @@ public:
 					const BoundingBox & box);
 	const int & numValidSamples() const;
 	const Tn & sample(const int & i) const;
+	
+private:
+	void processKmean();
 	
 };
 
@@ -81,6 +91,51 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 			
 		}
 	}
+	
+	if(m_numValidSamples < 4) {
+		return;
+	}
+	
+	processKmean();
+}
+
+template<typename Tf, typename Tn, int Ndiv>
+void GridSampler<Tf, Tn, Ndiv>::processKmean()
+{
+	const int n = m_numValidSamples;
+	int k = 1 + n / 3;
+	if(k > 5) {
+		k = 5;
+	}
+/// position and normal
+	const int d = 6;
+/// to kmean data
+	m_data.resize(n, d);
+	for(int i=0;i<n;++i) {
+		const Tn & src = m_samples[i];
+		m_data.column(0)[i] = src.pos.x;
+		m_data.column(1)[i] = src.pos.y;
+		m_data.column(2)[i] = src.pos.z;
+		m_data.column(3)[i] = src.nml.x;
+		m_data.column(4)[i] = src.nml.y;
+		m_data.column(5)[i] = src.nml.z;
+	}
+	
+	m_cluster.setKND(k, n, d);
+	if(!m_cluster.compute(m_data) ) {
+		std::cout<<"\n GridSampler kmean failed ";
+		return;
+	}
+/// from kmean data	
+	DenseVector<float> centr;
+	for(int i=0;i<k;++i) {
+		m_cluster.getGroupCentroid(centr, i);
+		Tn & dst = m_samples[i];
+		dst.pos.set(centr[0], centr[1], centr[2]);
+		dst.nml.set(centr[3], centr[4], centr[5]);
+		
+	}
+	m_numValidSamples = k;
 }
 
 template<typename Tf, typename Tn, int Ndiv>

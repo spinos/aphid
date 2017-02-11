@@ -13,6 +13,7 @@
 #include <sdb/AdaptiveGrid3.h>
 #include <sdb/Array.h>
 #include <sdb/GridSampler.h>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 namespace aphid {
 
@@ -100,7 +101,14 @@ public:
 	void insertNodeAtLevel(int level,
 							Tf & fintersect)
 	{
-		std::cout<<"\n LodGrid::insertNodeAtLevel "<<level;
+		const int nlc = numCellsAtLevel(level);
+		std::cout<<"\n LodGrid::insertNodeAtLevel "<<level
+				<<"\n n cells "<<nlc;
+		std::cout.flush();
+				
+		boost::posix_time::ptime t0(boost::posix_time::second_clock::local_time());
+		boost::posix_time::ptime t1;
+		boost::posix_time::time_duration t3;
 		
 		GridSampler<Tf, LodNode, Ndiv > sampler;
 		
@@ -130,11 +138,24 @@ public:
 				c += ns;
 				
 				nc++;
+				
+				if((nc & 1023) == 0) {
+					t1 = boost::posix_time::ptime (boost::posix_time::second_clock::local_time());
+					t3 = t1 - t0;
+					std::cout<<"\n processed "<<nc<<" cells in "<<t3;
+					std::cout.flush();
+				}
+				
 			}
 			next();
 		}
 		
-		std::cout<<"\n done "<<c<<" samples in "<<nc<<" cells";
+		t1 = boost::posix_time::ptime (boost::posix_time::second_clock::local_time());
+		t3 = t1 - t0;
+		
+		std::cout<<"\n done. "
+				<<"\n n samples "<<c
+				<<"\n cost time "<<t3;
 		std::cout.flush();
 		
 	}

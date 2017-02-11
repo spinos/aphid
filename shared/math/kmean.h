@@ -163,7 +163,7 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 		getXi(apnt, points, i);
 		if(farEnoughToPreviousCentroids(apnt, i) ) {
 			m_centroids.copyColumn(nsel, apnt.v() );
-			std::cout<<"\n select point "<<i<<" as centroid "<<nsel;
+			//std::cout<<"\n select point "<<i<<" as centroid "<<nsel;
 			nsel++;
 			if(nsel==m_K) {
 				break;
@@ -184,7 +184,7 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 	
 	int i=0;
 	for(;i<29;++i) {
-		std::cout<<"\n centroid "<<i<<" "<<m_centroids;
+		//std::cout<<"\n centroid "<<i<<" "<<m_centroids;
 	
 		bool changed = assignPointsToGroup(apnt, points);
 		moveCentroid();
@@ -194,8 +194,8 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 		
 	}
 	
-	std::cout<<"\n kmean finish after "<<i<<" updates ";
-	std::cout.flush();
+	//std::cout<<"\n kmean finish after "<<i<<" updates ";
+	//std::cout.flush();
 	return true;
 	
 }
@@ -267,7 +267,7 @@ void KMeansClustering2<T>::moveCentroid()
 		gcen.copy(vmean);
 	}
 	
-	std::cout<<"\n moved "<<(sumMoved/ (T)m_K);
+	//std::cout<<"\n moved "<<(sumMoved/ (T)m_K);
 }
 
 template<typename T>
