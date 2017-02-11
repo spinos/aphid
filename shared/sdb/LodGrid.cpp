@@ -32,6 +32,28 @@ void LodCell::clear()
 	TParent::clear();
 }
 
+void LodCell::countNodesInCell(int & it)
+{
+	begin();
+	while(!end() ) {
+		value()->index = it;
+		it++;
+
+		next();
+	}
+}
+
+void LodCell::dumpNodesInCell(LodNode * dst)
+{
+	begin();
+	while(!end() ) {
+		LodNode * a = value();
+		dst[a->index] = *a;
+		
+		next();
+	}
+}
+
 LodGrid::LodGrid()
 {}
 
@@ -82,6 +104,40 @@ void LodGrid::clear()
 	TParent::clear(); 
 }
 
+int LodGrid::countLevelNodes(int level)
+{
+	int c = 0;
+	begin();
+	while(!end() ) {
+		if(key().w == level) {
+			value()->countNodesInCell(c);
+		}
+		
+		if(key().w > level) {
+			break;
+		}
+
+		next();
+	}
+	
+	return c;
+}
+
+void LodGrid::dumpLevelNodes(LodNode * dst, int level)
+{
+	begin();
+	while(!end() ) {
+		if(key().w == level) {
+			value()->dumpNodesInCell(dst);
+		}
+		
+		if(key().w > level) {
+			break;
+		}
+
+		next();
+	}
+}
 
 }
 

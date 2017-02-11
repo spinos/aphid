@@ -23,6 +23,7 @@
 #include <h5/LoadElemAsset.h>
 #include <sdb/LodGrid.h>
 #include <ogl/DrawGridSample.h>
+#include <sdb/LodGridMesher.h>
 
 using namespace aphid;
 
@@ -103,6 +104,10 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	m_sampleDrawer = new GridSampleDrawerT(m_lodg);
 	
+	sdb::LodGridMesher<LodGridTyp, sdb::LodNode > lodmesher(m_lodg);
+	m_l5mesh = new ATriangleMesh;
+	lodmesher.buildMesh(m_l5mesh, 5);
+	
 }
 
 GLWidget::~GLWidget()
@@ -121,7 +126,7 @@ void GLWidget::clientDraw()
 	
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(.125f, .125f, .5f);
-	
+#if 0
     glBegin(GL_TRIANGLES);
 	for(int i=0;i<m_triangles->size();++i) {
 		const cvx::Triangle * t = m_triangles->get(i);
@@ -130,7 +135,7 @@ void GLWidget::clientDraw()
 		glVertex3fv((const GLfloat *)&t->P(2));
 	}
 	glEnd();
-    
+#endif
     //draw3LevelGrid(4);
     
     getDrawer()->m_markerProfile.apply();
@@ -139,7 +144,22 @@ void GLWidget::clientDraw()
     //drawField();
 	//drawTriangulation();
     //draw3LevelGrid(5);
-	drawLevelGridSamples(5);
+//	drawLevelGridSamples(5);
+	getDrawer()->m_surfaceProfile.apply();
+    drawMesh(m_l5mesh);
+}
+
+void GLWidget::drawMesh(const ATriangleMesh * mesh)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)mesh->vertexNormals() );
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)mesh->points() );
+    glDrawElements(GL_TRIANGLES, mesh->numIndices(), GL_UNSIGNED_INT, mesh->indices() );
+    
+    glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::drawLevelGridSamples(int level)

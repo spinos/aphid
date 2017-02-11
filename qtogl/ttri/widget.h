@@ -57,6 +57,8 @@ struct IDistanceEdge;
 template<typename T, typename T1, typename T2>
 class DrawGridSample;
 
+class ATriangleMesh;
+
 }
 
 struct TFTNode {
@@ -89,6 +91,7 @@ private:
 	void drawLevelGridSamples(int level);
     void drawField();
     void drawTriangulation();
+	void drawMesh(const aphid::ATriangleMesh * mesh);
     
 private slots:
 
@@ -118,6 +121,8 @@ typedef aphid::sdb::LodGrid LodGridTyp;
 	
 typedef aphid::DrawGridSample<LodGridTyp, aphid::sdb::LodCell, aphid::sdb::LodNode > GridSampleDrawerT; 
 	GridSampleDrawerT * m_sampleDrawer;
+	
+	aphid::ATriangleMesh * m_l5mesh;
 	
 };
 

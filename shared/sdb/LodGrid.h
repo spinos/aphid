@@ -7,6 +7,7 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
+ 
 #ifndef APH_SDB_LOD_GRID_H
 #define APH_SDB_LOD_GRID_H
 
@@ -43,6 +44,9 @@ public:
 	virtual ~LodCell();
 	
 	virtual void clear();
+	
+	void countNodesInCell(int & it);
+	void dumpNodesInCell(LodNode * dst);
 	
 private:
 
@@ -147,6 +151,11 @@ public:
 				}
 				
 			}
+			
+			if(key().w > level) {
+				break;
+			}
+			
 			next();
 		}
 		
@@ -161,7 +170,10 @@ public:
 	}
 	
 	virtual void clear(); 
-			
+	
+	int countLevelNodes(int level);
+	void dumpLevelNodes(LodNode * dst, int level);
+	
 private:
 	template<typename Tf>
 	void subdivideCell(Tf & fintersect,

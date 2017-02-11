@@ -92,7 +92,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 		}
 	}
 	
-	if(m_numValidSamples < 4) {
+	if(m_numValidSamples < 6) {
 		return;
 	}
 	
@@ -103,10 +103,11 @@ template<typename Tf, typename Tn, int Ndiv>
 void GridSampler<Tf, Tn, Ndiv>::processKmean()
 {
 	const int n = m_numValidSamples;
-	int k = 1 + n / 3;
-	if(k > 5) {
-		k = 5;
+	int k = 3 + n / 2;
+	if(k > 8) {
+		k = 8;
 	}
+	
 /// position and normal
 	const int d = 6;
 /// to kmean data
@@ -116,9 +117,9 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 		m_data.column(0)[i] = src.pos.x;
 		m_data.column(1)[i] = src.pos.y;
 		m_data.column(2)[i] = src.pos.z;
-		m_data.column(3)[i] = src.nml.x;
-		m_data.column(4)[i] = src.nml.y;
-		m_data.column(5)[i] = src.nml.z;
+		m_data.column(3)[i] = src.nml.x * 4.f;
+		m_data.column(4)[i] = src.nml.y * 4.f;
+		m_data.column(5)[i] = src.nml.z * 4.f;
 	}
 	
 	m_cluster.setKND(k, n, d);
@@ -133,6 +134,7 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 		Tn & dst = m_samples[i];
 		dst.pos.set(centr[0], centr[1], centr[2]);
 		dst.nml.set(centr[3], centr[4], centr[5]);
+		dst.nml.normalize();
 		
 	}
 	m_numValidSamples = k;
