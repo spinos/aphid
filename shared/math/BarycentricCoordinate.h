@@ -32,6 +32,7 @@ public:
 	Vector3F getNormal() const;
 	
 private:
+	void computeContribute(const Vector3F & q);
 	void computeInsideTriangle();
 
 	Vector3F m_p[3];

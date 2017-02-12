@@ -69,6 +69,10 @@ bool ClosestToPointEngine<T, Tn>::selectedClosestToPoint(const Vector3F & origin
 		const T * ts = src[prims->key() ];
 		ts-> template closestToPoint<ClosestToPointTestResult>(&m_ctx);
 		
+		if(m_ctx.closeEnough() ) {
+			break;
+		}
+		
 		prims->next();
 	}
 	return m_ctx._hasResult;

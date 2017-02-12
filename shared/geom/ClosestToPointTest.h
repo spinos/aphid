@@ -34,7 +34,7 @@ public:
 	ClosestToPointTestResult();
 	
 	void reset();
-	void reset(const Vector3F & p, float initialDistance, bool fastOp = false);
+	void reset(const Vector3F & p, float initialDistance = 1e8f, bool fastOp = false);
 	bool closeTo(const BoundingBox & box) const;
 	bool closeEnough() const;
     

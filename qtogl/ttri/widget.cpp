@@ -144,9 +144,9 @@ void GLWidget::clientDraw()
     //drawField();
 	//drawTriangulation();
     //draw3LevelGrid(5);
-//	drawLevelGridSamples(5);
+	drawLevelGridSamples(5);
 	getDrawer()->m_surfaceProfile.apply();
-    drawMesh(m_l5mesh);
+	drawMesh(m_l5mesh);
 }
 
 void GLWidget::drawMesh(const ATriangleMesh * mesh)

@@ -288,7 +288,9 @@ void Triangle::closestToPoint(T * result) const
 	BarycentricCoordinate & bar = result->_bar;
 	bar.create(m_p0, m_p1, m_p2);
 	float d = bar.project(result->_toPoint);
-	if(d > result->_distance) return;
+	if(d > result->_distance) {
+		return;
+	}
 	bar.compute();
 	if(!bar.insideTriangle()) {
 		bar.computeClosest();
@@ -296,16 +298,21 @@ void Triangle::closestToPoint(T * result) const
 	
 	const Vector3F clampledP = bar.getClosest();
 	d = clampledP.distanceTo(result->_toPoint );
-	if(d > result->_distance) return;
+	if(d > result->_distance) {
+		return;
+	}
 	
 	result->_distance = d;
 	result->_hasResult = true;
 	result->_hitPoint = clampledP;
-	if(result->_isFast ) return;
+	result->_hitNormal = bar.getNormal();
+	if(result->_isFast ) {
+		return;
+	}
+	
 	result->_contributes[0] = bar.getV(0);
 	result->_contributes[1] = bar.getV(1);
 	result->_contributes[2] = bar.getV(2);
-	result->_hitNormal = bar.getNormal();
 	result->_igeometry = ind0();
 	result->_icomponent = ind1();
 }

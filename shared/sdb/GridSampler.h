@@ -78,7 +78,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 	const int ns = numSamples();
 	for(int i=0;i<ns;++i) {
 		box.getSubBox(childBx, m_gridCoord[i], m_cellDelta);
-		stat = fintersect.selectedClosestToPoint(childBx.center(), childBx.radius() );
+		stat = fintersect.selectedClosestToPoint(childBx.center() );
 		if(stat) {
 			stat = childBx.isPointInside(fintersect.closestToPointPoint() );
 		}
@@ -96,7 +96,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 		return;
 	}
 	
-	processKmean();
+	//processKmean();
 }
 
 template<typename Tf, typename Tn, int Ndiv>
@@ -117,9 +117,9 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 		m_data.column(0)[i] = src.pos.x;
 		m_data.column(1)[i] = src.pos.y;
 		m_data.column(2)[i] = src.pos.z;
-		m_data.column(3)[i] = src.nml.x * 4.f;
-		m_data.column(4)[i] = src.nml.y * 4.f;
-		m_data.column(5)[i] = src.nml.z * 4.f;
+		m_data.column(3)[i] = src.nml.x;
+		m_data.column(4)[i] = src.nml.y;
+		m_data.column(5)[i] = src.nml.z;
 	}
 	
 	m_cluster.setKND(k, n, d);

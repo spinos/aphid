@@ -222,8 +222,11 @@ void SphereSelectionContext::reset(const Vector3F & p,
 
 void SphereSelectionContext::addPrim(const int & i)
 { 
-	if(m_mode == SelectionContext::Append) m_prims.insert(i);
-	else m_prims.remove(i);
+	if(m_mode == SelectionContext::Append) {
+		m_prims.insert(i);
+	} else {
+		m_prims.remove(i);
+	}
 }
 
 int SphereSelectionContext::numSelected()

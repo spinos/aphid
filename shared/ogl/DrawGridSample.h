@@ -64,7 +64,7 @@ void DrawGridSample<T, Tc, Tn>::drawLevelSamples(int level)
     row[2].set(0,0,sz,0);
     row[3].set(1,1,0,0);
 	
-	glBegin(GL_POINTS);
+	glBegin(GL_LINES);
 	
 	m_grid->begin();
 	while(!m_grid->end() ) {
@@ -87,11 +87,16 @@ void DrawGridSample<T, Tc, Tn>::drawLevelSamples(int level)
 template<typename T, typename Tc, typename Tn>
 void DrawGridSample<T, Tc, Tn>::drawSamplesInCell(Tc * cell, Float4 * row)
 {
+	Vector3F pe;
 	cell->begin();
 	while (!cell->end() ) {
 		Tn * nd = cell->value();
 		
+		glColor3f(0.f, .2f, .9f);
 	    glVertex3fv((const float *)&nd->pos);
+		glColor3f(0.f, .5f, .7f);
+		pe = nd->pos + nd->nml;
+		glVertex3fv((const float *)&pe);
 		
 		cell->next();
 	}
