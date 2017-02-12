@@ -53,7 +53,7 @@ void LodGridMesher<T, Tn>::buildMesh(ATriangleMesh * mesh,
 	const int nv = nt * 3;
 	mesh->create(nv, nt);
 	
-	const float radius = m_grid->levelCellSize(level + 1) * .4f;
+	const float radius = m_grid->levelCellSize(level + 1) * .67f;
 	
 	Tn * samps = new Tn[nv];
 	m_grid->dumpLevelNodes(samps, level);
@@ -75,6 +75,7 @@ void LodGridMesher<T, Tn>::buildMesh(ATriangleMesh * mesh,
 	}
 	
 	delete[] samps;
+	std::cout<<"\n LodGridMesher done n triangles "<<nt;
 	
 }
 

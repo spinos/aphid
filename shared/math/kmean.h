@@ -213,8 +213,8 @@ int KMeansClustering2<T>::closestGroupTo(const DenseVector<T> & apoint) const
 		DenseVector<T> diff = gcen - apoint;
 		T dist = diff.norm();
 		if(maxDist > dist) {
-			ind = i;
 			maxDist = dist;
+			ind = i;
 		}
 	}
 	return ind;

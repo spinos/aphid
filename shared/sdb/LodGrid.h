@@ -35,9 +35,9 @@ private:
 
 };
 
-class LodCell : public sdb::Array<int, LodNode >, public sdb::AdaptiveGridCell {
+class LodCell : public Array<int, LodNode >, public AdaptiveGridCell {
 
-typedef sdb::Array<int, LodNode > TParent;
+typedef Array<int, LodNode > TParent;
 	
 public:
 	LodCell(Entity * parent = NULL);
@@ -52,9 +52,9 @@ private:
 
 };
 
-class LodGrid : public sdb::AdaptiveGrid3<LodCell, LodNode, 10 > {
+class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
-typedef sdb::AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
+typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 
 public:
 	LodGrid();
@@ -72,7 +72,7 @@ public:
 		BoundingBox cb;
 		int level = minLevel;
 		while(level < maxLevel) {
-			std::vector<sdb::Coord4> dirty;
+			std::vector<Coord4> dirty;
 			begin();
 			while(!end() ) {
 				if(key().w == level) {
@@ -88,7 +88,7 @@ public:
 			
 			std::cout<<"\n level"<<level;
 			
-			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
+			std::vector<Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
 				subdivideCell(fintersect, *it);
 			}
@@ -169,6 +169,8 @@ public:
 		
 	}
 	
+	void aggregateAtLevel(int level);
+	
 	virtual void clear(); 
 	
 	int countLevelNodes(int level);
@@ -177,7 +179,7 @@ public:
 private:
 	template<typename Tf>
 	void subdivideCell(Tf & fintersect,
-						const sdb::Coord4 & cellCoord)
+						const Coord4 & cellCoord)
 	{
 		LodCell * cell = findCell(cellCoord);
 		if(!cell) {
@@ -185,8 +187,9 @@ private:
 			return;
 		}
 		
-		if(cell->hasChild() ) 
+		if(cell->hasChild() ) {
 			return;
+		}
 			
 		BoundingBox cb;
 		for(int i=0; i< 8; ++i) { 
@@ -198,6 +201,11 @@ private:
 			
 		}
 	}
+	
+	void aggregateInCell(LodCell * cell, 
+						const Coord4 & cellCoord);
+	void processKmean(int & n, 
+					LodNode * samples);
 	
 };
 

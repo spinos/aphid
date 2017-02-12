@@ -101,12 +101,14 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	m_lodg->fillBox(rootBox, sz0);
 	m_lodg->subdivideToLevel<FIntersectTyp>(ineng, 0, 5);
 	m_lodg->insertNodeAtLevel<FClosestTyp, 3 >(5, clseng);
-
+	m_lodg->aggregateAtLevel(4);
+	m_lodg->aggregateAtLevel(3);
+	
 	m_sampleDrawer = new GridSampleDrawerT(m_lodg);
 	
 	sdb::LodGridMesher<LodGridTyp, sdb::LodNode > lodmesher(m_lodg);
 	m_l5mesh = new ATriangleMesh;
-	lodmesher.buildMesh(m_l5mesh, 5);
+	lodmesher.buildMesh(m_l5mesh, 4);
 	
 }
 
