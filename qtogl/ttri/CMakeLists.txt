@@ -34,6 +34,7 @@ target_link_libraries (ttri ${Boost_FILESYSTEM_LIBRARY})
 IF (WIN32)
 target_link_libraries (ttri ${Boost_THREAD_LIBRARY})
 target_link_libraries (ttri ${Boost_CHRONO_LIBRARY})
+target_link_libraries (ttri ${Boost_REGEX_LIBRARY})
 ENDIF ()
 
 target_link_libraries (ttri ${HDF5_LIBRARIES})
