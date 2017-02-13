@@ -39,22 +39,24 @@ public:
 	bool compute(const DenseMatrix<T> & points);
 	
 	const DenseMatrix<T> & groupCentroids() const;
+/// n indices
 	const int * groupIndices() const;
 	const int & K() const;
 	void getGroupCentroid(DenseVector<T> & d, 
 							const int & i) const;
 	
 protected:
-
+	void setGroupCentroid(const DenseVector<T> & d, 
+							const int & i);
+	
 private:
 /// get i-th row point
 	void getXi(DenseVector<T> & dst, 
 				const DenseMatrix<T> & points,
 				const int & idx) const;
-	bool assignPointsToGroup(DenseVector<T> & apoint,
-				const DenseMatrix<T> & points);
+	bool assignPointsToGroup(const DenseMatrix<T> & points);
 	int closestGroupTo(const DenseVector<T> & apoint) const;
-	void moveCentroid();
+	T moveCentroid();
 	bool farEnoughToPreviousCentroids(const DenseVector<T> & pnt,
 							const int & lastI) const;
 	bool assignToOneGroup(const DenseMatrix<T> & points);
@@ -184,9 +186,7 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 	
 	int i=0;
 	for(;i<29;++i) {
-		//std::cout<<"\n centroid "<<i<<" "<<m_centroids;
-	
-		bool changed = assignPointsToGroup(apnt, points);
+		bool changed = assignPointsToGroup(points);
 		moveCentroid();
 		if(!changed) {
 			break;
@@ -203,15 +203,12 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 template<typename T>
 int KMeansClustering2<T>::closestGroupTo(const DenseVector<T> & apoint) const
 {
-	DenseVector<T> gcen(m_D);
 	
 	T maxDist = 1e20;
 	int ind = 0;
 	for(int i=0;i<m_K;++i) {
-		gcen.copyData(m_centroids.column(i));
-		
-		DenseVector<T> diff = gcen - apoint;
-		T dist = diff.norm();
+		const DenseVector<T> gcen(m_centroids.column(i), m_D);
+		T dist = gcen.distanceTo(apoint);
 		if(maxDist > dist) {
 			maxDist = dist;
 			ind = i;
@@ -221,8 +218,7 @@ int KMeansClustering2<T>::closestGroupTo(const DenseVector<T> & apoint) const
 }
 
 template<typename T>
-bool KMeansClustering2<T>::assignPointsToGroup(DenseVector<T> & apoint,
-					const DenseMatrix<T> & points)
+bool KMeansClustering2<T>::assignPointsToGroup(const DenseMatrix<T> & points)
 {
 	m_groupMean.setZero();
 	
@@ -230,15 +226,17 @@ bool KMeansClustering2<T>::assignPointsToGroup(DenseVector<T> & apoint,
 		m_groupCount[i] = 0;
 	}
 	
+	DenseVector<T> apnt(m_D);
 	bool changed = false;
 	for(int i=0;i<m_N;++i) {
-		getXi(apoint, points, i);
+		getXi(apnt, points, i);
 		
-		const int closestG = closestGroupTo(apoint);
+		const int closestG = closestGroupTo(apnt);
 		
 		DenseVector<T> gmean(m_groupMean.column(closestG), m_D);
-		gmean.add(apoint);
-		m_groupCount[closestG] += 1;
+		gmean.add(apnt);
+		
+		m_groupCount[closestG]++;
 		
 		if(m_groupInd[i] != closestG) {
 			m_groupInd[i] = closestG;
@@ -249,25 +247,28 @@ bool KMeansClustering2<T>::assignPointsToGroup(DenseVector<T> & apoint,
 }
 
 template<typename T>
-void KMeansClustering2<T>::moveCentroid()
+T KMeansClustering2<T>::moveCentroid()
 {
 	T sumMoved = 0;
 	
 	DenseVector<T> vmean(m_D);
 		
 	for(int i=0;i<m_K;++i) {
+		
 		vmean.copyData(m_groupMean.column(i) );
-		vmean.scale((T)1 / (T)m_groupCount[i]);
+		vmean.scale((T)1.0 / (T)m_groupCount[i]);
 		
 		DenseVector<T> gcen(m_centroids.column(i), m_D);
 		
 		DenseVector<T> diff = gcen - vmean;
+		
 		sumMoved += diff.norm();
 		
-		gcen.copy(vmean);
+		setGroupCentroid(vmean, i);
+		
 	}
 	
-	//std::cout<<"\n moved "<<(sumMoved/ (T)m_K);
+	return (sumMoved/ (T)m_K);
 }
 
 template<typename T>
@@ -288,6 +289,13 @@ void KMeansClustering2<T>::getGroupCentroid(DenseVector<T> & d,
 {
 	d.resize(m_D);
 	d.copyData(m_centroids.column(i) );
+}
+
+template<typename T>
+void KMeansClustering2<T>::setGroupCentroid(const DenseVector<T> & d, 
+							const int & i)
+{
+	m_centroids.copyColumn(i, d.v() );
 }
 
 }
