@@ -12,6 +12,7 @@
 #include <fstream> 
 #include <ForestCell.h>
 #include <mama/MeshHelper.h>
+#include "GrowOption.h"
 
 namespace aphid {
 

@@ -18,6 +18,8 @@ public:
 	
 	static bool IsOpenExrFile(const std::string& filename);
 
+	virtual void sample(float u, float v, int count, float * dst) const;
+	
 protected:
 	virtual bool readImage(const std::string & filename);
 		

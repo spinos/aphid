@@ -13,6 +13,7 @@
 #include <maya/M3dView.h>
 #include "ProxyVizNode.h"
 #include <maya/MSceneMessage.h>
+#include "GrowOption.h"
 
 class proxyPaintContext : public MPxContext
 {
@@ -59,7 +60,7 @@ class proxyPaintContext : public MPxContext
     
     Operation m_currentOpt, mOpt;
     
-    aphid::ModifyForest::GrowOption m_growOpt;
+    aphid::GrowOption m_growOpt;
     
 	int m_extractGroupCount;
 	short					start_x, start_y;

@@ -15,6 +15,7 @@ class ForestCell;
 class PseudoNoise;
 class BarycentricCoordinate;
 class EbpGrid;
+class GrowOption;
 
 class ModifyForest : public Forest {
     
@@ -34,57 +35,6 @@ private:
 	ManipulateMode m_manipulateMode;
 	
 public:
-    struct GrowOption {
-		Vector3F m_upDirection;
-		Vector3F m_centerPoint;
-		Vector3F m_noiseOrigin;
-		int m_plantId;
-		float m_minScale, m_maxScale;
-		float m_minMarginSize, m_maxMarginSize;
-		float m_rotateNoise;
-		float m_strength;
-		float m_radius;
-		float m_noiseFrequency;
-		float m_noiseLacunarity;
-		float m_noiseLevel;
-		float m_noiseGain;
-		int m_noiseOctave;
-		bool m_alongNormal;
-		bool m_multiGrow;
-		bool m_stickToGround;
-		bool m_isInjectingParticle;
-		float m_strokeMagnitude;
-		
-		GrowOption() {
-			m_upDirection = Vector3F::YAxis;
-			m_alongNormal = 0;
-			m_minScale = 1.f;
-			m_maxScale = 1.f;
-			m_rotateNoise = 0.f;
-			m_plantId = 0;
-			m_multiGrow = 1;
-			m_minMarginSize = .1f;
-			m_maxMarginSize = .1f;
-			m_strength = .67f;
-			m_stickToGround = true;
-			m_noiseFrequency = 1.f;
-			m_noiseLacunarity = 1.5f;
-			m_noiseOctave = 4;
-			m_noiseLevel = 0.f;
-			m_noiseGain = .5f;
-			m_noiseOrigin.set(.4315f, .63987f, .6589f);
-		}
-		
-		void setStrokeMagnitude(const float & x) 
-		{
-			m_strokeMagnitude = x;
-			if(m_strokeMagnitude < -.5f)
-				m_strokeMagnitude = -.5f;
-			if(m_strokeMagnitude > .5f)
-				m_strokeMagnitude = .5f;
-		}
-	};
-    
 	ModifyForest();
 	virtual ~ModifyForest();
 	

@@ -15,6 +15,7 @@
 #include <ForestCell.h>
 #include <geom/PrimInd.h>
 #include <ctime>
+#include "GrowOption.h"
 
 namespace aphid {
 

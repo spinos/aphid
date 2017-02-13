@@ -16,6 +16,7 @@
 #include <ogl/RotationHandle.h>
 #include <ogl/TranslationHandle.h>
 #include <ogl/ScalingHandle.h>
+#include "GrowOption.h"
 
 namespace aphid {
 
