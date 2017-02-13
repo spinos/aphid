@@ -59,6 +59,7 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	Vector3F pog;
 	CollisionContext collctx;
 	collctx._minIndex = -1;
+	Float2 sampleTexCoord;
 	
 	try {
 	for(int i=0;i<ebpSampler.numParticles();++i) {
@@ -70,15 +71,17 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		}
 		
 		setBind(&bind);
+		getBindTexcoord(sampleTexCoord);
 	
-		if(option.m_noiseLevel > 0.001f) {
+		if(option.m_noiseLevel > 1e-3f) {
 			if(ANoise3::FractalF((const float *)&pog,
 							(const float *)&option.m_noiseOrigin,
 							freq,
 							option.m_noiseLacunarity,
 							option.m_noiseOctave,
-							option.m_noiseGain ) < option.m_noiseLevel )
+							option.m_noiseGain ) < option.m_noiseLevel ) {
 				continue;
+			}
 		}
 		
 		if(limitRadius) {

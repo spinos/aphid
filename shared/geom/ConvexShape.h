@@ -234,7 +234,8 @@ class Triangle {
 	Vector3F m_p0; int m_nc0;
 	Vector3F m_p1; int m_nc1;
 	Vector3F m_p2; int m_nc2;
-
+	Float2 m_uv[3];
+	
 public:
 	Triangle();
 	void set(const Vector3F & p0, const Vector3F & p1,
@@ -263,14 +264,17 @@ public:
 	void getBoundingSphere(Sphere & s) const;
 	
 	template<typename T>
-	bool exactIntersect(const T & b) const {
-		return gjk::Intersect1<Triangle, T>::Evaluate(*this, b);
-	}
-	
+	bool exactIntersect(const T & b) const;
+		
 	template<typename T>
 	void closestToPoint(T * result) const;
 	
 	bool sampleP(Vector3F & dst, const BoundingBox &  b) const;
+	
+	void setUV(const float & u, const float & v,
+					const int & i);
+					
+	const Float2 & uv(const int & i) const;
 	
 	const Vector3F & X(int idx) const;
 	const Vector3F & supportPoint(const Vector3F & v, Vector3F * localP = NULL) const;
@@ -281,6 +285,12 @@ public:
 private:
 	
 };
+
+template<typename T>
+bool Triangle::exactIntersect(const T & b) const 
+{
+	return gjk::Intersect1<Triangle, T>::Evaluate(*this, b);
+}
 
 template<typename T>
 void Triangle::closestToPoint(T * result) const

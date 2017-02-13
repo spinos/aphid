@@ -253,11 +253,11 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	view.beginGL();
 	
-	double mm[16];
-	matrix_as_array(_worldInverseSpace, mm);
+	float mm[16];
+	AHelper::getMat(_worldInverseSpace, mm);
 	
 	glPushMatrix();
-	glMultMatrixd(mm);	
+	glMultMatrixf(mm);	
 	
 	defBox->drawWiredBound();
 	

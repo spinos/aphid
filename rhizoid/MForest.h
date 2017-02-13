@@ -55,7 +55,6 @@ public:
     
 protected:
     bool updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & spaceDataArray);
-	static void matrix_as_array(const MMatrix &space, double *mm);
 	void savePlants(MPointArray & plantTms, 
 					MIntArray & plantIds,
 					MIntArray & plantTris,

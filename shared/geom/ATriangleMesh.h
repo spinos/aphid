@@ -10,12 +10,15 @@
  *
  */
 #include <geom/AGenericMesh.h>
+#include <boost/scoped_array.hpp>
 
 namespace aphid {
 
 class ATriangleMesh : public AGenericMesh {
 	
 	gjk::TriangleSet m_componentTriangle;
+/// face varying
+	boost::scoped_array<Float2> m_texcoord;
 	
 public:
 	ATriangleMesh();
@@ -31,6 +34,8 @@ public:
 	virtual bool intersectSphere(unsigned icomponent, const gjk::Sphere & B);
 	virtual bool intersectBox(unsigned icomponent, const BoundingBox & box);
 	const unsigned numTriangles() const;
+	void setTriangleTexcoord(const int & idx, const Float2 * uvs);
+	const Float2 * triangleTexcoord(const int & idx) const;
 	
 	void create(unsigned np, unsigned nt);
 	unsigned * triangleIndices(unsigned idx) const;

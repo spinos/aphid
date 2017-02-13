@@ -638,6 +638,13 @@ bool Triangle::sampleP(Vector3F & dst, const BoundingBox &  box) const
 	return false;
 }
 
+void Triangle::setUV(const float & u, const float & v,
+					const int & i)
+{ m_uv[i].set(u, v); }
+
+const Float2 & Triangle::uv(const int & i) const
+{ return m_uv[i]; }
+
 Quad::Quad()
 {}
 
