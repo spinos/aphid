@@ -93,7 +93,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 	}
 	
 	if(m_numValidSamples > 5) {
-		//processKmean();
+		processKmean();
 	}
 	
 }
@@ -105,6 +105,9 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 	int k = n - 2;
 	if(n > 12) {
 		k = n - 1 - n / 3;
+	}
+	if(n > 24) {
+		k = n / 2;
 	}
 	
 /// position and normal

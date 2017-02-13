@@ -205,6 +205,9 @@ void LodGrid::processKmean(int & n,
 	if(n > 12) {
 		k = n - 1 - n / 3;
 	}
+	if(n > 24) {
+		k = n / 2;
+	}
 	
 /// position and normal
 	const int d = 6;

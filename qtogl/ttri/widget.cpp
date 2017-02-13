@@ -108,7 +108,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	
 	sdb::LodGridMesher<LodGridTyp, sdb::LodNode > lodmesher(m_lodg);
 	m_l5mesh = new ATriangleMesh;
-	lodmesher.buildMesh(m_l5mesh, 4);
+	lodmesher.buildMesh(m_l5mesh, 3);
 	
 }
 
