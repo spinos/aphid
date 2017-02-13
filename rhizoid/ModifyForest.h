@@ -52,6 +52,7 @@ public:
 		bool m_alongNormal;
 		bool m_multiGrow;
 		bool m_stickToGround;
+		bool m_isInjectingParticle;
 		float m_strokeMagnitude;
 		
 		GrowOption() {

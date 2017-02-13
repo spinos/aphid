@@ -3,6 +3,7 @@
 #include <maya/MPointArray.h>
 #include <maya/MDagModifier.h>
 #include <maya/MToolsInfo.h>
+#include <maya/MFnParticleSystem.h>
 #include <AHelper.h>
 #include <ASearchHelper.h>
 
@@ -224,6 +225,10 @@ void proxyPaintContext::setOperation(short val)
 			resizeSelectedRandomly();
 			toReturn = true;
 		break;
+		case opInjectParticle:
+			injectSelectedParticle();
+			toReturn = true;
+			break;
 		case opInjectTransform:
 			injectSelectedTransform();
 			toReturn = true;
@@ -795,6 +800,63 @@ void proxyPaintContext::detachSceneCallbacks()
 void proxyPaintContext::releaseCallback(void* clientData)
 { PtrViz = NULL; }
 
+void proxyPaintContext::injectSelectedParticle()
+{
+	if(!PtrViz) {
+        MGlobal::displayWarning("proxyPaintContext has no active viz");
+		return;
+    }
+    
+    MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintContext wrong selection, select particle system(s) to inject");
+		return;
+	}
+	
+	MStatus stat;
+    MItSelectionList parIter(sels, MFn::kParticle, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintContext no particle system selected, nothing to inject");
+		return;
+	}
+	
+	m_growOpt.m_isInjectingParticle = true;
+	for(;!parIter.isDone();parIter.next() ) {
+		MObject parNode;
+		stat = parIter.getDependNode(parNode);
+		if(!stat) {
+			MGlobal::displayWarning("proxyPaintContext no particle system selected, nothing to inject");
+			continue;
+		}
+
+		MFnParticleSystem parFn(parNode, &stat);
+		if(!stat) {
+			AHelper::Info<MString>("not a particle system", MFnDependencyNode(parNode).name() );
+			continue;
+		}
+
+		MVectorArray pos;
+		parFn.position(pos);
+
+		const unsigned np = pos.length();
+			
+		std::vector<Matrix44F> ms;
+		Matrix44F wmf;
+		for(unsigned i=0;i < np;++i ) {
+			wmf.setTranslation(Vector3F(pos[i].x, pos[i].y, pos[i].z) );
+			ms.push_back(wmf);
+		}
+		
+		AHelper::Info<unsigned>("proxyPaintContext inject n particle", np );
+		PtrViz->injectPlants(ms, m_growOpt);
+		ms.clear();
+	}
+	AHelper::Info<int>("proxyPaintContext created n plant", PtrViz->numActivePlants() );
+    
+}
+
 void proxyPaintContext::injectSelectedTransform()
 {
     if(!PtrViz) {
@@ -823,13 +885,16 @@ void proxyPaintContext::injectSelectedTransform()
     for(;!transIter.isDone(); transIter.next() ) {
 		MDagPath transPath;
 		transIter.getDagPath(transPath);
-        wmd = aphid::AHelper::GetWorldTransformMatrix(transPath);
+        wmd = AHelper::GetWorldTransformMatrix(transPath);
         AHelper::ConvertToMatrix44F(wmf, wmd);
         ms.push_back(wmf);
 	}
     
     AHelper::Info<int>("proxyPaintContext inject n transform", ms.size() );
-    PtrViz->injectPlants(ms, m_growOpt);
+    m_growOpt.m_isInjectingParticle = false;
+	PtrViz->injectPlants(ms, m_growOpt);
+	AHelper::Info<int>("proxyPaintContext created n plant", PtrViz->numActivePlants() );
+    
 }
 
 void proxyPaintContext::resizeSelectedRandomly()

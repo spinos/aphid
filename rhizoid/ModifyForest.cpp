@@ -244,9 +244,10 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 		return false;
 	}
 	
-	if(option.m_alongNormal)
+	if(option.m_alongNormal) {
 		option.m_upDirection = t->calculateNormal();
-    
+    }
+	
 	m_bary->create(t->P(0), t->P(1), t->P(2) );
     
 	GroundBind bind;
@@ -288,33 +289,54 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 }
 
 bool ModifyForest::growAt(const Matrix44F & trans, GrowOption & option)
-{        
+{    
 	GroundBind bind;
-	if(option.m_stickToGround) {
 	Vector3F pog;
-	if(!bindToGround(&bind, trans.getTranslation(), pog) )
+	if(!bindToGround(&bind, trans.getTranslation(), pog) ) {
 		return false;
+	}
 	
+	if(option.m_alongNormal) {
+		option.m_upDirection = bindNormal(&bind);
+    }
+	
+	Matrix44F tm;
+	float scale;
+/// reshuffle for particles
+	if(option.m_isInjectingParticle) {
+		randomSpaceAt(pog, option, tm, scale); 
+	} else {
 /// x size
-	float scale = trans.getSide().length();
+		scale = trans.getSide().length();
+		tm = trans;
+	}
+	
+	const ExampVox * v = plantExample(option.m_plantId);
+	
 	CollisionContext collctx;
 	collctx._minIndex = -1;
-	collctx._radius = plantSize(option.m_plantId) * scale * .5f;
+	collctx._radius = v->geomSize() * scale * .5f;
 	collctx._minDistance = option.m_minMarginSize;
 	collctx._maxDistance = option.m_maxMarginSize;
 	collctx._pos = pog;
-	if(closeToOccupiedPosition(&collctx) ) 
-		return false;
-        
-	Matrix44F tm = trans;
+	
+	if(option.m_stickToGround) {
 /// snap to ground
-	tm.setTranslation(pog);
-	addPlant(tm, bind, option.m_plantId);
+		bind.m_offset.setZero();
+		tm.setTranslation(pog);
 	}
 	else {
-/// disable ground binding
-		bind.setGeomComp(1023, 0);
-		addPlant(trans, bind, option.m_plantId);
+/// preserve the offset
+		bind.m_offset = trans.getTranslation() - pog;
+		tm = trans;
+	}
+	
+	if(v->numExamples() > 1) {
+		growBundle(option, bind, v, option.m_plantId, tm, &collctx);			
+	
+	} else {
+		growSingle(option, bind, option.m_plantId, tm, &collctx);
+				
 	}
 	
 	return true;

@@ -45,6 +45,7 @@ class proxyPaintContext : public MPxContext
 		opBundleResize = 19,
 		opBundleRotate = 20,
         opBundleTranslate = 21,
+		opInjectParticle = 97,
 		opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
@@ -151,6 +152,7 @@ private:
     void scaleBrush();
     void discardFaceSelection();
     void discardPlantSelection();
+	void injectSelectedParticle();
     void injectSelectedTransform();
 	void resizeSelectedRandomly();
 	void moveRandomly();

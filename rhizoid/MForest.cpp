@@ -686,8 +686,7 @@ void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & optio
     disableDrawing();
     std::vector<Matrix44F>::const_iterator it = ms.begin();
     for(;it!=ms.end();++it) {
-		if(!growAt(*it, option) )
-			AHelper::Info<Vector3F>("no grow at ", (*it).getTranslation());		
+		growAt(*it, option);
 	}
 		
 	onPlantChanged();
