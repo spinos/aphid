@@ -183,8 +183,8 @@ void ExrImage::sample(float u, float v, int count, float * dst) const
 	if(lx > w-1 ) {
 		lx = w-1;
 	}
-	
-	int ly = v * getHeight();
+/// flip vertically, top-left is origin
+	int ly = (1.f - v) * getHeight();
 	if(ly < 0) {
 		ly = 0;
 	}
