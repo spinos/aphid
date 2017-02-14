@@ -11,6 +11,8 @@
 #include <math/PseudoNoise.h>
 #include <fstream> 
 #include <ForestCell.h>
+#include <mama/MeshHelper.h>
+#include "GrowOption.h"
 
 namespace aphid {
 
@@ -47,7 +49,9 @@ bool MForest::updateGround(MArrayDataHandle & meshDataArray, MArrayDataHandle & 
         }
         
         meshDataArray.next();
-		if(hasSpace) spaceDataArray.next();
+		if(hasSpace) {
+			spaceDataArray.next();
+		}
     }
     
     if(numGroundMeshes() < 1) {
@@ -68,7 +72,11 @@ void MForest::updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned
 	
 	const unsigned nv = ps.length();
 	unsigned i = 0;
-	if(worldTm != MMatrix::identity) for(;i<nv;i++) ps[i] *= worldTm;
+	if(worldTm != MMatrix::identity) {
+		for(;i<nv;i++) {
+			ps[i] *= worldTm;
+		}
+	}
 	
 	MIntArray triangleCounts, triangleVertices;
 	fmesh.getTriangles(triangleCounts, triangleVertices);
@@ -90,14 +98,20 @@ void MForest::updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned
     if(toRebuild) {
         trimesh->create(nv, triangleVertices.length()/3);
         unsigned * ind = trimesh->indices();
-        for(i=0;i<triangleVertices.length();i++) ind[i] = triangleVertices[i];
+        for(i=0;i<triangleVertices.length();i++) {
+			ind[i] = triangleVertices[i];
+		}
 	}
 	
 	Vector3F * cvs = trimesh->points();
-	for(i=0;i<nv;i++) cvs[i].set(ps[i].x, ps[i].y, ps[i].z);
+	for(i=0;i<nv;i++) {
+		cvs[i].set(ps[i].x, ps[i].y, ps[i].z);
+	}
+	
+	MeshHelper::UpdateMeshTriangleUVs(trimesh, mesh);
     
     if(toRebuild) {
-        AHelper::Info<std::string>("MForest ground ", trimesh->verbosestr());
+        AHelper::Info<std::string>("MForest update ground mesh ", trimesh->verbosestr());
         setGroundMesh(trimesh, idx);
     }
 }
@@ -169,26 +183,6 @@ void MForest::replacePlant(const MPoint & origin, const MPoint & dest,
 	Ray r(a, b);
 	replaceAt(r, option);
 	enableDrawing();
-}
-
-void MForest::matrix_as_array(const MMatrix &space, double *mm)
-{
-	mm[0] = space(0,0);
-	mm[1] = space(0,1);
-	mm[2] = space(0,2);
-	mm[3] = space(0,3);
-	mm[4] = space(1,0);
-	mm[5] = space(1,1);
-	mm[6] = space(1,2);
-	mm[7] = space(1,3);
-	mm[8] = space(2,0);
-	mm[9] = space(2,1);
-	mm[10] = space(2,2);
-	mm[11] = space(2,3);
-	mm[12] = space(3,0);
-	mm[13] = space(3,1);
-	mm[14] = space(3,2);
-	mm[15] = space(3,3);
 }
 
 void MForest::finishPlantSelection()
@@ -693,8 +687,7 @@ void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & optio
     disableDrawing();
     std::vector<Matrix44F>::const_iterator it = ms.begin();
     for(;it!=ms.end();++it) {
-		if(!growAt(*it, option) )
-			AHelper::Info<Vector3F>("no grow at ", (*it).getTranslation());		
+		growAt(*it, option);
 	}
 		
 	onPlantChanged();

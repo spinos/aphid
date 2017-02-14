@@ -107,7 +107,10 @@ void Forest::setGroundMesh(ATriangleMesh * trimesh, unsigned idx)
 
 ATriangleMesh * Forest::getGroundMesh(const int & idx) const
 {
-    if(idx >= numGroundMeshes() ) return NULL;
+    if(idx >= numGroundMeshes() ) {
+		std::cout<<"\n Forest out-of-range geom "<<idx;
+		return NULL;
+	}
     return m_grounds[idx];
 }
 
@@ -356,6 +359,22 @@ void Forest::setBind(GroundBind * bind) const
 	bind->m_w0 = m_closestPointTest._contributes[0];
 	bind->m_w1 = m_closestPointTest._contributes[1];
 	bind->m_w2 = m_closestPointTest._contributes[2];
+}
+
+void Forest::getBindTexcoord(Float2 & dst) const
+{
+	const ATriangleMesh * mesh = getGroundMesh(m_closestPointTest._igeometry);
+	if(!mesh) {
+		return;
+	}
+	
+	const Float2 * triuvs = mesh->triangleTexcoord(m_closestPointTest._icomponent);
+	dst.x = triuvs[0].x * m_closestPointTest._contributes[0]
+			+ triuvs[1].x * m_closestPointTest._contributes[1]
+			+ triuvs[2].x * m_closestPointTest._contributes[2];
+	dst.y = triuvs[0].y * m_closestPointTest._contributes[0]
+			+ triuvs[1].y * m_closestPointTest._contributes[1]
+			+ triuvs[2].y * m_closestPointTest._contributes[2];
 }
 
 bool Forest::bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest)

@@ -17,6 +17,8 @@ class MObject;
 
 namespace aphid {
 
+class ATriangleMesh;
+
 class MeshHelper {
 
 public:
@@ -39,6 +41,8 @@ public:
 						const float * pnts, const int & np,
 						const MIntArray & triangleVertices,
 						const int & nind);
+	static void UpdateMeshTriangleUVs(ATriangleMesh * trimesh,
+						const MObject & meshNode);
 
 };
 

@@ -48,6 +48,7 @@ void ATriangleMesh::create(unsigned np, unsigned nt)
 	createBuffer(np, nt * 3);
 	setNumPoints(np);
 	setNumIndices(nt * 3);
+	m_texcoord.reset(new Float2[nt * 3]);
 }
 
 unsigned * ATriangleMesh::triangleIndices(unsigned idx) const
@@ -218,6 +219,16 @@ void ATriangleMesh::calculateVertexNormals()
     }
     
 }
+
+void ATriangleMesh::setTriangleTexcoord(const int & idx, const Float2 * uvs)
+{
+	m_texcoord[idx * 3] = uvs[0];
+	m_texcoord[idx * 3 + 1] = uvs[1];
+	m_texcoord[idx * 3 + 2] = uvs[2];
+}
+	
+const Float2 * ATriangleMesh::triangleTexcoord(const int & idx) const
+{ return &m_texcoord[idx * 3]; }
 
 }
 //:~

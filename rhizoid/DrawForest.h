@@ -20,6 +20,7 @@ class ForestCell;
 class RotationHandle;
 class TranslationHandle;
 class ScalingHandle;
+class GrowOption;
 
 class DrawForest : public ModifyForest, public ViewObscureCull, 
 public DrawBox, public DrawCircle, public DrawInstance

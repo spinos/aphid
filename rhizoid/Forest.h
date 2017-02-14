@@ -19,6 +19,7 @@ namespace aphid {
 class ForestCell;
 class ExampVox;
 class ATriangleMesh;
+struct Float2;
 
 class Forest {
 
@@ -154,6 +155,8 @@ protected:
 	void intersectWorldBox(const Ray & ray);
 	const int & lastPlantIndex() const;
 
+	void getBindTexcoord(Float2 & dst) const;
+	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,
 					ForestCell * cell);

@@ -77,7 +77,11 @@ ExrImage::~ExrImage()
 { clear(); }
 
 void ExrImage::clear()
-{ if(_pixels) delete[] _pixels; }
+{ 
+	if(_pixels) {
+		delete[] _pixels;
+	}
+}
 
 bool ExrImage::readImage(const std::string & filename)
 {
@@ -164,6 +168,36 @@ bool ExrImage::IsOpenExrFile(const std::string& filename)
 	char b[4]; 
 	f.read (b, sizeof (b)); 
 	return !!f && b[0] == 0x76 && b[1] == 0x2f && b[2] == 0x31 && b[3] == 0x01; 
+}
+
+void ExrImage::sample(float u, float v, int count, float * dst) const
+{
+	const int w = getWidth();
+	int colorRank = channelRank();
+	if(colorRank > 4) colorRank = 4;
+	
+	int lx = u * w;
+	if(lx < 0) {
+		lx = 0;
+	}
+	if(lx > w-1 ) {
+		lx = w-1;
+	}
+/// flip vertically, top-left is origin
+	int ly = (1.f - v) * getHeight();
+	if(ly < 0) {
+		ly = 0;
+	}
+	if(ly > getHeight()-1 ) {
+		ly = getHeight()-1;
+	}
+	
+	half * hp = (half *)_pixels;
+	half *line = &hp[(ly * w + lx) * colorRank];
+	for(int i=0;i<count;++i) {
+		dst[i] = line[i];
+	}
+	
 }
 
 }

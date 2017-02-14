@@ -14,6 +14,7 @@
 #include <AHelper.h>
 #include <ASearchHelper.h>
 #include <geom/ConvexShape.h>
+#include <geom/ATriangleMesh.h>
 
 namespace aphid {
 
@@ -146,6 +147,32 @@ void MeshHelper::CalculateTriangleVerticesNormal(MVectorArray & nms,
 	}
 	
 	delete[] pvNm;
+}
+
+void MeshHelper::UpdateMeshTriangleUVs(ATriangleMesh * trimesh,
+						const MObject & meshNode)
+{
+	MStatus stat;
+	MItMeshPolygon faceIter(meshNode, &stat);
+	if(!stat) {
+		return;
+	}
+	
+	Float2 tuvs[3];
+	int ti = 0;
+	MFloatArray uArray, vArray;
+	for(;!faceIter.isDone();faceIter.next() ) {
+		faceIter.getUVs(uArray, vArray);
+		tuvs[0].set(uArray[0], vArray[0]);
+		const int nt = uArray.length() - 2;
+		for(int i=0;i<nt;++i) {
+			tuvs[1].set(uArray[i+1], vArray[i+1]);
+			tuvs[2].set(uArray[i+2], vArray[i+2]);
+			trimesh->setTriangleTexcoord(ti, tuvs);
+			ti++;
+		}
+	}
+	
 }
 
 }

@@ -3,13 +3,13 @@
 #include <maya/MPointArray.h>
 #include <maya/MDagModifier.h>
 #include <maya/MToolsInfo.h>
+#include <maya/MFnParticleSystem.h>
 #include <AHelper.h>
 #include <ASearchHelper.h>
-
-const char helpString[] =
-			"Select a proxy viz to paint on";
-            
+           
 using namespace aphid;
+
+const char helpString[] = "Select a proxy viz to paint on";
 
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
@@ -224,6 +224,10 @@ void proxyPaintContext::setOperation(short val)
 			resizeSelectedRandomly();
 			toReturn = true;
 		break;
+		case opInjectParticle:
+			injectSelectedParticle();
+			toReturn = true;
+			break;
 		case opInjectTransform:
 			injectSelectedTransform();
 			toReturn = true;
@@ -358,16 +362,18 @@ unsigned proxyPaintContext::getOperation() const
 
 void proxyPaintContext::setBrushRadius(float val)
 {
-    if(PtrViz)
+    if(PtrViz) {
         PtrViz->setSelectionRadius(val);
+	}
         
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getBrushRadius() const
 {
-    if(PtrViz)
+    if(PtrViz) {
         return PtrViz->selectionRadius();
+	}
         
 	return 8.f;
 }
@@ -418,10 +424,11 @@ float proxyPaintContext::getBrushWeight() const
 
 void proxyPaintContext::setGrowAlongNormal(unsigned val)
 {
-	if(val == 1) 
+	if(val == 1) {
 		MGlobal::displayInfo("proxyPaint enable grow along face normal");
-	else
+	} else {
 		MGlobal::displayInfo("proxyPaint disable grow along face normal");
+	}
 	m_growOpt.m_alongNormal = val;
 /// reset up anyway
 	m_growOpt.m_upDirection = Vector3F::YAxis;
@@ -795,6 +802,63 @@ void proxyPaintContext::detachSceneCallbacks()
 void proxyPaintContext::releaseCallback(void* clientData)
 { PtrViz = NULL; }
 
+void proxyPaintContext::injectSelectedParticle()
+{
+	if(!PtrViz) {
+        MGlobal::displayWarning("proxyPaintContext has no active viz");
+		return;
+    }
+    
+    MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 1) {
+		MGlobal::displayWarning("proxyPaintContext wrong selection, select particle system(s) to inject");
+		return;
+	}
+	
+	MStatus stat;
+    MItSelectionList parIter(sels, MFn::kParticle, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintContext no particle system selected, nothing to inject");
+		return;
+	}
+	
+	m_growOpt.m_isInjectingParticle = true;
+	for(;!parIter.isDone();parIter.next() ) {
+		MObject parNode;
+		stat = parIter.getDependNode(parNode);
+		if(!stat) {
+			MGlobal::displayWarning("proxyPaintContext no particle system selected, nothing to inject");
+			continue;
+		}
+
+		MFnParticleSystem parFn(parNode, &stat);
+		if(!stat) {
+			AHelper::Info<MString>("not a particle system", MFnDependencyNode(parNode).name() );
+			continue;
+		}
+
+		MVectorArray pos;
+		parFn.position(pos);
+
+		const unsigned np = pos.length();
+			
+		std::vector<Matrix44F> ms;
+		Matrix44F wmf;
+		for(unsigned i=0;i < np;++i ) {
+			wmf.setTranslation(Vector3F(pos[i].x, pos[i].y, pos[i].z) );
+			ms.push_back(wmf);
+		}
+		
+		AHelper::Info<unsigned>("proxyPaintContext inject n particle", np );
+		PtrViz->injectPlants(ms, m_growOpt);
+		ms.clear();
+	}
+	AHelper::Info<int>("proxyPaintContext created n plant", PtrViz->numActivePlants() );
+    
+}
+
 void proxyPaintContext::injectSelectedTransform()
 {
     if(!PtrViz) {
@@ -823,13 +887,16 @@ void proxyPaintContext::injectSelectedTransform()
     for(;!transIter.isDone(); transIter.next() ) {
 		MDagPath transPath;
 		transIter.getDagPath(transPath);
-        wmd = aphid::AHelper::GetWorldTransformMatrix(transPath);
+        wmd = AHelper::GetWorldTransformMatrix(transPath);
         AHelper::ConvertToMatrix44F(wmf, wmd);
         ms.push_back(wmf);
 	}
     
     AHelper::Info<int>("proxyPaintContext inject n transform", ms.size() );
-    PtrViz->injectPlants(ms, m_growOpt);
+    m_growOpt.m_isInjectingParticle = false;
+	PtrViz->injectPlants(ms, m_growOpt);
+	AHelper::Info<int>("proxyPaintContext created n plant", PtrViz->numActivePlants() );
+    
 }
 
 void proxyPaintContext::resizeSelectedRandomly()
@@ -996,5 +1063,30 @@ Ray proxyPaintContext::getIncidentAt(int x, int y)
 	Vector3F a(fromNear.x, fromNear.y, fromNear.z);
 	Vector3F b(fromFar.x, fromFar.y, fromFar.z);
 	return Ray(a, b);
+}
+
+void proxyPaintContext::setImageSamplerName(MString filename)
+{
+	if(filename.length() < 5) {
+		MGlobal::displayInfo("proxyPaintContext remove image sampler");
+		m_growOpt.closeImage();
+		
+	} else {
+		bool stat = m_growOpt.openImage(filename.asChar() );
+		if(stat) {
+			AHelper::Info<MString>("proxyPaintContext opened image sampler", filename);
+		} else {
+			AHelper::Info<MString>("proxyPaintContext cannot open image", filename);
+		}
+	}
+	MToolsInfo::setDirtyFlag(*this);
+}
+
+MString proxyPaintContext::imageSamplerName() const
+{
+	if(!m_growOpt.hasSampler() ) {
+		return MString("unknown");
+	}
+	return MString(m_growOpt.imageName().c_str() );
 }
 //:~

@@ -13,6 +13,7 @@
 #include <maya/M3dView.h>
 #include "ProxyVizNode.h"
 #include <maya/MSceneMessage.h>
+#include "GrowOption.h"
 
 class proxyPaintContext : public MPxContext
 {
@@ -45,6 +46,7 @@ class proxyPaintContext : public MPxContext
 		opBundleResize = 19,
 		opBundleRotate = 20,
         opBundleTranslate = 21,
+		opInjectParticle = 97,
 		opInjectTransform = 98,
         opClean = 99,
         opFlood = 100,
@@ -58,7 +60,7 @@ class proxyPaintContext : public MPxContext
     
     Operation m_currentOpt, mOpt;
     
-    aphid::ModifyForest::GrowOption m_growOpt;
+    aphid::GrowOption m_growOpt;
     
 	int m_extractGroupCount;
 	short					start_x, start_y;
@@ -126,6 +128,8 @@ public:
 	void setNoiseOriginX(float x);
 	void setNoiseOriginY(float x);
 	void setNoiseOriginZ(float x);
+	void setImageSamplerName(MString filename);
+	MString imageSamplerName() const;
 	
 private:
 	void resize(bool isBundled);
@@ -151,6 +155,7 @@ private:
     void scaleBrush();
     void discardFaceSelection();
     void discardPlantSelection();
+	void injectSelectedParticle();
     void injectSelectedTransform();
 	void resizeSelectedRandomly();
 	void moveRandomly();

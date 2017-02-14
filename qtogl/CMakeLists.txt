@@ -41,6 +41,7 @@ SET (APHID_MATH_LIBRARY ${APHID_DIR}/lib/aphidMath.lib)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/aphidTopology.lib)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/aphidOgl.lib)
 set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/aphidTtg.lib)
+set (APHID_IMG_LIBRARY ${APHID_DIR}/lib/aphidImg.lib)
 
 elseif (APPLE)
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
@@ -54,6 +55,7 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidTopology.a)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.a)
 set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/libaphidTtg.a)
+set (APHID_IMG_LIBRARY ${APHID_DIR}/lib/libaphidImg.a)
 
 ELSE ()
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
@@ -67,6 +69,7 @@ SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
 set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidGraph.so)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.so)
 set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/libaphidTtg.so)
+set (APHID_IMG_LIBRARY ${APHID_DIR}/lib/libaphidImg.so)
 
 endif ()
 
@@ -208,6 +211,24 @@ message ("blas " ${BLAS_LIBRARY})
 message ("lapack " ${LAPACK_LIBRARY})
 message ("f2c " ${F2C_LIBRARY})
 
+if (WIN32)
+add_definitions (-DOPENEXR_DLL)
+set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
+set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
+"D:/usr/openexr21/lib/Iex-2_1.lib"
+"D:/usr/openexr21/lib/IlmImf-2_1.lib"
+"D:/usr/openexr21/lib/IlmThread-2_1.lib")
+else ()
+set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)
+set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIex-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmImf-2_1.dylib
+ /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
+endif ()
+include_directories (${OpenEXR_INCLUDE_DIR})
+message (" openexr " ${OpenEXR_Library})
+
+
 SET (GPDF_HEADER cactus.h)
 
 SET (GPDF_SOURCE ../shared/Base3DView.cpp
@@ -250,3 +271,4 @@ add_subdirectory(tetf)
 add_subdirectory(abg)
 add_subdirectory(tkm)
 add_subdirectory(ttri)
+add_subdirectory(exrs)
