@@ -57,6 +57,8 @@
 #define kNoiseOriginYFlagLong "-noiseOriginY"
 #define kNoiseOriginZFlag "-noz"
 #define kNoiseOriginZFlagLong "-noiseOriginZ"
+#define kImageSamplerFlag "-msp"
+#define kImageSamplerFlagLong "-imageSampler"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -271,6 +273,13 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		if (argData.getFlagArgument(kNoiseOriginZFlag, 0, noz) )
 			fContext->setNoiseOriginZ(noz);
 	}
+	
+	if (argData.isFlagSet(kImageSamplerFlag)) {
+		MString imageName;
+		if (argData.getFlagArgument(kImageSamplerFlag, 0, imageName) ) {
+			fContext->setImageSamplerName(imageName);
+		}
+	}
 
 	return MS::kSuccess;
 }
@@ -348,8 +357,13 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	if (argData.isFlagSet(kNoiseOriginYFlag))
 		setResult(fContext->noiseOriginY() );
 		
-	if (argData.isFlagSet(kNoiseOriginZFlag))
+	if (argData.isFlagSet(kNoiseOriginZFlag)) {
 		setResult(fContext->noiseOriginZ() );
+	}
+	
+	if (argData.isFlagSet(kImageSamplerFlag)) {
+		setResult(fContext->imageSamplerName() );
+	}
 	
 	return MS::kSuccess;
 }
@@ -509,6 +523,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kNoiseOriginZFlag, kNoiseOriginZFlagLong, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add noise origin z arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kImageSamplerFlag, kImageSamplerFlagLong, MSyntax::kString);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise image sampler arg");
 		return MS::kFailure;
 	}
 	

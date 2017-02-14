@@ -47,8 +47,9 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	}
 	
     EbpGrid ebpSampler;
-	if(!sampleGround(&ebpSampler, option))
+	if(!sampleGround(&ebpSampler, option)) {
 		return false;
+	}
 		
 	const Vector3F * psamp = ebpSampler.positions();
 	const float freq = option.m_noiseFrequency / (gridSize() + 1e-3f);
@@ -60,7 +61,10 @@ bool ModifyForest::growOnGround(GrowOption & option)
 	Vector3F pog;
 	CollisionContext collctx;
 	collctx._minIndex = -1;
+	
+	const bool doSampleTex = option.hasSampler();
 	Float2 sampleTexCoord;
+	float texCol[3];
 	
 	try {
 	for(int i=0;i<ebpSampler.numParticles();++i) {
@@ -72,7 +76,14 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		}
 		
 		setBind(&bind);
-		getBindTexcoord(sampleTexCoord);
+		
+		if(doSampleTex) {
+			getBindTexcoord(sampleTexCoord);
+			option.sampleRed(texCol, sampleTexCoord.x, sampleTexCoord.y);
+			if(RandomF01() > texCol[0]) {
+				continue;
+			}
+		}
 	
 		if(option.m_noiseLevel > 1e-3f) {
 			if(ANoise3::FractalF((const float *)&pog,

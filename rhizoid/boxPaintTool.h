@@ -128,6 +128,8 @@ public:
 	void setNoiseOriginX(float x);
 	void setNoiseOriginY(float x);
 	void setNoiseOriginZ(float x);
+	void setImageSamplerName(MString filename);
+	MString imageSamplerName() const;
 	
 private:
 	void resize(bool isBundled);

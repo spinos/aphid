@@ -6,11 +6,10 @@
 #include <maya/MFnParticleSystem.h>
 #include <AHelper.h>
 #include <ASearchHelper.h>
-
-const char helpString[] =
-			"Select a proxy viz to paint on";
-            
+           
 using namespace aphid;
+
+const char helpString[] = "Select a proxy viz to paint on";
 
 ProxyViz * proxyPaintContext::PtrViz = NULL;
 
@@ -363,16 +362,18 @@ unsigned proxyPaintContext::getOperation() const
 
 void proxyPaintContext::setBrushRadius(float val)
 {
-    if(PtrViz)
+    if(PtrViz) {
         PtrViz->setSelectionRadius(val);
+	}
         
 	MToolsInfo::setDirtyFlag(*this);
 }
 
 float proxyPaintContext::getBrushRadius() const
 {
-    if(PtrViz)
+    if(PtrViz) {
         return PtrViz->selectionRadius();
+	}
         
 	return 8.f;
 }
@@ -423,10 +424,11 @@ float proxyPaintContext::getBrushWeight() const
 
 void proxyPaintContext::setGrowAlongNormal(unsigned val)
 {
-	if(val == 1) 
+	if(val == 1) {
 		MGlobal::displayInfo("proxyPaint enable grow along face normal");
-	else
+	} else {
 		MGlobal::displayInfo("proxyPaint disable grow along face normal");
+	}
 	m_growOpt.m_alongNormal = val;
 /// reset up anyway
 	m_growOpt.m_upDirection = Vector3F::YAxis;
@@ -1061,5 +1063,30 @@ Ray proxyPaintContext::getIncidentAt(int x, int y)
 	Vector3F a(fromNear.x, fromNear.y, fromNear.z);
 	Vector3F b(fromFar.x, fromFar.y, fromFar.z);
 	return Ray(a, b);
+}
+
+void proxyPaintContext::setImageSamplerName(MString filename)
+{
+	if(filename.length() < 5) {
+		MGlobal::displayInfo("proxyPaintContext remove image sampler");
+		m_growOpt.closeImage();
+		
+	} else {
+		bool stat = m_growOpt.openImage(filename.asChar() );
+		if(stat) {
+			AHelper::Info<MString>("proxyPaintContext opened image sampler", filename);
+		} else {
+			AHelper::Info<MString>("proxyPaintContext cannot open image", filename);
+		}
+	}
+	MToolsInfo::setDirtyFlag(*this);
+}
+
+MString proxyPaintContext::imageSamplerName() const
+{
+	if(!m_growOpt.hasSampler() ) {
+		return MString("unknown");
+	}
+	return MString(m_growOpt.imageName().c_str() );
 }
 //:~

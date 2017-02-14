@@ -46,7 +46,11 @@ public:
 	
 	void setStrokeMagnitude(const float & x);
 	bool openImage(const std::string & fileName);
+	void closeImage();
 	bool hasSampler() const;
+	std::string imageName() const;
+	void sampleRed(float * col, const float & u,
+					const float & v) const;
 	
 };
 

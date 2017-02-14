@@ -58,8 +58,18 @@ bool GrowOption::openImage(const std::string & fileName)
 		m_sampler = new ExrImage;
 	}
 	
-	return m_sampler->read(fileName);
+	bool stat = m_sampler->read(fileName);
+	m_sampler->verbose();
 	
+	return stat;
+}
+
+void GrowOption::closeImage()
+{
+	if(m_sampler) {
+		delete m_sampler;
+		m_sampler = NULL;
+	}
 }
 
 bool GrowOption::hasSampler() const
@@ -70,5 +80,12 @@ bool GrowOption::hasSampler() const
 	return m_sampler->isValid();
 	
 }
+
+std::string GrowOption::imageName() const
+{ return m_sampler->fileName(); }
+
+void GrowOption::sampleRed(float * col, const float & u,
+					const float & v) const
+{ m_sampler->sample(u, v, 1, col); }
 		
 }
