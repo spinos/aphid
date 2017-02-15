@@ -55,10 +55,10 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .79f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .99f;
     
     m_grid = new GridTyp;
-    m_grid->fillBox(m_tree->getBBox(), sz0 );
+    m_grid->fillBox(gridBox, sz0 );
     m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
     m_grid->build();
     
@@ -74,11 +74,14 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_tree);
     
     Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
-    float offset = m_grid->levelCellSize(6);
+	CalcDistanceProfile prof;
+	prof.referencePoint = rgp;
+	prof.direction = rgn;
+	prof.offset = m_grid->levelCellSize(6);
     
     FieldTyp * fld = m_mesher->field();
     
-    fld->calculateDistance<FClosestTyp>(m_tetg, &clseng, rgp, rgn, offset);
+    fld->calculateDistance<FClosestTyp>(m_tetg, &clseng, prof);
     
     m_mesher->triangulate();
     

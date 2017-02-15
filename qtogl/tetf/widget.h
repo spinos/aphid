@@ -13,6 +13,16 @@ namespace cvx {
 class Triangle;
 }
 
+namespace sdb {
+
+class LodCell;
+class LodGrid;
+
+template<typename T1, typename T2>
+class GridSelection;
+
+}
+
 template<typename T1, typename T2, typename T3>
 class PrimInd;
 
@@ -91,7 +101,13 @@ typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawer
 typedef aphid::PrimInd<aphid::sdb::Sequence<int>, std::vector<aphid::cvx::Triangle * >, aphid::cvx::Triangle > TIntersect;
 	
     aphid::ATriangleMesh * m_frontMesh;
-            
+
+typedef aphid::sdb::LodGrid LodGridTyp; 
+	LodGridTyp * m_lodg;
+
+typedef aphid::sdb::GridSelection<LodGridTyp, aphid::sdb::LodCell> SelGridTyp;
+	SelGridTyp * m_selGrd;
+	
 };
 
 #endif

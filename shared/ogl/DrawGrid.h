@@ -25,6 +25,7 @@ public:
 	
 	void drawCells();
 	void drawLevelCells(int level);
+	void drawCell(const sdb::Coord4 & k);
 	
 };
 
@@ -61,6 +62,14 @@ void DrawGrid<T>::drawLevelCells(int level)
 		}
 		m_grid->next();
 	}
+}
+
+template<typename T>
+void DrawGrid<T>::drawCell(const sdb::Coord4 & k)
+{ 
+	BoundingBox b;
+	m_grid->getCellBBox(b, k );
+	drawBoundingBox(&b);
 }
 
 }

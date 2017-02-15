@@ -56,6 +56,8 @@ class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
 typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 
+	int m_finestNodeLevel;
+	
 public:
 	LodGrid();
 	virtual ~LodGrid();
@@ -166,7 +168,7 @@ public:
 				<<"\n n samples "<<c
 				<<"\n cost time "<<t3;
 		std::cout.flush();
-		
+		m_finestNodeLevel = level;
 	}
 	
 	void aggregateAtLevel(int level);
