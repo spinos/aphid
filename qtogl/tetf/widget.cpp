@@ -9,6 +9,8 @@
 #include <ttg/TetraGridTriangulation.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
+#include <sdb/LodGrid.h>
+#include <sdb/GridClosestToPoint.h>
 
 using namespace aphid;
 
@@ -42,17 +44,6 @@ void GLWidget::clientInit()
 		
     TetrahedronGridUtil<5 > tu4;
 	m_grd = new GridT(tetra, 0);
-    
-#if 0
-    TFTNode anode;
-    const int nn = m_grd->numPoints();
-    std::cout << "\n n node " << nn;
-    for(int i=0;i<nn;++i) {
-        anode._distance = m_grd->pos(i).y  + 1.4f * sin(m_grd->pos(i).x * .2f + 1.f)
-                                        - cos(m_grd->pos(i).z  * .3f - 2.f) ;
-        m_grd->setValue(anode, i);
-    }
-#endif
     
     m_mesher = new MesherT;
     m_mesher->setGrid(m_grd);
@@ -96,12 +87,35 @@ static const float scCorners[6][3] = {
     m_sels.insert(5);
     
     TIntersect fintersect(&m_sels, &m_ground);
+	
+	BoundingBox rootBx;
+	rootBx.expandBy(ta->calculateBBox() );
+	rootBx.expandBy(tb->calculateBBox() );
+	rootBx.expandBy(tc->calculateBBox() );
+	rootBx.expandBy(td->calculateBBox() );
+	rootBx.expandBy(te->calculateBBox() );
+	rootBx.expandBy(tf->calculateBBox() );
+	
+	float sz0 = rootBx.getLongestDistance();
+	
+	m_lodg = new LodGridTyp;
+	m_lodg->fillBox(rootBx, sz0);
+	m_lodg->subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	m_lodg->insertNodeAtLevel<TIntersect, 3 >(3, fintersect);
+	
+	m_selGrd = new SelGridTyp(m_lodg);
+	m_selGrd->setMaxSelectLevel(3);
     
     Vector3F agp, agn;
     fintersect.getAggregatedPositionNormal(agp, agn);
         
-    m_mesher->field()->calculateDistance<TIntersect>(m_grd, &fintersect, agp, agn, 1.f);
-    //m_field->updateGrid(m_grd);
+	CalcDistanceProfile prof;
+	prof.referencePoint = agp;
+	prof.direction = agn;
+	prof.offset = 1.f;
+	
+    //m_mesher->field()->calculateDistance<TIntersect>(m_grd, &fintersect, prof);
+    m_mesher->field()->calculateDistance<SelGridTyp>(m_grd, m_selGrd, prof);
     
     m_mesher->triangulate();
     
@@ -109,6 +123,9 @@ static const float scCorners[6][3] = {
     m_mesher->dumpFrontTriangleMesh(m_frontMesh);
     m_frontMesh->calculateVertexNormals();
     
+	const BoundingBox bxc = te->calculateBBox();
+	m_selGrd->select(bxc );
+	
 }
 
 void GLWidget::clientDraw()
@@ -191,6 +208,15 @@ void GLWidget::drawGround()
         m_sels.next();
     }
     glEnd();
+	DrawGrid<LodGridTyp> drg(m_lodg);
+	drg.drawLevelCells(3);
+	
+	glColor3f(1,1,0);
+	const int nc = m_selGrd->numActiveCells();
+	for(int i=0;i<nc;++i) {
+		const sdb::Coord4 & k = m_selGrd->activeCellCoord(i);
+		drg.drawCell(k);
+	}
 }
 
 void GLWidget::drawGridEdges()

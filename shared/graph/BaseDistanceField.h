@@ -45,6 +45,12 @@ struct IDistanceEdge {
 	float cx; /// x [0,1] where front cross
 };
 
+struct CalcDistanceProfile {
+	Vector3F referencePoint;
+	float offset;
+	Vector3F direction;
+};
+
 class BaseDistanceField : public AGraph<DistanceNode, IDistanceEdge > {
 
 public:

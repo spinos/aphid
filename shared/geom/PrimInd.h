@@ -33,6 +33,11 @@ public:
     bool tetrahedronIntersect(const cvx::Tetrahedron & tet);
     bool closestToPoint(const Vector3F & origin,
                         const float & maxDistance = 1e8f);
+	bool select(const Vector3F & center,
+				const float & radius);
+	bool select(const BoundingBox & bx);
+	bool selectedClosestToPoint(const Vector3F & origin,
+                        const float & maxDistance = 1e8f);
     Plane closestPlane() const;
     
     const Vector3F & rayIntersectPoint() const;
@@ -144,6 +149,22 @@ bool PrimInd<Tind, Tsrc, Tprim>::closestToPoint(const Vector3F & origin,
 	}
     return m_closestPointTest._hasResult;
     
+}
+
+template<typename Tind, typename Tsrc, typename Tprim>
+bool PrimInd<Tind, Tsrc, Tprim>::select(const BoundingBox & bx)
+{ return true; }
+
+template<typename Tind, typename Tsrc, typename Tprim>
+bool PrimInd<Tind, Tsrc, Tprim>::select(const Vector3F & center,
+				const float & radius)
+{ return true; }
+
+template<typename Tind, typename Tsrc, typename Tprim>
+bool PrimInd<Tind, Tsrc, Tprim>::selectedClosestToPoint(const Vector3F & origin,
+                        const float & maxDistance)
+{
+	return closestToPoint(origin, maxDistance);
 }
 
 template<typename Tind, typename Tsrc, typename Tprim>

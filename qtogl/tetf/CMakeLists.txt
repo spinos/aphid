@@ -27,3 +27,7 @@ target_link_libraries (tetf ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (tetf ${Boost_THREAD_LIBRARY})
 target_link_libraries (tetf ${Boost_CHRONO_LIBRARY})
 ENDIF ()
+
+target_link_libraries (tetf ${BLAS_LIBRARY})
+target_link_libraries (tetf ${LAPACK_LIBRARY})
+target_link_libraries (tetf ${F2C_LIBRARY})

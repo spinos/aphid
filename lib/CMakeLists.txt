@@ -373,9 +373,13 @@ add_library(aphid ${LIB_TYP}
 ##../shared/UniformGrid.cpp
 )
 
+file (GLOB img_SRC
+    "../shared/img/*.h"
+    "../shared/img/*.cpp"
+)
+
 add_library(aphidImg ${LIB_TYP}
-../shared/BaseImage.cpp
-../shared/ExrImage.cpp
+${img_SRC}
 )
 
 find_package (CUDA QUIET)

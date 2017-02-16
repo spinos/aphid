@@ -35,9 +35,7 @@ public:
     
     template<typename Tf>
     void calculateDistance(T * grid, Tf * intersectF,
-                            const Vector3F & refPoint,
-                            const Vector3F & refDirection,
-                            const float & offset) 
+							CalcDistanceProfile & profile) 
     {
 		std::cout<<"\n TetrahedronDistanceField::calculateDistance";
 		std::cout.flush();
@@ -60,7 +58,7 @@ public:
 			
 /// approximate as node distance to plane
             TetraDistance cutDist(atet);
-            cutDist.compute(intersectF, trad * 2.f, offset);
+            cutDist.compute(intersectF, trad * 1.7f, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = cutDist.result();
@@ -106,7 +104,7 @@ public:
 /// propagate distance to all nodes        
         fastMarchingMethod();
         
-        int iFar = nodeFarthestFrom(refPoint, refDirection);
+        int iFar = nodeFarthestFrom(profile.referencePoint, profile.direction);
 /// visit out nodes
         marchOutside(iFar);
 /// unvisited nodes are inside

@@ -48,14 +48,42 @@ public:
 	void countNodesInCell(int & it);
 	void dumpNodesInCell(LodNode * dst);
 	
+	template<typename T>
+	void closestToPoint(T * result);
+	
 private:
 
 };
+
+template<typename T>
+void LodCell::closestToPoint(T * result)
+{
+	begin();
+	while(!end() ) {
+		LodNode * nd = value();
+		float d = nd->pos.distanceTo(result->_toPoint);
+		if(d < result->_distance) {
+			result->_distance = d;
+			result->_hasResult = true;
+			result->_hitPoint = nd->pos;
+			result->_hitNormal = nd->nml;
+		}
+		
+		if(result->closeEnough() ) {
+			return;
+		}
+		
+		next();
+	}
+}
+
 
 class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
 typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 
+	int m_finestNodeLevel;
+	
 public:
 	LodGrid();
 	virtual ~LodGrid();
@@ -166,7 +194,7 @@ public:
 				<<"\n n samples "<<c
 				<<"\n cost time "<<t3;
 		std::cout.flush();
-		
+		m_finestNodeLevel = level;
 	}
 	
 	void aggregateAtLevel(int level);
