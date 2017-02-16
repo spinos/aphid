@@ -58,7 +58,7 @@ public:
 			
 /// approximate as node distance to plane
             TetraDistance cutDist(atet);
-            cutDist.compute(intersectF, trad * 2.f, profile.offset);
+            cutDist.compute(intersectF, trad * 1.7f, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = cutDist.result();

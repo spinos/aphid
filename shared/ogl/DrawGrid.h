@@ -12,6 +12,7 @@
 #define APH_OGL_DRAW_GRID_H
 
 #include <ogl/DrawBox.h>
+#include <sdb/Types.h>
 
 namespace aphid {
 

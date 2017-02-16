@@ -17,9 +17,10 @@ namespace sdb {
 
 class LodCell;
 class LodGrid;
+class LodNode;
 
-template<typename T1, typename T2>
-class GridSelection;
+template<typename T1, typename T2, typename T3>
+class GridClosestToPoint;
 
 }
 
@@ -105,7 +106,7 @@ typedef aphid::PrimInd<aphid::sdb::Sequence<int>, std::vector<aphid::cvx::Triang
 typedef aphid::sdb::LodGrid LodGridTyp; 
 	LodGridTyp * m_lodg;
 
-typedef aphid::sdb::GridSelection<LodGridTyp, aphid::sdb::LodCell> SelGridTyp;
+typedef aphid::sdb::GridClosestToPoint<LodGridTyp, aphid::sdb::LodCell, aphid::sdb::LodNode > SelGridTyp;
 	SelGridTyp * m_selGrd;
 	
 };

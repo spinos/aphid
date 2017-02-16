@@ -36,7 +36,8 @@ public:
                 const float & offset)
     {
         for(int i=0;i<4;++i) {
-            if(!intersectF->selectedClosestToPoint(m_p[i], maxDistance) ) {
+			m_valid[i] = false;
+			if(!intersectF->selectedClosestToPoint(m_p[i], maxDistance) ) {
                 continue;
             }
 

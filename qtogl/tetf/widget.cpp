@@ -10,7 +10,7 @@
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <sdb/LodGrid.h>
-#include <sdb/GridSelection.h>
+#include <sdb/GridClosestToPoint.h>
 
 using namespace aphid;
 
@@ -102,6 +102,9 @@ static const float scCorners[6][3] = {
 	m_lodg->fillBox(rootBx, sz0);
 	m_lodg->subdivideToLevel<TIntersect>(fintersect, 0, 3);
 	m_lodg->insertNodeAtLevel<TIntersect, 3 >(3, fintersect);
+	
+	m_selGrd = new SelGridTyp(m_lodg);
+	m_selGrd->setMaxSelectLevel(3);
     
     Vector3F agp, agn;
     fintersect.getAggregatedPositionNormal(agp, agn);
@@ -111,7 +114,8 @@ static const float scCorners[6][3] = {
 	prof.direction = agn;
 	prof.offset = 1.f;
 	
-    m_mesher->field()->calculateDistance<TIntersect>(m_grd, &fintersect, prof);
+    //m_mesher->field()->calculateDistance<TIntersect>(m_grd, &fintersect, prof);
+    m_mesher->field()->calculateDistance<SelGridTyp>(m_grd, m_selGrd, prof);
     
     m_mesher->triangulate();
     
@@ -119,9 +123,6 @@ static const float scCorners[6][3] = {
     m_mesher->dumpFrontTriangleMesh(m_frontMesh);
     m_frontMesh->calculateVertexNormals();
     
-	m_selGrd = new SelGridTyp(m_lodg);
-	m_selGrd->setMaxSelectLevel(3);
-	
 	const BoundingBox bxc = te->calculateBBox();
 	m_selGrd->select(bxc );
 	
