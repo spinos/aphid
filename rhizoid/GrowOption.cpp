@@ -8,7 +8,7 @@
  */
 
 #include "GrowOption.h"
-#include <ExrImage.h>
+#include <img/ExrImage.h>
 
 namespace aphid {
 

@@ -4,7 +4,7 @@
 #include <maya/MEulerRotation.h>
 #include <maya/MFnTransform.h>
 #include <maya/MFnPluginData.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <ExampData.h>
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>

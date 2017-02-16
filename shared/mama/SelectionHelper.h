@@ -6,7 +6,7 @@
  *  Copyright 2011 __MyCompanyName__. All rights reserved.
  *
  */
-#include <AHelper.h>
+#include <mama/AHelper.h>
 class MString;
 class MSelectionList;
 #include <string>

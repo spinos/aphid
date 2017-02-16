@@ -11,8 +11,8 @@
 #include <maya/MSelectionList.h>
 #include <maya/MItMeshVertex.h>
 #include <maya/MDagModifier.h>
-#include <AHelper.h>
-#include <ASearchHelper.h>
+#include <mama/AHelper.h>
+#include <mama/ASearchHelper.h>
 #include <mama/MeshHelper.h>
 #include <mama/ConnectionHelper.h>
 #include <mama/SelectionHelper.h>

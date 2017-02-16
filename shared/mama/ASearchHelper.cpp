@@ -7,6 +7,9 @@
  *
  */
 #include <maya/MFnSet.h>
+#include <maya/MGlobal.h>
+#include <maya/MSelectionList.h>
+#include <maya/MItSelectionList.h>
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
 #include <maya/MFnDagNode.h>
@@ -16,12 +19,9 @@
 #include <maya/MMatrix.h>
 #include <maya/MFnTransform.h>
 #include <maya/MFnMesh.h>
-#include <maya/MSelectionList.h>
-#include <maya/MItSelectionList.h>
-#include <maya/MGlobal.h>
 #include "ASearchHelper.h"
 #include <foundation/SHelper.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>

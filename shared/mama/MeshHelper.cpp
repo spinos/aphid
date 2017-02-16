@@ -11,10 +11,12 @@
 #include <maya/MFnMesh.h>
 #include <maya/MItMeshPolygon.h>
 #include <maya/MItMeshVertex.h>
-#include <AHelper.h>
-#include <ASearchHelper.h>
+#include <mama/AHelper.h>
+#include <mama/ASearchHelper.h>
 #include <geom/ConvexShape.h>
 #include <geom/ATriangleMesh.h>
+#include <sdb/VectorArray.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 
@@ -173,6 +175,65 @@ void MeshHelper::UpdateMeshTriangleUVs(ATriangleMesh * trimesh,
 		}
 	}
 	
+}
+
+void MeshHelper::GetMeshTriangles(sdb::VectorArray<cvx::Triangle> & tris,
+								BoundingBox & bbox,
+								const MDagPath & meshPath,
+								const MDagPath & tansformPath)
+{
+	AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
+	
+	MMatrix worldTm = AHelper::GetWorldParentTransformMatrix2(meshPath, tansformPath);
+	
+    MStatus stat;
+	
+    MIntArray vertices;
+    int i, j, nv;
+	MPoint dp[3];
+	aphid::Vector3F fp[3];
+	MItMeshPolygon faceIt(meshPath);
+    for(; !faceIt.isDone(); faceIt.next() ) {
+
+		faceIt.getVertices(vertices);
+        nv = vertices.length();
+        
+        for(i=1; i<nv-1; ++i ) {
+			dp[0] = faceIt.point(0, MSpace::kObject );
+			dp[1] = faceIt.point(i, MSpace::kObject );
+			dp[2] = faceIt.point(i+1, MSpace::kObject );
+			
+			dp[0] *= worldTm;
+			dp[1] *= worldTm;	
+			dp[2] *= worldTm;
+			
+			aphid::cvx::Triangle tri;
+			for(j=0; j<3; ++j) {
+				fp[j].set(dp[j].x, dp[j].y, dp[j].z);
+				tri.setP(fp[j], j);
+				bbox.expandBy(fp[j], 1e-4f);
+			}
+			
+			tris.insert(tri);
+        }
+    }
+}
+
+void MeshHelper::GetMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
+								BoundingBox & bbox,
+							const MDagPath & groupPath)
+{
+    MDagPathArray meshPaths;
+	ASearchHelper::LsAllTypedPaths(meshPaths, groupPath, MFn::kMesh);
+	const int n = meshPaths.length();
+	if(n < 1) {
+		AHelper::Info<MString>("find no mesh in group", groupPath.fullPathName() );
+		return;
+	}
+	
+	for(int i=0;i<n;++i) {
+	    GetMeshTriangles(tris, bbox, meshPaths[i], groupPath );
+	}
 }
 
 }

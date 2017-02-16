@@ -10,7 +10,7 @@
 #include <maya/MPointArray.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MFnPluginData.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <ExampVox.h>
 #include <ExampData.h>
 #include <mama/AttributeHelper.h>

@@ -8,7 +8,7 @@
  */
 
 #include "ConnectionHelper.h"
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <maya/MDGModifier.h>
 #include <maya/MPlugArray.h>
 

@@ -16,7 +16,7 @@
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnMatrixAttribute.h>
 #include <math/BoundingBox.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <ExampData.h>
 #include <math/linearMath.h>
 #include <mama/MeshHelper.h>

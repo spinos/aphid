@@ -32,7 +32,7 @@
 #include "proxyVizNode.h"
 #include <mama/ConnectionHelper.h>
 #include <maya/MFnDagNode.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 
 using namespace aphid; 
 

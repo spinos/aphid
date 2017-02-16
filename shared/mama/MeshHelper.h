@@ -16,6 +16,17 @@ class MVectorArray;
 class MObject;
 
 namespace aphid {
+    
+class BoundingBox;
+
+namespace cvx {
+class Triangle;   
+}
+
+namespace sdb {
+template <typename T>
+class VectorArray;   
+}
 
 class ATriangleMesh;
 
@@ -44,6 +55,14 @@ public:
 	static void UpdateMeshTriangleUVs(ATriangleMesh * trimesh,
 						const MObject & meshNode);
 
+	static void GetMeshTriangles(sdb::VectorArray<cvx::Triangle> & tris,
+								BoundingBox & bbox,
+								const MDagPath & meshPath,
+								const MDagPath & tansformPath);
+	static void GetMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
+								BoundingBox & bbox,
+							const MDagPath & groupPath);
+	
 };
 
 };

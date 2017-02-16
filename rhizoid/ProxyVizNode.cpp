@@ -11,7 +11,7 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MFnCamera.h>
 #include <EnvVar.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <mama/AttributeHelper.h>
 #include <ExampVox.h>
 

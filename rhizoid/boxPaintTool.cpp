@@ -4,8 +4,8 @@
 #include <maya/MDagModifier.h>
 #include <maya/MToolsInfo.h>
 #include <maya/MFnParticleSystem.h>
-#include <AHelper.h>
-#include <ASearchHelper.h>
+#include <mama/AHelper.h>
+#include <mama/ASearchHelper.h>
            
 using namespace aphid;
 

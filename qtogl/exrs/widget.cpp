@@ -11,7 +11,7 @@
 #include <ogl/DrawDop.h>
 #include <ogl/DrawArrow.h>
 #include <math/miscfuncs.h>
-#include <ExrImage.h>
+#include <img/ExrImage.h>
 
 using namespace aphid;
 
