@@ -20,6 +20,8 @@
 #include <kd/IntersectEngine.h>
 #include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawGraph.h>
+#include <sdb/WorldGrid2.h>
+#include <sdb/LodGrid.h>
 #include "../cactus.h"
 
 using namespace aphid;
@@ -55,7 +57,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .99f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .87f;
     
     m_grid = new GridTyp;
     m_grid->fillBox(gridBox, sz0 );
@@ -91,6 +93,30 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     
     m_fieldDrawer = new FieldDrawerT;
     
+	m_sampg = new SampGridTyp;
+	m_sampg->setGridSize(sz0);
+	
+	BoundingBox cb; 
+	Vector3F cbcen;
+	m_grid->begin();
+	while(!m_grid->end() ) {
+		
+		const sdb::Coord4 & k = m_grid->key();
+		if(k.w > 0) {
+			break;
+		}
+		
+		m_grid->getCellBBox(cb, k);
+		cbcen = m_grid->cellCenter(k);
+		
+		sdb::LodGrid * cell = m_sampg->insertCell((const float *)&cbcen );
+		cell->resetBox(cb, sz0);
+		cell->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
+		cell->insertNodeAtLevel<FClosestTyp, 4 >(4, clseng);
+	
+		m_grid->next();
+	}
+	
 }
 
 GLWidget::~GLWidget()
@@ -119,6 +145,7 @@ void GLWidget::clientDraw()
 	glEnd();
     
     //draw3LevelGrid(4);
+	drawSampleGrid();
     
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(.05f, .5f, .15f);
@@ -194,6 +221,21 @@ void GLWidget::drawTetraMesh()
     }
     glEnd();
     
+}
+
+void GLWidget::drawSampleGrid()
+{
+	getDrawer()->setColor(.15f, .15f, .15f);
+    
+	m_sampg->begin();
+	while(!m_sampg->end() ) {
+	
+		DrawGrid<sdb::LodGrid> dgd(m_sampg->value() );
+		dgd.drawLevelCells(4);
+		
+		m_sampg->next();
+	}
+	
 }
 
 void GLWidget::draw3LevelGrid(int level)

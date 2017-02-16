@@ -54,11 +54,21 @@ void LodCell::dumpNodesInCell(LodNode * dst)
 	}
 }
 
-LodGrid::LodGrid()
+LodGrid::LodGrid(Entity * parent) : TParent(parent)
 {}
 
 LodGrid::~LodGrid()
 {}
+
+void LodGrid::resetBox(const BoundingBox & b,
+				const float & h)
+{
+	clear();
+	setLevel0CellSize(h);
+	const Coord4 lc = cellCoordAtLevel(b.center(), 0);
+	addCell(lc);
+	calculateBBox();
+}
 
 void LodGrid::fillBox(const BoundingBox & b,
 				const float & h)
@@ -206,7 +216,7 @@ void LodGrid::processKmean(int & n,
 		k = n - 1 - n / 3;
 	}
 	if(n > 24) {
-		k = n / 2;
+		k = n - 1 - n / 2;
 	}
 	
 /// position and normal

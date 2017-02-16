@@ -17,6 +17,14 @@ namespace sdb {
 template<typename T>
 class VectorArray;
 
+template<typename T>
+class WorldGrid2;
+
+template<typename T, typename Tv>
+class Array;
+
+class LodGrid;
+
 }
 
 template<int I>
@@ -77,6 +85,7 @@ public slots:
 private:
     void drawTetraMesh();
     void draw3LevelGrid(int level);
+	void drawSampleGrid();
     void drawField();
     void drawTriangulation();
     
@@ -102,6 +111,9 @@ typedef aphid::TetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
     MesherT * m_mesher;
     
     aphid::ATriangleMesh * m_frontMesh;
+	
+typedef aphid::sdb::WorldGrid2<aphid::sdb::LodGrid > SampGridTyp;
+	SampGridTyp * m_sampg;
             
 };
 

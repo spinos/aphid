@@ -85,10 +85,12 @@ typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 	int m_finestNodeLevel;
 	
 public:
-	LodGrid();
+	LodGrid(Entity * parent = NULL);
 	virtual ~LodGrid();
 	
 /// reset level0 cell size and bound
+	void resetBox(const BoundingBox & b,
+				const float & h);
 	void fillBox(const BoundingBox & b,
 				const float & h);
 		
@@ -114,6 +116,10 @@ public:
 				next();
 			}
 			
+			if(dirty.size() < 1) {
+				break;
+			}
+			
 			std::cout<<"\n level"<<level;
 			
 			std::vector<Coord4>::const_iterator it = dirty.begin();
@@ -124,7 +130,8 @@ public:
 		}
 		storeCellNeighbors();
 		
-		std::cout<<"\n done";
+		const int nlc = numCellsAtLevel(maxLevel);
+		std::cout<<"\n level"<<maxLevel<<" n cell "<<nlc;
 		std::cout.flush();
 		
 	}

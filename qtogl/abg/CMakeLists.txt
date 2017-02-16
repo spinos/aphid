@@ -29,3 +29,7 @@ target_link_libraries (abg ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (abg ${Boost_THREAD_LIBRARY})
 target_link_libraries (abg ${Boost_CHRONO_LIBRARY})
 ENDIF ()
+
+target_link_libraries (abg ${BLAS_LIBRARY})
+target_link_libraries (abg ${LAPACK_LIBRARY})
+target_link_libraries (abg ${F2C_LIBRARY})
