@@ -12,7 +12,8 @@
 #include <math/ANoise3.h>
 #include <sdb/ebp.h>
 #include "ExampVox.h"
-#include <ForestCell.h>
+#include "ForestGrid.h"
+#include "ForestCell.h"
 #include <geom/PrimInd.h>
 #include <ctime>
 #include "GrowOption.h"
@@ -1027,8 +1028,9 @@ typedef PrimInd<sdb::Sequence<int>, sdb::VectorArray<cvx::Triangle >, cvx::Trian
 	sampler->cachePositions();
 	std::cout<<"\n flood box    "<<sampler->boundingBox();
 	
-	for(int i=0;i<20;++i)
+	for(int i=0;i<20;++i) {
 		sampler->update();
+	}
 	
 	std::cout<<"\n num sample "<<sampler->numParticles();
 	std::cout.flush();

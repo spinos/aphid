@@ -61,6 +61,7 @@ MObject ProxyViz::adrawDopSizeZ;
 MObject ProxyViz::adrawDopSize;
 MObject ProxyViz::aininstspace;
 MObject ProxyViz::ashogrid;
+MObject ProxyViz::ashosamp;
 MObject ProxyViz::outValue1;
 MObject ProxyViz::outValue2;
 
@@ -247,6 +248,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
     
     MPlug shogridPlug(thisNode, ashogrid);
 	const bool showGrid = shogridPlug.asBool();
+	
+	MPlug shoSamplePlug(thisNode, ashosamp);
+	const bool showSample = shoSamplePlug.asBool();
 
 	_viewport = view;
 	fHasView = 1;
@@ -277,6 +281,10 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	if(showGrid) {
 	    drawGrid();
+	}
+	
+	if(showSample) {
+		drawSample();
 	}
 
 	bool hasGlsl = isGlslReady();
@@ -668,6 +676,12 @@ MStatus ProxyViz::initialize()
 	numFn.setKeyable(true);
 	numFn.setStorable(false);
 	addAttribute(ashogrid);
+	
+	ashosamp = numFn.create( "showSample", "shsp", MFnNumericData::kBoolean );
+	numFn.setDefault(0);
+	numFn.setKeyable(true);
+	numFn.setStorable(false);
+	addAttribute(ashosamp);
     
 	attributeAffects(agroundMesh, outValue);
 	attributeAffects(agroundSpace, outValue);

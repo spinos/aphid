@@ -15,14 +15,16 @@
 
 #include "Forest.h"
 #include "ForestCell.h"
+#include "ForestGrid.h"
 #include "ExampVox.h"
 #include <geom/ATriangleMesh.h>
+#include <kd/ClosestToPointEngine.h>
 
 namespace aphid {
 
 Forest::Forest() 
 {    
-	m_grid = new sdb::WorldGrid<ForestCell, Plant >();
+	m_grid = new ForestGrid;
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
 	m_selectCtx = new SphereSelectionContext;
@@ -164,13 +166,16 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 		return false;
 	}
 	
-	std::cout<<"\n Forest::selectGroundFaces "<<m_intersectCtx.m_hitP;
-	
 	m_selectCtx->reset(m_intersectCtx.m_hitP, m_activePlants->radius(),
 		mode);
 
 	KdEngine engine;
 	engine.select<cvx::Triangle, KdNode4>(m_ground, m_selectCtx);
+	
+	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_ground);
+	
+	m_grid->addCells<FClosestTyp>(&clseng, m_intersectCtx.m_hitP, m_activePlants->radius() );
 	return true;
 }
 
@@ -266,7 +271,7 @@ bool Forest::testNeighborsInCell(CollisionContext * ctx,
 const float & Forest::plantSize(const int & idx)
 { return m_examples[idx]->geomSize(); }
 
-sdb::WorldGrid<ForestCell, Plant > * Forest::grid()
+ForestGrid * Forest::grid()
 { return m_grid; }
 
 const int & Forest::numActivePlants() const

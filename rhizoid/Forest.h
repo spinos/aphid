@@ -17,13 +17,14 @@
 namespace aphid {
 
 class ForestCell;
+class ForestGrid;
 class ExampVox;
 class ATriangleMesh;
 struct Float2;
 
 class Forest {
 
-	sdb::WorldGrid<ForestCell, Plant > * m_grid;
+	ForestGrid * m_grid;
 	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
     std::vector<ATriangleMesh *> m_grounds;
@@ -66,7 +67,7 @@ protected:
 	unsigned numGroundMeshes() const;
     unsigned numPlants() const;
 	const BoundingBox & gridBoundingBox() const;
-	sdb::WorldGrid<ForestCell, Plant > * grid();
+	ForestGrid * grid();
 	PlantSelection * selection();
 	PlantSelection::SelectionTyp * activePlants();
 	KdNTree<cvx::Triangle, KdNode4 > * ground();

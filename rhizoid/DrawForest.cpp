@@ -11,11 +11,13 @@
 #include <gl_heads.h>
 #include <ExampVox.h>
 #include <geom/ATriangleMesh.h>
-#include <ForestCell.h>
+#include "ForestCell.h"
+#include "ForestGrid.h"
 #include <ogl/GlslInstancer.h>
 #include <ogl/RotationHandle.h>
 #include <ogl/TranslationHandle.h>
 #include <ogl/ScalingHandle.h>
+#include <ogl/DrawSample.h>
 #include "GrowOption.h"
 
 namespace aphid {
@@ -334,10 +336,11 @@ void DrawForest::drawGrid()
 		return;
 	}
 	
-	std::cout<<" DrawForest draw grid begin"<<std::endl;
-    
 	sdb::WorldGrid<ForestCell, Plant > * g = grid();
-	if(g->isEmpty() ) return;
+	if(g->isEmpty() ) {
+		return;
+	}
+	
 	try {
 	g->begin();
 	while(!g->end() ) {
@@ -349,10 +352,50 @@ void DrawForest::drawGrid()
 	}
 }
 
+void DrawForest::drawSample()
+{
+	if(!m_enabled) {
+		return;
+	}
+	
+	sdb::WorldGrid<ForestCell, Plant > * g = grid();
+	if(g->isEmpty() ) {
+		return;
+	}
+	
+	DrawSample::Profile drprof;
+	//drprof.m_stride = sdb::SampleCache::DataStride;
+	drprof.m_pointSize = 5.f;
+	drprof.m_hasNormal = true;
+	drprof.m_hasColor = false;
+	
+	DrawSample drs;
+	drs.begin(drprof);
+	
+	try {
+	g->begin();
+	while(!g->end() ) {
+		
+		
+		g->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw sample caught something";
+	}
+	
+	drs.end();
+	
+}
+
 void DrawForest::drawActivePlants()
 {
-    if(!m_enabled) return;
-	if(numActivePlants() < 1) return;
+    if(!m_enabled) {
+		return;
+	}
+	if(numActivePlants() < 1) {
+		return;
+	}
+	
 	glDepthFunc(GL_LEQUAL);
 	glColor3f(.1f, .9f, .43f);
 	PlantSelection::SelectionTyp * arr = activePlants();

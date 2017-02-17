@@ -60,6 +60,7 @@ protected:
 	void drawWiredPlants();
 	void drawGridBounding();
 	void drawGrid();
+	void drawSample();
 	void drawActivePlants();
 	void drawViewFrustum();
 	bool isVisibleInView(Plant * pl, 

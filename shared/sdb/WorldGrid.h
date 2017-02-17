@@ -24,27 +24,17 @@ class WorldGrid : public Sequence<Coord3>
 	float m_gridSize;
 	
 public:
-	WorldGrid(Entity * parent = NULL) : Sequence<Coord3>(parent),
-	m_gridSize(32.f)
-	{}
-	
-	virtual ~WorldGrid() 
-	{}
+	WorldGrid(Entity * parent = NULL);
+	virtual ~WorldGrid();
 	
 	void setGridSize(float x);
 	
-	ChildType * value() 
-	{ 
-		ChildType * r = dynamic_cast<ChildType *>(Sequence<Coord3>::currentIndex() );
-		if(r == NULL) throw "World Grid value null ";
-		return r;
-	}
+	ChildType * value();
 	
-	const Coord3 & key() const 
-	{ return Sequence<Coord3>::currentKey(); }
+	const Coord3 & key() const;
 	
 	ChildType * insertChild(const float * at);
-	ChildType * insertChild(const Coord3 & x);
+	ChildType * insertCell(const Coord3 & x);
 	
 	void insertChildValue(const Coord3 & x , ChildType * v);
 	
@@ -83,6 +73,27 @@ private:
 };
 
 template<typename ChildType, typename ValueType>
+WorldGrid<ChildType, ValueType>::WorldGrid(Entity * parent) : Sequence<Coord3>(parent),
+m_gridSize(32.f)
+{}
+
+template<typename ChildType, typename ValueType>
+WorldGrid<ChildType, ValueType>::~WorldGrid()
+{}
+
+template<typename ChildType, typename ValueType>
+ChildType * WorldGrid<ChildType, ValueType>::value() 
+{ 
+	ChildType * r = dynamic_cast<ChildType *>(Sequence<Coord3>::currentIndex() );
+	if(r == NULL) throw "World Grid value null ";
+	return r;
+}
+
+template<typename ChildType, typename ValueType>
+const Coord3 & WorldGrid<ChildType, ValueType>::key() const 
+{ return Sequence<Coord3>::currentKey(); }
+
+template<typename ChildType, typename ValueType>
 void WorldGrid<ChildType, ValueType>::setGridSize(float x)
 { m_gridSize = (x>32.f) ? x : 32.f; }
 
@@ -100,11 +111,11 @@ template<typename ChildType, typename ValueType>
 ChildType * WorldGrid<ChildType, ValueType>::insertChild(const float * at)
 {
 	const Coord3 x = gridCoord(at);
-	return insertChild(x);
+	return insertCell(x);
 }
 
 template<typename ChildType, typename ValueType>
-ChildType * WorldGrid<ChildType, ValueType>::insertChild(const Coord3 & x)
+ChildType * WorldGrid<ChildType, ValueType>::insertCell(const Coord3 & x)
 {
 	Pair<Coord3, Entity> * p = Sequence<Coord3>::insert(x);
 	if(!p->index)

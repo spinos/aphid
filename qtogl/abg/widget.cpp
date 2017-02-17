@@ -18,8 +18,8 @@
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
-#include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawGraph.h>
+#include <ogl/DrawSample.h>
 #include <sdb/WorldGrid2.h>
 #include <sdb/LodSampleCache.h>
 #include "../cactus.h"
@@ -231,13 +231,16 @@ void GLWidget::drawSamples()
 	getDrawer()->m_surfaceProfile.apply();
 	
 	getDrawer()->setColor(1.f, 0.f, 0.f);
-	glPointSize(5.f);
-    
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
 	
-	const int dsd = sdb::SampleCache::DataStride;
-	const int dlevel = 2;
+	DrawSample::Profile drprof;
+	drprof.m_stride = sdb::SampleCache::DataStride;
+	drprof.m_pointSize = 5.f;
+	drprof.m_hasNormal = true;
+	drprof.m_hasColor = false;
+	
+	DrawSample drs;
+	drs.begin(drprof);
+	const int dlevel = 3;
 	
 	m_sampg->begin();
 	while(!m_sampg->end() ) {
@@ -248,18 +251,14 @@ void GLWidget::drawSamples()
 		
 		if(nv>0) {
 			const sdb::SampleCache * sps = cell->samplesAtLevel(dlevel);
-			
-			glNormalPointer(GL_FLOAT, dsd, (const GLfloat*)sps->normals() );
-			glVertexPointer(3, GL_FLOAT, dsd, (const GLfloat*)sps->points() );
-			glDrawArrays(GL_POINTS, 0, nv);
-    
+			drs.draw(sps->points(), sps->normals(), nv);
 		}
 		
 		m_sampg->next();
 	}
 	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	drs.end();
+	
 }
 
 void GLWidget::drawSampleGrid()

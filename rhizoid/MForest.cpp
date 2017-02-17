@@ -13,6 +13,7 @@
 #include <ForestCell.h>
 #include <mama/MeshHelper.h>
 #include "GrowOption.h"
+#include "ForestGrid.h"
 
 namespace aphid {
 
