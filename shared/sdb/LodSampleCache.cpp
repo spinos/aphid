@@ -52,7 +52,7 @@ LodSampleCache::~LodSampleCache()
 {}
 
 bool LodSampleCache::hasLevel(int x)
-{ m_samples[x].numSamples() > 0; }
+{ return m_samples[x].numSamples() > 0; }
 
 void LodSampleCache::buildSamples(int minLevel, int maxLevel)
 {	

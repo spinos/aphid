@@ -18,6 +18,7 @@
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
+#include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawGraph.h>
 #include <ogl/DrawSample.h>
 #include <sdb/WorldGrid2.h>
@@ -240,7 +241,7 @@ void GLWidget::drawSamples()
 	
 	DrawSample drs;
 	drs.begin(drprof);
-	const int dlevel = 3;
+	const int dlevel = 4;
 	
 	m_sampg->begin();
 	while(!m_sampg->end() ) {

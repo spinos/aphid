@@ -16,6 +16,7 @@
 
 #include <math/BoundingBox.h>
 #include <math/kmean.h>
+#include <math/miscfuncs.h>
 
 namespace aphid {
 
@@ -36,7 +37,8 @@ public:
 	
 	int numSamples() const;
 	void sampleInBox(Tf & fintersect,
-					const BoundingBox & box);
+					const BoundingBox & box,
+					const BoundingBox & limitBox);
 	const int & numValidSamples() const;
 	const Tn & sample(const int & i) const;
 	
@@ -66,7 +68,8 @@ int GridSampler<Tf, Tn, Ndiv>::numSamples() const
 
 template<typename Tf, typename Tn, int Ndiv>
 void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
-					const BoundingBox & box)
+					const BoundingBox & box,
+					const BoundingBox & limitBox)
 {
 	m_numValidSamples = 0;
 	bool stat = fintersect.select(box);
@@ -75,10 +78,20 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 	}
 	
 	BoundingBox childBx;
+	const float dnoi = box.distance(0) *  m_cellDelta * .29f;
 	const int ns = numSamples();
 	for(int i=0;i<ns;++i) {
 		box.getSubBox(childBx, m_gridCoord[i], m_cellDelta);
-		stat = fintersect.selectedClosestToPoint(childBx.center() );
+		if(!childBx.intersect(limitBox) ) {
+			continue;
+		}
+		
+		Vector3F vnoi = childBx.center() +
+					Vector3F(RandomFn11() * dnoi,
+					RandomFn11() * dnoi,
+					RandomFn11() * dnoi);
+					
+		stat = fintersect.selectedClosestToPoint(vnoi);
 		if(stat) {
 			stat = childBx.isPointInside(fintersect.closestToPointPoint() );
 		}
@@ -92,7 +105,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 		}
 	}
 	
-	if(m_numValidSamples > 8) {
+	if(m_numValidSamples > 16) {
 		processKmean();
 	}
 	
@@ -103,10 +116,10 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 {
 	const int n = m_numValidSamples;
 	int k = n - 2;
-	if(n > 18) {
+	if(n > 32) {
 		k = n - n / 3;
 	}
-	if(n > 32) {
+	if(n > 64) {
 		k = n - n / 2;
 	}
 	

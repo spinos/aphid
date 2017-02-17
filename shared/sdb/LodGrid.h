@@ -98,6 +98,7 @@ class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
 typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 
+	BoundingBox m_limitBox;
 	int m_finestNodeLevel;
 	
 public:
@@ -124,8 +125,10 @@ public:
 				if(key().w == level) {
 					getCellBBox(cb, key() );
 					
-					if(fintersect.intersect(cb) ) {
-						dirty.push_back(key() );
+					if(m_limitBox.intersect(cb) ) {
+						if(fintersect.intersect(cb) ) {
+							dirty.push_back(key() );
+						}
 					}
 					
 				}
@@ -176,7 +179,7 @@ public:
 			if(key().w == level) {
 			
 				getCellBBox(cellBx, key() );
-				sampler.sampleInBox(fintersect, cellBx );
+				sampler.sampleInBox(fintersect, cellBx, m_limitBox );
 				
 				const int & ns = sampler.numValidSamples();
 				for(int i=0;i<ns;++i) {
@@ -251,10 +254,11 @@ private:
 		for(int i=0; i< 8; ++i) { 
 			getCellChildBox(cb, i, cellCoord );
 			
-			if(fintersect.intersect(cb) ) {
-				subdivide(cell, cellCoord, i);
+			if(m_limitBox.intersect(cb) ) {
+				if(fintersect.intersect(cb) ) {
+					subdivide(cell, cellCoord, i);
+				}
 			}
-			
 		}
 	}
 	

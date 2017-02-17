@@ -68,6 +68,7 @@ void LodGrid::resetBox(const BoundingBox & b,
 	const Coord4 lc = cellCoordAtLevel(b.center(), 0);
 	addCell(lc);
 	calculateBBox();
+	m_limitBox = b;
 }
 
 void LodGrid::fillBox(const BoundingBox & b,
@@ -107,6 +108,7 @@ void LodGrid::fillBox(const BoundingBox & b,
 	}
 	
 	calculateBBox();
+	m_limitBox = b;
 }
 
 void LodGrid::clear()

@@ -19,6 +19,7 @@
 #include "ExampVox.h"
 #include <geom/ATriangleMesh.h>
 #include <kd/ClosestToPointEngine.h>
+#include <kd/IntersectEngine.h>
 
 namespace aphid {
 
@@ -172,10 +173,14 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 	KdEngine engine;
 	engine.select<cvx::Triangle, KdNode4>(m_ground, m_selectCtx);
 	
+	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
+	FIntersectTyp ineng(m_ground);
+    
 	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_ground);
 	
-	m_grid->addCells<FClosestTyp>(&clseng, m_intersectCtx.m_hitP, m_activePlants->radius() );
+	m_grid->selectCells<FIntersectTyp, FClosestTyp >(ineng, clseng,
+					m_intersectCtx.m_hitP, m_activePlants->radius() );
 	return true;
 }
 

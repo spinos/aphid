@@ -9,7 +9,6 @@
 
 #include "ForestCell.h"
 #include <PlantCommon.h>
-#include <sdb/LodSampleCache.h>
 
 namespace aphid {
 
@@ -22,5 +21,17 @@ ForestCell::~ForestCell()
 {
 	delete m_lodsamp;
 }
+
+const sdb::SampleCache * ForestCell::sampleAtLevel(int level) const
+{ return m_lodsamp->samplesAtLevel(level); }
+
+const float * ForestCell::samplePoints(int level) const
+{ return sampleAtLevel(level)->points(); }
+
+const float * ForestCell::sampleNormals(int level) const
+{ return sampleAtLevel(level)->normals(); }
+
+const int & ForestCell::numSamples(int level) const
+{ return m_lodsamp->numSamplesAtLevel(level); }
 
 }

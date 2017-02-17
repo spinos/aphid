@@ -25,15 +25,18 @@ public:
 	ForestGrid();
 	virtual ~ForestGrid();
 	
-	template<typename T>
-	void addCells(T * ground,
+/// T as intersect type, Tc as closest to point type
+	template<typename T, typename Tc>
+	void selectCells(T & ground,
+					Tc & closestGround,
 					const Vector3F & center,
 					const float & radius);
 	
 };
 
-template<typename T>
-void ForestGrid::addCells(T * ground,
+template<typename T, typename Tc>
+void ForestGrid::selectCells(T & ground,
+					Tc & closestGround,
 					const Vector3F & center,
 					const float & radius)
 {
@@ -46,6 +49,7 @@ void ForestGrid::addCells(T * ground,
 	const sdb::Coord3 lc = gridCoord((const float *)&plow);
 	const sdb::Coord3 hc = gridCoord((const float *)&phigh);
 	
+	const float & gz0 = gridSize() * .83f;
 	const int dim = (hc.x - lc.x) + 1;
 	int i, j, k;
 	sdb::Coord3 sc;
@@ -59,19 +63,20 @@ void ForestGrid::addCells(T * ground,
 				
 				cbx = coordToGridBBox(sc);
 				
-				if(!ground->select(cbx) ) {
+				if(!ground.intersect(cbx) ) {
 					continue;
 				}
 				
 				ForestCell * cell = findCell(sc);
 				if(!cell) { 
 					cell = insertCell(sc);
-					cell->buildSamples(ground);
 				}
-				
+				cell->buildSamples(ground, closestGround,
+								cbx, gz0);
 			}
 		}
 	}
+	std::cout.flush();
 	
 }
 
