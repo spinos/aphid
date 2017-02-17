@@ -27,9 +27,10 @@ public:
 	LodNode();
 	~LodNode();
 	
-	Vector3F pos, nml;
-	float radius;
+	Vector3F pos; 
 	int index;
+	Vector3F nml;
+	float radius;
 	
 private:
 
@@ -50,6 +51,9 @@ public:
 	
 	template<typename T>
 	void closestToPoint(T * result);
+	
+	template<typename Ts>
+	void dumpSamplesInCell(Ts * dst);
 	
 private:
 
@@ -77,6 +81,18 @@ void LodCell::closestToPoint(T * result)
 	}
 }
 
+template<typename Ts>
+void LodCell::dumpSamplesInCell(Ts * dst)
+{
+	begin();
+	while(!end() ) {
+		LodNode * a = value();
+		dst[a->index].pos = a->pos;
+		dst[a->index].nml = a->nml;
+		
+		next();
+	}
+}
 
 class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
@@ -204,12 +220,17 @@ public:
 		m_finestNodeLevel = level;
 	}
 	
+	void inserNodedByAggregation(int minLevel, int maxLevel);
 	void aggregateAtLevel(int level);
 	
 	virtual void clear(); 
 	
 	int countLevelNodes(int level);
 	void dumpLevelNodes(LodNode * dst, int level);
+	
+protected:
+	template<typename Ts>
+	void dumpLevelSamples(Ts * dst, int level);
 	
 private:
 	template<typename Tf>
@@ -240,9 +261,27 @@ private:
 	void aggregateInCell(LodCell * cell, 
 						const Coord4 & cellCoord);
 	void processKmean(int & n, 
-					LodNode * samples);
+					LodNode * samples,
+					const float & separateDist);
 	
 };
+
+template<typename Ts>
+void LodGrid::dumpLevelSamples(Ts * dst, int level)
+{
+	begin();
+	while(!end() ) {
+		if(key().w == level) {
+			value()->dumpSamplesInCell(dst);
+		}
+		
+		if(key().w > level) {
+			break;
+		}
+
+		next();
+	}
+}
 
 }
 

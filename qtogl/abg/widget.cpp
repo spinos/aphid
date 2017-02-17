@@ -21,7 +21,7 @@
 #include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawGraph.h>
 #include <sdb/WorldGrid2.h>
-#include <sdb/LodGrid.h>
+#include <sdb/LodSampleCache.h>
 #include "../cactus.h"
 
 using namespace aphid;
@@ -109,11 +109,13 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 		m_grid->getCellBBox(cb, k);
 		cbcen = m_grid->cellCenter(k);
 		
-		sdb::LodGrid * cell = m_sampg->insertCell((const float *)&cbcen );
+		sdb::LodSampleCache * cell = m_sampg->insertCell((const float *)&cbcen );
 		cell->resetBox(cb, sz0);
 		cell->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
 		cell->insertNodeAtLevel<FClosestTyp, 4 >(4, clseng);
-	
+		cell->insertNodeAtLevel<FClosestTyp, 4 >(3, clseng);
+		cell->inserNodedByAggregation(2, 2);
+		cell->buildSamples(2,4);
 		m_grid->next();
 	}
 	
@@ -146,12 +148,13 @@ void GLWidget::clientDraw()
     
     //draw3LevelGrid(4);
 	drawSampleGrid();
+	drawSamples();
     
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(.05f, .5f, .15f);
     //drawTetraMesh();
     //drawField();
-    drawTriangulation();
+    //drawTriangulation();
     
 }
 
@@ -221,6 +224,42 @@ void GLWidget::drawTetraMesh()
     }
     glEnd();
     
+}
+
+void GLWidget::drawSamples()
+{
+	getDrawer()->m_surfaceProfile.apply();
+	
+	getDrawer()->setColor(1.f, 0.f, 0.f);
+	glPointSize(5.f);
+    
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	const int dsd = sdb::SampleCache::DataStride;
+	const int dlevel = 2;
+	
+	m_sampg->begin();
+	while(!m_sampg->end() ) {
+	
+		const sdb::LodSampleCache * cell = m_sampg->value();
+		
+		const int & nv = cell->numSamplesAtLevel(dlevel);
+		
+		if(nv>0) {
+			const sdb::SampleCache * sps = cell->samplesAtLevel(dlevel);
+			
+			glNormalPointer(GL_FLOAT, dsd, (const GLfloat*)sps->normals() );
+			glVertexPointer(3, GL_FLOAT, dsd, (const GLfloat*)sps->points() );
+			glDrawArrays(GL_POINTS, 0, nv);
+    
+		}
+		
+		m_sampg->next();
+	}
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::drawSampleGrid()

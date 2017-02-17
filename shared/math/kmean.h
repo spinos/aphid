@@ -26,7 +26,8 @@ class KMeansClustering2 {
 /// count points in group, size K
 	boost::scoped_array<int> m_groupCount;
 	int m_K, m_N, m_D;
-
+	T m_separateDistance;
+	
 public:
 	KMeansClustering2();
 	virtual ~KMeansClustering2();
@@ -44,6 +45,8 @@ public:
 	const int & K() const;
 	void getGroupCentroid(DenseVector<T> & d, 
 							const int & i) const;
+							
+	void setSeparateDistance(const T & x);
 	
 protected:
 	void setGroupCentroid(const DenseVector<T> & d, 
@@ -66,11 +69,15 @@ private:
 
 template<typename T>
 KMeansClustering2<T>::KMeansClustering2()
-{}
+{ m_separateDistance = 0.4; }
 
 template<typename T>
 KMeansClustering2<T>::~KMeansClustering2()
 {}
+
+template<typename T>
+void KMeansClustering2<T>::setSeparateDistance(const T & x)
+{ m_separateDistance = x; }
 
 template<typename T>
 void KMeansClustering2<T>::setKND(const int & k,
@@ -110,7 +117,7 @@ bool KMeansClustering2<T>::farEnoughToPreviousCentroids(const DenseVector<T> & p
 			minD = diff;
 		}
 	}
-	return minD > 0.4;
+	return minD > m_separateDistance;
 }
 
 template<typename T>

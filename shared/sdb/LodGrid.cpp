@@ -149,6 +149,13 @@ void LodGrid::dumpLevelNodes(LodNode * dst, int level)
 	}
 }
 
+void LodGrid::inserNodedByAggregation(int minLevel, int maxLevel)
+{
+	for(int i = maxLevel;i>=minLevel;--i) {
+		aggregateAtLevel(i);
+	}
+}
+
 void LodGrid::aggregateAtLevel(int level)
 {
 	begin();
@@ -192,8 +199,9 @@ void LodGrid::aggregateInCell(LodCell * cell,
 		}
 	}
 	
-	if(n > 5) {
-		processKmean(n, nds);
+	if(n > 12) {
+		const float sepd = levelCellSize(cellCoord.w + 3) * .1f;
+		processKmean(n, nds, sepd);
 	}
 	
 	for(int i=0; i< n; ++i) { 
@@ -209,14 +217,15 @@ void LodGrid::aggregateInCell(LodCell * cell,
 }
 
 void LodGrid::processKmean(int & n, 
-					LodNode * samples)
+					LodNode * samples,
+					const float & separateDist)
 {
 	int k = n - 2;
-	if(n > 12) {
-		k = n - 1 - n / 3;
-	}
 	if(n > 24) {
-		k = n - 1 - n / 2;
+		k = n - n / 3;
+	}
+	if(n > 48) {
+		k = n - n / 2;
 	}
 	
 /// position and normal
@@ -235,6 +244,7 @@ void LodGrid::processKmean(int & n,
 	
 	KMeansClustering2<float> cluster;
 	cluster.setKND(k, n, d);
+	cluster.setSeparateDistance(separateDist);
 	if(!cluster.compute(data) ) {
 		std::cout<<"\n LodGrid kmean failed ";
 		return;

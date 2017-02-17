@@ -23,7 +23,7 @@ class WorldGrid2;
 template<typename T, typename Tv>
 class Array;
 
-class LodGrid;
+class LodSampleCache;
 
 }
 
@@ -86,6 +86,7 @@ private:
     void drawTetraMesh();
     void draw3LevelGrid(int level);
 	void drawSampleGrid();
+	void drawSamples();
     void drawField();
     void drawTriangulation();
     
@@ -112,7 +113,7 @@ typedef aphid::TetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
     
     aphid::ATriangleMesh * m_frontMesh;
 	
-typedef aphid::sdb::WorldGrid2<aphid::sdb::LodGrid > SampGridTyp;
+typedef aphid::sdb::WorldGrid2<aphid::sdb::LodSampleCache > SampGridTyp;
 	SampGridTyp * m_sampg;
             
 };

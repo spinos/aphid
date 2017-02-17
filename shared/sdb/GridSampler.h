@@ -92,7 +92,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 		}
 	}
 	
-	if(m_numValidSamples > 5) {
+	if(m_numValidSamples > 8) {
 		processKmean();
 	}
 	
@@ -103,11 +103,11 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 {
 	const int n = m_numValidSamples;
 	int k = n - 2;
-	if(n > 12) {
-		k = n - 1 - n / 3;
+	if(n > 18) {
+		k = n - n / 3;
 	}
-	if(n > 24) {
-		k = n / 2;
+	if(n > 32) {
+		k = n - n / 2;
 	}
 	
 /// position and normal
@@ -125,6 +125,7 @@ void GridSampler<Tf, Tn, Ndiv>::processKmean()
 	}
 	
 	m_cluster.setKND(k, n, d);
+	m_cluster.setSeparateDistance(m_cellDelta * .4f);
 	if(!m_cluster.compute(m_data) ) {
 		std::cout<<"\n GridSampler kmean failed ";
 		return;
