@@ -34,4 +34,13 @@ const float * ForestCell::sampleNormals(int level) const
 const int & ForestCell::numSamples(int level) const
 { return m_lodsamp->numSamplesAtLevel(level); }
 
+void ForestCell::deselectSamples()
+{
+	m_activeSampleKeys.clear();
+	m_numActiveSamples = 0;
+}
+
+const int & ForestCell::numSelectedSamples() const
+{ return m_numActiveSamples; }
+
 }

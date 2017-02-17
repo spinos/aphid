@@ -115,7 +115,9 @@ public:
 	void subdivideToLevel(Tf & fintersect,
 						int minLevel, int maxLevel)
 	{
+#if 0
 		std::cout<<"\n LodGrid::subdivide ";
+#endif
 		BoundingBox cb;
 		int level = minLevel;
 		while(level < maxLevel) {
@@ -138,9 +140,9 @@ public:
 			if(dirty.size() < 1) {
 				break;
 			}
-			
+#if 0
 			std::cout<<"\n level"<<level;
-			
+#endif
 			std::vector<Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
 				subdivideCell(fintersect, *it);
@@ -148,20 +150,18 @@ public:
 			level++;
 		}
 		storeCellNeighbors();
-		
+#if 0		
 		const int nlc = numCellsAtLevel(maxLevel);
 		std::cout<<"\n level"<<maxLevel<<" n cell "<<nlc;
 		std::cout.flush();
-		
+#endif
 	}
 	
 	template<typename Tf, int Ndiv>
 	void insertNodeAtLevel(int level,
 							Tf & fintersect)
 	{
-		const int nlc = numCellsAtLevel(level);
-		std::cout<<"\n LodGrid::insertNodeAtLevel "<<level
-				<<"\n n cells "<<nlc;
+		std::cout<<"\n LodGrid::insertNodeAtLevel "<<level;
 		std::cout.flush();
 				
 		boost::posix_time::ptime t0(boost::posix_time::second_clock::local_time());

@@ -21,7 +21,10 @@ class Plant;
 
 class ForestCell : public sdb::Array<sdb::Coord2, Plant> {
 
+	sdb::Sequence<int> m_activeSampleKeys;
+	boost::scoped_array<int> m_activeSampleIndices;
 	sdb::LodSampleCache * m_lodsamp;
+	int m_numActiveSamples;
 	
 public:
 	ForestCell(Entity * parent = NULL);
@@ -36,6 +39,12 @@ public:
 	const float * samplePoints(int level) const;
 	const float * sampleNormals(int level) const;
 	const int & numSamples(int level) const;
+	
+	template<typename T>
+	void selectSamples(T & selFilter);
+	
+	void deselectSamples();
+	const int & numSelectedSamples() const;
 	
 protected:
 	const sdb::SampleCache * sampleAtLevel(int level) const;
@@ -55,7 +64,18 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 	m_lodsamp->fillBox(cellBox, cellSize);
 	m_lodsamp->subdivideToLevel<T>(ground, 0, maxLevel);
 	m_lodsamp->insertNodeAtLevel<Tc, 4 >(maxLevel, closestGround);
-	m_lodsamp->buildSamples(maxLevel, maxLevel);	
+	m_lodsamp->buildSamples(maxLevel, maxLevel);
+	const int & nv = m_lodsamp->numSamplesAtLevel(maxLevel);
+	if(nv) {
+		m_activeSampleIndices.reset(new int[nv]);
+	}
+	deselectSamples();
+}
+
+template<typename T>
+void ForestCell::selectSamples(T & selFilter)
+{
+	
 }
 
 }

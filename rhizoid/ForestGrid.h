@@ -26,26 +26,21 @@ public:
 	virtual ~ForestGrid();
 	
 /// T as intersect type, Tc as closest to point type
-	template<typename T, typename Tc>
+/// Tf as select filter type
+	template<typename T, typename Tc, typename Tf>
 	void selectCells(T & ground,
 					Tc & closestGround,
-					const Vector3F & center,
-					const float & radius);
+					Tf & selFilter);
 	
 };
 
-template<typename T, typename Tc>
+template<typename T, typename Tc, typename Tf>
 void ForestGrid::selectCells(T & ground,
 					Tc & closestGround,
-					const Vector3F & center,
-					const float & radius)
+					Tf & selFilter)
 {
-	const Vector3F plow(center.x - radius,
-						center.y - radius,
-						center.z - radius);
-	const Vector3F phigh(center.x + radius,
-						center.y + radius,
-						center.z + radius);			
+	const Vector3F plow = selFilter.boxLow();
+	const Vector3F phigh = selFilter.boxHigh();			
 	const sdb::Coord3 lc = gridCoord((const float *)&plow);
 	const sdb::Coord3 hc = gridCoord((const float *)&phigh);
 	
@@ -71,12 +66,14 @@ void ForestGrid::selectCells(T & ground,
 				if(!cell) { 
 					cell = insertCell(sc);
 				}
-				cell->buildSamples(ground, closestGround,
+				cell-> template buildSamples<T, Tc>(ground, closestGround,
 								cbx, gz0);
+								
+				cell-> template selectSamples<Tf>(selFilter);
+				
 			}
 		}
 	}
-	std::cout.flush();
 	
 }
 

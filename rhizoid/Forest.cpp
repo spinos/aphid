@@ -20,6 +20,7 @@
 #include <geom/ATriangleMesh.h>
 #include <kd/ClosestToPointEngine.h>
 #include <kd/IntersectEngine.h>
+#include "SampleFilter.h"
 
 namespace aphid {
 
@@ -30,6 +31,7 @@ Forest::Forest()
 	m_activePlants = new PlantSelection(m_grid);
 	m_selectCtx = new SphereSelectionContext;
 	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
+	m_sampleFlt = new SampleFilter;
 	m_lastPlantInd = -1;
 }
 
@@ -179,8 +181,11 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_ground);
 	
-	m_grid->selectCells<FIntersectTyp, FClosestTyp >(ineng, clseng,
-					m_intersectCtx.m_hitP, m_activePlants->radius() );
+	m_sampleFlt->setMode(mode );
+	m_sampleFlt->setSphere(m_intersectCtx.m_hitP, m_activePlants->radius() );
+	
+	m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter >(ineng, clseng,
+					*m_sampleFlt );
 	return true;
 }
 

@@ -20,6 +20,7 @@ class ForestCell;
 class ForestGrid;
 class ExampVox;
 class ATriangleMesh;
+class SampleFilter;
 struct Float2;
 
 class Forest {
@@ -36,6 +37,7 @@ class Forest {
 	IntersectionContext m_intersectCtx;
 	ClosestToPointTestResult m_closestPointTest;
 	SphereSelectionContext * m_selectCtx;
+	SampleFilter * m_sampleFlt;
 	RayMarch m_march;
 	unsigned m_numPlants;
 	int m_lastPlantInd;

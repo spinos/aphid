@@ -148,7 +148,7 @@ void GLWidget::clientDraw()
 	glEnd();
     
     //draw3LevelGrid(4);
-	drawSampleGrid();
+	//drawSampleGrid();
 	drawSamples();
     
     getDrawer()->m_markerProfile.apply();
@@ -241,7 +241,7 @@ void GLWidget::drawSamples()
 	
 	DrawSample drs;
 	drs.begin(drprof);
-	const int dlevel = 4;
+	const int dlevel = 3;
 	
 	m_sampg->begin();
 	while(!m_sampg->end() ) {

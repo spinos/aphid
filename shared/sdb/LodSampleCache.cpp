@@ -8,12 +8,13 @@
  */
 
 #include "LodSampleCache.h"
+#include <math/miscfuncs.h>
 
 namespace aphid {
 
 namespace sdb {
 
-const int SampleCache::DataStride = 32;
+const int SampleCache::DataStride = 64;
 
 SampleCache::SampleCache()
 { m_numSamples = 0; }
@@ -45,6 +46,24 @@ const float * SampleCache::points() const
 const float * SampleCache::normals() const
 { return (const float *)&(m_data[0].nml); }
 
+const float * SampleCache::colors() const
+{ return (const float *)&(m_data[0].col); }
+
+void SampleCache::assignNoise()
+{
+	for(int i=0;i<m_numSamples;++i) {
+		m_data[i].noi = RandomF01();
+	}
+}
+
+void SampleCache::setColorByNoise()
+{
+	for(int i=0;i<m_numSamples;++i) {
+		ASample & d = m_data[i];
+		d.col.set(d.noi, d.noi, d.noi);
+	}
+}
+
 LodSampleCache::LodSampleCache(Entity * parent) : LodGrid(parent)
 {}
 
@@ -63,6 +82,7 @@ void LodSampleCache::buildSamples(int minLevel, int maxLevel)
 		if(ns>0) {
 			spsi.create(ns);
 			dumpLevelSamples<SampleCache::ASample>(spsi.data(), i );
+			spsi.assignNoise();
 		}
 	}
 }
@@ -73,6 +93,9 @@ const int & LodSampleCache::numSamplesAtLevel(int x) const
 }
 
 const SampleCache * LodSampleCache::samplesAtLevel(int x) const
+{ return &m_samples[x]; }
+
+SampleCache * LodSampleCache::samplesAtLevel(int x)
 { return &m_samples[x]; }
 
 }

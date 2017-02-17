@@ -22,9 +22,15 @@ class SampleCache {
 public:
 	struct ASample {
 		Vector3F pos;
-		float radius;
-		Vector3F nml;
 		float noi;
+		Vector3F nml;
+		float u;
+		Vector3F col;
+		float v;
+		int geomInd;
+		int exmInd;
+		int pad0;
+		int pad1;
 	};
 	
 private:
@@ -37,13 +43,17 @@ public:
 	
 	void create(int n);
 	void clear();
+	void assignNoise();
 	
 	const int & numSamples() const;
 	
 	const float * points() const;
 	const float * normals() const;
+	const float * colors() const;
 	
 	ASample * data();
+	
+	void setColorByNoise();
 	
 	static const int DataStride;
 	
@@ -64,6 +74,7 @@ public:
 	const int & numSamplesAtLevel(int x) const;
 	
 	const SampleCache * samplesAtLevel(int x) const;
+	SampleCache * samplesAtLevel(int x);
 	
 protected:
 
