@@ -76,11 +76,82 @@ public:
 	const SampleCache * samplesAtLevel(int x) const;
 	SampleCache * samplesAtLevel(int x);
 	
+	template<typename T>
+	void select(Sequence<int> & indices,
+				T & selFilter,
+				const int & maxLevel);
+	
 protected:
 
 private:
-	
+	template<typename T>
+	void selectChildCell(Sequence<int> & indices,
+				const Coord4 & cellCoord,
+				LodCell * cell,
+				T & selFilter,
+				const int & level,
+				const int & maxLevel);
+				
 };
+
+template<typename T>
+void LodSampleCache::select(Sequence<int> & indices,
+				T & selFilter,
+				const int & maxLevel)
+{
+	BoundingBox cellBx;
+	begin();
+	while(!end() ) {
+		
+		const Coord4 & k = key();
+		
+		getCellBBox(cellBx, k );
+		if(selFilter.intersect(cellBx) ) {
+			selectChildCell(indices, k, value(), selFilter, 0, maxLevel);
+		}
+		
+		if(k.w > 0) {
+			break;
+		}
+		next();
+	}
+	
+}
+
+template<typename T>
+void LodSampleCache::selectChildCell(Sequence<int> & indices,
+				const Coord4 & cellCoord,
+				LodCell * cell,
+				T & selFilter,
+				const int & level,
+				const int & maxLevel)
+{
+	if(level == maxLevel) {
+		cell->selectInCell(indices, selFilter);
+		return;
+	}
+	
+	if(!cell->hasChild() ) {
+		return;
+	}
+	
+	BoundingBox cb;
+	Coord4 cc;
+	for(int i=0;i<8;++i) {
+		AdaptiveGridCell * childCellD = cell->child(i);
+		if(!childCellD ) {
+			continue;
+		}
+		
+		LodCell * childCell = static_cast<LodCell *>(childCellD);
+		
+		cc = childCoord(cellCoord, i);
+		getCellBBox(cb, cc);
+		if(selFilter.intersect(cb) ) {
+			selectChildCell(indices, cc, childCell, selFilter, level + 1, maxLevel);
+		}
+	}
+}
 
 }
 

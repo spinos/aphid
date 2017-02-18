@@ -51,6 +51,8 @@ public:
 	void shrinkBy(const BoundingBox &another);
 	void expand(float v);
 	Vector3F center() const;
+	Vector3F lowCorner() const;
+	Vector3F highCorner() const;
 	const Vector3F corner(const int & i) const;
 	char touch(const BoundingBox & b) const;
 	

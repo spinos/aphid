@@ -358,10 +358,14 @@ void DrawForest::drawSample()
 		return;
 	}
 	
-	sdb::WorldGrid<ForestCell, Plant > * g = grid();
+	ForestGrid * g = grid();
 	if(g->isEmpty() ) {
 		return;
 	}
+	
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glDisable(GL_LIGHTING);
+	glColor3f(0,1,1);
 	
 	DrawSample::Profile drprof;
 	drprof.m_stride = sdb::SampleCache::DataStride;
@@ -392,6 +396,61 @@ void DrawForest::drawSample()
 	
 	drs.end();
 	
+	glPopAttrib();
+	
+}
+
+void DrawForest::drawActiveSamples()
+{
+	if(!m_enabled) {
+		return;
+	}
+	
+	ForestGrid * g = grid();
+	if(g->isEmpty() ) {
+		return;
+	}
+	
+	if(g->numActiveCells() < 1) {
+		return;
+	}
+	
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glDisable(GL_LIGHTING);
+	glColor3f(0,1,1);
+	
+	DrawSample::Profile drprof;
+	drprof.m_stride = sdb::SampleCache::DataStride;
+	drprof.m_pointSize = 5.f;
+	drprof.m_hasNormal = true;
+	drprof.m_hasColor = false;
+	
+	DrawSample drs;
+	drs.begin(drprof);
+	
+	try {
+	g->activeCellBegin();
+	while(!g->activeCellEnd() ) {
+		
+		const ForestCell * cell = g->activeCellValue();
+		const int & nv = cell->numSelectedSamples();
+		if(nv > 0) {
+			drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
+			drs.draw(cell->samplePoints(4),
+					cell->sampleNormals(4),
+					cell->selectedSampleIndices(),
+					nv);
+		}
+		
+		g->activeCellNext();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw sample caught something";
+	}
+	
+	drs.end();
+	
+	glPopAttrib();
 }
 
 void DrawForest::drawActivePlants()

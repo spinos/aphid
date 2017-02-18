@@ -162,10 +162,11 @@ void GridSelection<T, Tc>::selectInCell(const BoundingBox & selBx,
 	BoundingBox cb;
 	CellInd ci;
 	for(int i=0; i< 8; ++i) { 
-		ci.key = m_grid->childCoord(ind.key, i);
-		Tc * childCell = m_grid->findCell(ci.key);
-		if(childCell) {
-			m_grid->getCellChildBox(cb, i, ind.key );
+		AdaptiveGridCell * childCellD = ind.value->child(i);
+		if(childCellD) {
+			Tc * childCell = static_cast<Tc *>(childCellD);
+			ci.key = m_grid->childCoord(ind.key, i);
+			m_grid->getCellBBox(cb, ci.key );
 			if(selBx.intersect(cb) ) {
 				ci.value = childCell;
 				m_activeCells.push_back(ci);

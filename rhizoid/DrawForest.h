@@ -61,6 +61,7 @@ protected:
 	void drawGridBounding();
 	void drawGrid();
 	void drawSample();
+	void drawActiveSamples();
 	void drawActivePlants();
 	void drawViewFrustum();
 	bool isVisibleInView(Plant * pl, 

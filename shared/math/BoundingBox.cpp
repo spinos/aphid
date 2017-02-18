@@ -220,6 +220,16 @@ Vector3F BoundingBox::center() const
 					(m_data[2] + m_data[5]) * 0.5f);
 }
 
+Vector3F BoundingBox::lowCorner() const
+{
+	return Vector3F(m_data[0], m_data[1], m_data[2]);
+}
+
+Vector3F BoundingBox::highCorner() const
+{
+	return Vector3F(m_data[3], m_data[4], m_data[5]);
+}
+
 char BoundingBox::touch(const BoundingBox & b) const
 {
 	if(m_data[0] >= b.m_data[3] || m_data[3] <= b.m_data[0]) return 0;

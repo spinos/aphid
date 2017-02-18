@@ -183,6 +183,7 @@ bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mod
 	
 	m_sampleFlt->setMode(mode );
 	m_sampleFlt->setSphere(m_intersectCtx.m_hitP, m_activePlants->radius() );
+	m_sampleFlt->limitBox(m_ground->getBBox() );
 	
 	m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter >(ineng, clseng,
 					*m_sampleFlt );

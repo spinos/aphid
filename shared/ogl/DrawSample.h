@@ -34,6 +34,10 @@ public:
 	void draw(const float * points,
 				const float * normals,
 				const int & count) const;
+	void draw(const float * points,
+				const float * normals,
+				const int * indices,
+				const int & count) const;
 	
 private:
 	

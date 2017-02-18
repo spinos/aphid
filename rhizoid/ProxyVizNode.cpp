@@ -282,10 +282,6 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	if(showGrid) {
 	    drawGrid();
 	}
-	
-	if(showSample) {
-		drawSample();
-	}
 
 	bool hasGlsl = isGlslReady();
 	if(!hasGlsl ) {
@@ -304,12 +300,17 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
 	}
 	
+	if(showSample) {
+		drawSample();
+	}
+	
     if(hasView() ) {
 		drawViewFrustum();
     }
 	
+	drawActiveSamples();
 	drawActivePlants();
-	drawGround();
+	
 	drawBrush(view);
 	drawManipulator();
 	glPopMatrix();

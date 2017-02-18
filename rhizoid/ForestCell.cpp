@@ -43,4 +43,25 @@ void ForestCell::deselectSamples()
 const int & ForestCell::numSelectedSamples() const
 { return m_numActiveSamples; }
 
+void ForestCell::updateActiveIndices()
+{
+	m_numActiveSamples = m_activeSampleKeys.size();
+	if(m_numActiveSamples < 1) {
+		return;
+	}
+	
+	int c=0;
+	m_activeSampleKeys.begin();
+	while(!m_activeSampleKeys.end() ) {
+	
+		m_activeSampleIndices[c] = m_activeSampleKeys.key();
+		c++;
+		
+		m_activeSampleKeys.next();
+	}
+}
+
+const int * ForestCell::selectedSampleIndices() const
+{ return m_activeSampleIndices.get(); }
+
 }

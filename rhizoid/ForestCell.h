@@ -41,15 +41,19 @@ public:
 	const int & numSamples(int level) const;
 	
 	template<typename T>
-	void selectSamples(T & selFilter);
+	bool selectSamples(T & selFilter,
+					int level = 4);
 	
 	void deselectSamples();
 	const int & numSelectedSamples() const;
+	const int * selectedSampleIndices() const;
 	
 protected:
 	const sdb::SampleCache * sampleAtLevel(int level) const;
 	 
 private:
+	void updateActiveIndices();
+	
 };
 
 template<typename T, typename Tc>
@@ -73,9 +77,16 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 }
 
 template<typename T>
-void ForestCell::selectSamples(T & selFilter)
+bool ForestCell::selectSamples(T & selFilter,
+				int level)
 {
+	if(selFilter.isReplacing() ) {
+		deselectSamples();
+	}
 	
+	m_lodsamp->select(m_activeSampleKeys, selFilter, level);
+	updateActiveIndices();
+	return m_numActiveSamples > 0;
 }
 
 }

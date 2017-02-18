@@ -29,7 +29,9 @@ typedef AdaptiveGridCell * SelfPtrType;
 private:
 	SelfPtrType m_parentCell;
 	SelfPtrType m_neighbors[26];
+	SelfPtrType m_children[8];
 	int m_numNeighbors;
+/// to parent
 	int m_childI;
 	bool m_hasChild;
 	
@@ -46,6 +48,9 @@ public:
 	
 	const int & numNeighbors() const;
 	AdaptiveGridCell * neighbor(const int & x);
+	
+	void setChild(SelfPtrType x, const int & i);
+	AdaptiveGridCell * child(const int & i);
 	
 protected:
 };
@@ -138,6 +143,7 @@ public:
 	
 protected:
 	void storeCellNeighbors();
+	void storeCellChildren();
 	
 private:
 	void countNodesIn(CellType * cell, int & c);
@@ -531,12 +537,35 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::storeCellNeighbors()
 	while(!end() ) {
 		
 		CellType * cell = value();
+		cell->clearNeighbors();
 		
 /// search 26 cells for neighbors
 		for(int i=0;i<26;++i) {
 			CellType * nei = findNeighborCell(key(), i);
 			if(nei)
 				cell->addNeighbor(nei);
+		}
+		
+		next();
+	}
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::storeCellChildren()
+{
+	begin();
+	while(!end() ) {
+		
+		CellType * cell = value();
+		
+		if(cell->hasChild() ) {
+			const Coord4 & k = key();
+/// search 8 child
+			for(int i=0;i<8;++i) {
+				const Coord4 cc = childCoord(k, i);
+				CellType * childCell = findCell(cc);
+				cell->setChild(childCell, i);
+			}
 		}
 		
 		next();

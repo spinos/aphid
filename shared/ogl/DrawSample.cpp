@@ -45,4 +45,14 @@ void DrawSample::draw(const float * points,
 	glDrawArrays(GL_POINTS, 0, count);
 }
 
+void DrawSample::draw(const float * points,
+				const float * normals,
+				const int * indices,
+				const int & count) const
+{
+	glNormalPointer(GL_FLOAT, m_prof.m_stride, normals );
+	glVertexPointer(3, GL_FLOAT, m_prof.m_stride, points );
+	glDrawElements(GL_POINTS, count, GL_UNSIGNED_INT, indices);
+}
+
 }

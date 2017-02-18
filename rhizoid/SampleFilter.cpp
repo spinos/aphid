@@ -27,28 +27,48 @@ void SampleFilter::setSphere(const Vector3F & center,
 {
 	m_center = center;
 	m_radius = radius;
+	m_bbox.setMin(m_center.x - m_radius,
+						m_center.y - m_radius,
+						m_center.z - m_radius);
+	m_bbox.setMax(m_center.x + m_radius,
+						m_center.y + m_radius,
+						m_center.z + m_radius);
 }
 
-bool SampleFilter::insideSphere(const Vector3F & p) const
-{
-	return p.distanceTo(m_center) < m_radius;
+void SampleFilter::limitBox(const BoundingBox & b)
+{ 
+	m_bbox.shrinkBy(b); 
 }
 
 Vector3F SampleFilter::boxLow() const
 { 
-	return Vector3F(m_center.x - m_radius,
-						m_center.y - m_radius,
-						m_center.z - m_radius); 
+	return m_bbox.lowCorner(); 
 }
-	
+
 Vector3F SampleFilter::boxHigh() const
 { 
-	return Vector3F(m_center.x + m_radius,
-						m_center.y + m_radius,
-						m_center.z + m_radius); 
+	return m_bbox.highCorner(); 
 }
 
 bool SampleFilter::isRemoving() const
 { return m_mode == SelectionContext::Remove; }
+
+bool SampleFilter::isReplacing() const
+{ return m_mode == SelectionContext::Replace; }
+
+bool SampleFilter::isAppending() const
+{ return m_mode == SelectionContext::Append; }
+
+bool SampleFilter::intersect(const BoundingBox & b) const
+{ return m_bbox.intersect(b); }
+
+bool SampleFilter::intersect(const Vector3F & p) const
+{ 
+	if(!m_bbox.isPointInside(p) ) {
+		return false;
+	}
+	
+	return p.distanceTo(m_center) < m_radius; 
+}
 
 }

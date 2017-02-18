@@ -34,6 +34,11 @@ const int & AdaptiveGridCell::numNeighbors() const
 AdaptiveGridCell * AdaptiveGridCell::neighbor(const int & x)
 { return m_neighbors[x]; }
 
+void AdaptiveGridCell::setChild(SelfPtrType x, const int & i)
+{ m_children[i] = x; }
+
+AdaptiveGridCell * AdaptiveGridCell::child(const int & i)
+{ return m_children[i]; }
 
 }
 

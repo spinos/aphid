@@ -55,6 +55,9 @@ public:
 	template<typename Ts>
 	void dumpSamplesInCell(Ts * dst);
 	
+	template<typename T>
+	void selectInCell(Sequence<int> & indices, T & selFilter);
+	
 private:
 
 };
@@ -93,6 +96,25 @@ void LodCell::dumpSamplesInCell(Ts * dst)
 		next();
 	}
 }
+
+template<typename T>
+void LodCell::selectInCell(Sequence<int> & indices, T & selFilter)
+{
+	begin();
+	while(!end() ) {
+		LodNode * a = value();
+		if(selFilter.intersect(a->pos) ) {
+			if(selFilter.isAppending() ) {
+				indices.insert(a->index);
+			} else {
+				indices.remove(a->index);
+			}
+		}
+		
+		next();
+	}
+}
+	
 
 class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
@@ -150,6 +172,8 @@ public:
 			level++;
 		}
 		storeCellNeighbors();
+		storeCellChildren();
+		
 #if 0		
 		const int nlc = numCellsAtLevel(maxLevel);
 		std::cout<<"\n level"<<maxLevel<<" n cell "<<nlc;

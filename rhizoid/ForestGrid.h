@@ -21,9 +21,14 @@ class Plant;
 
 class ForestGrid : public sdb::WorldGrid<ForestCell, Plant > {
 
+	sdb::Array<sdb::Coord3, ForestCell > m_activeCells;
+	int m_numActiveCells;
+	
 public:
 	ForestGrid();
 	virtual ~ForestGrid();
+	
+	const int & numActiveCells() const;
 	
 /// T as intersect type, Tc as closest to point type
 /// Tf as select filter type
@@ -31,6 +36,12 @@ public:
 	void selectCells(T & ground,
 					Tc & closestGround,
 					Tf & selFilter);
+					
+	void activeCellBegin();
+	void activeCellNext();
+	const bool activeCellEnd() const;
+	ForestCell * activeCellValue();
+	const sdb::Coord3 & activeCellKey() const;
 	
 };
 
@@ -69,12 +80,16 @@ void ForestGrid::selectCells(T & ground,
 				cell-> template buildSamples<T, Tc>(ground, closestGround,
 								cbx, gz0);
 								
-				cell-> template selectSamples<Tf>(selFilter);
+				if(cell-> template selectSamples<Tf>(selFilter) ) {
+					m_activeCells.insert(sc, cell);
+				} else {
+					m_activeCells.remove(sc);
+				}
 				
 			}
 		}
 	}
-	
+	m_numActiveCells = m_activeCells.size();
 }
 
 }
