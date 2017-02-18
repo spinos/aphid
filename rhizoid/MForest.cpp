@@ -131,7 +131,10 @@ void MForest::selectPlantByType(const MPoint & origin, const MPoint & dest,  int
 	
 	setSelectTypeFilter(typ);
 	bool stat = selectPlants(r, m);
-	if(!stat) AHelper::Info<int>("MForest error empty selection", 0);
+	if(!stat) {
+		AHelper::Info<int>("MForest error empty selection", 0);
+	}
+	
 	enableDrawing();
 }
 
@@ -142,12 +145,16 @@ void MForest::selectGround(const MPoint & origin, const MPoint & dest, MGlobal::
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
 	
-	SelectionContext::SelectMode m = SelectionContext::Replace;
-	if(adj == MGlobal::kAddToList) m = SelectionContext::Append;
-	else if(adj == MGlobal::kRemoveFromList) m = SelectionContext::Remove;
+	SelectionContext::SelectMode m = SelectionContext::Append;
+	if(adj == MGlobal::kRemoveFromList) {
+		m = SelectionContext::Remove;
+	}
 	
-	bool stat = selectGroundFaces(r, m);
-	if(!stat) AHelper::Info<int>("MForest error empty ground", 0);
+	bool stat = selectGroundSamples(r, m);
+	if(!stat) {
+		AHelper::Info<int>("MForest error empty ground selection", 0);
+	}
+	
 	enableDrawing();
 }
 
@@ -673,8 +680,12 @@ void MForest::updateExamples(MArrayDataHandle & dataArray)
 
 void MForest::deselectFaces()
 {
-    activeGround()->deselect();
-    MGlobal::displayInfo(" discard selected faces");
+	ForestGrid * g = grid();
+	if(g) {
+		g->deselectCells();
+	}
+    //activeGround()->deselect();
+    MGlobal::displayInfo(" discard selected samples");
 }
 
 void MForest::deselectPlants()
@@ -696,7 +707,14 @@ void MForest::injectPlants(const std::vector<Matrix44F> & ms, GrowOption & optio
 }
 
 void MForest::finishGroundSelection()
-{ AHelper::Info<unsigned>("MForest sel n faces", numActiveGroundFaces() ); }
+{ 
+	ForestGrid * g = grid();
+	if(!g) {
+		return;
+	}
+	onSampleChanged();
+	AHelper::Info<unsigned>("MForest sel n samples", g->numActiveSamples() ); 
+}
 
 void MForest::offsetAlongNormal(const MPoint & origin, const MPoint & dest,
 					GrowOption & option)

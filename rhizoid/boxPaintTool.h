@@ -149,7 +149,7 @@ private:
 	char validateViz(const MSelectionList &sels);
 	char validateSelection();
 	void smoothSelected();
-	void selectGround();
+	void processSelectGround();
 	void startSelectGround();
 	void replace();
     void scaleBrush();

@@ -13,13 +13,19 @@
 namespace aphid {
 
 ForestGrid::ForestGrid()
-{ m_numActiveCells = 0; }
+{ 
+	m_numActiveCells = 0;
+	m_numActiveSamples = 0; 
+}
 
 ForestGrid::~ForestGrid()
 {}
 
 const int & ForestGrid::numActiveCells() const
 { return m_numActiveCells; }
+
+const int & ForestGrid::numActiveSamples() const
+{ return m_numActiveSamples; }
 
 void ForestGrid::activeCellBegin()
 { m_activeCells.begin(); }
@@ -36,5 +42,56 @@ ForestCell * ForestGrid::activeCellValue()
 const sdb::Coord3 & ForestGrid::activeCellKey() const
 { return m_activeCells.key(); }
 
+void ForestGrid::deselectCells()
+{
+	if(m_numActiveCells < 1) {
+		return;
+	}
+	
+	m_activeCells.begin();
+	while(!m_activeCells.end() ) {
+		m_activeCells.value()->deselectSamples();
+		m_activeCells.next();
+	}
+	m_activeCells.clearSequence();
+	m_numActiveCells = 0;
+}
+
+int ForestGrid::countActiveSamples()
+{
+	m_numActiveSamples = 0;
+	
+	if(m_numActiveCells < 1) {
+		return 0;
+	}
+	
+	m_activeCells.begin();
+	while(!m_activeCells.end() ) {
+		m_numActiveSamples += m_activeCells.value()->numSelectedSamples();
+		m_activeCells.next();
+	}
+	return m_numActiveSamples;
+}
+
+void ForestGrid::clearSamplles()
+{
+	deselectCells();
+	begin();
+	while(!end() ) {
+		value()->clearSamples();
+		next();
+	}
+}
+
+int ForestGrid::countPlants()
+{
+	int c = 0;
+	begin();
+	while(!end() ) {
+		c += value()->size();
+		next();
+	}
+	return c;
+}
 
 }

@@ -64,4 +64,9 @@ void ForestCell::updateActiveIndices()
 const int * ForestCell::selectedSampleIndices() const
 { return m_activeSampleIndices.get(); }
 
+void ForestCell::clearSamples()
+{
+	m_lodsamp->clear();
+}
+
 }

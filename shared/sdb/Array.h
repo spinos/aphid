@@ -71,10 +71,18 @@ public:
 		Sequence<KeyType>::begin();
 		while(!Sequence<KeyType>::end()) {
 			ValueType * p = value();
-			if(p) delete p;
+			if(p) {
+				delete p;
+			}
 			Sequence<KeyType>::next();
 		}
 		
+		Sequence<KeyType>::clear();
+	}
+	
+/// keep data
+	virtual void clearSequence() 
+	{
 		Sequence<KeyType>::clear();
 	}
 

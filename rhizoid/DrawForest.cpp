@@ -369,7 +369,7 @@ void DrawForest::drawSample()
 	
 	DrawSample::Profile drprof;
 	drprof.m_stride = sdb::SampleCache::DataStride;
-	drprof.m_pointSize = 5.f;
+	drprof.m_pointSize = 4.f;
 	drprof.m_hasNormal = true;
 	drprof.m_hasColor = false;
 	
@@ -421,7 +421,7 @@ void DrawForest::drawActiveSamples()
 	
 	DrawSample::Profile drprof;
 	drprof.m_stride = sdb::SampleCache::DataStride;
-	drprof.m_pointSize = 5.f;
+	drprof.m_pointSize = 4.f;
 	drprof.m_hasNormal = true;
 	drprof.m_hasColor = false;
 	
@@ -435,7 +435,7 @@ void DrawForest::drawActiveSamples()
 		const ForestCell * cell = g->activeCellValue();
 		const int & nv = cell->numSelectedSamples();
 		if(nv > 0) {
-			drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
+			//drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
 			drs.draw(cell->samplePoints(4),
 					cell->sampleNormals(4),
 					cell->selectedSampleIndices(),

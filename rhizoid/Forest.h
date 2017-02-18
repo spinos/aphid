@@ -56,6 +56,7 @@ public:
 protected:
 	void resetGrid(float x);
 	void updateGrid();
+	void updateNumSamples();
 	void updateNumPlants();
 	void clearGroundMeshes();
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
@@ -63,11 +64,11 @@ protected:
     void setSelectTypeFilter(int flt);
 	bool selectTypedPlants(int x);
     bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
-	bool selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode);
+	bool selectGroundSamples(const Ray & ray, SelectionContext::SelectMode mode);
 	
 	unsigned numCells();
 	unsigned numGroundMeshes() const;
-    unsigned numPlants() const;
+    const unsigned & numPlants() const;
 	const BoundingBox & gridBoundingBox() const;
 	ForestGrid * grid();
 	PlantSelection * selection();
@@ -154,6 +155,7 @@ protected:
 					const Vector3F & origin,
 					const float & maxDistance);
 		
+	void onSampleChanged();
 	void onPlantChanged();
 	void intersectWorldBox(const Ray & ray);
 	const int & lastPlantIndex() const;

@@ -233,8 +233,7 @@ bool ModifyForest::growAt(const Ray & ray, GrowOption & option)
 	IntersectionContext * ctx = intersection();
 	
 	if(option.m_multiGrow) {
-		activeGround()->deselect();
-		selectGroundFaces(ray, SelectionContext::Append);
+		selectGroundSamples(ray, SelectionContext::Replace);
 /// limit radius
 		option.m_centerPoint = ctx->m_hitP;
 		option.m_radius = selection()->radius();
@@ -815,19 +814,26 @@ void ModifyForest::rotatePlant()
 
 void ModifyForest::moveWithGround()
 {
-	activeGround()->deselect();
+	ForestGrid * g = grid();
+	g->clearSamplles();
 	selection()->deselect();
-	if(numPlants() < 1) return;
-	if(isGroundEmpty() ) return;
+	if(numPlants() < 1) {
+		return;
+	}
+	if(isGroundEmpty() ) {
+		return;
+	}
 	
-	grid()->begin();
-	while(!grid()->end() ) {
-		movePlantsWithGround(grid()->value() );
-		grid()->next();
+	g->begin();
+	while(!g->end() ) {
+		movePlantsWithGround(g->value() );
+		g->next();
 	}
 	
 	PlantSelection::SelectionTyp * arr = activePlants();
-	if(arr->size() < 1) return;
+	if(arr->size() < 1) {
+		return;
+	}
 	
 	arr->begin();
 	while(!arr->end() ) {

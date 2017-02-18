@@ -80,6 +80,8 @@ public:
 	void select(Sequence<int> & indices,
 				T & selFilter,
 				const int & maxLevel);
+				
+	virtual void clear();
 	
 protected:
 

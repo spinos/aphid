@@ -104,10 +104,11 @@ void LodCell::selectInCell(Sequence<int> & indices, T & selFilter)
 	while(!end() ) {
 		LodNode * a = value();
 		if(selFilter.intersect(a->pos) ) {
-			if(selFilter.isAppending() ) {
-				indices.insert(a->index);
-			} else {
+			if(selFilter.isRemoving() ) {
 				indices.remove(a->index);
+			} else { 
+/// append or replace
+				indices.insert(a->index);
 			}
 		}
 		

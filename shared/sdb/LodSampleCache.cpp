@@ -98,6 +98,14 @@ const SampleCache * LodSampleCache::samplesAtLevel(int x) const
 SampleCache * LodSampleCache::samplesAtLevel(int x)
 { return &m_samples[x]; }
 
+void LodSampleCache::clear()
+{
+	for(int i=0;i<8;++i) {
+		m_samples[i].clear();
+	}
+	LodGrid::clear();
+}
+
 }
 
 }

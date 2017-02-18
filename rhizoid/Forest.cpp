@@ -64,7 +64,7 @@ void Forest::resetGrid(float x)
 {
 	m_grid->clear();
 	m_grid->setGridSize(x);
-	std::cout<<"\n reset grid "<<x;
+	std::cout<<"\n reset grid "<<m_grid->gridSize();
 	std::cout.flush();
 }
 
@@ -77,18 +77,12 @@ void Forest::updateGrid()
 const BoundingBox & Forest::gridBoundingBox() const
 { return m_grid->boundingBox(); }
 
-unsigned Forest::numPlants() const
+const unsigned & Forest::numPlants() const
 { return m_numPlants; }
 
 void Forest::updateNumPlants()
 {
-	m_numPlants = 0;
-	m_grid->begin();
-	while(!m_grid->end() ) {
-		ForestCell * cell = m_grid->value();
-		m_numPlants += cell->size();
-		m_grid->next();
-	}
+	m_numPlants = m_grid->countPlants();
 }
 
 unsigned Forest::numCells()
@@ -162,18 +156,12 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 	return true;
 }
 
-bool Forest::selectGroundFaces(const Ray & ray, SelectionContext::SelectMode mode)
+bool Forest::selectGroundSamples(const Ray & ray, SelectionContext::SelectMode mode)
 {
 	if(!intersectGround(ray) ) {
 		intersectWorldBox(ray);
 		return false;
 	}
-	
-	m_selectCtx->reset(m_intersectCtx.m_hitP, m_activePlants->radius(),
-		mode);
-
-	KdEngine engine;
-	engine.select<cvx::Triangle, KdNode4>(m_ground, m_selectCtx);
 	
 	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	FIntersectTyp ineng(m_ground);
@@ -500,7 +488,9 @@ const Vector3F & Forest::selectionNormal() const
 
 bool Forest::isGroundEmpty() const
 {
-    if(!m_ground) return true;
+    if(!m_ground) {
+		return true;
+	}
     return m_ground->isEmpty();
 }
 
@@ -551,6 +541,14 @@ const sdb::VectorArray<cvx::Triangle> & Forest::triangles() const
 
 const float & Forest::gridSize() const
 { return m_grid->gridSize(); }
+
+void Forest::onSampleChanged()
+{
+	std::cout<<"Forest on sample changed";
+    std::cout.flush();
+	updateGrid();
+	updateNumSamples();
+}
 
 void Forest::onPlantChanged()
 {
@@ -608,5 +606,8 @@ bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 
 const int & Forest::lastPlantIndex() const
 { return m_lastPlantInd; }
+
+void Forest::updateNumSamples()
+{ grid()->countActiveSamples(); }
 
 }

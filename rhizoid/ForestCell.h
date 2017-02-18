@@ -48,6 +48,8 @@ public:
 	const int & numSelectedSamples() const;
 	const int * selectedSampleIndices() const;
 	
+	void clearSamples();
+	
 protected:
 	const sdb::SampleCache * sampleAtLevel(int level) const;
 	 
@@ -62,7 +64,11 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 					const float & cellSize,
 					int maxLevel)
 {
+	//std::cout<<"\n ForestCell::buildSamples"<<cellBox;
+		
 	if(m_lodsamp->hasLevel(maxLevel)) {
+		//std::cout<<"\n skip"<<m_lodsamp->numSamplesAtLevel(maxLevel);
+		//std::cout.flush();
 		return;
 	}
 	m_lodsamp->fillBox(cellBox, cellSize);

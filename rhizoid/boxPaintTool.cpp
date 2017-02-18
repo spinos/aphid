@@ -127,7 +127,7 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
             rotateByStroke();
             break;
 		case opSelectGround :
-			selectGround();
+			processSelectGround();
 			break;
 		case opReplace :
 			replace();
@@ -311,7 +311,7 @@ void proxyPaintContext::setOperation(short val)
             mOpt = opResizeBrush;
 			break;
 		case opSelectGround:
-			opstr="ground faces";
+			opstr="select ground samples";
             mOpt = opSelectGround;
 			break;
 		case opReplace:
@@ -511,14 +511,15 @@ void proxyPaintContext::rotateAroundAxis(short axis)
 void proxyPaintContext::moveAlongAxis(short axis)
 {}
 
-void proxyPaintContext::selectGround()
+void proxyPaintContext::processSelectGround()
 {   
 	if(!PtrViz) {
 		std::cout<<"\n selectGround has no PtrViz";
 		return;
 	}
-	if(rejectSmallDragDistance() )
+	if(rejectSmallDragDistance() ) {
         return;
+	}
      
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
@@ -530,11 +531,14 @@ void proxyPaintContext::selectGround()
 void proxyPaintContext::startSelectGround()
 {
 	validateSelection();
-	if(!PtrViz) return;
+	if(!PtrViz) {
+		return;
+	}
+	
 	MPoint fromNear, fromFar;
 	view.viewToWorld (start_x, start_y, fromNear, fromFar );
 	
-	PtrViz->selectGround(fromNear, fromFar, MGlobal::kReplaceList);
+	PtrViz->selectGround(fromNear, fromFar, m_listAdjustment);
 }
 
 void proxyPaintContext::smoothSelected()
