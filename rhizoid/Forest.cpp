@@ -615,23 +615,18 @@ void Forest::updateNumSamples()
 const int & Forest::sampleLevel() const
 { return m_sampleFlt->maxSampleLevel(); }
 
-void Forest::rebuildSamplesBy(const float & distance)
+void Forest::reshuffleSamples()
 {
 	if(!m_grid) return;
-	if(m_grid->numActiveCells() < 1) return;
 	if(!m_ground) return;
 	if(m_ground->isEmpty() ) return;
 	
-	m_sampleFlt->computeGridLevelSize(gridSize(), distance);
-	std::cout<<"\n Forest build samples at level "<<sampleLevel();
+	std::cout<<"\n Forest reshuffle samples at level "<<sampleLevel();
 	
-	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
-	FIntersectTyp ineng(m_ground);
-    
 	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_ground);
 
-	m_grid->rebuildSamples<FIntersectTyp, FClosestTyp, SampleFilter >(ineng, clseng,
+	m_grid->reshuffleSamples<FClosestTyp, SampleFilter >(clseng,
 					*m_sampleFlt );
 }
 

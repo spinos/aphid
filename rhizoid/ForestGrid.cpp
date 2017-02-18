@@ -67,7 +67,7 @@ int ForestGrid::countActiveSamples()
 	
 	m_activeCells.begin();
 	while(!m_activeCells.end() ) {
-		m_numActiveSamples += m_activeCells.value()->numSelectedSamples();
+		m_numActiveSamples += m_activeCells.value()->numActiveSamples();
 		m_activeCells.next();
 	}
 	return m_numActiveSamples;

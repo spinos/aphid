@@ -40,6 +40,9 @@ const int & SampleCache::numSamples() const
 SampleCache::ASample * SampleCache::data()
 { return m_data.get(); }
 
+const SampleCache::ASample * SampleCache::data() const
+{ return m_data.get(); }
+
 const float * SampleCache::points() const
 { return (const float *)&m_data[0]; }
 
@@ -73,7 +76,7 @@ LodSampleCache::~LodSampleCache()
 bool LodSampleCache::hasLevel(int x)
 { return m_samples[x].numSamples() > 0; }
 
-void LodSampleCache::buildSamples(int minLevel, int maxLevel)
+void LodSampleCache::buildSampleCache(int minLevel, int maxLevel)
 {	
 	for(int i=minLevel;i<=maxLevel;++i) {
 		SampleCache & spsi = m_samples[i];

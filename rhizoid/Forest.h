@@ -52,7 +52,8 @@ public:
 	void removeAllPlants();
 	const float & selectionRadius() const;
 	const float & gridSize() const;
-    
+    void reshuffleSamples();
+	
 protected:
 	void resetGrid(float x);
 	void updateGrid();
@@ -162,7 +163,6 @@ protected:
 
 	void getBindTexcoord(Float2 & dst) const;
 	
-	void rebuildSamplesBy(const float & distance);
 	const int & sampleLevel() const;
 	
 private:

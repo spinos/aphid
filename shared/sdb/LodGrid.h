@@ -30,7 +30,7 @@ public:
 	Vector3F pos; 
 	int index;
 	Vector3F nml;
-	float radius;
+	float noi;
 	
 private:
 

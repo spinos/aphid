@@ -52,6 +52,7 @@ public:
 	const float * colors() const;
 	
 	ASample * data();
+	const ASample * data() const;
 	
 	void setColorByNoise();
 	
@@ -69,7 +70,7 @@ public:
 	virtual ~LodSampleCache();
 	
 	bool hasLevel(int x);
-	void buildSamples(int minLevel, int maxLevel);
+	void buildSampleCache(int minLevel, int maxLevel);
 	
 	const int & numSamplesAtLevel(int x) const;
 	

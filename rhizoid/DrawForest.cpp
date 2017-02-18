@@ -437,12 +437,12 @@ void DrawForest::drawActiveSamples()
 	while(!g->activeCellEnd() ) {
 		
 		const ForestCell * cell = g->activeCellValue();
-		const int & nv = cell->numSelectedSamples();
+		const int & nv = cell->numVisibleSamples();
 		if(nv > 0) {
 			//drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
 			drs.draw(cell->samplePoints(sl),
 					cell->sampleNormals(sl),
-					cell->selectedSampleIndices(),
+					cell->visibleSampleIndices(),
 					nv);
 		}
 		

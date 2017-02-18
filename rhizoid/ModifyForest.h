@@ -48,7 +48,6 @@ public:
 	void clearPlantOffset(GrowOption & option);
 	void setManipulatMode(ManipulateMode x);
 	ManipulateMode manipulateMode() const;
-	void rebuildSamples(GrowOption & option);
 	
 protected:
 	bool growOnGround(GrowOption & option);

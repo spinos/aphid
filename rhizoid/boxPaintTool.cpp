@@ -1099,7 +1099,7 @@ void proxyPaintContext::rebuildSamples()
 		return;
 	}
 	
-	MGlobal::displayInfo("proxyPaintContext rebuild samples");
-	PtrViz->rebuildSamples(m_growOpt);
+	MGlobal::displayInfo("proxyPaintContext reshuffle samples");
+	PtrViz->reshuffleSamples();
 }
 //:~

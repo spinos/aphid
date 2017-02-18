@@ -78,7 +78,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 	}
 	
 	BoundingBox childBx;
-	const float dnoi = box.distance(0) *  m_cellDelta * .29f;
+	const float dnoi = box.distance(0) *  m_cellDelta * .43f;
 	const int ns = numSamples();
 	for(int i=0;i<ns;++i) {
 		box.getSubBox(childBx, m_gridCoord[i], m_cellDelta);
@@ -105,7 +105,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 		}
 	}
 	
-	if(m_numValidSamples > 16) {
+	if(m_numValidSamples > 24) {
 		processKmean();
 	}
 	
@@ -115,8 +115,8 @@ template<typename Tf, typename Tn, int Ndiv>
 void GridSampler<Tf, Tn, Ndiv>::processKmean()
 {
 	const int n = m_numValidSamples;
-	int k = n - 2;
-	if(n > 32) {
+	int k = n - 3;
+	if(n > 48) {
 		k = n - n / 3;
 	}
 	if(n > 64) {

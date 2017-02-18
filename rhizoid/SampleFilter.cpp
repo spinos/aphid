@@ -80,9 +80,9 @@ const float & SampleFilter::sampleGridSize() const
 void SampleFilter::computeGridLevelSize(const float & cellSize,
 				const float & sampleDistance)
 {
-	m_sampleGridSize = sampleDistance * 2.3f;
+	m_sampleGridSize = sampleDistance * 2.f;
 	m_maxSampleLevel = 0;
-	for(;m_maxSampleLevel < 5;++m_maxSampleLevel) {
+	for(;m_maxSampleLevel < 6;++m_maxSampleLevel) {
 		if(m_sampleGridSize > cellSize) {
 			break;
 		}

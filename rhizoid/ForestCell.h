@@ -3,6 +3,8 @@
  *  proxyPaint
  *
  *  plant and sample storage in cell
+ *  selected samples are active
+ *  filtered are visible
  *
  *  Created by jian zhang on 1/19/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -21,10 +23,12 @@ class Plant;
 
 class ForestCell : public sdb::Array<sdb::Coord2, Plant> {
 
-	sdb::Sequence<int> m_activeSampleKeys;
+	sdb::Sequence<int> m_activeInd;
 	boost::scoped_array<int> m_activeSampleIndices;
+	boost::scoped_array<int> m_visibleSampleIndices;
 	sdb::LodSampleCache * m_lodsamp;
 	int m_numActiveSamples;
+	int m_numVisibleSamples;
 	
 public:
 	ForestCell(Entity * parent = NULL);
@@ -34,21 +38,26 @@ public:
 	void buildSamples(T & ground, Tc & closestGround,
 					Tf & selFilter,
 					const BoundingBox & cellBox);
-	template<typename T, typename Tc, typename Tf>
-	void rebuildSamples(T & ground, Tc & closestGround,
-					Tf & selFilter,
-					const BoundingBox & cellBox);
+
+	template<typename Tc, typename Tf>
+	void reshuffleSamples(Tc & closestGround,
+					Tf & selFilter);
 	
 	const float * samplePoints(int level) const;
 	const float * sampleNormals(int level) const;
 	const int & numSamples(int level) const;
 	
 	template<typename T>
-	bool selectSamples(T & selFilter);
+	void selectSamples(T & selFilter);
+	
+	template<typename T>
+	void processFilter(T & selFilter);
 	
 	void deselectSamples();
-	const int & numSelectedSamples() const;
-	const int * selectedSampleIndices() const;
+	const int & numActiveSamples() const;
+	const int * activeSampleIndices() const;
+	const int & numVisibleSamples() const;
+	const int * visibleSampleIndices() const;
 	
 	void clearSamples();
 	
@@ -58,7 +67,8 @@ protected:
 	const sdb::SampleCache * sampleAtLevel(int level) const;
 	 
 private:
-	void updateActiveIndices();
+	void updateIndices(int & count, int * indices,
+			sdb::Sequence<int> & srcInd);
 	
 };
 
@@ -75,34 +85,51 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 		return;
 	}
 	m_lodsamp->insertNodeAtLevel<Tc, 4 >(maxLevel, closestGround);
-	m_lodsamp->buildSamples(maxLevel, maxLevel);
+	m_lodsamp->buildSampleCache(maxLevel, maxLevel);
 	const int & nv = m_lodsamp->numSamplesAtLevel(maxLevel);
 	if(nv) {
 		m_activeSampleIndices.reset(new int[nv]);
+		m_visibleSampleIndices.reset(new int[nv]);
 	}
 }
 
-template<typename T, typename Tc, typename Tf>
-void ForestCell::rebuildSamples(T & ground, Tc & closestGround,
-					Tf & selFilter,
-					const BoundingBox & cellBox)
+template<typename Tc, typename Tf>
+void ForestCell::reshuffleSamples(Tc & closestGround,
+					Tf & selFilter)
 {
-	deselectSamples();
-	clearSamples();
-	buildSamples(ground, closestGround, selFilter,
-					cellBox);
+	//const int & maxLevel = selFilter.maxSampleLevel();
 }
 
 template<typename T>
-bool ForestCell::selectSamples(T & selFilter)
+void ForestCell::selectSamples(T & selFilter)
 {
 	if(selFilter.isReplacing() ) {
 		deselectSamples();
 	}
 	
-	m_lodsamp->select(m_activeSampleKeys, selFilter);
-	updateActiveIndices();
-	return m_numActiveSamples > 0;
+	m_lodsamp->select(m_activeInd, selFilter);
+	updateIndices(m_numActiveSamples,
+				m_activeSampleIndices.get(),
+				m_activeInd);
+}
+
+template<typename T>
+void ForestCell::processFilter(T & selFilter)
+{
+	const sdb::SampleCache * cache = sampleAtLevel(selFilter.maxSampleLevel() );
+	const sdb::SampleCache::ASample * sps = cache->data();
+	const int * activeInd = activeSampleIndices();
+	
+	m_numVisibleSamples = 0;
+	for(int i=0;i<m_numActiveSamples;++i) {
+		const int & ind = activeInd[i];
+		const sdb::SampleCache::ASample & asp = sps[ind];
+		const float & k = asp.noi;
+/// todo filter visible		 
+		m_visibleSampleIndices[m_numVisibleSamples] = ind;
+		m_numVisibleSamples++;
+	}
+	
 }
 
 }

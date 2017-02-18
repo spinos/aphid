@@ -16,6 +16,7 @@ ForestCell::ForestCell(Entity * parent) : sdb::Array<sdb::Coord2, Plant>(parent)
 {
 	m_lodsamp = new sdb::LodSampleCache;
 	m_numActiveSamples = 0;
+	m_numVisibleSamples = 0;
 }
 
 ForestCell::~ForestCell()
@@ -40,37 +41,45 @@ bool ForestCell::hasSamples(int level) const
 
 void ForestCell::deselectSamples()
 {
-	m_activeSampleKeys.clear();
+	m_activeInd.clear();
 	m_numActiveSamples = 0;
+	m_numVisibleSamples = 0;
 }
 
-const int & ForestCell::numSelectedSamples() const
-{ return m_numActiveSamples; }
-
-void ForestCell::updateActiveIndices()
+void ForestCell::updateIndices(int & count, int * indices,
+			sdb::Sequence<int> & srcInd)
 {
-	m_numActiveSamples = m_activeSampleKeys.size();
-	if(m_numActiveSamples < 1) {
+	count = srcInd.size();
+	if(count < 1) {
 		return;
 	}
 	
 	int c=0;
-	m_activeSampleKeys.begin();
-	while(!m_activeSampleKeys.end() ) {
+	srcInd.begin();
+	while(!srcInd.end() ) {
 	
-		m_activeSampleIndices[c] = m_activeSampleKeys.key();
+		indices[c] = srcInd.key();
 		c++;
 		
-		m_activeSampleKeys.next();
+		srcInd.next();
 	}
 }
-
-const int * ForestCell::selectedSampleIndices() const
-{ return m_activeSampleIndices.get(); }
 
 void ForestCell::clearSamples()
 {
 	m_lodsamp->clear();
 }
+
+const int & ForestCell::numActiveSamples() const
+{ return m_numActiveSamples; }
+
+const int * ForestCell::activeSampleIndices() const
+{ return m_activeSampleIndices.get(); }
+
+const int & ForestCell::numVisibleSamples() const
+{ return m_numVisibleSamples; }
+
+const int * ForestCell::visibleSampleIndices() const
+{ return m_visibleSampleIndices.get(); }
 
 }

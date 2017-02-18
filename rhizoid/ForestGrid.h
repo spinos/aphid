@@ -39,10 +39,9 @@ public:
 					Tc & closestGround,
 					Tf & selFilter);
 					
-/// in active cells
-	template<typename T, typename Tc, typename Tf>
-	void rebuildSamples(T & ground,
-					Tc & closestGround,
+/// for all cells, reshuffle existing samples
+	template<typename Tc, typename Tf>
+	void reshuffleSamples(Tc & closestGround,
 					Tf & selFilter);
 					
 	void activeCellBegin();
@@ -100,9 +99,12 @@ void ForestGrid::selectCells(T & ground,
 					cell->buildSamples(ground, closestGround, selFilter,
 								cbx);
 				}
+				
+				cell-> template selectSamples<Tf>(selFilter);
 								
-				if(cell-> template selectSamples<Tf>(selFilter) ) {
+				if(cell->numActiveSamples() > 0) {
 					m_activeCells.insert(sc, cell);
+					cell-> template processFilter<Tf>(selFilter);
 				} else {
 					m_activeCells.remove(sc);
 				}
@@ -113,21 +115,18 @@ void ForestGrid::selectCells(T & ground,
 	m_numActiveCells = m_activeCells.size();
 }
 
-template<typename T, typename Tc, typename Tf>
-void ForestGrid::rebuildSamples(T & ground,
-					Tc & closestGround,
+template<typename Tc, typename Tf>
+void ForestGrid::reshuffleSamples(Tc & closestGround,
 					Tf & selFilter)
 {
-	BoundingBox cbx;
-	m_activeCells.begin();
-	while(!m_activeCells.end() ) {
-		const sdb::Coord3 & k = m_activeCells.key();
-		cbx = coordToGridBBox(k);
-		ForestCell * cell = m_activeCells.value();
-		cell->rebuildSamples(ground, closestGround, selFilter,
-					cbx);
+	begin();
+	while(!end() ) {
+		ForestCell * cell = value();
+		if(cell->hasSamples(selFilter.maxSampleLevel() ) ) {
+			cell->reshuffleSamples(closestGround, selFilter);
+		}
 		
-		m_activeCells.next();
+		next();
 	}
 }
 
