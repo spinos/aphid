@@ -559,11 +559,12 @@ char proxyPaintContext::validateSelection()
 {
 	MSelectionList slist;
  	MGlobal::getActiveSelectionList( slist );
-	if(!validateViz(slist))
+	if(!validateViz(slist)) {
 	    MGlobal::displayWarning("No proxyViz selected");
-			
-    if(!PtrViz) return 0;
-
+	}
+    if(!PtrViz) {
+		return 0;
+	}
 	PtrViz->setSelectionRadius(getBrushRadius() );
 	return 1;
 }
@@ -603,8 +604,7 @@ void proxyPaintContext::snap()
 void proxyPaintContext::erase()
 {
     if(!PtrViz) return;
-    if(rejectSmallDragDistance() )
-        return;
+    if(rejectSmallDragDistance() ) return;
         
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
@@ -625,8 +625,7 @@ void proxyPaintContext::startProcessSelect()
 void proxyPaintContext::processSelect()
 {
 	if(!PtrViz) return;
-	if(rejectSmallDragDistance() )
-        return;
+	if(rejectSmallDragDistance() ) return;
         
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
@@ -637,8 +636,7 @@ void proxyPaintContext::processSelect()
 void proxyPaintContext::processSelectByType()
 {
     if(!PtrViz) return;
-    if(rejectSmallDragDistance() )
-        return;
+    if(rejectSmallDragDistance() ) return;
         
 	MPoint fromNear, fromFar;
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
@@ -1092,5 +1090,16 @@ MString proxyPaintContext::imageSamplerName() const
 		return MString("unknown");
 	}
 	return MString(m_growOpt.imageName().c_str() );
+}
+
+void proxyPaintContext::rebuildSamples()
+{
+	validateSelection();
+	if(!PtrViz) {
+		return;
+	}
+	
+	MGlobal::displayInfo("proxyPaintContext rebuild samples");
+	PtrViz->rebuildSamples(m_growOpt);
 }
 //:~

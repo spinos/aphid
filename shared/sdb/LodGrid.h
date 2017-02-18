@@ -122,7 +122,6 @@ class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 
 	BoundingBox m_limitBox;
-	int m_finestNodeLevel;
 	
 public:
 	LodGrid(Entity * parent = NULL);
@@ -134,8 +133,9 @@ public:
 	void fillBox(const BoundingBox & b,
 				const float & h);
 		
+/// level reached
 	template<typename Tf>
-	void subdivideToLevel(Tf & fintersect,
+	int subdivideToLevel(Tf & fintersect,
 						int minLevel, int maxLevel)
 	{
 #if 0
@@ -180,6 +180,7 @@ public:
 		std::cout<<"\n level"<<maxLevel<<" n cell "<<nlc;
 		std::cout.flush();
 #endif
+		return level;
 	}
 	
 	template<typename Tf, int Ndiv>
@@ -245,7 +246,6 @@ public:
 				<<"\n n samples "<<c
 				<<"\n cost time "<<t3;
 		std::cout.flush();
-		m_finestNodeLevel = level;
 	}
 	
 	void inserNodedByAggregation(int minLevel, int maxLevel);

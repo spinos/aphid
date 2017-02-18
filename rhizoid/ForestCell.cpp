@@ -15,6 +15,7 @@ namespace aphid {
 ForestCell::ForestCell(Entity * parent) : sdb::Array<sdb::Coord2, Plant>(parent)
 {
 	m_lodsamp = new sdb::LodSampleCache;
+	m_numActiveSamples = 0;
 }
 
 ForestCell::~ForestCell()
@@ -33,6 +34,9 @@ const float * ForestCell::sampleNormals(int level) const
 
 const int & ForestCell::numSamples(int level) const
 { return m_lodsamp->numSamplesAtLevel(level); }
+
+bool ForestCell::hasSamples(int level) const
+{ return m_lodsamp->hasLevel(level); }
 
 void ForestCell::deselectSamples()
 {

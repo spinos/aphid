@@ -59,6 +59,8 @@
 #define kNoiseOriginZFlagLong "-noiseOriginZ"
 #define kImageSamplerFlag "-msp"
 #define kImageSamplerFlagLong "-imageSampler"
+#define kRebuildSampleFlag "-rbs"
+#define kRebuildSampleFlagLong "-rebuildSample"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -279,6 +281,10 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		if (argData.getFlagArgument(kImageSamplerFlag, 0, imageName) ) {
 			fContext->setImageSamplerName(imageName);
 		}
+	}
+	
+	if (argData.isFlagSet(kRebuildSampleFlag)) {
+		fContext->rebuildSamples();
 	}
 
 	return MS::kSuccess;
@@ -528,7 +534,13 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	
 	stat = mySyntax.addFlag(kImageSamplerFlag, kImageSamplerFlagLong, MSyntax::kString);
 	if(!stat) {
-		MGlobal::displayInfo("failed to add noise image sampler arg");
+		MGlobal::displayInfo("failed to add image sampler arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kRebuildSampleFlag, kRebuildSampleFlagLong, MSyntax::kNoArg);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add rebuild sample arg");
 		return MS::kFailure;
 	}
 	

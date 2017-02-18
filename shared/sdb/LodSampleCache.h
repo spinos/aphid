@@ -78,8 +78,7 @@ public:
 	
 	template<typename T>
 	void select(Sequence<int> & indices,
-				T & selFilter,
-				const int & maxLevel);
+				T & selFilter);
 				
 	virtual void clear();
 	
@@ -98,9 +97,9 @@ private:
 
 template<typename T>
 void LodSampleCache::select(Sequence<int> & indices,
-				T & selFilter,
-				const int & maxLevel)
+				T & selFilter)
 {
+	const int & maxLevel = selFilter.maxSampleLevel();
 	BoundingBox cellBx;
 	begin();
 	while(!end() ) {

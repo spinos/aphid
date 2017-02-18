@@ -64,7 +64,9 @@ void Forest::resetGrid(float x)
 {
 	m_grid->clear();
 	m_grid->setGridSize(x);
-	std::cout<<"\n reset grid "<<m_grid->gridSize();
+	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.4f );
+	std::cout<<"\n reset grid "<<gridSize()
+			<<"\n sample level "<<sampleLevel();
 	std::cout.flush();
 }
 
@@ -609,5 +611,28 @@ const int & Forest::lastPlantIndex() const
 
 void Forest::updateNumSamples()
 { grid()->countActiveSamples(); }
+
+const int & Forest::sampleLevel() const
+{ return m_sampleFlt->maxSampleLevel(); }
+
+void Forest::rebuildSamplesBy(const float & distance)
+{
+	if(!m_grid) return;
+	if(m_grid->numActiveCells() < 1) return;
+	if(!m_ground) return;
+	if(m_ground->isEmpty() ) return;
+	
+	m_sampleFlt->computeGridLevelSize(gridSize(), distance);
+	std::cout<<"\n Forest build samples at level "<<sampleLevel();
+	
+	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
+	FIntersectTyp ineng(m_ground);
+    
+	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_ground);
+
+	m_grid->rebuildSamples<FIntersectTyp, FClosestTyp, SampleFilter >(ineng, clseng,
+					*m_sampleFlt );
+}
 
 }

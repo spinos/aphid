@@ -39,6 +39,12 @@ public:
 					Tc & closestGround,
 					Tf & selFilter);
 					
+/// in active cells
+	template<typename T, typename Tc, typename Tf>
+	void rebuildSamples(T & ground,
+					Tc & closestGround,
+					Tf & selFilter);
+					
 	void activeCellBegin();
 	void activeCellNext();
 	const bool activeCellEnd() const;
@@ -67,7 +73,6 @@ void ForestGrid::selectCells(T & ground,
 	const sdb::Coord3 lc = gridCoord((const float *)&plow);
 	const sdb::Coord3 hc = gridCoord((const float *)&phigh);
 	
-	const float & gz0 = gridSize() * .83f;
 	const int dimx = (hc.x - lc.x) + 1;
 	const int dimy = (hc.y - lc.y) + 1;
 	const int dimz = (hc.z - lc.z) + 1;
@@ -91,8 +96,10 @@ void ForestGrid::selectCells(T & ground,
 				if(!cell) { 
 					cell = insertCell(sc);
 				}
-				cell-> template buildSamples<T, Tc>(ground, closestGround,
-								cbx, gz0);
+				if(!cell->hasSamples(selFilter.maxSampleLevel() ) ) {
+					cell->buildSamples(ground, closestGround, selFilter,
+								cbx);
+				}
 								
 				if(cell-> template selectSamples<Tf>(selFilter) ) {
 					m_activeCells.insert(sc, cell);
@@ -104,6 +111,24 @@ void ForestGrid::selectCells(T & ground,
 		}
 	}
 	m_numActiveCells = m_activeCells.size();
+}
+
+template<typename T, typename Tc, typename Tf>
+void ForestGrid::rebuildSamples(T & ground,
+					Tc & closestGround,
+					Tf & selFilter)
+{
+	BoundingBox cbx;
+	m_activeCells.begin();
+	while(!m_activeCells.end() ) {
+		const sdb::Coord3 & k = m_activeCells.key();
+		cbx = coordToGridBBox(k);
+		ForestCell * cell = m_activeCells.value();
+		cell->rebuildSamples(ground, closestGround, selFilter,
+					cbx);
+		
+		m_activeCells.next();
+	}
 }
 
 }

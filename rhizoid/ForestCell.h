@@ -30,25 +30,29 @@ public:
 	ForestCell(Entity * parent = NULL);
 	virtual ~ForestCell();
 	
-	template<typename T, typename Tc>
+	template<typename T, typename Tc, typename Tf>
 	void buildSamples(T & ground, Tc & closestGround,
-					const BoundingBox & cellBox,
-					const float & cellSize,
-					int maxLevel = 4);
+					Tf & selFilter,
+					const BoundingBox & cellBox);
+	template<typename T, typename Tc, typename Tf>
+	void rebuildSamples(T & ground, Tc & closestGround,
+					Tf & selFilter,
+					const BoundingBox & cellBox);
 	
 	const float * samplePoints(int level) const;
 	const float * sampleNormals(int level) const;
 	const int & numSamples(int level) const;
 	
 	template<typename T>
-	bool selectSamples(T & selFilter,
-					int level = 4);
+	bool selectSamples(T & selFilter);
 	
 	void deselectSamples();
 	const int & numSelectedSamples() const;
 	const int * selectedSampleIndices() const;
 	
 	void clearSamples();
+	
+	bool hasSamples(int level) const;
 	
 protected:
 	const sdb::SampleCache * sampleAtLevel(int level) const;
@@ -58,39 +62,45 @@ private:
 	
 };
 
-template<typename T, typename Tc>
+template<typename T, typename Tc, typename Tf>
 void ForestCell::buildSamples(T & ground, Tc & closestGround,
-					const BoundingBox & cellBox,
-					const float & cellSize,
-					int maxLevel)
+					Tf & selFilter,
+					const BoundingBox & cellBox)
 {
 	//std::cout<<"\n ForestCell::buildSamples"<<cellBox;
-		
-	if(m_lodsamp->hasLevel(maxLevel)) {
-		//std::cout<<"\n skip"<<m_lodsamp->numSamplesAtLevel(maxLevel);
-		//std::cout.flush();
+	const int & maxLevel = selFilter.maxSampleLevel();
+	m_lodsamp->fillBox(cellBox, selFilter.sampleGridSize() );
+	const int reached = m_lodsamp->subdivideToLevel<T>(ground, 0, maxLevel);
+	if(reached < maxLevel) {
 		return;
 	}
-	m_lodsamp->fillBox(cellBox, cellSize);
-	m_lodsamp->subdivideToLevel<T>(ground, 0, maxLevel);
 	m_lodsamp->insertNodeAtLevel<Tc, 4 >(maxLevel, closestGround);
 	m_lodsamp->buildSamples(maxLevel, maxLevel);
 	const int & nv = m_lodsamp->numSamplesAtLevel(maxLevel);
 	if(nv) {
 		m_activeSampleIndices.reset(new int[nv]);
 	}
+}
+
+template<typename T, typename Tc, typename Tf>
+void ForestCell::rebuildSamples(T & ground, Tc & closestGround,
+					Tf & selFilter,
+					const BoundingBox & cellBox)
+{
 	deselectSamples();
+	clearSamples();
+	buildSamples(ground, closestGround, selFilter,
+					cellBox);
 }
 
 template<typename T>
-bool ForestCell::selectSamples(T & selFilter,
-				int level)
+bool ForestCell::selectSamples(T & selFilter)
 {
 	if(selFilter.isReplacing() ) {
 		deselectSamples();
 	}
 	
-	m_lodsamp->select(m_activeSampleKeys, selFilter, level);
+	m_lodsamp->select(m_activeSampleKeys, selFilter);
 	updateActiveIndices();
 	return m_numActiveSamples > 0;
 }

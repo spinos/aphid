@@ -376,15 +376,17 @@ void DrawForest::drawSample()
 	DrawSample drs;
 	drs.begin(drprof);
 	
+	const int & sl = sampleLevel();
+	
 	try {
 	g->begin();
 	while(!g->end() ) {
 		
 		const ForestCell * cell = g->value();
-		const int & nv = cell->numSamples(4);
+		const int & nv = cell->numSamples(sl);
 		if(nv > 0) {
-			drs.draw(cell->samplePoints(4),
-					cell->sampleNormals(4),
+			drs.draw(cell->samplePoints(sl),
+					cell->sampleNormals(sl),
 					nv);
 		}
 		
@@ -428,6 +430,8 @@ void DrawForest::drawActiveSamples()
 	DrawSample drs;
 	drs.begin(drprof);
 	
+	const int & sl = sampleLevel();
+	
 	try {
 	g->activeCellBegin();
 	while(!g->activeCellEnd() ) {
@@ -436,8 +440,8 @@ void DrawForest::drawActiveSamples()
 		const int & nv = cell->numSelectedSamples();
 		if(nv > 0) {
 			//drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
-			drs.draw(cell->samplePoints(4),
-					cell->sampleNormals(4),
+			drs.draw(cell->samplePoints(sl),
+					cell->sampleNormals(sl),
 					cell->selectedSampleIndices(),
 					nv);
 		}

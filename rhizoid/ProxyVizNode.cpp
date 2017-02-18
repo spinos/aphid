@@ -103,7 +103,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		//std::cout<<"\n ProxyViz "<< MFnDependencyNode(thisMObject() ).name();
 		//std::cout<<"\n ProxyViz default Geom Box"<<defBox->geomBox();
 		
-		float grdsz = defBox->geomExtent() * 20.f ;
+		float grdsz = defBox->geomExtent() * 24.f ;
 		grdsz = (int)grdsz + 1.f;
 		if(grdsz < 100.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);

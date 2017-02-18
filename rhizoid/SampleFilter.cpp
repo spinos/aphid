@@ -71,4 +71,29 @@ bool SampleFilter::intersect(const Vector3F & p) const
 	return p.distanceTo(m_center) < m_radius; 
 }
 
+const int & SampleFilter::maxSampleLevel() const
+{ return m_maxSampleLevel; }
+
+const float & SampleFilter::sampleGridSize() const
+{ return m_sampleGridSize; }
+
+void SampleFilter::computeGridLevelSize(const float & cellSize,
+				const float & sampleDistance)
+{
+	m_sampleGridSize = sampleDistance * 2.3f;
+	m_maxSampleLevel = 0;
+	for(;m_maxSampleLevel < 5;++m_maxSampleLevel) {
+		if(m_sampleGridSize > cellSize) {
+			break;
+		}
+		m_sampleGridSize *= 2.f;
+	}
+	if(m_sampleGridSize < cellSize * .5f) {
+		m_sampleGridSize = cellSize * .5f;
+	}
+	else if(m_sampleGridSize > cellSize) {
+		m_sampleGridSize = cellSize;
+	}
+}
+
 }

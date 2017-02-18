@@ -1111,4 +1111,10 @@ void ModifyForest::setManipulatMode(ModifyForest::ManipulateMode x)
 ModifyForest::ManipulateMode ModifyForest::manipulateMode() const
 { return m_manipulateMode; }
 
+void ModifyForest::rebuildSamples(GrowOption & option)
+{
+	const float sampleDistance = plantSize(option.m_plantId) * 1.4f + option.m_maxMarginSize;
+	rebuildSamplesBy(sampleDistance);
+}
+
 }

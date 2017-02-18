@@ -162,6 +162,9 @@ protected:
 
 	void getBindTexcoord(Float2 & dst) const;
 	
+	void rebuildSamplesBy(const float & distance);
+	const int & sampleLevel() const;
+	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,
 					ForestCell * cell);

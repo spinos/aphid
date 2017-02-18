@@ -20,6 +20,8 @@ class SampleFilter {
 	BoundingBox m_bbox;
 	Vector3F m_center;
 	float m_radius;
+	int m_maxSampleLevel;
+	float m_sampleGridSize;
 	SelectionContext::SelectMode m_mode;
 	
 public:
@@ -40,6 +42,11 @@ public:
 	bool isReplacing() const;
 	bool isRemoving() const;
 	bool isAppending() const;
+	
+	const int & maxSampleLevel() const;
+	const float & sampleGridSize() const;
+	void computeGridLevelSize(const float & cellSize,
+				const float & sampleDistance);
 	
 protected:
 
