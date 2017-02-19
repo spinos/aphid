@@ -96,7 +96,8 @@ global proc proxyPaintSetNoise3dOrigin()
     floatFieldGrp -e
     -value1 $a -value2 $b -value3 $c
     proxyPaintField_noise3dOrigin;
-    proxyPaintToolContext -e -nox $a `currentCtx`;
-    proxyPaintToolContext -e -noy $b `currentCtx`;
-    proxyPaintToolContext -e -noz $c `currentCtx`;
+    proxyPaintToolContext -e -noiseOriginVec $a $b $c `currentCtx`;
+    //proxyPaintToolContext -e -nox $a `currentCtx`;
+    //proxyPaintToolContext -e -noy $b `currentCtx`;
+    //proxyPaintToolContext -e -noz $c `currentCtx`;
 }
