@@ -59,8 +59,10 @@
 #define kNoiseOriginZFlagLong "-noiseOriginZ"
 #define kImageSamplerFlag "-msp"
 #define kImageSamplerFlagLong "-imageSampler"
-#define kRebuildSampleFlag "-rbs"
-#define kRebuildSampleFlagLong "-rebuildSample"
+#define kReshuffleSampleFlag "-rss"
+#define kReshuffleSampleFlagLong "-reshuffleSample"
+#define kFilterPortionFlag "-fpt"
+#define kFilterPortionFlagLong "-filterPortion"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -283,8 +285,14 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		}
 	}
 	
-	if (argData.isFlagSet(kRebuildSampleFlag)) {
-		fContext->rebuildSamples();
+	if (argData.isFlagSet(kReshuffleSampleFlag)) {
+		fContext->reshuffleSamples();
+	}
+	
+	if (argData.isFlagSet(kFilterPortionFlag)) {
+		double portion = 1.0;
+		if (argData.getFlagArgument(kFilterPortionFlag, 0, flt) )
+			fContext->setFilterPortion(portion);
 	}
 
 	return MS::kSuccess;
@@ -369,6 +377,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kImageSamplerFlag)) {
 		setResult(fContext->imageSamplerName() );
+	}
+	
+	if (argData.isFlagSet(kFilterPortionFlag)) {
+		setResult(fContext->filterPortion() );
 	}
 	
 	return MS::kSuccess;
@@ -538,9 +550,15 @@ MStatus proxyPaintContextCmd::appendSyntax()
 		return MS::kFailure;
 	}
 	
-	stat = mySyntax.addFlag(kRebuildSampleFlag, kRebuildSampleFlagLong, MSyntax::kNoArg);
+	stat = mySyntax.addFlag(kReshuffleSampleFlag, kReshuffleSampleFlagLong, MSyntax::kNoArg);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add rebuild sample arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kFilterPortionFlag, kFilterPortionFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add filter portion arg");
 		return MS::kFailure;
 	}
 	

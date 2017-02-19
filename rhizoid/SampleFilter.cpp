@@ -12,10 +12,18 @@
 namespace aphid {
 
 SampleFilter::SampleFilter()
-{}
+{ m_portion = .8f; }
 
 SampleFilter::~SampleFilter()
 {}
+
+void SampleFilter::setPortion(const float & x)
+{ 
+	m_portion = x; 
+	if(m_portion < .05f) {
+		m_portion = .05f;
+	}
+}
 
 void SampleFilter::setMode(SelectionContext::SelectMode mode)
 {
@@ -95,5 +103,8 @@ void SampleFilter::computeGridLevelSize(const float & cellSize,
 		m_sampleGridSize = cellSize;
 	}
 }
+
+bool SampleFilter::throughPortion(const float & x) const
+{ return x < m_portion; }
 
 }

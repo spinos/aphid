@@ -1,14 +1,13 @@
 global proc proxyPaintValues(string $toolName) 
 {
-	string $parent = 
-		(`toolPropertyWindow -q -location` + "|proxyPaint|proxyPaintTabs|proxyPaintTab");
+	string $parent = `toolPropertyWindow -q -location`;
 	setParent $parent;
 
 	string $icon = "proxyPaintTool.xpm";
 	string $help = "";
 	toolPropertySetCommon $toolName $icon $help;
 
-	frameLayout -e -en true -cl false proxyPaintFrame;
+	//frameLayout -e -en true -cl false proxyPaint;
 	proxyPaintOptionValues($toolName);
 
 	toolPropertySelect proxyPaint;

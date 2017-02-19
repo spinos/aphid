@@ -1,4 +1,3 @@
-
 proc string proxyPaint_getCurrentCache()
 {
     string $node = proxyPaint_getCurrentViz();
@@ -16,14 +15,11 @@ global proc proxyPaintProperties ()
 	string $parent = `toolPropertyWindow -q -location`;
     setParent $parent;
 	string $curctx = `currentCtx`;
-
-	columnLayout proxyPaint;
-		tabLayout -childResizable true proxyPaintTabs;
-			columnLayout proxyPaintTab;
-				frameLayout -cll true -cl false -l "proxyPaint Options" proxyPaintFrame;
-					columnLayout  -adjustableColumn true proxyPaintOptions;
-						separator -style "none";
-		
+				
+	string $ppnForm = `formLayout proxyPaint`;
+	string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
+// begin of proxyPaintOptions			
+	    separator -style "none";
 		text -al left -l "Select A ProxyViz To Paint";
 		textScrollList -ams off -sc "proxyPaint_selectVizToPaint" proxyPaint_VizToPaintScroll;
 	
@@ -31,30 +27,16 @@ global proc proxyPaintProperties ()
 	
 	string $viz = proxyPaint_getCurrentViz();
     int $nodeVer = proxyPaint_getNodeVersion($viz);
-	if($nodeVer == 1)
-		text -e -ann "1" proxyPaint_vizNameText;
 		
 	textScrollList -allowMultiSelection false 
 	    -sc "proxyPaintSelectExample" 
 	    proxyPaint_vizExampleScroll;
-
-	rowColumnLayout -numberOfColumns 2
-        -columnWidth 1 150
-		-columnWidth 2 150;
-    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_face.xpm" -label "Select Faces To Flood" -c "proxyPaintSetOpt(9)";
-    iconTextButton -style "iconAndTextHorizontal" -image1 "generic_discard.png" -label "Discard" -c "proxyPaintSetOpt(103)";
-    setParent ..;
     
 	rowColumnLayout -numberOfColumns 3
         -columnWidth 1 120
 		-columnWidth 2 120
 		-columnWidth 3 120;
-	        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_flood.xpm" -label "Flood" -c "proxyPaintDoFlood(`floatSliderGrp -q -value proxyPaintSlider_BRad`)";
-            if($nodeVer == 1) {
-			iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_snap.xpm" -label "Snap Along Y" -c "proxyPaintDoSnap";
-            iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_erect.xpm" -label "Align to World Up" -c "proxyPaintSetOpt(103)";  
-            }
-            iconTextButton -label "Clear Typed" 
+	        iconTextButton -label "Clear Typed" 
                         -image1 "filter.xpm" 
                         -style "iconAndTextHorizontal" 
                         -c "proxyPaintSetOpt(106)";
@@ -123,7 +105,36 @@ intSliderGrp -label "Multiple Create" -field true
 setParent ..; /// end of column
 setParent ..; /// end of frame
 
-frameLayout -label "3D Noise" -cl false;
+// end of proxyPaintOptions	
+	setParent ..;
+	
+	string $ppnTab = `tabLayout `;
+              
+	formLayout -edit
+     
+        -attachControl     $ppnTab "top"    2 $ppnColumn
+        -attachForm    $ppnTab "left"   2
+        -attachForm    $ppnTab "bottom" 2
+        -attachForm     $ppnTab "right" 2
+        
+        -attachForm $ppnColumn "top" 2   
+         -attachForm $ppnColumn "left"   2
+         -attachNone $ppnColumn "bottom"
+         -attachForm $ppnColumn "right" 2 
+        
+     $ppnForm;
+     
+// setup tabs
+        string $groundColn = `columnLayout -adjustableColumn true`;
+        rowColumnLayout -numberOfColumns 2
+        -columnWidth 1 150
+		-columnWidth 2 150;
+    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_face.xpm" -label "Select Faces To Flood" -c "proxyPaintSetOpt(9)";
+    iconTextButton -style "iconAndTextHorizontal" -image1 "generic_discard.png" -label "Discard" -c "proxyPaintSetOpt(103)";
+    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_flood.xpm" -label "Flood" -c "proxyPaintDoFlood(`floatSliderGrp -q -value proxyPaintSlider_BRad`)";
+            setParent ..;
+            
+        frameLayout -label "3D Noise" -cl false;
 columnLayout -adj true;
 floatSliderGrp -label "Level" -field true
     -minValue 0.0 -maxValue 1.0
@@ -169,8 +180,11 @@ button -label "Change Randomly" -c "proxyPaintSetNoise3dOrigin";
     
 setParent ..; /// end of column
 setParent ..; /// end of frame
-
-	rowColumnLayout -numberOfColumns 3
+        setParent ..; /// end of groundColn
+        
+        string $brushColn = `columnLayout -adjustableColumn true`;
+/// begin of brushColn
+        	rowColumnLayout -numberOfColumns 3
 		-columnWidth 1 120
 		-columnWidth 2 120
 		-columnWidth 3 120;
@@ -183,10 +197,7 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
     iconTextButton -style "iconAndTextHorizontal" -image1 "generic_discard.png" -label "Discard" -c "proxyPaintSetOpt(104)";
 
         setParent ..;
-        
-    if($nodeVer == 1)
-	    checkBox -label "Cull Select/Erase" -cc "proxyPaintSetCull(`checkBox -q -value proxyPaintSlider_cullCheck`)" proxyPaintSlider_cullCheck;
-     
+
 	rowColumnLayout -numberOfColumns 3
         -columnWidth 1 120
 		-columnWidth 2 120
@@ -224,14 +235,22 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
                         
 	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_scale.xpm" -label "Scale" -c "proxyPaintSetOpt(3)";
     iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_move.xpm" -label "Move" -c "proxyPaintSetOpt(4)";
-    iconTextButton -style "iconAndTextHorizontal" 
-        -image1 "proxyPaintTool_bundle_resize.xpm"
-        -label "Bundle Resize" 
-        -c "proxyPaintSetOpt(19)";
+    
+    iconTextButton -style "iconAndTextHorizontal"
+        -image1 "proxyPaintTool_bundle_move.xpm"
+        -label "Bundle Translate" 
+        -c "proxyPaintSetOpt(21)";
+        
     iconTextButton -style "iconAndTextHorizontal" 
         -image1 "proxyPaintTool_bundle_rotate.xpm"
         -label "Bundle Rotate" 
         -c "proxyPaintSetOpt(20)";
+        
+    iconTextButton -style "iconAndTextHorizontal" 
+        -image1 "proxyPaintTool_bundle_resize.xpm"
+        -label "Bundle Resize" 
+        -c "proxyPaintSetOpt(19)";
+    
     
     text -l "";
 	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateY.xpm" -label "RotateY" -c "proxyPaintSetOpt(5)";
@@ -249,50 +268,39 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
                         -c "proxyPaintSetOpt(105)";  
                 
 	setParent ..;
-	separator;
-	
-    rowColumnLayout -numberOfColumns 2
-        -columnWidth 1 120
-		-columnWidth 2 120;
-    iconTextButton -style "iconAndTextHorizontal" -image1 "generic_inject.png" 
-                    -label "Inject Selected" -c "proxyPaintSetOpt(98)";
-            checkBox -label "Stick to Ground" -v 1 
-                    -cc "proxyPaintSetStickToGround(`checkBox -q -value proxyPaintUICheck_stg`)" proxyPaintUICheck_stg;
-    setParent ..;
-	separator;
-    
-	intSliderGrp -label "Num Instance Groups" -field true
-    -minValue 1 -maxValue 8
-    -fieldMinValue 1 -fieldMaxValue 100
-    -value 1
-	-cw 1 130
-	-cc "proxyPaintSetInstanceGroupCount(`intSliderGrp -q -value proxyPaintSlider_instanceGroupCount`)" proxyPaintSlider_instanceGroupCount;
-	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_extract.xpm" -label "Extract Selected" -c "proxyPaintSetOpt(102)";  
-	separator;
-	
-	if($nodeVer == 1) {
-	string $cache = proxyPaint_getCurrentCache();
-	textFieldButtonGrp -columnWidth 1 80 -columnWidth 2 280 -label "Cache File" -text $cache -buttonLabel "Browse" -bc "proxyPaintChooseCache" -cc "proxyPaintSetCache" proxyPaintSlider_cacheField;
-	rowLayout -numberOfColumns 2
-	        -columnWidth2 110 110;
-	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_save.xpm" -label "Save" -c "proxyPaintWriteCache";
-	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_load.xpm" -label "Load(Revert)" -c "proxyPaintReadCache";
-	}
-	setParent ..;
-	
-	
-	                                setParent ..; // proxyPaintOptions
-				setParent ..; // proxyPaintFrame
-			setParent ..; // proxyPaintTab
-		setParent ..; // proxyPaintTabs
-	setParent ..; // proxyPaint
+/// end of brushColn
+         setParent ..; 
+        
+     string $injectColn = `rowColumnLayout -numberOfColumns 2
+            -columnWidth 1 120
+            -columnWidth 2 120`;
+        iconTextButton -style "iconAndTextHorizontal" -image1 "generic_inject.png" 
+                        -label "Inject Selected" -c "proxyPaintSetOpt(98)";
+                checkBox -label "Stick to Ground" -v 1 
+                        -cc "proxyPaintSetStickToGround(`checkBox -q -value proxyPaintUICheck_stg`)" proxyPaintUICheck_stg;
+         setParent ..;
 
-	// Name the tabs; -tl does not allow tab labelling upon creation
-	tabLayout -e -tl proxyPaintTab "Tool Defaults" proxyPaintTabs;
+     string $extractColn = `columnLayout -adjustableColumn true`;
+         intSliderGrp -label "Num Instance Groups" -field true
+        -minValue 1 -maxValue 8
+        -fieldMinValue 1 -fieldMaxValue 100
+        -value 1
+        -cw 1 130
+        -cc "proxyPaintSetInstanceGroupCount(`intSliderGrp -q -value proxyPaintSlider_instanceGroupCount`)" proxyPaintSlider_instanceGroupCount;
+        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_extract.xpm" -label "Extract Selected" -c "proxyPaintSetOpt(102)";  
+        
+         setParent ..;
 
+     tabLayout -edit
+        -tabLabel $groundColn "Ground"
+        -tabLabel $brushColn "Brush"
+         -tabLabel $injectColn "Inject" 
+         -tabLabel $extractColn "Extract"
+         $ppnTab;
+         
+     
 	setUITemplate -popTemplate;
 
-	//proxyPaintSetCallbacks($parent);
 	proxyPaintUpdateExampleScroll();
 }
 

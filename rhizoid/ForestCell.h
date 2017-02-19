@@ -125,9 +125,14 @@ void ForestCell::processFilter(T & selFilter)
 		const int & ind = activeInd[i];
 		const sdb::SampleCache::ASample & asp = sps[ind];
 		const float & k = asp.noi;
-/// todo filter visible		 
-		m_visibleSampleIndices[m_numVisibleSamples] = ind;
-		m_numVisibleSamples++;
+
+		bool stat = selFilter.throughPortion(k);
+		
+		if(stat) {
+			m_visibleSampleIndices[m_numVisibleSamples] = ind;
+			m_numVisibleSamples++;
+		}
+		
 	}
 	
 }

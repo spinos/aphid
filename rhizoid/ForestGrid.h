@@ -56,6 +56,9 @@ public:
 	
 	int countPlants();
 	
+	template<typename Tf>
+	void processFilter(Tf & selFilter);
+	
 };
 
 template<typename T, typename Tc, typename Tf>
@@ -119,11 +122,27 @@ template<typename Tc, typename Tf>
 void ForestGrid::reshuffleSamples(Tc & closestGround,
 					Tf & selFilter)
 {
+	const int & level = selFilter.maxSampleLevel();
 	begin();
 	while(!end() ) {
 		ForestCell * cell = value();
-		if(cell->hasSamples(selFilter.maxSampleLevel() ) ) {
+		if(cell->hasSamples(level) ) {
 			cell->reshuffleSamples(closestGround, selFilter);
+		}
+		
+		next();
+	}
+}
+
+template<typename Tf>
+void ForestGrid::processFilter(Tf & selFilter)
+{
+	const int & level = selFilter.maxSampleLevel();
+	begin();
+	while(!end() ) {
+		ForestCell * cell = value();
+		if(cell->hasSamples(level) ) {
+			cell->processFilter(selFilter);
 		}
 		
 		next();

@@ -130,7 +130,9 @@ public:
 	void setNoiseOriginZ(float x);
 	void setImageSamplerName(MString filename);
 	MString imageSamplerName() const;
-	void rebuildSamples();
+	void reshuffleSamples();
+	void setFilterPortion(float x);
+	const float & filterPortion() const;
 	
 private:
 	void resize(bool isBundled);

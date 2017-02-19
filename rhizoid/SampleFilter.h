@@ -22,6 +22,7 @@ class SampleFilter {
 	float m_radius;
 	int m_maxSampleLevel;
 	float m_sampleGridSize;
+	float m_portion;
 	SelectionContext::SelectMode m_mode;
 	
 public:
@@ -29,6 +30,7 @@ public:
 	virtual ~SampleFilter();
 	
 	void setMode(SelectionContext::SelectMode mode);
+	void setPortion(const float & x);
 	void setSphere(const Vector3F & center,
 						const float & radius);
 	void limitBox(const BoundingBox & b);
@@ -47,6 +49,8 @@ public:
 	const float & sampleGridSize() const;
 	void computeGridLevelSize(const float & cellSize,
 				const float & sampleDistance);
+				
+	bool throughPortion(const float & x) const;
 	
 protected:
 

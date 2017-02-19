@@ -1092,7 +1092,7 @@ MString proxyPaintContext::imageSamplerName() const
 	return MString(m_growOpt.imageName().c_str() );
 }
 
-void proxyPaintContext::rebuildSamples()
+void proxyPaintContext::reshuffleSamples()
 {
 	validateSelection();
 	if(!PtrViz) {
@@ -1101,5 +1101,22 @@ void proxyPaintContext::rebuildSamples()
 	
 	MGlobal::displayInfo("proxyPaintContext reshuffle samples");
 	PtrViz->reshuffleSamples();
+}
+
+void proxyPaintContext::setFilterPortion(float x)
+{
+	if(!PtrViz) {
+		return;
+	}
+	MGlobal::displayInfo("proxyPaintContext filter portion");
+	PtrViz->setFilterPortion(x);
+}
+	
+const float & proxyPaintContext::filterPortion() const
+{
+	if(!PtrViz) {
+		return 1.f;
+	}
+	return PtrViz->filterPortion();
 }
 //:~

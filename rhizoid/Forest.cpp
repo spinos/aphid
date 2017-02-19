@@ -630,4 +630,17 @@ void Forest::reshuffleSamples()
 					*m_sampleFlt );
 }
 
+void Forest::setFilterPortion(float x)
+{
+	m_sampleFlt->setPortion(x);
+	if(m_grid) {
+		m_grid->processFilter<SampleFilter>(*m_sampleFlt);
+	}
+}
+	
+const float & Forest::filterPortion() const
+{
+	return m_sampleFlt->portion();
+}
+
 }

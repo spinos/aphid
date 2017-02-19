@@ -53,6 +53,8 @@ public:
 	const float & selectionRadius() const;
 	const float & gridSize() const;
     void reshuffleSamples();
+	void setFilterPortion(float x);
+	const float & filterPortion() const;
 	
 protected:
 	void resetGrid(float x);
