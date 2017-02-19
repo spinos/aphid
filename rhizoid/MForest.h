@@ -44,8 +44,7 @@ public:
 	
 	void loadExternal(const char* filename);
 	void saveExternal(const char* filename);
-	void deselectFaces();
-    void deselectPlants();
+	void deselectPlants();
     void injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option);
 	void offsetAlongNormal(const MPoint & origin, const MPoint & dest,
 					GrowOption & option);

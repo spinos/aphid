@@ -59,22 +59,22 @@ float ANoise3::FractalF(const float * v,
 						const int & octaves,
 						const float & gain)
 {
-	const float ox = o[0];
-	const float oy = o[1];
-	const float oz = o[2];
+	float ox = o[0];
+	float oy = o[1];
+	float oz = o[2];
 	float sx = v[0] * freq + ox;
 	float sy = v[1] * freq + oy;
 	float sz = v[2] * freq + oz;
 	
 	float c = Trilinear(sx, sy, sz);
 	
-	float f = lacunarity, lg = 1.23f + gain * .47f;
+	float f = lacunarity, lg = 1.13f + gain * .87f;
 	float l = 1.f / lg;
 	int i=1;
 	for(;i<octaves;++i) {
-		sx += ox;
-		sy += oy;
-		sz += oz;
+		sx += ox; ox += oy;
+		sy += oy; oy -= oz;
+		sz += oz; oz += ox;
 		c += (Trilinear(sx*f, sy*f, sz*f) - .5f) * gain * l;
 		f *= lacunarity;
 		l /= lg;
@@ -90,5 +90,25 @@ float ANoise3::Fbm(const float * v,
 						const float & lacunarity,
 						const float & gain)
 { return FractalF(v, o, freq, lacunarity, octaves, gain); }
+
+ANoise3Sampler::ANoise3Sampler()
+{
+	m_noiseFrequency = 1.f;
+	m_noiseLacunarity = 1.5f;
+	m_noiseOctave = 4;
+	m_noiseLevel = 0.f;
+	m_noiseGain = .5f;
+	m_noiseOrigin.set(.4315f, .63987f, .6589f);
+}
+
+float ANoise3Sampler::sampleNoise3(const float * v) const
+{
+	return ANoise3::FractalF(v,
+							(const float *)&m_noiseOrigin,
+							m_noiseFrequency,
+							m_noiseLacunarity,
+							m_noiseOctave,
+							m_noiseGain );
+}
 
 }

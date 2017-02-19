@@ -81,6 +81,8 @@ public:
 	void select(Sequence<int> & indices,
 				T & selFilter);
 				
+	void reshuffleAtLevel(const int & level);
+				
 	virtual void clear();
 	
 protected:

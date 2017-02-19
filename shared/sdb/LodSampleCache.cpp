@@ -109,6 +109,11 @@ void LodSampleCache::clear()
 	LodGrid::clear();
 }
 
+void LodSampleCache::reshuffleAtLevel(const int & level)
+{
+	m_samples[level].assignNoise();
+}
+
 }
 
 }

@@ -1,0 +1,102 @@
+/*
+ *  proxyPaintFuncs.mel
+ *
+ *  misc funcs
+ *
+ */
+ 
+global proc proxyPaintSetFilterPortion(float $val)
+{
+	proxyPaintToolContext -e -filterPortion $val `currentCtx`;
+}
+
+global proc proxyPaintSetOpt(int $val)
+{
+	proxyPaintToolContext -e -opt $val `currentCtx`;
+}
+
+global proc proxyPaintSetMultiCreate(int $val)
+{
+	proxyPaintToolContext -e -mct $val `currentCtx`;
+}
+
+global proc proxyPaintSetInstanceGroupCount(int $val)
+{
+    proxyPaintToolContext -e -igc $val `currentCtx`;
+}
+
+global proc proxyPaintSetBRadius(float $val)
+{
+	proxyPaintToolContext -e -brd $val `currentCtx`;
+}
+
+global proc proxyPaintSetMinMargin(float $val)
+{
+	proxyPaintToolContext -e -mng $val `currentCtx`;
+}
+
+global proc proxyPaintSetMaxMargin(float $val)
+{
+	proxyPaintToolContext -e -mxg $val `currentCtx`;
+}
+
+global proc proxyPaintSetBWeight(float $val)
+{
+	proxyPaintToolContext -e -bwt $val `currentCtx`;
+}
+
+global proc proxyPaintSetScaleMin(float $val)
+{
+	proxyPaintToolContext -e -smn $val `currentCtx`;
+}
+
+global proc proxyPaintSetScaleMax(float $val)
+{
+	proxyPaintToolContext -e -smx $val `currentCtx`;
+}
+
+global proc proxyPaintSetRotateNoise(float $val)
+{
+	proxyPaintToolContext -e -rno $val `currentCtx`;
+}
+
+global proc proxyPaintSetALN(int $val)
+{
+    proxyPaintToolContext -e -anl $val `currentCtx`;
+}
+
+global proc proxyPaintSetCull(int $val)
+{
+    proxyPaintToolContext -e -cus $val `currentCtx`;
+}
+
+global proc proxyPaintSetStickToGround(int $val)
+{ proxyPaintToolContext -e -stg $val `currentCtx`; }
+
+global proc proxyPaintSetNoise3dLevel(float $x)
+{ proxyPaintToolContext -e -nlv $x `currentCtx`; }
+
+global proc proxyPaintSetNoise3dFrequency(float $x)
+{ proxyPaintToolContext -e -nfr $x `currentCtx`; }
+
+global proc proxyPaintSetNoise3dLacunarity(float $x)
+{ proxyPaintToolContext -e -nlc $x `currentCtx`; }
+
+global proc proxyPaintSetNoise3dOctave(int $x)
+{ proxyPaintToolContext -e -nov $x `currentCtx`; }
+
+global proc proxyPaintSetNoise3dGain(float $x)
+{ proxyPaintToolContext -e -ngn $x `currentCtx`; }
+
+global proc proxyPaintSetNoise3dOrigin()
+{
+    float $a = `rand 1`;
+    float $b = `rand 1`;
+    float $c = `rand 1`;
+    floatFieldGrp -e
+    -value1 $a -value2 $b -value3 $c
+    proxyPaintField_noise3dOrigin;
+    proxyPaintToolContext -e -nox $a `currentCtx`;
+    proxyPaintToolContext -e -noy $b `currentCtx`;
+    proxyPaintToolContext -e -noz $c `currentCtx`;
+}

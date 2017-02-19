@@ -64,7 +64,7 @@ void Forest::resetGrid(float x)
 {
 	m_grid->clear();
 	m_grid->setGridSize(x);
-	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.4f );
+	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.414f );
 	std::cout<<"\n reset grid "<<gridSize()
 			<<"\n sample level "<<sampleLevel();
 	std::cout.flush();
@@ -622,17 +622,12 @@ void Forest::reshuffleSamples()
 	if(m_ground->isEmpty() ) return;
 	
 	std::cout<<"\n Forest reshuffle samples at level "<<sampleLevel();
-	
-	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
-    FClosestTyp clseng(m_ground);
 
-	m_grid->reshuffleSamples<FClosestTyp, SampleFilter >(clseng,
-					*m_sampleFlt );
+	m_grid->reshuffleSamples(sampleLevel() );
 }
 
-void Forest::setFilterPortion(float x)
+void Forest::processSampleFilter()
 {
-	m_sampleFlt->setPortion(x);
 	if(m_grid) {
 		m_grid->processFilter<SampleFilter>(*m_sampleFlt);
 	}
@@ -641,6 +636,27 @@ void Forest::setFilterPortion(float x)
 const float & Forest::filterPortion() const
 {
 	return m_sampleFlt->portion();
+}
+
+void Forest::setFilterPortion(const float & x)
+{ return m_sampleFlt->setPortion(x); }
+
+void Forest::setFilterNoise(const ANoise3Sampler & param)
+{
+	m_sampleFlt->m_noiseOrigin = param.m_noiseOrigin;
+	m_sampleFlt->m_noiseFrequency = 3.1f * param.m_noiseFrequency / gridSize();
+	m_sampleFlt->m_noiseLacunarity = param.m_noiseLacunarity;
+	m_sampleFlt->m_noiseLevel = param.m_noiseLevel;
+	m_sampleFlt->m_noiseGain = param.m_noiseGain;
+	m_sampleFlt->m_noiseOctave = param.m_noiseOctave;
+}
+
+void Forest::deselectSamples()
+{
+	ForestGrid * g = grid();
+	if(g) {
+		g->deselectCells();
+	}
 }
 
 }

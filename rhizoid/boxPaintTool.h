@@ -55,8 +55,9 @@ class proxyPaintContext : public MPxContext
         opDiscardPlantSelection = 104,
         opRotateToDir = 105,
 		opCleanByType = 106,
-		opClearOffset = 107
-    };
+		opClearOffset = 107,
+		opReshuffle = 108
+	};
     
     Operation m_currentOpt, mOpt;
     
@@ -128,11 +129,12 @@ public:
 	void setNoiseOriginX(float x);
 	void setNoiseOriginY(float x);
 	void setNoiseOriginZ(float x);
+	void setNoiseOrigin(float x, float y, float z);
 	void setImageSamplerName(MString filename);
 	MString imageSamplerName() const;
 	void reshuffleSamples();
 	void setFilterPortion(float x);
-	const float & filterPortion() const;
+	float filterPortion() const;
 	
 private:
 	void resize(bool isBundled);
@@ -176,6 +178,7 @@ private:
 	void processTranslate();
 	void startResize();
 	void processResize();
+	void processFilterNoise();
     aphid::Ray getIncidentAt(int x, int y);
     
 	void attachSceneCallbacks();

@@ -26,6 +26,8 @@
 
 namespace aphid {
 
+class GrowOption;
+
 class ProxyViz : public MPxLocatorNode, public MForest
 {
 	M3dView _viewport;
@@ -113,6 +115,11 @@ public:
 	
 	const MMatrix & worldSpace() const;
 	void setEnableCompute(bool x);
+	
+	void processDeselectSamples();
+	void processReshuffle();
+	void processFilterPortion(const float & x);
+	void processFilterNoise(const GrowOption & param);
 	
 private:
     void drawBrush(M3dView & view);

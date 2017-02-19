@@ -57,6 +57,8 @@
 #define kNoiseOriginYFlagLong "-noiseOriginY"
 #define kNoiseOriginZFlag "-noz"
 #define kNoiseOriginZFlagLong "-noiseOriginZ"
+#define kNoiseOriginVecFlag "-ogv"
+#define kNoiseOriginVecFlagLong "-noiseOriginVec"
 #define kImageSamplerFlag "-msp"
 #define kImageSamplerFlagLong "-imageSampler"
 #define kReshuffleSampleFlag "-rss"
@@ -278,6 +280,17 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setNoiseOriginZ(noz);
 	}
 	
+	if (argData.isFlagSet(kNoiseOriginVecFlag)) {
+		double originx = 1.0;
+		double originy = 1.0;
+		double originz = 1.0;
+		argData.getFlagArgument(kNoiseOriginVecFlag, 0, originx);
+		argData.getFlagArgument(kNoiseOriginVecFlag, 1, originy);
+		argData.getFlagArgument(kNoiseOriginVecFlag, 2, originz);
+		
+		fContext->setNoiseOrigin(originx, originy, originz);
+	}
+	
 	if (argData.isFlagSet(kImageSamplerFlag)) {
 		MString imageName;
 		if (argData.getFlagArgument(kImageSamplerFlag, 0, imageName) ) {
@@ -291,10 +304,10 @@ MStatus proxyPaintContextCmd::doEditFlags()
 	
 	if (argData.isFlagSet(kFilterPortionFlag)) {
 		double portion = 1.0;
-		if (argData.getFlagArgument(kFilterPortionFlag, 0, flt) )
+		if (argData.getFlagArgument(kFilterPortionFlag, 0, portion) )
 			fContext->setFilterPortion(portion);
 	}
-
+	
 	return MS::kSuccess;
 }
 
@@ -559,6 +572,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kFilterPortionFlag, kFilterPortionFlagLong, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add filter portion arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kNoiseOriginVecFlag, kNoiseOriginVecFlagLong, MSyntax::kDouble, MSyntax::kDouble, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add noise origin vec arg");
 		return MS::kFailure;
 	}
 	

@@ -107,4 +107,16 @@ void SampleFilter::computeGridLevelSize(const float & cellSize,
 bool SampleFilter::throughPortion(const float & x) const
 { return x < m_portion; }
 
+const float & SampleFilter::portion() const
+{ return m_portion; }
+
+bool SampleFilter::throughNoise3D(const Vector3F & p) const
+{
+	if(m_noiseLevel < 1e-2f) {
+		return true;
+	}
+	
+	return sampleNoise3((const float *)&p) > m_noiseLevel;
+}
+
 }

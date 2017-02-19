@@ -21,6 +21,7 @@ ForestCell::ForestCell(Entity * parent) : sdb::Array<sdb::Coord2, Plant>(parent)
 
 ForestCell::~ForestCell()
 {
+	m_activeInd.clear();
 	delete m_lodsamp;
 }
 
@@ -81,5 +82,8 @@ const int & ForestCell::numVisibleSamples() const
 
 const int * ForestCell::visibleSampleIndices() const
 { return m_visibleSampleIndices.get(); }
+
+void ForestCell::reshuffleSamples(const int & level)
+{ m_lodsamp->reshuffleAtLevel(level); }
 
 }

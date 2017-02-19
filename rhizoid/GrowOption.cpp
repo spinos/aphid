@@ -25,12 +25,6 @@ GrowOption::GrowOption()
 	m_maxMarginSize = .1f;
 	m_strength = .67f;
 	m_stickToGround = true;
-	m_noiseFrequency = 1.f;
-	m_noiseLacunarity = 1.5f;
-	m_noiseOctave = 4;
-	m_noiseLevel = 0.f;
-	m_noiseGain = .5f;
-	m_noiseOrigin.set(.4315f, .63987f, .6589f);
 	m_sampler = NULL;
 }
 

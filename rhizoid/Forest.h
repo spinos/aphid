@@ -20,6 +20,7 @@ class ForestCell;
 class ForestGrid;
 class ExampVox;
 class ATriangleMesh;
+class ANoise3Sampler;
 class SampleFilter;
 struct Float2;
 
@@ -52,8 +53,6 @@ public:
 	void removeAllPlants();
 	const float & selectionRadius() const;
 	const float & gridSize() const;
-    void reshuffleSamples();
-	void setFilterPortion(float x);
 	const float & filterPortion() const;
 	
 protected:
@@ -166,7 +165,13 @@ protected:
 	void getBindTexcoord(Float2 & dst) const;
 	
 	const int & sampleLevel() const;
+	void processSampleFilter();
 	
+	void setFilterPortion(const float & x);
+	void reshuffleSamples();
+	void deselectSamples();
+	void setFilterNoise(const ANoise3Sampler & param);
+    
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,
 					ForestCell * cell);

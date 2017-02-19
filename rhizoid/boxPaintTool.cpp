@@ -208,6 +208,10 @@ void proxyPaintContext::setOperation(short val)
 {
 	bool toReturn = false;
 	switch (val) {
+		case opReshuffle:
+			reshuffleSamples();
+			toReturn = true;
+		break;
 		case opClearOffset:
 			clearOffset();
 			toReturn = true;
@@ -776,7 +780,7 @@ const int & proxyPaintContext::plantType() const
 void proxyPaintContext::discardFaceSelection()
 {
     if(!PtrViz) return;
-    PtrViz->deselectFaces();
+    PtrViz->processDeselectSamples();
 }
 
 void proxyPaintContext::discardPlantSelection()
@@ -968,31 +972,36 @@ const float & proxyPaintContext::noiseOriginZ() const
 void proxyPaintContext::setNoiseFrequency(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise frequency", x);
-	m_growOpt.m_noiseFrequency = x; 
+	m_growOpt.m_noiseFrequency = x;
+	processFilterNoise(); 
 }
 
 void proxyPaintContext::setNoiseLacunarity(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise lacunarity", x);
 	m_growOpt.m_noiseLacunarity = x; 
+	processFilterNoise();
 }
 
 void proxyPaintContext::setNoiseOctave(int x)
 { 
 	AHelper::Info<int>(" proxyPaintContext set noise octace", x);
-	m_growOpt.m_noiseOctave = x; 
+	m_growOpt.m_noiseOctave = x;
+	processFilterNoise(); 
 }
 
 void proxyPaintContext::setNoiseLevel(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise level", x);
 	m_growOpt.m_noiseLevel = x; 
+	processFilterNoise();
 }
 
 void proxyPaintContext::setNoiseGain(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise gain", x);
 	m_growOpt.m_noiseGain = x; 
+	processFilterNoise();
 }
 
 void proxyPaintContext::setNoiseOriginX(float x)
@@ -1011,6 +1020,13 @@ void proxyPaintContext::setNoiseOriginZ(float x)
 { 
 	AHelper::Info<float>(" proxyPaintContext set noise origin z", x);
 	m_growOpt.m_noiseOrigin.z = x; 
+}
+
+void proxyPaintContext::setNoiseOrigin(float x, float y, float z)
+{
+	AHelper::Info<Vector3F>(" proxyPaintContext set noise origin", Vector3F(x, y, z) );
+	m_growOpt.m_noiseOrigin.set(x, y, z);
+	processFilterNoise();
 }
 
 /// limit frequency of action
@@ -1095,28 +1111,31 @@ MString proxyPaintContext::imageSamplerName() const
 void proxyPaintContext::reshuffleSamples()
 {
 	validateSelection();
-	if(!PtrViz) {
-		return;
+	if(PtrViz) {
+		PtrViz->processReshuffle();
 	}
-	
-	MGlobal::displayInfo("proxyPaintContext reshuffle samples");
-	PtrViz->reshuffleSamples();
 }
 
 void proxyPaintContext::setFilterPortion(float x)
 {
-	if(!PtrViz) {
-		return;
+	if(PtrViz) {
+		PtrViz->processFilterPortion(x);
 	}
-	MGlobal::displayInfo("proxyPaintContext filter portion");
-	PtrViz->setFilterPortion(x);
 }
 	
-const float & proxyPaintContext::filterPortion() const
+float proxyPaintContext::filterPortion() const
 {
 	if(!PtrViz) {
 		return 1.f;
 	}
 	return PtrViz->filterPortion();
+}
+
+void proxyPaintContext::processFilterNoise()
+{
+	validateSelection();
+	if(PtrViz) {
+		PtrViz->processFilterNoise(m_growOpt);
+	}
 }
 //:~

@@ -9,6 +9,8 @@
 #ifndef APH_A_NOISE_3_H
 #define APH_A_NOISE_3_H
 
+#include <math/Vector3F.h>
+
 namespace aphid {
 
 class ANoise3 {
@@ -45,6 +47,22 @@ public:
 						const int & octaves = 5,
 						const float & lacunarity = 2.f,
 						const float & gain = .5f);
+	
+};
+
+class ANoise3Sampler {
+
+public:
+	Vector3F m_noiseOrigin;
+	float m_noiseFrequency;
+	float m_noiseLacunarity;
+	float m_noiseLevel;
+	float m_noiseGain;
+	int m_noiseOctave; 
+	
+	ANoise3Sampler();
+	
+	float sampleNoise3(const float * v) const;
 	
 };
 

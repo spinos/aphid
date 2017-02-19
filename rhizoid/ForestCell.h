@@ -39,9 +39,7 @@ public:
 					Tf & selFilter,
 					const BoundingBox & cellBox);
 
-	template<typename Tc, typename Tf>
-	void reshuffleSamples(Tc & closestGround,
-					Tf & selFilter);
+	void reshuffleSamples(const int & level);
 	
 	const float * samplePoints(int level) const;
 	const float * sampleNormals(int level) const;
@@ -93,13 +91,6 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 	}
 }
 
-template<typename Tc, typename Tf>
-void ForestCell::reshuffleSamples(Tc & closestGround,
-					Tf & selFilter)
-{
-	//const int & maxLevel = selFilter.maxSampleLevel();
-}
-
 template<typename T>
 void ForestCell::selectSamples(T & selFilter)
 {
@@ -115,7 +106,7 @@ void ForestCell::selectSamples(T & selFilter)
 
 template<typename T>
 void ForestCell::processFilter(T & selFilter)
-{
+{	
 	const sdb::SampleCache * cache = sampleAtLevel(selFilter.maxSampleLevel() );
 	const sdb::SampleCache::ASample * sps = cache->data();
 	const int * activeInd = activeSampleIndices();
@@ -127,6 +118,10 @@ void ForestCell::processFilter(T & selFilter)
 		const float & k = asp.noi;
 
 		bool stat = selFilter.throughPortion(k);
+		
+		if(stat) {
+			stat = selFilter.throughNoise3D(asp.pos);
+		}
 		
 		if(stat) {
 			m_visibleSampleIndices[m_numVisibleSamples] = ind;

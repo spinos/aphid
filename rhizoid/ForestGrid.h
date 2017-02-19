@@ -39,10 +39,8 @@ public:
 					Tc & closestGround,
 					Tf & selFilter);
 					
-/// for all cells, reshuffle existing samples
-	template<typename Tc, typename Tf>
-	void reshuffleSamples(Tc & closestGround,
-					Tf & selFilter);
+/// for all active cells, reshuffle samples noise
+	void reshuffleSamples(const int & level);
 					
 	void activeCellBegin();
 	void activeCellNext();
@@ -116,22 +114,6 @@ void ForestGrid::selectCells(T & ground,
 		}
 	}
 	m_numActiveCells = m_activeCells.size();
-}
-
-template<typename Tc, typename Tf>
-void ForestGrid::reshuffleSamples(Tc & closestGround,
-					Tf & selFilter)
-{
-	const int & level = selFilter.maxSampleLevel();
-	begin();
-	while(!end() ) {
-		ForestCell * cell = value();
-		if(cell->hasSamples(level) ) {
-			cell->reshuffleSamples(closestGround, selFilter);
-		}
-		
-		next();
-	}
 }
 
 template<typename Tf>

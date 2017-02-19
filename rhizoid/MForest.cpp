@@ -678,16 +678,6 @@ void MForest::updateExamples(MArrayDataHandle & dataArray)
 	}
 }
 
-void MForest::deselectFaces()
-{
-	ForestGrid * g = grid();
-	if(g) {
-		g->deselectCells();
-	}
-    //activeGround()->deselect();
-    MGlobal::displayInfo(" discard selected samples");
-}
-
 void MForest::deselectPlants()
 {
     selection()->deselect();

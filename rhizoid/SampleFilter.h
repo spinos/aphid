@@ -12,10 +12,11 @@
 
 #include <math/BoundingBox.h>
 #include <SelectionContext.h>
+#include <math/ANoise3.h>
 
 namespace aphid {
 
-class SampleFilter {
+class SampleFilter : public ANoise3Sampler {
 
 	BoundingBox m_bbox;
 	Vector3F m_center;
@@ -51,6 +52,9 @@ public:
 				const float & sampleDistance);
 				
 	bool throughPortion(const float & x) const;
+	bool throughNoise3D(const Vector3F & p) const;
+	
+	const float & portion() const;
 	
 protected:
 

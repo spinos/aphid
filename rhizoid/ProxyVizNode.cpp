@@ -14,6 +14,7 @@
 #include <mama/AHelper.h>
 #include <mama/AttributeHelper.h>
 #include <ExampVox.h>
+#include <GrowOption.h>
 
 namespace aphid {
 
@@ -1075,6 +1076,37 @@ void ProxyViz::updateDrawSize(ExampVox * dst, const MObject & node)
 
 bool ProxyViz::drawLast () const
 { return true; }
+
+void ProxyViz::processDeselectSamples()
+{
+	AHelper::Info<int>("ProxyViz deselect active samples", 0);
+	deselectSamples();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processReshuffle()
+{
+	AHelper::Info<int>("ProxyViz process reshuffle samples", 0);
+	reshuffleSamples();
+	processSampleFilter();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processFilterPortion(const float & x)
+{
+	AHelper::Info<float>("ProxyViz process filter portion", x);
+	setFilterPortion(x);
+	processSampleFilter();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processFilterNoise(const GrowOption & param)
+{
+	AHelper::Info<float>("ProxyViz process filter noise", param.m_noiseLevel);
+	setFilterNoise(param);
+	processSampleFilter();
+	_viewport.refresh(false, true);
+}
 
 }
 //:~
