@@ -46,11 +46,31 @@ public:
 	void reverseTriangleNormals();
     void calculateVertexNormals();
 	
+	template<typename T>
+	void dumpComponent(T & acomp, const int & i) const;
+	
 protected:
 	
 private:
 	
 };
+
+template<typename T>
+void ATriangleMesh::dumpComponent(T & acomp, const int & i) const
+{
+	const Vector3F * p = points();
+	const unsigned * v = triangleIndices(i);
+	int a = v[0];
+	int b = v[1];
+	int c = v[2];
+			
+	acomp.setP(p[a], 0);
+	acomp.setP(p[b], 1);
+	acomp.setP(p[c], 2);
+		
+	const Float2 * uvs = triangleTexcoord(i);
+	acomp.setUVs(uvs);
+}
 
 }
 #endif        //  #ifndef APH_GEOM_TRIANGLE_MESH_H

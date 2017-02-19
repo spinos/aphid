@@ -116,7 +116,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 		cell->insertNodeAtLevel<FClosestTyp, 4 >(4, clseng);
 		cell->insertNodeAtLevel<FClosestTyp, 4 >(3, clseng);
 		cell->inserNodedByAggregation(2, 2);
-		cell->buildSamples(2,4);
+		cell->buildSampleCache(2,4);
 		m_grid->next();
 	}
 	

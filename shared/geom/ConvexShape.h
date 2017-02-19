@@ -271,8 +271,8 @@ public:
 	
 	bool sampleP(Vector3F & dst, const BoundingBox &  b) const;
 	
-	void setUV(const float & u, const float & v,
-					const int & i);
+	void setUVs(const Float2 * src);
+	Float2 interpolateTexcoord(const float * contribs) const;
 					
 	const Float2 & uv(const int & i) const;
 	
@@ -325,6 +325,7 @@ void Triangle::closestToPoint(T * result) const
 	result->_contributes[2] = bar.getV(2);
 	result->_igeometry = ind0();
 	result->_icomponent = ind1();
+	result->_isource = result->_currentSourceInd;
 }
 
 /// 3 -- 2

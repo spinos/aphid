@@ -37,7 +37,7 @@ public:
 	unsigned numSelected();
  
 protected:
-	TreeTyp * tree();
+	const TreeTyp * tree() const;
 	const sdb::VectorArray<T> & source() const;
 	sdb::Sequence<int> * primIndices();
 	
@@ -75,7 +75,7 @@ unsigned SelectEngine<T, Tn>::numSelected()
 { return m_selectCtx.numSelected(); }
 
 template<typename T, typename Tn>
-KdNTree<T, Tn > * SelectEngine<T, Tn>::tree()
+const KdNTree<T, Tn > * SelectEngine<T, Tn>::tree() const
 { return m_tree; }
 
 template<typename T, typename Tn>

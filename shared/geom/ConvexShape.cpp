@@ -638,9 +638,22 @@ bool Triangle::sampleP(Vector3F & dst, const BoundingBox &  box) const
 	return false;
 }
 
-void Triangle::setUV(const float & u, const float & v,
-					const int & i)
-{ m_uv[i].set(u, v); }
+void Triangle::setUVs(const Float2 * src)
+{ 
+	m_uv[0] = src[0];
+	m_uv[1] = src[1];
+	m_uv[2] = src[2];
+}
+
+Float2 Triangle::interpolateTexcoord(const float * contribs) const
+{
+	return Float2(m_uv[0].x * contribs[0]
+			+ m_uv[1].x * contribs[1]
+			+ m_uv[2].x * contribs[2],
+			m_uv[0].y * contribs[0]
+			+ m_uv[1].y * contribs[1]
+			+ m_uv[2].y * contribs[2]);
+}
 
 const Float2 & Triangle::uv(const int & i) const
 { return m_uv[i]; }

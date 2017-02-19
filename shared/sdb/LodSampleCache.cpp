@@ -67,6 +67,14 @@ void SampleCache::setColorByNoise()
 	}
 }
 
+void SampleCache::setColorByUV()
+{
+	for(int i=0;i<m_numSamples;++i) {
+		ASample & d = m_data[i];
+		d.col.set(d.u, d.v, 0.f);
+	}
+}
+
 LodSampleCache::LodSampleCache(Entity * parent) : LodGrid(parent)
 {}
 
@@ -86,6 +94,7 @@ void LodSampleCache::buildSampleCache(int minLevel, int maxLevel)
 			spsi.create(ns);
 			dumpLevelSamples<SampleCache::ASample>(spsi.data(), i );
 			spsi.assignNoise();
+			spsi.setColorByUV();
 		}
 	}
 }

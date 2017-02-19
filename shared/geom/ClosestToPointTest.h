@@ -27,6 +27,8 @@ public:
 	float _distance;
 	unsigned _icomponent;
 	unsigned _igeometry;
+	int _isource;
+	int _currentSourceInd;
 	bool _hasResult;
 	bool _isInside;
 	bool _isFast;

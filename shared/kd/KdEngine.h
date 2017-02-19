@@ -204,31 +204,26 @@ void KdEngine::buildSource(sdb::VectorArray<T> * dst,
 {
 	box.reset();
 	T acomp;
-	unsigned a, b, c;
 	typename std::vector<Ts *>::const_iterator it = src.begin();
     for(int i=0;it!=src.end();++it,++i) {
 /// ind 0 to geom
 		acomp.setInd(i, 0);
-		Ts * w = *it;
-		const Vector3F * p = w->points();
-		unsigned n = w->numComponents();
-		for(unsigned j=0; j<n; ++j) {
-			unsigned * v = w->triangleIndices(j);
-			a = v[0];
-			b = v[1];
-			c = v[2];
-			box.expandBy(p[a], 1e-4f);
-			acomp.setP(p[a], 0);
-			box.expandBy(p[b], 1e-4f);
-			acomp.setP(p[b], 1);
-			box.expandBy(p[c], 1e-4f);
-			acomp.setP(p[c], 2);
+		const Ts * w = *it;
+		const int n = w->numComponents();
+		for(int j=0; j<n; ++j) {
+		
+			w-> template dumpComponent<T>(acomp, j);
+			
 /// ind 1 to component
 			acomp.setInd(j, 1);
+	
 			dst->insert(acomp);
+			
+			const BoundingBox cbx = acomp.calculateBBox();
+			box.expandBy(cbx);
 		}
 	}
-    box.round();
+	box.round();
 }
 
 template<typename T, typename Tn, int NLevel>

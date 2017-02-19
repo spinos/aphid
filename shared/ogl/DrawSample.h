@@ -31,11 +31,18 @@ public:
 	
 	void begin(const Profile & prof);
 	void end() const;
+	void drawColored(const float * points,
+				const float * colors,
+				const int & count) const;
 	void draw(const float * points,
 				const float * normals,
 				const int & count) const;
 	void draw(const float * points,
 				const float * normals,
+				const int * indices,
+				const int & count) const;
+	void drawColored(const float * points,
+				const float * colors,
 				const int * indices,
 				const int & count) const;
 	

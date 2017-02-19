@@ -34,6 +34,9 @@ const float * ForestCell::samplePoints(int level) const
 const float * ForestCell::sampleNormals(int level) const
 { return sampleAtLevel(level)->normals(); }
 
+const float * ForestCell::sampleColors(int level) const
+{ return sampleAtLevel(level)->colors(); }
+
 const int & ForestCell::numSamples(int level) const
 { return m_lodsamp->numSamplesAtLevel(level); }
 

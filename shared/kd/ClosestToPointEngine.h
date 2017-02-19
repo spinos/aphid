@@ -35,8 +35,10 @@ public:
 
     const Vector3F & closestToPointPoint() const;
 	const Vector3F & closestToPointNormal() const;
+    Float2 closestToPointTexcoord() const;
+	void getClosestToPointGeomcomp(int & geom, int & comp) const;
     Plane closestPlane() const;
-    
+	
 };
 
 template<typename T, typename Tn>
@@ -66,7 +68,8 @@ bool ClosestToPointEngine<T, Tn>::selectedClosestToPoint(const Vector3F & origin
 	prims->begin();
 	while(!prims->end() ) {
 	
-		const T * ts = src[prims->key() ];
+		m_ctx._currentSourceInd = prims->key();
+		const T * ts = src[m_ctx._currentSourceInd];
 		ts-> template closestToPoint<ClosestToPointTestResult>(&m_ctx);
 		
 		if(m_ctx.closeEnough() ) {
@@ -100,6 +103,21 @@ const Vector3F & ClosestToPointEngine<T, Tn>::closestToPointPoint() const
 template<typename T, typename Tn>
 const Vector3F & ClosestToPointEngine<T, Tn>::closestToPointNormal() const
 { return m_ctx._hitNormal; }
+
+template<typename T, typename Tn>
+Float2 ClosestToPointEngine<T, Tn>::closestToPointTexcoord() const
+{
+	const sdb::VectorArray<T> & src = SelectEngine<T, Tn>::source();
+	const T * comp = src[m_ctx._isource];
+	return comp->interpolateTexcoord(m_ctx._contributes);
+}
+
+template<typename T, typename Tn>
+void ClosestToPointEngine<T, Tn>::getClosestToPointGeomcomp(int & geom, int & comp) const
+{ 
+	geom = m_ctx._igeometry;
+	comp = m_ctx._icomponent;
+}
 
 template<typename T, typename Tn>
 Plane ClosestToPointEngine<T, Tn>::closestPlane() const

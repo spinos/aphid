@@ -55,6 +55,7 @@ public:
 	const ASample * data() const;
 	
 	void setColorByNoise();
+	void setColorByUV();
 	
 	static const int DataStride;
 	

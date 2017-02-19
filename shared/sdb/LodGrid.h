@@ -30,7 +30,10 @@ public:
 	Vector3F pos; 
 	int index;
 	Vector3F nml;
-	float noi;
+	int geom;
+	Float2 texcoord;
+	int comp;
+	int pad;
 	
 private:
 
@@ -90,8 +93,11 @@ void LodCell::dumpSamplesInCell(Ts * dst)
 	begin();
 	while(!end() ) {
 		LodNode * a = value();
-		dst[a->index].pos = a->pos;
-		dst[a->index].nml = a->nml;
+		const int & i = a->index;
+		dst[i].pos = a->pos;
+		dst[i].nml = a->nml;
+		dst[i].u = a->texcoord.x;
+		dst[i].v = a->texcoord.y;
 		
 		next();
 	}

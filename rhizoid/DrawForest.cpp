@@ -365,13 +365,12 @@ void DrawForest::drawSample()
 	
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
-	glColor3f(0,1,1);
 	
 	DrawSample::Profile drprof;
 	drprof.m_stride = sdb::SampleCache::DataStride;
 	drprof.m_pointSize = 4.f;
-	drprof.m_hasNormal = true;
-	drprof.m_hasColor = false;
+	drprof.m_hasNormal = false;
+	drprof.m_hasColor = true;
 	
 	DrawSample drs;
 	drs.begin(drprof);
@@ -385,8 +384,8 @@ void DrawForest::drawSample()
 		const ForestCell * cell = g->value();
 		const int & nv = cell->numSamples(sl);
 		if(nv > 0) {
-			drs.draw(cell->samplePoints(sl),
-					cell->sampleNormals(sl),
+			drs.drawColored(cell->samplePoints(sl),
+					cell->sampleColors(sl),
 					nv);
 		}
 		
@@ -419,13 +418,12 @@ void DrawForest::drawActiveSamples()
 	
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
-	glColor3f(0,1,1);
 	
 	DrawSample::Profile drprof;
 	drprof.m_stride = sdb::SampleCache::DataStride;
 	drprof.m_pointSize = 4.f;
-	drprof.m_hasNormal = true;
-	drprof.m_hasColor = false;
+	drprof.m_hasNormal = false;
+	drprof.m_hasColor = true;
 	
 	DrawSample drs;
 	drs.begin(drprof);
@@ -440,8 +438,8 @@ void DrawForest::drawActiveSamples()
 		const int & nv = cell->numVisibleSamples();
 		if(nv > 0) {
 			//drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
-			drs.draw(cell->samplePoints(sl),
-					cell->sampleNormals(sl),
+			drs.drawColored(cell->samplePoints(sl),
+					cell->sampleColors(sl),
 					cell->visibleSampleIndices(),
 					nv);
 		}

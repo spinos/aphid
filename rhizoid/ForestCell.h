@@ -43,6 +43,7 @@ public:
 	
 	const float * samplePoints(int level) const;
 	const float * sampleNormals(int level) const;
+	const float * sampleColors(int level) const;
 	const int & numSamples(int level) const;
 	
 	template<typename T>
