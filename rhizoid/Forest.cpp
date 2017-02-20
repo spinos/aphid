@@ -358,7 +358,7 @@ Vector3F Forest::bindNormal(const GroundBind * bind) const
     return msh->triangleNormal(icomp);
 }
 
-void Forest::setBind(GroundBind * bind) const
+void Forest::getClosestBind(GroundBind * bind) const
 {
 	bind->setGeomComp(m_closestPointTest._igeometry, 
 								m_closestPointTest._icomponent );
@@ -563,8 +563,9 @@ void Forest::onPlantChanged()
 void Forest::intersectWorldBox(const Ray & ray)
 {
 	float h0, h1;
-	if(!gridBoundingBox().intersect(ray, &h0, &h1) )
+	if(!gridBoundingBox().intersect(ray, &h0, &h1) ) {
 		h1 = 1e6f;
+	}
 	m_intersectCtx.m_hitP = ray.travel(h1);
 	m_intersectCtx.m_hitN = ray.m_dir;
 }

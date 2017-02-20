@@ -681,7 +681,7 @@ MStatus ProxyViz::initialize()
 	
 	ashosamp = numFn.create( "showSample", "shsp", MFnNumericData::kBoolean );
 	numFn.setDefault(0);
-	numFn.setKeyable(true);
+	numFn.setKeyable(false);
 	numFn.setStorable(false);
 	addAttribute(ashosamp);
     

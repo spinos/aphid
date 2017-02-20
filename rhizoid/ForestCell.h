@@ -62,8 +62,9 @@ public:
 	
 	bool hasSamples(int level) const;
 	
+	const sdb::SampleCache * sampleCacheAtLevel(int level) const;
+	
 protected:
-	const sdb::SampleCache * sampleAtLevel(int level) const;
 	 
 private:
 	void updateIndices(int & count, int * indices,
@@ -108,7 +109,7 @@ void ForestCell::selectSamples(T & selFilter)
 template<typename T>
 void ForestCell::processFilter(T & selFilter)
 {	
-	const sdb::SampleCache * cache = sampleAtLevel(selFilter.maxSampleLevel() );
+	const sdb::SampleCache * cache = sampleCacheAtLevel(selFilter.maxSampleLevel() );
 	const sdb::SampleCache::ASample * sps = cache->data();
 	const int * activeInd = activeSampleIndices();
 	

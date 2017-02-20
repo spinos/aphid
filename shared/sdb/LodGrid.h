@@ -94,10 +94,13 @@ void LodCell::dumpSamplesInCell(Ts * dst)
 	while(!end() ) {
 		LodNode * a = value();
 		const int & i = a->index;
-		dst[i].pos = a->pos;
-		dst[i].nml = a->nml;
-		dst[i].u = a->texcoord.x;
-		dst[i].v = a->texcoord.y;
+		
+		Ts & d = dst[i];
+		d.pos = a->pos;
+		d.nml = a->nml;
+		d.u = a->texcoord.x;
+		d.v = a->texcoord.y;
+		d.geomcomp = (a->geom<<22) | a->comp;
 		
 		next();
 	}

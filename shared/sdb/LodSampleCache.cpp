@@ -43,6 +43,9 @@ SampleCache::ASample * SampleCache::data()
 const SampleCache::ASample * SampleCache::data() const
 { return m_data.get(); }
 
+const SampleCache::ASample & SampleCache::getASample(const int & i) const
+{ return m_data[i]; }
+
 const float * SampleCache::points() const
 { return (const float *)&m_data[0]; }
 

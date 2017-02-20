@@ -24,6 +24,7 @@ class ForestGrid : public sdb::WorldGrid<ForestCell, Plant > {
 	sdb::Array<sdb::Coord3, ForestCell > m_activeCells;
 	int m_numActiveCells;
 	int m_numActiveSamples;
+	int m_numVisibleSamples;
 	
 public:
 	ForestGrid();
@@ -31,6 +32,7 @@ public:
 	
 	const int & numActiveCells() const;
 	const int & numActiveSamples() const;
+	const int & numVisibleSamples() const;
 	
 /// T as intersect type, Tc as closest to point type
 /// Tf as select filter type

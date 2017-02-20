@@ -16,6 +16,7 @@ ForestGrid::ForestGrid()
 { 
 	m_numActiveCells = 0;
 	m_numActiveSamples = 0; 
+	m_numVisibleSamples = 0;
 }
 
 ForestGrid::~ForestGrid()
@@ -26,6 +27,9 @@ const int & ForestGrid::numActiveCells() const
 
 const int & ForestGrid::numActiveSamples() const
 { return m_numActiveSamples; }
+
+const int & ForestGrid::numVisibleSamples() const
+{ return m_numVisibleSamples; }
 
 void ForestGrid::activeCellBegin()
 { m_activeCells.begin(); }
@@ -60,6 +64,7 @@ void ForestGrid::deselectCells()
 int ForestGrid::countActiveSamples()
 {
 	m_numActiveSamples = 0;
+	m_numVisibleSamples = 0;
 	
 	if(m_numActiveCells < 1) {
 		return 0;
@@ -67,7 +72,9 @@ int ForestGrid::countActiveSamples()
 	
 	m_activeCells.begin();
 	while(!m_activeCells.end() ) {
-		m_numActiveSamples += m_activeCells.value()->numActiveSamples();
+		const ForestCell * cell = m_activeCells.value();
+		m_numActiveSamples += cell->numActiveSamples();
+		m_numVisibleSamples += cell->numVisibleSamples();
 		m_activeCells.next();
 	}
 	return m_numActiveSamples;

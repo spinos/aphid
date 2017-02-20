@@ -87,7 +87,7 @@ protected:
 	void displacePlantInGrid(PlantInstance * inst );
 	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
-	void setBind(GroundBind * bind) const;
+	void getClosestBind(GroundBind * bind) const;
 /// ground normal at bind point
 	Vector3F bindNormal(const GroundBind * bind) const;
 /// -1: disable binding

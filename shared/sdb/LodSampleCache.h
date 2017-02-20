@@ -27,7 +27,7 @@ public:
 		float u;
 		Vector3F col;
 		float v;
-		int geomInd;
+		int geomcomp;
 		int exmInd;
 		int pad0;
 		int pad1;
@@ -53,6 +53,7 @@ public:
 	
 	ASample * data();
 	const ASample * data() const;
+	const ASample & getASample(const int & i) const;
 	
 	void setColorByNoise();
 	void setColorByUV();

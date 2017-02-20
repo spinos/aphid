@@ -76,7 +76,7 @@ bool ModifyForest::growOnGround(GrowOption & option)
 		    continue;
 		}
 		
-		setBind(&bind);
+		getClosestBind(&bind);
 		
 		if(doSampleTex) {
 			getBindTexcoord(sampleTexCoord);

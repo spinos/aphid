@@ -25,17 +25,17 @@ ForestCell::~ForestCell()
 	delete m_lodsamp;
 }
 
-const sdb::SampleCache * ForestCell::sampleAtLevel(int level) const
+const sdb::SampleCache * ForestCell::sampleCacheAtLevel(int level) const
 { return m_lodsamp->samplesAtLevel(level); }
 
 const float * ForestCell::samplePoints(int level) const
-{ return sampleAtLevel(level)->points(); }
+{ return sampleCacheAtLevel(level)->points(); }
 
 const float * ForestCell::sampleNormals(int level) const
-{ return sampleAtLevel(level)->normals(); }
+{ return sampleCacheAtLevel(level)->normals(); }
 
 const float * ForestCell::sampleColors(int level) const
-{ return sampleAtLevel(level)->colors(); }
+{ return sampleCacheAtLevel(level)->colors(); }
 
 const int & ForestCell::numSamples(int level) const
 { return m_lodsamp->numSamplesAtLevel(level); }
