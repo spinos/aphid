@@ -52,6 +52,7 @@ public:
 	const float & selectionRadius() const;
 	const float & gridSize() const;
 	const float & filterPortion() const;
+	int numVisibleSamples();
 	
 protected:
 	void resetGrid(float x);

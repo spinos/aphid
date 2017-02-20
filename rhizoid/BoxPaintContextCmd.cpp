@@ -65,6 +65,8 @@
 #define kReshuffleSampleFlagLong "-reshuffleSample"
 #define kFilterPortionFlag "-fpt"
 #define kFilterPortionFlagLong "-filterPortion"
+#define kSampleCountFlag "-spc"
+#define kSampleCountFlagLong "-sampleCount"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -396,6 +398,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		setResult(fContext->filterPortion() );
 	}
 	
+	if (argData.isFlagSet(kSampleCountFlag)) {
+		setResult(fContext->numVisibleSamples() );
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -578,6 +584,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kNoiseOriginVecFlag, kNoiseOriginVecFlagLong, MSyntax::kDouble, MSyntax::kDouble, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add noise origin vec arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kSampleCountFlag, kSampleCountFlagLong, MSyntax::kNoArg);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add sample count arg");
 		return MS::kFailure;
 	}
 	

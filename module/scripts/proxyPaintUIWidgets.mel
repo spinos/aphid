@@ -55,10 +55,19 @@ global proc proxyPaintGroundEditUI(string $coln)
         -c "proxyPaintSetOpt(103)";
         
     setParent ..;
+    
+    rowLayout -numberOfColumns 2
+        -columnWidth2 120 120
+        -p $coln;
+        
+        text -l "#Visible";
+        intField -value 0
+            proxyPaintFld_sampleCount;
+    setParent ..;
             
     floatSliderGrp -label "Sample Portion" 
-        -minValue 0.0005 -maxValue 0.9995
-        -field true -fieldMinValue 0.0005 -fieldMaxValue 0.9995
+        -minValue 0.0003 -maxValue 0.9997
+        -field true -fieldMinValue 0.0003 -fieldMaxValue 0.9997
         -value 0.8
         -cw 1 130
         -cc "proxyPaintSetFilterPortion(`floatSliderGrp -q -value proxyPaintSlider_filterPortion`)" 

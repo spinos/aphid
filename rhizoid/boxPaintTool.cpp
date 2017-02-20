@@ -366,8 +366,9 @@ unsigned proxyPaintContext::getOperation() const
 
 void proxyPaintContext::setBrushRadius(float val)
 {
+	validateSelection();
     if(PtrViz) {
-        PtrViz->setSelectionRadius(val);
+        PtrViz->processBrushRadius(val);
 	}
         
 	MToolsInfo::setDirtyFlag(*this);
@@ -569,7 +570,7 @@ char proxyPaintContext::validateSelection()
     if(!PtrViz) {
 		return 0;
 	}
-	PtrViz->setSelectionRadius(getBrushRadius() );
+	
 	return 1;
 }
 
@@ -664,8 +665,9 @@ char proxyPaintContext::validateViz(const MSelectionList &sels)
 		PtrViz = (ProxyViz*)fviz.userNode();
 	}
     
-    if(!PtrViz)
+    if(!PtrViz) {
         return 0;
+	}
     
     return 1;
 }
@@ -1039,7 +1041,7 @@ void proxyPaintContext::setManipulator(ModifyForest::ManipulateMode x)
     if(!PtrViz) {
 		return;
 	}
-	PtrViz->setManipulatMode(x);
+	PtrViz->processManipulatMode(x);
 }
 
 void proxyPaintContext::startRotate()
@@ -1138,5 +1140,15 @@ void proxyPaintContext::processFilterNoise()
 	if(PtrViz) {
 		PtrViz->processFilterNoise(m_growOpt);
 	}
+}
+
+int proxyPaintContext::numVisibleSamples()
+{
+	int c = 0;
+	validateSelection();
+	if(PtrViz) {
+		c = PtrViz->numVisibleSamples();
+	}
+	return c;
 }
 //:~

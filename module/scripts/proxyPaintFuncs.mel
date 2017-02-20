@@ -5,9 +5,16 @@
  *
  */
  
+global proc proxyPaintShowNumSamples()
+{
+    int $sampleCount = eval("proxyPaintToolContext -q -spc " + `currentCtx`);
+	intField -e -v $sampleCount proxyPaintFld_sampleCount;
+}
+ 
 global proc proxyPaintSetFilterPortion(float $val)
 {
 	proxyPaintToolContext -e -filterPortion $val `currentCtx`;
+	proxyPaintShowNumSamples();
 }
 
 global proc proxyPaintSetOpt(int $val)
@@ -79,19 +86,34 @@ global proc proxyPaintSetStickToGround(int $val)
 { proxyPaintToolContext -e -stg $val `currentCtx`; }
 
 global proc proxyPaintSetNoise3dLevel(float $x)
-{ proxyPaintToolContext -e -nlv $x `currentCtx`; }
+{ 
+    proxyPaintToolContext -e -nlv $x `currentCtx`; 
+    proxyPaintShowNumSamples();
+}
 
 global proc proxyPaintSetNoise3dFrequency(float $x)
-{ proxyPaintToolContext -e -nfr $x `currentCtx`; }
+{ 
+    proxyPaintToolContext -e -nfr $x `currentCtx`; 
+    proxyPaintShowNumSamples();
+}
 
 global proc proxyPaintSetNoise3dLacunarity(float $x)
-{ proxyPaintToolContext -e -nlc $x `currentCtx`; }
+{ 
+    proxyPaintToolContext -e -nlc $x `currentCtx`;
+    proxyPaintShowNumSamples();
+}
 
 global proc proxyPaintSetNoise3dOctave(int $x)
-{ proxyPaintToolContext -e -nov $x `currentCtx`; }
+{ 
+    proxyPaintToolContext -e -nov $x `currentCtx`; 
+    proxyPaintShowNumSamples();
+}
 
 global proc proxyPaintSetNoise3dGain(float $x)
-{ proxyPaintToolContext -e -ngn $x `currentCtx`; }
+{ 
+    proxyPaintToolContext -e -ngn $x `currentCtx`; 
+    proxyPaintShowNumSamples();
+}
 
 global proc proxyPaintSetNoise3dOrigin()
 {
@@ -102,9 +124,7 @@ global proc proxyPaintSetNoise3dOrigin()
     -value1 $a -value2 $b -value3 $c
     proxyPaintField_noise3dOrigin;
     proxyPaintToolContext -e -noiseOriginVec $a $b $c `currentCtx`;
-    //proxyPaintToolContext -e -nox $a `currentCtx`;
-    //proxyPaintToolContext -e -noy $b `currentCtx`;
-    //proxyPaintToolContext -e -noz $c `currentCtx`;
+    proxyPaintShowNumSamples();
 }
 
 global proc proxyPaint_openFileAsImageSampler()

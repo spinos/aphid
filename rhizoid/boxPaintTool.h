@@ -135,6 +135,7 @@ public:
 	void reshuffleSamples();
 	void setFilterPortion(float x);
 	float filterPortion() const;
+	int numVisibleSamples();
 	
 private:
 	void resize(bool isBundled);

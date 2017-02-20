@@ -625,9 +625,9 @@ void Forest::reshuffleSamples()
 
 void Forest::processSampleFilter()
 {
-	if(m_grid) {
-		m_grid->processFilter<SampleFilter>(*m_sampleFlt);
-	}
+	if(!m_grid) return;
+	m_grid->processFilter<SampleFilter>(*m_sampleFlt);
+	countNumSamples();
 }
 	
 const float & Forest::filterPortion() const
@@ -659,6 +659,11 @@ void Forest::deselectSamples()
 	if(g) {
 		g->deselectCells();
 	}
+}
+
+int Forest::numVisibleSamples()
+{
+	return grid()->numVisibleSamples();
 }
 
 }

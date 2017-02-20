@@ -244,8 +244,12 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	setViewportAspect(view.portWidth(), view.portHeight() );
 	
 	MPlug actp(thisNode, aactivated);
-	if(actp.asBool()) setWireColor(.125f, .1925f, .1725f);
-    else setWireColor(.0675f, .0675f, .0675f);
+	const bool isActive = actp.asBool();
+	if(isActive) {
+		setWireColor(.125f, .1925f, .1725f);
+	} else {
+		setWireColor(.0675f, .0675f, .0675f);
+	}
     
     MPlug shogridPlug(thisNode, ashogrid);
 	const bool showGrid = shogridPlug.asBool();
@@ -309,11 +313,13 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		drawViewFrustum();
     }
 	
-	drawActiveSamples();
-	drawActivePlants();
+	if(isActive) {
+		drawActiveSamples();
+		drawActivePlants();
+		drawBrush(view);
+		drawManipulator();
+	}
 	
-	drawBrush(view);
-	drawManipulator();
 	glPopMatrix();
 	view.endGL();
 	//std::cout<<" viz node draw end";
@@ -1144,6 +1150,18 @@ void ProxyViz::processClearAllPlants()
 void ProxyViz::processDeselectPlants()
 {
 	deselectPlants();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processBrushRadius(const float & x)
+{
+	setSelectionRadius(x);
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processManipulatMode(ModifyForest::ManipulateMode x)
+{
+	setManipulatMode(x);
 	_viewport.refresh(false, true);
 }
 

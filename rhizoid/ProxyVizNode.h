@@ -126,6 +126,8 @@ public:
 	void processRemoveTypedPlants(const GrowOption & param);
 	void processClearAllPlants();
 	void processDeselectPlants();
+	void processBrushRadius(const float & x);
+	void processManipulatMode(ModifyForest::ManipulateMode x);
 	
 private:
     void drawBrush(M3dView & view);
