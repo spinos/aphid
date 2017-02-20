@@ -46,8 +46,8 @@ public:
 	const float * sampleColors(int level) const;
 	const int & numSamples(int level) const;
 	
-	template<typename T>
-	void selectSamples(T & selFilter);
+	template<typename T, typename Tshape>
+	void selectSamples(T & selFilter, const Tshape & shape);
 	
 	template<typename T>
 	void processFilter(T & selFilter);
@@ -94,14 +94,14 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 	}
 }
 
-template<typename T>
-void ForestCell::selectSamples(T & selFilter)
+template<typename T, typename Tshape>
+void ForestCell::selectSamples(T & selFilter, const Tshape & shape)
 {
 	if(selFilter.isReplacing() ) {
 		deselectSamples();
 	}
 	
-	m_lodsamp->select(m_activeInd, selFilter);
+	m_lodsamp->select(m_activeInd, selFilter, shape);
 	updateIndices(m_numActiveSamples,
 				m_activeSampleIndices.get(),
 				m_activeInd);

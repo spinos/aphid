@@ -10,7 +10,7 @@
 #ifndef APH_SAMPLE_FILTER_H
 #define APH_SAMPLE_FILTER_H
 
-#include <math/BoundingBox.h>
+#include <math/Vector3F.h>
 #include <SelectionContext.h>
 #include <math/ANoise3.h>
 
@@ -20,9 +20,6 @@ class ExrImage;
 
 class SampleFilter : public ANoise3Sampler {
 
-	BoundingBox m_bbox;
-	Vector3F m_center;
-	float m_radius;
 	int m_maxSampleLevel;
 	float m_sampleGridSize;
 	float m_portion;
@@ -34,15 +31,6 @@ public:
 	
 	void setMode(SelectionContext::SelectMode mode);
 	void setPortion(const float & x);
-	void setSphere(const Vector3F & center,
-						const float & radius);
-	void limitBox(const BoundingBox & b);
-	
-	bool intersect(const BoundingBox & b) const;
-	bool intersect(const Vector3F & p) const;
-	
-	Vector3F boxLow() const;
-	Vector3F boxHigh() const;
 	
 	bool isReplacing() const;
 	bool isRemoving() const;

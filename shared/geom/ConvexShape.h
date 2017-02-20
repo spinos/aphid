@@ -107,8 +107,9 @@ public:
 	{
 		BoundingBox bb = b->calculateBBox();
 		BoundingBox ba = calculateBBox();
-		if(!ba.intersect(bb) )
+		if(!ba.intersect(bb) ) {
 			return false;
+		}
 			
 		return gjk::Intersect1<T, Sphere>::Evaluate(*b, *this); 
 	}
@@ -132,6 +133,7 @@ public:
 	
 	static Domain::FunctionType FunctionTypeId;
 	bool intersectBBox(const BoundingBox & b) const;
+	bool intersectPoint(const Vector3F & p) const;
 	float rayIntersect(const Ray & r) const;
 	float beamIntersect(const Beam & bm) const;
 	const Vector3F & center() const;

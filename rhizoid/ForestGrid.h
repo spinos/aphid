@@ -36,10 +36,11 @@ public:
 	
 /// T as intersect type, Tc as closest to point type
 /// Tf as select filter type
-	template<typename T, typename Tc, typename Tf>
+	template<typename T, typename Tc, typename Tf, typename Tshape>
 	void selectCells(T & ground,
 					Tc & closestGround,
-					Tf & selFilter);
+					Tf & selFilter,
+					const Tshape & selShape);
 					
 /// for all active cells, reshuffle samples noise
 	void reshuffleSamples(const int & level);
@@ -62,17 +63,21 @@ public:
 	
 };
 
-template<typename T, typename Tc, typename Tf>
+template<typename T, typename Tc, typename Tf, typename Tshape>
 void ForestGrid::selectCells(T & ground,
 					Tc & closestGround,
-					Tf & selFilter)
+					Tf & selFilter,
+					const Tshape & selShape)
 {
 	if(selFilter.isReplacing() ) {
 		deselectCells();
 	}
 	
-	const Vector3F plow = selFilter.boxLow();
-	const Vector3F phigh = selFilter.boxHigh();			
+	BoundingBox shapeBx = selShape.calculateBBox();
+	shapeBx.shrinkBy(ground.getBBox() );
+	
+	const Vector3F plow = shapeBx.lowCorner();
+	const Vector3F phigh = shapeBx.highCorner();			
 	const sdb::Coord3 lc = gridCoord((const float *)&plow);
 	const sdb::Coord3 hc = gridCoord((const float *)&phigh);
 	
@@ -104,7 +109,7 @@ void ForestGrid::selectCells(T & ground,
 								cbx);
 				}
 				
-				cell-> template selectSamples<Tf>(selFilter);
+				cell-> template selectSamples<Tf, Tshape>(selFilter, selShape);
 								
 				if(cell->numActiveSamples() > 0) {
 					m_activeCells.insert(sc, cell);

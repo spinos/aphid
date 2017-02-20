@@ -79,9 +79,10 @@ public:
 	const SampleCache * samplesAtLevel(int x) const;
 	SampleCache * samplesAtLevel(int x);
 	
-	template<typename T>
+	template<typename T, typename Tshape>
 	void select(Sequence<int> & indices,
-				T & selFilter);
+				 T & selFilter,
+				 const Tshape & selShape);
 				
 	void reshuffleAtLevel(const int & level);
 				
@@ -90,19 +91,21 @@ public:
 protected:
 
 private:
-	template<typename T>
+	template<typename T, typename Tshape>
 	void selectChildCell(Sequence<int> & indices,
 				const Coord4 & cellCoord,
 				LodCell * cell,
 				T & selFilter,
+				const Tshape & selShape,
 				const int & level,
 				const int & maxLevel);
 				
 };
 
-template<typename T>
+template<typename T, typename Tshape>
 void LodSampleCache::select(Sequence<int> & indices,
-				T & selFilter)
+				T & selFilter,
+				 const Tshape & selShape)
 {
 	const int & maxLevel = selFilter.maxSampleLevel();
 	BoundingBox cellBx;
@@ -112,8 +115,8 @@ void LodSampleCache::select(Sequence<int> & indices,
 		const Coord4 & k = key();
 		
 		getCellBBox(cellBx, k );
-		if(selFilter.intersect(cellBx) ) {
-			selectChildCell(indices, k, value(), selFilter, 0, maxLevel);
+		if(selShape. template intersect<BoundingBox>(&cellBx) ) {
+			selectChildCell(indices, k, value(), selFilter, selShape, 0, maxLevel);
 		}
 		
 		if(k.w > 0) {
@@ -124,16 +127,17 @@ void LodSampleCache::select(Sequence<int> & indices,
 	
 }
 
-template<typename T>
+template<typename T, typename Tshape>
 void LodSampleCache::selectChildCell(Sequence<int> & indices,
 				const Coord4 & cellCoord,
 				LodCell * cell,
 				T & selFilter,
+				const Tshape & selShape,
 				const int & level,
 				const int & maxLevel)
 {
 	if(level == maxLevel) {
-		cell->selectInCell(indices, selFilter);
+		cell->selectInCell(indices, selFilter, selShape);
 		return;
 	}
 	
@@ -153,8 +157,8 @@ void LodSampleCache::selectChildCell(Sequence<int> & indices,
 		
 		cc = childCoord(cellCoord, i);
 		getCellBBox(cb, cc);
-		if(selFilter.intersect(cb) ) {
-			selectChildCell(indices, cc, childCell, selFilter, level + 1, maxLevel);
+		if(selShape. template intersect<BoundingBox>(&cb) ) {
+			selectChildCell(indices, cc, childCell, selFilter, selShape, level + 1, maxLevel);
 		}
 	}
 }

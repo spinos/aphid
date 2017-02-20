@@ -27,6 +27,8 @@ public:
 	
 	bool intersect(const BoundingBox & box);
     bool intersect(const cvx::Tetrahedron & tet);
+	
+	const BoundingBox & getBBox() const;
 
 };
 
@@ -50,6 +52,10 @@ bool IntersectEngine<T, Tn>::intersect(const cvx::Tetrahedron & tet)
 {
     return false;
 }
+
+template<typename T, typename Tn>
+const BoundingBox & IntersectEngine<T, Tn>::getBBox() const
+{ return m_tree->getBBox(); }
 
 }
 #endif

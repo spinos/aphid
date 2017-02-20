@@ -241,6 +241,9 @@ const Vector3F & Sphere::center() const
 const float & Sphere::radius() const
 { return m_r; }
 
+bool Sphere::intersectPoint(const Vector3F & p) const
+{ return p.distanceTo(m_p) < m_r; }
+
 Cube::Cube() {}
 
 void Cube::set(const Vector3F & x, const float & r)

@@ -23,6 +23,7 @@ class ATriangleMesh;
 class ANoise3Sampler;
 class SampleFilter;
 class ExrImage;
+class AFrustum;
 struct Float2;
 
 class Forest {
@@ -66,6 +67,7 @@ protected:
 	bool selectTypedPlants(int x);
     bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
 	bool selectGroundSamples(const Ray & ray, SelectionContext::SelectMode mode);
+	bool selectGroundSamples(const AFrustum & fru, SelectionContext::SelectMode mode);
 	
 	unsigned numCells();
 	unsigned numGroundMeshes() const;

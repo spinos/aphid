@@ -58,8 +58,10 @@ public:
 	template<typename Ts>
 	void dumpSamplesInCell(Ts * dst);
 	
-	template<typename T>
-	void selectInCell(Sequence<int> & indices, T & selFilter);
+	template<typename T, typename Tshape>
+	void selectInCell(Sequence<int> & indices, 
+					T & selFilter,
+					const Tshape & selShape);
 	
 private:
 
@@ -106,13 +108,15 @@ void LodCell::dumpSamplesInCell(Ts * dst)
 	}
 }
 
-template<typename T>
-void LodCell::selectInCell(Sequence<int> & indices, T & selFilter)
+template<typename T, typename Tshape>
+void LodCell::selectInCell(Sequence<int> & indices, 
+							T & selFilter,
+							const Tshape & selShape)
 {
 	begin();
 	while(!end() ) {
 		LodNode * a = value();
-		if(selFilter.intersect(a->pos) ) {
+		if(selShape.intersectPoint(a->pos) ) {
 			if(selFilter.isRemoving() ) {
 				indices.remove(a->index);
 			} else { 

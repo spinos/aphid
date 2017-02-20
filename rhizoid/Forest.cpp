@@ -21,6 +21,7 @@
 #include <kd/ClosestToPointEngine.h>
 #include <kd/IntersectEngine.h>
 #include "SampleFilter.h"
+#include <AFrustum.h>
 
 namespace aphid {
 
@@ -147,28 +148,6 @@ bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 	m_activePlants->setCenter(m_intersectCtx.m_hitP, m_intersectCtx.m_hitN);
 	m_activePlants->select(mode);
 	
-	return true;
-}
-
-bool Forest::selectGroundSamples(const Ray & ray, SelectionContext::SelectMode mode)
-{
-	if(!intersectGround(ray) ) {
-		intersectWorldBox(ray);
-		return false;
-	}
-	
-	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
-	FIntersectTyp ineng(m_ground);
-    
-	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
-    FClosestTyp clseng(m_ground);
-	
-	m_sampleFlt->setMode(mode );
-	m_sampleFlt->setSphere(m_intersectCtx.m_hitP, m_activePlants->radius() );
-	m_sampleFlt->limitBox(m_ground->getBBox() );
-	
-	m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter >(ineng, clseng,
-					*m_sampleFlt );
 	return true;
 }
 
@@ -664,6 +643,46 @@ void Forest::deselectSamples()
 int Forest::numVisibleSamples()
 {
 	return grid()->numVisibleSamples();
+}
+
+bool Forest::selectGroundSamples(const Ray & ray, SelectionContext::SelectMode mode)
+{
+	if(!intersectGround(ray) ) {
+		intersectWorldBox(ray);
+		return false;
+	}
+	
+	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
+	FIntersectTyp ineng(m_ground);
+    
+	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_ground);
+	
+	m_sampleFlt->setMode(mode );
+	
+	cvx::Sphere sph;
+	sph.set(m_intersectCtx.m_hitP, m_activePlants->radius() );
+	
+	m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter, cvx::Sphere >(ineng, clseng,
+					*m_sampleFlt, sph );
+	return true;
+}
+
+bool Forest::selectGroundSamples(const AFrustum & fru, SelectionContext::SelectMode mode)
+{
+	typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
+	FIntersectTyp ineng(m_ground);
+    
+	typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_ground);
+	
+	m_sampleFlt->setMode(mode );
+	
+	// todo intersect
+	//m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter, AFrustum >(ineng, clseng,
+	//				*m_sampleFlt, fru );
+					
+	return true;
 }
 
 }
