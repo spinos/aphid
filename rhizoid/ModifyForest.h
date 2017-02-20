@@ -6,18 +6,14 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
-#include "Forest.h"
+#ifndef APH_RHI_MODIFY_FOREST_H
+#define APH_RHI_MODIFY_FOREST_H
+
+#include "GrowForest.h"
 
 namespace aphid {
 
-class ForestCell;
-class PseudoNoise;
-class BarycentricCoordinate;
-class EbpGrid;
-class GrowOption;
-
-class ModifyForest : public Forest {
+class ModifyForest : public GrowForest {
     
 public:
     enum ManipulateMode {
@@ -28,9 +24,6 @@ public:
 	};
 	
 private:
-	BarycentricCoordinate * m_bary;
-	PseudoNoise * m_pnoise;
-	int m_seed;
 	float m_noiseWeight;
 	ManipulateMode m_manipulateMode;
 	
@@ -44,16 +37,12 @@ public:
 	void movePlant(GrowOption & option);
     void rotatePlant(GrowOption & option);
     void removeActivePlants();
-    void removeTypedPlants(int x);
+    void removeTypedPlants(const GrowOption & param);
 	void clearPlantOffset(GrowOption & option);
 	void setManipulatMode(ManipulateMode x);
 	ManipulateMode manipulateMode() const;
 	
 protected:
-	bool growOnGround(GrowOption & option);
-	
-	bool growAt(const Ray & ray, GrowOption & option);
-	bool growAt(const Matrix44F & trans, GrowOption & option);
 	void replaceAt(const Ray & ray, GrowOption & option);
 	void clearSelected();
 	void clearAt(const Ray & ray, GrowOption & option);
@@ -86,28 +75,12 @@ protected:
 				
 private:
 	void clearPlant(Plant * pl, const sdb::Coord2 & k);
-	void randomSpaceAt(const Vector3F & pos, 
-							const GrowOption & option,
-							Matrix44F & space, float & scale);
 	void movePlantsWithGround(ForestCell * arr);
 	bool calculateSelecedWeight(const Ray & ray);
     float getNoise() const;
     float getNoise2(const float & a, const float & b) const;
-    bool sampleGround(EbpGrid * sampler, GrowOption & option);
-/// when bundleBegin > -1
-/// does not collide plant id >= bundleBegin
-	bool growSingle(GrowOption & option,
-				GroundBind & bind,
-				const int & iExample,
-				const Matrix44F & tm,
-				CollisionContext * collctx);
-	void growBundle(GrowOption & option,
-				GroundBind & bind,
-				const ExampVox * bundle,
-				const int & iExample,
-				const Matrix44F & tm,
-				CollisionContext * collctx);
 				
 };
 
 }
+#endif

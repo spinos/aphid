@@ -1108,5 +1108,24 @@ void ProxyViz::processFilterNoise(const GrowOption & param)
 	_viewport.refresh(false, true);
 }
 
+void ProxyViz::processFlood(GrowOption & option)
+{
+	flood(option);
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processRemoveActivePlants()
+{
+	removeActivePlants();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processRemoveTypedPlants(const GrowOption & param)
+{
+	AHelper::Info<int>("ProxyViz set to clear by type", param.m_plantId);
+	removeTypedPlants(param);
+	_viewport.refresh(false, true);
+}
+
 }
 //:~

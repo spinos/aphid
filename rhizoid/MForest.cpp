@@ -166,8 +166,8 @@ void MForest::flood(GrowOption & option)
 	if(growOnGround(option)) {
 	    onPlantChanged();
 	}
-	enableDrawing();
 	AHelper::Info<int>("ProxyViz end flood, result total plant count", numPlants() );
+	enableDrawing();
 }
 
 void MForest::grow(const MPoint & origin, const MPoint & dest, 

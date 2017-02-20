@@ -578,7 +578,7 @@ void proxyPaintContext::flood()
 	if(!PtrViz) return;
 /// no radius limit
 	m_growOpt.m_radius = -1.f;
-	PtrViz->flood(m_growOpt);
+	PtrViz->processFlood(m_growOpt);
 }
 
 void proxyPaintContext::extractSelected()
@@ -699,7 +699,7 @@ void proxyPaintContext::clearBySelections()
     if(!getSelectedViz())
 		return;
 	MGlobal::displayInfo("proxyPaint set to clear all selected");
-	PtrViz->removeActivePlants();	
+	PtrViz->processRemoveActivePlants();	
 }
 
 void proxyPaintContext::clearByType()
@@ -710,9 +710,7 @@ void proxyPaintContext::clearByType()
 	    clearBySelections();
 	    return;
 	}
-	MGlobal::displayInfo("proxyPaint set to clear by type");
-	AHelper::Info<int>("active plant type", m_growOpt.m_plantId);
-	PtrViz->removeTypedPlants(m_growOpt.m_plantId);	
+	PtrViz->processRemoveTypedPlants(m_growOpt);	
 }
 
 void proxyPaintContext::replace()

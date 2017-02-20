@@ -25,8 +25,7 @@ public:
 	void selectGround(const MPoint & origin, const MPoint & dest, 
 					MGlobal::ListAdjustment adj);
 	void finishGroundSelection();
-/// cover selected faces
-	void flood(GrowOption & option);
+
 	void grow(const MPoint & origin, const MPoint & dest, 
 					GrowOption & option);
 	void replacePlant(const MPoint & origin, const MPoint & dest, 
@@ -78,7 +77,8 @@ protected:
 	void pickVisiblePlants(float lodLowGate, float lodHighGate, 
 					double percentage,
                     int plantTyp);	
-				
+	void flood(GrowOption & option);
+	
 private:
     void updateGroundMesh(MObject & mesh, const MMatrix & worldTm, unsigned idx);
     void saveCell(ForestCell *cell,
