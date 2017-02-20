@@ -160,6 +160,11 @@ void MeshHelper::UpdateMeshTriangleUVs(ATriangleMesh * trimesh,
 		return;
 	}
 	
+	if(!faceIter.hasUVs() ) {
+	    AHelper::Info<int>(" WARNING mesh has no uv", 0 );
+	     return;   
+	}
+	
 	Float2 tuvs[3];
 	int ti = 0;
 	MFloatArray uArray, vArray;

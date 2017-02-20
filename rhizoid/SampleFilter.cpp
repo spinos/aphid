@@ -8,11 +8,15 @@
  */
 
 #include "SampleFilter.h"
+#include <img/ExrImage.h>
 
 namespace aphid {
 
 SampleFilter::SampleFilter()
-{ m_portion = .8f; }
+{ 
+    m_imageSampler = NULL;
+    m_portion = .8f; 
+}
 
 SampleFilter::~SampleFilter()
 {}
@@ -117,6 +121,16 @@ bool SampleFilter::throughNoise3D(const Vector3F & p) const
 	}
 	
 	return sampleNoise3((const float *)&p) > m_noiseLevel;
+}
+
+bool SampleFilter::throughImage(const float & k, const float & s, const float & t) const
+{
+    if(!m_imageSampler) {
+        return true;
+    }
+    float texCol[3];
+    m_imageSampler->sample(s, t, 1, texCol);			
+    return k < texCol[0];
 }
 
 }

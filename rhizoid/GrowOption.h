@@ -47,6 +47,8 @@ public:
 	void sampleRed(float * col, const float & u,
 					const float & v) const;
 	
+	const ExrImage * imageSampler() const;
+	
 };
 
 }

@@ -37,11 +37,12 @@ Forest::Forest()
 
 Forest::~Forest() 
 {
-	delete m_grid;
-	delete m_activePlants;
+    deselectSamples();
+    removeAllPlants();
+    clearGroundMeshes();
     
-	std::vector<Plant *>::iterator ita = m_plants.begin();
-	for(;ita!=m_plants.end();++ita) delete *ita;
+    m_grid->clear();
+    
     m_plants.clear();
     
 	std::vector<PlantData *>::iterator itb = m_pool.begin();
@@ -51,10 +52,13 @@ Forest::~Forest()
 		delete (*itb);
 	}
     m_pool.clear();
-    
-    clearGroundMeshes();
-    
+	
 	delete m_ground;
+	delete m_activePlants;
+	delete m_sampleFlt;
+	delete m_selectCtx;
+	delete m_grid;
+    
 }
 
 void Forest::setSelectionRadius(float x)
@@ -296,7 +300,11 @@ PlantSelection::SelectionTyp * Forest::activePlants()
 void Forest::removeAllPlants()
 {
 	m_activePlants->deselect();
-	m_grid->clear();
+	m_grid->begin();
+	while(!m_grid->end() ) {
+	    m_grid->value()->clear();
+	    m_grid->next();
+	}
 	m_numPlants = 0;
 }
 
@@ -650,6 +658,11 @@ void Forest::setFilterNoise(const ANoise3Sampler & param)
 	m_sampleFlt->m_noiseLevel = param.m_noiseLevel;
 	m_sampleFlt->m_noiseGain = param.m_noiseGain;
 	m_sampleFlt->m_noiseOctave = param.m_noiseOctave;
+}
+
+void Forest::setFilterImage(const ExrImage * img)
+{
+    m_sampleFlt->m_imageSampler = img;
 }
 
 void Forest::deselectSamples()

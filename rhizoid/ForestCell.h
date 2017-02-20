@@ -122,6 +122,10 @@ void ForestCell::processFilter(T & selFilter)
 		bool stat = selFilter.throughPortion(k);
 		
 		if(stat) {
+			stat = selFilter.throughImage(asp.noi, asp.u, asp.v);
+		}
+		
+		if(stat) {
 			stat = selFilter.throughNoise3D(asp.pos);
 		}
 		

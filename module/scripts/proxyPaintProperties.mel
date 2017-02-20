@@ -1,18 +1,11 @@
-/*
- *  proxyPaintProperties.mel
- *
- *  tool UI
- *
- */
- 
+
 source "proxyPaintFuncs.mel";
 
 proc string proxyPaint_getCurrentCache()
 {
     string $node = proxyPaint_getCurrentViz();
-    if($node == "") {
+    if($node == "")
         return "";
-    }
     
     string $ch = `getAttr ($node + ".cachePath")`;
     return $ch;
@@ -25,11 +18,12 @@ global proc proxyPaintProperties ()
 	string $parent = `toolPropertyWindow -q -location`;
     setParent $parent;
 	string $curctx = `currentCtx`;
-				
+
 	string $ppnForm = `formLayout proxyPaint`;
 	string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
-// begin of proxyPaintOptions			
-	    separator -style "none";
+// begin of proxyPaintOptions
+    separator -style "none";
+		
 		text -al left -l "Select A ProxyViz To Paint";
 		textScrollList -ams off -sc "proxyPaint_selectVizToPaint" proxyPaint_VizToPaintScroll;
 	
@@ -46,7 +40,7 @@ global proc proxyPaintProperties ()
         -columnWidth 1 120
 		-columnWidth 2 120
 		-columnWidth 3 120;
-	        iconTextButton -label "Clear Typed" 
+            iconTextButton -label "Clear Typed" 
                         -image1 "filter.xpm" 
                         -style "iconAndTextHorizontal" 
                         -c "proxyPaintSetOpt(106)";
@@ -69,7 +63,7 @@ floatSliderGrp -label "Brush Weight" -field true
     -value 0.8
 	-cw 1 130
 	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
-	
+
 floatSliderGrp -label "Brush Noise" -field true
     -minValue 0.0 -maxValue 1.0
     -fieldMinValue 0.0 -fieldMaxValue 1.0
@@ -103,7 +97,7 @@ setParent ..; /// end of frame
         string $groundColn = `columnLayout -adjustableColumn true`;
 /// begin of groundColn
 
-        rowColumnLayout -numberOfColumns 2
+rowColumnLayout -numberOfColumns 2
         -columnWidth 1 150
 		-columnWidth 2 150;
     iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_face.xpm" -label "Select Faces To Flood" -c "proxyPaintSetOpt(9)";
@@ -122,6 +116,22 @@ setParent ..; /// end of frame
         -image1 "generic_shuffle.xpm" 
         -style "iconAndTextHorizontal" 
         -c "proxyPaintSetOpt(108)";
+        
+        frameLayout -label "Image Sampler" -cl false;
+        columnLayout -adj true;
+
+    textFieldGrp -label "File Name"
+        -text  ""
+        -cc "proxyPaintTextField_setSampleFileName"
+        proxyPaintTextField_samplerFileName;
+        
+    iconTextButton -label "Open EXR Image File" 
+        -image1 "proxyPaintTool_imageFile.xpm" 
+        -style "iconAndTextHorizontal" 
+        -c "proxyPaint_openFileAsImageSampler";
+
+        setParent ..; /// end of column
+        setParent ..; /// end of frame
                 
 frameLayout -label "3D Noise" -cl false;
 columnLayout -adj true;
@@ -178,11 +188,11 @@ setParent ..; /// end of frame
 
 /// end of groundColn
         setParent ..; 
-        
-    string $createColn = `columnLayout -adjustableColumn true`;
+
+        string $createColn = `columnLayout -adjustableColumn true`;
 /// begin of createColn
-        
-        rowColumnLayout -numberOfColumns 3
+
+rowColumnLayout -numberOfColumns 3
 		-columnWidth 1 120
 		-columnWidth 2 120
 		-columnWidth 3 120;
@@ -251,22 +261,23 @@ setParent ..; /// end of frame
 	
 /// end of createColn
     setParent ..;
-        
-        string $brushColn = `columnLayout -adjustableColumn true`;
+
+    string $brushColn = `columnLayout -adjustableColumn true`;
 /// begin of brushColn
-        	rowColumnLayout -numberOfColumns 3
+
+	rowColumnLayout -numberOfColumns 3
 		-columnWidth 1 120
 		-columnWidth 2 120
 		-columnWidth 3 120;
 		
-    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_replace.xpm" -label "Replace" -c "proxyPaintSetOpt(10)";
-iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_erase.xpm" -label "Erase" -c "proxyPaintSetOpt(1)";
-iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm" -label "Select" -c "proxyPaintSetOpt(2)";
+    //iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_replace.xpm" -label "Replace" -c "proxyPaintSetOpt(10)";
+    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm" -label "Select" -c "proxyPaintSetOpt(2)";
 	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_selectByType.xpm" -label "Select by Type" -c "proxyPaintSetOpt(12)";
     iconTextButton -style "iconAndTextHorizontal" -image1 "generic_discard.png" -label "Discard" -c "proxyPaintSetOpt(104)";
+    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_erase.xpm" -label "Erase" -c "proxyPaintSetOpt(1)";
 
         setParent ..;
-
+        
 	rowColumnLayout -numberOfColumns 3
         -columnWidth 1 120
 		-columnWidth 2 120
@@ -302,9 +313,6 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
                         -style "iconAndTextHorizontal" 
                         -c "proxyPaintSetOpt(107)";
                         
-	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_scale.xpm" -label "Scale" -c "proxyPaintSetOpt(3)";
-    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_move.xpm" -label "Move" -c "proxyPaintSetOpt(4)";
-    
     iconTextButton -style "iconAndTextHorizontal"
         -image1 "proxyPaintTool_bundle_move.xpm"
         -label "Bundle Translate" 
@@ -320,7 +328,6 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
         -label "Bundle Resize" 
         -c "proxyPaintSetOpt(19)";
     
-    
     text -l "";
 	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateY.xpm" -label "RotateY" -c "proxyPaintSetOpt(5)";
         iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateZ.xpm" -label "RotateZ" -c "proxyPaintSetOpt(6)";
@@ -330,37 +337,47 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
                         -image1 "arrowup.xpm" 
                         -style "iconAndTextHorizontal" 
                         -c "proxyPaintSetOpt(16)";
-                        
-        iconTextButton -label "Rotate by Stroke" 
-                        -image1 "proxyPaintTool_erect.xpm" 
-                        -style "iconAndTextHorizontal" 
-                        -c "proxyPaintSetOpt(105)";  
                 
 	setParent ..;
 /// end of brushColn
          setParent ..; 
-        
-     string $injectColn = `rowColumnLayout -numberOfColumns 2
+	
+    string $injectColn = `rowColumnLayout -numberOfColumns 2
             -columnWidth 1 120
             -columnWidth 2 120`;
-        iconTextButton -style "iconAndTextHorizontal" -image1 "generic_inject.png" 
-                        -label "Inject Selected" -c "proxyPaintSetOpt(98)";
-                checkBox -label "Stick to Ground" -v 1 
-                        -cc "proxyPaintSetStickToGround(`checkBox -q -value proxyPaintUICheck_stg`)" proxyPaintUICheck_stg;
-         setParent ..;
+/// begin of injectColn
+		    iconTextButton -style "iconAndTextHorizontal" 
+                    -image1 "generic_inject.png" 
+                    -label "Inject Transform" 
+                    -c "proxyPaintSetOpt(98)";
+                    
+            iconTextButton -style "iconAndTextHorizontal" 
+                    -image1 "proxyPaintTool_injectParticle.xpm" 
+                    -label "Inject Particle" 
+                    -c "proxyPaintSetOpt(97)";
+                    
+            checkBox -label "Stick to Ground" -v 1 
+                    -cc "proxyPaintSetStickToGround(`checkBox -q -value proxyPaintUICheck_stg`)" 
+                    proxyPaintUICheck_stg;
+                    
+    setParent ..;
+/// end of injectColn
 
-     string $extractColn = `columnLayout -adjustableColumn true`;
-         intSliderGrp -label "Num Instance Groups" -field true
-        -minValue 1 -maxValue 8
-        -fieldMinValue 1 -fieldMaxValue 100
-        -value 1
-        -cw 1 130
-        -cc "proxyPaintSetInstanceGroupCount(`intSliderGrp -q -value proxyPaintSlider_instanceGroupCount`)" proxyPaintSlider_instanceGroupCount;
-        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_extract.xpm" -label "Extract Selected" -c "proxyPaintSetOpt(102)";  
-        
-         setParent ..;
+    string $extractColn = `columnLayout -adjustableColumn true`;
+/// begin of extractColn
+    
+	    intSliderGrp -label "Num Instance Groups" -field true
+    -minValue 1 -maxValue 8
+    -fieldMinValue 1 -fieldMaxValue 100
+    -value 1
+	-cw 1 130
+	-cc "proxyPaintSetInstanceGroupCount(`intSliderGrp -q -value proxyPaintSlider_instanceGroupCount`)" proxyPaintSlider_instanceGroupCount;
+	iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_extract.xpm" -label "Extract Selected" -c "proxyPaintSetOpt(102)";  
 
-     tabLayout -edit
+/// end of injectColn
+    setParent ..;
+    
+    tabLayout -edit
         -tabLabel $groundColn "Ground"
         -tabLabel $createColn "Create"
         -tabLabel $brushColn "Edit"
@@ -368,9 +385,9 @@ iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm
          -tabLabel $extractColn "Extract"
          $ppnTab;
          
-     
 	setUITemplate -popTemplate;
 
+	//proxyPaintSetCallbacks($parent);
 	proxyPaintUpdateExampleScroll();
 }
 

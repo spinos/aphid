@@ -1108,6 +1108,14 @@ void ProxyViz::processFilterNoise(const GrowOption & param)
 	_viewport.refresh(false, true);
 }
 
+void ProxyViz::processFilterImage(const GrowOption & param)
+{
+    AHelper::Info<float>("todo ProxyViz process filter image",0.f);
+    setFilterImage(param.imageSampler() );
+	processSampleFilter();
+	_viewport.refresh(false, true);
+}
+
 void ProxyViz::processFlood(GrowOption & option)
 {
 	flood(option);

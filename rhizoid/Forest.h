@@ -22,6 +22,7 @@ class ExampVox;
 class ATriangleMesh;
 class ANoise3Sampler;
 class SampleFilter;
+class ExrImage;
 struct Float2;
 
 class Forest {
@@ -171,6 +172,7 @@ protected:
 	void reshuffleSamples();
 	void deselectSamples();
 	void setFilterNoise(const ANoise3Sampler & param);
+    void setFilterImage(const ExrImage * img);
     
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,

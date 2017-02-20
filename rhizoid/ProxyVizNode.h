@@ -120,6 +120,7 @@ public:
 	void processReshuffle();
 	void processFilterPortion(const float & x);
 	void processFilterNoise(const GrowOption & param);
+	void processFilterImage(const GrowOption & param);
 	void processFlood(GrowOption & option);
 	void processRemoveActivePlants();
 	void processRemoveTypedPlants(const GrowOption & param);

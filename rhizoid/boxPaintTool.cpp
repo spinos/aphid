@@ -1095,6 +1095,9 @@ void proxyPaintContext::setImageSamplerName(MString filename)
 			AHelper::Info<MString>("proxyPaintContext cannot open image", filename);
 		}
 	}
+	if(PtrViz) {
+	     PtrViz->processFilterImage(m_growOpt);   
+	}
 	MToolsInfo::setDirtyFlag(*this);
 }
 

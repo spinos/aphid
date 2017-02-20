@@ -7,13 +7,11 @@ global proc proxyPaintValues(string $toolName)
 	string $help = "";
 	toolPropertySetCommon $toolName $icon $help;
 
-	//frameLayout -e -en true -cl false proxyPaint;
 	proxyPaintOptionValues($toolName);
 
 	toolPropertySelect proxyPaint;
 	proxyPaint_listAllVizToPaint();
 }
-
 
 global proc proxyPaintOptionValues(string $toolName)
 {
@@ -68,8 +66,10 @@ global proc proxyPaintOptionValues(string $toolName)
  	$fval = eval("proxyPaintToolContext -q -ngn " + $toolName);
  	floatSliderGrp -e -value $fval proxyPaintSlider_noise3dGain;
  	
+ 	string $imageName = eval("proxyPaintToolContext -q -msp " + $toolName);
+ 	textFieldGrp -e -text $imageName proxyPaintTextField_samplerFileName;
+ 	
  	$fval = eval("proxyPaintToolContext -q -filterPortion " + $toolName);
  	floatSliderGrp -e -value $fval proxyPaintSlider_filterPortion;
- 	
 }
 

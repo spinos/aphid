@@ -81,5 +81,14 @@ std::string GrowOption::imageName() const
 void GrowOption::sampleRed(float * col, const float & u,
 					const float & v) const
 { m_sampler->sample(u, v, 1, col); }
+
+const ExrImage * GrowOption::imageSampler() const
+{
+    if(hasSampler() ) {
+        return m_sampler;
+    }
+    return NULL;
+    
+}
 		
 }

@@ -15,6 +15,8 @@
 #include <math/ANoise3.h>
 
 namespace aphid {
+    
+class ExrImage;
 
 class SampleFilter : public ANoise3Sampler {
 
@@ -53,8 +55,11 @@ public:
 				
 	bool throughPortion(const float & x) const;
 	bool throughNoise3D(const Vector3F & p) const;
+	bool throughImage(const float & k, const float & s, const float & t) const;
 	
 	const float & portion() const;
+	
+	const ExrImage * m_imageSampler;
 	
 protected:
 

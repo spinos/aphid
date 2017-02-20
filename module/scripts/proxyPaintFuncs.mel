@@ -101,3 +101,20 @@ global proc proxyPaintSetNoise3dOrigin()
     //proxyPaintToolContext -e -noy $b `currentCtx`;
     //proxyPaintToolContext -e -noz $c `currentCtx`;
 }
+
+global proc proxyPaint_openFileAsImageSampler()
+{
+    string $sctFilter = "*.exr";
+    string $filenm[] = `fileDialog2 -fm 1 -fileFilter $sctFilter`;
+    if(size($filenm) < 1) {
+        print("proxyPaint_openFileAsImageSampler aborted");
+        return;   
+    }
+    proxyPaintToolContext -e -msp $filenm[0] `currentCtx`;
+}
+
+global proc proxyPaintTextField_setSampleFileName()
+{
+    string $filenm = `textFieldGrp -q -text proxyPaintTextField_samplerFileName`;
+    proxyPaintToolContext -e -msp $filenm `currentCtx`;
+}
