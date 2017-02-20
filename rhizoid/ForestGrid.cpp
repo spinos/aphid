@@ -114,4 +114,13 @@ void ForestGrid::reshuffleSamples(const int & level)
 	}
 }
 
+void ForestGrid::clearPlants()
+{
+	begin();
+	while(!end() ) {
+		value()->clearPlants();
+		next();
+	}
+}
+
 }

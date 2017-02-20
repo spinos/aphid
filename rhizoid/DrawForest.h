@@ -54,8 +54,7 @@ public:
     
 protected:
 	void setScaleMuliplier(float x, float y, float z);
-    void drawGround();
-	float plantExtent(int idx) const;
+    float plantExtent(int idx) const;
 	void drawSolidPlants();
 	void drawWiredPlants();
 	void drawGridBounding();

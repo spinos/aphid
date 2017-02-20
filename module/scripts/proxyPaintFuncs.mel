@@ -70,6 +70,11 @@ global proc proxyPaintSetCull(int $val)
     proxyPaintToolContext -e -cus $val `currentCtx`;
 }
 
+global proc proxyPaintDoSnap()
+{
+    proxyPaintToolContext -e -opt 101 `currentCtx`;
+}
+
 global proc proxyPaintSetStickToGround(int $val)
 { proxyPaintToolContext -e -stg $val `currentCtx`; }
 
@@ -104,13 +109,12 @@ global proc proxyPaintSetNoise3dOrigin()
 
 global proc proxyPaint_openFileAsImageSampler()
 {
-    string $sctFilter = "*.exr";
-    string $filenm[] = `fileDialog2 -fm 1 -fileFilter $sctFilter`;
+    string $filenm = `fileDialog -m 0 -dm "*.exr"`;
     if(size($filenm) < 1) {
         print("proxyPaint_openFileAsImageSampler aborted");
         return;   
     }
-    proxyPaintToolContext -e -msp $filenm[0] `currentCtx`;
+    proxyPaintToolContext -e -msp $filenm `currentCtx`;
 }
 
 global proc proxyPaintTextField_setSampleFileName()
@@ -118,3 +122,66 @@ global proc proxyPaintTextField_setSampleFileName()
     string $filenm = `textFieldGrp -q -text proxyPaintTextField_samplerFileName`;
     proxyPaintToolContext -e -msp $filenm `currentCtx`;
 }
+
+global proc proxyPaintReset()
+{
+    if(`confirmDialog -title "Reset Confirmation" -message "Are you sure you want to reset current Viz and discard all unsaved changes?"
+    -button "Yes" -button "No" -defaultButton "No"
+    -cancelButton "No" -dismissString "No"` == "No")
+        return;
+    proxyPaintToolContext -e -opt 99 `currentCtx`;
+}
+
+proc string proxyPaint_getCurrentCache()
+{
+    string $node = proxyPaint_getCurrentViz();
+    if($node == "")
+        return "";
+    
+    string $ch = `getAttr ($node + ".cachePath")`;
+    return $ch;
+}
+
+global proc proxyPaintDoFlood()
+{
+    proxyPaintToolContext -e -opt 100 `currentCtx`;
+}
+
+global proc proxyPaintChooseCache()
+{
+    string $cache[] = `fileDialog2 -fileFilter "*.sct;;*.*"`;
+    textFieldGrp -e -text $cache[0] proxyPaintSlider_cacheField;
+    
+    proxyPaintSetCache();
+}
+
+global proc proxyPaintSetCache()
+{
+    string $node = proxyPaint_getCurrentViz();
+    if($node == "")
+        return;
+    
+    setAttr -type "string" ($node + ".cachePath") `textFieldGrp -q -text proxyPaintSlider_cacheField`;
+}
+
+global proc proxyPaintWriteCache()
+{
+    string $filename = `textFieldGrp -q -text proxyPaintSlider_cacheField`;
+    if($filename == "")
+        return;
+    if(`confirmDialog -title "Override Confirmation" -message ("Are you sure you want to write current proxy to file \n" + $filename + " ?")
+    -button "Yes" -button "No" -defaultButton "No"
+    -cancelButton "No" -dismissString "No"` == "No")
+        return;
+    proxyPaintToolContext -e -wch $filename `currentCtx`;
+}
+
+global proc proxyPaintReadCache()
+{
+    string $filename = `textFieldGrp -q -text proxyPaintSlider_cacheField`;
+    if($filename == "")
+        return;
+    
+    proxyPaintToolContext -e -rch $filename `currentCtx`;
+}
+

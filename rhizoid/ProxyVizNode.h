@@ -124,6 +124,8 @@ public:
 	void processFlood(GrowOption & option);
 	void processRemoveActivePlants();
 	void processRemoveTypedPlants(const GrowOption & param);
+	void processClearAllPlants();
+	void processDeselectPlants();
 	
 private:
     void drawBrush(M3dView & view);

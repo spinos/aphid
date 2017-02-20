@@ -235,7 +235,7 @@ public:
 				if((nc & 1023) == 0) {
 					t1 = boost::posix_time::ptime (boost::posix_time::second_clock::local_time());
 					t3 = t1 - t0;
-					std::cout<<"\n processed "<<nc<<" cells in "<<t3;
+					std::cout<<"\n processed "<<nc<<" cells in "<<t3.seconds()<<" seconds";
 					std::cout.flush();
 				}
 				
@@ -253,7 +253,7 @@ public:
 		
 		std::cout<<"\n done. "
 				<<"\n n samples "<<c
-				<<"\n cost time "<<t3;
+				<<"\n cost time "<<t3.seconds()<<" seconds";
 		std::cout.flush();
 	}
 	

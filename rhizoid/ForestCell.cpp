@@ -74,6 +74,11 @@ void ForestCell::clearSamples()
 	m_lodsamp->clear();
 }
 
+void ForestCell::clearPlants()
+{
+	sdb::Array<sdb::Coord2, Plant>::clear();
+}
+
 const int & ForestCell::numActiveSamples() const
 { return m_numActiveSamples; }
 

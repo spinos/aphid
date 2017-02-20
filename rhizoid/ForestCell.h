@@ -59,6 +59,7 @@ public:
 	const int * visibleSampleIndices() const;
 	
 	void clearSamples();
+	void clearPlants();
 	
 	bool hasSamples(int level) const;
 	

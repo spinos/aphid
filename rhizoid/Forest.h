@@ -30,7 +30,7 @@ class Forest {
 	ForestGrid * m_grid;
 	std::vector<PlantData *> m_pool;
 	std::vector<Plant *> m_plants;
-    std::vector<ATriangleMesh *> m_grounds;
+    std::vector<ATriangleMesh *> m_groundMeshes;
 	std::map<int, ExampVox *> m_examples;
 	std::map<ExampVox *, unsigned> m_exampleIndices;
 	KdNTree<cvx::Triangle, KdNode4 > * m_ground;
@@ -38,10 +38,9 @@ class Forest {
 	PlantSelection * m_activePlants;
 	IntersectionContext m_intersectCtx;
 	ClosestToPointTestResult m_closestPointTest;
-	SphereSelectionContext * m_selectCtx;
 	SampleFilter * m_sampleFlt;
 	RayMarch m_march;
-	unsigned m_numPlants;
+	int m_numPlants;
 	int m_lastPlantInd;
 	
 public:
@@ -49,9 +48,7 @@ public:
 	virtual ~Forest();
 	
     void setSelectionRadius(float x);
-	unsigned numActiveGroundFaces();
 	const int & numActivePlants() const;
-	void removeAllPlants();
 	const float & selectionRadius() const;
 	const float & gridSize() const;
 	const float & filterPortion() const;
@@ -59,8 +56,8 @@ public:
 protected:
 	void resetGrid(float x);
 	void updateGrid();
-	void updateNumSamples();
-	void updateNumPlants();
+	void countNumSamples();
+	void countNumPlants();
 	void clearGroundMeshes();
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     void buildGround();
@@ -71,7 +68,7 @@ protected:
 	
 	unsigned numCells();
 	unsigned numGroundMeshes() const;
-    const unsigned & numPlants() const;
+    const int & numPlants() const;
 	const BoundingBox & gridBoundingBox() const;
 	ForestGrid * grid();
 	PlantSelection * selection();
@@ -79,7 +76,6 @@ protected:
 	KdNTree<cvx::Triangle, KdNode4 > * ground();
 	const KdNTree<cvx::Triangle, KdNode4 > * ground() const;
 	IntersectionContext * intersection();
-	SphereSelectionContext * activeGround();
 	ATriangleMesh * getGroundMesh(const int & idx) const;
 	const std::vector<ATriangleMesh *> & groundMeshes() const;
 	
@@ -174,6 +170,8 @@ protected:
 	void setFilterNoise(const ANoise3Sampler & param);
     void setFilterImage(const ExrImage * img);
     
+	void clearAllPlants();
+	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,
 					ForestCell * cell);

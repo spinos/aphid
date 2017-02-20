@@ -236,8 +236,8 @@ void proxyPaintContext::setOperation(short val)
 			injectSelectedTransform();
 			toReturn = true;
 		break;
-		case opDiscardFaceSelection:
-			discardFaceSelection();
+		case opDiscardSampleSelection:
+			discardSampleSelection();
 			toReturn = true;
 		break;
 		case opDiscardPlantSelection:
@@ -245,7 +245,7 @@ void proxyPaintContext::setOperation(short val)
 			toReturn = true;
 		break;
 		case opClean:
-			cleanup();
+			clearAllPlants();
 			toReturn = true;
 		break;
 		case opFlood:
@@ -686,12 +686,12 @@ void proxyPaintContext::setReadCache(MString filename)
 	PtrViz->pressToLoad();
 }
 
-void proxyPaintContext::cleanup()
+void proxyPaintContext::clearAllPlants()
 {
-	MGlobal::displayInfo("proxyPaint set to reset");
+	MGlobal::displayInfo("proxyPaint set to clear all plants");
 	if(!getSelectedViz())
 		return;
-	PtrViz->removeAllPlants();	
+	PtrViz->processClearAllPlants();	
 }
 
 void proxyPaintContext::clearBySelections()
@@ -775,7 +775,7 @@ void proxyPaintContext::setPlantType(int x)
 const int & proxyPaintContext::plantType() const
 { return m_growOpt.m_plantId; }
 
-void proxyPaintContext::discardFaceSelection()
+void proxyPaintContext::discardSampleSelection()
 {
     if(!PtrViz) return;
     PtrViz->processDeselectSamples();
@@ -784,7 +784,7 @@ void proxyPaintContext::discardFaceSelection()
 void proxyPaintContext::discardPlantSelection()
 {
     if(!PtrViz) return;
-    PtrViz->deselectPlants();
+    PtrViz->processDeselectPlants();
 }
 
 void proxyPaintContext::attachSceneCallbacks()

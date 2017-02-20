@@ -29,7 +29,6 @@ Forest::Forest()
 	m_grid = new ForestGrid;
 	m_numPlants = 0;
 	m_activePlants = new PlantSelection(m_grid);
-	m_selectCtx = new SphereSelectionContext;
 	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
 	m_sampleFlt = new SampleFilter;
 	m_lastPlantInd = -1;
@@ -38,25 +37,14 @@ Forest::Forest()
 Forest::~Forest() 
 {
     deselectSamples();
-    removeAllPlants();
+    clearAllPlants();
     clearGroundMeshes();
     
     m_grid->clear();
     
-    m_plants.clear();
-    
-	std::vector<PlantData *>::iterator itb = m_pool.begin();
-	for(;itb!=m_pool.end();++itb) {
-		delete (*itb)->t1;
-		delete (*itb)->t2;
-		delete (*itb);
-	}
-    m_pool.clear();
-	
 	delete m_ground;
 	delete m_activePlants;
 	delete m_sampleFlt;
-	delete m_selectCtx;
 	delete m_grid;
     
 }
@@ -68,7 +56,7 @@ void Forest::resetGrid(float x)
 {
 	m_grid->clear();
 	m_grid->setGridSize(x);
-	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.414f );
+	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.1f );
 	std::cout<<"\n reset grid "<<gridSize()
 			<<"\n sample level "<<sampleLevel();
 	std::cout.flush();
@@ -83,31 +71,31 @@ void Forest::updateGrid()
 const BoundingBox & Forest::gridBoundingBox() const
 { return m_grid->boundingBox(); }
 
-const unsigned & Forest::numPlants() const
+const int & Forest::numPlants() const
 { return m_numPlants; }
 
-void Forest::updateNumPlants()
-{
-	m_numPlants = m_grid->countPlants();
-}
+void Forest::countNumPlants()
+{ m_numPlants = m_grid->countPlants(); }
 
 unsigned Forest::numCells()
 { return m_grid->size(); }
 
 unsigned Forest::numGroundMeshes() const
-{ return m_grounds.size(); }
+{ return m_groundMeshes.size(); }
 
 void Forest::clearGroundMeshes()
 {
-    std::vector<ATriangleMesh *>::iterator itg = m_grounds.begin();
-    for(;itg!=m_grounds.end();++itg) delete *itg;
-    m_grounds.clear();
+    std::vector<ATriangleMesh *>::iterator itg = m_groundMeshes.begin();
+    for(;itg!=m_groundMeshes.end();++itg) {
+		delete *itg;
+	}
+    m_groundMeshes.clear();
 }
 
 void Forest::setGroundMesh(ATriangleMesh * trimesh, unsigned idx)
 { 
-    if(idx >= numGroundMeshes() ) m_grounds.push_back(trimesh); 
-    else m_grounds[idx] = trimesh;
+    if(idx >= numGroundMeshes() ) m_groundMeshes.push_back(trimesh); 
+    else m_groundMeshes[idx] = trimesh;
 }
 
 ATriangleMesh * Forest::getGroundMesh(const int & idx) const
@@ -116,11 +104,11 @@ ATriangleMesh * Forest::getGroundMesh(const int & idx) const
 		std::cout<<"\n Forest out-of-range geom "<<idx;
 		return NULL;
 	}
-    return m_grounds[idx];
+    return m_groundMeshes[idx];
 }
 
 const std::vector<ATriangleMesh *> & Forest::groundMeshes() const
-{ return m_grounds; }
+{ return m_groundMeshes; }
 
 void Forest::buildGround()
 {
@@ -130,7 +118,7 @@ void Forest::buildGround()
 	KdEngine engine;
 	engine.buildSource<cvx::Triangle, ATriangleMesh >(&m_triangles, 
 													gridBox,
-													m_grounds);
+													m_groundMeshes);
 
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 64;
@@ -183,12 +171,6 @@ bool Forest::selectGroundSamples(const Ray & ray, SelectionContext::SelectMode m
 					*m_sampleFlt );
 	return true;
 }
-
-unsigned Forest::numActiveGroundFaces()
-{ return m_selectCtx->numSelected(); }
-
-SphereSelectionContext * Forest::activeGround()
-{ return m_selectCtx; }
 
 bool Forest::closeToOccupiedPosition(CollisionContext * ctx)
 {
@@ -297,15 +279,21 @@ PlantSelection * Forest::selection()
 PlantSelection::SelectionTyp * Forest::activePlants()
 { return m_activePlants->data(); }
 
-void Forest::removeAllPlants()
+void Forest::clearAllPlants()
 {
 	m_activePlants->deselect();
-	m_grid->begin();
-	while(!m_grid->end() ) {
-	    m_grid->value()->clear();
-	    m_grid->next();
+	m_grid->clearPlants();
+	m_plants.clear();
+    
+	std::vector<PlantData *>::iterator itb = m_pool.begin();
+	for(;itb!=m_pool.end();++itb) {
+		delete (*itb)->t1;
+		delete (*itb)->t2;
+		delete (*itb);
 	}
+    m_pool.clear();
 	m_numPlants = 0;
+	
 }
 
 int Forest::getBindPoint(Vector3F & pos, GroundBind * bind)
@@ -315,7 +303,7 @@ int Forest::getBindPoint(Vector3F & pos, GroundBind * bind)
 	if(geom < 0 || geom > 999) return -1;
 	if(geom >= numGroundMeshes() ) return 0;
 	
-	ATriangleMesh * mesh = m_grounds[geom];
+	ATriangleMesh * mesh = m_groundMeshes[geom];
 	if(component < 0 || component >= mesh->numTriangles() ) return 0;
 	unsigned * tri = mesh->triangleIndices(component);
 	Vector3F * pnt = mesh->points();
@@ -557,7 +545,7 @@ void Forest::onSampleChanged()
 	std::cout<<"Forest on sample changed";
     std::cout.flush();
 	updateGrid();
-	updateNumSamples();
+	countNumSamples();
 }
 
 void Forest::onPlantChanged()
@@ -565,7 +553,7 @@ void Forest::onPlantChanged()
 	std::cout<<"Forest on plant changed";
     std::cout.flush();
 	updateGrid();
-	updateNumPlants();
+	countNumPlants();
 }
 
 void Forest::intersectWorldBox(const Ray & ray)
@@ -618,7 +606,7 @@ bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 const int & Forest::lastPlantIndex() const
 { return m_lastPlantInd; }
 
-void Forest::updateNumSamples()
+void Forest::countNumSamples()
 { grid()->countActiveSamples(); }
 
 const int & Forest::sampleLevel() const

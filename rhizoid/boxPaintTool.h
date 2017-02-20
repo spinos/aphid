@@ -51,7 +51,7 @@ class proxyPaintContext : public MPxContext
         opClean = 99,
         opFlood = 100,
         opExtract = 102,
-        opDiscardFaceSelection = 103,
+        opDiscardSampleSelection = 103,
         opDiscardPlantSelection = 104,
         opRotateToDir = 105,
 		opCleanByType = 106,
@@ -102,7 +102,7 @@ public:
     unsigned getInstanceGroupCount() const;
 	void setWriteCache(MString filename);
 	void setReadCache(MString filename);
-	void cleanup();
+	void clearAllPlants();
 	char getSelectedViz();
 	void setMinCreateMargin(float x);
 	const float & minCreateMargin();
@@ -158,7 +158,7 @@ private:
 	void startSelectGround();
 	void replace();
     void scaleBrush();
-    void discardFaceSelection();
+    void discardSampleSelection();
     void discardPlantSelection();
 	void injectSelectedParticle();
     void injectSelectedTransform();

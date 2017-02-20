@@ -55,6 +55,7 @@ public:
 	void clearSamplles();
 	
 	int countPlants();
+	void clearPlants();
 	
 	template<typename Tf>
 	void processFilter(Tf & selFilter);

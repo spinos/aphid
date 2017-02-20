@@ -38,37 +38,6 @@ DrawForest::~DrawForest()
 	delete m_scalHand;
 }
 
-void DrawForest::drawGround() 
-{
-	//std::cout<<" DrawForest draw ground begin"<<std::endl;
-    if(!m_enabled) return;
-	if(numActiveGroundFaces() < 1) return;
-	sdb::Sequence<int> * prims = activeGround()->primIndices();
-	const sdb::VectorArray<cvx::Triangle> & tris = triangles();
-	
-	glPushAttrib(GL_CURRENT_BIT);
-	glDisable(GL_LIGHTING);
-	glColor3f(.57f, .37f, 0.f);
-	
-	glBegin(GL_TRIANGLES);
-	
-	try {
-	prims->begin();
-	while(!prims->end() ) {
-	
-		const cvx::Triangle * t = tris[prims->key() ];
-		drawFace(t->ind0(), t->ind1() );
-		
-		prims->next();
-	}
-	} catch (...) {
-		std::cerr<<"DrawForest draw ground caught something";
-	}
-	
-	glEnd();
-	glPopAttrib();
-}
-
 void DrawForest::drawFace(const int & geoId, const int & triId)
 {
 	const ATriangleMesh * mesh = groundMeshes()[geoId];
@@ -380,13 +349,14 @@ void DrawForest::drawSample()
 	try {
 	g->begin();
 	while(!g->end() ) {
-		
 		const ForestCell * cell = g->value();
 		const int & nv = cell->numSamples(sl);
 		if(nv > 0) {
-			drs.drawColored(cell->samplePoints(sl),
+			if(!cullByFrustum(g->coordToGridBBox(g->key() ) ) ) {
+				drs.drawColored(cell->samplePoints(sl),
 					cell->sampleColors(sl),
 					nv);
+			}
 		}
 		
 		g->next();
@@ -415,7 +385,7 @@ void DrawForest::drawActiveSamples()
 	if(g->numActiveCells() < 1) {
 		return;
 	}
-	
+		
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
 	
@@ -437,11 +407,12 @@ void DrawForest::drawActiveSamples()
 		const ForestCell * cell = g->activeCellValue();
 		const int & nv = cell->numVisibleSamples();
 		if(nv > 0) {
-			//drawBoundingBox(&g->coordToGridBBox(g->activeCellKey() ) );
-			drs.drawColored(cell->samplePoints(sl),
+			if(!cullByFrustum(g->coordToGridBBox(g->activeCellKey() ) ) ) {
+				drs.drawColored(cell->samplePoints(sl),
 					cell->sampleColors(sl),
 					cell->visibleSampleIndices(),
 					nv);
+			}
 		}
 		
 		g->activeCellNext();

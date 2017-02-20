@@ -171,7 +171,12 @@ bool GrowForest::growAt(const Ray & ray, GrowOption & option)
 	IntersectionContext * ctx = intersection();
 	
 	if(option.m_multiGrow) {
-		selectGroundSamples(ray, SelectionContext::Replace);
+		bool stat = selectGroundSamples(ray, SelectionContext::Replace);
+		if(!stat) {
+			return false;
+		}
+		onSampleChanged();
+		
 /// limit radius
 		option.m_centerPoint = ctx->m_hitP;
 		option.m_radius = selection()->radius();

@@ -715,7 +715,7 @@ void ProxyViz::releaseCallback(void* clientData)
 void ProxyViz::saveInternal()
 {
 	AHelper::Info<MString>("prxnode save internal", MFnDependencyNode(thisMObject()).name() );
-	updateNumPlants();
+	countNumPlants();
 	const unsigned n = numPlants();
 	AHelper::Info<unsigned>("num plants", n );
 	if(n<1) return;
@@ -907,8 +907,8 @@ void ProxyViz::updateViewFrustum(MObject & thisNode)
 	MPlug flplg(thisNode, afocallength);
 	float fl = flplg.asFloat();
 	
-    float farClip = -20.f;
-    if(numPlants() > 0) getFarClipDepth(farClip, gridBoundingBox() );
+    float farClip = -1000.f;
+    getFarClipDepth(farClip, gridBoundingBox() );
     
     setFrustum(hfa, vfa, fl, -10.f, farClip );
 	
@@ -928,8 +928,8 @@ void ProxyViz::updateViewFrustum(const MDagPath & cameraPath)
 	peye[2] = cameraMat.matrix[3][2];
 	setEyePosition(peye);
 	
-    float farClip = -20.f;
-    if(numPlants() > 0) getFarClipDepth(farClip, gridBoundingBox() );
+    float farClip = -1000.f;
+    getFarClipDepth(farClip, gridBoundingBox() );
     
 	MFnCamera fcam(cameraPath.node() );
 	if(fcam.isOrtho() ) {
@@ -1132,6 +1132,18 @@ void ProxyViz::processRemoveTypedPlants(const GrowOption & param)
 {
 	AHelper::Info<int>("ProxyViz set to clear by type", param.m_plantId);
 	removeTypedPlants(param);
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processClearAllPlants()
+{
+	clearAllPlants();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processDeselectPlants()
+{
+	deselectPlants();
 	_viewport.refresh(false, true);
 }
 
