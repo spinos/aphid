@@ -14,6 +14,8 @@
  */
 
 #include "AFrustum.h"
+#include <math/Matrix44F.h>
+#include <geom/ConvexShape.h>
 #include <iostream>
 
 namespace aphid {
@@ -123,6 +125,22 @@ void AFrustum::toRayFrame(Vector3F * dst, const int & gridX, const int & gridY) 
 		<<"\n corner[6] "<<dst[3] + dst[5] * gridY
 		<<"\n corner[7] "<<dst[3] + dst[4] * gridX + dst[5] * gridY
 		<<"\n ray[0] "<<(dst[3] - dst[0]).normal();*/
+}
+
+bool AFrustum::intersectPoint(const Vector3F & p) const
+{
+    cvx::Sphere ball;
+    ball.set(p, .5f);
+    return gjk::Intersect1<AFrustum, cvx::Sphere>::Evaluate(*this, ball);
+}
+
+const BoundingBox AFrustum::calculateBBox() const
+{
+    BoundingBox bx;
+    for(int i=0; i < 8; i++) {
+        bx.expandBy(m_v[i]);
+    }
+    return bx;
 }
 
 }

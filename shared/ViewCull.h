@@ -8,8 +8,9 @@
  */
 
 #pragma once
-#include <AFrustum.h>
+#include <geom/AFrustum.h>
 #include <math/BoundingBox.h>
+#include <math/Matrix44F.h>
 #include <math/BoundingRectangle.h>
 
 namespace aphid {

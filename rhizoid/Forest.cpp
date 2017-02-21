@@ -21,7 +21,7 @@
 #include <kd/ClosestToPointEngine.h>
 #include <kd/IntersectEngine.h>
 #include "SampleFilter.h"
-#include <AFrustum.h>
+#include <geom/AFrustum.h>
 
 namespace aphid {
 
@@ -678,9 +678,8 @@ bool Forest::selectGroundSamples(const AFrustum & fru, SelectionContext::SelectM
 	
 	m_sampleFlt->setMode(mode );
 	
-	// todo intersect
-	//m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter, AFrustum >(ineng, clseng,
-	//				*m_sampleFlt, fru );
+	m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter, AFrustum >(ineng, clseng,
+					*m_sampleFlt, fru );
 					
 	return true;
 }

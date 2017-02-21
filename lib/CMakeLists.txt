@@ -191,7 +191,6 @@ ${Geom_SRC}
 ../shared/DiscMesh.cpp
 ../shared/PlaneMesh.cpp
 ../catmullclark/bezierPatch.cpp 
-../shared/AFrustum.cpp
 ../shared/TriangleRaster.cpp
 ../shared/PrimitiveFilter.cpp
 ../shared/PatchMesh.cpp
