@@ -128,6 +128,7 @@ public:
 	void processDeselectPlants();
 	void processBrushRadius(const float & x);
 	void processManipulatMode(ModifyForest::ManipulateMode x);
+	void processViewDependentSelectSamples();
 	
 private:
     void drawBrush(M3dView & view);

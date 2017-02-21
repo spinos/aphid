@@ -133,6 +133,7 @@ public:
 	void setImageSamplerName(MString filename);
 	MString imageSamplerName() const;
 	void reshuffleSamples();
+	void viewDependentSelectSamples();
 	void setFilterPortion(float x);
 	float filterPortion() const;
 	int numVisibleSamples();

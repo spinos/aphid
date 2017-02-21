@@ -1119,6 +1119,14 @@ void proxyPaintContext::reshuffleSamples()
 	}
 }
 
+void proxyPaintContext::viewDependentSelectSamples()
+{
+	validateSelection();
+	if(PtrViz) {
+		PtrViz->processViewDependentSelectSamples();
+	}
+}
+
 void proxyPaintContext::setFilterPortion(float x)
 {
 	if(PtrViz) {

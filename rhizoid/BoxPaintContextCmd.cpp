@@ -67,6 +67,8 @@
 #define kFilterPortionFlagLong "-filterPortion"
 #define kSampleCountFlag "-spc"
 #define kSampleCountFlagLong "-sampleCount"
+#define kViewSelectSampleFlag "-vsp"
+#define kViewSelectSampleFlagLong "-viewSelectSample"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -302,6 +304,10 @@ MStatus proxyPaintContextCmd::doEditFlags()
 	
 	if (argData.isFlagSet(kReshuffleSampleFlag)) {
 		fContext->reshuffleSamples();
+	}
+	
+	if (argData.isFlagSet(kViewSelectSampleFlag)) {
+		fContext->viewDependentSelectSamples();
 	}
 	
 	if (argData.isFlagSet(kFilterPortionFlag)) {
@@ -590,6 +596,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kSampleCountFlag, kSampleCountFlagLong, MSyntax::kNoArg);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add sample count arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kViewSelectSampleFlag, kViewSelectSampleFlagLong, MSyntax::kNoArg);
+	if(!stat) {
+		MGlobal::displayInfo("failed to view select sample arg");
 		return MS::kFailure;
 	}
 	

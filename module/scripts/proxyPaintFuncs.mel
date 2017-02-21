@@ -162,6 +162,12 @@ proc string proxyPaint_getCurrentCache()
     return $ch;
 }
 
+global proc proxyPaintDoSelectSampleByView()
+{
+    proxyPaintToolContext -e -vsp `currentCtx`;
+    proxyPaintShowNumSamples();
+}
+
 global proc proxyPaintDoFlood()
 {
     proxyPaintToolContext -e -opt 100 `currentCtx`;

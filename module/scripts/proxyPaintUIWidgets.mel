@@ -54,6 +54,11 @@ global proc proxyPaintGroundEditUI(string $coln)
         -image1 "generic_discard.png" 
         -c "proxyPaintSetOpt(103)";
         
+    iconTextButton -label "Select by View" 
+        -image1 "generic_eye.xpm" 
+        -style "iconAndTextHorizontal" 
+        -c "proxyPaintDoSelectSampleByView";
+        
     setParent ..;
     
     rowLayout -numberOfColumns 2

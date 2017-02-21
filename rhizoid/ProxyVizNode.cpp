@@ -1165,5 +1165,13 @@ void ProxyViz::processManipulatMode(ModifyForest::ManipulateMode x)
 	_viewport.refresh(false, true);
 }
 
+void ProxyViz::processViewDependentSelectSamples()
+{
+	const AFrustum & fshape = frustum();
+	selectGroundSamples(fshape, SelectionContext::Append);
+	onSampleChanged();
+	_viewport.refresh(false, true);
+}
+
 }
 //:~

@@ -57,7 +57,7 @@ void Forest::resetGrid(float x)
 {
 	m_grid->clear();
 	m_grid->setGridSize(x);
-	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.1f );
+	m_sampleFlt->computeGridLevelSize(gridSize(), plantSize(0) * 1.41f );
 	std::cout<<"\n reset grid "<<gridSize()
 			<<"\n sample level "<<sampleLevel();
 	std::cout.flush();
