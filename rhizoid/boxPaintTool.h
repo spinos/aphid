@@ -137,6 +137,9 @@ public:
 	void setFilterPortion(float x);
 	float filterPortion() const;
 	int numVisibleSamples();
+	void setShowVizGrid(int x);
+	int getShowVizGrid();
+	void getVizStatistics(std::map<std::string, std::string > & stats);
 	
 private:
 	void resize(bool isBundled);

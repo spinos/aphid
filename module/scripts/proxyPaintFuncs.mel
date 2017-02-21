@@ -115,6 +115,11 @@ global proc proxyPaintSetNoise3dGain(float $x)
     proxyPaintShowNumSamples();
 }
 
+global proc proxyPaintSetShoVizGrid(int $x)
+{
+    proxyPaintToolContext -e -vvg $x `currentCtx`; 
+}
+
 global proc proxyPaintSetNoise3dOrigin()
 {
     float $a = `rand 1`;
@@ -209,5 +214,33 @@ global proc proxyPaintReadCache()
         return;
     
     proxyPaintToolContext -e -rch $filename `currentCtx`;
+}
+
+global proc proxyPaint_updateVizStats(string $toolName)
+{
+    string $names = eval("proxyPaintToolContext -q -vst " + $toolName);
+    if(size($names) < 3) {
+        return;   
+    }
+    
+    string $buffer[];
+    $numTokens = `tokenize $names "|" $buffer`;
+    
+    int $i;
+    for($i=0;$i<$numTokens;$i=$i+1) {
+        if($buffer[$i] == "box") {
+            textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatBox; 
+        }
+        if($buffer[$i] == "cell") {
+            textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatCell; 
+        }
+        if($buffer[$i] == "bound") {
+            textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatBound; 
+        }
+        if($buffer[$i] == "triangle") {
+            textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatTriangle; 
+        }
+    }
+    
 }
 

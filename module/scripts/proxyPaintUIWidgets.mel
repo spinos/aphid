@@ -2,6 +2,43 @@
  *  proxyPaintUIWidgets.mel
  *
  */
+ 
+global proc proxyPaintCreateVizUI(string $coln)
+{
+    checkBox -label "Show Grid"
+        -value 1
+        -cc "proxyPaintSetShoVizGrid(`checkBox -q -value proxyPaintCheck_shoVizGrid`)" 
+        -p $coln
+        proxyPaintCheck_shoVizGrid;
+        
+    frameLayout -label "Statistics" 
+        -cl true -cll true
+        -p $coln;
+    columnLayout -adj true;
+    
+        textFieldGrp
+            -label "#Box"
+            -text  ""
+            ppnField_vizStatBox;
+            
+        textFieldGrp
+            -label "#Cell"
+            -text  ""
+            ppnField_vizStatCell;
+            
+        textFieldGrp
+            -label "#Triangle"
+            -text  ""
+            ppnField_vizStatTriangle;
+            
+        textFieldGrp
+            -label "Bound"
+            -text  ""
+            ppnField_vizStatBound;
+    
+    setParent ..; /// end of column
+    setParent ..; /// end of frame
+}
 
 global proc proxyPaintCreateBrushUI(string $coln)
 {
@@ -217,14 +254,10 @@ global proc proxyPaintCreateCreateUI(string $coln)
             -cc "proxyPaintSetScaleMax(`floatSliderGrp -q -value proxyPaintSlider_ScaleMax`)" 
             proxyPaintSlider_ScaleMax;
             
-    intSliderGrp -label "Multiple Create"
-            -minValue 0 -maxValue 6
-            -field true
-            -fieldMinValue 0 -fieldMaxValue 6
-            -value 0
-            -cw 1 130
-            -cc "proxyPaintSetMultiCreate(`intSliderGrp -q -value proxyPaintSlider_multiCreate`)" 
-            proxyPaintSlider_multiCreate;
+        checkBox -label "Multiple Create"
+            -value 1
+            -cc "proxyPaintSetMultiCreate(`checkBox -q -value proxyPaintCheck_multiCreate`)" 
+            proxyPaintCheck_multiCreate;
 
     setParent ..;
 	setParent ..;

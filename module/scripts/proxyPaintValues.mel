@@ -25,7 +25,10 @@ global proc proxyPaintOptionValues(string $toolName)
  	intSliderGrp -e -value $aln proxyPaintSlider_noise3dOctave;
  	
  	int $mct = eval("proxyPaintToolContext -q -mct " + $toolName);
- 	intSliderGrp -e -value $mct proxyPaintSlider_multiCreate;
+ 	checkBox -e -value $mct proxyPaintCheck_multiCreate;
+ 	
+ 	int $vvg = eval("proxyPaintToolContext -q -vvg " + $toolName);
+ 	checkBox -e -value $vvg proxyPaintCheck_shoVizGrid;
  	
  	int $igc = eval("proxyPaintToolContext -q -igc " + $toolName);
  	intSliderGrp -e -value $igc proxyPaintSlider_instanceGroupCount;

@@ -13,6 +13,8 @@
 #include <kd/KdEngine.h>
 #include <math/RayMarch.h>
 #include <PlantSelection.h>
+#include <string>
+#include <map>
 
 namespace aphid {
 
@@ -54,6 +56,8 @@ public:
 	const float & gridSize() const;
 	const float & filterPortion() const;
 	int numVisibleSamples();
+	
+	void getStatistics(std::map<std::string, std::string > & stats);
 	
 protected:
 	void resetGrid(float x);

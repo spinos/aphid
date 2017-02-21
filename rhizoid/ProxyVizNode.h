@@ -34,6 +34,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	MMatrix _worldSpace, _worldInverseSpace;
 	ExampVox * m_defExample;
 	float m_transBuf[16];
+	int m_iShowGrid;
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;
 	bool m_hasParticle, m_enableCompute;
@@ -98,7 +99,6 @@ public:
 	static MObject adrawDopSizeZ;
 	static MObject adrawDopSize;
 	static MObject aininstspace;
-	static MObject ashogrid;
 	static MObject ashosamp;
 	static MObject outValue1;
 	static MObject outValue2;
@@ -129,6 +129,8 @@ public:
 	void processBrushRadius(const float & x);
 	void processManipulatMode(ModifyForest::ManipulateMode x);
 	void processViewDependentSelectSamples();
+	void processSetShowGrid(int x);
+	const int & getShowGrid() const;
 	
 private:
     void drawBrush(M3dView & view);

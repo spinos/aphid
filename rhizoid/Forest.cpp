@@ -22,6 +22,7 @@
 #include <kd/IntersectEngine.h>
 #include "SampleFilter.h"
 #include <geom/AFrustum.h>
+#include <sstream>
 
 namespace aphid {
 
@@ -682,6 +683,28 @@ bool Forest::selectGroundSamples(const AFrustum & fru, SelectionContext::SelectM
 					*m_sampleFlt, fru );
 					
 	return true;
+}
+
+void Forest::getStatistics(std::map<std::string, std::string > & stats)
+{
+	std::stringstream sst;
+	const int & nbx = numPlants();
+	sst<<nbx;
+	stats["box"] = sst.str();
+	
+	sst.str("");
+	int nc = numCells();
+	sst<<nc;
+	stats["cell"] = sst.str();
+	
+	sst.str("");
+	sst<<gridBoundingBox();
+	stats["bound"] = sst.str();
+	
+	sst.str("");
+	int ntri = m_triangles.size();
+	sst<<ntri;
+	stats["triangle"] = sst.str();
 }
 
 }

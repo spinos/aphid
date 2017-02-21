@@ -61,7 +61,6 @@ MObject ProxyViz::adrawDopSizeY;
 MObject ProxyViz::adrawDopSizeZ;
 MObject ProxyViz::adrawDopSize;
 MObject ProxyViz::aininstspace;
-MObject ProxyViz::ashogrid;
 MObject ProxyViz::ashosamp;
 MObject ProxyViz::outValue1;
 MObject ProxyViz::outValue2;
@@ -70,7 +69,8 @@ ProxyViz::ProxyViz() : _firstLoad(1), fHasView(0),
 m_toSetGrid(true),
 m_toCheckVisibility(false),
 m_enableCompute(true),
-m_hasParticle(false)
+m_hasParticle(false),
+m_iShowGrid(0)
 { 
 	attachSceneCallbacks(); 
 	m_defExample = new ExampVox;
@@ -106,9 +106,9 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		float grdsz = defBox->geomExtent() * 24.f ;
 		grdsz = (int)grdsz + 1.f;
-		if(grdsz < 100.f) {
+		if(grdsz < 128.f) {
 			AHelper::Info<float>(" ProxyViz input box is too small", grdsz);
-			grdsz = 100.f;
+			grdsz = 128.f;
 			AHelper::Info<float>(" truncated to", grdsz);
 		}
 		
@@ -250,9 +250,6 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	} else {
 		setWireColor(.0675f, .0675f, .0675f);
 	}
-    
-    MPlug shogridPlug(thisNode, ashogrid);
-	const bool showGrid = shogridPlug.asBool();
 	
 	MPlug shoSamplePlug(thisNode, ashosamp);
 	const bool showSample = shoSamplePlug.asBool();
@@ -284,7 +281,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	drawGridBounding();
 	
-	if(showGrid) {
+	if(m_iShowGrid > 0) {
 	    drawGrid();
 	}
 
@@ -678,12 +675,6 @@ MStatus ProxyViz::initialize()
     matAttr.setArray(true);
     matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( aininstspace );
-	
-	ashogrid = numFn.create( "showGrid", "shg", MFnNumericData::kBoolean );
-	numFn.setDefault(0);
-	numFn.setKeyable(true);
-	numFn.setStorable(false);
-	addAttribute(ashogrid);
 	
 	ashosamp = numFn.create( "showSample", "shsp", MFnNumericData::kBoolean );
 	numFn.setDefault(0);
@@ -1172,6 +1163,15 @@ void ProxyViz::processViewDependentSelectSamples()
 	onSampleChanged();
 	_viewport.refresh(false, true);
 }
+
+void ProxyViz::processSetShowGrid(int x)
+{
+	m_iShowGrid = x;
+	_viewport.refresh(false, true);
+}
+
+const int & ProxyViz::getShowGrid() const
+{ return m_iShowGrid; }
 
 }
 //:~

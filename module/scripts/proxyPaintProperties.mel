@@ -46,6 +46,9 @@ global proc proxyPaintProperties ()
         
      $ppnForm;
      
+        string $vizColn = `columnLayout -adjustableColumn true pxpnVizColn`;
+        setParent ..;
+        
         string $brushColn = `columnLayout -adjustableColumn true pxpnBrushColn`;
         setParent ..;       
         
@@ -62,6 +65,7 @@ global proc proxyPaintProperties ()
         setParent ..;  
         
     tabLayout -edit
+        -tabLabel $vizColn "Viz"
         -tabLabel $brushColn "Brush"
         -tabLabel $groundColn "Ground"
         -tabLabel $createColn "Create"
@@ -72,7 +76,8 @@ global proc proxyPaintProperties ()
 	setUITemplate -popTemplate;
 
 /// setup tab content	
-	proxyPaintCreateBrushUI($brushColn); 
+	proxyPaintCreateVizUI($vizColn); 
+    proxyPaintCreateBrushUI($brushColn); 
     proxyPaintGroundEditUI($groundColn);
     proxyPaintCreateCreateUI($createColn);
 	proxyPaintCreateEditUI($edtColn);
@@ -109,7 +114,12 @@ global proc proxyPaint_selectVizToPaint()
         else setAttr ($ani + ".act") 0;
     }
     
-    proxyPaintToolContext -e -slv `currentCtx`;
+    string $toolName = `currentCtx`;
+    
+    proxyPaintToolContext -e -slv $toolName;
+    
+    proxyPaint_updateVizStats($toolName);
+    
 }
 
 global proc proxyPaintUpdateExampleScroll()

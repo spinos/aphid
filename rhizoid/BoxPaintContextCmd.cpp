@@ -69,6 +69,10 @@
 #define kSampleCountFlagLong "-sampleCount"
 #define kViewSelectSampleFlag "-vsp"
 #define kViewSelectSampleFlagLong "-viewSelectSample"
+#define kVizViewGridFlag "-vvg"
+#define kVizViewGridFlagLong "-vizViewGrid"
+#define kVizStatFlag "-vst"
+#define kVizStatFlagLong "-vizStat"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -316,6 +320,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setFilterPortion(portion);
 	}
 	
+	if (argData.isFlagSet(kVizViewGridFlag)) {
+		int vvg = 0;
+		if (argData.getFlagArgument(kVizViewGridFlag, 0, vvg) )
+			fContext->setShowVizGrid(vvg);
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -406,6 +416,15 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kSampleCountFlag)) {
 		setResult(fContext->numVisibleSamples() );
+	}
+	
+	if (argData.isFlagSet(kVizViewGridFlag)) {
+		setResult(fContext->getShowVizGrid() );
+	}
+	
+	if (argData.isFlagSet(kVizStatFlag)) {
+		setVizStatResult();
+		
 	}
 	
 	return MS::kSuccess;
@@ -605,5 +624,33 @@ MStatus proxyPaintContextCmd::appendSyntax()
 		return MS::kFailure;
 	}
 	
+	stat = mySyntax.addFlag(kVizViewGridFlag, kVizViewGridFlagLong, MSyntax::kLong);
+	if(!stat) {
+		MGlobal::displayInfo("failed to viz view grid arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kVizStatFlag, kVizStatFlagLong, MSyntax::kNoArg);
+	if(!stat) {
+		MGlobal::displayInfo("failed to viz stat arg");
+		return MS::kFailure;
+	}
+	
 	return stat;
+}
+
+void proxyPaintContextCmd::setVizStatResult()
+{
+	std::map<std::string, std::string > stats;
+	fContext->getVizStatistics(stats);
+	MString res;
+	std::map<std::string, std::string >::iterator it = stats.begin();
+	for(;it != stats.end();++it) {
+		res += MString(it->first.c_str() );
+		res += MString("|");
+		res += MString(it->second.c_str() );
+		res += MString("|");
+	}
+	
+	setResult(res);
 }

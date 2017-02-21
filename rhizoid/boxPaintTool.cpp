@@ -445,10 +445,11 @@ unsigned proxyPaintContext::getGrowAlongNormal() const
 
 void proxyPaintContext::setMultiCreate(unsigned val)
 {
-	if(val == 1) 
+	if(val > 0) { 
 		MGlobal::displayInfo("proxyPaint enable multiple create");
-	else
+	} else {
 		MGlobal::displayInfo("proxyPaint disable multiple create");
+	}
 	m_growOpt.m_multiGrow = val;
 	MToolsInfo::setDirtyFlag(*this);
 }
@@ -1158,5 +1159,31 @@ int proxyPaintContext::numVisibleSamples()
 		c = PtrViz->numVisibleSamples();
 	}
 	return c;
+}
+
+void proxyPaintContext::setShowVizGrid(int x)
+{
+	validateSelection();
+	if(PtrViz) {
+		PtrViz->processSetShowGrid(x);
+	}
+}
+
+int proxyPaintContext::getShowVizGrid()
+{
+	int r = 0;
+	validateSelection();
+	if(PtrViz) {
+		r = PtrViz->getShowGrid();
+	}
+	return r;
+}
+
+void proxyPaintContext::getVizStatistics(std::map<std::string, std::string > & stats)
+{
+	validateSelection();
+	if(PtrViz) {
+		PtrViz->getStatistics(stats);
+	}
 }
 //:~

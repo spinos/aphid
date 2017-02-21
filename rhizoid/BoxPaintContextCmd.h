@@ -24,5 +24,9 @@ public:
 	
 protected:
     proxyPaintContext*		fContext;
+	
+private:
+	void setVizStatResult();
+	
 };
 #endif        //  #ifndef BOXPAINTCONTEXTCMD_H
