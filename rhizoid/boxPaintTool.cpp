@@ -1179,6 +1179,24 @@ int proxyPaintContext::getShowVizGrid()
 	return r;
 }
 
+void proxyPaintContext::setEditVizGround(int x)
+{
+	validateSelection();
+	if(PtrViz) {
+		PtrViz->processSetFastGround(x);
+	}
+}
+	
+int proxyPaintContext::getEditVizGround()
+{
+	int r = -1;
+	validateSelection();
+	if(PtrViz) {
+		r = PtrViz->getFastGround();
+	}
+	return r;
+}
+
 void proxyPaintContext::getVizStatistics(std::map<std::string, std::string > & stats)
 {
 	validateSelection();

@@ -139,6 +139,8 @@ public:
 	int numVisibleSamples();
 	void setShowVizGrid(int x);
 	int getShowVizGrid();
+	void setEditVizGround(int x);
+	int getEditVizGround();
 	void getVizStatistics(std::map<std::string, std::string > & stats);
 	
 private:

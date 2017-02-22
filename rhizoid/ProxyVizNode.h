@@ -35,6 +35,7 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	ExampVox * m_defExample;
 	float m_transBuf[16];
 	int m_iShowGrid;
+	int m_iFastGround;
 	bool m_toSetGrid;
 	bool m_toCheckVisibility;
 	bool m_hasParticle, m_enableCompute;
@@ -131,6 +132,8 @@ public:
 	void processViewDependentSelectSamples();
 	void processSetShowGrid(int x);
 	const int & getShowGrid() const;
+	void processSetFastGround(int x);
+	const int & getFastGround() const;
 	
 private:
     void drawBrush(M3dView & view);

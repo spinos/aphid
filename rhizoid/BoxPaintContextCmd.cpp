@@ -73,6 +73,8 @@
 #define kVizViewGridFlagLong "-vizViewGrid"
 #define kVizStatFlag "-vst"
 #define kVizStatFlagLong "-vizStat"
+#define kVizEditGroundFlag "-veg"
+#define kVizEditGroundFlagLong "-vizEditGround"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -326,6 +328,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setShowVizGrid(vvg);
 	}
 	
+	if (argData.isFlagSet(kVizEditGroundFlag)) {
+		int veg = 0;
+		if (argData.getFlagArgument(kVizEditGroundFlag, 0, veg) )
+			fContext->setEditVizGround(veg);
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -422,9 +430,12 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		setResult(fContext->getShowVizGrid() );
 	}
 	
+	if (argData.isFlagSet(kVizEditGroundFlag)) {
+		setResult(fContext->getEditVizGround() );
+	}
+	
 	if (argData.isFlagSet(kVizStatFlag)) {
 		setVizStatResult();
-		
 	}
 	
 	return MS::kSuccess;
@@ -633,6 +644,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kVizStatFlag, kVizStatFlagLong, MSyntax::kNoArg);
 	if(!stat) {
 		MGlobal::displayInfo("failed to viz stat arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kVizEditGroundFlag, kVizEditGroundFlagLong, MSyntax::kLong);
+	if(!stat) {
+		MGlobal::displayInfo("failed to viz edit ground arg");
 		return MS::kFailure;
 	}
 	

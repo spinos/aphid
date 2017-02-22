@@ -70,7 +70,8 @@ m_toSetGrid(true),
 m_toCheckVisibility(false),
 m_enableCompute(true),
 m_hasParticle(false),
-m_iShowGrid(0)
+m_iShowGrid(0),
+m_iFastGround(0)
 { 
 	attachSceneCallbacks(); 
 	m_defExample = new ExampVox;
@@ -90,6 +91,10 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 	}
 	
 	if( plug == outValue ) {
+	
+		if(m_iFastGround > 0) {
+			return MS::kSuccess;
+		}
 		
 		updateWorldSpace(thisMObject() );
 
@@ -99,8 +104,8 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		updateGeomBox(defBox, block);
 		updateGeomDop(defBox, block);
 		
-		AHelper::Info<MString>("ProxyViz", MFnDependencyNode(thisMObject() ).name() );
-		AHelper::Info<BoundingBox>("bbox", defBox->geomBox() );
+		AHelper::Info<MString>("ProxyViz compute", MFnDependencyNode(thisMObject() ).name() );
+		//AHelper::Info<BoundingBox>("bbox", defBox->geomBox() );
 		//std::cout<<"\n ProxyViz "<< MFnDependencyNode(thisMObject() ).name();
 		//std::cout<<"\n ProxyViz default Geom Box"<<defBox->geomBox();
 		
@@ -131,7 +136,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 /// in case no ground is connected
             if(updateGround(groundMeshArray, groundSpaceArray )) {
                 moveWithGround();
-                AHelper::Info<std::string>(" ProxyViz ground ", groundBuildLog() );
+                AHelper::Info<std::string>(" ProxyViz update ground ", groundBuildLog() );
             }
 		}
 		
@@ -1172,6 +1177,22 @@ void ProxyViz::processSetShowGrid(int x)
 
 const int & ProxyViz::getShowGrid() const
 { return m_iShowGrid; }
+
+void ProxyViz::processSetFastGround(int x)
+{
+	AHelper::Info<int>("ProxyViz set edit ground", x);
+	m_iFastGround = x;
+	if(m_iFastGround < 1) {
+		MPlug op(thisMObject(), outValue );
+		float vop;
+		op.getValue(vop);
+		_viewport.refresh(false, true);
+	}
+	
+}
+	
+const int & ProxyViz::getFastGround() const
+{ return m_iFastGround; }
 
 }
 //:~

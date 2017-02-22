@@ -5,34 +5,43 @@
  
 global proc proxyPaintCreateVizUI(string $coln)
 {
+    rowLayout -numberOfColumns 3
+		-columnWidth 1 120
+		-columnWidth 2 120
+		-columnWidth 3 120
+		-p $coln;
+		
     checkBox -label "Show Grid"
         -value 1
         -cc "proxyPaintSetShoVizGrid(`checkBox -q -value proxyPaintCheck_shoVizGrid`)" 
-        -p $coln
         proxyPaintCheck_shoVizGrid;
+        
+        iconTextButton -label "Edit Ground" 
+            -style "iconAndTextHorizontal" 
+            -image "generic_red_light.xpm" 
+            -c "proxyPaintSetEditVizGround"
+            proxyPaintIcon_editVizGroung;
+        
+    setParent ..;
         
     frameLayout -label "Statistics" 
         -cl true -cll true
         -p $coln;
     columnLayout -adj true;
     
-        textFieldGrp
-            -label "#Box"
+        textFieldGrp -label "#Box"
             -text  ""
             ppnField_vizStatBox;
             
-        textFieldGrp
-            -label "#Cell"
+        textFieldGrp -label "#Cell"
             -text  ""
             ppnField_vizStatCell;
             
-        textFieldGrp
-            -label "#Triangle"
+        textFieldGrp -label "#Triangle"
             -text  ""
             ppnField_vizStatTriangle;
             
-        textFieldGrp
-            -label "Bound"
+        textFieldGrp -label "Bound"
             -text  ""
             ppnField_vizStatBound;
     

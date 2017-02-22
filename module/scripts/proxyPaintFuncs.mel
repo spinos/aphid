@@ -242,5 +242,42 @@ global proc proxyPaint_updateVizStats(string $toolName)
         }
     }
     
+    iconTextButton -e -image "generic_amber_light.xpm" 
+        proxyPaintIcon_editVizGroung;
+        
+    int $veg = eval("proxyPaintToolContext -q -veg " + `currentCtx`);
+    if($veg == 0) {
+        iconTextButton -e -image "generic_red_light.xpm" 
+            proxyPaintIcon_editVizGroung;
+    } else {
+        iconTextButton -e -image "generic_green_light.xpm" 
+            proxyPaintIcon_editVizGroung;
+    }
+    
+}
+
+global proc proxyPaintSetEditVizGround()
+{
+    iconTextButton -e -image "generic_amber_light.xpm" 
+        proxyPaintIcon_editVizGroung;
+      
+    int $veg = eval("proxyPaintToolContext -q -veg " + `currentCtx`);
+    
+    if($veg < 0) {
+        iconTextButton -e -image "generic_red_light.xpm" 
+            proxyPaintIcon_editVizGroung;
+        return;
+    }
+    
+    if($veg == 0) {
+        proxyPaintToolContext -e -veg 1 `currentCtx`;
+        iconTextButton -e -image "generic_green_light.xpm" 
+            proxyPaintIcon_editVizGroung;
+    } else {
+        proxyPaintToolContext -e -veg 0 `currentCtx`;
+        iconTextButton -e -image "generic_red_light.xpm" 
+            proxyPaintIcon_editVizGroung;
+    }
+    
 }
 
