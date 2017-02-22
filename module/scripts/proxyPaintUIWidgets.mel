@@ -306,7 +306,32 @@ global proc proxyPaintCreateEditUI(string $coln)
         -image1 "proxyPaintTool_bundle_resize.xpm"
         -label "Bundle Resize" 
         -c "proxyPaintSetOpt(19)";
-		
+	
+    iconTextButton  -label "Move" 
+        -style "iconAndTextHorizontal" 
+        -image1 "proxyPaintTool_move.xpm"
+        -c "proxyPaintSetOpt(4)";
+        
+    iconTextButton  -label "Scale" 
+        -style "iconAndTextHorizontal" 
+        -image1 "proxyPaintTool_scale.xpm"
+        -c "proxyPaintSetOpt(3)";
+
+    iconTextButton -label "RotateY" 
+        -style "iconAndTextHorizontal" 
+        -image1 "proxyPaintTool_rotateY.xpm" 
+        -c "proxyPaintSetOpt(5)";
+        
+    iconTextButton -label "RotateZ" 
+        -style "iconAndTextHorizontal" 
+        -image1 "proxyPaintTool_rotateZ.xpm" 
+        -c "proxyPaintSetOpt(6)";
+        
+    iconTextButton  -label "RotateX" 
+        -style "iconAndTextHorizontal" 
+        -image1 "proxyPaintTool_rotateX.xpm"
+        -c "proxyPaintSetOpt(7)";
+        
 	iconTextButton -label "Rand Scale" 
 	                    -image1 "proxyPaintTool_randscale.xpm" 
 	                    -style "iconAndTextHorizontal" 
@@ -337,11 +362,6 @@ global proc proxyPaintCreateEditUI(string $coln)
                         -style "iconAndTextHorizontal" 
                         -c "proxyPaintSetOpt(107)";
                         
-    
-    iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateY.xpm" -label "RotateY" -c "proxyPaintSetOpt(5)";
-        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateZ.xpm" -label "RotateZ" -c "proxyPaintSetOpt(6)";
-        iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_rotateX.xpm" -label "RotateX" -c "proxyPaintSetOpt(7)";
-        
         iconTextButton -label "Right Up" 
                         -image1 "arrowup.xpm" 
                         -style "iconAndTextHorizontal" 
