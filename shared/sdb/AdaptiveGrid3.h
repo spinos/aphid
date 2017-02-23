@@ -52,26 +52,45 @@ public:
 	void setChild(SelfPtrType x, const int & i);
 	AdaptiveGridCell * child(const int & i);
 	
+	AdaptiveGridCell * parentCell();
+	const int & childInd() const;
+	
 protected:
+};
+
+class AdaptiveGridDivideProfle {
+
+	int m_minLevel;
+	int m_maxLevel;
+	bool m_divideAllChild;
+	
+public:
+	AdaptiveGridDivideProfle();
+	
+	std::vector<sdb::Coord4 > * m_dividedCoord;
+	
+	void setLevels(int minLevel, int maxLevel);
+	void setToDivideAllChild(bool x);
+	const int & minLevel() const;
+	const int & maxLevel() const;
+	const bool & toDivideAllChild() const;
+	
 };
 
 template<typename CellType, typename ValueType, int MaxLevel>
 class AdaptiveGrid3 : public Sequence<Coord4>
 {
 	BoundingBox m_bbox;
+	BoundingBox m_limitBox;
 /// size of cell of each level
 	float m_cellSize[MaxLevel+1];
 	int m_levelCoord[MaxLevel+1];
 	int m_numNodes;
 	
 public:
-	AdaptiveGrid3(Entity * parent = NULL) : Sequence<Coord4>(parent) 
-	{ m_numNodes = 0; }
+	AdaptiveGrid3(Entity * parent = NULL);
+	virtual ~AdaptiveGrid3();
 	
-	virtual ~AdaptiveGrid3() 
-	{}
-	
-	int maxLevel() const;
 	void setLevel0CellSize(const float & x);
 	const float & finestCellSize() const;
 	const float & level0CellSize() const;
@@ -81,17 +100,12 @@ public:
 	
 	CellType * value();
 	const Coord4 key() const;
-	
-/// add cell at level
-	CellType * addCell(const Coord4 & c);
-	CellType * addCell(const Vector3F & pref, const int & level = 0);
-	
+
 	const Coord4 cellCoordAtLevel(const Vector3F & pref, 
 						int level) const;
-	
-/// bbox of all level0 cells
-	void calculateBBox();
+
 	const BoundingBox & boundingBox() const;
+	const BoundingBox & limitBox() const;
 	void getCellBBox(BoundingBox & b, 
 						const Coord4 & c) const;
 /// i 0:7
@@ -99,12 +113,6 @@ public:
 						const int & i,
 						const Coord4 & c) const;
 	Vector3F cellCenter(const Coord4 & c) const;
-						
-/// add child i of cell i 0:7
-	CellType * subdivide(const Coord4 & cellCoord, const int & i);
-	CellType * subdivide(CellType * cell,
-						const Coord4 & cellCoord,
-						const int & i);
 	
 	CellType * findCell(const Coord4 & c);
 	Coord4 parentCoord(const Coord4 & c) const;
@@ -141,7 +149,26 @@ public:
 	
 	virtual void clear();
 	
+/// reset level0 cell size h and bound
+	virtual void fillBox(const BoundingBox & b,
+				const float & h);
+
+	virtual void resetBox(const BoundingBox & b,
+				const float & h);
+	
+	static int LevelLimit();
+	
 protected:
+/// add cell at level
+	virtual CellType * addCell(const Coord4 & c);
+	virtual CellType * addCell(const Vector3F & pref, const int & level = 0);
+/// bbox of all level0 cells
+	void calculateBBox();						
+/// add child i of cell i 0:7
+	CellType * subdivide(const Coord4 & cellCoord, const int & i);
+	CellType * subdivide(CellType * cell,
+						const Coord4 & cellCoord,
+						const int & i);
 	void storeCellNeighbors();
 	void storeCellChildren();
 	
@@ -151,8 +178,77 @@ private:
 };
 
 template<typename CellType, typename ValueType, int MaxLevel>
-int AdaptiveGrid3<CellType, ValueType, MaxLevel>::maxLevel() const
-{ return MaxLevel; }
+AdaptiveGrid3<CellType, ValueType, MaxLevel>::AdaptiveGrid3(Entity * parent) : Sequence<Coord4>(parent)
+{ m_numNodes = 0; }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+AdaptiveGrid3<CellType, ValueType, MaxLevel>::~AdaptiveGrid3()
+{}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::resetBox(const BoundingBox & b,
+				const float & h)
+{
+#if 0
+	std::cout<<"\n AdaptiveGrid3::setBox "<<b;
+#endif
+	clear();
+	setLevel0CellSize(h);
+	const Coord4 lc = cellCoordAtLevel(b.center(), 0);
+	addCell(lc);
+	calculateBBox();
+	m_limitBox = b;
+#if 0
+	std::cout<<"\n AdaptiveGrid3 bbox "<<boundingBox();
+#endif
+}
+
+template<typename CellType, typename ValueType, int MaxLevel>
+void AdaptiveGrid3<CellType, ValueType, MaxLevel>::fillBox(const BoundingBox & b,
+				const float & h)
+{
+#if 0
+	std::cout<<"\n AdaptiveGrid3::fillBox "<<b;
+#endif
+	clear();
+	setLevel0CellSize(h);
+	
+	const int s = level0CoordStride();
+	const Coord4 lc = cellCoordAtLevel(b.getMin(), 0);
+	const Coord4 hc = cellCoordAtLevel(b.getMax(), 0);
+	const int dimx = (hc.x - lc.x) / s + 1;
+	const int dimy = (hc.y - lc.y) / s + 1;
+	const int dimz = (hc.z - lc.z) / s + 1;
+	const float fh = finestCellSize();
+	
+	const Vector3F ori(fh * (lc.x + s/2),
+						fh * (lc.y + s/2),
+						fh * (lc.z + s/2));
+						
+	int i, j, k;
+	Coord4 sc;
+	sc.w = 0;
+	for(k=0; k<dimz;++k) {
+		sc.z = lc.z + s * k;
+		for(j=0; j<dimy;++j) {
+			sc.y = lc.y + s * j;
+			for(i=0; i<dimx;++i) {
+				sc.x = lc.x + s * i;
+				CellType * cell = findCell(sc);
+				if(!cell) {
+					addCell(sc);
+				}
+				
+			}
+		}
+	}
+	
+	calculateBBox();
+	m_limitBox = b;
+#if 0
+	std::cout<<"\n AdaptiveGrid3 bbox "<<boundingBox();
+#endif
+}
 
 template<typename CellType, typename ValueType, int MaxLevel>
 void AdaptiveGrid3<CellType, ValueType, MaxLevel>::setLevel0CellSize(const float & x)
@@ -486,8 +582,9 @@ CellType * AdaptiveGrid3<CellType, ValueType, MaxLevel>::cellClosestTo(const Vec
 			c = value();
 		}
 		
-		if(key().w > 0)
+		if(key().w > 0) {
 			break;
+		}
 			
 		next();
 	}
@@ -517,9 +614,15 @@ int AdaptiveGrid3<CellType, ValueType, MaxLevel>::numCellsAtLevel(int level)
 }
 
 template<typename CellType, typename ValueType, int MaxLevel>
+const BoundingBox & AdaptiveGrid3<CellType, ValueType, MaxLevel>::limitBox() const
+{ return m_limitBox; }
+
+template<typename CellType, typename ValueType, int MaxLevel>
 void AdaptiveGrid3<CellType, ValueType, MaxLevel>::clear()
 { 
+#if 0
 	std::cout<<"\n adaptive grid3 clear";
+#endif
 	begin();
 	while(!end() ) {
 		value()->clear();
@@ -571,6 +674,10 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::storeCellChildren()
 		next();
 	}
 }
+
+template<typename CellType, typename ValueType, int MaxLevel>
+int AdaptiveGrid3<CellType, ValueType, MaxLevel>::LevelLimit()
+{ return MaxLevel; }
 
 }
 

@@ -81,7 +81,9 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 	//std::cout<<"\n ForestCell::buildSamples"<<cellBox;
 	const int & maxLevel = selFilter.maxSampleLevel();
 	m_lodsamp->fillBox(cellBox, selFilter.sampleGridSize() );
-	const int reached = m_lodsamp->subdivideToLevel<T>(ground, 0, maxLevel);
+	sdb::AdaptiveGridDivideProfle subdprof;
+	subdprof.setLevels(0, maxLevel);
+	const int reached = m_lodsamp->subdivideToLevel<T>(ground, subdprof);
 	if(reached < maxLevel) {
 		return;
 	}

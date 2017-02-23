@@ -64,7 +64,7 @@ public:
 					const Tshape & selShape);
 	
 private:
-
+	
 };
 
 template<typename T>
@@ -134,42 +134,38 @@ class LodGrid : public AdaptiveGrid3<LodCell, LodNode, 10 > {
 
 typedef AdaptiveGrid3<LodCell, LodNode, 10 > TParent;
 
-	BoundingBox m_limitBox;
-	
 public:
 	LodGrid(Entity * parent = NULL);
 	virtual ~LodGrid();
 	
-/// reset level0 cell size and bound
-	void resetBox(const BoundingBox & b,
-				const float & h);
-	void fillBox(const BoundingBox & b,
-				const float & h);
-		
 /// level reached
 	template<typename Tf>
 	int subdivideToLevel(Tf & fintersect,
-						int minLevel, int maxLevel)
+						AdaptiveGridDivideProfle & prof)
 	{
 #if 0
 		std::cout<<"\n LodGrid::subdivide ";
 #endif
 		BoundingBox cb;
-		int level = minLevel;
-		while(level < maxLevel) {
+		int level = prof.minLevel();
+		while(level < prof.maxLevel() ) {
+/// dirty cells at level
 			std::vector<Coord4> dirty;
 			begin();
 			while(!end() ) {
 				if(key().w == level) {
 					getCellBBox(cb, key() );
 					
-					if(m_limitBox.intersect(cb) ) {
+					if(limitBox().intersect(cb) ) {
 						if(fintersect.intersect(cb) ) {
 							dirty.push_back(key() );
 						}
 					}
 					
-				}
+				} else if(key().w > level) {
+					break;
+				} 
+				
 				next();
 			}
 			
@@ -178,6 +174,9 @@ public:
 			}
 #if 0
 			std::cout<<"\n level"<<level;
+			if(prof.m_dividedCoord) {
+				std::cout<<" divided "<<prof.m_dividedCoord->size();
+			}
 #endif
 			std::vector<Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
@@ -189,8 +188,8 @@ public:
 		storeCellChildren();
 		
 #if 0		
-		const int nlc = numCellsAtLevel(maxLevel);
-		std::cout<<"\n level"<<maxLevel<<" n cell "<<nlc;
+		const int nlc = numCellsAtLevel(level );
+		std::cout<<"\n to level "<<level<<" n cell "<<nlc;
 		std::cout.flush();
 #endif
 		return level;
@@ -210,6 +209,7 @@ public:
 		GridSampler<Tf, LodNode, Ndiv > sampler;
 		
 		BoundingBox cellBx;
+		const BoundingBox & limBx = limitBox();
 		
 		int nc = 0;
 		int c = 0;
@@ -218,9 +218,10 @@ public:
 			if(key().w == level) {
 			
 				getCellBBox(cellBx, key() );
-				sampler.sampleInBox(fintersect, cellBx, m_limitBox );
+				sampler.sampleInBox(fintersect, cellBx, limBx );
 				
 				const int & ns = sampler.numValidSamples();
+				
 				for(int i=0;i<ns;++i) {
 
 					LodNode * par = new LodNode;
@@ -264,16 +265,22 @@ public:
 	void inserNodedByAggregation(int minLevel, int maxLevel);
 	void aggregateAtLevel(int level);
 	
-	virtual void clear(); 
-	
 	int countLevelNodes(int level);
 	void dumpLevelNodes(LodNode * dst, int level);
+	
+	virtual void clear();
 	
 protected:
 	template<typename Ts>
 	void dumpLevelSamples(Ts * dst, int level);
 	
 private:
+	void aggregateInCell(LodCell * cell, 
+						const Coord4 & cellCoord);
+	void processKmean(int & n, 
+					LodNode * samples,
+					const float & separateDist);
+					
 	template<typename Tf>
 	void subdivideCell(Tf & fintersect,
 						const Coord4 & cellCoord)
@@ -287,24 +294,20 @@ private:
 		if(cell->hasChild() ) {
 			return;
 		}
-			
+		
 		BoundingBox cb;
 		for(int i=0; i< 8; ++i) { 
-			getCellChildBox(cb, i, cellCoord );
 			
-			if(m_limitBox.intersect(cb) ) {
+			getCellChildBox(cb, i, cellCoord );
+			if(limitBox().intersect(cb) ) {
 				if(fintersect.intersect(cb) ) {
-					subdivide(cell, cellCoord, i);
+					subdivide(cellCoord, i);
 				}
 			}
+			
 		}
+		
 	}
-	
-	void aggregateInCell(LodCell * cell, 
-						const Coord4 & cellCoord);
-	void processKmean(int & n, 
-					LodNode * samples,
-					const float & separateDist);
 	
 };
 

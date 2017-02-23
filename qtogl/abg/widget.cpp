@@ -58,11 +58,16 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .87f;
-    
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .83f;
+	
     m_grid = new GridTyp;
     m_grid->fillBox(gridBox, sz0 );
-    m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
+	
+	sdb::AdaptiveGridDivideProfle subdprof;
+	subdprof.setLevels(0, 4);
+	subdprof.setToDivideAllChild(true);
+	
+    m_grid->subdivideToLevel<FIntersectTyp>(ineng, subdprof);
     m_grid->build();
     
     m_tetg = new TetGridTyp;
@@ -97,6 +102,8 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	m_sampg = new SampGridTyp;
 	m_sampg->setGridSize(sz0);
 	
+	subdprof.setToDivideAllChild(false);
+	
 	BoundingBox cb; 
 	Vector3F cbcen;
 	m_grid->begin();
@@ -112,7 +119,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 		
 		sdb::LodSampleCache * cell = m_sampg->insertCell((const float *)&cbcen );
 		cell->resetBox(cb, sz0);
-		cell->subdivideToLevel<FIntersectTyp>(ineng, 0, 4);
+		cell->subdivideToLevel<FIntersectTyp>(ineng, subdprof);
 		cell->insertNodeAtLevel<FClosestTyp, 4 >(4, clseng);
 		cell->insertNodeAtLevel<FClosestTyp, 4 >(3, clseng);
 		cell->inserNodedByAggregation(2, 2);
@@ -153,9 +160,10 @@ void GLWidget::clientDraw()
     
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(.05f, .5f, .15f);
-    //drawTetraMesh();
+    
+	//drawTetraMesh();
     //drawField();
-    //drawTriangulation();
+	drawTriangulation();
     
 }
 
@@ -241,7 +249,7 @@ void GLWidget::drawSamples()
 	
 	DrawSample drs;
 	drs.begin(drprof);
-	const int dlevel = 3;
+	const int dlevel = 4;
 	
 	m_sampg->begin();
 	while(!m_sampg->end() ) {

@@ -19,57 +19,30 @@ AdaptiveBccGrid3::AdaptiveBccGrid3()
 AdaptiveBccGrid3::~AdaptiveBccGrid3()
 {}
 
-void AdaptiveBccGrid3::fillBox(const BoundingBox & b,
-                const float & h)
-{
-    clear();
-	resetNumNodes();
-	setLevel0CellSize(h);
-	subdivideToLevel(b, 0);
-	calculateBBox();
-}
-
 BccCell3 * AdaptiveBccGrid3::addCell(const sdb::Coord4 & cellCoord)
 {
+#if 0
+	std::cout<<"\n AdaptiveBccGrid3::addCell";
+#endif
 	BccCell3 * c = AdaptiveGrid10T::addCell(cellCoord);
-	
 	c->insertRed( cellCenter(cellCoord) );
 	
 	return c;
 }
 
-bool AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord)
-{
-	BccCell3 * cell = findCell(cellCoord);
-	if(!cell) {
-		std::cout<<"\n [ERROR] cannot find cell to subdivide "<<cellCoord;
-		return false;
-	}
-	
-	if(cell->hasChild() ) {
-		//std::cout<<"\n [WARNING] cell already divided "<<cellCoord;
-		return false;
-	}
-	
-	for(int i=0; i< 8; ++i) { 
-		BccCell3 * c = subdivide(cellCoord, i);
-	
-		c->insertRed( childCenter(cellCoord, i) );
-	}
-	return true;
-}
-
 void AdaptiveBccGrid3::subdivideCells(const std::vector<sdb::Coord4 > & divided)
 {
 	std::vector<sdb::Coord4 >::const_iterator it = divided.begin();
-	for(;it!=divided.end();++it)
+	for(;it!=divided.end();++it) {
 		subdivideCell(*it);
+	}
 }
 
 void AdaptiveBccGrid3::build()
 {
+#if 0
 	std::cout<<"\n AdaptiveBccGrid3::build";
-	
+#endif
 	begin();
 	while(!end() ) {
 		const sdb::Coord4 k = key();
@@ -84,13 +57,15 @@ void AdaptiveBccGrid3::build()
 		next();
 	}
 	countNodes();
-	std::cout<<"\n done.";
 }
 
 void AdaptiveBccGrid3::subdivideToLevel(const BoundingBox & bx, 
 						const int & level,
 						std::vector<sdb::Coord4 > * divided)
 {
+#if 0
+	std::cout<<"\n AdaptiveBccGrid3::subdivideToLevel"<<bx<<" "<<level;
+#endif
 	const int s = level0CoordStride();
 	const sdb::Coord4 lc = cellCoordAtLevel(bx.getMin(), 0);
 	const sdb::Coord4 hc = cellCoordAtLevel(bx.getMax(), 0);
@@ -118,10 +93,10 @@ void AdaptiveBccGrid3::subdivideToLevel(const BoundingBox & bx,
 				sc.x = lc.x + s * i;
 				BccCell3 * cell = findCell(sc);
 				if(cell) {
-					if(level > 0)
+					if(level > 0) {
 						subdivideCellToLevel(cell, sc, bx, level, divided);
-				}
-				else { 
+					}
+				} else { 
 					if(level < 1) {
 						addCell(sc);
 					}
@@ -143,19 +118,19 @@ void AdaptiveBccGrid3::subdivideCellToLevel(BccCell3 * cell,
 	if(!cell->hasChild() ) {
 /// add 8 children
 		for(i=0; i< 8; ++i) { 
-			BccCell3 * c = subdivide(cellCoord, i);
-	
-			c->insertRed( childCenter(cellCoord, i) );
-		}
-		
-		if(cellCoord.w > 0) {
-			if(divided)
-				divided->push_back(cellCoord);
+			subdivide(cellCoord, i);
 		}
 	}
 	
-	if(cellCoord.w + 1 == level)
+	if(cellCoord.w > 0) {
+		if(divided) {
+			divided->push_back(cellCoord);
+		}
+	}
+	
+	if(cellCoord.w + 1 == level) {
 		return;
+	}
 	
 	BoundingBox childBx;
 /// subdidive each child if intersect
@@ -170,28 +145,37 @@ void AdaptiveBccGrid3::subdivideCellToLevel(BccCell3 * cell,
 	}
 }
 
-void AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord,
+bool AdaptiveBccGrid3::subdivideCell(const sdb::Coord4 & cellCoord,
 						std::vector<sdb::Coord4 > * divided)
 {
 	BccCell3 * cell = findCell(cellCoord);
-	if(cell->hasChild() ) 
-		return;
-		
-	int i;	
-/// add 8 children
-	for(i=0; i< 8; ++i) { 
-		BccCell3 * c = subdivide(cellCoord, i);
-
-		c->insertRed( childCenter(cellCoord, i) );
+	if(!cell) {
+		std::cout<<"\n [ERROR] cannot find cell to subdivide "<<cellCoord;
+		return false;
 	}
 	
-	if(divided)
+	if(cell->hasChild() ) {
+		return false;
+	}
+	
+/// add 8 children
+	for(int i=0; i< 8; ++i) { 
+		subdivide(cellCoord, i);
+		
+	}
+	
+	if(divided) {
 		divided->push_back(cellCoord);
-			
+	}
+	
+	return true;
 }
 
 void AdaptiveBccGrid3::enforceBoundary(std::vector<sdb::Coord4 > & ks)
 {
+#if 1
+	std::cout<<"\n AdaptiveBccGrid3::enforceBoundar "<<ks.size();
+#endif
 	while(ks.size() > 0) {
 /// first one
 		const sdb::Coord4 c = ks[0];

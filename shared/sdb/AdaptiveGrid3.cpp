@@ -40,6 +40,38 @@ void AdaptiveGridCell::setChild(SelfPtrType x, const int & i)
 AdaptiveGridCell * AdaptiveGridCell::child(const int & i)
 { return m_children[i]; }
 
+AdaptiveGridCell * AdaptiveGridCell::parentCell()
+{ return m_parentCell; }
+
+const int & AdaptiveGridCell::childInd() const
+{ return m_childI; }
+
+AdaptiveGridDivideProfle::AdaptiveGridDivideProfle()
+{
+	m_dividedCoord = 0;
+	m_minLevel = 0;
+	m_maxLevel = 5;
+	m_divideAllChild = false;
+}
+
+void AdaptiveGridDivideProfle::setLevels(int minLevel, int maxLevel)
+{
+	m_minLevel = minLevel;
+	m_maxLevel = maxLevel;
+}
+
+void AdaptiveGridDivideProfle::setToDivideAllChild(bool x)
+{ m_divideAllChild = x; }
+
+const int & AdaptiveGridDivideProfle::minLevel() const
+{ return m_minLevel; }
+
+const int & AdaptiveGridDivideProfle::maxLevel() const
+{ return m_maxLevel; }
+
+const bool & AdaptiveGridDivideProfle::toDivideAllChild() const
+{ return m_divideAllChild; }
+
 }
 
 }
