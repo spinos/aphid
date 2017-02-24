@@ -142,6 +142,8 @@ public:
 	void setEditVizGround(int x);
 	int getEditVizGround();
 	void getVizStatistics(std::map<std::string, std::string > & stats);
+	void setBrushFalloff(float x);
+	float getBrushFalloff();
 	
 private:
 	void resize(bool isBundled);

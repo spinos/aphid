@@ -17,6 +17,8 @@
 #define kOptFlagLong "-option"
 #define kLsegFlag "-brd" 
 #define kLsegFlagLong "-brushRadius"
+#define kBrushFallOffFlag "-bfo" 
+#define kBrushFallOffFlagLong "-brushFalloff"
 #define kMinFlag "-smn" 
 #define kMinFlagLong "-scaleMin"
 #define kMaxFlag "-smx" 
@@ -111,7 +113,7 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		double lseg;
 		status = argData.getFlagArgument(kLsegFlag, 0, lseg);
 		if (!status) {
-			status.perror("lseg flag parsing failed.");
+			status.perror("brush radius flag parsing failed.");
 			return status;
 		}
 		fContext->setBrushRadius(lseg);
@@ -122,7 +124,7 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		double wei;
 		status = argData.getFlagArgument(kWeightFlag, 0, wei);
 		if (!status) {
-			status.perror("lseg flag parsing failed.");
+			status.perror("brush weight flag parsing failed.");
 			return status;
 		}
 		fContext->setBrushWeight(wei);
@@ -334,6 +336,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setEditVizGround(veg);
 	}
 	
+	if (argData.isFlagSet(kBrushFallOffFlag)) {
+		double bfo = 0.f;
+		if (argData.getFlagArgument(kBrushFallOffFlag, 0, bfo) )
+			fContext->setBrushFalloff(bfo);
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -436,6 +444,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kVizStatFlag)) {
 		setVizStatResult();
+	}
+	
+	if (argData.isFlagSet(kBrushFallOffFlag)) {
+		setResult(fContext->getBrushFalloff() );
 	}
 	
 	return MS::kSuccess;
@@ -650,6 +662,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kVizEditGroundFlag, kVizEditGroundFlagLong, MSyntax::kLong);
 	if(!stat) {
 		MGlobal::displayInfo("failed to viz edit ground arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kBrushFallOffFlag, kBrushFallOffFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add brush falloff arg");
 		return MS::kFailure;
 	}
 	

@@ -286,7 +286,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	drawGridBounding();
 	
-	if(m_iShowGrid > 0) {
+	if(isActive && (m_iShowGrid > 0) ) {
 	    drawGrid();
 	}
 
@@ -1193,6 +1193,11 @@ void ProxyViz::processSetFastGround(int x)
 	
 const int & ProxyViz::getFastGround() const
 { return m_iFastGround; }
+
+void ProxyViz::processBrushFalloff(float x)
+{
+    setSelectionFalloff(x);
+}
 
 }
 //:~

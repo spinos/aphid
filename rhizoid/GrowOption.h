@@ -35,6 +35,7 @@ public:
 	bool m_stickToGround;
 	bool m_isInjectingParticle;
 	float m_strokeMagnitude;
+	float m_brushFalloff;
 	
 	GrowOption();
 	~GrowOption();
@@ -48,6 +49,8 @@ public:
 					const float & v) const;
 	
 	const ExrImage * imageSampler() const;
+/// limit to [0,3]
+	void setbrushFalloff(const float & x);
 	
 };
 

@@ -54,6 +54,9 @@ Forest::~Forest()
 void Forest::setSelectionRadius(float x)
 { m_activePlants->setRadius(x); }
 
+void Forest::setSelectionFalloff(float x)
+{ m_activePlants->setFalloff(x); }
+
 void Forest::resetGrid(float x)
 {
 	m_grid->clear();

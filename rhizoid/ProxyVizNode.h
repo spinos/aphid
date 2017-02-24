@@ -134,6 +134,7 @@ public:
 	const int & getShowGrid() const;
 	void processSetFastGround(int x);
 	const int & getFastGround() const;
+	void processBrushFalloff(float x);
 	
 private:
     void drawBrush(M3dView & view);

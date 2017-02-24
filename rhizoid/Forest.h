@@ -50,8 +50,7 @@ public:
 	Forest();
 	virtual ~Forest();
 	
-    void setSelectionRadius(float x);
-	const int & numActivePlants() const;
+    const int & numActivePlants() const;
 	const float & selectionRadius() const;
 	const float & gridSize() const;
 	const float & filterPortion() const;
@@ -60,6 +59,8 @@ public:
 	void getStatistics(std::map<std::string, std::string > & stats);
 	
 protected:
+    void setSelectionRadius(float x);
+	void setSelectionFalloff(float x);
 	void resetGrid(float x);
 	void updateGrid();
 	void countNumSamples();

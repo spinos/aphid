@@ -24,6 +24,7 @@ GrowOption::GrowOption()
 	m_minMarginSize = .1f;
 	m_maxMarginSize = .1f;
 	m_strength = .67f;
+	m_brushFalloff = 0.5f;
 	m_stickToGround = true;
 	m_sampler = NULL;
 }
@@ -89,6 +90,17 @@ const ExrImage * GrowOption::imageSampler() const
     }
     return NULL;
     
+}
+
+void GrowOption::setbrushFalloff(const float & x)
+{
+    if(x > 3.f) {
+        m_brushFalloff = 3.f;
+    } else if(x < 0.f) {
+        m_brushFalloff = 0.f;
+    } else {
+        m_brushFalloff = x;
+    }
 }
 		
 }

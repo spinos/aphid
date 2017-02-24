@@ -18,7 +18,7 @@ PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid)
 	m_plants = new SelectionTyp;
 	m_numSelected = 0;
     m_radius = 8.f;
-    m_weightDecay = 2.f;
+    m_weightDecay = .5f;
     m_typeFilter = -1;
 }
 
@@ -27,6 +27,14 @@ PlantSelection::~PlantSelection()
 	
 void PlantSelection::setRadius(float x)
 { m_radius = (x > 0.1f) ? x : 0.1f; }
+
+void PlantSelection::setFalloff(float x)
+{ 
+    m_weightDecay = x; 
+    if(m_numSelected > 0) {
+        calculateWeight();
+    }
+}
 
 void PlantSelection::setCenter(const Vector3F & center, const Vector3F & direction)
 {

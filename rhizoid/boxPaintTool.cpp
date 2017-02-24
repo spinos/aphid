@@ -1204,4 +1204,22 @@ void proxyPaintContext::getVizStatistics(std::map<std::string, std::string > & s
 		PtrViz->getStatistics(stats);
 	}
 }
+
+void proxyPaintContext::setBrushFalloff(float x)
+{
+    m_growOpt.setbrushFalloff(x);
+    AHelper::Info<float>("proxyPaintContext set brush fall off", m_growOpt.m_brushFalloff);
+    
+    validateSelection();
+    if(PtrViz) {
+        PtrViz->processBrushFalloff(x);
+	}
+	
+	MToolsInfo::setDirtyFlag(*this);
+}
+
+float proxyPaintContext::getBrushFalloff()
+{
+	return m_growOpt.m_brushFalloff;
+}
 //:~
