@@ -67,15 +67,19 @@ template <typename KeyType, int MaxNKey>
 KeyNData<KeyType, MaxNKey>::KeyNData() :
 m_numKeys(0)
 {
-    for(int i=0;i< MaxNKey;++i)
+    for(int i=0;i< MaxNKey;++i) {
         m_data[i].index = NULL;
+	}
 }
 
 template <typename KeyType, int MaxNKey>
 KeyNData<KeyType, MaxNKey>::~KeyNData() 
 {
-    for(int i=0;i< m_numKeys;++i)
-		if(m_data[i].index) delete m_data[i].index;
+	for(int i=0;i< m_numKeys;++i) {
+		if(m_data[i].index) {
+			delete m_data[i].index;
+		}
+	}
 }
 
 template <typename KeyType, int MaxNKey>

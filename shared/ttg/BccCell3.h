@@ -28,20 +28,14 @@ public:
 	int index;
 };
 
-class BccCell3 : public sdb::Array<int, BccNode3 > {
+class BccCell3 : public sdb::Array<int, BccNode3 >, public sdb::AdaptiveGridCell {
 
 	typedef sdb::AdaptiveGrid3<BccCell3, BccNode3, 10 > AdaptiveGridT;
-
-	bool m_hasChild;
-	BccCell3 * m_parentCell;
-	int m_childI;
 	
 public:
 	BccCell3(Entity * parent = NULL);
 	virtual ~BccCell3();
 	
-	void setHasChild();
-	void setParentCell(BccCell3 * x, const int & i);
 	void insertRed(const Vector3F & pref);
 	void insertBlue(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
@@ -52,8 +46,6 @@ public:
 	BccNode3 * findBlue(const Vector3F & pref);
 	void insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-	
-	const bool & hasChild() const;
 	
 	BccNode3 * blueNode(const int & i,
 					const sdb::Coord4 & cellCoord,
@@ -75,7 +67,10 @@ public:
 /// all node value negative
 	bool isInterior(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
-					
+	
+protected:
+	BccCell3 * parentCell();
+	
 private:
 	void findRedValueFrontBlue(BccNode3 * redN,
 					const sdb::Coord4 & cellCoord,

@@ -206,7 +206,9 @@ SphereSelectionContext::~SphereSelectionContext()
 {}
 
 void SphereSelectionContext::deselect()
-{ m_prims.clear(); }
+{
+	m_prims.clear();
+}
 
 void SphereSelectionContext::reset(const Vector3F & p,
 									const float & r,

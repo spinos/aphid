@@ -53,10 +53,6 @@ typedef sdb::AdaptiveGrid3<EbpCell, EbpNode, 10 > TParent;
 public:
 	EbpGrid();
 	virtual ~EbpGrid();
-	
-/// reset level0 cell size and bound
-	void fillBox(const BoundingBox & b,
-				const float & h);
 		
 	template<typename Tf>
 	void subdivideToLevel(Tf & fintersect,

@@ -38,11 +38,7 @@ void AdaptiveBccMesher::clearTetra()
 void AdaptiveBccMesher::fillBox(const BoundingBox & b,
 				const float & h)
 {
-	m_grid.clear();
-	m_grid.resetNumNodes();
-	m_grid.setLevel0CellSize(h);
-	m_grid.subdivideToLevel(b, 0);
-	m_grid.calculateBBox();
+	m_grid.fillBox(b, h);
 	std::cout<<"\n adaptive bcc mesher grid bbx "<<m_grid.boundingBox();
 }
 

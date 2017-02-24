@@ -24,66 +24,55 @@ class AdaptiveBccGrid3 : public AdaptiveGrid10T {
 public:
 	AdaptiveBccGrid3();
 	virtual ~AdaptiveBccGrid3();
-    
-/// reset level 0 w size h then fill box b 
-    void fillBox(const BoundingBox & b,
-                const float & h);
-                
+/// subdivide intersected cells to 8 sub-cells
+/// enforce cell boundray           
     template<typename Tf>
 	void subdivideToLevel(Tf & fintersect,
-						int minLevel, int maxLevel)
+						sdb::AdaptiveGridDivideProfle & prof)
 	{
-        std::vector<aphid::sdb::Coord4 > divided;
+#if 0
+		std::cout<<"\n AdaptiveBccGrid3::subdivide ";
+#endif
+		std::vector<sdb::Coord4 > divided;
+
 		BoundingBox cb;
-		int level = minLevel;
-		while(level < maxLevel) {
+		int level = prof.minLevel();
+		while(level < prof.maxLevel() ) {
 			std::vector<sdb::Coord4> dirty;
 			begin();
 			while(!end() ) {
 				if(key().w == level) {
 					getCellBBox(cb, key() );
 					
-					if(fintersect.intersect(cb) ) {
-						dirty.push_back(key() );
-                    }
+					if(limitBox().intersect(cb) ) {
+						if(fintersect.intersect(cb) ) {
+							dirty.push_back(key() );
+						}
+					}
 				}
+				
 				next();
 			}
-			
-			std::cout<<"\n subdiv level "<<level;
-			
+#if 0			
+			std::cout<<"\n subdiv level "<<level<<" divided "<<divided.size();
+#endif
 			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
                 getCellBBox(cb, *it);
-                subdivideToLevel(cb, level+1, &divided);
+				cb.expand(-1e-4f);
+				BccCell3 * cell = findCell(*it);
+                subdivideCellToLevel(cell, *it, cb, level+1, &divided);
 			}
 			level++;
 		}
+		
         enforceBoundary(divided);
-        divided.clear();
-		// storeCellNeighbors();
+        storeCellNeighbors();
+		storeCellChildren();
 	}
-	
-/// add 8 child cells
-	bool subdivideCell(const sdb::Coord4 & cellCoord);
 	
 /// create node in each cell
 	void build();
-/// find all level0 cell intersect box
-/// subdivide recursively to level
-	void subdivideToLevel(const BoundingBox & bx, 
-						const int & level,
-						std::vector<sdb::Coord4 > * divided = NULL);
-						
-	void subdivideCellToLevel(BccCell3 * cell,
-						const sdb::Coord4 & cellCoord,
-						const BoundingBox & bx, 
-						const int & level,
-						std::vector<sdb::Coord4 > * divided);
-					
-/// to level + 1
-	void subdivideCell(const sdb::Coord4 & cellCoord,
-						std::vector<sdb::Coord4 > * divided);
 	
 /// find level cell intersect distance function
 	template<typename Tf>
@@ -106,11 +95,27 @@ public:
 			next();
 		}
 	}
-	
+
 	void subdivideCells(const std::vector<sdb::Coord4 > & divided);
+/// add 8 child cells
+/// to level + 1
+	bool subdivideCell(const sdb::Coord4 & cellCoord,
+						std::vector<sdb::Coord4 > * divided = 0);
+/// subdivide recursively to level
+	void subdivideToLevel(const BoundingBox & bx, 
+						const int & level,
+						std::vector<sdb::Coord4 > * divided = 0);	
 						
-private:
+protected:
+	void subdivideCellToLevel(BccCell3 * cell,
+						const sdb::Coord4 & cellCoord,
+						const BoundingBox & bx, 
+						const int & level,
+						std::vector<sdb::Coord4 > * divided);					
 	BccCell3 * addCell(const sdb::Coord4 & cellCoord);
+	
+private:
+	
 /// for each cell divied, must have same level neighbor cell on six faces and twelve edges
 /// level change cross face or edge <= 1
 	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
