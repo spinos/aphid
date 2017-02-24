@@ -25,7 +25,8 @@ class MassiveTetraGridTriangulation : public TetraGridTriangulation<Tv, Tg> {
 
 typedef TetraGridTriangulation<Tv, Tg> ParentTyp;
 
-	ATriangleMesh * m_frontMesh;
+/// result of triangulation
+	std::vector<ATriangleMesh *> m_frontMeshes;
 	
 public:
 	MassiveTetraGridTriangulation();
@@ -37,7 +38,8 @@ public:
 					Tclosest & fclosest, 
 					CalcDistanceProfile & profile);
 	
-	const ATriangleMesh * frontMesh() const;
+	int numFrontMeshes() const;
+	const ATriangleMesh * frontMesh(int i) const;
 	
 protected:
 
@@ -47,14 +49,19 @@ private:
 						const float & b,
 						const float & c,
 						const float & d) const;
+/// first value >= 0.f
+	int vertexOutside(const sdb::Coord4 & itet,
+						const float & a,
+						const float & b,
+						const float & c,
+						const float & d) const;
 	
 };
 
 template <typename Tv, typename Tg>
 MassiveTetraGridTriangulation<Tv, Tg>::MassiveTetraGridTriangulation()
 {
-	TetrahedronGridUtil<5 > tu4;
-	m_frontMesh = 0;
+	TetrahedronGridUtil<4 > tu4;
 }
 
 template <typename Tv, typename Tg>
@@ -67,6 +74,7 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 						Tclosest & fclosest,
 						CalcDistanceProfile & profile)
 {
+	float gz0 = fintersect.getBBox().getLongestDistance() / 32.f;
 	profile.offset = fintersect.getBBox().getLongestDistance() * .000977f;
 	sdb::LodGrid lodG;
 	
@@ -84,47 +92,71 @@ typedef sdb::GridClosestToPoint<sdb::LodGrid, sdb::LodCell, sdb::LodNode > SelGr
     
 	const int & nt = g->numCells();
 	cvx::Tetrahedron atet;
-	TetraGridTriangulation<Tv, TetrahedronGrid<Tv, 5 > >  amesher;
+	TetraGridTriangulation<Tv, TetrahedronGrid<Tv, 4 > >  amesher;
 	
 	for(int i=0;i<nt;++i) {
 		const sdb::Coord4 & itet = g->cellVertices(i);
-        if(isTetrahedronOnFront(nds[itet.x].val, 
+        if(!isTetrahedronOnFront(nds[itet.x].val, 
                              nds[itet.y].val, 
 							nds[itet.z].val, 
                             nds[itet.w].val) ) {
+			continue;
+		}
 							
 			std::cout<<"\n MassiveTetraGridTriangulation::triangulate "<<i;
 			g->getCell(atet, i);
 			
-			TetrahedronGrid<Tv, 5 > * tetg = new TetrahedronGrid<Tv, 5 >(atet, 0);
+		profile.referencePoint = atet.getCenter();
+		const int vo = vertexOutside(itet, nds[itet.x].val, 
+                             nds[itet.y].val, 
+							nds[itet.z].val, 
+                            nds[itet.w].val);
+							
+		profile.direction = nds[vo].pos - profile.referencePoint;
+			
+			TetrahedronGrid<Tv, 4 > * tetg = new TetrahedronGrid<Tv, 4 >(atet, 0);
 			amesher.setGrid(tetg);
 			
 			BoundingBox tbx = atet.calculateBBox();
-			tbx.expand(.1f);
+			tbx.expand(1.f);
 			
-			lodG.fillBox(tbx, tbx.getLongestDistance() );
+			lodG.fillBox(tbx,  gz0);
 			lodG. template subdivideToLevel<Tintersect>(fintersect, subdprof);
 			lodG. template insertNodeAtLevel<Tclosest, 4 >(4, fclosest);
 	
 			amesher.field()-> template calculateDistance<SelGridTyp>(tetg, &selGrid, profile);
 			amesher.triangulate();
 			
-			m_frontMesh = new ATriangleMesh;
-			amesher.dumpFrontTriangleMesh(m_frontMesh);
-			m_frontMesh->calculateVertexNormals();
-			
-			std::cout<<"\n n tri "<<m_frontMesh->numTriangles();
-	
+		if(amesher.numFrontTriangles() < 1) {
+			continue;
+		}
+		
+		ATriangleMesh * amesh = new ATriangleMesh;
+		amesher.dumpFrontTriangleMesh(amesh);
+		amesh->calculateVertexNormals();
+		
+		m_frontMeshes.push_back(amesh);
+		
+		std::cout<<"\n add n tri "<<amesh->numTriangles();
+
 			delete tetg;
 			
-			if(m_frontMesh->numTriangles() ) break;
+		if(m_frontMeshes.size() > 1) {
+			break;
 		}
+			
 	}
+	
+	std::cout<<"\n MassiveTetraGridTriangulation::triangulate n mesh "<<numFrontMeshes();
 }
 
 template <typename Tv, typename Tg>
-const ATriangleMesh * MassiveTetraGridTriangulation<Tv, Tg>::frontMesh() const
-{ return m_frontMesh; }
+int MassiveTetraGridTriangulation<Tv, Tg>::numFrontMeshes() const
+{ return m_frontMeshes.size(); }
+
+template <typename Tv, typename Tg>
+const ATriangleMesh * MassiveTetraGridTriangulation<Tv, Tg>::frontMesh(int i) const
+{ return m_frontMeshes[i]; }
 
 template <typename Tv, typename Tg>
 bool MassiveTetraGridTriangulation<Tv, Tg>::isTetrahedronOnFront(const float & a,
@@ -151,6 +183,25 @@ bool MassiveTetraGridTriangulation<Tv, Tg>::isTetrahedronOnFront(const float & a
 		return true;
 	}
 	return false;
+}
+
+template <typename Tv, typename Tg>
+int MassiveTetraGridTriangulation<Tv, Tg>::vertexOutside(const sdb::Coord4 & itet,
+						const float & a,
+						const float & b,
+						const float & c,
+						const float & d) const
+{
+	if(a >= 0.f) {
+		return itet.x;
+	}
+	if(b >= 0.f) {
+		return itet.y;
+	}
+	if(c >= 0.f) {
+		return itet.z;
+	}
+	return itet.w;
 }
 
 }

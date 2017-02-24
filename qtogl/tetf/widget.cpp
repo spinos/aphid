@@ -27,26 +27,36 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 GLWidget::~GLWidget()
 {}
 
-static const float stetvs[4][3] = {
+static const float stetvs[5][3] = {
 { -13.f, -3.f, -9.f}, 
 { 0.f, 17.f, -5.f},
 { 16.f, 2.f, -10.f}, 
-{ 4.f, -12.f, 12.f}
+{ 4.f, 0.f, 12.f},
+{ -12.f, 18.f, -24.f}
 };
 
 void GLWidget::clientInit()
 {
-	cvx::Tetrahedron tetra;
-	tetra.set(Vector3F(stetvs[0]), 
+	cvx::Tetrahedron tetra[2];
+	tetra[0].set(Vector3F(stetvs[0]), 
 				Vector3F(stetvs[1]),
 				Vector3F(stetvs[2]), 
 				Vector3F(stetvs[3]) );
+				
+	cvx::Tetrahedron tetra1;
+	tetra[1].set(Vector3F(stetvs[0]), 
+				Vector3F(stetvs[2]),
+				Vector3F(stetvs[1]), 
+				Vector3F(stetvs[4]) );
 		
     TetrahedronGridUtil<5 > tu4;
-	m_grd = new GridT(tetra, 0);
-    
-    m_mesher = new MesherT;
-    m_mesher->setGrid(m_grd);
+	
+	for(int i=0;i<2;++i) {
+		m_grd[i] = new GridT(tetra[i], 0);
+		
+		m_mesher[i] = new MesherT;
+		m_mesher[i]->setGrid(m_grd[i]);
+	}
     
     m_fieldDrawer = new FieldDrawerT;
     m_fieldDrawer->initGlsl();
@@ -116,16 +126,19 @@ static const float scCorners[6][3] = {
 	CalcDistanceProfile prof;
 	prof.referencePoint = agp;
 	prof.direction = agn;
-	prof.offset = 1.f;
+	prof.offset = 0.1f;
 	
-    //m_mesher->field()->calculateDistance<TIntersect>(m_grd, &fintersect, prof);
-    m_mesher->field()->calculateDistance<SelGridTyp>(m_grd, m_selGrd, prof);
+	for(int i=0;i<2;++i) {
+	
+		m_mesher[i]->field()->calculateDistance<TIntersect>(m_grd[i], &fintersect, prof);
+    //m_mesher[i]->field()->calculateDistance<SelGridTyp>(m_grd, m_selGrd, prof);
     
-    m_mesher->triangulate();
+		m_mesher[i]->triangulate();
     
-    m_frontMesh = new ATriangleMesh;
-    m_mesher->dumpFrontTriangleMesh(m_frontMesh);
-    m_frontMesh->calculateVertexNormals();
+		m_frontMesh[i] = new ATriangleMesh;
+		m_mesher[i]->dumpFrontTriangleMesh(m_frontMesh[i]);
+		m_frontMesh[i]->calculateVertexNormals();
+	}
     
 	const BoundingBox bxc = te->calculateBBox();
 	m_selGrd->select(bxc );
@@ -169,9 +182,12 @@ void GLWidget::drawCellCut()
     
     glBegin(GL_LINES);
     cvx::Tetrahedron atet;
-    const int n = m_grd->numCells();
-    for(int i=0;i<n;++i) {
-        m_grd->getCell(atet, i);
+	
+	for(int j=0;j<2;++j) {
+		GridT * jg = m_grd[j];
+		const int n = jg->numCells();
+		for(int i=0;i<n;++i) {
+			jg->getCell(atet, i);
         
         if(!fintersect.tetrahedronIntersect(atet) ) {
             continue;
@@ -190,6 +206,7 @@ void GLWidget::drawCellCut()
         Vector3F pnm = pop + fintersect.closestToPointNormal();
         glVertex3fv((const float *)&pnm );
     }
+	}
     glEnd();
     
 }
@@ -212,28 +229,30 @@ void GLWidget::drawGround()
         m_sels.next();
     }
     glEnd();
+#if 0
 	DrawGrid<LodGridTyp> drg(m_lodg);
 	drg.drawLevelCells(3);
-	
+
 	glColor3f(1,1,0);
 	const int nc = m_selGrd->numActiveCells();
 	for(int i=0;i<nc;++i) {
 		const sdb::Coord4 & k = m_selGrd->activeCellCoord(i);
 		drg.drawCell(k);
 	}
+#endif
 }
 
 void GLWidget::drawGridEdges()
 {
-    TetraGridEdgeMap<GridT > & edges = m_mesher->gridEdges();
+    TetraGridEdgeMap<GridT > & edges = m_mesher[0]->gridEdges();
     
     glBegin(GL_LINES);
     edges.begin();
     while(!edges.end() ) {
         const sdb::Coord2 & k = edges.key();
         
-        glVertex3fv((const float *)&m_grd->pos(k.x) );
-        glVertex3fv((const float *)&m_grd->pos(k.y) );
+        glVertex3fv((const float *)&m_grd[0]->pos(k.x) );
+        glVertex3fv((const float *)&m_grd[0]->pos(k.y) );
         
         edges.next();
     }
@@ -243,8 +262,10 @@ void GLWidget::drawGridEdges()
 
 void GLWidget::drawField()
 {
-    m_fieldDrawer->drawEdge(m_mesher->field() );
-    m_fieldDrawer->drawNode(m_mesher->field() );
+	for(int i=0;i<2;++i) {
+		m_fieldDrawer->drawEdge(m_mesher[i]->field() );
+		m_fieldDrawer->drawNode(m_mesher[i]->field() );
+	}
 }
 
 void GLWidget::drawSolidGrid()
@@ -255,9 +276,9 @@ void GLWidget::drawSolidGrid()
     glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	cvx::Tetrahedron atet;
-    const int n = m_grd->numCells();
+    const int n = m_grd[0]->numCells();
     for(int i=0;i<n;++i) {
-        m_grd->getCell(atet, i);
+        m_grd[0]->getCell(atet, i);
         drawAShrinkSolidTetrahedron(atet, .67f);
     }
     
@@ -269,9 +290,9 @@ void GLWidget::drawWiredGrid()
 {
     glEnableClientState(GL_VERTEX_ARRAY);
 	cvx::Tetrahedron atet;
-    const int n = m_grd->numCells();
+    const int n = m_grd[0]->numCells();
     for(int i=0;i<n;++i) {
-        m_grd->getCell(atet, i);
+        m_grd[0]->getCell(atet, i);
         drawAWireTetrahedron(atet);
     }
     
@@ -283,11 +304,13 @@ void GLWidget::drawTriangulation()
 {
     getDrawer()->m_surfaceProfile.apply();
      getDrawer()->setColor(1,.7,0);
-
-    const unsigned nind = m_frontMesh->numIndices();
-    const unsigned * inds = m_frontMesh->indices();
-    const Vector3F * pos = m_frontMesh->points();
-    const Vector3F * nms = m_frontMesh->vertexNormals();
+	 
+	 for(int i=0;i<2;++i) {
+		ATriangleMesh * fm = m_frontMesh[i];
+		const unsigned nind = fm->numIndices();
+		const unsigned * inds = fm->indices();
+		const Vector3F * pos = fm->points();
+		const Vector3F * nms = fm->vertexNormals();
     
     glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -295,6 +318,8 @@ void GLWidget::drawTriangulation()
     glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
     glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
+	
+	}
     
     glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);

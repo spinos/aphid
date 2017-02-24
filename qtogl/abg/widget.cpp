@@ -102,7 +102,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     
     FieldTyp * fld = m_mesher->field();
     
-    fld->calculateDistance<SelGridTyp>(m_tetg, &coarseSampDistance, prof);
+	fld->calculateDistance<SelGridTyp>(m_tetg, &coarseSampDistance, prof);
     
     //m_mesher->triangulate();
 	
@@ -189,7 +189,9 @@ void GLWidget::drawTriangulation()
     //getDrawer()->m_surfaceProfile.apply();
     getDrawer()->setColor(1,.7,0);
 	
-	const ATriangleMesh * fm = m_mesher->frontMesh();
+	const int nm = m_mesher->numFrontMeshes();
+	for(int i=0;i<nm;++i) {
+		const ATriangleMesh * fm = m_mesher->frontMesh(i);
 
     const unsigned nind = fm->numIndices();
     const unsigned * inds = fm->indices();
@@ -202,6 +204,7 @@ void GLWidget::drawTriangulation()
     glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
     glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
+	}
     
     glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -220,6 +223,7 @@ void GLWidget::drawTetraMesh()
     glBegin(GL_LINES);
     for(int i=0;i<nt;++i) {
         m_tetg->getCell(atet, i);
+		/*
         atet.circumSphere(pcen, frad);
         
         selctx.deselect();
@@ -228,7 +232,7 @@ void GLWidget::drawTetraMesh()
         seleng.select(m_tree, &selctx );
         if(selctx.numSelected() < 1) {
             continue;
-        }
+        }*/
         
         glVertex3fv((const GLfloat *)&atet.X(0) );
         glVertex3fv((const GLfloat *)&atet.X(1) );

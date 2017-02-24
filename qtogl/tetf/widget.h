@@ -88,10 +88,10 @@ private slots:
 private:
 
 typedef aphid::TetrahedronGrid<TFTNode, 5 > GridT;
-    GridT * m_grd;
+    GridT * m_grd[2];
     
 typedef aphid::TetraGridTriangulation<TFTNode, GridT > MesherT;
-    MesherT * m_mesher;
+    MesherT * m_mesher[2];
 	
 typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
     FieldDrawerT * m_fieldDrawer;
@@ -101,7 +101,7 @@ typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawer
 
 typedef aphid::PrimInd<aphid::sdb::Sequence<int>, std::vector<aphid::cvx::Triangle * >, aphid::cvx::Triangle > TIntersect;
 	
-    aphid::ATriangleMesh * m_frontMesh;
+    aphid::ATriangleMesh * m_frontMesh[2];
 
 typedef aphid::sdb::LodGrid LodGridTyp; 
 	LodGridTyp * m_lodg;
