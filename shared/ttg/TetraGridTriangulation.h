@@ -46,6 +46,8 @@ public:
     
     FieldT * field();
     const FieldT * field() const;
+	
+	const Tg * grid() const;
     
 protected:
 
@@ -87,11 +89,7 @@ TetraGridTriangulation<Tv, Tg>::TetraGridTriangulation()
 
 template <typename Tv, typename Tg>
 TetraGridTriangulation<Tv, Tg>::~TetraGridTriangulation()
-{
-    if(m_tg) {
-        delete m_tg;
-    }
-    
+{    
     if(m_edgeMap) {
         m_edgeMap->clear();
         delete m_edgeMap;
@@ -111,6 +109,10 @@ void TetraGridTriangulation<Tv, Tg>::setGrid(Tg * g)
     m_field->buildGraph(g, m_edgeMap );
     
 }
+
+template <typename Tv, typename Tg>
+const Tg * TetraGridTriangulation<Tv, Tg>::grid() const
+{ return m_tg; }
 
 template <typename Tv, typename Tg>
 void TetraGridTriangulation<Tv, Tg>::triangulate()

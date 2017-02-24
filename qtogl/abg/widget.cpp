@@ -15,6 +15,7 @@
 #include <ttg/GenericTetraGrid.h>
 #include <ttg/TetraMeshBuilder.h>
 #include <ttg/TetraGridTriangulation.h>
+#include <ttg/MassiveTetraGridTriangulation.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
@@ -23,6 +24,7 @@
 #include <ogl/DrawSample.h>
 #include <sdb/WorldGrid2.h>
 #include <sdb/LodSampleCache.h>
+#include <sdb/GridClosestToPoint.h>
 #include "../cactus.h"
 
 using namespace aphid;
@@ -40,7 +42,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[4],
+									sCactusMeshVertices[5],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -58,7 +60,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .83f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .79f;
 	
     m_grid = new GridTyp;
     m_grid->fillBox(gridBox, sz0 );
@@ -77,21 +79,34 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     
     m_mesher = new MesherT;
     m_mesher->setGrid(m_tetg);
-    
+	
+	CoarseGridType coarseSampG;
+	coarseSampG.fillBox(m_tree->getBBox(), sz0);
+	
+	subdprof.setLevels(0, 5);
+	coarseSampG.subdivideToLevel<FIntersectTyp>(ineng, subdprof);
+	
 typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp clseng(m_tree);
+	
+    coarseSampG.insertNodeAtLevel<FClosestTyp, 4 >(5, clseng);
+	
+	SelGridTyp coarseSampDistance(&coarseSampG);
+	coarseSampDistance.setMaxSelectLevel(5);
     
     Vector3F rgp(0.f, 0.f, 0.f), rgn(1.f, 1.f, 1.f);
 	CalcDistanceProfile prof;
 	prof.referencePoint = rgp;
 	prof.direction = rgn;
-	prof.offset = m_grid->levelCellSize(6);
+	prof.offset = m_grid->levelCellSize(7);
     
     FieldTyp * fld = m_mesher->field();
     
-    fld->calculateDistance<FClosestTyp>(m_tetg, &clseng, prof);
+    fld->calculateDistance<SelGridTyp>(m_tetg, &coarseSampDistance, prof);
     
-    m_mesher->triangulate();
+    //m_mesher->triangulate();
+	
+	m_mesher->triangulate<FIntersectTyp, FClosestTyp>(ineng, clseng, prof);
     
     m_frontMesh = new ATriangleMesh;
     m_mesher->dumpFrontTriangleMesh(m_frontMesh);
@@ -102,6 +117,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	m_sampg = new SampGridTyp;
 	m_sampg->setGridSize(sz0);
 	
+	subdprof.setLevels(0, 4);
 	subdprof.setToDivideAllChild(false);
 	
 	BoundingBox cb; 
@@ -169,14 +185,16 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawTriangulation()
 {
-    //getDrawer()->m_wireProfile.apply();
-    getDrawer()->m_surfaceProfile.apply();
+    getDrawer()->m_wireProfile.apply();
+    //getDrawer()->m_surfaceProfile.apply();
     getDrawer()->setColor(1,.7,0);
+	
+	const ATriangleMesh * fm = m_mesher->frontMesh();
 
-    const unsigned nind = m_frontMesh->numIndices();
-    const unsigned * inds = m_frontMesh->indices();
-    const Vector3F * pos = m_frontMesh->points();
-    const Vector3F * nms = m_frontMesh->vertexNormals();
+    const unsigned nind = fm->numIndices();
+    const unsigned * inds = fm->indices();
+    const Vector3F * pos = fm->points();
+    const Vector3F * nms = fm->vertexNormals();
     
     glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);

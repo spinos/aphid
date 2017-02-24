@@ -100,7 +100,11 @@ static const float scCorners[6][3] = {
 	
 	m_lodg = new LodGridTyp;
 	m_lodg->fillBox(rootBx, sz0);
-	m_lodg->subdivideToLevel<TIntersect>(fintersect, 0, 3);
+	
+	sdb::AdaptiveGridDivideProfle subdprof;
+	subdprof.setLevels(0, 3);
+	
+	m_lodg->subdivideToLevel<TIntersect>(fintersect, subdprof);
 	m_lodg->insertNodeAtLevel<TIntersect, 3 >(3, fintersect);
 	
 	m_selGrd = new SelGridTyp(m_lodg);

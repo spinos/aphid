@@ -25,6 +25,13 @@ class Array;
 
 class LodSampleCache;
 
+class LodGrid;
+class LodCell;
+class LodNode;
+
+template<typename T1, typename T2, typename T3>
+class GridClosestToPoint;
+
 }
 
 template<int I>
@@ -47,6 +54,9 @@ class TetrahedronDistanceField;
 
 template<typename T>
 class GenericTetraGrid;
+
+template <typename Tv, typename Tg>
+class MassiveTetraGridTriangulation;
 
 }
 
@@ -108,14 +118,18 @@ typedef aphid::ttg::TetrahedronDistanceField<TetGridTyp > FieldTyp;
 typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawerT;
     FieldDrawerT * m_fieldDrawer;
 
-typedef aphid::TetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
+typedef aphid::ttg::MassiveTetraGridTriangulation<TFTNode, TetGridTyp > MesherT;
     MesherT * m_mesher;
     
     aphid::ATriangleMesh * m_frontMesh;
 	
 typedef aphid::sdb::WorldGrid2<aphid::sdb::LodSampleCache > SampGridTyp;
 	SampGridTyp * m_sampg;
-            
+	
+typedef aphid::sdb::LodGrid CoarseGridType;
+	
+typedef aphid::sdb::GridClosestToPoint<CoarseGridType, aphid::sdb::LodCell, aphid::sdb::LodNode > SelGridTyp;
+	
 };
 
 #endif

@@ -44,6 +44,8 @@ public:
 	const Vector3F & rayIntersectNormal() const;
     const Vector3F & closestToPointPoint() const;
 	const Vector3F & closestToPointNormal() const;
+    Float2 closestToPointTexcoord() const;
+	void getClosestToPointGeomcomp(int & geom, int & comp) const;
     
     void getAggregatedPositionNormal(Vector3F & resultP,
                         Vector3F& resultN);
@@ -186,6 +188,14 @@ const Vector3F & PrimInd<Tind, Tsrc, Tprim>::closestToPointPoint() const
 template<typename Tind, typename Tsrc, typename Tprim>
 const Vector3F & PrimInd<Tind, Tsrc, Tprim>::closestToPointNormal() const
 { return m_closestPointTest._hitNormal; }
+
+template<typename Tind, typename Tsrc, typename Tprim>
+Float2 PrimInd<Tind, Tsrc, Tprim>::closestToPointTexcoord() const
+{ return Float2(0.f, 0.f); }
+	
+template<typename Tind, typename Tsrc, typename Tprim>
+void PrimInd<Tind, Tsrc, Tprim>::getClosestToPointGeomcomp(int & geom, int & comp) const
+{}
 
 template<typename Tind, typename Tsrc, typename Tprim>
 void PrimInd<Tind, Tsrc, Tprim>::getAggregatedPositionNormal(Vector3F & resultP,
