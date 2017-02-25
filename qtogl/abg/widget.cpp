@@ -62,6 +62,11 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     
     const float sz0 = m_tree->getBBox().getLongestDistance() * .79f;
 	
+	MesherT::Profile mshprof;
+	mshprof.coarsGridBox = m_tree->getBBox();
+	mshprof.coarseCellSize = sz0;
+	mshprof.coarseGridSubdivLevel = 2;
+	
     m_grid = new GridTyp;
     m_grid->fillBox(gridBox, sz0 );
 	
@@ -78,7 +83,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     teter.buildMesh(m_tetg, m_grid);
     
     m_mesher = new MesherT;
-    m_mesher->setGrid(m_tetg);
+    //m_mesher->setGrid(m_tetg);
 	
 	CoarseGridType coarseSampG;
 	coarseSampG.fillBox(m_tree->getBBox(), sz0);
@@ -98,19 +103,20 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	CalcDistanceProfile prof;
 	prof.referencePoint = rgp;
 	prof.direction = rgn;
-	prof.offset = m_grid->levelCellSize(7);
+	prof.offset = 0.f;//m_grid->levelCellSize(7);
+    prof.snapDistance = 0.f;
     
-    FieldTyp * fld = m_mesher->field();
+    //FieldTyp * fld = m_mesher->field();
     
-	fld->calculateDistance<SelGridTyp>(m_tetg, &coarseSampDistance, prof);
+	//fld->calculateDistance<SelGridTyp>(m_tetg, &coarseSampDistance, prof);
     
     //m_mesher->triangulate();
 	
-	m_mesher->triangulate<FIntersectTyp, FClosestTyp>(ineng, clseng, prof);
+	m_mesher->triangulate<FIntersectTyp, FClosestTyp>(ineng, clseng, mshprof);
     
     m_frontMesh = new ATriangleMesh;
-    m_mesher->dumpFrontTriangleMesh(m_frontMesh);
-    m_frontMesh->calculateVertexNormals();
+    //m_mesher->dumpFrontTriangleMesh(m_frontMesh);
+    //m_frontMesh->calculateVertexNormals();
     
     m_fieldDrawer = new FieldDrawerT;
     
@@ -178,15 +184,41 @@ void GLWidget::clientDraw()
     getDrawer()->setColor(.05f, .5f, .15f);
     
 	//drawTetraMesh();
-    //drawField();
-	drawTriangulation();
+    drawField();
+	//drawTriangulation();
+	//drawCoarseGrid();
     
+}
+
+void GLWidget::drawCoarseGrid()
+{
+	getDrawer()->m_wireProfile.apply();
+	getDrawer()->setColor(0.f,.5f,.7f);
+	const GenericHexagonGrid<TFTNode> * g = m_mesher->coarseGrid();
+	
+	glBegin(GL_LINES);
+	
+	cvx::Hexagon ahexa;
+	const int & nc = g->numCells();
+	for(int i=0;i<nc;++i) {
+		g->getCell(ahexa, i);
+		
+		for(int j=0;j<12;++j) {
+			const Vector3F & p0 = ahexa.P(sdb::gdt::TwelveBlueBlueEdges[j][0] - 6);
+			const Vector3F & p1 = ahexa.P(sdb::gdt::TwelveBlueBlueEdges[j][1] - 6);
+			glVertex3fv((const float *)&p0);
+			glVertex3fv((const float *)&p1);
+		}
+	}
+	
+	glEnd();
+	
 }
 
 void GLWidget::drawTriangulation()
 {
-    getDrawer()->m_wireProfile.apply();
-    //getDrawer()->m_surfaceProfile.apply();
+    //getDrawer()->m_wireProfile.apply();
+    getDrawer()->m_surfaceProfile.apply();
     getDrawer()->setColor(1,.7,0);
 	
 	const int nm = m_mesher->numFrontMeshes();
@@ -320,8 +352,8 @@ void GLWidget::draw3LevelGrid(int level)
 
 void GLWidget::drawField()
 {
-   // m_fieldDrawer->drawEdge(m_mesher->field() );
-    m_fieldDrawer->drawNode(m_mesher->field() );
+	m_fieldDrawer->drawEdge(m_mesher->coarseField() );
+	m_fieldDrawer->drawNode(m_mesher->coarseField() );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

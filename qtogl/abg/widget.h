@@ -99,6 +99,7 @@ private:
 	void drawSamples();
     void drawField();
     void drawTriangulation();
+	void drawCoarseGrid();
     
 private slots:
 

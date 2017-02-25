@@ -67,6 +67,12 @@ public:
 /// all node value negative
 	bool isInterior(const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid);
+					
+/// 8 vertices of hexagon 
+	void getBlueVertices(sdb::Array<int, sdb::Couple<Vector3F, int> > & pnts,
+					std::vector<int> & indices,
+					const sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid);
 	
 protected:
 	BccCell3 * parentCell();

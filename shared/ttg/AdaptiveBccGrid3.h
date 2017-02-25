@@ -105,7 +105,10 @@ public:
 	void subdivideToLevel(const BoundingBox & bx, 
 						const int & level,
 						std::vector<sdb::Coord4 > * divided = 0);	
-						
+			
+	template<typename T>
+	void buildHexagonGrid(T * hexag, int level);
+	
 protected:
 	void subdivideCellToLevel(BccCell3 * cell,
 						const sdb::Coord4 & cellCoord,
@@ -121,6 +124,73 @@ private:
 	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
 
 };
+
+template<typename T>
+void AdaptiveBccGrid3::buildHexagonGrid(T * hexag, int level)
+{
+#if 0
+	std::cout<<"\n AdaptiveBccGrid3::buildHexagonGrid "<<level;
+	std::cout.flush();
+#endif
+
+typedef sdb::Couple<Vector3F, int> PosIndTyp;
+	sdb::Array<int, PosIndTyp > pnts;
+	std::vector<int> inds;
+	
+	int nc = 0;
+	begin();
+	while(!end() ) {
+		const sdb::Coord4 k = key();
+		if(k.w == level) {
+			BccCell3 * cell = value();
+			cell->getBlueVertices(pnts, inds, k, this);
+			nc++;
+		
+		} else if(k.w > level) {
+			break;
+		}
+		
+		next();
+	}
+	
+	int np = 0;
+	pnts.begin();
+	while(!pnts.end() ) {
+		int * ind = pnts.value()->t2;
+		*ind = np;
+		np++;
+		pnts.next();
+	}
+
+#if 0
+	std::cout<<"\n np "<<np<<" nc "<<nc;
+	std::cout.flush();
+#endif
+
+	hexag->create(np, nc);
+	
+	pnts.begin();
+	while(!pnts.end() ) {
+		const PosIndTyp * pind = pnts.value();
+		
+		hexag->setPos(*pind->t1, *pind->t2);
+		
+		pnts.next();
+	}
+	
+	int hexav[8];
+	for(int i=0;i<nc;++i) {
+		const int cf = i<<3;
+		for(int j=0;j<8;++j) {
+			hexav[j] = *(pnts.find(inds[cf+j])->t2);
+		}
+		
+		hexag->setCell(hexav, i);
+	}
+	
+	pnts.clear();
+	
+}
 
 }
 }

@@ -774,7 +774,7 @@ Vector3F Tetrahedron::getEdgeCenter(const int & i) const
 	return (m_p[2] + m_p[3]) * .5f;
 }
 
-void Tetrahedron::split(Hexahedron * hexa) const
+void Tetrahedron::split(Hexagon * hexa) const
 {
 	Vector3F tc = getCenter();
 	Vector3F f0 = getFaceCenter(0);
@@ -852,10 +852,10 @@ void Tetrahedron::getCenterRadius(Vector3F & center, float & radius) const
 	radius = m_p[0].distanceTo(center);
 }
 
-Hexahedron::Hexahedron()
+Hexagon::Hexagon()
 {}
 
-void Hexahedron::set(const Vector3F & p0, const Vector3F & p1,
+void Hexagon::set(const Vector3F & p0, const Vector3F & p1,
 					const Vector3F & p2, const Vector3F & p3,
 					const Vector3F & p4, const Vector3F & p5,
 					const Vector3F & p6, const Vector3F & p7)
@@ -870,7 +870,7 @@ void Hexahedron::set(const Vector3F & p0, const Vector3F & p1,
 	m_p[7] = p7; 
 }
 
-BoundingBox Hexahedron::calculateBBox() const
+BoundingBox Hexagon::calculateBBox() const
 { 
 	BoundingBox b;
     b.expandBy(m_p[0]);
@@ -884,18 +884,18 @@ BoundingBox Hexahedron::calculateBBox() const
     return b;
 }
 
-ShapeType Hexahedron::ShapeTypeId = THexahedron;
+ShapeType Hexagon::ShapeTypeId = THexagon;
 
-std::string Hexahedron::GetTypeStr()
-{ return "hexahedron"; }
+std::string Hexagon::GetTypeStr()
+{ return "Hexagon"; }
 
-int Hexahedron::numPoints() const
+int Hexagon::numPoints() const
 { return 8; }
 
-Vector3F Hexahedron::X(int idx) const
+Vector3F Hexagon::X(int idx) const
 { return m_p[idx]; }
 
-Vector3F Hexahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
+Vector3F Hexagon::supportPoint(const Vector3F & v, Vector3F * localP) const
 {
 	float maxdotv = -1e19f;
     float dotv;
@@ -912,13 +912,13 @@ Vector3F Hexahedron::supportPoint(const Vector3F & v, Vector3F * localP) const
     return X(ir);
 }
 
-const Vector3F * Hexahedron::p(int idx) const
+const Vector3F * Hexagon::p(int idx) const
 { return &m_p[idx]; }
 
-const Vector3F & Hexahedron::P(int idx) const
+const Vector3F & Hexagon::P(int idx) const
 { return m_p[idx]; }
 
-void Hexahedron::getFace(Quad & qud, const int & i) const
+void Hexagon::getFace(Quad & qud, const int & i) const
 {
 	if(i==0)
 		qud.set(P(0), P(4), P(6), P(2) );
@@ -934,11 +934,11 @@ void Hexahedron::getFace(Quad & qud, const int & i) const
 		qud.set(P(4), P(5), P(7), P(6) );
 }
 
-Vector3F Hexahedron::getCenter() const
+Vector3F Hexagon::getCenter() const
 { return (m_p[0]+m_p[1]+m_p[2]+m_p[3]
 		 +m_p[4]+m_p[5]+m_p[6]+m_p[7]) * .125f; }
 
-void Hexahedron::expand(const float & eps)
+void Hexagon::expand(const float & eps)
 { 
 	const Vector3F c = getCenter();
 	m_p[0] += (m_p[0] - c)*eps;
@@ -949,6 +949,13 @@ void Hexahedron::expand(const float & eps)
 	m_p[5] += (m_p[5] - c)*eps;
 	m_p[6] += (m_p[6] - c)*eps;
 	m_p[7] += (m_p[7] - c)*eps;
+}
+
+void Hexagon::getCenterRadius(Vector3F & cen,
+						float & rad) const
+{
+	cen = getCenter();
+	rad = cen.distanceTo(m_p[0]);
 }
 
 }

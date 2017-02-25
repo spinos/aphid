@@ -105,7 +105,7 @@ static const int TwelveBlueBlueEdges[12][5] = {
 { 6,10, 610, 0, 2}, /// z
 { 7,11, 711, 1, 2},
 { 8,12, 812, 0, 3},
-{ 9,13, 913, 1, 3},
+{ 9,13, 913, 1, 3}
 };
 
 static const int ThreeNeighborOnEdge[36][4] = {

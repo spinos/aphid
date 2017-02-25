@@ -37,9 +37,10 @@ public:
     void calculateDistance(T * grid, Tf * intersectF,
 							CalcDistanceProfile & profile) 
     {
+#if 0
 		std::cout<<"\n TetrahedronDistanceField::calculateDistance";
 		std::cout.flush();
-		
+#endif
         resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
         uncutEdges();
         
@@ -49,16 +50,12 @@ public:
         float trad;
         const int & nt = grid->numCells();
         for(int i=0;i<nt;++i) {
-            grid->getCell(atet, i);
-            
+            grid->getCell(atet, i);            
             atet.getCenterRadius(tcen, trad);
-            //if(!intersectF->select(tcen, trad) ) {
-              //  continue;
-            //}
 			
 /// approximate as node distance to plane
             TetraDistance cutDist(atet);
-            cutDist.compute(intersectF, trad * 4.f, profile.offset);
+            cutDist.compute(intersectF, trad * 3.f, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = cutDist.result();
@@ -111,7 +108,9 @@ public:
         setFarNodeInside();
 /// merge short edges
         snapToFrontByDistance(profile.snapDistance);
+#if 0
 		std::cout<<"\n done.";
+#endif
     }
     
 protected:

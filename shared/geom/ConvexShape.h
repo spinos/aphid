@@ -24,7 +24,7 @@ namespace cvx {
 		TTriangle = 4,
 		TBox = 5,
 		TTetrahedron = 6,
-		THexahedron = 7,
+		THexagon = 7,
 		TQuad = 8
     };
 
@@ -350,7 +350,7 @@ public:
 	
 };
 
-class Hexahedron;
+class Hexagon;
 
 class Tetrahedron {
 
@@ -387,7 +387,7 @@ public:
 	Vector3F getEdgeCenter(const int & i) const;
 	void getFace(Triangle & tri, const int & i) const;
 /// into 4 hexa
-	void split(Hexahedron * hexa) const;
+	void split(Hexagon * hexa) const;
     
     bool isPointInside(const Vector3F & q) const;
     void circumSphere(Vector3F & center, float & radius) const;
@@ -406,12 +406,12 @@ private:
 /// |  0 -| -1
 /// | /   | /
 /// 4-----5
-class Hexahedron {
+class Hexagon {
 
 	Vector3F m_p[8];
 	
 public:
-	Hexahedron();
+	Hexagon();
 	void set(const Vector3F & p0, const Vector3F & p1,
 			const Vector3F & p2, const Vector3F & p3,
 			const Vector3F & p4, const Vector3F & p5,
@@ -437,6 +437,8 @@ public:
 	const Vector3F & P(int idx) const;
 	void expand(const float & eps);
 	Vector3F getCenter() const;
+	void getCenterRadius(Vector3F & cen,
+						float & rad) const;
 	
 private:
 

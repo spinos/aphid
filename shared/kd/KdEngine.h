@@ -70,7 +70,7 @@ public:
 				
 	template<typename T, typename Tn>
 	bool narrowphase(KdNTree<T, Tn > * tree, 
-				const cvx::Hexahedron & hexa);			
+				const cvx::Hexagon & hexa);			
 	
 protected:
 
@@ -159,13 +159,13 @@ private:
 				
 	template<typename T, typename Tn>
 	bool leafNarrowphase(KdNTree<T, Tn > * tree,
-				const cvx::Hexahedron & hexa,
+				const cvx::Hexagon & hexa,
 				const BoundingBox & b,
 				KdTreeNode * r);
 				
 	template <typename T, typename Tn>
 	bool innerNarrowphase(KdNTree<T, Tn > * tree,
-				const cvx::Hexahedron & hexa,
+				const cvx::Hexagon & hexa,
 				const BoundingBox & b,
 				int branchIdx,
 				int nodeIdx,
@@ -1045,7 +1045,7 @@ bool KdEngine::beamIntersect(KdNTree<T, Tn > * tree,
 
 template<typename T, typename Tn>
 bool KdEngine::leafNarrowphase(KdNTree<T, Tn > * tree,
-			const cvx::Hexahedron & hexa,
+			const cvx::Hexagon & hexa,
 			const BoundingBox & b,
 			KdTreeNode * r)
 {
@@ -1056,7 +1056,7 @@ bool KdEngine::leafNarrowphase(KdNTree<T, Tn > * tree,
 	for(;i<len;++i) {
 		const T * c = tree->getSource(start + i );
         if(b.intersect(c->calculateBBox() ) ) {
-			if(c-> template exactIntersect <cvx::Hexahedron > (hexa) )
+			if(c-> template exactIntersect <cvx::Hexagon > (hexa) )
 				return true;
 		}
 	}
@@ -1065,7 +1065,7 @@ bool KdEngine::leafNarrowphase(KdNTree<T, Tn > * tree,
 			
 template<typename T, typename Tn>
 bool KdEngine::innerNarrowphase(KdNTree<T, Tn > * tree,
-			const cvx::Hexahedron & hexa,
+			const cvx::Hexagon & hexa,
 			const BoundingBox & b,
 			int branchIdx,
 			int nodeIdx,
@@ -1124,7 +1124,7 @@ bool KdEngine::innerNarrowphase(KdNTree<T, Tn > * tree,
 
 template<typename T, typename Tn>
 bool KdEngine::narrowphase(KdNTree<T, Tn > * tree, 
-				const cvx::Hexahedron & hexa)
+				const cvx::Hexagon & hexa)
 {
 	const BoundingBox bx = hexa.calculateBBox();
 	KdTreeNode * r = tree->root()->node(0);

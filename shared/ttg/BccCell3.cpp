@@ -473,5 +473,23 @@ bool BccCell3::isInterior(const sdb::Coord4 & cellCoord,
 	return true;
 }
 
+void BccCell3::getBlueVertices(sdb::Array<int, sdb::Couple<Vector3F, int> > & pnts,
+					std::vector<int> & indices,
+					const sdb::Coord4 & cellCoord,
+					AdaptiveGridT * grid)
+{
+	for(int i=0;i<8;++i) {
+		BccNode3 * bb = blueNode(i, cellCoord, grid);
+		if(!pnts.find(bb->index) ) {
+			sdb::Couple<Vector3F, int> * ap = new sdb::Couple<Vector3F, int>;
+			*ap->t1 = bb->pos;
+			*ap->t2 = -1;
+			pnts.insert(bb->index, ap);
+		}
+		indices.push_back(bb->index);
+	}
+	
+}
+
 }
 }

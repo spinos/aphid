@@ -1,5 +1,5 @@
 /*
- *  TetraDistance.h
+ *  HexagonDistance.h
  *  
  *
  *  Created by zhang on 17-2-4.
@@ -7,42 +7,38 @@
  *
  */
 
-#ifndef APH_TTG_TETRA_DISTANCE_H
-#define APH_TTG_TETRA_DISTANCE_H
+#ifndef APH_TTG_HEXAGON_DISTANCE_H
+#define APH_TTG_HEXAGON_DISTANCE_H
 
 #include <math/Plane.h>
 #include <math/miscfuncs.h>
+#include <geom/ConvexShape.h>
 
 namespace aphid {
 
-namespace cvx {
-class Tetrahedron;
-}
-
 namespace ttg {
 
-class TetraDistance {
+class HexagonDistance : public cvx::Hexagon {
     
-    Vector3F m_p[4];
-    float m_d[4];
-    bool m_valid[4];
+    float m_d[8];
+    bool m_valid[8];
     
 public:
-    TetraDistance(const cvx::Tetrahedron & tet);
-    virtual ~TetraDistance();
+    HexagonDistance();
+    virtual ~HexagonDistance();
     
     template<typename Tf>
     void compute(Tf * intersectF, const float & maxDistance,
                 const float & offset)
     {
-        for(int i=0;i<4;++i) {
+        for(int i=0;i<8;++i) {
 			m_valid[i] = false;
-			if(!intersectF->selectedClosestToPoint(m_p[i], maxDistance) ) {
+			if(!intersectF->selectedClosestToPoint(P(i), maxDistance) ) {
                 continue;
             }
 
             m_valid[i] = true;
-            Vector3F dv = intersectF->closestToPointPoint() - m_p[i];
+            Vector3F dv = intersectF->closestToPointPoint() - P(i);
 			float ldv = dv.length();
            if(ldv > 1e-3f) {
                 dv /= ldv;
@@ -62,8 +58,6 @@ public:
             m_d[i] = ldv  - offset;
         }
     }
-    
-    void compute(const Plane & pl);
     
     const float * result() const;
     
