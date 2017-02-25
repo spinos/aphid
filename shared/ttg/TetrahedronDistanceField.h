@@ -52,13 +52,13 @@ public:
             grid->getCell(atet, i);
             
             atet.getCenterRadius(tcen, trad);
-            if(!intersectF->select(tcen, trad) ) {
-                continue;
-            }
+            //if(!intersectF->select(tcen, trad) ) {
+              //  continue;
+            //}
 			
 /// approximate as node distance to plane
             TetraDistance cutDist(atet);
-            cutDist.compute(intersectF, trad * 1.7f, profile.offset);
+            cutDist.compute(intersectF, trad * 4.f, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = cutDist.result();
@@ -110,7 +110,7 @@ public:
 /// unvisited nodes are inside
         setFarNodeInside();
 /// merge short edges
-        snapToFront();
+        snapToFrontByDistance(profile.snapDistance);
 		std::cout<<"\n done.";
     }
     

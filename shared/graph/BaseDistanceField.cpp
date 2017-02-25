@@ -442,4 +442,70 @@ void BaseDistanceField::cutEdges()
     }
 }
 
+float BaseDistanceField::closestDistanceToFront(int & closestEdgeIdx,
+                const int & idx) const
+{
+	float closestCut = 1e8f, curCut;
+	const DistanceNode & d = nodes()[idx];
+    
+/// for each neighbor of A find closest cut
+	const int endj = edgeBegins()[idx+1];
+	int vj, j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+        
+        vj = eg.vi.x;
+		if(vj == idx) {
+			vj = eg.vi.y;
+        }
+        
+/// sign changes
+		if(nodes()[vj].val * d.val < 0.f) {
+            
+			curCut = Absolute<float>(d.val);
+            if(closestCut > curCut) {
+                closestCut = curCut;
+				closestEdgeIdx = k;
+            }
+        }
+	}
+    
+    return closestCut;
+}
+
+/// without changing pos
+void BaseDistanceField::moveToFront3(const int & idx)
+{    
+    DistanceNode & d = nodes()[idx];
+    d.val = 0.f;
+    
+    const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+        IDistanceEdge & eg = edges()[k];
+		eg.cx = -1.f;
+	}
+    
+}
+
+void BaseDistanceField::snapToFrontByDistance(const float & threshold)
+{
+	int iedge;
+	float d;
+    const int n = numNodes();
+	for(int i = 0;i<n;++i) {
+		d = closestDistanceToFront(iedge, i);
+        if(d < threshold) {
+            moveToFront3(i);
+        }
+		
+	}
+}
+
 }

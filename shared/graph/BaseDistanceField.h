@@ -49,6 +49,7 @@ struct CalcDistanceProfile {
 	Vector3F referencePoint;
 	float offset;
 	Vector3F direction;
+	float snapDistance;
 };
 
 class BaseDistanceField : public AGraph<DistanceNode, IDistanceEdge > {
@@ -70,6 +71,7 @@ protected:
 /// if node connected to edge cut close to 0 or 1
 /// un-cut all edges connected and set node val zero
     void snapToFront(const float & threshold = .2f);
+    void snapToFrontByDistance(const float & threshold = .1f);
     int nodeFarthestFrom(const Vector3F & origin,
                         const Vector3F & dir) const;
     void setNodeDistance(const int & idx,
@@ -95,6 +97,9 @@ private:
     void moveToFront2(const int & idx,
                 const int & edgeIdx);
     float getShortestCutEdgeLength(const int & idx) const;
+	float closestDistanceToFront(int & closestEdgeIdx,
+                const int & idx) const;
+	void moveToFront3(const int & idx);
         
 };
 

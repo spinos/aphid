@@ -32,7 +32,7 @@ static const float stetvs[5][3] = {
 { 0.f, 17.f, -5.f},
 { 16.f, 2.f, -10.f}, 
 { 4.f, 0.f, 12.f},
-{ -12.f, 18.f, -24.f}
+{ -9.f, 9.f, -24.f}
 };
 
 void GLWidget::clientInit()
@@ -62,12 +62,12 @@ void GLWidget::clientInit()
     m_fieldDrawer->initGlsl();
     
 static const float scCorners[6][3] = {
-{4, -2, 0},
+{4, 7, 0},
 {2, 17, -9},
-{-2, 0, -1},
+{-2, 6, -1},
 {9, 6, -13},
 {6, 12, -11},
-{4, -5, 1}
+{4, -5, 0}
 };
 
     cvx::Triangle * ta = new cvx::Triangle;
@@ -127,6 +127,7 @@ static const float scCorners[6][3] = {
 	prof.referencePoint = agp;
 	prof.direction = agn;
 	prof.offset = 0.1f;
+	prof.snapDistance = .4f;
 	
 	for(int i=0;i<2;++i) {
 	
