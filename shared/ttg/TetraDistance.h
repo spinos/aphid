@@ -53,7 +53,7 @@ public:
 			}
 			
 /// to far away
-			if(!intersectF->selectedClosestToPoint(P(i), rDistance * 2.f + offset) ) {
+			if(!intersectF->selectedClosestToPoint(P(i), rDistance * 1.8f + offset) ) {
                 continue;
             }
 			
@@ -94,7 +94,7 @@ public:
         }
 		
 		m_snapInd = -1;
-		float minD = rDistance * .43f;
+		float minD = rDistance * .3f;
 /// the one closest to front
 		for(int i=0;i<4;++i) {
 			if(!m_valid[i]) {

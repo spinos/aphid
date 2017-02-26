@@ -62,6 +62,8 @@ class AdaptiveGridDivideProfle {
 
 	int m_minLevel;
 	int m_maxLevel;
+	float m_minNormalDistribute;
+	float m_offset;
 	bool m_divideAllChild;
 	
 public:
@@ -71,9 +73,14 @@ public:
 	
 	void setLevels(int minLevel, int maxLevel);
 	void setToDivideAllChild(bool x);
+	void setMinNormalDistribute(float x);
+	void setOffset(float x);
+	
 	const int & minLevel() const;
 	const int & maxLevel() const;
+	const float & minNormalDistribute() const;
 	const bool & toDivideAllChild() const;
+	const float & offset() const;
 	
 };
 

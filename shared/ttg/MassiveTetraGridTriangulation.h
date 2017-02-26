@@ -43,6 +43,9 @@ public:
 		float coarseCellSize;
 		int coarseGridSubdivLevel;
 		int fineGridSubdivLevel;
+		float fineGridSubdivNormalDistribute;
+		float offset;
+		
 	};
 
 	MassiveTetraGridTriangulation();
@@ -109,8 +112,9 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 	sdb::AdaptiveGridDivideProfle subdprof;
 	subdprof.setLevels(0, prof.coarseGridSubdivLevel);
 	subdprof.setToDivideAllChild(true);
+	subdprof.setOffset(prof.offset);
 	
-	bccg. template subdivideToLevel<Tintersect>(fintersect, subdprof);
+	bccg.subdivideToLevel(fintersect, fclosest, subdprof);
 	bccg.build();
 	
 	bccg. template buildHexagonGrid <CoarseGridTyp> (&m_coarseGrid, prof.coarseGridSubdivLevel);
@@ -127,7 +131,8 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 
 	const float gz0 = bccg.levelCellSize(prof.coarseGridSubdivLevel);
 	subdprof.setLevels(0, prof.fineGridSubdivLevel);
-		
+	subdprof.setMinNormalDistribute(prof.fineGridSubdivNormalDistribute);
+	
 	BoundingBox cellBx;
 	cvx::Hexagon ahexa;
 	const int & nc = m_coarseGrid.numCells();
@@ -141,7 +146,7 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 		
 		AdaptiveBccGrid3 abccg;
 		abccg.resetBox(cellBx, gz0);
-		abccg. template subdivideToLevel<Tintersect>(fintersect, subdprof);
+		abccg.subdivideToLevel(fintersect, fclosest, subdprof);
 		abccg.build();
 		
 		TetraMeshBuilder teter;
@@ -156,8 +161,11 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 		
 		CalcDistanceProfile adistprof;
 		adistprof.referencePoint = cellBx.center();
-		adistprof.direction = fclosest.aggregatedNormal();
-		adistprof.offset = .1f;
+		adistprof.direction = m_coarseField.getCellNormal(&m_coarseGrid, i, adistprof.referencePoint );
+		if(adistprof.direction.length() < .01f) {
+			adistprof.direction = fclosest.aggregatedNormal();
+		}
+		adistprof.offset = prof.offset;
 		adistprof.snapDistance = .1f;
 			
 		afld-> template calculateDistance<Tclosest>(&tetg, &fclosest, adistprof);

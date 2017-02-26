@@ -26,8 +26,8 @@ public:
 	virtual ~AdaptiveBccGrid3();
 /// subdivide intersected cells to 8 sub-cells
 /// enforce cell boundray           
-    template<typename Tf>
-	void subdivideToLevel(Tf & fintersect,
+    template<typename Tf, typename Tclosest>
+	void subdivideToLevel(Tf & fintersect, Tclosest & fclosest,
 						sdb::AdaptiveGridDivideProfle & prof)
 	{
 #if 0
@@ -44,10 +44,19 @@ public:
 				if(key().w == level) {
 					getCellBBox(cb, key() );
 					
-					if(limitBox().intersect(cb) ) {
-						if(fintersect.intersect(cb) ) {
-							dirty.push_back(key() );
-						}
+					bool stat = limitBox().intersect(cb);
+					if(stat) {
+						stat = fintersect.intersect(cb);
+					}
+					
+					if(stat && prof.minNormalDistribute() < 1.f) {
+						cb.expand(prof.offset() );
+						fclosest.select(cb);
+						stat = fclosest.normalDistributeBelow(prof.minNormalDistribute() );
+					}
+					
+					if(stat) {
+						dirty.push_back(key() );
 					}
 				}
 				

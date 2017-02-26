@@ -36,6 +36,7 @@ public:
 	const Tv & value(const int & i) const;
     const int * cellVertices(const int & i) const;
 	void getCell(cvx::Hexagon & hexa, const int & i) const;
+	void getCellVertices(int * dst, const int & i) const;
 	
 	void setPos(const Vector3F & v, const int & i);
 	void setValue(const Tv & v, const int & i);
@@ -107,6 +108,13 @@ void GenericHexagonGrid<Tv>::getCell(cvx::Hexagon & hexa, const int & i) const
 	const int * c = cellVertices(i);
 	hexa.set(pos(c[0]), pos(c[1]), pos(c[2]), pos(c[3]),
 			pos(c[4]), pos(c[5]), pos(c[6]), pos(c[7]));
+}
+
+template <typename Tv>
+void GenericHexagonGrid<Tv>::getCellVertices(int * dst, const int & i) const
+{
+	const int * c = cellVertices(i);
+	memcpy(dst, c, 32);
 }
 
 template <typename Tv>

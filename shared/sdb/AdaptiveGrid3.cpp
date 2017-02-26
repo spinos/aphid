@@ -51,7 +51,9 @@ AdaptiveGridDivideProfle::AdaptiveGridDivideProfle()
 	m_dividedCoord = 0;
 	m_minLevel = 0;
 	m_maxLevel = 5;
+	m_minNormalDistribute = 1.f;
 	m_divideAllChild = false;
+	m_offset = .1f;
 }
 
 void AdaptiveGridDivideProfle::setLevels(int minLevel, int maxLevel)
@@ -60,8 +62,14 @@ void AdaptiveGridDivideProfle::setLevels(int minLevel, int maxLevel)
 	m_maxLevel = maxLevel;
 }
 
+void AdaptiveGridDivideProfle::setMinNormalDistribute(float x)
+{ m_minNormalDistribute = x; }
+
 void AdaptiveGridDivideProfle::setToDivideAllChild(bool x)
 { m_divideAllChild = x; }
+
+void AdaptiveGridDivideProfle::setOffset(float x)
+{ m_offset = x; }
 
 const int & AdaptiveGridDivideProfle::minLevel() const
 { return m_minLevel; }
@@ -69,8 +77,14 @@ const int & AdaptiveGridDivideProfle::minLevel() const
 const int & AdaptiveGridDivideProfle::maxLevel() const
 { return m_maxLevel; }
 
+const float & AdaptiveGridDivideProfle::minNormalDistribute() const
+{ return m_minNormalDistribute; }
+
 const bool & AdaptiveGridDivideProfle::toDivideAllChild() const
 { return m_divideAllChild; }
+
+const float & AdaptiveGridDivideProfle::offset() const
+{ return m_offset; }
 
 }
 

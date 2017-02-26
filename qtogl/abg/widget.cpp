@@ -60,13 +60,16 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .89f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .87f;
 	
 	MesherT::Profile mshprof;
 	mshprof.coarsGridBox = m_tree->getBBox();
 	mshprof.coarseCellSize = sz0;
 	mshprof.coarseGridSubdivLevel = 2;
-	mshprof.fineGridSubdivLevel = 4;
+	mshprof.fineGridSubdivLevel = 5;
+	mshprof.offset = .1f;
+/// quality of mesh
+	mshprof.fineGridSubdivNormalDistribute = .9f;
 	
     m_grid = new GridTyp;
     m_grid->fillBox(gridBox, sz0 );
@@ -75,7 +78,10 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	subdprof.setLevels(0, 4);
 	subdprof.setToDivideAllChild(true);
 	
-    m_grid->subdivideToLevel<FIntersectTyp>(ineng, subdprof);
+typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp clseng(m_tree);
+	
+    m_grid->subdivideToLevel<FIntersectTyp, FClosestTyp>(ineng, clseng, subdprof);
     m_grid->build();
     
     m_tetg = new TetGridTyp;
@@ -90,9 +96,6 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	
 	subdprof.setLevels(0, 5);
 	coarseSampG.subdivideToLevel<FIntersectTyp>(ineng, subdprof);
-	
-typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
-    FClosestTyp clseng(m_tree);
 	
     coarseSampG.insertNodeAtLevel<FClosestTyp, 4 >(5, clseng);
 	
@@ -110,7 +113,8 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     
     m_frontMesh = new ATriangleMesh;
     m_fieldDrawer = new FieldDrawerT;
-    
+
+#if 0
 	m_sampg = new SampGridTyp;
 	m_sampg->setGridSize(sz0);
 	
@@ -139,7 +143,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 		cell->buildSampleCache(2,4);
 		m_grid->next();
 	}
-	
+#endif	
 }
 
 GLWidget::~GLWidget()
@@ -169,10 +173,10 @@ void GLWidget::clientDraw()
     
     //draw3LevelGrid(4);
 	//drawSampleGrid();
-	drawSamples();
+	//drawSamples();
     
     getDrawer()->m_markerProfile.apply();
-    getDrawer()->setColor(.05f, .5f, .15f);
+    getDrawer()->setColor(0.f, .35f, .13f);
     
 	//drawTetraMesh();
     drawField();
@@ -347,8 +351,8 @@ void GLWidget::drawField()
 	m_fieldDrawer->drawNode(m_mesher->coarseField() );
 	
 	m_fieldDrawer->setDrawNodeSize(.1f);
-	m_fieldDrawer->drawEdge(m_mesher->fineField(2) );
-	//m_fieldDrawer->drawNode(m_mesher->fineField(2) );
+	m_fieldDrawer->drawEdge(m_mesher->fineField(5) );
+	//m_fieldDrawer->drawNode(m_mesher->fineField(7) );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

@@ -79,6 +79,10 @@ public:
 		std::cout<<"\n done.";
 #endif
     }
+	
+/// based on distance on corners
+	Vector3F getCellNormal(const T * grid, const int & idx,
+						const Vector3F & pcenter) const;
     
 protected:
 
@@ -197,6 +201,32 @@ void HexagonDistanceField<T>::extractGridPos(const T * grid)
     for(int i=0;i<n;++i) {
         dst[i].pos = grid->pos(i);
     }
+}
+
+template<typename T>
+Vector3F HexagonDistanceField<T>::getCellNormal(const T * grid, const int & idx,
+							const Vector3F & pcenter) const
+{
+	int cellVs[8];
+	grid->getCellVertices(cellVs, idx);
+	
+	Vector3F cellNml(0.f, 0.f, 0.f);
+	
+	int c = 0;
+	for(int i=0;i<8;++i) {
+		
+		const DistanceNode & d = nodes()[cellVs[i]];
+		
+		if(d.val > 0.f) {
+			cellNml += d.pos - pcenter;
+			c++;
+		}
+	}
+	
+	if(c>0) {
+		cellNml /= (float)c;
+	}
+	return cellNml;
 }
 
 }

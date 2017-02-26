@@ -96,10 +96,13 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     m_frontMesh->calculateVertexNormals();
 #endif    
     m_fieldDrawer = new FieldDrawerT;
+	
+	sdb::AdaptiveGridDivideProfle subdprof;
+	subdprof.setLevels(0, 5);
     
 	m_lodg = new LodGridTyp;
 	m_lodg->fillBox(rootBox, sz0);
-	m_lodg->subdivideToLevel<FIntersectTyp>(ineng, 0, 5);
+	m_lodg->subdivideToLevel<FIntersectTyp>(ineng, subdprof);
 	m_lodg->insertNodeAtLevel<FClosestTyp, 3 >(5, clseng);
 	m_lodg->aggregateAtLevel(4);
 	m_lodg->aggregateAtLevel(3);

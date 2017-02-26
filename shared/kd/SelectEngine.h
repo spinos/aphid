@@ -37,6 +37,7 @@ public:
 	unsigned numSelected();
 	
 	Vector3F aggregatedNormal();
+	bool normalDistributeBelow(const float threshold);
  
 protected:
 	const TreeTyp * tree() const;
@@ -104,7 +105,32 @@ Vector3F SelectEngine<T, Tn>::aggregatedNormal()
 	
 		prims->next();
 	}
+	
+	agn.normalize();
 	return agn;
+}
+
+template<typename T, typename Tn>
+bool SelectEngine<T, Tn>::normalDistributeBelow(const float threshold)
+{
+	const Vector3F agn = aggregatedNormal();
+	sdb::Sequence<int> * prims = primIndices();
+	const sdb::VectorArray<T> & src = source();
+	
+	prims->begin();
+	while(!prims->end() ) {
+	
+		const T * ts = src[prims->key()];
+		float ndn = ts->calculateNormal().dot(agn);
+	
+		if(ndn < threshold) {
+			return true;
+		}
+		
+		prims->next();
+	}
+	
+	return false;
 }
 
 }
