@@ -508,4 +508,21 @@ void BaseDistanceField::snapToFrontByDistance(const float & threshold)
 	}
 }
 
+void BaseDistanceField::moveNodeToFront(const Vector3F & pos,
+						const int & idx)
+{
+	DistanceNode & d = nodes()[idx];
+	d.pos = pos;
+	
+	const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+        IDistanceEdge & eg = edges()[k];
+		eg.cx = -1.f;
+	}
+}
+
 }

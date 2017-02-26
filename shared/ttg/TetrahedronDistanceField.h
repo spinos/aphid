@@ -53,12 +53,20 @@ public:
             grid->getCell(atet, i);            
             atet.getCenterRadius(tcen, trad);
 			
-			if(!intersectF->select(tcen, trad) ) {
+			if(!intersectF->select(tcen, trad + profile.offset) ) {
 				continue;
 			}
 			
+/// retrieve distances and indices
+			const sdb::Coord4 & cellv = grid->cellVertices(i);
+			atet.setDistance(nodes()[cellv.x].val, 0); 
+			atet.setDistance(nodes()[cellv.y].val, 1); 
+			atet.setDistance(nodes()[cellv.z].val, 2); 
+			atet.setDistance(nodes()[cellv.w].val, 3); 
+			atet.setIndices((const int * )&cellv);
+			
 /// approximate as node distance to plane
-            atet.compute(intersectF, trad * 2.f, profile.offset);
+            atet.compute(intersectF, trad, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = atet.result();
@@ -99,6 +107,10 @@ public:
             if(validD[2] && validD[3]) {
                 cutEdge(tetv.z, tetv.w, dist[2], dist[3]);
             }
+			
+			if(atet.snapInd() > -1) {
+				moveNodeToFront(atet.snapPos(), atet.snapInd() );
+			}
         }
         
 /// propagate distance to all nodes        
@@ -109,8 +121,7 @@ public:
         marchOutside(iFar);
 /// unvisited nodes are inside
         setFarNodeInside();
-/// merge short edges
-        snapToFrontByDistance(profile.snapDistance);
+
 #if 0
 		std::cout<<"\n done.";
 #endif

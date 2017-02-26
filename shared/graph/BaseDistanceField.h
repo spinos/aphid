@@ -82,6 +82,9 @@ protected:
     void cutEdge(const int & v1, const int & v2,
                 const float & d1, const float & d2);
     void cutEdges();
+/// move idx-th node to pos, uncut connected edges
+	void moveNodeToFront(const Vector3F & pos,
+						const int & idx);
     
 private:
 /// propagate distance value

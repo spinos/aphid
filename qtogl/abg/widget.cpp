@@ -42,7 +42,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[5],
+									sCactusMeshVertices[2],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -84,7 +84,6 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
     teter.buildMesh(m_tetg, m_grid);
     
     m_mesher = new MesherT;
-    //m_mesher->setGrid(m_tetg);
 	
 	CoarseGridType coarseSampG;
 	coarseSampG.fillBox(m_tree->getBBox(), sz0);
@@ -104,21 +103,12 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	CalcDistanceProfile prof;
 	prof.referencePoint = rgp;
 	prof.direction = rgn;
-	prof.offset = 0.f;//m_grid->levelCellSize(7);
+	prof.offset = 0.1f;//m_grid->levelCellSize(7);
     prof.snapDistance = 0.f;
     
-    //FieldTyp * fld = m_mesher->field();
-    
-	//fld->calculateDistance<SelGridTyp>(m_tetg, &coarseSampDistance, prof);
-    
-    //m_mesher->triangulate();
-	
 	m_mesher->triangulate<FIntersectTyp, FClosestTyp>(ineng, clseng, mshprof);
     
     m_frontMesh = new ATriangleMesh;
-    //m_mesher->dumpFrontTriangleMesh(m_frontMesh);
-    //m_frontMesh->calculateVertexNormals();
-    
     m_fieldDrawer = new FieldDrawerT;
     
 	m_sampg = new SampGridTyp;
@@ -358,7 +348,7 @@ void GLWidget::drawField()
 	
 	m_fieldDrawer->setDrawNodeSize(.1f);
 	m_fieldDrawer->drawEdge(m_mesher->fineField(2) );
-	m_fieldDrawer->drawNode(m_mesher->fineField(2) );
+	//m_fieldDrawer->drawNode(m_mesher->fineField(2) );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)

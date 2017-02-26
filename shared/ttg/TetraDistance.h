@@ -24,43 +24,96 @@ namespace ttg {
 
 class TetraDistance : public cvx::Tetrahedron {
     
+	Vector3F m_pvs[4];
     float m_d[4];
     bool m_valid[4];
+	int m_indices[4];
+	Vector3F m_snapPos;
+	int m_snapInd;
     
 public:
     TetraDistance();
     virtual ~TetraDistance();
+	
+	void setDistance(const float & x, int i);
+	void setIndices(const int * x);
+	
+	const int & snapInd() const;
+	const Vector3F & snapPos() const;
     
     template<typename Tf>
-    void compute(Tf * intersectF, const float & maxDistance,
+    void compute(Tf * intersectF, const float & rDistance,
                 const float & offset)
     {
         for(int i=0;i<4;++i) {
 			m_valid[i] = false;
-			if(!intersectF->selectedClosestToPoint(P(i), maxDistance) ) {
+/// already on front or inside			
+			if(m_d[i] <= 0.f) {
+				continue;
+			}
+			
+/// to far away
+			if(!intersectF->selectedClosestToPoint(P(i), rDistance * 2.f + offset) ) {
                 continue;
             }
-
-            m_valid[i] = true;
-            Vector3F dv = intersectF->closestToPointPoint() - P(i);
+			
+			m_valid[i] = true;
+			
+			Vector3F dv = intersectF->closestToPointPoint() - P(i);
 			float ldv = dv.length();
-           if(ldv > 1e-3f) {
+			if(ldv > 1e-3f) {
                 dv /= ldv;
                 const float dvdotn = intersectF->closestToPointNormal().dot(dv);
 				if(dvdotn > 0.f) {
 /// back side					
-					if(dvdotn < .2f) {
+					if(dvdotn < .1f) {
 /// no effect
 						m_valid[i] = false;
 						
-					} else if(dvdotn > .8f) {
+					} else if(dvdotn > .7f) {
 /// inside
 						ldv = -ldv;
 					}
 				} 
+			} else {
+				ldv = 0.f;
 			}
-            m_d[i] = ldv  - offset;
+			
+			if(!m_valid[i]) {
+				continue;
+			}
+			
+			ldv -= offset;
+			
+			m_pvs[i] = intersectF->closestToPointPoint() 
+						+ intersectF->closestToPointNormal() * offset;
+						
+			if(m_d[i] > ldv) {
+				m_d[i] = ldv;
+			}
         }
+		
+		m_snapInd = -1;
+		float minD = rDistance * .43f;
+/// the one closest to front
+		for(int i=0;i<4;++i) {
+			if(!m_valid[i]) {
+				continue;
+			}
+			float d = Absolute<float>(m_d[i]);
+			if(d < minD ) {
+				m_snapInd = i;
+				minD = d;
+			}
+		}
+		
+		if(m_snapInd > -1) {
+/// move to front
+			m_snapPos = m_pvs[m_snapInd];
+			m_d[m_snapInd] = 0.f;
+			m_snapInd = m_indices[m_snapInd];
+			
+		}
     }
     
     void compute(const Plane & pl);

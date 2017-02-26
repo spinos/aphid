@@ -126,8 +126,8 @@ static const float scCorners[6][3] = {
 	CalcDistanceProfile prof;
 	prof.referencePoint = agp;
 	prof.direction = agn;
-	prof.offset = 0.1f;
-	prof.snapDistance = .4f;
+	prof.offset = 0.f;
+	prof.snapDistance = .1f;
 	
 	for(int i=0;i<2;++i) {
 	

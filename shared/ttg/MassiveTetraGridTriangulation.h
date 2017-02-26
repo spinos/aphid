@@ -175,7 +175,7 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 			m_frontMeshes.push_back(amesh);
 		}
 		
-		if(m_frontMeshes.size() > 7) break;
+		if(m_frontMeshes.size() > 10) break;
 		
 	}
 
