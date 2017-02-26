@@ -53,8 +53,12 @@ public:
             grid->getCell(atet, i);            
             atet.getCenterRadius(tcen, trad);
 			
+			if(!intersectF->select(tcen, trad) ) {
+				continue;
+			}
+			
 /// approximate as node distance to plane
-            atet.compute(intersectF, trad * 4.f, profile.offset);
+            atet.compute(intersectF, trad * 2.f, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = atet.result();

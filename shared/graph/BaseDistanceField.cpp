@@ -463,7 +463,7 @@ float BaseDistanceField::closestDistanceToFront(int & closestEdgeIdx,
         }
         
 /// sign changes
-		if(nodes()[vj].val * d.val < 0.f) {
+		if(nodes()[vj].val * d.val <= 0.f) {
             
 			curCut = Absolute<float>(d.val);
             if(closestCut > curCut) {
