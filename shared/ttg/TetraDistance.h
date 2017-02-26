@@ -45,8 +45,11 @@ public:
     void compute(Tf * intersectF, const float & rDistance,
                 const float & offset)
     {
+		m_snapInd = -1;
         for(int i=0;i<4;++i) {
+/// reset
 			m_valid[i] = false;
+			
 /// already on front or inside			
 			if(m_d[i] <= 0.f) {
 				continue;
@@ -93,7 +96,6 @@ public:
 			}
         }
 		
-		m_snapInd = -1;
 		float minD = rDistance * .3f;
 /// the one closest to front
 		for(int i=0;i<4;++i) {
@@ -101,9 +103,9 @@ public:
 				continue;
 			}
 			float d = Absolute<float>(m_d[i]);
-			if(d < minD ) {
-				m_snapInd = i;
+			if(minD > d) {
 				minD = d;
+				m_snapInd = i;
 			}
 		}
 		

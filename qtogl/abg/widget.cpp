@@ -66,7 +66,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	mshprof.coarsGridBox = m_tree->getBBox();
 	mshprof.coarseCellSize = sz0;
 	mshprof.coarseGridSubdivLevel = 2;
-	mshprof.fineGridSubdivLevel = 5;
+	mshprof.fineGridSubdivLevel = 4;
 	mshprof.offset = .1f;
 /// quality of mesh
 	mshprof.fineGridSubdivNormalDistribute = .9f;
@@ -212,9 +212,12 @@ void GLWidget::drawCoarseGrid()
 
 void GLWidget::drawTriangulation()
 {
-    //getDrawer()->m_wireProfile.apply();
-    getDrawer()->m_surfaceProfile.apply();
-    getDrawer()->setColor(1,.7,0);
+#if 1
+    getDrawer()->m_wireProfile.apply();
+#else
+	getDrawer()->m_surfaceProfile.apply();
+#endif
+	getDrawer()->setColor(1,.7,0);
 	
 	const int nm = m_mesher->numFrontMeshes();
 	for(int i=0;i<nm;++i) {
