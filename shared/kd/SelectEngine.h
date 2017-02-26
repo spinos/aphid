@@ -35,6 +35,8 @@ public:
 	bool select(const BoundingBox & bx);
 				
 	unsigned numSelected();
+	
+	Vector3F aggregatedNormal();
  
 protected:
 	const TreeTyp * tree() const;
@@ -85,6 +87,25 @@ const sdb::VectorArray<T> & SelectEngine<T, Tn>::source() const
 template<typename T, typename Tn>
 sdb::Sequence<int> * SelectEngine<T, Tn>::primIndices()
 { return m_selectCtx.primIndices(); }
+
+template<typename T, typename Tn>
+Vector3F SelectEngine<T, Tn>::aggregatedNormal()
+{
+	sdb::Sequence<int> * prims = primIndices();
+	const sdb::VectorArray<T> & src = source();
+	
+	Vector3F agn(0.f, 0.f, 0.f);
+
+	prims->begin();
+	while(!prims->end() ) {
+	
+		const T * ts = src[prims->key()];
+		agn += ts->calculateNormal();
+	
+		prims->next();
+	}
+	return agn;
+}
 
 }
 #endif

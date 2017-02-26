@@ -392,6 +392,7 @@ public:
     bool isPointInside(const Vector3F & q) const;
     void circumSphere(Vector3F & center, float & radius) const;
 	void getCenterRadius(Vector3F & center, float & radius) const;
+	const Vector3F & P(int idx) const;
 	
 	static ShapeType ShapeTypeId;
 	static std::string GetTypeStr();

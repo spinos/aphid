@@ -37,6 +37,7 @@ public:
     virtual ~TetraGridTriangulation();
     
     void setGrid(Tg * g);
+	void setGridField(Tg * g, FieldT * fld);
     
     void triangulate();
     
@@ -108,6 +109,15 @@ void TetraGridTriangulation<Tv, Tg>::setGrid(Tg * g)
     m_field = new FieldT;
     m_field->buildGraph(g, m_edgeMap );
     
+}
+
+template <typename Tv, typename Tg>
+void TetraGridTriangulation<Tv, Tg>::setGridField(Tg * g, FieldT * fld)
+{
+	m_tg = g;
+    m_edgeMap = new TetraGridEdgeMap<Tg >(m_tg);
+    m_field = fld;
+    m_field->buildGraph(g, m_edgeMap );
 }
 
 template <typename Tv, typename Tg>

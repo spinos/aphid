@@ -45,7 +45,7 @@ public:
         uncutEdges();
         
 /// for each cell
-        cvx::Tetrahedron atet;
+        TetraDistance atet;
         Vector3F tcen;
         float trad;
         const int & nt = grid->numCells();
@@ -54,12 +54,11 @@ public:
             atet.getCenterRadius(tcen, trad);
 			
 /// approximate as node distance to plane
-            TetraDistance cutDist(atet);
-            cutDist.compute(intersectF, trad * 3.f, profile.offset);
+            atet.compute(intersectF, trad * 4.f, profile.offset);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
-            const float * dist = cutDist.result();
-            const bool * validD = cutDist.isValid();
+            const float * dist = atet.result();
+            const bool * validD = atet.isValid();
             if(validD[0]) {
                 setNodeDistance(tetv.x, dist[0]);
             }

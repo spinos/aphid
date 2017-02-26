@@ -11,6 +11,7 @@
 #define APH_TTG_TETRA_DISTANCE_H
 
 #include <math/Plane.h>
+#include <geom/ConvexShape.h>
 #include <math/miscfuncs.h>
 
 namespace aphid {
@@ -21,14 +22,13 @@ class Tetrahedron;
 
 namespace ttg {
 
-class TetraDistance {
+class TetraDistance : public cvx::Tetrahedron {
     
-    Vector3F m_p[4];
     float m_d[4];
     bool m_valid[4];
     
 public:
-    TetraDistance(const cvx::Tetrahedron & tet);
+    TetraDistance();
     virtual ~TetraDistance();
     
     template<typename Tf>
@@ -37,12 +37,12 @@ public:
     {
         for(int i=0;i<4;++i) {
 			m_valid[i] = false;
-			if(!intersectF->selectedClosestToPoint(m_p[i], maxDistance) ) {
+			if(!intersectF->selectedClosestToPoint(P(i), maxDistance) ) {
                 continue;
             }
 
             m_valid[i] = true;
-            Vector3F dv = intersectF->closestToPointPoint() - m_p[i];
+            Vector3F dv = intersectF->closestToPointPoint() - P(i);
 			float ldv = dv.length();
            if(ldv > 1e-3f) {
                 dv /= ldv;

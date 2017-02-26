@@ -852,6 +852,9 @@ void Tetrahedron::getCenterRadius(Vector3F & center, float & radius) const
 	radius = m_p[0].distanceTo(center);
 }
 
+const Vector3F & Tetrahedron::P(int idx) const
+{ return m_p[idx]; }
+
 Hexagon::Hexagon()
 {}
 

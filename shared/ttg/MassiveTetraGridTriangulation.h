@@ -25,13 +25,15 @@ namespace ttg {
 template <typename Tv, typename Tg>
 class MassiveTetraGridTriangulation {
 
-typedef TetraGridTriangulation<Tv, Tg> ParentTyp;
+typedef TetraGridTriangulation<Tv, Tg> MesherTyp;
 typedef GenericHexagonGrid<Tv> CoarseGridTyp;
 typedef HexagonDistanceField<CoarseGridTyp> CoarseFieldTyp;
+typedef TetrahedronDistanceField<Tg > FineFieldTyp;
 
 	CoarseGridTyp m_coarseGrid;
 	CoarseFieldTyp m_coarseField;
 	
+	std::vector<FineFieldTyp *> m_fineFields;
 /// result of triangulation
 	std::vector<ATriangleMesh *> m_frontMeshes;
 	
@@ -40,7 +42,7 @@ public:
 		BoundingBox coarsGridBox;
 		float coarseCellSize;
 		int coarseGridSubdivLevel;
-		
+		int fineGridSubdivLevel;
 	};
 
 	MassiveTetraGridTriangulation();
@@ -54,6 +56,9 @@ public:
 	
 	int numFrontMeshes() const;
 	const ATriangleMesh * frontMesh(int i) const;
+	
+	int numFineFields() const;
+	const FineFieldTyp * fineField(int i) const;
 	
 	const GenericHexagonGrid<Tv> * coarseGrid() const;
 	const CoarseFieldTyp * coarseField() const;
@@ -78,6 +83,11 @@ MassiveTetraGridTriangulation<Tv, Tg>::~MassiveTetraGridTriangulation()
 template <typename Tv, typename Tg>
 void MassiveTetraGridTriangulation<Tv, Tg>::internalClear()
 {
+	for(int i=0;i<m_fineFields.size();++i) {
+		delete m_fineFields[i];
+	}
+	m_fineFields.clear();
+	
 	for(int i=0;i<m_frontMeshes.size();++i) {
 		delete m_frontMeshes[i];
 	}
@@ -98,9 +108,9 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 	
 	sdb::AdaptiveGridDivideProfle subdprof;
 	subdprof.setLevels(0, prof.coarseGridSubdivLevel);
-	subdprof.setToDivideAllChild(false);
+	subdprof.setToDivideAllChild(true);
 	
-	bccg.subdivideToLevel<Tintersect>(fintersect, subdprof);
+	bccg. template subdivideToLevel<Tintersect>(fintersect, subdprof);
 	bccg.build();
 	
 	bccg. template buildHexagonGrid <CoarseGridTyp> (&m_coarseGrid, prof.coarseGridSubdivLevel);
@@ -111,116 +121,64 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 	distprof.referencePoint = prof.coarsGridBox.lowCorner();
 	distprof.direction.set(1.f, 1.f, 1.f);
 	distprof.offset = 0.f;
-    distprof.snapDistance = 0.5f;
+    distprof.snapDistance = 0.f;
 	
 	m_coarseField. template calculateDistance<Tclosest>(&m_coarseGrid, &fclosest, distprof);
 
-	/*
-	
-	const float gz0 = m_coarseGrid.levelCellSize(profile.coarseGridSubdivLevel);
-	subdprof.setLevels(0, profile.fineGridSubdivLevel);
-	subdprof.setToDivideAllChild(true);
+	const float gz0 = bccg.levelCellSize(prof.coarseGridSubdivLevel);
+	subdprof.setLevels(0, prof.fineGridSubdivLevel);
 		
 	BoundingBox cellBx;
-	m_coarseGrid.begin();
-	while(!m_coarseGrid.end() ) {
+	cvx::Hexagon ahexa;
+	const int & nc = m_coarseGrid.numCells();
+	for(int i=0;i<nc;++i ) {
+		m_coarseGrid.getCell(ahexa, i);
+		cellBx = ahexa.calculateBBox();
 		
-		if(m_coarseGrid.key() == profile.coarseGridSubdivLevel) {
-			m_coarseGrid.getCellBBox(cellBx, m_coarseGrid.key() );
+		if(!fclosest.select(cellBx) ) {
+			continue;
+		}
+		
+		AdaptiveBccGrid3 abccg;
+		abccg.resetBox(cellBx, gz0);
+		abccg. template subdivideToLevel<Tintersect>(fintersect, subdprof);
+		abccg.build();
+		
+		TetraMeshBuilder teter;
+		Tg tetg;
 			
-			ttg::AdaptiveBccGrid3 bccg;
-			bccg.resetBox(cellBx, gz0);
-			bccg.subdivideToLevel<FIntersectTyp>(ineng, subdprof);
-			bccg.build();
-			
-			ttg::TetraMeshBuilder teter;
-			ttg::GenericTetraGrid<Tv > tetg;
-			
-			teter.buildMesh(&tetg, &bccg);
+		teter.buildMesh(&tetg, &abccg);
+		
+		FineFieldTyp * afld = new FineFieldTyp;
 	
-			ttg::TetraGridTriangulation<Tv, ttg::GenericTetraGrid<Tv > > mesher;
-			mesher.setGrid(&tetg);
+		MesherTyp mesher;
+		mesher.setGridField(&tetg, afld);
+		
+		CalcDistanceProfile adistprof;
+		adistprof.referencePoint = cellBx.center();
+		adistprof.direction = fclosest.aggregatedNormal();
+		adistprof.offset = .1f;
+		adistprof.snapDistance = .1f;
 			
-			ttg::TetrahedronDistanceField<ttg::GenericTetraGrid<Tv > > * fld = mesher.field();
-			fld-> template calculateDistance<Tclosest>(&tetg, &fclosest, profile);
-			
-			mesher.triangulate();
-			
-			if(mesher.numFrontTriangles() > 0) {
+		afld-> template calculateDistance<Tclosest>(&tetg, &fclosest, adistprof);
+		
+		m_fineFields.push_back(afld);
+		
+		mesher.triangulate();
+		
+		if(mesher.numFrontTriangles() > 0) {
 					
-				ATriangleMesh * amesh = new ATriangleMesh;
-				mesher.dumpFrontTriangleMesh(amesh);
-				amesh->calculateVertexNormals();
-		
-				m_frontMeshes.push_back(amesh);
-			}
-			
+			ATriangleMesh * amesh = new ATriangleMesh;
+			mesher.dumpFrontTriangleMesh(amesh);
+			amesh->calculateVertexNormals();
+	
+			m_frontMeshes.push_back(amesh);
 		}
-		m_coarseGrid.next();
+		
+		if(m_frontMeshes.size() > 2) break;
+		
 	}
-	
-	profile.offset = .1f;
-	
-	const Tg * g = ParentTyp::grid();
-	const DistanceNode * nds = ParentTyp::field()->nodes();
-    
-	const int & nt = g->numCells();
-	cvx::Tetrahedron atet;
-	TetraGridTriangulation<Tv, TetrahedronGrid<Tv, 4 > >  amesher;
-	
-	Vector3F tcen;
-	float trad;
-	
-	for(int i=0;i<nt;++i) {
-	
-		const sdb::Coord4 & itet = g->cellVertices(i);
-		if(isTetrahedronInside(nds[itet.x].val, 
-                             nds[itet.y].val, 
-							nds[itet.z].val, 
-                            nds[itet.w].val) ) {
-			continue;
-		}
-		
-		g->getCell(atet, i);
-		atet.getCenterRadius(tcen, trad);
-		
-		if(!fclosest.select(tcen, trad) ) {
-			continue;
-		}
-		
-		profile.referencePoint = tcen;
-		const int vo = vertexOutside(itet, nds[itet.x].val, 
-                             nds[itet.y].val, 
-							nds[itet.z].val, 
-                            nds[itet.w].val);
-							
-		profile.direction = nds[vo].pos - profile.referencePoint;
-		profile.snapDistance = trad * .1f;
-			
-		TetrahedronGrid<Tv, 4 > * tetg = new TetrahedronGrid<Tv, 4 >(atet, 0);
-		amesher.setGrid(tetg);
-		
-		amesher.field()-> template calculateDistance<Tclosest>(tetg, &fclosest, profile);
-		amesher.triangulate();
-		
-		if(amesher.numFrontTriangles() < 1) {
-			continue;
-		}
-		
-		ATriangleMesh * amesh = new ATriangleMesh;
-		amesher.dumpFrontTriangleMesh(amesh);
-		amesh->calculateVertexNormals();
-		
-		m_frontMeshes.push_back(amesh);
-		
-		delete tetg;
-			
-		if(m_frontMeshes.size() > 99) {
-			//break;
-		}
-			
-	}
-	*/
+
 	std::cout<<"\n MassiveTetraGridTriangulation::triangulate n mesh "<<numFrontMeshes();
 }
 
@@ -243,6 +201,14 @@ int MassiveTetraGridTriangulation<Tv, Tg>::numFrontMeshes() const
 template <typename Tv, typename Tg>
 const ATriangleMesh * MassiveTetraGridTriangulation<Tv, Tg>::frontMesh(int i) const
 { return m_frontMeshes[i]; }
+
+template <typename Tv, typename Tg>
+int MassiveTetraGridTriangulation<Tv, Tg>::numFineFields() const
+{ return m_fineFields.size(); }
+
+template <typename Tv, typename Tg>
+const TetrahedronDistanceField<Tg > * MassiveTetraGridTriangulation<Tv, Tg>::fineField(int i) const
+{ return m_fineFields[i]; }
 
 }
 

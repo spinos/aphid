@@ -14,13 +14,8 @@ namespace aphid {
 
 namespace ttg {
 
-TetraDistance::TetraDistance(const cvx::Tetrahedron & tet)
-{
-	for(int i=0;i<4;++i) {
-        m_p[i] = tet.X(i);
-        m_valid[i] = false;
-    }
-}
+TetraDistance::TetraDistance()
+{}
 
 TetraDistance::~TetraDistance()
 {}
@@ -28,7 +23,7 @@ TetraDistance::~TetraDistance()
 void TetraDistance::compute(const Plane & pl)
 {
     for(int i=0;i<4;++i) {
-        m_d[i] = pl.distanceTo(m_p[i]);
+        m_d[i] = pl.distanceTo(P(i));
         m_valid[i] = true;
     }
 }

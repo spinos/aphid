@@ -60,12 +60,13 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .79f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .89f;
 	
 	MesherT::Profile mshprof;
 	mshprof.coarsGridBox = m_tree->getBBox();
 	mshprof.coarseCellSize = sz0;
 	mshprof.coarseGridSubdivLevel = 2;
+	mshprof.fineGridSubdivLevel = 4;
 	
     m_grid = new GridTyp;
     m_grid->fillBox(gridBox, sz0 );
@@ -185,7 +186,7 @@ void GLWidget::clientDraw()
     
 	//drawTetraMesh();
     drawField();
-	//drawTriangulation();
+	drawTriangulation();
 	//drawCoarseGrid();
     
 }
@@ -354,6 +355,10 @@ void GLWidget::drawField()
 {
 	m_fieldDrawer->drawEdge(m_mesher->coarseField() );
 	m_fieldDrawer->drawNode(m_mesher->coarseField() );
+	
+	m_fieldDrawer->setDrawNodeSize(.1f);
+	m_fieldDrawer->drawEdge(m_mesher->fineField(2) );
+	m_fieldDrawer->drawNode(m_mesher->fineField(2) );
 }
 
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
