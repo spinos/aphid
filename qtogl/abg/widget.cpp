@@ -61,7 +61,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .87f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * .97f;
 	
 	MesherT::Profile mshprof;
 	mshprof.coarsGridBox = m_tree->getBBox();

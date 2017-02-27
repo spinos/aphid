@@ -211,5 +211,17 @@ void AdaptiveBccGrid3::enforceBoundary(std::vector<sdb::Coord4 > & ks)
 	}
 }
 
+bool AdaptiveBccGrid3::forceSubdivide(int level, 
+					const BoundingBox & limitBx,
+					const BoundingBox & bx) const
+{
+	if(level < 3) {
+		return true;
+	}
+	
+	return limitBx.isBoxOnBoundary(bx);
+	
+}
+
 }
 }

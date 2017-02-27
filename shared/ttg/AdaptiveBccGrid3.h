@@ -50,7 +50,7 @@ public:
 					}
 					
 					if(stat) {
-						if(limitBox().isBoxOnBoundary(cb) ) {
+						if(forceSubdivide(level, limitBox(), cb) ) {
 							stat = true;
 						} else {
 							if(prof.minNormalDistribute() < 1.f) {
@@ -143,6 +143,11 @@ private:
 /// level change cross face or edge <= 1
 	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
 
+/// low level or on boundary
+	bool forceSubdivide(int level, 
+					const BoundingBox & limitBx,
+					const BoundingBox & bx) const;
+	
 };
 
 template<typename T>
