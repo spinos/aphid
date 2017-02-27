@@ -84,7 +84,8 @@ void BccCell3::insertFaceOnBoundary(const sdb::Coord4 & cellCoord,
 			continue;
 		}
 		
-		if(!grid->findNeighborCell(cellCoord, i ) ) {
+		//if(!grid->findNeighborCell(cellCoord, i ) ) {
+		if(!neighborCell(i ) ) {
 			BccNode3 * ni = new BccNode3;
 			ni->val = 1e9f;
 			ni->key = i;
@@ -111,7 +112,8 @@ void BccCell3::insertYellow(const sdb::Coord4 & cellCoord,
 			continue;
 		}
 			
-		BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+		//BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+		BccCell3 * nei = neighborCell(i);
 		BccNode3 * ni = new BccNode3;
 		ni->key = 15000 + i;
 		ni->prop = sdb::gdt::NYellow;
@@ -181,12 +183,15 @@ BccNode3 * BccCell3::yellowNode(const int & i,
 	}
 		
 	node = find(15000 + i);
-	if(node)
+	if(node) {
 		return node;
-		
-	BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
-	if(!nei)
+	}
+	
+	//BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+	BccCell3 * nei = neighborCell(i);
+	if(!nei) {
 		return NULL;
+	}
 		
 /// opposite face in neighbor
 	node = nei->find(sdb::gdt::SixNeighborOnFace[i][3]);
@@ -239,9 +244,10 @@ BccNode3 * BccCell3::findBlueNodeInNeighbor(const int & i,
 	for(j=0;j<7;++j) {
 		int neighborJ = sdb::gdt::GetVertexNeighborJ(i, j);
 		
-		BccCell3 * neighborCell = grid->findNeighborCell(cellCoord, neighborJ);
-		if(neighborCell) {
-			BccNode3 * node = neighborCell->findBlue(q);
+		//BccCell3 * neighborC = grid->findNeighborCell(cellCoord, neighborJ);
+		BccCell3 * neighborC = neighborCell(neighborJ);
+		if(neighborC) {
+			BccNode3 * node = neighborC->findBlue(q);
 			if(node) {
 				return node;
 			}
@@ -252,6 +258,15 @@ BccNode3 * BccCell3::findBlueNodeInNeighbor(const int & i,
 
 BccCell3 * BccCell3::parentCell()
 { return static_cast<BccCell3 *>(sdb::AdaptiveGridCell::parentCell() ); }
+
+BccCell3 * BccCell3::neighborCell(const int & i)
+{
+	sdb::AdaptiveGridCell * c = neighbor(i);
+	if(!c) {
+		return NULL;
+	}
+	return static_cast<BccCell3 *>(c );
+}
 
 BccNode3 * BccCell3::derivedBlueNode(const int & i,
 					const sdb::Coord4 & cellCoord,
@@ -288,7 +303,8 @@ BccNode3 * BccCell3::faceNode(const int & i,
 		return node;
 	}
 	
-	BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+	//BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+	BccCell3 * nei = neighborCell(i);
 	if(!nei) {
 		std::cout<<"\n [ERROR] no neighbor"<<i<<" in cell"<<cellCoord;
 		return NULL;
@@ -403,7 +419,8 @@ bool BccCell3::isFaceDivided(const int & i,
 					const sdb::Coord4 & cellCoord,
 					AdaptiveGridT * grid)
 { 
-	BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+	//BccCell3 * nei = grid->findNeighborCell(cellCoord, i);
+	BccCell3 * nei = neighborCell(i);
 	if(!nei) {
 		return false;
 	}

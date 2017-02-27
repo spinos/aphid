@@ -120,8 +120,7 @@ void EbpGrid::repelForce(Vector3F & frepel,
 						EbpCell * cell,
 						const EbpNode * node)
 {
-	int i=0;
-	for(;i<cell->numNeighbors();++i) {
+	for(int i=0;i<26;++i) {
 		repelForceInCell(frepel, 
 					static_cast<EbpCell *>(cell->neighbor(i) ), node);
 	}
@@ -131,7 +130,9 @@ void EbpGrid::repelForceInCell(Vector3F & frepel,
 					EbpCell * cell,
 					const EbpNode * node)
 {
-	if(!cell) return;
+	if(!cell) {
+		return;
+	}
 	
 	Vector3F vd;
 	float l;

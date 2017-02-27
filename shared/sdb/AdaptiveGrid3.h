@@ -30,7 +30,6 @@ private:
 	SelfPtrType m_parentCell;
 	SelfPtrType m_neighbors[26];
 	SelfPtrType m_children[8];
-	int m_numNeighbors;
 /// to parent
 	int m_childI;
 	bool m_hasChild;
@@ -44,9 +43,8 @@ public:
 	void setHasChild();
 	void setParentCell(SelfPtrType x, const int & i);
 	void clearNeighbors();
-	void addNeighbor(SelfPtrType x);
+	void setNeighbor(SelfPtrType x, const int & i);
 	
-	const int & numNeighbors() const;
 	AdaptiveGridCell * neighbor(const int & x);
 	
 	void setChild(SelfPtrType x, const int & i);
@@ -652,8 +650,9 @@ void AdaptiveGrid3<CellType, ValueType, MaxLevel>::storeCellNeighbors()
 /// search 26 cells for neighbors
 		for(int i=0;i<26;++i) {
 			CellType * nei = findNeighborCell(key(), i);
-			if(nei)
-				cell->addNeighbor(nei);
+			if(nei) {
+				cell->setNeighbor(nei, i);
+			}
 		}
 		
 		next();

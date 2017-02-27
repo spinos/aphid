@@ -76,6 +76,7 @@ public:
 	
 protected:
 	BccCell3 * parentCell();
+	BccCell3 * neighborCell(const int & i);
 	
 private:
 	void findRedValueFrontBlue(BccNode3 * redN,

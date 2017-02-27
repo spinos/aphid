@@ -43,6 +43,7 @@ public:
     void buildMesh(T * grid, AdaptiveBccGrid3 * bccg)
     {
 		std::cout<<"\n TetraMeshBuilder::buildMesh";
+		std::cout.flush();
 	
         std::vector<ITetrahedron *> tets;
         
@@ -84,6 +85,7 @@ public:
         vertmap.clear();
         clearTetra(tets);
         std::cout<<"\n done.";
+		std::cout.flush();
     }
                 
 protected:
