@@ -166,7 +166,7 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 			adistprof.direction = fclosest.aggregatedNormal();
 		}
 		adistprof.offset = prof.offset;
-		adistprof.snapDistance = .23f * abccg.levelCellSize(prof.fineGridSubdivLevel);
+		adistprof.snapDistance = .24f * abccg.levelCellSize(prof.fineGridSubdivLevel);
 			
 		afld-> template calculateDistance<Tclosest>(&tetg, &fclosest, adistprof);
 		

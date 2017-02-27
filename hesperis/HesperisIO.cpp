@@ -17,11 +17,11 @@
 #include <maya/MItDag.h>
 #include <geom/CurveGroup.h>
 #include <geom/ATriangleMeshGroup.h>
-#include <HBase.h>
-#include <HWorld.h>
-#include <HCurveGroup.h>
-#include <HTriangleMeshGroup.h>
-#include <AAttributeHelper.h>
+#include <h5/HBase.h>
+#include <h5/HWorld.h>
+#include <h5/HCurveGroup.h>
+#include <h5/HTriangleMeshGroup.h>
+#include <mama/AHelper.h>
 #include <sstream>
 #include <boost/format.hpp>
 

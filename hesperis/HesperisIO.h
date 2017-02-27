@@ -16,11 +16,11 @@
 #include <maya/MObjectArray.h>
 #include <AllMath.h>
 #include <BaseTransform.h>
-#include <HTransform.h>
+#include <h5/HTransform.h>
 #include <foundation/SHelper.h>
 #include <string>
 #include <map>
-#include "HesperisFile.h"
+#include <h5/HesperisFile.h>
 #include <h5/H5IO.h>
 
 namespace aphid {

@@ -13,13 +13,13 @@
 #include <maya/MFnEnumAttribute.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <foundation/SHelper.h>
-#include <ASearchHelper.h>
+#include <mama/ASearchHelper.h>
 #include <HesperisAttributeIO.h>
 #include <HesperisAttribConnector.h>
-#include <H5IO.h>
-#include <AAttributeHelper.h>
+#include <h5/H5IO.h>
+#include <mama/AttributeHelper.h>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
 #include <sceneIO.h>
@@ -85,7 +85,7 @@ void AttribUtil::saveUserDefinedAttrib(AnimIO & doc, MObject & entity)
     AttribNameMap::const_iterator it = attribs.begin();
     for( ; it != attribs.end(); ++it ) {
         MObject oattrib = pf.attribute(MString(it->first.c_str()));
-        AAttribute::AttributeType t = AAttributeHelper::GetAttribType(oattrib);
+        AAttribute::AttributeType t = AttributeHelper::GetAttribType(oattrib);
         saveAttrib(t, doc, entity, oattrib);
     }
 }
@@ -160,27 +160,27 @@ void AttribUtil::saveNumericAttrib(AnimIO & doc, const MObject & node, const MOb
    switch(fn.unitType()) {
        case MFnNumericData::kByte :
            typ = "short";
-           val = AAttributeHelper::GetPlugValueAsStr<short>(pl);
+           val = AttributeHelper::GetPlugValueAsStr<short>(pl);
            break;
        case MFnNumericData::kShort :
            typ = "short";
-           val = AAttributeHelper::GetPlugValueAsStr<short>(pl);
+           val = AttributeHelper::GetPlugValueAsStr<short>(pl);
            break;
        case MFnNumericData::kInt:
            typ = "int";
-           val = AAttributeHelper::GetPlugValueAsStr<int>(pl);
+           val = AttributeHelper::GetPlugValueAsStr<int>(pl);
            break;
        case MFnNumericData::kFloat:
            typ = "float";
-           val = AAttributeHelper::GetPlugValueAsStr<float>(pl);
+           val = AttributeHelper::GetPlugValueAsStr<float>(pl);
            break;
        case MFnNumericData::kDouble:
            typ = "double";
-           val = AAttributeHelper::GetPlugValueAsStr<double>(pl);
+           val = AttributeHelper::GetPlugValueAsStr<double>(pl);
            break;
        case MFnNumericData::kBoolean:
            typ = "boolean";
-           val = AAttributeHelper::GetPlugValueAsStr<bool>(pl);
+           val = AttributeHelper::GetPlugValueAsStr<bool>(pl);
            break;
        default:
            MGlobal::displayInfo(fn.name() + " unknown numberic attribute type " + fn.unitType());
@@ -223,7 +223,7 @@ void AttribUtil::saveEnumAttrib(AnimIO & doc, const MObject & node, const MObjec
  	fn.getMax(maxValue);
  	
  	MPlug pl(node, attrib);
- 	std::string val = AAttributeHelper::GetPlugValueAsStr<short>(pl);
+ 	std::string val = AttributeHelper::GetPlugValueAsStr<short>(pl);
  	
  	xmlNodePtr p = doc.nodeBegin("attribute");
     doc.setNodeProp(p, "name", fn.name().asChar());
@@ -251,7 +251,7 @@ void AttribUtil::loadAttrib(AnimIO & doc, MObject & entity, const AttribNameMap 
     bool doCreate = false;
     if(existingAttribs.find(attrName) == existingAttribs.end())
         doCreate = true;
-    switch( AAttributeHelper::AsAttributeType( doc.getAttribByName("attrib_type") ) ) {
+    switch( AttributeHelper::AsAttributeType( doc.getAttribByName("attrib_type") ) ) {
         case AAttribute::aString:
             loadStringAttrib(doc, entity, doCreate);
             break;
@@ -310,7 +310,7 @@ void AttribUtil::loadEnumAttrib(AnimIO & doc, MObject & entity, bool doCreate)
     }
     
     MPlug pl = fdep.findPlug(nameLong);
-    AAttributeHelper::SetPlugValueFromStr<short>( pl, doc.getAttribByName("value") );
+    AttributeHelper::SetPlugValueFromStr<short>( pl, doc.getAttribByName("value") );
 }
 
 void AttribUtil::loadCompoundAttrib(AnimIO & doc, MObject & entity, bool doCreate)
@@ -376,25 +376,25 @@ void AttribUtil::setNumericAttrib(MFnDependencyNode & fdep, AnimIO & doc)
     std::string value(doc.getAttribByName("value"));
     MPlug pl = fdep.findPlug(nameLong);
     
-    MFnNumericData::Type typ = AAttributeHelper::GetNumericAttributeType(doc.getAttribByName("attrib_type"));
+    MFnNumericData::Type typ = AttributeHelper::GetNumericAttributeType(doc.getAttribByName("attrib_type"));
     switch( typ ) {
         case MFnNumericData::kByte:
-            AAttributeHelper::SetPlugValueFromStr<short>( pl, value );
+            AttributeHelper::SetPlugValueFromStr<short>( pl, value );
             break;
         case MFnNumericData::kShort:
-            AAttributeHelper::SetPlugValueFromStr<short>( pl, value );
+            AttributeHelper::SetPlugValueFromStr<short>( pl, value );
             break;
         case MFnNumericData::kInt:
-            AAttributeHelper::SetPlugValueFromStr<int>( pl, value );
+            AttributeHelper::SetPlugValueFromStr<int>( pl, value );
             break;
         case MFnNumericData::kFloat:
-            AAttributeHelper::SetPlugValueFromStr<float>( pl, value );
+            AttributeHelper::SetPlugValueFromStr<float>( pl, value );
             break;
         case MFnNumericData::kDouble:
-            AAttributeHelper::SetPlugValueFromStr<double>( pl, value );
+            AttributeHelper::SetPlugValueFromStr<double>( pl, value );
             break;
         case MFnNumericData::kBoolean:
-            AAttributeHelper::SetPlugValueFromStr<bool>( pl, value );
+            AttributeHelper::SetPlugValueFromStr<bool>( pl, value );
             break;
         default:
             MGlobal::displayWarning(MString("unknown numerica attrib ") + nameLong
@@ -442,7 +442,7 @@ MObject AttribUtil::createNumericAttrib(AnimIO & doc)
 {
     MString nameLong(doc.getAttribByName("name"));
     MString nameShort(doc.getAttribByName("short_name"));
-    MFnNumericData::Type typ = AAttributeHelper::GetNumericAttributeType(doc.getAttribByName("attrib_type"));
+    MFnNumericData::Type typ = AttributeHelper::GetNumericAttributeType(doc.getAttribByName("attrib_type"));
     if(typ == MFnNumericData::kInvalid) {
         MGlobal::displayWarning(nameLong + MString("unknown numberic attrib type ") + doc.getAttribByName("attrib_type"));
         return MObject::kNullObj;
@@ -480,19 +480,19 @@ void AttribUtil::saveH5(const MPlug & attrib)
 {
 	bool supported = true;
 	const MObject entity = attrib.node();
-	AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
+	AAttribute::AttributeType t = AttributeHelper::GetAttribType(attrib.attribute());
 	switch(t) {
 		case AAttribute::aString:
-			saveH5(entity, AAttributeHelper::AsStrData(attrib) );
+			saveH5(entity, AttributeHelper::AsStrData(attrib) );
 			break;
 		case AAttribute::aNumeric:
-			saveH5(entity, AAttributeHelper::AsNumericData(attrib) );
+			saveH5(entity, AttributeHelper::AsNumericData(attrib) );
 			break;
 		case AAttribute::aCompound:
-			saveH5(entity, AAttributeHelper::AsCompoundData(attrib) );
+			saveH5(entity, AttributeHelper::AsCompoundData(attrib) );
 			break;
 		case AAttribute::aEnum:
-			saveH5(entity, AAttributeHelper::AsEnumData(attrib) );
+			saveH5(entity, AttributeHelper::AsEnumData(attrib) );
 			break;
 		default:
 			AHelper::Info<std::string >(" AttribUtil error attr type not supported ", attrib.name().asChar() );
@@ -554,17 +554,17 @@ void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int f
 
 void AttribUtil::bakeH5(const MPlug & attrib, int flag)
 {
-	if(AAttributeHelper::IsDirectAnimated (attrib ) ) return;
+	if(AttributeHelper::IsDirectAnimated (attrib ) ) return;
 
 	MPlugArray conns;
 	if(!attrib.connectedTo (conns, true, false )) return;
 /// has connection but not key-framed	
-	AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
+	AAttribute::AttributeType t = AttributeHelper::GetAttribType(attrib.attribute());
 	if(t == AAttribute::aNumeric) {
-		bakeNumeric(attrib.node(), AAttributeHelper::AsNumericData(attrib), flag );
+		bakeNumeric(attrib.node(), AttributeHelper::AsNumericData(attrib), flag );
 	}
 	else if(t == AAttribute::aEnum) {
-		bakeEnum(attrib.node(), AAttributeHelper::AsEnumData(attrib), flag);
+		bakeEnum(attrib.node(), AttributeHelper::AsEnumData(attrib), flag);
 	}
 	else {
 		AHelper::Info<MString >(" attr not bakable", attrib.name() );

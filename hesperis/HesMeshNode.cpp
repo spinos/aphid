@@ -1,4 +1,4 @@
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include "HesMeshNode.h"
 #include <maya/MFnMeshData.h>
 #include <math/Vector3F.h>
@@ -6,7 +6,8 @@
 #include <baseUtil.h>
 #include <HesperisPolygonalMeshIO.h>
 #include <geom/APolygonalMesh.h>
-
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/progress.hpp"

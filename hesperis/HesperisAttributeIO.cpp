@@ -8,10 +8,11 @@
  */
 
 #include "HesperisAttributeIO.h"
-#include <AAttributeHelper.h>
-#include <HWorld.h>
-#include <HAttributeGroup.h>
-#include <HNumericBundle.h>
+#include <mama/AHelper.h>
+#include <mama/AttributeHelper.h>
+#include <h5/HWorld.h>
+#include <h5/HAttributeGroup.h>
+#include <h5/HNumericBundle.h>
 #include <h5/HOocArray.h>
 #include <boost/format.hpp>
 #include "HesperisAttribConnector.h"
@@ -34,9 +35,9 @@ void buildBundle(std::vector<ANumericAttribute * > & bundle,
             continue;
             
         ANumericAttribute * data = NULL;
-        AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
+        AAttribute::AttributeType t = AttributeHelper::GetAttribType(attrib.attribute());
         if(t == AAttribute::aNumeric)
-		    data = AAttributeHelper::AsNumericData(attrib);
+		    data = AttributeHelper::AsNumericData(attrib);
 		else
 		    AHelper::Info<std::string>("\n HesperisAttributeIO build bundle attr type not supported", attrName);
 		       
@@ -133,19 +134,19 @@ bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % attrib.partialName().asChar());
 	AHelper::Info<std::string>("HesperisAttributeIO add attrib ", attrName);
 	
-	AAttribute::AttributeType t = AAttributeHelper::GetAttribType(attrib.attribute());
+	AAttribute::AttributeType t = AttributeHelper::GetAttribType(attrib.attribute());
 	switch(t) {
 		case AAttribute::aString:
-			file->addAttribute(attrName, AAttributeHelper::AsStrData(attrib));
+			file->addAttribute(attrName, AttributeHelper::AsStrData(attrib));
 			break;
 		case AAttribute::aNumeric:
-			file->addAttribute(attrName, AAttributeHelper::AsNumericData(attrib));
+			file->addAttribute(attrName, AttributeHelper::AsNumericData(attrib));
 			break;
 		case AAttribute::aCompound:
-			file->addAttribute(attrName, AAttributeHelper::AsCompoundData(attrib));
+			file->addAttribute(attrName, AttributeHelper::AsCompoundData(attrib));
 			break;
 		case AAttribute::aEnum:
-			file->addAttribute(attrName, AAttributeHelper::AsEnumData(attrib));
+			file->addAttribute(attrName, AttributeHelper::AsEnumData(attrib));
 			break;
 		default:
 			AHelper::Info<std::string>("attr type not supported", attrName);
@@ -304,14 +305,14 @@ bool HesperisAttributeIO::ReadAttribute(MObject & dst,
 bool HesperisAttributeIO::ReadStringAttribute(MObject & dst, AStringAttribute * data, 
                 const MObject &target)
 {
-	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
-		if(!AAttributeHelper::IsStringAttr(dst) ) {
+	if(AttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
+		if(!AttributeHelper::IsStringAttr(dst) ) {
 			AHelper::Info<std::string >(" existing attrib is not string ", data->longName() );
 			return false;
 		}
 	}
 	else {
-		if(!AAttributeHelper::AddStringAttr(dst, target,
+		if(!AttributeHelper::AddStringAttr(dst, target,
 							data->longName(),
 							data->shortName())) {
 			AHelper::Info<std::string >(" cannot create string attrib ", data->longName() );
@@ -351,14 +352,14 @@ bool HesperisAttributeIO::ReadNumericAttribute(MObject & dst, ANumericAttribute 
     }
 	if(dt == MFnNumericData::kInvalid) return false;
 
-	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
-		if(!AAttributeHelper::IsNumericAttr(dst, dt) ) {
+	if(AttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
+		if(!AttributeHelper::IsNumericAttr(dst, dt) ) {
 			AHelper::Info<std::string >(" existing attrib is not correct numeric type ", data->longName() );
 			return false;
 		}
 	}
 	else {
-		if(!AAttributeHelper::AddNumericAttr(dst, target,
+		if(!AttributeHelper::AddNumericAttr(dst, target,
 							data->longName(),
 							data->shortName(),
 							dt) ) {
@@ -423,8 +424,8 @@ bool HesperisAttributeIO::ReadEnumAttribute(MObject & dst, AEnumAttribute * data
 	short a, b, i;
 	short v = data->value(a, b);
 		
-	if(AAttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
-		if(!AAttributeHelper::IsEnumAttr(dst) ) {
+	if(AttributeHelper::HasNamedAttribute(dst, target, data->shortName() )) {
+		if(!AttributeHelper::IsEnumAttr(dst) ) {
 			AHelper::Info<std::string >(" existing attrib is not enum ", data->longName() );
 			return false;
 		}
@@ -435,7 +436,7 @@ bool HesperisAttributeIO::ReadEnumAttribute(MObject & dst, AEnumAttribute * data
 			fld[i] = data->fieldName(i);
 		}
 		
-		if(!AAttributeHelper::AddEnumAttr(dst, target,
+		if(!AttributeHelper::AddEnumAttr(dst, target,
 							data->longName(),
 							data->shortName(),
 							fld )) {

@@ -9,7 +9,7 @@
 
 #pragma once
 #include <maya/MObject.h>
-#include <AAttribute.h>
+#include <foundation/AAttribute.h>
 
 namespace aphid {
     

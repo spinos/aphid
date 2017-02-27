@@ -91,10 +91,7 @@ public:
 				continue;
 			}
 			
-			ldv -= offset;
-			
-			m_pvs[i] = intersectF->closestToPointPoint() 
-						+ intersectF->closestToPointNormal() * offset;
+			m_pvs[i] = intersectF->closestToPointPoint();
 						
 			if(m_d[i] > ldv) {
 				m_d[i] = ldv;
@@ -117,7 +114,7 @@ public:
 		
 		if(m_snapInd > -1) {
 /// move to front
-			m_snapPos = m_pvs[m_snapInd];//P(m_snapInd);//
+			m_snapPos = m_pvs[m_snapInd];
 			m_d[m_snapInd] = 0.f;
 			m_snapInd = m_indices[m_snapInd];
 			

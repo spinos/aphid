@@ -14,7 +14,7 @@
 #include <maya/MGlobal.h>
 #include <h5/HObject.h>
 #include <animUtil.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 
 namespace aphid {
     

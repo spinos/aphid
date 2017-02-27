@@ -210,6 +210,19 @@ void SphereSelectionContext::deselect()
 	m_prims.clear();
 }
 
+void SphereSelectionContext::reset(const BoundingBox & b,
+				SelectionContext::SelectMode mode,
+				bool beExact)
+{
+    const Vector3F c = b.center();
+    const float r = .5f * b.getLongestDistance();
+    setMin(c.x - r, c.y - r, c.z - r);
+	setMax(c.x + r, c.y + r, c.z + r);
+	m_sphere.set(c, r);
+	m_mode = mode;
+	m_exact = beExact;
+}
+
 void SphereSelectionContext::reset(const Vector3F & p,
 									const float & r,
 									SelectionContext::SelectMode mode,

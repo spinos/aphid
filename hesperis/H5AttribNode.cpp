@@ -1,5 +1,7 @@
 #include "H5AttribNode.h"
 #include <foundation/SHelper.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
 #include <baseUtil.h>
 #include <boost/format.hpp>
 

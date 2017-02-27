@@ -7,8 +7,8 @@
 #include <EnvVar.h>
 #include <H5Holder.h>
 #include <h5/HOocArray.h>
-#include <HBase.h>
-#include <AHelper.h>
+#include <h5/HBase.h>
+#include <mama/AHelper.h>
 
 class H5AttribNode : public MPxNode, public EnvVar, public aphid::H5Holder
 {

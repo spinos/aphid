@@ -6,12 +6,12 @@
 #include <maya/MItMeshPolygon.h>
 #include <geom/APolygonalMesh.h>
 #include <geom/APolygonalUV.h>
-#include "HesperisFile.h"
-#include <HWorld.h>
+#include <h5/HesperisFile.h>
+#include <h5/HWorld.h>
 #include <foundation/SHelper.h>
-#include <HTransform.h>
-#include <HPolygonalMesh.h>
-#include <AHelper.h>
+#include <h5/HTransform.h>
+#include <h5/HPolygonalMesh.h>
+#include <mama/AHelper.h>
 #include <baseUtil.h>
 
 namespace aphid {

@@ -7,7 +7,7 @@
 #include <maya/MDataHandle.h>
 #include <maya/MIOStream.h>
 #include <maya/MFnMesh.h>
-#include <AHelper.h>
+#include <mama/AHelper.h>
 #include <foundation/SHelper.h>
 #include <HesperisPolygonalMeshIO.h>
 #include <baseUtil.h>

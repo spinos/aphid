@@ -11,10 +11,11 @@
 #include <maya/MGlobal.h>
 #include <maya/MFnNurbsCurve.h>
 #include <maya/MPointArray.h>
-#include <HWorld.h>
-#include <HCurveGroup.h>
+#include <h5/HWorld.h>
+#include <h5/HCurveGroup.h>
 #include <geom/CurveGroup.h>
-#include <ASearchHelper.h>
+#include <mama/AHelper.h>
+#include <mama/ASearchHelper.h>
 #include <boost/format.hpp>
 namespace aphid {
     

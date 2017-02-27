@@ -8,8 +8,8 @@
  */
 
 #include "H5Holder.h"
-#include <HBase.h>
-#include <HFrameRange.h>
+#include <h5/HBase.h>
+#include <h5/HFrameRange.h>
 
 namespace aphid {
     

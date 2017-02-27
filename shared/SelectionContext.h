@@ -93,6 +93,9 @@ public:
 	virtual ~SphereSelectionContext();
 	
 	void deselect();
+	void reset(const BoundingBox & b,
+				SelectionContext::SelectMode mode = SelectionContext::Replace,
+				bool beExact = false);
 	void reset(const Vector3F & p, const float & r,
 				SelectionContext::SelectMode mode = SelectionContext::Replace,
 				bool beExact = true);

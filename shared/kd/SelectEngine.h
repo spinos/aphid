@@ -67,9 +67,9 @@ template<typename T, typename Tn>
 bool SelectEngine<T, Tn>::select(const BoundingBox & bx)
 {
 	m_selectCtx.deselect();
-	m_selectCtx.reset(bx.center(), bx.radius(), SelectionContext::Append);
-	
-	KdEngine::select(m_tree, &m_selectCtx);
+	m_selectCtx.reset(bx, SelectionContext::Append);
+/// todo broadphase select
+	KdEngine::selectBox(m_tree, &m_selectCtx);
 	return numSelected() > 0;
 }
 

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <H5Availability.h>
+#include <h5/H5Availability.h>
 #include <SampleFrame.h>
 #include <AFrameRange.h>
 

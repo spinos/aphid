@@ -8,10 +8,12 @@
  */
 
 #include "HesperisAnimIO.h"
-#include <AAttributeHelper.h>
-#include <HAnimationCurve.h>
+#include <mama/AHelper.h>
+#include <mama/AttributeHelper.h>
+#include <h5/HAnimationCurve.h>
 #include <maya/MFnAnimCurve.h>
 #include <maya/MAnimUtil.h>
+#include <maya/MDGModifier.h>
 #include <boost/format.hpp>
 
 namespace aphid {
@@ -20,7 +22,7 @@ double HesperisAnimIO::SecondsPerFrame = 0.0416667;
 
 bool HesperisAnimIO::WriteAnimation(const MPlug & attrib, const MObject & animCurveObj)
 {
-	if(!AAttributeHelper::IsDirectAnimated(attrib)) return false;
+	if(!AttributeHelper::IsDirectAnimated(attrib)) return false;
 	MObject entity = attrib.node();
 	const std::string nodeName = H5PathNameTo(entity);
 	const std::string shortName(attrib.partialName().asChar());

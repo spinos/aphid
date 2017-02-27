@@ -15,17 +15,18 @@
 #include <string>
 
 #include <foundation/SHelper.h>
-#include <ASearchHelper.h>
-#include <AAttributeHelper.h>
+#include <mama/AHelper.h>
+#include <mama/ASearchHelper.h>
+#include <mama/AttributeHelper.h>
 #include "AttribUtil.h"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/progress.hpp"
 #include <boost/format.hpp>
 
-#include <HesperisFile.h>
+#include <h5/HesperisFile.h>
 #include <HesperisAttributeIO.h>
-#include <H5IO.h>
+#include <h5/H5IO.h>
 
 using namespace boost::filesystem;
 using namespace std;
