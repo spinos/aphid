@@ -43,7 +43,8 @@ public:
     
     template<typename Tf>
     void compute(Tf * intersectF, const float & rDistance,
-                const float & offset)
+                const float & offset,
+				const float & snapThreshold)
     {
 		m_snapInd = -1;
         for(int i=0;i<4;++i) {
@@ -56,7 +57,7 @@ public:
 			}
 			
 /// to far away
-			if(!intersectF->selectedClosestToPoint(P(i), rDistance * 1.8f + offset) ) {
+			if(!intersectF->selectedClosestToPoint(P(i), rDistance * 3.f + offset) ) {
                 continue;
             }
 			
@@ -69,15 +70,19 @@ public:
                 const float dvdotn = intersectF->closestToPointNormal().dot(dv);
 				if(dvdotn > 0.f) {
 /// back side					
-					if(dvdotn < .1f) {
+					if(dvdotn < .2f) {
 /// no effect
 						m_valid[i] = false;
 						
-					} else if(dvdotn > .7f) {
+					} else if(dvdotn > .8f) {
 /// inside
 						ldv = -ldv;
 					}
-				} 
+				} else {
+					if(dvdotn > -.2f) {
+						m_valid[i] = false;
+					}
+				}
 			} else {
 				ldv = 0.f;
 			}
@@ -96,7 +101,8 @@ public:
 			}
         }
 		
-		float minD = rDistance * .3f;
+/// same for all tetra
+		float minD = snapThreshold;
 /// the one closest to front
 		for(int i=0;i<4;++i) {
 			if(!m_valid[i]) {
@@ -111,11 +117,12 @@ public:
 		
 		if(m_snapInd > -1) {
 /// move to front
-			m_snapPos = m_pvs[m_snapInd];
+			m_snapPos = m_pvs[m_snapInd];//P(m_snapInd);//
 			m_d[m_snapInd] = 0.f;
 			m_snapInd = m_indices[m_snapInd];
 			
 		}
+		
     }
     
     void compute(const Plane & pl);

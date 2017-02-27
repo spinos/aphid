@@ -49,10 +49,18 @@ public:
 						stat = fintersect.intersect(cb);
 					}
 					
-					if(stat && prof.minNormalDistribute() < 1.f) {
-						cb.expand(prof.offset() );
-						fclosest.select(cb);
-						stat = fclosest.normalDistributeBelow(prof.minNormalDistribute() );
+					if(stat) {
+						if(limitBox().isBoxOnBoundary(cb) ) {
+							stat = true;
+						} else {
+							if(prof.minNormalDistribute() < 1.f) {
+								cb.expand(prof.offset() );
+								fclosest.select(cb);
+								stat = fclosest.normalDistributeBelow(prof.minNormalDistribute() );
+							} else {
+								stat = true;
+							}
+						}
 					}
 					
 					if(stat) {
@@ -61,6 +69,10 @@ public:
 				}
 				
 				next();
+			}
+			
+			if(dirty.size() < 1) {
+				break;
 			}
 #if 0			
 			std::cout<<"\n subdiv level "<<level<<" divided "<<divided.size();

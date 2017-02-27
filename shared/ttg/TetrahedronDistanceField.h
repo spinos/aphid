@@ -47,13 +47,16 @@ public:
 /// for each cell
         TetraDistance atet;
         Vector3F tcen;
+		BoundingBox tbx;
         float trad;
         const int & nt = grid->numCells();
         for(int i=0;i<nt;++i) {
             grid->getCell(atet, i);            
             atet.getCenterRadius(tcen, trad);
+			tbx = atet.calculateBBox();
+			tbx.expand(profile.offset);
 			
-			if(!intersectF->select(tcen, trad + profile.offset) ) {
+			if(!intersectF->select(tbx) ) {
 				continue;
 			}
 			
@@ -66,7 +69,7 @@ public:
 			atet.setIndices((const int * )&cellv);
 			
 /// approximate as node distance to plane
-            atet.compute(intersectF, trad, profile.offset);
+            atet.compute(intersectF, trad, profile.offset, profile.snapDistance);
             
             const sdb::Coord4 & tetv = grid->cellVertices(i);
             const float * dist = atet.result();

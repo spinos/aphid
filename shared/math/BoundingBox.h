@@ -67,6 +67,7 @@ public:
 	char isPointInside(const Vector3F & p) const;
 	char isPointAround(const Vector3F & p, float threshold) const;
 	char isBoxAround(const BoundingBox & b, float threshold) const;
+	bool isBoxOnBoundary(const BoundingBox & b) const;
 	char inside(const BoundingBox & b) const;
 	int pointOnSide(const Vector3F & v) const;
 	int pointOnEdge(const Vector3F & v) const;

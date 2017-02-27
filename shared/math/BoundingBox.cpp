@@ -678,5 +678,28 @@ void BoundingBox::getSubBox(BoundingBox & dst,
 	dst.m_data[5] = dst.m_data[2] + d2 * delta;
 }
 
+bool BoundingBox::isBoxOnBoundary(const BoundingBox & b) const
+{
+	if(b.m_data[0] <= m_data[0]) {
+		return  true;
+	}
+	if(b.m_data[1] <= m_data[1]) {
+		return  true;
+	}
+	if(b.m_data[2] <= m_data[2]) {
+		return  true;
+	}
+	if(b.m_data[3] >= m_data[3]) {
+		return  true;
+	}
+	if(b.m_data[4] >= m_data[4]) {
+		return  true;
+	}
+	if(b.m_data[5] >= m_data[5]) {
+		return  true;
+	}
+	return false;
+}
+
 }
 //:~

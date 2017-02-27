@@ -42,7 +42,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[2],
+									sCactusMeshVertices[3],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -212,14 +212,13 @@ void GLWidget::drawCoarseGrid()
 
 void GLWidget::drawTriangulation()
 {
-#if 1
-    getDrawer()->m_wireProfile.apply();
-#else
 	getDrawer()->m_surfaceProfile.apply();
-#endif
-	getDrawer()->setColor(1,.7,0);
 	
 	const int nm = m_mesher->numFrontMeshes();
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
 	for(int i=0;i<nm;++i) {
 		const ATriangleMesh * fm = m_mesher->frontMesh(i);
 
@@ -228,9 +227,22 @@ void GLWidget::drawTriangulation()
     const Vector3F * pos = fm->points();
     const Vector3F * nms = fm->vertexNormals();
     
-    glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
+    glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
+	}
 	
+	getDrawer()->m_wireProfile.apply();
+	getDrawer()->setColor(1,.7,0);
+	
+	for(int i=0;i<nm;++i) {
+		const ATriangleMesh * fm = m_mesher->frontMesh(i);
+
+    const unsigned nind = fm->numIndices();
+    const unsigned * inds = fm->indices();
+    const Vector3F * pos = fm->points();
+    const Vector3F * nms = fm->vertexNormals();
+    
     glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
     glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
@@ -354,7 +366,8 @@ void GLWidget::drawField()
 	m_fieldDrawer->drawNode(m_mesher->coarseField() );
 	
 	m_fieldDrawer->setDrawNodeSize(.1f);
-	m_fieldDrawer->drawEdge(m_mesher->fineField(5) );
+	//m_fieldDrawer->drawEdge(m_mesher->fineField(3) );
+	//m_fieldDrawer->drawEdge(m_mesher->fineField(4) );
 	//m_fieldDrawer->drawNode(m_mesher->fineField(7) );
 }
 
