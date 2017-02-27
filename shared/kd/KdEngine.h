@@ -12,7 +12,7 @@
 #include <kd/KdNTree.h>
 #include <kd/KdBuilder.h>
 #include <IntersectionContext.h>
-#include <SelectionContext.h>
+#include <geom/SelectionContext.h>
 #include <geom/ClosestToPointTest.h>
 #include <geom/ConvexShape.h>
 
@@ -49,6 +49,10 @@ public:
 	
 	template<typename T, typename Tn>
 	void select(KdNTree<T, Tn > * tree, 
+				SphereSelectionContext * ctx);
+				
+	template<typename T, typename Tn>
+	void broadphaseSelect(KdNTree<T, Tn > * tree, 
 				SphereSelectionContext * ctx);
 				
 	template<typename T, typename Tn>
@@ -170,6 +174,18 @@ private:
 				int branchIdx,
 				int nodeIdx,
 				const BoundingBox & innerBx);
+				
+	template<typename T, typename Tn>
+	void broadphaseLeafSelect(KdNTree<T, Tn > * tree, 
+					SphereSelectionContext * ctx,
+					KdTreeNode * r);
+	
+	template<typename T, typename Tn>
+	void broadphaseInnerSelect(KdNTree<T, Tn > * tree, 
+					SphereSelectionContext * ctx,
+					int branchIdx,
+					int nodeIdx,
+					const BoundingBox & b);
 				
 };
 
@@ -1148,6 +1164,108 @@ bool KdEngine::narrowphase(KdNTree<T, Tn > * tree,
 		stat = innerNarrowphase(tree, hexa, bx, branchIdx, 1, rgtBox);
 		
 	return stat;
+}
+
+template<typename T, typename Tn>
+void KdEngine::broadphaseSelect(KdNTree<T, Tn > * tree, 
+						SphereSelectionContext * ctx)
+{
+	if(tree->isEmpty() ) {
+		return;
+	}
+	
+	const BoundingBox b = tree->getBBox();
+	if(!b.intersect(*ctx)) {
+		return;
+	}
+
+	KdTreeNode * r = tree->root()->node(0);
+	if(r->isLeaf() ) {
+		broadphaseLeafSelect(tree, ctx, r);
+		return;
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+		
+	int branchIdx = tree->root()->internalOffset(0);
+	broadphaseInnerSelect(tree, ctx, branchIdx, 0, lftBox);
+	broadphaseInnerSelect(tree, ctx, branchIdx, 1, rgtBox);
+	
+}
+
+template<typename T, typename Tn>
+void KdEngine::broadphaseLeafSelect(KdNTree<T, Tn > * tree, 
+				SphereSelectionContext * ctx,
+				KdTreeNode * r)
+{
+	if(r->getNumPrims() < 1) {
+		return;
+	}
+	
+	int start, len;
+	tree->leafPrimStartLength(start, len, r->getPrimStart() );
+	
+	for(int i=0;i<len;++i) {
+		const T * c = tree->getSource(start + i );
+		if(c->calculateBBox().intersect(*ctx) ) {
+			ctx->addPrim(tree->primIndirectionAt(start + i) );
+		}
+	}
+}
+
+template<typename T, typename Tn>
+void KdEngine::broadphaseInnerSelect(KdNTree<T, Tn > * tree, 
+				SphereSelectionContext * ctx,
+				int branchIdx,
+				int nodeIdx,
+				const BoundingBox & b)
+{
+	Tn * currentBranch = tree->branches()[branchIdx];
+	KdTreeNode * r = currentBranch->node(nodeIdx);
+	if(r->isLeaf() ) {
+		broadphaseLeafSelect(tree, ctx, r);
+		return;
+	}
+	
+	const int axis = r->getAxis();
+	const float splitPos = r->getSplitPos();
+	BoundingBox lftBox, rgtBox;
+	b.split(axis, splitPos, lftBox, rgtBox);
+	
+	const int offset = r->getOffset();
+	if(offset < Tn::TreeletOffsetMask) {
+		if(ctx->getMin(axis) < splitPos ) {
+			broadphaseInnerSelect(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset,
+							lftBox);
+		}
+		
+		if(ctx->getMax(axis) > splitPos ) {
+			broadphaseInnerSelect(tree, ctx, 
+							branchIdx,
+							nodeIdx + offset + 1,
+							rgtBox);
+		}
+	}
+	else {
+		if(ctx->getMin(axis) < splitPos ) {
+			broadphaseInnerSelect(tree, ctx, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							0,
+							lftBox);
+		}
+		
+		if(ctx->getMax(axis) > splitPos ) {
+			broadphaseInnerSelect(tree, ctx, 
+							branchIdx + offset & Tn::TreeletOffsetMaskTau,
+							1,
+							rgtBox);
+		}
+	}
 }
 
 }

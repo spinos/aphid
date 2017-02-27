@@ -525,4 +525,57 @@ void BaseDistanceField::moveNodeToFront(const Vector3F & pos,
 	}
 }
 
+void BaseDistanceField::cutEdgesConnectedToNode(const int & idx)
+{
+	const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+        IDistanceEdge & eg = edges()[k];
+		const sdb::Coord2 & ev = eg.vi;
+		DistanceNode & node1 = nodes()[ev.x];
+        DistanceNode & node2 = nodes()[ev.y];
+		if(node1.stat == sdf::StKnown && 
+            node2.stat == sdf::StKnown) {
+            if(node1.val * node2.val < 0.f) {
+                eg.cx = Absolute<float>(node1.val) / 
+                    (Absolute<float>(node1.val) + Absolute<float>(node2.val) );
+            } 
+        }
+	}
+}
+
+float BaseDistanceField::longestEdgeLength(const int & idx) const
+{
+	float l = -1.f;
+	const int endj = edgeBegins()[idx+1];
+	int j = edgeBegins()[idx];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+        const IDistanceEdge & eg = edges()[k];
+		if(l < eg.len) {
+			l = eg.len;
+		}
+	}
+	return l;
+}
+
+void BaseDistanceField::setNodePosDistance(const Vector3F & pos,
+						const float & v, 
+						const int & idx)
+{
+	DistanceNode & d = nodes()[idx];
+	d.val = v;
+	d.stat = sdf::StKnown;
+	if(v == 0.f) {
+		moveNodeToFront(pos, idx);
+	} else {
+		cutEdgesConnectedToNode(idx);
+	}
+}
+
 }

@@ -11,7 +11,7 @@
 #include <PointInsidePolygonTest.h>
 #include <InverseBilinearInterpolate.h>
 #include <BiLinearInterpolate.h>
-#include <SelectionContext.h>
+#include <geom/SelectionContext.h>
 
 namespace aphid {
 

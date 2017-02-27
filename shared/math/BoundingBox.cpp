@@ -31,12 +31,18 @@ BoundingBox::BoundingBox(const float & x0, const float & y0, const float & z0,
 
 BoundingBox::BoundingBox(const float * d)
 {
-    m_data[0] = d[0];
-    m_data[1] = d[1];
-    m_data[2] = d[2];
-    m_data[3] = d[3];
-    m_data[4] = d[4];
-    m_data[5] = d[5];
+	memcpy(m_data, d, 24);
+}
+
+void BoundingBox::set(const Vector3F & center,
+			const float & h)
+{
+	m_data[0] = center.x - h;
+	m_data[1] = center.y - h;
+	m_data[2] = center.z - h;
+	m_data[3] = center.x + h;
+	m_data[4] = center.y + h;
+	m_data[5] = center.z + h;
 }
 
 void BoundingBox::reset()

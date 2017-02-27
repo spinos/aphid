@@ -31,6 +31,7 @@ using namespace aphid;
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
+	m_doDrawTriWire = false;
 	perspCamera()->setFarClipPlane(20000.f);
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(20000.f);
@@ -66,7 +67,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 	mshprof.coarsGridBox = m_tree->getBBox();
 	mshprof.coarseCellSize = sz0;
 	mshprof.coarseGridSubdivLevel = 2;
-	mshprof.fineGridSubdivLevel = 4;
+	mshprof.fineGridSubdivLevel = 5;
 	mshprof.offset = .1f;
 /// quality of mesh
 	mshprof.fineGridSubdivNormalDistribute = .9f;
@@ -181,6 +182,9 @@ void GLWidget::clientDraw()
 	//drawTetraMesh();
     drawField();
 	drawTriangulation();
+	if(m_doDrawTriWire) {
+		drawTriangulationWire();
+	}
 	//drawCoarseGrid();
     
 }
@@ -232,23 +236,29 @@ void GLWidget::drawTriangulation()
     glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
 	}
 	
+    glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void GLWidget::drawTriangulationWire()
+{
 	getDrawer()->m_wireProfile.apply();
 	getDrawer()->setColor(1,.7,0);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	const int nm = m_mesher->numFrontMeshes();
 	
 	for(int i=0;i<nm;++i) {
 		const ATriangleMesh * fm = m_mesher->frontMesh(i);
 
-    const unsigned nind = fm->numIndices();
-    const unsigned * inds = fm->indices();
-    const Vector3F * pos = fm->points();
-    const Vector3F * nms = fm->vertexNormals();
-    
-    glNormalPointer(GL_FLOAT, 0, (GLfloat*)nms );
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
-    glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
+		const unsigned nind = fm->numIndices();
+		const unsigned * inds = fm->indices();
+		const Vector3F * pos = fm->points();
+		
+		glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
+		glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
 	}
-    
-    glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -371,6 +381,9 @@ void GLWidget::drawField()
 	//m_fieldDrawer->drawNode(m_mesher->fineField(7) );
 }
 
+void GLWidget::toggleDrawTriangulationWire()
+{ m_doDrawTriWire = !m_doDrawTriWire; }
+
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
 }
@@ -388,7 +401,8 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
-		case Qt::Key_M:
+		case Qt::Key_W:
+			toggleDrawTriangulationWire();
 			break;
 		case Qt::Key_N:
 			break;

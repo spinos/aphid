@@ -13,6 +13,7 @@
 #include <graph/BaseDistanceField.h>
 #include <ttg/TetraGridEdgeMap.h>
 #include <ttg/TetraDistance.h>
+#include <ttg/PointDistance.h>
 #include <geom/ConvexShape.h>
 #include <vector>
 #include <map>
@@ -34,101 +35,8 @@ public:
                 const int & v1, const int & v2) const;
     
     template<typename Tf>
-    void calculateDistance(T * grid, Tf * intersectF,
-							CalcDistanceProfile & profile) 
-    {
-#if 0
-		std::cout<<"\n TetrahedronDistanceField::calculateDistance";
-		std::cout.flush();
-#endif
-        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
-        uncutEdges();
-        
-/// for each cell
-        TetraDistance atet;
-        Vector3F tcen;
-		BoundingBox tbx;
-        float trad;
-        const int & nt = grid->numCells();
-        for(int i=0;i<nt;++i) {
-            grid->getCell(atet, i);            
-            atet.getCenterRadius(tcen, trad);
-			tbx = atet.calculateBBox();
-			tbx.expand(profile.offset);
-			
-			if(!intersectF->select(tbx) ) {
-				continue;
-			}
-			
-/// retrieve distances and indices
-			const sdb::Coord4 & cellv = grid->cellVertices(i);
-			atet.setDistance(nodes()[cellv.x].val, 0); 
-			atet.setDistance(nodes()[cellv.y].val, 1); 
-			atet.setDistance(nodes()[cellv.z].val, 2); 
-			atet.setDistance(nodes()[cellv.w].val, 3); 
-			atet.setIndices((const int * )&cellv);
-			
-/// approximate as node distance to plane
-            atet.compute(intersectF, trad, profile.offset, profile.snapDistance);
-            
-            const sdb::Coord4 & tetv = grid->cellVertices(i);
-            const float * dist = atet.result();
-            const bool * validD = atet.isValid();
-            if(validD[0]) {
-                setNodeDistance(tetv.x, dist[0]);
-            }
-            if(validD[1]) {
-                setNodeDistance(tetv.y, dist[1]);
-            }
-            if(validD[2]) {
-                setNodeDistance(tetv.z, dist[2]);
-            }
-            if(validD[3]) {
-                setNodeDistance(tetv.w, dist[3]);
-            }
-            
-            if(validD[0] && validD[1]) {
-                cutEdge(tetv.x, tetv.y, dist[0], dist[1]);
-            }
-            
-            if(validD[1] && validD[2]) {
-                cutEdge(tetv.y, tetv.z, dist[1], dist[2]);
-            }
-            
-            if(validD[2] && validD[0]) {
-                cutEdge(tetv.z, tetv.x, dist[2], dist[0]);
-            }
-            
-            if(validD[0] && validD[3]) {
-                cutEdge(tetv.x, tetv.w, dist[0], dist[3]);
-            }
-            
-            if(validD[1] && validD[3]) {
-                cutEdge(tetv.y, tetv.w, dist[1], dist[3]);
-            }
-            
-            if(validD[2] && validD[3]) {
-                cutEdge(tetv.z, tetv.w, dist[2], dist[3]);
-            }
-			
-			if(atet.snapInd() > -1) {
-				moveNodeToFront(atet.snapPos(), atet.snapInd() );
-			}
-        }
-        
-/// propagate distance to all nodes        
-        fastMarchingMethod();
-        
-        int iFar = nodeFarthestFrom(profile.referencePoint, profile.direction);
-/// visit out nodes
-        marchOutside(iFar);
-/// unvisited nodes are inside
-        setFarNodeInside();
-
-#if 0
-		std::cout<<"\n done.";
-#endif
-    }
+    void calculateDistance(Tf * intersectF,
+							CalcDistanceProfile & profile);
     
 protected:
 
@@ -244,6 +152,55 @@ bool TetrahedronDistanceField<T>::getCutEdgePos(Vector3F & pdst,
     }
     return true;
 }
+
+template<typename T>
+template<typename Tf>
+void TetrahedronDistanceField<T>::calculateDistance(Tf * intersectF,
+							CalcDistanceProfile & profile)
+{
+#if 0
+		std::cout<<"\n TetrahedronDistanceField::calculateDistance";
+		std::cout.flush();
+#endif
+        resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+        uncutEdges();
+ 
+		float selR;
+		BoundingBox selBx;
+		PointDistance apnt;
+		const int & np = numNodes();
+        for(int i=0;i<np;++i) {
+			apnt.setPos(nodes()[i].pos);
+			selR = longestEdgeLength(i);
+			selBx.set(apnt.pos(), selR);
+			
+			if(!intersectF->select(selBx) ) {
+				continue;
+			}
+			
+			apnt.compute(intersectF, selR, profile.snapDistance);
+            
+			if(!apnt.isValid() ) {
+				continue;
+			}
+			
+			setNodePosDistance(apnt.pos(), apnt.result(), i);
+			
+		}
+        
+/// propagate distance to all nodes        
+        fastMarchingMethod();
+        
+        int iFar = nodeFarthestFrom(profile.referencePoint, profile.direction);
+/// visit out nodes
+        marchOutside(iFar);
+/// unvisited nodes are inside
+        setFarNodeInside();
+
+#if 0
+		std::cout<<"\n done.";
+#endif
+    }
 
 }
 

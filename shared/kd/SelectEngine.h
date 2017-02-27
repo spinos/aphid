@@ -12,7 +12,7 @@
 #define APH_KD_SELECT_ENGINE_H
 
 #include <kd/KdEngine.h>
-#include <SelectionContext.h>
+#include <geom/SelectionContext.h>
 
 namespace aphid {
 
@@ -68,8 +68,8 @@ bool SelectEngine<T, Tn>::select(const BoundingBox & bx)
 {
 	m_selectCtx.deselect();
 	m_selectCtx.reset(bx, SelectionContext::Append);
-/// todo broadphase select
-	KdEngine::selectBox(m_tree, &m_selectCtx);
+	
+	KdEngine::broadphaseSelect(m_tree, &m_selectCtx);
 	return numSelected() > 0;
 }
 

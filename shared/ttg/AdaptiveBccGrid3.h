@@ -54,7 +54,6 @@ public:
 							stat = true;
 						} else {
 							if(prof.minNormalDistribute() < 1.f) {
-								cb.expand(prof.offset() );
 								fclosest.select(cb);
 								stat = fclosest.normalDistributeBelow(prof.minNormalDistribute() );
 							} else {
@@ -80,7 +79,7 @@ public:
 			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
 			for(;it!=dirty.end();++it) {
                 getCellBBox(cb, *it);
-				cb.expand(-1e-4f);
+				cb.expand(-1e-3f);
 				BccCell3 * cell = findCell(*it);
                 subdivideCellToLevel(cell, *it, cb, level+1, &divided);
 			}

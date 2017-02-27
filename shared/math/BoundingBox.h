@@ -20,6 +20,8 @@ public:
 	BoundingBox(const float & x0, const float & y0, const float & z0,
 	            const float & x1, const float & y1, const float & z1);
 	BoundingBox(const float * d);
+	void set(const Vector3F & center,
+			const float & h);
 	void reset();
 	void setOne();
 	void setMin(float x, int axis);

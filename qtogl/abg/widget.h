@@ -99,8 +99,10 @@ private:
 	void drawSamples();
     void drawField();
     void drawTriangulation();
+	void drawTriangulationWire();
 	void drawCoarseGrid();
-    
+	void toggleDrawTriangulationWire();
+	    
 private slots:
 
 private:
@@ -130,6 +132,8 @@ typedef aphid::sdb::WorldGrid2<aphid::sdb::LodSampleCache > SampGridTyp;
 typedef aphid::sdb::LodGrid CoarseGridType;
 	
 typedef aphid::sdb::GridClosestToPoint<CoarseGridType, aphid::sdb::LodCell, aphid::sdb::LodNode > SelGridTyp;
+	
+	bool m_doDrawTriWire;
 	
 };
 

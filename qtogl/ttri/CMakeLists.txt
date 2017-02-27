@@ -4,7 +4,6 @@ widget.h
 Parameter.h)
 
 set (TTRI_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
-${APHID_DIR}/shared/SelectionContext.cpp
 Parameter.cpp
 widget.cpp
 window.cpp

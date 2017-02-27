@@ -166,9 +166,9 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 			adistprof.direction = fclosest.aggregatedNormal();
 		}
 		adistprof.offset = prof.offset;
-		adistprof.snapDistance = .24f * abccg.levelCellSize(prof.fineGridSubdivLevel);
+		adistprof.snapDistance = .2f * abccg.levelCellSize(prof.fineGridSubdivLevel);
 			
-		afld-> template calculateDistance<Tclosest>(&tetg, &fclosest, adistprof);
+		afld-> template calculateDistance<Tclosest>(&fclosest, adistprof);
 		
 		m_fineFields.push_back(afld);
 		
@@ -182,9 +182,9 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 	
 			m_frontMeshes.push_back(amesh);
 		}
-		
+#if 1
 		if(m_frontMeshes.size() > 16) break;
-		
+#endif
 	}
 
 	std::cout<<"\n MassiveTetraGridTriangulation::triangulate n mesh "<<numFrontMeshes();

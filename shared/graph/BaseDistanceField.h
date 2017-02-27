@@ -85,7 +85,15 @@ protected:
 /// move idx-th node to pos, uncut connected edges
 	void moveNodeToFront(const Vector3F & pos,
 						const int & idx);
-    
+/// longest edge connected to i-th node
+	float longestEdgeLength(const int & idx) const;
+	
+/// set node distance known
+/// cut edges move to front if necessary
+	void setNodePosDistance(const Vector3F & pos,
+						const float & v, 
+						const int & idx);
+						
 private:
 /// propagate distance value
     void propagate(std::map<int, int > & heap, const int & i);
@@ -103,7 +111,8 @@ private:
 	float closestDistanceToFront(int & closestEdgeIdx,
                 const int & idx) const;
 	void moveToFront3(const int & idx);
-        
+	void cutEdgesConnectedToNode(const int & idx);
+						
 };
 
 }

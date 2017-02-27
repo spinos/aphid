@@ -3,10 +3,11 @@ window.h
 widget.h)
 
 set (ABG_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
-${APHID_DIR}/shared/SelectionContext.cpp
 widget.cpp
 window.cpp
 main.cpp)
+
+set(CMAKE_MACOSX_BUNDLE OFF)
 
 add_executable (abg ${ABG_HEADER_FILES} ${ABG_SOURCE_FILES})
 
