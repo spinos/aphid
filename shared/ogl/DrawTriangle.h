@@ -42,7 +42,7 @@ protected:
 				const int & nv, 
 				const Vector3F * vertP, 
 				const Vector3F * vertN );
-	
+				
 };
 
 }

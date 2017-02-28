@@ -63,16 +63,16 @@ void PointDistance::compute(Tf * intersectF, const float & rDistance,
 			const float dvdotn = intersectF->closestToPointNormal().dot(dv);
 			if(dvdotn > 0.f) {
 /// back side					
-				if(dvdotn < .2f) {
+				if(dvdotn < .5f) {
 /// no effect
 					m_valid = false;
 						
-				} else if(dvdotn > .5f) {
+				} else {// if(dvdotn > .9f) {
 /// inside
 					ldv = -ldv;
 				}
 			} else {
-				if(dvdotn > -.2f) {
+				if(dvdotn > -.5f) {
 					m_valid = false;
 				}
 			}
@@ -83,7 +83,7 @@ void PointDistance::compute(Tf * intersectF, const float & rDistance,
 		if(!m_valid) {
 			return;
 		}
-			
+		
 		m_d = ldv;
 		
 		if(Absolute<float>(m_d) < snapThreshold) {

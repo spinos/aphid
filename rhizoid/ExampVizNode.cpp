@@ -118,7 +118,7 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	MPlug szzp(selfNode, adrawDopSizeZ);
 	setDopSize(szxp.asFloat(), szyp.asFloat(), szzp.asFloat() );
 	
-	bool stat = triBufLength() > 0;
+	bool stat = pntBufLength() > 0;
 	if(!stat) {
 		stat = loadTriangles(selfNode);
 	}
@@ -141,19 +141,29 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	
 	drawZCircle(m_transBuf);
 	
-	glPushAttrib(GL_CURRENT_BIT);
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	
-	//if ( style == M3dView::kFlatShaded || 
-	//	    style == M3dView::kGouraudShaded ) {
+	glColor3fv(diffCol);
+	glMaterialfv( GL_FRONT, GL_DIFFUSE, diffCol );
+	glPointSize(2.f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnableClientState(GL_VERTEX_ARRAY);
+	
 	drawAWireDop();
-	glColor3fv(diffCol);
-	drawWiredTriangles();
+	
+	glEnable(GL_LIGHTING);
+	if ( style == M3dView::kFlatShaded || 
+		    style == M3dView::kGouraudShaded ) {
+		
+		glEnableClientState(GL_NORMAL_ARRAY);
+		drawPoints();
+		glDisableClientState(GL_NORMAL_ARRAY);
+	
+	} else {
+		drawWiredPoints();
+	} 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//} 
-	
 	glPopAttrib();
 	
 	view.endGL();
@@ -383,15 +393,15 @@ void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	MPlug bbmxPlug(thisMObject(), abboxmaxv);
 	bbmxPlug.setValue(bbData);
 	
-	const int n = triBufLength();
+	const int n = pntBufLength();
 	MPlug dopLenPlug(thisMObject(), adoplen);
 	dopLenPlug.setInt(n);
 	if(n < 1) return;
 	
 	MVectorArray dopp; dopp.setLength(n);
 	MVectorArray dopn; dopn.setLength(n);
-	const Vector3F * ps = triPositionR();
-	const Vector3F * ns = triNormalR();
+	const Vector3F * ps = pntPositionR();
+	const Vector3F * ns = pntNormalR();
 	for(int i=0; i<n; ++i) {
 		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
 		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
@@ -406,7 +416,7 @@ void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	MPlug dopnPlug(thisMObject(), adopNBuf);
 	dopnPlug.setValue(onor);
 	
-	AHelper::Info<int>("reduced draw n triangle ", triBufLength() / 3 );
+	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
 }
 
 void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
@@ -425,7 +435,7 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	MPlug bbmxPlug(thisMObject(), abboxmaxv);
 	bbmxPlug.setValue(bbData);
 	
-	const int n = triBufLength();
+	const int n = pntBufLength();
 	MPlug dopLenPlug(thisMObject(), adoplen);
 	dopLenPlug.setInt(n);
 	if(n < 1) {
@@ -434,8 +444,8 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	
 	MVectorArray dopp; dopp.setLength(n);
 	MVectorArray dopn; dopn.setLength(n);
-	const Vector3F * ps = triPositionR();
-	const Vector3F * ns = triNormalR();
+	const Vector3F * ps = pntPositionR();
+	const Vector3F * ns = pntNormalR();
 	for(int i=0; i<n; ++i) {
 		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
 		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
@@ -450,7 +460,7 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	MPlug dopnPlug(thisMObject(), adopNBuf);
 	dopnPlug.setValue(onor);
 	
-	AHelper::Info<int>("reduced draw n triangle ", triBufLength() / 3 );
+	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
 }
 
 void ExampViz::updateGeomBox(MObject & node)
@@ -503,16 +513,16 @@ bool ExampViz::loadTriangles(MDataBlock & data)
 		return false;
 	}
 	
-	setTriDrawBufLen(n);
+	setPointDrawBufLen(n);
 	
-	Vector3F * ps = triPositionR();
-	Vector3F * ns = triNormalR();
+	Vector3F * ps = pntPositionR();
+	Vector3F * ns = pntNormalR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
 		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
 	}
 	
-	AHelper::Info<int>(" ExampViz load dop buf triangle", n/3 );
+	AHelper::Info<int>(" ExampViz load n point", n );
 	buildBounding8Dop(geomBox() );
 	return true;
 }
@@ -549,16 +559,16 @@ bool ExampViz::loadTriangles(MObject & node)
 		return false;
 	}
 
-	setTriDrawBufLen(n);
+	setPointDrawBufLen(n);
 	
-	Vector3F * ps = triPositionR();
-	Vector3F * ns = triNormalR();
+	Vector3F * ps = pntPositionR();
+	Vector3F * ns = pntNormalR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
 		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
 	}
 	
-	AHelper::Info<unsigned>(" ExampViz load n triangle", n/3 );
+	AHelper::Info<unsigned>(" ExampViz load n point", n );
 	buildBounding8Dop(geomBox() );
 	return true;
 }

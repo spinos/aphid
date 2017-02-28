@@ -12,6 +12,9 @@
 #include <FieldTriangulation.h>
 #include <geom/ConvexShape.h>
 #include <sdb/VectorArray.h>
+#include <kd/IntersectEngine.h>
+#include <kd/ClosestToPointEngine.h>
+#include <sdb/LodSampleCache.h>
 
 namespace aphid {
 
@@ -61,8 +64,7 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	
 	std::cout.flush();
 	
-	buildTriangleDrawBuf(msh.numFrontTriangles(), msh.triangleIndices(),
-						msh.numVertices(), msh.triangleVertexP(), msh.triangleVertexN() );
+	buildPointDrawBuf(msh.numVertices(), (const float *)msh.triangleVertexP(), (const float *)msh.triangleVertexN() );
 	buildBounding8Dop(bbox);
 }
 
@@ -70,11 +72,36 @@ void ExampVox::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {
 	TreeProperty::BuildProfile bf;
-	bf._maxLeafPrims = 64;
+	bf._maxLeafPrims = 32;
 	KdEngine engine;
 	KdNTree<cvx::Triangle, KdNode4 > gtr;
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, tri, bbox, &bf);
-/// todo	
+
+	BoundingBox tb = gtr.getBBox();
+	const float gz = tb.getLongestDistance() * .89f;
+	
+typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
+	FIntersectTyp fintersect(&gtr);
+	
+typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
+    FClosestTyp fclosest(&gtr);
+	
+	sdb::AdaptiveGridDivideProfle subdprof;
+	subdprof.setLevels(0, 4);
+	
+	sdb::LodSampleCache spg;
+	spg.fillBox(tb, gz);
+	spg.subdivideToLevel<FIntersectTyp>(fintersect, subdprof);
+	spg.insertNodeAtLevel<FClosestTyp, 3 >(4, fclosest);
+	spg.buildSampleCache(4,4);
+	
+	std::cout<<"\n ExampVox::voxelize3 has n samples "<<spg.numSamplesAtLevel(4);
+	std::cout.flush();
+	
+	const sdb::SampleCache * sps = spg.samplesAtLevel(4);
+	buildPointDrawBuf(spg.numSamplesAtLevel(4), sps->points(), sps->normals(),
+					sdb::SampleCache::DataStride>>2);
+	buildBounding8Dop(bbox);
 }
 
 void ExampVox::buildBounding8Dop(const BoundingBox & bbox)
@@ -84,7 +111,7 @@ void ExampVox::buildBounding8Dop(const BoundingBox & bbox)
 	//zup.rotateX(-1.57f);
 	//ob.setOrientation(zup);
 	ob.caluclateOrientation(&bbox);
-	ob.calculateCenterExtents(triPositionBuf(), triBufLength(), &bbox );
+	ob.calculateCenterExtents(pntPositionBuf(), pntBufLength(), &bbox );
 	update8DopPoints(ob, (const float * )&m_dopSize);
 }
 

@@ -119,7 +119,7 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
     mf.glMatrix(m_transBuf);
 		
 	view.beginGL();
-	
+	glPointSize(2.f);
 	drawBoundingBox(&bb);
 	
 	drawZCircle(m_transBuf);
@@ -496,7 +496,7 @@ void ShrubVizNode::drawSolidInstances() const
 			const float * c = v->diffuseMaterialColor();
 			
 			m_instancer->setDiffueColorVec(c);
-			v->drawSolidTriangles();
+			v->drawPoints();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);
@@ -534,7 +534,7 @@ void ShrubVizNode::drawWiredInstances() const
 			const float * c = v->diffuseMaterialColor();
 			
 			m_wireInstancer->setDiffueColorVec(c);
-			v->drawWiredTriangles();
+			v->drawWiredPoints();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);

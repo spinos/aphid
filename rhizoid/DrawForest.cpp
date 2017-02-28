@@ -279,7 +279,7 @@ void DrawForest::drawLODPlant(PlantData * data,
 		return;
 	}
 	
-	if(v->triBufLength() < 1) {
+	if(v->pntBufLength() < 1) {
 		v->drawASolidDop();
 		return;
 	}
@@ -289,7 +289,7 @@ void DrawForest::drawLODPlant(PlantData * data,
 	if(cullByLod(camZ, r, m_showVoxLodThresold, 1.9f, lod) ) {
 		v->drawASolidDop();
 	} else {
-		v->drawSolidTriangles();
+		v->drawPoints();
 	}
 }
 

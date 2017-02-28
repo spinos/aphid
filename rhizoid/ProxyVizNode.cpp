@@ -263,7 +263,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	fHasView = 1;
 	
 	view.beginGL();
-	
+	glPointSize(2.f);
 	float mm[16];
 	AHelper::getMat(_worldInverseSpace, mm);
 	

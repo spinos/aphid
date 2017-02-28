@@ -11,7 +11,7 @@
 
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
-#include <ogl/DrawTriangle.h>
+#include <ogl/DrawPoint.h>
 #include <math/BoundingBox.h>
 
 namespace aphid {
@@ -29,7 +29,7 @@ class Triangle;
 
 }
 
-class ExampVox : public DrawBox, public DrawDop, public DrawTriangle {
+class ExampVox : public DrawBox, public DrawDop, public DrawPoint {
 
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;

@@ -10,12 +10,7 @@
 #include "widget.h"
 #include <GeoDrawer.h>
 #include <ogl/DrawGrid.h>
-#include <ttg/AdaptiveBccGrid3.h>
-#include <ttg/TetrahedronDistanceField.h>
-#include <ttg/GenericTetraGrid.h>
-#include <ttg/TetraMeshBuilder.h>
-#include <ttg/TetraGridTriangulation.h>
-#include <ttg/MassiveTetraGridTriangulation.h>
+#include <AllTtg.h>
 #include <ogl/DrawGraph.h>
 #include <geom/PrimInd.h>
 #include <kd/IntersectEngine.h>
@@ -61,7 +56,7 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
     
-    const float sz0 = m_tree->getBBox().getLongestDistance() * .97f;
+    const float sz0 = m_tree->getBBox().getLongestDistance() * 1.17f;
 	
 	MesherT::Profile mshprof;
 	mshprof.coarsGridBox = m_tree->getBBox();
