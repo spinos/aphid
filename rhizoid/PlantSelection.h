@@ -8,7 +8,7 @@
  */
 #pragma once
 #include <PlantCommon.h>
-#include <SelectionContext.h>
+#include <geom/SelectionContext.h>
 
 namespace aphid {
 

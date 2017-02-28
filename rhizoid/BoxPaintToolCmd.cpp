@@ -22,10 +22,7 @@
 #include <maya/MFnMesh.h>
 #include "ProxyVizNode.h"
 #include "ExampVizNode.h"
-#include <mama/AHelper.h>
-#include <mama/ASearchHelper.h>
-#include <mama/ConnectionHelper.h>
-#include <mama/SelectionHelper.h>
+#include <AllMama.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/PrincipalComponents.h>
 #include <geom/ConvexShape.h>
@@ -551,20 +548,20 @@ MStatus proxyPaintTool::voxelizeSelected()
 		}
 	}
 	
-	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	MItSelectionList transIter(sels, MFn::kTransform, &stat);
 	if(!stat) {
-		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		MGlobal::displayWarning("proxyPaintTool no group selected");
 		return MS::kFailure;
 	}
 	
 	sdb::VectorArray<cvx::Triangle> tris;
 	BoundingBox bbox;
 	
-	for(;!meshIter.isDone(); meshIter.next() ) {
+	for(;!transIter.isDone(); transIter.next() ) {
 		
-		MDagPath meshPath;
-		meshIter.getDagPath(meshPath);
-		getMeshTris(tris, bbox, meshPath);
+		MDagPath transPath;
+		transIter.getDagPath(transPath);
+		MeshHelper::GetMeshTrianglesInGroup(tris, bbox, transPath);
 	}
 	
 	if(tris.size() < 1) {
@@ -579,50 +576,9 @@ MStatus proxyPaintTool::voxelizeSelected()
 	AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
 		
 	ExampViz* pViz = (ExampViz*)fviz.userNode();
-	pViz->voxelize2(&tris, bbox);
+	pViz->voxelize3(&tris, bbox);
 	
 	return stat;
-}
-
-void proxyPaintTool::getMeshTris(sdb::VectorArray<cvx::Triangle> & tris,
-								BoundingBox & bbox,
-								const MDagPath & meshPath)
-{
-	AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
-	
-	MMatrix worldTm = AHelper::GetWorldParentTransformMatrix(meshPath);
-	
-    MStatus stat;
-	
-    MIntArray vertices;
-    int i, j, nv;
-	MPoint dp[3];
-	Vector3F fp[3];
-	MItMeshPolygon faceIt(meshPath);
-    for(; !faceIt.isDone(); faceIt.next() ) {
-
-		faceIt.getVertices(vertices);
-        nv = vertices.length();
-        
-        for(i=1; i<nv-1; ++i ) {
-			dp[0] = faceIt.point(0, MSpace::kObject );
-			dp[1] = faceIt.point(i, MSpace::kObject );
-			dp[2] = faceIt.point(i+1, MSpace::kObject );
-			
-			dp[0] *= worldTm;
-			dp[1] *= worldTm;	
-			dp[2] *= worldTm;
-			
-			cvx::Triangle tri;
-			for(j=0; j<3; ++j) {
-				fp[j].set(dp[j].x, dp[j].y, dp[j].z);
-				tri.setP(fp[j], j);
-				bbox.expandBy(fp[j], 1e-4f);
-			}
-			
-			tris.insert(tri);
-        }
-    }
 }
 
 void proxyPaintTool::checkOutputConnection(MObject & node, const MString & outName)
@@ -665,20 +621,20 @@ MStatus proxyPaintTool::performPCA()
 		return MS::kFailure;
 	}
 
-	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	MItSelectionList transIter(sels, MFn::kTransform, &stat);
 	if(!stat) {
-		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		MGlobal::displayWarning("proxyPaintTool no group selected");
 		return MS::kFailure;
 	}
 	
 	sdb::VectorArray<cvx::Triangle> tris;
 	BoundingBox bbox;
 	
-	for(;!meshIter.isDone(); meshIter.next() ) {
+	for(;!transIter.isDone(); transIter.next() ) {
 		
-		MDagPath meshPath;
-		meshIter.getDagPath(meshPath);
-		getMeshTris(tris, bbox, meshPath);
+		MDagPath transPath;
+		transIter.getDagPath(transPath);
+		MeshHelper::GetMeshTrianglesInGroup(tris, bbox, transPath);
 	}
 	
 	if(tris.size() < 1) {
@@ -758,20 +714,20 @@ MStatus proxyPaintTool::performDFT()
 		return MS::kFailure;
 	}
 	
-	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	MItSelectionList transIter(sels, MFn::kTransform, &stat);
 	if(!stat) {
-		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		MGlobal::displayWarning("proxyPaintTool no group selected");
 		return MS::kFailure;
 	}
 	
 	sdb::VectorArray<cvx::Triangle> tris;
 	BoundingBox bbox;
 	
-	for(;!meshIter.isDone(); meshIter.next() ) {
+	for(;!transIter.isDone(); transIter.next() ) {
 		
-		MDagPath meshPath;
-		meshIter.getDagPath(meshPath);
-		getMeshTris(tris, bbox, meshPath);
+		MDagPath transPath;
+		transIter.getDagPath(transPath);
+		MeshHelper::GetMeshTrianglesInGroup(tris, bbox, transPath);
 	}
 	
 	if(tris.size() < 1) {
@@ -811,8 +767,7 @@ MStatus proxyPaintTool::performDFT()
 	BoundingBox tb = gtr.getBBox();
 	const float gz = tb.getLongestDistance() * 1.01f * uscale;
 	const Vector3F cent = tb.center();
-	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
-	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
+	tb.set(cent, gz );
 	
 	ttg::FieldTriangulation msh;
 	msh.fillBox(tb, gz);

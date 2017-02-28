@@ -49,6 +49,9 @@ public:
 	
 	virtual void voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox);
+							
+	virtual void voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox);
 	
 /// set b4 geom box
 	void setGeomSizeMult(const float & x);

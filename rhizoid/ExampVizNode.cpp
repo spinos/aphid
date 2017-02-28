@@ -409,6 +409,50 @@ void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	AHelper::Info<int>("reduced draw n triangle ", triBufLength() / 3 );
 }
 
+void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox)
+{
+	ExampVox::voxelize3(tri, bbox);
+	
+	MFnNumericData bbFn;
+	MObject bbData = bbFn.create(MFnNumericData::k3Float);
+	
+	bbFn.setData(bbox.data()[0], bbox.data()[1], bbox.data()[2]);
+	MPlug bbmnPlug(thisMObject(), abboxminv);
+	bbmnPlug.setValue(bbData);
+	
+	bbFn.setData(bbox.data()[3], bbox.data()[4], bbox.data()[5]);
+	MPlug bbmxPlug(thisMObject(), abboxmaxv);
+	bbmxPlug.setValue(bbData);
+	
+	const int n = triBufLength();
+	MPlug dopLenPlug(thisMObject(), adoplen);
+	dopLenPlug.setInt(n);
+	if(n < 1) {
+		return;
+	}
+	
+	MVectorArray dopp; dopp.setLength(n);
+	MVectorArray dopn; dopn.setLength(n);
+	const Vector3F * ps = triPositionR();
+	const Vector3F * ns = triNormalR();
+	for(int i=0; i<n; ++i) {
+		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
+		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
+	}
+	
+	MFnVectorArrayData vecFn;
+	MObject opnt = vecFn.create(dopp);
+	MPlug doppPlug(thisMObject(), adopPBuf);
+	doppPlug.setValue(opnt);
+	
+	MObject onor = vecFn.create(dopn);
+	MPlug dopnPlug(thisMObject(), adopNBuf);
+	dopnPlug.setValue(onor);
+	
+	AHelper::Info<int>("reduced draw n triangle ", triBufLength() / 3 );
+}
+
 void ExampViz::updateGeomBox(MObject & node)
 {
 	MPlug radiusMultPlug(node, aradiusMult);

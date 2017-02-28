@@ -47,8 +47,7 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	BoundingBox tb = gtr.getBBox();
 	const float gz = tb.getLongestDistance() * 1.23f;
 	const Vector3F cent = tb.center();
-	tb.setMin(cent.x - gz, cent.y - gz, cent.z - gz );
-	tb.setMax(cent.x + gz, cent.y + gz, cent.z + gz );
+	tb.set(cent, gz );
 	
 	ttg::FieldTriangulation msh;
 	msh.fillBox(tb, gz);
@@ -65,6 +64,17 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	buildTriangleDrawBuf(msh.numFrontTriangles(), msh.triangleIndices(),
 						msh.numVertices(), msh.triangleVertexP(), msh.triangleVertexN() );
 	buildBounding8Dop(bbox);
+}
+
+void ExampVox::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox)
+{
+	TreeProperty::BuildProfile bf;
+	bf._maxLeafPrims = 64;
+	KdEngine engine;
+	KdNTree<cvx::Triangle, KdNode4 > gtr;
+	engine.buildTree<cvx::Triangle, KdNode4, 4>(&gtr, tri, bbox, &bf);
+/// todo	
 }
 
 void ExampVox::buildBounding8Dop(const BoundingBox & bbox)

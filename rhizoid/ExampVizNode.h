@@ -70,6 +70,9 @@ public:
 						
 	virtual void voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
+							
+	virtual void voxelize3(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
+							const aphid::BoundingBox & bbox);
 	
 private:
 	void updateGeomBox(MObject & node);

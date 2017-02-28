@@ -140,7 +140,7 @@ void MassiveTetraGridTriangulation<Tv, Tg>::triangulate(Tintersect & fintersect,
 		m_coarseGrid.getCell(ahexa, i);
 		cellBx = ahexa.calculateBBox();
 		
-		if(!fclosest.select(cellBx) ) {
+		if(!fintersect.intersect(cellBx) ) {
 			continue;
 		}
 		

@@ -80,7 +80,7 @@ public:
 		return false;
 	}
 	
-	bool narrowphase(const cvx::Hexahedron & a) const;
+	bool narrowphase(const cvx::Hexagon & a) const;
 	
 protected:
 	

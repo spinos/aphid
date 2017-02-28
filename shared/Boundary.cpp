@@ -35,7 +35,7 @@ Domain::FunctionType Domain::functionType() const
 bool Domain::broadphaseIntersect(const BoundingBox & b)
 { return false; }
 
-bool Domain::narrowphaseHexahedron(const cvx::Hexahedron & hexa)
+bool Domain::narrowphaseHexagon(const cvx::Hexagon & hexa)
 { return false; }
 
 float Domain::distanceTo(const Vector3F & pref)

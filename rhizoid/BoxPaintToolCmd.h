@@ -58,9 +58,6 @@ private:
 	MStatus loadCacheSelected();
 	MStatus voxelizeSelected();
 	void checkOutputConnection(MObject & node, const MString & outName);
-	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
-					aphid::BoundingBox & bbox,
-					const MDagPath & meshPath);
 	MStatus performPCA();
 	MStatus performDFT();
 	void strToRotateOrder(const MString & srod);

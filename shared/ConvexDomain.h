@@ -63,6 +63,6 @@ float ConvexDomain<T>::beamIntersect(const Beam & b,
 
 typedef ConvexDomain<cvx::Sphere> SphereDomain;
 typedef ConvexDomain<cvx::Box> BoxDomain;
-typedef ConvexDomain<cvx::Hexahedron> HexahedronDomain;
+typedef ConvexDomain<cvx::Hexagon> HexagonDomain;
 
 }

@@ -11,7 +11,7 @@
 #define APH_SAMPLE_FILTER_H
 
 #include <math/Vector3F.h>
-#include <SelectionContext.h>
+#include <geom/SelectionContext.h>
 #include <math/ANoise3.h>
 
 namespace aphid {

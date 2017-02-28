@@ -244,12 +244,12 @@ public:
 		
 	}
 	
-/// split tetrahedron to four hexahedron
-/// if hexahedron intersect, block three edges
+/// split tetrahedron to four hexagon
+/// if hexagon intersect, block three edges
 	template<typename Tf>
 	void findTetraEdgeCross(Tf * func, 
 							const int & itet,
-							const cvx::Hexahedron * hexashp) 
+							const cvx::Hexagon * hexashp) 
 	{
 		if(func-> narrowphase (hexashp[0]) ) {
 			setTetraVertexEdgeCross(itet, 0, .5f);
@@ -276,7 +276,7 @@ public:
 		
 		typename cvx::Tetrahedron;
 		cvx::Tetrahedron tetshp;
-		cvx::Hexahedron hexashp[4];
+		cvx::Hexagon hexashp[4];
 		
 		const int nt = numTetrahedrons();
 		int i = 0;
