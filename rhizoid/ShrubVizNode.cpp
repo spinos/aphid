@@ -25,6 +25,12 @@ MObject ShrubVizNode::ashrubbox;
 MObject ShrubVizNode::ainsttrans;
 MObject ShrubVizNode::ainstexamp;
 MObject ShrubVizNode::ainexamp;
+MObject ShrubVizNode::adrawColor;
+MObject ShrubVizNode::adrawColorR;
+MObject ShrubVizNode::adrawColorG;
+MObject ShrubVizNode::adrawColorB;
+MObject ShrubVizNode::avoxactive;
+MObject ShrubVizNode::avoxvisible;
 MObject ShrubVizNode::outValue;
 	
 ShrubVizNode::ShrubVizNode()
@@ -180,12 +186,43 @@ MStatus ShrubVizNode::initialize()
 	MFnTypedAttribute typFn;
 	MStatus			 stat;
 	
+	adrawColorR = numFn.create( "dspColorR", "dspr", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setDefault(0.47f);
+	addAttribute(adrawColorR);
+	
+	adrawColorG = numFn.create( "dspColorG", "dspg", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setDefault(0.46f);
+	addAttribute(adrawColorG);
+	
+	adrawColorB = numFn.create( "dspColorB", "dspb", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setDefault(0.45f);
+	addAttribute(adrawColorB);
+	
+	adrawColor = numFn.create( "dspColor", "dspc", adrawColorR, adrawColorG, adrawColorB );
+	numFn.setStorable(true);
+	numFn.setUsedAsColor(true);
+	numFn.setDefault(0.47f, 0.46f, 0.45f);
+	addAttribute(adrawColor);
+	
 	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(1.f);
 	numFn.setMin(.05f);
 	addAttribute(aradiusMult);
+	
+	avoxactive = numFn.create( "exampleActive", "exa", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setDefault(1);
+	addAttribute(avoxactive);
+	
+	avoxvisible = numFn.create( "exampleVisible", "exv", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setDefault(1);
+	addAttribute(avoxvisible);
 	
 	MDoubleArray defaultDArray;
 	MFnDoubleArrayData dArrayDataFn;
@@ -258,7 +295,12 @@ MStatus ShrubVizNode::initialize()
 	pntArrayDataFn.create( defaultPntArray );
 	    
 	attributeAffects(aradiusMult, outValue);
+	attributeAffects(adrawColorR, outValue);
+	attributeAffects(adrawColorG, outValue);
+	attributeAffects(adrawColorB, outValue);
 	attributeAffects(ainexamp, outValue);
+	attributeAffects(avoxactive, outValue);
+	attributeAffects(avoxvisible, outValue);
 	
 	return MS::kSuccess;
 }

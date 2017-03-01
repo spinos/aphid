@@ -77,6 +77,8 @@
 #define kVizStatFlagLong "-vizStat"
 #define kVizEditGroundFlag "-veg"
 #define kVizEditGroundFlagLong "-vizEditGround"
+#define kExampleStatusFlag "-exs"
+#define kExampleStatusFlagLong "-exampleStatus"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -450,6 +452,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 		setResult(fContext->getBrushFalloff() );
 	}
 	
+	if (argData.isFlagSet(kExampleStatusFlag)) {
+		setResult(fContext->getExampleStatusStr() );
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -668,6 +674,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kBrushFallOffFlag, kBrushFallOffFlagLong, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add brush falloff arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kExampleStatusFlag, kExampleStatusFlagLong, MSyntax::kString);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add example status arg");
 		return MS::kFailure;
 	}
 	

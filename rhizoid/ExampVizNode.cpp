@@ -16,10 +16,11 @@
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnMatrixAttribute.h>
 #include <math/BoundingBox.h>
-#include <mama/AHelper.h>
 #include <ExampData.h>
 #include <math/linearMath.h>
-#include <mama/MeshHelper.h>
+#include <geom/ConvexShape.h>
+#include <sdb/VectorArray.h>
+#include <AllMama.h>
 
 MTypeId ExampViz::id( 0x95a20e );
 MObject ExampViz::abboxminv;
@@ -37,6 +38,8 @@ MObject ExampViz::adrawDopSizeZ;
 MObject ExampViz::adrawDopSize;
 MObject ExampViz::aradiusMult;
 MObject ExampViz::aininstspace;
+MObject ExampViz::avoxactive;
+MObject ExampViz::avoxvisible;
 MObject ExampViz::outValue;
 
 using namespace aphid;
@@ -257,6 +260,16 @@ MStatus ExampViz::initialize()
 	numFn.setMin(.05f);
 	addAttribute(aradiusMult);
 	
+	avoxactive = numFn.create( "exampleActive", "exa", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setDefault(1);
+	addAttribute(avoxactive);
+	
+	avoxvisible = numFn.create( "exampleVisible", "exv", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setDefault(1);
+	addAttribute(avoxvisible);
+	
 	abboxminv = numFn.create( "BBoxMin", "bbxmn", MFnNumericData::k3Float );
 	numFn.setStorable(true);
 	numFn.setDefault(-1.f, -1.f, -1.f);
@@ -316,6 +329,8 @@ MStatus ExampViz::initialize()
 	attributeAffects(adrawDopSizeX, outValue);
 	attributeAffects(adrawDopSizeY, outValue);
 	attributeAffects(adrawDopSizeZ, outValue);
+	attributeAffects(avoxactive, outValue);
+	attributeAffects(avoxvisible, outValue);
 	return MS::kSuccess;
 }
 
@@ -331,50 +346,6 @@ MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	if(plug == outValue)
 		AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
-}
-
-void ExampViz::setTriangleMesh(const DenseMatrix<float> & pnts,
-						const MIntArray & triangleVertices,
-						const BoundingBox & bbox)
-{
-	MFnNumericData bbFn;
-	MObject bbData = bbFn.create(MFnNumericData::k3Float);
-	
-	bbFn.setData(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2));
-	MPlug bbmnPlug(thisMObject(), abboxminv);
-	bbmnPlug.setValue(bbData);
-	
-	bbFn.setData(bbox.getMax(0), bbox.getMax(1), bbox.getMax(2));
-	MPlug bbmxPlug(thisMObject(), abboxmaxv);
-	bbmxPlug.setValue(bbData);
-	
-	const int nind = triangleVertices.length();
-	const int & np = pnts.numCols();
-	MPlug dopLenPlug(thisMObject(), adoplen);
-	dopLenPlug.setInt(nind);
-	
-	MVectorArray vecp; 
-	MeshHelper::ScatterTriangleVerticesPosition(vecp,
-						pnts.column(0), np,
-						triangleVertices, nind);
-						
-	MVectorArray vecn; 
-	MeshHelper::CalculateTriangleVerticesNormal(vecn,
-						pnts.column(0), np,
-						triangleVertices, nind);
-						
-	MFnVectorArrayData vecFn;
-	MObject opnt = vecFn.create(vecp);
-	MPlug doppPlug(thisMObject(), adopPBuf);
-	doppPlug.setValue(opnt);
-	
-	MObject onor = vecFn.create(vecn);
-	MPlug dopnPlug(thisMObject(), adopNBuf);
-	dopnPlug.setValue(onor);
-	
-	AHelper::Info<unsigned>(" ExampViz load n points", np );
-	AHelper::Info<unsigned>(" n triangle vertex", nind );
-	
 }
 
 void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
@@ -461,6 +432,31 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	dopnPlug.setValue(onor);
 	
 	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
+}
+
+void ExampViz::voxelize3(const aphid::DenseMatrix<float> & pnts,
+						const MIntArray & triangleVertices,
+						const aphid::BoundingBox & bbox)
+{
+	const int nind = triangleVertices.length();
+	const int ntri = nind / 3;
+	const float * vps = pnts.column(0);
+						
+	sdb::VectorArray<cvx::Triangle> tris;
+	
+	for(int i=0;i<ntri;++i) {
+		aphid::cvx::Triangle atri;
+		
+		for(int j=0;j<3;++j) {
+			const float * ci = &vps[triangleVertices[i*3+j] * 3];
+			Vector3F fp(ci[0], ci[1], ci[2]);
+			atri.setP(fp, j);
+		}
+		
+		tris.insert(atri);
+	}
+	
+	voxelize3(&tris, bbox);
 }
 
 void ExampViz::updateGeomBox(MObject & node)

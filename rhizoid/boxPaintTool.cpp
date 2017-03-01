@@ -11,8 +11,6 @@ using namespace aphid;
 
 const char helpString[] = "Select a proxy viz to paint on";
 
-ProxyViz * proxyPaintContext::PtrViz = NULL;
-
 proxyPaintContext::proxyPaintContext() : mOpt(opSelect),
 m_extractGroupCount(1)
 {
@@ -561,20 +559,6 @@ void proxyPaintContext::grow()
 	PtrViz->grow(fromNear, fromFar, m_growOpt);
 }
 
-char proxyPaintContext::validateSelection()
-{
-	MSelectionList slist;
- 	MGlobal::getActiveSelectionList( slist );
-	if(!validateViz(slist)) {
-	    MGlobal::displayWarning("No proxyViz selected");
-	}
-    if(!PtrViz) {
-		return 0;
-	}
-	
-	return 1;
-}
-
 void proxyPaintContext::flood()
 {
 	if(!PtrViz) return;
@@ -648,29 +632,6 @@ void proxyPaintContext::processSelectByType()
 	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	
 	PtrViz->selectPlantByType(fromNear, fromFar, m_growOpt.m_plantId, m_listAdjustment);
-}
-
-char proxyPaintContext::validateViz(const MSelectionList &sels)
-{
-    MStatus stat;
-    MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
-    MObject vizobj;
-    iter.getDependNode(vizobj);
-    if(vizobj != MObject::kNullObj)
-	{
-        MFnDependencyNode fviz(vizobj);
-		if(fviz.typeName() != "proxyViz") {
-			PtrViz = NULL;
-			return 0;
-		}
-		PtrViz = (ProxyViz*)fviz.userNode();
-	}
-    
-    if(!PtrViz) {
-        return 0;
-	}
-    
-    return 1;
 }
 
 void proxyPaintContext::setWriteCache(MString filename)
@@ -1222,4 +1183,5 @@ float proxyPaintContext::getBrushFalloff()
 {
 	return m_growOpt.m_brushFalloff;
 }
+
 //:~

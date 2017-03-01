@@ -61,18 +61,20 @@ public:
 	static MObject adrawDopSize;
 	static MObject aradiusMult;
 	static MObject aininstspace;
+	static MObject avoxactive;
+	static MObject avoxvisible;
 	static MObject outValue;
 	static	MTypeId		id;
-	
-	void setTriangleMesh(const aphid::DenseMatrix<float> & pnts,
-						const MIntArray & triangleVertices,
-						const aphid::BoundingBox & bbox);
 						
 	virtual void voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
 							
 	virtual void voxelize3(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
+							
+	void voxelize3(const aphid::DenseMatrix<float> & pnts,
+						const MIntArray & triangleVertices,
+						const aphid::BoundingBox & bbox);
 	
 private:
 	void updateGeomBox(MObject & node);

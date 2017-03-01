@@ -1,25 +1,25 @@
-#ifndef BOXPAINTTOOL_H
-#define BOXPAINTTOOL_H
-
 /*
  *  proxyPaintTool.h
- *  hair
  *
  *  Created by jian zhang on 6/3/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
+ 
+#ifndef RHI_BOX_PAINT_TOOL_H
+#define RHI_BOX_PAINT_TOOL_H
+
 #include <maya/MPxContext.h>
 #include <maya/M3dView.h>
-#include "ProxyVizNode.h"
+#include <maya/MGlobal.h>
 #include <maya/MSceneMessage.h>
 #include "GrowOption.h"
+#include "ExampleWorks.h"
 
-class proxyPaintContext : public MPxContext
+class proxyPaintContext : public MPxContext, public ExampleWorks
 {
     
 	M3dView					view;
-	static aphid::ProxyViz * PtrViz;
 	
 	double clipNear, clipFar;
 	
@@ -160,8 +160,6 @@ private:
 	void startProcessSelect();
 	void processSelect();
     void processSelectByType();
-	char validateViz(const MSelectionList &sels);
-	char validateSelection();
 	void smoothSelected();
 	void processSelectGround();
 	void startSelectGround();
@@ -195,5 +193,5 @@ private:
 	static void releaseCallback(void* clientData);
 	
 };
-#endif        //  #ifndef BOXPAINTTOOL_H
+#endif        //  #ifndef RHI_BOX_PAINT_TOOL_H
 

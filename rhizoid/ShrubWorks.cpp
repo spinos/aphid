@@ -273,7 +273,7 @@ void ShrubWorks::addExamples(const MObject & vizNode,
 				toConnect = true;
 			}
 			ExampViz * example = (ExampViz *)MFnDependencyNode(exampleNode).userNode();
-			example->setTriangleMesh(pnts, tris, bbox);
+			example->voxelize3(pnts, tris, bbox);
 			
 			if(toConnect) {
 				ConnectionHelper::ConnectToArray(exampleNode, "outValue",

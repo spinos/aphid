@@ -63,6 +63,12 @@ public:
 	static MObject ainsttrans;
 	static MObject ainstexamp;
 	static MObject ainexamp;
+	static MObject adrawColorR;
+	static MObject adrawColorG;
+	static MObject adrawColorB;
+	static MObject adrawColor;
+	static MObject avoxactive;
+	static MObject avoxvisible;
     static MObject outValue;
 	
 	const MMatrix & worldSpace() const;

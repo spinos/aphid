@@ -34,7 +34,7 @@ class ExampVox : public DrawBox, public DrawDop, public DrawPoint {
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;
 	Vector3F m_dopSize;
-	
+/// gl_front color
 	float m_diffuseMaterialColV[3];
 /// radius of bbox
 	float m_geomExtent;
@@ -42,14 +42,18 @@ class ExampVox : public DrawBox, public DrawDop, public DrawPoint {
 	float m_geomSize;
 /// scaling radius of exclusion
 	float m_sizeMult;
+/// selected
+	bool m_isActive;
+/// show up during drawing
+	bool m_isVisible;
 	
 public:
 	ExampVox();
 	virtual ~ExampVox();
-	
+/// distance field based	
 	virtual void voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox);
-							
+/// point sample based
 	virtual void voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox);
 	
@@ -83,9 +87,15 @@ public:
 	
 	virtual const InstanceD & getInstance(const int & i) const;
 	
+	const bool & isActive() const;
+	const bool & isVisible() const;
+	
 protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
+	
+	void setActive(bool x);
+	void setVisible(bool x);
 						
 private:
 	InstanceD m_defInstance;

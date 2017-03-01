@@ -19,7 +19,9 @@
 namespace aphid {
 
 ExampVox::ExampVox() : 
-m_sizeMult(1.f)
+m_sizeMult(1.f),
+m_isActive(true),
+m_isVisible(true)
 { 
     memset(m_defInstance._trans, 0, 64);
     m_defInstance._trans[0] = 1.f;
@@ -86,20 +88,26 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
     FClosestTyp fclosest(&gtr);
 	
+	int mxLevel = 3;
+	if(tri->size() > 8192) {
+		mxLevel++;
+	}
+	
 	sdb::AdaptiveGridDivideProfle subdprof;
-	subdprof.setLevels(0, 4);
+	subdprof.setLevels(0, mxLevel);
 	
 	sdb::LodSampleCache spg;
 	spg.fillBox(tb, gz);
 	spg.subdivideToLevel<FIntersectTyp>(fintersect, subdprof);
-	spg.insertNodeAtLevel<FClosestTyp, 3 >(4, fclosest);
-	spg.buildSampleCache(4,4);
+	spg.insertNodeAtLevel<FClosestTyp, 3 >(mxLevel, fclosest);
+	spg.buildSampleCache(mxLevel, mxLevel);
 	
-	std::cout<<"\n ExampVox::voxelize3 has n samples "<<spg.numSamplesAtLevel(4);
+	const int & ns = spg.numSamplesAtLevel(mxLevel);
+	std::cout<<"\n ExampVox::voxelize3 has n samples "<<ns;
 	std::cout.flush();
 	
-	const sdb::SampleCache * sps = spg.samplesAtLevel(4);
-	buildPointDrawBuf(spg.numSamplesAtLevel(4), sps->points(), sps->normals(),
+	const sdb::SampleCache * sps = spg.samplesAtLevel(mxLevel);
+	buildPointDrawBuf(ns, sps->points(), sps->normals(),
 					sdb::SampleCache::DataStride>>2);
 	buildBounding8Dop(bbox);
 }
@@ -195,5 +203,17 @@ ExampVox * ExampVox::getExample(const int & i)
 
 const ExampVox::InstanceD & ExampVox::getInstance(const int & i) const
 { return m_defInstance; }
+
+void ExampVox::setActive(bool x)
+{ m_isActive = x; }
+	
+void ExampVox::setVisible(bool x)
+{ m_isVisible = x; }
+
+const bool & ExampVox::isActive() const
+{ return m_isActive; }
+	
+const bool & ExampVox::isVisible() const
+{ return m_isVisible; }
 
 }
