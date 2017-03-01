@@ -66,7 +66,7 @@ char HPolygonalUV::load(APolygonalUV * poly)
 	
 	readFloatData(".ucoord", poly->numCoords(), poly->ucoord());
 	readFloatData(".vcoord", poly->numCoords(), poly->vcoord());
-	readIntData(".uvid", poly->numIndices(), poly->indices());
+	readIntData(".uvid", poly->numIndices(), (int *)poly->indices());
 	
 	return 1;
 }

@@ -15,7 +15,8 @@ public:
 	static MObject create(CurveGroup * data, MObject & parentObj,
                        const std::string & nodeName);
 	static bool CheckExistingCurves(CurveGroup * geos, MObject &target);
-	static bool CreateACurve(Vector3F * pos, unsigned nv, MObject &target = MObject::kNullObj);
+	static bool CreateACurve(Vector3F * pos, unsigned nv, int curveDegree, 
+						MObject &target = MObject::kNullObj);
 };
 
 class HesperisCurveIO : public HesperisIO {

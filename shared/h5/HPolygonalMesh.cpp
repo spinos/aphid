@@ -92,10 +92,10 @@ char HPolygonalMesh::load(APolygonalMesh * poly)
 	poly->create(nv, nfv, npoly);
 	
 	readVector3Data(".p", poly->numPoints(), (Vector3F *)poly->points());
-	readIntData(".a", poly->numPoints(), (unsigned *)poly->anchors());
-	readIntData(".v", poly->numIndices(), (unsigned *)poly->indices());
-	readIntData(".fcnt", poly->numPolygons(), (unsigned *)poly->faceCounts());
-	readIntData(".fdft", poly->numPolygons(), (unsigned *)poly->faceDrifts());
+	readIntData(".a", poly->numPoints(), (int *)poly->anchors());
+	readIntData(".v", poly->numIndices(), (int *)poly->indices());
+	readIntData(".fcnt", poly->numPolygons(), (int *)poly->faceCounts());
+	readIntData(".fdft", poly->numPolygons(), (int *)poly->faceDrifts());
 	
 	std::vector<std::string > uvNames;
 	lsTypedChild<HPolygonalUV>(uvNames);

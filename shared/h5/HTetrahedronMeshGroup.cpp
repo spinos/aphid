@@ -51,8 +51,8 @@ char HTetrahedronMeshGroup::load(ATetrahedronMeshGroup * tetra)
 	
 	tetra->create(nv, nt, npart);
 
-	readIntData(".pntdrift", npart, (unsigned *)tetra->pointDrifts());
-	readIntData(".inddrift", npart, (unsigned *)tetra->indexDrifts());
+	readIntData(".pntdrift", npart, (int *)tetra->pointDrifts());
+	readIntData(".inddrift", npart, (int *)tetra->indexDrifts());
 	
 	return HTetrahedronMesh::readAftCreation(tetra);
 }

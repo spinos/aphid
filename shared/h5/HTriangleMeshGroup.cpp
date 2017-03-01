@@ -57,8 +57,8 @@ char HTriangleMeshGroup::load(ATriangleMeshGroup * tri)
 	
 	tri->create(nv, nt, npart);
 	
-	readIntData(".pntdrift", npart, (unsigned *)tri->pointDrifts());
-	readIntData(".inddrift", npart, (unsigned *)tri->indexDrifts());
+	readIntData(".pntdrift", npart, (int *)tri->pointDrifts());
+	readIntData(".inddrift", npart, (int *)tri->indexDrifts());
 	
 	return HTriangleMesh::readAftCreation(tri);
 }

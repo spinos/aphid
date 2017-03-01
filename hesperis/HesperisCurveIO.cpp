@@ -30,9 +30,10 @@ MObject HesperisCurveCreator::create(CurveGroup * data, MObject & parentObj,
 	
 	Vector3F * pnts = data->points();
     unsigned * cnts = data->counts();
+	int * degrees = data->curveDegrees();
     unsigned i=0;
     for(;i<data->numCurves();i++) {
-        CreateACurve(pnts, cnts[i], parentObj);
+        CreateACurve(pnts, cnts[i], degrees[i], parentObj);
         pnts+= cnts[i];
     }
 	
@@ -68,19 +69,23 @@ bool HesperisCurveCreator::CheckExistingCurves(CurveGroup * geos, MObject &targe
     return true;
 }
 
-bool HesperisCurveCreator::CreateACurve(Vector3F * pos, unsigned nv, MObject &target)
+bool HesperisCurveCreator::CreateACurve(Vector3F * pos, unsigned nv, int curveDegree,
+							MObject &target)
 {
 	MPointArray vertexArray;
     unsigned i=0;
-	for(; i<nv; i++)
+	for(; i<nv; i++) {
 		vertexArray.append( MPoint( pos[i].x, pos[i].y, pos[i].z ) );
-	const int degree = 2;
+	}
+	
+	const int degree = curveDegree;
     const int spans = nv - degree;
 	const int nknots = spans + 2 * degree - 1;
     MDoubleArray knotSequences;
 	knotSequences.append(0.0);
-	for(i = 0; i < nknots-2; i++)
+	for(i = 0; i < nknots-2; i++) {
 		knotSequences.append( (double)i );
+	}
 	knotSequences.append(nknots-3);
     
     MFnNurbsCurve curveFn;
@@ -104,7 +109,7 @@ bool HesperisCurveIO::IsCurveValid(const MDagPath & path)
 		return false;
 	}
 	if(fcurve.numCVs() < 4) {
-		MGlobal::displayInfo(path.fullPathName() + " has less than 4 cvs!");
+		AHelper::Info<MString>(" curve has less than 4 cvs", path.fullPathName() );
 		return false;
 	}
 	return true;
@@ -119,7 +124,10 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
     
 	const unsigned n = paths.length();
     for(i=0; i<n; i++) {
-		if(!IsCurveValid(paths[i])) continue;
+		if(!IsCurveValid(paths[i])) {
+			continue;
+		}
+		
 		MFnNurbsCurve fcurve(paths[i].node());
 		numCvs += fcurve.numCVs();
 		numNodes++;
@@ -133,6 +141,7 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
     dst->create(numNodes, numCvs);
     Vector3F * pnts = dst->points();
 	unsigned * counts = dst->counts();
+	int * degrees = dst->curveDegrees();
     
     unsigned inode = 0;
 	unsigned icv = 0;
@@ -141,7 +150,9 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
 	MMatrix worldTm;
 	
 	for(i=0; i<n; i++) {
-		if(!IsCurveValid(paths[i])) continue;
+		if(!IsCurveValid(paths[i])) {
+			continue;
+		}
 		
 		worldTm = AHelper::GetWorldTransformMatrix(paths[i]);
 		
@@ -151,6 +162,7 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
 		fcurve.getCVs(ps, MSpace::kWorld);
 		
 		counts[inode] = nj;
+		degrees[inode] = fcurve.degree();
 		inode++;
 		
 		for(j=0; j<nj; j++) {
@@ -173,7 +185,10 @@ bool HesperisCurveIO::WriteCurves(const MDagPathArray & paths,
     }
     
 	std::string curveName = "|curves";
-    if(parentName.size()>1) curveName = boost::str(boost::format("%1%|curves") % parentName);
+    if(parentName.size()>1) {
+		curveName = boost::str(boost::format("%1%|curves") % parentName);
+	}
+	
 	H5PathName(curveName);
     
 	MGlobal::displayInfo(MString("hes io write curve group ")+curveName.c_str());
@@ -183,7 +198,9 @@ bool HesperisCurveIO::WriteCurves(const MDagPathArray & paths,
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WCurve);
 	bool fstat = file->save();
-	if(!fstat) MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
+	if(!fstat) {
+		MGlobal::displayWarning(MString(" cannot save curves to file ")+ file->fileName().c_str());
+	}
 	file->close();
 	
 	return true;
@@ -191,7 +208,7 @@ bool HesperisCurveIO::WriteCurves(const MDagPathArray & paths,
 
 bool HesperisCurveIO::ReadCurves(MObject &target)
 {
-	MGlobal::displayInfo("opium read curve");
+	MGlobal::displayInfo("hesperis read curve");
     HWorld grpWorld;
     ReadTransformAnd<HCurveGroup, CurveGroup, HesperisCurveCreator>(&grpWorld, target);
     grpWorld.close();

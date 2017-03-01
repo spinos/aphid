@@ -406,14 +406,18 @@ void AttribUtil::setNumericAttrib(MFnDependencyNode & fdep, AnimIO & doc)
 void AttribUtil::ResetUserDefinedAttribFilter(const MString & arg)
 {
     UserDefinedAttribFilter.clear();
-	if(arg.length() < 1) return;
+	if(arg.length() < 1) {
+		return;
+	}
+	
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("|");
 	std::string s(arg.asChar());
 	tokenizer tokens(s, sep);
 	tokenizer::iterator tok_iter = tokens.begin();
-	for (; tok_iter != tokens.end(); ++tok_iter)
+	for (; tok_iter != tokens.end(); ++tok_iter) {
         UserDefinedAttribFilter[std::string(*tok_iter)] = 1;
+	}
 }
 
 AttribNameMap AttribUtil::ListUserDefinedAttribs(const MString & nodeName, bool filtered)

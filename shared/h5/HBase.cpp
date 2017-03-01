@@ -253,7 +253,7 @@ char HBase::readVLStringAttr(const char * attrName, std::string & value)
 	return 1;
 }
 
-char HBase::readIntData(const char * dataName, unsigned count, unsigned *dst, HDataset::SelectPart * part)
+char HBase::readIntData(const char * dataName, unsigned count, int *dst, HDataset::SelectPart * part)
 {	
 	IndicesHDataset cset(dataName);
 	cset.setNumIndices(count);

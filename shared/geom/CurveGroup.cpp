@@ -16,6 +16,7 @@ CurveGroup::CurveGroup()
 	m_numCurves = m_numPoints = 0;
 	m_points = 0;
 	m_counts = 0;
+	m_degrees = 0;
 }
 
 CurveGroup::~CurveGroup() 
@@ -31,12 +32,14 @@ void CurveGroup::create(unsigned n, unsigned ncvs)
 	
 	m_counts = new unsigned[m_numCurves];
 	m_points = new Vector3F[m_numPoints];
+	m_degrees = new int[m_numCurves];
 }
 
 void CurveGroup::clear()
 {
 	m_numCurves = 0;
 	m_numPoints = 0;
+	if(m_degrees) delete[] m_degrees;
 	if(m_points) delete[] m_points;
 	if(m_counts) delete[] m_counts;
 }
@@ -47,11 +50,21 @@ Vector3F * CurveGroup::points()
 unsigned * CurveGroup::counts()
 { return m_counts; }
 
-const unsigned CurveGroup::numPoints() const
+int * CurveGroup::curveDegrees()
+{ return m_degrees; }
+
+const unsigned & CurveGroup::numPoints() const
 { return m_numPoints; }
 
-const unsigned CurveGroup::numCurves() const
+const unsigned & CurveGroup::numCurves() const
 { return m_numCurves; }
+
+void CurveGroup::setAllCurveDegree(int x)
+{
+	for(int i=0; i<m_numCurves; ++i ) {
+		m_degrees[i] = x;
+	}
+}
 
 void CurveGroup::verbose() const
 {

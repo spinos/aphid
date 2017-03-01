@@ -130,14 +130,14 @@ char HMesh::load(BaseMesh * mesh)
 	mesh->createPolygonIndices(numPolygonVertices);
 	
 	readVector3Data(".p", numVertices, mesh->vertices());
-	readIntData(".polyc", numPolygons, mesh->polygonCounts());
-	readIntData(".polyv", numPolygonVertices, mesh->polygonIndices());
+	readIntData(".polyc", numPolygons, (int *)mesh->polygonCounts());
+	readIntData(".polyv", numPolygonVertices, (int *)mesh->polygonIndices());
 	
 	mesh->createPolygonUV(numUVs, numUVIds);
 	
 	readFloatData(".us", numUVs, mesh->us());
 	readFloatData(".vs", numUVs, mesh->vs());
-	readIntData(".uvids", numUVIds, mesh->uvIds());
+	readIntData(".uvids", numUVIds, (int *)mesh->uvIds());
 
 	mesh->processTriangleFromPolygon();
 	mesh->processQuadFromPolygon();
