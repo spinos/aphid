@@ -36,8 +36,8 @@ public:
 
 class HesperisIO : public H5IO {
 public:
-	static bool WriteTransforms(const MDagPathArray & paths, HesperisFile * file );
-    static bool AddTransform(const MDagPath & path, HesperisFile * file );
+	static bool WriteTransforms(const MDagPathArray & paths, 
+							HesperisFile * file );
 	static bool WriteMeshes(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName = "");
@@ -102,7 +102,10 @@ protected:
         }
         return true;
     }
-    
+  
+	static bool AddTransform(const MDagPath & curPath, 
+							HesperisFile * file );
+							  
 };
 
 }

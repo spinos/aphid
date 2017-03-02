@@ -79,6 +79,11 @@ public:
 	static void LsAllTransformsTo(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails);
 	static void LsAll(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails);
 
+private:
+	static void GetChildPathTo(MDagPath & dst,
+				const MObject & childO,
+				const MDagPath & parentP);
+	
 };
 
 }

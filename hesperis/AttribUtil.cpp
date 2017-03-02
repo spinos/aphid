@@ -32,8 +32,12 @@ AttribUtil::~AttribUtil() {}
 void AttribUtil::save3(const MDagPathArray & entities)
 {
 	unsigned i = 0;
-	for(; i< entities.length(); i++) scan(entities[i]);
-	if(m_dirtyPlugs.length() < 1) return;
+	for(; i< entities.length(); i++) {
+		scan(entities[i]);
+	}
+	if(m_dirtyPlugs.length() < 1) {
+		return;
+	}
 	HesperisAttributeIO::WriteAttributes(m_dirtyPlugs, HesDoc); 
 	m_dirtyPlugs.clear();
 }
