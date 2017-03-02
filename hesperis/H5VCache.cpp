@@ -25,6 +25,7 @@ H5VCache::H5VCache()
     m_numPoints = 0;
     m_hasPiecesChecked = false;
     m_minInd = 1<<30;
+	m_blender = 1e8f;
 }
 
 H5VCache::~H5VCache()
@@ -237,16 +238,60 @@ bool H5VCache::readData(const std::string & fileName,
 	return m_hasData;
 }
 
-float * H5VCache::data0()
+float * H5VCache::data0() const
 { return (float *)m_data[0]->data(); }
 
 const int & H5VCache::numPieces() const
 { return m_numPieces; }
+
+const int & H5VCache::numPoints() const
+{ return m_numPoints; }
 
 void H5VCache::setMinInd(int x)
 { m_minInd = x; }
 
 bool H5VCache::isFirstPiece(int x) const
 { return x < m_minInd; }
+
+void H5VCache::mixData(const H5VCache * b, float alpha)
+{	
+	if(alpha < 1e-2f) {
+		return;
+	}
+	
+	if(!b->hasData() ) {
+		std::cout<<"\n H5VCache::mixData has no data ";
+		return;
+	}
+	
+	if(b->numPoints() < numPoints() ) {
+		std::cout<<"\n H5VCache::mixData not enough data "<<b->numPoints()
+				<<"\n need "<<numPoints();
+		return;
+	}
+	
+	float * p = (float *)m_data[0]->data();
+	float * p1 = b->data0();
+	int n = m_numPoints * 3;
+	
+	if(alpha > .99f) {
+		for ( int i=0; i < n; i++) {
+			p[i] = p1[i];
+		}
+		return;
+	}
+	
+	const float beta = 1.f - alpha;
+	for ( int i=0; i < n; i++) {
+		p[i] = p[i] * beta + p1[i] * alpha;
+	}
+	
+}
+
+bool H5VCache::isBlenderChanged(float x) const
+{ return x != m_blender; }
+	
+void H5VCache::setBlender(float x)
+{ m_blender = x; }
 
 }

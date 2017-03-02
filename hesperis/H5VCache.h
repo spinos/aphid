@@ -2,10 +2,14 @@
  *  H5VCache.h
  *  opium
  *
+ *  vertex data reader and blender
+ *
  *  Created by jian zhang on 3/2/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
+#ifndef APH_H5_VCACHE_H
+#define APH_H5_VCACHE_H
 
 #include <H5Holder.h>
 
@@ -27,6 +31,7 @@ class H5VCache : public H5Holder
     int m_numPoints;
 	bool m_hasData;
     bool m_hasPiecesChecked;
+	float m_blender;
 
 public:
 	H5VCache();
@@ -48,6 +53,7 @@ protected:
 	const bool & hasData() const;
 	const bool & hasPiecesChecked() const;
 	const int & numPieces() const;
+	const int & numPoints() const;
 
 	bool readData(const std::string & fileName, 
                    const std::string & pathName,
@@ -55,7 +61,12 @@ protected:
                    unsigned numIterPoints,
                    int isSubframe,
 				   bool isLegacy = false);
-	float * data0();
+	float * data0() const;
+	
+	void mixData(const H5VCache * b, float alpha);
+	
+	bool isBlenderChanged(float x) const;
+	void setBlender(float x);
 	
 private:
 	void scanExclusive(int n, int * dst, int * src);
@@ -63,3 +74,4 @@ private:
 };
 
 }
+#endif
