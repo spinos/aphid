@@ -13,7 +13,7 @@
 #include <maya/MPlug.h>
 #include <maya/MDataBlock.h>
 #include <maya/M3dView.h>
-#include <maya/MPointArray.h>
+#include <maya/MVectorArray.h>
 
 namespace aphid {
 
@@ -51,6 +51,7 @@ public:
 	static  MObject         adoplen;
 	static  MObject         adopPBuf;
 	static  MObject         adopNBuf;
+	static  MObject         adopCBuf;
 	static MObject adrawColorR;
 	static MObject adrawColorG;
 	static MObject adrawColorB;
@@ -66,9 +67,6 @@ public:
 	static MObject outValue;
 	static	MTypeId		id;
 						
-	virtual void voxelize2(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
-							const aphid::BoundingBox & bbox);
-							
 	virtual void voxelize3(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
 							
@@ -80,5 +78,11 @@ private:
 	void updateGeomBox(MObject & node);
 	bool loadTriangles(MDataBlock & data);
 	bool loadTriangles(MObject & node);
+	void fillDefaultCol(MVectorArray & cols,
+					int n);
+	void buildDrawBuf(int n,
+				const MVectorArray & pnts,
+				const MVectorArray & nmls,
+				const MVectorArray & cols);
 	
 };

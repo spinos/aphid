@@ -28,6 +28,7 @@ MObject ExampViz::abboxmaxv;
 MObject ExampViz::adoplen;
 MObject ExampViz::adopPBuf;
 MObject ExampViz::adopNBuf;
+MObject ExampViz::adopCBuf;
 MObject ExampViz::adrawColor;
 MObject ExampViz::adrawColorR;
 MObject ExampViz::adrawColorG;
@@ -312,6 +313,13 @@ MStatus ExampViz::initialize()
     typedFn.setStorable(true);
 	addAttribute(adopNBuf);
 	
+	adopCBuf = typedFn.create( "dopCBuf", "dpc",
+											MFnData::kVectorArray,
+											vecArrayDataFn.object(),
+											&stat );
+    typedFn.setStorable(true);
+	addAttribute(adopCBuf);
+	
 	MFnMatrixAttribute matAttr;
 	aininstspace = matAttr.create("instanceSpace", "sinst", MFnMatrixAttribute::kDouble);
 	matAttr.setStorable(false);
@@ -324,7 +332,6 @@ MStatus ExampViz::initialize()
 	attributeAffects(aradiusMult, outValue);
 	attributeAffects(adoplen, outValue);
 	attributeAffects(adopPBuf, outValue);
-	attributeAffects(adopNBuf, outValue);
 	attributeAffects(adrawColorR, outValue);
 	attributeAffects(adrawColorG, outValue);
 	attributeAffects(adrawColorB, outValue);
@@ -348,48 +355,6 @@ MStatus ExampViz::connectionBroken ( const MPlug & plug, const MPlug & otherPlug
 	if(plug == outValue)
 		AHelper::Info<MString>("disconnect", plug.name());
 	return MPxLocatorNode::connectionMade (plug, otherPlug, asSrc );
-}
-
-void ExampViz::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
-							const BoundingBox & bbox)
-{
-	ExampVox::voxelize2(tri, bbox);
-	
-	MFnNumericData bbFn;
-	MObject bbData = bbFn.create(MFnNumericData::k3Float);
-	
-	bbFn.setData(bbox.data()[0], bbox.data()[1], bbox.data()[2]);
-	MPlug bbmnPlug(thisMObject(), abboxminv);
-	bbmnPlug.setValue(bbData);
-	
-	bbFn.setData(bbox.data()[3], bbox.data()[4], bbox.data()[5]);
-	MPlug bbmxPlug(thisMObject(), abboxmaxv);
-	bbmxPlug.setValue(bbData);
-	
-	const int n = pntBufLength();
-	MPlug dopLenPlug(thisMObject(), adoplen);
-	dopLenPlug.setInt(n);
-	if(n < 1) return;
-	
-	MVectorArray dopp; dopp.setLength(n);
-	MVectorArray dopn; dopn.setLength(n);
-	const Vector3F * ps = pntPositionR();
-	const Vector3F * ns = pntNormalR();
-	for(int i=0; i<n; ++i) {
-		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
-		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
-	}
-	
-	MFnVectorArrayData vecFn;
-	MObject opnt = vecFn.create(dopp);
-	MPlug doppPlug(thisMObject(), adopPBuf);
-	doppPlug.setValue(opnt);
-	
-	MObject onor = vecFn.create(dopn);
-	MPlug dopnPlug(thisMObject(), adopNBuf);
-	dopnPlug.setValue(onor);
-	
-	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
 }
 
 void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
@@ -417,11 +382,14 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	
 	MVectorArray dopp; dopp.setLength(n);
 	MVectorArray dopn; dopn.setLength(n);
+	MVectorArray dopc; dopc.setLength(n);
 	const Vector3F * ps = pntPositionR();
 	const Vector3F * ns = pntNormalR();
+	const Vector3F * cs = pntColorR();
 	for(int i=0; i<n; ++i) {
 		dopp[i] = MVector(ps[i].x, ps[i].y, ps[i].z);
 		dopn[i] = MVector(ns[i].x, ns[i].y, ns[i].z);
+		dopc[i] = MVector(cs[i].x, cs[i].y, cs[i].z);
 	}
 	
 	MFnVectorArrayData vecFn;
@@ -432,6 +400,10 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	MObject onor = vecFn.create(dopn);
 	MPlug dopnPlug(thisMObject(), adopNBuf);
 	dopnPlug.setValue(onor);
+	
+	MObject ocol = vecFn.create(dopc);
+	MPlug dopcPlug(thisMObject(), adopCBuf);
+	dopcPlug.setValue(ocol);
 	
 	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
 }
@@ -502,26 +474,24 @@ bool ExampViz::loadTriangles(MDataBlock & data)
 		return false;
 	}
 	
-	MDataHandle norH = data.inputValue(adopNBuf);
-	MFnVectorArrayData norFn(norH.data());
-	MVectorArray nors = norFn.array();
+	MDataHandle nmlH = data.inputValue(adopNBuf);
+	MFnVectorArrayData nmlFn(nmlH.data());
+	MVectorArray nmls = nmlFn.array();
 	
-	if(nors.length() < n) {
-		AHelper::Info<unsigned>(" ExampViz error wrong triangle normal length", pnts.length() );
+	if(nmls.length() < n) {
+		AHelper::Info<unsigned>(" ExampViz error wrong triangle normal length", nmls.length() );
 		return false;
 	}
 	
-	setPointDrawBufLen(n);
+	MDataHandle colH = data.inputValue(adopCBuf);
+	MFnVectorArrayData colFn(colH.data());
+	MVectorArray cols = colFn.array();
 	
-	Vector3F * ps = pntPositionR();
-	Vector3F * ns = pntNormalR();
-	for(int i=0; i<n; ++i) {
-		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
-		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
+	if(cols.length() < n) {
+		fillDefaultCol(cols, n);
 	}
 	
-	AHelper::Info<int>(" ExampViz load n point", n );
-	buildBounding8Dop(geomBox() );
+	buildDrawBuf(n, pnts, nmls, cols);
 	return true;
 }
 
@@ -529,7 +499,9 @@ bool ExampViz::loadTriangles(MObject & node)
 {
 	MPlug doplenPlug(node, adoplen);
 	int n = doplenPlug.asInt();
-	if(n<1) return false;
+	if(n<1) {
+		return false;
+	}
 	
 	MPlug doppPlug(node, adopPBuf);
 	MObject doppObj;
@@ -549,25 +521,59 @@ bool ExampViz::loadTriangles(MObject & node)
 	dopnPlug.getValue(dopnObj);
 	
 	MFnVectorArrayData norFn(dopnObj);
-	MVectorArray nors = norFn.array();
+	MVectorArray nmls = norFn.array();
 	
-	unsigned nn = nors.length();
+	unsigned nn = nmls.length();
 	if(nn < n ) {
 		AHelper::Info<unsigned>(" ExampViz error wrong triangle normal length", nn );
 		return false;
 	}
+	
+	MPlug dopcPlug(node, adopCBuf);
+	MObject dopcObj;
+	dopcPlug.getValue(dopcObj);
+	
+	MFnVectorArrayData colFn(dopcObj);
+	MVectorArray cols = colFn.array();
+	
+	unsigned nc = cols.length();
+	if(nc < n ) {
+		fillDefaultCol(cols, n);
+	}
+	
+	buildDrawBuf(n, pnts, nmls, cols);
+	return true;
+}
 
+void ExampViz::fillDefaultCol(MVectorArray & cols,
+					int n)
+{
+	cols.setLength(n);
+	float * diffCol = diffuseMaterialColV();
+	const MVector c(diffCol[0], diffCol[1], diffCol[2]);
+	for(int i=0;i<n;++i) {
+		cols[i] = c;
+	}
+}
+
+void ExampViz::buildDrawBuf(int n,
+				const MVectorArray & pnts,
+				const MVectorArray & nmls,
+				const MVectorArray & cols)
+{
 	setPointDrawBufLen(n);
 	
 	Vector3F * ps = pntPositionR();
 	Vector3F * ns = pntNormalR();
+	Vector3F * cs = pntColorR();
 	for(int i=0; i<n; ++i) {
 		ps[i].set(pnts[i].x, pnts[i].y, pnts[i].z);
-		ns[i].set(nors[i].x, nors[i].y, nors[i].z);
+		ns[i].set(nmls[i].x, nmls[i].y, nmls[i].z);
+		cs[i].set(cols[i].x, cols[i].y, cols[i].z);
 	}
 	
 	AHelper::Info<unsigned>(" ExampViz load n point", n );
 	buildBounding8Dop(geomBox() );
-	return true;
+	
 }
 //:~

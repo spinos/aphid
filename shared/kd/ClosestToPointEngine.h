@@ -39,6 +39,7 @@ public:
     Float2 closestToPointTexcoord() const;
 	void getClosestToPointGeomcomp(int & geom, int & comp) const;
     Plane closestPlane() const;
+	Vector3F closestToPointColor() const;
 	int closestToPointColorCompressed() const;
 	
 };
@@ -126,15 +127,20 @@ Plane ClosestToPointEngine<T, Tn>::closestPlane() const
 { return m_ctx.asPlane(); }
 
 template<typename T, typename Tn>
-int ClosestToPointEngine<T, Tn>::closestToPointColorCompressed() const
-{ 
+Vector3F ClosestToPointEngine<T, Tn>::closestToPointColor() const
+{
 	const sdb::VectorArray<T> & src = SelectEngine<T, Tn>::source();
 	const T * comp = src[m_ctx._isource];
 
-	Vector3F c = comp->interpolateColor(m_ctx._contributes);
+	return comp->interpolateColor(m_ctx._contributes);
+}
+
+template<typename T, typename Tn>
+int ClosestToPointEngine<T, Tn>::closestToPointColorCompressed() const
+{ 
+	const Vector3F c = closestToPointColor();
 	int ic;
 	col32::encodeC(ic, c.x, c.y, c.z, 1.f);
-	
 	return ic;
 }
 
