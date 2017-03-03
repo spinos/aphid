@@ -144,6 +144,7 @@ public:
 	void getVizStatistics(std::map<std::string, std::string > & stats);
 	void setBrushFalloff(float x);
 	float getBrushFalloff();
+	void setShowVoxelThreshold(float x);
 	
 private:
 	void resize(bool isBundled);

@@ -79,6 +79,8 @@
 #define kVizEditGroundFlagLong "-vizEditGround"
 #define kExampleStatusFlag "-exs"
 #define kExampleStatusFlagLong "-exampleStatus"
+#define kShoVoxFlag "-shv"
+#define kShoVoxFlagLong "-showVoxel"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -344,6 +346,12 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setBrushFalloff(bfo);
 	}
 	
+	if (argData.isFlagSet(kShoVoxFlag)) {
+		double shv = 1.f;
+		if (argData.getFlagArgument(kShoVoxFlag, 0, shv) )
+			fContext->setShowVoxelThreshold(shv);
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -454,6 +462,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kExampleStatusFlag)) {
 		setResult(fContext->getExampleStatusStr() );
+	}
+	
+	if (argData.isFlagSet(kShoVoxFlag)) {
+		setResult(fContext->getShowVoxelThreshold() );
 	}
 	
 	return MS::kSuccess;
@@ -680,6 +692,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kExampleStatusFlag, kExampleStatusFlagLong, MSyntax::kString);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add example status arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kShoVoxFlag, kShoVoxFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add showVoxel status arg");
 		return MS::kFailure;
 	}
 	

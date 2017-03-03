@@ -45,6 +45,7 @@ bool ExampleWorks::validateViz(const MSelectionList &sels)
         MFnDependencyNode fviz(vizobj);
 		if(fviz.typeName() != "proxyViz") {
 			PtrViz = NULL;
+			ObjViz = MObject::kNullObj;
 			return 0;
 		}
 		PtrViz = (ProxyViz*)fviz.userNode();
@@ -58,11 +59,82 @@ bool ExampleWorks::validateViz(const MSelectionList &sels)
     return 1;
 }
 
+void ExampleWorks::getConnectExamples(MObjectArray & exmpOs)
+{
+	MPlug dstPlug;
+	AHelper::getNamedPlug(dstPlug, ObjViz, "inExample");
+	
+	MPlugArray srcPlugs;
+	ConnectionHelper::GetArrayPlugInputConnections(srcPlugs, dstPlug);
+	
+	const int n = srcPlugs.length();
+	for(int i=0;i<n;++i) {
+		MObject exmpObj = srcPlugs[i].node();
+		exmpOs.append(exmpObj);
+	}
+}
+
 MString ExampleWorks::getExampleStatusStr()
 {
 	validateSelection();
-	if(PtrViz) {
-        return "todo";
+	if(ObjViz == MObject::kNullObj) {
+        return "none"; 
 	}
-	return "none";
+	
+	MObjectArray exmpOs;
+	getConnectExamples(exmpOs);
+	
+	const int n = exmpOs.length();
+	
+	MString res;
+	for(int i=0;i<n;++i) {
+		MFnDependencyNode fexmp(exmpOs[i]);
+		res += "|.name";
+		res += "|" + fexmp.name();
+		
+		bool isActive = true;
+		AttributeHelper::getBoolAttributeByName(fexmp, "exampleActive", isActive);
+		
+		res += "|.is_active";
+		if(isActive) {
+			res += "|on";
+		} else {
+			res += "|off";
+		}
+		
+		bool isVisible = true;
+		AttributeHelper::getBoolAttributeByName(fexmp, "exampleVisible", isVisible);
+		
+		res += "|.is_visible";
+		if(isVisible) {
+			res += "|on";
+		} else {
+			res += "|off";
+		}
+		
+	}
+	
+	return res;
+}
+
+void ExampleWorks::processShowVoxelThreshold(float x)
+{
+	validateSelection();
+	if(ObjViz != MObject::kNullObj) {
+		MFnDependencyNode fviz(ObjViz);
+		MPlug psho = fviz.findPlug("svt");
+		psho.setValue(x);
+	}
+}
+
+float ExampleWorks::getShowVoxelThreshold()
+{
+	float r = 1.f;
+	validateSelection();
+	if(ObjViz != MObject::kNullObj) {
+		MFnDependencyNode fviz(ObjViz);
+		MPlug psho = fviz.findPlug("svt");
+		psho.getValue(r);
+	}
+	return r;
 }

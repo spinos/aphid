@@ -184,6 +184,7 @@ bool H5VCache::readData(const std::string & fileName,
                    double dtime,
                    unsigned numIterPoints,
                    int isSubframe,
+				   bool toSkipReading,
 				   bool isLegacy)
 {
 	m_hasData = false;
@@ -198,7 +199,15 @@ bool H5VCache::readData(const std::string & fileName,
     }
     
     // std::cout<<"\n oflBakePNode switch to h5 file "<<fileName;
-    
+    if(!hasPiecesChecked() ) {
+        checkPieces(pathName, numIterPoints);
+	}
+	
+	if(toSkipReading) {
+		m_hasData = true;
+		return true;
+	}
+	
     int currentSpf = sampler()->m_spf;
     
     if(hasSpfSegment() ) {
@@ -209,10 +218,6 @@ bool H5VCache::readData(const std::string & fileName,
     sampler()->calculateWeights(dtime, currentSpf);
     if(isSubframe == 0) {
 		sampler()->m_weights[0] = 1.f;
-	}
-    
-    if(!hasPiecesChecked() ) {
-        checkPieces(pathName, numIterPoints);
 	}
     
     if(!readFrame((float *)m_data[0]->data(), m_numPoints, pathName.c_str(), 
@@ -275,9 +280,7 @@ void H5VCache::mixData(const H5VCache * b, float alpha)
 	int n = m_numPoints * 3;
 	
 	if(alpha > .99f) {
-		for ( int i=0; i < n; i++) {
-			p[i] = p1[i];
-		}
+		memcpy(p, p1, n<<2);
 		return;
 	}
 	

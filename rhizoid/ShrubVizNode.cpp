@@ -216,12 +216,12 @@ MStatus ShrubVizNode::initialize()
 	
 	avoxactive = numFn.create( "exampleActive", "exa", MFnNumericData::kBoolean);
 	numFn.setStorable(true);
-	numFn.setDefault(1);
+	numFn.setDefault(true);
 	addAttribute(avoxactive);
 	
 	avoxvisible = numFn.create( "exampleVisible", "exv", MFnNumericData::kBoolean);
 	numFn.setStorable(true);
-	numFn.setDefault(1);
+	numFn.setDefault(true);
 	addAttribute(avoxvisible);
 	
 	MDoubleArray defaultDArray;

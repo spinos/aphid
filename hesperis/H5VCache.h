@@ -60,7 +60,8 @@ protected:
                    double dtime,
                    unsigned numIterPoints,
                    int isSubframe,
-				   bool isLegacy = false);
+				   bool toSkipReading,
+				   bool isLegacy);
 	float * data0() const;
 	
 	void mixData(const H5VCache * b, float alpha);

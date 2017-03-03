@@ -16,6 +16,7 @@
  #include "ProxyVizNode.h"
  
  class MSelectionList;
+ class MObjectArray;
  
  class ExampleWorks {
  
@@ -24,6 +25,7 @@
 	virtual ~ExampleWorks();
 	
 	MString getExampleStatusStr();
+	float getShowVoxelThreshold();
 	
  protected:
  /// active viz
@@ -33,7 +35,11 @@
 	bool validateViz(const MSelectionList &sels);
 	bool validateSelection();
 	
+	void processShowVoxelThreshold(float x);
+	
  private:
+	void getConnectExamples(MObjectArray & exmpOs);
+	
  };
  
  #endif
