@@ -66,7 +66,10 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 	
 	std::cout.flush();
 	
-	buildPointDrawBuf(msh.numVertices(), (const float *)msh.triangleVertexP(), (const float *)msh.triangleVertexN() );
+	buildPointDrawBuf(msh.numVertices(), 
+			(const float *)msh.triangleVertexP(), 
+			(const float *)msh.triangleVertexN(),
+			(const float *)msh.triangleVertexN() );
 	buildBounding8Dop(bbox);
 }
 
@@ -107,7 +110,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	std::cout.flush();
 	
 	const sdb::SampleCache * sps = spg.samplesAtLevel(mxLevel);
-	buildPointDrawBuf(ns, sps->points(), sps->normals(),
+	buildPointDrawBuf(ns, sps->points(), sps->normals(), sps->colors(),
 					sdb::SampleCache::DataStride>>2);
 	buildBounding8Dop(bbox);
 }

@@ -448,7 +448,7 @@ void Triangle::setInd(const int & x, const int & idx)
 { 
 	if(idx == 0) m_nc0 = x;
 	else if(idx == 1) m_nc1 = x;
-	m_nc2 = x;
+	else m_nc2 = x;
 }
 
 const Vector3F * Triangle::p(int idx) const
@@ -656,6 +656,13 @@ Float2 Triangle::interpolateTexcoord(const float * contribs) const
 			m_uv[0].y * contribs[0]
 			+ m_uv[1].y * contribs[1]
 			+ m_uv[2].y * contribs[2]);
+}
+
+Vector3F Triangle::interpolateColor(const float * contribs) const
+{
+	return (C(0) * contribs[0] 
+		+ C(1) * contribs[1] 
+		+ C(2) * contribs[2]);
 }
 
 const Float2 & Triangle::uv(const int & i) const

@@ -14,6 +14,7 @@
 #include <sdb/AdaptiveGrid3.h>
 #include <sdb/Array.h>
 #include <sdb/GridSampler.h>
+#include <math/Quantization.h>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 namespace aphid {
@@ -33,7 +34,7 @@ public:
 	int geom;
 	Float2 texcoord;
 	int comp;
-	int pad;
+	int colcom;
 	
 private:
 
@@ -92,6 +93,7 @@ void LodCell::closestToPoint(T * result)
 template<typename Ts>
 void LodCell::dumpSamplesInCell(Ts * dst)
 {
+	float r, g, b, alpha;
 	begin();
 	while(!end() ) {
 		LodNode * a = value();
@@ -103,6 +105,8 @@ void LodCell::dumpSamplesInCell(Ts * dst)
 		d.u = a->texcoord.x;
 		d.v = a->texcoord.y;
 		d.geomcomp = (a->geom<<22) | a->comp;
+		col32::decodeC(r, g, b, alpha, a->colcom );
+		d.col.set(r, g, b);
 		
 		next();
 	}

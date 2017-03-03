@@ -196,26 +196,51 @@ void MeshHelper::GetMeshTriangles(sdb::VectorArray<cvx::Triangle> & tris,
     MIntArray vertices;
     int i, j, nv;
 	MPoint dp[3];
-	aphid::Vector3F fp[3];
+	Vector3F fp[3];
+	Float2 tuvs[3];
+	int tvert[3];
+	MFloatArray uArray, vArray;
+	cvx::Triangle tri;
+	
 	MItMeshPolygon faceIt(meshPath);
+	
+	const bool hasUv = faceIt.hasUVs();
+	
     for(; !faceIt.isDone(); faceIt.next() ) {
 
 		faceIt.getVertices(vertices);
         nv = vertices.length();
         
+		dp[0] = faceIt.point(0, MSpace::kObject );
+		dp[0] *= worldTm;
+		
+		tvert[0] = vertices[0];
+		
+		if(hasUv) {
+			faceIt.getUVs(uArray, vArray);
+			tuvs[0].set(uArray[0], vArray[0]);
+		}
+		
         for(i=1; i<nv-1; ++i ) {
-			dp[0] = faceIt.point(0, MSpace::kObject );
 			dp[1] = faceIt.point(i, MSpace::kObject );
 			dp[2] = faceIt.point(i+1, MSpace::kObject );
 			
-			dp[0] *= worldTm;
 			dp[1] *= worldTm;	
 			dp[2] *= worldTm;
 			
-			aphid::cvx::Triangle tri;
+			tvert[1] = vertices[i];
+			tvert[2] = vertices[i+1];
+			
+			if(hasUv) {
+				tuvs[1].set(uArray[i], vArray[i]);
+				tuvs[2].set(uArray[i+1], vArray[i+1]);
+				tri.setUVs(tuvs);
+			}
+			
 			for(j=0; j<3; ++j) {
 				fp[j].set(dp[j].x, dp[j].y, dp[j].z);
 				tri.setP(fp[j], j);
+				tri.setInd(tvert[j], j);
 				bbox.expandBy(fp[j], 1e-4f);
 			}
 			

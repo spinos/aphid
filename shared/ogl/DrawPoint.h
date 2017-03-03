@@ -20,6 +20,7 @@ class DrawPoint {
 
 	boost::scoped_array<Vector3F> m_pntNormalBuf;
 	boost::scoped_array<Vector3F> m_pntPositionBuf;
+	boost::scoped_array<Vector3F> m_pntColorBuf;
 	int m_pntBufLength;
 	
 public:
@@ -33,14 +34,17 @@ public:
 protected:
 	const float * pntNormalBuf() const;
 	const float * pntPositionBuf() const;
+	const float * pntColorBuf() const;
 	
 	Vector3F * pntNormalR();
 	Vector3F * pntPositionR();
+	Vector3F * pntColorR();
 	void setPointDrawBufLen(const int & x);
 	
 	void buildPointDrawBuf(const int & nv,
 				const float * vertP, 
 				const float * vertN,
+				const float * vertC,
 				int stride = 0);
 				
 };

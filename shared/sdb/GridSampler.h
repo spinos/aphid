@@ -102,6 +102,7 @@ void GridSampler<Tf, Tn, Ndiv>::sampleInBox(Tf & fintersect,
 			d->pos = fintersect.closestToPointPoint();
 			d->nml = fintersect.closestToPointNormal();
 			d->texcoord = fintersect.closestToPointTexcoord();
+			d->colcom = fintersect.closestToPointColorCompressed();
 			fintersect.getClosestToPointGeomcomp(d->geom, d->comp);
 			
 		}

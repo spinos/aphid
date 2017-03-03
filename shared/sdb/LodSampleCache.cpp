@@ -93,12 +93,14 @@ void LodSampleCache::buildSampleCache(int minLevel, int maxLevel)
 		SampleCache & spsi = m_samples[i];
 		spsi.clear();
 		int ns = countLevelNodes(i);
-		if(ns>0) {
-			spsi.create(ns);
-			dumpLevelSamples<SampleCache::ASample>(spsi.data(), i );
-			spsi.assignNoise();
-			spsi.setColorByUV();
+		if(ns < 1) {
+			continue;
 		}
+		spsi.create(ns);
+		dumpLevelSamples<SampleCache::ASample>(spsi.data(), i );
+		spsi.assignNoise();
+		//spsi.setColorByUV();
+		
 	}
 }
 

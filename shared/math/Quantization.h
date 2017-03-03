@@ -43,9 +43,9 @@ inline void encodeC(int & dst, const float &r, const float &g,
 					const float &b, const float &a)
 {
 	int red = r<1.f ? 256 * r : 255;
-	int green = g<1.f ? 256 * r : 255;
-	int blue = b<1.f ? 256 * r : 255;
-	int alpha = a<1.f ? 256 * r : 255;
+	int green = g<1.f ? 256 * g : 255;
+	int blue = b<1.f ? 256 * b : 255;
+	int alpha = a<1.f ? 256 * a : 255;
 	dst = (alpha<<24 | red<<16 | green<<8 | blue);
 }
 

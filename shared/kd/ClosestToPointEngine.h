@@ -11,6 +11,7 @@
 #define APH_KD_CLOSEST_TO_POINT_ENGINE_H
 
 #include <kd/SelectEngine.h>
+#include <math/Quantization.h>
 
 namespace aphid {
 
@@ -38,6 +39,7 @@ public:
     Float2 closestToPointTexcoord() const;
 	void getClosestToPointGeomcomp(int & geom, int & comp) const;
     Plane closestPlane() const;
+	int closestToPointColorCompressed() const;
 	
 };
 
@@ -122,6 +124,19 @@ void ClosestToPointEngine<T, Tn>::getClosestToPointGeomcomp(int & geom, int & co
 template<typename T, typename Tn>
 Plane ClosestToPointEngine<T, Tn>::closestPlane() const
 { return m_ctx.asPlane(); }
+
+template<typename T, typename Tn>
+int ClosestToPointEngine<T, Tn>::closestToPointColorCompressed() const
+{ 
+	const sdb::VectorArray<T> & src = SelectEngine<T, Tn>::source();
+	const T * comp = src[m_ctx._isource];
+
+	Vector3F c = comp->interpolateColor(m_ctx._contributes);
+	int ic;
+	col32::encodeC(ic, c.x, c.y, c.z, 1.f);
+	
+	return ic;
+}
 
 }
 #endif

@@ -145,26 +145,28 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	drawZCircle(m_transBuf);
 	
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
-	
+
 	glColor3fv(diffCol);
-	glMaterialfv( GL_FRONT, GL_DIFFUSE, diffCol );
+	
 	glPointSize(2.f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
 	drawAWireDop();
 	
-	glEnable(GL_LIGHTING);
-	if ( style == M3dView::kFlatShaded || 
-		    style == M3dView::kGouraudShaded ) {
+	glDisable(GL_LIGHTING);
+	//if ( style == M3dView::kFlatShaded || 
+	//	    style == M3dView::kGouraudShaded ) {
 		
+		glEnableClientState(GL_COLOR_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
 		drawPoints();
 		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
 	
-	} else {
-		drawWiredPoints();
-	} 
+	//} else {
+	//	drawWiredPoints();
+	//} 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glPopAttrib();

@@ -275,6 +275,7 @@ public:
 	
 	void setUVs(const Float2 * src);
 	Float2 interpolateTexcoord(const float * contribs) const;
+	Vector3F interpolateColor(const float * contribs) const;
 					
 	const Float2 & uv(const int & i) const;
 	

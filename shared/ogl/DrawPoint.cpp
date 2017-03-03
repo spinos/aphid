@@ -29,11 +29,17 @@ Vector3F * DrawPoint::pntNormalR()
 Vector3F * DrawPoint::pntPositionR()
 { return m_pntPositionBuf.get(); }
 
+Vector3F * DrawPoint::pntColorR()
+{ return m_pntColorBuf.get(); }
+
 const float * DrawPoint::pntNormalBuf() const
 { return (const float *)m_pntNormalBuf.get(); }
 
 const float * DrawPoint::pntPositionBuf() const
 { return (const float *)m_pntPositionBuf.get(); }
+
+const float * DrawPoint::pntColorBuf() const
+{ return (const float *)m_pntColorBuf.get(); }
 
 void DrawPoint::setPointDrawBufLen(const int & x)
 { 
@@ -41,15 +47,18 @@ void DrawPoint::setPointDrawBufLen(const int & x)
 	if(x<1) {
 		m_pntNormalBuf.reset();
 		m_pntPositionBuf.reset();
+		m_pntColorBuf.reset();
 	} else {
 		m_pntNormalBuf.reset(new Vector3F[x]);
 		m_pntPositionBuf.reset(new Vector3F[x]);
+		m_pntColorBuf.reset(new Vector3F[x]);
 	}
 }
 
 void DrawPoint::buildPointDrawBuf(const int & nv,
 				const float * vertP, 
 				const float * vertN,
+				const float * vertC,
 				int stride)
 {
 	setPointDrawBufLen(nv);
@@ -61,6 +70,7 @@ void DrawPoint::buildPointDrawBuf(const int & nv,
 		for(int i=0;i<m_pntBufLength;++i) {
 			m_pntNormalBuf[i].set(vertN[i*3], vertN[i*3+1], vertN[i*3+2]);
 			m_pntPositionBuf[i].set(vertP[i*3], vertP[i*3+1], vertP[i*3+2]);
+			m_pntColorBuf[i].set(vertC[i*3], vertC[i*3+1], vertC[i*3+2]);
 		}
 	} else {
 		for(int i=0;i<m_pntBufLength;++i) {
@@ -68,12 +78,15 @@ void DrawPoint::buildPointDrawBuf(const int & nv,
 			m_pntNormalBuf[i].set(vnml[0], vnml[1], vnml[2]);
 			const float * vpos = &vertP[i*stride];
 			m_pntPositionBuf[i].set(vpos[0], vpos[1], vpos[2]);
+			const float * vcol = &vertC[i*stride];
+			m_pntColorBuf[i].set(vcol[0], vcol[1], vcol[2]);
 		}
 	}
 }
 
 void DrawPoint::drawPoints() const
 {
+	glColorPointer(3, GL_FLOAT, 0, (const GLfloat*)m_pntColorBuf.get() );
 	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)m_pntNormalBuf.get() );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_pntPositionBuf.get() );
 	glDrawArrays(GL_POINTS, 0, m_pntBufLength);
