@@ -1,6 +1,3 @@
-#ifndef APH_CURVE_GROUP_H
-#define APH_CURVE_GROUP_H
-
 /*
  *  CurveGroup.h
  *  hesperis
@@ -9,7 +6,10 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-#include <AllMath.h>
+#ifndef APH_CURVE_GROUP_H
+#define APH_CURVE_GROUP_H
+
+#include <math/Vector3F.h>
 #include <geom/Geometry.h>
 
 namespace aphid {
@@ -23,9 +23,12 @@ public:
 	
 	Vector3F * points();
 	unsigned * counts();
+	int * curveDegrees();
 	
-	const unsigned numPoints() const;
-	const unsigned numCurves() const;
+	const unsigned & numPoints() const;
+	const unsigned & numCurves() const;
+	
+	void setAllCurveDegree(int x);
 	
 	void verbose() const;
 protected:
@@ -33,6 +36,7 @@ protected:
 private:
 	Vector3F * m_points;
 	unsigned * m_counts;
+	int * m_degrees;
 	unsigned m_numCurves, m_numPoints;
 };
 

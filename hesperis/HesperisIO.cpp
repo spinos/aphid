@@ -30,36 +30,44 @@ namespace aphid {
 MPoint HesperisIO::GlobalReferencePoint;
 std::string HesperisIO::CurrentHObjectPath;
 
-bool HesperisIO::WriteTransforms(const MDagPathArray & paths, HesperisFile * file )
+bool HesperisIO::WriteTransforms(const MDagPathArray & paths, 
+						HesperisFile * file )
 {
     file->clearTransforms();
     
-	unsigned i = 0;
-	for(;i<paths.length();i++) AddTransform(paths[i], file );
+	for(unsigned i = 0;i<paths.length();i++) {
+		AddTransform(paths[i], file );
+	}
 	
 	file->setDirty();
 	file->setWriteComponent(HesperisFile::WTransform);
     bool fstat = file->save();
-	if(!fstat) MGlobal::displayWarning(MString(" cannot save transform to file ")+ file->fileName().c_str());
+	if(!fstat) {
+		AHelper::Info<std::string>("HesperisIO cannot save transform to file ", file->fileName() );
+	}
 	file->close();
 	return true;
 }
 
-bool HesperisIO::AddTransform(const MDagPath & path, HesperisFile * file )
+bool HesperisIO::AddTransform(const MDagPath & curPath, 
+						HesperisFile * file )
 {
-	const std::string nodeName = H5PathNameTo(path);
-	if(nodeName.size() < 2 ) return false;
+	const std::string nodeName = H5PathNameTo(curPath);
+	if(nodeName.size() < 2 ) {
+		return false;
+	}
 	
-	MFnDagNode fdg(path);
-	if(fdg.parentCount() < 1) return false;
+	MFnDagNode fdg(curPath);
+	if(fdg.parentCount() < 1) {
+		return false;
+	}
 	
-// AHelper::Info<MString>("hes io add transform ", path.fullPathName());
-
-	MObject oparent = fdg.parent(0);
-	MFnDagNode fp(oparent);
-	MDagPath pp;
-	fp.getPath(pp);
-	AddTransform(pp, file);
+	MDagPath parentPath = curPath;
+	parentPath.pop();
+	
+	AddTransform(parentPath, file);
+	
+//	std::cout<<"\n HesperisIO add transform "<<curPath.fullPathName();
 	
 // todo extract tm    
 	file->addTransform( nodeName, new BaseTransform );

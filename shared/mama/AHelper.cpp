@@ -1128,8 +1128,9 @@ double AHelper::AreaOfTriangle(const MPoint & a, const MPoint & b, const MPoint 
 
 void AHelper::PrintFullPath(const MDagPathArray & paths)
 {
-    for(unsigned i=0;i<paths.length();++i)
+    for(unsigned i=0;i<paths.length();++i) {
         MGlobal::displayInfo(paths[i].fullPathName() );
+	}
 }
 
 bool AHelper::GetDepNodeByName(MObject & dst, MFn::Type type, const MString & name)

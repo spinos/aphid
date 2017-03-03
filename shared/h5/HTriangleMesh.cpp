@@ -84,8 +84,8 @@ char HTriangleMesh::load(ATriangleMesh * tri)
 char HTriangleMesh::readAftCreation(ATriangleMesh * tri)
 {
 	readVector3Data(".p", tri->numPoints(), (Vector3F *)tri->points());
-	readIntData(".a", tri->numPoints(), (unsigned *)tri->anchors());
-	readIntData(".v", tri->numTriangles() * 3, (unsigned *)tri->indices());
+	readIntData(".a", tri->numPoints(), (int *)tri->anchors());
+	readIntData(".v", tri->numTriangles() * 3, (int *)tri->indices());
 	
 	return 1;
 }

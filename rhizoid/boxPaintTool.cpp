@@ -1184,4 +1184,12 @@ float proxyPaintContext::getBrushFalloff()
 	return m_growOpt.m_brushFalloff;
 }
 
+void proxyPaintContext::setShowVoxelThreshold(float x)
+{
+	processShowVoxelThreshold(x);
+	
+	MToolsInfo::setDirtyFlag(*this);
+}
+	
+
 //:~

@@ -841,46 +841,78 @@ bool ASearchHelper::FirstTypedObj(const MObject &root, MObject & dst, MFn::Type 
     return false;
 }
 
+void ASearchHelper::GetChildPathTo(MDagPath & dst,
+				const MObject & childO,
+				const MDagPath & parentP)
+{
+	MFnDagNode fdag(childO);
+	if(!fdag.isInstanced() ) {
+		MDagPath::getAPathTo(childO, dst);
+		return;
+	}
+			
+	MDagPathArray pathsToChild;
+	MDagPath::getAllPathsTo(childO, pathsToChild);
+	const unsigned n = pathsToChild.length();
+	for(unsigned i=0;i<n;++i) {
+		MDagPath ap = pathsToChild[i];
+		ap.pop();
+		if(ap == parentP) {
+			dst = pathsToChild[i];
+			return;
+		}
+	}
+}
+
 void ASearchHelper::LsAllTypedPaths(MDagPathArray & dst, const MDagPath & root, MFn::Type typ)
 {
 	MStatus stat;
 	const unsigned nc = root.childCount();
 	std::map<std::string, MDagPath > sorted;
-// ls transform children ordered by name
+// ls transform children ordered by node name
 	unsigned i;
 	for(i=0; i<nc; i++) {
 		MObject	child = root.child(i);
 		if(child.hasFn(MFn::kTransform)) {
+			
 			MDagPath pchild;
-			MDagPath::getAPathTo(child, pchild);
+			GetChildPathTo(pchild, child, root);
+			
 			sorted[MFnDagNode(child).name().asChar()] = pchild;
 		}
 	}
 	
 // handle transform children first
 	std::map<std::string, MDagPath >::const_iterator it = sorted.begin();
-	for(; it !=sorted.end(); ++it)
+	for(; it !=sorted.end(); ++it) {
 		LsAllTypedPaths(dst, it->second, typ);
+	}
 	
-// then typed children	
-	if(root.node().hasFn(typ) && !MFnDagNode(root).isIntermediateObject()) 
+// then ls typed children ordered by node name
+	if(root.node().hasFn(typ) && !MFnDagNode(root).isIntermediateObject()) {
 		dst.append(root);
+	}
 	
 	sorted.clear();
-	if(typ == MFn::kTransform) return;
+	if(typ == MFn::kTransform) {
+		return;
+	}
 	
 	for(i=0; i<nc; i++) {
 		MObject	child = root.child(i);
 		if(child.hasFn(typ) && !MFnDagNode(child).isIntermediateObject()) {
+			
 			MDagPath pchild;
-			MDagPath::getAPathTo(child, pchild);
+			GetChildPathTo(pchild, child, root);
+			
 			sorted[MFnDagNode(child).name().asChar()] = pchild;
 		}
 	}
 	
 	it = sorted.begin();
-	for(; it !=sorted.end(); ++it)
+	for(; it !=sorted.end(); ++it) {
 		dst.append(it->second);
+	}
 }
 
 bool ASearchHelper::FirstObjByAttrValInArray(MObjectArray &objarr, MString &attrname, MString &attrval, MObject &res)
@@ -958,7 +990,9 @@ void ASearchHelper::TransformsToWorld(std::map<std::string, MDagPath> & dst,
 	MDagPath cur = longer;
 	MStatus stat = cur.pop();
 	while(stat) {
-		if(!cur.node().hasFn(MFn::kTransform)) return;
+		if(!cur.node().hasFn(MFn::kTransform)) {
+			return;
+		}
 		dst[cur.fullPathName().asChar()] = cur;
 		stat = cur.pop();
 	}
@@ -968,16 +1002,18 @@ void ASearchHelper::LsAllTransformsTo(std::map<std::string, MDagPath> & dst, con
 {
 	const unsigned n = tails.length();
 	unsigned i = 0;
-	for(;i<n;i++)
+	for(;i<n;i++) {
 		TransformsToWorld(dst, tails[i]);
+	}
 }
 
 void ASearchHelper::LsAll(std::map<std::string, MDagPath> & dst, const MDagPathArray & tails)
 {
 	const unsigned n = tails.length();
 	unsigned i = 0;
-	for(;i<n;i++)
+	for(;i<n;i++) {
 		dst[tails[i].fullPathName().asChar()] = tails[i];
+	}
 }
 
 }

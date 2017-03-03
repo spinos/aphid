@@ -213,6 +213,16 @@ ADD_LIBRARY (aphidH5 ${LIB_TYP}
 ../shared/AAnimationCurve.cpp
 )
 
+set (APH_HES_SRC
+../hesperis/SampleFrame.cpp
+../hesperis/H5Holder.cpp
+../hesperis/H5VCache.cpp
+)
+
+ADD_LIBRARY (aphidHes ${LIB_TYP}
+    ${APH_HES_SRC}
+)
+
 ADD_LIBRARY (aphidUI ${LIB_TYP}
 ../shared/BaseCamera.cpp
 ../shared/PerspectiveCamera.cpp 

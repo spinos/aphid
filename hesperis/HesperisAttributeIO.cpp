@@ -185,6 +185,7 @@ bool HesperisAttributeIO::ReadAttributeBundle(const ABundleAttribute * d,
         MObject oattr;
 		ReadAttribute(oattr, solAtt, obs[i]);
     }
+	return true;
 }
 
 bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, const MObject &target)

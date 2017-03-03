@@ -58,6 +58,12 @@ char HCurveGroup::save(CurveGroup * curve)
 	    addIntData(".cc", nc);
 	
 	writeIntData(".cc", nc, (int *)curve->counts());
+	
+	if(!hasNamedData(".cdeg")) {
+	    addIntData(".cdeg", nc);
+	}
+	
+	writeIntData(".cdeg", nc, curve->curveDegrees());
 
 	return 1;
 }
@@ -76,7 +82,13 @@ char HCurveGroup::load(CurveGroup * curve)
 	curve->create(numCurves, numPoints);
 	
 	readVector3Data(".p", numPoints, curve->points());
-	readIntData(".cc", numCurves, curve->counts());
+	readIntData(".cc", numCurves, (int *)curve->counts());
+	
+	if(hasNamedData(".cdeg") ) {
+		readIntData(".cdeg", numCurves, curve->curveDegrees());
+	} else {
+		curve->setAllCurveDegree(3);
+	}
 	
 	curve->verbose();
 	
