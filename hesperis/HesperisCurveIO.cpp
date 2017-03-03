@@ -72,15 +72,19 @@ bool HesperisCurveCreator::CreateACurve(Vector3F * pos, unsigned nv, MObject &ta
 {
 	MPointArray vertexArray;
     unsigned i=0;
-	for(; i<nv; i++)
+	for(; i<nv; i++) {
 		vertexArray.append( MPoint( pos[i].x, pos[i].y, pos[i].z ) );
+	}
+	
 	const int degree = 2;
     const int spans = nv - degree;
 	const int nknots = spans + 2 * degree - 1;
     MDoubleArray knotSequences;
 	knotSequences.append(0.0);
-	for(i = 0; i < nknots-2; i++)
+	for(i = 0; i < nknots-2; i++) {
 		knotSequences.append( (double)i );
+	}
+	
 	knotSequences.append(nknots-3);
     
     MFnNurbsCurve curveFn;
@@ -191,7 +195,7 @@ bool HesperisCurveIO::WriteCurves(const MDagPathArray & paths,
 
 bool HesperisCurveIO::ReadCurves(MObject &target)
 {
-	MGlobal::displayInfo("opium read curve");
+	MGlobal::displayInfo("HesperisCurveIO read curve");
     HWorld grpWorld;
     ReadTransformAnd<HCurveGroup, CurveGroup, HesperisCurveCreator>(&grpWorld, target);
     grpWorld.close();

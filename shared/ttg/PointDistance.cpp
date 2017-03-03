@@ -29,7 +29,7 @@ const bool & PointDistance::isValid() const
 void PointDistance::setPos(const Vector3F & v)
 { m_pos = v; }
 	
-const Vector3F & PointDistance::PointDistance::pos() const
+const Vector3F & PointDistance::pos() const
 { return m_pos; }
 
 }

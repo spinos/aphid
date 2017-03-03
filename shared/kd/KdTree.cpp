@@ -9,7 +9,7 @@
 #include "KdTree.h"
 #include <IntersectionContext.h>
 #include <geom/ClosestToPointTest.h>
-#include "SelectionContext.h"
+#include <geom/SelectionContext.h>
 #include <boost/timer.hpp>
 #include <iostream>
 #include <sstream>
