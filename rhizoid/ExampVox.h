@@ -89,6 +89,9 @@ public:
 	
 	virtual const InstanceD & getInstance(const int & i) const;
 	
+	void setActive(bool x);
+	void setVisible(bool x);
+	
 	const bool & isActive() const;
 	const bool & isVisible() const;
 	
@@ -96,9 +99,6 @@ protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
 	
-	void setActive(bool x);
-	void setVisible(bool x);
-						
 private:
 	InstanceD m_defInstance;
 	

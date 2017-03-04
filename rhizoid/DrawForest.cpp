@@ -171,6 +171,7 @@ void DrawForest::drawPlantsInCell(ForestCell * cell,
 		return;
 	}
 	
+	bool bvis = false;
 	int iExample = -1;
 	ExampVox * v = 0;
 	cell->begin();
@@ -179,15 +180,17 @@ void DrawForest::drawPlantsInCell(ForestCell * cell,
 			iExample = cell->key().y;
 			v = plantExample(iExample );
 			if(v) {
+				bvis = v->isVisible();
 			    //const float * c = v->diffuseMaterialColor();
 			    //m_instancer->setDiffueColorVec(c);
 			} else {
 			    std::cout<<"drawWiredPlant v is null";
+				bvis = false;
 			}
 			
 		}
 		
-		if(v) {
+		if(bvis) {
 		    drawPlant(cell->value()->index, v);
 		}
 		
@@ -197,6 +200,7 @@ void DrawForest::drawPlantsInCell(ForestCell * cell,
 
 void DrawForest::drawPlantSolidBoundInCell(ForestCell * cell)
 {
+	bool bvis = false;
 	int iExample = -1;
 	ExampVox * v = 0;
 	cell->begin();
@@ -205,14 +209,16 @@ void DrawForest::drawPlantSolidBoundInCell(ForestCell * cell)
 			iExample = cell->key().y;
 			v = plantExample(iExample );
 			if(v) {
+				bvis = v->isVisible();
 				//const float * c = v->diffuseMaterialColor();	
 				//m_instancer->setDiffueColorVec(c);
 			} else {
 				std::cout<<"drawPlantSolidBoundInCell v is null";
+				bvis = false;
 			}
 		}
 
-		if(v) {
+		if(bvis) {
 			drawPlantSolidBound(cell->value()->index, v);
 		}
 

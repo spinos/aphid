@@ -38,5 +38,13 @@ ExampVox * BundleExamp::getExample(const int & i)
 const ExampVox::InstanceD & BundleExamp::getInstance(const int & i) const
 { return m_instances[i]; }
 
+void BundleExamp::setVisible(bool x)
+{
+	std::vector<ExampVox * >::iterator it = m_examples.begin();
+	for(;it!=m_examples.end();++it) {
+		(*it)->setVisible(x);
+	}
+}
+
 }
 

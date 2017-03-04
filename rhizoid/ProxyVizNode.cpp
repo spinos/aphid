@@ -252,6 +252,10 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	diffCol[1] = gPlug.asFloat();
 	diffCol[2] = bPlug.asFloat();
 	defBox->setDiffuseMaterialCol(diffCol);
+	
+	MPlug avisp(selfNode, avoxvisible);
+	const bool vis = avisp.asBool();
+	defBox->setVisible(vis);
 	                    
     MPlug svtPlug(selfNode, adisplayVox);
     setShowVoxLodThresold(svtPlug.asFloat() );
@@ -273,7 +277,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	} else {
 		setWireColor(.0675f, .0675f, .0675f);
 	}
-
+	
 	_viewport = view;
 	fHasView = 1;
 	

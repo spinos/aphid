@@ -70,6 +70,9 @@ MStatus ShrubVizNode::compute( const MPlug& plug, MDataBlock& block )
 		}
 		AHelper::Info<int>("shrub viz n instance", nins);
 		
+		const bool vis = block.inputValue(avoxvisible).asBool(); 
+		setVisible(vis);
+		
 		MFnPluginData fnPluginData;
 		MStatus status;
 		MObject newDataObject = fnPluginData.create(ExampData::id, &status);

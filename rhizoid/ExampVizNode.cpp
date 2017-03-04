@@ -81,11 +81,12 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		diffCol[2] = block.inputValue(adrawColorB).asFloat();
 		setDiffuseMaterialCol(diffCol);
 		
+		const bool vis = block.inputValue(avoxvisible).asBool(); 
+		setVisible(vis);
+		
 		if(!loadTriangles(block) ) {
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
-		
-		
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
