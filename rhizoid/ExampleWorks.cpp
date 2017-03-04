@@ -81,40 +81,46 @@ MString ExampleWorks::getExampleStatusStr()
         return "none"; 
 	}
 	
+	MString res("/.name/default");
+	MFnDependencyNode fviz(ObjViz);
+	bool isActive = true;
+	bool isVisible = true;
+	
+	AttributeHelper::getBoolAttributeByName(fviz, "exampleActive", isActive);
+	addBoolStatusStrSeg(res, isActive, "/.is_active");
+	
+	AttributeHelper::getBoolAttributeByName(fviz, "exampleVisible", isVisible);
+	addBoolStatusStrSeg(res, isVisible, "/.is_visible");
+	
 	MObjectArray exmpOs;
 	getConnectExamples(exmpOs);
 	
 	const int n = exmpOs.length();
 	
-	MString res;
 	for(int i=0;i<n;++i) {
 		MFnDependencyNode fexmp(exmpOs[i]);
-		res += "|.name";
-		res += "|" + fexmp.name();
+		res += "/.name/";
+		res += fexmp.name();
 		
-		bool isActive = true;
 		AttributeHelper::getBoolAttributeByName(fexmp, "exampleActive", isActive);
+		addBoolStatusStrSeg(res, isActive, "/.is_active");
 		
-		res += "|.is_active";
-		if(isActive) {
-			res += "|on";
-		} else {
-			res += "|off";
-		}
-		
-		bool isVisible = true;
 		AttributeHelper::getBoolAttributeByName(fexmp, "exampleVisible", isVisible);
-		
-		res += "|.is_visible";
-		if(isVisible) {
-			res += "|on";
-		} else {
-			res += "|off";
-		}
+		addBoolStatusStrSeg(res, isVisible, "/.is_visible");
 		
 	}
 	
 	return res;
+}
+
+void ExampleWorks::addBoolStatusStrSeg(MString & res, bool b, const char * segName)
+{
+	res += segName;
+	if(b) {
+		res += "/on";
+	} else {
+		res += "/off";
+	}
 }
 
 void ExampleWorks::processShowVoxelThreshold(float x)

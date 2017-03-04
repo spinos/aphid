@@ -39,6 +39,7 @@
 	
  private:
 	void getConnectExamples(MObjectArray & exmpOs);
+	void addBoolStatusStrSeg(MString & res, bool b, const char * segName);
 	
  };
  

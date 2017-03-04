@@ -5,6 +5,25 @@
  *
  */
  
+global proc string[] proxyPaintGetExampleStats()
+{
+    string $exmpStat = eval("proxyPaintToolContext -q -exs "+`currentCtx`);
+    string $buffer[];
+    $numTokens = `tokenize $exmpStat "/" $buffer`;
+    return $buffer;
+}
+ 
+global proc proxyPaintSetShoVox()
+{
+    float $val = `floatSliderGrp -q -value proxyPaintSlider_ShoVoxThre`;
+	proxyPaintToolContext -e -shv $val `currentCtx`;
+}
+
+global proc proxyPaintSetBrushFalloff(float $val)
+{
+	proxyPaintToolContext -e -bfo $val `currentCtx`;
+}
+
 global proc proxyPaintShowNumSamples()
 {
     int $sampleCount = eval("proxyPaintToolContext -q -spc " + `currentCtx`);
@@ -253,6 +272,9 @@ global proc proxyPaint_updateVizStats(string $toolName)
         iconTextButton -e -image "generic_green_light.xpm" 
             proxyPaintIcon_editVizGroung;
     }
+    
+    float $fval = eval("proxyPaintToolContext -q -shv " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_ShoVoxThre;
     
 }
 

@@ -689,7 +689,7 @@ MStatus proxyPaintContextCmd::appendSyntax()
 		return MS::kFailure;
 	}
 	
-	stat = mySyntax.addFlag(kExampleStatusFlag, kExampleStatusFlagLong, MSyntax::kString);
+	stat = mySyntax.addFlag(kExampleStatusFlag, kExampleStatusFlagLong, MSyntax::kLong, MSyntax::kString);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add example status arg");
 		return MS::kFailure;

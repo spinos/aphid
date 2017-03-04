@@ -5,6 +5,15 @@
  
 global proc proxyPaintCreateVizUI(string $coln)
 {
+    floatSliderGrp -label "Show Voxel Threshold" -field true
+    -minValue 0.5 -maxValue 1.0
+    -fieldMinValue 0.5 -fieldMaxValue 1.0
+    -value 1.0
+	-cw 1 130
+	-p $coln
+	-cc "proxyPaintSetShoVox" 
+	proxyPaintSlider_ShoVoxThre;
+	
     rowLayout -numberOfColumns 3
 		-columnWidth 1 120
 		-columnWidth 2 120
@@ -49,9 +58,149 @@ global proc proxyPaintCreateVizUI(string $coln)
     setParent ..; /// end of frame
 }
 
+proc string proxyPaintGetExmpName(string $stats[],
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==".name") {
+            return  $stats[$i+1];  
+        }
+    }
+    return "unknown";
+}
+
+proc int proxyPaintGetExmpBoolStat(string $stats[],
+                    string $skey,
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==$skey) {
+            if($stats[$i+1] == "on") {
+                return 1;
+            } else {
+                return 0;   
+            }
+        }
+    }
+    return 0;
+}
+
+global proc proxyPaintUpdateExmpActive(string $com)
+{
+    int $stat =`iconTextCheckBox -q -v $com`; 
+    if($stat) {
+        iconTextCheckBox -e -image "generic_checked.xpm" $com;
+    } else {
+        iconTextCheckBox -e -image "generic_unchecked.xpm" $com;
+    }
+}
+
+global proc proxyPaintUpdateExmpVisible(string $com)
+{
+    int $stat =`iconTextCheckBox -q -v $com`; 
+    if($stat) {
+        iconTextCheckBox -e -image "generic_show.xpm" $com;
+    } else {
+        iconTextCheckBox -e -image "generic_hide.xpm" $com;
+    }  
+}
+
+global proc proxyPaintUpdateExmpUI(string $coln)
+{
+    string $chds[] = `rowColumnLayout -q
+        -ca pxpnExmpUIRow`;
+    string $achd;
+    for($achd in $chds) {
+        deleteUI -control $achd;
+    }
+    
+    string $stats[] = proxyPaintGetExampleStats();
+        
+    int $nexmps = size($stats) / 6;
+    if($nexmps < 1) {
+        return;   
+    }
+    
+    int $index;
+    for ($index = 0; $index < $nexmps; $index++) {
+        
+        int $iBegin = $index * 6;
+        int $iEnd = $iBegin + 6;
+        
+        string $name = proxyPaintGetExmpName($stats, $iBegin, $iEnd);
+        int $bActive = proxyPaintGetExmpBoolStat($stats, ".is_active", $iBegin, $iEnd);
+        int $bVisible = proxyPaintGetExmpBoolStat($stats, ".is_visible", $iBegin, $iEnd);
+        
+        string $exmpActiveCheckName = "pxpnUICheckExmpActive"+$index;
+        string $exmpActiveCheck = `iconTextCheckBox -v $bActive 
+            -ann $index
+            -p pxpnExmpUIRow
+            -style "iconOnly"
+            -w 24 -mw 0
+            -h 24 -mh 0
+            -image "generic_checked.xpm" 
+            $exmpActiveCheckName`;
+            
+        if($bActive) {
+            iconTextCheckBox -e -image "generic_checked.xpm" 
+            $exmpActiveCheck;
+        } else {
+            iconTextCheckBox -e -image "generic_unchecked.xpm" 
+            $exmpActiveCheck;
+        }
+        
+        string $exmpActiveCC = "proxyPaintUpdateExmpActive(\""+$exmpActiveCheck+"\")";
+        
+        iconTextCheckBox -e -cc $exmpActiveCC $exmpActiveCheck;
+        
+        textField -text $name 
+            -p pxpnExmpUIRow
+            -ed off; 
+         
+        string $exmpVisibleCheckName = "pxpnUICheckExmpVisible"+$index;
+        string $exmpVisibleCheck = `iconTextCheckBox -v $bVisible 
+            -ann $index
+            -p pxpnExmpUIRow
+            -style "iconOnly"
+            -w 24 -mw 0
+            -h 24 -mh 0
+            -image "generic_show.xpm"
+            $exmpVisibleCheckName`;
+        
+        if($bVisible) {
+            iconTextCheckBox -e -image "generic_show.xpm" 
+            $exmpVisibleCheck;
+        } else {
+            iconTextCheckBox -e -image "generic_hide.xpm" 
+            $exmpVisibleCheck;
+        }
+        
+        string $exmpActiveCC = "proxyPaintUpdateExmpVisible(\""+$exmpVisibleCheck+"\")";
+        
+        iconTextCheckBox -e -cc $exmpActiveCC $exmpVisibleCheck;
+    }
+    
+}
+
+global proc proxyPaintCreateExmpUI(string $coln)
+{
+    rowColumnLayout -p $coln
+        -numberOfColumns 3
+        -cw 1 26
+        -cs 1 2
+        -cw 2 124
+        -cs 2 2
+        -cw 3 26
+        -cs 3 2
+        pxpnExmpUIRow;
+    setParent ..;   
+}
+
 global proc proxyPaintCreateBrushUI(string $coln)
 {
-    floatSliderGrp -label "Brush Radius" -field true
+    floatSliderGrp -label "Radius" -field true
     -minValue 0.01 -maxValue 1000.0
     -fieldMinValue 0.01 -fieldMaxValue 500000.0
     -value 10.0
@@ -59,7 +208,7 @@ global proc proxyPaintCreateBrushUI(string $coln)
 	-p $coln
 	-cc "proxyPaintSetBRadius(`floatSliderGrp -q -value proxyPaintSlider_BRad`)" proxyPaintSlider_BRad;
 
-	floatSliderGrp -label "Brush Weight" -field true
+	floatSliderGrp -label "Weight" -field true
     -minValue 0.01 -maxValue 1.0
     -fieldMinValue 0.01 -fieldMaxValue 1.0
     -value 0.8
@@ -67,13 +216,14 @@ global proc proxyPaintCreateBrushUI(string $coln)
 	-p $coln
 	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
 
-	floatSliderGrp -label "Brush Noise" -field true
+	floatSliderGrp -label "Fall off" -field true
     -minValue 0.0 -maxValue 1.0
     -fieldMinValue 0.0 -fieldMaxValue 1.0
-    -value 0.1
+    -value 0.5
 	-cw 1 130
 	-p $coln
-	-cc "proxyPaintSetRotateNoise(`floatSliderGrp -q -value proxyPaintSlider_rotateNoise`)" proxyPaintSlider_rotateNoise;
+	-cc "proxyPaintSetBrushFalloff(`floatSliderGrp -q -value proxyPaintSlider_BFalloff`)" 
+	proxyPaintSlider_BFalloff;
 
 }
 
@@ -262,6 +412,14 @@ global proc proxyPaintCreateCreateUI(string $coln)
             -cw 1 130
             -cc "proxyPaintSetScaleMax(`floatSliderGrp -q -value proxyPaintSlider_ScaleMax`)" 
             proxyPaintSlider_ScaleMax;
+            
+    floatSliderGrp -label "Rotate Noise" -field true
+        -minValue 0.0 -maxValue 1.0
+        -fieldMinValue 0.0 -fieldMaxValue 1.0
+        -value 0.1
+        -cw 1 130
+        -cc "proxyPaintSetRotateNoise(`floatSliderGrp -q -value proxyPaintSlider_rotateNoise`)" 
+        proxyPaintSlider_rotateNoise;
             
         checkBox -label "Multiple Create"
             -value 1
