@@ -9,6 +9,9 @@
 
 #include "ExampleWorks.h"
 #include <AllMama.h>
+#include <boost/regex.hpp>
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace aphid;
 
@@ -92,6 +95,10 @@ MString ExampleWorks::getExampleStatusStr()
 	AttributeHelper::getBoolAttributeByName(fviz, "exampleVisible", isVisible);
 	addBoolStatusStrSeg(res, isVisible, "/.is_visible");
 	
+	double r, g, b;
+	AttributeHelper::getColorAttributeByName(fviz, "dspColor", r, g, b);
+	addVec3StatusStrSeg(res, r, g, b, "/.dsp_color");
+	
 	MObjectArray exmpOs;
 	getConnectExamples(exmpOs);
 	
@@ -108,6 +115,9 @@ MString ExampleWorks::getExampleStatusStr()
 		AttributeHelper::getBoolAttributeByName(fexmp, "exampleVisible", isVisible);
 		addBoolStatusStrSeg(res, isVisible, "/.is_visible");
 		
+		AttributeHelper::getColorAttributeByName(fexmp, "dspColor", r, g, b);
+		addVec3StatusStrSeg(res, r, g, b, "/.dsp_color");
+	
 	}
 	
 	return res;
@@ -121,6 +131,12 @@ void ExampleWorks::addBoolStatusStrSeg(MString & res, bool b, const char * segNa
 	} else {
 		res += "/off";
 	}
+}
+
+void ExampleWorks::addVec3StatusStrSeg(MString & res, double r, double g, double b, const char * segName)
+{
+	res += segName;
+	res += str(boost::format("/%1% %2% %3%") % r % g % b).c_str();
 }
 
 void ExampleWorks::processShowVoxelThreshold(float x)
@@ -143,4 +159,175 @@ float ExampleWorks::getShowVoxelThreshold()
 		psho.getValue(r);
 	}
 	return r;
+}
+
+bool ExampleWorks::setExampleStatus(int idx, const std::string & expression)
+{
+	validateSelection();
+	if(ObjViz == MObject::kNullObj) {
+		return false;
+	}
+	
+	MObject oexmp;
+	
+	if(idx < 1) {
+		oexmp = ObjViz;
+	} else {
+		MObjectArray exmpOs;
+		getConnectExamples(exmpOs);
+		if(idx-1 < exmpOs.length() ) {
+			oexmp = exmpOs[idx-1];
+		}
+	}
+	
+	if(oexmp == MObject::kNullObj) {
+		return false;
+	}
+	
+	const std::string pattern = "([a-z_0-9]+=[a-z0-9 -.]+;)";
+	
+	std::string::const_iterator start, end;
+    start = expression.begin();
+    end = expression.end();
+	
+	const boost::regex re1(pattern);
+	boost::match_results<std::string::const_iterator> what;
+	
+	while(regex_search(start, end, what, re1, boost::match_default) ) {
+	
+		setExampleStatus(oexmp, what[0]);
+		
+		start = what[0].second;
+	}
+	
+	return true;
+}
+
+void ExampleWorks::setExampleStatus(const MObject & exmpO,
+				const std::string & expression)
+{	
+///	std::cout<<"\n ExampleWorks::setExampleStatus "<<expression;
+	
+	const std::string pattern = "([a-z_0-9]+)=([a-z0-9 -.]+);";
+	
+	std::string::const_iterator start, end;
+    start = expression.begin();
+    end = expression.end();
+	
+	const boost::regex re1(pattern);
+	boost::match_results<std::string::const_iterator> what;
+	while(regex_search(start, end, what, re1, boost::match_default) ) {
+		
+		std::string shead;
+		std::string sval;
+		
+		for(unsigned i = 0; i <what.size(); ++i) {
+		    if(i==1) {
+				shead = what[1];
+			} else if(i==2) {
+				sval = what[2];
+			}
+		}
+		
+		if(shead == "active") {
+			setExampleBoolAttrib(exmpO, "exampleActive", sval);
+		}
+		if(shead == "visible") {
+			setExampleBoolAttrib(exmpO, "exampleVisible", sval);
+		}
+		if(shead == "dspcolor") {
+			setExampleCol3Attrib(exmpO, "dspColor", sval);
+		}
+		
+		start = what[0].second;
+	}
+}
+
+void ExampleWorks::setExampleBoolAttrib(const MObject & exmpO,
+				const MString & attribName,
+				const std::string & expression)
+{
+	bool val;
+	if(!matchedBool(val, expression)) {
+		return;
+	}
+	
+	MStatus stat;
+	MFnDependencyNode fexmp(exmpO, &stat);
+	if(!stat) {
+		return;
+	}
+	
+	fexmp.findPlug(attribName).setValue(val);
+}
+
+void ExampleWorks::setExampleCol3Attrib(const MObject & exmpO,
+				const MString & attribName,
+				const std::string & expression)
+{
+	float v[3];
+	if(!matchedVec3(v, expression)) {
+		return;
+	}
+	
+	MStatus stat;
+	MFnDependencyNode fexmp(exmpO, &stat);
+	if(!stat) {
+		return;
+	}
+	
+	fexmp.findPlug(attribName+"R").setValue(v[0]);
+	fexmp.findPlug(attribName+"G").setValue(v[1]);
+	fexmp.findPlug(attribName+"B").setValue(v[2]);
+}
+
+bool ExampleWorks::matchedBool(bool & val,
+				const std::string & expression)
+{
+	const std::string pattern1 = "(on|1|true)";
+	const boost::regex re1(pattern1);
+	boost::match_results<std::string::const_iterator> what;
+	if(regex_match(expression, what, re1, boost::match_default) ) {
+		val = true;
+		return true;
+	}
+	
+	const std::string pattern2 = "(off|0|false)";
+	const boost::regex re2(pattern2);
+	
+	if(regex_match(expression, what, re2, boost::match_default) ) {
+		val = false;
+		return true;
+	}
+	return false;
+}
+
+bool ExampleWorks::matchedVec3(float * vs,
+				const std::string & expression)
+{
+	const std::string pattern1 = "(^[+-]?[0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?";
+	
+	std::string::const_iterator start, end;
+    start = expression.begin();
+    end = expression.end();
+	
+	int i = 0;
+	const boost::regex re1(pattern1);
+	boost::match_results<std::string::const_iterator> what;
+	while(regex_search(start, end, what, re1, boost::match_default) ) {
+	
+		try {
+			vs[i++] = boost::lexical_cast<float>(what[0]);
+			
+		} catch (boost::bad_lexical_cast &) {
+            std::cout<<"\n bad cast "<<what[0];
+			return false;
+        }
+		
+		if(i==3) {
+			return true;
+		}
+		start = what[0].second;
+	}
+	return false;
 }

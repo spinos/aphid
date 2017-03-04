@@ -352,6 +352,22 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			fContext->setShowVoxelThreshold(shv);
 	}
 	
+	if (argData.isFlagSet(kExampleStatusFlag)) {
+		int iexmp = 0;
+		status = argData.getFlagArgument(kExampleStatusFlag, 0, iexmp);
+		if(!status) {
+			status.perror("failed to parse example status arg 0");
+			return status;
+		}
+		MString sexmp;
+		status = argData.getFlagArgument(kExampleStatusFlag, 1, sexmp);
+		if(!status) {
+			status.perror("failed to parse example status arg 1");
+			return status;
+		}
+		fContext->setExampleStatus(iexmp, sexmp.asChar() );
+	}
+	
 	return MS::kSuccess;
 }
 

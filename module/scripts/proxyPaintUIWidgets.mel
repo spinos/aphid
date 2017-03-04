@@ -87,24 +87,62 @@ proc int proxyPaintGetExmpBoolStat(string $stats[],
     return 0;
 }
 
+proc string proxyPaintGetExmpVec3Stat(string $stats[],
+                    string $skey,
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==$skey) {
+            return $stats[$i+1];
+        }
+    }
+    return "0 0 0";
+}
+
 global proc proxyPaintUpdateExmpActive(string $com)
 {
+    string $ind = `iconTextCheckBox -q -ann $com`;
     int $stat =`iconTextCheckBox -q -v $com`; 
-    if($stat) {
+    if($stat == 1) {
         iconTextCheckBox -e -image "generic_checked.xpm" $com;
     } else {
         iconTextCheckBox -e -image "generic_unchecked.xpm" $com;
     }
+    string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"active="+$stat+";\" "+ `currentCtx`;
+    eval($cmd);
 }
 
 global proc proxyPaintUpdateExmpVisible(string $com)
 {
+    string $ind = `iconTextCheckBox -q -ann $com`;
     int $stat =`iconTextCheckBox -q -v $com`; 
-    if($stat) {
+    if($stat == 1) {
         iconTextCheckBox -e -image "generic_show.xpm" $com;
     } else {
         iconTextCheckBox -e -image "generic_hide.xpm" $com;
     }  
+    string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"visible="+$stat+";\" "+ `currentCtx`;
+    eval($cmd);
+}
+
+global proc proxyPaintEditCanvasColor(string $com)
+{
+    string $ind = `canvas -q -ann $com`;
+    
+    float $initCol[] = `canvas -q -rgbValue $com`;
+    
+    string $result, $buffer[];
+    $result = `colorEditor -rgbValue $initCol[0] $initCol[1] $initCol[2]`;
+    tokenize($result, $buffer);
+    if ("1" == $buffer[3]) {
+        eval("canvas -e -rgbValue "+$buffer[0]+" "+$buffer[1]+" "+$buffer[2]+" "+$com);
+        string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"dspcolor="+$buffer[0]+" "+$buffer[1]+" "+$buffer[2]+";\" "+ `currentCtx`;
+        eval($cmd);
+    } else {
+        print ("ColorEditor was dismissed\n");
+    }
+
 }
 
 global proc proxyPaintUpdateExmpUI(string $coln)
@@ -118,7 +156,7 @@ global proc proxyPaintUpdateExmpUI(string $coln)
     
     string $stats[] = proxyPaintGetExampleStats();
         
-    int $nexmps = size($stats) / 6;
+    int $nexmps = size($stats) / 8;
     if($nexmps < 1) {
         return;   
     }
@@ -126,12 +164,13 @@ global proc proxyPaintUpdateExmpUI(string $coln)
     int $index;
     for ($index = 0; $index < $nexmps; $index++) {
         
-        int $iBegin = $index * 6;
-        int $iEnd = $iBegin + 6;
+        int $iBegin = $index * 8;
+        int $iEnd = $iBegin + 8;
         
         string $name = proxyPaintGetExmpName($stats, $iBegin, $iEnd);
         int $bActive = proxyPaintGetExmpBoolStat($stats, ".is_active", $iBegin, $iEnd);
         int $bVisible = proxyPaintGetExmpBoolStat($stats, ".is_visible", $iBegin, $iEnd);
+        string $scolor = proxyPaintGetExmpVec3Stat($stats, ".dsp_color", $iBegin, $iEnd);
         
         string $exmpActiveCheckName = "pxpnUICheckExmpActive"+$index;
         string $exmpActiveCheck = `iconTextCheckBox -v $bActive 
@@ -180,6 +219,17 @@ global proc proxyPaintUpdateExmpUI(string $coln)
         string $exmpActiveCC = "proxyPaintUpdateExmpVisible(\""+$exmpVisibleCheck+"\")";
         
         iconTextCheckBox -e -cc $exmpActiveCC $exmpVisibleCheck;
+        
+        string $exmpColorCanvasName = `canvas -rgbValue 0 0 1
+            -ann $index
+            -p pxpnExmpUIRow
+            -width 24 -height 22`;
+            
+        eval("canvas -e -rgbValue "+ $scolor+" "+$exmpColorCanvasName);
+        
+        string $exmpColorPC = "proxyPaintEditCanvasColor(\""+$exmpColorCanvasName+"\")";
+        
+        canvas -e -pc $exmpColorPC $exmpColorCanvasName;
     }
     
 }
@@ -187,13 +237,15 @@ global proc proxyPaintUpdateExmpUI(string $coln)
 global proc proxyPaintCreateExmpUI(string $coln)
 {
     rowColumnLayout -p $coln
-        -numberOfColumns 3
+        -numberOfColumns 4
         -cw 1 26
         -cs 1 2
         -cw 2 124
         -cs 2 2
         -cw 3 26
         -cs 3 2
+        -cw 4 26
+        -cs 4 2
         pxpnExmpUIRow;
     setParent ..;   
 }

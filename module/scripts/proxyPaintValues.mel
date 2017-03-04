@@ -72,5 +72,9 @@ global proc proxyPaintOptionValues(string $toolName)
  	
  	$fval = eval("proxyPaintToolContext -q -filterPortion " + $toolName);
  	floatSliderGrp -e -value $fval proxyPaintSlider_filterPortion;
+ 	
+ 	$fval = eval("proxyPaintToolContext -q -bfo " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_BFalloff;
+ 	
 }
 
