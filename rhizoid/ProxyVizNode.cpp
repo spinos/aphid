@@ -61,7 +61,12 @@ MObject ProxyViz::adrawDopSizeY;
 MObject ProxyViz::adrawDopSizeZ;
 MObject ProxyViz::adrawDopSize;
 MObject ProxyViz::aininstspace;
-MObject ProxyViz::ashosamp;
+MObject ProxyViz::adrawColor;
+MObject ProxyViz::adrawColorR;
+MObject ProxyViz::adrawColorG;
+MObject ProxyViz::adrawColorB;
+MObject ProxyViz::avoxactive;
+MObject ProxyViz::avoxvisible;
 MObject ProxyViz::outValue1;
 MObject ProxyViz::outValue2;
 
@@ -229,35 +234,45 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	    return;
 	}
 	
-	MObject thisNode = thisMObject();
-	updateWorldSpace(thisNode);
+	MObject selfNode = thisMObject();
+	updateWorldSpace(selfNode);
 					
 	ExampVox * defBox = plantExample(0);
 	
-	updateDrawSize(defBox, thisNode);
-	updateGeomBox(defBox, thisNode);
-	updateGeomDop(defBox, thisNode);
+	updateDrawSize(defBox, selfNode);
+	updateGeomBox(defBox, selfNode);
+	updateGeomDop(defBox, selfNode);
+	
+	MPlug rPlug(selfNode, adrawColorR);
+	MPlug gPlug(selfNode, adrawColorG);
+	MPlug bPlug(selfNode, adrawColorB);
+	
+	float diffCol[3];
+	diffCol[0] = rPlug.asFloat();
+	diffCol[1] = gPlug.asFloat();
+	diffCol[2] = bPlug.asFloat();
+	defBox->setDiffuseMaterialCol(diffCol);
 	                    
-    MPlug svtPlug(thisNode, adisplayVox);
+    MPlug svtPlug(selfNode, adisplayVox);
     setShowVoxLodThresold(svtPlug.asFloat() );
 	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
-	if(hasView() ) updateViewFrustum(thisNode);
-	else updateViewFrustum(cameraPath);
+	if(hasView() ) {
+		updateViewFrustum(selfNode);
+	} else {
+		updateViewFrustum(cameraPath);
+	}
 	
 	setViewportAspect(view.portWidth(), view.portHeight() );
 	
-	MPlug actp(thisNode, aactivated);
+	MPlug actp(selfNode, aactivated);
 	const bool isActive = actp.asBool();
 	if(isActive) {
 		setWireColor(.125f, .1925f, .1725f);
 	} else {
 		setWireColor(.0675f, .0675f, .0675f);
 	}
-	
-	MPlug shoSamplePlug(thisNode, ashosamp);
-	const bool showSample = shoSamplePlug.asBool();
 
 	_viewport = view;
 	fHasView = 1;
@@ -307,10 +322,6 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 		AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
 	}
 	
-	if(showSample) {
-		drawSample();
-	}
-	
     if(hasView() ) {
 		drawViewFrustum();
     }
@@ -354,6 +365,41 @@ MStatus ProxyViz::initialize()
 { 
 	MFnNumericAttribute numFn;
 	MStatus			 stat;
+	
+	avoxactive = numFn.create( "exampleActive", "exa", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setDefault(true);
+	addAttribute(avoxactive);
+	
+	avoxvisible = numFn.create( "exampleVisible", "exv", MFnNumericData::kBoolean);
+	numFn.setStorable(true);
+	numFn.setDefault(true);
+	addAttribute(avoxvisible);
+	
+	adrawColorR = numFn.create( "dspColorR", "dspr", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.47f);
+	addAttribute(adrawColorR);
+	
+	adrawColorG = numFn.create( "dspColorG", "dspg", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.46f);
+	addAttribute(adrawColorG);
+	
+	adrawColorB = numFn.create( "dspColorB", "dspb", MFnNumericData::kFloat);
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setDefault(0.45f);
+	addAttribute(adrawColorB);
+	
+	adrawColor = numFn.create( "dspColor", "dspc", adrawColorR, adrawColorG, adrawColorB );
+	numFn.setStorable(true);
+	numFn.setKeyable(true);
+	numFn.setUsedAsColor(true);
+	numFn.setDefault(0.47f, 0.46f, 0.45f);
+	addAttribute(adrawColor);
 	
 	alodgatehigh = numFn.create( "lodGateMax", "ldmx", MFnNumericData::kFloat, 1.f);
 	numFn.setKeyable(true);
@@ -680,12 +726,6 @@ MStatus ProxyViz::initialize()
     matAttr.setArray(true);
     matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( aininstspace );
-	
-	ashosamp = numFn.create( "showSample", "shsp", MFnNumericData::kBoolean );
-	numFn.setDefault(0);
-	numFn.setKeyable(false);
-	numFn.setStorable(false);
-	addAttribute(ashosamp);
     
 	attributeAffects(agroundMesh, outValue);
 	attributeAffects(agroundSpace, outValue);
@@ -1042,6 +1082,7 @@ void ProxyViz::updateGeomDop(ExampVox * dst, const MObject & node)
 	ob.caluclateOrientation(&dst->geomBox() );
 	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
 	dst->update8DopPoints(ob, dst->dopSize() );
+	dst->updateDopCol();
 }
 
 void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
@@ -1056,6 +1097,7 @@ void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
 	ob.caluclateOrientation(&dst->geomBox() );
 	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
 	dst->update8DopPoints(ob, dst->dopSize());
+	dst->updateDopCol();
 }
 
 void ProxyViz::updateDrawSize(ExampVox * dst, MDataBlock & block)

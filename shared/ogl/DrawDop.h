@@ -19,6 +19,7 @@ class DrawDop {
 
 	float * m_vertexNormals;
 	float * m_vertexPoints;
+	float * m_vertexColors;
 	int m_numVertices;
 	
 public:
@@ -33,7 +34,8 @@ public:
 	void drawASolidDop() const;
 
 protected:
-
+	void setUniformDopColor(const float * c);
+	
 private:
 	void clear();
 	

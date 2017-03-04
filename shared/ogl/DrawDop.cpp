@@ -18,6 +18,7 @@ DrawDop::DrawDop()
 { 
 	m_vertexNormals = 0;
 	m_vertexPoints = 0;
+	m_vertexColors = 0;
 	m_numVertices = 0;
 }
 
@@ -32,6 +33,9 @@ void DrawDop::clear()
 	if(m_vertexPoints) {
 		delete[] m_vertexPoints;
 	}
+	if(m_vertexColors) {
+		delete[] m_vertexColors;
+	}
 }
 
 void DrawDop::update8DopPoints(const AOrientedBox & ob,
@@ -45,8 +49,10 @@ void DrawDop::update8DopPoints(const AOrientedBox & ob,
 	const int & nt = bd.numTriangles();
 	m_numVertices = 3 * nt;
 	
-	m_vertexNormals = new float[m_numVertices*3];
-	m_vertexPoints = new float[m_numVertices*3];
+	const int nf = m_numVertices*3;
+	m_vertexNormals = new float[nf];
+	m_vertexPoints = new float[nf];
+	m_vertexColors = new float[nf];
 	
 	const Vector3F * bv = bd.vertex();
 	const Vector3F * bn = bd.normal();
@@ -54,13 +60,9 @@ void DrawDop::update8DopPoints(const AOrientedBox & ob,
 	
 	for(int i=0;i<m_numVertices;++i) {
 		const int i3 = i * 3;
-		m_vertexNormals[i3] = bn[i].x;
-		m_vertexNormals[i3+1] = bn[i].y;
-		m_vertexNormals[i3+2] = bn[i].z;
+		memcpy(&m_vertexNormals[i3], &bn[i], 12);
+		memcpy(&m_vertexPoints[i3], &bv[i], 12);
 		
-		m_vertexPoints[i3] = bv[i].x;
-		m_vertexPoints[i3+1] = bv[i].y;
-		m_vertexPoints[i3+2] = bv[i].z;
 	}
 	
 	if(!sizing) {
@@ -75,6 +77,13 @@ void DrawDop::update8DopPoints(const AOrientedBox & ob,
 	}
 }
 
+void DrawDop::setUniformDopColor(const float * c)
+{
+	for(int i=0;i<m_numVertices;++i) {
+		memcpy(&m_vertexColors[i*3], c, 12);
+	}
+}
+
 void DrawDop::drawAWireDop() const
 {
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_vertexPoints);
@@ -84,6 +93,7 @@ void DrawDop::drawAWireDop() const
 	
 void DrawDop::drawASolidDop() const
 {
+	glColorPointer(3, GL_FLOAT, 0, (const GLfloat*)m_vertexColors);
 	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)m_vertexNormals);
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_vertexPoints);
 

@@ -40,7 +40,8 @@ const char* GlslLegacyInstancer::vertexProgramSource() const
 "\n   normalWorld.z = dot(gl_MultiTexCoord3.xyz, gl_Normal);"
 "\n   normalWorld = normalize(normalWorld);"
 "\n   shadingNormal = normalWorld;"
-"\n}\n";
+"\n		gl_FrontColor = gl_Color;"
+"}\n";
 }
 
 const char* GlslLegacyInstancer::fragmentProgramSource() const
@@ -52,9 +53,10 @@ const char* GlslLegacyInstancer::fragmentProgramSource() const
 "\nvoid main()"
 "\n{"
 "\n   float ldn = dot(shadingNormal, distantLightVec);"
-"\n   if(ldn < 0.0) ldn = 0.0;\n"
-"\n   ldn = 0.2 + 0.8 * ldn;\n"
-"\n	gl_FragColor = vec4(diffuseColor * ldn, 1.0);"
+"\n   if(ldn < 0.0) ldn = 0.0;"
+"\n   ldn = 0.2 + 0.8 * ldn;"
+"\n   vec3 cs = vec3(gl_Color) * diffuseColor;"
+"\n	  gl_FragColor = vec4(cs * ldn, 1.0);"
 "\n}\n";
 }
 
@@ -69,6 +71,8 @@ void GlslLegacyInstancer::updateShaderParameters() const
 {
     glUniformMatrix4fvARB(m_worldMatLoc, 1, 0, (float*)&m_worldMat);
     glUniform3fvARB(m_distantLightVecLoc, 1, (float*)&m_distantLightVec);
+	float defCol[3] = {1.f, 1.f, 1.f};
+	glUniform3fvARB(m_diffColorLoc, 1, defCol);
 }
 
 void GlslLegacyInstancer::setWorldTm(const Matrix44F & x)

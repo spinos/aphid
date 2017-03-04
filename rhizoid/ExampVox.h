@@ -63,6 +63,8 @@ public:
 	void setDopSize(const float & a,
 	                const float & b,
 	                const float &c);
+	void setDiffuseMaterialCol(const float * x);
+	void updateDopCol();
 	
 	const float & geomExtent() const;
 	const float & geomSize() const;

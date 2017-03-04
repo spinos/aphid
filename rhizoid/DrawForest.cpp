@@ -38,32 +38,6 @@ DrawForest::~DrawForest()
 	delete m_scalHand;
 }
 
-void DrawForest::drawFace(const int & geoId, const int & triId)
-{
-	const ATriangleMesh * mesh = groundMeshes()[geoId];
-	Vector3F * p = mesh->points();
-	unsigned * tri = mesh->triangleIndices(triId );
-	glVertex3fv((GLfloat *)&p[tri[0]]);
-	glVertex3fv((GLfloat *)&p[tri[1]]);
-	glVertex3fv((GLfloat *)&p[tri[2]]);
-		
-}
-
-void DrawForest::drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components)
-{
-    if(!m_enabled) return;
-	ATriangleMesh * mesh = static_cast<ATriangleMesh *>(geo);
-	Vector3F *p = mesh->points();
-	components->begin();
-	while(!components->end()) {
-		unsigned * tri = mesh->triangleIndices(components->key() );
-		glVertex3fv((GLfloat *)&p[tri[0]]);
-		glVertex3fv((GLfloat *)&p[tri[1]]);
-		glVertex3fv((GLfloat *)&p[tri[2]]);
-		components->next();
-	}
-}
-
 void DrawForest::drawWiredPlants()
 {
 	if(!m_enabled) {
@@ -79,6 +53,7 @@ void DrawForest::drawWiredPlants()
 	glDepthFunc(GL_LEQUAL);
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
 	glColor3fv(m_wireColor);
 	try {
 	g->begin();
@@ -144,7 +119,8 @@ void DrawForest::drawSolidPlants()
 	
 	const float margin = g->gridSize() * .1f;
 	
-	glPushAttrib(GL_LIGHTING_BIT);
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glColor3f(1.f,1.f,1.f);
 	
 	Vector3F lightVec(1,1,1);
 	lightVec = cameraSpace().transformAsNormal(lightVec);
@@ -153,6 +129,7 @@ void DrawForest::drawSolidPlants()
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	
 	try {
 	g->begin();
@@ -170,6 +147,7 @@ void DrawForest::drawSolidPlants()
 	
 	m_instancer->programEnd();
 	
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
@@ -201,8 +179,8 @@ void DrawForest::drawPlantsInCell(ForestCell * cell,
 			iExample = cell->key().y;
 			v = plantExample(iExample );
 			if(v) {
-			    const float * c = v->diffuseMaterialColor();
-			    m_instancer->setDiffueColorVec(c);
+			    //const float * c = v->diffuseMaterialColor();
+			    //m_instancer->setDiffueColorVec(c);
 			} else {
 			    std::cout<<"drawWiredPlant v is null";
 			}
@@ -227,8 +205,8 @@ void DrawForest::drawPlantSolidBoundInCell(ForestCell * cell)
 			iExample = cell->key().y;
 			v = plantExample(iExample );
 			if(v) {
-				const float * c = v->diffuseMaterialColor();	
-				m_instancer->setDiffueColorVec(c);
+				//const float * c = v->diffuseMaterialColor();	
+				//m_instancer->setDiffueColorVec(c);
 			} else {
 				std::cout<<"drawPlantSolidBoundInCell v is null";
 			}
@@ -250,7 +228,8 @@ void DrawForest::drawPlantSolidBound(PlantData * data,
 	glMultiTexCoord4f(GL_TEXTURE2, trans(0,1), trans(1,1), trans(2,1), trans(3,1) );
 	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
 	
-	v->drawSolidBound();
+	//v->drawSolidBound();
+	v->drawASolidDop();
 }
 
 void DrawForest::drawPlant(PlantData * data,
@@ -267,7 +246,7 @@ void DrawForest::drawPlant(PlantData * data,
 void DrawForest::drawLODPlant(PlantData * data,
 					const ExampVox * v)
 {	
-	if(m_showVoxLodThresold > .9999f) {
+	if(m_showVoxLodThresold > .999f) {
         v->drawASolidDop();
 		return;
     }
@@ -295,7 +274,9 @@ void DrawForest::drawLODPlant(PlantData * data,
 
 void DrawForest::drawGridBounding()
 {
-	if(numPlants() < 1) return;
+	if(numPlants() < 1) {
+		return;
+	}
 	drawBoundingBox(&gridBoundingBox() );
 }
 

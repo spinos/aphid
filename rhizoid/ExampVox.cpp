@@ -209,7 +209,7 @@ const ExampVox::InstanceD & ExampVox::getInstance(const int & i) const
 
 void ExampVox::setActive(bool x)
 { m_isActive = x; }
-	
+
 void ExampVox::setVisible(bool x)
 { m_isVisible = x; }
 
@@ -218,5 +218,11 @@ const bool & ExampVox::isActive() const
 	
 const bool & ExampVox::isVisible() const
 { return m_isVisible; }
+
+void ExampVox::setDiffuseMaterialCol(const float * x)
+{ memcpy(m_diffuseMaterialColV, x, 12); }
+
+void ExampVox::updateDopCol()
+{ setUniformDopColor(m_diffuseMaterialColV); }
 
 }

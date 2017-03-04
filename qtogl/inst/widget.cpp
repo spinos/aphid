@@ -68,7 +68,7 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
     getDrawer()->m_markerProfile.apply();
-	getDrawer()->setColor(.5f, .85f, .7f);
+	getDrawer()->setColor(1.f, 1.f, 1.f);
 	
 	drawParticles();
 	

@@ -100,7 +100,12 @@ public:
 	static MObject adrawDopSizeZ;
 	static MObject adrawDopSize;
 	static MObject aininstspace;
-	static MObject ashosamp;
+	static MObject adrawColorR;
+	static MObject adrawColorG;
+	static MObject adrawColorB;
+	static MObject adrawColor;
+	static MObject avoxactive;
+	static MObject avoxvisible;
 	static MObject outValue1;
 	static MObject outValue2;
 	static MObject outValue;

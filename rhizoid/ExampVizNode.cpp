@@ -15,7 +15,6 @@
 #include <maya/MFnPluginData.h>
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnMatrixAttribute.h>
-#include <math/BoundingBox.h>
 #include <ExampData.h>
 #include <math/linearMath.h>
 #include <geom/ConvexShape.h>
@@ -76,14 +75,17 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		MDataHandle drszz = block.inputValue(adrawDopSizeZ);
 		setDopSize(drszx.asFloat(), drszy.asFloat(), drszz.asFloat() );
 	
-		float * diffCol = diffuseMaterialColV();
-		
-		MFloatVector c = block.inputValue(adrawColor).asFloatVector();
-		diffCol[0] = c.x; diffCol[1] = c.y; diffCol[2] = c.z;
+		float diffCol[3];
+		diffCol[0] = block.inputValue(adrawColorR).asFloat(); 
+		diffCol[1] = block.inputValue(adrawColorG).asFloat(); 
+		diffCol[2] = block.inputValue(adrawColorB).asFloat();
+		setDiffuseMaterialCol(diffCol);
 		
 		if(!loadTriangles(block) ) {
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
+		
+		
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
@@ -487,7 +489,9 @@ bool ExampViz::loadTriangles(MDataBlock & data)
 	MFnVectorArrayData colFn(colH.data());
 	MVectorArray cols = colFn.array();
 	
-	if(cols.length() < n) {
+	AHelper::Info<int>("col len", cols.length() );
+	
+	if(cols.length() != n) {
 		fillDefaultCol(cols, n);
 	}
 	
@@ -537,7 +541,7 @@ bool ExampViz::loadTriangles(MObject & node)
 	MVectorArray cols = colFn.array();
 	
 	unsigned nc = cols.length();
-	if(nc < n ) {
+	if(nc != n ) {
 		fillDefaultCol(cols, n);
 	}
 	
@@ -554,6 +558,8 @@ void ExampViz::fillDefaultCol(MVectorArray & cols,
 	for(int i=0;i<n;++i) {
 		cols[i] = c;
 	}
+	std::cout<<"\n ExampViz::fillDefaultCol "<<n
+			<<" rgb "<<diffCol[0]<<","<<diffCol[1]<<","<<diffCol[2];
 }
 
 void ExampViz::buildDrawBuf(int n,
@@ -574,6 +580,6 @@ void ExampViz::buildDrawBuf(int n,
 	
 	AHelper::Info<unsigned>(" ExampViz load n point", n );
 	buildBounding8Dop(geomBox() );
-	
+	setUniformDopColor(diffuseMaterialColV() );
 }
 //:~

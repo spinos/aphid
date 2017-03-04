@@ -81,9 +81,7 @@ protected:
 					const float & weight = 1.f) const;
                     
 private:
-    void drawFace(const int & geoId, const int & triId);
-	void drawFaces(Geometry * geo, sdb::Sequence<unsigned> * components);
-	void drawPlantsInCell(ForestCell * cell,
+    void drawPlantsInCell(ForestCell * cell,
 					const BoundingBox & box);
 	void drawPlant(PlantData * data,
 					const ExampVox * v);

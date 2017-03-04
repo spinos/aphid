@@ -125,9 +125,8 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
     mf.glMatrix(m_transBuf);
 		
 	view.beginGL();
-	glPointSize(2.f);
-	drawBoundingBox(&bb);
 	
+	drawBoundingBox(&bb);
 	drawZCircle(m_transBuf);
 	
 	bool hasGlsl = isGlslReady();
@@ -138,9 +137,14 @@ void ShrubVizNode::draw( M3dView & view, const MDagPath & path,
 	if(hasGlsl ) {
 
 	drawWiredBoundInstances();
+	
 /// https://www.opengl.org/sdk/docs/man2/xhtml/glPushAttrib.xml	
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glPushAttrib(GL_ALL_ATTRIB_BITS | GL_CURRENT_BIT);
+	glDisable(GL_LIGHTING);
 		
+	glColor3f(1.f, 1.f, 1.f);
+	glPointSize(2.f);
+	
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {	
 
@@ -517,6 +521,7 @@ void ShrubVizNode::drawSolidInstances() const
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	m_instancer->programBegin();
 	
@@ -524,10 +529,7 @@ void ShrubVizNode::drawSolidInstances() const
 	const int nins = numInstances();
 	for(int i=0;i<nins;++i) {
 		const InstanceD & ins = getInstance(i);
-#if 0
-		glPushMatrix();
-		glMultMatrixf(ins._trans);
-#endif
+
 		const float *d = ins._trans;
 	    glMultiTexCoord4f(GL_TEXTURE1, d[0], d[4], d[8], d[12]);
 	    glMultiTexCoord4f(GL_TEXTURE2, d[1], d[5], d[9], d[13]);
@@ -535,21 +537,18 @@ void ShrubVizNode::drawSolidInstances() const
 	    
 		if(ins._exampleId < nexp) {
 			const ExampVox * v = getExample(ins._exampleId);
-			const float * c = v->diffuseMaterialColor();
-			
-			m_instancer->setDiffueColorVec(c);
+			//const float * c = v->diffuseMaterialColor();
+			//m_instancer->setDiffueColorVec(c);
 			v->drawPoints();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);
 		}
 		
-#if 0
-		glPopMatrix();
-#endif
 	}
 	m_instancer->programEnd();
 	
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -574,7 +573,6 @@ void ShrubVizNode::drawWiredInstances() const
 		if(ins._exampleId < nexp) {
 			const ExampVox * v = getExample(ins._exampleId);
 			const float * c = v->diffuseMaterialColor();
-			
 			m_wireInstancer->setDiffueColorVec(c);
 			v->drawWiredPoints();
 		} else {
