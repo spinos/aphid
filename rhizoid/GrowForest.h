@@ -108,6 +108,7 @@ bool GrowForest::growOnSample(const T & asmp,
 	collctx->_maxDistance = option.m_maxMarginSize;
 	collctx->_pos = asmp.pos;
 	
+	option.m_plantId = asmp.exmInd;
 	return processGrow(option, bind, tm, collctx);
 	
 }

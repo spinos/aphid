@@ -49,7 +49,9 @@ public:
 	void colorSampleByPlantType(const Tf & selFilter);
 					
 /// for all active cells, reshuffle samples noise
-	void reshuffleSamples(const int & level);
+/// and plant type
+	template<typename Tf>
+	void reshuffleSamples(const Tf & selFilter);
 					
 	void activeCellBegin();
 	void activeCellNext();
@@ -173,6 +175,24 @@ void ForestGrid::colorSampleByPlantType(const Tf & selFilter)
 		
 		next();
 	}
+}
+
+template<typename Tf>
+void ForestGrid::reshuffleSamples(const Tf & selFilter)
+{
+	const int & level = selFilter.maxSampleLevel();
+	
+	m_activeCells.begin();
+	while(!m_activeCells.end() ) {
+		ForestCell * cell = m_activeCells.value();
+		if(cell->hasSamples(level) ) {
+			cell->reshuffleSamples(level);
+		}
+		
+		m_activeCells.next();
+	}
+	
+	assignSamplePlantType(selFilter);
 }
 
 }

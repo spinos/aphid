@@ -184,6 +184,7 @@ protected:
 	void setFilterPlantColors(const std::vector<Vector3F> & colors);
 	void updateSamplePlantType();
 	void updateSampleColor();
+	int randomExampleInd() const;
 	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,

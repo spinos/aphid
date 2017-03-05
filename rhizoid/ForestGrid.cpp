@@ -101,21 +101,6 @@ int ForestGrid::countPlants()
 	return c;
 }
 
-void ForestGrid::reshuffleSamples(const int & level)
-{
-	std::cout<<"\n Forest reshuffle samples at level "<<level;
-
-	m_activeCells.begin();
-	while(!m_activeCells.end() ) {
-		ForestCell * cell = m_activeCells.value();
-		if(cell->hasSamples(level) ) {
-			cell->reshuffleSamples(level);
-		}
-		
-		m_activeCells.next();
-	}
-}
-
 void ForestGrid::clearPlants()
 {
 	begin();

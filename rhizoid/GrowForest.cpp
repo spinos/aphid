@@ -199,6 +199,8 @@ bool GrowForest::growAt(const Ray & ray, GrowOption & option)
 		return false;
 	}
 	
+	option.m_plantId = randomExampleInd();
+	
 	if(option.m_alongNormal) {
 		option.m_upDirection = t->calculateNormal();
     }
@@ -236,7 +238,6 @@ bool GrowForest::growAt(const Ray & ray, GrowOption & option)
 	
 	} else {
 		growSingle(option, bind, option.m_plantId, tm, &collctx);
-				
 	}
 		
     return true;
@@ -249,6 +250,8 @@ bool GrowForest::growAt(const Matrix44F & trans, GrowOption & option)
 	if(!bindToGround(&bind, trans.getTranslation(), pog) ) {
 		return false;
 	}
+	
+	option.m_plantId = randomExampleInd();
 	
 	if(option.m_alongNormal) {
 		option.m_upDirection = bindNormal(&bind);

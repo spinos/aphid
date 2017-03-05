@@ -601,7 +601,7 @@ void Forest::reshuffleSamples()
 	if(!m_ground) return;
 	if(m_ground->isEmpty() ) return;
 	
-	m_grid->reshuffleSamples(sampleLevel() );
+	m_grid->reshuffleSamples<SampleFilter>(*m_sampleFlt);
 }
 
 void Forest::processSampleFilter()
@@ -726,6 +726,11 @@ void Forest::updateSamplePlantType()
 void Forest::updateSampleColor()
 {
 	grid()->colorSampleByPlantType<SampleFilter>(*m_sampleFlt);
+}
+
+int Forest::randomExampleInd() const
+{
+	return m_sampleFlt->selectPlantType(rand() & 65535);
 }
 
 }
