@@ -140,6 +140,9 @@ public:
 	void processSetFastGround(int x);
 	const int & getFastGround() const;
 	void processBrushFalloff(float x);
+	void processFilterPlantTypeMap(const std::vector<int> & indices,
+				const std::vector<Vector3F> & colors);
+	void processSampleColorChanges(const std::vector<Vector3F> & colors);
 	
 private:
     void drawBrush(M3dView & view);

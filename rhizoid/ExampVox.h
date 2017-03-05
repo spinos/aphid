@@ -90,7 +90,7 @@ public:
 	virtual const InstanceD & getInstance(const int & i) const;
 	
 	void setActive(bool x);
-	void setVisible(bool x);
+	virtual void setVisible(bool x);
 	
 	const bool & isActive() const;
 	const bool & isVisible() const;

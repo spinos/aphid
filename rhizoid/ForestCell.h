@@ -65,6 +65,12 @@ public:
 	
 	const sdb::SampleCache * sampleCacheAtLevel(int level) const;
 	
+	template<typename Tf>
+	void assignSamplePlantType(const Tf & selFilter);
+	
+	template<typename Tf>
+	void colorSampleByPlantType(const Tf & selFilter);
+	
 protected:
 	 
 private:
@@ -88,12 +94,19 @@ void ForestCell::buildSamples(T & ground, Tc & closestGround,
 		return;
 	}
 	m_lodsamp->insertNodeAtLevel<Tc, 4 >(maxLevel, closestGround);
-	m_lodsamp->buildSampleCache(maxLevel, maxLevel);
+	m_lodsamp->buildSampleCache(maxLevel, maxLevel);	
 	const int & nv = m_lodsamp->numSamplesAtLevel(maxLevel);
-	if(nv) {
-		m_activeSampleIndices.reset(new int[nv]);
-		m_visibleSampleIndices.reset(new int[nv]);
-	}
+	if(nv < 1) {
+		m_activeSampleIndices.reset();
+		m_visibleSampleIndices.reset();
+		return;
+	} 
+	
+	m_activeSampleIndices.reset(new int[nv]);
+	m_visibleSampleIndices.reset(new int[nv]);
+	
+	assignSamplePlantType<Tf>(selFilter);
+	
 }
 
 template<typename T, typename Tshape>
@@ -139,6 +152,32 @@ void ForestCell::processFilter(T & selFilter)
 		
 	}
 	
+}
+
+template<typename Tf>
+void ForestCell::assignSamplePlantType(const Tf & selFilter)
+{
+	sdb::SampleCache * cache = m_lodsamp->samplesAtLevel(selFilter.maxSampleLevel() );
+	sdb::SampleCache::ASample * sps = cache->data();
+	const int & ns = cache->numSamples();
+	for(int i=0; i<ns; ++i) {
+		sdb::SampleCache::ASample & asp = sps[i];
+		const int k = rand() & 65535;
+		asp.exmInd = selFilter.selectPlantType(k);
+		asp.col = selFilter.plantTypeColor(asp.exmInd);
+	}
+}
+
+template<typename Tf>
+void ForestCell::colorSampleByPlantType(const Tf & selFilter)
+{
+	sdb::SampleCache * cache = m_lodsamp->samplesAtLevel(selFilter.maxSampleLevel() );
+	sdb::SampleCache::ASample * sps = cache->data();
+	const int & ns = cache->numSamples();
+	for(int i=0; i<ns; ++i) {
+		sdb::SampleCache::ASample & asp = sps[i];
+		asp.col = selFilter.plantTypeColor(asp.exmInd);
+	}
 }
 
 }

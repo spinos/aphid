@@ -5,6 +5,11 @@
  *
  */
  
+global proc proxyPaintOnActiveExampleChanges()
+{
+    proxyPaintToolContext -e -aex `currentCtx`;
+}
+
 global proc string[] proxyPaintGetExampleStats()
 {
     string $exmpStat = eval("proxyPaintToolContext -q -exs "+`currentCtx`);

@@ -142,11 +142,12 @@ void ExampleWorks::addVec3StatusStrSeg(MString & res, double r, double g, double
 void ExampleWorks::processShowVoxelThreshold(float x)
 {
 	validateSelection();
-	if(ObjViz != MObject::kNullObj) {
-		MFnDependencyNode fviz(ObjViz);
-		MPlug psho = fviz.findPlug("svt");
-		psho.setValue(x);
+	if(ObjViz == MObject::kNullObj) {
+		return;
 	}
+	MFnDependencyNode fviz(ObjViz);
+	MPlug psho = fviz.findPlug("svt");
+	psho.setValue(x);
 }
 
 float ExampleWorks::getShowVoxelThreshold()
@@ -331,3 +332,107 @@ bool ExampleWorks::matchedVec3(float * vs,
 	}
 	return false;
 }
+
+void ExampleWorks::getVizStatistics(std::map<std::string, std::string > & stats)
+{
+	validateSelection();
+	if(!PtrViz) {
+		return;
+	}
+	PtrViz->getStatistics(stats);
+}
+
+bool ExampleWorks::getActiveExamplePriority(std::map<int, int > & stats)
+{
+	validateSelection();
+	if(ObjViz == MObject::kNullObj) {
+		return false;
+	}
+	
+	bool isActive = false;
+	
+	MFnDependencyNode fviz(ObjViz);
+	AttributeHelper::getBoolAttributeByName(fviz, "exampleActive", isActive);
+	if(isActive) {
+		stats[0] = 1;
+	}
+	
+	MObjectArray exmpOs;
+	getConnectExamples(exmpOs);
+	
+	const int n = exmpOs.length();
+	
+	for(int i=0;i<n;++i) {
+		MFnDependencyNode fexmp(exmpOs[i]);
+		AttributeHelper::getBoolAttributeByName(fexmp, "exampleActive", isActive);
+		if(isActive) {
+			stats[i+1] = 1;
+		}
+	
+	}
+	return true;
+}
+
+void ExampleWorks::getExampleColors(std::vector<Vector3F> & colors)
+{
+	if(ObjViz == MObject::kNullObj) {
+        return; 
+	}
+	
+	MFnDependencyNode fviz(ObjViz);
+	double r, g, b;
+	AttributeHelper::getColorAttributeByName(fviz, "dspColor", r, g, b);
+	
+	colors.push_back(Vector3F(r, g, b) );
+	
+	MObjectArray exmpOs;
+	getConnectExamples(exmpOs);
+	
+	const int n = exmpOs.length();
+	
+	for(int i=0;i<n;++i) {
+		MFnDependencyNode fexmp(exmpOs[i]);
+		AttributeHelper::getColorAttributeByName(fexmp, "dspColor", r, g, b);
+		colors.push_back(Vector3F(r, g, b) );
+	}
+}
+
+void ExampleWorks::activateExamples()
+{
+	std::map<int, int > priotityMap;
+	if(!getActiveExamplePriority(priotityMap) ) {
+		return;
+	}
+	
+	std::vector<int> inds;
+	std::map<int, int >::const_iterator it = priotityMap.begin();
+	for(;it!=priotityMap.end();++it) {
+		int n = it->second;
+		for(int i=0;i<n;++i) {
+			inds.push_back(it->first);
+		}
+	}
+	
+	if(inds.size() < 1) {
+		std::cout<<"\n WARNING no active examples, use default 0";
+		inds.push_back(0);
+	}
+	
+	std::vector<Vector3F> colorVec;
+	getExampleColors(colorVec);
+	
+	PtrViz->processFilterPlantTypeMap(inds, colorVec);
+}
+
+void ExampleWorks::updateSampleColor()
+{
+	validateSelection();
+	if(!PtrViz) {
+		return;
+	}
+	
+	std::vector<Vector3F> colorVec;
+	getExampleColors(colorVec);
+	PtrViz->processSampleColorChanges(colorVec);
+}
+//:~

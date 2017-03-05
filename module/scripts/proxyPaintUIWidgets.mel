@@ -111,6 +111,7 @@ global proc proxyPaintUpdateExmpActive(string $com)
     }
     string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"active="+$stat+";\" "+ `currentCtx`;
     eval($cmd);
+    proxyPaintOnActiveExampleChanges();
 }
 
 global proc proxyPaintUpdateExmpVisible(string $com)
@@ -139,6 +140,9 @@ global proc proxyPaintEditCanvasColor(string $com)
         eval("canvas -e -rgbValue "+$buffer[0]+" "+$buffer[1]+" "+$buffer[2]+" "+$com);
         string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"dspcolor="+$buffer[0]+" "+$buffer[1]+" "+$buffer[2]+";\" "+ `currentCtx`;
         eval($cmd);
+        $cmd = "proxyPaintToolContext -e -usc "+ `currentCtx`;
+        eval($cmd);
+        
     } else {
         print ("ColorEditor was dismissed\n");
     }
@@ -231,7 +235,7 @@ global proc proxyPaintUpdateExmpUI(string $coln)
         
         canvas -e -pc $exmpColorPC $exmpColorCanvasName;
     }
-    
+    proxyPaintOnActiveExampleChanges();
 }
 
 global proc proxyPaintCreateExmpUI(string $coln)

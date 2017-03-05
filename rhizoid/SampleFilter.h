@@ -13,6 +13,8 @@
 #include <math/Vector3F.h>
 #include <geom/SelectionContext.h>
 #include <math/ANoise3.h>
+#include <boost/scoped_array.hpp>
+#include <vector>
 
 namespace aphid {
     
@@ -24,6 +26,10 @@ class SampleFilter : public ANoise3Sampler {
 	float m_sampleGridSize;
 	float m_portion;
 	SelectionContext::SelectMode m_mode;
+	boost::scoped_array<int> m_plantTypeIndices;
+	boost::scoped_array<Vector3F> m_plantTypeColors;
+	int m_numPlantTypeIndices;
+	int m_numPlantTypeColors;
 	
 public:
 	SampleFilter();
@@ -49,9 +55,20 @@ public:
 	
 	const ExrImage * m_imageSampler;
 	
+	void resetPlantTypeIndices(const std::vector<int> & indices);
+	void resetPlantTypeColors(const std::vector<Vector3F> & colors);
+
+	const Vector3F & plantTypeColor(int idx) const;
+	
+/// randomly
+	int selectPlantType(int x) const;
+	
 protected:
 
 private:
+	void initPlantTypeIndices();
+	void initPlantTypeColors();
+	
 };
 
 }

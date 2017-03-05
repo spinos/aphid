@@ -30,6 +30,14 @@
 /// change status of idx-th example
 /// visible=0;active=true;color=.5 .5 .5
 	bool setExampleStatus(int idx, const std::string & expression);
+/// .is_active:on/off
+/// .is_visible:on/off
+/// .name:string
+/// .dsp_color:float float float
+	void getVizStatistics(std::map<std::string, std::string > & stats);
+/// map example:priority
+	void activateExamples();
+	void updateSampleColor();
 	
  protected:
  /// active viz
@@ -38,7 +46,6 @@
 	
 	bool validateViz(const MSelectionList &sels);
 	bool validateSelection();
-	
 	void processShowVoxelThreshold(float x);
 	
  private:
@@ -57,6 +64,9 @@
 				const std::string & expression);
 	bool matchedVec3(float * vs,
 				const std::string & expression);
+/// ind:priority
+	bool getActiveExamplePriority(std::map<int, int > & stats);
+	void getExampleColors(std::vector<aphid::Vector3F> & colors);
 	
  };
  

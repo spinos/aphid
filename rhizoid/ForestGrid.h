@@ -41,6 +41,12 @@ public:
 					Tc & closestGround,
 					Tf & selFilter,
 					const Tshape & selShape);
+/// set type and color					
+	template<typename Tf>
+	void assignSamplePlantType(const Tf & selFilter);
+/// type unchanged
+	template<typename Tf>
+	void colorSampleByPlantType(const Tf & selFilter);
 					
 /// for all active cells, reshuffle samples noise
 	void reshuffleSamples(const int & level);
@@ -133,6 +139,36 @@ void ForestGrid::processFilter(Tf & selFilter)
 		ForestCell * cell = value();
 		if(cell->hasSamples(level) ) {
 			cell->processFilter(selFilter);
+		}
+		
+		next();
+	}
+}
+
+template<typename Tf>
+void ForestGrid::assignSamplePlantType(const Tf & selFilter)
+{
+	const int & level = selFilter.maxSampleLevel();
+	begin();
+	while(!end() ) {
+		ForestCell * cell = value();
+		if(cell->hasSamples(level) ) {
+			cell->assignSamplePlantType(selFilter);
+		}
+		
+		next();
+	}
+}
+
+template<typename Tf>
+void ForestGrid::colorSampleByPlantType(const Tf & selFilter)
+{
+	const int & level = selFilter.maxSampleLevel();
+	begin();
+	while(!end() ) {
+		ForestCell * cell = value();
+		if(cell->hasSamples(level) ) {
+			cell->colorSampleByPlantType(selFilter);
 		}
 		
 		next();

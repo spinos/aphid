@@ -51,7 +51,7 @@ global proc proxyPaintProperties ()
         string $vizColn = `columnLayout -adjustableColumn true pxpnVizColn`;
         setParent ..;
         
-        string $exmpColn = `columnLayout -adjustableColumn true pxpnExmpUIColn`;
+        string $exmpColn = `columnLayout -adjustableColumn true pxpnExmpUIColn1cc22e1b`;
         setParent ..;
         
         string $brushColn = `columnLayout -adjustableColumn true pxpnBrushColn`;
@@ -150,7 +150,7 @@ global proc proxyPaintUpdateExampleScroll()
     }
     textScrollList -e -sii 1 proxyPaint_vizExampleScroll;
     
-    proxyPaintUpdateExmpUI("pxpnExmpUIColn");
+    proxyPaintUpdateExmpUI("pxpnExmpUIColn1cc22e1b");
     
 }
 

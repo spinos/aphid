@@ -1158,14 +1158,6 @@ int proxyPaintContext::getEditVizGround()
 	return r;
 }
 
-void proxyPaintContext::getVizStatistics(std::map<std::string, std::string > & stats)
-{
-	validateSelection();
-	if(PtrViz) {
-		PtrViz->getStatistics(stats);
-	}
-}
-
 void proxyPaintContext::setBrushFalloff(float x)
 {
     m_growOpt.setbrushFalloff(x);
@@ -1190,6 +1182,4 @@ void proxyPaintContext::setShowVoxelThreshold(float x)
 	
 	MToolsInfo::setDirtyFlag(*this);
 }
-	
-
 //:~

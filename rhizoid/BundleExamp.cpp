@@ -44,6 +44,7 @@ void BundleExamp::setVisible(bool x)
 	for(;it!=m_examples.end();++it) {
 		(*it)->setVisible(x);
 	}
+	ExampVox::setVisible(x);
 }
 
 }

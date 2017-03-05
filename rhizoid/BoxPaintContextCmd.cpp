@@ -79,8 +79,12 @@
 #define kVizEditGroundFlagLong "-vizEditGround"
 #define kExampleStatusFlag "-exs"
 #define kExampleStatusFlagLong "-exampleStatus"
+#define kActivateExampleFlag "-aex"
+#define kActivateExampleFlagLong "-activateExample"
 #define kShoVoxFlag "-shv"
 #define kShoVoxFlagLong "-showVoxel"
+#define kUpdateSampleColorFlag "-usc"
+#define kUpdateSampleColorFlagLong "-updateSampleColor"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -366,6 +370,14 @@ MStatus proxyPaintContextCmd::doEditFlags()
 			return status;
 		}
 		fContext->setExampleStatus(iexmp, sexmp.asChar() );
+	}
+	
+	if (argData.isFlagSet(kActivateExampleFlag)) {
+		fContext->activateExamples();
+	}
+	
+	if (argData.isFlagSet(kUpdateSampleColorFlag)) {
+		fContext->updateSampleColor();
 	}
 	
 	return MS::kSuccess;
@@ -714,6 +726,18 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kShoVoxFlag, kShoVoxFlagLong, MSyntax::kDouble);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add showVoxel status arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kActivateExampleFlag, kActivateExampleFlagLong, MSyntax::kNoArg);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add activate example arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kUpdateSampleColorFlag, kUpdateSampleColorFlagLong, MSyntax::kNoArg);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add update sample color arg");
 		return MS::kFailure;
 	}
 	

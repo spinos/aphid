@@ -1245,5 +1245,21 @@ void ProxyViz::processBrushFalloff(float x)
     setSelectionFalloff(x);
 }
 
+void ProxyViz::processFilterPlantTypeMap(const std::vector<int> & indices,
+						const std::vector<Vector3F> & colors)
+{
+	setFilterPlantTypeMap(indices);
+	setFilterPlantColors(colors);
+	updateSamplePlantType();
+	_viewport.refresh(false, true);
+}
+
+void ProxyViz::processSampleColorChanges(const std::vector<Vector3F> & colors)
+{
+	setFilterPlantColors(colors);
+	updateSampleColor();
+	_viewport.refresh(false, true);
+}
+
 }
 //:~

@@ -180,6 +180,11 @@ protected:
     
 	void clearAllPlants();
 	
+	void setFilterPlantTypeMap(const std::vector<int> & indices);
+	void setFilterPlantColors(const std::vector<Vector3F> & colors);
+	void updateSamplePlantType();
+	void updateSampleColor();
+	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,
 					ForestCell * cell);

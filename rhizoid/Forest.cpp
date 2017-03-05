@@ -601,8 +601,6 @@ void Forest::reshuffleSamples()
 	if(!m_ground) return;
 	if(m_ground->isEmpty() ) return;
 	
-	std::cout<<"\n Forest reshuffle samples at level "<<sampleLevel();
-
 	m_grid->reshuffleSamples(sampleLevel() );
 }
 
@@ -708,6 +706,26 @@ void Forest::getStatistics(std::map<std::string, std::string > & stats)
 	int ntri = m_triangles.size();
 	sst<<ntri;
 	stats["triangle"] = sst.str();
+}
+
+void Forest::setFilterPlantTypeMap(const std::vector<int> & indices)
+{
+	m_sampleFlt->resetPlantTypeIndices(indices);
+}
+
+void Forest::setFilterPlantColors(const std::vector<Vector3F> & colors)
+{
+	m_sampleFlt->resetPlantTypeColors(colors);
+}
+
+void Forest::updateSamplePlantType()
+{
+	grid()->assignSamplePlantType<SampleFilter>(*m_sampleFlt);
+}
+
+void Forest::updateSampleColor()
+{
+	grid()->colorSampleByPlantType<SampleFilter>(*m_sampleFlt);
 }
 
 }

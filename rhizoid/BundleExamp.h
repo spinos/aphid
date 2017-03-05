@@ -26,7 +26,7 @@ public:
 	
 	void addAExample(ExampVox * v);
     
-	void setVisible(bool x);
+	virtual void setVisible(bool x);
 	
 protected:
     void addAInstance(const InstanceD & v);

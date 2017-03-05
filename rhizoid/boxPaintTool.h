@@ -141,7 +141,6 @@ public:
 	int getShowVizGrid();
 	void setEditVizGround(int x);
 	int getEditVizGround();
-	void getVizStatistics(std::map<std::string, std::string > & stats);
 	void setBrushFalloff(float x);
 	float getBrushFalloff();
 	void setShowVoxelThreshold(float x);
