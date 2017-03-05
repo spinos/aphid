@@ -634,7 +634,7 @@ void ModifyForest::removeActivePlants()
 
 void ModifyForest::removeTypedPlants(const GrowOption & param)
 {
-	if(numPlantExamples() < 1) {
+	if(numPlantExamples() < 2) {
 		clearAllPlants();
 		return;
 	}

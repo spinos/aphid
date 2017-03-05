@@ -26,6 +26,7 @@ public:
 	
 	void addAExample(ExampVox * v);
     
+	virtual void setActive(bool x);
 	virtual void setVisible(bool x);
 	
 protected:

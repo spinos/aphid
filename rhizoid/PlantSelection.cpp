@@ -12,7 +12,8 @@
 
 namespace aphid {
 
-PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid)
+PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid,
+						std::map<int, bool> * filterTypeMap)
 { 
 	m_grid = grid; 
 	m_plants = new SelectionTyp;
@@ -20,6 +21,8 @@ PlantSelection::PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid)
     m_radius = 8.f;
     m_weightDecay = .5f;
     m_typeFilter = -1;
+	m_filterTypeMap = filterTypeMap;
+	
 }
 
 PlantSelection::~PlantSelection()
@@ -82,14 +85,20 @@ void PlantSelection::selectInCell(const sdb::Coord3 & c,
 		samp = d->t1->getTranslation() - d->t2->m_offset;
 		
 		if(m_center.distanceTo(samp ) < m_radius) {
-            if(m_typeFilter > -1 ) {
+            /*
+			if(m_typeFilter > -1 ) {
                 if(m_typeFilter == plant::bundleIndex(cell->key().y) ) {
                     usemode = mode;
 				}
                 else {
                     usemode = SelectionContext::Unknown;
 				}
-            }
+            }*/
+			if(m_filterTypeMap->find(plant::bundleIndex(cell->key().y) ) != m_filterTypeMap->end() ) {
+				usemode = mode;
+			} else {
+				usemode = SelectionContext::Unknown;
+			}
 			
 			if(usemode == SelectionContext::Append) {
 				select(cell->value() );

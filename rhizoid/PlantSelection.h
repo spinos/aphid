@@ -9,6 +9,7 @@
 #pragma once
 #include <PlantCommon.h>
 #include <geom/SelectionContext.h>
+#include <map>
 
 namespace aphid {
 
@@ -26,9 +27,11 @@ private:
     int m_typeFilter;
 	sdb::WorldGrid<ForestCell, Plant > * m_grid;
 	SelectionTyp * m_plants;
+	std::map<int, bool> * m_filterTypeMap;
 	
 public:
-	PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid);
+	PlantSelection(sdb::WorldGrid<ForestCell, Plant > * grid,
+					std::map<int, bool> * filterTypeMap);
 	virtual ~PlantSelection();
 	
     void setRadius(float x);

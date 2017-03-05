@@ -15,6 +15,7 @@
 #include <math/ANoise3.h>
 #include <boost/scoped_array.hpp>
 #include <vector>
+#include <map>
 
 namespace aphid {
     
@@ -22,6 +23,7 @@ class ExrImage;
 
 class SampleFilter : public ANoise3Sampler {
 
+	std::map<int, bool> m_plantTypeMap;
 	int m_maxSampleLevel;
 	float m_sampleGridSize;
 	float m_portion;
@@ -62,6 +64,8 @@ public:
 	
 /// randomly
 	int selectPlantType(int x) const;
+	
+	std::map<int, bool> * plantTypeMap();
 	
 protected:
 

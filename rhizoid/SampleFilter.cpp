@@ -18,10 +18,13 @@ SampleFilter::SampleFilter()
     m_portion = .8f; 
 	initPlantTypeIndices();
 	initPlantTypeColors();
+	m_plantTypeMap[0] = true;
 }
 
 SampleFilter::~SampleFilter()
-{}
+{
+	m_plantTypeMap.clear();
+}
 
 void SampleFilter::setPortion(const float & x)
 { 
@@ -97,16 +100,20 @@ bool SampleFilter::throughImage(const float & k, const float & s, const float & 
 
 void SampleFilter::resetPlantTypeIndices(const std::vector<int> & indices)
 {
+	m_plantTypeMap.clear();
 	const int n = indices.size();
 	if(n<1) {
 		initPlantTypeIndices();
+		m_plantTypeMap[0] = true;
 		return;
 	}
 	
 	m_numPlantTypeIndices = n;
 	m_plantTypeIndices.reset(new int[n]);
 	for(int i=0;i<n;++i) {
-		m_plantTypeIndices[i] = indices[i];
+		const int & j = indices[i];
+		m_plantTypeIndices[i] = j;
+		m_plantTypeMap[j] = true;
 	}
 }
 
@@ -151,5 +158,8 @@ int SampleFilter::selectPlantType(int x) const
 	const int k = x % m_numPlantTypeIndices;
 	return m_plantTypeIndices[k];
 }
+
+std::map<int, bool> * SampleFilter::plantTypeMap()
+{ return &m_plantTypeMap; }
 
 }
