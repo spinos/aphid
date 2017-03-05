@@ -69,7 +69,7 @@ protected:
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     void buildGround();
     void setSelectTypeFilter(int flt);
-	bool selectTypedPlants(int x);
+	bool selectTypedPlants();
     bool selectPlants(const Ray & ray, SelectionContext::SelectMode mode);
 	bool selectGroundSamples(const Ray & ray, SelectionContext::SelectMode mode);
 	bool selectGroundSamples(const AFrustum & fru, SelectionContext::SelectMode mode);

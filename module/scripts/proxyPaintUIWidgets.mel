@@ -497,15 +497,10 @@ global proc proxyPaintCreateEditUI(string $coln)
     //iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_replace.xpm" -label "Replace" -c "proxyPaintSetOpt(10)";
     iconTextButton -label "Select" 
         -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm" -c "proxyPaintSetOpt(2)";
-	iconTextButton -label "Select by Type" 
-	    -style "iconAndTextHorizontal" -image1 "proxyPaintTool_selectByType.xpm" -c "proxyPaintSetOpt(12)";
     iconTextButton -label "Discard" 
         -style "iconAndTextHorizontal" -image1 "generic_discard.png" -c "proxyPaintSetOpt(104)";
     iconTextButton -label "Erase" 
         -style "iconAndTextHorizontal" -image1 "proxyPaintTool_erase.xpm" -c "proxyPaintSetOpt(1)";
-		
-    text -l "";
-    text -l "";
 	iconTextButton -style "iconAndTextHorizontal"
         -image1 "proxyPaintTool_bundle_move.xpm"
         -label "Bundle Translate" 

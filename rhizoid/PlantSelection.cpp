@@ -85,16 +85,8 @@ void PlantSelection::selectInCell(const sdb::Coord3 & c,
 		samp = d->t1->getTranslation() - d->t2->m_offset;
 		
 		if(m_center.distanceTo(samp ) < m_radius) {
-            /*
-			if(m_typeFilter > -1 ) {
-                if(m_typeFilter == plant::bundleIndex(cell->key().y) ) {
-                    usemode = mode;
-				}
-                else {
-                    usemode = SelectionContext::Unknown;
-				}
-            }*/
-			if(m_filterTypeMap->find(plant::bundleIndex(cell->key().y) ) != m_filterTypeMap->end() ) {
+
+			if(isPlantTypeActive(cell->key().y) ) {
 				usemode = mode;
 			} else {
 				usemode = SelectionContext::Unknown;
@@ -115,20 +107,26 @@ void PlantSelection::selectInCell(const sdb::Coord3 & c,
 	}
 }
 
-void PlantSelection::selectByType(int x)
+void PlantSelection::selectByType()
 {
-	if(m_grid->isEmpty() ) return;
+	if(m_grid->isEmpty() ) {
+		return;
+	}
+	
 	m_grid->begin();
 	while(!m_grid->end() ) {
-		selectByTypeInCell(m_grid->value(), x);
+		selectByTypeInCell(m_grid->value() );
 		m_grid->next();
 	}
 	m_numSelected = m_plants->size();
 }
 
-void PlantSelection::selectByTypeInCell(ForestCell * cell, int x)
+void PlantSelection::selectByTypeInCell(ForestCell * cell)
 {
-	if(cell->isEmpty() ) return;
+	if(cell->isEmpty() ) {
+		return;
+	}
+	
 	try {
 	cell->begin();
 	while(!cell->end()) {
@@ -136,7 +134,9 @@ void PlantSelection::selectByTypeInCell(ForestCell * cell, int x)
 		if(!d) {
 			throw "PlantSelection select in cell null data";
 		}
-		if(x == cell->key().y) select(cell->value() );
+		if(isPlantTypeActive(cell->key().y) ) {
+			select(cell->value() );
+		}
 		
 		cell->next();
 	}
@@ -227,6 +227,12 @@ bool PlantSelection::touchCell(const Ray & incident, const sdb::Coord3 & c,
 		cell->next();
 	}
 	return false;
+}
+
+bool PlantSelection::isPlantTypeActive(int x)
+{
+	const int idx = plant::bundleIndex(x);
+	return m_filterTypeMap->find(idx) != m_filterTypeMap->end();
 }
 
 }

@@ -38,7 +38,7 @@ public:
     void setFalloff(float x);
 	void setCenter(const Vector3F & center, const Vector3F & direction);
 	void select(SelectionContext::SelectMode mode);
-	void selectByType(int x);
+	void selectByType();
     void deselect();
 	const int & numSelected() const;
 	SelectionTyp * data();
@@ -57,7 +57,8 @@ protected:
 private:
 	void selectInCell(const sdb::Coord3 & c, 
 	            const SelectionContext::SelectMode & mode);
-	void selectByTypeInCell(ForestCell * cell, int x);
+	void selectByTypeInCell(ForestCell * cell);
+	bool isPlantTypeActive(int x);
 	
 };
 

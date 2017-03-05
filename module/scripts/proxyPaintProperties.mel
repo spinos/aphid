@@ -13,21 +13,19 @@ global proc proxyPaintProperties ()
 	string $ppnForm = `formLayout proxyPaint`;
 	string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
 // begin of proxyPaintOptions
-    separator -style "none";
+    text -ann "2" proxyPaint_vizNameText;	
 		
-		text -al left -l "Select A ProxyViz To Paint";
 	textScrollList -ams off 
 		-sc "proxyPaint_selectVizToPaint" 
 		proxyPaint_VizToPaintScroll;
 	
-	text -ann "2" proxyPaint_vizNameText;
-	
 	string $viz = proxyPaint_getCurrentViz();
     int $nodeVer = proxyPaint_getNodeVersion($viz);
-		
-	textScrollList -allowMultiSelection false 
-	    -sc "proxyPaintSelectExample" 
-	    proxyPaint_vizExampleScroll;
+	   
+	    scrollLayout -h 120;
+        string $exmpColn = `columnLayout -adjustableColumn true pxpnExmpUIColn1cc22e1b`;
+            setParent ..;
+            setParent ..;
 
 // end of proxyPaintOptions	
 	setParent ..;
@@ -51,9 +49,6 @@ global proc proxyPaintProperties ()
         string $vizColn = `columnLayout -adjustableColumn true pxpnVizColn`;
         setParent ..;
         
-        string $exmpColn = `columnLayout -adjustableColumn true pxpnExmpUIColn1cc22e1b`;
-        setParent ..;
-        
         string $brushColn = `columnLayout -adjustableColumn true pxpnBrushColn`;
         setParent ..;       
         
@@ -71,7 +66,6 @@ global proc proxyPaintProperties ()
         
     tabLayout -edit
         -tabLabel $vizColn "Viz"
-        -tabLabel $exmpColn "Example"
         -tabLabel $brushColn "Brush"
         -tabLabel $groundColn "Ground"
         -tabLabel $createColn "Create"
@@ -83,7 +77,6 @@ global proc proxyPaintProperties ()
 
 /// setup tab content	
 	proxyPaintCreateVizUI($vizColn); 
-    proxyPaintCreateExmpUI($exmpColn); 
     proxyPaintCreateBrushUI($brushColn); 
     proxyPaintGroundEditUI($groundColn);
     proxyPaintCreateCreateUI($createColn);
@@ -91,6 +84,7 @@ global proc proxyPaintProperties ()
 	proxyPaintCreateInjectUI($injectColn);
 
 	//proxyPaintSetCallbacks($parent);
+	proxyPaintCreateExmpUI("pxpnExmpUIColn1cc22e1b");
 	proxyPaintUpdateExampleScroll();
 }
 
@@ -132,7 +126,6 @@ global proc proxyPaint_selectVizToPaint()
 global proc proxyPaintUpdateExampleScroll()
 {
     proxyPaintToolContext -e -plantType 0 `currentCtx`;
-    textScrollList -e -ra proxyPaint_vizExampleScroll;
     string $node = proxyPaint_getCurrentViz();
     if($node == "") {
         text -e -label "No Viz Selected" proxyPaint_vizNameText;
@@ -140,34 +133,7 @@ global proc proxyPaintUpdateExampleScroll()
     }
     
     text -e -label $node proxyPaint_vizNameText;
-    textScrollList -e -a "none" proxyPaint_vizExampleScroll;
-    
-    string $conns[] = `listConnections -s on -d off ($node + ".inExample")`;
-    string $aconn;
-    for($aconn in $conns) {
-        textScrollList -e -a $aconn proxyPaint_vizExampleScroll;
-    
-    }
-    textScrollList -e -sii 1 proxyPaint_vizExampleScroll;
-    
     proxyPaintUpdateExmpUI("pxpnExmpUIColn1cc22e1b");
     
-}
-
-global proc proxyPaintSelectExample()
-{
-    int $oneBasedInd[] = `textScrollList -q -sii proxyPaint_vizExampleScroll`;
-    int $realInd = $oneBasedInd[0];
-    if($realInd > 0) {
-        $realInd = $realInd - 1;
-    }
-    
-    proxyPaintToolContext -e -plantType $realInd `currentCtx`;
- 
-    string $seledExmp[] = `textScrollList -q -selectItem proxyPaint_vizExampleScroll`; 
-    if($seledExmp[0] == "none") {
-        return;    
-    }
-    updateAE $seledExmp[0];
 }
 //:~

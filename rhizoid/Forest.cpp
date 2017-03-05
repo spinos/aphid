@@ -124,10 +124,12 @@ void Forest::buildGround()
 	engine.buildTree<cvx::Triangle, KdNode4, 4>(m_ground, &m_triangles, gridBox, &bf);
 }
 
-bool Forest::selectTypedPlants(int x)
+bool Forest::selectTypedPlants()
 {
-	if(numPlants() < 1) return false;
-	m_activePlants->selectByType(x);
+	if(numPlants() < 1) {
+		return false;
+	}
+	m_activePlants->selectByType();
 	return true;
 }
 

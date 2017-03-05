@@ -639,7 +639,7 @@ void ModifyForest::removeTypedPlants(const GrowOption & param)
 		return;
 	}
 	selection()->deselect();
-	selectTypedPlants(param.m_plantId);
+	selectTypedPlants();
 	removeActivePlants();
 }
 
