@@ -5,6 +5,61 @@
  *
  */
  
+global proc string proxyPaintGetExmpName(string $stats[],
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==".name") {
+            return  $stats[$i+1];  
+        }
+    }
+    return "unknown";
+}
+
+global proc int proxyPaintGetExmpBoolStat(string $stats[],
+                    string $skey,
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==$skey) {
+            if($stats[$i+1] == "on") {
+                return 1;
+            } else {
+                return 0;   
+            }
+        }
+    }
+    return 0;
+}
+
+global proc string proxyPaintGetExmpIntStat(string $stats[],
+                    string $skey,
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==$skey) {
+            return $stats[$i+1];
+        }
+    }
+    return "1";
+}
+
+global proc string proxyPaintGetExmpVec3Stat(string $stats[],
+                    string $skey,
+                    int $minInd, int $maxInd)
+{
+    int $i;
+    for($i=$minInd;$i<$maxInd;$i++) {
+        if($stats[$i]==$skey) {
+            return $stats[$i+1];
+        }
+    }
+    return "0 0 0";
+}
+
 global proc proxyPaintOnActiveExampleChanges()
 {
     proxyPaintToolContext -e -aex `currentCtx`;

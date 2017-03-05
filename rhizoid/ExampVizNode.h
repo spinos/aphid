@@ -64,6 +64,7 @@ public:
 	static MObject aininstspace;
 	static MObject avoxactive;
 	static MObject avoxvisible;
+	static MObject avoxpriority;
 	static MObject outValue;
 	static	MTypeId		id;
 						

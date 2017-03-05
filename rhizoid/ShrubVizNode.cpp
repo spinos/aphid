@@ -31,6 +31,7 @@ MObject ShrubVizNode::adrawColorG;
 MObject ShrubVizNode::adrawColorB;
 MObject ShrubVizNode::avoxactive;
 MObject ShrubVizNode::avoxvisible;
+MObject ShrubVizNode::avoxpriority;
 MObject ShrubVizNode::outValue;
 	
 ShrubVizNode::ShrubVizNode()
@@ -230,6 +231,14 @@ MStatus ShrubVizNode::initialize()
 	numFn.setStorable(true);
 	numFn.setDefault(true);
 	addAttribute(avoxvisible);
+	
+	avoxpriority = numFn.create( "examplePriority", "expi", MFnNumericData::kShort);
+	numFn.setStorable(true);
+	numFn.setDefault(true);
+	numFn.setMin(1);
+	numFn.setMax(100);
+	numFn.setDefault(1);
+	addAttribute(avoxpriority);
 	
 	MDoubleArray defaultDArray;
 	MFnDoubleArrayData dArrayDataFn;

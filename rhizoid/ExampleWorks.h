@@ -52,6 +52,7 @@
 	void getConnectExamples(MObjectArray & exmpOs);
 	void addBoolStatusStrSeg(MString & res, bool b, const char * segName);
 	void addVec3StatusStrSeg(MString & res, double r, double g, double b, const char * segName);
+	void addIntStatusStrSeg(MString & res, int b, const char * segName);
 	void setExampleStatus(const MObject & exmpO,
 				const std::string & expression);
 	void setExampleBoolAttrib(const MObject & exmpO,
@@ -60,9 +61,14 @@
 	void setExampleCol3Attrib(const MObject & exmpO,
 				const MString & attribName,
 				const std::string & expression);
+	void setExampleIntAttrib(const MObject & exmpO,
+				const MString & attribName,
+				const std::string & expression);
 	bool matchedBool(bool & val,
 				const std::string & expression);
 	bool matchedVec3(float * vs,
+				const std::string & expression);
+	bool matchedInt(int * vs,
 				const std::string & expression);
 /// ind:priority
 	bool getActiveExamplePriority(std::map<int, int > & stats);

@@ -99,6 +99,10 @@ MString ExampleWorks::getExampleStatusStr()
 	AttributeHelper::getColorAttributeByName(fviz, "dspColor", r, g, b);
 	addVec3StatusStrSeg(res, r, g, b, "/.dsp_color");
 	
+	int priority = 1;
+	AttributeHelper::getIntAttributeByName(fviz, "examplePriority", priority);
+	addIntStatusStrSeg(res, priority, "/.priority");
+	
 	MObjectArray exmpOs;
 	getConnectExamples(exmpOs);
 	
@@ -118,6 +122,8 @@ MString ExampleWorks::getExampleStatusStr()
 		AttributeHelper::getColorAttributeByName(fexmp, "dspColor", r, g, b);
 		addVec3StatusStrSeg(res, r, g, b, "/.dsp_color");
 	
+		AttributeHelper::getIntAttributeByName(fexmp, "examplePriority", priority);
+		addIntStatusStrSeg(res, priority, "/.priority");
 	}
 	
 	return res;
@@ -137,6 +143,12 @@ void ExampleWorks::addVec3StatusStrSeg(MString & res, double r, double g, double
 {
 	res += segName;
 	res += str(boost::format("/%1% %2% %3%") % r % g % b).c_str();
+}
+
+void ExampleWorks::addIntStatusStrSeg(MString & res, int b, const char * segName)
+{
+	res += segName;
+	res += str(boost::format("/%1%") % b).c_str();
 }
 
 void ExampleWorks::processShowVoxelThreshold(float x)
@@ -239,6 +251,9 @@ void ExampleWorks::setExampleStatus(const MObject & exmpO,
 		if(shead == "dspcolor") {
 			setExampleCol3Attrib(exmpO, "dspColor", sval);
 		}
+		if(shead == "priority") {
+			setExampleIntAttrib(exmpO, "examplePriority", sval);
+		}
 		
 		start = what[0].second;
 	}
@@ -333,6 +348,54 @@ bool ExampleWorks::matchedVec3(float * vs,
 	return false;
 }
 
+void ExampleWorks::setExampleIntAttrib(const MObject & exmpO,
+				const MString & attribName,
+				const std::string & expression)
+{
+	int val;
+	if(!matchedInt(&val, expression)) {
+		return;
+	}
+	
+	MStatus stat;
+	MFnDependencyNode fexmp(exmpO, &stat);
+	if(!stat) {
+		return;
+	}
+	
+	fexmp.findPlug(attribName).setValue(val);
+}
+
+bool ExampleWorks::matchedInt(int * vs,
+				const std::string & expression)
+{
+	const std::string pattern1 = "(^[+-]?[0-9]*)";
+	
+	std::string::const_iterator start, end;
+    start = expression.begin();
+    end = expression.end();
+	
+	int i = 0;
+	const boost::regex re1(pattern1);
+	boost::match_results<std::string::const_iterator> what;
+	while(regex_search(start, end, what, re1, boost::match_default) ) {
+	
+		try {
+			vs[i++] = boost::lexical_cast<int>(what[0]);
+			
+		} catch (boost::bad_lexical_cast &) {
+            std::cout<<"\n bad cast "<<what[0];
+			return false;
+        }
+		
+		if(i==1) {
+			return true;
+		}
+		start = what[0].second;
+	}
+	return false;
+}
+
 void ExampleWorks::getVizStatistics(std::map<std::string, std::string > & stats)
 {
 	validateSelection();
@@ -350,11 +413,13 @@ bool ExampleWorks::getActiveExamplePriority(std::map<int, int > & stats)
 	}
 	
 	bool isActive = false;
+	int prior = 1;
 	
 	MFnDependencyNode fviz(ObjViz);
 	AttributeHelper::getBoolAttributeByName(fviz, "exampleActive", isActive);
 	if(isActive) {
-		stats[0] = 1;
+		AttributeHelper::getIntAttributeByName(fviz, "examplePriority", prior);
+		stats[0] = prior;
 	}
 	
 	MObjectArray exmpOs;
@@ -366,7 +431,8 @@ bool ExampleWorks::getActiveExamplePriority(std::map<int, int > & stats)
 		MFnDependencyNode fexmp(exmpOs[i]);
 		AttributeHelper::getBoolAttributeByName(fexmp, "exampleActive", isActive);
 		if(isActive) {
-			stats[i+1] = 1;
+			AttributeHelper::getIntAttributeByName(fexmp, "examplePriority", prior);
+			stats[i+1] = prior;
 		}
 	
 	}

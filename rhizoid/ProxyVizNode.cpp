@@ -67,6 +67,7 @@ MObject ProxyViz::adrawColorG;
 MObject ProxyViz::adrawColorB;
 MObject ProxyViz::avoxactive;
 MObject ProxyViz::avoxvisible;
+MObject ProxyViz::avoxpriority;
 MObject ProxyViz::outValue1;
 MObject ProxyViz::outValue2;
 
@@ -379,6 +380,14 @@ MStatus ProxyViz::initialize()
 	numFn.setStorable(true);
 	numFn.setDefault(true);
 	addAttribute(avoxvisible);
+	
+	avoxpriority = numFn.create( "examplePriority", "expi", MFnNumericData::kShort);
+	numFn.setStorable(true);
+	numFn.setDefault(true);
+	numFn.setMin(1);
+	numFn.setMax(100);
+	numFn.setDefault(1);
+	addAttribute(avoxpriority);
 	
 	adrawColorR = numFn.create( "dspColorR", "dspr", MFnNumericData::kFloat);
 	numFn.setStorable(true);

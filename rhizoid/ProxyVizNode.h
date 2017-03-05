@@ -106,6 +106,7 @@ public:
 	static MObject adrawColor;
 	static MObject avoxactive;
 	static MObject avoxvisible;
+	static MObject avoxpriority;
 	static MObject outValue1;
 	static MObject outValue2;
 	static MObject outValue;

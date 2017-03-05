@@ -69,6 +69,7 @@ public:
 	static MObject adrawColor;
 	static MObject avoxactive;
 	static MObject avoxvisible;
+	static MObject avoxpriority;
     static MObject outValue;
 	
 	const MMatrix & worldSpace() const;

@@ -69,6 +69,14 @@ char AttributeHelper::getDoubleAttributeByNameAndTime(const MFnDependencyNode& f
 	return 1;
 }
 
+char AttributeHelper::getIntAttributeByName(const MFnDependencyNode& fnode, const char* attrname, int& v)
+{
+	MPlug plgV = fnode.findPlug(MString(attrname));
+	if(plgV.isNull()) return 0;
+	plgV.getValue(v);
+	return 1;
+}
+
 char AttributeHelper::getStringAttributeByName(const MFnDependencyNode& fnode, const char* attrname, MString& v)
 {
 	MPlug plgV = fnode.findPlug(MString(attrname));
