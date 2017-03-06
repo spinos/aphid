@@ -63,7 +63,8 @@ protected:
 	void resizePlant();
 
 	void moveWithGround();
-	void scaleBrushAt(const Ray & ray, float magnitude);
+	void placeBrushAt(const Ray & ray);
+	void scaleBrush(float magnitude);
 	void raiseOffsetAt(const Ray & ray, GrowOption & option);
 	void calculateSelectedWeight();
 	virtual void getDeltaRotation(Matrix33F & mat,

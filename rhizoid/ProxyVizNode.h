@@ -134,7 +134,8 @@ public:
 	void processClearAllPlants();
 	void processDeselectPlants();
 	void processBrushRadius(const float & x);
-	void processManipulatMode(ModifyForest::ManipulateMode x);
+	void processManipulatMode(ModifyForest::ManipulateMode x,
+				GrowOption & option);
 	void processViewDependentSelectSamples();
 	void processSetShowGrid(int x);
 	const int & getShowGrid() const;

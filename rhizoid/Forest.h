@@ -185,6 +185,7 @@ protected:
 	void updateSamplePlantType();
 	void updateSampleColor();
 	int randomExampleInd() const;
+	void moveSelectionCenter(const Vector3F & dv);
 	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,

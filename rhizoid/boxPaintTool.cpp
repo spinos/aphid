@@ -61,6 +61,9 @@ MStatus proxyPaintContext::doPress( MEvent & event )
     }
     
     switch (m_currentOpt) {
+		case opResizeBrush:
+            startResizeBrush();
+            break;
         case opSelectGround:
             startSelectGround();
             break;
@@ -131,9 +134,8 @@ MStatus proxyPaintContext::doDrag( MEvent & event )
 			replace();
 			break;
         case opResizeBrush :
-            scaleBrush();
-			PtrViz->updateManipulateSpace(m_growOpt);
-            break;
+            processResizeBrush();
+			break;
 		case opRaise :
             raiseOffset();
             break;
@@ -173,9 +175,6 @@ MStatus proxyPaintContext::doRelease( MEvent & event )
 		case opSelect :
 		case opSelectByType :
 			PtrViz->finishPlantSelection();
-		case opResizeBrush :
-			PtrViz->updateManipulateSpace(m_growOpt);
-			break;
 		case opBundleResize:
             PtrViz->finishResize();
             break;
@@ -465,15 +464,21 @@ void proxyPaintContext::setInstanceGroupCount(unsigned val)
 unsigned proxyPaintContext::getInstanceGroupCount() const
 { return m_extractGroupCount; }
 
-void proxyPaintContext::scaleBrush()
+void proxyPaintContext::startResizeBrush()
 {
     if(!PtrViz) return;
 	MPoint fromNear, fromFar;
-	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
-		
+	view.viewToWorld ( start_x, start_y, fromNear, fromFar );
+	
+	PtrViz->beginAdjustBrushSize(fromNear, fromFar, m_growOpt);
+}
+
+void proxyPaintContext::processResizeBrush()
+{
+    if(!PtrViz) return;
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
-	PtrViz->adjustBrushSize(fromNear, fromFar, mag);
+	PtrViz->adjustBrushSize(mag);
 }
 
 void proxyPaintContext::resize(bool isBundled)
@@ -637,7 +642,7 @@ void proxyPaintContext::processSelectByType()
 void proxyPaintContext::setWriteCache(MString filename)
 {
 	MGlobal::displayInfo(MString("proxyPaint tries to write to cache ") + filename);
-	if(!getSelectedViz())
+	if(!validateSelection())
 		return;
 	PtrViz->pressToSave();
 }
@@ -645,7 +650,7 @@ void proxyPaintContext::setWriteCache(MString filename)
 void proxyPaintContext::setReadCache(MString filename)
 {
 	MGlobal::displayInfo(MString("proxyPaint tries to read from cache ") + filename);
-	if(!getSelectedViz())
+	if(!validateSelection())
 		return;
 	PtrViz->pressToLoad();
 }
@@ -653,14 +658,14 @@ void proxyPaintContext::setReadCache(MString filename)
 void proxyPaintContext::clearAllPlants()
 {
 	MGlobal::displayInfo("proxyPaint set to clear all plants");
-	if(!getSelectedViz())
+	if(!validateSelection())
 		return;
 	PtrViz->processClearAllPlants();	
 }
 
 void proxyPaintContext::clearBySelections()
 {
-    if(!getSelectedViz())
+    if(!validateSelection())
 		return;
 	MGlobal::displayInfo("proxyPaint set to clear all selected");
 	PtrViz->processRemoveActivePlants();	
@@ -668,7 +673,7 @@ void proxyPaintContext::clearBySelections()
 
 void proxyPaintContext::clearByType()
 {
-	if(!getSelectedViz())
+	if(!validateSelection())
 		return;
 	if(PtrViz->numActivePlants() > 0 ) {
 	    clearBySelections();
@@ -705,17 +710,6 @@ void proxyPaintContext::depressOffset()
 	mag /= 48;
 	m_growOpt.setStrokeMagnitude(mag * -1.f);
 	PtrViz->offsetAlongNormal(fromNear, fromFar, m_growOpt);
-}
-
-char proxyPaintContext::getSelectedViz()
-{
-	MSelectionList slist;
-	MGlobal::getActiveSelectionList( slist );
-	if(!validateViz(slist)) {
-		MGlobal::displayWarning("No proxyViz selected");
-		return 0;
-	}
-	return 1;
 }
 
 void proxyPaintContext::setMinCreateMargin(float x)
@@ -768,7 +762,10 @@ void proxyPaintContext::detachSceneCallbacks()
 }
 
 void proxyPaintContext::releaseCallback(void* clientData)
-{ PtrViz = NULL; }
+{ 
+	PtrViz = NULL; 
+	ObjViz = MObject::kNullObj;
+}
 
 void proxyPaintContext::injectSelectedParticle()
 {
@@ -1003,7 +1000,7 @@ void proxyPaintContext::setManipulator(ModifyForest::ManipulateMode x)
     if(!PtrViz) {
 		return;
 	}
-	PtrViz->processManipulatMode(x);
+	PtrViz->processManipulatMode(x, m_growOpt);
 }
 
 void proxyPaintContext::startRotate()

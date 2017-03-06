@@ -39,15 +39,21 @@ void PlantSelection::setFalloff(float x)
     }
 }
 
+void PlantSelection::setCenter(const Vector3F & center)
+{ m_center = center; }
+
 void PlantSelection::setCenter(const Vector3F & center, const Vector3F & direction)
 {
 	m_center = center;
 	m_direction = direction;
 }
 
+void PlantSelection::moveCenter(const Vector3F & dv)
+{ m_center += dv; }
+
 void PlantSelection::select(SelectionContext::SelectMode mode)
 {
-	std::cout<<"PlantSelection select begin "<<std::endl;
+	std::cout<<"\n PlantSelection select begin ";
 	int ng = 1 + m_radius / m_grid->gridSize();
 	
 	const sdb::Coord3 c0 = m_grid->gridCoord((const float *)&m_center);
@@ -64,7 +70,7 @@ void PlantSelection::select(SelectionContext::SelectMode mode)
 		}
 	}
 	updateNumSelected();
-	std::cout<<"PlantSelection select end "<<std::endl;
+	std::cout<<"\n PlantSelection select end "<<std::endl;
 }
 
 void PlantSelection::selectInCell(const sdb::Coord3 & c, 

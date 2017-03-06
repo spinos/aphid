@@ -32,8 +32,9 @@ public:
 					GrowOption & option);
 	void erase(const MPoint & origin, const MPoint & dest,
 					GrowOption & option);
-    void adjustBrushSize(const MPoint & origin, const MPoint & dest, 
-                    float magnitude);
+	void beginAdjustBrushSize(const MPoint & origin, const MPoint & dest,
+					GrowOption & option);
+    void adjustBrushSize(float magnitude);
 	void adjustSize(const MPoint & origin, const MPoint & dest, 
                      float magnitude,
 					 bool isBundled);

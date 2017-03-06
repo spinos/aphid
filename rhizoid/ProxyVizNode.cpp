@@ -1210,9 +1210,11 @@ void ProxyViz::processBrushRadius(const float & x)
 	_viewport.refresh(false, true);
 }
 
-void ProxyViz::processManipulatMode(ModifyForest::ManipulateMode x)
+void ProxyViz::processManipulatMode(ModifyForest::ManipulateMode x,
+							GrowOption & option)
 {
 	setManipulatMode(x);
+	updateManipulateSpace(option);
 	_viewport.refresh(false, true);
 }
 

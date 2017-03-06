@@ -103,7 +103,6 @@ public:
 	void setWriteCache(MString filename);
 	void setReadCache(MString filename);
 	void clearAllPlants();
-	char getSelectedViz();
 	void setMinCreateMargin(float x);
 	const float & minCreateMargin();
     void setMaxCreateMargin(float x);
@@ -164,7 +163,8 @@ private:
 	void processSelectGround();
 	void startSelectGround();
 	void replace();
-    void scaleBrush();
+	void startResizeBrush();
+    void processResizeBrush();
     void discardSampleSelection();
     void discardPlantSelection();
 	void injectSelectedParticle();

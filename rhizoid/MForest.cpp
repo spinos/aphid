@@ -210,15 +210,21 @@ void MForest::erase(const MPoint & origin, const MPoint & dest,
 	enableDrawing();
 }
 
-void MForest::adjustBrushSize(const MPoint & origin, const MPoint & dest, 
-                         float magnitude)
+void MForest::beginAdjustBrushSize(const MPoint & origin, const MPoint & dest,
+					GrowOption & option)
 {
-    Vector3F a(origin.x, origin.y, origin.z);
+	Vector3F a(origin.x, origin.y, origin.z);
 	Vector3F b(dest.x, dest.y, dest.z);
 	Ray r(a, b);
+	placeBrushAt(r);
+	updateManipulateSpace(option);
+}
+
+void MForest::adjustBrushSize(float magnitude)
+{
 	if(magnitude > .5f) magnitude = .5f;
     if(magnitude < -.5f) magnitude = -.5f;
-    scaleBrushAt(r, magnitude);
+    scaleBrush(magnitude);
 }
 
 void MForest::adjustSize(const MPoint & origin, const MPoint & dest, 

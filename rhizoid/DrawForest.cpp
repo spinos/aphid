@@ -617,6 +617,11 @@ void DrawForest::processTranslate(const Ray & r)
     disableDrawing();
     m_transHand->translate(&r);
     translatePlant();
+/// move the brush
+	Vector3F dv;
+	getDeltaTranslation(dv);
+	moveSelectionCenter(dv);
+	
     enableDrawing();
 }
     

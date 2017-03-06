@@ -26,35 +26,38 @@ ExampleWorks::~ExampleWorks()
 
 bool ExampleWorks::validateSelection()
 {
-	MSelectionList slist;
- 	MGlobal::getActiveSelectionList( slist );
-	if(!validateViz(slist)) {
-	    MGlobal::displayWarning("No proxyViz selected");
-	}
-    if(!PtrViz) {
+	MSelectionList sels;
+ 	MGlobal::getActiveSelectionList( sels );
+	if(!validateViz(sels)) {
+	    MGlobal::displayWarning("no proxyViz selected");
 		return 0;
 	}
-	
 	return 1;
 }
 
 bool ExampleWorks::validateViz(const MSelectionList &sels)
 {
+	PtrViz = NULL;
+	ObjViz = MObject::kNullObj;
+	
+	if(sels.length() < 1) {
+		return 0;
+	}
+			
     MStatus stat;
     MItSelectionList iter(sels, MFn::kPluginLocatorNode, &stat );
-    MObject vizobj;
-    iter.getDependNode(vizobj);
-    if(vizobj != MObject::kNullObj) {
-        MFnDependencyNode fviz(vizobj);
-		if(fviz.typeName() != "proxyViz") {
-			PtrViz = NULL;
-			ObjViz = MObject::kNullObj;
-			return 0;
-		}
-		PtrViz = (ProxyViz*)fviz.userNode();
-		ObjViz = vizobj;
-	}
     
+	iter.getDependNode(ObjViz);
+    if(ObjViz == MObject::kNullObj) {
+		return 0;
+	}
+        
+	MFnDependencyNode fviz(ObjViz);
+	if(fviz.typeName() != "proxyViz") {
+		return 0;
+	}
+	
+	PtrViz = (ProxyViz*)fviz.userNode();
     if(!PtrViz) {
         return 0;
 	}

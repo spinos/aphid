@@ -36,7 +36,9 @@ public:
 	
     void setRadius(float x);
     void setFalloff(float x);
+	void setCenter(const Vector3F & center);
 	void setCenter(const Vector3F & center, const Vector3F & direction);
+	void moveCenter(const Vector3F & dv);
 	void select(SelectionContext::SelectMode mode);
 	void selectByType();
     void deselect();

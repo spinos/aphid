@@ -566,13 +566,20 @@ bool Forest::closeToOccupiedBundlePosition(CollisionContext * ctx)
 			throw "Forest testNeighborsInCell null data";
 		}
 		
-		if(plant::bundleIndex(cell->key().y) == ctx->_bundleIndex) {
+		const int k = cell->key().y;
+		if(plant::bundleIndex(k) == ctx->_bundleIndex) {
 		
 			size1 = d->t1->getSide().length() * ctx->_bundleScaling * .5f;
 			pos1 = d->t1->getTranslation() - d->t2->m_offset;
-			if(ctx->contact(pos1, size1) ) {
+			
+		} else {
+			size1 = d->t1->getSide().length() * plantSize(k) * .5f;
+			pos1 = d->t1->getTranslation();
+			
+		}
+		
+		if(ctx->contact(pos1, size1) ) {
 				return true;
-			}
 		}
 		
 		cell->next();
@@ -726,6 +733,12 @@ void Forest::updateSampleColor()
 int Forest::randomExampleInd() const
 {
 	return m_sampleFlt->selectPlantType(rand() & 65535);
+}
+
+void Forest::moveSelectionCenter(const Vector3F & dv)
+{
+	selection()->moveCenter(dv);
+	m_intersectCtx.m_hitP += dv;
 }
 
 }

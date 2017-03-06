@@ -103,7 +103,7 @@ void ModifyForest::clearAt(const Ray & ray, GrowOption & option)
 	idToClear.clear();
 }
 
-void ModifyForest::scaleBrushAt(const Ray & ray, float magnitude)
+void ModifyForest::placeBrushAt(const Ray & ray)
 {
     if(!intersectGround(ray)) {
 		if(!intersectGrid(ray)) {
@@ -115,7 +115,10 @@ void ModifyForest::scaleBrushAt(const Ray & ray, float magnitude)
 	IntersectionContext * ctx = intersection();
 	
 	selection()->setCenter(ctx->m_hitP, ctx->m_hitN);
-	
+}
+
+void ModifyForest::scaleBrush(float magnitude)
+{
     float r = selection()->radius();
     r *= 1.f + magnitude;
     selection()->setRadius(r);
