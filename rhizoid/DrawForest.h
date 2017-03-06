@@ -35,6 +35,7 @@ public DrawBox, public DrawCircle, public DrawInstance
 	float m_transbuf[16];
     float m_showVoxLodThresold;
     bool m_enabled;
+	bool m_overrideWireColor;
 	
 public:
     DrawForest();
@@ -53,6 +54,7 @@ public:
     void finishResize();
     
 protected:
+	void setOvrrideWireColor(bool x);
 	void setScaleMuliplier(float x, float y, float z);
     float plantExtent(int idx) const;
 	void drawSolidPlants();
@@ -85,7 +87,7 @@ private:
 					const BoundingBox & box);
 	void drawPlant(PlantData * data,
 					const ExampVox * v);
-	void drawWiredPlants(ForestCell * cell);
+	void drawWiredPlantsInCell(ForestCell * cell);
 	void drawWiredPlant(PlantData * data,
 					const ExampVox * v);
 	void drawLODPlant(PlantData * data,

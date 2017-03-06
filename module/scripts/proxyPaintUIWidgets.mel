@@ -255,8 +255,8 @@ global proc proxyPaintCreateBrushUI(string $coln)
 	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
 
 	floatSliderGrp -label "Fall off" -field true
-    -minValue 0.0 -maxValue 1.0
-    -fieldMinValue 0.0 -fieldMaxValue 1.0
+    -minValue 0.0 -maxValue 2.0
+    -fieldMinValue 0.0 -fieldMaxValue 2.0
     -value 0.5
 	-cw 1 130
 	-p $coln

@@ -57,7 +57,7 @@ const char* GlslLegacyInstancer::fragmentProgramSource() const
 "\n   ldn = 0.2 + 0.8 * ldn;"
 "\n   vec3 cs = vec3(gl_Color) * diffuseColor;"
 "\n	  gl_FragColor = vec4(cs * ldn, 1.0);"
-"\n}\n";
+"}\n";
 }
 
 void GlslLegacyInstancer::defaultShaderParameters()
@@ -105,7 +105,8 @@ const char* GlslLegacyFlatInstancer::vertexProgramSource() const
 "\n   positionWorld.w = 1.0;"
 "\n   worldViewPosition = worldMatrix * positionWorld;"
 "\n   gl_Position = gl_ModelViewProjectionMatrix * worldViewPosition;"
-"\n}\n";
+"\n		gl_FrontColor = gl_Color;"
+"}\n";
 }
 
 const char* GlslLegacyFlatInstancer::fragmentProgramSource() const
@@ -114,8 +115,9 @@ const char* GlslLegacyFlatInstancer::fragmentProgramSource() const
 "\nuniform vec3 diffuseColor;"
 "\nvoid main()"
 "\n{"
-"\n	gl_FragColor = vec4(diffuseColor, 1.0);"
-"\n}\n";
+"\n   vec3 cs = vec3(gl_Color) * diffuseColor;"
+"\n	gl_FragColor = vec4(cs, 1.0);"
+"}\n";
 }
 
 void GlslLegacyFlatInstancer::defaultShaderParameters()
@@ -127,6 +129,8 @@ void GlslLegacyFlatInstancer::defaultShaderParameters()
 void GlslLegacyFlatInstancer::updateShaderParameters() const
 {
     glUniformMatrix4fvARB(m_worldMatLoc, 1, 0, (float*)&m_worldMat);
+	float defCol[3] = {1.f, 1.f, 1.f};
+	glUniform3fvARB(m_diffColorLoc, 1, defCol);
 }
 
 void GlslLegacyFlatInstancer::setWorldTm(const Matrix44F & x)

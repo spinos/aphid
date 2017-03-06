@@ -275,8 +275,10 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	const bool isActive = actp.asBool();
 	if(isActive) {
 		setWireColor(.125f, .1925f, .1725f);
+		setOvrrideWireColor(true);
 	} else {
 		setWireColor(.0675f, .0675f, .0675f);
+		setOvrrideWireColor(false);
 	}
 	
 	_viewport = view;

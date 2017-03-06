@@ -23,7 +23,8 @@
 namespace aphid {
 
 DrawForest::DrawForest() : m_showVoxLodThresold(1.f),
-m_enabled(true)
+m_enabled(true),
+m_overrideWireColor(false)
 {
 	m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.0675f;
 	m_rotHand = new RotationHandle(&m_rotMat);
@@ -38,6 +39,9 @@ DrawForest::~DrawForest()
 	delete m_scalHand;
 }
 
+void DrawForest::setOvrrideWireColor(bool x)
+{ m_overrideWireColor = x; }
+
 void DrawForest::drawWiredPlants()
 {
 	if(!m_enabled) {
@@ -49,19 +53,22 @@ void DrawForest::drawWiredPlants()
 		return;
 	}
 	
-	const float margin = g->gridSize() * .13f;
-	glDepthFunc(GL_LEQUAL);
+	const float margin = g->gridSize() * .1f;
+	
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glDepthFunc(GL_LEQUAL);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
+	
 	glColor3fv(m_wireColor);
+	
 	try {
 	g->begin();
 	while(!g->end() ) {
 		BoundingBox cellBox = g->coordToGridBBox(g->key() );
         cellBox.expand(margin);
         if(!cullByFrustum(cellBox ) ) {
-			drawWiredPlants(g->value() );
+			drawWiredPlantsInCell(g->value() );
 		}
 		
 		g->next();
@@ -69,10 +76,11 @@ void DrawForest::drawWiredPlants()
 	} catch (...) {
 		std::cerr<<"DrawForest draw wired plants caught something";
 	}
+	
 	glPopAttrib();
 }
 
-void DrawForest::drawWiredPlants(ForestCell * cell)
+void DrawForest::drawWiredPlantsInCell(ForestCell * cell)
 {
 	int iExample = -1;
 	ExampVox * v = 0;
@@ -81,8 +89,19 @@ void DrawForest::drawWiredPlants(ForestCell * cell)
 		if(cell->key().y != iExample) {
 			iExample = cell->key().y;
 			v = plantExample(iExample );
+			if(v) {
+				if(m_overrideWireColor) {
+					const float * vcol = v->diffuseMaterialColor();
+					glColor3fv(vcol);
+				}
+			} else {
+				std::cout<<"drawWiredPlant v is null";
+			}
 		}
-		drawWiredPlant(cell->value()->index, v );
+		
+		if(v) {
+			drawWiredPlant(cell->value()->index, v );
+		}
 		
 		cell->next();
 	}
@@ -90,12 +109,7 @@ void DrawForest::drawWiredPlants(ForestCell * cell)
 
 void DrawForest::drawWiredPlant(PlantData * data, 
 						const ExampVox * v)
-{
-    if(!v) {
-        std::cout<<"drawWiredPlant v is null";
-        return;    
-    }
-    
+{   
 	glPushMatrix();
     
 	data->t1->glMatrix(m_transbuf);
@@ -120,7 +134,10 @@ void DrawForest::drawSolidPlants()
 	const float margin = g->gridSize() * .1f;
 	
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
-	glColor3f(1.f,1.f,1.f);
+	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	//glColor3f(1.f,1.f,1.f);
 	
 	Vector3F lightVec(1,1,1);
 	lightVec = cameraSpace().transformAsNormal(lightVec);
@@ -234,7 +251,6 @@ void DrawForest::drawPlantSolidBound(PlantData * data,
 	glMultiTexCoord4f(GL_TEXTURE2, trans(0,1), trans(1,1), trans(2,1), trans(3,1) );
 	glMultiTexCoord4f(GL_TEXTURE3, trans(0,2), trans(1,2), trans(2,2), trans(3,2) );
 	
-	//v->drawSolidBound();
 	v->drawASolidDop();
 }
 
