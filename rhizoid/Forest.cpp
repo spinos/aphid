@@ -16,6 +16,7 @@
 #include <kd/IntersectEngine.h>
 #include "SampleFilter.h"
 #include <geom/AFrustum.h>
+#include "CollisionContext.h"
 
 namespace aphid {
 
@@ -63,6 +64,7 @@ void Forest::resetGrid(float x)
 void Forest::updateGrid()
 {
 	m_grid->calculateBBox();
+	m_grid->storeCellNeighbors();
 	m_march.initialize(m_grid->boundingBox(), m_grid->gridSize());
 }
 
@@ -154,44 +156,25 @@ bool Forest::closeToOccupiedPosition(CollisionContext * ctx)
 {
 	sdb::Coord3 c0 = m_grid->gridCoord((const float *)&ctx->_pos);
 	ForestCell * cell = m_grid->findCell(c0);
-	if(testNeighborsInCell(ctx, cell) ) return true;
+	bool stat = testNeighborsInCell(ctx, cell);
+	if(stat) {
+		return stat;
+	}
 	
-	BoundingBox b = m_grid->coordToGridBBox(c0);
+	const BoundingBox cbx = ctx->getBBox();
+	BoundingBox nbx;
 	
-	sdb::Coord3 c1 = c0;
-	if(ctx->getXMin() < b.getMin(0) ) {
-		 c1.x = c0.x - 1;
-		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(ctx, cell) ) return true;
+	for(int i=0;i<6;++i) {
+		m_grid->getCellNeighborBBox(nbx, c0, i);
+		stat = nbx.intersect(cbx);
+		if(stat) {
+			stat = testNeighborsInCell(ctx, cell->cellNeighbor(i) );
+		}
+		if(stat) {
+			return stat;
+		}
 	}
-	if(ctx->getXMax() > b.getMax(0) ) {
-		 c1.x = c0.x + 1;
-		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(ctx, cell) ) return true;
-	}
-	c1.x = c0.x;
-	if(ctx->getYMin() < b.getMin(1) ) {
-		 c1.y = c0.y - 1;
-		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(ctx, cell) ) return true;
-	}
-	if(ctx->getYMax() > b.getMax(1) ) {
-		 c1.y = c0.y + 1;
-		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(ctx, cell) ) return true;
-	}
-	c1.y = c0.y;
-	if(ctx->getZMin() < b.getMin(2) ) {
-		 c1.z = c0.z - 1;
-		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(ctx, cell) ) return true;
-	}
-	if(ctx->getZMax() > b.getMax(2) ) {
-		 c1.z = c0.z + 1;
-		 cell = m_grid->findCell(c1);
-		 if(testNeighborsInCell(ctx, cell) ) return true;
-	}
-	return false;
+	return stat;
 }
 
 bool Forest::testNeighborsInCell(CollisionContext * ctx,
@@ -200,37 +183,7 @@ bool Forest::testNeighborsInCell(CollisionContext * ctx,
 	if(!cell) {
 		return false;
 	}
-	
-	if(cell->isEmpty() ) {
-		return false;
-	}
-	
-	bool doCollide;
-	
-	cell->begin();
-	while(!cell->end()) {
-		PlantData * d = cell->value()->index;
-		if(d == NULL) {
-			throw "Forest testNeighborsInCell null data";
-		}
-		
-		if(ctx->_minIndex > -1) {
-			doCollide = cell->key().x < ctx->_minIndex;
-		} else {
-			doCollide = true;
-		}
-		
-		if(doCollide) {
-			float scale = d->t1->getSide().length() * .5f;
-			if(ctx->contact(d->t1->getTranslation(),
-							plantSize(cell->key().y) * scale) ) {
-				return true;
-			}
-		}
-		
-		cell->next();
-	}
-	return false;
+	return cell->collide<Forest, CollisionContext >(this, ctx);
 }
 
 const float & Forest::plantSize(const int & idx)

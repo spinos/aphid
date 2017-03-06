@@ -27,6 +27,7 @@ class SampleFilter;
 class ExrImage;
 class AFrustum;
 struct Float2;
+class CollisionContext;
 
 class Forest {
 
@@ -53,6 +54,7 @@ public:
     const int & numActivePlants() const;
 	const float & selectionRadius() const;
 	const float & gridSize() const;
+	const float & plantSize(const int & idx);
 	const float & filterPortion() const;
 	int numVisibleSamples();
 	
@@ -87,8 +89,6 @@ protected:
 	ATriangleMesh * getGroundMesh(const int & idx) const;
 	const std::vector<ATriangleMesh *> & groundMeshes() const;
 	
-	const float & plantSize(const int & idx);
-	
 	void displacePlantInGrid(PlantInstance * inst );
 	bool bindToGround(GroundBind * bind, const Vector3F & origin, Vector3F & dest);
 	void bindToGround(PlantData * plantd, const Vector3F & origin, Vector3F & dest);
@@ -99,46 +99,6 @@ protected:
 ///  0: failed, rebind
 ///  1: success
 	int getBindPoint(Vector3F & pos, GroundBind * bind);
-	
-	struct CollisionContext {
-		Vector3F _pos;
-		int _bundleIndex;
-		int _minIndex;
-		float _minDistance;
-		float _maxDistance;
-		float _bundleScaling;
-		float _radius;
-		
-		float getXMin() {
-			return _pos.x - _radius;
-		}
-		
-		float getXMax() {
-			return _pos.x + _radius;
-		}
-		
-		float getYMin() {
-			return _pos.y - _radius;
-		}
-		
-		float getYMax() {
-			return _pos.y + _radius;
-		}
-		
-		float getZMin() {
-			return _pos.z - _radius;
-		}
-		
-		float getZMax() {
-			return _pos.z + _radius;
-		}
-		
-		bool contact(const Vector3F & q,
-					const float & r) {
-			return _pos.distanceTo(q) < (_radius + _minDistance + r);
-		}
-		
-	};
 	
 	bool closeToOccupiedPosition(CollisionContext * ctx);
 	bool closeToOccupiedBundlePosition(CollisionContext * ctx);

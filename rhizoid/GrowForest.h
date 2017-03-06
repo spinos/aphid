@@ -11,6 +11,7 @@
 
 #include "Forest.h"
 #include "GrowOption.h"
+#include "CollisionContext.h"
 
 namespace aphid {
 

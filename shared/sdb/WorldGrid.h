@@ -61,6 +61,11 @@ public:
 	
 	int elementCount();
 	
+	void storeCellNeighbors();
+	void getCellNeighborBBox(BoundingBox & b,
+					const Coord3 & cellCoord,
+					const int & i) const;
+	
 	static int TwentySixNeighborCoord[26][3];
 	
 protected:
@@ -288,6 +293,41 @@ int WorldGrid<ChildType, ValueType>::TwentySixNeighborCoord[26][3] = {
 {-1, 1, 0},
 { 1, 1, 0}
 };
+
+template<typename ChildType, typename ValueType>
+void WorldGrid<ChildType, ValueType>::storeCellNeighbors()
+{
+	begin();
+	while(!end() ) {
+	
+		ChildType * c = value();
+		
+		const Coord3 & k = key();
+		for(int i=0;i<26;++i) {
+			const Coord3 ki = k + Coord3(TwentySixNeighborCoord[i][0],
+									TwentySixNeighborCoord[i][1],
+									TwentySixNeighborCoord[i][2]);
+			ChildType * nei = findCell(ki);
+			c->setCellNeighbor(nei, i);
+			
+		}
+		
+		next();
+	}
+}
+
+template<typename ChildType, typename ValueType>
+void WorldGrid<ChildType, ValueType>::getCellNeighborBBox(BoundingBox & b,
+					const Coord3 & cellCoord,
+					const int & i) const
+{
+	const Coord3 k = cellCoord + Coord3(TwentySixNeighborCoord[i][0],
+									TwentySixNeighborCoord[i][1],
+									TwentySixNeighborCoord[i][2]);
+	b.setMin(m_gridSize * k.x, m_gridSize * k.y, m_gridSize * k.z);
+	b.setMax(m_gridSize * (k.x + 1), m_gridSize * (k.y + 1), m_gridSize * (k.z + 1));
+	
+}
 
 } //end namespace sdb
 

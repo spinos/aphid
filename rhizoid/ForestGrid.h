@@ -27,6 +27,7 @@ class ForestGrid : public sdb::WorldGrid<ForestCell, Plant > {
 	int m_numVisibleSamples;
 	
 public:
+	
 	ForestGrid();
 	virtual ~ForestGrid();
 	

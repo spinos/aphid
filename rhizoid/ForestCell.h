@@ -16,6 +16,7 @@
 
 #include <sdb/Array.h>
 #include <sdb/LodSampleCache.h>
+#include <PlantCommon.h>
 
 namespace aphid {
 
@@ -23,6 +24,8 @@ class Plant;
 
 class ForestCell : public sdb::Array<sdb::Coord2, Plant> {
 
+	ForestCell * m_cellNeighbor[26];
+	
 	sdb::Sequence<int> m_activeInd;
 	boost::scoped_array<int> m_activeSampleIndices;
 	boost::scoped_array<int> m_visibleSampleIndices;
@@ -70,6 +73,13 @@ public:
 	
 	template<typename Tf>
 	void colorSampleByPlantType(const Tf & selFilter);
+/// 0-25
+	void setCellNeighbor(ForestCell * v, int idx);
+	
+	ForestCell * cellNeighbor(int idx);
+	
+	template<typename Tgrd, typename Tctx>
+	bool collide(Tgrd * grid, Tctx * context);
 	
 protected:
 	 
@@ -179,6 +189,43 @@ void ForestCell::colorSampleByPlantType(const Tf & selFilter)
 		asp.col = selFilter.plantTypeColor(asp.exmInd);
 	}
 }
+
+template<typename T, typename Tctx>
+bool ForestCell::collide(T * forest, Tctx * context)
+{
+	if(isEmpty() ) {
+		return false;
+	}
+	
+	bool doCollide;
+	
+	begin();
+	while(!end()) {
+		PlantData * d = value()->index;
+		if(d == NULL) {
+			throw "ForestCell has null data";
+		}
+		
+		if(context->_minIndex > -1) {
+			doCollide = key().x < context->_minIndex;
+		} else {
+			doCollide = true;
+		}
+		
+		if(doCollide) {
+			float scale = d->t1->getSide().length() * .5f;
+			if(context->contact(d->t1->getTranslation(),
+							forest->plantSize(key().y) * scale) ) {
+				return true;
+			}
+		}
+		
+		next();
+	}
+	
+	return false;
+}
+	
 
 }
 #endif

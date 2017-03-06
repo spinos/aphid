@@ -8,7 +8,6 @@
  */
 
 #include "ForestCell.h"
-#include <PlantCommon.h>
 
 namespace aphid {
 
@@ -17,6 +16,9 @@ ForestCell::ForestCell(Entity * parent) : sdb::Array<sdb::Coord2, Plant>(parent)
 	m_lodsamp = new sdb::LodSampleCache;
 	m_numActiveSamples = 0;
 	m_numVisibleSamples = 0;
+	for(int i=0;i<26;++i) {
+		m_cellNeighbor[i] = 0;
+	}
 }
 
 ForestCell::~ForestCell()
@@ -93,5 +95,11 @@ const int * ForestCell::visibleSampleIndices() const
 
 void ForestCell::reshuffleSamples(const int & level)
 { m_lodsamp->reshuffleAtLevel(level); }
+
+void ForestCell::setCellNeighbor(ForestCell * v, int idx)
+{ m_cellNeighbor[idx] = v; }
+
+ForestCell * ForestCell::cellNeighbor(int idx)
+{ return m_cellNeighbor[idx]; }
 
 }
