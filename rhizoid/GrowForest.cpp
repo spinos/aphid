@@ -21,8 +21,16 @@ namespace aphid {
 GrowForest::GrowForest()
 {
 	m_ftricoord = new BarycentricCoordinate;
-	std::time_t tim(NULL);
-	srand((int)tim);
+	std::time_t tnow;
+	struct tm y2010;
+	y2010.tm_hour = 0;   y2010.tm_min = 0; y2010.tm_sec = 0;
+	y2010.tm_year = 110; y2010.tm_mon = 0; y2010.tm_mday = 1;
+  
+	std::time(&tnow);
+	
+	double tseconds = std::difftime(tnow, std::mktime(&y2010) );
+	
+	srand((int)tseconds);
 }
 
 GrowForest::~GrowForest() 

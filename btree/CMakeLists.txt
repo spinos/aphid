@@ -7,9 +7,7 @@ set(CMAKE_CXX_FLAGS "-O0")
 include_directories ("." "../shared")
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
-add_executable(tbtree 
-../shared/PseudoNoise.cpp
-main.cpp)
+add_executable(tbtree main.cpp)
 
 if (WIN32)
 SET (APHID_DIR "D:/aphid")

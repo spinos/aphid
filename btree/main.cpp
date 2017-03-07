@@ -12,8 +12,11 @@
 #include <sdb/Array.h>
 #include <sdb/Sequence.h>
 #include <sdb/WorldGrid.h>
-#include <PseudoNoise.h>
+#include <sdb/LimitedArray.h>
+#include <math/PseudoNoise.h>
 #include <AllMath.h>
+#include <ctime>
+
 using namespace aphid::sdb;
 
 void testFind(Array<int, int> & arr, int k)
@@ -349,8 +352,59 @@ void testPolymex()
 	std::cout<<"\n passed ";
 }
 
+void testLimitedSeq()
+{
+	std::cout<<"\n test limited sequence "<<std::endl;
+	
+	LimitedArray<int, int, 64> seq;
+	int k, lastK;
+	for(int i=0;i<100;++i) {
+		if(seq.isFull() ) {
+			break;
+		}
+		k = rand() % 4095;
+		int * vi = new int;
+		*vi = k;
+		seq.insert(k, vi );
+		lastK = k;
+		
+	}
+	
+	seq.verbose();
+	
+	std::cout<<"\n find key "<<lastK;
+	
+	int * vv = seq.find(lastK);
+	if(vv) {
+		std::cout<<"\n yes"
+			<<" value "<<*vv;
+	} else {
+		std::cout<<"\n no";
+	}
+	
+	std::cout<<"\n remove key "<<lastK;
+	seq.remove(lastK);
+	
+	seq.verbose();
+	
+	std::cout<<"\n passed ";
+}
+
 int main()
 {
+	time_t now;
+	
+	struct tm y2010;
+	y2010.tm_hour = 0;   y2010.tm_min = 0; y2010.tm_sec = 0;
+	y2010.tm_year = 110; y2010.tm_mon = 0; y2010.tm_mday = 1;
+  
+	time(&now);
+	
+	double seconds = difftime(now, mktime(&y2010) );
+
+	//std::cout<<" "<<(int)seconds <<" seconds since January 1, 2010 in the current timezone";
+	srand((int)seconds);
+	
 	/*
 	std::cout<<"b-tree test\ntry to insert a few keys\n";
 	BTree tree;
@@ -526,10 +580,11 @@ int main()
 	Pair<Coord3, Entity> * p0 = c3t.insert(Coord3(0,0,0));
 	std::cout<<"\n p"<<p0->index;
 	*/
-	testSequenceRemove();
-	testArrayInsert(1000000);
-	testWorldG(1000000);
-	testPolymex();
+	//testSequenceRemove();
+	//testArrayInsert(1000000);
+	//testWorldG(1000000);
+	//testPolymex();
+	testLimitedSeq();
 	std::cout<<"\n end of test\n";
 	return 0;
 }
