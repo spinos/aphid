@@ -1,5 +1,5 @@
 /*
- *  MeshSampler.cpp
+ *  MaterialSampler.cpp
  *  proxyPaint
  *
  *  Created by jian zhang on 12/28/16.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "MeshSampler.h"
+#include "MaterialSampler.h"
 #include <maya/MFloatPointArray.h>
 #include <maya/MFloatArray.h>
 #include <maya/MFloatMatrix.h>
@@ -22,10 +22,10 @@
 
 namespace aphid {
 
-MeshSampler::MeshSampler()
+MaterialSampler::MaterialSampler()
 {}
 
-void MeshSampler::SampleMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
+void MaterialSampler::SampleMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
 								BoundingBox & bbox,
 							const MDagPath & groupPath)
 {
@@ -56,7 +56,7 @@ void MeshSampler::SampleMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & t
 	}
 }
 
-bool MeshSampler::SampleTriangles(sdb::VectorArray<cvx::Triangle> & tris,
+bool MaterialSampler::SampleTriangles(sdb::VectorArray<cvx::Triangle> & tris,
 						const int & iBegin, const int & iEnd,
 						const MObject & shadingEngineNode)
 {
@@ -104,7 +104,7 @@ bool MeshSampler::SampleTriangles(sdb::VectorArray<cvx::Triangle> & tris,
 			transps );
 			
 	if(stat != MS::kSuccess) {
-		AHelper::Info<MString>(" ERROR MeshSampler::SampleTriangles cannot sample shading network", sgName);
+		AHelper::Info<MString>(" ERROR MaterialSampler::SampleTriangles cannot sample shading network", sgName);
 		return false;
 	}
 	
@@ -119,7 +119,7 @@ bool MeshSampler::SampleTriangles(sdb::VectorArray<cvx::Triangle> & tris,
 		}
 	}
 	
-	AHelper::Info<MString>("MeshSampler::SampleTriangles done sample shading network", sgName);
+	AHelper::Info<MString>("MaterialSampler::SampleTriangles done sample shading network", sgName);
 		
 	return true;
 }

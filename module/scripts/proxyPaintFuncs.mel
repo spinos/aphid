@@ -363,3 +363,74 @@ global proc proxyPaintSetEditVizGround()
     
 }
 
+global proc string proxyPaintGetSampleMeshColor(string $shape)
+{
+    string $scv = "0.25 0.5 0.35";
+    if (`attributeExists "pxpnColor" $shape`) {
+        float $col[] = `getAttr ($shape + ".pxpnColor")`;
+        $scv = $col[0];
+        $scv = $scv + " " + $col[1] + " " + $col[2];
+    } else {
+        string $cmd = "addAttr -ln \"pxpnColor\" -at double3 "+$shape;
+        eval($cmd);
+        $cmd = "addAttr -ln \"pxpnColorR\" -at double -p pxpnColor "+$shape;
+        eval($cmd);
+        $cmd = "addAttr -ln \"pxpnColorG\" -at double -p pxpnColor "+$shape;
+        eval($cmd);
+        $cmd = "addAttr -ln \"pxpnColorB\" -at double -p pxpnColor "+$shape;
+        eval($cmd);
+        $cmd = "setAttr -type double3 "+$shape+".pxpnColor "+$scv;
+        eval($cmd);
+    }
+    return $scv;
+}
+
+global proc proxyPaintSetSampleMeshColor(string $com)
+{
+    string $shape = `colorSliderGrp -q -ann $com`;
+    float $col[] = `colorSliderGrp -q -rgb $com`;
+    string $cmd = "setAttr -type double3 \""+$shape+".pxpnColor\" "+$col[0]+" "+$col[1]+" "+$col[2];
+    eval($cmd);
+}
+
+global proc string proxyPaintGetSampleMeshImage(string $shape)
+{
+    string $scv = "none";
+    if (`attributeExists "pxpnImage" $shape`) {
+        $scv = `getAttr ($shape + ".pxpnImage")`;
+    } else {
+        string $cmd = "addAttr -ln \"pxpnImage\"  -dt \"string\" "+$shape;
+        eval($cmd);
+        $cmd = "setAttr -type \"string\" "+$shape+".pxpnImage \""+$scv+"\"";
+        eval($cmd);
+    }
+    return $scv;
+}
+
+global proc proxyPaintSetSampleMeshImage(string $com)
+{
+    string $image = `fileDialog -m 0 -dm "*.exr"`;
+    if(size($image) < 1) {
+        print("proxyPaintSetSampleMeshImage aborted");
+        return;   
+    }
+    
+    string $shape = `textField -q -ann $com`;
+    string $cmd = "setAttr -type \"string\" "+$shape+".pxpnImage \""+$image+"\"";
+    eval($cmd);
+    textField -e -text $image $com;
+}
+
+global proc proxyPaintSetSampleMeshImage2(string $com)
+{
+    string $image = `textField -q -text $com`;
+    if(size($image) < 5) {
+        $image = "none";   
+    }
+    
+    string $shape = `textField -q -ann $com`;
+    string $cmd = "setAttr -type \"string\" "+$shape+".pxpnImage \""+$image+"\"";
+    eval($cmd);
+    textField -e -text $image $com;
+}
+

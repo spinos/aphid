@@ -1,3 +1,6 @@
+source "proxyPaintFuncs.mel";
+source "proxyPaintUIWidgets.mel";
+
 proc string[] proxyPaint_GetMenuItemNames()
 {
     string $items[] = {"proxyPaint_menu_item_01"};    
@@ -10,7 +13,7 @@ proc proxyPaint_appendMenuItems(string $master)
     menuItem -l "Paint Tool" -c "proxyPaint_comb" proxyPaint_toolMenuItem;
     menuItem -l "Create Proxy Viz On Selected" -c "proxyPaint_cviz";
     menuItem -l "Connect Ground To Viz" -c "proxyPaintTool -cgm";
-    menuItem -l "Create Example On Selected Mesh" -c "proxyPaintTool -vxl";
+    menuItem -l "Create Example On Selected Mesh" -c "proxyPaint_createExample";
     menuItem -l "Connect Example To Viz" -c "proxyPaintTool -cvx";
     menuItem -l "Connect Camera To Viz" -c "proxyPaint_connectCameraToViz";
     menuItem -l "Save Cache" -c "proxyPaint_saveCache";
@@ -1096,5 +1099,45 @@ global proc proxyPaint_cvtSelectL2Example()
     if(size($l2insts) > 0) {
         proxyPaint_addNamedTarget($l2insts);
     }
+}
+
+global proc proxyPaint_createExample()
+{
+    if ( (`window -exists proxyPaint_CreateExampleNote`) == true ) {
+        deleteUI proxyPaint_CreateExampleNote;
+    }
+    
+    window -title ("Creare Example on Selected Mesh")  -wh 480 320 proxyPaint_CreateExampleNote;
+	
+    string $form = `formLayout -numberOfDivisions 100`;
+    string $bline = `columnLayout -adjustableColumn true`;
+    string $scroll = `scrollLayout -p $form -cr on`;
+    
+    columnLayout -adjustableColumn true -p $scroll 
+        pxpnSampleMeshUICol2c69e36a;
+	
+	setParent..;
+	rowColumnLayout -numberOfColumns 3 -p $bline;
+	button -l "Create/Edit Example" -c "proxyPaintTool -vxl";
+	button -l "Reload Selected" -c "proxyPaint_createExample";
+	button -l "Close" -c "deleteUI proxyPaint_CreateExampleNote";
+	setParent..;
+	
+	formLayout -edit
+        -attachNone  $bline     "top"
+        -attachForm     $bline     "left"   2
+        -attachForm    $bline     "bottom" 2
+        -attachForm     $bline     "right"  2
+
+        -attachForm     $scroll "top"    2
+        -attachForm    $scroll "left"   2
+        -attachControl    $scroll "bottom" 2 $bline
+        -attachForm     $scroll "right"  2
+    $form;
+    
+    proxyPaintCreateSampleMeshUI("pxpnSampleMeshUICol2c69e36a");
+    
+    showWindow proxyPaint_CreateExampleNote;
+
 }
 

@@ -1,5 +1,5 @@
 /*
- *  MeshSampler.h
+ *  MaterialSampler.h
  *  mama
  *
  *  Created by jian zhang on 12/28/16.
@@ -7,17 +7,17 @@
  *
  */
 
-#ifndef APH_MAMA_MESH_SAMPLER_H
-#define APH_MAMA_MESH_SAMPLER_H
+#ifndef APH_MAMA_MATERIAL_SAMPLER_H
+#define APH_MAMA_MATERIAL_SAMPLER_H
 
 #include <mama/MeshHelper.h>
 
 namespace aphid {
 
-class MeshSampler : public MeshHelper {
+class MaterialSampler : public MeshHelper {
 
 public:
-	MeshSampler();
+	MaterialSampler();
 
 	static void SampleMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
 								BoundingBox & bbox,

@@ -23,7 +23,7 @@
 #include "ProxyVizNode.h"
 #include "ExampVizNode.h"
 #include <AllMama.h>
-#include <mama/MeshSampler.h>
+#include <mama/ColorSampler.h>
 #include <geom/ATriangleMesh.h>
 #include <geom/PrincipalComponents.h>
 #include <geom/ConvexShape.h>
@@ -562,7 +562,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 		
 		MDagPath transPath;
 		transIter.getDagPath(transPath);
-		MeshSampler::SampleMeshTrianglesInGroup(tris, bbox, transPath);
+		ColorSampler::SampleMeshTrianglesInGroup(tris, bbox, transPath);
 	}
 	
 	if(tris.size() < 1) {

@@ -1,8 +1,7 @@
 /*
  *  proxyPaintUIWidgets.mel
  *
- */
- 
+ */ 
 global proc proxyPaintCreateVizUI(string $coln)
 {
     floatSliderGrp -label "Show Voxel Threshold" -field true
@@ -612,4 +611,62 @@ global proc proxyPaintCreateInjectUI(string $coln)
 	-p $coln
 	-c "proxyPaintSetOpt(102)";  
 
+}
+
+global proc proxyPaintCreateSampleMeshUI(string $coln)
+{    
+    rowColumnLayout -p $coln -numberOfColumns 2
+        -cw 1 310
+        -cw 2 200;
+        
+    string $sels[] = `ls -sl`;
+    int $nsel = size($sels);
+    int $i, $j;
+    for($i=0; $i<$nsel; $i++) {
+        string $meshes[] = `listRelatives -ad -type mesh $sels[$i]`;
+        int $nmsh = size($meshes);
+        for($j=0; $j<$nmsh; $j++) {
+            
+            string $colstr = proxyPaintGetSampleMeshColor($meshes[$j]);
+            string $imgstr = proxyPaintGetSampleMeshImage($meshes[$j]);
+            
+            textField -text $meshes[$j];
+            
+            string $pxpnSampleMeshColEdit = `colorSliderGrp
+                -ann $meshes[$j]
+                -label ""
+                -rgb 0.5 0.5 0.5
+                -columnWidth 1 4
+                -columnWidth 2 48
+                -columnWidth 3 56`;
+                
+            string $cmd = "colorSliderGrp -e -rgb "+$colstr+" \""+$pxpnSampleMeshColEdit+"\"";
+            eval($cmd); 
+            $cmd = "proxyPaintSetSampleMeshColor(\""+$pxpnSampleMeshColEdit+"\")";
+            colorSliderGrp -e -cc $cmd $pxpnSampleMeshColEdit;
+              
+            string $pxpnSampleMeshImgEdit = `textField -ann $meshes[$j]
+                -text $imgstr`;
+            
+            $cmd = "proxyPaintSetSampleMeshImage2(\""+$pxpnSampleMeshImgEdit+"\")";
+            textField -e -cc $cmd $pxpnSampleMeshImgEdit;
+            
+            $cmd = "proxyPaintSetSampleMeshImage(\""+$pxpnSampleMeshImgEdit+"\")";
+            
+            iconTextButton -label "Open EXR Image File"     
+                -image "proxyPaintTool_imageFile.xpm" 
+                -style "iconAndTextHorizontal"
+                -c $cmd;
+            
+        }
+    }
+    setParent ..;
+    string $locs[];
+    for($i=0; $i<$nsel; $i++) {
+        $locs = `listRelatives -ad -type locator $sels[$i]`;
+    }
+    if(size($locs) < 1) {
+        return;   
+    }
+    textFieldGrp -l "Edit Example" -text $locs[0] -p $coln;
 }

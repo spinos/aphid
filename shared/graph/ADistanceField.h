@@ -9,7 +9,7 @@
 
 #pragma once
 #include "BaseDistanceField.h"
-#include <sdb/Array.h>
+#include <sdb/LimitedArray.h>
 #include <math/Calculus.h>
 #include <math/miscfuncs.h>
 
@@ -404,7 +404,7 @@ private:
 	
 	template<typename Ts>
 	void extractGridNodesIn(DistanceNode * dst,
-						sdb::Array<int, Ts> * cell) {
+						sdb::LimitedArray<int, Ts, 32> * cell) {
 		cell->begin();
 		while(!cell->end() ) {
 			
@@ -421,7 +421,7 @@ private:
 		
 	template<typename Ts>
 	void obtainGridNodeValIn(const DistanceNode * src,
-							sdb::Array<int, Ts> * cell) {
+							sdb::LimitedArray<int, Ts, 32> * cell) {
 		cell->begin();
 		while(!cell->end() ) {
 			

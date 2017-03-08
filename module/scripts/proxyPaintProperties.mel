@@ -1,5 +1,4 @@
 
-source "proxyPaintFuncs.mel";
 source "proxyPaintUIWidgets.mel";
 
 global proc proxyPaintProperties ()
