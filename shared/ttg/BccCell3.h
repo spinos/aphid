@@ -10,7 +10,7 @@
 #ifndef APH_TTG_BCC_CELL_3_H
 #define APH_TTG_BCC_CELL_3_H
 
-#include <sdb/Array.h>
+#include <sdb/LimitedArray.h>
 #include <sdb/AdaptiveGrid3.h>
 #include "RedBlueRefine.h"
 
@@ -28,9 +28,10 @@ public:
 	int index;
 };
 
-class BccCell3 : public sdb::Array<int, BccNode3 >, public sdb::AdaptiveGridCell {
+class BccCell3 : public sdb::LimitedArray<int, BccNode3, 32 >, public sdb::AdaptiveGridCell {
 
 	typedef sdb::AdaptiveGrid3<BccCell3, BccNode3, 10 > AdaptiveGridT;
+	typedef sdb::LimitedArray<int, BccNode3, 32 > ArrayTyp;
 	
 public:
 	BccCell3(Entity * parent = NULL);

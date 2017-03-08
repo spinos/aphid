@@ -13,7 +13,7 @@ namespace aphid {
 
 namespace ttg {
 
-BccCell3::BccCell3(Entity * parent) : sdb::Array<int, BccNode3 >(parent)
+BccCell3::BccCell3(Entity * parent) : ArrayTyp(parent)
 {}
 
 BccCell3::~BccCell3()

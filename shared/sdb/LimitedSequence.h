@@ -12,7 +12,7 @@
 #ifndef APH_SDB_LIMITED_SEQUENCE_H
 #define APH_SDB_LIMITED_SEQUENCE_H
 
-#include <sdb/KeyNData.h>
+#include <sdb/BNode.h>
 
 namespace aphid {
 
