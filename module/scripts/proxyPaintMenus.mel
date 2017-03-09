@@ -13,7 +13,7 @@ proc proxyPaint_appendMenuItems(string $master)
     menuItem -l "Paint Tool" -c "proxyPaint_comb" proxyPaint_toolMenuItem;
     menuItem -l "Create Proxy Viz On Selected" -c "proxyPaint_cviz";
     menuItem -l "Connect Ground To Viz" -c "proxyPaintTool -cgm";
-    menuItem -l "Create Example On Selected Mesh" -c "proxyPaint_createExample";
+    menuItem -l "Create/Edit Example On Selected Mesh" -c "proxyPaint_createExample";
     menuItem -l "Connect Example To Viz" -c "proxyPaintTool -cvx";
     menuItem -l "Connect Camera To Viz" -c "proxyPaint_connectCameraToViz";
     menuItem -l "Save Cache" -c "proxyPaint_saveCache";
@@ -1107,7 +1107,7 @@ global proc proxyPaint_createExample()
         deleteUI proxyPaint_CreateExampleNote;
     }
     
-    window -title ("Creare Example on Selected Mesh")  -wh 480 320 proxyPaint_CreateExampleNote;
+    window -title ("Creare/Edit Example on Selected Mesh")  -wh 480 320 proxyPaint_CreateExampleNote;
 	
     string $form = `formLayout -numberOfDivisions 100`;
     string $bline = `columnLayout -adjustableColumn true`;

@@ -14,5 +14,6 @@
 #include <ttg/TetraMeshBuilder.h>
 #include <ttg/TetraGridTriangulation.h>
 #include <ttg/MassiveTetraGridTriangulation.h>
+#include <ttg/LandBlock.h>
 
 #endif
