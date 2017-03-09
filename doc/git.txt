@@ -13,3 +13,7 @@ ssh -T git@github.com
 
 git log -p <path>
 shows commits that touch the specified path
+
+http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html
+
+git rebase -i

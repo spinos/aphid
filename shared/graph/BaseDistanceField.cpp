@@ -578,4 +578,16 @@ void BaseDistanceField::setNodePosDistance(const Vector3F & pos,
 	}
 }
 
+void BaseDistanceField::displayNodes() const
+{
+	std::cout<<"\n BaseDistanceField::displayNodes";
+	
+	for(int i=0;i<numNodes();++i) {
+		const DistanceNode & d = nodes()[i];
+		std::cout<<"\n node["<<i<<"] pos "<<d.pos
+				<<" val "<<d.val;
+	}
+	
+}
+
 }

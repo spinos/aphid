@@ -96,7 +96,8 @@ public slots:
 		
 private:
     void drawTetraMesh();
-    void toggleDrawTriangulationWire();
+    void drawTriangulation();
+	void toggleDrawTriangulationWire();
 	    
 private slots:
 

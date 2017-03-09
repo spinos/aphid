@@ -7,7 +7,7 @@
  *
  */
 #include <QtGui>
-#include <Calculus.h>
+#include <math/Calculus.h>
 #include "dt2widget.h"
 #include "dtdwt2.h"
 #include "gensig.h"

@@ -5,7 +5,6 @@ set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
 set (CMAKE_BUILD_TYPE RELEASE)
 
-
 add_executable (tif2exr main.cpp)
 
 if (WIN32)
@@ -60,6 +59,11 @@ target_link_libraries (tif2exr ${TIF_LIBRARY})
 if (WIN32)
     set (ZLIB_INCLUDE_DIR d:/usr/zlib-1.2.5)
     set (ZLIB_LIBRARY d:/usr/zlib-1.2.5/zdll.lib)
+
+elseif (APPLE)
+	set (ZLIB_INCLUDE_DIR /usr/include)
+    set (ZLIB_LIBRARY /usr/lib/libz.dylib)
+
 else ()
     set (ZLIB_INCLUDE_DIR /usr/include)
     set (ZLIB_LIBRARY /usr/lib64/libz.so)

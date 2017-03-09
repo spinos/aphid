@@ -12,30 +12,55 @@
 #define APH_TTG_LAND_BLOCK_H
 
 #include <sdb/Entity.h>
-#include <ttg/GenericTetraGrid.h>
-#include <ttg/AdaptiveBccGrid3.h>
+#include <math/Vector3F.h>
 
 namespace aphid {
 
+class ATriangleMesh;
+
+template<typename T1, typename T2>
+class TetraGridTriangulation;
+
 namespace ttg {
+
+class AdaptiveBccGrid3;
+class GlobalHeightField;
+
+template<typename T>
+class GenericTetraGrid;
+
+template<typename T>
+class TetrahedronDistanceField;
 
 class LandBlock : public sdb::Entity {
 
+	Vector3F m_origin;
+
 public:
-typedef	ttg::GenericTetraGrid<float > TetGridTyp;
+typedef	GenericTetraGrid<float > TetGridTyp;
+typedef TetrahedronDistanceField<TetGridTyp > FieldTyp;
+typedef TetraGridTriangulation<float, TetGridTyp > MesherTyp;
 
 private:
-	TetGridTyp m_tetg;
-	AdaptiveBccGrid3 m_bccg;
+	AdaptiveBccGrid3 * m_bccg;
+	TetGridTyp * m_tetg;
+	FieldTyp * m_field;
+	MesherTyp * m_mesher;
+	ATriangleMesh * m_frontMesh;
 	
 public:
 	LandBlock(sdb::Entity * parent = NULL);
 	virtual ~LandBlock();
 	
+	void processHeightField(const GlobalHeightField * elevation);
+	void triangulate();
+	
 	const TetGridTyp * grid() const;
+	const FieldTyp * field() const;
+	const ATriangleMesh * frontMesh() const;
 	
 protected:
-
+	
 private:	
 };
 

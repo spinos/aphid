@@ -8,9 +8,8 @@
  */
 #ifndef WLA_DWT_2D_H
 #define WLA_DWT_2D_H
-//#include <linearMath.h>
+
 #include "fltbanks.h"
-#include <ATypes.h>
 
 namespace aphid {
 

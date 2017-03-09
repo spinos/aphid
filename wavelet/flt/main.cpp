@@ -19,7 +19,9 @@
  *  http://robotics.stanford.edu/%7Escohen/lect02/lect02.html
  */
 
-#include <Calculus.h>
+#include <iostream>
+#include <math/Calculus.h>
+#include <math/miscFuncs.h>
 #include <map>
 #include <boost/format.hpp>
 #include <boost/timer.hpp>

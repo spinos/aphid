@@ -8,7 +8,7 @@
  */
 
 #include "gensig.h"
-#include <ANoise3.h>
+#include <math/ANoise3.h>
 
 using namespace aphid;
 
@@ -29,10 +29,11 @@ void gen1dsig(UniformPlot1D * line,
 	}
 }
 
-void gen2dsig(aphid::UniformPlot2D * img,
+void gen2dsig(UniformPlot2D * img,
 				int m, int n, int p,
 				float noi)
 {
+	img->create(m, n, p);
 	int i, j, k;
 	for(k=0;k<p;++k) {
 		float * Xv = img->y(k);

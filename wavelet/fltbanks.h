@@ -8,7 +8,7 @@
  */
 #ifndef WLA_FLT_BANKS_H
 #define WLA_FLT_BANKS_H
-#include <ATypes.h>
+#include <math/ATypes.h>
 
 namespace aphid {
 

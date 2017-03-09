@@ -57,6 +57,8 @@ class BaseDistanceField : public AGraph<DistanceNode, IDistanceEdge > {
 public:
     BaseDistanceField();
     virtual ~BaseDistanceField();
+	
+	void displayNodes() const;
     
 protected:	
 	void resetNodes(float val, sdf::NodeState lab, sdf::NodeState stat);

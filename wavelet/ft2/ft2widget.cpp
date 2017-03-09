@@ -8,8 +8,8 @@
  */
 #include <QtGui>
 #include "ft2widget.h"
-#include "dwt2.h"
-#include "gensig.h"
+#include <dwt2.h>
+#include <gensig.h>
 
 using namespace aphid;
 
@@ -85,7 +85,6 @@ Ft2Widget::Ft2Widget(QWidget *parent) : Plot2DWidget(parent)
 	
 	for(k=0;k<DIM_Z;++k) {
 /// original x
-		//wla::circleShift2(Xp->channel(k), 5);
 		Xp->channel(k)->maxAbsError(mxe, *yP->channel(k) );
 		
 	}

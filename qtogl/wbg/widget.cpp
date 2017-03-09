@@ -19,7 +19,7 @@
 #include <sdb/WorldGrid2.h>
 #include <sdb/LodSampleCache.h>
 #include <sdb/GridClosestToPoint.h>
-#include "../cactus.h"
+#include <ttg/GlobalHeightField.h>
 
 using namespace aphid;
 
@@ -33,6 +33,9 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	usePerspCamera();
     
 	m_landBlk = new ttg::LandBlock;
+	ttg::GlobalHeightField elevation;
+	m_landBlk->processHeightField(&elevation);
+	m_landBlk->triangulate();
 	
     m_fieldDrawer = new FieldDrawerT;
 	
@@ -48,27 +51,20 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	//updatePerspectiveView();
-	//getDrawer()->frustum(perspectiveView()->frustum() );
-	
-	getDrawer()->m_wireProfile.apply();
-	getDrawer()->setColor(.125f, .125f, .5f);
-    
-    //draw3LevelGrid(4);
-	//drawSampleGrid();
-	//drawSamples();
+	//getDrawer()->m_wireProfile.apply();
+	//getDrawer()->setColor(.125f, .125f, .5f);
     
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(0.f, .35f, .13f);
-    
 	drawTetraMesh();
-    //drawField();
-	//drawTriangulation();
+
+	getDrawer()->m_surfaceProfile.apply();
+	drawTriangulation();
 	if(m_doDrawTriWire) {
-	//	drawTriangulationWire();
+		getDrawer()->m_wireProfile.apply();
+		getDrawer()->setColor(1,.7,0);
+		drawTriangulation();
 	}
-	//drawCoarseGrid();
-    
 }
 
 void GLWidget::drawTetraMesh()
@@ -103,6 +99,22 @@ void GLWidget::drawTetraMesh()
     }
     glEnd();
     
+}
+
+void GLWidget::drawTriangulation()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	const ATriangleMesh * fm = m_landBlk->frontMesh();
+
+	const unsigned nind = fm->numIndices();
+	const unsigned * inds = fm->indices();
+	const Vector3F * pos = fm->points();
+	
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
+	glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::toggleDrawTriangulationWire()

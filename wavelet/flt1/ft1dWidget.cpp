@@ -7,7 +7,7 @@
  *
  */
 #include <QtGui>
-#include <Calculus.h>
+#include <math/Calculus.h>
 #include "ft1dWidget.h"
 #include "fltbanks.h"
 
