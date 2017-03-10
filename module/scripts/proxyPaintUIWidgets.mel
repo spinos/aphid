@@ -574,6 +574,25 @@ global proc proxyPaintCreateEditUI(string $coln)
 			    -c "proxyPaintReset";
 	setParent ..;
 	setParent ..;
+	
+	frameLayout -l "Cache" 
+        -cl false -cll true -p $coln;
+    rowColumnLayout -numberOfColumns 2
+		-columnWidth 1 140
+		-columnWidth 2 140;
+		
+		iconTextButton -label "Load"
+			    -style "iconAndTextHorizontal" 
+			    -image1 "generic_load.xpm"  
+			    -c "proxyPaint_loadCache";
+		
+		iconTextButton -label "Save" 
+                -image1 "generic_save.xpm" 
+                -style "iconAndTextHorizontal" 
+                -c "proxyPaint_saveCache";		
+			    
+	setParent ..;
+	setParent ..;
 }
 
 global proc proxyPaintCreateInjectUI(string $coln)
@@ -682,10 +701,16 @@ global proc proxyPaintCreateEditGroundUI(string $vizName, string $row)
         
         textField -text $transName
             -p $row;
-        string $cmd = "select -r "+$transName;
-        button -l "Select"
+        
+        string $pxpnUIGroundSelCheck = `checkBox -l ""
+            -ann $transName
             -p $row
-            -c $cmd;
+            -v 0`;
+        
+        string $cmd = "proxyPaintSelGroundCheckedChnaged(\""+$pxpnUIGroundSelCheck+"\")";
+        
+        checkBox -e -cc $cmd $pxpnUIGroundSelCheck;
+        
         $cmd = "proxyPaintReplaceGroundMesh(\""+$vizName+"\", "+$i+")";
         button -l "Replace"
             -p $row

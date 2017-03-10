@@ -72,7 +72,9 @@ private:
 	void connectTransform(MPlug & worldSpacePlug, 
 					MObject & vizOb);
 	MStatus getSelectedViz(MSelectionList & sels, 
-					MObject & vizobj);
+					MObject & vizobj,
+					const int & minNumSelected,
+					const char * errMsg);
 	void disconnectGround(const MObject & vizobj,
 					int iSlot);
 	

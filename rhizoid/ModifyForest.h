@@ -65,7 +65,7 @@ protected:
 	void moveWithGround();
 	void placeBrushAt(const Ray & ray);
 	void scaleBrush(float magnitude);
-	void raiseOffsetAt(const Ray & ray, GrowOption & option);
+	void raiseOffsetAlongNormal(GrowOption & option);
 	void calculateSelectedWeight();
 	virtual void getDeltaRotation(Matrix33F & mat,
 					const float & weight = 1.f) const;
@@ -73,7 +73,9 @@ protected:
 					const float & weight = 1.f) const;
 	virtual void getDeltaScaling(Vector3F & vec,
 					const float & weight = 1.f) const;
-				
+/// weight centered at ground intersection
+	bool calculateSelecedWeightAt(const Ray & ray);
+	
 private:
 	void clearPlant(Plant * pl, const sdb::Coord2 & k);
 	void movePlantsWithGround(ForestCell * arr);

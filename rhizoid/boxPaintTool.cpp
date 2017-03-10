@@ -80,6 +80,10 @@ MStatus proxyPaintContext::doPress( MEvent & event )
         case opBundleTranslate:
             startTranslate();
             break;
+		case opRaise:
+		case opDepress:
+            startEditOffset();
+            break;
         default:
             ;
     }
@@ -692,24 +696,18 @@ void proxyPaintContext::replace()
 
 void proxyPaintContext::raiseOffset()
 {
-	if(!PtrViz) return;
-	MPoint fromNear, fromFar;
-	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	m_growOpt.setStrokeMagnitude(mag);
-	PtrViz->offsetAlongNormal(fromNear, fromFar, m_growOpt);
+	PtrViz->offsetAlongNormal(m_growOpt);
 }
 
 void proxyPaintContext::depressOffset()
 {
-	if(!PtrViz) return;
-	MPoint fromNear, fromFar;
-	view.viewToWorld ( last_x, last_y, fromNear, fromFar );
 	float mag = last_x - start_x - last_y + start_y;
 	mag /= 48;
 	m_growOpt.setStrokeMagnitude(mag * -1.f);
-	PtrViz->offsetAlongNormal(fromNear, fromFar, m_growOpt);
+	PtrViz->offsetAlongNormal(m_growOpt);
 }
 
 void proxyPaintContext::setMinCreateMargin(float x)
@@ -1178,5 +1176,13 @@ void proxyPaintContext::setShowVoxelThreshold(float x)
 	processShowVoxelThreshold(x);
 	
 	MToolsInfo::setDirtyFlag(*this);
+}
+
+void proxyPaintContext::startEditOffset()
+{
+	if(!PtrViz) {
+		return;
+	}
+	PtrViz->processStartEditOffset(getIncidentAt(start_x, start_y) );
 }
 //:~

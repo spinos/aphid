@@ -1037,6 +1037,7 @@ void ProxyViz::endPickInView()
 { 
 	MGlobal::displayInfo("proxyviz end pick in view");
 	clearGroups();
+	deselectPlants();
 	m_toCheckVisibility = false; 
 }
 
@@ -1270,6 +1271,20 @@ void ProxyViz::processSampleColorChanges(const std::vector<Vector3F> & colors)
 	setFilterPlantColors(colors);
 	updateSampleColor();
 	_viewport.refresh(false, true);
+}
+
+bool ProxyViz::processLoadExternal(const char * fileName)
+{
+	bool stat = loadExternal(fileName);
+	if(stat) {
+		_viewport.refresh(false, true);
+	}
+	return stat;
+}
+
+bool ProxyViz::processStartEditOffset(const Ray & ray)
+{
+	return calculateSelecedWeightAt(ray);
 }
 
 }

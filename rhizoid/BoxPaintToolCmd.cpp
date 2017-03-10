@@ -126,9 +126,25 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	
 	if(m_operation == opConnectGround) return connectGroundSelected();
 	
-	if(m_operation == opSaveCache) return saveCacheSelected();
+	if(m_operation == opSaveCache) {
+		status = saveCacheSelected();
+		if(status) {
+			setResult(true);
+		} else {
+			setResult(false);
+		}
+		return status;
+	}
 			
-	if(m_operation == opLoadCache) return loadCacheSelected();
+	if(m_operation == opLoadCache) {
+		status = loadCacheSelected();
+		if(status) {
+			setResult(true);
+		} else {
+			setResult(false);
+		}
+		return status;
+	}
 	
 	if(m_operation == opVoxelize) return voxelizeSelected();
 	
@@ -376,7 +392,7 @@ MStatus proxyPaintTool::connectGroundSelected()
 {
 	MSelectionList sels;
  	MObject vizobj;
- 	MStatus stat = getSelectedViz(sels, vizobj);
+ 	MStatus stat = getSelectedViz(sels, vizobj, 2, "select mesh(es) and a viz to connect");
 	if(!stat) {
 		return stat;
 	}
@@ -391,7 +407,8 @@ MStatus proxyPaintTool::connectGroundSelected()
 	}
 	
 	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
-	pViz->setEnableCompute(false);
+	
+	pViz->processSetFastGround(1);
 	
 	bool connStat;
 	
@@ -423,8 +440,6 @@ MStatus proxyPaintTool::connectGroundSelected()
 		}
 	}
 	
-	pViz->setEnableCompute(true);
-	
 	return stat;
 }
 
@@ -432,7 +447,7 @@ MStatus proxyPaintTool::connectVoxelSelected()
 {
 	MSelectionList sels;
 	MObject vizobj;
- 	MStatus stat = getSelectedViz(sels, vizobj);
+ 	MStatus stat = getSelectedViz(sels, vizobj, 2, "select example(s) and a viz to connect");
 	if(!stat) {
 		return stat;
 	}
@@ -487,51 +502,47 @@ void proxyPaintTool::connectTransform(MPlug & worldSpacePlug, MObject & vizObj)
 
 MStatus proxyPaintTool::saveCacheSelected()
 {
-	MStatus stat;
 	MSelectionList sels;
- 	MGlobal::getActiveSelectionList( sels );
-	
-	if(sels.length() < 1) {
-		MGlobal::displayWarning("proxyPaintTool wrong selection, select a viz to save cache");
-		return MS::kFailure;
-	}
-	
-	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
-	if(vizobj == MObject::kNullObj ) {
-		return MS::kFailure;
+	MObject vizobj;
+	MStatus stat = getSelectedViz(sels, vizobj, 1, "select a viz to save cache");
+	if(!stat) {
+		return stat;
 	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
+	if(!stat) {
+		return stat;
+	}
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 		
 	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
-	pViz->saveExternal(m_cacheName.asChar() );
-	
+	bool saved = pViz->saveExternal(m_cacheName.asChar() );
+	if(!saved) {
+		return MS::kFailure;
+	}
 	return stat;
 }
 	
 MStatus proxyPaintTool::loadCacheSelected()
 {
-	MStatus stat;
 	MSelectionList sels;
- 	MGlobal::getActiveSelectionList( sels );
-	
-	if(sels.length() < 1) {
-		MGlobal::displayWarning("proxyPaintTool wrong selection, select a viz to load cache");
-		return MS::kFailure;
-	}
-	
-	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
-	if(vizobj == MObject::kNullObj ) {
-		return MS::kFailure;
+	MObject vizobj;
+	MStatus stat = getSelectedViz(sels, vizobj, 1, "select a viz to load cache");
+	if(!stat) {
+		return stat;
 	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
+	if(!stat) {
+		return stat;
+	}
 	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
 		
 	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
-	pViz->loadExternal(m_cacheName.asChar() );
-	
+	bool loaded = pViz->processLoadExternal(m_cacheName.asChar() );
+	if(!loaded) {
+		return MS::kFailure;
+	}
 	return stat;
 }
 
@@ -854,19 +865,21 @@ bool proxyPaintTool::isMeshConnectedSlot(const MObject & meshObj,
 	return false;
 }
 
-MStatus proxyPaintTool::getSelectedViz(MSelectionList & sels, MObject & vizobj)
+MStatus proxyPaintTool::getSelectedViz(MSelectionList & sels, MObject & vizobj,
+						const int & minNumSelected,
+						const char * errMsg)
 {
 	MGlobal::getActiveSelectionList( sels );
 	
-	if(sels.length() < 2) {
-		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) and a viz to connect");
+	if(sels.length() < minNumSelected) {
+		AHelper::Info<const char *>("proxyPaintTool wrong selection,", errMsg);
 		return MS::kFailure;
 	}
 	
 	MStatus stat;
 	vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
 	if(vizobj == MObject::kNullObj ) {
-		MGlobal::displayWarning("proxyPaintTool found no viz selected, select mesh(es) and a viz to connect");
+		AHelper::Info<const char *>("proxyPaintTool wrong selection,", errMsg);
 		return MS::kFailure;
 	}
 	
@@ -884,7 +897,7 @@ MStatus proxyPaintTool::replaceGroundSelected(int iSlot)
 {
 	MSelectionList sels;
 	MObject vizobj;
- 	MStatus stat = getSelectedViz(sels, vizobj);
+ 	MStatus stat = getSelectedViz(sels, vizobj, 2, "select a mesh to replace");
 	if(!stat) {
 		return stat;
 	}
@@ -899,7 +912,8 @@ MStatus proxyPaintTool::replaceGroundSelected(int iSlot)
 	}
 	
 	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
-	pViz->setEnableCompute(false);
+	
+	pViz->processSetFastGround(1);
 	
 	AHelper::Info<int>("proxyPaintTool replace ground", iSlot);
 	
@@ -934,8 +948,6 @@ MStatus proxyPaintTool::replaceGroundSelected(int iSlot)
 		ConnectionHelper::ConnectToArray(worldSpacePlug, vizobj, "groundSpace");
 		
 	}
-		
-	pViz->setEnableCompute(true);
 	
 	return stat;
 }

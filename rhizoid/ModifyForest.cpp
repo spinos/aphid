@@ -557,6 +557,23 @@ bool ModifyForest::calculateSelecedWeight(const Ray & ray)
 	calculateSelectedWeight();
 	return true;
 }
+
+bool ModifyForest::calculateSelecedWeightAt(const Ray & ray)
+{
+	if(numActivePlants() < 1 ) {
+		return false;
+	}
+	
+	if(!intersectGround(ray) ) {
+		if(!intersectGrid(ray)) {
+			intersectWorldBox(ray);
+			return false;
+		}
+	}
+	
+	calculateSelectedWeight();
+	return true;
+}
 	
 void ModifyForest::calculateSelectedWeight()
 {
@@ -667,11 +684,8 @@ void ModifyForest::clearPlantOffset(GrowOption & option)
 	}
 }
 
-void ModifyForest::raiseOffsetAt(const Ray & ray, 
-								GrowOption & option)
+void ModifyForest::raiseOffsetAlongNormal(GrowOption & option)
 {
-    if(!calculateSelecedWeight(ray)) return;
-    
 	const Vector3F offsetVec = selectionNormal() * (option.m_strokeMagnitude * plantSize(option.m_plantId) * 10.f);
     std::cout<<"\n offset vec "<<offsetVec;
 	Vector3F pos, deltaPos;

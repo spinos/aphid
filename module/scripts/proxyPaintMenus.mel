@@ -17,7 +17,7 @@ proc proxyPaint_appendMenuItems(string $master)
     menuItem -l "Connect Example To Viz" -c "proxyPaintTool -cvx";
     menuItem -l "Connect Camera To Viz" -c "proxyPaint_connectCameraToViz";
     menuItem -l "Save Cache" -c "proxyPaint_saveCache";
-    menuItem -l "Load Cache" -c "proxyPaintTool -lcf `fileDialog -m 0`";
+    menuItem -l "Load Cache" -c "proxyPaint_loadCache";
     menuItem -l "Convert Selected Viz To Instancer" -c "proxyPaint_instance";
     menuItem -l "Convert Locators To Objects" -c "proxyPaint_realize";
     menuItem -l "Display Select As" -subMenu true;
@@ -28,17 +28,6 @@ proc proxyPaint_appendMenuItems(string $master)
     menuItem -l "Create Bundle Example" -c "proxyPaint_createBundle";
 
 	menuItem -e -ann `proxyPaintToolContext` proxyPaint_toolMenuItem;
-}
-
-global proc proxyPaint_saveCache()
-{
-    string $sctFilter = "*.sct";
-    string $filenm[] = `fileDialog2 -fileFilter $sctFilter`;
-    if(size($filenm) < 1) {
-        print("proxyPaint_saveCache aborted");
-        return;   
-    }
-    proxyPaintTool -scf $filenm[0];
 }
 
 global proc proxyPaintRemoveMenus()

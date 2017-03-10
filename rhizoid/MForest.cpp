@@ -301,12 +301,19 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 					MVectorArray & plantOffsets)
 {
 	const unsigned npl = plantIds.length();
-	if(npl<1) return false;
-	if(npl != plantTris.length() ) return false;
-	if(npl != plantCoords.length() ) return false;
+	if(npl<1) {
+		return false;
+	}
+	if(npl != plantTris.length() ) {
+		return false;
+	}
+	if(npl != plantCoords.length() ) {
+		return false;
+	}
 	const unsigned ntm = plantTms.length();
-	if(ntm != npl * 4) return false;
-	
+	if(ntm != npl * 4) {
+		return false;
+	}
 	unsigned i;
 	if(plantOffsets.length() != npl) {
 		AHelper::Info<Vector3F >("reset all plant offset", Vector3F::Zero);
@@ -351,32 +358,57 @@ bool MForest::loadPlants(const MPointArray & plantTms,
 	return true;
 }
 
-void MForest::loadExternal(const char* filename)
+bool MForest::loadExternal(const char* filename)
 {
     MGlobal::displayInfo("MForest loading external ...");
 	std::ifstream chFile;
 	chFile.open(filename, std::ios_base::in | std::ios_base::binary);
 	if(!chFile.is_open()) {
 		AHelper::Info<const char *>("MForest error cannot open file: ", filename);
-		return;
+		return false;
 	}
 	
 	chFile.seekg (0, ios::end);
-
-	if(chFile.tellg() < 4 + 4 * 16) {
+	if(chFile.tellg() < 4) {
 		AHelper::Info<const char *>("MForest error empty file: ", filename);
 		chFile.close();
-		return;
+		return false;
 	}
 	
 	chFile.seekg (0, ios::beg);
 	int numRec;
 	chFile.read((char*)&numRec, sizeof(int));
 	AHelper::Info<int>("MForest read record count ", numRec);
-	float *data = new float[numRec * 16];
-	int *typd = new int[numRec];
-	chFile.read((char*)data, sizeof(float) * numRec * 16);
-	chFile.read((char*)typd, sizeof(int) * numRec);
+	
+	const int matSize = numRec * 64;
+	const int typSize = numRec * 4;
+	const int offSize = numRec * 12;
+	const int mattypSize = 4 + matSize + typSize;
+	const int mattypoffSize = mattypSize + offSize;
+	
+	chFile.seekg (0, ios::end);
+	if(chFile.tellg() < mattypSize) {
+		AHelper::Info<const char *>("MForest error wrong file size: ", filename);
+		chFile.close();
+		return false;
+	}
+	
+	bool hasOffset = chFile.tellg() >= mattypoffSize;
+	
+	float * data = new float[numRec * 16];
+	int * typd = new int[numRec];
+	float * voff = new float[numRec * 3];
+	
+	chFile.seekg (0, ios::beg);
+	chFile.read((char*)&numRec, 4);
+	chFile.read((char*)data, matSize);
+	chFile.read((char*)typd, typSize);
+	if(hasOffset) {
+		chFile.read((char*)voff, offSize);
+	} else {
+		std::cout<<"\n no offset data, set all zero";
+		memset((char*)voff, 0, offSize);
+	}
 	chFile.close();
 	
 	Matrix44F space;
@@ -398,6 +430,8 @@ void MForest::loadExternal(const char* filename)
 		*space.m(3, 1) = data[ii+13];
 		*space.m(3, 2) = data[ii+14];
 		
+		bind.m_offset = Vector3F(&voff[i*3]);
+		
 		bindToGround(&bind, space.getTranslation(), bindPos);
 		space.setTranslation(bindPos);
 		
@@ -408,29 +442,34 @@ void MForest::loadExternal(const char* filename)
 	onPlantChanged();
 	moveWithGround();
 	AHelper::Info<const char *>("MForest read cache from ", filename);
+	return true;
 }
 
-void MForest::saveExternal(const char* filename)
+bool MForest::saveExternal(const char* filename)
 {
-    if(numActivePlants() < 1) saveAllExternel(filename);
-    else saveActiveExternal(filename);
+	if(numActivePlants() < 1) {
+		return saveAllExternel(filename);
+	}
+     
+	return saveActiveExternal(filename);
 }
 
-void MForest::saveActiveExternal(const char* filename)
+bool MForest::saveActiveExternal(const char* filename)
 {
     std::ofstream chFile;
 	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
 	if(!chFile.is_open()) {
 		AHelper::Info<const char *>("MForest cannot open file: ", filename);
-		return;
+		return false;
 	}
 	
 	unsigned numRec = numActivePlants();
 	AHelper::Info<unsigned>("MForest write n plants ", numRec);
 	chFile.write((char*)&numRec, sizeof(int));
 	
-	float *data = new float[numRec * 16];
+	float * data = new float[numRec * 16];
 	int * tpi = new int[numRec];
+	float * voffset = new float[numRec * 3];
 	
 	unsigned it = 0;
 	
@@ -439,26 +478,29 @@ void MForest::saveActiveExternal(const char* filename)
 	while(!arr->end() ) {
 		getDataRef(arr->value()->m_reference->index,
 				arr->key().y,
-				data, tpi, it);
+				data, tpi, voffset, it);
 	    
 		arr->next();
 	}
 	
 	chFile.write((char*)data, sizeof(float) * numRec * 16);
 	chFile.write((char*)tpi, sizeof(int) * numRec);
+	chFile.write((char*)voffset, sizeof(float) * numRec * 3);
 	chFile.close();
 	AHelper::Info<const char *>(" Proxy saved to file: ", filename);
 	delete[] data;
 	delete[] tpi;
+	delete[] voffset;
+	return true;
 }
 
-void MForest::saveAllExternel(const char* filename)
+bool MForest::saveAllExternel(const char* filename)
 {
 	std::ofstream chFile;
 	chFile.open(filename, std::ios_base::out | std::ios_base::binary);
 	if(!chFile.is_open()) {
 		AHelper::Info<const char *>("MForest cannot open file: ", filename);
-		return;
+		return false;
 	}
 	
 	unsigned numRec = numPlants();
@@ -467,26 +509,32 @@ void MForest::saveAllExternel(const char* filename)
 	
 	float *data = new float[numRec * 16];
 	int * tpi = new int[numRec];
+	float * voffset = new float[numRec * 3];
+	
 	unsigned it = 0;
 	sdb::WorldGrid<ForestCell, Plant > * g = grid();
 	g->begin();
 	while(!g->end() ) {
-		getDataInCell(g->value(), data, tpi, it);
+		getDataInCell(g->value(), data, tpi, voffset, it);
 		g->next();
 	}
 	
 	chFile.write((char*)data, sizeof(float) * numRec * 16);
 	chFile.write((char*)tpi, sizeof(int) * numRec);
+	chFile.write((char*)voffset, sizeof(float) * numRec * 3);
 	chFile.close();
 	AHelper::Info<const char *>(" Proxy saved to file: ", filename);
 	delete[] data;
 	delete[] tpi;
+	delete[] voffset;
+	return true;
 }
 
 void MForest::getDataRef(PlantData * plt, 
 					const int & plantTyp,
 					float * data, 
 					int * typd,
+					float * voff,
 					unsigned & it)
 {
     Matrix44F * mat = plt->t1;
@@ -504,19 +552,21 @@ void MForest::getDataRef(PlantData * plt,
     data[ii+13] = mat->M(3, 1);
     data[ii+14] = mat->M(3, 2);
     typd[it] = plantTyp;
+	memcpy(&voff[it * 3], &(plt->t2->m_offset), 12);
     it++;
 }
 
 void MForest::getDataInCell(ForestCell *cell, 
 							float * data, 
 							int * typd,
+							float * voff,
 							unsigned & it)
 {
 	cell->begin();
 	while(!cell->end() ) {
 	    getDataRef(cell->value()->index, 
 					cell->key().y,
-					data, typd, it);
+					data, typd, voff, it);
 		cell->next();
 	}
 }
@@ -712,14 +762,10 @@ void MForest::finishGroundSelection()
 	AHelper::Info<unsigned>("MForest sel n samples", g->numActiveSamples() ); 
 }
 
-void MForest::offsetAlongNormal(const MPoint & origin, const MPoint & dest,
-					GrowOption & option)
+void MForest::offsetAlongNormal(GrowOption & option)
 {
 	disableDrawing();
-	Vector3F a(origin.x, origin.y, origin.z);
-	Vector3F b(dest.x, dest.y, dest.z);
-	Ray r(a, b);
-	raiseOffsetAt(r, option);
+	raiseOffsetAlongNormal(option);
 	enableDrawing();
 }
 

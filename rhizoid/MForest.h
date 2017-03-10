@@ -42,12 +42,11 @@ public:
                         float magnitude, short axis);
 	void extractActive(int numGroups);
 	
-	void loadExternal(const char* filename);
-	void saveExternal(const char* filename);
+	bool loadExternal(const char* filename);
+	bool saveExternal(const char* filename);
 	void deselectPlants();
     void injectPlants(const std::vector<Matrix44F> & ms, GrowOption & option);
-	void offsetAlongNormal(const MPoint & origin, const MPoint & dest,
-					GrowOption & option);
+	void offsetAlongNormal(GrowOption & option);
 	void movePlantByVec(const Ray & ray,
 						const Vector3F & displaceNear, const Vector3F & displaceFar,
 						const float & clipNear, const float & clipFar);
@@ -91,13 +90,15 @@ private:
 	void getDataInCell(ForestCell *cell, 
 					float * data, 
 					int * typd,
+					float * voff,
 					unsigned & it);
-    void saveActiveExternal(const char* filename);
-    void saveAllExternel(const char* filename);
+    bool saveActiveExternal(const char* filename);
+    bool saveAllExternel(const char* filename);
     void getDataRef(PlantData * plt, 
 					const int & plantTyp,
 					float * data, 
 					int * typd,
+					float * voff,
 					unsigned & it);
 	void pickupVisiblePlantsInCell(ForestCell *cell,
 					float lodLowGate, float lodHighGate, 

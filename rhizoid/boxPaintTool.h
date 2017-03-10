@@ -187,6 +187,7 @@ private:
 	void processResize();
 	void processFilterNoise();
     aphid::Ray getIncidentAt(int x, int y);
+	void startEditOffset();
     
 	void attachSceneCallbacks();
 	void detachSceneCallbacks();

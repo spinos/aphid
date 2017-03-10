@@ -145,6 +145,8 @@ public:
 	void processFilterPlantTypeMap(const std::vector<int> & indices,
 				const std::vector<Vector3F> & colors);
 	void processSampleColorChanges(const std::vector<Vector3F> & colors);
+	bool processLoadExternal(const char * fileName);
+	bool processStartEditOffset(const Ray & ray);
 	
 private:
     void drawBrush(M3dView & view);

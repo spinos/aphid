@@ -496,12 +496,11 @@ global proc proxyPaint_EditVizGround()
     columnLayout -adjustableColumn true -p $scroll;
         
         textFieldGrp -label "Viz" 
-            -text $vizName -ed 0
-            pxpnGroundUIVizName;
-            
+            -text $vizName -ed 0;
+               
         string $cmd = "proxyPaintConnectGroundMesh(\"" + $vizName + "\")"; 
             
-        iconTextButton -label "Connect Selected" 
+        iconTextButton -label "Connect Selected Mesh" 
             -image "generic_add.xpm" 
             -style "iconAndTextHorizontal" 
             -c $cmd;
@@ -509,7 +508,7 @@ global proc proxyPaint_EditVizGround()
         rowColumnLayout -numberOfColumns 4
             -cw 1 32
             -cw 2 300
-            -cw 3 50
+            -cw 3 32
             -cw 4 50
             pxpnGroundUIGroundRowd454bda;
 	
@@ -589,3 +588,51 @@ global proc proxyPaintReplaceGroundMesh(string $vizName, int $ind)
     eval("proxyPaintTool -rgm "+$ind);
     evalDeferred("proxyPaint_EditVizGround");
 }
+
+global proc proxyPaintSelGroundCheckedChnaged(string $chk)
+{
+    string $trans = `checkBox -q -ann $chk`;
+    int $stat = `checkBox -q -v $chk`;
+    if($stat == 1) {
+        select -r $trans;
+    } else {
+        select -d $trans;
+    }
+}
+
+global proc proxyPaint_saveCache()
+{
+    string $sctFilter = "*.sct";
+    string $filenm = `fileDialog -m 1 -dm $sctFilter`;
+    if(size($filenm) < 1) {
+        print("proxyPaint_saveCache aborted");
+        return;   
+    }
+    int $r = `proxyPaintTool -scf $filenm`;
+    if($r==1) {
+        confirmDialog -title "Success" 
+            -message ("Saved to cache file "+$filenm);
+    } else {
+        confirmDialog -title "Failure" 
+            -message ("Cannot save to cache file "+$filenm);
+    }
+}
+
+global proc proxyPaint_loadCache()
+{
+    string $sctFilter = "*.sct";
+    string $filenm = `fileDialog -m 0 -dm $sctFilter`;
+    if(size($filenm) < 1) {
+        print("proxyPaint_loadCache aborted");
+        return;   
+    }
+    int $r = `proxyPaintTool -lcf $filenm`;
+    if($r==1) {
+        confirmDialog -title "Success" 
+            -message ("Loaded cache file "+$filenm);
+    } else {
+        confirmDialog -title "Failure" 
+            -message ("Cannot load cache file "+$filenm);
+    }
+}
+
