@@ -45,7 +45,7 @@ public:
 							const MObject & dstNode,
 							const MString & dstArrayAttrName,
 							const int & refSlot = -1);
-							
+/// write logical index of source plug connected to destination plug if necessary
 	static bool ConnectedToNode(const MPlug & srcPlug, 
 							const MObject & dstNode,
 							int * outSlot = 0);
@@ -59,7 +59,13 @@ public:
 	static MObject GetConnectedNode(const MObject & node,
 							const MString & attrName,
 							const int & refSlot = -1);
-	
+							
+	static void BreakInputConnection(MPlug & dstPlug);
+/// to prefered (sparse) logical index slot or break all by default
+	static void BreakArrayPlugInputConnections(const MObject & dstNode,
+							const MString & dstArrayAttrName,
+							const int & refSlot = -1);
+							
 };
 
 }

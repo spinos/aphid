@@ -1,5 +1,7 @@
-
-source "proxyPaintUIWidgets.mel";
+/*
+ *  proxyPaintProperties.mel
+ *
+ */ 
 
 global proc proxyPaintProperties ()
 {
@@ -12,11 +14,20 @@ global proc proxyPaintProperties ()
 	string $ppnForm = `formLayout proxyPaint`;
 	string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
 // begin of proxyPaintOptions
-    text -ann "2" proxyPaint_vizNameText;	
-		
+    text -ann "2" proxyPaint_vizNameText;
+        	
 	textScrollList -ams off 
 		-sc "proxyPaint_selectVizToPaint" 
 		proxyPaint_VizToPaintScroll;
+		
+	rowLayout -numberOfColumns 2
+        -adjustableColumn 1;
+        
+	iconTextButton -image "generic_land.xpm" 
+        -style "iconOnly" 
+        -c "proxyPaint_EditVizGround";	
+        
+	setParent ..;
 	
 	string $viz = proxyPaint_getCurrentViz();
     int $nodeVer = proxyPaint_getNodeVersion($viz);
@@ -48,15 +59,9 @@ global proc proxyPaintProperties ()
         string $vizColn = `columnLayout -adjustableColumn true pxpnVizColn`;
         setParent ..;
         
-        string $brushColn = `columnLayout -adjustableColumn true pxpnBrushColn`;
-        setParent ..;       
-        
         string $groundColn = `columnLayout -adjustableColumn true pxpnGroundColn`;
         setParent ..; 
         
-        string $createColn = `columnLayout -adjustableColumn true pxpnCreateColn`;
-        setParent ..;
-
         string $edtColn = `columnLayout -adjustableColumn true pxpnEditColn`;
         setParent ..; 
 	
@@ -65,10 +70,8 @@ global proc proxyPaintProperties ()
         
     tabLayout -edit
         -tabLabel $vizColn "Viz"
-        -tabLabel $brushColn "Brush"
         -tabLabel $groundColn "Ground"
-        -tabLabel $createColn "Create"
-        -tabLabel $edtColn "Edit"
+        -tabLabel $edtColn "Paint"
          -tabLabel $injectColn "Misc" 
          $ppnTab;
          
@@ -76,13 +79,10 @@ global proc proxyPaintProperties ()
 
 /// setup tab content	
 	proxyPaintCreateVizUI($vizColn); 
-    proxyPaintCreateBrushUI($brushColn); 
-    proxyPaintGroundEditUI($groundColn);
-    proxyPaintCreateCreateUI($createColn);
-	proxyPaintCreateEditUI($edtColn);
+    proxyPaintCreateGroundUI($groundColn);
+    proxyPaintCreateEditUI($edtColn);
 	proxyPaintCreateInjectUI($injectColn);
 
-	//proxyPaintSetCallbacks($parent);
 	proxyPaintCreateExmpUI("pxpnExmpUIColn1cc22e1b");
 	proxyPaintUpdateExampleScroll();
 }

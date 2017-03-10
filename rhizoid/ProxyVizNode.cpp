@@ -647,16 +647,14 @@ MStatus ProxyViz::initialize()
 	typedAttrFn.setWritable(true);
 	typedAttrFn.setConnectable(true);
     typedAttrFn.setArray(true);
-    typedAttrFn.setDisconnectBehavior(MFnAttribute::kDelete);
-	addAttribute( agroundMesh );
+    addAttribute( agroundMesh );
 	
 	agroundSpace = matAttr.create("groundSpace", "grdsp", MFnMatrixAttribute::kDouble);
 	matAttr.setStorable(false);
 	matAttr.setWritable(true);
 	matAttr.setConnectable(true);
     matAttr.setArray(true);
-    matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
-	addAttribute( agroundSpace );
+    addAttribute( agroundSpace );
 	
 	MPointArray defaultPntArray;
 	MFnPointArrayData pntArrayDataFn;

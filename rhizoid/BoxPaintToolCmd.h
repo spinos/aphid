@@ -52,6 +52,7 @@ public:
 
 private:
 	MStatus connectGroundSelected();
+	MStatus replaceGroundSelected(int iSlot);
 	MStatus connectVoxelSelected();
 	bool connectVoxToViz(MObject & voxObj, MObject & vizObj);
 	MStatus saveCacheSelected();
@@ -63,13 +64,17 @@ private:
 	void strToRotateOrder(const MString & srod);
     bool isTransformConnected(const MDagPath & transPath, 
 					const MObject & vizObj,
-					int & slotPhyInd,
+					int & slotLgcInd,
 					MPlug & worldSpacePlug);
 	bool isMeshConnectedSlot(const MObject & meshObj, 
 					const MObject & vizObj,
-					const int & slotPhyInd);
+					const int & slotLgcInd);
 	void connectTransform(MPlug & worldSpacePlug, 
 					MObject & vizOb);
+	MStatus getSelectedViz(MSelectionList & sels, 
+					MObject & vizobj);
+	void disconnectGround(const MObject & vizobj,
+					int iSlot);
 	
 private:
 	enum Operation {
@@ -87,12 +92,14 @@ private:
         opPrincipalComponent = 11,
 		opDistanceFieldTriangulate = 12,
 		opListReplacer = 13,
-		opConnectReplacer = 14
+		opConnectReplacer = 14,
+		opReplaceGround = 15
 	};
 	
 	Operation m_operation;
 	
 	unsigned opt, nseg;
+	int m_replaceGroundId;
 	int m_dftLevel;
 	float lseg;
 	double m_dftScale, m_dftRound;

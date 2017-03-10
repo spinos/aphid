@@ -369,7 +369,8 @@ global proc string proxyPaintGetSampleMeshColor(string $shape)
     if (`attributeExists "pxpnColor" $shape`) {
         float $col[] = `getAttr ($shape + ".pxpnColor")`;
         $scv = $col[0];
-        $scv = $scv + " " + $col[1] + " " + $col[2];
+        
+$scv = $scv + " " + $col[1] + " " + $col[2];
     } else {
         string $cmd = "addAttr -ln \"pxpnColor\" -at double3 "+$shape;
         eval($cmd);
@@ -434,3 +435,157 @@ global proc proxyPaintSetSampleMeshImage2(string $com)
     textField -e -text $image $com;
 }
 
+global proc proxyPaint_createExample()
+{
+    if ( (`window -exists proxyPaint_CreateExampleNote`) == true ) {
+        deleteUI proxyPaint_CreateExampleNote;
+    }
+    
+    window -title ("Creare/Edit Example on Selected Mesh")  -wh 480 320 proxyPaint_CreateExampleNote;
+	
+    string $form = `formLayout -numberOfDivisions 100`;
+    string $bline = `columnLayout -adjustableColumn true`;
+    string $scroll = `scrollLayout -p $form -cr on`;
+    
+    columnLayout -adjustableColumn true -p $scroll 
+        pxpnSampleMeshUICol2c69e36a;
+	
+	setParent..;
+	rowColumnLayout -numberOfColumns 3 -p $bline;
+	button -l "Create/Edit Example" -c "proxyPaintTool -vxl";
+	button -l "Reload Selected" -c "proxyPaint_createExample";
+	button -l "Close" -c "deleteUI proxyPaint_CreateExampleNote";
+	setParent..;
+	
+	formLayout -edit
+        -attachNone  $bline     "top"
+        -attachForm     $bline     "left"   2
+        -attachForm    $bline     "bottom" 2
+        -attachForm     $bline     "right"  2
+
+        -attachForm     $scroll "top"    2
+        -attachForm    $scroll "left"   2
+        -attachControl    $scroll "bottom" 2 $bline
+        -attachForm     $scroll "right"  2
+    $form;
+    
+    proxyPaintCreateSampleMeshUI("pxpnSampleMeshUICol2c69e36a");
+    
+    showWindow proxyPaint_CreateExampleNote;
+
+}
+
+global proc proxyPaint_EditVizGround()
+{
+    string $vizName = `text -q -label proxyPaint_vizNameText`;
+    if($vizName == "No Viz Selected") {
+        print("\n no viz selected");
+        return;   
+    }
+    
+    if ( (`window -exists proxyPaint_EditGroundNote`) == true ) {
+        deleteUI proxyPaint_EditGroundNote;
+    }
+    
+    window -title ("Setup Ground Mesh")  -wh 480 320 proxyPaint_EditGroundNote;
+	
+    string $form = `formLayout -numberOfDivisions 100`;
+    string $bline = `columnLayout -adjustableColumn true`;
+    string $scroll = `scrollLayout -p $form -cr on`;
+    
+    columnLayout -adjustableColumn true -p $scroll;
+        
+        textFieldGrp -label "Viz" 
+            -text $vizName -ed 0
+            pxpnGroundUIVizName;
+            
+        string $cmd = "proxyPaintConnectGroundMesh(\"" + $vizName + "\")"; 
+            
+        iconTextButton -label "Connect Selected" 
+            -image "generic_add.xpm" 
+            -style "iconAndTextHorizontal" 
+            -c $cmd;
+            
+        rowColumnLayout -numberOfColumns 4
+            -cw 1 32
+            -cw 2 300
+            -cw 3 50
+            -cw 4 50
+            pxpnGroundUIGroundRowd454bda;
+	
+	setParent..;
+	rowColumnLayout -numberOfColumns 3 
+	    -cw 1 200 
+	    -p $bline;
+	button -l "Close" -c "deleteUI proxyPaint_EditGroundNote";
+	setParent..;
+	
+	formLayout -edit
+        -attachNone  $bline     "top"
+        -attachForm     $bline     "left"   2
+        -attachForm    $bline     "bottom" 2
+        -attachForm     $bline     "right"  2
+
+        -attachForm     $scroll "top"    2
+        -attachForm    $scroll "left"   2
+        -attachControl    $scroll "bottom" 2 $bline
+        -attachForm     $scroll "right"  2
+    $form;
+    
+    proxyPaintCreateEditGroundUI($vizName, "pxpnGroundUIGroundRowd454bda");
+    
+    showWindow proxyPaint_EditGroundNote;
+    
+}
+
+proc proxyPaintCheckSelectViz(string $vizName)
+{
+    string $sels[] = `ls -sl`;
+    int $nsel = size($sels);
+    int $i;
+    int $isVizSelected = 0;
+    
+    for($i=0; $i<$nsel; $i++) {
+        string $vizs[] = `listRelatives -ad -type locator $sels[$i]`;
+        
+        if(stringArrayContains($vizName, $vizs) == 1 ) {
+            
+            $isVizSelected = 1;
+            break;   
+        }
+    }
+    
+    if($isVizSelected == 0) {
+        select -tgl $vizName;
+    }
+}
+
+global proc proxyPaintConnectGroundMesh(string $vizName)
+{
+    proxyPaintCheckSelectViz($vizName);
+    eval("proxyPaintTool -cgm");
+    evalDeferred("proxyPaint_EditVizGround");
+}
+
+global proc string proxyPaintGetAttrNodeName(string $attrName)
+{
+    string $array[] = stringToStringArray($attrName, ".");
+    return $array[0];
+}
+
+global proc proxyPaintReplaceGroundMesh(string $vizName, int $ind)
+{
+    string $sels[] = `ls -type transform -sl`;
+    if(size($sels) < 1) {
+        print("\n no transform selected, cannot replace");
+        return;
+    }
+    string $mesh[] = `listRelatives -ad -type mesh $sels[0]`;
+    if(size($mesh) < 1) {
+        print("\n no mesh selected, cannot replace");
+        return;
+    }
+    proxyPaintCheckSelectViz($vizName);
+    eval("proxyPaintTool -rgm "+$ind);
+    evalDeferred("proxyPaint_EditVizGround");
+}

@@ -161,9 +161,9 @@ bool ConnectionHelper::ConnectedToNode(const MPlug & srcPlug,
 			AHelper::Info<MString>(" plug ", srcPlug.name() );
 			AHelper::Info<MString>(" is connected to", connected[i].name() );
 			if(outSlot && connected[i].isElement() ) {
-				unsigned phyInd = connected[i].logicalIndex();
-				*outSlot = (int)phyInd;
-				AHelper::Info<int>(" physical index ", *outSlot );
+				unsigned lgcInd = connected[i].logicalIndex();
+				*outSlot = (int)lgcInd;				
+				AHelper::Info<int>(" logical index ", *outSlot );
 
 			}
 			return true;
@@ -257,6 +257,57 @@ MObject ConnectionHelper::GetConnectedNode(const MObject & node,
 	
 	return srcPlugs[refSlot].node();
 	
+}
+
+void ConnectionHelper::BreakInputConnection(MPlug & dstPlug)
+{
+	MPlugArray srcPlugs;
+	GetInputConnections(srcPlugs, dstPlug );
+	const int n = srcPlugs.length();
+	if(n < 1) {
+		return;
+	}
+	
+	MDGModifier modif;
+
+	for(int i=0;i<n;++i) {
+	    AHelper::Info<MString>(" disconnect", srcPlugs[i].name() );
+		AHelper::Info<MString>(" and", dstPlug.name() );
+		     
+		modif.disconnect(srcPlugs[i], dstPlug );
+		
+		if(!modif.doIt() ) {
+		     AHelper::Info<MString>(" WARNING cannot disconnect", srcPlugs[i].name() );
+		     AHelper::Info<MString>(" and", dstPlug.name() );
+		}
+	}
+}
+
+void ConnectionHelper::BreakArrayPlugInputConnections(const MObject & dstNode,
+							const MString & dstArrayAttrName,
+							const int & refSlot)
+{
+	MPlug attrPlug;
+	AHelper::getNamedPlug(attrPlug, dstNode, dstArrayAttrName.asChar() );
+	if(attrPlug.isNull() ) {
+	    AHelper::Info<MString>("no destination attrib", dstArrayAttrName);
+		return;
+	}
+	
+	if(refSlot < 0) {
+		BreakArrayPlugInputConnections(attrPlug);
+		return;
+	}
+	
+	MStatus stat; 
+	MPlug elmp = attrPlug.elementByLogicalIndex (refSlot, &stat);
+	if(!stat) {
+		AHelper::Info<MString>("WARNING destination attrib", dstArrayAttrName);
+		AHelper::Info<int>("has no logical element", refSlot);
+		return;
+	}
+	
+	BreakInputConnection(elmp);
 }
 
 }

@@ -1,7 +1,8 @@
 /*
  *  proxyPaintUIWidgets.mel
  *
- */ 
+ */
+ 
 global proc proxyPaintCreateVizUI(string $coln)
 {
     floatSliderGrp -label "Show Voxel Threshold" -field true
@@ -235,36 +236,7 @@ global proc proxyPaintCreateExmpUI(string $coln)
     setParent ..;   
 }
 
-global proc proxyPaintCreateBrushUI(string $coln)
-{
-    floatSliderGrp -label "Radius" -field true
-    -minValue 0.01 -maxValue 1000.0
-    -fieldMinValue 0.01 -fieldMaxValue 500000.0
-    -value 10.0
-	-cw 1 130
-	-p $coln
-	-cc "proxyPaintSetBRadius(`floatSliderGrp -q -value proxyPaintSlider_BRad`)" proxyPaintSlider_BRad;
-
-	floatSliderGrp -label "Weight" -field true
-    -minValue 0.01 -maxValue 1.0
-    -fieldMinValue 0.01 -fieldMaxValue 1.0
-    -value 0.8
-	-cw 1 130
-	-p $coln
-	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
-
-	floatSliderGrp -label "Fall off" -field true
-    -minValue 0.0 -maxValue 2.0
-    -fieldMinValue 0.0 -fieldMaxValue 2.0
-    -value 0.5
-	-cw 1 130
-	-p $coln
-	-cc "proxyPaintSetBrushFalloff(`floatSliderGrp -q -value proxyPaintSlider_BFalloff`)" 
-	proxyPaintSlider_BFalloff;
-
-}
-
-global proc proxyPaintGroundEditUI(string $coln)
+global proc proxyPaintCreateGroundUI(string $coln)
 {
     rowColumnLayout -numberOfColumns 3
         -columnWidth 1 140
@@ -388,13 +360,45 @@ setParent ..; /// end of column
 setParent ..; /// end of frame
 }
 
-global proc proxyPaintCreateCreateUI(string $coln)
-{
+global proc proxyPaintCreateEditUI(string $coln)
+{		  
+    frameLayout -l "Brush" 
+        -cl false -cll true -p $coln;
+    columnLayout -adj true;
+    
+    floatSliderGrp -label "Radius" -field true
+    -minValue 0.01 -maxValue 1000.0
+    -fieldMinValue 0.01 -fieldMaxValue 500000.0
+    -value 10.0
+	-cw 1 130
+	-cc "proxyPaintSetBRadius(`floatSliderGrp -q -value proxyPaintSlider_BRad`)" proxyPaintSlider_BRad;
+
+	floatSliderGrp -label "Weight" -field true
+    -minValue 0.01 -maxValue 1.0
+    -fieldMinValue 0.01 -fieldMaxValue 1.0
+    -value 0.8
+	-cw 1 130
+	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
+
+	floatSliderGrp -label "Fall off" -field true
+    -minValue 0.0 -maxValue 2.0
+    -fieldMinValue 0.0 -fieldMaxValue 2.0
+    -value 0.5
+	-cw 1 130
+	-cc "proxyPaintSetBrushFalloff(`floatSliderGrp -q -value proxyPaintSlider_BFalloff`)" 
+	proxyPaintSlider_BFalloff;
+	
+	setParent ..; /// end of column
+	setParent ..; /// end of frame
+	
+	frameLayout -l "Create" 
+	-cl false -cll true -p $coln;
+		columnLayout -adj true;
+		
     rowColumnLayout -numberOfColumns 3
 		-columnWidth 1 120
 		-columnWidth 2 120
-		-columnWidth 3 120
-		-p $coln;
+		-columnWidth 3 120;
 		
         iconTextButton -label "Flood" 
             -style "iconAndTextHorizontal" 
@@ -406,10 +410,8 @@ global proc proxyPaintCreateCreateUI(string $coln)
             -image1 "proxyPaintTool_create.xpm" 
             -c "proxyPaintSetOpt(11)";
             
-    setParent ..;
-       
-    frameLayout -l "" -cl false -cll false -p $coln;
-		columnLayout -adj true;
+    setParent ..;  
+    
     checkBox -label "Along Face Normal" 
             -cc "proxyPaintSetALN(`checkBox -q -value proxyPaintSlider_ALN`)" 
             proxyPaintSlider_ALN;
@@ -465,17 +467,14 @@ global proc proxyPaintCreateCreateUI(string $coln)
 
     setParent ..;
 	setParent ..;
-}
-
-global proc proxyPaintCreateEditUI(string $coln)
-{		    
+	
+	frameLayout -l "Edit" 
+	-cl false -cll true -p $coln;
     rowColumnLayout -numberOfColumns 3
 		-columnWidth 1 140
 		-columnWidth 2 140
-		-columnWidth 3 140
-		-p $coln;
+		-columnWidth 3 140;
 		
-    //iconTextButton -style "iconAndTextHorizontal" -image1 "proxyPaintTool_replace.xpm" -label "Replace" -c "proxyPaintSetOpt(10)";
     iconTextButton -label "Select" 
         -style "iconAndTextHorizontal" -image1 "proxyPaintTool_select.xpm" -c "proxyPaintSetOpt(2)";
     iconTextButton -label "Discard" 
@@ -557,13 +556,14 @@ global proc proxyPaintCreateEditUI(string $coln)
                         -style "iconAndTextHorizontal" 
                         -c "proxyPaintSetOpt(16)";
      setParent ..;
+    setParent ..;
      
-         frameLayout -l "" -cll false -cl false -p $coln;
+    frameLayout -l "Clear" 
+        -cl false -cll true -p $coln;
     rowColumnLayout -numberOfColumns 2
 		-columnWidth 1 140
 		-columnWidth 2 140;
 		
-	
     iconTextButton -label "Clear Typed" 
                         -image1 "filter.xpm" 
                         -style "iconAndTextHorizontal" 
@@ -669,4 +669,26 @@ global proc proxyPaintCreateSampleMeshUI(string $coln)
         return;   
     }
     textFieldGrp -l "Edit Example" -text $locs[0] -p $coln;
+}
+
+global proc proxyPaintCreateEditGroundUI(string $vizName, string $row)
+{
+    string $meshes[] = `listConnections -p on ($vizName+".groundSpace")`;
+    int $i;
+    for($i=0;$i<size($meshes);$i++) {
+        intField -p $row -ed off -v $i;
+        
+        string $transName = proxyPaintGetAttrNodeName($meshes[$i]);
+        
+        textField -text $transName
+            -p $row;
+        string $cmd = "select -r "+$transName;
+        button -l "Select"
+            -p $row
+            -c $cmd;
+        $cmd = "proxyPaintReplaceGroundMesh(\""+$vizName+"\", "+$i+")";
+        button -l "Replace"
+            -p $row
+            -c $cmd;
+    }
 }

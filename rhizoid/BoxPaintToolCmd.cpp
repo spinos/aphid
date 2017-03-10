@@ -39,7 +39,7 @@
 #define kGetPickFlag "-gpk" 
 #define kGetPickFlagLong "-getPick"
 #define kConnectGroundFlag "-cgm" 
-#define kConnectGroundFlagLong "-connectGMesh"
+#define kConnectGroundFlagLong "-connectGroundMesh"
 #define kSaveCacheFlag "-scf" 
 #define kSaveCacheFlagLong "-saveCacheFile"
 #define kLoadCacheFlag "-lcf" 
@@ -68,6 +68,8 @@
 #define kL2VoxFlagLong "-l2Vox"
 #define kShrubCreateFlag "-csb" 
 #define kShrubCreateFlagLong "-createShrub"
+#define kReplaceGroundFlag "-rgm" 
+#define kReplaceGroundFlagLong "-replaceGroundMesh"
 
 using namespace aphid;
 
@@ -106,6 +108,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kDFTScaleFlag, kDFTScaleFlagLong, MSyntax::kDouble);
 	syntax.addFlag(kDFTRoundFlag, kDFTRoundFlagLong, MSyntax::kDouble);
 	syntax.addFlag(kShrubCreateFlag, kShrubCreateFlagLong, MSyntax::kNoArg);
+	syntax.addFlag(kReplaceGroundFlag, kReplaceGroundFlagLong, MSyntax::kLong);
 	return syntax;
 }
 
@@ -114,6 +117,10 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	MStatus status;
 
 	status = parseArgs(args);
+	
+	if(!status) {
+		return status;
+	}
 	
 	if(m_operation == opUnknown) return status;
 	
@@ -133,6 +140,10 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	
 	if(m_operation == opCreateShrub) {
 		return creatShrub();
+	}
+	
+	if(m_operation == opReplaceGround) {
+		return replaceGroundSelected(m_replaceGroundId);
 	}
 		
 	ASearchHelper finder;
@@ -197,6 +208,7 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 	m_rotPca = Matrix33F::XYZ;
 	m_dftScale = 1;
 	m_dftRound = 0;
+	m_replaceGroundId = -1;
 	
 	MStatus status;
 	MArgDatabase argData(syntax(), args);
@@ -341,6 +353,15 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 		m_operation = opCreateShrub;
 	}
 	
+	if (argData.isFlagSet(kReplaceGroundFlag)) {
+		status = argData.getFlagArgument(kReplaceGroundFlag, 0, m_replaceGroundId);
+		if (!status) {
+			MGlobal::displayWarning(" proxyPaintTool cannot parse -rgm flag");
+			return status;
+		}
+		m_operation = opReplaceGround;
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -354,18 +375,10 @@ MStatus proxyPaintTool::finalize()
 MStatus proxyPaintTool::connectGroundSelected()
 {
 	MSelectionList sels;
- 	MGlobal::getActiveSelectionList( sels );
-	
-	if(sels.length() < 2) {
-		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) and a viz to connect");
-		return MS::kFailure;
-	}
-	
-	MStatus stat;
-	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
-	if(vizobj == MObject::kNullObj ) {
-		MGlobal::displayWarning("proxyPaintTool found no viz selected, select mesh(es) and a viz to connect");
-		return MS::kFailure;
+ 	MObject vizobj;
+ 	MStatus stat = getSelectedViz(sels, vizobj);
+	if(!stat) {
+		return stat;
 	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
@@ -393,7 +406,7 @@ MStatus proxyPaintTool::connectGroundSelected()
 		MPlug worldSpacePlug;
 		int slotI = -1;
 		if(isTransformConnected(transPath, vizobj, slotI, worldSpacePlug) ) {
-			AHelper::Info<MString>(" WARNING skip connected transform", transPath.fullPathName() );
+			AHelper::Info<MString>(" WARNING transform already connected", transPath.fullPathName() );
 			if(isMeshConnectedSlot(meshobj, vizobj, slotI) ) {
 				continue;
 			}
@@ -418,17 +431,10 @@ MStatus proxyPaintTool::connectGroundSelected()
 MStatus proxyPaintTool::connectVoxelSelected()
 {
 	MSelectionList sels;
- 	MGlobal::getActiveSelectionList( sels );
-	
-	if(sels.length() < 2) {
-		MGlobal::displayWarning("proxyPaintTool wrong selection, select proxyExample(s) and a viz to connect");
-		return MS::kFailure;
-	}
-	
-	MStatus stat;
-	MObject vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
-	if(vizobj == MObject::kNullObj ) {
-		return MS::kFailure;
+	MObject vizobj;
+ 	MStatus stat = getSelectedViz(sels, vizobj);
+	if(!stat) {
+		return stat;
 	}
 	
 	MFnDependencyNode fviz(vizobj, &stat);
@@ -819,7 +825,7 @@ MStatus proxyPaintTool::performDFT()
 
 bool proxyPaintTool::isTransformConnected(const MDagPath & transPath, 
 								const MObject & vizObj,
-								int & slotPhyInd,
+								int & slotLgcInd,
 								MPlug & worldSpacePlug)
 {
 	MFnDependencyNode ftrans(transPath.node() );
@@ -830,22 +836,107 @@ bool proxyPaintTool::isTransformConnected(const MDagPath & transPath,
 		AHelper::Info<unsigned>(" world matrix space id", wsi );
 	}
 	worldSpacePlug = ftrans.findPlug("worldMatrix").elementByLogicalIndex(wsi);
-	return ConnectionHelper::ConnectedToNode(worldSpacePlug, vizObj, &slotPhyInd);
+	return ConnectionHelper::ConnectedToNode(worldSpacePlug, vizObj, &slotLgcInd);
 }
 
 bool proxyPaintTool::isMeshConnectedSlot(const MObject & meshObj, 
 					const MObject & vizObj,
-					const int & slotPhyInd)
+					const int & slotLgcInd)
 {
 	MFnDependencyNode fnode(meshObj);
 	MPlug srcPlug = fnode.findPlug("outMesh");
 	
 	int inSlot = -1;
 	if(ConnectionHelper::ConnectedToNode(srcPlug, vizObj, &inSlot) ) {
-		return inSlot == slotPhyInd;
+		return inSlot == slotLgcInd;
 	}
 	
 	return false;
 }
 
+MStatus proxyPaintTool::getSelectedViz(MSelectionList & sels, MObject & vizobj)
+{
+	MGlobal::getActiveSelectionList( sels );
+	
+	if(sels.length() < 2) {
+		MGlobal::displayWarning("proxyPaintTool wrong selection, select mesh(es) and a viz to connect");
+		return MS::kFailure;
+	}
+	
+	MStatus stat;
+	vizobj = SelectionHelper::GetTypedNode(sels, "proxyViz", MFn::kPluginLocatorNode);
+	if(vizobj == MObject::kNullObj ) {
+		MGlobal::displayWarning("proxyPaintTool found no viz selected, select mesh(es) and a viz to connect");
+		return MS::kFailure;
+	}
+	
+	return stat;
+}
+
+void proxyPaintTool::disconnectGround(const MObject & vizobj,
+					int iSlot)
+{
+	ConnectionHelper::BreakArrayPlugInputConnections(vizobj, "groundSpace", iSlot);
+	ConnectionHelper::BreakArrayPlugInputConnections(vizobj, "groundMesh", iSlot);
+}
+
+MStatus proxyPaintTool::replaceGroundSelected(int iSlot)
+{
+	MSelectionList sels;
+	MObject vizobj;
+ 	MStatus stat = getSelectedViz(sels, vizobj);
+	if(!stat) {
+		return stat;
+	}
+	
+	MFnDependencyNode fviz(vizobj, &stat);
+	AHelper::Info<MString>("proxyPaintTool found viz node", fviz.name() );
+	
+	MItSelectionList meshIter(sels, MFn::kMesh, &stat);
+	if(!stat) {
+		MGlobal::displayWarning("proxyPaintTool no mesh selected");
+		return MS::kFailure;
+	}
+	
+	ProxyViz* pViz = (ProxyViz*)fviz.userNode();
+	pViz->setEnableCompute(false);
+	
+	AHelper::Info<int>("proxyPaintTool replace ground", iSlot);
+	
+	disconnectGround(vizobj, iSlot);
+	
+	MObject meshobj;
+	meshIter.getDependNode(meshobj);
+	
+	MDagPath transPath;
+	meshIter.getDagPath ( transPath );
+	transPath.pop();
+	
+	bool connStat = true;
+	MPlug worldSpacePlug;
+	int slotI = -1;
+	if(isTransformConnected(transPath, vizobj, slotI, worldSpacePlug) ) {
+		AHelper::Info<MString>(" WARNING transform already connected", transPath.fullPathName() );
+		if(isMeshConnectedSlot(meshobj, vizobj, slotI) ) {
+			connStat = false;
+		}
+	}
+	
+	if(connStat) {
+		connStat = ConnectionHelper::ConnectToArray(meshobj, "outMesh", 
+										vizobj, "groundMesh",
+										iSlot);
+	}
+	
+	if(connStat) {
+		MObject transobj = transPath.node();
+		AHelper::Info<MString>("proxyPaintTool connect ground", transPath.fullPathName() );
+		ConnectionHelper::ConnectToArray(worldSpacePlug, vizobj, "groundSpace");
+		
+	}
+		
+	pViz->setEnableCompute(true);
+	
+	return stat;
+}
 //:~
