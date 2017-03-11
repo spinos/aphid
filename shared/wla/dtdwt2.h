@@ -18,7 +18,7 @@ namespace wla {
 class DualTree2 {
 
 #define DT2_MAX_N_STAGE 6
-/// lohi hilo hihi for up and down tree
+/// lohi hilo hihi for up [0:2] and down [3:5] tree
 	Array3<float> m_w[DT2_MAX_N_STAGE][6];
 	int m_lastStage, m_numRanks;
 
@@ -38,6 +38,8 @@ public:
 /// k [0,2] lohi hilo hihi
 	const Array3<float> & stageBand(const int & i, const int & j, const int & k ) const;
 	const Array3<float> & lastStageBand(const int & j) const;
+
+	void scaleUp(int level, float scaling);
 	
 /// nearest neightbor search
 /// a 16x16 patch will shrink to 1x1 after 4 stages

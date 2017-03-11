@@ -391,6 +391,15 @@ add_library(aphidImg ${LIB_TYP}
 ${img_SRC}
 )
 
+file (GLOB wla_SRC
+    "../shared/wla/*.h"
+    "../shared/wla/*.cpp"
+)
+
+add_library(aphidWla ${LIB_TYP}
+${wla_SRC}
+)
+
 find_package (CUDA QUIET)
 
 IF (${CUDA_FOUND})

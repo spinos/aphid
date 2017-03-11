@@ -9,7 +9,7 @@
 #include <QtGui>
 #include <math/Calculus.h>
 #include "dtftwidget.h"
-#include "dtdwt1.h"
+#include <wla/dtdwt1.h>
 #include "gensig.h"
 
 using namespace aphid;

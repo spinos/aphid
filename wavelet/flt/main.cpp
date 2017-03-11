@@ -25,8 +25,8 @@
 #include <map>
 #include <boost/format.hpp>
 #include <boost/timer.hpp>
-#include "fltbanks.h"
-#include "dwt2.h"
+#include <wla/fltbanks.h>
+#include <wla/dwt2.h>
 
 using namespace aphid;
 

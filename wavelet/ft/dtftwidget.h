@@ -9,7 +9,7 @@
 #ifndef DT_FT_WIDGET_H
 #define DT_FT_WIDGET_H
 
-#include <Plot1DWidget.h>
+#include <qt/Plot1DWidget.h>
 
 class DtFtWidget : public aphid::Plot1DWidget {
 

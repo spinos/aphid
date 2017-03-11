@@ -52,16 +52,29 @@ public:
     void setHeight(int x);
 	int getWidth() const;
 	int getHeight() const;
-	const float aspectRation() const;
+/// h / w
+	const float aspectRatio() const;
 	int pixelLoc(float s, float t, bool flipV, int pixelRank) const;
 
 	virtual void sample(float u, float v, int count, float * dst) const;
 	virtual float sampleRed(float u, float v);
 	virtual float sampleRed(float u, float v) const;
+
 	virtual void setRed(float u, float v, float red);
 	virtual void applyMask(BaseImage * another);
 	bool isRGBAZ() const;
 	void verbose() const;
+/// 2 to the power of ? closest to image size
+	void getResampleSize(int & xdim, int & ydim) const;
+/// scale longer dimension to refSize
+	void getThumbnailSize(int & xdim, int & ydim,
+					const int & refSize = 256) const;
+/// y must have width x heigh
+	virtual void sampleRed(float * y) const;
+/// resample to specific size
+	virtual void resampleRed(float * y, int sx, int sy) const;
+/// longer dimension no lower than lowSize after divided by 2 for ? times
+	int getMaxCompressLevel(int lowSize = 128) const;
 	
 protected:
 	virtual bool readImage(const std::string & filename);

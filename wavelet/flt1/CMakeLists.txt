@@ -1,7 +1,6 @@
 
-SET (SHFT_SRC ${APHID_DIR}/shared/BaseImageWidget.cpp
-${APHID_DIR}/shared/Plot1DWidget.cpp
-${APHID_DIR}/wavelet/fltbanks.cpp
+SET (SHFT_SRC ${APHID_DIR}/shared/qt/BaseImageWidget.cpp
+${APHID_DIR}/shared/qt/Plot1DWidget.cpp
 ft1dWidget.cpp
 ftwindow.cpp
 main.cpp)
@@ -16,5 +15,6 @@ target_link_libraries (shoflt ${Boost_CHRONO_LIBRARY})
 
 target_link_libraries (shoflt ${APHID_MATH_LIBRARY})
 target_link_libraries (shoflt ${APHID_GEOM_LIBRARY})
+target_link_libraries (shoflt ${APHID_WLA_LIBRARY})
 
 target_link_libraries (shoflt Qt4::QtGui)

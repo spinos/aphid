@@ -9,7 +9,7 @@
 #ifndef DT_FT_2D_WIDGET_H
 #define DT_FT_2D_WIDGET_H
 
-#include <Plot2DWidget.h>
+#include <qt/Plot2DWidget.h>
 
 class Dt2Widget : public aphid::Plot2DWidget {
 

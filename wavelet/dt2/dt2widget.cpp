@@ -9,7 +9,7 @@
 #include <QtGui>
 #include <math/Calculus.h>
 #include "dt2widget.h"
-#include "dtdwt2.h"
+#include <wla/dtdwt2.h>
 #include "gensig.h"
 
 using namespace aphid;
@@ -72,7 +72,7 @@ Dt2Widget::Dt2Widget(QWidget *parent) : Plot2DWidget(parent)
 	float mxe = 0.f;
 	
 	for(k=0;k<1;++k) {
-		Xp->channel(k)->maxAbsError(mxe, *sythy.rank(k) );
+		Xp->channel(k)->maxAbsError(mxe, *(sythy.rank(k) ) );
 		
 	}
 	

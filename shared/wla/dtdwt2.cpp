@@ -2,6 +2,7 @@
  *  dtdwt2.cpp
  *  
  *  http://eeweb.poly.edu/iselesni/WaveletSoftware/dt2D.html
+ *  http://eeweb.poly.edu/iselesni/DoubleSoftware/ddintro.html
  *  Created by jian zhang on 9/16/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
@@ -83,7 +84,7 @@ void DualTree2::analize(const Array3<float> & x, const int & nstage)
 	m_w[j][3] = xd;
 	
 	m_lastStage = j;
-
+/*
 /// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/dualtree2D.m
 /// sum and difference
 	for(j=0;j<m_lastStage;++j) {
@@ -99,14 +100,17 @@ void DualTree2::analize(const Array3<float> & x, const int & nstage)
 			}
 		}
 	}
-
+*/
+	std::cout<<"\n DualTree2::analize last stage level "<<m_lastStage
+		<<" dim "<<lastStageBand(0).numRows()<<"-by-"<<lastStageBand(0).numCols();
+		
 }
 
 void DualTree2::synthesize(Array3<float> & y)
 {
 	const int & p = m_w[m_lastStage][0].numRanks();
 	int i, j, k;
-
+/*
 /// http://eeweb.poly.edu/iselesni/WaveletSoftware/allcode/idualtree2D.m
 /// sum and difference
 	for(j=0;j<m_lastStage;++j) {
@@ -121,7 +125,7 @@ void DualTree2::synthesize(Array3<float> & y)
 			}
 		}
 	}
-
+*/
 	j = m_lastStage;
 	Array3<float> yu;
 	yu = m_w[j][0];
@@ -130,6 +134,7 @@ void DualTree2::synthesize(Array3<float> & y)
 	
 	j--;
 	while(j>0) {
+		
 		for(k=0;k<p;++k) {
 			sfb2flt(yu.rank(k), Dtf::UpSynthesis,
 					yu.rank(k), m_w[j][0].rank(k), m_w[j][1].rank(k), m_w[j][2].rank(k) );
@@ -164,12 +169,23 @@ const Array3<float> & DualTree2::stageBand(const int & i, const int & j, const i
 const Array3<float> & DualTree2::lastStageBand(const int & j) const
 { return m_w[m_lastStage][j*3]; }
 
+void DualTree2::scaleUp(int level, float scaling)
+{
+	const int & p = m_w[level][0].numRanks();
+	for(int i=0;i<3;++i) {
+		for(int k=0;k<p;++k) {
+			Array2<float> & a = *m_w[level][i].rank(k);
+			a *= scaling;
+			Array2<float> & b = *m_w[level][3+i].rank(k);
+			b *= scaling;
+		}
+	}
+	
+}
+
 void DualTree2::nns(const DualTree2 & ts,
 			const int & crow, const int & ccol) const
-{
-	std::cout<<"\n last stage dim "<<lastStageBand(0).numRows()
-			<<" "<<lastStageBand(0).numCols();
-	
+{	
 	Array2<float> pch;
 	pch.create(1,1);
 	ts.lastStageBand(0).rank(0)->sub(pch, crow, ccol);

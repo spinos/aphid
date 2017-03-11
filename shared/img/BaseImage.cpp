@@ -59,7 +59,7 @@ void BaseImage::setWidth(int x)
 void BaseImage::setHeight(int x)
 { m_imageHeight = x; }
 
-const float BaseImage::aspectRation() const
+const float BaseImage::aspectRatio() const
 { return (float)m_imageHeight/(float)m_imageWidth; }
 
 int BaseImage::pixelLoc(float s, float t, bool flipV, int pixelRank) const
@@ -126,9 +126,76 @@ void BaseImage::verbose() const
 		
 	std::cout<<"\n image file "<<fileName()
 			<<"\n format: "<<formatNameStr()
-			<<"\n size: ("<<getWidth()<<", "<<getHeight()
-			<<"\n channel: "<<channelRankStr();
+			<<"\n size: "<<getWidth()<<" x "<<getHeight()
+			<<"\n channel: "<<channelRankStr()
+			<<"\n";
 	
+}
+
+void BaseImage::getResampleSize(int & xdim, int & ydim) const
+{
+	const int w = getWidth();
+	xdim = 16;
+	for(;;) {
+		int x2 = xdim<<1;
+		if(x2 >= w ) {
+			if(x2 - w < w - xdim) {
+				xdim = x2;
+			} 
+			break;
+		}
+		xdim = x2;
+	}
+	const int h = getHeight();
+	ydim = 16;
+	for(;;) {
+		int y2 = ydim<<1;
+		if(y2 >= h ) {
+			if(y2 - h < h - ydim) {
+				ydim = y2;
+			} 
+			break;
+		}
+		ydim = y2;
+	}
+}
+
+void BaseImage::sampleRed(float * y) const
+{}
+
+void BaseImage::resampleRed(float * y, int sx, int sy) const
+{}
+
+int BaseImage::getMaxCompressLevel(int lowSize) const
+{
+	int x = getHeight();
+	if(x > getWidth() ) {
+		x = getWidth();
+	}
+	
+	int l = 0;
+	for(;;) {
+		int x2 = x>>1;
+		if(x2 < lowSize) {
+			break;
+		}
+		x = x2;
+		l++;
+	}
+	return l;
+}
+
+void BaseImage::getThumbnailSize(int & xdim, int & ydim,
+					const int & refSize) const
+{
+	const float r = aspectRatio();
+	if(r < 1.f) {
+		xdim = refSize;
+		ydim = (float)refSize * r;
+	} else {
+		xdim = (float)refSize / r;
+		ydim = refSize;
+	}
 }
 
 }

@@ -37,20 +37,20 @@ void BaseImageWidget::mousePressEvent(QMouseEvent *event)
     if(event->modifiers() == Qt::AltModifier) 
         return;
     
-    //processSelection(event);
+    processSelect(event);
 }
 
 void BaseImageWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    //processDeselection(event);
+    processDeselect(event);
 }
 
 void BaseImageWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if(event->modifiers() == Qt::AltModifier)
         processCamera(event);
-    //else 
-      //  processMouseInput(event);
+    else 
+        processMouseInput(event);
 
     m_lastMousePos = event->pos();
 }
@@ -101,5 +101,14 @@ void BaseImageWidget::setMargin(const int & h, const int & v)
 
 const Int2 & BaseImageWidget::margin() const
 { return m_margin; }
+
+void BaseImageWidget::processSelect(QMouseEvent *event)
+{}
+
+void BaseImageWidget::processDeselect(QMouseEvent *event)
+{}
+
+void BaseImageWidget::processMouseInput(QMouseEvent *event)
+{}
 
 }

@@ -19,6 +19,8 @@ public:
 	static bool IsOpenExrFile(const std::string& filename);
 
 	virtual void sample(float u, float v, int count, float * dst) const;
+	virtual void sampleRed(float * y) const;
+	virtual void resampleRed(float * y, int sx, int sy) const;
 	
 protected:
 	virtual bool readImage(const std::string & filename);
@@ -26,6 +28,13 @@ protected:
 private:
     void tileCoord(const int ind, const int tileSize, int & x, int & y) const;
 	void clear();
+	void boxSample(const float & u, const float & v, const int & count, 
+			const int & w, const int & h, const int & colorRank,
+			float * dst) const;
+	void sample(float & dst,
+			const int & u, const int & v,
+			const int & w, const int & h, const int & colorRank,
+			const int & offset) const;
 	
 };
 }

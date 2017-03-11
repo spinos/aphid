@@ -9,7 +9,7 @@
 #include <QtGui>
 #include <math/Calculus.h>
 #include "ft1dWidget.h"
-#include "fltbanks.h"
+#include <wla/fltbanks.h>
 
 using namespace aphid;
 

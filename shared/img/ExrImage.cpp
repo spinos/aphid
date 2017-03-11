@@ -200,4 +200,96 @@ void ExrImage::sample(float u, float v, int count, float * dst) const
 	
 }
 
+void ExrImage::sampleRed(float * y) const
+{
+	const int w = getWidth();
+	const int h = getHeight();
+	int colorRank = channelRank();
+	if(colorRank > 4) {
+		colorRank = 4;
+	}
+	
+	const half * hp = (const half *)_pixels;
+	for(int j=0;j<h;++j) {
+		const half * line = &hp[j * w * colorRank];
+		float * yline = &y[j * w];
+		for(int i=0;i<w;++i) {
+			yline[i] = line[i * colorRank];
+		}
+	}
+	
+}
+
+void ExrImage::resampleRed(float * y, int sx, int sy) const
+{
+	const int w = getWidth();
+	const int h = getHeight();
+	int colorRank = channelRank();
+	if(colorRank > 4) {
+		colorRank = 4;
+	}
+	
+	const float dx = 1.f / (float)(sx-1);
+	const float dy = 1.f / (float)(sy-1);
+	float u, v;
+	for(int j=0;j<sy;j++) {
+		v =  dy * j;
+		for(int i=0;i<sx;i++) {
+			u =  dx * i;			
+			boxSample(u, v, 1, w, h, colorRank, &y[j * sx + i]); 
+		}
+	}
+}
+
+void ExrImage::boxSample(const float & u, const float & v, const int & count, 
+			const int & w, const int & h, const int & colorRank,
+			float * dst) const
+{
+	float fu = u * (w-1)  - .5f;
+	float fv = v * (h-1)  - .5f;
+	int u0 = fu;
+	int u1 = u0 + 1;
+	int v0 = fv;
+	int v1 = v0 + 1;
+	fu = fu - u0;
+	fv = fv - v0;
+	float box[4];
+	for(int c=0; c < count;++c) {
+		sample(box[0], u0, v0, w, h, colorRank, c);
+		sample(box[1], u1, v0, w, h, colorRank, c);
+		sample(box[2], u0, v1, w, h, colorRank, c);
+		sample(box[3], u1, v1, w, h, colorRank, c);
+		
+		box[0] += fu * (box[1] - box[0]);
+		box[2] += fu * (box[3] - box[2]);
+		
+		dst[c] = box[0] + fv * (box[2] - box[0]);
+		
+	}
+}
+
+void ExrImage::sample(float & dst,
+			const int & u, const int & v,
+			const int & w, const int & h, const int & colorRank,
+			const int & offset) const
+{
+	int i = u;
+	if(i<0) {
+		i = 0;
+	}
+	else if(i> w - 1) {
+		i = w - 1;
+	}
+	int j = v;
+	if(j<0) {
+		j = 0;
+	}
+	else if(j > h - 1) {
+		j = h - 1;
+	}
+	const half * hp = (const half *)_pixels;
+	const half * line = &hp[j * w * colorRank];
+	dst = line[i * colorRank + offset];
+}
+
 }

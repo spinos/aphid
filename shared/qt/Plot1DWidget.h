@@ -10,7 +10,7 @@
 #ifndef APHID_PLOT_1D_WIDGET_H
 #define APHID_PLOT_1D_WIDGET_H
 
-#include <BaseImageWidget.h>
+#include <qt/BaseImageWidget.h>
 #include <plots.h>
 
 namespace aphid {

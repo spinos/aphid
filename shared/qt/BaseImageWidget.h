@@ -37,8 +37,12 @@ protected:
 	bool isLandscape() const;
 	const Int2 & margin() const;
 	
+	virtual void processSelect(QMouseEvent *event);
+	virtual void processDeselect(QMouseEvent *event);
+	virtual void processMouseInput(QMouseEvent *event);
+	virtual void processCamera(QMouseEvent *event);
+	
 private:
-	void processCamera(QMouseEvent *event);
 	void trackCamera(int dx, int dy);
 	void zoomCamera(int dx);
 	

@@ -8,7 +8,7 @@
  */
 #include <QtGui>
 #include "ft2widget.h"
-#include <dwt2.h>
+#include <wla/dwt2.h>
 #include <gensig.h>
 
 using namespace aphid;

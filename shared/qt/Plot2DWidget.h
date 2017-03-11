@@ -10,7 +10,7 @@
 #ifndef APHID_PLOT_2D_WIDGET_H
 #define APHID_PLOT_2D_WIDGET_H
 
-#include <Plot1DWidget.h>
+#include <qt/Plot1DWidget.h>
 
 namespace aphid {
 

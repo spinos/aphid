@@ -1,9 +1,7 @@
 
-SET (DT_FLT_SRC ${APHID_DIR}/shared/BaseImageWidget.cpp
-${APHID_DIR}/shared/Plot1DWidget.cpp
-${APHID_DIR}/wavelet/fltbanks.cpp
+SET (DT_FLT_SRC ${APHID_DIR}/shared/qt/BaseImageWidget.cpp
+${APHID_DIR}/shared/qt/Plot1DWidget.cpp
 ${APHID_DIR}/wavelet/gensig.cpp
-${APHID_DIR}/wavelet/dtdwt1.cpp
 dtftwidget.cpp
 dtftwindow.cpp
 main.cpp)
@@ -18,5 +16,6 @@ target_link_libraries (dtft ${Boost_CHRONO_LIBRARY})
 
 target_link_libraries (dtft ${APHID_MATH_LIBRARY})
 target_link_libraries (dtft ${APHID_GEOM_LIBRARY})
+target_link_libraries (dtft ${APHID_WLA_LIBRARY})
 
 target_link_libraries (dtft Qt4::QtGui)

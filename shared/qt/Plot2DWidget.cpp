@@ -20,13 +20,17 @@ UniformPlot2DImage::~UniformPlot2DImage()
 
 void UniformPlot2DImage::updateImage(const bool & negative)
 {
-	if(m_img.isNull() )
+	if(m_img.isNull() ) {
 		m_img = QImage(numCols(), numRows(), QImage::Format_RGB32);
-		
+	}
+	
 	const int & w = numCols();
 	const int & h = numRows();
 	int nch = numChannels();
-	if(nch>4) nch = 4;
+	if(nch>4) {
+		nch = 4;
+	}
+	
 	uint *scanLine = reinterpret_cast<uint *>(m_img.bits() );
 	int i, j, k;
 	unsigned v;
@@ -56,13 +60,14 @@ void UniformPlot2DImage::updateImage(const bool & negative)
 			}
 			
 			v = col[3] << 24;
-			v = v | ( col[0] << 16 );
-			v = v | ( col[1] << 8 );
-			v = v | ( col[2] );
+			v |= ( col[0] << 16 );
+			v |= ( col[1] << 8 );
+			v |= ( col[2] );
 			
 			scanLine[j*w + i] = v;
 		}
 	}
+	
 }
 
 const QImage & UniformPlot2DImage::image() const
@@ -116,8 +121,9 @@ void Plot2DWidget::drawPlot(const UniformPlot2DImage * plt, const QPoint & offse
 
 float Plot2DWidget::scaleOf(const UniformPlot2DImage * plt) const
 {
-	if(plt->fillMode() == UniformPlot2D::flFixed)
+	if(plt->fillMode() == UniformPlot2D::flFixed) {
 		return plt->drawScale();
+	}
 		
 	QPoint lu = luCorner();
 	QPoint rb = rbCorner();
