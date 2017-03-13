@@ -17,6 +17,12 @@ class Array3;
 
 class UniformPlot2DImage;
 
+namespace wla {
+
+class DualTree2;
+
+}
+
 }
 
 class DthfWidget : public aphid::Plot2DWidget {
@@ -28,6 +34,8 @@ public:
 				QWidget *parent = 0);
 	virtual ~DthfWidget();
 	
+	void resizeEvent(QResizeEvent *event);
+	
 protected:
 
 public slots:
@@ -38,11 +46,12 @@ public slots:
 
 private:
 	void checkSynthesisErr(const aphid::Array3<float> & synth);
-	void resynth();
+	void resynthsize();
 	
 private:
 /// input signal
 	aphid::Array3<float> * m_inputX;
+	aphid::wla::DualTree2 * m_synthesis;
 	aphid::UniformPlot2DImage * m_plot;
 	float m_levelScale[4];
 	

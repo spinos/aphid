@@ -30,6 +30,13 @@ void DualTree2::createStage(int j, int m, int n, int p)
 		m_w[j][i].create(m, n, p);
 	}
 }
+
+void DualTree2::zeroStage(int j)
+{
+	for(int i=0;i<6;++i) {
+		m_w[j][i].setZero();
+	}
+}
 	
 void DualTree2::analize(const Array3<float> & x, const int & nstage)
 {
@@ -101,9 +108,10 @@ void DualTree2::analize(const Array3<float> & x, const int & nstage)
 		}
 	}
 */
+#if 0
 	std::cout<<"\n DualTree2::analize last stage level "<<m_lastStage
 		<<" dim "<<lastStageBand(0).numRows()<<"-by-"<<lastStageBand(0).numCols();
-		
+#endif
 }
 
 void DualTree2::synthesize(Array3<float> & y)

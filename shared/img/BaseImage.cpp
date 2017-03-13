@@ -198,4 +198,7 @@ void BaseImage::getThumbnailSize(int & xdim, int & ydim,
 	}
 }
 
+void BaseImage::sampleRed(Array3<float> & y) const
+{}
+
 }

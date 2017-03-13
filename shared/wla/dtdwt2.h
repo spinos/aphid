@@ -51,7 +51,9 @@ public:
 			const int & crow, const int & ccol) const;
 	
 protected:
-
+/// band[j] <- 0
+	void zeroStage(int j);
+	
 private:
 	void createStage(int j, int m, int n, int p);
 	

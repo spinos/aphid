@@ -1,3 +1,5 @@
+## Thu Mar 16 01:52:27 CST 2017
+
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE Release)

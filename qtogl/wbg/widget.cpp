@@ -19,7 +19,8 @@
 #include <sdb/WorldGrid2.h>
 #include <sdb/LodSampleCache.h>
 #include <sdb/GridClosestToPoint.h>
-#include <ttg/GlobalHeightField.h>
+#include <ttg/GlobalElevation.h>
+#include <img/HeightField.h>
 
 using namespace aphid;
 
@@ -31,9 +32,12 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setFarClipPlane(20000.f);
 	orthoCamera()->setNearClipPlane(1.f);
 	usePerspCamera();
-    
+	
+	img::HeightField::GlobalHeightFieldProfile.set(.5f, -500.f, 500.f);
+	
 	m_landBlk = new ttg::LandBlock;
-	ttg::GlobalHeightField elevation;
+	ttg::GlobalElevation elevation;
+	elevation.loadHeightField("../data/grandcan.exr");
 	m_landBlk->processHeightField(&elevation);
 	m_landBlk->triangulate();
 	

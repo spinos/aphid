@@ -21,6 +21,7 @@ public:
 	virtual void sample(float u, float v, int count, float * dst) const;
 	virtual void sampleRed(float * y) const;
 	virtual void resampleRed(float * y, int sx, int sy) const;
+	virtual void sampleRed(Array3<float> & y) const;
 	
 protected:
 	virtual bool readImage(const std::string & filename);

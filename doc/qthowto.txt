@@ -2,3 +2,10 @@ http://wiki.qt.io/How_to_prevent_Qt_from_compiling_code_examples
 
 configure.exe -release -fast -no-qt3support -no-sql-sqlite -no-openvg -no-webkit -no-phonon -no-multimedia -no-audio-backend -no-dbus -no-script -no-scripttools -no-declarative -no-directwrite
 .\qmake\qmake -r QT_BUILD_PARTS="libs tools"
+
+https://wiki.qt.io/Using_CMake_build_system
+set ( RESOURCES
+ main.qrc
+)
+
+QT4_ADD_RESOURCES( RES_SOURCES ${RESOURCES} )

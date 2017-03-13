@@ -14,7 +14,11 @@ using namespace aphid;
 DthfWidget::DthfWidget(const ExrImage * img,
 					QWidget *parent) : Plot2DWidget(parent)
 {
-	setMargin(4, 4);
+	setMargin(0, 0);
+	
+	setMinimumWidth(512);
+	setMinimumHeight(512);
+	
 	m_levelScale[0] = 1.f;
 	m_levelScale[1] = 1.f;
 	m_levelScale[2] = 1.f;
@@ -34,18 +38,10 @@ DthfWidget::DthfWidget(const ExrImage * img,
 	int level = 4;
 	std::cout<<"\n dtdwt level "<<level;
 
-	wla::DualTree2 tree;
-	tree.analize(*m_inputX, level);
-	
-	Array3<float> sythy;
-	tree.synthesize(sythy);
-	checkSynthesisErr(sythy);
+	m_synthesis = new wla::DualTree2;
 	
 	m_plot = new UniformPlot2DImage;
-	m_plot->create(sythy);
-	m_plot->setDrawScale(1.f);					
-	m_plot->updateImage();
-	
+	m_plot->setDrawScale(1.f);
 	addImage(m_plot);
 	
 }
@@ -65,43 +61,66 @@ DthfWidget::~DthfWidget()
 void DthfWidget::recvL0scale(double x)
 {
 	m_levelScale[0] = x;
-	resynth();
+	resynthsize();
 }
 
 void DthfWidget::recvL1scale(double x)
 {
 	m_levelScale[1] = x;
-	resynth();
+	resynthsize();
 }
 
 void DthfWidget::recvL2scale(double x)
 {
 	m_levelScale[2] = x;
-	resynth();
+	resynthsize();
 }
 
 void DthfWidget::recvL3scale(double x)
 {
 	m_levelScale[3] = x;
-	resynth();
+	resynthsize();
 }
 
-void DthfWidget::resynth()
+void DthfWidget::resizeEvent(QResizeEvent * event)
 {
-	wla::DualTree2 tree;
-	tree.analize(*m_inputX, 4);
+	BaseImageWidget::resizeEvent(event);
+	resynthsize();
+		
+}
+
+void DthfWidget::resynthsize()
+{
+	int pw = portSize().width();
+	int ph = portSize().height();
+	if(pw > m_inputX->numRows() ) {
+		pw = m_inputX->numRows();
+	}
+	if(ph > m_inputX->numCols() ) {
+		ph = m_inputX->numCols();
+	}
 	
-	tree.scaleUp(0, m_levelScale[0]);
-	tree.scaleUp(1, m_levelScale[1]);
-	tree.scaleUp(2, m_levelScale[2]);
-	tree.scaleUp(3, m_levelScale[3]);
+	Array3<float> wndX;
+	wndX.create(pw, ph, 1);
 	
-	Array3<float> sythy;
-	tree.synthesize(sythy);
+	Array2SampleProfile<float> sampler;
+	sampler._translate = Float2(0.3191f, 0.432f);
+	sampler._scale = Float2(.2743f, .2743f);
+	sampler._defaultValue = 0.5f;
 	
-	checkSynthesisErr(sythy);
+	wndX.sample(*m_inputX, &sampler);
 	
-	m_plot->create(sythy);
+	m_synthesis->analize(wndX, 4);
+	
+	m_synthesis->scaleUp(0, m_levelScale[0]);
+	m_synthesis->scaleUp(1, m_levelScale[1]);
+	m_synthesis->scaleUp(2, m_levelScale[2]);
+	m_synthesis->scaleUp(3, m_levelScale[3]);
+	
+	Array3<float> wndY;
+	m_synthesis->synthesize(wndY);
+	
+	m_plot->create(wndY);
 	m_plot->updateImage();
 	update();
 }
