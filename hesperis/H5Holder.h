@@ -17,6 +17,7 @@ namespace aphid {
     
 class H5Holder {
 
+    std::string m_lastFilename;
     AFrameRangeSegment m_spfSegment;
 	SampleFrame m_sampler;
 	double m_lastTime;
