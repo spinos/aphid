@@ -10,12 +10,13 @@
  
 #include "LandBlock.h"
 #include <ttg/TetraMeshBuilder.h>
-#include <ttg/GlobalHeightField.h>
+#include <ttg/GlobalElevation.h>
 #include <ttg/GenericTetraGrid.h>
 #include <ttg/AdaptiveBccGrid3.h>
 #include <ttg/TetrahedronDistanceField.h>
 #include <ttg/TetraGridTriangulation.h>
 #include <geom/ATriangleMesh.h>
+#include <img/HeightField.h>
 
 namespace aphid {
 
@@ -39,6 +40,8 @@ LandBlock::LandBlock(sdb::Entity * parent) : sdb::Entity(parent)
 	m_mesher->setGridField(m_tetg, m_field);
 	
 	m_frontMesh = new ATriangleMesh;
+	
+	m_heightField = new img::HeightField;
 }
 
 LandBlock::~LandBlock()
@@ -48,10 +51,13 @@ LandBlock::~LandBlock()
 	delete m_field;
 	delete m_mesher;
 	delete m_frontMesh;
+	delete m_heightField;
 }
 
-void LandBlock::processHeightField(const GlobalHeightField * elevation)
+void LandBlock::processHeightField(const GlobalElevation * elevation)
 {
+/// todo synthesize local hieght field
+/// todo subdivide to necessary level
 	for(int i=0;i<m_field->numNodes();++i) {
 		DistanceNode & d = m_field->nodes()[i];
 		d.val = elevation->sample(d.pos);

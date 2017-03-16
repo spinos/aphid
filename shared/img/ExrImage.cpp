@@ -5,6 +5,7 @@
 #include <OpenEXR/ImfHeader.h>
 #include <OpenEXR/ImfNamespace.h>
 #include <OpenEXR/ImathNamespace.h>
+#include <math/ATypes.h>
 
 namespace IMF = OPENEXR_IMF_NAMESPACE;
 using namespace IMF;
@@ -290,6 +291,30 @@ void ExrImage::sample(float & dst,
 	const half * hp = (const half *)_pixels;
 	const half * line = &hp[j * w * colorRank];
 	dst = line[i * colorRank + offset];
+}
+
+void ExrImage::sampleRed(Array3<float> & y) const
+{
+	const int w = getWidth();
+	const int h = getHeight();
+	int colorRank = channelRank();
+	if(colorRank > 4) {
+		colorRank = 4;
+	}
+	
+	y.create(h, w, 1);
+	
+	Array2<float> * slice = y.rank(0);
+	
+	const half * hp = (const half *)_pixels;
+	for(int j=0;j<h;++j) {
+		const half * line = &hp[j * w * colorRank];
+		
+		for(int i=0;i<w;++i) {
+			slice->column(i)[j] = line[i * colorRank];
+		}
+	}
+	
 }
 
 }

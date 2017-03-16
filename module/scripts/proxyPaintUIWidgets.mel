@@ -116,6 +116,43 @@ global proc proxyPaintEditCanvasColor(string $com)
 
 }
 
+global proc proxyPaintSetAllExamplesActive(int $stat)
+{
+    string $iconstr = "generic_checked.xpm";
+    if($stat != 1) {
+        $iconstr = "generic_unchecked.xpm";
+    }
+    string $chds[] = `rowColumnLayout -q
+        -ca pxpnExmpUIRow`;
+    int $nchild = size($chds);    
+    int $i;
+    for($i=5;$i<$nchild;$i=$i+5) {
+        int $v = `iconTextCheckBox -q -v $chds[$i]`;
+        if($v == $stat) {
+            continue;
+        }
+        iconTextCheckBox -e -v $stat $chds[$i];
+        iconTextCheckBox -e -image $iconstr $chds[$i];
+        int $index = ($i - 5)/5;
+        string $cmd = "proxyPaintToolContext -e -exs "+$index+" \"active="+$stat+";\" "+ `currentCtx`;
+        eval($cmd);
+    }
+    proxyPaintOnActiveExampleChanges();
+}
+
+global proc proxyPaintCheckAllExamplesActive(string $chk)
+{
+    int $stat = `iconTextCheckBox -q -v $chk`;
+    print("\n proxyPaintCheckAllExamplesActive_v_"+$stat);
+    if($stat == 1) {
+        iconTextCheckBox -e -image "generic_checked.xpm" $chk;
+        proxyPaintSetAllExamplesActive(1);
+    } else {
+        iconTextCheckBox -e -image "generic_unchecked.xpm" $chk;
+        proxyPaintSetAllExamplesActive(0);
+    }
+}
+
 global proc proxyPaintUpdateExmpUI(string $coln)
 {
     string $chds[] = `rowColumnLayout -q
@@ -131,6 +168,23 @@ global proc proxyPaintUpdateExmpUI(string $coln)
     if($nexmps < 1) {
         return;   
     }
+    
+    string $allExmpActiveCheck = `iconTextCheckBox -v 0 
+            -p pxpnExmpUIRow
+            -style "iconOnly"
+            -w 24 -mw 0
+            -h 24 -mh 0
+            -image "generic_unchecked.xpm"`;
+           
+    string $allExmpActiveCheckCC = "proxyPaintCheckAllExamplesActive(\""
+                                + $allExmpActiveCheck + "\")";
+    
+    iconTextCheckBox -e -cc $allExmpActiveCheckCC $allExmpActiveCheck;
+            
+    text -l "All" -al left -p pxpnExmpUIRow;
+    text -l "" -p pxpnExmpUIRow;
+    text -l "" -p pxpnExmpUIRow;
+    text -l "" -p pxpnExmpUIRow;
     
     int $index;
     for ($index = 0; $index < $nexmps; $index++) {

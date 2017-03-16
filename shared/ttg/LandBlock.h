@@ -16,6 +16,12 @@
 
 namespace aphid {
 
+namespace img {
+
+class HeightField;
+
+}
+
 class ATriangleMesh;
 
 template<typename T1, typename T2>
@@ -24,7 +30,7 @@ class TetraGridTriangulation;
 namespace ttg {
 
 class AdaptiveBccGrid3;
-class GlobalHeightField;
+class GlobalElevation;
 
 template<typename T>
 class GenericTetraGrid;
@@ -47,12 +53,13 @@ private:
 	FieldTyp * m_field;
 	MesherTyp * m_mesher;
 	ATriangleMesh * m_frontMesh;
+	img::HeightField * m_heightField;
 	
 public:
 	LandBlock(sdb::Entity * parent = NULL);
 	virtual ~LandBlock();
 	
-	void processHeightField(const GlobalHeightField * elevation);
+	void processHeightField(const GlobalElevation * elevation);
 	void triangulate();
 	
 	const TetGridTyp * grid() const;

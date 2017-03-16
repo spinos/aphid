@@ -24,6 +24,11 @@ void UniformPlot2DImage::updateImage(const bool & negative)
 		m_img = QImage(numCols(), numRows(), QImage::Format_RGB32);
 	}
 	
+	if(m_img.width() != numCols()
+		|| m_img.height() != numRows() ) {
+		m_img = QImage(numCols(), numRows(), QImage::Format_RGB32);
+	}
+	
 	const int & w = numCols();
 	const int & h = numRows();
 	int nch = numChannels();

@@ -11,6 +11,9 @@
 
 namespace aphid {
 
+template<typename T>
+struct Array3;
+
 class BaseImage {
 
 		bool m_isValid;
@@ -75,6 +78,7 @@ public:
 	virtual void resampleRed(float * y, int sx, int sy) const;
 /// longer dimension no lower than lowSize after divided by 2 for ? times
 	int getMaxCompressLevel(int lowSize = 128) const;
+	virtual void sampleRed(Array3<float> & y) const;
 	
 protected:
 	virtual bool readImage(const std::string & filename);

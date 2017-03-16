@@ -232,8 +232,8 @@ message (" openexr " ${OpenEXR_Library})
 SET (GPDF_HEADER cactus.h)
 
 SET (GPDF_SOURCE ../shared/Base3DView.cpp
-../shared/BaseImageWidget.cpp
-../shared/Plot1DWidget.cpp
+../shared/qt/BaseImageWidget.cpp
+../shared/qt/Plot1DWidget.cpp
 gpdfwidget.cpp
 gpdfwindow.cpp
 gpdfxwidget.cpp

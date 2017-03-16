@@ -23,6 +23,7 @@ target_link_libraries (wbg ${APHID_OGL_LIBRARY})
 target_link_libraries (wbg ${APHID_GRAPH_LIBRARY})
 target_link_libraries (wbg ${APHID_TTG_LIBRARY})
 target_link_libraries (wbg ${APHID_KD_LIBRARY})
+target_link_libraries (wbg ${APHID_IMG_LIBRARY})
 
 target_link_libraries (wbg ${Boost_SYSTEM_LIBRARY})
 IF (WIN32)
@@ -34,3 +35,5 @@ ENDIF ()
 target_link_libraries (wbg ${BLAS_LIBRARY})
 target_link_libraries (wbg ${LAPACK_LIBRARY})
 target_link_libraries (wbg ${F2C_LIBRARY})
+
+target_link_libraries (wbg ${OpenEXR_Library})
