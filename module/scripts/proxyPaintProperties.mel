@@ -12,29 +12,39 @@ global proc proxyPaintProperties ()
 	string $curctx = `currentCtx`;
 
 	string $ppnForm = `formLayout proxyPaint`;
-	string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
+	//string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
+	string $ppnColumn = `paneLayout -h 400 -configuration "horizontal2"`;
 // begin of proxyPaintOptions
+
+	scrollLayout;
+/// begin of scroll up
+	columnLayout -adj true;
     text -ann "2" proxyPaint_vizNameText;
         	
-	textScrollList -ams off 
+	textScrollList -ams off -w 400 -h 100
 		-sc "proxyPaint_selectVizToPaint" 
 		proxyPaint_VizToPaintScroll;
 		
 	rowLayout -numberOfColumns 2
-        -adjustableColumn 1;
+        -cw 1 64;
         
 	iconTextButton -image "generic_land.xpm" 
         -style "iconOnly" 
         -c "proxyPaint_EditVizGround";	
         
 	setParent ..;
+	setParent ..;
+/// end of scroll up
+	setParent ..;
 	
 	string $viz = proxyPaint_getCurrentViz();
     int $nodeVer = proxyPaint_getNodeVersion($viz);
 	   
-	    scrollLayout -h 120;
+	scrollLayout;
+/// begin of scroll down
         string $exmpColn = `columnLayout -adjustableColumn true pxpnExmpUIColn1cc22e1b`;
             setParent ..;
+/// end of scroll down
             setParent ..;
 
 // end of proxyPaintOptions	

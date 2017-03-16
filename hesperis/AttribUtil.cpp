@@ -524,7 +524,7 @@ void AttribUtil::saveH5(const MObject & node, AAttribute * data)
 
 void AttribUtil::load3(const char * filename, MObject & target)
 {
-	if(!OpenH5(filename, HDocument::oReadAndWrite)) {
+	if(!OpenH5(filename, HDocument::oReadOnly)) {
 		AHelper::Info<const char *>("AttribUtil error cannot open h5 file ", filename);
         return;
 	}
