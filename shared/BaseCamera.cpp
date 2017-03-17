@@ -8,7 +8,7 @@
  */
 
 #include "BaseCamera.h"
-#include <iostream>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 
@@ -279,14 +279,20 @@ void BaseCamera::frameAll(const BoundingBox & b)
 {
 	if(!b.isValid() ) return;
 	
-	std::cout<<"\n camera frame all "<<b;
-			
 	const float d = b.distance(0);
 	const Vector3F c = b.center();
 
 	fSpace.setIdentity();
 	fSpace.setTranslation(c + Vector3F(0.f, 0.f, d*2.f));
 	fCenterOfInterest = c;
+	updateInverseSpace();
+}
+
+void BaseCamera::setViewTransform(const Matrix44F & mat,
+					const float & focalLength)
+{
+	fSpace = mat;
+	fCenterOfInterest = mat.transform(Vector3F(0.f, 0.f, -focalLength) );
 	updateInverseSpace();
 }
  

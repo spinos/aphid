@@ -1,9 +1,9 @@
-set (exrs_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (exrs_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 Parameter.h
 window.h
 widget.h)
 
-set (exrs_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (exrs_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 Parameter.cpp
 widget.cpp
 window.cpp

@@ -1,9 +1,9 @@
-set (TTRI_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (TTRI_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 widget.h
 Parameter.h)
 
-set (TTRI_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (TTRI_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 Parameter.cpp
 widget.cpp
 window.cpp

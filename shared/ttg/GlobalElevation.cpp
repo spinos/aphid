@@ -33,7 +33,7 @@ float GlobalElevation::sample(const Vector3F & pos) const
 	return pos.distanceTo(m_planetCenter) + m_planetCenter.y;
 }
 
-int GlobalElevation::numHeightFiles() const
+int GlobalElevation::numHeightFields() const
 { return m_fields.size(); }
 
 void GlobalElevation::internalClear()
@@ -57,13 +57,17 @@ bool GlobalElevation::loadHeightField(const std::string & fileName)
 	Array3<float> inputX;
 	exr.sampleRed(inputX);
 	
-	img::HeightField * afld = new img::HeightField(inputX);
+	img::HeightField * afld = new img::HeightField;
+	afld->create(inputX);
+	afld->setRange(exr.getWidth() );
+	afld->verbose();
 	m_fields.push_back(afld);
-	
-	afld->calculateBBox();
 	
 	return true;
 }
+
+const img::HeightField & GlobalElevation::heightField(int i) const
+{ return *m_fields[i]; }
 
 }
 

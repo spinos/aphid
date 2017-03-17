@@ -1,6 +1,6 @@
 /*
- *  untitled.cpp
- *  masq
+ *  ContextIconFrame.cpp
+ *  aphid
  *
  *  Created by jian zhang on 5/5/13.
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
@@ -9,7 +9,10 @@
 #include <QtGui>
 #include "ContextIconFrame.h"
 
-ContextIconFrame::ContextIconFrame(QWidget *parent) : QIconFrame(parent) {}
+namespace aphid {
+
+ContextIconFrame::ContextIconFrame(QWidget *parent) : QIconFrame(parent) 
+{}
 
 void ContextIconFrame::setContext(int val)
 {
@@ -30,4 +33,7 @@ void ContextIconFrame::mousePressEvent(QMouseEvent *event)
 		emit contextDisabled(m_context);
 }
 
-void ContextIconFrame::mouseReleaseEvent(QMouseEvent *event) {}
+void ContextIconFrame::mouseReleaseEvent(QMouseEvent *event) 
+{}
+
+}

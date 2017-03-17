@@ -12,28 +12,19 @@ global proc proxyPaintProperties ()
 	string $curctx = `currentCtx`;
 
 	string $ppnForm = `formLayout proxyPaint`;
-	//string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
-	string $ppnColumn = `paneLayout -h 400 -configuration "horizontal2"`;
-// begin of proxyPaintOptions
+	string $ppnColumn = `columnLayout  -adjustableColumn true proxyPaintOptions`;
 
+/// begin of proxyPaintOptions
+	text -ann "2" proxyPaint_vizNameText;
+	
+	paneLayout -h 400 -configuration "horizontal2";
+/// begin of pane
 	scrollLayout;
 /// begin of scroll up
-	columnLayout -adj true;
-    text -ann "2" proxyPaint_vizNameText;
         	
-	textScrollList -ams off -w 400 -h 100
-		-sc "proxyPaint_selectVizToPaint" 
-		proxyPaint_VizToPaintScroll;
-		
-	rowLayout -numberOfColumns 2
-        -cw 1 64;
-        
-	iconTextButton -image "generic_land.xpm" 
-        -style "iconOnly" 
-        -c "proxyPaint_EditVizGround";	
-        
+    string $vizColn = `columnLayout -adjustableColumn true pxpnVizUIColn34952260`;
 	setParent ..;
-	setParent ..;
+	
 /// end of scroll up
 	setParent ..;
 	
@@ -42,12 +33,16 @@ global proc proxyPaintProperties ()
 	   
 	scrollLayout;
 /// begin of scroll down
+
         string $exmpColn = `columnLayout -adjustableColumn true pxpnExmpUIColn1cc22e1b`;
             setParent ..;
 /// end of scroll down
             setParent ..;
+            
+/// end of pane
+    setParent ..;
 
-// end of proxyPaintOptions	
+/// end of proxyPaintOptions	
 	setParent ..;
 	
 	string $ppnTab = `tabLayout `;
@@ -99,29 +94,38 @@ global proc proxyPaintProperties ()
 
 global proc proxyPaint_listAllVizToPaint()
 {
-    textScrollList -e -ra proxyPaint_VizToPaintScroll;
-    string $vizs[] = `ls -l -type proxyViz`;
-    string $aviz;
-    for($aviz in $vizs) {
-        textScrollList -e -append $aviz proxyPaint_VizToPaintScroll;
+    string $chds[] = `columnLayout -q - ca "pxpnVizUIColn34952260"`;
+    string $achd;
+    for($achd in $chds) {
+        deleteUI -control $achd;
+    }
+    string $vizs[] = `ls -type proxyViz`;
+    int $nvizs = size($vizs);
+    int $i;
+    for($i = 0;$i<$nvizs;$i++) {
+        button -l $vizs[$i] 
+            -al left -w 320
+            -p "pxpnVizUIColn34952260"
+            -c ("proxyPaint_selectAViz2("+ $i +")");
     }
 }
 
-global proc proxyPaint_selectVizToPaint()
+global proc proxyPaint_selectAViz2(int $index)
 {
-    string $vizs[] = `textScrollList -q -selectItem proxyPaint_VizToPaintScroll`;
-    if(size($vizs) < 1) {
-        print "no proxyViz selected, do nothing\n";
-        return;
-    }
+    string $vizs[] = `ls -type proxyViz`;
     
-    select -r $vizs[0];
+    select -r $vizs[$index];
     proxyPaintUpdateExampleScroll;
     
-    string $ani;
-    for($ani in `textScrollList -q -allItems proxyPaint_VizToPaintScroll`) {
-        if($ani == $vizs[0]) setAttr ($ani + ".act") 1;
-        else setAttr ($ani + ".act") 0;
+    int $nvizs = size($vizs);
+    int $i;
+    for($i = 0;$i<$nvizs;$i++) {
+        if($i == $index) {
+            setAttr ($vizs[$i] + ".act") 1;
+        }
+        else {
+            setAttr ($vizs[$i] + ".act") 0;
+        }
     }
     
     string $toolName = `currentCtx`;

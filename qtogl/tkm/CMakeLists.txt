@@ -1,8 +1,8 @@
-set (tkm_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (tkm_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 widget.h)
 
-set (tkm_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (tkm_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 widget.cpp
 window.cpp
 main.cpp)

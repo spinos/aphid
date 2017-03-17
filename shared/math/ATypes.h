@@ -492,6 +492,8 @@ struct Array2 {
                 const T * kern3tap);
 /// vmin vmax already have values				
 	void getMinMax(T & vmin, T & vmax) const;
+/// set all values
+	void set(const T & x);
 	
 };
 
@@ -668,6 +670,15 @@ void Array2<T>::getMinMax(T & vmin, T & vmax) const
 		if(vmax < vi) {
 			vmax = vi;
 		}
+	}
+}
+
+template<typename T>
+void Array2<T>::set(const T & x)
+{
+	const int mn = numCols() * numRows();
+	for(int i=0;i<mn;++i) {
+		m_data[i] = x;
 	}
 }
 

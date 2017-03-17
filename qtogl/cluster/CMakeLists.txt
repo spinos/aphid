@@ -1,8 +1,8 @@
-set (CLS_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (CLS_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 widget.h)
 
-set (CLS_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (CLS_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 ${APHID_DIR}/shared/topo/TriangleMeshCluster.cpp
 widget.cpp
 window.cpp

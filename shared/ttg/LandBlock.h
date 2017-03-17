@@ -29,7 +29,7 @@ class TetraGridTriangulation;
 
 namespace ttg {
 
-class AdaptiveBccGrid3;
+class HeightBccGrid;
 class GlobalElevation;
 
 template<typename T>
@@ -41,14 +41,16 @@ class TetrahedronDistanceField;
 class LandBlock : public sdb::Entity {
 
 	Vector3F m_origin;
+	int m_level;
 
 public:
+typedef HeightBccGrid BccTyp;
 typedef	GenericTetraGrid<float > TetGridTyp;
 typedef TetrahedronDistanceField<TetGridTyp > FieldTyp;
 typedef TetraGridTriangulation<float, TetGridTyp > MesherTyp;
 
 private:
-	AdaptiveBccGrid3 * m_bccg;
+	BccTyp * m_bccg;
 	TetGridTyp * m_tetg;
 	FieldTyp * m_field;
 	MesherTyp * m_mesher;
@@ -67,6 +69,8 @@ public:
 	const ATriangleMesh * frontMesh() const;
 	
 protected:
+	void toUV(float & u, float & v, const Vector3F & p) const;
+	float heightSampleFilterSize() const;
 	
 private:	
 };

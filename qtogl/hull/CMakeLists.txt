@@ -1,9 +1,9 @@
-set (HULL_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (HULL_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 glwidget.h
 HullContainer.h)
 
-set (HULL_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (HULL_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 glwidget.cpp
 window.cpp
 HullContainer.cpp

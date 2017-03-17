@@ -8,6 +8,7 @@
 #include "gauwidget.h"
 #include <img/HeightField.h>
 #include <img/ExrImage.h>
+#include <img/ImageSensor.h>
 
 using namespace aphid;
 
@@ -21,11 +22,12 @@ GauWidget::GauWidget(const ExrImage * img,
 	}
 	
 	Array3<float> inputX;
-	//inputX.create(xdim, ydim, 1);
-	//img->sampleRed(inputX.rank(0)->v() );
 	img->sampleRed(inputX );
 	
-	m_gau = new img::HeightField(inputX);
+	m_gau = new img::HeightField;
+	m_gau->create(inputX);
+	m_gau->setRange(1024);
+	m_gau->verbose();
 	const int & n = m_gau->numLevels();
 #if 0
 	for(int i=0;i<n;++i) {
@@ -66,35 +68,17 @@ void GauWidget::resizeEvent(QResizeEvent * event)
 
 void GauWidget::resample()
 {
-	int m = portSize().height();
-	int n = m / m_gau->aspectRatio();
-	float du = 1.f / (float)n;
-	float dv = 1.f / (float)m;
-	float hdu = du * .5f;
-	float hdv = dv * .5f;
+	int n = portSize().width();
+	int m = n * m_gau->aspectRatio();
 	
 	m_Y->create(m, n, 1);
 	
-	Array2<float> * slice = m_Y->rank(0);
-	
-	float filterSize = (float)m_gau->levelSignal(0).numRows() / (float)m;
-	
-	img::BoxSampleProfile<float> sampler;
-	sampler._channel = 0;
-	m_gau->getSampleProfle(&sampler, filterSize);
-	
-	for(int j=0;j<n;++j) {
-		float * colj = slice->column(j);
+	img::ImageSensor<img::HeightField> sensor(Vector2F(0,0),
+		Vector2F(n,0), n,
+		Vector2F(0,m), m);
+	sensor.verbose();
 		
-		sampler._uCoord = hdu + du * j;
-		
-		for(int i=0;i<m;++i) {
-		
-			sampler._vCoord = hdv + dv * i;
-			
-			colj[i] = m_gau->sample(&sampler);
-		}
-	}
+	sensor.sense(m_Y, 0, *m_gau);
 	
 	m_plotY->create(*m_Y);
 	m_plotY->updateImage();

@@ -10,6 +10,7 @@ global proc proxyPaintValues(string $toolName)
 	proxyPaintOptionValues($toolName);
 
 	toolPropertySelect proxyPaint;
+	
 	proxyPaint_listAllVizToPaint();
 }
 

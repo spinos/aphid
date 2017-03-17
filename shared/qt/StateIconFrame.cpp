@@ -1,6 +1,6 @@
 /*
  *  StateIconFrame.cpp
- *  mallard
+ *  aphid
  *
  *  Created by jian zhang on 1/29/14.
  *  Copyright 2014 __MyCompanyName__. All rights reserved.
@@ -9,6 +9,8 @@
 
 #include <QtGui>
 #include "StateIconFrame.h"
+
+namespace aphid {
 
 StateIconFrame::StateIconFrame(QWidget *parent) : QIconFrame(parent) {}
 
@@ -29,3 +31,5 @@ void StateIconFrame::mousePressEvent(QMouseEvent *event)
 }
 
 void StateIconFrame::mouseReleaseEvent(QMouseEvent *) {}
+
+}

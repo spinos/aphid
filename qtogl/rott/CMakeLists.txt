@@ -1,8 +1,8 @@
-set (ROTT_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (ROTT_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 widget.h)
 
-set (ROTT_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (ROTT_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 widget.cpp
 window.cpp
 main.cpp)

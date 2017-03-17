@@ -1,9 +1,7 @@
 #ifndef TTI_GLWIDGET_H
 #define TTI_GLWIDGET_H
 
-#include <QGLWidget>
-#include <Base3DView.h>
-
+#include <qt/Base3DView.h>
 #include <ogl/DrawTetrahedron.h>
 
 namespace aphid {

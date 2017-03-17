@@ -10,6 +10,8 @@
 #include "Base2DView.h"
 #include <BaseCamera.h>
 
+namespace aphid {
+
 Base2DView::Base2DView(QWidget *parent) : Base3DView(parent)
 {}
 
@@ -44,4 +46,6 @@ Vector2F Base2DView::updateTracking(const Vector2F & p)
 	Vector2F d = p - Vector2F(m_trackPos);
 	m_trackPos = p;
 	return d;
+}
+
 }

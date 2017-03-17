@@ -38,6 +38,9 @@ public:
     void calculateDistance(Tf * intersectF,
 							CalcDistanceProfile & profile);
     
+	template<typename Tf, typename Ts>
+	void mergeShortEdges(const Tf & heightF, Ts & sampler);
+	
 protected:
 
 private:
@@ -201,6 +204,27 @@ void TetrahedronDistanceField<T>::calculateDistance(Tf * intersectF,
 		std::cout<<"\n done.";
 #endif
     }
+	
+template<typename T>
+template<typename Tf, typename Ts>
+void TetrahedronDistanceField<T>::mergeShortEdges(const Tf & heightF,
+								  Ts & sampler)
+{ 
+	float rell;
+	int iedge;
+    const int n = numNodes();
+	for(int i = 0;i<n;++i) {
+		
+		rell = distanceToFront2(iedge, i);
+        if(rell < 0.24f) {
+		
+		//	dh = heightF.sampleHeightDerivative(&sampler);
+		//	toMove = Absolute<float>(nodes()[i].val) > dh;
+
+            moveToFront2(i, iedge);
+		}
+	}
+}
 
 }
 

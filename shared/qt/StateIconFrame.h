@@ -1,6 +1,6 @@
 /*
  *  StateIconFrame.h
- *  mallard
+ *  aphid
  *
  *  Created by jian zhang on 1/29/14.
  *  Copyright 2014 __MyCompanyName__. All rights reserved.
@@ -8,7 +8,9 @@
  */
 #pragma once
 
-#include <QIconFrame.h>
+#include <qt/QIconFrame.h>
+
+namespace aphid {
 
 class StateIconFrame : public QIconFrame
 {
@@ -28,3 +30,5 @@ signals:
 private:
 	int m_state;
 };
+
+}

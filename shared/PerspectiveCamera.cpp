@@ -7,6 +7,7 @@
  *
  */
 #include "PerspectiveCamera.h"
+#include <cmath>
 
 namespace aphid {
 

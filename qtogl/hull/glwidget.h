@@ -1,7 +1,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 
 class HullContainer;
 

@@ -1,8 +1,8 @@
-set (PCA_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (PCA_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 drpcawindow.h
 drpcawidget.h)
 
-set (PCA_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (PCA_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 drpcawidget.cpp
 drpcawindow.cpp
 testDrpca.cpp)

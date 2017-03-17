@@ -1,9 +1,7 @@
 #ifndef VTG_GLWIDGET_H
 #define VTG_GLWIDGET_H
 
-#include <QGLWidget>
-#include <Base3DView.h>
-
+#include <qt/Base3DView.h>
 #include <ogl/DrawTetrahedron.h>
 #include <sdb/Sequence.h>
 

@@ -5,6 +5,17 @@
  *
  */
  
+global proc string proxyPaint_getCurrentViz()
+{
+    pickWalk -d down;
+    string $sel[] = `ls -sl -type proxyViz`;
+    if(size($sel) < 1) {
+        return "";
+    }
+    
+    return $sel[0];
+}
+
 global proc string proxyPaintGetExmpName(string $stats[],
                     int $minInd, int $maxInd)
 {

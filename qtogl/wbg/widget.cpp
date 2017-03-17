@@ -27,13 +27,14 @@ using namespace aphid;
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
 	m_doDrawTriWire = false;
-	perspCamera()->setFarClipPlane(20000.f);
+	perspCamera()->setFarClipPlane(30000.f);
 	perspCamera()->setNearClipPlane(1.f);
-	orthoCamera()->setFarClipPlane(20000.f);
+	orthoCamera()->setFarClipPlane(30000.f);
 	orthoCamera()->setNearClipPlane(1.f);
 	usePerspCamera();
+	resetView();
 	
-	img::HeightField::GlobalHeightFieldProfile.set(.5f, -500.f, 500.f);
+	img::HeightField::SetGlobalProfile(.5f, -200.f, 450.f);
 	
 	m_landBlk = new ttg::LandBlock;
 	ttg::GlobalElevation elevation;
@@ -60,7 +61,7 @@ void GLWidget::clientDraw()
     
     getDrawer()->m_markerProfile.apply();
     getDrawer()->setColor(0.f, .35f, .13f);
-	drawTetraMesh();
+	//drawTetraMesh();
 
 	getDrawer()->m_surfaceProfile.apply();
 	drawTriangulation();
@@ -108,32 +109,54 @@ void GLWidget::drawTetraMesh()
 void GLWidget::drawTriangulation()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
-	
+	glEnableClientState(GL_NORMAL_ARRAY);
 	const ATriangleMesh * fm = m_landBlk->frontMesh();
 
 	const unsigned nind = fm->numIndices();
 	const unsigned * inds = fm->indices();
 	const Vector3F * pos = fm->points();
+	const Vector3F * nml = fm->vertexNormals();
 	
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)nml );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
 	glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
 
+	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::toggleDrawTriangulationWire()
 { m_doDrawTriWire = !m_doDrawTriWire; }
 
+void GLWidget::resetPerspViewTransform()
+{
+static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 0.8660254f, -0.5f, 0.f,
+					0.f, 0.5f, 0.8660254f, 0.f,
+					0.f, 2000.f, 3464.101616f, 1.f};
+	Matrix44F mat(mm);
+	getCamera()->setViewTransform(mat, 4000.f);
+}
+
+void GLWidget::resetOrthoViewTransform()
+{
+static const float mm1[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 0.f, -1.f, 0.f,
+					0.f, 1.f, 0.f, 0.f,
+					0.f, 15000.f, 0.f, 1.f};
+	Matrix44F mat(mm1);
+	getCamera()->setViewTransform(mat, 15000.f);
+	getCamera()->setHorizontalAperture(8000.f);
+}
+
 void GLWidget::clientSelect(Vector3F & origin, Vector3F & ray, Vector3F & hit)
 {
 }
-//! [9]
 
 void GLWidget::clientDeselect()
 {
 }
 
-//! [10]
 void GLWidget::clientMouseInput(Vector3F & stir)
 {
 }

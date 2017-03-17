@@ -30,6 +30,10 @@ global proc proxyPaintCreateVizUI(string $coln)
             -image "generic_red_light.xpm" 
             -c "proxyPaintSetEditVizGround"
             proxyPaintIcon_editVizGroung;
+            
+        iconTextButton -image "generic_land.xpm" 
+        -style "iconOnly" 
+        -c "proxyPaint_EditVizGround";	
         
     setParent ..;
         

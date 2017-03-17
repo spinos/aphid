@@ -1,7 +1,7 @@
 #ifndef INST_GLWIDGET_H
 #define INST_GLWIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 #include <ogl/DrawParticle.h>
 
 namespace aphid {

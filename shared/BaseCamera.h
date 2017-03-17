@@ -7,9 +7,11 @@
  *
  */
 #pragma once
-#include <AllMath.h>
+#include <math/Matrix44F.h>
 
 namespace aphid {
+
+class BoundingBox;
 
 class BaseCamera {
 public:
@@ -53,6 +55,8 @@ public:
 	
 	void traverse(const Vector3F & v);
 	void frameAll(const BoundingBox & b);
+	void setViewTransform(const Matrix44F & mat,
+				const float & focalLength);
 	
 	Matrix44F fSpace, fInverseSpace;
 	Vector3F fCenterOfInterest;

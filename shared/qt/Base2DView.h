@@ -8,7 +8,9 @@
  */
 
 #pragma once
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
+
+namespace aphid {
 
 class Base2DView : public Base3DView {
 	Q_OBJECT
@@ -23,3 +25,5 @@ public:
 private:
 	Vector2F m_trackPos;
 };
+
+}

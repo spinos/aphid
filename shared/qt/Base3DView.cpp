@@ -1,4 +1,8 @@
-
+/*
+ *   Base3DView.cpp
+ *
+ */
+ 
 #include <QtGui>
 #include <gl_heads.h>
 #include <QtOpenGL>
@@ -50,9 +54,7 @@ Base3DView::Base3DView(QWidget *parent)
 	m_perspView = new PerspectiveView(m_perspCamera);
 	m_lastTime = m_startTime = (boost::posix_time::ptime(boost::posix_time::microsec_clock::local_time()) - time_t_epoch).total_milliseconds();
 }
-//! [0]
 
-//! [1]
 Base3DView::~Base3DView()
 {
 	delete fCamera;
@@ -67,11 +69,8 @@ QSize Base3DView::minimumSizeHint() const
 {
     return QSize(50, 50);
 }
-//! [2]
 
-//! [3]
 QSize Base3DView::sizeHint() const
-//! [3] //! [4]
 {
     return QSize(640, 480);
 }
@@ -128,9 +127,7 @@ void Base3DView::initializeGL()
 	
 	clientInit();
 }
-//! [6]
 
-//! [7]
 void Base3DView::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
@@ -160,9 +157,7 @@ void Base3DView::paintGL()
 	}
 	glFlush();
 }
-//! [7]
 
-//! [8]
 void Base3DView::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -175,9 +170,7 @@ void Base3DView::resizeGL(int width, int height)
 	else
 		updatePerspProjection();
 }
-//! [8]
 
-//! [9]
 void Base3DView::mousePressEvent(QMouseEvent *event)
 {	
     m_lastPos = event->pos();
@@ -186,14 +179,12 @@ void Base3DView::mousePressEvent(QMouseEvent *event)
     
     processSelection(event);
 }
-//! [9]
 
 void Base3DView::mouseReleaseEvent(QMouseEvent *event)
 {
     processDeselection(event);
 }
 
-//! [10]
 void Base3DView::mouseMoveEvent(QMouseEvent *event)
 {
     if(event->modifiers() == Qt::AltModifier)
@@ -203,7 +194,6 @@ void Base3DView::mouseMoveEvent(QMouseEvent *event)
 
     m_lastPos = event->pos();
 }
-//! [10]
 
 void Base3DView::processCamera(QMouseEvent *event)
 {
@@ -314,13 +304,30 @@ void Base3DView::updatePerspProjection()
 	doneCurrent();
 }
 
+void Base3DView::resetPerspViewTransform()
+{
+static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 1.f, 0.f, 0.f,
+					0.f, 0.f, 1.f, 0.f,
+					0.f, 0.f, 120.f, 1.f};
+	Matrix44F mat(mm);
+	getCamera()->setViewTransform(mat, 120.f);
+}
+
+void Base3DView::resetOrthoViewTransform()
+{
+	resetPerspViewTransform();
+}
+
 void Base3DView::resetView()
 {
-	getCamera()->reset(sceneCenter());
-	if(getCamera()->isOrthographic())
+	if(getCamera()->isOrthographic()) {
+		resetOrthoViewTransform();
 		updateOrthoProjection();
-	else
+	} else {
+		resetPerspViewTransform();
 		updatePerspProjection();
+	}
 }
 
 void Base3DView::drawSelection()

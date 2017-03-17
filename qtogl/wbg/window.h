@@ -9,6 +9,8 @@ class QAction;
 QT_END_NAMESPACE
 
 class GLWidget;
+class ToolBox;
+class AssetDlg;
 
 class Window : public QMainWindow
 {
@@ -24,8 +26,15 @@ private:
 	void createActions();
 	void createMenus();
 	
+private slots:
+	void toggleAssetDlg(bool x);
+	
 private:
     GLWidget *glWidget;
-	
+	ToolBox * m_tools;
+	AssetDlg * m_assets;
+	QAction * m_assetAct;
+    QMenu * m_windowMenu;
+    
 };
 #endif

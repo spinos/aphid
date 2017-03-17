@@ -94,8 +94,11 @@ protected:
 /// cut edges move to front if necessary
 	void setNodePosDistance(const Vector3F & pos,
 						const float & v, 
-						const int & idx);
-						
+						const int & idx);		
+	float distanceToFront2(int & closestEdgeIdx,
+                const int & idx) const;
+	void moveToFront2(const int & idx,
+                const int & edgeIdx);			
 private:
 /// propagate distance value
     void propagate(std::map<int, int > & heap, const int & i);
@@ -104,10 +107,6 @@ private:
                 const int & idx) const;
 /// move node to front and un-cut all connected edges
     void moveToFront(const int & idx,
-                const int & edgeIdx);
-    float distanceToFront2(int & closestEdgeIdx,
-                const int & idx) const;
-    void moveToFront2(const int & idx,
                 const int & edgeIdx);
     float getShortestCutEdgeLength(const int & idx) const;
 	float closestDistanceToFront(int & closestEdgeIdx,

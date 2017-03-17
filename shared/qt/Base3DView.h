@@ -1,5 +1,10 @@
-#ifndef BASE3DVIEW_H
-#define BASE3DVIEW_H
+/*
+ *   Base3DView.h
+ *
+ */
+
+#ifndef APH_BASE3DVIEW_H
+#define APH_BASE3DVIEW_H
 
 #include <QGLWidget>
 #include <AllMath.h>
@@ -102,6 +107,9 @@ protected:
 	
 	void updatePerspectiveView();
 	const PerspectiveView * perspectiveView() const;
+	
+	virtual void resetPerspViewTransform();
+	virtual void resetOrthoViewTransform();
 	
 private:
 	void computeIncidentRay(int x, int y);

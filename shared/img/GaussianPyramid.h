@@ -17,27 +17,17 @@
 #define APH_IMG_GAUSSIAN_PYRMAID_H
 
 #include <math/ATypes.h>
+#include <img/BoxSampleProfile.h>
+#include <img/ImageSpace.h>
 
 namespace aphid {
 
 namespace img {
 
-/// uCoord horizontal, vCoord vertical (0.0,1.0)
-template<typename T>
-struct BoxSampleProfile {
-	int _loLevel;
-	int _hiLevel;
-	float _uCoord;
-	float _vCoord;
-	float _mixing;
-	int _channel;
-	T _box[4];
-};
-
 template<typename T>
 class GaussianPyramid {
 
-/// 1:5
+/// 1:7
 	int m_numLevels;
 	
 public:
@@ -45,23 +35,29 @@ public:
 	typedef Array2<T> SignalSliceTyp;
 	
 	GaussianPyramid();
-	GaussianPyramid(const SignalTyp & inputSignal);
 	virtual ~GaussianPyramid();
 
+	virtual void create(const SignalTyp & inputSignal);
 	const float & aspectRatio() const;
 	const int & numLevels() const;
 	const SignalTyp & levelSignal(int level) const;
+	Int2 levelSignalSize(int level) const;
 	
 /// find SampleFilterSize[lo] <= filterSize < SampleFilterSize[hi]	
 /// mixing <- (filterSize - loFilterSize) / (hiFilterSize - loFilterSize)
-/// filter size (1.0, 16.0), disable filtering if filter size == 0.0
-	void getSampleProfle(BoxSampleProfile<T> * prof,
+/// filter size (1.0, 32.0), disable filtering if filter size == 0.0
+	void getSampleProfile(BoxSampleProfile<T> * prof,
 			const float & filterSize) const;
-
+/// filter size by sample_spacing / source_spacing			
+	void getSampleProfile(BoxSampleProfile<T> * prof,
+			ImageSpace * mspace) const;
+	
 	T sample(BoxSampleProfile<T> * prof) const;
 	
 	const int & inputSignalNumCols() const;
 	const int & inputSignalNumRows() const;
+	
+	void verbose() const;
 	
 protected:
 	void applyBlurFilter(SignalTyp & dst, const SignalTyp & src);
@@ -80,6 +76,7 @@ protected:
 /// without filter
 	T sampleStage(int level, const int & k, 
 				const float & coordU, const float & coordV) const;
+	
 /// channel[k] at level
 /// dst has 2 ranks, 0 is u horizontal, 1 is v vertical
 	void computeDerivative(SignalTyp & dst, int k, int level) const;
@@ -88,12 +85,12 @@ protected:
 	void getMinMax(T & vmin, T & vmax, int k) const;
 	
 private:
-//// 0:4
-	SignalTyp m_stage[5];
+//// 0:5
+	SignalTyp m_stage[7];
 /// height (num rows) / width (num cols)
 	float m_aspectRatio;
 /// pixel size at each level
-	static const float SampleFilterSize[5];
+	static const float SampleFilterSize[7];
 /// blur filter separated convolution
 	static const T BlurKernel[5];
 /// https://en.wikipedia.org/wiki/Image_derivatives
@@ -109,7 +106,7 @@ private:
 };
 
 template<typename T>
-const float GaussianPyramid<T>::SampleFilterSize[5] = {1.f, 2.f, 4.f, 8.f, 16.f};
+const float GaussianPyramid<T>::SampleFilterSize[7] = {1.f, 2.f, 4.f, 8.f, 16.f, 32.f, 64.f};
 
 /// (1 4 6.4 4 1) / 16.4
 template<typename T>
@@ -129,9 +126,13 @@ template<typename T>
 GaussianPyramid<T>::GaussianPyramid() :
 m_numLevels(0)
 {}
-	
+
 template<typename T>
-GaussianPyramid<T>::GaussianPyramid(const SignalTyp & inputSignal)
+GaussianPyramid<T>::~GaussianPyramid()
+{}
+
+template<typename T>
+void GaussianPyramid<T>::create(const SignalTyp & inputSignal)
 {
 	m_aspectRatio = (float)inputSignal.numRows() / (float)inputSignal.numCols();
 	
@@ -140,9 +141,9 @@ GaussianPyramid<T>::GaussianPyramid(const SignalTyp & inputSignal)
 	
 	SignalTyp cur;
 	
-	while(m_numLevels < 5
-		&& m_stage[m_numLevels-1].numRows() > 32
-		&& m_stage[m_numLevels-1].numCols() > 32 ) {
+	while(m_numLevels < 7
+		&& m_stage[m_numLevels-1].numRows() > 8
+		&& m_stage[m_numLevels-1].numCols() > 8 ) {
 		
 		applyBlurFilter(cur, m_stage[m_numLevels-1]);
 		scaleDown(m_stage[m_numLevels], cur);
@@ -150,10 +151,6 @@ GaussianPyramid<T>::GaussianPyramid(const SignalTyp & inputSignal)
 		m_numLevels++;
 	}
 }
-
-template<typename T>
-GaussianPyramid<T>::~GaussianPyramid()
-{}
 
 template<typename T>
 void GaussianPyramid<T>::applyBlurFilter(SignalTyp & dst, const SignalTyp & src)
@@ -289,8 +286,19 @@ const Array3<T> & GaussianPyramid<T>::levelSignal(int level) const
 { return m_stage[level]; }
 
 template<typename T>
+Int2 GaussianPyramid<T>::levelSignalSize(int level) const
+{ 
+	const SignalTyp & lsig = levelSignal(level);
+	return Int2(lsig.numCols(), lsig.numRows() ); 
+}
+
+template<typename T>
 T GaussianPyramid<T>::sample(BoxSampleProfile<T> * prof) const
 {
+	if(prof->isTexcoordOutofRange() ) {
+		return prof->_defaultValue;
+	}
+	
 	if(prof->_loLevel < 0) {
 		return sampleStage(0, prof->_channel, 
 				prof->_uCoord, prof->_vCoord);
@@ -307,9 +315,20 @@ T GaussianPyramid<T>::sample(BoxSampleProfile<T> * prof) const
 }
 
 template<typename T>
-void GaussianPyramid<T>::getSampleProfle(BoxSampleProfile<T> * prof,
+void GaussianPyramid<T>::getSampleProfile(BoxSampleProfile<T> * prof,
+							ImageSpace * mspace) const
+{
+/// 1 / num of samples 
+	mspace->_sourceSpacing = 1.f / (float)levelSignal(0).numCols();			
+	float filterSize = mspace->_sampleSpacing / mspace->_sourceSpacing;
+	getSampleProfile(prof, filterSize);
+}
+
+template<typename T>
+void GaussianPyramid<T>::getSampleProfile(BoxSampleProfile<T> * prof,
 			const float & filterSize) const
 {
+	prof->_mixing = 0.f;
 	int & lo = prof->_loLevel;
 	int & hi = prof->_hiLevel;
 	if(filterSize == 0.f) {
@@ -324,7 +343,6 @@ void GaussianPyramid<T>::getSampleProfle(BoxSampleProfile<T> * prof,
 	
 	lo = 0;
 	hi = 1;
-	prof->_mixing = 0.f;
 	while (hi < m_numLevels - 1) {
 		if(filterSize >= SampleFilterSize[lo]
 			&& filterSize < SampleFilterSize[hi]) {
@@ -335,8 +353,8 @@ void GaussianPyramid<T>::getSampleProfle(BoxSampleProfile<T> * prof,
 		lo = hi;
 		hi++;
 	}
+	lo = hi = m_numLevels - 1;
 }
-
 
 template<typename T>
 T GaussianPyramid<T>::sampleStage(int level, const int & k, 
@@ -393,7 +411,7 @@ T GaussianPyramid<T>::sampleStage(int level, const int & k,
 	
 	box[0] += fv * (box[1] - box[0]);
 	box[2] += fv * (box[3] - box[2]);
-		
+	
 	return box[0] + fu * (box[2] - box[0]);
 }
 
@@ -443,6 +461,19 @@ void GaussianPyramid<T>::getMinMax(T & vmin, T & vmax, int k) const
 { 
 	const SignalSliceTyp * slice = m_stage[m_numLevels - 1].rank(k);
 	slice->getMinMax(vmin, vmax); 
+}
+
+template<typename T>
+void GaussianPyramid<T>::verbose() const
+{
+	Int2 size0 = levelSignalSize(0);
+	Int2 size1 = levelSignalSize(numLevels()-1);
+	std::cout<<"\n GaussianPyramid n levels "<<numLevels()
+		<<"\n size0 "<<size0.x<<" x "<<size0.y
+		<<"\n size"<<numLevels()-1<<" "<<size1.x<<" x "<<size1.y
+		<<"\n aspect ratio "<<aspectRatio()
+		<<"\n n channels "<<levelSignal(0).numRanks();
+		
 }
 
 }

@@ -1,10 +1,8 @@
-#ifndef QIconFrame_H
-#define QIconFrame_H
+#ifndef APH_Q_ICON_FRAME_H
+#define APH_Q_ICON_FRAME_H
 
-#include <QColor>
 #include <QImage>
-#include <QPoint>
-#include <QWidget>
+#include <QLabel>
 
 namespace aphid {
 

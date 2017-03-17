@@ -1,7 +1,7 @@
 #ifndef HERMITE_WIDGET_H
 #define HERMITE_WIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 
 namespace aphid {
 

@@ -4,8 +4,16 @@ configure.exe -release -fast -no-qt3support -no-sql-sqlite -no-openvg -no-webkit
 .\qmake\qmake -r QT_BUILD_PARTS="libs tools"
 
 https://wiki.qt.io/Using_CMake_build_system
+
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTORCC ON)
+
 set ( RESOURCES
  main.qrc
 )
 
 QT4_ADD_RESOURCES( RES_SOURCES ${RESOURCES} )
+
+add_executable (foo ${SOURCE_FILES} ${RES_SOURCES})
+
+

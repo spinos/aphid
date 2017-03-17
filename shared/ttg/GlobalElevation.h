@@ -40,7 +40,8 @@ public:
 	
 	void setPlanetRadius(float x);
 	float sample(const Vector3F & pos) const;
-	int numHeightFiles() const;
+	int numHeightFields() const;
+	const img::HeightField & heightField(int i) const;
 	
 protected:
 

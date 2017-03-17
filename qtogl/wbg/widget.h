@@ -1,9 +1,13 @@
+/*
+ *  widget.h
+ *  world block grid
+ *
+ */
+
 #ifndef WBG_GLWIDGET_H
 #define WBG_GLWIDGET_H
 
-#include <QGLWidget>
-#include <Base3DView.h>
-
+#include <qt/Base3DView.h>
 #include <ogl/DrawTetrahedron.h>
 
 namespace aphid {
@@ -91,7 +95,9 @@ protected:
     virtual void clientMouseInput(aphid::Vector3F & stir);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
-    
+    virtual void resetPerspViewTransform();
+	virtual void resetOrthoViewTransform();
+	
 public slots:
 		
 private:

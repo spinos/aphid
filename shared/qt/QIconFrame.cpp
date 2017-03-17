@@ -1,6 +1,6 @@
 #include <QtGui>
 
-#include "qIconFrame.h"
+#include "QIconFrame.h"
 
 namespace aphid {
 

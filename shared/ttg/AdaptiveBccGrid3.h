@@ -28,68 +28,7 @@ public:
 /// enforce cell boundray           
     template<typename Tf, typename Tclosest>
 	void subdivideToLevel(Tf & fintersect, Tclosest & fclosest,
-						sdb::AdaptiveGridDivideProfle & prof)
-	{
-#if 0
-		std::cout<<"\n AdaptiveBccGrid3::subdivide ";
-#endif
-		std::vector<sdb::Coord4 > divided;
-
-		BoundingBox cb;
-		int level = prof.minLevel();
-		while(level < prof.maxLevel() ) {
-			std::vector<sdb::Coord4> dirty;
-			begin();
-			while(!end() ) {
-				if(key().w == level) {
-					getCellBBox(cb, key() );
-					
-					bool stat = limitBox().intersect(cb);
-					if(stat) {
-						stat = fintersect.intersect(cb);
-					}
-					
-					if(stat) {
-						if(forceSubdivide(level, limitBox(), cb) ) {
-							stat = true;
-						} else {
-							if(prof.minNormalDistribute() < 1.f) {
-								fclosest.select(cb);
-								stat = fclosest.normalDistributeBelow(prof.minNormalDistribute() );
-							} else {
-								stat = true;
-							}
-						}
-					}
-					
-					if(stat) {
-						dirty.push_back(key() );
-					}
-				}
-				
-				next();
-			}
-			
-			if(dirty.size() < 1) {
-				break;
-			}
-#if 0			
-			std::cout<<"\n subdiv level "<<level<<" divided "<<divided.size();
-#endif
-			std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
-			for(;it!=dirty.end();++it) {
-                getCellBBox(cb, *it);
-				cb.expand(-1e-3f);
-				BccCell3 * cell = findCell(*it);
-                subdivideCellToLevel(cell, *it, cb, level+1, &divided);
-			}
-			level++;
-		}
-		
-        enforceBoundary(divided);
-        storeCellNeighbors();
-		storeCellChildren();
-	}
+						sdb::AdaptiveGridDivideProfle & prof);
 	
 /// create node in each cell
 	void build();
@@ -98,23 +37,7 @@ public:
 	template<typename Tf>
 	void markCellIntersectDomainAtLevel(Tf * d, 
 						const int & level,
-						std::vector<sdb::Coord4 > & divided)
-	{
-		BoundingBox cb;
-		begin();
-		while(!end() ) {
-			const sdb::Coord4 k = key();
-			
-			if(k.w == level) {
-				getCellBBox(cb, k);
-				
-				if(d-> template broadphase <BoundingBox>(&cb ) )
-					divided.push_back(k);
-			}
-			
-			next();
-		}
-	}
+						std::vector<sdb::Coord4 > & divided);
 
 	void subdivideCells(const std::vector<sdb::Coord4 > & divided);
 /// add 8 child cells
@@ -137,18 +60,83 @@ protected:
 						std::vector<sdb::Coord4 > * divided);					
 	BccCell3 * addCell(const sdb::Coord4 & cellCoord);
 	
-private:
-	
 /// for each cell divied, must have same level neighbor cell on six faces and twelve edges
 /// level change cross face or edge <= 1
 	void enforceBoundary(std::vector<aphid::sdb::Coord4 > & ks);
 
+private:
+	
 /// low level or on boundary
 	bool forceSubdivide(int level, 
 					const BoundingBox & limitBx,
 					const BoundingBox & bx) const;
 	
 };
+
+template<typename Tf, typename Tclosest>
+void AdaptiveBccGrid3::subdivideToLevel(Tf & fintersect, Tclosest & fclosest,
+						sdb::AdaptiveGridDivideProfle & prof)
+{
+#if 0
+	std::cout<<"\n AdaptiveBccGrid3::subdivide ";
+#endif
+	std::vector<sdb::Coord4 > divided;
+
+	BoundingBox cb;
+	int level = prof.minLevel();
+	while(level < prof.maxLevel() ) {
+		std::vector<sdb::Coord4> dirty;
+		begin();
+		while(!end() ) {
+			if(key().w == level) {
+				getCellBBox(cb, key() );
+				
+				bool stat = limitBox().intersect(cb);
+				if(stat) {
+					stat = fintersect.intersect(cb);
+				}
+				
+				if(stat) {
+					if(forceSubdivide(level, limitBox(), cb) ) {
+						stat = true;
+					} else {
+						if(prof.minNormalDistribute() < 1.f) {
+							fclosest.select(cb);
+							stat = fclosest.normalDistributeBelow(prof.minNormalDistribute() );
+						} else {
+							stat = true;
+						}
+					}
+				}
+				
+				if(stat) {
+					dirty.push_back(key() );
+				}
+			}
+			
+			next();
+		}
+		
+		if(dirty.size() < 1) {
+			break;
+		}
+#if 0			
+		std::cout<<"\n subdiv level "<<level<<" divided "<<divided.size();
+#endif
+		std::vector<sdb::Coord4>::const_iterator it = dirty.begin();
+		for(;it!=dirty.end();++it) {
+			getCellBBox(cb, *it);
+			cb.expand(-1e-3f);
+			BccCell3 * cell = findCell(*it);
+			subdivideCellToLevel(cell, *it, cb, level+1, &divided);
+		}
+		level++;
+	}
+	
+	enforceBoundary(divided);
+	storeCellNeighbors();
+	storeCellChildren();
+}
 
 template<typename T>
 void AdaptiveBccGrid3::buildHexagonGrid(T * hexag, int level)
@@ -215,6 +203,27 @@ typedef sdb::Couple<Vector3F, int> PosIndTyp;
 	
 	pnts.clear();
 	
+}
+
+template<typename Tf>
+void AdaptiveBccGrid3::markCellIntersectDomainAtLevel(Tf * d, 
+					const int & level,
+					std::vector<sdb::Coord4 > & divided)
+{
+	BoundingBox cb;
+	begin();
+	while(!end() ) {
+		const sdb::Coord4 k = key();
+		
+		if(k.w == level) {
+			getCellBBox(cb, k);
+			
+			if(d-> template broadphase <BoundingBox>(&cb ) )
+				divided.push_back(k);
+		}
+		
+		next();
+	}
 }
 
 }

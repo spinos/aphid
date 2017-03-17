@@ -1,7 +1,7 @@
 #ifndef DR_PCA_WIDGET_H
 #define DR_PCA_WIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 
 namespace aphid {
 

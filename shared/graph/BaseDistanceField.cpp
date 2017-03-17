@@ -293,6 +293,7 @@ float BaseDistanceField::distanceToFront2(int & closestEdgeIdx,
                                 const int & idx) const
 {
     const DistanceNode & d = nodes()[idx];
+	const float ad = Absolute<float>(d.val);
     
     float closestCut = 2.f;
     float currentCut = 3.f;
@@ -310,11 +311,12 @@ float BaseDistanceField::distanceToFront2(int & closestEdgeIdx,
 		if(vj == idx) {
 			vj = eg.vi.y;
         }
+		
+		const float & bd = nodes()[vj].val;
         
 /// sign changes
-		if(nodes()[vj].val * d.val < 0.f) {
-            currentCut = Absolute<float>(d.val) / (Absolute<float>(d.val) +
-                                                    Absolute<float>(nodes()[vj].val ) );
+		if(bd * d.val < 0.f) {
+            currentCut = ad / (ad + Absolute<float>(bd) );
             
             if(closestCut > currentCut) {
                 closestEdgeIdx = k;

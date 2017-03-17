@@ -186,20 +186,19 @@ void Matrix44F::inverse()
 
 Vector3F Matrix44F::transform(const Vector3F& p) const
 {
-	float tx = p.x * M(0, 0) + p.y * M(1, 0) + p.z * M(2, 0)  + M(3, 0);
-	float ty = p.x* M(0, 1) + p.y* M(1, 1) + p.z* M(2, 1) + M(3, 1);
-	float tz = p.x* M(0, 2) + p.y* M(1, 2) + p.z* M(2, 2) + M(3, 2);
+	float tx = p.x * M(0, 0) + p.y * M(1, 0) + p.z * M(2, 0) + M(3, 0);
+	float ty = p.x * M(0, 1) + p.y * M(1, 1) + p.z * M(2, 1) + M(3, 1);
+	float tz = p.x * M(0, 2) + p.y * M(1, 2) + p.z * M(2, 2) + M(3, 2);
 		
 	return Vector3F(tx, ty, tz);
 }
 
-Vector3F Matrix44F::transform(const Vector3F& p)
+Vector2F Matrix44F::transform(const Vector2F& p) const
 {
-	float tx = p.x* *m(0, 0) + p.y* *m(1, 0) + p.z* *m(2, 0) + *m(3, 0);
-	float ty = p.x* *m(0, 1) + p.y* *m(1, 1) + p.z* *m(2, 1) + *m(3, 1);
-	float tz = p.x* *m(0, 2) + p.y* *m(1, 2) + p.z* *m(2, 2) + *m(3, 2);
+	float tx = p.x* M(0, 0) + p.y* M(1, 0) + M(3, 0);
+	float ty = p.x* M(0, 1) + p.y* M(1, 1) + M(3, 1);
 		
-	return Vector3F(tx, ty, tz);
+	return Vector2F(tx, ty);
 }
 
 Vector3F Matrix44F::transformAsNormal(const Vector3F& p) const

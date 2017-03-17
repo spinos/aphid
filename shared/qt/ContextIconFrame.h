@@ -1,6 +1,6 @@
 /*
- *  untitled.h
- *  masq
+ *  ContextIconFrame.h
+ *  aphid
  *
  *  Created by jian zhang on 5/5/13.
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
@@ -9,7 +9,9 @@
 
 #pragma once
 
-#include <QIconFrame.h>
+#include <qt/QIconFrame.h>
+
+namespace aphid {
 
 class ContextIconFrame : public QIconFrame
 {
@@ -29,3 +31,5 @@ signals:
 private:
 	int m_context;
 };
+
+}

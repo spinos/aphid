@@ -1,8 +1,7 @@
 #ifndef TKM_GLWIDGET_H
 #define TKM_GLWIDGET_H
 
-#include <QGLWidget>
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 
 namespace aphid {
 

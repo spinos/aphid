@@ -4,6 +4,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (glstrudy)
 set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 include_directories (../shared)
@@ -21,6 +22,8 @@ SET (APHID_DIR ${APPLE_HOME}/aphid)
 else()
 SET (APHID_DIR "~/aphid")
 endif ()
+
+set (APHID_QT_DIR ${APHID_DIR}/shared/qt )
 
 if(WIN32)
 add_definitions (-DWIN32)
@@ -231,9 +234,9 @@ message (" openexr " ${OpenEXR_Library})
 
 SET (GPDF_HEADER cactus.h)
 
-SET (GPDF_SOURCE ../shared/Base3DView.cpp
-../shared/qt/BaseImageWidget.cpp
-../shared/qt/Plot1DWidget.cpp
+SET (GPDF_SOURCE ${APHID_QT_DIR}/Base3DView.cpp
+${APHID_QT_DIR}/BaseImageWidget.cpp
+${APHID_QT_DIR}/Plot1DWidget.cpp
 gpdfwidget.cpp
 gpdfwindow.cpp
 gpdfxwidget.cpp

@@ -35,7 +35,7 @@ namespace aphid {
 	float determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i ) const;
 	void inverse();
 	Vector3F transform(const Vector3F& p) const;
-	Vector3F transform(const Vector3F& p);
+	Vector2F transform(const Vector2F& p) const;
 	Vector3F transformAsNormal(const Vector3F& p) const;
 	const Matrix44F transformBy(const Matrix44F & a) const;
 	void translate(const Vector3F& p);

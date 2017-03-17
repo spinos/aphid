@@ -1,7 +1,7 @@
 #ifndef NACA_4_DIGIT_WIDGET_H
 #define NACA_4_DIGIT_WIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 #include <math/ATypes.h>
 
 class GLWidget : public aphid::Base3DView

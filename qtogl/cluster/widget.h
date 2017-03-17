@@ -1,7 +1,7 @@
 #ifndef ROTT_WIDGET_H
 #define ROTT_WIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 #include <ogl/DrawParticle.h>
 
 namespace aphid {

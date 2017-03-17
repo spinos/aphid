@@ -1,15 +1,31 @@
-set (ABG_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
-window.h
-widget.h)
-
-set (WBG_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
-widget.cpp
-window.cpp
-main.cpp)
-
 set(CMAKE_MACOSX_BUNDLE OFF)
 
-add_executable (wbg ${WBG_HEADER_FILES} ${WBG_SOURCE_FILES})
+set (ABG_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
+window.h
+widget.h
+assetdlg.h
+toolBox.h)
+
+set ( RESOURCES
+wbg.qrc
+)
+
+QT4_ADD_RESOURCES ( RES_SOURCES ${RESOURCES} )
+
+message ("rcc output is " ${RES_SOURCES})
+
+set (WBG_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
+${APHID_QT_DIR}/QIconFrame.cpp
+${APHID_QT_DIR}/StateIconFrame.cpp
+${APHID_QT_DIR}/ContextIconFrame.cpp
+${APHID_QT_DIR}/ActionIconFrame.cpp
+widget.cpp
+window.cpp
+assetdlg.cpp
+toolBox.cpp
+main.cpp)
+
+add_executable (wbg ${WBG_HEADER_FILES} ${WBG_SOURCE_FILES} ${RES_SOURCES})
 
 target_link_libraries (wbg Qt4::QtGui Qt4::QtOpenGL)
 target_link_libraries (wbg ${OPENGL_LIBRARIES})
