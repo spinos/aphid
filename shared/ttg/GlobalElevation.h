@@ -29,19 +29,21 @@ namespace ttg {
 class GlobalElevation {
 
 typedef std::vector<img::HeightField * > FieldVecTyp;
-	FieldVecTyp m_fields;
+	static FieldVecTyp m_fields;
 	Vector3F m_planetCenter;
 	
 public:
 	GlobalElevation();
 	virtual ~GlobalElevation();
 	
-	bool loadHeightField(const std::string & fileName);
+	static bool LoadHeightField(const std::string & fileName);
+	static std::string LastFileBaseName();
+	static int NumHeightFields();
+	static const img::HeightField & GetHeightField(int i);
+	static img::HeightField * HeightFieldR(int i);
 	
 	void setPlanetRadius(float x);
 	float sample(const Vector3F & pos) const;
-	int numHeightFields() const;
-	const img::HeightField & heightField(int i) const;
 	
 protected:
 

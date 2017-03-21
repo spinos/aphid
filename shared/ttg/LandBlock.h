@@ -13,8 +13,11 @@
 
 #include <sdb/Entity.h>
 #include <math/Vector3F.h>
+#include <vector>
 
 namespace aphid {
+
+class BoundingBox;
 
 namespace img {
 
@@ -61,7 +64,9 @@ public:
 	LandBlock(sdb::Entity * parent = NULL);
 	virtual ~LandBlock();
 	
-	void processHeightField(const GlobalElevation * elevation);
+	void rebuild();
+	
+	void processHeightField();
 	void triangulate();
 	
 	const TetGridTyp * grid() const;
@@ -71,6 +76,11 @@ public:
 protected:
 	void toUV(float & u, float & v, const Vector3F & p) const;
 	float heightSampleFilterSize() const;
+	void getTouchedHeightFields(std::vector<int> & inds) const;
+	void senseHeightField(Array3<float> & sigY,
+							const img::HeightField & fld) const;
+	
+	BoundingBox buildBox() const;
 	
 private:	
 };

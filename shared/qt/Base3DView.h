@@ -71,8 +71,8 @@ public:
 	void setInteractContext(ToolContext * ctx);
 	int interactMode() const;
 	
-	void usePerspCamera();
-	void useOrthoCamera();
+	void usePerspCamera(bool transferSpace = true);
+	void useOrthoCamera(bool transferSpace = true);
 	
 	float deltaTime();
 	float elapsedTime() const;

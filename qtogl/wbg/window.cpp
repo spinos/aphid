@@ -22,13 +22,29 @@ Window::Window()
 	createActions();
     createMenus();
 	
+	connect(m_tools, SIGNAL(actionTriggered(int)), 
+			glWidget, SLOT(recvToolAction(int)));
+			
+	connect(m_assets, SIGNAL(onAssetDlgClose()), 
+			this, SLOT(recvAssetDlgClose()));
+			
+	connect(m_assets, SIGNAL(onHeightFieldAdd()), 
+			glWidget, SLOT(recvHeightFieldAdd()));
+			
+	connect(m_assets, SIGNAL(onHeightFieldSel(int)), 
+			glWidget, SLOT(recvHeightFieldSel(int)));
+			
+	connect(m_assets, SIGNAL(sendHeightFieldTransformTool(int)), 
+			glWidget, SLOT(recvHeightFieldTransformTool(int)));
+			
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-	//if (e->key() == Qt::Key_Escape)
-      //  close();
-
+	if (e->key() == Qt::Key_Escape) {
+        close();
+	}
+	
 	QWidget::keyPressEvent(e);
 }
 
@@ -54,4 +70,9 @@ void Window::toggleAssetDlg(bool x)
 	} else {
 		m_assets->hide();
 	}
+}
+
+void Window::recvAssetDlgClose()
+{
+	m_assetAct->setChecked(false);
 }

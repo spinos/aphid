@@ -11,12 +11,18 @@
 #include <qt/ContextIconFrame.h>
 #include <qt/ActionIconFrame.h>
 #include <qt/StateIconFrame.h>
-#include <iostream>
+#include "wbg_common.h"
 
 using namespace aphid;
 
 ToolBox::ToolBox(QWidget *parent) : QToolBar(parent) 
 {
+	createAction();
+	for(std::vector<ActionIconFrame *>::iterator it = m_actionFrames.begin(); it != m_actionFrames.end(); ++it) {
+		addWidget(*it);
+		connect(*it, SIGNAL(actionTriggered(int)), this, SLOT(onActionFrameTriggered(int)));
+	}
+/*	
 	createContext();
 	
 	for(std::vector<ContextIconFrame *>::iterator it = m_contextFrames.begin(); it != m_contextFrames.end(); ++it) {
@@ -25,21 +31,12 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 		connect(*it, SIGNAL(contextDisabled(int)), this, SLOT(onContextFrameChanged(int)));
 	}
 	//addSeparator();
-/*
-	
-	createAction();
-	
 	
 	createState();
 	
 	for(std::vector<StateIconFrame *>::iterator it = m_stateFrames.begin(); it != m_stateFrames.end(); ++it) {
 		addWidget(*it);
 		connect(*it, SIGNAL(stateChanged(int)), this, SLOT(onStateFrameChanged(int)));
-	}
-	
-	for(std::vector<ActionIconFrame *>::iterator it = m_actionFrames.begin(); it != m_actionFrames.end(); ++it) {
-		addWidget(*it);
-		connect(*it, SIGNAL(actionTriggered(int)), this, SLOT(onActionFrameTriggered(int)));
 	}
 */	
 }
@@ -77,44 +74,30 @@ void ToolBox::onActionFrameTriggered(int a)
 }
 
 void ToolBox::createContext()
-{
-    ContextIconFrame * selectFace = new ContextIconFrame(this);
-	selectFace->addIconFile(":/icons/perspView.png");
-	selectFace->addIconFile(":/icons/perspView.png");
-	selectFace->setIconIndex(1);
-	//selectFace->setContext(SelectFace);
-	
-    ContextIconFrame * createContour = new ContextIconFrame(this);
-	createContour->addIconFile(":/icons/topView.png");
-	createContour->addIconFile(":/icons/topView.png");
-	createContour->setIconIndex(0);
-	//createContour->setContext(CreateBodyContourFeather);
-	
-	m_contextFrames.push_back(selectFace);
-	m_contextFrames.push_back(createContour);
-	
+{	
 }
 
 void ToolBox::createAction()
 {
-    ActionIconFrame * rb = new ActionIconFrame(this);
-	rb->addIconFile(":/icons/perspView.png");
-	rb->addIconFile(":/icons/perspView.png");
-	rb->setIconIndex(0);
-	//rb->setAction(RebuildBodyContourFeather);
-
-	m_actionFrames.push_back(rb);
+    ActionIconFrame * topview = new ActionIconFrame(this);
+	topview->addIconFile(":/icons/topView.png");
+	topview->addIconFile(":/icons/topView.png");
+	topview->setIconIndex(0);
+	topview->setAction(wbg::actViewTop);
+	
+    ActionIconFrame * perspview = new ActionIconFrame(this);
+	perspview->addIconFile(":/icons/perspView.png");
+	perspview->addIconFile(":/icons/perspView.png");
+	perspview->setIconIndex(0);
+	perspview->setAction(wbg::actViewPersp);
+	
+	m_actionFrames.push_back(topview);
+	m_actionFrames.push_back(perspview);
 	
 }
 
 void ToolBox::createState()
 {
-	StateIconFrame * toggleFeather = new StateIconFrame(this);
-	toggleFeather->addIconFile(":/icons/topView.png");
-	toggleFeather->addIconFile(":/icons/topView.png");
-	toggleFeather->setIconIndex(0);
-	toggleFeather->setState(0);
-	m_stateFrames.push_back(toggleFeather);
 }
 
 void ToolBox::onStateFrameChanged(int s)

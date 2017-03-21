@@ -53,6 +53,8 @@ protected:
 
 	float scaleOf(const UniformPlot2DImage * plt) const;
 	
+	UniformPlot2DImage * plotImage(int idx);
+	
 private:
 	void drawPlot(const UniformPlot2DImage * plt, const QPoint & offset, 
 					QPainter * pr);

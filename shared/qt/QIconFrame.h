@@ -1,8 +1,11 @@
 #ifndef APH_Q_ICON_FRAME_H
 #define APH_Q_ICON_FRAME_H
 
-#include <QImage>
 #include <QLabel>
+
+QT_BEGIN_NAMESPACE
+class QPixmap;
+QT_END_NAMESPACE
 
 namespace aphid {
 

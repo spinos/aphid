@@ -10,10 +10,13 @@
 #include "GlobalElevation.h"
 #include <img/HeightField.h>
 #include <img/ExrImage.h>
+#include <foundation/SHelper.h>
 
 namespace aphid {
 
 namespace ttg {
+
+GlobalElevation::FieldVecTyp GlobalElevation::m_fields;
 
 GlobalElevation::GlobalElevation()
 {
@@ -33,7 +36,7 @@ float GlobalElevation::sample(const Vector3F & pos) const
 	return pos.distanceTo(m_planetCenter) + m_planetCenter.y;
 }
 
-int GlobalElevation::numHeightFields() const
+int GlobalElevation::NumHeightFields()
 { return m_fields.size(); }
 
 void GlobalElevation::internalClear()
@@ -45,7 +48,7 @@ void GlobalElevation::internalClear()
 	m_fields.clear();
 }
 
-bool GlobalElevation::loadHeightField(const std::string & fileName)
+bool GlobalElevation::LoadHeightField(const std::string & fileName)
 {
 	ExrImage exr;
 	exr.read(fileName);
@@ -60,14 +63,34 @@ bool GlobalElevation::loadHeightField(const std::string & fileName)
 	img::HeightField * afld = new img::HeightField;
 	afld->create(inputX);
 	afld->setRange(exr.getWidth() );
+	afld->setFileName(fileName);
 	afld->verbose();
 	m_fields.push_back(afld);
 	
 	return true;
 }
 
-const img::HeightField & GlobalElevation::heightField(int i) const
+const img::HeightField & GlobalElevation::GetHeightField(int i)
 { return *m_fields[i]; }
+
+img::HeightField * GlobalElevation::HeightFieldR(int i)
+{ 
+	if(i < 0 || i > m_fields.size() - 1) {
+		return NULL;
+	}
+	return m_fields[i]; 
+}
+
+std::string GlobalElevation::LastFileBaseName()
+{
+	if(m_fields.size()  < 1) {
+		return "";
+	}
+	
+	std::string fnm = m_fields.back()->fileName();
+	SHelper::cutfilepath(fnm);
+	return fnm;
+}
 
 }
 
