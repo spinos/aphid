@@ -152,15 +152,46 @@ Vector2F HeightField::localCenterPnt() const
 	return Vector2F(range().x * .5f, range().y * .5f);
 }
 
+BoundingBox HeightField::calculateBBox() const
+{
+	BoundingBox b;
+	Vector3F corner(0.f, 0.f, 0.f);
+	b.expandBy(m_tm.transform(corner) );
+	corner.set(range().x, 0.f, 0.f);
+	b.expandBy(m_tm.transform(corner) );
+	corner.set(0.f, 0.f, range().y);
+	b.expandBy(m_tm.transform(corner) );
+	corner.set(range().x, 0.f, range().y);
+	b.expandBy(m_tm.transform(corner) );
+	b.expand(1.f);
+	return b;
+}
+
 bool HeightField::intersect(const BoundingBox & bx) const
 {
-	Vector3F lop(0.f, -1.f, 0.f);
-	lop = m_tm.transform(lop);
-	Vector3F hip(range().x, 1.f, range().y);
-	hip = m_tm.transform(hip);
-	const BoundingBox ax(lop.x, lop.y, lop.z,
-				hip.x, hip.y, hip.z);
+	const BoundingBox ax = calculateBBox();
 	return ax.intersect(bx);
+}
+
+void HeightField::getSampleProfileSapce(BoxSampleProfile<float> * prof,
+			ImageSpace * mspace) const
+{
+/// world to local
+	mspace->_worldToUVMatrix = m_invtm;
+	
+	Matrix44F tmuv;
+	Vector3F freq(1.f / range().x,
+				1.f,
+				1.f / range().y);
+	tmuv.scaleBy(freq);
+/// local to uv
+	mspace->_worldToUVMatrix *= tmuv;
+				
+/// 1 / num of samples 
+	mspace->_sourceSpacing = 1.f / (float)levelSignal(0).numCols();	
+	float filterSize = mspace->_sampleSpacing / mspace->_sourceSpacing;
+	ParentTyp::getSampleProfile(prof, filterSize);
+	
 }
 
 void HeightField::verbose() const

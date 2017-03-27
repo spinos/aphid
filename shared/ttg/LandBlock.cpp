@@ -150,8 +150,7 @@ void LandBlock::senseHeightField(Array3<float> & sigY,
 {
 	img::ImageSensor<img::HeightField> sensor(Vector2F(-1024.f, -1024.f),
 		Vector2F(1024.f, -1024.f), sigY.numCols(),
-		Vector2F(-1024.f, 1024.f), sigY.numRows(),
-		Vector2F(0.f, 0.f), Vector2F(1.f, 1.f) );
+		Vector2F(-1024.f, 1024.f), sigY.numRows() );
 	sensor.verbose();
 	
 	sensor.sense(&sigY, 0, fld );

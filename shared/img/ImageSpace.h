@@ -2,6 +2,7 @@
  *  ImageSpace.h
  *  
  *	space transform between destination and source image
+ *  in x-z plane
  *
  *  Created by jian zhang on 3/18/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -23,15 +24,17 @@ struct ImageSpace {
 	float _sampleSpacing;
 /// 1.0 / num sample in source
 	float _sourceSpacing;
+/// world to texcoord
 	Matrix44F _worldToUVMatrix;
 	
-/// from world point to texcoord	
+/// from world point to texcoord in source	
 	void toUV(float & u, float & v,
 				const Vector2F & p)
 	{
-		Vector2F q = _worldToUVMatrix.transform(p);
+		Vector3F q(p.x, 0.f, p.y);
+		q = _worldToUVMatrix.transform(q);
 		u = q.x;
-		v = q.y;
+		v = q.z;
 	}
 	
 };

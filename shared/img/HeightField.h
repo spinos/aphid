@@ -21,6 +21,8 @@ namespace img {
 
 class HeightField : public GaussianPyramid<float> {
 
+typedef GaussianPyramid<float> ParentTyp;
+
 	Matrix44F m_tm;
 	Matrix44F m_invtm;
 	std::string m_fileName;
@@ -74,6 +76,10 @@ public:
 	Vector2F localCenterPnt() const;
 /// in world space
 	bool intersect(const BoundingBox & bx) const;
+/// world to local space	
+	void getSampleProfileSapce(BoxSampleProfile<float> * prof,
+			ImageSpace * mspace) const;
+	BoundingBox calculateBBox() const;
 	void verbose() const;
 	
 	static Profile GlobalHeightFieldProfile;
@@ -85,9 +91,8 @@ public:
 	static const Array3<float> & InitialValueAtLevel(int level);
 				
 protected:
-
+	 
 private:
-
 };
 
 }
