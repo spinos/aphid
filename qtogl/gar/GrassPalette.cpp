@@ -9,6 +9,8 @@
 
 #include <QtGui>
 #include "GrassPalette.h"
+#include "AssetDescription.h"
+#include "PiecesList.h"
 #include <qt/ContextIconFrame.h>
 #include <gar_common.h>
 #include <boost/format.hpp>
@@ -17,28 +19,25 @@ using namespace aphid;
 
 GrassPalette::GrassPalette(QWidget *parent) : QWidget(parent)
 {
-	m_grassList = new QListWidget(this);
-	m_grassList->setViewMode(QListView::IconMode);
-    m_grassList->setIconSize(QSize(32, 32));
-	m_grassList->setSpacing(4);
-	
-	QListWidgetItem *pieceItem = new QListWidgetItem(m_grassList);
-	QIcon cloverIcon(":/icons/clover.png");
-	pieceItem->setIcon(cloverIcon);
-	pieceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	m_grassList = new PiecesList(this);
+	m_describ = new AssetDescription(this);
 	
 	QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_grassList);
+	mainLayout->addWidget(m_describ);
 	mainLayout->setContentsMargins(0,0,0,0);
 	setLayout(mainLayout);
 	
 	connect(m_grassList, SIGNAL(itemClicked(QListWidgetItem *) ), 
 		this, SLOT(selectAGrass(QListWidgetItem *) ) );
+		
+	connect(this, SIGNAL(onGrassSel(int) ), 
+		m_describ, SLOT(recvAssetSel(int) ) );
 
 }
 
 void GrassPalette::selectAGrass(QListWidgetItem * item)
 {
-	qDebug()<<"GrassPalette::selectAGrass"<<item;
-	
+	QVariant di = item->data(Qt::UserRole+1);
+	emit onGrassSel(di.toInt());
 }

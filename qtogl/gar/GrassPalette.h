@@ -24,6 +24,9 @@ class NavigatorWidget;
 class ContextIconFrame;
 }
 
+class AssetDescription;
+class PiecesList;
+
 class GrassPalette : public QWidget
 {
 	Q_OBJECT
@@ -34,6 +37,7 @@ public:
 protected:
 
 signals:
+	void onGrassSel(int);
 	
 public slots:
 	
@@ -41,7 +45,8 @@ private slots:
 	void selectAGrass(QListWidgetItem * item);
 	
 private:
-	QListWidget * m_grassList;
+	PiecesList * m_grassList;
+	AssetDescription * m_describ;
 	
 };
 #endif

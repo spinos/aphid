@@ -9,6 +9,7 @@
  
 #include <QtGui>
 #include <QtGui/QTreeWidget>
+#include "groundAssets.h"
 #include "plantAssets.h"
 #include "GrassPalette.h"
 #include "assetdlg.h"
@@ -44,12 +45,18 @@ AssetDlg::AssetDlg(QWidget *parent)
 	m_assetTree->setHeaderLabel(tr("Asset"));
 	m_grassPlt = new GrassPalette(this);
 	m_grassPlt->setVisible(false);
+	lsGround();
 	lsPlant();
 	
 }
 
 void AssetDlg::keyPressEvent(QKeyEvent *e)
 {
+}
+
+void AssetDlg::lsGround()
+{
+	m_groundAsset = new GroundAssets(m_assetTree);
 }
 
 void AssetDlg::lsPlant()
@@ -62,7 +69,11 @@ void AssetDlg::onSelectAsset(QTreeWidgetItem * item, int column)
 	QVariant varwhat = item->data(0, Qt::WhatsThisRole);
 	QString swhat = varwhat.toString();
 	if(swhat == tr("allGrass") ) {
-		m_rgtArea->	setWidget(m_grassPlt);
+		m_rgtArea->setWidget(m_grassPlt);
+		m_grassPlt->setVisible(true);
+	}
+	if(swhat == tr("allRoot") ) {
+		m_rgtArea->setWidget(m_grassPlt);
 		m_grassPlt->setVisible(true);
 	}
 }

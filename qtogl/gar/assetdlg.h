@@ -23,6 +23,7 @@ class QTreeWidget;
 class QTreeWidgetItem;
 QT_END_NAMESPACE
 
+class GroundAssets;
 class PlantAssets;
 class GrassPalette;
 
@@ -47,10 +48,12 @@ private slots:
 	void onSelectAsset(QTreeWidgetItem * item, int column);
 	
 private:
+	void lsGround();
 	void lsPlant();
 	
 private:
 	QTreeWidget * m_assetTree;
+	GroundAssets * m_groundAsset;
 	PlantAssets * m_plantAsset;
 	QSplitter * m_split;
 	QScrollArea * m_rgtArea;

@@ -5,5 +5,7 @@
         <file>icons/grass.png</file>
         <file>icons/clover.png</file>
         <file>images/clover.png</file>
+        <file>icons/root.png</file>
+        <file>icons/unknown.png</file>
     </qresource>
 </RCC>

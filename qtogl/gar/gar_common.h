@@ -13,10 +13,16 @@
 namespace gar {
 
 enum ToolAction {
-	actNone = 0,
-	actViewPlant = 1,
-	actViewGraph = 2
+	actViewGraph = 0,
+	actViewPlant = 1
 };
+
+enum GrassTyp {
+	gsNone = 0,
+	gsClover = 1
+};
+
+static const char * PieceMimeStr = "image/x-garden-piece";
 
 }
 #endif

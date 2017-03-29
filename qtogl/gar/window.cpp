@@ -8,6 +8,9 @@
 #include "widget.h"
 #include "toolBox.h"
 #include "assetdlg.h"
+#include "ShrubScene.h"
+#include "ShrubChartView.h"
+#include "gar_common.h"
 
 Window::Window()
 {
@@ -15,15 +18,22 @@ Window::Window()
 	m_tools = new ToolBox(this);
 	m_assets = new AssetDlg(this);
 	
+	m_scene = new ShrubScene(this);
+	m_chartView = new ShrubChartView(m_scene);
+	
 	addToolBar(m_tools);
-	setCentralWidget(glWidget);
+	
+	m_centerStack = new QStackedWidget(this);
+	m_centerStack->addWidget(m_chartView);
+	m_centerStack->addWidget(glWidget);
+	setCentralWidget(m_centerStack);
     setWindowTitle(tr("Garden") );
 	
 	createActions();
     createMenus();
 	
 	connect(m_tools, SIGNAL(actionTriggered(int)), 
-			glWidget, SLOT(recvToolAction(int)));
+			this, SLOT(recvToolAction(int)));
 			
 	connect(m_assets, SIGNAL(onAssetDlgClose()), 
 			this, SLOT(recvAssetDlgClose()));
@@ -66,4 +76,23 @@ void Window::toggleAssetDlg(bool x)
 void Window::recvAssetDlgClose()
 {
 	m_assetAct->setChecked(false);
+}
+
+void Window::recvToolAction(int x)
+{
+	switch(x) {
+		case gar::actViewPlant:
+		case gar::actViewGraph:
+			changeView(x);
+		break;
+	}
+}
+
+void Window::changeView(int x)
+{
+	if(x == m_centerStack->currentIndex() ) {
+		return;
+	}
+	
+	m_centerStack->setCurrentIndex(x);
 }

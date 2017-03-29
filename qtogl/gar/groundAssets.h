@@ -1,5 +1,5 @@
 /*
- *  plantAssets.h
+ *  groundAssets.h
  *  garden
  *
  *  Created by jian zhang on 3/22/17.
@@ -7,16 +7,16 @@
  *
  */
 
-#ifndef GAR_PLANT_ASSETS_H
-#define GAR_PLANT_ASSETS_H
+#ifndef GAR_GROUND_ASSETS_H
+#define GAR_GROUND_ASSETS_H
 
 #include <QTreeWidgetItem>
 
-class PlantAssets : public QTreeWidgetItem, public QObject
+class GroundAssets : public QTreeWidgetItem, public QObject
 {
 	
 public:
-	PlantAssets(QTreeWidget *parent = 0);
+	GroundAssets(QTreeWidget *parent = 0);
 	
 protected:
 
