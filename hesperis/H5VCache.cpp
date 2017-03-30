@@ -12,6 +12,7 @@
 #include <h5/HBase.h>
 #include <h5/VerticesHDataset.h>
 #include <sstream>
+#include <string.h>
 
 namespace aphid {
 

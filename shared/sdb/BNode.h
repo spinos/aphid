@@ -205,7 +205,7 @@ BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::nextIndex(KeyType x) const
 		return static_cast<BNode *>(leftChild());
 	}
 	int ii;
-	SearchResult s = findKey(x);
+	SearchResult s = this->findKey(x);
 	ii = s.low;
 	if(s.found > -1) ii = s.found;
 	else if(KeyNData<KeyType, MaxNKey>::key(s.high) < x) ii = s.high;
@@ -250,7 +250,7 @@ void BNode<KeyType, MaxNKey>::removeRoot(const KeyType & x)
 		n->remove(x);
 	}
 	else {
-		removeKeyAndData(x);
+		this->removeKeyAndData(x);
 		
 		connectLeftChild(NULL);
 	}
@@ -274,9 +274,9 @@ Pair<KeyType, Entity> * BNode<KeyType, MaxNKey>::insertRoot(const KeyType & x)
 		return n->insertLeaf(x);
 	}
 	
-	SearchResult sr = findKey(x);
+	SearchResult sr = this->findKey(x);
 	if(sr.found < 0) {
-		sr.found = insertKey(x);
+		sr.found = this->insertKey(x);
 		// std::cout<<"\n bnode insert root "<<x<<" into "<<*this;
 	}
 	
@@ -286,9 +286,9 @@ Pair<KeyType, Entity> * BNode<KeyType, MaxNKey>::insertRoot(const KeyType & x)
 template <typename KeyType, int MaxNKey> 
 Pair<KeyType, Entity> * BNode<KeyType, MaxNKey>::insertLeaf(const KeyType & x)
 {
-	SearchResult sr = findKey(x);
+	SearchResult sr = this->findKey(x);
 	if(sr.found < 0) {
-		sr.found = insertKey(x);
+		sr.found = this->insertKey(x);
 		/// std::cout<<"\n bnode insert leaf"<<x<<" into "<<*this;
 	}
 	
@@ -390,7 +390,7 @@ void BNode<KeyType, MaxNKey>::bounce(const Pair<KeyType, Entity> & b)
 			partInterior(b);
 	}
 	else
-		insertData(b);
+		this->insertData(b);
 }
 
 template <typename KeyType, int MaxNKey> 
@@ -669,7 +669,7 @@ template <typename KeyType, int MaxNKey>
 BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::leftTo(const KeyType & x) const
 {
 	if(KeyNData<KeyType, MaxNKey>::isSingular() ) return static_cast<BNode *>(leftChild());
-	int i = keyLeft(x);
+	int i = this->keyLeft(x);
 	if(i < 0) return static_cast<BNode *>(leftChild());
 	return static_cast<BNode *>(KeyNData<KeyType, MaxNKey>::index(i));
 }
@@ -789,7 +789,7 @@ bool BNode<KeyType, MaxNKey>::mergeLeafLeft()
 template <typename KeyType, int MaxNKey> 
 bool BNode<KeyType, MaxNKey>::removeDataLeaf(const KeyType & x)
 {
-    SearchResult s = findKey(x);
+    SearchResult s = this->findKey(x);
 	if(s.found < 0) return false;
 	
 	int found = s.found;
@@ -829,7 +829,7 @@ void BNode<KeyType, MaxNKey>::behead()
 template <typename KeyType, int MaxNKey> 
 bool BNode<KeyType, MaxNKey>::removeKey(const KeyType & x)
 {
-	SearchResult s = findKey(x);
+	SearchResult s = this->findKey(x);
 	
 	if(s.found < 0) return false;
 	
@@ -946,7 +946,7 @@ bool BNode<KeyType, MaxNKey>::mergeInteriorRight(const KeyType x)
 	k.key = parentNode()->key(kr);
 	k.index = rgt->leftChild();
 	
-	insertData(k);
+	this->insertData(k);
     
 	rgt->sendDataLeft(rgt->numKeys(), this);
 	
@@ -1013,7 +1013,7 @@ BNode<KeyType, MaxNKey> * BNode<KeyType, MaxNKey>::leftInteriorNeighbor() const
 template <typename KeyType, int MaxNKey> 
 bool BNode<KeyType, MaxNKey>::dataLeftTo(const KeyType & x, Pair<KeyType, Entity> & dst) const
 {
-	int i = keyLeft(x);
+	int i = this->keyLeft(x);
 	if(i > -1) {
 		dst = KeyNData<KeyType, MaxNKey>::data(i);
 		return true;
@@ -1125,10 +1125,10 @@ Pair<Entity *, Entity> BNode<KeyType, MaxNKey>::findLeaf(const KeyType & x)
 	Pair<Entity *, Entity> r;
 	r.key = this;
 	r.index = NULL;
-	if(!isKeyInRange(x) ) {
+	if(!this->isKeyInRange(x) ) {
 		return r;
 	}
-	int f = findKey(x).found;
+	int f = this->findKey(x).found;
 	if(f < 0) return r;
 	
 	r.index = KeyNData<KeyType, MaxNKey>::index(f);
@@ -1149,7 +1149,7 @@ Pair<Entity *, Entity> BNode<KeyType, MaxNKey>::findInNode(const KeyType & x, Se
 	Pair<Entity *, Entity> r;
 	r.key = this;
 	r.index = NULL;
-	if(!isKeyInRange(x)) {
+	if(!this->isKeyInRange(x)) {
 		result->found = -1;
 		result->low = 0;
 		result->high = KeyNData<KeyType, MaxNKey>::numKeys() - 1;
@@ -1160,7 +1160,7 @@ Pair<Entity *, Entity> BNode<KeyType, MaxNKey>::findInNode(const KeyType & x, Se
 		return r;
 	}
 	
-	*result = findKey(x);
+	*result = this->findKey(x);
 
 	if(result->found < 0) return r;
 	
@@ -1318,7 +1318,7 @@ void BNode<KeyType, MaxNKey>::leafTakeover()
     BNode * lft = leftChildNode();
     int i, j=0;
     for(i = 0; i< lft->numKeys(); ++i) 
-        setData(j++, lft->data(i) );
+        this->setData(j++, lft->data(i) );
     KeyNData<KeyType, MaxNKey>::setNumKeys(j);
     connectSibling(NULL);
 }
@@ -1331,7 +1331,7 @@ void BNode<KeyType, MaxNKey>::innerTakeover()
     
     int i, j=0;
     for(i = 0; i< lft->numKeys(); ++i) 
-        setData(j++, lft->data(i) );
+        this->setData(j++, lft->data(i) );
     
     KeyNData<KeyType, MaxNKey>::setNumKeys(j);
     connectSibling(lftLnk);
@@ -1361,9 +1361,9 @@ void BNode<KeyType, MaxNKey>::leaf3WayMerge()
     BNode * rgt = linkedNode(0);
     int i, j=0;
     for(i = 0; i< lft->numKeys(); ++i) 
-        setData(j++, lft->data(i) );
+        this->setData(j++, lft->data(i) );
     for(i = 0; i< rgt->numKeys(); ++i) 
-        setData(j++, rgt->data(i) );
+        this->setData(j++, rgt->data(i) );
     KeyNData<KeyType, MaxNKey>::setNumKeys(j);
     connectSibling(NULL);
 }
@@ -1382,12 +1382,12 @@ void BNode<KeyType, MaxNKey>::inner3WayMerge()
     
     int i, j=0;
     for(i = 0; i< lft->numKeys(); ++i) 
-        setData(j++, lft->data(i) );
+        this->setData(j++, lft->data(i) );
     
-    setData(j++, k);
+    this->setData(j++, k);
     
     for(i = 0; i< rgt->numKeys(); ++i) 
-        setData(j++, rgt->data(i) );
+        this->setData(j++, rgt->data(i) );
     
     KeyNData<KeyType, MaxNKey>::setNumKeys(j);
     connectSibling(lftLnk);

@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <string.h>
 
 namespace aphid {
 

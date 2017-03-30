@@ -1,8 +1,8 @@
 #ifndef MORTON3D_H
 #define MORTON3D_H
 
-#define min(a, b) (a < b?a: b)
-#define max(a, b) (a > b?a: b)
+#define _min(a, b) (a < b?a: b)
+#define _max(a, b) (a > b?a: b)
 
 // http://stackoverflow.com/questions/18529057/produce-interleaving-bit-patterns-morton-keys-for-32-bit-64-bit-and-128bit
 inline unsigned expandBits(unsigned v) 
@@ -23,9 +23,9 @@ inline unsigned expandBits(unsigned v)
 // given 3D point located within the unit cube [0,1].
 inline unsigned encodeMorton3D(unsigned x, unsigned y, unsigned z) 
 { 
-    x = min(max(x, 0), 1023); 
-    y = min(max(y, 0), 1023); 
-    z = min(max(z, 0), 1023); 
+    x = _min(_max(x, 0), 1023); 
+    y = _min(_max(y, 0), 1023); 
+    z = _min(_max(z, 0), 1023); 
     unsigned xx = expandBits((unsigned)x); 
     unsigned yy = expandBits((unsigned)y); 
     unsigned zz = expandBits((unsigned)z); 
