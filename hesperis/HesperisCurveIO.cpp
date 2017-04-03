@@ -17,6 +17,7 @@
 #include <mama/AHelper.h>
 #include <mama/ASearchHelper.h>
 #include <boost/format.hpp>
+
 namespace aphid {
     
 MObject HesperisCurveCreator::create(CurveGroup * data, MObject & parentObj,
@@ -82,11 +83,21 @@ bool HesperisCurveCreator::CreateACurve(Vector3F * pos, unsigned nv, int curveDe
     const int spans = nv - degree;
 	const int nknots = spans + 2 * degree - 1;
     MDoubleArray knotSequences;
-	knotSequences.append(0.0);
-	for(i = 0; i < nknots-2; i++) {
+
+	const int nred = 2 * degree - 1;
+	const int npad = nred / 2;
+
+	for(i =0;i<npad;++i) {
+		knotSequences.append( 0.0 );
+	}
+	
+	for(i = 0; i < spans+1; i++) {
 		knotSequences.append( (double)i );
 	}
-	knotSequences.append(nknots-3);
+
+	for(i =0;i<npad;++i) {
+		knotSequences.append( (double)spans );
+	}
     
     MFnNurbsCurve curveFn;
 	MStatus stat;
