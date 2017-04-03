@@ -39,9 +39,8 @@ if (WIN32)
         SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/libhdf5.lib")
 	ENDIF ()
 ELSEIF (UNIX)
-	SET (HDF5_VERSION "1.8.17")
-	SET (HDF5_INCLUDE_DIRS "~/Public/hdf5-1.8.17/include")
-        SET (HDF5_LIBRARIES "~/Public/hdf5-1.8.17/lib/libhdf5.so")
+	SET (HDF5_INCLUDE_DIRS "/home/td21/usr/hdf5/include")
+        SET (HDF5_LIBRARIES "/home/td21/usr/hdf5/lib/libhdf5.so")
 endif ()
 
 IF (INSTALLED_HDF5)
@@ -73,7 +72,7 @@ ELSEIF (APPLE)
 	ENDIF ()
 
 ELSEIF (UNIX)
-	SET (BOOST_ROOT "~/Public/boost_1_51_0")
+	SET (BOOST_ROOT "/home/td21/usr/boost_1_51_0")
 	
 endif()
 

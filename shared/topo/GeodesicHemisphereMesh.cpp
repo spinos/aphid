@@ -36,8 +36,8 @@ GeodesicHemisphereMesh::GeodesicHemisphereMesh(unsigned level)
 	subdivide(level, currentver, currentidx, p, idx, a, b, c, d);
 	subdivide(level, currentver, currentidx, p, idx, a, d, e, b);
 
-    printf("vertices count: %d\n", currentver);
-    printf("indices count: %d\n", currentidx);	
+    std::cout<<"vertices count: "<< currentver;
+    std::cout<<"indices count: "<< currentidx;	
 }
 
 GeodesicHemisphereMesh::~GeodesicHemisphereMesh() {}
