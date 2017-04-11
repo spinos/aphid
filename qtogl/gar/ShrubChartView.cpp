@@ -14,6 +14,7 @@
 #include "GlyphPort.h"
 #include "GlyphConnection.h"
 #include "gar_common.h"
+#include "GlyphBuilder.h"
 
 ShrubChartView::ShrubChartView(QGraphicsScene * scene, QWidget * parent) : QGraphicsView(scene, parent)
 {
@@ -120,10 +121,10 @@ void ShrubChartView::dropEvent(QDropEvent *event)
 		QByteArray pieceData = event->mimeData()->data(gar::PieceMimeStr);
 		QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
 		QPixmap pixmap;
-		int pieceTyp;
-		dataStream >> pixmap >> pieceTyp;
+		QPoint pieceTypGrp;
+		dataStream >> pixmap >> pieceTypGrp;
 		
-		addGlyphPiece(pieceTyp, pixmap, event->pos() );
+		addGlyphPiece(pieceTypGrp, pixmap, event->pos() );
 
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
@@ -133,7 +134,7 @@ void ShrubChartView::dropEvent(QDropEvent *event)
 	
 }
 
-void ShrubChartView::addGlyphPiece(int x, 
+void ShrubChartView::addGlyphPiece(const QPoint & pieceTypGrp, 
 						const QPixmap & px,
 						const QPoint & pos)
 {
@@ -143,12 +144,12 @@ void ShrubChartView::addGlyphPiece(int x,
 	QPointF posmts = 	mapToScene(pos);
 	g->setPos(posmts);
 	
-	g->addPort(tr("a"), false);
-	g->addPort(tr("b"), false);
-	g->addPort(tr("c"), false);
-	//g->addPort(tr("d"), false);
-	g->addPort(tr("e"), true);
-	g->finalizeShape();
+	const int & gtype = pieceTypGrp.x();
+	const int & ggroup = pieceTypGrp.y();
+	
+	GlyphBuilder bdr;
+	bdr.build(g, gtype, ggroup);
+	
 }
 
 void ShrubChartView::processSelect(const QPoint & pos)

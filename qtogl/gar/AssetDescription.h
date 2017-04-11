@@ -28,9 +28,13 @@ protected:
 signals:
 	
 public slots:
-	void recvAssetSel(int x);
+	void recvAssetSel(QPoint tg);
 	
 private slots:
+
+private:
+	void showGroundGesc(const QPoint & tg);
+	void showGrassGesc(const QPoint & tg);
 	
 private:
 	QLabel * m_lab;

@@ -17,9 +17,21 @@ enum ToolAction {
 	actViewPlant = 1
 };
 
-enum GrassTyp {
-	gsNone = 0,
-	gsClover = 1
+enum GlyphTyp {
+	gtNone = 0,
+	gtPot = 1,
+	gtClover = 33
+};
+
+enum GlyphGroup {
+	ggGround = 0,
+	ggGrass = 1
+};
+
+/// begin, end, 32 per group
+static const int GlyphRange[2][2] = {
+{1, 2},
+{33, 34}
 };
 
 static const char * PieceMimeStr = "image/x-garden-piece";

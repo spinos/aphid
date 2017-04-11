@@ -37,7 +37,7 @@ protected:
     void dropEvent(QDropEvent *event);
 	
 private:
-	void addGlyphPiece(int x, 
+	void addGlyphPiece(const QPoint & pieceTypGrp, 
 		const QPixmap & px,
 		const QPoint & pos);
     void processSelect(const QPoint & pos);

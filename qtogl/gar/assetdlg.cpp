@@ -11,7 +11,7 @@
 #include <QtGui/QTreeWidget>
 #include "groundAssets.h"
 #include "plantAssets.h"
-#include "GrassPalette.h"
+#include "GlyphPalette.h"
 #include "assetdlg.h"
 
 using namespace std;
@@ -43,8 +43,9 @@ AssetDlg::AssetDlg(QWidget *parent)
 	connect(m_assetTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
 			this, SLOT(onSelectAsset(QTreeWidgetItem *, int)));
 	m_assetTree->setHeaderLabel(tr("Asset"));
-	m_grassPlt = new GrassPalette(this);
-	m_grassPlt->setVisible(false);
+	m_palette = new GlyphPalette(this);
+	//m_grassPlt->setVisible(false);
+	m_rgtArea->setWidget(m_palette);
 	lsGround();
 	lsPlant();
 	
@@ -68,14 +69,7 @@ void AssetDlg::onSelectAsset(QTreeWidgetItem * item, int column)
 {
 	QVariant varwhat = item->data(0, Qt::WhatsThisRole);
 	QString swhat = varwhat.toString();
-	if(swhat == tr("allGrass") ) {
-		m_rgtArea->setWidget(m_grassPlt);
-		m_grassPlt->setVisible(true);
-	}
-	if(swhat == tr("allRoot") ) {
-		m_rgtArea->setWidget(m_grassPlt);
-		m_grassPlt->setVisible(true);
-	}
+	m_palette->showNamedPieces(swhat);
 }
 
 void AssetDlg::closeEvent ( QCloseEvent * e )

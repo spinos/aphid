@@ -22,7 +22,7 @@ GardenGlyph::GardenGlyph(const QPixmap & iconPix,
 	
 	m_icon = new QGraphicsPixmapItem(iconPix, this);
 	m_icon->setPos(60-16, 18-16);
-	
+	m_glyphType = 0;
 }
 
 void GardenGlyph::resizeBlock(int bx, int by)
@@ -124,4 +124,14 @@ void GardenGlyph::moveBlockBy(const QPointF & dp)
 		
 	}
 	moveBy(dp.x(), dp.y() );
+}
+
+void GardenGlyph::setGlyphType(int x)
+{
+	m_glyphType = x;
+}
+
+const int & GardenGlyph::glyphType() const
+{
+	return m_glyphType;
 }

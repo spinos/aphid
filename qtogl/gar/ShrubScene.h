@@ -24,6 +24,8 @@ class ShrubScene : public QGraphicsScene
 public:
 	ShrubScene(QObject *parent = 0);
 	
+	void genPlants();
+	
 protected:
 	
 };

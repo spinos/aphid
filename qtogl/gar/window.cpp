@@ -94,5 +94,8 @@ void Window::changeView(int x)
 		return;
 	}
 	
+	if(x == gar::actViewPlant) {
+		m_scene->genPlants();
+	}
 	m_centerStack->setCurrentIndex(x);
 }

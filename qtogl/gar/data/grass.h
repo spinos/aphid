@@ -14,7 +14,7 @@ namespace gar {
 
 static const char * GrassTypeNames[2] = {
 "unknown",
-"Glover"
+"Clover"
 };
 
 static const char * GrassTypeImages[2] = {
@@ -23,18 +23,37 @@ static const char * GrassTypeImages[2] = {
 };
 
 static const char * GrassTypeIcons[2] = {
-"unknown",
+":/icons/unknown.png",
 ":/icons/clover.png"
 };
 
-static const char * GrassTypeDetals[2] = {
-"unknown",
-":/images/clover.png"
-};
-
-static const char * GrassTypeDescs[3] = {
+static const char * GrassTypeDescs[2] = {
 "unknown",
 "common clover \"three leaf\" \n16 deviations\nheight 4 unit"
+};
+
+static inline int ToGrassType(int x) {
+	return x - 32;
+}
+
+static const int GrassInPortRange[2][2] = {
+{0,0},
+{0,0}
+};
+
+static const char * GrassInPortRangeNames[2] = {
+"",
+""
+};
+
+static const int GrassOutPortRange[2][2] = {
+{0,0},
+{0,1}
+};
+
+static const char * GrassOutPortRangeNames[2] = {
+"outStem",
+""
 };
 
 }

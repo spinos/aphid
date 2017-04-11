@@ -10,6 +10,7 @@
 #include <QtGui>
 #include "AssetDescription.h"
 #include <gar_common.h>
+#include "data/ground.h"
 #include "data/grass.h"
 
 AssetDescription::AssetDescription(QWidget *parent) : QWidget(parent)
@@ -27,15 +28,37 @@ AssetDescription::AssetDescription(QWidget *parent) : QWidget(parent)
 	
 }
 
-void AssetDescription::recvAssetSel(int x)
+void AssetDescription::recvAssetSel(QPoint tg)
 {
-	m_lab->setText(tr(gar::GrassTypeNames[x]));
-	QPixmap px(tr(gar::GrassTypeImages[x]) );
-	m_pic->setPixmap(px);
-	m_dtl->setText(tr(gar::GrassTypeDescs[x]));
-	
+	switch (tg.y() ) {
+		case gar::ggGround :
+			showGroundGesc(tg);
+		break;
+		case gar::ggGrass :
+			showGrassGesc(tg);
+		break;
+		default:
+			qDebug()<<"group is unknown";
+		;
+	}
+	/*
+	*/
 }
  
-
-
-
+void AssetDescription::showGroundGesc(const QPoint & tg)
+{
+	const int & groundTyp = tg.x() - gar::ggGround * 32;
+	m_lab->setText(tr(gar::GroundTypeNames[groundTyp]));
+	QPixmap px(tr(gar::GroundTypeImages[groundTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::GroundTypeDescs[groundTyp]));
+}
+	
+void AssetDescription::showGrassGesc(const QPoint & tg)
+{
+	const int & grassTyp = tg.x() - gar::ggGrass * 32;
+	m_lab->setText(tr(gar::GrassTypeNames[grassTyp]));
+	QPixmap px(tr(gar::GrassTypeImages[grassTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::GrassTypeDescs[grassTyp]));
+}
