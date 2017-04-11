@@ -15,6 +15,7 @@ class ToolBox;
 class AssetDlg;
 class ShrubScene;
 class ShrubChartView;
+class VegetationPatch;
 
 class Window : public QMainWindow
 {
@@ -22,6 +23,7 @@ class Window : public QMainWindow
 
 public:
     Window();
+	~Window();
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -45,6 +47,7 @@ private:
     QMenu * m_windowMenu;
     ShrubScene * m_scene;
 	ShrubChartView * m_chartView;
+	VegetationPatch * m_vege;
 
 };
 #endif

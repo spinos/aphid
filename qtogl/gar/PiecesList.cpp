@@ -10,6 +10,7 @@
 #include <QtGui>
 #include "PiecesList.h"
 #include "gar_common.h"
+#include "data/ground.h"
 #include "data/grass.h"
 
 PiecesList::PiecesList(QWidget *parent)
@@ -22,16 +23,6 @@ PiecesList::PiecesList(QWidget *parent)
     setAcceptDrops(false);
     setDropIndicatorShown(false);
 	
-	QListWidgetItem *pieceItem = new QListWidgetItem(this);
-	
-	QPixmap pixm(gar::GrassTypeIcons[gar::gsClover]);
-	QIcon cloverIcon(pixm);
-	pieceItem->setIcon(cloverIcon);
-	pieceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable
-						| Qt::ItemIsDragEnabled);
-	pieceItem->setData(Qt::UserRole, QVariant(pixm) );
-	pieceItem->setData(Qt::UserRole+1, gar::gsClover);
-    
 }
 
 void PiecesList::dragEnterEvent(QDragEnterEvent *event)
@@ -60,9 +51,9 @@ void PiecesList::startDrag(Qt::DropActions /*supportedActions*/)
     QByteArray itemData;
     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
     QPixmap pixmap = qVariantValue<QPixmap>(item->data(Qt::UserRole));
-    int pieceTyp = item->data(Qt::UserRole+1).toInt();
+    QPoint pieceTypGrp = item->data(Qt::UserRole+1).toPoint();
 
-    dataStream << pixmap << pieceTyp;
+    dataStream << pixmap << pieceTypGrp;
 
     QMimeData *mimeData = new QMimeData;
     mimeData->setData(gar::PieceMimeStr, itemData);
@@ -75,4 +66,41 @@ void PiecesList::startDrag(Qt::DropActions /*supportedActions*/)
 	
 	drag->exec(Qt::MoveAction);
 	setCursor(Qt::OpenHandCursor);
+}
+
+void PiecesList::showGroundPieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggGround][0];
+	const int gend = gar::GlyphRange[gar::ggGround][1];
+	lsPieces(gbegin, gend, gar::ggGround,
+			gar::GroundTypeIcons);
+}
+
+void PiecesList::showGrassPieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggGrass][0];
+	const int gend = gar::GlyphRange[gar::ggGrass][1];
+	lsPieces(gbegin, gend, gar::ggGrass,
+			gar::GrassTypeIcons);
+}
+
+void PiecesList::lsPieces(const int & gbegin,
+				const int & gend,
+				const int & ggroup,
+				const char * iconNames[])
+{
+	QListWidget::clear();
+	for(int i=gbegin;i<gend;++i) {
+		QListWidgetItem *pieceItem = new QListWidgetItem(this);
+	
+		QPixmap pixm(iconNames[i - ggroup * 32]);
+		QIcon cloverIcon(pixm);
+		pieceItem->setIcon(cloverIcon);
+		pieceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable
+							| Qt::ItemIsDragEnabled);
+		pieceItem->setData(Qt::UserRole, QVariant(pixm) );
+		QPoint tg(i, ggroup);
+		pieceItem->setData(Qt::UserRole+1, tg);
+	}
+
 }

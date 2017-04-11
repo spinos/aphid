@@ -33,6 +33,9 @@ public:
 	const QString & portName() const;
 	const bool & isOutgoing() const;
 	
+	int numConnections() const;
+	const GlyphConnection * connection(const int & i) const;
+	
 	int type() const { return Type; }
 	
 protected:

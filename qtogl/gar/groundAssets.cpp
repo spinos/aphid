@@ -14,16 +14,16 @@
 
 GroundAssets::GroundAssets(QTreeWidget *parent) : QTreeWidgetItem(parent)
 {
-	QIcon plantIcon(":/icons/ground.png");
-	setText(0, tr("Ground"));
+	QIcon plantIcon(":/icons/spade.png");
+	setText(0, tr("Utilities"));
 	setIcon(0, plantIcon);
-	setData(0, Qt::WhatsThisRole, QString(tr("allGround")) );
+	setData(0, Qt::WhatsThisRole, QString(tr("allUtility")) );
 	
-	QIcon grassIcon(":/icons/root.png");
+	QIcon grassIcon(":/icons/ground.png");
 	QTreeWidgetItem * grass = new QTreeWidgetItem(this);
-	grass->setText(0, tr("Root"));
+	grass->setText(0, tr("Ground"));
 	grass->setIcon(0, grassIcon);
-	grass->setData(0, Qt::WhatsThisRole, QString(tr("allRoot")) );
+	grass->setData(0, Qt::WhatsThisRole, QString(tr("allGround")) );
 	
 	setExpanded(true);
 

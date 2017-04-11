@@ -17,6 +17,11 @@ class QGraphicsSceneMouseEvent;
 class QParallelAnimationGroup;
 QT_END_NAMESPACE
 
+class GardenGlyph;
+class GlyphPort;
+class PlantPiece;
+class VegetationPatch;
+
 class ShrubScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -24,7 +29,14 @@ class ShrubScene : public QGraphicsScene
 public:
 	ShrubScene(QObject *parent = 0);
 	
-protected:
+	void genPlants(VegetationPatch * vege);
 	
+protected:
+/// from ground up to leaf
+	void assemblePlant(PlantPiece * pl, GardenGlyph * gl);
+	void addBranch(PlantPiece * pl, const GlyphPort * pt);
+	void addGrassBranch(PlantPiece * pl, GardenGlyph * gl);
+	
+private:
 };
 #endif

@@ -25,7 +25,7 @@ QT_END_NAMESPACE
 
 class GroundAssets;
 class PlantAssets;
-class GrassPalette;
+class GlyphPalette;
 
 class AssetDlg : public QDialog
 {
@@ -57,7 +57,7 @@ private:
 	PlantAssets * m_plantAsset;
 	QSplitter * m_split;
 	QScrollArea * m_rgtArea;
-	GrassPalette * m_grassPlt;
+	GlyphPalette * m_palette;
 	
 };
 #endif

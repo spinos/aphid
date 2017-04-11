@@ -10,11 +10,13 @@
 #include "assetdlg.h"
 #include "ShrubScene.h"
 #include "ShrubChartView.h"
+#include "VegetationPatch.h"
 #include "gar_common.h"
 
 Window::Window()
 {
-	glWidget = new GLWidget(this);
+	m_vege = new VegetationPatch;
+	glWidget = new GLWidget(m_vege, this);
 	m_tools = new ToolBox(this);
 	m_assets = new AssetDlg(this);
 	
@@ -39,6 +41,9 @@ Window::Window()
 			this, SLOT(recvAssetDlgClose()));
 		
 }
+
+Window::~Window()
+{}
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
@@ -94,5 +99,8 @@ void Window::changeView(int x)
 		return;
 	}
 	
+	if(x == gar::actViewPlant) {
+		m_scene->genPlants(m_vege);
+	}
 	m_centerStack->setCurrentIndex(x);
 }

@@ -9,13 +9,17 @@ assetdlg.h
 AssetDescription.h
 plantAssets.h
 groundAssets.h
-GrassPalette.h
+GlyphPalette.h
 ShrubScene.h
 PiecesList.h
 ShrubChartView.h
 GardenGlyph.h
 GlyphPort.h
 GlyphConnection.h
+GlyphBuilder.h
+PlantPiece.h
+VegetationPatch.h
+DrawVegetation.h
 toolBox.h)
 
 set ( GAR_RESOURCES
@@ -37,7 +41,7 @@ assetdlg.cpp
 AssetDescription.cpp
 plantAssets.cpp
 groundAssets.cpp
-GrassPalette.cpp
+GlyphPalette.cpp
 toolBox.cpp
 ShrubScene.cpp
 PiecesList.cpp
@@ -45,6 +49,10 @@ ShrubChartView.cpp
 GardenGlyph.cpp
 GlyphPort.cpp
 GlyphConnection.cpp
+GlyphBuilder.cpp
+PlantPiece.cpp
+VegetationPatch.cpp
+DrawVegetation.cpp
 main.cpp)
 
 add_executable (gar ${GAR_HEADER_FILES} ${GAR_SOURCE_FILES} ${GAR_RES_SOURCES})

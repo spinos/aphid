@@ -26,13 +26,16 @@ class ATriangleMesh;
 
 }
 
+class VegetationPatch;
+class DrawVegetation;
+
 class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
 
 public:
 
-    GLWidget(QWidget *parent = 0);
+    GLWidget(VegetationPatch * vege, QWidget *parent = 0);
     ~GLWidget();
 	
 protected:    
@@ -50,10 +53,13 @@ public slots:
 	void recvToolAction(int x);
 	
 private:
-    
+    void simpleDraw();
+	
 private slots:
 
 private:
+	VegetationPatch * m_vege;
+	DrawVegetation * m_vegd;
 	
 };
 

@@ -1,5 +1,5 @@
 /*
- *  GrassPalette.h
+ *  GlyphPalette.h
  *  garden
  *
  *  Created by jian zhang on 3/22/17.
@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef GAR_GRASS_PALETTE_H
-#define GAR_GRASS_PALETTE_H
+#ifndef GAR_GLYPH_PALETTE_H
+#define GAR_GLYPH_PALETTE_H
 
 #include <QWidget>
 
@@ -27,25 +27,26 @@ class ContextIconFrame;
 class AssetDescription;
 class PiecesList;
 
-class GrassPalette : public QWidget
+class GlyphPalette : public QWidget
 {
 	Q_OBJECT
 	
 public:
-	GrassPalette(QWidget *parent = 0);
+	GlyphPalette(QWidget *parent = 0);
 	
 protected:
 
 signals:
-	void onGrassSel(int);
+	void onAssetSel(QPoint);
 	
 public slots:
+	void showNamedPieces(const QString & swhat);
 	
 private slots:
 	void selectAGrass(QListWidgetItem * item);
 	
 private:
-	PiecesList * m_grassList;
+	PiecesList * m_glyphList;
 	AssetDescription * m_describ;
 	
 };

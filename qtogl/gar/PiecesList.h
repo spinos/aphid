@@ -19,10 +19,19 @@ class PiecesList : public QListWidget
 public:
     PiecesList(QWidget *parent = 0);
 	
+	void showGrassPieces();
+	void showGroundPieces();
+	
 protected:
 	void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void startDrag(Qt::DropActions supportedActions);
+	
+private:
+	void lsPieces(const int & gbegin,
+				const int & gend,
+				const int & ggroup,
+				const char * iconNames[]);
 	
 };
 

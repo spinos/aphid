@@ -22,7 +22,7 @@ GardenGlyph::GardenGlyph(const QPixmap & iconPix,
 	
 	m_icon = new QGraphicsPixmapItem(iconPix, this);
 	m_icon->setPos(60-16, 18-16);
-	
+	m_glyphType = 0;
 }
 
 void GardenGlyph::resizeBlock(int bx, int by)
@@ -45,9 +45,9 @@ void GardenGlyph::movePorts(int n, bool downSide)
 		return;
 	}
 	
-	int py = -6;
+	int py = -7;
 	if(downSide) {
-		py = m_blockHeight + 6;
+		py = m_blockHeight + 7;
 	}
 	
 	int px = m_blockWidth / 2 - 30 * (n / 2);
@@ -55,7 +55,7 @@ void GardenGlyph::movePorts(int n, bool downSide)
 		px += 15;
 	}
 	
-	foreach(QGraphicsItem *port_, children()) {
+	foreach(QGraphicsItem *port_, childItems()) {
 		if (port_->type() != GlyphPort::Type) {
 			continue;
 		}
@@ -83,7 +83,7 @@ void GardenGlyph::finalizeShape()
 {
 	int nincoming = 0;
 	int noutgoing = 0;
-	foreach(QGraphicsItem *port_, children()) {
+	foreach(QGraphicsItem *port_, childItems()) {
 		if (port_->type() != GlyphPort::Type) {
 			continue;
 		}
@@ -114,7 +114,7 @@ void GardenGlyph::finalizeShape()
 
 void GardenGlyph::moveBlockBy(const QPointF & dp)
 {
-	foreach(QGraphicsItem *port_, children()) {
+	foreach(QGraphicsItem *port_, childItems()) {
 		if (port_->type() != GlyphPort::Type) {
 			continue;
 		}
@@ -124,4 +124,14 @@ void GardenGlyph::moveBlockBy(const QPointF & dp)
 		
 	}
 	moveBy(dp.x(), dp.y() );
+}
+
+void GardenGlyph::setGlyphType(int x)
+{
+	m_glyphType = x;
+}
+
+const int & GardenGlyph::glyphType() const
+{
+	return m_glyphType;
 }

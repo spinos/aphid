@@ -1,7 +1,8 @@
 /*
  *  GlyphConnection.h
- *  
+ *  garden
  *
+ *  from port0 to port1
  *  Created by jian zhang on 4/1/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
@@ -31,6 +32,9 @@ public:
 	void updatePath();
 	void updatePathByPort(GlyphPort * p);
 	bool isComplete() const;
+	
+	const GlyphPort * port0() const;
+	const GlyphPort * port1() const;
 	
 protected:
 

@@ -91,3 +91,9 @@ void GlyphConnection::updatePathByPort(GlyphPort * p)
 	}
 	updatePath();
 }
+
+const GlyphPort * GlyphConnection::port0() const
+{ return m_port0; }
+
+const GlyphPort * GlyphConnection::port1() const
+{ return m_port1; }

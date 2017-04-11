@@ -21,7 +21,8 @@ class GlyphPort;
 
 class GardenGlyph : public QGraphicsPathItem
 {
-
+	int m_glyphType;
+	
 public:
 	enum { Type = UserType + 1 };
 	
@@ -35,6 +36,9 @@ public:
 	void moveBlockBy(const QPointF & dp);
 	
 	int type() const { return Type; }
+	
+	void setGlyphType(int x);
+	const int & glyphType() const;
 	
 protected:
 	void resizeBlock(int bx, int by);

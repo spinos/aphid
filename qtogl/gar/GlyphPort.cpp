@@ -13,7 +13,7 @@
 
 GlyphPort::GlyphPort(QGraphicsItem * parent) : QGraphicsEllipseItem(parent)
 {
-	setRect(-6, -6, 12, 12);
+	setRect(-7, -7, 14, 14);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
 	
@@ -64,3 +64,11 @@ void GlyphPort::updateConnectionsPath()
 		conn->updatePathByPort(this);
 	}
 }
+
+int GlyphPort::numConnections() const
+{
+	return m_connections.size();
+}
+
+const GlyphConnection * GlyphPort::connection(const int & i) const
+{ return m_connections[i]; }
