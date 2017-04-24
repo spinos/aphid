@@ -23,6 +23,8 @@
 using namespace gar;
 using namespace aphid;
 
+using namespace gar;
+
 ShrubScene::ShrubScene(QObject *parent)
     : QGraphicsScene(parent)
 {}
