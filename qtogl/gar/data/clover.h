@@ -4659,4 +4659,23 @@ static const float sCloverMeshNormals[16][414] = {
 0.895571f, 0.355355f, 0.267723f,
 } /// 15
 };
+static const float sCloverExclRadius[16] = {
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f,
+1.f
+};
+
 #endif

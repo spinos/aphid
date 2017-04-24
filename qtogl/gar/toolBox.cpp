@@ -89,9 +89,14 @@ void ToolBox::createAction()
 	plantview->setIconIndex(0);
 	plantview->setAction(gar::actViewPlant);
 	
+	ActionIconFrame * turfview = new ActionIconFrame(this);
+	turfview->addIconFile(":/icons/turf.png");
+	turfview->setIconIndex(0);
+	turfview->setAction(gar::actViewTurf);
+	
 	m_actionFrames.push_back(graphview);
 	m_actionFrames.push_back(plantview);
-	
+	m_actionFrames.push_back(turfview);
 }
 
 void ToolBox::createState()

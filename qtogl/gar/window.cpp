@@ -88,6 +88,7 @@ void Window::recvToolAction(int x)
 	switch(x) {
 		case gar::actViewPlant:
 		case gar::actViewGraph:
+		case gar::actViewTurf:
 			changeView(x);
 		break;
 	}
@@ -101,6 +102,11 @@ void Window::changeView(int x)
 	
 	if(x == gar::actViewPlant) {
 		m_scene->genPlants(m_vege);
+	}
+	
+	if(x == gar::actViewTurf) {
+		qDebug()<<"todo turf";
+		return;
 	}
 	m_centerStack->setCurrentIndex(x);
 }

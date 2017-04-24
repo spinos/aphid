@@ -10,12 +10,17 @@
 #ifndef GAR_SHRUB_SCENE_H
 #define GAR_SHRUB_SCENE_H
 
+#include <map>
 #include <QGraphicsScene>
 
 QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
 class QParallelAnimationGroup;
 QT_END_NAMESPACE
+
+namespace aphid {
+class ATriangleMesh;
+}
 
 class GardenGlyph;
 class GlyphPort;
@@ -28,7 +33,9 @@ class ShrubScene : public QGraphicsScene
 
 public:
 	ShrubScene(QObject *parent = 0);
+	virtual ~ShrubScene();
 	
+/// throw darts repeatedly untill patch is full
 	void genPlants(VegetationPatch * vege);
 	
 protected:
@@ -38,5 +45,11 @@ protected:
 	void addGrassBranch(PlantPiece * pl, GardenGlyph * gl);
 	
 private:
+	void genAPlant(VegetationPatch * vege);
+	void clearCachedGeom();
+	
+private:
+	std::map<int, aphid::ATriangleMesh * > m_cachedGeom;
+	
 };
 #endif

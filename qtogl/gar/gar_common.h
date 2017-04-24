@@ -14,7 +14,8 @@ namespace gar {
 
 enum ToolAction {
 	actViewGraph = 0,
-	actViewPlant = 1
+	actViewPlant = 1,
+	actViewTurf = 2
 };
 
 enum GlyphTyp {

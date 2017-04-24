@@ -29,23 +29,44 @@ ShrubScene::ShrubScene(QObject *parent)
     : QGraphicsScene(parent)
 {}
 
+ShrubScene::~ShrubScene()
+{ clearCachedGeom(); }
+
 void ShrubScene::genPlants(VegetationPatch * vege)
 {
 	vege->clearPlants();
 	
+	for(int i=0;i<2000;++i) {
+	
+		if(vege->isFull() ) {
+			break;
+		}
+		
+		genAPlant(vege);
+		
+	}
+	
+	qDebug()<<" patch n "<<vege->numPlants();
+}	
+
+void ShrubScene::genAPlant(VegetationPatch * vege)
+{	
 	foreach(QGraphicsItem *its_, items()) {
 		
 		if(its_->type() == GardenGlyph::Type) {
 			GardenGlyph *g = (GardenGlyph*) its_;
 		
 			if(g->glyphType() == gtPot) {
+			
 				PlantPiece * pl = new PlantPiece;
-				const int gt = gar::ToGroundType(g->glyphType());
 				assemblePlant(pl, g );
-				vege->addPlant(pl );
+				if(!vege->addPlant(pl ) ) {
+					delete pl;
+				}
 			}
 		}
 	}
+	
 }
 
 void ShrubScene::assemblePlant(PlantPiece * pl, GardenGlyph * gl)
@@ -61,6 +82,8 @@ void ShrubScene::assemblePlant(PlantPiece * pl, GardenGlyph * gl)
 			
 		}
 	}
+	pl->setExclRByChild();
+	
 }
 
 void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
@@ -96,7 +119,6 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 {
 	const int gt = gar::ToGrassType(gl->glyphType() );
-	qDebug()<<" brach "<<GrassTypeNames[gt];
 	const int ngeom = GrassGeomDeviations[gt];
 	const int r = rand() % ngeom;
 	
@@ -104,6 +126,7 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 	const int * triind;
 	const float * vertpos;
 	const float * vertnml;
+	float exclR;
 	switch (gl->glyphType() ) {
 		case gar::gtClover:
 			np = sCloverNumVertices;
@@ -111,6 +134,7 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 			triind = sCloverMeshTriangleIndices;
 			vertpos = sCloverMeshVertices[r];
 			vertnml = sCloverMeshNormals[r];
+			exclR = sCloverExclRadius[r];
 		break;
 		default:
 		;
@@ -120,14 +144,36 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 		return;
 	}
 	
-	ATriangleMesh * msh = new ATriangleMesh;
-	msh->create(np, nt);
-	unsigned * indDst = msh->indices();
-	memcpy(indDst, sCloverMeshTriangleIndices, nt * 12);
-    Vector3F * pntDst = msh->points();
-	memcpy(pntDst, vertpos, np * 12);
-	Vector3F * nmlDst = msh->vertexNormals();
-	memcpy(nmlDst, vertnml, np * 12);
+	ATriangleMesh * msh = NULL;
+	
+	const int kgeom = (gl->glyphType()<<4) | r;
+	if(m_cachedGeom.find(kgeom) != m_cachedGeom.end() ) {
+		msh = m_cachedGeom[kgeom];
+	}
+	
+	if(!msh) {
+		msh = new ATriangleMesh;
+		msh->create(np, nt);
+		unsigned * indDst = msh->indices();
+		memcpy(indDst, sCloverMeshTriangleIndices, nt * 12);
+		Vector3F * pntDst = msh->points();
+		memcpy(pntDst, vertpos, np * 12);
+		Vector3F * nmlDst = msh->vertexNormals();
+		memcpy(nmlDst, vertnml, np * 12);
+		
+		m_cachedGeom[kgeom] = msh;
+	}
+	
 	pl->setGeometry(msh);
+	pl->setExclR(exclR);
+}
+
+void ShrubScene::clearCachedGeom()
+{
+	std::map<int, aphid::ATriangleMesh * >::iterator it = m_cachedGeom.begin();
+	for(;it!=m_cachedGeom.end();++it) {
+		delete it->second;
+	}
+	m_cachedGeom.clear();
 	
 }

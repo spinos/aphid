@@ -10,5 +10,6 @@
         <file>icons/flowerpot.png</file>
         <file>icons/spade.png</file>
         <file>icons/ground.png</file>
+        <file>icons/turf.png</file>
     </qresource>
 </RCC>

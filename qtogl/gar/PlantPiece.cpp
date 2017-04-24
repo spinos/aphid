@@ -14,7 +14,8 @@ using namespace aphid;
 
 PlantPiece::PlantPiece(PlantPiece * parent) :
 m_parentPiece(parent),
-m_geom(NULL)
+m_geom(NULL),
+m_exclR(1.f)
 {
 	if(parent) {
 		parent->addBranch(this);
@@ -50,3 +51,22 @@ void PlantPiece::setGeometry(aphid::ATriangleMesh * geom)
 
 const ATriangleMesh * PlantPiece::geometry() const
 { return m_geom; }
+
+void PlantPiece::setExclR(const float & x)
+{ m_exclR = x; }
+	
+const float & PlantPiece::exclR() const
+{ return m_exclR; }
+
+void PlantPiece::setExclRByChild()
+{
+	m_exclR = 0.f;
+	ChildListTyp::const_iterator it = m_childPieces.begin();
+	for(;it!=m_childPieces.end();++it) {
+		const float & r = (*it)->exclR();
+		if(m_exclR < r) {
+			m_exclR = r;
+		}
+	}
+	
+}

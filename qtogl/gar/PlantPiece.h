@@ -27,6 +27,7 @@ typedef std::vector<PlantPiece * > ChildListTyp;
 	ChildListTyp m_childPieces;
 	PlantPiece * m_parentPiece;
 	aphid::ATriangleMesh * m_geom;
+	float m_exclR;
 	
 public:
 	PlantPiece(PlantPiece * parent = NULL);
@@ -42,6 +43,11 @@ public:
 	
 	void setGeometry(aphid::ATriangleMesh * geom);
 	const aphid::ATriangleMesh * geometry() const;
+	
+	void setExclR(const float & x);
+/// composite exclusion radius of child 
+	void setExclRByChild();
+	const float & exclR() const;
 	
 protected:
 
