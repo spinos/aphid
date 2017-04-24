@@ -9,11 +9,13 @@
 #include <PerspectiveView.h>
 #include "widget.h"
 #include <GeoDrawer.h>
+#include "VegetationPatch.h"
+#include "DrawVegetation.h"
 #include "gar_common.h"
 
 using namespace aphid;
 
-GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
+GLWidget::GLWidget(VegetationPatch * vege, QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(30000.f);
 	perspCamera()->setNearClipPlane(1.f);
@@ -21,26 +23,41 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
 	usePerspCamera();
 	resetView();
-	
+	m_vege = vege;
+	m_vegd = new DrawVegetation;
 }
 
 GLWidget::~GLWidget()
-{}
+{
+	delete m_vegd;
+}
 
 void GLWidget::clientInit()
 {}
 
 void GLWidget::clientDraw()
 {
+	if(m_vege->numPlants() < 1) {
+		return;
+	}
+	simpleDraw();
+}
+
+void GLWidget::simpleDraw()
+{
 	//getDrawer()->m_wireProfile.apply();
 	//getDrawer()->setColor(.125f, .125f, .5f);
     
-    getDrawer()->m_markerProfile.apply();
-    getDrawer()->setColor(0.f, .35f, .13f);
+    //getDrawer()->m_markerProfile.apply();
+    //getDrawer()->setColor(0.f, .35f, .13f);
 	//drawTetraMesh();
 
 	getDrawer()->m_surfaceProfile.apply();
-	
+	const int n = m_vege->numPlants();
+	for(int i=0;i<n;++i) {
+		const PlantPiece * pl = m_vege->plant(i);
+		m_vegd->drawPlant(pl);
+	}
 }
 
 void GLWidget::resetPerspViewTransform()
@@ -50,7 +67,7 @@ static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
 					0.f, 0.5f, 0.8660254f, 0.f,
 					0.f, 200.f, 346.4101616f, 1.f};
 	Matrix44F mat(mm);
-	perspCamera()->setViewTransform(mat, 4000.f);
+	perspCamera()->setViewTransform(mat, 400.f);
 }
 
 void GLWidget::resetOrthoViewTransform()

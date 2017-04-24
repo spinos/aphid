@@ -1,12 +1,25 @@
 set(CMAKE_MACOSX_BUNDLE OFF)
 
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
+data/grass.h
 window.h
 widget.h
 gar_common.h
 assetdlg.h
+AssetDescription.h
 plantAssets.h
-GrassPalette.h
+groundAssets.h
+GlyphPalette.h
+ShrubScene.h
+PiecesList.h
+ShrubChartView.h
+GardenGlyph.h
+GlyphPort.h
+GlyphConnection.h
+GlyphBuilder.h
+PlantPiece.h
+VegetationPatch.h
+DrawVegetation.h
 toolBox.h)
 
 set ( GAR_RESOURCES
@@ -15,7 +28,7 @@ gar.qrc
 
 QT4_ADD_RESOURCES ( GAR_RES_SOURCES ${GAR_RESOURCES} )
 
-message ("rcc output is " ${RES_SOURCES})
+message ("rcc output is " ${GAR_RES_SOURCES})
 
 set (GAR_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 ${APHID_QT_DIR}/QIconFrame.cpp
@@ -25,9 +38,21 @@ ${APHID_QT_DIR}/ActionIconFrame.cpp
 widget.cpp
 window.cpp
 assetdlg.cpp
+AssetDescription.cpp
 plantAssets.cpp
-GrassPalette.cpp
+groundAssets.cpp
+GlyphPalette.cpp
 toolBox.cpp
+ShrubScene.cpp
+PiecesList.cpp
+ShrubChartView.cpp
+GardenGlyph.cpp
+GlyphPort.cpp
+GlyphConnection.cpp
+GlyphBuilder.cpp
+PlantPiece.cpp
+VegetationPatch.cpp
+DrawVegetation.cpp
 main.cpp)
 
 add_executable (gar ${GAR_HEADER_FILES} ${GAR_SOURCE_FILES} ${GAR_RES_SOURCES})

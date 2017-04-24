@@ -5,5 +5,10 @@
         <file>icons/grass.png</file>
         <file>icons/clover.png</file>
         <file>images/clover.png</file>
+        <file>icons/root.png</file>
+        <file>icons/unknown.png</file>
+        <file>icons/flowerpot.png</file>
+        <file>icons/spade.png</file>
+        <file>icons/ground.png</file>
     </qresource>
 </RCC>

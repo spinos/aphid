@@ -23,8 +23,9 @@ class QTreeWidget;
 class QTreeWidgetItem;
 QT_END_NAMESPACE
 
+class GroundAssets;
 class PlantAssets;
-class GrassPalette;
+class GlyphPalette;
 
 class AssetDlg : public QDialog
 {
@@ -47,14 +48,16 @@ private slots:
 	void onSelectAsset(QTreeWidgetItem * item, int column);
 	
 private:
+	void lsGround();
 	void lsPlant();
 	
 private:
 	QTreeWidget * m_assetTree;
+	GroundAssets * m_groundAsset;
 	PlantAssets * m_plantAsset;
 	QSplitter * m_split;
 	QScrollArea * m_rgtArea;
-	GrassPalette * m_grassPlt;
+	GlyphPalette * m_palette;
 	
 };
 #endif
