@@ -46,7 +46,7 @@ void ShrubScene::genPlants(VegetationPatch * vege)
 		
 	}
 	
-	qDebug()<<" patch n "<<vege->numPlants();
+	//qDebug()<<" patch n "<<vege->numPlants();
 }	
 
 void ShrubScene::genAPlant(VegetationPatch * vege)

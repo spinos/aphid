@@ -19,6 +19,7 @@ GlyphConnection.h
 GlyphBuilder.h
 PlantPiece.h
 VegetationPatch.h
+Vegetation.h
 DrawVegetation.h
 toolBox.h)
 
@@ -52,6 +53,7 @@ GlyphConnection.cpp
 GlyphBuilder.cpp
 PlantPiece.cpp
 VegetationPatch.cpp
+Vegetation.cpp
 DrawVegetation.cpp
 main.cpp)
 

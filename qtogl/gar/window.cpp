@@ -10,12 +10,13 @@
 #include "assetdlg.h"
 #include "ShrubScene.h"
 #include "ShrubChartView.h"
+#include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "gar_common.h"
 
 Window::Window()
 {
-	m_vege = new VegetationPatch;
+	m_vege = new Vegetation;
 	glWidget = new GLWidget(m_vege, this);
 	m_tools = new ToolBox(this);
 	m_assets = new AssetDlg(this);
@@ -39,7 +40,6 @@ Window::Window()
 			
 	connect(m_assets, SIGNAL(onAssetDlgClose()), 
 			this, SLOT(recvAssetDlgClose()));
-		
 }
 
 Window::~Window()
@@ -58,7 +58,7 @@ void Window::createActions()
 {
 	m_assetAct = new QAction(tr("&Asset"), this);
 	m_assetAct->setCheckable(true);
-	m_assetAct->setChecked(false);
+	m_assetAct->setChecked(true);
 	connect(m_assetAct, SIGNAL(toggled(bool)), this, SLOT(toggleAssetDlg(bool)));
 	
 }
@@ -87,11 +87,35 @@ void Window::recvToolAction(int x)
 {
 	switch(x) {
 		case gar::actViewPlant:
-		case gar::actViewGraph:
+			singleSynth();
+			changeView(x);
+		break;
 		case gar::actViewTurf:
+			multiSynth();
+			changeView(gar::actViewPlant);
+		break;
+		case gar::actViewGraph:
 			changeView(x);
 		break;
 	}
+}
+
+void Window::singleSynth()
+{
+	m_scene->genPlants(m_vege->patch(0));
+	m_vege->setNumPatches(1);
+	glWidget->update();
+}
+
+void Window::multiSynth()
+{
+	const int n = m_vege->getMaxNumPatches();
+	for(int i=0;i<n;++i) {
+		m_scene->genPlants(m_vege->patch(i));
+	}
+	m_vege->setNumPatches(n);
+	m_vege->rearrange();
+	glWidget->update();
 }
 
 void Window::changeView(int x)
@@ -100,13 +124,12 @@ void Window::changeView(int x)
 		return;
 	}
 	
-	if(x == gar::actViewPlant) {
-		m_scene->genPlants(m_vege);
-	}
-	
-	if(x == gar::actViewTurf) {
-		qDebug()<<"todo turf";
-		return;
-	}
 	m_centerStack->setCurrentIndex(x);
+}
+
+void Window::showAssets()
+{
+	m_assets->show();
+	m_assets->raise();
+	m_assets->move(0, 0);
 }

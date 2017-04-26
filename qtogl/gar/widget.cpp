@@ -9,13 +9,14 @@
 #include <PerspectiveView.h>
 #include "widget.h"
 #include <GeoDrawer.h>
+#include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "DrawVegetation.h"
 #include "gar_common.h"
 
 using namespace aphid;
 
-GLWidget::GLWidget(VegetationPatch * vege, QWidget *parent) : Base3DView(parent)
+GLWidget::GLWidget(Vegetation * vege, QWidget *parent) : Base3DView(parent)
 {
 	perspCamera()->setFarClipPlane(30000.f);
 	perspCamera()->setNearClipPlane(1.f);
@@ -37,27 +38,35 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-	if(m_vege->numPlants() < 1) {
-		return;
+	for(int i=0;i<m_vege->numPatches();++i) {
+		simpleDraw(m_vege->patch(i) );
 	}
-	simpleDraw();
+	
 }
 
-void GLWidget::simpleDraw()
+void GLWidget::simpleDraw(VegetationPatch * vgp)
 {
+	if(vgp->numPlants() < 1) {
+		return;
+	}
+	
 	//getDrawer()->m_wireProfile.apply();
 	//getDrawer()->setColor(.125f, .125f, .5f);
     
     //getDrawer()->m_markerProfile.apply();
     //getDrawer()->setColor(0.f, .35f, .13f);
-	//drawTetraMesh();
 
 	getDrawer()->m_surfaceProfile.apply();
-	const int n = m_vege->numPlants();
+	
+	glPushMatrix();
+	const float * tv = vgp->translationV();
+	glTranslatef(tv[0], tv[1], tv[2]);
+	const int n = vgp->numPlants();
 	for(int i=0;i<n;++i) {
-		const PlantPiece * pl = m_vege->plant(i);
+		const PlantPiece * pl = vgp->plant(i);
 		m_vegd->drawPlant(pl);
 	}
+	glPopMatrix();
 }
 
 void GLWidget::resetPerspViewTransform()

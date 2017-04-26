@@ -16,7 +16,11 @@ using namespace aphid;
 VegetationPatch::VegetationPatch() :
 m_yardR(.5f),
 m_tilt(0.f)
-{}
+{
+	m_translatev[0] = 0.f;
+	m_translatev[1] = 0.f;
+	m_translatev[2] = 0.f;
+}
 
 VegetationPatch::~VegetationPatch()
 {
@@ -110,3 +114,15 @@ const float & VegetationPatch::tilt() const
 
 const float & VegetationPatch::yardRadius() const
 { return m_yardR; }
+
+void VegetationPatch::setTranslation(const float & px,
+		const float & py,
+		const float & pz)
+{
+	m_translatev[0] = px;
+	m_translatev[1] = py;
+	m_translatev[2] = pz;
+}
+
+const float * VegetationPatch::translationV() const
+{ return &m_translatev[0]; }

@@ -25,6 +25,7 @@ class VegetationPatch {
 	typedef std::vector<PlantPiece *> PlantListTyp;
 /// to roots
 	PlantListTyp m_plants;
+	float m_translatev[3];
 	float m_yardR;
 	float m_tilt;
 	
@@ -45,6 +46,12 @@ public:
 	const float & tilt() const;
 	
 	const float & yardRadius() const;
+	
+	void setTranslation(const float & px,
+		const float & py,
+		const float & pz);
+
+	const float * translationV() const;
 	
 protected:
 

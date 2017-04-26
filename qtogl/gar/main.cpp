@@ -12,5 +12,6 @@ int main(int argc, char *argv[])
     //window.showMaximized();
     //window.resize(800, 600);
     window.show();
+	window.showAssets();
     return app.exec();
 }
