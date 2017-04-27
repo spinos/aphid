@@ -41,6 +41,7 @@ private slots:
 	void recvToolAction(int x);
 	void toggleAssetDlg(bool x);
 	void recvAssetDlgClose();
+	void performExport(bool x);
 	
 private:
 	QStackedWidget * m_centerStack;
@@ -48,6 +49,8 @@ private:
 	ToolBox * m_tools;
 	AssetDlg * m_assets;
 	QAction * m_assetAct;
+	QAction * m_exportAct;
+	QMenu * m_fileMenu;
     QMenu * m_windowMenu;
     ShrubScene * m_scene;
 	ShrubChartView * m_chartView;

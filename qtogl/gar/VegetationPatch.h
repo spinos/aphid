@@ -16,6 +16,7 @@
 
 namespace aphid {
 class Vector3F;
+class Matrix44F;
 }
 
 class PlantPiece;
@@ -25,7 +26,7 @@ class VegetationPatch {
 	typedef std::vector<PlantPiece *> PlantListTyp;
 /// to roots
 	PlantListTyp m_plants;
-	float m_translatev[3];
+	float m_tmv[16];
 	float m_yardR;
 	float m_tilt;
 	
@@ -47,11 +48,12 @@ public:
 	
 	const float & yardRadius() const;
 	
-	void setTranslation(const float & px,
-		const float & py,
-		const float & pz);
+	void setTransformation(const aphid::Matrix44F & tm);
 
-	const float * translationV() const;
+	const float * transformationV() const;
+	
+	int getNumTms();
+	void extractTms(aphid::Matrix44F * dst);
 	
 protected:
 

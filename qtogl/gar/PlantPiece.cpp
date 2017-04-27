@@ -70,3 +70,31 @@ void PlantPiece::setExclRByChild()
 	}
 	
 }
+
+void PlantPiece::countNumTms(int & count) const
+{
+	if(numBranches() < 1) {
+		return;
+	}
+	count++;
+	
+	ChildListTyp::const_iterator it = m_childPieces.begin();
+	for(;it!=m_childPieces.end();++it) {
+		(*it)->countNumTms(count);
+	}
+}
+
+void PlantPiece::extractTms(aphid::Matrix44F * dst,
+			int & count) const
+{
+	if(numBranches() < 1) {
+		return;
+	}
+	dst[count] = m_tm;
+	count++;
+	
+	ChildListTyp::const_iterator it = m_childPieces.begin();
+	for(;it!=m_childPieces.end();++it) {
+		(*it)->extractTms(dst, count);
+	}
+}

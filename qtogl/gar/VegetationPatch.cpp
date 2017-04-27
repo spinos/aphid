@@ -9,6 +9,7 @@
 
 #include "VegetationPatch.h"
 #include "PlantPiece.h"
+#include <math/Matrix44F.h>
 #include <math/miscfuncs.h>
 
 using namespace aphid;
@@ -17,9 +18,8 @@ VegetationPatch::VegetationPatch() :
 m_yardR(.5f),
 m_tilt(0.f)
 {
-	m_translatev[0] = 0.f;
-	m_translatev[1] = 0.f;
-	m_translatev[2] = 0.f;
+	Matrix44F eye;
+	eye.glMatrix(m_tmv);
 }
 
 VegetationPatch::~VegetationPatch()
@@ -38,15 +38,11 @@ bool VegetationPatch::addPlant(PlantPiece * pl)
 	const float r = pl->exclR();
 	const float px = RandomFn11() * m_yardR;
 	const float pz = RandomFn11() * m_yardR;
-	Vector3F pos(px, 0.f, pz);
+	const Vector3F pos(px, 0.f, pz);
 	
 	if(pos.length() > m_yardR) {
 		return false;
 	}
-	
-	Matrix44F rotm;
-	rotm.rotateX(m_tilt);
-	pos = rotm.transform(pos);
 	
 	const float sc = RandomF01() * -.19f + 1.f;
 	
@@ -58,6 +54,7 @@ bool VegetationPatch::addPlant(PlantPiece * pl)
 	tm.scaleBy(sc);
 	const float ry = RandomFn11() * PIF;
 	tm.rotateY(ry);
+	tm.rotateX(-m_tilt);
 	tm.setTranslation(pos);
 	
 	pl->setTransformMatrix(tm);
@@ -65,8 +62,8 @@ bool VegetationPatch::addPlant(PlantPiece * pl)
 	m_plants.push_back(pl);
 	
 	float nr = r * 2.f + pos.length();
-	if(nr > r * 14.f) {
-		nr = r * 14.f;
+	if(nr > r * 12.f) {
+		nr = r * 12.f;
 	}
 	if(m_yardR < nr) {
 		m_yardR = nr;
@@ -103,7 +100,7 @@ void VegetationPatch::clearPlants()
 
 bool VegetationPatch::isFull() const
 {
-	return numPlants() > 99;
+	return numPlants() > 79;
 }
 
 void VegetationPatch::setTilt(const float & x)
@@ -115,14 +112,27 @@ const float & VegetationPatch::tilt() const
 const float & VegetationPatch::yardRadius() const
 { return m_yardR; }
 
-void VegetationPatch::setTranslation(const float & px,
-		const float & py,
-		const float & pz)
+void VegetationPatch::setTransformation(const Matrix44F & tm)
+{ tm.glMatrix(m_tmv); }
+
+const float * VegetationPatch::transformationV() const
+{ return &m_tmv[0]; }
+
+int VegetationPatch::getNumTms()
 {
-	m_translatev[0] = px;
-	m_translatev[1] = py;
-	m_translatev[2] = pz;
+	int cc = 0;
+	const int n = numPlants();
+	for(int i=0;i<n;++i) {
+		m_plants[i]->countNumTms(cc);
+	}
+	return cc;
 }
 
-const float * VegetationPatch::translationV() const
-{ return &m_translatev[0]; }
+void VegetationPatch::extractTms(Matrix44F * dst)
+{
+	int it = 0;
+	const int n = numPlants();
+	for(int i=0;i<n;++i) {
+		m_plants[i]->extractTms(dst, it);
+	}
+}

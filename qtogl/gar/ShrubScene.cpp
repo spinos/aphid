@@ -18,6 +18,7 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/clover.h"
+#include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 
 using namespace gar;
@@ -25,12 +26,12 @@ using namespace aphid;
 
 using namespace gar;
 
-ShrubScene::ShrubScene(QObject *parent)
+ShrubScene::ShrubScene(Vegetation * vege, QObject *parent)
     : QGraphicsScene(parent)
-{}
+{ m_vege = vege; }
 
 ShrubScene::~ShrubScene()
-{ clearCachedGeom(); }
+{}
 
 void ShrubScene::genPlants(VegetationPatch * vege)
 {
@@ -50,7 +51,7 @@ void ShrubScene::genPlants(VegetationPatch * vege)
 }	
 
 void ShrubScene::genAPlant(VegetationPatch * vege)
-{	
+{
 	foreach(QGraphicsItem *its_, items()) {
 		
 		if(its_->type() == GardenGlyph::Type) {
@@ -144,12 +145,8 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 		return;
 	}
 	
-	ATriangleMesh * msh = NULL;
-	
 	const int kgeom = (gl->glyphType()<<4) | r;
-	if(m_cachedGeom.find(kgeom) != m_cachedGeom.end() ) {
-		msh = m_cachedGeom[kgeom];
-	}
+	ATriangleMesh * msh = m_vege->findGeom(kgeom);
 	
 	if(!msh) {
 		msh = new ATriangleMesh;
@@ -161,19 +158,25 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 		Vector3F * nmlDst = msh->vertexNormals();
 		memcpy(nmlDst, vertnml, np * 12);
 		
-		m_cachedGeom[kgeom] = msh;
+		m_vege->addGeom(kgeom, msh);
 	}
 	
 	pl->setGeometry(msh);
 	pl->setExclR(exclR);
 }
 
-void ShrubScene::clearCachedGeom()
+void ShrubScene::genSinglePlant()
 {
-	std::map<int, aphid::ATriangleMesh * >::iterator it = m_cachedGeom.begin();
-	for(;it!=m_cachedGeom.end();++it) {
-		delete it->second;
-	}
-	m_cachedGeom.clear();
+	genPlants(m_vege->patch(0));
+	m_vege->setNumPatches(1);
+}
 	
+void ShrubScene::genMultiPlant()
+{
+	const int n = m_vege->getMaxNumPatches();
+	for(int i=0;i<n;++i) {
+		genPlants(m_vege->patch(i));
+	}
+	m_vege->setNumPatches(n);
+	m_vege->rearrange();
 }

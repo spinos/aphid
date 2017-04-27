@@ -21,6 +21,9 @@ PlantPiece.h
 VegetationPatch.h
 Vegetation.h
 DrawVegetation.h
+exportDlg.h
+ExportExample.h
+HGardenExample.h
 toolBox.h)
 
 set ( GAR_RESOURCES
@@ -55,6 +58,9 @@ PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp
 DrawVegetation.cpp
+exportDlg.cpp
+ExportExample.cpp
+HGardenExample.cpp
 main.cpp)
 
 add_executable (gar ${GAR_HEADER_FILES} ${GAR_SOURCE_FILES} ${GAR_RES_SOURCES})
@@ -72,16 +78,21 @@ target_link_libraries (gar ${APHID_GRAPH_LIBRARY})
 target_link_libraries (gar ${APHID_TTG_LIBRARY})
 target_link_libraries (gar ${APHID_KD_LIBRARY})
 target_link_libraries (gar ${APHID_IMG_LIBRARY})
+target_link_libraries (gar ${APHID_H5_LIBRARY})
+
+target_link_libraries (gar ${HDF5_LIBRARIES})
+target_link_libraries (gar ${ZLIB_LIBRARY})
 
 target_link_libraries (gar ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (gar ${Boost_FILESYSTEM_LIBRARY})
+
 IF (WIN32)
 target_link_libraries (gar ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (gar ${Boost_THREAD_LIBRARY})
 target_link_libraries (gar ${Boost_CHRONO_LIBRARY})
+target_link_libraries (gar ${SZIP_LIBRARY})
 ENDIF ()
 
 target_link_libraries (gar ${BLAS_LIBRARY})
 target_link_libraries (gar ${LAPACK_LIBRARY})
 target_link_libraries (gar ${F2C_LIBRARY})
-
-target_link_libraries (gar ${OpenEXR_Library})

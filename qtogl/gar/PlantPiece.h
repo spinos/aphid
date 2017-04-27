@@ -48,6 +48,10 @@ public:
 /// composite exclusion radius of child 
 	void setExclRByChild();
 	const float & exclR() const;
+
+	void countNumTms(int & count) const;
+	void extractTms(aphid::Matrix44F * dst,
+			int & count) const;
 	
 protected:
 

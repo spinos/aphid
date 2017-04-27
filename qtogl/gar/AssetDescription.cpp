@@ -41,8 +41,6 @@ void AssetDescription::recvAssetSel(QPoint tg)
 			qDebug()<<"group is unknown";
 		;
 	}
-	/*
-	*/
 }
  
 void AssetDescription::showGroundGesc(const QPoint & tg)

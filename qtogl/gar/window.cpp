@@ -12,6 +12,8 @@
 #include "ShrubChartView.h"
 #include "Vegetation.h"
 #include "VegetationPatch.h"
+#include "exportDlg.h"
+#include "ExportExample.h"
 #include "gar_common.h"
 
 Window::Window()
@@ -21,7 +23,7 @@ Window::Window()
 	m_tools = new ToolBox(this);
 	m_assets = new AssetDlg(this);
 	
-	m_scene = new ShrubScene(this);
+	m_scene = new ShrubScene(m_vege, this);
 	m_chartView = new ShrubChartView(m_scene);
 	
 	addToolBar(m_tools);
@@ -61,10 +63,14 @@ void Window::createActions()
 	m_assetAct->setChecked(true);
 	connect(m_assetAct, SIGNAL(toggled(bool)), this, SLOT(toggleAssetDlg(bool)));
 	
+	m_exportAct = new QAction(tr("&Export"), this);
+	connect(m_exportAct, SIGNAL(triggered(bool)), this, SLOT(performExport(bool)));
 }
 	
 void Window::createMenus()
 {
+	m_fileMenu = menuBar()->addMenu(tr("&File")); 
+	m_fileMenu->addAction(m_exportAct);
 	m_windowMenu = menuBar()->addMenu(tr("&Window")); 
 	m_windowMenu->addAction(m_assetAct);
 }
@@ -102,19 +108,13 @@ void Window::recvToolAction(int x)
 
 void Window::singleSynth()
 {
-	m_scene->genPlants(m_vege->patch(0));
-	m_vege->setNumPatches(1);
+	m_scene->genSinglePlant();
 	glWidget->update();
 }
 
 void Window::multiSynth()
 {
-	const int n = m_vege->getMaxNumPatches();
-	for(int i=0;i<n;++i) {
-		m_scene->genPlants(m_vege->patch(i));
-	}
-	m_vege->setNumPatches(n);
-	m_vege->rearrange();
+	m_scene->genMultiPlant();
 	glWidget->update();
 }
 
@@ -132,4 +132,17 @@ void Window::showAssets()
 	m_assets->show();
 	m_assets->raise();
 	m_assets->move(0, 0);
+}
+
+void Window::performExport(bool x)
+{
+	ExportDlg dlg(m_vege, this);
+	int res = dlg.exec();
+	if(res == QDialog::Rejected) {
+		qDebug()<<"abort export";
+		return;
+	}
+	
+	ExportExample xpt(m_vege);
+	xpt.exportToFile(dlg.exportToFilename());
 }

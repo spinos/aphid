@@ -9,7 +9,13 @@
 
 #include "Vegetation.h"
 #include "VegetationPatch.h"
+#include <geom/ATriangleMesh.h>
+#include "gar_common.h"
+#include "data/grass.h"
+#include <boost/format.hpp>
 #include <cmath>
+
+using namespace aphid;
 
 Vegetation::Vegetation() :
 m_numPatches(1)
@@ -31,6 +37,7 @@ Vegetation::~Vegetation()
 	for(int i=0;i<TOTAL_NUM_P;++i) {
 		delete m_patches[i];
 	}
+	clearCachedGeom();
 }
 
 VegetationPatch * Vegetation::patch(const int & i)
@@ -49,6 +56,7 @@ int Vegetation::getMaxNumPatches() const
 
 void Vegetation::rearrange()
 {
+	Matrix44F tm;
 	float px, pz = 0.f, py = 0.f, spacing;
 	const float deltaAng = .8f / ((float)NUM_ANGLE - 1);
 	for(int j=0;j<NUM_ANGLE;++j) {
@@ -59,7 +67,11 @@ void Vegetation::rearrange()
 				return;
 			}
 			
-			m_patches[k]->setTranslation(px, py, pz);
+			tm.setIdentity();
+			tm.rotateX(deltaAng * j);
+			tm.setTranslation(px, py, pz);
+			
+			m_patches[k]->setTransformation(tm);
 			
 			spacing = m_patches[k]->yardRadius() * 2.f;
 			px += spacing;
@@ -68,4 +80,76 @@ void Vegetation::rearrange()
 		pz -= spacing * cos(deltaAng*j);;
 		
 	}
+}
+
+int Vegetation::getNumInstances()
+{
+	int n = 0;
+	for(int i=0;i<m_numPatches;++i) {
+		n += m_patches[i]->getNumTms();
+	}
+	return n;
+}
+
+void Vegetation::clearCachedGeom()
+{
+	std::map<int, GeomPtrTyp >::iterator it = m_cachedGeom.begin();
+	for(;it!=m_cachedGeom.end();++it) {
+		delete it->second;
+	}
+	m_cachedGeom.clear();
+	
+}
+
+ATriangleMesh * Vegetation::findGeom(const int & k)
+{
+	if(m_cachedGeom.find(k) != m_cachedGeom.end() ) {
+		return m_cachedGeom[k];
+	}
+	return NULL;
+}
+
+void Vegetation::addGeom(const int & k, ATriangleMesh * v)
+{ m_cachedGeom[k] = v; }
+
+int Vegetation::numCachedGeoms() const
+{ return m_cachedGeom.size(); }
+
+void Vegetation::geomBegin(std::string & mshName, Vegetation::GeomPtrTyp & mshVal)
+{
+	if(numCachedGeoms() < 1) {
+		mshVal = NULL;
+		return;
+	}
+	m_geomIter = m_cachedGeom.begin();
+	mshName = getGeomName(m_geomIter->first);
+	mshVal = m_geomIter->second;
+}
+	
+void Vegetation::geomNext(std::string & mshName, Vegetation::GeomPtrTyp & mshVal)
+{
+	m_geomIter++;
+	if(m_geomIter == m_cachedGeom.end()) {
+		mshVal = NULL;
+		return;
+	}
+	mshName = getGeomName(m_geomIter->first);
+	mshVal = m_geomIter->second;
+}
+
+std::string Vegetation::getGeomName(const int & k)
+{
+	const int gt = k>>4;
+	const int gg = gar::ToGroupType(gt );
+	int geomt;
+	std::string geoms;
+	switch (gg) {
+		case gar::ggGrass:
+			geomt = gar::ToGrassType(gt );
+			geoms = gar::GrassTypeNames[geomt];
+		break;
+		default:
+		;
+	}
+	return str(boost::format("%1%_%2%") % geoms % (k & 15));
 }

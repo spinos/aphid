@@ -8,8 +8,8 @@
  *
  */
  
-#ifndef WBG_ASSET_DLG_H
-#define WBG_ASSET_DLG_H
+#ifndef GAR_ASSET_DLG_H
+#define GAR_ASSET_DLG_H
 
 #include <QDialog>
 

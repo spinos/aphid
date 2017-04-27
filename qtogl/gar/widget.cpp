@@ -59,8 +59,8 @@ void GLWidget::simpleDraw(VegetationPatch * vgp)
 	getDrawer()->m_surfaceProfile.apply();
 	
 	glPushMatrix();
-	const float * tv = vgp->translationV();
-	glTranslatef(tv[0], tv[1], tv[2]);
+	glMultMatrixf(vgp->transformationV());
+	
 	const int n = vgp->numPlants();
 	for(int i=0;i<n;++i) {
 		const PlantPiece * pl = vgp->plant(i);

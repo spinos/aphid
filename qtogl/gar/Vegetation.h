@@ -12,10 +12,23 @@
 #ifndef GAR_VEGETATION_H
 #define GAR_VEGETATION_H
 
+#include <map>
+
+namespace aphid {
+class ATriangleMesh;
+}
+
 class VegetationPatch;
 
 class Vegetation {
 
+public:
+	typedef aphid::ATriangleMesh * GeomPtrTyp;
+	
+private:
+	std::map<int, GeomPtrTyp > m_cachedGeom;
+	std::map<int, GeomPtrTyp >::iterator m_geomIter;
+	
 #define NUM_ANGLE 11
 #define NUM_VARIA 11
 #define TOTAL_NUM_P 121
@@ -34,10 +47,22 @@ public:
 	int getMaxNumPatches() const;
 	
 	void rearrange();
+	int getNumInstances();
+	
+	aphid::ATriangleMesh * findGeom(const int & k);
+	void addGeom(const int & k, aphid::ATriangleMesh * v);
+	
+	int numCachedGeoms() const;
+	
+	void geomBegin(std::string & mshName, GeomPtrTyp & mshVal);
+	void geomNext(std::string & mshName, GeomPtrTyp & mshVal);
 	
 protected:
 
 private:
+	void clearCachedGeom();
+	std::string getGeomName(const int & k);
+	
 };
 
 #endif
