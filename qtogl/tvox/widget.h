@@ -9,6 +9,8 @@
 #include <ogl/DrawParticle.h>
 
 namespace aphid {
+    
+class DrawGrid2;
 
 class RotationHandle;
 
@@ -23,6 +25,8 @@ namespace sdb {
 template<typename T>
 class VectorArray;
 
+template<typename T>
+class ValGrid;
 }
 
 template<int I>
@@ -61,7 +65,11 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	aphid::Matrix44F m_space;
 	aphid::Ray m_incident;
 	aphid::RotationHandle * m_roth;
-	
+
+	typedef aphid::sdb::ValGrid<aphid::Vector3F> VGDTyp;
+	VGDTyp * m_valGrd;
+
+	aphid::DrawGrid2 * m_drdg;
 };
 
 #endif

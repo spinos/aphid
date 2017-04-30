@@ -19,6 +19,8 @@
 #include <ogl/DrawGrid.h>
 #include "../cactus.h"
 #include <sdb/ebp.h>
+#include <sdb/ValGrid.h>
+#include <ogl/DrawGrid2.h>
 
 using namespace aphid;
 
@@ -33,7 +35,7 @@ GLWidget::GLWidget(QWidget *parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[0],
+									sCactusMeshVertices[3],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -95,6 +97,19 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	
 	permutateParticleColors();
 	
+	m_valGrd = new VGDTyp;
+	m_valGrd->fillBox(m_tree->getBBox(), sz0 );
+	for(int i=0;i<np;++i) {
+	    Float4 * pr = particleR(i);
+	    m_valGrd->insertValueAtLevel(3, Vector3F(pr[0].w, pr[1].w, pr[2].w),
+	        Vector3F(1,1,0));
+	}
+	m_valGrd->finishInsert();
+	
+	m_drdg = new DrawGrid2;
+	m_drdg->create(m_valGrd, 3);
+	float ucol[3] = {.2f, .8f, .45f};
+	m_drdg->setUniformColor(ucol);
 	std::cout.flush();	
 }
 
@@ -111,14 +126,6 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(0.f, .35f, .45f);
 	
 	getDrawer()->m_wireProfile.apply();
-/*
-	glEnableClientState(GL_VERTEX_ARRAY);
-	
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sCactusMeshVertices[0] );
-	glDrawElements(GL_TRIANGLES, sCactusNumTriangleIndices, GL_UNSIGNED_INT, sCactusMeshTriangleIndices );
-	
-	glDisableClientState(GL_VERTEX_ARRAY);
-*/
 		
 	glBegin(GL_TRIANGLES);
 	for(int i=0;i<m_triangles->size();++i) {
@@ -129,11 +136,21 @@ void GLWidget::clientDraw()
 	}
 	glEnd();
 	
-	//getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->m_markerProfile.apply();
 	
 	getDrawer()->setColor(1.f, 1.f, 1.f);
 	drawParticles();
+	
+	getDrawer()->m_surfaceProfile.apply();
+	//getDrawer()->m_wireProfile.apply();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	m_drdg->drawSolidGrid();
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	
 }
 
