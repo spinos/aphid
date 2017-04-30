@@ -1,3 +1,7 @@
+/*
+ *  tvox
+ */
+
 #include <QtGui>
 #include <QtOpenGL>
 #include "widget.h"
@@ -13,7 +17,6 @@
 #include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawKdTree.h>
 #include <ogl/DrawGrid.h>
-#include <topo/TriangleMeshCluster.h>
 #include "../cactus.h"
 #include <sdb/ebp.h>
 
@@ -48,42 +51,33 @@ typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
 	const float sz0 = m_tree->getBBox().getLongestDistance() * .89f;
-	m_grid = new EbpGrid;
-	m_grid->fillBox(m_tree->getBBox(), sz0 );
-	m_grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 3);
-	m_grid->insertNodeAtLevel(3);
-	m_grid->cachePositions();
-	int np = m_grid->numParticles();
-	qDebug()<<"\n grid n cell "<<m_grid->numCellsAtLevel(3);
+	EbpGrid * grid = new EbpGrid;
+	grid->fillBox(m_tree->getBBox(), sz0 );
+	grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 3);
+	grid->insertNodeAtLevel(3);
+	grid->cachePositions();
+	int np = grid->numParticles();
+	qDebug()<<"\n grid n cell "<<grid->numCellsAtLevel(3);
 	
 	for(int i=0;i<20;++i) {
-		m_grid->update();    
+		grid->update();    
 	}
 	
 	createParticles(np);
-	
-	TriangleMeshCluster * cluster = new TriangleMeshCluster;
-	cluster->create(sCactusMeshVertices[0],
-									sCactusNumTriangleIndices,
-									sCactusMeshTriangleIndices);
-		
-	const int ns = cluster->numSites();
-	std::cout<<"\n n site "<<ns;
-	
-	m_cs.reset(new int[ns]);
 	
 typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	
 	FClosestTyp clseng(m_tree);
 	Vector3F top;
 	
-	const Vector3F * poss = m_grid->positions(); 
+	const Vector3F * poss = grid->positions(); 
 
 	int igeom, icomp;
 	float contrib[4];	
 
     for(int i=0;i<np;++i) {
 		clseng.closestToPoint(poss[i]);
+		top = clseng.closestToPointPoint();
 
 		clseng.getGeomCompContribute(igeom, icomp, contrib);
 #if 0
@@ -92,9 +86,6 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 					<<" contrib "<<contrib[0]<<","<<contrib[1]<<","<<contrib[2];
 #endif
 
-		cluster->assignToCliqueOrigin(&sCactusMeshTriangleIndices[icomp * 3], 
-								i);
-		
 // column-major element[3] is translate  
 		Float4 * pr = particleR(i);
             pr[0] = Float4(.25 ,0,0,top.x);
@@ -104,10 +95,6 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	
 	permutateParticleColors();
 	
-	float cliqueDistance = sz0 / 5.f;
-	cluster->buildCliques(cliqueDistance);
-	cluster->extractCliques(m_cs.get() );
-	delete cluster;
 	std::cout.flush();	
 }
 
@@ -142,50 +129,11 @@ void GLWidget::clientDraw()
 	}
 	glEnd();
 	
-#if 0
-	getDrawer()->setColor(0.f, .15f, .25f);
-
-	DrawKdTree<cvx::Triangle, KdNode4 > drt(m_tree);
-	drt.drawCells();
-	
-	getDrawer()->setColor(.35f, .15f, 0.f);
-	
-	DrawGrid<EbpGrid> dgd(m_grid);
-	dgd.drawLevelCells(3);
-#endif
-	
 	//getDrawer()->m_surfaceProfile.apply();
 	getDrawer()->m_markerProfile.apply();
 	
+	getDrawer()->setColor(1.f, 1.f, 1.f);
 	drawParticles();
-	
-	drawFaceCliques();
-}
-
-void GLWidget::drawFaceCliques()
-{
-glColor3f(1,1,0);
-	const int ns = sCactusNumTriangleIndices / 3;
-	const float * pos = sCactusMeshVertices[0];
-	glBegin(GL_TRIANGLES);
-	for(int i=0;i<ns;++i) {
-	
-		const int c = m_cs[i]; 
-		if(c < 0) {
-			continue;
-		}
-		
-		const Float4 * col = particleColor(c);
-		glColor3f(col->x, col->y, col->z);
-		
-		const int * tri = &sCactusMeshTriangleIndices[i*3];
-		
-		glVertex3fv((const float *)&pos[tri[0] * 3]);
-		glVertex3fv((const float *)&pos[tri[1] * 3]);
-		glVertex3fv((const float *)&pos[tri[2] * 3]);
-		
-	}
-	glEnd();
 	
 }
 

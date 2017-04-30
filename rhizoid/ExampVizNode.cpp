@@ -420,6 +420,12 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
 }
 
+void ExampViz::voxelize4(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox)
+{
+	voxelize3(tri, bbox);
+}
+
 void ExampViz::voxelize3(const aphid::DenseMatrix<float> & pnts,
 						const MIntArray & triangleVertices,
 						const aphid::BoundingBox & bbox)
@@ -442,7 +448,7 @@ void ExampViz::voxelize3(const aphid::DenseMatrix<float> & pnts,
 		tris.insert(atri);
 	}
 	
-	voxelize3(&tris, bbox);
+	voxelize4(&tris, bbox);
 }
 
 void ExampViz::updateGeomBox(MObject & node)

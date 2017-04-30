@@ -54,7 +54,7 @@ bool ClosestToPointEngine<T, Tn>::closestToPoint(const Vector3F & origin,
                                     const float & maxDistance)
 {
     m_ctx.reset(origin, maxDistance);
-    KdEngine::closestToPoint(SelectEngine<T, Tn>::tree(), &m_ctx);
+    KdEngine::closestToPoint<T, Tn>(SelectEngine<T, Tn>::tree(), &m_ctx);
     return m_ctx._hasResult;
     
 }

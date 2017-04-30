@@ -594,7 +594,7 @@ MStatus proxyPaintTool::voxelizeSelected()
 	AHelper::Info<MString>("proxyPaintTool init viz node", fviz.name() );
 		
 	ExampViz* pViz = (ExampViz*)fviz.userNode();
-	pViz->voxelize3(&tris, bbox);
+	pViz->voxelize4(&tris, bbox);
 	
 	return stat;
 }
