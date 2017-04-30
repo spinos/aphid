@@ -26,6 +26,8 @@ public:
 	ValCell(Entity * parent = NULL);
 	virtual ~ValCell();
 
+	void getMeanValue(T & dst);
+	
 private:
 	
 };
@@ -37,6 +39,23 @@ ValCell<T>::ValCell(Entity * parent) : TParent(parent)
 template<typename T>
 ValCell<T>::~ValCell()
 {}
+
+template<typename T>
+void ValCell<T>::getMeanValue(T & dst)
+{
+	dst.setZero();
+	int cnt = 0;
+	TParent::begin();
+	while(!TParent::end() ) {
+		dst += *TParent::value();
+		cnt++;
+		TParent::next();
+	}
+	
+	if(cnt > 0) {
+		dst /= (float)cnt;
+	}
+}
 	
 template<typename T>
 class ValGrid : public AdaptiveGrid3<ValCell<T>, T, 10 > {
@@ -53,6 +72,8 @@ public:
 	        const T & v);
 	
 	void finishInsert();
+	
+	void getCellColor(float * dst);
 	
 protected:
 	
@@ -77,10 +98,10 @@ void ValGrid<T>::insertValueAtLevel(const int & level,
     
     int i=0;
     while(i<=level) {
-        const Coord4 c = cellCoordAtLevel(pref, i);
-        TCell * cell = findCell(c);
+        const Coord4 c = TParent::cellCoordAtLevel(pref, i);
+        TCell * cell = TParent::findCell(c);
         if(!cell) {
-            cell = addCell(c);
+            cell = TParent::addCell(c);
         }
         
         if(i==level) {
@@ -101,9 +122,17 @@ void ValGrid<T>::insertValueAtLevel(const int & level,
 template<typename T>
 void ValGrid<T>::finishInsert()
 {
-    storeCellNeighbors();
-	storeCellChildren();
-	calculateBBox();
+    TParent::storeCellNeighbors();
+	TParent::storeCellChildren();
+	TParent::calculateBBox();
+}
+
+template<typename T>
+void ValGrid<T>::getCellColor(float * dst)
+{
+	T mv;
+	TParent::value()->getMeanValue(mv);
+	mv.getColor(dst);
 }
 
 }

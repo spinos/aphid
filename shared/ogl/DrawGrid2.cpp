@@ -106,6 +106,14 @@ void DrawGrid2::setUniformColor(const float * col)
     }
 }
 
+void DrawGrid2::setFaceColor(float * dst,
+					const float * col)
+{
+	for(int i = 0; i<6;++i ) {
+        memcpy(&dst[i*3], col, 12);
+    }
+}
+
 void DrawGrid2::drawSolidGrid() const
 {
 	glColorPointer(3, GL_FLOAT, 0, (const GLfloat*)m_vertexColors.get());

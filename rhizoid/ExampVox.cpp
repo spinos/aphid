@@ -21,7 +21,8 @@ namespace aphid {
 ExampVox::ExampVox() : 
 m_sizeMult(1.f),
 m_isActive(true),
-m_isVisible(true)
+m_isVisible(true),
+m_drawDetailType(0)
 { 
     memset(m_defInstance._trans, 0, 64);
     m_defInstance._trans[0] = 1.f;
@@ -224,5 +225,17 @@ void ExampVox::setDiffuseMaterialCol(const float * x)
 
 void ExampVox::updateDopCol()
 { setUniformDopColor(m_diffuseMaterialColV); }
+
+void ExampVox::setDetailDrawType(const short & x)
+{ m_drawDetailType  = x; }
+
+void ExampVox::drawDetail() const
+{
+	if(m_drawDetailType == 1) {
+		drawSolidGrid();
+	} else {
+		drawPoints();
+	}
+}
 
 }

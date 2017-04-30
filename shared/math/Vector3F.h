@@ -74,6 +74,7 @@ public:
 	int orientation() const;
 /// quantized
 	Vector3F inOrientation(const float & l = 1.f) const;
+	void getColor(float * dst) const;
 
     static Vector3F FromPolarXYZ(float phi, float theta, float zdir=-1.f);
 	static Vector3F XAxis;

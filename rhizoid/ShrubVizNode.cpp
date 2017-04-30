@@ -551,7 +551,7 @@ void ShrubVizNode::drawSolidInstances() const
 			const ExampVox * v = getExample(ins._exampleId);
 			//const float * c = v->diffuseMaterialColor();
 			//m_instancer->setDiffueColorVec(c);
-			v->drawPoints();
+			v->drawDetail();
 		} else {
 			AHelper::Info<int>(" WARNING ShrubVizNode out of range example", ins._exampleId);
 			AHelper::Info<int>(" instance", i);

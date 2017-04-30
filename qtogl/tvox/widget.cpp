@@ -100,16 +100,18 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	m_valGrd = new VGDTyp;
 	m_valGrd->fillBox(m_tree->getBBox(), sz0 );
 	for(int i=0;i<np;++i) {
-	    Float4 * pr = particleR(i);
+	    const Float4 * pr = particleR(i);
+		const Float4 * cr = particleColor(i);
 	    m_valGrd->insertValueAtLevel(3, Vector3F(pr[0].w, pr[1].w, pr[2].w),
-	        Vector3F(1,1,0));
+	        Vector3F(cr[0].x, cr[0].y, cr[0].z));
 	}
 	m_valGrd->finishInsert();
 	
 	m_drdg = new DrawGrid2;
-	m_drdg->create(m_valGrd, 3);
-	float ucol[3] = {.2f, .8f, .45f};
-	m_drdg->setUniformColor(ucol);
+	m_drdg->create<VGDTyp> (m_valGrd, 3);
+	//float ucol[3] = {.2f, .8f, .45f};
+	//m_drdg->setUniformColor(ucol);
+	m_drdg->setPerCellColor<VGDTyp> (m_valGrd, 3);
 	std::cout.flush();	
 }
 
@@ -142,7 +144,7 @@ void GLWidget::clientDraw()
 	drawParticles();
 	
 	getDrawer()->m_surfaceProfile.apply();
-	//getDrawer()->m_wireProfile.apply();
+	getDrawer()->m_wireProfile.apply();
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);

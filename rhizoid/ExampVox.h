@@ -12,6 +12,7 @@
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
 #include <ogl/DrawPoint.h>
+#include <ogl/DrawGrid2.h>
 #include <math/BoundingBox.h>
 
 namespace aphid {
@@ -29,7 +30,7 @@ class Triangle;
 
 }
 
-class ExampVox : public DrawBox, public DrawDop, public DrawPoint {
+class ExampVox : public DrawBox, public DrawDop, public DrawPoint, public DrawGrid2 {
 
 	BoundingBox m_geomBox;
 	Vector3F m_geomCenter;
@@ -42,6 +43,8 @@ class ExampVox : public DrawBox, public DrawDop, public DrawPoint {
 	float m_geomSize;
 /// scaling radius of exclusion
 	float m_sizeMult;
+/// 0 point 1 grid
+	short m_drawDetailType;
 /// selected
 	bool m_isActive;
 /// show up during drawing
@@ -95,9 +98,12 @@ public:
 	const bool & isActive() const;
 	const bool & isVisible() const;
 	
+	void drawDetail() const;
+	
 protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
+	void setDetailDrawType(const short & x);
 	
 private:
 	InstanceD m_defInstance;

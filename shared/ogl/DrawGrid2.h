@@ -1,6 +1,7 @@
 #ifndef APH_DRAWGRID2_H
 #define APH_DRAWGRID2_H
 
+#include <sdb/AdaptiveGrid3.h>
 #include <boost/scoped_array.hpp>
 
 namespace aphid {
@@ -21,6 +22,9 @@ public:
 /// buffer face has no neighbor
     template<typename T>
     void create(T * grd, const int & level);
+	template<typename T>
+	void setPerCellColor(T * grd, const int & level);
+	
     void setUniformColor(const float * col);
     
     void drawSolidGrid() const;
@@ -30,7 +34,9 @@ protected:
                     float * mnl,
                     const BoundingBox & bx,
                     const int & iface);
-    
+    void setFaceColor(float * dst,
+					const float * col);
+	
 private:
 };
 
@@ -55,7 +61,7 @@ void DrawGrid2::create(T * grd, const int & level)
 			
 		grd->next();
 	}
-	std::cout<<"\n DrawGrid2::create nfaces "<<nfaces;
+	
 /// 2 triangles * 3 vertices * 3 floats
 	m_vertexPoints.reset(new float[nfaces * 18]);
 	m_vertexNormals.reset(new float[nfaces * 18]);
@@ -88,6 +94,35 @@ void DrawGrid2::create(T * grd, const int & level)
 		grd->next();
 	}
 	m_numVertices = nfaces * 6;
+}
+
+template<typename T>
+void DrawGrid2::setPerCellColor(T * grd, const int & level)
+{
+	float cellCol[3];
+	int nfaces = 0;
+    grd->begin();
+    while(!grd->end() ) {
+        sdb::Coord4 c = grd->key();
+        if(c.w == level) {
+		
+			grd->getCellColor(cellCol);
+		
+			for(int i=0;i<6;++i) {
+			    if(!grd->value()->neighbor(i)) {
+			        float * cr = &m_vertexColors[nfaces * 18];
+			        setFaceColor(cr, cellCol);
+			        nfaces++;
+			    }
+			}
+        }
+        
+        if(c.w > level) {
+			break;
+		}
+			
+		grd->next();
+	}
 }
 
 }

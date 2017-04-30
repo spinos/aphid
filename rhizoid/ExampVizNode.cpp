@@ -15,10 +15,12 @@
 #include <maya/MFnPluginData.h>
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnMatrixAttribute.h>
+#include <maya/MFnEnumAttribute.h>
 #include <ExampData.h>
 #include <math/linearMath.h>
 #include <geom/ConvexShape.h>
 #include <sdb/VectorArray.h>
+#include <sdb/ValGrid.h>
 #include <AllMama.h>
 
 MTypeId ExampViz::id( 0x95a20e );
@@ -41,12 +43,17 @@ MObject ExampViz::aininstspace;
 MObject ExampViz::avoxactive;
 MObject ExampViz::avoxvisible;
 MObject ExampViz::avoxpriority;
+MObject ExampViz::adrawVoxTag;
 MObject ExampViz::outValue;
 
 using namespace aphid;
 
 ExampViz::ExampViz()
-{}
+{
+	m_preDiffCol[0] = 0.f;
+	m_preDiffCol[1] = 0.f;
+	m_preDiffCol[2] = 0.f;
+}
 
 ExampViz::~ExampViz() 
 {}
@@ -88,6 +95,12 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		if(!loadTriangles(block) ) {
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
+		
+		updateGridUniformColor(diffCol);
+		
+		MDataHandle detailTypeHandle = block.inputValue( adrawVoxTag );
+		const short detailType = detailTypeHandle.asShort();
+		setDetailDrawType(detailType);
 		
 		MFnPluginData fnPluginData;
 		MStatus status;
@@ -135,6 +148,12 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		return;
 	}
 	
+	updateGridUniformColor(diffCol);
+	
+	MPlug detailTypePlg(selfNode, adrawVoxTag);
+	const short detailType = detailTypePlg.asShort();
+	setDetailDrawType(detailType);
+	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
 	Matrix33F mf;
@@ -165,7 +184,13 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		
 		glEnableClientState(GL_COLOR_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
-		drawPoints();
+		
+		if(detailType == 0) {
+			drawPoints();
+		} else {
+			drawSolidGrid();
+		}
+		
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 	
@@ -201,6 +226,7 @@ MStatus ExampViz::initialize()
 { 
 	MFnNumericAttribute numFn;
 	MFnTypedAttribute typedFn;
+	MFnEnumAttribute	enumAttr;
 	
 	MStatus			 stat;
 	
@@ -208,18 +234,24 @@ MStatus ExampViz::initialize()
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(0.47f);
+	numFn.setMin(0.f);
+	numFn.setMax(1.f);
 	addAttribute(adrawColorR);
 	
 	adrawColorG = numFn.create( "dspColorG", "dspg", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(0.46f);
+	numFn.setMin(0.f);
+	numFn.setMax(1.f);
 	addAttribute(adrawColorG);
 	
 	adrawColorB = numFn.create( "dspColorB", "dspb", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setDefault(0.45f);
+	numFn.setMin(0.f);
+	numFn.setMax(1.f);
 	addAttribute(adrawColorB);
 	
 	adrawColor = numFn.create( "dspColor", "dspc", adrawColorR, adrawColorG, adrawColorB );
@@ -295,6 +327,13 @@ MStatus ExampViz::initialize()
 	numFn.setDefault(1.f, 1.f, 1.f);
 	addAttribute(abboxmaxv);
 	
+	adrawVoxTag = enumAttr.create( "dspDetailType", "ddt", 0, &stat );
+	enumAttr.addField( "point", 0 );
+	enumAttr.addField( "grid", 1 );
+	enumAttr.setHidden( false );
+	enumAttr.setKeyable( true );
+	addAttribute(adrawVoxTag);
+	
 	outValue = typedFn.create( "outValue", "ov", MFnData::kPlugin );
 	typedFn.setStorable(false);
 	typedFn.setWritable(false);
@@ -352,6 +391,7 @@ MStatus ExampViz::initialize()
 	attributeAffects(adrawDopSizeZ, outValue);
 	attributeAffects(avoxactive, outValue);
 	attributeAffects(avoxvisible, outValue);
+	attributeAffects(adrawVoxTag, outValue);
 	return MS::kSuccess;
 }
 
@@ -418,12 +458,30 @@ void ExampViz::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	dopcPlug.setValue(ocol);
 	
 	AHelper::Info<int>("reduced draw n point ", pntBufLength() );
+	
 }
 
 void ExampViz::voxelize4(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {
 	voxelize3(tri, bbox);
+	
+	const int & np = pntBufLength();
+	AHelper::Info<int>("voxelize4 n point ", np );
+	const Vector3F * pr = pntPositionR();
+	const float sz0 = bbox.getLongestDistance() * .57f;
+	const Vector3F colgrn(0,1,0);	
+	VGDTyp valGrd;
+	valGrd.fillBox(bbox, sz0 );
+	for(int i=0;i<np;++i) {
+	    valGrd.insertValueAtLevel(3, pr[i],
+	        colgrn);
+	}
+	valGrd.finishInsert();
+	DrawGrid2::create<VGDTyp> (&valGrd, 3);
+	float ucol[3] = {.23f, .81f, .45f};
+	setUniformColor(ucol);
+	
 }
 
 void ExampViz::voxelize3(const aphid::DenseMatrix<float> & pnts,
@@ -595,7 +653,48 @@ void ExampViz::buildDrawBuf(int n,
 	}
 	
 	AHelper::Info<unsigned>(" ExampViz load n point", n );
-	buildBounding8Dop(geomBox() );
+	
+	const BoundingBox & bbox = geomBox();
+	buildBounding8Dop(bbox);
+	
+	const float sz0 = bbox.getLongestDistance() * .57f;
+	const Vector3F colgrn(0,1,0);	
+	
+	VGDTyp valGrd;
+	valGrd.fillBox(bbox, sz0 );
+	for(int i=0;i<n;++i) {
+	    valGrd.insertValueAtLevel(3, Vector3F(pnts[i].x, pnts[i].y, pnts[i].z),
+	        colgrn);
+	}
+	valGrd.finishInsert();
+	DrawGrid2::create<VGDTyp> (&valGrd, 3);
+	
 	setUniformDopColor(diffuseMaterialColV() );
+	setUniformColor(diffuseMaterialColV() );
+}
+
+void ExampViz::updateGridUniformColor(const float * col)
+{
+	bool stat = false;
+	if(m_preDiffCol[0] != col[0]) {
+		m_preDiffCol[0] = col[0];
+		stat = true;
+	}
+	
+	if(m_preDiffCol[1] != col[1]) {
+		m_preDiffCol[1] = col[1];
+		stat = true;
+	}
+	
+	if(m_preDiffCol[2] != col[2]) {
+		m_preDiffCol[2] = col[2];
+		stat = true;
+	}
+	
+	if(!stat) {
+		return;
+	}
+	
+	setUniformColor(col);
 }
 //:~

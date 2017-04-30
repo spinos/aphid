@@ -381,5 +381,8 @@ Vector3F Vector3F::inversed() const
 	r.inverse();
 	return r;
 }
+
+void Vector3F::getColor(float * dst) const
+{ memcpy(dst, this, 12); }
     
 }
