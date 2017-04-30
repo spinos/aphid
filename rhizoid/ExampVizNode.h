@@ -71,10 +71,13 @@ public:
 	virtual void voxelize3(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 							const aphid::BoundingBox & bbox);
 							
+	virtual void voxelize4(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
+							const aphid::BoundingBox & bbox);
+	
 	void voxelize3(const aphid::DenseMatrix<float> & pnts,
 						const MIntArray & triangleVertices,
 						const aphid::BoundingBox & bbox);
-	
+						
 private:
 	void updateGeomBox(MObject & node);
 	bool loadTriangles(MDataBlock & data);

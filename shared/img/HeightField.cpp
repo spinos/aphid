@@ -8,6 +8,7 @@
  */
 
 #include "HeightField.h"
+#include <math/BoundingBox.h>
 
 namespace aphid {
 
@@ -105,10 +106,99 @@ void HeightField::setRange(const float & w)
 const float & HeightField::sampleSize() const
 { return m_sampleSize; }
 
+void HeightField::setFileName(const std::string & x)
+{ m_fileName = x; }
+
+const std::string & HeightField::fileName() const
+{ return m_fileName; }
+
+const Float2 & HeightField::range() const
+{ return m_range; }
+
+void HeightField::setTransformMatrix(const Matrix44F & tm)
+{
+	m_tm = tm; 
+	m_invtm = tm;
+	m_invtm.inverse();
+}
+
+const Matrix44F & HeightField::transformMatrix() const
+{ return m_tm; }
+
+bool HeightField::getLocalPnt(Vector2F & pin) const
+{
+	Vector3F p3(pin.x, 0.f, pin.y);
+	p3 = m_invtm.transform(p3);
+	if(p3.x < 0.f || p3.x >= m_range.x) {
+		return false;
+	}
+	if(p3.y < 0.f || p3.y >= m_range.y) {
+		return false;
+	}
+	pin.set(p3.x - m_range.x * .5f, p3.z - m_range.y * .5f);
+	return true;
+}
+
+Vector2F HeightField::worldCenterPnt() const
+{
+	Vector3F dc(range().x, 0.f, range().y);
+	dc *= .5f;
+	dc = m_tm.transform(dc);
+	return Vector2F(dc.x, dc.z);
+}
+
+Vector2F HeightField::localCenterPnt() const
+{
+	return Vector2F(range().x * .5f, range().y * .5f);
+}
+
+BoundingBox HeightField::calculateBBox() const
+{
+	BoundingBox b;
+	Vector3F corner(0.f, 0.f, 0.f);
+	b.expandBy(m_tm.transform(corner) );
+	corner.set(range().x, 0.f, 0.f);
+	b.expandBy(m_tm.transform(corner) );
+	corner.set(0.f, 0.f, range().y);
+	b.expandBy(m_tm.transform(corner) );
+	corner.set(range().x, 0.f, range().y);
+	b.expandBy(m_tm.transform(corner) );
+	b.expand(1.f);
+	return b;
+}
+
+bool HeightField::intersect(const BoundingBox & bx) const
+{
+	const BoundingBox ax = calculateBBox();
+	return ax.intersect(bx);
+}
+
+void HeightField::getSampleProfileSapce(BoxSampleProfile<float> * prof,
+			ImageSpace * mspace) const
+{
+/// world to local
+	mspace->_worldToUVMatrix = m_invtm;
+	
+	Matrix44F tmuv;
+	Vector3F freq(1.f / range().x,
+				1.f,
+				1.f / range().y);
+	tmuv.scaleBy(freq);
+/// local to uv
+	mspace->_worldToUVMatrix *= tmuv;
+				
+/// 1 / num of samples 
+	mspace->_sourceSpacing = 1.f / (float)levelSignal(0).numCols();	
+	float filterSize = mspace->_sampleSpacing / mspace->_sourceSpacing;
+	ParentTyp::getSampleProfile(prof, filterSize);
+	
+}
+
 void HeightField::verbose() const
 {
 	GaussianPyramid<float>::verbose();
-	std::cout<<"\n HeightField "<<m_range.x<<" x "<<m_range.y
+	std::cout<<"\n HeightField "<<m_fileName
+		<<"\n range "<<m_range.x<<" x "<<m_range.y
 		<<"\n sample size "<<m_sampleSize;
 }
 

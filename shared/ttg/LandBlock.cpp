@@ -25,7 +25,7 @@ namespace ttg {
 
 LandBlock::LandBlock(sdb::Entity * parent) : sdb::Entity(parent)
 {
-	BoundingBox bx(-1023.99f, -1023.99f, -1023.99f, 1023.99f, 1023.99f, 1023.99f);
+	const BoundingBox bx = buildBox();
 	m_bccg = new BccTyp;
 	m_bccg->fillBox(bx, 512.f);
 	
@@ -47,17 +47,25 @@ LandBlock::~LandBlock()
 	delete m_heightField;
 }
 
-void LandBlock::processHeightField(const GlobalElevation * elevation)
+void LandBlock::rebuild()
 {
+	const BoundingBox bx = buildBox();
+	m_bccg->fillBox(bx, 512.f);
+	processHeightField();
+	triangulate();
+}
+
+void LandBlock::processHeightField()
+{
+	std::vector<int> fieldInds;
+	getTouchedHeightFields(fieldInds);
+
 	Array3<float> sig = img::HeightField::InitialValueAtLevel(9);
 	
-	img::ImageSensor<img::HeightField> sensor(Vector2F(-1024.f, -1024.f),
-		Vector2F(1024.f, -1024.f), sig.numCols(),
-		Vector2F(-1024.f, 1024.f), sig.numRows(),
-		Vector2F(0.f, 0.f), Vector2F(1.f, 1.f) );
-	sensor.verbose();
-	
-	//sensor.sense(&sig, 0, elevation->heightField(0) );
+/// todo fusion
+	if(fieldInds.size() > 0) {
+		senseHeightField(sig, GlobalElevation::GetHeightField(fieldInds[0]));
+	}
 	
 	m_heightField->create(sig);
 	m_heightField->setRange(2048.f);
@@ -119,6 +127,37 @@ const LandBlock::FieldTyp * LandBlock::field() const
 
 const ATriangleMesh * LandBlock::frontMesh() const
 { return m_frontMesh; }
+
+void LandBlock::getTouchedHeightFields(std::vector<int> & inds) const
+{
+	const int n = GlobalElevation::NumHeightFields();
+	if(n<1) {
+		return;
+	}
+	const BoundingBox bx = buildBox();
+
+	for(int i=0;i<n;++i) {
+		const img::HeightField & fld = GlobalElevation::GetHeightField(i);
+		if(fld.intersect(bx) ) {
+			inds.push_back(i);
+		}
+	}
+	
+}
+
+void LandBlock::senseHeightField(Array3<float> & sigY,
+							const img::HeightField & fld) const
+{
+	img::ImageSensor<img::HeightField> sensor(Vector2F(-1024.f, -1024.f),
+		Vector2F(1024.f, -1024.f), sigY.numCols(),
+		Vector2F(-1024.f, 1024.f), sigY.numRows() );
+	sensor.verbose();
+	
+	sensor.sense(&sigY, 0, fld );
+}
+
+BoundingBox LandBlock::buildBox() const
+{ return BoundingBox(-1023.99f, -1023.99f, -1023.99f, 1023.99f, 1023.99f, 1023.99f); }
 
 }
 

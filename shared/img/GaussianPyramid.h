@@ -48,9 +48,6 @@ public:
 /// filter size (1.0, 32.0), disable filtering if filter size == 0.0
 	void getSampleProfile(BoxSampleProfile<T> * prof,
 			const float & filterSize) const;
-/// filter size by sample_spacing / source_spacing			
-	void getSampleProfile(BoxSampleProfile<T> * prof,
-			ImageSpace * mspace) const;
 	
 	T sample(BoxSampleProfile<T> * prof) const;
 	
@@ -312,16 +309,6 @@ T GaussianPyramid<T>::sample(BoxSampleProfile<T> * prof) const
 	
 	T hiValue = sampleStage(prof->_hiLevel, prof->_channel, prof);
 	return loValue + (hiValue - loValue) * prof->_mixing;
-}
-
-template<typename T>
-void GaussianPyramid<T>::getSampleProfile(BoxSampleProfile<T> * prof,
-							ImageSpace * mspace) const
-{
-/// 1 / num of samples 
-	mspace->_sourceSpacing = 1.f / (float)levelSignal(0).numCols();			
-	float filterSize = mspace->_sampleSpacing / mspace->_sourceSpacing;
-	getSampleProfile(prof, filterSize);
 }
 
 template<typename T>

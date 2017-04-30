@@ -14,10 +14,18 @@
 
 namespace aphid {
 
+class Vector2F;
+class BoundingBox;
+
 namespace img {
 
 class HeightField : public GaussianPyramid<float> {
 
+typedef GaussianPyramid<float> ParentTyp;
+
+	Matrix44F m_tm;
+	Matrix44F m_invtm;
+	std::string m_fileName;
 	SignalTyp m_derivative[7];
 /// area covered
 	Float2 m_range;
@@ -49,7 +57,12 @@ public:
 	
 	virtual void create(const SignalTyp & inputSignal);
 	
+	void setFileName(const std::string & x);
 	void setRange(const float & w);
+	void setTransformMatrix(const Matrix44F & tm);
+	
+	const Float2 & range() const;
+	const Matrix44F & transformMatrix() const;
 
 	const SignalTyp & levelDerivative(int level) const;
 	
@@ -57,6 +70,16 @@ public:
 /// range of change
 	Float2 sampleHeightDerivative(BoxSampleProfile<float> * prof) const;
 	const float & sampleSize() const;
+	const std::string & fileName() const;
+	bool getLocalPnt(Vector2F & pin) const;
+	Vector2F worldCenterPnt() const;
+	Vector2F localCenterPnt() const;
+/// in world space
+	bool intersect(const BoundingBox & bx) const;
+/// world to local space	
+	void getSampleProfileSapce(BoxSampleProfile<float> * prof,
+			ImageSpace * mspace) const;
+	BoundingBox calculateBBox() const;
 	void verbose() const;
 	
 	static Profile GlobalHeightFieldProfile;
@@ -68,9 +91,8 @@ public:
 	static const Array3<float> & InitialValueAtLevel(int level);
 				
 protected:
-
+	 
 private:
-
 };
 
 }

@@ -38,6 +38,8 @@ if (WIN32)
         SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
         SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/libhdf5.lib")
 	ENDIF ()
+ELSEIF (APPLE)
+
 ELSEIF (UNIX)
 	SET (HDF5_INCLUDE_DIRS "/home/td21/usr/hdf5/include")
         SET (HDF5_LIBRARIES "/home/td21/usr/hdf5/lib/libhdf5.so")

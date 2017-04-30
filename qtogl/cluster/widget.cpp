@@ -83,7 +83,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	float contrib[4];	
 
     for(int i=0;i<np;++i) {
-		clseng.closestTo(top, poss[i]);
+		clseng.closestToPoint(poss[i]);
 
 		clseng.getGeomCompContribute(igeom, icomp, contrib);
 #if 0

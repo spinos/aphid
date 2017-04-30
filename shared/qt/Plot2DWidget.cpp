@@ -141,4 +141,9 @@ float Plot2DWidget::scaleOf(const UniformPlot2DImage * plt) const
 	return ((float)rb.x() - (float)lu.x() ) / (float)w;
 }
 
+UniformPlot2DImage * Plot2DWidget::plotImage(int idx)
+{
+	return m_images[idx];
+}
+
 }

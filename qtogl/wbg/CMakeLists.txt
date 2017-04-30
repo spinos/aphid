@@ -1,8 +1,13 @@
 set(CMAKE_MACOSX_BUNDLE OFF)
 
 set (ABG_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
+wbg_common.h
 window.h
 widget.h
+HeightFieldAttrib.h
+HeightFieldAssets.h
+ModifyHeightField.h
+DrawHeightField.h
 assetdlg.h
 toolBox.h)
 
@@ -19,8 +24,17 @@ ${APHID_QT_DIR}/QIconFrame.cpp
 ${APHID_QT_DIR}/StateIconFrame.cpp
 ${APHID_QT_DIR}/ContextIconFrame.cpp
 ${APHID_QT_DIR}/ActionIconFrame.cpp
+${APHID_QT_DIR}/IconLine.cpp
+${APHID_QT_DIR}/BaseImageWidget.cpp
+${APHID_QT_DIR}/Plot1DWidget.cpp
+${APHID_QT_DIR}/Plot2DWidget.cpp
+${APHID_QT_DIR}/NavigatorWidget.cpp
 widget.cpp
 window.cpp
+HeightFieldAttrib.cpp
+HeightFieldAssets.cpp
+ModifyHeightField.cpp
+DrawHeightField.cpp
 assetdlg.cpp
 toolBox.cpp
 main.cpp)

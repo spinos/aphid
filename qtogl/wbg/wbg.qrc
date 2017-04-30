@@ -2,5 +2,13 @@
     <qresource prefix="/">
         <file>icons/topView.png</file>
         <file>icons/perspView.png</file>
+        <file>icons/heightField.png</file>
+        <file>icons/generic_add.png</file>
+        <file>icons/rotate_2d.png</file>
+        <file>icons/resize_2d.png</file>
+        <file>icons/move_2d.png</file>
+        <file>icons/rotate_2d_inactive.png</file>
+        <file>icons/resize_2d_inactive.png</file>
+        <file>icons/move_2d_inactive.png</file>
     </qresource>
 </RCC>

@@ -311,12 +311,18 @@ static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
 					0.f, 0.f, 1.f, 0.f,
 					0.f, 0.f, 120.f, 1.f};
 	Matrix44F mat(mm);
-	getCamera()->setViewTransform(mat, 120.f);
+	perspCamera()->setViewTransform(mat, 120.f);
 }
 
 void Base3DView::resetOrthoViewTransform()
 {
-	resetPerspViewTransform();
+static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 1.f, 0.f, 0.f,
+					0.f, 0.f, 1.f, 0.f,
+					0.f, 0.f, 120.f, 1.f};
+	Matrix44F mat(mm);
+	orthoCamera()->setViewTransform(mat, 120.f);
+	orthoCamera()->setHorizontalAperture(120.f);
 }
 
 void Base3DView::resetView()
@@ -492,21 +498,25 @@ int Base3DView::interactMode() const
 	return m_interactContext->getContext();
 }
 
-void Base3DView::usePerspCamera()
+void Base3DView::usePerspCamera(bool transferSpace)
 {
 	if(getCamera()->isOrthographic()) {
 		fCamera = m_perspCamera;
-		fCamera->copyTransformFrom(m_orthoCamera);
+		if(transferSpace) {
+			fCamera->copyTransformFrom(m_orthoCamera);
+		}
 		updatePerspProjection();
 	}
 		
 }
 
-void Base3DView::useOrthoCamera()
+void Base3DView::useOrthoCamera(bool transferSpace)
 {
 	if(!getCamera()->isOrthographic()) {
 		fCamera = m_orthoCamera;
-		fCamera->copyTransformFrom(m_perspCamera);
+		if(transferSpace) {
+			fCamera->copyTransformFrom(m_perspCamera);
+		}
 		updateOrthoProjection();
 	}
 }

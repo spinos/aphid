@@ -28,6 +28,7 @@ private:
 	
 private slots:
 	void toggleAssetDlg(bool x);
+	void recvAssetDlgClose();
 	
 private:
     GLWidget *glWidget;

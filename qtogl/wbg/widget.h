@@ -8,6 +8,7 @@
 #define WBG_GLWIDGET_H
 
 #include <qt/Base3DView.h>
+#include "ModifyHeightField.h"
 #include <ogl/DrawTetrahedron.h>
 
 namespace aphid {
@@ -78,7 +79,7 @@ struct TFTNode {
     float _distance;
 };
 
-class GLWidget : public aphid::Base3DView, public aphid::DrawTetrahedron
+class GLWidget : public aphid::Base3DView, public aphid::DrawTetrahedron, public ModifyHeightField
 {
     Q_OBJECT
 
@@ -90,21 +91,25 @@ public:
 protected:    
     virtual void clientInit();
     virtual void clientDraw();
-    virtual void clientSelect(aphid::Vector3F & origin, aphid::Vector3F & ray, aphid::Vector3F & hit);
-    virtual void clientDeselect();
-    virtual void clientMouseInput(aphid::Vector3F & stir);
+    virtual void clientSelect(QMouseEvent *event);
+    virtual void clientDeselect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
     virtual void resetPerspViewTransform();
 	virtual void resetOrthoViewTransform();
 	
 public slots:
-		
+	void recvToolAction(int x);
+	void recvHeightFieldAdd();
+	void recvHeightFieldSel(int x);
+	void recvHeightFieldTransformTool(int x);
+	
 private:
     void drawTetraMesh();
     void drawTriangulation();
 	void toggleDrawTriangulationWire();
-	    
+	
 private slots:
 
 private:
@@ -113,6 +118,8 @@ typedef aphid::DrawGraph<aphid::DistanceNode, aphid::IDistanceEdge > FieldDrawer
     FieldDrawerT * m_fieldDrawer;
     aphid::ttg::LandBlock * m_landBlk;
 	bool m_doDrawTriWire;
+	
+	int m_showComponent;
 	
 };
 

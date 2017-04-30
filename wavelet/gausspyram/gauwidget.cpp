@@ -74,8 +74,8 @@ void GauWidget::resample()
 	m_Y->create(m, n, 1);
 	
 	img::ImageSensor<img::HeightField> sensor(Vector2F(0,0),
-		Vector2F(n,0), n,
-		Vector2F(0,m), m);
+		Vector2F(1024,0), n,
+		Vector2F(0,1024.f * m_gau->aspectRatio() ), m);
 	sensor.verbose();
 		
 	sensor.sense(m_Y, 0, *m_gau);
