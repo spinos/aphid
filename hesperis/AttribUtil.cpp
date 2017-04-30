@@ -45,9 +45,13 @@ void AttribUtil::save3(const MDagPathArray & entities)
 void AttribUtil::saveBoundle(const MDagPathArray & entities,
                             const std::string & parentName)
 {
-    unsigned i = 0;
-	for(; i< entities.length(); i++) scan(entities[i]);
-	if(m_dirtyPlugs.length() < 1) return;
+	for(unsigned i=0; i< entities.length(); i++) {
+		scan(entities[i]);
+	}
+	if(m_dirtyPlugs.length() < 1) {
+		return;
+	}
+	std::cout<<"\n AttribUtil::saveBoundle n "<<m_dirtyPlugs.length();
 	HesperisAttributeIO::WriteAttributeBoundle(UserDefinedAttribFilter,
 	                        m_dirtyPlugs, parentName, HesDoc); 
 	m_dirtyPlugs.clear();
