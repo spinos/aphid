@@ -24,6 +24,8 @@ public:
 	static bool IsCurveValid(const MDagPath & path);
 	static bool CreateCurveGroup(const MDagPathArray & paths, 
 								CurveGroup * dst);
+	static bool UpdateCurveGroup(const MDagPathArray & paths, 
+								CurveGroup * dst);
 	static bool WriteCurves(const MDagPathArray & paths, 
 							HesperisFile * file, 
 							const std::string & parentName = "");

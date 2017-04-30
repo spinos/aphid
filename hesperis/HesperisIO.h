@@ -43,6 +43,8 @@ public:
 							const std::string & parentName = "");
     static bool CreateMeshGroup(const MDagPathArray & paths, 
 								ATriangleMeshGroup * dst);
+    static bool UpdateMeshGroup(const MDagPathArray & paths, 
+								ATriangleMeshGroup * dst);
 	static void LsChildren(MObjectArray & dst, 
 	            const int & maxCount,
 	            const MObject & oparent);

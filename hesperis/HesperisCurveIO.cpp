@@ -170,13 +170,47 @@ bool HesperisCurveIO::CreateCurveGroup(const MDagPathArray & paths, CurveGroup *
 		MFnNurbsCurve fcurve(paths[i].node());
 		nj = fcurve.numCVs();
 		MPointArray ps;
-		fcurve.getCVs(ps, MSpace::kWorld);
+		fcurve.getCVs(ps, MSpace::kObject);
 		
 		counts[inode] = nj;
 		degrees[inode] = fcurve.degree();
 		inode++;
 		
 		for(j=0; j<nj; j++) {
+			wp = ps[j] * worldTm - GlobalReferencePoint;
+			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
+			icv++;
+		}
+	}
+    return true;
+}
+
+bool HesperisCurveIO::UpdateCurveGroup(const MDagPathArray & paths, CurveGroup * dst)
+{
+    const unsigned n = paths.length();
+    Vector3F * pnts = dst->points();
+	const unsigned * counts = dst->counts();
+	unsigned inode = 0;
+	unsigned icv = 0;
+	unsigned nj;
+	MPoint wp;
+	MMatrix worldTm;
+    for(unsigned i=0; i<n; i++) {
+		if(!IsCurveValid(paths[i])) {
+			continue;
+		}
+		
+		worldTm = AHelper::GetWorldTransformMatrix(paths[i]);
+		
+		MFnNurbsCurve fcurve(paths[i].node());
+		MPointArray ps;
+		fcurve.getCVs(ps, MSpace::kObject);
+		
+		nj = counts[inode];
+		
+		inode++;
+		
+		for(unsigned j=0; j<nj; j++) {
 			wp = ps[j] * worldTm - GlobalReferencePoint;
 			pnts[icv].set((float)wp.x, (float)wp.y, (float)wp.z);
 			icv++;

@@ -199,8 +199,9 @@ bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup
 			pnts[pDrift + j].set((float)wp.x, (float)wp.y, (float)wp.z);
         }
 		
-		for(j=0; j<triangleVertices.length(); j++)
+		for(j=0; j<triangleVertices.length(); j++) {
 			inds[iDrift + j] = pDrift + triangleVertices[j];
+        }
         
         pntDrift[iNode] = pDrift;
         indDrift[iNode] = iDrift;
@@ -210,6 +211,39 @@ bool HesperisIO::CreateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup
         iNode++;
 	}
     
+    return true;
+}
+
+bool HesperisIO::UpdateMeshGroup(const MDagPathArray & paths, ATriangleMeshGroup * dst)
+{
+    MStatus stat;
+	MPointArray ps;
+    MPoint wp;
+	MMatrix worldTm;
+    
+    const unsigned n = paths.length();
+
+	Vector3F * pnts = dst->points();
+    
+    unsigned pDrift = 0;
+    unsigned iNode = 0;
+    for(unsigned i=0; i<n; i++) {
+		MFnMesh fmesh(paths[i].node(), &stat);
+		if(!stat) continue;
+
+        worldTm = AHelper::GetWorldTransformMatrix(paths[i]);
+		
+		fmesh.getPoints(ps, MSpace::kObject);
+			
+		for(unsigned j=0; j<fmesh.numVertices(); j++) {
+            wp = ps[j] * worldTm - GlobalReferencePoint;
+			pnts[pDrift + j].set((float)wp.x, (float)wp.y, (float)wp.z);
+        }
+        
+        pDrift += fmesh.numVertices();
+        
+        iNode++;
+	}
     return true;
 }
 
