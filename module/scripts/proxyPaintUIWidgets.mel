@@ -89,6 +89,15 @@ global proc proxyPaintUpdateExmpVisible(string $com)
     eval($cmd);
 }
 
+global proc proxyPaintEditDspTyp(string $com)
+{
+    string $ind = `intField -q -ann $com`;
+    int $dsptyp = `intField -q -v $com`;
+    string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"dsp_type="+$dsptyp+";\" "+ `currentCtx`;
+    eval($cmd);
+    proxyPaintOnActiveExampleChanges();
+}
+
 global proc proxyPaintEditPriority(string $com)
 {
     string $ind = `intField -q -ann $com`;
@@ -130,14 +139,14 @@ global proc proxyPaintSetAllExamplesActive(int $stat)
         -ca pxpnExmpUIRow`;
     int $nchild = size($chds);    
     int $i;
-    for($i=5;$i<$nchild;$i=$i+5) {
+    for($i=6;$i<$nchild;$i=$i+6) {
         int $v = `iconTextCheckBox -q -v $chds[$i]`;
         if($v == $stat) {
             continue;
         }
         iconTextCheckBox -e -v $stat $chds[$i];
         iconTextCheckBox -e -image $iconstr $chds[$i];
-        int $index = ($i - 5)/5;
+        int $index = ($i - 6)/6;
         string $cmd = "proxyPaintToolContext -e -exs "+$index+" \"active="+$stat+";\" "+ `currentCtx`;
         eval($cmd);
     }
@@ -168,7 +177,7 @@ global proc proxyPaintUpdateExmpUI(string $coln)
     
     string $stats[] = proxyPaintGetExampleStats();
         
-    int $nexmps = size($stats) / 10;
+    int $nexmps = size($stats) / 12;
     if($nexmps < 1) {
         return;   
     }
@@ -189,18 +198,20 @@ global proc proxyPaintUpdateExmpUI(string $coln)
     text -l "" -p pxpnExmpUIRow;
     text -l "" -p pxpnExmpUIRow;
     text -l "" -p pxpnExmpUIRow;
+    text -l "" -p pxpnExmpUIRow;
     
     int $index;
     for ($index = 0; $index < $nexmps; $index++) {
         
-        int $iBegin = $index * 10;
-        int $iEnd = $iBegin + 10;
+        int $iBegin = $index * 12;
+        int $iEnd = $iBegin + 12;
         
         string $name = proxyPaintGetExmpName($stats, $iBegin, $iEnd);
         int $bActive = proxyPaintGetExmpBoolStat($stats, ".is_active", $iBegin, $iEnd);
         int $bVisible = proxyPaintGetExmpBoolStat($stats, ".is_visible", $iBegin, $iEnd);
         string $scolor = proxyPaintGetExmpVec3Stat($stats, ".dsp_color", $iBegin, $iEnd);
         string $sPriority = proxyPaintGetExmpIntStat($stats, ".priority", $iBegin, $iEnd);
+        string $sDspType = proxyPaintGetExmpIntStat($stats, ".dsp_type", $iBegin, $iEnd);
         
         string $exmpActiveCheckName = "pxpnUICheckExmpActive"+$index;
         string $exmpActiveCheck = `iconTextCheckBox -v $bActive 
@@ -272,6 +283,20 @@ global proc proxyPaintUpdateExmpUI(string $coln)
         string $exmpColorPC = "proxyPaintEditCanvasColor(\""+$exmpColorCanvasName+"\")";
         
         canvas -e -pc $exmpColorPC $exmpColorCanvasName;
+        
+        if($index < 1) {
+            text -l "" -p pxpnExmpUIRow;
+        } else {
+            string $exmpDspTypeField = `intField -w 24
+            -ann $index
+            -p pxpnExmpUIRow
+            -minValue -1 -maxValue 2 -value 0`;
+        
+            eval("intField -e -v "+$sDspType+" "+$exmpDspTypeField);
+            string $exmpDspTypCC = "proxyPaintEditDspTyp(\""+$exmpDspTypeField+"\")";
+            intField -e -cc $exmpDspTypCC $exmpDspTypeField;
+        
+        }
     }
     proxyPaintOnActiveExampleChanges();
 }
@@ -279,7 +304,7 @@ global proc proxyPaintUpdateExmpUI(string $coln)
 global proc proxyPaintCreateExmpUI(string $coln)
 {
     rowColumnLayout -p $coln
-        -numberOfColumns 5
+        -numberOfColumns 6
         -cw 1 26
         -cs 1 2
         -cw 2 154
@@ -290,6 +315,8 @@ global proc proxyPaintCreateExmpUI(string $coln)
         -cs 4 2
         -cw 5 26
         -cs 5 2
+        -cw 6 26
+        -cs 6 2
         pxpnExmpUIRow;
     setParent ..;   
 }

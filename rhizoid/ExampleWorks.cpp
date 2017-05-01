@@ -106,6 +106,9 @@ MString ExampleWorks::getExampleStatusStr()
 	AttributeHelper::getIntAttributeByName(fviz, "examplePriority", priority);
 	addIntStatusStrSeg(res, priority, "/.priority");
 	
+	int detailType = -1;
+	addIntStatusStrSeg(res, detailType, "/.dsp_type");
+	
 	MObjectArray exmpOs;
 	getConnectExamples(exmpOs);
 	
@@ -127,6 +130,9 @@ MString ExampleWorks::getExampleStatusStr()
 	
 		AttributeHelper::getIntAttributeByName(fexmp, "examplePriority", priority);
 		addIntStatusStrSeg(res, priority, "/.priority");
+		
+		AttributeHelper::getIntAttributeByName(fexmp, "dspDetailType", detailType);
+		addIntStatusStrSeg(res, detailType, "/.dsp_type");
 	}
 	
 	return res;
@@ -257,7 +263,9 @@ void ExampleWorks::setExampleStatus(const MObject & exmpO,
 		if(shead == "priority") {
 			setExampleIntAttrib(exmpO, "examplePriority", sval);
 		}
-		
+		if(shead == "dsp_typ") {
+			setExampleIntAttrib(exmpO, "dspDetailType", sval);
+		}
 		start = what[0].second;
 	}
 }
