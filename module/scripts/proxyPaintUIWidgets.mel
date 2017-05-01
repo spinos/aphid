@@ -89,12 +89,32 @@ global proc proxyPaintUpdateExmpVisible(string $com)
     eval($cmd);
 }
 
+global proc proxyPaintSetDspTypImg(string $val, string $com)
+{
+    if($val == "0") {
+        iconTextButton -e -image1 "proxyPaintTool_point.xpm" $com;
+    } else {
+        iconTextButton -e -image1 "proxyPaintTool_voxel.xpm" $com;
+    }
+}
+
 global proc proxyPaintEditDspTyp(string $com)
 {
-    string $ind = `intField -q -ann $com`;
-    int $dsptyp = `intField -q -v $com`;
-    string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"dsp_type="+$dsptyp+";\" "+ `currentCtx`;
+    string $ind = `iconTextButton -q -ann $com`;
+    string $imgi = `iconTextButton -q -image1 $com`;
+    int $dsptyp = 0;
+    if($imgi == "proxyPaintTool_point.xpm") {
+        $dsptyp = 1;
+    }
+    
+    string $cmd = "proxyPaintToolContext -e -exs "+$ind+" \"dsptyp="+$dsptyp+";\" "+ `currentCtx`;
     eval($cmd);
+    
+    if($dsptyp == 0) {
+        proxyPaintSetDspTypImg("0", $com);
+    } else {
+        proxyPaintSetDspTypImg("1", $com);
+    }
     proxyPaintOnActiveExampleChanges();
 }
 
@@ -287,14 +307,16 @@ global proc proxyPaintUpdateExmpUI(string $coln)
         if($index < 1) {
             text -l "" -p pxpnExmpUIRow;
         } else {
-            string $exmpDspTypeField = `intField -w 24
+            string $exmpDspTypeField = `iconTextButton -st "iconOnly" -w 24
             -ann $index
-            -p pxpnExmpUIRow
-            -minValue -1 -maxValue 2 -value 0`;
+            -w 24 -mw 0
+            -h 24 -mh 0
+            -p pxpnExmpUIRow`;
         
-            eval("intField -e -v "+$sDspType+" "+$exmpDspTypeField);
+            proxyPaintSetDspTypImg($sDspType, $exmpDspTypeField);
+            
             string $exmpDspTypCC = "proxyPaintEditDspTyp(\""+$exmpDspTypeField+"\")";
-            intField -e -cc $exmpDspTypCC $exmpDspTypeField;
+            iconTextButton -e -c $exmpDspTypCC $exmpDspTypeField;
         
         }
     }

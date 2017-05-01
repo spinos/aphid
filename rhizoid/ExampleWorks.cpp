@@ -228,7 +228,7 @@ bool ExampleWorks::setExampleStatus(int idx, const std::string & expression)
 void ExampleWorks::setExampleStatus(const MObject & exmpO,
 				const std::string & expression)
 {	
-///	std::cout<<"\n ExampleWorks::setExampleStatus "<<expression;
+/// std::cout<<"\n ExampleWorks::setExampleStatus "<<expression;
 	
 	const std::string pattern = "([a-z_0-9]+)=([a-z0-9 -.]+);";
 	
@@ -263,7 +263,7 @@ void ExampleWorks::setExampleStatus(const MObject & exmpO,
 		if(shead == "priority") {
 			setExampleIntAttrib(exmpO, "examplePriority", sval);
 		}
-		if(shead == "dsp_typ") {
+		if(shead == "dsptyp") {
 			setExampleIntAttrib(exmpO, "dspDetailType", sval);
 		}
 		start = what[0].second;
@@ -476,6 +476,11 @@ void ExampleWorks::getExampleColors(std::vector<Vector3F> & colors)
 
 void ExampleWorks::activateExamples()
 {
+	validateSelection();
+	if(!PtrViz) {
+		return;
+	}
+	
 	std::map<int, int > priotityMap;
 	if(!getActiveExamplePriority(priotityMap) ) {
 		return;
