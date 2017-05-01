@@ -23,6 +23,7 @@
 #include <math/Matrix33F.h>
 #include "ShrubWorks.h"
 #include "ReplacerWorks.h"
+#include "GardenWorks.h"
 
 namespace aphid {
 
@@ -34,7 +35,7 @@ class Triangle;
 
 }
 
-class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks, public ReplacerWorks
+class proxyPaintTool : public MPxToolCommand, public aphid::ShrubWorks, public ReplacerWorks, public GardenWorks
 {
     int m_currentVoxInd;
 	int m_l2VoxInd;
@@ -95,7 +96,8 @@ private:
 		opDistanceFieldTriangulate = 12,
 		opListReplacer = 13,
 		opConnectReplacer = 14,
-		opReplaceGround = 15
+		opReplaceGround = 15,
+		opImportGarden = 16
 	};
 	
 	Operation m_operation;
@@ -105,7 +107,7 @@ private:
 	int m_dftLevel;
 	float lseg;
 	double m_dftScale, m_dftRound;
-	MString fBlockerName, fVizName, m_cacheName;
+	MString fBlockerName, fVizName, m_cacheName, m_gardenName;
 	
 };
 #endif        //  #ifndef BOXPAINTTOOLCMD_H

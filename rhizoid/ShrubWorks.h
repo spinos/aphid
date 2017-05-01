@@ -6,6 +6,10 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
+
+#ifndef PXPNT_SHRUB_WORKS_H
+#define PXPNT_SHRUB_WORKS_H
+
 #include <maya/MStatus.h>
 #include <maya/MDagPath.h>
 #include <maya/MDagPathArray.h>
@@ -91,3 +95,4 @@ typedef std::map<int, Int2 > FeatureExampleMap;
 };
 
 }
+#endif

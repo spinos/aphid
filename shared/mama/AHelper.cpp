@@ -1227,6 +1227,19 @@ MObject AHelper::CreateDGNode(const MTypeId & typeId,
     return node;
 }
 
+MObject AHelper::CreateTransform(const MString & nodeName,
+							 MObject parent)
+{
+	MFnTransform ft;
+	MObject node = ft.create(parent);
+	if(node == MObject::kNullObj) {
+		return node;
+	}
+	ft.setObject(node);
+	ft.setName(nodeName);
+	return node;
+}
+
 void AHelper::GetViewMatrix(Matrix33F * mat,
 								const MDagPath & cameraPath)
 {

@@ -70,6 +70,8 @@
 #define kShrubCreateFlagLong "-createShrub"
 #define kReplaceGroundFlag "-rgm" 
 #define kReplaceGroundFlagLong "-replaceGroundMesh"
+#define kImportGardenExampleFlag "-ige" 
+#define kImportGardenExampleFlagLong "-importGardenExample"
 
 using namespace aphid;
 
@@ -109,6 +111,7 @@ MSyntax proxyPaintTool::newSyntax()
 	syntax.addFlag(kDFTRoundFlag, kDFTRoundFlagLong, MSyntax::kDouble);
 	syntax.addFlag(kShrubCreateFlag, kShrubCreateFlagLong, MSyntax::kNoArg);
 	syntax.addFlag(kReplaceGroundFlag, kReplaceGroundFlagLong, MSyntax::kLong);
+	syntax.addFlag(kImportGardenExampleFlag, kImportGardenExampleFlagLong, MSyntax::kString);
 	return syntax;
 }
 
@@ -123,8 +126,6 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 	}
 	
 	if(m_operation == opUnknown) return status;
-	
-	if(m_operation == opConnectGround) return connectGroundSelected();
 	
 	if(m_operation == opSaveCache) {
 		status = saveCacheSelected();
@@ -146,20 +147,46 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 		return status;
 	}
 	
-	if(m_operation == opVoxelize) return voxelizeSelected();
-	
-	if(m_operation == opConnectVoxel) return connectVoxelSelected();
-	
-    if(m_operation == opPrincipalComponent) return performPCA();
-	
-	if(m_operation == opDistanceFieldTriangulate) return performDFT();
-	
-	if(m_operation == opCreateShrub) {
-		return creatShrub();
+	bool toReturn = false;
+	switch (m_operation) {
+		case opConnectGround:
+			status = connectGroundSelected();
+			toReturn = true;
+			break;
+		case opVoxelize:
+			status = voxelizeSelected();
+			toReturn = true;
+			break;
+		case opConnectVoxel:
+			status = connectVoxelSelected();
+			toReturn = true;
+			break;
+		case opPrincipalComponent:
+			status = performPCA();
+			toReturn = true;
+			break;
+		case opDistanceFieldTriangulate:
+			status = performDFT();
+			toReturn = true;
+			break;
+		case opCreateShrub:
+			status = creatShrub();
+			toReturn = true;
+			break;
+		case opReplaceGround:
+			status = replaceGroundSelected(m_replaceGroundId);
+			toReturn = true;
+			break;
+		case opImportGarden:
+			status = importGardenFile(m_gardenName.asChar() );
+			toReturn = true;
+			break;
+		default:
+			break;
 	}
 	
-	if(m_operation == opReplaceGround) {
-		return replaceGroundSelected(m_replaceGroundId);
+	if(toReturn) {
+		return status;
 	}
 		
 	ASearchHelper finder;
@@ -376,6 +403,15 @@ MStatus proxyPaintTool::parseArgs(const MArgList &args)
 			return status;
 		}
 		m_operation = opReplaceGround;
+	}
+	
+	if (argData.isFlagSet(kImportGardenExampleFlag)) {
+		status = argData.getFlagArgument(kImportGardenExampleFlag, 0, m_gardenName);
+		if (!status) {
+			MGlobal::displayWarning(" proxyPaintTool cannot parse -ige flag");
+			return status;
+		}
+		m_operation = opImportGarden;
 	}
 	
 	return MS::kSuccess;

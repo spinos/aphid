@@ -266,4 +266,43 @@ void MeshHelper::GetMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
 	}
 }
 
+MObject MeshHelper::CreateMesh(const ATriangleMesh & msh,
+					MObject parent)
+{
+	const int numVertices = msh.numPoints();
+	const int numPolygons = msh.numTriangles();
+	const int ninds = numPolygons * 3;
+	
+	MPointArray vertexArray;
+	vertexArray.setLength(numVertices);
+	
+	const Vector3F * pos = msh.points();
+	for(int i=0;i<numVertices;++i) {
+		vertexArray[i] = MPoint(pos[i].x, pos[i].y, pos[i].z);
+	}
+	
+	MIntArray polygonCounts;
+	polygonCounts.setLength(numPolygons);
+	for(int i=0;i<numPolygons;++i) {
+		polygonCounts[i] = 3;
+	}
+	
+	MIntArray polygonConnects;
+	polygonConnects.setLength(ninds);
+	
+	const unsigned * ind = msh.indices();
+	for(int i=0;i<ninds;++i) {
+		polygonConnects[i] = ind[i];
+	}
+	
+	MFnMesh mf;
+	MObject node = mf.create (numVertices, numPolygons, 
+		vertexArray, 
+		polygonCounts, 
+		polygonConnects, 
+		parent );
+		
+	return node;
+}
+
 }
