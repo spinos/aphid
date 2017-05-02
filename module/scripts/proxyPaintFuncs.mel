@@ -647,3 +647,31 @@ global proc proxyPaint_loadCache()
     }
 }
 
+proc proxyPaint_showParentTransform(string $name)
+{
+    print("\n proxyPaint show transform "+$name);
+    string $par = firstParentOf($name);
+    if($par != "") {
+        string $attrName = $par + ".visibility";
+        if(`getAttr $attrName` == 0) {
+            setAttr $attrName 1;
+            proxyPaint_showParentTransform($par);
+        }
+    }
+}
+
+proc proxyPaint_showAViz(string $name)
+{
+    print("\n proxyPaint show viz "+$name);
+    proxyPaint_showParentTransform($name);
+}
+
+global proc proxyPaint_showAllVizs()
+{
+    string $shapes[] = `ls -type proxyViz`;
+    string $ashape;
+    for($ashape in $shapes) {
+        proxyPaint_showAViz($ashape);
+    }
+}
+

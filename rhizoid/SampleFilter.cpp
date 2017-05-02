@@ -107,7 +107,7 @@ void SampleFilter::resetPlantTypeIndices(const std::vector<int> & indices)
 		m_plantTypeMap[0] = true;
 		return;
 	}
-	
+	std::cout<<"\n SampleFilter::resetPlantTypeIndices n ind "<<n;
 	m_numPlantTypeIndices = n;
 	m_plantTypeIndices.reset(new int[n]);
 	for(int i=0;i<n;++i) {
@@ -124,7 +124,7 @@ void SampleFilter::resetPlantTypeColors(const std::vector<Vector3F> & colors)
 		initPlantTypeColors();
 		return;
 	}
-	
+	std::cout<<"\n SampleFilter::resetPlantTypeColors n color "<<n;
 	m_numPlantTypeColors = n;
 	m_plantTypeColors.reset(new Vector3F[n]);
 	for(int i=0;i<n;++i) {

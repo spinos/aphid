@@ -112,6 +112,8 @@ global proc proxyPaint_listAllVizToPaint()
 
 global proc proxyPaint_selectAViz2(int $index)
 {
+/// cannot have empty data
+    proxyPaint_showAllVizs();
     string $vizs[] = `ls -type proxyViz`;
     
     select -r $vizs[$index];
