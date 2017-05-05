@@ -148,6 +148,8 @@ public:
 	bool processLoadExternal(const char * fileName);
 	bool processStartEditOffset(const Ray & ray);
 	
+	bool isNullViz() const;
+	
 private:
     void drawBrush(M3dView & view);
 	

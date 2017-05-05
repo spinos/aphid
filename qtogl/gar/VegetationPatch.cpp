@@ -136,3 +136,11 @@ void VegetationPatch::extractTms(Matrix44F * dst)
 		m_plants[i]->extractTms(dst, it);
 	}
 }
+
+void VegetationPatch::getBBox(BoundingBox * dst)
+{
+	const int n = numPlants();
+	for(int i=0;i<n;++i) {
+		m_plants[i]->getBBox(dst);
+	}
+}

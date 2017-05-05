@@ -106,9 +106,9 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 	GardenGlyph * gl = (GardenGlyph *)top;
 	const int gg = gar::ToGroupType(gl->glyphType() );
 		
+	PlantPiece * pl1 = new PlantPiece(pl);
 	switch (gg) {
 		case gar::ggGrass:
-			PlantPiece * pl1 = new PlantPiece(pl);
 			addGrassBranch(pl1, gl);
 		break;
 		default:

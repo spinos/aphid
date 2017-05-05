@@ -1287,5 +1287,8 @@ bool ProxyViz::processStartEditOffset(const Ray & ray)
 	return calculateSelecedWeightAt(ray);
 }
 
+bool ProxyViz::isNullViz() const
+{ return _firstLoad; }
+
 }
 //:~

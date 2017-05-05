@@ -17,6 +17,7 @@
 namespace aphid {
 class Vector3F;
 class Matrix44F;
+class BoundingBox;
 }
 
 class PlantPiece;
@@ -54,6 +55,8 @@ public:
 	
 	int getNumTms();
 	void extractTms(aphid::Matrix44F * dst);
+	
+	void getBBox(aphid::BoundingBox * dst);
 	
 protected:
 

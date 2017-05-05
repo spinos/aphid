@@ -98,3 +98,8 @@ void PlantPiece::extractTms(aphid::Matrix44F * dst,
 		(*it)->extractTms(dst, count);
 	}
 }
+
+void PlantPiece::getBBox(BoundingBox * dst) const
+{
+
+}

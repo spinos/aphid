@@ -17,6 +17,7 @@
 
 namespace aphid {
 class ATriangleMesh;
+class BoundingBox;
 }
 
 class PlantPiece {
@@ -52,6 +53,8 @@ public:
 	void countNumTms(int & count) const;
 	void extractTms(aphid::Matrix44F * dst,
 			int & count) const;
+			
+	void getBBox(BoundingBox * dst) const;
 	
 protected:
 

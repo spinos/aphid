@@ -481,6 +481,11 @@ void ExampleWorks::activateExamples()
 		return;
 	}
 	
+	if(PtrViz->isNullViz() ) {
+		std::cout<<"viz is null!";
+		return;
+	}
+	
 	std::map<int, int > priotityMap;
 	if(!getActiveExamplePriority(priotityMap) ) {
 		return;

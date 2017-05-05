@@ -1,9 +1,11 @@
-#ifndef SHRUB_VIZ_NODE_H
-#define SHRUB_VIZ_NODE_H
+#ifndef VEG_EXAMPLE_NODE_H
+#define VEG_EXAMPLE_NODE_H
 
 /*
- *  ShrubVizNode.h
+ *  VegExampleNode.h
  *  proxyPaint
+ *
+ *	n examples, 1 instance each
  *
  *  Created by jian zhang on 3/1/12.
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
@@ -19,29 +21,23 @@
 #include <maya/MSceneMessage.h>
 #include <maya/MIntArray.h>
 #include <maya/MVectorArray.h>
-#include <ogl/DrawInstance.h>
 #include <ogl/DrawCircle.h>
-#include "BundleExamp.h"
+#include "ExampVox.h"
 
 namespace aphid {
 
 class Matrix44F;
-class ExampVox;
-
-template<typename T>
-class DenseMatrix;
-
 class BoundingBox;
 
-class ShrubVizNode : public MPxLocatorNode, public BundleExamp, public DrawInstance, public DrawCircle
+class VegExampleNode : public MPxLocatorNode, public ExampVox, public DrawCircle
 {
-	float m_transBuf[16];
 	Matrix44F * m_cameraSpace;
-	bool m_useExampleInput;
+/// n examples internal
+	int m_nemp;
 	
 public:
-	ShrubVizNode();
-	virtual ~ShrubVizNode(); 
+	VegExampleNode();
+	virtual ~VegExampleNode(); 
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& data );
 
@@ -51,58 +47,51 @@ public:
 
 	virtual bool            isBounded() const;
 	virtual MBoundingBox    boundingBox() const; 
-	virtual MStatus connectionMade ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
-	virtual MStatus connectionBroken ( const MPlug & plug, const MPlug & otherPlug, bool asSrc );
 	
 	static  void *          creator();
 	static  MStatus         initialize();
 
 	static MTypeId id;
-	static MObject aradiusMult;
+/// overall bbox
 	static MObject ashrubbox;
-	static MObject ainsttrans;
+/// bbox of each group, length n, n is # groups
+	static MObject ainstbbox;
+/// begin of each group, length (n+1), n is # groups
+	static MObject ainstrange;
+/// ind to instance
 	static MObject ainstexamp;
-	static MObject ainexamp;
+/// space to instance
+	static MObject ainsttrans;
 	static MObject adrawColorR;
 	static MObject adrawColorG;
 	static MObject adrawColorB;
 	static MObject adrawColor;
+	static MObject adrawDopSizeX;
+	static MObject adrawDopSizeY;
+	static MObject adrawDopSizeZ;
+	static MObject adrawDopSize;
+	static MObject aradiusMult;
+	static MObject aininstspace;
 	static MObject avoxactive;
 	static MObject avoxvisible;
 	static MObject avoxpriority;
     static MObject outValue;
 	
-	const MMatrix & worldSpace() const;
-	
 	void setBBox(const BoundingBox & bbox);
-/// instance as transform 4-by-4 and example_id
-	void addInstance(const DenseMatrix<float> & trans,
-					const int & exampleId);
 	
-	void enableExampleInput();
-	void disableExampleInput();
+/// override ExampVox
+	virtual int numExamples() const;
 	
 protected:
 	void getBBox(BoundingBox & bbox) const;
-
-	void drawWiredBoundInstances() const;
-	void drawSolidInstances() const;
-	void drawWiredInstances() const;
 	   
 private:
-	void attachSceneCallbacks();
-	void detachSceneCallbacks();
-	static void releaseCallback(void* clientData);
-
-	MCallbackId fBeforeSaveCB;
-	void saveInternal();
 	bool loadInstances(const MVectorArray & instvecs,
 						const MIntArray & instexmps);
 	bool loadInternal();
 	bool loadInternal(MDataBlock& block);
-	void addExample(const MPlug & plug);
 	
 };
 
 }
-#endif        //  #ifndef ShrubVizNode_H
+#endif        //  #ifndef VegExampleNode_H
