@@ -54,8 +54,8 @@ public:
 	ExampVox();
 	virtual ~ExampVox();
 /// distance field based	
-	virtual void voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
-							const BoundingBox & bbox);
+	//virtual void voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
+	//						const BoundingBox & bbox);
 /// point sample based
 	virtual void voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox);

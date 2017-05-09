@@ -56,6 +56,7 @@ public slots:
 private:
     void simpleDraw(VegetationPatch * vgp);
 	void geomDraw(VegetationPatch * vgp);
+	void pointDraw(VegetationPatch * vgp);
 	
 private slots:
 

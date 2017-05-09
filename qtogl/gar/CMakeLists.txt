@@ -1,3 +1,5 @@
+include_directories (${APHID_DIR}/rhizoid)
+
 set(CMAKE_MACOSX_BUNDLE OFF)
 
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
@@ -24,7 +26,8 @@ DrawVegetation.h
 exportDlg.h
 ExportExample.h
 HGardenExample.h
-toolBox.h)
+toolBox.h
+${APHID_DIR}/rhizoid/ExampVox.cpp)
 
 set ( GAR_RESOURCES
 gar.qrc

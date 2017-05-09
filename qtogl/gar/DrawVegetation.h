@@ -25,6 +25,7 @@ public:
 	
 	void drawNaive(const VegetationPatch * vgp);
 	void drawPlantPatch(const VegetationPatch * vgp);
+	void drawPointPatch(const VegetationPatch * vgp);
 	void drawPlant(const PlantPiece * pl);
 	
 protected:

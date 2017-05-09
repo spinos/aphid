@@ -173,4 +173,6 @@ void Vegetation::voxelize(VegetationPatch * ap)
 	//std::cout.flush();
 	
 	ap->setTriangleDrawCache(triangles);
+	
+	//ap->voxelize3(&triangles, gridBox);
 }

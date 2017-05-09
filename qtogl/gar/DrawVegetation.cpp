@@ -21,6 +21,26 @@ DrawVegetation::DrawVegetation()
 DrawVegetation::~DrawVegetation()
 {}
 
+void DrawVegetation::drawPointPatch(const VegetationPatch * vgp)
+{
+	if(vgp->numPlants() < 1) {
+		return;
+	}
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	glPushMatrix();
+	glMultMatrixf(vgp->transformationV());
+	
+	vgp->drawPoints();
+	
+	glPopMatrix();
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void DrawVegetation::drawNaive(const VegetationPatch * vgp)
 {
 	if(vgp->numPlants() < 1) {

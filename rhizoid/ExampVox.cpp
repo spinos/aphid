@@ -9,7 +9,7 @@
 
 #include "ExampVox.h"
 #include <kd/KdEngine.h>
-#include <FieldTriangulation.h>
+//#include <FieldTriangulation.h>
 #include <geom/ConvexShape.h>
 #include <sdb/VectorArray.h>
 #include <kd/IntersectEngine.h>
@@ -40,7 +40,7 @@ m_drawDetailType(0)
 
 ExampVox::~ExampVox() 
 {}
-
+/*
 void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {
@@ -73,7 +73,7 @@ void ExampVox::voxelize2(sdb::VectorArray<cvx::Triangle> * tri,
 			(const float *)msh.triangleVertexN() );
 	buildBounding8Dop(bbox);
 }
-
+*/
 void ExampVox::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {

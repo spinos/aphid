@@ -41,8 +41,18 @@ void GLWidget::clientDraw()
 	for(int i=0;i<m_vege->numPatches();++i) {
 		//simpleDraw(m_vege->patch(i) );
 		geomDraw(m_vege->patch(i) );
+		//pointDraw(m_vege->patch(i) );
 	}
 	
+}
+
+void GLWidget::pointDraw(VegetationPatch * vgp)
+{
+	getDrawer()->setColor(.125f, .125f, .5f);
+	//getDrawer()->m_wireProfile.apply();
+	//getDrawer()->m_markerProfile.apply();
+	getDrawer()->m_surfaceProfile.apply();
+	m_vegd->drawPointPatch(vgp);
 }
 
 void GLWidget::geomDraw(VegetationPatch * vgp)

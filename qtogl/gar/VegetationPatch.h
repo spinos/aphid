@@ -15,26 +15,17 @@
 #include <vector>
 #include <ogl/DrawTriangle.h>
 
+#include <ExampVox.h>
+
 namespace aphid {
-class Vector3F;
+
 class Matrix44F;
-class BoundingBox;
-
-namespace cvx {
-class Triangle;
-}
-
-namespace sdb {
-template<typename T>
-class VectorArray;
-
-}
 
 }
 
 class PlantPiece;
 
-class VegetationPatch : public aphid::DrawTriangle {
+class VegetationPatch : public aphid::ExampVox, public aphid::DrawTriangle {
 
 	typedef std::vector<PlantPiece *> PlantListTyp;
 	typedef aphid::cvx::Triangle GeomElmTyp;
