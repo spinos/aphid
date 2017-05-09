@@ -469,7 +469,7 @@ void ExampViz::voxelize4(sdb::VectorArray<cvx::Triangle> * tri,
 	const int & np = pntBufLength();
 	AHelper::Info<int>("voxelize4 n point ", np );
 	const Vector3F * pr = pntPositionR();
-	const float sz0 = bbox.getLongestDistance() * .57f;
+	const float sz0 = bbox.getLongestDistance() * .299f;
 	const Vector3F colgrn(0,1,0);	
 	VGDTyp valGrd;
 	valGrd.fillBox(bbox, sz0 );
@@ -657,7 +657,7 @@ void ExampViz::buildDrawBuf(int n,
 	const BoundingBox & bbox = geomBox();
 	buildBounding8Dop(bbox);
 	
-	const float sz0 = bbox.getLongestDistance() * .57f;
+	const float sz0 = bbox.getLongestDistance() * .299f;
 	const Vector3F colgrn(0,1,0);	
 	
 	VGDTyp valGrd;

@@ -54,7 +54,7 @@ public:
 	void extractTms(aphid::Matrix44F * dst,
 			int & count) const;
 			
-	void getBBox(BoundingBox * dst) const;
+	void getBBox(aphid::BoundingBox * dst) const;
 	
 protected:
 

@@ -92,6 +92,12 @@ global proc proxyPaintProperties ()
 	proxyPaintUpdateExampleScroll();
 }
 
+proc string pxpnt_parentOfViz(string $node)
+{
+    string $par[] = `listRelatives -ap $node`;
+    return $par[0];
+}
+
 global proc proxyPaint_listAllVizToPaint()
 {
     string $chds[] = `columnLayout -q - ca "pxpnVizUIColn34952260"`;
@@ -103,7 +109,8 @@ global proc proxyPaint_listAllVizToPaint()
     int $nvizs = size($vizs);
     int $i;
     for($i = 0;$i<$nvizs;$i++) {
-        button -l $vizs[$i] 
+        string $transname = pxpnt_parentOfViz($vizs[$i]);
+        button -l $transname
             -al left -w 320
             -p "pxpnVizUIColn34952260"
             -c ("proxyPaint_selectAViz2("+ $i +")");
