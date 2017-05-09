@@ -10,6 +10,8 @@
 #include "Vegetation.h"
 #include "VegetationPatch.h"
 #include <geom/ATriangleMesh.h>
+#include <sdb/VectorArray.h>
+#include <geom/ConvexShape.h>
 #include "gar_common.h"
 #include "data/grass.h"
 #include <boost/format.hpp>
@@ -152,4 +154,23 @@ std::string Vegetation::getGeomName(const int & k)
 		;
 	}
 	return str(boost::format("%1%_%2%") % geoms % (k & 15));
+}
+
+void Vegetation::voxelize()
+{
+	for(int i=0;i<m_numPatches;++i) {
+		voxelize(m_patches[i]);
+	}
+}
+
+void Vegetation::voxelize(VegetationPatch * ap)
+{
+	sdb::VectorArray<cvx::Triangle> triangles;
+	BoundingBox gridBox;
+	ap->getGeom(&triangles, gridBox);
+	//std::cout<<"\n Vegetation::voxelize bx"<<gridBox
+	//		<<" n elm "<<triangles.size();
+	//std::cout.flush();
+	
+	ap->setTriangleDrawCache(triangles);
 }

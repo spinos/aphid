@@ -49,6 +49,10 @@ public:
 	template<typename T>
 	void dumpComponent(T & acomp, const int & i) const;
 	
+	template<typename T>
+	void dumpComponent(T & acomp, const int & i,
+					const Matrix44F & tm) const;
+	
 protected:
 	
 private:
@@ -67,6 +71,36 @@ void ATriangleMesh::dumpComponent(T & acomp, const int & i) const
 	acomp.setP(p[a], 0);
 	acomp.setP(p[b], 1);
 	acomp.setP(p[c], 2);
+		
+	const Float2 * uvs = triangleTexcoord(i);
+	acomp.setUVs(uvs);
+}
+
+template<typename T>
+void ATriangleMesh::dumpComponent(T & acomp, const int & i,
+					const Matrix44F & tm) const
+{
+	const Vector3F * p = points();
+	const Vector3F * nml = vertexNormals();
+	const unsigned * v = triangleIndices(i);
+	int a = v[0];
+	int b = v[1];
+	int c = v[2];
+			
+	acomp.setP(tm.transform(p[a]), 0);
+	acomp.setP(tm.transform(p[b]), 1);
+	acomp.setP(tm.transform(p[c]), 2);
+	
+	acomp.resetNC();
+	Vector3F wn = tm.transformAsNormal(nml[a]);
+	wn.normalize();
+	acomp.setN(wn, 0);
+	wn = tm.transformAsNormal(nml[b]);
+	wn.normalize();
+	acomp.setN(wn, 1);
+	wn = tm.transformAsNormal(nml[c]);
+	wn.normalize();
+	acomp.setN(wn, 2);
 		
 	const Float2 * uvs = triangleTexcoord(i);
 	acomp.setUVs(uvs);

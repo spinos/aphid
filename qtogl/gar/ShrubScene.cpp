@@ -169,6 +169,7 @@ void ShrubScene::genSinglePlant()
 {
 	genPlants(m_vege->patch(0));
 	m_vege->setNumPatches(1);
+	m_vege->voxelize();
 }
 	
 void ShrubScene::genMultiPlant()
@@ -179,4 +180,5 @@ void ShrubScene::genMultiPlant()
 	}
 	m_vege->setNumPatches(n);
 	m_vege->rearrange();
+	m_vege->voxelize();
 }

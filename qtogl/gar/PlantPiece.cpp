@@ -9,6 +9,8 @@
 
 #include "PlantPiece.h"
 #include <geom/ATriangleMesh.h>
+#include <geom/ConvexShape.h>
+#include <sdb/VectorArray.h>
 
 using namespace aphid;
 
@@ -46,7 +48,7 @@ int PlantPiece::numBranches() const
 const PlantPiece * PlantPiece::branch(const int & i) const
 { return m_childPieces[i]; }
 
-void PlantPiece::setGeometry(aphid::ATriangleMesh * geom)
+void PlantPiece::setGeometry(ATriangleMesh * geom)
 { m_geom = geom; }
 
 const ATriangleMesh * PlantPiece::geometry() const
@@ -73,10 +75,11 @@ void PlantPiece::setExclRByChild()
 
 void PlantPiece::countNumTms(int & count) const
 {
+	count++;
+	
 	if(numBranches() < 1) {
 		return;
 	}
-	count++;
 	
 	ChildListTyp::const_iterator it = m_childPieces.begin();
 	for(;it!=m_childPieces.end();++it) {
@@ -87,11 +90,12 @@ void PlantPiece::countNumTms(int & count) const
 void PlantPiece::extractTms(aphid::Matrix44F * dst,
 			int & count) const
 {
+	dst[count] = m_tm;
+	count++;
+	
 	if(numBranches() < 1) {
 		return;
 	}
-	dst[count] = m_tm;
-	count++;
 	
 	ChildListTyp::const_iterator it = m_childPieces.begin();
 	for(;it!=m_childPieces.end();++it) {
@@ -99,7 +103,50 @@ void PlantPiece::extractTms(aphid::Matrix44F * dst,
 	}
 }
 
-void PlantPiece::getBBox(BoundingBox * dst) const
+void PlantPiece::worldTransformMatrix(Matrix44F & dst) const
 {
+	dst.multiply(m_tm);
+	if(m_parentPiece) {
+		m_parentPiece->worldTransformMatrix(dst);
+	}
+}
 
+void PlantPiece::getGeom(GeomElmArrTyp * dst,
+					BoundingBox & box,
+					const aphid::Matrix44F & relTm)
+{
+	Matrix44F wtm = m_tm;
+	wtm.multiply(relTm);
+	
+	getGeomElm(dst, box, relTm);
+	
+	if(numBranches() < 1) {
+		return;
+	}
+	
+	ChildListTyp::const_iterator it = m_childPieces.begin();
+	for(;it!=m_childPieces.end();++it) {
+		(*it)->getGeom(dst, box, wtm);
+	}
+	
+}
+
+void PlantPiece::getGeomElm(GeomElmArrTyp * dst,
+					BoundingBox & box,
+					const Matrix44F & relTm)
+{
+	if(!m_geom) {
+		return;
+	}
+	GeomElmTyp acomp;
+	const int n = m_geom->numComponents();
+	for(int j=0; j<n; ++j) {
+		
+		m_geom->dumpComponent<GeomElmTyp>(acomp, j, relTm);
+		dst->insert(acomp);
+			
+		const BoundingBox cbx = acomp.calculateBBox();
+		box.expandBy(cbx);
+	}
+	
 }

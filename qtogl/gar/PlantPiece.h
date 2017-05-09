@@ -18,6 +18,17 @@
 namespace aphid {
 class ATriangleMesh;
 class BoundingBox;
+
+namespace cvx {
+class Triangle;
+}
+
+namespace sdb {
+template<typename T>
+class VectorArray;
+
+}
+
 }
 
 class PlantPiece {
@@ -29,6 +40,9 @@ typedef std::vector<PlantPiece * > ChildListTyp;
 	PlantPiece * m_parentPiece;
 	aphid::ATriangleMesh * m_geom;
 	float m_exclR;
+	
+typedef aphid::cvx::Triangle GeomElmTyp;
+typedef aphid::sdb::VectorArray<GeomElmTyp > GeomElmArrTyp;
 	
 public:
 	PlantPiece(PlantPiece * parent = NULL);
@@ -54,11 +68,19 @@ public:
 	void extractTms(aphid::Matrix44F * dst,
 			int & count) const;
 			
-	void getBBox(aphid::BoundingBox * dst) const;
+	void getGeom(GeomElmArrTyp * dst,
+					aphid::BoundingBox & box,
+					const aphid::Matrix44F & relTm);
+					
+	void worldTransformMatrix(aphid::Matrix44F & dst) const;
 	
 protected:
 
 private:
+	void getGeomElm(GeomElmArrTyp * dst,
+					aphid::BoundingBox & box,
+					const aphid::Matrix44F & relTm);
+	
 };
 
 #endif

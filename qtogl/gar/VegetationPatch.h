@@ -13,18 +13,32 @@
 #define GAR_VEGETATION_PATCH_H
 
 #include <vector>
+#include <ogl/DrawTriangle.h>
 
 namespace aphid {
 class Vector3F;
 class Matrix44F;
 class BoundingBox;
+
+namespace cvx {
+class Triangle;
+}
+
+namespace sdb {
+template<typename T>
+class VectorArray;
+
+}
+
 }
 
 class PlantPiece;
 
-class VegetationPatch {
+class VegetationPatch : public aphid::DrawTriangle {
 
 	typedef std::vector<PlantPiece *> PlantListTyp;
+	typedef aphid::cvx::Triangle GeomElmTyp;
+	typedef aphid::sdb::VectorArray<GeomElmTyp > GeomElmArrTyp;
 /// to roots
 	PlantListTyp m_plants;
 	float m_tmv[16];
@@ -56,7 +70,10 @@ public:
 	int getNumTms();
 	void extractTms(aphid::Matrix44F * dst);
 	
-	void getBBox(aphid::BoundingBox * dst);
+	void getGeom(GeomElmArrTyp * dst,
+					aphid::BoundingBox & box);
+					
+	void setTriangleDrawCache(const GeomElmArrTyp & src);
 	
 protected:
 

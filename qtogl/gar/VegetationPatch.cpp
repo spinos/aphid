@@ -9,6 +9,8 @@
 
 #include "VegetationPatch.h"
 #include "PlantPiece.h"
+#include <sdb/VectorArray.h>
+#include <geom/ConvexShape.h>
 #include <math/Matrix44F.h>
 #include <math/miscfuncs.h>
 
@@ -137,10 +139,30 @@ void VegetationPatch::extractTms(Matrix44F * dst)
 	}
 }
 
-void VegetationPatch::getBBox(BoundingBox * dst)
+void VegetationPatch::getGeom(GeomElmArrTyp * dst,
+					BoundingBox & box)
 {
+	const Matrix44F space;
 	const int n = numPlants();
 	for(int i=0;i<n;++i) {
-		m_plants[i]->getBBox(dst);
+		m_plants[i]->getGeom(dst, box, space);
+	}
+}
+
+void VegetationPatch::setTriangleDrawCache(const GeomElmArrTyp & src)
+{
+	const int n = src.size();
+	setTriDrawBufLen(n * 3);
+	Vector3F * pos = triPositionR();
+	Vector3F * nml = triNormalR();
+	for(int i=0; i<n; ++i) {
+		const GeomElmTyp * atri = src.get(i);
+		pos[i*3] = atri->P(0);
+		pos[i*3+1] = atri->P(1);
+		pos[i*3+2] = atri->P(2);
+		
+		nml[i*3] = atri->N(0);
+		nml[i*3+1] = atri->N(1);
+		nml[i*3+2] = atri->N(2);
 	}
 }

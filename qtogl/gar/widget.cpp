@@ -39,34 +39,26 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw()
 {
 	for(int i=0;i<m_vege->numPatches();++i) {
-		simpleDraw(m_vege->patch(i) );
+		//simpleDraw(m_vege->patch(i) );
+		geomDraw(m_vege->patch(i) );
 	}
 	
 }
 
+void GLWidget::geomDraw(VegetationPatch * vgp)
+{
+	getDrawer()->setColor(.125f, .125f, .5f);
+	//getDrawer()->m_wireProfile.apply();
+	//getDrawer()->m_markerProfile.apply();
+	getDrawer()->m_surfaceProfile.apply();
+	m_vegd->drawPlantPatch(vgp);
+}
+
 void GLWidget::simpleDraw(VegetationPatch * vgp)
 {
-	if(vgp->numPlants() < 1) {
-		return;
-	}
-	
-	//getDrawer()->m_wireProfile.apply();
-	//getDrawer()->setColor(.125f, .125f, .5f);
-    
-    //getDrawer()->m_markerProfile.apply();
-    //getDrawer()->setColor(0.f, .35f, .13f);
-
+    getDrawer()->setColor(0.f, .45f, .13f);
 	getDrawer()->m_surfaceProfile.apply();
-	
-	glPushMatrix();
-	glMultMatrixf(vgp->transformationV());
-	
-	const int n = vgp->numPlants();
-	for(int i=0;i<n;++i) {
-		const PlantPiece * pl = vgp->plant(i);
-		m_vegd->drawPlant(pl);
-	}
-	glPopMatrix();
+	m_vegd->drawNaive(vgp);
 }
 
 void GLWidget::resetPerspViewTransform()

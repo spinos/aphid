@@ -56,12 +56,15 @@ public:
 	
 	void geomBegin(std::string & mshName, GeomPtrTyp & mshVal);
 	void geomNext(std::string & mshName, GeomPtrTyp & mshVal);
+/// for each patch, sample grid
+	void voxelize();
 	
 protected:
 
 private:
 	void clearCachedGeom();
 	std::string getGeomName(const int & k);
+	void voxelize(VegetationPatch * ap);
 	
 };
 

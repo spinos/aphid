@@ -30,10 +30,10 @@ public:
 	void drawWiredTriangles() const;
 	void drawSolidTriangles() const;
 	
-protected:
 	const float * triNormalBuf() const;
 	const float * triPositionBuf() const;
-	
+
+protected:
 	Vector3F * triNormalR();
 	Vector3F * triPositionR();
 	void setTriDrawBufLen(const int & x);
