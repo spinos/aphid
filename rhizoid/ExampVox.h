@@ -63,6 +63,8 @@ public:
 /// set b4 geom box
 	void setGeomSizeMult(const float & x);
 	void setGeomBox(BoundingBox * bx);
+/// wo limit
+	void setGeomBox2(const BoundingBox & bx);
 	void setDopSize(const float & a,
 	                const float & b,
 	                const float &c);

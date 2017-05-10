@@ -172,6 +172,7 @@ void VegetationPatch::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {
 	ExampVox::voxelize3(tri, bbox);
+	setGeomBox2(bbox);
 	const int & np = pntBufLength();
 	const Vector3F * pr = pntPositionR();
 	const float sz0 = bbox.getLongestDistance() * .299f;

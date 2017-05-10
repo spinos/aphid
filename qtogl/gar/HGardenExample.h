@@ -11,7 +11,6 @@
 #define GAR_GARDEN_EXAMPLE_H
 
 #include <h5/HBase.h>
-#include <h5/HOocArray.h>
 
 class Vegetation;
 

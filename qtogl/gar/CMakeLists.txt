@@ -26,6 +26,7 @@ DrawVegetation.h
 exportDlg.h
 ExportExample.h
 HGardenExample.h
+HVegePatch.h
 toolBox.h
 ${APHID_DIR}/rhizoid/ExampVox.cpp)
 
@@ -64,6 +65,7 @@ DrawVegetation.cpp
 exportDlg.cpp
 ExportExample.cpp
 HGardenExample.cpp
+HVegePatch.cpp
 main.cpp)
 
 add_executable (gar ${GAR_HEADER_FILES} ${GAR_SOURCE_FILES} ${GAR_RES_SOURCES})

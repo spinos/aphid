@@ -31,11 +31,11 @@ public:
 	void drawPoints() const;
 	void drawWiredPoints() const;
 	
-protected:
 	const float * pntNormalBuf() const;
 	const float * pntPositionBuf() const;
 	const float * pntColorBuf() const;
 	
+protected:
 	Vector3F * pntNormalR();
 	Vector3F * pntPositionR();
 	Vector3F * pntColorR();

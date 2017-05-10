@@ -13,6 +13,7 @@
 #define GAR_VEGETATION_H
 
 #include <map>
+#include <math/BoundingBox.h>
 
 namespace aphid {
 class ATriangleMesh;
@@ -21,7 +22,9 @@ class ATriangleMesh;
 class VegetationPatch;
 
 class Vegetation {
-
+/// over all patches
+	aphid::BoundingBox m_bbox;
+	
 public:
 	typedef aphid::ATriangleMesh * GeomPtrTyp;
 	
@@ -58,6 +61,8 @@ public:
 	void geomNext(std::string & mshName, GeomPtrTyp & mshVal);
 /// for each patch, sample grid
 	void voxelize();
+	
+	const aphid::BoundingBox & bbox() const;
 	
 protected:
 

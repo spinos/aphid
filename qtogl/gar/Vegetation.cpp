@@ -158,9 +158,14 @@ std::string Vegetation::getGeomName(const int & k)
 
 void Vegetation::voxelize()
 {
+	m_bbox.reset();
 	for(int i=0;i<m_numPatches;++i) {
 		voxelize(m_patches[i]);
+		m_bbox.expandBy(m_patches[i]->geomBox() );
 	}
+	std::cout<<"\n vegetation bbox "<<m_bbox;
+	std::cout.flush();
+	
 }
 
 void Vegetation::voxelize(VegetationPatch * ap)
@@ -176,3 +181,6 @@ void Vegetation::voxelize(VegetationPatch * ap)
 	
 	ap->voxelize3(&triangles, gridBox);
 }
+
+const aphid::BoundingBox & Vegetation::bbox() const
+{ return m_bbox; }

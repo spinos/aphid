@@ -163,7 +163,12 @@ void ExampVox::setGeomBox(BoundingBox * bx)
 		bx->setMin(-1.f, 2);
 		bx->setMax( 1.f, 2);
 	}
-	m_geomBox = *bx;
+	setGeomBox2(*bx);
+}
+
+void ExampVox::setGeomBox2(const BoundingBox & bx)
+{
+	m_geomBox = bx;
 	m_geomExtent = m_geomBox.radius();
 	m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); 
 	m_geomCenter = m_geomBox.center();

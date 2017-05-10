@@ -13,6 +13,8 @@
 #include <math/Matrix44F.h>
 #include <geom/ATriangleMesh.h>
 #include <h5/HTriangleMesh.h>
+#include "HVegePatch.h"
+#include <sstream>
 
 namespace aphid {
 
@@ -25,9 +27,8 @@ HGardenExample::~HGardenExample()
 	
 char HGardenExample::verifyType()
 {
+	if(!hasNamedAttr(".bbox") ) return 0;
 	if(!hasNamedAttr(".xmpc") ) return 0;
-	if(!hasNamedData(".tmblk") ) return 0;
-	if(!hasNamedData(".tms") ) return 0;
 	if(!hasNamedAttr(".geoc") ) return 0;
 	return 1;
 }
@@ -35,6 +36,12 @@ char HGardenExample::verifyType()
 char HGardenExample::save(Vegetation * vege)
 {
 	std::cout<<" HGardenExample save "<<fObjectPath;
+	
+	const BoundingBox & bbox = vege->bbox();
+	if(!hasNamedAttr(".bbox"))
+		addFloatAttr(".bbox", 6);
+	
+	writeFloatAttr(".bbox", (float *)&bbox);
 	
 	int nxmp = vege->numPatches();
 	if(!hasNamedAttr(".xmpc"))
@@ -44,40 +51,16 @@ char HGardenExample::save(Vegetation * vege)
 	
 	std::cout<<"\n n example "<<nxmp;
 	
-	int * blks = new int[nxmp+1];
-	int cc = 0;
+	std::stringstream sst;
 	for(int i=0;i<nxmp;++i) {
-		blks[i] = cc;
+		sst.str("vgp_");
+		sst<<i;
 		VegetationPatch * vgp = vege->patch(i);
-		cc += vgp->getNumTms();
+		std::string vgpPathName = childPath(sst.str().c_str() );
+		HVegePatch chd(vgpPathName);
+		chd.save(vgp);
+		chd.close();
 	}
-	blks[nxmp] = cc;
-	
-	std::cout<<"\n n instance "<<cc;
-	
-	if(!hasNamedData(".tmblk"))
-	    addIntData(".tmblk", nxmp+1);
-	
-	writeIntData(".tmblk", nxmp+1, (int *)blks);
-	
-	Matrix44F * tms = new Matrix44F[cc];
-	for(int i=0;i<nxmp;++i) {
-		VegetationPatch * vgp = vege->patch(i);
-		vgp->extractTms(&tms[blks[i]]);
-	}
-	
-	HOocArray<hdata::TFloat, 16, 256> tmD(".tms");
-	if(!hasNamedData(".tms") ) {
-		tmD.createStorage(fObjectId);
-	}
-	
-	for(int i=0;i<cc;++i) {
-		tmD.insert((char *)&tms[i]);
-	}
-	tmD.finishInsert();
-	
-	delete[] tms;
-	delete[] blks;
 	
 	int ngeo = vege->numCachedGeoms();
 	if(!hasNamedAttr(".geoc"))
