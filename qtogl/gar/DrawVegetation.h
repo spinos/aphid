@@ -23,9 +23,13 @@ public:
 	DrawVegetation();
 	virtual ~DrawVegetation();
 	
+	void begin();
+	void end();
 	void drawNaive(const VegetationPatch * vgp);
 	void drawPlantPatch(const VegetationPatch * vgp);
 	void drawPointPatch(const VegetationPatch * vgp);
+	void drawDopPatch(const VegetationPatch * vgp);
+	void drawVoxelPatch(const VegetationPatch * vgp);
 	void drawPlant(const PlantPiece * pl);
 	
 protected:

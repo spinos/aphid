@@ -31,14 +31,13 @@ ToolBox::ToolBox(QWidget *parent) : QToolBar(parent)
 		connect(*it, SIGNAL(contextDisabled(int)), this, SLOT(onContextFrameChanged(int)));
 	}
 	//addSeparator();
-	
+*/	
 	createState();
 	
 	for(std::vector<StateIconFrame *>::iterator it = m_stateFrames.begin(); it != m_stateFrames.end(); ++it) {
-		addWidget(*it);
-		connect(*it, SIGNAL(stateChanged(int)), this, SLOT(onStateFrameChanged(int)));
+		
 	}
-*/	
+	
 }
 
 ToolBox::~ToolBox() 
@@ -101,9 +100,28 @@ void ToolBox::createAction()
 
 void ToolBox::createState()
 {
+	m_dspStateIcon = new StateIconFrame(this);
+	m_dspStateIcon->addIconFile(":/icons/triangle.png");
+	m_dspStateIcon->addIconFile(":/icons/dop.png");
+	m_dspStateIcon->addIconFile(":/icons/point.png");
+	m_dspStateIcon->addIconFile(":/icons/voxel.png");
+	m_dspStateIcon->setIconIndex(0);
+	m_dspStateIcon->mapState(0, gar::dsTriangle);
+	m_dspStateIcon->mapState(1, gar::dsDop);
+	m_dspStateIcon->mapState(2, gar::dsPoint);
+	m_dspStateIcon->mapState(3, gar::dsVoxel);
+	
+	connect(m_dspStateIcon, SIGNAL(stateChanged(int)), this, SLOT(onDspStateChanged(int)));
+	
+	addWidget(m_dspStateIcon);
 }
 
-void ToolBox::onStateFrameChanged(int s)
+void ToolBox::onDspStateChanged(int s)
 {
-	emit stateChanged(s);
+	emit dspStateChanged(s);
+}
+
+void ToolBox::setDisplayState(int x)
+{
+	m_dspStateIcon->setState(x);
 }

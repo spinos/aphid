@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#include <map>
 #include <qt/QIconFrame.h>
 
 namespace aphid {
@@ -19,8 +20,10 @@ Q_OBJECT
 public:
     StateIconFrame(QWidget *parent = 0);
 	
+	void mapState(int k, int x);
 	void setState(int val);
-	int getState() const;
+	int getState();
+	
 protected:	
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseReleaseEvent(QMouseEvent *event);
@@ -28,7 +31,7 @@ signals:
 	void stateChanged(int a);
 
 private:
-	int m_state;
+	std::map<int, int > m_stateMap;
 };
 
 }

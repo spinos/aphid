@@ -66,6 +66,9 @@ public:
 					
 	void setTriangleDrawCache(const GeomElmArrTyp & src);
 	
+	virtual void voxelize3(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
+							const aphid::BoundingBox & bbox);
+	
 protected:
 
 private:

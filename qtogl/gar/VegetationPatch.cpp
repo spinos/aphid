@@ -13,6 +13,7 @@
 #include <geom/ConvexShape.h>
 #include <math/Matrix44F.h>
 #include <math/miscfuncs.h>
+#include <sdb/ValGrid.h>
 
 using namespace aphid;
 
@@ -165,4 +166,25 @@ void VegetationPatch::setTriangleDrawCache(const GeomElmArrTyp & src)
 		nml[i*3+1] = atri->N(1);
 		nml[i*3+2] = atri->N(2);
 	}
+}
+
+void VegetationPatch::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
+							const BoundingBox & bbox)
+{
+	ExampVox::voxelize3(tri, bbox);
+	const int & np = pntBufLength();
+	const Vector3F * pr = pntPositionR();
+	const float sz0 = bbox.getLongestDistance() * .299f;
+	const Vector3F colgrn(0,1,0);
+typedef sdb::ValGrid<Vector3F> VGDTyp;		
+	VGDTyp valGrd;
+	valGrd.fillBox(bbox, sz0 );
+	for(int i=0;i<np;++i) {
+	    valGrd.insertValueAtLevel(3, pr[i],
+	        colgrn);
+	}
+	valGrd.finishInsert();
+	DrawGrid2::create<VGDTyp> (&valGrd, 3);
+	float ucol[3] = {.23f, .81f, .45f};
+	setUniformColor(ucol);
 }

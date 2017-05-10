@@ -27,9 +27,6 @@ void DrawVegetation::drawPointPatch(const VegetationPatch * vgp)
 		return;
 	}
 	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	
 	glPushMatrix();
 	glMultMatrixf(vgp->transformationV());
 	
@@ -37,8 +34,6 @@ void DrawVegetation::drawPointPatch(const VegetationPatch * vgp)
 	
 	glPopMatrix();
 	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void DrawVegetation::drawNaive(const VegetationPatch * vgp)
@@ -46,9 +41,6 @@ void DrawVegetation::drawNaive(const VegetationPatch * vgp)
 	if(vgp->numPlants() < 1) {
 		return;
 	}
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
 	
 	glPushMatrix();
 	glMultMatrixf(vgp->transformationV());
@@ -59,9 +51,6 @@ void DrawVegetation::drawNaive(const VegetationPatch * vgp)
 		drawPlant(pl);
 	}
 	glPopMatrix();
-	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void DrawVegetation::drawPlantPatch(const VegetationPatch * vgp)
@@ -69,9 +58,6 @@ void DrawVegetation::drawPlantPatch(const VegetationPatch * vgp)
 	if(vgp->numPlants() < 1) {
 		return;
 	}
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
 	
 	glPushMatrix();
 	glMultMatrixf(vgp->transformationV());
@@ -82,8 +68,6 @@ void DrawVegetation::drawPlantPatch(const VegetationPatch * vgp)
 	
 	glPopMatrix();
 	
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void DrawVegetation::drawPlant(const PlantPiece * pl)
@@ -118,4 +102,36 @@ void DrawVegetation::drawMesh(const ATriangleMesh * geo)
 	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)geo->vertexNormals() );
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)geo->points() );
 	glDrawElements(GL_TRIANGLES, geo->numIndices(), GL_UNSIGNED_INT, geo->indices() );
+}
+
+void DrawVegetation::drawDopPatch(const VegetationPatch * vgp)
+{
+	glPushMatrix();
+	glMultMatrixf(vgp->transformationV());
+	
+	vgp->drawASolidDop();
+	glPopMatrix();
+
+}
+
+void DrawVegetation::drawVoxelPatch(const VegetationPatch * vgp)
+{
+	glPushMatrix();
+	glMultMatrixf(vgp->transformationV());
+	
+	vgp->drawSolidGrid();
+	glPopMatrix();
+
+}	
+
+void DrawVegetation::begin()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+}
+
+void DrawVegetation::end()
+{
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }

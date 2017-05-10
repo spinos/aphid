@@ -29,6 +29,13 @@ enum GlyphGroup {
 	ggGrass = 1
 };
 
+enum DisplayStat {
+	dsTriangle = 256,
+	dsDop = 257,
+	dsPoint = 258,
+	dsVoxel = 259
+};
+
 /// begin, end, 32 per group
 static const int GlyphRange[2][2] = {
 {1, 2},

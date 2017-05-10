@@ -28,6 +28,8 @@ public:
 	ToolBox(QWidget *parent = 0);
     ~ToolBox();
 	
+	void setDisplayState(int x);
+	
 private:
     void createContext();
     void createAction();
@@ -39,12 +41,16 @@ private:
 signals:
 	void contextChanged(int c);
 	void actionTriggered(int c);
-	void stateChanged(int s);
+	void dspStateChanged(int s);
 	
 public slots:
 	void onContextFrameChanged(int c);
 	void onActionFrameTriggered(int a);
-	void onStateFrameChanged(int s);
+	void onDspStateChanged(int s);
+
+private:
+	aphid::StateIconFrame * m_dspStateIcon;
+	
 };
 
 #endif

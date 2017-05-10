@@ -16,7 +16,8 @@
 
 using namespace aphid;
 
-GLWidget::GLWidget(Vegetation * vege, QWidget *parent) : Base3DView(parent)
+GLWidget::GLWidget(Vegetation * vege, QWidget *parent) : Base3DView(parent),
+m_dspState(gar::dsTriangle)
 {
 	perspCamera()->setFarClipPlane(30000.f);
 	perspCamera()->setNearClipPlane(1.f);
@@ -38,12 +39,45 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
+	m_vegd->begin();
 	for(int i=0;i<m_vege->numPatches();++i) {
-		//simpleDraw(m_vege->patch(i) );
-		geomDraw(m_vege->patch(i) );
-		//pointDraw(m_vege->patch(i) );
+		diffDraw(m_vege->patch(i) );
 	}
-	
+	m_vegd->end();
+}
+
+void GLWidget::diffDraw(VegetationPatch * vgp)
+{
+	switch(m_dspState) {
+		case gar::dsTriangle :
+			geomDraw(vgp);
+		break;
+		case gar::dsDop :
+			dopDraw(vgp);
+		break;
+		case gar::dsPoint :
+			pointDraw(vgp );
+		break;
+		case gar::dsVoxel :
+			voxelDraw(vgp);
+		break;
+		default :
+			;
+	}
+}
+
+void GLWidget::dopDraw(VegetationPatch * vgp)
+{
+	getDrawer()->setColor(.125f, .125f, .5f);
+	getDrawer()->m_surfaceProfile.apply();
+	m_vegd->drawDopPatch(vgp);
+}
+
+void GLWidget::voxelDraw(VegetationPatch * vgp)
+{
+	getDrawer()->setColor(.125f, .125f, .5f);
+	getDrawer()->m_surfaceProfile.apply();
+	m_vegd->drawVoxelPatch(vgp);
 }
 
 void GLWidget::pointDraw(VegetationPatch * vgp)
@@ -125,4 +159,10 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::recvToolAction(int x)
 {
 	qDebug()<<" unknown tool action "<<x;
+}
+
+void GLWidget::setDisplayState(int x)
+{
+	m_dspState = x;
+	update();
 }

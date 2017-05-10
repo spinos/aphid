@@ -174,5 +174,5 @@ void Vegetation::voxelize(VegetationPatch * ap)
 	
 	ap->setTriangleDrawCache(triangles);
 	
-	//ap->voxelize3(&triangles, gridBox);
+	ap->voxelize3(&triangles, gridBox);
 }

@@ -39,6 +39,8 @@ public:
     GLWidget(Vegetation * vege, QWidget *parent = 0);
     ~GLWidget();
 	
+	void setDisplayState(int x);
+	
 protected:    
     virtual void clientInit();
     virtual void clientDraw();
@@ -57,12 +59,16 @@ private:
     void simpleDraw(VegetationPatch * vgp);
 	void geomDraw(VegetationPatch * vgp);
 	void pointDraw(VegetationPatch * vgp);
-	
+	void dopDraw(VegetationPatch * vgp);
+	void voxelDraw(VegetationPatch * vgp);
+	void diffDraw(VegetationPatch * vgp);
+
 private slots:
 
 private:
 	Vegetation * m_vege;
 	DrawVegetation * m_vegd;
+	int m_dspState;
 	
 };
 

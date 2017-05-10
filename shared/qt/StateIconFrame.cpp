@@ -14,20 +14,31 @@ namespace aphid {
 
 StateIconFrame::StateIconFrame(QWidget *parent) : QIconFrame(parent) {}
 
-void StateIconFrame::setState(int val)
+void StateIconFrame::mapState(int k, int x)
 {
-	m_state = val;
+	m_stateMap[k] = x;
 }
 
-int StateIconFrame::getState() const
+void StateIconFrame::setState(int val)
 {
-	return m_state;
+	std::map<int, int >::iterator it = m_stateMap.begin();
+	for(;it!=m_stateMap.end();++it) {
+		if(it->second == val) {
+			setIconIndex(it->first);
+			return;
+		}
+	}
+}
+
+int StateIconFrame::getState()
+{
+	return m_stateMap[getIconIndex()];
 }
 
 void StateIconFrame::mousePressEvent(QMouseEvent *event)
 {
 	QIconFrame::mousePressEvent(event);
-	emit stateChanged(m_state);
+	emit stateChanged(getState());
 }
 
 void StateIconFrame::mouseReleaseEvent(QMouseEvent *) {}

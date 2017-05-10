@@ -42,6 +42,7 @@ private slots:
 	void toggleAssetDlg(bool x);
 	void recvAssetDlgClose();
 	void performExport(bool x);
+	void recvDspState(int x);
 	
 private:
 	QStackedWidget * m_centerStack;

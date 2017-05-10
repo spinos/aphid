@@ -40,6 +40,9 @@ Window::Window()
 	connect(m_tools, SIGNAL(actionTriggered(int)), 
 			this, SLOT(recvToolAction(int)));
 			
+	connect(m_tools, SIGNAL(dspStateChanged(int)), 
+			this, SLOT(recvDspState(int)));
+			
 	connect(m_assets, SIGNAL(onAssetDlgClose()), 
 			this, SLOT(recvAssetDlgClose()));
 }
@@ -124,6 +127,11 @@ void Window::changeView(int x)
 		return;
 	}
 	
+	if(gar::actViewPlant == x ) {
+		glWidget->setDisplayState(gar::dsTriangle);
+		m_tools->setDisplayState(gar::dsTriangle);
+	}
+	
 	m_centerStack->setCurrentIndex(x);
 }
 
@@ -145,4 +153,13 @@ void Window::performExport(bool x)
 	
 	ExportExample xpt(m_vege);
 	xpt.exportToFile(dlg.exportToFilename());
+}
+
+void Window::recvDspState(int x)
+{
+	if(gar::actViewPlant != m_centerStack->currentIndex() ) {
+		return;
+	}
+	
+	glWidget->setDisplayState(x);
 }
