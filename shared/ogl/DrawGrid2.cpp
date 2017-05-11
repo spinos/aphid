@@ -123,4 +123,51 @@ void DrawGrid2::drawSolidGrid() const
 	glDrawArrays(GL_TRIANGLES, 0, m_numVertices);
 }
 
+static const float sOctaVertOffset[24][3] = {
+{ 1.f, 0.f, 0.f},
+{ 0.f, 1.f, 0.f},
+{ 0.f, 0.f, 1.f},/// 0
+{ 1.f, 0.f, 0.f},
+{ 0.f, 0.f,-1.f},
+{ 0.f, 1.f, 0.f},/// 1
+{-1.f, 0.f, 0.f},
+{ 0.f, 1.f, 0.f},
+{ 0.f, 0.f,-1.f},/// 2
+{-1.f, 0.f, 0.f},
+{ 0.f, 0.f, 1.f},
+{ 0.f, 1.f, 0.f},/// 3
+{ 1.f, 0.f, 0.f},
+{ 0.f, 0.f, 1.f},
+{ 0.f,-1.f, 0.f},/// 4
+{ 1.f, 0.f, 0.f},
+{ 0.f,-1.f, 0.f},
+{ 0.f, 0.f,-1.f},/// 5
+{-1.f, 0.f, 0.f},
+{ 0.f, 0.f,-1.f},
+{ 0.f,-1.f, 0.f},/// 6
+{-1.f, 0.f, 0.f},
+{ 0.f,-1.f, 0.f},
+{ 0.f, 0.f, 1.f},/// 7
+};
+
+void DrawGrid2::setOctahedron(float * pos,
+                    float * mnl,
+					const Vector3F & pncen,
+					const Vector3F & pnnml,
+					const float & pnwd)
+{
+	Vector3F vert;
+	for(int i=0;i<24;++i) {
+		vert = pncen + Vector3F(sOctaVertOffset[i][0] * pnwd,
+							sOctaVertOffset[i][1] * pnwd,
+							sOctaVertOffset[i][2] * pnwd);
+		pos[i*3] = vert.x;
+		pos[i*3+1] = vert.y;
+		pos[i*3+2] = vert.z;
+		mnl[i*3] = pnnml.x;
+		mnl[i*3+1] = pnnml.y;
+		mnl[i*3+2] = pnnml.z;
+	}
+}
+
 }

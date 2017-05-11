@@ -22,6 +22,9 @@ public:
 /// buffer face has no neighbor
     template<typename T>
     void create(T * grd, const int & level);
+/// place an octahedron at point
+	template<typename T, typename Tv>
+    void createPointBased(T * grd, const int & level);
 	template<typename T>
 	void setPerCellColor(T * grd, const int & level);
 	
@@ -30,6 +33,11 @@ public:
     void drawSolidGrid() const;
     
 protected:
+	void setOctahedron(float * pos,
+                    float * mnl,
+					const Vector3F & pncen,
+					const Vector3F & pnnml,
+					const float & pnwd);
     void setBoxFace(float * pos,
                     float * mnl,
                     const BoundingBox & bx,
@@ -123,6 +131,53 @@ void DrawGrid2::setPerCellColor(T * grd, const int & level)
 			
 		grd->next();
 	}
+}
+
+template<typename T, typename Tv>
+void DrawGrid2::createPointBased(T * grd, const int & level)
+{
+	int np = 0;
+    grd->begin();
+    while(!grd->end() ) {
+        if(grd->key().w == level) {
+			np++;
+        }
+        
+        if(grd->key().w > level) {
+			break;
+		}
+			
+		grd->next();
+	}
+
+/// 8 triangles * 3 vertices * 3 floats
+	m_vertexPoints.reset(new float[np * 72]);
+	m_vertexNormals.reset(new float[np * 72]);
+	m_vertexColors.reset(new float[np * 72]);
+	
+	const float psz = grd->levelCellSize(level) * .31f;
+	
+	Tv vcel;
+	np = 0;
+	grd->begin();
+    while(!grd->end() ) {
+        sdb::Coord4 c = grd->key();
+        if(c.w == level) {
+			float * pr = &m_vertexPoints[np * 72];
+			float * nr = &m_vertexNormals[np * 72];
+			
+			grd->getFirstValue(vcel);
+			setOctahedron(pr, nr, vcel._pos, vcel._nml, psz);
+			np++;
+        }
+        
+        if(c.w > level) {
+			break;
+		}
+			
+		grd->next();
+	}
+	m_numVertices = np * 24;
 }
 
 }

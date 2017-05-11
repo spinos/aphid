@@ -469,16 +469,20 @@ void ExampViz::voxelize4(sdb::VectorArray<cvx::Triangle> * tri,
 	const int & np = pntBufLength();
 	AHelper::Info<int>("voxelize4 n point ", np );
 	const Vector3F * pr = pntPositionR();
-	const float sz0 = bbox.getLongestDistance() * .299f;
-	const Vector3F colgrn(0,1,0);	
+	const Vector3F * nr = pntNormalR();
+	const float sz0 = bbox.getLongestDistance() * .399f;
+	
+	PosNml smp;	
 	VGDTyp valGrd;
 	valGrd.fillBox(bbox, sz0 );
 	for(int i=0;i<np;++i) {
-	    valGrd.insertValueAtLevel(3, pr[i],
-	        colgrn);
+		smp._pos = pr[i];
+		smp._nml = nr[i];
+	    valGrd.insertValueAtLevel(3, pr[i], smp);
 	}
 	valGrd.finishInsert();
-	DrawGrid2::create<VGDTyp> (&valGrd, 3);
+	DrawGrid2::createPointBased<VGDTyp, PosNml> (&valGrd, 3);
+	
 	float ucol[3] = {.23f, .81f, .45f};
 	setUniformColor(ucol);
 	
@@ -657,17 +661,19 @@ void ExampViz::buildDrawBuf(int n,
 	const BoundingBox & bbox = geomBox();
 	buildBounding8Dop(bbox);
 	
-	const float sz0 = bbox.getLongestDistance() * .299f;
-	const Vector3F colgrn(0,1,0);	
+	const float sz0 = bbox.getLongestDistance() * .399f;
 	
+	PosNml smp;
 	VGDTyp valGrd;
 	valGrd.fillBox(bbox, sz0 );
 	for(int i=0;i<n;++i) {
+		smp._pos = Vector3F(ps[i].x, ps[i].y, ps[i].z);
+		smp._nml = Vector3F(ns[i].x, ns[i].y, ns[i].z);
 	    valGrd.insertValueAtLevel(3, Vector3F(pnts[i].x, pnts[i].y, pnts[i].z),
-	        colgrn);
+								smp);
 	}
 	valGrd.finishInsert();
-	DrawGrid2::create<VGDTyp> (&valGrd, 3);
+	DrawGrid2::createPointBased<VGDTyp, PosNml> (&valGrd, 3);
 	
 	setUniformDopColor(diffuseMaterialColV() );
 	setUniformColor(diffuseMaterialColV() );

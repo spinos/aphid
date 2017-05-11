@@ -86,6 +86,11 @@ public:
 	float x,y,z;
 };
 
+struct PosNml {
+	Vector3F _pos;
+	Vector3F _nml;
+};
+
 }
 #endif        //  #ifndef VECTOR3F_H
 

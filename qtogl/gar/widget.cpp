@@ -76,6 +76,7 @@ void GLWidget::dopDraw(VegetationPatch * vgp)
 void GLWidget::voxelDraw(VegetationPatch * vgp)
 {
 	getDrawer()->setColor(.125f, .125f, .5f);
+	//getDrawer()->m_wireProfile.apply();
 	getDrawer()->m_surfaceProfile.apply();
 	m_vegd->drawVoxelPatch(vgp);
 }
@@ -83,7 +84,6 @@ void GLWidget::voxelDraw(VegetationPatch * vgp)
 void GLWidget::pointDraw(VegetationPatch * vgp)
 {
 	getDrawer()->setColor(.125f, .125f, .5f);
-	//getDrawer()->m_wireProfile.apply();
 	//getDrawer()->m_markerProfile.apply();
 	getDrawer()->m_surfaceProfile.apply();
 	m_vegd->drawPointPatch(vgp);

@@ -27,6 +27,7 @@ public:
 	virtual ~ValCell();
 
 	void getMeanValue(T & dst);
+	void getFirstValue(T & dst);
 	
 private:
 	
@@ -56,11 +57,20 @@ void ValCell<T>::getMeanValue(T & dst)
 		dst /= (float)cnt;
 	}
 }
+
+template<typename T>
+void ValCell<T>::getFirstValue(T & dst)
+{
+	TParent::begin();
+	dst = *TParent::value();
+}
 	
 template<typename T>
 class ValGrid : public AdaptiveGrid3<ValCell<T>, T, 10 > {
 
+public:
     typedef ValCell<T> TCell;
+private:
 typedef AdaptiveGrid3<TCell, T, 10 > TParent;
 
 public:
@@ -74,6 +84,7 @@ public:
 	void finishInsert();
 	
 	void getCellColor(float * dst);
+	void getFirstValue(T & dst);
 	
 protected:
 	
@@ -133,6 +144,12 @@ void ValGrid<T>::getCellColor(float * dst)
 	T mv;
 	TParent::value()->getMeanValue(mv);
 	mv.getColor(dst);
+}
+
+template<typename T>
+void ValGrid<T>::getFirstValue(T & dst)
+{
+	TParent::value()->getFirstValue(dst);
 }
 
 }
