@@ -182,4 +182,21 @@ const float * DrawGrid2::grdNormalBuf() const
 const float * DrawGrid2::grdColorBuf() const
 { return m_vertexColors.get(); }
 
+void DrawGrid2::setGrdDrawBufLen(const int & nv)
+{
+	m_numVertices = nv;
+	m_vertexPoints.reset(new float[nv * 3]);
+	m_vertexNormals.reset(new float[nv * 3]);
+	m_vertexColors.reset(new float[nv * 3]);
+}
+
+float * DrawGrid2::grdPositionR()
+{ return m_vertexPoints.get(); }
+
+float * DrawGrid2::grdNormalR()
+{ return m_vertexNormals.get(); }
+
+float * DrawGrid2::grdColorR()
+{ return m_vertexColors.get(); }
+
 }

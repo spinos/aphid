@@ -16,6 +16,8 @@ class Vegetation;
 
 namespace aphid {
 
+class GardenExamp;
+
 class HGardenExample : public HBase {
 
 public:
@@ -24,6 +26,7 @@ public:
 	
 	virtual char verifyType();
 	char save(Vegetation * vege);
+	char load(GardenExamp * vege);
 	
 protected:
 private:

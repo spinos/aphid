@@ -209,6 +209,9 @@ public:
 								const MString & nodeName);
 	static MObject CreateTransform(const MString & nodeName,
 							 MObject parent = MObject::kNullObj);
+	static MObject CreateShapeNode(const MString & nodeType,
+								const MString & nodeName,
+								MObject parent = MObject::kNullObj);
 /// rotation only
 	static void GetViewMatrix(Matrix33F * mat,
 								const MDagPath & cameraPath);

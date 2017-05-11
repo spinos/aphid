@@ -13,6 +13,8 @@
 #include <math/Matrix44F.h>
 #include <geom/ATriangleMesh.h>
 #include <h5/HTriangleMesh.h>
+#include <CompoundExamp.h>
+#include <GardenExamp.h>
 #include "HVegePatch.h"
 #include <boost/format.hpp>
 #include <iomanip>
@@ -83,6 +85,33 @@ char HGardenExample::save(Vegetation * vege)
 	}
 	std::cout<<"\n done saving garden example ";
 	std::cout.flush();
+	return 1;
+}
+
+char HGardenExample::load(GardenExamp * vege)
+{
+	std::cout<<" HGardenExample load "<<fObjectPath;
+	
+	BoundingBox bbox;
+	readFloatAttr(".bbox", (float *)&bbox);
+	vege->setGeomBox2(bbox);
+	
+	int nxmp = 0;
+	readIntAttr(".xmpc", &nxmp);
+	std::cout<<"\n n example "<<nxmp;
+	
+	std::vector<std::string> exmpNames;
+	lsTypedChild<HVegePatch > (exmpNames);
+	
+	std::vector<std::string>::const_iterator it = exmpNames.begin();
+	for(;it!=exmpNames.end();++it) {
+		CompoundExamp * vgp = new CompoundExamp;
+		HVegePatch chd(*it);
+		chd.load(vgp);
+		chd.close();
+		vege->addAExample(vgp);
+	}
+	
 	return 1;
 }
 

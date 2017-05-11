@@ -35,12 +35,12 @@ public:
 	const float * pntPositionBuf() const;
 	const float * pntColorBuf() const;
 	
-protected:
 	Vector3F * pntNormalR();
 	Vector3F * pntPositionR();
 	Vector3F * pntColorR();
 	void setPointDrawBufLen(const int & x);
 	
+protected:
 	void buildPointDrawBuf(const int & nv,
 				const float * vertP, 
 				const float * vertN,

@@ -10,6 +10,7 @@
 #include "HVegePatch.h"
 #include "VegetationPatch.h"
 #include <math/Matrix44F.h>
+#include <CompoundExamp.h>
 
 namespace aphid {
 
@@ -92,6 +93,55 @@ char HVegePatch::save(VegetationPatch * vgp)
 	addVertexBlock(".grdnv", ".grdpos", ".grdnml",
 					&grdnv, (Vector3F *)vgp->grdPositionBuf(),
 					(Vector3F *)vgp->grdNormalBuf());
+	
+	return 1;
+}
+
+char HVegePatch::load(CompoundExamp * vgp)
+{
+	BoundingBox bbox;
+	readFloatAttr(".bbox", (float *)&bbox);
+	vgp->setGeomBox2(bbox);
+	
+	int tmc = 0;
+	readIntAttr(".tmc", &tmc);
+	
+	Matrix44F * tms = new Matrix44F[tmc];
+	HOocArray<hdata::TFloat, 16, 256> tmD(".tms");
+	tmD.openStorage(fObjectId);
+	const int & ntm = tmD.numCols();
+	for(int i=0; i<ntm; ++i) {
+	    tmD.readColumn((char *)&tms[i], i);
+	}
+	
+	int * geoid = new int[tmc];
+	readIntData(".geoid", tmc, geoid);
+	
+	for(int i=0; i<ntm; ++i) {
+		vgp->addInstance(tms[i], geoid[i]);
+	}
+	
+	delete[] geoid;
+	delete[] tms;
+	
+	int npnt = 0;
+	readIntAttr(".npnt", &npnt);
+	vgp->setPointDrawBufLen(npnt);
+	readVector3Data(".pntpos", npnt, vgp->pntPositionR() );
+	readVector3Data(".pntnml", npnt, vgp->pntNormalR() );
+	readVector3Data(".pntcol", npnt, vgp->pntColorR() );
+	
+	int dopnv = 0;
+	readIntAttr(".dopnv", &dopnv);
+	vgp->setDopDrawBufLen(dopnv);
+	readVector3Data(".doppos", dopnv, (Vector3F *)vgp->dopPositionR() );
+	readVector3Data(".dopnml", dopnv, (Vector3F *)vgp->dopNormalR() );
+	
+	int grdnv = 0;
+	readIntAttr(".grdnv", &grdnv);
+	vgp->setGrdDrawBufLen(grdnv);
+	readVector3Data(".grdpos", grdnv, (Vector3F *)vgp->grdPositionR() );
+	readVector3Data(".grdnml", grdnv, (Vector3F *)vgp->grdNormalR() );
 	
 	return 1;
 }

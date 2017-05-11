@@ -12,6 +12,7 @@
 #include <h5/HDocument.h>
 #include <h5/HTriangleMesh.h>
 #include <HGardenExample.h>
+#include <VegExampleNode.h>
 #include <geom/ATriangleMesh.h>
 #include <mama/AHelper.h>
 #include <mama/MeshHelper.h>
@@ -69,13 +70,32 @@ MStatus GardenWorks::doImport(const std::string & gdeName)
 	MObject od = AHelper::CreateTransform(sgde);
 	if(od.isNull() ) {
 		AHelper::Info<MString > ("GardenWorks error cannot create transform ", sgde);
-        stat = MS::kFailure;
-		
-	} else {	
-		importMesh(&gd, &od);
+        gd.close();
+		return MS::kFailure;
 	}
+	
+	importExample(&gd, &od);
+	importMesh(&gd, &od);
+	
 	gd.close();
 	
+	return stat;
+}
+
+MStatus GardenWorks::importExample(aphid::HGardenExample * grp,
+			MObject * parent)
+{
+	MStatus stat = MS::kSuccess;
+	const MString vizName = MFnDependencyNode(*parent).name() + "Shape";
+	MObject oviz = AHelper::CreateShapeNode("gardenExampleViz", vizName, *parent);
+	if(oviz.isNull() ) {
+		AHelper::Info<std::string > ("GardenWorks error cannot create shape ", grp->lastName() );
+		return MS::kFailure;
+	}
+	
+	VegExampleNode * viz = (VegExampleNode *)MFnDependencyNode(oviz).userNode();
+	grp->load(viz);
+	viz->saveInternal();
 	return stat;
 }
 

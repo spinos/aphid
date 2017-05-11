@@ -44,15 +44,8 @@ void DrawDop::update8DopPoints(const AOrientedBox & ob,
 	DOP8Builder bd;
 	bd.build(ob);
 	
-	clear();
-	
 	const int & nt = bd.numTriangles();
-	m_numVertices = 3 * nt;
-	
-	const int nf = m_numVertices*3;
-	m_vertexNormals = new float[nf];
-	m_vertexPoints = new float[nf];
-	m_vertexColors = new float[nf];
+	setDopDrawBufLen(nt * 3);
 	
 	const Vector3F * bv = bd.vertex();
 	const Vector3F * bn = bd.normal();
@@ -110,6 +103,26 @@ const float * DrawDop::dopNormalBuf() const
 { return m_vertexNormals; }
 
 const float * DrawDop::dopColorBuf() const
+{ return m_vertexColors; }
+
+void DrawDop::setDopDrawBufLen(const int & nv)
+{ 
+	clear();
+	
+	m_numVertices = nv;
+	const int nf = m_numVertices * 3;
+	m_vertexNormals = new float[nf];
+	m_vertexPoints = new float[nf];
+	m_vertexColors = new float[nf];
+}
+
+float * DrawDop::dopPositionR()
+{ return m_vertexPoints; }
+
+float * DrawDop::dopNormalR()
+{ return m_vertexNormals; }
+
+float * DrawDop::dopColorR()
 { return m_vertexColors; }
 
 }

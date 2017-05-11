@@ -22,18 +22,16 @@
 #include <maya/MIntArray.h>
 #include <maya/MVectorArray.h>
 #include <ogl/DrawCircle.h>
-#include "ExampVox.h"
+#include "GardenExamp.h"
 
 namespace aphid {
 
 class Matrix44F;
 class BoundingBox;
 
-class VegExampleNode : public MPxLocatorNode, public ExampVox, public DrawCircle
+class VegExampleNode : public MPxLocatorNode, public GardenExamp, public DrawCircle
 {
 	Matrix44F * m_cameraSpace;
-/// n examples internal
-	int m_nemp;
 	
 public:
 	VegExampleNode();
@@ -54,7 +52,7 @@ public:
 	static MTypeId id;
 /// overall bbox
 	static MObject ashrubbox;
-/// bbox of each group, length n, n is # groups
+/// bbox of each group, length n*2, n is # groups
 	static MObject ainstbbox;
 /// begin of each group, length (n+1), n is # groups
 	static MObject ainstrange;
@@ -77,10 +75,7 @@ public:
 	static MObject avoxpriority;
     static MObject outValue;
 	
-	void setBBox(const BoundingBox & bbox);
-	
-/// override ExampVox
-	virtual int numExamples() const;
+	void saveInternal();
 	
 protected:
 	void getBBox(BoundingBox & bbox) const;
@@ -90,6 +85,9 @@ private:
 						const MIntArray & instexmps);
 	bool loadInternal();
 	bool loadInternal(MDataBlock& block);
+	void saveBBox(const BoundingBox & bbox);
+	void saveGroupBBox();
+	int saveGroupRange();
 	
 };
 

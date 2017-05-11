@@ -31,6 +31,8 @@ protected:
 
 private:
 	MStatus doImport(const std::string & gdeName);
+	MStatus importExample(aphid::HGardenExample * grp,
+			MObject * parent);
 	MStatus importMesh(aphid::HGardenExample * grp,
 			MObject * parent);
 	

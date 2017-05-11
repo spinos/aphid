@@ -11,7 +11,7 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MFnPluginData.h>
 #include <mama/AHelper.h>
-#include <ExampVox.h>
+#include <CompoundExamp.h>
 #include <ExampData.h>
 #include <mama/AttributeHelper.h>
 #include <ogl/GlslInstancer.h>
@@ -40,8 +40,7 @@ MObject VegExampleNode::avoxvisible;
 MObject VegExampleNode::avoxpriority;
 MObject VegExampleNode::outValue;
 	
-VegExampleNode::VegExampleNode() :
-m_nemp(0)
+VegExampleNode::VegExampleNode()
 { 
 	m_cameraSpace = new Matrix44F;
 }
@@ -66,7 +65,7 @@ MStatus VegExampleNode::compute( const MPlug& plug, MDataBlock& block )
 		int nexp = numExamples();
 		if(nexp < 1) {
 			loadInternal();
-			nexp = numInstances();
+			nexp = numExamples();
 		}
 		AHelper::Info<int>("vege viz n example", nexp);
 
@@ -432,7 +431,7 @@ bool VegExampleNode::loadInternal(MDataBlock& block)
 	return loadInstances(instt, insti);
 }
 
-void VegExampleNode::setBBox(const BoundingBox & bbox)
+void VegExampleNode::saveBBox(const BoundingBox & bbox)
 {
 	MVectorArray dbox; dbox.setLength(2);
 	dbox[0] = MVector(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2) );
@@ -463,8 +462,53 @@ void VegExampleNode::getBBox(BoundingBox & bbox) const
 	bbox.setMax(dbox[1].x, dbox[1].y, dbox[1].z );
 }
 
-int VegExampleNode::numExamples() const
-{ return m_nemp; }
+void VegExampleNode::saveInternal()
+{
+	const int nexmp = numExamples();
+	AHelper::Info<int>(" VegExampleNode::saveInternal n exmp", nexmp );
+	if(nexmp < 1) {
+		return;
+	}
+	saveBBox(geomBox() );
+	saveGroupBBox();
+	const int totalNInst = saveGroupRange();
+	AHelper::Info<unsigned>(" n inst", totalNInst );
+}
+
+void VegExampleNode::saveGroupBBox()
+{
+	const int nexmp = numExamples();
+	MVectorArray dbox; dbox.setLength(nexmp);
+	for(int i=0;i<nexmp;++i) {
+		CompoundExamp * cxmp = getCompoundExample(i);
+		const BoundingBox & gbx = cxmp->geomBox();
+		dbox[i*2] = MVector(gbx.getMin(0), gbx.getMin(1), gbx.getMin(2) );
+		dbox[i*2 + 1] = MVector(gbx.getMax(0), gbx.getMax(1), gbx.getMax(2) );
+	}
+	MFnVectorArrayData vecFn;
+	MObject obox = vecFn.create(dbox);
+	MPlug dboxPlug(thisMObject(), ainstbbox );
+	dboxPlug.setValue(obox);
+}
+
+int VegExampleNode::saveGroupRange()
+{
+	const int nexmp = numExamples();
+	MIntArray drange; drange.setLength(nexmp+1);
+	int b = 0;
+	for(int i=0;i<nexmp;++i) {
+		CompoundExamp * cxmp = getCompoundExample(i);
+		drange[i] = b;
+		const int c = cxmp->numInstances();
+		b += c;
+	}
+	drange[nexmp] = b;
+	MFnIntArrayData vecFn;
+	MObject orange = vecFn.create(drange);
+	MPlug drangePlug(thisMObject(), ainstrange );
+	drangePlug.setValue(orange);
+	return b;
+}
 
 }
 //:~

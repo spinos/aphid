@@ -37,6 +37,11 @@ public:
 	const float * dopPositionBuf() const;
 	const float * dopNormalBuf() const;
 	const float * dopColorBuf() const;
+	
+	void setDopDrawBufLen(const int & nv);
+	float * dopPositionR();
+	float * dopNormalR();
+	float * dopColorR();
 
 protected:
 	void setUniformDopColor(const float * c);

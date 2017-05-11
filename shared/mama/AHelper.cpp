@@ -1240,6 +1240,21 @@ MObject AHelper::CreateTransform(const MString & nodeName,
 	return node;
 }
 
+MObject AHelper::CreateShapeNode(const MString & nodeType,
+								const MString & nodeName,
+								MObject parent)
+{
+	MDagModifier modif;
+	MObject viz = modif.createNode(nodeType, parent);
+	modif.doIt();
+	if(viz.isNull() ) {
+		return viz;
+	}
+	modif.renameNode(viz, nodeName);
+	modif.doIt();
+	return viz;
+}
+
 void AHelper::GetViewMatrix(Matrix33F * mat,
 								const MDagPath & cameraPath)
 {

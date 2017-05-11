@@ -17,6 +17,8 @@ class VegetationPatch;
 
 namespace aphid {
 
+class CompoundExamp;
+
 class HVegePatch : public HBase {
 
 public:
@@ -25,6 +27,7 @@ public:
 	
 	virtual char verifyType();
 	char save(VegetationPatch * vgp);
+	char load(CompoundExamp * vgp);
 	
 protected:
 private:

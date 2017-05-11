@@ -36,6 +36,11 @@ public:
 	const float * grdPositionBuf() const;
 	const float * grdNormalBuf() const;
 	const float * grdColorBuf() const;
+	
+	void setGrdDrawBufLen(const int & nv);
+	float * grdPositionR();
+	float * grdNormalR();
+	float * grdColorR();
     
 protected:
 	void setOctahedron(float * pos,
