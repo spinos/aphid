@@ -60,6 +60,7 @@ public:
 	
 	int getNumTms();
 	void extractTms(aphid::Matrix44F * dst);
+	void extractGeomIds(int * dst);
 	
 	void getGeom(GeomElmArrTyp * dst,
 					aphid::BoundingBox & box);

@@ -31,6 +31,7 @@ public:
 private:
 	std::map<int, GeomPtrTyp > m_cachedGeom;
 	std::map<int, GeomPtrTyp >::iterator m_geomIter;
+	int m_curGeomId;
 	
 #define NUM_ANGLE 11
 #define NUM_VARIA 11
@@ -54,6 +55,8 @@ public:
 	
 	aphid::ATriangleMesh * findGeom(const int & k);
 	void addGeom(const int & k, aphid::ATriangleMesh * v);
+/// as instance id
+	int getGeomInd(aphid::ATriangleMesh * x);
 	
 	int numCachedGeoms() const;
 	

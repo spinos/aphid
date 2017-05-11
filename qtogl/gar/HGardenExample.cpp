@@ -14,7 +14,8 @@
 #include <geom/ATriangleMesh.h>
 #include <h5/HTriangleMesh.h>
 #include "HVegePatch.h"
-#include <sstream>
+#include <boost/format.hpp>
+#include <iomanip>
 
 namespace aphid {
 
@@ -51,12 +52,12 @@ char HGardenExample::save(Vegetation * vege)
 	
 	std::cout<<"\n n example "<<nxmp;
 	
-	std::stringstream sst;
+	std::string vgpName;
 	for(int i=0;i<nxmp;++i) {
-		sst.str("vgp_");
-		sst<<i;
+		vgpName = str(boost::format("vgp_%1%") % boost::io::group(std::setw(3), std::setfill('0'), i) );
+		
 		VegetationPatch * vgp = vege->patch(i);
-		std::string vgpPathName = childPath(sst.str().c_str() );
+		std::string vgpPathName = childPath(vgpName.c_str() );
 		HVegePatch chd(vgpPathName);
 		chd.save(vgp);
 		chd.close();
@@ -80,7 +81,7 @@ char HGardenExample::save(Vegetation * vege)
 		chd.close();
 		vege->geomNext(mshName, mshVal);
 	}
-	
+	std::cout<<"\n done saving garden example ";
 	std::cout.flush();
 	return 1;
 }

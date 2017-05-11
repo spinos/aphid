@@ -40,6 +40,8 @@ typedef std::vector<PlantPiece * > ChildListTyp;
 	PlantPiece * m_parentPiece;
 	aphid::ATriangleMesh * m_geom;
 	float m_exclR;
+/// as instance id
+	int m_geomid;
 	
 typedef aphid::cvx::Triangle GeomElmTyp;
 typedef aphid::sdb::VectorArray<GeomElmTyp > GeomElmArrTyp;
@@ -56,7 +58,7 @@ public:
 	int numBranches() const;
 	const PlantPiece * branch(const int & i) const;
 	
-	void setGeometry(aphid::ATriangleMesh * geom);
+	void setGeometry(aphid::ATriangleMesh * geom, const int & geomId);
 	const aphid::ATriangleMesh * geometry() const;
 	
 	void setExclR(const float & x);
@@ -66,6 +68,8 @@ public:
 
 	void countNumTms(int & count) const;
 	void extractTms(aphid::Matrix44F * dst,
+			int & count) const;
+	void extractGeomIds(int * dst,
 			int & count) const;
 			
 	void getGeom(GeomElmArrTyp * dst,

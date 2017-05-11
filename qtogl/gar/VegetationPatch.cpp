@@ -140,6 +140,15 @@ void VegetationPatch::extractTms(Matrix44F * dst)
 	}
 }
 
+void VegetationPatch::extractGeomIds(int * dst)
+{
+	int it = 0;
+	const int n = numPlants();
+	for(int i=0;i<n;++i) {
+		m_plants[i]->extractGeomIds(dst, it);
+	}
+}
+
 void VegetationPatch::getGeom(GeomElmArrTyp * dst,
 					BoundingBox & box)
 {

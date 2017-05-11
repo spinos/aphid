@@ -44,12 +44,13 @@ ExportDlg::ExportDlg(Vegetation * vege, QWidget *parent) : QDialog(parent)
 
 void ExportDlg::fillLab(Vegetation * vege)
 {
+#if 0
 	if(vege->numPatches() < 2) {
 		m_lab->setText(tr("no example synthesized, cannot export"));
 		m_applyBtn->setDisabled(true);
 		return;
 	}
-	
+#endif
 	QString note(tr("synthesized n example "));
 	QTextStream(&note)<<vege->numPatches();
 	QTextStream(&note)<<"\n n instance "<<vege->getNumInstances();

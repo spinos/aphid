@@ -32,6 +32,11 @@ public:
 	
 	void drawAWireDop() const;
 	void drawASolidDop() const;
+	
+	const int & dopBufLength() const;
+	const float * dopPositionBuf() const;
+	const float * dopNormalBuf() const;
+	const float * dopColorBuf() const;
 
 protected:
 	void setUniformDopColor(const float * c);

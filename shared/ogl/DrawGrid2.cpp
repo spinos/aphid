@@ -170,4 +170,16 @@ void DrawGrid2::setOctahedron(float * pos,
 	}
 }
 
+const int & DrawGrid2::grdBufLength() const
+{ return m_numVertices; }
+	
+const float * DrawGrid2::grdPositionBuf() const
+{ return m_vertexPoints.get(); }
+	
+const float * DrawGrid2::grdNormalBuf() const
+{ return m_vertexNormals.get(); }
+	
+const float * DrawGrid2::grdColorBuf() const
+{ return m_vertexColors.get(); }
+
 }

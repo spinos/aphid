@@ -100,4 +100,16 @@ void DrawDop::drawASolidDop() const
 	glDrawArrays(GL_TRIANGLES, 0, m_numVertices);
 }
 
+const int & DrawDop::dopBufLength() const
+{ return m_numVertices; }
+
+const float * DrawDop::dopPositionBuf() const
+{ return m_vertexPoints; }
+	
+const float * DrawDop::dopNormalBuf() const
+{ return m_vertexNormals; }
+
+const float * DrawDop::dopColorBuf() const
+{ return m_vertexColors; }
+
 }

@@ -29,6 +29,12 @@ char HVegePatch::verifyType()
 	if(!hasNamedData(".pntpos") ) return 0;
 	if(!hasNamedData(".pntnml") ) return 0;
 	if(!hasNamedData(".pntcol") ) return 0;
+	if(!hasNamedAttr(".dopnv") ) return 0;
+	if(!hasNamedData(".doppos") ) return 0;
+	if(!hasNamedData(".dopnml") ) return 0;
+	if(!hasNamedAttr(".grdnv") ) return 0;
+	if(!hasNamedData(".grdpos") ) return 0;
+	if(!hasNamedData(".grdnml") ) return 0;
 	return 1;
 }
 
@@ -61,26 +67,31 @@ char HVegePatch::save(VegetationPatch * vgp)
 	
 	delete[] tms;
 	
+	int * geoid = new int[tmc];
+	vgp->extractGeomIds(geoid);
+	
+	if(!hasNamedData(".geoid"))
+	    addIntData(".geoid", tmc);
+	
+	writeIntData(".geoid", tmc, geoid);
+	
+	delete[] geoid;
+	
 	int npnt = vgp->pntBufLength();
-	if(!hasNamedAttr(".npnt"))
-		addIntAttr(".npnt");
+	addVertexBlock2(".npnt", ".pntpos", ".pntnml", ".pntcol",
+					&npnt, (Vector3F *)vgp->pntPositionBuf(),
+					(Vector3F *)vgp->pntNormalBuf(),
+					(Vector3F *)vgp->pntColorBuf() );
 	
-	writeIntAttr(".npnt", &npnt);
+	int dopnv = vgp->dopBufLength();
+	addVertexBlock(".dopnv", ".doppos", ".dopnml",
+					&dopnv, (Vector3F *)vgp->dopPositionBuf(),
+					(Vector3F *)vgp->dopNormalBuf());
 	
-	if(!hasNamedData(".pntpos"))
-	    addVector3Data(".pntpos", npnt);
-	
-	writeVector3Data(".pntpos", npnt, (Vector3F *)vgp->pntPositionBuf());
-	
-	if(!hasNamedData(".pntnml"))
-	    addVector3Data(".pntnml", npnt);
-	
-	writeVector3Data(".pntnml", npnt, (Vector3F *)vgp->pntNormalBuf());
-	
-	if(!hasNamedData(".pntcol"))
-	    addVector3Data(".pntcol", npnt);
-	
-	writeVector3Data(".pntcol", npnt, (Vector3F *)vgp->pntColorBuf());
+	int grdnv = vgp->grdBufLength();
+	addVertexBlock(".grdnv", ".grdpos", ".grdnml",
+					&grdnv, (Vector3F *)vgp->grdPositionBuf(),
+					(Vector3F *)vgp->grdNormalBuf());
 	
 	return 1;
 }

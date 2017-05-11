@@ -467,5 +467,50 @@ char HBase::load()
 char HBase::verifyType()
 { return 1; }
 
+void HBase::addVertexBlock(const char * nvName, const char * posName, const char * nmlName,
+						int * nv, Vector3F * pos, Vector3F * nml)
+{
+	if(!hasNamedAttr(nvName))
+		addIntAttr(nvName);
+	
+	writeIntAttr(nvName, nv);
+	
+	if(!hasNamedData(posName))
+	    addVector3Data(posName, *nv);
+	
+	writeVector3Data(posName, *nv, pos);
+	
+	if(!hasNamedData(nmlName))
+	    addVector3Data(nmlName, *nv);
+	
+	writeVector3Data(nmlName, *nv, nml);
+
+}
+
+void HBase::addVertexBlock2(const char * nvName, const char * posName, const char * nmlName, const char * colName,
+						int * nv, Vector3F * pos, Vector3F * nml, Vector3F * col)
+{
+	if(!hasNamedAttr(nvName))
+		addIntAttr(nvName);
+	
+	writeIntAttr(nvName, nv);
+	
+	if(!hasNamedData(posName))
+	    addVector3Data(posName, *nv);
+	
+	writeVector3Data(posName, *nv, pos);
+	
+	if(!hasNamedData(nmlName))
+	    addVector3Data(nmlName, *nv);
+	
+	writeVector3Data(nmlName, *nv, nml);
+	
+	if(!hasNamedData(colName))
+	    addVector3Data(colName, *nv);
+	
+	writeVector3Data(colName, *nv, col);
+
+}
+
 }
 //:~

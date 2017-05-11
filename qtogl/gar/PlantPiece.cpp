@@ -17,7 +17,8 @@ using namespace aphid;
 PlantPiece::PlantPiece(PlantPiece * parent) :
 m_parentPiece(parent),
 m_geom(NULL),
-m_exclR(1.f)
+m_exclR(1.f),
+m_geomid(0)
 {
 	if(parent) {
 		parent->addBranch(this);
@@ -48,8 +49,11 @@ int PlantPiece::numBranches() const
 const PlantPiece * PlantPiece::branch(const int & i) const
 { return m_childPieces[i]; }
 
-void PlantPiece::setGeometry(ATriangleMesh * geom)
-{ m_geom = geom; }
+void PlantPiece::setGeometry(ATriangleMesh * geom, const int & geomId)
+{ 
+	m_geom = geom; 
+	m_geomid = geomId;
+}
 
 const ATriangleMesh * PlantPiece::geometry() const
 { return m_geom; }
@@ -100,6 +104,22 @@ void PlantPiece::extractTms(aphid::Matrix44F * dst,
 	ChildListTyp::const_iterator it = m_childPieces.begin();
 	for(;it!=m_childPieces.end();++it) {
 		(*it)->extractTms(dst, count);
+	}
+}
+
+void PlantPiece::extractGeomIds(int * dst,
+			int & count) const
+{
+	dst[count] = m_geomid;
+	count++;
+	
+	if(numBranches() < 1) {
+		return;
+	}
+	
+	ChildListTyp::const_iterator it = m_childPieces.begin();
+	for(;it!=m_childPieces.end();++it) {
+		(*it)->extractGeomIds(dst, count);
 	}
 }
 

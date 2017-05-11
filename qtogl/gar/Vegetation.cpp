@@ -15,6 +15,7 @@
 #include "gar_common.h"
 #include "data/grass.h"
 #include <boost/format.hpp>
+#include <iomanip>
 #include <cmath>
 
 using namespace aphid;
@@ -114,6 +115,19 @@ ATriangleMesh * Vegetation::findGeom(const int & k)
 void Vegetation::addGeom(const int & k, ATriangleMesh * v)
 { m_cachedGeom[k] = v; }
 
+int Vegetation::getGeomInd(aphid::ATriangleMesh * x)
+{
+	int i = 0;
+	std::map<int, GeomPtrTyp >::iterator it = m_cachedGeom.begin();
+	for(;it!=m_cachedGeom.end();++it) {
+		if(x == it->second) {
+			return i;
+		}
+		i++;
+	}
+	return 0;
+}
+
 int Vegetation::numCachedGeoms() const
 { return m_cachedGeom.size(); }
 
@@ -124,6 +138,7 @@ void Vegetation::geomBegin(std::string & mshName, Vegetation::GeomPtrTyp & mshVa
 		return;
 	}
 	m_geomIter = m_cachedGeom.begin();
+	m_curGeomId = 0;
 	mshName = getGeomName(m_geomIter->first);
 	mshVal = m_geomIter->second;
 }
@@ -131,6 +146,7 @@ void Vegetation::geomBegin(std::string & mshName, Vegetation::GeomPtrTyp & mshVa
 void Vegetation::geomNext(std::string & mshName, Vegetation::GeomPtrTyp & mshVal)
 {
 	m_geomIter++;
+	m_curGeomId++;
 	if(m_geomIter == m_cachedGeom.end()) {
 		mshVal = NULL;
 		return;
@@ -153,7 +169,7 @@ std::string Vegetation::getGeomName(const int & k)
 		default:
 		;
 	}
-	return str(boost::format("%1%_%2%") % geoms % (k & 15));
+	return str(boost::format("inst_%1%_%2%_%3%") % boost::io::group(std::setw(3), std::setfill('0'), m_curGeomId) % geoms % (k & 15));
 }
 
 void Vegetation::voxelize()

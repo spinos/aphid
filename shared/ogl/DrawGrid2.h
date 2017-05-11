@@ -31,6 +31,11 @@ public:
     void setUniformColor(const float * col);
     
     void drawSolidGrid() const;
+	
+	const int & grdBufLength() const;
+	const float * grdPositionBuf() const;
+	const float * grdNormalBuf() const;
+	const float * grdColorBuf() const;
     
 protected:
 	void setOctahedron(float * pos,

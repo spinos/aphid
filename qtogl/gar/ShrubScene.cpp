@@ -161,7 +161,8 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 		m_vege->addGeom(kgeom, msh);
 	}
 	
-	pl->setGeometry(msh);
+	int geomInd = m_vege->getGeomInd(msh);
+	pl->setGeometry(msh, geomInd);
 	pl->setExclR(exclR);
 }
 

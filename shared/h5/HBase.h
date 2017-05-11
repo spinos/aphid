@@ -174,6 +174,11 @@ public:
 		return d;
 	}
 	
+	void addVertexBlock(const char * nvName, const char * posName, const char * nmlName,
+						int * nv, Vector3F * pos, Vector3F * nml);
+	void addVertexBlock2(const char * nvName, const char * posName, const char * nmlName, const char * colName,
+						int * nv, Vector3F * pos, Vector3F * nml, Vector3F * col);
+						
 };
 
 }
