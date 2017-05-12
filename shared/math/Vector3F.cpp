@@ -384,5 +384,50 @@ Vector3F Vector3F::inversed() const
 
 void Vector3F::getColor(float * dst) const
 { memcpy(dst, this, 12); }
+
+PosNml::PosNml()
+{}
+
+void PosNml::setZero()
+{ 
+	_pos.setZero();
+	_nml.setZero();
+}
+
+void PosNml::operator/=( const float& scale )
+{ 
+	_pos /= scale;
+	_nml.normalize();
+}
+
+void PosNml::operator+=( const PosNml& other )
+{ 
+	_pos += other._pos;
+	_nml += other._nml;
+}
+
+PosNmlCol::PosNmlCol()
+{}
+
+void PosNmlCol::setZero()
+{ 
+	_pos.setZero();
+	_nml.setZero();
+	_col.setZero();
+}
+
+void PosNmlCol::operator/=( const float& scale )
+{ 
+	_pos /= scale;
+	_nml.normalize();
+	_col /= scale;
+}
+
+void PosNmlCol::operator+=( const PosNmlCol& other )
+{ 
+	_pos += other._pos;
+	_nml += other._nml;
+	_col += other._col;
+}
     
 }

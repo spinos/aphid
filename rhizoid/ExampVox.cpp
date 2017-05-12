@@ -15,6 +15,7 @@
 #include <kd/IntersectEngine.h>
 #include <kd/ClosestToPointEngine.h>
 #include <sdb/LodSampleCache.h>
+#include <topo/KHullGen.h>
 
 namespace aphid {
 
@@ -113,7 +114,45 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	const sdb::SampleCache * sps = spg.samplesAtLevel(mxLevel);
 	buildPointDrawBuf(ns, sps->points(), sps->normals(), sps->colors(),
 					sdb::SampleCache::DataStride>>2);
-	buildBounding8Dop(bbox);
+/// obsolete
+	//buildBounding8Dop(bbox);
+	buildPointHull(bbox);
+}
+
+void ExampVox::buildPointHull(const BoundingBox & bbox)
+{
+	const int & np = pntBufLength();
+	const Vector3F * pr = pntPositionR();
+	const Vector3F * nr = pntNormalR();
+	const Vector3F * cr = pntColorR();
+	const float sz0 = bbox.getLongestDistance() * .59f;
+	
+	KHullGen<PosNmlCol> khl;
+	khl.fillBox(bbox, sz0);
+	
+	PosNmlCol smp;
+	for(int i=0;i<np;++i) {
+	    
+		smp._pos = pr[i];
+		smp._nml = nr[i];
+		smp._col = cr[i];
+		
+		khl.insertValueAtLevel(3, smp._pos, smp);
+	}
+	khl.finishInsert();
+	
+	ATriangleMesh msh;
+	khl.build(&msh, 3, 5);
+	
+	const int nv = msh.numPoints();
+	setDopDrawBufLen(nv);
+	float * posf = dopRefPositionR();
+	float * nmlf = dopNormalR();
+	
+	for(int i=0;i<nv;++i) {
+		memcpy(&posf[i*3], &msh.points()[i], 12);
+		memcpy(&nmlf[i*3], &msh.vertexNormals()[i], 12);
+	}
 }
 
 void ExampVox::buildBounding8Dop(const BoundingBox & bbox)

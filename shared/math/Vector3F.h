@@ -86,15 +86,25 @@ public:
 	float x,y,z;
 };
 
-struct PosNml {
+class PosNml {
+public:
 	Vector3F _pos;
 	Vector3F _nml;
+	PosNml();
+	void setZero();
+	void operator/=( const float& scale );
+	void operator+=( const PosNml& other );
 };
 
-struct PosNmlCol {
+class PosNmlCol {
+public:
 	Vector3F _pos;
 	Vector3F _nml;
 	Vector3F _col;
+	PosNmlCol();
+	void setZero();
+	void operator/=( const float& scale );
+	void operator+=( const PosNmlCol& other );		
 };
 
 }

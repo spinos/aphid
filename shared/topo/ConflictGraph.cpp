@@ -79,8 +79,10 @@ void ConflictGraph::removeFace(Facet *f)
 			GraphArch *o = arch->previousVertex;
 			GraphArch *r = arch->nextVertex;
 			if(r) r->previousVertex = o;
-			if(o) o->nextVertex = r;
-			if(o) arch = o;
+			if(o) {
+				o->nextVertex = r;
+				arch = o;
+			}
 		}
 		arch = arch->nextVertex;
 	}

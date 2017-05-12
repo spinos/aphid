@@ -105,6 +105,7 @@ public:
 protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
+	void buildPointHull(const BoundingBox & bbox);
 	void setDetailDrawType(const short & x);
 	
 private:

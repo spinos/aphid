@@ -28,3 +28,7 @@ target_link_libraries (tvox ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (tvox ${Boost_THREAD_LIBRARY})
 target_link_libraries (tvox ${Boost_CHRONO_LIBRARY})
 ENDIF ()
+
+target_link_libraries (tvox ${BLAS_LIBRARY})
+target_link_libraries (tvox ${LAPACK_LIBRARY})
+target_link_libraries (tvox ${F2C_LIBRARY})

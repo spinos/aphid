@@ -111,6 +111,9 @@ Vertex * Facet::vertex(int idx)
 	return m_vertices[idx];
 }
 
+const Vertex * Facet::vertex(int idx) const
+{ return m_vertices[idx]; }
+
 Vertex * Facet::vertexAfter(int idx)
 {
 	if(idx == 2) return m_vertices[0];
@@ -152,9 +155,22 @@ float Facet::getArea() const
 
 char Facet::isVertexAbove(const Vertex & v) const
 {
-	Vector3F dv = *v.m_v - getCentroid();
+	Vector3F dv = *v.m_v - *m_vertices[0]->m_v;
 	dv.normalize();
-	return dv.dot(m_normal) > 0.0f;
+	if(dv.dot(m_normal) < 0.f) {
+		return 0;
+	}
+	dv = *v.m_v - *m_vertices[1]->m_v;
+	dv.normalize();
+	if(dv.dot(m_normal) < 0.f) {
+		return 0;
+	}
+	dv = *v.m_v - *m_vertices[2]->m_v;
+	dv.normalize();
+	if(dv.dot(m_normal) < 0.f) {
+		return 0;
+	}
+	return 1;
 }
 
 char Facet::getEdgeOnHorizon(std::vector<Edge *> & horizons) const

@@ -187,7 +187,7 @@ void VegetationPatch::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 	const Vector3F * nr = pntNormalR();
 	const Vector3F * cr = pntColorR();
 	const float sz0 = bbox.getLongestDistance() * .39f;
-	const Vector3F colgrn(0,1,0);
+	
 	PosNmlCol smp;
 typedef sdb::ValGrid<PosNmlCol> VGDTyp;		
 	VGDTyp valGrd;

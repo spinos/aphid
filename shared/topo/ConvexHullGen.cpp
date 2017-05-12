@@ -1,5 +1,5 @@
 /*
- *  HullContainer.cpp
+ *  ConvexHullGen.cpp
  *  qtbullet
  *
  *  Created by jian zhang on 7/13/11.
@@ -7,46 +7,49 @@
  *
  */
 #include <iostream>
-#include "HullContainer.h"
+#include "ConvexHullGen.h"
 #include <topo/Vertex.h>
 #include <topo/Facet.h>
 #include <topo/Edge.h>
 #include <topo/GraphArch.h>
 #include <topo/ConflictGraph.h>
+#include <geom/ATriangleMesh.h>
 #include <cmath>
 
-using namespace aphid;
+namespace aphid {
 
-HullContainer::HullContainer() 
+ConvexHullGen::ConvexHullGen() 
 {}
 
-HullContainer::~HullContainer() 
-{}
-
-void HullContainer::initHull()
+ConvexHullGen::~ConvexHullGen() 
 {
-	int nv = 9999;
-	for(int i = 0; i < nv; i++) 
-	{
-		Vertex * v = new Vertex;
-		float r = ((float)(rand() % 24091)) / 24091.f * 10.f + 12.f;
-		float phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
-		float theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
-		
-		v->m_v = new Vector3F;
-		v->m_v->x = sin(theta) * cos(phi) * r + 16.f;
-		v->m_v->y = sin(theta) * sin(phi) * r + 16.f;
-		v->m_v->z = cos(theta) * r + 16.f;
-		//v->x = ((float)(rand() % 218091)) / 8092.f;
-		//v->y = ((float)(rand() % 308391)) / 8392.f;
-		//v->z = ((float)(rand() % 298331)) / 8332.f;
-		addVertex(v);
-		v->setData((char*)new ConflictGraph(0));
+	delete m_horizon;
+	visibleFaces.clear();
+	
+	std::vector<ConflictGraph *>::iterator it = m_conflg.begin();
+	for(;it!=m_conflg.end();++it) {
+		delete *it;
 	}
-	processHull();
+	
+	std::vector<GraphArch *>::iterator it1 = m_arch.begin();
+	for(;it1!=m_arch.end();++it1) {
+		delete *it1;
+	}
+	
 }
 
-void HullContainer::processHull()
+void ConvexHullGen::addSample(const Vector3F & p)
+{
+	Vertex * vet = new Vertex;
+	vet->m_v = new Vector3F;
+	*vet->m_v = p;
+	addVertex(vet);
+	ConflictGraph * cfg = new ConflictGraph(0);
+	vet->setData((char*)cfg);
+	m_conflg.push_back(cfg);
+}
+
+void ConvexHullGen::processHull()
 {
 	Vertex *a = vertex(0);
 	Vertex *b = vertex(1);
@@ -58,10 +61,20 @@ void HullContainer::processHull()
 	Facet *f3 = new Facet(a, b, d, c->m_v);
 	Facet *f4 = new Facet(b, c, d, a->m_v);
 	
-	f1->setData((char*)new ConflictGraph(1));
-	f2->setData((char*)new ConflictGraph(1));
-	f3->setData((char*)new ConflictGraph(1));
-	f4->setData((char*)new ConflictGraph(1));
+	ConflictGraph * cfg1 = new ConflictGraph(1);
+	ConflictGraph * cfg2 = new ConflictGraph(1);
+	ConflictGraph * cfg3 = new ConflictGraph(1);
+	ConflictGraph * cfg4 = new ConflictGraph(1);
+	
+	f1->setData((char*)cfg1);
+	f2->setData((char*)cfg2);
+	f3->setData((char*)cfg3);
+	f4->setData((char*)cfg4);
+	
+	m_conflg.push_back(cfg1);
+	m_conflg.push_back(cfg2);
+	m_conflg.push_back(cfg3);
+	m_conflg.push_back(cfg4);
 	
 	addFacet(f1);
 	addFacet(f2);
@@ -121,7 +134,7 @@ void HullContainer::processHull()
 #endif
 }
 
-char HullContainer::searchVisibleFaces(Vertex *v)
+char ConvexHullGen::searchVisibleFaces(Vertex *v)
 {
 	visibleFaces.clear();
 	((ConflictGraph *)v->getData())->getFaces(visibleFaces);
@@ -132,7 +145,7 @@ char HullContainer::searchVisibleFaces(Vertex *v)
 	return 1;
 }
 
-char HullContainer::searchHorizons()
+char ConvexHullGen::searchHorizons()
 {
 	std::vector<Facet *>::iterator it = faces().begin();
 	for(; it < faces().end(); it++ ) {
@@ -235,19 +248,14 @@ char HullContainer::searchHorizons()
 	return 1;
 }
 
-char HullContainer::spawn(Vertex *v)
+char ConvexHullGen::spawn(Vertex *v)
 {
 	Edge *cur = m_horizon;
 	Vector3F horizonCen(0.f, 0.f, 0.f);
-	for(int i = 0; i < (int)visibleFaces.size(); i++)
-	{
-		
-		horizonCen += visibleFaces.at(i)->getCentroid() - visibleFaces.at(i)->getNormal();
-		
+	for(int i = 0; i < (int)visibleFaces.size(); i++) {
+		horizonCen += visibleFaces.at(i)->getCentroid();
 	}
 	horizonCen /= (float)visibleFaces.size();
-	
-	
 	
 	Facet *last = 0;
 	Facet *first = 0;
@@ -278,7 +286,11 @@ char HullContainer::spawn(Vertex *v)
 		
 		//Vertex * c = yard->thirdVertex(a, b);
 		Facet *f = new Facet(v, a, b, &horizonCen);
-		f->setData((char*)new ConflictGraph(1));
+		
+		ConflictGraph * cfg = new ConflictGraph(1);
+		f->setData((char*)cfg);
+		
+		m_conflg.push_back(cfg);
 		
 		addFacet(f);
 		
@@ -301,7 +313,7 @@ char HullContainer::spawn(Vertex *v)
 	return last->connectTo(first, v, end);
 }
 
-char HullContainer::finishStep(Vertex *v)
+char ConvexHullGen::finishStep(Vertex *v)
 {
 	v->setVisibility(0);
 	
@@ -331,57 +343,15 @@ char HullContainer::finishStep(Vertex *v)
 	return 1;
 }
 
-/*
-void HullContainer::renderWorld(ShapeDrawer * drawer)
-{
-	std::vector<Facet *>::iterator it;
-	
-	drawer->setGrey(1.f);
-	
-	drawer->beginSolidTriangle();
-	for(it = visibleFaces.begin(); it < visibleFaces.end(); it++ )
-	{
-		const Facet *f = *it;
-		Vertex p = f->getVertex(0);
-		drawer->aVertex(p.x, p.y, p.z);
-		p = f->getVertex(1);
-		drawer->aVertex(p.x, p.y, p.z);
-		p = f->getVertex(2);
-		drawer->aVertex(p.x, p.y, p.z);
-	}
-	drawer->end();
-	
-	drawer->setColor(1.f, 0.f, 0.f);
-	
-	const Vertex pv = getVertex(m_currentVertexId);
-	drawer->solidCube(pv.x, pv.y, pv.z, 0.5f);
-	
-	drawer->beginLine();
-	
-	Edge *cur = m_horizon;
-	int i = 0;
-	while(cur && i <= m_numHorizon) 
-	{
-		const Vertex a = cur->getV0();
-		const Vertex b = cur->getV1();
-		drawer->aVertex(a.x, a.y, a.z);
-		drawer->aVertex(b.x, b.y, b.z);
-		cur = (Edge *)cur->getNext();
-		i++;
-	}
-	
-	drawer->end();
-}
-*/
-
-void HullContainer::addConflict(Facet *f, Vertex *v)
+void ConvexHullGen::addConflict(Facet *f, Vertex *v)
 {
 	GraphArch *arc = new GraphArch(f, v);
       ((ConflictGraph *)f->getData())->add(arc);
       ((ConflictGraph *)v->getData())->add(arc);
+	m_arch.push_back(arc);
 }
 
-void HullContainer::addConflict(Facet *f, Facet *f1, Facet *f2)
+void ConvexHullGen::addConflict(Facet *f, Facet *f1, Facet *f2)
 {
 	std::vector<Vertex *> f1Visible;
 	std::vector<Vertex *> f2Visible;
@@ -431,11 +401,13 @@ void HullContainer::addConflict(Facet *f, Facet *f1, Facet *f2)
 	
 	for(int i=(int)visible.size() - 1; i >= 0; i--) {
 		Vertex *v = visible.at(i);
-		if (f->isVertexAbove(*v)) addConflict(f, v);
+		if (f->isVertexAbove(*v)) {
+			addConflict(f, v);
+		}
 	}
 }
 
-void HullContainer::removeConflict(Facet *f)
+void ConvexHullGen::removeConflict(Facet *f)
 {
 	Vertex *conflictedV = new Vertex;
 	((ConflictGraph *)f->getData())->getVertices(conflictedV);
@@ -446,4 +418,81 @@ void HullContainer::removeConflict(Facet *f)
 		conflictedV = (Vertex *)conflictedV->getNext();
 	}
 	delete conflictedV;
+}
+
+Vector3F ConvexHullGen::getCenter() const
+{
+	Vector3F c(0.f, 0.f, 0.f);
+	std::vector<Facet *>::const_iterator it = visibleFaces.begin();
+	for(;it!=visibleFaces.end();++it) {
+		c += (*it)->getCentroid();
+	}
+	c /= (float)visibleFaces.size();
+	return c;
+}
+
+void ConvexHullGen::checkFaceNormal(Vector3F* pos, Vector3F* nml,
+			const Vector3F & vref) const
+{
+	Vector3F va = pos[1] - pos[0];
+	Vector3F vb = pos[2] - pos[0];
+	Vector3F vn = va.cross(vb);
+	vn.normalize();
+	if(vn.dot(vref) < 0.f) {
+		vn.reverse();
+		va = pos[1];
+		pos[1] = pos[2];
+		pos[2] = va;
+	}
+	for(int j=0;j<3;++j) {
+		nml[j] = vn;
+	}
+}
+
+void ConvexHullGen::extractMesh(ATriangleMesh * msh)
+{
+	const int nt = getNumFace();
+	const int nv = nt * 3;
+	msh->create(nv, nt);
+	
+	unsigned * indDst = msh->indices();
+    Vector3F * pntDst = msh->points();
+    Vector3F * nmlDst = msh->vertexNormals();
+	
+	const Vector3F hc = getCenter();
+	
+	for(int i=0;i<nt;++i) {
+		const Facet & fc = getFacet(i);
+		Vector3F dv = fc.getCentroid() - hc;
+		
+		for(int j=0;j<3;++j) {
+			const Vertex * vj = fc.vertex(j);
+			pntDst[i*3 + j] = *(vj->m_v);
+			indDst[i*3 + j] = i*3 + j;
+		}
+		checkFaceNormal(&pntDst[i*3], &nmlDst[i*3], dv);
+		
+	}
+}
+
+void ConvexHullGen::extractMesh(Vector3F* pos, Vector3F* nml, unsigned* inds, int offset)
+{
+	const Vector3F hc = getCenter();
+	
+	const int nt = getNumFace();
+	for(int i=0;i<nt;++i) {
+		const Facet & fc = getFacet(i);
+		
+		Vector3F dv = fc.getCentroid() - hc;
+		
+		for(int j=0;j<3;++j) {
+			const Vertex * vj = fc.vertex(j);
+			pos[i*3 + j] = *(vj->m_v);
+			inds[i*3 + j] = i*3 + j + offset;
+		}
+		checkFaceNormal(&pos[i*3], &nml[i*3], dv);
+		
+	}
+}
+
 }

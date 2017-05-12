@@ -3,7 +3,9 @@
 
 #include <qt/Base3DView.h>
 
-class HullContainer;
+namespace aphid {
+class ATriangleMesh;
+}
 
 class GLWidget : public aphid::Base3DView
 {
@@ -24,8 +26,8 @@ protected:
 private slots:
     
 private:	
-	HullContainer* _dynamics;
-
+	aphid::ATriangleMesh * m_tri;
+	
 };
 
 #endif

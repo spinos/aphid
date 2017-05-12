@@ -85,6 +85,7 @@ public:
 	
 	void getCellColor(float * dst);
 	void getFirstValue(T & dst);
+	void getMeanValue(T & dst);
 	
 protected:
 	
@@ -150,6 +151,12 @@ template<typename T>
 void ValGrid<T>::getFirstValue(T & dst)
 {
 	TParent::value()->getFirstValue(dst);
+}
+
+template<typename T>
+void ValGrid<T>::getMeanValue(T & dst)
+{
+	TParent::value()->getMeanValue(dst);
 }
 
 }

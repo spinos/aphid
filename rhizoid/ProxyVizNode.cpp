@@ -82,6 +82,16 @@ m_iFastGround(0)
 	attachSceneCallbacks(); 
 	m_defExample = new ExampVox;
 	addPlantExample(m_defExample, 0);
+	m_preDopCorner[0] = 0.f;
+	m_preDopCorner[1] = 0.f;
+	m_preDopCorner[2] = 0.f;
+	m_preDopCorner[3] = 0.f;
+	m_preDopSize[0] = 0.f;
+	m_preDopSize[1] = 0.f;
+	m_preDopSize[2] = 0.f;
+	m_preDopCol[0] = 0.f;
+	m_preDopCol[1] = 0.f;
+	m_preDopCol[2] = 0.f;
 }
 
 ProxyViz::~ProxyViz() 
@@ -1091,12 +1101,8 @@ void ProxyViz::updateGeomDop(ExampVox * dst, const MObject & node)
 	dopcorner[1] = mutyplug.asFloat();
 	dopcorner[2] = mutzplug.asFloat();
 	dopcorner[3] = mutwplug.asFloat();
-						
-    AOrientedBox ob;
-	ob.caluclateOrientation(&dst->geomBox() );
-	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
-	dst->update8DopPoints(ob, dst->dopSize() );
-	dst->updateDopCol();
+	
+	updateDop(dst, dopcorner);
 }
 
 void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
@@ -1107,9 +1113,41 @@ void ProxyViz::updateGeomDop(ExampVox * dst, MDataBlock & block)
 	dopcorner[2] = block.inputValue(azmultiplier).asFloat();
 	dopcorner[3] = block.inputValue(awmultiplier).asFloat();
 						
-    AOrientedBox ob;
+    updateDop(dst, dopcorner);
+}
+
+bool ProxyViz::isDopParamChanged(ExampVox * dst, const float * dopcorners)
+{
+	bool stat = false;
+	for(int i=0;i<4;++i) {
+		if(m_preDopCorner[i] != dopcorners[i]) {
+			m_preDopCorner[i] = dopcorners[i];
+			stat = true;
+		}
+	}
+	for(int i=0;i<3;++i) {
+		if(m_preDopSize[i] != dst->dopSize()[i]) {
+			m_preDopSize[i] = dst->dopSize()[i];
+			stat = true;
+		}
+	}
+	for(int i=0;i<3;++i) {
+		if(m_preDopCol[i] != dst->diffuseMaterialColor()[i]) {
+			m_preDopCol[i] = dst->diffuseMaterialColor()[i];
+			stat = true;
+		}
+	}
+	return stat;
+}
+
+void ProxyViz::updateDop(ExampVox * dst, const float * dopcorners)
+{
+	if(!isDopParamChanged(dst, dopcorners) ) {
+		return;
+	}
+	AOrientedBox ob;
 	ob.caluclateOrientation(&dst->geomBox() );
-	ob.calculateCenterExtents(&dst->geomBox(), dopcorner);
+	ob.calculateCenterExtents(&dst->geomBox(), dopcorners);
 	dst->update8DopPoints(ob, dst->dopSize());
 	dst->updateDopCol();
 }

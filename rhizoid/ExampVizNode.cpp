@@ -53,6 +53,9 @@ ExampViz::ExampViz()
 	m_preDiffCol[0] = 0.f;
 	m_preDiffCol[1] = 0.f;
 	m_preDiffCol[2] = 0.f;
+	m_preDspSize[0] = 0.f;
+	m_preDspSize[1] = 0.f;
+	m_preDspSize[2] = 0.f;
 }
 
 ExampViz::~ExampViz() 
@@ -92,11 +95,16 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 		const bool vis = block.inputValue(avoxvisible).asBool(); 
 		setVisible(vis);
 		
-		if(!loadTriangles(block) ) {
+		bool stat = pntBufLength() > 0;
+		if(!stat) {
+			stat = loadTriangles(block);
+		}
+		if(!stat ) {
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
 		
 		//updateGridUniformColor(diffCol);
+		updateDop();
 		
 		MDataHandle detailTypeHandle = block.inputValue( adrawVoxTag );
 		const short detailType = detailTypeHandle.asShort();
@@ -149,6 +157,7 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 	}
 	
 	//updateGridUniformColor(diffCol);
+	updateDop();
 	
 	MPlug detailTypePlg(selfNode, adrawVoxTag);
 	const short detailType = detailTypePlg.asShort();
@@ -272,7 +281,7 @@ MStatus ExampViz::initialize()
 	adrawDopSizeY = numFn.create( "dspDopY", "ddpy", MFnNumericData::kFloat);
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
-	numFn.setDefault(0.9f);
+	numFn.setDefault(1.0f);
 	numFn.setMin(0.1f);
 	numFn.setMax(1.f);
 	addAttribute(adrawDopSizeY);
@@ -289,7 +298,7 @@ MStatus ExampViz::initialize()
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setUsedAsColor(true);
-	numFn.setDefault(0.9f, 0.9f, 0.9f);
+	numFn.setDefault(0.9f, 1.f, 0.9f);
 	addAttribute(adrawDopSize);
 	
 	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
@@ -661,8 +670,7 @@ void ExampViz::buildDrawBuf(int n,
 	AHelper::Info<unsigned>(" ExampViz load n point", n );
 	
 	const BoundingBox & bbox = geomBox();
-	buildBounding8Dop(bbox);
-	
+
 	const float sz0 = bbox.getLongestDistance() * .399f;
 	
 	PosNmlCol smp;
@@ -677,8 +685,8 @@ void ExampViz::buildDrawBuf(int n,
 	valGrd.finishInsert();
 	DrawGrid2::createPointBased<VGDTyp, PosNmlCol> (&valGrd, 3);
 	
-	setUniformDopColor(diffuseMaterialColV() );
-	//setUniformColor(diffuseMaterialColV() );
+	buildPointHull(bbox);
+	
 }
 
 void ExampViz::updateGridUniformColor(const float * col)
@@ -704,5 +712,50 @@ void ExampViz::updateGridUniformColor(const float * col)
 	}
 	
 	setUniformColor(col);
+}
+
+void ExampViz::updateDop()
+{
+	const float * col = diffuseMaterialColor();
+	bool stat = false;
+	if(m_preDiffCol[0] != col[0]) {
+		m_preDiffCol[0] = col[0];
+		stat = true;
+	}
+	
+	if(m_preDiffCol[1] != col[1]) {
+		m_preDiffCol[1] = col[1];
+		stat = true;
+	}
+	
+	if(m_preDiffCol[2] != col[2]) {
+		m_preDiffCol[2] = col[2];
+		stat = true;
+	}
+	
+	if(stat) {
+		setUniformDopColor(col);
+	}
+	
+	const float * sz = dopSize();
+	stat = false;
+	if(m_preDspSize[0] != sz[0]) {
+		m_preDspSize[0] = sz[0];
+		stat = true;
+	}
+	
+	if(m_preDspSize[1] != sz[1]) {
+		m_preDspSize[1] = sz[1];
+		stat = true;
+	}
+	
+	if(m_preDspSize[2] != sz[2]) {
+		m_preDspSize[2] = sz[2];
+		stat = true;
+	}
+	
+	if(stat) {
+		resizeDopPoints(sz);
+	}
 }
 //:~

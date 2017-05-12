@@ -14,10 +14,12 @@
 namespace aphid {
 
 class AOrientedBox;
+class Vector3F;
 
 class DrawDop {
 
 	float * m_vertexNormals;
+	float * m_refPoints;
 	float * m_vertexPoints;
 	float * m_vertexColors;
 	int m_numVertices;
@@ -39,9 +41,12 @@ public:
 	const float * dopColorBuf() const;
 	
 	void setDopDrawBufLen(const int & nv);
+	float * dopRefPositionR();
 	float * dopPositionR();
 	float * dopNormalR();
 	float * dopColorR();
+	
+	void resizeDopPoints(const Vector3F & scaling );
 
 protected:
 	void setUniformDopColor(const float * c);

@@ -34,6 +34,9 @@ class ProxyViz : public MPxLocatorNode, public MForest
 	MMatrix _worldSpace, _worldInverseSpace;
 	ExampVox * m_defExample;
 	float m_transBuf[16];
+	float m_preDopCorner[4];
+	float m_preDopSize[3];
+	float m_preDopCol[3];
 	int m_iShowGrid;
 	int m_iFastGround;
 	bool m_toSetGrid;
@@ -181,6 +184,9 @@ private:
 	void updateGeomBox(ExampVox * dst, MDataBlock & block);
 	void updateGeomDop(ExampVox * dst, const MObject & node);
 	void updateGeomDop(ExampVox * dst, MDataBlock & block);
+	/// extend, size and color if changed
+	void updateDop(ExampVox * dst, const float * dopcorners);
+	bool isDopParamChanged(ExampVox * dst, const float * dopcorners);
 	
 };
 

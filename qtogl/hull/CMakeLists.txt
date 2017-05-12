@@ -1,12 +1,12 @@
+set(CMAKE_MACOSX_BUNDLE OFF)
+
 set (HULL_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
-glwidget.h
-HullContainer.h)
+glwidget.h)
 
 set (HULL_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 glwidget.cpp
 window.cpp
-HullContainer.cpp
 main.cpp)
 
 add_executable (cvxhull ${HULL_HEADER_FILES} ${HULL_SOURCE_FILES})

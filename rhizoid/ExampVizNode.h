@@ -33,6 +33,7 @@ class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public aphid::Dr
 {
 	float m_transBuf[16];
 	float m_preDiffCol[3];
+	float m_preDspSize[3];
 	
 public:
 	ExampViz();
@@ -96,5 +97,8 @@ private:
 				const MVectorArray & nmls,
 				const MVectorArray & cols);
 	void updateGridUniformColor(const float * col);
+/// size and color if changed
+	void updateDop();
+	
 	
 };

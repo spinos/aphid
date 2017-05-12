@@ -30,6 +30,7 @@ public:
 	
 	Edge * edge(int idx);
 	Vertex * vertex(int idx);
+	const Vertex * vertex(int idx) const;
 	Vertex * vertexAfter(int idx);
 	Vertex * vertexBefore(int idx);
 	Vertex * thirdVertex(Vertex *a, Vertex *b);

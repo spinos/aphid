@@ -21,6 +21,7 @@
 #include <sdb/ebp.h>
 #include <sdb/ValGrid.h>
 #include <ogl/DrawGrid2.h>
+#include <topo/KHullGen.h>
 
 using namespace aphid;
 
@@ -35,7 +36,7 @@ GLWidget::GLWidget(QWidget *parent)
 	BoundingBox gridBox;
 	KdEngine eng;
 	eng.buildSource<cvx::Triangle, 3 >(m_triangles, gridBox,
-									sCactusMeshVertices[3],
+									sCactusMeshVertices[2],
 									sCactusNumTriangleIndices,
 									sCactusMeshTriangleIndices);
 									
@@ -52,7 +53,7 @@ GLWidget::GLWidget(QWidget *parent)
 typedef IntersectEngine<cvx::Triangle, KdNode4 > FIntersectTyp;
 
 	FIntersectTyp ineng(m_tree);
-	const float sz0 = m_tree->getBBox().getLongestDistance() * .89f;
+	const float sz0 = m_tree->getBBox().getLongestDistance() * .49f;
 	EbpGrid * grid = new EbpGrid;
 	grid->fillBox(m_tree->getBBox(), sz0 );
 	grid->subdivideToLevel<FIntersectTyp>(ineng, 0, 3);
@@ -101,7 +102,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	smp._nml = Vector3F(0.f, 1.f, 0.f);
 	    
 	m_valGrd = new VGDTyp;
-	m_valGrd->fillBox(m_tree->getBBox(), sz0 );
+	m_valGrd->fillBox(m_tree->getBBox(), sz0 * 1.4f);
 	for(int i=0;i<np;++i) {
 	    const Float4 * pr = particleR(i);
 		const Float4 * cr = particleColor(i);
@@ -117,7 +118,11 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	//float ucol[3] = {.2f, .8f, .45f};
 	//m_drdg->setUniformColor(ucol);
 	//m_drdg->setPerCellColor<VGDTyp> (m_valGrd, 3);
-	std::cout.flush();	
+	
+	m_hullTri[0] = new ATriangleMesh;
+	m_valGrd->build(m_hullTri[0], 3, 5);
+	
+	std::cout.flush();
 }
 
 GLWidget::~GLWidget()
@@ -147,9 +152,8 @@ void GLWidget::clientDraw()
 	
 	getDrawer()->setColor(1.f, 1.f, 1.f);
 	drawParticles();
-	
+#if 0
 	getDrawer()->m_surfaceProfile.apply();
-	getDrawer()->m_wireProfile.apply();
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -158,7 +162,37 @@ void GLWidget::clientDraw()
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+#endif	
+	getDrawer()->m_wireProfile.apply();
+	getDrawer()->m_surfaceProfile.apply();
+	getDrawer()->setColor(1,.7,0);
+	drawMesh(m_hullTri[0]);
+	/*getDrawer()->setColor(0,1,.7);
+	drawMesh(m_hullTri[1]);
+	getDrawer()->setColor(1,0,.7);
+	drawMesh(m_hullTri[2]);
+	getDrawer()->setColor(1,1,.7);
+	drawMesh(m_hullTri[3]);*/
 	
+}
+	
+void GLWidget::drawMesh(const aphid::ATriangleMesh * msh)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	//const unsigned nind = msh->numIndices();
+	//const unsigned * inds = msh->indices();
+	const Vector3F * pos = msh->points();
+	const Vector3F * nml = msh->vertexNormals();
+	
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)nml );
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos );
+	//glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds);
+	glDrawArrays(GL_TRIANGLES, 0, msh->numPoints() );
+
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)
