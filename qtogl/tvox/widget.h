@@ -66,7 +66,7 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	aphid::Ray m_incident;
 	aphid::RotationHandle * m_roth;
 
-	typedef aphid::sdb::ValGrid<aphid::Vector3F> VGDTyp;
+	typedef aphid::sdb::ValGrid<aphid::PosNmlCol> VGDTyp;
 	VGDTyp * m_valGrd;
 
 	aphid::DrawGrid2 * m_drdg;

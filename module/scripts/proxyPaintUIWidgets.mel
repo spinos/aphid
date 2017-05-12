@@ -6,6 +6,7 @@
 global proc proxyPaintCreateVizUI(string $coln)
 {
     floatSliderGrp -label "Show Voxel Threshold" -field true
+    -ss 0.01 -fs 0.01
     -minValue 0.5 -maxValue 1.0
     -fieldMinValue 0.5 -fieldMaxValue 1.0
     -value 1.0
@@ -383,6 +384,7 @@ global proc proxyPaintCreateGroundUI(string $coln)
     setParent ..;
             
     floatSliderGrp -label "Sample Portion" 
+        -ss 0.01 -fs 0.01
         -minValue 0.0003 -maxValue 0.9997
         -field true -fieldMinValue 0.0003 -fieldMaxValue 0.9997
         -value 0.8
@@ -416,6 +418,7 @@ global proc proxyPaintCreateGroundUI(string $coln)
     columnLayout -adj true;
 
     floatSliderGrp -label "Level" -field true
+        -ss 0.01 -fs 0.01
     -minValue 0.0 -maxValue 1.0
     -fieldMinValue 0.0 -fieldMaxValue 1.0
     -value 0.5
@@ -424,6 +427,7 @@ global proc proxyPaintCreateGroundUI(string $coln)
 	proxyPaintSlider_noise3dLevel;
 	
 floatSliderGrp -label "Frequency" -field true
+    -ss 0.01 -fs 0.01
     -minValue 0.1 -maxValue 10.0
     -fieldMinValue 0.01 -fieldMaxValue 100.0
     -value 1.0
@@ -432,6 +436,7 @@ floatSliderGrp -label "Frequency" -field true
 	proxyPaintSlider_noise3dFrequency;
 	
 floatSliderGrp -label "Lacunarity" -field true
+    -ss 0.01 -fs 0.01
     -minValue 1.1 -maxValue 4.0
     -fieldMinValue 1.01 -fieldMaxValue 8.0
     -value 1.5
@@ -448,6 +453,7 @@ intSliderGrp -label "Octaves" -field true
 	proxyPaintSlider_noise3dOctave;
 	
 floatSliderGrp -label "Gain" -field true
+    -ss 0.01 -fs 0.01
     -minValue 0.05 -maxValue 0.95
     -fieldMinValue 0.05 -fieldMaxValue 0.95
     -value 0.5
@@ -474,6 +480,7 @@ global proc proxyPaintCreateEditUI(string $coln)
     columnLayout -adj true;
     
     floatSliderGrp -label "Radius" -field true
+        -ss 0.01 -fs 0.01
     -minValue 0.01 -maxValue 1000.0
     -fieldMinValue 0.01 -fieldMaxValue 500000.0
     -value 10.0
@@ -481,6 +488,7 @@ global proc proxyPaintCreateEditUI(string $coln)
 	-cc "proxyPaintSetBRadius(`floatSliderGrp -q -value proxyPaintSlider_BRad`)" proxyPaintSlider_BRad;
 
 	floatSliderGrp -label "Weight" -field true
+	    -ss 0.01 -fs 0.01
     -minValue 0.01 -maxValue 1.0
     -fieldMinValue 0.01 -fieldMaxValue 1.0
     -value 0.8
@@ -488,6 +496,7 @@ global proc proxyPaintCreateEditUI(string $coln)
 	-cc "proxyPaintSetBWeight(`floatSliderGrp -q -value proxyPaintSlider_BWei`)" proxyPaintSlider_BWei;
 
 	floatSliderGrp -label "Fall off" -field true
+	    -ss 0.01 -fs 0.01
     -minValue 0.0 -maxValue 2.0
     -fieldMinValue 0.0 -fieldMaxValue 2.0
     -value 0.5
@@ -524,6 +533,7 @@ global proc proxyPaintCreateEditUI(string $coln)
             proxyPaintSlider_ALN;
 
     floatSliderGrp -label "Margin Min"
+        -ss 0.01 -fs 0.01
             -minValue 0.1 -maxValue 100.0
              -field true
             -fieldMinValue 0.1 -fieldMaxValue 10000.0
@@ -533,6 +543,7 @@ global proc proxyPaintCreateEditUI(string $coln)
             proxyPaint_minMarginSlider;
         
     floatSliderGrp -label "Margin Max"
+        -ss 0.01 -fs 0.01
             -minValue 0.1 -maxValue 100.0
              -field true
             -fieldMinValue 0.1 -fieldMaxValue 10000.0
@@ -542,6 +553,7 @@ global proc proxyPaintCreateEditUI(string $coln)
             proxyPaint_maxMarginSlider;
             
     floatSliderGrp -label "Scale Min"
+        -ss 0.01 -fs 0.01
             -minValue 0.1 -maxValue 2.0
             -field true
             -fieldMinValue 0.01 -fieldMaxValue 20.0
@@ -551,6 +563,7 @@ global proc proxyPaintCreateEditUI(string $coln)
             proxyPaintSlider_ScaleMin;
             
     floatSliderGrp -label "Scale Max"
+        -ss 0.01 -fs 0.01
             -minValue 0.1 -maxValue 2.0
             -field true
             -fieldMinValue 0.01 -fieldMaxValue 20.0
@@ -560,6 +573,7 @@ global proc proxyPaintCreateEditUI(string $coln)
             proxyPaintSlider_ScaleMax;
             
     floatSliderGrp -label "Rotate Noise" -field true
+        -ss 0.01 -fs 0.01
         -minValue 0.0 -maxValue 1.0
         -fieldMinValue 0.0 -fieldMaxValue 1.0
         -value 0.1

@@ -488,7 +488,8 @@ global proc proxyPaint_createExample()
 
 global proc proxyPaint_EditVizGround()
 {
-    string $vizName = `text -q -label proxyPaint_vizNameText`;
+    string $transName = `text -q -label proxyPaint_vizNameText`;
+    string $vizName = `text -q -ann proxyPaint_vizNameText`;
     if($vizName == "No Viz Selected") {
         print("\n no viz selected");
         return;   
@@ -506,8 +507,8 @@ global proc proxyPaint_EditVizGround()
     
     columnLayout -adjustableColumn true -p $scroll;
         
-        textFieldGrp -label "Viz" 
-            -text $vizName -ed 0;
+        textFieldGrp -label "Viz Name" 
+            -text $transName -ed 0;
                
         string $cmd = "proxyPaintConnectGroundMesh(\"" + $vizName + "\")"; 
             

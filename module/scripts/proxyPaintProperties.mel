@@ -119,8 +119,8 @@ global proc proxyPaint_listAllVizToPaint()
 
 global proc proxyPaint_selectAViz2(int $index)
 {
-/// cannot have empty data
-    proxyPaint_showAllVizs();
+/// cannot have empty data while should enable to hide
+    //proxyPaint_showAllVizs();
     string $vizs[] = `ls -type proxyViz`;
     
     select -r $vizs[$index];
@@ -154,7 +154,9 @@ global proc proxyPaintUpdateExampleScroll()
         return;
     }
     
-    text -e -label $node proxyPaint_vizNameText;
+    string $transname = pxpnt_parentOfViz($node);
+    text -e -label $transname proxyPaint_vizNameText;
+    text -e -ann $node proxyPaint_vizNameText;
     proxyPaintUpdateExmpUI("pxpnExmpUIColn1cc22e1b");
     
 }

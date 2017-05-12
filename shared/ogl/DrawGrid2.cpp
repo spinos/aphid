@@ -152,8 +152,10 @@ static const float sOctaVertOffset[24][3] = {
 
 void DrawGrid2::setOctahedron(float * pos,
                     float * mnl,
+					float * col,
 					const Vector3F & pncen,
 					const Vector3F & pnnml,
+					const Vector3F & pncol,
 					const float & pnwd)
 {
 	Vector3F vert;
@@ -161,12 +163,9 @@ void DrawGrid2::setOctahedron(float * pos,
 		vert = pncen + Vector3F(sOctaVertOffset[i][0] * pnwd,
 							sOctaVertOffset[i][1] * pnwd,
 							sOctaVertOffset[i][2] * pnwd);
-		pos[i*3] = vert.x;
-		pos[i*3+1] = vert.y;
-		pos[i*3+2] = vert.z;
-		mnl[i*3] = pnnml.x;
-		mnl[i*3+1] = pnnml.y;
-		mnl[i*3+2] = pnnml.z;
+		memcpy(&pos[i * 3], &vert, 12);
+		memcpy(&mnl[i * 3], &pnnml, 12);
+		memcpy(&col[i * 3], &pncol, 12);
 	}
 }
 

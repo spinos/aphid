@@ -45,8 +45,10 @@ public:
 protected:
 	void setOctahedron(float * pos,
                     float * mnl,
+					float * col,
 					const Vector3F & pncen,
 					const Vector3F & pnnml,
+					const Vector3F & pncol,
 					const float & pnwd);
     void setBoxFace(float * pos,
                     float * mnl,
@@ -165,7 +167,7 @@ void DrawGrid2::createPointBased(T * grd, const int & level)
 	m_vertexNormals.reset(new float[np * 72]);
 	m_vertexColors.reset(new float[np * 72]);
 	
-	const float psz = grd->levelCellSize(level) * .31f;
+	const float psz = grd->levelCellSize(level) * .41f;
 	
 	Tv vcel;
 	np = 0;
@@ -175,9 +177,10 @@ void DrawGrid2::createPointBased(T * grd, const int & level)
         if(c.w == level) {
 			float * pr = &m_vertexPoints[np * 72];
 			float * nr = &m_vertexNormals[np * 72];
+			float * cr = &m_vertexColors[np * 72];
 			
 			grd->getFirstValue(vcel);
-			setOctahedron(pr, nr, vcel._pos, vcel._nml, psz);
+			setOctahedron(pr, nr, cr, vcel._pos, vcel._nml, vcel._col, psz);
 			np++;
         }
         

@@ -91,6 +91,12 @@ struct PosNml {
 	Vector3F _nml;
 };
 
+struct PosNmlCol {
+	Vector3F _pos;
+	Vector3F _nml;
+	Vector3F _col;
+};
+
 }
 #endif        //  #ifndef VECTOR3F_H
 

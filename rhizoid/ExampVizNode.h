@@ -84,7 +84,7 @@ public:
 /// point sample based before grid faces 
 	void voxelize4(aphid::sdb::VectorArray<aphid::cvx::Triangle> * tri,
 						const aphid::BoundingBox & bbox);
-	typedef aphid::sdb::ValGrid<aphid::PosNml > VGDTyp;					
+	typedef aphid::sdb::ValGrid<aphid::PosNmlCol > VGDTyp;					
 private:
 	void updateGeomBox(MObject & node);
 	bool loadTriangles(MDataBlock & data);

@@ -96,7 +96,7 @@ MStatus ExampViz::compute( const MPlug& plug, MDataBlock& block )
 			AHelper::Info<MString>(" ERROR ExampViz has no draw data", MFnDependencyNode(thisMObject() ).name() );
 		}
 		
-		updateGridUniformColor(diffCol);
+		//updateGridUniformColor(diffCol);
 		
 		MDataHandle detailTypeHandle = block.inputValue( adrawVoxTag );
 		const short detailType = detailTypeHandle.asShort();
@@ -148,7 +148,7 @@ void ExampViz::draw( M3dView & view, const MDagPath & path,
 		return;
 	}
 	
-	updateGridUniformColor(diffCol);
+	//updateGridUniformColor(diffCol);
 	
 	MPlug detailTypePlg(selfNode, adrawVoxTag);
 	const short detailType = detailTypePlg.asShort();
@@ -470,21 +470,23 @@ void ExampViz::voxelize4(sdb::VectorArray<cvx::Triangle> * tri,
 	AHelper::Info<int>("voxelize4 n point ", np );
 	const Vector3F * pr = pntPositionR();
 	const Vector3F * nr = pntNormalR();
+	const Vector3F * cr = pntColorR();
 	const float sz0 = bbox.getLongestDistance() * .399f;
 	
-	PosNml smp;	
+	PosNmlCol smp;	
 	VGDTyp valGrd;
 	valGrd.fillBox(bbox, sz0 );
 	for(int i=0;i<np;++i) {
 		smp._pos = pr[i];
 		smp._nml = nr[i];
+		smp._col = cr[i];
 	    valGrd.insertValueAtLevel(3, pr[i], smp);
 	}
 	valGrd.finishInsert();
-	DrawGrid2::createPointBased<VGDTyp, PosNml> (&valGrd, 3);
+	DrawGrid2::createPointBased<VGDTyp, PosNmlCol> (&valGrd, 3);
 	
-	float ucol[3] = {.23f, .81f, .45f};
-	setUniformColor(ucol);
+	//float ucol[3] = {.23f, .81f, .45f};
+	//setUniformColor(ucol);
 	
 }
 
@@ -663,20 +665,20 @@ void ExampViz::buildDrawBuf(int n,
 	
 	const float sz0 = bbox.getLongestDistance() * .399f;
 	
-	PosNml smp;
+	PosNmlCol smp;
 	VGDTyp valGrd;
 	valGrd.fillBox(bbox, sz0 );
 	for(int i=0;i<n;++i) {
-		smp._pos = Vector3F(ps[i].x, ps[i].y, ps[i].z);
-		smp._nml = Vector3F(ns[i].x, ns[i].y, ns[i].z);
-	    valGrd.insertValueAtLevel(3, Vector3F(pnts[i].x, pnts[i].y, pnts[i].z),
-								smp);
+		smp._pos = ps[i];
+		smp._nml = ns[i];
+		smp._col = cs[i];
+	    valGrd.insertValueAtLevel(3, smp._pos, smp);
 	}
 	valGrd.finishInsert();
-	DrawGrid2::createPointBased<VGDTyp, PosNml> (&valGrd, 3);
+	DrawGrid2::createPointBased<VGDTyp, PosNmlCol> (&valGrd, 3);
 	
 	setUniformDopColor(diffuseMaterialColV() );
-	setUniformColor(diffuseMaterialColV() );
+	//setUniformColor(diffuseMaterialColV() );
 }
 
 void ExampViz::updateGridUniformColor(const float * col)
