@@ -3,8 +3,9 @@
 #include <maya/MDataBlock.h>
 #include <maya/MObject.h> 
 #include <EnvVar.h>
+#include "LockableMech.h"
 
-class HesMeshNode : public MPxNode, public EnvVar
+class HesMeshNode : public MPxNode, public EnvVar, public LockableMech
 {
 public:
 						HesMeshNode();

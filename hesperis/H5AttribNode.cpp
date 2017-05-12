@@ -45,9 +45,12 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 	
     std::string substitutedCacheName(cacheName.asChar());
 	EnvVar::replace(substitutedCacheName);
+	
+	fCriticalSection.lock();
 
 	if(!openH5File(substitutedCacheName) ) {
 		aphid::AHelper::Info<std::string >("H5AttribNode cannot open h5 file ", substitutedCacheName );
+		fCriticalSection.unlock();
 		return stat;
 	}
 	
@@ -147,9 +150,11 @@ MStatus H5AttribNode::compute( const MPlug& plug, MDataBlock& data )
 		data.setClean(plug);
 	} 
 	else {
+		fCriticalSection.unlock();
 		return MS::kUnknownParameter;
 	}
-
+	fCriticalSection.unlock();
+	
 	return MS::kSuccess;
 }
 

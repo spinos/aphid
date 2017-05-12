@@ -14,7 +14,7 @@
 #include <vector>
 #include <AllMath.h>
 #include <sdb/VectorArray.h>
-#include <ConvexShape.h>
+#include <geom/ConvexShape.h>
 
 class FrustumBoxCmd : public MPxCommand 
 {
@@ -42,11 +42,6 @@ protected:
                      const MDagPathArray & paths,
                      const std::vector<int> & visibilities,
                      bool visible);
-					 
-	void getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
-					aphid::BoundingBox & bbox,
-					const MDagPath & meshPath,
-					const MDagPath & tansformPath) const;
 								
 private:
 	enum WorkMode {

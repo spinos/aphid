@@ -48,17 +48,21 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 	
     bool hesStat = false;
 	if( plug.array() == outMesh ) {
+	    fCriticalSection.lock();
+
 		const unsigned idx = plug.logicalIndex();
-		if(BaseUtil::IsImporting)
+		if(BaseUtil::IsImporting) {
             hesStat = true;
-        else {
-            if(idx == 0) 
+        } else {
+            if(idx == 0) {
                 AHelper::Info<std::string>(" hes mesh open file ", substitutedCacheName );
+            }
             hesStat = BaseUtil::OpenHes(substitutedCacheName, HDocument::oReadOnly);
         }
 		
 		if(!hesStat) {
 			AHelper::Info<std::string >("hes mesh cannot open file ", substitutedCacheName);
+			fCriticalSection.unlock();
 			return MS::kFailure;
 		}
         
@@ -67,6 +71,7 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 		
         if(!BaseUtil::HesDoc->find(meshName.asChar())) {
             AHelper::Info<MString>(" hes cannot find mesh ", meshName );
+            fCriticalSection.unlock();
             return MS::kFailure;
 		}
         
@@ -84,6 +89,7 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 			
 		if( !stat ) {
 			MGlobal::displayWarning("hes mesh cannot create " + meshName);
+			fCriticalSection.unlock();
 			return MS::kFailure;
 		}
 		
@@ -100,6 +106,7 @@ MStatus HesMeshNode::compute( const MPlug& plug, MDataBlock& data )
 				BaseUtil::CloseHes();
 			}
 		}
+		fCriticalSection.unlock();
 	} 
 	else {
 		return MS::kUnknownParameter;

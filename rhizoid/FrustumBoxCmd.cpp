@@ -10,13 +10,16 @@
  */
 
 #include "FrustumBoxCmd.h"
-#include <ASearchHelper.h>
-
+#include <mama/ASearchHelper.h>
+#include <mama/AHelper.h>
+#include <mama/MeshHelper.h>
 #include <maya/MFnPointArrayData.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnAnimCurve.h>
 #include <maya/MItDependencyNodes.h>
+#include <maya/MFnCamera.h>
+#include <maya/MItMeshPolygon.h>
 #include <GjkIntersection.h>
 #include <geom/PrincipalComponents.h>
 
@@ -242,48 +245,6 @@ void FrustumBoxCmd::collide(std::vector<int> & visibilities,
     }
 }
 
-void FrustumBoxCmd::getMeshTris(aphid::sdb::VectorArray<aphid::cvx::Triangle> & tris,
-								aphid::BoundingBox & bbox,
-								const MDagPath & meshPath,
-								const MDagPath & tansformPath) const
-{
-	AHelper::Info<MString>("get mesh triangles", meshPath.fullPathName() );
-	
-	MMatrix worldTm = AHelper::GetWorldParentTransformMatrix2(meshPath, tansformPath);
-	
-    MStatus stat;
-	
-    MIntArray vertices;
-    int i, j, nv;
-	MPoint dp[3];
-	aphid::Vector3F fp[3];
-	MItMeshPolygon faceIt(meshPath);
-    for(; !faceIt.isDone(); faceIt.next() ) {
-
-		faceIt.getVertices(vertices);
-        nv = vertices.length();
-        
-        for(i=1; i<nv-1; ++i ) {
-			dp[0] = faceIt.point(0, MSpace::kObject );
-			dp[1] = faceIt.point(i, MSpace::kObject );
-			dp[2] = faceIt.point(i+1, MSpace::kObject );
-			
-			dp[0] *= worldTm;
-			dp[1] *= worldTm;	
-			dp[2] *= worldTm;
-			
-			aphid::cvx::Triangle tri;
-			for(j=0; j<3; ++j) {
-				fp[j].set(dp[j].x, dp[j].y, dp[j].z);
-				tri.setP(fp[j], j);
-				bbox.expandBy(fp[j], 1e-4f);
-			}
-			
-			tris.insert(tri);
-        }
-    }
-}
-
 void FrustumBoxCmd::worldOrientedBox(aphid::Vector3F * corners, const MDagPath & path) const
 {
     AHelper::Info<const char *>("get world oriented box", path.fullPathName().asChar() );
@@ -301,8 +262,9 @@ void FrustumBoxCmd::worldOrientedBox(aphid::Vector3F * corners, const MDagPath &
 	BoundingBox bbox;
 	
 	int i=0;
-	for(;i<n;++i) 
-		getMeshTris(tris, bbox, meshPaths[i], path);
+	for(;i<n;++i) {
+		MeshHelper::GetMeshTriangles(tris, bbox, meshPaths[i], path);
+	}
 	
 	const int nt = tris.size();
 	if(nt < 1) {

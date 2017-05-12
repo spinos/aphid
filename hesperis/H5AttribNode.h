@@ -9,8 +9,9 @@
 #include <h5/HOocArray.h>
 #include <h5/HBase.h>
 #include <mama/AHelper.h>
+#include "LockableMech.h"
 
-class H5AttribNode : public MPxNode, public EnvVar, public aphid::H5Holder
+class H5AttribNode : public MPxNode, public EnvVar, public aphid::H5Holder, public LockableMech
 {
 public:
 						H5AttribNode();
