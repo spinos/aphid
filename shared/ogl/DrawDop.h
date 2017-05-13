@@ -34,6 +34,7 @@ public:
 	
 	void drawAWireDop() const;
 	void drawASolidDop() const;
+	void drawFlatSolidDop() const;
 	
 	const int & dopBufLength() const;
 	const float * dopPositionBuf() const;

@@ -63,6 +63,7 @@ protected:
 	void drawGrid();
 	void drawSample();
 	void drawActiveSamples();
+	void drawActivePlantContour();
 	void drawActivePlants();
 	void drawViewFrustum();
 	bool isVisibleInView(Plant * pl, 
@@ -95,7 +96,9 @@ private:
 	void drawPlantSolidBoundInCell(ForestCell * cell);
 	void drawPlantSolidBound(PlantData * data,
 					const ExampVox * v);
-
+	void drawPlantFlatSolidBound(PlantData * data,
+					const ExampVox * v);
+					
 };
 
 }

@@ -282,4 +282,9 @@ void ExampVox::drawDetail() const
 	}
 }
 
+void ExampVox::drawFlatBound() const
+{
+	drawFlatSolidDop();
+}
+
 }

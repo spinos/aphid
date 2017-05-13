@@ -88,6 +88,12 @@ void DrawDop::drawAWireDop() const
 	
 	glDrawArrays(GL_TRIANGLES, 0, m_numVertices);
 }
+
+void DrawDop::drawFlatSolidDop() const
+{
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)m_vertexPoints);
+	glDrawArrays(GL_TRIANGLES, 0, m_numVertices);
+}
 	
 void DrawDop::drawASolidDop() const
 {

@@ -332,9 +332,9 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {		
 		drawSolidPlants();
-	}
-	else 
+	} else {
 		drawWiredPlants();
+	}
 	} else {
 		AHelper::Info<std::string >(" ERROR opengl ", "has no glsl");
 	}
@@ -345,7 +345,8 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	if(isActive) {
 		drawActiveSamples();
-		drawActivePlants();
+		drawActivePlantContour();
+		//drawActivePlants();
 		drawBrush(view);
 		drawManipulator();
 	}

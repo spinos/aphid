@@ -119,6 +119,18 @@ void DrawForest::drawWiredPlant(PlantData * data,
 	glPopMatrix();
 }
 
+void DrawForest::drawPlantFlatSolidBound(PlantData * data,
+					const ExampVox * v)
+{
+	glPushMatrix();
+    
+	data->t1->glMatrix(m_transbuf);
+	glMultMatrixf((const GLfloat*)m_transbuf);
+	v->drawFlatBound();
+	
+	glPopMatrix();
+}
+
 void DrawForest::drawSolidPlants()
 {
 	//std::cout<<" DrawForest draw plants begin"<<std::endl;
@@ -429,6 +441,49 @@ void DrawForest::drawActiveSamples()
 	glPopAttrib();
 }
 
+void DrawForest::drawActivePlantContour()
+{
+	if(!m_enabled) {
+		return;
+	}
+	if(numActivePlants() < 1) {
+		return;
+	}
+	
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); 
+	glColor3f(.41f, .71f, .1f);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	PlantSelection::SelectionTyp * arr = activePlants();
+	int iExample = -1;
+	ExampVox * v = 0;
+	try {
+	arr->begin();
+	while(!arr->end() ) {
+		if(arr->key().y != iExample) {
+			iExample = arr->key().y;
+			v = plantExample(iExample );
+		}
+		drawPlantFlatSolidBound(arr->value()->m_reference->index, v );
+		
+		arr->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw active plant contour caught something";
+	}
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 
+	glDepthMask(GL_TRUE);
+	
+}
+
 void DrawForest::drawActivePlants()
 {
     if(!m_enabled) {
@@ -474,7 +529,7 @@ void DrawForest::drawBrush()
 {
 	glPushAttrib(GL_CURRENT_BIT);
 	glDepthFunc(GL_ALWAYS);
-	
+	glColor3f(.1f, .9f, .43f);
     const float & radius = selectionRadius();
     const Vector3F & position = selectionCenter();
     const Vector3F & direction = selectionNormal();

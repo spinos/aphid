@@ -101,6 +101,7 @@ public:
 	const bool & isVisible() const;
 	
 	void drawDetail() const;
+	void drawFlatBound() const;
 	
 protected:
 	float * diffuseMaterialColV();
