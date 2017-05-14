@@ -36,6 +36,7 @@ public:
 	bool m_isInjectingParticle;
 	float m_strokeMagnitude;
 	float m_brushFalloff;
+	float m_zenithNoise;
 	
 	GrowOption();
 	~GrowOption();
@@ -51,6 +52,7 @@ public:
 	const ExrImage * imageSampler() const;
 /// limit to [0,3]
 	void setbrushFalloff(const float & x);
+	Vector3F getModifiedUpDirection() const;
 	
 };
 

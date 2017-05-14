@@ -580,6 +580,15 @@ global proc proxyPaintCreateEditUI(string $coln)
         -cw 1 130
         -cc "proxyPaintSetRotateNoise(`floatSliderGrp -q -value proxyPaintSlider_rotateNoise`)" 
         proxyPaintSlider_rotateNoise;
+        
+    floatSliderGrp -label "Zenith Noise" -field true
+        -ss 0.01 -fs 0.01
+        -minValue 0.0 -maxValue 1.0
+        -fieldMinValue 0.0 -fieldMaxValue 1.0
+        -value 0.5
+        -cw 1 130
+        -cc "proxyPaintSetZenithNoise(`floatSliderGrp -q -value proxyPaintSlider_zenithNoise`)" 
+        proxyPaintSlider_zenithNoise;
             
         checkBox -label "Multiple Create"
             -value 1

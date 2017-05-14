@@ -143,6 +143,8 @@ public:
 	void setBrushFalloff(float x);
 	float getBrushFalloff();
 	void setShowVoxelThreshold(float x);
+	float zenithNoise() const;
+	void setZenithNoise(float x);
 	
 private:
 	void resize(bool isBundled);

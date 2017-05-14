@@ -384,6 +384,15 @@ float proxyPaintContext::getBrushRadius() const
 	return 8.f;
 }
 
+float proxyPaintContext::zenithNoise() const
+{ return m_growOpt.m_zenithNoise; }
+
+void proxyPaintContext::setZenithNoise(float x)
+{ 
+	m_growOpt.m_zenithNoise = x; 
+	MToolsInfo::setDirtyFlag(*this);
+}
+
 void proxyPaintContext::setScaleMin(float val)
 {
 	m_growOpt.m_minScale = val;

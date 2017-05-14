@@ -85,6 +85,8 @@
 #define kShoVoxFlagLong "-showVoxel"
 #define kUpdateSampleColorFlag "-usc"
 #define kUpdateSampleColorFlagLong "-updateSampleColor"
+#define kZenithNoiseFlag "-zno"
+#define kZenithNoiseFlagLong "-zenithNoise"
 
 proxyPaintContextCmd::proxyPaintContextCmd() {}
 
@@ -380,6 +382,16 @@ MStatus proxyPaintContextCmd::doEditFlags()
 		fContext->updateSampleColor();
 	}
 	
+	if (argData.isFlagSet(kZenithNoiseFlag)) {
+		double zno;
+		status = argData.getFlagArgument(kZenithNoiseFlag, 0, zno);
+		if (!status) {
+			status.perror("zenith noise flag parsing failed.");
+			return status;
+		}
+		fContext->setZenithNoise(zno);
+	}
+	
 	return MS::kSuccess;
 }
 
@@ -494,6 +506,10 @@ MStatus proxyPaintContextCmd::doQueryFlags()
 	
 	if (argData.isFlagSet(kShoVoxFlag)) {
 		setResult(fContext->getShowVoxelThreshold() );
+	}
+	
+	if (argData.isFlagSet(kZenithNoiseFlag)) {
+		setResult(fContext->zenithNoise() );
 	}
 	
 	return MS::kSuccess;
@@ -738,6 +754,12 @@ MStatus proxyPaintContextCmd::appendSyntax()
 	stat = mySyntax.addFlag(kUpdateSampleColorFlag, kUpdateSampleColorFlagLong, MSyntax::kNoArg);
 	if(!stat) {
 		MGlobal::displayInfo("failed to add update sample color arg");
+		return MS::kFailure;
+	}
+	
+	stat = mySyntax.addFlag(kZenithNoiseFlag, kZenithNoiseFlagLong, MSyntax::kDouble);
+	if(!stat) {
+		MGlobal::displayInfo("failed to add zenith noise arg");
 		return MS::kFailure;
 	}
 	

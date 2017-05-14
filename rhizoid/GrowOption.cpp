@@ -9,6 +9,7 @@
 
 #include "GrowOption.h"
 #include <img/ExrImage.h>
+#include <math/miscfuncs.h>
 
 namespace aphid {
 
@@ -27,6 +28,7 @@ GrowOption::GrowOption()
 	m_brushFalloff = 0.5f;
 	m_stickToGround = true;
 	m_sampler = NULL;
+	m_zenithNoise = .5f;
 }
 
 GrowOption::~GrowOption()
@@ -101,6 +103,25 @@ void GrowOption::setbrushFalloff(const float & x)
     } else {
         m_brushFalloff = x;
     }
+}
+
+Vector3F GrowOption::getModifiedUpDirection() const
+{
+	if(m_zenithNoise < 0.001f) {
+		return m_upDirection;
+	}
+	
+	Vector3F res = m_upDirection;
+	float yfac = 1.f - res.y;
+	if(yfac > 1.f) {
+		yfac = 1.f;
+	}
+	
+	res.x += RandomFn11() * m_zenithNoise;
+	res.z += RandomFn11() * m_zenithNoise;
+	res.y += yfac;
+	res.normalize();
+	return res;
 }
 		
 }

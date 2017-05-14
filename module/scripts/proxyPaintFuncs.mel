@@ -157,6 +157,11 @@ global proc proxyPaintSetRotateNoise(float $val)
 	proxyPaintToolContext -e -rno $val `currentCtx`;
 }
 
+global proc proxyPaintSetZenithNoise(float $val)
+{
+	proxyPaintToolContext -e -zno $val `currentCtx`;
+}
+
 global proc proxyPaintSetALN(int $val)
 {
     proxyPaintToolContext -e -anl $val `currentCtx`;

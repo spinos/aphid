@@ -314,7 +314,7 @@ void GrowForest::randomSpaceAt(const Vector3F & pos, const GrowOption & option,
 	*space.m(3, 1) =  pos.y;
 	*space.m(3, 2) =  pos.z;
 	
-	Vector3F up = option.m_upDirection;
+	Vector3F up = option.getModifiedUpDirection();
 	
 	Vector3F side(1.f, 0.f, 0.f);
 	if(up.x > 0.9f || up.x < -0.9f) {

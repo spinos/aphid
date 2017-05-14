@@ -50,6 +50,9 @@ global proc proxyPaintOptionValues(string $toolName)
  	$fval = eval("proxyPaintToolContext -q -rno " + $toolName);
  	floatSliderGrp -e -value $fval proxyPaintSlider_rotateNoise;
  	
+ 	$fval = eval("proxyPaintToolContext -q -zno " + $toolName);
+ 	floatSliderGrp -e -value $fval proxyPaintSlider_zenithNoise;
+ 	
  	$fval = eval("proxyPaintToolContext -q -mng " + $toolName);
  	floatSliderGrp -e -value $fval proxyPaint_minMarginSlider;
  	
