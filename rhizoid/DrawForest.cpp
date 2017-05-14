@@ -131,6 +131,62 @@ void DrawForest::drawPlantFlatSolidBound(PlantData * data,
 	glPopMatrix();
 }
 
+void DrawForest::drawSolidPlants2()
+{
+    if(m_showVoxLodThresold < .999f) {
+        drawSolidPlants();
+        return;
+    }
+	
+    if(!m_enabled) {
+		return;
+	}
+	
+    sdb::WorldGrid<ForestCell, Plant > * g = grid();
+	if(g->isEmpty() ) {
+		return;
+	}
+	
+	const float margin = g->gridSize() * .1f;
+	
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	//glColor3f(1.f,1.f,1.f);
+	
+	Vector3F lightVec(1,1,1);
+	lightVec = cameraSpace().transformAsNormal(lightVec);
+	m_instancer->setDistantLightVec(lightVec);
+	m_instancer->programBegin();
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	
+	try {
+	g->begin();
+	while(!g->end() ) {
+        BoundingBox cellBox = g->coordToGridBBox(g->key() );
+		cellBox.expand(margin);
+        if(!cullByFrustum(cellBox ) ) {
+            drawPlantSolidBoundInCell(g->value() );
+		}
+		g->next();
+	}
+	} catch (...) {
+		std::cerr<<"DrawForest draw plants caught something";
+	}
+	
+	m_instancer->programEnd();
+	
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glPopAttrib();
+}
+
 void DrawForest::drawSolidPlants()
 {
 	//std::cout<<" DrawForest draw plants begin"<<std::endl;

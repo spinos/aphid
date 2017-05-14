@@ -331,7 +331,7 @@ void ProxyViz::draw( M3dView & view, const MDagPath & path,
 	
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {		
-		drawSolidPlants();
+		drawSolidPlants2();
 	} else {
 		drawWiredPlants();
 	}
