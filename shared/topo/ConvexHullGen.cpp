@@ -58,8 +58,8 @@ void ConvexHullGen::processHull()
 	
 	Facet *f1 = new Facet(a, b, c, d->m_v);
 	Facet *f2 = new Facet(a, c, d, b->m_v);
-	Facet *f3 = new Facet(a, b, d, c->m_v);
-	Facet *f4 = new Facet(b, c, d, a->m_v);
+	Facet *f3 = new Facet(a, d, b, c->m_v);
+	Facet *f4 = new Facet(b, d, c, a->m_v);
 	
 	ConflictGraph * cfg1 = new ConflictGraph(1);
 	ConflictGraph * cfg2 = new ConflictGraph(1);
@@ -438,7 +438,7 @@ void ConvexHullGen::checkFaceNormal(Vector3F* pos, Vector3F* nml,
 	Vector3F vb = pos[2] - pos[0];
 	Vector3F vn = va.cross(vb);
 	vn.normalize();
-	if(vn.dot(vref) < 0.f) {
+	if(vn.dot(vref) < 0.f) { std::cout<<" revsd";
 		vn.reverse();
 		va = pos[1];
 		pos[1] = pos[2];
@@ -487,7 +487,8 @@ void ConvexHullGen::extractMesh(Vector3F* pos, Vector3F* nml, unsigned* inds, in
 		
 		for(int j=0;j<3;++j) {
 			const Vertex * vj = fc.vertex(j);
-			pos[i*3 + j] = *(vj->m_v);
+			pos[i*3 + j] = hc + (*(vj->m_v) - hc) * 1.29f;
+			pos[i*3 + j].y = vj->m_v->y;
 			inds[i*3 + j] = i*3 + j + offset;
 		}
 		checkFaceNormal(&pos[i*3], &nml[i*3], dv);

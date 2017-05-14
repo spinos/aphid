@@ -16,7 +16,7 @@ GLWidget::GLWidget(QWidget *parent)
 	int nv = 999;
 	Vector3F vp;
 	for(int i = 0; i < nv; i++) {
-		float r = ((float)(rand() % 24091)) / 24091.f * .1f + 12.f;
+		float r = ((float)(rand() % 24091)) / 24091.f * 11.1f + 12.f;
 		float phi = ((float)(rand() % 25391)) / 25391.f * 2.f * 3.14f;
 		float theta = ((float)(rand() % 24331)) / 24331.f * 3.14f;
 		

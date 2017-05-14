@@ -102,7 +102,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	smp._nml = Vector3F(0.f, 1.f, 0.f);
 	    
 	m_valGrd = new VGDTyp;
-	m_valGrd->fillBox(m_tree->getBBox(), sz0 * 1.4f);
+	m_valGrd->fillBox(m_tree->getBBox(), sz0 * .79f);
 	for(int i=0;i<np;++i) {
 	    const Float4 * pr = particleR(i);
 		const Float4 * cr = particleColor(i);
@@ -120,7 +120,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	//m_drdg->setPerCellColor<VGDTyp> (m_valGrd, 3);
 	
 	m_hullTri[0] = new ATriangleMesh;
-	m_valGrd->build(m_hullTri[0], 3, 5);
+	m_valGrd->build(m_hullTri[0], 3, 4);
 	
 	std::cout.flush();
 }

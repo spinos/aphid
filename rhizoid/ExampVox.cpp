@@ -35,7 +35,7 @@ m_drawDetailType(0)
 	m_diffuseMaterialColV[0] = 0.47f;
 	m_diffuseMaterialColV[1] = 0.46f;
 	m_diffuseMaterialColV[2] = 0.48f;
-	m_dopSize.set(.9f, .9f, .9f);
+	m_dopSize.set(.9f, 1.f, .9f);
 	m_geomBox.setOne(); 
 }
 
@@ -124,18 +124,16 @@ void ExampVox::buildPointHull(const BoundingBox & bbox)
 	const int & np = pntBufLength();
 	const Vector3F * pr = pntPositionR();
 	const Vector3F * nr = pntNormalR();
-	const Vector3F * cr = pntColorR();
-	const float sz0 = bbox.getLongestDistance() * .59f;
+	const float sz0 = bbox.getLongestDistance() * .73f;
 	
-	KHullGen<PosNmlCol> khl;
+	KHullGen<PosNml> khl;
 	khl.fillBox(bbox, sz0);
 	
-	PosNmlCol smp;
+	PosNml smp;
 	for(int i=0;i<np;++i) {
 	    
 		smp._pos = pr[i];
 		smp._nml = nr[i];
-		smp._col = cr[i];
 		
 		khl.insertValueAtLevel(3, smp._pos, smp);
 	}
@@ -147,10 +145,12 @@ void ExampVox::buildPointHull(const BoundingBox & bbox)
 	const int nv = msh.numPoints();
 	setDopDrawBufLen(nv);
 	float * posf = dopRefPositionR();
+	float * posf1 = dopPositionR();
 	float * nmlf = dopNormalR();
 	
 	for(int i=0;i<nv;++i) {
 		memcpy(&posf[i*3], &msh.points()[i], 12);
+		memcpy(&posf1[i*3], &msh.points()[i], 12);
 		memcpy(&nmlf[i*3], &msh.vertexNormals()[i], 12);
 	}
 }

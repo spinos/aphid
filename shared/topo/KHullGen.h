@@ -53,8 +53,8 @@ void KHullGen<T>::build(ATriangleMesh * msh, int level, int k)
 	ParentTyp::begin();
     while(!ParentTyp::end() ) {
         sdb::Coord4 c = ParentTyp::key();
-        if(c.w == 3) {
-			ParentTyp::getFirstValue(vcel);
+        if(c.w == level) {
+			ParentTyp::getMeanValue(vcel);
 			
 			kmnd.column(0)[nv] = vcel._pos.x;
 			kmnd.column(1)[nv] = vcel._pos.y;

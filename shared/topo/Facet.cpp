@@ -43,8 +43,11 @@ Facet::Facet(Vertex *a, Vertex *b, Vertex *c, Vector3F *d)
 	m_normal.normalize();
 	
 	Vector3F e2 = *d - *a->m_v;
-	if(e2.dot(m_normal) > 0.f)
+	if(e2.dot(m_normal) > 0.f) {
 		m_normal.reverse();
+		m_vertices[1] = c;
+		m_vertices[2] = b;
+	}
 		
 	createEdges();
 	
@@ -157,20 +160,7 @@ char Facet::isVertexAbove(const Vertex & v) const
 {
 	Vector3F dv = *v.m_v - *m_vertices[0]->m_v;
 	dv.normalize();
-	if(dv.dot(m_normal) < 0.f) {
-		return 0;
-	}
-	dv = *v.m_v - *m_vertices[1]->m_v;
-	dv.normalize();
-	if(dv.dot(m_normal) < 0.f) {
-		return 0;
-	}
-	dv = *v.m_v - *m_vertices[2]->m_v;
-	dv.normalize();
-	if(dv.dot(m_normal) < 0.f) {
-		return 0;
-	}
-	return 1;
+	return (dv.dot(m_normal) > 0.f);
 }
 
 char Facet::getEdgeOnHorizon(std::vector<Edge *> & horizons) const

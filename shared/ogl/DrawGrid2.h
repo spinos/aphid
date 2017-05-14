@@ -167,7 +167,7 @@ void DrawGrid2::createPointBased(T * grd, const int & level)
 	m_vertexNormals.reset(new float[np * 72]);
 	m_vertexColors.reset(new float[np * 72]);
 	
-	const float psz = grd->levelCellSize(level) * .41f;
+	const float psz = grd->levelCellSize(level) * .31f;
 	
 	Tv vcel;
 	np = 0;
