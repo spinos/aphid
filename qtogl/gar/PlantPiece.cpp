@@ -79,7 +79,9 @@ void PlantPiece::setExclRByChild()
 
 void PlantPiece::countNumTms(int & count) const
 {
-	count++;
+	if(m_geom) {
+		count++;
+	}
 	
 	if(numBranches() < 1) {
 		return;
@@ -94,8 +96,12 @@ void PlantPiece::countNumTms(int & count) const
 void PlantPiece::extractTms(aphid::Matrix44F * dst,
 			int & count) const
 {
-	dst[count] = m_tm;
-	count++;
+	if(m_geom) {
+		Matrix44F & mat = dst[count];
+		mat.setIdentity();
+		worldTransformMatrix(mat);
+		count++;
+	}
 	
 	if(numBranches() < 1) {
 		return;
@@ -110,8 +116,10 @@ void PlantPiece::extractTms(aphid::Matrix44F * dst,
 void PlantPiece::extractGeomIds(int * dst,
 			int & count) const
 {
-	dst[count] = m_geomid;
-	count++;
+	if(m_geom) {
+		dst[count] = m_geomid;
+		count++;
+	}
 	
 	if(numBranches() < 1) {
 		return;

@@ -1057,13 +1057,13 @@ void ProxyViz::setEnableCompute(bool x)
 
 void ProxyViz::drawBrush(M3dView & view)
 {
+	DrawForest::drawBrush();
     const float & radius = selectionRadius();
     MString radstr("radius: ");
     radstr += radius;
     const Vector3F & position = selectionCenter();
     view.drawText(radstr, MPoint(position.x, position.y, position.z) );
-	
-    DrawForest::drawBrush();
+    
 }
 
 void ProxyViz::updateGeomBox(ExampVox * dst, const MObject & node)
