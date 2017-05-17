@@ -217,7 +217,9 @@ public:
 								const MDagPath & cameraPath);
 	static void GetViewMatrix(Matrix44F * mat,
 								const MDagPath & cameraPath);
-								
+	static void CheckWarningStat(const MStatus & stat,
+								const char * log);				
+											
 };
 
 }

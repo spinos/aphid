@@ -1269,5 +1269,13 @@ void AHelper::GetViewMatrix(Matrix44F * mat,
 	AHelper::ConvertToMatrix44F(*mat, cameraMat);
 }
 
+void AHelper::CheckWarningStat(const MStatus & stat,
+								const char * log)
+{
+	if(stat != MS::kSuccess) {
+		MGlobal::displayWarning(MString(log) );
+	}
+}
+
 }
 //:~

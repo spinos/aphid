@@ -27,4 +27,7 @@ int GardenExamp::numExamples() const
 CompoundExamp * GardenExamp::getCompoundExample(const int & i)
 { return m_examples[i]; }
 
+const ExampVox * GardenExamp::getExample(const int & i) const
+{ return m_examples[i]; }
+
 }

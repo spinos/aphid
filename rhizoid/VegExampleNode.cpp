@@ -8,9 +8,10 @@
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnIntArrayData.h>
 #include <maya/MPointArray.h>
-#include <maya/MFnMeshData.h>
+#include <maya/MFnEnumAttribute.h>
 #include <maya/MFnPluginData.h>
 #include <mama/AHelper.h>
+#include <mama/AttributeHelper.h>
 #include <CompoundExamp.h>
 #include <ExampData.h>
 #include <mama/AttributeHelper.h>
@@ -23,8 +24,14 @@ MTypeId VegExampleNode::id( 0xdb02444 );
 MObject VegExampleNode::ashrubbox;
 MObject VegExampleNode::ainstbbox;
 MObject VegExampleNode::ainstrange;
-MObject VegExampleNode::ainstexamp;
+MObject VegExampleNode::ainstinds;
 MObject VegExampleNode::ainsttrans;
+MObject VegExampleNode::apntPosNmlCol;
+MObject VegExampleNode::apntRange;
+MObject VegExampleNode::ahullPosNml;
+MObject VegExampleNode::ahullRange;
+MObject VegExampleNode::avoxelPosNmlCol;
+MObject VegExampleNode::avoxelRange;
 MObject VegExampleNode::adrawColor;
 MObject VegExampleNode::adrawColorR;
 MObject VegExampleNode::adrawColorG;
@@ -38,6 +45,7 @@ MObject VegExampleNode::aininstspace;
 MObject VegExampleNode::avoxactive;
 MObject VegExampleNode::avoxvisible;
 MObject VegExampleNode::avoxpriority;
+MObject VegExampleNode::adrawVoxTag;
 MObject VegExampleNode::outValue;
 	
 VegExampleNode::VegExampleNode()
@@ -54,21 +62,34 @@ MStatus VegExampleNode::compute( const MPlug& plug, MDataBlock& block )
 {
 	if( plug == outValue ) {
 	
+		MDataHandle rch = block.inputValue(adrawColorR);
+		MDataHandle gch = block.inputValue(adrawColorG);
+		MDataHandle bch = block.inputValue(adrawColorB);
+		setDiffuseMaterialCol3(rch.asFloat(), gch.asFloat(), bch.asFloat() );
+	
+		MDataHandle szxh = block.inputValue(adrawDopSizeX);
+		MDataHandle szyh = block.inputValue(adrawDopSizeY);
+		MDataHandle szzh = block.inputValue(adrawDopSizeZ);
+		setDopSize(szxh.asFloat(), szyh.asFloat(), szzh.asFloat() );
+	
 		MDataHandle radiusMultH = block.inputValue(aradiusMult);
 		float radiusScal = radiusMultH.asFloat();
 		setGeomSizeMult(radiusScal);
 	
-		BoundingBox bb;
-		getBBox(bb);
-		setGeomBox(&bb);
-	
+		MDataHandle detailTypeHandle = block.inputValue( adrawVoxTag );
+		const short detailType = detailTypeHandle.asShort();
+		setDetailDrawType(detailType);
+
 		int nexp = numExamples();
 		if(nexp < 1) {
 			loadInternal();
 			nexp = numExamples();
 		}
 		AHelper::Info<int>("vege viz n example", nexp);
-
+		
+		updateAllDop();
+		updateAllDetailDrawType();
+		
 		const bool vis = block.inputValue(avoxvisible).asBool(); 
 		setVisible(vis);
 		
@@ -92,26 +113,35 @@ void VegExampleNode::draw( M3dView & view, const MDagPath & path,
 							 M3dView::DisplayStyle style,
 							 M3dView::DisplayStatus status )
 {
+	MObject selfNode = thisMObject();
+	
+	MPlug rPlug(selfNode, adrawColorR);
+	MPlug gPlug(selfNode, adrawColorG);
+	MPlug bPlug(selfNode, adrawColorB);
+	setDiffuseMaterialCol3(rPlug.asFloat(), gPlug.asFloat(), bPlug.asFloat() );
+	
+	MPlug szxp(selfNode, adrawDopSizeX);
+	MPlug szyp(selfNode, adrawDopSizeY);
+	MPlug szzp(selfNode, adrawDopSizeZ);
+	setDopSize(szxp.asFloat(), szyp.asFloat(), szzp.asFloat() );
+	
 	MPlug radiusMultPlug(thisMObject(), aradiusMult);
 	float radiusScal = radiusMultPlug.asFloat();
 	setGeomSizeMult(radiusScal);
 	
-	BoundingBox bb;
-	getBBox(bb);
-	setGeomBox(&bb);
-	
 	int nexp = numExamples();
-//AHelper::Info<int>("nexp", nexp);
-	
+
 	if(nexp < 1) {
 		loadInternal();
 		nexp = numExamples();
 	}
-//AHelper::Info<int>("nins", nins);
 	
 	if(nexp < 1) {
+		AHelper::Info<int>("vege viz has no data", nexp);
 		return;
 	}
+	
+	updateAllDop();
 	
 	MDagPath cameraPath;
 	view.getCamera(cameraPath);
@@ -124,6 +154,8 @@ void VegExampleNode::draw( M3dView & view, const MDagPath & path,
 		
 	view.beginGL();
 	
+	const BoundingBox & bb = geomBox();
+	
 	drawBoundingBox(&bb);
 	drawZCircle(transF);
 
@@ -133,6 +165,9 @@ void VegExampleNode::draw( M3dView & view, const MDagPath & path,
 		
 	glColor3f(1.f, 1.f, 1.f);
 	glPointSize(2.f);
+	
+	drawExampPoints(0);
+	drawExampHull(0);
 	
 	if ( style == M3dView::kFlatShaded || 
 		    style == M3dView::kGouraudShaded ) {	
@@ -170,6 +205,7 @@ MStatus VegExampleNode::initialize()
 { 
 	MFnNumericAttribute numFn;
 	MFnTypedAttribute typFn;
+	MFnEnumAttribute	enumAttr;
 	MStatus			 stat;
 	
 	adrawColorR = numFn.create( "dspColorR", "dspr", MFnNumericData::kFloat);
@@ -227,7 +263,7 @@ MStatus VegExampleNode::initialize()
 	numFn.setStorable(true);
 	numFn.setKeyable(true);
 	numFn.setUsedAsColor(true);
-	numFn.setDefault(0.9f, 0.9f, 0.9f);
+	numFn.setDefault(0.9f, 1.f, 0.9f);
 	addAttribute(adrawDopSize);
 	
 	aradiusMult = numFn.create( "radiusMultiplier", "rml", MFnNumericData::kFloat);
@@ -270,75 +306,119 @@ MStatus VegExampleNode::initialize()
 	ashrubbox = typFn.create( "shrubBox", "sbbx",
 									MFnData::kVectorArray, vectArrayDataFn.object(),
 									&stat );
-											
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed create shrub box attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed create shrub box attrib");
 	
 	typFn.setStorable(true);
 	
 	stat = addAttribute(ashrubbox);
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed add veg box attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed add veg box attrib");
 	
 	ainstbbox = typFn.create( "shrubExampleBox", "sbeb",
 									MFnData::kVectorArray, vectArrayDataFn.object(),
 									&stat );
-											
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed create veg instance bbox attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed create veg instance bbox attrib");
 	
 	typFn.setStorable(true);
 	
 	stat = addAttribute(ainstbbox);
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed add veg instance bbox attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed add veg instance bbox attrib");
 	
 	ainstrange = typFn.create( "shrubIndRange", "sbir",
 									MFnData::kIntArray, iArrayDataFn.object(),
 									&stat );
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed create veg instance range attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed create veg instance range attrib");
 	
 	typFn.setStorable(true);
 	
 	stat = addAttribute(ainstrange);
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed add veg instance range attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed add veg instance range attrib");
 	
-	ainstexamp = typFn.create( "shrubExampleInd", "sbei",
+/// instance ind and tm
+	ainstinds = typFn.create( "shrubExampleInd", "sbei",
 									MFnData::kIntArray, iArrayDataFn.object(),
 									&stat );
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed create shrub example ind attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed create shrub example ind attrib");
 	
 	typFn.setStorable(true);
 	
-	stat = addAttribute(ainstexamp);
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed add shrub example ind attrib");
-	}
+	stat = addAttribute(ainstinds);
+	AHelper::CheckWarningStat(stat, "failed add shrub example ind attrib");
 	
 	ainsttrans = typFn.create( "shrubExampleTrans", "sbet",
 									MFnData::kVectorArray, vectArrayDataFn.object(),
 									&stat );
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed create shrub example trans attrib");
-	}
+	AHelper::CheckWarningStat(stat, "failed create shrub example trans attrib");
 	
 	typFn.setStorable(true);
 	
 	stat = addAttribute(ainsttrans);
-	if(stat != MS::kSuccess) {
-		MGlobal::displayWarning("failed add shrub example trans attrib");
-	}
-		
+	AHelper::CheckWarningStat(stat, "failed add shrub example trans attrib");
+	
+/// points	
+	apntPosNmlCol = typFn.create( "pntPNC", "ppnc",
+									MFnData::kVectorArray, vectArrayDataFn.object(),
+									&stat );
+	AHelper::CheckWarningStat(stat, "failed create ppnc attrib");
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(apntPosNmlCol);
+	AHelper::CheckWarningStat(stat, "failed add ppnc attrib");
+	
+	apntRange = typFn.create( "pntRange", "prng",
+									MFnData::kIntArray, iArrayDataFn.object(),
+									&stat );
+	AHelper::CheckWarningStat(stat, "failed create veg pnt range attrib");
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(apntRange);
+	AHelper::CheckWarningStat(stat, "failed add veg pnt range attrib");
+	
+/// hull
+	ahullPosNml = typFn.create( "cvxhullPN", "chlpn",
+									MFnData::kVectorArray, vectArrayDataFn.object(),
+									&stat );
+											
+	AHelper::CheckWarningStat(stat, "failed create hull pn attrib");
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(ahullPosNml);
+	AHelper::CheckWarningStat(stat, "failed add hull pn attrib");
+	
+	ahullRange = typFn.create( "cvxhullRange", "chlng",
+									MFnData::kIntArray, iArrayDataFn.object(),
+									&stat );
+	AHelper::CheckWarningStat(stat, "failed create veg hull range attrib");
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(ahullRange);
+	AHelper::CheckWarningStat(stat, "failed add veg hull range attrib");
+	
+/// voxel
+	avoxelPosNmlCol = typFn.create( "voxelPNC", "vpnc",
+									MFnData::kVectorArray, vectArrayDataFn.object(),
+									&stat );
+											
+	AHelper::CheckWarningStat(stat, "failed create voxel pnc attrib");
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(avoxelPosNmlCol);
+	AHelper::CheckWarningStat(stat, "failed add voxel pnc attrib");
+	
+	avoxelRange = typFn.create( "voxelRange", "vrng",
+									MFnData::kIntArray, iArrayDataFn.object(),
+									&stat );
+	AHelper::CheckWarningStat(stat, "failed create veg voxel range attrib");
+	
+	typFn.setStorable(true);
+	
+	stat = addAttribute(avoxelRange);
+	AHelper::CheckWarningStat(stat, "failed add veg voxel range attrib");
+	
     outValue = typFn.create( "outValue", "ov", MFnData::kPlugin );
 	typFn.setStorable(false);
 	typFn.setWritable(false);
@@ -356,6 +436,13 @@ MStatus VegExampleNode::initialize()
     matAttr.setArray(true);
     matAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute( aininstspace );
+	
+	adrawVoxTag = enumAttr.create( "dspDetailType", "ddt", 0, &stat );
+	enumAttr.addField( "point", 0 );
+	enumAttr.addField( "grid", 1 );
+	enumAttr.setHidden( false );
+	enumAttr.setKeyable( true );
+	addAttribute(adrawVoxTag);
 	    
 	attributeAffects(aradiusMult, outValue);
 	attributeAffects(adrawColorR, outValue);
@@ -366,69 +453,44 @@ MStatus VegExampleNode::initialize()
 	attributeAffects(adrawDopSizeZ, outValue);
 	attributeAffects(avoxactive, outValue);
 	attributeAffects(avoxvisible, outValue);
-	
+	attributeAffects(adrawVoxTag, outValue);
 	return MS::kSuccess;
-}
-
-bool VegExampleNode::loadInstances(const MVectorArray & instvecs,
-						const MIntArray & instexmps)
-{
-	const int n = instexmps.length();
-	if(n<1) {
-		AHelper::Info<int>(" VegExampleNode load no instance", n);
-		return false;
-	}
-	
-	if((n<<2) != instvecs.length() ) {
-		AHelper::Info<unsigned>(" VegExampleNode load wrong instance trans", instvecs.length() );
-		return false;
-	}
-	
-	DenseMatrix<float> trans(4,4);
-	trans.setIdentity();
-	
-	for(int i=0;i<n;++i) {
-		for(int j =0;j<4;++j) {
-			const MVector & a = instvecs[(i<<2) + j];
-			float * cj = trans.column(j);
-			cj[0] = a.x;
-			cj[1] = a.y;
-			cj[2] = a.z;
-		}
-		
-	}
-	
-	return true;
 }
 
 bool VegExampleNode::loadInternal()
 {
-	AHelper::Info<MString>("shrub load internal", MFnDependencyNode(thisMObject()).name() );
+	MObject onode = thisMObject();
+	loadBBox();
 	
-	MPlug exmpPlug(thisMObject(), ainstexamp);
-	MIntArray insti;
-	AttributeHelper::LoadArrayDataPlug<MIntArray, MFnIntArrayData>(insti, exmpPlug);
+	MPlug dboxPlug(onode, ainstbbox );
+	loadGroupBBox(dboxPlug);
 	
-	MPlug transPlug(thisMObject(), ainsttrans);
-	MVectorArray instt;
-	AttributeHelper::LoadArrayDataPlug<MVectorArray, MFnVectorArrayData>(instt, transPlug);
+	MPlug drangePlug(onode, ainstrange );
+	MPlug dindPlug(onode, ainstinds );
+	MPlug dtmPlug(onode, ainsttrans );
+	loadInstance(drangePlug, dindPlug, dtmPlug);
 	
-	return loadInstances(instt, insti);
+	MPlug dpntPncPlug(onode, apntPosNmlCol );
+	MPlug dpntRangePlug(onode, apntRange );
+	loadPoints(dpntRangePlug, dpntPncPlug);
+	
+	MPlug dhullPnPlug(onode, ahullPosNml );
+	MPlug dhullRangePlug(onode, ahullRange );
+	loadHull(dhullRangePlug, dhullPnPlug );
+	
+	MPlug dvoxelPncPlug(onode, avoxelPosNmlCol );
+	MPlug dvoxelRangePlug(onode, avoxelRange );
+	loadVoxel(dvoxelRangePlug, dvoxelPncPlug );
+	std::cout.flush();
+	
+	return true;
 }
 
-bool VegExampleNode::loadInternal(MDataBlock& block)
+void VegExampleNode::loadBBox()
 {
-	AHelper::Info<MString>("shrub load internal", MFnDependencyNode(thisMObject()).name() );
-	
-	MDataHandle exmpH = block.inputValue(ainstexamp);
-	MIntArray insti;
-	AttributeHelper::LoadArrayDataHandle<MIntArray, MFnIntArrayData>(insti, exmpH);
-	
-	MDataHandle transH = block.inputValue(ainsttrans);
-	MVectorArray instt;
-	AttributeHelper::LoadArrayDataHandle<MVectorArray, MFnVectorArrayData>(instt, transH);
-	
-	return loadInstances(instt, insti);
+	BoundingBox dbox;
+	getBBox(dbox);
+	setGeomBox(&dbox);
 }
 
 void VegExampleNode::saveBBox(const BoundingBox & bbox)
@@ -436,20 +498,17 @@ void VegExampleNode::saveBBox(const BoundingBox & bbox)
 	MVectorArray dbox; dbox.setLength(2);
 	dbox[0] = MVector(bbox.getMin(0), bbox.getMin(1), bbox.getMin(2) );
 	dbox[1] = MVector(bbox.getMax(0), bbox.getMax(1), bbox.getMax(2) );
-	MFnVectorArrayData vecFn;
-	MObject obox = vecFn.create(dbox);
+	
 	MPlug dboxPlug(thisMObject(), ashrubbox );
-	dboxPlug.setValue(obox);
+	AttributeHelper::SaveArrayDataPlug<MVectorArray, MFnVectorArrayData > (dbox, dboxPlug);
 }
 
 void VegExampleNode::getBBox(BoundingBox & bbox) const
 {
+	MVectorArray dbox;
 	MPlug dboxPlug(thisMObject(), ashrubbox);
-	MObject obox;
-	dboxPlug.getValue(obox);
 	
-	MFnVectorArrayData vecFn(obox);
-	MVectorArray dbox = vecFn.array();
+	AttributeHelper::LoadArrayDataPlug<MVectorArray, MFnVectorArrayData > (dbox, dboxPlug);
 	
 	if(dbox.length() < 2) {
 		AHelper::Info<unsigned>(" WARNING VegExampleNode getBBox invalid data n", dbox.length() );
@@ -470,45 +529,29 @@ void VegExampleNode::saveInternal()
 		return;
 	}
 	saveBBox(geomBox() );
-	saveGroupBBox();
-	const int totalNInst = saveGroupRange();
-	AHelper::Info<unsigned>(" n inst", totalNInst );
+	
+	MObject onode = thisMObject();
+	MPlug dboxPlug(onode, ainstbbox );
+	saveGroupBBox(dboxPlug);
+	
+	MPlug drangePlug(onode, ainstrange );
+	MPlug dindPlug(onode, ainstinds );
+	MPlug dtmPlug(onode, ainsttrans );
+	saveInstance(drangePlug, dindPlug, dtmPlug);
+	
+	MPlug dpntPncPlug(onode, apntPosNmlCol );
+	MPlug dpntRangePlug(onode, apntRange );
+	savePoints(dpntRangePlug, dpntPncPlug);
+	
+	MPlug dhullPnPlug(onode, ahullPosNml );
+	MPlug dhullRangePlug(onode, ahullRange );
+	saveHull(dhullRangePlug, dhullPnPlug);
+	
+	MPlug dvoxelPncPlug(onode, avoxelPosNmlCol );
+	MPlug dvoxelRangePlug(onode, avoxelRange );
+	saveVoxel(dvoxelRangePlug, dvoxelPncPlug);
+	std::cout.flush();
 }
-
-void VegExampleNode::saveGroupBBox()
-{
-	const int nexmp = numExamples();
-	MVectorArray dbox; dbox.setLength(nexmp);
-	for(int i=0;i<nexmp;++i) {
-		CompoundExamp * cxmp = getCompoundExample(i);
-		const BoundingBox & gbx = cxmp->geomBox();
-		dbox[i*2] = MVector(gbx.getMin(0), gbx.getMin(1), gbx.getMin(2) );
-		dbox[i*2 + 1] = MVector(gbx.getMax(0), gbx.getMax(1), gbx.getMax(2) );
-	}
-	MFnVectorArrayData vecFn;
-	MObject obox = vecFn.create(dbox);
-	MPlug dboxPlug(thisMObject(), ainstbbox );
-	dboxPlug.setValue(obox);
-}
-
-int VegExampleNode::saveGroupRange()
-{
-	const int nexmp = numExamples();
-	MIntArray drange; drange.setLength(nexmp+1);
-	int b = 0;
-	for(int i=0;i<nexmp;++i) {
-		CompoundExamp * cxmp = getCompoundExample(i);
-		drange[i] = b;
-		const int c = cxmp->numInstances();
-		b += c;
-	}
-	drange[nexmp] = b;
-	MFnIntArrayData vecFn;
-	MObject orange = vecFn.create(drange);
-	MPlug drangePlug(thisMObject(), ainstrange );
-	drangePlug.setValue(orange);
-	return b;
-}
-
+	
 }
 //:~

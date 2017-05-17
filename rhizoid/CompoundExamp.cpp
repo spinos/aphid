@@ -27,7 +27,19 @@ void CompoundExamp::addInstance(const Matrix44F & tm, const int & instanceId)
 	m_instances.push_back(ainst);
 }
 
+void CompoundExamp::addInstance(const float * tm, const int & instanceId)
+{
+	InstanceD ainst;
+	memcpy(ainst._trans, tm, 64);
+	ainst._exampleId = 0;
+	ainst._instanceId = instanceId;
+	m_instances.push_back(ainst);
+}
+
 int CompoundExamp::numInstances() const
 { return m_instances.size(); }
+
+const ExampVox::InstanceD & CompoundExamp::getInstance(const int & i) const
+{ return m_instances[i]; }
 
 }

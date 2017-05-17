@@ -48,9 +48,9 @@ public:
 	float * dopColorR();
 	
 	void resizeDopPoints(const Vector3F & scaling );
-
-protected:
 	void setUniformDopColor(const float * c);
+	
+protected:
 	
 private:
 	void clear();

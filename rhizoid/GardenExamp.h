@@ -28,8 +28,8 @@ public:
 	void addAExample(CompoundExamp * v);
     
     virtual int numExamples() const;
-	/*virtual int numInstances() const;
 	virtual const ExampVox * getExample(const int & i) const;
+	/*virtual int numInstances() const;
 	virtual ExampVox * getExample(const int & i);
 	virtual const InstanceD & getInstance(const int & i) const;
 	

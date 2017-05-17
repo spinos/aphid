@@ -267,11 +267,23 @@ const bool & ExampVox::isVisible() const
 void ExampVox::setDiffuseMaterialCol(const float * x)
 { memcpy(m_diffuseMaterialColV, x, 12); }
 
+void ExampVox::setDiffuseMaterialCol3(const float & xr,
+					const float & xg,
+					const float & xb)
+{
+	m_diffuseMaterialColV[0] = xr;
+	m_diffuseMaterialColV[1] = xg;
+	m_diffuseMaterialColV[2] = xb;
+}
+
 void ExampVox::updateDopCol()
 { setUniformDopColor(m_diffuseMaterialColV); }
 
 void ExampVox::setDetailDrawType(const short & x)
 { m_drawDetailType  = x; }
+
+const short& ExampVox::detailDrawType() const
+{ return m_drawDetailType; }
 
 void ExampVox::drawDetail() const
 {

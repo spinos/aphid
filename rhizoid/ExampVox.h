@@ -69,6 +69,12 @@ public:
 	                const float & b,
 	                const float &c);
 	void setDiffuseMaterialCol(const float * x);
+	void setDiffuseMaterialCol3(const float & xr,
+					const float & xg,
+					const float & xb);
+	void setDetailDrawType(const short & x);
+	const short& detailDrawType() const;
+	
 	void updateDopCol();
 	
 	const float & geomExtent() const;
@@ -107,7 +113,6 @@ protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
 	void buildPointHull(const BoundingBox & bbox);
-	void setDetailDrawType(const short & x);
 	
 private:
 	InstanceD m_defInstance;

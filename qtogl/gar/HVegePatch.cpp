@@ -134,8 +134,9 @@ char HVegePatch::load(CompoundExamp * vgp)
 	int dopnv = 0;
 	readIntAttr(".dopnv", &dopnv);
 	vgp->setDopDrawBufLen(dopnv);
-	readVector3Data(".doppos", dopnv, (Vector3F *)vgp->dopPositionR() );
+	readVector3Data(".doppos", dopnv, (Vector3F *)vgp->dopRefPositionR() );
 	readVector3Data(".dopnml", dopnv, (Vector3F *)vgp->dopNormalR() );
+	vgp->resizeDopPoints(Vector3F(1.f, 1.f, 1.f) );
 	
 	int grdnv = 0;
 	readIntAttr(".grdnv", &grdnv);

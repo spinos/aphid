@@ -28,13 +28,14 @@ public:
     virtual ~CompoundExamp();
 	
 	void addInstance(const Matrix44F & tm, const int & instanceId);
+    void addInstance(const float * tm, const int & instanceId);
     
 	virtual int numInstances() const;
-    //virtual int numExamples() const;
-	/*
+    virtual const InstanceD & getInstance(const int & i) const;
+	/*virtual int numExamples() const;
+	
 	virtual const ExampVox * getExample(const int & i) const;
 	virtual ExampVox * getExample(const int & i);
-	virtual const InstanceD & getInstance(const int & i) const;
 	
 	void clearExamples();
 	void clearInstances();
