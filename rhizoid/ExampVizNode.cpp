@@ -670,7 +670,6 @@ void ExampViz::buildDrawBuf(int n,
 	AHelper::Info<unsigned>(" ExampViz load n point", n );
 	
 	const BoundingBox & bbox = geomBox();
-
 	const float sz0 = bbox.getLongestDistance() * .399f;
 	
 	PosNmlCol smp;

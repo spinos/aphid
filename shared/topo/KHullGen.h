@@ -69,14 +69,18 @@ void KHullGen<T>::build(ATriangleMesh * msh, int level, int k)
 			
 		ParentTyp::next();
 	}
+	std::cout<<"\n kmean "<<k<<" "<<n;
 	
 	KMeansClustering2<float> cluster;
 	cluster.setKND(k, n, d);
 	if(!cluster.compute(kmnd) ) {
 		std::cout<<"\n kmean failed ";
 	}
+/// maybe not enough k
+	const int realK = cluster.K();
+	std::cout<<"\n kmean cluster to "<<realK<<" parts";
 	
-	ConvexHullGen * hlg = new ConvexHullGen[k];
+	ConvexHullGen hlg[5];
 	
 	for(int i=0;i<n;++i) {
 		Vector3F pe(kmnd.column(0)[i], kmnd.column(1)[i], kmnd.column(2)[i]);
@@ -87,12 +91,12 @@ void KHullGen<T>::build(ATriangleMesh * msh, int level, int k)
 	}
 		
 	int nt = 0;
-	for(int j = 0;j<k;++j) {
+	for(int j = 0;j<realK;++j) {
 	
 		hlg[j].processHull();
 		
 		nt+= hlg[j].getNumFace();
-		
+		std::cout<<" khull n tri "<<nt;
 	}
 	
 	msh->create(nt * 3, nt);
@@ -101,13 +105,11 @@ void KHullGen<T>::build(ATriangleMesh * msh, int level, int k)
     Vector3F * nmlDst = msh->vertexNormals();
     
 	nt = 0;
-	for(int j = 0;j<k;++j) {
+	for(int j = 0;j<realK;++j) {
 		hlg[j].extractMesh(&pntDst[nt*3], &nmlDst[nt*3], 
 				&indDst[nt*3], nt*3);
 		nt += hlg[j].getNumFace();
 	}
-	
-	delete[] hlg;
 	
 }
 

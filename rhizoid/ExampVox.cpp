@@ -121,6 +121,7 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 
 void ExampVox::buildPointHull(const BoundingBox & bbox)
 {
+    std::cout<<"\n buildPointHull "<<bbox;
 	const int & np = pntBufLength();
 	const Vector3F * pr = pntPositionR();
 	const Vector3F * nr = pntNormalR();
@@ -139,8 +140,12 @@ void ExampVox::buildPointHull(const BoundingBox & bbox)
 	}
 	khl.finishInsert();
 	
+	int k = 5;
+	if(khl.numCellsAtLevel(3) < 100) {
+	     k = 2;
+	}
 	ATriangleMesh msh;
-	khl.build(&msh, 3, 5);
+	khl.build(&msh, 3, k);
 	
 	const int nv = msh.numPoints();
 	setDopDrawBufLen(nv);
