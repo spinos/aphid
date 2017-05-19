@@ -28,8 +28,10 @@ ExportExample.h
 HGardenExample.h
 HVegePatch.h
 toolBox.h
+${APHID_DIR}/rhizoid/Variform.cpp
 ${APHID_DIR}/rhizoid/GardenExamp.cpp
 ${APHID_DIR}/rhizoid/CompoundExamp.cpp
+${APHID_DIR}/rhizoid/SelectExmpCondition.cpp
 ${APHID_DIR}/rhizoid/ExampVox.cpp)
 
 set ( GAR_RESOURCES

@@ -29,11 +29,9 @@ class ValGrid;
 
 }
 
-class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public aphid::DrawCircle
+class ExampViz : public MPxLocatorNode, public aphid::ExampVox, public aphid::CachedExampParam, public aphid::DrawCircle
 {
 	float m_transBuf[16];
-	float m_preDiffCol[3];
-	float m_preDspSize[3];
 	
 public:
 	ExampViz();

@@ -23,25 +23,38 @@ using namespace aphid;
 Vegetation::Vegetation() :
 m_numPatches(1)
 {
-	for(int i=0;i<TOTAL_NUM_P;++i) {
+	for(int i=0;i<TOTAL_NUM_PAC;++i) {
 		m_patches[i] = new VegetationPatch;
-	}
-	const float deltaAng = .8f / ((float)NUM_ANGLE - 1);
-	for(int j=0;j<NUM_ANGLE;++j) {
-		const float angj = deltaAng * j;
-		for(int i=0;i<NUM_VARIA;++i) {
-			m_patches[j * NUM_VARIA + i]->setTilt(angj);
-		}
 	}
 }
 
 Vegetation::~Vegetation()
 {
-	for(int i=0;i<TOTAL_NUM_P;++i) {
+	for(int i=0;i<TOTAL_NUM_PAC;++i) {
 		delete m_patches[i];
 	}
 	clearCachedGeom();
 }
+
+void Vegetation::setSynthByAngleAlign()
+{
+	Variform::setPattern(Variform::pnAngleAlign);
+	const float deltaAng = deltaAnglePerGroup();
+	for(int j=0;j<NumAngleGroups;++j) {
+		const float angj = deltaAng * j;
+		for(int i=0;i<NumEventsPerGroup;++i) {
+			m_patches[j * NumEventsPerGroup + i]->setTilt(angj);
+		}
+	}
+}
+
+void Vegetation::setSynthByRandom()
+{
+	Variform::setPattern(Variform::pnRandom);
+	for(int i=0;i<TOTAL_NUM_PAC;++i) {
+		m_patches[i]->setTilt(0.f);
+	}
+}	
 
 VegetationPatch * Vegetation::patch(const int & i)
 {
@@ -55,17 +68,17 @@ const int & Vegetation::numPatches() const
 { return m_numPatches; }
 
 int Vegetation::getMaxNumPatches() const
-{ return TOTAL_NUM_P; }
+{ return TOTAL_NUM_PAC; }
 
 void Vegetation::rearrange()
 {
 	Matrix44F tm;
 	float px, pz = 0.f, py = 0.f, spacing;
-	const float deltaAng = .8f / ((float)NUM_ANGLE - 1);
-	for(int j=0;j<NUM_ANGLE;++j) {
+	const float deltaAng = deltaAnglePerGroup();
+	for(int j=0;j<NumAngleGroups;++j) {
 		px = 0.f;
-		for(int i=0;i<NUM_VARIA;++i) {
-			const int k = j * NUM_VARIA + i;
+		for(int i=0;i<NumEventsPerGroup;++i) {
+			const int k = j * NumEventsPerGroup + i;
 			if(k >= m_numPatches) {
 				return;
 			}

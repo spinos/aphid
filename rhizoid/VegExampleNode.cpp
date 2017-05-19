@@ -30,8 +30,6 @@ MObject VegExampleNode::apntPosNmlCol;
 MObject VegExampleNode::apntRange;
 MObject VegExampleNode::ahullPosNml;
 MObject VegExampleNode::ahullRange;
-MObject VegExampleNode::avoxelPosNmlCol;
-MObject VegExampleNode::avoxelRange;
 MObject VegExampleNode::adrawColor;
 MObject VegExampleNode::adrawColorR;
 MObject VegExampleNode::adrawColorG;
@@ -46,6 +44,7 @@ MObject VegExampleNode::avoxactive;
 MObject VegExampleNode::avoxvisible;
 MObject VegExampleNode::avoxpriority;
 MObject VegExampleNode::adrawVoxTag;
+MObject VegExampleNode::avarp;
 MObject VegExampleNode::outValue;
 	
 VegExampleNode::VegExampleNode()
@@ -285,11 +284,18 @@ MStatus VegExampleNode::initialize()
 	
 	avoxpriority = numFn.create( "examplePriority", "expi", MFnNumericData::kShort);
 	numFn.setStorable(true);
-	numFn.setDefault(true);
 	numFn.setMin(1);
 	numFn.setMax(100);
 	numFn.setDefault(1);
 	addAttribute(avoxpriority);
+	
+/// synth pattern
+	avarp = numFn.create( "variablePattern", "varp", MFnNumericData::kShort);
+	numFn.setStorable(true);
+	numFn.setMin(0);
+	numFn.setMax(100);
+	numFn.setDefault(0);
+	addAttribute(avarp);
 	
 	MDoubleArray defaultDArray;
 	MFnDoubleArrayData dArrayDataFn;
@@ -337,17 +343,17 @@ MStatus VegExampleNode::initialize()
 	ainstinds = typFn.create( "shrubExampleInd", "sbei",
 									MFnData::kIntArray, iArrayDataFn.object(),
 									&stat );
-	AHelper::CheckWarningStat(stat, "failed create shrub example ind attrib");
+	AHelper::CheckWarningStat(stat, "failed create veg example ind attrib");
 	
 	typFn.setStorable(true);
 	
 	stat = addAttribute(ainstinds);
-	AHelper::CheckWarningStat(stat, "failed add shrub example ind attrib");
+	AHelper::CheckWarningStat(stat, "failed add veg example ind attrib");
 	
 	ainsttrans = typFn.create( "shrubExampleTrans", "sbet",
 									MFnData::kVectorArray, vectArrayDataFn.object(),
 									&stat );
-	AHelper::CheckWarningStat(stat, "failed create shrub example trans attrib");
+	AHelper::CheckWarningStat(stat, "failed create veg example trans attrib");
 	
 	typFn.setStorable(true);
 	
@@ -376,7 +382,7 @@ MStatus VegExampleNode::initialize()
 	AHelper::CheckWarningStat(stat, "failed add veg pnt range attrib");
 	
 /// hull
-	ahullPosNml = typFn.create( "cvxhullPN", "chlpn",
+	ahullPosNml = typFn.create( "hullPNC", "hpnc",
 									MFnData::kVectorArray, vectArrayDataFn.object(),
 									&stat );
 											
@@ -387,7 +393,7 @@ MStatus VegExampleNode::initialize()
 	stat = addAttribute(ahullPosNml);
 	AHelper::CheckWarningStat(stat, "failed add hull pn attrib");
 	
-	ahullRange = typFn.create( "cvxhullRange", "chlng",
+	ahullRange = typFn.create( "hullRange", "hlng",
 									MFnData::kIntArray, iArrayDataFn.object(),
 									&stat );
 	AHelper::CheckWarningStat(stat, "failed create veg hull range attrib");
@@ -396,28 +402,6 @@ MStatus VegExampleNode::initialize()
 	
 	stat = addAttribute(ahullRange);
 	AHelper::CheckWarningStat(stat, "failed add veg hull range attrib");
-	
-/// voxel
-	avoxelPosNmlCol = typFn.create( "voxelPNC", "vpnc",
-									MFnData::kVectorArray, vectArrayDataFn.object(),
-									&stat );
-											
-	AHelper::CheckWarningStat(stat, "failed create voxel pnc attrib");
-	
-	typFn.setStorable(true);
-	
-	stat = addAttribute(avoxelPosNmlCol);
-	AHelper::CheckWarningStat(stat, "failed add voxel pnc attrib");
-	
-	avoxelRange = typFn.create( "voxelRange", "vrng",
-									MFnData::kIntArray, iArrayDataFn.object(),
-									&stat );
-	AHelper::CheckWarningStat(stat, "failed create veg voxel range attrib");
-	
-	typFn.setStorable(true);
-	
-	stat = addAttribute(avoxelRange);
-	AHelper::CheckWarningStat(stat, "failed add veg voxel range attrib");
 	
     outValue = typFn.create( "outValue", "ov", MFnData::kPlugin );
 	typFn.setStorable(false);
@@ -465,6 +449,12 @@ bool VegExampleNode::loadInternal()
 	MPlug dboxPlug(onode, ainstbbox );
 	loadGroupBBox(dboxPlug);
 	
+	short pat = 0;
+	MPlug patPlug(onode, avarp );
+	pat = patPlug.asShort();
+	std::cout<<"\n synth pattern "<<pat;
+	setShortPattern(pat);
+	
 	MPlug drangePlug(onode, ainstrange );
 	MPlug dindPlug(onode, ainstinds );
 	MPlug dtmPlug(onode, ainsttrans );
@@ -478,9 +468,7 @@ bool VegExampleNode::loadInternal()
 	MPlug dhullRangePlug(onode, ahullRange );
 	loadHull(dhullRangePlug, dhullPnPlug );
 	
-	MPlug dvoxelPncPlug(onode, avoxelPosNmlCol );
-	MPlug dvoxelRangePlug(onode, avoxelRange );
-	loadVoxel(dvoxelRangePlug, dvoxelPncPlug );
+	buildAllExmpVoxel();
 	std::cout.flush();
 	
 	return true;
@@ -531,6 +519,11 @@ void VegExampleNode::saveInternal()
 	saveBBox(geomBox() );
 	
 	MObject onode = thisMObject();
+	
+	short pat = getPattern();
+	MPlug patPlug(onode, avarp );
+	patPlug.setValue(pat);
+	
 	MPlug dboxPlug(onode, ainstbbox );
 	saveGroupBBox(dboxPlug);
 	
@@ -547,9 +540,6 @@ void VegExampleNode::saveInternal()
 	MPlug dhullRangePlug(onode, ahullRange );
 	saveHull(dhullRangePlug, dhullPnPlug);
 	
-	MPlug dvoxelPncPlug(onode, avoxelPosNmlCol );
-	MPlug dvoxelRangePlug(onode, avoxelRange );
-	saveVoxel(dvoxelRangePlug, dvoxelPncPlug);
 	std::cout.flush();
 }
 	

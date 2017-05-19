@@ -23,20 +23,18 @@
 #include <maya/MSceneMessage.h>
 #include <ogl/DrawDop.h>
 #include "MForest.h"
+#include "ExampVox.h"
 
 namespace aphid {
 
 class GrowOption;
 
-class ProxyViz : public MPxLocatorNode, public MForest
+class ProxyViz : public MPxLocatorNode, public MForest, public aphid::CachedExampParam
 {
 	M3dView _viewport;
 	MMatrix _worldSpace, _worldInverseSpace;
 	ExampVox * m_defExample;
 	float m_transBuf[16];
-	float m_preDopCorner[4];
-	float m_preDopSize[3];
-	float m_preDopCol[3];
 	int m_iShowGrid;
 	int m_iFastGround;
 	bool m_toSetGrid;

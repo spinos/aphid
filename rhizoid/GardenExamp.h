@@ -11,13 +11,15 @@
 #define APH_GARDEN_EXAMP_H
 
 #include "ExampVox.h"
+#include <Variform.h>
 #include <vector>
 
 namespace aphid {
 
 class CompoundExamp;
+class SelectExmpCondition;
 
-class GardenExamp : public ExampVox {
+class GardenExamp : public ExampVox, public Variform {
   
     std::vector<CompoundExamp * > m_examples;
 
@@ -29,8 +31,10 @@ public:
     
     virtual int numExamples() const;
 	virtual const ExampVox * getExample(const int & i) const;
-	/*virtual int numInstances() const;
 	virtual ExampVox * getExample(const int & i);
+	virtual bool isVariable() const;
+	int selectExample(SelectExmpCondition & cond) const;
+	/*virtual int numInstances() const;
 	virtual const InstanceD & getInstance(const int & i) const;
 	
 	void clearExamples();
@@ -41,6 +45,7 @@ public:
 	
 protected:
     CompoundExamp * getCompoundExample(const int & i);
+	int fitToSurface(SelectExmpCondition & cond) const;
 	
 private:
     

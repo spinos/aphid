@@ -503,8 +503,7 @@ MStatus proxyPaintTool::connectVoxelSelected()
 		MFnDependencyNode fvox(vox, &stat);
 		if(!stat) continue;
 		
-		if(fvox.typeName() != "proxyExample"
-			&& fvox.typeName() != "shrubViz") continue;
+		if(!canConnectToViz(fvox.typeName()) ) continue;
 			
 		if(connectVoxToViz(vox, vizobj) ) {
 			AHelper::Info<MString>("proxyPaintTool connect (bundle) example", fvox.name() );
@@ -986,5 +985,19 @@ MStatus proxyPaintTool::replaceGroundSelected(int iSlot)
 	}
 	
 	return stat;
+}
+
+bool proxyPaintTool::canConnectToViz(const MString & nodeTypeName) const
+{
+	if(nodeTypeName == "proxyExample") {
+		return true;
+	}
+	if(nodeTypeName == "shrubViz") {
+		return true;
+	}
+	if(nodeTypeName == "gardenExampleViz") {
+		return true;
+	}
+	return false;
 }
 //:~

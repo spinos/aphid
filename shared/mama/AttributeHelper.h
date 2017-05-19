@@ -34,6 +34,7 @@ public:
 		MStatus stat;
 		MObject od = dataFn.create(dataArray, &stat);
 		if(!stat) {
+			MGlobal::displayWarning(MString(" cannot save array data plug ")+plug.name() );
 			return false;
 		}
 		plug.setValue(od);

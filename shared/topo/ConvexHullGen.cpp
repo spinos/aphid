@@ -14,6 +14,7 @@
 #include <topo/GraphArch.h>
 #include <topo/ConflictGraph.h>
 #include <geom/ATriangleMesh.h>
+#include <line_math.h>
 #include <cmath>
 
 namespace aphid {
@@ -31,12 +32,12 @@ ConvexHullGen::~ConvexHullGen()
 	
 	std::vector<ConflictGraph *>::iterator it = m_conflg.begin();
 	for(;it!=m_conflg.end();++it) {
-		//delete *it;
+		delete *it;
 	}
 	m_conflg.clear();
 	std::vector<GraphArch *>::iterator it1 = m_arch.begin();
 	for(;it1!=m_arch.end();++it1) {
-		//delete *it1;
+		delete *it1;
 	}
 	m_arch.clear();
 }
@@ -52,11 +53,87 @@ void ConvexHullGen::addSample(const Vector3F & p)
 	m_conflg.push_back(cfg);
 }
 
+void ConvexHullGen::find2ndSampleTo(const Vector3F & p1st)
+{
+	const int nv = getNumVertex();
+	Vector3F q = *vertex(1)->m_v;
+	float maxD = q.distanceTo(p1st);
+	for(int i = 2;i<nv;++i) {
+		q = *vertex(i)->m_v;
+		float d = q.distanceTo(p1st);
+		if(maxD < d) {
+			maxD = d;
+			Vector3F * qr1 = vertex(1)->m_v;
+			vertex(1)->m_v = vertex(i)->m_v;
+			vertex(i)->m_v = qr1;
+		}
+	}
+	
+}
+
+void ConvexHullGen::find3rdSampleTo(const Vector3F & p1st, const Vector3F & p2nd)
+{
+	const int nv = getNumVertex();
+	Vector3F q = *vertex(2)->m_v;
+	float maxD = distancePointLine(q, p1st, p2nd);
+	
+	for(int i = 3;i<nv;++i) {
+		q = *vertex(i)->m_v;
+		float d = distancePointLine(q, p1st, p2nd);
+		if(maxD < d) {
+			maxD = d;
+			Vector3F * qr1 = vertex(2)->m_v;
+			vertex(2)->m_v = vertex(i)->m_v;
+			vertex(i)->m_v = qr1;
+		}
+	}
+	
+}
+
+void ConvexHullGen::find4thSampleTo(const Vector3F & p1st, const Vector3F & p2nd,
+						const Vector3F & p3rd)
+{
+	const int nv = getNumVertex();
+	Vector3F q = *vertex(3)->m_v;
+	
+	Vector3F ab = p2nd - p1st;
+	Vector3F ac = p3rd - p1st;
+	Vector3F nml = ab.cross(ac);
+	nml.normalize();
+	Vector3F av = q - p1st;
+	float maxD = av.dot(nml);
+	if(maxD < 0.f) {
+		maxD = -maxD;
+	}
+	
+	for(int i = 4;i<nv;++i) {
+		q = *vertex(i)->m_v;
+		av = q - p1st;
+		float d = av.dot(nml);
+		if(d < 0.f) {
+			d = -d;
+		}
+		if(maxD < d) {
+			maxD = d;
+			Vector3F * qr1 = vertex(3)->m_v;
+			vertex(3)->m_v = vertex(i)->m_v;
+			vertex(i)->m_v = qr1;
+		}
+	}
+	
+}
+
 void ConvexHullGen::processHull()
 {
 	Vertex *a = vertex(0);
+	find2ndSampleTo(*a->m_v);
+	
 	Vertex *b = vertex(1);
+	find3rdSampleTo(*a->m_v, *b->m_v );
+	
 	Vertex *c = vertex(2);
+	find4thSampleTo(*a->m_v, *b->m_v, *c->m_v );
+	
 	Vertex *d = vertex(3);
 	
 	Facet *f1 = new Facet(a, b, c, d->m_v);
@@ -485,13 +562,11 @@ void ConvexHullGen::extractMesh(Vector3F* pos, Vector3F* nml, unsigned* inds, in
 	const int nt = getNumFace();
 	for(int i=0;i<nt;++i) {
 		const Facet & fc = getFacet(i);
-		
 		Vector3F dv = fc.getCentroid() - hc;
 		
 		for(int j=0;j<3;++j) {
 			const Vertex * vj = fc.vertex(j);
-			pos[i*3 + j] = hc + (*(vj->m_v) - hc) * 1.29f;
-			pos[i*3 + j].y = vj->m_v->y;
+			pos[i*3 + j] = *vj->m_v;
 			inds[i*3 + j] = i*3 + j + offset;
 		}
 		checkFaceNormal(&pos[i*3], &nml[i*3], dv);

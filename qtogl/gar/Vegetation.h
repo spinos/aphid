@@ -12,6 +12,7 @@
 #ifndef GAR_VEGETATION_H
 #define GAR_VEGETATION_H
 
+#include <Variform.h>
 #include <map>
 #include <math/BoundingBox.h>
 
@@ -21,7 +22,7 @@ class ATriangleMesh;
 
 class VegetationPatch;
 
-class Vegetation {
+class Vegetation : public aphid::Variform {
 /// over all patches
 	aphid::BoundingBox m_bbox;
 	
@@ -33,15 +34,16 @@ private:
 	std::map<int, GeomPtrTyp >::iterator m_geomIter;
 	int m_curGeomId;
 	
-#define NUM_ANGLE 11
-#define NUM_VARIA 11
-#define TOTAL_NUM_P 121
-	VegetationPatch * m_patches[TOTAL_NUM_P];
+#define TOTAL_NUM_PAC 64
+	VegetationPatch * m_patches[TOTAL_NUM_PAC];
 	int m_numPatches;
 	
 public:
 	Vegetation();
 	virtual ~Vegetation();
+	
+	void setSynthByAngleAlign();
+	void setSynthByRandom();
 	
 	VegetationPatch * patch(const int & i);
 	

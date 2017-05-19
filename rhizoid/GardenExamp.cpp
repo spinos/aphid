@@ -9,6 +9,7 @@
 
 #include "GardenExamp.h"
 #include "CompoundExamp.h"
+#include "SelectExmpCondition.h"
 
 namespace aphid {
 
@@ -29,5 +30,48 @@ CompoundExamp * GardenExamp::getCompoundExample(const int & i)
 
 const ExampVox * GardenExamp::getExample(const int & i) const
 { return m_examples[i]; }
+
+ExampVox * GardenExamp::getExample(const int & i)
+{ return m_examples[i]; }
+
+
+bool GardenExamp::isVariable() const
+{ return true; }
+
+int GardenExamp::selectExample(SelectExmpCondition & cond) const
+{
+	
+	if(getPattern() == pnAngleAlign) {
+		return fitToSurface(cond);
+	}
+
+	return rand() % numExamples(); 
+}
+
+int GardenExamp::fitToSurface(SelectExmpCondition & cond) const
+{
+	Vector3F surfNml = cond.surfaceNormal();
+	surfNml.normalize();
+	
+	Matrix44F tm = cond.transform();
+	
+	Vector3F spaceUp = tm.getUp();
+	spaceUp.normalize();
+	Vector3F side = tm.getSide();
+	float sz = side.length();
+	side.normalize();
+	
+	int res = Variform::selectByAngle(surfNml, spaceUp, side);
+	
+	Vector3F up = surfNml;
+	
+	Vector3F front = side.cross(up);
+	front.normalize();
+	side = up.cross(front);
+	tm.setOrientations(side, up, front);
+	tm.scaleBy(sz);
+	cond.setTransform(tm);
+	return res;
+}
 
 }

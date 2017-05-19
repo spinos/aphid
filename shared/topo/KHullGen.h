@@ -54,7 +54,7 @@ void KHullGen<T>::build(ATriangleMesh * msh, int level, int k)
     while(!ParentTyp::end() ) {
         sdb::Coord4 c = ParentTyp::key();
         if(c.w == level) {
-			ParentTyp::getMeanValue(vcel);
+			ParentTyp::getFirstValue(vcel);
 			
 			kmnd.column(0)[nv] = vcel._pos.x;
 			kmnd.column(1)[nv] = vcel._pos.y;
@@ -82,12 +82,29 @@ void KHullGen<T>::build(ATriangleMesh * msh, int level, int k)
 	
 	ConvexHullGen hlg[5];
 	
+	static const float soctaoffset[6][3] = {
+	{-.5f, 0.f, 0.f},
+	{ 0.f,-.5f, 0.f},
+	{ 0.f, 0.f,-.5f},
+	{ .5f, 0.f, 0.f},
+	{ 0.f, .5f, 0.f},
+	{ 0.f, 0.f, .5f}
+	};
+	
+	const float gzl = ParentTyp::levelCellSize(level);
 	for(int i=0;i<n;++i) {
-		Vector3F pe(kmnd.column(0)[i], kmnd.column(1)[i], kmnd.column(2)[i]);
+	
+		Vector3F pe(kmnd.column(0)[i], 
+				kmnd.column(1)[i], 
+				kmnd.column(2)[i]);
 			
 		int g = cluster.groupIndices()[i];
-		hlg[g].addSample(pe);
 		
+		for(int j =0;j<6;++j) {
+			hlg[g].addSample(pe + Vector3F(soctaoffset[j][0] * gzl, 
+					soctaoffset[j][1] * gzl, 
+					soctaoffset[j][2] * gzl) );
+		}
 	}
 		
 	int nt = 0;

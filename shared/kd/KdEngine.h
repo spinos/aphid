@@ -251,6 +251,7 @@ void KdEngine::buildTree(KdNTree<T, Tn > * tree,
     
     std::cout<<"\n kdengine begin building "<<T::GetTypeStr()<<" tree "
             <<"\n bbx "<<box
+			<<"\n n input "<<source->size()
 			<<"\n max n prims per leaf "<<prof->_maxLeafPrims
 			<<"\n max build level "<<prof->_maxLevel;
     
@@ -267,7 +268,9 @@ void KdEngine::buildTree(KdNTree<T, Tn > * tree,
 	
 	bud.build(&splt, tree);
 	if(prof->_doTightBox) tree->storeTightBox();
+	
 	tree->verbose();
+	
 }
 
 template<typename T, typename Tn>
@@ -304,10 +307,16 @@ template<typename T, typename Tn>
 bool KdEngine::intersect(KdNTree<T, Tn > * tree, 
 				IntersectionContext * ctx)
 {
-	if(tree->isEmpty()) return 0;
+	if(tree->isEmpty()) {
+		std::cout<<" KdEngine intersect null tree"<<std::endl;
+		return 0;
+	}
 	
 	const BoundingBox & b = tree->getBBox();
-	if(!b.intersect(ctx->m_ray)) return 0;
+	if(!b.intersect(ctx->m_ray)) {
+		std::cout<<" KdEngine intersect oob"<<b<<std::endl;
+		return 0;
+	}
 	
 	m_numRopeTraversed = 0;
     
@@ -343,8 +352,9 @@ bool KdEngine::intersect(KdNTree<T, Tn > * tree,
 			else stat = 0;
 		}
 		
-		if(ctx->m_ray.length() < 1e-3)
+		if(ctx->m_ray.length() < 1e-3) {
 			return true;
+		}
 			
 		if(stat==0) {
 			hasNext = climbRope(tree, ctx, branchIdx, nodeIdx, 
@@ -490,7 +500,7 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 /// limit rope traverse
     if(m_numRopeTraversed > 19) {
 		std::cout<<"\n KdEngine::climbRope out of rope traverse "
-			<<ctx->m_ray<<" "<<ctx->getBBox();
+			<<ctx->m_ray<<" "<<ctx->getBBox()<<std::endl;
         return false;
 	}
     
@@ -501,7 +511,7 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 	Vector3F hit1 = ctx->m_ray.travel(t1 + ctx->m_tdelta);
 /// end inside 
 	if(b.isPointInside(hit1) ) {
-		// std::cout<<"\n KdEngine::climbRope "<<hit1<<" out of "<<b;
+		//std::cout<<"\n KdEngine::climbRope "<<hit1<<" out of "<<b<<std::endl;
 		return false;
 	}
 		
@@ -521,7 +531,7 @@ bool KdEngine::climbRope(KdNTree<T, Tn > * tree,
 	BoxNeighbors::DecodeTreeletNodeHash(rp->m_padding1, KdNode4::BranchingFactor, 
 					branchIdx, nodeIdx);
          
-    std::cout.flush();
+//    std::cout.flush();
 	ctx->setBBox(*rp);
 	return true;
 }

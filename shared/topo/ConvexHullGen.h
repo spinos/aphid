@@ -53,7 +53,13 @@ protected:
 			const Vector3F & vref) const;
 	
 private:
-	
+/// farthest to 1st point
+	void find2ndSampleTo(const Vector3F & p1st);
+/// farthest to segment 1st and 2nd point
+	void find3rdSampleTo(const Vector3F & p1st, const Vector3F & p2nd);
+/// farthest to plane 
+	void find4thSampleTo(const Vector3F & p1st, const Vector3F & p2nd,
+						const Vector3F & p3rd);
 };
 
 }

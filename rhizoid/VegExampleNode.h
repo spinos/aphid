@@ -67,10 +67,8 @@ public:
 	static MObject ahullPosNml;
 /// begin of each group hull, length n+1, n is # groups
 	static MObject ahullRange;
-/// voxel pos, nml, col length n*3, n is # voxel vertices
-	static MObject avoxelPosNmlCol;
-/// begin of each group voxel, length n+1, n is # groups
-	static MObject avoxelRange;
+/// synth pattern 
+	static MObject avarp;
 	static MObject adrawColorR;
 	static MObject adrawColorG;
 	static MObject adrawColorB;

@@ -158,9 +158,14 @@ float Facet::getArea() const
 
 char Facet::isVertexAbove(const Vertex & v) const
 {
-	Vector3F dv = *v.m_v - *m_vertices[0]->m_v;
-	dv.normalize();
-	return (dv.dot(m_normal) > 0.f);
+	for(int i=0;i<3;++i) {
+	Vector3F dv = *v.m_v - *m_vertices[i]->m_v;
+
+	if (dv.dot(m_normal) < 0.01f) {
+		return false;
+	}
+	}
+	return true;
 }
 
 char Facet::getEdgeOnHorizon(std::vector<Edge *> & horizons) const

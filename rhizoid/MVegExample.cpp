@@ -101,9 +101,8 @@ int MVegExample::saveHull(MPlug & drangePlug, MPlug & dpntPlug)
 	}
 	drange.append(c );
 	
-	AttributeHelper::SaveArrayDataPlug<MVectorArray, MFnVectorArrayData > (dpnt, dpntPlug);
-	
 	AttributeHelper::SaveArrayDataPlug<MIntArray, MFnIntArrayData > (drange, drangePlug);
+	AttributeHelper::SaveArrayDataPlug<MVectorArray, MFnVectorArrayData > (dpnt, dpntPlug);
 	std::cout<<"\n save hull draw nv "<<c;
 	return c;
 }
@@ -213,11 +212,13 @@ void MVegExample::drawExampHull(int idx)
 	glColor3f(1,1,1);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnableClientState(GL_VERTEX_ARRAY);
-	//glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	
-	ve->drawFlatBound();
+	ve->drawASolidDop();
 	
-	//glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glPopAttrib();
@@ -348,6 +349,8 @@ void MVegExample::loadHull(const MPlug & rangePlug,
 	
 	const int nexmp = numExamples();
 	const int nrange = drange.length();
+	const int npnc = dpnc.length();
+	std::cout<<" nexmp "<<nexmp<<" nrange"<<nrange<<" npnc "<<npnc;
 	int c = 0;
 	for(int i=0;i<nexmp;++i) {
 		if(i+1 >= nrange) {
@@ -422,9 +425,9 @@ void MVegExample::loadExmpHull(CompoundExamp * exmp,
 					const int & ibegin, const int & iend,
 					const MVectorArray & dpnc)
 {
-	const int npnc = dpnc.length() >> 1; 
+	const int npnc = dpnc.length() >> 1;
 	const int np = iend - ibegin;
-	exmp->setDopDrawBufLen(np); std::cout<<" npnc "<<np;
+	exmp->setDopDrawBufLen(np);
 	float * nr = exmp->dopNormalR();
 	float * pr = exmp->dopRefPositionR();
 	//float * cr = exmp->dopColorR();
@@ -478,15 +481,24 @@ void MVegExample::loadExmpVoxel(CompoundExamp * exmp,
 void MVegExample::updateAllDop()
 {
 	const float * col = diffuseMaterialColor();
+	bool stat = isDiffColChanged(col);
 	const float * sz = dopSize();
+	if(isDspSizeChanged(sz) ) {
+		stat = true;
+	}
+	
+	if(!stat) {
+		return;
+	}
+	
 	const int nexmp = numExamples();
 	for(int i=0;i<nexmp;++i) {
 		CompoundExamp * cxmp = getCompoundExample(i);
-		updateDop(cxmp, col, sz);
+		updateExampDop(cxmp, col, sz);
 	}
 }
 
-void MVegExample::updateDop(CompoundExamp * exmp,
+void MVegExample::updateExampDop(CompoundExamp * exmp,
 			const float * col,
 			const float * sz)
 {
@@ -496,10 +508,24 @@ void MVegExample::updateDop(CompoundExamp * exmp,
 
 void MVegExample::updateAllDetailDrawType()
 {
+	const short & dt = detailDrawType();
+	if(!isDrawTypeChanged(dt) ) {
+		return;
+	}
 	const int nexmp = numExamples();
 	for(int i=0;i<nexmp;++i) {
 		CompoundExamp * cxmp = getCompoundExample(i);
-		cxmp->setDetailDrawType(detailDrawType() );
+		cxmp->setDetailDrawType(dt);
+	}
+}
+
+void MVegExample::buildAllExmpVoxel()
+{
+	const int nexmp = numExamples();
+	for(int i=0;i<nexmp;++i) {
+		ExampVox * xmp = getCompoundExample(i);
+		const BoundingBox & bbx = xmp->geomBox();
+		xmp->buildVoxel(bbx);
 	}
 }
 

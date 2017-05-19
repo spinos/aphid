@@ -10,14 +10,14 @@
 #ifndef APH_RHIZ_GROW_OPTION_H
 #define APH_RHIZ_GROW_OPTION_H
 
-#include <math/Vector3F.h>
+#include "SelectExmpCondition.h"
 #include <math/ANoise3.h>
 
 namespace aphid {
 
 class ExrImage;
 
-class GrowOption : public ANoise3Sampler {
+class GrowOption : public SelectExmpCondition, public ANoise3Sampler {
 
 	ExrImage * m_sampler;
 
@@ -39,7 +39,7 @@ public:
 	float m_zenithNoise;
 	
 	GrowOption();
-	~GrowOption();
+	virtual ~GrowOption();
 	
 	void setStrokeMagnitude(const float & x);
 	bool openImage(const std::string & fileName);

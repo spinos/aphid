@@ -78,6 +78,7 @@ private:
 					const char * errMsg);
 	void disconnectGround(const MObject & vizobj,
 					int iSlot);
+	bool canConnectToViz(const MString & nodeTypeName) const;
 	
 private:
 	enum Operation {

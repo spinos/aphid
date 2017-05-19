@@ -119,13 +119,37 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	buildPointHull(bbox);
 }
 
+void ExampVox::buildVoxel(const BoundingBox & bbox)
+{
+	const int & np = pntBufLength();
+	const Vector3F * pr = pntPositionR();
+	const Vector3F * nr = pntNormalR();
+	const Vector3F * cr = pntColorR();
+	const float sz0 = bbox.getLongestDistance() * .37f;
+	
+	PosNmlCol smp;
+typedef sdb::ValGrid<PosNmlCol> VGDTyp;		
+	VGDTyp valGrd;
+	valGrd.fillBox(bbox, sz0 );
+	for(int i=0;i<np;++i) {
+		smp._pos = pr[i];
+		smp._nml = nr[i];
+		smp._col = cr[i];
+	    valGrd.insertValueAtLevel(3, smp._pos, smp);
+	}
+	valGrd.finishInsert();
+	DrawGrid2::createPointBased<VGDTyp, PosNmlCol > (&valGrd, 3);
+	//float ucol[3] = {.23f, .81f, .45f};
+	//setUniformColor(ucol);
+}
+
 void ExampVox::buildPointHull(const BoundingBox & bbox)
 {
     std::cout<<"\n buildPointHull "<<bbox;
 	const int & np = pntBufLength();
 	const Vector3F * pr = pntPositionR();
 	const Vector3F * nr = pntNormalR();
-	const float sz0 = bbox.getLongestDistance() * .73f;
+	const float sz0 = bbox.getLongestDistance() * .53f;
 	
 	KHullGen<PosNml> khl;
 	khl.fillBox(bbox, sz0);
@@ -140,10 +164,14 @@ void ExampVox::buildPointHull(const BoundingBox & bbox)
 	}
 	khl.finishInsert();
 	
-	int k = 5;
-	if(khl.numCellsAtLevel(3) < 100) {
-	     k = 2;
+	int ns = khl.numCellsAtLevel(3);
+	int k = ns >> 7;
+	if(k < 1) {
+	     k = 1;
+	} else if(k > 5) {
+	     k = 5;
 	}
+	
 	ATriangleMesh msh;
 	khl.build(&msh, 3, k);
 	
@@ -302,6 +330,89 @@ void ExampVox::drawDetail() const
 void ExampVox::drawFlatBound() const
 {
 	drawFlatSolidDop();
+}
+
+bool ExampVox::isVariable() const
+{ return false; }
+
+CachedExampParam::CachedExampParam()
+{
+	m_preDopCorner[0] = 0.f;
+	m_preDopCorner[1] = 0.f;
+	m_preDopCorner[2] = 0.f;
+	m_preDopCorner[3] = 0.f;
+	m_preDiffCol[0] = 0.f;
+	m_preDiffCol[1] = 0.f;
+	m_preDiffCol[2] = 0.f;
+	m_preDrawType = -1;
+	m_preDspSize[0] = 0.f;
+	m_preDspSize[1] = 0.f;
+	m_preDspSize[2] = 0.f;
+}
+
+CachedExampParam::~CachedExampParam()
+{}
+
+bool CachedExampParam::isDopCornerChnaged(const float * dopcorners)
+{
+	bool stat = false;
+	for(int i=0;i<4;++i) {
+		if(m_preDopCorner[i] != dopcorners[i]) {
+			m_preDopCorner[i] = dopcorners[i];
+			stat = true;
+		}
+	}
+	return stat;
+}
+
+bool CachedExampParam::isDiffColChanged(const float * col)
+{
+	bool stat = false;
+	if(m_preDiffCol[0] != col[0]) {
+		m_preDiffCol[0] = col[0];
+		stat = true;
+	}
+	
+	if(m_preDiffCol[1] != col[1]) {
+		m_preDiffCol[1] = col[1];
+		stat = true;
+	}
+	
+	if(m_preDiffCol[2] != col[2]) {
+		m_preDiffCol[2] = col[2];
+		stat = true;
+	}
+	return stat;
+}
+
+bool CachedExampParam::isDrawTypeChanged(const short & x)
+{
+	if(m_preDrawType != x) {
+		m_preDrawType = x;
+		return true;
+	}
+	return false;
+}
+	
+bool CachedExampParam::isDspSizeChanged(const float * sz)
+{
+	bool stat = false;
+	if(m_preDspSize[0] != sz[0]) {
+		m_preDspSize[0] = sz[0];
+		stat = true;
+	}
+	
+	if(m_preDspSize[1] != sz[1]) {
+		m_preDspSize[1] = sz[1];
+		stat = true;
+	}
+	
+	if(m_preDspSize[2] != sz[2]) {
+		m_preDspSize[2] = sz[2];
+		stat = true;
+	}
+	
+	return stat;
 }
 
 }

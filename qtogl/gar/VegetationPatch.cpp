@@ -182,24 +182,6 @@ void VegetationPatch::voxelize3(sdb::VectorArray<cvx::Triangle> * tri,
 {
 	ExampVox::voxelize3(tri, bbox);
 	setGeomBox2(bbox);
-	const int & np = pntBufLength();
-	const Vector3F * pr = pntPositionR();
-	const Vector3F * nr = pntNormalR();
-	const Vector3F * cr = pntColorR();
-	const float sz0 = bbox.getLongestDistance() * .39f;
+	ExampVox::buildVoxel(bbox);
 	
-	PosNmlCol smp;
-typedef sdb::ValGrid<PosNmlCol> VGDTyp;		
-	VGDTyp valGrd;
-	valGrd.fillBox(bbox, sz0 );
-	for(int i=0;i<np;++i) {
-		smp._pos = pr[i];
-		smp._nml = nr[i];
-		smp._col = cr[i];
-	    valGrd.insertValueAtLevel(3, smp._pos, smp);
-	}
-	valGrd.finishInsert();
-	DrawGrid2::createPointBased<VGDTyp, PosNmlCol > (&valGrd, 3);
-	//float ucol[3] = {.23f, .81f, .45f};
-	//setUniformColor(ucol);
 }

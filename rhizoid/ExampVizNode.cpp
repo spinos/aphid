@@ -49,14 +49,7 @@ MObject ExampViz::outValue;
 using namespace aphid;
 
 ExampViz::ExampViz()
-{
-	m_preDiffCol[0] = 0.f;
-	m_preDiffCol[1] = 0.f;
-	m_preDiffCol[2] = 0.f;
-	m_preDspSize[0] = 0.f;
-	m_preDspSize[1] = 0.f;
-	m_preDspSize[2] = 0.f;
-}
+{}
 
 ExampViz::~ExampViz() 
 {}
@@ -474,29 +467,8 @@ void ExampViz::voxelize4(sdb::VectorArray<cvx::Triangle> * tri,
 							const BoundingBox & bbox)
 {
 	voxelize3(tri, bbox);
-	
-	const int & np = pntBufLength();
-	AHelper::Info<int>("voxelize4 n point ", np );
-	const Vector3F * pr = pntPositionR();
-	const Vector3F * nr = pntNormalR();
-	const Vector3F * cr = pntColorR();
-	const float sz0 = bbox.getLongestDistance() * .399f;
-	
-	PosNmlCol smp;	
-	VGDTyp valGrd;
-	valGrd.fillBox(bbox, sz0 );
-	for(int i=0;i<np;++i) {
-		smp._pos = pr[i];
-		smp._nml = nr[i];
-		smp._col = cr[i];
-	    valGrd.insertValueAtLevel(3, pr[i], smp);
-	}
-	valGrd.finishInsert();
-	DrawGrid2::createPointBased<VGDTyp, PosNmlCol> (&valGrd, 3);
-	
-	//float ucol[3] = {.23f, .81f, .45f};
-	//setUniformColor(ucol);
-	
+	AHelper::Info<int>("voxelize4 n point ", pntBufLength() );
+	ExampVox::buildVoxel(bbox);
 }
 
 void ExampViz::voxelize3(const aphid::DenseMatrix<float> & pnts,
@@ -670,90 +642,28 @@ void ExampViz::buildDrawBuf(int n,
 	AHelper::Info<unsigned>(" ExampViz load n point", n );
 	
 	const BoundingBox & bbox = geomBox();
-	const float sz0 = bbox.getLongestDistance() * .399f;
-	
-	PosNmlCol smp;
-	VGDTyp valGrd;
-	valGrd.fillBox(bbox, sz0 );
-	for(int i=0;i<n;++i) {
-		smp._pos = ps[i];
-		smp._nml = ns[i];
-		smp._col = cs[i];
-	    valGrd.insertValueAtLevel(3, smp._pos, smp);
-	}
-	valGrd.finishInsert();
-	DrawGrid2::createPointBased<VGDTyp, PosNmlCol> (&valGrd, 3);
-	
 	buildPointHull(bbox);
-	
+	buildVoxel(bbox);
 }
 
 void ExampViz::updateGridUniformColor(const float * col)
-{
-	bool stat = false;
-	if(m_preDiffCol[0] != col[0]) {
-		m_preDiffCol[0] = col[0];
-		stat = true;
+{	
+	if(isDiffColChanged(col) ) {
+		setUniformColor(col);
 	}
-	
-	if(m_preDiffCol[1] != col[1]) {
-		m_preDiffCol[1] = col[1];
-		stat = true;
-	}
-	
-	if(m_preDiffCol[2] != col[2]) {
-		m_preDiffCol[2] = col[2];
-		stat = true;
-	}
-	
-	if(!stat) {
-		return;
-	}
-	
-	setUniformColor(col);
 }
 
 void ExampViz::updateDop()
 {
 	const float * col = diffuseMaterialColor();
-	bool stat = false;
-	if(m_preDiffCol[0] != col[0]) {
-		m_preDiffCol[0] = col[0];
-		stat = true;
-	}
 	
-	if(m_preDiffCol[1] != col[1]) {
-		m_preDiffCol[1] = col[1];
-		stat = true;
-	}
-	
-	if(m_preDiffCol[2] != col[2]) {
-		m_preDiffCol[2] = col[2];
-		stat = true;
-	}
-	
-	if(stat) {
+	if(isDiffColChanged(col) ) {
 		setUniformDopColor(col);
 	}
 	
 	const float * sz = dopSize();
-	stat = false;
-	if(m_preDspSize[0] != sz[0]) {
-		m_preDspSize[0] = sz[0];
-		stat = true;
-	}
-	
-	if(m_preDspSize[1] != sz[1]) {
-		m_preDspSize[1] = sz[1];
-		stat = true;
-	}
-	
-	if(m_preDspSize[2] != sz[2]) {
-		m_preDspSize[2] = sz[2];
-		stat = true;
-	}
-	
-	if(stat) {
+		
+	if(isDspSizeChanged(sz) ) {
 		resizeDopPoints(sz);
 	}
 }

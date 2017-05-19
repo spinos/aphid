@@ -97,6 +97,8 @@ bool GrowForest::growOnSample(const T & asmp,
 		return stat;
 	}
 
+	option.setSurfaceNormal(asmp.nml);
+	
 	if(option.m_alongNormal) {
 		option.m_upDirection = asmp.nml;
 	}

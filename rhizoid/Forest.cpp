@@ -332,8 +332,8 @@ bool Forest::intersectGround(const Ray & ray)
     if(!m_ground) return false;
 	if(m_ground->isEmpty() ) return false;
 
-	std::cout<<"\n Forest::intersectGround "<<ray.m_origin
-		<<" "<<ray.m_dir<<" "<<ray.m_tmax;
+	std::cout<<"\n Forest intersectGround "<<ray.m_origin
+		<<" "<<ray.m_dir<<" "<<ray.m_tmax<<std::endl;
 		
 	m_intersectCtx.reset(ray, m_grid->gridSize() * 0.001f );
 	KdEngine engine;
@@ -344,14 +344,15 @@ bool Forest::intersectGround(const Ray & ray)
 	} catch(...) {
 	    std::cerr<<"Forest intersectGround caught something";
 	}
-	if(!m_intersectCtx.m_success) std::cout<<"\n Forest::intersectGround result is false";
-	
+	if(!m_intersectCtx.m_success) {
+		std::cout<<"\n Forest::intersectGround result is false";
+	}
 	return m_intersectCtx.m_success;
 }
 
 bool Forest::intersectGrid(const Ray & incident)
 {
-	std::cout<<"\n Forest::intersectGrid";
+	std::cout<<"\n Forest intersectGrid";
 	if(!m_march.begin(incident)) return false;
 	sdb::Sequence<sdb::Coord3> added;
 	BoundingBox touchedBox;
@@ -432,15 +433,15 @@ void Forest::addPlantExample(ExampVox * x, const int & islot)
 		return;
 	}
 	
-	std::cout<<"\n add example "<<islot;
-	
+	std::cout<<"\n add example "<<islot<<" "<<x;
 	m_exampleIndices[x] = m_examples.size();
 	m_examples[islot] = x;
 	const int ne = x->numExamples();
-	if(ne > 1) {
+	if(ne > 1 || x->isVariable() ) {
 		for(int i=0;i<ne;++i) {
 			int elmi = plant::exampleIndex(islot, i);
 			m_examples[elmi] = x->getExample(i);
+			std::cout<<"\n add elm example "<<elmi<<" "<<m_examples[elmi];
 		}
 	}
 	
@@ -620,8 +621,14 @@ bool Forest::selectGroundSamples(const Ray & ray, SelectionContext::SelectMode m
 	cvx::Sphere sph;
 	sph.set(m_intersectCtx.m_hitP, m_activePlants->radius() );
 	
+	try {
 	m_grid->selectCells<FIntersectTyp, FClosestTyp, SampleFilter, cvx::Sphere >(ineng, clseng,
 					*m_sampleFlt, sph );
+	} catch(const char * ex) {
+	    std::cerr<<" Forest select ground samples caught: "<<ex;
+	} catch (...) {
+		std::cerr<<" Forest select ground samples caught something";
+	}
 	return true;
 }
 

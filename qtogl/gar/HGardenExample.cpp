@@ -33,12 +33,19 @@ char HGardenExample::verifyType()
 	if(!hasNamedAttr(".bbox") ) return 0;
 	if(!hasNamedAttr(".xmpc") ) return 0;
 	if(!hasNamedAttr(".geoc") ) return 0;
+	if(!hasNamedAttr(".varp") ) return 0;
 	return 1;
 }
 
 char HGardenExample::save(Vegetation * vege)
 {
 	std::cout<<" HGardenExample save "<<fObjectPath;
+	
+	int synPattern = vege->getPattern();
+	if(!hasNamedAttr(".varp"))
+		addIntAttr(".varp");
+	
+	writeIntAttr(".varp", &synPattern);
 	
 	const BoundingBox & bbox = vege->bbox();
 	if(!hasNamedAttr(".bbox"))
@@ -91,6 +98,14 @@ char HGardenExample::save(Vegetation * vege)
 char HGardenExample::load(GardenExamp * vege)
 {
 	std::cout<<" HGardenExample load "<<fObjectPath;
+	
+	int synPattern = 0;
+	readIntAttr(".varp", &synPattern);
+	if(synPattern == Variform::pnRandom) {
+		vege->setPattern(Variform::pnRandom);
+	} else {
+		vege->setPattern(Variform::pnAngleAlign);
+	}
 	
 	BoundingBox bbox;
 	readFloatAttr(".bbox", (float *)&bbox);

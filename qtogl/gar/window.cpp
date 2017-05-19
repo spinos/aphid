@@ -19,6 +19,7 @@
 Window::Window()
 {
 	m_vege = new Vegetation;
+	m_vege->setSynthByAngleAlign();
 	glWidget = new GLWidget(m_vege, this);
 	m_tools = new ToolBox(this);
 	m_assets = new AssetDlg(this);

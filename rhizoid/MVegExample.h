@@ -17,7 +17,7 @@
 
 namespace aphid {
 
-class MVegExample : public GardenExamp {
+class MVegExample : public GardenExamp, public CachedExampParam {
 
 public:
 	MVegExample();
@@ -70,8 +70,10 @@ protected:
 	void updateAllDop();
 	void updateAllDetailDrawType();
 	
+	void buildAllExmpVoxel();
+	
 private:
-	void updateDop(CompoundExamp * exmp,
+	void updateExampDop(CompoundExamp * exmp,
 				const float * col,
 			const float * sz);
 	

@@ -91,6 +91,7 @@ public:
 	virtual int numInstances() const;
 	virtual const ExampVox * getExample(const int & i) const;
 	virtual ExampVox * getExample(const int & i);
+	virtual bool isVariable() const;
 	
 	struct InstanceD {
 		float _trans[16];
@@ -109,6 +110,8 @@ public:
 	void drawDetail() const;
 	void drawFlatBound() const;
 	
+	void buildVoxel(const BoundingBox & bbox);
+	
 protected:
 	float * diffuseMaterialColV();
 	void buildBounding8Dop(const BoundingBox & bbox);
@@ -116,6 +119,26 @@ protected:
 	
 private:
 	InstanceD m_defInstance;
+	
+};
+
+class CachedExampParam {
+
+	float m_preDopCorner[4];
+	float m_preDiffCol[3];
+	short m_preDrawType;
+	short m_pad;
+	float m_preDspSize[3];
+	
+public:
+	CachedExampParam();
+	virtual ~CachedExampParam();
+	
+protected:
+	bool isDopCornerChnaged(const float * dopcorners);
+	bool isDiffColChanged(const float * col);
+	bool isDrawTypeChanged(const short & x);
+	bool isDspSizeChanged(const float * sz);
 	
 };
 

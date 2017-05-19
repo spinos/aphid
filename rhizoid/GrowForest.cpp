@@ -14,6 +14,7 @@
 #include "ForestGrid.h"
 #include "ForestCell.h"
 #include <geom/ATriangleMesh.h>
+#include "GardenExamp.h"
 #include <ctime>
 
 namespace aphid {
@@ -240,15 +241,8 @@ bool GrowForest::growAt(const Ray & ray, GrowOption & option)
 	collctx._maxDistance = option.m_maxMarginSize;
 	collctx._pos = ctx->m_hitP;
 	
-	const ExampVox * v = plantExample(option.m_plantId);
-	if(v->numExamples() > 1) {
-		growBundle(option, bind, v, option.m_plantId, tm, &collctx);			
+	return processGrow(option, bind, tm, &collctx);
 	
-	} else {
-		growSingle(option, bind, option.m_plantId, tm, &collctx);
-	}
-		
-    return true;
 }
 
 bool GrowForest::growAt(const Matrix44F & trans, GrowOption & option)
@@ -296,15 +290,8 @@ bool GrowForest::growAt(const Matrix44F & trans, GrowOption & option)
 		tm = trans;
 	}
 	
-	if(v->numExamples() > 1) {
-		growBundle(option, bind, v, option.m_plantId, tm, &collctx);			
+	return processGrow(option, bind, tm, &collctx);
 	
-	} else {
-		growSingle(option, bind, option.m_plantId, tm, &collctx);
-				
-	}
-	
-	return true;
 }
 
 void GrowForest::randomSpaceAt(const Vector3F & pos, const GrowOption & option,
@@ -339,15 +326,8 @@ void GrowForest::randomSpaceAt(const Vector3F & pos, const GrowOption & option,
 	front = side.cross(up);
 	front.normalize();
 
-	*space.m(0, 0) = side.x * scale;
-	*space.m(0, 1) = side.y * scale;
-	*space.m(0, 2) = side.z * scale;
-	*space.m(1, 0) = up.x * scale;
-	*space.m(1, 1) = up.y * scale;
-	*space.m(1, 2) = up.z * scale;
-	*space.m(2, 0) = front.x * scale;
-	*space.m(2, 1) = front.y * scale;
-	*space.m(2, 2) = front.z * scale;
+	space.setOrientations(side, up, front);
+	space.scaleBy(scale);
 }
 
 void GrowForest::growInCell(ForestCell * cell,
@@ -416,11 +396,19 @@ bool GrowForest::processGrow(GrowOption & option,
 				Matrix44F & tm,
 				CollisionContext * collctx)
 {
-	const ExampVox * v = plantExample(option.m_plantId);
+	ExampVox * v = plantExample(option.m_plantId);
+	if(v->isVariable() ) {
+		GardenExamp * ge = static_cast<GardenExamp *>(v);
+		option.setTransform(tm);
+		const int varId = ge->selectExample(option);
+		const int selId = plant::exampleIndex(option.m_plantId, varId);
+		return growSingle(option, bind, selId, option.transform(), collctx);;
+	}
+	
 	if(v->numExamples() > 1) {
 		growBundle(option, bind, v, option.m_plantId, tm, collctx);			
 		return true;
-	} 
+	}
 	
 	return growSingle(option, bind, option.m_plantId, tm, collctx);
 	
