@@ -233,13 +233,17 @@ int MVegExample::loadGroupBBox(const MPlug & boxPlug)
 		return nexmp;
 	}
 	
+	const float & sm = geomSizeMult();
+	
 	BoundingBox bbox;
 	for(int i=0;i<nexmp;++i) {
+		
 		int i2 = i<<1;
 		const MVector & vlo = dbox[i2];
 		const MVector & vhi = dbox[i2 + 1];
 		
 		CompoundExamp * cxmp = new CompoundExamp;
+		cxmp->setGeomSizeMult(sm);
 		bbox.setMin(vlo.x, vlo.y, vlo.z);
 		bbox.setMax(vhi.x, vhi.y, vhi.z);
 		cxmp->setGeomBox2(bbox);
@@ -526,6 +530,21 @@ void MVegExample::buildAllExmpVoxel()
 		ExampVox * xmp = getCompoundExample(i);
 		const BoundingBox & bbx = xmp->geomBox();
 		xmp->buildVoxel(bbx);
+	}
+}
+
+void MVegExample::updateAllGeomSize()
+{
+	const float & gm = geomSizeMult();
+	if(!isGeomSizeMultChanged(gm) ) {
+		return;
+	}
+	updateGeomSize();
+	const int nexmp = numExamples();
+	for(int i=0;i<nexmp;++i) {
+		ExampVox * xmp = getCompoundExample(i);
+		xmp->setGeomSizeMult(gm);
+		xmp->updateGeomSize();
 	}
 }
 

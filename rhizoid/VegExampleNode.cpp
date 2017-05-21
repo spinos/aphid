@@ -86,6 +86,7 @@ MStatus VegExampleNode::compute( const MPlug& plug, MDataBlock& block )
 		}
 		AHelper::Info<int>("vege viz n example", nexp);
 		
+		updateAllGeomSize();
 		updateAllDop();
 		updateAllDetailDrawType();
 		
@@ -140,6 +141,7 @@ void VegExampleNode::draw( M3dView & view, const MDagPath & path,
 		return;
 	}
 	
+	updateAllGeomSize();
 	updateAllDop();
 	
 	MDagPath cameraPath;

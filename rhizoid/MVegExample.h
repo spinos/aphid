@@ -67,6 +67,7 @@ protected:
 					MPlug & dpntPlug);
 	void drawExampPoints(int idx);
 	void drawExampHull(int idx);
+	void updateAllGeomSize();
 	void updateAllDop();
 	void updateAllDetailDrawType();
 	

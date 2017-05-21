@@ -214,6 +214,9 @@ const float & ExampVox::geomSize() const
 const Vector3F & ExampVox::geomCenter() const
 { return m_geomCenter; }
 
+const float & ExampVox::geomSizeMult() const
+{ return m_sizeMult; }
+
 float * ExampVox::diffuseMaterialColV()
 { return m_diffuseMaterialColV; }
 
@@ -242,10 +245,13 @@ void ExampVox::setGeomBox2(const BoundingBox & bx)
 {
 	m_geomBox = bx;
 	m_geomExtent = m_geomBox.radius();
-	m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); 
 	m_geomCenter = m_geomBox.center();
-	updatePoints(&m_geomBox);
+	DrawBox::updatePoints(&m_geomBox);
+	updateGeomSize();
 }
+
+void ExampVox::updateGeomSize()
+{ m_geomSize = m_sizeMult * sqrt((m_geomBox.distance(0) * m_geomBox.distance(2) ) / 6.f); }
 
 const float * ExampVox::diffuseMaterialColor() const
 { return m_diffuseMaterialColV; }
@@ -348,6 +354,7 @@ CachedExampParam::CachedExampParam()
 	m_preDspSize[0] = 0.f;
 	m_preDspSize[1] = 0.f;
 	m_preDspSize[2] = 0.f;
+	m_preGeomSizeMult = 0.f;
 }
 
 CachedExampParam::~CachedExampParam()
@@ -413,6 +420,15 @@ bool CachedExampParam::isDspSizeChanged(const float * sz)
 	}
 	
 	return stat;
+}
+
+bool CachedExampParam::isGeomSizeMultChanged(const float & x)
+{
+	if(m_preGeomSizeMult != x) {
+		m_preGeomSizeMult = x;
+		return true;
+	}
+	return false;
 }
 
 }

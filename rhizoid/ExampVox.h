@@ -81,6 +81,7 @@ public:
 	const float & geomSize() const;
 	const BoundingBox & geomBox() const;
 	const Vector3F & geomCenter() const;
+	const float & geomSizeMult() const;
 	const float * diffuseMaterialColor() const;
 	const float * dopSize() const;
 	
@@ -111,6 +112,7 @@ public:
 	void drawFlatBound() const;
 	
 	void buildVoxel(const BoundingBox & bbox);
+	void updateGeomSize();
 	
 protected:
 	float * diffuseMaterialColV();
@@ -129,6 +131,7 @@ class CachedExampParam {
 	short m_preDrawType;
 	short m_pad;
 	float m_preDspSize[3];
+	float m_preGeomSizeMult;
 	
 public:
 	CachedExampParam();
@@ -139,6 +142,7 @@ protected:
 	bool isDiffColChanged(const float * col);
 	bool isDrawTypeChanged(const short & x);
 	bool isDspSizeChanged(const float * sz);
+	bool isGeomSizeMultChanged(const float & x);
 	
 };
 
