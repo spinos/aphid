@@ -127,6 +127,8 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 	const int * triind;
 	const float * vertpos;
 	const float * vertnml;
+	const float * vertcol;
+	const float * tritexcoord;
 	float exclR;
 	switch (gl->glyphType() ) {
 		case gar::gtClover:
@@ -136,6 +138,8 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 			vertpos = sCloverMeshVertices[r];
 			vertnml = sCloverMeshNormals[r];
 			exclR = sCloverExclRadius[r];
+			vertcol = sCloverMeshVertexColors[r];
+			tritexcoord = sCloverMeshTriangleTexcoords[r];
 		break;
 		default:
 		;
@@ -151,12 +155,17 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 	if(!msh) {
 		msh = new ATriangleMesh;
 		msh->create(np, nt);
+		msh->createVertexColors(np);
 		unsigned * indDst = msh->indices();
 		memcpy(indDst, sCloverMeshTriangleIndices, nt * 12);
 		Vector3F * pntDst = msh->points();
 		memcpy(pntDst, vertpos, np * 12);
 		Vector3F * nmlDst = msh->vertexNormals();
 		memcpy(nmlDst, vertnml, np * 12);
+		float * colDst = msh->vertexColors();
+		memcpy(colDst, vertcol, np * 12);
+		float * texcoordDst = msh->triangleTexcoords();
+		memcpy(texcoordDst, tritexcoord, nt * 24);
 		
 		m_vege->addGeom(kgeom, msh);
 	}

@@ -22,6 +22,9 @@ public:
 	virtual char save(ATriangleMesh * tri);
 	virtual char load(ATriangleMesh * tri);
 	
+	char saveTriangleTexcoord(ATriangleMesh * tri);
+	char loadTriangleTexcoord(ATriangleMesh * tri);
+	
 protected:
 	char readAftCreation(ATriangleMesh * tri);
 	

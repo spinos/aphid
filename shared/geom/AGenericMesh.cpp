@@ -9,6 +9,7 @@
 
 #include <geom/AGenericMesh.h>
 #include <math/BaseBuffer.h>
+#include <math/Matrix44F.h>
 
 namespace aphid {
 
@@ -142,6 +143,15 @@ void AGenericMesh::moveIntoSpace(const Matrix44F & m)
 
 BaseBuffer * AGenericMesh::pointsBuf() const
 { return m_points; }
+
+void AGenericMesh::createVertexColors(int nv)
+{ m_vertcol.reset(new float[nv * 3]); }
+
+float * AGenericMesh::vertexColors()
+{ return m_vertcol.get(); }
+
+const float * AGenericMesh::vertexColors() const
+{ return m_vertcol.get(); }
 
 }
 //:~

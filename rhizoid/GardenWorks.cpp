@@ -114,11 +114,14 @@ MStatus GardenWorks::importMesh(HGardenExample * grp,
 		
 		ATriangleMesh td;
 		gm.load(&td);
+		gm.loadTriangleTexcoord(&td);
 		
 		const MString smsh(gm.lastName().c_str() );
 		MObject om = AHelper::CreateTransform(smsh, *parent);
 		
-		MObject tg = MeshHelper::CreateMesh(td, om);
+		MeshHelper::CreateProfile prof;
+		prof._hasUV = true;
+		MObject tg = MeshHelper::CreateMesh(td, om, &prof);
 		
 		if(tg != MObject::kNullObj) {
 			MFnDependencyNode dpf(tg);

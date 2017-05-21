@@ -267,7 +267,7 @@ void MeshHelper::GetMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
 }
 
 MObject MeshHelper::CreateMesh(const ATriangleMesh & msh,
-					MObject parent)
+					MObject parent, CreateProfile * prof)
 {
 	const int numVertices = msh.numPoints();
 	const int numPolygons = msh.numTriangles();
@@ -301,6 +301,45 @@ MObject MeshHelper::CreateMesh(const ATriangleMesh & msh,
 		polygonCounts, 
 		polygonConnects, 
 		parent );
+		
+	if(!prof) {
+		return node;
+	}
+	
+	if(prof->_hasUV) {
+		MFloatArray uArray, vArray;
+		MIntArray uvIds;
+		MIntArray uvCounts;
+		MString uvSet("map1");
+		
+		int ci = 0;
+		for(int i=0;i<numPolygons;++i) {
+			const Float2 * triuv = msh.triangleTexcoord(i);
+			uArray.append(triuv[0].x);
+			vArray.append(triuv[0].y);
+			uArray.append(triuv[1].x);
+			vArray.append(triuv[1].y);
+			uArray.append(triuv[2].x);
+			vArray.append(triuv[2].y);
+			
+			uvIds.append(ci);
+			uvIds.append(ci + 1);
+			uvIds.append(ci + 2);
+			ci += 3;
+			
+			uvCounts.append(3);
+			
+		}
+		
+		MStatus ms = mf.setUVs( uArray, vArray, &uvSet);
+		if(!ms)
+			MGlobal::displayWarning(MString(" MeshHelper cannot create uv set coord ")+uvSet);
+		
+		ms = mf.assignUVs( uvCounts, uvIds, &uvSet );
+		if(!ms)
+			MGlobal::displayWarning(MString(" MeshHelper cannot create uv set uvid ")+uvSet);
+		
+	}
 		
 	return node;
 }

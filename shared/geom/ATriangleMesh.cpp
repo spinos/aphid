@@ -230,5 +230,8 @@ void ATriangleMesh::setTriangleTexcoord(const int & idx, const Float2 * uvs)
 const Float2 * ATriangleMesh::triangleTexcoord(const int & idx) const
 { return &m_texcoord[idx * 3]; }
 
+float * ATriangleMesh::triangleTexcoords()
+{ return (float *)m_texcoord.get(); }
+
 }
 //:~

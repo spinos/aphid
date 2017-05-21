@@ -66,6 +66,18 @@ char HTriangleMesh::save(ATriangleMesh * tri)
 	return 1;
 }
 
+char HTriangleMesh::saveTriangleTexcoord(ATriangleMesh * tri)
+{
+	int nt = tri->numTriangles();
+	if(!hasNamedData(".tritexcoord")) {
+	    addFloatData(".tritexcoord", nt * 6);
+	}
+	
+	writeFloatData(".tritexcoord", nt * 6, tri->triangleTexcoords() );
+	
+	return 1;
+}
+
 char HTriangleMesh::load(ATriangleMesh * tri)
 {
 	int nv = 3;
@@ -86,6 +98,19 @@ char HTriangleMesh::readAftCreation(ATriangleMesh * tri)
 	readVector3Data(".p", tri->numPoints(), (Vector3F *)tri->points());
 	readIntData(".a", tri->numPoints(), (int *)tri->anchors());
 	readIntData(".v", tri->numTriangles() * 3, (int *)tri->indices());
+	
+	return 1;
+}
+
+char HTriangleMesh::loadTriangleTexcoord(ATriangleMesh * tri)
+{
+	if(!hasNamedData(".tritexcoord")) {
+	    std::cout<<"\n HTriangleMesh has no tritexcoord";
+		return 0;
+	}
+	
+	int nt = tri->numTriangles();
+	readFloatData(".tritexcoord", nt * 6, tri->triangleTexcoords() );
 	
 	return 1;
 }

@@ -25,6 +25,9 @@ const int & DrawTriangle::triBufLength() const
 
 Vector3F * DrawTriangle::triNormalR()
 { return m_triNormalBuf.get(); }
+
+Vector3F * DrawTriangle::triColorR()
+{ return m_triColorBuf.get(); }
 	
 Vector3F * DrawTriangle::triPositionR()
 { return m_triPositionBuf.get(); }
@@ -35,25 +38,30 @@ const float * DrawTriangle::triNormalBuf() const
 const float * DrawTriangle::triPositionBuf() const
 { return (const float *)m_triPositionBuf.get(); }
 
+const float * DrawTriangle::triColorBuf() const
+{ return (const float *)m_triColorBuf.get(); }
+
 void DrawTriangle::setTriDrawBufLen(const int & x)
 { 
 	m_triBufLength = x;
 	m_triNormalBuf.reset(new Vector3F[x]);
+	m_triColorBuf.reset(new Vector3F[x]);
 	m_triPositionBuf.reset(new Vector3F[x]);
 }
 
 void DrawTriangle::buildTriangleDrawBuf(const int & nt, const int * tri,
-				const int & nv, const Vector3F * vertP, const Vector3F * vertN )
+				const int & nv, const Vector3F * vertP, 
+				const Vector3F * vertN,
+				const Vector3F * vertC )
 {
-	m_triBufLength = nt * 3;
-	m_triNormalBuf.reset(new Vector3F[m_triBufLength]);
-	m_triPositionBuf.reset(new Vector3F[m_triBufLength]);
+	setTriDrawBufLen(nt * 3);
 	
 	int i=0, j;
 	for(;i<m_triBufLength;++i) {
 		j = tri[i]; 
 		m_triNormalBuf[i] = vertN[j];
 		m_triPositionBuf[i] = vertP[j];
+		m_triColorBuf[i] = vertC[j];
 	}
 	
 }

@@ -165,6 +165,7 @@ void VegetationPatch::setTriangleDrawCache(const GeomElmArrTyp & src)
 	setTriDrawBufLen(n * 3);
 	Vector3F * pos = triPositionR();
 	Vector3F * nml = triNormalR();
+	Vector3F * col = triColorR();
 	for(int i=0; i<n; ++i) {
 		const GeomElmTyp * atri = src.get(i);
 		pos[i*3] = atri->P(0);
@@ -174,6 +175,10 @@ void VegetationPatch::setTriangleDrawCache(const GeomElmArrTyp & src)
 		nml[i*3] = atri->N(0);
 		nml[i*3+1] = atri->N(1);
 		nml[i*3+2] = atri->N(2);
+		
+		col[i*3] = atri->C(0);
+		col[i*3+1] = atri->C(1);
+		col[i*3+2] = atri->C(2);
 	}
 }
 

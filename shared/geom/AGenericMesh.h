@@ -11,13 +11,19 @@
  */
 
 #include <geom/Geometry.h>
-#include <math/Matrix44F.h>
+#include <boost/scoped_array.hpp>
 #include <map>
 
 namespace aphid {
 
 class BaseBuffer;
+class Vector3F;
+class Matrix44F;
+
 class AGenericMesh : public Geometry {
+
+	boost::scoped_array<float > m_vertcol;
+	
 public:
 	AGenericMesh();                                      
 	virtual ~AGenericMesh();
@@ -40,6 +46,11 @@ public:
     void moveIntoSpace(const Matrix44F & m);
     void clearAnchors();
     BaseBuffer * pointsBuf() const;
+	
+	void createVertexColors(int nv);
+	float * vertexColors();
+	const float * vertexColors() const;
+	
 protected:
 	void createBuffer(unsigned np, unsigned ni);
 	void setNumPoints(unsigned n);

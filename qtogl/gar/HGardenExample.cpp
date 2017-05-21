@@ -87,6 +87,7 @@ char HGardenExample::save(Vegetation * vege)
 		mshPathName = childPath(mshName.c_str() );
 		HTriangleMesh chd(mshPathName);
 		chd.save(mshVal);
+		chd.saveTriangleTexcoord(mshVal);
 		chd.close();
 		vege->geomNext(mshName, mshVal);
 	}

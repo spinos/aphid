@@ -62,8 +62,14 @@ public:
 	static void GetMeshTrianglesInGroup(sdb::VectorArray<cvx::Triangle> & tris,
 								BoundingBox & bbox,
 							const MDagPath & groupPath);
+							
+	struct CreateProfile {
+		bool _hasUV;
+		
+	};
+	
 	static MObject CreateMesh(const ATriangleMesh & msh,
-					MObject parent);
+					MObject parent, CreateProfile * prof = NULL);
 };
 
 };

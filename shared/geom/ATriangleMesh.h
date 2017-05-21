@@ -10,7 +10,7 @@
  *
  */
 #include <geom/AGenericMesh.h>
-#include <boost/scoped_array.hpp>
+#include <math/Matrix44F.h>
 
 namespace aphid {
 
@@ -36,6 +36,7 @@ public:
 	const unsigned numTriangles() const;
 	void setTriangleTexcoord(const int & idx, const Float2 * uvs);
 	const Float2 * triangleTexcoord(const int & idx) const;
+	float * triangleTexcoords();
 	
 	void create(unsigned np, unsigned nt);
 	unsigned * triangleIndices(unsigned idx) const;
@@ -82,6 +83,7 @@ void ATriangleMesh::dumpComponent(T & acomp, const int & i,
 {
 	const Vector3F * p = points();
 	const Vector3F * nml = vertexNormals();
+	const Vector3F * col = (const Vector3F *)vertexColors();
 	const unsigned * v = triangleIndices(i);
 	int a = v[0];
 	int b = v[1];
@@ -101,6 +103,10 @@ void ATriangleMesh::dumpComponent(T & acomp, const int & i,
 	wn = tm.transformAsNormal(nml[c]);
 	wn.normalize();
 	acomp.setN(wn, 2);
+	
+	acomp.setC(col[a], 0);
+	acomp.setC(col[b], 1);
+	acomp.setC(col[c], 2);
 		
 	const Float2 * uvs = triangleTexcoord(i);
 	acomp.setUVs(uvs);

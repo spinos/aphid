@@ -63,6 +63,7 @@ void DrawVegetation::drawPlantPatch(const VegetationPatch * vgp)
 	glMultMatrixf(vgp->transformationV());
 	
 	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)vgp->triNormalBuf() );
+	glColorPointer(3, GL_FLOAT, 0, (const GLfloat*)vgp->triColorBuf() );
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)vgp->triPositionBuf() );
 	glDrawArrays(GL_TRIANGLES, 0, vgp->triBufLength() );
 	
@@ -128,10 +129,12 @@ void DrawVegetation::begin()
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 }
 
 void DrawVegetation::end()
 {
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
