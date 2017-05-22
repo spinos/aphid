@@ -32,6 +32,7 @@ public:
     
 	virtual int numInstances() const;
     virtual const InstanceD & getInstance(const int & i) const;
+	virtual bool isCompound() const;
 	/*virtual int numExamples() const;
 	
 	virtual const ExampVox * getExample(const int & i) const;

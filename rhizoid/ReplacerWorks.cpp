@@ -98,7 +98,7 @@ int ReplacerWorks::countInstanceGroup(ProxyViz * viz,
 	MFnDependencyNode fex(iexNode);
 	if(fex.typeName() == "shrubViz") {
 		return countInstanceToShrub(viz, iexNode);
-	} 
+	}
 	
 	int ngrp = countInstanceTo(iexNode);
 	if(ngrp < 1) {

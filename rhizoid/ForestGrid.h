@@ -70,6 +70,9 @@ public:
 	template<typename Tf>
 	void processFilter(Tf & selFilter);
 	
+	template<typename T>
+	int countInstances(T * tforest);
+	
 };
 
 template<typename T, typename Tc, typename Tf, typename Tshape>
@@ -194,6 +197,18 @@ void ForestGrid::reshuffleSamples(const Tf & selFilter)
 	}
 	
 	assignSamplePlantType(selFilter);
+}
+
+template<typename T>
+int ForestGrid::countInstances(T * tforest)
+{
+	int c = 0;
+	begin();
+	while(!end() ) {
+		c += value()-> template countInstances<T> (tforest);
+		next();
+	}
+	return c;
 }
 
 }

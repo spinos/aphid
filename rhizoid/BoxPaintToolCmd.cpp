@@ -223,7 +223,7 @@ MStatus proxyPaintTool::doIt(const MArgList &args)
 			pViz->endPickInView();
 			break;
 		case opGetPick:
-			ng = pViz->numActivePlants();
+			ng = pViz->countActiveInstances();
 			setResult(ng);
 			break;
 		case opConnectReplacer:

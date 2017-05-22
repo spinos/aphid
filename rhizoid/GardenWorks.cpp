@@ -16,6 +16,7 @@
 #include <geom/ATriangleMesh.h>
 #include <mama/AHelper.h>
 #include <mama/MeshHelper.h>
+#include <mama/ConnectionHelper.h>
 
 using namespace aphid;
 
@@ -74,33 +75,34 @@ MStatus GardenWorks::doImport(const std::string & gdeName)
 		return MS::kFailure;
 	}
 	
-	importExample(&gd, &od);
-	importMesh(&gd, &od);
+	MObject gde = importExample(&gd, &od, &stat);
+	if(!gde.isNull() ) importMesh(&gd, &od, &gde);
 	
 	gd.close();
 	
 	return stat;
 }
 
-MStatus GardenWorks::importExample(aphid::HGardenExample * grp,
-			MObject * parent)
+MObject GardenWorks::importExample(aphid::HGardenExample * grp,
+			MObject * parent, MStatus * stat)
 {
-	MStatus stat = MS::kSuccess;
 	const MString vizName = MFnDependencyNode(*parent).name() + "Shape";
 	MObject oviz = AHelper::CreateShapeNode("gardenExampleViz", vizName, *parent);
 	if(oviz.isNull() ) {
 		AHelper::Info<std::string > ("GardenWorks error cannot create shape ", grp->lastName() );
-		return MS::kFailure;
+		*stat = MS::kFailure;
+		return oviz;
 	}
 	
 	VegExampleNode * viz = (VegExampleNode *)MFnDependencyNode(oviz).userNode();
 	grp->load(viz);
 	viz->saveInternal();
-	return stat;
+	*stat = MS::kSuccess;
+	return oviz;
 }
 
 MStatus GardenWorks::importMesh(HGardenExample * grp,
-							MObject * parent)
+							MObject * parent, MObject * gde)
 {
 	MStatus stat = MS::kSuccess;
 	std::vector<std::string > mshNames;
@@ -108,7 +110,7 @@ MStatus GardenWorks::importMesh(HGardenExample * grp,
 	
 	const int n = mshNames.size();
 	for(int i=0;i<n;++i) {
-		std::cout<<"GardenWorks import geom "<< mshNames[i];
+		std::cout<<" GardenWorks import geom "<< mshNames[i];
 		
 		HTriangleMesh gm(mshNames[i]);
 		
@@ -118,6 +120,10 @@ MStatus GardenWorks::importMesh(HGardenExample * grp,
 		
 		const MString smsh(gm.lastName().c_str() );
 		MObject om = AHelper::CreateTransform(smsh, *parent);
+		
+		ConnectionHelper::ConnectToArray(om, "matrix", 
+										*gde, "instanceSpace",
+										-1);
 		
 		MeshHelper::CreateProfile prof;
 		prof._hasUV = true;

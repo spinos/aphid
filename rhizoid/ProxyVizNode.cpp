@@ -155,6 +155,7 @@ MStatus ProxyViz::compute( const MPlug& plug, MDataBlock& block )
 		
 		MArrayDataHandle hArray = block.inputArrayValue(ainexamp);
 		updateExamples(hArray);
+		countNumInstances();
 
 		float result = 91.f;
 

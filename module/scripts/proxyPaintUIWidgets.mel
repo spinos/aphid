@@ -47,6 +47,10 @@ global proc proxyPaintCreateVizUI(string $coln)
             -text  ""
             ppnField_vizStatBox;
             
+        textFieldGrp -label "#Instance"
+            -text  ""
+            ppnField_vizStatInstance;
+            
         textFieldGrp -label "#Cell"
             -text  ""
             ppnField_vizStatCell;

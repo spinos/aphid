@@ -24,6 +24,7 @@ Forest::Forest()
 {    
 	m_grid = new ForestGrid;
 	m_numPlants = 0;
+	m_numInstances = 0;
 	m_sampleFlt = new SampleFilter;
 	m_activePlants = new PlantSelection(m_grid, m_sampleFlt->plantTypeMap() );
 	m_ground = new KdNTree<cvx::Triangle, KdNode4 >();
@@ -137,8 +138,9 @@ bool Forest::selectTypedPlants()
 
 bool Forest::selectPlants(const Ray & ray, SelectionContext::SelectMode mode)
 {
-	if(numPlants() < 1) return false;
-	
+	if(numPlants() < 1) {
+		return false;
+	}
 	if(!intersectGround(ray) ) {
 		if(!intersectGrid(ray) ) {
 			intersectWorldBox(ray);
@@ -224,7 +226,7 @@ void Forest::clearAllPlants()
 	}
     m_pool.clear();
 	m_numPlants = 0;
-	
+	m_numInstances = 0;
 }
 
 int Forest::getBindPoint(Vector3F & pos, GroundBind * bind)
@@ -437,12 +439,14 @@ void Forest::addPlantExample(ExampVox * x, const int & islot)
 	m_exampleIndices[x] = m_examples.size();
 	m_examples[islot] = x;
 	const int ne = x->numExamples();
-	if(ne > 1 || x->isVariable() ) {
-		for(int i=0;i<ne;++i) {
-			int elmi = plant::exampleIndex(islot, i);
-			m_examples[elmi] = x->getExample(i);
-			std::cout<<"\n add elm example "<<elmi<<" "<<m_examples[elmi];
-		}
+	if(ne < 2) {
+		return;
+	}
+
+	for(int i=0;i<ne;++i) {
+		int elmi = plant::exampleIndex(islot, i);
+		m_examples[elmi] = x->getExample(i);
+		std::cout<<"\n add elm example "<<elmi<<" "<<m_examples[elmi];
 	}
 	
 }
@@ -486,6 +490,7 @@ void Forest::onPlantChanged()
     std::cout.flush();
 	updateGrid();
 	countNumPlants();
+	countNumInstances();
 }
 
 void Forest::intersectWorldBox(const Ray & ray)
@@ -656,6 +661,10 @@ void Forest::getStatistics(std::map<std::string, std::string > & stats)
 	stats["box"] = sst.str();
 	
 	sst.str("");
+	sst<<m_numInstances;
+	stats["instance"] = sst.str();
+	
+	sst.str("");
 	int nc = numCells();
 	sst<<nc;
 	stats["cell"] = sst.str();
@@ -699,6 +708,49 @@ void Forest::moveSelectionCenter(const Vector3F & dv)
 {
 	selection()->moveCenter(dv);
 	m_intersectCtx.m_hitP += dv;
+}
+
+int Forest::countActiveInstances()
+{
+	int cnt = 0;
+	bool bCompound = false;
+	int iExample = -1;
+	ExampVox * v = 0;
+	PlantSelection::SelectionTyp * arr = activePlants();
+	arr->begin();
+	while(!arr->end() ) {
+		const int & curK = arr->key().y;
+		if(iExample != curK) {
+			iExample = curK;
+			v = plantExample(iExample );
+			if(v) {
+				bCompound = v->isCompound();
+			} else {
+				std::cout<<"\n exmp is null "<<iExample;
+			}
+		}
+		
+		if(v) {
+			if(bCompound) {
+				cnt += v->numInstances();
+				
+			} else {
+				cnt++;
+			}
+		}
+			
+		arr->next();
+	}
+	return cnt;
+}
+
+void Forest::countNumInstances()
+{
+	if(m_numPlants < 1) {
+		m_numInstances = 0;
+		return;
+	}
+	m_numInstances = m_grid->countInstances<Forest > (this);
 }
 
 }

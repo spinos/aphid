@@ -326,6 +326,9 @@ global proc proxyPaint_updateVizStats(string $toolName)
         if($buffer[$i] == "box") {
             textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatBox; 
         }
+        if($buffer[$i] == "instance") {
+            textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatInstance; 
+        }
         if($buffer[$i] == "cell") {
             textFieldGrp -e -text $buffer[$i+1] ppnField_vizStatCell; 
         }

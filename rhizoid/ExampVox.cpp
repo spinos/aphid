@@ -341,6 +341,9 @@ void ExampVox::drawFlatBound() const
 bool ExampVox::isVariable() const
 { return false; }
 
+bool ExampVox::isCompound() const
+{ return false; }
+
 CachedExampParam::CachedExampParam()
 {
 	m_preDopCorner[0] = 0.f;

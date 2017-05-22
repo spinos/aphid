@@ -93,6 +93,7 @@ public:
 	virtual const ExampVox * getExample(const int & i) const;
 	virtual ExampVox * getExample(const int & i);
 	virtual bool isVariable() const;
+	virtual bool isCompound() const;
 	
 	struct InstanceD {
 		float _trans[16];

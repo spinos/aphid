@@ -45,6 +45,7 @@ class Forest {
 	SampleFilter * m_sampleFlt;
 	RayMarch m_march;
 	int m_numPlants;
+	int m_numInstances;
 	int m_lastPlantInd;
 	
 public:
@@ -59,6 +60,7 @@ public:
 	int numVisibleSamples();
 	
 	void getStatistics(std::map<std::string, std::string > & stats);
+	int countActiveInstances();
 	
 protected:
     void setSelectionRadius(float x);
@@ -67,6 +69,7 @@ protected:
 	void updateGrid();
 	void countNumSamples();
 	void countNumPlants();
+	void countNumInstances();
 	void clearGroundMeshes();
     void setGroundMesh(ATriangleMesh * trimesh, unsigned idx);
     void buildGround();
@@ -146,6 +149,8 @@ protected:
 	void updateSampleColor();
 	int randomExampleInd() const;
 	void moveSelectionCenter(const Vector3F & dv);
+	
+	friend class ForestCell;
 	
 private:
 	bool testNeighborsInCell(CollisionContext * ctx,

@@ -42,4 +42,7 @@ int CompoundExamp::numInstances() const
 const ExampVox::InstanceD & CompoundExamp::getInstance(const int & i) const
 { return m_instances[i]; }
 
+bool CompoundExamp::isCompound() const
+{ return true; }
+
 }

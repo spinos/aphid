@@ -42,9 +42,10 @@ void GroupSelect::finishGroups()
 		b += m_groups[i].x;
 	}
 	
-	std::cout<<"\n GroupSelect finish n group "<<m_groups.size();
-	for(int i=0;i<m_groups.size();++i) {
-		std::cout<<"\n "<<i<<": "<<m_groups[i].x<<","<<m_groups[i].y;
+	const int ng = m_groups.size();
+	std::cout<<"\n GroupSelect finish n group "<<ng;
+	for(int i=0;i<ng;++i) {
+		std::cout<<"\n "<<i<<": "<<m_groups[i].x<<", "<<m_groups[i].y;
 	}
 }
 

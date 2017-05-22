@@ -104,6 +104,25 @@ private:
 					float lodLowGate, float lodHighGate, 
 					double percentage, int plantTyp, 
                     int & it);
+	void addExampleAttribs(const int & iExample,
+					PlantInstance * pli,
+					MVectorArray & positions,
+					MVectorArray & rotations,
+					MVectorArray & scales,
+					MDoubleArray & replacers);
+/// multi instances for compount 
+	void addCompoundExampleAttribs(const ExampVox * exmp,
+					PlantInstance * pli,
+					MVectorArray & positions,
+					MVectorArray & rotations,
+					MVectorArray & scales,
+					MDoubleArray & replacers);
+	void appendAInstance(MVectorArray & positions,
+					MVectorArray & rotations,
+					MVectorArray & scales,
+					MDoubleArray & replacers,
+					const Matrix44F & mat,
+					const int & instanceId);
 					
 };
 

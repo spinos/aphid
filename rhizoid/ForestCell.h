@@ -17,6 +17,7 @@
 #include <sdb/Array.h>
 #include <sdb/LodSampleCache.h>
 #include <PlantCommon.h>
+#include "ExampVox.h"
 
 namespace aphid {
 
@@ -80,6 +81,9 @@ public:
 	
 	template<typename Tgrd, typename Tctx>
 	bool collide(Tgrd * grid, Tctx * context);
+	
+	template<typename T>
+	int countInstances(T* tforest);
 	
 protected:
 	 
@@ -226,6 +230,39 @@ bool ForestCell::collide(T * forest, Tctx * context)
 	return false;
 }
 	
+template<typename T>
+int ForestCell::countInstances(T* tforest)
+{
+	int cnt = 0;
+	bool bCompound = false;
+	int iExample = -1;
+	ExampVox * v = 0;
+	begin();
+	while(!end() ) {
+		const int & curK = key().y;
+		if(iExample != curK) {
+			iExample = curK;
+			v = tforest->plantExample(iExample );
+			if(v) {
+				bCompound = v->isCompound();
+			} else {
+				std::cout<<"\n exmp is null "<<iExample;
+			}
+		}
+		
+		if(v) {
+			if(bCompound) {
+				cnt += v->numInstances();
+				
+			} else {
+				cnt++;
+			}
+		}
+		
+		next();
+	}
+	return cnt;
+}
 
 }
 #endif

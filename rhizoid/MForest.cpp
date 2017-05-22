@@ -671,45 +671,48 @@ void MForest::computePPAttribs(MVectorArray & positions,
 	scales.clear();
 	replacers.clear();
 	
-	if(numActivePlants() < 1) {
+	const int np = numActivePlants();
+	if(np < 1) {
 		MGlobal::displayInfo("MForest has no active plants to replace");
 		return;
 	}
 	
-	MMatrix mm;
-	MEulerRotation eula;
-	double sz;
-	int igroup = 0;
-	int iExample;
+	AHelper::Info<int>(" MForest has n active proxy", np );
+	
+	bool bCompound = false;
+	int iExample = -1;
+	ExampVox * v = 0;
 	PlantSelection::SelectionTyp * arr = activePlants();
 	arr->begin();
 	while(!arr->end() ) {
-	
-		Matrix44F * mat = arr->value()->m_reference->index->t1;
-		AHelper::ConvertToMMatrix(mm, *mat);
-		
-		positions.append(MVector(mm(3,0), mm(3,1), mm(3,2) ) );
-		
-		eula = mm;
-		rotations.append(eula.asVector());
-		
-/// size x actually
-		sz = MVector(mm(0,0), mm(0,1), mm(0,2)).length();
-		scales.append(MVector(sz, sz, sz) );
-		
-		iExample = arr->key().y;
-		if(plant::isChildOfBundle(iExample) ) {
-			igroup = selectInstance(plant::childIndex(iExample), arr->value()->m_seed );
-		} else {
-			igroup = selectInstance(0, arr->value()->m_seed );
+		const int & curK = arr->key().y;
+		if(iExample != curK) {
+			iExample = curK;
+			v = plantExample(iExample );
+			if(v) {
+				bCompound = v->isCompound();
+			} else {
+				std::cout<<"\n exmp is null "<<iExample;
+			}
 		}
 		
-		replacers.append((double)igroup);
+		if(v) {		
+			PlantInstance * pli = arr->value();
+			
+			if(bCompound) {
+				addCompoundExampleAttribs(v, pli,
+								positions, rotations, scales, replacers);
+				
+			} else {
+				addExampleAttribs(iExample, pli,
+								positions, rotations, scales, replacers);
+			}
+		}
 			
 		arr->next();
 	}
 	
-	AHelper::Info<unsigned>(" save n particles", numActivePlants() );
+	AHelper::Info<unsigned>(" MForest save replacer attrib for n particles", replacers.length() );
 }
 
 void MForest::updateExamples(MArrayDataHandle & dataArray)
@@ -836,6 +839,70 @@ void MForest::pickupVisiblePlantsInCell(ForestCell *cell,
 		it++;
 		cell->next();
 	}
+}
+
+void MForest::addExampleAttribs(const int & iExample,
+					PlantInstance * pli,
+					MVectorArray & positions,
+					MVectorArray & rotations,
+					MVectorArray & scales,
+					MDoubleArray & replacers)
+{
+	Matrix44F * mat = pli->m_reference->index->t1;
+	
+	int igroup;
+	if(plant::isChildOfBundle(iExample) ) {
+/// i-th in bundle as group
+		igroup = selectInstance(plant::childIndex(iExample), pli->m_seed );
+	} else {
+/// only 1 group
+		igroup = selectInstance(0, pli->m_seed );
+	}
+
+	appendAInstance(positions, rotations, scales, replacers,
+				*mat, igroup);
+}
+
+void MForest::addCompoundExampleAttribs(const ExampVox * exmp,
+					PlantInstance * pli,
+					MVectorArray & positions,
+					MVectorArray & rotations,
+					MVectorArray & scales,
+					MDoubleArray & replacers)
+{
+	Matrix44F * mat = pli->m_reference->index->t1;
+	
+	const int ninst = exmp->numInstances();
+	for(int i=0;i<ninst;++i) {
+		const ExampVox::InstanceD & inst = exmp->getInstance(i);
+		Matrix44F instTm(inst._trans);
+		instTm *= *mat;
+		appendAInstance(positions, rotations, scales, replacers,
+				instTm, inst._instanceId);
+	}
+}
+
+void MForest::appendAInstance(MVectorArray & positions,
+					MVectorArray & rotations,
+					MVectorArray & scales,
+					MDoubleArray & replacers,
+					const Matrix44F & mat,
+					const int & instanceId)
+{
+	MMatrix mm;
+	AHelper::ConvertToMMatrix(mm, mat);
+	positions.append(MVector(mm(3,0), mm(3,1), mm(3,2) ) );
+	
+	MEulerRotation eula;
+	eula = mm;
+	rotations.append(eula.asVector());
+	
+/// size x actually
+	double sz = MVector(mm(0,0), mm(0,1), mm(0,2)).length();
+	scales.append(MVector(sz, sz, sz) );
+	
+	//std::cout<<" add inst "<<mat<<" "<<instanceId;
+	replacers.append((double)instanceId);
 }
 
 }

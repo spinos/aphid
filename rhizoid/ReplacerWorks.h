@@ -28,6 +28,7 @@ protected:
 	int listInstanceGroup(MStringArray & instanceNames,
 					const MObject& node,
 					const int & iExample);
+/// # instance from i-th example
 	int countInstanceGroup(aphid::ProxyViz * viz,
 					const MObject& node,
 					const int & iExample);
