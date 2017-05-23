@@ -684,3 +684,17 @@ global proc proxyPaint_showAllVizs()
     }
 }
 
+global proc pxpn_importGDE()
+{
+    string $gdeFilter = "*.gde";
+    string $filenm = `fileDialog -m 0 -dm $gdeFilter`;
+    if(size($filenm) < 1) {
+        print("proxyPaint import GDE aborted");
+        return;   
+    }
+    int $r = `proxyPaintTool -ige $filenm`;
+    confirmDialog -title "Success" 
+            -message ("Imported Garden Example file "+$filenm);
+    
+}
+

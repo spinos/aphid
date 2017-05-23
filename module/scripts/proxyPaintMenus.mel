@@ -26,6 +26,7 @@ proc proxyPaint_appendMenuItems(string $master)
     menuItem -l "Instancer BoundingBoxes"  -c "proxyPaint_display(2)";    
     setParent -menu ..;
     menuItem -l "Create Bundle Example" -c "proxyPaint_createBundle";
+    menuItem -l "Import Garden Example" -c "pxpn_importGDE";
 
 	menuItem -e -ann `proxyPaintToolContext` proxyPaint_toolMenuItem;
 }

@@ -69,7 +69,7 @@ public:
 	};
 	
 	static MObject CreateMesh(const ATriangleMesh & msh,
-					MObject parent, CreateProfile * prof = NULL);
+					MObject parent, CreateProfile * prof = 0);
 };
 
 };
