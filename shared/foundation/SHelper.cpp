@@ -42,20 +42,22 @@ void SHelper::getTime(std::string& log)
 	log = std::string(asctime(timeinfo));
 }
 
-void SHelper::cutByFirstDot(std::string& res)
+bool SHelper::cutByFirstDot(std::string& res)
 {
 	int found = res.find('.', 0);
-	if(found < 0) return;
+	if(found < 0) return false;
 		
 	res.erase(found);
+	return true;
 }
 
-void SHelper::cutByLastDot(std::string& res)
+bool SHelper::cutByLastDot(std::string& res)
 {
 	int found = res.rfind('.', res.size());
-	if(found < 0) return;
+	if(found < 0) return false;
 		
 	res.erase(found);
+	return true;
 }
 
 void SHelper::cutByLastSlash(std::string& res)
