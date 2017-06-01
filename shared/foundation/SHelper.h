@@ -15,8 +15,8 @@ public:
 	static void divideByFirstSpace(std::string& ab2a, std::string& b);
 	static void trimByFirstSpace(std::string& res);
 	static void getTime(std::string& log);
-	static void cutByFirstDot(std::string& res);
-	static void cutByLastDot(std::string& res);
+	static bool cutByFirstDot(std::string& res);
+	static bool cutByLastDot(std::string& res);
 	static void cutByLastSlash(std::string& res);
 	static void changeFrameNumber(std::string& res, int frame);
 	static void changeFrameNumber(std::string& res, int frame, int padding);

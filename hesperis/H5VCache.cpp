@@ -12,11 +12,14 @@
 #include <h5/HBase.h>
 #include <h5/VerticesHDataset.h>
 #include <sstream>
-#include <string.h>
+#include <foundation/SHelper.h>
+#include <boost/lexical_cast.hpp>
 
 namespace aphid {
 
-H5VCache::H5VCache()
+H5VCache::H5VCache() :
+m_hasPiecesChecked(false),
+m_hasArbitrarySampleChecked(false)
 {
 	m_data[0] = new BaseBuffer;
     m_data[1] = new BaseBuffer;
@@ -24,7 +27,6 @@ H5VCache::H5VCache()
     m_drifts = new BaseBuffer;
     m_numPieces = 1;
     m_numPoints = 0;
-    m_hasPiecesChecked = false;
     m_minInd = 1<<30;
 	m_blender = 1e8f;
 }
@@ -180,6 +182,9 @@ const bool & H5VCache::hasData() const
 const bool & H5VCache::hasPiecesChecked() const
 { return m_hasPiecesChecked; }
 
+const bool & H5VCache::hasArbitrarySampleChecked() const
+{ return m_hasArbitrarySampleChecked; }
+
 bool H5VCache::readData(const std::string & fileName, 
                    const std::string & pathName,
                    double dtime,
@@ -200,6 +205,11 @@ bool H5VCache::readData(const std::string & fileName,
     }
     
     // std::cout<<"\n oflBakePNode switch to h5 file "<<fileName;
+    
+    if(!hasArbitrarySampleChecked() ) {
+        checkArbitrarySamples(HObject::ValidPathName(pathName) );
+    }
+    
     if(!hasPiecesChecked() ) {
         checkPieces(pathName, numIterPoints);
 	}
@@ -210,6 +220,7 @@ bool H5VCache::readData(const std::string & fileName,
 	}
 	
     int currentSpf = sampler()->m_spf;
+ /// discover arbitrary sample time
     
     if(hasSpfSegment() ) {
         spfSegment().getSamples<double>(currentSpf, dtime);
@@ -297,5 +308,45 @@ bool H5VCache::isBlenderChanged(float x) const
 	
 void H5VCache::setBlender(float x)
 { m_blender = x; }
+
+void H5VCache::checkArbitrarySamples(const std::string & pathName)
+{
+    std::cout<<"\n check arbitrary samples in grp"<<pathName;
+    std::stringstream sst;
+	sst.str("");
+	sst<<pathName<<"/.geom/.bake/";
+
+    HBase bakeNode(sst.str().c_str());
+    const int nc = bakeNode.numChildren();
+		
+		for(int i = 0;i<nc;i++) {
+			if(bakeNode.isChildData(i)) {
+				std::cout<<"\n "<<bakeNode.getChildName(i);
+			}
+		}
+		
+		bakeNode.close();
+    
+    std::cout.flush();
+    
+    m_hasArbitrarySampleChecked = true;
+}
+
+bool H5VCache::asSampleTime(int& frame, int& subframe, 
+                const std::string& stime) const
+{
+    std::string atime(stime);
+    if(!SHelper::cutByLastDot(atime) ) {
+        return false;
+    }
+    float ftime = boost::lexical_cast<float>(stime);
+    frame = ftime;
+    if(ftime < 0.f) {
+        frame--;
+     }
+    subframe = boost::lexical_cast<int>(atime);
+    
+    return true;
+}
 
 }

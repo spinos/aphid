@@ -31,6 +31,7 @@ class H5VCache : public H5Holder
     int m_numPoints;
 	bool m_hasData;
     bool m_hasPiecesChecked;
+    bool m_hasArbitrarySampleChecked;
 	float m_blender;
 
 public:
@@ -52,6 +53,7 @@ protected:
     
 	const bool & hasData() const;
 	const bool & hasPiecesChecked() const;
+	const bool& hasArbitrarySampleChecked() const;
 	const int & numPieces() const;
 	const int & numPoints() const;
 
@@ -69,8 +71,11 @@ protected:
 	bool isBlenderChanged(float x) const;
 	void setBlender(float x);
 	
+	void checkArbitrarySamples(const std::string & pathName);
+	
 private:
 	void scanExclusive(int n, int * dst, int * src);
+	bool asSampleTime(int& frame, int& subframe, const std::string& stime) const;
 	
 };
 

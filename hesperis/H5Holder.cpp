@@ -37,7 +37,9 @@ void H5Holder::readSampler(SampleFrame & sampler)
 		return;
 	}
 	
-	if(!HObject::FileIO.checkExist("/.spf" )) return;
+	if(!HObject::FileIO.checkExist("/.spf" )) {
+	    return;
+	}
     
     HIntAttribute aspf("/.spf");
     if(aspf.open()) {
@@ -101,10 +103,13 @@ bool H5Holder::readSpfSegment()
     AFrameRange::SamplesPerFrame = oldSpf;
     AFrameRange::FramesPerSecond = oldFps;
     
-    if(afr.segmentExpr().size() < 3) return false;
+    if(afr.segmentExpr().size() < 3) {
+        return false;
+     }
     
-    if( m_spfSegment.create(afr.segmentExpr() ) )
+    if( m_spfSegment.create(afr.segmentExpr() ) ) {
         return true;
+     }
     
     return false;
 }
