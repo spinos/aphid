@@ -18,24 +18,27 @@
 
 namespace aphid {
 
-ConvexHullGen::ConvexHullGen() 
+ConvexHullGen::ConvexHullGen() :
+m_horizon(0)
 {}
 
 ConvexHullGen::~ConvexHullGen() 
 {
-	delete m_horizon;
+    if(m_horizon) {
+        delete m_horizon;
+    }
 	visibleFaces.clear();
 	
 	std::vector<ConflictGraph *>::iterator it = m_conflg.begin();
 	for(;it!=m_conflg.end();++it) {
-		delete *it;
+		//delete *it;
 	}
-	
+	m_conflg.clear();
 	std::vector<GraphArch *>::iterator it1 = m_arch.begin();
 	for(;it1!=m_arch.end();++it1) {
-		delete *it1;
+		//delete *it1;
 	}
-	
+	m_arch.clear();
 }
 
 void ConvexHullGen::addSample(const Vector3F & p)
