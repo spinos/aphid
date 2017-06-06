@@ -220,8 +220,6 @@ bool H5VCache::readData(const std::string & fileName,
 		return true;
 	}
 	
-    if(!findArbitrarySample(dtime) ) {
-	
     int currentSpf = sampler()->m_spf;
     
     if(hasSpfSegment() ) {
@@ -234,7 +232,10 @@ bool H5VCache::readData(const std::string & fileName,
 		sampler()->m_weights[0] = 1.f;
 	}
 	
-	}
+	findArbitrarySample(dtime);
+	
+	std::cout<<sampler()->str();
+	std::cout.flush();
     
     if(!readFrame((float *)m_data[0]->data(), m_numPoints, pathName.c_str(), 
         sampler()->m_frames[0], sampler()->m_samples[0], 
@@ -389,10 +390,12 @@ bool H5VCache::findArbitrarySample(const double& dtime)
     if(!m_hasArbitrarySamples ) {
         return false;
     }
-    int iframe = dtime;
+    int iframe = double(int(dtime * 1000 + 0.5) )/1000.0;
     if(dtime < 0.0) {
         iframe--;
     }
+    
+    std::cout<<"\n search subframe "<<dtime<<" "<<iframe;
     
     SubframeSampleTimeI * sps = m_arbitrarySamples.findFrame(iframe);
     if(!sps) {
@@ -404,7 +407,7 @@ bool H5VCache::findArbitrarySample(const double& dtime)
         return false;
     }
     
- /// std::cout<<"\n search subframe "<<kframe;
+    std::cout<<"\n search subframe "<<subframe;
     
     int curk, prek = 9999999;
     sps->begin();
