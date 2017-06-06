@@ -60,6 +60,15 @@ bool SHelper::cutByLastDot(std::string& res)
 	return true;
 }
 
+bool SHelper::PartAfterDot(std::string & a)
+{
+    int found = a.rfind('.', a.size());
+	if(found < 0 || found == a.size() - 1) return false;
+	
+	a.erase(0, found + 1);
+	return true;
+}
+
 void SHelper::cutByLastSlash(std::string& res)
 {
 	int found = res.rfind('\\', res.size());

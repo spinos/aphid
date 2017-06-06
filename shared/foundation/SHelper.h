@@ -77,6 +77,7 @@ public:
 /// separated by one dot
     static bool SeparateNodeAttrib(std::string & a, std::string & b,
                                     const std::string & ab);
+    static bool PartAfterDot(std::string & a);
     
 };
 

@@ -19,7 +19,8 @@ namespace aphid {
 
 H5VCache::H5VCache() :
 m_hasPiecesChecked(false),
-m_hasArbitrarySampleChecked(false)
+m_hasArbitrarySampleChecked(false),
+m_hasArbitrarySamples(false)
 {
 	m_data[0] = new BaseBuffer;
     m_data[1] = new BaseBuffer;
@@ -219,8 +220,9 @@ bool H5VCache::readData(const std::string & fileName,
 		return true;
 	}
 	
+    if(!findArbitrarySample(dtime) ) {
+	
     int currentSpf = sampler()->m_spf;
- /// discover arbitrary sample time
     
     if(hasSpfSegment() ) {
         spfSegment().getSamples<double>(currentSpf, dtime);
@@ -230,6 +232,8 @@ bool H5VCache::readData(const std::string & fileName,
     sampler()->calculateWeights(dtime, currentSpf);
     if(isSubframe == 0) {
 		sampler()->m_weights[0] = 1.f;
+	}
+	
 	}
     
     if(!readFrame((float *)m_data[0]->data(), m_numPoints, pathName.c_str(), 
@@ -311,7 +315,9 @@ void H5VCache::setBlender(float x)
 
 void H5VCache::checkArbitrarySamples(const std::string & pathName)
 {
-    std::cout<<"\n check arbitrary samples in grp"<<pathName;
+    m_arbitrarySamples.clear();
+    m_hasArbitrarySamples = false;
+    std::cout<<"\n check arbitrary samples in "<<pathName;
     std::stringstream sst;
 	sst.str("");
 	sst<<pathName<<"/.geom/.bake/";
@@ -321,12 +327,18 @@ void H5VCache::checkArbitrarySamples(const std::string & pathName)
 		
 		for(int i = 0;i<nc;i++) {
 			if(bakeNode.isChildData(i)) {
-				std::cout<<"\n "<<bakeNode.getChildName(i);
+			    addASample(bakeNode.getChildName(i) );
+				
 			}
 		}
 		
 		bakeNode.close();
     
+    const int ns = m_arbitrarySamples.sampleCount();
+    if(ns > 0) {
+        std::cout<<"\n n arbitrary sample "<<ns;
+        m_hasArbitrarySamples = true;
+     }
     std::cout.flush();
     
     m_hasArbitrarySampleChecked = true;
@@ -336,16 +348,98 @@ bool H5VCache::asSampleTime(int& frame, int& subframe,
                 const std::string& stime) const
 {
     std::string atime(stime);
-    if(!SHelper::cutByLastDot(atime) ) {
+    if(!SHelper::PartAfterDot(atime) ) {
         return false;
     }
+    
+    try {
+    subframe = boost::lexical_cast<int>(atime);
+    
     float ftime = boost::lexical_cast<float>(stime);
     frame = ftime;
     if(ftime < 0.f) {
         frame--;
      }
-    subframe = boost::lexical_cast<int>(atime);
+    } catch (...) {
+        std::cout<<" H5VCache::asSampleTime cannot cast "<<atime;
+        return false;
+    }
     
+    return true;
+}
+
+void H5VCache::addASample(const std::string & stime)
+{
+    int iframe, subframe;
+    if(!asSampleTime(iframe, subframe, stime ) ) {
+        return;
+    }
+    if(subframe < 99) {
+        return;
+    }
+// std::cout<<"\n frame subframe "<<iframe<<" "<<subframe<<" "<<stime;
+    m_arbitrarySamples.insertSample(iframe, subframe);
+}
+
+const bool& H5VCache::hasArbitrarySamples() const
+{ return m_hasArbitrarySamples; }
+
+bool H5VCache::findArbitrarySample(const double& dtime)
+{
+    if(!m_hasArbitrarySamples ) {
+        return false;
+    }
+    int iframe = dtime;
+    if(dtime < 0.0) {
+        iframe--;
+    }
+    
+    SubframeSampleTimeI * sps = m_arbitrarySamples.findFrame(iframe);
+    if(!sps) {
+        return false;
+    }
+    
+    int subframe = 1000000 * (dtime - iframe);
+    if(subframe < 99) {
+        return false;
+    }
+    
+ /// std::cout<<"\n search subframe "<<kframe;
+    
+    int curk, prek = 9999999;
+    sps->begin();
+    while(!sps->end() ) {
+        curk = sps->key();
+        
+        if(subframe <= curk && prek > 1000000) {
+            prek = curk;
+            break;
+        }
+        if(subframe > prek && subframe <= curk ) {
+            break;
+        }
+        prek = curk;
+        sps->next();
+    }
+
+/// first or last one
+    if(prek == curk) {
+        subframe = prek;
+    } else {
+
+/// closer one
+    int diff0 = subframe - prek;
+    int diff1 = curk - subframe;
+    if(diff0 < diff1) {
+        subframe = prek;
+    } else {
+        subframe = curk;
+    }
+    
+    }
+    
+    sampler()->setFirst(iframe, subframe, 1.f);
+
     return true;
 }
 
