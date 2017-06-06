@@ -13,6 +13,7 @@ class SampleFrame {
 public:
 	SampleFrame();
 	
+	void setFirst(const int& iframe, const int& isample, const float& weight);
 	void calculateWeights(double frameTime, const int & spf);
 	int sampleOfset0() const;
 	int sampleOfset1() const;

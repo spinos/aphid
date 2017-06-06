@@ -12,6 +12,7 @@
 #define APH_H5_VCACHE_H
 
 #include <H5Holder.h>
+#include <ASampleTime.h>
 
 namespace aphid {
 
@@ -33,6 +34,9 @@ class H5VCache : public H5Holder
     bool m_hasPiecesChecked;
     bool m_hasArbitrarySampleChecked;
 	float m_blender;
+	    bool m_hasArbitrarySamples;
+/// frame.subframe, subframe > 99
+    ASampleTimeI m_arbitrarySamples;
 
 public:
 	H5VCache();
@@ -54,6 +58,7 @@ protected:
 	const bool & hasData() const;
 	const bool & hasPiecesChecked() const;
 	const bool& hasArbitrarySampleChecked() const;
+	const bool& hasArbitrarySamples() const;
 	const int & numPieces() const;
 	const int & numPoints() const;
 
@@ -76,6 +81,8 @@ protected:
 private:
 	void scanExclusive(int n, int * dst, int * src);
 	bool asSampleTime(int& frame, int& subframe, const std::string& stime) const;
+	void addASample(const std::string & stime);
+	bool findArbitrarySample(const double& dtime);
 	
 };
 

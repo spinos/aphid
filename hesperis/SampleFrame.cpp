@@ -11,6 +11,14 @@
 #include <sstream>
 SampleFrame::SampleFrame() : m_spf(1) {}
 
+void SampleFrame::setFirst(const int& iframe, const int& isample, 
+	                const float& weight)
+{
+    m_frames[0] = iframe;
+    m_samples[0] = isample;
+    m_weights[0] = weight;
+}
+
 void SampleFrame::calculateWeights(double frameTime, const int & spf)
 {
     frameTime = double(int(frameTime * 1000 + 0.5))/1000;
