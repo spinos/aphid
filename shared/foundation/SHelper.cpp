@@ -1071,5 +1071,14 @@ bool SHelper::SeparateNodeAttrib(std::string & a, std::string & b,
     return false;
 }
 
+void SHelper::PrintVectorStr(const std::vector<std::string >& names)
+{
+    std::vector<std::string >::const_iterator it = names.begin();
+    for(;it!=names.end();++it) {
+        std::cout<<"\n "<<*it;
+    }
+    std::cout.flush();
+}
+
 }
 //:~

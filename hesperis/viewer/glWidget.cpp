@@ -8,7 +8,6 @@
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
 #include "glWidget.h"
-#include <GeoDrawer.h>
 
 using namespace aphid;
 

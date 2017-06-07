@@ -78,8 +78,11 @@ public:
     static bool SeparateNodeAttrib(std::string & a, std::string & b,
                                     const std::string & ab);
     static bool PartAfterDot(std::string & a);
+    static void PrintVectorStr(const std::vector<std::string >& names); 
     
 };
+
+ 
 
 }
 #endif

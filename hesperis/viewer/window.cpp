@@ -7,9 +7,13 @@
 #include "window.h"
 #include "glWidget.h"
 #include "toolBox.h"
+#include <HesScene.h>
+
+using namespace aphid;
 
 Window::Window()
 {
+    m_scene = new HesScene;
 	glWidget = new GLWidget(this);
 	m_tools = new ToolBox(this);
 	
@@ -109,6 +113,21 @@ void Window::showAssets()
 
 void Window::performLoad(bool x)
 {
+    QString fileName = QFileDialog::getOpenFileName(this,
+			tr("Select one file to load"), 
+			"~", 
+			tr("OFL Cache Files (*.m *.hes *.h5)"));
+	
+	if(fileName.length() < 5) {
+	    qDebug()<<" abort loading file ";
+		return;
+	}
+	
+	qDebug()<<fileName;
+	bool stat = m_scene->load(fileName.toStdString() );
+	if(stat) {
+	    qDebug()<<" hes is loaded ";
+	}
 }
 
 void Window::recvDspState(int x)

@@ -5,6 +5,7 @@ set (VIE_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h
 window.h
 glWidget.h
 toolBox.h
+../HesScene.h
 )
 
 set ( VIE_RESOURCES
@@ -23,6 +24,7 @@ ${APHID_QT_DIR}/ActionIconFrame.cpp
 glWidget.cpp
 window.cpp
 toolBox.cpp
+../HesScene.cpp
 main.cpp)
 
 add_executable (viewHes ${VIE_HEADER_FILES} ${VIE_SOURCE_FILES} ${VIE_RES_SOURCES})
@@ -32,14 +34,14 @@ target_link_libraries (viewHes ${OPENGL_LIBRARIES})
 target_link_libraries (viewHes ${APHID_FOUND_LIBRARY})
 target_link_libraries (viewHes ${APHID_MATH_LIBRARY})
 target_link_libraries (viewHes ${APHID_GEOM_LIBRARY})
+target_link_libraries (viewHes ${APHID_OGL_LIBRARY})
 target_link_libraries (viewHes ${APHID_UI_LIBRARY})
 target_link_libraries (viewHes ${APHID_SDB_LIBRARY})
 target_link_libraries (viewHes ${APHID_TOPO_LIBRARY})
-target_link_libraries (viewHes ${APHID_OGL_LIBRARY})
-target_link_libraries (viewHes ${APHID_GRAPH_LIBRARY})
-target_link_libraries (viewHes ${APHID_TTG_LIBRARY})
-target_link_libraries (viewHes ${APHID_KD_LIBRARY})
-target_link_libraries (viewHes ${APHID_IMG_LIBRARY})
+#target_link_libraries (viewHes ${APHID_GRAPH_LIBRARY})
+#target_link_libraries (viewHes ${APHID_TTG_LIBRARY})
+#target_link_libraries (viewHes ${APHID_KD_LIBRARY})
+#target_link_libraries (viewHes ${APHID_IMG_LIBRARY})
 target_link_libraries (viewHes ${APHID_H5_LIBRARY})
 
 target_link_libraries (viewHes ${HDF5_LIBRARIES})
@@ -47,6 +49,7 @@ target_link_libraries (viewHes ${ZLIB_LIBRARY})
 
 target_link_libraries (viewHes ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (viewHes ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (viewHes ${Boost_REGEX_LIBRARY})
 
 IF (WIN32)
 target_link_libraries (viewHes ${Boost_DATE_TIME_LIBRARY})
@@ -58,3 +61,7 @@ ENDIF ()
 target_link_libraries (viewHes ${BLAS_LIBRARY})
 target_link_libraries (viewHes ${LAPACK_LIBRARY})
 target_link_libraries (viewHes ${F2C_LIBRARY})
+
+IF (UNIX)
+target_link_libraries (viewHes ${GLEW_LIBRARY})
+ENDIF ()

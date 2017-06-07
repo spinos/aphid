@@ -13,6 +13,10 @@ QT_END_NAMESPACE
 class GLWidget;
 class ToolBox;
 
+namespace aphid {
+class HesScene;
+}
+
 class Window : public QMainWindow
 {
     Q_OBJECT
@@ -39,6 +43,7 @@ private slots:
 	void recvDspState(int x);
 	
 private:
+    aphid::HesScene* m_scene;
 	QStackedWidget * m_centerStack;
     GLWidget *glWidget;
 	ToolBox * m_tools;
