@@ -7,11 +7,14 @@
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
+#include <HesScene.h>
+#include <geom/ATriangleMeshGroup.h>
 #include "glWidget.h"
 
 using namespace aphid;
 
-GLWidget::GLWidget(QWidget *parent) : Base3DView(parent),
+GLWidget::GLWidget(const aphid::HesScene* scene, QWidget *parent) : Base3DView(parent),
+m_scene(scene),
 m_dspState(0)
 {
 	perspCamera()->setFarClipPlane(30000.f);
@@ -26,10 +29,17 @@ GLWidget::~GLWidget()
 {}
 
 void GLWidget::clientInit()
-{}
+{
+	glEnable(GL_POLYGON_OFFSET_LINE);
+	glDisable(GL_POLYGON_OFFSET_FILL);
+}
 
 void GLWidget::clientDraw()
 {
+	const int nmsh = m_scene->numMeshes();
+	for(int i=0;i<nmsh;++i) {
+		drawMesh(m_scene->mesh(i) );
+	}
 }
 
 void GLWidget::resetPerspViewTransform()
@@ -92,4 +102,22 @@ void GLWidget::setDisplayState(int x)
 {
 	m_dspState = x;
 	update();
+}
+
+void GLWidget::drawMesh(const ATriangleMeshGroup* msh)
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)msh->points() );
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glColor3f(1.f, 1.f, 1.f);
+	glDrawElements(GL_TRIANGLES, msh->numIndices(), GL_UNSIGNED_INT, msh->indices() );
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonOffset(-1.0f, -1.0f);
+	glColor3f(.1f, .1f, .1f);
+	glDrawElements(GL_TRIANGLES, msh->numIndices(), GL_UNSIGNED_INT, msh->indices() );
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
 }

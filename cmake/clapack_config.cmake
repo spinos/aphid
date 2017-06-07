@@ -1,0 +1,22 @@
+MESSAGE (" find clapack ")
+if(WIN32)
+    include_directories (D:/usr/CLAPACK/include)
+    set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
+	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
+    set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
+
+elseif(APPLE)
+	set(F2C_LIBRARY libf2c.a)
+	set(BLAS_LIBRARY libblas.a)
+	set(LAPACK_LIBRARY liblapack.a)
+elseif (UNIX)
+include_directories (/usr/local/include)
+	set(F2C_LIBRARY /usr/local/lib/libf2c.a)
+    set(BLAS_LIBRARY /usr/local/lib/libblas.a)
+	set(LAPACK_LIBRARY /usr/local/lib/liblapack.a)
+	
+endif()
+
+message (" blas is " ${BLAS_LIBRARY})
+message (" lapack is " ${LAPACK_LIBRARY})
+message (" f2c is " ${F2C_LIBRARY})

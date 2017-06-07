@@ -6,6 +6,11 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_BUILD_TYPE RELEASE)
 
 include (../cmake/base_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/boost_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/ogl_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/qt_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/aphid_config.cmake)
 include_directories (${APHID_DIR}/hesperis)
 
 add_subdirectory(viewer)

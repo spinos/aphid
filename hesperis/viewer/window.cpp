@@ -14,7 +14,7 @@ using namespace aphid;
 Window::Window()
 {
     m_scene = new HesScene;
-	glWidget = new GLWidget(this);
+	glWidget = new GLWidget(m_scene, this);
 	m_tools = new ToolBox(this);
 	
 	addToolBar(m_tools);

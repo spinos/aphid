@@ -4,3 +4,219 @@ addAttr -ln userScalar1PP -dt doubleArray particleShape1addAttr -ln userScalar1
 userScalar1PP = rand(3)
 
 particleInstancer  -addObject -object  pSphere1 -object  pCylinder1 -object  pCone1 -cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail BoundingBox -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -objectIndex userScalar1PP -age age particleShape1
+
+GLSL instances
+
+
+static const char* vertexShader= \
+"#version 330\n"
+"\n"
+"uniform mat4 ModelViewMatrix;\n"
+"uniform mat4 ProjectionMatrix;\n"
+"uniform mat3 NormalMatrix;\n"
+"\n"
+"\n"
+"layout (location = 0) in vec4 position;\n"
+"layout (location = 1) in vec4 instance_color;\n"
+"layout (location = 2) in vec4 instance_position;\n"
+"layout (location = 3) in vec4 instance_quaternion;\n"
+"layout (location = 4) in vec2 uvcoords;\n"
+"layout (location = 5) in vec3 vertexnormal;\n"
+"\n"
+"\n"
+"\n"
+"out Fragment\n"
+"{\n"
+"    vec4 color;\n"
+"} fragment;\n"
+"\n"
+"out Vert\n"
+"{\n"
+"	vec2 texcoord;\n"
+"} vert;\n"
+"\n"
+"\n"
+"vec4 quatMul ( in vec4 q1, in vec4 q2 )\n"
+"{\n"
+"    vec3  im = q1.w * q2.xyz + q1.xyz * q2.w + cross ( q1.xyz, q2.xyz );\n"
+"    vec4  dt = q1 * q2;\n"
+"    float re = dot ( dt, vec4 ( -1.0, -1.0, -1.0, 1.0 ) );\n"
+"    return vec4 ( im, re );\n"
+"}\n"
+"\n"
+"vec4 quatFromAxisAngle(vec4 axis, in float angle)\n"
+"{\n"
+"    float cah = cos(angle*0.5);\n"
+"    float sah = sin(angle*0.5);\n"
+"	float d = inversesqrt(dot(axis,axis));\n"
+"	vec4 q = vec4(axis.x*sah*d,axis.y*sah*d,axis.z*sah*d,cah);\n"
+"	return q;\n"
+"}\n"
+"//\n"
+"// vector rotation via quaternion\n"
+"//\n"
+"vec4 quatRotate3 ( in vec3 p, in vec4 q )\n"
+"{\n"
+"    vec4 temp = quatMul ( q, vec4 ( p, 0.0 ) );\n"
+"    return quatMul ( temp, vec4 ( -q.x, -q.y, -q.z, q.w ) );\n"
+"}\n"
+"vec4 quatRotate ( in vec4 p, in vec4 q )\n"
+"{\n"
+"    vec4 temp = quatMul ( q, p );\n"
+"    return quatMul ( temp, vec4 ( -q.x, -q.y, -q.z, q.w ) );\n"
+"}\n"
+"\n"
+"out vec3 lightDir,normal,ambient;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"	vec4 q = instance_quaternion;\n"
+"	ambient = vec3(0.2,0.2,0.2);\n"
+"		\n"
+"		\n"
+"	vec4 local_normal = (quatRotate3( vertexnormal,q));\n"
+"	vec3 light_pos = vec3(1000,1000,1000);\n"
+"	normal = normalize(ModelViewMatrix * local_normal).xyz;\n"
+"\n"
+"	lightDir = normalize(light_pos);//gl_LightSource[0].position.xyz));\n"
+"//	lightDir = normalize(vec3(gl_LightSource[0].position));\n"
+"		\n"
+"	vec4 axis = vec4(1,1,1,0);\n"
+"	vec4 localcoord = quatRotate3( position.xyz,q);\n"
+"	vec4 vertexPos = ProjectionMatrix *ModelViewMatrix *(instance_position+localcoord);\n"
+"\n"
+"	gl_Position = vertexPos;\n"
+"	\n"
+"//	fragment.color = instance_color;\n"
+"	vert.texcoord = uvcoords;\n"
+"}\n"
+;
+
+
+static const char* fragmentShader= \
+"#version 330\n"
+"\n"
+"in Fragment\n"
+"{\n"
+"    vec4 color;\n"
+"} fragment;\n"
+"\n"
+"in Vert\n"
+"{\n"
+"	vec2 texcoord;\n"
+"} vert;\n"
+"\n"
+"uniform sampler2D Diffuse;\n"
+"uniform float diffuse_alpha;\n"
+"\n"
+"in vec3 lightDir,normal,ambient;\n"
+"\n"
+"out vec4 color;\n"
+"\n"
+"void main_textured(void)\n"
+"{\n"
+"    color = texture2D(Diffuse,vert.texcoord);//fragment.color;\n"
+"}\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    vec4 texel = texture2D(Diffuse,vert.texcoord);//fragment.color;\n"
+"	vec3 ct,cf;\n"
+"	float intensity,at,af;\n"
+"	intensity = max(dot(lightDir,normalize(normal)),0.0);\n"
+"	cf = intensity*vec3(1.0,1.0,1.0);//intensity * (gl_FrontMaterial.diffuse).rgb+ambient;//gl_FrontMaterial.ambient.rgb;\n"
+"	af = diffuse_alpha;\n"
+"		\n"
+"	ct = texel.rgb;\n"
+"	at = texel.a;\n"
+"		\n"
+"	color  = vec4(ct * cf, at * af);	\n"
+"}\n"
+;
+
+GLuint offset = 0;
+
+    glGenVertexArrays(1, &cube_vao);
+    glGenBuffers(1, &cube_vbo);
+    glBindVertexArray(cube_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
+
+instance_positions_ptr = (GLfloat*)new float[NUM_OBJECTS*4];
+instance_quaternion_ptr = (GLfloat*)new float[NUM_OBJECTS*4];
+
+glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices) + sizeof(instance_colors) + POSITION_BUFFER_SIZE+ORIENTATION_BUFFER_SIZE, NULL, GL_DYNAMIC_DRAW);//GL_STATIC_DRAW);
+
+	///initialize parts of the buffer
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(cube_vertices), cube_vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(cube_vertices), sizeof(instance_colors), instance_colors);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(cube_vertices) + sizeof(instance_colors), POSITION_BUFFER_SIZE, instance_positions_ptr);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(cube_vertices) + sizeof(instance_colors)+POSITION_BUFFER_SIZE,ORIENTATION_BUFFER_SIZE , instance_quaternion_ptr);
+
+	
+
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+
+glGenBuffers(1, &index_vbo);
+	int indexBufferSize = sizeof(cube_indices);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0,indexBufferSize,cube_indices);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	
+glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
+	char* bla =  (char*)glMapBuffer( GL_ARRAY_BUFFER,GL_WRITE_ONLY);
+
+	float* positions = (float*)(bla+sizeof(cube_vertices) + sizeof(instance_colors));
+	float* orientations = (float*)(bla+sizeof(cube_vertices) + sizeof(instance_colors)+ POSITION_BUFFER_SIZE);
+
+glUnmapBuffer( GL_ARRAY_BUFFER);
+
+glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
+	
+glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 9*sizeof(float), 0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *)sizeof(cube_vertices));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(sizeof(cube_vertices) + sizeof(instance_colors)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(sizeof(cube_vertices) + sizeof(instance_colors)+POSITION_BUFFER_SIZE));
+	int uvoffset = 7*sizeof(float);
+	int normaloffset = 4*sizeof(float);
+
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 9*sizeof(float), (GLvoid *)uvoffset);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 9*sizeof(float), (GLvoid *)normaloffset);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
+
+    glVertexAttribDivisor(1, 1);
+    glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 0);
+    glVertexAttribDivisor(5, 0);
+
+	glUseProgram(instancingShader);
+    glBindVertexArray(cube_vao);
+	GLint err = glGetError();
+	assert(err==GL_NO_ERROR);
+
+
+	glUniformMatrix4fv(ProjectionMatrix, 1, false, &projectionMatrix[0]);
+
+		err = glGetError();
+	assert(err==GL_NO_ERROR);
+
+
+	glUniformMatrix4fv(ModelViewMatrix, 1, false, &modelviewMatrix[0]);
+
+   	glUniform1i(uniform_texture_diffuse, 0);
+	
+	int numInstances = NUM_OBJECTS;
+	int indexCount = sizeof(cube_indices)/sizeof(int);
+	int indexOffset = 0;
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
+
+	glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (void*)indexOffset, numInstances);
+	

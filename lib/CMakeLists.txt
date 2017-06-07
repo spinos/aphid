@@ -28,36 +28,6 @@ ELSEIF (UNIX)
     ADD_DEFINITIONS(-DBOOST_HAS_TR1)
 ENDIF()
 
-SET (INSTALLED_HDF5 OFF)
-if (WIN32)
-	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
-# location of configure file FindHDF5.cmake
-		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
-        SET (INSTALLED_HDF5 ON)
-    ELSEIF (EXISTS "D:/usr/hdf5")
-        SET (HDF5_INCLUDE_DIRS "D:/usr/hdf5/include")
-        SET (HDF5_LIBRARIES "D:/usr/hdf5/lib/libhdf5.lib")
-	ENDIF ()
-ELSEIF (APPLE)
-
-ELSEIF (UNIX)
-	SET (HDF5_INCLUDE_DIRS "/home/td21/usr/hdf5/include")
-        SET (HDF5_LIBRARIES "/home/td21/usr/hdf5/lib/libhdf5.so")
-endif ()
-
-IF (INSTALLED_HDF5)
-FIND_PACKAGE (HDF5 REQUIRED)
-IF (WIN32)
-SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/libhdf5.lib")	
-ENDIF ()
-ENDIF ()
-
-MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
-MESSAGE (" hdf5 include is " ${HDF5_INCLUDE_DIRS} )
-MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
-
-include_directories (${HDF5_INCLUDE_DIRS})
-
 if(WIN32)
 	IF (EXISTS "D:/usr/boost_1_51_0")
 		SET (Boost_INCLUDE_DIR "D:/usr/boost_1_51_0")
@@ -89,57 +59,6 @@ MESSAGE (" boost filesystem is " ${Boost_FILESYSTEM_LIBRARY})
 
 include_directories (${Boost_INCLUDE_DIR})
 include_directories (${Boost_INCLUDE_DIR}/boost/tr1/tr1)
-
-if (WIN32)
-add_definitions (-DOPENEXR_DLL)
-set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
-set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
-"D:/usr/openexr21/lib/Iex-2_1.lib"
-"D:/usr/openexr21/lib/IlmImf-2_1.lib"
-"D:/usr/openexr21/lib/IlmThread-2_1.lib")
-elseif (APPLE)
-set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)
-set (OpenEXR_Library /Users/jianzhang/Library/openexr21/lib/libHalf.dylib
- /Users/jianzhang/Library/openexr21/lib/libIex-2_1.dylib
- /Users/jianzhang/Library/openexr21/lib/libIlmImf-2_1.dylib
- /Users/jianzhang/Library/openexr21/lib/libIlmThread-2_1.dylib)
-else ()
-
-SET (ILMBASE_PACKAGE_PREFIX /usr/local)
-
-set (OpenEXR_INCLUDE_DIR ${ILMBASE_PACKAGE_PREFIX}/include)
-set (OpenEXR_Library ${ILMBASE_PACKAGE_PREFIX}/lib/libHalf.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libIex-2_2.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libImath-2_2.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmImf-2_2.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmThread-2_2.so)
-endif ()
-
-message (" openexr include is " ${OpenEXR_INCLUDE_DIR})
-
-include_directories (${OpenEXR_INCLUDE_DIR})
-
-if(WIN32)
-    include_directories (D:/usr/CLAPACK/include)
-    set(BLAS_LIBRARY D:/usr/CLAPACK/lib/blas.lib)
-	set(LAPACK_LIBRARY D:/usr/CLAPACK/lib/lapack.lib)
-    set(F2C_LIBRARY D:/usr/CLAPACK/lib/libf2c.lib)
-
-elseif(APPLE)
-	set(F2C_LIBRARY libf2c.a)
-	set(BLAS_LIBRARY libblas.a)
-	set(LAPACK_LIBRARY liblapack.a)
-else ()
-include_directories (/usr/local/include)
-	set(F2C_LIBRARY /usr/local/lib/libf2c.so)
-    set(BLAS_LIBRARY /usr/local/lib/libblas.so)
-	set(LAPACK_LIBRARY /usr/local/lib/liblapack.so)
-	
-endif()
-
-message ("blas " ${BLAS_LIBRARY})
-message ("lapack " ${LAPACK_LIBRARY})
-message ("f2c " ${F2C_LIBRARY})
 
 IF (WIN32) 
 	SET (LIB_TYP STATIC)
@@ -204,6 +123,8 @@ ${Geom_SRC}
 ../shared/LinearInterpolate.cpp  
 ../shared/VertexDataGroup.cpp
 ../shared/ViewCull.cpp)
+
+INCLUDE ("../cmake/hdf5_config.cmake")
 
 file (GLOB H5_SRC
     "../shared/h5/*.h"
@@ -276,6 +197,8 @@ file (GLOB Topo_SRC
 
 ADD_LIBRARY (aphidTopology ${LIB_TYP}
 ${Topo_SRC})
+
+INCLUDE (../cmake/clapack_config.cmake)
 
 file (GLOB Gpr_SRC
     "../shared/gpr/*.h"
@@ -384,6 +307,8 @@ add_library(aphid ${LIB_TYP}
 ##../shared/HField.cpp
 ##../shared/UniformGrid.cpp
 )
+
+INCLUDE (../cmake/exr_config.cmake)
 
 file (GLOB img_SRC
     "../shared/img/*.h"

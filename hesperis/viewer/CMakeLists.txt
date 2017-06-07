@@ -1,4 +1,4 @@
-
+## https://cmake.org/Wiki/CMake:Bundles_And_Frameworks
 set(CMAKE_MACOSX_BUNDLE OFF)
 
 set (VIE_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
@@ -62,6 +62,8 @@ target_link_libraries (viewHes ${BLAS_LIBRARY})
 target_link_libraries (viewHes ${LAPACK_LIBRARY})
 target_link_libraries (viewHes ${F2C_LIBRARY})
 
-IF (UNIX)
+IF (APPLE)
+
+ELSEIF (UNIX)
 target_link_libraries (viewHes ${GLEW_LIBRARY})
 ENDIF ()

@@ -11,6 +11,9 @@
 
 namespace aphid {
 
+class HesScene;
+class ATriangleMeshGroup;
+
 namespace cvx {
 class Triangle;
 }
@@ -32,7 +35,7 @@ class GLWidget : public aphid::Base3DView
 
 public:
 
-    GLWidget(QWidget *parent = 0);
+    GLWidget(const aphid::HesScene* scene, QWidget *parent = 0);
     ~GLWidget();
 	
 	void setDisplayState(int x);
@@ -48,6 +51,8 @@ protected:
     virtual void resetPerspViewTransform();
 	virtual void resetOrthoViewTransform();
 	
+	void drawMesh(const aphid::ATriangleMeshGroup* msh);
+	
 public slots:
 	void recvToolAction(int x);
 	
@@ -57,6 +62,7 @@ private slots:
 
 private:
 	int m_dspState;
+	const aphid::HesScene* m_scene;
 	
 };
 
