@@ -58,11 +58,12 @@ def CatchSelectedMesh(fileName, prefix):
     
     rec.write('static const int s%sMeshTriangleIndices[] = {' % prefix)
 
+    cnt = 0
     for i in range(0, triangleVertices.length() / 3):
-        if i == (triangleVertices.length() / 3 - 1):
-            rec.write("%i, %i, %i\n" % (triangleVertices[i * 3], triangleVertices[i * 3 + 1], triangleVertices[i * 3 + 2]))
-        else:
-            rec.write("%i, %i, %i,\n" % (triangleVertices[i * 3], triangleVertices[i * 3 + 1], triangleVertices[i * 3 + 2]))
+        rec.write("%i, %i, %i, " % (triangleVertices[i * 3], triangleVertices[i * 3 + 1], triangleVertices[i * 3 + 2]))
+        cnt += 1
+        if i == (triangleVertices.length() / 3 - 1) or cnt % 32 == 0:
+            rec.write("\n")
         
     rec.write('};\n')
     
@@ -70,20 +71,27 @@ def CatchSelectedMesh(fileName, prefix):
     fmesh.getPoints(vertexArray, om.MSpace.kObject)
     
     rec.write('static const float s%sMeshVertices[] = {' % prefix)
+    
+    cnt = 0
     for i in range(0, vertexArray.length()):
-        if i == (vertexArray.length() - 1):
-            rec.write("%ff, %ff, %ff\n" % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
-        else:
-            rec.write("%ff, %ff, %ff,\n" % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
+        rec.write("%ff, %ff, %ff, " % (vertexArray[i].x, vertexArray[i].y, vertexArray[i].z))
+        cnt += 1
+        if i == (vertexArray.length() - 1) or cnt % 32 == 0:
+            rec.write("\n")
+        
     rec.write('};\n')
     
     itv = om.MItMeshVertex(mesh);
     
+    cnt = 0
     rec.write('static const float s%sMeshNormals[] = {' % prefix)
     while not itv.isDone():
         nor = om.MVector()
         itv.getNormal(nor, om.MSpace.kObject)
-        rec.write("%ff, %ff, %ff,\n" % (nor.x, nor.y, nor.z))
+        rec.write("%ff, %ff, %ff, " % (nor.x, nor.y, nor.z))
+        cnt += 1
+        if cnt % 32 == 0:
+            rec.write("\n")
         itv.next()
     rec.write('};\n')    
     rec.close()
@@ -253,6 +261,53 @@ def WriteMeshTexcoordFV(fileRec, meshPath, prof) :
             
     fileRec.write('};\n')
     
+def WriteMeshVertexPosition(fileRec, meshPath, prof) :
+    print('write mesh vertex position %s' % meshPath.fullPathName())
+    
+    itvert = om.MItMeshVertex(meshPath)
+    nv = itvert.count()
+    print('vertex count: %i' % nv )
+    
+    nf = nv * 3
+    fileRec.write('static const float s%s_%s_MeshVertices[%i] = {' % (prof.prefixName, meshPath.partialPathName(), nf) )
+    
+    cnt = 0
+    while not itvert.isDone():
+        pnt = itvert.position(om.MSpace.kObject);
+        
+        fileRec.write("%ff, %ff, %ff, " % (pnt.x, pnt.y, pnt.z ) )
+        cnt += 1
+        if (cnt % 32 == 0) or (cnt == nv - 1):
+            fileRec.write("\n")
+            
+        itvert.next()
+            
+    fileRec.write('};\n')
+    
+def WriteMeshVertexNormal(fileRec, meshPath, prof) :
+    print('write mesh vertex normal %s' % meshPath.fullPathName())
+    
+    itvert = om.MItMeshVertex(meshPath)
+    nv = itvert.count()
+    print('vertex count: %i' % nv )
+    
+    nf = nv * 3
+    fileRec.write('static const float s%s_%s_MeshNormals[%i] = {' % (prof.prefixName, meshPath.partialPathName(), nf) )
+    
+    cnt = 0
+    while not itvert.isDone():
+        nml = om.MVector()
+        itvert.getNormal(nml, om.MSpace.kObject);
+        
+        fileRec.write("%ff, %ff, %ff, " % (nml.x, nml.y, nml.z ) )
+        cnt += 1
+        if (cnt % 32 == 0) or (cnt == nv - 1):
+            fileRec.write("\n")
+            
+        itvert.next()
+            
+    fileRec.write('};\n')
+    
 def CatchSelectedMeshTexcoordFV(fileName, prof):
     meshes = om.MDagPathArray()
     if not GetSelectedMeshes(meshes):
@@ -264,7 +319,35 @@ def CatchSelectedMeshTexcoordFV(fileName, prof):
         WriteMeshTexcoordFV(rec, meshes[it], prof)
       
     rec.close()
-    print('catched mesh into file: %s' % fileName)
+    print('catched mesh texcoord into file: %s' % fileName)
+    return True
+    
+def CatchSelectedMeshVertexPosition(fileName, prof):
+    meshes = om.MDagPathArray()
+    if not GetSelectedMeshes(meshes):
+        return False
+        
+    rec = open(fileName, 'w')
+    
+    for it in range(0, meshes.length() ) :
+        WriteMeshVertexPosition(rec, meshes[it], prof)
+      
+    rec.close()
+    print('catched mesh vertex position into file: %s' % fileName)
+    return True
+    
+def CatchSelectedMeshVertexNormal(fileName, prof):
+    meshes = om.MDagPathArray()
+    if not GetSelectedMeshes(meshes):
+        return False
+        
+    rec = open(fileName, 'w')
+    
+    for it in range(0, meshes.length() ) :
+        WriteMeshVertexNormal(rec, meshes[it], prof)
+      
+    rec.close()
+    print('catched mesh vertex normal into file: %s' % fileName)
     return True
 
 class CatMeshFrofile():
@@ -273,8 +356,11 @@ class CatMeshFrofile():
         self.colorName = 'colorSet1'
         self.uvName = 'map1'
    
-prof = CatMeshFrofile('foo')
+prof = CatMeshFrofile('Haircap')
+##CatchSelectedMesh('/Users/jianzhang/aphid/data/box.h', 'Haircap')
+##CatchSelectedMeshVertexPosition('/Users/jianzhang/aphid/data/box.h', prof)
+CatchSelectedMeshVertexNormal('/Users/jianzhang/aphid/data/box.h', prof)
 ##CatchSelectedMeshVertexColor('/Users/jianzhang/aphid/data/foo.h', prof)
 ##CatchSelectedMeshFV('/Users/jianzhang/aphid/data/box.h', 'box')
-CatchSelectedMeshTexcoordFV('/Users/jianzhang/aphid/data/foo.h', prof)
+##CatchSelectedMeshTexcoordFV('/Users/jianzhang/aphid/data/foo.h', prof)
 

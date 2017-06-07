@@ -38,7 +38,6 @@ const PlantPiece * VegetationPatch::plant(const int & i) const
 
 bool VegetationPatch::addPlant(PlantPiece * pl)
 {
-	const float r = pl->exclR();
 	const float px = RandomFn11() * m_yardR;
 	const float pz = RandomFn11() * m_yardR;
 	const Vector3F pos(px, 0.f, pz);
@@ -47,7 +46,8 @@ bool VegetationPatch::addPlant(PlantPiece * pl)
 		return false;
 	}
 	
-	const float sc = RandomF01() * -.19f + 1.f;
+	const float r = pl->exclR();
+	const float sc = 1.f - RandomF01() * .2f;
 	
 	if(intersectPlants(pos, r * sc) ) {
 		return false;
@@ -55,9 +55,16 @@ bool VegetationPatch::addPlant(PlantPiece * pl)
 	
 	Matrix44F tm;
 	tm.scaleBy(sc);
-	const float ry = RandomFn11() * PIF;
-	tm.rotateY(ry);
 	tm.rotateX(-m_tilt);
+	
+	Vector3F modU(RandomFn11() * .07f, 1.f, RandomFn11() * .07f);
+	modU.normalize();
+
+	Quaternion rotQ(RandomFn11() * PIF, modU);
+	Matrix33F locM(rotQ);
+	
+	locM *= tm.rotation();
+	tm.setRotation(locM);
 	tm.setTranslation(pos);
 	
 	pl->setTransformMatrix(tm);
@@ -85,7 +92,7 @@ bool VegetationPatch::intersectPlants(const aphid::Vector3F & pos, const float &
 		const Matrix44F & amat = (*it)->transformMatrix();
 		const float sx = amat.scale().x;
 		
-		if(pos.distanceTo(amat.getTranslation() ) < (r + ar * sx + .1f)) {
+		if(pos.distanceTo(amat.getTranslation() ) < (r + ar * sx + .23f)) {
 			return true;
 		}
 	}
