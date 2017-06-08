@@ -17,9 +17,9 @@ GLWidget::GLWidget(const aphid::HesScene* scene, QWidget *parent) : Base3DView(p
 m_scene(scene),
 m_dspState(0)
 {
-	perspCamera()->setFarClipPlane(30000.f);
+	perspCamera()->setFarClipPlane(1000.f);
 	perspCamera()->setNearClipPlane(1.f);
-	orthoCamera()->setFarClipPlane(30000.f);
+	orthoCamera()->setFarClipPlane(1000.f);
 	orthoCamera()->setNearClipPlane(1.f);
 	usePerspCamera();
 	resetView();
@@ -30,8 +30,8 @@ GLWidget::~GLWidget()
 
 void GLWidget::clientInit()
 {
-	glEnable(GL_POLYGON_OFFSET_LINE);
-	glDisable(GL_POLYGON_OFFSET_FILL);
+	glDisable(GL_POLYGON_OFFSET_LINE);
+	glEnable(GL_POLYGON_OFFSET_FILL);
 }
 
 void GLWidget::clientDraw()
@@ -114,13 +114,13 @@ void GLWidget::drawMesh(const ATriangleMeshGroup* msh)
 	
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)msh->points() );
 	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor3f(.9f, .9f, .9f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(.2f, .2f, .2f);
 	glDrawElements(GL_TRIANGLES, msh->numIndices(), GL_UNSIGNED_INT, msh->indices() );
 	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glPolygonOffset(-1.0f, -1.0f);
-	glColor3f(.2f, .2f, .2f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glPolygonOffset(1.0f, 1.0f);
+	glColor3f(.9f, .9f, .9f);
 	glDrawElements(GL_TRIANGLES, msh->numIndices(), GL_UNSIGNED_INT, msh->indices() );
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
