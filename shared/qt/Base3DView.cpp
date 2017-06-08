@@ -593,5 +593,41 @@ void Base3DView::updatePerspectiveView()
 const PerspectiveView * Base3DView::perspectiveView() const
 { return m_perspView; }
 
+void Base3DView::viewAll(const BoundingBox& bbx)
+{
+    const float rd = bbx.radius();
+    Vector3F coi = bbx.center();
+    Vector3F dir = getCamera()->eyeDirection();
+    Vector3F eye = coi + dir * rd * 4.f;
+    
+    Matrix44F mat = getCamera()->fSpace;
+    mat.setTranslation(eye);
+
+    getCamera()->setViewTransform(mat, rd * 4.f);
+    
+    bool viewChanged = false;
+    
+    const float ffar = rd * 8.f;
+    if(getCamera()->farClipPlane() < ffar ) {
+        getCamera()->setFarClipPlane(rd * 8.f);
+        viewChanged = true;
+     }
+     
+    if(viewChanged) {
+        if(getCamera()->nearClipPlane() < ffar * 1e-6f ) {
+           getCamera()->setNearClipPlane(ffar * 1.9e-6f);
+        }
+     
+    if(getCamera()->isOrthographic()) {
+		updateOrthoProjection();
+		orthoCamera()->setHorizontalAperture(rd * 2.f);
+		
+	} else {
+		updatePerspProjection();
+	}
+	}
+    update();
+}
+
 }
 //:~

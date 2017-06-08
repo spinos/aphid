@@ -57,6 +57,7 @@ public slots:
 	void recvToolAction(int x);
 	
 private:
+    void processSceneCamera(int x);
     
 private slots:
 

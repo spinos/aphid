@@ -33,7 +33,7 @@ AGenericMesh::~AGenericMesh()
 const TypedEntity::Type AGenericMesh::type() const
 { return TGenericMesh; }
 
-const BoundingBox AGenericMesh::calculateBBox() const
+const BoundingBox AGenericMesh::calculateGeomBBox() const
 {
 	BoundingBox box;
 	const unsigned nv = numPoints();

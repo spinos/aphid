@@ -63,5 +63,15 @@ const int HesScene::numMeshes() const
 const ATriangleMeshGroup* HesScene::mesh(const int& i) const
 { return m_meshes[i]; }
 
+const BoundingBox HesScene::calculateBBox() const
+{
+    BoundingBox rb;
+    MeshVecTyp::const_iterator it = m_meshes.begin();
+	for(;it!=m_meshes.end();++it) {
+		rb.expandBy((*it)->calculateGeomBBox() );
+	}
+    return rb;
+}
+
 }
 

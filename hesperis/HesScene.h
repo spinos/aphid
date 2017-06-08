@@ -7,6 +7,7 @@
 namespace aphid {
 
 class ATriangleMeshGroup;
+class BoundingBox;
 
 class HesScene {
 
@@ -14,6 +15,11 @@ typedef std::vector<ATriangleMeshGroup * > MeshVecTyp;
 	MeshVecTyp m_meshes;
 	
 public:
+    enum CameraOperation {
+        opUnknown = 0,
+        opFrameAll = 1
+    };
+    
     HesScene();
     virtual ~HesScene();
     
@@ -21,6 +27,8 @@ public:
 	void close();
 	const int numMeshes() const;
 	const ATriangleMeshGroup* mesh(const int& i) const;
+    
+   const BoundingBox calculateBBox() const;
     
 protected:
 	void loadMesh(const std::string& mshName);

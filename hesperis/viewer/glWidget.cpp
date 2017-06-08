@@ -77,14 +77,18 @@ void GLWidget::clientMouseInput(Vector3F & stir)
 
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
+    int camerop = HesScene::opUnknown;
 	switch (e->key()) {
-		case Qt::Key_W:
+		case Qt::Key_F:
+		    camerop = HesScene::opFrameAll;
 			break;
 		case Qt::Key_N:
 			break;
 		default:
 			break;
 	}
+	
+	processSceneCamera(camerop);
 	Base3DView::keyPressEvent(e);
 }
 
@@ -111,13 +115,27 @@ void GLWidget::drawMesh(const ATriangleMeshGroup* msh)
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)msh->points() );
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor3f(1.f, 1.f, 1.f);
+	glColor3f(.9f, .9f, .9f);
 	glDrawElements(GL_TRIANGLES, msh->numIndices(), GL_UNSIGNED_INT, msh->indices() );
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glPolygonOffset(-1.0f, -1.0f);
-	glColor3f(.1f, .1f, .1f);
+	glColor3f(.2f, .2f, .2f);
 	glDrawElements(GL_TRIANGLES, msh->numIndices(), GL_UNSIGNED_INT, msh->indices() );
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
+
+void GLWidget::processSceneCamera(int x)
+{
+    if(x == HesScene::opUnknown ) {
+        return;
+    }
+    
+    if(x == HesScene::opFrameAll) {
+        const BoundingBox bbx = m_scene->calculateBBox();
+        viewAll(bbx);
+    }
+    
+}
+

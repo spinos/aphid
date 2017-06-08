@@ -23,6 +23,7 @@ class BaseBrush;
 class BaseTransform;
 class GLHUD;
 class PerspectiveView;
+class BoundingBox;
 
 class Base3DView : public QGLWidget
 {
@@ -61,6 +62,7 @@ public:
 	void growSelection();
 	void shrinkSelection();
 	void frameAll();
+	void viewAll(const BoundingBox& bbx);
 	virtual void drawIntersection() const;
 	
 	void updateOrthoProjection();

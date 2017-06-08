@@ -29,7 +29,7 @@ public:
 	virtual ~AGenericMesh();
 	
 	virtual const Type type() const;
-	virtual const BoundingBox calculateBBox() const;
+	const BoundingBox calculateGeomBBox() const;
 	
 	const unsigned numPoints() const;
 	const unsigned numIndices() const;
