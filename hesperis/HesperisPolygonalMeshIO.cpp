@@ -139,9 +139,10 @@ bool HesperisPolygonalMeshIO::CreateMeshUV(APolygonalUV * data, const MDagPath &
 bool HesperisPolygonalMeshIO::ReadMeshes(MObject &target)
 {
     MGlobal::displayInfo("opium v3 read poly mesh");
-    HWorld grpWorld;
-    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(&grpWorld, target);
-    grpWorld.close();
+    HBase * grpWorld = GetWorldHeadGroup();
+    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisPolygonalMeshCreator>(grpWorld, target);
+    grpWorld->close();
+    delete grpWorld;
     return true;
 }
 
@@ -162,9 +163,10 @@ bool HesperisPolygonalMeshIO::ConnectUv(MObject &target)
     AHelper::Info<MString>(" hesMesh node is ", MFnDependencyNode(ohes).name() );
     HesperisMeshUvConnector::MasterMeshNode = ohes;
 
-	HWorld grpWorld;
-    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisMeshUvConnector>(&grpWorld, target);
-    grpWorld.close();
+	HBase * grpWorld = GetWorldHeadGroup();
+    ReadTransformAnd<HPolygonalMesh, APolygonalMesh, HesperisMeshUvConnector>(grpWorld, target);
+    grpWorld->close();
+    delete grpWorld;
     return true;
 }
 

@@ -230,9 +230,10 @@ bool HesperisAttributeIO::ReadAttributeBundle(HBase * parent, const MObject &tar
 bool HesperisAttributeIO::ReadAttributes(const MObject &target)
 {
 	MGlobal::displayInfo("HesperisAttributeIO read attribute");
-    HWorld grpWorld;
-    ReadAttributes(&grpWorld, target);
-    grpWorld.close();
+    HBase * grpWorld = GetWorldHeadGroup();
+    ReadAttributes(grpWorld, target);
+    grpWorld->close();
+    delete grpWorld;
     return true;
 }
 

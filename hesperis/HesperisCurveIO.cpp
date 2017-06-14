@@ -254,9 +254,10 @@ bool HesperisCurveIO::WriteCurves(const MDagPathArray & paths,
 bool HesperisCurveIO::ReadCurves(MObject &target)
 {
 	MGlobal::displayInfo("HesperisCurveIO read curve");
-    HWorld grpWorld;
-    ReadTransformAnd<HCurveGroup, CurveGroup, HesperisCurveCreator>(&grpWorld, target);
-    grpWorld.close();
+    HBase * grpWorld = GetWorldHeadGroup();
+    ReadTransformAnd<HCurveGroup, CurveGroup, HesperisCurveCreator>(grpWorld, target);
+    grpWorld->close();
+    delete grpWorld;
     return true;
 }
 

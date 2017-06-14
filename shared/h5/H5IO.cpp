@@ -57,7 +57,7 @@ bool H5IO::objectExists(const std::string & fullPath)
 		}
 		else {
 			std::cout<<"\n  h5io cannot find "<<openedGrps.back()->childPath(*it )
-					<<" in file "<<m_doc.fileName();
+					<<" in file "<<HObject::FileIO.fileName();
 			std::cout.flush();
 			stat = false;
 			break;

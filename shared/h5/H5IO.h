@@ -23,7 +23,7 @@ public:
 				HDocument::OpenMode om = HDocument::oReadOnly);
 	void end();
 	
-	bool objectExists(const std::string & fullPath);
+	static bool objectExists(const std::string & fullPath);
 	
 	static void CreateGroup(const std::string & name);
 	template<typename T1, typename T2>

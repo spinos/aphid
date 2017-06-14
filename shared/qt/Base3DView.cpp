@@ -595,6 +595,9 @@ const PerspectiveView * Base3DView::perspectiveView() const
 
 void Base3DView::viewAll(const BoundingBox& bbx)
 {
+    if(!bbx.isValid() ) {
+        return;
+    }
     const float rd = bbx.radius();
     Vector3F coi = bbx.center();
     Vector3F dir = getCamera()->eyeDirection();

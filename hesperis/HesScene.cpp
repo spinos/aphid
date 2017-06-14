@@ -35,6 +35,8 @@ bool HesScene::load(const std::string& fileName)
 	
 	hesDoc->close();
 	delete hesDoc;
+	std::cout<<"\n HesScene load n mesh "<<numMeshes();
+	std::cout.flush();
     return true;
 }
 

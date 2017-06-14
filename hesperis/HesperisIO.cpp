@@ -357,6 +357,22 @@ std::string HesperisIO::H5PathNameTo(const MObject & node)
     return r;
 }
 
+HBase * HesperisIO::GetWorldHeadGroup()
+{
+    if(BeheadName.size() < 2) {
+        return new HWorld;
+    }
+    
+   std::string hdName = boost::str(boost::format("/world%1%") % BeheadName);
+   
+   if(!objectExists(hdName)) {
+        return new HWorld;
+   }
+   
+   std::cout<<"\n world head name is "<<hdName;
+   return new HBase(hdName);
+}
+
 MObject HesperisTransformCreator::create(BaseTransform * data, MObject & parentObj,
                        const std::string & nodeName)
 {
