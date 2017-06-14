@@ -12,6 +12,7 @@ INCLUDE (${APHID_DIR}/cmake/ogl_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/qt_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/aphid_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/clapack_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
 include_directories (${APHID_DIR}/hesperis)
 
 add_subdirectory(viewer)
