@@ -61,6 +61,7 @@ public:
 	static std::string H5PathNameTo(const MObject & node);
 	static std::string CurrentHObjectPath;
     static MPoint GlobalReferencePoint;
+    static std::string H5HeadPathName(const std::string& name);
     
 protected:
     template<typename Th, typename Td, typename Tc>

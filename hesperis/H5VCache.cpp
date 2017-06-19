@@ -234,8 +234,8 @@ bool H5VCache::readData(const std::string & fileName,
 	
 	findArbitrarySample(dtime);
 	
-	std::cout<<sampler()->str();
-	std::cout.flush();
+	//std::cout<<sampler()->str();
+	//std::cout.flush();
     
     if(!readFrame((float *)m_data[0]->data(), m_numPoints, pathName.c_str(), 
         sampler()->m_frames[0], sampler()->m_samples[0], 

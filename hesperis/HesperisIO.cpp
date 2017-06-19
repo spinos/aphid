@@ -373,6 +373,18 @@ HBase * HesperisIO::GetWorldHeadGroup()
    return new HBase(hdName);
 }
 
+std::string HesperisIO::H5HeadPathName(const std::string& name)
+{
+    std::string dagName = name;
+    SHelper::behead(dagName, "/world");
+    if(BeheadName.size() > 1) {
+        SHelper::behead(dagName, HObject::ValidPathName(BeheadName) );
+    } 
+    dagName = SHelper::getParentName(dagName);
+    std::cout<<"\n H5HeadPathName is "<<dagName<<std::endl;
+    return dagName;
+}
+
 MObject HesperisTransformCreator::create(BaseTransform * data, MObject & parentObj,
                        const std::string & nodeName)
 {
