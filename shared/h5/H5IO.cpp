@@ -94,4 +94,19 @@ void H5IO::H5PathName(std::string & dst)
     SHelper::removeAnyNamespace(dst);
 }
 
+HBase * H5IO::GetH5dHeadGroup()
+{
+    if(BeheadName.size() < 2) {
+        return new HBase("/");
+    }
+    
+    if(!objectExists(BeheadName)) {
+        return new HBase("/");
+   }
+   
+   std::cout<<"\n h5 head name is "<<BeheadName;
+   return new HBase(BeheadName);
+}
+
+
 }

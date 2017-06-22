@@ -111,7 +111,7 @@ protected:
 
 /// /world/behead so input path will be shortened					
 	static HBase * GetWorldHeadGroup();
-							  
+
 };
 
 }

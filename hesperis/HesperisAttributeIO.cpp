@@ -159,9 +159,10 @@ bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file
 bool HesperisAttributeIO::ReadAttributeBundle(const MObject &target)
 {
     MGlobal::displayInfo("HesperisAttributeIO read attribute bundle");
-    HWorld grpWorld;
-    ReadAttributeBundle(&grpWorld, target);
-    grpWorld.close();
+    HBase * grpWorld = GetWorldHeadGroup();
+    ReadAttributeBundle(grpWorld, target);
+    grpWorld->close();
+    delete grpWorld;
     return true;
 }
 
@@ -251,11 +252,12 @@ bool HesperisAttributeIO::ReadAttributes(HBase * parent, const MObject &target)
 		}
 		else {
 			MObject otm;
-			if( FindNamedChild(otm, child.lastName(), target) )
+			if( FindNamedChild(otm, child.lastName(), target) ) {
 				ReadAttributes(&child, otm);
-            //else {
-            //    AHelper::Info<std::string>("HesperisAttributeIO cannot find child by name", child.fObjectPath );
-            //}
+          } 
+          /*else {
+                AHelper::Info<std::string>("HesperisAttributeIO cannot find child by name", child.fObjectPath );
+            }*/
 		}
 		child.close();
 	}

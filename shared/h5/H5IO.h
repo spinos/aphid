@@ -44,6 +44,9 @@ public:
 	
 	static std::string BeheadName;
 	
+/// / or /head
+	static HBase * GetH5dHeadGroup();
+							  
 protected:
 	static void H5PathName(std::string & dst);
 	

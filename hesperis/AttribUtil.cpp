@@ -539,9 +539,11 @@ void AttribUtil::load3(const char * filename, MObject & target)
     }
 
 	AHelper::Info<const char *>(" AttribUtil read attrib from ", filename);
-	HBase w("/");
-	HesperisAttributeIO::ReadAttributes(&w, target);
-	w.close();
+/// no world
+	HBase* w = H5IO::GetH5dHeadGroup();
+	HesperisAttributeIO::ReadAttributes(w, target);
+	w->close();
+	delete w;
 	
 	HesperisAttribConnector::ClearMasterNode();
 	CloseH5();
