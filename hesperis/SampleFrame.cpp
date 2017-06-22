@@ -23,7 +23,7 @@ void SampleFrame::setFirst(const int& iframe, const int& isample,
 
 void SampleFrame::calculateWeights(double frameTime, const int & spf)
 {
-    std::cout<<"\n SampleFrame::calculateWeights "<<frameTime;
+// std::cout<<"\n SampleFrame::calculateWeights "<<frameTime;
     frameTime = double(int(frameTime * 1000 + 0.5))/1000;
     m_samples[0] = m_samples[1] = 0;
 	const double subframe = frameTime - (int)frameTime;
