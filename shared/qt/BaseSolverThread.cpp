@@ -1,8 +1,10 @@
 #include <QtCore>
 #include "BaseSolverThread.h"
 
+namespace aphid {
+
 float BaseSolverThread::TimeStep = 1.f / 60.f;
-int BaseSolverThread::NumSubsteps = 2;
+int BaseSolverThread::NumSubsteps = 5;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {
@@ -41,8 +43,9 @@ void BaseSolverThread::run()
             return;
         }
         
-        for(int i=0; i < NumSubsteps; i++)
-            stepPhysics(TimeStep);
+		const float dt = TimeStep / NumSubsteps;
+        for(int i=0; i < NumSubsteps;++i)
+            stepPhysics(dt);
 		
 		emit doneStep();
 
@@ -62,3 +65,4 @@ void BaseSolverThread::stepPhysics(float dt)
 const unsigned BaseSolverThread::numLoops() const
 { return m_numLoops; }
 
+}

@@ -22,10 +22,12 @@
 #include <cuReduceSum_implement.h>
 #include <CudaReduction.h>
 #include <CUDABuffer.h>
-#include <BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <CudaScan.h>
 #include <cu_testAtomic_impl.h>
 #include "TestPRNG_impl.h"
+
+using namespace aphid;
 
 cudaEvent_t start_event, stop_event;
     
@@ -778,9 +780,9 @@ int main(int argc, char **argv)
 	//testReduceSum();
 	// testScan();
     // testRadixSort();
-    // testAtomic();
+    testAtomic();
     // testAsyncKernels();
-    testPRNG();
+    //testPRNG();
     printf("done.\n");
     exit(0);
 }

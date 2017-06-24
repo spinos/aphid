@@ -40,7 +40,7 @@ int doSplitWorks(void * q, int * qelements,
                                 lpb,
                                // 2);
                                 numPrimitives-1);
-    CudaBase::CheckCudaError("split work");                            
+    aphid::CudaBase::CheckCudaError("split work");                            
     simpleQueue::SimpleQueue result;
     cudaError_t err = cudaMemcpy(&result, queue, SIZE_OF_SIMPLEQUEUE, cudaMemcpyDeviceToHost); 
     if (err != cudaSuccess) {

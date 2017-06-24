@@ -1,6 +1,9 @@
 #include <QtCore>
 #include "SolverThread.h"
-#include <BoxProgram.h>
+//#include <BoxProgram.h>
+
+using namespace aphid;
+
 #define NU 99
 #define NV 99
 #define NF (NU * NV)
@@ -17,23 +20,20 @@ const float DEFAULT_DAMPING =  -0.0825f;
 float	KsStruct = 180.5f,KdStruct = -.25f;
 float	KsShear = 180.5f,KdShear = -.25f;
 float	KsBend = 80.5f,KdBend = -.25f;
-float timeStep = 1.f / 720.f;
+
 Vector3F gravity(0.0f,-981.f,0.0f);
 float mass = 1.f;
 float iniHeight = 99.f;
 float gridSize = iniHeight / (float)NU;
-const unsigned solver_iterations = 2;
+const unsigned solver_iterations = 7;
 float kBend = 0.5f;
 float kStretch = 1.f; 
-float kDamp = 0.0125f;
+float kDamp = 0.025f;
 float global_dampening = 0.99f;
 
 SolverThread::SolverThread(QObject *parent)
-    : QThread(parent)
+    : BaseSolverThread(parent)
 {
-    restart = false;
-    abort = false;
-    
     m_pos = new Vector3F[NP];
 	m_posLast = new Vector3F[NP];
 	m_force = new Vector3F[NP];
@@ -103,7 +103,7 @@ SolverThread::SolverThread(QObject *parent)
 	}
 	
 	m_numBendingConstraint = 0;
-/*
+#if 0
 	for(j=0; j<= NV; j++) {
 		for(i=0; i < NU - 1; i++) {
 			m_numBendingConstraint++;
@@ -115,7 +115,7 @@ SolverThread::SolverThread(QObject *parent)
 			m_numBendingConstraint++;
 		}
 	}
-*/	
+#endif	
 	qDebug()<<"num distance constraint "<<m_numDistanceConstraint;
 	qDebug()<<"num bending constraint "<<m_numBendingConstraint;
 	
@@ -146,7 +146,7 @@ SolverThread::SolverThread(QObject *parent)
 			//d++;
 		}
 	}
-/*	
+#if 0
 	for(j=0; j<= NV; j++) {
 		for(i=0; i < NU - 1; i++) {
 			setSpring(spr, nl * j + i, nl * j + i + 2, KsBend, KdBend, BEND_SPRING);
@@ -160,76 +160,21 @@ SolverThread::SolverThread(QObject *parent)
 			spr++;
 		}
 	}
-*/	
+#endif	
 	qDebug()<<"total mass "<<mass * NP;
 	
-	m_program = new BoxProgram;
+	//m_program = new BoxProgram;
 }
 
 SolverThread::~SolverThread()
 {
-    mutex.lock();
-    abort = true;
-    condition.wakeOne();
-    mutex.unlock();
-    wait();
-    
 }
 
 void SolverThread::initProgram()
 {
-    m_program->createCvs(NP);
-    m_program->createIndices(NI, m_indices);
-    m_program->createAabbs(NTri);
-}
-
-void SolverThread::simulate()
-{
-    QMutexLocker locker(&mutex);
-
-    if (!isRunning()) {
-        start(LowPriority);
-    } else {
-        restart = true;
-        //qDebug()<<"wait";
-        condition.wakeOne();
-    }
-}
-
-void SolverThread::run()
-{
-   forever {
-        // qDebug()<<"run";
-	
-	for(int i=0; i< 24; i++) {
-	    if(restart) {
-	        // qDebug()<<"restart ";
-            // break;
-	    }
-	        
-	    if (abort) {
-            // destroySolverData();
-            qDebug()<<"abort";
-            return;
-        }
-        
-	    stepPhysics(timeStep);
-	}
- 
-		//if (!restart) {
-		    // qDebug()<<"end";
-            
-		    emit doneStep();
-		//}
-
-		mutex.lock();
-		
-        if (!restart)
-            condition.wait(&mutex);
-			
-        restart = false;
-        mutex.unlock();
-   }
+    //m_program->createCvs(NP);
+    //m_program->createIndices(NI, m_indices);
+    //m_program->createAabbs(NTri);
 }
 
 void SolverThread::computeForces() 
@@ -435,6 +380,7 @@ void SolverThread::stepPhysics(float dt)
 	integrate(dt);
 	
 	// m_program->run(m_pos, NTri, NP);
+	BaseSolverThread::stepPhysics(dt);
 }
 
 void SolverThread::setSpring(pbd::Spring * dest, unsigned a, unsigned b, float ks, float kd, int type) 

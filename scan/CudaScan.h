@@ -2,6 +2,8 @@
 #define CUDASCAN_H
 #include <CUDABuffer.h>
 
+namespace aphid {
+
 class CudaScan {
 public:
     CudaScan();
@@ -16,5 +18,7 @@ protected:
 private:
     CUDABuffer * m_intermediate;
 };
+
+}
 #endif        //  #ifndef CUDASCAN_H
 

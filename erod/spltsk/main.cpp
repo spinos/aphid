@@ -2,9 +2,11 @@
 #include <cuReduceSum_implement.h>
 #include <CudaReduction.h>
 #include <CUDABuffer.h>
-#include <BaseBuffer.h>
+#include <math/BaseBuffer.h>
 #include <CudaScan.h>
 #include "SahInterface.h"
+
+using namespace aphid;
 
 cudaEvent_t start_event, stop_event;
 

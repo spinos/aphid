@@ -13,6 +13,8 @@
 
 using namespace boost::posix_time;
 
+namespace aphid {
+
 std::map<std::string, bool> BaseLog::VisitedPtr;
 
 BaseLog::BaseLog(const std::string & fileName)
@@ -162,10 +164,13 @@ void BaseLog::writeVec3(BaseBuffer * buf, unsigned n,
 	newLine();
     write(notation);
 	writeArraySize(n);
+	std::stringstream sst;
     unsigned i = 0;
     for(; i < n; i++) {
         writeArrayIndex(i);
-        write(m[i].str());
+		sst.str("");
+		sst<<m[i];
+        write(sst.str());
 		newLine();
     }
 }
@@ -197,10 +202,13 @@ void BaseLog::writeMat33(BaseBuffer * buf, unsigned n,
 	newLine();
     write(notation);
 	writeArraySize(n);
+	std::stringstream sst;
     unsigned i = 0;
     for(; i < n; i++) {
         writeArrayIndex(i);
-        write(m[i].str());
+        sst.str("");
+		sst<<m[i];
+        write(sst.str());
     }
 }
 
@@ -322,4 +330,6 @@ void BaseLog::writeStruct(BaseBuffer * buf, unsigned n,
         writeArrayIndex(i);
         writeStruct1(&m[i*size], desc);
     }
+}
+
 }
