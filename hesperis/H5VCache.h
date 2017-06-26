@@ -83,7 +83,12 @@ private:
 	bool asSampleTime(int& frame, int& subframe, const std::string& stime) const;
 	void addASample(const std::string & stime);
 	bool findArbitrarySample(const double& dtime);
-	
+	void setSampleWeight1(const int& frame,
+                const int& sample0, const int& sample1,
+                const int& samplex);
+   void setSampleWeight2(const int& frame,
+                const int& sample1,
+                const int& samplex);
 };
 
 }

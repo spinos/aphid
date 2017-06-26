@@ -21,6 +21,13 @@ void SampleFrame::setFirst(const int& iframe, const int& isample,
     m_weights[0] = weight;
 }
 
+void SampleFrame::setSecond(const int& iframe, const int& isample, const float& weight)
+{
+    m_frames[1] = iframe;
+    m_samples[1] = isample;
+    m_weights[1] = weight;
+}
+
 void SampleFrame::calculateWeights(double frameTime, const int & spf)
 {
 // std::cout<<"\n SampleFrame::calculateWeights "<<frameTime;

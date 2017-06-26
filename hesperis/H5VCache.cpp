@@ -409,41 +409,43 @@ bool H5VCache::findArbitrarySample(const double& dtime)
     
     std::cout<<"\n search subframe "<<subframe;
     
-    int curk, prek = 9999999;
+    int prek = 0, curk;
     sps->begin();
     while(!sps->end() ) {
         curk = sps->key();
         
-        if(subframe <= curk && prek > 1000000) {
-            prek = curk;
-            break;
-        }
+/// in between
         if(subframe > prek && subframe <= curk ) {
-            break;
+            setSampleWeight1(iframe, prek, curk, subframe);
+            return true;
         }
+        
         prek = curk;
         sps->next();
     }
 
-/// first or last one
-    if(prek == curk) {
-        subframe = prek;
-    } else {
-
-/// closer one
-    int diff0 = subframe - prek;
-    int diff1 = curk - subframe;
-    if(diff0 < diff1) {
-        subframe = prek;
-    } else {
-        subframe = curk;
-    }
-    
-    }
-    
-    sampler()->setFirst(iframe, subframe, 1.f);
+/// after last one, next frame
+    setSampleWeight2(iframe, curk, subframe);
 
     return true;
+}
+
+void H5VCache::setSampleWeight1(const int& frame,
+                const int& sample0, const int& sample1,
+                const int& samplex)
+{
+    float wei = ((float)(samplex - sample0)) / ((float)(sample1 - sample0) );
+    sampler()->setFirst(frame, sample0, 1.f - wei);
+    sampler()->setSecond(frame, sample1, wei);
+}
+
+void H5VCache::setSampleWeight2(const int& frame,
+                const int& sample1,
+                const int& samplex)
+{
+    float wei = ((float)(samplex - sample1)) / ((float)(1000000 - sample1) );
+    sampler()->setFirst(frame, sample1, 1.f - wei);
+    sampler()->setSecond(frame + 1, 0, wei);
 }
 
 }
