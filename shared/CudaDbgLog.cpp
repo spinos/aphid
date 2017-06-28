@@ -2,6 +2,8 @@
 #include "AllMath.h"
 #include <boost/format.hpp>
 
+namespace aphid {
+
 CudaDbgLog::CudaDbgLog(const std::string & fileName) :
 BaseLog(fileName)
 {
@@ -123,5 +125,7 @@ void CudaDbgLog::writeStruct(CUDABuffer * buf, unsigned n,
     buf->deviceToHost(m_hostBuf->data());
 	
 	BaseLog::writeStruct(m_hostBuf, n, notation, desc, size, FIgnore);
+}
+
 }
 //:~

@@ -10,6 +10,8 @@
 #include <cuReduceMinMax_implement.h>
 #include <cuReduceMinMaxBox_implement.h>
 
+namespace aphid {
+
 class CudaReduction {
 public:
     CudaReduction();
@@ -166,5 +168,7 @@ protected:
 private:
     CUDABuffer * m_obuf;
 };
+
+}
 #endif        //  #ifndef CUDAREDUCTION_H
 

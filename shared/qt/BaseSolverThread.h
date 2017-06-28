@@ -1,5 +1,5 @@
-#ifndef BASESOLVERTHREAD_H
-#define BASESOLVERTHREAD_H
+#ifndef APH_BASE_SOLVER_THREAD_H
+#define APH_BASE_SOLVER_THREAD_H
 
 #include <QMutex>
 #include <QThread>
@@ -8,6 +8,8 @@
 QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
+
+namespace aphid {
 
 class BaseSolverThread : public QThread
 {
@@ -20,13 +22,13 @@ public:
     static float TimeStep;
     static int NumSubsteps;
     const unsigned numLoops() const;
-    virtual void stepPhysics(float dt);
     
 signals:
     void doneStep();
 
 protected:
     void run();
+    virtual void stepPhysics(float dt);
     
 private:
     QMutex mutex;
@@ -41,5 +43,6 @@ public slots:
 	
 };
 
+}
 #endif        //  #ifndef BASESOLVERTHREAD_H
 

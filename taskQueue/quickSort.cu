@@ -73,7 +73,7 @@ void cu_testQuickSort(void * q,
                                 lpb,
                                 255);
     
-    CudaBase::CheckCudaError("q sort");
+    aphid::CudaBase::CheckCudaError("q sort");
 }
 
 }

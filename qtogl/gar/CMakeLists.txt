@@ -1,3 +1,5 @@
+INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
+
 include_directories (${APHID_DIR}/rhizoid)
 
 set(CMAKE_MACOSX_BUNDLE OFF)

@@ -1,3 +1,5 @@
+INCLUDE (${APHID_DIR}/cmake/exr_config.cmake)
+
 set (exrs_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 Parameter.h
 window.h

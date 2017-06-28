@@ -1,3 +1,4 @@
+INCLUDE (${APHID_DIR}/cmake/exr_config.cmake)
 set(CMAKE_MACOSX_BUNDLE OFF)
 
 set (ABG_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 

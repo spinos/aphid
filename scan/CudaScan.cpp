@@ -1,6 +1,8 @@
 #include "CudaScan.h"
 #include <scan_implement.h>
 
+namespace aphid {
+
 CudaScan::CudaScan()
 {
     m_intermediate = new CUDABuffer;
@@ -30,3 +32,5 @@ unsigned CudaScan::prefixSum(CUDABuffer * obuf, CUDABuffer * ibuf, unsigned n)
 
 unsigned CudaScan::getScanBufferLength(unsigned n)
 { return iRound1024(n); }
+
+}

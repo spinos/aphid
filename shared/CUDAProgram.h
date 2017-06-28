@@ -8,6 +8,9 @@
  */
 #pragma once
 #include <CUDABuffer.h>
+
+namespace aphid {
+
 class CUDAProgram {
 public:
 	CUDAProgram();
@@ -21,3 +24,5 @@ public:
 	void calculateDim(unsigned count, unsigned & w, unsigned & h);
 
 };
+
+}

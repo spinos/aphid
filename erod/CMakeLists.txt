@@ -1,0 +1,18 @@
+cmake_minimum_required (VERSION 2.8)
+project (elasticRod)
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
+set (CMAKE_BUILD_TYPE RELEASE)
+SET (EXECUTABLE_OUTPUT_PATH ../bin)
+set(CMAKE_MACOSX_BUNDLE OFF)
+
+INCLUDE (../cmake/base_config.cmake)
+INCLUDE (../cmake/aphid_config.cmake)
+INCLUDE (../cmake/ogl_config.cmake)
+INCLUDE (../cmake/qt_config.cmake)
+
+add_subdirectory(pbd)
+add_subdirectory(testcu)
+add_subdirectory(radixt)
+add_subdirectory(spltsk)
+add_subdirectory(tskque)

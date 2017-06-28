@@ -2,6 +2,9 @@
 #define CUDADBGLOG_H
 #include "BaseLog.h"
 #include "CUDABuffer.h"
+
+namespace aphid {
+
 class CudaDbgLog : public BaseLog {
 public:    
 	CudaDbgLog(const std::string & fileName);
@@ -65,5 +68,7 @@ protected:
 private:
 	BaseBuffer * m_hostBuf;
 };
+
+}
 #endif        //  #ifndef CUDADBGLOG_H
 

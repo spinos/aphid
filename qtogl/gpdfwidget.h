@@ -1,7 +1,7 @@
 #ifndef GP_DF_WIDGET_H
 #define GP_DF_WIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 
 namespace aphid {
 

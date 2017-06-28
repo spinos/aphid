@@ -17,7 +17,10 @@
 #include <vector>
 #include <map>
 #include <boost/format.hpp>
-#include "BaseBuffer.h"
+#include "math/BaseBuffer.h"
+
+namespace aphid {
+
 class BaseLog {
 public:
 	enum Frequency {
@@ -132,5 +135,7 @@ private:
 	std::vector<std::string > m_pathToName;
 	static std::map<std::string, bool> VisitedPtr;
 };
+
+}
 #endif        //  #ifndef BASELOG_H
 

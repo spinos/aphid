@@ -1,12 +1,15 @@
 #include <cuda_runtime_api.h>
 
 #include <CUDABuffer.h>
-#include <BaseBuffer.h>
-#include <QuickSort.h>
+#include <math/BaseBuffer.h>
+#include <math/QuickSort.h>
 #include <CudaDbgLog.h>
 #include <iostream>
 #include <SimpleQueueInterface.h>
 #include <vector>
+
+using namespace aphid;
+
 CudaDbgLog qslog("qsort.txt");
 
 static std::vector<std::pair<int, int> > headtailDesc;

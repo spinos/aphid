@@ -2,8 +2,9 @@
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include "glwidget.h"
-#include <KdTreeDrawer.h>
 #include <SolverThread.h>
+
+using namespace aphid;
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -12,7 +13,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	perspCamera()->setNearClipPlane(1.f);
 	orthoCamera()->setFarClipPlane(2000.f);
 	orthoCamera()->setNearClipPlane(1.f);
-	
+	usePerspCamera();
+	resetView();
 	m_solver = new SolverThread;
 }
 //! [0]
@@ -32,9 +34,6 @@ void GLWidget::clientInit()
 
 void GLWidget::clientDraw()
 {
-    // simulate();
-    //qDebug()<<"dr";
-    //return;
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	const Vector3F * pos = m_solver->pos();
@@ -103,4 +102,25 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 void GLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	Base3DView::keyReleaseEvent(event);
+}
+
+void GLWidget::resetPerspViewTransform()
+{
+static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 0.8660254f, -0.5f, 0.f,
+					0.f, 0.5f, 0.8660254f, 0.f,
+					32.f, 200.f, 346.4101616f, 1.f};
+	Matrix44F mat(mm);
+	perspCamera()->setViewTransform(mat, 400.f);
+}
+
+void GLWidget::resetOrthoViewTransform()
+{
+static const float mm1[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 0.8660254f, -0.5f, 0.f,
+					0.f, 0.5f, 0.8660254f, 0.f,
+					32.f, 200.f, 346.4101616f, 1.f};
+	Matrix44F mat(mm1);
+	orthoCamera()->setViewTransform(mat, 150.f);
+	orthoCamera()->setHorizontalAperture(150.f);
 }

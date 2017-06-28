@@ -1,5 +1,7 @@
 #include "CudaReduction.h"
 
+namespace aphid {
+
 CudaReduction::CudaReduction()
 {
     m_obuf = new CUDABuffer;
@@ -17,4 +19,6 @@ void CudaReduction::initOnDevice()
 
 void * CudaReduction::resultOnDevice()
 { return m_obuf->bufferOnDevice(); }
+
+}
 

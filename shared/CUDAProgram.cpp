@@ -15,6 +15,8 @@
 #include <cutil_gl_inline.h>
 #include <iostream>
 
+namespace aphid {
+
 CUDAProgram::CUDAProgram() {}
 CUDAProgram::~CUDAProgram() {}
 
@@ -47,4 +49,6 @@ void CUDAProgram::calculateDim(unsigned count, unsigned & w, unsigned & h)
         w *= 2;
         h = count / w;
     }
+}
+
 }

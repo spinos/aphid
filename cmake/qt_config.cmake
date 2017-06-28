@@ -5,7 +5,8 @@ endif()
 
 find_package (Qt4 REQUIRED)
 message ("qt opengl is " ${QT_QTOPENGL_LIBRARY})
+set (QT_MT_REQUIRED ON)
 set (QT_USE_QTOPENGL ON)
 
-set (APHID_QT_DIR ${APHID_DIR}/shared/qt )
+set (APHID_QT_DIR ${APHID_DIR}/shared/qt)
 

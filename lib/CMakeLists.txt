@@ -328,17 +328,13 @@ add_library(aphidWla ${LIB_TYP}
 ${wla_SRC}
 )
 
-find_package (CUDA QUIET)
+INCLUDE (../cmake/cuda_config.cmake)
 
 IF (${CUDA_FOUND})
 
-message ("cuda found ? " ${CUDA_FOUND})
-message ("cuda version " ${CUDA_VERSION})
-message ("cuda sdk root dir " ${CUDA_SDK_ROOT_DIR})
-message ("cuda librarie " ${CUDA_CUDA_LIBRARY})
-message ("cuda art librarie " ${CUDA_CUDART_LIBRARY})
-message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
-message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
+message (" aphid has cuda ")
+
+include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc)
 
 CUDA_ADD_LIBRARY (aphidCu ${LIB_TYP}
 ../shared/CudaBase.cpp
