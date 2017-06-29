@@ -97,6 +97,7 @@ MObject GardenWorks::importExample(aphid::HGardenExample * grp,
 	VegExampleNode * viz = (VegExampleNode *)MFnDependencyNode(oviz).userNode();
 	grp->load(viz);
 	viz->saveInternal();
+	viz->buildAllExmpVoxel();
 	*stat = MS::kSuccess;
 	return oviz;
 }

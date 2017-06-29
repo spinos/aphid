@@ -1,6 +1,6 @@
 MESSAGE (" find openEXR")
 if (WIN32)
-#add_definitions (-DOPENEXR_DLL)
+add_definitions (-DOPENEXR_DLL)
 set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
 set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
 "D:/usr/openexr21/lib/Iex-2_1.lib"

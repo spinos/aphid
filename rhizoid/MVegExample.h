@@ -23,6 +23,8 @@ public:
 	MVegExample();
 	virtual ~MVegExample();
 	
+	void buildAllExmpVoxel();
+	
 protected:
 	int loadGroupBBox(const MPlug & boxPlug);
 	int loadInstance(const MPlug & drangePlug,
@@ -70,8 +72,6 @@ protected:
 	void updateAllGeomSize();
 	void updateAllDop();
 	void updateAllDetailDrawType();
-	
-	void buildAllExmpVoxel();
 	
 private:
 	void updateExampDop(CompoundExamp * exmp,
