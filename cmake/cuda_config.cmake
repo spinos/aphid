@@ -1,6 +1,8 @@
 MESSAGE (" find CUDA ")
 
-find_package (CUDA QUIET REQUIRED)
+find_package (CUDA QUIET)
+
+IF (${CUDA_FOUND})
 
 message ("cuda found ? " ${CUDA_FOUND})
 message ("cuda version " ${CUDA_VERSION})
@@ -24,3 +26,5 @@ set (CUDA_NVCC_FLAGS "--ptxas-options=-v -arch sm_11")
 endif()
 
 include_directories (${CUDA_TOOLKIT_INCLUDE} ${CUDA_SDK_ROOT_DIR}/common/inc)
+
+ENDIF ()
