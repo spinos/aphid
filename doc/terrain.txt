@@ -1,0 +1,41 @@
+https://www.volume-gfx.com/volume-rendering/introduction/
+
+https://gamedev.stackexchange.com/questions/64598/what-are-some-ways-to-texture-map-a-terrain
+
+https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch01.html
+
+triplanar texutring
+
+VShader:
+
+float tileSize = 2.0;
+vec4 worldPos = ( gl_Vertex);//So we obtain the world position
+
+TexCoordX = (worldPos.zy/tileSize);//here are our texture coordinates...
+TexCoordY = (worldPos.xz/tileSize);
+TexCoordZ = (worldPos.xy/tileSize);
+normal =  gl_Normal;
+wNormal = normal;
+
+FShader:
+
+vec3 n = wNormal;
+n*=n;
+vec2 tcX = fract(TexCoordX);
+vec2 tcY = fract(TexCoordY);
+vec2 tcZ = fract(TexCoordZ);
+
+vec4 grassCol = texture2D(grassTexture,tcX)*n.x+
+                texture2D(grassTexture,tcY)*n.y+
+                texture2D(grassTexture,tcZ)*n.z;
+
+http://www.cbloom.com/3d/techdocs/splatting.txt
+
+http://www.gamasutra.com/blogs/AndreyMishkinis/20130716/196339/Advanced_Terrain_Texture_Splatting.php
+https://www.gamedev.net/articles/programming/graphics/advanced-terrain-texture-splatting-r3287
+https://www.gamedev.net/articles/programming/graphics/virtual-texture-terrain-r3278
+https://www.panda3d.org/forums/viewtopic.php?t=9313
+
+https://forums.inovaestudios.com/t/procedural-terrain-rendering-how-to/765/74
+https://docs.unity3d.com/Manual/terrain-UsingTerrains.html
+
