@@ -19,6 +19,7 @@
 #include "data/grass.h"
 #include "data/clover.h"
 #include "data/poapratensis.h"
+#include "data/haircap.h"
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 
@@ -151,6 +152,16 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 			exclR = sPoapratensisExclRadius[r];
 			vertcol = sPoapratensisMeshVertexColors[r];
 			tritexcoord = sPoapratensisMeshTriangleTexcoords[r];
+		break;
+		case gar::gtHaircap:
+			np = sHaircapNumVertices;
+			nt = sHaircapNumTriangleIndices / 3;
+			triind = sHaircapMeshTriangleIndices;
+			vertpos = sHaircapMeshVertices[r];
+			vertnml = sHaircapMeshNormals[r];
+			exclR = sHaircapExclRadius[r];
+			vertcol = sHaircapMeshVertexColors[r];
+			tritexcoord = sHaircapMeshTriangleTexcoords[r];
 		break;
 		default:
 		;

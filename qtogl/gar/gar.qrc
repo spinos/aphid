@@ -17,5 +17,7 @@
         <file>icons/point.png</file>
         <file>icons/dop.png</file>
         <file>icons/triangle.png</file>
+        <file>images/haircap.png</file>
+        <file>icons/haircap.png</file>
     </qresource>
 </RCC>

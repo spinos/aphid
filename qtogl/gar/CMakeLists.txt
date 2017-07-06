@@ -104,6 +104,7 @@ target_link_libraries (gar ${Boost_IOSTREAMS_LIBRARY})
 
 target_link_libraries (gar ${HDF5_LIBRARIES})
 target_link_libraries (gar ${SZIP_LIBRARY})
+target_link_libraries (gar ${ZLIB_LIBRARY})
 
 IF (WIN32)
 ELSE ()
