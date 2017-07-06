@@ -1,4 +1,5 @@
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
 
 include_directories (${APHID_DIR}/rhizoid)
 
@@ -6,6 +7,9 @@ set(CMAKE_MACOSX_BUNDLE OFF)
 
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 data/grass.h
+data/clover.h
+data/haircap.h
+data/poapratensis.h
 window.h
 widget.h
 gar_common.h
@@ -84,26 +88,28 @@ target_link_libraries (gar ${APHID_GEOM_LIBRARY})
 target_link_libraries (gar ${APHID_UI_LIBRARY})
 target_link_libraries (gar ${APHID_SDB_LIBRARY})
 target_link_libraries (gar ${APHID_TOPO_LIBRARY})
+target_link_libraries (gar ${APHID_H5_LIBRARY})
 target_link_libraries (gar ${APHID_OGL_LIBRARY})
 target_link_libraries (gar ${APHID_GRAPH_LIBRARY})
 target_link_libraries (gar ${APHID_TTG_LIBRARY})
 target_link_libraries (gar ${APHID_KD_LIBRARY})
 target_link_libraries (gar ${APHID_IMG_LIBRARY})
-target_link_libraries (gar ${APHID_H5_LIBRARY})
-
-target_link_libraries (gar ${HDF5_LIBRARIES})
-target_link_libraries (gar ${ZLIB_LIBRARY})
 
 target_link_libraries (gar ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (gar ${Boost_FILESYSTEM_LIBRARY})
-
-IF (WIN32)
 target_link_libraries (gar ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (gar ${Boost_THREAD_LIBRARY})
 target_link_libraries (gar ${Boost_CHRONO_LIBRARY})
+target_link_libraries (gar ${Boost_IOSTREAMS_LIBRARY})
+
+target_link_libraries (gar ${HDF5_LIBRARIES})
 target_link_libraries (gar ${SZIP_LIBRARY})
+
+IF (WIN32)
+ELSE ()
 ENDIF ()
 
 target_link_libraries (gar ${BLAS_LIBRARY})
 target_link_libraries (gar ${LAPACK_LIBRARY})
 target_link_libraries (gar ${F2C_LIBRARY})
+
