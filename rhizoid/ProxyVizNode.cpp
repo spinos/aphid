@@ -13,7 +13,6 @@
 #include <EnvVar.h>
 #include <mama/AHelper.h>
 #include <mama/AttributeHelper.h>
-#include <ExampVox.h>
 #include <GrowOption.h>
 
 namespace aphid {

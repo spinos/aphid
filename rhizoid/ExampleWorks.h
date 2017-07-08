@@ -13,10 +13,18 @@
  #ifndef RHI_EXAMPLE_WORKS_H
  #define RHI_EXAMPLE_WORKS_H
  
- #include "ProxyVizNode.h"
+ #include <vector>
+ #include <map>
  
  class MSelectionList;
  class MObjectArray;
+ class MString;
+ class MObject;
+ 
+ namespace aphid {
+ class ProxyViz;
+ class Vector3F;
+ }
  
  class ExampleWorks {
  

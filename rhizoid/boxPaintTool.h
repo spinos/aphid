@@ -9,13 +9,21 @@
 #ifndef RHI_BOX_PAINT_TOOL_H
 #define RHI_BOX_PAINT_TOOL_H
 
+#ifdef LINUX
 #include <gl_heads.h>
+#endif
 #include <maya/MPxContext.h>
 #include <maya/M3dView.h>
 #include <maya/MGlobal.h>
 #include <maya/MSceneMessage.h>
 #include "GrowOption.h"
 #include "ExampleWorks.h"
+
+namespace aphid {
+ 
+class Ray;
+
+}
 
 class proxyPaintContext : public MPxContext, public ExampleWorks
 {
@@ -181,7 +189,7 @@ private:
 	bool rejectSmallDragDistance(int d = 2) const;
 	void clearByType();
 	void clearBySelections();
-	void setManipulator(aphid::ModifyForest::ManipulateMode x);
+	void setManipulator(int x);
 	void startRotate();
 	void processRotate();
     void startTranslate();

@@ -6,7 +6,8 @@
 #include <maya/MFnParticleSystem.h>
 #include <mama/AHelper.h>
 #include <mama/ASearchHelper.h>
-           
+#include "ProxyVizNode.h"
+
 using namespace aphid;
 
 const char helpString[] = "Select a proxy viz to paint on";
@@ -1002,12 +1003,24 @@ bool proxyPaintContext::rejectSmallDragDistance(int d) const
         + Absolute<int>(last_y - start_y)) < d;
 }
 
-void proxyPaintContext::setManipulator(ModifyForest::ManipulateMode x)
+void proxyPaintContext::setManipulator(int x)
 {
     if(!PtrViz) {
 		return;
 	}
-	PtrViz->processManipulatMode(x, m_growOpt);
+	ModifyForest::ManipulateMode md = ModifyForest::manNone;
+	switch(x) {
+	case ModifyForest::manRotate :
+	    md = ModifyForest::manRotate;
+	    break;
+	    case ModifyForest::manTranslate :
+	    md = ModifyForest::manTranslate;
+	    break;
+	    case ModifyForest::manScaling :
+	    md = ModifyForest::manScaling;
+	    break;
+	}
+	PtrViz->processManipulatMode(md, m_growOpt);
 }
 
 void proxyPaintContext::startRotate()

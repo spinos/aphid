@@ -12,7 +12,9 @@
  *
  */
  
+#ifdef LINUX
 #include <gl_heads.h>
+#endif
 #include <maya/MPxLocatorNode.h> 
 #include <maya/MTypeId.h> 
 #include <maya/MPlug.h>
