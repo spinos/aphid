@@ -18,10 +18,10 @@ ELSEIF (UNIX)
     SET (ILMBASE_PACKAGE_PREFIX /usr/local)
 SET (OpenEXR_INCLUDE_DIR ${ILMBASE_PACKAGE_PREFIX}/include)
 SET (OpenEXR_Library ${ILMBASE_PACKAGE_PREFIX}/lib/libHalf.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libIex-2_2.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libImath-2_2.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmImf-2_2.so
-    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmThread-2_2.so)
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIex-2_1.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libImath-2_1.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmImf-2_1.so
+    ${ILMBASE_PACKAGE_PREFIX}/lib/libIlmThread-2_1.so)
 
 ENDIF ()
 

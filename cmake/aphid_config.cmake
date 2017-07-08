@@ -14,6 +14,7 @@ set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/aphidOgl.lib)
 set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/aphidTtg.lib)
 set (APHID_IMG_LIBRARY ${APHID_DIR}/lib/aphidImg.lib)
 set (APHID_CU_LIBRARY ${APHID_DIR}/lib/aphidCU.lib)
+SET (APHID_HES_LIBRARY ${APHID_DIR}/lib/aphidHes.lib)
 
 ELSEIF (APPLE)
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.a)
@@ -29,6 +30,7 @@ set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.a)
 set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/libaphidTtg.a)
 set (APHID_IMG_LIBRARY ${APHID_DIR}/lib/libaphidImg.a)
 set (APHID_CU_LIBRARY ${APHID_DIR}/lib/libaphidCu.a)
+SET (APHID_HES_LIBRARY ${APHID_DIR}/lib/libaphidHes.a)
 
 ELSEIF (UNIX)
 SET (APHID_FOUND_LIBRARY ${APHID_DIR}/lib/libaphidFoundation.so)
@@ -43,6 +45,7 @@ set (APHID_TOPO_LIBRARY ${APHID_DIR}/lib/libaphidTopology.so)
 set (APHID_OGL_LIBRARY ${APHID_DIR}/lib/libaphidOgl.so)
 set (APHID_TTG_LIBRARY ${APHID_DIR}/lib/libaphidTtg.so)
 set (APHID_IMG_LIBRARY ${APHID_DIR}/lib/libaphidImg.so)
+SET (APHID_HES_LIBRARY ${APHID_DIR}/lib/libaphidHes.so)
 
 endif ()
 

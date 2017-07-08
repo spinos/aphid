@@ -11,9 +11,9 @@ elseif(APPLE)
 	set(LAPACK_LIBRARY liblapack.a)
 elseif (UNIX)
 include_directories (/usr/local/include)
-	set(F2C_LIBRARY /usr/local/lib/libf2c.a)
-    set(BLAS_LIBRARY /usr/local/lib/libblas.a)
-	set(LAPACK_LIBRARY /usr/local/lib/liblapack.a)
+	set(F2C_LIBRARY /usr/local/lib/libf2c.so)
+    set(BLAS_LIBRARY /usr/local/lib/libblas.so)
+	set(LAPACK_LIBRARY /usr/local/lib/liblapack.so)
 	
 endif()
 

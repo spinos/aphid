@@ -14,8 +14,8 @@
 #include <ExampVox.h>
 #include <ExampData.h>
 #include <mama/AttributeHelper.h>
-#include <ogl/GlslInstancer.h>
 #include <math/linearMath.h>
+#include <ogl/GlslInstancer.h>
 
 namespace aphid {
 

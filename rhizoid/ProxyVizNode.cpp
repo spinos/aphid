@@ -1,4 +1,4 @@
-#include "proxyVizNode.h"
+#include "ProxyVizNode.h"
 #include <maya/MFnMatrixAttribute.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>

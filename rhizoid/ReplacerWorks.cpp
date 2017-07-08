@@ -29,7 +29,7 @@
  */
 
 #include "ReplacerWorks.h"
-#include "proxyVizNode.h"
+#include "ProxyVizNode.h"
 #include <mama/ConnectionHelper.h>
 #include <maya/MFnDagNode.h>
 #include <mama/AHelper.h>

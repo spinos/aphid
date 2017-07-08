@@ -9,6 +9,7 @@
 #ifndef RHI_BOX_PAINT_TOOL_H
 #define RHI_BOX_PAINT_TOOL_H
 
+#include <gl_heads.h>
 #include <maya/MPxContext.h>
 #include <maya/M3dView.h>
 #include <maya/MGlobal.h>

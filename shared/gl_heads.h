@@ -7,18 +7,23 @@
  *
  */
  
+#ifndef APH_GL_HEADS_H
+#define APH_GL_HEADS_H
+
 #ifdef WIN32
 #include <ogl/gExtension.h>
-
-#else
+#endif
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
 #include <GLUT/glut.h>
-#else
+#endif
+
+#ifdef LINUX
 #include <GL/glew.h>
+#include <GL/gl.h>
 #endif
 
 #endif

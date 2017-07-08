@@ -29,3 +29,7 @@ target_link_libraries (drpca ${Boost_CHRONO_LIBRARY})
 target_link_libraries (drpca ${BLAS_LIBRARY})
 target_link_libraries (drpca ${LAPACK_LIBRARY})
 target_link_libraries (drpca ${F2C_LIBRARY})
+
+IF (UNIX)
+target_link_libraries (drpca ${GLEW_LIBRARY})
+ENDIF ()

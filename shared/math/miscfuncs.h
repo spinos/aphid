@@ -9,6 +9,7 @@
 #ifndef APH_MISC_FUNCS_H
 #define APH_MISC_FUNCS_H
 
+#include <stdlib.h>
 #include <cmath>
 
 namespace aphid {

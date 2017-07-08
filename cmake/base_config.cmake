@@ -17,6 +17,10 @@ endif ()
 
 if(WIN32)
 add_definitions (-DWIN32)
+ELSEIF (APPLE)
+
+ELSEIF (UNIX)
+add_definitions (-DLINUX)
 endif()
 
 include_directories (${APHID_DIR}/shared)

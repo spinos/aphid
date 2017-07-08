@@ -9,6 +9,7 @@
 
 #include "Variform.h"
 #include <math/Matrix44F.h>
+#include <stdlib.h>
 #include <cmath>
 
 namespace aphid {

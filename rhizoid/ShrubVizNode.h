@@ -9,7 +9,8 @@
  *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
- 
+
+#include <gl_heads.h>
 #include <maya/MPxLocatorNode.h> 
 #include <maya/MTypeId.h> 
 #include <maya/MPlug.h>

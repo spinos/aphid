@@ -8,6 +8,7 @@ include_directories(../shared ../lapl ../catmullclark
 
 IF (UNIX)
 SET (CMAKE_CXX_FLAGS -fPIC)
+ADD_DEFINITIONS(-DLINUX)
 ENDIF ()
 
 IF (WIN32)
@@ -139,8 +140,8 @@ ADD_LIBRARY (aphidH5 ${LIB_TYP}
 
 set (APH_HES_SRC
 ../hesperis/SampleFrame.cpp
-../hesperis/H5Holder.cpp
 ../hesperis/H5VCache.cpp
+../hesperis/H5Holder.cpp
 )
 
 ADD_LIBRARY (aphidHes ${LIB_TYP}
@@ -207,6 +208,8 @@ file (GLOB Gpr_SRC
 
 ADD_LIBRARY (aphidGp ${LIB_TYP}
 ${Gpr_SRC})
+
+INCLUDE (../cmake/ogl_config.cmake)
 
 file (GLOB Ogl_SRC
     "../shared/ogl/*.h"
