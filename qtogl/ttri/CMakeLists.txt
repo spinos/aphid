@@ -1,3 +1,6 @@
+INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/exr_config.cmake)
+
 set (TTRI_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 widget.h
@@ -26,14 +29,17 @@ target_link_libraries (ttri ${APHID_GRAPH_LIBRARY})
 target_link_libraries (ttri ${APHID_TTG_LIBRARY})
 target_link_libraries (ttri ${APHID_KD_LIBRARY})
 target_link_libraries (ttri ${APHID_H5_LIBRARY})
+target_link_libraries (ttri ${APHID_IMG_LIBRARY})
 
 target_link_libraries (ttri ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (ttri ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (ttri ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (ttri ${Boost_REGEX_LIBRARY})
+
 IF (WIN32)
 target_link_libraries (ttri ${Boost_THREAD_LIBRARY})
 target_link_libraries (ttri ${Boost_CHRONO_LIBRARY})
-target_link_libraries (ttri ${Boost_REGEX_LIBRARY})
+
 ENDIF ()
 
 target_link_libraries (ttri ${HDF5_LIBRARIES})
@@ -41,8 +47,14 @@ target_link_libraries (ttri ${ZLIB_LIBRARY})
 
 IF (WIN32)
 target_link_libraries (ttri ${SZIP_LIBRARY})
-ENDIF ()
+
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (ttri ${GLEW_LIBRARY})
+
+ENDIF()
 
 target_link_libraries (ttri ${BLAS_LIBRARY})
 target_link_libraries (ttri ${LAPACK_LIBRARY})
-target_link_libraries (ttri ${F2C_LIBRARY})
+target_link_libraries (ttri ${OpenEXR_Library})
+

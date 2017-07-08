@@ -34,3 +34,12 @@ target_link_libraries (exrs ${Boost_REGEX_LIBRARY})
 target_link_libraries (exrs ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (exrs ${Boost_THREAD_LIBRARY})
 target_link_libraries (exrs ${Boost_CHRONO_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (exrs ${GLEW_LIBRARY})
+target_link_libraries (exrs ${BLAS_LIBRARY})
+
+ENDIF()
+

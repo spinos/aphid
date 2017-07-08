@@ -1,3 +1,5 @@
+INCLUDE (${APHID_DIR}/cmake/exr_config.cmake)
+
 set (ABG_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h
 widget.h)
@@ -23,14 +25,21 @@ target_link_libraries (abg ${APHID_OGL_LIBRARY})
 target_link_libraries (abg ${APHID_GRAPH_LIBRARY})
 target_link_libraries (abg ${APHID_TTG_LIBRARY})
 target_link_libraries (abg ${APHID_KD_LIBRARY})
+target_link_libraries (abg ${APHID_IMG_LIBRARY})
 
 target_link_libraries (abg ${Boost_SYSTEM_LIBRARY})
 IF (WIN32)
 target_link_libraries (abg ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (abg ${Boost_THREAD_LIBRARY})
 target_link_libraries (abg ${Boost_CHRONO_LIBRARY})
-ENDIF ()
 
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (abg ${GLEW_LIBRARY})
 target_link_libraries (abg ${BLAS_LIBRARY})
-target_link_libraries (abg ${LAPACK_LIBRARY})
-target_link_libraries (abg ${F2C_LIBRARY})
+
+ENDIF()
+
+target_link_libraries (abg ${OpenEXR_Library})
+
+

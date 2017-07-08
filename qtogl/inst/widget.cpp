@@ -1,7 +1,7 @@
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include "widget.h"
-#include <GeoDrawer.h>
 #include <sdb/ebp.h>
 #include <geom/PrimInd.h>
 

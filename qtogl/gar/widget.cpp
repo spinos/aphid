@@ -3,12 +3,12 @@
  *  garden
  *
  */
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
 #include "widget.h"
-#include <GeoDrawer.h>
 #include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "DrawVegetation.h"

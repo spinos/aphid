@@ -32,3 +32,10 @@ ENDIF ()
 target_link_libraries (tvox ${BLAS_LIBRARY})
 target_link_libraries (tvox ${LAPACK_LIBRARY})
 target_link_libraries (tvox ${F2C_LIBRARY})
+
+IF (WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (tvox ${GLEW_LIBRARY})
+
+ENDIF()

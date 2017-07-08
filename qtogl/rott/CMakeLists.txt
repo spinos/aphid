@@ -25,3 +25,11 @@ target_link_libraries (rott ${Boost_REGEX_LIBRARY})
 target_link_libraries (rott ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (rott ${Boost_THREAD_LIBRARY})
 target_link_libraries (rott ${Boost_CHRONO_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (rott ${GLEW_LIBRARY})
+target_link_libraries (rott ${BLAS_LIBRARY})
+
+ENDIF()

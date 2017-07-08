@@ -1,8 +1,8 @@
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include "widget.h"
 #include <math/linspace.h>
-#include <GeoDrawer.h>
 #include <ogl/DrawArrow.h>
 #include <math/HermiteInterpolatePiecewise.h>
 

@@ -25,3 +25,11 @@ target_link_libraries (tkm ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (tkm ${BLAS_LIBRARY})
 target_link_libraries (tkm ${LAPACK_LIBRARY})
 target_link_libraries (tkm ${F2C_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (tkm ${GLEW_LIBRARY})
+
+ENDIF()
+

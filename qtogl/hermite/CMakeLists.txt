@@ -25,3 +25,11 @@ target_link_libraries (pwhermite ${Boost_REGEX_LIBRARY})
 target_link_libraries (pwhermite ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (pwhermite ${Boost_THREAD_LIBRARY})
 target_link_libraries (pwhermite ${Boost_CHRONO_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (pwhermite ${GLEW_LIBRARY})
+target_link_libraries (pwhermite ${BLAS_LIBRARY})
+
+ENDIF()

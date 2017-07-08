@@ -1,9 +1,9 @@
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include "widget.h"
 #include <geom/AirfoilMesh.h>
 #include <math/linspace.h>
-#include <GeoDrawer.h>
 #include <ogl/DrawArrow.h>
 
 using namespace aphid;

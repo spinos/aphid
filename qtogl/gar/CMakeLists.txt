@@ -101,16 +101,23 @@ target_link_libraries (gar ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (gar ${Boost_THREAD_LIBRARY})
 target_link_libraries (gar ${Boost_CHRONO_LIBRARY})
 target_link_libraries (gar ${Boost_IOSTREAMS_LIBRARY})
+target_link_libraries (gar ${Boost_REGEX_LIBRARY})
 
 target_link_libraries (gar ${HDF5_LIBRARIES})
 target_link_libraries (gar ${SZIP_LIBRARY})
 target_link_libraries (gar ${ZLIB_LIBRARY})
 
 IF (WIN32)
-ELSE ()
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (gar ${GLEW_LIBRARY})
 ENDIF ()
 
 target_link_libraries (gar ${BLAS_LIBRARY})
 target_link_libraries (gar ${LAPACK_LIBRARY})
 target_link_libraries (gar ${F2C_LIBRARY})
+
+INCLUDE (${APHID_DIR}/cmake/exr_config.cmake)
+
+target_link_libraries (gar ${OpenEXR_Library})
 

@@ -27,3 +27,11 @@ target_link_libraries (cvxhull ${Boost_REGEX_LIBRARY})
 target_link_libraries (cvxhull ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (cvxhull ${Boost_THREAD_LIBRARY})
 target_link_libraries (cvxhull ${Boost_CHRONO_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (cvxhull ${GLEW_LIBRARY})
+target_link_libraries (cvxhull ${BLAS_LIBRARY})
+
+ENDIF()

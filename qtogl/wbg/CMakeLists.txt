@@ -68,3 +68,10 @@ target_link_libraries (wbg ${LAPACK_LIBRARY})
 target_link_libraries (wbg ${F2C_LIBRARY})
 
 target_link_libraries (wbg ${OpenEXR_Library})
+
+IF (WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (wbg ${GLEW_LIBRARY})
+
+ENDIF()

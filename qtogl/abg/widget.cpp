@@ -3,12 +3,12 @@
  *  Adaptive Bcc Grid Test
  *
  */
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
 #include "widget.h"
-#include <GeoDrawer.h>
 #include <ogl/DrawGrid.h>
 #include <AllTtg.h>
 #include <ogl/DrawGraph.h>

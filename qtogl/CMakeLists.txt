@@ -43,6 +43,13 @@ target_link_libraries (gpdeform ${LAPACK_LIBRARY})
 target_link_libraries (gpdeform ${F2C_LIBRARY})
 
 target_link_libraries (gpdeform ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (gpdeform ${Boost_SYSTEM_LIBRARY})
+
+IF (WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (gpdeform ${GLEW_LIBRARY})
+ENDIF ()
 
 ## https://cmake.org/Wiki/CMake:Bundles_And_Frameworks
 ## set(CMAKE_MACOSX_BUNDLE ON)
@@ -54,7 +61,7 @@ add_subdirectory(pca)
 add_subdirectory(hull)
 add_subdirectory(cluster)
 add_subdirectory(inst)
-add_subdirectory(tetf)
+##add_subdirectory(tetf)
 add_subdirectory(abg)
 add_subdirectory(tkm)
 add_subdirectory(ttri)

@@ -61,3 +61,5 @@ message (" topo is " ${APHID_TOPO_LIBRARY})
 message (" ogl is " ${APHID_OGL_LIBRARY})
 message (" ttg is " ${APHID_TTG_LIBRARY})
 message (" hes is " ${APHID_HES_LIBRARY})
+message (" img is " ${APHID_IMG_LIBRARY})
+

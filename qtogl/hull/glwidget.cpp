@@ -1,9 +1,9 @@
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include "glwidget.h"
 #include <topo/ConvexHullGen.h>
 #include <geom/ATriangleMesh.h>
-#include <GeoDrawer.h>
 #include <cmath>
 
 using namespace aphid;

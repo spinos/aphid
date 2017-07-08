@@ -30,3 +30,11 @@ target_link_libraries (naca4digit ${Boost_REGEX_LIBRARY})
 target_link_libraries (naca4digit ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (naca4digit ${Boost_THREAD_LIBRARY})
 target_link_libraries (naca4digit ${Boost_CHRONO_LIBRARY})
+
+IF(WIN32)
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (naca4digit ${GLEW_LIBRARY})
+target_link_libraries (naca4digit ${BLAS_LIBRARY})
+
+ENDIF()

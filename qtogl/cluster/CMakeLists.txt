@@ -26,4 +26,10 @@ IF (WIN32)
 target_link_libraries (clust ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (clust ${Boost_THREAD_LIBRARY})
 target_link_libraries (clust ${Boost_CHRONO_LIBRARY})
-ENDIF ()
+
+ELSEIF (APPLE)
+ELSEIF (UNIX)
+target_link_libraries (clust ${GLEW_LIBRARY})
+target_link_libraries (clust ${BLAS_LIBRARY})
+
+ENDIF()

@@ -3,12 +3,12 @@
  *  Kmean clustering Test
  *
  */
+#include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
 #include "widget.h"
-#include <GeoDrawer.h>
 #include <math/miscfuncs.h>
 #include <math/kmean.h>
 #include <ogl/DrawCircle.h>
