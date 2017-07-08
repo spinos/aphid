@@ -18,6 +18,8 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/clover.h"
+#include "data/poapratensis.h"
+#include "data/haircap.h"
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 
@@ -141,6 +143,26 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 			vertcol = sCloverMeshVertexColors[r];
 			tritexcoord = sCloverMeshTriangleTexcoords[r];
 		break;
+		case gar::gtPoapratensis:
+			np = sPoapratensisNumVertices;
+			nt = sPoapratensisNumTriangleIndices / 3;
+			triind = sPoapratensisMeshTriangleIndices;
+			vertpos = sPoapratensisMeshVertices[r];
+			vertnml = sPoapratensisMeshNormals[r];
+			exclR = sPoapratensisExclRadius[r];
+			vertcol = sPoapratensisMeshVertexColors[r];
+			tritexcoord = sPoapratensisMeshTriangleTexcoords[r];
+		break;
+		case gar::gtHaircap:
+			np = sHaircapNumVertices;
+			nt = sHaircapNumTriangleIndices / 3;
+			triind = sHaircapMeshTriangleIndices;
+			vertpos = sHaircapMeshVertices[r];
+			vertnml = sHaircapMeshNormals[r];
+			exclR = sHaircapExclRadius[r];
+			vertcol = sHaircapMeshVertexColors[r];
+			tritexcoord = sHaircapMeshTriangleTexcoords[r];
+		break;
 		default:
 		;
 	}
@@ -157,7 +179,7 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 		msh->create(np, nt);
 		msh->createVertexColors(np);
 		unsigned * indDst = msh->indices();
-		memcpy(indDst, sCloverMeshTriangleIndices, nt * 12);
+		memcpy(indDst, triind, nt * 12);
 		Vector3F * pntDst = msh->points();
 		memcpy(pntDst, vertpos, np * 12);
 		Vector3F * nmlDst = msh->vertexNormals();

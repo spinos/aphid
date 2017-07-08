@@ -5,6 +5,8 @@
         <file>icons/grass.png</file>
         <file>icons/clover.png</file>
         <file>images/clover.png</file>
+        <file>images/poapratensis.png</file>
+        <file>icons/poapratensis.png</file>
         <file>icons/root.png</file>
         <file>icons/unknown.png</file>
         <file>icons/flowerpot.png</file>
@@ -15,5 +17,7 @@
         <file>icons/point.png</file>
         <file>icons/dop.png</file>
         <file>icons/triangle.png</file>
+        <file>images/haircap.png</file>
+        <file>icons/haircap.png</file>
     </qresource>
 </RCC>
