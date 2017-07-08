@@ -15,6 +15,7 @@
  
  #include <vector>
  #include <map>
+ #include <string>
  
  class MSelectionList;
  class MObjectArray;
