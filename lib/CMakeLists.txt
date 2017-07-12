@@ -6,7 +6,8 @@ set (CMAKE_BUILD_TYPE Release)
 include_directories(../shared ../lapl ../catmullclark 
 ../hesperis)
 
-IF (UNIX)
+IF (APPLE)
+ELSEIF (UNIX)
 SET (CMAKE_CXX_FLAGS -fPIC)
 ADD_DEFINITIONS(-DLINUX)
 ENDIF ()
@@ -111,7 +112,6 @@ ${Geom_SRC}
 ../shared/BaseMesh.cpp
 ../shared/PyramidMesh.cpp 
 ../shared/CubeMesh.cpp 
-../shared/DiscMesh.cpp
 ../shared/PlaneMesh.cpp
 ../catmullclark/bezierPatch.cpp 
 ../shared/TriangleRaster.cpp
@@ -226,6 +226,14 @@ file (GLOB ttg_SRC
 
 ADD_LIBRARY (aphidTtg ${LIB_TYP}
 ${ttg_SRC})
+
+file (GLOB smp_SRC
+    "../shared/smp/*.h"
+    "../shared/smp/*.cpp"
+)
+
+ADD_LIBRARY (aphidSmp ${LIB_TYP}
+${smp_SRC})
 
 add_library(aphid ${LIB_TYP}                                
     ../shared/SkeletonSubspaceDeformer.cpp                                  

@@ -2,9 +2,8 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include "widget.h"
-#include <sdb/ebp.h>
-#include <geom/PrimInd.h>
-#include <geom/GeodesicSphereMesh.h>
+#include <smp/EbpSphere.h>
+#include <smp/SampleFilter.h>
 
 using namespace aphid;
 
@@ -13,43 +12,11 @@ GLWidget::GLWidget(QWidget *parent)
 {
 	updateGlyph(.5f, .5f);
 	
-	TriangleGeodesicSphere geodsph(6);
-	const int nv = geodsph.numPoints();
-	Vector3F * sphps = geodsph.points();
-	for(int i=0;i<nv;++i) {
-	    sphps[i] *= 9.f;
-	}
-	std::cout<<"\n geod sph bbox "<<geodsph.calculateGeomBBox();
+	m_grid = new EbpSphere;
 	
-	std::vector<cvx::Triangle * > tris;
-    sdb::Sequence<int> sels;
-    
-	const int nt = geodsph.numTriangles();
-	for(int i=0;i<nt;++i) {
-	    const unsigned * trii = geodsph.triangleIndices(i);
-	    cvx::Triangle * ta = new cvx::Triangle;
-	    ta->set(sphps[trii[0]], sphps[trii[1]], sphps[trii[2]] );
-	    tris.push_back(ta);
-	    sels.insert(i);
-	    
-	}
-		
-typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
-	TIntersect fintersect(&sels, &tris);
-	
-#define GrdLvl 3
-	m_grid = new EbpGrid;
-	m_grid->fillBox(fintersect, 9.3);
-	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, GrdLvl);
-	m_grid->insertNodeAtLevel(GrdLvl);
-	m_grid->cachePositions();
 	const int np = m_grid->numParticles();
-	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(GrdLvl)
+	qDebug()<<"\n n cell "<<m_grid->numSamples()
 			<<" num instances "<<np;
-	
-	for(int i=0;i<10;++i) {
-		m_grid->updateNormalized(10.f);    
-	}
 	
 	createParticles(np);
 	
@@ -65,10 +32,11 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
 	
 	permutateParticleColors();
 	
-	m_samples = new Vector3F[np];
-	for(int i=0;i<np;++i) {
-	    m_samples[i] = poss[i];
-	}
+	m_flt = new smp::SampleFilter;
+	//m_flt->setPortion(.9f);
+	//m_flt->setFacing(Vector3F(0.f, .5f, .5f) );
+	m_flt->setAngle(.5f);
+	m_flt->processFilter<EbpSphere>(m_grid);
 	
 }
 
@@ -94,8 +62,8 @@ void GLWidget::drawSamples()
 {
     glEnableClientState(GL_VERTEX_ARRAY);
 	
-	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_samples);
-	glDrawArrays(GL_POINTS, 0, numParticles());
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_flt->filteredSamples() );
+	glDrawArrays(GL_POINTS, 0, m_flt->numFilteredSamples());
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
 }

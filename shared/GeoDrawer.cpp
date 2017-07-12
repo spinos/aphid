@@ -12,7 +12,7 @@
 #include <PyramidMesh.h>
 #include <CubeMesh.h>
 #include <CircleCurve.h>
-#include <DiscMesh.h>
+#include <geom/DiscMesh.h>
 #include <geom/Geometry.h>
 #include <geom/GeometryArray.h>
 #include <geom/ATriangleMesh.h>
@@ -38,7 +38,7 @@ GeoDrawer::GeoDrawer()
 	m_pyramid = new PyramidMesh;
 	m_circle = new CircleCurve;
 	m_cube = new CubeMesh;
-	m_disc = new DiscMesh;
+	m_disc = new DiscMesh(18);
 	m_boxVBuf = new Vector3F[8];
 }
 
@@ -263,7 +263,7 @@ void GeoDrawer::alignedDisc(const Vector3F & pos, float radius) const
     mat.setFrontOrientation(alignDir() );
 	mat.scaleBy(radius);
 	useSpace(mat);
-	drawMesh(m_disc);
+	triangleMesh(m_disc);
     glPopMatrix();
 }
 
@@ -635,7 +635,7 @@ void GeoDrawer::drawDisc(float scale) const
 {
 	glPushMatrix();
 	glScalef(scale, scale, scale);
-	drawMesh(m_disc);
+	triangleMesh(m_disc);
 	glPopMatrix();
 }
 

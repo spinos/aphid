@@ -7,8 +7,8 @@
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef APH_SDB_EBP_H
-#define APH_SDB_EBP_H
+#ifndef APH_SMP_EBP_H
+#define APH_SMP_EBP_H
 
 #include <sdb/AdaptiveGrid3.h>
 #include <sdb/Array.h>
@@ -92,6 +92,7 @@ public:
 	const int & numParticles() const;
 	
 	void update();
+	void updateFlat();
 	void updateNormalized(const float& l);
 	virtual void clear(); 
 			

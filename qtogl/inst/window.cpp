@@ -7,7 +7,7 @@ Window::Window()
     glWidget = new GLWidget(this);
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Instance Draw"));
+    setWindowTitle(tr("Instance Draw + Energy based Particle"));
 }
 
 Window::~Window()
