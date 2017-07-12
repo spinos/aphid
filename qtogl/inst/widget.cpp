@@ -4,6 +4,7 @@
 #include "widget.h"
 #include <sdb/ebp.h>
 #include <geom/PrimInd.h>
+#include <geom/GeodesicSphereMesh.h>
 
 using namespace aphid;
 
@@ -12,33 +13,42 @@ GLWidget::GLWidget(QWidget *parent)
 {
 	updateGlyph(.5f, .5f);
 	
+	TriangleGeodesicSphere geodsph(6);
+	const int nv = geodsph.numPoints();
+	Vector3F * sphps = geodsph.points();
+	for(int i=0;i<nv;++i) {
+	    sphps[i] *= 9.f;
+	}
+	std::cout<<"\n geod sph bbox "<<geodsph.calculateGeomBBox();
+	
 	std::vector<cvx::Triangle * > tris;
-	cvx::Triangle * ta = new cvx::Triangle;
-	ta->set(Vector3F(-12, -2, 8), Vector3F(8, 0, 1), Vector3F(-1, 12, -4) );
-	tris.push_back(ta);
-	cvx::Triangle * tb = new cvx::Triangle;
-	tb->set(Vector3F(-1, 12, -4), Vector3F(8, 0, 1), Vector3F(5, 0, -20) );
-	tris.push_back(tb);
-	
-	sdb::Sequence<int> sels;
-	sels.insert(0);
-	sels.insert(1);
-	
+    sdb::Sequence<int> sels;
+    
+	const int nt = geodsph.numTriangles();
+	for(int i=0;i<nt;++i) {
+	    const unsigned * trii = geodsph.triangleIndices(i);
+	    cvx::Triangle * ta = new cvx::Triangle;
+	    ta->set(sphps[trii[0]], sphps[trii[1]], sphps[trii[2]] );
+	    tris.push_back(ta);
+	    sels.insert(i);
+	    
+	}
+		
 typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(&sels, &tris);
 	
-	float gz = 1.5f;
+#define GrdLvl 3
 	m_grid = new EbpGrid;
-	m_grid->fillBox(fintersect, 12);
-	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, 3);
-	m_grid->insertNodeAtLevel(3);
+	m_grid->fillBox(fintersect, 9.3);
+	m_grid->subdivideToLevel<TIntersect>(fintersect, 0, GrdLvl);
+	m_grid->insertNodeAtLevel(GrdLvl);
 	m_grid->cachePositions();
 	const int np = m_grid->numParticles();
-	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(3)
+	qDebug()<<"\n n cell "<<m_grid->numCellsAtLevel(GrdLvl)
 			<<" num instances "<<np;
 	
-	for(int i=0;i<20;++i) {
-		m_grid->update();    
+	for(int i=0;i<10;++i) {
+		m_grid->updateNormalized(10.f);    
 	}
 	
 	createParticles(np);
@@ -55,6 +65,11 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
 	
 	permutateParticleColors();
 	
+	m_samples = new Vector3F[np];
+	for(int i=0;i<np;++i) {
+	    m_samples[i] = poss[i];
+	}
+	
 }
 
 GLWidget::~GLWidget()
@@ -70,20 +85,18 @@ void GLWidget::clientDraw()
     getDrawer()->m_markerProfile.apply();
 	getDrawer()->setColor(1.f, 1.f, 1.f);
 	
-	drawParticles();
+	//drawParticles();
+	drawSamples();
 	
-#if 0
-	for(int i=0;i<20;++i) {
-		m_grid->update();    
-	}
-	
-	const Vector3F * poss = m_grid->positions(); 
-	
-    for(int i=0;i<numParticles();++i) {
-		Float4 * pr = particleR(i);
-            pr[0].w = poss[i].x;
-            pr[1].w = poss[i].y;
-            pr[2].w = poss[i].z;
-    }
-#endif
 }
+
+void GLWidget::drawSamples()
+{
+    glEnableClientState(GL_VERTEX_ARRAY);
+	
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)m_samples);
+	glDrawArrays(GL_POINTS, 0, numParticles());
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+

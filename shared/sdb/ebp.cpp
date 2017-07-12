@@ -116,6 +116,37 @@ void EbpGrid::update()
 	std::cout.flush();
 }
 
+void EbpGrid::updateNormalized(const float& l)
+{
+    Vector3F frepel;
+	begin();
+	while(!end() ) {
+		
+		EbpCell * cell = value();
+		cell->begin();
+		while(!cell->end() ) {
+			
+			EbpNode * node = cell->value();
+			
+			frepel.set(0.f,0.f,0.f);
+			repelForce(frepel, cell, node);
+			repelForceInCell(frepel, cell, node);
+			
+			node->pos += frepel;
+			node->pos.normalize();
+			node->pos *= l;
+			
+			cell->next();
+		}
+		
+		next();
+	}
+	
+	extractPos(m_pos.get());
+	
+	std::cout.flush();
+}
+
 void EbpGrid::repelForce(Vector3F & frepel,
 						EbpCell * cell,
 						const EbpNode * node)
@@ -146,7 +177,7 @@ void EbpGrid::repelForceInCell(Vector3F & frepel,
 			l = vd.length();
 			vd /= l;
 			l *= m_repelDistance;
-			frepel += vd * std::exp(-8.f*l*l);
+			frepel += vd * std::exp(-7.f*l*l);
 		}
 		
 		cell->next();
