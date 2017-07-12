@@ -1,5 +1,6 @@
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/exr_config.cmake)
+INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
 
 set (TTRI_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 window.h

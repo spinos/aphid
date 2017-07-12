@@ -36,10 +36,9 @@ target_link_libraries (abg ${Boost_CHRONO_LIBRARY})
 ELSEIF (APPLE)
 ELSEIF (UNIX)
 target_link_libraries (abg ${GLEW_LIBRARY})
-target_link_libraries (abg ${BLAS_LIBRARY})
 
 ENDIF()
 
 target_link_libraries (abg ${OpenEXR_Library})
-
+target_link_libraries (abg ${BLAS_LIBRARY})
 
