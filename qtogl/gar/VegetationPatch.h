@@ -43,7 +43,8 @@ public:
 	int numPlants() const;
 	const PlantPiece * plant(const int & i) const;
 	
-/// cannot collide with existing ones
+	void addPlant1(PlantPiece * pl);
+/// reject if collide with existing ones
 	bool addPlant(PlantPiece * pl);
 	void clearPlants();
 	

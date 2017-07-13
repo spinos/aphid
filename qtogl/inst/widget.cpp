@@ -4,6 +4,8 @@
 #include "widget.h"
 #include <smp/EbpSphere.h>
 #include <smp/SampleFilter.h>
+#include <smp/EbpMeshSample.h>
+#include <geom/DiscMesh.h>
 
 using namespace aphid;
 
@@ -32,11 +34,30 @@ GLWidget::GLWidget(QWidget *parent)
 	
 	permutateParticleColors();
 	
+	DiscMesh dsk(24);
+	const int ndskv = dsk.numPoints();
+	for(int i=0;i<ndskv;++i) {
+		Vector3F vi = dsk.points()[i];
+		vi.set(vi.x * 10.f, RandomFn11(), vi.y * 10.f);
+		dsk.points()[i] = vi;
+	}
+	
+	std::cout<<"\n disc bbx"<<dsk.calculateGeomBBox();
+	
+	EbpMeshSample smsh;
+	smsh.sample(&dsk);
+	
 	m_flt = new smp::SampleFilter;
+#if 0
 	//m_flt->setPortion(.9f);
 	//m_flt->setFacing(Vector3F(0.f, .5f, .5f) );
 	m_flt->setAngle(.5f);
 	m_flt->processFilter<EbpSphere>(m_grid);
+#else
+	m_flt->setPortion(.49f);
+	m_flt->processFilter<EbpMeshSample>(&smsh);
+	qDebug()<<"\n n disc samples "<<m_flt->numFilteredSamples();
+#endif
 	
 }
 

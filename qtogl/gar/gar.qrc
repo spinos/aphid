@@ -19,5 +19,6 @@
         <file>icons/triangle.png</file>
         <file>images/haircap.png</file>
         <file>icons/haircap.png</file>
+        <file>icons/bush.png</file>
     </qresource>
 </RCC>

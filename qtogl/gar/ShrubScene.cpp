@@ -22,6 +22,7 @@
 #include "data/haircap.h"
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
+#include "GrowthSample.h"
 
 using namespace gar;
 using namespace aphid;
@@ -39,6 +40,7 @@ void ShrubScene::genPlants(VegetationPatch * vege)
 {
 	vege->clearPlants();
 	
+/// dart throwing
 	for(int i=0;i<2000;++i) {
 	
 		if(vege->isFull() ) {
@@ -199,18 +201,100 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 
 void ShrubScene::genSinglePlant()
 {
-	genPlants(m_vege->patch(0));
+	GardenGlyph * gnd = getGround();
+	if(!gnd) {
+		m_vege->setNumPatches(0);
+		return;
+	}
+	
+	growOnGround(m_vege->patch(0), gnd);
+	
 	m_vege->setNumPatches(1);
 	m_vege->voxelize();
 }
 	
 void ShrubScene::genMultiPlant()
 {
+	GardenGlyph * gnd = getGround();
+	if(!gnd) {
+		m_vege->setNumPatches(0);
+		return;
+	}
+	
 	const int n = m_vege->getMaxNumPatches();
 	for(int i=0;i<n;++i) {
-		genPlants(m_vege->patch(i));
+		growOnGround(m_vege->patch(i), gnd);
 	}
 	m_vege->setNumPatches(n);
 	m_vege->rearrange();
 	m_vege->voxelize();
+}
+
+GardenGlyph * ShrubScene::getGround()
+{
+	foreach(QGraphicsItem *its_, items()) {
+		
+		if(its_->type() == GardenGlyph::Type) {
+			GardenGlyph *g = (GardenGlyph*) its_;
+		
+			if(g->glyphType() == gtPot) {
+			
+				std::cout<<"\n INFO grow by pot";
+				return g;
+			}
+			
+			if(g->glyphType() == gtBush) {
+			
+				std::cout<<"\n INFO grow by bush";
+				return g;
+			}
+		}
+	}
+	std::cout<<"\n ERROR no ground to grow on";
+	return NULL;
+}
+
+void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
+{
+	switch (gnd->glyphType()) {
+		case gtPot:
+			genPlants(vege);
+			break;
+		case gtBush:
+			genBushPlants(vege, gnd);
+			break;
+		default:
+			break;
+	}
+
+}
+
+void ShrubScene::genBushPlants(VegetationPatch * vege, GardenGlyph * gnd)
+{
+	vege->clearPlants();
+	
+	PlantPiece * pl = new PlantPiece;
+	assemblePlant(pl, gnd );
+	
+	GrowthSampleProfile prof;
+	prof.m_portion = .34f;
+	prof.m_angle = .41f;
+	prof.m_sizing = pl->exclR();
+	prof.m_tilt = vege->tilt();
+	
+	delete pl;
+	
+	GrowthSample gsmp;
+	gsmp.sampleBush(prof);
+	
+	const int& np = gsmp.numGrowthSamples();
+	for(int i=0;i<np;++i) {
+		pl = new PlantPiece;
+		assemblePlant(pl, gnd );
+		
+		Matrix44F tm = gsmp.getGrowSpace(i, prof);
+		pl->setTransformMatrix(tm);
+		vege->addPlant1(pl);
+	}
+	
 }

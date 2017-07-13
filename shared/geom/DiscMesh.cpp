@@ -28,7 +28,11 @@ DiscMesh::DiscMesh(int nseg)
 	for(int i = 0; i < nseg; i++) {
 		idx[i * 3] = nseg;
 		idx[i * 3 + 1] = i;
-		idx[i * 3 + 2] = (i + 1) % nseg;
+		int i1 = i+1;
+		if(i1== nseg) {
+			i1 = 0;
+		}
+		idx[i * 3 + 2] = i1;
 	}
 }
 

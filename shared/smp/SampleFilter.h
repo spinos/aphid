@@ -57,8 +57,7 @@ void SampleFilter::processFilter(T* grd)
 	int acc = 0;
 	for(int i=0;i<np;++i) {
 		if(isFiltered(poss[i]) ) continue;
-	    m_samples[acc] = poss[i];
-		acc++;
+	    m_samples[acc++] = poss[i];
 	}
 	m_numFilteredSamples = acc;
 	

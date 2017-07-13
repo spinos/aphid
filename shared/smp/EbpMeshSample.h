@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef APH_SMP_EBP_SPHERE_H
-#define APH_SMP_EBP_SPHERE_H
+#ifndef APH_SMP_EBP_MESH_SAMPLE_H
+#define APH_SMP_EBP_MESH_SAMPLE_H
 
 #include "ebp.h"
 
@@ -32,5 +32,4 @@ private:
 };
 
 }
-
 #endif

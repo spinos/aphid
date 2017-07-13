@@ -34,6 +34,7 @@ ExportExample.h
 HGardenExample.h
 HVegePatch.h
 toolBox.h
+GrowthSample.h
 ${APHID_DIR}/rhizoid/Variform.cpp
 ${APHID_DIR}/rhizoid/GardenExamp.cpp
 ${APHID_DIR}/rhizoid/CompoundExamp.cpp
@@ -76,6 +77,7 @@ exportDlg.cpp
 ExportExample.cpp
 HGardenExample.cpp
 HVegePatch.cpp
+GrowthSample.cpp
 main.cpp)
 
 add_executable (gar ${GAR_HEADER_FILES} ${GAR_SOURCE_FILES} ${GAR_RES_SOURCES})
@@ -94,6 +96,7 @@ target_link_libraries (gar ${APHID_GRAPH_LIBRARY})
 target_link_libraries (gar ${APHID_TTG_LIBRARY})
 target_link_libraries (gar ${APHID_KD_LIBRARY})
 target_link_libraries (gar ${APHID_IMG_LIBRARY})
+target_link_libraries (gar ${APHID_SMP_LIBRARY})
 
 target_link_libraries (gar ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (gar ${Boost_FILESYSTEM_LIBRARY})

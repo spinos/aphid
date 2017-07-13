@@ -36,6 +36,15 @@ int VegetationPatch::numPlants() const
 const PlantPiece * VegetationPatch::plant(const int & i) const
 { return m_plants[i]; }
 
+void VegetationPatch::addPlant1(PlantPiece * pl)
+{
+	m_plants.push_back(pl);
+	float nr = pl->exclR() * 12.f;
+	if(m_yardR < nr) {
+		m_yardR = nr;
+	}
+}
+
 bool VegetationPatch::addPlant(PlantPiece * pl)
 {
 	const float px = RandomFn11() * m_yardR;
@@ -106,6 +115,7 @@ void VegetationPatch::clearPlants()
 		delete *it;
 	}
 	m_plants.clear();
+	m_yardR = .5f;
 }
 
 bool VegetationPatch::isFull() const

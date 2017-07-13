@@ -17,6 +17,9 @@ EbpMeshSample::EbpMeshSample()
 {
 }
 
+EbpMeshSample::~EbpMeshSample()
+{}
+
 void EbpMeshSample::sample(ATriangleMesh* msh)
 {	
 	const Vector3F* ps = msh->points();
@@ -34,7 +37,7 @@ void EbpMeshSample::sample(ATriangleMesh* msh)
 	}
 	
 	const BoundingBox bbx = msh->calculateGeomBBox();
-	const float gz = bbx.radius() * .7f;
+	const float gz = bbx.radius() * .91f;
 	
 typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle > TIntersect;
 	TIntersect fintersect(&sels, &tris);
@@ -49,9 +52,6 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
 		EbpGrid::updateFlat();    
 	}	
 }
-
-EbpMeshSample::~EbpMeshSample()
-{}
 
 int EbpMeshSample::numSamples()
 { return numCellsAtLevel(3); }

@@ -21,6 +21,7 @@ enum ToolAction {
 enum GlyphTyp {
 	gtNone = 0,
 	gtPot = 1,
+	gtBush = 2,
 	gtClover = 33,
 	gtPoapratensis = 34,
 	gtHaircap = 35
@@ -40,7 +41,7 @@ enum DisplayStat {
 
 /// begin, end, 32 per group
 static const int GlyphRange[2][2] = {
-{1, 2},
+{1, 3},
 {33, 36}
 };
 

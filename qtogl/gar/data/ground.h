@@ -12,32 +12,39 @@
 
 namespace gar {
 
-static const char * GroundTypeNames[2] = {
+#define NUM_GROUND_PIECES 3
+
+static const char * GroundTypeNames[NUM_GROUND_PIECES] = {
 "unknown",
-"Flower Pot"
+"Flower Pot",
+"Bush"
 };
 
-static const char * GroundTypeImages[2] = {
+static const char * GroundTypeImages[NUM_GROUND_PIECES] = {
 "unknown",
+":/icons/unknown.png",
 ":/icons/unknown.png"
 };
 
-static const char * GroundTypeIcons[2] = {
+static const char * GroundTypeIcons[NUM_GROUND_PIECES] = {
 ":/icons/unknown.png",
-":/icons/flowerpot.png"
+":/icons/flowerpot.png",
+":/icons/bush.png"
 };
 
-static const char * GroundTypeDescs[2] = {
+static const char * GroundTypeDescs[NUM_GROUND_PIECES] = {
 "unknown",
-"flower pot"
+"flower pot",
+"bush"
 };
 
 static inline int ToGroundType(int x) {
 	return x;
 }
 
-static const int GroundInPortRange[2][2] = {
+static const int GroundInPortRange[NUM_GROUND_PIECES][2] = {
 {0,0},
+{0,1},
 {0,1}
 };
 

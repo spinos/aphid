@@ -133,7 +133,7 @@ void EbpGrid::updateFlat()
 			repelForceInCell(frepel, cell, node);
 			
 			node->pos += frepel;
-			node->pos.z = 0.f;
+			node->pos.y = 0.f;
 			
 			cell->next();
 		}
