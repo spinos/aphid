@@ -36,44 +36,6 @@ ShrubScene::ShrubScene(Vegetation * vege, QObject *parent)
 ShrubScene::~ShrubScene()
 {}
 
-void ShrubScene::genPlants(VegetationPatch * vege)
-{
-	vege->clearPlants();
-	
-/// dart throwing
-	for(int i=0;i<2000;++i) {
-	
-		if(vege->isFull() ) {
-			break;
-		}
-		
-		genAPlant(vege);
-		
-	}
-	
-	//qDebug()<<" patch n "<<vege->numPlants();
-}	
-
-void ShrubScene::genAPlant(VegetationPatch * vege)
-{
-	foreach(QGraphicsItem *its_, items()) {
-		
-		if(its_->type() == GardenGlyph::Type) {
-			GardenGlyph *g = (GardenGlyph*) its_;
-		
-			if(g->glyphType() == gtPot) {
-			
-				PlantPiece * pl = new PlantPiece;
-				assemblePlant(pl, g );
-				if(!vege->addPlant(pl ) ) {
-					delete pl;
-				}
-			}
-		}
-	}
-	
-}
-
 void ShrubScene::assemblePlant(PlantPiece * pl, GardenGlyph * gl)
 {
 	foreach(QGraphicsItem *port_, gl->childItems()) {
@@ -256,37 +218,35 @@ GardenGlyph * ShrubScene::getGround()
 
 void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 {
-	switch (gnd->glyphType()) {
-		case gtPot:
-			genPlants(vege);
-			break;
-		case gtBush:
-			genBushPlants(vege, gnd);
-			break;
-		default:
-			break;
-	}
-
-}
-
-void ShrubScene::genBushPlants(VegetationPatch * vege, GardenGlyph * gnd)
-{
 	vege->clearPlants();
 	
 	PlantPiece * pl = new PlantPiece;
 	assemblePlant(pl, gnd );
 	
 	GrowthSampleProfile prof;
-	prof.m_portion = .34f;
-	prof.m_angle = .41f;
+	prof.m_numSampleLimit = 80;
 	prof.m_sizing = pl->exclR();
 	prof.m_tilt = vege->tilt();
 	
 	delete pl;
 	
 	GrowthSample gsmp;
-	gsmp.sampleBush(prof);
 	
+	switch (gnd->glyphType()) {
+		case gtPot:
+			prof.m_portion = .43f;
+			prof.m_angle = -1.f;
+			gsmp.samplePot(prof);
+			break;
+		case gtBush:
+			prof.m_portion = .34f;
+			prof.m_angle = .41f;
+			gsmp.sampleBush(prof);
+			break;
+		default:
+			break;
+	}
+
 	const int& np = gsmp.numGrowthSamples();
 	for(int i=0;i<np;++i) {
 		pl = new PlantPiece;
@@ -294,7 +254,7 @@ void ShrubScene::genBushPlants(VegetationPatch * vege, GardenGlyph * gnd)
 		
 		Matrix44F tm = gsmp.getGrowSpace(i, prof);
 		pl->setTransformMatrix(tm);
-		vege->addPlant1(pl);
+		vege->addPlant(pl);
 	}
 	
 }

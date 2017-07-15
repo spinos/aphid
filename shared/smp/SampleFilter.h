@@ -25,6 +25,7 @@ class SampleFilter {
 	Vector3F m_facing;
 	float m_portion;
 	float m_angle;
+	int m_maxNumSample;
 	
 public:
 	SampleFilter();
@@ -36,6 +37,7 @@ public:
 	void setPortion(const float& x);
 	void setFacing(const Vector3F& v);
 	void setAngle(const float& x);
+	void setNumSampleLimit(const int& x);
 	
 	template<typename T>
 	void processFilter(T* grd);
@@ -44,6 +46,7 @@ protected:
 
 private:
 	bool isFiltered(const Vector3F& v) const;
+	void limitSamples();
 	
 };
 
@@ -61,6 +64,9 @@ void SampleFilter::processFilter(T* grd)
 	}
 	m_numFilteredSamples = acc;
 	
+	if(m_numFilteredSamples > m_maxNumSample) {
+		limitSamples();
+	}
 }
 
 }

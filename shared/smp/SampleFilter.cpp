@@ -18,7 +18,8 @@ SampleFilter::SampleFilter() :
 m_facing(Vector3F(0.f, 1.f, 0.f) ),
 m_portion(1.f),
 m_angle(-1.f),
-m_numFilteredSamples(0)
+m_numFilteredSamples(0),
+m_maxNumSample(10000)
 {}
 
 SampleFilter::~SampleFilter()
@@ -39,6 +40,9 @@ void SampleFilter::setFacing(const Vector3F& v)
 void SampleFilter::setAngle(const float& x)
 { m_angle = x; }
 
+void SampleFilter::setNumSampleLimit(const int& x)
+{ m_maxNumSample = x; }
+
 bool SampleFilter::isFiltered(const Vector3F& v) const
 {
 	if(m_portion < 1.f) {
@@ -56,6 +60,19 @@ bool SampleFilter::isFiltered(const Vector3F& v) const
 	}
 	
 	return false; 
+}
+
+void SampleFilter::limitSamples()
+{
+	const int num = m_numFilteredSamples;
+	const float alf = (float)m_maxNumSample / (float)m_numFilteredSamples;
+	int acc = 0;
+	for(int i=0;i<num;++i) {
+		if(RandomF01() < alf) {
+			m_samples[acc++] = m_samples[i];
+		}
+	}
+	m_numFilteredSamples = acc;
 }
 
 }

@@ -42,13 +42,8 @@ protected:
 private:
 /// first ground piece
 	GardenGlyph* getGround();
-	void genAPlant(VegetationPatch * vege);
 	void growOnGround(VegetationPatch * vege, GardenGlyph * gnd);
-/// throw darts repeatedly untill patch is full
-	void genPlants(VegetationPatch * vege);
-/// point and angle
-	void genBushPlants(VegetationPatch * vege, GardenGlyph * gnd);
-	
+
 private:
 	Vegetation * m_vege;
 };

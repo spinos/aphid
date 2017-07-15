@@ -28,14 +28,14 @@ static const char * GroundTypeImages[NUM_GROUND_PIECES] = {
 
 static const char * GroundTypeIcons[NUM_GROUND_PIECES] = {
 ":/icons/unknown.png",
-":/icons/flowerpot.png",
+":/icons/evendist.png",
 ":/icons/bush.png"
 };
 
 static const char * GroundTypeDescs[NUM_GROUND_PIECES] = {
 "unknown",
-"flower pot",
-"bush"
+"plant within a circle and growing up",
+"plant within a circle and growing with angles"
 };
 
 static inline int ToGroundType(int x) {

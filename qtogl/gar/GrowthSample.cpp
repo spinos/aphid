@@ -11,6 +11,8 @@
 #include <smp/EbpSphere.h>
 #include <math/Plane.h>
 #include <math/miscfuncs.h>
+#include <smp/EbpMeshSample.h>
+#include <geom/DiscMesh.h>
 
 using namespace aphid;
 
@@ -20,11 +22,45 @@ GrowthSample::GrowthSample()
 GrowthSample::~GrowthSample()
 {}
 
+void GrowthSample::samplePot(const GrowthSampleProfile& prof)
+{
+	DiscMesh dsk(24);
+	const int ndskv = dsk.numPoints();
+	for(int i=0;i<ndskv;++i) {
+		Vector3F vi = dsk.points()[i];
+		vi.set(vi.x * 9.9f * prof.m_sizing, 
+				RandomFn11(), 
+				vi.y * 9.9f * prof.m_sizing);
+		dsk.points()[i] = vi;
+	}
+	
+	EbpMeshSample smsh;
+	smsh.sample(&dsk);
+	
+	setAngle(prof.m_angle);
+	setPortion(prof.m_portion);
+	setNumSampleLimit(prof.m_numSampleLimit);
+	
+	processFilter<EbpMeshSample>(&smsh);
+	
+	const int& np = numFilteredSamples();
+	const Vector3F* ps = filteredSamples();
+	
+	m_pnds.reset(new Ray[np]);
+	
+	for(int i=0;i<np;++i) {
+		m_pnds[i].m_origin = ps[i];
+		m_pnds[i].m_dir = Vector3F::YAxis;
+	}
+}
+
 void GrowthSample::sampleBush(const GrowthSampleProfile& prof)
 {
 	const float relsz = prof.m_sizing * 1.1f;
 	setAngle(prof.m_angle);
 	setPortion(prof.m_portion);
+	setNumSampleLimit(prof.m_numSampleLimit);
+	
 	EbpSphere sph;
 	processFilter<EbpSphere>(&sph);
 	
@@ -65,7 +101,7 @@ Matrix44F GrowthSample::getGrowSpace(const int& i,
 		tm.rotateX(-prof.m_tilt);
 	}
 	
-	Vector3F modU(RandomFn11() * .1f, 0.f, RandomFn11() * .1f);
+	Vector3F modU(RandomFn11() * .14f, 0.f, RandomFn11() * .14f);
 	modU += m_pnds[i].m_dir;
 	modU.normalize();
 	

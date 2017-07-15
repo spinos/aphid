@@ -22,6 +22,7 @@ struct GrowthSampleProfile {
 	float m_portion;
 	float m_sizing;
 	float m_tilt;
+	int m_numSampleLimit;
 };
 
 class GrowthSample : public aphid::smp::SampleFilter {
@@ -33,6 +34,7 @@ public:
 	GrowthSample();
 	virtual ~GrowthSample();
 	
+	void samplePot(const GrowthSampleProfile& prof);
 	void sampleBush(const GrowthSampleProfile& prof);
 	
 	const int& numGrowthSamples() const;
