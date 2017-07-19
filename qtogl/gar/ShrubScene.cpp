@@ -20,6 +20,11 @@
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 #include "GrowthSample.h"
+#include "data/clover.h"
+#include "data/poapratensis.h"
+#include "data/haircap.h"
+#include "data/haircap.h"
+#include "data/hypericum.h"
 
 using namespace gar;
 using namespace aphid;

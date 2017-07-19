@@ -84,11 +84,5 @@ static const int GrassGeomDeviations[NUM_GRASS_PIECES] = {
 16
 };
 
-#include "data/clover.h"
-#include "data/poapratensis.h"
-#include "data/haircap.h"
-#include "data/haircap.h"
-#include "data/hypericum.h"
-
 }
 #endif

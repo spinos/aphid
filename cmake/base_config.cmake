@@ -11,8 +11,10 @@ ELSEIF (EXISTS /Users/jianzhang)
 ENDIF ()
 
 SET (APHID_DIR ${APPLE_HOME}/aphid)
+SET (OFL_DIR ${APPLE_HOME}/ofl)
 else()
 SET (APHID_DIR "~/aphid")
+SET (OFL_DIR "~/ofl")
 endif ()
 
 if(WIN32)

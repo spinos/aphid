@@ -24,7 +24,7 @@ iostreams zlib)
 ELSEIF (APPLE)
     find_package(Boost 1.55 REQUIRED  COMPONENTS system filesystem date_time regex thread)
 else()
-    find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono)
+    find_package(Boost 1.51 COMPONENTS system filesystem date_time regex thread chrono iostreams)
 endif()
 
 message (" boost system is " ${Boost_SYSTEM_LIBRARY})
