@@ -5,8 +5,12 @@
 #include <ogl/DrawParticle.h>
 
 namespace aphid {
-class EbpGrid;
-class Vector3F;
+class EbpSphere;
+
+namespace smp {
+class SampleFilter;
+}
+
 }
 
 class GLWidget : public aphid::Base3DView, public aphid::DrawParticle
@@ -29,8 +33,9 @@ private:
     void drawSamples();
     
 private:
-	aphid::EbpGrid * m_grid;
-	aphid::Vector3F * m_samples;
+	aphid::EbpSphere * m_grid;
+	aphid::smp::SampleFilter* m_flt;
+	
 };
 
 #endif

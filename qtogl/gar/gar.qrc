@@ -21,5 +21,7 @@
         <file>icons/haircap.png</file>
         <file>images/hypericum.png</file>
         <file>icons/hypericum.png</file>
+        <file>icons/bush.png</file>
+        <file>icons/evendist.png</file>
     </qresource>
 </RCC>

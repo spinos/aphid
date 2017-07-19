@@ -40,10 +40,10 @@ protected:
 	void addGrassBranch(PlantPiece * pl, GardenGlyph * gl);
 	
 private:
-	void genAPlant(VegetationPatch * vege);
-/// throw darts repeatedly untill patch is full
-	void genPlants(VegetationPatch * vege);
-	
+/// first ground piece
+	GardenGlyph* getGround();
+	void growOnGround(VegetationPatch * vege, GardenGlyph * gnd);
+
 private:
 	Vegetation * m_vege;
 };

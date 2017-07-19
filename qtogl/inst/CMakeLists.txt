@@ -19,6 +19,7 @@ target_link_libraries (psinst ${APHID_SDB_LIBRARY})
 target_link_libraries (psinst ${APHID_TOPO_LIBRARY})
 target_link_libraries (psinst ${APHID_OGL_LIBRARY})
 target_link_libraries (psinst ${APHID_KD_LIBRARY})
+target_link_libraries (psinst ${APHID_SMP_LIBRARY})
 
 target_link_libraries (psinst ${Boost_SYSTEM_LIBRARY})
 IF (WIN32)

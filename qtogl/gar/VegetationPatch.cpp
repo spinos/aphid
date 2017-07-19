@@ -36,52 +36,13 @@ int VegetationPatch::numPlants() const
 const PlantPiece * VegetationPatch::plant(const int & i) const
 { return m_plants[i]; }
 
-bool VegetationPatch::addPlant(PlantPiece * pl)
+void VegetationPatch::addPlant(PlantPiece * pl)
 {
-	const float px = RandomFn11() * m_yardR;
-	const float pz = RandomFn11() * m_yardR;
-	const Vector3F pos(px, 0.f, pz);
-	
-	if(pos.length() > m_yardR) {
-		return false;
-	}
-	
-	const float r = pl->exclR();
-	const float sc = 1.f - RandomF01() * .2f;
-	
-	if(intersectPlants(pos, r * sc) ) {
-		return false;
-	}
-	
-	Matrix44F tm;
-	tm.scaleBy(sc);
-	tm.rotateX(-m_tilt);
-	
-	Vector3F modU(RandomFn11() * .07f, 1.f, RandomFn11() * .07f);
-	modU.normalize();
-
-	Quaternion rotQ(RandomFn11() * PIF, modU);
-	Matrix33F locM(rotQ);
-	
-	locM *= tm.rotation();
-	tm.setRotation(locM);
-	tm.setTranslation(pos);
-	
-	pl->setTransformMatrix(tm);
-	
 	m_plants.push_back(pl);
-	
-	float nr = r * 2.f + pos.length();
-	if(nr > r * 12.f) {
-		nr = r * 12.f;
-	}
+	float nr = pl->exclR() * 12.f;
 	if(m_yardR < nr) {
 		m_yardR = nr;
 	}
-	
-	std::cout.flush();
-	
-	return true;
 }
 
 bool VegetationPatch::intersectPlants(const aphid::Vector3F & pos, const float & r) const
@@ -106,6 +67,7 @@ void VegetationPatch::clearPlants()
 		delete *it;
 	}
 	m_plants.clear();
+	m_yardR = .5f;
 }
 
 bool VegetationPatch::isFull() const

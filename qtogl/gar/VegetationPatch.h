@@ -43,8 +43,7 @@ public:
 	int numPlants() const;
 	const PlantPiece * plant(const int & i) const;
 	
-/// cannot collide with existing ones
-	bool addPlant(PlantPiece * pl);
+	void addPlant(PlantPiece * pl);
 	void clearPlants();
 	
 	bool isFull() const;
