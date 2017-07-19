@@ -17,9 +17,6 @@
 #include "VegetationPatch.h"
 #include "data/ground.h"
 #include "data/grass.h"
-#include "data/clover.h"
-#include "data/poapratensis.h"
-#include "data/haircap.h"
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 #include "GrowthSample.h"
@@ -126,6 +123,16 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 			exclR = sHaircapExclRadius[r];
 			vertcol = sHaircapMeshVertexColors[r];
 			tritexcoord = sHaircapMeshTriangleTexcoords[r];
+		break;
+		case gar::gtHypericum:
+			np = sHypericumNumVertices;
+			nt = sHypericumNumTriangleIndices / 3;
+			triind = sHypericumMeshTriangleIndices;
+			vertpos = sHypericumMeshVertices[r];
+			vertnml = sHypericumMeshNormals[r];
+			exclR = sHypericumExclRadius[r];
+			vertcol = sHypericumMeshVertexColors[r];
+			tritexcoord = sHypericumMeshTriangleTexcoords[r];
 		break;
 		default:
 		;

@@ -24,7 +24,8 @@ enum GlyphTyp {
 	gtBush = 2,
 	gtClover = 33,
 	gtPoapratensis = 34,
-	gtHaircap = 35
+	gtHaircap = 35,
+	gtHypericum = 36
 };
 
 enum GlyphGroup {
@@ -42,7 +43,7 @@ enum DisplayStat {
 /// begin, end, 32 per group
 static const int GlyphRange[2][2] = {
 {1, 3},
-{33, 36}
+{33, 37}
 };
 
 static const char * PieceMimeStr = "image/x-garden-piece";
