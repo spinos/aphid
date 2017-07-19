@@ -81,7 +81,7 @@ public:
 			}
 			level++;
 		}
-		m_repelDistance = .67f / levelCellSize(level);
+		m_repelDistance = 1.4f / levelCellSize(level);
 		storeCellNeighbors();
 	}
 	
@@ -92,6 +92,7 @@ public:
 	const int & numParticles() const;
 	
 	void update();
+	void updateNormalized(const float& l);
 	virtual void clear(); 
 			
 private:

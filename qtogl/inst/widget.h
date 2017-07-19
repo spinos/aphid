@@ -6,6 +6,7 @@
 
 namespace aphid {
 class EbpGrid;
+class Vector3F;
 }
 
 class GLWidget : public aphid::Base3DView, public aphid::DrawParticle
@@ -23,10 +24,13 @@ protected:
 public slots:
 
 signals:
+
+private:
+    void drawSamples();
     
 private:
 	aphid::EbpGrid * m_grid;
-	
+	aphid::Vector3F * m_samples;
 };
 
 #endif
