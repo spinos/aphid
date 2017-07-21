@@ -552,18 +552,25 @@ void AttribUtil::load3(const char * filename, MObject & target)
 
 void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int flag)
 {
-	std::map<std::string, MDagPath >::const_iterator ita = entities.begin();
-	for(;ita!=entities.end();++ita) scan(ita->second);
+    if(flag==0) {
+/// find plugs
+        m_dirtyPlugs.clear();
+        std::map<std::string, MDagPath >::const_iterator ita = entities.begin();
+        for(;ita!=entities.end();++ita) scan(ita->second);
+        AHelper::Info<int>(" AttribUtil found n dirty plugs", m_dirtyPlugs.length());
+    }
 	
-// AHelper::Info<int>("num dirty plug", m_dirtyPlugs.length());
 	if(m_dirtyPlugs.length() < 1) return;
 	
 	const unsigned n = m_dirtyPlugs.length();
 	unsigned i = 0;
 	for(;i<n;i++) bakeH5(m_dirtyPlugs[i], flag);
 	
-	m_dirtyPlugs.clear();
-	if(flag == 2) HesperisAttributeIO::ClearBakeData();
+	if(flag == 2) {
+/// cleanup
+	    m_dirtyPlugs.clear();
+	    HesperisAttributeIO::ClearBakeData();
+	}
 }
 
 void AttribUtil::bakeH5(const MPlug & attrib, int flag)

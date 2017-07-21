@@ -6,7 +6,8 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
-
+#ifndef OFL_HES_ATTRIB_UTIL_H
+#define OFL_HES_ATTRIB_UTIL_H
 #include "animUtil.h"
 #include <maya/MPlugArray.h>
 
@@ -26,6 +27,10 @@ public:
     void saveUserDefinedAttrib(AnimIO & doc, MObject & entity);
     void loadUserDefinedAttrib(AnimIO & doc, MObject & entity);
 	void saveH5(const std::map<std::string, MDagPath > & entities);
+/// write attrib at current frame, flag
+/// :0 begin 
+/// :1 reuse
+/// :2 end
 	void bakeH5(const std::map<std::string, MDagPath > & entities, int flag);
 	void load3(const char * filename, MObject & target);
     
@@ -59,8 +64,10 @@ private:
 	void bakeNumeric(const MObject & entity, aphid::ANumericAttribute * data, int flag);
 	void bakeEnum(const MObject & entity, aphid::AEnumAttribute * data, int flag);
 	std::string fullAttrName(const std::string & nodeName, aphid::AAttribute * data) const;
+/// write arrib through all frames
 	void bakeAttrib(const char *filename, MDagPathArray &active_list);
 
 private:
 	MPlugArray m_dirtyPlugs;
 };
+#endif

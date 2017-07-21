@@ -461,7 +461,7 @@ bool HesperisAttributeIO::BeginBakeAttribute(const std::string & attrName, ANume
 	HObject * d = CreateBake(&grp, data->numericType(), attrName, ".bake", stat );
 	grp.close();
 	if(stat) {
-		AHelper::Info<std::string >("bake attr", attrName );
+		//AHelper::Info<std::string >("bake attr", attrName );
 		MappedBakeData[attrName] = d;
 	}
 	else {
