@@ -16,7 +16,8 @@ namespace aphid {
 H5Availability H5Holder::H5Files;
 
 H5Holder::H5Holder() : m_lastFilename(""),
-m_lastTime(1e28), m_hasSampler(false), m_hasSpfSegment(false) 
+m_lastTime(1e28), m_hasSampler(false), m_hasSpfSegment(false),
+m_fileNameChanged(false)
 {}
 
 H5Holder::~H5Holder() 
@@ -33,7 +34,7 @@ void H5Holder::readSampler(SampleFrame & sampler)
     w.close();
 	
     if(hasSpf) {
-		std::cout<<"\n spf "<<sampler.m_spf;
+		std::cout<<"\n H5Holder::readSampler spf "<<sampler.m_spf<<"\n";
 		return;
 	}
 	
@@ -54,7 +55,8 @@ bool H5Holder::openH5File(const std::string & fileName)
 	    return false; 
 	}
 /// to read sampler on name changed
-	if(m_lastFilename != fileName) {
+    m_fileNameChanged = (m_lastFilename != fileName);
+	if(m_fileNameChanged) {
 	    m_hasSampler = false;
 	    m_lastFilename = fileName;
 	}
@@ -119,5 +121,8 @@ const AFrameRangeSegment & H5Holder::spfSegment() const
 
 const bool & H5Holder::hasSpfSegment() const
 { return m_hasSpfSegment; }
+
+bool H5Holder::fileNameChanged() const
+{ return m_fileNameChanged; }
 
 }

@@ -23,6 +23,7 @@ class H5Holder {
 	double m_lastTime;
 	bool m_hasSampler;
     bool m_hasSpfSegment;
+    bool m_fileNameChanged;
 	
 public:
 	H5Holder();
@@ -41,6 +42,7 @@ protected:
     
     const AFrameRangeSegment & spfSegment() const;
     const bool & hasSpfSegment() const;
+    bool fileNameChanged() const;
     
 private:
 

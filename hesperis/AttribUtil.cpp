@@ -27,7 +27,11 @@
 AttribNameMap AttribUtil::UserDefinedAttribFilter;
 
 AttribUtil::AttribUtil() {}
-AttribUtil::~AttribUtil() {}
+AttribUtil::~AttribUtil() 
+{
+    m_dirtyPlugs.clear();
+    m_plugStates.clear();
+}
 
 void AttribUtil::save3(const MDagPathArray & entities)
 {
@@ -70,7 +74,10 @@ void AttribUtil::scan(const MDagPath &entity)
         MPlug pl(entity.node(), oattrib);
 		pls.append(pl);
     }
-	AHelper::Merge(m_dirtyPlugs, pls);
+	//AHelper::Merge(m_dirtyPlugs, pls);
+	for(int i=0;i<pls.length();++i) {
+	    m_dirtyPlugs.append(pls[i]);
+	}
 }
 
 void AttribUtil::saveUDANames(AnimIO& doc)
@@ -522,7 +529,7 @@ void AttribUtil::saveH5(const MObject & node, AAttribute * data)
 	const std::string nodeName = HesperisIO::H5PathNameTo(node);
 	if(nodeName.size() < 1) return;
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % data->shortName() );
-	AHelper::Info<std::string>(" w attr", attrName);
+	//AHelper::Info<std::string>(" w attr", attrName);
 	H5IO::SaveData<HAttributeGroup, AAttribute>(attrName, data);
 }
 
@@ -555,31 +562,49 @@ void AttribUtil::bakeH5(const std::map<std::string, MDagPath > & entities, int f
     if(flag==0) {
 /// find plugs
         m_dirtyPlugs.clear();
+        m_plugStates.clear();
         std::map<std::string, MDagPath >::const_iterator ita = entities.begin();
         for(;ita!=entities.end();++ita) scan(ita->second);
+        storeAttribStats();
         AHelper::Info<int>(" AttribUtil found n dirty plugs", m_dirtyPlugs.length());
     }
 	
 	if(m_dirtyPlugs.length() < 1) return;
 	
 	const unsigned n = m_dirtyPlugs.length();
-	unsigned i = 0;
-	for(;i<n;i++) bakeH5(m_dirtyPlugs[i], flag);
+	for(unsigned i = 0;i<n;i++) {
+	    if(m_plugStates[i] == bkTrue) {
+	        bakeH5(m_dirtyPlugs[i], flag);
+	    }
+	}
 	
 	if(flag == 2) {
 /// cleanup
 	    m_dirtyPlugs.clear();
+	    m_plugStates.clear();
 	    HesperisAttributeIO::ClearBakeData();
 	}
 }
 
-void AttribUtil::bakeH5(const MPlug & attrib, int flag)
+void AttribUtil::storeAttribStats()
 {
-	if(AttributeHelper::IsDirectAnimated (attrib ) ) return;
+    const unsigned n = m_dirtyPlugs.length();
+	for(unsigned i = 0;i<n;i++) {
+	    AttribBakableState stat = bkUnknown;
+	    MPlugArray conns;
+	    if(m_dirtyPlugs[i].connectedTo (conns, true, false )) {
+	        if(AttributeHelper::IsDirectAnimated (conns ) ) {
+	            stat = bkAnimated;
+	        } else {
+	            stat = bkTrue;
+	        }
+	    }
+	    m_plugStates.push_back(stat);
+	}
+}
 
-	MPlugArray conns;
-	if(!attrib.connectedTo (conns, true, false )) return;
-/// has connection but not key-framed	
+void AttribUtil::bakeH5(const MPlug & attrib, int flag)
+{	
 	AAttribute::AttributeType t = AttributeHelper::GetAttribType(attrib.attribute());
 	if(t == AAttribute::aNumeric) {
 		bakeNumeric(attrib.node(), AttributeHelper::AsNumericData(attrib), flag );
@@ -756,19 +781,19 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
 
             MGlobal::executeCommand(MString("currentTime ")+realFrame);
             
-            AHelper::Info<double>("frame", realFrame);
-                        
+            AHelper::Info<double>("frame", realFrame);            
 			bakeH5(orderedDag, 1);
             
 			sampIter++;
         }
     }
-	bakeH5(orderedDag, 2);
     
+	bakeH5(orderedDag, 2);
+	
     AHelper::Info<int>("n samples", sampIter);
     
     saveH5(orderedDag);
-    useH5Bake();
+
 	BaseUtil::CloseH5();
     AHelper::Info<const char *>(" done baking attrib ", filename);
 }

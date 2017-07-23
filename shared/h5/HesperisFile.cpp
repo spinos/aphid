@@ -89,8 +89,8 @@ bool HesperisFile::writeTransform()
 {
 	std::map<std::string, BaseTransform *>::iterator ittrans = m_transforms.begin();
 	for(; ittrans != m_transforms.end(); ++ittrans) {
-		std::cout<<" write transform "<<WorldPath(ittrans->first)
-        <<"\n";
+		//std::cout<<" write transform "<<WorldPath(ittrans->first)
+        //<<"\n";
 		HTransform grp(WorldPath(ittrans->first));
 		grp.save(ittrans->second);
 		grp.close();
@@ -102,8 +102,8 @@ bool HesperisFile::writeCurve()
 {
 	std::map<std::string, CurveGroup *>::iterator itcurve = m_curves.begin();
 	for(; itcurve != m_curves.end(); ++itcurve) {
-		std::cout<<" write curve "<<WorldPath(itcurve->first)
-        <<"\n";
+		//std::cout<<" write curve "<<WorldPath(itcurve->first)
+        //<<"\n";
 		HCurveGroup grpCurve(WorldPath(itcurve->first));
 		grpCurve.save(itcurve->second);
 		grpCurve.close();
@@ -115,8 +115,8 @@ bool HesperisFile::writeTetrahedron()
 {
 	std::map<std::string, ATetrahedronMeshGroup *>::iterator it = m_terahedrons.begin();
 	for(; it != m_terahedrons.end(); ++it) {
-		std::cout<<" write tetrahedron mesh "<<WorldPath(it->first)
-		<<"\n";
+		//std::cout<<" write tetrahedron mesh "<<WorldPath(it->first)
+		//<<"\n";
 		HTetrahedronMeshGroup grp(WorldPath(it->first));
 		grp.save(it->second);
 		grp.close();
@@ -128,8 +128,8 @@ bool HesperisFile::writeTriangle()
 {
 	std::map<std::string, ATriangleMeshGroup *>::iterator it = m_triangleMeshes.begin();
 	for(; it != m_triangleMeshes.end(); ++it) {
-		std::cout<<" write triangle mesh "<<WorldPath(it->first)
-		<<"\n";
+		//std::cout<<" write triangle mesh "<<WorldPath(it->first)
+		//<<"\n";
 		HTriangleMeshGroup grp(WorldPath(it->first));
 		grp.save(it->second);
 		grp.close();
@@ -141,8 +141,8 @@ bool HesperisFile::writePolygon()
 {
     std::map<std::string, APolygonalMesh *>::iterator it = m_polyMeshes.begin();
 	for(; it != m_polyMeshes.end(); ++it) {
-		std::cout<<" write poly mesh "<<WorldPath(it->first)
-		<<"\n";
+		//std::cout<<" write poly mesh "<<WorldPath(it->first)
+		//<<"\n";
 		HPolygonalMesh grp(WorldPath(it->first));
 		grp.save(it->second);
 		grp.close();
@@ -154,8 +154,8 @@ bool HesperisFile::writeAttribute()
 {
 	std::map<std::string, AAttribute *>::iterator it = m_attribs.begin();
 	for(; it != m_attribs.end(); ++it) {
-		std::cout<<" write attrib "<<WorldPath(it->first)
-		<<"\n";
+		//std::cout<<" write attrib "<<WorldPath(it->first)
+		//<<"\n";
 		HAttributeGroup grp(WorldPath(it->first));
 		grp.save(it->second);
 		grp.close();

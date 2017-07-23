@@ -63,7 +63,7 @@ private:
 	template<typename Td>
 	Td * getDataStorage(aphid::HBase * grp, const std::string & attrName, bool & stat)
 	{
-		Td * d = NULL;
+	    Td * d = NULL;
 		if(m_mappedAttribDatas.find(attrName) == m_mappedAttribDatas.end() ) {
             d = grp->openDataStorage<Td>(".bake", stat);
 			if(stat) m_mappedAttribDatas[attrName] = d;
@@ -85,6 +85,7 @@ private:
 		if(stat) {
             Tv a, b;
 			d->readPoint((char *)&a, sampler->sampleOfset0() );
+			
 			if(sampler->m_weights[0] > .99f) {
 				result = a;
 			}

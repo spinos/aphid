@@ -14,7 +14,7 @@ set (CUSOURCES ${APHID_DIR}/radixsort/radixsort.cu)
 
 CUDA_ADD_EXECUTABLE (radixst ${HEADER_FILES} ${SOURC_FILES} ${CUSOURCES})
 
-target_link_libraries(radixst ${CUDA_CUT_LIBRARY})
+#target_link_libraries(radixst ${CUDA_CUT_LIBRARY})
 target_link_libraries(radixst ${CUDA_CUDART_LIBRARY})
 
 ## boost must after nvcc for some reason

@@ -222,7 +222,7 @@ void HOocArray<DataRank, NRows, BufSize>::printAValue(char * v)
 
 template <int DataRank, int NRows, int BufSize>
 void HOocArray<DataRank, NRows, BufSize>::readPoint(char * dst, int idx)
-{
+{   
 	if(idx >= m_pnts) {
 		std::cout<<"\n HOocArray out-of-range index: "<<idx;
 		return;

@@ -3,6 +3,7 @@
 
 IF (WIN32)
 SET (APHID_DIR "D:/aphid")
+SET (OFL_DIR "D:/ofl")
 elseif (APPLE)
 IF (EXISTS /Users/jollyroger)
 	SET (APPLE_HOME /Users/jollyroger)

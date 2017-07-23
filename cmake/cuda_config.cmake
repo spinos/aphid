@@ -1,5 +1,9 @@
 MESSAGE (" find CUDA ")
 
+IF (WIN32)
+SET (CUDA_SDK_ROOT_DIR "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v7.0")
+ENDIF ()
+
 find_package (CUDA QUIET)
 
 IF (${CUDA_FOUND})
@@ -13,9 +17,12 @@ message ("cuda blas librarie " ${CUDA_cublas_LIBRARY})
 message ("cuda sparse librarie " ${CUDA_cusparse_LIBRARY})
 message ("cuda toolkit include " ${CUDA_TOOLKIT_INCLUDE})
 
+IF (WIN32)
+ELSE ()
 find_library (CUDA_CUT_LIBRARY NAMES libcutil_${CMAKE_SYSTEM_PROCESSOR}
 	HINTS ${CUDA_SDK_ROOT_DIR}/lib
 	DOC "Location of cutil library")
+ENDIF()
 
 message ("cuda cut library " ${CUDA_CUT_LIBRARY})
 

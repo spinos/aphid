@@ -74,8 +74,8 @@ bool H5IO::objectExists(const std::string & fullPath)
 
 void H5IO::CreateGroup(const std::string & name)
 {
-    std::cout<<"\n h5 io create group "<<name
-    <<" in file "<<HObject::FileIO.fileName();
+    //std::cout<<"\n h5 io create group "<<name
+    //<<" in file "<<HObject::FileIO.fileName();
 /// hierarchy to name
 	std::vector<std::string> allNames; 
     SHelper::listAllNames(name, allNames);

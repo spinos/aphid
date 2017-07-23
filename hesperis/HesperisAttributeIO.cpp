@@ -132,7 +132,7 @@ bool HesperisAttributeIO::AddAttribute(const MPlug & attrib, HesperisFile * file
 {
     const std::string nodeName = H5PathNameTo(attrib.node());
 	const std::string attrName = boost::str(boost::format("%1%|%2%") % nodeName % attrib.partialName().asChar());
-	AHelper::Info<std::string>("HesperisAttributeIO add attrib ", attrName);
+	//AHelper::Info<std::string>("HesperisAttributeIO add attrib ", attrName);
 	
 	AAttribute::AttributeType t = AttributeHelper::GetAttribType(attrib.attribute());
 	switch(t) {
@@ -474,8 +474,9 @@ HObject * HesperisAttributeIO::CreateBake(HBase * grp, ANumericAttribute::Numeri
 										const std::string & attrName, const std::string & dataName,
 										bool &stat)
 {
-    std::cout<<"\n HesperisAttributeIO create bake "<<grp->pathToObject()<<dataName
-        <<" in file "<<HObject::FileIO.fileName();
+    //std::cout<<"\n HesperisAttributeIO create bake "<<grp->pathToObject()<<dataName
+    //    <<" in file "<<HObject::FileIO.fileName()
+   //     <<"\n";
 	HObject * d = NULL;
 	stat = false;
 	switch(typ) {

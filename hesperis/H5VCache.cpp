@@ -129,6 +129,7 @@ char H5VCache::readFrame(float *data, int count, const char *h5name, int frame, 
     }
     
     bakeNode.close();
+    
     return res;
 }
 
@@ -205,9 +206,7 @@ bool H5VCache::readData(const std::string & fileName,
         return m_hasData;
     }
     
-    // std::cout<<"\n oflBakePNode switch to h5 file "<<fileName;
-    
-    if(!hasArbitrarySampleChecked() ) {
+    if(!hasArbitrarySampleChecked() || fileNameChanged() ) {
         checkArbitrarySamples(HObject::ValidPathName(pathName) );
     }
     

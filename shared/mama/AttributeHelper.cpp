@@ -331,10 +331,8 @@ bool AttributeHelper::AddEnumAttr(MObject & attr,
 	return stat == MS::kSuccess;
 }
 
-bool AttributeHelper::IsDirectAnimated(const MPlug & attrib)
+bool AttributeHelper::IsDirectAnimated(const MPlugArray & conns)
 {
-	MPlugArray conns;
-	attrib.connectedTo ( conns, true, false);
 	if(conns.length() < 1) return false;
 
 /// connected to a time-based animation curve node	
@@ -342,6 +340,13 @@ bool AttributeHelper::IsDirectAnimated(const MPlug & attrib)
 	return (node.hasFn( MFn::kAnimCurveTimeToAngular )  ||
 			node.hasFn( MFn::kAnimCurveTimeToDistance )  ||
 			node.hasFn( MFn::kAnimCurveTimeToUnitless ) );
+}
+
+bool AttributeHelper::IsDirectAnimated(const MPlug & attrib)
+{
+	MPlugArray conns;
+	attrib.connectedTo ( conns, true, false);
+	return IsDirectAnimated(conns);
 }
 
 MStatus AttributeHelper::CreateVector3FAttrib(MObject & a,

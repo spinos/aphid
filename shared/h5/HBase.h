@@ -157,7 +157,8 @@ public:
 				stat = false;
 			}
 		}
-		d->close();
+/// not a data set?
+		//d->close();
 		return d;
 	}
 	
@@ -170,7 +171,9 @@ public:
 		}
 		T * d = new T(name);
 		stat = d->openStorage(fObjectId);
-		d->close();
+		//d->close();		
+		//std::cout<<"\n HBase:: open sto end"<<__LINE__<<__FILE__<<"\n";
+    //std::cout.flush();
 		return d;
 	}
 	

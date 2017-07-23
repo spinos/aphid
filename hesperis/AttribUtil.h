@@ -10,12 +10,24 @@
 #define OFL_HES_ATTRIB_UTIL_H
 #include "animUtil.h"
 #include <maya/MPlugArray.h>
+#include <vector>
 
 namespace aphid {
 class AAttribute;
 }
 
 class AttribUtil : public AnimUtil {
+/// all attrib plugs
+    MPlugArray m_dirtyPlugs;
+    
+    enum AttribBakableState {
+       bkUnknown = 0,
+       bkAnimated = 1,
+       bkTrue = 2
+    };
+    
+    std::vector<AttribBakableState > m_plugStates;
+    
 public:
 	AttribUtil();
 	virtual ~AttribUtil();
@@ -68,6 +80,7 @@ private:
 	void bakeAttrib(const char *filename, MDagPathArray &active_list);
 
 private:
-	MPlugArray m_dirtyPlugs;
+	void storeAttribStats();
+	
 };
 #endif

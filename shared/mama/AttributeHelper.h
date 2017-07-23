@@ -135,6 +135,7 @@ public:
 							const std::string & nameLong, 
 							const std::string & nameShort,
 							MFnNumericData::Type t);
+	static bool IsDirectAnimated(const MPlugArray & conns);
 	static bool IsDirectAnimated(const MPlug & attrib);
 	
 	static MStatus CreateVector3FAttrib(MObject & a,
