@@ -1,24 +1,20 @@
+/*
+ *  rodt
+ */
 #ifndef SOLVERTHREAD_H
 #define SOLVERTHREAD_H
 
 #include <qt/BaseSolverThread.h>
 #include <pbd/pbd_common.h>
+#include <pbd/SimulationContext.h>
 
 QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
-//class BoxProgram;
-class SolverThread : public aphid::BaseSolverThread
+
+class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::SimulationContext
 {
-    //BoxProgram * m_program;
-    aphid::Vector3F * m_pos;
-	aphid::Vector3F * m_projectedPos;
-	aphid::Vector3F * m_posLast;
-	aphid::Vector3F * m_force;
-	aphid::Vector3F * m_velocity;
 	unsigned * m_indices;
-	float * m_invMass;
-	aphid::Vector3F * m_Ri;
 	aphid::pbd::Spring * m_spring;
 	aphid::pbd::DistanceConstraint * m_distanceConstraint;
 	unsigned m_numBendingConstraint, m_numDistanceConstraint;
@@ -30,7 +26,6 @@ public:
     void initProgram();
 	
     unsigned numIndices() const;
-    aphid::Vector3F * pos();
     unsigned * indices();
 
 protected:
@@ -41,11 +36,9 @@ private:
 	void setDistanceConstraint(aphid::pbd::DistanceConstraint * dest, unsigned a, unsigned b, float k);
 	void computeForces();
 	void integrateExplicitWithDamping(float dt);
-	void integrateVerlet(float dt);
 	void updateConstraints(float dt);
 	void updateDistanceConstraint(unsigned i);
 	void groundCollision();
-	void integrate(float deltaTime);
 	
 	static aphid::Vector3F getVerletVelocity(aphid::Vector3F x_i, aphid::Vector3F xi_last, float dt );
 

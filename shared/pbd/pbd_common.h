@@ -1,6 +1,7 @@
 #ifndef PBD_COMMON_H
 #define PBD_COMMON_H
 #include <AllMath.h>
+namespace aphid {
 namespace pbd {
 
 struct Spring {
@@ -20,6 +21,7 @@ struct BendingConstraint {
 	float rest_length,  w,  k, k_prime;
 };
 
+}
 }
 #endif        //  #ifndef PBD_COMMON_H
 

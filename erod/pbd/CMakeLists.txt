@@ -1,5 +1,4 @@
-set (PBD_HEADER_FILES pbd_common.h
-window.h
+set (PBD_HEADER_FILES window.h
 glwidget.h
 SolverThread.h)
 
