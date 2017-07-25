@@ -62,6 +62,26 @@ void SimulationContext::clearGravitiyForce()
 	}
 }
 
+void SimulationContext::semiImplicitEulerIntegrate(ParticleData* part, float dt)
+{
+	const int& np = part->numParticles();
+	Vector3F* vel = part->velocity();
+	Vector3F* pos = part->projectedPos();
+	Vector3F* f = part->force();
+    float* im = part->invMass();
+	
+	for(int i=0;i< np;i++) {
+		vel[i] += f[i] * (im[i] * dt);
+		pos[i] += vel[i] * dt;
+	}
+}
+
+void SimulationContext::addExternalForce()
+{}
+
+void SimulationContext::positionConstraintProjection()
+{}
+
 }
 }
 

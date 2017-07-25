@@ -27,6 +27,11 @@ protected:
     void integrate(float dt);
 /// clear force add gravity
     void clearGravitiyForce();
+/// v <- v + a dt
+/// x <- x + v dt
+	void semiImplicitEulerIntegrate(ParticleData* part, float dt);
+	virtual void addExternalForce();
+	virtual void positionConstraintProjection();
 	
 private:
    

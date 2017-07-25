@@ -22,24 +22,12 @@ class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::ElasticR
 public:
     SolverThread(QObject *parent = 0);
     ~SolverThread();
-    
-    unsigned numIndices() const;
-    unsigned * indices();
 
 protected:
     virtual void stepPhysics(float dt);
 	
 private:
-    void setSpring(aphid::pbd::Spring * dest, unsigned a, unsigned b, float ks, float kd, int type);
-	void setDistanceConstraint(aphid::pbd::DistanceConstraint * dest, unsigned a, unsigned b, float k);
-	void computeForces();
-	void integrateExplicitWithDamping(float dt);
-	void updateConstraints(float dt);
-	void updateDistanceConstraint(unsigned i);
-	void groundCollision();
-	
-	static aphid::Vector3F getVerletVelocity(aphid::Vector3F x_i, aphid::Vector3F xi_last, float dt );
-
+    
 public slots:
    
 };

@@ -8,9 +8,9 @@ namespace pbd {
  
 class ParticleData {
 
-    Vector3F * m_pos;
+    Vector3F * m_posLast;
+	Vector3F * m_pos;
 	Vector3F * m_projectedPos;
-	Vector3F * m_posLast;
 	Vector3F * m_force;
 	Vector3F * m_velocity;
 	Vector3F * m_Ri;
@@ -30,10 +30,16 @@ public:
     Vector3F* pos();
     Vector3F* projectedPos();
     Vector3F* posLast();
-    Vector3F * force();
-	Vector3F * velocity();
-	Vector3F * Ri();
+    Vector3F* force();
+	Vector3F* velocity();
+	Vector3F* Ri();
 	float * invMass();
+	
+/// posLast <- pos
+/// pos<- posProjected
+	void cachePositions();
+/// v <- v(1 - d)
+	void dampVelocity(float damping);
 	
 private:
 };

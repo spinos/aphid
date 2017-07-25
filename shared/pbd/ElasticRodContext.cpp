@@ -33,5 +33,17 @@ void ElasticRodContext::clearConstraints()
     m_edgeConstraints.clear();
 }
 
+void ElasticRodContext::positionConstraintProjection()
+{
+	int nloop = 0;
+	while(nloop < 4) {
+		EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
+		for(;it!=m_edgeConstraints.end();++it) {
+			(*it)->solvePositionConstraint(particles(), ghostParticles() );
+			nloop++;
+		}
+	}
+}
+
 }
 }

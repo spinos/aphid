@@ -25,7 +25,8 @@ public:
 protected:
     ParticleData* ghostParticles();
     void addElasticRodEdgeConstraint(int a, int b, int g);
-    
+    virtual void positionConstraintProjection();
+	
 private:
     void clearConstraints();
     
