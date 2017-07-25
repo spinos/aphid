@@ -5,42 +5,33 @@
 #ifndef APH_PBD_SIMULATIONCONTEXT_H
 #define APH_PBD_SIMULATIONCONTEXT_H
 
-#include <math/Vector3F.h>
+#include "ParticleData.h"
+#include <vector>
 
 namespace aphid {
 namespace pbd {
+
 class SimulationContext {
 
-    Vector3F * m_pos;
-	Vector3F * m_projectedPos;
-	Vector3F * m_posLast;
-	Vector3F * m_force;
-	Vector3F * m_velocity;
-	Vector3F * m_Ri;
-	float * m_invMass;
-	int m_numPoints;
-	
+    ParticleData m_part;
+    
 public:
     SimulationContext();
     virtual ~SimulationContext();
     
-    const int& numPoints() const;
+    const ParticleData* c_particles() const;
     
-    Vector3F* pos();
-    Vector3F* projectedPos();
-    Vector3F* posLast();
-    Vector3F * force();
-	Vector3F * velocity();
-	Vector3F * Ri();
-	float * invMass();
-	
 protected:
-    void createNPoints(int x);
+    ParticleData* particles();
     void integrateVerlet(float dt);
     void integrate(float dt);
+/// clear force add gravity
+    void clearGravitiyForce();
 	
 private:
+   
 };
+
 }
 }
 

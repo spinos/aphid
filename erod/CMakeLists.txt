@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 project (elasticRod)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_BUILD_TYPE RELEASE)
+set (CMAKE_BUILD_TYPE RelWithDebInfo)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 set(CMAKE_MACOSX_BUNDLE OFF)
 

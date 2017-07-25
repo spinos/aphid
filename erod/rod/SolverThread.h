@@ -6,13 +6,13 @@
 
 #include <qt/BaseSolverThread.h>
 #include <pbd/pbd_common.h>
-#include <pbd/SimulationContext.h>
+#include <pbd/ElasticRodContext.h>
 
 QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
-class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::SimulationContext
+class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::ElasticRodContext
 {
 	unsigned * m_indices;
 	aphid::pbd::Spring * m_spring;
@@ -23,8 +23,6 @@ public:
     SolverThread(QObject *parent = 0);
     ~SolverThread();
     
-    void initProgram();
-	
     unsigned numIndices() const;
     unsigned * indices();
 

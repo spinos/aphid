@@ -19,17 +19,13 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	resetView();
 	m_solver = new SolverThread;
 }
-//! [0]
 
-//! [1]
 GLWidget::~GLWidget()
 {
 }
 
 void GLWidget::clientInit()
 {
-    m_solver->initProgram();
-
     connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 }
@@ -38,45 +34,30 @@ void GLWidget::clientDraw()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
-	const Vector3F * pos = m_solver->pos();
-	const unsigned * indices = m_solver->indices();
-	const unsigned NI = m_solver->numIndices();
+	const pbd::ParticleData* particle = m_solver->c_particles();
+	const Vector3F * pos = particle->pos();
+	const int& np = particle->numParticles();
 	glColor3f(1,1,1);
-	glBegin(GL_TRIANGLES);
-	unsigned i;
-	for(i=0; i< NI; i += 3) {
-		Vector3F p1 = pos[indices[i]];
-		Vector3F p2 = pos[indices[i+1]];
-		Vector3F p3 = pos[indices[i+2]];
+	glBegin(GL_LINES);
+	for(int i=0; i< np-1;++i) {
+		const Vector3F& p1 = pos[i];
+		const Vector3F& p2 = pos[i+1];
 		glVertex3f(p1.x,p1.y,p1.z);
 		glVertex3f(p2.x,p2.y,p2.z);
-		glVertex3f(p3.x,p3.y,p3.z);
 	}
 	glEnd();
 	
-	/*
-	Vector3F bbox[NTri * 2];
-    m_program->getAabbs(bbox, NTri);
-
-	GeoDrawer * dr = getDrawer();
-	dr->setColor(0.f, 0.5f, 0.f);
-	for(i=0; i< NTri; i++) {
-	    BoundingBox bb;
-	    bb.updateMin(bbox[i*2]);
-	    bb.updateMax(bbox[i*2 + 1]);
-	    dr->boundingBox(bb);
-	}
-	
-	glColor3f(1,0,0);
-	glBegin(GL_LINES);
-	for(i=0; i< m_numSpring; i++) {
-		// if(m_spring[i].type != BEND_SPRING) continue;
-		Vector3F p1 = m_pos[m_spring[i].p1];
-		Vector3F p2 = m_pos[m_spring[i].p2];
+	const pbd::ParticleData* ghost = m_solver->c_ghostParticles();
+	const Vector3F * gpos = ghost->pos();
+	const int& ngp = ghost->numParticles();
+	glColor3f(1,1,0);
+	glBegin(GL_POINTS);
+	for(int i=0; i< ngp;++i) {
+		const Vector3F& p1 = gpos[i];
 		glVertex3f(p1.x,p1.y,p1.z);
-		glVertex3f(p2.x,p2.y,p2.z);
 	}
-	glEnd();*/
+	glEnd();
+	
 }
 //! [7]
 
