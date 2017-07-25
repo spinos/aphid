@@ -1,0 +1,1870 @@
+https://github.com/korzen/PositionBasedDynamics-ElasticRod
+http://www.interactive-graphics.de/PositionBasedDynamics/doc/html/
+
+PositionBasedDynamics-ElasticRod/PositionBasedDynamics/PositionBasedElasticRod.h
+
+#ifndef POSITION_BASED_ELASTIC_ROD_H
+#define POSITION_BASED_ELASTIC_ROD_H
+#include <Eigen/Dense>
+// ------------------------------------------------------------------------------------
+namespace PBD
+{
+// Implementation of "Position Based Elastic Rods" paper
+// (http://www.nobuyuki-umetani.com/PositionBasedElasticRod/2014_sca_PositionBasedElasticRod.html)
+// for Position Based Dynamics library
+// (http://github.com/janbender/PositionBasedDynamics)
+//
+//	Przemyslaw Korzeniowski
+//	Department of Surgery and Cancer
+//	Imperial College London
+//
+// https://github.com/korzen/PositionBasedDynamics-ElasticRod
+//	p.korzeniowski [at] imperial.ac.uk
+//	korzenio [at] gmail.com
+//
+//	Bending and twisting constraints ported to Eigen from https ://github.com/serpheroth/rod
+//
+// IMPORTANT: OpenMP is not supported in this release!
+// By default, the CMake generated ElasticRodDemo project has OpenMP turned on. Deactivate it in order to run the demo.
+//
+// v0.1 (initial release)- see /Demos/ElasticRodDemos/ReadMe.txt for more info
+class PositionBasedElasticRod
+{
+public:
+// -------------- Position Based Elastic Rod -----------------------------------------------------
+/// <summary>
+/// Sequentially project all three edge-ghost points constraints (eq. 18, 19 and 20 in the paper)
+/// See the paper appendix for derivation details
+/// </summary>
+static bool ProjectEdgeConstraints(
+const Eigen::Vector3f& pA, const float wA, const Eigen::Vector3f& pB, const float wB, const Eigen::Vector3f& pG, const float wG,
+const float edgeKs, const float edgeRestLength, const float ghostEdgeRestLength,
+Eigen::Vector3f& corr0, Eigen::Vector3f& corr1, Eigen::Vector3f& corr2);
+/// <summary>
+/// Project bending and twisting constraints (eq. 21 in the paper)
+/// See the paper appendix for derivation details
+/// </summary>
+static bool PositionBasedElasticRod::ProjectBendingAndTwistingConstraint(
+const Eigen::Vector3f& pA, const float wA,
+const Eigen::Vector3f& pB, const float wB,
+const Eigen::Vector3f& pC, const float wC,
+const Eigen::Vector3f& pD, const float wD,
+const Eigen::Vector3f& pE, const float wE,
+const Eigen::Vector3f& bendingAndTwistingKs,
+const float midEdgeLength,
+const Eigen::Vector3f& restDarbouxVector,
+Eigen::Vector3f& oa, Eigen::Vector3f& ob, Eigen::Vector3f& oc, Eigen::Vector3f& od, Eigen::Vector3f& oe,
+bool useGaussianElimination);
+/// <summary>
+/// Computes the material frame (eq. 3 in the paper)
+/// </summary>
+static bool ComputeMaterialFrame(
+const Eigen::Vector3f& pA, //1st centreline point id
+const Eigen::Vector3f& pB, //2nd centreline point id
+const Eigen::Vector3f& pG, //corresponding ghost point
+Eigen::Matrix3f& frame); //resulting material frame
+/// <summary>
+/// Computes the Darboux Vector (eq. 10 in the paper)
+/// </summary>
+static bool ComputeDarbouxVector(
+const Eigen::Matrix3f& dA, //1st material frame
+const Eigen::Matrix3f& dB, //2nd material frame
+const float mid_edge_length, //
+Eigen::Vector3f& darboux_vector); //resulting darboux vector
+/// <summary>
+/// Computes the material frame derivatives (eq. 43, 44 and 45 in the appendix)
+/// </summary>
+static bool ComputeMaterialFrameDerivative(
+const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, const Eigen::Vector3f& p2, // points
+const Eigen::Matrix3f& d, //corresponding material frame
+Eigen::Matrix3f& d1p0, Eigen::Matrix3f& d1p1, Eigen::Matrix3f& d1p2, //resulting matrices
+Eigen::Matrix3f& d2p0, Eigen::Matrix3f& d2p1, Eigen::Matrix3f& d2p2, //resulting matrices
+Eigen::Matrix3f& d3p0, Eigen::Matrix3f& d3p1, Eigen::Matrix3f& d3p2); //resulting matrices
+/// <summary>
+/// Compute the Darboux gradient in respect to each point (eq. 49-53 in the appendix)
+/// </summary>
+static bool ComputeDarbouxGradient(
+const Eigen::Vector3f& darboux_vector, //Darboux vector
+const float length, //element length
+const Eigen::Matrix3f& dA, //1st material frame
+const Eigen::Matrix3f& dB, //2nd material frame
+const Eigen::Matrix3f[3][3], const Eigen::Matrix3f[3][3], //material frames derivatives
+const Eigen::Vector3f& bendAndTwistKs, //bending (x,y) and twisting (z) stiffness
+Eigen::Matrix3f& omega_pa, Eigen::Matrix3f& omega_pb, Eigen::Matrix3f& omega_pc, Eigen::Matrix3f& omega_pd, Eigen::Matrix3f& omega_pe); //resulting matrices
+};
+}
+#endif
+
+#include "PositionBasedElasticRod.h"
+#include "MathFunctions.h"
+#include <cfloat>
+// Implementation of "Position Based Elastic Rods" paper
+// (http://www.nobuyuki-umetani.com/PositionBasedElasticRod/2014_sca_PositionBasedElasticRod.html)
+// for Position Based Dynamics library
+// (http://github.com/janbender/PositionBasedDynamics)
+//
+//	Przemyslaw Korzeniowski
+//	Department of Surgery and Cancer
+//	Imperial College London
+//
+// https://github.com/korzen/PositionBasedDynamics-ElasticRod
+//	p.korzeniowski [at] imperial.ac.uk
+//	korzenio [at] gmail.com
+//
+//	Bending and twisting constraints ported to Eigen from https ://github.com/serpheroth/rod
+//
+// IMPORTANT: OpenMP is not supported in this release!
+// By default, the CMake generated ElasticRodDemo project has OpenMP turned on. Deactivate it in order to run the demo.
+//
+// v0.1 (initial release)- see /Demos/ElasticRodDemos/ReadMe.txt for more info
+using namespace PBD;
+const float EPSILON = 1e-6f;
+const int permutation[3][3] = {
+//0, 1, 2,
+//1, 2, 0,
+//2, 1, 0
+0, 2, 1,
+1, 0, 2,
+2, 1, 0
+};
+bool PositionBasedElasticRod::ProjectEdgeConstraints(
+const Eigen::Vector3f& pA, const float wA,
+const Eigen::Vector3f& pB, const float wB,
+const Eigen::Vector3f& pG, const float wG,
+const float edgeKs, const float edgeRestLength, const float ghostEdgeRestLength,
+Eigen::Vector3f& corrA, Eigen::Vector3f& corrB, Eigen::Vector3f& corrC)
+{
+corrA.setZero(); corrB.setZero(); corrC.setZero();
+//Edge distance constraint
+Eigen::Vector3f dir = pA - pB;
+float len = dir.norm();
+float wSum = wA + wB;
+if (len > EPSILON && wSum > EPSILON)
+{
+Eigen::Vector3f dP = (1.0f / wSum) * (len - edgeRestLength) * (dir / len) * edgeKs;
+corrA -= dP * wA;
+corrB += dP * wB;
+corrC = Eigen::Vector3f(0, 0, 0);
+}
+//Bisector constraint
+Eigen::Vector3f pm = 0.5f * (pA + pB);
+Eigen::Vector3f p0p2 = pA - pG;
+Eigen::Vector3f p2p1 = pG - pB;
+Eigen::Vector3f p1p0 = pB - pA;
+Eigen::Vector3f p2pm = pG - pm;
+float lambda;
+wSum = wA * p0p2.squaredNorm() + wB * p2p1.squaredNorm() + wG * p1p0.squaredNorm();
+if (wSum > EPSILON)
+{
+lambda = p2pm.dot(p1p0) / wSum * edgeKs;
+corrA -= p0p2 * lambda * wA;
+corrB -= p2p1 * lambda * wB;
+corrC -= p1p0 * lambda * wG;
+}
+////Ghost-Edge constraint
+wSum = 0.25f * wA + 0.25f * wB + 1.0f * wG;
+if (wSum > EPSILON)
+{
+//need to use updated positions
+pm = 0.5f * (pA + corrA + pB + corrB);
+p2pm = pG + corrC - pm;
+float p2pm_mag = p2pm.norm();
+p2pm *= 1.0f / p2pm_mag;
+lambda = (p2pm_mag - ghostEdgeRestLength) / wSum * edgeKs;
+corrA += 0.5f * wA * lambda * p2pm;
+corrB += 0.5f * wB * lambda * p2pm;
+corrC -= 1.0f * wG * lambda * p2pm;
+}
+return true;
+}
+bool PositionBasedElasticRod::ProjectBendingAndTwistingConstraint(
+const Eigen::Vector3f& pA, const float wA,
+const Eigen::Vector3f& pB, const float wB,
+const Eigen::Vector3f& pC, const float wC,
+const Eigen::Vector3f& pD, const float wD,
+const Eigen::Vector3f& pE, const float wE,
+const Eigen::Vector3f& bendingAndTwistingKs,
+const float midEdgeLength,
+const Eigen::Vector3f& restDarbouxVector,
+Eigen::Vector3f& corrA, Eigen::Vector3f& corrB, Eigen::Vector3f& corrC, Eigen::Vector3f& corrD, Eigen::Vector3f& corrE,
+bool useGaussianElimination)
+{
+Eigen::Vector3f darboux_vector;
+Eigen::Matrix3f dA, dB;
+PositionBasedElasticRod::ComputeMaterialFrame(pA, pB, pD, dA);
+PositionBasedElasticRod::ComputeMaterialFrame(pB, pC, pE, dB);
+PositionBasedElasticRod::ComputeDarbouxVector(dA, dB, midEdgeLength, darboux_vector);
+Eigen::Matrix3f dajpi[3][3];
+ComputeMaterialFrameDerivative(pA, pB, pD, dA,
+dajpi[0][0], dajpi[0][1], dajpi[0][2],
+dajpi[1][0], dajpi[1][1], dajpi[1][2],
+dajpi[2][0], dajpi[2][1], dajpi[2][2]);
+Eigen::Matrix3f dbjpi[3][3];
+ComputeMaterialFrameDerivative(pB, pC, pE, dB,
+dbjpi[0][0], dbjpi[0][1], dbjpi[0][2],
+dbjpi[1][0], dbjpi[1][1], dbjpi[1][2],
+dbjpi[2][0], dbjpi[2][1], dbjpi[2][2]);
+Eigen::Matrix3f constraint_jacobian[5];
+ComputeDarbouxGradient(
+darboux_vector, midEdgeLength, dA, dB,
+dajpi, dbjpi,
+bendingAndTwistingKs,
+constraint_jacobian[0],
+constraint_jacobian[1],
+constraint_jacobian[2],
+constraint_jacobian[3],
+constraint_jacobian[4]);
+Eigen::Vector3f constraint_value(bendingAndTwistingKs[0] * (darboux_vector[0] - restDarbouxVector[0]),
+bendingAndTwistingKs[1] * (darboux_vector[1] - restDarbouxVector[1]),
+bendingAndTwistingKs[2] * (darboux_vector[2] - restDarbouxVector[2]));
+Eigen::Matrix3f factor_matrix;
+factor_matrix.setZero();
+Eigen::Matrix3f tmp_mat;
+float invMasses[]{ wA, wB, wC, wD, wE };
+for (int i = 0; i < 5; ++i)
+{
+//dj::MulMatrixRightTransposed3x3<real>((real(*)[3]) &constraint_jacobian[i][0][0],
+//	(real(*)[3]) &constraint_jacobian[i][0][0],
+//	(real(*)[3]) &tmp_mat[0][0]);
+//tmp_mat = constraint_jacobian[i] * constraint_jacobian[i].transpose();
+tmp_mat = constraint_jacobian[i].transpose() * constraint_jacobian[i];
+tmp_mat.col(0) *= invMasses[i];
+tmp_mat.col(1) *= invMasses[i];
+tmp_mat.col(2) *= invMasses[i];
+factor_matrix += tmp_mat;
+}
+Eigen::Vector3f dp[5];
+//if (useGaussianElimination)
+//{
+//	Vec3 tmp(constraint_value[0], constraint_value[1], constraint_value[2]);
+//	dj::GaussianElimination<real, 3>(&factor_matrix[0][0], &tmp[0]);
+//	for (int i = 0; i < 5; ++i)
+//	{
+//	//dp[i][0] = (constraint_jacobian[i][0][0] * tmp[0] + constraint_jacobian[i][1][0] * tmp[1] + constraint_jacobian[i][2][0] * tmp[2]);
+//	//dp[i][1] = (constraint_jacobian[i][0][1] * tmp[0] + constraint_jacobian[i][1][1] * tmp[1] + constraint_jacobian[i][2][1] * tmp[2]);
+//	//dp[i][2] = (constraint_jacobian[i][0][2] * tmp[0] + constraint_jacobian[i][1][2] * tmp[1] + constraint_jacobian[i][2][2] * tmp[2]);
+//	dp[i][0] = real(invMasses[i]) * (constraint_jacobian[i][0][0] * tmp[0] + constraint_jacobian[i][1][0] * tmp[1] + constraint_jacobian[i][2][0] * tmp[2]);
+//	dp[i][1] = real(invMasses[i]) * (constraint_jacobian[i][0][1] * tmp[0] + constraint_jacobian[i][1][1] * tmp[1] + constraint_jacobian[i][2][1] * tmp[2]);
+//	dp[i][2] = real(invMasses[i]) * (constraint_jacobian[i][0][2] * tmp[0] + constraint_jacobian[i][1][2] * tmp[1] + constraint_jacobian[i][2][2] * tmp[2]);
+//	}
+//}
+//else
+{
+//dj::Inverse3<real>((real(*)[3]) &factor_matrix[0][0], (real(*)[3]) &tmp_mat[0][0]);
+tmp_mat = factor_matrix.inverse();
+for (int i = 0; i < 5; ++i)
+{
+constraint_jacobian[i].col(0) *= invMasses[i];
+constraint_jacobian[i].col(1) *= invMasses[i];
+constraint_jacobian[i].col(2) *= invMasses[i];
+dp[i] = -(constraint_jacobian[i]) * (tmp_mat * constraint_value);
+}
+corrA = dp[0];
+corrB = dp[1];
+corrC = dp[2];
+corrD = dp[3];
+corrE = dp[4];
+}
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRod::ComputeMaterialFrame(
+const Eigen::Vector3f& pA,
+const Eigen::Vector3f& pB,
+const Eigen::Vector3f& pG,
+Eigen::Matrix3f& frame)
+{
+frame.col(2) = (pB - pA);
+frame.col(2).normalize();
+frame.col(1) = (frame.col(2).cross(pG - pA));
+frame.col(1).normalize();
+frame.col(0) = frame.col(1).cross(frame.col(2));
+//	frame.col(0).normalize();
+return true;
+}
+bool PositionBasedElasticRod::ComputeDarbouxVector(const Eigen::Matrix3f& dA, const Eigen::Matrix3f& dB, const float mid_edge_length, Eigen::Vector3f& darboux_vector)
+{
+float factor = 1.0f + dA.col(0).dot(dB.col(0)) + dA.col(1).dot(dB.col(1)) + dA.col(2).dot(dB.col(2));
+factor = 2.0f / (mid_edge_length * factor);
+for (int c = 0; c < 3; ++c)
+{
+const int i = permutation[c][0];
+const int j = permutation[c][1];
+const int k = permutation[c][2];
+darboux_vector[i] = dA.col(j).dot(dB.col(k)) - dA.col(k).dot(dB.col(j));
+}
+darboux_vector *= factor;
+return true;
+}
+bool PositionBasedElasticRod::ComputeMaterialFrameDerivative(
+const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, const Eigen::Vector3f& p2, const Eigen::Matrix3f& d,
+Eigen::Matrix3f& d1p0, Eigen::Matrix3f& d1p1, Eigen::Matrix3f& d1p2,
+Eigen::Matrix3f& d2p0, Eigen::Matrix3f& d2p1, Eigen::Matrix3f& d2p2,
+Eigen::Matrix3f& d3p0, Eigen::Matrix3f& d3p1, Eigen::Matrix3f& d3p2)
+{
+// d3pi
+Eigen::Vector3f p01 = p1 - p0;
+float length_p01 = p01.norm();
+d3p0.col(0) = d.col(2)[0] * d.col(2);
+d3p0.col(1) = d.col(2)[1] * d.col(2);
+d3p0.col(2) = d.col(2)[2] * d.col(2);
+d3p0.col(0)[0] -= 1.0f;
+d3p0.col(1)[1] -= 1.0f;
+d3p0.col(2)[2] -= 1.0f;
+d3p0.col(0) *= (1.0f / length_p01);
+d3p0.col(1) *= (1.0f / length_p01);
+d3p0.col(2) *= (1.0f / length_p01);
+d3p1.col(0) = -d3p0.col(0);
+d3p1.col(1) = -d3p0.col(1);
+d3p1.col(2) = -d3p0.col(2);
+d3p2.col(0).setZero();
+d3p2.col(1).setZero();
+d3p2.col(2).setZero();
+////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//// d2pi
+Eigen::Vector3f p02 = p2 - p0;
+Eigen::Vector3f p01_cross_p02 = p01.cross(p02);
+float length_cross = p01_cross_p02.norm();
+Eigen::Matrix3f mat;
+mat.col(0) = d.col(1)[0] * d.col(1);
+mat.col(1) = d.col(1)[1] * d.col(1);
+mat.col(2) = d.col(1)[2] * d.col(1);
+mat.col(0)[0] -= 1.0f;
+mat.col(1)[1] -= 1.0f;
+mat.col(2)[2] -= 1.0f;
+mat.col(0) *= (-1.0f / length_cross);
+mat.col(1) *= (-1.0f / length_cross);
+mat.col(2) *= (-1.0f / length_cross);
+Eigen::Matrix3f product_matrix;
+MathFunctions::crossProductMatrix(p2 - p1, product_matrix);
+d2p0 = mat * product_matrix;
+MathFunctions::crossProductMatrix(p0 - p2, product_matrix);
+d2p1 = mat * product_matrix;
+MathFunctions::crossProductMatrix(p1 - p0, product_matrix);
+d2p2 = mat * product_matrix;
+////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//// d1pi
+Eigen::Matrix3f product_mat_d3;
+Eigen::Matrix3f product_mat_d2;
+Eigen::Matrix3f m1, m2;
+MathFunctions::crossProductMatrix(d.col(2), product_mat_d3);
+MathFunctions::crossProductMatrix(d.col(1), product_mat_d2);
+//dj::MulMatrix3x3<real>(&product_mat_d3[0][0], &d2p0[0][0], &m1[0][0]);
+//dj::MulMatrix3x3<real>(&product_mat_d2[0][0], &d3p0[0][0], &m2[0][0]);
+d1p0 = product_mat_d2 * d3p0 - product_mat_d3 * d2p0;
+//dj::MulMatrix3x3<real>(&product_mat_d3[0][0], &d2p1[0][0], &m1[0][0]);
+//dj::MulMatrix3x3<real>(&product_mat_d2[0][0], &d3p1[0][0], &m2[0][0]);
+d1p1 = product_mat_d2 * d3p1 - product_mat_d3 * d2p1;
+/*dj::MulMatrix3x3<real>(&product_mat_d3[0][0], &d2p2[0][0], &d1p2[0][0]);*/
+d1p2 = product_mat_d3 * d2p2;
+d1p2.col(0) *= -1.0f;
+d1p2.col(1) *= -1.0f;
+d1p2.col(2) *= -1.0f;
+return true;
+}
+bool PositionBasedElasticRod::ComputeDarbouxGradient(
+const Eigen::Vector3f& darboux_vector, const float length,
+const Eigen::Matrix3f& da, const Eigen::Matrix3f& db,
+//const Eigen::Matrix3f(*dajpi)[3], const Eigen::Matrix3f(*dbjpi)[3],
+const Eigen::Matrix3f dajpi[3][3], const Eigen::Matrix3f dbjpi[3][3],
+const Eigen::Vector3f& bendAndTwistKs,
+Eigen::Matrix3f& omega_pa, Eigen::Matrix3f& omega_pb, Eigen::Matrix3f& omega_pc, Eigen::Matrix3f& omega_pd, Eigen::Matrix3f& omega_pe
+)
+{
+//float x = 1.0f + da[0] * db[0] + da[1] * db[1] + da[2] * db[2];
+float x = 1.0f + da.col(0).dot(db.col(0)) + da.col(1).dot(db.col(1)) + da.col(2).dot(db.col(2));
+x = 2.0f / (length * x);
+for (int c = 0; c < 3; ++c)
+{
+const int i = permutation[c][0];
+const int j = permutation[c][1];
+const int k = permutation[c][2];
+// pa
+{
+Eigen::Vector3f term1(0,0,0);
+Eigen::Vector3f term2(0,0,0);
+Eigen::Vector3f tmp(0,0,0);
+// first term
+//dj::MulVecMatrix3x3<real>(db[k](), (real(*)[3]) &dajpi[j][0], term1());
+//dj::MulVecMatrix3x3<real>(db[j](), (real(*)[3]) &dajpi[k][0], tmp());
+//DOUBLE CHECK !!!
+term1 = dajpi[j][0].transpose() * db.col(k);
+tmp = dajpi[k][0].transpose() * db.col(j);
+term1 = term1 - tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+//dj::MulVecMatrix3x3<real>(db[n](), (real(*)[3]) &dajpi[n][0], tmp());
+//DOUBLE CHECK !!!
+tmp = dajpi[n][0].transpose() * db.col(n);
+term2 = term2 + tmp;
+}
+omega_pa.col(i) = (term1)-(0.5f * darboux_vector[i] * length) * (term2);
+omega_pa.col(i) *= (x * bendAndTwistKs[i]);
+}
+// pb
+{
+Eigen::Vector3f term1(0, 0, 0);
+Eigen::Vector3f term2(0, 0, 0);
+Eigen::Vector3f tmp(0, 0, 0);
+// first term
+//dj::MulVecMatrix3x3<real>(db[k](), (real(*)[3]) &dajpi[j][1], term1());
+//dj::MulVecMatrix3x3<real>(db[j](), (real(*)[3]) &dajpi[k][1], tmp());
+term1 = dajpi[j][1].transpose() * db.col(k);
+tmp = dajpi[k][1].transpose() * db.col(j);
+term1 = term1 - tmp;
+// third term
+//dj::MulVecMatrix3x3<real>(da[k](), (real(*)[3]) &dbjpi[j][0], tmp());
+tmp = dbjpi[j][0].transpose() * da.col(k);
+term1 = term1 - tmp;
+//dj::MulVecMatrix3x3<real>(da[j](), (real(*)[3]) &dbjpi[k][0], tmp());
+tmp = dbjpi[k][0].transpose() * da.col(j);
+term1 = term1 + tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+//dj::MulVecMatrix3x3<real>(db[n](), (real(*)[3]) &dajpi[n][1], tmp());
+tmp = dajpi[n][1].transpose() * db.col(n);
+term2 = term2 + tmp;
+//dj::MulVecMatrix3x3<real>(da[n](), (real(*)[3]) &dbjpi[n][0], tmp());
+tmp = dbjpi[n][0].transpose() * da.col(n);
+term2 = term2 + tmp;
+}
+omega_pb.col(i) = (term1)-(0.5f * darboux_vector[i] * length) * (term2);
+omega_pb.col(i) *= (x * bendAndTwistKs[i]);
+}
+// pc
+{
+Eigen::Vector3f term1(0, 0, 0);
+Eigen::Vector3f term2(0, 0, 0);
+Eigen::Vector3f tmp(0, 0, 0);
+// first term
+//dj::MulVecMatrix3x3<real>(da[k](), (real(*)[3]) &dbjpi[j][1], term1());
+//dj::MulVecMatrix3x3<real>(da[j](), (real(*)[3]) &dbjpi[k][1], tmp());
+term1 = dbjpi[j][1].transpose() * da.col(k);
+tmp = dbjpi[k][1].transpose() * da.col(j);
+term1 = term1 - tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+//dj::MulVecMatrix3x3<real>(da[n](), (real(*)[3]) &dbjpi[n][1], tmp());
+tmp = dbjpi[n][1].transpose() * da.col(n);
+term2 = term2 + tmp;
+}
+omega_pc.col(i) = (term1)+(0.5f * darboux_vector[i] * length) * (term2);
+omega_pc.col(i) *= (-x * bendAndTwistKs[i]);
+}
+// pd
+{
+Eigen::Vector3f term1(0, 0, 0);
+Eigen::Vector3f term2(0, 0, 0);
+Eigen::Vector3f tmp(0, 0, 0);
+// first term
+//dj::MulVecMatrix3x3<real>(db[k](), (real(*)[3]) &dajpi[j][2], term1());
+//dj::MulVecMatrix3x3<real>(db[j](), (real(*)[3]) &dajpi[k][2], tmp());
+term1 = dajpi[j][2].transpose() * db.col(k);
+tmp = dajpi[k][2].transpose() * db.col(j);
+term1 = term1 - tmp;
+// second term
+for (int n = 0; n < 3; ++n) {
+//dj::MulVecMatrix3x3<real>(db[n](), (real(*)[3]) &dajpi[n][2], tmp());
+tmp = dajpi[n][2].transpose() * db.col(n);
+term2 = term2 + tmp;
+}
+omega_pd.col(i) = (term1)-(0.5f * darboux_vector[i] * length) * (term2);
+omega_pd.col(i) *= (x * bendAndTwistKs[i]);
+}
+// pe
+{
+Eigen::Vector3f term1(0, 0, 0);
+Eigen::Vector3f term2(0, 0, 0);
+Eigen::Vector3f tmp(0, 0, 0);
+// first term
+//dj::MulVecMatrix3x3<real>(da[k](), (real(*)[3]) &dbjpi[j][2], term1());
+//dj::MulVecMatrix3x3<real>(da[j](), (real(*)[3]) &dbjpi[k][2], tmp());
+term1 = dbjpi[j][2].transpose() * da.col(k);
+tmp = dbjpi[k][2].transpose() * da.col(j);
+term1 -= tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{ //WARNING!!! &dbjpi[n][2][0][0] ???
+//dj::MulVecMatrix3x3<real>(da[n](), (real(*)[3]) &dbjpi[n][2][0][0], tmp());
+tmp = dbjpi[n][2].transpose() * da.col(n);
+term2 += tmp;
+}
+omega_pe.col(i) = (term1)+(0.5f * darboux_vector[i] * length) * (term2);
+omega_pe.col(i) *= (-x * bendAndTwistKs[i]);
+}
+}
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+
+https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/PositionBasedDynamics/PositionBasedElasticRods.h
+
+#ifndef POSITION_BASED_ELASTIC_RODS_H
+#define POSITION_BASED_ELASTIC_RODS_H
+#include <Eigen/Dense>
+#include "Common/Common.h"
+// ------------------------------------------------------------------------------------
+namespace PBD
+{
+// Implementation of "Position And Orientation Based Cosserat Rods" paper
+// (https://animation.rwth-aachen.de/publication/0550/)
+//
+//	Implemented by:
+//
+//	Tassilo Kugelstadt
+//	Computer Animation Group
+//	RWTH Aachen University
+//
+// kugelstadt[at] cs.rwth-aachen.de
+//
+class PositionBasedCosseratRods
+{
+public:
+/** Determine the position and orientation corrections for the stretch and shear constraint constraint (eq. 37 in the paper). \n\n
+*
+* @param p0 position of first particle
+* @param invMass0 inverse mass of first particle
+* @param p1 position of second particle
+* @param invMass1 inverse mass of second particle
+* @param q0 quaternion at the center of the edge
+* @param invMassq0 inverse mass of the quaternion
+* @param stretchingAndShearingKs stiffness coefficients for stretching and shearing
+* @param restLength rest edge length
+* @param corr0 position correction of first particle
+* @param corr1 position correction of second particle
+* @param corrq0 orientation correction of quaternion
+*/
+static bool solve_StretchShearConstraint(
+const Vector3r& p0, Real invMass0,
+const Vector3r& p1, Real invMass1,
+const Quaternionr& q0, Real invMassq0,
+const Vector3r& stretchingAndShearingKs,
+const Real restLength,
+Vector3r& corr0, Vector3r& corr1, Quaternionr& corrq0);
+/** Determine the position corrections for the bending and torsion constraint constraint (eq. 40 in the paper). \n\n
+*
+* @param q0 first quaternion
+* @param invMassq0 inverse mass of the first quaternion
+* @param q1 second quaternion
+* @param invMassq1 inverse Mass of the second quaternion
+* @param bendingAndTwistingKs stiffness coefficients for stretching and shearing
+* @param restDarbouxVector rest Darboux vector
+* @param corrq0 position correction of first particle
+* @param corrq1 position correction of second particle
+*/
+static bool solve_BendTwistConstraint(
+const Quaternionr& q0, Real invMassq0,
+const Quaternionr& q1, Real invMassq1,
+const Vector3r& bendingAndTwistingKs,
+const Quaternionr& restDarbouxVector,
+Quaternionr& corrq0, Quaternionr& corrq1);
+};
+// Implementation of "Position Based Elastic Rods" paper
+// (http://www.nobuyuki-umetani.com/PositionBasedElasticRod/2014_sca_PositionBasedElasticRod.html)
+//
+//	The code is based on the implementation of
+//
+//	Przemyslaw Korzeniowski
+//	Department of Surgery and Cancer
+//	Imperial College London
+//
+//	http://github.com/korzen/PositionBasedDynamics-ElasticRod
+// korzenio[at] gmail.com
+//
+class PositionBasedElasticRods
+{
+public:
+/** Determine the position corrections for a perpendicular bisector constraint:\n\n
+* \f$C(\mathbf{p}_0, \mathbf{p}_1, \mathbf{p}_2) = ( \mathbf{p}_1 - 0.5 (\mathbf{p}_0 + \mathbf{p}_1))^T (\mathbf{p}_1 - \mathbf{p}_0) = 0\f$\n\n
+*
+* @param p0 position of first particle
+* @param invMass0 inverse mass of first particle
+* @param p1 position of second particle
+* @param invMass1 inverse mass of second particle
+* @param p2 position of third particle
+* @param invMass2 inverse mass of third particle
+* @param stiffness stiffness coefficient
+* @param corr0 position correction of first particle
+* @param corr1 position correction of second particle
+* @param corr2 position correction of third particle
+*/
+static bool solve_PerpendiculaBisectorConstraint(
+const Vector3r &p0, Real invMass0,
+const Vector3r &p1, Real invMass1,
+const Vector3r &p2, Real invMass2,
+const Real stiffness,
+Vector3r &corr0, Vector3r &corr1, Vector3r &corr2);
+/** Determine the position corrections for a constraint that enforces a rest length between an edge and a ghost point:\n\n
+* \f$C(\mathbf{p}_0, \mathbf{p}_1, \mathbf{p}_2) = \| ( 0.5 (\mathbf{p}_0 + \mathbf{p}_1) - \mathbf{p}_2 \| - L_0 = 0\f$\n\n
+*
+* @param p0 position of first particle
+* @param invMass0 inverse mass of first particle
+* @param p1 position of second particle
+* @param invMass1 inverse mass of second particle
+* @param p2 position of third particle
+* @param invMass2 inverse mass of third particle
+* @param stiffness stiffness coefficient
+* @param ghostEdgeRestLength rest length
+* @param corr0 position correction of first particle
+* @param corr1 position correction of second particle
+* @param corr2 position correction of third particle
+*/
+static bool solve_GhostPointEdgeDistanceConstraint(
+const Vector3r& p0, Real invMass0,
+const Vector3r& p1, Real invMass1,
+const Vector3r& p2, Real invMass2,
+const Real stiffness,
+const Real ghostEdgeRestLength,
+Vector3r& corr0, Vector3r& corr1, Vector3r& corr2);
+/** Determine the position corrections for the Darboux vector constraint (eq. 21 in the paper). See the paper appendix for derivation details\n\n
+*
+* @param p0 position of first particle
+* @param invMass0 inverse mass of first particle
+* @param p1 position of second particle
+* @param invMass1 inverse mass of second particle
+* @param p2 position of third particle
+* @param invMass2 inverse mass of third particle
+* @param p3 position of fourth particle
+* @param invMass3 inverse mass of fourth particle
+* @param p4 position of fifth particle
+* @param invMass4 inverse mass of fifth particle
+* @param bendingAndTwistingKs stiffness coefficients for bending and twisting
+* @param midEdgeLength average edge length
+* @param restDarbouxVector Darboux vector in rest state
+* @param corr0 position correction of first particle
+* @param corr1 position correction of second particle
+* @param corr2 position correction of third particle
+* @param corr3 position correction of fourth particle
+* @param corr4 position correction of fifth particle
+*/
+static bool solve_DarbouxVectorConstraint(
+const Vector3r& p0, Real invMass0,
+const Vector3r& p1, Real invMass1,
+const Vector3r& p2, Real invMass2,
+const Vector3r& p3, Real invMass3,
+const Vector3r& p4, Real invMass4,
+const Vector3r& bendingAndTwistingKs,
+const Real midEdgeLength,
+const Vector3r& restDarbouxVector,
+Vector3r& oa, Vector3r& ob, Vector3r& oc, Vector3r& od, Vector3r& oe);
+/** Computes the material frame (eq. 3 in the paper)
+*/
+static bool computeMaterialFrame(
+const Vector3r& p0, //1st centreline point id
+const Vector3r& p1, //2nd centreline point id
+const Vector3r& p2, //corresponding ghost point
+Matrix3r& frame); //resulting material frame
+/** Computes the Darboux Vector (eq. 10 in the paper)
+*/
+static bool computeDarbouxVector(
+const Matrix3r& dA, //1st material frame
+const Matrix3r& dB, //2nd material frame
+const Real mid_edge_length, //
+Vector3r& darboux_vector); //resulting darboux vector
+/** Computes the material frame derivatives (eq. 43, 44 and 45 in the appendix)
+*/
+static bool computeMaterialFrameDerivative(
+const Vector3r& p0, const Vector3r& p1, const Vector3r& p2, // points
+const Matrix3r& d, //corresponding material frame
+Matrix3r& d1p0, Matrix3r& d1p1, Matrix3r& d1p2, //resulting matrices
+Matrix3r& d2p0, Matrix3r& d2p1, Matrix3r& d2p2, //resulting matrices
+Matrix3r& d3p0, Matrix3r& d3p1, Matrix3r& d3p2); //resulting matrices
+/** Compute the Darboux gradient in respect to each point (eq. 49-53 in the appendix)
+*/
+static bool computeDarbouxGradient(
+const Vector3r& darboux_vector, //Darboux vector
+const Real length, //element length
+const Matrix3r& dA, //1st material frame
+const Matrix3r& dB, //2nd material frame
+const Matrix3r[3][3], const Matrix3r[3][3], //material frames derivatives
+//const Vector3r& bendAndTwistKs, //bending (x,y) and twisting (z) stiffness
+Matrix3r& omega_pa, Matrix3r& omega_pb, Matrix3r& omega_pc, Matrix3r& omega_pd, Matrix3r& omega_pe); //resulting matrices
+};
+}
+#endif
+
+#include "PositionBasedElasticRods.h"
+#include "PositionBasedDynamics/MathFunctions.h"
+using namespace PBD;
+const Real eps = 1e-6;
+const int permutation[3][3] = {
+0, 2, 1,
+1, 0, 2,
+2, 1, 0
+};
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedCosseratRods::solve_StretchShearConstraint(
+const Vector3r& p0, Real invMass0,
+const Vector3r& p1, Real invMass1,
+const Quaternionr& q0, Real invMassq0,
+const Vector3r& stretchingAndShearingKs,
+const Real restLength,
+Vector3r& corr0, Vector3r& corr1, Quaternionr& corrq0)
+{
+Vector3r d3; //third director d3 = q0 * e_3 * q0_conjugate
+d3[0] = 2.0 * (q0.x() * q0.z() + q0.w() * q0.y());
+d3[1] = 2.0 * (q0.y() * q0.z() - q0.w() * q0.x());
+d3[2] = q0.w() * q0.w() - q0.x() * q0.x() - q0.y() * q0.y() + q0.z() * q0.z();
+Vector3r gamma = (p1 - p0) / restLength - d3;
+gamma /= (invMass1 + invMass0) / restLength + invMassq0 * 4.0*restLength + 1.0e-6;
+for (int i = 0; i<3; i++) gamma[i] *= stretchingAndShearingKs[i];
+corr0 = invMass0 * gamma;
+corr1 = -invMass1 * gamma;
+Quaternionr q_e_3_bar(q0.z(), -q0.y(), q0.x(), -q0.w()); //compute q*e_3.conjugate (cheaper than quaternion product)
+corrq0 = Quaternionr(0.0, gamma.x(), gamma.y(), gamma.z()) * q_e_3_bar;
+corrq0.coeffs() *= 2.0 * invMassq0 * restLength;
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedCosseratRods::solve_BendTwistConstraint(
+const Quaternionr& q0, Real invMassq0,
+const Quaternionr& q1, Real invMassq1,
+const Vector3r& bendingAndTwistingKs,
+const Quaternionr& restDarbouxVector,
+Quaternionr& corrq0, Quaternionr& corrq1)
+{
+Quaternionr omega = q0.conjugate() * q1; //darboux vector
+Quaternionr omega_plus;
+omega_plus.coeffs() = omega.coeffs() + restDarbouxVector.coeffs(); //delta Omega with -Omega_0
+omega.coeffs() = omega.coeffs() - restDarbouxVector.coeffs(); //delta Omega with + omega_0
+if (omega.squaredNorm() > omega_plus.squaredNorm()) omega = omega_plus;
+for (int i = 0; i < 3; i++) omega.coeffs()[i] *= bendingAndTwistingKs[i] / (invMassq0 + invMassq1 + 1.0e-6);
+omega.w() = 0.0; //discrete Darboux vector does not have vanishing scalar part
+corrq0 = q1 * omega;
+corrq1 = q0 * omega;
+corrq0.coeffs() *= invMassq0;
+corrq1.coeffs() *= -invMassq1;
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::solve_PerpendiculaBisectorConstraint(
+const Vector3r &p0, Real invMass0,
+const Vector3r &p1, Real invMass1,
+const Vector3r &p2, Real invMass2,
+const Real stiffness,
+Vector3r &corr0, Vector3r &corr1, Vector3r &corr2)
+{
+const Vector3r pm = 0.5 * (p0 + p1);
+const Vector3r p0p2 = p0 - p2;
+const Vector3r p2p1 = p2 - p1;
+const Vector3r p1p0 = p1 - p0;
+const Vector3r p2pm = p2 - pm;
+Real wSum = invMass0 * p0p2.squaredNorm() + invMass1 * p2p1.squaredNorm() + invMass2 * p1p0.squaredNorm();
+if (wSum < eps)
+return false;
+const Real lambda = stiffness * p2pm.dot(p1p0) / wSum;
+corr0 = -invMass0 * lambda * p0p2;
+corr1 = -invMass1 * lambda * p2p1;
+corr2 = -invMass2 * lambda * p1p0;
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::solve_GhostPointEdgeDistanceConstraint(
+const Vector3r& p0, Real invMass0,
+const Vector3r& p1, Real invMass1,
+const Vector3r& p2, Real invMass2,
+const Real stiffness,
+const Real ghostEdgeRestLength,
+Vector3r& corr0, Vector3r& corr1, Vector3r& corr2)
+{
+// Ghost-Edge constraint
+Vector3r pm = 0.5 * (p0 + p1);
+Vector3r p2pm = p2 - pm;
+Real wSum = 0.25 * invMass0 + 0.25 * invMass1 + 1.0 * invMass2;
+if (wSum < eps)
+return false;
+Real p2pm_mag = p2pm.norm();
+p2pm *= 1.0 / p2pm_mag;
+const Real lambda = stiffness * (p2pm_mag - ghostEdgeRestLength) / wSum;
+corr0 = 0.5 * invMass0 * lambda * p2pm;
+corr1 = 0.5 * invMass1 * lambda * p2pm;
+corr2 = -1.0 * invMass2 * lambda * p2pm;
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::solve_DarbouxVectorConstraint(
+const Vector3r& p0, Real invMass0,
+const Vector3r& p1, Real invMass1,
+const Vector3r& p2, Real invMass2,
+const Vector3r& p3, Real invMass3,
+const Vector3r& p4, Real invMass4,
+const Vector3r& bendingAndTwistingKs,
+const Real midEdgeLength,
+const Vector3r& restDarbouxVector,
+Vector3r& corr0, Vector3r& corr1, Vector3r& corr2, Vector3r& corr3, Vector3r& corr4)
+{
+// Single rod element:
+// 3 4 //ghost points
+//	| |
+// --0---1---2-- // rod points
+Vector3r darboux_vector;
+Matrix3r d0, d1;
+PositionBasedElasticRods::computeMaterialFrame(p0, p1, p3, d0);
+PositionBasedElasticRods::computeMaterialFrame(p1, p2, p4, d1);
+PositionBasedElasticRods::computeDarbouxVector(d0, d1, midEdgeLength, darboux_vector);
+Matrix3r dajpi[3][3];
+computeMaterialFrameDerivative(p0, p1, p3, d0,
+dajpi[0][0], dajpi[0][1], dajpi[0][2],
+dajpi[1][0], dajpi[1][1], dajpi[1][2],
+dajpi[2][0], dajpi[2][1], dajpi[2][2]);
+Matrix3r dbjpi[3][3];
+computeMaterialFrameDerivative(p1, p2, p4, d1,
+dbjpi[0][0], dbjpi[0][1], dbjpi[0][2],
+dbjpi[1][0], dbjpi[1][1], dbjpi[1][2],
+dbjpi[2][0], dbjpi[2][1], dbjpi[2][2]);
+Matrix3r constraint_jacobian[5];
+computeDarbouxGradient(
+darboux_vector, midEdgeLength, d0, d1,
+dajpi, dbjpi,
+//bendingAndTwistingKs,
+constraint_jacobian[0],
+constraint_jacobian[1],
+constraint_jacobian[2],
+constraint_jacobian[3],
+constraint_jacobian[4]);
+const Vector3r constraint_value(bendingAndTwistingKs[0] * (darboux_vector[0] - restDarbouxVector[0]),
+bendingAndTwistingKs[1] * (darboux_vector[1] - restDarbouxVector[1]),
+bendingAndTwistingKs[2] * (darboux_vector[2] - restDarbouxVector[2]));
+Matrix3r factor_matrix;
+factor_matrix.setZero();
+Matrix3r tmp_mat;
+Real invMasses[]{ invMass0, invMass1, invMass2, invMass3, invMass4 };
+for (int i = 0; i < 5; ++i)
+{
+tmp_mat = constraint_jacobian[i].transpose() * constraint_jacobian[i];
+tmp_mat.col(0) *= invMasses[i];
+tmp_mat.col(1) *= invMasses[i];
+tmp_mat.col(2) *= invMasses[i];
+factor_matrix += tmp_mat;
+}
+Vector3r dp[5];
+tmp_mat = factor_matrix.inverse();
+for (int i = 0; i < 5; ++i)
+{
+constraint_jacobian[i].col(0) *= invMasses[i];
+constraint_jacobian[i].col(1) *= invMasses[i];
+constraint_jacobian[i].col(2) *= invMasses[i];
+dp[i] = -(constraint_jacobian[i]) * (tmp_mat * constraint_value);
+}
+corr0 = dp[0];
+corr1 = dp[1];
+corr2 = dp[2];
+corr3 = dp[3];
+corr4 = dp[4];
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::computeMaterialFrame(
+const Vector3r& p0,
+const Vector3r& p1,
+const Vector3r& p2,
+Matrix3r& frame)
+{
+frame.col(2) = (p1 - p0);
+frame.col(2).normalize();
+frame.col(1) = (frame.col(2).cross(p2 - p0));
+frame.col(1).normalize();
+frame.col(0) = frame.col(1).cross(frame.col(2));
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::computeDarbouxVector(const Matrix3r& dA, const Matrix3r& dB, const Real mid_edge_length, Vector3r& darboux_vector)
+{
+Real factor = 1.0 + dA.col(0).dot(dB.col(0)) + dA.col(1).dot(dB.col(1)) + dA.col(2).dot(dB.col(2));
+factor = 2.0 / (mid_edge_length * factor);
+for (int c = 0; c < 3; ++c)
+{
+const int i = permutation[c][0];
+const int j = permutation[c][1];
+const int k = permutation[c][2];
+darboux_vector[i] = dA.col(j).dot(dB.col(k)) - dA.col(k).dot(dB.col(j));
+}
+darboux_vector *= factor;
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::computeMaterialFrameDerivative(
+const Vector3r& p0, const Vector3r& p1, const Vector3r& p2, const Matrix3r& d,
+Matrix3r& d1p0, Matrix3r& d1p1, Matrix3r& d1p2,
+Matrix3r& d2p0, Matrix3r& d2p1, Matrix3r& d2p2,
+Matrix3r& d3p0, Matrix3r& d3p1, Matrix3r& d3p2)
+{
+//////////////////////////////////////////////////////////////////////////
+// d3pi
+//////////////////////////////////////////////////////////////////////////
+const Vector3r p01 = p1 - p0;
+Real length_p01 = p01.norm();
+d3p0.col(0) = d.col(2)[0] * d.col(2);
+d3p0.col(1) = d.col(2)[1] * d.col(2);
+d3p0.col(2) = d.col(2)[2] * d.col(2);
+d3p0.col(0)[0] -= 1.0;
+d3p0.col(1)[1] -= 1.0;
+d3p0.col(2)[2] -= 1.0;
+d3p0.col(0) *= (1.0 / length_p01);
+d3p0.col(1) *= (1.0 / length_p01);
+d3p0.col(2) *= (1.0 / length_p01);
+d3p1.col(0) = -d3p0.col(0);
+d3p1.col(1) = -d3p0.col(1);
+d3p1.col(2) = -d3p0.col(2);
+d3p2.col(0).setZero();
+d3p2.col(1).setZero();
+d3p2.col(2).setZero();
+//////////////////////////////////////////////////////////////////////////
+// d2pi
+//////////////////////////////////////////////////////////////////////////
+const Vector3r p02 = p2 - p0;
+const Vector3r p01_cross_p02 = p01.cross(p02);
+const Real length_cross = p01_cross_p02.norm();
+Matrix3r mat;
+mat.col(0) = d.col(1)[0] * d.col(1);
+mat.col(1) = d.col(1)[1] * d.col(1);
+mat.col(2) = d.col(1)[2] * d.col(1);
+mat.col(0)[0] -= 1.0;
+mat.col(1)[1] -= 1.0;
+mat.col(2)[2] -= 1.0;
+mat.col(0) *= (-1.0 / length_cross);
+mat.col(1) *= (-1.0 / length_cross);
+mat.col(2) *= (-1.0 / length_cross);
+Matrix3r product_matrix;
+MathFunctions::crossProductMatrix(p2 - p1, product_matrix);
+d2p0 = mat * product_matrix;
+MathFunctions::crossProductMatrix(p0 - p2, product_matrix);
+d2p1 = mat * product_matrix;
+MathFunctions::crossProductMatrix(p1 - p0, product_matrix);
+d2p2 = mat * product_matrix;
+//////////////////////////////////////////////////////////////////////////
+// d1pi
+//////////////////////////////////////////////////////////////////////////
+Matrix3r product_mat_d3;
+Matrix3r product_mat_d2;
+MathFunctions::crossProductMatrix(d.col(2), product_mat_d3);
+MathFunctions::crossProductMatrix(d.col(1), product_mat_d2);
+d1p0 = product_mat_d2 * d3p0 - product_mat_d3 * d2p0;
+d1p1 = product_mat_d2 * d3p1 - product_mat_d3 * d2p1;
+d1p2 = -product_mat_d3 * d2p2;
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+bool PositionBasedElasticRods::computeDarbouxGradient(
+const Vector3r& darboux_vector, const Real length,
+const Matrix3r& da, const Matrix3r& db,
+const Matrix3r dajpi[3][3], const Matrix3r dbjpi[3][3],
+//const Vector3r& bendAndTwistKs,
+Matrix3r& omega_pa, Matrix3r& omega_pb, Matrix3r& omega_pc, Matrix3r& omega_pd, Matrix3r& omega_pe
+)
+{
+Real X = 1.0 + da.col(0).dot(db.col(0)) + da.col(1).dot(db.col(1)) + da.col(2).dot(db.col(2));
+X = 2.0 / (length * X);
+for (int c = 0; c < 3; ++c)
+{
+const int i = permutation[c][0];
+const int j = permutation[c][1];
+const int k = permutation[c][2];
+// pa
+{
+Vector3r term1(0,0,0);
+Vector3r term2(0,0,0);
+Vector3r tmp(0,0,0);
+// first term
+term1 = dajpi[j][0].transpose() * db.col(k);
+tmp = dajpi[k][0].transpose() * db.col(j);
+term1 = term1 - tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+tmp = dajpi[n][0].transpose() * db.col(n);
+term2 = term2 + tmp;
+}
+omega_pa.col(i) = X * (term1-(0.5 * darboux_vector[i] * length) * term2);
+//omega_pa.col(i) *= bendAndTwistKs[i];
+}
+// pb
+{
+Vector3r term1(0, 0, 0);
+Vector3r term2(0, 0, 0);
+Vector3r tmp(0, 0, 0);
+// first term
+term1 = dajpi[j][1].transpose() * db.col(k);
+tmp = dajpi[k][1].transpose() * db.col(j);
+term1 = term1 - tmp;
+// third term
+tmp = dbjpi[j][0].transpose() * da.col(k);
+term1 = term1 - tmp;
+tmp = dbjpi[k][0].transpose() * da.col(j);
+term1 = term1 + tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+tmp = dajpi[n][1].transpose() * db.col(n);
+term2 = term2 + tmp;
+tmp = dbjpi[n][0].transpose() * da.col(n);
+term2 = term2 + tmp;
+}
+omega_pb.col(i) = X * (term1-(0.5 * darboux_vector[i] * length) * term2);
+//omega_pb.col(i) *= bendAndTwistKs[i];
+}
+// pc
+{
+Vector3r term1(0, 0, 0);
+Vector3r term2(0, 0, 0);
+Vector3r tmp(0, 0, 0);
+// first term
+term1 = dbjpi[j][1].transpose() * da.col(k);
+tmp = dbjpi[k][1].transpose() * da.col(j);
+term1 = term1 - tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+tmp = dbjpi[n][1].transpose() * da.col(n);
+term2 = term2 + tmp;
+}
+omega_pc.col(i) = -X*(term1+(0.5 * darboux_vector[i] * length) * term2);
+//omega_pc.col(i) *= bendAndTwistKs[i];
+}
+// pd
+{
+Vector3r term1(0, 0, 0);
+Vector3r term2(0, 0, 0);
+Vector3r tmp(0, 0, 0);
+// first term
+term1 = dajpi[j][2].transpose() * db.col(k);
+tmp = dajpi[k][2].transpose() * db.col(j);
+term1 = term1 - tmp;
+// second term
+for (int n = 0; n < 3; ++n) {
+tmp = dajpi[n][2].transpose() * db.col(n);
+term2 = term2 + tmp;
+}
+omega_pd.col(i) = X*(term1-(0.5 * darboux_vector[i] * length) * term2);
+//omega_pd.col(i) *= bendAndTwistKs[i];
+}
+// pe
+{
+Vector3r term1(0, 0, 0);
+Vector3r term2(0, 0, 0);
+Vector3r tmp(0, 0, 0);
+// first term
+term1 = dbjpi[j][2].transpose() * da.col(k);
+tmp = dbjpi[k][2].transpose() * da.col(j);
+term1 -= tmp;
+// second term
+for (int n = 0; n < 3; ++n)
+{
+tmp = dbjpi[n][2].transpose() * da.col(n);
+term2 += tmp;
+}
+omega_pe.col(i) = -X*(term1+(0.5 * darboux_vector[i] * length) * term2);
+//omega_pe.col(i) *= bendAndTwistKs[i];
+}
+}
+return true;
+}
+// ----------------------------------------------------------------------------------------------
+
+https://github.com/korzen/PositionBasedDynamics-ElasticRod/blob/master/Demos/ElasticRodDemos/ElasticRodDemo.cpp
+
+#include "Demos/Utils/Config.h"
+#include "Demos/Visualization/MiniGL.h"
+#include "Demos/Visualization/Selection.h"
+#include "GL/glut.h"
+#include "Demos/Simulation/TimeManager.h"
+#include <Eigen/Dense>
+#include "Demos/Simulation/SimulationModel.h"
+#include "Demos/Simulation/TimeStepController.h"
+#include <iostream>
+#define _USE_MATH_DEFINES
+#include "math.h"
+// Enable memory leak detection
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+using namespace PBD;
+using namespace Eigen;
+using namespace std;
+void timeStep ();
+void buildModel ();
+void createRod();
+void render ();
+void reset();
+void cleanup();
+void selection(const Eigen::Vector2i &start, const Eigen::Vector2i &end);
+void TW_CALL setBendAndTwistStiffness(const void *value, void *clientData);
+void TW_CALL getBendAndTwistStiffness(void *value, void *clientData);
+void TW_CALL setRestDarbouxX(const void *value, void *clientData);
+void TW_CALL setRestDarbouxY(const void *value, void *clientData);
+void TW_CALL setRestDarbouxZ(const void *value, void *clientData);
+void TW_CALL getRestDarbouxX(void *value, void *clientData);
+void TW_CALL getRestDarbouxY(void *value, void *clientData);
+void TW_CALL getRestDarbouxZ(void *value, void *clientData);
+void TW_CALL setTimeStep(const void *value, void *clientData);
+void TW_CALL getTimeStep(void *value, void *clientData);
+void TW_CALL setVelocityUpdateMethod(const void *value, void *clientData);
+void TW_CALL getVelocityUpdateMethod(void *value, void *clientData);
+SimulationModel model;
+TimeStepController sim;
+const int numberOfPoints = 32;
+bool doPause = false;
+std::vector<unsigned int> selectedBodies;
+Eigen::Vector3f oldMousePos;
+Eigen::Vector3f restDarboux;
+// main
+int main( int argc, char **argv )
+{
+REPORT_MEMORY_LEAKS
+// OpenGL
+MiniGL::init (argc, argv, 1024, 768, 0, 0, "Rigid body demo");
+MiniGL::initLights ();
+MiniGL::setClientIdleFunc (50, timeStep);
+MiniGL::setKeyFunc(0, 'r', reset);
+MiniGL::setSelectionFunc(selection);
+buildModel ();
+MiniGL::setClientSceneFunc(render);
+MiniGL::setViewport (40.0f, 0.1f, 500.0f, Vector3f (5.0, -10.0, 30.0), Vector3f (5.0, 0.0, 0.0));
+TwAddVarRW(MiniGL::getTweakBar(), "Pause", TW_TYPE_BOOLCPP, &doPause, " label='Pause' group=Simulation key=SPACE ");
+TwAddVarCB(MiniGL::getTweakBar(), "TimeStepSize", TW_TYPE_FLOAT, setTimeStep, getTimeStep, &model, " label='Time step size' min=0.0 max = 0.1 step=0.001 precision=4 group=Simulation ");
+TwType enumType = TwDefineEnum("VelocityUpdateMethodType", NULL, 0);
+TwAddVarCB(MiniGL::getTweakBar(), "VelocityUpdateMethod", enumType, setVelocityUpdateMethod, getVelocityUpdateMethod, &sim, " label='Velocity update method' enum='0 {First Order Update}, 1 {Second Order Update}' group=Simulation ");
+TwAddVarCB(MiniGL::getTweakBar(), "BendAndTwistKs", TW_TYPE_FLOAT, setBendAndTwistStiffness, getBendAndTwistStiffness, &model, " label='Bend and Twist Stiffness' min=0.0 max = 1.0 step=0.1 precision=2 group=BendTwist ");
+TwAddVarCB(MiniGL::getTweakBar(), "RestDarbouxX", TW_TYPE_FLOAT, setRestDarbouxX, getRestDarbouxX, &model, " label='Rest Darboux X' min=-1.0 max = 1.0 step=0.01 precision=2 group=BendTwist ");
+TwAddVarCB(MiniGL::getTweakBar(), "RestDarbouxY", TW_TYPE_FLOAT, setRestDarbouxY, getRestDarbouxY, &model, " label='Rest Darboux Y' min=-1.0 max = 1.0 step=0.01 precision=2 group=BendTwist ");
+TwAddVarCB(MiniGL::getTweakBar(), "RestDarbouxZ", TW_TYPE_FLOAT, setRestDarbouxZ, getRestDarbouxZ, &model, " label='Rest Darboux Z' min=-1.0 max = 1.0 step=0.01 precision=2 group=BendTwist ");
+glutMainLoop ();
+cleanup ();
+return 0;
+}
+void cleanup()
+{
+delete TimeManager::getCurrent();
+}
+void reset()
+{
+model.reset();
+sim.reset();
+TimeManager::getCurrent()->setTime(0.0);
+}
+void mouseMove(int x, int y)
+{
+Eigen::Vector3f mousePos;
+MiniGL::unproject(x, y, mousePos);
+const Eigen::Vector3f diff = mousePos - oldMousePos;
+TimeManager *tm = TimeManager::getCurrent();
+const float h = tm->getTimeStepSize();
+SimulationModel::RigidBodyVector &rb = model.getRigidBodies();
+for (size_t j = 0; j < selectedBodies.size(); j++)
+{
+rb[selectedBodies[j]]->getVelocity() += 1.0f / h * diff;
+}
+oldMousePos = mousePos;
+}
+void selection(const Eigen::Vector2i &start, const Eigen::Vector2i &end)
+{
+MiniGL::unproject(end[0], end[1], oldMousePos);
+}
+void buildModel()
+{
+TimeManager::getCurrent()->setTimeStepSize(0.002f);
+sim.setDamping(0.001f);
+model.setElasticRodBendAndTwistStiffness(0.5f);
+model.setElasticRodStretchStiffness(1.0f);
+restDarboux = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+createRod();
+}
+void timeStep ()
+{
+if (doPause)
+return;
+// Simulation code
+for (unsigned int i = 0; i < 8; i++)
+sim.step(model);
+}
+void render()
+{
+MiniGL::coordinateSystem();
+// Draw sim model
+ParticleData &particles = model.getParticles();
+ParticleData &ghostParticles = model.getGhostParticles();
+SimulationModel::ConstraintVector &constraints = model.getConstraints();
+float selectionColor[4] = { 0.8f, 0.0f, 0.0f, 1 };
+float pointColor[4] = { 0.1f, 0.1f, 0.5f, 1 };
+float ghostPointColor[4] = { 0.1f, 0.1f, 0.1f, 0.5f };
+float edgeColor[4] = { 0.0f, 0.6f, 0.2f, 1 };
+for (size_t i = 0; i < numberOfPoints; i++)
+{
+MiniGL::drawSphere(particles.getPosition(i), 0.2f, pointColor);
+}
+for (size_t i = 0; i < numberOfPoints-1; i++)
+{
+MiniGL::drawSphere(ghostParticles.getPosition(i), 0.1f, ghostPointColor);
+MiniGL::drawVector(particles.getPosition(i), particles.getPosition(i + 1), 0.2f, edgeColor);
+}
+for (size_t i = 0; i < constraints.size(); i++)
+{
+if (constraints[i]->getTypeId() == ElasticRodBendAndTwistConstraint::TYPE_ID)
+{
+((ElasticRodBendAndTwistConstraint*)constraints[i])->m_restDarbouxVector = restDarboux;
+}
+}
+MiniGL::drawTime( TimeManager::getCurrent ()->getTime ());
+}
+/** Create the elastic rod model
+*/
+void createRod()
+{
+ParticleData &particles = model.getParticles();
+ParticleData &ghostParticles = model.getGhostParticles();
+SimulationModel::ConstraintVector &constraints = model.getConstraints();
+//centreline points
+for (unsigned int i = 0; i < numberOfPoints; i++)
+{
+particles.addVertex(Eigen::Vector3f((float)i*1.0f, 0.0f, 0.0f));
+}
+//edge ghost points
+for (unsigned int i = 0; i < numberOfPoints-1; i++)
+{
+ghostParticles.addVertex(Eigen::Vector3f((float)i*1.0f + 0.5f, 1.0f, 0.0f));
+}
+//lock two first particles and first ghost point
+particles.setMass(0, 0.0f);
+particles.setMass(1, 0.0f);
+ghostParticles.setMass(0, 0.0f);
+for (unsigned int i = 0; i < numberOfPoints - 1; i++)
+{
+model.addElasticRodEdgeConstraint(i, i + 1, i);
+if (i < numberOfPoints - 2)
+{
+// Single rod element:
+// D E //ghost points
+//	| |
+// --A---B---C-- // rod points
+int pA = i;
+int pB = i + 1;
+int pC = i + 2;
+int pD = i;
+int pE = i + 1;
+model.addElasticRodBendAndTwistConstraint(pA, pB, pC, pD, pE);
+}
+}
+}
+void TW_CALL setBendAndTwistStiffness(const void *value, void *clientData)
+{
+const float val = *(const float *)(value);
+model.setElasticRodBendAndTwistStiffness(val);
+}
+void TW_CALL getBendAndTwistStiffness(void *value, void *clientData)
+{
+*(float *)(value) = model.getElasticRodBendAndTwistStiffness();
+}
+void TW_CALL setRestDarbouxX(const void *value, void *clientData)
+{
+const float val = *(const float *)(value);
+restDarboux[0] = val;
+}
+void TW_CALL setRestDarbouxY(const void *value, void *clientData)
+{
+const float val = *(const float *)(value);
+restDarboux[1] = val;
+}
+void TW_CALL setRestDarbouxZ(const void *value, void *clientData)
+{
+const float val = *(const float *)(value);
+restDarboux[2] = val;
+}
+void TW_CALL getRestDarbouxX(void *value, void *clientData)
+{
+*(float *)(value) = restDarboux[0];
+}
+void TW_CALL getRestDarbouxY(void *value, void *clientData)
+{
+*(float *)(value) = restDarboux[1];
+}
+void TW_CALL getRestDarbouxZ(void *value, void *clientData)
+{
+*(float *)(value) = restDarboux[2];
+}
+void TW_CALL setTimeStep(const void *value, void *clientData)
+{
+const float val = *(const float *)(value);
+TimeManager::getCurrent()->setTimeStepSize(val);
+}
+void TW_CALL getTimeStep(void *value, void *clientData)
+{
+*(float *)(value) = TimeManager::getCurrent()->getTimeStepSize();
+}
+void TW_CALL setVelocityUpdateMethod(const void *value, void *clientData)
+{
+const short val = *(const short *)(value);
+((TimeStepController*)clientData)->setVelocityUpdateMethod((unsigned int)val);
+}
+void TW_CALL getVelocityUpdateMethod(void *value, void *clientData)
+{
+*(short *)(value) = (short)((TimeStepController*)clientData)->getVelocityUpdateMethod();
+}
+
+https://github.com/korzen/PositionBasedDynamics-ElasticRod/blob/master/Demos/Simulation/SimulationModel.h
+
+#ifndef __SIMULATIONMODEL_H__
+#define __SIMULATIONMODEL_H__
+#include "Demos/Utils/Config.h"
+#include <vector>
+#include "Demos/Simulation/RigidBody.h"
+#include "Demos/Simulation/ParticleData.h"
+#include <Eigen/StdVector>
+#include "TriangleModel.h"
+#include "TetModel.h"
+namespace PBD
+{
+class Constraint;
+class SimulationModel
+{
+public:
+SimulationModel();
+virtual ~SimulationModel();
+typedef std::vector<Constraint*> ConstraintVector;
+typedef std::vector<RigidBody*> RigidBodyVector;
+typedef std::vector<TriangleModel*> TriangleModelVector;
+typedef std::vector<TetModel*> TetModelVector;
+typedef std::vector<unsigned int> ConstraintGroup;
+typedef std::vector<ConstraintGroup> ConstraintGroupVector;
+protected:
+RigidBodyVector m_rigidBodies;
+TriangleModelVector m_triangleModels;
+TetModelVector m_tetModels;
+ParticleData m_particles;
+ParticleData m_ghostParticles;
+ConstraintVector m_constraints;
+ConstraintGroupVector m_constraintGroups;
+float m_cloth_stiffness;
+float m_cloth_bendingStiffness;
+float m_cloth_xxStiffness;
+float m_cloth_yyStiffness;
+float m_cloth_xyStiffness;
+float m_cloth_xyPoissonRatio;
+float m_cloth_yxPoissonRatio;
+bool m_cloth_normalizeStretch;
+bool m_cloth_normalizeShear;
+float m_solid_stiffness;
+float m_solid_poissonRatio;
+bool m_solid_normalizeStretch;
+bool m_solid_normalizeShear;
+float m_elasticrod_stretch_stiffness;
+float m_elasticrod_bend_and_twist_stiffness;
+public:
+void reset();
+void cleanup();
+RigidBodyVector &getRigidBodies();
+ParticleData &getParticles();
+ParticleData &getGhostParticles();
+TriangleModelVector &getTriangleModels();
+TetModelVector &getTetModels();
+ConstraintVector &getConstraints();
+ConstraintGroupVector &getConstraintGroups();
+bool m_groupsInitialized;
+void addTriangleModel(
+const unsigned int nPoints,
+const unsigned int nFaces,
+Eigen::Vector3f *points,
+unsigned int* indices,
+const TriangleModel::ParticleMesh::UVIndices& uvIndices,
+const TriangleModel::ParticleMesh::UVs& uvs);
+void addTetModel(
+const unsigned int nPoints,
+const unsigned int nTets,
+Eigen::Vector3f *points,
+unsigned int* indices);
+void addElasticRodModel(
+const unsigned int nPoints,
+Eigen::Vector3f *points);
+void updateConstraints();
+void initConstraintGroups();
+bool addBallJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos);
+bool addBallOnLineJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &dir);
+bool addHingeJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis);
+bool addTargetAngleMotorHingeJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis);
+bool addTargetVelocityMotorHingeJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis);
+bool addUniversalJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis1, const Eigen::Vector3f &axis2);
+bool addSliderJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis);
+bool addTargetPositionMotorSliderJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis);
+bool addTargetVelocityMotorSliderJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis);
+bool addRigidBodyParticleBallJoint(const unsigned int rbIndex, const unsigned int particleIndex);
+bool addDistanceConstraint(const unsigned int particle1, const unsigned int particle2);
+bool addDihedralConstraint( const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4);
+bool addIsometricBendingConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4);
+bool addFEMTriangleConstraint(const unsigned int particle1, const unsigned int particle2, const unsigned int particle3);
+bool addStrainTriangleConstraint(const unsigned int particle1, const unsigned int particle2, const unsigned int particle3);
+bool addVolumeConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4);
+bool addFEMTetConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4);
+bool addStrainTetConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4);
+bool addShapeMatchingConstraint(const unsigned int numberOfParticles, const unsigned int particleIndices[], const unsigned int numClusters[]);
+bool addElasticRodEdgeConstraint(const unsigned int pA, const unsigned int pB, const unsigned int pG);
+bool addElasticRodBendAndTwistConstraint(const unsigned int pA, const unsigned int pB,
+const unsigned int pC, const unsigned int pD, const unsigned int pE);
+float getClothStiffness() const { return m_cloth_stiffness; }
+void setClothStiffness(float val) { m_cloth_stiffness = val; }
+float getClothBendingStiffness() const { return m_cloth_bendingStiffness; }
+void setClothBendingStiffness(float val) { m_cloth_bendingStiffness = val; }
+float getClothXXStiffness() const { return m_cloth_xxStiffness; }
+void setClothXXStiffness(float val) { m_cloth_xxStiffness = val; }
+float getClothYYStiffness() const { return m_cloth_yyStiffness; }
+void setClothYYStiffness(float val) { m_cloth_yyStiffness = val; }
+float getClothXYStiffness() const { return m_cloth_xyStiffness; }
+void setClothXYStiffness(float val) { m_cloth_xyStiffness = val; }
+bool getClothNormalizeStretch() const { return m_cloth_normalizeStretch; }
+void setClothNormalizeStretch(bool val) { m_cloth_normalizeStretch = val; }
+bool getClothNormalizeShear() const { return m_cloth_normalizeShear; }
+void setClothNormalizeShear(bool val) { m_cloth_normalizeShear = val; }
+float getClothXYPoissonRatio() const { return m_cloth_xyPoissonRatio; }
+void setClothXYPoissonRatio(float val) { m_cloth_xyPoissonRatio = val; }
+float getClothYXPoissonRatio() const { return m_cloth_yxPoissonRatio; }
+void setClothYXPoissonRatio(float val) { m_cloth_yxPoissonRatio = val; }
+float getSolidStiffness() const { return m_solid_stiffness; }
+void setSolidStiffness(float val) { m_solid_stiffness = val; }
+float getSolidPoissonRatio() { return m_solid_poissonRatio; }
+void setSolidPoissonRatio(const float val) { m_solid_poissonRatio = val; }
+bool getSolidNormalizeStretch() const { return m_solid_normalizeStretch; }
+void setSolidNormalizeStretch(bool val) { m_solid_normalizeStretch = val; }
+bool getSolidNormalizeShear() const { return m_solid_normalizeShear; }
+void setSolidNormalizeShear(bool val) { m_solid_normalizeShear = val; }
+void setElasticRodStretchStiffness(float val) { m_elasticrod_stretch_stiffness = val; }
+float getElasticRodStretchStiffness() const { return m_elasticrod_stretch_stiffness; }
+void setElasticRodBendAndTwistStiffness(float val) { m_elasticrod_bend_and_twist_stiffness = val; }
+float getElasticRodBendAndTwistStiffness() const { return m_elasticrod_bend_and_twist_stiffness; }
+};
+}
+#endif
+
+https://github.com/korzen/PositionBasedDynamics-ElasticRod/blob/master/Demos/Simulation/SimulationModel.cpp
+
+#include "SimulationModel.h"
+#include "PositionBasedDynamics/PositionBasedRigidBodyDynamics.h"
+#include "Constraints.h"
+using namespace PBD;
+SimulationModel::SimulationModel()
+{
+m_cloth_stiffness = 1.0f;
+m_cloth_bendingStiffness = 0.01f;
+m_cloth_xxStiffness = 1.0f;
+m_cloth_yyStiffness = 1.0f;
+m_cloth_xyStiffness = 1.0f;
+m_cloth_xyPoissonRatio = 0.3f;
+m_cloth_yxPoissonRatio = 0.3f;
+m_cloth_normalizeShear = false;
+m_cloth_normalizeStretch = false;
+m_solid_stiffness = 1.0f;
+m_solid_poissonRatio = 0.3f;
+m_solid_normalizeShear = false;
+m_solid_normalizeStretch = false;
+m_groupsInitialized = false;
+}
+SimulationModel::~SimulationModel(void)
+{
+cleanup();
+}
+void SimulationModel::cleanup()
+{
+for (unsigned int i = 0; i < m_rigidBodies.size(); i++)
+delete m_rigidBodies[i];
+m_rigidBodies.clear();
+for (unsigned int i = 0; i < m_triangleModels.size(); i++)
+delete m_triangleModels[i];
+m_triangleModels.clear();
+for (unsigned int i = 0; i < m_tetModels.size(); i++)
+delete m_tetModels[i];
+m_tetModels.clear();
+for (unsigned int i = 0; i < m_constraints.size(); i++)
+delete m_constraints[i];
+m_constraints.clear();
+m_particles.release();
+m_ghostParticles.release();
+}
+void SimulationModel::reset()
+{
+// rigid bodies
+for (size_t i = 0; i < m_rigidBodies.size(); i++)
+m_rigidBodies[i]->reset();
+// particles
+for (unsigned int i = 0; i < m_particles.size(); i++)
+{
+const Eigen::Vector3f& x0 = m_particles.getPosition0(i);
+m_particles.getPosition(i) = x0;
+m_particles.getLastPosition(i) = m_particles.getPosition(i);
+m_particles.getOldPosition(i) = m_particles.getPosition(i);
+m_particles.getVelocity(i).setZero();
+m_particles.getAcceleration(i).setZero();
+}
+// ghost particles
+for (unsigned int i = 0; i < m_ghostParticles.size(); i++)
+{
+const Eigen::Vector3f& x0 = m_ghostParticles.getPosition0(i);
+m_ghostParticles.getPosition(i) = x0;
+m_ghostParticles.getLastPosition(i) = m_ghostParticles.getPosition(i);
+m_ghostParticles.getOldPosition(i) = m_ghostParticles.getPosition(i);
+m_ghostParticles.getVelocity(i).setZero();
+m_ghostParticles.getAcceleration(i).setZero();
+}
+updateConstraints();
+}
+SimulationModel::RigidBodyVector & SimulationModel::getRigidBodies()
+{
+return m_rigidBodies;
+}
+ParticleData & SimulationModel::getParticles()
+{
+return m_particles;
+}
+ParticleData & PBD::SimulationModel::getGhostParticles()
+{
+return m_ghostParticles;
+}
+SimulationModel::TriangleModelVector & SimulationModel::getTriangleModels()
+{
+return m_triangleModels;
+}
+SimulationModel::TetModelVector & SimulationModel::getTetModels()
+{
+return m_tetModels;
+}
+SimulationModel::ConstraintVector & SimulationModel::getConstraints()
+{
+return m_constraints;
+}
+SimulationModel::ConstraintGroupVector & SimulationModel::getConstraintGroups()
+{
+return m_constraintGroups;
+}
+void SimulationModel::updateConstraints()
+{
+for (unsigned int i = 0; i < m_constraints.size(); i++)
+m_constraints[i]->updateConstraint(*this);
+}
+bool SimulationModel::addBallJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos)
+{
+BallJoint *bj = new BallJoint();
+const bool res = bj->initConstraint(*this, rbIndex1, rbIndex2, pos);
+if (res)
+{
+m_constraints.push_back(bj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addBallOnLineJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &dir)
+{
+BallOnLineJoint *bj = new BallOnLineJoint();
+const bool res = bj->initConstraint(*this, rbIndex1, rbIndex2, pos, dir);
+if (res)
+{
+m_constraints.push_back(bj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addHingeJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis)
+{
+HingeJoint *hj = new HingeJoint();
+const bool res = hj->initConstraint(*this, rbIndex1, rbIndex2, pos, axis);
+if (res)
+{
+m_constraints.push_back(hj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addUniversalJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis1, const Eigen::Vector3f &axis2)
+{
+UniversalJoint *uj = new UniversalJoint();
+const bool res = uj->initConstraint(*this, rbIndex1, rbIndex2, pos, axis1, axis2);
+if (res)
+{
+m_constraints.push_back(uj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addSliderJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis)
+{
+SliderJoint *joint = new SliderJoint();
+const bool res = joint->initConstraint(*this, rbIndex1, rbIndex2, pos, axis);
+if (res)
+{
+m_constraints.push_back(joint);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addTargetPositionMotorSliderJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis)
+{
+TargetPositionMotorSliderJoint *joint = new TargetPositionMotorSliderJoint();
+const bool res = joint->initConstraint(*this, rbIndex1, rbIndex2, pos, axis);
+if (res)
+{
+m_constraints.push_back(joint);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addTargetVelocityMotorSliderJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis)
+{
+TargetVelocityMotorSliderJoint *joint = new TargetVelocityMotorSliderJoint();
+const bool res = joint->initConstraint(*this, rbIndex1, rbIndex2, pos, axis);
+if (res)
+{
+m_constraints.push_back(joint);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addTargetAngleMotorHingeJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis)
+{
+TargetAngleMotorHingeJoint *hj = new TargetAngleMotorHingeJoint();
+const bool res = hj->initConstraint(*this, rbIndex1, rbIndex2, pos, axis);
+if (res)
+{
+m_constraints.push_back(hj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addTargetVelocityMotorHingeJoint(const unsigned int rbIndex1, const unsigned int rbIndex2, const Eigen::Vector3f &pos, const Eigen::Vector3f &axis)
+{
+TargetVelocityMotorHingeJoint *hj = new TargetVelocityMotorHingeJoint();
+const bool res = hj->initConstraint(*this, rbIndex1, rbIndex2, pos, axis);
+if (res)
+{
+m_constraints.push_back(hj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addRigidBodyParticleBallJoint(const unsigned int rbIndex, const unsigned int particleIndex)
+{
+RigidBodyParticleBallJoint *bj = new RigidBodyParticleBallJoint();
+const bool res = bj->initConstraint(*this, rbIndex, particleIndex);
+if (res)
+{
+m_constraints.push_back(bj);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addDistanceConstraint(const unsigned int particle1, const unsigned int particle2)
+{
+DistanceConstraint *c = new DistanceConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addDihedralConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4)
+{
+DihedralConstraint *c = new DihedralConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3, particle4);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addIsometricBendingConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4)
+{
+IsometricBendingConstraint *c = new IsometricBendingConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3, particle4);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addFEMTriangleConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3)
+{
+FEMTriangleConstraint *c = new FEMTriangleConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addStrainTriangleConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3)
+{
+StrainTriangleConstraint *c = new StrainTriangleConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addVolumeConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4)
+{
+VolumeConstraint *c = new VolumeConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3, particle4);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addFEMTetConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4)
+{
+FEMTetConstraint *c = new FEMTetConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3, particle4);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addStrainTetConstraint(const unsigned int particle1, const unsigned int particle2,
+const unsigned int particle3, const unsigned int particle4)
+{
+StrainTetConstraint *c = new StrainTetConstraint();
+const bool res = c->initConstraint(*this, particle1, particle2, particle3, particle4);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addShapeMatchingConstraint(const unsigned int numberOfParticles, const unsigned int particleIndices[], const unsigned int numClusters[])
+{
+ShapeMatchingConstraint *c = new ShapeMatchingConstraint(numberOfParticles);
+const bool res = c->initConstraint(*this, particleIndices, numClusters);
+if (res)
+{
+m_constraints.push_back(c);
+m_groupsInitialized = false;
+}
+return res;
+}
+bool SimulationModel::addElasticRodEdgeConstraint(const unsigned int pA, const unsigned int pB, const unsigned int pG)
+{
+ElasticRodEdgeConstraint *c = new ElasticRodEdgeConstraint();
+const bool res = c->initConstraint(*this, pA, pB, pG);
+if (res)
+m_constraints.push_back(c);
+return res;
+}
+bool SimulationModel::addElasticRodBendAndTwistConstraint(const unsigned int pA, const unsigned int pB,
+const unsigned int pC, const unsigned int pD, const unsigned int pE)
+{
+ElasticRodBendAndTwistConstraint *c = new ElasticRodBendAndTwistConstraint();
+const bool res = c->initConstraint(*this, pA, pB, pC, pD, pE);
+if (res)
+m_constraints.push_back(c);
+return res;
+}
+void SimulationModel::addTriangleModel(
+const unsigned int nPoints,
+const unsigned int nFaces,
+Eigen::Vector3f *points,
+unsigned int* indices,
+const TriangleModel::ParticleMesh::UVIndices& uvIndices,
+const TriangleModel::ParticleMesh::UVs& uvs)
+{
+TriangleModel *triModel = new TriangleModel();
+m_triangleModels.push_back(triModel);
+unsigned int startIndex = m_particles.size();
+m_particles.reserve(startIndex + nPoints);
+for (unsigned int i = 0; i < nPoints; i++)
+m_particles.addVertex(points[i]);
+triModel->initMesh(nPoints, nFaces, startIndex, indices, uvIndices, uvs);
+// Update normals
+triModel->updateMeshNormals(m_particles);
+}
+void SimulationModel::addTetModel(
+const unsigned int nPoints,
+const unsigned int nTets,
+Eigen::Vector3f *points,
+unsigned int* indices)
+{
+TetModel *tetModel = new TetModel();
+m_tetModels.push_back(tetModel);
+unsigned int startIndex = m_particles.size();
+m_particles.reserve(startIndex + nPoints);
+for (unsigned int i = 0; i < nPoints; i++)
+m_particles.addVertex(points[i]);
+tetModel->initMesh(nPoints, nTets, startIndex, indices);
+}
+void PBD::SimulationModel::addElasticRodModel(
+const unsigned int nPoints,
+Eigen::Vector3f * points)
+{
+}
+void SimulationModel::initConstraintGroups()
+{
+if (m_groupsInitialized)
+return;
+const unsigned int numConstraints = (unsigned int) m_constraints.size();
+const unsigned int numParticles = (unsigned int) m_particles.size();
+const unsigned int numRigidBodies = (unsigned int) m_rigidBodies.size();
+const unsigned int numBodies = numParticles + numRigidBodies;
+m_constraintGroups.clear();
+// Maps in which group a particle is or 0 if not yet mapped
+std::vector<unsigned char*> mapping;
+for (unsigned int i = 0; i < numConstraints; i++)
+{
+Constraint *constraint = m_constraints[i];
+bool addToNewGroup = true;
+for (unsigned int j = 0; j < m_constraintGroups.size(); j++)
+{
+bool addToThisGroup = true;
+for (unsigned int k = 0; k < constraint->m_numberOfBodies; k++)
+{
+if (mapping[j][constraint->m_bodies[k]] != 0)
+{
+addToThisGroup = false;
+break;
+}
+}
+if (addToThisGroup)
+{
+m_constraintGroups[j].push_back(i);
+for (unsigned int k = 0; k < constraint->m_numberOfBodies; k++)
+mapping[j][constraint->m_bodies[k]] = 1;
+addToNewGroup = false;
+break;
+}
+}
+if (addToNewGroup)
+{
+mapping.push_back(new unsigned char[numBodies]);
+memset(mapping[mapping.size() - 1], 0, sizeof(unsigned char)*numBodies);
+m_constraintGroups.resize(m_constraintGroups.size() + 1);
+m_constraintGroups[m_constraintGroups.size()-1].push_back(i);
+for (unsigned int k = 0; k < constraint->m_numberOfBodies; k++)
+mapping[m_constraintGroups.size() - 1][constraint->m_bodies[k]] = 1;
+}
+}
+for (unsigned int i = 0; i < mapping.size(); i++)
+{
+delete[] mapping[i];
+}
+mapping.clear();
+m_groupsInitialized = true;
+}
+
+
