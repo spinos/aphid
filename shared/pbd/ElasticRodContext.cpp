@@ -4,7 +4,8 @@
 namespace aphid {
 namespace pbd {
 
-ElasticRodContext::ElasticRodContext()
+ElasticRodContext::ElasticRodContext() :
+m_vmt(0)
 {}
 
 ElasticRodContext::~ElasticRodContext()
@@ -22,6 +23,11 @@ void ElasticRodContext::addElasticRodEdgeConstraint(int a, int b, int g)
     const bool res = c->initConstraint(this, a, b, g);
     if (res)
         m_edgeConstraints.push_back(c);
+}
+
+void ElasticRodContext::addElasticRodBendAndTwistConstraint(int a, int b, int c,
+                                    int d, int e)
+{   
 }
 
 void ElasticRodContext::clearConstraints()
@@ -44,6 +50,78 @@ void ElasticRodContext::positionConstraintProjection()
 		}
 	}
 }
+
+int ElasticRodContext::numEdges() const
+{ return m_edgeConstraints.size(); }
+
+void ElasticRodContext::applyGravity(float dt)
+{
+    SimulationContext::applyGravity(dt);
+/// gravity on ghost points
+    const int& ng = ghostParticles()->numParticles();
+	Vector3F* velg = ghostParticles()->velocity();
+	const float* im = ghostParticles()->invMass();
+	for(int i=0;i< ng;i++) {
+	    if(im[i] > 0.f) velg[i].y -= 9.8f * dt;
+	}
+	
+    const int ne = numEdges();
+    Vector3F* vel = particles()->velocity();
+    
+    for(int i=0;i<ne;++i) {
+        const ElasticRodEdgeConstraint * c = m_edgeConstraints[i];
+        const int vA = c->c_bodyInds()[0];
+        const int vB = c->c_bodyInds()[1];
+        const int vG = c->c_bodyInds()[2];
+        modifyEdgeGravity(vel[vA], vel[vB], velg[vG], m_vmt[i], dt);
+    }
+}
+
+void ElasticRodContext::projectPosition(float dt)
+{
+    SimulationContext::projectPosition(dt);
+    m_ghostPart.projectPosition(dt);
+}
+
+void ElasticRodContext::createEdges()
+{
+    const int ne = numEdges();
+    m_vmt = new Vector3F[ne];
+    memset(m_vmt, 0, 12 * ne);
+}
+
+void ElasticRodContext::modifyEdgeGravity(Vector3F& vA, Vector3F& vB, Vector3F& vG,
+                                Vector3F& vmt_1, float dt)
+{
+/// the velocity of the mid-point at time t
+    Vector3F vmt = (vA + vB) * .5f;
+/// acceleration of the mid-point
+    Vector3F am = (vmt - vmt_1) / dt;
+/// update vmt
+    vmt_1 = vmt;
+    
+    static const Vector3F gv(0.f, -9.8, 0.f);
+    
+/// r <- (am .g) / |g|2
+    float r = 1.f - am.dot(gv) / 96.04f;
+
+    vG -= gv * r * dt;
+    vA += gv * 0.5 * r * dt;
+    vB += gv * 0.5 * r * dt;
+}
+
+void ElasticRodContext::updateVelocityAndPosition(float dt)
+{
+    SimulationContext::updateVelocityAndPosition(dt);
+    m_ghostPart.updateVelocityAndPosition(dt);
+}
+
+void ElasticRodContext::dampVelocity(float damping)
+{ 
+    SimulationContext::dampVelocity(damping);
+    m_ghostPart.dampVelocity(damping); 
+} 
+
 
 }
 }

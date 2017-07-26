@@ -40,7 +40,12 @@ public:
 	void cachePositions();
 /// v <- v(1 - d)
 	void dampVelocity(float damping);
-	
+/// x* <- x + v dt
+    void projectPosition(float dt);
+/// v <- (x* - x) / dt
+/// x <- x*
+    void updateVelocityAndPosition(float dt);
+    
 private:
 };
 

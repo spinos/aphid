@@ -94,5 +94,20 @@ void ParticleData::dampVelocity(float damping)
 	}
 }
 
+void ParticleData::projectPosition(float dt)
+{
+	for(int i=0;i< m_numParticles;i++) {
+	    if(m_invMass[i] > 0.f) m_projectedPos[i] = m_pos[i] + m_velocity[i] * dt;
+	}
+}
+
+void ParticleData::updateVelocityAndPosition(float dt)
+{
+	for(int i=0;i< m_numParticles;i++) {
+	    m_velocity[i] = (m_projectedPos[i] - m_pos[i]) / dt;
+	    m_pos[i] = m_projectedPos[i];
+	}
+}
+
 }
 }

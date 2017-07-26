@@ -12,6 +12,9 @@ SimulationContext::~SimulationContext()
 const ParticleData* SimulationContext::c_particles() const
 { return &m_part; }
 
+const ParticleData* SimulationContext::c_ghostParticles() const
+{ return 0; }
+
 ParticleData* SimulationContext::particles()
 { return &m_part; }
 
@@ -81,6 +84,29 @@ void SimulationContext::addExternalForce()
 
 void SimulationContext::positionConstraintProjection()
 {}
+
+void SimulationContext::applyGravity(float dt)
+{
+    const int& np = m_part.numParticles();
+	Vector3F* vel = m_part.velocity();
+	const float* im = m_part.invMass();
+	for(int i=0;i< np;i++) {
+	    if(im[i] > 0.f) vel[i].y -= 9.8f * dt;
+	}
+}
+
+void SimulationContext::projectPosition(float dt)
+{
+    m_part.projectPosition(dt);
+}
+
+void SimulationContext::updateVelocityAndPosition(float dt)
+{
+    m_part.updateVelocityAndPosition(dt);
+}
+
+void SimulationContext::dampVelocity(float damping)
+{ m_part.dampVelocity(damping); } 
 
 }
 }

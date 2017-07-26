@@ -20,6 +20,7 @@ public:
     virtual ~SimulationContext();
     
     const ParticleData* c_particles() const;
+    virtual const ParticleData* c_ghostParticles() const;
     
 protected:
     ParticleData* particles();
@@ -27,12 +28,21 @@ protected:
     void integrate(float dt);
 /// clear force add gravity
     void clearGravitiyForce();
+/// v <- v + g dt
+    virtual void applyGravity(float dt);
 /// v <- v + a dt
 /// x <- x + v dt
 	void semiImplicitEulerIntegrate(ParticleData* part, float dt);
 	virtual void addExternalForce();
 	virtual void positionConstraintProjection();
-	
+/// x* <- x + v dt
+    virtual void projectPosition(float dt);
+/// v <- (x* - x) / dt
+/// x <- x*
+    virtual void updateVelocityAndPosition(float dt);
+/// v <- v damping
+    virtual void dampVelocity(float damping);
+    
 private:
    
 };

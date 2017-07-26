@@ -55,6 +55,13 @@ SolverThread::SolverThread(QObject *parent)
 	for(int i=0;i<NP-1;++i) {
 	    addElasticRodEdgeConstraint(i, i+1, i);
 	}
+	
+	for(int i=0;i<NP-2;++i) {
+	    addElasticRodBendAndTwistConstraint(i, i+1, i+2, i, i+1);
+	}
+	
+	createEdges();
+	
 }
 
 SolverThread::~SolverThread()
@@ -63,6 +70,9 @@ SolverThread::~SolverThread()
 
 void SolverThread::stepPhysics(float dt)
 {
+    applyGravity(dt);
+    projectPosition(dt);
+ /*   
     clearGravitiyForce();
 	addExternalForce();
 	pbd::ParticleData* part = particles();
@@ -76,9 +86,10 @@ void SolverThread::stepPhysics(float dt)
 	ghost->dampVelocity(0.0f);
 	
 	semiImplicitEulerIntegrate(ghost, dt);
-	
+*/	
 	positionConstraintProjection();
-	
+	dampVelocity(0.01f);
+	updateVelocityAndPosition(dt);
 	//integrateExplicitWithDamping(dt);
 	//updateConstraints(dt);
 	//integrate(dt);
