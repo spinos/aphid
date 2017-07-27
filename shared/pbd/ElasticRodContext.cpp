@@ -1,5 +1,6 @@
 #include "ElasticRodContext.h"
 #include "ElasticRodEdgeConstraint.h"
+#include "ElasticRodBendAndTwistConstraint.h"
 
 namespace aphid {
 namespace pbd {
@@ -28,6 +29,10 @@ void ElasticRodContext::addElasticRodEdgeConstraint(int a, int b, int g)
 void ElasticRodContext::addElasticRodBendAndTwistConstraint(int a, int b, int c,
                                     int d, int e)
 {   
+    ElasticRodBendAndTwistConstraint *cn = new ElasticRodBendAndTwistConstraint();
+    const bool res = cn->initConstraint(this, a, b, c, d, e);
+    if (res) 
+        m_bendTwistConstraints.push_back(cn);
 }
 
 void ElasticRodContext::clearConstraints()
@@ -37,17 +42,29 @@ void ElasticRodContext::clearConstraints()
         delete *it;
     }
     m_edgeConstraints.clear();
+    
+    BendTwistConstraintVector::iterator itbt = m_bendTwistConstraints.begin();
+    for(;itbt!=m_bendTwistConstraints.end();++itbt) {
+        delete *itbt;
+    }
+    m_bendTwistConstraints.clear();
 }
 
 void ElasticRodContext::positionConstraintProjection()
 {
 	int nloop = 0;
-	while(nloop < 4) {
+	while(nloop < 1) {
 		EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
 		for(;it!=m_edgeConstraints.end();++it) {
 			(*it)->solvePositionConstraint(particles(), ghostParticles() );
-			nloop++;
 		}
+		
+		BendTwistConstraintVector::iterator itb = m_bendTwistConstraints.begin();
+		for(;itb!=m_bendTwistConstraints.end();++itb) {
+			(*itb)->solvePositionConstraint(particles(), ghostParticles() );
+		}
+		
+		nloop++;
 	}
 }
 

@@ -6,7 +6,7 @@
 
 using namespace aphid;
 
-#define NU 32
+#define NU 12
 #define NV 32
 #define NF (NU * NV)
 #define NTri (NF * 2)

@@ -49,6 +49,19 @@ private:
 		const float midEdgeLength,
 		const Vector3F& restDarbouxVector,
 		Vector3F& corrA, Vector3F& corrB, Vector3F& corrC, Vector3F& corrD, Vector3F& corrE);
+	bool computeMaterialFrameDerivative(const Vector3F& p0, const Vector3F& p1, const Vector3F& p2, 
+            const Matrix33F& d,
+            Matrix33F& d1p0, Matrix33F& d1p1, Matrix33F& d1p2,
+            Matrix33F& d2p0, Matrix33F& d2p1, Matrix33F& d2p2,
+            Matrix33F& d3p0, Matrix33F& d3p1, Matrix33F& d3p2);
+    bool computeDarbouxGradient(const Vector3F& darboux_vector, 
+            const float length,
+            const Matrix33F& da, const Matrix33F& db,
+            const Matrix33F dajpi[3][3], const Matrix33F dbjpi[3][3],
+            const Vector3F& bendAndTwistKs,
+            Matrix33F& omega_pa, Matrix33F& omega_pb, Matrix33F& omega_pc, Matrix33F& omega_pd, Matrix33F& omega_pe
+            );
+	
 };
 
 }

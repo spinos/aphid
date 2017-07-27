@@ -79,7 +79,7 @@ Matrix33F Matrix33F::operator*( float scaling ) const
     return t;
 }
 
-Matrix33F Matrix33F::operator+( Matrix33F other ) const
+Matrix33F Matrix33F::operator+( const Matrix33F& other ) const
 {
 	Matrix33F a;
 	*a.m(0, 0) = M(0,0) + other.M(0,0);
@@ -91,6 +91,21 @@ Matrix33F Matrix33F::operator+( Matrix33F other ) const
 	*a.m(2, 0) = M(2,0) + other.M(2,0);
 	*a.m(2, 1) = M(2,1) + other.M(2,1);
 	*a.m(2, 2) = M(2,2) + other.M(2,2);
+	return a;
+}
+
+Matrix33F Matrix33F::operator-( const Matrix33F& other ) const
+{
+	Matrix33F a;
+	*a.m(0, 0) -= other.M(0,0);
+	*a.m(0, 1) -= other.M(0,1);
+	*a.m(0, 2) -= other.M(0,2);
+	*a.m(1, 0) -= other.M(1,0);
+	*a.m(1, 1) -= other.M(1,1);
+	*a.m(1, 2) -= other.M(1,2);
+	*a.m(2, 0) -= other.M(2,0);
+	*a.m(2, 1) -= other.M(2,1);
+	*a.m(2, 2) -= other.M(2,2);
 	return a;
 }
 
@@ -160,6 +175,13 @@ void Matrix33F::transpose()
     tmp = M(1, 2);
     *m(1, 2) = M(2, 1);
     *m(2, 1) = tmp;
+}
+
+Matrix33F Matrix33F::transposed() const
+{
+    Matrix33F r(*this);
+    r.transpose();
+    return r;
 }
 
 void Matrix33F::multiply(const Matrix33F& a)
@@ -607,6 +629,19 @@ void Matrix33F::getFront(Vector3F & dst) const
 
 void Matrix33F::copy(const Matrix33F & another)
 { memcpy(v, another.v, 36); }
+
+/*
+ *  |  0 -a3  a2 |
+ *  | a3   0 -a1 |
+ *  |-a2  a1   0 |
+ *
+ */
+void Matrix33F::asCrossProductMatrix(const Vector3F& a)
+{
+    *m(0, 0) =  0.f; *m(0, 1) = -a.z; *m(0, 2) = a.y;
+    *m(1, 0) = a.z; *m(1, 1) =  0.f; *m(1, 2) = -a.x;
+    *m(2, 0) =  -a.y; *m(2, 1) = a.x; *m(2, 2) =  0.f;
+}
 
 }
 //:~

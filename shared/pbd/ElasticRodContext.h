@@ -10,11 +10,14 @@
 namespace aphid {
 namespace pbd {
 class ElasticRodEdgeConstraint;
+class ElasticRodBendAndTwistConstraint;
 class ElasticRodContext : public SimulationContext {
 
     ParticleData m_ghostPart;
     typedef std::vector<ElasticRodEdgeConstraint* > EdgeConstraintVector;
     EdgeConstraintVector m_edgeConstraints;
+    typedef std::vector<ElasticRodBendAndTwistConstraint* > BendTwistConstraintVector;
+    BendTwistConstraintVector m_bendTwistConstraints;
 /// velocity of mid-point of each edge
     Vector3F * m_vmt;
     
