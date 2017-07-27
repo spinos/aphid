@@ -25,10 +25,10 @@ public:
     ElasticRodContext();
     virtual ~ElasticRodContext();
     
+    virtual ParticleData* ghostParticles();
     virtual const ParticleData* c_ghostParticles() const;
     
 protected:
-    ParticleData* ghostParticles();
     void addElasticRodEdgeConstraint(int a, int b, int g);
     void addElasticRodBendAndTwistConstraint(int a, int b, int c,
                                     int d, int e);
@@ -43,6 +43,10 @@ protected:
 	virtual void dampVelocity(float damping);
 	virtual void projectPosition(float dt);
     virtual void updateVelocityAndPosition(float dt);
+	
+	void addElasticRodBendAndTwistConstraint(ElasticRodBendAndTwistConstraint* c);
+	
+	ElasticRodBendAndTwistConstraint* bendAndTwistConstraint(int i);
     
 private:
     void clearConstraints();

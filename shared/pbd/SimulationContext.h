@@ -19,11 +19,12 @@ public:
     SimulationContext();
     virtual ~SimulationContext();
     
+    ParticleData* particles();
     const ParticleData* c_particles() const;
-    virtual const ParticleData* c_ghostParticles() const;
+	virtual ParticleData* ghostParticles();
+	virtual const ParticleData* c_ghostParticles() const;
     
 protected:
-    ParticleData* particles();
     void integrateVerlet(float dt);
     void integrate(float dt);
 /// clear force add gravity

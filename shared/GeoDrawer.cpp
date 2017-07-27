@@ -346,6 +346,17 @@ void GeoDrawer::coordsys(const Matrix33F & orient, const Vector3F & p, const Vec
 	glPopMatrix();
 }
 
+void GeoDrawer::coordsys1(const Matrix44F & mat)
+{
+	glPushMatrix();
+	
+	mat.glMatrix(m_spaceBuf);
+	glMultMatrixf((const GLfloat*)m_spaceBuf);
+	coordsys();
+	
+	glPopMatrix();
+}
+
 /*
 void GeoDrawer::manipulator(TransformManipulator * m)
 {

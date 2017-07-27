@@ -24,14 +24,6 @@ class Geometry;
 class GeometryArray;
 class ATetrahedronMesh;
 class AOrientedBox;
-//class CartesianGrid;
-//class APointCloud;
-//class SelectionArray;
-//class BaseTransform;
-//class TransformManipulator;
-//class SkeletonJoint;
-//class Anchor;
-//class SpaceHandle;
 
 class GeoDrawer : public MeshDrawer {
 public:
@@ -58,6 +50,7 @@ public:
 	void coordsys(const Matrix33F & orient, float size = 1.f, Vector3F * p = 0);
 	void coordsys(const Matrix33F & orient, const Vector3F & p, 
 					const Vector3F & size = Vector3F(1.f, 1.f, 1.f) );
+	void coordsys1(const Matrix44F & mat);
 	
 	//void manipulator(TransformManipulator * m);
 	//void spaceHandle(SpaceHandle * hand);

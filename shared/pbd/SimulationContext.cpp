@@ -12,11 +12,14 @@ SimulationContext::~SimulationContext()
 const ParticleData* SimulationContext::c_particles() const
 { return &m_part; }
 
+ParticleData* SimulationContext::particles()
+{ return &m_part; }
+
 const ParticleData* SimulationContext::c_ghostParticles() const
 { return 0; }
 
-ParticleData* SimulationContext::particles()
-{ return &m_part; }
+ParticleData* SimulationContext::ghostParticles()
+{ return 0; }
 
 /// http://www.physics.udel.edu/~bnikolic/teaching/phys660/numerical_ode/node5.html
 /// http://codeflow.org/entries/2010/aug/28/integration-by-example-euler-vs-verlet-vs-runge-kutta/

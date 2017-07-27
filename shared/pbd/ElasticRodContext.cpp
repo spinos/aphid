@@ -35,6 +35,9 @@ void ElasticRodContext::addElasticRodBendAndTwistConstraint(int a, int b, int c,
         m_bendTwistConstraints.push_back(cn);
 }
 
+void ElasticRodContext::addElasticRodBendAndTwistConstraint(ElasticRodBendAndTwistConstraint* c)
+{ m_bendTwistConstraints.push_back(c); }
+
 void ElasticRodContext::clearConstraints()
 {
     EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
@@ -53,7 +56,7 @@ void ElasticRodContext::clearConstraints()
 void ElasticRodContext::positionConstraintProjection()
 {
 	int nloop = 0;
-	while(nloop < 1) {
+	while(nloop < 5) {
 		EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
 		for(;it!=m_edgeConstraints.end();++it) {
 			(*it)->solvePositionConstraint(particles(), ghostParticles() );
@@ -139,6 +142,8 @@ void ElasticRodContext::dampVelocity(float damping)
     m_ghostPart.dampVelocity(damping); 
 } 
 
+ElasticRodBendAndTwistConstraint* ElasticRodContext::bendAndTwistConstraint(int i)
+{ return m_bendTwistConstraints[i]; }
 
 }
 }

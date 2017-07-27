@@ -3,7 +3,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
 set (CMAKE_BUILD_TYPE Release)
-include_directories(../shared ../lapl ../catmullclark 
+include_directories(../shared ../lapl ../catmullclark
 ../hesperis)
 
 IF (APPLE)

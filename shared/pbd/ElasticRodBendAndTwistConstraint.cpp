@@ -12,6 +12,9 @@ ElasticRodBendAndTwistConstraint::ElasticRodBendAndTwistConstraint()
 ElasticRodBendAndTwistConstraint::ConstraintType ElasticRodBendAndTwistConstraint::getConstraintType() const
 { return ctElasticRodBendAndTwist; }
 
+const Vector3F& ElasticRodBendAndTwistConstraint::restDarbouxVector() const
+{ return m_restDarbouxVector; }
+
 bool ElasticRodBendAndTwistConstraint::initConstraint(SimulationContext * model, const int pA, const int pB, const int pC,
                     const int pD, const int pE)
 {
@@ -93,25 +96,25 @@ bool ElasticRodBendAndTwistConstraint::projectBendingAndTwistingConstraint(const
 		Vector3F& corrA, Vector3F& corrB, Vector3F& corrC, Vector3F& corrD, Vector3F& corrE)
 {
     Vector3F darboux;
-	Matrix33F dA, dB;
+	MatrixC33F dA, dB;
 
 	computeMaterialFrame(dA, pA, pB, pD);
 	computeMaterialFrame(dB, pB, pC, pE);
 	computeDarbouxVector(darboux, dA, dB, midEdgeLength);
 	
-	Matrix33F dajpi[3][3];
+	MatrixC33F dajpi[3][3];
 	computeMaterialFrameDerivative(pA, pB, pD, dA,
 		dajpi[0][0], dajpi[0][1], dajpi[0][2],
 		dajpi[1][0], dajpi[1][1], dajpi[1][2],
 		dajpi[2][0], dajpi[2][1], dajpi[2][2]);
 
-	Matrix33F  dbjpi[3][3];
+	MatrixC33F  dbjpi[3][3];
 	computeMaterialFrameDerivative(pB, pC, pE, dB,
 		dbjpi[0][0], dbjpi[0][1], dbjpi[0][2],
 		dbjpi[1][0], dbjpi[1][1], dbjpi[1][2],
 		dbjpi[2][0], dbjpi[2][1], dbjpi[2][2]);
 	
-	Matrix33F constraint_jacobian[5];
+	MatrixC33F constraint_jacobian[5];
 	computeDarbouxGradient(darboux, midEdgeLength, dA, dB, 
 		dajpi, dbjpi, 
 		bendingAndTwistingKs,
@@ -125,23 +128,22 @@ bool ElasticRodBendAndTwistConstraint::projectBendingAndTwistingConstraint(const
                              bendingAndTwistingKs.comp(1) * (darboux.comp(1) - restDarbouxVector.comp(1)),
                              bendingAndTwistingKs.comp(2) * (darboux.comp(2) - restDarbouxVector.comp(2)) );
 
-	Matrix33F factor_matrix;
+	MatrixC33F factor_matrix;
 	factor_matrix.setZero();
 	
-	Matrix33F tmp_mat;
+	MatrixC33F tmp_mat;
 	float invMasses[] = { wA, wB, wC, wD, wE };
 	for (int i = 0; i < 5; ++i) {
-		tmp_mat = constraint_jacobian[i] * constraint_jacobian[i];
+		tmp_mat = constraint_jacobian[i].transMult( constraint_jacobian[i] );
 		tmp_mat *= invMasses[i];
 
 		factor_matrix += tmp_mat;
 	}
 	
-	Vector3F dp[5];
-	tmp_mat = factor_matrix;
-	tmp_mat.inverse();
+	tmp_mat = factor_matrix.inversed();
 
-    for (int i = 0; i < 5; ++i) {
+    Vector3F dp[5];
+	for (int i = 0; i < 5; ++i) {
         constraint_jacobian[i] *= invMasses[i];
         dp[i] = constraint_jacobian[i] * (tmp_mat * constraint_value);
         dp[i] *= -1.f;
@@ -163,7 +165,7 @@ bool ElasticRodBendAndTwistConstraint::projectBendingAndTwistingConstraint(const
 /// d^1e <- d^2e x d^3e front
 /// De <- [d^1e, d^2e, d^3e]
 /// material frame at the center of an edge
-void ElasticRodBendAndTwistConstraint::computeMaterialFrame(Matrix33F& frame,
+void ElasticRodBendAndTwistConstraint::computeMaterialFrame(MatrixC33F& frame,
 	        const Vector3F& vA, const Vector3F& vB, const Vector3F& vG)
 {
     Vector3F d3 = vB - vA;
@@ -171,7 +173,9 @@ void ElasticRodBendAndTwistConstraint::computeMaterialFrame(Matrix33F& frame,
     Vector3F d2 = d3.cross(vG - vA);
     d2.normalize();
     Vector3F d1 = d2.cross(d3);
-    frame.fill(d1, d2, d3);
+    frame.setCol(0, d1);
+	frame.setCol(1, d2);
+	frame.setCol(2, d3);
 }
 
 static const int permutation[3][3] = {
@@ -184,12 +188,12 @@ static const int permutation[3][3] = {
 /// an axial vector of frame rotation with respect to change of s.
 /// s is a point on rod
 void ElasticRodBendAndTwistConstraint::computeDarbouxVector(Vector3F& darboux,
-	        const Matrix33F& frameA, const Matrix33F& frameB,
+	        const MatrixC33F& frameA, const MatrixC33F& frameB,
 	        float midEdgeLength)
 {
-    float factor = 1.0f + frameA.row(0).dot(frameB.row(0))
-                        + frameA.row(1).dot(frameB.row(1)) 
-                        + frameA.row(2).dot(frameB.row(2));
+    float factor = 1.0f + frameA.colV(0).dot(frameB.colV(0))
+                        + frameA.colV(1).dot(frameB.colV(1)) 
+                        + frameA.colV(2).dot(frameB.colV(2));
 	factor = 2.0f / (midEdgeLength * factor);
 	
 	for (int c = 0; c < 3; ++c) {
@@ -197,7 +201,7 @@ void ElasticRodBendAndTwistConstraint::computeDarbouxVector(Vector3F& darboux,
 		const int j = permutation[c][1];
 		const int k = permutation[c][2];
 
-		darboux.setComp(frameA.row(j).dot(frameB.row(k) ) - frameA.row(k).dot(frameB.row(j) ), 
+		darboux.setComp(frameA.colV(j).dot(frameB.colV(k) ) - frameA.colV(k).dot(frameB.colV(j) ), 
 		                i);
 	}
 
@@ -205,72 +209,62 @@ void ElasticRodBendAndTwistConstraint::computeDarbouxVector(Vector3F& darboux,
 }
 
 bool ElasticRodBendAndTwistConstraint::computeMaterialFrameDerivative(const Vector3F& p0, const Vector3F& p1, const Vector3F& p2, 
-            const Matrix33F& d,
-            Matrix33F& d1p0, Matrix33F& d1p1, Matrix33F& d1p2,
-            Matrix33F& d2p0, Matrix33F& d2p1, Matrix33F& d2p2,
-            Matrix33F& d3p0, Matrix33F& d3p1, Matrix33F& d3p2)
+            const MatrixC33F& d,
+            MatrixC33F& d1p0, MatrixC33F& d1p1, MatrixC33F& d1p2,
+            MatrixC33F& d2p0, MatrixC33F& d2p1, MatrixC33F& d2p2,
+            MatrixC33F& d3p0, MatrixC33F& d3p1, MatrixC33F& d3p2)
 {
-    /// d3pi
+/// d3dp0 <- -(I - d^3 circled-cross d^3) / |p01|
+/// d3dp1 <-  (I - d^3 circled-cross d^3) / |p01|
+/// d3dp2 <- 0
 	Vector3F p01 = p1 - p0;
 	float length_p01 = p01.length();
 
-	const Vector3F d3 = d.row(2);
-	d3p0.setRow(0, d3 * d3.x);
-	d3p0.setRow(1, d3 * d3.y);
-	d3p0.setRow(2, d3 * d3.z);
+	const Vector3F d3 = d.colV(2);
+	d3p0.asAAtMatrix(d3);
 
-	*d3p0.m(0, 0) -= 1.0f;
-	*d3p0.m(1, 1) -= 1.0f;
-	*d3p0.m(2, 2) -= 1.0f;
+	d3p0.addDiagonal(-1.f);
 
 	d3p0 *= 1.f / length_p01;
 
 	d3p1 = d3p0 * -1.f;
 
 	d3p2.setZero();
-	
-	std::cout<<"\n d3dp0"<<d3p0
-	<<"\n d3dp1"<<d3p1
-	<<"\n d3dp2"<<d3p2;
 
-	//// d2pi
+/// d2dp0 <- (I - d^2 circled-cross d^2) [p2 - p1] / |p01 x p02| 
+/// d2dp1 <- (I - d^2 circled-cross d^2) [p0 - p2] / |p01 x p02|
+/// d2dp2 <- (I - d^2 circled-cross d^2) [p1 - p0] / |p01 x p02|  
 	Vector3F p02 = p2 - p0;
 	Vector3F p01_cross_p02 = p01.cross(p02);
 	float length_cross = p01_cross_p02.length();
 
-	Matrix33F mat;
-	const Vector3F dr1 = d.row(1);
-	mat.setRow(0, dr1 * dr1.x);
-	mat.setRow(1, dr1 * dr1.y);
-	mat.setRow(2, dr1 * dr1.z);
+	MatrixC33F d2xd2;
+	const Vector3F d2 = d.colV(1);
+	d2xd2.asAAtMatrix(d2);
 
-	*mat.m(0,0) -= 1.f;
-	*mat.m(1,1) -= 1.f;
-	*mat.m(2,2) -= 1.f;
+	d2xd2.addDiagonal(-1.f);
 
-	mat *= 1.f / length_cross;
+	d2xd2 *= -1.f / length_cross;
 
-	Matrix33F product_matrix;
+	MatrixC33F product_matrix;
 	product_matrix.asCrossProductMatrix(p2 - p1);
-	d2p0 = mat * product_matrix;
+	d2p0 = d2xd2 * product_matrix;
 
 	product_matrix.asCrossProductMatrix(p0 - p2);
-	d2p1 = mat * product_matrix;
+	d2p1 = d2xd2 * product_matrix;
 
 	product_matrix.asCrossProductMatrix(p1 - p0);
-	d2p2 = mat * product_matrix;
-	
-	std::cout<<"\n d2dp0"<<d2p0
-	<<"\n d2dp1"<<d2p1
-	<<"\n d2dp2"<<d2p2;
+	d2p2 = d2xd2 * product_matrix;
 
-	//// d1pi
-	Matrix33F product_mat_d3;
-	Matrix33F product_mat_d2;
-	Matrix33F m1, m2;
+/// d1p0 <- -[d^3]d2p0 + [d^2]d3p0
+/// d1p1 <- -[d^3]d2p1 + [d^2]d3p1
+/// d1p2 <- -[d^3]d2p2
+	MatrixC33F product_mat_d3;
+	MatrixC33F product_mat_d2;
+	MatrixC33F m1, m2;
 
-	product_mat_d3.asCrossProductMatrix(d.row(2));
-	product_mat_d2.asCrossProductMatrix(d.row(1));
+	product_mat_d3.asCrossProductMatrix(d.colV(2));
+	product_mat_d2.asCrossProductMatrix(d.colV(1));
 
 	d1p0 = product_mat_d2 * d3p0 - product_mat_d3 * d2p0;
 
@@ -279,23 +273,20 @@ bool ElasticRodBendAndTwistConstraint::computeMaterialFrameDerivative(const Vect
 	d1p2 = product_mat_d3 * d2p2;
 	d1p2 *= -1.f;
 	
-	std::cout<<"\n d1dp0"<<d1p0
-	<<"\n d1dp1"<<d1p1
-	<<"\n d1dp2"<<d1p2;
 	return true;
 }
 
 bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 	const Vector3F& darboux_vector, const float length,
-	const Matrix33F& da, const Matrix33F& db,
-	const Matrix33F dajpi[3][3], const Matrix33F dbjpi[3][3],
+	const MatrixC33F& da, const MatrixC33F& db,
+	const MatrixC33F dajpi[3][3], const MatrixC33F dbjpi[3][3],
 	const Vector3F& bendAndTwistKs,
-	Matrix33F& omega_pa, Matrix33F& omega_pb, Matrix33F& omega_pc, Matrix33F& omega_pd, Matrix33F& omega_pe
-	)
+	MatrixC33F& omega_pa, MatrixC33F& omega_pb, MatrixC33F& omega_pc, 
+	MatrixC33F& omega_pd, MatrixC33F& omega_pe)
 {
-    float x = 1.0f + da.row(0).dot(db.row(0)) 
-                    + da.row(1).dot(db.row(1)) 
-                    + da.row(2).dot(db.row(2));
+    float x = 1.0f + da.colV(0).dot(db.colV(0)) 
+                    + da.colV(1).dot(db.colV(1)) 
+                    + da.colV(2).dot(db.colV(2));
 	x = 2.0f / (length * x);
 
 	for (int c = 0; c < 3; ++c) {
@@ -308,18 +299,18 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			Vector3F term2(0,0,0);
 			Vector3F tmp(0,0,0);
 			// first term
-			term1 = dajpi[j][0] * db.row(k);
-			tmp =   dajpi[k][0] * db.row(j);
+			term1 = dajpi[j][0].transMult( db.colV(k) );
+			tmp =   dajpi[k][0].transMult( db.colV(j) );
 			term1 = term1 - tmp;
 			// second term
 			for (int n = 0; n < 3; ++n) {
-				tmp = dajpi[n][0] * db.row(n);
+				tmp = dajpi[n][0].transMult( db.colV(n) );
 				term2 = term2 + tmp;
 			}
 			
 			tmp = term1 - term2 * (0.5f * darboux_vector.comp(i) * length);
 			tmp *= x * bendAndTwistKs.comp(i);
-			omega_pa.setRow(i, tmp);
+			omega_pa.setCol(i, tmp);
 			
 		}
 		// pb
@@ -328,28 +319,28 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			Vector3F term2(0, 0, 0);
 			Vector3F tmp(0, 0, 0);
 			// first term
-			term1 = dajpi[j][1] * db.row(k);
-			tmp =   dajpi[k][1] * db.row(j);
+			term1 = dajpi[j][1].transMult( db.colV(k) );
+			tmp =   dajpi[k][1].transMult( db.colV(j) );
 			term1 = term1 - tmp;
 			// third term
-			tmp = dbjpi[j][0] * da.row(k);
+			tmp = dbjpi[j][0].transMult( da.colV(k) );
 			term1 = term1 - tmp;
 			
-			tmp = dbjpi[k][0] * da.row(j);
+			tmp = dbjpi[k][0].transMult( da.colV(j) );
 			term1 = term1 + tmp;
 
 			// second term
 			for (int n = 0; n < 3; ++n) {
-				tmp = dajpi[n][1] * db.row(n);
+				tmp = dajpi[n][1].transMult( db.colV(n) );
 				term2 = term2 + tmp;
 				
-				tmp = dbjpi[n][0] * da.row(n);
+				tmp = dbjpi[n][0].transMult( da.colV(n) );
 				term2 = term2 + tmp;
 			}
 			
 			tmp = term1 - term2 *(0.5f * darboux_vector.comp(i) * length);
 			tmp *= x * bendAndTwistKs.comp(i);
-			omega_pb.setRow(i, tmp);
+			omega_pb.setCol(i, tmp);
 			
 		}
 		// pc
@@ -359,19 +350,19 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			Vector3F tmp(0, 0, 0);
 			
 			// first term
-			term1 = dbjpi[j][1] * da.row(k);
-			tmp =   dbjpi[k][1] * da.row(j);
+			term1 = dbjpi[j][1].transMult( da.colV(k) );
+			tmp =   dbjpi[k][1].transMult( da.colV(j) );
 			term1 = term1 - tmp;
 
 			// second term
 			for (int n = 0; n < 3; ++n) {
-				tmp = dbjpi[n][1] * da.row(n);
+				tmp = dbjpi[n][1].transMult( da.colV(n) );
 				term2 = term2 + tmp;
 			}
 			
 			tmp = term1 + term2 * (0.5f * darboux_vector.comp(i) * length);
 			tmp *= -x * bendAndTwistKs.comp(i);
-			omega_pc.setRow(i, tmp);
+			omega_pc.setCol(i, tmp);
 			
 		}
 		// pd
@@ -380,17 +371,17 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			Vector3F term2(0, 0, 0);
 			Vector3F tmp(0, 0, 0);
 			// first term
-			term1 = dajpi[j][2] * db.row(k);
-			tmp =   dajpi[k][2] * db.row(j);
+			term1 = dajpi[j][2].transMult( db.colV(k) );
+			tmp =   dajpi[k][2].transMult( db.colV(j) );
 			term1 = term1 - tmp;
 			// second term
 			for (int n = 0; n < 3; ++n) {
-				tmp = dajpi[n][2] * db.row(n);
+				tmp = dajpi[n][2].transMult( db.colV(n) );
 				term2 = term2 + tmp;
 			}
 			tmp = term1 - term2 * (0.5f * darboux_vector.comp(i) * length);
 			tmp *= x * bendAndTwistKs.comp(i);
-			omega_pd.setRow(i, tmp);
+			omega_pd.setCol(i, tmp);
 		}
 		// pe
 		{
@@ -398,19 +389,19 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			Vector3F term2(0, 0, 0);
 			Vector3F tmp(0, 0, 0);
 			// first term
-			term1 = dbjpi[j][2] * da.row(k);
-			tmp = dbjpi[k][2] * da.row(j);
+			term1 = dbjpi[j][2].transMult( da.colV(k) );
+			tmp = dbjpi[k][2].transMult( da.colV(j) );
 			term1 -= tmp;
 			
 			// second term
 			for (int n = 0; n < 3; ++n) {	
-			    tmp = dbjpi[n][2] * da.row(n);
+			    tmp = dbjpi[n][2].transMult(da.colV(n) );
 				term2 += tmp;
 			}
 
 			tmp = term1 + term2 * (0.5f * darboux_vector.comp(i) * length);
 			tmp *= -x * bendAndTwistKs.comp(i);
-			omega_pe.setRow(i, tmp);
+			omega_pe.setCol(i, tmp);
 		}
 	}
 	return true;

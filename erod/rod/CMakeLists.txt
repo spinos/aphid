@@ -32,3 +32,6 @@ target_link_libraries (rodt ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (rodt ${Boost_THREAD_LIBRARY})
 target_link_libraries (rodt ${Boost_CHRONO_LIBRARY})
 ENDIF ()
+
+target_link_libraries (rodt ${BLAS_LIBRARY})
+target_link_libraries (rodt ${LAPACK_LIBRARY})
