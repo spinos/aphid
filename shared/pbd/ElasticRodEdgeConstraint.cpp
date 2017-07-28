@@ -19,7 +19,15 @@ bool ElasticRodEdgeConstraint::initConstraint(SimulationContext * model, const i
     bodyInds()[2] = pG;
     
     const Vector3F* ps = model->c_particles()->pos();
-    m_restLength = ps[pA].distanceTo(ps[pB]);
+    const Vector3F* gs = model->c_ghostParticles()->pos();
+    
+    const Vector3F& xA = ps[pA];
+    const Vector3F& xB = ps[pB];
+    const Vector3F& xG = gs[pG];
+    
+    m_restLength = xA.distanceTo(xB);
+    m_ghostRestLength = xG.distanceTo((xA + xB) * .5f );
+    m_edgeKs = 1.f;
     return true;
 }
 
@@ -39,7 +47,7 @@ bool ElasticRodEdgeConstraint::solvePositionConstraint(ParticleData* part, Parti
 	
 	Vector3F corr[3];
 	const bool res = projectEdgeConstraints(xA, wA, xB, wB, xG, wG, 
-				1.0f, m_restLength, m_restLength, 
+				m_edgeKs, m_restLength, m_ghostRestLength, 
 				corr[0], corr[1], corr[2]);
 	if (res) {
 		if (wA != 0.0f)
@@ -99,6 +107,9 @@ bool ElasticRodEdgeConstraint::projectEdgeConstraints(
 	}
 	return true;
 }
+
+void ElasticRodEdgeConstraint::setEdgeKs(const float& x)
+{ m_edgeKs = x; }
     
 }
 }

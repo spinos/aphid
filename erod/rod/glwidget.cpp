@@ -36,19 +36,28 @@ void GLWidget::clientDraw()
 	
 	const pbd::ParticleData* particle = m_solver->c_particles();
 	const Vector3F * pos = particle->pos();
-	const int& np = particle->numParticles();
-	glColor3f(1,1,1);
+	const pbd::ParticleData* ghost = m_solver->c_ghostParticles();
+	const Vector3F * gpos = ghost->pos();
+	
+	const int ne = m_solver->numEdges();
+	int iA, iB, iG;
 	glBegin(GL_LINES);
-	for(int i=0; i< np-1;++i) {
-		const Vector3F& p1 = pos[i];
-		const Vector3F& p2 = pos[i+1];
-		glVertex3f(p1.x,p1.y,p1.z);
+	for(int i=0; i< ne;++i) {
+		m_solver->getEdgeIndices(iA, iB, iG, i);
+	    const Vector3F& p1 = pos[iA];
+	    const Vector3F& p2 = pos[iB];
+	    const Vector3F& p3 = gpos[iG];
+		glColor3f(1,1,1);
+	    glVertex3f(p1.x,p1.y,p1.z);
 		glVertex3f(p2.x,p2.y,p2.z);
+		glColor3f(0,1,0);
+		glVertex3f((p1.x + p2.x) * .5f,
+		            (p1.y + p2.y) * .5f,
+		            (p1.z + p2.z) * .5f);
+		glVertex3f(p3.x,p3.y,p3.z);
 	}
 	glEnd();
 	
-	const pbd::ParticleData* ghost = m_solver->c_ghostParticles();
-	const Vector3F * gpos = ghost->pos();
 	const int& ngp = ghost->numParticles();
 	glColor3f(1,1,0);
 	glBegin(GL_POINTS);

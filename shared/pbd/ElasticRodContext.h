@@ -28,6 +28,10 @@ public:
     virtual ParticleData* ghostParticles();
     virtual const ParticleData* c_ghostParticles() const;
     
+    int numEdges() const;
+    void getEdgeIndices(int& iA, int& iB, int& iG, 
+                        const int& i) const;
+    
 protected:
     void addElasticRodEdgeConstraint(int a, int b, int g);
     void addElasticRodBendAndTwistConstraint(int a, int b, int c,
@@ -36,7 +40,6 @@ protected:
 /// modify gravity on ghost points
 	virtual void applyGravity(float dt);
 	
-	int numEdges() const;
 /// by num edge constraints
 	void createEdges();
 	

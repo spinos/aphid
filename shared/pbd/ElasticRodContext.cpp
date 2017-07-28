@@ -145,5 +145,14 @@ void ElasticRodContext::dampVelocity(float damping)
 ElasticRodBendAndTwistConstraint* ElasticRodContext::bendAndTwistConstraint(int i)
 { return m_bendTwistConstraints[i]; }
 
+void ElasticRodContext::getEdgeIndices(int& iA, int& iB, int& iG,
+                                    const int& i) const
+{
+    ElasticRodEdgeConstraint *c = m_edgeConstraints[i];
+    iA = c->c_bodyInds()[0];
+    iB = c->c_bodyInds()[1];
+    iG = c->c_bodyInds()[2];
+}
+
 }
 }

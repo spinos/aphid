@@ -35,3 +35,4 @@ ENDIF ()
 
 target_link_libraries (rodt ${BLAS_LIBRARY})
 target_link_libraries (rodt ${LAPACK_LIBRARY})
+target_link_libraries (rodt ${F2C_LIBRARY})

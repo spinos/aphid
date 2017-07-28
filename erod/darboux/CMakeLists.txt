@@ -36,3 +36,4 @@ ENDIF ()
 
 target_link_libraries (darboux ${BLAS_LIBRARY})
 target_link_libraries (darboux ${LAPACK_LIBRARY})
+target_link_libraries (darboux ${F2C_LIBRARY})

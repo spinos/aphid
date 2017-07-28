@@ -26,6 +26,8 @@ class ElasticRodBendAndTwistConstraint : public Constraint<5> {
 	MatrixC33F m_dB; 
 	Vector3F m_restDarbouxVector;
 	Vector3F m_bendAndTwistKs;
+/// |D - edgeAB midpoint|
+	float m_midEdgeRestLength;
 	
 public:
     ElasticRodBendAndTwistConstraint();
@@ -36,6 +38,8 @@ public:
                                     const int pD, const int pE);
 	bool solvePositionConstraint(ParticleData* part, ParticleData* ghost);
 	
+	void setBendAndTwistKs(const float& a, const float& b, const float& c);
+
 protected:
 	void computeMaterialFrame(MatrixC33F& frame,
 	        const Vector3F& vA, const Vector3F& vB, const Vector3F& vG);

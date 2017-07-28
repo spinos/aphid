@@ -35,8 +35,8 @@ bool ElasticRodBendAndTwistConstraint::initConstraint(SimulationContext * model,
 	computeMaterialFrame(m_dA, xA, xB, xD);
 	computeMaterialFrame(m_dB, xB, xC, xE);
 	computeDarbouxVector(m_restDarbouxVector, m_dA, m_dB, 1.0f);
-	m_bendAndTwistKs.set(1.f,1.f,1.f);
-	
+	m_bendAndTwistKs.set(1.f, 1.f, 1.f);
+	m_midEdgeRestLength = xD.distanceTo((xA + xB)*.5f);
 	return true;
 }
 
@@ -62,7 +62,7 @@ bool ElasticRodBendAndTwistConstraint::solvePositionConstraint(ParticleData* par
 	Vector3F corr[5];
 	bool res = projectBendingAndTwistingConstraint(
 		xA, wA, xB, wB, xC, wC, xD, wD, xE, wE, 
-		m_bendAndTwistKs, 1.0f, m_restDarbouxVector, 
+		m_bendAndTwistKs, m_midEdgeRestLength, m_restDarbouxVector, 
 		corr[0], corr[1], corr[2], corr[3], corr[4]);
 	//return true;
 	if (res) {
@@ -406,6 +406,9 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 	}
 	return true;
 }
+
+void ElasticRodBendAndTwistConstraint::setBendAndTwistKs(const float& a, const float& b, const float& c)
+{ m_bendAndTwistKs.set(a, b, c); }
 
 }
 }

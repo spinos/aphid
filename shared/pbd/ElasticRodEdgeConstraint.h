@@ -22,6 +22,8 @@ class ParticleData;
 class ElasticRodEdgeConstraint : public Constraint<3> {
 
     float m_restLength;
+    float m_ghostRestLength;
+    float m_edgeKs;
     
 public:
     ElasticRodEdgeConstraint();
@@ -30,6 +32,8 @@ public:
     
     bool initConstraint(SimulationContext * model, const int pA, const int pB, const int pG);
 	bool solvePositionConstraint(ParticleData* part, ParticleData* ghost);
+	
+	void setEdgeKs(const float& x);
 	
 private:
 	bool projectEdgeConstraints(const Vector3F& pA, const float wA, 
