@@ -10,7 +10,7 @@
 #ifndef APH_MATH_HERMITE_INTERPOLATE_PIECE_WISE_H
 #define APH_MATH_HERMITE_INTERPOLATE_PIECE_WISE_H
 
-#include <math/linspace.h>
+#include "linspace.h"
 
 namespace aphid {
 
@@ -35,7 +35,7 @@ public:
 /// x [0,1] within idx-th piece
 	T2 interpolate(const int & idx,
 				const T1 & x) const;
-				
+/// tangent	x [0,1] within idx-th piece			
 	T2 derivative(const int & idx,
 				const T1 & x) const;
 				
@@ -45,6 +45,9 @@ public:
 	void getLengths(float * & segmentLs,
 					int & np,
 					float & totalL) const;
+/// access
+	const T2& Pnt(const int& i) const;
+	const T2& Tng(const int& i) const;
 	
 protected:
 
@@ -78,6 +81,7 @@ void HermiteInterpolatePiecewise<T1, T2>::create(const int & npieces)
 	if(m_tg) {
 		delete[] m_tg;
 	}
+/// begin and end per seg
 	m_pt = new T2[npieces << 1];
 	m_tg = new T2[npieces << 1];
 }
@@ -166,6 +170,14 @@ void HermiteInterpolatePiecewise<T1, T2>::getLengths(float * & segmentLs,
 		totalL += segmentLs[i];
 	}
 }
+
+template<typename T1, typename T2>
+const T2& HermiteInterpolatePiecewise<T1, T2>::Pnt(const int& i) const
+{ return m_pt[i]; }
+
+template<typename T1, typename T2>
+const T2& HermiteInterpolatePiecewise<T1, T2>::Tng(const int& i) const
+{ return m_tg[i]; }
 
 }
 #endif

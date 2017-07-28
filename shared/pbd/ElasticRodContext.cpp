@@ -55,8 +55,11 @@ void ElasticRodContext::clearConstraints()
 
 void ElasticRodContext::positionConstraintProjection()
 {
+	const int nec = m_edgeConstraints.size();
+	const int nbtc = m_bendTwistConstraints.size();
 	int nloop = 0;
 	while(nloop < 5) {
+#if 1
 		EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
 		for(;it!=m_edgeConstraints.end();++it) {
 			(*it)->solvePositionConstraint(particles(), ghostParticles() );
@@ -66,7 +69,14 @@ void ElasticRodContext::positionConstraintProjection()
 		for(;itb!=m_bendTwistConstraints.end();++itb) {
 			(*itb)->solvePositionConstraint(particles(), ghostParticles() );
 		}
-		
+#else
+		for(int i=0;i<nec;++i) {
+			m_edgeConstraints[i]->solvePositionConstraint(particles(), ghostParticles() );
+			if(i<nbtc) {
+				m_bendTwistConstraints[i]->solvePositionConstraint(particles(), ghostParticles() );
+			}
+		}
+#endif		
 		nloop++;
 	}
 }

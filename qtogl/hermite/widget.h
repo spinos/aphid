@@ -6,9 +6,13 @@
 namespace aphid {
 
 class Vector3F;
+class Matrix44F;
+class TranslationHandle;
+class Ray;
 
-template<typename T1, typename T2>
-class HermiteInterpolatePiecewise;
+namespace pbd {
+class Beam;
+}
 
 }
 
@@ -23,13 +27,30 @@ public:
 protected:
     virtual void clientInit();
     virtual void clientDraw();
-
+	virtual void clientSelect(QMouseEvent *event);
+    virtual void clientDeselect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
+	virtual void keyPressEvent(QKeyEvent *event);
+	
 public slots:
 	
 signals:
 
 private:
-	aphid::HermiteInterpolatePiecewise<float, aphid::Vector3F > * m_interp;
+	void selectSeg(int d);
+	void toggleTngSel();
+	void movePnt();
+	void moveTng();
+	void printSegs();
+	
+private:
+	aphid::TranslationHandle * m_tranh;
+	aphid::Matrix44F* m_space;
+	aphid::Ray* m_incident;
+	aphid::pbd::Beam* m_beam;
+/// [0:3] 3 is end of 3rd seg
+	int m_pntI;
+	bool m_tngSel;
 	
 };
 

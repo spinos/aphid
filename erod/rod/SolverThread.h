@@ -27,7 +27,7 @@ protected:
     virtual void stepPhysics(float dt);
 	
 private:
-    void createBeam(float deltaL, float deltaAngle, const aphid::Matrix44F& tm);
+    void createBeam(const aphid::Matrix44F& tm);
     void createBones();
     
 public slots:

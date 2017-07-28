@@ -4,20 +4,22 @@
 #include <QtCore>
 #include "SolverThread.h"
 #include "bones.h"
+#include <pbd/Beam.h>
 
 using namespace aphid;
 
 SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
-#if 0
+#if 1
     Matrix33F rtm;
-    rtm.rotateZ(1.5f);
-    rtm.rotateX(.55f);
+    rtm.rotateZ(-2.5f);
+	//rtm.rotateY(-1.5f);
+    //rtm.rotateX(1.55f);
     Matrix44F spc;
-    spc.setRotation(rtm);
-    spc.setTranslation(1,2,3);
-    createBeam(1.f, 0.034f, spc);
+    //spc.setRotation(rtm);
+    spc.setTranslation(4,5,6);
+    createBeam(spc);
 #else 
     createBones();
 #endif
@@ -40,30 +42,42 @@ void SolverThread::stepPhysics(float dt)
 	BaseSolverThread::stepPhysics(dt);
 }
 
-void SolverThread::createBeam(float deltaL, float deltaAngle, const Matrix44F& tm)
+void SolverThread::createBeam(const Matrix44F& tm)
 {
-#define NU 18
-#define NP (NU + 1)
+static const float P0[4][3] = {
+ {1.4973,0.0135717,0},
+ {3.61696,27.5391,-0.852699},
+ {4.40409,48.8,-2.99834},
+ {-8.09004,60.4578,-8.07755},
+};
 
-    Vector3F dP(deltaL,0,0), curP(0,0,0);
-    Matrix33F rotm;
+static const float T0[4][3] = {
+ {-0.176762,16.6883,-0.949179},
+ {6.95258,24.9088,-0.236556},
+ {-5.12741,20.8168,-3.41737},
+ {-7.79407,4.84709,-8.56933},
+};
+	pbd::Beam bem;
+	for(int i=0;i<3;++i) {
+		bem.setPieceBegin(i, P0[i], T0[i]);
+		bem.setPieceEnd(i, P0[i+1], T0[i+1]);
+	}
+	bem.createNumSegments(4);
+	
+	const int np = bem.numParticles();
+	
     pbd::ParticleData* part = particles();
-	part->createNParticles(NP);
-	for(int i=0;i<NP;++i) {
-        part->setParticle(tm.transform(curP), i);
-        rotm.rotateZ(deltaAngle);
-        curP += rotm.transform(dP);
+	part->createNParticles(np);
+	for(int i=0;i<np;++i) {
+        part->setParticle(tm.transform(bem.getParticlePnt(i) ), i);
     }
     
-    rotm.setIdentity();
-    rotm.rotateZ(deltaAngle * 0.5f);
-	curP.set(deltaL * .5f, 1.f,0.f);
-    pbd::ParticleData* ghost = ghostParticles();
-	ghost->createNParticles(NP-1);
-    for(int i=0;i<NP-1;++i) {
-        ghost->setParticle(tm.transform(curP), i);
-        rotm.rotateZ(deltaAngle);
-        curP += rotm.transform(dP);
+	const int& ngp = bem.numGhostParticles();
+	
+	pbd::ParticleData* ghost = ghostParticles();
+	ghost->createNParticles(ngp);
+    for(int i=0;i<ngp;++i) {
+        ghost->setParticle(tm.transform(bem.getGhostParticlePnt(i) ), i);
     }
     
 ///lock two first particles and first ghost point
@@ -71,13 +85,22 @@ void SolverThread::createBeam(float deltaL, float deltaAngle, const Matrix44F& t
     part->invMass()[1] = 0.f;
     ghost->invMass()[0] = 0.f;
     
-	for(int i=0;i<NP-1;++i) {
-	    addElasticRodEdgeConstraint(i, i+1, i);
+	const int& ns = bem.numSegments();
+	std::cout<<"\n nseg "<<ns;
+	for(int i=0;i<ns;++i) {
+		const int& ci = bem.getConstraintSegInd(i);
+	    addElasticRodEdgeConstraint(ci, ci+1, ci);
+		std::cout<<"\n eg "<<ci<<" "<<(ci+1)<<" "<<ci;
 	}
 	
-	for(int i=0;i<NP-2;++i) {
-	    addElasticRodBendAndTwistConstraint(i, i+1, i+2, i, i+1);
+	for(int i=0;i<ns;++i) {
+		const int& ci = bem.getConstraintSegInd(i);
+		if(ci < ns - 1) {
+			addElasticRodBendAndTwistConstraint(ci, ci+1, ci+2, ci, ci+1);
+			std::cout<<"\n bnt "<<ci<<" "<<(ci+1)<<" "<<(ci+2)<<" "<<(ci)<<" "<<(ci+1);
+		}
 	}
+	std::cout.flush();
 }
 
 void SolverThread::createBones()

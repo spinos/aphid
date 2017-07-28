@@ -18,6 +18,7 @@ target_link_libraries (pwhermite ${APHID_UI_LIBRARY})
 target_link_libraries (pwhermite ${APHID_SDB_LIBRARY})
 target_link_libraries (pwhermite ${APHID_TOPO_LIBRARY})
 target_link_libraries (pwhermite ${APHID_OGL_LIBRARY})
+target_link_libraries (pwhermite ${APHID_PBD_LIBRARY})
 
 target_link_libraries (pwhermite ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (pwhermite ${Boost_DATE_TIME_LIBRARY})
@@ -30,6 +31,9 @@ IF(WIN32)
 ELSEIF (APPLE)
 ELSEIF (UNIX)
 target_link_libraries (pwhermite ${GLEW_LIBRARY})
-target_link_libraries (pwhermite ${BLAS_LIBRARY})
 
 ENDIF()
+
+target_link_libraries (pwhermite ${BLAS_LIBRARY})
+target_link_libraries (pwhermite ${LAPACK_LIBRARY})
+target_link_libraries (pwhermite ${F2C_LIBRARY})

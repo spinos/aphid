@@ -35,7 +35,7 @@ bool ElasticRodBendAndTwistConstraint::initConstraint(SimulationContext * model,
 	computeMaterialFrame(m_dA, xA, xB, xD);
 	computeMaterialFrame(m_dB, xB, xC, xE);
 	computeDarbouxVector(m_restDarbouxVector, m_dA, m_dB, 1.0f);
-	m_bendAndTwistKs.set(1.f, 1.f, 1.f);
+	m_bendAndTwistKs.set(.5f, .5f, .5f);
 	m_midEdgeRestLength = xD.distanceTo((xA + xB)*.5f);
 	return true;
 }
