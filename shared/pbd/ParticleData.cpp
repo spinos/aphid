@@ -10,7 +10,9 @@ m_projectedPos(0),
 m_force(0),
 m_velocity(0),
 m_Ri(0),
+m_geomNml(0),
 m_invMass(0),
+m_localGeomNml(0),
 m_numParticles(0)
 {}
 
@@ -22,7 +24,9 @@ ParticleData::~ParticleData()
     if(m_force) delete[] m_force;
     if(m_velocity) delete[] m_velocity;
     if(m_Ri) delete[] m_Ri;
+	if(m_geomNml) delete[] m_geomNml;
     if(m_invMass) delete[] m_invMass;
+	if(m_localGeomNml) delete[] m_localGeomNml;
 }
 
 void ParticleData::createNParticles(int x)
@@ -33,7 +37,9 @@ void ParticleData::createNParticles(int x)
 	m_force = new Vector3F[x];
 	m_velocity = new Vector3F[x];
 	m_Ri = new Vector3F[x];
+	m_geomNml = new Vector3F[x];
 	m_invMass = new float[x];
+	m_localGeomNml = new char[x];
 	m_numParticles = x;
 }
 
@@ -61,8 +67,14 @@ Vector3F * ParticleData::velocity()
 Vector3F * ParticleData::Ri()
 { return m_Ri; }
 
+Vector3F* ParticleData::geomNml()
+{ return m_geomNml; }
+
 float * ParticleData::invMass()
 { return m_invMass; }
+
+char* ParticleData::localGeomNml()
+{ return m_localGeomNml; }
 
 void ParticleData::setParticle(const Vector3F& pv, int i)
 {
@@ -73,7 +85,8 @@ void ParticleData::setParticle(const Vector3F& pv, int i)
     m_velocity[i].setZero();
     m_Ri[i].setZero();
     m_invMass[i] = 1.f;
-    
+    m_localGeomNml[i] = 0;
+	m_geomNml[i].set(0,1,0);
 }
 
 void ParticleData::cachePositions()

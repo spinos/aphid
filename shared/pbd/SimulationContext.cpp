@@ -1,10 +1,17 @@
 #include "SimulationContext.h"
+#include "WindForce.h"
+#include <math/miscfuncs.h>
 
 namespace aphid {
 namespace pbd {
     
 SimulationContext::SimulationContext()
-{}
+{
+	m_meanWindVel[0] = -9.f;
+	m_meanWindVel[1] = 0.f;
+	m_meanWindVel[2] = 0.f;
+	m_gravityY = -100.f;
+}
 
 SimulationContext::~SimulationContext()
 {}
@@ -89,12 +96,38 @@ void SimulationContext::positionConstraintProjection()
 {}
 
 void SimulationContext::applyGravity(float dt)
+{ applyGravityTo(&m_part, dt); }
+
+void SimulationContext::applyGravityTo(ParticleData* part, float dt)
 {
-    const int& np = m_part.numParticles();
-	Vector3F* vel = m_part.velocity();
-	const float* im = m_part.invMass();
+    const int& np = part->numParticles();
+	Vector3F* vel = part->velocity();
+	const float* im = part->invMass();
 	for(int i=0;i< np;i++) {
-	    if(im[i] > 0.f) vel[i].y -= 9.8f * dt;
+	    if(im[i] > 0.f) vel[i].y += m_gravityY * dt;
+	}
+}
+
+void SimulationContext::applyWind(float dt)
+{
+	applyWindTo(&m_part, dt);
+}
+
+void SimulationContext::applyWindTo(ParticleData* part, float dt)
+{
+	Vector3F vair(m_meanWindVel);
+	if(vair.length2() < 1e-3f) return;
+	
+	const int& np = part->numParticles();
+	Vector3F* vel = part->velocity();
+	Vector3F* nml = part->geomNml();
+	const float* im = part->invMass();
+	for(int i=0;i< np;i++) {
+	    if(im[i] > 0.f) {
+			Vector3F relair = vair;// - vel[i];
+			Vector3F fdl = WindForce::ComputeDragAndLift(relair, nml[i]);
+			vel[i] += fdl * (im[i] * dt);
+		}
 	}
 }
 
@@ -110,6 +143,12 @@ void SimulationContext::updateVelocityAndPosition(float dt)
 
 void SimulationContext::dampVelocity(float damping)
 { m_part.dampVelocity(damping); } 
+
+Vector3F SimulationContext::getGravityVec() const
+{ return Vector3F(0.f, m_gravityY, 0.f); }
+
+const float& SimulationContext::grivityY() const
+{ return m_gravityY; }
 
 }
 }

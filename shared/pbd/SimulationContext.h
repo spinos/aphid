@@ -14,7 +14,9 @@ namespace pbd {
 class SimulationContext {
 
     ParticleData m_part;
-    
+    float m_meanWindVel[3];
+	float m_gravityY;
+	
 public:
     SimulationContext();
     virtual ~SimulationContext();
@@ -31,6 +33,7 @@ protected:
     void clearGravitiyForce();
 /// v <- v + g dt
     virtual void applyGravity(float dt);
+	virtual void applyWind(float dt);
 /// v <- v + a dt
 /// x <- x + v dt
 	void semiImplicitEulerIntegrate(ParticleData* part, float dt);
@@ -44,6 +47,12 @@ protected:
 /// v <- v damping
     virtual void dampVelocity(float damping);
     
+	void applyGravityTo(ParticleData* part, float dt);
+	void applyWindTo(ParticleData* part, float dt);
+	
+	Vector3F getGravityVec() const;
+	const float& grivityY() const;
+	
 private:
    
 };

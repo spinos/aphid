@@ -9,6 +9,7 @@
 
 namespace aphid {
 namespace pbd {
+class Beam;
 class ElasticRodEdgeConstraint;
 class ElasticRodBendAndTwistConstraint;
 class ElasticRodContext : public SimulationContext {
@@ -27,15 +28,17 @@ public:
     
     virtual ParticleData* ghostParticles();
     virtual const ParticleData* c_ghostParticles() const;
-    
+    virtual void applyWind(float dt);
     int numEdges() const;
     void getEdgeIndices(int& iA, int& iB, int& iG, 
                         const int& i) const;
     
 protected:
+/// create particles from beam models
+	void createBeams(const Beam* bems, int numBeams);
     void addElasticRodEdgeConstraint(int a, int b, int g);
     void addElasticRodBendAndTwistConstraint(int a, int b, int c,
-                                    int d, int e);
+                                    int d, int e, float stiffness);
     void positionConstraintProjection();
 /// modify gravity on ghost points
 	virtual void applyGravity(float dt);
@@ -51,6 +54,8 @@ protected:
 	
 	ElasticRodBendAndTwistConstraint* bendAndTwistConstraint(int i);
     
+	void computeGeometryNormal();
+	
 private:
     void clearConstraints();
     void modifyEdgeGravity(Vector3F& vA, Vector3F& vB, Vector3F& vG,

@@ -30,11 +30,83 @@ void Beam::createNumSegments(int spp)
 	const int ns = spp * 3;
 	m_p.reset(new Vector3F[ns + 1]);
 	m_gp.reset(new Vector3F[ns]);
+	m_invMass.reset(new float[ns + 1]);
+	m_stiffness.reset(new float[ns + 1]);
 	m_constraintSegInd.reset(new int[ns]);
 	m_numSegs = ns;
 	
 	permutateConstraintInd();
 	calculatePnts();
+/// default inv_mass curve
+	HermiteInterpolatePiecewise<float, Vector2F > invMassCurve;
+	static const float pnt[4][2] = {
+	{0.f, 1.f},
+	{4.f, 1.4f},
+	{8.f, 3.f},
+	{12.f, 6.f},
+	};
+	static const float tng[4][2] = {
+	{1.f, 0.f},
+	{1.f, 0.f},
+	{1.f, 0.1f},
+	{1.f, 0.1f},
+	};
+	for(int i=0;i<3;++i) {
+		invMassCurve.setPieceBegin(i, pnt[i], tng[i]);
+		invMassCurve.setPieceEnd(i, pnt[i+1], tng[i+1]);
+	}
+	calculateInvMass(&invMassCurve);
+	
+	static const float pntStiff[4][2] = {
+	{0.f, 1.f},
+	{4.f, .5f},
+	{8.f, .1f},
+	{12.f, .05f},
+	};
+	static const float tngStiff[4][2] = {
+	{1.f, -.1f},
+	{1.f, -.1f},
+	{1.f, 0.f},
+	{1.f, 0.f},
+	};
+	for(int i=0;i<3;++i) {
+		invMassCurve.setPieceBegin(i, pntStiff[i], tngStiff[i]);
+		invMassCurve.setPieceEnd(i, pntStiff[i+1], tngStiff[i+1]);
+	}
+	calculateStiffness(&invMassCurve);
+	
+}
+
+void Beam::calculateInvMass(HermiteInterpolatePiecewise<float, Vector2F > * crv)
+{
+	interpolateValue(m_invMass.get(), crv);
+}
+
+void Beam::calculateStiffness(HermiteInterpolatePiecewise<float, Vector2F > * crv)
+{
+	interpolateValue(m_stiffness.get(), crv);
+}
+
+void Beam::interpolateValue(float* vals,
+		HermiteInterpolatePiecewise<float, Vector2F > * crv)
+{
+	const int& ns = m_numSegs;
+	const int spp = ns / 3;
+	const int ppp = spp + 1;
+	float* param = new float[ppp];
+	linspace<float>(param, 0.f, 1.f, ppp);
+	
+	int acc = 0;
+	for(int j=0;j<3;++j) {
+		for(int i=0;i<spp;++i) {
+			vals[acc++] = crv->interpolate(j, param[i]).y;
+		}
+	}
+	
+	delete[] param;
+	
+/// last particle
+	vals[acc] = crv->Pnt(5).y;
 }
 
 void Beam::calculatePnts()
@@ -51,6 +123,8 @@ void Beam::calculatePnts()
 			m_p[acc++] = interpolate(j, param[i]);
 		}
 	}
+	
+	delete[] param;
 	
 /// last particle
 	m_p[acc] = Pnt(5);
@@ -87,7 +161,13 @@ const Vector3F& Beam::getParticlePnt(int i) const
 { return m_p[i]; }
 
 const Vector3F& Beam::getGhostParticlePnt(int i) const
-{ return m_gp[i]; }	
+{ return m_gp[i]; }
+
+const float& Beam::getStiffness(int i) const
+{ return m_stiffness[i]; }
+
+const float& Beam::getInvMass(int i) const
+{ return m_invMass[i]; }	
 
 const int& Beam::getConstraintSegInd(int i) const
 { return m_constraintSegInd[i]; }

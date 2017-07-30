@@ -27,6 +27,8 @@ class Beam : public HermiteInterpolatePiecewise<float, Vector3F > {
 
 	boost::scoped_array<Vector3F > m_p;
 	boost::scoped_array<Vector3F > m_gp;
+	boost::scoped_array<float > m_invMass;
+	boost::scoped_array<float > m_stiffness;
 /// order to enforce constraints using
 /// bidirectional interleaving permutation
 /// 1  3 5 7 9
@@ -54,13 +56,20 @@ public:
 	
 	const Vector3F& getParticlePnt(int i) const;
 	const Vector3F& getGhostParticlePnt(int i) const;
+	const float& getInvMass(int i) const;
+	const float& getStiffness(int i) const;
 	const int& getConstraintSegInd(int i) const;
 	Vector3F getSegmentMidPnt(int i) const;
 	MatrixC33F getMaterialFrame(int i) const;
 	
+	void calculateInvMass(HermiteInterpolatePiecewise<float, Vector2F > * crv);
+	void calculateStiffness(HermiteInterpolatePiecewise<float, Vector2F > * crv);
+	
 private:
 	void permutateConstraintInd();
-	
+	void interpolateValue(float* vals,
+		HermiteInterpolatePiecewise<float, Vector2F > * crv);
+		
 };
 
 }

@@ -1,6 +1,7 @@
 #include "ElasticRodContext.h"
 #include "ElasticRodEdgeConstraint.h"
 #include "ElasticRodBendAndTwistConstraint.h"
+#include "Beam.h"
 
 namespace aphid {
 namespace pbd {
@@ -27,12 +28,14 @@ void ElasticRodContext::addElasticRodEdgeConstraint(int a, int b, int g)
 }
 
 void ElasticRodContext::addElasticRodBendAndTwistConstraint(int a, int b, int c,
-                                    int d, int e)
+                                    int d, int e, float stiffness)
 {   
     ElasticRodBendAndTwistConstraint *cn = new ElasticRodBendAndTwistConstraint();
     const bool res = cn->initConstraint(this, a, b, c, d, e);
-    if (res) 
+    if (res) {
+		cn->setStiffness(stiffness);
         m_bendTwistConstraints.push_back(cn);
+	}
 }
 
 void ElasticRodContext::addElasticRodBendAndTwistConstraint(ElasticRodBendAndTwistConstraint* c)
@@ -88,12 +91,9 @@ void ElasticRodContext::applyGravity(float dt)
 {
     SimulationContext::applyGravity(dt);
 /// gravity on ghost points
-    const int& ng = ghostParticles()->numParticles();
+	applyGravityTo(ghostParticles(), dt);
+    
 	Vector3F* velg = ghostParticles()->velocity();
-	const float* im = ghostParticles()->invMass();
-	for(int i=0;i< ng;i++) {
-	    if(im[i] > 0.f) velg[i].y -= 9.8f * dt;
-	}
 	
     const int ne = numEdges();
     Vector3F* vel = particles()->velocity();
@@ -130,10 +130,10 @@ void ElasticRodContext::modifyEdgeGravity(Vector3F& vA, Vector3F& vB, Vector3F& 
 /// update vmt
     vmt_1 = vmt;
     
-    static const Vector3F gv(0.f, -9.8, 0.f);
-    
-/// r <- (am .g) / |g|2
-    float r = 1.f - am.dot(gv) / 96.04f;
+	const Vector3F gv = getGravityVec();
+	
+/// r <- (am . g) / |g|2
+    float r = 1.f - am.dot(gv ) / (grivityY() * grivityY() );
 
     vG -= gv * r * dt;
     vA += gv * 0.5 * r * dt;
@@ -162,6 +162,82 @@ void ElasticRodContext::getEdgeIndices(int& iA, int& iB, int& iG,
     iA = c->c_bodyInds()[0];
     iB = c->c_bodyInds()[1];
     iG = c->c_bodyInds()[2];
+}
+
+void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
+{
+	int np = 0;
+	int ngp = 0;
+	
+	for(int j=0;j<numBeams;++j) {
+		np += bems[j].numParticles();
+		ngp += bems[j].numGhostParticles();
+	
+	}
+	
+    pbd::ParticleData* part = particles();
+	part->createNParticles(np);
+	pbd::ParticleData* ghost = ghostParticles();
+	ghost->createNParticles(ngp);
+	
+	int npbegin = 0;
+	int ngpbegin = 0;
+	for(int j=0;j<numBeams;++j) {
+		const int npj = bems[j].numParticles();
+		const int ngpj = bems[j].numGhostParticles();
+		
+		for(int i=0;i<npj;++i) {
+			part->setParticle(bems[j].getParticlePnt(i), npbegin + i);
+			part->invMass()[npbegin + i] = bems[j].getInvMass(i);
+		}
+    
+		for(int i=0;i<ngpj;++i) {
+			ghost->setParticle(bems[j].getGhostParticlePnt(i), ngpbegin + i);
+			ghost->invMass()[ngpbegin + i] = bems[j].getInvMass(i);
+		}
+    
+///lock two first particles and first ghost point
+		part->invMass()[npbegin + 0] = 0.f;
+		part->invMass()[npbegin + 1] = 0.f;
+		ghost->invMass()[ngpbegin + 0] = 0.f;
+    
+		const int& nsj = bems[j].numSegments();
+		//std::cout<<"\n nseg "<<nsj;
+		for(int i=0;i<nsj;++i) {
+			const int& ci = bems[j].getConstraintSegInd(i);
+			addElasticRodEdgeConstraint(ci + npbegin, ci+1 + npbegin, ci + ngpbegin);
+			//std::cout<<"\n eg "<<ci<<" "<<(ci+1)<<" "<<ci;
+		}
+		
+		for(int i=0;i<nsj;++i) {
+			const int& ci = bems[j].getConstraintSegInd(i);
+			if(ci < nsj - 1) {
+				addElasticRodBendAndTwistConstraint(ci + npbegin, ci+1 + npbegin, ci+2 + npbegin, 
+											ci + ngpbegin, ci+1 + ngpbegin,
+											bems[j].getStiffness(i+1) );
+			}
+		}
+		
+		npbegin += npj;
+		ngpbegin += ngpj;
+		
+	}
+	
+}
+
+void ElasticRodContext::computeGeometryNormal()
+{
+	BendTwistConstraintVector::iterator itb = m_bendTwistConstraints.begin();
+	for(;itb!=m_bendTwistConstraints.end();++itb) {
+		(*itb)->calculateGeometryNormal(particles(), ghostParticles() );
+	}
+}
+
+void ElasticRodContext::applyWind(float dt)
+{
+	computeGeometryNormal();
+	SimulationContext::applyWind(dt);
+	applyWindTo(&m_ghostPart, dt);
 }
 
 }

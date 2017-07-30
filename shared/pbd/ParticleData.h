@@ -14,7 +14,13 @@ class ParticleData {
 	Vector3F * m_force;
 	Vector3F * m_velocity;
 	Vector3F * m_Ri;
+/// for wind effect
+	Vector3F * m_geomNml;
 	float * m_invMass;
+/// 0 +x 1 -x
+/// 2 +y 3 -y
+/// 4 +z 5 -z
+	char* m_localGeomNml;
 	int m_numParticles;
 	
 public:
@@ -33,7 +39,9 @@ public:
     Vector3F* force();
 	Vector3F* velocity();
 	Vector3F* Ri();
+	Vector3F* geomNml();
 	float * invMass();
+	char* localGeomNml();
 	
 /// posLast <- pos
 /// pos<- posProjected

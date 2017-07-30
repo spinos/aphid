@@ -3,8 +3,8 @@
 
 namespace aphid {
 
-float BaseSolverThread::TimeStep = 1.f / 60.f;
-int BaseSolverThread::NumSubsteps = 5;
+float BaseSolverThread::TimeStep = 1.f / 30.f;
+int BaseSolverThread::NumSubsteps = 9;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {
