@@ -66,7 +66,7 @@ void GLWidget::clientDraw()
 	getDrawer()->coordsys1(dA);
 	getDrawer()->coordsys1(dB);
 	getDrawer()->setColor(1,1,0);
-	getDrawer()->arrow(Vector3F(0,0,0), darboux);
+	getDrawer()->arrow(pos[1], pos[1] + darboux);
 	
 	glBegin(GL_LINES);
 	for(int i=0; i< 3;++i) {

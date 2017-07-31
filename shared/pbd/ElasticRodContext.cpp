@@ -61,7 +61,7 @@ void ElasticRodContext::positionConstraintProjection()
 	const int nec = m_edgeConstraints.size();
 	const int nbtc = m_bendTwistConstraints.size();
 	int nloop = 0;
-	while(nloop < 5) {
+	while(nloop < 4) {
 #if 1
 		EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
 		for(;it!=m_edgeConstraints.end();++it) {
@@ -92,7 +92,10 @@ void ElasticRodContext::applyGravity(float dt)
     SimulationContext::applyGravity(dt);
 /// gravity on ghost points
 	applyGravityTo(ghostParticles(), dt);
-    
+}
+
+void ElasticRodContext::modifyGhostGravity(float dt)
+{    
 	Vector3F* velg = ghostParticles()->velocity();
 	
     const int ne = numEdges();

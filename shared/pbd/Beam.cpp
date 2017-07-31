@@ -40,10 +40,10 @@ void Beam::createNumSegments(int spp)
 /// default inv_mass curve
 	HermiteInterpolatePiecewise<float, Vector2F > invMassCurve;
 	static const float pnt[4][2] = {
-	{0.f, 1.f},
-	{4.f, 1.4f},
+	{0.f, .5f},
+	{4.f, 1.f},
 	{8.f, 3.f},
-	{12.f, 6.f},
+	{12.f, 5.f},
 	};
 	static const float tng[4][2] = {
 	{1.f, 0.f},
@@ -59,9 +59,9 @@ void Beam::createNumSegments(int spp)
 	
 	static const float pntStiff[4][2] = {
 	{0.f, 1.f},
-	{4.f, .5f},
-	{8.f, .1f},
-	{12.f, .05f},
+	{4.f, .8f},
+	{8.f, .4f},
+	{12.f, .1f},
 	};
 	static const float tngStiff[4][2] = {
 	{1.f, -.1f},
@@ -142,7 +142,8 @@ void Beam::calculatePnts()
 		Vector3F p1p2 = p2 - p1;
 		Vector3F p1pm02 = (p0 + p2) * 0.5f - p1;
 		segnml.calculateNormal(i, p0p1, p1p2, p1pm02 );
-		m_gp[i] = (p1 + p2) * .5f + segnml.getNormal(i);
+/// mid edge rest length?
+		m_gp[i] = (p1 + p2) * .5f + segnml.getNormal(i) * p1.distanceTo(p2) * .5f;
 	
 	}
 	

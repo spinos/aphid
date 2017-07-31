@@ -446,6 +446,8 @@ private:
 
 };
 
+typedef Hexagon Hexahedron;
+
 template<int N>
 class Hull {
 	

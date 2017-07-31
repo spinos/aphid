@@ -28,6 +28,7 @@ public:
 	virtual ~WindTurbine();
 	
 	Matrix44F* visualizeSpace();
+	const Matrix44F* visualizeSpace() const;
 	
 	void setWindSpeed(float x);
 	const float& windSpeed() const;

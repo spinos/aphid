@@ -53,6 +53,8 @@ protected:
 	Vector3F getGravityVec() const;
 	const float& grivityY() const;
 	
+	void setMeanWindVelocity(const Vector3F& vwind);
+	
 private:
    
 };

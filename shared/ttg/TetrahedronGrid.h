@@ -215,6 +215,9 @@ void TetrahedronGridUtil<N>::BuildCells(std::vector<sdb::Coord4> & tets,
 
 }
 
+/// grid by a tetrahedron cage
+/// after a level N TetrahedronGridUtil
+/// N is level subdiv
 template <typename Tv, int N>
 class TetrahedronGrid 
 {
@@ -244,6 +247,8 @@ public:
     void setNodeDistance(const float & v, const int & i);
     
     bool isPointInside(const Vector3F & q) const;
+	
+	Vector3F* posR();
 	
 protected:
 
@@ -332,6 +337,10 @@ void TetrahedronGrid<Tv, N>::setNodeDistance(const float & v, const int & i)
 template <typename Tv, int N>
 bool TetrahedronGrid<Tv, N>::isPointInside(const Vector3F & q) const
 { return m_cage.isPointInside(q); }
+
+template <typename Tv, int N>
+Vector3F* TetrahedronGrid<Tv, N>::posR()
+{ return m_pos; }
 
 }
 #endif

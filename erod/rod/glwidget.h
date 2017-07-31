@@ -5,6 +5,14 @@
 #include <qt/Base3DView.h>
 #include <pbd/pbd_common.h>
 
+namespace aphid {
+class RotationHandle;
+
+template<typename T>
+class GenericHexahedronGrid;
+ 
+}
+
 class SolverThread;
 class GLWidget : public aphid::Base3DView
 {
@@ -18,16 +26,28 @@ public:
 protected:
 	virtual void clientInit();
     virtual void clientDraw();
-    virtual void clientSelect(aphid::Vector3F & origin, aphid::Vector3F & ray, aphid::Vector3F & hit);
-    virtual void clientDeselect();
-    virtual void clientMouseInput(aphid::Vector3F & stir);
+    virtual void clientSelect(QMouseEvent *event);
+    virtual void clientDeselect(QMouseEvent *event);
+    virtual void clientMouseInput(QMouseEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
     virtual void resetPerspViewTransform();
 	virtual void resetOrthoViewTransform();
 	
 private:
+	void drawWindTurbine();
+	void drawMesh(const int& nind, const int* inds, const float* pos, const float* nml);
+	void addWindSpeed(float x);
+	void drawGrid();
+	void shuffleSample();
+	
+private:
     SolverThread * m_solver;
+	aphid::RotationHandle * m_roth;
+	aphid::Vector3F m_smpV;
+	
+typedef aphid::GenericHexahedronGrid<float> GridTyp;
+	GridTyp * m_grd;
 	
 private slots:
 

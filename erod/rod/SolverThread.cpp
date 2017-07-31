@@ -5,20 +5,24 @@
 #include "SolverThread.h"
 #include "bones.h"
 #include <pbd/Beam.h>
+#include <pbd/WindTurbine.h>
 
 using namespace aphid;
 
 SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
+	m_windicator = new pbd::WindTurbine;
+	
 #if 1
     Matrix33F rtm;
-    rtm.rotateZ(-1.5f);
+	rtm = rtm * .43f;
+    //rtm.rotateZ(-1.5f);
 	//rtm.rotateY(-1.5f);
     //rtm.rotateX(1.55f);
     Matrix44F spc;
-    //spc.setRotation(rtm);
-    spc.setTranslation(6,5,4);
+    spc.setRotation(rtm);
+    spc.setTranslation(8,4,2);
     createBeam(spc);
 #else 
     createBones();
@@ -34,30 +38,33 @@ void SolverThread::stepPhysics(float dt)
 {
 #if 1
     applyGravity(dt);
-	applyWind(dt);
-    projectPosition(dt);	
+	setMeanWindVelocity(m_windicator->getMeanWindVec() );
+	modifyGhostGravity(dt);
+    applyWind(dt);
+	projectPosition(dt);	
 	positionConstraintProjection();
-	dampVelocity(0.01f);
+	dampVelocity(0.02f);
 	updateVelocityAndPosition(dt);
 #endif	
+	m_windicator->progress(dt);
 	BaseSolverThread::stepPhysics(dt);
 }
 
 void SolverThread::createBeam(const Matrix44F& tm)
 {
 static const float P0[16][3] = {
- {1.4973,0.0135717,0},
- {3.61696,27.5391,-0.852699},
- {4.40409,48.8,-2.99834},
- {-8.09004,60.4578,-8.07755},
- {0.239419,0,0},
- {2.26399,11.6731,-0.852699},
- {5.80086,25.8274,-1.50135},
+ {0,0,1.23228},
+ {0.628691,12.7256,2.27426},
+ {-0.58565,27.1779,5.54291},
+ {-3.74737,38.7331,7.29831},
+ {0.239419,0,-1},
+ {2.26399,11.6731,-1.852699},
+ {5.80086,25.8274,-2.50135},
  {14.6939,31.0103,-4.02684},
  {-0.883503,0.0963957,0},
- {-1.36914,12.6204,-0.759043},
- {-3.4397,27.3021,0.0450491},
- {-7.02952,39.8786,-2.8443},
+ {-1.36914,12.6204,-2.759043},
+ {-3.4397,27.3021,-4.0450491},
+ {-7.02952,39.8786,-5.8443},
   {-0.91866,-2.87294e-05,0},
  {-3.39053,11.7276,0.151154},
  {-9.40395,20.0547,0.945781},
@@ -66,15 +73,15 @@ static const float P0[16][3] = {
 };
 
 static const float T0[16][3] = {
- {-0.176762,16.6883,-0.949179},
- {6.95258,24.9088,-0.236556},
- {-5.12741,20.8168,-3.41737},
- {-7.79407,4.84709,-8.56933},
+ {0.147823,11.6085,0.118592},
+ {0.249545,13.8477,2.66619},
+ {-0.721688,12.0848,4.52784},
+ {-7.35406,8.41056,3.76844},
 {1.16552,8.85645,0.118592},
  {0.213102,14.175,-1.12544},
  {6.97878,8.44556,-1.91793},
  {8.12793,2.29141,-1.25547},
- {0.147823,11.6085,0.118592},
+ {0.147823,11.6085,-1.118592},
  {-2.4618,14.1684,-1.12544},
  {-0.721688,12.5583,-1.91793},
  {-7.35406,8.41031,-1.25547},
@@ -85,8 +92,8 @@ static const float T0[16][3] = {
  
 };
 
-#define BmNumMdl 3
-#define BmMdlOffset 4
+#define BmNumMdl 4
+#define BmMdlOffset 0
 
 	pbd::Beam bem[BmNumMdl];
 	for(int j=0;j<BmNumMdl;++j) {
@@ -101,11 +108,7 @@ static const float T0[16][3] = {
 			bem[j].setPieceEnd(i, pnt, tng);
 		}
 		
-		if(j==2) {
-			bem[j].setGhostRef(Vector3F(1,0,0));
-	
-		}
-		bem[j].createNumSegments(3);
+		bem[j].createNumSegments(4);
 		
 	}
 	
@@ -143,3 +146,8 @@ void SolverThread::createBones()
 	}
 }
 
+pbd::WindTurbine* SolverThread::windTurbine()
+{ return m_windicator; }
+
+const pbd::WindTurbine* SolverThread::windTurbine() const
+{ return m_windicator; }

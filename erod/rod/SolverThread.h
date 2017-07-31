@@ -12,6 +12,13 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
+namespace aphid {
+
+namespace pbd {
+class WindTurbine;
+}
+}
+
 class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::ElasticRodContext
 {
 	unsigned * m_indices;
@@ -22,9 +29,15 @@ class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::ElasticR
 public:
     SolverThread(QObject *parent = 0);
     ~SolverThread();
+	
+	aphid::pbd::WindTurbine* windTurbine();
+	const aphid::pbd::WindTurbine* windTurbine() const;
 
 protected:
     virtual void stepPhysics(float dt);
+	
+private:
+	aphid::pbd::WindTurbine* m_windicator;
 	
 private:
     void createBeam(const aphid::Matrix44F& tm);

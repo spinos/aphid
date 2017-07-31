@@ -99,8 +99,13 @@ WindTurbine::~WindTurbine()
 Matrix44F* WindTurbine::visualizeSpace()
 { return &m_vizSpace; }
 
+const Matrix44F* WindTurbine::visualizeSpace() const
+{ return &m_vizSpace; }
+
 void WindTurbine::setWindSpeed(float x)
-{ m_windSpeed = x; }
+{ 
+	if(x > 0.f) m_windSpeed = x;
+}
 	
 const float& WindTurbine::windSpeed() const
 { return m_windSpeed; }
@@ -117,7 +122,7 @@ const float& WindTurbine::rotorAngle() const
 { return m_rotorAngle; }
 
 void WindTurbine::progress(float dt)
-{ m_rotorAngle -= dt * m_windSpeed; }
+{ m_rotorAngle -= dt * m_windSpeed * 10.f; }
 
 }
 

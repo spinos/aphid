@@ -7,10 +7,10 @@ namespace pbd {
     
 SimulationContext::SimulationContext()
 {
-	m_meanWindVel[0] = -9.f;
+	m_meanWindVel[0] = -1.f;
 	m_meanWindVel[1] = 0.f;
 	m_meanWindVel[2] = 0.f;
-	m_gravityY = -100.f;
+	m_gravityY = -30.f;
 }
 
 SimulationContext::~SimulationContext()
@@ -124,7 +124,7 @@ void SimulationContext::applyWindTo(ParticleData* part, float dt)
 	const float* im = part->invMass();
 	for(int i=0;i< np;i++) {
 	    if(im[i] > 0.f) {
-			Vector3F relair = vair;// - vel[i];
+			Vector3F relair = vair - vel[i];
 			Vector3F fdl = WindForce::ComputeDragAndLift(relair, nml[i]);
 			vel[i] += fdl * (im[i] * dt);
 		}
@@ -149,6 +149,13 @@ Vector3F SimulationContext::getGravityVec() const
 
 const float& SimulationContext::grivityY() const
 { return m_gravityY; }
+
+void SimulationContext::setMeanWindVelocity(const Vector3F& vwind)
+{ 
+	m_meanWindVel[0] = vwind.x;
+	m_meanWindVel[1] = vwind.y;
+	m_meanWindVel[2] = vwind.z;
+}
 
 }
 }

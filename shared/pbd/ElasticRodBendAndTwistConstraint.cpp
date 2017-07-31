@@ -34,9 +34,9 @@ bool ElasticRodBendAndTwistConstraint::initConstraint(SimulationContext * model,
 	
 	computeMaterialFrame(m_dA, xA, xB, xD);
 	computeMaterialFrame(m_dB, xB, xC, xE);
-	computeDarbouxVector(m_restDarbouxVector, m_dA, m_dB, 1.0f);
+	m_midEdgeRestLength = ((xA + xB) * .5f).distanceTo((xB + xC) * .5f);
+	computeDarbouxVector(m_restDarbouxVector, m_dA, m_dB, m_midEdgeRestLength);
 	m_bendAndTwistKs.set(1.f, 1.f, 1.f);
-	m_midEdgeRestLength = 1.f;
 	m_stiffness = 1.f;
 	return true;
 }
@@ -207,7 +207,8 @@ void ElasticRodBendAndTwistConstraint::computeDarbouxVector(Vector3F& darboux,
 		const int j = permutation[c][1];
 		const int k = permutation[c][2];
 
-		darboux.setComp(frameA.colV(j).dot(frameB.colV(k) ) - frameA.colV(k).dot(frameB.colV(j) ), 
+		darboux.setComp(frameA.colV(j).dot(frameB.colV(k) ) 
+						- frameA.colV(k).dot(frameB.colV(j) ), 
 		                i);
 	}
 
@@ -290,10 +291,11 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 	MatrixC33F& omega_pa, MatrixC33F& omega_pb, MatrixC33F& omega_pc, 
 	MatrixC33F& omega_pd, MatrixC33F& omega_pe)
 {
-    float x = 1.0f + da.colV(0).dot(db.colV(0)) 
+/// X <- 2 / (l + sigma n=1,3 (dan^t dbn) )
+    float X = 1.0f + da.colV(0).dot(db.colV(0)) 
                     + da.colV(1).dot(db.colV(1)) 
                     + da.colV(2).dot(db.colV(2));
-	x = 2.0f / (length * x);
+	X = 2.0f / (length * X);
 
 	for (int c = 0; c < 3; ++c) {
 		const int i = permutation[c][0];
@@ -315,7 +317,7 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			}
 			
 			tmp = term1 - term2 * (0.5f * darboux_vector.comp(i) * length);
-			tmp *= x * bendAndTwistKs.comp(i);
+			tmp *= X;// * bendAndTwistKs.comp(i);
 			omega_pa.setCol(i, tmp);
 			
 		}
@@ -345,7 +347,7 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			}
 			
 			tmp = term1 - term2 *(0.5f * darboux_vector.comp(i) * length);
-			tmp *= x * bendAndTwistKs.comp(i);
+			tmp *= X;// * bendAndTwistKs.comp(i);
 			omega_pb.setCol(i, tmp);
 			
 		}
@@ -367,7 +369,7 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			}
 			
 			tmp = term1 + term2 * (0.5f * darboux_vector.comp(i) * length);
-			tmp *= -x * bendAndTwistKs.comp(i);
+			tmp *= -X;// * bendAndTwistKs.comp(i);
 			omega_pc.setCol(i, tmp);
 			
 		}
@@ -386,7 +388,7 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 				term2 = term2 + tmp;
 			}
 			tmp = term1 - term2 * (0.5f * darboux_vector.comp(i) * length);
-			tmp *= x * bendAndTwistKs.comp(i);
+			tmp *= X;// * bendAndTwistKs.comp(i);
 			omega_pd.setCol(i, tmp);
 		}
 		// pe
@@ -406,7 +408,7 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 			}
 
 			tmp = term1 + term2 * (0.5f * darboux_vector.comp(i) * length);
-			tmp *= -x * bendAndTwistKs.comp(i);
+			tmp *= -X;// * bendAndTwistKs.comp(i);
 			omega_pe.setCol(i, tmp);
 		}
 	}

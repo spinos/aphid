@@ -18,10 +18,11 @@ target_link_libraries (rodt ${APHID_FOUND_LIBRARY})
 target_link_libraries (rodt ${APHID_MATH_LIBRARY})
 target_link_libraries (rodt ${APHID_GEOM_LIBRARY})
 target_link_libraries (rodt ${APHID_OGL_LIBRARY})
-target_link_libraries (rodt ${APHID_CU_LIBRARY})
 target_link_libraries (rodt ${APHID_UI_LIBRARY})
 target_link_libraries (rodt ${APHID_TOPO_LIBRARY})
 target_link_libraries (rodt ${APHID_PBD_LIBRARY})
+target_link_libraries (rodt ${APHID_SDB_LIBRARY})
+target_link_libraries (rodt ${APHID_SMP_LIBRARY})
 
 INCLUDE (${APHID_DIR}/cmake/boost_config.cmake)
 

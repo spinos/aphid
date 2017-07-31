@@ -11,7 +11,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Untitled"));
+    setWindowTitle(tr("Position Based Elastic Rod"));
 }
 
 void Window::keyPressEvent(QKeyEvent *e)

@@ -55,6 +55,7 @@ protected:
 	ElasticRodBendAndTwistConstraint* bendAndTwistConstraint(int i);
     
 	void computeGeometryNormal();
+	void modifyGhostGravity(float dt);
 	
 private:
     void clearConstraints();

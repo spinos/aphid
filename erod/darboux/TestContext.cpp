@@ -16,19 +16,19 @@ TestContext::TestContext()
     pbd::ParticleData* part = particles();
 	part->createNParticles(NP);
 	for(int i=0;i<NP;++i) {
-        part->setParticle(Vector3F(1.f * i, 2.f, 0.f), i);
+        part->setParticle(Vector3F(2.f * i, 2.f, 0.f), i);
     }
     
 	pbd::ParticleData* ghost = ghostParticles();
 	ghost->createNParticles(NP-1);
     for(int i=0;i<NP-1;++i) {
-        ghost->setParticle(Vector3F(1.f * i + .5f, 3.f, 0.f), i);
+        ghost->setParticle(Vector3F(2.f * i + 1.f, 3.f, 0.f), i);
     }
     
 ///lock two first particles and first ghost point
-    part->invMass()[0] = 0.f;
-    part->invMass()[1] = 0.f;
-    ghost->invMass()[0] = 0.f;
+    //part->invMass()[0] = 0.f;
+    //part->invMass()[1] = 0.f;
+    //ghost->invMass()[0] = 0.f;
     
 	for(int i=0;i<NP-1;++i) {
 	    addElasticRodEdgeConstraint(i, i+1, i);

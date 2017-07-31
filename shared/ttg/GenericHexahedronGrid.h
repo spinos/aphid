@@ -1,5 +1,5 @@
 /*
- *  GenericHexagonGrid.h
+ *  GenericHexahedronGrid.h
  *  
  *
  *  Created by jian zhang on 2/26/17.
@@ -7,15 +7,15 @@
  *
  */
 
-#ifndef APHID_GENERIC_HEXAGON_GRID_H
-#define APHID_GENERIC_HEXAGON_GRID_H
+#ifndef APHID_GENERIC_HEXAHEDRON_GRID_H
+#define APHID_GENERIC_HEXAHEDRON_GRID_H
 
 #include <geom/ConvexShape.h>
 
 namespace aphid {
 
 template <typename Tv>
-class GenericHexagonGrid {
+class GenericHexahedronGrid {
 
 	Tv * m_value;
 	Vector3F * m_pos;
@@ -24,9 +24,9 @@ class GenericHexagonGrid {
     int m_numCells;
 	
 public:
-	GenericHexagonGrid();
-	virtual ~GenericHexagonGrid();
-	
+	GenericHexahedronGrid();
+	virtual ~GenericHexahedronGrid();
+/// num points and num cells
 	void create(int np, int nc);
 	
 	const int & numPoints() const;
@@ -35,7 +35,7 @@ public:
 	const Vector3F & pos(const int & i) const;
 	const Tv & value(const int & i) const;
     const int * cellVertices(const int & i) const;
-	void getCell(cvx::Hexagon & hexa, const int & i) const;
+	void getCell(cvx::Hexahedron & hexa, const int & i) const;
 	void getCellVertices(int * dst, const int & i) const;
 	
 	void setPos(const Vector3F & v, const int & i);
@@ -50,7 +50,7 @@ private:
 };
 
 template <typename Tv>
-GenericHexagonGrid<Tv>::GenericHexagonGrid()
+GenericHexahedronGrid<Tv>::GenericHexahedronGrid()
 {
     m_value = 0;
     m_pos = 0;
@@ -58,13 +58,13 @@ GenericHexagonGrid<Tv>::GenericHexagonGrid()
 }
 
 template <typename Tv>
-GenericHexagonGrid<Tv>::~GenericHexagonGrid()
+GenericHexahedronGrid<Tv>::~GenericHexahedronGrid()
 {
     internalClear();
 }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::internalClear()
+void GenericHexahedronGrid<Tv>::internalClear()
 {
 	if(m_value) delete[] m_value;
 	if(m_pos) delete[] m_pos;
@@ -72,7 +72,7 @@ void GenericHexagonGrid<Tv>::internalClear()
 }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::create(int np, int nc)
+void GenericHexahedronGrid<Tv>::create(int np, int nc)
 {
     internalClear();
     m_numPoints = np;
@@ -83,27 +83,27 @@ void GenericHexagonGrid<Tv>::create(int np, int nc)
 }
 
 template <typename Tv>
-const int & GenericHexagonGrid<Tv>::numPoints() const
+const int & GenericHexahedronGrid<Tv>::numPoints() const
 { return m_numPoints; }
 
 template <typename Tv>
-const int & GenericHexagonGrid<Tv>::numCells() const
+const int & GenericHexahedronGrid<Tv>::numCells() const
 { return m_numCells; }
 
 template <typename Tv>
-const Vector3F & GenericHexagonGrid<Tv>::pos(const int & i) const
+const Vector3F & GenericHexahedronGrid<Tv>::pos(const int & i) const
 { return m_pos[i]; }
 
 template <typename Tv>
-const Tv & GenericHexagonGrid<Tv>::value(const int & i) const
+const Tv & GenericHexahedronGrid<Tv>::value(const int & i) const
 { return m_value[i]; }
 
 template <typename Tv>
-const int * GenericHexagonGrid<Tv>::cellVertices(const int & i) const
+const int * GenericHexahedronGrid<Tv>::cellVertices(const int & i) const
 { return &m_cells[i<<3]; }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::getCell(cvx::Hexagon & hexa, const int & i) const
+void GenericHexahedronGrid<Tv>::getCell(cvx::Hexahedron & hexa, const int & i) const
 {
 	const int * c = cellVertices(i);
 	hexa.set(pos(c[0]), pos(c[1]), pos(c[2]), pos(c[3]),
@@ -111,22 +111,22 @@ void GenericHexagonGrid<Tv>::getCell(cvx::Hexagon & hexa, const int & i) const
 }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::getCellVertices(int * dst, const int & i) const
+void GenericHexahedronGrid<Tv>::getCellVertices(int * dst, const int & i) const
 {
 	const int * c = cellVertices(i);
 	memcpy(dst, c, 32);
 }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::setPos(const Vector3F & v, const int & i)
+void GenericHexahedronGrid<Tv>::setPos(const Vector3F & v, const int & i)
 { m_pos[i] = v; }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::setValue(const Tv & v, const int & i)
+void GenericHexahedronGrid<Tv>::setValue(const Tv & v, const int & i)
 { m_value[i] = v; }
 
 template <typename Tv>
-void GenericHexagonGrid<Tv>::setCell(const int * v, const int & i)
+void GenericHexahedronGrid<Tv>::setCell(const int * v, const int & i)
 { memcpy(&m_cells[i<<3], v, 32); }
 
 }
