@@ -32,6 +32,8 @@ public:
 	
 	void setWindSpeed(float x);
 	const float& windSpeed() const;
+/// v_tau direction and speed, update viz space as well
+    void setMeanWindVec(const Vector3F& vtau);
 /// v_tau
 /// +x facing wind direction
 	Vector3F getMeanWindVec() const;

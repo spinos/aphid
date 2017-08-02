@@ -124,6 +124,20 @@ const float& WindTurbine::rotorAngle() const
 void WindTurbine::progress(float dt)
 { m_rotorAngle -= dt * m_windSpeed * 10.f; }
 
+void WindTurbine::setMeanWindVec(const Vector3F& vtau)
+{
+    m_windSpeed = vtau.length();
+    if(m_windSpeed < 1e-2f) {
+        m_vizSpace.setIdentity();
+        return;
+    }
+    
+    const Vector3F vside = vtau / m_windSpeed;
+    Vector3F vup = vside.perpendicular();
+    Vector3F vfront = vside.cross(vup);
+    m_vizSpace.setOrientations(vside, vup, vfront);
+}
+
 }
 
 }

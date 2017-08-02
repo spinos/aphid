@@ -22,8 +22,10 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
 	//usePerspCamera();
 	//resetView();
+	m_workMode = wmInteractive;
 	m_smpV.set(.3f, .4f, .5f);
 	m_solver = new SolverThread;
+	
 	pbd::WindTurbine* windicator = m_solver->windTurbine();
 	m_roth = new RotationHandle(windicator->visualizeSpace() );
 	m_roth->setRadius(8.f);
@@ -124,6 +126,9 @@ void GLWidget::clientInit()
 {
     connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
+	connect(this, SIGNAL(sendBeginCache()), m_solver, SLOT(recvBeginCache()) );
+	connect(m_solver, SIGNAL(doneCache()), this, SLOT(recvEndCache()) );
+	
 }
 
 void GLWidget::clientDraw()
@@ -182,6 +187,7 @@ void GLWidget::clientDraw()
 
 void GLWidget::clientSelect(QMouseEvent *event)
 {
+    if(m_workMode > wmInteractive) return;
 	m_roth->begin(getIncidentRay() );
     //m_tranh->begin(getIncidentRay() );
 	update();
@@ -189,6 +195,7 @@ void GLWidget::clientSelect(QMouseEvent *event)
 
 void GLWidget::clientDeselect(QMouseEvent *event)
 {
+    if(m_workMode > wmInteractive) return;
 	m_roth->end();
     //m_tranh->end();
 	update();
@@ -196,6 +203,7 @@ void GLWidget::clientDeselect(QMouseEvent *event)
 
 void GLWidget::clientMouseInput(QMouseEvent *event)
 {
+    if(m_workMode > wmInteractive) return;
 	m_roth->rotate(getIncidentRay() );
     //m_tranh->translate(getIncidentRay() );
 	update();
@@ -212,6 +220,9 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			break;
 		case Qt::Key_V:
 			shuffleSample();
+			break;
+		case Qt::Key_C:
+			makeDynCache();
 			break;
 		default:
 			break;
@@ -331,4 +342,30 @@ void GLWidget::shuffleSample()
 	m_smpV.set(RandomFn11(), RandomFn11(), RandomFn11() );
 	if(m_smpV.length() > 1.f) m_smpV.normalize();
 	update();
+}
+
+void GLWidget::makeDynCache()
+{
+    pbd::WindTurbine* windicator = m_solver->windTurbine();
+	const float& s = windicator->windSpeed();
+	if(s < 4.f) {
+	    qDebug()<<" wind speed "<<s<<" is too low, skip making cache";
+	    return;
+	}
+	qDebug()<<" cache wind speed "<<s;
+	m_solver->setCacheWindSpeed(s);
+	beginCaching();
+	
+}
+
+void GLWidget::beginCaching()
+{
+    m_workMode = wmMakeingCache;
+    emit sendBeginCache();
+}
+
+void GLWidget::recvEndCache()
+{ 
+    qDebug()<<" end cache wind ";
+    m_workMode = wmInteractive; 
 }

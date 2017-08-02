@@ -11,6 +11,7 @@ BaseSolverThread::BaseSolverThread(QObject *parent)
     abort = false;
 	restart = false;
 	m_numLoops = 0;
+	m_numTicks = 0;
 }
 
 BaseSolverThread::~BaseSolverThread()
@@ -48,6 +49,10 @@ void BaseSolverThread::run()
             stepPhysics(dt);
 		
 		emit doneStep();
+		m_numTicks++;
+		if(isMakingCache() ) {
+		    processMakingCache();
+		}
 
 		mutex.lock();
 		
@@ -64,5 +69,23 @@ void BaseSolverThread::stepPhysics(float dt)
 
 const unsigned BaseSolverThread::numLoops() const
 { return m_numLoops; }
+
+void BaseSolverThread::recvBeginCache()
+{ beginMakingCache(); }
+
+void BaseSolverThread::beginMakingCache()
+{}
+
+void BaseSolverThread::endMakingCache()
+{ emit doneCache(); }
+
+void BaseSolverThread::processMakingCache()
+{}
+
+bool BaseSolverThread::isMakingCache() const
+{ return false; }
+
+const int& BaseSolverThread::numTicks() const
+{ return m_numTicks; }
 
 }

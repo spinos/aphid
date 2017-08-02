@@ -40,17 +40,30 @@ private:
 	void addWindSpeed(float x);
 	void drawGrid();
 	void shuffleSample();
+	void makeDynCache();
+	void beginCaching();
 	
 private:
     SolverThread * m_solver;
 	aphid::RotationHandle * m_roth;
 	aphid::Vector3F m_smpV;
 	
+	enum WorkMode {
+	    wmInteractive = 0,
+	    wmMakeingCache = 1
+	};
+	WorkMode m_workMode;
+	
+	
 typedef aphid::GenericHexahedronGrid<float> GridTyp;
 	GridTyp * m_grd;
 	
+signals:
+    void sendBeginCache();
+    
 private slots:
-
+    void recvEndCache();
+    
 };
 //! [3]
 

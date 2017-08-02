@@ -6,6 +6,7 @@
 #include "bones.h"
 #include <pbd/Beam.h>
 #include <pbd/WindTurbine.h>
+#include <smp/UniformGrid8Sphere.h>
 
 using namespace aphid;
 
@@ -13,6 +14,7 @@ SolverThread::SolverThread(QObject *parent)
     : BaseSolverThread(parent)
 {
 	m_windicator = new pbd::WindTurbine;
+	m_curCacheSample = -1;
 	
 #if 1
     Matrix33F rtm;
@@ -151,3 +153,43 @@ pbd::WindTurbine* SolverThread::windTurbine()
 
 const pbd::WindTurbine* SolverThread::windTurbine() const
 { return m_windicator; }
+
+void SolverThread::beginMakingCache()
+{
+    qDebug()<<" SolverThread::beginMakingCache";
+    m_curCacheSample = 0;
+    updateCacheWindVec();
+    
+}
+
+void SolverThread::endMakingCache()
+{ 
+    m_curCacheSample = -1;
+    BaseSolverThread::endMakingCache(); 
+}
+
+void SolverThread::processMakingCache()
+{
+    m_curCacheSample++;
+    if(m_curCacheSample == smp::UniformGrid8Sphere::sNumSamples) {
+        endMakingCache();
+    }
+    updateCacheWindVec();
+    
+}
+
+void SolverThread::updateCacheWindVec()
+{
+    Vector3F pv(smp::UniformGrid8Sphere::sSamplePnts[m_curCacheSample]);
+    pv *= m_cacheWindSpeed;
+    m_windicator->setMeanWindVec(pv);
+    std::cout<<"\n cache sample "<<m_curCacheSample<<" "<<pv<<" wind speed "<<m_windicator->windSpeed();
+    std::cout.flush();
+}
+
+void SolverThread::setCacheWindSpeed(float x)
+{ m_cacheWindSpeed = x; }
+
+bool SolverThread::isMakingCache() const
+{ return (m_curCacheSample > -1) && ((numTicks() & 31) == 0); }
+

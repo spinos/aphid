@@ -32,19 +32,26 @@ public:
 	
 	aphid::pbd::WindTurbine* windTurbine();
 	const aphid::pbd::WindTurbine* windTurbine() const;
-
+	void setCacheWindSpeed(float x);
+	
 protected:
     virtual void stepPhysics(float dt);
-	
+    virtual void beginMakingCache();
+	virtual void endMakingCache();
+	virtual void processMakingCache();
+	virtual bool isMakingCache() const;
+    
 private:
 	aphid::pbd::WindTurbine* m_windicator;
+	float m_cacheWindSpeed;
+	int m_curCacheSample;
 	
 private:
     void createBeam(const aphid::Matrix44F& tm);
     void createBones();
+/// cur wind direction and speed
+    void updateCacheWindVec();
     
-public slots:
-   
 };
 
 #endif        //  #ifndef SOLVERTHREAD_H
