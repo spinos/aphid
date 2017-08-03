@@ -158,6 +158,7 @@ void SolverThread::beginMakingCache()
 {
     qDebug()<<" SolverThread::beginMakingCache";
     m_curCacheSample = 0;
+	initStates();
     updateCacheWindVec();
     
 }
@@ -170,11 +171,13 @@ void SolverThread::endMakingCache()
 
 void SolverThread::processMakingCache()
 {
+    saveState(m_curCacheSample);
     m_curCacheSample++;
     if(m_curCacheSample == smp::UniformGrid8Sphere::sNumSamples) {
         endMakingCache();
+		return;
     }
-    updateCacheWindVec();
+	updateCacheWindVec();
     
 }
 

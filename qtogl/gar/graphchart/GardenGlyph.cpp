@@ -9,20 +9,30 @@
 
 #include <QtGui>
 #include "GardenGlyph.h"
-#include "GlyphPort.h"
+#include "gar_common.h"
+#include <qt/GlyphPort.h>
+#include <qt/GlyphHalo.h>
+
+using namespace aphid;
 
 GardenGlyph::GardenGlyph(const QPixmap & iconPix,
 			QGraphicsItem * parent) : QGraphicsPathItem(parent)
 {
+	//setFlag(QGraphicsItem::ItemIsSelectable);
 	resizeBlock(120, 36);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
-	setFlag(QGraphicsItem::ItemIsMovable);
-	setFlag(QGraphicsItem::ItemIsSelectable);
-	
+	setZValue(1);
+	//m_halo->setPos(60-50, 18-50);
 	m_icon = new QGraphicsPixmapItem(iconPix, this);
 	m_icon->setPos(60-16, 18-16);
 	m_glyphType = 0;
+	
+	
+	char b[17];
+    gar::GenGlyphName(b);
+	m_glyphName = std::string(b);
+	
 }
 
 void GardenGlyph::resizeBlock(int bx, int by)
@@ -124,6 +134,7 @@ void GardenGlyph::moveBlockBy(const QPointF & dp)
 		
 	}
 	moveBy(dp.x(), dp.y() );
+	m_halo->moveBy(dp.x(), dp.y() );
 }
 
 void GardenGlyph::setGlyphType(int x)
@@ -135,3 +146,27 @@ const int & GardenGlyph::glyphType() const
 {
 	return m_glyphType;
 }
+
+void GardenGlyph::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+{ event->ignore(); }
+
+void GardenGlyph::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
+{ event->ignore(); }
+
+void GardenGlyph::setHalo(GlyphHalo* hal)
+{ m_halo = hal; }
+
+void GardenGlyph::showHalo()
+{ m_halo->show(); }
+
+void GardenGlyph::hideHalo()
+{ m_halo->hide(); }
+
+GlyphHalo* GardenGlyph::halo()
+{ return m_halo; }
+
+QPointF GardenGlyph::localCenter() const
+{ return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
+
+const std::string& GardenGlyph::glyphName() const
+{ return m_glyphName; }

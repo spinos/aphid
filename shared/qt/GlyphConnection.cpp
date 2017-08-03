@@ -12,13 +12,15 @@
 #include "GlyphConnection.h"
 #include "GlyphPort.h"
 
+namespace aphid {
+
 GlyphConnection::GlyphConnection(QGraphicsItem * parent) : QGraphicsPathItem(parent)
 {
 	m_port0 = 0;
 	m_port1 = 0;
 	setPen(QPen(Qt::black, 2));
 	setBrush(Qt::NoBrush);
-	setZValue(-1);
+	setZValue(0);
 }
 
 GlyphConnection::~GlyphConnection()
@@ -97,3 +99,5 @@ const GlyphPort * GlyphConnection::port0() const
 
 const GlyphPort * GlyphConnection::port1() const
 { return m_port1; }
+
+}

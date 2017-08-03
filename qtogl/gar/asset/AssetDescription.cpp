@@ -9,9 +9,10 @@
 
 #include <QtGui>
 #include "AssetDescription.h"
-#include <gar_common.h>
+#include "gar_common.h"
 #include "data/ground.h"
 #include "data/grass.h"
+#include "data/file.h"
 
 AssetDescription::AssetDescription(QWidget *parent) : QWidget(parent)
 {
@@ -37,15 +38,18 @@ void AssetDescription::recvAssetSel(QPoint tg)
 		case gar::ggGrass :
 			showGrassGesc(tg);
 		break;
+		case gar::ggFile :
+			showFileGesc(tg);
+		break;
 		default:
-			qDebug()<<"group is unknown";
+			qDebug()<<" AssetDescription::recvAssetSel group is unknown";
 		;
 	}
 }
  
 void AssetDescription::showGroundGesc(const QPoint & tg)
 {
-	const int & groundTyp = tg.x() - gar::ggGround * 32;
+	const int & groundTyp = gar::ToGroundType(tg.x() );
 	m_lab->setText(tr(gar::GroundTypeNames[groundTyp]));
 	QPixmap px(tr(gar::GroundTypeImages[groundTyp]) );
 	m_pic->setPixmap(px);
@@ -54,9 +58,18 @@ void AssetDescription::showGroundGesc(const QPoint & tg)
 	
 void AssetDescription::showGrassGesc(const QPoint & tg)
 {
-	const int & grassTyp = tg.x() - gar::ggGrass * 32;
+	const int & grassTyp = gar::ToGrassType(tg.x() );
 	m_lab->setText(tr(gar::GrassTypeNames[grassTyp]));
 	QPixmap px(tr(gar::GrassTypeImages[grassTyp]) );
 	m_pic->setPixmap(px);
 	m_dtl->setText(tr(gar::GrassTypeDescs[grassTyp]));
+}
+
+void AssetDescription::showFileGesc(const QPoint & tg)
+{
+	const int & fileTyp = gar::ToFileType(tg.x() );
+	m_lab->setText(tr(gar::FileTypeNames[fileTyp]));
+	QPixmap px(tr(gar::FileTypeImages[fileTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::FileTypeDescs[fileTyp]));
 }

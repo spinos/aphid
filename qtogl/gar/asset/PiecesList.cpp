@@ -12,6 +12,7 @@
 #include "gar_common.h"
 #include "data/ground.h"
 #include "data/grass.h"
+#include "data/file.h"
 
 PiecesList::PiecesList(QWidget *parent)
     : QListWidget(parent)
@@ -82,6 +83,14 @@ void PiecesList::showGrassPieces()
 	const int gend = gar::GlyphRange[gar::ggGrass][1];
 	lsPieces(gbegin, gend, gar::ggGrass,
 			gar::GrassTypeIcons);
+}
+
+void PiecesList::showFilePieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggFile][0];
+	const int gend = gar::GlyphRange[gar::ggFile][1];
+	lsPieces(gbegin, gend, gar::ggFile,
+			gar::FileTypeIcons);
 }
 
 void PiecesList::lsPieces(const int & gbegin,

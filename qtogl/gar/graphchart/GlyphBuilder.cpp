@@ -12,6 +12,7 @@
 #include "gar_common.h"
 #include "data/ground.h"
 #include "data/grass.h"
+#include "data/file.h"
 #include <QString>
 
 using namespace gar;
@@ -32,6 +33,9 @@ void GlyphBuilder::build(GardenGlyph * dst,
 		break;
 		case gar::ggGrass:
 			buildGrass(dst, gtyp);
+		break;
+		case gar::ggFile:
+			buildFile(dst, gtyp);
 		break;
 		default:
 		;
@@ -64,5 +68,16 @@ void GlyphBuilder::buildGrass(GardenGlyph * dst,
 	const int & outEnd = GrassOutPortRange[gt][1];
 	for(int i=outBegin;i<outEnd;++i) {
 		dst->addPort(QObject::tr(GrassOutPortRangeNames[i]), true);
+	}
+}
+
+void GlyphBuilder::buildFile(GardenGlyph * dst,
+			const int & gtyp)
+{
+	const int gt = ToFileType(gtyp);
+	const int & outBegin = FileOutPortRange[gt][0];
+	const int & outEnd = FileOutPortRange[gt][1];
+	for(int i=outBegin;i<outEnd;++i) {
+		dst->addPort(QObject::tr(FileOutPortRangeNames[i]), true);
 	}
 }

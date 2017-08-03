@@ -25,12 +25,14 @@ enum GlyphTyp {
 	gtClover = 33,
 	gtPoapratensis = 34,
 	gtHaircap = 35,
-	gtHypericum = 36
+	gtHypericum = 36,
+	gtImportGeom = 65
 };
 
 enum GlyphGroup {
 	ggGround = 0,
-	ggGrass = 1
+	ggGrass = 1,
+	ggFile = 2
 };
 
 enum DisplayStat {
@@ -40,16 +42,31 @@ enum DisplayStat {
 	dsVoxel = 259
 };
 
+#define NumGlyphGroups 3
+
 /// begin, end, 32 per group
-static const int GlyphRange[2][2] = {
+static const int GlyphRange[NumGlyphGroups][2] = {
 {1, 3},
-{33, 37}
+{33, 37},
+{65, 66}
 };
 
 static const char * PieceMimeStr = "image/x-garden-piece";
 
 static inline int ToGroupType(int x) {
 	return x>>5;
+}
+
+static const char sdecihexchart[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+
+static inline void GenGlyphName(char* b)
+{
+	const int nid = rand();
+	b[16] = '\0';
+	
+	for (int z = 0; z < 16; z++) {
+        b[15-z] = sdecihexchart[(nid>>(z<<1)) & 15];
+    }
 }
 
 }

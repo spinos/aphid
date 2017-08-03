@@ -16,8 +16,10 @@ QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
 QT_END_NAMESPACE
 
-class GardenGlyph;
+namespace aphid {
 class GlyphPort;
+}
+class GardenGlyph;
 class PlantPiece;
 class VegetationPatch;
 class Vegetation;
@@ -30,13 +32,17 @@ public:
 	ShrubScene(Vegetation * vege, QObject *parent = 0);
 	virtual ~ShrubScene();
 	
+	GardenGlyph* lastSelectedGlyph();
+	void selectGlyph(GardenGlyph* gl);
+	void deselectGlyph();
+	
 	void genSinglePlant();
 	void genMultiPlant();
 		
 protected:
 /// from ground up to leaf
 	void assemblePlant(PlantPiece * pl, GardenGlyph * gl);
-	void addBranch(PlantPiece * pl, const GlyphPort * pt);
+	void addBranch(PlantPiece * pl, const aphid::GlyphPort * pt);
 	void addGrassBranch(PlantPiece * pl, GardenGlyph * gl);
 	
 private:
@@ -46,5 +52,7 @@ private:
 
 private:
 	Vegetation * m_vege;
+	QList<GardenGlyph *> m_selectedGlyph;
+	
 };
 #endif

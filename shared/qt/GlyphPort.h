@@ -1,16 +1,19 @@
 /*
  *  GlyphPort.h
- *  garden
+ *
+ *  source of destination of glyph connections
  *
  *  Created by jian zhang on 4/1/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
-#ifndef GAR_GLYPH_PORT_H
-#define GAR_GLYPH_PORT_H
+#ifndef APH_GLYPH_PORT_H
+#define APH_GLYPH_PORT_H
 
 #include <QGraphicsEllipseItem>
+
+namespace aphid {
 
 class GlyphConnection;
 
@@ -47,4 +50,5 @@ private:
 	
 };
 
+}
 #endif

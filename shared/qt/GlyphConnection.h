@@ -1,17 +1,19 @@
 /*
  *  GlyphConnection.h
- *  garden
  *
  *  from port0 to port1
+ *
  *  Created by jian zhang on 4/1/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
-#ifndef GAR_GLYPH_CONNECTION_H
-#define GAR_GLYPH_CONNECTION_H
+#ifndef APH_GLYPH_CONNECTION_H
+#define APH_GLYPH_CONNECTION_H
 
 #include <QGraphicsPathItem>
+
+namespace aphid {
 
 class GlyphPort;
 
@@ -45,5 +47,7 @@ private:
 	GlyphPort * m_port1;
 	
 };
+
+}
 
 #endif

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/plant.png</file>
-        <file>icons/graph.png</file>
         <file>icons/grass.png</file>
         <file>icons/clover.png</file>
         <file>images/clover.png</file>
@@ -23,5 +22,7 @@
         <file>icons/hypericum.png</file>
         <file>icons/bush.png</file>
         <file>icons/evendist.png</file>
+        <file>icons/import_geom.png</file>
+        <file>icons/file.png</file>
     </qresource>
 </RCC>

@@ -50,4 +50,7 @@ void GlyphPalette::showNamedPieces(const QString & swhat)
 	if(swhat == tr("allGround") ) {
 		m_glyphList->showGroundPieces();
 	}
+	if(swhat == tr("allFile") ) {
+		m_glyphList->showFilePieces();
+	}
 }

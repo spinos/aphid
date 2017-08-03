@@ -11,12 +11,14 @@
 #include "GlyphPort.h"
 #include "GlyphConnection.h"
 
+namespace aphid {
+
 GlyphPort::GlyphPort(QGraphicsItem * parent) : QGraphicsEllipseItem(parent)
 {
 	setRect(-7, -7, 14, 14);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
-	
+	setZValue(2);
 }
 
 GlyphPort::~GlyphPort()
@@ -72,3 +74,5 @@ int GlyphPort::numConnections() const
 
 const GlyphConnection * GlyphPort::connection(const int & i) const
 { return m_connections[i]; }
+
+}

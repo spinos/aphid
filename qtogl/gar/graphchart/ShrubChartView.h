@@ -19,7 +19,9 @@ class QPixmap;
 class QPoint;
 QT_END_NAMESPACE
 
+namespace aphid {
 class GlyphConnection;
+}
 
 class ShrubChartView : public QGraphicsView
 {
@@ -35,6 +37,9 @@ protected:
 	void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dropEvent(QDropEvent *event);
+	
+signals:
+	void sendSelectGlyph(bool x);
 	
 private:
 	void addGlyphPiece(const QPoint & pieceTypGrp, 
@@ -54,7 +59,7 @@ private:
 	
 	Mode m_mode;
 	QGraphicsItem * m_selectedItem;
-	GlyphConnection * m_selectedConnection;
+	aphid::GlyphConnection * m_selectedConnection;
 	QPoint m_lastMosePos;
 	
 };

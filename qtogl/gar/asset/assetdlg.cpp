@@ -11,6 +11,7 @@
 #include <QtGui/QTreeWidget>
 #include "groundAssets.h"
 #include "plantAssets.h"
+#include "FileAssets.h"
 #include "GlyphPalette.h"
 #include "assetdlg.h"
 
@@ -44,11 +45,10 @@ AssetDlg::AssetDlg(QWidget *parent)
 			this, SLOT(onSelectAsset(QTreeWidgetItem *, int)));
 	m_assetTree->setHeaderLabel(tr("Asset"));
 	m_palette = new GlyphPalette(this);
-	//m_grassPlt->setVisible(false);
 	m_rgtArea->setWidget(m_palette);
 	lsGround();
 	lsPlant();
-	
+	lsFile();
 }
 
 void AssetDlg::keyPressEvent(QKeyEvent *e)
@@ -64,6 +64,9 @@ void AssetDlg::lsPlant()
 {
 	m_plantAsset = new PlantAssets(m_assetTree);
 }
+
+void AssetDlg::lsFile()
+{ m_files = new FileAssets(m_assetTree); }
 
 void AssetDlg::onSelectAsset(QTreeWidgetItem * item, int column)
 {

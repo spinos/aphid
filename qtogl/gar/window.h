@@ -6,14 +6,14 @@
 QT_BEGIN_NAMESPACE
 class QMenu;
 class QAction;
-class QStackedWidget;
-class QGraphicsView;
 QT_END_NAMESPACE
 
 class GLWidget;
 class ToolBox;
 class AssetDlg;
+class AttribDlg;
 class ShrubScene;
+class ChartDlg;
 class ShrubChartView;
 class Vegetation;
 
@@ -25,15 +25,15 @@ public:
     Window();
 	~Window();
 	
-	void showAssets();
-
+/// initial states
+	void showDlgs();
+	
 protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
 	void createActions();
 	void createMenus();
-	void changeView(int x);
 	void singleSynth();
 	void multiSynth();
 	
@@ -43,13 +43,20 @@ private slots:
 	void recvAssetDlgClose();
 	void performExport(bool x);
 	void recvDspState(int x);
+	void recvChartDlgClose();
+	void recvAttribDlgClose();
+	void toggleChartDlg(bool x);
+	void toggleAttribDlg(bool x);
 	
 private:
-	QStackedWidget * m_centerStack;
-    GLWidget *glWidget;
+	GLWidget *glWidget;
 	ToolBox * m_tools;
 	AssetDlg * m_assets;
+	ChartDlg* m_chart;
+	AttribDlg* m_attrib;
 	QAction * m_assetAct;
+	QAction * m_graphAct;
+	QAction * m_attribAct;
 	QAction * m_exportAct;
 	QMenu * m_fileMenu;
     QMenu * m_windowMenu;

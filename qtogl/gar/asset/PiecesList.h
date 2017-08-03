@@ -21,6 +21,7 @@ public:
 	
 	void showGrassPieces();
 	void showGroundPieces();
+	void showFilePieces();
 	
 protected:
 	void dragEnterEvent(QDragEnterEvent *event);

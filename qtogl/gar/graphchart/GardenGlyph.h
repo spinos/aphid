@@ -1,6 +1,6 @@
 /*
  *  GardenGlyph.h
- *  
+ *
  *
  *  Created by jian zhang on 3/31/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -17,11 +17,17 @@ class QPixmap;
 class QGraphicsPixmapItem;
 QT_END_NAMESPACE
 
+namespace aphid {
+
 class GlyphPort;
+class GlyphHalo;
+
+}
 
 class GardenGlyph : public QGraphicsPathItem
 {
 	int m_glyphType;
+	std::string m_glyphName;
 	
 public:
 	enum { Type = UserType + 1 };
@@ -29,7 +35,7 @@ public:
 	GardenGlyph(const QPixmap & iconPix,
 			QGraphicsItem * parent = 0 );
 	
-	GlyphPort * addPort(const QString & name, 
+	aphid::GlyphPort * addPort(const QString & name, 
 							bool isOutgoing);
 							
 	void finalizeShape();
@@ -40,8 +46,18 @@ public:
 	void setGlyphType(int x);
 	const int & glyphType() const;
 	
+	void setHalo(aphid::GlyphHalo* hal);
+	void showHalo();
+	void hideHalo();
+	aphid::GlyphHalo* halo();
+	
+	QPointF localCenter() const;
+	const std::string& glyphName() const;
+	
 protected:
 	void resizeBlock(int bx, int by);
+	virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+	virtual void mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
 	
 private:
 	void centerIcon();
@@ -49,6 +65,7 @@ private:
 	
 private:
 	QGraphicsPixmapItem * m_icon;
+	aphid::GlyphHalo* m_halo;
 	int m_blockWidth, m_blockHeight;
 	
 };

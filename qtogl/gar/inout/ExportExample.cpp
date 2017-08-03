@@ -11,7 +11,7 @@
 #include "Vegetation.h"
 #include <h5/HObject.h>
 #include <h5/HDocument.h>
-#include <HGardenExample.h>
+#include "HGardenExample.h"
 #include <boost/format.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 

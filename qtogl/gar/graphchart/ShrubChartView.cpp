@@ -11,10 +11,14 @@
 
 #include "ShrubChartView.h"
 #include "GardenGlyph.h"
-#include "GlyphPort.h"
-#include "GlyphConnection.h"
+#include <qt/GlyphPort.h>
+#include <qt/GlyphConnection.h>
+#include <qt/GlyphHalo.h>
 #include "gar_common.h"
 #include "GlyphBuilder.h"
+#include "ShrubScene.h"
+
+using namespace aphid;
 
 ShrubChartView::ShrubChartView(QGraphicsScene * scene, QWidget * parent) : QGraphicsView(scene, parent)
 {
@@ -150,6 +154,11 @@ void ShrubChartView::addGlyphPiece(const QPoint & pieceTypGrp,
 	GlyphBuilder bdr;
 	bdr.build(g, gtype, ggroup);
 	
+	GlyphHalo* hal = new GlyphHalo;
+	posmts += g->localCenter();
+	hal->setPos(posmts.x() - 50, posmts.y() - 50 );
+	scene()->addItem(hal);
+	g->setHalo(hal);
 }
 
 void ShrubChartView::processSelect(const QPoint & pos)
@@ -159,7 +168,7 @@ void ShrubChartView::processSelect(const QPoint & pos)
 	if (item) {
          if(isOutgoingPort(item) ) {
 			m_mode = mConnectItems;
-			m_selectedConnection = new GlyphConnection;
+			m_selectedConnection = new GlyphConnection();
 			m_selectedConnection->setPos0(item->scenePos() );
 			
 			GlyphPort * pt = (GlyphPort *)item;
@@ -171,9 +180,18 @@ void ShrubChartView::processSelect(const QPoint & pos)
 			m_selectedItem = item->topLevelItem();
 			if(m_selectedItem->type() == GardenGlyph::Type ) {
 				m_mode = mMoveItem;
+				GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
+				gl->showHalo();
+				ShrubScene* ssc = (ShrubScene* )scene();
+				ssc->selectGlyph(gl);
+				emit sendSelectGlyph(true);
 			}
 		 }
-     }
+     } else {
+		ShrubScene* ssc = (ShrubScene* )scene();
+		ssc->deselectGlyph();
+		emit sendSelectGlyph(false);
+	 }
 	 m_lastMosePos = pos;
 }
 

@@ -9,9 +9,9 @@
 
 #include <QtGui>
 #include "ShrubScene.h"
-#include "GardenGlyph.h"
-#include "GlyphPort.h"
-#include "GlyphConnection.h"
+#include "graphchart/GardenGlyph.h"
+#include <qt/GlyphPort.h>
+#include <qt/GlyphConnection.h>
 #include "gar_common.h"
 #include "PlantPiece.h"
 #include "VegetationPatch.h"
@@ -28,8 +28,6 @@
 
 using namespace gar;
 using namespace aphid;
-
-using namespace gar;
 
 ShrubScene::ShrubScene(Vegetation * vege, QObject *parent)
     : QGraphicsScene(parent)
@@ -270,3 +268,17 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	}
 	
 }
+
+void ShrubScene::selectGlyph(GardenGlyph* gl)
+{ m_selectedGlyph<<gl; }
+
+void ShrubScene::deselectGlyph()
+{
+	foreach(GardenGlyph * gl, m_selectedGlyph) {
+		gl->hideHalo();
+	}
+	m_selectedGlyph.clear();
+}
+
+GardenGlyph* ShrubScene::lastSelectedGlyph()
+{ return m_selectedGlyph.back(); }

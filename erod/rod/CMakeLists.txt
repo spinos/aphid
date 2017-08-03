@@ -1,11 +1,15 @@
 set (PBD_HEADER_FILES window.h
 glwidget.h
+StemDeformer.h
+RodDeformer.h
 SolverThread.h)
 
 set (PBD_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 ${APHID_QT_DIR}/BaseSolverThread.cpp
 glwidget.cpp
 window.cpp
+StemDeformer.cpp
+RodDeformer.cpp
 SolverThread.cpp
 main.cpp)
 

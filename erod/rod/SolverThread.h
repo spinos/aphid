@@ -6,7 +6,7 @@
 
 #include <qt/BaseSolverThread.h>
 #include <pbd/pbd_common.h>
-#include <pbd/ElasticRodContext.h>
+#include "RodDeformer.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -19,7 +19,7 @@ class WindTurbine;
 }
 }
 
-class SolverThread : public aphid::BaseSolverThread, public aphid::pbd::ElasticRodContext
+class SolverThread : public aphid::BaseSolverThread, public RodDeformer 
 {
 	unsigned * m_indices;
 	aphid::pbd::Spring * m_spring;

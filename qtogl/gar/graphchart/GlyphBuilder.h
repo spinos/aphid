@@ -31,6 +31,8 @@ private:
 			const int & gtyp);
 	void buildGrass(GardenGlyph * dst,
 			const int & gtyp);
+	void buildFile(GardenGlyph * dst,
+			const int & gtyp);
 	
 };
 #endif
