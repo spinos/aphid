@@ -1,6 +1,8 @@
 /*
  *  GardenGlyph.h
+ *  garden
  *
+ *  top level item
  *
  *  Created by jian zhang on 3/31/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -24,16 +26,20 @@ class GlyphHalo;
 
 }
 
+class PieceAttrib;
+
 class GardenGlyph : public QGraphicsPathItem
 {
+	PieceAttrib * m_attrib;
 	int m_glyphType;
-	std::string m_glyphName;
 	
 public:
 	enum { Type = UserType + 1 };
 	
 	GardenGlyph(const QPixmap & iconPix,
 			QGraphicsItem * parent = 0 );
+			
+	void setAttrib(PieceAttrib * attrib);
 	
 	aphid::GlyphPort * addPort(const QString & name, 
 							bool isOutgoing);

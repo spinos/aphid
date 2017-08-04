@@ -12,6 +12,9 @@
 #include "ShrubScene.h"
 #include "graphchart/GardenGlyph.h"
 #include "gar_common.h"
+#include "data/ground.h"
+#include "data/grass.h"
+#include "data/file.h"
 
 AttribDlg::AttribDlg(ShrubScene* scene, QWidget *parent) : QDialog(parent)
 {
@@ -45,6 +48,7 @@ void AttribDlg::recvSelectGlyph(bool x)
 
 void AttribDlg::lsAttribs(GardenGlyph* g)
 {
+	lsDefault(g);
 	switch(g->glyphType() ) {
 		case gar::gtPot :
 			break;
@@ -53,10 +57,8 @@ void AttribDlg::lsAttribs(GardenGlyph* g)
 		case gar::gtImportGeom :
 			break;
 		default:
-			lsDefault(g);
+			;
 	}
-	
-	
     
 	const int n = m_collWigs.count();
     for (int i = 0; i < n; ++i) {
@@ -74,7 +76,23 @@ void AttribDlg::clearAttribs()
 		delete m_collWigs.dequeue();
 }
 
-void AttribDlg::lsDefault()
+void AttribDlg::lsDefault(GardenGlyph* g)
 {
-	m_collWigs.enqueue(new QLabel);
+	const int& gt = g->glyphType();
+	QString stype(tr("unknown"));
+	const int gg = gar::ToGroupType(gt );
+	switch (gg) {
+		case gar::ggGround :
+			stype = gar::GroundTypeNames[gar::ToGroundType(gt)];
+		break;
+		case gar::ggGrass :
+			stype = gar::GrassTypeNames[gar::ToGrassType(gt)];
+		break;
+		case gar::ggFile :
+			stype = gar::FileTypeNames[gar::ToFileType(gt)];
+		break;
+		default:
+		;
+	}
+	m_collWigs.enqueue(new QLabel(stype) );
 }

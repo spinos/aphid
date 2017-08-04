@@ -2,7 +2,7 @@
 #include <GeoDrawer.h>
 #include <QtOpenGL>
 #include "gpdfwidget.h"
-#include "cactus.h"
+#include "../cactus.h"
 #include <gpr/GPInterpolate.h>
 
 using namespace aphid;

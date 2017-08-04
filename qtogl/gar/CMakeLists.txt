@@ -29,6 +29,7 @@ asset/FileAssets.h
 asset/GlyphPalette.h
 asset/PiecesList.h
 attr/AttribDlg.h
+attr/PieceAttrib.h
 PlantPiece.h
 VegetationPatch.h
 Vegetation.h
@@ -77,6 +78,7 @@ asset/FileAssets.cpp
 asset/GlyphPalette.cpp
 asset/PiecesList.cpp
 attr/AttribDlg.cpp
+attr/PieceAttrib.cpp
 PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp

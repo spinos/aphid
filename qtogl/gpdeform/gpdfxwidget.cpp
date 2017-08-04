@@ -8,7 +8,7 @@
  */
 #include <QtGui>
 #include "gpdfxwidget.h"
-#include "cactus.h"
+#include "../cactus.h"
 
 using namespace aphid;
 

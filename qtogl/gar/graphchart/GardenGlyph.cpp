@@ -12,6 +12,7 @@
 #include "gar_common.h"
 #include <qt/GlyphPort.h>
 #include <qt/GlyphHalo.h>
+#include <attr/PieceAttrib.h>
 
 using namespace aphid;
 
@@ -27,11 +28,6 @@ GardenGlyph::GardenGlyph(const QPixmap & iconPix,
 	m_icon = new QGraphicsPixmapItem(iconPix, this);
 	m_icon->setPos(60-16, 18-16);
 	m_glyphType = 0;
-	
-	
-	char b[17];
-    gar::GenGlyphName(b);
-	m_glyphName = std::string(b);
 	
 }
 
@@ -168,5 +164,8 @@ GlyphHalo* GardenGlyph::halo()
 QPointF GardenGlyph::localCenter() const
 { return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
 
+void GardenGlyph::setAttrib(PieceAttrib * attrib)
+{ m_attrib = attrib; }
+
 const std::string& GardenGlyph::glyphName() const
-{ return m_glyphName; }
+{ return m_attrib->glyphName(); }

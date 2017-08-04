@@ -47,7 +47,7 @@ private slots:
 private:
 	void lsAttribs(GardenGlyph* g);
 	void clearAttribs();
-	void lsDefault();
+	void lsDefault(GardenGlyph* g);
 	
 private:
 	ShrubScene* m_scene;

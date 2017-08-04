@@ -24,5 +24,6 @@
         <file>icons/evendist.png</file>
         <file>icons/import_geom.png</file>
         <file>icons/file.png</file>
+        <file>icons/document_open.png</file>
     </qresource>
 </RCC>

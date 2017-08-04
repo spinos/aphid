@@ -13,6 +13,7 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/file.h"
+#include <attr/PieceAttrib.h>
 #include <QString>
 
 using namespace gar;
@@ -40,6 +41,8 @@ void GlyphBuilder::build(GardenGlyph * dst,
 		default:
 		;
 	}
+	PieceAttrib * attr = new PieceAttrib;
+	dst->setAttrib(attr);
 	dst->setGlyphType(gtyp);
 	dst->finalizeShape();
 }
