@@ -1,0 +1,17 @@
+/*
+ *  BushAttribs.cpp
+ *  
+ *
+ *  Created by jian zhang on 8/6/17.
+ *  Copyright 2017 __MyCompanyName__. All rights reserved.
+ *
+ */
+
+#include "BushAttribs.h"
+
+BushAttribs::BushAttribs()
+{
+	addFloatAttrib(gar::nGrowMargin, 0.8f, 0.5f, 1.5f);
+	addFloatAttrib(gar::nGrowAngle, 0.5f, 0.1f, 1.f);
+	addFloatAttrib(gar::nZenithNoise, 0.5f);
+}

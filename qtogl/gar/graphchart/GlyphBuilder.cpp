@@ -13,7 +13,8 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/file.h"
-#include <attr/PieceAttrib.h>
+#include <attr/PotAttribs.h>
+#include <attr/BushAttribs.h>
 #include <QString>
 
 using namespace gar;
@@ -30,7 +31,7 @@ void GlyphBuilder::build(GardenGlyph * dst,
 {
 	switch (ggrp) {
 		case gar::ggGround:
-			buildGround(dst, gtyp);
+			buildGround(dst, gtyp);			
 		break;
 		case gar::ggGrass:
 			buildGrass(dst, gtyp);
@@ -39,12 +40,33 @@ void GlyphBuilder::build(GardenGlyph * dst,
 			buildFile(dst, gtyp);
 		break;
 		default:
-		;
+			;
 	}
-	PieceAttrib * attr = new PieceAttrib;
+	PieceAttrib * attr = buildAttrib(gtyp, ggrp);	
 	dst->setAttrib(attr);
 	dst->setGlyphType(gtyp);
 	dst->finalizeShape();
+}
+
+PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
+			const int & ggrp)
+{
+	switch (ggrp) {
+		case gar::ggGround:
+			return buildGroundAttrib(gtyp);			
+		break;
+		default:
+			;
+	}
+	return (new PieceAttrib);
+}
+
+PieceAttrib* GlyphBuilder::buildGroundAttrib(const int & gtyp)
+{
+	if(gtyp == gar::gtPot)
+		return (new PotAttribs);
+		
+	return (new BushAttribs);
 }
 
 void GlyphBuilder::buildGround(GardenGlyph * dst,

@@ -95,6 +95,10 @@ void QDoubleEditSlider::setEditValue(double x)
 	t.setNum(x);
 	m_edit->setText(t);
 	emit valueChanged(x);
+	QPair<int, double> val;
+	val.first = m_nameId;
+	val.second = x;
+	emit valueChanged2(val);
 }
 
 void QDoubleEditSlider::convertEditValue(int x)
@@ -102,5 +106,11 @@ void QDoubleEditSlider::convertEditValue(int x)
 	const double d = m_slideMin + (m_slideMax - m_slideMin) * (double)x / 100.0;
 	setEditValue(d);
 }
+
+void QDoubleEditSlider::setNameId(int x)
+{ m_nameId = x; }
+
+const int& QDoubleEditSlider::nameId() const
+{ return m_nameId; }
 
 }

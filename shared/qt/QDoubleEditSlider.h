@@ -27,6 +27,8 @@ class QDoubleEditSlider : public QWidget
 public:
 	QDoubleEditSlider(const QString & name, QWidget *parent = 0);
 	
+	void setNameId(int x);
+	const int& nameId() const;
 	void setLimit(double bottom, double top);
 	void setValue(double x);
 	double value() const;
@@ -38,6 +40,7 @@ private slots:
 	
 signals:
 	void valueChanged(double x);
+	void valueChanged2(QPair<int, double> x);
 	
 private:
 	void updateSlider(double x);
@@ -48,6 +51,7 @@ private:
 	QSlider * m_slider;
 	QDoubleValidator * m_validate;
 	
+	int m_nameId;
 	double m_bottomValue, m_topValue;
 	double m_slideMin, m_slideMax;
 };

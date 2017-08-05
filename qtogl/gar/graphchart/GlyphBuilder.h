@@ -12,6 +12,7 @@
 #ifndef GAR_GLYPH_BUILDER_H
 #define GAR_GLYPH_BUILDER_H
 
+class PieceAttrib;
 class GardenGlyph;
 
 class GlyphBuilder {
@@ -33,6 +34,11 @@ private:
 			const int & gtyp);
 	void buildFile(GardenGlyph * dst,
 			const int & gtyp);
+			
+	PieceAttrib* buildAttrib(const int & gtyp,
+			const int & ggrp);
+			
+	PieceAttrib* buildGroundAttrib(const int & gtyp);
 	
 };
 #endif

@@ -40,6 +40,7 @@ public:
 			QGraphicsItem * parent = 0 );
 			
 	void setAttrib(PieceAttrib * attrib);
+	PieceAttrib * attrib();
 	
 	aphid::GlyphPort * addPort(const QString & name, 
 							bool isOutgoing);

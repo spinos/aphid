@@ -18,10 +18,17 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QVBoxLayout;
+class QSpacerItem;
 QT_END_NAMESPACE
 
 class ShrubScene;
 class GardenGlyph;
+
+namespace gar {
+class Attrib;
+}
+
+class PieceAttrib;
 
 class AttribDlg : public QDialog
 {
@@ -43,17 +50,24 @@ public slots:
 	void recvSelectGlyph(bool x);
 	
 private slots:
+	void recvDoubleValue(QPair<int, double> x);
 	
 private:
 	void lsAttribs(GardenGlyph* g);
 	void clearAttribs();
 	void lsDefault(GardenGlyph* g);
+	void lsAdded(GardenGlyph* g);
+	void lsAttr(gar::Attrib* attr);
+	QWidget* shoFltAttr(gar::Attrib* attr);
+	QWidget* shoStrAttr(gar::Attrib* attr);
 	
 private:
 	ShrubScene* m_scene;
 	QVBoxLayout *mainLayout;
+	QSpacerItem* m_lastStretch;
     QQueue<QWidget *> m_collWigs;
-
+	PieceAttrib * m_attribs;
+	
 };
 
 #endif

@@ -15,16 +15,22 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/file.h"
+#include "attr/PieceAttrib.h"
+#include <qt/QDoubleEditSlider.h>
+
+using namespace aphid;
 
 AttribDlg::AttribDlg(ShrubScene* scene, QWidget *parent) : QDialog(parent)
 {
+	m_attribs = NULL;
 	m_scene = scene;
 	setWindowTitle(tr("Attributes") );
 	
 	mainLayout = new QVBoxLayout;
+	mainLayout->setSpacing(2);
     setLayout(mainLayout);
 	resize(360, 240);
-	
+	m_lastStretch = 0;
 }
 
 void AttribDlg::closeEvent ( QCloseEvent * e )
@@ -49,22 +55,15 @@ void AttribDlg::recvSelectGlyph(bool x)
 void AttribDlg::lsAttribs(GardenGlyph* g)
 {
 	lsDefault(g);
-	switch(g->glyphType() ) {
-		case gar::gtPot :
-			break;
-		case gar::gtBush :
-			break;
-		case gar::gtImportGeom :
-			break;
-		default:
-			;
-	}
+	lsAdded(g);
     
 	const int n = m_collWigs.count();
     for (int i = 0; i < n; ++i) {
         mainLayout->addWidget(m_collWigs[i]);
     }
 
+	m_lastStretch = new QSpacerItem(8,8, QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+	mainLayout->addItem(m_lastStretch);
 }
 
 void AttribDlg::clearAttribs()
@@ -74,6 +73,12 @@ void AttribDlg::clearAttribs()
 
 	while (!m_collWigs.isEmpty())
 		delete m_collWigs.dequeue();
+		
+	if(m_lastStretch) {
+		mainLayout->removeItem(m_lastStretch);
+		delete m_lastStretch;
+		m_lastStretch = 0;
+	}
 }
 
 void AttribDlg::lsDefault(GardenGlyph* g)
@@ -94,5 +99,68 @@ void AttribDlg::lsDefault(GardenGlyph* g)
 		default:
 		;
 	}
-	m_collWigs.enqueue(new QLabel(stype) );
+	m_collWigs.enqueue(new QLabel(tr(" node type: %1").arg(stype) ) );
+}
+
+void AttribDlg::lsAdded(GardenGlyph* g)
+{
+	PieceAttrib* att = g->attrib();
+	const int n = att->numAttribs();
+	for(int i=0;i<n;++i) {
+		gar::Attrib* ati = att->getAttrib(i);
+		lsAttr(ati);
+	}
+	m_attribs = att;
+}
+
+void AttribDlg::lsAttr(gar::Attrib* attr)
+{
+	const gar::AttribType& atyp = attr->attrType();
+	
+	QWidget* wig = NULL;
+	switch (atyp) {
+		case gar::tFloat :
+			wig = shoFltAttr(attr);
+		break;
+		case gar::tString :
+			wig = shoStrAttr(attr);
+		break;
+		default:
+			wig = new QLabel(tr(attr->attrNameStr() ) );
+	}
+	
+	m_collWigs.enqueue(wig);
+}
+
+QWidget* AttribDlg::shoFltAttr(gar::Attrib* attr)
+{
+	QDoubleEditSlider* wig = new QDoubleEditSlider(tr(attr->attrNameStr() ) );
+	float val, val0, val1;
+	attr->getValue(val);
+	attr->getMin(val0);
+	attr->getMax(val1);
+	wig->setLimit(val0, val1);
+	wig->setValue(val);
+	wig->setNameId(attr->attrName() );
+	
+	connect(wig, SIGNAL(valueChanged2(QPair<int, double>)),
+            this, SLOT(recvDoubleValue(QPair<int, double>)));
+			
+	return wig;
+}
+
+QWidget* AttribDlg::shoStrAttr(gar::Attrib* attr)
+{
+	gar::StringAttrib* sattr = static_cast<gar::StringAttrib*> (attr);
+	return new QLabel(tr(attr->attrNameStr() ) );
+}
+
+void AttribDlg::recvDoubleValue(QPair<int, double> x)
+{
+	gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(x.first) );	
+	if(!dst) {
+		qDebug()<<" AttribDlg::recvDoubleValue cannot find attr "
+			<<x.first;
+	}
+	dst->setValue((float)x.second);
 }

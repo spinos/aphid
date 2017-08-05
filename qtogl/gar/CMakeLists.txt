@@ -30,6 +30,9 @@ asset/GlyphPalette.h
 asset/PiecesList.h
 attr/AttribDlg.h
 attr/PieceAttrib.h
+attr/Attrib.h
+attr/PotAttribs.h
+attr/BushAttribs.h
 PlantPiece.h
 VegetationPatch.h
 Vegetation.h
@@ -55,6 +58,7 @@ QT4_ADD_RESOURCES ( GAR_RES_SOURCES ${GAR_RESOURCES} )
 message ("rcc output is " ${GAR_RES_SOURCES})
 
 set (GAR_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
+${APHID_QT_DIR}/QDoubleEditSlider.cpp
 ${APHID_QT_DIR}/QIconFrame.cpp
 ${APHID_QT_DIR}/StateIconFrame.cpp
 ${APHID_QT_DIR}/ContextIconFrame.cpp
@@ -79,6 +83,9 @@ asset/GlyphPalette.cpp
 asset/PiecesList.cpp
 attr/AttribDlg.cpp
 attr/PieceAttrib.cpp
+attr/Attrib.cpp
+attr/PotAttribs.cpp
+attr/BushAttribs.cpp
 PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp

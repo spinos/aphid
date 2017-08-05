@@ -167,5 +167,8 @@ QPointF GardenGlyph::localCenter() const
 void GardenGlyph::setAttrib(PieceAttrib * attrib)
 { m_attrib = attrib; }
 
+PieceAttrib * GardenGlyph::attrib()
+{ return m_attrib; }
+
 const std::string& GardenGlyph::glyphName() const
 { return m_attrib->glyphName(); }
