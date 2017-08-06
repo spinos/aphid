@@ -56,7 +56,7 @@ void GrowthSample::samplePot(const GrowthSampleProfile& prof)
 
 void GrowthSample::sampleBush(const GrowthSampleProfile& prof)
 {
-	const float relsz = prof.m_sizing * 1.1f;
+	const float relsz = prof.m_sizing * 1.13f;
 	setAngle(prof.m_angle);
 	setPortion(prof.m_portion);
 	setNumSampleLimit(prof.m_numSampleLimit);
@@ -69,7 +69,7 @@ void GrowthSample::sampleBush(const GrowthSampleProfile& prof)
 	
 	m_pnds.reset(new Ray[np]);
 	
-	const Vector3F ori(0.f, -10.f, 0.f);
+	const Vector3F ori(0.f, -10.f + prof.m_spread * 6.f, 0.f);
 	const Plane pln(0.f, -1.f, 0.f, 0.f);
 	Vector3F rd;
 	float rt;
@@ -101,7 +101,7 @@ Matrix44F GrowthSample::getGrowSpace(const int& i,
 		tm.rotateX(-prof.m_tilt);
 	}
 	
-	Vector3F modU(RandomFn11() * .14f, 0.f, RandomFn11() * .14f);
+	Vector3F modU(RandomFn11() * prof.m_zenithNoise, 0.f, RandomFn11() * prof.m_zenithNoise);
 	modU += m_pnds[i].m_dir;
 	modU.normalize();
 	

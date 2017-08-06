@@ -97,7 +97,7 @@ bool Attrib::isStringType() const
 static const char* sAttribNameAsStr[] = {
 "unknown",
 "grow margin",
-"row angle",
+"grow angle",
 "zenith noise",
 "file name"
 };

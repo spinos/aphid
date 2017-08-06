@@ -22,6 +22,8 @@ struct GrowthSampleProfile {
 	float m_portion;
 	float m_sizing;
 	float m_tilt;
+	float m_zenithNoise;
+	float m_spread;
 	int m_numSampleLimit;
 };
 

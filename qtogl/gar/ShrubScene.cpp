@@ -25,6 +25,7 @@
 #include "data/haircap.h"
 #include "data/haircap.h"
 #include "data/hypericum.h"
+#include "attr/PieceAttrib.h"
 
 using namespace gar;
 using namespace aphid;
@@ -230,13 +231,34 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 {
 	vege->clearPlants();
 	
+	PieceAttrib * gndAttr = gnd->attrib();
+	
 	PlantPiece * pl = new PlantPiece;
 	assemblePlant(pl, gnd );
 	
+	float zenithf = 0.1f;
+	gar::Attrib* azenith = gndAttr->findAttrib(gar::nZenithNoise);
+	if(azenith) {
+	    azenith->getValue(zenithf);
+	}
+	float sizing = 1.f;
+	gar::Attrib* asizing = gndAttr->findAttrib(gar::nGrowMargin);
+	if(asizing) {
+	    asizing->getValue(sizing);
+	}
+	
+	float angleA = 0.f;
+	gar::Attrib* aangle = gndAttr->findAttrib(gar::nGrowAngle);
+	if(aangle) {
+	    aangle->getValue(angleA);
+	}
+	
 	GrowthSampleProfile prof;
 	prof.m_numSampleLimit = 80;
-	prof.m_sizing = pl->exclR();
+	prof.m_sizing = pl->exclR() * sizing;
 	prof.m_tilt = vege->tilt();
+	prof.m_zenithNoise = zenithf;
+	prof.m_spread = angleA;
 	
 	delete pl;
 	
