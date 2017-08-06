@@ -20,6 +20,7 @@ endif ()
 
 if(WIN32)
 add_definitions (-DWIN32)
+##set(CMAKE_EXE_LINKER_FLAGS "/machine:x64")
 ELSEIF (APPLE)
 
 ELSEIF (UNIX)

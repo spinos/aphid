@@ -3,10 +3,9 @@
 
 cmake_minimum_required (VERSION 2.8)
 project (glstudy)
-set (CMAKE_AUTOMOC ON)
-set (CMAKE_AUTORCC ON)
+
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_BUILD_TYPE RELEASE)
+set (CMAKE_BUILD_TYPE RelWithDebInfo)
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 INCLUDE (../cmake/base_config.cmake)
@@ -35,3 +34,5 @@ add_subdirectory(exrs)
 add_subdirectory(wbg)
 add_subdirectory(tvox)
 add_subdirectory(gar)
+
+##MESSAGE ("CMAKE_EXE_LINKER_FLAGS" ${CMAKE_EXE_LINKER_FLAGS})

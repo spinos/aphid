@@ -3,14 +3,16 @@ if(WIN32)
 SET (ZLIB_DIR "D:/usr/zlib-1.2.5")
 SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
 SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
-endif()
+else ()
 
 FIND_PACKAGE (ZLIB REQUIRED)
 MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
 MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
+
+endif()
+
 MESSAGE (" zlib include is " ${ZLIB_INCLUDE_DIR})
 MESSAGE (" zlib library is " ${ZLIB_LIBRARY})
-
 
 IF (WIN32)
 set (SZIP_DIR "C:/Program Files/SZIP/share/cmake/SZIP")
