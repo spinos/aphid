@@ -25,26 +25,43 @@ ShrubChartView::ShrubChartView(QGraphicsScene * scene, QWidget * parent) : QGrap
 	setAcceptDrops(true);
 	setMinimumSize(400, 300);
 	setRenderHint(QPainter::Antialiasing);
-	qDebug()<<"view rect"<<rect();
 	setSceneRect(	frameRect() );
 }
 
 void ShrubChartView::mousePressEvent(QMouseEvent *event)
 {
-	switch (event->button())
-	{
-		case Qt::LeftButton:
-			processSelect(event->pos() );
-		break;
-		case Qt::RightButton:
-			qDebug()<<"todo del";
-		break;
-		default:
-		;
+	if(event->modifiers() == Qt::AltModifier) {
+		beginProcessView(event);		
+	} else {
+		beginProcessItem(event);
 	}
 }
 
 void ShrubChartView::mouseMoveEvent(QMouseEvent *event)
+{
+	if(m_mode == mPanView) {
+		panView(event);
+	} else {
+		processItem(event);
+	}
+}
+
+void ShrubChartView::panView(QMouseEvent *event)
+{
+	QPoint mousePos = event->pos();
+	QPointF dv(mousePos.x() - m_lastMosePos.x(),
+					mousePos.y() - m_lastMosePos.y() );
+					
+	QRectF frm = sceneRect ();
+	frm.adjust(-dv.x(), -dv.y(), -dv.x(), -dv.y() );
+	m_sceneOrigin.rx() += dv.x();
+	m_sceneOrigin.ry() += dv.y();
+	setSceneRect(frm); 
+	
+	m_lastMosePos = mousePos;
+}
+
+void ShrubChartView::processItem(QMouseEvent *event)
 {
 	QPoint mousePos = event->pos();
 	QGraphicsItem *item = itemAt(mousePos);
@@ -57,6 +74,8 @@ void ShrubChartView::mouseMoveEvent(QMouseEvent *event)
 	}
 	if(m_mode == mConnectItems) {
 		QPointF pf(mousePos.x(), mousePos.y() );
+		pf.rx() -= m_sceneOrigin.x();
+		pf.ry() -= m_sceneOrigin.y();
 		m_selectedConnection->setPos1(pf );
 		m_selectedConnection->updatePath();
 	}
@@ -138,6 +157,13 @@ void ShrubChartView::dropEvent(QDropEvent *event)
 	
 }
 
+void ShrubChartView::resizeEvent ( QResizeEvent * event )
+{
+	setSceneRect(QRectF(-m_sceneOrigin.x(), -m_sceneOrigin.y(), 
+		event->size().width(), event->size().height() ));
+	QGraphicsView::resizeEvent(event);
+}
+
 void ShrubChartView::addGlyphPiece(const QPoint & pieceTypGrp, 
 						const QPixmap & px,
 						const QPoint & pos)
@@ -163,7 +189,6 @@ void ShrubChartView::addGlyphPiece(const QPoint & pieceTypGrp,
 
 void ShrubChartView::processSelect(const QPoint & pos)
 {
-	m_mode = mPanView;
 	QGraphicsItem *item = itemAt(pos);
 	if (item) {
          if(isOutgoingPort(item) ) {
@@ -223,3 +248,26 @@ bool ShrubChartView::isIncomingPort(const QGraphicsItem *item) const
 	const GlyphPort * pt = (const GlyphPort *)item;
 	return !pt->isOutgoing();
 }
+
+void ShrubChartView::beginProcessView(QMouseEvent *event) 
+{
+	QPoint mousePos = event->pos();
+	m_mode = mPanView;
+	m_lastMosePos = mousePos;
+}
+
+void ShrubChartView::beginProcessItem(QMouseEvent *event) 
+{
+	switch (event->button())
+	{
+		case Qt::LeftButton:
+			processSelect(event->pos() );
+		break;
+		case Qt::RightButton:
+			qDebug()<<"todo del";
+		break;
+		default:
+		;
+	}
+}
+

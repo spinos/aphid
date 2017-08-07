@@ -40,6 +40,14 @@ Ray::Ray(const Vector3F& pfrom, const Vector3F& pto)
 	m_dir.normalize();
 }
 
+void Ray::operator=(const Ray& b)
+{ 
+	m_origin = b.m_origin;
+	m_tmin = b.m_tmin;
+	m_dir = b.m_dir;
+	m_tmax = b.m_tmax;
+}
+
 Vector3F Ray::travel(const float & t) const
 { return m_origin + m_dir * t; }
 

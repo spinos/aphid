@@ -18,6 +18,7 @@ INCLUDE (../cmake/boost_config.cmake)
 ## https://cmake.org/Wiki/CMake:Bundles_And_Frameworks
 ## set(CMAKE_MACOSX_BUNDLE ON)
 
+add_subdirectory(hilbert2)
 add_subdirectory(gpdeform)
 add_subdirectory(rott)
 add_subdirectory(naca4)

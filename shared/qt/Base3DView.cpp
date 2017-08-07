@@ -472,7 +472,7 @@ void Base3DView::computeIncidentRay(int x, int y)
 	Vector3F origin, direct;
     getCamera()->incidentRay(x, y, origin, direct);
     direct.normalize();
-	m_incidentRay = Ray(origin + direct * getCamera()->nearClipPlane(), origin + direct * getCamera()->farClipPlane());
+	m_incidentRay = Ray(origin, direct, 0.f, getCamera()->farClipPlane() );
 }
 
 

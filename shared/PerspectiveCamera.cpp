@@ -14,11 +14,11 @@ namespace aphid {
 PerspectiveCamera::PerspectiveCamera()
 {
 	m_fov = 35.f;
+	m_2tanfov = tan(m_fov / 360.f * 3.1415927f) * 2.f; // half fov angle * 2
 }
 
 PerspectiveCamera::~PerspectiveCamera()
 {
-
 }
 	
 bool PerspectiveCamera::isOrthographic() const
@@ -31,11 +31,10 @@ float PerspectiveCamera::fieldOfView() const
 	return m_fov;
 }
 
-// at depth 1.0f
+/// width of near clipping plane
 float PerspectiveCamera::frameWidth() const
 {
-	double e = tan(m_fov/360.f*3.1415927f); // half fov angle
-	return e * 2.f;
+	return m_2tanfov * m_nearClipPlane;
 }
 
 float PerspectiveCamera::frameWidthRel() const
@@ -51,17 +50,22 @@ void PerspectiveCamera::zoom(int y)
 }
 
 void PerspectiveCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const
-{
-	worldVec.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
-	worldVec.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
-	worldVec.z = -2.f;
+{		
+	float cx, cy;
+	getScreenCoord(cx, cy, x, y);
+	worldVec.x = cx * frameWidth();
+	worldVec.y = cy * frameHeight();
+	worldVec.z = -m_nearClipPlane;
+	
+	origin = fSpace.transform(worldVec);
+	worldVec.normalize();
 	worldVec = fSpace.transformAsNormal(worldVec);
-	origin = fSpace.getTranslation();
 }
 
 void PerspectiveCamera::setFieldOfView(float x)
 {
 	m_fov = x;
+	m_2tanfov = tan(m_fov / 360.f * 3.1415927f) * 2.f; // half fov angle * 2
 }
 
 void PerspectiveCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const

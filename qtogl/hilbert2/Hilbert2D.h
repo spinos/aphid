@@ -8,13 +8,17 @@
  */
 #ifndef TTG_HILBERT_2D_H
 #define TTG_HILBERT_2D_H
-#include "Scene.h"
-#include "QuickSort.h"
 
-namespace ttg {
+#include <math/Vector3F.h>
+#include <math/QuickSort.h>
 
-class Hilbert2D : public Scene {
+namespace aphid {
+class GeoDrawer;
+}
 
+class Hilbert2D {
+
+	int m_level;
 	int m_N;
 	aphid::Vector3F * m_X;
 	aphid::QuickSortPair<int, int> * m_ind;
@@ -23,17 +27,17 @@ public:
 	Hilbert2D();
 	virtual ~Hilbert2D();
 	
-	virtual const char * titleStr() const;
 	virtual bool init();
 	virtual bool progressForward();
 	virtual bool progressBackward();
 	virtual void draw(aphid::GeoDrawer * dr);
 	
+	void printCoord();
+	
 private:
-	void generateSamples();
+	void generateSamples(int level);
 	
 		
 };
 
-}
 #endif

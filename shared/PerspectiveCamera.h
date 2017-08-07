@@ -12,6 +12,10 @@
 namespace aphid {
 
 class PerspectiveCamera : public BaseCamera {
+/// field of view angle in degrees
+	float m_fov;
+/// field width relative to depth
+	float m_2tanfov;
 public:
 	PerspectiveCamera();
 	virtual ~PerspectiveCamera();
@@ -25,7 +29,7 @@ public:
 	virtual void setFieldOfView(float x);
 	virtual void screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const;
 private:
-	float m_fov;
+	
 };
 
 }

@@ -64,6 +64,7 @@ namespace aphid {
 	void scaleBy(const Vector3F & scv);
 	void scaleTranslationBy(float sc);
 	void copy(const Matrix44F & another);
+	bool isEqual(const Matrix44F & another) const;
 	
 	static float Determinant33( float a, float b, float c, float d, float e, float f, float g, float h, float i );
 	static Matrix44F IdentityMatrix;

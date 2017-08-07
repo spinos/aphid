@@ -174,11 +174,15 @@ void BaseCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3F & wor
 
 void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const
 {
-    origin.x = ((float)x/(float)fPortWidth - 0.5f) * frameWidth();
-	origin.y = -((float)y/(float)fPortHeight - 0.5f) * frameHeight();
-	origin.z = -1.f;
+	float cx, cy;
+	getScreenCoord(cx, cy, x, y);
+	origin.x = cx * frameWidth();
+	origin.y = cy * frameHeight();
+	origin.z = -m_nearClipPlane;
 	origin = fSpace.transform(origin);
-	worldVec = fCenterOfInterest - fSpace.getTranslation();
+	
+	worldVec = fSpace.getFront() * -1.f;
+	
 }
 
 Vector3F BaseCamera::eyePosition() const
@@ -294,6 +298,13 @@ void BaseCamera::setViewTransform(const Matrix44F & mat,
 	fSpace = mat;
 	fCenterOfInterest = mat.transform(Vector3F(0.f, 0.f, -focalLength) );
 	updateInverseSpace();
+}
+
+void BaseCamera::getScreenCoord(float& cx, float& cy,
+			const int& px, const int& py) const
+{
+	cx = (float)px/(float)fPortWidth - .5f;
+	cy = -((float)py/(float)fPortHeight - .5f);
 }
  
 }

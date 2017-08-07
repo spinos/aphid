@@ -37,6 +37,7 @@ protected:
 	void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dropEvent(QDropEvent *event);
+	virtual void resizeEvent ( QResizeEvent * event );
 	
 signals:
 	void sendSelectGlyph(bool x);
@@ -49,6 +50,10 @@ private:
 	bool isItemPort(const QGraphicsItem *item) const;
 	bool isOutgoingPort(const QGraphicsItem *item) const;
 	bool isIncomingPort(const QGraphicsItem *item) const;
+	void beginProcessView(QMouseEvent *event);
+	void beginProcessItem(QMouseEvent *event);
+	void processItem(QMouseEvent *event);
+	void panView(QMouseEvent *event);
 	
 	enum Mode {
 		mNone = 0,
@@ -61,6 +66,8 @@ private:
 	QGraphicsItem * m_selectedItem;
 	aphid::GlyphConnection * m_selectedConnection;
 	QPoint m_lastMosePos;
+/// changed after pan
+	QPoint m_sceneOrigin;
 	
 };
 

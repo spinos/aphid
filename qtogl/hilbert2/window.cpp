@@ -4,19 +4,19 @@
 
 Window::Window()
 {
-	 qDebug()<<"Pievewise Hermite Interpolate";
+	 qDebug()<<"rotate test";
 	 QDateTime local(QDateTime::currentDateTime());
 	 qDebug() << "local time is:" << local;
 	 srand (local.toTime_t() );
     glWidget = new GLWidget(this);
 
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Hilbert 2D"));
+    setWindowTitle(tr("Rotate Test"));
     
 }
 
 Window::~Window()
-{ qDebug()<<"exit pwhermite window"; }
+{ qDebug()<<"exit rot window"; }
 
 void Window::keyPressEvent(QKeyEvent *e)
 {

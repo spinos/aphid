@@ -492,5 +492,13 @@ void Matrix44F::scaleBy(const Vector3F & scv)
 	*m(2, 2) *= scv.z;
 }
 
+bool Matrix44F::isEqual(const Matrix44F & another) const
+{
+	for(int i=0;i<16;++i) {
+		if(v[i] != another.v[i]) return false;
+	}
+	return true;
+}
+
 }
 //:~
