@@ -17,6 +17,7 @@
 #include "data/file.h"
 #include "attr/PieceAttrib.h"
 #include <qt/QDoubleEditSlider.h>
+#include <qt/QStringEditField.h>
 
 using namespace aphid;
 
@@ -152,15 +153,39 @@ QWidget* AttribDlg::shoFltAttr(gar::Attrib* attr)
 QWidget* AttribDlg::shoStrAttr(gar::Attrib* attr)
 {
 	gar::StringAttrib* sattr = static_cast<gar::StringAttrib*> (attr);
-	return new QLabel(tr(attr->attrNameStr() ) );
+	std::string sval;
+	sattr->getValue(sval);
+	QStringEditField* wig = new QStringEditField(tr(attr->attrNameStr() ) );
+	wig->setValue(tr(sval.c_str() ) );
+	if(sattr->isFileName() ) {
+	    wig->addButton(":/icons/document_open.png");
+	    wig->setSelectFileFilter("*.hes;;*.m");
+	}
+	wig->setNameId(attr->attrName() );
+	
+	connect(wig, SIGNAL(valueChanged2(QPair<int, QString>)),
+            this, SLOT(recvStringValue(QPair<int, QString>)));
+    
+	return wig;
 }
 
 void AttribDlg::recvDoubleValue(QPair<int, double> x)
 {
 	gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(x.first) );	
 	if(!dst) {
-		qDebug()<<" AttribDlg::recvDoubleValue cannot find attr "
+		qDebug()<<" AttribDlg::recvDoubleValue cannot find float attr "
 			<<x.first;
 	}
 	dst->setValue((float)x.second);
+}
+
+void AttribDlg::recvStringValue(QPair<int, QString> x)
+{
+    gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(x.first) );	
+	if(!dst) {
+		qDebug()<<" AttribDlg::recvDoubleValue cannot find string attr "
+			<<x.first;
+	}
+	gar::StringAttrib* sattr = static_cast<gar::StringAttrib*> (dst);
+	sattr->setValue(x.second.toStdString() );
 }

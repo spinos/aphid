@@ -205,26 +205,37 @@ void ShrubScene::genMultiPlant()
 
 GardenGlyph * ShrubScene::getGround()
 {
+    GardenGlyph * firstGround = NULL;
 	foreach(QGraphicsItem *its_, items()) {
 		
 		if(its_->type() == GardenGlyph::Type) {
 			GardenGlyph *g = (GardenGlyph*) its_;
 		
 			if(g->glyphType() == gtPot) {
-			
+			    if(m_selectedGlyph.contains(g) ) {
 				std::cout<<"\n INFO grow by pot";
 				return g;
+				}
+				if(!firstGround) {
+				    firstGround = g;
+				}
 			}
 			
 			if(g->glyphType() == gtBush) {
-			
+			    if(m_selectedGlyph.contains(g) ) {
 				std::cout<<"\n INFO grow by bush";
 				return g;
+				}
+				if(!firstGround) {
+				    firstGround = g;
+				}
 			}
 		}
 	}
-	std::cout<<"\n ERROR no ground to grow on";
-	return NULL;
+	if(!firstGround) {
+	    std::cout<<"\n ERROR no ground to grow on";
+	}
+	return firstGround;
 }
 
 void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)

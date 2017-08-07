@@ -51,6 +51,7 @@ public slots:
 	
 private slots:
 	void recvDoubleValue(QPair<int, double> x);
+	void recvStringValue(QPair<int, QString> x);
 	
 private:
 	void lsAttribs(GardenGlyph* g);

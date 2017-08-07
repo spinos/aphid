@@ -15,6 +15,7 @@
 #include "data/file.h"
 #include <attr/PotAttribs.h>
 #include <attr/BushAttribs.h>
+#include <attr/ImportGeomAttribs.h>
 #include <QString>
 
 using namespace gar;
@@ -55,6 +56,9 @@ PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
 		case gar::ggGround:
 			return buildGroundAttrib(gtyp);			
 		break;
+		case gar::ggFile:
+			return buildFileAttrib(gtyp);			
+		break;
 		default:
 			;
 	}
@@ -67,6 +71,14 @@ PieceAttrib* GlyphBuilder::buildGroundAttrib(const int & gtyp)
 		return (new PotAttribs);
 		
 	return (new BushAttribs);
+}
+
+PieceAttrib* GlyphBuilder::buildFileAttrib(const int & gtyp)
+{
+	if(gtyp == gar::gtImportGeom)
+		return (new ImportGeomAttribs);
+		
+	return (new PieceAttrib);
 }
 
 void GlyphBuilder::buildGround(GardenGlyph * dst,

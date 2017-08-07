@@ -39,6 +39,7 @@ private:
 			const int & ggrp);
 			
 	PieceAttrib* buildGroundAttrib(const int & gtyp);
+	PieceAttrib* buildFileAttrib(const int & gtyp);
 	
 };
 #endif

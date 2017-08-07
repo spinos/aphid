@@ -5,6 +5,15 @@ include_directories (${APHID_DIR}/rhizoid)
 
 set(CMAKE_MACOSX_BUNDLE OFF)
 
+file (GLOB Attr_HEAD
+    "attr/*.h"
+    "attr/*.cpp"
+)
+
+file (GLOB Attr_SRC
+    "attr/*.cpp"
+)
+
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 data/grass.h
 data/clover.h
@@ -28,11 +37,7 @@ asset/groundAssets.h
 asset/FileAssets.h
 asset/GlyphPalette.h
 asset/PiecesList.h
-attr/AttribDlg.h
-attr/PieceAttrib.h
-attr/Attrib.h
-attr/PotAttribs.h
-attr/BushAttribs.h
+${Attr_HEAD}
 PlantPiece.h
 VegetationPatch.h
 Vegetation.h
@@ -59,6 +64,7 @@ message ("rcc output is " ${GAR_RES_SOURCES})
 
 set (GAR_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 ${APHID_QT_DIR}/QDoubleEditSlider.cpp
+${APHID_QT_DIR}/QStringEditField.cpp
 ${APHID_QT_DIR}/QIconFrame.cpp
 ${APHID_QT_DIR}/StateIconFrame.cpp
 ${APHID_QT_DIR}/ContextIconFrame.cpp
@@ -81,11 +87,7 @@ asset/groundAssets.cpp
 asset/FileAssets.cpp
 asset/GlyphPalette.cpp
 asset/PiecesList.cpp
-attr/AttribDlg.cpp
-attr/PieceAttrib.cpp
-attr/Attrib.cpp
-attr/PotAttribs.cpp
-attr/BushAttribs.cpp
+${Attr_SRC}
 PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp
