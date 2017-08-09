@@ -13,10 +13,14 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/file.h"
+#include "data/billboard.h"
+#include "data/variation.h"
 #include <attr/PotAttribs.h>
 #include <attr/BushAttribs.h>
 #include <attr/ImportGeomAttribs.h>
+#include <attr/SplineSpriteAttribs.h>
 #include <QString>
+#include <iostream>
 
 using namespace gar;
 
@@ -40,6 +44,12 @@ void GlyphBuilder::build(GardenGlyph * dst,
 		case gar::ggFile:
 			buildFile(dst, gtyp);
 		break;
+		case gar::ggSprite:
+			buildSprite(dst, gtyp);
+		break;
+		case gar::ggVariant:
+			buildVariant(dst, gtyp);
+		break;
 		default:
 			;
 	}
@@ -52,17 +62,24 @@ void GlyphBuilder::build(GardenGlyph * dst,
 PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
 			const int & ggrp)
 {
+	PieceAttrib* res = NULL;
 	switch (ggrp) {
 		case gar::ggGround:
-			return buildGroundAttrib(gtyp);			
+			res = buildGroundAttrib(gtyp);			
 		break;
 		case gar::ggFile:
-			return buildFileAttrib(gtyp);			
+			res = buildFileAttrib(gtyp);			
+		break;
+		case gar::ggSprite:
+			res = buildSpriteAttrib(gtyp);
+		break;
+		case gar::ggVariant:
+			res = buildVariantAttrib(gtyp);
 		break;
 		default:
-			;
+			res = new PieceAttrib;
 	}
-	return (new PieceAttrib);
+	return res;
 }
 
 PieceAttrib* GlyphBuilder::buildGroundAttrib(const int & gtyp)
@@ -78,6 +95,19 @@ PieceAttrib* GlyphBuilder::buildFileAttrib(const int & gtyp)
 	if(gtyp == gar::gtImportGeom)
 		return (new ImportGeomAttribs);
 		
+	return (new PieceAttrib);
+}
+
+PieceAttrib* GlyphBuilder::buildSpriteAttrib(const int & gtyp)
+{
+	if(gtyp == gar::gtSplineSprite)
+		return (new SplineSpriteAttribs);
+		
+	return (new PieceAttrib);
+}
+
+PieceAttrib* GlyphBuilder::buildVariantAttrib(const int & gtyp)
+{
 	return (new PieceAttrib);
 }
 
@@ -118,3 +148,31 @@ void GlyphBuilder::buildFile(GardenGlyph * dst,
 		dst->addPort(QObject::tr(FileOutPortRangeNames[i]), true);
 	}
 }
+
+void GlyphBuilder::buildSprite(GardenGlyph * dst,
+			const int & gtyp)
+{
+	const int gt = ToBillboardType(gtyp);
+	const int & outBegin = BillboardOutPortRange[gt][0];
+	const int & outEnd = BillboardOutPortRange[gt][1];
+	for(int i=outBegin;i<outEnd;++i) {
+		dst->addPort(QObject::tr(BillboardOutPortRangeNames[i]), true);
+	}
+}
+
+void GlyphBuilder::buildVariant(GardenGlyph * dst,
+			const int & gtyp)
+{
+	const int gt = ToVariationType(gtyp);
+	const int & inBegin = VariationInPortRange[gt][0];
+	const int & inEnd = VariationInPortRange[gt][1];
+	for(int i=inBegin;i<inEnd;++i) {
+		dst->addPort(QObject::tr(VariationInPortRangeNames[i]), false);
+	}
+	const int & outBegin = VariationOutPortRange[gt][0];
+	const int & outEnd = VariationOutPortRange[gt][1];
+	for(int i=outBegin;i<outEnd;++i) {
+		dst->addPort(QObject::tr(VariationOutPortRangeNames[i]), true);
+	}
+}
+	

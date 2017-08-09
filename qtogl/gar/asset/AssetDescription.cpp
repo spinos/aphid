@@ -13,6 +13,8 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/file.h"
+#include "data/billboard.h"
+#include "data/variation.h"
 
 AssetDescription::AssetDescription(QWidget *parent) : QWidget(parent)
 {
@@ -40,6 +42,12 @@ void AssetDescription::recvAssetSel(QPoint tg)
 		break;
 		case gar::ggFile :
 			showFileGesc(tg);
+		break;
+		case gar::ggSprite :
+			showSpriteGesc(tg);
+		break;
+		case gar::ggVariant :
+			showVariantGesc(tg);
 		break;
 		default:
 			qDebug()<<" AssetDescription::recvAssetSel group is unknown";
@@ -73,3 +81,22 @@ void AssetDescription::showFileGesc(const QPoint & tg)
 	m_pic->setPixmap(px);
 	m_dtl->setText(tr(gar::FileTypeDescs[fileTyp]));
 }
+
+void AssetDescription::showSpriteGesc(const QPoint & tg)
+{
+	const int & billboardTyp = gar::ToBillboardType(tg.x() );
+	m_lab->setText(tr(gar::BillboardTypeNames[billboardTyp]));
+	QPixmap px(tr(gar::BillboardTypeImages[billboardTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::BillboardTypeDescs[billboardTyp]));
+}
+
+void AssetDescription::showVariantGesc(const QPoint & tg)
+{
+	const int & billboardTyp = gar::ToVariationType(tg.x() );
+	m_lab->setText(tr(gar::VariationTypeNames[billboardTyp]));
+	QPixmap px(tr(gar::VariationTypeImages[billboardTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::VariationTypeDescs[billboardTyp]));
+}
+	

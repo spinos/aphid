@@ -5,9 +5,16 @@ include_directories (${APHID_DIR}/rhizoid)
 
 set(CMAKE_MACOSX_BUNDLE OFF)
 
+file (GLOB Asst_HEAD
+    "asset/*.h"
+)
+
+file (GLOB Asst_SRC
+    "asset/*.cpp"
+)
+
 file (GLOB Attr_HEAD
     "attr/*.h"
-    "attr/*.cpp"
 )
 
 file (GLOB Attr_SRC
@@ -30,13 +37,7 @@ graphchart/ShrubChartView.h
 graphchart/GardenGlyph.h
 graphchart/GlyphBuilder.h
 graphchart/ChartDlg.h
-asset/assetdlg.h
-asset/AssetDescription.h
-asset/plantAssets.h
-asset/groundAssets.h
-asset/FileAssets.h
-asset/GlyphPalette.h
-asset/PiecesList.h
+${Asst_HEAD}
 ${Attr_HEAD}
 PlantPiece.h
 VegetationPatch.h
@@ -69,6 +70,8 @@ ${APHID_QT_DIR}/QIconFrame.cpp
 ${APHID_QT_DIR}/StateIconFrame.cpp
 ${APHID_QT_DIR}/ContextIconFrame.cpp
 ${APHID_QT_DIR}/ActionIconFrame.cpp
+${APHID_QT_DIR}/QSplineEdit.cpp
+${APHID_QT_DIR}/SplineEditGroup.cpp
 widget.cpp
 window.cpp
 toolBox.cpp
@@ -80,14 +83,8 @@ graphchart/ShrubChartView.cpp
 graphchart/GardenGlyph.cpp
 graphchart/GlyphBuilder.cpp
 graphchart/ChartDlg.cpp
-asset/assetdlg.cpp
-asset/AssetDescription.cpp
-asset/plantAssets.cpp
-asset/groundAssets.cpp
-asset/FileAssets.cpp
-asset/GlyphPalette.cpp
-asset/PiecesList.cpp
 ${Attr_SRC}
+${Asst_SRC}
 PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp

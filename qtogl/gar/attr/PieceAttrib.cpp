@@ -55,6 +55,12 @@ void PieceAttrib::addFloatAttrib(gar::AttribName anm,
 	
 }
 
+void PieceAttrib::addSplineAttrib(gar::AttribName anm)
+{
+	gar::SplineAttrib* aat = new gar::SplineAttrib(anm);
+	m_collAttrs.push_back(aat);
+}
+
 void PieceAttrib::addStringAttrib(gar::AttribName anm,
 		const std::string& val,
 		const bool& asFileName)
@@ -98,6 +104,18 @@ gar::AttribName PieceAttrib::IntAsAttribName(int x)
 		break;
 		case gar::nFileName :
 			r = gar::nFileName;
+		break;
+		case gar::nWidth :
+			r = gar::nWidth;
+		break;
+		case gar::nHeight :
+			r = gar::nHeight;
+		break;
+		case gar::nLeftSide :
+			r = gar::nLeftSide;
+		break;
+		case gar::nRightSide :
+			r = gar::nRightSide;
 		break;
 		default:
 			;

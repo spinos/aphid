@@ -15,9 +15,12 @@
 #include "data/ground.h"
 #include "data/grass.h"
 #include "data/file.h"
+#include "data/billboard.h"
+#include "data/variation.h"
 #include "attr/PieceAttrib.h"
 #include <qt/QDoubleEditSlider.h>
 #include <qt/QStringEditField.h>
+#include <qt/SplineEditGroup.h>
 
 using namespace aphid;
 
@@ -97,6 +100,12 @@ void AttribDlg::lsDefault(GardenGlyph* g)
 		case gar::ggFile :
 			stype = gar::FileTypeNames[gar::ToFileType(gt)];
 		break;
+		case gar::ggSprite :
+			stype = gar::BillboardTypeNames[gar::ToBillboardType(gt)];
+		break;
+		case gar::ggVariant :
+			stype = gar::VariationTypeNames[gar::ToVariationType(gt)];
+		break;
 		default:
 		;
 	}
@@ -125,6 +134,9 @@ void AttribDlg::lsAttr(gar::Attrib* attr)
 		break;
 		case gar::tString :
 			wig = shoStrAttr(attr);
+		break;
+		case gar::tSpline :
+			wig = shoSplineAttr(attr);
 		break;
 		default:
 			wig = new QLabel(tr(attr->attrNameStr() ) );
@@ -169,12 +181,40 @@ QWidget* AttribDlg::shoStrAttr(gar::Attrib* attr)
 	return wig;
 }
 
+QWidget* AttribDlg::shoSplineAttr(gar::Attrib* attr)
+{
+	gar::SplineAttrib* sattr = static_cast<gar::SplineAttrib*> (attr);
+	
+	SplineEditGroup* wig = new SplineEditGroup(tr(attr->attrNameStr()) );
+	wig->setNameId(attr->attrName() );
+	
+	float tmp[2];
+	sattr->getSplineValue(tmp);
+	wig->setSplineValue(tmp);
+	sattr->getSplineCv0(tmp);
+	wig->setSplineCv0(tmp);
+	sattr->getSplineCv1(tmp);
+	wig->setSplineCv1(tmp);
+	
+	connect(wig, SIGNAL(valueChanged(QPair<int, QPointF>)),
+            this, SLOT(recvSplineValue(QPair<int, QPointF>)));
+			
+	connect(wig, SIGNAL(leftControlChanged(QPair<int, QPointF>)),
+            this, SLOT(recvSplineCv0(QPair<int, QPointF>)));
+			
+	connect(wig, SIGNAL(rightControlChanged(QPair<int, QPointF>)),
+            this, SLOT(recvSplineCv1(QPair<int, QPointF>)));
+			
+	return wig;
+}
+
 void AttribDlg::recvDoubleValue(QPair<int, double> x)
 {
 	gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(x.first) );	
 	if(!dst) {
 		qDebug()<<" AttribDlg::recvDoubleValue cannot find float attr "
 			<<x.first;
+		return;
 	}
 	dst->setValue((float)x.second);
 }
@@ -185,7 +225,59 @@ void AttribDlg::recvStringValue(QPair<int, QString> x)
 	if(!dst) {
 		qDebug()<<" AttribDlg::recvDoubleValue cannot find string attr "
 			<<x.first;
+		return;
 	}
 	gar::StringAttrib* sattr = static_cast<gar::StringAttrib*> (dst);
 	sattr->setValue(x.second.toStdString() );
+}
+
+gar::SplineAttrib* AttribDlg::findSplineAttr(int i)
+{
+	gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(i) );	
+	if(!dst) {
+		qDebug()<<" AttribDlg cannot find spline attr "
+			<<i;
+		return NULL;
+	}
+	
+	return static_cast<gar::SplineAttrib*> (dst);
+}
+
+void AttribDlg::recvSplineValue(QPair<int, QPointF> x)
+{
+	gar::SplineAttrib* sattr = findSplineAttr(x.first);
+	if(!sattr) 
+		return;
+	
+	float tmp[2];
+	QPointF& p = x.second;
+	tmp[0] = p.x();
+	tmp[1] = p.y();
+	sattr->setSplineValue(tmp[0], tmp[1] );
+}
+	
+void AttribDlg::recvSplineCv0(QPair<int, QPointF> x)
+{
+	gar::SplineAttrib* sattr = findSplineAttr(x.first);
+	if(!sattr) 
+		return;
+		
+	float tmp[2];
+	QPointF& p = x.second;
+	tmp[0] = p.x();
+	tmp[1] = p.y();
+	sattr->setSplineCv0(tmp[0], tmp[1]);
+}
+	
+void AttribDlg::recvSplineCv1(QPair<int, QPointF> x)
+{
+	gar::SplineAttrib* sattr = findSplineAttr(x.first);
+	if(!sattr) 
+		return;
+		
+	float tmp[2];
+	QPointF& p = x.second;
+	tmp[0] = p.x();
+	tmp[1] = p.y();
+	sattr->setSplineCv1(tmp[0], tmp[1]);
 }

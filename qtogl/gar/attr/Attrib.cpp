@@ -99,11 +99,55 @@ static const char* sAttribNameAsStr[] = {
 "grow margin",
 "grow angle",
 "zenith noise",
-"file name"
+"file name",
+"width",
+"height",
+"left side",
+"right side"
 };
 
 const char* Attrib::attrNameStr() const
 { return sAttribNameAsStr[m_anm]; }
+
+SplineAttrib::SplineAttrib(AttribName anm) : Attrib(anm, tSpline)
+{
+	m_splineValue[0] = 1.f;
+	m_splineValue[1] = 1.f;
+	m_splineCv[0] = .4f;
+	m_splineCv[1] = 1.f;
+	m_splineCv[2] = .6f;
+	m_splineCv[3] = 1.f;
+}
+
+SplineAttrib::~SplineAttrib()
+{}
+
+void SplineAttrib::setSplineValue(float y0, float y1)
+{
+	m_splineValue[0] = y0;
+	m_splineValue[1] = y1;
+}
+
+void SplineAttrib::setSplineCv0(float x, float y)
+{
+	m_splineCv[0] = x;
+	m_splineCv[1] = y;
+}
+
+void SplineAttrib::setSplineCv1(float x, float y)
+{
+	m_splineCv[2] = x;
+	m_splineCv[3] = y;
+}
+
+void SplineAttrib::getSplineValue(float* y) const
+{ memcpy(y, m_splineValue, 8); }
+
+void SplineAttrib::getSplineCv0(float* y) const
+{ memcpy(y, m_splineCv, 8); }
+
+void SplineAttrib::getSplineCv1(float* y) const
+{ memcpy(y, &m_splineCv[2], 8); }
 
 StringAttrib::StringAttrib(AttribName anm, const bool& ifn) : Attrib(anm, tString)
 { m_isFileName = ifn; }

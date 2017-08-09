@@ -25,6 +25,13 @@ GroundAssets::GroundAssets(QTreeWidget *parent) : QTreeWidgetItem(parent)
 	grass->setIcon(0, grassIcon);
 	grass->setData(0, Qt::WhatsThisRole, QString(tr("allGround")) );
 	
+	
+	QIcon varIcon(":/icons/variants.png");
+	QTreeWidgetItem * var = new QTreeWidgetItem(this);
+	var->setText(0, tr("Variation"));
+	var->setIcon(0, varIcon);
+	var->setData(0, Qt::WhatsThisRole, QString(tr("allVariation")) );
+	
 	setExpanded(true);
 
 }

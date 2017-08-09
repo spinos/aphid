@@ -1,5 +1,7 @@
 #include "SplineMap1D.h"
 
+namespace aphid {
+
 SplineMap1D::SplineMap1D() 
 {
     m_spline.cv[0].set(0.f, 1.f, 0.f);
@@ -16,7 +18,8 @@ SplineMap1D::SplineMap1D(float a, float b)
     m_spline.cv[3].set(1.f, b, 0.f);
 }
 
-SplineMap1D::~SplineMap1D() {}
+SplineMap1D::~SplineMap1D()
+{}
 
 void SplineMap1D::setStart(float y)
 { m_spline.cv[0].y = y; }
@@ -39,6 +42,8 @@ void SplineMap1D::setRightControl(float x, float y)
 float SplineMap1D::interpolate(float t) const
 { return m_spline.calculateBezierPoint(t).y; }
 
-const BezierSpline * SplineMap1D::spline() const
+BezierSpline * SplineMap1D::spline()
 { return &m_spline; }
+
+}
 //:~

@@ -33,6 +33,24 @@ QSize QSplineEdit::sizeHint() const
 {
     return QSize(200, 100);
 }
+
+void QSplineEdit::setValue(const float* x)
+{ 
+	m_startValue = x[0]; 
+	m_endValue = x[1];
+}
+
+void QSplineEdit::setCv0(const float* x)
+{
+	m_startCvx = x[0]; 
+	m_startCvy = x[1];
+}
+
+void QSplineEdit::setCv1(const float* x)
+{
+	m_endCvx = x[0]; 
+	m_endCvy = x[1];
+}
 	
 void QSplineEdit::paintEvent(QPaintEvent *event)
 {

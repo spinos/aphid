@@ -12,6 +12,8 @@
 #include "gar_common.h"
 #include "data/ground.h"
 #include "data/grass.h"
+#include "data/billboard.h"
+#include "data/variation.h"
 #include "data/file.h"
 
 PiecesList::PiecesList(QWidget *parent)
@@ -91,6 +93,22 @@ void PiecesList::showFilePieces()
 	const int gend = gar::GlyphRange[gar::ggFile][1];
 	lsPieces(gbegin, gend, gar::ggFile,
 			gar::FileTypeIcons);
+}
+
+void PiecesList::showSpritePieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggSprite][0];
+	const int gend = gar::GlyphRange[gar::ggSprite][1];
+	lsPieces(gbegin, gend, gar::ggSprite,
+			gar::BillboardTypeIcons);
+}
+
+void PiecesList::showVariationPieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggVariant][0];
+	const int gend = gar::GlyphRange[gar::ggVariant][1];
+	lsPieces(gbegin, gend, gar::ggVariant,
+			gar::VariationTypeIcons);
 }
 
 void PiecesList::lsPieces(const int & gbegin,

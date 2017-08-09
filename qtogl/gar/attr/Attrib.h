@@ -19,7 +19,11 @@ enum AttribName {
 	nGrowMargin,
 	nGrowAngle,
 	nZenithNoise,
-	nFileName
+	nFileName,
+	nWidth,
+	nHeight,
+	nLeftSide,
+	nRightSide,
 };
 
 enum AttribType {
@@ -30,7 +34,8 @@ enum AttribType {
 	tVector2,
 	tVector3,
 	tColor,
-	tString
+	tString,
+	tSpline
 };
 
 class Attrib {
@@ -76,6 +81,26 @@ public:
 	
 	bool isStringType() const;
 	const char* attrNameStr() const;
+	
+};
+
+class SplineAttrib : public Attrib {
+
+	float m_splineValue[2];
+/// cv0 cv1
+	float m_splineCv[4];
+	
+public:
+	SplineAttrib(AttribName anm);
+	virtual ~SplineAttrib();
+	
+	void setSplineValue(float y0, float y1);
+	void setSplineCv0(float x, float y);
+	void setSplineCv1(float x, float y);
+	
+	void getSplineValue(float* y) const;
+	void getSplineCv0(float* y) const;
+	void getSplineCv1(float* y) const;
 	
 };
 

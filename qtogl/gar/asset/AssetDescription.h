@@ -36,6 +36,8 @@ private:
 	void showGroundGesc(const QPoint & tg);
 	void showGrassGesc(const QPoint & tg);
 	void showFileGesc(const QPoint & tg);
+	void showSpriteGesc(const QPoint & tg);
+	void showVariantGesc(const QPoint & tg);
 	
 private:
 	QLabel * m_lab;

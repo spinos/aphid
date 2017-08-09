@@ -12,6 +12,7 @@
 #include "groundAssets.h"
 #include "plantAssets.h"
 #include "FileAssets.h"
+#include "SpriteAssets.h"
 #include "GlyphPalette.h"
 #include "assetdlg.h"
 
@@ -49,7 +50,6 @@ AssetDlg::AssetDlg(QWidget *parent)
 	lsGround();
 	lsPlant();
 	lsSprite();
-	lsVariant();
 	lsFile();
 }
 
@@ -84,11 +84,4 @@ void AssetDlg::closeEvent ( QCloseEvent * e )
 }
 
 void AssetDlg::lsSprite()
-{
-	
-}
-
-void AssetDlg::lsVariant()
-{
-	
-}
+{ m_billboards = new SpriteAssets(m_assetTree); }

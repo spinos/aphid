@@ -47,10 +47,16 @@ void GlyphPalette::showNamedPieces(const QString & swhat)
 	if(swhat == tr("allGrass") ) {
 		m_glyphList->showGrassPieces();
 	}
-	if(swhat == tr("allGround") ) {
+	else if(swhat == tr("allGround") ) {
 		m_glyphList->showGroundPieces();
 	}
-	if(swhat == tr("allFile") ) {
+	else if(swhat == tr("allFile") ) {
 		m_glyphList->showFilePieces();
+	}
+	else if(swhat == tr("allSprite") ) {
+		m_glyphList->showSpritePieces();
+	}
+	else if(swhat == tr("allVariation") ) {
+		m_glyphList->showVariationPieces();
 	}
 }

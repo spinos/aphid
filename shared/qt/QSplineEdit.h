@@ -25,6 +25,11 @@ public:
 	
 	QSize minimumSizeHint() const;
     QSize sizeHint() const;
+	
+	void setValue(const float* x);
+	void setCv0(const float* x);
+	void setCv1(const float* x);
+	
 private slots:
 	
 protected:
@@ -52,9 +57,8 @@ private:
 	void moveEnd(int y);
 	void moveControlLeft(int x, int y);
 	void moveControlRight(int x, int y);
-private:
-	QLabel * m_label;
 	
+private:
 	double m_startValue, m_endValue;
 	double m_startCvx, m_startCvy;
 	double m_endCvx, m_endCvy;

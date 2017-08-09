@@ -26,6 +26,7 @@ class GardenGlyph;
 
 namespace gar {
 class Attrib;
+class SplineAttrib;
 }
 
 class PieceAttrib;
@@ -52,6 +53,9 @@ public slots:
 private slots:
 	void recvDoubleValue(QPair<int, double> x);
 	void recvStringValue(QPair<int, QString> x);
+	void recvSplineValue(QPair<int, QPointF> x);
+	void recvSplineCv0(QPair<int, QPointF> x);
+	void recvSplineCv1(QPair<int, QPointF> x);
 	
 private:
 	void lsAttribs(GardenGlyph* g);
@@ -61,7 +65,9 @@ private:
 	void lsAttr(gar::Attrib* attr);
 	QWidget* shoFltAttr(gar::Attrib* attr);
 	QWidget* shoStrAttr(gar::Attrib* attr);
-	
+	QWidget* shoSplineAttr(gar::Attrib* attr);
+	gar::SplineAttrib* findSplineAttr(int i);
+
 private:
 	ShrubScene* m_scene;
 	QVBoxLayout *mainLayout;

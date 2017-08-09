@@ -34,12 +34,18 @@ private:
 			const int & gtyp);
 	void buildFile(GardenGlyph * dst,
 			const int & gtyp);
+	void buildSprite(GardenGlyph * dst,
+			const int & gtyp);
+	void buildVariant(GardenGlyph * dst,
+			const int & gtyp);
 			
 	PieceAttrib* buildAttrib(const int & gtyp,
 			const int & ggrp);
 			
 	PieceAttrib* buildGroundAttrib(const int & gtyp);
 	PieceAttrib* buildFileAttrib(const int & gtyp);
+	PieceAttrib* buildSpriteAttrib(const int & gtyp);
+	PieceAttrib* buildVariantAttrib(const int & gtyp);
 	
 };
 #endif

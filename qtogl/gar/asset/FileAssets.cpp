@@ -19,12 +19,6 @@ FileAssets::FileAssets(QTreeWidget *parent) : QTreeWidgetItem(parent)
 	setIcon(0, fileIcon);
 	setData(0, Qt::WhatsThisRole, QString(tr("allFile")) );
 	
-	//QIcon grassIcon(":/icons/ground.png");
-	//QTreeWidgetItem * grass = new QTreeWidgetItem(this);
-	//grass->setText(0, tr("Ground"));
-	//grass->setIcon(0, grassIcon);
-	//grass->setData(0, Qt::WhatsThisRole, QString(tr("allGround")) );
-	
 	setExpanded(true);
 
 }

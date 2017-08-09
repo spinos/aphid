@@ -26,6 +26,7 @@ QT_END_NAMESPACE
 class GroundAssets;
 class PlantAssets;
 class FileAssets;
+class SpriteAssets;
 class GlyphPalette;
 
 class AssetDlg : public QDialog
@@ -60,6 +61,7 @@ private:
 	GroundAssets * m_groundAsset;
 	PlantAssets * m_plantAsset;
 	FileAssets* m_files;
+	SpriteAssets* m_billboards;
 	QSplitter * m_split;
 	QScrollArea * m_rgtArea;
 	GlyphPalette * m_palette;

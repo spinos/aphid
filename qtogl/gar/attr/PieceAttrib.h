@@ -19,14 +19,7 @@ typedef std::vector<gar::Attrib* > AttribArrayTyp;
 	AttribArrayTyp m_collAttrs;
 	std::string m_glyphName;
 	
-public:
-	enum AttribType {
-		tUnknown = 0,
-		tString = 1,
-		tStringFileName = 2,
-		tFloat = 3
-	};
-	
+public:	
 	PieceAttrib();
 	virtual ~PieceAttrib();
 	
@@ -49,6 +42,8 @@ protected:
 		const float& val, 
 		const float& minVal = 0.f,
 		const float& maxVal = 1.f);
+		
+	void addSplineAttrib(gar::AttribName anm);
 		
 	void addStringAttrib(gar::AttribName anm,
 		const std::string& val,
