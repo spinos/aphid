@@ -52,6 +52,8 @@ private:
 	void lsGround();
 	void lsPlant();
 	void lsFile();
+	void lsSprite();
+	void lsVariant();
 	
 private:
 	QTreeWidget * m_assetTree;

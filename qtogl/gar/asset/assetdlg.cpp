@@ -48,6 +48,8 @@ AssetDlg::AssetDlg(QWidget *parent)
 	m_rgtArea->setWidget(m_palette);
 	lsGround();
 	lsPlant();
+	lsSprite();
+	lsVariant();
 	lsFile();
 }
 
@@ -79,4 +81,14 @@ void AssetDlg::closeEvent ( QCloseEvent * e )
 {
 	emit onAssetDlgClose();
 	QDialog::closeEvent(e);
+}
+
+void AssetDlg::lsSprite()
+{
+	
+}
+
+void AssetDlg::lsVariant()
+{
+	
 }

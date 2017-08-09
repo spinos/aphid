@@ -25,5 +25,9 @@
         <file>icons/import_geom.png</file>
         <file>icons/file.png</file>
         <file>icons/document_open.png</file>
+        <file>icons/splinesprite.png</file>
+        <file>icons/texturesprite.png</file>
+        <file>icons/variants.png</file>
+        <file>icons/bendtwistrollvariant.png</file>
     </qresource>
 </RCC>

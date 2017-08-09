@@ -35,7 +35,7 @@ static const char * FileTypeDescs[NUM_FILE_PIECES] = {
 };
 
 static inline int ToFileType(int x) {
-	return x - 64;
+	return x - 128;
 }
 
 static const int FileInPortRange[NUM_FILE_PIECES][2] = {
