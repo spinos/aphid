@@ -1,6 +1,8 @@
 /*
  *  PieceAttrib.h
+ *
  *  collection of attribs
+ *  update geom after any attrib changes
  *
  *  Created by jian zhang on 8/5/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -12,6 +14,10 @@
 
 #include "Attrib.h"
 #include <vector>
+
+namespace aphid {
+class ATriangleMesh;
+}
 
 class PieceAttrib {
 
@@ -29,9 +35,15 @@ public:
 	gar::Attrib* getAttrib(const int& i);
 	const gar::Attrib* getAttrib(const int& i) const;
 	gar::Attrib* findAttrib(gar::AttribName anm);
+	const gar::Attrib* findAttrib(gar::AttribName anm) const;
 	
-	static gar::AttribName IntAsAttribName(int x);
-	 
+	virtual bool hasGeom() const;
+	virtual int numGeomVariations() const;
+	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
+	virtual bool update();
+/// multi instance of different settings
+	virtual int attribInstanceId() const;
+	
 protected:
 	void addIntAttrib(gar::AttribName anm,
 		const int& val, 

@@ -8,7 +8,9 @@
 #include <QtOpenGL>
 #include <BaseCamera.h>
 #include <PerspectiveView.h>
+#include <geom/ATriangleMesh.h>
 #include "widget.h"
+#include "ShrubScene.h"
 #include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "DrawVegetation.h"
@@ -16,7 +18,8 @@
 
 using namespace aphid;
 
-GLWidget::GLWidget(Vegetation * vege, QWidget *parent) : Base3DView(parent),
+GLWidget::GLWidget(Vegetation * vege, ShrubScene* scene, QWidget *parent) : Base3DView(parent),
+m_viewState(gar::actViewAsset),
 m_dspState(gar::dsTriangle)
 {
 	perspCamera()->setFarClipPlane(30000.f);
@@ -26,6 +29,7 @@ m_dspState(gar::dsTriangle)
 	usePerspCamera();
 	resetView();
 	m_vege = vege;
+	m_scene = scene;
 	m_vegd = new DrawVegetation;
 }
 
@@ -38,6 +42,27 @@ void GLWidget::clientInit()
 {}
 
 void GLWidget::clientDraw()
+{
+	if(m_viewState == gar::actViewAsset) {
+		drawAsset();
+	} else {
+		drawSynthesis();
+	}
+}
+
+void GLWidget::drawAsset()
+{
+	const ATriangleMesh* msh = m_scene->lastSelectedGeom();
+	if(!msh)
+		return;
+		
+	getDrawer()->m_wireProfile.apply();
+	m_vegd->begin();
+	m_vegd->drawMesh(msh);
+	m_vegd->end();
+}
+
+void GLWidget::drawSynthesis()
 {
 	m_vegd->begin();
 	for(int i=0;i<m_vege->numPatches();++i) {
@@ -164,5 +189,11 @@ void GLWidget::recvToolAction(int x)
 void GLWidget::setDisplayState(int x)
 {
 	m_dspState = x;
+	update();
+}
+
+void GLWidget::setViewState(int x)
+{
+	m_viewState = x;
 	update();
 }

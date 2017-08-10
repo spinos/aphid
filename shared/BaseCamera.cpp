@@ -181,7 +181,7 @@ void BaseCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVe
 	origin.z = -m_nearClipPlane;
 	origin = fSpace.transform(origin);
 	
-	worldVec = fSpace.getFront() * -1.f;
+	worldVec = eyeDirection() * -1.f;
 	
 }
 
@@ -191,9 +191,10 @@ Vector3F BaseCamera::eyePosition() const
 }
 
 Vector3F BaseCamera::eyeDirection() const
-{
-	return Vector3F(fSpace.M(2, 0), fSpace.M(2, 1), fSpace.M(2, 2));
-}
+{ return fSpace.getFront(); }
+
+Vector3F BaseCamera::frameCenter() const
+{ return fSpace.transform(Vector3F(0.f, 0.f, -m_nearClipPlane) ); }
 
 float BaseCamera::getHorizontalAperture() const
 {

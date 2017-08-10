@@ -35,9 +35,15 @@ public:
 	void screenToWorldVector(int x, int y, Vector3F & worldVec) const;
 	virtual void screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const;
 /// origin on near clipping plane
+/// (x,y) is pixel location (0,0) is top-left 
 	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
+/// world position of space
 	Vector3F eyePosition() const;
+/// world direction +z of space pointing out of screen
 	Vector3F eyeDirection() const;
+/// center of focal plane at near clipping depth
+	Vector3F frameCenter() const;
+	
 /// width / height
 	float aspectRatio() const;
 	float nearClipPlane() const;

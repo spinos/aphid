@@ -9,23 +9,7 @@
 
 #include <qt/Base3DView.h>
 
-namespace aphid {
-
-namespace cvx {
-class Triangle;
-}
-
-namespace sdb {
-
-template<typename T>
-class VectorArray;
-
-}
-
-class ATriangleMesh;
-
-}
-
+class ShrubScene;
 class Vegetation;
 class VegetationPatch;
 class DrawVegetation;
@@ -36,10 +20,11 @@ class GLWidget : public aphid::Base3DView
 
 public:
 
-    GLWidget(Vegetation * vege, QWidget *parent = 0);
+    GLWidget(Vegetation * vege, ShrubScene* scene, QWidget *parent = 0);
     ~GLWidget();
 	
 	void setDisplayState(int x);
+	void setViewState(int x);
 	
 protected:    
     virtual void clientInit();
@@ -56,6 +41,8 @@ public slots:
 	void recvToolAction(int x);
 	
 private:
+	void drawAsset();
+    void drawSynthesis();
     void simpleDraw(VegetationPatch * vgp);
 	void geomDraw(VegetationPatch * vgp);
 	void pointDraw(VegetationPatch * vgp);
@@ -66,8 +53,10 @@ private:
 private slots:
 
 private:
+	ShrubScene* m_scene;
 	Vegetation * m_vege;
 	DrawVegetation * m_vegd;
+	int m_viewState;
 	int m_dspState;
 	
 };

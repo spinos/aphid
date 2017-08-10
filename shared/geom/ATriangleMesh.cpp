@@ -233,5 +233,30 @@ const Float2 * ATriangleMesh::triangleTexcoord(const int & idx) const
 float * ATriangleMesh::triangleTexcoords()
 { return (float *)m_texcoord.get(); }
 
+ATriangleMesh* ATriangleMesh::CreateFromData(const int& np,
+		const int& nt,
+		const int* triind,
+		const float * vertpos,
+		const float * vertnml,
+		const float * vertcol,
+		const float * tritexcoord)
+{
+	ATriangleMesh* msh = new ATriangleMesh;
+	msh->create(np, nt);
+	msh->createVertexColors(np);
+	unsigned * indDst = msh->indices();
+	memcpy(indDst, triind, nt * 12);
+	Vector3F * pntDst = msh->points();
+	memcpy(pntDst, vertpos, np * 12);
+	Vector3F * nmlDst = msh->vertexNormals();
+	memcpy(nmlDst, vertnml, np * 12);
+	float * colDst = msh->vertexColors();
+	memcpy(colDst, vertcol, np * 12);
+	float * texcoordDst = msh->triangleTexcoords();
+	memcpy(texcoordDst, tritexcoord, nt * 24);
+	
+	return msh;
+}
+
 }
 //:~

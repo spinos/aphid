@@ -46,7 +46,7 @@ void GridMesh::createGrid(int nu, int nv, float du, float dv)
 		bool isOdd = j & 1;
 		
 		for(int i=0;i<nu;++i) {
-			
+		
 			if(isOdd) 
 				addOddCell(ind, itri, i, j, nu1);
 			else
@@ -61,6 +61,15 @@ void GridMesh::createGrid(int nu, int nv, float du, float dv)
 	m_du = du;
 	m_dv = dv;
 	projectTexcoord();
+	
+	Vector3F * nmlDst = vertexNormals();
+	createVertexColors(np);
+	Vector3F * colDst = (Vector3F *)vertexColors();
+	for(int i=0;i<np;++i) {
+		nmlDst[i].set(0.f,0.f,1.f);
+		colDst[i].set(.1f,.7f,.4f);
+	}
+	
 }
 
 const int& GridMesh::nu() const
@@ -81,12 +90,13 @@ void GridMesh::addOddCell(unsigned* ind, int& tri,
 {
 	const int i1 = i + 1;
 	const int j1 = j + 1;
-	const int tri3 = tri * 3;
+	int tri3 = tri * 3;
 	ind[tri3    ] = j * nu1 + i;
 	ind[tri3 + 1] = j * nu1 + i1;
 	ind[tri3 + 2] = j1 * nu1 + i1;
 	tri++;
-	ind[tri3] = j * nu1 + i;
+	tri3 = tri * 3;
+	ind[tri3    ] = j * nu1 + i;
 	ind[tri3 + 1] = j1 * nu1 + i1;
 	ind[tri3 + 2] = j1 * nu1 + i;
 	tri++;
@@ -98,11 +108,12 @@ void GridMesh::addEvenCell(unsigned* ind, int& tri,
 {
 	const int i1 = i + 1;
 	const int j1 = j + 1;
-	const int tri3 = tri * 3;
+	int tri3 = tri * 3;
 	ind[tri3    ] = j * nu1 + i;
 	ind[tri3 + 1] = j * nu1 + i1;
 	ind[tri3 + 2] = j1 * nu1 + i;
 	tri++;
+	tri3 = tri * 3;
 	ind[tri3    ] = j * nu1 + i1;
 	ind[tri3 + 1] = j1 * nu1 + i1;
 	ind[tri3 + 2] = j1 * nu1 + i;
@@ -131,11 +142,12 @@ void GridMesh::projectTexcoord()
 	const int nt = numTriangles();
 	Vector3F * p = points();
 	unsigned * ind = indices();
-
+	
 	int acc=0;
 	for(int i=0;i<nt;++i) {
 		const int i3 = i * 3;
 		for(int j=0;j<3;++j) {
+			
 			const Vector3F& pj = p[ind[i3 + j] ];
 			texc[acc++] = .0025f + pj.x * sv;
 			texc[acc++] = .0025f + pj.y * sv;

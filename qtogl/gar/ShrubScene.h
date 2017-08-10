@@ -18,6 +18,7 @@ QT_END_NAMESPACE
 
 namespace aphid {
 class GlyphPort;
+class ATriangleMesh;
 }
 class GardenGlyph;
 class PlantPiece;
@@ -33,6 +34,8 @@ public:
 	virtual ~ShrubScene();
 	
 	GardenGlyph* lastSelectedGlyph();
+	const GardenGlyph* lastSelectedGlyph() const;
+	const aphid::ATriangleMesh* lastSelectedGeom() const;
 	void selectGlyph(GardenGlyph* gl);
 	void deselectGlyph();
 	
@@ -53,6 +56,7 @@ private:
 private:
 	Vegetation * m_vege;
 	QList<GardenGlyph *> m_selectedGlyph;
+	GardenGlyph* m_lastSelectedGlyph;
 	
 };
 #endif

@@ -20,18 +20,13 @@
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 #include "GrowthSample.h"
-#include "data/clover.h"
-#include "data/poapratensis.h"
-#include "data/haircap.h"
-#include "data/haircap.h"
-#include "data/hypericum.h"
 #include "attr/PieceAttrib.h"
 
-using namespace gar;
 using namespace aphid;
 
 ShrubScene::ShrubScene(Vegetation * vege, QObject *parent)
-    : QGraphicsScene(parent)
+    : QGraphicsScene(parent),
+m_lastSelectedGlyph(NULL)
 { m_vege = vege; }
 
 ShrubScene::~ShrubScene()
@@ -76,6 +71,7 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 	PlantPiece * pl1 = new PlantPiece(pl);
 	switch (gg) {
 		case gar::ggGrass:
+		case gar::ggSprite:
 			addGrassBranch(pl1, gl);
 		break;
 		default:
@@ -86,84 +82,16 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 
 void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 {
-	const int gt = gar::ToGrassType(gl->glyphType() );
-	const int ngeom = GrassGeomDeviations[gt];
+	PieceAttrib* attr = gl->attrib();
+	const int ngeom = attr->numGeomVariations();
+/// select randomly
 	const int r = rand() % ngeom;
+	float exclR = 1.f;
+	ATriangleMesh * msh = attr->selectGeom(r, exclR);
 	
-	int np = 0, nt = 0;
-	const int * triind;
-	const float * vertpos;
-	const float * vertnml;
-	const float * vertcol;
-	const float * tritexcoord;
-	float exclR;
-	switch (gl->glyphType() ) {
-		case gar::gtClover:
-			np = sCloverNumVertices;
-			nt = sCloverNumTriangleIndices / 3;
-			triind = sCloverMeshTriangleIndices;
-			vertpos = sCloverMeshVertices[r];
-			vertnml = sCloverMeshNormals[r];
-			exclR = sCloverExclRadius[r];
-			vertcol = sCloverMeshVertexColors[r];
-			tritexcoord = sCloverMeshTriangleTexcoords[r];
-		break;
-		case gar::gtPoapratensis:
-			np = sPoapratensisNumVertices;
-			nt = sPoapratensisNumTriangleIndices / 3;
-			triind = sPoapratensisMeshTriangleIndices;
-			vertpos = sPoapratensisMeshVertices[r];
-			vertnml = sPoapratensisMeshNormals[r];
-			exclR = sPoapratensisExclRadius[r];
-			vertcol = sPoapratensisMeshVertexColors[r];
-			tritexcoord = sPoapratensisMeshTriangleTexcoords[r];
-		break;
-		case gar::gtHaircap:
-			np = sHaircapNumVertices;
-			nt = sHaircapNumTriangleIndices / 3;
-			triind = sHaircapMeshTriangleIndices;
-			vertpos = sHaircapMeshVertices[r];
-			vertnml = sHaircapMeshNormals[r];
-			exclR = sHaircapExclRadius[r];
-			vertcol = sHaircapMeshVertexColors[r];
-			tritexcoord = sHaircapMeshTriangleTexcoords[r];
-		break;
-		case gar::gtHypericum:
-			np = sHypericumNumVertices;
-			nt = sHypericumNumTriangleIndices / 3;
-			triind = sHypericumMeshTriangleIndices;
-			vertpos = sHypericumMeshVertices[r];
-			vertnml = sHypericumMeshNormals[r];
-			exclR = sHypericumExclRadius[r];
-			vertcol = sHypericumMeshVertexColors[r];
-			tritexcoord = sHypericumMeshTriangleTexcoords[r];
-		break;
-		default:
-		;
-	}
+	const int kgeom = gar::GlyphTypeToGeomIdGroup(gl->glyphType() ) | gl->attribInstanceId() | r;
 	
-	if(np < 3) {
-		return;
-	}
-	
-	const int kgeom = (gl->glyphType()<<4) | r;
-	ATriangleMesh * msh = m_vege->findGeom(kgeom);
-	
-	if(!msh) {
-		msh = new ATriangleMesh;
-		msh->create(np, nt);
-		msh->createVertexColors(np);
-		unsigned * indDst = msh->indices();
-		memcpy(indDst, triind, nt * 12);
-		Vector3F * pntDst = msh->points();
-		memcpy(pntDst, vertpos, np * 12);
-		Vector3F * nmlDst = msh->vertexNormals();
-		memcpy(nmlDst, vertnml, np * 12);
-		float * colDst = msh->vertexColors();
-		memcpy(colDst, vertcol, np * 12);
-		float * texcoordDst = msh->triangleTexcoords();
-		memcpy(texcoordDst, tritexcoord, nt * 24);
-		
+	if(!m_vege->findGeom(kgeom)) {
 		m_vege->addGeom(kgeom, msh);
 	}
 	
@@ -211,7 +139,7 @@ GardenGlyph * ShrubScene::getGround()
 		if(its_->type() == GardenGlyph::Type) {
 			GardenGlyph *g = (GardenGlyph*) its_;
 		
-			if(g->glyphType() == gtPot) {
+			if(g->glyphType() == gar::gtPot) {
 			    if(m_selectedGlyph.contains(g) ) {
 				std::cout<<"\n INFO grow by pot";
 				return g;
@@ -221,7 +149,7 @@ GardenGlyph * ShrubScene::getGround()
 				}
 			}
 			
-			if(g->glyphType() == gtBush) {
+			if(g->glyphType() == gar::gtBush) {
 			    if(m_selectedGlyph.contains(g) ) {
 				std::cout<<"\n INFO grow by bush";
 				return g;
@@ -276,12 +204,12 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	GrowthSample gsmp;
 	
 	switch (gnd->glyphType()) {
-		case gtPot:
+		case gar::gtPot:
 			prof.m_portion = .43f;
 			prof.m_angle = -1.f;
 			gsmp.samplePot(prof);
 			break;
-		case gtBush:
+		case gar::gtBush:
 			prof.m_portion = .34f;
 			prof.m_angle = .41f;
 			gsmp.sampleBush(prof);
@@ -303,7 +231,11 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 }
 
 void ShrubScene::selectGlyph(GardenGlyph* gl)
-{ m_selectedGlyph<<gl; }
+{
+	if(!m_selectedGlyph.contains(gl) )
+		m_selectedGlyph<<gl; 
+	m_lastSelectedGlyph = gl;
+}
 
 void ShrubScene::deselectGlyph()
 {
@@ -311,7 +243,23 @@ void ShrubScene::deselectGlyph()
 		gl->hideHalo();
 	}
 	m_selectedGlyph.clear();
+	m_lastSelectedGlyph = NULL;
 }
 
 GardenGlyph* ShrubScene::lastSelectedGlyph()
-{ return m_selectedGlyph.back(); }
+{ return m_lastSelectedGlyph; }
+
+const GardenGlyph* ShrubScene::lastSelectedGlyph() const
+{ return m_lastSelectedGlyph; }
+
+const ATriangleMesh* ShrubScene::lastSelectedGeom() const
+{
+	if(!m_lastSelectedGlyph) 
+		return NULL;
+	PieceAttrib* attr = m_lastSelectedGlyph->attrib();
+	if(!attr->hasGeom())
+		return NULL;
+	float r;
+/// first geom
+	return attr->selectGeom(0, r);
+}

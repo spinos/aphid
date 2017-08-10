@@ -35,13 +35,13 @@ SplineMap1D* SplineBillboard::rightSpline()
 
 void SplineBillboard::adjustLeft()
 {
-	const float hw = .47f * width();
+	const float hw = .5f * width();
 	const float dv = 1.f / (float)nv();
 	Vector3F * p = points();
 	
 	for(int i=0;i<=nv();++i) {
 		float d = m_leftSpline.interpolate(dv * i);
-		Clamp01(d);
+		if(d < .05f) d = .05f;
 		
 		p[i * 2].x = -d * hw;
 	}
@@ -51,13 +51,13 @@ void SplineBillboard::adjustLeft()
 
 void SplineBillboard::adjustRight()
 {
-	const float hw = .47f * width();
+	const float hw = .5f * width();
 	const float dv = 1.f / (float)nv();
 	Vector3F * p = points();
 	
 	for(int i=0;i<=nv();++i) {
 		float d = m_rightSpline.interpolate(dv * i);
-		Clamp01(d);
+		if(d < .05f) d = .05f;
 		
 		p[1 + i * 2].x = d * hw;
 	}

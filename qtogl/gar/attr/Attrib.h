@@ -24,6 +24,9 @@ enum AttribName {
 	nHeight,
 	nLeftSide,
 	nRightSide,
+	nBend,
+	nTwist,
+	nRoll
 };
 
 enum AttribType {
@@ -81,6 +84,8 @@ public:
 	
 	bool isStringType() const;
 	const char* attrNameStr() const;
+	
+	static gar::AttribName IntAsAttribName(int x);
 	
 };
 

@@ -103,11 +103,58 @@ static const char* sAttribNameAsStr[] = {
 "width",
 "height",
 "left side",
-"right side"
+"right side",
+"bend",
+"twist",
+"roll"
 };
 
 const char* Attrib::attrNameStr() const
 { return sAttribNameAsStr[m_anm]; }
+
+gar::AttribName Attrib::IntAsAttribName(int x)
+{
+	gar::AttribName r = gar::nUnknown;
+	switch (x) {
+		case gar::nGrowMargin :
+			r = gar::nGrowMargin;
+		break;
+		case gar::nGrowAngle :
+			r = gar::nGrowAngle;
+		break;
+		case gar::nZenithNoise :
+			r = gar::nZenithNoise;
+		break;
+		case gar::nFileName :
+			r = gar::nFileName;
+		break;
+		case gar::nWidth :
+			r = gar::nWidth;
+		break;
+		case gar::nHeight :
+			r = gar::nHeight;
+		break;
+		case gar::nLeftSide :
+			r = gar::nLeftSide;
+		break;
+		case gar::nRightSide :
+			r = gar::nRightSide;
+		break;
+		case gar::nBend :
+			r = gar::nBend;
+		break;
+		case gar::nTwist :
+			r = gar::nTwist;
+		break;
+		case gar::nRoll :
+			r = gar::nRoll;
+		break;
+		default:
+			;
+	}
+	return r;
+}
+
 
 SplineAttrib::SplineAttrib(AttribName anm) : Attrib(anm, tSpline)
 {

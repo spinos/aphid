@@ -31,12 +31,12 @@ public:
 	void drawDopPatch(const VegetationPatch * vgp);
 	void drawVoxelPatch(const VegetationPatch * vgp);
 	void drawPlant(const PlantPiece * pl);
+	void drawMesh(const aphid::ATriangleMesh * geo);
 	
 protected:
 
 private:
 	void drawPiece(const PlantPiece * pl);
-	void drawMesh(const aphid::ATriangleMesh * geo);
 	
 };
 

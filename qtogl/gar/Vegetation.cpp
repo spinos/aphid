@@ -14,6 +14,7 @@
 #include <geom/ConvexShape.h>
 #include "gar_common.h"
 #include "data/grass.h"
+#include "data/billboard.h"
 #include <boost/format.hpp>
 #include <iomanip>
 #include <cmath>
@@ -128,7 +129,7 @@ ATriangleMesh * Vegetation::findGeom(const int & k)
 void Vegetation::addGeom(const int & k, ATriangleMesh * v)
 { m_cachedGeom[k] = v; }
 
-int Vegetation::getGeomInd(aphid::ATriangleMesh * x)
+int Vegetation::getGeomInd(ATriangleMesh * x)
 {
 	int i = 0;
 	std::map<int, GeomPtrTyp >::iterator it = m_cachedGeom.begin();
@@ -170,7 +171,7 @@ void Vegetation::geomNext(std::string & mshName, Vegetation::GeomPtrTyp & mshVal
 
 std::string Vegetation::getGeomName(const int & k)
 {
-	const int gt = k>>4;
+	const int gt = gar::GeomIdToGlyphType(k);
 	const int gg = gar::ToGroupType(gt );
 	int geomt;
 	std::string geoms;
@@ -179,10 +180,16 @@ std::string Vegetation::getGeomName(const int & k)
 			geomt = gar::ToGrassType(gt );
 			geoms = gar::GrassTypeNames[geomt];
 		break;
+		case gar::ggSprite:
+			geomt = gar::ToBillboardType(gt );
+			geoms = gar::BillboardTypeNames[geomt];
+		break;
 		default:
 		;
 	}
-	return str(boost::format("inst_%1%_%2%_%3%") % boost::io::group(std::setw(3), std::setfill('0'), m_curGeomId) % geoms % (k & 15));
+	return str(boost::format("inst_%1%_%2%_%3%") % boost::io::group(std::setw(4), std::setfill('0'), m_curGeomId) 
+		% geoms 
+		% gar::GeomIdInGlyphGroup(k) );
 }
 
 void Vegetation::voxelize()

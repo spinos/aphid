@@ -53,6 +53,14 @@ public:
 	template<typename T>
 	void dumpComponent(T & acomp, const int & i,
 					const Matrix44F & tm) const;
+					
+	static ATriangleMesh* CreateFromData(const int& np,
+		const int& nt,
+		const int* triind,
+		const float * vertpos,
+		const float * vertnml,
+		const float * vertcol,
+		const float * tritexcoord);
 	
 protected:
 	

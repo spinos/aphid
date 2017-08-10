@@ -46,6 +46,7 @@ private:
 	PieceAttrib* buildFileAttrib(const int & gtyp);
 	PieceAttrib* buildSpriteAttrib(const int & gtyp);
 	PieceAttrib* buildVariantAttrib(const int & gtyp);
+	PieceAttrib* buildGrassAttrib(const int & gtyp);
 	
 };
 #endif

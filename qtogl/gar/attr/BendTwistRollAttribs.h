@@ -1,5 +1,5 @@
 /*
- *  SplineSpriteAttribs.h
+ *  BendTwistRollAttribs.h
  *  
  *
  *  Created by jian zhang on 8/6/17.
@@ -7,29 +7,26 @@
  *
  */
 
-#ifndef GAR_SPLINE_SPRITE_ATTRIBS_H
-#define GAR_SPLINE_SPRITE_ATTRIBS_H
+#ifndef GAR_BEND_TWIST_ROLL_ATTRIBS_H
+#define GAR_BEND_TWIST_ROLL_ATTRIBS_H
 
 #include "PieceAttrib.h"
 
-namespace aphid {
-class SplineBillboard;
-}
+class BendTwistRollAttribs : public PieceAttrib {
 
-class SplineSpriteAttribs : public PieceAttrib {
-	
-	aphid::SplineBillboard* m_billboard;
-	int m_instId;
-	
-	static int sNumInstances;
+	aphid::ATriangleMesh* m_inGeom;
+	aphid::ATriangleMesh* m_outGeom[64];
 	
 public:
-	SplineSpriteAttribs();
+	BendTwistRollAttribs();
+	
+	void setInputGeom(aphid::ATriangleMesh* x);
 	
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
 	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
 	virtual bool update();
+/// multi instance of different settings
 	virtual int attribInstanceId() const;
 	
 };

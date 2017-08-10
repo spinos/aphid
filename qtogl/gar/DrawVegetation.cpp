@@ -100,6 +100,7 @@ void DrawVegetation::drawMesh(const ATriangleMesh * geo)
 		return;
 	}
 	
+	glColorPointer(3, GL_FLOAT, 0, (const GLfloat*)geo->vertexColors() );
 	glNormalPointer(GL_FLOAT, 0, (const GLfloat*)geo->vertexNormals() );
 	glVertexPointer(3, GL_FLOAT, 0, (const GLfloat*)geo->points() );
 	glDrawElements(GL_TRIANGLES, geo->numIndices(), GL_UNSIGNED_INT, geo->indices() );

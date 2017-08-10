@@ -13,7 +13,7 @@
 namespace gar {
 
 enum ToolAction {
-	actViewGraph = 0,
+	actViewAsset = 0,
 	actViewPlant = 1,
 	actViewTurf = 2
 };
@@ -74,6 +74,16 @@ static inline void GenGlyphName(char* b)
         b[15-z] = sdecihexchart[(nid>>(z<<1)) & 15];
     }
 }
+
+/// up to 1024 instances of glyph with 1024 geom per glyph
+static inline int GlyphTypeToGeomIdGroup(int gt)
+{ return gt<<20; }
+
+static inline int GeomIdToGlyphType(int gi)
+{ return gi>>20; }
+
+static inline int GeomIdInGlyphGroup(int gi)
+{ return gi & 1048575; }
 
 }
 #endif

@@ -24,8 +24,8 @@ BillboardMesh::~BillboardMesh()
 void BillboardMesh::setBillboardSize(float w, float h)
 {
 	int nu = 1;
-	int nv = h / w;
-	if(nv < 2) nv = 2;
+	int nv = 3 + h / w;
+	
 	float dv = h / (float)nv; 
 	
 	createGrid(nu, nv, w, dv);

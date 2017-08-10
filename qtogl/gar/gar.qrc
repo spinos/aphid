@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+	<file>icons/leaf.png</file>
         <file>icons/plant.png</file>
         <file>icons/grass.png</file>
         <file>icons/clover.png</file>

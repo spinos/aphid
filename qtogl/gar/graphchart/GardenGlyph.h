@@ -1,8 +1,7 @@
 /*
  *  GardenGlyph.h
- *  garden
  *
- *  top level item
+ *  top level item holds instance of attribs
  *
  *  Created by jian zhang on 3/31/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -41,6 +40,7 @@ public:
 			
 	void setAttrib(PieceAttrib * attrib);
 	PieceAttrib * attrib();
+	int attribInstanceId() const;
 	
 	aphid::GlyphPort * addPort(const QString & name, 
 							bool isOutgoing);

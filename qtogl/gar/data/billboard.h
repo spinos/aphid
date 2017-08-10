@@ -16,7 +16,7 @@ namespace gar {
 
 static const char * BillboardTypeNames[NUM_BILLBOARD_PIECES] = {
 "unknown",
-"Spline Patch"
+"SplinePatch"
 };
 
 static const char * BillboardTypeImages[NUM_BILLBOARD_PIECES] = {

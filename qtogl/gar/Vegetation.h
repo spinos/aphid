@@ -73,6 +73,7 @@ protected:
 
 private:
 	void clearCachedGeom();
+/// compose name of current geom
 	std::string getGeomName(const int & k);
 	void voxelize(VegetationPatch * ap);
 	

@@ -89,36 +89,27 @@ gar::Attrib* PieceAttrib::findAttrib(gar::AttribName anm)
 	return NULL;
 }
 
-gar::AttribName PieceAttrib::IntAsAttribName(int x)
+const gar::Attrib* PieceAttrib::findAttrib(gar::AttribName anm) const
 {
-	gar::AttribName r = gar::nUnknown;
-	switch (x) {
-		case gar::nGrowMargin :
-			r = gar::nGrowMargin;
-		break;
-		case gar::nGrowAngle :
-			r = gar::nGrowAngle;
-		break;
-		case gar::nZenithNoise :
-			r = gar::nZenithNoise;
-		break;
-		case gar::nFileName :
-			r = gar::nFileName;
-		break;
-		case gar::nWidth :
-			r = gar::nWidth;
-		break;
-		case gar::nHeight :
-			r = gar::nHeight;
-		break;
-		case gar::nLeftSide :
-			r = gar::nLeftSide;
-		break;
-		case gar::nRightSide :
-			r = gar::nRightSide;
-		break;
-		default:
-			;
+	AttribArrayTyp::const_iterator it = m_collAttrs.begin();
+	for(;it!=m_collAttrs.end();++it) {
+		if( (*it)->attrName() == anm)
+			return *it;
 	}
-	return r;
+	return NULL;
 }
+
+bool PieceAttrib::hasGeom() const
+{ return false; }
+	
+int PieceAttrib::numGeomVariations() const
+{ return 0; }
+
+aphid::ATriangleMesh* PieceAttrib::selectGeom(int x, float& exclR) const
+{ return NULL; }
+
+bool PieceAttrib::update()
+{ return false; }
+
+int PieceAttrib::attribInstanceId() const
+{ return 0; }

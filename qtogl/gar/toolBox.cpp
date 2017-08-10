@@ -78,6 +78,11 @@ void ToolBox::createContext()
 
 void ToolBox::createAction()
 {	
+	ActionIconFrame * leafview = new ActionIconFrame(this);
+	leafview->addIconFile(":/icons/leaf.png");
+	leafview->setIconIndex(0);
+	leafview->setAction(gar::actViewAsset);
+	
     ActionIconFrame * plantview = new ActionIconFrame(this);
 	plantview->addIconFile(":/icons/plant.png");
 	plantview->setIconIndex(0);
@@ -88,6 +93,7 @@ void ToolBox::createAction()
 	turfview->setIconIndex(0);
 	turfview->setAction(gar::actViewTurf);
 	
+	m_actionFrames.push_back(leafview);
 	m_actionFrames.push_back(plantview);
 	m_actionFrames.push_back(turfview);
 }

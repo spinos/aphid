@@ -19,6 +19,11 @@
 #include <attr/BushAttribs.h>
 #include <attr/ImportGeomAttribs.h>
 #include <attr/SplineSpriteAttribs.h>
+#include <attr/CloverProp.h>
+#include <attr/PoapratensisProp.h>
+#include <attr/HaircapProp.h>
+#include <attr/HypericumProp.h>
+#include <attr/BendTwistRollAttribs.h>
 #include <QString>
 #include <iostream>
 
@@ -76,10 +81,27 @@ PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
 		case gar::ggVariant:
 			res = buildVariantAttrib(gtyp);
 		break;
+		case gar::ggGrass:
+			res = buildGrassAttrib(gtyp);
+		break;
 		default:
 			res = new PieceAttrib;
 	}
 	return res;
+}
+
+PieceAttrib* GlyphBuilder::buildGrassAttrib(const int & gtyp)
+{
+	if(gtyp == gar::gtClover)
+		return (new CloverProp);
+	if(gtyp == gar::gtPoapratensis)
+		return (new PoapratensisProp);
+	if(gtyp == gar::gtHaircap)
+		return (new HaircapProp);
+	if(gtyp == gar::gtHypericum)
+		return (new HypericumProp);
+		
+	return (new PieceAttrib);
 }
 
 PieceAttrib* GlyphBuilder::buildGroundAttrib(const int & gtyp)
@@ -108,6 +130,9 @@ PieceAttrib* GlyphBuilder::buildSpriteAttrib(const int & gtyp)
 
 PieceAttrib* GlyphBuilder::buildVariantAttrib(const int & gtyp)
 {
+	if(gtyp == gar::gtBendTwistRollVariant)
+		return (new BendTwistRollAttribs);
+		
 	return (new PieceAttrib);
 }
 

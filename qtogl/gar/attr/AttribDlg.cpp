@@ -26,7 +26,7 @@ using namespace aphid;
 
 AttribDlg::AttribDlg(ShrubScene* scene, QWidget *parent) : QDialog(parent)
 {
-	m_attribs = NULL;
+	m_selectedGlyph = NULL;
 	m_scene = scene;
 	setWindowTitle(tr("Attributes") );
 	
@@ -45,13 +45,19 @@ void AttribDlg::closeEvent ( QCloseEvent * e )
 
 void AttribDlg::recvSelectGlyph(bool x)
 {
-	clearAttribs();
 	if(x) {
 		GardenGlyph* g = m_scene->lastSelectedGlyph();
+		if(g == m_selectedGlyph) {
+			return;
+		}
+		m_selectedGlyph = g;
+		clearAttribs();
 		setWindowTitle(tr("Attributes: %1").arg(g->glyphName().c_str() ) );
 		lsAttribs(g);
 			
 	} else {
+		m_selectedGlyph = NULL;
+		clearAttribs();
 		setWindowTitle(tr("Attributes") );
 	}
 }
@@ -120,7 +126,6 @@ void AttribDlg::lsAdded(GardenGlyph* g)
 		gar::Attrib* ati = att->getAttrib(i);
 		lsAttr(ati);
 	}
-	m_attribs = att;
 }
 
 void AttribDlg::lsAttr(gar::Attrib* attr)
@@ -210,30 +215,49 @@ QWidget* AttribDlg::shoSplineAttr(gar::Attrib* attr)
 
 void AttribDlg::recvDoubleValue(QPair<int, double> x)
 {
-	gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(x.first) );	
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
 	if(!dst) {
 		qDebug()<<" AttribDlg::recvDoubleValue cannot find float attr "
 			<<x.first;
 		return;
 	}
 	dst->setValue((float)x.second);
+	updateSelectedGlyph();
 }
 
 void AttribDlg::recvStringValue(QPair<int, QString> x)
 {
-    gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(x.first) );	
-	if(!dst) {
-		qDebug()<<" AttribDlg::recvDoubleValue cannot find string attr "
-			<<x.first;
+	gar::StringAttrib* sattr = findStringAttr(x.first);
+	if(!sattr) 
 		return;
-	}
-	gar::StringAttrib* sattr = static_cast<gar::StringAttrib*> (dst);
 	sattr->setValue(x.second.toStdString() );
+	updateSelectedGlyph();
+}
+
+gar::StringAttrib* AttribDlg::findStringAttr(int i)
+{
+	if(!m_selectedGlyph) 
+		return NULL;
+		
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
+	if(!dst) {
+		qDebug()<<" AttribDlg cannot find string attr "
+			<<i;
+		return NULL;
+	}
+	
+	return static_cast<gar::StringAttrib*> (dst);
 }
 
 gar::SplineAttrib* AttribDlg::findSplineAttr(int i)
 {
-	gar::Attrib* dst = m_attribs->findAttrib(PieceAttrib::IntAsAttribName(i) );	
+	if(!m_selectedGlyph) 
+		return NULL;
+		
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
 	if(!dst) {
 		qDebug()<<" AttribDlg cannot find spline attr "
 			<<i;
@@ -254,6 +278,7 @@ void AttribDlg::recvSplineValue(QPair<int, QPointF> x)
 	tmp[0] = p.x();
 	tmp[1] = p.y();
 	sattr->setSplineValue(tmp[0], tmp[1] );
+	updateSelectedGlyph();
 }
 	
 void AttribDlg::recvSplineCv0(QPair<int, QPointF> x)
@@ -267,6 +292,7 @@ void AttribDlg::recvSplineCv0(QPair<int, QPointF> x)
 	tmp[0] = p.x();
 	tmp[1] = p.y();
 	sattr->setSplineCv0(tmp[0], tmp[1]);
+	updateSelectedGlyph();
 }
 	
 void AttribDlg::recvSplineCv1(QPair<int, QPointF> x)
@@ -280,4 +306,15 @@ void AttribDlg::recvSplineCv1(QPair<int, QPointF> x)
 	tmp[0] = p.x();
 	tmp[1] = p.y();
 	sattr->setSplineCv1(tmp[0], tmp[1]);
+	updateSelectedGlyph();
+}
+
+void AttribDlg::updateSelectedGlyph()
+{
+	if(!m_selectedGlyph) 
+		return;
+		
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	if(att->update())
+		emit sendAttribChanged();
 }

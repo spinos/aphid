@@ -26,10 +26,9 @@ class GardenGlyph;
 
 namespace gar {
 class Attrib;
+class StringAttrib;
 class SplineAttrib;
 }
-
-class PieceAttrib;
 
 class AttribDlg : public QDialog
 {
@@ -43,6 +42,7 @@ protected:
 
 signals:
 	void onAttribDlgClose();
+	void sendAttribChanged();
 		
 public slots:
 /// on select glyph
@@ -66,14 +66,16 @@ private:
 	QWidget* shoFltAttr(gar::Attrib* attr);
 	QWidget* shoStrAttr(gar::Attrib* attr);
 	QWidget* shoSplineAttr(gar::Attrib* attr);
+	gar::StringAttrib* findStringAttr(int i);
 	gar::SplineAttrib* findSplineAttr(int i);
+	void updateSelectedGlyph();
 
 private:
 	ShrubScene* m_scene;
+	GardenGlyph* m_selectedGlyph;
 	QVBoxLayout *mainLayout;
 	QSpacerItem* m_lastStretch;
     QQueue<QWidget *> m_collWigs;
-	PieceAttrib * m_attribs;
 	
 };
 

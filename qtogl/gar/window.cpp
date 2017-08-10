@@ -22,7 +22,6 @@ Window::Window()
 {
 	m_vege = new Vegetation;
 	m_vege->setSynthByAngleAlign();
-	glWidget = new GLWidget(m_vege, this);
 	m_tools = new ToolBox(this);
 	m_assets = new AssetDlg(this);
 	
@@ -30,6 +29,7 @@ Window::Window()
 	m_chartView = new ShrubChartView(m_scene);
 	m_chart = new ChartDlg(m_chartView, this);
 	m_attrib = new AttribDlg(m_scene, this);
+	glWidget = new GLWidget(m_vege, m_scene, this);
 	
 	addToolBar(m_tools);
 	
@@ -56,6 +56,12 @@ Window::Window()
 			
 	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
 			m_attrib, SLOT(recvSelectGlyph(bool)));
+			
+	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
+			glWidget, SLOT(update()));
+			
+	connect(m_attrib, SIGNAL(sendAttribChanged()), 
+			glWidget, SLOT(update()));
 }
 
 Window::~Window()
@@ -146,7 +152,8 @@ void Window::recvToolAction(int x)
 		case gar::actViewTurf:
 			multiSynth();
 		break;
-		case gar::actViewGraph:
+		case gar::actViewAsset:
+		glWidget->setViewState(gar::actViewAsset);
 		break;
 	}
 }
@@ -154,13 +161,13 @@ void Window::recvToolAction(int x)
 void Window::singleSynth()
 {
 	m_scene->genSinglePlant();
-	glWidget->update();
+	glWidget->setViewState(gar::actViewPlant);
 }
 
 void Window::multiSynth()
 {
 	m_scene->genMultiPlant();
-	glWidget->update();
+	glWidget->setViewState(gar::actViewTurf);
 }
 
 void Window::showDlgs()

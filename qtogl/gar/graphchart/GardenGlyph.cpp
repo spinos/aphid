@@ -172,3 +172,6 @@ PieceAttrib * GardenGlyph::attrib()
 
 const std::string& GardenGlyph::glyphName() const
 { return m_attrib->glyphName(); }
+
+int GardenGlyph::attribInstanceId() const
+{ return m_attrib->attribInstanceId(); }
