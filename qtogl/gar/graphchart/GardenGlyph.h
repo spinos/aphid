@@ -61,6 +61,8 @@ public:
 	QPointF localCenter() const;
 	const std::string& glyphName() const;
 	
+	void postConnection(GardenGlyph* another);
+	
 protected:
 	void resizeBlock(int bx, int by);
 	virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );

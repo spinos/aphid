@@ -16,6 +16,8 @@ class BendTwistRollAttribs : public PieceAttrib {
 
 	aphid::ATriangleMesh* m_inGeom;
 	aphid::ATriangleMesh* m_outGeom[64];
+	int m_instId;
+	static int sNumInstances;
 	
 public:
 	BendTwistRollAttribs();
@@ -28,7 +30,8 @@ public:
 	virtual bool update();
 /// multi instance of different settings
 	virtual int attribInstanceId() const;
-	
+/// recv input geom
+	virtual void connectTo(PieceAttrib* another);
 };
 
 #endif

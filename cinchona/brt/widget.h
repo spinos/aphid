@@ -1,7 +1,7 @@
 #ifndef BRT_WIDGET_H
 #define BRT_WIDGET_H
 
-#include <Base3DView.h>
+#include <qt/Base3DView.h>
 #include <math/ATypes.h>
 
 namespace aphid {

@@ -44,7 +44,7 @@ void GLWidget::clientDraw()
 	meye.setFrontOrientation(veye );
 	meye.glMatrix(m);
 
-	m_roth->draw(m);
+	m_roth->draw(&meye);
 
 	getDrawer()->m_surfaceProfile.apply();
 	

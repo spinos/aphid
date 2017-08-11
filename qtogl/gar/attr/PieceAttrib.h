@@ -43,6 +43,8 @@ public:
 	virtual bool update();
 /// multi instance of different settings
 	virtual int attribInstanceId() const;
+/// set upstream
+	virtual void connectTo(PieceAttrib* another);
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,

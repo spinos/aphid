@@ -11,8 +11,8 @@
 
 #include "ShrubChartView.h"
 #include "GardenGlyph.h"
+#include "GardenConnection.h"
 #include <qt/GlyphPort.h>
-#include <qt/GlyphConnection.h>
 #include <qt/GlyphHalo.h>
 #include "gar_common.h"
 #include "GlyphBuilder.h"
@@ -99,8 +99,21 @@ void ShrubChartView::mouseReleaseEvent(QMouseEvent *event)
 			QPointF pf = item->scenePos();
 			m_selectedConnection->setPos1(pf );
 			GlyphPort * pt = (GlyphPort *)item;
-			m_selectedConnection->setPort1(pt);
-			m_selectedConnection->updatePath();
+			if(m_selectedConnection->canConnectTo(pt) ) {
+			    m_selectedConnection->setPort1(pt);
+			    m_selectedConnection->updatePath();
+			    
+			    GardenGlyph * srcNode = m_selectedConnection->node0();
+			    GardenGlyph * destNode = m_selectedConnection->node1();
+			    destNode->postConnection(srcNode);
+			    //qDebug()<<" made connection "<<m_selectedConnection->port0()->portName()
+			    //    <<" -> "<<pt->portName();
+			        
+			} else {
+			    
+			    //qDebug()<<" rejects connection "<<m_selectedConnection->port0()->parentItem()
+			    //<<" -> "<<pt->parentItem();
+			}
 		}
 		
 		if(!m_selectedConnection->isComplete() ) {
@@ -193,7 +206,7 @@ void ShrubChartView::processSelect(const QPoint & pos)
 	if (item) {
          if(isOutgoingPort(item) ) {
 			m_mode = mConnectItems;
-			m_selectedConnection = new GlyphConnection();
+			m_selectedConnection = new GardenConnection;
 			m_selectedConnection->setPos0(item->scenePos() );
 			
 			GlyphPort * pt = (GlyphPort *)item;

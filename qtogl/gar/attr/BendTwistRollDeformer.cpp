@@ -1,41 +1,38 @@
 /*
- *  FeatherDeformer.cpp
+ *  BendTwistRollDeformer.cpp
  *  
+ *  bend effect > twist effect > roll
  *
- *  Created by jian zhang on 1/5/17.
+ *  Created by jian zhang on 8/10/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "FeatherDeformer.h"
-#include "FeatherMesh.h"
+#include "BendTwistRollDeformer.h"
+#include "geom/ATriangleMesh.h"
 #include <math/Matrix44F.h>
 #include <geom/ConvexShape.h>
 
 using namespace aphid;
 
-FeatherDeformer::FeatherDeformer(const FeatherMesh * mesh)
+BendTwistRollDeformer::BendTwistRollDeformer(const ATriangleMesh * mesh)
 { 
 	m_mesh = mesh; 
 	m_points.reset(new Vector3F[mesh->numPoints() ]);
 	m_normals.reset(new Vector3F[mesh->numPoints() ]);
-	m_leadingEdgePoints.reset(new Vector3F[mesh->numLeadingEdgeVertices() ]);
 	m_warpAngle[0] = m_warpAngle[1] = 0.f;
 }
 
-FeatherDeformer::~FeatherDeformer()
+BendTwistRollDeformer::~BendTwistRollDeformer()
 {}
 
-const Vector3F * FeatherDeformer::deformedPoints() const
+const Vector3F * BendTwistRollDeformer::deformedPoints() const
 { return m_points.get(); }
 
-const Vector3F * FeatherDeformer::deformedNormals() const
+const Vector3F * BendTwistRollDeformer::deformedNormals() const
 { return m_normals.get(); }
 
-const Vector3F * FeatherDeformer::deformedLeadingEdgePoints() const
-{ return m_leadingEdgePoints.get(); }
-
-void FeatherDeformer::deform(const Matrix33F & mat)
+void BendTwistRollDeformer::deform(const Matrix33F & mat)
 {
 	memcpy( m_points.get(), m_mesh->points(), m_mesh->numPoints() * 12 );
 	
@@ -91,15 +88,9 @@ void FeatherDeformer::deform(const Matrix33F & mat)
 		
 	}
 	
-/// update leading edge
-	const int & nev = m_mesh->numLeadingEdgeVertices();
-	const int * eind = m_mesh->leadingEdgeIndices();
-	for(int i=0;i<nev;++i) {
-		m_leadingEdgePoints[i] = m_points[eind[i]];
-	}
 }
 
-void FeatherDeformer::calculateNormal()
+void BendTwistRollDeformer::calculateNormal()
 {
 	const int nv = m_mesh->numPoints();
 	std::memset(m_normals.get(), 0, nv * 12);
@@ -133,7 +124,7 @@ void FeatherDeformer::calculateNormal()
 
 }
 
-void FeatherDeformer::setWarpAngles(const float * v)
+void BendTwistRollDeformer::setWarpAngles(const float * v)
 { 
 	m_warpAngle[0] = v[1];
 	m_warpAngle[1] = v[0] - v[1];

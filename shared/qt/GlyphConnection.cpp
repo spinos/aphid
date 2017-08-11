@@ -100,4 +100,7 @@ const GlyphPort * GlyphConnection::port0() const
 const GlyphPort * GlyphConnection::port1() const
 { return m_port1; }
 
+bool GlyphConnection::canConnectTo(GlyphPort* p1) const
+{ return true; }
+
 }

@@ -19,9 +19,7 @@ class QPixmap;
 class QPoint;
 QT_END_NAMESPACE
 
-namespace aphid {
-class GlyphConnection;
-}
+class GardenConnection;
 
 class ShrubChartView : public QGraphicsView
 {
@@ -64,7 +62,7 @@ private:
 	
 	Mode m_mode;
 	QGraphicsItem * m_selectedItem;
-	aphid::GlyphConnection * m_selectedConnection;
+	GardenConnection * m_selectedConnection;
 	QPoint m_lastMosePos;
 /// changed after pan
 	QPoint m_sceneOrigin;

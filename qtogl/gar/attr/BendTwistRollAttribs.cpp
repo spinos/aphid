@@ -12,9 +12,14 @@
 
 using namespace aphid;
 
+int BendTwistRollAttribs::sNumInstances = 0;
+
 BendTwistRollAttribs::BendTwistRollAttribs() :
 m_inGeom(NULL)
 {
+    m_instId = sNumInstances;
+	sNumInstances++;
+	
 	addFloatAttrib(gar::nBend, 1.f, 0.f, 1.f);
 	addFloatAttrib(gar::nTwist, 0.5f, 0.f, 1.f);
 	addFloatAttrib(gar::nRoll, 0.2f, 0.f, 1.f);
@@ -36,8 +41,24 @@ ATriangleMesh* BendTwistRollAttribs::selectGeom(int x, float& exclR) const
 
 bool BendTwistRollAttribs::update()
 {
-	return false;
+    std::cout<<"\n BendTwistRollAttribs::update ";
+        std::cout.flush();
+    m_outGeom[0] = m_inGeom;
+	return true;
 }
 
 int BendTwistRollAttribs::attribInstanceId() const
-{ return 0; }
+{ return m_instId; }
+
+void BendTwistRollAttribs::connectTo(PieceAttrib* another)
+{
+    if(!another->hasGeom()) {
+        std::cout<<"\n ERROR BendTwistRollAttribs cannot connect input geom ";
+        m_inGeom = NULL;  
+        return;
+    }
+    
+    float r;
+    m_inGeom = another->selectGeom(0, r);
+    update();
+}

@@ -1,9 +1,9 @@
-set (BRT_HEADER_FILES ${APHID_DIR}/shared/Base3DView.h 
+set (BRT_HEADER_FILES ${APHID_DIR}/shared/qt/Base3DView.h 
 window.h
 widget.h
 ../FeatherMesh.h)
 
-set (BRT_SOURCE_FILES ${APHID_DIR}/shared/Base3DView.cpp
+set (BRT_SOURCE_FILES ${APHID_DIR}/shared/qt/Base3DView.cpp
 widget.cpp
 window.cpp
 main.cpp

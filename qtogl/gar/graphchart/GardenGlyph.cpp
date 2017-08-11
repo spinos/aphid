@@ -175,3 +175,6 @@ const std::string& GardenGlyph::glyphName() const
 
 int GardenGlyph::attribInstanceId() const
 { return m_attrib->attribInstanceId(); }
+
+void GardenGlyph::postConnection(GardenGlyph* another)
+{ m_attrib->connectTo(another->attrib() ); }

@@ -113,3 +113,6 @@ bool PieceAttrib::update()
 
 int PieceAttrib::attribInstanceId() const
 { return 0; }
+
+void PieceAttrib::connectTo(PieceAttrib* another)
+{}

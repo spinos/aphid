@@ -38,6 +38,8 @@ public:
 	const GlyphPort * port0() const;
 	const GlyphPort * port1() const;
 	
+	virtual bool canConnectTo(GlyphPort* p1) const;
+	
 protected:
 
 private:

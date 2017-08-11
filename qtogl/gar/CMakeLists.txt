@@ -1,3 +1,5 @@
+## Fri Aug 11 19:10:52 CST 2017 
+
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
 
@@ -21,6 +23,14 @@ file (GLOB Attr_SRC
     "attr/*.cpp"
 )
 
+file (GLOB Chart_HEAD
+    "graphchart/*.h"
+)
+
+file (GLOB Chart_SRC
+    "graphchart/*.cpp"
+)
+
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 data/grass.h
 data/clover.h
@@ -33,10 +43,7 @@ ShrubScene.h
 ${APHID_QT_DIR}/GlyphPort.h
 ${APHID_QT_DIR}/GlyphConnection.h
 ${APHID_QT_DIR}/GlyphHalo.h
-graphchart/ShrubChartView.h
-graphchart/GardenGlyph.h
-graphchart/GlyphBuilder.h
-graphchart/ChartDlg.h
+${Chart_HEAD}
 ${Asst_HEAD}
 ${Attr_HEAD}
 PlantPiece.h
@@ -79,10 +86,7 @@ ShrubScene.cpp
 ${APHID_QT_DIR}/GlyphPort.cpp
 ${APHID_QT_DIR}/GlyphConnection.cpp
 ${APHID_QT_DIR}/GlyphHalo.cpp
-graphchart/ShrubChartView.cpp
-graphchart/GardenGlyph.cpp
-graphchart/GlyphBuilder.cpp
-graphchart/ChartDlg.cpp
+${Chart_SRC}
 ${Attr_SRC}
 ${Asst_SRC}
 PlantPiece.cpp

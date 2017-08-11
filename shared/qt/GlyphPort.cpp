@@ -41,8 +41,8 @@ const bool & GlyphPort::isOutgoing() const
 { return m_isOutgoing; }
 
 void GlyphPort::addConnection(GlyphConnection * conn)
-{
-	m_connections.append(conn);
+{   
+    m_connections.append(conn);
 }
 
 void GlyphPort::removeConnection(GlyphConnection * conn2rm)
