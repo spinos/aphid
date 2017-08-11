@@ -72,6 +72,7 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 	switch (gg) {
 		case gar::ggGrass:
 		case gar::ggSprite:
+		case gar::ggVariant:
 			addGrassBranch(pl1, gl);
 		break;
 		default:

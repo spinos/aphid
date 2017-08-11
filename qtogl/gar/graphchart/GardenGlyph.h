@@ -40,6 +40,7 @@ public:
 			
 	void setAttrib(PieceAttrib * attrib);
 	PieceAttrib * attrib();
+	PieceAttrib * attrib() const;
 	int attribInstanceId() const;
 	
 	aphid::GlyphPort * addPort(const QString & name, 
@@ -62,6 +63,7 @@ public:
 	const std::string& glyphName() const;
 	
 	void postConnection(GardenGlyph* another);
+	void postSelection();
 	
 protected:
 	void resizeBlock(int bx, int by);

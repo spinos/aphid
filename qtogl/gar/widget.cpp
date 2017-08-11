@@ -14,6 +14,8 @@
 #include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "DrawVegetation.h"
+#include <graphchart/GardenGlyph.h>
+#include <attr/PieceAttrib.h>
 #include "gar_common.h"
 
 using namespace aphid;
@@ -52,7 +54,42 @@ void GLWidget::clientDraw()
 
 void GLWidget::drawAsset()
 {
-	const ATriangleMesh* msh = m_scene->lastSelectedGeom();
+    const GardenGlyph* glp = m_scene->lastSelectedGlyph();
+    if(!glp)
+        return;
+    
+    if(gar::ToGroupType(glp->glyphType() ) == gar::ggVariant ) {
+        drawVariableAsset(glp->attrib() );
+    } else {
+        drawSingleAsset(glp->attrib() );
+    }
+}
+
+void GLWidget::drawVariableAsset(PieceAttrib* attr)
+{
+    if(!attr->hasGeom())
+        return;
+    
+    getDrawer()->m_wireProfile.apply();
+	m_vegd->begin();
+    
+    const int ngeom = attr->numGeomVariations();
+    for(int i=0;i<ngeom;++i) {
+        float r;
+        const ATriangleMesh* msh = attr->selectGeom(i, r);
+        m_vegd->drawMesh(msh);
+    }
+    
+    m_vegd->end();
+}
+
+void GLWidget::drawSingleAsset(PieceAttrib* attr)
+{
+    if(!attr->hasGeom())
+        return;
+    
+    float r;
+	const ATriangleMesh* msh = attr->selectGeom(0, r);
 	if(!msh)
 		return;
 		

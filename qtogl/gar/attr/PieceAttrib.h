@@ -45,6 +45,8 @@ public:
 	virtual int attribInstanceId() const;
 /// set upstream
 	virtual void connectTo(PieceAttrib* another);
+/// width / height, for uv packing
+	virtual float texcoordBlockAspectRatio() const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,

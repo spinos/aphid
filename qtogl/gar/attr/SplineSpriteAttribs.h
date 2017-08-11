@@ -31,6 +31,7 @@ public:
 	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
 	virtual bool update();
 	virtual int attribInstanceId() const;
+	virtual float texcoordBlockAspectRatio() const;
 	
 };
 

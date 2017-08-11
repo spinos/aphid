@@ -80,3 +80,6 @@ bool SplineSpriteAttribs::update()
 
 int SplineSpriteAttribs::attribInstanceId() const
 { return m_instId; }
+
+float SplineSpriteAttribs::texcoordBlockAspectRatio() const
+{ return m_billboard->widthHeightRatio(); }

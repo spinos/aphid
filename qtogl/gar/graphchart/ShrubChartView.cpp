@@ -219,7 +219,7 @@ void ShrubChartView::processSelect(const QPoint & pos)
 			if(m_selectedItem->type() == GardenGlyph::Type ) {
 				m_mode = mMoveItem;
 				GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
-				gl->showHalo();
+				gl->postSelection();
 				ShrubScene* ssc = (ShrubScene* )scene();
 				ssc->selectGlyph(gl);
 				emit sendSelectGlyph(true);

@@ -170,6 +170,9 @@ void GardenGlyph::setAttrib(PieceAttrib * attrib)
 PieceAttrib * GardenGlyph::attrib()
 { return m_attrib; }
 
+PieceAttrib * GardenGlyph::attrib() const
+{ return m_attrib; }
+
 const std::string& GardenGlyph::glyphName() const
 { return m_attrib->glyphName(); }
 
@@ -178,3 +181,9 @@ int GardenGlyph::attribInstanceId() const
 
 void GardenGlyph::postConnection(GardenGlyph* another)
 { m_attrib->connectTo(another->attrib() ); }
+
+void GardenGlyph::postSelection()
+{ 
+    m_attrib->update(); 
+    showHalo();
+}

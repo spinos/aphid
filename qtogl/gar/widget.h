@@ -13,6 +13,7 @@ class ShrubScene;
 class Vegetation;
 class VegetationPatch;
 class DrawVegetation;
+class PieceAttrib;
 
 class GLWidget : public aphid::Base3DView
 {
@@ -49,7 +50,9 @@ private:
 	void dopDraw(VegetationPatch * vgp);
 	void voxelDraw(VegetationPatch * vgp);
 	void diffDraw(VegetationPatch * vgp);
-
+	void drawVariableAsset(PieceAttrib* attr);
+	void drawSingleAsset(PieceAttrib* attr);
+	
 private slots:
 
 private:

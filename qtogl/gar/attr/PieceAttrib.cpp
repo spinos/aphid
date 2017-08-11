@@ -116,3 +116,7 @@ int PieceAttrib::attribInstanceId() const
 
 void PieceAttrib::connectTo(PieceAttrib* another)
 {}
+
+float PieceAttrib::texcoordBlockAspectRatio() const
+{ return 1.f; }
+

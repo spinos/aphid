@@ -11,12 +11,21 @@
 #define GAR_BEND_TWIST_ROLL_ATTRIBS_H
 
 #include "PieceAttrib.h"
+#include <geom/PackTexcoord.h>
 
-class BendTwistRollAttribs : public PieceAttrib {
+namespace aphid {
+class BendTwistRollDeformer;
+}
 
+class BendTwistRollAttribs : public PieceAttrib, public aphid::PackTexcoord {
+
+    PieceAttrib* m_inAttr;
 	aphid::ATriangleMesh* m_inGeom;
-	aphid::ATriangleMesh* m_outGeom[64];
+	aphid::ATriangleMesh* m_outGeom[32];
 	int m_instId;
+	float m_exclR;
+	aphid::BendTwistRollDeformer* m_dfm;
+	
 	static int sNumInstances;
 	
 public:
@@ -32,6 +41,11 @@ public:
 	virtual int attribInstanceId() const;
 /// recv input geom
 	virtual void connectTo(PieceAttrib* another);
+	
+private:
+    void updateGeom(aphid::ATriangleMesh* msh,
+                const float* angles);
+    
 };
 
 #endif
