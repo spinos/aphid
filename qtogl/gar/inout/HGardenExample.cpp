@@ -84,6 +84,7 @@ char HGardenExample::save(Vegetation * vege)
 	ATriangleMesh * mshVal = NULL;
 	vege->geomBegin(mshName, mshVal);
 	while(mshVal) {
+		//std::cout<<"\n save mesh "<<mshName;
 		mshPathName = childPath(mshName.c_str() );
 		HTriangleMesh chd(mshPathName);
 		chd.save(mshVal);
