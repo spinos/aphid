@@ -14,6 +14,7 @@
 #include <geom/ConvexShape.h>
 #include "gar_common.h"
 #include "data/grass.h"
+#include "data/variation.h"
 #include "data/billboard.h"
 #include <boost/format.hpp>
 #include <iomanip>
@@ -183,6 +184,10 @@ std::string Vegetation::getGeomName(const int & k)
 		case gar::ggSprite:
 			geomt = gar::ToBillboardType(gt );
 			geoms = gar::BillboardTypeNames[geomt];
+		break;
+		case gar::ggVariant:
+			geomt = gar::ToVariationType(gt );
+			geoms = gar::VariationTypeNames[geomt];
 		break;
 		default:
 		;

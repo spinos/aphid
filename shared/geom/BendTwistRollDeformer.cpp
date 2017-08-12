@@ -129,6 +129,7 @@ float BendTwistRollDeformer::getRowMean(int rowBegin, int nv, int& nvRow, float&
 		nvRow++;
 	}
 	res /= (float)nvRow;
+	return res;
 }
 
 void BendTwistRollDeformer::calculateNormal(const ATriangleMesh * mesh)

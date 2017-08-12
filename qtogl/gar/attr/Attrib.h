@@ -16,6 +16,7 @@ namespace gar {
 
 enum AttribName {
 	nUnknown = 0,
+	nGrowPortion,
 	nGrowMargin,
 	nGrowAngle,
 	nZenithNoise,

@@ -71,6 +71,9 @@ bool BendTwistRollAttribs::update()
         int bendGrp = i>>3;
         angles[0] = deltaBend * (RandomF01() + bendGrp);
         angles[1] = rng[1] * (.5f + RandomF01() * .5f);
+        if(i&1)
+            angles[1] = -angles[1];
+        
         angles[2] = rng[2] * RandomFn11();
         
         updateGeom(m_outGeom[i], angles);

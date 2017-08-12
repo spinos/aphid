@@ -193,6 +193,12 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	    aangle->getValue(angleA);
 	}
 	
+	float portion = 1.f;
+	gar::Attrib* aportion = gndAttr->findAttrib(gar::nGrowPortion);
+	if(aportion) {
+	    aportion->getValue(portion);
+	}
+	
 	GrowthSampleProfile prof;
 	prof.m_numSampleLimit = 80;
 	prof.m_sizing = pl->exclR() * sizing;
@@ -206,12 +212,12 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	
 	switch (gnd->glyphType()) {
 		case gar::gtPot:
-			prof.m_portion = .43f;
+			prof.m_portion = .43f * portion;
 			prof.m_angle = -1.f;
 			gsmp.samplePot(prof);
 			break;
 		case gar::gtBush:
-			prof.m_portion = .34f;
+			prof.m_portion = .34f * portion;
 			prof.m_angle = .41f;
 			gsmp.sampleBush(prof);
 			break;

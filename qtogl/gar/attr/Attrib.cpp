@@ -96,6 +96,7 @@ bool Attrib::isStringType() const
 
 static const char* sAttribNameAsStr[] = {
 "unknown",
+"grow portion",
 "grow margin",
 "grow angle",
 "zenith noise",
@@ -116,6 +117,9 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 {
 	gar::AttribName r = gar::nUnknown;
 	switch (x) {
+	    case gar::nGrowPortion :
+			r = gar::nGrowPortion;
+		break;
 		case gar::nGrowMargin :
 			r = gar::nGrowMargin;
 		break;

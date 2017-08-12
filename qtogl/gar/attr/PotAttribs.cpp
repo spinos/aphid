@@ -11,6 +11,7 @@
 
 PotAttribs::PotAttribs()
 {
+	addFloatAttrib(gar::nGrowPortion, 1.f, 0.1f, 1.f);
 	addFloatAttrib(gar::nGrowMargin, 1.f, 0.5f, 2.f);
 	addFloatAttrib(gar::nZenithNoise, 0.2f, 0.f, 1.f);
 }
