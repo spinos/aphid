@@ -24,6 +24,7 @@ public:
 	void showFilePieces();
 	void showSpritePieces();
 	void showVariationPieces();
+	void showStemPieces();
 	
 protected:
 	void dragEnterEvent(QDragEnterEvent *event);

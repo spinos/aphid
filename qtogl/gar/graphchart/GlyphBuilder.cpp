@@ -15,6 +15,7 @@
 #include "data/file.h"
 #include "data/billboard.h"
 #include "data/variation.h"
+#include "data/stem.h"
 #include <attr/PotAttribs.h>
 #include <attr/BushAttribs.h>
 #include <attr/ImportGeomAttribs.h>
@@ -24,6 +25,7 @@
 #include <attr/HaircapProp.h>
 #include <attr/HypericumProp.h>
 #include <attr/BendTwistRollAttribs.h>
+#include <attr/SplineCylinderAttribs.h>
 #include <QString>
 #include <iostream>
 
@@ -55,6 +57,9 @@ void GlyphBuilder::build(GardenGlyph * dst,
 		case gar::ggVariant:
 			buildVariant(dst, gtyp);
 		break;
+		case gar::ggStem:
+			buildStem(dst, gtyp);
+		break;
 		default:
 			;
 	}
@@ -83,6 +88,9 @@ PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
 		break;
 		case gar::ggGrass:
 			res = buildGrassAttrib(gtyp);
+		break;
+		case gar::ggStem:
+			res = buildStemAttrib(gtyp);
 		break;
 		default:
 			res = new PieceAttrib;
@@ -132,6 +140,14 @@ PieceAttrib* GlyphBuilder::buildVariantAttrib(const int & gtyp)
 {
 	if(gtyp == gar::gtBendTwistRollVariant)
 		return (new BendTwistRollAttribs);
+		
+	return (new PieceAttrib);
+}
+
+PieceAttrib* GlyphBuilder::buildStemAttrib(const int & gtyp)
+{
+	if(gtyp == gtSplineCylinder)
+		return (new SplineCylinderAttribs);
 		
 	return (new PieceAttrib);
 }
@@ -198,6 +214,22 @@ void GlyphBuilder::buildVariant(GardenGlyph * dst,
 	const int & outEnd = VariationOutPortRange[gt][1];
 	for(int i=outBegin;i<outEnd;++i) {
 		dst->addPort(QObject::tr(VariationOutPortRangeNames[i]), true);
+	}
+}
+
+void GlyphBuilder::buildStem(GardenGlyph * dst,
+			const int & gtyp)
+{
+	const int gt = ToStemType(gtyp);
+	const int & inBegin = StemInPortRange[gt][0];
+	const int & inEnd = StemInPortRange[gt][1];
+	for(int i=inBegin;i<inEnd;++i) {
+		dst->addPort(QObject::tr(StemInPortRangeNames[i]), false);
+	}
+	const int & outBegin = StemOutPortRange[gt][0];
+	const int & outEnd = StemOutPortRange[gt][1];
+	for(int i=outBegin;i<outEnd;++i) {
+		dst->addPort(QObject::tr(StemOutPortRangeNames[i]), true);
 	}
 }
 	

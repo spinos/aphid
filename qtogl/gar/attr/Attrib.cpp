@@ -103,11 +103,15 @@ static const char* sAttribNameAsStr[] = {
 "file name",
 "width",
 "height",
+"radius",
 "left side",
 "right side",
 "bend",
 "twist",
-"roll"
+"roll",
+"width variation",
+"height variation",
+"radius variation",
 };
 
 const char* Attrib::attrNameStr() const
@@ -138,6 +142,9 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nHeight :
 			r = gar::nHeight;
 		break;
+		case gar::nRadius :
+			r = gar::nRadius;
+		break;
 		case gar::nLeftSide :
 			r = gar::nLeftSide;
 		break;
@@ -152,6 +159,15 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nRoll :
 			r = gar::nRoll;
+		break;
+		case gar::nWidthVariation :
+			r = gar::nWidthVariation;
+		break;
+		case gar::nHeightVariation :
+			r = gar::nHeightVariation;
+		break;
+		case gar::nRadiusVariation :
+			r = gar::nRadiusVariation;
 		break;
 		default:
 			;

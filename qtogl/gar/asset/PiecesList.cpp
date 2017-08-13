@@ -15,6 +15,7 @@
 #include "data/billboard.h"
 #include "data/variation.h"
 #include "data/file.h"
+#include "data/stem.h"
 
 PiecesList::PiecesList(QWidget *parent)
     : QListWidget(parent)
@@ -111,6 +112,14 @@ void PiecesList::showVariationPieces()
 			gar::VariationTypeIcons);
 }
 
+void PiecesList::showStemPieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggStem][0];
+	const int gend = gar::GlyphRange[gar::ggStem][1];
+	lsPieces(gbegin, gend, gar::ggStem,
+			gar::StemTypeIcons);
+}
+
 void PiecesList::lsPieces(const int & gbegin,
 				const int & gend,
 				const int & ggroup,
@@ -120,7 +129,7 @@ void PiecesList::lsPieces(const int & gbegin,
 	for(int i=gbegin;i<gend;++i) {
 		QListWidgetItem *pieceItem = new QListWidgetItem(this);
 	
-		QPixmap pixm(iconNames[i - ggroup * 32]);
+		QPixmap pixm(iconNames[i - gar::ToGroupBegin(ggroup)]);
 		QIcon cloverIcon(pixm);
 		pieceItem->setIcon(cloverIcon);
 		pieceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable

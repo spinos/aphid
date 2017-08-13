@@ -23,17 +23,23 @@ enum AttribName {
 	nFileName,
 	nWidth,
 	nHeight,
+	nRadius,
 	nLeftSide,
 	nRightSide,
 	nBend,
 	nTwist,
-	nRoll
+	nRoll,
+	nWidthVariation,
+	nHeightVariation,
+	nRadiusVariation,
 };
 
 enum AttribType {
 	tUnknown = 0,
 	tBool,
 	tInt,
+	tInt2,
+	tInt3,
 	tFloat,
 	tVector2,
 	tVector3,

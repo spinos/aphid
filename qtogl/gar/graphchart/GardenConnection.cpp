@@ -39,8 +39,9 @@ bool GardenConnection::canConnectTo(GlyphPort* p1) const
 bool GardenConnection::rejectedByNode(GardenGlyph* node0, GardenGlyph* node1) const
 {
     if(gar::ToGroupType(node1->glyphType() ) == gar::ggVariant) {
-        if(gar::ToGroupType(node0->glyphType() ) != gar::ggSprite) {
-            qDebug() << " variation input should be sprite, rejected ";
+        if(node0->glyphType() != gar::gtSplineSprite
+			&& node0->glyphType() != gar::gtSplineCylinder) {
+            qDebug() << " variation input should be sprite or cylinder, rejected ";
             return true;
         }
     }

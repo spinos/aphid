@@ -25,6 +25,12 @@ PlantAssets::PlantAssets(QTreeWidget *parent) : QTreeWidgetItem(parent)
 	grass->setIcon(0, grassIcon);
 	grass->setData(0, Qt::WhatsThisRole, QString(tr("allGrass")) );
 	
+	QIcon stemIcon(":/icons/stem.png");
+	QTreeWidgetItem * stem = new QTreeWidgetItem(this);
+	stem->setText(0, tr("Stem"));
+	stem->setIcon(0, stemIcon);
+	stem->setData(0, Qt::WhatsThisRole, QString(tr("allStem")) );
+	
 	setExpanded(true);
 
 }

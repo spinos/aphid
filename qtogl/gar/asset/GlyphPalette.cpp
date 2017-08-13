@@ -59,4 +59,7 @@ void GlyphPalette::showNamedPieces(const QString & swhat)
 	else if(swhat == tr("allVariation") ) {
 		m_glyphList->showVariationPieces();
 	}
+	else if(swhat == tr("allStem") ) {
+		m_glyphList->showStemPieces();
+	}
 }

@@ -17,6 +17,7 @@
 #include "data/file.h"
 #include "data/billboard.h"
 #include "data/variation.h"
+#include "data/stem.h"
 #include "attr/PieceAttrib.h"
 #include <qt/QDoubleEditSlider.h>
 #include <qt/QStringEditField.h>
@@ -111,6 +112,9 @@ void AttribDlg::lsDefault(GardenGlyph* g)
 		break;
 		case gar::ggVariant :
 			stype = gar::VariationTypeNames[gar::ToVariationType(gt)];
+		break;
+		case gar::ggStem :
+			stype = gar::StemTypeNames[gar::ToStemType(gt)];
 		break;
 		default:
 		;

@@ -93,10 +93,10 @@ void AssetDescription::showSpriteGesc(const QPoint & tg)
 
 void AssetDescription::showVariantGesc(const QPoint & tg)
 {
-	const int & billboardTyp = gar::ToVariationType(tg.x() );
-	m_lab->setText(tr(gar::VariationTypeNames[billboardTyp]));
-	QPixmap px(tr(gar::VariationTypeImages[billboardTyp]) );
+	const int & variantTyp = gar::ToVariationType(tg.x() );
+	m_lab->setText(tr(gar::VariationTypeNames[variantTyp]));
+	QPixmap px(tr(gar::VariationTypeImages[variantTyp]) );
 	m_pic->setPixmap(px);
-	m_dtl->setText(tr(gar::VariationTypeDescs[billboardTyp]));
+	m_dtl->setText(tr(gar::VariationTypeDescs[variantTyp]));
 }
 	

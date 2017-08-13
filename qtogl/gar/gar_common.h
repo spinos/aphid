@@ -28,7 +28,9 @@ enum GlyphTyp {
 	gtHypericum = 36,
 	gtSplineSprite = 65,
 	gtBendTwistRollVariant = 97,
+	gtDirectionalVariant = 98,
 	gtImportGeom = 129,
+	gtSplineCylinder = 161
 };
 
 enum GlyphGroup {
@@ -36,7 +38,8 @@ enum GlyphGroup {
 	ggGrass = 1,
 	ggSprite = 2,
 	ggVariant = 3,
-	ggFile = 4
+	ggFile = 4,
+	ggStem = 5
 };
 
 enum DisplayStat {
@@ -46,21 +49,26 @@ enum DisplayStat {
 	dsVoxel = 259
 };
 
-#define NumGlyphGroups 5
+#define NumGlyphGroups 6
 
 /// begin, end, 32 per group
 static const int GlyphRange[NumGlyphGroups][2] = {
 {1, 3},
 {33, 37},
 {65, 66},
-{97, 98},
-{129, 130}
+{97, 99},
+{129, 130},
+{161, 162}
 };
 
 static const char * PieceMimeStr = "image/x-garden-piece";
 
 static inline int ToGroupType(int x) {
 	return x>>5;
+}
+
+static inline int ToGroupBegin(int x) {
+	return x<<5;
 }
 
 static const char sdecihexchart[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};

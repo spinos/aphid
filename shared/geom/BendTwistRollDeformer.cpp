@@ -71,11 +71,12 @@ void BendTwistRollDeformer::deform(const ATriangleMesh * mesh)
 	
 /// scaled by num_rows
 	float deltaBend = (float)rownv / (float)nv * m_angles[0] * 3.3f;
+	float deltaRoll = (float)rownv / (float)nv * m_angles[2] * 2.9f;
 	
 	Matrix33F mat;
 /// bend backward for positive values
     mat.rotateX(-deltaBend);
-    mat.rotateZ(m_angles[2]);
+    mat.rotateZ(deltaRoll);
 	Matrix44F matStep;
 	matStep.setRotation(mat);
 	

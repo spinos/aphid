@@ -38,6 +38,8 @@ private:
 			const int & gtyp);
 	void buildVariant(GardenGlyph * dst,
 			const int & gtyp);
+	void buildStem(GardenGlyph * dst,
+			const int & gtyp);
 			
 	PieceAttrib* buildAttrib(const int & gtyp,
 			const int & ggrp);
@@ -47,6 +49,7 @@ private:
 	PieceAttrib* buildSpriteAttrib(const int & gtyp);
 	PieceAttrib* buildVariantAttrib(const int & gtyp);
 	PieceAttrib* buildGrassAttrib(const int & gtyp);
+	PieceAttrib* buildStemAttrib(const int & gtyp);
 	
 };
 #endif
