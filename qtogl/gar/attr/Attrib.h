@@ -32,6 +32,8 @@ enum AttribName {
 	nWidthVariation,
 	nHeightVariation,
 	nRadiusVariation,
+	nBendVariation,
+	nNoiseVariation,
 };
 
 enum AttribType {

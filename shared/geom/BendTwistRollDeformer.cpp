@@ -17,7 +17,6 @@ namespace aphid {
 
 BendTwistRollDeformer::BendTwistRollDeformer()
 { 
-    m_np = 0;
     memset(m_angles, 0, 12);
 }
 
@@ -32,27 +31,6 @@ void BendTwistRollDeformer::setTwist(const float& x)
 
 void BendTwistRollDeformer::setRoll(const float& x)
 { m_angles[2] = x; }
-
-void BendTwistRollDeformer::setOriginalMesh(const ATriangleMesh * mesh)
-{
-	if(!mesh) 
-	    return;
-	
-	int np = mesh->numPoints();
-	if(m_np < np) {
-	    m_points.reset(new Vector3F[np]);
-	    m_normals.reset(new Vector3F[np]);
-	}
-	
-	memcpy( m_points.get(), mesh->points(), np * 12 );
-	m_np = np;
-}
-
-const Vector3F * BendTwistRollDeformer::deformedPoints() const
-{ return m_points.get(); }
-
-const Vector3F * BendTwistRollDeformer::deformedNormals() const
-{ return m_normals.get(); }
 
 void BendTwistRollDeformer::deform(const ATriangleMesh * mesh)
 {
@@ -90,7 +68,7 @@ void BendTwistRollDeformer::deform(const ATriangleMesh * mesh)
 		
 /// relative to last step
 		for(int i=0;i<rownv;++i) {
-			m_points[it + i].y -= lastYMean;
+			points()[it + i].y -= lastYMean;
 		}
 		
 /// local warp
@@ -98,11 +76,11 @@ void BendTwistRollDeformer::deform(const ATriangleMesh * mesh)
 		Matrix33F mwarp(q);
 
 		for(int i=0;i<rownv;++i) {			
-			m_points[it + i] = mwarp.transform(m_points[it + i]);
+			points()[it + i] = mwarp.transform(points()[it + i]);
 		}
 
 		for(int i=0;i<rownv;++i) {
-			m_points[it + i] = acct.transform(m_points[it + i]);
+			points()[it + i] = acct.transform(points()[it + i]);
 		}
 		
 /// accumulate each step
@@ -114,57 +92,6 @@ void BendTwistRollDeformer::deform(const ATriangleMesh * mesh)
 	
 	calculateNormal(mesh);
 	
-}
-
-float BendTwistRollDeformer::getRowMean(int rowBegin, int nv, int& nvRow, float& rowBase ) const
-{
-	rowBase = m_points[rowBegin].y;
-	
-	float res = 0.f;
-	nvRow = 0;
-	for(int i=rowBegin;i<nv;++i) {
-		if(m_points[i].y > rowBase + 1e-3f)
-			break;
-			
-		res += m_points[i].y;
-		nvRow++;
-	}
-	res /= (float)nvRow;
-	return res;
-}
-
-void BendTwistRollDeformer::calculateNormal(const ATriangleMesh * mesh)
-{
-	const int nv = mesh->numPoints();
-	std::memset(m_normals.get(), 0, nv * 12);
-	const int ni = mesh->numIndices();
-	const unsigned * ind = mesh->indices();
-	const Vector3F * ps = m_points.get();
-	
-	cvx::Triangle atri;
-	Vector3F triNm;
-
-	for(int i=0;i<ni;i+=3) {
-		const unsigned & i0 = ind[i];
-		const unsigned & i1 = ind[i+1];
-		const unsigned & i2 = ind[i+2];
-		
-		const Vector3F & a = ps[i0];
-		const Vector3F & b = ps[i1];
-		const Vector3F & c = ps[i2];
-		
-		atri.set(a, b, c);
-		triNm = atri.calculateNormal();
-		
-		m_normals[i0] += triNm;
-		m_normals[i1] += triNm;
-		m_normals[i2] += triNm;
-	}
-	
-	for(int i=0;i<nv;++i) {
-		m_normals[i].normalize();
-	}
-
 }
 
 }

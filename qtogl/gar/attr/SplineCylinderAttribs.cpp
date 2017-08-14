@@ -21,10 +21,11 @@ SplineCylinderAttribs::SplineCylinderAttribs()
 	
 	m_cylinder = new SplineCylinder;
 	
-	addFloatAttrib(gar::nRadius, 2.f, 1.f, 80.f);
+	addFloatAttrib(gar::nRadius, 1.f, .5f, 80.f);
 	addFloatAttrib(gar::nHeight, 10.f, 4.f, 120.f);
 	addSplineAttrib(gar::nRadiusVariation);
 	addSplineAttrib(gar::nHeightVariation);
+	update();
 }
 
 bool SplineCylinderAttribs::hasGeom() const

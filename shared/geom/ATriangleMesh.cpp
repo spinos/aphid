@@ -233,6 +233,9 @@ const Float2 * ATriangleMesh::triangleTexcoord(const int & idx) const
 float * ATriangleMesh::triangleTexcoords()
 { return (float *)m_texcoord.get(); }
 
+const float * ATriangleMesh::triangleTexcoords() const
+{ return (float *)m_texcoord.get(); }
+
 ATriangleMesh* ATriangleMesh::CreateFromData(const int& np,
 		const int& nt,
 		const int* triind,

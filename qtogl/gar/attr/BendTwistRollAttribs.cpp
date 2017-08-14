@@ -75,48 +75,17 @@ bool BendTwistRollAttribs::update()
             angles[1] = -angles[1];
         
         angles[2] = rng[2] * RandomFn11();
-        
-        updateGeom(m_outGeom[i], angles);
+
+		m_dfm->setBend(angles[0]);
+		m_dfm->setTwist(angles[1]);
+		m_dfm->setRoll(angles[2]);
+		m_dfm->deform(m_inGeom);
+		m_dfm->updateGeom(m_outGeom[i], m_inGeom);
 	}
 	
 	computeTexcoord(m_outGeom, 32, m_inAttr->texcoordBlockAspectRatio() );
 	
 	return true;
-}
-
-void BendTwistRollAttribs::updateGeom(ATriangleMesh* msh,
-        const float* angles)
-{
-    int np = m_inGeom->numPoints();
-	int nt = m_inGeom->numTriangles();
-	    
-	msh->create(np, nt);
-	msh->createVertexColors(np);
-	
-	unsigned * indDst = msh->indices();
-	memcpy(indDst, m_inGeom->indices(), nt * 12);
-	
-	Vector3F * pntDst = msh->points();
-	memcpy(pntDst, m_inGeom->points(), np * 12);
-	
-	Vector3F * nmlDst = msh->vertexNormals();
-	memcpy(nmlDst, m_inGeom->vertexNormals(), np * 12);
-	
-	float * colDst = msh->vertexColors();
-	memcpy(colDst, m_inGeom->vertexColors(), np * 12);
-	
-	float * texcoordDst = msh->triangleTexcoords();
-	memcpy(texcoordDst, m_inGeom->triangleTexcoords(), nt * 24);
-	
-	m_dfm->setBend(angles[0]);
-	m_dfm->setTwist(angles[1]);
-	m_dfm->setRoll(angles[2]);
-	m_dfm->deform(m_inGeom);
-	
-	memcpy(pntDst, m_dfm->deformedPoints(), np * 12);
-	
-	memcpy(nmlDst, m_dfm->deformedNormals(), np * 12);
-	
 }
 
 int BendTwistRollAttribs::attribInstanceId() const

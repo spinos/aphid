@@ -35,7 +35,7 @@ static const char * VariationTypeIcons[NUM_VARIATION_PIECES] = {
 static const char * VariationTypeDescs[NUM_VARIATION_PIECES] = {
 "unknown",
 "one to many by Bend-Twist-Roll deformation",
-"one to many by Directional deformation",
+"one to many by Directional Bending deformation",
 };
 
 static inline int ToVariationType(int x) {
@@ -44,6 +44,7 @@ static inline int ToVariationType(int x) {
 
 static const int VariationInPortRange[NUM_VARIATION_PIECES][2] = {
 {0,0},
+{0,1},
 {0,1},
 };
 

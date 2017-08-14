@@ -17,6 +17,7 @@
 
 namespace aphid {
 class ATriangleMesh;
+class SplineMap1D;
 }
 
 class PieceAttrib {
@@ -64,6 +65,8 @@ protected:
 	void addStringAttrib(gar::AttribName anm,
 		const std::string& val,
 		const bool& asFileName = false);
+	
+	void updateSplineValues(aphid::SplineMap1D* ls, gar::SplineAttrib* als);
 	
 private:
 };

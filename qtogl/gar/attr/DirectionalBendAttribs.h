@@ -1,5 +1,5 @@
 /*
- *  BendTwistRollAttribs.h
+ *  DirectionalBendAttribs.h
  *  
  *
  *  Created by jian zhang on 8/6/17.
@@ -7,29 +7,34 @@
  *
  */
 
-#ifndef GAR_BEND_TWIST_ROLL_ATTRIBS_H
-#define GAR_BEND_TWIST_ROLL_ATTRIBS_H
+#ifndef GAR_DIRECTIONAL_BEND_ATTRIBS_H
+#define GAR_DIRECTIONAL_BEND_ATTRIBS_H
 
 #include "PieceAttrib.h"
 #include <geom/PackTexcoord.h>
 
 namespace aphid {
-class BendTwistRollDeformer;
+class DirectionalBendDeformer;
+
+namespace smp {
+class GeodesicSphere;
 }
 
-class BendTwistRollAttribs : public PieceAttrib, public aphid::PackTexcoord {
+}
+
+class DirectionalBendAttribs : public PieceAttrib, public aphid::PackTexcoord {
 
     PieceAttrib* m_inAttr;
 	aphid::ATriangleMesh* m_inGeom;
-	aphid::ATriangleMesh* m_outGeom[32];
+	aphid::ATriangleMesh* m_outGeom[36];
 	int m_instId;
 	float m_exclR;
-	aphid::BendTwistRollDeformer* m_dfm;
-	
+	aphid::DirectionalBendDeformer* m_dfm;
+	aphid::smp::GeodesicSphere* m_samples;
 	static int sNumInstances;
 	
 public:
-	BendTwistRollAttribs();
+	DirectionalBendAttribs();
 	
 	void setInputGeom(aphid::ATriangleMesh* x);
 	

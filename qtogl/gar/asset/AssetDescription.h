@@ -38,6 +38,7 @@ private:
 	void showFileGesc(const QPoint & tg);
 	void showSpriteGesc(const QPoint & tg);
 	void showVariantGesc(const QPoint & tg);
+	void showStemGesc(const QPoint & tg);
 	
 private:
 	QLabel * m_lab;

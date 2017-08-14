@@ -15,6 +15,7 @@
 #include "data/file.h"
 #include "data/billboard.h"
 #include "data/variation.h"
+#include "data/stem.h"
 
 AssetDescription::AssetDescription(QWidget *parent) : QWidget(parent)
 {
@@ -48,6 +49,9 @@ void AssetDescription::recvAssetSel(QPoint tg)
 		break;
 		case gar::ggVariant :
 			showVariantGesc(tg);
+		break;
+		case gar::ggStem :
+			showStemGesc(tg);
 		break;
 		default:
 			qDebug()<<" AssetDescription::recvAssetSel group is unknown";
@@ -98,5 +102,14 @@ void AssetDescription::showVariantGesc(const QPoint & tg)
 	QPixmap px(tr(gar::VariationTypeImages[variantTyp]) );
 	m_pic->setPixmap(px);
 	m_dtl->setText(tr(gar::VariationTypeDescs[variantTyp]));
+}
+
+void AssetDescription::showStemGesc(const QPoint & tg)
+{
+	const int & stemTyp = gar::ToStemType(tg.x() );
+	m_lab->setText(tr(gar::StemTypeNames[stemTyp]));
+	QPixmap px(tr(gar::StemTypeImages[stemTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::StemTypeDescs[stemTyp]));
 }
 	

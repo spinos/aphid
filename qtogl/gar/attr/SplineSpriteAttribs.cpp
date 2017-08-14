@@ -25,6 +25,7 @@ SplineSpriteAttribs::SplineSpriteAttribs()
 	addFloatAttrib(gar::nHeight, 6.f, 3.f, 120.f);
 	addSplineAttrib(gar::nLeftSide);
 	addSplineAttrib(gar::nRightSide);
+	update();
 }
 
 bool SplineSpriteAttribs::hasGeom() const

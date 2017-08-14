@@ -26,6 +26,7 @@
 #include <attr/HypericumProp.h>
 #include <attr/BendTwistRollAttribs.h>
 #include <attr/SplineCylinderAttribs.h>
+#include <attr/DirectionalBendAttribs.h>
 #include <QString>
 #include <iostream>
 
@@ -140,6 +141,9 @@ PieceAttrib* GlyphBuilder::buildVariantAttrib(const int & gtyp)
 {
 	if(gtyp == gar::gtBendTwistRollVariant)
 		return (new BendTwistRollAttribs);
+	
+	if(gtyp == gar::gtDirectionalVariant)
+		return (new DirectionalBendAttribs);
 		
 	return (new PieceAttrib);
 }

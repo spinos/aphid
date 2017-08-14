@@ -37,6 +37,7 @@ public:
 	void setTriangleTexcoord(const int & idx, const Float2 * uvs);
 	const Float2 * triangleTexcoord(const int & idx) const;
 	float * triangleTexcoords();
+	const float * triangleTexcoords() const;
 	
 	void create(unsigned np, unsigned nt);
 	unsigned * triangleIndices(unsigned idx) const;

@@ -9,6 +9,9 @@
 
 #include "PieceAttrib.h"
 #include "gar_common.h"
+#include <math/SplineMap1D.h>
+
+using namespace aphid;
 
 PieceAttrib::PieceAttrib()
 {
@@ -119,4 +122,18 @@ void PieceAttrib::connectTo(PieceAttrib* another)
 
 float PieceAttrib::texcoordBlockAspectRatio() const
 { return 1.f; }
+
+void PieceAttrib::updateSplineValues(SplineMap1D* ls, gar::SplineAttrib* als)
+{
+	float tmp[2];
+	als->getSplineValue(tmp);
+	ls->setStart(tmp[0]);
+	ls->setEnd(tmp[1]);
+	
+	als->getSplineCv0(tmp);
+	ls->setLeftControl(tmp[0], tmp[1]);
+	
+	als->getSplineCv1(tmp);
+	ls->setRightControl(tmp[0], tmp[1]);
+}
 

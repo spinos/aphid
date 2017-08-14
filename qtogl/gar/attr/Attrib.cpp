@@ -112,6 +112,8 @@ static const char* sAttribNameAsStr[] = {
 "width variation",
 "height variation",
 "radius variation",
+"bend variation",
+"noise variation",
 };
 
 const char* Attrib::attrNameStr() const
@@ -168,6 +170,12 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nRadiusVariation :
 			r = gar::nRadiusVariation;
+		break;
+		case gar::nBendVariation :
+			r = gar::nBendVariation;
+		break;
+		case gar::nNoiseVariation :
+			r = gar::nNoiseVariation;
 		break;
 		default:
 			;
