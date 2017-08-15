@@ -48,7 +48,8 @@ void CylinderMesh::createCylinder1(int nu, int nv, float radius, float height,
 	unsigned * ind = indices();
 	
 	const float da = TWOPIF / (float)nu;
-	const float du = 1.f / (float)nu;
+	m_circum = Vector3F(cos(da), 0.f, sin(da) ).distanceTo(Vector3F::XAxis) * radius * nu; 
+	const float du = m_circum / (float)nu;
 
 	int acc = 0;
 	for(int j=0;j<=nv;++j) {
@@ -83,7 +84,6 @@ void CylinderMesh::createCylinder1(int nu, int nv, float radius, float height,
 	m_nu = nu;
 	m_nv = nv;
 	m_radius = radius;
-	m_circum = Vector3F(cos(da), 0.f, sin(da) ).length() * radius * nu; 
 	m_height = height;
 	projectTexcoord();
 	
