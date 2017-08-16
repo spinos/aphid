@@ -33,6 +33,8 @@ public:
 	float height() const;
 /// w / h
 	float widthHeightRatio() const;
+/// first triangle will be (0,1,nu1)	
+	static int GetNumVerticesPerRow(const ATriangleMesh* msh);
 		
 protected:
     void createGrid(int nu, int nv, float du, float dv);

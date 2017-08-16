@@ -113,8 +113,13 @@ const char* Attrib::sAttribNameAsStr[] = {
 "width variation",
 "height variation",
 "radius variation",
+"size variation",
 "bend variation",
 "noise variation",
+"folding variation",
+"petiole angle",
+"leaf placement",
+"whorl count"
 };
 
 const char* Attrib::attrNameStr() const
@@ -175,17 +180,79 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nRadiusVariation :
 			r = gar::nRadiusVariation;
 		break;
+		case gar::nSizeVariation :
+			r = gar::nSizeVariation;
+		break;
 		case gar::nBendVariation :
 			r = gar::nBendVariation;
 		break;
 		case gar::nNoiseVariation :
 			r = gar::nNoiseVariation;
 		break;
+		case gar::nFoldingVariation :
+			r = gar::nFoldingVariation;
+		break;
+		case gar::nPetioleAngle :
+			r = gar::nPetioleAngle;
+		break;
+		case gar::nLeafPlacement :
+			r = gar::nLeafPlacement;
+		break;
+		case gar::nWhorlCount :
+			r = gar::nWhorlCount;
+		break;
 		default:
 			;
 	}
 	return r;
 }
+
+const char* Attrib::IntAsEnumFieldName(int x)
+{
+	switch (x) {
+		case gar::phOpposite :
+			return "opposite";
+		break;
+		case gar::phAlternate :
+			return "alternate";
+		break;
+		case gar::phDecussate :
+			return "decussate";
+		break;
+		case gar::phWhorled :
+			return "whorled";
+		break;
+		default:
+			;
+	}
+	return "unknown";
+}
+
+EnumAttrib::EnumAttrib(AttribName anm) : Attrib(anm, tEnum),
+m_fields(NULL),
+m_numFields(0)
+{}
+
+EnumAttrib::~EnumAttrib()
+{
+	if(m_fields)
+		delete[] m_fields;
+}
+
+void EnumAttrib::createFields(int n)
+{ 
+	m_numFields = n;
+	m_fields = new int[n]; 
+}
+
+void EnumAttrib::setField(int i, int x)
+{ m_fields[i] = x; }
+
+const int& EnumAttrib::numFields() const
+{ return m_numFields; }
+
+const int& EnumAttrib::getField(int x) const
+{ return m_fields[x]; }
 
 
 SplineAttrib::SplineAttrib(AttribName anm) : Attrib(anm, tSpline)

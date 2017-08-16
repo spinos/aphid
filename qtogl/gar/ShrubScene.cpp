@@ -90,7 +90,7 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 	const int r = rand() % ngeom;
 	float exclR = 1.f;
 	ATriangleMesh * msh = attr->selectGeom(r, exclR);
-	
+/// node_type node_instance geom_ind	
 	const int kgeom = gar::GlyphTypeToGeomIdGroup(gl->glyphType() ) | (gl->attribInstanceId() << 10) | r;
 	
 	if(!m_vege->findGeom(kgeom)) {

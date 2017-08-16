@@ -28,6 +28,7 @@ namespace gar {
 class Attrib;
 class StringAttrib;
 class SplineAttrib;
+class EnumAttrib;
 }
 
 class AttribDlg : public QDialog
@@ -52,10 +53,12 @@ public slots:
 	
 private slots:
 	void recvDoubleValue(QPair<int, double> x);
+	void recvIntValue(QPair<int, int> x);
 	void recvStringValue(QPair<int, QString> x);
 	void recvSplineValue(QPair<int, QPointF> x);
 	void recvSplineCv0(QPair<int, QPointF> x);
 	void recvSplineCv1(QPair<int, QPointF> x);
+	void recvEnumValue(QPair<int, int> x);
 	
 private:
 	void lsAttribs(GardenGlyph* g);
@@ -64,10 +67,13 @@ private:
 	void lsAdded(GardenGlyph* g);
 	void lsAttr(gar::Attrib* attr);
 	QWidget* shoFltAttr(gar::Attrib* attr);
+	QWidget* shoIntAttr(gar::Attrib* attr);
 	QWidget* shoStrAttr(gar::Attrib* attr);
 	QWidget* shoSplineAttr(gar::Attrib* attr);
+	QWidget* shoEnumAttr(gar::Attrib* attr);
 	gar::StringAttrib* findStringAttr(int i);
 	gar::SplineAttrib* findSplineAttr(int i);
+	gar::EnumAttrib* findEnumAttr(int i);
 	void updateSelectedGlyph();
 
 private:

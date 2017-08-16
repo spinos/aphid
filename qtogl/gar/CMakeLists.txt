@@ -1,4 +1,4 @@
-## Sat Aug 16 11:12:05 CST 2017 
+## Sat Aug 16 22:47:05 CST 2017 
 
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
@@ -79,6 +79,8 @@ ${APHID_QT_DIR}/ContextIconFrame.cpp
 ${APHID_QT_DIR}/ActionIconFrame.cpp
 ${APHID_QT_DIR}/QSplineEdit.cpp
 ${APHID_QT_DIR}/SplineEditGroup.cpp
+${APHID_QT_DIR}/IntEditGroup.cpp
+${APHID_QT_DIR}/QEnumCombo.cpp
 widget.cpp
 window.cpp
 toolBox.cpp

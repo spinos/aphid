@@ -202,4 +202,32 @@ void CylinderMesh::projectTexcoord()
 	
 }
 
+int CylinderMesh::GetNumVerticesPerRow(const ATriangleMesh* msh)
+{
+	const unsigned * ind = msh->indices();
+	return ind[2];
+}
+
+Vector3F CylinderMesh::GetRowMean(const ATriangleMesh* msh, int irow, int nvrow)
+{
+	Vector3F res(0,0,0);
+	
+	int rowBegin = irow*nvrow;
+	int rowEnd = rowBegin + nvrow;
+	if(rowEnd > msh->numPoints() )
+		rowEnd = msh->numPoints();
+		
+	int acc = 0;
+	for(int i=rowBegin;i<rowEnd;++i) {
+	
+		res += msh->points()[i];
+		acc++;
+	}
+	
+	if(acc > 0)
+		res *= 1.f/(float)acc;
+		
+	return res;
+}
+
 }

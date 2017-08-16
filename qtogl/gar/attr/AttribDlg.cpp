@@ -22,6 +22,8 @@
 #include <qt/QDoubleEditSlider.h>
 #include <qt/QStringEditField.h>
 #include <qt/SplineEditGroup.h>
+#include <qt/QEnumCombo.h>
+#include <qt/IntEditGroup.h>
 
 using namespace aphid;
 
@@ -141,11 +143,17 @@ void AttribDlg::lsAttr(gar::Attrib* attr)
 		case gar::tFloat :
 			wig = shoFltAttr(attr);
 		break;
+		case gar::tInt :
+			wig = shoIntAttr(attr);
+		break;
 		case gar::tString :
 			wig = shoStrAttr(attr);
 		break;
 		case gar::tSpline :
 			wig = shoSplineAttr(attr);
+		break;
+		case gar::tEnum :
+			wig = shoEnumAttr(attr);
 		break;
 		default:
 			wig = new QLabel(tr(attr->attrNameStr() ) );
@@ -167,6 +175,23 @@ QWidget* AttribDlg::shoFltAttr(gar::Attrib* attr)
 	
 	connect(wig, SIGNAL(valueChanged2(QPair<int, double>)),
             this, SLOT(recvDoubleValue(QPair<int, double>)));
+			
+	return wig;
+}
+
+QWidget* AttribDlg::shoIntAttr(gar::Attrib* attr)
+{
+	IntEditGroup* wig = new IntEditGroup(tr(attr->attrNameStr() ) );
+	int val, val0, val1;
+	attr->getValue(val);
+	attr->getMin(val0);
+	attr->getMax(val1);
+	wig->setLimit(val0, val1);
+	wig->setValue(val);
+	wig->setNameId(attr->attrName() );
+	
+	connect(wig, SIGNAL(valueChanged2(QPair<int, int>)),
+            this, SLOT(recvIntValue(QPair<int, int>)));
 			
 	return wig;
 }
@@ -217,6 +242,30 @@ QWidget* AttribDlg::shoSplineAttr(gar::Attrib* attr)
 	return wig;
 }
 
+QWidget* AttribDlg::shoEnumAttr(gar::Attrib* attr)
+{
+	gar::EnumAttrib* sattr = static_cast<gar::EnumAttrib*> (attr);
+	
+	QEnumCombo* wig = new QEnumCombo(tr(attr->attrNameStr()) );
+	wig->setNameId(attr->attrName() );
+	
+	const int& nf = sattr->numFields();
+	for(int i=0;i<nf;++i) {
+		const int& fi = sattr->getField(i);
+		QString fnm(gar::Attrib::IntAsEnumFieldName(fi) );
+		wig->addField(fnm, fi);
+	}
+	
+	int val;
+	sattr->getValue(val);
+	wig->setValue(val);
+	
+	connect(wig, SIGNAL(valueChanged2(QPair<int, int>)),
+            this, SLOT(recvEnumValue(QPair<int, int>)));
+	
+	return wig;
+}
+
 void AttribDlg::recvDoubleValue(QPair<int, double> x)
 {
 	PieceAttrib* att = m_selectedGlyph->attrib();
@@ -227,6 +276,19 @@ void AttribDlg::recvDoubleValue(QPair<int, double> x)
 		return;
 	}
 	dst->setValue((float)x.second);
+	updateSelectedGlyph();
+}
+
+void AttribDlg::recvIntValue(QPair<int, int> x)
+{
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
+	if(!dst) {
+		qDebug()<<" AttribDlg::recvDoubleValue cannot find int attr "
+			<<x.first;
+		return;
+	}
+	dst->setValue(x.second);
 	updateSelectedGlyph();
 }
 
@@ -269,6 +331,22 @@ gar::SplineAttrib* AttribDlg::findSplineAttr(int i)
 	}
 	
 	return static_cast<gar::SplineAttrib*> (dst);
+}
+
+gar::EnumAttrib* AttribDlg::findEnumAttr(int i)
+{
+	if(!m_selectedGlyph) 
+		return NULL;
+		
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
+	if(!dst) {
+		qDebug()<<" AttribDlg cannot find enum attr "
+			<<i;
+		return NULL;
+	}
+	
+	return static_cast<gar::EnumAttrib*> (dst);
 }
 
 void AttribDlg::recvSplineValue(QPair<int, QPointF> x)
@@ -321,4 +399,14 @@ void AttribDlg::updateSelectedGlyph()
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	if(att->update())
 		emit sendAttribChanged();
+}
+
+void AttribDlg::recvEnumValue(QPair<int, int> x)
+{
+	gar::EnumAttrib* sattr = findEnumAttr(x.first);
+	if(!sattr) 
+		return;
+	
+	sattr->setValue(x.second);
+	updateSelectedGlyph();
 }

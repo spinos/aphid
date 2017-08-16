@@ -37,7 +37,11 @@ public:
 	const float& height() const;
 /// nu seg_u r / h
 	float circumferenceHeightRatio() const;
-		
+/// first triangle will be (0,1,nu)	
+	static int GetNumVerticesPerRow(const ATriangleMesh* msh);
+/// irow-th row center
+	static Vector3F GetRowMean(const ATriangleMesh* msh, int irow, int nvrow);
+			
 protected:
 /// nv+1 segment heights provided
     void createCylinder1(int nu, int nv, float radius, float height,

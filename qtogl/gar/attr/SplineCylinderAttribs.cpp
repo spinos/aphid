@@ -9,12 +9,13 @@
 
 #include "SplineCylinderAttribs.h"
 #include <geom/SplineCylinder.h>
+#include <gar_common.h>
 
 using namespace aphid;
 
 int SplineCylinderAttribs::sNumInstances = 0;
 
-SplineCylinderAttribs::SplineCylinderAttribs()
+SplineCylinderAttribs::SplineCylinderAttribs() : PieceAttrib(gar::gtSplineCylinder)
 {
 	m_instId = sNumInstances;
 	sNumInstances++;
@@ -56,7 +57,7 @@ bool SplineCylinderAttribs::update()
 	findAttrib(gar::nRadius)->getValue(r);
 	findAttrib(gar::nHeight)->getValue(h);
 	
-	int nv = 4 + h * .19f / r;
+	int nv = 4 + h * .23f / r;
 	m_cylinder->createCylinder(6, nv, r, h);
 	return true;
 }

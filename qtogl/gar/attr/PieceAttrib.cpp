@@ -8,12 +8,13 @@
  */
 
 #include "PieceAttrib.h"
-#include "gar_common.h"
+#include <gar_common.h>
 #include <math/SplineMap1D.h>
 
 using namespace aphid;
 
-PieceAttrib::PieceAttrib()
+PieceAttrib::PieceAttrib(int glyphType) :
+m_glyphType(glyphType)
 {
 	char b[17];
     gar::GenGlyphName(b);
@@ -32,6 +33,9 @@ PieceAttrib::~PieceAttrib()
 const std::string& PieceAttrib::glyphName() const
 { return m_glyphName; }
 
+const int& PieceAttrib::glyphType() const
+{ return m_glyphType; }
+
 void PieceAttrib::addIntAttrib(gar::AttribName anm,
 		const int& val, 
 		const int& minVal,
@@ -42,7 +46,6 @@ void PieceAttrib::addIntAttrib(gar::AttribName anm,
 	aat->setMin(minVal);
 	aat->setMax(maxVal);
 	m_collAttrs.push_back(aat);
-	
 }	
 
 void PieceAttrib::addFloatAttrib(gar::AttribName anm,
@@ -70,6 +73,21 @@ void PieceAttrib::addStringAttrib(gar::AttribName anm,
 {
 	gar::StringAttrib* aat = new gar::StringAttrib(anm, asFileName);
 	aat->setValue(val);
+	m_collAttrs.push_back(aat);
+}
+
+void PieceAttrib::addEnumAttrib(gar::AttribName anm,
+			const std::vector<int>& fields)
+{
+	gar::EnumAttrib* aat = new gar::EnumAttrib(anm);
+	
+	int nf = fields.size();
+	aat->createFields(nf);
+	for(int i=0;i<nf;++i) {
+		aat->setField(i, fields[i]);
+	}
+/// first is default
+	aat->setValue(fields[0]);
 	m_collAttrs.push_back(aat);
 }
 
@@ -137,3 +155,11 @@ void PieceAttrib::updateSplineValues(SplineMap1D* ls, gar::SplineAttrib* als)
 	ls->setRightControl(tmp[0], tmp[1]);
 }
 
+bool PieceAttrib::isSynthesized() const
+{ return false; }
+
+int PieceAttrib::numSynthesizedGroups() const
+{ return 0; }
+
+gar::SynthesisGroup* PieceAttrib::synthesisGroup(int i) const
+{ return NULL; }

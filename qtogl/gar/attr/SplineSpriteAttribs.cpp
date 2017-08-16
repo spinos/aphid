@@ -9,12 +9,13 @@
 
 #include "SplineSpriteAttribs.h"
 #include <geom/SplineBillboard.h>
+#include <gar_common.h>
 
 using namespace aphid;
 
 int SplineSpriteAttribs::sNumInstances = 0;
 
-SplineSpriteAttribs::SplineSpriteAttribs()
+SplineSpriteAttribs::SplineSpriteAttribs() : PieceAttrib(gar::gtSplineSprite)
 {
 	m_instId = sNumInstances;
 	sNumInstances++;

@@ -20,17 +20,23 @@ class ATriangleMesh;
 class SplineMap1D;
 }
 
+namespace gar {
+class SynthesisGroup;
+}
+
 class PieceAttrib {
 
 typedef std::vector<gar::Attrib* > AttribArrayTyp;
 	AttribArrayTyp m_collAttrs;
 	std::string m_glyphName;
+	int m_glyphType;
 	
 public:	
-	PieceAttrib();
+	PieceAttrib(int glyphType = 0);
 	virtual ~PieceAttrib();
 	
 	const std::string& glyphName() const;
+	const int& glyphType() const;
 	
 	int numAttribs() const;
 	gar::Attrib* getAttrib(const int& i);
@@ -48,6 +54,10 @@ public:
 	virtual void connectTo(PieceAttrib* another);
 /// width / height, for uv packing
 	virtual float texcoordBlockAspectRatio() const;
+/// for synthesized
+	virtual bool isSynthesized() const;
+	virtual int numSynthesizedGroups() const;
+	virtual gar::SynthesisGroup* synthesisGroup(int i) const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,
@@ -65,6 +75,9 @@ protected:
 	void addStringAttrib(gar::AttribName anm,
 		const std::string& val,
 		const bool& asFileName = false);
+		
+	void addEnumAttrib(gar::AttribName anm,
+		const std::vector<int>& fields);
 	
 	void updateSplineValues(aphid::SplineMap1D* ls, gar::SplineAttrib* als);
 	

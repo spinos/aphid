@@ -156,4 +156,10 @@ void GridMesh::projectTexcoord()
 	
 }
 
+int GridMesh::GetNumVerticesPerRow(const ATriangleMesh* msh)
+{
+	const unsigned * ind = msh->indices();
+	return ind[2];
+}
+
 }

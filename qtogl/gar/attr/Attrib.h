@@ -33,13 +33,19 @@ enum AttribName {
 	nWidthVariation,
 	nHeightVariation,
 	nRadiusVariation,
+	nSizeVariation,
 	nBendVariation,
 	nNoiseVariation,
+	nFoldingVariation,
+	nPetioleAngle,
+	nLeafPlacement,
+	nWhorlCount,
 };
 
 enum AttribType {
 	tUnknown = 0,
 	tBool,
+	tEnum,
 	tInt,
 	tInt2,
 	tInt3,
@@ -49,6 +55,14 @@ enum AttribType {
 	tColor,
 	tString,
 	tSpline
+};
+
+/// phyllotaxy describes the organisation of the leaves on the stem
+enum PhyllotaxyValue {
+	phOpposite = 1024,
+	phAlternate,
+	phDecussate,
+	phWhorled,
 };
 
 class Attrib {
@@ -96,9 +110,27 @@ public:
 	const char* attrNameStr() const;
 	
 	static gar::AttribName IntAsAttribName(int x);
+	static const char* IntAsEnumFieldName(int x);
 
 private:
 	static const char* sAttribNameAsStr[];
+	
+};
+
+class EnumAttrib : public Attrib {
+
+	int * m_fields;
+	int m_numFields;
+	
+public:
+	EnumAttrib(AttribName anm);
+	virtual ~EnumAttrib();
+	
+	void createFields(int n);
+	void setField(int i, int x);
+	
+	const int& numFields() const;
+	const int& getField(int x) const;
 	
 };
 

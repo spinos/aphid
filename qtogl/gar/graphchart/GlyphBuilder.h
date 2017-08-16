@@ -52,6 +52,7 @@ private:
 	PieceAttrib* buildVariantAttrib(const int & gtyp);
 	PieceAttrib* buildGrassAttrib(const int & gtyp);
 	PieceAttrib* buildStemAttrib(const int & gtyp);
+	PieceAttrib* buildTwigAttrib(const int & gtyp);
 	
 };
 #endif

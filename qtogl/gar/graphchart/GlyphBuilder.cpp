@@ -29,6 +29,7 @@
 #include <attr/BendTwistRollAttribs.h>
 #include <attr/SplineCylinderAttribs.h>
 #include <attr/DirectionalBendAttribs.h>
+#include <attr/SimpleTwigAttribs.h>
 #include <QString>
 #include <iostream>
 
@@ -98,6 +99,9 @@ PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
 		case gar::ggStem:
 			res = buildStemAttrib(gtyp);
 		break;
+		case gar::ggTwig:
+			res = buildTwigAttrib(gtyp);
+		break;
 		default:
 			res = new PieceAttrib;
 	}
@@ -160,6 +164,14 @@ PieceAttrib* GlyphBuilder::buildStemAttrib(const int & gtyp)
 {
 	if(gtyp == gtSplineCylinder)
 		return (new SplineCylinderAttribs);
+		
+	return (new PieceAttrib);
+}
+
+PieceAttrib* GlyphBuilder::buildTwigAttrib(const int & gtyp)
+{
+	if(gtyp == gtSimpleTwig)
+		return (new SimpleTwigAttribs);
 		
 	return (new PieceAttrib);
 }

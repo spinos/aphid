@@ -16,6 +16,7 @@
 #include "DrawVegetation.h"
 #include <graphchart/GardenGlyph.h>
 #include <attr/PieceAttrib.h>
+#include <attr/SynthesisGroup.h>
 #include "gar_common.h"
 
 using namespace aphid;
@@ -60,6 +61,9 @@ void GLWidget::drawAsset()
     
     if(gar::ToGroupType(glp->glyphType() ) == gar::ggVariant ) {
         drawVariableAsset(glp->attrib() );
+    }
+	else if(gar::ToGroupType(glp->glyphType() ) == gar::ggTwig ) {
+        drawTwigAsset(glp->attrib() );
     } else {
         drawSingleAsset(glp->attrib() );
     }
@@ -97,6 +101,43 @@ void GLWidget::drawSingleAsset(PieceAttrib* attr)
 	m_vegd->begin();
 	m_vegd->drawMesh(msh);
 	m_vegd->end();
+}
+
+void GLWidget::drawTwigAsset(PieceAttrib* attr)
+{
+	const int ng = attr->numSynthesizedGroups();
+	if(ng < 1)
+		return;
+		
+	getDrawer()->m_wireProfile.apply();
+	m_vegd->begin();
+	
+	for(int i=0;i<ng;++i) {
+		gar::SynthesisGroup* gi = attr->synthesisGroup(i);
+		drawSynthesisGroup(attr, gi);
+	}
+	
+	m_vegd->end();
+}
+
+void GLWidget::drawSynthesisGroup(PieceAttrib* attr, gar::SynthesisGroup* grp)
+{
+	const int& ninst = grp->numInstances();
+	int igeom;
+	Matrix44F tm;
+	float exclr;
+	for(int i=0;i<ninst;++i) {
+		grp->getInstance(igeom, tm, i);
+		
+		const ATriangleMesh* msh = attr->selectGeom(igeom, exclr);
+		
+		if(msh) {
+			glPushMatrix();
+			getDrawer()->useSpace(tm);
+			m_vegd->drawMesh(msh);
+			glPopMatrix();
+		}
+	}
 }
 
 void GLWidget::drawSynthesis()

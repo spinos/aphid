@@ -15,6 +15,10 @@ class VegetationPatch;
 class DrawVegetation;
 class PieceAttrib;
 
+namespace gar {
+class SynthesisGroup;
+}
+
 class GLWidget : public aphid::Base3DView
 {
     Q_OBJECT
@@ -52,6 +56,8 @@ private:
 	void diffDraw(VegetationPatch * vgp);
 	void drawVariableAsset(PieceAttrib* attr);
 	void drawSingleAsset(PieceAttrib* attr);
+	void drawTwigAsset(PieceAttrib* attr);
+	void drawSynthesisGroup(PieceAttrib* attr, gar::SynthesisGroup* grp);
 	
 private slots:
 

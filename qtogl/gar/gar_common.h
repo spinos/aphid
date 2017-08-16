@@ -31,7 +31,8 @@ enum GlyphTyp {
 	gtBendTwistRollVariant = 97,
 	gtDirectionalVariant = 98,
 	gtImportGeom = 129,
-	gtSplineCylinder = 161
+	gtSplineCylinder = 161,
+	gtSimpleTwig = 193,
 };
 
 enum GlyphGroup {
