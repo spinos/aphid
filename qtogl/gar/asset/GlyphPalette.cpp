@@ -62,4 +62,7 @@ void GlyphPalette::showNamedPieces(const QString & swhat)
 	else if(swhat == tr("allStem") ) {
 		m_glyphList->showStemPieces();
 	}
+	else if(swhat == tr("allTwig") ) {
+		m_glyphList->showTwigPieces();
+	}
 }

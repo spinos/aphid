@@ -25,6 +25,7 @@ public:
 	void showSpritePieces();
 	void showVariationPieces();
 	void showStemPieces();
+	void showTwigPieces();
 	
 protected:
 	void dragEnterEvent(QDragEnterEvent *event);

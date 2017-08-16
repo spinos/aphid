@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
-	<file>icons/leaf.png</file>
+		<file>icons/leaf.png</file>
+		<file>icons/ribsprite.png</file>
 		<file>icons/twig.png</file>
 		<file>icons/directional.png</file>
 		<file>icons/stem.png</file>

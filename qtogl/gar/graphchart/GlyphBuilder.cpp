@@ -16,10 +16,12 @@
 #include "data/billboard.h"
 #include "data/variation.h"
 #include "data/stem.h"
+#include "data/twig.h"
 #include <attr/PotAttribs.h>
 #include <attr/BushAttribs.h>
 #include <attr/ImportGeomAttribs.h>
 #include <attr/SplineSpriteAttribs.h>
+#include <attr/RibSpriteAttribs.h>
 #include <attr/CloverProp.h>
 #include <attr/PoapratensisProp.h>
 #include <attr/HaircapProp.h>
@@ -60,6 +62,9 @@ void GlyphBuilder::build(GardenGlyph * dst,
 		break;
 		case gar::ggStem:
 			buildStem(dst, gtyp);
+		break;
+		case gar::ggTwig:
+			buildTwig(dst, gtyp);
 		break;
 		default:
 			;
@@ -133,6 +138,9 @@ PieceAttrib* GlyphBuilder::buildSpriteAttrib(const int & gtyp)
 {
 	if(gtyp == gar::gtSplineSprite)
 		return (new SplineSpriteAttribs);
+		
+	if(gtyp == gar::gtRibSprite)
+		return (new RibSpriteAttribs);
 		
 	return (new PieceAttrib);
 }
@@ -234,6 +242,22 @@ void GlyphBuilder::buildStem(GardenGlyph * dst,
 	const int & outEnd = StemOutPortRange[gt][1];
 	for(int i=outBegin;i<outEnd;++i) {
 		dst->addPort(QObject::tr(StemOutPortRangeNames[i]), true);
+	}
+}
+
+void GlyphBuilder::buildTwig(GardenGlyph * dst,
+			const int & gtyp)
+{
+	const int gt = ToTwigType(gtyp);
+	const int & inBegin = TwigInPortRange[gt][0];
+	const int & inEnd = TwigInPortRange[gt][1];
+	for(int i=inBegin;i<inEnd;++i) {
+		dst->addPort(QObject::tr(TwigInPortRangeNames[i]), false);
+	}
+	const int & outBegin = TwigOutPortRange[gt][0];
+	const int & outEnd = TwigOutPortRange[gt][1];
+	for(int i=outBegin;i<outEnd;++i) {
+		dst->addPort(QObject::tr(TwigOutPortRangeNames[i]), true);
 	}
 }
 	

@@ -36,11 +36,24 @@ bool GardenConnection::canConnectTo(GlyphPort* p1) const
     return true; 
 }
 
+static const int sVariableNodeTypes[3] = {gar::gtSplineSprite,
+gar::gtRibSprite,
+gar::gtSplineCylinder,
+};
+
+bool GardenConnection::isNodeVariable(int gt) const
+{
+	for(int i=0;i<3;++i) {
+		if(gt == sVariableNodeTypes[i])
+			return true;
+	}
+	return false;
+}
+
 bool GardenConnection::rejectedByNode(GardenGlyph* node0, GardenGlyph* node1) const
 {
     if(gar::ToGroupType(node1->glyphType() ) == gar::ggVariant) {
-        if(node0->glyphType() != gar::gtSplineSprite
-			&& node0->glyphType() != gar::gtSplineCylinder) {
+        if(!isNodeVariable(node0->glyphType() ) ) {
             qDebug() << " variation input should be sprite or cylinder, rejected ";
             return true;
         }

@@ -40,6 +40,8 @@ private:
 			const int & gtyp);
 	void buildStem(GardenGlyph * dst,
 			const int & gtyp);
+	void buildTwig(GardenGlyph * dst,
+			const int & gtyp);
 			
 	PieceAttrib* buildAttrib(const int & gtyp,
 			const int & ggrp);

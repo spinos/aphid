@@ -24,6 +24,7 @@ enum AttribName {
 	nWidth,
 	nHeight,
 	nRadius,
+	nCenterLine,
 	nLeftSide,
 	nRightSide,
 	nBend,
@@ -95,6 +96,9 @@ public:
 	const char* attrNameStr() const;
 	
 	static gar::AttribName IntAsAttribName(int x);
+
+private:
+	static const char* sAttribNameAsStr[];
 	
 };
 

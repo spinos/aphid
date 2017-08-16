@@ -19,10 +19,10 @@ namespace aphid {
 class BillboardMesh : public GridMesh {
      
 public:
-	BillboardMesh(float w, float h);
+	BillboardMesh();
     virtual ~BillboardMesh();
 	
-	virtual void setBillboardSize(float w, float h);
+	virtual void setBillboardSize(float w, float h, int nu);
 	
 protected:
     

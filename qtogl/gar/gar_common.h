@@ -27,6 +27,7 @@ enum GlyphTyp {
 	gtHaircap = 35,
 	gtHypericum = 36,
 	gtSplineSprite = 65,
+	gtRibSprite = 66,
 	gtBendTwistRollVariant = 97,
 	gtDirectionalVariant = 98,
 	gtImportGeom = 129,
@@ -39,7 +40,8 @@ enum GlyphGroup {
 	ggSprite = 2,
 	ggVariant = 3,
 	ggFile = 4,
-	ggStem = 5
+	ggStem = 5,
+	ggTwig = 6,
 };
 
 enum DisplayStat {
@@ -49,16 +51,17 @@ enum DisplayStat {
 	dsVoxel = 259
 };
 
-#define NumGlyphGroups 6
+#define NumGlyphGroups 7
 
 /// begin, end, 32 per group
 static const int GlyphRange[NumGlyphGroups][2] = {
 {1, 3},
 {33, 37},
-{65, 66},
+{65, 67},
 {97, 99},
 {129, 130},
-{161, 162}
+{161, 162},
+{193, 194}
 };
 
 static const char * PieceMimeStr = "image/x-garden-piece";

@@ -94,7 +94,7 @@ void Attrib::getMax(float& y) const
 bool Attrib::isStringType() const
 { return m_atyp == tString; }
 
-static const char* sAttribNameAsStr[] = {
+const char* Attrib::sAttribNameAsStr[] = {
 "unknown",
 "grow portion",
 "grow margin",
@@ -104,6 +104,7 @@ static const char* sAttribNameAsStr[] = {
 "width",
 "height",
 "radius",
+"center line",
 "left side",
 "right side",
 "bend",
@@ -146,6 +147,9 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nRadius :
 			r = gar::nRadius;
+		break;
+		case gar::nCenterLine :
+			r = gar::nCenterLine;
 		break;
 		case gar::nLeftSide :
 			r = gar::nLeftSide;

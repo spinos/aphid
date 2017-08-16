@@ -49,26 +49,8 @@ bool SplineCylinderAttribs::update()
 	gar::SplineAttrib* als = (gar::SplineAttrib*)findAttrib(gar::nRadiusVariation);
 	gar::SplineAttrib* ars = (gar::SplineAttrib*)findAttrib(gar::nHeightVariation);
 	
-	float tmp[2];
-	als->getSplineValue(tmp);
-	ls->setStart(tmp[0]);
-	ls->setEnd(tmp[1]);
-	
-	als->getSplineCv0(tmp);
-	ls->setLeftControl(tmp[0], tmp[1]);
-	
-	als->getSplineCv1(tmp);
-	ls->setRightControl(tmp[0], tmp[1]);
-	
-	ars->getSplineValue(tmp);
-	rs->setStart(tmp[0]);
-	rs->setEnd(tmp[1]);
-	
-	ars->getSplineCv0(tmp);
-	rs->setLeftControl(tmp[0], tmp[1]);
-	
-	ars->getSplineCv1(tmp);
-	rs->setRightControl(tmp[0], tmp[1]);
+	updateSplineValues(ls, als);
+	updateSplineValues(rs, ars);
 	
 	float r, h;
 	findAttrib(gar::nRadius)->getValue(r);

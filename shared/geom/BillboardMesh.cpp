@@ -13,22 +13,20 @@
 
 namespace aphid {
 
-BillboardMesh::BillboardMesh(float w, float h)
-{
-	setBillboardSize(w, h);
-}
+BillboardMesh::BillboardMesh()
+{}
 
 BillboardMesh::~BillboardMesh()
 {}
 
-void BillboardMesh::setBillboardSize(float w, float h)
+void BillboardMesh::setBillboardSize(float w, float h, int nu)
 {
-	int nu = 1;
-	int nv = 3 + h / w;
+	int nv = 3 + h / w * nu;
 	
+	float du = w / (float)nu;
 	float dv = h / (float)nv; 
 	
-	createGrid(nu, nv, w, dv);
+	createGrid(nu, nv, du, dv);
 	
 	int np = numPoints();
 	Vector3F * p = points();
