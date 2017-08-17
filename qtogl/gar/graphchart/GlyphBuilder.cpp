@@ -30,6 +30,7 @@
 #include <attr/SplineCylinderAttribs.h>
 #include <attr/DirectionalBendAttribs.h>
 #include <attr/SimpleTwigAttribs.h>
+#include <attr/FoldCrumpleAttribs.h>
 #include <QString>
 #include <iostream>
 
@@ -156,6 +157,9 @@ PieceAttrib* GlyphBuilder::buildVariantAttrib(const int & gtyp)
 	
 	if(gtyp == gar::gtDirectionalVariant)
 		return (new DirectionalBendAttribs);
+	
+	if(gtyp == gar::gtFoldCrumpleVariant)
+		return (new FoldCrumpleAttribs);
 		
 	return (new PieceAttrib);
 }

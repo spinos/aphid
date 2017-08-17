@@ -19,6 +19,7 @@ m_glyphType(glyphType)
 	char b[17];
     gar::GenGlyphName(b);
 	m_glyphName = std::string(b);
+	addStringAttrib(gar::nmNodeName, m_glyphName);
 }
 
 PieceAttrib::~PieceAttrib()
@@ -57,8 +58,20 @@ void PieceAttrib::addFloatAttrib(gar::AttribName anm,
 	aat->setValue(val);
 	aat->setMin(minVal);
 	aat->setMax(maxVal);
+	m_collAttrs.push_back(aat);	
+}
+
+void PieceAttrib::addVector2Attrib(gar::AttribName anm,
+		const float& val0, 
+		const float& val1)
+{
+	gar::Attrib* aat = new gar::Attrib(anm, gar::tVec2);
+	float tmp[2]; 
+	tmp[0] = val0;
+	tmp[1] = val1;
+		
+	aat->setValue2(tmp);
 	m_collAttrs.push_back(aat);
-	
 }
 
 void PieceAttrib::addSplineAttrib(gar::AttribName anm)
@@ -107,6 +120,8 @@ gar::Attrib* PieceAttrib::findAttrib(gar::AttribName anm)
 		if( (*it)->attrName() == anm)
 			return *it;
 	}
+	std::cout<<"\n ERROR cannot find attrib "<<anm;
+	std::cout.flush();
 	return NULL;
 }
 
@@ -117,6 +132,8 @@ const gar::Attrib* PieceAttrib::findAttrib(gar::AttribName anm) const
 		if( (*it)->attrName() == anm)
 			return *it;
 	}
+	std::cout<<"\n ERROR cannot find attrib "<<anm;
+	std::cout.flush();
 	return NULL;
 }
 
@@ -126,7 +143,7 @@ bool PieceAttrib::hasGeom() const
 int PieceAttrib::numGeomVariations() const
 { return 0; }
 
-aphid::ATriangleMesh* PieceAttrib::selectGeom(int x, float& exclR) const
+aphid::ATriangleMesh* PieceAttrib::selectGeom(gar::SelectProfile* prof) const
 { return NULL; }
 
 bool PieceAttrib::update()
@@ -135,7 +152,10 @@ bool PieceAttrib::update()
 int PieceAttrib::attribInstanceId() const
 { return 0; }
 
-void PieceAttrib::connectTo(PieceAttrib* another)
+bool PieceAttrib::canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const
+{ return true; }
+
+void PieceAttrib::connectTo(PieceAttrib* another, const std::string& portName)
 {}
 
 float PieceAttrib::texcoordBlockAspectRatio() const
@@ -163,3 +183,8 @@ int PieceAttrib::numSynthesizedGroups() const
 
 gar::SynthesisGroup* PieceAttrib::synthesisGroup(int i) const
 { return NULL; }
+
+bool PieceAttrib::isGeomStem() const
+{ return false; }
+bool PieceAttrib::isGeomLeaf() const
+{ return false; }

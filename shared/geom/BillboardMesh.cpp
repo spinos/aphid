@@ -21,7 +21,7 @@ BillboardMesh::~BillboardMesh()
 
 void BillboardMesh::setBillboardSize(float w, float h, int nu)
 {
-	int nv = 3 + h / w * nu;
+	int nv = 4 + h / w * nu;
 	
 	float du = w / (float)nu;
 	float dv = h / (float)nv; 

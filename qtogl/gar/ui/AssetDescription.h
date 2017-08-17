@@ -39,6 +39,7 @@ private:
 	void showSpriteGesc(const QPoint & tg);
 	void showVariantGesc(const QPoint & tg);
 	void showStemGesc(const QPoint & tg);
+	void showTwigGesc(const QPoint & tg);
 	
 private:
 	QLabel * m_lab;

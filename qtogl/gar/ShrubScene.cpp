@@ -85,13 +85,13 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 {
 	PieceAttrib* attr = gl->attrib();
-	const int ngeom = attr->numGeomVariations();
 /// select randomly
-	const int r = rand() % ngeom;
-	float exclR = 1.f;
-	ATriangleMesh * msh = attr->selectGeom(r, exclR);
+	gar::SelectProfile selprof;
+	selprof._condition = gar::slRandom;
+	
+	ATriangleMesh * msh = attr->selectGeom(&selprof);
 /// node_type node_instance geom_ind	
-	const int kgeom = gar::GlyphTypeToGeomIdGroup(gl->glyphType() ) | (gl->attribInstanceId() << 10) | r;
+	const int kgeom = gar::GlyphTypeToGeomIdGroup(gl->glyphType() ) | (gl->attribInstanceId() << 10) | selprof._index;
 	
 	if(!m_vege->findGeom(kgeom)) {
 		m_vege->addGeom(kgeom, msh);
@@ -99,7 +99,7 @@ void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
 	
 	int geomInd = m_vege->getGeomInd(msh);
 	pl->setGeometry(msh, geomInd);
-	pl->setExclR(exclR);
+	pl->setExclR(selprof._exclR);
 }
 
 void ShrubScene::genSinglePlant()
@@ -189,9 +189,11 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	}
 	
 	float angleA = 0.f;
-	gar::Attrib* aangle = gndAttr->findAttrib(gar::nGrowAngle);
-	if(aangle) {
-	    aangle->getValue(angleA);
+	if(gnd->glyphType() == gar::gtBush) {
+		gar::Attrib* aangle = gndAttr->findAttrib(gar::nGrowAngle);
+		if(aangle) {
+			aangle->getValue(angleA);
+		}
 	}
 	
 	float portion = 1.f;
@@ -267,7 +269,7 @@ const ATriangleMesh* ShrubScene::lastSelectedGeom() const
 	PieceAttrib* attr = m_lastSelectedGlyph->attrib();
 	if(!attr->hasGeom())
 		return NULL;
-	float r;
-/// first geom
-	return attr->selectGeom(0, r);
+	
+	gar::SelectProfile selprof;
+	return attr->selectGeom(&selprof);
 }

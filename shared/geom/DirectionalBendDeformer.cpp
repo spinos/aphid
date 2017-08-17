@@ -46,6 +46,10 @@ void DirectionalBendDeformer::deform(const ATriangleMesh * mesh)
 	
 	Matrix44F acct;
 	getBaseMat(acct);
+/// first row
+	for(int i = 0;i < rownv;++i) {
+		points()[i] = acct.transform(points()[i]);
+	}
 		
 	int irow = 1;
 	for(int it = rownv;it < nv;it+=rownv) {
@@ -82,7 +86,7 @@ void DirectionalBendDeformer::deform(const ATriangleMesh * mesh)
 
 void DirectionalBendDeformer::getBaseMat(Matrix44F& mat)
 {
-	const float noi = .4f * RandomFn11();
+	const float noi = .1f * RandomFn11();
 	Matrix33F thetamat;
 	switch (m_orientation) {
 		case 0:
@@ -124,7 +128,7 @@ void DirectionalBendDeformer::getRotMat(Matrix44F& mat, const float& wei,
 			break;
 	}
 	Matrix33F thetamat;
-	thetamat.rotateY( noi * 3.f );
+	thetamat.rotateY( noi * 1.5f );
 	mat.setRotation(phimat * thetamat);
 	
 }

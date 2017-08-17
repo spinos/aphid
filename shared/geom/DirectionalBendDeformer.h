@@ -32,10 +32,9 @@ public:
 	virtual ~DirectionalBendDeformer();
 	
 	void setDirection(const Vector3F& v);
+	void computeRowWeight(const ATriangleMesh * mesh);
 	
 	virtual void deform(const ATriangleMesh * mesh);
-	
-	void computeRowWeight(const ATriangleMesh * mesh);
 	
 	SplineMap1D* bendSpline();
 	SplineMap1D* noiseSpline();

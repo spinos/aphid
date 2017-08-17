@@ -76,11 +76,14 @@ void GLWidget::drawVariableAsset(PieceAttrib* attr)
     
     getDrawer()->m_wireProfile.apply();
 	m_vegd->begin();
+	
+	gar::SelectProfile selprof;
+	selprof._condition = gar::slIndex;
     
     const int ngeom = attr->numGeomVariations();
     for(int i=0;i<ngeom;++i) {
-        float r;
-        const ATriangleMesh* msh = attr->selectGeom(i, r);
+		selprof._index = i;
+        const ATriangleMesh* msh = attr->selectGeom(&selprof);
         m_vegd->drawMesh(msh);
     }
     
@@ -92,8 +95,11 @@ void GLWidget::drawSingleAsset(PieceAttrib* attr)
     if(!attr->hasGeom())
         return;
     
-    float r;
-	const ATriangleMesh* msh = attr->selectGeom(0, r);
+    gar::SelectProfile selprof;
+	selprof._condition = gar::slIndex;
+	selprof._index = 0;
+    
+	const ATriangleMesh* msh = attr->selectGeom(&selprof);
 	if(!msh)
 		return;
 		
@@ -109,27 +115,31 @@ void GLWidget::drawTwigAsset(PieceAttrib* attr)
 	if(ng < 1)
 		return;
 		
-	getDrawer()->m_wireProfile.apply();
+	getDrawer()->m_surfaceProfile.apply();
 	m_vegd->begin();
 	
+	glPushMatrix();
+	glTranslatef(-10.f, 0.f, 0.f);
 	for(int i=0;i<ng;++i) {
+		glTranslatef(10.f, 0.f, 0.f);
 		gar::SynthesisGroup* gi = attr->synthesisGroup(i);
 		drawSynthesisGroup(attr, gi);
 	}
-	
+	glPopMatrix();
 	m_vegd->end();
 }
 
 void GLWidget::drawSynthesisGroup(PieceAttrib* attr, gar::SynthesisGroup* grp)
 {
+	gar::SelectProfile selprof;
+	selprof._condition = gar::slIndex;
+	
 	const int& ninst = grp->numInstances();
-	int igeom;
 	Matrix44F tm;
-	float exclr;
 	for(int i=0;i<ninst;++i) {
-		grp->getInstance(igeom, tm, i);
-		
-		const ATriangleMesh* msh = attr->selectGeom(igeom, exclr);
+		grp->getInstance(selprof._index, tm, i);
+    
+		const ATriangleMesh* msh = attr->selectGeom(&selprof);
 		
 		if(msh) {
 			glPushMatrix();

@@ -24,7 +24,7 @@ public:
 
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
-	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
+	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	
 private:
 	void loadMeshes();

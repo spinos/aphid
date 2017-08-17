@@ -8,21 +8,23 @@
  */
 
 #include "Attrib.h"
+#include <iostream>
 
 namespace gar {
 
-Attrib::Attrib(AttribName anm, AttribType at) :
-m_anm(anm),
-m_atyp(at)
-{}
+Attrib::Attrib(AttribName anm, AttribType atyp)
+{ 
+	m_anm = anm;
+	m_atyp = atyp;
+}
 
 Attrib::~Attrib()
 {}
 
-const AttribName& Attrib::attrName() const
+AttribName Attrib::attrName() const
 { return m_anm; }
 
-const AttribType& Attrib::attrType() const
+AttribType Attrib::attrType() const
 { return m_atyp; }
 
 void Attrib::setValue(const bool& x)
@@ -35,16 +37,16 @@ void Attrib::setValue(const float& x)
 { memcpy(m_data, &x, 4 ); }	
 
 void Attrib::setValue2(const int* x)
-{ memcpy(m_data, &x, 8 ); }
+{ memcpy(m_data, x, 8 ); }
 
 void Attrib::setValue2(const float* x)
-{ memcpy(m_data, &x, 8 ); }
+{ memcpy(m_data, x, 8 ); }
 
 void Attrib::setValue3(const int* x)
-{ memcpy(m_data, &x, 12 ); }
+{ memcpy(m_data, x, 12 ); }
 
 void Attrib::setValue3(const float* x)
-{ memcpy(m_data, &x, 12 ); }
+{ memcpy(m_data, x, 12 ); }
 
 void Attrib::setMin(const int& x)
 { memcpy(&m_data[8], &x, 4 ); }
@@ -71,13 +73,13 @@ void Attrib::getValue2(int* y) const
 { memcpy(&y, m_data, 8 ); }
 
 void Attrib::getValue2(float* y) const
-{ memcpy(&y, m_data, 8 ); }
+{ memcpy(y, m_data, 8 ); }
 
 void Attrib::getValue3(int* y) const
-{ memcpy(&y, m_data, 12 ); }
+{ memcpy(y, m_data, 12 ); }
 
 void Attrib::getValue3(float* y) const
-{ memcpy(&y, m_data, 12 ); }
+{ memcpy(y, m_data, 12 ); }
 
 void Attrib::getMin(int& y) const
 { memcpy(&y, &m_data[8], 4 ); }
@@ -96,6 +98,7 @@ bool Attrib::isStringType() const
 
 const char* Attrib::sAttribNameAsStr[] = {
 "unknown",
+"node name",
 "grow portion",
 "grow margin",
 "grow angle",
@@ -110,25 +113,40 @@ const char* Attrib::sAttribNameAsStr[] = {
 "bend",
 "twist",
 "roll",
+"fold",
+"crumple",
 "width variation",
 "height variation",
 "radius variation",
 "size variation",
 "bend variation",
+"weight variation",
 "noise variation",
-"folding variation",
+"crumple variation",
+"fold variation",
+"aging variation",
 "petiole angle",
 "leaf placement",
-"whorl count"
+"whorl count",
 };
 
-const char* Attrib::attrNameStr() const
-{ return sAttribNameAsStr[m_anm]; }
+std::string Attrib::attrNameStr() const
+{ 
+	if(m_anm > 2048 + 30) {
+		std::cout<<"\n ERROR oor attr name "<<m_anm;
+		std::cout.flush();
+		return std::string("unknown");
+	}
+	return std::string(sAttribNameAsStr[m_anm - 2048]); 
+}
 
 gar::AttribName Attrib::IntAsAttribName(int x)
 {
 	gar::AttribName r = gar::nUnknown;
 	switch (x) {
+		case gar::nmNodeName :
+			r = gar::nmNodeName;
+		break;
 	    case gar::nGrowPortion :
 			r = gar::nGrowPortion;
 		break;
@@ -171,6 +189,12 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nRoll :
 			r = gar::nRoll;
 		break;
+		case gar::nFold :
+			r = gar::nFold;
+		break;
+		case gar::nmCrumple :
+			r = gar::nmCrumple;
+		break;
 		case gar::nWidthVariation :
 			r = gar::nWidthVariation;
 		break;
@@ -186,11 +210,17 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nBendVariation :
 			r = gar::nBendVariation;
 		break;
+		case gar::nWeightVariation :
+			r = gar::nWeightVariation;
+		break;
 		case gar::nNoiseVariation :
 			r = gar::nNoiseVariation;
 		break;
-		case gar::nFoldingVariation :
-			r = gar::nFoldingVariation;
+		case gar::nCrumpleVar :
+			r = gar::nCrumpleVar;
+		break;
+		case gar::nFoldVar :
+			r = gar::nFoldVar;
 		break;
 		case gar::nPetioleAngle :
 			r = gar::nPetioleAngle;

@@ -12,12 +12,13 @@
 #include <geom/DirectionalBendDeformer.h>
 #include <smp/GeodesicSphere.h>
 #include <math/miscfuncs.h>
+#include <gar_common.h>
 
 using namespace aphid;
 
 int DirectionalBendAttribs::sNumInstances = 0;
 
-DirectionalBendAttribs::DirectionalBendAttribs() :
+DirectionalBendAttribs::DirectionalBendAttribs() : PieceAttrib(gar::gtDirectionalVariant),
 m_inAttr(NULL),
 m_inGeom(NULL),
 m_exclR(1.f)
@@ -43,10 +44,13 @@ bool DirectionalBendAttribs::hasGeom() const
 int DirectionalBendAttribs::numGeomVariations() const
 { return 36; }
 
-ATriangleMesh* DirectionalBendAttribs::selectGeom(int x, float& exclR) const
+ATriangleMesh* DirectionalBendAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-    exclR = m_exclR;
-	return m_outGeom[x]; 
+	if(prof->_condition != gar::slIndex)
+		prof->_index = rand() % numGeomVariations();
+		
+    prof->_exclR = m_exclR;
+	return m_outGeom[prof->_index];
 }
 
 bool DirectionalBendAttribs::update()
@@ -54,10 +58,13 @@ bool DirectionalBendAttribs::update()
     if(!m_inAttr)
         return false;
     
-    m_inGeom = m_inAttr->selectGeom(0, m_exclR);
+	gar::SelectProfile selprof;
+    m_inGeom = m_inAttr->selectGeom(&selprof);
     
     if(!m_inGeom)
         return false;
+		
+	m_exclR = selprof._exclR;
 		
 	SplineMap1D* ls = m_dfm->bendSpline();
 	SplineMap1D* ns = m_dfm->noiseSpline();
@@ -85,7 +92,7 @@ bool DirectionalBendAttribs::update()
 int DirectionalBendAttribs::attribInstanceId() const
 { return m_instId; }
 
-void DirectionalBendAttribs::connectTo(PieceAttrib* another)
+void DirectionalBendAttribs::connectTo(PieceAttrib* another, const std::string& portName)
 {
     if(!another->hasGeom()) {
         std::cout<<"\n ERROR DirectionalBendAttribs cannot connect input geom ";
@@ -95,4 +102,23 @@ void DirectionalBendAttribs::connectTo(PieceAttrib* another)
     
     m_inAttr = another;
     update();
+}
+
+bool DirectionalBendAttribs::isGeomStem() const
+{
+	if(!m_inAttr)
+		return false;
+	return m_inAttr->isGeomStem();
+}
+
+bool DirectionalBendAttribs::isGeomLeaf() const
+{
+	if(!m_inAttr)
+		return false;
+	return m_inAttr->isGeomLeaf();
+}
+
+bool DirectionalBendAttribs::canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const
+{
+	return (another->isGeomStem() || another->isGeomLeaf() );
 }

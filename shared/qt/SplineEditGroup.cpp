@@ -22,6 +22,7 @@ SplineEditGroup::SplineEditGroup(const QString& labelName, QWidget *parent) : QG
 	QVBoxLayout * yaLayout = new QVBoxLayout;
     yaLayout->addWidget(m_lab);
 	yaLayout->addWidget(m_edit);
+	yaLayout->setContentsMargins(0, 0, 0, 0);
 	
     setLayout(yaLayout);
 	

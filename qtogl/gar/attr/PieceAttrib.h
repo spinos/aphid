@@ -22,6 +22,21 @@ class SplineMap1D;
 
 namespace gar {
 class SynthesisGroup;
+
+struct SelectProfile {
+
+	SelectCondition _condition;
+	int _index;
+	float _exclR;
+	
+	SelectProfile() {
+		_condition = slIndex;
+		_index = 0;
+		_exclR = 1.f;
+	}
+	
+};
+
 }
 
 class PieceAttrib {
@@ -46,18 +61,22 @@ public:
 	
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
-	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
+	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	virtual bool update();
 /// multi instance of different settings
 	virtual int attribInstanceId() const;
+/// check possible upstream
+	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
 /// set upstream
-	virtual void connectTo(PieceAttrib* another);
+	virtual void connectTo(PieceAttrib* another, const std::string& portName);
 /// width / height, for uv packing
 	virtual float texcoordBlockAspectRatio() const;
 /// for synthesized
 	virtual bool isSynthesized() const;
 	virtual int numSynthesizedGroups() const;
 	virtual gar::SynthesisGroup* synthesisGroup(int i) const;
+	virtual bool isGeomStem() const;
+	virtual bool isGeomLeaf() const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,
@@ -69,6 +88,10 @@ protected:
 		const float& val, 
 		const float& minVal = 0.f,
 		const float& maxVal = 1.f);
+		
+	void addVector2Attrib(gar::AttribName anm,
+		const float& val0, 
+		const float& val1);
 		
 	void addSplineAttrib(gar::AttribName anm);
 		

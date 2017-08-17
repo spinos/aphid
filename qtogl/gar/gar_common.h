@@ -30,6 +30,7 @@ enum GlyphTyp {
 	gtRibSprite = 66,
 	gtBendTwistRollVariant = 97,
 	gtDirectionalVariant = 98,
+	gtFoldCrumpleVariant = 99,
 	gtImportGeom = 129,
 	gtSplineCylinder = 161,
 	gtSimpleTwig = 193,
@@ -59,7 +60,7 @@ static const int GlyphRange[NumGlyphGroups][2] = {
 {1, 3},
 {33, 37},
 {65, 67},
-{97, 99},
+{97, 100},
 {129, 130},
 {161, 162},
 {193, 194}

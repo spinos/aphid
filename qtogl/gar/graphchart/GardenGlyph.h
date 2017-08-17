@@ -62,7 +62,7 @@ public:
 	QPointF localCenter() const;
 	const std::string& glyphName() const;
 	
-	void postConnection(GardenGlyph* another);
+	void postConnection(GardenGlyph* another, aphid::GlyphPort* viaPort);
 	void postSelection();
 	
 protected:

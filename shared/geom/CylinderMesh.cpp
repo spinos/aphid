@@ -93,7 +93,8 @@ void CylinderMesh::createCylinder1(int nu, int nv, float radius, float height,
 	for(int i=0;i<np;++i) {
 		nmlDst[i].set(p[i].x ,0.f, p[i].z);
 		nmlDst[i].normalize();
-		colDst[i].set(.1f,.7f,.4f);
+/// brown color
+		colDst[i].set(.29f,.06f,.08f);
 	}
 	
 }

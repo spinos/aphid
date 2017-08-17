@@ -38,13 +38,22 @@ m_inLeafAttr(NULL)
 	
 	addEnumAttrib(gar::nLeafPlacement, phyllotaxyFields);
 	addIntAttrib(gar::nWhorlCount, 4, 3, 8);
+	addSplineAttrib(gar::nAgingVar);
 	addSplineAttrib(gar::nSizeVariation);
-	addSplineAttrib(gar::nFoldingVariation);
+	addSplineAttrib(gar::nFoldVar);
+	addSplineAttrib(gar::nNoiseVariation);
 	
 	m_morph._sizingSpline = new SplineMap1D;
 	m_morph._foldingSpline = new SplineMap1D;
+	m_morph._noiseSpline = new SplineMap1D;
+	m_morph._agingSpline = new SplineMap1D;
 	
-	gar::SplineAttrib* afs = (gar::SplineAttrib*)findAttrib(gar::nFoldingVariation);
+	gar::SplineAttrib* aas = (gar::SplineAttrib*)findAttrib(gar::nAgingVar);
+	aas->setSplineValue(1.f, 0.f);
+	aas->setSplineCv0(.4f, 1.f);
+	aas->setSplineCv1(.6f, 0.f);
+	
+	gar::SplineAttrib* afs = (gar::SplineAttrib*)findAttrib(gar::nFoldVar);
 	afs->setSplineValue(0.f, .5f);
 	afs->setSplineCv0(.4f, .0f);
 	afs->setSplineCv1(.6f, .5f);
@@ -55,6 +64,8 @@ SimpleTwigAttribs::~SimpleTwigAttribs()
 {
 	delete m_morph._sizingSpline;
 	delete m_morph._foldingSpline;
+	delete m_morph._noiseSpline;
+	delete m_morph._agingSpline;
 }
 
 bool SimpleTwigAttribs::update()
@@ -66,23 +77,33 @@ bool SimpleTwigAttribs::update()
 		
 	clearSynths();
 	
+	SplineMap1D* ags = m_morph._agingSpline;
+	gar::SplineAttrib* aags = (gar::SplineAttrib*)findAttrib(gar::nAgingVar);
+	updateSplineValues(ags, aags);
+	
 	SplineMap1D* ls = m_morph._sizingSpline;
 	gar::SplineAttrib* als = (gar::SplineAttrib*)findAttrib(gar::nSizeVariation);
 	updateSplineValues(ls, als);
 	
 	SplineMap1D* fs = m_morph._foldingSpline;
-	gar::SplineAttrib* afs = (gar::SplineAttrib*)findAttrib(gar::nFoldingVariation);
+	gar::SplineAttrib* afs = (gar::SplineAttrib*)findAttrib(gar::nFoldVar);
 	updateSplineValues(fs, afs);
+	
+	SplineMap1D* ns = m_morph._noiseSpline;
+	gar::SplineAttrib* ans = (gar::SplineAttrib*)findAttrib(gar::nNoiseVariation);
+	updateSplineValues(ns, ans);
 	
 	findAttrib(gar::nPetioleAngle)->getValue(m_morph._petioleAngle);
 	findAttrib(gar::nLeafPlacement)->getValue(m_morph._leafPlacement);
 	findAttrib(gar::nWhorlCount)->getValue(m_morph._whorlCount);
 	
+	gar::SelectProfile selprof;
+	
 /// for each stem variation
 	const int ng = m_inStemAttr->numGeomVariations();
 	for(int i=0;i<ng;++i) {
-		float exclR;
-		ATriangleMesh* inGeom = m_inStemAttr->selectGeom(i, exclR);
+		selprof._index = i;
+		ATriangleMesh* inGeom = m_inStemAttr->selectGeom(&selprof);
 		if(!inGeom)
 			return false;
 			
@@ -122,18 +143,31 @@ bool SimpleTwigAttribs::connectToLeaf(PieceAttrib* another)
 
 bool SimpleTwigAttribs::CanBeTwigStem(int x)
 {
-	return (gar::ToGroupType(x) == gar::ggStem);
+	const int gg = gar::ToGroupType(x);
+	return (gg == gar::ggStem
+		|| gg == gar::ggVariant);
 }
 
 bool SimpleTwigAttribs::CanBeTwigLeaf(int x)
 {
-	return (gar::ToGroupType(x) == gar::ggSprite);
+	const int gg = gar::ToGroupType(x);
+	return (gg == gar::ggSprite
+		|| gg == gar::ggVariant);
 }
 
-void SimpleTwigAttribs::connectTo(PieceAttrib* another)
+bool SimpleTwigAttribs::canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const
 {
-	bool stat = connectToStem(another);
-	if(!stat)
+	if(portName == "inStem") 
+		return another->isGeomStem();
+	return another->isGeomLeaf();
+}
+
+void SimpleTwigAttribs::connectTo(PieceAttrib* another, const std::string& portName)
+{
+	bool stat = false;
+	if(portName == "inStem") 
+		stat = connectToStem(another);
+	else
 		stat = connectToLeaf(another);
 		
     if(!stat) {
@@ -144,19 +178,22 @@ void SimpleTwigAttribs::connectTo(PieceAttrib* another)
     update();
 }
 
-ATriangleMesh* SimpleTwigAttribs::selectGeom(int x, float& exclR) const
+ATriangleMesh* SimpleTwigAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	if(x < 1024) {
+/// always by index
+	if(prof->_index < 1024) {
 		if(!m_inStemAttr)
 			return NULL;
 			
-		return m_inStemAttr->selectGeom(x, exclR);
+		return m_inStemAttr->selectGeom(prof);
 	}
 	
 	if(!m_inLeafAttr)
 		return NULL;
 		
-	return m_inLeafAttr->selectGeom(x>>10, exclR);
+	prof->_index = prof->_index>>10;
+	
+	return m_inLeafAttr->selectGeom(prof);
 }
 
 bool SimpleTwigAttribs::isSynthesized() const
@@ -221,13 +258,23 @@ void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 		vup = p0p1.cross(vside);
 		vup.normalize();
 		
+		float& noiseWeight = m_morph._nodeNoiseWeight;
+		noiseWeight = m_morph._noiseSpline->interpolate(m_morph._nodeParam);
+		
 		float d = m_morph._sizingSpline->interpolate(m_morph._nodeParam);
+		if(noiseWeight > 1e-3f) 
+			d += RandomFn11() * 0.03f * noiseWeight;
 		if(d < .07f) d = .07f;
 		
 		segmat.setOrientations(vside * d, vup * d, p0p1 * d);
 		segmat.setTranslation(p1);
 		
 		d = m_morph._petioleAngle + m_morph._foldingSpline->interpolate(m_morph._nodeParam);
+		
+		if(noiseWeight > 1e-3f) {
+			d += RandomFn11() * 0.13f * noiseWeight;
+		}
+		
 		if(d > 1.43f) d = 1.43f;
 		
 		Quaternion petq(d, Vector3F::XAxis );
@@ -275,6 +322,11 @@ void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
 	
 	}
 	
+	const float& noiseWeight = m_morph._nodeNoiseWeight;
+	if(noiseWeight > 1e-3f) {
+		petAng *= 1.f + RandomFn11() * 0.17f * noiseWeight;
+	}
+	
 	if(m_morph._leafPlacement == gar::phOpposite
 		|| m_morph._leafPlacement == gar::phWhorled) {
 /// skip odd nodes
@@ -284,14 +336,20 @@ void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
 	}
 	
 	Matrix44F phymat;
+	const Vector3F ppos = segmat.getTranslation();
 	const Vector3F vrot = segmat.getFront().normal();
 	for(int i=0;i<nleaf;++i) {
+		
 		Quaternion phyq(m_morph._phyllotaxyAngle + petAng * i, vrot );
 		Matrix33F mrot(phyq);
 		phymat.setRotation(mrot);
+		
+/// combine rotation then restore translation
+		Matrix44F instmat = petmat * segmat * phymat;
+		instmat.setTranslation(ppos);
 	
 /// first geom in leaf
-		grp->addInstance(1024, petmat * segmat * phymat);
+		grp->addInstance(1024, instmat);
 	}
 	
 	m_morph._phyllotaxyAngle += segAng;

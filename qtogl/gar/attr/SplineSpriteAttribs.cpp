@@ -36,11 +36,9 @@ bool SplineSpriteAttribs::hasGeom() const
 int SplineSpriteAttribs::numGeomVariations() const
 { return 1; }
 
-ATriangleMesh* SplineSpriteAttribs::selectGeom(int x, float& exclR) const
+ATriangleMesh* SplineSpriteAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	const gar::Attrib* wa = findAttrib(gar::nWidth);
-	wa->getValue(exclR);
-	exclR *= .4f;
+	prof->_exclR = m_exclR;
 	return m_billboard; 
 }
 
@@ -58,6 +56,7 @@ bool SplineSpriteAttribs::update()
 	float w, h;
 	findAttrib(gar::nWidth)->getValue(w);
 	findAttrib(gar::nHeight)->getValue(h);
+	m_exclR = w * .39f;
 	
 	m_billboard->setBillboardSize(w, h, 1);
 	return true;
@@ -68,3 +67,6 @@ int SplineSpriteAttribs::attribInstanceId() const
 
 float SplineSpriteAttribs::texcoordBlockAspectRatio() const
 { return m_billboard->widthHeightRatio(); }
+
+bool SplineSpriteAttribs::isGeomLeaf() const
+{ return true; }

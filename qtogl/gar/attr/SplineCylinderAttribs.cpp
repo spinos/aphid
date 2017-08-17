@@ -22,8 +22,8 @@ SplineCylinderAttribs::SplineCylinderAttribs() : PieceAttrib(gar::gtSplineCylind
 	
 	m_cylinder = new SplineCylinder;
 	
-	addFloatAttrib(gar::nRadius, 1.f, .5f, 80.f);
-	addFloatAttrib(gar::nHeight, 10.f, 4.f, 120.f);
+	addFloatAttrib(gar::nRadius, 1.f, .5f, 25.f);
+	addFloatAttrib(gar::nHeight, 20.f, 4.f, 200.f);
 	addSplineAttrib(gar::nRadiusVariation);
 	addSplineAttrib(gar::nHeightVariation);
 	update();
@@ -35,10 +35,9 @@ bool SplineCylinderAttribs::hasGeom() const
 int SplineCylinderAttribs::numGeomVariations() const
 { return 1; }
 
-ATriangleMesh* SplineCylinderAttribs::selectGeom(int x, float& exclR) const
+ATriangleMesh* SplineCylinderAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	const gar::Attrib* wa = findAttrib(gar::nRadius);
-	wa->getValue(exclR);
+	prof->_exclR = m_exclR;
 	return m_cylinder; 
 }
 
@@ -58,7 +57,9 @@ bool SplineCylinderAttribs::update()
 	findAttrib(gar::nHeight)->getValue(h);
 	
 	int nv = 4 + h * .23f / r;
-	m_cylinder->createCylinder(6, nv, r, h);
+	m_cylinder->createCylinder(5, nv, r, h);
+	
+	m_exclR = r * 1.9f;
 	return true;
 }
 
@@ -67,3 +68,6 @@ int SplineCylinderAttribs::attribInstanceId() const
 
 float SplineCylinderAttribs::texcoordBlockAspectRatio() const
 { return m_cylinder->circumferenceHeightRatio(); }
+
+bool SplineCylinderAttribs::isGeomStem() const
+{ return true; }

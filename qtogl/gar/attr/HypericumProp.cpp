@@ -60,9 +60,12 @@ int HypericumProp::numGeomVariations() const
 	return gar::GrassGeomDeviations[gt];
 }
 
-ATriangleMesh* HypericumProp::selectGeom(int x, float& exclR) const
+ATriangleMesh* HypericumProp::selectGeom(gar::SelectProfile* prof) const
 { 
-	exclR = sExclRs[x];
-	return sMeshes[x]; 
+	if(prof->_condition != gar::slIndex)
+		prof->_index = rand() % numGeomVariations();
+		
+	prof->_exclR = sExclRs[prof->_index];
+	return sMeshes[prof->_index]; 
 }
 

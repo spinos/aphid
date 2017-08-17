@@ -9,10 +9,10 @@
  
 #include <QtGui>
 #include <QtGui/QTreeWidget>
-#include "groundAssets.h"
-#include "plantAssets.h"
-#include "FileAssets.h"
-#include "SpriteAssets.h"
+#include <asset/groundAssets.h>
+#include <asset/plantAssets.h>
+#include <asset/FileAssets.h>
+#include <asset/SpriteAssets.h>
 #include "GlyphPalette.h"
 #include "assetdlg.h"
 
@@ -39,7 +39,7 @@ AssetDlg::AssetDlg(QWidget *parent)
 	
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_split);
-
+	
     setLayout(mainLayout);
 	setWindowTitle(tr(" ") );
 	connect(m_assetTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 

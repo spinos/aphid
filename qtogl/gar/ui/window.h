@@ -63,6 +63,6 @@ private:
     ShrubScene * m_scene;
 	ShrubChartView * m_chartView;
 	Vegetation * m_vege;
-
+	
 };
 #endif

@@ -7,15 +7,15 @@
 #include "window.h"
 #include "widget.h"
 #include "toolBox.h"
-#include "asset/assetdlg.h"
+#include "assetdlg.h"
 #include "ShrubScene.h"
 #include "graphchart/ShrubChartView.h"
 #include "graphchart/ChartDlg.h"
 #include "Vegetation.h"
 #include "VegetationPatch.h"
-#include "inout/exportDlg.h"
+#include "exportDlg.h"
 #include "inout/ExportExample.h"
-#include "attr/AttribDlg.h"
+#include "AttribDlg.h"
 #include "gar_common.h"
 
 Window::Window()
@@ -60,7 +60,7 @@ Window::Window()
 	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
 			glWidget, SLOT(update()));
 			
-	connect(m_attrib, SIGNAL(sendAttribChanged()), 
+	connect(m_attrib->getWidget(), SIGNAL(sendAttribChanged()), 
 			glWidget, SLOT(update()));
 }
 
@@ -144,7 +144,7 @@ void Window::recvAttribDlgClose()
 { m_attribAct->setChecked(false); }
 
 void Window::recvToolAction(int x)
-{
+{	
 	switch(x) {
 		case gar::actViewPlant:
 			singleSynth();

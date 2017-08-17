@@ -16,7 +16,7 @@ namespace gar {
 
 static const char * TwigTypeNames[NUM_TWIG_PIECES] = {
 "unknown",
-"Twig"
+"Simple Twig"
 };
 
 static const char * TwigTypeImages[NUM_TWIG_PIECES] = {
@@ -40,12 +40,12 @@ static inline int ToTwigType(int x) {
 
 static const int TwigInPortRange[NUM_TWIG_PIECES][2] = {
 {0,0},
-{0,1},
+{0,2},
 };
 
 static const char * TwigInPortRangeNames[2] = {
 "inStem",
-""
+"inLeaf",
 };
 
 static const int TwigOutPortRange[NUM_TWIG_PIECES][2] = {

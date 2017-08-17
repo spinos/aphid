@@ -60,9 +60,12 @@ int PoapratensisProp::numGeomVariations() const
 	return gar::GrassGeomDeviations[gt];
 }
 
-ATriangleMesh* PoapratensisProp::selectGeom(int x, float& exclR) const
+ATriangleMesh* PoapratensisProp::selectGeom(gar::SelectProfile* prof) const
 { 
-	exclR = sExclRs[x];
-	return sMeshes[x]; 
+	if(prof->_condition != gar::slIndex)
+		prof->_index = rand() % numGeomVariations();
+		
+	prof->_exclR = sExclRs[prof->_index];
+	return sMeshes[prof->_index]; 
 }
 

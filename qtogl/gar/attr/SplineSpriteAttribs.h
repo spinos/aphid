@@ -20,6 +20,7 @@ class SplineSpriteAttribs : public PieceAttrib {
 	
 	aphid::SplineBillboard* m_billboard;
 	int m_instId;
+	float m_exclR;
 	
 	static int sNumInstances;
 	
@@ -28,10 +29,11 @@ public:
 	
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
-	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
+	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	virtual bool update();
 	virtual int attribInstanceId() const;
 	virtual float texcoordBlockAspectRatio() const;
+	virtual bool isGeomLeaf() const;
 	
 };
 

@@ -1,25 +1,16 @@
 /*
- *  AttribDlg.h
- *  garden
+ *  AttribWidget.h
+ *  
  *
- *  Created by jian zhang on 4/27/17.
+ *  Created by jian zhang on 8/18/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
-#ifndef GAR_ATTRIB_DLG_H
-#define GAR_ATTRIB_DLG_H
+#ifndef GAR_ATTRIB_WIDGET_H
+#define GAR_ATTRIB_WIDGET_H
 
-#include <QDialog>
-#include <QQueue>
-
-QT_BEGIN_NAMESPACE
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QVBoxLayout;
-class QSpacerItem;
-QT_END_NAMESPACE
+#include <QWidget>
 
 class ShrubScene;
 class GardenGlyph;
@@ -31,25 +22,22 @@ class SplineAttrib;
 class EnumAttrib;
 }
 
-class AttribDlg : public QDialog
+class AttribWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    AttribDlg(ShrubScene* scene, QWidget *parent = 0);
+    AttribWidget(ShrubScene* scene, QWidget *parent = 0);
 	
+	void recvSelectGlyph(bool x);
+	
+	QString lastSelectedGlyphName() const;
+	QString lastSelectedGlyphTypeName() const;
+
 protected:
-	virtual void 	closeEvent ( QCloseEvent * e );
 
 signals:
-	void onAttribDlgClose();
 	void sendAttribChanged();
-		
-public slots:
-/// on select glyph
-/// true: update attribs
-/// false: clear attribs
-	void recvSelectGlyph(bool x);
 	
 private slots:
 	void recvDoubleValue(QPair<int, double> x);
@@ -59,11 +47,11 @@ private slots:
 	void recvSplineCv0(QPair<int, QPointF> x);
 	void recvSplineCv1(QPair<int, QPointF> x);
 	void recvEnumValue(QPair<int, int> x);
+	void recvVec2Value(QPair<int, QVector<double> > x);
 	
 private:
 	void lsAttribs(GardenGlyph* g);
 	void clearAttribs();
-	void lsDefault(GardenGlyph* g);
 	void lsAdded(GardenGlyph* g);
 	void lsAttr(gar::Attrib* attr);
 	QWidget* shoFltAttr(gar::Attrib* attr);
@@ -71,6 +59,7 @@ private:
 	QWidget* shoStrAttr(gar::Attrib* attr);
 	QWidget* shoSplineAttr(gar::Attrib* attr);
 	QWidget* shoEnumAttr(gar::Attrib* attr);
+	QWidget* shoVec2Attr(gar::Attrib* attr);
 	gar::StringAttrib* findStringAttr(int i);
 	gar::SplineAttrib* findSplineAttr(int i);
 	gar::EnumAttrib* findEnumAttr(int i);

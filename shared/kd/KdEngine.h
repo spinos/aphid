@@ -38,7 +38,7 @@ public:
 	template<typename T, typename Tn, int NLevel>
 	void buildTree(KdNTree<T, Tn > * tree, 
 					sdb::VectorArray<T> * source, const BoundingBox & box,
-					const TreeProperty::BuildProfile * prof);
+					TreeProperty::BuildProfile * prof);
 	
 	template<typename T, typename Tn>
 	void printTree(KdNTree<T, Tn > * tree);
@@ -245,7 +245,7 @@ void KdEngine::buildSource(sdb::VectorArray<T> * dst,
 template<typename T, typename Tn, int NLevel>
 void KdEngine::buildTree(KdNTree<T, Tn > * tree, 
 							sdb::VectorArray<T> * source, const BoundingBox & box,
-							const TreeProperty::BuildProfile * prof)
+							TreeProperty::BuildProfile * prof)
 {
 	tree->init(source, box);
     
@@ -254,6 +254,11 @@ void KdEngine::buildTree(KdNTree<T, Tn > * tree,
 			<<"\n n input "<<source->size()
 			<<"\n max n prims per leaf "<<prof->_maxLeafPrims
 			<<"\n max build level "<<prof->_maxLevel;
+			
+	if(source->size() < 1024) {
+		prof->_maxLeafPrims = 8;
+		std::cout<<"\n kdengine reduce max leaf prims to 8";
+	}
     
     KdNBuilder<NLevel, T, Tn > bud;
 	bud.SetNumPrimsInLeaf(prof->_maxLeafPrims);

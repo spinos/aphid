@@ -1,4 +1,4 @@
-## Sat Aug 16 22:47:05 CST 2017 
+## Sat Aug 19 00:54:05 CST 2017 
 
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
@@ -31,13 +31,19 @@ file (GLOB Chart_SRC
     "graphchart/*.cpp"
 )
 
+file (GLOB Ui_HEAD
+    "ui/*.h"
+)
+
+file (GLOB Ui_SRC
+    "ui/*.cpp"
+)
+
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 data/grass.h
 data/clover.h
 data/haircap.h
 data/poapratensis.h
-window.h
-widget.h
 gar_common.h
 ShrubScene.h
 ${APHID_QT_DIR}/GlyphPort.h
@@ -46,15 +52,13 @@ ${APHID_QT_DIR}/GlyphHalo.h
 ${Chart_HEAD}
 ${Asst_HEAD}
 ${Attr_HEAD}
+${Ui_HEAD}
 PlantPiece.h
 VegetationPatch.h
 Vegetation.h
-DrawVegetation.h
-inout/exportDlg.h
 inout/ExportExample.h
 inout/HGardenExample.h
 inout/HVegePatch.h
-toolBox.h
 GrowthSample.h
 ${APHID_DIR}/rhizoid/Variform.cpp
 ${APHID_DIR}/rhizoid/GardenExamp.cpp
@@ -80,10 +84,8 @@ ${APHID_QT_DIR}/ActionIconFrame.cpp
 ${APHID_QT_DIR}/QSplineEdit.cpp
 ${APHID_QT_DIR}/SplineEditGroup.cpp
 ${APHID_QT_DIR}/IntEditGroup.cpp
+${APHID_QT_DIR}/DoubleEditGroup.cpp
 ${APHID_QT_DIR}/QEnumCombo.cpp
-widget.cpp
-window.cpp
-toolBox.cpp
 ShrubScene.cpp
 ${APHID_QT_DIR}/GlyphPort.cpp
 ${APHID_QT_DIR}/GlyphConnection.cpp
@@ -91,11 +93,10 @@ ${APHID_QT_DIR}/GlyphHalo.cpp
 ${Chart_SRC}
 ${Attr_SRC}
 ${Asst_SRC}
+${Ui_SRC}
 PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp
-DrawVegetation.cpp
-inout/exportDlg.cpp
 inout/ExportExample.cpp
 inout/HGardenExample.cpp
 inout/HVegePatch.cpp

@@ -1,14 +1,14 @@
 /*
- *  AttribDlg.cpp
- *  garden
+ *  AttribWidget.cpp
+ *  
  *
- *  Created by jian zhang on 4/27/17.
+ *  Created by jian zhang on 8/18/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
 #include <QtGui>
-#include "AttribDlg.h"
+#include "AttribWidget.h"
 #include "ShrubScene.h"
 #include "graphchart/GardenGlyph.h"
 #include "gar_common.h"
@@ -18,56 +18,32 @@
 #include "data/billboard.h"
 #include "data/variation.h"
 #include "data/stem.h"
+#include "data/twig.h"
 #include "attr/PieceAttrib.h"
 #include <qt/QDoubleEditSlider.h>
 #include <qt/QStringEditField.h>
 #include <qt/SplineEditGroup.h>
 #include <qt/QEnumCombo.h>
 #include <qt/IntEditGroup.h>
+#include <qt/DoubleEditGroup.h>
 
 using namespace aphid;
 
-AttribDlg::AttribDlg(ShrubScene* scene, QWidget *parent) : QDialog(parent)
+AttribWidget::AttribWidget(ShrubScene* scene, QWidget *parent) : QWidget(parent)
 {
 	m_selectedGlyph = NULL;
 	m_scene = scene;
-	setWindowTitle(tr("Attributes") );
 	
 	mainLayout = new QVBoxLayout;
 	mainLayout->setSpacing(2);
-    setLayout(mainLayout);
-	resize(360, 240);
+    mainLayout->setContentsMargins(2,2,2,2);
+	setLayout(mainLayout);
+	
 	m_lastStretch = 0;
 }
 
-void AttribDlg::closeEvent ( QCloseEvent * e )
+void AttribWidget::lsAttribs(GardenGlyph* g)
 {
-	emit onAttribDlgClose();
-	QDialog::closeEvent(e);
-}
-
-void AttribDlg::recvSelectGlyph(bool x)
-{
-	if(x) {
-		GardenGlyph* g = m_scene->lastSelectedGlyph();
-		if(g == m_selectedGlyph) {
-			return;
-		}
-		m_selectedGlyph = g;
-		clearAttribs();
-		setWindowTitle(tr("Attributes: %1").arg(g->glyphName().c_str() ) );
-		lsAttribs(g);
-			
-	} else {
-		m_selectedGlyph = NULL;
-		clearAttribs();
-		setWindowTitle(tr("Attributes") );
-	}
-}
-
-void AttribDlg::lsAttribs(GardenGlyph* g)
-{
-	lsDefault(g);
 	lsAdded(g);
     
 	const int n = m_collWigs.count();
@@ -79,7 +55,7 @@ void AttribDlg::lsAttribs(GardenGlyph* g)
 	mainLayout->addItem(m_lastStretch);
 }
 
-void AttribDlg::clearAttribs()
+void AttribWidget::clearAttribs()
 {
 	foreach (QWidget *widget, m_collWigs)
         mainLayout->removeWidget(widget);
@@ -94,37 +70,7 @@ void AttribDlg::clearAttribs()
 	}
 }
 
-void AttribDlg::lsDefault(GardenGlyph* g)
-{
-	const int& gt = g->glyphType();
-	QString stype(tr("unknown"));
-	const int gg = gar::ToGroupType(gt );
-	switch (gg) {
-		case gar::ggGround :
-			stype = gar::GroundTypeNames[gar::ToGroundType(gt)];
-		break;
-		case gar::ggGrass :
-			stype = gar::GrassTypeNames[gar::ToGrassType(gt)];
-		break;
-		case gar::ggFile :
-			stype = gar::FileTypeNames[gar::ToFileType(gt)];
-		break;
-		case gar::ggSprite :
-			stype = gar::BillboardTypeNames[gar::ToBillboardType(gt)];
-		break;
-		case gar::ggVariant :
-			stype = gar::VariationTypeNames[gar::ToVariationType(gt)];
-		break;
-		case gar::ggStem :
-			stype = gar::StemTypeNames[gar::ToStemType(gt)];
-		break;
-		default:
-		;
-	}
-	m_collWigs.enqueue(new QLabel(tr(" node type: %1").arg(stype) ) );
-}
-
-void AttribDlg::lsAdded(GardenGlyph* g)
+void AttribWidget::lsAdded(GardenGlyph* g)
 {
 	PieceAttrib* att = g->attrib();
 	const int n = att->numAttribs();
@@ -134,10 +80,13 @@ void AttribDlg::lsAdded(GardenGlyph* g)
 	}
 }
 
-void AttribDlg::lsAttr(gar::Attrib* attr)
+void AttribWidget::lsAttr(gar::Attrib* attr)
 {
-	const gar::AttribType& atyp = attr->attrType();
-	
+	const gar::AttribType atyp = attr->attrType();	
+/// skip node name
+	if(attr->attrName() == gar::nmNodeName)
+		return;
+			
 	QWidget* wig = NULL;
 	switch (atyp) {
 		case gar::tFloat :
@@ -155,16 +104,19 @@ void AttribDlg::lsAttr(gar::Attrib* attr)
 		case gar::tEnum :
 			wig = shoEnumAttr(attr);
 		break;
+		case gar::tVec2 :
+			wig = shoVec2Attr(attr);
+		break;
 		default:
-			wig = new QLabel(tr(attr->attrNameStr() ) );
+			wig = new QLabel(tr(attr->attrNameStr().c_str() ) );
 	}
 	
 	m_collWigs.enqueue(wig);
 }
 
-QWidget* AttribDlg::shoFltAttr(gar::Attrib* attr)
+QWidget* AttribWidget::shoFltAttr(gar::Attrib* attr)
 {
-	QDoubleEditSlider* wig = new QDoubleEditSlider(tr(attr->attrNameStr() ) );
+	QDoubleEditSlider* wig = new QDoubleEditSlider(tr(attr->attrNameStr().c_str() ) );
 	float val, val0, val1;
 	attr->getValue(val);
 	attr->getMin(val0);
@@ -179,9 +131,24 @@ QWidget* AttribDlg::shoFltAttr(gar::Attrib* attr)
 	return wig;
 }
 
-QWidget* AttribDlg::shoIntAttr(gar::Attrib* attr)
+QWidget* AttribWidget::shoVec2Attr(gar::Attrib* attr)
 {
-	IntEditGroup* wig = new IntEditGroup(tr(attr->attrNameStr() ) );
+	DoubleEditGroup* wig = new DoubleEditGroup(tr(attr->attrNameStr().c_str() ), 2 );
+	float val[2];
+	attr->getValue2(val);
+	
+	wig->setValues(val);
+	wig->setNameId(attr->attrName() );
+	
+	connect(wig, SIGNAL(valueChanged2(QPair<int, QVector<double> >)),
+            this, SLOT(recvVec2Value(QPair<int, QVector<double> >)));
+			
+	return wig;
+}
+
+QWidget* AttribWidget::shoIntAttr(gar::Attrib* attr)
+{
+	IntEditGroup* wig = new IntEditGroup(tr(attr->attrNameStr().c_str() ) );
 	int val, val0, val1;
 	attr->getValue(val);
 	attr->getMin(val0);
@@ -196,12 +163,12 @@ QWidget* AttribDlg::shoIntAttr(gar::Attrib* attr)
 	return wig;
 }
 
-QWidget* AttribDlg::shoStrAttr(gar::Attrib* attr)
+QWidget* AttribWidget::shoStrAttr(gar::Attrib* attr)
 {
 	gar::StringAttrib* sattr = static_cast<gar::StringAttrib*> (attr);
 	std::string sval;
 	sattr->getValue(sval);
-	QStringEditField* wig = new QStringEditField(tr(attr->attrNameStr() ) );
+	QStringEditField* wig = new QStringEditField(tr(attr->attrNameStr().c_str() ) );
 	wig->setValue(tr(sval.c_str() ) );
 	if(sattr->isFileName() ) {
 	    wig->addButton(":/icons/document_open.png");
@@ -215,11 +182,11 @@ QWidget* AttribDlg::shoStrAttr(gar::Attrib* attr)
 	return wig;
 }
 
-QWidget* AttribDlg::shoSplineAttr(gar::Attrib* attr)
+QWidget* AttribWidget::shoSplineAttr(gar::Attrib* attr)
 {
 	gar::SplineAttrib* sattr = static_cast<gar::SplineAttrib*> (attr);
 	
-	SplineEditGroup* wig = new SplineEditGroup(tr(attr->attrNameStr()) );
+	SplineEditGroup* wig = new SplineEditGroup(tr(attr->attrNameStr().c_str() ) );
 	wig->setNameId(attr->attrName() );
 	
 	float tmp[2];
@@ -242,11 +209,11 @@ QWidget* AttribDlg::shoSplineAttr(gar::Attrib* attr)
 	return wig;
 }
 
-QWidget* AttribDlg::shoEnumAttr(gar::Attrib* attr)
+QWidget* AttribWidget::shoEnumAttr(gar::Attrib* attr)
 {
 	gar::EnumAttrib* sattr = static_cast<gar::EnumAttrib*> (attr);
 	
-	QEnumCombo* wig = new QEnumCombo(tr(attr->attrNameStr()) );
+	QEnumCombo* wig = new QEnumCombo(tr(attr->attrNameStr().c_str() ) );
 	wig->setNameId(attr->attrName() );
 	
 	const int& nf = sattr->numFields();
@@ -266,12 +233,29 @@ QWidget* AttribDlg::shoEnumAttr(gar::Attrib* attr)
 	return wig;
 }
 
-void AttribDlg::recvDoubleValue(QPair<int, double> x)
+void AttribWidget::recvVec2Value(QPair<int, QVector<double> > x)
 {
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
 	if(!dst) {
-		qDebug()<<" AttribDlg::recvDoubleValue cannot find float attr "
+		qDebug()<<" AttribWidget::recvDoubleValue cannot find float attr "
+			<<x.first;
+		return;
+	}
+	
+	float vals[2];
+	vals[0] = x.second[0];
+	vals[1] = x.second[1];
+	dst->setValue2(vals);
+	updateSelectedGlyph();
+}
+
+void AttribWidget::recvDoubleValue(QPair<int, double> x)
+{
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
+	if(!dst) {
+		qDebug()<<" AttribWidget::recvDoubleValue cannot find float attr "
 			<<x.first;
 		return;
 	}
@@ -279,12 +263,12 @@ void AttribDlg::recvDoubleValue(QPair<int, double> x)
 	updateSelectedGlyph();
 }
 
-void AttribDlg::recvIntValue(QPair<int, int> x)
+void AttribWidget::recvIntValue(QPair<int, int> x)
 {
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
 	if(!dst) {
-		qDebug()<<" AttribDlg::recvDoubleValue cannot find int attr "
+		qDebug()<<" AttribWidget::recvDoubleValue cannot find int attr "
 			<<x.first;
 		return;
 	}
@@ -292,7 +276,7 @@ void AttribDlg::recvIntValue(QPair<int, int> x)
 	updateSelectedGlyph();
 }
 
-void AttribDlg::recvStringValue(QPair<int, QString> x)
+void AttribWidget::recvStringValue(QPair<int, QString> x)
 {
 	gar::StringAttrib* sattr = findStringAttr(x.first);
 	if(!sattr) 
@@ -301,7 +285,7 @@ void AttribDlg::recvStringValue(QPair<int, QString> x)
 	updateSelectedGlyph();
 }
 
-gar::StringAttrib* AttribDlg::findStringAttr(int i)
+gar::StringAttrib* AttribWidget::findStringAttr(int i)
 {
 	if(!m_selectedGlyph) 
 		return NULL;
@@ -309,7 +293,7 @@ gar::StringAttrib* AttribDlg::findStringAttr(int i)
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
 	if(!dst) {
-		qDebug()<<" AttribDlg cannot find string attr "
+		qDebug()<<" AttribWidget cannot find string attr "
 			<<i;
 		return NULL;
 	}
@@ -317,7 +301,7 @@ gar::StringAttrib* AttribDlg::findStringAttr(int i)
 	return static_cast<gar::StringAttrib*> (dst);
 }
 
-gar::SplineAttrib* AttribDlg::findSplineAttr(int i)
+gar::SplineAttrib* AttribWidget::findSplineAttr(int i)
 {
 	if(!m_selectedGlyph) 
 		return NULL;
@@ -325,7 +309,7 @@ gar::SplineAttrib* AttribDlg::findSplineAttr(int i)
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
 	if(!dst) {
-		qDebug()<<" AttribDlg cannot find spline attr "
+		qDebug()<<" AttribWidget cannot find spline attr "
 			<<i;
 		return NULL;
 	}
@@ -333,7 +317,7 @@ gar::SplineAttrib* AttribDlg::findSplineAttr(int i)
 	return static_cast<gar::SplineAttrib*> (dst);
 }
 
-gar::EnumAttrib* AttribDlg::findEnumAttr(int i)
+gar::EnumAttrib* AttribWidget::findEnumAttr(int i)
 {
 	if(!m_selectedGlyph) 
 		return NULL;
@@ -341,7 +325,7 @@ gar::EnumAttrib* AttribDlg::findEnumAttr(int i)
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
 	if(!dst) {
-		qDebug()<<" AttribDlg cannot find enum attr "
+		qDebug()<<" AttribWidget cannot find enum attr "
 			<<i;
 		return NULL;
 	}
@@ -349,7 +333,7 @@ gar::EnumAttrib* AttribDlg::findEnumAttr(int i)
 	return static_cast<gar::EnumAttrib*> (dst);
 }
 
-void AttribDlg::recvSplineValue(QPair<int, QPointF> x)
+void AttribWidget::recvSplineValue(QPair<int, QPointF> x)
 {
 	gar::SplineAttrib* sattr = findSplineAttr(x.first);
 	if(!sattr) 
@@ -363,7 +347,7 @@ void AttribDlg::recvSplineValue(QPair<int, QPointF> x)
 	updateSelectedGlyph();
 }
 	
-void AttribDlg::recvSplineCv0(QPair<int, QPointF> x)
+void AttribWidget::recvSplineCv0(QPair<int, QPointF> x)
 {
 	gar::SplineAttrib* sattr = findSplineAttr(x.first);
 	if(!sattr) 
@@ -377,7 +361,7 @@ void AttribDlg::recvSplineCv0(QPair<int, QPointF> x)
 	updateSelectedGlyph();
 }
 	
-void AttribDlg::recvSplineCv1(QPair<int, QPointF> x)
+void AttribWidget::recvSplineCv1(QPair<int, QPointF> x)
 {
 	gar::SplineAttrib* sattr = findSplineAttr(x.first);
 	if(!sattr) 
@@ -391,7 +375,7 @@ void AttribDlg::recvSplineCv1(QPair<int, QPointF> x)
 	updateSelectedGlyph();
 }
 
-void AttribDlg::updateSelectedGlyph()
+void AttribWidget::updateSelectedGlyph()
 {
 	if(!m_selectedGlyph) 
 		return;
@@ -401,7 +385,7 @@ void AttribDlg::updateSelectedGlyph()
 		emit sendAttribChanged();
 }
 
-void AttribDlg::recvEnumValue(QPair<int, int> x)
+void AttribWidget::recvEnumValue(QPair<int, int> x)
 {
 	gar::EnumAttrib* sattr = findEnumAttr(x.first);
 	if(!sattr) 
@@ -409,4 +393,68 @@ void AttribDlg::recvEnumValue(QPair<int, int> x)
 	
 	sattr->setValue(x.second);
 	updateSelectedGlyph();
+}
+
+void AttribWidget::recvSelectGlyph(bool x)
+{
+	if(x) {
+		GardenGlyph* g = m_scene->lastSelectedGlyph();
+		if(g == m_selectedGlyph) {
+			return;
+		}
+		m_selectedGlyph = g;
+		clearAttribs();
+		lsAttribs(g);
+			
+	} else {
+		m_selectedGlyph = NULL;
+		clearAttribs();
+	}
+}
+
+QString AttribWidget::lastSelectedGlyphName() const
+{
+	GardenGlyph* g = m_scene->lastSelectedGlyph();
+	if(!g)
+		return tr("");
+		
+	return tr(g->glyphName().c_str() );
+}
+
+QString AttribWidget::lastSelectedGlyphTypeName() const
+{
+	QString stype(tr("unknown"));
+	
+	if(!m_selectedGlyph)
+		return stype;
+		
+	const int& gt = m_selectedGlyph->glyphType();
+	
+	const int gg = gar::ToGroupType(gt );
+	switch (gg) {
+		case gar::ggGround :
+			stype = gar::GroundTypeNames[gar::ToGroundType(gt)];
+		break;
+		case gar::ggGrass :
+			stype = gar::GrassTypeNames[gar::ToGrassType(gt)];
+		break;
+		case gar::ggFile :
+			stype = gar::FileTypeNames[gar::ToFileType(gt)];
+		break;
+		case gar::ggSprite :
+			stype = gar::BillboardTypeNames[gar::ToBillboardType(gt)];
+		break;
+		case gar::ggVariant :
+			stype = gar::VariationTypeNames[gar::ToVariationType(gt)];
+		break;
+		case gar::ggStem :
+			stype = gar::StemTypeNames[gar::ToStemType(gt)];
+		break;
+		case gar::ggTwig :
+			stype = gar::TwigTypeNames[gar::ToTwigType(gt)];
+		break;
+		default:
+		;
+	}
+	return stype;
 }

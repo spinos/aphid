@@ -179,8 +179,8 @@ const std::string& GardenGlyph::glyphName() const
 int GardenGlyph::attribInstanceId() const
 { return m_attrib->attribInstanceId(); }
 
-void GardenGlyph::postConnection(GardenGlyph* another)
-{ m_attrib->connectTo(another->attrib() ); }
+void GardenGlyph::postConnection(GardenGlyph* another, GlyphPort* viaPort)
+{ m_attrib->connectTo(another->attrib(), viaPort->portName().toStdString() ); }
 
 void GardenGlyph::postSelection()
 { 

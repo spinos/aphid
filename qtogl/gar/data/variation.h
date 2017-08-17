@@ -12,30 +12,34 @@
 
 namespace gar {
     
-#define NUM_VARIATION_PIECES 3
+#define NUM_VARIATION_PIECES 4
 
 static const char * VariationTypeNames[NUM_VARIATION_PIECES] = {
 "unknown",
 "BendTwistRoll",
-"Directional"
+"Directional",
+"FoldCrumple",
 };
 
 static const char * VariationTypeImages[NUM_VARIATION_PIECES] = {
 "unknown",
 ":/icons/bendtwistrollvariant.png",
 ":/icons/directional.png",
+":/icons/aging.png",
 };
 
 static const char * VariationTypeIcons[NUM_VARIATION_PIECES] = {
 ":/icons/unknown.png",
 ":/icons/bendtwistrollvariant.png",
 ":/icons/directional.png",
+":/icons/aging.png",
 };
 
 static const char * VariationTypeDescs[NUM_VARIATION_PIECES] = {
 "unknown",
 "one to many by Bend-Twist-Roll deformation",
 "one to many by Directional Bending deformation",
+"one to many by fold and crumple deformation",
 };
 
 static inline int ToVariationType(int x) {
@@ -44,6 +48,7 @@ static inline int ToVariationType(int x) {
 
 static const int VariationInPortRange[NUM_VARIATION_PIECES][2] = {
 {0,0},
+{0,1},
 {0,1},
 {0,1},
 };
@@ -57,6 +62,7 @@ static const int VariationOutPortRange[NUM_VARIATION_PIECES][2] = {
 {0,0},
 {0,1},
 {0,1},
+{0,1},
 };
 
 static const char * VariationOutPortRangeNames[2] = {
@@ -67,7 +73,8 @@ static const char * VariationOutPortRangeNames[2] = {
 static const int VariationGeomDeviations[NUM_VARIATION_PIECES] = {
 0,
 32,
-32,
+36,
+48,
 };
 
 }

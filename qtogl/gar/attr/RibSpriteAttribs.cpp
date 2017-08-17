@@ -43,11 +43,9 @@ bool RibSpriteAttribs::hasGeom() const
 int RibSpriteAttribs::numGeomVariations() const
 { return 1; }
 
-ATriangleMesh* RibSpriteAttribs::selectGeom(int x, float& exclR) const
+ATriangleMesh* RibSpriteAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	const gar::Attrib* wa = findAttrib(gar::nWidth);
-	wa->getValue(exclR);
-	exclR *= .4f;
+	prof->_exclR = m_exclR;
 	return m_billboard; 
 }
 
@@ -70,6 +68,8 @@ bool RibSpriteAttribs::update()
 	findAttrib(gar::nHeight)->getValue(h);
 	
 	m_billboard->setBillboardSize(w, h, 2);
+	
+	m_exclR = w * .37f;
 	return true;
 }
 
@@ -78,3 +78,6 @@ int RibSpriteAttribs::attribInstanceId() const
 
 float RibSpriteAttribs::texcoordBlockAspectRatio() const
 { return m_billboard->widthHeightRatio(); }
+
+bool RibSpriteAttribs::isGeomLeaf() const
+{ return true; }

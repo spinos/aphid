@@ -3,7 +3,7 @@
  */
 #include <QApplication>
 #include <QtCore>
-#include "window.h"
+#include "ui/window.h"
 
 int main(int argc, char *argv[])
 {

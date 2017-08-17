@@ -40,9 +40,12 @@ class SimpleTwigAttribs : public PieceAttrib, public gar::MultiSynthesis {
 /// to tip		
 		float _nodeParam;
 		float _deltaNodeParam;
+		float _nodeNoiseWeight;
 /// sizing to tip
 		aphid::SplineMap1D* _sizingSpline;
 		aphid::SplineMap1D* _foldingSpline;
+		aphid::SplineMap1D* _noiseSpline;
+		aphid::SplineMap1D* _agingSpline;
 	};
 	
 	MorphologyParam m_morph;
@@ -55,14 +58,15 @@ public:
 /// multi instance of different settings
 	virtual int attribInstanceId() const;
 /// recv input attr
-	virtual void connectTo(PieceAttrib* another);
+	virtual void connectTo(PieceAttrib* another, const std::string& portName);
 /// when x < 1024 select stem geom x
 /// when x >= 1024 select leaf geom x>>10
-	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
+	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	
 	virtual bool isSynthesized() const;
 	virtual int numSynthesizedGroups() const;
 	virtual gar::SynthesisGroup* synthesisGroup(int i) const;
+	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
 	
 private:
     bool connectToStem(PieceAttrib* another);

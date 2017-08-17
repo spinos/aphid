@@ -98,14 +98,14 @@ void ShrubChartView::mouseReleaseEvent(QMouseEvent *event)
 		if(isIncomingPort(item)) {
 			QPointF pf = item->scenePos();
 			m_selectedConnection->setPos1(pf );
-			GlyphPort * pt = (GlyphPort *)item;
-			if(m_selectedConnection->canConnectTo(pt) ) {
-			    m_selectedConnection->setPort1(pt);
+			GlyphPort * p1 = (GlyphPort *)item;
+			if(m_selectedConnection->canConnectTo(p1) ) {
+			    m_selectedConnection->setPort1(p1);
 			    m_selectedConnection->updatePath();
 			    
 			    GardenGlyph * srcNode = m_selectedConnection->node0();
 			    GardenGlyph * destNode = m_selectedConnection->node1();
-			    destNode->postConnection(srcNode);
+			    destNode->postConnection(srcNode, p1);
 			    //qDebug()<<" made connection "<<m_selectedConnection->port0()->portName()
 			    //    <<" -> "<<pt->portName();
 			        

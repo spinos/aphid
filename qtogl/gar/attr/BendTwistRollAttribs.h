@@ -35,12 +35,16 @@ public:
 	
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
-	virtual aphid::ATriangleMesh* selectGeom(int x, float& exclR) const;
+	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	virtual bool update();
 /// multi instance of different settings
 	virtual int attribInstanceId() const;
 /// recv input geom
-	virtual void connectTo(PieceAttrib* another);
+	virtual void connectTo(PieceAttrib* another, const std::string& portName);
+/// depend on in attr
+	virtual bool isGeomStem() const;
+	virtual bool isGeomLeaf() const;
+	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
 	
 private:
     

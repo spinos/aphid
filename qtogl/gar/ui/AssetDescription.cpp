@@ -16,6 +16,7 @@
 #include "data/billboard.h"
 #include "data/variation.h"
 #include "data/stem.h"
+#include "data/twig.h"
 
 AssetDescription::AssetDescription(QWidget *parent) : QWidget(parent)
 {
@@ -52,6 +53,9 @@ void AssetDescription::recvAssetSel(QPoint tg)
 		break;
 		case gar::ggStem :
 			showStemGesc(tg);
+		break;
+		case gar::ggTwig :
+			showTwigGesc(tg);
 		break;
 		default:
 			qDebug()<<" AssetDescription::recvAssetSel group is unknown";
@@ -111,5 +115,14 @@ void AssetDescription::showStemGesc(const QPoint & tg)
 	QPixmap px(tr(gar::StemTypeImages[stemTyp]) );
 	m_pic->setPixmap(px);
 	m_dtl->setText(tr(gar::StemTypeDescs[stemTyp]));
+}
+
+void AssetDescription::showTwigGesc(const QPoint & tg)
+{
+	const int & twigTyp = gar::ToTwigType(tg.x() );
+	m_lab->setText(tr(gar::TwigTypeNames[twigTyp]));
+	QPixmap px(tr(gar::TwigTypeImages[twigTyp]) );
+	m_pic->setPixmap(px);
+	m_dtl->setText(tr(gar::TwigTypeDescs[twigTyp]));
 }
 	

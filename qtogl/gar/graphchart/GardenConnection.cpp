@@ -1,7 +1,7 @@
 /*
  *  GardenConnection.h
  *
- *  with can make connection check
+ *  access to node attrib
  *
  *  Created by jian zhang on 4/1/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -12,13 +12,13 @@
 #include "GardenConnection.h"
 #include "GardenGlyph.h"
 #include <qt/GlyphPort.h>
+#include <attr/PieceAttrib.h>
 #include "gar_common.h"
 
 using namespace aphid;
    
 GardenConnection::GardenConnection(QGraphicsItem * parent) : GlyphConnection(parent)
-{
-}
+{}
 
 GardenConnection::~GardenConnection()
 {}
@@ -30,35 +30,9 @@ bool GardenConnection::canConnectTo(GlyphPort* p1) const
     GardenGlyph* node0 = static_cast<GardenGlyph*>(item0);
     GardenGlyph* node1 = static_cast<GardenGlyph*>(item1);
     
-    if(rejectedByNode(node0, node1) )    
-        return false;
-    
-    return true; 
-}
-
-static const int sVariableNodeTypes[3] = {gar::gtSplineSprite,
-gar::gtRibSprite,
-gar::gtSplineCylinder,
-};
-
-bool GardenConnection::isNodeVariable(int gt) const
-{
-	for(int i=0;i<3;++i) {
-		if(gt == sVariableNodeTypes[i])
-			return true;
-	}
-	return false;
-}
-
-bool GardenConnection::rejectedByNode(GardenGlyph* node0, GardenGlyph* node1) const
-{
-    if(gar::ToGroupType(node1->glyphType() ) == gar::ggVariant) {
-        if(!isNodeVariable(node0->glyphType() ) ) {
-            qDebug() << " variation input should be sprite or cylinder, rejected ";
-            return true;
-        }
-    }
-    return false;
+	const PieceAttrib* attr0 = node0->attrib();
+    const PieceAttrib* attr1 = node1->attrib();
+	return attr1->canConnectToViaPort(attr0, p1->portName().toStdString() );
 }
 
 GardenGlyph* GardenConnection::node0() const

@@ -15,7 +15,8 @@
 namespace gar {
 
 enum AttribName {
-	nUnknown = 0,
+	nUnknown = 2048,
+	nmNodeName,
 	nGrowPortion,
 	nGrowMargin,
 	nGrowAngle,
@@ -30,55 +31,67 @@ enum AttribName {
 	nBend,
 	nTwist,
 	nRoll,
+	nFold,
+	nmCrumple,
 	nWidthVariation,
 	nHeightVariation,
 	nRadiusVariation,
 	nSizeVariation,
 	nBendVariation,
+	nWeightVariation,
 	nNoiseVariation,
-	nFoldingVariation,
+	nCrumpleVar,
+	nFoldVar,
+	nAgingVar,
 	nPetioleAngle,
 	nLeafPlacement,
 	nWhorlCount,
 };
 
 enum AttribType {
-	tUnknown = 0,
+	tUnknown = 1024,
 	tBool,
 	tEnum,
 	tInt,
 	tInt2,
 	tInt3,
 	tFloat,
-	tVector2,
-	tVector3,
+	tVec2,
+	tVec3,
 	tColor,
 	tString,
-	tSpline
+	tSpline,
 };
 
 /// phyllotaxy describes the organisation of the leaves on the stem
 enum PhyllotaxyValue {
-	phOpposite = 1024,
+	phOpposite = 512,
 	phAlternate,
 	phDecussate,
 	phWhorled,
 };
 
+enum SelectCondition {
+	slUnknown = 256,
+	slIndex,
+	slRandom,
+	slAge,
+};
+
 class Attrib {
 
-	AttribName m_anm;
-	AttribType m_atyp;
 /// value, value_min, value_max
 /// comp0, comp1, comp2
-	char m_data[24];
+	char m_data[32];
+	AttribName m_anm;
+	AttribType m_atyp;
 	
 public:
-	Attrib(AttribName anm, AttribType at);
+	Attrib(AttribName anm, AttribType atyp);
 	virtual ~Attrib();
 	
-	const AttribName& attrName() const;
-	const AttribType& attrType() const;
+	AttribName attrName() const;
+	AttribType attrType() const;
 	
 	void setValue(const bool& x);
 	void setValue(const int& x);
@@ -107,7 +120,7 @@ public:
 	void getMax(float& y) const;
 	
 	bool isStringType() const;
-	const char* attrNameStr() const;
+	std::string attrNameStr() const;
 	
 	static gar::AttribName IntAsAttribName(int x);
 	static const char* IntAsEnumFieldName(int x);

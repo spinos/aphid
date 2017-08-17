@@ -1,40 +1,37 @@
 /*
- *  DirectionalBendAttribs.h
+ *  FoldCrumpleAttribs.h
  *  
+ *  unfolding, crumpling
  *
  *  Created by jian zhang on 8/6/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
-#ifndef GAR_DIRECTIONAL_BEND_ATTRIBS_H
-#define GAR_DIRECTIONAL_BEND_ATTRIBS_H
+#ifndef GAR_FOLD_CRUMPLE_ATTRIBS_H
+#define GAR_FOLD_CRUMPLE_ATTRIBS_H
 
 #include "PieceAttrib.h"
 #include <geom/PackTexcoord.h>
 
 namespace aphid {
-class DirectionalBendDeformer;
-
-namespace smp {
-class GeodesicSphere;
-}
+class FoldCrumpleDeformer;
 
 }
 
-class DirectionalBendAttribs : public PieceAttrib, public aphid::PackTexcoord {
+class FoldCrumpleAttribs : public PieceAttrib, public aphid::PackTexcoord {
 
     PieceAttrib* m_inAttr;
 	aphid::ATriangleMesh* m_inGeom;
-	aphid::ATriangleMesh* m_outGeom[36];
+	aphid::ATriangleMesh* m_outGeom[48];
 	int m_instId;
 	float m_exclR;
-	aphid::DirectionalBendDeformer* m_dfm;
-	aphid::smp::GeodesicSphere* m_samples;
+	aphid::FoldCrumpleDeformer* m_dfm;
 	static int sNumInstances;
 	
 public:
-	DirectionalBendAttribs();
+	FoldCrumpleAttribs();
+	virtual ~FoldCrumpleAttribs();
 	
 	void setInputGeom(aphid::ATriangleMesh* x);
 	
