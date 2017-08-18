@@ -115,15 +115,18 @@ void GLWidget::drawTwigAsset(PieceAttrib* attr)
 	if(ng < 1)
 		return;
 		
+	gar::SelectProfile selprof;
+		
 	getDrawer()->m_surfaceProfile.apply();
 	m_vegd->begin();
 	
 	glPushMatrix();
-	glTranslatef(-10.f, 0.f, 0.f);
 	for(int i=0;i<ng;++i) {
-		glTranslatef(10.f, 0.f, 0.f);
-		gar::SynthesisGroup* gi = attr->synthesisGroup(i);
+		selprof._index = i;
+		gar::SynthesisGroup* gi = attr->selectSynthesisGroup(&selprof);
+		glTranslatef(selprof._exclR, 0.f, 0.f);
 		drawSynthesisGroup(attr, gi);
+		glTranslatef(selprof._exclR, 0.f, 0.f);
 	}
 	glPopMatrix();
 	m_vegd->end();
@@ -132,7 +135,6 @@ void GLWidget::drawTwigAsset(PieceAttrib* attr)
 void GLWidget::drawSynthesisGroup(PieceAttrib* attr, gar::SynthesisGroup* grp)
 {
 	gar::SelectProfile selprof;
-	selprof._condition = gar::slIndex;
 	
 	const int& ninst = grp->numInstances();
 	Matrix44F tm;

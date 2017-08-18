@@ -46,6 +46,7 @@ int RibSpriteAttribs::numGeomVariations() const
 ATriangleMesh* RibSpriteAttribs::selectGeom(gar::SelectProfile* prof) const
 {
 	prof->_exclR = m_exclR;
+	prof->_height = m_billboard->height();
 	return m_billboard; 
 }
 

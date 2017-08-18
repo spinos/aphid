@@ -54,10 +54,19 @@ int FoldCrumpleAttribs::numGeomVariations() const
 
 ATriangleMesh* FoldCrumpleAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	if(prof->_condition != gar::slIndex)
+	if(prof->_condition == gar::slRandom)
 		prof->_index = rand() % numGeomVariations();
+	else if (prof->_condition == gar::slAge) {
+		int ind = RandomFn11() * 3.f + prof->_age * numGeomVariations();
+		if(ind < 0)
+			ind = 0;
+		else if(ind > numGeomVariations() - 1)
+			ind = numGeomVariations() - 1;
+		prof->_index = ind;
+	}
 		
     prof->_exclR = m_exclR;
+	prof->_height = m_geomHeight;
 	return m_outGeom[prof->_index]; 
 }
 
@@ -75,7 +84,8 @@ bool FoldCrumpleAttribs::update()
         return false;
 		
 	m_exclR = selprof._exclR;
-		
+	m_geomHeight = selprof._height;
+    	
 	float bendRange[2];
 	findAttrib(gar::nBend)->getValue2(bendRange);
 	

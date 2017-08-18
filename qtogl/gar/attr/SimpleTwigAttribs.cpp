@@ -110,6 +110,7 @@ bool SimpleTwigAttribs::update()
 		gar::SynthesisGroup * gi = addSynthesisGroup();
 /// instance of stem
 		gi->addInstance(i, Matrix44F::IdentityMatrix);
+		gi->setExclusionRadius(selprof._exclR);
 		synthsizeAGroup(gi, inGeom);
 	}
     
@@ -124,8 +125,6 @@ bool SimpleTwigAttribs::connectToStem(PieceAttrib* another)
 	if(!CanBeTwigStem(another->glyphType() ) )
 		return false;
 	
-	std::cout<<"\n connect to stem "<<another->glyphType();
-	std::cout.flush();
 	m_inStemAttr = another;
 	return true;
 }
@@ -135,8 +134,6 @@ bool SimpleTwigAttribs::connectToLeaf(PieceAttrib* another)
 	if(!CanBeTwigLeaf(another->glyphType() ) )
 		return false;
 		
-	std::cout<<"\n connect to leaf "<<another->glyphType();
-	std::cout.flush();
 	m_inLeafAttr = another;
 	return true;
 }
@@ -191,7 +188,7 @@ ATriangleMesh* SimpleTwigAttribs::selectGeom(gar::SelectProfile* prof) const
 	if(!m_inLeafAttr)
 		return NULL;
 		
-	prof->_index = prof->_index>>10;
+	prof->_index = (prof->_index - 1)>>10;
 	
 	return m_inLeafAttr->selectGeom(prof);
 }
@@ -202,8 +199,14 @@ bool SimpleTwigAttribs::isSynthesized() const
 int SimpleTwigAttribs::numSynthesizedGroups() const
 { return synthsisGroups().size(); }
 
-gar::SynthesisGroup* SimpleTwigAttribs::synthesisGroup(int i) const
-{ return synthsisGroups()[i]; }
+gar::SynthesisGroup* SimpleTwigAttribs::selectSynthesisGroup(gar::SelectProfile* prof) const
+{
+	if(prof->_condition != gar::slIndex)
+		prof->_index = rand() % numSynthesizedGroups();
+	
+	prof->_exclR = synthsisGroups()[prof->_index]->exclusionRadius();	
+	return synthsisGroups()[prof->_index]; 
+}
 
 /// http://www.svenlandrein.com/systematiccoursepages/morphology.html
 void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
@@ -264,7 +267,10 @@ void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 		float d = m_morph._sizingSpline->interpolate(m_morph._nodeParam);
 		if(noiseWeight > 1e-3f) 
 			d += RandomFn11() * 0.03f * noiseWeight;
-		if(d < .07f) d = .07f;
+		if(d < .07f) 
+			d = .07f;
+			
+		m_morph._nodeScaling = d;
 		
 		segmat.setOrientations(vside * d, vup * d, p0p1 * d);
 		segmat.setTranslation(p1);
@@ -275,7 +281,8 @@ void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 			d += RandomFn11() * 0.13f * noiseWeight;
 		}
 		
-		if(d > 1.43f) d = 1.43f;
+		if(d > 1.41f) 
+			d = 1.41f;
 		
 		Quaternion petq(d, Vector3F::XAxis );
 		Matrix33F mrot(petq);
@@ -287,7 +294,6 @@ void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 	}
 	
 	delete[] rowmeans;
-	
 }
 
 void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
@@ -335,6 +341,10 @@ void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
 		}
 	}
 	
+	gar::SelectProfile selprof;
+	selprof._condition = gar::slAge;
+	selprof._age = m_morph._agingSpline->interpolate(m_morph._nodeParam);
+	
 	Matrix44F phymat;
 	const Vector3F ppos = segmat.getTranslation();
 	const Vector3F vrot = segmat.getFront().normal();
@@ -348,8 +358,9 @@ void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
 		Matrix44F instmat = petmat * segmat * phymat;
 		instmat.setTranslation(ppos);
 	
-/// first geom in leaf
-		grp->addInstance(1024, instmat);
+		m_inLeafAttr->selectGeom(&selprof);
+		grp->addInstance((selprof._index+1) << 10, instmat);
+		grp->adjustExclusionRadius(.73f * selprof._height * m_morph._nodeScaling );
 	}
 	
 	m_morph._phyllotaxyAngle += segAng;

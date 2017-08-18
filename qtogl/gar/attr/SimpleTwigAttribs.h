@@ -24,6 +24,7 @@ class SimpleTwigAttribs : public PieceAttrib, public gar::MultiSynthesis {
     PieceAttrib* m_inStemAttr;
 	PieceAttrib* m_inLeafAttr;
 	int m_instId;
+	
 	static int sNumInstances;
 	
 	struct MorphologyParam {
@@ -37,11 +38,12 @@ class SimpleTwigAttribs : public PieceAttrib, public gar::MultiSynthesis {
 		float _phyllotaxyAngle;
 /// # leaf in ring
 		int _whorlCount;
-/// to tip		
+/// varying root to tip		
 		float _nodeParam;
 		float _deltaNodeParam;
 		float _nodeNoiseWeight;
-/// sizing to tip
+		float _nodeScaling;
+
 		aphid::SplineMap1D* _sizingSpline;
 		aphid::SplineMap1D* _foldingSpline;
 		aphid::SplineMap1D* _noiseSpline;
@@ -65,7 +67,7 @@ public:
 	
 	virtual bool isSynthesized() const;
 	virtual int numSynthesizedGroups() const;
-	virtual gar::SynthesisGroup* synthesisGroup(int i) const;
+	virtual gar::SynthesisGroup* selectSynthesisGroup(gar::SelectProfile* prof) const;
 	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
 	
 private:

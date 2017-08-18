@@ -7,10 +7,9 @@
 #include "window.h"
 #include "widget.h"
 #include "toolBox.h"
-#include "assetdlg.h"
 #include "ShrubScene.h"
 #include "graphchart/ShrubChartView.h"
-#include "graphchart/ChartDlg.h"
+#include "ChartDlg.h"
 #include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "exportDlg.h"
@@ -23,7 +22,6 @@ Window::Window()
 	m_vege = new Vegetation;
 	m_vege->setSynthByAngleAlign();
 	m_tools = new ToolBox(this);
-	m_assets = new AssetDlg(this);
 	
 	m_scene = new ShrubScene(m_vege, this);
 	m_chartView = new ShrubChartView(m_scene);
@@ -44,9 +42,6 @@ Window::Window()
 			
 	connect(m_tools, SIGNAL(dspStateChanged(int)), 
 			this, SLOT(recvDspState(int)));
-			
-	connect(m_assets, SIGNAL(onAssetDlgClose()), 
-			this, SLOT(recvAssetDlgClose()));
 			
 	connect(m_chart, SIGNAL(onChartDlgClose()), 
 			this, SLOT(recvChartDlgClose()));
@@ -78,11 +73,6 @@ void Window::keyPressEvent(QKeyEvent *e)
 
 void Window::createActions()
 {
-	m_assetAct = new QAction(tr("&Asset"), this);
-	m_assetAct->setCheckable(true);
-	m_assetAct->setChecked(true);
-	connect(m_assetAct, SIGNAL(toggled(bool)), this, SLOT(toggleAssetDlg(bool)));
-	
 	m_graphAct = new QAction(tr("&Graph"), this);
 	m_graphAct->setCheckable(true);
 	m_graphAct->setChecked(true);
@@ -90,7 +80,7 @@ void Window::createActions()
 	
 	m_attribAct = new QAction(tr("&Attribute"), this);
 	m_attribAct->setCheckable(true);
-	m_attribAct->setChecked(false);
+	m_attribAct->setChecked(true);
 	connect(m_attribAct, SIGNAL(toggled(bool)), this, SLOT(toggleAttribDlg(bool)));
 	
 	m_exportAct = new QAction(tr("&Export"), this);
@@ -103,21 +93,8 @@ void Window::createMenus()
 	m_fileMenu->addAction(m_exportAct);
 	m_windowMenu = menuBar()->addMenu(tr("&Window")); 
 	m_windowMenu->addAction(m_graphAct);
-	m_windowMenu->addAction(m_assetAct);
 	m_windowMenu->addAction(m_attribAct);
 }
-
-void Window::toggleAssetDlg(bool x)
-{
-	if(x) {
-		m_assets->show();
-	} else {
-		m_assets->hide();
-	}
-}
-
-void Window::recvAssetDlgClose()
-{ m_assetAct->setChecked(false); }
 
 void Window::toggleChartDlg(bool x)
 {
@@ -172,12 +149,12 @@ void Window::multiSynth()
 
 void Window::showDlgs()
 {
-	m_assets->show();
-	m_assets->raise();
-	m_assets->move(0, 0);
+	m_attrib->show();
+	m_attrib->raise();
+	m_attrib->move(0, 0);
 	m_chart->show();
 	m_chart->raise();
-	m_chart->move(400, 300);
+	m_chart->move(360, 300);
 }
 
 void Window::performExport(bool x)

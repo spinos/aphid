@@ -20,7 +20,8 @@
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
 #include "GrowthSample.h"
-#include "attr/PieceAttrib.h"
+#include <attr/PieceAttrib.h>
+#include <attr/SynthesisGroup.h>
 
 using namespace aphid;
 
@@ -55,9 +56,8 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 	if(n < 1) {
 		return;
 	}
-	
+/// randomly select an input
 	int r = rand() % n;
-	
 	const GlyphConnection * conn = pt->connection(r);
 	const GlyphPort * srcpt = conn->port0();
 	QGraphicsItem * top = srcpt->topLevelItem();
@@ -74,15 +74,38 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 		case gar::ggSprite:
 		case gar::ggVariant:
 		case gar::ggStem:
-			addGrassBranch(pl1, gl);
+			addSingleBranch(pl1, gl);
+		break;
+		case gar::ggTwig:
+			addSynthesizedBranch(pl1, gl);
 		break;
 		default:
 		;
-	}
-	
+	}	
 }
 
-void ShrubScene::addGrassBranch(PlantPiece * pl, GardenGlyph * gl)
+void ShrubScene::addSynthesizedBranch(PlantPiece * pl, GardenGlyph * gl)
+{
+	PieceAttrib* attr = gl->attrib();
+/// select randomly
+	gar::SelectProfile selprof;
+	selprof._condition = gar::slRandom;
+	
+	gar::SynthesisGroup* syng = attr->selectSynthesisGroup(&selprof);
+	
+	const int& ninst = syng->numInstances();
+	
+	gar::SelectProfile selinst;
+	
+	Matrix44F tm;
+	for(int i=0;i<ninst;++i) {
+		syng->getInstance(selinst._index, tm, i);
+	}
+	
+	pl->setExclR(selprof._exclR);
+}
+
+void ShrubScene::addSingleBranch(PlantPiece * pl, GardenGlyph * gl)
 {
 	PieceAttrib* attr = gl->attrib();
 /// select randomly

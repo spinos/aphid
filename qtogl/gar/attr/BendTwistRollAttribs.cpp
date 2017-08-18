@@ -50,6 +50,7 @@ ATriangleMesh* BendTwistRollAttribs::selectGeom(gar::SelectProfile* prof) const
 		prof->_index = rand() % numGeomVariations();
 		
     prof->_exclR = m_exclR;
+	prof->_height = m_geomHeight;
 	return m_outGeom[prof->_index]; 
 }
 
@@ -65,6 +66,7 @@ bool BendTwistRollAttribs::update()
         return false;
 		
 	m_exclR = selprof._exclR;
+	m_geomHeight = selprof._height;
     
     float bendRange[2];
 	findAttrib(gar::nBend)->getValue2(bendRange);

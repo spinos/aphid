@@ -15,10 +15,13 @@
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE
-
+class QSplitter;
+class QTreeWidget;
+class QTreeWidgetItem;
 QT_END_NAMESPACE
 
 class ShrubChartView;
+class PaletteView;
 
 class ChartDlg : public QDialog
 {
@@ -38,11 +41,14 @@ signals:
 public slots:
 	
 private slots:
+	void onSelectAsset(QTreeWidgetItem * item, int column);
 	
 private:
+	void lsAssets();
 	
 private:
-	ShrubChartView * m_chart;
-	
+	PaletteView * m_chartView;
+	QTreeWidget * m_assetTree;
+	QSplitter * m_split;
 };
 #endif

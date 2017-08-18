@@ -10,7 +10,6 @@ QT_END_NAMESPACE
 
 class GLWidget;
 class ToolBox;
-class AssetDlg;
 class AttribDlg;
 class ShrubScene;
 class ChartDlg;
@@ -39,8 +38,6 @@ private:
 	
 private slots:
 	void recvToolAction(int x);
-	void toggleAssetDlg(bool x);
-	void recvAssetDlgClose();
 	void performExport(bool x);
 	void recvDspState(int x);
 	void recvChartDlgClose();
@@ -51,10 +48,8 @@ private slots:
 private:
 	GLWidget *glWidget;
 	ToolBox * m_tools;
-	AssetDlg * m_assets;
 	ChartDlg* m_chart;
 	AttribDlg* m_attrib;
-	QAction * m_assetAct;
 	QAction * m_graphAct;
 	QAction * m_attribAct;
 	QAction * m_exportAct;

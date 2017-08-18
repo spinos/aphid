@@ -24,10 +24,11 @@ PiecesList::PiecesList(QWidget *parent)
     setDragEnabled(true);
     setViewMode(QListView::IconMode);
     setIconSize(QSize(32, 32));
-    setSpacing(4);
+	setGridSize(QSize(36, 36));
+    setSpacing(2);
     setAcceptDrops(false);
     setDropIndicatorShown(false);
-	
+	setMaximumHeight(48);
 }
 
 void PiecesList::dragEnterEvent(QDragEnterEvent *event)

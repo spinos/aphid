@@ -181,7 +181,7 @@ bool PieceAttrib::isSynthesized() const
 int PieceAttrib::numSynthesizedGroups() const
 { return 0; }
 
-gar::SynthesisGroup* PieceAttrib::synthesisGroup(int i) const
+gar::SynthesisGroup* PieceAttrib::selectSynthesisGroup(gar::SelectProfile* prof) const
 { return NULL; }
 
 bool PieceAttrib::isGeomStem() const

@@ -29,6 +29,7 @@ class DirectionalBendAttribs : public PieceAttrib, public aphid::PackTexcoord {
 	aphid::ATriangleMesh* m_outGeom[36];
 	int m_instId;
 	float m_exclR;
+	float m_geomHeight;
 	aphid::DirectionalBendDeformer* m_dfm;
 	aphid::smp::GeodesicSphere* m_samples;
 	static int sNumInstances;

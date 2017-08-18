@@ -222,6 +222,9 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nFoldVar :
 			r = gar::nFoldVar;
 		break;
+		case gar::nAgingVar :
+			r = gar::nAgingVar;
+		break;
 		case gar::nPetioleAngle :
 			r = gar::nPetioleAngle;
 		break;

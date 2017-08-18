@@ -38,6 +38,7 @@ int SplineCylinderAttribs::numGeomVariations() const
 ATriangleMesh* SplineCylinderAttribs::selectGeom(gar::SelectProfile* prof) const
 {
 	prof->_exclR = m_exclR;
+	prof->_height = m_cylinder->height();
 	return m_cylinder; 
 }
 

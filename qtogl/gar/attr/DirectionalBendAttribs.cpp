@@ -50,6 +50,7 @@ ATriangleMesh* DirectionalBendAttribs::selectGeom(gar::SelectProfile* prof) cons
 		prof->_index = rand() % numGeomVariations();
 		
     prof->_exclR = m_exclR;
+	prof->_height = m_geomHeight;
 	return m_outGeom[prof->_index];
 }
 
@@ -65,6 +66,7 @@ bool DirectionalBendAttribs::update()
         return false;
 		
 	m_exclR = selprof._exclR;
+	m_geomHeight = selprof._height;
 		
 	SplineMap1D* ls = m_dfm->bendSpline();
 	SplineMap1D* ns = m_dfm->noiseSpline();

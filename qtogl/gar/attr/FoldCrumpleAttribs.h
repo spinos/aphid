@@ -26,6 +26,7 @@ class FoldCrumpleAttribs : public PieceAttrib, public aphid::PackTexcoord {
 	aphid::ATriangleMesh* m_outGeom[48];
 	int m_instId;
 	float m_exclR;
+	float m_geomHeight;
 	aphid::FoldCrumpleDeformer* m_dfm;
 	static int sNumInstances;
 	

@@ -24,6 +24,7 @@ class BendTwistRollAttribs : public PieceAttrib, public aphid::PackTexcoord {
 	aphid::ATriangleMesh* m_outGeom[32];
 	int m_instId;
 	float m_exclR;
+	float m_geomHeight;
 	aphid::BendTwistRollDeformer* m_dfm;
 	
 	static int sNumInstances;

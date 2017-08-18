@@ -28,11 +28,14 @@ struct SelectProfile {
 	SelectCondition _condition;
 	int _index;
 	float _exclR;
+	float _height;
+	float _age;
 	
 	SelectProfile() {
 		_condition = slIndex;
 		_index = 0;
 		_exclR = 1.f;
+		_height = 1.f;
 	}
 	
 };
@@ -74,7 +77,7 @@ public:
 /// for synthesized
 	virtual bool isSynthesized() const;
 	virtual int numSynthesizedGroups() const;
-	virtual gar::SynthesisGroup* synthesisGroup(int i) const;
+	virtual gar::SynthesisGroup* selectSynthesisGroup(gar::SelectProfile* prof) const;
 	virtual bool isGeomStem() const;
 	virtual bool isGeomLeaf() const;
 	

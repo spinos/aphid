@@ -46,7 +46,8 @@ protected:
 /// from ground up to leaf
 	void assemblePlant(PlantPiece * pl, GardenGlyph * gl);
 	void addBranch(PlantPiece * pl, const aphid::GlyphPort * pt);
-	void addGrassBranch(PlantPiece * pl, GardenGlyph * gl);
+	void addSingleBranch(PlantPiece * pl, GardenGlyph * gl);
+	void addSynthesizedBranch(PlantPiece * pl, GardenGlyph * gl);
 	
 private:
 /// first ground piece

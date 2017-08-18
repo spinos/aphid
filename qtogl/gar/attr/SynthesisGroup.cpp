@@ -14,7 +14,8 @@
 namespace gar {
 
 SynthesisGroup::SynthesisGroup() :
-m_numInstances(0)
+m_numInstances(0),
+m_exclR(1.f)
 {}
 
 SynthesisGroup::~SynthesisGroup()
@@ -38,5 +39,17 @@ void SynthesisGroup::getInstance(int& geom, aphid::Matrix44F& tm, const int& i)
 	geom = m_geoms[i];
 	tm = m_tms[i];
 }
+
+void SynthesisGroup::setExclusionRadius(const float& x)
+{ m_exclR = x; }
+
+void SynthesisGroup::adjustExclusionRadius(const float& x)
+{
+	if(m_exclR < x)
+		m_exclR = x;
+}
+
+const float& SynthesisGroup::exclusionRadius() const
+{ return m_exclR; }
 
 }
