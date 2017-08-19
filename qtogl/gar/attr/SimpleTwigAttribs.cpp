@@ -175,22 +175,49 @@ void SimpleTwigAttribs::connectTo(PieceAttrib* another, const std::string& portN
     update();
 }
 
+ATriangleMesh* SimpleTwigAttribs::selectStemGeom(gar::SelectProfile* prof) const
+{
+    if(!m_inStemAttr)
+			return NULL;
+#if 0	
+		std::cout<<"\n stem attr"<<m_inStemAttr->glyphType()
+		<<" instance"<<m_inStemAttr->attribInstanceId()
+		<<" geom"<<prof->_index;
+		std::cout.flush();
+#endif		
+	prof->_geomInd = (gar::GlyphTypeToGeomIdGroup(m_inStemAttr->glyphType() ) 
+	                    | (m_inStemAttr->attribInstanceId() << 10) 
+	                    | prof->_index);
+	
+	return m_inStemAttr->selectGeom(prof);
+}
+
+ATriangleMesh* SimpleTwigAttribs::selectLeafGeom(gar::SelectProfile* prof) const
+{
+    if(!m_inLeafAttr)
+		return NULL;
+/// real index	
+	prof->_index = (prof->_index - 1)>>10;
+#if 0	
+		std::cout<<"\n leaf attr"<<m_inLeafAttr->glyphType()
+		<<" instance"<<m_inLeafAttr->attribInstanceId()
+		<<" geom"<<prof->_index;
+		std::cout.flush();
+#endif	
+	prof->_geomInd = (gar::GlyphTypeToGeomIdGroup(m_inLeafAttr->glyphType() ) 
+	                    | (m_inLeafAttr->attribInstanceId() << 10) 
+	                    | prof->_index);
+	return m_inLeafAttr->selectGeom(prof);
+}
+
 ATriangleMesh* SimpleTwigAttribs::selectGeom(gar::SelectProfile* prof) const
 {
 /// always by index
 	if(prof->_index < 1024) {
-		if(!m_inStemAttr)
-			return NULL;
-			
-		return m_inStemAttr->selectGeom(prof);
+	    return selectStemGeom(prof);
 	}
 	
-	if(!m_inLeafAttr)
-		return NULL;
-		
-	prof->_index = (prof->_index - 1)>>10;
-	
-	return m_inLeafAttr->selectGeom(prof);
+	return selectLeafGeom(prof);
 }
 
 bool SimpleTwigAttribs::isSynthesized() const

@@ -83,7 +83,8 @@ private:
 	void processPhyllotaxy(gar::SynthesisGroup* grp,
 			const aphid::Matrix44F& petmat,
 			const aphid::Matrix44F& segmat);
-	
+	aphid::ATriangleMesh* selectStemGeom(gar::SelectProfile* prof) const;
+	aphid::ATriangleMesh* selectLeafGeom(gar::SelectProfile* prof) const;
 };
 
 #endif

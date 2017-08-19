@@ -98,11 +98,38 @@ void ShrubScene::addSynthesizedBranch(PlantPiece * pl, GardenGlyph * gl)
 	gar::SelectProfile selinst;
 	
 	Matrix44F tm;
-	for(int i=0;i<ninst;++i) {
-		syng->getInstance(selinst._index, tm, i);
+/// first as root piece
+	syng->getInstance(selinst._index, tm, 0);
+	ATriangleMesh * msh = attr->selectGeom(&selinst);
+	const int& kgeom = selinst._geomInd;
+	
+	if(!m_vege->findGeom(kgeom)) {
+		m_vege->addGeom(kgeom, msh);
 	}
 	
+	int geomInd = m_vege->getGeomInd(msh);
+	pl->setGeometry(msh, geomInd);
 	pl->setExclR(selprof._exclR);
+
+/// rest as child pieces
+	for(int i=1;i<ninst;++i) {
+		syng->getInstance(selinst._index, tm, i);
+		
+		ATriangleMesh * childMsh = attr->selectGeom(&selinst);
+		const int& kchildGeom = selinst._geomInd;
+	
+		if(!m_vege->findGeom(kchildGeom)) {
+		    m_vege->addGeom(kchildGeom, childMsh);
+		}
+		
+		int childGeomInd = m_vege->getGeomInd(childMsh);
+		PlantPiece* childPiece = new PlantPiece(pl);
+		
+		childPiece->setGeometry(childMsh, childGeomInd);
+	    childPiece->setExclR(selinst._exclR);
+	    childPiece->setTransformMatrix(tm);
+	    
+	}
 }
 
 void ShrubScene::addSingleBranch(PlantPiece * pl, GardenGlyph * gl)

@@ -143,10 +143,11 @@ void PlantPiece::getGeom(GeomElmArrTyp * dst,
 					BoundingBox & box,
 					const aphid::Matrix44F & relTm)
 {
-	Matrix44F wtm = m_tm;
+	Matrix44F wtm;
+	worldTransformMatrix(wtm);
 	wtm.multiply(relTm);
 	
-	getGeomElm(dst, box, relTm);
+	getGeomElm(dst, box, wtm);
 	
 	if(numBranches() < 1) {
 		return;
@@ -154,7 +155,7 @@ void PlantPiece::getGeom(GeomElmArrTyp * dst,
 	
 	ChildListTyp::const_iterator it = m_childPieces.begin();
 	for(;it!=m_childPieces.end();++it) {
-		(*it)->getGeom(dst, box, wtm);
+		(*it)->getGeom(dst, box, relTm);
 	}
 	
 }

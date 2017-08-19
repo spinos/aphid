@@ -26,9 +26,15 @@ class SynthesisGroup;
 struct SelectProfile {
 
 	SelectCondition _condition;
+/// selection
 	int _index;
+/// attr_type | attr_instance | geom_selection
+	int _geomInd;
+/// exclusion radius
 	float _exclR;
+/// geometry
 	float _height;
+/// selection
 	float _age;
 	
 	SelectProfile() {

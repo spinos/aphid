@@ -49,7 +49,7 @@ typedef aphid::sdb::VectorArray<GeomElmTyp > GeomElmArrTyp;
 public:
 	PlantPiece(PlantPiece * parent = NULL);
 	virtual ~PlantPiece();
-	
+/// add child piece	
 	void addBranch(PlantPiece * c);
 	
 	void setTransformMatrix(const aphid::Matrix44F &tm);

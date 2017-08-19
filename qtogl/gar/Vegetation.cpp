@@ -16,6 +16,7 @@
 #include "data/grass.h"
 #include "data/variation.h"
 #include "data/billboard.h"
+#include "data/stem.h"
 #include <boost/format.hpp>
 #include <iomanip>
 #include <cmath>
@@ -188,6 +189,10 @@ std::string Vegetation::getGeomName(const int & k)
 		case gar::ggVariant:
 			geomt = gar::ToVariationType(gt );
 			geoms = gar::VariationTypeNames[geomt];
+		break;
+		case gar::ggStem:
+			geomt = gar::ToStemType(gt );
+			geoms = gar::StemTypeNames[geomt];
 		break;
 		default:
 		;
