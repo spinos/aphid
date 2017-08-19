@@ -46,6 +46,12 @@ enum AttribName {
 	nPetioleAngle,
 	nLeafPlacement,
 	nWhorlCount,
+	nAddSegment,
+	nNProfiles,
+	nMidribWidth,
+	nMidribThickness,
+	nVein,
+	nGrowBegin,
 };
 
 enum AttribType {

@@ -43,6 +43,7 @@ class SimpleTwigAttribs : public PieceAttrib, public gar::MultiSynthesis {
 		float _deltaNodeParam;
 		float _nodeNoiseWeight;
 		float _nodeScaling;
+		float _nodeBegin;
 
 		aphid::SplineMap1D* _sizingSpline;
 		aphid::SplineMap1D* _foldingSpline;

@@ -57,7 +57,7 @@ ATriangleMesh* FoldCrumpleAttribs::selectGeom(gar::SelectProfile* prof) const
 	if(prof->_condition == gar::slRandom)
 		prof->_index = rand() % numGeomVariations();
 	else if (prof->_condition == gar::slAge) {
-		int ind = RandomFn11() * 3.f + prof->_age * numGeomVariations();
+		int ind = prof->_age * numGeomVariations() - (rand() & 3);
 		if(ind < 0)
 			ind = 0;
 		else if(ind > numGeomVariations() - 1)

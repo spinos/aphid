@@ -25,9 +25,9 @@ SplineBillboard::SplineBillboard()
 SplineBillboard::~SplineBillboard()
 {}
 
-void SplineBillboard::setBillboardSize(float w, float h, int nu)
+void SplineBillboard::setBillboardSize(float w, float h, int nu, int addNv)
 {
-	BillboardMesh::setBillboardSize(w, h, nu);
+	BillboardMesh::setBillboardSize(w, h, nu, addNv);
 	adjustCenter();
 	adjustLeft();
 	adjustRight();

@@ -128,11 +128,17 @@ const char* Attrib::sAttribNameAsStr[] = {
 "petiole angle",
 "leaf placement",
 "whorl count",
+"add segment",
+"num profile",
+"midrib width",
+"midrib thickness",
+"vein",
+"grow begin",
 };
 
 std::string Attrib::attrNameStr() const
 { 
-	if(m_anm > 2048 + 30) {
+	if(m_anm > 2048 + 36) {
 		std::cout<<"\n ERROR oor attr name "<<m_anm;
 		std::cout.flush();
 		return std::string("unknown");
@@ -233,6 +239,24 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nWhorlCount :
 			r = gar::nWhorlCount;
+		break;
+		case gar::nAddSegment :
+			r = gar::nAddSegment;
+		break;
+		case gar::nNProfiles :
+			r = gar::nNProfiles;
+		break;
+		case gar::nMidribWidth :
+			r = gar::nMidribWidth;
+		break;
+		case gar::nMidribThickness :
+			r = gar::nMidribThickness;
+		break;
+		case gar::nVein :
+			r = gar::nVein;
+		break;
+		case gar::nGrowBegin :
+			r = gar::nGrowBegin;
 		break;
 		default:
 			;

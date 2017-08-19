@@ -26,7 +26,7 @@ public:
 	SplineBillboard();
     virtual ~SplineBillboard();
 	
-	virtual void setBillboardSize(float w, float h, int nu);
+	virtual void setBillboardSize(float w, float h, int nu, int addNv);
 	
 	SplineMap1D* centerSpline();
 	SplineMap1D* leftSpline();

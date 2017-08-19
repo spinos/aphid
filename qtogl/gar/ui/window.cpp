@@ -13,6 +13,7 @@
 #include "Vegetation.h"
 #include "VegetationPatch.h"
 #include "exportDlg.h"
+#include "AboutGardenDlg.h"
 #include "inout/ExportExample.h"
 #include "AttribDlg.h"
 #include "gar_common.h"
@@ -28,6 +29,7 @@ Window::Window()
 	m_chart = new ChartDlg(m_chartView, this);
 	m_attrib = new AttribDlg(m_scene, this);
 	glWidget = new GLWidget(m_vege, m_scene, this);
+	m_aboutDlg = new AboutGardenDlg(this);
 	
 	addToolBar(m_tools);
 	
@@ -85,6 +87,10 @@ void Window::createActions()
 	
 	m_exportAct = new QAction(tr("&Export"), this);
 	connect(m_exportAct, SIGNAL(triggered(bool)), this, SLOT(performExport(bool)));
+
+	m_aboutAct = new QAction(tr("&About Garden"), this);
+	m_aboutAct->setMenuRole(QAction::NoRole);
+	connect(m_aboutAct, SIGNAL(triggered(bool)), this, SLOT(shoAboutWin()));
 }
 	
 void Window::createMenus()
@@ -94,6 +100,8 @@ void Window::createMenus()
 	m_windowMenu = menuBar()->addMenu(tr("&Window")); 
 	m_windowMenu->addAction(m_graphAct);
 	m_windowMenu->addAction(m_attribAct);
+	m_helpMenu = menuBar()->addMenu(tr("&Help"));
+	m_helpMenu->addAction(m_aboutAct); 
 }
 
 void Window::toggleChartDlg(bool x)
@@ -172,3 +180,10 @@ void Window::performExport(bool x)
 
 void Window::recvDspState(int x)
 { glWidget->setDisplayState(x); }
+
+void Window::shoAboutWin()
+{
+	m_aboutDlg->show();
+	m_aboutDlg->raise();
+	m_aboutDlg->activateWindow();
+}

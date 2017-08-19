@@ -24,6 +24,7 @@ SplineCylinderAttribs::SplineCylinderAttribs() : PieceAttrib(gar::gtSplineCylind
 	
 	addFloatAttrib(gar::nRadius, 1.f, .5f, 25.f);
 	addFloatAttrib(gar::nHeight, 20.f, 4.f, 200.f);
+	addIntAttrib(gar::nAddSegment, 0, -20, 20);
 	addSplineAttrib(gar::nRadiusVariation);
 	addSplineAttrib(gar::nHeightVariation);
 	update();
@@ -56,8 +57,12 @@ bool SplineCylinderAttribs::update()
 	float r, h;
 	findAttrib(gar::nRadius)->getValue(r);
 	findAttrib(gar::nHeight)->getValue(h);
+	int ag;
+	findAttrib(gar::nAddSegment)->getValue(ag);
 	
-	int nv = 4 + h * .23f / r;
+	int nv = 4 + h * .23f / r + ag;
+	if(nv < 4)
+		nv = 4;
 	m_cylinder->createCylinder(5, nv, r, h);
 	
 	m_exclR = r * 1.9f;

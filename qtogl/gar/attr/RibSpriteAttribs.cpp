@@ -21,10 +21,10 @@ RibSpriteAttribs::RibSpriteAttribs() : PieceAttrib(gar::gtRibSprite)
 	sNumInstances++;
 	
 	m_billboard = new SplineBillboard;
-	m_billboard->setBillboardSize(4.f, 6.f, 2);
 	
 	addFloatAttrib(gar::nWidth, 4.f, 2.f, 80.f);
 	addFloatAttrib(gar::nHeight, 6.f, 3.f, 120.f);
+	addIntAttrib(gar::nAddSegment, 0, -20, 20);
 	addSplineAttrib(gar::nCenterLine);
 	addSplineAttrib(gar::nLeftSide);
 	addSplineAttrib(gar::nRightSide);
@@ -67,8 +67,10 @@ bool RibSpriteAttribs::update()
 	float w, h;
 	findAttrib(gar::nWidth)->getValue(w);
 	findAttrib(gar::nHeight)->getValue(h);
+	int ag;
+	findAttrib(gar::nAddSegment)->getValue(ag);
 	
-	m_billboard->setBillboardSize(w, h, 2);
+	m_billboard->setBillboardSize(w, h, 2, ag);
 	
 	m_exclR = w * .37f;
 	return true;

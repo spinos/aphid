@@ -12,6 +12,9 @@
 
 namespace gar {
 
+static const float DEV_VERSION_MAJOR = 1.3;
+static const int DEV_VERSION_MINOR = 4;
+
 enum ToolAction {
 	actViewAsset = 0,
 	actViewPlant = 1,
@@ -28,6 +31,7 @@ enum GlyphTyp {
 	gtHypericum = 36,
 	gtSplineSprite = 65,
 	gtRibSprite = 66,
+	gtBladeSprite = 67,
 	gtBendTwistRollVariant = 97,
 	gtDirectionalVariant = 98,
 	gtFoldCrumpleVariant = 99,
@@ -59,7 +63,7 @@ enum DisplayStat {
 static const int GlyphRange[NumGlyphGroups][2] = {
 {1, 3},
 {33, 37},
-{65, 67},
+{65, 68},
 {97, 100},
 {129, 130},
 {161, 162},

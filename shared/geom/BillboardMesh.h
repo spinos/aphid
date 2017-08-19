@@ -22,7 +22,7 @@ public:
 	BillboardMesh();
     virtual ~BillboardMesh();
 	
-	virtual void setBillboardSize(float w, float h, int nu);
+	virtual void setBillboardSize(float w, float h, int nu, int addNv);
 	
 protected:
     

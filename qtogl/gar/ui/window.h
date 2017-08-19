@@ -14,6 +14,7 @@ class AttribDlg;
 class ShrubScene;
 class ChartDlg;
 class ShrubChartView;
+class AboutGardenDlg;
 class Vegetation;
 
 class Window : public QMainWindow
@@ -44,6 +45,7 @@ private slots:
 	void recvAttribDlgClose();
 	void toggleChartDlg(bool x);
 	void toggleAttribDlg(bool x);
+	void shoAboutWin();
 	
 private:
 	GLWidget *glWidget;
@@ -53,10 +55,13 @@ private:
 	QAction * m_graphAct;
 	QAction * m_attribAct;
 	QAction * m_exportAct;
+	QAction * m_aboutAct;
 	QMenu * m_fileMenu;
     QMenu * m_windowMenu;
+    QMenu * m_helpMenu;
     ShrubScene * m_scene;
 	ShrubChartView * m_chartView;
+	AboutGardenDlg* m_aboutDlg;
 	Vegetation * m_vege;
 	
 };

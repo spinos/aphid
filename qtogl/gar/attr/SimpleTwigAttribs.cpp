@@ -38,6 +38,7 @@ m_inLeafAttr(NULL)
 	
 	addEnumAttrib(gar::nLeafPlacement, phyllotaxyFields);
 	addIntAttrib(gar::nWhorlCount, 4, 3, 8);
+	addFloatAttrib(gar::nGrowBegin, .3f, 0.f, .9f);
 	addSplineAttrib(gar::nAgingVar);
 	addSplineAttrib(gar::nSizeVariation);
 	addSplineAttrib(gar::nFoldVar);
@@ -96,6 +97,7 @@ bool SimpleTwigAttribs::update()
 	findAttrib(gar::nPetioleAngle)->getValue(m_morph._petioleAngle);
 	findAttrib(gar::nLeafPlacement)->getValue(m_morph._leafPlacement);
 	findAttrib(gar::nWhorlCount)->getValue(m_morph._whorlCount);
+	findAttrib(gar::nGrowBegin)->getValue(m_morph._nodeBegin);
 	
 	gar::SelectProfile selprof;
 	
@@ -236,6 +238,9 @@ gar::SynthesisGroup* SimpleTwigAttribs::selectSynthesisGroup(gar::SelectProfile*
 }
 
 /// http://www.svenlandrein.com/systematiccoursepages/morphology.html
+/// http://hosho.ees.hokudai.ac.jp/~tsuyu/top/dct/morph.html
+/// https://en.wikipedia.org/wiki/Inflorescence
+/// http://dept.ca.uky.edu/PLS220/Stemmorphbranching.pdf
 void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 					const ATriangleMesh* stemGeom)
 {
@@ -315,7 +320,8 @@ void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 		Matrix33F mrot(petq);
 		petmat.setRotation(mrot);
 		
-		processPhyllotaxy(grp, petmat, segmat);
+		if(m_morph._nodeParam > m_morph._nodeBegin)
+			processPhyllotaxy(grp, petmat, segmat);
 		
 		m_morph._nodeParam += m_morph._deltaNodeParam;
 	}

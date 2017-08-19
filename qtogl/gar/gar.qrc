@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
 		<file>icons/aging.png</file>
+		<file>icons/blade.png</file>
 		<file>icons/left_spin.png</file>
 		<file>icons/right_spin.png</file>
 		<file>icons/leaf.png</file>
