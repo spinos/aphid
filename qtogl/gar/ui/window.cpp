@@ -16,6 +16,7 @@
 #include "AboutGardenDlg.h"
 #include "inout/ExportExample.h"
 #include "AttribDlg.h"
+#include "TexcoordDlg.h"
 #include "gar_common.h"
 
 Window::Window()
@@ -28,6 +29,7 @@ Window::Window()
 	m_chartView = new ShrubChartView(m_scene);
 	m_chart = new ChartDlg(m_chartView, this);
 	m_attrib = new AttribDlg(m_scene, this);
+	m_texcoord = new TexcoordDlg(m_scene, this);
 	glWidget = new GLWidget(m_vege, m_scene, this);
 	m_aboutDlg = new AboutGardenDlg(this);
 	
@@ -51,14 +53,23 @@ Window::Window()
 	connect(m_attrib, SIGNAL(onAttribDlgClose()), 
 			this, SLOT(recvAttribDlgClose()));
 			
+	connect(m_texcoord, SIGNAL(onTexcoordDlgClose()), 
+			this, SLOT(recvTexcoordDlgClose()));
+			
 	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
 			m_attrib, SLOT(recvSelectGlyph(bool)));
+			
+	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
+			m_texcoord->getWidget(), SLOT(recvSelectGlyph(bool)));
 			
 	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
 			glWidget, SLOT(update()));
 			
 	connect(m_attrib->getWidget(), SIGNAL(sendAttribChanged()), 
 			glWidget, SLOT(update()));
+			
+	connect(m_attrib->getWidget(), SIGNAL(sendAttribChanged()), 
+			m_texcoord->getWidget(), SLOT(update()));
 }
 
 Window::~Window()
@@ -85,6 +96,11 @@ void Window::createActions()
 	m_attribAct->setChecked(true);
 	connect(m_attribAct, SIGNAL(toggled(bool)), this, SLOT(toggleAttribDlg(bool)));
 	
+	m_texcoordAct = new QAction(tr("&UV"), this);
+	m_texcoordAct->setCheckable(true);
+	m_texcoordAct->setChecked(false);
+	connect(m_texcoordAct, SIGNAL(toggled(bool)), this, SLOT(toggleTexcoordDlg(bool)));
+	
 	m_exportAct = new QAction(tr("&Export"), this);
 	connect(m_exportAct, SIGNAL(triggered(bool)), this, SLOT(performExport(bool)));
 
@@ -100,6 +116,7 @@ void Window::createMenus()
 	m_windowMenu = menuBar()->addMenu(tr("&Window")); 
 	m_windowMenu->addAction(m_graphAct);
 	m_windowMenu->addAction(m_attribAct);
+	m_windowMenu->addAction(m_texcoordAct);
 	m_helpMenu = menuBar()->addMenu(tr("&Help"));
 	m_helpMenu->addAction(m_aboutAct); 
 }
@@ -122,11 +139,23 @@ void Window::toggleAttribDlg(bool x)
 	}
 }
 
+void Window::toggleTexcoordDlg(bool x)
+{
+	if(x) {
+		m_texcoord->show();
+	} else {
+		m_texcoord->hide();
+	}
+}
+
 void Window::recvChartDlgClose()
 { m_graphAct->setChecked(false); }
 
 void Window::recvAttribDlgClose()
 { m_attribAct->setChecked(false); }
+
+void Window::recvTexcoordDlgClose()
+{ m_texcoordAct->setChecked(false); }
 
 void Window::recvToolAction(int x)
 {	

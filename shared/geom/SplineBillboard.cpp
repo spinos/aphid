@@ -44,7 +44,7 @@ SplineMap1D* SplineBillboard::rightSpline()
 
 void SplineBillboard::adjustCenter()
 { 
-	if(nu() < 2) 
+	if(nu() & 1) 
 		return;
 		
 	const float dv = 1.f / (float)nv();
@@ -77,7 +77,7 @@ void SplineBillboard::adjustLeft()
 		p[stripe * i].x = rowCenter(i) - d * hw;
 	}
 	
-	adjustTexcoord(false);
+	adjustTexcoord();
 }
 
 void SplineBillboard::adjustRight()
@@ -92,21 +92,18 @@ void SplineBillboard::adjustRight()
 		float d = m_rightSpline.interpolate(dv * i);
 		if(d < .07f) d = .07f;
 		
-		p[nu() + stripe * i].x = rowCenter(i) + d * hw;
+		p[stripe * i + nu()].x = rowCenter(i) + d * hw;
 	}
 	
-	adjustTexcoord(true);
+	adjustTexcoord();
 }
 
-void SplineBillboard::adjustTexcoord(bool isLeft)
+void SplineBillboard::adjustTexcoord()
 {
-	float sv;
-	if(widthHeightRatio() > 1.f) {
-		sv = .995 / width();
-	} else {
-		sv = .995f / height();
+	float midu = 0.5025f;
+	if(widthHeightRatio() < 1.f) {
+		midu = .0025 + widthHeightRatio() * .5f;
 	}
-	float midu = width() * .5f * sv;
 	
 	Vector2F * texc = (Vector2F *)triangleTexcoords();
 	const int nt = numTriangles();
@@ -115,28 +112,25 @@ void SplineBillboard::adjustTexcoord(bool isLeft)
 		const int i3 = i * 3;
 		for(int j=0;j<3;++j) {
 			Vector2F& texcj = texc[i3 + j];
-			adjustTexcoordPnt(texcj, midu, isLeft);
+			adjustTexcoordPnt(texcj, midu);
 		}
 	}
 }
 
 void SplineBillboard::adjustTexcoordPnt(Vector2F& texc,
-			float midu, bool isLeft)
+			float midu)
 {
-	if(isLeft) {
-		if(texc.x < midu - 1e-4f) {
-			float d = m_leftSpline.interpolate(texc.y);
-			Clamp01(d);
-			
-			texc.x = midu - d * midu;
-		} 
-	} else {
-		if(texc.x > midu + 1e-4f) {
-			float d = m_rightSpline.interpolate(texc.y);
-			Clamp01(d);
-			
-			texc.x = midu + d * midu;
-		} 
+	if(texc.x < midu - 1e-4f) {
+		float d = m_leftSpline.interpolate(texc.y);
+		Clamp01(d);
+		
+		texc.x = midu + d * (texc.x - midu);
+		
+	} else if(texc.x > midu + 1e-4f) {
+		float d = m_rightSpline.interpolate(texc.y);
+		Clamp01(d);
+		
+		texc.x = midu + d * (texc.x - midu);
 	}
 }
 

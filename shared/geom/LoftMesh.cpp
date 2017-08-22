@@ -158,8 +158,8 @@ void LoftMeshBuilder::projectTexcoord(ATriangleMesh* msh,
 		for(int j=0;j<3;++j) {
 			
 			const Vector3F& pj = p[ind[i3 + j] ];
-			texc[acc++] = .0025f + pj.x * sr + xoffset;
-			texc[acc++] = .0025f + pj.y * sr + yoffset;
+			texc[acc++] = .0025f + (pj.x + xoffset) * sr;
+			texc[acc++] = .0025f + (pj.y + yoffset) * sr;
 		}
 	}
 }

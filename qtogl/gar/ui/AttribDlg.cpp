@@ -58,5 +58,3 @@ void AttribDlg::recvSelectGlyph(bool x)
 
 QWidget* AttribDlg::getWidget()
 { return m_widget; }
-
-///m_collWigs.enqueue(new QLabel( );

@@ -37,9 +37,9 @@ public:
 	void adjustRight();
 	
 protected:
-    void adjustTexcoord(bool isLeft);
+    void adjustTexcoord();
 	void adjustTexcoordPnt(Vector2F& texc,
-			float midu, bool isLeft);
+			float midu);
 			
 private:
     float rowCenter(int i) const;

@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+		<file>icons/blocks.png</file>
+		<file>icons/monopodial.png</file>
 		<file>icons/aging.png</file>
 		<file>icons/blade.png</file>
 		<file>icons/left_spin.png</file>

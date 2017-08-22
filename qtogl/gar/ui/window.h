@@ -13,6 +13,7 @@ class ToolBox;
 class AttribDlg;
 class ShrubScene;
 class ChartDlg;
+class TexcoordDlg;
 class ShrubChartView;
 class AboutGardenDlg;
 class Vegetation;
@@ -43,8 +44,10 @@ private slots:
 	void recvDspState(int x);
 	void recvChartDlgClose();
 	void recvAttribDlgClose();
+	void recvTexcoordDlgClose();
 	void toggleChartDlg(bool x);
 	void toggleAttribDlg(bool x);
+	void toggleTexcoordDlg(bool x);
 	void shoAboutWin();
 	
 private:
@@ -52,9 +55,11 @@ private:
 	ToolBox * m_tools;
 	ChartDlg* m_chart;
 	AttribDlg* m_attrib;
+	TexcoordDlg* m_texcoord;
 	QAction * m_graphAct;
 	QAction * m_attribAct;
 	QAction * m_exportAct;
+	QAction * m_texcoordAct;
 	QAction * m_aboutAct;
 	QMenu * m_fileMenu;
     QMenu * m_windowMenu;

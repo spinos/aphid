@@ -1,4 +1,4 @@
-## Sat Aug 20 20:22:05 CST 2017 
+## Sat Aug 23 06:22:05 CST 2017 
 
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
@@ -44,6 +44,7 @@ data/grass.h
 data/clover.h
 data/haircap.h
 data/poapratensis.h
+data/monopodial.h
 gar_common.h
 ShrubScene.h
 ${APHID_QT_DIR}/GlyphPort.h
@@ -75,6 +76,7 @@ QT4_ADD_RESOURCES ( GAR_RES_SOURCES ${GAR_RESOURCES} )
 message ("rcc output is " ${GAR_RES_SOURCES})
 
 set (GAR_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
+${APHID_QT_DIR}/Base2DView.cpp
 ${APHID_QT_DIR}/QDoubleEditSlider.cpp
 ${APHID_QT_DIR}/QStringEditField.cpp
 ${APHID_QT_DIR}/QIconFrame.cpp

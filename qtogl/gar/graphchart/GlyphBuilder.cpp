@@ -28,7 +28,9 @@
 #include <attr/HaircapProp.h>
 #include <attr/HypericumProp.h>
 #include <attr/BendTwistRollAttribs.h>
+#include <attr/BlockDeformAttribs.h>
 #include <attr/SplineCylinderAttribs.h>
+#include <attr/MonopodialAttribs.h>
 #include <attr/DirectionalBendAttribs.h>
 #include <attr/SimpleTwigAttribs.h>
 #include <attr/FoldCrumpleAttribs.h>
@@ -165,6 +167,9 @@ PieceAttrib* GlyphBuilder::buildVariantAttrib(const int & gtyp)
 	if(gtyp == gar::gtFoldCrumpleVariant)
 		return (new FoldCrumpleAttribs);
 		
+	if(gtyp == gtBlockDeformVariant)
+		return (new BlockDeformAttribs);
+		
 	return (new PieceAttrib);
 }
 
@@ -172,6 +177,9 @@ PieceAttrib* GlyphBuilder::buildStemAttrib(const int & gtyp)
 {
 	if(gtyp == gtSplineCylinder)
 		return (new SplineCylinderAttribs);
+		
+	if(gtyp == gtMonopodial)
+		return (new MonopodialAttribs);
 		
 	return (new PieceAttrib);
 }

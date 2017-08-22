@@ -20,8 +20,10 @@ public:
 	
 	virtual void processCamera(QMouseEvent *event);
 	
+protected:
 	void startTracking(const Vector2F & p);
 	Vector2F updateTracking(const Vector2F & p);
+	
 private:
 	Vector2F m_trackPos;
 };

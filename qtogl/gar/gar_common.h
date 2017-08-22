@@ -13,7 +13,7 @@
 namespace gar {
 
 static const float DEV_VERSION_MAJOR = 1.3;
-static const int DEV_VERSION_MINOR = 4;
+static const int DEV_VERSION_MINOR = 6;
 
 enum ToolAction {
 	actViewAsset = 0,
@@ -35,8 +35,10 @@ enum GlyphTyp {
 	gtBendTwistRollVariant = 97,
 	gtDirectionalVariant = 98,
 	gtFoldCrumpleVariant = 99,
+	gtBlockDeformVariant = 100,
 	gtImportGeom = 129,
 	gtSplineCylinder = 161,
+	gtMonopodial = 162,
 	gtSimpleTwig = 193,
 };
 
@@ -64,9 +66,9 @@ static const int GlyphRange[NumGlyphGroups][2] = {
 {1, 3},
 {33, 37},
 {65, 68},
-{97, 100},
+{97, 101},
 {129, 130},
-{161, 162},
+{161, 163},
 {193, 194}
 };
 

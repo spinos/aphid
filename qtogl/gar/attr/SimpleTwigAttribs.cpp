@@ -237,10 +237,6 @@ gar::SynthesisGroup* SimpleTwigAttribs::selectSynthesisGroup(gar::SelectProfile*
 	return synthsisGroups()[prof->_index]; 
 }
 
-/// http://www.svenlandrein.com/systematiccoursepages/morphology.html
-/// http://hosho.ees.hokudai.ac.jp/~tsuyu/top/dct/morph.html
-/// https://en.wikipedia.org/wiki/Inflorescence
-/// http://dept.ca.uky.edu/PLS220/Stemmorphbranching.pdf
 void SimpleTwigAttribs::synthsizeAGroup(gar::SynthesisGroup* grp,
 					const ATriangleMesh* stemGeom)
 {
