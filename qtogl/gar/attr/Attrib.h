@@ -52,6 +52,8 @@ enum AttribName {
 	nMidribThickness,
 	nVein,
 	nGrowBegin,
+	nLengthScale,
+	nRadiusScale,
 };
 
 enum AttribType {

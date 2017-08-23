@@ -21,7 +21,7 @@ class BlockDeformAttribs : public PieceAttrib, public aphid::PackTexcoord {
 
     PieceAttrib* m_inAttr;
 	aphid::ATriangleMesh* m_inGeom;
-	aphid::ATriangleMesh* m_outGeom[32];
+	aphid::ATriangleMesh* m_outGeom[48];
 	int m_instId;
 	float m_exclR;
 	float m_geomHeight;

@@ -28,10 +28,12 @@ m_exclR(1.f)
 	addVector2Attrib(gar::nBend, 0.f, 0.5f);
 	addFloatAttrib(gar::nTwist, 0.1f, 0.f, 1.f);
 	addFloatAttrib(gar::nRoll, 0.1f, 0.f, 1.f);
-	addSplineAttrib(gar::nWeightVariation);
+	addFloatAttrib(gar::nLengthScale, 1.f, 0.1f, 100.f);
+	addFloatAttrib(gar::nRadiusScale, 1.f, 0.1f, 100.f);
+	// addSplineAttrib(gar::nRadiusVariation);
 	
 	m_dfm = new BlockDeformer;	
-	for(int i=0;i<32;++i) 
+	for(int i=0;i<48;++i) 
 	    m_outGeom[i] = new ATriangleMesh;
 }
 
@@ -42,7 +44,7 @@ bool BlockDeformAttribs::hasGeom() const
 { return m_inGeom != NULL; }
 
 int BlockDeformAttribs::numGeomVariations() const
-{ return 32; }
+{ return 48; }
 
 ATriangleMesh* BlockDeformAttribs::selectGeom(gar::SelectProfile* prof) const
 {
@@ -69,14 +71,30 @@ bool BlockDeformAttribs::update()
 	m_geomHeight = selprof._height;
 		
 	BlockDeformerBuilder builder;
-/// a chain of 4
-	float deltaHeight = m_geomHeight * .25;
-	deform::Block* lastBlock = NULL;
-	for(int i=0;i<4;++i) {
-		deform::Block* curBlock = new deform::Block(lastBlock);
+/// a chain of 8 blocks
+	const float deltaHeight = m_geomHeight * .125f;
+	builder.setYSeg(deltaHeight);
+	
+	float scaling2[2];
+	findAttrib(gar::nLengthScale)->getValue(scaling2[0]);
+	findAttrib(gar::nRadiusScale)->getValue(scaling2[1]);
+	m_dfm->setScaling(scaling2);
+	
+	m_exclR *= scaling2[1];
+	m_geomHeight *= scaling2[0];
+	
+/// root at origin
+	deform::Block* curBlock = new deform::Block;
+	Matrix44F* ltm = curBlock->tmR();
+	ltm->setIdentity();
+	builder.addBlock(curBlock);
+	
+	deform::Block* lastBlock = curBlock;
+	for(int i=1;i<8;++i) {
+		curBlock = new deform::Block(lastBlock);
 /// local translation of each block
-		Matrix44F* ltm = curBlock->tmR();
-		ltm->setTranslation(0.f, deltaHeight, 0.f);
+		ltm = curBlock->tmR();
+		ltm->setTranslation(0.f, deltaHeight * scaling2[0], 0.f);
 		
 		builder.addBlock(curBlock);
 		lastBlock = curBlock;
@@ -90,29 +108,33 @@ bool BlockDeformAttribs::update()
 	findAttrib(gar::nTwist)->getValue(twistRoll[0]);
 	findAttrib(gar::nRoll)->getValue(twistRoll[1]);
 	
-/// 4 bend/roll groups
-	const float deltaBend = (bendRange[1] - bendRange[0]) * .25f;
-	const float deltaRoll = twistRoll[1] * .25f;
+/// 6 bend groups
+	const float deltaBend = (bendRange[1] - bendRange[0]) / 5.f;
+/// 8 roll per group
+	const float deltaRoll = twistRoll[1] / 3.5f;
 		
 	float angles[3];
-    for(int i=0;i<32;++i) {
-        int bendGrp = i>>3;
-        angles[0] = bendRange[0] + deltaBend * (RandomF01() + bendGrp);
-        angles[1] = twistRoll[0] * (.5f + RandomF01() * .5f);
-		if(i&1) {
-            angles[1] = -angles[1];
-		}
+    for(int i=0;i<6;++i) {
+        angles[0] = bendRange[0] + deltaBend * i;
+        m_dfm->setBend(angles[0]);
+        
+        for(int j=0;j<8;++j) {
+            angles[1] = twistRoll[0] * RandomF01();
+            
+            if(j < 4) {
+                angles[1] = -angles[1];
+            }
 /// roll distribution
-        angles[2] = deltaRoll * ((float)i - (bendGrp<<3) - 4 + RandomF01() );
+            angles[2] = deltaRoll * j - twistRoll[1];
 
-		m_dfm->setBend(angles[0]);
-		m_dfm->setTwist(angles[1]);
-		m_dfm->setRoll(angles[2]);
-		m_dfm->deform(m_inGeom);
-		m_dfm->updateGeom(m_outGeom[i], m_inGeom);
+            m_dfm->setTwist(angles[1]);
+            m_dfm->setRoll(angles[2]);
+            m_dfm->deform(m_inGeom);
+            m_dfm->updateGeom(m_outGeom[i * 8  + j], m_inGeom);
+		}
 	}
 	
-	computeTexcoord(m_outGeom, 32, m_inAttr->texcoordBlockAspectRatio() );
+	computeTexcoord(m_outGeom, 48, m_inAttr->texcoordBlockAspectRatio() );
 	
 	return true;
 }

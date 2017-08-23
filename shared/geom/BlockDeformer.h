@@ -48,6 +48,7 @@ protected:
 class BlockDeformerBuilder {
 
 	std::vector<deform::Block* > m_blocks;
+	float m_ySegment;
 
 public:
 	BlockDeformerBuilder();
@@ -60,6 +61,8 @@ public:
 	
 	deform::Block* getBlock(int i) const;
 	
+	void setYSeg(float x);
+	
 protected:
 
 private:
@@ -71,8 +74,8 @@ typedef deform::Block* BlockPtrType;
 
 	BlockPtrType* m_blocks;
 	int m_numBlocks;	
-/// bend-x, twist-y, roll-z rotation
-	float m_angles[3];
+/// bend-x, twist-y, roll-z rotation, scale_xz, scale_y
+	float m_angles[5];
 /// 16 per vertex, 12 for local p, 4 for block ind
 	boost::scoped_array<char> m_bind;
 		
@@ -86,6 +89,8 @@ public:
 	void setBend(const float& x);
 	void setTwist(const float& x);
 	void setRoll(const float& x);
+/// x[0] is y scale x[1] is x and z scale
+	void setScaling(const float* x);
 	
 	virtual void deform(const ATriangleMesh * mesh);
 	

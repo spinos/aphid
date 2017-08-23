@@ -134,11 +134,13 @@ const char* Attrib::sAttribNameAsStr[] = {
 "midrib thickness",
 "vein",
 "grow begin",
+"length scale",
+"radius scale",
 };
 
 std::string Attrib::attrNameStr() const
 { 
-	if(m_anm > 2048 + 36) {
+	if(m_anm > 2048 + 38) {
 		std::cout<<"\n ERROR oor attr name "<<m_anm;
 		std::cout.flush();
 		return std::string("unknown");
@@ -257,6 +259,12 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nGrowBegin :
 			r = gar::nGrowBegin;
+		break;
+		case gar::nLengthScale :
+			r = gar::nLengthScale;
+		break;
+		case gar::nRadiusScale :
+			r = gar::nRadiusScale;
 		break;
 		default:
 			;

@@ -19,7 +19,10 @@ namespace deform {
 
 Block::Block(Block* parent) :
 m_parentBlock(parent)
-{ parent->addChild(this); }
+{
+    if(parent)
+        parent->addChild(this); 
+}
 
 Block::~Block()
 {
@@ -67,7 +70,17 @@ BlockDeformerBuilder::~BlockDeformerBuilder()
 
 void BlockDeformerBuilder::bindVertexToBlock(Vector3F& pnt, int& iblock) const
 {
+/// by y
+    int yseg = (pnt.y - 0.1f) / m_ySegment;
+    if(yseg > numBlocks() - 1)
+        yseg = numBlocks() - 1;
+/// to local
+    pnt.y -= m_ySegment * (float)yseg;
+    iblock = yseg;
 }
+
+void BlockDeformerBuilder::setYSeg(float x)
+{ m_ySegment = x; }
 
 void BlockDeformerBuilder::addBlock(deform::Block* b)
 { m_blocks.push_back(b); }
@@ -125,6 +138,12 @@ void BlockDeformer::setTwist(const float& x)
 void BlockDeformer::setRoll(const float& x)
 { m_angles[2] = x; }
 
+void BlockDeformer::setScaling(const float* x)
+{ 
+    m_angles[3] = x[0];
+    m_angles[4] = x[1];
+}
+
 void BlockDeformer::deform(const ATriangleMesh * mesh)
 {
     if(!mesh)
@@ -134,9 +153,18 @@ void BlockDeformer::deform(const ATriangleMesh * mesh)
 	
 	updateBlocks();
     
+	Vector3F plocal;
+	int iblock;
 	const int & nv = mesh->numPoints();
 	for(int i=0;i<nv;++i) {
-		Vector3F& pv = mesh->points()[i];
+		Vector3F& pv = points()[i];
+		pv = mesh->points()[i];
+		getBind(plocal, iblock, i);
+		BlockPtrType bi = getBlock(iblock);
+		plocal.x *= m_angles[4];
+		plocal.y *= m_angles[3];
+		plocal.z *= m_angles[4];
+		pv = bi->worldTm().transform(plocal);
 	}
 	
 	calculateNormal(mesh);
@@ -145,9 +173,23 @@ void BlockDeformer::deform(const ATriangleMesh * mesh)
 
 void BlockDeformer::updateBlocks()
 {
-	for(int i=0;i<m_numBlocks;++i) {
+    const float scaling = 1.f / (float)(m_numBlocks - 1);
+    const float droll = rollAngle() * scaling;
+    const float dtwist = twistAngle() * scaling;
+    const float dbend = bendAngle() * scaling;
+    Matrix33F zrm;
+    zrm.rotateZ(droll);
+    Matrix33F yrm;
+    yrm.rotateY(dtwist);
+    Matrix33F xrm;
+    xrm.rotateX(dbend);
+    
+	for(int i=1;i<m_numBlocks;++i) {
 		BlockPtrType bi = getBlock(i);
 /// calculate local tm
+        bi->tmR()->setRotation(xrm * yrm * zrm);
+/// shrink to about 0.6 after 7 blocks
+        bi->tmR()->scaleBy(Vector3F(.93f, 1.f, .93f));
 	}
 	BlockPtrType br = getBlock(0);
 	br->updateWorldTm();
