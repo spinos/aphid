@@ -28,7 +28,7 @@ public:
 protected:
 	SynthesisGroup* addSynthesisGroup();
 	const SynthListType& synthsisGroups() const;
-	void clearSynths();
+	virtual void clearSynths();
 	
 };
 

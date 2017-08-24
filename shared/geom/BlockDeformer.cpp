@@ -33,6 +33,9 @@ Block::~Block()
 	m_childBlocks.clear();
 }
 
+Block* Block::child(int i) const
+{ return m_childBlocks[i]; }
+
 void Block::addChild(Block* child)
 { m_childBlocks.push_back(child); }
 
@@ -188,8 +191,8 @@ void BlockDeformer::updateBlocks()
 		BlockPtrType bi = getBlock(i);
 /// calculate local tm
         bi->tmR()->setRotation(xrm * yrm * zrm);
-/// shrink to about 0.6 after 7 blocks
-        bi->tmR()->scaleBy(Vector3F(.93f, 1.f, .93f));
+/// shrink to about 0.932 after 7 blocks
+        bi->tmR()->scaleBy(Vector3F(.99f, 1.f, .99f));
 	}
 	BlockPtrType br = getBlock(0);
 	br->updateWorldTm();
@@ -207,11 +210,23 @@ const float& BlockDeformer::rollAngle() const
 BlockDeformer::BlockPtrType BlockDeformer::getBlock(int i)
 { return m_blocks[i]; }
 
+const BlockDeformer::BlockPtrType BlockDeformer::getBlock(int i) const
+{ return m_blocks[i]; }
+
 void BlockDeformer::getBind(Vector3F& plocal, int& iblock, const int& i) const
 {
 	char* src = &m_bind[i<<4];		
 	memcpy(&plocal, src, 12);
 	memcpy(&iblock, &src[12], 4);
+}
+
+void BlockDeformer::getBlockTms(float* y) const
+{
+	for(int i=0;i<m_numBlocks;++i) {
+		const BlockPtrType bi = getBlock(i);
+		const Matrix44F& wtm = bi->worldTm();
+		wtm.glMatrix(&y[i<<4]);
+	}
 }
 
 }

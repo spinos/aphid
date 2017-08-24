@@ -12,7 +12,7 @@
 #define GAR_SIMPLE_TWIG_ATTRIBS_H
 
 #include "PieceAttrib.h"
-#include "MultiSynthesis.h"
+#include <syn/MultiSynthesis.h>
 
 namespace aphid {
 class Matrix44F;

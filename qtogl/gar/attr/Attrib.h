@@ -54,12 +54,15 @@ enum AttribName {
 	nGrowBegin,
 	nLengthScale,
 	nRadiusScale,
+	nNumSeasons,
+	nShuffle,
 };
 
 enum AttribType {
 	tUnknown = 1024,
 	tBool,
 	tEnum,
+	tAction,
 	tInt,
 	tInt2,
 	tInt3,
@@ -69,6 +72,24 @@ enum AttribType {
 	tColor,
 	tString,
 	tSpline,
+};
+
+/// monopodial: a single continuous growth axis that 
+/// extends at its apex and produces succesive lateral 
+/// shoots.
+/// sympodial: the apparent main axis or stem of a plant,
+/// made up of succesive secondary axes due to the death
+/// of each season's terminal bud, as in the vine. 
+enum BranchingUnitType {
+	buUnknown = 0,
+	buMonopodial,
+	buSympodial,
+};
+
+enum BudType {
+	bdUnknown = 768,
+	bdTerminal,
+	bdLateral,
 };
 
 /// phyllotaxy describes the organisation of the leaves on the stem
@@ -84,6 +105,7 @@ enum SelectCondition {
 	slIndex,
 	slRandom,
 	slAge,
+	slCloseToUp,
 };
 
 class Attrib {
@@ -188,6 +210,19 @@ public:
 	void getValue(std::string& y) const;
 	
 	const bool& isFileName() const;
+	
+};
+
+class ActionAttrib : public Attrib {
+
+	std::string m_imgname;
+	
+public:
+	ActionAttrib(AttribName anm);
+	virtual ~ActionAttrib();
+	
+	void setImageName(const std::string& x);
+	const std::string& imageName() const;
 	
 };
 

@@ -36,12 +36,49 @@ struct SelectProfile {
 	float _height;
 /// selection
 	float _age;
-	
+/// close to up reference
+	float _upVec[3];
+/// space of growth
+	float _relMat[16];
+			
 	SelectProfile() {
 		_condition = slIndex;
 		_index = 0;
 		_exclR = 1.f;
 		_height = 1.f;
+		_upVec[0] = 0.f;
+		_upVec[1] = 1.f;
+		_upVec[2] = 0.f;
+	}
+	
+};
+
+/// select max 8 buds
+struct SelectBudContext {
+
+	BudType _budType;
+	SelectCondition _condition;
+/// local transform of bud
+	float _budTm[8][16];
+/// bind ind of bud
+	int _budBind[8];
+	int _numSelect;
+	int _variationIndex;
+/// eliminate downward growth 
+	float _upVec[3];
+	float _upLimit;
+/// space of growth
+	float _relMat[16];
+	
+	SelectBudContext() {
+		_budType = bdTerminal;
+		_condition = slCloseToUp;
+		_numSelect = 1;
+		_variationIndex = 0;
+		_upLimit = 0.f;
+		_upVec[0] = 0.f;
+		_upVec[1] = 1.f;
+		_upVec[2] = 0.f;
 	}
 	
 };
@@ -86,6 +123,9 @@ public:
 	virtual gar::SynthesisGroup* selectSynthesisGroup(gar::SelectProfile* prof) const;
 	virtual bool isGeomStem() const;
 	virtual bool isGeomLeaf() const;
+	virtual bool isGeomBranchingUnit() const;
+	virtual gar::BranchingUnitType getBranchingUnitType() const;
+	virtual bool selectBud(gar::SelectBudContext* ctx) const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,
@@ -110,6 +150,9 @@ protected:
 		
 	void addEnumAttrib(gar::AttribName anm,
 		const std::vector<int>& fields);
+		
+	void addActionAttrib(gar::AttribName anm,
+		const std::string& imgname);
 	
 	void updateSplineValues(aphid::SplineMap1D* ls, gar::SplineAttrib* als);
 	

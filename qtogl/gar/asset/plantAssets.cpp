@@ -37,6 +37,12 @@ PlantAssets::PlantAssets(QTreeWidget *parent) : QTreeWidgetItem(parent)
 	twig->setIcon(0, twigIcon);
 	twig->setData(0, Qt::WhatsThisRole, QString(tr("allTwig")) );
 	
+	QIcon branchIcon(":/icons/branch.png");
+	QTreeWidgetItem * branch = new QTreeWidgetItem(this);
+	branch->setText(0, tr("Branch"));
+	branch->setIcon(0, branchIcon);
+	branch->setData(0, Qt::WhatsThisRole, QString(tr("allBranch")) );
+	
 	setExpanded(true);
 
 }

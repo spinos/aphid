@@ -25,13 +25,12 @@ m_exclR(1.f)
     m_instId = sNumInstances;
 	sNumInstances++;
 	
-	addVector2Attrib(gar::nBend, 0.f, 0.5f);
+	addVector2Attrib(gar::nBend, 0.2f, -.2f);
 	addFloatAttrib(gar::nTwist, 0.1f, 0.f, 1.f);
 	addFloatAttrib(gar::nRoll, 0.1f, 0.f, 1.f);
 	addFloatAttrib(gar::nLengthScale, 1.f, 0.1f, 100.f);
 	addFloatAttrib(gar::nRadiusScale, 1.f, 0.1f, 100.f);
-	// addSplineAttrib(gar::nRadiusVariation);
-	
+
 	m_dfm = new BlockDeformer;	
 	for(int i=0;i<48;++i) 
 	    m_outGeom[i] = new ATriangleMesh;
@@ -48,8 +47,10 @@ int BlockDeformAttribs::numGeomVariations() const
 
 ATriangleMesh* BlockDeformAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	if(prof->_condition != gar::slIndex)
+	if(prof->_condition == gar::slRandom)
 		prof->_index = rand() % numGeomVariations();
+	else if(prof->_condition == gar::slCloseToUp)
+		prof->_index = variationCloseToUp(prof);
 		
     prof->_exclR = m_exclR;
 	prof->_height = m_geomHeight;
@@ -115,22 +116,23 @@ bool BlockDeformAttribs::update()
 		
 	float angles[3];
     for(int i=0;i<6;++i) {
-        angles[0] = bendRange[0] + deltaBend * i;
+        angles[0] = bendRange[0] + deltaBend * (RandomFn11() + i);
         m_dfm->setBend(angles[0]);
         
         for(int j=0;j<8;++j) {
-            angles[1] = twistRoll[0] * RandomF01();
+            angles[1] = twistRoll[0] * (.5f + .5f* RandomF01() );
             
-            if(j < 4) {
+            if(j & 1) {
                 angles[1] = -angles[1];
             }
 /// roll distribution
-            angles[2] = deltaRoll * j - twistRoll[1];
+            angles[2] = deltaRoll * (RandomFn11() + j) - twistRoll[1];
 
             m_dfm->setTwist(angles[1]);
             m_dfm->setRoll(angles[2]);
             m_dfm->deform(m_inGeom);
             m_dfm->updateGeom(m_outGeom[i * 8  + j], m_inGeom);
+			m_dfm->getBlockTms(m_blkMat[i * 8  + j]);
 		}
 	}
 	
@@ -168,7 +170,94 @@ bool BlockDeformAttribs::isGeomLeaf() const
 	return m_inAttr->isGeomLeaf();
 }
 
+bool BlockDeformAttribs::isGeomBranchingUnit() const
+{
+	if(!m_inAttr)
+		return false;
+	return m_inAttr->isGeomStem();
+}
+
+gar::BranchingUnitType BlockDeformAttribs::getBranchingUnitType() const
+{
+	if(!m_inAttr)
+		return gar::buUnknown;
+	return m_inAttr->getBranchingUnitType();
+}
+
 bool BlockDeformAttribs::canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const
 {
 	return (another->isGeomStem() || another->isGeomLeaf() );
+}
+
+bool BlockDeformAttribs::selectBud(gar::SelectBudContext* ctx) const
+{
+	if(!m_inAttr)
+		return false;
+				
+	if(!m_inAttr->selectBud(ctx) )
+		return false;
+		
+	if(ctx->_budType == gar::bdTerminal)
+		return selectTerminalBud(ctx);
+	
+	return selectLateralBud(ctx);
+}
+
+bool BlockDeformAttribs::selectTerminalBud(gar::SelectBudContext* ctx) const
+{
+	const float* vartm = m_blkMat[ctx->_variationIndex];
+	const int& bindi = ctx->_budBind[0];
+	Matrix44F tm(&vartm[bindi<<4]);
+	Matrix44F loctm(ctx->_budTm[0]);
+	loctm *= tm;
+	loctm.glMatrix(ctx->_budTm[0]);
+	return true;
+}
+
+bool BlockDeformAttribs::selectLateralBud(gar::SelectBudContext* ctx) const
+{
+	const Matrix44F wtm(ctx->_relMat);
+	const Vector3F upref(ctx->_upVec);
+		
+	const float* vartm = m_blkMat[ctx->_variationIndex];
+	
+	int nup = 0;
+	for(int i=0;i<ctx->_numSelect;++i) {
+		const int& bindi = ctx->_budBind[i];
+		Matrix44F tm(&vartm[bindi<<4]);
+		Matrix44F loctm(ctx->_budTm[i]);
+		loctm *= tm;
+		const Vector3F locup = wtm.transformAsNormal(loctm.getUp() );
+		if(locup.dot(upref) > ctx->_upLimit) {
+/// facing up
+			loctm.glMatrix(ctx->_budTm[nup]);
+			nup++;
+		}
+	}
+	ctx->_numSelect = nup;
+	
+	return true;
+}
+
+Vector3F BlockDeformAttribs::variationDirection(int i) const
+{ 
+	const float* mati = &m_blkMat[i][112];
+	return Vector3F(mati[4], mati[5], mati[6]); 
+}
+
+int BlockDeformAttribs::variationCloseToUp(gar::SelectProfile* prof) const
+{
+	const Vector3F vref(prof->_upVec);
+	const Matrix44F tm(prof->_relMat);
+	int ind = 0;
+	float maxD = -1e8f;
+	for(int i=0;i<numGeomVariations();++i) {
+		const Vector3F vi = tm.transformAsNormal(variationDirection(i) );
+		float d = vi.dot(vref);
+		if(maxD < d) {
+			maxD = d;
+			ind = i;
+		}
+	}
+	return ind;
 }

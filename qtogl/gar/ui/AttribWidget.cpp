@@ -19,6 +19,7 @@
 #include "data/variation.h"
 #include "data/stem.h"
 #include "data/twig.h"
+#include "data/branch.h"
 #include "attr/PieceAttrib.h"
 #include <qt/QDoubleEditSlider.h>
 #include <qt/QStringEditField.h>
@@ -26,6 +27,7 @@
 #include <qt/QEnumCombo.h>
 #include <qt/IntEditGroup.h>
 #include <qt/DoubleEditGroup.h>
+#include <qt/IconButtonGroup.h>
 
 using namespace aphid;
 
@@ -106,6 +108,9 @@ void AttribWidget::lsAttr(gar::Attrib* attr)
 		break;
 		case gar::tVec2 :
 			wig = shoVec2Attr(attr);
+		break;
+		case gar::tAction :
+			wig = shoActionAttr(attr);
 		break;
 		default:
 			wig = new QLabel(tr(attr->attrNameStr().c_str() ) );
@@ -233,6 +238,23 @@ QWidget* AttribWidget::shoEnumAttr(gar::Attrib* attr)
 	return wig;
 }
 
+QWidget* AttribWidget::shoActionAttr(gar::Attrib* attr)
+{
+	gar::ActionAttrib* sattr = static_cast<gar::ActionAttrib*> (attr);
+	
+	QString lab = tr(attr->attrNameStr().c_str() );
+	 	
+	QIcon icn(tr(sattr->imageName().c_str()) );
+	
+	IconButtonGroup* wig = new IconButtonGroup(icn, lab);
+	wig->setNameId(attr->attrName() );
+	
+	connect(wig, SIGNAL(buttonPressed2(QPair<int, int>)),
+            this, SLOT(recvActionPressed(QPair<int, int>)));
+	
+	return wig;
+}
+
 void AttribWidget::recvVec2Value(QPair<int, QVector<double> > x)
 {
 	PieceAttrib* att = m_selectedGlyph->attrib();
@@ -333,6 +355,22 @@ gar::EnumAttrib* AttribWidget::findEnumAttr(int i)
 	return static_cast<gar::EnumAttrib*> (dst);
 }
 
+gar::ActionAttrib* AttribWidget::findActionAttr(int i)
+{
+	if(!m_selectedGlyph) 
+		return NULL;
+		
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(i) );	
+	if(!dst) {
+		qDebug()<<" AttribWidget cannot find action attr "
+			<<i;
+		return NULL;
+	}
+	
+	return static_cast<gar::ActionAttrib*> (dst);
+}
+
 void AttribWidget::recvSplineValue(QPair<int, QPointF> x)
 {
 	gar::SplineAttrib* sattr = findSplineAttr(x.first);
@@ -388,6 +426,16 @@ void AttribWidget::updateSelectedGlyph()
 void AttribWidget::recvEnumValue(QPair<int, int> x)
 {
 	gar::EnumAttrib* sattr = findEnumAttr(x.first);
+	if(!sattr) 
+		return;
+	
+	sattr->setValue(x.second);
+	updateSelectedGlyph();
+}
+
+void AttribWidget::recvActionPressed(QPair<int, int> x)
+{
+	gar::ActionAttrib* sattr = findActionAttr(x.first);
 	if(!sattr) 
 		return;
 	
@@ -452,6 +500,9 @@ QString AttribWidget::lastSelectedGlyphTypeName() const
 		break;
 		case gar::ggTwig :
 			stype = gar::TwigTypeNames[gar::ToTwigType(gt)];
+		break;
+		case gar::ggBranch :
+			stype = gar::BranchTypeNames[gar::ToBranchType(gt)];
 		break;
 		default:
 		;

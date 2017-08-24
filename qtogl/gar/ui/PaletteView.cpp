@@ -51,4 +51,7 @@ void PaletteView::showNamedPieces(const QString & swhat)
 	else if(swhat == tr("allTwig") ) {
 		m_glyphList->showTwigPieces();
 	}
+	else if(swhat == tr("allBranch") ) {
+		m_glyphList->showBranchPieces();
+	}
 }

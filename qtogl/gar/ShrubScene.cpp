@@ -21,7 +21,7 @@
 #include <geom/ATriangleMesh.h>
 #include "GrowthSample.h"
 #include <attr/PieceAttrib.h>
-#include <attr/SynthesisGroup.h>
+#include <syn/SynthesisGroup.h>
 
 using namespace aphid;
 

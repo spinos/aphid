@@ -20,6 +20,7 @@ class Attrib;
 class StringAttrib;
 class SplineAttrib;
 class EnumAttrib;
+class ActionAttrib;
 }
 
 class AttribWidget : public QWidget
@@ -47,6 +48,7 @@ private slots:
 	void recvSplineCv0(QPair<int, QPointF> x);
 	void recvSplineCv1(QPair<int, QPointF> x);
 	void recvEnumValue(QPair<int, int> x);
+	void recvActionPressed(QPair<int, int> x);
 	void recvVec2Value(QPair<int, QVector<double> > x);
 	
 private:
@@ -60,9 +62,11 @@ private:
 	QWidget* shoSplineAttr(gar::Attrib* attr);
 	QWidget* shoEnumAttr(gar::Attrib* attr);
 	QWidget* shoVec2Attr(gar::Attrib* attr);
+	QWidget* shoActionAttr(gar::Attrib* attr);
 	gar::StringAttrib* findStringAttr(int i);
 	gar::SplineAttrib* findSplineAttr(int i);
 	gar::EnumAttrib* findEnumAttr(int i);
+	gar::ActionAttrib* findActionAttr(int i);
 	void updateSelectedGlyph();
 
 private:

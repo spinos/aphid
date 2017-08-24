@@ -15,6 +15,7 @@
 
 namespace aphid {
 class BlockDeformer;
+class Vector3F;
 }
 
 class BlockDeformAttribs : public PieceAttrib, public aphid::PackTexcoord {
@@ -22,6 +23,8 @@ class BlockDeformAttribs : public PieceAttrib, public aphid::PackTexcoord {
     PieceAttrib* m_inAttr;
 	aphid::ATriangleMesh* m_inGeom;
 	aphid::ATriangleMesh* m_outGeom[48];
+/// 8 mat per variation
+	float m_blkMat[48][128];
 	int m_instId;
 	float m_exclR;
 	float m_geomHeight;
@@ -45,10 +48,17 @@ public:
 /// depend on in attr
 	virtual bool isGeomStem() const;
 	virtual bool isGeomLeaf() const;
+	virtual bool isGeomBranchingUnit() const;
 	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
+	virtual gar::BranchingUnitType getBranchingUnitType() const;
+	virtual bool selectBud(gar::SelectBudContext* ctx) const;
 	
 private:
-    
+    bool selectTerminalBud(gar::SelectBudContext* ctx) const;
+	bool selectLateralBud(gar::SelectBudContext* ctx) const;
+/// last block up of i-th variation
+	aphid::Vector3F variationDirection(int i) const;
+	int variationCloseToUp(gar::SelectProfile* prof) const;
 };
 
 #endif

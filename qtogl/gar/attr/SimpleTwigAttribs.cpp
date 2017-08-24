@@ -13,7 +13,7 @@
 #include <math/miscfuncs.h>
 #include <math/SplineMap1D.h>
 #include <gar_common.h>
-#include "SynthesisGroup.h"
+#include <syn/SynthesisGroup.h>
 #include <geom/CylinderMesh.h>
 #include <geom/SegmentNormals.h>
 

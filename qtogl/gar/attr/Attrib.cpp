@@ -136,11 +136,13 @@ const char* Attrib::sAttribNameAsStr[] = {
 "grow begin",
 "length scale",
 "radius scale",
+"num seasons",
+"shuffle",
 };
 
 std::string Attrib::attrNameStr() const
 { 
-	if(m_anm > 2048 + 38) {
+	if(m_anm > 2048 + 40) {
 		std::cout<<"\n ERROR oor attr name "<<m_anm;
 		std::cout.flush();
 		return std::string("unknown");
@@ -266,6 +268,12 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nRadiusScale :
 			r = gar::nRadiusScale;
 		break;
+		case gar::nNumSeasons :
+			r = gar::nNumSeasons;
+		break;
+		case gar::nShuffle :
+			r = gar::nShuffle;
+		break;
 		default:
 			;
 	}
@@ -374,6 +382,18 @@ void StringAttrib::getValue(std::string& y) const
 
 const bool& StringAttrib::isFileName() const
 { return m_isFileName; }
+
+ActionAttrib::ActionAttrib(AttribName anm) : Attrib(anm, tAction)
+{ setValue(1); }
+
+ActionAttrib::~ActionAttrib()
+{}
+
+void ActionAttrib::setImageName(const std::string& x)
+{ m_imgname = x; }
+
+const std::string& ActionAttrib::imageName() const
+{ return m_imgname; }
 
 }
 

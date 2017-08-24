@@ -16,7 +16,7 @@
 #include "DrawVegetation.h"
 #include <graphchart/GardenGlyph.h>
 #include <attr/PieceAttrib.h>
-#include <attr/SynthesisGroup.h>
+#include <syn/SynthesisGroup.h>
 #include "gar_common.h"
 
 using namespace aphid;
@@ -58,12 +58,17 @@ void GLWidget::drawAsset()
     const GardenGlyph* glp = m_scene->lastSelectedGlyph();
     if(!glp)
         return;
+		
+	const int grp = gar::ToGroupType(glp->glyphType() );
     
-    if(gar::ToGroupType(glp->glyphType() ) == gar::ggVariant ) {
+    if(grp == gar::ggVariant ) {
         drawVariableAsset(glp->attrib() );
     }
-	else if(gar::ToGroupType(glp->glyphType() ) == gar::ggTwig ) {
+	else if(grp == gar::ggTwig ) {
         drawTwigAsset(glp->attrib() );
+    }
+	else if(grp == gar::ggBranch ) {
+        drawBranchAsset(glp->attrib() );
     } else {
         drawSingleAsset(glp->attrib() );
     }
@@ -129,6 +134,25 @@ void GLWidget::drawTwigAsset(PieceAttrib* attr)
 		glTranslatef(selprof._exclR, 0.f, 0.f);
 	}
 	glPopMatrix();
+	m_vegd->end();
+}
+
+void GLWidget::drawBranchAsset(PieceAttrib* attr)
+{
+	const int ng = attr->numSynthesizedGroups();
+	if(ng < 1)
+		return;
+		
+	gar::SelectProfile selprof;
+		
+	getDrawer()->m_surfaceProfile.apply();
+	m_vegd->begin();
+	
+	for(int i=0;i<ng;++i) {
+		selprof._index = i;
+		gar::SynthesisGroup* gi = attr->selectSynthesisGroup(&selprof);
+		drawSynthesisGroup(attr, gi);
+	}
 	m_vegd->end();
 }
 

@@ -1,4 +1,4 @@
-## Sat Aug 23 06:22:05 CST 2017 
+## Sat Aug 24 23:18:05 CST 2017 
 
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
@@ -39,6 +39,14 @@ file (GLOB Ui_SRC
     "ui/*.cpp"
 )
 
+file (GLOB Syn_HEAD
+    "syn/*.h"
+)
+
+file (GLOB Syn_SRC
+    "syn/*.cpp"
+)
+
 set (GAR_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
 data/grass.h
 data/clover.h
@@ -54,6 +62,7 @@ ${Chart_HEAD}
 ${Asst_HEAD}
 ${Attr_HEAD}
 ${Ui_HEAD}
+${Syn_HEAD}
 PlantPiece.h
 VegetationPatch.h
 Vegetation.h
@@ -88,6 +97,7 @@ ${APHID_QT_DIR}/SplineEditGroup.cpp
 ${APHID_QT_DIR}/IntEditGroup.cpp
 ${APHID_QT_DIR}/DoubleEditGroup.cpp
 ${APHID_QT_DIR}/QEnumCombo.cpp
+${APHID_QT_DIR}/IconButtonGroup.cpp
 ShrubScene.cpp
 ${APHID_QT_DIR}/GlyphPort.cpp
 ${APHID_QT_DIR}/GlyphConnection.cpp
@@ -96,6 +106,7 @@ ${Chart_SRC}
 ${Attr_SRC}
 ${Asst_SRC}
 ${Ui_SRC}
+${Syn_SRC}
 PlantPiece.cpp
 VegetationPatch.cpp
 Vegetation.cpp

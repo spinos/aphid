@@ -17,6 +17,7 @@
 #include "data/variation.h"
 #include "data/stem.h"
 #include "data/twig.h"
+#include "data/branch.h"
 #include <attr/PotAttribs.h>
 #include <attr/BushAttribs.h>
 #include <attr/ImportGeomAttribs.h>
@@ -34,6 +35,7 @@
 #include <attr/DirectionalBendAttribs.h>
 #include <attr/SimpleTwigAttribs.h>
 #include <attr/FoldCrumpleAttribs.h>
+#include <attr/SimpleBranchAttribs.h>
 #include <QString>
 #include <iostream>
 
@@ -71,6 +73,9 @@ void GlyphBuilder::build(GardenGlyph * dst,
 		case gar::ggTwig:
 			buildTwig(dst, gtyp);
 		break;
+		case gar::ggBranch:
+			buildBranch(dst, gtyp);
+		break;
 		default:
 			;
 	}
@@ -105,6 +110,9 @@ PieceAttrib* GlyphBuilder::buildAttrib(const int & gtyp,
 		break;
 		case gar::ggTwig:
 			res = buildTwigAttrib(gtyp);
+		break;
+		case gar::ggBranch:
+			res = buildBranchAttrib(gtyp);
 		break;
 		default:
 			res = new PieceAttrib;
@@ -188,6 +196,14 @@ PieceAttrib* GlyphBuilder::buildTwigAttrib(const int & gtyp)
 {
 	if(gtyp == gtSimpleTwig)
 		return (new SimpleTwigAttribs);
+		
+	return (new PieceAttrib);
+}
+
+PieceAttrib* GlyphBuilder::buildBranchAttrib(const int & gtyp)
+{
+	if(gtyp == gtSimpleBranch)
+		return (new SimpleBranchAttribs);
 		
 	return (new PieceAttrib);
 }
@@ -286,6 +302,22 @@ void GlyphBuilder::buildTwig(GardenGlyph * dst,
 	const int & outEnd = TwigOutPortRange[gt][1];
 	for(int i=outBegin;i<outEnd;++i) {
 		dst->addPort(QObject::tr(TwigOutPortRangeNames[i]), true);
+	}
+}
+
+void GlyphBuilder::buildBranch(GardenGlyph * dst,
+			const int & gtyp)
+{
+	const int gt = ToBranchType(gtyp);
+	const int & inBegin = BranchInPortRange[gt][0];
+	const int & inEnd = BranchInPortRange[gt][1];
+	for(int i=inBegin;i<inEnd;++i) {
+		dst->addPort(QObject::tr(BranchInPortRangeNames[i]), false);
+	}
+	const int & outBegin = BranchOutPortRange[gt][0];
+	const int & outEnd = BranchOutPortRange[gt][1];
+	for(int i=outBegin;i<outEnd;++i) {
+		dst->addPort(QObject::tr(BranchOutPortRangeNames[i]), true);
 	}
 }
 	

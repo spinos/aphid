@@ -42,6 +42,8 @@ private:
 			const int & gtyp);
 	void buildTwig(GardenGlyph * dst,
 			const int & gtyp);
+	void buildBranch(GardenGlyph * dst,
+			const int & gtyp);
 			
 	PieceAttrib* buildAttrib(const int & gtyp,
 			const int & ggrp);
@@ -53,6 +55,7 @@ private:
 	PieceAttrib* buildGrassAttrib(const int & gtyp);
 	PieceAttrib* buildStemAttrib(const int & gtyp);
 	PieceAttrib* buildTwigAttrib(const int & gtyp);
+	PieceAttrib* buildBranchAttrib(const int & gtyp);
 	
 };
 #endif

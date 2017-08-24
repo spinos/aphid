@@ -24,6 +24,13 @@ public:
 	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	virtual bool update();
 	virtual bool isGeomStem() const;
+	virtual bool isGeomBranchingUnit() const;
+	virtual gar::BranchingUnitType getBranchingUnitType() const;
+	virtual bool selectBud(gar::SelectBudContext* ctx) const;
+
+private:
+	bool selectTerminalBud(gar::SelectBudContext* ctx) const;
+	bool selectLateralBud(gar::SelectBudContext* ctx) const;
 	
 };
 

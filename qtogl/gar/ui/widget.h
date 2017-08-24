@@ -58,6 +58,7 @@ private:
 	void drawSingleAsset(PieceAttrib* attr);
 	void drawTwigAsset(PieceAttrib* attr);
 	void drawSynthesisGroup(PieceAttrib* attr, gar::SynthesisGroup* grp);
+	void drawBranchAsset(PieceAttrib* attr);
 	
 private slots:
 

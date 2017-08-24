@@ -13,7 +13,7 @@
 namespace gar {
 
 static const float DEV_VERSION_MAJOR = 1.3;
-static const int DEV_VERSION_MINOR = 6;
+static const int DEV_VERSION_MINOR = 8;
 
 enum ToolAction {
 	actViewAsset = 0,
@@ -40,6 +40,7 @@ enum GlyphTyp {
 	gtSplineCylinder = 161,
 	gtMonopodial = 162,
 	gtSimpleTwig = 193,
+	gtSimpleBranch = 225,
 };
 
 enum GlyphGroup {
@@ -50,6 +51,7 @@ enum GlyphGroup {
 	ggFile = 4,
 	ggStem = 5,
 	ggTwig = 6,
+	ggBranch = 7,
 };
 
 enum DisplayStat {
@@ -59,7 +61,7 @@ enum DisplayStat {
 	dsVoxel = 259
 };
 
-#define NumGlyphGroups 7
+#define NumGlyphGroups 8
 
 /// begin, end, 32 per group
 static const int GlyphRange[NumGlyphGroups][2] = {
@@ -69,7 +71,8 @@ static const int GlyphRange[NumGlyphGroups][2] = {
 {97, 101},
 {129, 130},
 {161, 163},
-{193, 194}
+{193, 194},
+{225, 226},
 };
 
 static const char * PieceMimeStr = "image/x-garden-piece";

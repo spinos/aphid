@@ -39,6 +39,7 @@ public:
 	const Matrix44F& worldTm() const;
 
 protected:
+	Block* child(int i) const;
 	void addChild(Block* child);
 	
 };
@@ -91,6 +92,8 @@ public:
 	void setRoll(const float& x);
 /// x[0] is y scale x[1] is x and z scale
 	void setScaling(const float* x);
+/// dump world tm of all blocks
+	void getBlockTms(float* y) const;
 	
 	virtual void deform(const ATriangleMesh * mesh);
 	
@@ -100,6 +103,7 @@ protected:
 	const float& rollAngle() const;
 	void updateBlocks();
 	BlockPtrType getBlock(int i);
+	const BlockPtrType getBlock(int i) const;
 /// local pnt and block ind of i-th vertex
 	void getBind(Vector3F& plocal, int& iblock, const int&i) const;
 	

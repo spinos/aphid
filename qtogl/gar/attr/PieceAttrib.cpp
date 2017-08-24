@@ -104,6 +104,14 @@ void PieceAttrib::addEnumAttrib(gar::AttribName anm,
 	m_collAttrs.push_back(aat);
 }
 
+void PieceAttrib::addActionAttrib(gar::AttribName anm,
+		const std::string& imgname)
+{
+	gar::ActionAttrib* aat = new gar::ActionAttrib(anm);
+	aat->setImageName(imgname);
+	m_collAttrs.push_back(aat);
+}
+
 int PieceAttrib::numAttribs() const
 { return m_collAttrs.size(); }
 
@@ -186,5 +194,15 @@ gar::SynthesisGroup* PieceAttrib::selectSynthesisGroup(gar::SelectProfile* prof)
 
 bool PieceAttrib::isGeomStem() const
 { return false; }
+
 bool PieceAttrib::isGeomLeaf() const
+{ return false; }
+
+bool PieceAttrib::isGeomBranchingUnit() const
+{ return false; }
+
+gar::BranchingUnitType PieceAttrib::getBranchingUnitType() const
+{ return gar::buUnknown; }
+
+bool PieceAttrib::selectBud(gar::SelectBudContext* ctx) const
 { return false; }
