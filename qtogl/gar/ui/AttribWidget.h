@@ -42,7 +42,7 @@ signals:
 	
 private slots:
 	void recvDoubleValue(QPair<int, double> x);
-	void recvIntValue(QPair<int, int> x);
+	void recvIntValue(QPair<int, QVector<int> > x);
 	void recvStringValue(QPair<int, QString> x);
 	void recvSplineValue(QPair<int, QPointF> x);
 	void recvSplineCv0(QPair<int, QPointF> x);
@@ -50,6 +50,7 @@ private slots:
 	void recvEnumValue(QPair<int, int> x);
 	void recvActionPressed(QPair<int, int> x);
 	void recvVec2Value(QPair<int, QVector<double> > x);
+	void recvInt2Value(QPair<int, QVector<int> > x);
 	
 private:
 	void lsAttribs(GardenGlyph* g);
@@ -62,6 +63,7 @@ private:
 	QWidget* shoSplineAttr(gar::Attrib* attr);
 	QWidget* shoEnumAttr(gar::Attrib* attr);
 	QWidget* shoVec2Attr(gar::Attrib* attr);
+	QWidget* shoInt2Attr(gar::Attrib* attr);
 	QWidget* shoActionAttr(gar::Attrib* attr);
 	gar::StringAttrib* findStringAttr(int i);
 	gar::SplineAttrib* findSplineAttr(int i);

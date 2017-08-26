@@ -31,6 +31,8 @@ public:
 private:
 	bool selectTerminalBud(gar::SelectBudContext* ctx) const;
 	bool selectLateralBud(gar::SelectBudContext* ctx) const;
+	bool selectTerminalFoliage(gar::SelectBudContext* ctx) const;
+	bool selectLateralFoliage(gar::SelectBudContext* ctx) const;
 	
 };
 

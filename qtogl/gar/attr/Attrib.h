@@ -54,8 +54,14 @@ enum AttribName {
 	nGrowBegin,
 	nLengthScale,
 	nRadiusScale,
-	nNumSeasons,
+	nGrowSeasons,
+	nAxialSeasons,
+	nLateralShoots,
 	nShuffle,
+	nAscendAngle,
+	nAscendVary,
+	nLeafSeason,
+	nAxil,
 };
 
 enum AttribType {
@@ -90,6 +96,8 @@ enum BudType {
 	bdUnknown = 768,
 	bdTerminal,
 	bdLateral,
+	bdTerminalFoliage,
+	bdLateralFoliage,
 };
 
 /// phyllotaxy describes the organisation of the leaves on the stem
@@ -106,6 +114,7 @@ enum SelectCondition {
 	slRandom,
 	slAge,
 	slCloseToUp,
+	slAll,
 };
 
 class Attrib {

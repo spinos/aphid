@@ -12,6 +12,7 @@
 
 #include "MultiSynthesis.h"
 #include <foundation/BoundedStack.h>
+#include <math/SplineMap1D.h>
 
 class PieceAttrib;
 class StemBlock;
@@ -23,10 +24,27 @@ struct SelectProfile;
 
 struct BranchingProfile {
 	int _numSeasons;
+/// begin and end
+	int _axialSeason[2];
+/// min and max
+	int _numLateralShoots[2];
+/// begin of foliage
+	int _leafSeason;
+	float _axil;
+/// of stem
+	float _ascending;
+	aphid::SplineMap1D _ascendVaring;
 	
 	BranchingProfile()
 	{
 		_numSeasons = 4;
+		_axialSeason[0] = 0;
+		_axialSeason[1] = 2;
+		_numLateralShoots[0] = 1;
+		_numLateralShoots[1] = 3;
+		_leafSeason = 2;
+		_ascending = .2f;
+		_axil = 1.2f;
 	}
 	
 };
@@ -44,12 +62,11 @@ public:
 	
 protected:
 	BranchingProfile* profile();
-	bool synthesizeAGroup(PieceAttrib* stemAttr);
+	bool synthesizeAGroup(PieceAttrib* stemAttr,
+					PieceAttrib* leafAttr);
 	
 private:
 	void growOnStem(PieceAttrib* stemAttr, 
-					StemBlock* parentStem);
-	void addBlockChildInstance(gar::SynthesisGroup* g,
 					StemBlock* parentStem);
 /// growth of this season
 	BlockPtrType growOnTerminalBud(gar::SelectBudContext* selbud,
@@ -57,7 +74,14 @@ private:
 						StemBlock* parentStem);
 	void growOnLateralBud(gar::SelectBudContext* selbud,
 						PieceAttrib* stemAttr,
+						StemBlock* parentStem);						
+	void growLeafOnStem(PieceAttrib* stemAttr, PieceAttrib* leafAttr,
 						StemBlock* parentStem);
+	void growTerminalLeaf(PieceAttrib* stemAttr, PieceAttrib* leafAttr,
+						StemBlock* parentStem);
+	void growLateralLeaf(PieceAttrib* stemAttr, PieceAttrib* leafAttr,
+						StemBlock* parentStem);	
+	
 };
 
 }

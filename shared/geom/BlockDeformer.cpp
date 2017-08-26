@@ -192,7 +192,7 @@ void BlockDeformer::updateBlocks()
 /// calculate local tm
         bi->tmR()->setRotation(xrm * yrm * zrm);
 /// shrink to about 0.932 after 7 blocks
-        bi->tmR()->scaleBy(Vector3F(.99f, 1.f, .99f));
+        bi->tmR()->scaleBy(.99f);
 	}
 	BlockPtrType br = getBlock(0);
 	br->updateWorldTm();

@@ -31,7 +31,7 @@ static const char * BranchTypeIcons[NUM_BRANCH_PIECES] = {
 
 static const char * BranchTypeDescs[NUM_BRANCH_PIECES] = {
 "unknown",
-"synthesized by connecting input stem \n # deviations unknown\n height unknown unit"
+"synthesized by connecting input stem and leaf \n # deviations unknown\n height unknown unit"
 };
 
 static inline int ToBranchType(int x) {
@@ -40,7 +40,7 @@ static inline int ToBranchType(int x) {
 
 static const int BranchInPortRange[NUM_BRANCH_PIECES][2] = {
 {0,0},
-{0,1},
+{0,2},
 };
 
 static const char * BranchInPortRangeNames[2] = {

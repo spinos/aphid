@@ -22,6 +22,7 @@ class SplineMap1D;
 class SimpleBranchAttribs : public PieceAttrib, public gar::BranchSynthesis {
 	
     PieceAttrib* m_inStemAttr;
+	PieceAttrib* m_inLeafAttr;
 	int m_instId;
 	
 	static int sNumInstances;
@@ -46,7 +47,9 @@ public:
 	
 private:
     bool connectToStem(PieceAttrib* another);
+	bool connectToLeaf(PieceAttrib* another);
 	aphid::ATriangleMesh* selectStemGeom(gar::SelectProfile* prof) const;
+	aphid::ATriangleMesh* selectLeafGeom(gar::SelectProfile* prof) const;
 	
 };
 

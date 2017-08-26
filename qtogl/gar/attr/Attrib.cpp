@@ -70,7 +70,7 @@ void Attrib::getValue(float& y) const
 { memcpy(&y, m_data, 4 ); }
 
 void Attrib::getValue2(int* y) const
-{ memcpy(&y, m_data, 8 ); }
+{ memcpy(y, m_data, 8 ); }
 
 void Attrib::getValue2(float* y) const
 { memcpy(y, m_data, 8 ); }
@@ -136,13 +136,19 @@ const char* Attrib::sAttribNameAsStr[] = {
 "grow begin",
 "length scale",
 "radius scale",
-"num seasons",
+"grow seasons",
+"axial seasons",
+"lateral shoots",
 "shuffle",
+"ascend angle",
+"ascend variation",
+"leaf season",
+"axil",
 };
 
 std::string Attrib::attrNameStr() const
 { 
-	if(m_anm > 2048 + 40) {
+	if(m_anm > 2048 + 47) {
 		std::cout<<"\n ERROR oor attr name "<<m_anm;
 		std::cout.flush();
 		return std::string("unknown");
@@ -268,11 +274,29 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nRadiusScale :
 			r = gar::nRadiusScale;
 		break;
-		case gar::nNumSeasons :
-			r = gar::nNumSeasons;
+		case gar::nGrowSeasons :
+			r = gar::nGrowSeasons;
+		break;
+		case gar::nAxialSeasons :
+			r = gar::nAxialSeasons;
+		break;
+		case gar::nLateralShoots :
+			r = gar::nLateralShoots;
 		break;
 		case gar::nShuffle :
 			r = gar::nShuffle;
+		break;
+		case gar::nAscendAngle :
+			r = gar::nAscendAngle;
+		break;
+		case gar::nAscendVary :
+			r = gar::nAscendVary;
+		break;
+		case gar::nLeafSeason :
+			r = gar::nLeafSeason;
+		break;
+		case gar::nAxil :
+			r = gar::nAxil;
 		break;
 		default:
 			;

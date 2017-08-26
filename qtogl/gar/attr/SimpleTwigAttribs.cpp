@@ -109,7 +109,8 @@ bool SimpleTwigAttribs::update()
 		if(!inGeom)
 			return false;
 			
-		gar::SynthesisGroup * gi = addSynthesisGroup();
+		gar::SynthesisGroup * gi = new gar::SynthesisGroup;
+		addSynthesisGroup(gi);
 /// instance of stem
 		gi->addInstance(i, Matrix44F::IdentityMatrix);
 		gi->setExclusionRadius(selprof._exclR);
@@ -209,6 +210,7 @@ ATriangleMesh* SimpleTwigAttribs::selectLeafGeom(gar::SelectProfile* prof) const
 	prof->_geomInd = (gar::GlyphTypeToGeomIdGroup(m_inLeafAttr->glyphType() ) 
 	                    | (m_inLeafAttr->attribInstanceId() << 10) 
 	                    | prof->_index);
+						
 	return m_inLeafAttr->selectGeom(prof);
 }
 
@@ -395,3 +397,6 @@ void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
 	m_morph._phyllotaxyAngle += segAng;
 	m_morph._nodeInd++;
 }
+
+bool SimpleTwigAttribs::isTwig() const
+{ return false; }

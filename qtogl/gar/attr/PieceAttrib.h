@@ -18,6 +18,7 @@
 namespace aphid {
 class ATriangleMesh;
 class SplineMap1D;
+class Vector3F;
 }
 
 namespace gar {
@@ -69,6 +70,11 @@ struct SelectBudContext {
 	float _upLimit;
 /// space of growth
 	float _relMat[16];
+/// ascend angle and age varing
+	float _ascending;
+	float _ascendVaring;
+/// angle between leaf stalk and stem
+	float _axil;
 	
 	SelectBudContext() {
 		_budType = bdTerminal;
@@ -79,6 +85,9 @@ struct SelectBudContext {
 		_upVec[0] = 0.f;
 		_upVec[1] = 1.f;
 		_upVec[2] = 0.f;
+		_ascending = .2f;
+		_ascendVaring = 0.f;
+		_axil = 1.2f;
 	}
 	
 };
@@ -126,6 +135,8 @@ public:
 	virtual bool isGeomBranchingUnit() const;
 	virtual gar::BranchingUnitType getBranchingUnitType() const;
 	virtual bool selectBud(gar::SelectBudContext* ctx) const;
+	virtual bool isTwig() const;
+	virtual bool isBranch() const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,
@@ -142,6 +153,10 @@ protected:
 		const float& val0, 
 		const float& val1);
 		
+	void addInt2Attrib(gar::AttribName anm,
+		const int& val0, 
+		const int& val1);
+		
 	void addSplineAttrib(gar::AttribName anm);
 		
 	void addStringAttrib(gar::AttribName anm,
@@ -155,6 +170,8 @@ protected:
 		const std::string& imgname);
 	
 	void updateSplineValues(aphid::SplineMap1D* ls, gar::SplineAttrib* als);
+	
+	aphid::Vector3F getLocalUpRef(gar::SelectBudContext* ctx) const;
 	
 private:
 };
