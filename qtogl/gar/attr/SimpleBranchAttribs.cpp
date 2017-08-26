@@ -20,19 +20,29 @@ using namespace aphid;
 int SimpleBranchAttribs::sNumInstances = 0;
 
 SimpleBranchAttribs::SimpleBranchAttribs() : PieceAttrib(gar::gtSimpleBranch),
-m_inStemAttr(NULL)
+m_inStemAttr(NULL),
+m_inLeafAttr(NULL)
 {
     m_instId = sNumInstances;
 	sNumInstances++;
 	
 	addActionAttrib(gar::nShuffle, ":/icons/shuffle.png");
-	addIntAttrib(gar::nNumSeasons, 4, 1, 9);
+	addIntAttrib(gar::nGrowSeasons, 4, 1, 10);
+	addInt2Attrib(gar::nAxialSeasons, 0, 2);
+	addInt2Attrib(gar::nLateralShoots, 1, 3);
+	addFloatAttrib(gar::nAscendAngle, .2f, 0.f, .5f);
+	addSplineAttrib(gar::nAscendVary);
+	addIntAttrib(gar::nLeafSeason, 3, 1, 10);
+	addFloatAttrib(gar::nAxil, 1.2f, 0.4f, 2.f);
 	
+	gar::SplineAttrib* acs = (gar::SplineAttrib*)findAttrib(gar::nAscendVary);
+	acs->setSplineValue(.5f, .5f);
+	acs->setSplineCv0(.4f, .5f);
+	acs->setSplineCv1(.6f, .5f);
 }
 
 SimpleBranchAttribs::~SimpleBranchAttribs()
-{
-}
+{}
 
 bool SimpleBranchAttribs::update()
 {    
@@ -40,7 +50,16 @@ bool SimpleBranchAttribs::update()
         return false;
 		
 	gar::BranchingProfile* prof = profile();
-	findAttrib(gar::nNumSeasons)->getValue(prof->_numSeasons);
+	findAttrib(gar::nGrowSeasons)->getValue(prof->_numSeasons);
+	findAttrib(gar::nAxialSeasons)->getValue2(prof->_axialSeason);
+	findAttrib(gar::nLateralShoots)->getValue2(prof->_numLateralShoots);
+	findAttrib(gar::nAscendAngle)->getValue(prof->_ascending);
+	findAttrib(gar::nLeafSeason)->getValue(prof->_leafSeason);
+	findAttrib(gar::nAxil)->getValue(prof->_axil);
+	
+	SplineMap1D* acs = &prof->_ascendVaring;
+	gar::SplineAttrib* aacs = (gar::SplineAttrib*)findAttrib(gar::nAscendVary);
+	updateSplineValues(acs, aacs);
 	
 	gar::Attrib* shuffleA = findAttrib(gar::nShuffle);
 	int ishuffle;
@@ -52,7 +71,7 @@ bool SimpleBranchAttribs::update()
 	}
 		
 	if(numSynthesizedGroups() < 1)
-		synthesizeAGroup(m_inStemAttr);
+		synthesizeAGroup(m_inStemAttr, m_inLeafAttr);
     
 	return true;
 }
@@ -66,9 +85,18 @@ bool SimpleBranchAttribs::connectToStem(PieceAttrib* another)
 	return true;
 }
 
+bool SimpleBranchAttribs::connectToLeaf(PieceAttrib* another)
+{
+	m_inLeafAttr = another;
+	return true;
+}
+
 bool SimpleBranchAttribs::canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const
 {
-	return another->isGeomBranchingUnit();
+	if(portName == "inStem") 
+		return another->isGeomBranchingUnit();
+/// leaf or twig
+	return another->isGeomLeaf() || another->isTwig();
 }
 
 void SimpleBranchAttribs::connectTo(PieceAttrib* another, const std::string& portName)
@@ -76,6 +104,8 @@ void SimpleBranchAttribs::connectTo(PieceAttrib* another, const std::string& por
 	bool stat = false;
 	if(portName == "inStem") 
 		stat = connectToStem(another);
+	else
+		stat = connectToLeaf(another);
 		
     if(!stat) {
         std::cout<<"\n ERROR SimpleBranchAttribs cannot connect input attr ";
@@ -88,23 +118,38 @@ void SimpleBranchAttribs::connectTo(PieceAttrib* another, const std::string& por
 ATriangleMesh* SimpleBranchAttribs::selectStemGeom(gar::SelectProfile* prof) const
 {
     if(!m_inStemAttr)
-			return NULL;
+		return NULL;
+		
+/// recover stem geom ind
+	prof->_index = (prof->_index>>20) - 1;
 #if 0	
 		std::cout<<"\n stem attr"<<m_inStemAttr->glyphType()
 		<<" instance"<<m_inStemAttr->attribInstanceId()
 		<<" geom"<<prof->_index;
 		std::cout.flush();
-#endif		
+#endif
+		
 	prof->_geomInd = (gar::GlyphTypeToGeomIdGroup(m_inStemAttr->glyphType() ) 
 	                    | (m_inStemAttr->attribInstanceId() << 10) 
 	                    | prof->_index);
-	
+		
 	return m_inStemAttr->selectGeom(prof);
+}
+
+ATriangleMesh* SimpleBranchAttribs::selectLeafGeom(gar::SelectProfile* prof) const
+{
+    if(!m_inLeafAttr)
+		return NULL;
+		
+	return m_inLeafAttr->selectGeom(prof);
 }
 
 ATriangleMesh* SimpleBranchAttribs::selectGeom(gar::SelectProfile* prof) const
 {
-	return selectStemGeom(prof);
+	if(prof->_index > 1048575)
+		return selectStemGeom(prof);
+		
+	return selectLeafGeom(prof);
 }
 
 bool SimpleBranchAttribs::isSynthesized() const

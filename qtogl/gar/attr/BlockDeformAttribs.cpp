@@ -116,9 +116,6 @@ bool BlockDeformAttribs::update()
 		
 	float angles[3];
     for(int i=0;i<6;++i) {
-        angles[0] = bendRange[0] + deltaBend * (RandomFn11() + i);
-        m_dfm->setBend(angles[0]);
-        
         for(int j=0;j<8;++j) {
             angles[1] = twistRoll[0] * (.5f + .5f* RandomF01() );
             
@@ -128,6 +125,8 @@ bool BlockDeformAttribs::update()
 /// roll distribution
             angles[2] = deltaRoll * (RandomFn11() + j) - twistRoll[1];
 
+			angles[0] = bendRange[0] + deltaBend * (RandomFn11() + i);
+			m_dfm->setBend(angles[0]);
             m_dfm->setTwist(angles[1]);
             m_dfm->setRoll(angles[2]);
             m_dfm->deform(m_inGeom);
@@ -197,7 +196,8 @@ bool BlockDeformAttribs::selectBud(gar::SelectBudContext* ctx) const
 	if(!m_inAttr->selectBud(ctx) )
 		return false;
 		
-	if(ctx->_budType == gar::bdTerminal)
+	if(ctx->_budType == gar::bdTerminal
+		|| ctx->_budType == gar::bdTerminalFoliage )
 		return selectTerminalBud(ctx);
 	
 	return selectLateralBud(ctx);
@@ -205,17 +205,52 @@ bool BlockDeformAttribs::selectBud(gar::SelectBudContext* ctx) const
 
 bool BlockDeformAttribs::selectTerminalBud(gar::SelectBudContext* ctx) const
 {
+	const Vector3F relup = getLocalUpRef(ctx);
+	
 	const float* vartm = m_blkMat[ctx->_variationIndex];
 	const int& bindi = ctx->_budBind[0];
 	Matrix44F tm(&vartm[bindi<<4]);
 	Matrix44F loctm(ctx->_budTm[0]);
 	loctm *= tm;
+	if(ctx->_budType == gar::bdTerminalFoliage) {
+		rotateToUp(loctm, relup);
+	}
 	loctm.glMatrix(ctx->_budTm[0]);
 	return true;
 }
 
 bool BlockDeformAttribs::selectLateralBud(gar::SelectBudContext* ctx) const
 {
+	if(ctx->_condition == gar::slAll)
+		return selectAllLateralBud(ctx);
+		
+	return selectCloseToUpLateralBud(ctx);
+}
+
+bool BlockDeformAttribs::selectAllLateralBud(gar::SelectBudContext* ctx) const
+{
+	const Vector3F relup = getLocalUpRef(ctx);
+
+	const float* vartm = m_blkMat[ctx->_variationIndex];
+	for(int i=0;i<ctx->_numSelect;++i) {
+		const int& bindi = ctx->_budBind[i];
+		Matrix44F tm(&vartm[bindi<<4]);
+		Matrix44F loctm(ctx->_budTm[i]);
+		loctm *= tm;
+		if(ctx->_budType == gar::bdLateralFoliage) {
+		
+			Vector3F wup = tm.getUp();
+			wup.normalize();
+			rotateToUp2(loctm, relup, wup);
+		}
+		loctm.glMatrix(ctx->_budTm[i]);
+	}
+	
+	return true;
+}
+	
+bool BlockDeformAttribs::selectCloseToUpLateralBud(gar::SelectBudContext* ctx) const
+{		
 	const Matrix44F wtm(ctx->_relMat);
 	const Vector3F upref(ctx->_upVec);
 		
@@ -260,4 +295,132 @@ int BlockDeformAttribs::variationCloseToUp(gar::SelectProfile* prof) const
 		}
 	}
 	return ind;
+}
+
+void BlockDeformAttribs::rotateToUp(aphid::Matrix44F& tm, const Vector3F& relup) const
+{
+	Vector3F locf = tm.getFront();
+	locf.normalize();
+
+/// front is close to up
+	if(locf.dot(relup) > .9f)
+		return;
+		
+	Vector3F locup = tm.getUp();
+	locup.normalize();
+	
+	const float udu = locup.dot(relup);
+	if(udu > .9f || udu < -.9f)
+/// undefined angle
+		return;
+		
+	Vector3F ucu = locup.cross(relup);
+	ucu.normalize();
+	
+	Vector3F tfront = ucu.cross(locup);
+	tfront.normalize();
+	
+	float fdf = locf.dot(tfront);
+	if(fdf > .9f)
+		return;
+		
+	if(fdf < -.9f) {
+/// back facing to up
+		Quaternion qy(3.14f, locup);
+		Matrix33F roty(qy);
+		tm *= roty;
+		return;
+	}
+	
+	float ang = acos(fdf);
+	Vector3F rotax = locf.cross(tfront);
+	rotax.normalize();
+	
+	Quaternion qya(ang, rotax);
+	Matrix33F rotya(qya);
+	tm *= rotya;
+}
+
+void BlockDeformAttribs::rotateToUp2(aphid::Matrix44F& tm, const aphid::Vector3F& relup,
+							const aphid::Vector3F& yaxis) const
+{
+	Vector3F locf = tm.getFront();
+	locf.normalize();
+
+/// front is close to up
+	if(locf.dot(relup) > .9f)
+		return;
+		
+	Vector3F locup = tm.getUp();
+	
+/// project to x-z
+	Vector3F locupxz(locup.x, 0.f, locup.z);
+	locupxz.normalize();
+	
+	Vector3F refupxz(relup.x, 0.f, relup.z);
+	refupxz.normalize();
+	
+	const float uduxz = locupxz.dot(refupxz);
+	
+	if(uduxz > .9f || uduxz < -.9f) {
+		Quaternion qy(.789f, yaxis );
+		Matrix33F rot(qy);
+		tm *= rot;
+				
+	} else if(uduxz > .707f) {
+	
+		float ang = 1.57f - acos(uduxz);
+		if(ang > .789f)
+			ang = .789f;
+			
+		Quaternion qy(ang, yaxis );
+		Matrix33F rot(qy);
+		tm *= rot;
+		
+	} else if(uduxz < -.707f) {
+	
+		float ang = acos(uduxz) - 1.57f;
+		if(ang > .789f)
+			ang = .789f;
+		
+		Quaternion qy(ang, yaxis );
+		Matrix33F rot(qy);
+		tm *= rot;
+		
+	}
+
+/// update y-axis	
+	locup = tm.getUp();
+	locup.normalize();
+	
+	Vector3F locfront = tm.getFront();
+	locfront.normalize();
+	
+	float fdu = locfront.dot(relup);
+/// close to up
+	if(fdu > .9f)
+		return;
+		
+	if(fdu < -.9f) {
+/// back side facing up, flip
+		Quaternion qy(3.14f, locup );
+		Matrix33F rot(qy);
+		tm *= rot;
+		return;
+	}
+	
+/// rotate around y-axis half way to up
+	float hang = .53f * acos(fdu);
+	if(hang > .789f)
+		hang = .789f;
+	
+	Vector3F ucu = locup.cross(relup);
+	if(ucu.dot(locfront) > 0.f ) {
+		hang = -hang;
+	}
+	
+	Quaternion qu(hang, locup );
+	Matrix33F rot(qu);
+	tm *= rot;
+	
 }

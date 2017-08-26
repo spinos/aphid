@@ -10,6 +10,7 @@
 #include "PieceAttrib.h"
 #include <gar_common.h>
 #include <math/SplineMap1D.h>
+#include <math/Matrix44F.h>
 
 using namespace aphid;
 
@@ -67,6 +68,19 @@ void PieceAttrib::addVector2Attrib(gar::AttribName anm,
 {
 	gar::Attrib* aat = new gar::Attrib(anm, gar::tVec2);
 	float tmp[2]; 
+	tmp[0] = val0;
+	tmp[1] = val1;
+		
+	aat->setValue2(tmp);
+	m_collAttrs.push_back(aat);
+}
+
+void PieceAttrib::addInt2Attrib(gar::AttribName anm,
+		const int& val0, 
+		const int& val1)
+{
+	gar::Attrib* aat = new gar::Attrib(anm, gar::tInt2);
+	int tmp[2]; 
 	tmp[0] = val0;
 	tmp[1] = val1;
 		
@@ -206,3 +220,20 @@ gar::BranchingUnitType PieceAttrib::getBranchingUnitType() const
 
 bool PieceAttrib::selectBud(gar::SelectBudContext* ctx) const
 { return false; }
+
+bool PieceAttrib::isTwig() const
+{ return false; }
+
+bool PieceAttrib::isBranch() const
+{ return false; }
+
+Vector3F PieceAttrib::getLocalUpRef(gar::SelectBudContext* ctx) const
+{
+	Matrix44F invmat(ctx->_relMat);
+	invmat.inverse();
+	
+	Vector3F relup(ctx->_upVec);
+	relup = invmat.transformAsNormal(relup );
+	relup.normalize();
+	return relup;
+}

@@ -20,12 +20,8 @@ MultiSynthesis::~MultiSynthesis()
 	clearSynths();
 }
 
-SynthesisGroup* MultiSynthesis::addSynthesisGroup()
-{
-	SynthesisGroup* g = new SynthesisGroup;
-	m_synths.push_back(g);
-	return g;
-}
+void MultiSynthesis::addSynthesisGroup(SynthesisGroup* x)
+{ m_synths.push_back(x); }
 
 void MultiSynthesis::clearSynths()
 {

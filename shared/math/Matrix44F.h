@@ -26,6 +26,7 @@ namespace aphid {
 	float operator() (int i, int j) const;
 	Matrix44F operator* (const Matrix44F & a) const;
 	void operator*= (const Matrix44F & a);
+	void operator*= (const Matrix33F & a);
 	void multiply(const Matrix44F & a);
 	void setIdentity();
 	void setZero();

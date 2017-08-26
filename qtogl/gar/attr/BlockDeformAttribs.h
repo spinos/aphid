@@ -16,6 +16,7 @@
 namespace aphid {
 class BlockDeformer;
 class Vector3F;
+class Matrix44F;
 }
 
 class BlockDeformAttribs : public PieceAttrib, public aphid::PackTexcoord {
@@ -56,9 +57,19 @@ public:
 private:
     bool selectTerminalBud(gar::SelectBudContext* ctx) const;
 	bool selectLateralBud(gar::SelectBudContext* ctx) const;
+	bool selectAllLateralBud(gar::SelectBudContext* ctx) const;
+	bool selectCloseToUpLateralBud(gar::SelectBudContext* ctx) const;
+
 /// last block up of i-th variation
 	aphid::Vector3F variationDirection(int i) const;
 	int variationCloseToUp(gar::SelectProfile* prof) const;
+/// rotate around local tm y-axis to face z-axis up
+	void rotateToUp(aphid::Matrix44F& tm, const aphid::Vector3F& relup) const;
+/// first rotate y-axis around world_y to perpendicular to up
+/// then z-axis rotate around new y to face up 
+	void rotateToUp2(aphid::Matrix44F& tm, const aphid::Vector3F& relup,
+				const aphid::Vector3F& worldy) const;
+	
 };
 
 #endif

@@ -26,7 +26,7 @@ public:
 	virtual ~MultiSynthesis();
 
 protected:
-	SynthesisGroup* addSynthesisGroup();
+	void addSynthesisGroup(SynthesisGroup* x);
 	const SynthListType& synthsisGroups() const;
 	virtual void clearSynths();
 	

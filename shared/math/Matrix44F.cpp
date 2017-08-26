@@ -82,6 +82,13 @@ void Matrix44F::operator*= (const Matrix44F & a)
 	multiply(a);
 }
 
+void Matrix44F::operator*= (const Matrix33F & a)
+{
+	Matrix33F t = rotation();
+	t *= a;
+	setRotation(t);
+}
+
 void Matrix44F::multiply(const Matrix44F & a)
 {
 	Matrix44F t(*this);

@@ -109,6 +109,9 @@ void AttribWidget::lsAttr(gar::Attrib* attr)
 		case gar::tVec2 :
 			wig = shoVec2Attr(attr);
 		break;
+		case gar::tInt2 :
+			wig = shoInt2Attr(attr);
+		break;
 		case gar::tAction :
 			wig = shoActionAttr(attr);
 		break;
@@ -151,19 +154,34 @@ QWidget* AttribWidget::shoVec2Attr(gar::Attrib* attr)
 	return wig;
 }
 
+QWidget* AttribWidget::shoInt2Attr(gar::Attrib* attr)
+{
+	IntEditGroup* wig = new IntEditGroup(tr(attr->attrNameStr().c_str() ), 2 );
+	int val[2];
+	attr->getValue2(val);
+	
+	wig->setValues(val);
+	wig->setNameId(attr->attrName() );
+	
+	connect(wig, SIGNAL(valueChanged2(QPair<int, QVector<int> >)),
+            this, SLOT(recvInt2Value(QPair<int, QVector<int> >)));
+			
+	return wig;
+}
+
 QWidget* AttribWidget::shoIntAttr(gar::Attrib* attr)
 {
-	IntEditGroup* wig = new IntEditGroup(tr(attr->attrNameStr().c_str() ) );
+	IntEditGroup* wig = new IntEditGroup(tr(attr->attrNameStr().c_str() ), 1 );
 	int val, val0, val1;
 	attr->getValue(val);
 	attr->getMin(val0);
 	attr->getMax(val1);
 	wig->setLimit(val0, val1);
-	wig->setValue(val);
+	wig->setValue0(val);
 	wig->setNameId(attr->attrName() );
 	
-	connect(wig, SIGNAL(valueChanged2(QPair<int, int>)),
-            this, SLOT(recvIntValue(QPair<int, int>)));
+	connect(wig, SIGNAL(valueChanged2(QPair<int, QVector<int> >)),
+            this, SLOT(recvIntValue(QPair<int, QVector<int> >)));
 			
 	return wig;
 }
@@ -285,16 +303,32 @@ void AttribWidget::recvDoubleValue(QPair<int, double> x)
 	updateSelectedGlyph();
 }
 
-void AttribWidget::recvIntValue(QPair<int, int> x)
+void AttribWidget::recvIntValue(QPair<int, QVector<int> > x)
 {
 	PieceAttrib* att = m_selectedGlyph->attrib();
 	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
 	if(!dst) {
-		qDebug()<<" AttribWidget::recvDoubleValue cannot find int attr "
+		qDebug()<<" AttribWidget::recvIntValue cannot find int attr "
 			<<x.first;
 		return;
 	}
-	dst->setValue(x.second);
+	dst->setValue(x.second[0]);
+	updateSelectedGlyph();
+}
+
+void AttribWidget::recvInt2Value(QPair<int, QVector<int> > x)
+{
+	PieceAttrib* att = m_selectedGlyph->attrib();
+	gar::Attrib* dst = att->findAttrib(gar::Attrib::IntAsAttribName(x.first) );	
+	if(!dst) {
+		qDebug()<<" AttribWidget::recvInt2Value cannot find int2 attr "
+			<<x.first;
+		return;
+	}
+	int vals[2];
+	vals[0] = x.second[0];
+	vals[1] = x.second[1];
+	dst->setValue2(vals);
 	updateSelectedGlyph();
 }
 
