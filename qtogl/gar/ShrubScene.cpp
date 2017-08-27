@@ -79,6 +79,9 @@ void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
 		case gar::ggTwig:
 			addSynthesizedBranch(pl1, gl);
 		break;
+		case gar::ggBranch:
+/// todo
+		break;
 		default:
 		;
 	}	
@@ -224,9 +227,6 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	
 	PieceAttrib * gndAttr = gnd->attrib();
 	
-	PlantPiece * pl = new PlantPiece;
-	assemblePlant(pl, gnd );
-	
 	float zenithf = 0.1f;
 	gar::Attrib* azenith = gndAttr->findAttrib(gar::nZenithNoise);
 	if(azenith) {
@@ -252,14 +252,14 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 	    aportion->getValue(portion);
 	}
 	
+	const float minExclR = getMinExclR(gnd) * 1.33f;
+	
 	GrowthSampleProfile prof;
 	prof.m_numSampleLimit = 80;
-	prof.m_sizing = pl->exclR() * sizing;
+	prof.m_sizing = minExclR * sizing;
 	prof.m_tilt = vege->tilt();
 	prof.m_zenithNoise = zenithf;
 	prof.m_spread = angleA;
-	
-	delete pl;
 	
 	GrowthSample gsmp;
 	
@@ -280,9 +280,8 @@ void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
 
 	const int& np = gsmp.numGrowthSamples();
 	for(int i=0;i<np;++i) {
-		pl = new PlantPiece;
+		PlantPiece* pl = new PlantPiece;
 		assemblePlant(pl, gnd );
-		
 		Matrix44F tm = gsmp.getGrowSpace(i, prof);
 		pl->setTransformMatrix(tm);
 		vege->addPlant(pl);
@@ -322,4 +321,34 @@ const ATriangleMesh* ShrubScene::lastSelectedGeom() const
 	
 	gar::SelectProfile selprof;
 	return attr->selectGeom(&selprof);
+}
+
+float ShrubScene::getMinExclR(GardenGlyph * gnd)
+{
+	gar::SelectProfile selprof;
+	selprof._condition = gar::slRandom;
+	
+	float minR = 1e8f;
+	foreach(QGraphicsItem *port_, gnd->childItems()) {
+		if (port_->type() != GlyphPort::Type) {
+			continue;
+		}
+
+		GlyphPort *port = (GlyphPort*) port_;
+		if(!port->isOutgoing() ) {
+			const int n = port->numConnections();
+			for(int i=0;i<n;++i) {
+				const GlyphConnection * conn = port->connection(i);
+				const GlyphPort * srcpt = conn->port0();
+				QGraphicsItem * top = srcpt->topLevelItem();
+				GardenGlyph * gl = (GardenGlyph *)top;
+				PieceAttrib* attr = gl->attrib();
+				attr->selectGeom(&selprof);
+				
+				if(minR > selprof._exclR)
+					minR = selprof._exclR;
+			}
+		}
+	}
+	return minR;
 }

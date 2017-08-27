@@ -62,6 +62,7 @@ enum AttribName {
 	nAscendVary,
 	nLeafSeason,
 	nAxil,
+	nTilt,
 };
 
 enum AttribType {

@@ -72,9 +72,9 @@ public:
 protected:
 
 private:
+/// intersect with existing plants	
 	bool intersectPlants(const aphid::Vector3F & pos, 
 		const float & r) const;
-	
 };
 
 #endif

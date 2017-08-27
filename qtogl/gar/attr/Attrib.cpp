@@ -144,11 +144,12 @@ const char* Attrib::sAttribNameAsStr[] = {
 "ascend variation",
 "leaf season",
 "axil",
+"tilt",
 };
 
 std::string Attrib::attrNameStr() const
 { 
-	if(m_anm > 2048 + 47) {
+	if(m_anm > 2048 + 48) {
 		std::cout<<"\n ERROR oor attr name "<<m_anm;
 		std::cout.flush();
 		return std::string("unknown");
@@ -297,6 +298,9 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nAxil :
 			r = gar::nAxil;
+		break;
+		case gar::nTilt :
+			r = gar::nTilt;
 		break;
 		default:
 			;

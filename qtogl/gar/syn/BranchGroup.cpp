@@ -47,6 +47,7 @@ void BranchGroup::addBlockChildInstance(StemBlock* parentStem)
 
 void BranchGroup::calculateExclusionRadius()
 {
+/// todo tilt?
 	setExclusionRadius(1.f);
 	adjustBlockExclusionRadius(m_rootBlock);
 }

@@ -31,6 +31,9 @@ struct BranchingProfile {
 /// begin of foliage
 	int _leafSeason;
 	float _axil;
+/// sloping of ground affects up direction
+	float _tilt;
+	float _upVec[3];
 /// of stem
 	float _ascending;
 	aphid::SplineMap1D _ascendVaring;
@@ -45,6 +48,10 @@ struct BranchingProfile {
 		_leafSeason = 2;
 		_ascending = .2f;
 		_axil = 1.2f;
+		_tilt = 0.f;
+		_upVec[0] = 0.f;
+		_upVec[1] = 1.f;
+		_upVec[2] = 0.f;
 	}
 	
 };
@@ -66,6 +73,8 @@ protected:
 					PieceAttrib* leafAttr);
 	
 private:
+	void calculateUpVec();
+	void getUpVecWithNoise(float* dest, const float& noiwei) const;
 	void growOnStem(PieceAttrib* stemAttr, 
 					StemBlock* parentStem);
 /// growth of this season

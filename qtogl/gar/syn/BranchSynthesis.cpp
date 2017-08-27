@@ -31,11 +31,12 @@ BranchingProfile* BranchSynthesis::profile()
 bool BranchSynthesis::synthesizeAGroup(PieceAttrib* stemAttr,
 								PieceAttrib* leafAttr)
 {
+	calculateUpVec();
+	
 	gar::SelectProfile selprof;
 	selprof._condition = gar::slCloseToUp;
 	Matrix44F::IdentityMatrix.glMatrix(selprof._relMat);
-	selprof._upVec[0] = RandomFn11() * .2f;
-	selprof._upVec[2] = RandomFn11() * .2f;
+	getUpVecWithNoise(selprof._upVec, .2f);
 	
 	ATriangleMesh* inGeom = stemAttr->selectGeom(&selprof);
 	if(!inGeom)
@@ -59,6 +60,8 @@ bool BranchSynthesis::synthesizeAGroup(PieceAttrib* stemAttr,
 		selbud._variationIndex = rootBlock->geomInd();
 		selbud._budType = gar::bdLateral;
 		rootBlock->worldTm().glMatrix(selbud._relMat);
+		getUpVecWithNoise(selbud._upVec, .2f);
+		
 		stemAttr->selectBud(&selbud);
 		
 		growOnLateralBud(&selbud, stemAttr, rootBlock);
@@ -101,6 +104,8 @@ void BranchSynthesis::growOnStem(PieceAttrib* stemAttr,
 	selbud._upLimit = 0.f;
 	selbud._variationIndex = parentStem->geomInd();
 	parentStem->worldTm().glMatrix(selbud._relMat);
+	getUpVecWithNoise(selbud._upVec, .1f);
+		
 	stemAttr->selectBud(&selbud);
 	BlockPtrType stm = growOnTerminalBud(&selbud, stemAttr, parentStem);
 	
@@ -128,11 +133,11 @@ BranchSynthesis::BlockPtrType BranchSynthesis::growOnTerminalBud(gar::SelectBudC
 	childBlock->updateWorldTm();
 	
 	gar::SelectProfile selprof;
+	getUpVecWithNoise(selprof._upVec, .1f);
+	
 	if(parentStem->isAxial() ) {
 		selprof._condition = gar::slCloseToUp;
 		childBlock->worldTm().glMatrix(selprof._relMat);
-		selprof._upVec[0] = RandomFn11() * .2f;
-		selprof._upVec[2] = RandomFn11() * .2f;
 		childBlock->setIsAxial();
 		
 	} else {
@@ -168,6 +173,7 @@ void BranchSynthesis::growOnLateralBud(gar::SelectBudContext* selbud,
 	
 	gar::SelectProfile selprof;
 	selprof._condition = gar::slRandom;
+	getUpVecWithNoise(selprof._upVec, .1f);
 	
 	for(int i = 0;i<nb;++i) {
 	
@@ -273,6 +279,27 @@ void BranchSynthesis::growLateralLeaf(PieceAttrib* stemAttr, PieceAttrib* leafAt
 		childBlock->setExclR(selprof._exclR);
 		
 	}
+}
+
+void BranchSynthesis::calculateUpVec()
+{
+	Matrix33F tiltm;
+/// pitch up
+	tiltm.rotateX(-m_profile._tilt);
+	Vector3F tiltup;
+	tiltm.getUp(tiltup);
+	memcpy(m_profile._upVec, &tiltup, 12);
+}
+
+void BranchSynthesis::getUpVecWithNoise(float* dest, const float& noiwei) const
+{
+	Matrix33F rotm;
+/// +/- 5 deg
+	rotm.rotateY(.1f * noiwei * RandomFn11() );
+	rotm.rotateX(.1f * noiwei * RandomFn11() );
+	Vector3F vu(m_profile._upVec);
+	vu = rotm.transform(vu);
+	memcpy(dest, &vu, 12);
 }
 
 }

@@ -32,6 +32,7 @@ m_inLeafAttr(NULL)
 	addInt2Attrib(gar::nLateralShoots, 1, 3);
 	addFloatAttrib(gar::nAscendAngle, .2f, 0.f, .5f);
 	addSplineAttrib(gar::nAscendVary);
+	addFloatAttrib(gar::nTilt, 0.f, 0.f, 1.f);
 	addIntAttrib(gar::nLeafSeason, 3, 1, 10);
 	addFloatAttrib(gar::nAxil, 1.2f, 0.4f, 2.f);
 	
@@ -56,6 +57,7 @@ bool SimpleBranchAttribs::update()
 	findAttrib(gar::nAscendAngle)->getValue(prof->_ascending);
 	findAttrib(gar::nLeafSeason)->getValue(prof->_leafSeason);
 	findAttrib(gar::nAxil)->getValue(prof->_axil);
+	findAttrib(gar::nTilt)->getValue(prof->_tilt);
 	
 	SplineMap1D* acs = &prof->_ascendVaring;
 	gar::SplineAttrib* aacs = (gar::SplineAttrib*)findAttrib(gar::nAscendVary);

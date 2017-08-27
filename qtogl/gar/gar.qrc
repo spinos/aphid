@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+		<file>icons/single.png</file>
 		<file>icons/shuffle.png</file>
 		<file>icons/branch.png</file>
 		<file>icons/connect_branch.png</file>

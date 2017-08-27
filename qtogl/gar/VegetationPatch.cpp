@@ -45,7 +45,7 @@ void VegetationPatch::addPlant(PlantPiece * pl)
 	}
 }
 
-bool VegetationPatch::intersectPlants(const aphid::Vector3F & pos, const float & r) const
+bool VegetationPatch::intersectPlants(const Vector3F & pos, const float & r) const
 {
 	PlantListTyp::const_iterator it = m_plants.begin();
 	for(;it!=m_plants.end();++it) {
@@ -53,7 +53,7 @@ bool VegetationPatch::intersectPlants(const aphid::Vector3F & pos, const float &
 		const Matrix44F & amat = (*it)->transformMatrix();
 		const float sx = amat.scale().x;
 		
-		if(pos.distanceTo(amat.getTranslation() ) < (r + ar * sx + .23f)) {
+		if(pos.distanceTo(amat.getTranslation() ) < (r + ar * sx)) {
 			return true;
 		}
 	}

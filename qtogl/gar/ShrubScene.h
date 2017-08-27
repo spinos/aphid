@@ -53,6 +53,8 @@ private:
 /// first ground piece
 	GardenGlyph* getGround();
 	void growOnGround(VegetationPatch * vege, GardenGlyph * gnd);
+/// smallest exclr of piece connected to ground
+	float getMinExclR(GardenGlyph * gnd);
 
 private:
 	Vegetation * m_vege;
