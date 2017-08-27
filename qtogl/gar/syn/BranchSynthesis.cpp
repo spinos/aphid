@@ -79,7 +79,7 @@ bool BranchSynthesis::synthesizeAGroup(PieceAttrib* stemAttr,
 	
 	gi->addBlockInstances();
 	gi->calculateExclusionRadius();
-	
+
 	return true;
 }
 
