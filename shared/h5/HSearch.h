@@ -29,7 +29,11 @@ public:
     SearchResult listPathInFile(std::vector<std::string > & log,
                             const std::string & pathName,
                             const std::string & fileName);
-
+/// list mesh in a specific path
+/// stored in log
+    SearchResult listMeshInFile(std::vector<std::string > & log,
+                            const std::string & pathName,
+                            const std::string & fileName);
     std::string resultAsStr(SearchResult s) const;
     
 };

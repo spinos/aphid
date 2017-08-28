@@ -181,7 +181,39 @@ public:
 						int * nv, Vector3F * pos, Vector3F * nml);
 	void addVertexBlock2(const char * nvName, const char * posName, const char * nmlName, const char * colName,
 						int * nv, Vector3F * pos, Vector3F * nml, Vector3F * col);
-						
+	
+	template<typename T>
+	void lsTypedChildHierarchy(std::vector<std::string>& log) 
+	{
+	    std::vector<std::string > tmNames;
+        lsTypedChild<HBase >(tmNames);
+        std::vector<std::string>::const_iterator it = tmNames.begin();
+        
+        for(;it!=tmNames.end();++it) {
+            std::string nodeName = *it;
+            
+            HTransform child(*it);
+            
+            child.lsTypedChildHierarchy<T>(log);
+            
+            child.close();
+        }
+        
+        std::vector<std::string > tNames;
+        lsTypedChild<T>(tNames);
+        std::vector<std::string>::const_iterator ita = tNames.begin();
+        
+        for(;ita !=tNames.end();++ita) {
+            std::string nodeName = *ita;
+            //SHelper::behead(nodeName, pathToObject());
+            //SHelper::behead(nodeName, "/");
+            
+            log.push_back(nodeName);
+
+        }
+        
+	}
+
 };
 
 }

@@ -1,6 +1,7 @@
 #include "HSearch.h"
 #include <h5/HBase.h>
 #include <h5/HTransform.h>
+#include <h5/HTriangleMeshGroup.h>
 #include <foundation/SHelper.h>
 #include <deque>
 
@@ -131,6 +132,37 @@ HSearch::SearchResult HSearch::listPathInFile(std::vector<std::string > & log,
         log.push_back(nodeName);   
         
     }
+    
+    w.close();
+
+    if(!doc.close()) {
+        return hFileNotClose;
+    }
+    
+    return stat;
+}
+
+HSearch::SearchResult HSearch::listMeshInFile(std::vector<std::string > & log,
+                            const std::string & pathName,
+                            const std::string & fileName)
+{
+    SearchResult stat = searchPathInFile(log, pathName, fileName);
+    
+    if(stat != hSuccess) {
+        return stat;
+    }
+    
+    HDocument doc;
+    if(!doc.open(fileName.c_str(), HDocument::oReadOnly) ) {
+        return hFileNotOpen;
+    }
+    
+    HObject::FileIO = doc;
+
+    HBase w(pathName);
+    
+    log.clear();
+    w.lsTypedChildHierarchy<HTriangleMeshGroup>(log);
     
     w.close();
 
