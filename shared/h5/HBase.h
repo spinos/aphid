@@ -192,7 +192,7 @@ public:
         for(;it!=tmNames.end();++it) {
             std::string nodeName = *it;
             
-            HTransform child(*it);
+            HBase child(*it);
             
             child.lsTypedChildHierarchy<T>(log);
             

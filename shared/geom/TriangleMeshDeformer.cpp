@@ -12,7 +12,9 @@
 #include "geom/ATriangleMesh.h"
 #include <math/Matrix44F.h>
 #include <geom/ConvexShape.h>
-
+#ifndef WIN32
+#include <cstring>
+#endif
 namespace aphid {
 
 TriangleMeshDeformer::TriangleMeshDeformer()

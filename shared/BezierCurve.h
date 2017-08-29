@@ -9,7 +9,7 @@
 #pragma once
 #include <BaseCurve.h>
 #include <Primitive.h>
-#include <math/bezierSpline.h>
+#include <math/BezierSpline.h>
 
 namespace aphid {
 
