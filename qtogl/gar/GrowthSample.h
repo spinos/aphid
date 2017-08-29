@@ -24,6 +24,7 @@ struct GrowthSampleProfile {
 	float m_tilt;
 	float m_zenithNoise;
 	float m_spread;
+	float _exclR;
 	int m_numSampleLimit;
 };
 

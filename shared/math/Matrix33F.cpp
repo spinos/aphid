@@ -157,8 +157,7 @@ void Matrix33F::fill(const Vector3F& a, const Vector3F& b, const Vector3F& c)
    i
    00 01 02
    10 11 12
-   20 21 22
-           j
+   20 21 22 j
 */
 
 void Matrix33F::transpose()
@@ -641,6 +640,23 @@ void Matrix33F::asCrossProductMatrix(const Vector3F& a)
     *m(0, 0) =  0.f; *m(0, 1) = -a.z; *m(0, 2) = a.y;
     *m(1, 0) = a.z; *m(1, 1) =  0.f; *m(1, 2) = -a.x;
     *m(2, 0) =  -a.y; *m(2, 1) = a.x; *m(2, 2) =  0.f;
+}
+
+bool Matrix33F::rotateUpTo(const Vector3F& vref)
+{
+	Vector3F vz = vref.cross(Vector3F::YAxis);
+	const float lz = vz.length();
+	if(lz < .02f) 
+		return false;
+		
+	vz /= lz;
+	
+	Vector3F vx = vref.cross(vz);
+	vx.normalize();
+		
+	fill(vx, vref.normal(), vz);
+		
+	return true;
 }
 
 }

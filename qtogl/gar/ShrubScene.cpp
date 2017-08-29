@@ -15,278 +15,43 @@
 #include "gar_common.h"
 #include "PlantPiece.h"
 #include "VegetationPatch.h"
-#include "data/ground.h"
-#include "data/grass.h"
 #include "Vegetation.h"
 #include <geom/ATriangleMesh.h>
-#include "GrowthSample.h"
 #include <attr/PieceAttrib.h>
-#include <syn/SynthesisGroup.h>
 
 using namespace aphid;
 
 ShrubScene::ShrubScene(Vegetation * vege, QObject *parent)
-    : QGraphicsScene(parent),
+    : QGraphicsScene(parent), 
+PlantAssemble(vege),
 m_lastSelectedGlyph(NULL)
-{ m_vege = vege; }
+{}
 
 ShrubScene::~ShrubScene()
 {}
 
-void ShrubScene::assemblePlant(PlantPiece * pl, GardenGlyph * gl)
-{
-	foreach(QGraphicsItem *port_, gl->childItems()) {
-		if (port_->type() != GlyphPort::Type) {
-			continue;
-		}
-
-		GlyphPort *port = (GlyphPort*) port_;
-		if(!port->isOutgoing() ) {
-			addBranch(pl, port);
-			
-		}
-	}
-	pl->setExclRByChild();
-	
-}
-
-void ShrubScene::addBranch(PlantPiece * pl, const GlyphPort * pt)
-{
-	const int n = pt->numConnections();
-	if(n < 1) {
-		return;
-	}
-/// randomly select an input
-	int r = rand() % n;
-	const GlyphConnection * conn = pt->connection(r);
-	const GlyphPort * srcpt = conn->port0();
-	QGraphicsItem * top = srcpt->topLevelItem();
-	if(top->type() != GardenGlyph::Type) {
-		return;
-	}
-		
-	GardenGlyph * gl = (GardenGlyph *)top;
-	const int gg = gar::ToGroupType(gl->glyphType() );
-		
-	PlantPiece * pl1 = new PlantPiece(pl);
-	switch (gg) {
-		case gar::ggGrass:
-		case gar::ggSprite:
-		case gar::ggVariant:
-		case gar::ggStem:
-			addSingleBranch(pl1, gl);
-		break;
-		case gar::ggTwig:
-			addSynthesizedBranch(pl1, gl);
-		break;
-		case gar::ggBranch:
-/// todo
-		break;
-		default:
-		;
-	}	
-}
-
-void ShrubScene::addSynthesizedBranch(PlantPiece * pl, GardenGlyph * gl)
-{
-	PieceAttrib* attr = gl->attrib();
-/// select randomly
-	gar::SelectProfile selprof;
-	selprof._condition = gar::slRandom;
-	
-	gar::SynthesisGroup* syng = attr->selectSynthesisGroup(&selprof);
-	
-	const int& ninst = syng->numInstances();
-	
-	gar::SelectProfile selinst;
-	
-	Matrix44F tm;
-/// first as root piece
-	syng->getInstance(selinst._index, tm, 0);
-	ATriangleMesh * msh = attr->selectGeom(&selinst);
-	const int& kgeom = selinst._geomInd;
-	
-	if(!m_vege->findGeom(kgeom)) {
-		m_vege->addGeom(kgeom, msh);
-	}
-	
-	int geomInd = m_vege->getGeomInd(msh);
-	pl->setGeometry(msh, geomInd);
-	pl->setExclR(selprof._exclR);
-
-/// rest as child pieces
-	for(int i=1;i<ninst;++i) {
-		syng->getInstance(selinst._index, tm, i);
-		
-		ATriangleMesh * childMsh = attr->selectGeom(&selinst);
-		const int& kchildGeom = selinst._geomInd;
-	
-		if(!m_vege->findGeom(kchildGeom)) {
-		    m_vege->addGeom(kchildGeom, childMsh);
-		}
-		
-		int childGeomInd = m_vege->getGeomInd(childMsh);
-		PlantPiece* childPiece = new PlantPiece(pl);
-		
-		childPiece->setGeometry(childMsh, childGeomInd);
-	    childPiece->setExclR(selinst._exclR);
-	    childPiece->setTransformMatrix(tm);
-	    
-	}
-}
-
-void ShrubScene::addSingleBranch(PlantPiece * pl, GardenGlyph * gl)
-{
-	PieceAttrib* attr = gl->attrib();
-/// select randomly
-	gar::SelectProfile selprof;
-	selprof._condition = gar::slRandom;
-	
-	ATriangleMesh * msh = attr->selectGeom(&selprof);
-/// node_type node_instance geom_ind	
-	const int kgeom = gar::GlyphTypeToGeomIdGroup(gl->glyphType() ) | (gl->attribInstanceId() << 10) | selprof._index;
-	
-	if(!m_vege->findGeom(kgeom)) {
-		m_vege->addGeom(kgeom, msh);
-	}
-	
-	int geomInd = m_vege->getGeomInd(msh);
-	pl->setGeometry(msh, geomInd);
-	pl->setExclR(selprof._exclR);
-}
-
-void ShrubScene::genSinglePlant()
-{
-	GardenGlyph * gnd = getGround();
-	if(!gnd) {
-		m_vege->setNumPatches(0);
-		return;
-	}
-	
-	growOnGround(m_vege->patch(0), gnd);
-	
-	m_vege->setNumPatches(1);
-	m_vege->voxelize();
-}
-	
-void ShrubScene::genMultiPlant()
-{
-	GardenGlyph * gnd = getGround();
-	if(!gnd) {
-		m_vege->setNumPatches(0);
-		return;
-	}
-	
-	const int n = m_vege->getMaxNumPatches();
-	for(int i=0;i<n;++i) {
-		growOnGround(m_vege->patch(i), gnd);
-	}
-	m_vege->setNumPatches(n);
-	m_vege->rearrange();
-	m_vege->voxelize();
-}
-
 GardenGlyph * ShrubScene::getGround()
 {
-    GardenGlyph * firstGround = NULL;
+/// select first
+	foreach(GardenGlyph* its_, m_selectedGlyph) {
+		GardenGlyph *g = its_;
+		PieceAttrib* pa = g->attrib();
+		if(pa->isGround() )
+			return g;
+	}
+	
 	foreach(QGraphicsItem *its_, items()) {
 		
 		if(its_->type() == GardenGlyph::Type) {
 			GardenGlyph *g = (GardenGlyph*) its_;
-		
-			if(g->glyphType() == gar::gtPot) {
-			    if(m_selectedGlyph.contains(g) ) {
-				std::cout<<"\n INFO grow by pot";
+			PieceAttrib* pa = g->attrib();
+			if(pa->isGround() )
 				return g;
-				}
-				if(!firstGround) {
-				    firstGround = g;
-				}
-			}
-			
-			if(g->glyphType() == gar::gtBush) {
-			    if(m_selectedGlyph.contains(g) ) {
-				std::cout<<"\n INFO grow by bush";
-				return g;
-				}
-				if(!firstGround) {
-				    firstGround = g;
-				}
-			}
 		}
 	}
-	if(!firstGround) {
-	    std::cout<<"\n ERROR no ground to grow on";
-	}
-	return firstGround;
-}
-
-void ShrubScene::growOnGround(VegetationPatch * vege, GardenGlyph * gnd)
-{
-	vege->clearPlants();
-	
-	PieceAttrib * gndAttr = gnd->attrib();
-	
-	float zenithf = 0.1f;
-	gar::Attrib* azenith = gndAttr->findAttrib(gar::nZenithNoise);
-	if(azenith) {
-	    azenith->getValue(zenithf);
-	}
-	float sizing = 1.f;
-	gar::Attrib* asizing = gndAttr->findAttrib(gar::nGrowMargin);
-	if(asizing) {
-	    asizing->getValue(sizing);
-	}
-	
-	float angleA = 0.f;
-	if(gnd->glyphType() == gar::gtBush) {
-		gar::Attrib* aangle = gndAttr->findAttrib(gar::nGrowAngle);
-		if(aangle) {
-			aangle->getValue(angleA);
-		}
-	}
-	
-	float portion = 1.f;
-	gar::Attrib* aportion = gndAttr->findAttrib(gar::nGrowPortion);
-	if(aportion) {
-	    aportion->getValue(portion);
-	}
-	
-	const float minExclR = getMinExclR(gnd) * 1.33f;
-	
-	GrowthSampleProfile prof;
-	prof.m_numSampleLimit = 80;
-	prof.m_sizing = minExclR * sizing;
-	prof.m_tilt = vege->tilt();
-	prof.m_zenithNoise = zenithf;
-	prof.m_spread = angleA;
-	
-	GrowthSample gsmp;
-	
-	switch (gnd->glyphType()) {
-		case gar::gtPot:
-			prof.m_portion = .43f * portion;
-			prof.m_angle = -1.f;
-			gsmp.samplePot(prof);
-			break;
-		case gar::gtBush:
-			prof.m_portion = .34f * portion;
-			prof.m_angle = .41f;
-			gsmp.sampleBush(prof);
-			break;
-		default:
-			break;
-	}
-
-	const int& np = gsmp.numGrowthSamples();
-	for(int i=0;i<np;++i) {
-		PlantPiece* pl = new PlantPiece;
-		assemblePlant(pl, gnd );
-		Matrix44F tm = gsmp.getGrowSpace(i, prof);
-		pl->setTransformMatrix(tm);
-		vege->addPlant(pl);
-	}
-	
+	std::cout<<"\n ERROR cannot find ground to grow on";
+	std::cout.flush();
+	return NULL;
 }
 
 void ShrubScene::selectGlyph(GardenGlyph* gl)
@@ -321,34 +86,4 @@ const ATriangleMesh* ShrubScene::lastSelectedGeom() const
 	
 	gar::SelectProfile selprof;
 	return attr->selectGeom(&selprof);
-}
-
-float ShrubScene::getMinExclR(GardenGlyph * gnd)
-{
-	gar::SelectProfile selprof;
-	selprof._condition = gar::slRandom;
-	
-	float minR = 1e8f;
-	foreach(QGraphicsItem *port_, gnd->childItems()) {
-		if (port_->type() != GlyphPort::Type) {
-			continue;
-		}
-
-		GlyphPort *port = (GlyphPort*) port_;
-		if(!port->isOutgoing() ) {
-			const int n = port->numConnections();
-			for(int i=0;i<n;++i) {
-				const GlyphConnection * conn = port->connection(i);
-				const GlyphPort * srcpt = conn->port0();
-				QGraphicsItem * top = srcpt->topLevelItem();
-				GardenGlyph * gl = (GardenGlyph *)top;
-				PieceAttrib* attr = gl->attrib();
-				attr->selectGeom(&selprof);
-				
-				if(minR > selprof._exclR)
-					minR = selprof._exclR;
-			}
-		}
-	}
-	return minR;
 }

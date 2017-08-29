@@ -11,6 +11,7 @@
 #include "BranchGroup.h"
 #include <math/Matrix44F.h>
 #include "StemBlock.h"
+#include <math/miscfuncs.h>
 
 using namespace aphid;
 
@@ -26,11 +27,9 @@ void BranchGroup::addBlockInstances()
 {
 /// instance of root stem
 	addInstance(m_rootBlock->geomInstanceInd(), m_rootBlock->worldTm() );
-/// todo exclR of whole branch
+
 	setExclusionRadius(m_rootBlock->exclR() );
-	
-	addBlockChildInstance(m_rootBlock);
-	
+	addBlockChildInstance(m_rootBlock);	
 }
 
 void BranchGroup::addBlockChildInstance(StemBlock* parentStem)
@@ -47,23 +46,59 @@ void BranchGroup::addBlockChildInstance(StemBlock* parentStem)
 
 void BranchGroup::calculateExclusionRadius()
 {
-/// todo tilt?
 	setExclusionRadius(1.f);
-	adjustBlockExclusionRadius(m_rootBlock);
-}
-
-void BranchGroup::adjustBlockExclusionRadius(StemBlock* parentStem)
-{
-	const int n = parentStem->numChildBlocks();
-	if(n < 1) {
-		Vector3F pv = parentStem->worldTm().getTranslation();
-		Vector3F pxz(pv.x, 0.f, pv.z);
-		adjustExclusionRadius(pxz.length() * .43f);
+	Vector3F meanDisplace(0.f, 0.f, 0.f);
+	int count = 0;
+	addStemBlockDisplace(meanDisplace, count, m_rootBlock);
+	meanDisplace /= (float)count;
+	
+	Matrix44F invspace;
+	Matrix33F rotm;
+	if(rotm.rotateUpTo(meanDisplace) ) {
+		invspace.setRotation(rotm);
+		invspace.inverse();
 	}
 	
+	calculateDisplaceR(meanDisplace, invspace, m_rootBlock);
+}
+
+void BranchGroup::addStemBlockDisplace(Vector3F& dest, int& count, StemBlock* parentBlock)
+{
+	if(!parentBlock->isStem() )
+		return;
+		
+	dest += parentBlock->worldTm().getTranslation();
+	count++;
+	
+	const int n = parentBlock->numChildBlocks();	
 	for(int i=0;i<n;++i) {
-		StemBlock* childStem = parentStem->childStem(i);
-		adjustBlockExclusionRadius(childStem);
+		StemBlock* childStem = parentBlock->childStem(i);
+		addStemBlockDisplace(dest, count, childStem);
+		
+	}
+}
+
+void BranchGroup::calculateDisplaceR(const Vector3F& refVec, 
+				const Matrix44F& invMat, 
+				StemBlock* parentBlock)
+{
+	if(!parentBlock->isStem() )
+		return;
+		
+	Vector3F displace = parentBlock->worldTm().getTranslation();
+/// rotate to man
+	displace = refVec + (displace - refVec) * .57f;
+	
+	displace = invMat.transform(displace);
+/// project to x-z plane
+	displace.y = 0.f;
+	
+	adjustExclusionRadius(displace.length() );
+	
+	const int n = parentBlock->numChildBlocks();	
+	for(int i=0;i<n;++i) {
+		StemBlock* childStem = parentBlock->childStem(i);
+		calculateDisplaceR(refVec, invMat, childStem);
 		
 	}
 }

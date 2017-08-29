@@ -16,7 +16,9 @@ class PotAttribs : public PieceAttrib {
 
 public:
 	PotAttribs();
-	
+	virtual bool isGround() const;
+	virtual void getGrowthProfile(GrowthSampleProfile* prof) const;
+
 };
 
 #endif

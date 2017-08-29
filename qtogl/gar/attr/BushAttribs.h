@@ -16,7 +16,9 @@ class BushAttribs : public PieceAttrib {
 
 public:
 	BushAttribs();
-	
+	virtual bool isGround() const;
+	virtual void getGrowthProfile(GrowthSampleProfile* prof) const;
+
 };
 
 #endif
