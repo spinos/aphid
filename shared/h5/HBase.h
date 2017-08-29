@@ -205,9 +205,6 @@ public:
         
         for(;ita !=tNames.end();++ita) {
             std::string nodeName = *ita;
-            //SHelper::behead(nodeName, pathToObject());
-            //SHelper::behead(nodeName, "/");
-            
             log.push_back(nodeName);
 
         }

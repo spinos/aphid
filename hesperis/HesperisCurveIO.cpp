@@ -20,6 +20,8 @@
 
 namespace aphid {
     
+bool HesperisCurveCreator::DoRebuildCurve = false;
+    
 MObject HesperisCurveCreator::create(CurveGroup * data, MObject & parentObj,
                        const std::string & nodeName)
 {
@@ -97,6 +99,14 @@ bool HesperisCurveCreator::CreateACurve(Vector3F * pos, unsigned nv, int curveDe
 
 	for(i =0;i<npad;++i) {
 		knotSequences.append( (double)spans );
+	}
+	
+	if(DoRebuildCurve) {
+	    const double scale = 1.0 / (double)spans;
+	    const int nk = knotSequences.length();
+	    for(int i=0; i< nk;++i) {
+	        knotSequences[i] *= scale;
+	    }
 	}
     
     MFnNurbsCurve curveFn;
