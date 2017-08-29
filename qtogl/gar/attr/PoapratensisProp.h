@@ -18,6 +18,7 @@ class PoapratensisProp : public PieceAttrib {
 	static aphid::ATriangleMesh * sMeshes[16];
 	static float sExclRs[16];
 	static bool sMeshesLoaded;
+	static float sMeanExclR;
 	
 public:
 	PoapratensisProp();
@@ -25,6 +26,7 @@ public:
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
 	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
+	virtual void estimateExclusionRadius(float& minRadius);
 	
 private:
 	void loadMeshes();

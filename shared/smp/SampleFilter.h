@@ -41,12 +41,14 @@ public:
 	
 	template<typename T>
 	void processFilter(T* grd);
+
+/// by distance to origin	
+	void sortSamples();
 	
 protected:
 
 private:
 	bool isFiltered(const Vector3F& v) const;
-	void limitSamples();
 	
 };
 
@@ -59,14 +61,16 @@ void SampleFilter::processFilter(T* grd)
 	m_samples.reset(new Vector3F[np]);
 	int acc = 0;
 	for(int i=0;i<np;++i) {
-		if(isFiltered(poss[i]) ) continue;
+		if(isFiltered(poss[i]) ) 
+			continue;
 	    m_samples[acc++] = poss[i];
 	}
 	m_numFilteredSamples = acc;
 	
-	if(m_numFilteredSamples > m_maxNumSample) {
-		limitSamples();
-	}
+	sortSamples();
+	
+	if(m_numFilteredSamples > m_maxNumSample)
+		m_numFilteredSamples = m_maxNumSample;
 }
 
 }

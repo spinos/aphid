@@ -44,6 +44,9 @@ public:
 	virtual int numSynthesizedGroups() const;
 	virtual gar::SynthesisGroup* selectSynthesisGroup(gar::SelectProfile* prof) const;
 	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
+	virtual bool resynthesize();
+/// resynthesize a few time, average r
+	virtual void estimateExclusionRadius(float& minRadius);
 	
 private:
     bool connectToStem(PieceAttrib* another);

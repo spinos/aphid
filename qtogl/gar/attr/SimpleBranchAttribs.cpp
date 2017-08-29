@@ -142,7 +142,11 @@ ATriangleMesh* SimpleBranchAttribs::selectLeafGeom(gar::SelectProfile* prof) con
 {
     if(!m_inLeafAttr)
 		return NULL;
-		
+	
+	prof->_geomInd = (gar::GlyphTypeToGeomIdGroup(m_inLeafAttr->glyphType() ) 
+	                    | (m_inLeafAttr->attribInstanceId() << 10) 
+	                    | prof->_index);
+												
 	return m_inLeafAttr->selectGeom(prof);
 }
 
@@ -167,4 +171,22 @@ gar::SynthesisGroup* SimpleBranchAttribs::selectSynthesisGroup(gar::SelectProfil
 	
 	prof->_exclR = synthsisGroups()[prof->_index]->exclusionRadius();	
 	return synthsisGroups()[prof->_index];
+}
+
+bool SimpleBranchAttribs::resynthesize()
+{
+	findAttrib(gar::nShuffle)->setValue(1);
+	return update();
+}
+
+void SimpleBranchAttribs::estimateExclusionRadius(float& minRadius)
+{
+	float meanR = 0.f;
+	for(int i=0;i<7;++i) {
+		resynthesize();
+		meanR += synthsisGroups()[0]->exclusionRadius();
+	}
+	meanR *= .14285714f;
+	if(minRadius > meanR)
+		minRadius = meanR;
 }

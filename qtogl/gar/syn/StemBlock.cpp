@@ -33,6 +33,9 @@ void StemBlock::setExclR(float x)
 void StemBlock::setIsAxial()
 { m_blkType = tAxialStem; }
 
+void StemBlock::setIsLateral()
+{ m_blkType = tLateralStem; }
+
 void StemBlock::setIsLeaf()
 { m_blkType = tLeaf; }
 
@@ -47,6 +50,9 @@ const int& StemBlock::geomInd() const
 
 const float& StemBlock::exclR() const
 { return m_exclR; }
+
+bool StemBlock::isLateral() const
+{ return m_blkType == tLateralStem; }
 
 bool StemBlock::isAxial() const
 { return m_blkType == tAxialStem; }

@@ -39,7 +39,7 @@ typedef PrimInd<sdb::Sequence<int>, std::vector<cvx::Triangle * >, cvx::Triangle
 	TIntersect fintersect(&sels, &tris);
 	
 #define GrdLvl 3
-	EbpGrid::fillBox(fintersect, 9.3f);
+	EbpGrid::fillBox(fintersect, 10.9f);
 	EbpGrid::subdivideToLevel<TIntersect>(fintersect, 0, GrdLvl);
 	EbpGrid::insertNodeAtLevel(GrdLvl);
 	EbpGrid::cachePositions();

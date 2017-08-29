@@ -77,3 +77,9 @@ float SplineCylinderAttribs::texcoordBlockAspectRatio() const
 
 bool SplineCylinderAttribs::isGeomStem() const
 { return true; }
+
+void SplineCylinderAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > m_exclR)
+		minRadius = m_exclR;
+}

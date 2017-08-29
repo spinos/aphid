@@ -18,6 +18,7 @@ using namespace aphid;
 ATriangleMesh * HypericumProp::sMeshes[16];
 float HypericumProp::sExclRs[16];
 bool HypericumProp::sMeshesLoaded = false;
+float HypericumProp::sMeanExclR = 1.f;
 
 HypericumProp::HypericumProp()
 {
@@ -33,6 +34,7 @@ void HypericumProp::loadMeshes()
 	int nt = sHypericumNumTriangleIndices / 3;
 	const int * triind = sHypericumMeshTriangleIndices;
 		
+	sMeanExclR = 0.f;
 	for(int i=0;i<ngeom;++i) {
 	
 		const float * vertpos = sHypericumMeshVertices[i];
@@ -46,7 +48,9 @@ void HypericumProp::loadMeshes()
 				tritexcoord);
 				
 		sExclRs[i] = exclR;
+		sMeanExclR += exclR;
 	}
+	sMeanExclR /= (float)ngeom;
 	
 	sMeshesLoaded = true;
 }
@@ -69,3 +73,8 @@ ATriangleMesh* HypericumProp::selectGeom(gar::SelectProfile* prof) const
 	return sMeshes[prof->_index]; 
 }
 
+void HypericumProp::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > sMeanExclR)
+		minRadius = sMeanExclR;
+}

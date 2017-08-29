@@ -230,3 +230,6 @@ void Vegetation::voxelize(VegetationPatch * ap)
 
 const aphid::BoundingBox & Vegetation::bbox() const
 { return m_bbox; }
+
+void Vegetation::clearGeom()
+{ m_cachedGeom.clear(); }

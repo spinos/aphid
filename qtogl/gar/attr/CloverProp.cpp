@@ -18,6 +18,7 @@ using namespace aphid;
 ATriangleMesh * CloverProp::sMeshes[16];
 float CloverProp::sExclRs[16];
 bool CloverProp::sMeshesLoaded = false;
+float CloverProp::sMeanExclR = 1.f;
 
 CloverProp::CloverProp()
 {
@@ -33,6 +34,7 @@ void CloverProp::loadMeshes()
 	int nt = sCloverNumTriangleIndices / 3;
 	const int * triind = sCloverMeshTriangleIndices;
 		
+	sMeanExclR = 0.f;
 	for(int i=0;i<ngeom;++i) {
 	
 		const float * vertpos = sCloverMeshVertices[i];
@@ -46,7 +48,9 @@ void CloverProp::loadMeshes()
 				tritexcoord);
 				
 		sExclRs[i] = exclR;
+		sMeanExclR += exclR;
 	}
+	sMeanExclR /= (float)ngeom;
 	
 	sMeshesLoaded = true;
 }
@@ -69,3 +73,8 @@ ATriangleMesh* CloverProp::selectGeom(gar::SelectProfile* prof) const
 	return sMeshes[prof->_index]; 
 }
 
+void CloverProp::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > sMeanExclR)
+		minRadius = sMeanExclR;
+}

@@ -68,6 +68,8 @@ public:
 	void voxelize();
 	
 	const aphid::BoundingBox & bbox() const;
+/// map only
+	void clearGeom();
 	
 protected:
 

@@ -27,7 +27,8 @@ public:
 	virtual bool isGeomBranchingUnit() const;
 	virtual gar::BranchingUnitType getBranchingUnitType() const;
 	virtual bool selectBud(gar::SelectBudContext* ctx) const;
-
+	virtual void estimateExclusionRadius(float& minRadius);
+	
 private:
 	bool selectTerminalBud(gar::SelectBudContext* ctx) const;
 	bool selectLateralBud(gar::SelectBudContext* ctx) const;

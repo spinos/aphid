@@ -18,6 +18,7 @@ using namespace aphid;
 ATriangleMesh * HaircapProp::sMeshes[16];
 float HaircapProp::sExclRs[16];
 bool HaircapProp::sMeshesLoaded = false;
+float HaircapProp::sMeanExclR = 1.f;
 
 HaircapProp::HaircapProp()
 {
@@ -32,7 +33,8 @@ void HaircapProp::loadMeshes()
 	int np = sHaircapNumVertices;
 	int nt = sHaircapNumTriangleIndices / 3;
 	const int * triind = sHaircapMeshTriangleIndices;
-		
+	
+	sMeanExclR = 0.f;
 	for(int i=0;i<ngeom;++i) {
 	
 		const float * vertpos = sHaircapMeshVertices[i];
@@ -46,7 +48,9 @@ void HaircapProp::loadMeshes()
 				tritexcoord);
 				
 		sExclRs[i] = exclR;
+		sMeanExclR += exclR;
 	}
+	sMeanExclR /= (float)ngeom;
 	
 	sMeshesLoaded = true;
 }
@@ -69,3 +73,8 @@ ATriangleMesh* HaircapProp::selectGeom(gar::SelectProfile* prof) const
 	return sMeshes[prof->_index]; 
 }
 
+void HaircapProp::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > sMeanExclR)
+		minRadius = sMeanExclR;
+}

@@ -60,6 +60,7 @@ void BranchGroup::calculateExclusionRadius()
 	}
 	
 	calculateDisplaceR(meanDisplace, invspace, m_rootBlock);
+	
 }
 
 void BranchGroup::addStemBlockDisplace(Vector3F& dest, int& count, StemBlock* parentBlock)
@@ -87,9 +88,9 @@ void BranchGroup::calculateDisplaceR(const Vector3F& refVec,
 		
 	Vector3F displace = parentBlock->worldTm().getTranslation();
 /// rotate to man
-	displace = refVec + (displace - refVec) * .57f;
+	displace = refVec + (displace - refVec) * .7f;
 	
-	displace = invMat.transform(displace);
+	displace = invMat.transformAsNormal(displace);
 /// project to x-z plane
 	displace.y = 0.f;
 	

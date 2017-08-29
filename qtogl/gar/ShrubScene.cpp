@@ -31,8 +31,8 @@ ShrubScene::~ShrubScene()
 {}
 
 GardenGlyph * ShrubScene::getGround()
-{
-/// select first
+{	
+/// search selected first
 	foreach(GardenGlyph* its_, m_selectedGlyph) {
 		GardenGlyph *g = its_;
 		PieceAttrib* pa = g->attrib();
@@ -49,8 +49,7 @@ GardenGlyph * ShrubScene::getGround()
 				return g;
 		}
 	}
-	std::cout<<"\n ERROR cannot find ground to grow on";
-	std::cout.flush();
+	qDebug()<<"  ERROR cannot find ground to grow on";
 	return NULL;
 }
 

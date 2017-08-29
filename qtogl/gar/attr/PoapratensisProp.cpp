@@ -18,6 +18,7 @@ using namespace aphid;
 ATriangleMesh * PoapratensisProp::sMeshes[16];
 float PoapratensisProp::sExclRs[16];
 bool PoapratensisProp::sMeshesLoaded = false;
+float PoapratensisProp::sMeanExclR = 1.f;
 
 PoapratensisProp::PoapratensisProp()
 {
@@ -33,6 +34,7 @@ void PoapratensisProp::loadMeshes()
 	int nt = sPoapratensisNumTriangleIndices / 3;
 	const int * triind = sPoapratensisMeshTriangleIndices;
 		
+	sMeanExclR = 0.f;
 	for(int i=0;i<ngeom;++i) {
 	
 		const float * vertpos = sPoapratensisMeshVertices[i];
@@ -46,7 +48,9 @@ void PoapratensisProp::loadMeshes()
 				tritexcoord);
 				
 		sExclRs[i] = exclR;
+		sMeanExclR += exclR;
 	}
+	sMeanExclR /= (float)ngeom;
 	
 	sMeshesLoaded = true;
 }
@@ -69,3 +73,8 @@ ATriangleMesh* PoapratensisProp::selectGeom(gar::SelectProfile* prof) const
 	return sMeshes[prof->_index]; 
 }
 
+void PoapratensisProp::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > sMeanExclR)
+		minRadius = sMeanExclR;
+}

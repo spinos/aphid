@@ -76,7 +76,6 @@ public:
 	~QuickSort() {}
 	
 	static void Sort(unsigned * kv, int first, int last);
-	// static void Sort(BaseArray &array,int first,int last);
 	static void Sort(std::vector<unsigned> &array,int first,int last);
 	static void Sort(std::deque<unsigned> &array,int first,int last);
 };

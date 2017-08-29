@@ -73,3 +73,9 @@ float SplineSpriteAttribs::texcoordBlockAspectRatio() const
 
 bool SplineSpriteAttribs::isGeomLeaf() const
 { return true; }
+
+void SplineSpriteAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > m_exclR)
+		minRadius = m_exclR;
+}

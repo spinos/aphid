@@ -97,3 +97,9 @@ float BladeSpriteAttribs::texcoordBlockAspectRatio() const
 
 bool BladeSpriteAttribs::isGeomLeaf() const
 { return true; }
+
+void BladeSpriteAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > m_exclR)
+		minRadius = m_exclR;
+}

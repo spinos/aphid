@@ -9,6 +9,7 @@
 
 #include "SampleFilter.h"
 #include <math/miscfuncs.h>
+#include <math/QuickSort.h>
 
 namespace aphid {
 
@@ -62,17 +63,21 @@ bool SampleFilter::isFiltered(const Vector3F& v) const
 	return false; 
 }
 
-void SampleFilter::limitSamples()
+void SampleFilter::sortSamples()
 {
-	const int num = m_numFilteredSamples;
-	const float alf = (float)m_maxNumSample / (float)m_numFilteredSamples;
-	int acc = 0;
-	for(int i=0;i<num;++i) {
-		if(RandomF01() < alf) {
-			m_samples[acc++] = m_samples[i];
-		}
+	QuickSortPair<float, Vector3F > * sps = new QuickSortPair<float, Vector3F >[m_numFilteredSamples];
+	for(int i=0;i<m_numFilteredSamples;++i) {
+		sps[i].key = m_samples[i].distanceTo(Vector3F::YAxis);
+		sps[i].value = m_samples[i];
 	}
-	m_numFilteredSamples = acc;
+	
+	QuickSort1::Sort<float, Vector3F > (sps, 0, m_numFilteredSamples - 1);
+	
+	for(int i=0;i<m_numFilteredSamples;++i) {
+		m_samples[i] = sps[i].value;
+	}
+	
+	delete[] sps;
 }
 
 }

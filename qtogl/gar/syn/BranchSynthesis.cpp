@@ -114,6 +114,11 @@ void BranchSynthesis::growOnStem(PieceAttrib* stemAttr,
 			return;
 	}
 	
+/// skip branching low lateral shoot
+	if(parentStem->isLateral()
+		&& parentStem->age() < 3)
+		return;
+	
 	selbud._variationIndex = stm->geomInd();
 	selbud._budType = gar::bdLateral;
 	stm->worldTm().glMatrix(selbud._relMat);
@@ -180,6 +185,7 @@ void BranchSynthesis::growOnLateralBud(gar::SelectBudContext* selbud,
 	Matrix44F budTm(selbud->_budTm[i]);
 	
 	BlockPtrType childBlock = new StemBlock(parentStem);
+		childBlock->setIsLateral();
 	*childBlock->tmR() = budTm;
 	childBlock->updateWorldTm();
 	

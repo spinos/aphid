@@ -17,7 +17,7 @@ using namespace aphid;
 
 int BlockDeformAttribs::sNumInstances = 0;
 
-BlockDeformAttribs::BlockDeformAttribs() : PieceAttrib(gar::gtBendTwistRollVariant),
+BlockDeformAttribs::BlockDeformAttribs() : PieceAttrib(gar::gtBlockDeformVariant),
 m_inAttr(NULL),
 m_inGeom(NULL),
 m_exclR(1.f)
@@ -423,4 +423,10 @@ void BlockDeformAttribs::rotateToUp2(aphid::Matrix44F& tm, const aphid::Vector3F
 	Matrix33F rot(qu);
 	tm *= rot;
 	
+}
+
+void BlockDeformAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(m_inAttr)
+		m_inAttr->estimateExclusionRadius(minRadius);
 }

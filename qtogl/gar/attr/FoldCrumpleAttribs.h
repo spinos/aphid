@@ -47,6 +47,7 @@ public:
 	virtual bool isGeomStem() const;
 	virtual bool isGeomLeaf() const;
 	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
+	virtual void estimateExclusionRadius(float& minRadius);
 	
 private:
     

@@ -63,6 +63,7 @@ enum AttribName {
 	nLeafSeason,
 	nAxil,
 	nTilt,
+	nGrowLimit,
 };
 
 enum AttribType {

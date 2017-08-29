@@ -34,6 +34,7 @@ public:
 	virtual int attribInstanceId() const;
 	virtual float texcoordBlockAspectRatio() const;
 	virtual bool isGeomLeaf() const;
+	virtual void estimateExclusionRadius(float& minRadius);
 	
 };
 

@@ -8,14 +8,15 @@
  */
 
 #include "PotAttribs.h"
-#include <GrowthSample.h>
+#include <syn/GrowthSample.h>
 #include <gar_common.h>
 
 PotAttribs::PotAttribs() : PieceAttrib(gar::gtPot)
 {
 	addFloatAttrib(gar::nGrowPortion, 1.f, 0.1f, 1.f);
-	addFloatAttrib(gar::nGrowMargin, 1.f, 0.5f, 2.f);
+	addFloatAttrib(gar::nGrowMargin, 1.f, 0.1f, 10.f);
 	addFloatAttrib(gar::nZenithNoise, 0.2f, 0.f, 1.f);
+	addIntAttrib(gar::nGrowLimit, 80, 3, 80);
 }
 
 bool PotAttribs::isGround() const
@@ -28,8 +29,7 @@ void PotAttribs::getGrowthProfile(GrowthSampleProfile* prof) const
 	
 	findAttrib(gar::nZenithNoise)->getValue(prof->m_zenithNoise);
 	findAttrib(gar::nGrowPortion)->getValue(prof->m_portion);
-	prof->m_portion *= .43f;
+	findAttrib(gar::nGrowLimit)->getValue(prof->m_numSampleLimit);
 	prof->m_angle = -1.f;
-	prof->m_numSampleLimit = 80;
 	
 }

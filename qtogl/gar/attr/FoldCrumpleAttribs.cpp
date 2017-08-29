@@ -177,3 +177,9 @@ bool FoldCrumpleAttribs::canConnectToViaPort(const PieceAttrib* another, const s
 {
 	return another->isGeomLeaf();
 }
+
+void FoldCrumpleAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(m_inAttr)
+		m_inAttr->estimateExclusionRadius(minRadius);
+}

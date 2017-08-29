@@ -206,6 +206,9 @@ int PieceAttrib::numSynthesizedGroups() const
 gar::SynthesisGroup* PieceAttrib::selectSynthesisGroup(gar::SelectProfile* prof) const
 { return NULL; }
 
+bool PieceAttrib::resynthesize()
+{ return false; }
+
 bool PieceAttrib::isGeomStem() const
 { return false; }
 
@@ -226,6 +229,9 @@ bool PieceAttrib::isTwig() const
 
 bool PieceAttrib::isBranch() const
 { return false; }
+
+void PieceAttrib::estimateExclusionRadius(float& minRadius)
+{}
 
 bool PieceAttrib::isGround() const
 { return false; }

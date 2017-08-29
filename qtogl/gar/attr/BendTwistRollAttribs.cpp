@@ -141,3 +141,9 @@ bool BendTwistRollAttribs::canConnectToViaPort(const PieceAttrib* another, const
 {
 	return (another->isGeomStem() || another->isGeomLeaf() );
 }
+
+void BendTwistRollAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(m_inAttr)
+		m_inAttr->estimateExclusionRadius(minRadius);
+}

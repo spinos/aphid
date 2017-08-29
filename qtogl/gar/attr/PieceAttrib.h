@@ -132,6 +132,7 @@ public:
 	virtual bool isSynthesized() const;
 	virtual int numSynthesizedGroups() const;
 	virtual gar::SynthesisGroup* selectSynthesisGroup(gar::SelectProfile* prof) const;
+	virtual bool resynthesize();
 	virtual bool isGeomStem() const;
 	virtual bool isGeomLeaf() const;
 	virtual bool isGeomBranchingUnit() const;
@@ -139,6 +140,7 @@ public:
 	virtual bool selectBud(gar::SelectBudContext* ctx) const;
 	virtual bool isTwig() const;
 	virtual bool isBranch() const;
+	virtual void estimateExclusionRadius(float& minRadius);
 /// to grow on
 	virtual bool isGround() const;
 	virtual void getGrowthProfile(GrowthSampleProfile* prof) const;

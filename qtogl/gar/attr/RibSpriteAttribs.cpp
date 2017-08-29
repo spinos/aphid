@@ -84,3 +84,9 @@ float RibSpriteAttribs::texcoordBlockAspectRatio() const
 
 bool RibSpriteAttribs::isGeomLeaf() const
 { return true; }
+
+void RibSpriteAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > m_exclR)
+		minRadius = m_exclR;
+}

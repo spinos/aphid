@@ -15,7 +15,7 @@
 
 using namespace aphid;
 
-MonopodialAttribs::MonopodialAttribs() : PieceAttrib(gar::gtSplineCylinder)
+MonopodialAttribs::MonopodialAttribs() : PieceAttrib(gar::gtMonopodial)
 {
 	const int np = sMonopodialNumVertices;
 	const int nt = sMonopodialNumTriangleIndices / 3;
@@ -192,4 +192,10 @@ bool MonopodialAttribs::selectLateralFoliage(gar::SelectBudContext* ctx) const
 	}
 	
 	return true;
+}
+
+void MonopodialAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > 1.57f)
+		minRadius = 1.57f;
 }

@@ -20,12 +20,17 @@ class ATriangleMesh;
 
 class GardenGlyph;
 class PlantPiece;
+class PieceAttrib;
 
 namespace gar {
+
+class SynthesisGroup;
 
 class PlantAssemble {
 
 	Vegetation * m_vege;
+/// smallest exclr of piece connected to ground
+	float m_exclR;
 	
 public:
 	PlantAssemble(Vegetation * vege);
@@ -35,8 +40,8 @@ public:
 	
 protected:
 	virtual GardenGlyph* getGround();
-/// smallest exclr of piece connected to ground
-	float getMinExclR(GardenGlyph * gnd) const;
+
+	void estimateExclusionRadius(GardenGlyph * gnd);
 	
 	Vegetation* vegetationR();
 
@@ -48,6 +53,8 @@ private:
 	void addSinglePiece(PlantPiece * pl, GardenGlyph * gl);
 	void addTwigPiece(PlantPiece * pl, GardenGlyph * gl);
 	void addBranchPiece(PlantPiece * pl, GardenGlyph * gl);
+	void addSynthesisPiece(PlantPiece * pl, PieceAttrib* attr, 
+							SynthesisGroup* syng);
 	
 };
 

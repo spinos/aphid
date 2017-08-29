@@ -15,8 +15,8 @@
 #include <qt/GlyphConnection.h>
 #include <Vegetation.h>
 #include <VegetationPatch.h>
-#include <GrowthSample.h>
-#include <syn/SynthesisGroup.h>
+#include "GrowthSample.h"
+#include "SynthesisGroup.h"
 #include <gar_common.h>
 #include <data/ground.h>
 #include <data/grass.h>
@@ -34,13 +34,14 @@ Vegetation* PlantAssemble::vegetationR()
 void PlantAssemble::genSinglePlant()
 {
 	Vegetation* vege = vegetationR();
-	
+	vege->clearGeom();
 	GardenGlyph * gnd = getGround();
 	if(!gnd) {
 		vege->setNumPatches(0);
 		return;
 	}
 	
+	estimateExclusionRadius(gnd);
 	growOnGround(vege->patch(0), gnd);
 	
 	vege->setNumPatches(1);
@@ -50,7 +51,7 @@ void PlantAssemble::genSinglePlant()
 void PlantAssemble::genMultiPlant()
 {
 	Vegetation* vege = vegetationR();
-	
+	vege->clearGeom();
 	GardenGlyph * gnd = getGround();
 	if(!gnd) {
 		vege->setNumPatches(0);
@@ -59,6 +60,7 @@ void PlantAssemble::genMultiPlant()
 	
 	const int n = vege->getMaxNumPatches();
 	for(int i=0;i<n;++i) {
+		std::cout<<"\n n patches to go "<<(n - i);
 		growOnGround(vege->patch(i), gnd);
 	}
 	vege->setNumPatches(n);
@@ -69,11 +71,8 @@ void PlantAssemble::genMultiPlant()
 GardenGlyph* PlantAssemble::getGround()
 { return NULL; }
 
-float PlantAssemble::getMinExclR(GardenGlyph * gnd) const
+void PlantAssemble::estimateExclusionRadius(GardenGlyph * gnd)
 {
-	gar::SelectProfile selprof;
-	selprof._condition = gar::slRandom;
-	
 	float minR = 1e8f;
 	foreach(QGraphicsItem *port_, gnd->childItems()) {
 		if (port_->type() != GlyphPort::Type) {
@@ -89,24 +88,18 @@ float PlantAssemble::getMinExclR(GardenGlyph * gnd) const
 				QGraphicsItem * top = srcpt->topLevelItem();
 				GardenGlyph * gl = (GardenGlyph *)top;
 				PieceAttrib* attr = gl->attrib();
-				attr->selectGeom(&selprof);
-				
-				if(minR > selprof._exclR)
-					minR = selprof._exclR;
+				attr->estimateExclusionRadius(minR);
 			}
 		}
 	}
-	return minR;
+	m_exclR = minR;
 }
 
 void PlantAssemble::growOnGround(VegetationPatch * vpatch, GardenGlyph * gnd)
 {
-	const int& gt = gnd->glyphType();
-	std::cout<<"\n    INFO begin grow on "<<gar::GroundTypeNames[gar::ToGroundType(gt)];
-	
 	GrowthSampleProfile prof;
 	
-	prof._exclR = getMinExclR(gnd) * 1.33f;
+	prof._exclR = m_exclR;
 	prof.m_tilt = vpatch->tilt();
 	
 	PieceAttrib * gndAttr = gnd->attrib();
@@ -194,21 +187,35 @@ void PlantAssemble::addPiece(PlantPiece * pl, const GlyphPort * pt)
 
 void PlantAssemble::addBranchPiece(PlantPiece * pl, GardenGlyph * gl)
 {
+	PieceAttrib* attr = gl->attrib();
+	attr->resynthesize();
+/// select first	
+	SelectProfile selprof;
+	SynthesisGroup* syng = attr->selectSynthesisGroup(&selprof);
+	pl->setExclR(selprof._exclR);
+	
+	addSynthesisPiece(pl, attr, syng);
 }
 
 void PlantAssemble::addTwigPiece(PlantPiece * pl, GardenGlyph * gl)
 {
 	PieceAttrib* attr = gl->attrib();
 /// select randomly
-	gar::SelectProfile selprof;
+	SelectProfile selprof;
 	selprof._condition = gar::slRandom;
 	
-	gar::SynthesisGroup* syng = attr->selectSynthesisGroup(&selprof);
-	
+	SynthesisGroup* syng = attr->selectSynthesisGroup(&selprof);
+	pl->setExclR(selprof._exclR);
+
+	addSynthesisPiece(pl, attr, syng);
+}
+
+void PlantAssemble::addSynthesisPiece(PlantPiece * pl, PieceAttrib* attr, 
+							SynthesisGroup* syng)
+{
 	const int& ninst = syng->numInstances();
 	
-	gar::SelectProfile selinst;
-	
+	SelectProfile selinst;	
 	Matrix44F tm;
 /// first as root piece
 	syng->getInstance(selinst._index, tm, 0);
@@ -221,8 +228,7 @@ void PlantAssemble::addTwigPiece(PlantPiece * pl, GardenGlyph * gl)
 	
 	int geomInd = m_vege->getGeomInd(msh);
 	pl->setGeometry(msh, geomInd);
-	pl->setExclR(selprof._exclR);
-
+	
 /// rest as child pieces
 	for(int i=1;i<ninst;++i) {
 		syng->getInstance(selinst._index, tm, i);
@@ -231,7 +237,7 @@ void PlantAssemble::addTwigPiece(PlantPiece * pl, GardenGlyph * gl)
 		const int& kchildGeom = selinst._geomInd;
 	
 		if(!m_vege->findGeom(kchildGeom)) {
-		    m_vege->addGeom(kchildGeom, childMsh);
+			m_vege->addGeom(kchildGeom, childMsh);
 		}
 		
 		int childGeomInd = m_vege->getGeomInd(childMsh);
@@ -248,7 +254,7 @@ void PlantAssemble::addSinglePiece(PlantPiece * pl, GardenGlyph * gl)
 {
 	PieceAttrib* attr = gl->attrib();
 /// select randomly
-	gar::SelectProfile selprof;
+	SelectProfile selprof;
 	selprof._condition = gar::slRandom;
 	
 	ATriangleMesh * msh = attr->selectGeom(&selprof);

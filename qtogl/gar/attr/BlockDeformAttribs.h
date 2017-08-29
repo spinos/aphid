@@ -53,6 +53,7 @@ public:
 	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
 	virtual gar::BranchingUnitType getBranchingUnitType() const;
 	virtual bool selectBud(gar::SelectBudContext* ctx) const;
+	virtual void estimateExclusionRadius(float& minRadius);
 	
 private:
     bool selectTerminalBud(gar::SelectBudContext* ctx) const;

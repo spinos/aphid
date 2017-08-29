@@ -28,9 +28,9 @@ void GrowthSample::samplePot(const GrowthSampleProfile& prof)
 	const int ndskv = dsk.numPoints();
 	for(int i=0;i<ndskv;++i) {
 		Vector3F vi = dsk.points()[i];
-		vi.set(vi.x * 9.9f * prof.m_sizing, 
+		vi.set(vi.x * 10.9f * prof.m_sizing, 
 				RandomFn11(), 
-				vi.y * 9.9f * prof.m_sizing);
+				vi.y * 10.9f * prof.m_sizing);
 		dsk.points()[i] = vi;
 	}
 	
@@ -56,7 +56,6 @@ void GrowthSample::samplePot(const GrowthSampleProfile& prof)
 
 void GrowthSample::sampleBush(const GrowthSampleProfile& prof)
 {
-	const float relsz = prof.m_sizing * 1.13f;
 	setAngle(prof.m_angle);
 	setPortion(prof.m_portion);
 	setNumSampleLimit(prof.m_numSampleLimit);
@@ -69,23 +68,24 @@ void GrowthSample::sampleBush(const GrowthSampleProfile& prof)
 	
 	m_pnds.reset(new Ray[np]);
 	
-	const Vector3F ori(0.f, -10.f + prof.m_spread * 6.f, 0.f);
+	const Vector3F ori(0.f, prof.m_spread * 5.f -10.f, 0.f);
 	const Plane pln(0.f, -1.f, 0.f, 0.f);
 	Vector3F rd;
 	float rt;
 	
 	for(int i=0;i<np;++i) {
-		Ray ri(ori, ps[i]);
+		Vector3F dest = ps[i];
+		dest.x *= 1.4f + prof.m_spread;
+		dest.z *= 1.4f + prof.m_spread;
+		
+		Ray ri(ori, dest);
 		m_pnds[i] = ri;
 		
 		pln.rayIntersect(ri, rd, rt);
 		
-		m_pnds[i].m_origin = rd * relsz;
+		m_pnds[i].m_origin = rd * prof.m_sizing;
 	}
 	
-	//std::cout<<"\n sph n sample "<<sph.numSamples()
-	//	<<"\n fltd n sample "<<np;
-	//std::cout.flush();
 }
 
 const int& GrowthSample::numGrowthSamples() const

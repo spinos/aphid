@@ -124,3 +124,9 @@ bool DirectionalBendAttribs::canConnectToViaPort(const PieceAttrib* another, con
 {
 	return (another->isGeomStem() || another->isGeomLeaf() );
 }
+
+void DirectionalBendAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(m_inAttr)
+		m_inAttr->estimateExclusionRadius(minRadius);
+}

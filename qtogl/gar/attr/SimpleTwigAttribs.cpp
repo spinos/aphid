@@ -101,6 +101,7 @@ bool SimpleTwigAttribs::update()
 	
 	gar::SelectProfile selprof;
 	
+	m_exclR = 0.f;
 /// for each stem variation
 	const int ng = m_inStemAttr->numGeomVariations();
 	for(int i=0;i<ng;++i) {
@@ -115,7 +116,9 @@ bool SimpleTwigAttribs::update()
 		gi->addInstance(i, Matrix44F::IdentityMatrix);
 		gi->setExclusionRadius(selprof._exclR);
 		synthsizeAGroup(gi, inGeom);
+		m_exclR += gi->exclusionRadius();
 	}
+	m_exclR /= (float)ng;
     
 	return true;
 }
@@ -400,3 +403,9 @@ void SimpleTwigAttribs::processPhyllotaxy(gar::SynthesisGroup* grp,
 
 bool SimpleTwigAttribs::isTwig() const
 { return false; }
+
+void SimpleTwigAttribs::estimateExclusionRadius(float& minRadius)
+{
+	if(minRadius > m_exclR)
+		minRadius = m_exclR;
+}

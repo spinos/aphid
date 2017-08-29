@@ -1,4 +1,4 @@
-## Sat Aug 29 11:58:05 CST 2017 
+## Sat Aug 30 18:14:05 CST 2017 
 
 INCLUDE (${APHID_DIR}/cmake/hdf5_config.cmake)
 INCLUDE (${APHID_DIR}/cmake/zip_config.cmake)
@@ -69,7 +69,6 @@ Vegetation.h
 inout/ExportExample.h
 inout/HGardenExample.h
 inout/HVegePatch.h
-GrowthSample.h
 ${APHID_DIR}/rhizoid/Variform.cpp
 ${APHID_DIR}/rhizoid/GardenExamp.cpp
 ${APHID_DIR}/rhizoid/CompoundExamp.cpp
@@ -113,7 +112,6 @@ Vegetation.cpp
 inout/ExportExample.cpp
 inout/HGardenExample.cpp
 inout/HVegePatch.cpp
-GrowthSample.cpp
 main.cpp)
 
 add_executable (gar ${GAR_HEADER_FILES} ${GAR_SOURCE_FILES} ${GAR_RES_SOURCES})

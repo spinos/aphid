@@ -21,6 +21,7 @@ class StemBlock : public aphid::deform::Block {
 	
 	enum BlockType {
 		tUnknown = 0,
+		tLateralStem,
 		tAxialStem,
 		tLeaf,
 	};
@@ -31,6 +32,7 @@ public:
 	
 	void setGeomInd(int x);
 	void setExclR(float x);
+	void setIsLateral();
 	void setIsAxial();
 	void setIsLeaf();
 	void setHasTerminalStem();
@@ -38,6 +40,7 @@ public:
 	const int& age() const;
 	const int& geomInd() const;
 	const float& exclR() const;
+	bool isLateral() const;
 	bool isAxial() const;
 	bool isLeaf() const;
 	bool isStem() const;
