@@ -227,6 +227,9 @@ bool PieceAttrib::isTwig() const
 bool PieceAttrib::isBranch() const
 { return false; }
 
+bool PieceAttrib::isGround() const
+{ return false; }
+
 Vector3F PieceAttrib::getLocalUpRef(gar::SelectBudContext* ctx) const
 {
 	Matrix44F invmat(ctx->_relMat);
@@ -237,3 +240,6 @@ Vector3F PieceAttrib::getLocalUpRef(gar::SelectBudContext* ctx) const
 	relup.normalize();
 	return relup;
 }
+
+void PieceAttrib::getGrowthProfile(GrowthSampleProfile* prof) const
+{}

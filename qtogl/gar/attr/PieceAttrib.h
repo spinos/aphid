@@ -21,6 +21,8 @@ class SplineMap1D;
 class Vector3F;
 }
 
+class GrowthSampleProfile;
+
 namespace gar {
 class SynthesisGroup;
 
@@ -137,6 +139,9 @@ public:
 	virtual bool selectBud(gar::SelectBudContext* ctx) const;
 	virtual bool isTwig() const;
 	virtual bool isBranch() const;
+/// to grow on
+	virtual bool isGround() const;
+	virtual void getGrowthProfile(GrowthSampleProfile* prof) const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,

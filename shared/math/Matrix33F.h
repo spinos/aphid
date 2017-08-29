@@ -74,6 +74,7 @@ namespace aphid {
 	void rotateY(float beta);
 	void rotateZ(float gamma);
 	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
+	bool rotateUpTo(const Vector3F& vref);
 	
 	Vector3F scale() const;
 	void orthoNormalize();

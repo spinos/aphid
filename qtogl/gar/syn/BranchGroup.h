@@ -13,6 +13,11 @@
 
 #include "SynthesisGroup.h"
 
+namespace aphid {
+class Vector3F;
+class Matrix44F;
+}
+
 class StemBlock;
 
 namespace gar {
@@ -33,8 +38,11 @@ protected:
 
 private:
 	void addBlockChildInstance(StemBlock* parentStem);
-	void adjustBlockExclusionRadius(StemBlock* parentStem);
-	
+	void addStemBlockDisplace(aphid::Vector3F& dest, int& count, 
+				StemBlock* parentBlock);
+	void calculateDisplaceR(const aphid::Vector3F& refVec, 
+				const aphid::Matrix44F& invMat,
+				StemBlock* parentBlock);
 };
 
 }
