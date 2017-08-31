@@ -11,7 +11,7 @@
 #include <h5/HObject.h>
 #include <h5/HDocument.h>
 #include <h5/HTriangleMesh.h>
-#include <HGardenExample.h>
+#include <inout/HGardenExample.h>
 #include <VegExampleNode.h>
 #include <geom/ATriangleMesh.h>
 #include <mama/AHelper.h>
