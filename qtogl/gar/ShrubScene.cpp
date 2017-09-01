@@ -37,7 +37,7 @@ GardenGlyph * ShrubScene::getGround()
 		GardenGlyph *g = its_;
 		PieceAttrib* pa = g->attrib();
 		if(pa->isGround() )
-			return g;
+			return checkGroundConnection(g);
 	}
 	
 	foreach(QGraphicsItem *its_, items()) {
@@ -46,7 +46,7 @@ GardenGlyph * ShrubScene::getGround()
 			GardenGlyph *g = (GardenGlyph*) its_;
 			PieceAttrib* pa = g->attrib();
 			if(pa->isGround() )
-				return g;
+				return checkGroundConnection(g);
 		}
 	}
 	qDebug()<<"  ERROR cannot find ground to grow on";
@@ -58,6 +58,7 @@ void ShrubScene::selectGlyph(GardenGlyph* gl)
 	if(!m_selectedGlyph.contains(gl) )
 		m_selectedGlyph<<gl; 
 	m_lastSelectedGlyph = gl;
+	emit sendSelectGlyph(true);
 }
 
 void ShrubScene::deselectGlyph()
@@ -67,6 +68,7 @@ void ShrubScene::deselectGlyph()
 	}
 	m_selectedGlyph.clear();
 	m_lastSelectedGlyph = NULL;
+	emit sendSelectGlyph(false);
 }
 
 GardenGlyph* ShrubScene::lastSelectedGlyph()

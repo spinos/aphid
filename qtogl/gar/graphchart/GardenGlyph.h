@@ -61,8 +61,12 @@ public:
 	
 	QPointF localCenter() const;
 	const std::string& glyphName() const;
-	
+
+/// before (dis)connect with another via port	
 	void postConnection(GardenGlyph* another, aphid::GlyphPort* viaPort);
+	void preDisconnection(GardenGlyph* another, aphid::GlyphPort* viaPort);
+/// after connection via port is changed
+	void postDisconnection(aphid::GlyphPort* viaPort);
 	void postSelection();
 	
 protected:

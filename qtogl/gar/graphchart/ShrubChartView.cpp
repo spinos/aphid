@@ -20,7 +20,8 @@
 
 using namespace aphid;
 
-ShrubChartView::ShrubChartView(QGraphicsScene * scene, QWidget * parent) : QGraphicsView(scene, parent)
+ShrubChartView::ShrubChartView(QGraphicsScene * scene, QWidget * parent) : QGraphicsView(scene, parent),
+m_selectedConnection(NULL)
 {
 	setAcceptDrops(true);
 	setMinimumSize(400, 300);
@@ -66,18 +67,15 @@ void ShrubChartView::processItem(QMouseEvent *event)
 	QPoint mousePos = event->pos();
 	QGraphicsItem *item = itemAt(mousePos);
 	
-	if(m_mode == mMoveItem) {
-		QPointF dv(mousePos.x() - m_lastMosePos.x(),
-					mousePos.y() - m_lastMosePos.y() );
-		GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
-		gl->moveBlockBy(dv);
-	}
-	if(m_mode == mConnectItems) {
-		QPointF pf(mousePos.x(), mousePos.y() );
-		pf.rx() -= m_sceneOrigin.x();
-		pf.ry() -= m_sceneOrigin.y();
-		m_selectedConnection->setPos1(pf );
-		m_selectedConnection->updatePath();
+	switch (m_mode) {
+		case mMoveItem :
+			doMoveItem(mousePos);
+			break;
+		case mConnectItems :
+			doMoveConnection(mousePos);
+			break;
+		default :
+			;
 	}
 	
 	m_lastMosePos = mousePos;
@@ -88,37 +86,15 @@ void ShrubChartView::mouseReleaseEvent(QMouseEvent *event)
 	QPoint mousePos = event->pos();
 	QGraphicsItem *item = itemAt(mousePos);
 	
-	if(m_mode == mMoveItem) {
-		QPointF dv(mousePos.x() - m_lastMosePos.x(),
-					mousePos.y() - m_lastMosePos.y() );
-		GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
-		gl->moveBlockBy(dv);
-	}
-	if(m_mode == mConnectItems) {
-		if(isIncomingPort(item)) {
-			QPointF pf = item->scenePos();
-			m_selectedConnection->setPos1(pf );
-			GlyphPort * p1 = (GlyphPort *)item;
-			if(m_selectedConnection->canConnectTo(p1) ) {
-			    m_selectedConnection->setPort1(p1);
-			    m_selectedConnection->updatePath();
-			    
-			    GardenGlyph * srcNode = m_selectedConnection->node0();
-			    GardenGlyph * destNode = m_selectedConnection->node1();
-			    destNode->postConnection(srcNode, p1);
-			    //qDebug()<<" made connection "<<m_selectedConnection->port0()->portName()
-			    //    <<" -> "<<pt->portName();
-			        
-			} else {
-			    
-			    //qDebug()<<" rejects connection "<<m_selectedConnection->port0()->parentItem()
-			    //<<" -> "<<pt->parentItem();
-			}
-		}
-		
-		if(!m_selectedConnection->isComplete() ) {
-			delete m_selectedConnection;
-		}
+	switch (m_mode) {
+		case mMoveItem :
+			doMoveItem(mousePos);
+			break;
+		case mConnectItems :
+			doConnectItem(item);
+			break;
+		default :
+			;
 	}
 	m_mode = mNone;
 }
@@ -204,7 +180,7 @@ void ShrubChartView::processSelect(const QPoint & pos)
 {
 	QGraphicsItem *item = itemAt(pos);
 	if (item) {
-         if(isOutgoingPort(item) ) {
+         if(GlyphPort::IsItemOutgoingPort(item) ) {
 			m_mode = mConnectItems;
 			m_selectedConnection = new GardenConnection;
 			m_selectedConnection->setPos0(item->scenePos() );
@@ -221,45 +197,14 @@ void ShrubChartView::processSelect(const QPoint & pos)
 				GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
 				gl->postSelection();
 				ShrubScene* ssc = (ShrubScene* )scene();
-				ssc->selectGlyph(gl);
-				emit sendSelectGlyph(true);
+				ssc->selectGlyph(gl);				
 			}
 		 }
      } else {
 		ShrubScene* ssc = (ShrubScene* )scene();
 		ssc->deselectGlyph();
-		emit sendSelectGlyph(false);
 	 }
 	 m_lastMosePos = pos;
-}
-
-bool ShrubChartView::isItemPort(const QGraphicsItem *item) const
-{
-	if(!item) {
-		return false;
-	}	
-	if(item->type() != GlyphPort::Type) {
-		return false;
-	}
-	return true;
-}
-
-bool ShrubChartView::isOutgoingPort(const QGraphicsItem *item) const
-{
-	if(!isItemPort(item) ) {
-		return false;
-	}
-	const GlyphPort * pt = (const GlyphPort *)item;
-	return pt->isOutgoing();
-}
-
-bool ShrubChartView::isIncomingPort(const QGraphicsItem *item) const
-{
-	if(!isItemPort(item) ) {
-		return false;
-	}
-	const GlyphPort * pt = (const GlyphPort *)item;
-	return !pt->isOutgoing();
 }
 
 void ShrubChartView::beginProcessView(QMouseEvent *event) 
@@ -267,6 +212,79 @@ void ShrubChartView::beginProcessView(QMouseEvent *event)
 	QPoint mousePos = event->pos();
 	m_mode = mPanView;
 	m_lastMosePos = mousePos;
+}
+
+void ShrubChartView::processRemove(const QPoint& pos)
+{
+	QGraphicsItem *item = itemAt(pos);
+	if (item) {
+         if(GlyphConnection::IsItemConnection(item) ) {
+			m_mode = mRemoveConnection;
+			doRemoveConnection(item);
+		 }
+     }
+	 m_lastMosePos = pos;
+}
+
+void ShrubChartView::doMoveItem(const QPoint& mousePos)
+{
+	QPointF dv(mousePos.x() - m_lastMosePos.x(),
+					mousePos.y() - m_lastMosePos.y() );
+	GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
+	gl->moveBlockBy(dv);
+}
+
+void ShrubChartView::doMoveConnection(const QPoint& mousePos)
+{
+	if(!m_selectedConnection)
+		return;
+		
+	QPointF pf(mousePos.x(), mousePos.y() );
+	pf.rx() -= m_sceneOrigin.x();
+	pf.ry() -= m_sceneOrigin.y();
+	m_selectedConnection->setPos1(pf );
+	m_selectedConnection->updatePath();
+}
+
+void ShrubChartView::doConnectItem(QGraphicsItem* item)
+{
+	if(!m_selectedConnection)
+		return;
+		
+	if(GlyphPort::IsItemIncomingPort(item)) {
+		QPointF pf = item->scenePos();
+		m_selectedConnection->setPos1(pf );
+		GlyphPort * p1 = (GlyphPort *)item;
+		if(m_selectedConnection->canConnectTo(p1) ) {
+			m_selectedConnection->setPort1(p1);
+			m_selectedConnection->updatePath();
+			
+			GardenGlyph * srcNode = m_selectedConnection->node0();
+			GardenGlyph * destNode = m_selectedConnection->node1();
+			destNode->postConnection(srcNode, p1);
+			//qDebug()<<" made connection "<<m_selectedConnection->port0()->portName()
+			//    <<" -> "<<pt->portName();
+				
+		} else {
+			
+			//qDebug()<<" rejects connection "<<m_selectedConnection->port0()->parentItem()
+			//<<" -> "<<pt->parentItem();
+		}
+	}
+	
+	if(!m_selectedConnection->isComplete() ) {
+		scene()->removeItem( m_selectedConnection );
+		delete m_selectedConnection;
+	}
+	m_selectedConnection = NULL;
+}
+
+void ShrubChartView::doRemoveConnection(QGraphicsItem* item)
+{
+	GardenConnection* conn = static_cast<GardenConnection*>(item);
+	conn->breakUp();
+	scene()->removeItem( item );
+	delete item;
 }
 
 void ShrubChartView::beginProcessItem(QMouseEvent *event) 
@@ -277,10 +295,9 @@ void ShrubChartView::beginProcessItem(QMouseEvent *event)
 			processSelect(event->pos() );
 		break;
 		case Qt::RightButton:
-			qDebug()<<"todo del";
+			processRemove(event->pos() );
 		break;
 		default:
 		;
 	}
 }
-

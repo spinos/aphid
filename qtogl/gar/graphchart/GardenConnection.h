@@ -27,6 +27,7 @@ public:
 	virtual ~GardenConnection();
 	
 	virtual bool canConnectTo(aphid::GlyphPort* p1) const;
+	virtual void breakUp();
 
 	GardenGlyph* node0() const;
 	GardenGlyph* node1() const;

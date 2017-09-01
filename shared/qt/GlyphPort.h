@@ -41,6 +41,10 @@ public:
 	
 	int type() const { return Type; }
 	
+	static bool IsItemPort(const QGraphicsItem *item);
+	static bool IsItemOutgoingPort(const QGraphicsItem *item);
+	static bool IsItemIncomingPort(const QGraphicsItem *item);
+	
 protected:
 	
 private:

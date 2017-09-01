@@ -43,9 +43,6 @@ m_exclR(1.f)
 FoldCrumpleAttribs::~FoldCrumpleAttribs()
 {}
 
-void FoldCrumpleAttribs::setInputGeom(ATriangleMesh* x)
-{ m_inGeom = x; }
-
 bool FoldCrumpleAttribs::hasGeom() const
 { return m_inGeom != NULL; }
 
@@ -157,6 +154,12 @@ void FoldCrumpleAttribs::connectTo(PieceAttrib* another, const std::string& port
     
     m_inAttr = another;
     update();
+}
+
+void FoldCrumpleAttribs::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{
+	m_inAttr = NULL;
+	m_inGeom = NULL;
 }
 
 bool FoldCrumpleAttribs::isGeomStem() const

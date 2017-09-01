@@ -180,6 +180,12 @@ bool PieceAttrib::canConnectToViaPort(const PieceAttrib* another, const std::str
 void PieceAttrib::connectTo(PieceAttrib* another, const std::string& portName)
 {}
 
+void PieceAttrib::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{}
+
+void PieceAttrib::postPortChange(const std::string& portName)
+{}
+
 float PieceAttrib::texcoordBlockAspectRatio() const
 { return 1.f; }
 

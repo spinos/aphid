@@ -36,6 +36,8 @@ public:
 	virtual int attribInstanceId() const;
 /// recv input attr
 	virtual void connectTo(PieceAttrib* another, const std::string& portName);
+/// clear input stem or leaf
+	virtual void disconnectFrom(PieceAttrib* another, const std::string& portName);
 /// when x < 1024 select stem geom x
 /// when x >= 1024 select leaf geom x>>10
 	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;

@@ -13,7 +13,7 @@
 namespace gar {
 
 static const float DEV_VERSION_MAJOR = 1.4;
-static const int DEV_VERSION_MINOR = 0;
+static const int DEV_VERSION_MINOR = 1;
 
 enum ToolAction {
 	actViewAsset = 0,

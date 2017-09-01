@@ -20,7 +20,7 @@ class GlyphPort;
 class GlyphConnection : public QGraphicsPathItem
 {
 public:
-	enum { Type = QGraphicsItem::UserType + 3 };
+	enum { Type = UserType + 3 };
 	
 	GlyphConnection(QGraphicsItem * parent = 0);
 	virtual ~GlyphConnection();
@@ -39,8 +39,15 @@ public:
 	const GlyphPort * port1() const;
 	
 	virtual bool canConnectTo(GlyphPort* p1) const;
+	virtual void breakUp();
+	
+	int type() const { return Type; }
+	
+	static bool IsItemConnection(const QGraphicsItem *item);
 	
 protected:
+	GlyphPort * port0();
+	GlyphPort * port1();
 
 private:
 	QPointF m_pos0;

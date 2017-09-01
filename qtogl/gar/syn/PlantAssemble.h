@@ -46,6 +46,8 @@ protected:
 	Vegetation* vegetationR();
 
 	void growOnGround(VegetationPatch * vpatch, GardenGlyph * gnd);
+/// make sure ground has input connection
+	GardenGlyph* checkGroundConnection(GardenGlyph* gnd);
 	
 private:
 	void assemblePlant(PlantPiece * pl, GardenGlyph * gl);

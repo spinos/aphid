@@ -31,13 +31,16 @@ public:
 	const aphid::ATriangleMesh* lastSelectedGeom() const;
 	void selectGlyph(GardenGlyph* gl);
 	void deselectGlyph();
-	
+
+signals:
+	void sendSelectGlyph(bool x);
+		
 protected:
 /// first (selected) ground piece
 	virtual GardenGlyph* getGround();
 	
 private:
-
+	
 private:
 	QList<GardenGlyph *> m_selectedGlyph;
 	GardenGlyph* m_lastSelectedGlyph;

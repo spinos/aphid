@@ -181,6 +181,14 @@ void SimpleTwigAttribs::connectTo(PieceAttrib* another, const std::string& portN
     update();
 }
 
+void SimpleTwigAttribs::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{
+	if(portName == "inStem")
+		m_inStemAttr = NULL;
+	else
+		m_inLeafAttr = NULL;
+}
+
 ATriangleMesh* SimpleTwigAttribs::selectStemGeom(gar::SelectProfile* prof) const
 {
     if(!m_inStemAttr)

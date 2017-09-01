@@ -14,10 +14,10 @@
 
 namespace aphid {
 
-GlyphConnection::GlyphConnection(QGraphicsItem * parent) : QGraphicsPathItem(parent)
+GlyphConnection::GlyphConnection(QGraphicsItem * parent) : QGraphicsPathItem(parent),
+m_port0(NULL),
+m_port1(NULL)
 {
-	m_port0 = 0;
-	m_port1 = 0;
 	setPen(QPen(Qt::black, 2));
 	setBrush(Qt::NoBrush);
 	setZValue(0);
@@ -100,7 +100,27 @@ const GlyphPort * GlyphConnection::port0() const
 const GlyphPort * GlyphConnection::port1() const
 { return m_port1; }
 
+GlyphPort * GlyphConnection::port0()
+{ return m_port0; }
+
+GlyphPort * GlyphConnection::port1()
+{ return m_port1; }
+
 bool GlyphConnection::canConnectTo(GlyphPort* p1) const
 { return true; }
+
+bool GlyphConnection::IsItemConnection(const QGraphicsItem *item)
+{
+	if(!item)
+		return false;
+		
+	return (item->type() == GlyphConnection::Type);
+}
+
+void GlyphConnection::breakUp()
+{
+	m_port1->removeConnection(this);
+	m_port0->removeConnection(this);
+}
 
 }
