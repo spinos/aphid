@@ -255,3 +255,6 @@ Vector3F PieceAttrib::getLocalUpRef(gar::SelectBudContext* ctx) const
 
 void PieceAttrib::getGrowthProfile(GrowthSampleProfile* prof) const
 {}
+
+bool PieceAttrib::isGeomProfiled() const
+{ return false; }

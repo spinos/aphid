@@ -146,6 +146,8 @@ public:
 /// to grow on
 	virtual bool isGround() const;
 	virtual void getGrowthProfile(GrowthSampleProfile* prof) const;
+/// can be deformed by profiles
+	virtual bool isGeomProfiled() const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,

@@ -22,7 +22,7 @@ class SplineBlade : public BladeMesh {
 	SplineMap1D m_rightSpline;
 /// horizontal
 	SplineMap1D m_veinSpline;
-	
+
 public:
 	SplineBlade();
     virtual ~SplineBlade();
