@@ -40,6 +40,8 @@ void TexcoordWidget::clientDraw()
 	PieceAttrib* attr = m_selectedGlyph->attrib();
 	if(!attr->hasGeom() )
 		return;
+		
+	drawGrid();
 	
 	getDrawer()->m_wireProfile.apply();
 	glColor3f(1.f, 1.f, 1.f);
@@ -125,4 +127,20 @@ void TexcoordWidget::drawTexcoord(const ATriangleMesh* msh)
 	glEnd();
 	
 	glPopMatrix();
+}
+
+void TexcoordWidget::drawGrid()
+{
+	glColor3f(.23f, .23f, .23f);
+	const float dx = 12.5f;
+	const float dy = 12.5f;
+	glBegin(GL_LINES);
+	for(int i=0;i<9;++i) {
+		glVertex3f(0.f, dy * i, -100.f);
+		glVertex3f(100.f, dy * i, -100.f);
+		
+		glVertex3f(dx * i, 0.f, -100.f);
+		glVertex3f(dx * i, 100.f, -100.f);
+	}
+	glEnd();
 }

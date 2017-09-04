@@ -40,6 +40,7 @@ public slots:
 	void recvSelectGlyph(bool x);
 	
 private:
+	void drawGrid();
 	void drawTexcoord(const aphid::ATriangleMesh* msh);
 	
 private slots:
