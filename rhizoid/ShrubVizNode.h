@@ -12,6 +12,8 @@
 
 #ifdef LINUX
 #include <gl_heads.h>
+#else
+#include <windows.h>
 #endif
 #include <maya/MPxLocatorNode.h> 
 #include <maya/MTypeId.h> 

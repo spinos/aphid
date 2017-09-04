@@ -26,7 +26,6 @@ OvalSpriteAttribs::OvalSpriteAttribs() : PieceAttrib(gar::gtOvalSprite)
 	addFloatAttrib(gar::nHeight, 6.f, 3.f, 120.f);
 	addIntAttrib(gar::nNProfiles, 1, 1, 5);
 	addIntAttrib(gar::nAddSegment, 0, -20, 20);
-	addIntAttrib(gar::nMidribWidth, 10, 5, 50);
 	addSplineAttrib(gar::nLeftSide);
 	addSplineAttrib(gar::nRightSide);
 	addSplineAttrib(gar::nHeightVariation);
