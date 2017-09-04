@@ -12,13 +12,15 @@
 
 namespace gar {
     
-#define NUM_BILLBOARD_PIECES 4
+#define NUM_BILLBOARD_PIECES 6
 
 static const char * BillboardTypeNames[NUM_BILLBOARD_PIECES] = {
 "unknown",
 "SplinePatch",
 "RibPatch",
-"BladePatch"
+"BladePatch",
+"OvalPatch",
+"KidneyPatch",
 };
 
 static const char * BillboardTypeImages[NUM_BILLBOARD_PIECES] = {
@@ -26,6 +28,8 @@ static const char * BillboardTypeImages[NUM_BILLBOARD_PIECES] = {
 ":/icons/splinesprite.png",
 ":/icons/ribsprite.png",
 ":/icons/blade.png",
+":/icons/oval.png",
+":/icons/reniform.png",
 };
 
 static const char * BillboardTypeIcons[NUM_BILLBOARD_PIECES] = {
@@ -33,6 +37,8 @@ static const char * BillboardTypeIcons[NUM_BILLBOARD_PIECES] = {
 ":/icons/splinesprite.png",
 ":/icons/ribsprite.png",
 ":/icons/blade.png",
+":/icons/oval.png",
+":/icons/reniform.png",
 };
 
 static const char * BillboardTypeDescs[NUM_BILLBOARD_PIECES] = {
@@ -40,6 +46,8 @@ static const char * BillboardTypeDescs[NUM_BILLBOARD_PIECES] = {
 "segmented patch shaped by two splines",
 "segmented patch with midrib",
 "segmented patch with merged tip",
+"segmented patch with two tips",
+"reniform kidney-shaped patch with blade and stalk",
 };
 
 static inline int ToBillboardType(int x) {
@@ -47,6 +55,8 @@ static inline int ToBillboardType(int x) {
 }
 
 static const int BillboardInPortRange[NUM_BILLBOARD_PIECES][2] = {
+{0,0},
+{0,0},
 {0,0},
 {0,0},
 {0,0},
@@ -63,6 +73,8 @@ static const int BillboardOutPortRange[NUM_BILLBOARD_PIECES][2] = {
 {0,1},
 {0,1},
 {0,1},
+{0,1},
+{0,1},
 };
 
 static const char * BillboardOutPortRangeNames[2] = {
@@ -72,6 +84,8 @@ static const char * BillboardOutPortRangeNames[2] = {
 
 static const int BillboardGeomDeviations[NUM_BILLBOARD_PIECES] = {
 0,
+1,
+1,
 1,
 1,
 1,

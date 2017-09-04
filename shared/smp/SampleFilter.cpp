@@ -80,6 +80,21 @@ void SampleFilter::sortSamples()
 	delete[] sps;
 }
 
+void SampleFilter::centerSamples()
+{
+	Vector3F vsum(0.f, 0.f, 0.f);
+	for(int i=0;i<m_numFilteredSamples;++i) {
+		vsum += m_samples[i];
+	}
+	
+	if(m_numFilteredSamples > 1)
+		vsum /= (float)m_numFilteredSamples;
+		
+	for(int i=0;i<m_numFilteredSamples;++i) {
+		m_samples[i] -= vsum;
+	}
+}
+
 }
 
 }

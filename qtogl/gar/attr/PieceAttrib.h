@@ -124,8 +124,10 @@ public:
 	virtual int attribInstanceId() const;
 /// check possible upstream
 	virtual bool canConnectToViaPort(const PieceAttrib* another, const std::string& portName) const;
-/// set upstream
+/// update upstream
 	virtual void connectTo(PieceAttrib* another, const std::string& portName);
+	virtual void disconnectFrom(PieceAttrib* another, const std::string& portName);
+	virtual void postPortChange(const std::string& portName);
 /// width / height, for uv packing
 	virtual float texcoordBlockAspectRatio() const;
 /// for synthesized
@@ -144,6 +146,8 @@ public:
 /// to grow on
 	virtual bool isGround() const;
 	virtual void getGrowthProfile(GrowthSampleProfile* prof) const;
+/// can be deformed by profiles
+	virtual bool isGeomProfiled() const;
 	
 protected:
 	void addIntAttrib(gar::AttribName anm,

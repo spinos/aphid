@@ -131,8 +131,11 @@ const char* Attrib::sAttribNameAsStr[] = {
 "add segment",
 "num profile",
 "midrib width",
+"midrib height",
 "midrib thickness",
 "vein",
+"vein variation",
+"vein segments",
 "grow begin",
 "length scale",
 "radius scale",
@@ -146,11 +149,14 @@ const char* Attrib::sAttribNameAsStr[] = {
 "axil",
 "tilt",
 "grow limit",
+"kidney angle",
+"stalk width",
+"stalk height",
 };
 
 std::string Attrib::attrNameStr() const
 { 
-	if(m_anm > 2048 + 49) {
+	if(m_anm > 2048 + 55) {
 		std::cout<<"\n ERROR oor attr name "<<m_anm;
 		std::cout.flush();
 		return std::string("unknown");
@@ -261,11 +267,20 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		case gar::nMidribWidth :
 			r = gar::nMidribWidth;
 		break;
+		case gar::nMidribHeight :
+			r = gar::nMidribHeight;
+		break;
 		case gar::nMidribThickness :
 			r = gar::nMidribThickness;
 		break;
 		case gar::nVein :
 			r = gar::nVein;
+		break;
+		case gar::nVeinVariation :
+			r = gar::nVeinVariation;
+		break;
+		case gar::nVeinSegments :
+			r = gar::nVeinSegments;
 		break;
 		case gar::nGrowBegin :
 			r = gar::nGrowBegin;
@@ -305,6 +320,16 @@ gar::AttribName Attrib::IntAsAttribName(int x)
 		break;
 		case gar::nGrowLimit :
 			r = gar::nGrowLimit;
+		break;
+		case gar::nKidneyAngle :
+			r = gar::nKidneyAngle;
+		break;
+		case gar::nStalkWidth :
+			r = gar::nStalkWidth;
+		break;
+		case gar::nStalkHeight :
+			r = gar::nStalkHeight;
+		break;
 		default:
 			;
 	}

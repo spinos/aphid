@@ -35,9 +35,6 @@ m_exclR(1.f)
 	    m_outGeom[i] = new ATriangleMesh;
 }
 
-void DirectionalBendAttribs::setInputGeom(ATriangleMesh* x)
-{ m_inGeom = x; }
-
 bool DirectionalBendAttribs::hasGeom() const
 { return m_inGeom != NULL; }
 
@@ -104,6 +101,12 @@ void DirectionalBendAttribs::connectTo(PieceAttrib* another, const std::string& 
     
     m_inAttr = another;
     update();
+}
+
+void DirectionalBendAttribs::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{
+	m_inAttr = NULL;
+	m_inGeom = NULL;
 }
 
 bool DirectionalBendAttribs::isGeomStem() const

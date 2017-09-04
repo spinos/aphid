@@ -44,3 +44,9 @@ GardenGlyph* GardenConnection::node1() const
 GardenGlyph * GardenConnection::PortToNode(const GlyphPort * pt)
 { return static_cast<GardenGlyph *>(pt->parentItem() ); }
 
+void GardenConnection::breakUp()
+{
+	node1()->preDisconnection(node0(), port1() );
+	GlyphConnection::breakUp();
+	node1()->postDisconnection(port1() );
+}

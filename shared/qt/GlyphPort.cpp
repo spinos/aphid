@@ -75,4 +75,30 @@ int GlyphPort::numConnections() const
 const GlyphConnection * GlyphPort::connection(const int & i) const
 { return m_connections[i]; }
 
+bool GlyphPort::IsItemPort(const QGraphicsItem *item)
+{
+	if(!item)
+		return false;
+	
+	return (item->type() == GlyphPort::Type);
+}
+
+bool GlyphPort::IsItemOutgoingPort(const QGraphicsItem *item)
+{
+	if(!IsItemPort(item) ) {
+		return false;
+	}
+	const GlyphPort * pt = (const GlyphPort *)item;
+	return pt->isOutgoing();
+}
+
+bool GlyphPort::IsItemIncomingPort(const QGraphicsItem *item)
+{
+	if(!IsItemPort(item) ) {
+		return false;
+	}
+	const GlyphPort * pt = (const GlyphPort *)item;
+	return !pt->isOutgoing();
+}
+
 }

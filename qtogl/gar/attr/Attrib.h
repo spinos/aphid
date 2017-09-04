@@ -49,8 +49,11 @@ enum AttribName {
 	nAddSegment,
 	nNProfiles,
 	nMidribWidth,
+	nMidribHeight,
 	nMidribThickness,
 	nVein,
+	nVeinVariation,
+	nVeinSegments,
 	nGrowBegin,
 	nLengthScale,
 	nRadiusScale,
@@ -64,6 +67,9 @@ enum AttribName {
 	nAxil,
 	nTilt,
 	nGrowLimit,
+	nKidneyAngle,
+	nStalkWidth,
+	nStalkHeight,
 };
 
 enum AttribType {

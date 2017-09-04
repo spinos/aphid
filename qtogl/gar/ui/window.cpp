@@ -56,13 +56,13 @@ Window::Window()
 	connect(m_texcoord, SIGNAL(onTexcoordDlgClose()), 
 			this, SLOT(recvTexcoordDlgClose()));
 			
-	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
+	connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
 			m_attrib, SLOT(recvSelectGlyph(bool)));
 			
-	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
+	connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
 			m_texcoord->getWidget(), SLOT(recvSelectGlyph(bool)));
 			
-	connect(m_chartView, SIGNAL(sendSelectGlyph(bool)), 
+	connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
 			glWidget, SLOT(update()));
 			
 	connect(m_attrib->getWidget(), SIGNAL(sendAttribChanged()), 

@@ -36,9 +36,6 @@ m_exclR(1.f)
 	    m_outGeom[i] = new ATriangleMesh;
 }
 
-void BlockDeformAttribs::setInputGeom(ATriangleMesh* x)
-{ m_inGeom = x; }
-
 bool BlockDeformAttribs::hasGeom() const
 { return m_inGeom != NULL; }
 
@@ -153,6 +150,12 @@ void BlockDeformAttribs::connectTo(PieceAttrib* another, const std::string& port
     
     m_inAttr = another;
     update();
+}
+
+void BlockDeformAttribs::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{
+	m_inAttr = NULL;
+	m_inGeom = NULL;
 }
 
 bool BlockDeformAttribs::isGeomStem() const

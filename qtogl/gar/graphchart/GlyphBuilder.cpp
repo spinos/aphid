@@ -24,6 +24,8 @@
 #include <attr/SplineSpriteAttribs.h>
 #include <attr/RibSpriteAttribs.h>
 #include <attr/BladeSpriteAttribs.h>
+#include <attr/OvalSpriteAttribs.h>
+#include <attr/ReniformSpriteAttribs.h>
 #include <attr/CloverProp.h>
 #include <attr/PoapratensisProp.h>
 #include <attr/HaircapProp.h>
@@ -160,6 +162,12 @@ PieceAttrib* GlyphBuilder::buildSpriteAttrib(const int & gtyp)
 		
 	if(gtyp == gar::gtBladeSprite)
 		return (new BladeSpriteAttribs);
+		
+	if(gtyp == gar::gtOvalSprite)
+		return (new OvalSpriteAttribs);
+	
+	if(gtyp == gar::gtReniformSprite)
+		return (new ReniformSpriteAttribs);
 		
 	return (new PieceAttrib);
 }

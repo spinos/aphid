@@ -35,9 +35,6 @@ m_exclR(1.f)
 	    m_outGeom[i] = new ATriangleMesh;
 }
 
-void BendTwistRollAttribs::setInputGeom(ATriangleMesh* x)
-{ m_inGeom = x; }
-
 bool BendTwistRollAttribs::hasGeom() const
 { return m_inGeom != NULL; }
 
@@ -121,6 +118,12 @@ void BendTwistRollAttribs::connectTo(PieceAttrib* another, const std::string& po
     
     m_inAttr = another;
     update();
+}
+
+void BendTwistRollAttribs::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{
+	m_inAttr = NULL;
+	m_inGeom = NULL;
 }
 
 bool BendTwistRollAttribs::isGeomStem() const

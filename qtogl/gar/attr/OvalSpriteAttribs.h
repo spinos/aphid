@@ -1,5 +1,5 @@
 /*
- *  BladeSpriteAttribs.h
+ *  OvalSpriteAttribs.h
  *  
  *
  *  Created by jian zhang on 8/6/17.
@@ -7,25 +7,25 @@
  *
  */
 
-#ifndef GAR_BLADE_SPRITE_ATTRIBS_H
-#define GAR_BLADE_SPRITE_ATTRIBS_H
+#ifndef GAR_OVAL_SPRITE_ATTRIBS_H
+#define GAR_OVAL_SPRITE_ATTRIBS_H
 
 #include "PieceAttrib.h"
 
 namespace aphid {
-class SplineBlade;
+class EllipseMesh;
 }
 
-class BladeSpriteAttribs : public PieceAttrib {
+class OvalSpriteAttribs : public PieceAttrib {
 	
-	aphid::SplineBlade* m_billboard;
+	aphid::EllipseMesh* m_billboard;
 	int m_instId;
 	float m_exclR;
 	
 	static int sNumInstances;
 	
 public:
-	BladeSpriteAttribs();
+	OvalSpriteAttribs();
 	
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;

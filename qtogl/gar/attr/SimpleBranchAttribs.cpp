@@ -117,6 +117,14 @@ void SimpleBranchAttribs::connectTo(PieceAttrib* another, const std::string& por
     update();
 }
 
+void SimpleBranchAttribs::disconnectFrom(PieceAttrib* another, const std::string& portName)
+{
+	if(portName == "inStem")
+		m_inStemAttr = NULL;
+	else
+		m_inLeafAttr = NULL;
+}
+
 ATriangleMesh* SimpleBranchAttribs::selectStemGeom(gar::SelectProfile* prof) const
 {
     if(!m_inStemAttr)

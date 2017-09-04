@@ -38,26 +38,28 @@ protected:
 	virtual void resizeEvent ( QResizeEvent * event );
 	
 signals:
-	void sendSelectGlyph(bool x);
 	
 private:
 	void addGlyphPiece(const QPoint & pieceTypGrp, 
 		const QPixmap & px,
 		const QPoint & pos);
-    void processSelect(const QPoint & pos);
-	bool isItemPort(const QGraphicsItem *item) const;
-	bool isOutgoingPort(const QGraphicsItem *item) const;
-	bool isIncomingPort(const QGraphicsItem *item) const;
+    void processSelect(const QPoint& pos);
+	void processRemove(const QPoint& pos);
 	void beginProcessView(QMouseEvent *event);
 	void beginProcessItem(QMouseEvent *event);
 	void processItem(QMouseEvent *event);
 	void panView(QMouseEvent *event);
+	void doMoveItem(const QPoint& mousePos);
+	void doMoveConnection(const QPoint& mousePos);
+	void doConnectItem(QGraphicsItem* item);
+	void doRemoveConnection(QGraphicsItem* item);
 	
 	enum Mode {
 		mNone = 0,
 		mPanView = 1,
 		mMoveItem = 2,
-		mConnectItems = 3
+		mConnectItems = 3,
+		mRemoveConnection = 4,
 	}; 
 	
 	Mode m_mode;

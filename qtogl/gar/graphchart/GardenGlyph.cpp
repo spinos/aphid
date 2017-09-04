@@ -180,10 +180,24 @@ int GardenGlyph::attribInstanceId() const
 { return m_attrib->attribInstanceId(); }
 
 void GardenGlyph::postConnection(GardenGlyph* another, GlyphPort* viaPort)
-{ m_attrib->connectTo(another->attrib(), viaPort->portName().toStdString() ); }
+{ 
+	m_attrib->connectTo(another->attrib(), 
+				viaPort->portName().toStdString() ); 
+}
 
 void GardenGlyph::postSelection()
 { 
     m_attrib->update(); 
     showHalo();
+}
+
+void GardenGlyph::preDisconnection(GardenGlyph* another, aphid::GlyphPort* viaPort)
+{
+	m_attrib->disconnectFrom(another->attrib(),
+					viaPort->portName().toStdString() );
+}
+
+void GardenGlyph::postDisconnection(aphid::GlyphPort* viaPort)
+{
+	m_attrib->postPortChange(viaPort->portName().toStdString() );
 }

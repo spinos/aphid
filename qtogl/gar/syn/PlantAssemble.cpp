@@ -71,6 +71,26 @@ void PlantAssemble::genMultiPlant()
 GardenGlyph* PlantAssemble::getGround()
 { return NULL; }
 
+GardenGlyph* PlantAssemble::checkGroundConnection(GardenGlyph* gnd)
+{
+	int nc = 0;
+	foreach(QGraphicsItem *port_, gnd->childItems()) {
+		if (port_->type() != GlyphPort::Type) {
+			continue;
+		}
+
+		GlyphPort *port = (GlyphPort*) port_;
+		if(!port->isOutgoing() ) {
+			nc += port->numConnections();
+		}
+	}
+	
+	if(nc < 1)
+		return NULL;
+		
+	return gnd;
+}
+
 void PlantAssemble::estimateExclusionRadius(GardenGlyph * gnd)
 {
 	float minR = 1e8f;

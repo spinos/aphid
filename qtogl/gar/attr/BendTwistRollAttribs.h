@@ -32,8 +32,6 @@ class BendTwistRollAttribs : public PieceAttrib, public aphid::PackTexcoord {
 public:
 	BendTwistRollAttribs();
 	
-	void setInputGeom(aphid::ATriangleMesh* x);
-	
 	virtual bool hasGeom() const;
 	virtual int numGeomVariations() const;
 	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
@@ -42,6 +40,8 @@ public:
 	virtual int attribInstanceId() const;
 /// recv input geom
 	virtual void connectTo(PieceAttrib* another, const std::string& portName);
+/// clear input geom
+	virtual void disconnectFrom(PieceAttrib* another, const std::string& portName);
 /// depend on in attr
 	virtual bool isGeomStem() const;
 	virtual bool isGeomLeaf() const;
