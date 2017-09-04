@@ -92,9 +92,6 @@ bool BladeSpriteAttribs::update()
 int BladeSpriteAttribs::attribInstanceId() const
 { return m_instId; }
 
-float BladeSpriteAttribs::texcoordBlockAspectRatio() const
-{ return m_billboard->widthHeightRatio(); }
-
 bool BladeSpriteAttribs::isGeomLeaf() const
 { return true; }
 

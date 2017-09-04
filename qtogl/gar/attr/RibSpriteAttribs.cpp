@@ -79,9 +79,6 @@ bool RibSpriteAttribs::update()
 int RibSpriteAttribs::attribInstanceId() const
 { return m_instId; }
 
-float RibSpriteAttribs::texcoordBlockAspectRatio() const
-{ return m_billboard->widthHeightRatio(); }
-
 bool RibSpriteAttribs::isGeomLeaf() const
 { return true; }
 

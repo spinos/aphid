@@ -130,40 +130,6 @@ const Vector3F& LoftMeshBuilder::defaultNormal() const
 const Vector3F& LoftMeshBuilder::defaultColor() const
 { return m_defaultCol; }
 
-void LoftMeshBuilder::projectTexcoord(ATriangleMesh* msh,
-						BoundingBox& bbx) const
-{
-	bbx = msh->calculateGeomBBox();
-	const float width = bbx.distance(0);
-	const float height = bbx.distance(1);
-	const float woverh = width / height;
-	float sr;
-	if(woverh > 1.f) {
-		sr = .995f / width;
-	} else {
-		sr = .995f / height;
-	}
-	const Vector3F offset = bbx.getMin();
-	const float xoffset = -offset.x;
-	const float yoffset = -offset.y;
-	
-	float * texc = msh->triangleTexcoords();
-	const int nt = msh->numTriangles();
-	Vector3F * p = msh->points();
-	unsigned * ind = msh->indices();
-	
-	int acc=0;
-	for(int i=0;i<nt;++i) {
-		const int i3 = i * 3;
-		for(int j=0;j<3;++j) {
-			
-			const Vector3F& pj = p[ind[i3 + j] ];
-			texc[acc++] = .0025f + (pj.x + xoffset) * sr;
-			texc[acc++] = .0025f + (pj.y + yoffset) * sr;
-		}
-	}
-}
-
 LoftMesh::LoftMesh()
 {}
 

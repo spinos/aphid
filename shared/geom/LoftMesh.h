@@ -12,10 +12,11 @@
 #define APH_LOFT_MESH_H
 
 #include "ATriangleMesh.h"
+#include "PlanarTexcoordProjector.h"
 
 namespace aphid {
 
-class LoftMeshBuilder {
+class LoftMeshBuilder : public PlanarTexcoordProjector {
 
 	std::vector<Vector3F> m_points;
 	std::vector<int> m_profileVertices;
@@ -49,9 +50,6 @@ public:
 	
 	const Vector3F& defaultNormal() const;
 	const Vector3F& defaultColor() const;
-/// x-y plane	
-	virtual void projectTexcoord(ATriangleMesh* msh,
-					BoundingBox& bbx) const;
 	
 protected:
 

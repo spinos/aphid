@@ -72,9 +72,6 @@ bool SplineCylinderAttribs::update()
 int SplineCylinderAttribs::attribInstanceId() const
 { return m_instId; }
 
-float SplineCylinderAttribs::texcoordBlockAspectRatio() const
-{ return m_cylinder->circumferenceHeightRatio(); }
-
 bool SplineCylinderAttribs::isGeomStem() const
 { return true; }
 

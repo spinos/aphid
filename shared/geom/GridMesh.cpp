@@ -10,6 +10,7 @@
  */
  
 #include "GridMesh.h"
+#include "PlanarTexcoordProjector.h"
 
 namespace aphid {
 
@@ -60,7 +61,11 @@ void GridMesh::createGrid(int nu, int nv, float du, float dv)
 	m_nv = nv;
 	m_du = du;
 	m_dv = dv;
-	projectTexcoord();
+	
+	PlanarTexcoordProjector proj;
+	proj.setTexcoordOrigin(PlanarTexcoordProjector::tCenteredBox);
+	BoundingBox bbx;
+	proj.projectTexcoord(this, bbx);
 	
 	Vector3F * nmlDst = vertexNormals();
 	createVertexColors(np);
@@ -128,7 +133,7 @@ float GridMesh::width() const
 
 float GridMesh::height() const
 { return (m_dv * m_nv); }
-
+/*
 void GridMesh::projectTexcoord()
 {
 	float sv;
@@ -155,7 +160,7 @@ void GridMesh::projectTexcoord()
 	}
 	
 }
-
+*/
 int GridMesh::GetNumVerticesPerRow(const ATriangleMesh* msh)
 {
 	const unsigned * ind = msh->indices();

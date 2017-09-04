@@ -190,12 +190,13 @@ void CylinderMesh::projectTexcoord()
 		sv = .995f / height();
 	}
 	
-	const Vector2F ori(.0025f, .0025f);
+	const Vector2F ori(.5f, .0025f);
 	
 	Vector2F* texc = (Vector2F*)triangleTexcoords();
 	const int n = numTriangles() * 3;
 
 	for(int i=0;i<n;++i) {
+		texc[i].x -= circumference() * .5f;
 		texc[i] *= sv;
 		texc[i] += ori;
 		

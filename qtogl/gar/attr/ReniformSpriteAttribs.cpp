@@ -96,9 +96,6 @@ bool ReniformSpriteAttribs::update()
 int ReniformSpriteAttribs::attribInstanceId() const
 { return m_instId; }
 
-float ReniformSpriteAttribs::texcoordBlockAspectRatio() const
-{ return m_billboard->widthHeightRatio(); }
-
 bool ReniformSpriteAttribs::isGeomLeaf() const
 { return true; }
 

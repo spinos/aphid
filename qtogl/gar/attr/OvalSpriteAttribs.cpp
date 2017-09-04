@@ -92,9 +92,6 @@ bool OvalSpriteAttribs::update()
 int OvalSpriteAttribs::attribInstanceId() const
 { return m_instId; }
 
-float OvalSpriteAttribs::texcoordBlockAspectRatio() const
-{ return m_billboard->widthHeightRatio(); }
-
 bool OvalSpriteAttribs::isGeomLeaf() const
 { return true; }
 

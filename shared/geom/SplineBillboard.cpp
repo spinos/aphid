@@ -9,7 +9,7 @@
  */
  
 #include "SplineBillboard.h"
-#include <math/Vector2F.h>
+#include "PlanarTexcoordProjector.h"
 #include <math/miscfuncs.h>
 
 namespace aphid {
@@ -31,6 +31,9 @@ void SplineBillboard::setBillboardSize(float w, float h, int nu, int addNv)
 	adjustCenter();
 	adjustLeft();
 	adjustRight();
+	PlanarTexcoordProjector proj;
+	BoundingBox bbx;
+	proj.projectTexcoord(this, bbx);
 }
 
 SplineMap1D* SplineBillboard::centerSpline()
@@ -77,7 +80,6 @@ void SplineBillboard::adjustLeft()
 		p[stripe * i].x = rowCenter(i) - d * hw;
 	}
 	
-	adjustTexcoord();
 }
 
 void SplineBillboard::adjustRight()
@@ -95,43 +97,6 @@ void SplineBillboard::adjustRight()
 		p[stripe * i + nu()].x = rowCenter(i) + d * hw;
 	}
 	
-	adjustTexcoord();
-}
-
-void SplineBillboard::adjustTexcoord()
-{
-	float midu = 0.5025f;
-	if(widthHeightRatio() < 1.f) {
-		midu = .0025 + widthHeightRatio() * .5f;
-	}
-	
-	Vector2F * texc = (Vector2F *)triangleTexcoords();
-	const int nt = numTriangles();
-	int acc=0;
-	for(int i=0;i<nt;++i) {
-		const int i3 = i * 3;
-		for(int j=0;j<3;++j) {
-			Vector2F& texcj = texc[i3 + j];
-			adjustTexcoordPnt(texcj, midu);
-		}
-	}
-}
-
-void SplineBillboard::adjustTexcoordPnt(Vector2F& texc,
-			float midu)
-{
-	if(texc.x < midu - 1e-4f) {
-		float d = m_leftSpline.interpolate(texc.y);
-		Clamp01(d);
-		
-		texc.x = midu + d * (texc.x - midu);
-		
-	} else if(texc.x > midu + 1e-4f) {
-		float d = m_rightSpline.interpolate(texc.y);
-		Clamp01(d);
-		
-		texc.x = midu + d * (texc.x - midu);
-	}
 }
 
 float SplineBillboard::rowCenter(int i) const

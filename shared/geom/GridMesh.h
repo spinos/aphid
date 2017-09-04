@@ -47,7 +47,7 @@ private:
 				const int& i, const int& j,
 				const int& nu1);
 /// (x,y) to uv with v fill [0,1]
-	void projectTexcoord();
+//	void projectTexcoord();
 	
 };
 

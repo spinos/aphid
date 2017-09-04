@@ -32,7 +32,6 @@ public:
 	virtual aphid::ATriangleMesh* selectGeom(gar::SelectProfile* prof) const;
 	virtual bool update();
 	virtual int attribInstanceId() const;
-	virtual float texcoordBlockAspectRatio() const;
 	virtual bool isGeomLeaf() const;
 	virtual void estimateExclusionRadius(float& minRadius);
 	
