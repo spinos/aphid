@@ -14,7 +14,7 @@ namespace aphid {
 
 IntEditGroup::IntEditGroup(const QString & name, int numFields,
 	QWidget *parent)
-    : QWidget(parent)
+    : QGroupBox(parent)
 {
 	m_label = new QLabel(name);
 	m_label->setMinimumWidth(100);

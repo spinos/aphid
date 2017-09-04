@@ -42,13 +42,14 @@ public:
 	template<typename T>
 	void processFilter(T* grd);
 
-/// by distance to origin	
-	void sortSamples();
-	
 protected:
 
 private:
 	bool isFiltered(const Vector3F& v) const;
+/// by distance to origin	
+	void sortSamples();
+/// mean to origin
+	void centerSamples();
 	
 };
 
@@ -71,6 +72,8 @@ void SampleFilter::processFilter(T* grd)
 	
 	if(m_numFilteredSamples > m_maxNumSample)
 		m_numFilteredSamples = m_maxNumSample;
+		
+	centerSamples();
 }
 
 }

@@ -11,7 +11,7 @@
 #ifndef APH_INT_EDIT_GROUP_H
 #define APH_INT_EDIT_GROUP_H
 
-#include <QWidget>
+#include <QGroupBox>
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -22,7 +22,7 @@ QT_END_NAMESPACE
 
 namespace aphid {
 
-class IntEditGroup : public QWidget 
+class IntEditGroup : public QGroupBox 
 {
 	Q_OBJECT
 public:
