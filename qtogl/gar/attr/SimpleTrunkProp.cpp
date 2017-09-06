@@ -27,21 +27,20 @@ SimpleTrunkProp::SimpleTrunkProp()
 
 void SimpleTrunkProp::loadMesh()
 {
-	int np = sCloverNumVertices;
-	int nt = sCloverNumTriangleIndices / 3;
-	const int * triind = sCloverMeshTriangleIndices;
+	int np = sAlmondNumVertices;
+	int nt = sAlmondNumTriangleIndices / 3;
+	const int * triind = sAlmondMeshTriangleIndices;
 		
-	const float * vertpos = sCloverMeshVertices;
-	const float * vertnml = sCloverMeshNormals;
-	const float * vertcol = sCloverMeshVertexColors;
-	const float * tritexcoord = sCloverMeshTriangleTexcoords;
-	const float exclR = sCloverExclRadius;
-	
+	const float * vertpos = sAlmondMeshVertices;
+	const float * vertnml = sAlmondMeshNormals;
+	const float * vertcol = sAlmondMeshVertexColors;
+	const float * tritexcoord = sAlmondMeshTriangleTexcoords;
+
 	sMesh = ATriangleMesh::CreateFromData(np, nt, triind, 
 				vertpos, vertnml, vertcol,
 				tritexcoord);
 				
-	sExclR = exclR;
+	sExclR = sAlmondExclRadius;
 	
 	sMeshLoaded = true;
 }
