@@ -18,6 +18,7 @@
 #include "data/stem.h"
 #include "data/twig.h"
 #include "data/branch.h"
+#include "data/trunk.h"
 
 PiecesList::PiecesList(QWidget *parent)
     : QListWidget(parent)
@@ -137,6 +138,14 @@ void PiecesList::showBranchPieces()
 	const int gend = gar::GlyphRange[gar::ggBranch][1];
 	lsPieces(gbegin, gend, gar::ggBranch,
 			gar::BranchTypeIcons);
+}
+
+void PiecesList::showTrunkPieces()
+{
+	const int gbegin = gar::GlyphRange[gar::ggTrunk][0];
+	const int gend = gar::GlyphRange[gar::ggTrunk][1];
+	lsPieces(gbegin, gend, gar::ggTrunk,
+			gar::TrunkTypeIcons);
 }
 
 void PiecesList::lsPieces(const int & gbegin,

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+		<file>icons/trunk.png</file>
 		<file>icons/reniform.png</file>
 		<file>icons/oval.png</file>
 		<file>icons/single.png</file>
