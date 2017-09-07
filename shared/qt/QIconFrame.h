@@ -22,8 +22,12 @@ public:
 	
 	char useNextIcon();
 	
+	void setNameId(int x);
+	const int& nameId() const;
+	
 signals:
-
+	void iconChanged2(QPair<int, int> x);
+	
 public slots:
 
 protected:
@@ -33,6 +37,7 @@ protected:
 private:
     QList<QPixmap *> icons;
 	int currentIconIndex;
+	int m_nameId;
 };
 
 }

@@ -74,11 +74,13 @@ namespace aphid {
 	void rotateY(float beta);
 	void rotateZ(float gamma);
 	void rotateEuler(float phi, float theta, float psi, RotateOrder order = XYZ);
+	bool rotateSideTo(const Vector3F& vref);
 	bool rotateUpTo(const Vector3F& vref);
 	
 	Vector3F scale() const;
 	void orthoNormalize();
 	void set(const Quaternion & q);
+	void getQuaternion(Quaternion& qOut) const;
 	
 	Vector3F eigenVector(float & lambda) const;
 	Vector3F eigenValues() const;

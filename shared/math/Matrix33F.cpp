@@ -450,6 +450,39 @@ void Matrix33F::set(const Quaternion & q)
 	*m(2, 2) = 1.0f - qxqx2 - qyqy2;
 }
 
+/// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+void Matrix33F::getQuaternion(Quaternion& qOut) const
+{
+	float trace = M(0,0) + M(1,1) + M(2,2);
+  if( trace > 0.f ) {
+    float s = 0.5f / sqrtf(trace + 1.0f);
+    qOut.w = 0.25f / s;
+    qOut.x = ( M(1, 2) - M(2, 1) ) * s;
+    qOut.y = ( M(2, 0) - M(0, 2) ) * s;
+    qOut.z = ( M(0, 1) - M(1, 0) ) * s;
+  } else {
+    if ( M(0, 0) > M(1, 1) && M(0, 0) > M(2, 2) ) {
+      float s = 2.0f * sqrtf( 1.0f + M(0, 0) - M(1, 1) - M(2, 2));
+      qOut.w = (M(1,2) - M(2,1) ) / s;
+      qOut.x = 0.25f * s;
+      qOut.y = (M(1,0) + M(0,1) ) / s;
+      qOut.z = (M(2,0) + M(0,2) ) / s;
+    } else if (M(1, 1) > M(2, 2)) {
+      float s = 2.0f * sqrtf( 1.0f + M(1, 1) - M(0, 0) - M(2, 2));
+      qOut.w = (M(2,0) - M(0,2) ) / s;
+      qOut.x = (M(1,0) + M(0,1) ) / s;
+      qOut.y = 0.25f * s;
+      qOut.z = (M(2,1) + M(1,2) ) / s;
+    } else {
+      float s = 2.0f * sqrtf( 1.0f + M(2, 2) - M(0, 0) - M(1, 1) );
+      qOut.w = (M(0,1) - M(1,0) ) / s;
+      qOut.x = (M(2,0) + M(0,2) ) / s;
+      qOut.y = (M(2,1) + M(1,2) ) / s;
+      qOut.z = 0.25f * s;
+    }
+  }
+}
+
 Vector3F Matrix33F::eigenVector(float & lambda) const
 {
 // power iterative method finds dominant eigen pair
@@ -640,6 +673,24 @@ void Matrix33F::asCrossProductMatrix(const Vector3F& a)
     *m(0, 0) =  0.f; *m(0, 1) = -a.z; *m(0, 2) = a.y;
     *m(1, 0) = a.z; *m(1, 1) =  0.f; *m(1, 2) = -a.x;
     *m(2, 0) =  -a.y; *m(2, 1) = a.x; *m(2, 2) =  0.f;
+}
+
+bool Matrix33F::rotateSideTo(const Vector3F& vref)
+{
+	Vector3F v0;
+	getSide(v0);
+	Vector3F rota = v0.cross(vref);
+	float l = rota.length();
+	if(l < .05f) {
+		return false;
+	}
+	rota /= l;
+	
+	const float ang = acos(v0.dot(vref) );
+	Quaternion q(ang, rota);
+	Matrix33F rotm(q);
+	multiply(rotm);
+	return true;
 }
 
 bool Matrix33F::rotateUpTo(const Vector3F& vref)

@@ -21,6 +21,10 @@ public:
 	DrawArrow();
 	virtual ~DrawArrow();
 	
+	void begin();
+	void end();
+/// between begin and end
+	void drawBoneArrowAt(const Matrix44F * mat);
 	void drawArrowAt(const Matrix44F * mat);
 	void drawCoordinateAt(const Matrix44F * mat);
 	void drawCoordinateTandem(const Matrix44F * mat,

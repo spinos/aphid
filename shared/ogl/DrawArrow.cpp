@@ -13,6 +13,58 @@
 
 namespace aphid {
 
+static const int sBoneArrowNumTriangleFVVertices = 24;
+static const float sBoneArrowTriangleFVVertices[] = {0.005912f, 0.000000f, 0.000000f,
+0.279940f, -0.490637f, 0.490637f,
+0.279940f, 0.490637f, 0.490637f,
+0.279940f, -0.490637f, 0.490637f,
+0.997291f, 0.000000f, 0.000000f,
+0.279940f, 0.490637f, 0.490637f,
+0.005912f, 0.000000f, 0.000000f,
+0.279940f, 0.490637f, 0.490637f,
+0.279940f, 0.490637f, -0.490637f,
+0.279940f, 0.490637f, 0.490637f,
+0.997291f, 0.000000f, 0.000000f,
+0.279940f, 0.490637f, -0.490637f,
+0.005912f, 0.000000f, 0.000000f,
+0.279940f, 0.490637f, -0.490637f,
+0.279940f, -0.490637f, -0.490637f,
+0.279940f, 0.490637f, -0.490637f,
+0.997291f, 0.000000f, 0.000000f,
+0.279940f, -0.490637f, -0.490637f,
+0.005912f, 0.000000f, 0.000000f,
+0.279940f, -0.490637f, -0.490637f,
+0.279940f, -0.490637f, 0.490637f,
+0.279940f, -0.490637f, -0.490637f,
+0.997291f, 0.000000f, 0.000000f,
+0.279940f, -0.490637f, 0.490637f,
+};
+static const float sBoneArrowTriangleFVNormals[] = {-0.873058f, 0.000000f, 0.487616f,
+-0.873058f, 0.000000f, 0.487616f,
+-0.873058f, 0.000000f, 0.487616f,
+0.564541f, -0.000000f, 0.825405f,
+0.564541f, -0.000000f, 0.825405f,
+0.564541f, -0.000000f, 0.825405f,
+-0.873058f, 0.487616f, 0.000000f,
+-0.873058f, 0.487616f, 0.000000f,
+-0.873058f, 0.487616f, 0.000000f,
+0.564541f, 0.825405f, 0.000000f,
+0.564541f, 0.825405f, 0.000000f,
+0.564541f, 0.825405f, 0.000000f,
+-0.873058f, 0.000000f, -0.487616f,
+-0.873058f, 0.000000f, -0.487616f,
+-0.873058f, 0.000000f, -0.487616f,
+0.564541f, 0.000000f, -0.825405f,
+0.564541f, 0.000000f, -0.825405f,
+0.564541f, 0.000000f, -0.825405f,
+-0.873058f, -0.487616f, 0.000000f,
+-0.873058f, -0.487616f, 0.000000f,
+-0.873058f, -0.487616f, 0.000000f,
+0.564541f, -0.825405f, 0.000000f,
+0.564541f, -0.825405f, 0.000000f,
+0.564541f, -0.825405f, 0.000000f,
+};
+
 static const int sXArrowNumTriangleFVVertices = 66;
 static const float sXArrowTriangleFVVertices[] = {0.020067f, -0.021930f, 0.021930f,
 0.775657f, -0.021930f, 0.021930f,
@@ -428,6 +480,31 @@ DrawArrow::DrawArrow()
 DrawArrow::~DrawArrow()
 {}
 
+void DrawArrow::begin()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+}
+
+void DrawArrow::end()
+{
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void DrawArrow::drawBoneArrowAt(const Matrix44F * mat)
+{
+	glPushMatrix();
+	
+	glMultMatrixf((const GLfloat*)mat);
+	
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)sBoneArrowTriangleFVNormals);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sBoneArrowTriangleFVVertices);
+	glDrawArrays(GL_TRIANGLES, 0, sBoneArrowNumTriangleFVVertices);
+	
+	glPopMatrix();
+}
+
 void DrawArrow::drawArrowAt(const Matrix44F * mat)
 {
 	glPushMatrix();
@@ -532,19 +609,6 @@ static const float sXZFlatArrowVertices[] = {
 
 void DrawArrow::drawFlatArraw()
 {
-/*
-	glBegin(GL_LINES);
-	glColor3f(1,0,0);
-	glVertex3f(0,0,0);
-	glVertex3f(1,0,0);
-	glColor3f(0,1,0);
-	glVertex3f(0,0,0);
-	glVertex3f(0,1,0);
-	glColor3f(0,0,1);
-	glVertex3f(0,0,0);
-	glVertex3f(0,0,1);
-	glEnd();
-*/
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sXZFlatArrowVertices);

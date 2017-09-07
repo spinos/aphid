@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/curve_rotate_strand_inactive.png</file>
+        <file>icons/curve_move_strand_inactive.png</file>
+        <file>icons/curve_move_inactive.png</file>
+        <file>icons/curve_new_inactive.png</file>
+        <file>icons/curve_rotate_strand.png</file>
+        <file>icons/curve_move_strand.png</file>
+        <file>icons/curve_move.png</file>
+        <file>icons/curve_new.png</file>
+    </qresource>
+</RCC>

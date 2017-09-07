@@ -43,14 +43,25 @@ void QIconFrame::mousePressEvent(QMouseEvent *event)
 {
 	if (event->button() == Qt::LeftButton) {
 		useNextIcon();
+		
+		QPair<int, int> val;
+		val.first = m_nameId;
+		val.second = currentIconIndex;
+		
+		emit iconChanged2(val);
 	}
 }
 
 void QIconFrame::mouseReleaseEvent(QMouseEvent *event)
 {
-	if (event->button() == Qt::LeftButton) {
-		useNextIcon();
+	if (event->button() == Qt::LeftButton) {	
 	}
 }
+
+void QIconFrame::setNameId(int x)
+{ m_nameId = x; }
+	
+const int& QIconFrame::nameId() const
+{ return m_nameId; }
 
 }

@@ -37,7 +37,10 @@ public:
     }
 	
 /// project q on line, return t
+/// if return -1 out of range
 	float projectP(const Vector3F & q, Vector3F & pproj) const;
+	
+	float distanceToPoint(const Vector3F & q) const;
 	
 };
 

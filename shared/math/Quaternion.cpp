@@ -60,4 +60,77 @@ Quaternion Quaternion::progress(const Vector3F & angularVelocity, const float & 
 	return q * *this;
 }
 
+void Quaternion::Slerp(Quaternion& qOut, 
+					const Quaternion& qA,
+					const Quaternion& qB,
+					const float& t)
+{
+	float		fCosine, fAngle, A, B;
+
+/// parameter checking
+	if (t<0.0f || t>1.0f) {
+		std::cout<<"\n ERROR Quaternion::Slerp bad parameters";
+		qOut.x = 0;
+		qOut.y = 0;
+		qOut.z = 0;
+		qOut.w = 1;
+		return;
+	}
+
+/// dot product of A and B	
+	fCosine = qA.w*qB.w + qA.x*qB.x + qA.y*qB.y + qA.z*qB.z;
+
+	if (fCosine < 0) {
+		Quaternion qi;
+
+/// http://www.magic-software.com/Documentation/Quaternions.pdf
+/// choose the sign... on q1 so that... the angle
+/// between q0 and q1 is acute. This choice avoids extra
+/// spinning caused by the interpolated rotations
+
+		qi.x = -qB.x;
+		qi.y = -qB.y;
+		qi.z = -qB.z;
+		qi.w = -qB.w;
+
+		Slerp(qOut, qA, qi, t);
+		return;
+	}
+	
+	if(fCosine > 1.f)
+		fCosine = 1.f;
+		
+	fAngle = (float)acos(fCosine);
+	
+/// A equals B
+	if (fAngle==0.0f) {
+		qOut = qA;
+		return;
+	}
+	
+/// precompute some values
+	A = (float)(sin((1.0f-t)*fAngle) / sin(fAngle));
+	B = (float)(sin(t*fAngle) / sin(fAngle));
+
+/// compute resulting quaternion
+	qOut.x = A * qA.x + B * qB.x;
+	qOut.y = A * qA.y + B * qB.y;
+	qOut.z = A * qA.z + B * qB.z;
+	qOut.w = A * qA.w + B * qB.w;
+
+/// normalise result
+	qOut.normalize();
+	
+}
+
+/// https://cn.mathworks.com/help/aeroblks/quaternioninverse.html
+void Quaternion::inverse()
+{
+	const float tr = w * w + x * x + y * y + z * z;
+	w = w / tr;
+	x = x / -tr;
+	y = y / -tr;
+	z = z / -tr;
+}
+
 }

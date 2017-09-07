@@ -79,15 +79,26 @@ float Ray::projectP(const Vector3F & q, Vector3F & pproj) const
 { 
 	Vector3F voq = q - m_origin;
 	float voqdotdir = voq.dot(m_dir);
-	if(voqdotdir < m_tmin)
+	if(voqdotdir < m_tmin) {
+		pproj = travel(m_tmin);
 		return -1.f;
+	}
 		
-	if(voqdotdir >= m_tmax)
+	if(voqdotdir >= m_tmax) {
+		pproj = travel(m_tmax);
 		return -1.f;
+	}
 		
 	pproj = travel(voqdotdir);
 	return voqdotdir;
 	
+}
+
+float Ray::distanceToPoint(const Vector3F & q) const
+{
+	Vector3F pol;
+	projectP(q, pol);
+	return q.distanceTo(pol);
 }
 
 Beam::Beam() {}

@@ -35,5 +35,6 @@ add_subdirectory(exrs)
 add_subdirectory(wbg)
 add_subdirectory(tvox)
 add_subdirectory(gar)
+add_subdirectory(slerp)
 
 ##MESSAGE ("CMAKE_EXE_LINKER_FLAGS" ${CMAKE_EXE_LINKER_FLAGS})
