@@ -546,6 +546,10 @@ void AttribUtil::load3(const char * filename, MObject & target)
     }
 
 	AHelper::Info<const char *>(" AttribUtil read attrib from ", filename);
+	
+	AnimUtil::ResolveFPS(HesperisAnimIO::SecondsPerFrame);
+	AHelper::Info<double>(" seconds-per-frame ", HesperisAnimIO::SecondsPerFrame);
+	
 /// no world
 	HBase* w = H5IO::GetH5dHeadGroup();
 	HesperisAttributeIO::ReadAttributes(w, target);
@@ -705,11 +709,16 @@ void AttribUtil::dump(const char *filename, MDagPathArray &active_list)
 	doc.addFraneRange(FirstFrame, LastFrame);
 	doc.addSPF(SamplesPerFrame);
 	
-    saveFormatVersion(doc, 3.f);
-	AnimUtil::ResolveFPS(HesperisAnimIO::SecondsPerFrame);
-    saveUDANames(doc);
+    AnimUtil::ResolveFPS(HesperisAnimIO::SecondsPerFrame);
+	int fps = 1.0 / HesperisAnimIO::SecondsPerFrame;
+	if(fps < 1) fps = 1;
+	doc.addFPS(fps);
+    
+	saveFormatVersion(doc, 3.f);
+	saveUDANames(doc);
 	
-	if(H5IO::BeheadName.size() > 0) saveBehead( doc, H5IO::BeheadName );
+	if(H5IO::BeheadName.size() > 0) 
+	    saveBehead( doc, H5IO::BeheadName );
 	doc.recordDataSize();
 	doc.save(filename);
 	doc.free();
@@ -742,9 +751,9 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
 	w.close();
 
     MTime::Unit timeunit = MTime::kFilm;
-	double secondsPerFrame = 1.0 / 24.0;
+	double secPerfrm = 1.0 / 24.0;
 	
-	timeunit = AnimUtil::ResolveFPS(secondsPerFrame);
+	timeunit = AnimUtil::ResolveFPS(secPerfrm);
     
     MGlobal::executeCommand(MString("currentTime ")+FirstFrame);
     useH5Bake();
@@ -764,7 +773,7 @@ void AttribUtil::bakeAttrib(const char *filename, MDagPathArray &active_list)
     MGlobal::displayInfo(MString(" baking begin ")+FirstFrame
                          +" end "+LastFrame
                          +" samples/frame "+SamplesPerFrame
-                         +" seconds/frame "+secondsPerFrame);
+                         +" seconds/frame "+secPerfrm);
 
     bakeH5(orderedDag, 0);
     

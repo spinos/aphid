@@ -20,13 +20,15 @@ public:
 	static bool ReadAnimation(HBase * parent, const MObject & entity, MObject & attr);
 	static bool ProcessAnimationCurve(const AAnimationCurve & data, MPlug & dst);
 
-	static double SecondsPerFrame;
 	static int TangentTypeAsInt(MFnAnimCurve::TangentType type);
 	static MFnAnimCurve::TangentType IntAsTangentType(int x);
 	
 	static AAnimationCurve::CurveType GetAAnimCurveType(MFnAnimCurve::AnimCurveType typ);
 	static MFnAnimCurve::AnimCurveType GetMAnimCurveType(AAnimationCurve::CurveType typ);
 	static bool RemoveAnimationCurve(MPlug & dst);
+	
+	static double SecondsPerFrame;
+	
 };
 
 }

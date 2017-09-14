@@ -46,7 +46,7 @@ void H5Holder::readSampler(SampleFrame & sampler)
     if(aspf.open()) {
         aspf.read(& sampler.m_spf);
         aspf.close();
-    }
+    }	
 }
 
 bool H5Holder::openH5File(const std::string & fileName)
