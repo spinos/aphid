@@ -228,7 +228,8 @@ void Base3DView::processSelection(QMouseEvent *event)
 
 void Base3DView::processDeselection(QMouseEvent *event)
 {
-    clientDeselect(event);
+	if(event->modifiers() != Qt::AltModifier)
+		clientDeselect(event);
 }
 
 void Base3DView::processMouseInput(QMouseEvent *event)

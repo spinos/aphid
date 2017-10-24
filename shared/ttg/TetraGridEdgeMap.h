@@ -33,7 +33,6 @@ private:
 template<typename T>
 TetraGridEdgeMap<T>::TetraGridEdgeMap(const T * grd)
 {
-    sdb::Coord2 k;
     const int & nt = grd->numCells();
     for(int i=0;i<nt;++i) {
         const sdb::Coord4 & c = grd->cellVertices(i);
