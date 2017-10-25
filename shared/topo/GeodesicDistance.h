@@ -28,11 +28,16 @@ public:
 				const float* vertexPos,
 				const int& triangleCount,
 				const int* triangleIndices);
-	
+				
+	template<typename T>
+	void setNodeValues(const T& nodeIndices, const float& val);
+	void calaculateDistance(float* dest);
+
+/// set node A zero	
 /// for each node, distance to node A,
 /// store node distances in dest
-	void calaculateDistanceTo(float* dest,
-				const int& nodeA);
+	void calaculateDistanceTo(float* dest, 
+					const int& nodeA);
 	
 	const float& maxDistance() const;
 	
@@ -41,6 +46,20 @@ protected:
 protected:
 
 };
+
+template<typename T>
+void GeodesicDistance::setNodeValues(const T& nodeIndices, const float& val)
+{
+	resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+	uncutEdges();
+	
+	const int n = nodeIndices.size();
+	for(int i=0;i<n;++i) {
+		DistanceNode & d = nodes()[nodeIndices[i]];
+		d.val = 0.f;
+		d.stat = sdf::StKnown;
+	}
+}
 
 }
 

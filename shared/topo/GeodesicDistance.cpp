@@ -52,16 +52,8 @@ void GeodesicDistance::buildTriangleGraph(const int& vertexCount,
     
 }
 
-void GeodesicDistance::calaculateDistanceTo(float* dest,
-							const int& nodeA)
+void GeodesicDistance::calaculateDistance(float* dest)
 {
-	resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
-	uncutEdges();
-	
-	DistanceNode & d = nodes()[nodeA];
-	d.val = 1e-3f;
-	d.stat = sdf::StKnown;
-	
 	fastMarchingMethod();
 	
 	m_maxDist = 0.f;
@@ -73,6 +65,19 @@ void GeodesicDistance::calaculateDistanceTo(float* dest,
 		if(m_maxDist < d.val && d.val < 1e19f )
 			m_maxDist = d.val;
 	}
+}
+
+void GeodesicDistance::calaculateDistanceTo(float* dest, 
+								const int& nodeA)
+{
+	resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+	uncutEdges();
+	
+	DistanceNode & d = nodes()[nodeA];
+	d.val = 0.f;
+	d.stat = sdf::StKnown;
+	
+	calaculateDistance(dest);
 }
 
 const float& GeodesicDistance::maxDistance() const

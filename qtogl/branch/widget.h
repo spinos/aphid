@@ -33,6 +33,8 @@ class KdNTree;
 namespace topo {
 
 class GeodesicDistance;
+class GeodesicPath;
+
 }
 
 }
@@ -60,14 +62,15 @@ signals:
 private:
 	void selectRootNode(const aphid::Ray * incident);
 	void selectTipNode(const aphid::Ray * incident);
+	void moveRootNode(const aphid::Ray * incident);
 	void moveTipNode(const aphid::Ray * incident);
 	bool intersect(const aphid::Ray * incident);
 	int closestNodeOnFace(int i) const;
 	void drawAnchorNodes();
+	void drawSkeleton();
 	void calcDistanceToRoot();
 	void calcDistanceToTip();
-	void segmentRootToTip();
-	void clearAllTips();
+	void buildPaths();
 	
 private:
 typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
@@ -83,18 +86,9 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	InteractMode m_interactMode;
 	
 	aphid::IntersectionContext m_intersectCtx;
-	int m_rootNodeInd;
-	
-typedef boost::scoped_array<float> FltArrTyp;
-	FltArrTyp m_dist2Root;
-	FltArrTyp m_dysCols;
-	std::deque<FltArrTyp* > m_dist2Tip;
 	
 	aphid::topo::GeodesicDistance* m_gedis;
-	std::deque<int> m_tipIndices;
-	
-	static const float DspRootColor[3];
-	static const float DspTipColor[8][3];
+	aphid::topo::GeodesicPath* m_gedpath;
 	
 };
 

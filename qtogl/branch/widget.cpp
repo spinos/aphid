@@ -1,8 +1,5 @@
-/* 
+/*
  *  branching by geodesic distance
- *  one root, multiple leaves
- *  for each vertex, calculate geodesic distance to root and each leaf
- *  select the path from root to leaf with lowest sum of distance
  */
  
 #include <GeoDrawer.h>
@@ -21,27 +18,15 @@
 #include <ogl/DrawKdTree.h>
 #include <ogl/DrawGrid.h>
 #include <topo/GeodesicDistance.h>
+#include <topo/GeodesicPath.h>
 #include "../cylinder.h"
 
 using namespace aphid;
-
-const float GLWidget::DspRootColor[3] = {1.f, 0.f, 0.f};
-const float GLWidget::DspTipColor[8][3] = {
-{1.f, 1.f, 0.f},
-{0.f, 1.f, 1.f},
-{.8f, 0.f, .5f},
-{0.f, .5f, .8f},
-{.5f, .8f, 0.f},
-{.4f, .3f, 1.f},
-{.4f, 1.f, .3f},
-{1.f, .4f, .3f},
-};
 
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 { 
 	m_interactMode = imSelectRoot;
-	m_rootNodeInd = -1;
 	usePerspCamera(); 
 	m_triangles = new sdb::VectorArray<cvx::Triangle>();
 /// prepare kd tree
@@ -75,13 +60,9 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 							sCylinderMeshTriangleIndices);
 	m_gedis->verbose();
 	
-	m_dist2Root.reset(new float[sCylinderNumVertices]);
-	m_dysCols.reset(new float[sCylinderNumVertices * 3]);
+	m_gedpath = new topo::GeodesicPath;
+	m_gedpath->create(sCylinderNumVertices);
 	
-	const float defCol[3] = {0.f, .35f, .45f};
-	for(int i=0;i<sCylinderNumVertices;++i) {
-		memcpy(&m_dysCols[i*3], defCol, 12 );
-	}
 	std::cout.flush();	
 }
 
@@ -101,7 +82,7 @@ void GLWidget::clientDraw()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	
-	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)m_dysCols.get() );
+	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)m_gedpath->dysCols() );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sCylinderMeshVertices );
 	glDrawElements(GL_TRIANGLES, sCylinderNumTriangleIndices, GL_UNSIGNED_INT, sCylinderMeshTriangleIndices );
 	
@@ -111,6 +92,7 @@ void GLWidget::clientDraw()
 	getDrawer()->m_surfaceProfile.apply();
 	//getDrawer()->m_markerProfile.apply();
 	drawAnchorNodes();
+	drawSkeleton();
 }
 
 void GLWidget::drawAnchorNodes()
@@ -120,20 +102,45 @@ void GLWidget::drawAnchorNodes()
 	
 	const Vector3F* pv = (const Vector3F*)sCylinderMeshVertices;
 	
-	if(m_rootNodeInd > -1) {
-		getDrawer()->setSurfaceColor(DspRootColor[0], DspRootColor[1], DspRootColor[2]);
-		const Vector3F pn = pv[m_rootNodeInd];
+	const int nroot = m_gedpath->numRoots();
+	for(int i=0;i<nroot;++i) {
+		const float* ci = m_gedpath->dspRootColR();
+		getDrawer()->setSurfaceColor(ci[0], ci[1], ci[2]);
+		const Vector3F& pn = pv[m_gedpath->rootNodeIndices()[i]];
 		glPushMatrix();
 		glTranslatef(pn.x, pn.y, pn.z);
 		drawAGlyph();
 		glPopMatrix();
 	}
 	
-	const int ntip = m_tipIndices.size();
+	const int ntip = m_gedpath->numTips();
 	for(int i=0;i<ntip;++i) {
-	    const float* ci = DspTipColor[i&7];
+	    const float* ci = m_gedpath->dspTipColR(i);
 	    getDrawer()->setSurfaceColor(ci[0], ci[1], ci[2]);
-		const Vector3F pn = pv[m_tipIndices[i]];
+		const Vector3F& pn = pv[m_gedpath->tipNodeIndices()[i]];
+		glPushMatrix();
+		glTranslatef(pn.x, pn.y, pn.z);
+		drawAGlyph();
+		glPopMatrix();
+	}
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void GLWidget::drawSkeleton()
+{
+	const int& nj = m_gedpath->numJoints();
+	if(nj < 1)
+		return;
+	
+	getDrawer()->setSurfaceColor(.7f, .8f, .7f);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+		
+	for(int i=0;i<nj;++i) {
+		const Vector3F& pn = m_gedpath->jointPos()[i];
 		glPushMatrix();
 		glTranslatef(pn.x, pn.y, pn.z);
 		drawAGlyph();
@@ -166,11 +173,11 @@ void GLWidget::clientDeselect(QMouseEvent *event)
 	switch(m_interactMode) {
 		case imSelectRoot:
 			calcDistanceToRoot();
-			clearAllTips();
+			m_gedpath->clearAllPath();
 		break;
 		case imSelectTip:
 			calcDistanceToTip();
-			segmentRootToTip();
+			m_gedpath->findPathToTip();
 		break;
 		default:
 		;
@@ -184,7 +191,7 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 	
 	switch(m_interactMode) {
 		case imSelectRoot:
-			selectRootNode(incr);
+			moveRootNode(incr);
 		break;
 		case imSelectTip:
 			moveTipNode(incr);
@@ -206,6 +213,9 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			m_interactMode = imSelectTip;
 			qDebug()<<" begin select tip";
 			break;
+		case Qt::Key_Y:
+			buildPaths();
+			break;
 		default:
 		;
 	}
@@ -216,9 +226,10 @@ void GLWidget::selectRootNode(const Ray* incident)
 {
 	if(!intersect(incident))
 		return;
-	m_rootNodeInd = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n select root node "<<m_rootNodeInd;
+	int iroot = closestNodeOnFace(m_intersectCtx.m_componentIdx);
+	std::cout<<"\n select root node "<<iroot;
 	std::cout.flush();
+	m_gedpath->addRoot(iroot);
 }
 
 void GLWidget::selectTipNode(const aphid::Ray * incident)
@@ -226,26 +237,33 @@ void GLWidget::selectTipNode(const aphid::Ray * incident)
     if(!intersect(incident))
 		return;
 	int itip = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n select tip node "<<itip
-	<<"\n distance to root "<<m_dist2Root[itip];
+	std::cout<<"\n select tip node "<<itip;
 	std::cout.flush();
-	m_tipIndices.push_back(itip);
-	FltArrTyp* ad = new FltArrTyp;
-	ad->reset(new float[sCylinderNumVertices] );
-	m_dist2Tip.push_back(ad);
+	m_gedpath->addTip(itip);
+}
+
+void GLWidget::moveRootNode(const aphid::Ray * incident)
+{
+	if(!m_gedpath->hasRoot())
+        return;
+    if(!intersect(incident))
+		return;
+	int iroot = closestNodeOnFace(m_intersectCtx.m_componentIdx);
+	std::cout<<"\n reselect root node "<<iroot;
+	std::cout.flush();
+	m_gedpath->setLastRootNodeIndex(iroot);
 }
 
 void GLWidget::moveTipNode(const aphid::Ray * incident)
 {
-    if(m_tipIndices.size() < 1)
+    if(!m_gedpath->hasTip() )
         return;
     if(!intersect(incident))
 		return;
 	int itip = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n reselect tip node "<<itip
-	<<"\n distance to root "<<m_dist2Root[itip];
+	std::cout<<"\n reselect tip node "<<itip;
 	std::cout.flush();
-	m_tipIndices.back() = itip;
+	m_gedpath->setLastTipNodeIndex(itip);
 }
 
 int GLWidget::closestNodeOnFace(int i) const
@@ -289,70 +307,41 @@ bool GLWidget::intersect(const aphid::Ray * incident)
 
 void GLWidget::calcDistanceToRoot()
 {
-	if(m_rootNodeInd < 0)
+	if(!m_gedpath->hasRoot() )
 		return;
 		
-	m_gedis->calaculateDistanceTo(m_dist2Root.get(), m_rootNodeInd);
+	m_gedis->setNodeValues<std::deque<int> >(m_gedpath->rootNodeIndices(), 0.f);
+	m_gedis->calaculateDistance(m_gedpath->distanceToRoot() );
 	
 	const float& maxD = m_gedis->maxDistance();
 	std::cout<<"\n max distance "<<maxD;
-	for(int i=0;i<sCylinderNumVertices;++i) {
-		float* ci = &m_dysCols[i*3];
-		if(m_dist2Root[i] > maxD) {
-			memset(ci, 0, 12 );
-		} else {
-			ci[1] = m_dist2Root[i] / maxD;
-			ci[0] = 1.f - ci[1];
-			ci[2] = 0.f;
-		}
-	}
+	
+	m_gedpath->colorByDistanceToRoot(maxD);
+	
 	std::cout.flush();
 }
 
 void GLWidget::calcDistanceToTip()
 {
-    if(m_tipIndices.size() < 1)
+    if(!m_gedpath->hasTip() )
         return;
     
-    FltArrTyp* dest = m_dist2Tip.back();
-    m_gedis->calaculateDistanceTo(dest->get(), m_tipIndices.back());
+    m_gedis->calaculateDistanceTo(m_gedpath->distanceToLastTip(), 
+				m_gedpath->lastTipNodeIndex() );
 	
 }
 
-void GLWidget::segmentRootToTip()
+void GLWidget::buildPaths()
 {
-    if(m_tipIndices.size() < 1)
+	if(!m_gedpath->hasRoot() )
+		return;
+	if(!m_gedpath->hasTip() )
         return;
-    
-    const int itip = m_tipIndices.size() - 1;
-    const float* tipCol = DspTipColor[itip & 7];
-    const int& tipNode = m_tipIndices.back();
-    const float* distT = m_dist2Tip.back()->get();
-    const float* distR = m_dist2Root.get();
-    const float& pthl = distR[tipNode];
-    std::cout<<"\n path length "<<pthl;
-    int count = 0;
-    for(int i=0;i<sCylinderNumVertices;++i) {
-        float diff = (distT[i] + distR[i] - pthl) / pthl;
-		if(diff > -.1f && diff < .1f) {
-		    count++;
-		    float* ci = &m_dysCols[i*3];
-		    memcpy(ci, tipCol, 12);
-		}
-	}
-	std::cout<<"\n found n node "<<count;
+		
+	const float& unitD = m_gedis->maxDistance() * .09f;
+	std::cout<<"\n unit distance "<<unitD;
+	
+	const Vector3F* pv = (const Vector3F*)sCylinderMeshVertices;
+	m_gedpath->build(unitD, pv);
 	std::cout.flush();
 }
-
-void GLWidget::clearAllTips()
-{
-    if(m_tipIndices.size() < 1)
-        return;
-    m_tipIndices.clear();
-    std::deque<FltArrTyp* >::iterator it = m_dist2Tip.begin();
-    for(;it!=m_dist2Tip.end();++it) {
-        delete *it;
-    }
-    m_dist2Tip.clear();
-}
-
