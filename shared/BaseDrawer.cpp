@@ -334,6 +334,7 @@ void BaseDrawer::setGroupColorLight(int i) const
 void BaseDrawer::setSurfaceColor(const float& r, const float& g, const float& b)
 {
 	surfaceMat->m_Diffuse = Color4(r, g, b, 1.0);
+	surfaceMat->applyColor();
 }
 
 }

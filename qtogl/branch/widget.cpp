@@ -27,14 +27,14 @@ using namespace aphid;
 
 const float GLWidget::DspRootColor[3] = {1.f, 0.f, 0.f};
 const float GLWidget::DspTipColor[8][3] = {
-{0.f, 1.f, 0.f},
-{0.f, 0.f, 1.f},
-{0.f, .5f, .5f},
-{.5f, 0.f, .5f},
-{.5f, .5f, 0.f},
-{0.f, .3f, 1.f},
-{0.f, 1.f, .3f},
-{.3f, 0.f, 1.f},
+{1.f, 1.f, 0.f},
+{0.f, 1.f, 1.f},
+{.8f, 0.f, .5f},
+{0.f, .5f, .8f},
+{.5f, .8f, 0.f},
+{.4f, .3f, 1.f},
+{.4f, 1.f, .3f},
+{1.f, .4f, .3f},
 };
 
 GLWidget::GLWidget(QWidget *parent)
@@ -129,6 +129,17 @@ void GLWidget::drawAnchorNodes()
 		glPopMatrix();
 	}
 	
+	const int ntip = m_tipIndices.size();
+	for(int i=0;i<ntip;++i) {
+	    const float* ci = DspTipColor[i&7];
+	    getDrawer()->setSurfaceColor(ci[0], ci[1], ci[2]);
+		const Vector3F pn = pv[m_tipIndices[i]];
+		glPushMatrix();
+		glTranslatef(pn.x, pn.y, pn.z);
+		drawAGlyph();
+		glPopMatrix();
+	}
+	
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -141,6 +152,9 @@ void GLWidget::clientSelect(QMouseEvent *event)
 		case imSelectRoot:
 			selectRootNode(incr);
 		break;
+		case imSelectTip:
+			selectTipNode(incr);
+		break;
 		default:
 		;
 	}
@@ -152,6 +166,11 @@ void GLWidget::clientDeselect(QMouseEvent *event)
 	switch(m_interactMode) {
 		case imSelectRoot:
 			calcDistanceToRoot();
+			clearAllTips();
+		break;
+		case imSelectTip:
+			calcDistanceToTip();
+			segmentRootToTip();
 		break;
 		default:
 		;
@@ -166,6 +185,9 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 	switch(m_interactMode) {
 		case imSelectRoot:
 			selectRootNode(incr);
+		break;
+		case imSelectTip:
+			moveTipNode(incr);
 		break;
 		default:
 		;
@@ -195,8 +217,35 @@ void GLWidget::selectRootNode(const Ray* incident)
 	if(!intersect(incident))
 		return;
 	m_rootNodeInd = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n select node "<<m_rootNodeInd;
+	std::cout<<"\n select root node "<<m_rootNodeInd;
 	std::cout.flush();
+}
+
+void GLWidget::selectTipNode(const aphid::Ray * incident)
+{
+    if(!intersect(incident))
+		return;
+	int itip = closestNodeOnFace(m_intersectCtx.m_componentIdx);
+	std::cout<<"\n select tip node "<<itip
+	<<"\n distance to root "<<m_dist2Root[itip];
+	std::cout.flush();
+	m_tipIndices.push_back(itip);
+	FltArrTyp* ad = new FltArrTyp;
+	ad->reset(new float[sCylinderNumVertices] );
+	m_dist2Tip.push_back(ad);
+}
+
+void GLWidget::moveTipNode(const aphid::Ray * incident)
+{
+    if(m_tipIndices.size() < 1)
+        return;
+    if(!intersect(incident))
+		return;
+	int itip = closestNodeOnFace(m_intersectCtx.m_componentIdx);
+	std::cout<<"\n reselect tip node "<<itip
+	<<"\n distance to root "<<m_dist2Root[itip];
+	std::cout.flush();
+	m_tipIndices.back() = itip;
 }
 
 int GLWidget::closestNodeOnFace(int i) const
@@ -259,3 +308,51 @@ void GLWidget::calcDistanceToRoot()
 	}
 	std::cout.flush();
 }
+
+void GLWidget::calcDistanceToTip()
+{
+    if(m_tipIndices.size() < 1)
+        return;
+    
+    FltArrTyp* dest = m_dist2Tip.back();
+    m_gedis->calaculateDistanceTo(dest->get(), m_tipIndices.back());
+	
+}
+
+void GLWidget::segmentRootToTip()
+{
+    if(m_tipIndices.size() < 1)
+        return;
+    
+    const int itip = m_tipIndices.size() - 1;
+    const float* tipCol = DspTipColor[itip & 7];
+    const int& tipNode = m_tipIndices.back();
+    const float* distT = m_dist2Tip.back()->get();
+    const float* distR = m_dist2Root.get();
+    const float& pthl = distR[tipNode];
+    std::cout<<"\n path length "<<pthl;
+    int count = 0;
+    for(int i=0;i<sCylinderNumVertices;++i) {
+        float diff = (distT[i] + distR[i] - pthl) / pthl;
+		if(diff > -.1f && diff < .1f) {
+		    count++;
+		    float* ci = &m_dysCols[i*3];
+		    memcpy(ci, tipCol, 12);
+		}
+	}
+	std::cout<<"\n found n node "<<count;
+	std::cout.flush();
+}
+
+void GLWidget::clearAllTips()
+{
+    if(m_tipIndices.size() < 1)
+        return;
+    m_tipIndices.clear();
+    std::deque<FltArrTyp* >::iterator it = m_dist2Tip.begin();
+    for(;it!=m_dist2Tip.end();++it) {
+        delete *it;
+    }
+    m_dist2Tip.clear();
+}
+

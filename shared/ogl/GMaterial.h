@@ -25,6 +25,7 @@ public:
              float shininess);
  
     void apply() const;
+    void applyColor() const;
  
     Color4 m_Ambient;
     Color4 m_Diffuse;

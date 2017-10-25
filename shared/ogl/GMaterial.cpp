@@ -47,4 +47,7 @@ void GMaterial::apply() const
 	glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, m_Shininess );
 }
 
+void GMaterial::applyColor() const
+{ glMaterialfv( GL_FRONT, GL_DIFFUSE, &(m_Diffuse.r) ); }
+
 }
