@@ -11,6 +11,7 @@
 #define APH_GRAPH_BASE_DISTANCE_FIELD_H
 
 #include "AGraph.h"
+#include <deque>
 #include <map>
 #include <math/miscfuncs.h>
 #include <math/Ray.h>
@@ -101,7 +102,7 @@ protected:
                 const int & edgeIdx);			
 private:
 /// propagate distance value
-    void propagate(std::map<int, int > & heap, const int & i);
+    void propagate(std::deque<int > & heap, const int & i);
 /// lowest edge cut connected to node
     float distanceToFront(int & closestEdgeIdx,
                 const int & idx) const;
@@ -113,7 +114,8 @@ private:
                 const int & idx) const;
 	void moveToFront3(const int & idx);
 	void cutEdgesConnectedToNode(const int & idx);
-						
+	void addNodeToHeap(std::deque<int>& heap, const int&x) const;
+	
 };
 
 }

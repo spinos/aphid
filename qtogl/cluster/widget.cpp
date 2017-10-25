@@ -15,7 +15,7 @@
 #include <ogl/DrawGrid.h>
 #include <topo/TriangleMeshCluster.h>
 #include "../cactus.h"
-#include <sdb/ebp.h>
+#include <smp/ebp.h>
 
 using namespace aphid;
 

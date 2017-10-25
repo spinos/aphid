@@ -20,6 +20,7 @@ target_link_libraries (clust ${APHID_SDB_LIBRARY})
 target_link_libraries (clust ${APHID_TOPO_LIBRARY})
 target_link_libraries (clust ${APHID_OGL_LIBRARY})
 target_link_libraries (clust ${APHID_KD_LIBRARY})
+target_link_libraries (clust ${APHID_SMP_LIBRARY})
 
 target_link_libraries (clust ${Boost_SYSTEM_LIBRARY})
 IF (WIN32)

@@ -1,6 +1,7 @@
 /*
  *  BaseDistanceField.cpp
  *  
+ *  en.wikipedia.org/wiki/Dijkstra%27s_algorithm
  *
  *  Created by zhang on 17-1-31.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -40,7 +41,7 @@ void BaseDistanceField::unvisitAllNodes()
 void BaseDistanceField::fastMarchingMethod()
 {
 /// heap of trial
-	std::map<int, int> trials;
+	std::deque<int> trials;
 	const int n = numNodes();
 	int i = 0;
 	for(;i<n;++i) {
@@ -54,28 +55,29 @@ void BaseDistanceField::fastMarchingMethod()
 	while (trials.size() > 0) {
 
 /// A is first in trial		
-		i = trials.begin()->first;
-/// distance is known after propagation
-		nodes()[i].stat = sdf::StKnown;
-/// remove A from trial
-		trials.erase(trials.begin() );
-		
+		i = trials[0];
 /// from A
 		propagate(trials, i);
 		
+/// distance is known after propagation
+		nodes()[i].stat = sdf::StKnown;
+
+/// remove A from trial
+		trials.erase(trials.begin() );	
+
 		//std::cout<<"\n trial n "<<trials.size();
 		//std::cout.flush();
 	}
 }
 
 /// A to B
-void BaseDistanceField::propagate(std::map<int, int > & heap, 
+void BaseDistanceField::propagate(std::deque<int > & heap, 
 												const int & i)
 {
 	const DistanceNode & A = nodes()[i];
 	
 /// for each neighbor of A
-	const int endj = edgeBegins()[i+1];
+	const int& endj = edgeBegins()[i+1];
 	int vj, j = edgeBegins()[i];
 	for(;j<endj;++j) {
 		
@@ -88,19 +90,28 @@ void BaseDistanceField::propagate(std::map<int, int > & heap,
 			vj = eg.vi.y;
         }
             
-		DistanceNode & B = nodes()[vj];
-		if(B.stat == sdf::StUnknown) {
-		
+		DistanceNode& B = nodes()[vj];
 /// min distance to B via A
-/// need eikonal approximation here
-			if(B.val > A.val + eg.len) {
-				B.val = A.val + eg.len;
-            }
-				
+/// need eikonal approximation here		
+		if(B.val > A.val + eg.len) {
+			B.val = A.val + eg.len;
+		}
+		
+		if(B.stat == sdf::StUnknown) {
 /// add to trial
-			heap[vj] = 0;
+			addNodeToHeap(heap, vj);
+			
 		}
 	}
+}
+
+void BaseDistanceField::addNodeToHeap(std::deque<int>& heap, const int&x) const
+{
+	for(int i=0;i<heap.size();++i) {
+		if(heap[i] == x)
+			return;
+	}
+	heap.push_back(x);
 }
 
 int BaseDistanceField::nodeFarthestFrom(const Vector3F & origin,

@@ -57,6 +57,7 @@ public:
 	void quad(Vector3F & a, Vector3F & b, Vector3F & c, Vector3F & d, char filled = 0) const;
 	
 	void setGroupColorLight(int i) const;
+	void setSurfaceColor(const float& r, const float& g, const float& b);
 	
 protected:
 	const float * lightColor(int i) const;

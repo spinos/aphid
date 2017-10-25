@@ -331,5 +331,10 @@ const float * BaseDrawer::lightColor(int i) const
 void BaseDrawer::setGroupColorLight(int i) const
 { glColor3fv(lightColor(i)); }
 
+void BaseDrawer::setSurfaceColor(const float& r, const float& g, const float& b)
+{
+	surfaceMat->m_Diffuse = Color4(r, g, b, 1.0);
+}
+
 }
 //:~
