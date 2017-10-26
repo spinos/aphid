@@ -21,6 +21,7 @@ GeodesicDistance::~GeodesicDistance()
 
 void GeodesicDistance::buildTriangleGraph(const int& vertexCount,
 				const float* vertexPos,
+				const float* vertexNml,
 				const int& triangleCount,
 				const int* triangleIndices)
 {
@@ -49,7 +50,64 @@ void GeodesicDistance::buildTriangleGraph(const int& vertexCount,
 	edgeInds.clear();
 	
 	calculateEdgeLength();
+	calcEdgeDistance(vertexNml);
     
+}
+
+void GeodesicDistance::calcEdgeDistance(const float* vertexNml)
+{
+	const int & nv = numNodes();
+	float* lqs = new float[nv];
+	for(int i = 0;i<nv;++i) {
+		lqs[i] = getAverageEdgeLength(i);
+	}
+	
+	const Vector3F* nmls = (const Vector3F*)vertexNml;
+	const int n = numEdges();
+	for(int i=0;i<n;++i) {
+		
+		IDistanceEdge & ei = edges()[i];
+		ei.len += 10.f * getArcLen(lqs, nmls, ei.vi.x, ei.vi.y);
+		ei.len += 10.f * getAngleDistance(nmls, ei.vi.x, ei.vi.y);  
+	}
+	
+	delete[] lqs;
+}
+
+float GeodesicDistance::getArcLen(const float* lqs,
+			const Vector3F* nmls,
+			const int& vp, const int& vq) const
+{
+	float t = lqs[vp] - lqs[vq];
+	if(t < 0.f)
+		t = -t;
+	t += 1.f;
+	return t * nmls[vp].distanceTo(nmls[vq]);
+}
+
+float GeodesicDistance::getAngleDistance(const Vector3F* nmls,
+			const int& vp, const int& vq) const
+{
+	float t = nmls[vp].dot(nmls[vq]);
+	t = acos(t);std::cout<<" "<<t;
+	return log(1.f + t / 3.141593f);
+}
+
+float GeodesicDistance::getAverageEdgeLength(const int& i) const
+{
+	float r = 0.f;
+	const int& endj = edgeBegins()[i+1];
+	int j = edgeBegins()[i];
+	const int c = endj - j;
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+		r += eg.len;
+		
+	}
+	return r / c;
 }
 
 void GeodesicDistance::calaculateDistance(float* dest)
@@ -82,6 +140,33 @@ void GeodesicDistance::calaculateDistanceTo(float* dest,
 
 const float& GeodesicDistance::maxDistance() const
 { return m_maxDist; }
+
+int GeodesicDistance::getLowestNeightInd(const float* vals, const int& i)
+{
+	int r = -1;
+	float minVal = 1e8f;
+/// for each neighbor of A
+	const int& endj = edgeBegins()[i+1];
+	int vj, j = edgeBegins()[i];
+	for(;j<endj;++j) {
+		
+		int k = edgeIndices()[j];
+
+		const IDistanceEdge & eg = edges()[k];
+		
+		vj = eg.vi.x;
+		if(vj == i) {
+			vj = eg.vi.y;
+        }
+		
+		if(minVal > vals[vj]) {
+			minVal = vals[vj];
+			r = vj;
+		}
+		
+	}
+	return r;
+}
 
 }
 

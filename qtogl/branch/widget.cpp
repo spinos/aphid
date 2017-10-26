@@ -17,8 +17,7 @@
 #include <kd/ClosestToPointEngine.h>
 #include <ogl/DrawKdTree.h>
 #include <ogl/DrawGrid.h>
-#include <topo/GeodesicDistance.h>
-#include <topo/GeodesicPath.h>
+#include <topo/GeodesicSkeleton.h>
 #include "../cylinder.h"
 
 using namespace aphid;
@@ -26,8 +25,9 @@ using namespace aphid;
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 { 
-	m_interactMode = imSelectRoot;
-	usePerspCamera(); 
+	m_interactMode = imSelectSeed;
+	usePerspCamera();
+	
 	m_triangles = new sdb::VectorArray<cvx::Triangle>();
 /// prepare kd tree
 	BoundingBox gridBox;
@@ -53,16 +53,13 @@ typedef ClosestToPointEngine<cvx::Triangle, KdNode4 > FClosestTyp;
 	
 	FClosestTyp clseng(m_tree);
 	
-	m_gedis = new topo::GeodesicDistance;
-	m_gedis->buildTriangleGraph(sCylinderNumVertices,
+	m_skeleton = new topo::GeodesicSkeleton;
+	m_skeleton->createFromTriangles(sCylinderNumVertices,
 							sCylinderMeshVertices,
+							sCylinderMeshNormals,
 							sCylinderNumTriangleIndices / 3,
 							sCylinderMeshTriangleIndices);
-	m_gedis->verbose();
-	
-	m_gedpath = new topo::GeodesicPath;
-	m_gedpath->create(sCylinderNumVertices);
-	
+	m_skeleton->verbose();
 	std::cout.flush();	
 }
 
@@ -82,7 +79,7 @@ void GLWidget::clientDraw()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	
-	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)m_gedpath->dysCols() );
+	glColorPointer(3, GL_FLOAT, 0, (GLfloat*)m_skeleton->dysCols() );
 	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)sCylinderMeshVertices );
 	glDrawElements(GL_TRIANGLES, sCylinderNumTriangleIndices, GL_UNSIGNED_INT, sCylinderMeshTriangleIndices );
 	
@@ -102,22 +99,12 @@ void GLWidget::drawAnchorNodes()
 	
 	const Vector3F* pv = (const Vector3F*)sCylinderMeshVertices;
 	
-	const int nroot = m_gedpath->numRoots();
-	for(int i=0;i<nroot;++i) {
-		const float* ci = m_gedpath->dspRootColR();
-		getDrawer()->setSurfaceColor(ci[0], ci[1], ci[2]);
-		const Vector3F& pn = pv[m_gedpath->rootNodeIndices()[i]];
-		glPushMatrix();
-		glTranslatef(pn.x, pn.y, pn.z);
-		drawAGlyph();
-		glPopMatrix();
-	}
+	const int ntip = m_skeleton->numRegions();
 	
-	const int ntip = m_gedpath->numTips();
 	for(int i=0;i<ntip;++i) {
-	    const float* ci = m_gedpath->dspTipColR(i);
+	    const float* ci = m_skeleton->dspRegionColR(i);
 	    getDrawer()->setSurfaceColor(ci[0], ci[1], ci[2]);
-		const Vector3F& pn = pv[m_gedpath->tipNodeIndices()[i]];
+		const Vector3F& pn = pv[m_skeleton->siteNodeIndex(i)];
 		glPushMatrix();
 		glTranslatef(pn.x, pn.y, pn.z);
 		drawAGlyph();
@@ -130,7 +117,7 @@ void GLWidget::drawAnchorNodes()
 
 void GLWidget::drawSkeleton()
 {
-	const int& nj = m_gedpath->numJoints();
+	const int& nj = m_skeleton->numJoints();
 	if(nj < 1)
 		return;
 	
@@ -140,7 +127,7 @@ void GLWidget::drawSkeleton()
 	glEnableClientState(GL_NORMAL_ARRAY);
 		
 	for(int i=0;i<nj;++i) {
-		const Vector3F& pn = m_gedpath->jointPos()[i];
+		const Vector3F& pn = m_skeleton->jointPos()[i];
 		glPushMatrix();
 		glTranslatef(pn.x, pn.y, pn.z);
 		drawAGlyph();
@@ -156,28 +143,8 @@ void GLWidget::clientSelect(QMouseEvent *event)
 	const Ray* incr = getIncidentRay();
 	
 	switch(m_interactMode) {
-		case imSelectRoot:
-			selectRootNode(incr);
-		break;
-		case imSelectTip:
-			selectTipNode(incr);
-		break;
-		default:
-		;
-	}
-	update();
-}
-
-void GLWidget::clientDeselect(QMouseEvent *event)
-{
-	switch(m_interactMode) {
-		case imSelectRoot:
-			calcDistanceToRoot();
-			m_gedpath->clearAllPath();
-		break;
-		case imSelectTip:
-			calcDistanceToTip();
-			m_gedpath->findPathToTip();
+		case imSelectSeed:
+			selectSeedNode(incr);
 		break;
 		default:
 		;
@@ -190,11 +157,22 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 	const Ray* incr = getIncidentRay();
 	
 	switch(m_interactMode) {
-		case imSelectRoot:
-			moveRootNode(incr);
+		case imSelectSeed:
+			moveSeedNode(incr);
 		break;
-		case imSelectTip:
-			moveTipNode(incr);
+		default:
+		;
+	}
+	update();
+}
+
+void GLWidget::clientDeselect(QMouseEvent *event)
+{
+	switch(m_interactMode) {
+		case imSelectSeed:
+			performSegmentation();
+			//calcDistanceToTip();
+			//m_skeleton->findPathToTip();
 		break;
 		default:
 		;
@@ -205,13 +183,9 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
-		case Qt::Key_R:
-			m_interactMode = imSelectRoot;
-			qDebug()<<" begin select root";
-			break;
 		case Qt::Key_T:
-			m_interactMode = imSelectTip;
-			qDebug()<<" begin select tip";
+			m_interactMode = imSelectSeed;
+			qDebug()<<" begin select seed point";
 			break;
 		case Qt::Key_Y:
 			buildPaths();
@@ -221,49 +195,29 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 	}
 	Base3DView::keyPressEvent(e);
 }
-	
-void GLWidget::selectRootNode(const Ray* incident)
-{
-	if(!intersect(incident))
-		return;
-	int iroot = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n select root node "<<iroot;
-	std::cout.flush();
-	m_gedpath->addRoot(iroot);
-}
 
-void GLWidget::selectTipNode(const aphid::Ray * incident)
+void GLWidget::selectSeedNode(const aphid::Ray * incident)
 {
+	std::cout<<"\n select seed point";
+	std::cout.flush();
     if(!intersect(incident))
 		return;
 	int itip = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n select tip node "<<itip;
+	std::cout<<"\n select node "<<itip<<" as seed point";
 	std::cout.flush();
-	m_gedpath->addTip(itip);
+	m_skeleton->addSeed(itip);
 }
 
-void GLWidget::moveRootNode(const aphid::Ray * incident)
+void GLWidget::moveSeedNode(const aphid::Ray * incident)
 {
-	if(!m_gedpath->hasRoot())
-        return;
-    if(!intersect(incident))
-		return;
-	int iroot = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n reselect root node "<<iroot;
-	std::cout.flush();
-	m_gedpath->setLastRootNodeIndex(iroot);
-}
-
-void GLWidget::moveTipNode(const aphid::Ray * incident)
-{
-    if(!m_gedpath->hasTip() )
+    if(m_skeleton->numRegions() < 2 )
         return;
     if(!intersect(incident))
 		return;
 	int itip = closestNodeOnFace(m_intersectCtx.m_componentIdx);
-	std::cout<<"\n reselect tip node "<<itip;
+	std::cout<<"\n reselect node "<<itip<<" as seed point";
 	std::cout.flush();
-	m_gedpath->setLastTipNodeIndex(itip);
+	m_skeleton->setLastTipNodeIndex(itip);
 }
 
 int GLWidget::closestNodeOnFace(int i) const
@@ -305,43 +259,21 @@ bool GLWidget::intersect(const aphid::Ray * incident)
 	return m_intersectCtx.m_success;
 }
 
-void GLWidget::calcDistanceToRoot()
-{
-	if(!m_gedpath->hasRoot() )
-		return;
-		
-	m_gedis->setNodeValues<std::deque<int> >(m_gedpath->rootNodeIndices(), 0.f);
-	m_gedis->calaculateDistance(m_gedpath->distanceToRoot() );
-	
-	const float& maxD = m_gedis->maxDistance();
-	std::cout<<"\n max distance "<<maxD;
-	
-	m_gedpath->colorByDistanceToRoot(maxD);
-	
-	std::cout.flush();
-}
-
-void GLWidget::calcDistanceToTip()
-{
-    if(!m_gedpath->hasTip() )
-        return;
-    
-    m_gedis->calaculateDistanceTo(m_gedpath->distanceToLastTip(), 
-				m_gedpath->lastTipNodeIndex() );
-	
-}
-
 void GLWidget::buildPaths()
 {
-	if(!m_gedpath->hasRoot() )
-		return;
-	if(!m_gedpath->hasTip() )
-        return;
-		
-	const float& unitD = m_gedis->maxDistance() * .09f;
+	const float& unitD = m_skeleton->maxDistance() * .09f;
 	std::cout<<"\n unit distance "<<unitD;
 	
 	const Vector3F* pv = (const Vector3F*)sCylinderMeshVertices;
-	m_gedpath->build(unitD, pv);
+	m_skeleton->buildSkeleton(unitD, pv);
 	std::cout.flush();
+}
+
+void GLWidget::performSegmentation()
+{
+	bool stat = m_skeleton->findRootNode();
+	if(!stat)
+		return;
+		
+	m_skeleton->growRegions();
 }

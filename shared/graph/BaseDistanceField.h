@@ -99,7 +99,10 @@ protected:
 	float distanceToFront2(int & closestEdgeIdx,
                 const int & idx) const;
 	void moveToFront2(const int & idx,
-                const int & edgeIdx);			
+                const int & edgeIdx);
+						
+	void addNodeToHeap(std::deque<int>& heap, const int&x) const;
+	
 private:
 /// propagate distance value
     void propagate(std::deque<int > & heap, const int & i);
@@ -114,7 +117,6 @@ private:
                 const int & idx) const;
 	void moveToFront3(const int & idx);
 	void cutEdgesConnectedToNode(const int & idx);
-	void addNodeToHeap(std::deque<int>& heap, const int&x) const;
 	
 };
 

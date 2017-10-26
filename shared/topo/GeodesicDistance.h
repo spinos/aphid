@@ -14,11 +14,13 @@
 
 namespace aphid {
 
+class Vector3F;
+
 namespace topo {
 
 class GeodesicDistance : public BaseDistanceField {
 	
-	float m_maxDist;
+	float m_maxDist; 
 	
 public:
 	GeodesicDistance();
@@ -26,6 +28,7 @@ public:
 	
 	void buildTriangleGraph(const int& vertexCount,
 				const float* vertexPos,
+				const float* vertexNml,
 				const int& triangleCount,
 				const int* triangleIndices);
 				
@@ -43,8 +46,23 @@ public:
 	
 protected:
 
-protected:
+	int getLowestNeightInd(const float* vals, const int& i);
 
+protected:
+/// average of all incident edges of i-th vertex
+	float getAverageEdgeLength(const int& i) const;
+/// reference mesh segmentation guided by seed points
+/// (1 + |lp - lq|) ||np - nq||
+	float getArcLen(const float* lqs,
+			const Vector3F* nmls,
+			const int& vp, const int& vq) const;
+/// log(1 + arcos(angle_between(np, nq) ) / pi )
+	float getAngleDistance(const Vector3F* nmls,
+			const int& vp, const int& vq) const;
+/// distance of every pair of vertices
+/// arc lenght + angle distance
+	void calcEdgeDistance(const float* vertexNml);
+	
 };
 
 template<typename T>

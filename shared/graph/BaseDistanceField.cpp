@@ -65,8 +65,6 @@ void BaseDistanceField::fastMarchingMethod()
 /// remove A from trial
 		trials.erase(trials.begin() );	
 
-		//std::cout<<"\n trial n "<<trials.size();
-		//std::cout.flush();
 	}
 }
 

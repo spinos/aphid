@@ -32,8 +32,7 @@ class KdNTree;
 
 namespace topo {
 
-class GeodesicDistance;
-class GeodesicPath;
+class GeodesicSkeleton;
 
 }
 
@@ -60,17 +59,15 @@ public slots:
 signals:
 
 private:
-	void selectRootNode(const aphid::Ray * incident);
-	void selectTipNode(const aphid::Ray * incident);
-	void moveRootNode(const aphid::Ray * incident);
-	void moveTipNode(const aphid::Ray * incident);
+	void selectSeedNode(const aphid::Ray * incident);
+	void moveSeedNode(const aphid::Ray * incident);
 	bool intersect(const aphid::Ray * incident);
 	int closestNodeOnFace(int i) const;
 	void drawAnchorNodes();
 	void drawSkeleton();
-	void calcDistanceToRoot();
-	void calcDistanceToTip();
 	void buildPaths();
+/// aft seed points selected
+	void performSegmentation();
 	
 private:
 typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
@@ -79,16 +76,14 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	
 	enum InteractMode {
 		imUnknown = 0,
-		imSelectRoot,
-		imSelectTip,
+		imSelectSeed,
 	};
 	
 	InteractMode m_interactMode;
 	
 	aphid::IntersectionContext m_intersectCtx;
 	
-	aphid::topo::GeodesicDistance* m_gedis;
-	aphid::topo::GeodesicPath* m_gedpath;
+	aphid::topo::GeodesicSkeleton* m_skeleton;
 	
 };
 
