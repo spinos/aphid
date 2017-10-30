@@ -155,12 +155,7 @@ int GeodesicDistance::getLowestNeightInd(const float* vals, const int& i)
 		
 		int k = edgeIndices()[j];
 
-		const IDistanceEdge & eg = edges()[k];
-		
-		vj = eg.vi.x;
-		if(vj == i) {
-			vj = eg.vi.y;
-        }
+		vj = oppositeNodeIndex(i, k);
 		
 		if(minVal > vals[vj]) {
 			minVal = vals[vj];

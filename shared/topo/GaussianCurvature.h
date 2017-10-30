@@ -34,10 +34,13 @@ class GaussianCurvature : public BaseDistanceField {
     boost::scoped_array<float> m_A;
     boost::scoped_array<int> m_Vj;
     boost::scoped_array<int> m_edgeFace;
+	const int* m_triangleIndices;
     
 public:
     GaussianCurvature();
     virtual ~GaussianCurvature();
+	
+	void getVij(int& nvj, const int* & vj, const int& i) const;
     
 protected:
     void calcCurvatures(const int& vertexCount,
@@ -58,12 +61,16 @@ private:
 /// fi-face to ej-th edge
 	void setEdgeFace(const int& ej, const int& fi);
     bool isEdgeOnBoundary(const int& i) const;
-/// ej to first edge on boundary connected to i-th vertex
+/// ej is index to first edge on boundary connected to i-th vertex
     bool isVertexOnBoundary(int& ej, const int& i) const;
 	void find1RingNeighbors();
     void find1RingNeighborV(const int& i);
-    void findNeighborOnBoundary(const int& ej, const int& i);
-    
+/// opposite vertex on face connected to k-th edge
+/// excluding vi, vj[j] j0 <= j < j1
+	int nextVetexToEdge(const int& k, const int& vi, const int& j0, const int& j1);
+	int oppositeVertexOnFace(const int* tri, const int& v1, const int& v2);
+	bool isVjVisited(const int& x, const int& j0, const int& j1);
+	
 };
 
 }

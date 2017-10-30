@@ -31,6 +31,7 @@ void GaussianCurvature::calcCurvatures(const int& vertexCount,
 				    triangleCount,
 				    triangleIndices);
 	tagEdgeFace(triangleCount, triangleIndices);
+	m_triangleIndices = triangleIndices;
 	find1RingNeighbors();
 	
 }
@@ -97,11 +98,9 @@ bool GaussianCurvature::isVertexOnBoundary(int& ej, const int& i) const
 	int vj, j = edgeBegins()[i];
 	for(;j<endj;++j) {
 		
-		int k = edgeIndices()[j];
-
-		if(isEdgeOnBoundary(k) ) {
-		    ej = k;
-		    return true;   
+		ej = edgeIndices()[j];
+		if(isEdgeOnBoundary(ej) ) {
+		    return true; 
 		}
 		
 	}
@@ -120,34 +119,71 @@ void GaussianCurvature::find1RingNeighbors()
 
 void GaussianCurvature::find1RingNeighborV(const int& i)
 {
-/// vj by edge
-    int j = edgeBegins()[i];
+    const int j0 = edgeBegins()[i];
     const int& endj = edgeBegins()[i+1];
-    for(;j<endj;++j) {
-		
-        int k = edgeIndices()[j];
-        m_Vj[j]= oppositeNodeIndex(i, k);
-		
-	}
-
-/// re-order
-    int ej;
-    if(isVertexOnBoundary(ej, i) ) {
-        findNeighborOnBoundary(ej, i);
-        return;
+	int cj = edgeIndices()[j0];
+    if(isVertexOnBoundary(cj, i) ) {
+        
     }
-/// closed 
-/// first in ring
-    
+	
+/// first vj
+	int j = j0;
+	m_Vj[j]= oppositeNodeIndex(i, cj);
+	j++;
+	
+	while (j < endj) {
+		m_Vj[j] = nextVetexToEdge(cj, i, j0, j);
+		cj = edgeIndex(i, m_Vj[j]);
+		j++;
+	}
 }
 
-void GaussianCurvature::findNeighborOnBoundary(const int& ej, const int& i)
+int GaussianCurvature::nextVetexToEdge(const int& k, const int& vi, const int& j0, const int& j1)
 {
-    
+/// 1st face
+	int fi = m_edgeFace[k<<1];
+	int r = oppositeVertexOnFace(&m_triangleIndices[fi*3], vi, m_Vj[j1 - 1]);
+	
+	if(!isVjVisited(r, j0, j1) )
+		return r;
+	
+/// 2nd face	
+	fi = m_edgeFace[(k<<1) + 1];
+	if(fi < 0)
+		return r;
+		
+	r = oppositeVertexOnFace(&m_triangleIndices[fi*3], vi, m_Vj[j1 - 1]);
+	
+	return r;
+}
+
+bool GaussianCurvature::isVjVisited(const int& x, const int& j0, const int& j1)
+{
+	for(int i=j0;i<j1;++i) {
+		if(m_Vj[i] == x)
+			return true;
+	}
+	return false;
+}
+
+int GaussianCurvature::oppositeVertexOnFace(const int* tri, const int& v1, const int& v2)
+{
+	if(tri[0] != v1 && tri[0] != v2)
+		return tri[0];
+	if(tri[1] != v1 && tri[1] != v2)
+		return tri[1];
+	return tri[2];
 }
 
 const float& GaussianCurvature::vertexArea(const int& i) const
 { return m_A[i]; }
+
+void GaussianCurvature::getVij(int& nvj, const int* & vj, const int& i) const
+{ 
+	const int& j0 = edgeBegins()[i];
+	nvj = edgeBegins()[i+1] - j0;
+	vj = &m_Vj[j0];
+}
 
 }
 

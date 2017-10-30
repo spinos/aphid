@@ -25,6 +25,7 @@ using namespace aphid;
 GLWidget::GLWidget(QWidget *parent)
     : Base3DView(parent)
 { 
+	m_selVertex = 0;
 	m_interactMode = imSelectSeed;
 	usePerspCamera();
 	
@@ -87,9 +88,10 @@ void GLWidget::clientDraw()
 	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	getDrawer()->m_surfaceProfile.apply();
-	//getDrawer()->m_markerProfile.apply();
-	drawAnchorNodes();
-	drawSkeleton();
+	//drawAnchorNodes();
+	//drawSkeleton();
+	getDrawer()->m_markerProfile.apply();
+	draw1Ring();
 }
 
 void GLWidget::drawAnchorNodes()
@@ -136,6 +138,20 @@ void GLWidget::drawSkeleton()
 	
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void GLWidget::draw1Ring()
+{
+	int nv = 0;
+	const int* vj;
+	m_skeleton->getVij(nv, vj, m_selVertex);
+	glColor3f(1.f, 1.f, 1.f);
+	glBegin(GL_LINES);
+	for(int i=0;i<nv-1;++i) {
+		glVertex3fv((const GLfloat*)&m_skeleton->nodes()[vj[i]].pos);
+		glVertex3fv((const GLfloat*)&m_skeleton->nodes()[vj[i+1]].pos);
+	}
+	glEnd();
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)
@@ -206,6 +222,7 @@ void GLWidget::selectSeedNode(const aphid::Ray * incident)
 	std::cout<<"\n select node "<<itip<<" as seed point";
 	std::cout.flush();
 	m_skeleton->addSeed(itip);
+	m_selVertex = itip;
 }
 
 void GLWidget::moveSeedNode(const aphid::Ray * incident)
@@ -218,6 +235,7 @@ void GLWidget::moveSeedNode(const aphid::Ray * incident)
 	std::cout<<"\n reselect node "<<itip<<" as seed point";
 	std::cout.flush();
 	m_skeleton->setLastTipNodeIndex(itip);
+	m_selVertex = itip;
 }
 
 int GLWidget::closestNodeOnFace(int i) const

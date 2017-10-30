@@ -65,6 +65,7 @@ private:
 	int closestNodeOnFace(int i) const;
 	void drawAnchorNodes();
 	void drawSkeleton();
+	void draw1Ring();
 	void buildPaths();
 /// aft seed points selected
 	void performSegmentation();
@@ -84,7 +85,7 @@ typedef aphid::KdNTree<aphid::cvx::Triangle, aphid::KdNNode<4> > TreeTyp;
 	aphid::IntersectionContext m_intersectCtx;
 	
 	aphid::topo::GeodesicSkeleton* m_skeleton;
-	
+	int m_selVertex;
 };
 
 #endif
