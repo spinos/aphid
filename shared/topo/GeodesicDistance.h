@@ -10,7 +10,7 @@
 #ifndef APH_TOPO_GEODESIC_DISTANCE_H
 #define APH_TOPO_GEODESIC_DISTANCE_H
 
-#include <graph/BaseDistanceField.h>
+#include "GaussianCurvature.h"
 
 namespace aphid {
 
@@ -18,7 +18,7 @@ class Vector3F;
 
 namespace topo {
 
-class GeodesicDistance : public BaseDistanceField {
+class GeodesicDistance : public GaussianCurvature {
 	
 	float m_maxDist; 
 	

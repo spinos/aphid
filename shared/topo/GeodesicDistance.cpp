@@ -50,6 +50,9 @@ void GeodesicDistance::buildTriangleGraph(const int& vertexCount,
 	edgeInds.clear();
 	
 	calculateEdgeLength();
+	calcCurvatures(vertexCount,
+				vertexPos, vertexNml,
+				triangleCount, triangleIndices);
 	calcEdgeDistance(vertexNml);
     
 }
@@ -89,7 +92,7 @@ float GeodesicDistance::getAngleDistance(const Vector3F* nmls,
 			const int& vp, const int& vq) const
 {
 	float t = nmls[vp].dot(nmls[vq]);
-	t = acos(t);std::cout<<" "<<t;
+	t = acos(t);
 	return log(1.f + t / 3.141593f);
 }
 

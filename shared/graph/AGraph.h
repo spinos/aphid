@@ -54,6 +54,8 @@ public:
 	
 	const Te * edge(const int & v1, const int & v2) const;
 	Te * edge(const int & v1, const int & v2);
+/// opposite to v1 on ej-th edge	
+	int oppositeNodeIndex(const int& v1, const int& ej) const;
 	
 	void verbose() const;
 
@@ -276,6 +278,17 @@ Te * AGraph<Tn, Te>::edge(const int & v1, const int & v2)
 	}
 		
 	return &edges()[k];
+}
+
+template<typename Tn, typename Te>
+int AGraph<Tn, Te>::oppositeNodeIndex(const int& v1, const int& ej) const
+{
+    const Te & eg = edges()[ej];
+    int v2 = eg.vi.x;
+    if(v2 == v1) {
+        v2 = eg.vi.y;
+    }
+    return v2;
 }
 
 template<typename Tn, typename Te>
