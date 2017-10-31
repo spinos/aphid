@@ -72,6 +72,7 @@ void GeodesicDistance::calcEdgeDistance(const float* vertexNml)
 		IDistanceEdge & ei = edges()[i];
 		ei.len += 10.f * getArcLen(lqs, nmls, ei.vi.x, ei.vi.y);
 		ei.len += 10.f * getAngleDistance(nmls, ei.vi.x, ei.vi.y);  
+		ei.len += 10.f * curvatureChange(ei.vi.x, ei.vi.y);
 	}
 	
 	delete[] lqs;

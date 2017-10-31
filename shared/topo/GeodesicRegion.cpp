@@ -29,7 +29,6 @@ void GeodesicRegion::createFromTriangles(const int& vertexCount,
 				vertexPos, vertexNml,
 				triangleCount, triangleIndices);
 	DistancePath::create(vertexCount);
-	
 }
 
 bool GeodesicRegion::findRootNode()

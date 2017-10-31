@@ -83,11 +83,11 @@ const float DistancePath::DspRegionColor[8][3] = {
 {1.f, 0.f, 0.f},
 {0.f, 1.f, 0.f},
 {0.f, 0.f, 1.f},
-{.7f, .1f, 1.f},
-{.1f, 1.f, .7f},
-{1.f, .1f, .7f},
-{.8f, 0.f, .7f},
-{0.f, .7f, .8f},
+{1.f, 1.f, 0.f},
+{0.f, 1.f, 1.f},
+{1.f, 0.f, 1.f},
+{.8f, .5f, 0.f},
+{0.f, .5f, .8f},
 };
 
 DistancePath::DistancePath() :
@@ -146,6 +146,9 @@ const int& DistancePath::numVertices() const
 const float* DistancePath::dysCols() const
 { return m_dysCols.get(); }
 
+float* DistancePath::vertexCols()
+{ return m_dysCols.get(); }
+
 const float* DistancePath::dspRegionColR(int i) const
 { return DspRegionColor[i&7];}
 
@@ -185,46 +188,6 @@ void DistancePath::clearAllPath()
 	}
 	m_pathLength.clear();
 	addSite(0);
-}
-
-void DistancePath::findPathToTip()
-{
-    if(m_siteIndices.size() < 2)
-        return;
-    
-    const int itip = m_siteIndices.size() - 1;
-    const float* tipCol = dspRegionColR(itip);
-    const int& tipNode = m_siteIndices.back();
-    const float* distT = m_dist2Site.back()->get();
-    const float* distR = distanceToRoot();
-    const float& pthl = distR[tipNode];
-    for(int i=0;i<m_numVertices;++i) {
-#if 0
-		float diff = (distT[i] + distR[i] - pthl) / pthl;
-		if(diff < 0.f)
-			diff = -diff;
-		
-		if(diff < .1f || m_distDiff[i] > .99f) {
-		
-		//if(diff < .1f && diff < m_distDiff[i]) {
-#else
-/// scale up trail tip distance
-		float scal = 1.f;
-		if(m_distDiff[i] < 1e7f) {
-			scal = (m_pathLength[m_pathLab[i] ] ) / m_pathLength.back() + .5f;
-			if(scal < 1.f)
-				scal = 1.f;
-		}
-	
-		float diff = distT[i] * scal + distR[i];
-		if(diff < m_distDiff[i]) {
-#endif
-		    m_pathLab[i] = itip;
-			m_distDiff[i] = diff;
-			float* ci = &m_dysCols[i*3];
-		    memcpy(ci, tipCol, 12);
-		}
-	}
 }
 
 void DistancePath::colorByRegionLabels()
@@ -313,6 +276,9 @@ const int* DistancePath::vertexPathInd() const
 const int* DistancePath::vertexSetInd() const
 { return m_setInd.get(); }
 
+int* DistancePath::vertexSetInd()
+{ return m_setInd.get(); }
+
 void DistancePath::labelRootAndSeedPoints()
 {
 	for(int i=0;i<m_numVertices;++i) {
@@ -322,6 +288,16 @@ void DistancePath::labelRootAndSeedPoints()
 	const int ns = m_siteIndices.size();
 	for(int i=0;i<ns;++i) {
 		m_pathLab[m_siteIndices[i]] = i;
+	}
+}
+
+void DistancePath::collectRegionVertices(std::vector<int >& dest, 
+							const int& j) const
+{
+	for(int i=0;i<m_numVertices;++i) {
+		const int& phi = m_pathLab[i];
+		if(phi == j)
+			dest.push_back(i);
 	}
 }
 

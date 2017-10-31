@@ -20,38 +20,33 @@ namespace aphid {
 
 namespace topo {
 
+class JointPiece;
+
 class GeodesicSkeleton : public GeodesicRegion {
 
-	int m_numJoints;
-	
-typedef boost::scoped_array<int> IntArrTyp;
-	IntArrTyp m_pieceCounts;
-	IntArrTyp m_pieceBegins;
-	IntArrTyp m_pieceParent;
-
-typedef boost::scoped_array<Vector3F> PntArrTyp;
-	PntArrTyp m_jointPos;
-	
+	boost::scoped_array<JointPiece > m_pieces;
+	int m_numPieces;
+		
 public:
 	GeodesicSkeleton();
 	virtual ~GeodesicSkeleton();
 	
-	bool buildSkeleton(const float& unitD,
-					const Vector3F* pos);
+	bool buildSkeleton();
 	void clearAllJoint();
 	
-	const int& numJoints() const;
-	const Vector3F* jointPos() const;
+	const int& numPieces() const;
+	const JointPiece& getPiece(const int& i) const;	
 	
 protected:
 
-	bool buildJoints(PathData* pds);
-	void connectPieces();
+	//void connectPieces();
 /// global
 	int getJointIndex(const int& pieceI, const int& jointJ) const;
 	int getPieceVaryingJointIndex(const int& x) const;
 	
 private:
+	void buildClusters(const std::vector<int >& vertexSet,
+						const int& jregion);
 	
 };
 

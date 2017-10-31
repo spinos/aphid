@@ -34,21 +34,22 @@ namespace topo {
 
 class GaussianCurvature : public BaseDistanceField {
   
-    boost::scoped_array<float> m_A;
+    const Vector3F* m_vertexPos;
+	const Vector3F* m_vertexNml;
+	const int* m_triangleIndices;
+	boost::scoped_array<float> m_A;
 	boost::scoped_array<float> m_K;
     boost::scoped_array<float> m_H;
     boost::scoped_array<int> m_Vj;
     boost::scoped_array<int> m_edgeFace;
-	const Vector3F* m_vertexPos;
-	const Vector3F* m_vertexNml;
-	const int* m_triangleIndices;
-    
+	
 public:
     GaussianCurvature();
     virtual ~GaussianCurvature();
 	
 	void getVij(int& nvj, const int* & vj, const int& i) const;
-    
+    void colorEdgeByCurvature(float* edgePos, float* edgeCol, const int& i);
+	
 protected:
     void calcCurvatures(const int& vertexCount,
 				const float* vertexPos,
@@ -59,7 +60,11 @@ protected:
 	const float& vertexArea(const int& i) const;
 	const float* K() const;
 	const float* H() const;
+/// cross v1 and v2
+	float curvatureChange(const int& v1, const int& v2) const;
 	
+	const Vector3F* vertexPos() const;
+
 private:
     void accumVertexAreas(const int& vertexCount,
 				const float* vertexPos,
@@ -83,7 +88,7 @@ private:
 	void calcKi(const int& i);
 	void calcH();
 	void calcHi(const int& i);
-	
+
 };
 
 }

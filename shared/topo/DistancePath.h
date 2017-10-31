@@ -17,6 +17,7 @@
 #include <math/Vector3F.h>
 #include <boost/scoped_array.hpp>
 #include <deque>
+#include <vector>
 #include <map>
 
 namespace aphid {
@@ -57,7 +58,6 @@ public:
 	virtual ~DistancePath();
 	
 	void create(int nv);
-	void findPathToTip();
 	void colorByRegionLabels();
 	void colorByDistanceToRoot(const float& maxD);
 	void clearAllPath();
@@ -93,10 +93,17 @@ protected:
 /// assign label to known initial sites
 /// unknown sites <- -1
 	void labelRootAndSeedPoints();
+
+/// j-th region to dest	
+	void collectRegionVertices(std::vector<int >& dest, 
+							const int& j) const;
 	
 	bool buildLevelSet(PathData* dest,
 			const float& unitD,
 			const Vector3F* pos);
+	
+	float* vertexCols();
+	int* vertexSetInd();
 	
 private:
 	void addSite(int x);

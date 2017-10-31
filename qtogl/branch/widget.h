@@ -66,7 +66,8 @@ private:
 	void drawAnchorNodes();
 	void drawSkeleton();
 	void draw1Ring();
-	void buildPaths();
+	void drawCurvature();
+	
 /// aft seed points selected
 	void performSegmentation();
 	

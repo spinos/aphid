@@ -8,72 +8,96 @@
  */
 
 #include "GeodesicSkeleton.h"
+#include "JointPiece.h"
+#include <math/kmean.h>
 
 namespace aphid {
 
 namespace topo {
 
 GeodesicSkeleton::GeodesicSkeleton() :
-m_numJoints(0)
+m_numPieces(0)
 {}
 
 GeodesicSkeleton::~GeodesicSkeleton()
 {}
 
-const int& GeodesicSkeleton::numJoints() const
-{ return m_numJoints; }
-
-const Vector3F* GeodesicSkeleton::jointPos() const
-{ return m_jointPos.get(); }
+const int& GeodesicSkeleton::numPieces() const
+{ return m_numPieces; }
 
 void GeodesicSkeleton::clearAllJoint()
-{ m_numJoints = 0; }
+{ m_numPieces = 0; }
 
-bool GeodesicSkeleton::buildSkeleton(const float& unitD,
-					const Vector3F* pos)
+bool GeodesicSkeleton::buildSkeleton()
 {
-	const int np = numRegions();
-	PathData* pds = new PathData[np];
-	
-	bool stat = buildLevelSet(pds, unitD, pos);
-	
-	if(stat)
-		stat = buildJoints(pds);
-	else
-		m_numJoints = 0;
-	
-	delete[] pds;
-	
-	if(stat)
-		connectPieces();
-	
-	return stat;
+	m_numPieces = numRegions();
+	m_pieces.reset(new JointPiece[m_numPieces] );
+	for(int i=0;i<m_numPieces;++i) {
+		std::vector<int > vertexSet;
+		collectRegionVertices(vertexSet, i);
+		buildClusters(vertexSet, i);
+		vertexSet.clear();
+	}
+
+	std::cout.flush();
 }
 
-bool GeodesicSkeleton::buildJoints(PathData* pds)
+void GeodesicSkeleton::buildClusters(const std::vector<int >& vertexSet,
+						const int& jregion)
 {
-	const int np = numRegions();
-	m_pieceCounts.reset(new int[np]);
-	m_pieceBegins.reset(new int[np + 1]);
-	m_pieceParent.reset(new int[np]);
+	const int n = vertexSet.size();
+	int k = n>>6;
+	if(k < 4)
+		k = 4;
+	if(k > 15)
+		k = 15;
+	std::cout<<"\n region"<<jregion<<" has nv "<<n;
+		
+/// kmean by euclidean distance 
+	KMeansClustering2<float> cluster;
+	cluster.setKND(k, n, 3);
 	
-	m_numJoints = 0;
-	for(int i=0;i<np;++i) {
-		const int ns = pds[i].numSets();
-		m_pieceCounts[i] = ns;
-		m_pieceBegins[i] = m_numJoints;
-		m_pieceParent[i] = -1;
-		m_numJoints += ns;
+/// build data
+	DenseMatrix<float > d(n, 3);
+	for(int i=0;i<n;++i) {
+		const int& vi = vertexSet[i];
+		const Vector3F& pv = vertexPos()[vi];
+		d.column(0)[i] = pv.x;
+		d.column(1)[i] = pv.y;
+		d.column(2)[i] = pv.z;
 	}
-	m_pieceBegins[np] = m_numJoints;
 	
-	m_jointPos.reset(new Vector3F[m_numJoints]);
-	for(int i=0;i<np;++i) {
-		pds[i].getSetPos(&m_jointPos[m_pieceBegins[i] ]);
+	cluster.compute(d);
+	
+	DenseVector<float> cent;
+	const int& nj = cluster.K();
+	m_pieces[jregion].create(nj);
+	
+	for(int i=0;i<nj;++i) {
+		cluster.getGroupCentroid(cent, i);
+		JointData& aj = m_pieces[jregion].joints()[i];
+		cent.extractData(aj._posv);
 	}
 	
-	return true;
+	m_pieces[jregion].zeroJointVal();
+	
+	const float* dist = distanceToSite(0);
+	
+	const int* b = cluster.groupIndices();
+	for(int i=0;i<n;++i) {
+		const int& vi = vertexSet[i];
+/// todo sorted ind
+		vertexSetInd()[vi] = b[i];
+		m_pieces[jregion].addJointVal(dist[vi], b[i]);
+	}
+	
+	m_pieces[jregion].averageJointVal();
+
+	m_pieces[jregion].connectJoints();
+	
 }
+
+/*
 
 void GeodesicSkeleton::connectPieces()
 {
@@ -107,20 +131,9 @@ void GeodesicSkeleton::connectPieces()
 		}
 	}
 }
-
-int GeodesicSkeleton::getJointIndex(const int& pieceI, const int& jointJ) const
-{ return m_pieceBegins[pieceI] + jointJ; }
-
-int GeodesicSkeleton::getPieceVaryingJointIndex(const int& x) const
-{
-	const int np = numRegions();
-	for(int i=0;i<np;++i) {
-		if(x >= m_pieceBegins[i] 
-			&& x < m_pieceBegins[i+1])
-			return x - m_pieceBegins[i];
-	}
-	return 0;
-}
+*/
+const JointPiece& GeodesicSkeleton::getPiece(const int& i) const
+{ return m_pieces[i]; }
 
 }
 
