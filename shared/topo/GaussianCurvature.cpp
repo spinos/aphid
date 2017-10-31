@@ -31,9 +31,12 @@ void GaussianCurvature::calcCurvatures(const int& vertexCount,
 				    triangleCount,
 				    triangleIndices);
 	tagEdgeFace(triangleCount, triangleIndices);
+	m_vertexPos = (const Vector3F*)vertexPos;
+	m_vertexNml = (const Vector3F*)vertexNml;
 	m_triangleIndices = triangleIndices;
 	find1RingNeighbors();
-	
+	calcK();
+	calcH();
 }
 
 void GaussianCurvature::accumVertexAreas(const int& vertexCount,
@@ -42,8 +45,8 @@ void GaussianCurvature::accumVertexAreas(const int& vertexCount,
 				const int* triangleIndices)
 {
     m_A.reset(new float[vertexCount]);
-    memset(m_A.get(), 0, vertexCount<<2);
-    
+	memset(m_A.get(), 0, vertexCount<<2);
+	
     const Vector3F* vp = (const Vector3F*)vertexPos;
     cvx::Triangle ftri;
     for(int i=0;i<triangleCount;++i) {
@@ -175,8 +178,87 @@ int GaussianCurvature::oppositeVertexOnFace(const int* tri, const int& v1, const
 	return tri[2];
 }
 
+void GaussianCurvature::calcK()
+{
+	const int& nv = numNodes();
+	m_K.reset(new float[nv]);
+    memset(m_K.get(), 0, nv<<2);
+    for(int i=0;i<nv;++i) {
+        calcKi(i);
+    }
+}
+
+void GaussianCurvature::calcKi(const int& i)
+{
+	int cj;
+	if(isVertexOnBoundary(cj, i) )
+		return;
+		
+	const Vector3F& pvi = m_vertexPos[i];
+	
+	float& ki = m_K[i];
+	const int j0 = edgeBegins()[i];
+    const int& endj = edgeBegins()[i+1];
+	for(int j=j0;j<endj;++j) {
+		int j1 = j + 1;
+		if(j1 == endj)
+			j1 = j0;
+		
+		Vector3F e1 = m_vertexPos[m_Vj[j]] - pvi;
+		Vector3F e2 = m_vertexPos[m_Vj[j1]] - pvi;
+		e1.normalize();
+		e2.normalize();
+		float alpha = acos(e1.dot(e2) );
+		
+		ki += alpha;
+	}
+	
+	ki = (6.283185f - ki) / m_A[i] * 3.f;
+}
+
+void GaussianCurvature::calcH()
+{
+	const int& nv = numNodes();
+	m_H.reset(new float[nv]);
+    memset(m_K.get(), 0, nv<<2);
+    for(int i=0;i<nv;++i) {
+        calcHi(i);
+    }
+
+}
+
+void GaussianCurvature::calcHi(const int& i)
+{
+	int cj;
+	if(isVertexOnBoundary(cj, i) )
+		return;
+		
+	const Vector3F& pvi = m_vertexPos[i];
+	
+	float& hi = m_H[i];
+	const int j0 = edgeBegins()[i];
+    const int& endj = edgeBegins()[i+1];
+	for(int j=j0;j<endj;++j) {
+		int j1 = j + 1;
+		if(j1 == endj)
+			j1 = j0;
+			
+		Vector3F e1 = m_vertexPos[m_Vj[j] ] - pvi;
+		
+		hi += e1.length() * acos(m_vertexNml[m_Vj[j] ].dot(m_vertexNml[m_Vj[j1] ]) );
+	}
+	
+	hi = (.25f * hi) / m_A[i] * 3.f;
+}
+
 const float& GaussianCurvature::vertexArea(const int& i) const
 { return m_A[i]; }
+
+const float* GaussianCurvature::K() const
+{ return m_K.get(); }
+	
+const float* GaussianCurvature::H() const
+{ return m_H.get(); }
 
 void GaussianCurvature::getVij(int& nvj, const int* & vj, const int& i) const
 { 
