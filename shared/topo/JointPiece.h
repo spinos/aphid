@@ -40,13 +40,17 @@ public:
 /// add x to i-th joint
 	void addJointVal(const float& x, const int& i);
 	void averageJointVal();
-	
-	void connectJoints();
+/// find ind to x-id joint, set x to ind
+    void setJointInd(int& x) const;
+	void connectJoints(bool reversed);
+	void setParent(JointData* j);
 	
 	const int& numJoints() const;
 	
 	JointData* joints();
 	const JointData* joints() const;
+/// first joint has parent
+	bool hasParent() const;
 	
 protected:
 

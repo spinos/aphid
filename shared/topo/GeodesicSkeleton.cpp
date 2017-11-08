@@ -38,8 +38,9 @@ bool GeodesicSkeleton::buildSkeleton()
 		buildClusters(vertexSet, i);
 		vertexSet.clear();
 	}
-
+	connectPieces();
 	std::cout.flush();
+	return true;
 }
 
 void GeodesicSkeleton::buildClusters(const std::vector<int >& vertexSet,
@@ -81,23 +82,24 @@ void GeodesicSkeleton::buildClusters(const std::vector<int >& vertexSet,
 	
 	m_pieces[jregion].zeroJointVal();
 	
-	const float* dist = distanceToSite(0);
+	const float* dist = distanceToSite(jregion);
 	
 	const int* b = cluster.groupIndices();
 	for(int i=0;i<n;++i) {
 		const int& vi = vertexSet[i];
-/// todo sorted ind
 		vertexSetInd()[vi] = b[i];
 		m_pieces[jregion].addJointVal(dist[vi], b[i]);
 	}
 	
 	m_pieces[jregion].averageJointVal();
 
-	m_pieces[jregion].connectJoints();
+	m_pieces[jregion].connectJoints(jregion > 0);
 	
+	for(int i=0;i<n;++i) {
+		const int& vi = vertexSet[i];
+		m_pieces[jregion].setJointInd(vertexSetInd()[vi]);
+	}
 }
-
-/*
 
 void GeodesicSkeleton::connectPieces()
 {
@@ -109,29 +111,31 @@ void GeodesicSkeleton::connectPieces()
 	for(int i=0;i<nv;++i) {
 		if(jointI[i] > 0)
 			continue;
+		
 /// first set in piece
 		int neiJ = getLowestNeightInd(dist, i);
 		
 		const int& childPieceI = pathI[i];
+		const int& parentPieceI = pathI[neiJ];
 /// path changes and dist is lower			
 		if(dist[neiJ] < dist[i] 
-			&& pathI[neiJ] != childPieceI) {
+			&& parentPieceI != childPieceI) {
 			
-			bool stat = m_pieceParent[childPieceI] < 0;
-			if(!stat)
-				stat = getPieceVaryingJointIndex(m_pieceParent[childPieceI]) > jointI[neiJ];
-			
-			if(stat) {
+			bool stat = m_pieces[childPieceI].hasParent();
+
+			if(!stat) {
 				
 				std::cout<<"\n connect piece "<<childPieceI
-					<<" to piece"<<pathI[neiJ]<<" joint"<<jointI[neiJ];
-					
-				m_pieceParent[childPieceI] = getJointIndex(pathI[neiJ], jointI[neiJ]);
-			}		
+					<<" to piece"<<parentPieceI<<" joint"<<jointI[neiJ];
+				
+				JointData* pj = &m_pieces[parentPieceI].joints()[jointI[neiJ] ];
+				m_pieces[childPieceI].setParent(pj);
+				
+			}
 		}
 	}
 }
-*/
+
 const JointPiece& GeodesicSkeleton::getPiece(const int& i) const
 { return m_pieces[i]; }
 

@@ -28,6 +28,7 @@ IF (WIN32)
 target_link_libraries (branch ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (branch ${Boost_THREAD_LIBRARY})
 target_link_libraries (branch ${Boost_CHRONO_LIBRARY})
+target_link_libraries (branch ${BLAS_LIBRARY})
 
 ELSEIF (APPLE)
 target_link_libraries (branch ${BLAS_LIBRARY})

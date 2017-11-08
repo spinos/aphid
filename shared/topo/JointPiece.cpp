@@ -79,7 +79,7 @@ void JointPiece::averageJointVal()
 	}
 }
 
-void JointPiece::connectJoints()
+void JointPiece::connectJoints(bool reversed)
 {
 typedef QuickSortPair<float, int> SortTyp;
 	SortTyp* buf = new SortTyp[m_numJoints];
@@ -95,7 +95,10 @@ typedef QuickSortPair<float, int> SortTyp;
 	memcpy(tmp, m_joints.get(), sizeof(JointData) * m_numJoints);
 	
 	for(int i=0;i<m_numJoints;++i) {
-		m_joints[i] = tmp[buf[i].value];
+	    if(reversed)
+	        m_joints[i] = tmp[buf[m_numJoints - 1 - i].value];
+		else
+		    m_joints[i] = tmp[buf[i].value];
 	}
 	
 	delete[] buf;
@@ -110,6 +113,16 @@ typedef QuickSortPair<float, int> SortTyp;
 	}
 }
 
+void JointPiece::setJointInd(int& x) const
+{
+    for(int i=0;i<m_numJoints;++i) {
+		if(m_joints[i]._cls[0] == x) {
+		    x = i;
+		    return;
+		}
+	}
+}
+
 const int& JointPiece::numJoints() const
 { return m_numJoints; }
 
@@ -118,6 +131,12 @@ JointData* JointPiece::joints()
 
 const JointData* JointPiece::joints() const
 { return m_joints.get(); }
+
+bool JointPiece::hasParent() const
+{ return m_joints[0]._parent != NULL; }
+
+void JointPiece::setParent(JointData* j)
+{  m_joints[0]._parent = j; } 
 
 }
 

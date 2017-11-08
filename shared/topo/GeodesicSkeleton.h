@@ -39,12 +39,13 @@ public:
 	
 protected:
 
-	//void connectPieces();
 /// global
 	int getJointIndex(const int& pieceI, const int& jointJ) const;
 	int getPieceVaryingJointIndex(const int& x) const;
 	
 private:
+    
+    void connectPieces();
 	void buildClusters(const std::vector<int >& vertexSet,
 						const int& jregion);
 	
