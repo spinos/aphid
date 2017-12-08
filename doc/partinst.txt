@@ -1,4 +1,5 @@
-addAttr -ln userScalar1PP -dt doubleArray particleShape1addAttr -ln userScalar1PP0 -dt doubleArray particleShape1
+addAttr -ln userScalar1PP -dt doubleArray particleShape1
+addAttr -ln userScalar1PP0 -dt doubleArray particleShape1
 
 3 objects
 userScalar1PP = rand(3)
@@ -7,6 +8,9 @@ particleInstancer  -addObject -object  pSphere1 -object  pCylinder1 -object  pCo
 
 GLSL instances
 
+reference
+http://sol.gfxile.net/instancing.html
+https://github.com/progschj/OpenGL-Examples/blob/master/06instancing1.cpp
 
 static const char* vertexShader= \
 "#version 330\n"

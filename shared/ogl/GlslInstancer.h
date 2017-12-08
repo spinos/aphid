@@ -57,6 +57,8 @@ private:
 
 class GlslInstancer : public GLSLBase 
 {
+    GLint m_viewProjMatLoc;
+    
 public:
     GlslInstancer();
     virtual ~GlslInstancer();
@@ -64,6 +66,8 @@ public:
 protected:
     virtual const char* vertexProgramSource() const;
 	virtual const char* fragmentProgramSource() const;
+	virtual void defaultShaderParameters();
+	virtual void updateShaderParameters() const;
 	
 private:
     

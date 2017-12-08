@@ -148,25 +148,36 @@ GlslInstancer::~GlslInstancer()
 
 const char* GlslInstancer::vertexProgramSource() const
 {
-	return "#version 330\n"
-"uniform mat4 ModelViewMatrix;"
-"uniform mat4 ProjectionMatrix;"
-// "layout(location = 0) in vec3 in_position;"
-"void main()"
-"{"
-// "		gl_Position = ftransform();"
-"   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
-"		gl_FrontColor = gl_Color;"
-"}";
+	return  "#version 330\n"
+"uniform mat4 ViewProjection;\n"
+"layout(location = 0)in vec4 vposition;\n"
+"layout(location = 1) in vec4 vcolor;\n"
+"out vec4 fcolor;\n"
+"void main()\n"
+"{\n"
+"   fcolor = vcolor;\n"
+"   gl_Position = ViewProjection * vposition;\n"
+"}\n";
 }
 
 const char* GlslInstancer::fragmentProgramSource() const
 {
-	return "#version 330\n"
-"void main()"
-"{"
-"		gl_FragColor = gl_Color * vec4 (0.99);"
-"}";
+	return  "#version 330\n"
+"in vec4 fcolor;\n"
+"layout(location = 0) out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = fcolor;\n"
+"}\n";
+}
+
+void GlslInstancer::defaultShaderParameters()
+{
+     m_viewProjMatLoc = glGetUniformLocationARB(*program(), "ViewProjection");
+}
+
+void GlslInstancer::updateShaderParameters() const
+{
 }
 
 }
