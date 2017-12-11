@@ -32,6 +32,7 @@ public slots:
 signals:
 
 private:
+	void initInst();
     void drawSamples();
     
 private:

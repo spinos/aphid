@@ -1,3 +1,13 @@
+/*
+ *  real instance
+ *
+ *  http://www.informit.com/articles/article.aspx?p=1377833&seqNum=8
+ *  Vertex-Array Objects
+ *  https://github.com/erwincoumans/experiments/blob/master/rendering/GLSL_Instancing/main.cpp
+ *  glsl instancing
+ *
+ */
+
 #include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
@@ -7,6 +17,10 @@
 #include <smp/EbpMeshSample.h>
 #include <geom/DiscMesh.h>
 #include <ogl/GlslInstancer.h>
+
+static GLuint               cube_vao;
+static GLuint               cube_vbo;
+static GLuint               index_vbo;
 
 using namespace aphid;
 
@@ -79,7 +93,7 @@ void GLWidget::clientInit()
     }
     std::cout<<diaglog;
     std::cout.flush();
-    //return m_inst->isDiagnosed();
+    initInst();
 }
 
 void GLWidget::clientDraw()
@@ -102,3 +116,59 @@ void GLWidget::drawSamples()
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+
+void GLWidget::initInst()
+{
+	GLfloat  cubeVerts[][3] = {
+            { -1.0, -1.0, -1.0 },
+            { -1.0, -1.0,  1.0 },
+            { -1.0,  1.0, -1.0 },
+            { -1.0,  1.0,  1.0 },
+            {  1.0, -1.0, -1.0 },
+            {  1.0, -1.0,  1.0 },
+            {  1.0,  1.0, -1.0 },
+            {  1.0,  1.0,  1.0 },
+        };
+
+        GLfloat  cubeColors[][3] = {
+            {  0.0,  0.0,  0.0 },
+            {  0.0,  0.0,  1.0 },
+            {  0.0,  1.0,  0.0 },
+            {  0.0,  1.0,  1.0 },
+            {  1.0,  0.0,  0.0 },
+            {  1.0,  0.0,  1.0 },
+            {  1.0,  1.0,  0.0 },
+            {  1.0,  1.0,  1.0 },
+        };
+
+        GLubyte  cubeIndices[] = {
+            0, 1, 3, 2,
+            4, 6, 7, 5,
+            2, 3, 7, 6,
+            0, 4, 5, 1,
+            0, 2, 6, 4,
+            1, 5, 7, 3
+        };
+	
+	glGenVertexArrays(1, &cube_vao);
+	glBindVertexArray(cube_vao);
+        
+	glGenBuffers(1, &cube_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
+        
+	glBufferData(GL_ARRAY_BUFFER, 
+			sizeof(cubeVerts), cubeVerts, 
+			GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+
+	glGenBuffers(1, &index_vbo);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+            sizeof(cubeIndices), cubeIndices, 
+			GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+}
