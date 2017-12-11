@@ -88,6 +88,9 @@ PFNGLBINDBUFFERPROC glBindBuffer = NULL;
 PFNGLBUFFERDATAPROC glBufferData = NULL;
 PFNGLCLIENTACTIVETEXTUREPROC glClientActiveTexture = NULL;
 
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray = NULL;
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = NULL;
+
 #if defined(WIN32)
 #  include <windows.h>
 #  define GET_EXT_POINTER(name, type) \
@@ -225,6 +228,14 @@ GET_EXT_POINTER(glClientActiveTexture, PFNGLCLIENTACTIVETEXTUREPROC );
 		!glAttachObjectARB || !glCompileShaderARB || !glGetObjectParameterivARB ||
 		!glGetUniformLocationARB) {
 		printf( "ERROR: shader functions were not found");
+		return 0;
+	}
+	
+GET_EXT_POINTER(glBindVertexArray, PFNGLBINDVERTEXARRAYPROC );
+GET_EXT_POINTER(glGenVertexArrays, PFNGLGENVERTEXARRAYSPROC );
+
+    if(!glBindVertexArray || !glGenVertexArrays) {
+		printf( "ERROR: vertex array functions were not found");
 		return 0;
 	}
 	

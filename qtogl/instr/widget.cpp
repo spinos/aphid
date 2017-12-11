@@ -3,6 +3,7 @@
  *
  *  http://www.informit.com/articles/article.aspx?p=1377833&seqNum=8
  *  Vertex-Array Objects
+ *  http://www.songho.ca/opengl/gl_vbo.html#create
  *  https://github.com/erwincoumans/experiments/blob/master/rendering/GLSL_Instancing/main.cpp
  *  glsl instancing
  *
@@ -19,8 +20,6 @@
 #include <ogl/GlslInstancer.h>
 
 static GLuint               cube_vao;
-static GLuint               cube_vbo;
-static GLuint               index_vbo;
 
 using namespace aphid;
 
@@ -102,8 +101,8 @@ void GLWidget::clientDraw()
 	getDrawer()->setColor(1.f, 1.f, 1.f);
 	
 	//drawParticles();
-	drawSamples();
-	
+	//drawSamples();
+	drawTest();
 }
 
 void GLWidget::drawSamples()
@@ -149,19 +148,26 @@ void GLWidget::initInst()
             0, 2, 6, 4,
             1, 5, 7, 3
         };
+        
+        std::cout<<"\n size of cube vertices "<<sizeof(cubeVerts)
+	<<"\n num of cube indices "<<sizeof(cubeIndices);
+	std::cout.flush();
 	
-	glGenVertexArrays(1, &cube_vao);
+    glGenVertexArrays(1, &cube_vao);
+
 	glBindVertexArray(cube_vao);
-        
+	
+    GLuint cube_vbo;	
 	glGenBuffers(1, &cube_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
-        
+	
+	glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);   
 	glBufferData(GL_ARRAY_BUFFER, 
 			sizeof(cubeVerts), cubeVerts, 
 			GL_STATIC_DRAW);
+	glEnableClientState(GL_VERTEX_ARRAY); 
+	glVertexPointer(3, GL_FLOAT, 0, 0);    
 	
-	glBindBuffer(GL_ARRAY_BUFFER,0);
-
+	GLuint index_vbo;
 	glGenBuffers(1, &index_vbo);
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_vbo);
@@ -169,6 +175,18 @@ void GLWidget::initInst()
             sizeof(cubeIndices), cubeIndices, 
 			GL_STATIC_DRAW);
 
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER,0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	
+}
+
+void GLWidget::drawTest()
+{
+    glBindVertexArray(cube_vao);
+
+    glDrawElements(GL_QUADS, 24, GL_UNSIGNED_BYTE,0);
+
+    glBindVertexArray(0);
 
 }

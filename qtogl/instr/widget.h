@@ -34,6 +34,7 @@ signals:
 private:
 	void initInst();
     void drawSamples();
+    void drawTest();
     
 private:
 	aphid::EbpSphere * m_grid;

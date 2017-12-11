@@ -93,6 +93,9 @@ extern PFNGLBINDBUFFERPROC glBindBuffer;
 extern PFNGLBUFFERDATAPROC glBufferData;
 extern PFNGLCLIENTACTIVETEXTUREPROC glClientActiveTexture;
 
+extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+
 char gExtensionInit();
 const char* getExtension();
 char gCheckExtension(char* extName);
