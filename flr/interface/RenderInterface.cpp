@@ -11,13 +11,21 @@
 #include "BufferBlock.h"
 #include "DeepBuffer.h"
 #include "DisplayImage.h"
+#include "DisplayCamera.h"
 #include "NoiseRenderer.h"
+#include <math/BaseCamera.h>
+
+using namespace aphid;
 
 RenderInterface::RenderInterface()
 {
+	m_camera = new DisplayCamera;
 	m_buffer = new DeepBuffer;
 	m_image = new DisplayImage;
 }
+
+void RenderInterface::setCamera(BaseCamera* x)
+{ m_camera->setCamera(x); }
 
 bool RenderInterface::imageSizeChanged(int w, int h) const
 {

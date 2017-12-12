@@ -6,8 +6,10 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
-#pragma once
-#include <BaseCamera.h>
+#ifndef APH_PERSPECTIVE_CAMERA_H
+#define APH_PERSPECTIVE_CAMERA_H
+
+#include "BaseCamera.h"
 
 namespace aphid {
 
@@ -33,3 +35,4 @@ private:
 };
 
 }
+#endif

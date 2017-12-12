@@ -2,10 +2,12 @@
 #include <QtGui>
 
 #include <math.h>
-
+#include <math/PerspectiveCamera.h>
 #include "RenderWidget.h"
 #include <interface/RenderThread.h>
 #include <interface/RenderInterface.h>
+
+using namespace aphid;
 
 const double DefaultCenterX = -0.637011f;
 const double DefaultCenterY = -0.0395159f;
@@ -18,6 +20,7 @@ const int ScrollStep = 20;
 RenderWidget::RenderWidget(QWidget *parent)
     : QWidget(parent)
 {
+	m_perspCamera = new PerspectiveCamera;
     centerX = DefaultCenterX;
     centerY = DefaultCenterY;
     pixmapScale = DefaultScale;

@@ -1,4 +1,4 @@
-## Sat Nov 4 13:27:07 CST 2017 
+## Sat Dec 12 22:00:07 CST 2017 
 
 cmake_minimum_required (VERSION 2.8)
 project (aphid)
@@ -149,19 +149,15 @@ ADD_LIBRARY (aphidHes ${LIB_TYP}
 )
 
 ADD_LIBRARY (aphidUI ${LIB_TYP}
-../shared/BaseCamera.cpp
-../shared/PerspectiveCamera.cpp 
 ../shared/BaseDrawer.cpp 
 ../shared/LineDrawer.cpp 
 ../shared/MeshDrawer.cpp 
 ../shared/GeoDrawer.cpp  
 ../shared/LineBuffer.cpp
-../shared/AdaptableStripeBuffer.cpp
 ../shared/GLHUD.cpp
 ../shared/BaseBrush.cpp
 ../shared/ToolContext.cpp
 ../shared/SelectionArray.cpp
-../shared/BaseState.cpp
 ../shared/BaseDeformer.cpp  
 ../shared/PerspectiveView.cpp)
 

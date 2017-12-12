@@ -7,9 +7,11 @@
  *
  */
 
-#pragma once
+#ifndef APH_ADAPTABLE_STRIPE_BUFFER_H
+#define APH_ADAPTABLE_STRIPE_BUFFER_H
 
-#include <AllMath.h>
+#include "Vector3F.h"
+
 namespace aphid {
 
 class AdaptableStripeBuffer {
@@ -54,3 +56,4 @@ private:
 };
 
 }
+#endif

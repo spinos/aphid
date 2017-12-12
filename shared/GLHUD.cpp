@@ -1,5 +1,5 @@
 #include "GLHUD.h"
-#include <BaseCamera.h>
+#include <math/BaseCamera.h>
 
 namespace aphid {
 

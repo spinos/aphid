@@ -9,7 +9,7 @@
 
 #include "DisplayCamera.h"
 #include "BufferBlock.h"
-#include <BaseCamera.h>
+#include <math/BaseCamera.h>
 
 using namespace aphid;
 

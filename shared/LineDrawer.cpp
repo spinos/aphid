@@ -9,7 +9,7 @@
 
 #include "LineDrawer.h"
 #include <LineBuffer.h>
-#include <AdaptableStripeBuffer.h>
+#include <math/AdaptableStripeBuffer.h>
 #include <BaseCurve.h>
 #include <BezierCurve.h>
 #include <geom/ConvexShape.h>

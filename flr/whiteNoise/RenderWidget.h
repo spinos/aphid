@@ -5,6 +5,10 @@
 #include <QPixmap>
 #include <QWidget>
 
+namespace aphid {
+class PerspectiveCamera;
+}
+
 class RenderThread;
 class RenderInterface;
 
@@ -31,6 +35,7 @@ private:
     void zoom(double zoomFactor);
     void scroll(int deltaX, int deltaY);
 
+	aphid::PerspectiveCamera* m_perspCamera;
 	RenderInterface* m_interface;
     RenderThread* thread;
 	
