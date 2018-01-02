@@ -11,8 +11,7 @@
 #include <ToolContext.h>
 #include <SelectionArray.h>
 #include <BaseBrush.h>
-#include <BaseCamera.h>
-#include <PerspectiveCamera.h>
+#include <math/PerspectiveCamera.h>
 #include <GeoDrawer.h>
 #include <IntersectionContext.h>
 #include <GLHUD.h>

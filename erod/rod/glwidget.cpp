@@ -4,7 +4,7 @@
 #include <GeoDrawer.h>
 #include <QtGui>
 #include <QtOpenGL>
-#include <BaseCamera.h>
+#include <math/BaseCamera.h>
 #include "glwidget.h"
 #include <SolverThread.h>
 #include <pbd/WindTurbine.h>

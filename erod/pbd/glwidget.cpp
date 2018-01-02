@@ -1,6 +1,6 @@
 #include <QtGui>
 #include <QtOpenGL>
-#include <BaseCamera.h>
+#include <math/BaseCamera.h>
 #include "glwidget.h"
 #include <SolverThread.h>
 
