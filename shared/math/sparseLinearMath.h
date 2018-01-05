@@ -359,7 +359,7 @@ template<typename T>
 void SparseMatrix<T>::create(int nrow, int ncol)
 {
 	clear();
-	m_format = ncol > nrow ? cfRowMajor : cfRowMajor;
+	m_format = (ncol > nrow) ? cfRowMajor: m_format = cfColumnMajor;
 	if(m_format == cfRowMajor) {
 		m_vecs = new SVecTyp[nrow];
 	} else {
@@ -434,7 +434,7 @@ SparseMatrix<T> SparseMatrix<T>::operator*(const SparseMatrix& b) const
 	c.create(numRows(), b.numCols() );
 /// ijk-form matrix-matrix product
 	if(m_format == cfRowMajor) {
-	
+/// b is column-major
 		for(int i=0;i<numRows();++i) {
 /// i-th row in a
 			SVecTyp& ai = row(i);
@@ -445,7 +445,7 @@ SparseMatrix<T> SparseMatrix<T>::operator*(const SparseMatrix& b) const
 				SparseIterator<T> itEnd = ai.end();
 				for(;iter != itEnd;++iter) {
 /// i-th column in b
-					cij += iter.value() * b.get(iter.index(), i);
+					cij += iter.value() * b.get(iter.index(), j);
 				}
 				if(cij != 0) {
 					c.set(i, j, cij);
@@ -453,17 +453,24 @@ SparseMatrix<T> SparseMatrix<T>::operator*(const SparseMatrix& b) const
 			}
 		}
 	} else {
-	
+/// a is column-major, b can be column-major or row-major
 		for(int i=0;i<numRows();++i) {
 			for(int j=0;j<b.numCols();++j) {
 				T cij = 0;
+				
+				if(b.isColumnMajor() ) {
 /// j-th column in b
-				SVecTyp& bj = b.column(j);
-				SparseIterator<T> iter = bj.begin();
-				SparseIterator<T> itEnd = bj.end();
-				for(;iter != itEnd;++iter) {
+					SVecTyp& bj = b.column(j);
+					SparseIterator<T> iter = bj.begin();
+					SparseIterator<T> itEnd = bj.end();
+					for(;iter != itEnd;++iter) {
 /// i-th row in a
-					cij += get(i, iter.index() ) * iter.value();
+						cij += get(i, iter.index() ) * iter.value();
+					}
+				} else {
+					for(int k=0;k<numCols();++k) {
+						cij += get(i, k) * b.get(k, j);
+					}
 				}
 				if(cij != 0) {
 					c.set(i, j, cij);

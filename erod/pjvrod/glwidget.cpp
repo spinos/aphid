@@ -1,0 +1,262 @@
+/*
+ *  projective rod
+ */
+#include <GeoDrawer.h>
+#include <QtGui>
+#include <QtOpenGL>
+#include <math/BaseCamera.h>
+#include "glwidget.h"
+#include <TestSolver.h>
+#include <pbd/WindTurbine.h>
+#include <ogl/RotationHandle.h>
+#include "ElasticRodSystem.h"
+
+using namespace aphid;
+
+GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
+{
+	perspCamera()->setFarClipPlane(1000.f);
+	perspCamera()->setNearClipPlane(1.f);
+	orthoCamera()->setFarClipPlane(1000.f);
+	orthoCamera()->setNearClipPlane(1.f);
+	//usePerspCamera();
+	//resetView();
+	m_workMode = wmInteractive;
+	m_smpV.set(.3f, .4f, .5f);
+	m_solver = new TestSolver;
+	
+	pbd::WindTurbine* windicator = m_solver->windTurbine();
+	m_roth = new RotationHandle(windicator->visualizeSpace() );
+	m_roth->setRadius(8.f);
+	
+	m_erod = new pbd::ElasticRodSystem;
+	m_erod->create();
+	
+}
+
+GLWidget::~GLWidget()
+{
+}
+
+void GLWidget::clientInit()
+{
+    connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
+	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
+}
+
+void GLWidget::clientDraw()
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	const pbd::ParticleData* particle = m_solver->c_particles();
+	const Vector3F * pos = particle->pos();
+	const pbd::ParticleData* ghost = m_solver->c_ghostParticles();
+	const Vector3F * gpos = ghost->pos();
+	
+	const int ne = m_solver->numEdges();
+	int iA, iB, iG;
+	glBegin(GL_LINES);
+	for(int i=0; i< ne;++i) {
+		m_solver->getEdgeIndices(iA, iB, iG, i);
+	    const Vector3F& p1 = pos[iA];
+	    const Vector3F& p2 = pos[iB];
+	    const Vector3F& p3 = gpos[iG];
+		glColor3f(1,1,1);
+	    glVertex3f(p1.x,p1.y,p1.z);
+		glVertex3f(p2.x,p2.y,p2.z);
+	}
+	glEnd();
+	
+	const int& np = particle->numParticles();
+	glColor3f(0,0,1);
+	glBegin(GL_POINTS);
+	for(int i=0; i< np;++i) {
+		const Vector3F& p1 = pos[i];
+		glVertex3f(p1.x,p1.y,p1.z);
+	}
+	glEnd();
+
+	const int& ngp = ghost->numParticles();
+	glColor3f(1,1,0);
+	glBegin(GL_POINTS);
+	for(int i=0; i< ngp;++i) {
+		const Vector3F& p1 = gpos[i];
+		glVertex3f(p1.x,p1.y,p1.z);
+	}
+	glEnd();
+
+	drawWindTurbine();
+	
+	getDrawer()->m_markerProfile.apply();
+
+	Vector3F veye = getCamera()->eyeDirection();
+	
+	pbd::WindTurbine* windicator = m_solver->windTurbine();
+	Matrix44F meye = *windicator->visualizeSpace();
+	
+	meye.setFrontOrientation(veye );
+
+	m_roth->draw(&meye);
+	
+	drawERodNodes();
+	drawBishopFrames();
+	
+}
+
+void GLWidget::clientSelect(QMouseEvent *event)
+{
+    if(m_workMode > wmInteractive) return;
+	m_roth->begin(getIncidentRay() );
+    //m_tranh->begin(getIncidentRay() );
+	update();
+}
+
+void GLWidget::clientDeselect(QMouseEvent *event)
+{
+    if(m_workMode > wmInteractive) return;
+	m_roth->end();
+    //m_tranh->end();
+	update();
+}
+
+void GLWidget::clientMouseInput(QMouseEvent *event)
+{
+    if(m_workMode > wmInteractive) return;
+	m_roth->rotate(getIncidentRay() );
+    //m_tranh->translate(getIncidentRay() );
+	update();
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *e)
+{
+	switch (e->key()) {
+		case Qt::Key_N:
+			addWindSpeed(-5.f * RandomF01());
+			break;
+		case Qt::Key_M:
+			addWindSpeed(5.f * RandomF01());
+			break;
+		case Qt::Key_V:
+			break;
+		case Qt::Key_C:
+			break;
+		default:
+			break;
+	}
+
+	Base3DView::keyPressEvent(e);
+}
+
+void GLWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	Base3DView::keyReleaseEvent(event);
+}
+
+void GLWidget::resetPerspViewTransform()
+{
+static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 0.8660254f, -0.5f, 0.f,
+					0.f, 0.5f, 0.8660254f, 0.f,
+					32.f, 200.f, 346.4101616f, 1.f};
+	Matrix44F mat(mm);
+	perspCamera()->setViewTransform(mat, 400.f);
+}
+
+void GLWidget::resetOrthoViewTransform()
+{
+static const float mm1[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 0.8660254f, -0.5f, 0.f,
+					0.f, 0.5f, 0.8660254f, 0.f,
+					32.f, 200.f, 346.4101616f, 1.f};
+	Matrix44F mat(mm1);
+	orthoCamera()->setViewTransform(mat, 400.f);
+	orthoCamera()->setHorizontalAperture(150.f);
+}
+
+void GLWidget::drawWindTurbine()
+{
+	const pbd::WindTurbine* windicator = m_solver->windTurbine();
+	const Matrix44F* tm = windicator->visualizeSpace();
+	
+	getDrawer()->m_surfaceProfile.apply();
+	
+	glPushMatrix();
+	getDrawer()->useSpace(*tm);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	drawMesh(pbd::WindTurbine::sStatorNumTriangleIndices, pbd::WindTurbine::sStatorMeshTriangleIndices,
+		pbd::WindTurbine::sStatorMeshVertices, pbd::WindTurbine::sStatorMeshNormals);
+	
+	glRotatef(windicator->rotorAngle(), 1, 0, 0);
+	
+	drawMesh(pbd::WindTurbine::sRotorNumTriangleIndices, pbd::WindTurbine::sRotorMeshTriangleIndices,
+		pbd::WindTurbine::sRotorMeshVertices, pbd::WindTurbine::sRotorMeshNormals);
+		
+	drawMesh(pbd::WindTurbine::sBladeNumTriangleIndices, pbd::WindTurbine::sBladeMeshTriangleIndices,
+		pbd::WindTurbine::sBladeMeshVertices, pbd::WindTurbine::sBladeMeshNormals);
+		
+	glRotatef(120.f, 1, 0, 0);
+	
+	drawMesh(pbd::WindTurbine::sBladeNumTriangleIndices, pbd::WindTurbine::sBladeMeshTriangleIndices,
+		pbd::WindTurbine::sBladeMeshVertices, pbd::WindTurbine::sBladeMeshNormals);
+	
+	glRotatef(120.f, 1, 0, 0);
+	
+	drawMesh(pbd::WindTurbine::sBladeNumTriangleIndices, pbd::WindTurbine::sBladeMeshTriangleIndices,
+		pbd::WindTurbine::sBladeMeshVertices, pbd::WindTurbine::sBladeMeshNormals);
+	
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	glPopMatrix();
+	
+}
+
+void GLWidget::drawMesh(const int& nind, const int* inds, const float* pos, const float* nml)
+{
+	glNormalPointer(GL_FLOAT, 0, (GLfloat*)nml);
+	glVertexPointer(3, GL_FLOAT, 0, (GLfloat*)pos);
+	
+	glDrawElements(GL_TRIANGLES, nind, GL_UNSIGNED_INT, inds );
+	
+}
+
+void GLWidget::addWindSpeed(float x)
+{
+	pbd::WindTurbine* windicator = m_solver->windTurbine();
+	float s = x + windicator->windSpeed();
+	windicator->setWindSpeed(s);
+}
+
+void GLWidget::drawERodNodes()
+{
+	const int n = m_erod->numSegments();
+	
+	glBegin(GL_LINES);
+	
+	for(int i=0;i<n;++i) {
+		const Vector3F& p1 = m_erod->positions()[i];
+		glVertex3f(p1.x,p1.y,p1.z);
+		const Vector3F& p2 = m_erod->positions()[i+1];
+		glVertex3f(p2.x,p2.y,p2.z);
+	}
+	
+	glEnd();
+}
+
+void GLWidget::drawBishopFrames()
+{
+	const int n = m_erod->numSegments();
+	Vector3F c, t, u, v;
+	for(int i=0;i<n;++i) {
+		m_erod->getBishopFrame(c, t, u, v, i);
+		glColor3f(1,0,0);
+		getDrawer()->arrow(c, c + t);
+		glColor3f(0,1,0);
+		getDrawer()->arrow(c, c + u);
+		glColor3f(0,0,1);
+		getDrawer()->arrow(c, c + v);
+	}
+}

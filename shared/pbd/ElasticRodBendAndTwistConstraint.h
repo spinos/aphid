@@ -19,11 +19,7 @@ namespace pbd {
 class ParticleData;
 
 class ElasticRodBendAndTwistConstraint : public Constraint<5> {
-
-/// material frame ABD
-	MatrixC33F m_dA; 
-/// material frame BCE
-	MatrixC33F m_dB; 
+ 
 	Vector3F m_restDarbouxVector;
 	Vector3F m_bendAndTwistKs;
 /// |D - edgeAB midpoint|
@@ -44,12 +40,14 @@ public:
 	
 	void calculateGeometryNormal(ParticleData* part, ParticleData* ghost);
 
+	const Vector3F& bendAndTwistKs() const;
+	const float& midEdgeRestLength() const;
+	const float& stiffness() const;
+
 protected:
-	void computeMaterialFrame(MatrixC33F& frame,
-	        const Vector3F& vA, const Vector3F& vB, const Vector3F& vG);
-	void computeDarbouxVector(Vector3F& darboux,
-	        const MatrixC33F& frameA, const MatrixC33F& frameB,
-	        float midEdgeLength);
+
+	Vector3F& restDarbouxVector();
+	void setEdgeRestLength(float x);
 	bool projectBendingAndTwistingConstraint(const Vector3F& pA, const float wA, 
 		const Vector3F& pB, const float wB, 
 		const Vector3F& pC, const float wC,
@@ -58,19 +56,24 @@ protected:
 		const Vector3F& bendingAndTwistingKs,
 		const float midEdgeLength,
 		const Vector3F& restDarbouxVector,
-		Vector3F& corrA, Vector3F& corrB, Vector3F& corrC, Vector3F& corrD, Vector3F& corrE);
+		Vector3F& corrA, Vector3F& corrB, Vector3F& corrC, Vector3F& corrD, Vector3F& corrE) const;
+	void computeMaterialFrame(MatrixC33F& frame,
+	        const Vector3F& vA, const Vector3F& vB, const Vector3F& vG) const;
+	void computeDarbouxVector(Vector3F& darboux,
+	        const MatrixC33F& frameA, const MatrixC33F& frameB,
+	        float midEdgeLength) const;
 	bool computeMaterialFrameDerivative(const Vector3F& p0, const Vector3F& p1, const Vector3F& p2, 
             const MatrixC33F& d,
             MatrixC33F& d1p0, MatrixC33F& d1p1, MatrixC33F& d1p2,
             MatrixC33F& d2p0, MatrixC33F& d2p1, MatrixC33F& d2p2,
-            MatrixC33F& d3p0, MatrixC33F& d3p1, MatrixC33F& d3p2);
+            MatrixC33F& d3p0, MatrixC33F& d3p1, MatrixC33F& d3p2) const;
     bool computeDarbouxGradient(const Vector3F& darboux_vector, 
             const float length,
             const MatrixC33F& da, const MatrixC33F& db,
             const MatrixC33F dajpi[3][3], const MatrixC33F dbjpi[3][3],
             const Vector3F& bendAndTwistKs,
             MatrixC33F& omega_pa, MatrixC33F& omega_pb, MatrixC33F& omega_pc, 
-			MatrixC33F& omega_pd, MatrixC33F& omega_pe);
+			MatrixC33F& omega_pd, MatrixC33F& omega_pe) const;
 	const Vector3F& restDarbouxVector() const;
 	
 };

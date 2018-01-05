@@ -47,7 +47,12 @@ void printSpMat(const SparseMatrix<int>& matx)
 {
 	const int& nrow = matx.numRows();
 	const int& ncol = matx.numCols();
-	std::cout<<"\n "<<nrow<<"-by-"<<ncol<<" mat\n";
+	std::cout<<"\n "<<nrow<<"-by-"<<ncol<<" mat";
+	if(matx.isColumnMajor() ) {
+		std::cout<<" column-major\n";
+	} else {
+		std::cout<<" row-major\n";
+	}
 	for(int i=0;i<nrow;++i) {
 		for(int j=0;j<ncol;++j) {
 			int e = matx.get(i,j);
@@ -83,7 +88,7 @@ void testSpMat()
 	printSpMat(matt);
 	
 	std::cout<<"\n c = ab";
-	SparseMatrix<int> matc = matt * matx;
+	SparseMatrix<int> matc = matx * matt;
 	
 	printSpMat(matc);
 }

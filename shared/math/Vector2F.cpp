@@ -47,6 +47,9 @@ void Vector2F::set(float vx, float vy)
     y = vy;
 }
 
+void Vector2F::setZero()
+{ x = y = 0.f; }
+
 void Vector2F::operator+=( const Vector2F& other )
 {
         x += other.x;

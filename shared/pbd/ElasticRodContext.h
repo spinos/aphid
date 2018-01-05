@@ -12,6 +12,7 @@ namespace pbd {
 class Beam;
 class ElasticRodEdgeConstraint;
 class ElasticRodBendAndTwistConstraint;
+class ElasticRodAttachmentConstraint;
 class ElasticRodContext : public SimulationContext {
 
     ParticleData m_ghostPart;
@@ -19,6 +20,8 @@ class ElasticRodContext : public SimulationContext {
     EdgeConstraintVector m_edgeConstraints;
     typedef std::vector<ElasticRodBendAndTwistConstraint* > BendTwistConstraintVector;
     BendTwistConstraintVector m_bendTwistConstraints;
+	typedef std::vector<ElasticRodAttachmentConstraint* > AttachmentConstraintVector;
+    AttachmentConstraintVector m_attachmentConstraints;
 /// velocity of mid-point of each edge
     Vector3F * m_vmt;
     
@@ -39,6 +42,8 @@ protected:
     void addElasticRodEdgeConstraint(int a, int b, int g);
     void addElasticRodBendAndTwistConstraint(int a, int b, int c,
                                     int d, int e, float stiffness);
+	void addElasticRodAttachmentConstraint(int a, int b, int c,
+                                    int d, int e, float stiffness);
     void positionConstraintProjection();
 /// modify gravity on ghost points
 	virtual void applyGravity(float dt);
@@ -49,8 +54,6 @@ protected:
 	virtual void dampVelocity(float damping);
 	virtual void projectPosition(float dt);
     virtual void updateVelocityAndPosition(float dt);
-	
-	void addElasticRodBendAndTwistConstraint(ElasticRodBendAndTwistConstraint* c);
 	
 	ElasticRodBendAndTwistConstraint* bendAndTwistConstraint(int i);
     

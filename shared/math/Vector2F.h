@@ -23,6 +23,7 @@ public:
 	Vector2F(const Vector2F& from, const Vector2F& to);
 	
 	void set(float vx, float vy);
+	void setZero();
 	
 	void operator+=( const Vector2F& other );
 	void operator-=( const Vector2F& other );

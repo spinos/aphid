@@ -41,6 +41,7 @@ void Quaternion::normalize()
     w /= mag;
 }
 
+/// http://mathworld.wolfram.com/Quaternion.html
 Quaternion Quaternion::operator*( const Quaternion & b ) const
 {
     const float qw = w * b.w - x * b.x - y * b.y - z * b.z;
@@ -131,6 +132,12 @@ void Quaternion::inverse()
 	x = x / -tr;
 	y = y / -tr;
 	z = z / -tr;
+}
+
+/// https://github.com/millag/DiscreteElasticRods/blob/master/src/ElasticRod.cpp
+Quaternion Quaternion::conjugate() const
+{
+	return Quaternion(w, -x, -y, -z);
 }
 
 }

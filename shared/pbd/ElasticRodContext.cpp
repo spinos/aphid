@@ -1,6 +1,7 @@
 #include "ElasticRodContext.h"
 #include "ElasticRodEdgeConstraint.h"
 #include "ElasticRodBendAndTwistConstraint.h"
+#include "ElasticRodAttachmentConstraint.h"
 #include "Beam.h"
 
 namespace aphid {
@@ -38,8 +39,14 @@ void ElasticRodContext::addElasticRodBendAndTwistConstraint(int a, int b, int c,
 	}
 }
 
-void ElasticRodContext::addElasticRodBendAndTwistConstraint(ElasticRodBendAndTwistConstraint* c)
-{ m_bendTwistConstraints.push_back(c); }
+void ElasticRodContext::addElasticRodAttachmentConstraint(int a, int b, int c,
+                                    int d, int e, float stiffness)
+{
+	ElasticRodAttachmentConstraint* ac = new ElasticRodAttachmentConstraint();
+	ac->initConstraint(this, a, b, c, d, e);
+	ac->setStiffness(stiffness);
+	m_attachmentConstraints.push_back(ac);
+}
 
 void ElasticRodContext::clearConstraints()
 {
@@ -72,6 +79,12 @@ void ElasticRodContext::positionConstraintProjection()
 		for(;itb!=m_bendTwistConstraints.end();++itb) {
 			(*itb)->solvePositionConstraint(particles(), ghostParticles() );
 		}
+		
+		AttachmentConstraintVector::iterator ita = m_attachmentConstraints.begin();
+		for(;ita!=m_attachmentConstraints.end();++ita) {
+			(*ita)->solvePositionConstraint(particles(), ghostParticles() );
+		}
+		
 #else
 		for(int i=0;i<nec;++i) {
 			m_edgeConstraints[i]->solvePositionConstraint(particles(), ghostParticles() );
@@ -82,6 +95,7 @@ void ElasticRodContext::positionConstraintProjection()
 #endif		
 		nloop++;
 	}
+	
 }
 
 int ElasticRodContext::numEdges() const
@@ -199,9 +213,9 @@ void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
 			ghost->invMass()[ngpbegin + i] = bems[j].getInvMass(i);
 		}
     
-///lock two first particles and first ghost point
+///lock first particles and first ghost point
 		part->invMass()[npbegin + 0] = 0.f;
-		part->invMass()[npbegin + 1] = 0.f;
+		//part->invMass()[npbegin + 1] = 0.f;
 		ghost->invMass()[ngpbegin + 0] = 0.f;
     
 		const int& nsj = bems[j].numSegments();
@@ -220,6 +234,10 @@ void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
 											bems[j].getStiffness(i+1) );
 			}
 		}
+		
+		addElasticRodAttachmentConstraint(npbegin, 1 + npbegin, 1 + npbegin, 
+											ngpbegin, ngpbegin,
+											.5f );
 		
 		npbegin += npj;
 		ngpbegin += ngpj;
@@ -240,7 +258,7 @@ void ElasticRodContext::applyWind(float dt)
 {
 	computeGeometryNormal();
 	SimulationContext::applyWind(dt);
-	applyWindTo(&m_ghostPart, dt);
+	//applyWindTo(&m_ghostPart, dt);
 }
 
 }

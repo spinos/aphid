@@ -8,7 +8,8 @@
  */
 
 #include "Beam.h"
-#include <geom/SegmentNormals.h>
+#include <geom/ParallelTransport.h>
+#include <math/Matrix33F.h>
 #include <math/MatrixC33F.h>
 #include <math/linspace.h>
 
@@ -58,10 +59,10 @@ void Beam::createNumSegments(int spp)
 	calculateInvMass(&invMassCurve);
 	
 	static const float pntStiff[4][2] = {
-	{0.f, 1.f},
-	{4.f, .8f},
-	{8.f, .4f},
-	{12.f, .1f},
+	{0.f, .3f},
+	{4.f, .3f},
+	{8.f, .2f},
+	{12.f, .2f},
 	};
 	static const float tngStiff[4][2] = {
 	{1.f, -.1f},
@@ -129,10 +130,12 @@ void Beam::calculatePnts()
 /// last particle
 	m_p[acc] = Pnt(5);
 	
-	SegmentNormals segnml(ns);
+	//SegmentNormals segnml(ns);
 	Vector3F p0p1 = m_p[1] - m_p[0];
-	segnml.calculateFirstNormal(p0p1, m_ref);
-	m_gp[0] = (m_p[0] + m_p[1]) * .5f + segnml.getNormal(0);
+	Matrix33F frm;
+	ParallelTransport::FirstFrame(frm, p0p1, m_ref);
+	//segnml.calculateFirstNormal(p0p1, m_ref);
+	m_gp[0] = (m_p[0] + m_p[1]) * .5f + ParallelTransport::FrameUp(frm) * p0p1.length();
 	
 	for(int i=1;i<ns;++i) {
 		Vector3F p0 = m_p[i - 1];
@@ -140,10 +143,11 @@ void Beam::calculatePnts()
 		Vector3F p2 = m_p[i+1];
 		p0p1 = p1 - p0;
 		Vector3F p1p2 = p2 - p1;
-		Vector3F p1pm02 = (p0 + p2) * 0.5f - p1;
-		segnml.calculateNormal(i, p0p1, p1p2, p1pm02 );
+		ParallelTransport::RotateFrame(frm, p0p1, p1p2);
+		//Vector3F p1pm02 = (p0 + p2) * 0.5f - p1;
+		//segnml.calculateNormal(i, p0p1, p1p2, p1pm02 );
 /// mid edge rest length?
-		m_gp[i] = (p1 + p2) * .5f + segnml.getNormal(i) * p1.distanceTo(p2) * .5f;
+		m_gp[i] = (p1 + p2) * .5f + ParallelTransport::FrameUp(frm) * (p1.distanceTo(p2) * .5f);
 	
 	}
 	

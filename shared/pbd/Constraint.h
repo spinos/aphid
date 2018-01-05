@@ -15,7 +15,8 @@ public:
     enum ConstraintType {
         ctUnknown = 0,
         ctElasticRodEdge = 1,
-        ctElasticRodBendAndTwist = 2
+        ctElasticRodBendAndTwist = 2,
+		ctElasticRodAttachment = 3,
     };
     
     Constraint();

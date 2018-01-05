@@ -1,3 +1,9 @@
+/*
+ *  ElasticRodBendAndTwistConstraint.cpp
+ *
+ *  Position-based Elastic Rods
+ */
+
 #include "ElasticRodBendAndTwistConstraint.h"
 #include "SimulationContext.h"
 #include "ParticleData.h"
@@ -6,7 +12,7 @@
 namespace aphid {
 namespace pbd {
     
-ElasticRodBendAndTwistConstraint::ElasticRodBendAndTwistConstraint() 
+ElasticRodBendAndTwistConstraint::ElasticRodBendAndTwistConstraint() : m_stiffness(.5f)
 {}
 
 ElasticRodBendAndTwistConstraint::ConstraintType ElasticRodBendAndTwistConstraint::getConstraintType() const
@@ -32,17 +38,26 @@ bool ElasticRodBendAndTwistConstraint::initConstraint(SimulationContext * model,
 	const Vector3F& xD = gs[pD];
 	const Vector3F& xE = gs[pE];
 	
-	computeMaterialFrame(m_dA, xA, xB, xD);
-	computeMaterialFrame(m_dB, xB, xC, xE);
+/// material frame ABD
+	MatrixC33F dA; 
+/// material frame BCE
+	MatrixC33F dB;
+	computeMaterialFrame(dA, xA, xB, xD);
+	computeMaterialFrame(dB, xB, xC, xE);
 	m_midEdgeRestLength = ((xA + xB) * .5f).distanceTo((xB + xC) * .5f);
-	computeDarbouxVector(m_restDarbouxVector, m_dA, m_dB, m_midEdgeRestLength);
+	computeDarbouxVector(m_restDarbouxVector, dA, dB, m_midEdgeRestLength);
 	m_bendAndTwistKs.set(1.f, 1.f, 1.f);
-	m_stiffness = 1.f;
 	return true;
 }
 
+Vector3F& ElasticRodBendAndTwistConstraint::restDarbouxVector()
+{ return m_restDarbouxVector; }
+
 void ElasticRodBendAndTwistConstraint::setStiffness(float x)
 { m_stiffness = x; }
+
+void ElasticRodBendAndTwistConstraint::setEdgeRestLength(float x)
+{ m_midEdgeRestLength = x; }
 
 bool ElasticRodBendAndTwistConstraint::solvePositionConstraint(ParticleData* part, ParticleData* ghost)
 {
@@ -96,7 +111,7 @@ bool ElasticRodBendAndTwistConstraint::projectBendingAndTwistingConstraint(const
 		const Vector3F& bendingAndTwistingKs,
 		const float midEdgeLength,
 		const Vector3F& restDarbouxVector,
-		Vector3F& corrA, Vector3F& corrB, Vector3F& corrC, Vector3F& corrD, Vector3F& corrE)
+		Vector3F& corrA, Vector3F& corrB, Vector3F& corrC, Vector3F& corrD, Vector3F& corrE) const
 {
     Vector3F darboux;
 	MatrixC33F dA, dB;
@@ -145,6 +160,11 @@ bool ElasticRodBendAndTwistConstraint::projectBendingAndTwistingConstraint(const
 	
 	tmp_mat = factor_matrix;
 	if(!tmp_mat.inverse() ) {
+		std::cout<<" "<<c_bodyInds()[0]
+				<<" "<<c_bodyInds()[1]
+				<<" "<<c_bodyInds()[2]
+				<<" "<<c_bodyInds()[3]
+				<<" "<<c_bodyInds()[4];
 		return false;
 	}
 
@@ -172,7 +192,7 @@ bool ElasticRodBendAndTwistConstraint::projectBendingAndTwistingConstraint(const
 /// De <- [d^1e, d^2e, d^3e]
 /// material frame at the center of an edge
 void ElasticRodBendAndTwistConstraint::computeMaterialFrame(MatrixC33F& frame,
-	        const Vector3F& vA, const Vector3F& vB, const Vector3F& vG)
+	        const Vector3F& vA, const Vector3F& vB, const Vector3F& vG) const
 {
     Vector3F d3 = vB - vA;
     d3.normalize();
@@ -190,12 +210,13 @@ static const int permutation[3][3] = {
 	{2, 1, 0}
 };
 
+/// Omega
 /// Darboux vector describes how the material frame evolves along the curve
 /// an axial vector of frame rotation with respect to change of s.
 /// s is a point on rod
 void ElasticRodBendAndTwistConstraint::computeDarbouxVector(Vector3F& darboux,
 	        const MatrixC33F& frameA, const MatrixC33F& frameB,
-	        float midEdgeLength)
+	        float midEdgeLength) const
 {
     float factor = 1.0f + frameA.colV(0).dot(frameB.colV(0))
                         + frameA.colV(1).dot(frameB.colV(1)) 
@@ -219,7 +240,7 @@ bool ElasticRodBendAndTwistConstraint::computeMaterialFrameDerivative(const Vect
             const MatrixC33F& d,
             MatrixC33F& d1p0, MatrixC33F& d1p1, MatrixC33F& d1p2,
             MatrixC33F& d2p0, MatrixC33F& d2p1, MatrixC33F& d2p2,
-            MatrixC33F& d3p0, MatrixC33F& d3p1, MatrixC33F& d3p2)
+            MatrixC33F& d3p0, MatrixC33F& d3p1, MatrixC33F& d3p2) const
 {
 /// d3dp0 <- -(I - d^3 circled-cross d^3) / |p01|
 /// d3dp1 <-  (I - d^3 circled-cross d^3) / |p01|
@@ -289,7 +310,7 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 	const MatrixC33F dajpi[3][3], const MatrixC33F dbjpi[3][3],
 	const Vector3F& bendAndTwistKs,
 	MatrixC33F& omega_pa, MatrixC33F& omega_pb, MatrixC33F& omega_pc, 
-	MatrixC33F& omega_pd, MatrixC33F& omega_pe)
+	MatrixC33F& omega_pd, MatrixC33F& omega_pe) const
 {
 /// X <- 2 / (l + sigma n=1,3 (dan^t dbn) )
     float X = 1.0f + da.colV(0).dot(db.colV(0)) 
@@ -418,6 +439,15 @@ bool ElasticRodBendAndTwistConstraint::computeDarbouxGradient(
 void ElasticRodBendAndTwistConstraint::setBendAndTwistKs(const float& a, const float& b, const float& c)
 { m_bendAndTwistKs.set(a, b, c); }
 
+const Vector3F& ElasticRodBendAndTwistConstraint::bendAndTwistKs() const
+{ return m_bendAndTwistKs; }
+
+const float& ElasticRodBendAndTwistConstraint::midEdgeRestLength() const
+{ return m_midEdgeRestLength; }
+
+const float& ElasticRodBendAndTwistConstraint::stiffness() const
+{ return m_stiffness; }
+
 void ElasticRodBendAndTwistConstraint::calculateGeometryNormal(ParticleData* part, ParticleData* ghost)
 {
 	Vector3F* ps = part->pos();
@@ -457,8 +487,6 @@ void ElasticRodBendAndTwistConstraint::calculateGeometryNormal(ParticleData* par
 	nml[iC] = nC;
 	gNml[iD] = nD;
 	gNml[iE] = nE;
-	//std::cout<<" nA"<<nA<<" nB"<<nB<<" nC"<<nC
-	//	<<" nD"<<nD<<" nE"<<nE;
 		
 }
 

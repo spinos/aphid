@@ -31,6 +31,8 @@ public:
 					const Quaternion& qB,
 					const float& t);
 					
+	Quaternion conjugate() const;
+					
 	float w, x, y, z;
 };
 
