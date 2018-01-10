@@ -31,6 +31,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	
 	m_erod = new pbd::ElasticRodSystem;
 	m_erod->create();
+	std::cout<<"\n n edges "<<m_solver->numEdges()<<std::endl;
 	
 }
 
@@ -41,6 +42,8 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {
     connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
+	connect(this, SIGNAL(restartAtCurrentState()), m_solver, SLOT(recvRestartAtCurrentState()));
+	connect(this, SIGNAL(pauseSim()), m_solver, SLOT(recvToggleSimulation()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 }
 
@@ -50,38 +53,27 @@ void GLWidget::clientDraw()
 	
 	const pbd::ParticleData* particle = m_solver->c_particles();
 	const Vector3F * pos = particle->pos();
-	const pbd::ParticleData* ghost = m_solver->c_ghostParticles();
-	const Vector3F * gpos = ghost->pos();
-	
-	const int ne = m_solver->numEdges();
-	int iA, iB, iG;
+	glColor3f(0,0,1);
+/*	
+	const int& np = particle->numParticles();
 	glBegin(GL_LINES);
-	for(int i=0; i< ne;++i) {
-		m_solver->getEdgeIndices(iA, iB, iG, i);
-	    const Vector3F& p1 = pos[iA];
-	    const Vector3F& p2 = pos[iB];
-	    const Vector3F& p3 = gpos[iG];
-		glColor3f(1,1,1);
-	    glVertex3f(p1.x,p1.y,p1.z);
+	for(int i=1; i< np;++i) {
+		const Vector3F& p1 = pos[i - 1];
+		glVertex3f(p1.x,p1.y,p1.z);
+		const Vector3F& p2 = pos[i];
 		glVertex3f(p2.x,p2.y,p2.z);
 	}
 	glEnd();
-	
-	const int& np = particle->numParticles();
-	glColor3f(0,0,1);
-	glBegin(GL_POINTS);
-	for(int i=0; i< np;++i) {
-		const Vector3F& p1 = pos[i];
+*/
+	const int& ne = m_solver->numEdges();
+	int v1, v2;
+	glBegin(GL_LINES);
+	for(int i=0; i< ne;++i) {
+		m_solver->getEdge(v1, v2, i);
+		const Vector3F& p1 = pos[v1];
 		glVertex3f(p1.x,p1.y,p1.z);
-	}
-	glEnd();
-
-	const int& ngp = ghost->numParticles();
-	glColor3f(1,1,0);
-	glBegin(GL_POINTS);
-	for(int i=0; i< ngp;++i) {
-		const Vector3F& p1 = gpos[i];
-		glVertex3f(p1.x,p1.y,p1.z);
+		const Vector3F& p2 = pos[v2];
+		glVertex3f(p2.x,p2.y,p2.z);
 	}
 	glEnd();
 
@@ -97,9 +89,6 @@ void GLWidget::clientDraw()
 	meye.setFrontOrientation(veye );
 
 	m_roth->draw(&meye);
-	
-	drawERodNodes();
-	drawBishopFrames();
 	
 }
 
@@ -136,9 +125,11 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 		case Qt::Key_M:
 			addWindSpeed(5.f * RandomF01());
 			break;
-		case Qt::Key_V:
-			break;
 		case Qt::Key_C:
+			emit restartAtCurrentState();
+			break;
+		case Qt::Key_Space:
+			emit pauseSim();
 			break;
 		default:
 			break;

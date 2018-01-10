@@ -75,6 +75,8 @@ public:
 	T operator[](int i) const;
 /// insert if not found i-th element
 	void set(int i, const T& val);
+/// a_i <- a_i + b
+	void add(int i, const T& b);
 	void remove(int i);
 	
 	SparseIterator<T> begin();
@@ -140,6 +142,18 @@ void SparseVector<T>::set(int i, const T& val)
 	}
 	
 	insertElement(i, val, sr._followedBy);
+}
+
+template<typename T>
+void SparseVector<T>::add(int i, const T& b)
+{
+	SparseSearchResult sr = indexTo(i);
+	if(sr._found > -1) {
+		m_v[sr._found] += b;
+		return;
+	}
+	
+	insertElement(i, b, sr._followedBy);
 }
 
 template<typename T>
@@ -315,6 +329,9 @@ public:
 	void create(int nrow, int ncol);
 /// i-th row j-th column
 	void set(int i, int j, const T& val);
+/// a_ij <- a_ij + b
+	void add(int i, int j, const T& b);
+	
 	T get(int i, int j) const;
 	
 	const int& numCols() const;
@@ -329,6 +346,8 @@ public:
 	SVecTyp& column(int j) const;
 	
 	bool isColumnMajor() const;
+/// test
+	void printMatrix() const;
 	
 private:
 	void clear();
@@ -376,6 +395,16 @@ void SparseMatrix<T>::set(int i, int j, const T& val)
 		m_vecs[i].set(j, val);
 	} else {
 		m_vecs[j].set(i, val);
+	}
+}
+
+template<typename T>
+void SparseMatrix<T>::add(int i, int j, const T& b)
+{
+	if(m_format == cfRowMajor) {
+		m_vecs[i].add(j, b);
+	} else {
+		m_vecs[j].add(i, b);
 	}
 }
 
@@ -495,6 +524,25 @@ template<typename T>
 SparseVector<T>& SparseMatrix<T>::row(int i) const
 {
 	return m_vecs[i];
+}
+
+template<typename T>
+void SparseMatrix<T>::printMatrix() const
+{
+	std::cout<<"\n "<<m_numRows<<"-by-"<<m_numCols<<" mat";
+	if(isColumnMajor() ) {
+		std::cout<<" column-major\n";
+	} else {
+		std::cout<<" row-major\n";
+	}
+	for(int i=0;i<m_numRows;++i) {
+		for(int j=0;j<m_numCols;++j) {
+			T e = get(i,j);
+			std::cout<<" "<<e;
+		}
+		std::cout<<"\n";
+	}
+	std::cout.flush();
 }
 
 /// sparse matrix in Compressed Sparse Row (csr) format

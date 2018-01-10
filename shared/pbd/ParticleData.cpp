@@ -122,5 +122,10 @@ void ParticleData::updateVelocityAndPosition(float dt)
 	}
 }
 
+void ParticleData::zeroVelocity()
+{
+	memset(m_velocity, 0, m_numParticles*12);
+}
+
 }
 }

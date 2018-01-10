@@ -3,6 +3,8 @@
 #include "ElasticRodBendAndTwistConstraint.h"
 #include "ElasticRodAttachmentConstraint.h"
 #include "Beam.h"
+#include <geom/ParallelTransport.h>
+#include <math/Matrix33F.h>
 
 namespace aphid {
 namespace pbd {
@@ -68,7 +70,7 @@ void ElasticRodContext::positionConstraintProjection()
 	const int nec = m_edgeConstraints.size();
 	const int nbtc = m_bendTwistConstraints.size();
 	int nloop = 0;
-	while(nloop < 4) {
+	while(nloop < 3) {
 #if 1
 		EdgeConstraintVector::iterator it = m_edgeConstraints.begin();
 		for(;it!=m_edgeConstraints.end();++it) {
@@ -105,7 +107,7 @@ void ElasticRodContext::applyGravity(float dt)
 {
     SimulationContext::applyGravity(dt);
 /// gravity on ghost points
-	applyGravityTo(ghostParticles(), dt);
+	//applyGravityTo(ghostParticles(), dt);
 }
 
 void ElasticRodContext::modifyGhostGravity(float dt)
@@ -183,13 +185,15 @@ void ElasticRodContext::getEdgeIndices(int& iA, int& iB, int& iG,
 
 void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
 {
+	m_numStrands = numBeams;
+	m_strandBegin = new int[m_numStrands + 1];
+	m_strandGhostBegin = new int[m_numStrands + 1];
 	int np = 0;
 	int ngp = 0;
 	
 	for(int j=0;j<numBeams;++j) {
 		np += bems[j].numParticles();
 		ngp += bems[j].numGhostParticles();
-	
 	}
 	
     pbd::ParticleData* part = particles();
@@ -197,11 +201,12 @@ void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
 	pbd::ParticleData* ghost = ghostParticles();
 	ghost->createNParticles(ngp);
 	
+	int npj, ngpj;
 	int npbegin = 0;
 	int ngpbegin = 0;
 	for(int j=0;j<numBeams;++j) {
-		const int npj = bems[j].numParticles();
-		const int ngpj = bems[j].numGhostParticles();
+		npj = bems[j].numParticles();
+		ngpj = bems[j].numGhostParticles();
 		
 		for(int i=0;i<npj;++i) {
 			part->setParticle(bems[j].getParticlePnt(i), npbegin + i);
@@ -215,9 +220,9 @@ void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
     
 ///lock first particles and first ghost point
 		part->invMass()[npbegin + 0] = 0.f;
-		//part->invMass()[npbegin + 1] = 0.f;
+		part->invMass()[npbegin + 1] = 0.f;
 		ghost->invMass()[ngpbegin + 0] = 0.f;
-    
+		
 		const int& nsj = bems[j].numSegments();
 		//std::cout<<"\n nseg "<<nsj;
 		for(int i=0;i<nsj;++i) {
@@ -234,16 +239,19 @@ void ElasticRodContext::createBeams(const Beam* bems, int numBeams)
 											bems[j].getStiffness(i+1) );
 			}
 		}
-		
+#if 0		
 		addElasticRodAttachmentConstraint(npbegin, 1 + npbegin, 1 + npbegin, 
 											ngpbegin, ngpbegin,
 											.5f );
-		
+#endif
+		m_strandBegin[j] = npbegin;
+		m_strandGhostBegin[j] = ngpbegin;
+	
 		npbegin += npj;
 		ngpbegin += ngpj;
-		
 	}
-	
+	m_strandBegin[m_numStrands] = npbegin;
+	m_strandGhostBegin[m_numStrands] = ngpj;
 }
 
 void ElasticRodContext::computeGeometryNormal()
@@ -256,9 +264,48 @@ void ElasticRodContext::computeGeometryNormal()
 
 void ElasticRodContext::applyWind(float dt)
 {
-	computeGeometryNormal();
+	//computeGeometryNormal();
 	SimulationContext::applyWind(dt);
 	//applyWindTo(&m_ghostPart, dt);
+}
+
+void ElasticRodContext::resetBendAndTwistConstraints()
+{
+	for(int i=0;i<m_numStrands;++i) {
+		resetGhostPosition(m_strandBegin[i], m_strandBegin[i + 1],
+			m_strandGhostBegin[i], m_strandGhostBegin[i + 1]);
+	}
+	
+	BendTwistConstraintVector::iterator itb = m_bendTwistConstraints.begin();
+	for(;itb!=m_bendTwistConstraints.end();++itb) {
+		(*itb)->updateConstraint(this);
+	}
+}
+
+void ElasticRodContext::resetGhostPosition(const int& pbegin, const int& pend,
+				const int& gbegin, const int& gend)
+{
+	pbd::ParticleData* part = particles();
+	pbd::ParticleData* ghost = ghostParticles();
+	const Vector3F* ps = &part->pos()[pbegin];
+	Vector3F* gs = &ghost->pos()[gbegin];
+	const int np = pend - pbegin;
+	Matrix33F frm;
+	Vector3F p0p1 = ps[1] - ps[0];
+	ParallelTransport::FirstFrame(frm, p0p1, Vector3F(0.f, 1.f, 0.f) );
+	gs[0] = (ps[0] + ps[1]) * .5f + ParallelTransport::FrameUp(frm) * p0p1.length();
+	
+	Vector3F p1p2;
+	for(int i=1;i<np-1;++i) {
+		const Vector3F& p1 = ps[i];
+		const Vector3F& p2 = ps[i+1];
+		p1p2 = p2 - p1;
+		ParallelTransport::RotateFrame(frm, p0p1, p1p2);
+		
+		gs[i] = (p1 + p2) * .5f + ParallelTransport::FrameUp(frm) * (p1.distanceTo(p2) * .5f);
+		
+		p0p1 = p1p2;
+	}
 }
 
 }

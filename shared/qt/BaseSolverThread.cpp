@@ -4,12 +4,14 @@
 namespace aphid {
 
 float BaseSolverThread::TimeStep = 1.f / 30.f;
-int BaseSolverThread::NumSubsteps = 9;
+int BaseSolverThread::NumSubsteps = 8;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {
     abort = false;
+	pause = false;
 	restart = false;
+	restartAtCurrentState = false;
 	m_numLoops = 0;
 	m_numTicks = 0;
 }
@@ -35,6 +37,22 @@ void BaseSolverThread::simulate()
     }
 }
 
+void BaseSolverThread::recvRestartAtCurrentState()
+{ 
+	mutex.lock();
+    restartAtCurrentState = true;
+    condition.wakeOne();
+    mutex.unlock();
+}
+
+void BaseSolverThread::recvToggleSimulation()
+{
+	mutex.lock();
+    pause = !pause;
+    condition.wakeOne();
+    mutex.unlock();
+}
+
 void BaseSolverThread::run()
 {	 
 	forever {
@@ -43,6 +61,15 @@ void BaseSolverThread::run()
             qDebug()<<"abort";
             return;
         }
+		
+		if(pause)
+			continue;
+		
+		if(restartAtCurrentState) {
+			restartCurrentState();
+			restartAtCurrentState = false;
+			
+		}
         
 		const float dt = TimeStep / NumSubsteps;
         for(int i=0; i < NumSubsteps;++i)
@@ -60,7 +87,8 @@ void BaseSolverThread::run()
 			condition.wait(&mutex);
 			
 		restart = false;
-        mutex.unlock();
+			
+		mutex.unlock();
    }
 }
 
@@ -87,5 +115,8 @@ bool BaseSolverThread::isMakingCache() const
 
 const int& BaseSolverThread::numTicks() const
 { return m_numTicks; }
+
+void BaseSolverThread::restartCurrentState()
+{}
 
 }

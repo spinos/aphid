@@ -7,7 +7,7 @@
 
 #include <qt/BaseSolverThread.h>
 #include <pbd/pbd_common.h>
-#include <pbd/ElasticRodContext.h>
+#include <pbd/ShapeMatchingContext.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -20,7 +20,7 @@ class WindTurbine;
 }
 }
 
-class TestSolver : public aphid::pbd::ElasticRodContext, public aphid::BaseSolverThread
+class TestSolver : public aphid::pbd::ShapeMatchingContext, public aphid::BaseSolverThread
 {
 	unsigned * m_indices;
 	aphid::pbd::Spring * m_spring;
@@ -36,12 +36,12 @@ public:
 	
 protected:
     virtual void stepPhysics(float dt);
+	virtual void restartCurrentState();
     
 private:
 	aphid::pbd::WindTurbine* m_windicator;
 	
 private:
-    void createBeam(const aphid::Matrix44F& tm);
     
 };
 

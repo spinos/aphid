@@ -33,9 +33,10 @@ public:
     
     bool initConstraint(SimulationContext * model, const int pA, const int pB, const int pC,
                                     const int pD, const int pE);
+	void updateConstraint(SimulationContext * model);
+	
 	void setStiffness(float x);
 	bool solvePositionConstraint(ParticleData* part, ParticleData* ghost);
-	
 	void setBendAndTwistKs(const float& a, const float& b, const float& c);
 	
 	void calculateGeometryNormal(ParticleData* part, ParticleData* ghost);

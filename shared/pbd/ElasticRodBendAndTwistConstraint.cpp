@@ -30,24 +30,27 @@ bool ElasticRodBendAndTwistConstraint::initConstraint(SimulationContext * model,
     bodyInds()[3] = pD;
     bodyInds()[4] = pE;
     
-    const Vector3F* ps = model->c_particles()->pos();
+    m_bendAndTwistKs.set(1.f, 1.f, 1.f);
+	updateConstraint(model);
+	return true;
+}
+
+void ElasticRodBendAndTwistConstraint::updateConstraint(SimulationContext * model)
+{
+	const Vector3F* ps = model->c_particles()->pos();
     const Vector3F* gs = model->c_ghostParticles()->pos();
-    const Vector3F& xA = ps[pA];
-	const Vector3F& xB = ps[pB];
-	const Vector3F& xC = ps[pC];
-	const Vector3F& xD = gs[pD];
-	const Vector3F& xE = gs[pE];
-	
-/// material frame ABD
+    const Vector3F& xA = ps[bodyInds()[0]];
+	const Vector3F& xB = ps[bodyInds()[1]];
+	const Vector3F& xC = ps[bodyInds()[2]];
+	const Vector3F& xD = gs[bodyInds()[3]];
+	const Vector3F& xE = gs[bodyInds()[4]];
 	MatrixC33F dA; 
-/// material frame BCE
 	MatrixC33F dB;
 	computeMaterialFrame(dA, xA, xB, xD);
 	computeMaterialFrame(dB, xB, xC, xE);
 	m_midEdgeRestLength = ((xA + xB) * .5f).distanceTo((xB + xC) * .5f);
 	computeDarbouxVector(m_restDarbouxVector, dA, dB, m_midEdgeRestLength);
-	m_bendAndTwistKs.set(1.f, 1.f, 1.f);
-	return true;
+	
 }
 
 Vector3F& ElasticRodBendAndTwistConstraint::restDarbouxVector()

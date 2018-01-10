@@ -58,7 +58,9 @@ private:
 	aphid::pbd::ElasticRodSystem* m_erod;
 	
 signals:
-    
+    void restartAtCurrentState();
+	void pauseSim();
+	
 private slots:
     
 };

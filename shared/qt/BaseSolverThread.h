@@ -35,20 +35,25 @@ protected:
     virtual void endMakingCache();
     virtual void processMakingCache();
     virtual bool isMakingCache() const;
-    
+    virtual void restartCurrentState();
+	
 private:
     QMutex mutex;
     QWaitCondition condition;
     
     bool abort;
+	bool pause;
 	bool restart;
+	bool restartAtCurrentState;
 	unsigned m_numLoops;
 	int m_numTicks;
 
 public slots:
     void simulate();
     void recvBeginCache();
-
+	void recvRestartAtCurrentState();
+	void recvToggleSimulation();
+	
 };
 
 }

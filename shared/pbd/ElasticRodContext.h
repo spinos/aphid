@@ -24,6 +24,10 @@ class ElasticRodContext : public SimulationContext {
     AttachmentConstraintVector m_attachmentConstraints;
 /// velocity of mid-point of each edge
     Vector3F * m_vmt;
+	int m_numStrands;
+/// for each strand
+	int* m_strandBegin;
+	int* m_strandGhostBegin;
     
 public:
     ElasticRodContext();
@@ -60,10 +64,15 @@ protected:
 	void computeGeometryNormal();
 	void modifyGhostGravity(float dt);
 	
+	void resetBendAndTwistConstraints();
+	
 private:
     void clearConstraints();
     void modifyEdgeGravity(Vector3F& vA, Vector3F& vB, Vector3F& vG,
                         Vector3F& vmt_1, float dt);
+/// by parallel transport
+	void resetGhostPosition(const int& pbegin, const int& pend,
+				const int& gbegin, const int& gend);
     
 };
 

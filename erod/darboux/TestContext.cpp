@@ -35,10 +35,7 @@ TestContext::TestContext()
 	}
 	
 	for(int i=0;i<NP-2;++i) {
-	    //addElasticRodBendAndTwistConstraint(i, i+1, i+2, i, i+1);
-		pbd::TestConstraint *cn = new pbd::TestConstraint();
-		const bool res = cn->initConstraint(this, i, i+1, i+2, i, i+1);
-		addElasticRodBendAndTwistConstraint(cn);
+	    addElasticRodBendAndTwistConstraint(i, i+1, i+2, i, i+1, .5f);
 	}
 	
 	createEdges();

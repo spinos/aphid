@@ -53,7 +53,9 @@ public:
 /// v <- (x* - x) / dt
 /// x <- x*
     void updateVelocityAndPosition(float dt);
-    
+/// v <- 0
+	void zeroVelocity();
+	
 private:
 };
 
