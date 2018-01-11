@@ -10,6 +10,7 @@
 #define APH_PBD_ELASTIC_ROD_BEND_TWIST_CONSTRAINT_H
 
 #include "Constraint.h"
+#include <math/Vector3F.h>
 #include <math/MatrixC33F.h>
 
 namespace aphid {

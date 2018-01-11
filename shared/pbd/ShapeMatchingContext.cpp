@@ -8,154 +8,196 @@
  */
 
 #include "ShapeMatchingContext.h"
-#include <geom/ParallelTransport.h>
-#include <math/Matrix33F.h>
-#include <sdb/Sequence.h>
-#include <math/miscfuncs.h>
-#include <math/sparseLinearMath.h>
+#include <math/ConjugateGradient.h>
+#include "ShapeMatchingProfile.h"
 
 namespace aphid {
 namespace pbd {
 
 ShapeMatchingContext::ShapeMatchingContext() :
-m_numStrands(0),
-m_numEdges(0)
+m_lhsMat(0),
+m_cg(0),
+m_stiffness(200.f)
 {}
 
 ShapeMatchingContext::~ShapeMatchingContext()
-{}
+{ clearConstraints(); }
 
-void ShapeMatchingContext::create()
+void ShapeMatchingContext::clearConstraints()
 {
-/// one strand test
-	Vector3F g[32];
-	for(int i=0;i<32;++i) {
-		g[i].set(10.f + (.5f + .005 * i) * i, 10.f - .05f * i + 1.2f * (.5f + .005f * i) * sin(0.5f * i), 1.3f * (.5f + .005f * i) * cos(.5f * i) );
+	std::vector<ShapeMatchingRegion* >::iterator it = m_regions.begin();
+	for(;it!=m_regions.end();++it) {
+		delete *it;
 	}
+	m_regions.end();
+	if(m_cg)
+		delete m_cg;
+	if(m_lhsMat)
+		delete m_lhsMat;
+}
+
+void ShapeMatchingContext::create(const ShapeMatchingProfile& prof)
+{	
+	clearConstraints();
 	
-	m_numStrands = 1;
-	m_strandBegin = new int[m_numStrands + 1];
-	m_strandBegin[0] = 0;
-	m_strandBegin[1] = 64;
+	const int& np = prof.numPoints();
 	
-	const int np = 64;
-	const int hnp = 32;
-	const int nr = 30;
 	pbd::ParticleData* part = particles();
 	part->createNParticles(np);
 	
-	Vector3F p0p1 = g[1] - g[0];
-	Matrix33F frm;
-	ParallelTransport::FirstFrame(frm, p0p1, Vector3F(0.f, 1.f, 1.f) );
-	Vector3F nml = ParallelTransport::FrameUp(frm);
-	
-	part->setParticle(g[0] - nml * .25f, 0);
-	part->setParticle(g[0] + nml * .25f, 1);
-	
-	static const int hilb[2][2] = {{1, 0}, {0, 1}};
-	
-	Vector3F p1p2;
-	for(int i=1;i<hnp;++i) {
-		p1p2 = g[i+1] - g[i];
-		ParallelTransport::RotateFrame(frm, p0p1, p1p2);
-		nml = ParallelTransport::FrameUp(frm);
-		
-		part->setParticle(g[i] + nml * .25f, i * 2 + hilb[i&1][0]);
-		part->setParticle(g[i] - nml * .25f, i * 2 + hilb[i&1][1]);
-		
-		p0p1 = p1p2;
+	const Vector3F* p0 = prof.x0();
+	for(int i=0;i<np;++i) {
+		part->setParticle(p0[i], i);
 	}
 	
 	for(int i=0;i<np;++i) {
-		part->invMass()[i] = 2.f;
-	}
-/// lock first segment
-	for(int i=0;i<4;++i) {
-		part->invMass()[i] = 0.f;
-	}
-/// map edges
-	sdb::Sequence<sdb::Coord2> edgeMap;
-	edgeMap.insert(sdb::Coord2(0, 1));
-	
-	int prev[2] = {1, 0};
-	for(int i=1;i<hnp;++i) {
-/// prev1 - v11
-///	        |
-/// prev0 - v10
-		int v10 = i * 2 + hilb[i&1][0];
-		int v11 = i * 2 + hilb[i&1][1];
-		
-		edgeMap.insert(sdb::Coord2(v10, v11).ordered() );
-		edgeMap.insert(sdb::Coord2(v10, prev[0]).ordered() );
-		edgeMap.insert(sdb::Coord2(v11, prev[1]).ordered() );
-		
-		prev[0] = v10;
-		prev[1] = v11;
-	}
-	
-	const int ne = edgeMap.size();
-	
-	m_edgeInds = new sdb::Coord2[ne];
-	int ie = 0;
-	edgeMap.begin();
-	while(!edgeMap.end() ) {
-		m_edgeInds[ie] = edgeMap.key();
-		ie++;
-		edgeMap.next();
-	}
-	m_numEdges = ie;
-	
-/// rest edge lengths
-	m_restEdgeLs = new float[m_numEdges];
-	
-	const Vector3F* vs = part->pos();
-	for(int i=0;i<m_numEdges;++i) {
-		m_restEdgeLs[i] = (vs[m_edgeInds[i].x]).distanceTo(vs[m_edgeInds[i].y]);
+		part->invMass()[i] = prof.inverseMass()[i];
 	}
 
-	int dim = np;
+/// add all regions
+	RegionVE ve;
+	const int& nr = prof.numRegions();
+	for(int i=0;i<nr;++i) {
+		prof.getRegionVE(ve, i);
+		
+		ShapeMatchingRegion* ri = new ShapeMatchingRegion;
+		ri->createRegion(ve, (const float* )prof.x0(), prof.inverseMass() );
+		m_regions.push_back(ri);
+	}
+
+	const int dim = np * 3;
 /// t <- 1/30 sec
-	const float oneovert2 = 900.f;
+	static const float oneovert2 = 900.f;
 	m_lhsMat = new SparseMatrix<float>;
-	m_lhsMat->create(dim, dim);
+/// row-major
+	m_lhsMat->create(dim, dim, true);
 
-	const float attachmentStiffness = 75;
-	const float stretchStiffness = 20;
-	const float fixed = 100000;
-	const float springK = 300000;
+	float movert2;
 	for(int i=0;i<np;++i) {
 /// for each particle add mass diagonal
 /// (M + fixed) / t^2
-		const float& imi = part->invMass()[i];
-		if(imi > 0.f) {
-			m_lhsMat->set(i, i, oneovert2 / imi);
-		} else {
-			m_lhsMat->set(i, i, oneovert2 * fixed);
+		movert2 = part->getMass(i) * oneovert2;
+		
+		m_lhsMat->set(i * 3, i * 3, movert2);
+		m_lhsMat->set(i * 3 + 1, i * 3 + 1, movert2);
+		m_lhsMat->set(i * 3 + 2, i * 3 + 2, movert2);
+	}
+
+	int v1, v2;
+	for(int i=0;i<nr;++i) {
+/// for each region
+		const ShapeMatchingRegion* ri = m_regions[i];
+		const int& ne = ri->numEdges();
+		for(int j=0;j<ne;++j) {
+			ri->getEdge(v1, v2, j); 
+/// +k center
+		m_lhsMat->add(v1 * 3    , v1 * 3    , m_stiffness);
+		m_lhsMat->add(v1 * 3 + 1, v1 * 3 + 1, m_stiffness);
+		m_lhsMat->add(v1 * 3 + 2, v1 * 3 + 2, m_stiffness);
+		m_lhsMat->add(v2 * 3    , v2 * 3    , m_stiffness);
+		m_lhsMat->add(v2 * 3 + 1, v2 * 3 + 1, m_stiffness);
+		m_lhsMat->add(v2 * 3 + 2, v2 * 3 + 2, m_stiffness);
+/// -k neighbor
+		m_lhsMat->add(v1 * 3    , v2 * 3    , -m_stiffness);
+		m_lhsMat->add(v1 * 3 + 1, v2 * 3 + 1, -m_stiffness);
+		m_lhsMat->add(v1 * 3 + 2, v2 * 3 + 2, -m_stiffness);
+		m_lhsMat->add(v2 * 3    , v1 * 3    , -m_stiffness);
+		m_lhsMat->add(v2 * 3 + 1, v1 * 3 + 1, -m_stiffness);
+		m_lhsMat->add(v2 * 3 + 2, v1 * 3 + 2, -m_stiffness);
 		}
 	}
 	
-	for(int i=0;i<m_numEdges;++i) {
-/// for each edge
-		const sdb::Coord2& ei = m_edgeInds[i];
-/// +k center
-		m_lhsMat->add(ei.x, ei.x, springK);
-		m_lhsMat->add(ei.y, ei.y, springK);
-/// -k neighbor
-		m_lhsMat->add(ei.x, ei.y, -springK);
-		m_lhsMat->add(ei.y, ei.x, -springK);
-	}
-	
-	m_lhsMat->printMatrix();
+	//m_lhsMat->printMatrix();
+	m_cg = new ConjugateGradient<float>(m_lhsMat);
 	
 }
 
-const int& ShapeMatchingContext::numEdges() const
-{ return m_numEdges; }
+void ShapeMatchingContext::setStiffness(const float& x)
+{ m_stiffness = x; }
 
-void ShapeMatchingContext::getEdge(int& v1, int& v2, const int& i) const
-{ 
-	v1 = m_edgeInds[i].x;
-	v2 = m_edgeInds[i].y; 
+int ShapeMatchingContext::numRegions() const
+{ return m_regions.size(); }
+
+const ShapeMatchingRegion* ShapeMatchingContext::region(const int& i) const
+{ return m_regions[i]; }
+
+void ShapeMatchingContext::updateShapeMatchingRegions()
+{
+	pbd::ParticleData* part = particles();
+	const float* q = (const float*)part->projectedPos();
+	
+	const int nr = numRegions();
+	for(int i=0;i<nr;++i) {
+/// for each region
+		m_regions[i]->updateRegion(q);
+		
+	}
+}
+
+void ShapeMatchingContext::positionConstraintProjection()
+{
+	pbd::ParticleData* part = particles();
+	const int& np = part->numParticles();
+	const int dim = np * 3;
+	const int nr = numRegions();
+	
+	DenseVector<float> q_n1;
+	q_n1.create(dim);
+	q_n1.copyData((const float*)part->projectedPos() );
+/// rhs	
+	DenseVector<float> s_n; 
+	s_n.copy(q_n1);
+	
+	static const float oneovert2 = 900.f;
+	float movert2;
+	for(int i=0;i<np;++i) {
+		movert2 = part->getMass(i) * oneovert2;
+		
+/// M / h^2 S_n		
+		s_n[i * 3] *= movert2;
+		s_n[i * 3 + 1] *= movert2;
+		s_n[i * 3 + 2] *= movert2;
+	}
+	
+	float pSpring[6];
+	int v1, v2, g1, g2;
+	DenseVector<float> b;
+	
+	for(int k=0;k<8;++k) {
+	
+		b.copy(s_n);
+	
+/// + sigma (w_i S_i^T A_i^T B_i p)
+		for(int i=0;i<nr;++i) {
+/// for each region
+			ShapeMatchingRegion* ri = m_regions[i];
+/// center only?		
+			if(k > 0)
+				ri->updateRegion(q_n1.v() );
+		
+			const int& ne = ri->numEdges();
+			for(int j=0;j<ne;++j) {
+				ri->getEdge(v1, v2, j);
+				ri->getGoalInd(g1, g2, j);
+				
+				ri->solvePositionConstraint(pSpring, q_n1.v(), v1, g1);
+				ri->solvePositionConstraint(&pSpring[3], q_n1.v(), v2, g2);
+			
+				b[v1 * 3    ] += m_stiffness * (pSpring[0] - pSpring[3]);
+				b[v1 * 3 + 1] += m_stiffness * (pSpring[1] - pSpring[4]);
+				b[v1 * 3 + 2] += m_stiffness * (pSpring[2] - pSpring[5]);
+				
+				b[v2 * 3    ] += m_stiffness * (-pSpring[0] + pSpring[3]);
+				b[v2 * 3 + 1] += m_stiffness * (-pSpring[1] + pSpring[4]);
+				b[v2 * 3 + 2] += m_stiffness * (-pSpring[2] + pSpring[5]);
+			}
+		}
+
+		m_cg->solve(q_n1, b);
+	
+	}
+	
+	q_n1.extractData((float*)part->projectedPos());
 }
 
 }

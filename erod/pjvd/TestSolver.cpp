@@ -8,7 +8,7 @@
 #include "TestSolver.h"
 #include <pbd/Beam.h>
 #include <pbd/WindTurbine.h>
-#include <smp/UniformGrid8Sphere.h>
+#include <pbd/ShapeMatchingProfile.h>
 
 using namespace aphid;
 
@@ -23,7 +23,9 @@ TestSolver::TestSolver(QObject *parent)
     spc.setRotation(rtm);
     spc.setTranslation(8,4,2);
 
-	create();
+	pbd::ShapeMatchingProfile prof;
+	prof.createTestStrand();
+	create(prof);
 }
 
 TestSolver::~TestSolver()
@@ -36,10 +38,11 @@ void TestSolver::stepPhysics(float dt)
     applyGravity(dt);
 	setMeanWindVelocity(m_windicator->getMeanWindVec() );
 	applyWind(dt);
-	projectPosition(dt);	
+	projectPosition(dt);
+	updateShapeMatchingRegions();	
 	positionConstraintProjection();
-	dampVelocity(0.02f);
 	updateVelocityAndPosition(dt);
+	dampVelocity(0.001f);
 #endif	
 	m_windicator->progress(dt);
 	BaseSolverThread::stepPhysics(dt);
@@ -50,11 +53,3 @@ pbd::WindTurbine* TestSolver::windTurbine()
 
 const pbd::WindTurbine* TestSolver::windTurbine() const
 { return m_windicator; }
-
-void TestSolver::restartCurrentState()
-{ 
-	std::cout<<" TestSolver::restartCurrentState"<<std::endl; 
-	ghostParticles()->zeroVelocity();
-	particles()->zeroVelocity();
-	
-}

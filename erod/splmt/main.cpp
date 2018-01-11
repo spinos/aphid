@@ -3,7 +3,7 @@
  */
  
 #include <iostream>
-#include <math/sparseLinearMath.h>
+#include <math/ConjugateGradient.h>
 using namespace aphid;
 
 void testSpVec()
@@ -93,6 +93,13 @@ void testSpMat()
 	printSpMat(matc);
 }
 
+/// attachment S 3-by-3n n is num of particle
+/// spring S 6-by-3n
+/// attachment A 3-by-3
+/// |1    |
+/// |  1  |
+/// |    1|
+
 void testAttachmentStAtAS()
 {
     std::cout<<"\n test attachment StAtAS";
@@ -120,6 +127,14 @@ void testAttachmentStAtAS()
     
 }
 
+/// spring A 6-by-6
+/// | 0.5        -0.5          |
+/// |     0.5         -0.5     |
+/// |         0.5          -0.5|
+/// |-0.5         0.5          |
+/// |    -0.5          0.5     |
+/// |        -0.5           0.5|
+
 void testSpringStAtAS()
 {
     std::cout<<"\n test spring StAtAS";
@@ -128,9 +143,9 @@ void testSpringStAtAS()
     S.set(0, 12, 1.f);
     S.set(1, 13, 1.f);
     S.set(2, 14, 1.f);
-    S.set(3, 18, 1.f);
-    S.set(4, 19, 1.f);
-    S.set(5, 20, 1.f);
+    S.set(3, 3, 1.f);
+    S.set(4, 4, 1.f);
+    S.set(5, 5, 1.f);
     std::cout<<"\n S ";
     S.printMatrix();
     
@@ -151,42 +166,88 @@ void testSpringStAtAS()
     A.set(3, 0, -.5f);
     A.set(4, 1, -.5f);
     A.set(5, 2, -.5f);
+	
+	A *= 10.f;
     
     std::cout<<"\n A ";
     A.printMatrix();
     
     SparseMatrix<float> StAt = St * A; // A^T is A
-    SparseMatrix<float> StAtA = StAt * A;
-    std::cout<<"\n StAtA ";
-    StAtA.printMatrix();
-
-    SparseMatrix<float> StAtAS = StAtA * S;
+    SparseMatrix<float> StAtB = StAt * A; // B is A
+    std::cout<<"\n StAtB ";
+    StAtB.printMatrix();
+    
+    DenseVector<float> p;
+    p.create(6);
+    p[0] = -99.f;
+    p[1] = -30.f;
+    p[2] = -10.f;
+    p[3] = 39.f;
+    p[4] = 10.f;
+    p[5] = 12.f;
+    std::cout<<"\n p "<<p;
+    
+    DenseVector<float> StAtBp = StAtB * p;
+    std::cout<<"\n StAtBp "<<StAtBp;
+	
+	SparseMatrix<float> StAtAS = StAtB * S;
     std::cout<<"\n StAtAS ";
     StAtAS.printMatrix();
-    
-    SparseMatrix<float> p;
-    p.create(30, 1);
-    p.set(12, 0, 99.f);
-    p.set(13, 0, 30.f);
-    p.set(14, 0, 10.f);
-    p.set(18, 0, -99.f);
-    p.set(19, 0, -30.f);
-    p.set(20, 0, -10.f);
-    std::cout<<"\n p ";
-    p.printMatrix();
-    
-    SparseMatrix<float> StAtASp = StAtAS * p;
-    std::cout<<"\n StAtASp ";
-    StAtASp.printMatrix();
+}
+
+void testCg()
+{
+	std::cout<<"\n test conjugate gradient";
+    SparseMatrix<float> A;
+	A.create(4,4,true);
+	A.set(0,0,4.f);
+	A.set(0,2,-1.f);
+	A.set(0,3,-1.f);
+	A.set(1,1,4.f);
+	A.set(1,2,-1.f);
+	A.set(1,3,-1.f);
+	A.set(2,0,-1.f);
+	A.set(2,1,-1.f);
+	A.set(2,2,3.f);
+	A.set(3,0,-1.f);
+	A.set(3,1,-1.f);
+	A.set(3,3,3.f);
+	std::cout<<"\n A ";
+    A.printMatrix();
+	
+	DenseVector<float> b;
+	b.create(4);
+	b[0] = 3.f;
+	b[1] = 0.f;
+	b[2] = -2.f;
+	b[3] = 1.f;
+	std::cout<<"\n b"<<b;
+	
+	DenseVector<float> x;
+	x.create(4);
+	x[0] = 0.f;
+	x[1] = 1.f;
+	x[2] = -1.f;
+	x[3] = 0.f;
+	
+	ConjugateGradient<float> cg(&A);
+	cg.solve(x, b);
+	
+	std::cout<<"\n x"<<x;
+	
+	DenseVector<float> ax = A * x;
+	std::cout<<"\n proof "<<ax;
+	
 }
 
 int main(int argc, char **argv)
 {        
     std::cout<<"\n test sparse linear math";
-	testSpVec();
-	testSpMat();
-	testAttachmentStAtAS();
+	//testSpVec();
+	//testSpMat();
+	//testAttachmentStAtAS();
 	testSpringStAtAS();
+	//testCg();
 	std::cout<<"\ndone.\n";
     exit(0);
 }

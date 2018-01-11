@@ -73,6 +73,8 @@ public:
 	
 /// i-th element    
 	T operator[](int i) const;
+/// a <- a b
+	void operator*=(const T& b);
 /// insert if not found i-th element
 	void set(int i, const T& val);
 /// a_i <- a_i + b
@@ -300,6 +302,14 @@ SparseIterator<T> SparseVector<T>::end()
 	return SparseIterator<T>(m_numElms, m_elmIndex, m_v);
 }
 
+template<typename T>
+void SparseVector<T>::operator*=(const T& b)
+{
+	for(int j = 0;j<m_numElms;++j) {
+		m_v[j] *= b;
+	}
+}
+
 /// dynamic sparse matrix add/remove non-zero element
 /// if ncol > nrow, store in rows
 /// each column/row is a sparse vector
@@ -326,7 +336,7 @@ public:
 	virtual ~SparseMatrix();
 	
 /// nrow-by-ncol
-	void create(int nrow, int ncol);
+	void create(int nrow, int ncol, bool forcedRowMajor = false);
 /// i-th row j-th column
 	void set(int i, int j, const T& val);
 /// a_ij <- a_ij + b
@@ -340,6 +350,9 @@ public:
 	SparseMatrix transposed() const;
 /// c <- ab
 	SparseMatrix operator*(const SparseMatrix& b) const;
+	DenseVector<T> operator*(const DenseVector<T>& b) const;
+/// a <- a b
+	void operator*=(const T& b);
 /// i-th column
 	SVecTyp& row(int i) const;
 /// j-th column
@@ -375,10 +388,10 @@ void SparseMatrix<T>::clear()
 }
 
 template<typename T>
-void SparseMatrix<T>::create(int nrow, int ncol)
+void SparseMatrix<T>::create(int nrow, int ncol, bool forcedRowMajor)
 {
 	clear();
-	m_format = (ncol > nrow) ? cfRowMajor: m_format = cfColumnMajor;
+	m_format = ((ncol > nrow) || forcedRowMajor) ? cfRowMajor: cfColumnMajor;
 	if(m_format == cfRowMajor) {
 		m_vecs = new SVecTyp[nrow];
 	} else {
@@ -508,6 +521,46 @@ SparseMatrix<T> SparseMatrix<T>::operator*(const SparseMatrix& b) const
 		}
 	}
 	return c;
+}
+
+template<typename T>
+DenseVector<T> SparseMatrix<T>::operator*(const DenseVector<T>& b) const
+{
+	DenseVector<T> c;
+	c.create(numRows() );
+	c.setZero();
+	if(m_format == cfRowMajor) {
+		for(int i=0;i<numRows();++i) {
+/// i-th row in a
+			SVecTyp& ai = row(i);
+			SparseIterator<T> iter = ai.begin();
+			SparseIterator<T> itEnd = ai.end();
+			for(;iter != itEnd;++iter) {
+				c[i] += iter.value() * b[iter.index()];
+			}
+		}
+	} else {
+		for(int i=0;i<numRows();++i) {
+			for(int j=0;j<numCols();++j) {
+				c[i] += get(i, j) * b[j];
+			}
+		}
+	}
+	return c;
+}
+
+template<typename T>
+void SparseMatrix<T>::operator*=(const T& b)
+{
+	if(m_format == cfRowMajor) {
+		for(int i=0;i<numRows();++i) {
+			row(i) *= b;
+		}
+	} else {
+		for(int j=0;j<numCols();++j) {
+			column(j) *= b;
+		}
+	}
 }
 
 template<typename T>

@@ -1,13 +1,11 @@
 set (PJV_HEADER_FILES window.h
 glwidget.h
-ElasticRodSystem.h
 TestSolver.h)
 
 set (PJV_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 ${APHID_QT_DIR}/BaseSolverThread.cpp
 glwidget.cpp
 window.cpp
-ElasticRodSystem.cpp
 TestSolver.cpp
 main.cpp)
 

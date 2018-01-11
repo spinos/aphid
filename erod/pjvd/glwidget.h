@@ -10,10 +10,6 @@
 
 namespace aphid {
 class RotationHandle;
-
-namespace pbd {
-class ElasticRodSystem;
-}
 }
 
 class TestSolver;
@@ -41,8 +37,6 @@ private:
 	void drawWindTurbine();
 	void drawMesh(const int& nind, const int* inds, const float* pos, const float* nml);
 	void addWindSpeed(float x);
-	void drawERodNodes();
-	void drawBishopFrames();
 	
 private:
     TestSolver * m_solver;
@@ -54,8 +48,6 @@ private:
 	    wmMakeingCache = 1
 	};
 	WorkMode m_workMode;
-	
-	aphid::pbd::ElasticRodSystem* m_erod;
 	
 signals:
     void restartAtCurrentState();

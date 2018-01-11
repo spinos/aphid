@@ -34,7 +34,7 @@ public:
     T& operator[](const int i);
     T operator[](const int i) const;
     
-    T* v() const;
+    const T* v() const;
 	T* raw();
     
     void setZero();
@@ -152,7 +152,7 @@ T DenseVector<T>::operator[](const int i) const
 { return m_v[i]; }
 
 template<typename T>
-T* DenseVector<T>::v() const
+const T* DenseVector<T>::v() const
 { return m_v; }
 
 template<typename T>

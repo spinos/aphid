@@ -41,6 +41,9 @@ public:
 	Vector3F* Ri();
 	Vector3F* geomNml();
 	float * invMass();
+/// 1 / inverse_mass
+/// 1000 if inverse_mass is 0
+	float getMass(const int& i);
 	char* localGeomNml();
 	
 /// posLast <- pos

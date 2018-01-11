@@ -10,9 +10,12 @@
 #ifndef APH_MATH_MATRIXC33F_H
 #define APH_MATH_MATRIXC33F_H
 
-#include "Vector3F.h"
+#include <iostream>
 
 namespace aphid {
+
+class Vector3F;
+class Quaternion;
 
  class MatrixC33F
  {
@@ -21,6 +24,7 @@ namespace aphid {
  public:
 	MatrixC33F();
 	MatrixC33F(const MatrixC33F & a);
+	MatrixC33F(const Quaternion& q);
 	~MatrixC33F();
 	
 	void copy(const MatrixC33F & another);
@@ -60,6 +64,12 @@ namespace aphid {
 /// |a2|
 /// |a3|
 	void asAAtMatrix(const Vector3F& a);
+/// c <- a^T a
+	MatrixC33F AtA() const;
+/// m_ij <- sqrt(m_ij)
+	void squareRoot();
+/// A Robust Method to Extract the Rotational Part of Deformations 
+	void extractRotation(Quaternion& q, const int& maxIter = 10) const;
     friend std::ostream& operator<<(std::ostream &output, const MatrixC33F & p);
     
  };

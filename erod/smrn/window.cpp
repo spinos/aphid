@@ -1,5 +1,5 @@
 /*
- *  projective rod
+ *  shape matching region
  */
 #include <QtGui>
 
@@ -11,7 +11,7 @@ Window::Window()
     glWidget = new GLWidget;
 	
 	setCentralWidget(glWidget);
-    setWindowTitle(tr("Projective Elastic Rod"));
+    setWindowTitle(tr("Shape Matching Region"));
 }
 
 void Window::keyPressEvent(QKeyEvent *e)

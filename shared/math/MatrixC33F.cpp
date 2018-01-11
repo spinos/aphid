@@ -8,7 +8,8 @@
  */
 
 #include "MatrixC33F.h"
-#include <iostream>
+#include "Quaternion.h"
+#include "miscfuncs.h"
 #include "clapackTempl.h"
 
 namespace aphid {
@@ -18,6 +19,40 @@ MatrixC33F::MatrixC33F()
 
 MatrixC33F::MatrixC33F(const MatrixC33F & a)
 { copy(a); }
+
+MatrixC33F::MatrixC33F(const Quaternion& q)
+{
+	float qx, qy, qz, qw, qx2, qy2, qz2, qxqx2, qyqy2, qzqz2, qxqy2, qyqz2, qzqw2, qxqz2, qyqw2, qxqw2;
+    qx = q.x;
+    qy = q.y;
+    qz = q.z;
+    qw = q.w;
+    qx2 = ( qx + qx );
+    qy2 = ( qy + qy );
+    qz2 = ( qz + qz );
+    qxqx2 = ( qx * qx2 );
+    qxqy2 = ( qx * qy2 );
+    qxqz2 = ( qx * qz2 );
+    qxqw2 = ( qw * qx2 );
+    qyqy2 = ( qy * qy2 );
+    qyqz2 = ( qy * qz2 );
+    qyqw2 = ( qw * qy2 );
+    qzqz2 = ( qz * qz2 );
+    qzqw2 = ( qw * qz2 );
+
+	col(0)[0] = 1.0f - qyqy2 - qzqz2; 
+	col(0)[1] = qxqy2 + qzqw2; 
+	col(0)[2] = qxqz2 - qyqw2;
+	 
+	col(1)[0] = qxqy2 - qzqw2; 
+	col(1)[1] = 1.0f - qxqx2 - qzqz2; 
+	col(1)[2] = qyqz2 + qxqw2;
+	 
+	col(2)[0] = qxqz2 + qyqw2; 
+	col(2)[1] = qyqz2 - qxqw2; 
+	col(2)[2] = 1.0f - qxqx2 - qyqy2;
+
+}
 
 MatrixC33F::~MatrixC33F()
 {}
@@ -241,6 +276,41 @@ void MatrixC33F::asAAtMatrix(const Vector3F& a)
 	setCol(0, a * a.x);
 	setCol(1, a * a.y);
 	setCol(2, a * a.z);
+}
+
+MatrixC33F MatrixC33F::AtA() const
+{
+	return transMult(*this);
+}
+
+void MatrixC33F::squareRoot()
+{
+	for(int i=0;i<9;++i) {
+		v[i] = sqrt(v[i]);
+	}
+}
+
+/// sigma ( r_i x a_i ) / ( | sigma ( r_i . a_i ) | + eta )
+void  MatrixC33F::extractRotation(Quaternion& q, const int& maxIter) const
+{
+	for(int i=0;i<maxIter;++i) {
+		MatrixC33F R(q);
+		Vector3F omega = (R.colV(0).cross( colV(0) )
+					+ R.colV(1).cross( colV(1) )
+					+ R.colV(2).cross( colV(2) ) ) 
+					* (1.f / ( Absolute<float>(R.colV(0).dot( colV(0) )
+					+ R.colV(1).dot( colV(1) )
+					+ R.colV(2).dot( colV(2) )) + 1e-9f ) );
+					
+		float w = omega.length();
+		if(w < 1e-9f)
+			break;
+			
+		// std::cout<<"\n iter"<<i<<" w "<<w;
+			 
+		q = Quaternion(w, omega.normal() ) * q;
+		q.normalize();
+	}
 }
 
 std::ostream& operator<<(std::ostream &output, const MatrixC33F & p) 

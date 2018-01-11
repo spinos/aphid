@@ -127,5 +127,13 @@ void ParticleData::zeroVelocity()
 	memset(m_velocity, 0, m_numParticles*12);
 }
 
+float ParticleData::getMass(const int& i)
+{ 
+	const float& im = m_invMass[i];
+	if(im > 0.f)
+		return 1.f / im;
+	return 1000.f;
+}
+
 }
 }

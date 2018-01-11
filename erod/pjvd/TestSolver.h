@@ -22,10 +22,6 @@ class WindTurbine;
 
 class TestSolver : public aphid::pbd::ShapeMatchingContext, public aphid::BaseSolverThread
 {
-	unsigned * m_indices;
-	aphid::pbd::Spring * m_spring;
-	aphid::pbd::DistanceConstraint * m_distanceConstraint;
-	unsigned m_numBendingConstraint, m_numDistanceConstraint;
 	
 public:
     TestSolver(QObject *parent = 0);
@@ -36,8 +32,7 @@ public:
 	
 protected:
     virtual void stepPhysics(float dt);
-	virtual void restartCurrentState();
-    
+	
 private:
 	aphid::pbd::WindTurbine* m_windicator;
 	

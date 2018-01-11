@@ -8,8 +8,8 @@
 #include "glwidget.h"
 #include <TestSolver.h>
 #include <pbd/WindTurbine.h>
+#include <pbd/ShapeMatchingRegion.h>
 #include <ogl/RotationHandle.h>
-#include "ElasticRodSystem.h"
 
 using namespace aphid;
 
@@ -29,9 +29,8 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_roth = new RotationHandle(windicator->visualizeSpace() );
 	m_roth->setRadius(8.f);
 	
-	m_erod = new pbd::ElasticRodSystem;
-	m_erod->create();
-	std::cout<<"\n n edges "<<m_solver->numEdges()<<std::endl;
+	std::cout<<"\n n regions "<<m_solver->numRegions()
+		<<std::endl;
 	
 }
 
@@ -65,15 +64,30 @@ void GLWidget::clientDraw()
 	}
 	glEnd();
 */
-	const int& ne = m_solver->numEdges();
+	const int nr = m_solver->numRegions();
 	int v1, v2;
 	glBegin(GL_LINES);
-	for(int i=0; i< ne;++i) {
-		m_solver->getEdge(v1, v2, i);
-		const Vector3F& p1 = pos[v1];
-		glVertex3f(p1.x,p1.y,p1.z);
-		const Vector3F& p2 = pos[v2];
-		glVertex3f(p2.x,p2.y,p2.z);
+	for(int i=0; i< nr;++i) {
+		const pbd::ShapeMatchingRegion* ri = m_solver->region(i);
+		const int& ne = ri->numEdges();
+		for(int j=0;j<ne;++j) {
+			ri->getEdge(v1, v2, j);
+			const Vector3F& p1 = pos[v1];
+			glVertex3f(p1.x,p1.y,p1.z);
+			const Vector3F& p2 = pos[v2];
+			glVertex3f(p2.x,p2.y,p2.z);
+		}
+	}
+	glEnd();
+	
+	glColor3f(1,1,0);
+	glBegin(GL_LINE_STRIP);
+	for(int i=0; i< nr;++i) {
+		const pbd::ShapeMatchingRegion* ri = m_solver->region(i);
+		const int& nv = ri->numPoints();
+		for(int j=0;j<nv;++j) {
+			glVertex3fv(ri->goalPosition(j) );
+		}
 	}
 	glEnd();
 
@@ -219,35 +233,4 @@ void GLWidget::addWindSpeed(float x)
 	pbd::WindTurbine* windicator = m_solver->windTurbine();
 	float s = x + windicator->windSpeed();
 	windicator->setWindSpeed(s);
-}
-
-void GLWidget::drawERodNodes()
-{
-	const int n = m_erod->numSegments();
-	
-	glBegin(GL_LINES);
-	
-	for(int i=0;i<n;++i) {
-		const Vector3F& p1 = m_erod->positions()[i];
-		glVertex3f(p1.x,p1.y,p1.z);
-		const Vector3F& p2 = m_erod->positions()[i+1];
-		glVertex3f(p2.x,p2.y,p2.z);
-	}
-	
-	glEnd();
-}
-
-void GLWidget::drawBishopFrames()
-{
-	const int n = m_erod->numSegments();
-	Vector3F c, t, u, v;
-	for(int i=0;i<n;++i) {
-		m_erod->getBishopFrame(c, t, u, v, i);
-		glColor3f(1,0,0);
-		getDrawer()->arrow(c, c + t);
-		glColor3f(0,1,0);
-		getDrawer()->arrow(c, c + u);
-		glColor3f(0,0,1);
-		getDrawer()->arrow(c, c + v);
-	}
 }
