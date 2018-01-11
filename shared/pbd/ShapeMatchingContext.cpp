@@ -116,9 +116,11 @@ void ShapeMatchingContext::create()
 	int dim = np;
 /// t <- 1/30 sec
 	const float oneovert2 = 900.f;
-	SparseMatrix<float> matx;
-	matx.create(dim, dim);
+	m_lhsMat = new SparseMatrix<float>;
+	m_lhsMat->create(dim, dim);
 
+	const float attachmentStiffness = 75;
+	const float stretchStiffness = 20;
 	const float fixed = 100000;
 	const float springK = 300000;
 	for(int i=0;i<np;++i) {
@@ -126,9 +128,9 @@ void ShapeMatchingContext::create()
 /// (M + fixed) / t^2
 		const float& imi = part->invMass()[i];
 		if(imi > 0.f) {
-			matx.set(i, i, oneovert2 / imi);
+			m_lhsMat->set(i, i, oneovert2 / imi);
 		} else {
-			matx.set(i, i, oneovert2 * fixed);
+			m_lhsMat->set(i, i, oneovert2 * fixed);
 		}
 	}
 	
@@ -136,14 +138,14 @@ void ShapeMatchingContext::create()
 /// for each edge
 		const sdb::Coord2& ei = m_edgeInds[i];
 /// +k center
-		matx.add(ei.x, ei.x, springK);
-		matx.add(ei.y, ei.y, springK);
+		m_lhsMat->add(ei.x, ei.x, springK);
+		m_lhsMat->add(ei.y, ei.y, springK);
 /// -k neighbor
-		matx.add(ei.x, ei.y, -springK);
-		matx.add(ei.y, ei.x, -springK);
+		m_lhsMat->add(ei.x, ei.y, -springK);
+		m_lhsMat->add(ei.y, ei.x, -springK);
 	}
 	
-	//matx.printMatrix();
+	m_lhsMat->printMatrix();
 	
 }
 

@@ -93,11 +93,100 @@ void testSpMat()
 	printSpMat(matc);
 }
 
+void testAttachmentStAtAS()
+{
+    std::cout<<"\n test attachment StAtAS";
+    SparseMatrix<float> S;
+    S.create(3, 30);
+    S.set(0, 12, 1.f);
+    S.set(1, 13, 1.f);
+    S.set(2, 14, 1.f);
+    std::cout<<"\n S ";
+    S.printMatrix();
+    
+    SparseMatrix<float> St = S.transposed();
+    
+    SparseMatrix<float> A;
+    A.create(3, 3);
+    A.set(0, 0, 1.f);
+    A.set(1, 1, 1.f);
+    A.set(2, 2, 1.f);
+     
+    SparseMatrix<float> StAt = St * A; // A^T is A
+    SparseMatrix<float> StAtA = StAt * A;
+    SparseMatrix<float> StAtAS = StAtA * S;
+    std::cout<<"\n StAtAS ";
+    StAtAS.printMatrix();
+    
+}
+
+void testSpringStAtAS()
+{
+    std::cout<<"\n test spring StAtAS";
+    SparseMatrix<float> S;
+    S.create(6, 30);
+    S.set(0, 12, 1.f);
+    S.set(1, 13, 1.f);
+    S.set(2, 14, 1.f);
+    S.set(3, 18, 1.f);
+    S.set(4, 19, 1.f);
+    S.set(5, 20, 1.f);
+    std::cout<<"\n S ";
+    S.printMatrix();
+    
+    SparseMatrix<float> St = S.transposed();
+    
+    SparseMatrix<float> A;
+    A.create(6, 6);
+    A.set(0, 0, .5f);
+    A.set(1, 1, .5f);
+    A.set(2, 2, .5f);
+    A.set(3, 3, .5f);
+    A.set(4, 4, .5f);
+    A.set(5, 5, .5f);
+    
+    A.set(0, 3, -.5f);
+    A.set(1, 4, -.5f);
+    A.set(2, 5, -.5f);
+    A.set(3, 0, -.5f);
+    A.set(4, 1, -.5f);
+    A.set(5, 2, -.5f);
+    
+    std::cout<<"\n A ";
+    A.printMatrix();
+    
+    SparseMatrix<float> StAt = St * A; // A^T is A
+    SparseMatrix<float> StAtA = StAt * A;
+    std::cout<<"\n StAtA ";
+    StAtA.printMatrix();
+
+    SparseMatrix<float> StAtAS = StAtA * S;
+    std::cout<<"\n StAtAS ";
+    StAtAS.printMatrix();
+    
+    SparseMatrix<float> p;
+    p.create(30, 1);
+    p.set(12, 0, 99.f);
+    p.set(13, 0, 30.f);
+    p.set(14, 0, 10.f);
+    p.set(18, 0, -99.f);
+    p.set(19, 0, -30.f);
+    p.set(20, 0, -10.f);
+    std::cout<<"\n p ";
+    p.printMatrix();
+    
+    SparseMatrix<float> StAtASp = StAtAS * p;
+    std::cout<<"\n StAtASp ";
+    StAtASp.printMatrix();
+}
+
 int main(int argc, char **argv)
 {        
     std::cout<<"\n test sparse linear math";
 	testSpVec();
 	testSpMat();
+	testAttachmentStAtAS();
+	testSpringStAtAS();
 	std::cout<<"\ndone.\n";
     exit(0);
 }

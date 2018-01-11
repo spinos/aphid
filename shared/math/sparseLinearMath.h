@@ -53,7 +53,7 @@ public:
     
 /// dynamic sparse vector can add/remove non-zero element
 /// presumably most elements are zero
-/// capacity to store non-zero elements can be extended by 32
+/// capacity to store non-zero elements can be extended by 8
 /// element index [0, NNZ-1] to sparse index
 
 template<typename T>
@@ -96,7 +96,7 @@ private:
 };
 
 template<typename T>
-SparseVector<T>::SparseVector() : m_numElms(0), m_cap(32)
+SparseVector<T>::SparseVector() : m_numElms(0), m_cap(8)
 {
 	m_v = new T[m_cap];
 	m_elmIndex = new int[m_cap];
@@ -182,7 +182,7 @@ void SparseVector<T>::expand()
 	memcpy(ibuf, m_elmIndex, m_cap * 4 );
 	delete[] m_elmIndex;
 	
-	m_cap += 32;
+	m_cap += 8;
 	m_v = new T[m_cap];
 	m_elmIndex = new int[m_cap];
 	
@@ -437,8 +437,8 @@ SparseMatrix<T> SparseMatrix<T>::transposed() const
 	if(m_format == cfRowMajor) {
 		for(int i=0;i<numRows();++i) {
 /// i-th row
-			SparseIterator<int> iter = m_vecs[i].begin();
-			SparseIterator<int> itEnd = m_vecs[i].end();
+			SparseIterator<T> iter = m_vecs[i].begin();
+			SparseIterator<T> itEnd = m_vecs[i].end();
 			for(;iter != itEnd;++iter) {
 				tm.set(iter.index(), i, iter.value() );
 			}
@@ -446,8 +446,8 @@ SparseMatrix<T> SparseMatrix<T>::transposed() const
 	} else {
 		for(int j=0;j<numCols();++j) {
 /// j-th column
-			SparseIterator<int> iter = m_vecs[j].begin();
-			SparseIterator<int> itEnd = m_vecs[j].end();
+			SparseIterator<T> iter = m_vecs[j].begin();
+			SparseIterator<T> itEnd = m_vecs[j].end();
 			for(;iter != itEnd;++iter) {
 				tm.set(j, iter.index(), iter.value() );
 			}
