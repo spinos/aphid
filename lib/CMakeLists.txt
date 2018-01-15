@@ -270,4 +270,5 @@ add_subdirectory(ttg)
 add_subdirectory(topo)
 add_subdirectory(graph)
 add_subdirectory(kd)
+add_subdirectory(lbm)
 

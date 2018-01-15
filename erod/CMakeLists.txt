@@ -12,6 +12,7 @@ INCLUDE (../cmake/ogl_config.cmake)
 INCLUDE (../cmake/qt_config.cmake)
 INCLUDE (../cmake/clapack_config.cmake)
 
+add_subdirectory(lbmd)
 add_subdirectory(smrn)
 add_subdirectory(splmt)
 add_subdirectory(pjvd)

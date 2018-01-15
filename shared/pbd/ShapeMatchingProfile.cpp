@@ -58,7 +58,7 @@ void ShapeMatchingProfile::createTestStrand()
 	
 	Vector3F p1p2;
 	for(int i=1;i<hnp;++i) {
-		p1p2 = g[i+1] - g[i];
+		p1p2 = g[i] - g[i-1];
 		ParallelTransport::RotateFrame(frm, p0p1, p1p2);
 		nml = ParallelTransport::FrameUp(frm);
 		
@@ -78,6 +78,7 @@ void ShapeMatchingProfile::createTestStrand()
 	}
 	
 	m_numPoints = np;
+/// 2 segments a region
 	m_numRegions = hnp - 2;
 	m_regionVertexBegin.reset(new int[m_numRegions + 1]);
 	m_regionEdgeBegin.reset(new int[m_numRegions + 1]);
@@ -86,11 +87,11 @@ void ShapeMatchingProfile::createTestStrand()
 	int vertexC = 0;
 	int edgeC = 0;
 
-/// 0   3 - 4   7 ... 2n-2   2n+1 - 2n+2
-/// |   |   |   |      |      |      |
-/// 1 - 2   5 - 6     2n-1 - 2n     2n+3 ...
+/// 0   3 - 4   7 ... 2n     2n+3 - 2n+4
+/// |   |   |   |      |      |     |
+/// 1 - 2   5 - 6     2n+1 - 2n+2   2n+5
 
-	for(int i=2;i<m_numPoints-4;i+=2) {
+	for(int i=0;i<m_numPoints-5;i+=2) {
 		m_regionVertexBegin[regionC] = vertexC;
 		m_regionEdgeBegin[regionC] = edgeC;
 /// 6 vertices per region		
@@ -108,39 +109,39 @@ void ShapeMatchingProfile::createTestStrand()
 	m_edges.reset(new int[edgeC * 2]);
 	
 	regionC = 0;
-	for(int i=2;i<m_numPoints-4;i+=2) {
+	for(int i=0;i<m_numPoints-5;i+=2) {
 		
 		int* vr = &m_vertices[m_regionVertexBegin[regionC] ];
 		
-		vr[0] = i - 2;
-		vr[1] = i - 1;
-		vr[2] = i;
-		vr[3] = i + 1;
-		vr[4] = i + 2;
-		vr[5] = i + 3;
+		vr[0] = i;
+		vr[1] = i + 1;
+		vr[2] = i + 2;
+		vr[3] = i + 3;
+		vr[4] = i + 4;
+		vr[5] = i + 5;
 		
 		int* er = &m_edges[m_regionEdgeBegin[regionC] * 2 ];
 		
-		er[0] = i - 2;
-		er[1] = i - 1;
+		er[0] = i;
+		er[1] = i + 1;
 		
-		er[2] = i - 1;
-		er[3] = i;
+		er[2] = i + 1;
+		er[3] = i + 2;
 		
-		er[4] = i;
-		er[5] = i + 1;
+		er[4] = i + 2;
+		er[5] = i + 3;
 		
-		er[6] = i + 1;
-		er[7] = i + 2;
+		er[6] = i + 3;
+		er[7] = i + 4;
 		
-		er[8] = i + 2;
-		er[9] = i + 3;
+		er[8] = i + 4;
+		er[9] = i + 5;
 		
 		er[10] = i;
 		er[11] = i + 3;
 		
-		er[12] = i + 1;
-		er[13] = i - 2;
+		er[12] = i + 2;
+		er[13] = i + 5;
 		
 		regionC++;
 	}

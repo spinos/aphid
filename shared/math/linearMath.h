@@ -82,6 +82,8 @@ public:
 	
 	DenseVector<T> operator+(const DenseVector<T> & x) const;
 	DenseVector<T> operator-(const DenseVector<T> & x) const;
+/// preserve old values add n elements
+	void expand(int n);
 	
 	static void PrintVector(char* desc, int n, T* a)
 	{
@@ -127,6 +129,20 @@ void DenseVector<T>::create(int n)
     m_v = new T[n];
     m_numElements = n;
 	m_capacity = n;
+}
+
+template<typename T>
+void DenseVector<T>::expand(int n)
+{
+	T* tmp = new T[m_numElements];
+	extractData(tmp);
+	delete[] m_v;
+	m_v = new T[n + m_numElements];
+	memcpy(m_v, tmp, sizeof(T) * m_numElements );
+	delete[] tmp;
+	
+	m_numElements += n;
+	m_capacity = m_numElements;
 }
 
 template<typename T>
