@@ -72,22 +72,7 @@ ENDIF ()
 
 MESSAGE (" library type is " ${LIB_TYP})
 
-file (GLOB Foundation_SRC
-"../shared/foundation/*.h"
-    "../shared/foundation/*.cpp"
-)
 
-ADD_LIBRARY (aphidFoundation ${LIB_TYP}
-${Foundation_SRC})
-
-file (GLOB Math_SRC
-    "../shared/math/*.h"
-    "../shared/math/*.cpp"
-)
-
-ADD_LIBRARY (aphidMath ${LIB_TYP} 
-${Math_SRC}
-../shared/plots.cpp)
 
 SET (APHID_GEOM_PATH ../shared/geom)
 
@@ -163,73 +148,9 @@ ADD_LIBRARY (aphidUI ${LIB_TYP}
 
 set (APH_SDB_PATH ../shared/sdb)
 
-file (GLOB Sdb_SRC
-    "../shared/sdb/*.h"
-    "../shared/sdb/*.cpp"
-)
-
-ADD_LIBRARY (aphidSdb ${LIB_TYP}
-${Sdb_SRC})
-
-file (GLOB APH_Kd_SRC
-	"../shared/kd/*.h"
-    "../shared/kd/*.cpp"
-)
-
-ADD_LIBRARY (aphidKd ${LIB_TYP}
-${APH_Kd_SRC})
-
-file (GLOB graph_SRC
-	"../shared/graph/*.h"
-    "../shared/graph/*.cpp"
-)
-
-ADD_LIBRARY (aphidGraph ${LIB_TYP}
-${graph_SRC})
-
-file (GLOB Topo_SRC
-    "../shared/topo/*.h"
-    "../shared/topo/*.cpp"
-)
-
-ADD_LIBRARY (aphidTopology ${LIB_TYP}
-${Topo_SRC})
-
 INCLUDE (../cmake/clapack_config.cmake)
 
-file (GLOB Gpr_SRC
-    "../shared/gpr/*.h"
-    "../shared/gpr/*.cpp"
-)
-
-ADD_LIBRARY (aphidGp ${LIB_TYP}
-${Gpr_SRC})
-
 INCLUDE (../cmake/ogl_config.cmake)
-
-file (GLOB Ogl_SRC
-    "../shared/ogl/*.h"
-    "../shared/ogl/*.cpp"
-)
-
-ADD_LIBRARY (aphidOgl ${LIB_TYP}
-${Ogl_SRC})
-
-file (GLOB ttg_SRC
-    "../shared/ttg/*.h"
-    "../shared/ttg/*.cpp"
-)
-
-ADD_LIBRARY (aphidTtg ${LIB_TYP}
-${ttg_SRC})
-
-file (GLOB smp_SRC
-    "../shared/smp/*.h"
-    "../shared/smp/*.cpp"
-)
-
-ADD_LIBRARY (aphidSmp ${LIB_TYP}
-${smp_SRC})
 
 add_library(aphid ${LIB_TYP}                                
     ../shared/SkeletonSubspaceDeformer.cpp                                  
@@ -317,24 +238,6 @@ add_library(aphid ${LIB_TYP}
 
 INCLUDE (../cmake/exr_config.cmake)
 
-file (GLOB img_SRC
-    "../shared/img/*.h"
-    "../shared/img/*.cpp"
-)
-
-add_library(aphidImg ${LIB_TYP}
-${img_SRC}
-)
-
-file (GLOB wla_SRC
-    "../shared/wla/*.h"
-    "../shared/wla/*.cpp"
-)
-
-add_library(aphidWla ${LIB_TYP}
-${wla_SRC}
-)
-
 INCLUDE (../cmake/cuda_config.cmake)
 
 IF (${CUDA_FOUND})
@@ -354,11 +257,17 @@ ELSE ()
 	MESSAGE (" cuda not found ")
 ENDIF ()
 
-file (GLOB pbd_SRC
-    "../shared/pbd/*.h"
-    "../shared/pbd/*.cpp"
-)
+add_subdirectory(found)
+add_subdirectory(math)
+add_subdirectory(pbd)
+add_subdirectory(sdb)
+add_subdirectory(ogl)
+add_subdirectory(wla)
+add_subdirectory(img)
+add_subdirectory(gpr)
+add_subdirectory(smp)
+add_subdirectory(ttg)
+add_subdirectory(topo)
+add_subdirectory(graph)
+add_subdirectory(kd)
 
-add_library(aphidPbd ${LIB_TYP}
-${pbd_SRC}
-)
