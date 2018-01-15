@@ -34,8 +34,9 @@ public:
     T& operator[](const int i);
     T operator[](const int i) const;
     
-    const T* v() const;
-	T* raw();
+    T* v();
+	const T* c_v() const;
+	T* raw() const;
     
     void setZero();
 	void setOne();
@@ -152,11 +153,15 @@ T DenseVector<T>::operator[](const int i) const
 { return m_v[i]; }
 
 template<typename T>
-const T* DenseVector<T>::v() const
+T* DenseVector<T>::v()
 { return m_v; }
 
 template<typename T>
-T* DenseVector<T>::raw()
+const T* DenseVector<T>::c_v() const
+{ return m_v; }
+
+template<typename T>
+T* DenseVector<T>::raw() const
 { return m_v; }
 
 template<typename T>
@@ -296,7 +301,7 @@ T DenseVector<T>::dot(const T * x) const
 
 template<typename T>
 void DenseVector<T>::add(const DenseVector<T> & x, const T alpha)
-{ add(x.v(), alpha); }
+{ add(x.raw(), alpha); }
 
 template<typename T>
 void DenseVector<T>::add(T * x, const T alpha)
@@ -340,7 +345,7 @@ template<typename T>
 void DenseVector<T>::copy(const DenseVector<T> & x)
 {
 	create(x.numElements());
-	copyData(x.v());
+	copyData(x.c_v());
 }
 
 template<typename T>
@@ -840,7 +845,7 @@ void DenseMatrix<T>::mult(DenseVector<T>& b, const DenseVector<T>& x,
 {
 	clapack_gemv<T>("N", m_numRows, m_numColumns, 
 							alpha, m_v, m_numRows, 
-							x.v(), 1, 
+							x.raw(), 1, 
 							beta, b.v(), 1);
 }
 
@@ -850,7 +855,7 @@ void DenseMatrix<T>::multTrans(DenseVector<T>& b, const DenseVector<T>& x,
 {
 	clapack_gemv<T>("T", m_numRows, m_numColumns, 
 							alpha, m_v, m_numRows, 
-							x.v(), 1, 
+							x.raw(), 1, 
 							beta, b.v(), 1);
 }
 
@@ -862,7 +867,7 @@ void DenseMatrix<T>::lefthandMult(DenseVector<T>& b, const DenseVector<T>& x,
 /// xT is 1-by-m vector(matrix)
 /// b is 1-by-n vector(matrix)
 	clapack_gemm<T>("T", "N", 1, m_numColumns, m_numColumns, 
-							alpha, x.v(), x.numElements(), 
+							alpha, x.raw(), x.numElements(), 
 							m_v, m_numRows, beta, b.raw(), 1);
 }
 

@@ -100,7 +100,7 @@ void KMeansClustering2<T>::getXi(DenseVector<T> & dst,
 				const DenseMatrix<T> & points,
 				const int & idx) const
 {
-	points.extractRowData(dst.raw(), idx);
+	points.extractRowData(dst.v(), idx);
 }
 
 template<typename T>
@@ -130,7 +130,7 @@ bool KMeansClustering2<T>::assignToOneGroup(const DenseMatrix<T> & points)
 /// first data as only group centroid
 	DenseVector<T> apnt(m_D);
 	getXi(apnt, points, 0);
-	m_centroids.copyColumn(0, apnt.raw() );
+	m_centroids.copyColumn(0, apnt.c_v() );
 	return true;
 }
 	
@@ -141,7 +141,7 @@ bool KMeansClustering2<T>::assignToEachGroup(const DenseMatrix<T> & points)
 	for(int i=0;i<m_N;++i) {
 		m_groupInd[i] = i;
 		getXi(apnt, points, i);
-		m_centroids.copyColumn(i, apnt.raw() );
+		m_centroids.copyColumn(i, apnt.c_v() );
 	}
 	for(int i=0;i<m_K;++i) {
 		m_groupCount[i] = 1;
@@ -165,13 +165,13 @@ bool KMeansClustering2<T>::compute(const DenseMatrix<T> & points)
 /// to previously selected ones
 
 	getXi(apnt, points, 0);
-	m_centroids.copyColumn(0, apnt.v() );
+	m_centroids.copyColumn(0, apnt.c_v() );
 	int nsel = 1;
 	
 	for(int i=1;i<m_N;++i) {
 		getXi(apnt, points, i);
 		if(farEnoughToPreviousCentroids(apnt, i) ) {
-			m_centroids.copyColumn(nsel, apnt.v() );
+			m_centroids.copyColumn(nsel, apnt.c_v() );
 			//std::cout<<"\n select point "<<i<<" as centroid "<<nsel;
 			nsel++;
 			if(nsel==m_K) {
@@ -302,7 +302,7 @@ template<typename T>
 void KMeansClustering2<T>::setGroupCentroid(const DenseVector<T> & d, 
 							const int & i)
 {
-	m_centroids.copyColumn(i, d.v() );
+	m_centroids.copyColumn(i, d.c_v() );
 }
 
 }
