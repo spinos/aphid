@@ -12,6 +12,7 @@
 #define APH_LBM_LATTICE_MANAGER_H
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
 #include <math/linearMath.h>
 #include <sdb/WorldGrid2.h>
 
@@ -32,8 +33,16 @@ class LatticeManager {
 typedef DenseVector<float> QArrayTyp;
 typedef sdb::WorldGrid2<LatticeBlock > LatGridTyp;
 
-/// 19 discrete velocities q
-	boost::scoped_ptr<QArrayTyp> m_q[19];
+/// 19 distribution fuction values q_i
+/// last one is tmp
+	boost::scoped_ptr<QArrayTyp> m_q[20];
+/// MAC velocity
+	boost::scoped_ptr<QArrayTyp> m_u[3];
+/// weight
+	boost::scoped_ptr<QArrayTyp> m_sum[3];
+/// cell flag
+	boost::scoped_array<char > m_flag;
+	
 /// map to blocks
 	LatGridTyp m_grid;
 	int m_numBlocks;
@@ -49,18 +58,19 @@ public:
 	void injectParticles(const float* p,
 					const float* v,
 					const int& np);
+	void finishInjectingParticles();
 	
 	LatGridTyp& grid();
+	
+	QArrayTyp& q_i(const int& i);
+/// streaming and collision for all blocks
+	void simulationStep();
 	
 protected:
 
 private:
-	void extendQ();
-	void initializeBlockQ(const int& begin);
-	void addVelocity(const int& u, const int& v, const int& w,
-				const float& bu, const float& bv, const float& bw,
-				const float* vel,
-				const int& begin);
+	void extendArrays();
+	void resetBlock(LatticeBlock* blk, const float& cx, const float& cy, const float& cz);
 	
 };
 

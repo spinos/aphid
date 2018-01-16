@@ -1,6 +1,5 @@
 /*
  *  LatticeBlock.cpp
- *  
  *
  *  Created by jian zhang on 1/16/18.
  *  Copyright 2018 __MyCompanyName__. All rights reserved.
@@ -8,85 +7,151 @@
  */
 
 #include "LatticeBlock.h"
-#include <math/miscfuncs.h>
+#include "D3Q19DF.h"
+#include <math/linearMath.h>
 
 namespace aphid {
 
 namespace lbm {
 
-// the weight for the equilibrium distribution w
-static const float w_alpha[19] = { (1./3.), 
-	(1./18.),(1./18.),(1./18.),(1./18.),(1./18.),(1./18.),
-	(1./36.),(1./36.),(1./36.),(1./36.),(1./36.),(1./36.),
-	(1./36.),(1./36.),(1./36.),(1./36.),(1./36.),(1./36.), };
-	
-// the discrete set of microscopic velocities e
-static const int e_x[19] = { 0, 0,0,  1,-1, 0,0,  1,-1,1,-1, 0,0,0,0,   1,1,-1,-1 };
-static const int e_y[19] = { 0, 1,-1, 0,0,  0,0,  1,1,-1,-1, 1,1,-1,-1, 0,0,0,0 };
-static const int e_z[19] = { 0, 0,0,  0,0,  1,-1, 0,0,0,0,   1,-1,1,-1, 1,-1,1,-1 };
-
-float LatticeBlock::NodeSize = 1.f;
-float LatticeBlock::HalfNodeSize = .5f;
-float LatticeBlock::OneOverH = 1.f / 16.f;
-int LatticeBlock::BlockLength = 4096;
-
 LatticeBlock::LatticeBlock(sdb::Entity * parent) : sdb::Entity(parent)
 {}
 
-void LatticeBlock::setCorner(const float& x, const float& y, const float& z)
+void LatticeBlock::resetFlag(char* fg, const int& iblock)
 { 
-	m_corner[0] = x;
-	m_corner[1] = y;
-	m_corner[2] = z;
+	m_flag = &fg[iblock * BlockLength]; 
+	memset(m_flag, 0, BlockLength);
 }
 
-void LatticeBlock::setQOffset(const int& x)
-{ m_qoffset = x; }
-
-const int& LatticeBlock::qOffset() const
-{ return m_qoffset; }
-
-void LatticeBlock::calcNodeCoord(int& i, float& bary, const float& u, 
-					const int& d) const
+void LatticeBlock::resetQi(float* q, const int& iblock, const int& i)
 {
-	const float lu = (u - m_corner[d]) * OneOverH - .5f;
-	i = lu;
-	bary = lu - floor(lu);
+	m_q[i] = &q[iblock * BlockLength];
+	
+	if(i > 18)
+		return;
+		
+	D3Q19DF::SetWi(m_q[i], BlockLength, i);
+	
 }
 
-void LatticeBlock::InitializeQ(float* q, const int& i)
+void LatticeBlock::simulationStep()
 {
-	for(int j=0;j<BlockLength;++j) {
-		q[j] = w_alpha[i];
+	initialCondition();
+
+	float bcRho = .3f;
+	for(int iter = 0;iter<3;++iter) {
+/// no stream on q_0
+		for(int i=1;i<19;++i) {
+			streaming(i);
+		}
+		boundaryCondition(bcRho);
+		bcRho *= .8f;
+		if(iter > 3)
+			bcRho = 0.f;
+		collision();
 	}
 }
 
-void LatticeBlock::AddQ(const int& u, const int& v, const int& w,
-				const float* vel,
-				float* q, const int& i)
+void LatticeBlock::streaming(const int& i)
 {
-	if(IsNodeIndOutOfBound(u, v, w) )
-		return;
+	float* q_i = m_q[i];
+	float* tmp = m_q[19];
+	memcpy(tmp, q_i, BlockLength * 4);
+	
+	int c_i[3];
+	D3Q19DF::GetStreamDirection(c_i, i);
+	
+	for(int k=1; k<BlockDim[2] - 1;++k) {
+		for(int j=1;j<BlockDim[1] - 1;++j) {
+			for(int i=1;i<BlockDim[0] - 1;++i) {
 			
-	q[NodeInd(u, v, w)] += (e_x[i] * vel[0] + e_y[i] * vel[1] + e_z[i] * vel[2]) * w_alpha[i];
+				q_i[CellInd(i, j, k)] = tmp[CellInd(i + c_i[0], j + c_i[1], k + c_i[2])];
+				
+			}
+		}
+	}
 }
 
-bool LatticeBlock::IsNodeIndOutOfBound(const int& i, const int& j, const int& k)
+void LatticeBlock::collision()
 {
-	if(i < 0 || i > 15)
-		return true;
+	float u[3];
+	float rho, uu;
+	int ii, j, k;
+	for(int i=0;i<BlockLength;++i) {
 		
-	if(j < 0 || j > 15)
-		return true;
+		D3Q19DF::IncompressibleVelocity(u, rho, m_q, i);
 		
-	if(k < 0 || k > 15)
-		return true;
-		
-	return false;
+		uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+		D3Q19DF::Relaxing(m_q, u, uu, rho, i);
+	}
 }
 
-int LatticeBlock::NodeInd(const int& i, const int& j, const int& k)
-{ return ((k<<8) + (j<<4) + i); }
+void LatticeBlock::initialCondition()
+{
+	float u[3], uu;
+	for(int k=0; k<BlockDim[2];++k) {
+		for(int j=0;j<BlockDim[1];++j) {
+			for(int i=0;i<BlockDim[0];++i) {
+				evaluateCellCenterVelocity(u, i, j, k);
+				uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+				
+				if(uu < 1e-6f)
+					continue;
+					
+				m_flag[CellInd(i, j, k)] = 1;
+				D3Q19DF::DiscretizeVelocity(m_q, u, CellInd(i, j, k) );
+#if 0				
+				std::cout<<"\n discretize vel "<<u[0]<<","<<u[1]<<","<<u[2];
+				float u1[3];
+				float rho;
+				D3Q19DF::CompressibleVelocity(u1, rho, m_q, CellInd(i, j, k) );
+				std::cout<<"\n compressible vel "<<u1[0]<<","<<u1[1]<<","<<u1[2]
+					<<" rho "<<rho;
+#endif
+			}
+		}
+	}
+	
+}
+
+void LatticeBlock::boundaryCondition(const float& bcRho)
+{
+	float u[3];
+	int ii, j, k;
+	for(int i=0;i<BlockLength;++i) {
+		if(m_flag[i] > 0) {
+			CellCoord(ii, j, k, i);
+			evaluateCellCenterVelocity(u, ii, j, k);
+			D3Q19DF::IncomingBC(m_q, u, bcRho, i);
+		}
+	}
+}
+
+void LatticeBlock::updateVelocity()
+{
+	clearVelocities();
+	float u[3];
+	float rho, uu;
+	for(int k=0; k<BlockDim[2];++k) {
+		for(int j=0;j<BlockDim[1];++j) {
+			for(int i=0;i<BlockDim[0];++i) {
+				
+				D3Q19DF::CompressibleVelocity(u, rho, m_q, CellInd(i, j, k) );
+				uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+				
+				if(uu < 1e-6f) 
+					continue;
+					
+				depositeCellCenterVelocity(i, j, k, u);
+#if 0
+				std::cout<<"\n deposite vel "<<u[0]<<","<<u[1]<<","<<u[2]
+				<<" rho "<<rho;
+#endif
+			}
+		}
+	}
+	finishDepositeVelocity();
+}
 
 }
 

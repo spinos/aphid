@@ -76,7 +76,7 @@ WorldGrid2<ChildType>::~WorldGrid2()
 
 template<typename ChildType>
 void WorldGrid2<ChildType>::setGridSize(float x)
-{ m_gridSize = (x>32.f) ? x : 32.f; }
+{ m_gridSize = (x>16.f) ? x : 16.f; }
 
 template<typename ChildType>
 ChildType * WorldGrid2<ChildType>::value() 

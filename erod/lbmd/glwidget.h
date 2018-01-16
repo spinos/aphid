@@ -8,10 +8,13 @@
 
 namespace aphid {
 
+template<typename T>
+class DenseVector;
+
 namespace lbm {
 
 class LatticeManager;
-
+class LatticeBlock;
 }
 
 }
@@ -37,9 +40,12 @@ protected:
 	virtual void resetOrthoViewTransform();
 	
 private:
+	void drawBlock(aphid::lbm::LatticeBlock* blk);
 	
 private:
     aphid::lbm::LatticeManager* m_latman;
+	aphid::DenseVector<float>* m_nodeCenter;
+	aphid::DenseVector<float>* m_nodeU;
 	
 };
 

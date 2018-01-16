@@ -22,15 +22,22 @@ LatticeManager::~LatticeManager()
 
 void LatticeManager::resetLattice(const LatticeParam& param)
 {
-	for(int i=0;i<19;++i) {
-		m_q[i].reset(new DenseVector<float>(65536) );
+	for(int i=0;i<20;++i) {
+		m_q[i].reset(new DenseVector<float>(LatticeBlock::BlockLength * 16 ) );
 	}
+	
+	for(int i=0;i<3;++i) {
+		m_u[i].reset(new DenseVector<float>(LatticeBlock::BlockMarkerLength[i] * 16 ) );
+		m_sum[i].reset(new DenseVector<float>(LatticeBlock::BlockMarkerLength[i] * 16 ) );
+	}
+	
+	m_flag.reset(new char[LatticeBlock::BlockLength * 16]);
 	
 	m_grid.clear();
 	m_grid.setGridSize(param._blockSize);
-	LatticeBlock::NodeSize = param._blockSize / 16.f;
-	LatticeBlock::HalfNodeSize = 0.5f * LatticeBlock::NodeSize;
-	LatticeBlock::OneOverH = 1.f / LatticeBlock::NodeSize;
+	LatticeBlock::CellSize = m_grid.gridSize() / (float)LatticeBlock::BlockDim[0];
+	LatticeBlock::HalfCellSize = 0.5f * LatticeBlock::CellSize;
+	LatticeBlock::OneOverH = 1.f / LatticeBlock::CellSize;
 	m_numBlocks = 0;
 	m_capBlocks = 16;
 }
@@ -38,10 +45,14 @@ void LatticeManager::resetLattice(const LatticeParam& param)
 sdb::WorldGrid2<LatticeBlock >& LatticeManager::grid()
 { return m_grid; }
 
+DenseVector<float>& LatticeManager::q_i(const int& i)
+{ return *m_q[i]; }
+
 void LatticeManager::injectParticles(const float* p,
 					const float* v,
 					const int& np)
 {
+	float uscaled[3];
 	LatticeBlock* prevCell = 0;
 	LatticeBlock* curCell;
 /// unlikely
@@ -60,16 +71,14 @@ void LatticeManager::injectParticles(const float* p,
 			curCell = m_grid.findCell(c);
 			if(!curCell) {
 				curCell = m_grid.insertCell(c);
-				curCell->setCorner(blockSize * c.x,
-									blockSize * c.y,
-									blockSize * c.z);
-				curCell->setQOffset(m_numBlocks * LatticeBlock::BlockLength);
-				
-				initializeBlockQ(curCell->qOffset() );
 				
 				if((m_numBlocks + 1) > m_capBlocks) {
-					extendQ();
+					extendArrays();
 				}
+				
+				resetBlock(curCell, blockSize * c.x,
+									blockSize * c.y,
+									blockSize * c.z);
 				
 				m_numBlocks++;
 			}
@@ -78,120 +87,75 @@ void LatticeManager::injectParticles(const float* p,
 			
 		}
 		
-		curCell->calcNodeCoord(cu, bu, pos[0], 0);
-		curCell->calcNodeCoord(cv, bv, pos[1], 1);
-		curCell->calcNodeCoord(cw, bw, pos[2], 2);
-
 		const float* vel = &v[i * 3];
-		
-		addVelocity(cu, cv, cw, bu, bv, bw, vel, curCell->qOffset() );
+
+		uscaled[0] = vel[0] * LatticeBlock::OneOverH;
+		uscaled[1] = vel[1] * LatticeBlock::OneOverH;
+		uscaled[2] = vel[2] * LatticeBlock::OneOverH;
+		curCell->depositeVelocity(pos, vel);
 		
 	}
 }
 
-void LatticeManager::extendQ()
+void LatticeManager::finishInjectingParticles()
 {
-	for(int i=0;i<19;++i) {
-		m_q[i]->expand(65536);
+	m_grid.begin();
+	while(!m_grid.end() ) {
+		m_grid.value()->finishDepositeVelocity();
+		
+		m_grid.next();
 	}
+}
+
+void LatticeManager::extendArrays()
+{
+	for(int i=0;i<20;++i) {
+		m_q[i]->expand(LatticeBlock::BlockLength * 16 );
+	}
+	
+	for(int i=0;i<3;++i) {
+		m_u[i]->expand(LatticeBlock::BlockMarkerLength[i] * 16 );
+		m_sum[i]->expand(LatticeBlock::BlockMarkerLength[i] * 16 );
+	}
+	
+	char* tmp = new char[LatticeBlock::BlockLength * m_capBlocks];
+	memcpy(tmp, m_flag.get(), LatticeBlock::BlockLength * m_capBlocks );
+	
+	m_flag.reset(new char[LatticeBlock::BlockLength * (m_capBlocks + 16) ]);
+	memcpy(m_flag.get(), tmp, LatticeBlock::BlockLength * m_capBlocks );
+	
+	delete[] tmp;
+	
 	m_capBlocks += 16;
 	
 }
 
-void LatticeManager::initializeBlockQ(const int& begin)
+void LatticeManager::resetBlock(LatticeBlock* blk, const float& cx, const float& cy, const float& cz)
 {
-	for(int i=0;i<19;++i) {
-		LatticeBlock::InitializeQ(&m_q[i]->v()[begin], i );
+	blk->setCorner(cx, cy, cz);
+				
+	blk->resetBlockVelocity(m_u[0]->v(), m_sum[0]->v(),
+							m_numBlocks, 0);
+	blk->resetBlockVelocity(m_u[1]->v(), m_sum[1]->v(),
+							m_numBlocks, 1);
+	blk->resetBlockVelocity(m_u[2]->v(), m_sum[2]->v(),
+							m_numBlocks, 2);
+							
+	for(int i=0;i<20;++i) {
+		blk->resetQi(m_q[i]->v(), m_numBlocks, i );
 	}
+	
+	blk->resetFlag(m_flag.get(), m_numBlocks);
 }
 
-void LatticeManager::addVelocity(const int& u, const int& v, const int& w,
-				const float& bu, const float& bv, const float& bw,
-				const float* vel,
-				const int& begin)
+void LatticeManager::simulationStep()
 {
-	const float ub = 1.f - bu;
-	const float vb = 1.f - bv;
-	const float wb = 1.f - bw;
-	float vv[3];
-	float wei = ub * vb * wb;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u, v, w, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = bu * vb * wb;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u + 1, v, w, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = ub * bv * wb;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u, v + 1, w, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = bu * bv * wb;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u + 1, v + 1, w, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = ub * vb * bw;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u, v, w + 1, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = bu * vb * bw;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u + 1, v, w + 1, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = ub * bv * bw;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u, v + 1, w + 1, vv, &m_q[i]->v()[begin], i );
-	}
-	
-	wei = bu * bv * bw;
-	
-	vv[0] = vel[0] * wei;
-	vv[1] = vel[1] * wei;
-	vv[2] = vel[2] * wei;
-	
-	for(int i=0;i<19;++i) {
-		LatticeBlock::AddQ(u + 1, v + 1, w + 1, vv, &m_q[i]->v()[begin], i );
+	m_grid.begin();
+	while(!m_grid.end() ) {
+		m_grid.value()->simulationStep();
+		m_grid.value()->updateVelocity();
+		
+		m_grid.next();
 	}
 }
 

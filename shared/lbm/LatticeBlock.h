@@ -12,54 +12,45 @@
 #define APH_LBM_LATTICE_BLOCK_H
 
 #include <sdb/Entity.h>
+#include "MACVelocityField.h"
 
 namespace aphid {
 
+template<typename T>
+class DenseVector;
+
 namespace lbm {
 
-class LatticeBlock : public sdb::Entity {
+class LatticeBlock : public sdb::Entity, public MACVelocityField {
 
-/// lower corner
-	float m_corner[3];
-/// where q begins
-	int m_qoffset;
+/// 19 distribution functions values f_i and 1 tmp buffer
+	float* m_q[20];
+/// fluid, bounduary condition, obstacle
+	char* m_flag;
 	
 public:
 
 	LatticeBlock(sdb::Entity * parent = NULL);
 	
-	void setCorner(const float& x, const float& y, const float& z);
-	void setQOffset(const int& x);
+/// q_i <- w_i with block offset
+	void resetQi(float* q, const int& iblock, const int& i);
+	void resetFlag(char* fg, const int& iblock);
 	
-	const int& qOffset() const;
-	
-/// |       |       |
-/// |   i  x|   i1  |
-/// |       |       |
-/// ind to node and barycentric coordinate in d-th dimension
-/// if i = -1, outside lower bound
-	void calcNodeCoord(int& i, float& bary, const float& u, const int& d) const;
-	
-/// q_i <- w_i
-	static void InitializeQ(float* q, const int& i);
-	static void AddQ(const int& u, const int& v, const int& w,
-				const float* vel,
-				float* q, const int& i);
-	static int NodeInd(const int& i, const int& j, const int& k);
-	static bool IsNodeIndOutOfBound(const int& i, const int& j, const int& k);
-
-/// h
-	static float NodeSize;
-/// h / 2
-	static float HalfNodeSize;
-/// 1 / h
-	static float OneOverH;
-/// 16 x 16 x 16
-	static int BlockLength;
+	void simulationStep();
+/// cell center to MAC
+	void updateVelocity();
 	
 protected:
 
 private:
+/// propagate i-th distribution function values f_i to the next lattice site 
+/// in the direction of its assigned lattice vector c_i
+	void streaming(const int& i);
+	void collision();
+/// find incomming cells
+/// set initial velocities
+	void initialCondition();
+	void boundaryCondition(const float& bcRho);
 	
 };
 
