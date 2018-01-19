@@ -13,7 +13,7 @@ class DenseVector;
 
 namespace lbm {
 
-class LatticeManager;
+class VolumeResponse;
 class LatticeBlock;
 }
 
@@ -41,11 +41,16 @@ protected:
 	
 private:
 	void drawBlock(aphid::lbm::LatticeBlock* blk);
+	void simulationStep(bool toMoveParticles);
 	
 private:
-    aphid::lbm::LatticeManager* m_latman;
+    aphid::lbm::VolumeResponse* m_latman;
 	aphid::DenseVector<float>* m_nodeCenter;
 	aphid::DenseVector<float>* m_nodeU;
+	aphid::DenseVector<float>* m_nodeRho;
+	aphid::DenseVector<float>* m_particleX;
+	aphid::DenseVector<float>* m_particleU;
+	aphid::DenseVector<float>* m_particleUhat;
 	
 };
 

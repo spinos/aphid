@@ -36,20 +36,25 @@ public:
 	void resetQi(float* q, const int& iblock, const int& i);
 	void resetFlag(char* fg, const int& iblock);
 	
+/// find incomming cells
+/// initial condition prescribed in terms of fluid velocity
+/// f_i^0 <- f_i^eq(rho_i(x), u_0(x))
+	void initialCondition();
 	void simulationStep();
 /// cell center to MAC
 	void updateVelocity();
 	
-protected:
+	void extractCellDensities(float* dst);
+	void evaluateVelocityDensityAtPosition(float* u, float& rho, const float* p);
 
+protected:
+	virtual void limitSpeed(float& x) const;
+	
 private:
 /// propagate i-th distribution function values f_i to the next lattice site 
 /// in the direction of its assigned lattice vector c_i
 	void streaming(const int& i);
 	void collision();
-/// find incomming cells
-/// set initial velocities
-	void initialCondition();
 	void boundaryCondition(const float& bcRho);
 	
 };

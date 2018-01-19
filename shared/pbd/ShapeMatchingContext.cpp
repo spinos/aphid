@@ -17,7 +17,7 @@ namespace pbd {
 ShapeMatchingContext::ShapeMatchingContext() :
 m_lhsMat(0),
 m_cg(0),
-m_stiffness(200.f)
+m_stiffness(300.f)
 {}
 
 ShapeMatchingContext::~ShapeMatchingContext()
@@ -38,6 +38,7 @@ void ShapeMatchingContext::clearConstraints()
 
 void ShapeMatchingContext::create(const ShapeMatchingProfile& prof)
 {	
+	resetCollisionGrid(prof.averageSegmentLength() * 1.414f);
 	clearConstraints();
 	
 	const int& np = prof.numPoints();
@@ -57,6 +58,7 @@ void ShapeMatchingContext::create(const ShapeMatchingProfile& prof)
 /// add all regions
 	RegionVE ve;
 	const int& nr = prof.numRegions();
+	std::cout<<"\n ShapeMatchingContext::create n regions "<<nr;
 	for(int i=0;i<nr;++i) {
 		prof.getRegionVE(ve, i);
 		

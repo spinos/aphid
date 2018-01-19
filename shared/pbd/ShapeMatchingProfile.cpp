@@ -32,11 +32,16 @@ const int& ShapeMatchingProfile::numPoints() const
 const int& ShapeMatchingProfile::numRegions() const
 { return m_numRegions; }
 
+const float& ShapeMatchingProfile::averageSegmentLength() const
+{ return m_avgSegLen; }
+
 void ShapeMatchingProfile::createTestStrand()
 {
 	Vector3F g[32];
 	for(int i=0;i<32;++i) {
-		g[i].set(10.f + (.6f - .006 * i) * i, 10.f - .05f * i + 1.2f * (.5f + .005f * i) * sin(0.5f * i), 1.3f * (.5f + .005f * i) * cos(.5f * i) );
+		g[i].set(10.f + (.9f - .006 * i) * i, 
+				10.f - .05f * i + 1.8f * (.5f + .005f * i) * sin(0.5f * i), 
+				1.f + 1.9f * (.5f + .005f * i) * cos(.5f * i) );
 	}
 	
 	const int np = 64;
@@ -56,6 +61,8 @@ void ShapeMatchingProfile::createTestStrand()
 	
 	static const int hilb[2][2] = {{1, 0}, {0, 1}};
 	
+	m_avgSegLen = 0.f;
+	int numSeg = 0;
 	Vector3F p1p2;
 	for(int i=1;i<hnp;++i) {
 		p1p2 = g[i] - g[i-1];
@@ -65,8 +72,12 @@ void ShapeMatchingProfile::createTestStrand()
 		m_x0[i * 2 + hilb[i&1][0] ] = g[i] + nml * hw;
 		m_x0[i * 2 + hilb[i&1][1] ] = g[i] - nml * hw;
 		
+		m_avgSegLen += p1p2.length();
+		numSeg++;
+		
 		p0p1 = p1p2;
 	}
+	m_avgSegLen /= (float)numSeg;
 	
 /// lock first segment
 	for(int i=0;i<4;++i) {

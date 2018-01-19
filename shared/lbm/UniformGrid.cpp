@@ -64,6 +64,14 @@ void UniformGrid::getCellCoordWeight(int& i, int& j, int& k,
 	barz = lw - k;
 }
 
+int UniformGrid::getCellInd(const float* u) const
+{
+	int i = (u[0] - m_corner[0]) * OneOverH;
+	int j = (u[1] - m_corner[1]) * OneOverH;
+	int k = (u[2] - m_corner[2]) * OneOverH;
+	return CellInd(i, j, k);
+}
+
 int UniformGrid::CellInd(const int& i, const int& j, const int& k)
 { return (k * BlockDim[0] * BlockDim[1] + j * BlockDim[0] + i); }
 
@@ -101,6 +109,17 @@ void UniformGrid::extractCellCenters(float* p) const
 			}
 		}
 	}
+}
+
+bool UniformGrid::IsCellCoordValid(const int& i, const int& j, const int& k)
+{
+	if(i < 0 || i >= BlockDim[0])
+		return false;
+	if(j < 0 || j >= BlockDim[1])
+		return false;
+	if(k < 0 || k >= BlockDim[2])
+		return false;
+	return true;	
 }
 
 }

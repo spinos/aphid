@@ -7,36 +7,14 @@
 #include "glwidget.h"
 #include <GeoDrawer.h>
 #include <math/Quaternion.h>
-#include <lbm/LatticeManager.h>
+#include <lbm/VolumeResponse.h>
 #include <lbm/LatticeBlock.h>
 #include <lbm/D3Q19DF.h>
+#include <math/miscfuncs.h>
 
 using namespace aphid;
 
-static const int NumPart = 9;
-static const float PartP[9][3] = {
-{12.033f, 19.9743f, 7.978f},
-{10.33f, 18.43f, 9.9178f},
-{12.33f, 17.23f, 10.08f},
-{10.143f, 15.93f, 9.78f},
-{11.033f, 14.023f, 11.08f},
-{10.93f, 13.023f, 10.438f},
-{12.33f, 15.923f, 9.6708f},
-{12.17543f, 14.9143f, 12.708f},
-{11.943f, 12.53f, 13.18f},
-};
-
-static const float PartV[9][3] = {
-{.33f - 1.f, -.843f - 1.f, 1.978f},
-{.73f + 1.f, .53f - 1.f, -.7638f},
-{.383f + 1.f, -.23f - 1.f, -1.98f},
-{.53f + 1.f, -.83f - 1.f, 1.828f},
-{.73f + 1.f, .973f + 1.f, 1.7408f},
-{.283f + 1.f, -.123f + 1.f, 1.358f},
-{.143f + 1.f, .523f - 1.f, -1.508f},
-{.2041f - 1.f, .643f - 1.f, -1.3138f},
-{.03f + 1.f, .95606f + 1.f, -1.9467f},
-};
+static const int NumPart = 4096;
 
 GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 {
@@ -46,16 +24,58 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	orthoCamera()->setNearClipPlane(1.f);
 	usePerspCamera();
 	resetView();
-	m_latman = new lbm::LatticeManager;
+	
+	m_particleX = new DenseVector<float>(NumPart * 3);
+	m_particleU = new DenseVector<float>(NumPart * 3);
+	m_particleUhat = new DenseVector<float>(NumPart * 3);
+	
+	for(int i=0;i<(NumPart>>1);++i) {
+	
+		m_particleX->v()[i * 3] = 7.f + RandomFn11() * 4.f;
+		m_particleX->v()[i * 3 + 1] = 12.f + RandomFn11() * 4.f;
+		m_particleX->v()[i * 3 + 2] = 9.f + RandomFn11() * 5.f;
+		
+		m_particleU->v()[i * 3] = 2.5;
+		m_particleU->v()[i * 3 + 1] = RandomFn11() * .5f;
+		m_particleU->v()[i * 3 + 2] = .5 - RandomF01() * .5f;
+	
+	}
+	
+	for(int i=(NumPart>>1);i<NumPart;++i) {
+	
+		m_particleX->v()[i * 3] = 25.f + RandomFn11() * 4.f;
+		m_particleX->v()[i * 3 + 1] = 12.f + RandomFn11() * 5.f;
+		m_particleX->v()[i * 3 + 2] = 9.f + RandomFn11() * 4.f;
+		
+		m_particleU->v()[i * 3] = -2.5;
+		m_particleU->v()[i * 3 + 1] = RandomFn11() * .5f;
+		m_particleU->v()[i * 3 + 2] = .5 + RandomF01() * .5f;
+	
+	}
+	memcpy(m_particleUhat->v(), m_particleU->v(), NumPart * 12);
+
+	
+	m_latman = new lbm::VolumeResponse;
 	lbm::LatticeParam param;
-	param._blockSize = 23.f;
-	m_latman->resetLattice(param);
-	m_latman->injectParticles(PartP[0], PartV[0], NumPart);
-	m_latman->finishInjectingParticles();
-	m_latman->simulationStep();
+	param._blockSize = 32.f;
+	param._inScale = .1f;
+	param._outScale = 15.f;
+	m_latman->setParam(param);
+	m_latman->solveParticles(m_particleU->v(), m_particleX->v(), NumPart);
 	
 	m_nodeCenter = new DenseVector<float>(lbm::LatticeBlock::BlockLength * 3);
 	m_nodeU = new DenseVector<float>(lbm::LatticeBlock::BlockLength * 3);
+	m_nodeRho = new DenseVector<float>(lbm::LatticeBlock::BlockLength);
+	
+	std::cout<<"\n e_i";
+	for(int i=0;i<19;++i) {
+		std::cout<<"\n "<<lbm::D3Q19DF::e_alpha[0][i]
+					<<" "<<lbm::D3Q19DF::e_alpha[1][i]
+					<<" "<<lbm::D3Q19DF::e_alpha[2][i]
+					<<" inv "<<lbm::D3Q19DF::inv_e_alpha[0][i]
+					<<" "<<lbm::D3Q19DF::inv_e_alpha[1][i]
+					<<" "<<lbm::D3Q19DF::inv_e_alpha[2][i];
+	}
 	
 	float* f_i[19];
 	for(int i=0;i<19;++i) {
@@ -71,27 +91,41 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 		std::cout<<"\n f_"<<i<<" "<<f_i[i][0];
 	}
 	
-	float u[3] = {.5f, .2f, -1.1f};
+	float u[3] = {0,0,-0.97335};
 	std::cout<<"\n discretize u "<<u[0]<<","<<u[1]<<","<<u[2];
 	
-	lbm::D3Q19DF::DiscretizeVelocity(f_i, u, 0);
+	lbm::D3Q19DF::DiscretizeVelocity(f_i, 1.f, u, 0);
 	
 	std::cout<<"\n f_i";
 	for(int i=0;i<19;++i) {
 		std::cout<<"\n f_"<<i<<" "<<f_i[i][0];
 	}
 	
-	float rho;
-	lbm::D3Q19DF::CompressibleVelocity(u, rho, f_i, 0);
-	
-	std::cout<<"\n compose u "<<u[0]<<","<<u[1]<<","<<u[2]
-		<<"\n rho "<<rho;
-		
+	float rho;		
 	lbm::D3Q19DF::IncompressibleVelocity(u, rho, f_i, 0);
 	
-	std::cout<<"\n incompose u "<<u[0]<<","<<u[1]<<","<<u[2]
+	std::cout<<"\n incompressible u "<<u[0]<<","<<u[1]<<","<<u[2]
 		<<"\n rho "<<rho;
 
+	lbm::D3Q19DF::CompressibleVelocity(u, rho, f_i, 0);
+	
+	std::cout<<"\n compressible u "<<u[0]<<","<<u[1]<<","<<u[2]
+		<<"\n rho "<<rho;
+		
+	f_i[2][0] = 0.0277778;
+	f_i[13][0] = -0.0444444;
+	f_i[15][0] = 0.025;
+	
+	float uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+	lbm::D3Q19DF::Relaxing(f_i, u, uu, rho, 1.5f, 0);
+	
+	lbm::D3Q19DF::CompressibleVelocity(u, rho, f_i, 0);
+	
+	std::cout<<"\n relaxed\n compressible u "<<u[0]<<","<<u[1]<<","<<u[2]
+		<<"\n rho "<<rho;
+		
+	std::cout<<"\n cell size "<<lbm::LatticeBlock::CellSize;
+		
 	std::cout.flush();
 	
 }
@@ -105,26 +139,38 @@ void GLWidget::clientInit()
 }
 
 void GLWidget::clientDraw()
-{
-	glColor3f(.9f, .7f, .0f);
-#if 1
-	for(int i=0;i<NumPart;++i) {
-		glTranslatef(PartP[i][0], PartP[i][1], PartP[i][2]);
-		getDrawer()->sphere(.0625f);
-		glTranslatef(-PartP[i][0], -PartP[i][1], -PartP[i][2]);
-		
-	}
+{	
+	glColor3f(1, 1, 0);
+	const float vscale = .125f;
 
 	glBegin(GL_LINES);
 	for(int i=0;i<NumPart;++i) {
-		glVertex3fv(PartP[i]);
-		glVertex3f(PartP[i][0] + PartV[i][0], 
-					PartP[i][1] + PartV[i][1], 
-					PartP[i][2] + PartV[i][2]);
-		
+
+		const float* xi = &m_particleX->c_v()[i * 3];
+		glVertex3fv(xi);	
+		const float* ui = &m_particleUhat->c_v()[i * 3];
+		glVertex3f(xi[0] + ui[0] * vscale,
+				xi[1] + ui[1] * vscale,
+				xi[2] + ui[2] * vscale);
 	}
+	
 	glEnd();
-#endif	
+
+	glColor3f(0, 1, 0);
+
+	glBegin(GL_LINES);
+	for(int i=0;i<NumPart;++i) {
+
+		const float* xi = &m_particleX->c_v()[i * 3];
+		glVertex3fv(xi);	
+		const float* ui = &m_particleU->c_v()[i * 3];
+		glVertex3f(xi[0] + ui[0] * vscale,
+				xi[1] + ui[1] * vscale,
+				xi[2] + ui[2] * vscale);
+	}
+	
+	glEnd();
+	
 	sdb::WorldGrid2<lbm::LatticeBlock >& grd = m_latman->grid();
 	
 	BoundingBox bbx;
@@ -173,6 +219,10 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
 		case Qt::Key_A:
+			simulationStep(true);
+			break;
+		case Qt::Key_Space:
+			simulationStep(false);
 			break;
 		default:
 			break;
@@ -205,32 +255,64 @@ static const float mm1[16] = {1.f, 0.f, 0.f, 0.f,
 void GLWidget::drawBlock(aphid::lbm::LatticeBlock* blk)
 {
 	blk->extractCellCenters(m_nodeCenter->v() );
-
+	blk->extractCellDensities(m_nodeRho->v() );
 	blk->extractCellVelocities(m_nodeU->v() );
+	const float scaling = lbm::LatticeBlock::CellSize * 3.35f;
+	
+	glColor3f(0.f, .1f, .1f);
 	
 	glBegin(GL_LINES);
 	for(int i=0;i<lbm::LatticeBlock::BlockLength;++i) {
 		glVertex3fv(&m_nodeCenter->c_v()[i*3]);			
-		glVertex3f(m_nodeCenter->c_v()[i*3] + m_nodeU->c_v()[i*3] * lbm::LatticeBlock::CellSize,
-				m_nodeCenter->c_v()[i*3 + 1] + m_nodeU->c_v()[i*3 + 1] * lbm::LatticeBlock::CellSize,
-				m_nodeCenter->c_v()[i*3 + 2] + m_nodeU->c_v()[i*3 + 2] * lbm::LatticeBlock::CellSize);
+		glVertex3f(m_nodeCenter->c_v()[i*3] + m_nodeU->c_v()[i*3]      * scaling,
+				m_nodeCenter->c_v()[i*3 + 1] + m_nodeU->c_v()[i*3 + 1] * scaling,
+				m_nodeCenter->c_v()[i*3 + 2] + m_nodeU->c_v()[i*3 + 2] * scaling);
 	}
-	
 	glEnd();
 	
-	glColor3f(0, 1, 0);
-	
-	float u[3];
-	
-	glBegin(GL_LINES);
-	for(int i=0;i<NumPart;++i) {
-		blk->evaluateVelocityAtPosition(u, PartP[i]);
+	for(int i=0;i<lbm::LatticeBlock::BlockLength;++i) {
 		
-		glVertex3fv(PartP[i]);	
-		glVertex3f(PartP[i][0] + u[0] * lbm::LatticeBlock::CellSize,
-				PartP[i][1] + u[1] * lbm::LatticeBlock::CellSize,
-				PartP[i][2] + u[2] * lbm::LatticeBlock::CellSize);
+		const float* pv = &m_nodeCenter->c_v()[i*3];
+		const float& prho = m_nodeRho->c_v()[i];
+		
+		if(prho > 1.03f) {
+			glTranslatef(pv[0], pv[1], pv[2]);
+			glColor3f(1,0,0);
+			getDrawer()->sphere(.0625f);
+			glTranslatef(-pv[0], -pv[1], -pv[2]);
+		} else if(prho < .99f) {
+			glTranslatef(pv[0], pv[1], pv[2]);
+			glColor3f(0,0,1);
+			getDrawer()->sphere(.0625f);
+			glTranslatef(-pv[0], -pv[1], -pv[2]);
+		}
+		
 	}
-	
-	glEnd();	
+}
+
+void GLWidget::simulationStep(bool toMoveParticles)
+{
+	if(toMoveParticles) {
+		const float g = .098f;
+		for(int i=0;i<NumPart;++i) {
+			float* xi = &m_particleX->v()[i * 3];
+			float* ui = &m_particleU->v()[i * 3];
+			
+			xi[0] += ui[0] * .1f;
+			xi[1] += ui[1] * .1f;
+			xi[2] += ui[2] * .1f;
+			
+			ui[0] += RandomFn11() * 0.1f;
+			ui[1] += g;
+			ui[2] += RandomFn11() * 0.1f;
+			
+		}
+		
+		m_particleUhat->copy(*m_particleU);
+		
+		m_latman->solveParticles(m_particleU->v(), m_particleX->v(), NumPart);
+	} else {
+		m_latman->simulationStep();
+	}
+	update();
 }

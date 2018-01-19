@@ -1,16 +1,19 @@
 #include "SimulationContext.h"
 #include "WindForce.h"
 #include <math/miscfuncs.h>
+#include <lbm/VolumeResponse.h>
+#include <lbm/LatticeBlock.h>
 
 namespace aphid {
 namespace pbd {
     
 SimulationContext::SimulationContext()
 {
+	m_latman = new lbm::VolumeResponse;	
 	m_meanWindVel[0] = -1.f;
 	m_meanWindVel[1] = 0.f;
 	m_meanWindVel[2] = 0.f;
-	m_gravityY = -30.f;
+	m_gravityY = -98.f;
 }
 
 SimulationContext::~SimulationContext()
@@ -155,6 +158,24 @@ void SimulationContext::setMeanWindVelocity(const Vector3F& vwind)
 	m_meanWindVel[0] = vwind.x;
 	m_meanWindVel[1] = vwind.y;
 	m_meanWindVel[2] = vwind.z;
+}
+
+void SimulationContext::applyCollisionConstraint()
+{
+	const int& np = m_part.numParticles();
+	Vector3F* vel = m_part.velocity();
+	Vector3F* x = m_part.pos();
+	m_latman->solveParticles((float*)vel, (const float*)x, np);
+}
+
+void SimulationContext::resetCollisionGrid(const float& cellSize)
+{
+	std::cout<<"\n SimulationContext::resetCollisionGrid cell size "<<cellSize;
+	lbm::LatticeParam param;
+	param._blockSize = cellSize * 16.f;
+	param._inScale = .0333f;
+	param._outScale = 45.f;
+	m_latman->setParam(param);
 }
 
 }

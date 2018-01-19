@@ -23,6 +23,7 @@ target_link_libraries (pjvt ${APHID_TOPO_LIBRARY})
 target_link_libraries (pjvt ${APHID_PBD_LIBRARY})
 target_link_libraries (pjvt ${APHID_SDB_LIBRARY})
 target_link_libraries (pjvt ${APHID_SMP_LIBRARY})
+target_link_libraries (pjvt ${APHID_LBM_LIBRARY})
 
 INCLUDE (${APHID_DIR}/cmake/boost_config.cmake)
 

@@ -9,7 +9,9 @@
 #include <pbd/pbd_common.h>
 
 namespace aphid {
+
 class RotationHandle;
+
 }
 
 class TestSolver;
@@ -34,6 +36,7 @@ protected:
 	virtual void resetOrthoViewTransform();
 	
 private:
+	
 	void drawWindTurbine();
 	void drawMesh(const int& nind, const int* inds, const float* pos, const float* nml);
 	void addWindSpeed(float x);

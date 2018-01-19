@@ -28,7 +28,8 @@ class ShapeMatchingProfile {
 /// region varying
 	boost::scoped_array<int > m_vertices;	
 /// v1 and v2 per edge region varying
-	boost::scoped_array<int > m_edges;	
+	boost::scoped_array<int > m_edges;
+	float m_avgSegLen;
 	int m_numPoints;
 	int m_numRegions;
 	
@@ -37,6 +38,7 @@ public:
 	
 	const int& numPoints() const;
 	const int& numRegions() const;
+	const float& averageSegmentLength() const;
 	const Vector3F* x0() const;
 	const float* inverseMass() const;
 /// i-th region vertices and edges

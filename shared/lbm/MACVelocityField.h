@@ -34,7 +34,7 @@ public:
 	void resetBlockVelocity(float* u, float* sum, const int& iblock, const int& d);
 /// u <- u + w_i q_i 
 /// w <- w + w_i
-	void depositeVelocity(const float* pos, const float* vel);
+	void depositeVelocity(const float* pos, const float* vel, const float& scaling);
 /// u <- u / w
 	void finishDepositeVelocity();
 /// centered in other dimensions
@@ -63,6 +63,7 @@ protected:
 	void clearVelocities();
 	void depositeCellCenterVelocity(const int& i, const int& j, const int& k,
 				const float* vel);
+	virtual void limitSpeed(float& x) const;
 	
 private:
 	static const int ComponentMarkerTable[3][3];

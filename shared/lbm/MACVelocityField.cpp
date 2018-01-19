@@ -104,22 +104,31 @@ void MACVelocityField::getMarkerCoordWeight(int& i, int& j, int& k,
 	}
 }
 
-void MACVelocityField::depositeVelocity(const float* pos, const float* vel)
+void MACVelocityField::depositeVelocity(const float* pos, const float* vel, const float& scaling)
 {
 	int i, j, k;
-	float xbary, ybary, zbary;
+	float xbary, ybary, zbary, limited;
 	
 	getMarkerCoordWeight(i, j, k, xbary, ybary, zbary, pos, 0);
 	
-	addVelocity(m_u[0], m_sum[0], i, j, k, xbary, ybary, zbary, vel[0], 0);
+	limited = scaling * vel[0];
+	limitSpeed(limited);
+
+	addVelocity(m_u[0], m_sum[0], i, j, k, xbary, ybary, zbary, limited, 0);
 	
 	getMarkerCoordWeight(i, j, k, xbary, ybary, zbary, pos, 1);
 	
-	addVelocity(m_u[1], m_sum[1], i, j, k, xbary, ybary, zbary, vel[1], 1);
+	limited = scaling * vel[1];
+	limitSpeed(limited);
+
+	addVelocity(m_u[1], m_sum[1], i, j, k, xbary, ybary, zbary, limited, 1);
 	
 	getMarkerCoordWeight(i, j, k, xbary, ybary, zbary, pos, 2);
 	
-	addVelocity(m_u[2], m_sum[2], i, j, k, xbary, ybary, zbary, vel[2], 2);
+	limited = scaling * vel[2];
+	limitSpeed(limited);
+
+	addVelocity(m_u[2], m_sum[2], i, j, k, xbary, ybary, zbary, limited, 2);
 	
 }
 
@@ -228,6 +237,9 @@ void MACVelocityField::depositeCellCenterVelocity(const int& i, const int& j, co
 		m_sum[d][ind] += .5f;
 	}
 }
+
+void MACVelocityField::limitSpeed(float& x) const
+{}
 
 }
 

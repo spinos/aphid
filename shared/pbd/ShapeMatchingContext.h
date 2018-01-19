@@ -57,6 +57,7 @@ public:
 	const ShapeMatchingRegion* region(const int& i) const;
 	
 protected:
+	
 	virtual void updateShapeMatchingRegions();
 	virtual void positionConstraintProjection();
 

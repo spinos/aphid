@@ -26,6 +26,7 @@ TestSolver::TestSolver(QObject *parent)
 	pbd::ShapeMatchingProfile prof;
 	prof.createTestStrand();
 	create(prof);
+	
 }
 
 TestSolver::~TestSolver()
@@ -38,11 +39,12 @@ void TestSolver::stepPhysics(float dt)
     applyGravity(dt);
 	setMeanWindVelocity(m_windicator->getMeanWindVec() );
 	applyWind(dt);
+	applyCollisionConstraint();
 	projectPosition(dt);
 	updateShapeMatchingRegions();	
 	positionConstraintProjection();
 	updateVelocityAndPosition(dt);
-	dampVelocity(0.001f);
+	//dampVelocity(0.001f);
 #endif	
 	m_windicator->progress(dt);
 	BaseSolverThread::stepPhysics(dt);

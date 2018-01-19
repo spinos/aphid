@@ -18,6 +18,9 @@
 
 namespace aphid {
 
+template<typename T>
+class DenseVector;
+
 namespace lbm {
 
 class LatticeBlock;
@@ -25,6 +28,9 @@ class LatticeBlock;
 struct LatticeParam {
 	
 	float _blockSize;
+	float _inScale;
+	float _outScale;
+	int _padding;
 	
 };
 
@@ -47,13 +53,16 @@ typedef sdb::WorldGrid2<LatticeBlock > LatGridTyp;
 	LatGridTyp m_grid;
 	int m_numBlocks;
 	int m_capBlocks;
+	LatticeParam m_param;
 	
 public:
 	LatticeManager();
 	virtual ~LatticeManager();
+	
+	void setParam(const LatticeParam& param);
 
 /// 16 empty blocks 
-	void resetLattice(const LatticeParam& param);
+	void resetLattice();
 /// transfer np particles into grid p is position v is velocity
 	void injectParticles(const float* p,
 					const float* v,
@@ -63,8 +72,14 @@ public:
 	LatGridTyp& grid();
 	
 	QArrayTyp& q_i(const int& i);
+	
+	void initialCondition();
 /// streaming and collision for all blocks
 	void simulationStep();
+/// vel	and pos in vec3[np]	
+	void modifyParticleVelocities(float* vel,
+					const float* pos,
+					const int& np);
 	
 protected:
 

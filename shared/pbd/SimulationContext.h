@@ -9,6 +9,13 @@
 #include <vector>
 
 namespace aphid {
+
+namespace lbm {
+
+class VolumeResponse;
+
+}
+
 namespace pbd {
 
 class SimulationContext {
@@ -16,6 +23,7 @@ class SimulationContext {
     ParticleData m_part;
     float m_meanWindVel[3];
 	float m_gravityY;
+	lbm::VolumeResponse* m_latman;
 	
 public:
     SimulationContext();
@@ -25,7 +33,7 @@ public:
     const ParticleData* c_particles() const;
 	virtual ParticleData* ghostParticles();
 	virtual const ParticleData* c_ghostParticles() const;
-    
+	
 protected:
     void integrateVerlet(float dt);
     void integrate(float dt);
@@ -38,6 +46,8 @@ protected:
 /// x <- x + v dt
 	void semiImplicitEulerIntegrate(ParticleData* part, float dt);
 	virtual void addExternalForce();
+/// modify v at x     
+	virtual void applyCollisionConstraint();
 	virtual void positionConstraintProjection();
 /// x* <- x + v dt
     virtual void projectPosition(float dt);
@@ -46,7 +56,7 @@ protected:
     virtual void updateVelocityAndPosition(float dt);
 /// v <- v damping
     virtual void dampVelocity(float damping);
-    
+	
 	void applyGravityTo(ParticleData* part, float dt);
 	void applyWindTo(ParticleData* part, float dt);
 	
@@ -54,6 +64,8 @@ protected:
 	const float& grivityY() const;
 	
 	void setMeanWindVelocity(const Vector3F& vwind);
+/// cell size	
+	void resetCollisionGrid(const float& cellSize);
 	
 private:
    

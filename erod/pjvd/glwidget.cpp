@@ -29,8 +29,7 @@ GLWidget::GLWidget(QWidget *parent) : Base3DView(parent)
 	m_roth = new RotationHandle(windicator->visualizeSpace() );
 	m_roth->setRadius(8.f);
 	
-	std::cout<<"\n n regions "<<m_solver->numRegions()
-		<<std::endl;
+	std::cout.flush();
 	
 }
 
@@ -90,6 +89,8 @@ void GLWidget::clientDraw()
 		}
 	}
 	glEnd();
+	
+	qDebug()<<" simulation step"<<m_solver->numTicks();
 
 	drawWindTurbine();
 	
@@ -144,6 +145,7 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			break;
 		case Qt::Key_Space:
 			emit pauseSim();
+			//m_solver->simulate();
 			break;
 		default:
 			break;

@@ -15,12 +15,23 @@ namespace aphid {
 namespace lbm {
 
 LatticeManager::LatticeManager()
-{}
+{
+	m_param._blockSize = 16.f; 
+	m_param._inScale = 1.f;
+	m_param._outScale = 1.f;
+}
 
 LatticeManager::~LatticeManager()
 {}
 
-void LatticeManager::resetLattice(const LatticeParam& param)
+void LatticeManager::setParam(const LatticeParam& param)
+{
+	m_param._blockSize = param._blockSize > 16.f ? param._blockSize : 16.f;
+	m_param._inScale = param._inScale;
+	m_param._outScale = param._outScale;
+}
+
+void LatticeManager::resetLattice()
 {
 	for(int i=0;i<20;++i) {
 		m_q[i].reset(new DenseVector<float>(LatticeBlock::BlockLength * 16 ) );
@@ -34,7 +45,7 @@ void LatticeManager::resetLattice(const LatticeParam& param)
 	m_flag.reset(new char[LatticeBlock::BlockLength * 16]);
 	
 	m_grid.clear();
-	m_grid.setGridSize(param._blockSize);
+	m_grid.setGridSize(m_param._blockSize);
 	LatticeBlock::CellSize = m_grid.gridSize() / (float)LatticeBlock::BlockDim[0];
 	LatticeBlock::HalfCellSize = 0.5f * LatticeBlock::CellSize;
 	LatticeBlock::OneOverH = 1.f / LatticeBlock::CellSize;
@@ -52,7 +63,8 @@ void LatticeManager::injectParticles(const float* p,
 					const float* v,
 					const int& np)
 {
-	float uscaled[3];
+	const float scaling = LatticeBlock::OneOverH * m_param._inScale;
+	
 	LatticeBlock* prevCell = 0;
 	LatticeBlock* curCell;
 /// unlikely
@@ -88,11 +100,8 @@ void LatticeManager::injectParticles(const float* p,
 		}
 		
 		const float* vel = &v[i * 3];
-
-		uscaled[0] = vel[0] * LatticeBlock::OneOverH;
-		uscaled[1] = vel[1] * LatticeBlock::OneOverH;
-		uscaled[2] = vel[2] * LatticeBlock::OneOverH;
-		curCell->depositeVelocity(pos, vel);
+		
+		curCell->depositeVelocity(pos, vel, scaling );
 		
 	}
 }
@@ -148,6 +157,16 @@ void LatticeManager::resetBlock(LatticeBlock* blk, const float& cx, const float&
 	blk->resetFlag(m_flag.get(), m_numBlocks);
 }
 
+void LatticeManager::initialCondition()
+{
+	m_grid.begin();
+	while(!m_grid.end() ) {
+		m_grid.value()->initialCondition();
+		
+		m_grid.next();
+	}
+}
+
 void LatticeManager::simulationStep()
 {
 	m_grid.begin();
@@ -156,6 +175,63 @@ void LatticeManager::simulationStep()
 		m_grid.value()->updateVelocity();
 		
 		m_grid.next();
+	}
+}
+
+void LatticeManager::modifyParticleVelocities(float* vel,
+					const float* pos,
+					const int& np)
+{
+	const float scaling = LatticeBlock::CellSize * m_param._outScale;
+	
+	LatticeBlock* prevCell = 0;
+	LatticeBlock* curCell;
+/// unlikely
+	sdb::Coord3 prevCoord(999999,999999,999999);
+	int cu, cv, cw;
+	float bu, bv, bw, vout[3], rho;
+	
+	for(int i=0;i<np;++i) {
+		const float* posi = &pos[i * 3];
+		const sdb::Coord3 c = m_grid.gridCoord(posi);
+		
+		if(c == prevCoord) {
+			curCell = prevCell;
+			
+		} else {
+			curCell = m_grid.findCell(c);
+			if(curCell) {
+				prevCoord = c;
+				prevCell = curCell;
+			}
+		}
+		
+		if(!curCell) {
+			std::cout<<"\n LatticeManager::modifyParticleVelocities cannot find cell at coord"<<c;
+			continue;
+		}
+		
+		curCell->evaluateVelocityDensityAtPosition(vout, rho, posi);
+		
+		float weight = rho - 1.f;
+		if(weight < 0.f)
+			continue;
+			
+		weight /= .09f;
+			
+		if(weight > 1.f)
+			weight = 1.f;
+			
+		float* veli = &vel[i * 3];
+
+		vout[0] *= scaling;
+		vout[1] *= scaling;
+		vout[2] *= scaling;
+		
+		veli[0] += (vout[0] - veli[0]) * weight;
+		veli[1] += (vout[1] - veli[1]) * weight;
+		veli[2] += (vout[2] - veli[2]) * weight;
+		
 	}
 }
 

@@ -28,6 +28,7 @@ public:
 	void getCellCoordWeight(int& i, int& j, int& k,
 				float& barx, float& bary, float& barz,
 				const float* u) const;
+	int getCellInd(const float* u) const;
 
 /// p is vec3 array
 	void extractCellCenters(float* p) const;
@@ -38,6 +39,8 @@ public:
 /// j <- (ind - kMN) / M
 /// i <- ind - kMN - jM
 	static void CellCoord(int& i, int& j, int& k, const int& ind);
+	
+	static bool IsCellCoordValid(const int& i, const int& j, const int& k);
 	
 /// c[2][4] is 8 corners
 /// 000 100 010 110
