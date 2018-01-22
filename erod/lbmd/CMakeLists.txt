@@ -23,12 +23,9 @@ target_link_libraries (lbmt ${APHID_LBM_LIBRARY})
 INCLUDE (${APHID_DIR}/cmake/boost_config.cmake)
 
 target_link_libraries (lbmt ${Boost_SYSTEM_LIBRARY})
-
-IF (WIN32)
 target_link_libraries (lbmt ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (lbmt ${Boost_THREAD_LIBRARY})
 target_link_libraries (lbmt ${Boost_CHRONO_LIBRARY})
-ENDIF ()
 
 target_link_libraries (lbmt ${BLAS_LIBRARY})
 target_link_libraries (lbmt ${LAPACK_LIBRARY})

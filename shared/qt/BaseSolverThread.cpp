@@ -4,7 +4,7 @@
 namespace aphid {
 
 float BaseSolverThread::TimeStep = 1.f / 30.f;
-int BaseSolverThread::NumSubsteps = 8;
+int BaseSolverThread::NumSubsteps = 4;
 BaseSolverThread::BaseSolverThread(QObject *parent)
     : QThread(parent)
 {
@@ -71,7 +71,7 @@ void BaseSolverThread::run()
 			
 		}
         
-		const float dt = TimeStep / NumSubsteps;
+		const float dt = TimeStep / (float)NumSubsteps;
         for(int i=0; i < NumSubsteps;++i)
             stepPhysics(dt);
 		

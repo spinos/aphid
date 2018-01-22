@@ -23,12 +23,15 @@ public:
 	UniformGrid();
 
 	void setCorner(const float& x, const float& y, const float& z);
+	
+	bool isPointOutsideBound(const float* pos) const;
 
 /// in cell coord weight to lower corner	
 	void getCellCoordWeight(int& i, int& j, int& k,
 				float& barx, float& bary, float& barz,
 				const float* u) const;
 	int getCellInd(const float* u) const;
+	int getCellZCoord(const float* u) const;
 
 /// p is vec3 array
 	void extractCellCenters(float* p) const;
@@ -62,6 +65,10 @@ public:
 protected:
 /// in d-th dimension
 	static void CenteredCoordWeight(int& i, float& bary, const int& d);
+/// divide ind to 8 parts in z direction	
+	static int ZInd8Begins[9];
+/// divide rank to 8 parts in z direction
+	static int ZRank8Begins[9];
 	
 private:
 	

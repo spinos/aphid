@@ -9,21 +9,26 @@
 
 #include "MACVelocityField.h"
 #include <math/miscfuncs.h>
+#include <boost/thread.hpp>
 
 namespace aphid {
 
 namespace lbm {
 
+int MACVelocityField::MarkerDim[3] = {17,17,17};
+
 int MACVelocityField::BlockMarkerLength[3] = { 17 * 16 * 16,
 16 * 17 * 16,
 16 * 16 * 17 };
+
 const int MACVelocityField::ComponentMarkerTable[3][3] = {
 {1, 0, 0},
 {0, 1, 0},
 {0, 0, 1}
 };
 
-MACVelocityField::MACVelocityField()
+MACVelocityField::MACVelocityField() :
+m_numParticles(0)
 {}
 
 void MACVelocityField::resetBlockVelocity(float* u, float* sum, const int& iblock, const int& d)
@@ -132,9 +137,9 @@ void MACVelocityField::depositeVelocity(const float* pos, const float* vel, cons
 	
 }
 
-void MACVelocityField::qdwei(float* q, float* wei, const int& n )
+void MACVelocityField::qdwei(float* q, float* wei, const int& ibegin, const int& iend )
 {
-	for(int i=0;i<n;++i) {
+	for(int i=ibegin;i<iend;++i) {
 		if(wei[i] > 0.f)
 			q[i] /= wei[i];
 	}
@@ -142,18 +147,42 @@ void MACVelocityField::qdwei(float* q, float* wei, const int& n )
 
 void MACVelocityField::finishDepositeVelocity()
 {
-	qdwei(m_u[0], m_sum[0], BlockMarkerLength[0] );
-	qdwei(m_u[1], m_sum[1], BlockMarkerLength[1] );
-	qdwei(m_u[2], m_sum[2], BlockMarkerLength[2] );
+#if 1
+	int indpt[9];
+	
+	boost::thread qdwThread[8];
+	
+	for(int d=0;d<3;++d) {
+	
+		const int ncpt = (BlockMarkerLength[d]>>3);
+		for(int i=0;i<8;++i) {
+			indpt[i] = ncpt * i;
+		}
+		indpt[8] = BlockMarkerLength[d];
+		
+		for(int i=0;i<8;++i) {
+			qdwThread[i] = boost::thread( boost::bind(MACVelocityField::qdwei,
+									m_u[d], m_sum[d], indpt[i], indpt[i+1]) );
+		}
+		
+		for(int i=0;i<8;++i) {
+			qdwThread[i].join();
+		}
+	}
+#else	
+	qdwei(m_u[0], m_sum[0], 0, BlockMarkerLength[0] );
+	qdwei(m_u[1], m_sum[1], 0, BlockMarkerLength[1] );
+	qdwei(m_u[2], m_sum[2], 0, BlockMarkerLength[2] );
+#endif
 }
 
 int MACVelocityField::MarkerInd(const int& i, const int& j, const int& k, const int& d)
 { 
 	if(d == 0 ) {
-		return (k * (BlockDim[0] + 1) * BlockDim[1] + j * (BlockDim[0] + 1) + i); 
+		return (k * MarkerDim[0] * BlockDim[1] + j * MarkerDim[0] + i); 
 	}
 	if(d == 1) {
-		return (k * BlockDim[0] * (BlockDim[1] + 1) + j * BlockDim[0] + i); 
+		return (k * BlockDim[0] * MarkerDim[1] + j * BlockDim[0] + i); 
 	}
 	return (k * BlockDim[0] * BlockDim[1] + j * BlockDim[0] + i); 
 }
@@ -240,6 +269,104 @@ void MACVelocityField::depositeCellCenterVelocity(const int& i, const int& j, co
 
 void MACVelocityField::limitSpeed(float& x) const
 {}
+
+void MACVelocityField::jacobi(const float& a, const float& b)
+{
+	memcpy(m_sum[0], m_u[0], BlockMarkerLength[0]<<2);
+	for(int k=1; k<BlockDim[2]-1;++k) {
+		for(int j=1;j<BlockDim[1]-1;++j) {
+			for(int i=1;i<BlockDim[0];++i) {
+				
+				float& fu = m_u[0][MarkerInd(i, j, k, 0)]; 
+				fu = fu * a + (m_sum[0][MarkerInd(i - 1, j, k, 0)]
+								+ m_sum[0][MarkerInd(i + 1, j, k, 0)]
+								+ m_sum[0][MarkerInd(i, j - 1, k, 0)]
+								+ m_sum[0][MarkerInd(i, j + 1, k, 0)]
+								+ m_sum[0][MarkerInd(i, j, k - 1, 0)]
+								+ m_sum[0][MarkerInd(i, j, k + 1, 0)]) * b;
+								
+			}
+		}
+	}
+	memcpy(m_sum[1], m_u[1], BlockMarkerLength[1]<<2);
+	for(int k=1; k<BlockDim[2]-1;++k) {
+		for(int j=1;j<BlockDim[1];++j) {
+			for(int i=1;i<BlockDim[0]-1;++i) {
+				
+				float& fv = m_u[1][MarkerInd(i, j, k, 1)]; 
+				fv = fv * a + (m_sum[1][MarkerInd(i - 1, j, k, 1)]
+								+ m_sum[1][MarkerInd(i + 1, j, k, 1)]
+								+ m_sum[1][MarkerInd(i, j - 1, k, 1)]
+								+ m_sum[1][MarkerInd(i, j + 1, k, 1)]
+								+ m_sum[1][MarkerInd(i, j, k - 1, 1)]
+								+ m_sum[1][MarkerInd(i, j, k + 1, 1)]) * b;
+								
+			}
+		}
+	}
+	memcpy(m_sum[2], m_u[2], BlockMarkerLength[2]<<2);
+	for(int k=1; k<BlockDim[2];++k) {
+		for(int j=1;j<BlockDim[1]-1;++j) {
+			for(int i=1;i<BlockDim[0]-1;++i) {
+				
+				float& fw = m_u[2][MarkerInd(i, j, k, 2)]; 
+				fw = fw * a + (m_sum[2][MarkerInd(i - 1, j, k, 2)]
+								+ m_sum[2][MarkerInd(i + 1, j, k, 2)]
+								+ m_sum[2][MarkerInd(i, j - 1, k, 2)]
+								+ m_sum[2][MarkerInd(i, j + 1, k, 2)]
+								+ m_sum[2][MarkerInd(i, j, k - 1, 2)]
+								+ m_sum[2][MarkerInd(i, j, k + 1, 2)]) * b;
+								
+			}
+		}
+	}
+}
+
+void MACVelocityField::depositeVelocities(int& countAdded, const float* vel, const float* pos, const int& np, const float& scaling)
+{
+	clearVelocities();
+	
+	boost::thread depThread[4];
+	int countPt[4] = {0,0,0,0};
+	
+	int nloops = BlockDim[2]>>2;
+	for(int l=0;l<nloops;++l) {
+		for(int i=0;i<4;++i) {
+			depThread[i] = boost::thread( boost::bind(&MACVelocityField::sliceDepositeVelocities, this,
+											&countPt[i], vel, pos, np, scaling, l + (i<<2) ) );
+		}
+		
+		for(int i=0;i<4;++i) {
+			depThread[i].join();
+		}
+	}
+	finishDepositeVelocity();
+	
+	m_numParticles = 0;
+	for(int i=0;i<4;++i) {
+		countAdded += countPt[i];
+		m_numParticles += countPt[i];
+	}
+}
+
+void MACVelocityField::sliceDepositeVelocities(int* count, const float* vel, const float* pos, const int& np, 
+				const float& scaling, const int& zslice)
+{
+	for(int i=0;i<np;++i) {
+		const float* posi = &pos[i * 3];
+		if(isPointOutsideBound(posi))
+			continue;
+			
+		if(getCellZCoord(posi) != zslice)
+			continue;
+			
+		depositeVelocity(posi, &vel[i * 3], scaling);
+		(*count)++;
+	}
+}
+
+const int& MACVelocityField::numParticlesInGrid() const
+{ return m_numParticles; }
 
 }
 

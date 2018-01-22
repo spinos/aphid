@@ -16,7 +16,7 @@ namespace pbd {
 
 ShapeMatchingRegion::ShapeMatchingRegion() : m_numPoints(0), 
 m_numEdges(0),
-m_stiffness(0.7f)
+m_stiffness(.7f)
 {}
 
 void ShapeMatchingRegion::createRegion(const RegionVE& prof,
@@ -34,7 +34,7 @@ void ShapeMatchingRegion::createRegion(const RegionVE& prof,
 		if(im > 0)
 			m_mass[i] = 1.f / im;
 		else 
-			m_mass[i] = 1000.f;
+			m_mass[i] = 100000.f;
 		m_totalMass += m_mass[i];
 	}
 

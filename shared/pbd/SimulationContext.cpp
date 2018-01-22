@@ -14,10 +14,20 @@ SimulationContext::SimulationContext()
 	m_meanWindVel[1] = 0.f;
 	m_meanWindVel[2] = 0.f;
 	m_gravityY = -98.f;
+	m_isCollisionOn = true;
 }
 
 SimulationContext::~SimulationContext()
 {}
+
+const bool& SimulationContext::isCollisionEnabled() const
+{ return m_isCollisionOn; }
+
+void SimulationContext::enableCollision()
+{ m_isCollisionOn = true; }
+
+void SimulationContext::disableCollision()
+{ m_isCollisionOn = false; }
 
 const ParticleData* SimulationContext::c_particles() const
 { return &m_part; }
@@ -173,8 +183,10 @@ void SimulationContext::resetCollisionGrid(const float& cellSize)
 	std::cout<<"\n SimulationContext::resetCollisionGrid cell size "<<cellSize;
 	lbm::LatticeParam param;
 	param._blockSize = cellSize * 16.f;
-	param._inScale = .0333f;
-	param._outScale = 45.f;
+/// 30 fps 4 substeps 
+/// dx/dt <- velocity / 120
+	param._inScale = .0083f;
+	param._outScale = 120.f;
 	m_latman->setParam(param);
 }
 

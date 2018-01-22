@@ -134,6 +134,43 @@ void D3Q19DF::Equilibrium(float* f_i[], const float& rho, const float* u, const 
 	}
 }
 
+void D3Q19DF::ComputeCollision(float* f_i[], const float& omega, const int& begin, const int& end)
+{
+	float u[3];
+	float rho, uu;
+	for(int i=begin;i<end;++i) {
+		IncompressibleVelocity(u, rho, f_i, i);
+		uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+		Relaxing(f_i, u, uu, rho, omega, i);
+	}
+}
+
+void D3Q19DF::ComputeStreaming(float* f_i, const float* tmp, const int* c_i, 
+						const int& zbegin, const int& zend, const int* dim)
+{
+	const int slice = dim[0] * dim[1];
+	int si, sj, sk;
+	for(int k=zbegin; k<zend;++k) {
+		sk = k + c_i[2];
+		if(sk < 0 || sk >= dim[2])
+			continue;
+			
+		for(int j=0;j<dim[1];++j) {
+			sj = j + c_i[1];
+			if(sj < 0 || sj >= dim[1])
+				continue;
+			
+			for(int i=0;i<dim[0];++i) {
+				si = i + c_i[0];
+				if(si < 0 || si >= dim[0])
+					continue;
+					
+				f_i[k * slice + j * dim[0] + i] = tmp[sk * slice + sj * dim[0] + si];
+			}
+		}
+	}
+}
+
 }
 
 }

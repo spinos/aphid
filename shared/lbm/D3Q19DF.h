@@ -55,6 +55,11 @@ public:
 /// f_i^eq <- w_i rho (1 - 3 / 2 u.u + 3 e_i.u + 9 / 2 (e_i.u)^2)
 	static void Equilibrium(float* f_i[], const float& rho, const float* u, const float& uu,
 						const int& ind);
+/// collision ind from begin to end-1						
+	static void ComputeCollision(float* f_i[], const float& omega, const int& begin, const int& end);
+/// streaming by direction c_i in z from begin to end-1
+	static void ComputeStreaming(float* f_i, const float* tmp, const int* c_i, 
+						const int& zbegin, const int& zend, const int* dim);
 /// momentum exchange between fluid and particle
 
 /// the equilibrium distribution f_i at zero velocity w_i

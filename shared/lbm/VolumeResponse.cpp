@@ -18,9 +18,7 @@ VolumeResponse::VolumeResponse()
 
 void VolumeResponse::solveParticles(float* vel, const float* pos, const int& np)
 {
-	resetLattice();
 	injectParticles(pos, vel, np);
-	finishInjectingParticles();
 	initialCondition();
 	simulationStep();
 	modifyParticleVelocities(vel, pos, np);

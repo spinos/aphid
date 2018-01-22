@@ -17,8 +17,12 @@ namespace aphid {
 namespace pbd {
 
 ShapeMatchingProfile::ShapeMatchingProfile() : m_numPoints(0),
-m_numRegions(0)
+m_numRegions(0), 
+m_lod(1.f)
 {}
+
+void ShapeMatchingProfile::setLod(const float& x)
+{ m_lod = x; }
 
 const Vector3F* ShapeMatchingProfile::x0() const
 { return m_x0.get(); }
@@ -35,129 +39,218 @@ const int& ShapeMatchingProfile::numRegions() const
 const float& ShapeMatchingProfile::averageSegmentLength() const
 { return m_avgSegLen; }
 
-void ShapeMatchingProfile::createTestStrand()
+float ShapeMatchingProfile::detailSize() const
+{ return m_avgSegLen * m_lod; }
+
+void ShapeMatchingProfile::clearStrands()
+{ 
+	m_strandX0.clear();
+	m_strandBegin.clear();
+	m_strandBegin.push_back(0);
+	m_strandParams.clear();
+}
+
+void ShapeMatchingProfile::addStrandPoint(const Vector3F& x0)
+{ m_strandX0.push_back(x0); }
+
+void ShapeMatchingProfile::finishStrand(const StrandParam& param)
+{ 
+	m_strandBegin.push_back(m_strandX0.size() );
+	m_strandParams.push_back(param);
+}
+
+void ShapeMatchingProfile::buildProfile()
 {
-	Vector3F g[32];
-	for(int i=0;i<32;++i) {
-		g[i].set(10.f + (.9f - .006 * i) * i, 
-				10.f - .05f * i + 1.8f * (.5f + .005f * i) * sin(0.5f * i), 
-				1.f + 1.9f * (.5f + .005f * i) * cos(.5f * i) );
-	}
+	const int nstrand = m_strandBegin.size() - 1;
+	std::cout<<"\n ShapeMatchingProfile build n strand "<<nstrand;
 	
-	const int np = 64;
-	const int hnp = np / 2;
-	const float hw = .12f;
+	float sumSegLen = 0.f;
+	int numSeg = 0;
+	for(int i=0;i<nstrand;++i) {
+		addSegLen(sumSegLen, numSeg, i);
+	}
+	m_avgSegLen = sumSegLen / (float)numSeg;
+	std::cout<<"\n n segment "<<numSeg
+			<<"\n average segment length "<<m_avgSegLen;
+	
+	const int np = m_strandX0.size() * 2;
 	
 	m_x0.reset(new Vector3F[np]);
 	m_invmass.reset(new float[np]);
 	
-	Vector3F p0p1 = g[1] - g[0];
-	Matrix33F frm;
-	ParallelTransport::FirstFrame(frm, p0p1, Vector3F(0.f, 1.f, 1.f) );
-	Vector3F nml = ParallelTransport::FrameUp(frm);
-	
-	m_x0[0] = g[0] - nml * hw;
-	m_x0[1] = g[0] + nml * hw;
-	
-	static const int hilb[2][2] = {{1, 0}, {0, 1}};
-	
-	m_avgSegLen = 0.f;
-	int numSeg = 0;
-	Vector3F p1p2;
-	for(int i=1;i<hnp;++i) {
-		p1p2 = g[i] - g[i-1];
-		ParallelTransport::RotateFrame(frm, p0p1, p1p2);
-		nml = ParallelTransport::FrameUp(frm);
-		
-		m_x0[i * 2 + hilb[i&1][0] ] = g[i] + nml * hw;
-		m_x0[i * 2 + hilb[i&1][1] ] = g[i] - nml * hw;
-		
-		m_avgSegLen += p1p2.length();
-		numSeg++;
-		
-		p0p1 = p1p2;
-	}
-	m_avgSegLen /= (float)numSeg;
-	
-/// lock first segment
-	for(int i=0;i<4;++i) {
-		m_invmass[i] = 0.f;
-	}
-	
-	for(int i=4;i<np;++i) {
-		m_invmass[i] = 3.f;
-	}
-	
 	m_numPoints = np;
-/// 2 segments a region
-	m_numRegions = hnp - 2;
+	std::cout<<"\n n point "<<m_numPoints;
+	
+	for(int i=0;i<nstrand;++i) {
+		buildStrand(i);
+	}
+	
+	int regionCount = 0;
+	for(int i=0;i<nstrand;++i) {
+		countRegions(regionCount, i);
+	}
+	m_numRegions = regionCount;
+	std::cout<<"\n n region "<<m_numRegions;
+	
 	m_regionVertexBegin.reset(new int[m_numRegions + 1]);
 	m_regionEdgeBegin.reset(new int[m_numRegions + 1]);
 	
-	int regionC = 0;
-	int vertexC = 0;
-	int edgeC = 0;
-
-/// 0   3 - 4   7 ... 2n     2n+3 - 2n+4
-/// |   |   |   |      |      |     |
-/// 1 - 2   5 - 6     2n+1 - 2n+2   2n+5
-
-	for(int i=0;i<m_numPoints-5;i+=2) {
-		m_regionVertexBegin[regionC] = vertexC;
-		m_regionEdgeBegin[regionC] = edgeC;
-/// 6 vertices per region		
-		vertexC += 6;
-/// 7 edges per region
-		edgeC += 7;
-		
-		regionC++;
+	regionCount = 0;
+	int edgeCount = 0;
+	int vertexCount = 0;
+	for(int i=0;i<nstrand;++i) {
+		countRegionEdges(regionCount, edgeCount, vertexCount, i);
 	}
 	
-	m_regionVertexBegin[regionC] = vertexC;
-	m_regionEdgeBegin[regionC] = edgeC;
+	m_regionVertexBegin[regionCount] = vertexCount;
+	m_regionEdgeBegin[regionCount] = edgeCount;
+	std::cout<<"\n n edge "<<edgeCount;
 	
-	m_vertices.reset(new int[vertexC]);
-	m_edges.reset(new int[edgeC * 2]);
+	m_vertices.reset(new int[vertexCount]);
+	m_edges.reset(new int[edgeCount * 2]);
 	
-	regionC = 0;
-	for(int i=0;i<m_numPoints-5;i+=2) {
-		
-		int* vr = &m_vertices[m_regionVertexBegin[regionC] ];
-		
-		vr[0] = i;
-		vr[1] = i + 1;
-		vr[2] = i + 2;
-		vr[3] = i + 3;
-		vr[4] = i + 4;
-		vr[5] = i + 5;
-		
-		int* er = &m_edges[m_regionEdgeBegin[regionC] * 2 ];
-		
-		er[0] = i;
-		er[1] = i + 1;
-		
-		er[2] = i + 1;
-		er[3] = i + 2;
-		
-		er[4] = i + 2;
-		er[5] = i + 3;
-		
-		er[6] = i + 3;
-		er[7] = i + 4;
-		
-		er[8] = i + 4;
-		er[9] = i + 5;
-		
-		er[10] = i;
-		er[11] = i + 3;
-		
-		er[12] = i + 2;
-		er[13] = i + 5;
-		
-		regionC++;
+	regionCount = 0;
+	for(int i=0;i<nstrand;++i) {
+		buildRegions(regionCount, i);
 	}
+	std::cout<<"\n done";
 	
 }
+
+void ShapeMatchingProfile::addSegLen(float& segLenSum, int& segCount, const int& i)
+{
+	const int& strandEnd = m_strandBegin[i+1];
+		
+	for(int j=m_strandBegin[i] + 1;j<strandEnd;++j) {
+		Vector3F p0p1 = m_strandX0[j] - m_strandX0[j - 1];
+		segLenSum += p0p1.length();
+		segCount++;
+	}
+}
+
+void ShapeMatchingProfile::buildStrand(const int& istrand)
+{
+	const int& low = m_strandBegin[istrand];
+	const int& high = m_strandBegin[istrand + 1];
+	const StrandParam& sparam = m_strandParams[istrand];
+	const float hw = m_avgSegLen * .19f;
+	
+	Vector3F p0p1 = m_strandX0[low + 1] - m_strandX0[low];
+	Matrix33F frm;
+	ParallelTransport::FirstFrame(frm, p0p1, sparam._binormal );
+	Vector3F nml = ParallelTransport::FrameUp(frm);
+	
+	m_x0[low * 2] = m_strandX0[low] - nml * hw;
+	m_x0[low * 2 + 1] = m_strandX0[low] + nml * hw;
+	
+	static const int hilb[2][2] = {{1, 0}, {0, 1}};
+	
+	Vector3F p1p2;
+	for(int i=low + 1;i<high;++i) {
+		p1p2 = m_strandX0[i] - m_strandX0[i-1];
+		ParallelTransport::RotateFrame(frm, p0p1, p1p2);
+		nml = ParallelTransport::FrameUp(frm);
+		
+		m_x0[i * 2 + hilb[i&1][0] ] = m_strandX0[i] + nml * hw;
+		m_x0[i * 2 + hilb[i&1][1] ] = m_strandX0[i] - nml * hw;
+		
+		p0p1 = p1p2;
+	}
+	
+/// lock first segment
+	for(int i=low * 2;i<low * 2 +4;++i) {
+		m_invmass[i] = 0.f;
+	}
+	
+	const float dm = sparam._mass1 - sparam._mass0;
+	const float l = 2.f * (high - low);
+	float alpha;
+	
+	for(int i=low * 2+4;i<high * 2;++i) {
+		alpha = (float)(i - low*2) / l;
+		m_invmass[i] = 1.f / (sparam._mass0 + dm * alpha);
+	}	
+	
+}
+
+void ShapeMatchingProfile::countRegions(int& regionCount, const int& i)
+{ 
+	const int np = strandNumPoints(i);
+	for(int i=0;i<np-5;i+=2) {
+		regionCount++;
+	}
+}
+
+void ShapeMatchingProfile::countRegionEdges(int& regionCount, int& edgeCount, int& vertexCount,
+				const int& istrand)
+{
+	const int np = strandNumPoints(istrand);
+	
+	for(int i=0;i<np-5;i+=2) {
+		m_regionVertexBegin[regionCount] = vertexCount;
+		m_regionEdgeBegin[regionCount] = edgeCount;
+		
+		vertexCount += 6;
+		edgeCount += 7;
+		
+		regionCount++;
+	}
+}
+
+void ShapeMatchingProfile::buildRegions(int& regionCount, const int& istrand)
+{
+	const int np = strandNumPoints(istrand);
+	const int offset = m_strandBegin[istrand] * 2;
+	
+/// 0   3 - 4   7 ...    2n-5 - 2n-4   2n-1
+/// |   |   |   |         |      |      |
+/// 1 - 2   5 - 6    ... 2n-6   2n-3 - 2n-2
+	
+	for(int i=0;i<np-5;i+=2) {
+		
+		int* vr = &m_vertices[m_regionVertexBegin[regionCount] ];
+		
+		vr[0] = offset + i;
+		vr[1] = offset + i + 1;
+		vr[2] = offset + i + 2;
+		vr[3] = offset + i + 3;
+		vr[4] = offset + i + 4;
+		vr[5] = offset + i + 5;
+		
+		//std::cout<<"\n region "<<regionCount<<" "<<vr[0]<<","<<vr[1]<<","<<vr[2]
+		//	<<","<<vr[3]<<","<<vr[4]<<","<<vr[5];
+		
+		int* er = &m_edges[m_regionEdgeBegin[regionCount] * 2 ];
+		
+		er[0] = offset + i;
+		er[1] = offset + i + 1;
+		
+		er[2] = offset + i + 1;
+		er[3] = offset + i + 2;
+		
+		er[4] = offset + i + 2;
+		er[5] = offset + i + 3;
+		
+		er[6] = offset + i + 3;
+		er[7] = offset + i + 4;
+		
+		er[8] = offset + i + 4;
+		er[9] = offset + i + 5;
+		
+		er[10] = offset + i;
+		er[11] = offset + i + 3;
+		
+		er[12] = offset + i + 2;
+		er[13] = offset + i + 5;
+		
+		regionCount++;
+	}
+	
+	// std::cout<<"\n end strand "<<(offset)<<","<<(offset + np);
+}
+
+int ShapeMatchingProfile::strandNumPoints(const int& i) const
+{ return (m_strandBegin[i+1] - m_strandBegin[i] ) * 2; }
 
 void ShapeMatchingProfile::getRegionVE(RegionVE& ve, const int& i) const
 {

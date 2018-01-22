@@ -17,7 +17,7 @@ namespace pbd {
 ShapeMatchingContext::ShapeMatchingContext() :
 m_lhsMat(0),
 m_cg(0),
-m_stiffness(300.f)
+m_stiffness(500.f)
 {}
 
 ShapeMatchingContext::~ShapeMatchingContext()
@@ -38,7 +38,7 @@ void ShapeMatchingContext::clearConstraints()
 
 void ShapeMatchingContext::create(const ShapeMatchingProfile& prof)
 {	
-	resetCollisionGrid(prof.averageSegmentLength() * 1.414f);
+	resetCollisionGrid(prof.detailSize() );
 	clearConstraints();
 	
 	const int& np = prof.numPoints();
@@ -165,7 +165,7 @@ void ShapeMatchingContext::positionConstraintProjection()
 	int v1, v2, g1, g2;
 	DenseVector<float> b;
 	
-	for(int k=0;k<8;++k) {
+	for(int k=0;k<2;++k) {
 	
 		b.copy(s_n);
 	

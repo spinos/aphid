@@ -75,6 +75,10 @@ void ParallelTransport::RotateFrame(Matrix33F& frm,
 {
 	const Vector3F t0 = e0.normal();
 	const Vector3F t1 = e1.normal();
+	Vector3F t0xt1 = t0.cross(t1);
+	if(t0xt1.length2() < 1e-6f)
+		return;
+		
 	const float ang = acos(t0.dot(t1));
 	if(ang < 1e-3f)
 		return;

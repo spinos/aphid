@@ -23,6 +23,7 @@ class SimulationContext {
     ParticleData m_part;
     float m_meanWindVel[3];
 	float m_gravityY;
+	bool m_isCollisionOn;
 	lbm::VolumeResponse* m_latman;
 	
 public:
@@ -33,6 +34,9 @@ public:
     const ParticleData* c_particles() const;
 	virtual ParticleData* ghostParticles();
 	virtual const ParticleData* c_ghostParticles() const;
+	const bool& isCollisionEnabled() const;
+	void enableCollision();
+	void disableCollision();
 	
 protected:
     void integrateVerlet(float dt);

@@ -113,7 +113,7 @@ void ConjugateGradient<T>::solve(DenseVector<T>& x, const DenseVector<T>& b)
 			r_k1Tr_k1 += m_residual[i] * m_residual[i];
 		}
 		
-		// std::cout<<"\n step"<<k<<" residual "<<r_k1Tr_k1;
+		//std::cout<<"\n step"<<k<<" residual "<<r_k1Tr_k1;
 		
 		if(r_k1Tr_k1 < 1e-3f)
 			break;

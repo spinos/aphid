@@ -40,6 +40,7 @@ private:
 	void drawWindTurbine();
 	void drawMesh(const int& nind, const int* inds, const float* pos, const float* nml);
 	void addWindSpeed(float x);
+	void toggleCollision();
 	
 private:
     TestSolver * m_solver;
@@ -53,8 +54,7 @@ private:
 	WorkMode m_workMode;
 	
 signals:
-    void restartAtCurrentState();
-	void pauseSim();
+    void pauseSim();
 	
 private slots:
     

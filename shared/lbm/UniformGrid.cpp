@@ -20,6 +20,8 @@ int UniformGrid::BlockLength = 4096;
 float UniformGrid::CellSize = 1.f;
 float UniformGrid::HalfCellSize = .5f;
 float UniformGrid::OneOverH = 1.f / 16.f;
+int UniformGrid::ZInd8Begins[9] = {0, 512, 1024, 1536, 2048, 2560, 3072, 3584, 4096};
+int UniformGrid::ZRank8Begins[9] = {0, 2, 4, 6, 8, 10, 12, 14, 16};
 
 UniformGrid::UniformGrid()
 {}
@@ -29,6 +31,18 @@ void UniformGrid::setCorner(const float& x, const float& y, const float& z)
 	m_corner[0] = x;
 	m_corner[1] = y;
 	m_corner[2] = z;
+}
+
+bool UniformGrid::isPointOutsideBound(const float* pos) const
+{
+	if(pos[0] < m_corner[0] || pos[0] >= (m_corner[0] + CellSize * BlockDim[0] ) )
+		return true;
+	if(pos[1] < m_corner[1] || pos[1] >= (m_corner[1] + CellSize * BlockDim[1] ) )
+		return true;
+	if(pos[2] < m_corner[2] || pos[2] >= (m_corner[2] + CellSize * BlockDim[2] ) )
+		return true;
+		
+	return false;
 }
 
 void UniformGrid::CenteredCoordWeight(int& i, float& bary, const int& d)
@@ -71,6 +85,9 @@ int UniformGrid::getCellInd(const float* u) const
 	int k = (u[2] - m_corner[2]) * OneOverH;
 	return CellInd(i, j, k);
 }
+
+int UniformGrid::getCellZCoord(const float* u) const
+{ return (u[2] - m_corner[2]) * OneOverH; }
 
 int UniformGrid::CellInd(const int& i, const int& j, const int& k)
 { return (k * BlockDim[0] * BlockDim[1] + j * BlockDim[0] + i); }

@@ -40,7 +40,6 @@ GLWidget::~GLWidget()
 void GLWidget::clientInit()
 {
     connect(internalTimer(), SIGNAL(timeout()), m_solver, SLOT(simulate()));
-	connect(this, SIGNAL(restartAtCurrentState()), m_solver, SLOT(recvRestartAtCurrentState()));
 	connect(this, SIGNAL(pauseSim()), m_solver, SLOT(recvToggleSimulation()));
 	connect(m_solver, SIGNAL(doneStep()), this, SLOT(update()));
 }
@@ -80,15 +79,15 @@ void GLWidget::clientDraw()
 	glEnd();
 	
 	glColor3f(1,1,0);
-	glBegin(GL_LINE_STRIP);
 	for(int i=0; i< nr;++i) {
+		glBegin(GL_LINE_STRIP);	
 		const pbd::ShapeMatchingRegion* ri = m_solver->region(i);
 		const int& nv = ri->numPoints();
 		for(int j=0;j<nv;++j) {
 			glVertex3fv(ri->goalPosition(j) );
 		}
+		glEnd();
 	}
-	glEnd();
 	
 	qDebug()<<" simulation step"<<m_solver->numTicks();
 
@@ -135,17 +134,16 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
 		case Qt::Key_N:
-			addWindSpeed(-5.f * RandomF01());
+			addWindSpeed(-5.f - 2.f * RandomF01());
 			break;
 		case Qt::Key_M:
-			addWindSpeed(5.f * RandomF01());
+			addWindSpeed(5.f + 2.f * RandomF01());
 			break;
 		case Qt::Key_C:
-			emit restartAtCurrentState();
+			toggleCollision();
 			break;
 		case Qt::Key_Space:
 			emit pauseSim();
-			//m_solver->simulate();
 			break;
 		default:
 			break;
@@ -235,4 +233,12 @@ void GLWidget::addWindSpeed(float x)
 	pbd::WindTurbine* windicator = m_solver->windTurbine();
 	float s = x + windicator->windSpeed();
 	windicator->setWindSpeed(s);
+}
+
+void GLWidget::toggleCollision()
+{ 
+	if(m_solver->isCollisionEnabled() )
+		m_solver->disableCollision();
+	else 
+		m_solver->enableCollision();
 }
