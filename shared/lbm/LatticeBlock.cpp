@@ -270,10 +270,12 @@ void LatticeBlock::blockModifyParticleVelocities(float* vel, const float* pos, c
 		if(weight < 0.f)
 			continue;
 			
-		weight /= .13f;
+		weight /= .17f;
 			
 		if(weight > 1.f)
 			weight = 1.f;
+		else
+			weight = .2f + .8f * weight;
 			
 		float* veli = &vel[i * 3];
 

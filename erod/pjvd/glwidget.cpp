@@ -51,17 +51,7 @@ void GLWidget::clientDraw()
 	const pbd::ParticleData* particle = m_solver->c_particles();
 	const Vector3F * pos = particle->pos();
 	glColor3f(0,0,1);
-/*	
-	const int& np = particle->numParticles();
-	glBegin(GL_LINES);
-	for(int i=1; i< np;++i) {
-		const Vector3F& p1 = pos[i - 1];
-		glVertex3f(p1.x,p1.y,p1.z);
-		const Vector3F& p2 = pos[i];
-		glVertex3f(p2.x,p2.y,p2.z);
-	}
-	glEnd();
-*/
+
 	const int nr = m_solver->numRegions();
 	int v1, v2;
 	glBegin(GL_LINES);
@@ -89,8 +79,6 @@ void GLWidget::clientDraw()
 		glEnd();
 	}
 	
-	qDebug()<<" simulation step"<<m_solver->numTicks();
-
 	drawWindTurbine();
 	
 	getDrawer()->m_markerProfile.apply();
@@ -104,6 +92,12 @@ void GLWidget::clientDraw()
 
 	m_roth->draw(&meye);
 	
+	std::stringstream sst;
+	sst<<"step: "<<m_solver->numTicks();
+	hudText(sst.str(), 1);
+	sst.str("");
+	sst<<"fps: "<<frameRate();
+	hudText(sst.str(), 2);
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)

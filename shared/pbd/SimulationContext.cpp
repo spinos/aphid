@@ -172,6 +172,9 @@ void SimulationContext::setMeanWindVelocity(const Vector3F& vwind)
 
 void SimulationContext::applyCollisionConstraint()
 {
+	if(!m_isCollisionOn)
+		return;
+		
 	const int& np = m_part.numParticles();
 	Vector3F* vel = m_part.velocity();
 	Vector3F* x = m_part.pos();

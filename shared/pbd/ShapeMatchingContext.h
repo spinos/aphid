@@ -58,8 +58,7 @@ public:
 	
 protected:
 	
-	virtual void updateShapeMatchingRegions();
-	virtual void positionConstraintProjection();
+	virtual void applyPositionConstraint();
 
 private:
 	void clearConstraints();

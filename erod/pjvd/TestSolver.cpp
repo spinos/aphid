@@ -115,17 +115,13 @@ TestSolver::~TestSolver()
 
 void TestSolver::stepPhysics(float dt)
 {
-#if 1
-    applyGravity(dt);
-	setMeanWindVelocity(m_windicator->getMeanWindVec() );
+    setMeanWindVelocity(m_windicator->getMeanWindVec() );
+	applyGravity(dt);
 	applyWind(dt);
-	if(isCollisionEnabled() )
-		applyCollisionConstraint();
+	applyCollisionConstraint();
 	projectPosition(dt);
-	updateShapeMatchingRegions();	
-	positionConstraintProjection();
-	updateVelocityAndPosition(dt);
-#endif	
+	applyPositionConstraint();
+	updateVelocityAndPosition(dt);	
 	m_windicator->progress(dt);
 	BaseSolverThread::stepPhysics(dt);
 }

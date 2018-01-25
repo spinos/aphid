@@ -298,13 +298,13 @@ void GLWidget::simulationStep(bool toMoveParticles)
 			float* xi = &m_particleX->v()[i * 3];
 			float* ui = &m_particleU->v()[i * 3];
 			
-			xi[0] += ui[0] * .1f;
-			xi[1] += ui[1] * .1f;
-			xi[2] += ui[2] * .1f;
+			xi[0] += ui[0] * .04f;
+			xi[1] += ui[1] * .04f;
+			xi[2] += ui[2] * .04f;
 			
-			ui[0] += RandomFn11() * 0.1f;
+			ui[0] += RandomFn11() * 0.14f;
 			ui[1] += g;
-			ui[2] += RandomFn11() * 0.1f;
+			ui[2] += RandomFn11() * 0.14f;
 			
 		}
 		

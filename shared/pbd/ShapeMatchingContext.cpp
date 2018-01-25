@@ -123,20 +123,7 @@ int ShapeMatchingContext::numRegions() const
 const ShapeMatchingRegion* ShapeMatchingContext::region(const int& i) const
 { return m_regions[i]; }
 
-void ShapeMatchingContext::updateShapeMatchingRegions()
-{
-	pbd::ParticleData* part = particles();
-	const float* q = (const float*)part->projectedPos();
-	
-	const int nr = numRegions();
-	for(int i=0;i<nr;++i) {
-/// for each region
-		m_regions[i]->updateRegion(q);
-		
-	}
-}
-
-void ShapeMatchingContext::positionConstraintProjection()
+void ShapeMatchingContext::applyPositionConstraint()
 {
 	pbd::ParticleData* part = particles();
 	const int& np = part->numParticles();
@@ -174,8 +161,7 @@ void ShapeMatchingContext::positionConstraintProjection()
 /// for each region
 			ShapeMatchingRegion* ri = m_regions[i];
 /// center only?		
-			if(k > 0)
-				ri->updateRegion(q_n1.v() );
+			ri->updateRegion(q_n1.v() );
 		
 			const int& ne = ri->numEdges();
 			for(int j=0;j<ne;++j) {
