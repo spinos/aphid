@@ -1,8 +1,3 @@
-file (GLOB interface_SRC
-    "../interface/*.h"
-    "../interface/*.cpp"
-)
-
 set (WNOI_HEADER_FILES 
 RenderWidget.h
 window.h)

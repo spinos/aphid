@@ -56,6 +56,12 @@ void BaseCamera::setPortHeight(unsigned h)
 	fPortHeight = h;
 }
 
+int BaseCamera::portWidth() const
+{ return fPortWidth; }
+
+int BaseCamera::portHeight() const
+{ return fPortHeight; }
+
 void BaseCamera::setHorizontalAperture(float w)
 {
 	fHorizontalAperture = w;

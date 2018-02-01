@@ -48,6 +48,8 @@ public:
 	float aspectRatio() const;
 	float nearClipPlane() const;
 	float farClipPlane() const;
+	int portWidth() const;
+	int portHeight() const;
 	
 	virtual float fieldOfView() const;
 	virtual float frameWidth() const;

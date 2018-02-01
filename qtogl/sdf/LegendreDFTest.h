@@ -1,18 +1,20 @@
 /*
- *  Legendre3DTest.h
- *  foo
+ *  LegendreDFTest.h
+ *  sdf
  *
  *  Created by jian zhang on 7/14/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "Scene.h"
-#include <AQuadMesh.h>
+#include <math/Vector3F.h>
 
-namespace ttg {
+namespace aphid {
+class GeoDrawer;
+class Ray;
+}
 
-class Legendre3DTest : public Scene {
+class LegendreDFTest {
 
 #define N_L3_DIM 3
 #define N_L3_ORD 4
@@ -28,14 +30,20 @@ class Legendre3DTest : public Scene {
 	aphid::Vector3F m_samples[N_SEG3];
 	float m_exact[N_SEG3];
 	float m_appro[N_SEG3];
+	
+	aphid::Vector3F m_hitP;
+	aphid::Vector3F m_hitN;
+	aphid::Vector3F m_oriP;
+	bool m_isIntersected;
 
 public:
-	Legendre3DTest();
-	virtual ~Legendre3DTest();
+	LegendreDFTest();
+	virtual ~LegendreDFTest();
 	
-	virtual const char * titleStr() const;
 	virtual bool init();
 	virtual void draw(aphid::GeoDrawer * dr);
+	
+	void rayIntersect(const aphid::Ray* ray);
 	
 private:
 	float exactMeasure(const float & x, const float & y, const float & z) const;
@@ -43,9 +51,9 @@ private:
 	float computeCoeff(int l, int m, int n) const;
 /// continuous function expressed as a linear combination of Legendre polynomials
 	float approximate(const float & x, const float & y, const float & z) const;
+/// (dqdx,dqdy,dqdz)
+	void calculateNormal(aphid::Vector3F& nml, const float& q, const float & x, const float & y, const float & z) const;
 	
 	void drawSamples(const float * val, aphid::GeoDrawer * dr) const;
 	
 };
-
-}

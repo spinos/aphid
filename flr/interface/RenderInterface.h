@@ -1,7 +1,7 @@
 /*
  *  RenderInterface.h
  *  
- *  access to camera, image, buffer, renderer
+ *  access to camera, image, buffer, renderer, context
  *
  *  Created by jian zhang on 8/8/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -22,22 +22,33 @@ class DisplayImage;
 class DeepBuffer;
 class BufferBlock;
 class Renderer;
+class RenderContext;
 
 class RenderInterface {
 
 	DisplayCamera* m_camera;
 	DeepBuffer* m_buffer;
 	DisplayImage* m_image;
+	RenderContext* m_context;
+	Renderer* m_renderer;
+	int m_resizedImageDim[2];
 	
 public:
 	RenderInterface();
 	
 	void setCamera(aphid::BaseCamera* x);
+	void setChangedCamera();
+	bool cameraChanged() const;
 	
-	bool imageSizeChanged(int w, int h) const;
+	bool imageSizeChanged() const;
 	void createImage(int w, int h);
-	
-	BufferBlock* selectABlock(int nblk);
+	void setResizedImage(int w, int h);
+	int resizedImageWidth() const;
+	int resizedImageHeight() const;
+/// set frame in each block	
+	void updateDisplayView();
+/// by high residual
+	BufferBlock* selectBlock();
 	DisplayImage* image();
 	
 	uchar* imageScanline(int i);
@@ -48,6 +59,11 @@ public:
 	
 	Renderer* getRenderer();
 	QImage getQImage() const;
+	
+	RenderContext* getContext();
+	
+/// quality threshold
+	bool isResidualLowEnough() const;
 	
 };
 

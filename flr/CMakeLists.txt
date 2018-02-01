@@ -18,6 +18,15 @@ include_directories (${APHID_DIR}/flr)
 ## https://cmake.org/Wiki/CMake:Bundles_And_Frameworks
 ## set(CMAKE_MACOSX_BUNDLE ON)
 
+SET (FLR_INTERFACE_DIR ${PROJECT_BINARY_DIR}/interface)
+
+file (GLOB interface_SRC
+    ${FLR_INTERFACE_DIR}/*.h
+    ${FLR_INTERFACE_DIR}/*.cpp
+)
+
 add_subdirectory(whiteNoise)
+add_subdirectory(haltont)
+add_subdirectory(linreg)
 
 ##MESSAGE ("CMAKE_EXE_LINKER_FLAGS" ${CMAKE_EXE_LINKER_FLAGS})

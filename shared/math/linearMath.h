@@ -82,6 +82,8 @@ public:
 	
 	DenseVector<T> operator+(const DenseVector<T> & x) const;
 	DenseVector<T> operator-(const DenseVector<T> & x) const;
+	DenseVector<T> operator*(const DenseVector<T> & x) const;
+	DenseVector<T> operator*(const T & x) const;
 /// preserve old values add n elements
 	void expand(int n);
 	
@@ -305,7 +307,7 @@ T DenseVector<T>::sumAbsVal() const
 
 template<typename T>
 T DenseVector<T>::dot(const DenseVector<T> & x) const
-{ return dot(x.v()); }
+{ return dot(x.c_v()); }
 
 template<typename T>
 T DenseVector<T>::dot(const T * x) const
@@ -354,6 +356,28 @@ DenseVector<T> DenseVector<T>::operator-(const DenseVector<T> & x) const
     DenseVector<T> c;
     c.copy(*this);
     c.add(x, T(-1.0));
+    return c;
+}
+
+template<typename T>
+DenseVector<T> DenseVector<T>::operator*(const DenseVector<T> & x) const
+{
+	DenseVector<T> c;
+    c.copy(*this);
+    for(int i=0; i<m_numElements; i++) {
+	    c[i] *= x[i];
+	}
+    return c;
+}
+
+template<typename T>
+DenseVector<T> DenseVector<T>::operator*(const T& x) const
+{
+	DenseVector<T> c;
+    c.copy(*this);
+    for(int i=0; i<m_numElements; i++) {
+	    c[i] *= x;
+	}
     return c;
 }
 
@@ -494,6 +518,12 @@ public:
 /// b = x^T * A
 	void lefthandMult(DenseVector<T>& b, const DenseVector<T>& x, 
             const T alpha = 1.0, const T beta = 0.0) const;
+/// b <- A * x^T
+	void righthandMult(DenseMatrix<T>& b, const DenseVector<T>& x, 
+            const T alpha = 1.0, const T beta = 0.0) const;
+/// A <- b * x ^T
+	void asVVt(DenseVector<T>& b, DenseVector<T>& x);
+	
 /// A = b * b
 /// by relatively robust representations
 /// A is symmetric and positive semi-definite matrix
@@ -885,6 +915,30 @@ void DenseMatrix<T>::lefthandMult(DenseVector<T>& b, const DenseVector<T>& x,
 	clapack_gemm<T>("T", "N", 1, m_numColumns, m_numColumns, 
 							alpha, x.raw(), x.numElements(), 
 							m_v, m_numRows, beta, b.raw(), 1);
+}
+
+template <typename T>
+void DenseMatrix<T>::righthandMult(DenseMatrix<T>& b, const DenseVector<T>& x, 
+            const T alpha, const T beta) const
+{
+/// xT is 1-by-n vector(matrix)
+/// b is m-by-n matrix
+	clapack_gemm<T>("N", "T", 1, m_numColumns, m_numColumns, 
+							alpha, m_v, m_numRows, 
+							x.raw(), x.numElements(), 
+							beta, b.raw(), m_numRows);
+}
+
+template <typename T>
+void DenseMatrix<T>::asVVt(DenseVector<T>& b, DenseVector<T>& x)
+{
+/// b is m-by-1 vector(matrix)
+/// x is m-by-1 vector(matrix)
+/// A is m-by-m matrix
+	clapack_gemm<T>("N", "T", m_numRows, m_numRows, 1, 
+							1.0, b.raw(), m_numRows, 
+							x.raw(), m_numRows, 
+							1.0, m_v, m_numRows);
 }
 
 template <typename T>

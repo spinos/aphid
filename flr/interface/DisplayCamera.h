@@ -22,22 +22,29 @@ class DisplayCamera {
 
 	aphid::Matrix44F* m_lastViewFrame;
 	aphid::BaseCamera* m_camera;
-/// left-top origin is (-m_frameCenterX, -m_frameCenterY)
-	int m_frameCenterX, m_frameCenterY;
+/// 00 - 10
+/// |    | 
+/// 01 - 11
+	float m_framePoints[4][3];
 /// per-pixel
 	float m_deltaX, m_deltaY;
+	bool m_isChanged;
 	
 public:
 	DisplayCamera();
 	~DisplayCamera();
 	
 	void setCamera(aphid::BaseCamera* x);
-	void setFrameCenter(int x, int y);
+	void setChanged();
+	bool isChanged() const;
 	
-	bool isViewFrameChanged() const;
 	void updateViewFrame();
-/// calculte frame of block
-	void setBlockView(BufferBlock* blk);
+/// calculte view frame of block
+	void setBlockView(BufferBlock* blk) const;
+	
+private:
+/// by pixel location
+	void getPointOnFrame(float* pnt, const int& px, const int& py) const;
 	
 };
 

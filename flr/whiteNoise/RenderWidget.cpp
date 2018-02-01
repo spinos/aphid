@@ -9,31 +9,25 @@
 
 using namespace aphid;
 
-const double DefaultCenterX = -0.637011f;
-const double DefaultCenterY = -0.0395159f;
-const double DefaultScale = 0.00403897f;
-
-const double ZoomInFactor = 0.8f;
-const double ZoomOutFactor = 1 / ZoomInFactor;
-const int ScrollStep = 20;
-
 RenderWidget::RenderWidget(QWidget *parent)
     : QWidget(parent)
 {
 	m_perspCamera = new PerspectiveCamera;
-    centerX = DefaultCenterX;
-    centerY = DefaultCenterY;
-    pixmapScale = DefaultScale;
-    curScale = DefaultScale;
+	static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
+					0.f, 1.f, 0.f, 0.f,
+					0.f, 0.f, 1.f, 0.f,
+					0.f, 0.f, 200.f, 1.f};
+	Matrix44F mat(mm);
+	m_perspCamera->setViewTransform(mat, 200.f);
 
 	m_interface = new RenderInterface;
+	m_interface->setCamera(m_perspCamera);
 	m_interface->createImage(1024, 800);
 	thread = new RenderThread(m_interface);
 	
     connect(thread, SIGNAL(renderedImage()),
             this, SLOT(updatePixmap()));
 
-    resize(550, 400);
 }
 
 void RenderWidget::paintEvent(QPaintEvent * /* event */)
@@ -46,103 +40,66 @@ void RenderWidget::paintEvent(QPaintEvent * /* event */)
 
 }
 
+void RenderWidget::updatePixmap()
+{
+    update();
+}
+
 void RenderWidget::resizeEvent(QResizeEvent * /* event */)
 {
-	thread->render(centerX, centerY, curScale, size());
+	const int pw = size().width();
+	const int ph = size().height();
+	m_perspCamera->setPortWidth(pw);
+	m_perspCamera->setPortHeight(ph);
+	m_interface->setResizedImage(pw, ph);
+	thread->render();
+}
+
+void RenderWidget::mousePressEvent(QMouseEvent *event)
+{
+	m_lastMousePos = event->pos();
+    if(event->modifiers() == Qt::AltModifier) 
+        return;
+    
+}
+
+void RenderWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	if(event->modifiers() == Qt::AltModifier)
+        processCamera(event);
+		
+	m_lastMousePos = event->pos();
+}
+
+void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+}
+
+void RenderWidget::processCamera(QMouseEvent *event)
+{
+    m_dx = event->x() - m_lastMousePos.x();
+    m_dy = event->y() - m_lastMousePos.y();
+    if (event->buttons() & Qt::LeftButton) {
+        m_perspCamera->tumble(m_dx, m_dy);
+    } 
+	else if (event->buttons() & Qt::MidButton) {
+		m_perspCamera->track(m_dx, m_dy);
+    }
+	else if (event->buttons() & Qt::RightButton) {
+		m_perspCamera->zoom(-m_dx / 2 + -m_dy / 2);
+    }
+	
+	m_interface->setChangedCamera();
+	thread->render();
 }
 
 void RenderWidget::keyPressEvent(QKeyEvent *event)
 {
-    switch (event->key()) {
+	switch (event->key()) {
     case Qt::Key_Plus:
-        zoom(ZoomInFactor);
-        break;
-    case Qt::Key_Minus:
-        zoom(ZoomOutFactor);
-        break;
-    case Qt::Key_Left:
-        scroll(-ScrollStep, 0);
-        break;
-    case Qt::Key_Right:
-        scroll(+ScrollStep, 0);
-        break;
-    case Qt::Key_Down:
-        scroll(0, -ScrollStep);
-        break;
-    case Qt::Key_Up:
-        scroll(0, +ScrollStep);
         break;
     default:
-        QWidget::keyPressEvent(event);
-    }
-}
-//! [11]
-
-//! [12]
-void RenderWidget::wheelEvent(QWheelEvent *event)
-{
-    int numDegrees = event->delta() / 8;
-    double numSteps = numDegrees / 15.0f;
-    zoom(pow(ZoomInFactor, numSteps));
-}
-//! [12]
-
-//! [13]
-void RenderWidget::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton)
-        lastDragPos = event->pos();
-}
-//! [13]
-
-//! [14]
-void RenderWidget::mouseMoveEvent(QMouseEvent *event)
-{
-    if (event->buttons() & Qt::LeftButton) {
-        pixmapOffset += event->pos() - lastDragPos;
-        lastDragPos = event->pos();
-        update();
-    }
-}
-//! [14]
-
-//! [15]
-void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        pixmapOffset += event->pos() - lastDragPos;
-        lastDragPos = QPoint();
-
-        int deltaX = (width() - m_interface->xres()) / 2 - pixmapOffset.x();
-        int deltaY = (height() - m_interface->yres()) / 2 - pixmapOffset.y();
-        scroll(deltaX, deltaY);
-    }
-}
-//! [15]
-
-//! [16]
-void RenderWidget::updatePixmap()
-{
-    if (!lastDragPos.isNull())
-        return;
-
-    pixmapOffset = QPoint();
-    lastDragPos = QPoint();
-    pixmapScale = 1.0;
-    update();
-}
-
-void RenderWidget::zoom(double zoomFactor)
-{
-    curScale *= zoomFactor;
-    update();
-    thread->render(centerX, centerY, curScale, size());
-}
-
-void RenderWidget::scroll(int deltaX, int deltaY)
-{
-    centerX += deltaX * curScale;
-    centerY += deltaY * curScale;
-    update();
-    thread->render(centerX, centerY, curScale, size());
+		;
+	}	
+	QWidget::keyPressEvent(event);
 }

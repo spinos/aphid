@@ -20,8 +20,7 @@ public:
     RenderThread(RenderInterface* interf, QObject *parent = 0);
     ~RenderThread();
 
-    void render(double centerX, double centerY, double scaleFactor,
-                QSize resultSize);
+    void render();
 	
 signals:
     void renderedImage();
@@ -30,18 +29,20 @@ protected:
     void run();
 
 private:
+	void interruptAndResize();
+	void interruptAndReview();
+	void interruptRender();
+	
+private:
     QMutex mutex;
     QWaitCondition condition;
-	QSize m_resultSize;
-    double centerX;
-    double centerY;
-    double scaleFactor;
-    bool restart;
-    bool abort;
+/// loop again
+	bool m_restart;
+/// end before loop
+    bool m_abort;
 	
 	RenderInterface* m_interface;
 	
 };
-//! [0]
 
 #endif

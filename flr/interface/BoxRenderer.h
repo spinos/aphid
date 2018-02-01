@@ -1,5 +1,5 @@
 /*
- *  NoiseRenderer.h
+ *  BoxRenderer.h
  * 
  *
  *  Created by jian zhang on 8/8/17.
@@ -7,16 +7,16 @@
  *
  */
 
-#ifndef NOISE_RENDERER_H
-#define NOISE_RENDERER_H
+#ifndef BOX_RENDERER_H
+#define BOX_RENDERER_H
 
 #include "Renderer.h"
 
-class NoiseRenderer : public Renderer {
+class BoxRenderer : public Renderer {
 
 public:
-	NoiseRenderer();
-	virtual ~NoiseRenderer();
+	BoxRenderer();
+	virtual ~BoxRenderer();
 	
 	virtual void renderFragment(RenderContext& context, BufferBlock& blk);
 	

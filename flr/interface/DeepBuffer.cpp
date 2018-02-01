@@ -9,6 +9,11 @@
 
 #include "DeepBuffer.h"
 #include "BufferBlock.h"
+#include "DisplayCamera.h"
+#include <math/QuickSort.h>
+#include <math/miscfuncs.h>
+
+using namespace aphid;
 
 DeepBuffer::DeepBuffer() :
 m_width(0),
@@ -33,6 +38,10 @@ void DeepBuffer::create(int w, int h)
 		addBlocks(nblk);
 	}
 	initBlocks();
+	m_priority.reset(new aphid::QuickSortPair<float, int>[nblk] );
+	for(int i=0;i<nblk;++i) {
+		m_priority[i].value = i;
+	}
 }
 
 const int& DeepBuffer::width() const
@@ -70,9 +79,76 @@ void DeepBuffer::initBlocks()
 		int tileX = i - tileY * nblkX;
 		BufferBlock* bi = block(i);
 		bi->setTile(tileX, tileY);
-		bi->setEmpty();
 	}
 }
 
 BufferBlock* DeepBuffer::block(int i)
 { return m_blocks[i]; }
+
+void DeepBuffer::setBegin(const DisplayCamera* camera)
+{
+	const int nblk = numBlocks();
+	for(int i=0;i<nblk;++i) {
+		camera->setBlockView(m_blocks[i]);
+		m_blocks[i]->begin();
+		
+	}
+}
+
+BufferBlock* DeepBuffer::highResidualBlock()
+{
+	const int nblk = numBlocks();
+	for(int i=0;i<nblk;++i) {
+		m_priority[i].key = m_blocks[i]->residual();
+	}
+	QuickSort1::Sort<float, int>(m_priority.get(), 0, nblk-1);
+	
+	const float& high = m_priority[nblk-1].key;
+/// unrendered
+	float thre = 100.f;
+	if(high < thre)
+		thre = high * .67f;
+/// low bound
+	if(thre < .005f)
+		thre = .005f;
+		
+	int begin = findPriorityBegin(thre);
+	
+	const int j = begin + (rand() % (nblk - begin) );
+	
+	return m_blocks[m_priority[j].value];
+}
+
+int DeepBuffer::findPriorityBegin(const float& thre) const
+{
+	int low = 0;
+	if(m_priority[low].key > thre)
+		return low;
+	
+	int high = numBlocks()-1;
+	if(m_priority[high].key < thre)
+		return high>>1;
+		
+	while(high > low+1) {
+		int j = (low + high) / 2;
+		if(m_priority[j].key < thre) {
+			low = j;
+		} else {
+			high = j;
+		}
+	}
+
+	return high;
+}
+
+float DeepBuffer::maxResidual() const
+{
+	float r = -1.f;
+	const int nblk = numBlocks();
+	for(int i=0;i<nblk;++i) {
+		const float& ri = m_blocks[i]->residual();
+		if(r < ri)
+			r = ri;
+	}
+	return r;
+}

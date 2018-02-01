@@ -12,7 +12,6 @@
 #define PIXEL_SAMPLER_H
 
 class BufferBlock;
-class DisplayCamera;
 
 class PixelSampler {
 
@@ -20,7 +19,7 @@ public:
 	PixelSampler();
 	virtual ~PixelSampler();
 	
-	virtual void sampleRays(BufferBlock* blk);
+	virtual void generateViewRays(BufferBlock& blk) const;
 	
 };
 

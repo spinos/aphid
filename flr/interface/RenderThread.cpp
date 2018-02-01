@@ -11,31 +11,68 @@ RenderThread::RenderThread(RenderInterface* interf, QObject *parent)
     : QThread(parent)
 {
 	m_interface = interf;
-    abort = false;
+    m_abort = false;
 }
 
 RenderThread::~RenderThread()
 {
-    mutex.lock();
-	abort = true;
-    condition.wakeOne();
-    mutex.unlock();
-
-    wait();
+    interruptRender();
 }
 
-void RenderThread::render(double centerX, double centerY, double scaleFactor,
-                          QSize resultSize)
+void RenderThread::interruptRender()
 {
-    QMutexLocker locker(&mutex);
+	if(isRunning() ) {
+		mutex.lock();
+		this->m_abort = true;
+		condition.wakeOne();
+		mutex.unlock();
+
+		wait();
+	}
+}
+
+void RenderThread::interruptAndResize()
+{
+//	qDebug()<<"interruptAndResize";	
+	interruptRender();
 	
-	this->m_resultSize = resultSize;
-    this->centerX = centerX;
-    this->centerY = centerY;
-    this->scaleFactor = scaleFactor;
-    this->abort = false;
+	m_interface->createImage(m_interface->resizedImageWidth(),
+							m_interface->resizedImageHeight() );
 	
-    if (!isRunning()) {
+	m_interface->updateDisplayView();
+	
+	this->m_abort = false;
+	start(LowPriority);
+}
+
+void RenderThread::interruptAndReview()
+{
+//	qDebug()<<"interruptAndReview";
+	interruptRender();
+	
+	m_interface->updateDisplayView();
+	
+	this->m_abort = false;
+	start(LowPriority);
+}
+
+void RenderThread::render()
+{
+	if(m_interface->imageSizeChanged() ) {
+		interruptAndResize();
+		return;
+	}
+	
+	if(m_interface->cameraChanged() ) {
+		interruptAndReview();
+		return;
+	}
+
+	QMutexLocker locker(&mutex);
+	
+	this->m_abort = false;
+	
+	if (!isRunning()) {
         start(LowPriority);
     } else {
         condition.wakeOne();
@@ -47,26 +84,23 @@ void RenderThread::run()
     forever {
 		
         mutex.lock();
-        QSize resultSize = this->m_resultSize;
-		
+        
         mutex.unlock();
 				
-		if (abort) {
-			qDebug()<<" abort";
+		if (m_abort) {
+			//qDebug()<<" abort";
 			return;
 		}
 		
-		if(m_interface->imageSizeChanged(resultSize.width(), resultSize.height() ) ) {
-			qDebug()<<" size changed "<<resultSize;
-			m_interface->createImage(resultSize.width(), resultSize.height() );
-			
+		if(m_interface->isResidualLowEnough() ) {
+			return;
 		}
 		
-		BufferBlock* packet = m_interface->selectABlock(m_interface->bufferNumBlocks() );
+		BufferBlock* packet = m_interface->selectBlock();
 		Renderer* tracer = m_interface->getRenderer();
+		RenderContext* ctx = m_interface->getContext();
 		
-		tracer->traceRays(*packet);
-		delete tracer;
+		tracer->renderFragment(*ctx, *packet);
 					
 		packet->projectImage(m_interface->image() );
 

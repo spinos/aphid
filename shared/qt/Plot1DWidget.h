@@ -11,7 +11,7 @@
 #define APHID_PLOT_1D_WIDGET_H
 
 #include <qt/BaseImageWidget.h>
-#include <plots.h>
+#include <math/plots.h>
 
 namespace aphid {
 

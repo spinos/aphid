@@ -1,30 +1,27 @@
 /*
- *  Legendre3DTest.cpp
- *  foo
+ *  LegendreDFTest.cpp
+ *  sdf
  *  
  *  Created by jian zhang on 7/14/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "Legendre3DTest.h"
-#include <GridTables.h>
-#include <Calculus.h>
-#include <ANoise3.h>
+#include "LegendreDFTest.h"
+#include <math/miscfuncs.h>
+#include <math/Calculus.h>
+#include <math/ANoise3.h>
+#include <GeoDrawer.h>
 
 using namespace aphid;
-namespace ttg {
 
-Legendre3DTest::Legendre3DTest() 
+LegendreDFTest::LegendreDFTest() 
 {}
 
-Legendre3DTest::~Legendre3DTest() 
+LegendreDFTest::~LegendreDFTest() 
 {}
-	
-const char * Legendre3DTest::titleStr() const
-{ return "3D Legendre Polynomial Approximation"; }
 
-bool Legendre3DTest::init()
+bool LegendreDFTest::init()
 {
 	int i,j,k,l;
 	int indx[N_L3_DIM];
@@ -113,7 +110,7 @@ bool Legendre3DTest::init()
 	return true;
 }
 
-float Legendre3DTest::computeCoeff(int l, int m, int n) const
+float LegendreDFTest::computeCoeff(int l, int m, int n) const
 {
 	int indx[N_L3_DIM];
 	float fpp[N_ORD3];
@@ -143,7 +140,7 @@ float Legendre3DTest::computeCoeff(int l, int m, int n) const
 	return result;
 }
 
-float Legendre3DTest::approximate(const float & x, const float & y, const float & z) const
+float LegendreDFTest::approximate(const float & x, const float & y, const float & z) const
 {
 #define U_P 3
 	float result = 0.f;
@@ -168,41 +165,100 @@ float Legendre3DTest::approximate(const float & x, const float & y, const float 
 	return result;
 }
 
-float Legendre3DTest::exactMeasure(const float & x, const float & y, const float & z) const
+float LegendreDFTest::exactMeasure(const float & x, const float & y, const float & z) const
 {
-	const Vector3F at(x, y, z);
-	const Vector3F orp(.6241f, .8534f, .2786f);
-	return ANoise3::Fbm((const float *)&at,
+#if 0
+	const Vector3F at(x, 1.03f, z);
+	const Vector3F orp(-.5421f, -.7534f, -.386f);
+	return y - ANoise3::Fbm((const float *)&at,
 										(const float *)&orp,
-										.33f,
+										.7f,
 										4,
-										1.33f,
-										.695f);
+										1.8f,
+										.5f);
+#else
+	float cx = x * 1.1f + .1f;
+	float cy = y * .9f + .3f;
+	float cz = z * .7f + .8f;
+	float r = sqrt(cx * cx + cy * cy + cz * cz);
+	return r - 1.1f;
+#endif
 }
 
-void Legendre3DTest::draw(GeoDrawer * dr)
+void LegendreDFTest::draw(GeoDrawer * dr)
 {
 	glPushMatrix();
-	glScalef(10.f, 10.f, 10.f);
+	glScalef(8.f, 8.f, 8.f);
 	
-	glTranslatef(-1.4f, 0.f, 0.f);
+	glTranslatef(-3.f, 0.f, 0.f);
 	drawSamples(m_exact, dr);
 	
-	glTranslatef(2.8f, 0.f, 0.f);
+	glTranslatef(3.f, 0.f, 0.f);
 	drawSamples(m_appro, dr);
 	
 	glPopMatrix();
+	
+	if(m_isIntersected) {
+		glColor3f(0.f,1.f,.1f);
+		glBegin(GL_LINES);
+		glVertex3fv((const float* )&m_oriP);
+		glVertex3fv((const float* )&m_hitP);
+		glEnd();
+		dr->arrow(m_hitP, m_hitP + m_hitN * 8.f);
+	}
 }
 
-void Legendre3DTest::drawSamples(const float * val, GeoDrawer * dr) const
+void LegendreDFTest::drawSamples(const float * val, GeoDrawer * dr) const
 {
-	const float ssz = .8f / N_SEG;
+	const float ssz = 1.f / N_SEG;
 	int i=0;
 	for(;i<N_SEG3;++i) {
 		const float & r = val[i];
-		dr->setColor(r,r,r);
+		if(r > 0.f)
+			continue;
+		
+		dr->setColor(0.f,0.f,1.f + r);
 		dr->cube(m_samples[i], ssz);
 	}
 }
 
+void LegendreDFTest::rayIntersect(const Ray* ray)
+{
+	m_isIntersected = false;
+	BoundingBox bx(-8.f, -8.f, -8.f, 8.f, 8.f, 8.f);
+	float tmin, tmax;
+	if(!bx.intersect(*ray, &tmin, &tmax) )
+		return;
+		
+	m_hitP = ray->travel(tmin);
+	m_oriP = ray->m_origin;
+	
+	float fd = approximate(m_hitP.x * .125f, m_hitP.y * .125f, m_hitP.z * .125f);
+	if(fd < 0.f)
+		return;
+		
+	int step = 0;
+	while(fd > 1e-3f) {
+		m_hitP += ray->m_dir * (fd * 8.f);
+		if(!bx.isPointInside(m_hitP) )
+			return;
+			
+		fd = approximate(m_hitP.x * .125f, m_hitP.y * .125f, m_hitP.z * .125f);
+		// std::cout<<"\n d "<<step<<" "<<fd;
+		// std::cout.flush();
+		step++;
+		if(step > 19)
+			break;
+	}
+	
+	calculateNormal(m_hitN, fd, m_hitP.x * .125f, m_hitP.y * .125f, m_hitP.z * .125f);
+	m_isIntersected = true;
+}
+
+void LegendreDFTest::calculateNormal(Vector3F& nml, const float& q, const float & x, const float & y, const float & z) const
+{
+	nml.x = approximate(x + 6.25e-3f, y, z) - q;
+	nml.y = approximate(x, y + 6.25e-3f, z) - q;
+	nml.z = approximate(x, y, z + 6.25e-3f) - q;
+	nml.normalize();
 }

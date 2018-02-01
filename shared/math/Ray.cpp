@@ -40,6 +40,14 @@ Ray::Ray(const Vector3F& pfrom, const Vector3F& pto)
 	m_dir.normalize();
 }
 
+void Ray::set(const float* v)
+{
+	memcpy(&m_origin, v, 12);
+	memcpy(&m_dir, &v[3], 12);
+	m_tmin = v[6];
+	m_tmax = v[7];
+}
+
 void Ray::operator=(const Ray& b)
 { 
 	m_origin = b.m_origin;
