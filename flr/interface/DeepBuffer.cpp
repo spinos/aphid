@@ -39,9 +39,6 @@ void DeepBuffer::create(int w, int h)
 	}
 	initBlocks();
 	m_priority.reset(new aphid::QuickSortPair<float, int>[nblk] );
-	for(int i=0;i<nblk;++i) {
-		m_priority[i].value = i;
-	}
 }
 
 const int& DeepBuffer::width() const
@@ -99,24 +96,13 @@ BufferBlock* DeepBuffer::highResidualBlock()
 {
 	const int nblk = numBlocks();
 	for(int i=0;i<nblk;++i) {
-		m_priority[i].key = m_blocks[i]->residual();
+		QuickSortPair<float, int>& ind = m_priority[i];
+		ind.key = m_blocks[i]->residual();
+		ind.value = i;
 	}
 	QuickSort1::Sort<float, int>(m_priority.get(), 0, nblk-1);
 	
-	const float& high = m_priority[nblk-1].key;
-/// unrendered
-	float thre = 100.f;
-	if(high < thre)
-		thre = high * .67f;
-/// low bound
-	if(thre < .005f)
-		thre = .005f;
-		
-	int begin = findPriorityBegin(thre);
-	
-	const int j = begin + (rand() % (nblk - begin) );
-	
-	return m_blocks[m_priority[j].value];
+	return m_blocks[m_priority[nblk - 1].value];
 }
 
 int DeepBuffer::findPriorityBegin(const float& thre) const

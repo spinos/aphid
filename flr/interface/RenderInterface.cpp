@@ -109,4 +109,4 @@ RenderContext* RenderInterface::getContext()
 { return m_context; }
 
 bool RenderInterface::isResidualLowEnough() const
-{ return m_buffer->maxResidual() < .005f; }
+{ return m_buffer->maxResidual() < .0008f; }

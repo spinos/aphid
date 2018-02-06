@@ -11,6 +11,7 @@
 #include "BufferBlock.h"
 #include "DisplayCamera.h"
 #include <math/miscfuncs.h>
+#include <math/haltonSequence.h>
 
 using namespace aphid;
 
@@ -29,8 +30,9 @@ void PixelSampler::generateViewRays(BufferBlock& blk) const
 	float u, v;
 	for(int j=0;j<m;++j) {
 		for(int i=0;i<n;++i) {
-			u = dx * (RandomFlh(.1f, .9f) + i);
-			v = dy * (RandomFlh(.1f, .9f) + j);
+			const float* h32 = Halton32Sequence128[rand() & 255];
+			u = dx * (h32[0] + i);
+			v = dy * (h32[1] + j);
 			blk.calculateViewRay(u, v, j * n + i);
 		}
 	}
