@@ -165,9 +165,11 @@ void testPredictor()
 		Y[i] = .5f + .02f * i + RandomFn11() * .02f;
 	}
 	
+	float y_t_1 = Y[0];
 	for(int t=0;t<n;++t) {
-		float yhat = estimator.updateAndPredict(Y[t], t);
+		float yhat = estimator.updateAndPredict(Y[t], y_t_1, t);
 		std::cout<<"\n t="<<t<<" input signal "<<Y[t]<<" estimate "<<yhat;
+		y_t_1 = Y[t];
 	}
 }
 

@@ -130,7 +130,7 @@ const float* BufferBlock::viewRay(const int& i) const
 void BufferBlock::begin()
 { 
 	m_age = 0;
-	m_residual = RandomFlh(1000.f, 199999.f);  
+	m_residual = RandomFlh(5000.f, 199999.f);  
 }
 
 void BufferBlock::progressAge()

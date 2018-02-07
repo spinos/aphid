@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef TTG_SUPERFORMULA_CONTROL_H
-#define TTG_SUPERFORMULA_CONTROL_H
+#ifndef APH_SUPERFORMULA_CONTROL_H
+#define APH_SUPERFORMULA_CONTROL_H
 
 #include <QDialog>
 
@@ -20,7 +20,7 @@ QT_END_NAMESPACE
 
 class QDoubleEditSlider;
 
-namespace ttg {
+namespace aphid {
 
 class SuperformulaControl : public QDialog
 {

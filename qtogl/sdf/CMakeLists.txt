@@ -4,6 +4,8 @@ window.h
 widget.h)
 
 set (SDF_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
+${APHID_QT_DIR}/SuperFormulaControl.cpp
+${APHID_QT_DIR}/QDoubleEditSlider.cpp 
 LegendreDFTest.cpp
 widget.cpp
 window.cpp
@@ -20,7 +22,10 @@ target_link_libraries (sdft ${APHID_UI_LIBRARY})
 target_link_libraries (sdft ${APHID_SDB_LIBRARY})
 target_link_libraries (sdft ${APHID_TOPO_LIBRARY})
 target_link_libraries (sdft ${APHID_OGL_LIBRARY})
-
+target_link_libraries (sdft ${APHID_KD_LIBRARY})
+target_link_libraries (sdft ${APHID_SMP_LIBRARY})
+target_link_libraries (sdft ${APHID_TTG_LIBRARY})
+target_link_libraries (sdft ${APHID_GRAPH_LIBRARY})
 target_link_libraries (sdft ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (sdft ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (sdft ${Boost_REGEX_LIBRARY})

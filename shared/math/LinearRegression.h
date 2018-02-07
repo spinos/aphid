@@ -19,14 +19,13 @@
 #define APH_MATH_LINEAR_REGRESSION_DATA_H
 
 #include "linearMath.h"
+#include "miscfuncs.h"
 
 namespace aphid {
 
 template<typename T, int K>
 class LinearRegressionData {
 
-/// k recent history
-	T m_y[K];
 /// coefficient
 	T m_b[K + 1];
 /// inverse covariant matrix
@@ -36,20 +35,15 @@ public:
 
 	LinearRegressionData();
 	
-	void addSignal(const T& y_t, const int& t);
-	
-	float* b();
-	float* y();
-	float* P();
-	
-private:
 /// b_i <- 0
 /// x_i <- 0
 /// P <- 0 + diagonal(1000)
-	void clear();
-/// discard first 
-	void pushData(const T& y_t);
+	void clear();	
+	float* b();
+	float* P();
 	
+private:
+
 };
 
 template<typename T, int K>
@@ -60,7 +54,6 @@ template<typename T, int K>
 void LinearRegressionData<T, K>::clear()
 {
 	memset(m_b, 0, (K + 1) * sizeof(T) );
-	memset(m_y, 0, K * sizeof(T) );
 	memset(m_P, 0, (K + 1) * (K + 1) * sizeof(T) );
 	for(int i=0;i<K+1;++i) {
 		m_P[(K+1)*i + i] = 1000;
@@ -68,35 +61,8 @@ void LinearRegressionData<T, K>::clear()
 }
 
 template<typename T, int K>
-void LinearRegressionData<T, K>::addSignal(const T& y_t, const int& t)
-{	
-	if(t == 0) {
-		clear();
-	} 
-	
-	if(t >= K) {
-		pushData(y_t);
-	} else {
-		m_y[t] = y_t;
-	}
-}
-
-template<typename T, int K>
-void LinearRegressionData<T, K>::pushData(const T& y_t)
-{
-	for(int i=0;i<K-1;++i) {
-		m_y[i] = m_y[i+1];
-	}
-	m_y[K-1] = y_t;
-}
-
-template<typename T, int K>
 float* LinearRegressionData<T, K>::b()
 { return m_b; }
-	
-template<typename T, int K>
-float* LinearRegressionData<T, K>::y()
-{ return m_y; }
 
 template<typename T, int K>
 float* LinearRegressionData<T, K>::P()
@@ -106,6 +72,10 @@ template<typename T, int K>
 class LinearRegressionPredictor {
 
 	LinearRegressionData<T, K>* m_model;
+/// change the slope of fitting
+/// x_i <- 1 same as exponential blending
+/// x_i <- dydt fitting will use slope of y
+/// x_i <- -dydt fitting will smooth out close to mean
 	DenseVector<T> m_X;
 	DenseMatrix<T> P;
 	DenseVector<T> xtp;
@@ -119,11 +89,11 @@ public:
 	
 	void setData(LinearRegressionData<T, K>* model);
 	
-	T updateAndPredict(const T& Y_t, const int& t);
+	T updateAndPredict(const T& Y_t, const T& H_t, const int& t);
 	
 private:
 /// x_i <- [1, y_i]
-	void assembleX();
+	void assembleX(const T& s);
 /// Y^hat <- b_i^T x_i	
 	T predict();
 
@@ -138,7 +108,6 @@ LinearRegressionPredictor<T, K>::LinearRegressionPredictor()
 	Q.create(K + 1);
 	qxt.create(K + 1,K + 1);
 	qxtp.create(K + 1,K + 1);
-	
 }
 
 template<typename T, int K>
@@ -146,46 +115,54 @@ void LinearRegressionPredictor<T, K>::setData(LinearRegressionData<T, K>* model)
 { m_model = model; }
 
 template<typename T, int K>
-T LinearRegressionPredictor<T, K>::updateAndPredict(const T& Y_t, const int& t)
+T LinearRegressionPredictor<T, K>::updateAndPredict(const T& Y_t, const T& H_t, const int& t)
 {
-	m_model->addSignal(Y_t, t);
-	
-/// update x
-	assembleX(); 
-	// std::cout<<"\n X"<<m_X;
-	
-/// prediction error using current b	
-	const T et = Y_t - predict();
+	if(t<1)
+		m_model->clear();
+		
+	T dydt = Y_t * .994 - predict();
+	//if(Absolute<T>(dydt) < 1e-6)
+	//	return Y_t;
+			
+	if(t<1) {
+		assembleX(1.0);
+	} else {
+		//if(dydt < -.23 || dydt > .23) {
+		//	assembleX(.13);
+		//}
+		//else 
+			assembleX(-dydt);
+	}
+
+/// prediction error using current b		
+	const T et = Y_t * .994 - predict();
 	
 	P.copyData(m_model->P() );
-	//std::cout<<"\n P"<<P;
 	
 	xtp.setZero();
 	P.lefthandMult(xtp, m_X);
 	
-	const float lamda = .998f;
+	const float lamda = .98f;
 	float scal = 1.f / (lamda + xtp.dot(m_X) );
 	Q.setZero();
 	P.mult(Q, m_X);
 	Q.scale(scal);
-	//std::cout<<"\n Q"<<Q;
+
 /// update b	
 	DenseVector<T> B(m_model->b(), K+1);
 	B.add(Q * et);
-	//std::cout<<"\n b"<<B;
+
+	std::cout<<"\n B"<<B;
+	
 /// update P
 	qxt.setZero();
 	qxt.asVVt(Q, m_X);
-		//std::cout<<"\n Qx^t "<<qxt;
-	
+
 	qxtp.setZero();
 	qxt.mult(qxtp, P);
-		//std::cout<<"\n Qx^tP "<<qxtp;
-	
+
 	P.minus(qxtp);
 	P.scale(1.f/lamda);
-	
-	//std::cout<<"\n P"<<P;
 	
 	P.extractData(m_model->P() );
 /// updated prediction
@@ -200,13 +177,17 @@ T LinearRegressionPredictor<T, K>::predict()
 }
 
 template<typename T, int K>
-void LinearRegressionPredictor<T, K>::assembleX()
+void LinearRegressionPredictor<T, K>::assembleX(const T& s)
 {
-/// just slope ?
 	m_X[0] = 1;
 	for(int i=0;i<K;++i) {
-		m_X[i + 1] = 1.0 - 1.9 / (1.9 + (T)K);
+		m_X[i + 1] = 1 - s;
 	}
+	
+	//m_X[1] = 1 ;
+	//m_X[2] = -1 ;
+	//m_X[3] = 1 ;
+	//m_X[4] = -1 ;
 }
 
 }

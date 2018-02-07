@@ -31,6 +31,19 @@ protected:
 	
 public slots:
 
+	void receiveA1(double x);
+	void receiveB1(double x);
+	void receiveM1(double x);
+	void receiveN1(double x);
+	void receiveN2(double x);
+	void receiveN3(double x);
+	void receiveA2(double x);
+	void receiveB2(double x);
+	void receiveM2(double x);
+	void receiveN21(double x);
+	void receiveN22(double x);
+	void receiveN23(double x);
+	
 signals:
 
 private:

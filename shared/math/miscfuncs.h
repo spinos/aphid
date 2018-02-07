@@ -49,6 +49,7 @@ inline float log2f( float n )
 
 #define PI 3.14159265358979323846
 #define PIF 3.1415926535f
+#define ONE_OVER_PIF .318309886f
 #define HALFPIF 1.5707963268f
 #define TWOPIF 6.2831853072f
 #define ONEHALFPIF 4.71238898f

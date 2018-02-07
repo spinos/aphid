@@ -13,6 +13,8 @@
 #include <geom/ATriangleMesh.h>
 
 namespace aphid {
+
+struct Float2;
     
 class TriangleGeodesicSphere : public ATriangleMesh {
      
@@ -21,7 +23,10 @@ public:
     virtual ~TriangleGeodesicSphere();
     
 protected:
-    
+
+/// azimuth u [-pi,pi] v inclination [-0.5pi,0.5pi]    
+	void computeSphericalCoord(Float2* dst) const;
+
 private:
     void subdivide(int level, unsigned & currentVertex, unsigned & currentIndex, 
         Vector3F * p, unsigned * idx, 

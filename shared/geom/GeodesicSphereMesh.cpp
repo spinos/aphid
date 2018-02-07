@@ -8,7 +8,9 @@
  */
 #include <iostream>
 #include "GeodesicSphereMesh.h"
-#include <cmath>
+#include <math/ATypes.h>
+#include <math/miscfuncs.h>
+
 namespace aphid {
     
 TriangleGeodesicSphere::TriangleGeodesicSphere(int level)
@@ -90,6 +92,33 @@ void TriangleGeodesicSphere::subdivide(int level, unsigned & currentVertex, unsi
             currentIndex++;
         }
     }
+}
+
+void TriangleGeodesicSphere::computeSphericalCoord(Float2* dst) const
+{
+
+	const Vector3F * src = vertexNormals();
+	
+	const int n = numPoints();
+	for(int i=0;i<n;++i) {
+		const Vector3F & pcat = src[i];
+		Float2 & ppl = dst[i];
+/// phi
+		if(Absolute<float>(pcat.y) < .01f) {
+			if(pcat.x >= 0.f)
+				ppl.x = 0.f;
+			else
+				ppl.x = PIF;
+				
+		} else {
+			ppl.x = acos(pcat.x / sqrt(pcat.x * pcat.x + pcat.y * pcat.y ) );
+			if(pcat.y < 0.f)
+				ppl.x = -ppl.x;
+		}
+/// theta
+		ppl.y = asin(pcat.z);
+		
+	}
 }
     
 

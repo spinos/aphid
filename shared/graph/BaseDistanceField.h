@@ -103,6 +103,9 @@ protected:
 						
 	void addNodeToHeap(std::deque<int>& heap, const int&x) const;
 	
+	void pushIndices(const std::vector<int> & a,
+							std::vector<int> & b) const;
+							
 private:
 /// propagate distance value
     void propagate(std::deque<int > & heap, const int & i);

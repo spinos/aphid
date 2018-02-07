@@ -601,4 +601,13 @@ void BaseDistanceField::displayNodes() const
 	
 }
 
+void BaseDistanceField::pushIndices(const std::vector<int> & a,
+							std::vector<int> & b) const
+{
+	std::vector<int>::const_iterator it = a.begin();
+	for(;it!=a.end();++it) {
+		b.push_back(*it);
+    }
+}
+
 }

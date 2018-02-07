@@ -24,9 +24,4 @@ target_link_libraries (whiteNoise ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (whiteNoise ${Boost_THREAD_LIBRARY})
 target_link_libraries (whiteNoise ${Boost_CHRONO_LIBRARY})
 
-IF(WIN32)
-ELSEIF (APPLE)
-ELSEIF (UNIX)
 target_link_libraries (whiteNoise ${BLAS_LIBRARY})
-
-ENDIF()

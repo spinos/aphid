@@ -150,14 +150,15 @@ void Plot1DWidget::drawLine(const UniformPlot1D * plt, QPainter * pr)
 
 	QPoint p0, p1;
 	
-/// linspace x
-	p0.setX(MixClamp01F<int>(lu.x(), rb.x(), plt->x()[0]) );
+	p0.setX(RemapF<int>(lu.x(), rb.x(), m_hBound.x, m_hBound.y,
+								plt->x()[0] ));
 	p0.setY(RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
 								plt->y()[0] ));
 	
 	int i=1;
 	for(;i<=n;++i) {
-		p1.setX(MixClamp01F<int>(lu.x(), rb.x(), plt->x()[i]) );
+		p1.setX(RemapF<int>(lu.x(), rb.x(), m_hBound.x, m_hBound.y,
+								plt->x()[i] ));
 		p1.setY(RemapF<int>(rb.y(), lu.y(), m_vBound.x, m_vBound.y,
 								plt->y()[i] ));
 		pr->drawLine(p0, p1 );

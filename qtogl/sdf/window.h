@@ -6,6 +6,10 @@
 QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
+namespace aphid {
+class SuperformulaControl;
+}
+
 class GLWidget;
 
 class Window : public QMainWindow
@@ -22,6 +26,7 @@ protected:
 private:
 
     GLWidget *glWidget;
-
+	aphid::SuperformulaControl* m_superformulaControl;
+	
 };
 #endif

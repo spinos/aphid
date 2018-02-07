@@ -9,32 +9,38 @@
 #include <QtGui>
 #include "LinregWidget.h"
 #include <math/miscfuncs.h>
-#include <math/LinearRegression.h>
+#include <math/LeastMeanSquares.h>
+#include <math/linearMath.h>
 
 using namespace aphid;
 
 LinregWidget::LinregWidget(QWidget *parent) : Plot1DWidget(parent)
 {
-	setBound(0, 1, 10, 0, 1, 4);
+	setBound(0, 100, 10, 0, 1, 4);
 	
-#define SEQ_LEN 40
-#define Dx .025f
+#define SEQ_LEN 100
 	
 	m_trainPlot = new UniformPlot1D;
 	m_trainPlot->create(SEQ_LEN);
 	int i=0;
 	for(;i<SEQ_LEN;++i) {
-		m_trainPlot->x()[i] = Dx * i;
-		m_trainPlot->y()[i] = .5f + (.13f - Dx * i * .05f) * cos(3.14f * .43f * i + RandomFn11() * .19f ) + RandomFn11() * .07f;
+		m_trainPlot->x()[i] = i;
+		m_trainPlot->y()[i] = 
+			0.3f + .003f * i + .05f * sin(.49f * i - .2f) + .1f* cos(.29f * i + .32f ) + RandomFn11() * .1f;
 	}
 	
 	m_trainPlot->setColor(0,0,1);
 	m_trainPlot->setGeomType(UniformPlot1D::GtMark);
 	addVectorPlot(m_trainPlot);
 	
-	LinearRegressionData<float, 4> model;
-	LinearRegressionPredictor<float, 4> estimator;
-	estimator.setData(&model);
+/// filter data
+	DenseVector<float> xf(7);
+	xf.setZero();
+	DenseVector<float> hf(7);
+	hf.setZero();
+	
+	LeastMeanSquares<float, 7> estimator;
+	estimator.setData(xf.v(), hf.v() );
 
 	m_predictPlot = new UniformPlot1D;
 	m_predictPlot->create(SEQ_LEN);
@@ -44,18 +50,22 @@ LinregWidget::LinregWidget(QWidget *parent) : Plot1DWidget(parent)
 	
 	for(i=0;i<SEQ_LEN;++i) {
 	    
-	    m_predictPlot->x()[i] = Dx * i;
-	    float yhat = estimator.updateAndPredict(m_trainPlot->y()[i], i);
+	    m_predictPlot->x()[i] = i;
+		
+	    float yhat = estimator.predict(m_trainPlot->y()[i], i);
 	    m_predictPlot->y()[i] = yhat;
-	    
+		
+		std::cout//<<"\n x("<<i<<") "<<xf;
+			<<"\n h("<<i<<") "<<hf;
+			
 	}
-	m_predictPlot->setColor(1,.7,.1);
+	m_predictPlot->setColor(1,.67,0);
 	addVectorPlot(m_predictPlot);
 	
 	for(i=0;i<SEQ_LEN;++i) {
 	    
-	    m_blendPlot->x()[i] = Dx * i;
-	    float a = 1.f - 3.f / (3.f + i);
+	    m_blendPlot->x()[i] = i;
+	    float a = 1.f - 1.f / (1.f + i);
 		
 		if(i< 1)
 		    m_blendPlot->y()[i] = m_trainPlot->y()[i];

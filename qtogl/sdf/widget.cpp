@@ -14,6 +14,7 @@
 #include <ogl/DrawDop.h>
 #include <ogl/DrawArrow.h>
 #include "LegendreDFTest.h"
+#include <geom/SuperShape.h>
 
 using namespace aphid;
 
@@ -40,6 +41,10 @@ void GLWidget::clientDraw()
 	getDrawer()->m_markerProfile.apply();
 	
 	m_legen->draw(getDrawer() );
+	
+	getDrawer()->m_wireProfile.apply();
+	getDrawer()->setColor(.1f, .3f, .4f);
+	m_legen->drawShape(getDrawer() );
 }
 
 void GLWidget::clientSelect(QMouseEvent *event)
@@ -64,7 +69,9 @@ void GLWidget::clientMouseInput(QMouseEvent *event)
 void GLWidget::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
-		case Qt::Key_K:
+		case Qt::Key_M:
+			m_legen->measureShape();
+			update();
 			break;
 		case Qt::Key_L:
 			break;
@@ -74,4 +81,88 @@ void GLWidget::keyPressEvent(QKeyEvent *e)
 			break;
 	}
 	Base3DView::keyPressEvent(e);
+}
+
+void GLWidget::receiveA1(double x)
+{ 
+	m_legen->shapeParam()._a1 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveB1(double x)
+{ 
+	m_legen->shapeParam()._b1 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveM1(double x)
+{ 
+	m_legen->shapeParam()._m1 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveN1(double x)
+{ 
+	m_legen->shapeParam()._n1 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveN2(double x)
+{ 
+	m_legen->shapeParam()._n2 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveN3(double x)
+{ 
+	m_legen->shapeParam()._n3 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveA2(double x)
+{ 
+	m_legen->shapeParam()._a2 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveB2(double x)
+{ 
+	m_legen->shapeParam()._b2 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveM2(double x)
+{ 
+	m_legen->shapeParam()._m2 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveN21(double x)
+{ 
+	m_legen->shapeParam()._n21 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveN22(double x)
+{ 
+	m_legen->shapeParam()._n22 = x;
+	m_legen->updateShape();
+	update();
+}
+
+void GLWidget::receiveN23(double x)
+{ 
+	m_legen->shapeParam()._n23 = x;
+	m_legen->updateShape();
+	update();
 }

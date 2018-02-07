@@ -23,6 +23,13 @@ class KdEngine {
     int m_numRopeTraversed;
     
 public:
+
+	template<typename T, typename Tgeom>
+	void appendSource(sdb::VectorArray<T> * dst,
+					BoundingBox & box,
+					const Tgeom* geom,
+					const int& igeom);
+					
 	template<typename T, int Ies>
 	void buildSource(sdb::VectorArray<T> * dst,
 					BoundingBox & box,
@@ -188,6 +195,26 @@ private:
 					const BoundingBox & b);
 				
 };
+
+template<typename T, typename Tgeom>
+void KdEngine::appendSource(sdb::VectorArray<T> * dst,
+					BoundingBox & box,
+					const Tgeom* geom,
+					const int& igeom)
+{
+	T acomp;
+	acomp.setInd(igeom, 0);
+	const int ne = geom->numComponents();
+	for(int i=0;i<ne;++i) {
+		geom-> template dumpComponent<T>(acomp, i);
+		
+		acomp.setInd(i, 1);
+		dst->insert(acomp);
+			
+		const BoundingBox cbx = acomp.calculateBBox();
+		box.expandBy(cbx);
+	}
+}
 
 template<typename T, int Ies>
 void KdEngine::buildSource(sdb::VectorArray<T> * dst,

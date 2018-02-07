@@ -23,7 +23,7 @@ PixelProjector::~PixelProjector()
 void PixelProjector::reproject(BufferBlock& blk, const ImageFragment& y_t)
 {
 	const int& t = blk.age();
-	const float alpha = 1.f - 4.f / (4.f + t);
+	const float alpha = 1.f - 1.f / (1.f + t);
 	float residual = 0.f;
 	
 	ImageFragment* h_tm1 = blk.fragment();

@@ -30,7 +30,7 @@ void PixelSampler::generateViewRays(BufferBlock& blk) const
 	float u, v;
 	for(int j=0;j<m;++j) {
 		for(int i=0;i<n;++i) {
-			const float* h32 = Halton32Sequence128[rand() & 255];
+			const float* h32 = Halton32Sequence256[rand() & 255];
 			u = dx * (h32[0] + i);
 			v = dy * (h32[1] + j);
 			blk.calculateViewRay(u, v, j * n + i);

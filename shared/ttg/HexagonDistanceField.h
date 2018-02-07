@@ -87,8 +87,7 @@ public:
 protected:
 
 private:
-    void pushIndices(const std::vector<int> & a,
-							std::vector<int> & b);
+    
     void extractGridPos(const T * grid);
     
 };
@@ -181,16 +180,6 @@ static const int TwelveEdges[12][2] = {
 	
     calculateEdgeLength();
     
-}
-
-template<typename T>
-void HexagonDistanceField<T>::pushIndices(const std::vector<int> & a,
-							std::vector<int> & b)
-{
-	std::vector<int>::const_iterator it = a.begin();
-	for(;it!=a.end();++it) {
-		b.push_back(*it);
-    }
 }
 
 template<typename T>

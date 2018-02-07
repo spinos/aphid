@@ -62,6 +62,7 @@ public:
 	void projectImage(DisplayImage* img);
 	
 	ImageFragment* fragment();
+	
 /// i-th view ray bilinear interpolate frame by (u,v)
 	void calculateViewRay(const float& u, const float& v,
 						const int& i);
