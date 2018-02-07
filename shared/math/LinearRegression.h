@@ -63,7 +63,7 @@ void LinearRegressionData<T, K>::clear()
 	memset(m_y, 0, K * sizeof(T) );
 	memset(m_P, 0, (K + 1) * (K + 1) * sizeof(T) );
 	for(int i=0;i<K+1;++i) {
-		m_P[(K+1)*i + i] = 3000;
+		m_P[(K+1)*i + i] = 1000;
 	}
 }
 
@@ -202,9 +202,10 @@ T LinearRegressionPredictor<T, K>::predict()
 template<typename T, int K>
 void LinearRegressionPredictor<T, K>::assembleX()
 {
+/// just slope ?
 	m_X[0] = 1;
 	for(int i=0;i<K;++i) {
-		m_X[i + 1] = m_model->y()[i];
+		m_X[i + 1] = 1.0 - 1.9 / (1.9 + (T)K);
 	}
 }
 

@@ -6,6 +6,10 @@
 #include <math/linearMath.h>
 #include <math/miscfuncs.h>
 #include <math/LinearRegression.h>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QtCore>
+#include "window.h"
 
 using namespace aphid;
 
@@ -170,9 +174,15 @@ void testPredictor()
 int main(int argc, char **argv)
 {        
     std::cout<<"\n test linear model";
-	testPredictor();
+	//testPredictor();
 	//testEstimation();
 	//testVVt();
 	std::cout<<"\ndone.\n";
-    exit(0);
+    //exit(0);
+    QApplication app(argc, argv);
+    Window window;
+    //window.showMaximized();
+    window.resize(480, 480);
+    window.show();
+    return app.exec();
 }

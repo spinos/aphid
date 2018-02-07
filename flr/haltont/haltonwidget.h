@@ -26,7 +26,7 @@ public:
 protected:
 
 private:
-	float HaltonWidget::calcHalton(int i, int b);
+	float calcHalton(int i, int b);
 	aphid::UniformPlot1D * m_trainPlot;
     
 };

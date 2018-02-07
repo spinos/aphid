@@ -13,7 +13,9 @@
 #ifdef LINUX
 #include <gl_heads.h>
 #else
+#ifndef MAMA_VER2015
 #include <windows.h>
+#endif
 #endif
 #include <maya/MPxLocatorNode.h> 
 #include <maya/MTypeId.h> 
