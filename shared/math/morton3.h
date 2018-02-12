@@ -1,11 +1,17 @@
-#ifndef MORTON3D_H
-#define MORTON3D_H
+/*
+ *  z-order curve with max order 9
+ *
+ */
 
-#define _min(a, b) (a < b?a: b)
-#define _max(a, b) (a > b?a: b)
+#ifndef APH_MORTON_3_H
+#define APH_MORTON_3_H
+
+#include "miscfuncs.h"
+
+namespace aphid {
 
 // http://stackoverflow.com/questions/18529057/produce-interleaving-bit-patterns-morton-keys-for-32-bit-64-bit-and-128bit
-inline unsigned expandBits(unsigned v) 
+inline int expandBits(int v) 
 { 
     // v = (v * 0x00010001u) & 0xFF0000FFu; 
     // v = (v * 0x00000101u) & 0x0F00F00Fu; 
@@ -21,14 +27,14 @@ inline unsigned expandBits(unsigned v)
 
 // Calculates a 30-bit Morton code for the 
 // given 3D point located within the unit cube [0,1].
-inline unsigned encodeMorton3D(unsigned x, unsigned y, unsigned z) 
+inline int encodeMorton3D(int x, int y, int z) 
 { 
-    x = _min(_max(x, 0), 1023); 
-    y = _min(_max(y, 0), 1023); 
-    z = _min(_max(z, 0), 1023); 
-    unsigned xx = expandBits((unsigned)x); 
-    unsigned yy = expandBits((unsigned)y); 
-    unsigned zz = expandBits((unsigned)z); 
+    Clamp_0_1023<int>(x); 
+    Clamp_0_1023<int>(y); 
+    Clamp_0_1023<int>(z); 
+    int xx = expandBits(x); 
+    int yy = expandBits(y); 
+    int zz = expandBits(z); 
     return xx << 2 | yy << 1 | zz; 
 }
 
@@ -67,5 +73,7 @@ inline void decodeMorton3D(unsigned code, unsigned & x, unsigned & y, unsigned &
 // uint64_t y = morton3(bits>>1)
 // uint64_t z = morton3(bits>>2)
 
-#endif        //  #ifndef MORTON3D_H
+}
+
+#endif        //  #ifndef APH_MORTON_3_H
 

@@ -1,6 +1,7 @@
 /*
  *  hilbertCurve.h
  *  
+ *  3d hilbert sfc with max order 2 - 10, dim < 2 will return 0
  *
  *  Created by jian zhang on 6/5/16.
  *  Copyright 2016 __MyCompanyName__. All rights reserved.
@@ -96,9 +97,9 @@ inline int hilbert3DCoord( float x , float y, float z,
 		float coordRed = ( x - x0 ) * xRed + ( y - y0 ) * yRed + ( z - z0 ) * zRed ; 
 		float coordGreen = ( x - x0 ) * xGreen + ( y - y0 ) * yGreen + ( z - z0 ) * zGreen; 
 		float coordBlue = ( x - x0 ) * xBlue + ( y - y0 ) * yBlue + ( z - z0 ) * zBlue; 
-		xRed /= 2 ; yRed /= 2; zRed /=2;
-		xGreen /= 2; yGreen /= 2; zGreen /=2;
-		xBlue /= 2 ; yBlue /= 2 ; zBlue /= 2;
+		xRed /= 2.f; yRed /= 2.f; zRed /= 2.f;
+		xGreen /= 2.f; yGreen /= 2.f; zGreen /= 2.f;
+		xBlue /= 2.f; yBlue /= 2.f; zBlue /= 2.f;
 		
 		if(coordRed <= 0) {
 			if(coordGreen <= 0) {
@@ -225,6 +226,17 @@ inline int hilbert3DCoord( float x , float y, float z,
 	} 
 	return res;
 }
+
+static const float HilbertSubNodeCoord[8][3] = {
+{-1.f, -1.f, -1.f},
+{-1.f, -1.f,  1.f},
+{-1.f,  1.f,  1.f},
+{-1.f,  1.f, -1.f},
+{1.f,  1.f, -1.f},
+{1.f,  1.f,  1.f},
+{1.f, -1.f,  1.f},
+{1.f, -1.f, -1.f}
+};
 
 }
 #endif

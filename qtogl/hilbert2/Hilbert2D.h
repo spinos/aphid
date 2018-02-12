@@ -36,7 +36,7 @@ public:
 	
 private:
 	void generateSamples(int level);
-	
+	void test3d();
 		
 };
 

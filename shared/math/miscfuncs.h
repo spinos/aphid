@@ -140,6 +140,13 @@ inline void SameSign(T & a, const T & b)
 		a = -a;
 }
 
+template<typename T>
+inline void Clamp_0_1023(T& x)
+{
+	if(x<0) x = 0;
+	if(x>1023) x = 1023;
+}
+
 /// Box-Muller transform
 template<typename T>
 inline T GenerateGaussianNoise(T mu, T sigma)

@@ -6,7 +6,7 @@
 #include <ogl/RotationHandle.h>
 #include <ogl/TranslationHandle.h>
 #include <ogl/ScalingHandle.h>
-#include <BaseCamera.h>
+#include <math/BaseCamera.h>
 #include <ogl/DrawBox.h>
 #include <ogl/DrawDop.h>
 #include <ogl/DrawArrow.h>

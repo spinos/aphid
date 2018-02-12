@@ -1,4 +1,5 @@
 set (SDF_HEADER_FILES ${APHID_QT_DIR}/Base3DView.h 
+SvoTest.h
 LegendreDFTest.h
 window.h
 widget.h)
@@ -6,6 +7,7 @@ widget.h)
 set (SDF_SOURCE_FILES ${APHID_QT_DIR}/Base3DView.cpp
 ${APHID_QT_DIR}/SuperFormulaControl.cpp
 ${APHID_QT_DIR}/QDoubleEditSlider.cpp 
+SvoTest.cpp
 LegendreDFTest.cpp
 widget.cpp
 window.cpp

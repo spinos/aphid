@@ -10,99 +10,15 @@
 #include "LegendreDFTest.h"
 #include <math/miscfuncs.h>
 #include <math/Calculus.h>
-#include <math/ANoise3.h>
-#include <geom/SuperShape.h>
 #include <GeoDrawer.h>
-#include <kd/IntersectEngine.h>
-#include <kd/ClosestToPointEngine.h>
-#include <smp/Triangle.h>
-#include <ttg/UniformDensity.h>
-#include <math/LegendreInterpolation.h>
-
-using namespace aphid;
-
-struct MeasureSphere {
-
-	float measureAt(const float& x, const float& y, const float& z) {
-		
-		float cx = x * 1.1f + .1f;
-		float cy = y * .9f + .3f;
-		float cz = z * .7f + .8f;
-		float r = sqrt(cx * cx + cy * cy + cz * cz);
-		return r - 1.1f;
-	
-	}
-};
-
-struct MeasureNoise {
-
-	float measureAt(const float & x, const float & y, const float & z) const
-	{
-		const Vector3F at(x, 1.03f, z);
-		const Vector3F orp(-.5421f, -.7534f, -.386f);
-		return y - ANoise3::Fbm((const float *)&at,
-											(const float *)&orp,
-											.7f,
-											4,
-											1.8f,
-											.5f);
-	}
-};
-
-struct KdMeasure {
-
-	KdEngine _engine;
-	ClosestToPointTestResult _ctx;
-	KdNTree<PosSample, aphid::KdNNode<4> >* _tree;
-	Vector3F _u;
-	
-	Vector3F _offset;
-	float _scaling;
-	
-	float measureAt(const float& x, const float& y, const float& z) {
-
-/// to world		
-		_u.x = x * _scaling;
-		_u.y = y * _scaling;
-		_u.z = z * _scaling;
-		_u += _offset;
-	
-		_ctx.reset(_u, 1e8f, true);
-		_engine.closestToPoint<PosSample>(_tree, &_ctx);
-		if(!_ctx._hasResult)
-			return 0.f;
-/// back to local, which is [-1,1]	
-		return _ctx._distance / _scaling;
-	}
-	
-};
-
-struct TransformAprox {
-
-	float _u[3];
-	float _scaling;
-	float _offset[3];
-	
-	void setU(const float* p) {
-		_u[0] = p[0] + _offset[0];
-		_u[1] = p[1] + _offset[1];
-		_u[2] = p[2] + _offset[2];
-		_u[0] *= _scaling;
-		_u[1] *= _scaling;
-		_u[2] *= _scaling;
-	}
-	
-	void setU(const Vector3F& p) {
-		setU((const float*)&p);
-	}
-	
-};
+#include <ttg/SparseVoxelOctree.h>
+#include <ttg/LegendreSVORule.h>
+#include "PosSample.h"
+#include "measures.h"
 
 LegendreDFTest::LegendreDFTest() 
 { 
-	m_shape = new SuperShapeGlyph; 
-	m_tris = new sdb::VectorArray<cvx::Triangle>();
-	m_pnts = new sdb::VectorArray<PosSample>();
+	m_fzc = new sdb::FZFCurve;
 	m_tree = new KdNTree<PosSample, KdNode4 >();
 	m_closestPointTest = new ClosestToPointTestResult;
 	m_densityGrid = new ttg::UniformDensity;
@@ -180,6 +96,9 @@ bool LegendreDFTest::init()
 	std::cout<<"\n max error "<<mxErr<<" average "<<(sumErr/N_SEG3)
 		<<"\n done!";
 	std::cout.flush();
+	
+	measureShape();
+	
 	return true;
 }
 
@@ -199,11 +118,12 @@ void LegendreDFTest::draw(GeoDrawer * dr)
 	
 	glPopMatrix();
 	
-	drawShapeSamples(dr);
+	//drawShapeSamples(dr);
 	//drawDensity(dr);
 	//drawFront(dr);
 	//drawGraph(dr);
 	//drawAggregatedSamples(dr);
+	drawSVO(dr);
 	
 	if(m_isIntersected) {
 		glColor3f(0.f,1.f,.1f);
@@ -245,13 +165,19 @@ void LegendreDFTest::drawError(GeoDrawer *dr) const
 
 void LegendreDFTest::drawShapeSamples(GeoDrawer * dr) const
 {
-	const int ns = m_pnts->size();
-	glColor3f(.9f,.6f,0.f);
-	glBegin(GL_POINTS);
-	for(int i=0;i<ns;++i) {
-		glVertex3fv((const float* )&(m_pnts->get(i)->_pos));
-	}
-	glEnd();
+	const sdb::SpaceFillingVector<PosSample>& rpnts = pnts();
+	const int ns = rpnts.size();
+	if(ns < 1)
+		return;
+		
+#if 0
+	int drawRange[2] = {0,-1};
+	rpnts.searchSFC(drawRange, m_fzc->_range);
+	SvoTest::drawShapeSamples(dr, drawRange);
+#else
+	const sdb::FHilbertRule& hil = hilbertSFC();
+	SvoTest::drawShapeSamples(dr, hil._range);
+#endif
 }
 
 void LegendreDFTest::drawAggregatedSamples(GeoDrawer * dr) const
@@ -326,17 +252,6 @@ void LegendreDFTest::drawGraph(GeoDrawer *dr) const
 	glEnd();*/
 }
 
-void LegendreDFTest::drawShape(GeoDrawer * dr)
-{
-	dr->triangleMesh(m_shape);
-}
-
-SuperFormulaParam& LegendreDFTest::shapeParam()
-{ return m_shape->param(); }
-
-void LegendreDFTest::updateShape()
-{ m_shape->computePositions(); }
-
 void LegendreDFTest::rayIntersect(const Ray* ray)
 {
 	m_isIntersected = false;
@@ -364,7 +279,7 @@ void LegendreDFTest::rayIntersect(const Ray* ray)
 		return;
 		
 	int step = 0;
-	while(fd > .21e-1f) {
+	while(fd > .1e-1f) {
 		m_hitP += ray->m_dir * (fd * m_centerScale[3] * .998f);
 		if(!bx.isPointInside(m_hitP) )
 			return;
@@ -388,49 +303,46 @@ void LegendreDFTest::rayIntersect(const Ray* ray)
 
 void LegendreDFTest::measureShape()
 {
-	m_tris->clear();
 	BoundingBox shapeBox;
-	shapeBox.reset();
-	KdEngine eng;
-	eng.appendSource<cvx::Triangle, ATriangleMesh >(m_tris, shapeBox,
-									m_shape, 0);
-	shapeBox.round();
+	sampleShape(shapeBox);
 	
-	const float ssz = shapeBox.getLongestDistance() * .0037f;
-	smp::Triangle sampler;
-	sampler.setSampleSize(ssz);
-	
-	SampleInterp interp;
-	
-	m_pnts->clear();
-	PosSample asmp;
-/// same radius
-	asmp._r = ssz;
-	const int nt = m_tris->size();
-	for(int i=0;i<nt;++i) {
-		
-		const cvx::Triangle* ti = m_tris->get(i);
-		
-		sampleTriangle(asmp, sampler, interp, ti);
-	}
-	
-	std::cout<<"\n n triangle samples "<<m_pnts->size();
-	
+	const Vector3F midP = shapeBox.center();
+	const float spanL = shapeBox.getLongestDistance();
+	const float spanH = spanL * .5f;
+	const Vector3F lowP(midP.x - spanH, 
+						midP.y - spanH, 
+						midP.z - spanH );
+						
 	const float rhoSize = shapeBox.getLongestDistance() / 54.f;
 	float rhoOri[3];
-	rhoOri[0] = shapeBox.getMin(0) - rhoSize;
-	rhoOri[1] = shapeBox.getMin(1) - rhoSize;
-	rhoOri[2] = shapeBox.getMin(2) - rhoSize;
+	rhoOri[0] = lowP.x - rhoSize;
+	rhoOri[1] = lowP.y - rhoSize;
+	rhoOri[2] = lowP.z - rhoSize;
 	m_densityGrid->setOriginAndCellSize(rhoOri, rhoSize);
 	
-	const int ns = m_pnts->size();
+#if 0					
+	m_fzc->setOrginSpan(lowP.x, 
+						lowP.y, 
+						lowP.z,
+						spanL);
+	pnts().createSFC<sdb::FZFCurve>(*m_fzc);
+	
+	m_fzc->setRange(512, 512, 256,
+					767, 767, 511);
+#endif
+
+	const sdb::SpaceFillingVector<PosSample>& rpnts = pnts();
+	const int ns = rpnts.size();
 	for(int i=0;i<ns;++i) {
-		m_densityGrid->accumulate(1.f, m_pnts->get(i)->_pos);
+		m_densityGrid->accumulate(1.f, rpnts[i]._pos);
 	}
 	
 	m_densityGrid->finish();
 	
 	std::cout<<"\n n density fronts "<<m_densityGrid->numFronts();
+	
+	PosSample asmp;
+	asmp._r = shapeBox.getLongestDistance() * .00191f;
 	
 	m_aggrs->clear();
 	m_densityGrid->buildSamples<PosSample >(asmp, m_aggrs);
@@ -438,6 +350,7 @@ void LegendreDFTest::measureShape()
 	TreeProperty::BuildProfile bf;
 	bf._maxLeafPrims = 16;
 	
+	KdEngine eng;
 	eng.buildTree<PosSample, KdNode4, 4>(m_tree, m_aggrs, shapeBox, &bf);
 	
 	Vector3F cen = shapeBox.center();
@@ -455,27 +368,8 @@ void LegendreDFTest::measureShape()
 	m_centerScale[3] = scaling;
 	
 	estimateFittingError();
-
-	std::cout.flush();
 	
-}
-
-void LegendreDFTest::sampleTriangle(PosSample& asmp, smp::Triangle& sampler, 
-						SampleInterp& interp, const cvx::Triangle* g)
-{
-	const int ns = sampler.getNumSamples(g->calculateArea() );
-	int n = ns;
-	for(int i=0;i<500;++i) {
-		
-		if(n < 1)
-			return;
-			
-		if(!sampler.sampleTriangle<PosSample, SampleInterp >(asmp, interp, g) )
-			continue;
-			
-		m_pnts->insert(asmp);
-		n--;
-	}
+	std::cout.flush();
 }
 
 void LegendreDFTest::measureShapeDistance(const Vector3F& center, const float& scaling)

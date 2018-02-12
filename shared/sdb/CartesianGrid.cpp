@@ -1,6 +1,6 @@
 #include "CartesianGrid.h"
 #include <iostream>
-#include <Morton3D.h>
+#include <math/morton3.h>
 #include <sdb/BNode.h>
 #include <math/BaseBuffer.h>
 #include <geom/ConvexShape.h>

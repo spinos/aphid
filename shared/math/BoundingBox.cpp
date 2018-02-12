@@ -34,6 +34,17 @@ BoundingBox::BoundingBox(const float * d)
 	memcpy(m_data, d, 24);
 }
 
+void BoundingBox::setCenterHalfSpan(const float* & c)
+{
+	const float& h = c[3];
+	m_data[0] = c[0] - h;
+	m_data[1] = c[1] - h;
+	m_data[2] = c[2] - h;
+	m_data[3] = c[0] + h;
+	m_data[4] = c[1] + h;
+	m_data[5] = c[2] + h;
+}
+
 void BoundingBox::set(const Vector3F & center,
 			const float & h)
 {

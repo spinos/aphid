@@ -16,6 +16,59 @@ struct QuickSortPair {
 class QuickSort1
 {
 public:
+
+	template <typename KeyType, typename ValueType>
+	static void SortByKey(ValueType* kv, int first, int last)
+	{
+		if(last < first) return;
+        int low, high;
+        ValueType temp;
+        low = first;
+        high = last;
+        KeyType list_separator = kv[(first+last)/2]._key;
+        do
+        {
+            while(kv[low]._key < list_separator) low++;
+            while(kv[high]._key > list_separator) high--;
+    
+            if(low<=high)
+            {
+                temp = kv[low];
+                kv[low++] = kv[high];
+                kv[high--]=temp;
+            }
+        } while(low<=high);
+        
+        if(first<high) SortByKey<KeyType, ValueType >(kv,first,high);
+        if(low<last) SortByKey<KeyType, ValueType >(kv,low,last);
+	}
+	
+	template <typename KeyType, typename ValueType>
+	static void SortVector(std::vector<ValueType>& kv, int first, int last)
+	{
+		if(last < first) return;
+        int low, high;
+        ValueType temp;
+        low = first;
+        high = last;
+        KeyType list_separator = kv[(first+last)/2]._key;
+        do
+        {
+            while(kv[low]._key < list_separator) low++;
+            while(kv[high]._key > list_separator) high--;
+    
+            if(low<=high)
+            {
+                temp = kv[low];
+                kv[low++] = kv[high];
+                kv[high--]=temp;
+            }
+        } while(low<=high);
+        
+        if(first<high) SortVector<KeyType, ValueType >(kv,first,high);
+        if(low<last) SortVector<KeyType, ValueType >(kv,low,last);
+	}
+	
     template <typename ValueType>
     static void Sort(ValueType * kv, int first, int last)
     {

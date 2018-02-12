@@ -11,7 +11,7 @@
 #include <sdb/CartesianGrid.h>
 #include <GeoDrawer.h>
 #include <iostream>
-#include "hilbertCurve.h"
+#include <sdb/SpaceFillingVector.h>
 
 using namespace aphid;
 
@@ -30,6 +30,7 @@ Hilbert2D::~Hilbert2D()
 bool Hilbert2D::init() 
 {
 	generateSamples(m_level);
+	test3d();
     return true;
 }
 
@@ -100,6 +101,39 @@ void Hilbert2D::generateSamples(int level)
 	for(int i=0;i<m_N;++i) {
 		m_X[i] += voffset;
 	}
+}
+
+void Hilbert2D::test3d()
+{
+	sdb::FHilbertRule rule;
+	rule.setOriginSpan(-2.00001,
+						-2.00001,
+						-2.00001,
+						4.00002);
+						
+	float p[4] = {0,0,0, 2.00001};
+	float q[4];
+	int level = 0;
+	
+	while(level < 10) {
+		std::cout<<"\n p ("<<p[0]<<","<<p[1]<<","<<p[2]<<") at level "<<level<<" "<<rule.computeKey(p,level);
+		
+		for(int i=0;i<8;++i) {
+			rule.computeChildCoord(q, i, p);
+			std::cout<<"\n q_"<<i<<" ("<<q[0]<<","<<q[1]<<","<<q[2]<<") at level "<<(level+1)<<" "<<rule.computeKey(q,level+1);
+		
+		}
+		
+		float& h = p[3];
+		h /= 2;
+		p[0] -= h;
+		p[1] -= h;
+		p[2] -= h;
+
+		level++;
+		
+	}
+	std::cout.flush();
 }
 
 bool Hilbert2D::progressForward()
