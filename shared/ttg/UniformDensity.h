@@ -8,6 +8,8 @@
  *  [0,7] solid cells
  *  0 1  0 1  0 1       0 1
  *  0 0  0 1  1 1 good  1 0 bad
+ *  node at cell center, edges are axix-aligned and have same length
+ *  node position and distance has no use
  *
  *  Created by jian zhang on 2/10/18.
  *  Copyright 2018 __MyCompanyName__. All rights reserved.
@@ -55,6 +57,10 @@ public:
 	void create(int M, int N, int P,
 				const float* boxOrigin,
 				const float& cellSize);
+				
+	void setOriginAndCellSize(const float* boxOrigin,
+				const float& cellSize);
+	
 /// rho <- 0				
 	void setZero();
 /// accumulate in cells

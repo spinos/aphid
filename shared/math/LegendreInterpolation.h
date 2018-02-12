@@ -132,10 +132,10 @@ void LegendreInterpolation<T, P, D>::compute3(T* ys, T* coeffs, Tm& measure)
 		if(rnk==0)
 			break;
 	
-		calc::printValues<int>("tuple space", D, indx);
-		std::cout<<"\n measure at ("<<m_Xi[indx[0]-1]
-				<<","<<m_Xi[indx[1]-1]
-				<<","<<m_Xi[indx[2]-1]<<")";
+		//calc::printValues<int>("tuple space", D, indx);
+		//std::cout<<"\n measure at ("<<m_Xi[indx[0]-1]
+		//		<<","<<m_Xi[indx[1]-1]
+		//		<<","<<m_Xi[indx[2]-1]<<")";
 				
 		l = calc::lexIndex(D, P, indx, -1);
 		

@@ -64,6 +64,7 @@ protected:
 	void extractEdgeBegins(const std::vector<int> & a);
 	void extractEdgeIndices(const std::vector<int> & a);
 	void calculateEdgeLength();
+	void setAllEdgeLength(const float& x);
 /// ind to edge by vertex i
 	int edgeIndex(const int & v1, const int & v2) const;
 	
@@ -210,6 +211,18 @@ void AGraph<Tn, Te>::calculateEdgeLength()
 		if(m_maxEdgeLen < ei.len)
 			m_maxEdgeLen = ei.len;
 	}
+}
+
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::setAllEdgeLength(const float& x)
+{
+	const int n = numEdges();
+	int i = 0;
+	for(;i<n;++i) {
+		Te & ei = m_edges[i];
+		ei.len = x;
+	}
+	m_minEdgeLen = m_maxEdgeLen = x;
 }
 
 template<typename Tn, typename Te>

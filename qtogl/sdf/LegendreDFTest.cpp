@@ -106,6 +106,11 @@ LegendreDFTest::LegendreDFTest()
 	m_tree = new KdNTree<PosSample, KdNode4 >();
 	m_closestPointTest = new ClosestToPointTestResult;
 	m_densityGrid = new ttg::UniformDensity;
+	static const float rhoOri[3] = {0.f, 0.f, 0.f};
+	m_densityGrid->create(56, 56, 56, rhoOri, 1.f);
+	std::cout<<"\n density grid dim "<<m_densityGrid->dimension()[0]
+				<<" x "<<m_densityGrid->dimension()[1]
+				<<" x "<<m_densityGrid->dimension()[2];
 	m_aggrs = new sdb::VectorArray<PosSample>();
 	
 	m_centerScale[0] = 0;
@@ -411,19 +416,12 @@ void LegendreDFTest::measureShape()
 	
 	std::cout<<"\n n triangle samples "<<m_pnts->size();
 	
-	const float rhoSize = shapeBox.getLongestDistance() / 52.f;
-	const int rhoM = shapeBox.distance(0) / rhoSize + 2;
-	const int rhoN = shapeBox.distance(1) / rhoSize + 2;
-	const int rhoP = shapeBox.distance(2) / rhoSize + 2;
+	const float rhoSize = shapeBox.getLongestDistance() / 54.f;
 	float rhoOri[3];
 	rhoOri[0] = shapeBox.getMin(0) - rhoSize;
 	rhoOri[1] = shapeBox.getMin(1) - rhoSize;
 	rhoOri[2] = shapeBox.getMin(2) - rhoSize;
-	m_densityGrid->create(rhoM, rhoN, rhoP, rhoOri, rhoSize);
-	
-	std::cout<<"\n density grid dim "<<m_densityGrid->dimension()[0]
-				<<" x "<<m_densityGrid->dimension()[1]
-				<<" x "<<m_densityGrid->dimension()[2];
+	m_densityGrid->setOriginAndCellSize(rhoOri, rhoSize);
 	
 	const int ns = m_pnts->size();
 	for(int i=0;i<ns;++i) {

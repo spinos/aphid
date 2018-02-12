@@ -50,12 +50,7 @@ void UniformDensity::create(int M, int N, int P,
 	m_dim[3] = m_dim[0] * m_dim[1] * m_dim[2];
 	m_rho.reset(new Float4[m_dim[3]]);
 	m_front.reset(new DensityFront[m_dim[3]]);
-	m_originSize[0] = boxOrigin[0];
-	m_originSize[1] = boxOrigin[1];
-	m_originSize[2] = boxOrigin[2];
-	m_originSize[3] = cellSize;
-	m_originSize[4] = 1.f / cellSize;
-	setZero();
+	setOriginAndCellSize(boxOrigin, cellSize);
 	buildGraph();
 }
 
@@ -155,8 +150,18 @@ void UniformDensity::buildGraph()
 	edgeBegins.clear();
 	edgeInds.clear();
 	
-    calculateEdgeLength();
-	
+    setAllEdgeLength(cellSize() );
+}
+
+void UniformDensity::setOriginAndCellSize(const float* boxOrigin,
+				const float& cellSize)
+{
+	m_originSize[0] = boxOrigin[0];
+	m_originSize[1] = boxOrigin[1];
+	m_originSize[2] = boxOrigin[2];
+	m_originSize[3] = cellSize;
+	m_originSize[4] = 1.f / cellSize;
+	setZero();
 }
 
 void UniformDensity::setZero()
@@ -192,7 +197,6 @@ void UniformDensity::finish()
 	const int& n = numCells();
 	
 	resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
-	uncutEdges();
 	
 	for(int i=0;i<n;++i) {
 		const float& ri = m_rho[i].w; 
@@ -204,9 +208,6 @@ void UniformDensity::finish()
 			setNodeDistance(i, -.1f);
 		}
 	}
-	
-/// propagate distance to all nodes        
-	fastMarchingMethod();
 	
 	int iFar = firstEmptyCellInd();
 /// visit out nodes
