@@ -54,6 +54,11 @@ class SVOTraverser;
 template<typename T, typename Tr>
 class StackedDrawContext;
 
+template<typename T, typename Tr>
+class RaySVOContext;
+
+struct RayHilbertRule;
+
 }
 
 }
@@ -76,6 +81,9 @@ typedef aphid::ttg::LegendreSVORule<aphid::sdb::FHilbertRule> SvoRuleTyp;
 			
 typedef aphid::ttg::StackedDrawContext<aphid::ttg::SVOTNode, SvoRuleTyp > DrawCtxTyp;
 	DrawCtxTyp* m_drawCtx;
+	
+typedef aphid::ttg::RaySVOContext<aphid::ttg::SVOTNode, aphid::ttg::RayHilbertRule > RayCtxTyp;
+	RayCtxTyp* m_rayCtx;
 
 public:
 	

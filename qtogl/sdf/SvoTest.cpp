@@ -23,6 +23,8 @@ SvoTest::SvoTest()
 	m_pnts = new PntArrTyp;
 	m_hilbertRule = new SvoRuleTyp;
 	m_drawCtx = new DrawCtxTyp(m_hilbertRule);
+	m_rayCtx = new RayCtxTyp;
+	
 }
 
 SuperFormulaParam& SvoTest::shapeParam()
@@ -93,7 +95,7 @@ void SvoTest::sampleShape(BoundingBox& shapeBox)
 	ttg::SVOBuilder<ttg::SVOBNode> bldsvo;
 	bldsvo.build<PosSample, SvoRuleTyp >(pnts(), svoRule() );
 
-	bldsvo.save<ttg::SVOTNode, SvoRuleTyp >(*m_traverser, svoRule() );
+	bldsvo.save<ttg::SVOTNode, SvoRuleTyp >(*m_traverser);
 	std::cout<<"\n done svo \n\n";
 
 }

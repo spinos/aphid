@@ -69,8 +69,7 @@ public:
 				Tr& rule);
 				
 	template<typename Tt, typename Tr>
-	void save(SVOTraverser<Tt>& traverser, 
-				Tr& rule) const;
+	void save(SVOTraverser<Tt>& traverser) const;
 	
 protected:
 
@@ -140,7 +139,7 @@ void SVOBuilder<T>::build(const sdb::SpaceFillingVector<Ts>& samples,
 #if 0
 	for(int i=0;i<n;++i) {
 		std::cout<<"\n n "<<i;
-		rule. template printNode<T>(m_nodes[i]);
+		Tr:: template PrintNode<T>(m_nodes[i]);
 	}
 #endif
 	
@@ -245,18 +244,17 @@ void SVOBuilder<T>::connectNodes(T& parentNode,
 
 template<typename T>
 template<typename Tt, typename Tr>
-void SVOBuilder<T>::save(SVOTraverser<Tt>& traverser, 
-				Tr& rule) const
+void SVOBuilder<T>::save(SVOTraverser<Tt>& traverser) const
 {
 	const int n = m_nodes.size();
 	traverser.createNumNodes(n);
 	
-	rule. template saveRootNode<Tt, T>(traverser.node(0),
+	Tr:: template SaveRootNode<Tt, T>(traverser.node(0),
 								traverser.coord(),
 								m_nodes[0]);
 								
 	for(int i=1;i<n;++i) {
-		rule. template saveNode<Tt, T>(traverser.node(i),
+		Tr:: template SaveNode<Tt, T>(traverser.node(i),
 								m_nodes[i]);
 	}
 }

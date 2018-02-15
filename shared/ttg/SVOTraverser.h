@@ -96,6 +96,7 @@ template<typename T>
 const int& SVOTraverser<T>::numNodes() const
 { return m_numNodes; }
 
+/// draw all nodes via stack
 template<typename T, typename Tr>
 class StackedDrawContext {
 
@@ -145,7 +146,7 @@ void StackedDrawContext<T, Tr>::next()
 	const DrawEvent& fe = m_drawQueue.front();
 	const T& fn = fe._node;
 	//std::cout<<"\n p ";
-	//m_rule->printCoord(fe._coord);
+	//Tr::PrintCoord(fe._coord);
 	
 	DrawEvent subdraw;
 	for(int i=0;i<8;++i) {
@@ -156,7 +157,7 @@ void StackedDrawContext<T, Tr>::next()
 		subdraw._node = m_nodes[fn._ind[i] ];
 		m_rule->computeChildCoord(subdraw._coord, fe._coord, i);
 		//std::cout<<"\n c"<<i;
-		//m_rule->printCoord(subdraw._coord);
+		Tr::PrintCoord(subdraw._coord);
 		m_drawQueue.push_back(subdraw);
 		
 	}
@@ -170,6 +171,48 @@ const float* StackedDrawContext<T, Tr>::currentCoord() const
 	const DrawEvent& fe = m_drawQueue.front();
 	return fe._coord;
 }
+
+/// ray-svo intersection
+template<typename T, typename Tr>
+class RaySVOContext {
+	
+/// (origin, direction, t_min, t_max)
+	float* m_ray;
+/// (center, half_span)
+	float m_coord[4];
+	
+public:
+
+	RaySVOContext();
+	
+/// initialize
+	void setRay(float* ray);
+	
+	bool intersect(const SVOTraverser<T>& tree);
+	
+};
+
+template<typename T, typename Tr>
+RaySVOContext<T, Tr>::RaySVOContext()
+{}
+
+template<typename T, typename Tr>
+void RaySVOContext<T, Tr>::setRay(float* ray)
+{ m_ray = ray; }
+
+template<typename T, typename Tr>
+bool RaySVOContext<T, Tr>::intersect(const SVOTraverser<T>& tree)
+{
+	memcpy(m_coord, tree.coord(), 16);
+	return false;
+}
+
+struct RayHilbertRule {
+	
+	static bool IntersectBox(float* ray, const float* coord)
+	{ return false; }
+	
+};
 
 }
 

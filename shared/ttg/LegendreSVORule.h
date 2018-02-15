@@ -25,6 +25,7 @@ class LegendreSVORule {
 
 /// space filling curve
 	Tc m_sfc;
+/// to build
 	int m_maxLevel;
 	
 public:
@@ -65,17 +66,17 @@ public:
 	bool endSubdivide(const T& node) const;
 	
 	template<typename T>
-	void printNode(const T& node) const;
+	static void PrintNode(const T& node);
 	
-	void printCoord(const float* c) const;
+	static void PrintCoord(const float* c);
 	
 /// builer Tb to traverser Tt
 	template<typename Tt, typename Tb>
-	void saveRootNode(Tt& t, float* rootCoord,
-					const Tb& b) const;
+	static void SaveRootNode(Tt& t, float* rootCoord,
+					const Tb& b);
 					
 	template<typename Tt, typename Tb>
-	void saveNode(Tt& t, const Tb& b) const;
+	static void SaveNode(Tt& t, const Tb& b);
 	
 protected:
 
@@ -181,7 +182,7 @@ bool LegendreSVORule<Tc>::spawnNode(T* child, const int& i, T& parent,
 
 template<typename Tc>
 template<typename T>
-void LegendreSVORule<Tc>::printNode(const T& node) const
+void LegendreSVORule<Tc>::PrintNode(const T& node)
 {
 	std::cout<<"  k "<<node._key
 		<<"  l "<<node._level
@@ -201,7 +202,7 @@ void LegendreSVORule<Tc>::printNode(const T& node) const
 }
 
 template<typename Tc>
-void LegendreSVORule<Tc>::printCoord(const float* c) const
+void LegendreSVORule<Tc>::PrintCoord(const float* c)
 { 
 	std::cout<<" coord ("<<c[0]
 		<<","<<c[1]
@@ -212,8 +213,8 @@ void LegendreSVORule<Tc>::printCoord(const float* c) const
 
 template<typename Tc>
 template<typename Tt, typename Tb>
-void LegendreSVORule<Tc>::saveRootNode(Tt& t, float* rootCoord
-					, const Tb& b) const
+void LegendreSVORule<Tc>::SaveRootNode(Tt& t, float* rootCoord,
+						const Tb& b)
 {
 	memcpy(rootCoord, b._coord, 16);
 	b.getChildInds(t._ind);
@@ -223,7 +224,7 @@ void LegendreSVORule<Tc>::saveRootNode(Tt& t, float* rootCoord
 
 template<typename Tc>
 template<typename Tt, typename Tb>
-void LegendreSVORule<Tc>::saveNode(Tt& t, const Tb& b) const
+void LegendreSVORule<Tc>::SaveNode(Tt& t, const Tb& b)
 {
 	b.getChildInds(t._ind);
 	b.getParent(t._ind[8]);
